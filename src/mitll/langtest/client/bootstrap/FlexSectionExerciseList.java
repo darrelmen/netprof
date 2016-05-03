@@ -92,8 +92,13 @@ public class FlexSectionExerciseList extends NPExerciseList {
 
   protected SectionWidgetContainer<ButtonGroupSectionWidget> getSectionWidgetContainer() {
     return new SectionWidgetContainer<ButtonGroupSectionWidget>() {
+      /**
+       * @see #restoreListBoxState(SelectionState, Collection)
+       * @param type
+       * @param sections
+       */
       protected void selectItem(String type, Collection<String> sections) {
-//        logger.info("FlexSectionExerciseList.selectItem : selecting " + type + "=" + sections);
+        logger.info("FlexSectionExerciseList.selectItem : selecting " + type + "=" + sections);
 
         ButtonGroupSectionWidget listBox = getGroupSection(type);
         listBox.clearSelectionState();
@@ -392,7 +397,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
 
   /**
    * @param selectionState
-   * @see HistoryExerciseList#restoreUIState(SelectionState, String)
+   * @see HistoryExerciseList#restoreUIState
    */
   @Override
   protected void restoreListBoxState(SelectionState selectionState) {
@@ -408,7 +413,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */
   private void showSelectionState(SelectionState selectionState) {
-    //System.out.println("FlexSectionExerciseList.showSelectionState : got " + event + " and state '" + selectionState +"'");
+    logger.info("FlexSectionExerciseList.showSelectionState : state '" + selectionState +"'");
 
     // keep the download link info in sync with the selection
     Map<String, Collection<String>> typeToSection = selectionState.getTypeToSection();
@@ -495,6 +500,13 @@ public class FlexSectionExerciseList extends NPExerciseList {
     return overallButton;
   }
 
+  /**
+   * @see #addClearButton(ButtonGroupSectionWidget, Panel)
+   * @see #addColumnButton(Panel, String, ButtonGroupSectionWidget)
+   * @param overallButton
+   * @param sectionInFirstType
+   * @param buttonGroupSectionWidget
+   */
   private void addClickHandlerToButton(final ButtonWithChildren overallButton, final String sectionInFirstType,
                                        final ButtonGroupSectionWidget buttonGroupSectionWidget) {
     overallButton.addClickHandler(new ClickHandler() {
@@ -506,28 +518,26 @@ public class FlexSectionExerciseList extends NPExerciseList {
     });
   }
 
+  /**
+   * if we can't find the exercise b/c the current list is for a chapter, clear all chapter selections
+   * @param id
+   * @return
+   */
   @Override
   public boolean loadByID(String id) {
-    //  logger.info("loadByID loading exercise " + id);
+    logger.info("loadByID loading exercise " + id);
     if (hasExercise(id)) {
       //  logger.info("loadByID found exercise " + id);
       loadExercise(id);
       return true;
     } else {
-      clearSelections();
+      setHistoryItem("search=;item=" + id);
       rememberedID = id;
       return false;
     }
   }
 
-  private void clearSelections() {
-    //logger.info("clearSelections");
-    sectionWidgetContainer.clearSelections();
-    reload();
-  }
-
   protected void listLoaded() {
-    //logger.info("listLoaded " + rememberedID);
     if (rememberedID != null) {
       if (hasExercise(rememberedID)) {
         // logger.info("loading exercise " + id);
