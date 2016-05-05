@@ -123,10 +123,10 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
     addButtonRow(controller.getStartupInfo().getSectionNodes(), container, typeOrder);
   }
 
-  @Override
+/*  @Override
   protected Collection<String> getTypeOrder(Map<String, Collection<String>> selectionState2) {
     return typeOrder;
-  }
+  }*/
 
   Panel firstTypeRow;
 
@@ -401,7 +401,7 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
       // logger.info("gotSelection : got type " + type + " and " + text);
       int count = getNumSelections();
       if (count == 3) {
-        //    logger.info("push new token " + getHistoryToken());
+        //    logger.info("push new token " + getHistoryTokenFromUIState());
         logger.info("gotSelection count = " + count);
         loadExercisesUsingPrefix(selectionState.getTypeToSection(), getPrefix(), false, "");
       } else {
