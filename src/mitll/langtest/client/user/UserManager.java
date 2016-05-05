@@ -164,7 +164,7 @@ public class UserManager {
    * @see #storeUser
    */
   private void gotNewUser(User result) {
-    logger.info("UserManager.gotNewUser " + result);
+//    logger.info("UserManager.gotNewUser " + result);
     userNotification.getPermissions().clear();
     if (result != null) {
       boolean isCD = result.getUserKind() == User.Kind.CONTENT_DEVELOPER;

@@ -324,10 +324,6 @@ public class Analysis extends DAO {
 
   private void setSessions(Map<String, PhoneStats> phoneToAvgSorted) { new PhoneAnalysis().setSessions(phoneToAvgSorted);  }
 
-  private String getLanguage() {
-    return database.getLanguage();
-  }
-
   /**
    * @param connection
    * @param statement

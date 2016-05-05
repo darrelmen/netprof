@@ -287,10 +287,9 @@ public class FeedbackRecordPanel extends AmasExercisePanel {
     }
 
     private Widget addAudioAnswer(PressAndHoldExercisePanel autoCRTRecordPanel) {
-      Panel panel = autoCRTRecordPanel;
-      panel.setWidth("100%");
+      autoCRTRecordPanel.setWidth("100%");
       FluidContainer outerContainer = new FluidContainer();
-      outerContainer.add(panel);
+      outerContainer.add(autoCRTRecordPanel);
       outerContainer.addStyleName("floatLeft");
       outerContainer.getElement().setId("FeedbackRecordPanel_outerContainer");
       outerContainer.getElement().getStyle().setMarginRight(10, Style.Unit.PX);
