@@ -72,19 +72,24 @@ public class UserManagement {
             Object userid = jsonObject.get(RestUserManagement.USERID);
             Object pc = jsonObject.get(RestUserManagement.PASSWORD_CORRECT);
 
-            if (!userid.toString().equals(NO_USER)) {
-              logger.info(site + " : found user " + userid);
+            if (userid == null) {
+              logger.warn("huh? got back " + json + " for req " + login + " pass " +passwordH);
+            }
+            else {
+              if (!userid.toString().equals(NO_USER)) {
+                logger.info(site + " : found user " + userid);
 
-              if (pc.toString().equals("true")) {
-                logger.info("\tmatching password for " + site);
+                if (pc.toString().equals("true")) {
+                  logger.info("\tmatching password for " + site);
 
-                String ip = getIPInfo(request);
-                Object emailH = jsonObject.get(RestUserManagement.EMAIL_H);
-                Object kind = jsonObject.get(RestUserManagement.KIND);
-                User.Kind realKind = kind == null ? User.Kind.STUDENT : User.Kind.valueOf(kind.toString());
+                  String ip = getIPInfo(request);
+                  Object emailH = jsonObject.get(RestUserManagement.EMAIL_H);
+                  Object kind = jsonObject.get(RestUserManagement.KIND);
+                  User.Kind realKind = kind == null ? User.Kind.STUDENT : User.Kind.valueOf(kind.toString());
 
-                user = addUser(login, passwordH, emailH.toString(), "browser", ip, realKind, true);
-                break;
+                  user = addUser(login, passwordH, emailH.toString(), "browser", ip, realKind, true);
+                  break;
+                }
               }
             }
           } catch (Exception e) {
