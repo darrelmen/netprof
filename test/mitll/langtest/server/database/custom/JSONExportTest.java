@@ -35,7 +35,7 @@ public class JSONExportTest extends JsonExport {
    * @see ScoreServlet#getJsonNestedChapters(boolean)
    */
   public JSONExportTest() {
-    super(null, null, null);
+    super(null, null, null, false);
   }
   //private static String dbName;
 
@@ -71,7 +71,7 @@ public class JSONExportTest extends JsonExport {
 
   @Test
   public void testExport() {
-    JsonExport jsonExport = new JsonExport(null, database.getSectionHelper(), null);
+    JsonExport jsonExport = new JsonExport(null, database.getSectionHelper(), null, false);
     JSONArray exercisesAsJson = jsonExport.getExercisesAsJson(database.getExercises());
     logger.info("got " + exercisesAsJson);
 
@@ -83,7 +83,7 @@ public class JSONExportTest extends JsonExport {
 
   @Test
   public void testExport2() {
-    JsonExport jsonExport = new JsonExport(null, database.getSectionHelper(), null);
+    JsonExport jsonExport = new JsonExport(null, database.getSectionHelper(), null, false);
     JSONObject jsonObject = new JSONObject();
     jsonExport.addJSONExerciseExport(jsonObject, database.getExercises());
     logger.info("got " + jsonObject);
@@ -92,7 +92,7 @@ public class JSONExportTest extends JsonExport {
 
   @Test
   public void testExport3() {
-    JsonExport jsonExport = new JsonExport(null, database.getSectionHelper(), null);
+    JsonExport jsonExport = new JsonExport(null, database.getSectionHelper(), null, false);
     JSONObject jsonObject = new JSONObject();
     jsonExport.addJSONExerciseExport(jsonObject, database.getExercises());
     //logger.info("got " + jsonObject);
@@ -104,7 +104,7 @@ public class JSONExportTest extends JsonExport {
 
   @Test
   public void testExport4() {
-    JsonExport jsonExport = new JsonExport(null, database.getSectionHelper(), null);
+    JsonExport jsonExport = new JsonExport(null, database.getSectionHelper(), null, false);
     Collection<CommonExercise> exercises = database.getExercises();
     List<CommonExercise> copy = new ArrayList<>(exercises);
     List<CommonExercise> exercises1 = copy.subList(0, 10);
@@ -138,7 +138,7 @@ public class JSONExportTest extends JsonExport {
   }
 
   void exportTo(String pathname) {
-    JsonExport jsonExport = new JsonExport(null, database.getSectionHelper(), null);
+    JsonExport jsonExport = new JsonExport(null, database.getSectionHelper(), null, false);
     Collection<CommonExercise> exercises = database.getExercises();
     List<CommonExercise> copy = new ArrayList<>(exercises);
     List<CommonExercise> exercises1 = copy;//.subList(0, 4000);excel
@@ -177,7 +177,7 @@ public class JSONExportTest extends JsonExport {
 
   @Test
   public void testExport6() {
-    JsonExport jsonExport = new JsonExport(null, database.getSectionHelper(), null);
+    JsonExport jsonExport = new JsonExport(null, database.getSectionHelper(), null, false);
     Collection<CommonExercise> exercises = database.getExercises();
     //List<CommonExercise> copy = new ArrayList<>(exercises);
     //List<CommonExercise> exercises1 = copy.subList(0, 10);
