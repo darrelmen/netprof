@@ -68,7 +68,7 @@ public class Report {
   private static final String ALL_RECORDINGS1 = "allRecordings";
   private static final String DEVICE_RECORDINGS1 = "deviceRecordings";
   private static final String MONTH1 = "month";
-  public static final String COUNT = "count";
+  private static final String COUNT = "count";
   private static final String YTD = COUNT;
   private static final String YTD1 = " YTD ";
   private static final String REF_AUDIO_RECORDINGS = "Ref Audio Recordings";
@@ -76,7 +76,8 @@ public class Report {
   private static final String OPERATING_SYSTEM_VERSION = "operatingSystemVersion";
   private static final String BROWSER = "browser";
   private static final String BROWSER_VERSION = "browserVersion";
-  public static final String NAME = "name";
+  private static final String NAME = "name";
+  public static final String ACTIVE_I_PAD = "Active iPad/iPhone Users";
 
   private final UserDAO userDAO;
   private final ResultDAO resultDAO;
@@ -120,7 +121,6 @@ public class Report {
     int thisWeek2 = calendarForYear.get(Calendar.WEEK_OF_YEAR);
 
     logger.info("after " + thisWeek2 + " : " + calendarForYear.getTime());*/
-
   }
 
   /**
@@ -561,18 +561,13 @@ public class Report {
    */
   private Set<Long> getUsers(StringBuilder builder, Collection<User> users, String users1, JSONObject jsonObject, int year) {
     Calendar calendar = getCalendarForYear(year);
-    //  Date january1st = getJanuaryFirst(calendar, year);
-    //  Date january1stNextYear = getNextYear(year);
     YearTimeRange yearTimeRange = new YearTimeRange(year, calendar).invoke();
-
-    // logger.info("from " + new Date(yearTimeRange.getStart()));
-    // logger.info("to   " + new Date(yearTimeRange.getEnd()));
-
-    // logger.info("getUsers between " + january1st + " and " + january1stNextYear);
     int ytd = 0;
 
     Map<Integer, Integer> monthToCount = new TreeMap<>();
     Map<Integer, Integer> weekToCount = new TreeMap<>();
+    ensureYTDEntries(year, monthToCount, weekToCount);
+
     Set<Long> students = new HashSet<>();
 
     for (User user : users) {
@@ -626,6 +621,57 @@ public class Report {
     }
     builder.append(getSectionReport(ytd, monthToCount, weekToCount, users1, jsonObject, year));
     return students;
+  }
+
+  private void ensureYTDEntries0(int year, Map<Integer, Long> monthToCount) {
+    Calendar today = getCalendarForYearOrNow(year);
+    int thisMonth = today.get(Calendar.MONTH);
+    for (int i = 0; i <= thisMonth; i++) monthToCount.put(i, 0l);
+  }
+
+  private Calendar getCalendarForYearOrNow(int year) {
+    if (year == getThisYear()) {
+      Calendar today = Calendar.getInstance();
+      today.setTimeInMillis(System.currentTimeMillis());
+      return today;
+    } else {
+      Calendar today = Calendar.getInstance();
+      today.set(Calendar.YEAR, year);
+      today.set(Calendar.DAY_OF_YEAR, 364);
+      return today;
+    }
+  }
+
+  private void ensureYTDEntriesW(int year, Map<Integer, Long> weekToCount) {
+    Calendar today = getCalendarForYearOrNow(year);
+    int thisWeek = today.get(Calendar.WEEK_OF_YEAR);
+    for (int i = 0; i <= thisWeek; i++) weekToCount.put(i, 0l);
+  }
+
+  private void ensureYTDEntries(int year, Map<Integer, Integer> monthToCount, Map<Integer, Integer> weekToCount) {
+    Calendar today = getCalendarForYearOrNow(year);
+    int thisMonth = today.get(Calendar.MONTH);
+    int thisWeek = today.get(Calendar.WEEK_OF_YEAR);
+    //   Date now = today.getTime();
+    for (int i = 0; i <= thisMonth; i++) monthToCount.put(i, 0);
+    for (int i = 0; i <= thisWeek; i++) weekToCount.put(i, 0);
+  }
+
+  private void ensureYTDEntries2(int year, Map<Integer, Set<Long>> monthToCount, Map<Integer, Set<Long>> weekToCount) {
+    Calendar today = getCalendarForYearOrNow(year);
+    int thisMonth = today.get(Calendar.MONTH);
+    int thisWeek = today.get(Calendar.WEEK_OF_YEAR);
+    for (int i = 0; i <= thisMonth; i++) monthToCount.put(i, new HashSet<>());
+    for (int i = 0; i <= thisWeek; i++)  weekToCount.put(i,  new HashSet<>());
+  }
+
+  private void ensureYTDEntries3(int year, Map<Integer, Map<Long, Set<SlimEvent>>> monthToCount, Map<Integer, Map<Long, Set<SlimEvent>>> weekToCount) {
+    Calendar today = getCalendarForYearOrNow(year);
+    int thisMonth = today.get(Calendar.MONTH);
+    int thisWeek = today.get(Calendar.WEEK_OF_YEAR);
+    //   Date now = today.getTime();
+    for (int i = 0; i <= thisMonth; i++) monthToCount.put(i, new HashMap<>());
+    for (int i = 0; i <= thisWeek; i++) weekToCount.put(i, new HashMap<>());
   }
 
   private boolean shouldSkipUser(User user) {
@@ -836,7 +882,7 @@ public class Report {
   private String getWC(Map<Integer, ?> weekToCount, String unit, String count, JSONArray jsonArray, int year) {
     String s = "";
     Calendar calendar = getCalendarForYear(year);
-    SimpleDateFormat df = new SimpleDateFormat(MM_DD);
+    SimpleDateFormat df = new SimpleDateFormat("MM-dd");
     Integer max = getMax(weekToCount);
     long initial = calendar.getTimeInMillis();
 
@@ -917,6 +963,8 @@ public class Report {
 
     Map<Integer, Integer> monthToCount = new TreeMap<>();
     Map<Integer, Integer> weekToCount = new TreeMap<>();
+    ensureYTDEntries(year, monthToCount, weekToCount);
+
     Map<Long, Map<String, Integer>> userToDayToCount = new TreeMap<>();
 
     int teacherAudio = 0;
@@ -1006,6 +1054,8 @@ public class Report {
     int ytd = 0;
     Map<Integer, Integer> monthToCount = new TreeMap<>();
     Map<Integer, Integer> weekToCount = new TreeMap<>();
+    ensureYTDEntries(year, monthToCount, weekToCount);
+
     Map<Long, Map<String, Integer>> userToDayToCount = new TreeMap<>();
 
     YearTimeRange yearTimeRange = new YearTimeRange(year, getCalendarForYear(year)).invoke();
@@ -1179,7 +1229,7 @@ public class Report {
    * @see #getReport
    */
   private Set<Long> getEventsDevices(StringBuilder builder, Set<Long> students, JSONObject jsonObject, int year, List<SlimEvent> allDevicesSlim) {
-    String activeUsers = "Active iPad/iPhone Users";
+    String activeUsers = ACTIVE_I_PAD;
     String tableLabel = "iPad/iPhone Time on Task";
     return getEvents(builder, students, allDevicesSlim, activeUsers, tableLabel, jsonObject, year);
   }
@@ -1197,10 +1247,15 @@ public class Report {
   private Set<Long> getEvents(StringBuilder builder, Set<Long> students, Collection<SlimEvent> all, String activeUsers,
                               String tableLabel, JSONObject jsonObject, int year) {
     Map<Integer, Set<Long>> monthToCount = new TreeMap<>();
+    Map<Integer, Set<Long>> weekToCount = new TreeMap<>();
+    ensureYTDEntries2(year, monthToCount, weekToCount);
+
     Map<Integer, Map<Long, Set<SlimEvent>>> monthToCount2 = new TreeMap<>();
     Map<Integer, Map<Long, Set<SlimEvent>>> weekToCount2 = new TreeMap<>();
+    ensureYTDEntries3(year, monthToCount2, weekToCount2);
+    logger.info("now  2  " + weekToCount );
 
-    Map<Integer, Set<Long>> weekToCount = new TreeMap<>();
+
     Set<Long> teachers = new HashSet<>();
 //    int skipped = 0;
 
@@ -1215,7 +1270,7 @@ public class Report {
       if (yearTimeRange.inYear(timestamp) && students.contains(creatorID)) {
         if (isValidUser(creatorID)) {
           users.add(creatorID);
-          statsForEvent(calendar, monthToCount, monthToCount2, weekToCount2, weekToCount, event, creatorID);
+          statsForEvent(calendar, monthToCount, monthToCount2, weekToCount, weekToCount2, event, creatorID);
         }
       } else if (!students.contains(creatorID)) {
         //  skipped++;
@@ -1231,13 +1286,13 @@ public class Report {
 
 //    logger.debug("active users " + activeJSON);
 
-    Map<Integer, Long> monthToDur = getMonthToDur(monthToCount2);
+    Map<Integer, Long> monthToDur = getMonthToDur(monthToCount2, year);
     long total = 0;
     for (Long v : monthToDur.values()) total += v;
 
     total /= MIN_MILLIS;
 
-    Map<Integer, Long> weekToDur = getWeekToDur(weekToCount2);
+    Map<Integer, Long> weekToDur = getWeekToDur(weekToCount2, year);
 
     JSONObject timeOnTaskJSON = new JSONObject();
 
@@ -1280,17 +1335,19 @@ public class Report {
    * @param calendar
    * @param monthToCount
    * @param monthToUserToEvents
-   * @param weekToUserToEvents
    * @param weekToCount
+   * @param weekToUserToEvents
    * @param event
    * @param creatorID
    * @see #getEvents
    */
   private void statsForEvent(Calendar calendar,
+
                              Map<Integer, Set<Long>> monthToCount,
                              Map<Integer, Map<Long, Set<SlimEvent>>> monthToUserToEvents,
-                             Map<Integer, Map<Long, Set<SlimEvent>>> weekToUserToEvents,
+
                              Map<Integer, Set<Long>> weekToCount,
+                             Map<Integer, Map<Long, Set<SlimEvent>>> weekToUserToEvents,
                              SlimEvent event, long creatorID) {
     calendar.setTimeInMillis(event.getTimestamp());
 
@@ -1308,9 +1365,8 @@ public class Report {
       monthToUserToEvents.put(month, userToEvents = new HashMap<>());
     }
 
-    Set<SlimEvent> events = userToEvents.get(creatorID);
-    if (events == null) userToEvents.put(creatorID, events = new TreeSet<>());
-    events.add(event);
+    rememberEvent(event, creatorID, userToEvents);
+//    Set<SlimEvent> events;
 
 
     // weeks
@@ -1325,8 +1381,16 @@ public class Report {
     if (userToEvents == null) {
       weekToUserToEvents.put(w, userToEvents = new HashMap<>());
     }
-    events = userToEvents.get(creatorID);
 
+//    events = userToEvents.get(creatorID);
+//    if (events == null) userToEvents.put(creatorID, events = new TreeSet<>());
+//    events.add(event);
+    rememberEvent(event, creatorID, userToEvents);
+
+  }
+
+  private void rememberEvent(SlimEvent event, long creatorID, Map<Long, Set<SlimEvent>> userToEvents) {
+    Set<SlimEvent> events = userToEvents.get(creatorID);
     if (events == null) userToEvents.put(creatorID, events = new TreeSet<>());
     events.add(event);
   }
@@ -1349,8 +1413,9 @@ public class Report {
    * @param monthToCount2
    * @return in minutes
    */
-  private Map<Integer, Long> getMonthToDur(Map<Integer, Map<Long, Set<SlimEvent>>> monthToCount2) {
+  private Map<Integer, Long> getMonthToDur(Map<Integer, Map<Long, Set<SlimEvent>>> monthToCount2, int year) {
     Map<Integer, Long> monthToDur = new TreeMap<>();
+    ensureYTDEntries0(year, monthToDur);
     for (Map.Entry<Integer, Map<Long, Set<SlimEvent>>> monthToUserToEvents : monthToCount2.entrySet()) {
       Integer month = monthToUserToEvents.getKey();
       //logger.debug("month " + month);
@@ -1399,8 +1464,9 @@ public class Report {
    * @return
    * @see #getEvents(StringBuilder, Set, Collection, String, String, JSONObject, int)
    */
-  private Map<Integer, Long> getWeekToDur(Map<Integer, Map<Long, Set<SlimEvent>>> weekToCount) {
+  private Map<Integer, Long> getWeekToDur(Map<Integer, Map<Long, Set<SlimEvent>>> weekToCount, int year) {
     Map<Integer, Long> weekToDur = new TreeMap<>();
+    ensureYTDEntriesW(year, weekToDur);
     for (Map.Entry<Integer, Map<Long, Set<SlimEvent>>> weekToUserToEvents : weekToCount.entrySet()) {
       Integer week = weekToUserToEvents.getKey();
       //logger.debug("week " + week);
