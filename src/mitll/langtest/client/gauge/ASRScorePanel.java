@@ -15,16 +15,19 @@ import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.pretest.PretestGauge;
+import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.scoring.ScoreListener;
 import mitll.langtest.client.sound.PlayAudioWidget;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * ASR Scoring panel -- shows phonemes.
@@ -32,6 +35,8 @@ import java.util.*;
  * @author gregbramble
  */
 public class ASRScorePanel extends FlowPanel implements ScoreListener {
+  private Logger logger = Logger.getLogger("ASRScorePanel");
+
   private static final int NUM_TO_SHOW = 5;
   public static final String INSTRUCTIONS = "Your speech is scored by a speech recognizer trained on speech from many native speakers. " +
       "The recognizer generates scores for each word and phonetic unit (see the color-coded transcript for details).";
@@ -44,7 +49,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   private static final int HEIGHT = 18;
   private static final int ROW_LEFT_MARGIN = 18 + 5;
   private static final String PLAY_REFERENCE = "";
-  private static final String DOWNLOAD_YOUR_RECORDING = "Download your recording.";
+  //private static final String DOWNLOAD_YOUR_RECORDING = "Download your recording.";
 
   private final PretestGauge ASRGauge;
   private final Panel phoneList;
@@ -255,10 +260,14 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     container.setWidth("100px");
     container.add(row);
     hp.add(container);
-    hp.add(getDownload(scoreAndPath.getPath(),i));
+    long timestamp = scoreAndPath.getTimestamp();
+   // logger.info("timestamp " + timestamp);
+    String format = this.format.format(new Date(timestamp));
+    hp.add(getDownload(scoreAndPath.getPath(),i,format));
 
     return hp;
   }
+  private final DateTimeFormat format = DateTimeFormat.getFormat("MMM d");
 
   private void makeChildGreen(Widget w) {
     Node child = w.getElement().getChild(0);
@@ -271,14 +280,14 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
    * @param audioPath
    * @return link for this audio
    */
-  private IconAnchor getDownload(final String audioPath, int i) {
+  private IconAnchor getDownload(final String audioPath, int i, String dateFormat) {
     final IconAnchor download = new IconAnchor();
     download.getElement().setId("Download_user_audio_link_"+i);
     download.setIcon(IconType.DOWNLOAD);
     download.setIconSize(IconSize.LARGE);
     download.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
 
-    addTooltip(download);
+    addTooltip(download, dateFormat);
     setDownloadHref(download, audioPath);
 
     download.addClickHandler(new ClickHandler() {
@@ -292,20 +301,27 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     return download;
   }
 
+  /**
+   * @see #getDownload
+   * @param download
+   * @param audioPath
+   */
   private void setDownloadHref(IconAnchor download, String audioPath) {
-    String href = "downloadAudio?file=" +
-        audioPath +
-        "&" +
-        "exerciseID=" +
-        exerciseID +
-        "&" +
-        "userID=" +
-        controller.getUser();
+    audioPath = audioPath.endsWith(".ogg") ? audioPath.replaceAll(".ogg",".mp3") : audioPath;
+
+    String href = "downloadAudio?" +
+        "file="       + audioPath + "&" +
+        "exerciseID=" + exerciseID + "&" +
+        "userID="     + controller.getUser();
     download.setHref(href);
   }
 
-  private void addTooltip(Widget w) {
-    new TooltipHelper().createAddTooltip(w, DOWNLOAD_YOUR_RECORDING, Placement.LEFT);
+  /**
+   * @see #getDownload
+   * @param w
+   */
+  private void addTooltip(Widget w, String dateFormat) {
+    new TooltipHelper().createAddTooltip(w, "Download your recording from " + dateFormat, Placement.LEFT);
   }
 
   /**
