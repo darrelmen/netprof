@@ -1113,6 +1113,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    *
    * @return
    * @see mitll.langtest.client.LangTest#onModuleLoad
+   * @paramx userID
    */
   @Override
   public StartupInfo getStartupInfo() {
@@ -2139,8 +2140,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   private void ensureCompressedEquivalent(int user, CommonShell exercise1, AudioAnswer audioAnswer) {
-    String path = audioAnswer.getPath();
-    ensureCompressedAudio(user, exercise1, path);
+    ensureCompressedAudio(user, exercise1,  audioAnswer.getPath());
   }
 
   private void ensureCompressedAudio(int user, CommonShell exercise1, String path) {
