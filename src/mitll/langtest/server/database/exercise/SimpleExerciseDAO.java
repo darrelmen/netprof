@@ -2,7 +2,6 @@ package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.UserManagement;
-import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.List;
@@ -29,4 +28,6 @@ public interface SimpleExerciseDAO<T extends CommonShell> {
   int getNumExercises();
 
   SectionHelper<T> getSectionHelper();
+
+  void reload();
 }

@@ -15,14 +15,12 @@ public interface CommonShell extends Shell {
   String getForeignLanguage();
   String getTransliteration();
 
-  String getContext();
-  String getContextTranslation();
   String getDisplayID();
 
   MutableShell getMutableShell();
 
   /**
-   * @see mitll.langtest.server.autocrt.DecodeCorrectnessChecker#getRefSentences(CommonExercise, String, boolean)
+   * @see mitll.langtest.server.autocrt.DecodeCorrectnessChecker#getRefSentences
    * @return
    */
   Collection<String> getRefSentences();

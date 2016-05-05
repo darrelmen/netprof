@@ -383,8 +383,11 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell> extends
     }
     String selectionID = userListID + "_" + typeToSection.toString();
     scheduleWaitTimer();
-    service.getExerciseIds(lastReqID, typeToSection, prefix, userListID, controller.getUser(), getRole(),
-        getUnrecorded(), isOnlyExamples(), incorrectFirstOrder, onlyWithAudioAnno, new SetExercisesCallback(selectionID));
+    service.getExerciseIds(
+        getRequest(prefix)
+        .setTypeToSelection(typeToSection)
+        .setOnlyWithAudioAnno(onlyWithAudioAnno),
+        new SetExercisesCallback(selectionID));
   }
 
   @Override

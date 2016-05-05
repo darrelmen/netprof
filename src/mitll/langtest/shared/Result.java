@@ -6,9 +6,7 @@ package mitll.langtest.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Transient;
+import java.beans.Transient;
 import java.util.Date;
 
 /**
@@ -26,7 +24,6 @@ import java.util.Date;
  * Time: 5:45 PM
  * To change this template use File | Settings | File Templates.
  */
-@Entity
 public class Result implements IsSerializable, UserAndTime {
   private int uniqueID;
   private long userid;
@@ -51,6 +48,7 @@ public class Result implements IsSerializable, UserAndTime {
   public static final String AUDIO_TYPE_PRACTICE = "practice";
   public static final String AUDIO_TYPE_REVIEW = "review";
   public static final String AUDIO_TYPE_RECORDER = "recorder";
+  //private Long userID;
 
   public Result() {}
 
@@ -105,7 +103,6 @@ public class Result implements IsSerializable, UserAndTime {
 
   public float getPronScore() { return pronScore;  }
 
-  @Id
   public int getUniqueID() {
     return uniqueID;
   }
@@ -159,8 +156,7 @@ public class Result implements IsSerializable, UserAndTime {
     this.jsonScore = jsonScore;
   }
 
-
-  private void setUserid(long userid) {
+/*  private void setUserid(long userid) {
     this.userid = userid;
   }
 
@@ -206,5 +202,8 @@ public class Result implements IsSerializable, UserAndTime {
 
   private void setDevice(String device) {
     this.device = device;
+  }*/
+  public void setUserID(Long userID) {
+    this.userid = userID;
   }
 }

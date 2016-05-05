@@ -41,6 +41,7 @@ import java.util.logging.Logger;
  */
 public class AudioPanel<T extends Shell> extends VerticalPanel implements RequiresResize {
   private final Logger logger = Logger.getLogger("AudioPanel");
+  private static final int TRANSCRIPT_IMAGE_HEIGHT = 20;
 
   private static final int LEFT_COLUMN_WIDTH = PagingContainer.MAX_WIDTH;
 
@@ -167,8 +168,8 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     Panel imageContainer = new VerticalPanel();
     divWithRelativePosition.add(imageContainer);
     imageContainer.getElement().setId("AudioPanel_imageContainer");
-    float totalHeight = getWaveformHeight() + (2 * 20);
-    imageContainer.setHeight(totalHeight +"px");
+   // float totalHeight = getWaveformHeight() + (2 * TRANSCRIPT_IMAGE_HEIGHT);
+   // imageContainer.setHeight(totalHeight +"px");
   //  imageContainer.setWidth(getImageWidth()+"px");
 
     HorizontalPanel hp = new HorizontalPanel();
@@ -201,12 +202,12 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     Image wordsImage = words.getImage();
     imageContainer.add(wordsImage);
     wordsImage.getElement().setId("Transcript_Words");
-    wordsImage.setHeight(20+"px");
+    wordsImage.setHeight(TRANSCRIPT_IMAGE_HEIGHT +"px");
 
     phones = new ImageAndCheck();
     Image phonesImage = phones.getImage();
     imageContainer.add(phonesImage);
-    phonesImage.setHeight(20+"px");
+    phonesImage.setHeight(TRANSCRIPT_IMAGE_HEIGHT +"px");
     phonesImage.getElement().setId("Transcript_Phones");
 
    // hp.setWidth("100%");
@@ -290,7 +291,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
   public static class ImageAndCheck {
     private final Image image;
 
-    public ImageAndCheck() {
+    ImageAndCheck() {
       image = new Image();
       getImage().setVisible(false);
     }
@@ -355,9 +356,9 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     return path;
   }
 
-  private CompressedAudio compressedAudio = new CompressedAudio();
+  //private CompressedAudio compressedAudio = new CompressedAudio();
 
-  private String getPath(String path) { return compressedAudio.getPath(path);  }
+  private String getPath(String path) { return CompressedAudio.getPath(path);  }
 
   /**
    * Note this is currently not very accurate with soundmanager2.
@@ -371,7 +372,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     if (start >= end) {
       logger.warning("bad segment " + start + "-" + end);
     } else {
-      //logger.info("playSegment segment " + start + "-" + end);
+//      logger.info("playSegment segment " + start + "-" + end);
       playAudio.repeatSegment(start, end);
     }
   }

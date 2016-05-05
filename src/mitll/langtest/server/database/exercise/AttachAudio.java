@@ -135,12 +135,12 @@ public class AttachAudio {
 				logger.error("attachAudio can't find " + id);
 			}
 		} else if (!audioAttributes.isEmpty()) {
-			Set<String> audioPaths = new HashSet<>();
+			Set<String> previouslyAttachedAudio = new HashSet<>();
 			for (AudioAttribute audioAttribute : imported.getAudioAttributes()) {
-				audioPaths.add(audioAttribute.getAudioRef());
+				previouslyAttachedAudio.add(audioAttribute.getAudioRef());
 			}
 
-			int m = 0;
+		//	int m = 0;
 
 			for (AudioAttribute audio : audioAttributes) {
 				String child = mediaDir1 + File.separator + audio.getAudioRef();
@@ -154,9 +154,21 @@ public class AttachAudio {
 				}
 
 				if (exists) {
-					if (!audioPaths.contains(child)) {
-						if (audio.hasMatchingTranscript(imported.getForeignLanguage())) {
+					if (!previouslyAttachedAudio.contains(child)) {
+
+						if (audio.isContextAudio()) {
+							Collection<CommonExercise> directlyRelated = imported.getDirectlyRelated();
+							if (directlyRelated.isEmpty()) logger.warn("huh? no context exercise on " +imported.getID());
+							else {
+								if (directlyRelated.size() == 1) {
+									audio.setAudioRef(child);   // remember to prefix the path
+									directlyRelated.iterator().next().getMutableAudio().addAudio(audio);
+								}
+							}
+						}
+						else if (audio.hasMatchingTranscript(imported.getForeignLanguage())) {
 							audio.setAudioRef(child);   // remember to prefix the path
+
 							mutableAudio.addAudio(audio);
 						} else {
 							transcriptChanged.add(audio.getExid());
@@ -165,7 +177,7 @@ public class AttachAudio {
 										" doesn't match : '" + removePunct(audio.getTranscript()) + "' vs '" + removePunct(imported.getForeignLanguage()) + "'");
 							}*/
 						}
-						audioPaths.add(child);
+						previouslyAttachedAudio.add(child);
 //            logger.debug("imported " +imported.getID()+ " now " + imported.getAudioAttributes());
 					} else {
 						logger.debug("skipping " + child);

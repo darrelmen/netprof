@@ -26,6 +26,7 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ExerciseListRequest;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.Shell;
 
@@ -153,20 +154,29 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   public boolean getExercises(long userID) {
     if (DEBUG) logger.info("ExerciseList.getExercises for user " + userID + " instance " + getInstance());
     lastReqID++;
-    service.getExerciseIds(lastReqID, TYPE_TO_SELECTION, "", -1, controller.getUser(), getRole(), false, false,
-        incorrectFirstOrder, false, new SetExercisesCallback(""));
+    service.getExerciseIds(/*lastReqID, TYPE_TO_SELECTION, "", -1, controller.getUser(), getRole(), false, false,
+        incorrectFirstOrder, false,*/
+        getRequest(),
+        new SetExercisesCallback(""));
     return true;
+  }
+
+  ExerciseListRequest getRequest() {
+    return new ExerciseListRequest(lastReqID, controller.getUser())
+        .setRole(getRole())
+        .setIncorrectFirstOrder(incorrectFirstOrder);
   }
 
   /**
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#doAfterEditComplete(ListInterface, boolean)
-   * @see NPFHelper#reload()
+   * @see NPFHelper#reload
    */
   public void reload() {
-    int user1 = controller.getUser();
+/*    int user1 = controller.getUser();
 //    if (DEBUG) logger.info("ExerciseList.reload for user " + user1);// + " instance " + instance + " id " + getElement().getId());
     service.getExerciseIds(lastReqID, TYPE_TO_SELECTION, "", -1, user1, getRole(), false, false,
-        incorrectFirstOrder, false, new SetExercisesCallback(""));
+        incorrectFirstOrder, false, new SetExercisesCallback(""));*/
+    getExercises(controller.getUser());
   }
 
   @Override
@@ -182,9 +192,9 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    */
   @Override
   public void reloadWith(String id) {
-    if (DEBUG) logger.info("ExerciseList.reloadWith id = " + id + " for user " + controller.getUser() + " instance " + getInstance());
-    service.getExerciseIds(lastReqID, TYPE_TO_SELECTION, "", -1, controller.getUser(), getRole(), false, false,
-        incorrectFirstOrder, false, new SetExercisesCallbackWithID(id));
+    if (DEBUG)
+      logger.info("ExerciseList.reloadWith id = " + id + " for user " + controller.getUser() + " instance " + getInstance());
+    service.getExerciseIds(getRequest(), new SetExercisesCallbackWithID(id));
   }
 
   /**
@@ -208,7 +218,8 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
         "' vs new exercise " + exerciseID + " instance " + getInstance());*/
 
     if (token != null && idFromToken.equals(exerciseID)) {
-      if (DEBUG) logger.info("\tpushFirstSelection : (" + getInstance() + ") current token " + token + " same as new " + exerciseID);
+      if (DEBUG)
+        logger.info("\tpushFirstSelection : (" + getInstance() + ") current token " + token + " same as new " + exerciseID);
       checkAndAskServer(exerciseID);
     } else {
       if (DEBUG) logger.info("\tpushFirstSelection : (" + getInstance() + ") pushNewItem " + exerciseID);
@@ -237,9 +248,10 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */
   void pushNewItem(String search, String exerciseID) {
-    if (DEBUG) logger.info("------------ ExerciseList.pushNewItem : (" + getInstance() + ") push history " + exerciseID + " - ");
+    if (DEBUG)
+      logger.info("------------ ExerciseList.pushNewItem : (" + getInstance() + ") push history " + exerciseID + " - ");
     String instance = getInstance();
-    String suffix = instance.isEmpty() ? "": "instance=" + instance;
+    String suffix = instance.isEmpty() ? "" : "instance=" + instance;
     History.newItem("#" + "search=" + search + ";" +
         "item=" + exerciseID + ";" +
         suffix);
@@ -316,7 +328,8 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     public void onSuccess(ExerciseListWrapper<T> result) {
       //if (DEBUG) logger.info("\tExerciseList.SetExercisesCallback Got " + result.getExercises().size() + " results");
       if (isStaleResponse(result)) {
-        if (DEBUG) logger.info("----> SetExercisesCallback.onSuccess ignoring result " + result.getReqID() + " b/c before latest " + lastReqID);
+        if (DEBUG)
+          logger.info("----> SetExercisesCallback.onSuccess ignoring result " + result.getReqID() + " b/c before latest " + lastReqID);
       } else {
         gotExercises(result);
 
@@ -353,8 +366,9 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     }
 
     public void onSuccess(ExerciseListWrapper<T> result) {
-      if (DEBUG) logger.info("\tExerciseList.SetExercisesCallbackWithID Got " + result.getExercises().size() + " results, id = " +
-          id);
+      if (DEBUG)
+        logger.info("\tExerciseList.SetExercisesCallbackWithID Got " + result.getExercises().size() + " results, id = " +
+            id);
       if (isStaleResponse(result)) {
         if (DEBUG) logger.info("----> SetExercisesCallbackWithID.onSuccess ignoring result " + result.getReqID() +
             " b/c before latest " + lastReqID);
@@ -498,7 +512,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    */
   protected void loadFirstExercise() {
     if (isEmpty()) { // this can only happen if the database doesn't load properly, e.g. it's in use
-      if (DEBUG) logger.info("loadFirstExercise (" + instance+ ") : current exercises is empty?");
+      if (DEBUG) logger.info("loadFirstExercise (" + instance + ") : current exercises is empty?");
       removeCurrentExercise();
     } else {
       T toLoad = findFirstExercise();
@@ -561,7 +575,8 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   @Override
   public void checkAndAskServer(String id) {
-    if (DEBUG) logger.info(getClass() +" : (" +instance + ") ExerciseList.checkAndAskServer - askServerForExercise = "  + id);
+    if (DEBUG)
+      logger.info(getClass() + " : (" + instance + ") ExerciseList.checkAndAskServer - askServerForExercise = " + id);
     if (hasExercise(id)) {
       askServerForExercise(id);
     } else if (!id.equals(EditItem.NEW_EXERCISE_ID)) {
@@ -616,7 +631,8 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   protected void askServerForExercise(String itemID) {
     controller.checkUser();
     if (cachedNext != null && cachedNext.getID().equals(itemID)) {
-      if (DEBUG) logger.info("\tExerciseList.askServerForExercise using cached id = " + itemID + " instance " + instance);
+      if (DEBUG)
+        logger.info("\tExerciseList.askServerForExercise using cached id = " + itemID + " instance " + instance);
       useExercise(cachedNext);
     } else {
       pendingReq = true;
@@ -646,7 +662,9 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     }
   }
 
-  public void clearCachedExercise() { cachedNext = null; }
+  public void clearCachedExercise() {
+    cachedNext = null;
+  }
 
   private class ExerciseAsyncCallback implements AsyncCallback<U> {
     @Override
