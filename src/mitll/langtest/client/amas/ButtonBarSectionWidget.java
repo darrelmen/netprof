@@ -161,13 +161,18 @@ class ButtonBarSectionWidget implements SectionWidget {
     }
   }
 
-  @Override
+/*  @Override
   public void selectItem(Collection<String> section, boolean doToggle) {
+
+  }*/
+
+  @Override
+  public void clearAll() {
 
   }
 
   @Override
-  public void clearAll() {
+  public void clearEnabled() {
 
   }
 
