@@ -46,7 +46,7 @@ class WordContainer extends SimplePagingContainer<WordScore> implements Analysis
   private static final int ITEM_COL_WIDTH_NARROW = 190;
   private static final String SCORE = "Score";
   private static final int SCORE_WIDTH = 68;
-  public static final int PLAY_WIDTH = 42;
+  static final int PLAY_WIDTH = 42;
   private static final int NATIVE_WIDTH = PLAY_WIDTH;
   private static final String NATIVE = "Ref";
   private static final String PLAY = "Play";
@@ -64,7 +64,7 @@ class WordContainer extends SimplePagingContainer<WordScore> implements Analysis
    * @param plot
    * @see AnalysisTab#getWordScores(LangTestDatabaseAsync, ExerciseController, int, ShowTab, AnalysisPlot, Panel, int)
    */
-  public WordContainer(ExerciseController controller, AnalysisPlot plot, ShowTab learnTab, Heading w) {
+  WordContainer(ExerciseController controller, AnalysisPlot plot, ShowTab learnTab, Heading w) {
     super(controller);
     spanish = controller.getLanguage().equalsIgnoreCase("Spanish");
     sorter = new ExerciseComparator(controller.getStartupInfo().getTypeOrder());
