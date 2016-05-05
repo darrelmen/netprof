@@ -33,10 +33,11 @@ import java.util.*;
 @SuppressWarnings("serial")
 public class DownloadServlet extends DatabaseServlet {
   private static final Logger logger = Logger.getLogger(DownloadServlet.class);
-  public static final String AUDIO = "audio";
-  public static final String LIST = "list";
-  public static final String FILE = "file";
-  public static final String CONTEXT = "context";
+  private static final String AUDIO = "audio";
+  private static final String LIST = "list";
+  private static final String FILE = "file";
+  private static final String CONTEXT = "context";
+  private static final String COMPRESSED_SUFFIX = "mp3";
 
   /**
    * This is getting complicated.
@@ -217,7 +218,7 @@ public class DownloadServlet extends DatabaseServlet {
 
     String fileName = foreignPart + englishPart + userPart;
     fileName = fileName.replaceAll("\\.","");
-    fileName += ".mp3";
+    fileName += "." + COMPRESSED_SUFFIX;
 
     //logger.debug("file is '" + fileName + "'");
     String underscores = fileName.replaceAll("\\p{Z}+", "_");  // split on spaces
@@ -328,7 +329,7 @@ public class DownloadServlet extends DatabaseServlet {
 
     // logger.debug("sections " + sections[0]);
 
-    Map<String, Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
+    Map<String, Collection<String>> typeToSection = new HashMap<>();
     for (String section : sections) {
       // logger.debug("\tsection " + section);
 
@@ -346,7 +347,7 @@ public class DownloadServlet extends DatabaseServlet {
         //   logger.debug("\ts " + s);
 
         List<String> values = Arrays.asList(s.split(","));
-        List<String> trimmed = new ArrayList<String>();
+        List<String> trimmed = new ArrayList<>();
         for (String v : values) {
           trimmed.add(v.trim());
         }
