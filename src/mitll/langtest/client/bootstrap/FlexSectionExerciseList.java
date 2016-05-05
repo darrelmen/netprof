@@ -98,7 +98,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
        * @param sections
        */
       protected void selectItem(String type, Collection<String> sections) {
-        logger.info("FlexSectionExerciseList.selectItem : selecting " + type + "=" + sections);
+     //   logger.info("FlexSectionExerciseList.selectItem : selecting " + type + "=" + sections);
 
         ButtonGroupSectionWidget listBox = getGroupSection(type);
         listBox.clearSelectionState();
@@ -525,7 +525,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
    */
   @Override
   public boolean loadByID(String id) {
-    logger.info("loadByID loading exercise " + id);
+   // logger.info("loadByID loading exercise " + id);
     if (hasExercise(id)) {
       //  logger.info("loadByID found exercise " + id);
       loadExercise(id);
