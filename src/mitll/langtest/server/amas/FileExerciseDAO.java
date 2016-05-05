@@ -18,7 +18,6 @@ import java.util.*;
  * Date: 10/8/12
  * Time: 3:35 PM
  * To change this template use File | Settings | File Templates.
- * hasn't been used in a long time
  */
 public class FileExerciseDAO<T extends CommonShell> implements SimpleExerciseDAO<T> {
   private static final Logger logger = Logger.getLogger(FileExerciseDAO.class);
@@ -60,6 +59,14 @@ public class FileExerciseDAO<T extends CommonShell> implements SimpleExerciseDAO
   @Override
   public SectionHelper<T> getSectionHelper() {
     return sectionHelper;
+  }
+
+  @Override
+  public void reload() {
+    exercises = null;
+    idToExercise.clear();
+    sectionHelper.clear();
+    getRawExercises();
   }
 
   @Override

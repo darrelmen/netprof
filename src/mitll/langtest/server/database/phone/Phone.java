@@ -1,13 +1,8 @@
 package mitll.langtest.server.database.phone;
 
-import org.hibernate.annotations.GenericGenerator;
-
-import javax.persistence.*;
-
 /**
  * Created by go22670 on 3/29/16.
  */
-@Entity
 public class Phone {
   private Long id;
 
@@ -27,9 +22,6 @@ public class Phone {
     this.score = score;
   }
 
-  @Id
-  @GeneratedValue(generator = "increment")
-  @GenericGenerator(name = "increment", strategy = "increment")
   public Long getId() {
     return id;
   }
@@ -64,6 +56,7 @@ public class Phone {
     return score;
   }
 
+/*
   private void setWid(long wid) {
     this.wid = wid;
   }
@@ -83,4 +76,5 @@ public class Phone {
   private void setScore(float score) {
     this.score = score;
   }
+*/
 }

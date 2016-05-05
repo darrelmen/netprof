@@ -220,8 +220,11 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
    * @return
    * @see #scoreRepeatExercise
    */
-  private PretestScore getPretestScore(String imageOutDir, int imageWidth, int imageHeight, boolean useScoreForBkgColor,
-                                       boolean decode, String prefix, String noSuffix, File wavFile, Scores scores,
+  private PretestScore getPretestScore(String imageOutDir, int imageWidth, int imageHeight,
+                                       boolean useScoreForBkgColor,
+                                       boolean decode, String prefix, String noSuffix,
+                                       File wavFile,
+                                       Scores scores,
                                        JSONObject jsonObject,
                                        boolean usePhoneToDisplay) {
     //  logger.debug("getPretestScore jsonObject " + jsonObject);

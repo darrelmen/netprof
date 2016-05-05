@@ -209,7 +209,7 @@ class TextResponse {
     }
 
     if (controller.isRightAlignContent()) {
-      noPasteAnswer.addStyleName(controller.getLanguage().toLowerCase());
+      setLanguageSpecificFont(controller, noPasteAnswer);//.addStyleName(controller.getLanguage().toLowerCase());
       noPasteAnswer.setDirection(HasDirection.Direction.RTL);
     }
 
@@ -227,6 +227,18 @@ class TextResponse {
       });
     }
     return noPasteAnswer;
+  }
+
+  private void setLanguageSpecificFont(ExerciseController controller, Widget widget) {
+    widget.addStyleName(controller.getLanguage().toLowerCase());
+
+    String fontFamily = controller.getProps().getFontFamily();
+    if (!fontFamily.isEmpty()) {
+      logger.info("using font family " + fontFamily);
+      widget.getElement().getStyle().setProperty("fontFamily", fontFamily);
+    } else {
+      logger.info("not using font family property");
+    }
   }
 
   /**
