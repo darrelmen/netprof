@@ -14,11 +14,21 @@ public class CorrectAndScore implements IsSerializable, Comparable<CorrectAndSco
   private long userid;
 
   private String id;
+  /**
+   * For AMAS
+   */
   private int qid;
   private boolean correct;
   private float score;
+  /**
+   * For AMAS
+   */
   private float classifierScore;
+  /**
+   * For AMAS
+   */
   private float userScore;
+
   private long timestamp;
   private String path;
   private transient String scoreJson;
