@@ -42,7 +42,7 @@ public class LTSFactory implements CollationSort {
    * TODO : what about Japanese, Korean, ... for LTS?
    * Does reflection to make an appropriate LTS - expecting something like corpus.EnglishLTS
    * <p>
-   * ARABIC, MSA, and IRAQI all map to MSA LTS
+   * ARABIC and MSA  map to MSA LTS
    *
    * @param thisLanguage
    * @see ASRScoring#ASRScoring
@@ -57,9 +57,6 @@ public class LTSFactory implements CollationSort {
       switch (thisLanguage) {
         case ARABIC:
         case MSA:
-        case IRAQI:
-          ltsForLanguage = new ModernStandardArabicLTS();
-          break;
         case MANDARIN:
           ltsForLanguage = unknown;
           break;
@@ -153,6 +150,9 @@ public class LTSFactory implements CollationSort {
       case JAPANESE:
         locale = "jp";
         break;
+      case IRAQI:
+        locale = "iq";
+        break;
       case LEVANTINE:
         locale = "al";
         break;
@@ -214,6 +214,9 @@ public class LTSFactory implements CollationSort {
         break;
       case JAPANESE:
         locale = Locale.JAPANESE;
+        break;
+      case IRAQI:
+        locale = new Locale.Builder().setLanguage("ar").setRegion("iq").build();
         break;
       case LEVANTINE:
         locale = new Locale.Builder().setLanguage("ar").setRegion("sy").build();

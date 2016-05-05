@@ -35,7 +35,7 @@ public abstract class ExercisePanel<L extends Shell, T extends Shell> extends Ve
   private static final String PROMPT = "Read the following text and answer the question or questions below.";
   private final List<Widget> answers = new ArrayList<Widget>();
   private final Set<Widget> completed = new HashSet<Widget>();
-  T exercise = null;
+  protected T exercise = null;
   final ExerciseController controller;
   private final NavigationHelper<L> navigationHelper;
   final ListInterface<L> exerciseList;
@@ -118,11 +118,8 @@ public abstract class ExercisePanel<L extends Shell, T extends Shell> extends Ve
     HTML maybeRTLContent = getMaybeRTLContent(content);
     maybeRTLContent.addStyleName("rightTenMargin");
     maybeRTLContent.addStyleName("topMargin");
-    if (content.length() > 200) {
-      return getContentScroller(maybeRTLContent);
-    } else {
-      return maybeRTLContent;
-    }
+
+    return (content.length() > 200)  ? getContentScroller(maybeRTLContent) : maybeRTLContent;
   }
 
   protected abstract String getExerciseContent(T e);
