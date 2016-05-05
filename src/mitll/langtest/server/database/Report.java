@@ -78,6 +78,8 @@ public class Report {
   private static final String BROWSER_VERSION = "browserVersion";
   private static final String NAME = "name";
   public static final String ACTIVE_I_PAD = "Active iPad/iPhone Users";
+  public static final int EVIL_LAST_WEEK = 54;
+  public static final String SKIP_USER = "gvidaver";
 
   private final UserDAO userDAO;
   private final ResultDAO resultDAO;
@@ -90,7 +92,7 @@ public class Report {
   private final Map<Long, Long> userToStart = new HashMap<>();
   private static final boolean DEBUG = false;
 
-  private final Set<String> lincoln = new HashSet<>(Arrays.asList("gvidaver", "rbudd", "jmelot", "esalesky", "gatewood",
+  private final Set<String> lincoln = new HashSet<>(Arrays.asList(SKIP_USER, "rbudd", "jmelot", "esalesky", "gatewood",
       "testing", "grading", "fullperm", "0001abcd", "egodoy",
       "rb2rb2",
       "dajone3",
@@ -180,7 +182,7 @@ public class Report {
     File file = getReportPath(pathHelper, language);
     JSONObject jsonObject = new JSONObject();
     writeReportToFile(file, pathHelper, language, jsonObject, year);
-    logger.debug("wrote to " + file.getAbsolutePath());
+    logger.debug("writeReportToFile wrote to " + file.getAbsolutePath());
     //logger.debug("\n" + jsonObject.toString());
     return jsonObject;
   }
@@ -564,9 +566,9 @@ public class Report {
     YearTimeRange yearTimeRange = new YearTimeRange(year, calendar).invoke();
     int ytd = 0;
 
-    Map<Integer, Integer> monthToCount = new TreeMap<>();
-    Map<Integer, Integer> weekToCount = new TreeMap<>();
-    ensureYTDEntries(year, monthToCount, weekToCount);
+    Counts counts = new Counts(year);
+    Map<Integer, Integer> monthToCount = counts.getMonthToCount();
+    Map<Integer, Integer> weekToCount = counts.getWeekToCount();
 
     Set<Long> students = new HashSet<>();
 
@@ -619,64 +621,70 @@ public class Report {
       logger.info("weeks\n" + weekToCount);
       logger.info("users " + weekToCount.keySet());
     }
+    //logger.info("users " + weekToCount.keySet());
+
     builder.append(getSectionReport(ytd, monthToCount, weekToCount, users1, jsonObject, year));
     return students;
   }
 
   private void ensureYTDEntries0(int year, Map<Integer, Long> monthToCount) {
-    Calendar today = getCalendarForYearOrNow(year);
+    Calendar today = getCalendarForYearOrNow();
     int thisMonth = today.get(Calendar.MONTH);
     for (int i = 0; i <= thisMonth; i++) monthToCount.put(i, 0l);
-  }
 
-  private Calendar getCalendarForYearOrNow(int year) {
-    if (year == getThisYear()) {
-      Calendar today = Calendar.getInstance();
-      today.setTimeInMillis(System.currentTimeMillis());
-      return today;
-    } else {
-      Calendar today = Calendar.getInstance();
-      today.set(Calendar.YEAR, year);
-      today.set(Calendar.DAY_OF_YEAR, 364);
-      return today;
+    if (isNotThisYear(year)) {
+      for (int i = 0; i < 12; i++) monthToCount.put(i, 0l);
     }
   }
 
-  private void ensureYTDEntriesW(int year, Map<Integer, Long> weekToCount) {
-    Calendar today = getCalendarForYearOrNow(year);
-    int thisWeek = today.get(Calendar.WEEK_OF_YEAR);
-    for (int i = 0; i <= thisWeek; i++) weekToCount.put(i, 0l);
+  private boolean isNotThisYear(int year) {
+    return getThisYear() != year;
   }
 
-  private void ensureYTDEntries(int year, Map<Integer, Integer> monthToCount, Map<Integer, Integer> weekToCount) {
-    Calendar today = getCalendarForYearOrNow(year);
-    int thisMonth = today.get(Calendar.MONTH);
+  private Calendar getCalendarForYearOrNow() {
+      Calendar today = Calendar.getInstance();
+      today.setTimeInMillis(System.currentTimeMillis());
+      return today;
+  }
+
+  private void ensureYTDEntriesW(int year, Map<Integer, Long> weekToCount) {
+    Calendar today = getCalendarForYearOrNow();
     int thisWeek = today.get(Calendar.WEEK_OF_YEAR);
-    //   Date now = today.getTime();
-    for (int i = 0; i <= thisMonth; i++) monthToCount.put(i, 0);
-    for (int i = 0; i <= thisWeek; i++) weekToCount.put(i, 0);
+    for (int i = 0; i <= thisWeek; i++) weekToCount.put(i, 0l);
+
+    if (isNotThisYear(year)) {
+      for (int i = 0; i < EVIL_LAST_WEEK; i++) weekToCount.put(i, 0l);
+    }
   }
 
   private void ensureYTDEntries2(int year, Map<Integer, Set<Long>> monthToCount, Map<Integer, Set<Long>> weekToCount) {
-    Calendar today = getCalendarForYearOrNow(year);
+    Calendar today = getCalendarForYearOrNow();
     int thisMonth = today.get(Calendar.MONTH);
     int thisWeek = today.get(Calendar.WEEK_OF_YEAR);
     for (int i = 0; i <= thisMonth; i++) monthToCount.put(i, new HashSet<>());
     for (int i = 0; i <= thisWeek; i++)  weekToCount.put(i,  new HashSet<>());
+
+    if (isNotThisYear(year)) {
+      for (int i = 0; i < 12; i++) monthToCount.put(i, new HashSet<>());
+      for (int i = 0; i < EVIL_LAST_WEEK; i++) weekToCount.put(i, new HashSet<>());
+    }
   }
 
   private void ensureYTDEntries3(int year, Map<Integer, Map<Long, Set<SlimEvent>>> monthToCount, Map<Integer, Map<Long, Set<SlimEvent>>> weekToCount) {
-    Calendar today = getCalendarForYearOrNow(year);
+    Calendar today = getCalendarForYearOrNow();
     int thisMonth = today.get(Calendar.MONTH);
     int thisWeek = today.get(Calendar.WEEK_OF_YEAR);
     //   Date now = today.getTime();
     for (int i = 0; i <= thisMonth; i++) monthToCount.put(i, new HashMap<>());
     for (int i = 0; i <= thisWeek; i++) weekToCount.put(i, new HashMap<>());
-  }
+    if (isNotThisYear(year)) {
+      for (int i = 0; i < 12; i++) monthToCount.put(i, new HashMap<>());
+      for (int i = 0; i < EVIL_LAST_WEEK; i++) weekToCount.put(i, new HashMap<>());
+    } }
 
   private boolean shouldSkipUser(User user) {
     return user.getId() == 3 || user.getId() == 1 ||
-        lincoln.contains(user.getUserID()) || user.getUserID().startsWith("gvidaver");
+        lincoln.contains(user.getUserID()) || user.getUserID().startsWith(SKIP_USER);
   }
 
   /**
@@ -699,12 +707,13 @@ public class Report {
                                   int year) {
 
     JSONObject yearJSON = new JSONObject();
-    String yearCol = /*ytd > -1 ?*/ getYTD(ytd, users1, yearJSON, year)/* : ""*/;
+    String yearCol = getYTD(ytd, users1, yearJSON, year);
     jsonObject.put("year", yearJSON);
 
     JSONArray monthArray = new JSONArray();
     String monthCol = getMonthToCount(monthToCount, MONTH, users1, "", monthArray, year);
     jsonObject.put(MONTH1, monthArray);
+
 
     JSONArray weekArray = new JSONArray();
     String weekCol = getWC(weekToCount, WEEK, users1, weekArray, year);
@@ -885,6 +894,7 @@ public class Report {
     SimpleDateFormat df = new SimpleDateFormat("MM-dd");
     Integer max = getMax(weekToCount);
     long initial = calendar.getTimeInMillis();
+    SimpleDateFormat fullFormat = new SimpleDateFormat("MM-dd-yy");
 
 //    logger.info(unit +" before  " + year + " = " + calendar.getTime() + " or " + df.format(calendar.getTime()));
 
@@ -896,7 +906,7 @@ public class Report {
         value = ((Collection<?>) value).size();
       }
 
-      // logger.info("before week " +week + " = " + calendar.getTime() + " or " + df.format(calendar.getTime()));
+   //   logger.info("getWC before week " +week + " = " + calendar.getTime() + " or " + df.format(calendar.getTime()));
 
       calendar.set(Calendar.WEEK_OF_YEAR, week);
       calendar.set(Calendar.DAY_OF_WEEK, 1);
@@ -904,17 +914,19 @@ public class Report {
 
       Date time = calendar.getTime();
       boolean before = time.getTime() < initial;
-      String format1 = before ? new SimpleDateFormat("MM-dd-yy").format(time) : df.format(time);
-/*      logger.info("after  week " + week + " = " + time + " " + time.getTime() +
-          " or " + format1 + " = " + value);*/
+      String format1 = before ? fullFormat.format(time) : df.format(time);
+
+      //logger.info("getWC after  week " + week + " = " + time + " " + time.getTime() +" or " + format1 + " = " + value);
 
       JSONObject jsonObject = new JSONObject();
       jsonObject.put("weekOfYear", week);
       jsonObject.put(COUNT, value);
+      jsonObject.put("date",fullFormat.format(time));
+
       jsonArray.add(jsonObject);
 
       s += "<tr><td>" +
-          "<span>" + format1 +
+           "<span>" + format1 +
           "</span>" +
           "</td><td>" + value + "</td></tr>";
     }
@@ -958,12 +970,9 @@ public class Report {
     YearTimeRange yearTimeRange = new YearTimeRange(year, getCalendarForYear(year)).invoke();
 
     int ytd = 0;
-
-    //logger.debug("found " + exToAudio.size() + " ref audio exercises");
-
-    Map<Integer, Integer> monthToCount = new TreeMap<>();
-    Map<Integer, Integer> weekToCount = new TreeMap<>();
-    ensureYTDEntries(year, monthToCount, weekToCount);
+    Counts counts = new Counts(year);
+    Map<Integer, Integer> monthToCount = counts.getMonthToCount();
+    Map<Integer, Integer> weekToCount = counts.getWeekToCount();
 
     Map<Long, Map<String, Integer>> userToDayToCount = new TreeMap<>();
 
@@ -974,16 +983,7 @@ public class Report {
     int beforeJanuary = 0;
     Set<Long> skipped = new TreeSet<>();
     try {
-      //  SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("MM_dd_yy");
-      //  String today = simpleDateFormat2.format(new Date());
-
       BufferedWriter writer = null;
-
-/*      if (WRITE_RESULTS_TO_FILE) {
-        File file = getReportFile(pathHelper, today + "_all", language);
-        writer = new BufferedWriter(new FileWriter(file));
-      }*/
-
       teacherAudio = 0;
       invalid = 0;
       Calendar calendar = getCalendarForYear(year);
@@ -1052,9 +1052,9 @@ public class Report {
   private <T extends UserAndTime> void addRefAudio(StringBuilder builder, Calendar calendar,
                                                    Collection<T> refAudio, JSONObject jsonObject, int year) {
     int ytd = 0;
-    Map<Integer, Integer> monthToCount = new TreeMap<>();
-    Map<Integer, Integer> weekToCount = new TreeMap<>();
-    ensureYTDEntries(year, monthToCount, weekToCount);
+    Counts counts = new Counts(year);
+    Map<Integer, Integer> monthToCount = counts.getMonthToCount();
+    Map<Integer, Integer> weekToCount = counts.getWeekToCount();
 
     Map<Long, Map<String, Integer>> userToDayToCount = new TreeMap<>();
 
@@ -1084,6 +1084,49 @@ public class Report {
     builder.append(getSectionReport(ytd, monthToCount, weekToCount, REF_AUDIO_RECORDINGS, jsonObject, year));
   }
 
+  private static class Counts {
+    private Map<Integer, Integer> monthToCount = new TreeMap<>();
+    private Map<Integer, Integer> weekToCount = new TreeMap<>();
+
+    Counts(int year) {
+      if (year == getThisYear()) {
+        ensureYTDEntries(monthToCount, weekToCount);
+  //      logger.info("months " + monthToCount.keySet() + " weeks " + weekToCount.keySet());
+      }
+      else {
+        for (int i = 0; i < 12; i++) monthToCount.put(i, 0);
+        for (int i = 0; i < EVIL_LAST_WEEK; i++) weekToCount.put(i, 0);
+//        logger.info("months " + monthToCount.keySet() + " weeks " + weekToCount.keySet());
+      }
+    }
+
+    private Calendar getCalendarForYearOrNow() {
+        Calendar today = Calendar.getInstance();
+        today.setTimeInMillis(System.currentTimeMillis());
+        return today;
+    }
+
+    private int getThisYear() {
+      return Calendar.getInstance().get(Calendar.YEAR);
+    }
+
+    private void ensureYTDEntries(Map<Integer, Integer> monthToCount, Map<Integer, Integer> weekToCount) {
+      Calendar today = getCalendarForYearOrNow();
+      int thisMonth = today.get(Calendar.MONTH);
+      for (int i = 0; i <= thisMonth; i++) monthToCount.put(i, 0);
+      int thisWeek = today.get(Calendar.WEEK_OF_YEAR);
+    //  logger.info("week " +thisWeek);
+      for (int i = 0; i <= thisWeek; i++) weekToCount.put(i, 0);
+    }
+
+    Map<Integer, Integer> getMonthToCount() {
+      return monthToCount;
+    }
+
+    Map<Integer, Integer> getWeekToCount() {
+      return weekToCount;
+    }
+  }
   /**
    * @param calendar
    * @param monthToCount
@@ -1249,16 +1292,15 @@ public class Report {
     Map<Integer, Set<Long>> monthToCount = new TreeMap<>();
     Map<Integer, Set<Long>> weekToCount = new TreeMap<>();
     ensureYTDEntries2(year, monthToCount, weekToCount);
+//    logger.info("now " + monthToCount.keySet() + " " + weekToCount.keySet());
 
     Map<Integer, Map<Long, Set<SlimEvent>>> monthToCount2 = new TreeMap<>();
     Map<Integer, Map<Long, Set<SlimEvent>>> weekToCount2 = new TreeMap<>();
     ensureYTDEntries3(year, monthToCount2, weekToCount2);
-    logger.info("now  2  " + weekToCount );
-
+  //  logger.info("now " + monthToCount2.keySet() + " " + weekToCount2.keySet());
 
     Set<Long> teachers = new HashSet<>();
 //    int skipped = 0;
-
     Calendar calendar = getCalendarForYear(year);
     YearTimeRange yearTimeRange = new YearTimeRange(year, calendar).invoke();
 
@@ -1277,13 +1319,11 @@ public class Report {
         teachers.add(creatorID);
       }
     }
-
     //dumpActiveUsers(activeUsers, teachers, skipped, users);
 
     JSONObject activeJSON = new JSONObject();
     builder.append(getSectionReport(users.size(), monthToCount, weekToCount, activeUsers, activeJSON, year));
     jsonObject.put("activeUsers", activeJSON);
-
 //    logger.debug("active users " + activeJSON);
 
     Map<Integer, Long> monthToDur = getMonthToDur(monthToCount2, year);
