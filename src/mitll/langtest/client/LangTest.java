@@ -172,11 +172,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         }
       }
 
-      public void onSuccess(StartupInfo startupInfo2) {
+      public void onSuccess(StartupInfo startupInfo) {
         long now = System.currentTimeMillis();
-        startupInfo = startupInfo2;
-        //   logger.info("Got startup info " + startupInfo2);
-        props = new PropertyHandler(startupInfo2.getProperties());
+        LangTest.this.startupInfo = startupInfo;
+        //   logger.info("Got startup info " + startupInfo);
+        props = new PropertyHandler(startupInfo.getProperties());
         if (isLogClientMessages()) {
           String message = "onModuleLoad.getProperties : (success) took " + (now - then) + " millis";
           logMessageOnServer(message);
@@ -323,7 +323,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   /**
-   *
+   * @see #onModuleLoad()
    */
   private void onModuleLoad2() {
     setupSoundManager();
