@@ -27,9 +27,8 @@ import java.util.Map;
  * The async counterpart of <code>LangTestDatabase</code>.
  */
 public interface LangTestDatabaseAsync {
-  <T extends CommonShell> void getExerciseIds(int reqID, Map<String, Collection<String>> typeToSelection, String prefix, long userListID,
-                                              int userID, String role, boolean onlyUnrecordedByMe, boolean onlyExamples,
-                                              boolean incorrectFirstOrder, boolean onlyWithAudioAnno,
+  <T extends CommonShell> void getExerciseIds(
+                                              ExerciseListRequest request,
                                               AsyncCallback<ExerciseListWrapper<T>> async);
 
   void getUsers(AsyncCallback<List<User>> async);

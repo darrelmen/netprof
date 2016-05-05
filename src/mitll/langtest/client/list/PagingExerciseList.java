@@ -21,10 +21,14 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ExerciseListRequest;
 import mitll.langtest.shared.exercise.STATE;
 import mitll.langtest.shared.exercise.Shell;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -36,7 +40,7 @@ import java.util.logging.Logger;
  * Time: 5:35 PM
  * To change this template use File | Settings | File Templates.
  */
-public class PagingExerciseList<T extends CommonShell, U extends Shell> extends ExerciseList<T,U> {
+public class PagingExerciseList<T extends CommonShell, U extends Shell> extends ExerciseList<T, U> {
   private final Logger logger = Logger.getLogger("PagingExerciseList");
 
   protected final ExerciseController controller;
@@ -46,7 +50,7 @@ public class PagingExerciseList<T extends CommonShell, U extends Shell> extends 
   private TypeAhead typeAhead;
   long userListID = -1;
   private int unaccountedForVertical = 160;
-  private boolean unrecorded;
+  private boolean unrecorded, defaultAudioFilter;
   private boolean onlyExamples;
 
   /**
@@ -88,7 +92,8 @@ public class PagingExerciseList<T extends CommonShell, U extends Shell> extends 
   }
 
   @Override
-  public void reload(Map<String, Collection<String>> typeToSection) {}
+  public void reload(Map<String, Collection<String>> typeToSection) {
+  }
 
   /**
    * Add two rows -- the search box and then the item list
@@ -109,9 +114,20 @@ public class PagingExerciseList<T extends CommonShell, U extends Shell> extends 
     lastReqID++;
     logger.info("PagingExerciseList.loadExercises : looking for " +
         "'" + prefix + "' (" + prefix.length() + " chars) in list id " + userListID + " instance " + getInstance());
-    service.getExerciseIds(lastReqID, new HashMap<String, Collection<String>>(), prefix, userListID,
-        controller.getUser(), getRole(), getUnrecorded(), isOnlyExamples(), incorrectFirstOrder, false,
+    service.getExerciseIds(
+        getRequest(prefix),
         new SetExercisesCallback(""));
+  }
+
+  ExerciseListRequest getRequest(String prefix) {
+    return new ExerciseListRequest(lastReqID, controller.getUser())
+        .setPrefix(prefix)
+        .setUserListID(userListID)
+        .setRole(getRole())
+        .setOnlyUnrecordedByMe(getUnrecorded())
+        .setOnlyExamples(isOnlyExamples())
+        .setIncorrectFirstOrder(incorrectFirstOrder)
+        .setOnlyDefaultAudio(defaultAudioFilter);
   }
 
   /**
@@ -127,7 +143,7 @@ public class PagingExerciseList<T extends CommonShell, U extends Shell> extends 
    * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#addComponents()
    */
   protected ClickablePagingContainer<T> makePagingContainer() {
-    final PagingExerciseList<T,U> outer = this;
+    final PagingExerciseList<T, U> outer = this;
     pagingContainer =
         new ClickablePagingContainer<T>(controller) {
           @Override
@@ -211,13 +227,13 @@ public class PagingExerciseList<T extends CommonShell, U extends Shell> extends 
   }
 
   /**
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#makeClickableText(String, String, String, boolean)
    * @param text
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#makeClickableText(String, String, String, boolean)
    */
   public void searchBoxEntry(String text) {
     if (showTypeAhead) {
       typeAhead.setText(text);
-      pushNewItem(text,"");
+      pushNewItem(text, "");
     }
   }
 
@@ -238,7 +254,9 @@ public class PagingExerciseList<T extends CommonShell, U extends Shell> extends 
     return typeAhead != null ? typeAhead.getText() : "";
   }
 
-  void setTypeAheadText(String t) { typeAhead.setText(t);}
+  void setTypeAheadText(String t) {
+    typeAhead.setText(t);
+  }
 
   @Override
   protected void gotExercises(boolean success) {
@@ -252,7 +270,7 @@ public class PagingExerciseList<T extends CommonShell, U extends Shell> extends 
    * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#gotEmptyExerciseList
    */
   protected void showEmptySelection() {
-    logger.info("for " +getInstance()+
+    logger.info("for " + getInstance() +
         " showing no items match relative to " + typeAhead.getWidget().getElement().getId() + " parent " + typeAhead.getWidget().getParent());
     showPopup("No items match the selection and search.", "Try clearing one of your selections or changing the search.", typeAhead.getWidget());
     createdPanel = new SimplePanel();
@@ -271,7 +289,7 @@ public class PagingExerciseList<T extends CommonShell, U extends Shell> extends 
   }
 
   String getHistoryToken(String search, String id) {
-    return "search="+search +";item=" + id;
+    return "search=" + search + ";item=" + id;
   }
 
   public void gotClickOnItem(final T e) {
@@ -363,8 +381,8 @@ public class PagingExerciseList<T extends CommonShell, U extends Shell> extends 
   }
 
   /**
-   * @see ExerciseList#rememberExercises(Collection)
    * @param es
+   * @see ExerciseList#rememberExercises(Collection)
    */
   @Override
   public void addExercise(T es) {
@@ -372,9 +390,9 @@ public class PagingExerciseList<T extends CommonShell, U extends Shell> extends 
   }
 
   /**
-   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#duplicateExercise(Button)
    * @param after
    * @param es
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#duplicateExercise(Button)
    */
   public void addExerciseAfter(T after, T es) {
     pagingContainer.addExerciseAfter(after, es);
@@ -447,11 +465,15 @@ public class PagingExerciseList<T extends CommonShell, U extends Shell> extends 
     this.unrecorded = unrecorded;
   }
 
+  public void setDefaultAudioFilter(boolean unrecorded) {
+    this.defaultAudioFilter = unrecorded;
+  }
+
   boolean isOnlyExamples() {
     return onlyExamples;
   }
 
-  public void setOnlyExamples(boolean onlyExamples) {
+  protected void setOnlyExamples(boolean onlyExamples) {
     this.onlyExamples = onlyExamples;
   }
 }
