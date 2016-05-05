@@ -19,6 +19,7 @@ public class ReportAllTest extends BaseTest {
   private static final Logger logger = Logger.getLogger(ReportAllTest.class);
   public static final boolean DO_ONE = false;
 
+/*
   protected static DatabaseImpl getDatabase(String config) {
     File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
     String parent = file.getParent();
@@ -32,6 +33,7 @@ public class ReportAllTest extends BaseTest {
         serverProps.getMediaDir());
     return database;
   }
+*/
 
 
 
