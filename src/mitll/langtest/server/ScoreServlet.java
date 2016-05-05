@@ -113,7 +113,8 @@ public class ScoreServlet extends DatabaseServlet {
     if (queryString == null) queryString = ""; // how could this happen???
     if (!queryString.contains(NESTED_CHAPTERS)) { // quiet output for polling from status webapp
       String pathInfo = request.getPathInfo();
-      logger.debug("ScoreServlet.doGet : Request '" + queryString + "' path " + pathInfo +
+      logger.debug("ScoreServlet.doGet (" +getLanguage() +
+          "): Request '" + queryString + "' path " + pathInfo +
           " uri " + request.getRequestURI() + "  " + request.getRequestURL() + "  " + request.getServletPath());
     }
 
@@ -154,7 +155,7 @@ public class ScoreServlet extends DatabaseServlet {
           toReturn = nestedChapters;
         }
       } else if (userManagement.doGet(request, response, queryString, toReturn)) {
-        logger.info("doGet handled user command for " + queryString);
+        logger.info("doGet " + getLanguage() + " handled user command for " + queryString);
       } else if (matchesRequest(queryString, CHAPTER_HISTORY)) {
         queryString = removePrefix(queryString, CHAPTER_HISTORY);
         toReturn = getChapterHistory(queryString, toReturn);
