@@ -98,6 +98,7 @@ import java.util.logging.Logger;
  * 1.2.10
  * - More small report changes
  * 1.2.11
+ * - Fixed bugs with browser history forwards/backwards and clicking on characters
  * - Better support for keeping track of transcripts on audio files and noticing when they're out of sync with current content
  * 1.2.12
  * - Fix for lookup for ref audio, fix for sending meaning back in nested chapters score servlet call
@@ -105,11 +106,15 @@ import java.util.logging.Logger;
  * - fix for highlight on context sentence where now does max coverage, remove email cc to ltea,
  * looks at content to determine whether RTL language, bug where exercise lists wouldn't come up,
  * bug where didn't use cached alignment from refresult table, fix for sending meaning for english in nestedChapters
+ * 1.3.0
+ * - fixes for history stack
+ * 1.3.1
+ * - fix for bug where couldn't jump from word in analysis
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private final Logger logger = Logger.getLogger("LangTest");
 
-  public static final String VERSION_INFO = "1.2.12";
+  public static final String VERSION_INFO = "1.3.0";
 
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
