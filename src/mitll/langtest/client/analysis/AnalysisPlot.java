@@ -235,19 +235,21 @@ class AnalysisPlot extends TimeSeriesPlot {
   }
 
   private void populateExerciseMap(LangTestDatabaseAsync service, int userid) {
-    service.getExerciseIds(new ExerciseListRequest(1, userid), new AsyncCallback<ExerciseListWrapper<CommonShell>>() {
-      @Override
-      public void onFailure(Throwable throwable) {
-        logger.warning("\n\n\n-> getExerciseIds " + throwable);
-      }
+    service.getExerciseIds(
+        new ExerciseListRequest(1, userid),
+        new AsyncCallback<ExerciseListWrapper<CommonShell>>() {
+          @Override
+          public void onFailure(Throwable throwable) {
+            logger.warning("\n\n\n-> getExerciseIds " + throwable);
+          }
 
-      @Override
-      public void onSuccess(ExerciseListWrapper<CommonShell> exerciseListWrapper) {
-        for (CommonShell shell : exerciseListWrapper.getExercises()) {
-          getIdToEx().put(shell.getID(), shell);
-        }
-      }
-    });
+          @Override
+          public void onSuccess(ExerciseListWrapper<CommonShell> exerciseListWrapper) {
+            for (CommonShell shell : exerciseListWrapper.getExercises()) {
+              getIdToEx().put(shell.getID(), shell);
+            }
+          }
+        });
   }
 
   /**
