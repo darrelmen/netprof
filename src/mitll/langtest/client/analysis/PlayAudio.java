@@ -134,7 +134,7 @@ class PlayAudio {
     });
   }
 
-  private CompressedAudio compressedAudio = new CompressedAudio();
+  //private CompressedAudio compressedAudio = new CompressedAudio();
 
-  private String getPath(String path) { return compressedAudio.getPath(path);  }
+  private String getPath(String path) { return CompressedAudio.getPath(path);  }
 }

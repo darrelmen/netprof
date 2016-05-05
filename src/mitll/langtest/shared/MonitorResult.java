@@ -7,6 +7,7 @@ package mitll.langtest.shared;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
+import java.beans.Transient;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.*;
@@ -30,8 +31,8 @@ public class MonitorResult implements IsSerializable {
   public static final String PRON_SCORE = "pronScore";
   public static final String DEVICE = "device";
   public static final String TEXT = "text";
-  public static final String DYNAMIC_RANGE = "Dynamic Range";
-  public static final String VALIDITY = "Validity";
+  private static final String DYNAMIC_RANGE = "Dynamic Range";
+  private static final String VALIDITY = "Validity";
 
   private int uniqueID;
   private long userid;
@@ -54,6 +55,10 @@ public class MonitorResult implements IsSerializable {
   private int roundTripDur;
 
   private Map<String, String> unitToValue;
+/*
+  private String deviceType;
+  private String simpleDevice;
+  private String scoreJSON;*/
 
   public MonitorResult() {
   }
@@ -347,4 +352,38 @@ public class MonitorResult implements IsSerializable {
   public void setDisplayID(String displayID) {
     this.id = displayID;
   }
+
+/*  @Transient
+  public void setDeviceType(String deviceType) {
+    this.deviceType = deviceType;
+  }
+
+  @Transient
+  public String getDeviceType() {
+    return deviceType;
+  }
+
+  @Transient
+  public void setSimpleDevice(String simpleDevice) {
+    this.simpleDevice = simpleDevice;
+  }
+
+  @Transient
+  public String getSimpleDevice() {
+    return simpleDevice;
+  }
+
+  @Transient
+  public void setScoreJSON(String scoreJSON) {
+    this.scoreJSON = scoreJSON;
+  }
+
+  @Transient
+  public String getScoreJSON() {
+    return scoreJSON;
+  }
+
+  public void setUserID(Long userID) {
+    this.userid = userID;
+  }*/
 }

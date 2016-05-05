@@ -1,9 +1,11 @@
 package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.audio.HTTPClient;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.shared.exercise.CommonExercise;
+import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
@@ -13,13 +15,15 @@ import java.nio.file.Paths;
 import java.util.*;
 
 /**
+ * Get exercises from a json file.
+ *
  * Created by go22670 on 2/10/16.
+ *
  */
 public class JSONExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<CommonExercise> {
   private static final Logger logger = Logger.getLogger(JSONExerciseDAO.class);
 
   private static final String ENCODING = "UTF8";
-
   private final String jsonFile;
 
   /**
@@ -38,32 +42,17 @@ public class JSONExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Comm
 
   @Override
   List<CommonExercise> readExercises() {
-    JsonExport jsonExport = new JsonExport(null, sectionHelper, null);
-
     try {
       Path path = Paths.get(jsonFile);
-      byte[] encoded = Files.readAllBytes(path);
-      String asString = new String(encoded, ENCODING);
-      logger.info("readExercises reading from " + path.toFile().getAbsolutePath());
-
-      List<CommonExercise> exercises = jsonExport.getExercises(asString);
+      List<CommonExercise> exercises =
+          new JsonExport(null, sectionHelper, null).getExercises(new String(Files.readAllBytes(path), ENCODING));
       populateSections(exercises);
 
-      logger.info("read " +exercises.size() + " from " + jsonFile);
+      logger.info("read " +exercises.size() + " from " + jsonFile + " at " + path.toFile().getAbsolutePath());
       return exercises;
     } catch (IOException e) {
       logger.error("got " +e,e);
     }
     return Collections.emptyList();
-  }
-
-  protected void populateSections(List<CommonExercise> exercises) {
-    for (CommonExercise ex : exercises) {
-      Collection<SectionHelper.Pair> pairs = new ArrayList<>();
-      for (Map.Entry<String,String> pair : ex.getUnitToValue().entrySet()) {
-        pairs.add(getSectionHelper().addExerciseToLesson(ex, pair.getKey(), pair.getValue()));
-      }
-      getSectionHelper().addAssociations(pairs);
-    }
   }
 }
