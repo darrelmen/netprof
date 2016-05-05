@@ -5,6 +5,7 @@
 package mitll.langtest.client;
 
 import com.google.gwt.user.client.Window;
+import mitll.langtest.client.recorder.RecordButton;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -17,9 +18,19 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class PropertyHandler {
-  public static final String RTL = "rtl";
-  public static final String IS_AMAS = "isAMAS";
   private final Logger logger = Logger.getLogger("PropertyHandler");
+
+  public static final String TALKS_TO_DOMINO = "talksToDomino";
+  public static final String PRACTICE_CONTEXT = "practiceContext";
+  public static final String FONT_FAMILY = "fontFamily";
+
+  private static final String RTL = "rtl";
+  private static final String IS_AMAS = "isAMAS";
+  /**
+   * Possibly we need to add a delay after button is released to actually tell flash to stop recording.
+   * @see RecordButton#startOrStopRecording()
+   */
+  private static final int DEFAULT_AFTER_STOP_DELAY_MILLIS = 75;
 
   // property file property names
   private static final String ENABLE_ALL_USERS = "enableAllUsers";
@@ -76,12 +87,12 @@ public class PropertyHandler {
   private static final String PREFERRED_VOICES = "preferredVoices";
 
   private boolean adminView, analysis = false;
+  private boolean canPracticeContext = false;
   private boolean enableAllUsers;
   private boolean isAMAS;
   private boolean usePhoneToDisplay;
 
-  private final String AMAS_WELCOME = "Welcome to the Automatic Multi-Skilled Assessment System (AMAS)";
-  //  private static final String PRONUNCIATION_FEEDBACK = "NetProF – Network Pronunciation Feedback";//"Classroom";//NetProF";//"PRONUNCIATION FEEDBACK";
+  private static final String AMAS_WELCOME = "Welcome to the Automatic Multi-Skilled Assessment System (AMAS)";
   private static final String AMAS_PRONUNCIATION_FEEDBACK = "AMAS — Automatic Multi-Skilled Assessment System";
 
   private static final String INITIAL_PROMPT = "Practice pronunciation and learn vocabulary.";//"Learn how to pronounce words and practice vocabulary.";
@@ -108,7 +119,9 @@ public class PropertyHandler {
       "Urdu");
 
   private static final List<String> AMAS_SITES = Arrays.asList("Dari", "Farsi", "Korean", "Mandarin", "MSA", "Pashto", "Russian", "Spanish", "Urdu");
-  private boolean beta;
+ // private boolean beta;
+  private String fontFamily = "";
+  private String modelDir;
   private int afterStopDelayMillis;
 
   /**
@@ -147,10 +160,14 @@ public class PropertyHandler {
     return false;
   }
 
-  public boolean talksToDomino() {
+  boolean talksToDomino() {
     return talksToDomino;
   }
 
+  /**
+   * Typically 50 or 100 milliseconds.
+   * @return
+   */
   public int getAfterStopDelayMillis() {
     return afterStopDelayMillis;
   }
@@ -159,13 +176,24 @@ public class PropertyHandler {
     this.afterStopDelayMillis = afterStopDelayMillis;
   }
 
+  public String getFontFamily() {
+    return fontFamily;
+  }
+
+  public void setFontFamily(String fontFamily) {
+    this.fontFamily = fontFamily;
+  }
+  public String getModelDir() {
+    return modelDir;
+  }
+
   public enum LOGIN_TYPE {ANONYMOUS, STUDENT}
 
   private boolean spectrogram = false;
   private boolean clickAndHold = true;
   private boolean quietAudioOK;
   private boolean showContext = true;
-  private final Set<Long> preferredVoices = new HashSet<Long>();
+  private final Set<Long> preferredVoices = new HashSet<>();
   private String resetPassToken = "";
   private String cdEnableToken = "", emailRToken = "";
 
@@ -205,7 +233,7 @@ public class PropertyHandler {
   public static final String TEXT = "Text";
   private static final String AUDIO = "Audio";
   private String responseType = AUDIO;
-  boolean talksToDomino = false;
+  private boolean talksToDomino = false;
 
   /**
    * @param props
@@ -217,6 +245,9 @@ public class PropertyHandler {
     checkParams();
   }
 
+  /**
+   * Copy values from server props.
+   */
   private void useProps() {
     for (Map.Entry<String, String> kv : props.entrySet()) {
       String key = kv.getKey();
@@ -249,7 +280,11 @@ public class PropertyHandler {
       else if (key.equals(SHOW_CONTEXT)) showContext = getBoolean(value);
       else if (key.equals(ENABLE_ALL_USERS)) enableAllUsers = getBoolean(value);
       else if (key.equals(IS_AMAS)) isAMAS = getBoolean(value);
-      else if (key.equals("talksToDomino")) talksToDomino = getBoolean(value);
+      else if (key.equals(TALKS_TO_DOMINO)) talksToDomino = getBoolean(value);
+      else if (key.equals(PRACTICE_CONTEXT)) canPracticeContext = getBoolean(value);
+      else if (key.equals(FONT_FAMILY)) fontFamily = value;
+      else if (key.equals("scoringModel")) modelDir = value;
+      else if (key.equals("afterStopDelayMillis")) afterStopDelayMillis = getInt(value, DEFAULT_AFTER_STOP_DELAY_MILLIS, "afterStopDelayMillis");
         //else if (key.equals(IS_AMAS)) isAMAS = getBoolean(value);
       else if (key.equals(USE_PHONE_TO_DISPLAY)) {
         // logger.info("found " + USE_PHONE_TO_DISPLAY + " = " + value);
@@ -390,6 +425,11 @@ public class PropertyHandler {
       analysis = !p.equals("false");
     }
 
+    p = Window.Location.getParameter("context");
+    if (p != null) {
+      canPracticeContext = !p.equals("false");
+    }
+
     String turkParam = Window.Location.getParameter(TURK_PARAM);
     if (turkParam != null) {
       turkID = turkParam;
@@ -485,6 +525,10 @@ public class PropertyHandler {
 
   public boolean useAnalysis() {
     return analysis;
+  }
+
+  public boolean canPracticeContext() {
+    return canPracticeContext;
   }
 
   public String getTurkID() {

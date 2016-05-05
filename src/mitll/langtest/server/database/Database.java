@@ -6,7 +6,6 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.database.hibernate.SessionManagement;
 
 import java.sql.Connection;
 
@@ -33,5 +32,5 @@ public interface Database {
 
   LogAndNotify getLogAndNotify();
 
-  SessionManagement getSessionManagement();
+ // SessionManagement getSessionManagement();
 }

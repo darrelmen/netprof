@@ -18,7 +18,7 @@ import java.util.*;
 /**
  * Created by go22670 on 2/10/16.
  */
-public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
+abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 	private static final Logger logger = Logger.getLogger(BaseExerciseDAO.class);
 	private static final String CONTAINS_SEMI = "contains semicolon - should this item be split?";
 	private static final String ENGLISH = "english";
@@ -37,7 +37,13 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
 	private AttachAudio attachAudio;
 	private AudioDAO audioDAO;
 
-	public BaseExerciseDAO(ServerProperties serverProps, UserListManager userListManager, boolean addDefects) {
+	/**
+	 *
+	 * @param serverProps
+	 * @param userListManager
+	 * @param addDefects
+   */
+	BaseExerciseDAO(ServerProperties serverProps, UserListManager userListManager, boolean addDefects) {
 		this.serverProps = serverProps;
 		this.userListManager = userListManager;
 		this.language = serverProps.getLanguage();
@@ -62,6 +68,10 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
 		return exercises;
 	}
 
+	/**
+	 * Mainly to support reading from Domino after edits in Domino
+	 * @see DatabaseImpl#reloadExercises()
+	 */
 	public void reload() {
     exercises = null;
     idToExercise.clear();
@@ -69,6 +79,9 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
     getRawExercises();
   }
 
+	/**
+	 * Do steps after reading the exercises.
+	 */
 	private void afterReadingExercises() {
 		addAlternatives(exercises);
 
@@ -83,9 +96,16 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
 		// add new items
 		addNewExercises();
 
+		attachAudio();
+	}
+
+	/**
+	 * Worry about if the audio transcript doesn't match the exercise transcript
+	 */
+	private void attachAudio() {
 		Set<String> transcriptChanged = new HashSet<>();
 
-   // logger.info("afterReadingExercises trying to attach audio to " + exercises.size());
+		// logger.info("afterReadingExercises trying to attach audio to " + exercises.size());
 		for (CommonExercise ex : exercises) {
 			attachAudio.attachAudio(ex, transcriptChanged);
 			String refAudioIndex = ex.getRefAudioIndex();
@@ -130,6 +150,7 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
 	}
 
 	/**
+	 * Populate the lookup map.
 	 * @see #afterReadingExercises
 	 */
 	private void populateIdToExercise() {
@@ -251,6 +272,9 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
 	}
 
 	/**
+	 * When the QC process edits an exercise, a copy of the original becomes a UserExercise overlay,
+	 * which masks out the original.
+	 *
 	 * @param userExercise
 	 * @return old exercises
 	 * @see DatabaseImpl#editItem
@@ -300,12 +324,20 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
 	public boolean remove(String id) {
 		synchronized (this) {
 			CommonExercise remove = idToExercise.remove(id);
-			if (remove == null) return false;
-			return exercises.remove(remove);
+			return remove != null && exercises.remove(remove);
 		}
 	}
 
-
+	/**
+	 * This DAO needs to talk to other DAOs.
+	 *
+	 * @see DatabaseImpl#setDependencies(String, String, ExerciseDAO)
+	 * @param mediaDir
+	 * @param installPath
+	 * @param userExerciseDAO
+	 * @param addRemoveDAO
+	 * @param audioDAO
+   */
 	public void setDependencies(String mediaDir, String installPath,
 															UserExerciseDAO userExerciseDAO, AddRemoveDAO addRemoveDAO, AudioDAO audioDAO) {
 		this.userExerciseDAO = userExerciseDAO;
@@ -314,23 +346,22 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
 	}
 
 	/**
+	 * Worries about colliding with add and remove on the idToExercise map.
 	 * @param id
 	 * @return
 	 * @see UserExerciseDAO#getPredefExercise(String)
 	 * @see DatabaseImpl#getExercise(String)
 	 */
 	public CommonExercise getExercise(String id) {
-//    if (idToExercise.isEmpty()) {
-//      logger.error("huh? couldn't find any exercises..? " + id);
-//    }
-
 		synchronized (this) {
-			CommonExercise exercise = idToExercise.get(id);
-			//if (exercise == null) logger.warn("no '" +id+"'  in " + idToExercise.keySet().size()+" keys");
-			return exercise;
+			return idToExercise.get(id);
 		}
 	}
 
+	/**
+	 * @see #afterReadingExercises()
+	 * @param exTofieldToDefect
+   */
 	private void addDefects(Map<String, Map<String, String>> exTofieldToDefect) {
 		if (addDefects) {
 			int count = 0;
@@ -349,6 +380,10 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
 		}
 	}
 
+	/**
+	 * Look at the exercises and automatically flag defects
+	 * @return
+   */
 	private Map<String, Map<String, String>> findDefects() {
 		Map<String, Map<String, String>> idToDefectMap = new HashMap<>();
 
@@ -391,6 +426,10 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
 		return idToExercise.containsKey(id);
 	}
 
+	/**
+	 * Some exercises are marked as deleted - remove them from the list of current exercises.
+	 * @return
+   */
 	private Collection<String> removeExercises() {
 		if (addRemoveDAO != null) {
 			Collection<String> removes = addRemoveDAO.getRemoves();
@@ -436,8 +475,19 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
 		}
 	}
 
+	/**
+	 * Actually read the exercises from a datasource.
+	 * Could be an excel spreadsheet, csv file, or URL.
+	 * @return
+   */
 	abstract List<CommonExercise> readExercises();
 
+	/**
+	 * @see #findDefects()
+	 * @param fieldToDefect
+	 * @param foreignLanguagePhrase
+	 * @param translit
+   */
 	private void checkForSemicolons(Map<String, String> fieldToDefect, String foreignLanguagePhrase, String translit) {
 		if (foreignLanguagePhrase.contains(";")) {
 			fieldToDefect.put(QCNPFExercise.FOREIGN_LANGUAGE, CONTAINS_SEMI);
@@ -449,4 +499,19 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
 			fieldToDefect.put(QCNPFExercise.ENGLISH, "contains semicolon - should this item be split?");
     }*/
 	}
+
+	/**
+	 * Build the nested hierarchy represented in the section helper.
+	 * So we can ask for things like all exercises in Chapter 1.
+	 * @param exercises
+   */
+	void populateSections(Collection<CommonExercise> exercises) {
+    for (CommonExercise ex : exercises) {
+      Collection<SectionHelper.Pair> pairs = new ArrayList<>();
+      for (Map.Entry<String,String> pair : ex.getUnitToValue().entrySet()) {
+        pairs.add(getSectionHelper().addExerciseToLesson(ex, pair.getKey(), pair.getValue()));
+      }
+      getSectionHelper().addAssociations(pairs);
+    }
+  }
 }

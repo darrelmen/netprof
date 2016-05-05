@@ -92,9 +92,11 @@ public class AudioCheck {
     return (frames + 0.0d) / format.getFrameRate();
   }
 
-  public ValidityAndDur checkWavFileRejectAnyTooLoud(File file, boolean quietAudioOK) {
+  ValidityAndDur checkWavFileRejectAnyTooLoud(File file, boolean quietAudioOK) {
     ValidityAndDur validityAndDur = checkWavFileWithClipThreshold(file, false, quietAudioOK);
-    addDynamicRange(file, validityAndDur);
+    if (validityAndDur.isValid()) {
+      addDynamicRange(file, validityAndDur);
+    }
     return validityAndDur;
   }
 
@@ -105,9 +107,11 @@ public class AudioCheck {
    * @return
    * @see AudioConversion#isValid
    */
-  public ValidityAndDur checkWavFile(File file, boolean quietAudioOK) {
+  ValidityAndDur checkWavFile(File file, boolean quietAudioOK) {
     ValidityAndDur validityAndDur = checkWavFileWithClipThreshold(file, true, quietAudioOK);
-    addDynamicRange(file, validityAndDur);
+    if (validityAndDur.isValid()) {
+      addDynamicRange(file, validityAndDur);
+    }
     return validityAndDur;
   }
 
