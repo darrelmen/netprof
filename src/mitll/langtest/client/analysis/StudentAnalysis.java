@@ -99,7 +99,8 @@ public class StudentAnalysis extends DivWidget {
       if (user != null && user.getUserID() != null && !user.getUserID().equals("defectDetector")) {
         filtered.add(userInfo);
       } else {
-        logger.warning("skip " + user);
+        //String userID = user == null ? "" :user.getUserID();
+        //logger.warning("skip " + "'" + userID + "' : " +  user);
       }
     }
     return filtered;
