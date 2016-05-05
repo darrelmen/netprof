@@ -342,6 +342,8 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   private String getLanguage() {
+    getAudioFileHelper();
+
     return serverProps.getLanguage();
   }
 
