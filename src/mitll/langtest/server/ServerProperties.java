@@ -66,6 +66,7 @@ public class ServerProperties {
   private static final String MIRA_LEN = "https://mira.ll.mit.edu/scorer/item";
   private static final String MIRA_DEFAULT = MIRA_LEN;
   private static final String MIRA_CLASSIFIER_URL = "miraClassifierURL";
+
   private static final String WEBSERVICE_HOST_IP1 = "webserviceHostIP";
   private static final String WEBSERVICE_HOST_PORT = "webserviceHostPort";
   private static final String LESSON_PLAN_FILE = "lessonPlanFile";
@@ -74,6 +75,7 @@ public class ServerProperties {
   private static final String USE_POSTGRE_SQL = "usePostgreSQL";
   private static final String USE_ORM = "useORM";
   private static final String TYPE_ORDER = "typeOrder";
+  public static final String FONT_FAMILY = "fontFamily";
   private static final String SLEEP_BETWEEN_DECODES_MILLIS = "sleepBetweenDecodesMillis";
   private String miraClassifierURL = MIRA_DEVEL;// MIRA_LEN; //MIRA_DEVEL;
 
@@ -124,8 +126,16 @@ public class ServerProperties {
   private final Set<Long> preferredVoices = new HashSet<Long>();
   private EmailList emailList;
   private final int userInitialScores = 20;
+//  private boolean RTL;
+  private String fontFamily;
+  private String fontFaceURL;
   //private boolean RTL;
+/*
   private int sleepBetweenDecodes;
+  private long trimBeforeAndAfter;
+  private long trimBefore;
+  private long trimAfter;
+*/
 
   /**
    * @param servletContext
@@ -257,7 +267,7 @@ public class ServerProperties {
     return getDefaultFalse(NO_MODEL);
   }
 
-  public boolean removeExercisesWithMissingAudio() {
+  boolean removeExercisesWithMissingAudio() {
     return getDefaultTrue(REMOVE_EXERCISES_WITH_MISSING_AUDIO);
   }
 
@@ -273,6 +283,10 @@ public class ServerProperties {
     return getDefaultFalse("isAMAS");
   }
 
+  /**
+   * @see mitll.langtest.server.decoder.RefResultDecoder#doRefDecode(Collection, String)
+   * @return
+   */
   public boolean shouldTrimAudio() {
     return getDefaultTrue(DO_TRIM);
   }
@@ -368,7 +382,15 @@ public class ServerProperties {
     }
     miraClassifierURL = props.getProperty(MIRA_CLASSIFIER_URL, MIRA_DEFAULT);
 
+    props.put("scoringModel",props.getProperty("MODELS_DIR",""));
+
     if (getLessonPlan().startsWith("http")) props.setProperty("talksToDomino", TRUE);
+
+    if (getFontFamily() != null) {
+      props.setProperty(FONT_FAMILY, getFontFamily());
+      logger.info(FONT_FAMILY +
+          "=" + getFontFamily() + " : " + props.getProperty(FONT_FAMILY));
+    }
   }
 
   private boolean getDefaultFalse(String param) {
@@ -588,7 +610,42 @@ public class ServerProperties {
     props.setProperty("rtl", isRTL ? "true" : "false");
   }
 
+  public void setFontFamily(String fontNames) {
+    this.fontFamily = fontNames;
+    props.setProperty(FONT_FAMILY, fontNames);
+  }
+
+  private String getFontFamily() {
+    return fontFamily;
+  }
+
+  public void setFontFaceURL(String fontFaceURL) {
+    this.fontFaceURL = fontFaceURL;
+  }
+
+  public String getFontFaceURL() {
+    return fontFaceURL;
+  }
+
+  /**
+   * Something like : "https://domino-devel/dominoNP/attach/"
+   * @return
+   */
+  public String getAudioAttachPrefix() {
+    return props.getProperty("audioAttachPrefix");//,"https://domino-devel/dominoNP/attach/");
+  }
   public int getSleepBetweenDecodes() {
     return getIntPropertyDef(SLEEP_BETWEEN_DECODES_MILLIS, "" + SLEEP_BETWEEN_DECODES_DEFAULT);
+  }
+
+  private static final long TRIM_SILENCE_BEFORE = 300;
+  private static final long TRIM_SILENCE_AFTER  = 300;
+
+  public long getTrimBefore() {
+    return getIntPropertyDef("trimBeforeMillis", "" + TRIM_SILENCE_BEFORE);
+  }
+
+  public long getTrimAfter() {
+    return getIntPropertyDef("trimAfterMillis", "" + TRIM_SILENCE_AFTER);
   }
 }

@@ -57,6 +57,7 @@ public class ScoreServlet extends DatabaseServlet {
   public static final String CONTENT = "content";
   private static final String HAS_MODEL = "hasModel";
   private static final long REFRESH_CONTENT_INTERVAL = 12 * 60 * 60 * 1000L;
+  private static final long REFRESH_CONTENT_INTERVAL_THREE = 3 * 60 * 60 * 1000L;
 
   private static final String IS_CORRECT = "isCorrect";
   private static final String SAID_WORD = "saidWord";
@@ -88,19 +89,15 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String END = "end";
 
   private JSONObject nestedChapters;
+  private JSONObject nestedChaptersEverything;
   private long whenCached = -1;
+  private long whenCachedEverything = -1;
 
   private DatabaseImpl db;
   private AudioFileHelper audioFileHelper;
 
-  /**
-   * @seex mitll.langtest.server.LangTestDatabaseImpl#shareLoadTesting
-   */
-  // public static final String LOAD_TESTING = "loadTesting";
-
   private static final String ADD_USER = "addUser";
   private static final double ALIGNMENT_SCORE_CORRECT = 0.5;
-  //private boolean debug = true;
 
   /**
    * Remembers chapters from previous requests...
@@ -133,8 +130,19 @@ public class ScoreServlet extends DatabaseServlet {
         String[] split1 = queryString.split("&");
         if (split1.length == 2) {
           String removeExercisesWithMissingAudio = getRemoveExercisesParam(queryString);
-          if (removeExercisesWithMissingAudio.equals("true") || removeExercisesWithMissingAudio.equals("false")) {
-            toReturn = getJsonNestedChapters(removeExercisesWithMissingAudio.equals("true"));
+          boolean shouldRemoveExercisesWithNoAudio = removeExercisesWithMissingAudio.equals("true");
+          boolean dontRemove = removeExercisesWithMissingAudio.equals("false");
+          if (shouldRemoveExercisesWithNoAudio || dontRemove) {
+            if (dontRemove) {
+              if (nestedChaptersEverything == null || (System.currentTimeMillis() - whenCachedEverything > REFRESH_CONTENT_INTERVAL_THREE)) {
+                nestedChaptersEverything = getJsonNestedChapters(shouldRemoveExercisesWithNoAudio);
+                whenCachedEverything = System.currentTimeMillis();
+              }
+              toReturn = nestedChaptersEverything;
+            }
+            else {
+              toReturn = getJsonNestedChapters(true);
+            }
           } else {
             toReturn.put(ERROR, "expecting param " + REMOVE_EXERCISES_WITH_MISSING_AUDIO);
           }
@@ -185,9 +193,17 @@ public class ScoreServlet extends DatabaseServlet {
     long now = System.currentTimeMillis();
     long l = now - then;
     if (l > 10) {
-      logger.info("doGet : took " + l + " millis to do " + request.getQueryString());
+      logger.info("doGet : (" +getLanguage()+ ") took " + l + " millis to do " + request.getQueryString());
     }
-    reply(response, toReturn.toString());
+    then = now;
+    String x = toReturn.toString();
+    now = System.currentTimeMillis();
+    l = now - then;
+    if (l > 50) {
+      logger.info("doGet : (" +getLanguage()+ ") took " + l + " millis to do " + request.getQueryString() + " and to do toString on json");
+    }
+
+    reply(response, x);
   }
 
   /**
@@ -310,19 +326,23 @@ public class ScoreServlet extends DatabaseServlet {
     String user = userAndSelection.getUser();
     Map<String, Collection<String>> selection = userAndSelection.getSelection();
 
-    logger.debug("getPhoneReport (" + serverProps.getLanguage() + ") : user " + user + " selection " + selection);
+    logger.debug("getPhoneReport (" + getLanguage() + ") : user " + user + " selection " + selection);
     try {
       long then = System.currentTimeMillis();
       toReturn = db.getJsonPhoneReport(Long.parseLong(user), selection);
       long now = System.currentTimeMillis();
       if (now - then > 250) {
-        logger.debug("getPhoneReport (" + serverProps.getLanguage() + ") : user " + user + " selection " + selection +
+        logger.debug("getPhoneReport (" + getLanguage() + ") : user " + user + " selection " + selection +
             " took " + (now - then) + " millis");
       }
     } catch (NumberFormatException e) {
       toReturn.put(ERROR, "User id should be a number");
     }
     return toReturn;
+  }
+
+  private String getLanguage() {
+    return serverProps.getLanguage();
   }
 
   /**
@@ -525,7 +545,21 @@ public class ScoreServlet extends DatabaseServlet {
    */
   private JSONObject getJsonNestedChapters(boolean removeExercisesWithMissingAudio) {
     JSONObject jsonObject = new JSONObject();
-    jsonObject.put(CONTENT, getJSONExport().getContentAsJson(removeExercisesWithMissingAudio));
+
+    long then = System.currentTimeMillis();
+    JsonExport jsonExport = getJSONExport();
+    long now = System.currentTimeMillis();
+    if (now-then>1000) {
+      logger.warn("getJsonNestedChapters " + getLanguage() + " getJSONExport took " + (now-then) + " millis");
+    }
+    then = now;
+    JSONArray contentAsJson = jsonExport.getContentAsJson(removeExercisesWithMissingAudio);
+
+    now = System.currentTimeMillis();
+    if (now-then>1000) {
+      logger.warn("getJsonNestedChapters " + getLanguage() + " getContentAsJson took " + (now-then) + " millis");
+    }
+    jsonObject.put(CONTENT, contentAsJson);
     addVersion(jsonObject);
 
     return jsonObject;

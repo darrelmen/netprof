@@ -133,6 +133,10 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
     return flex;
   }
 
+  /**
+   * @see #doMaleFemale()
+   * @see MyWaveformExercisePanel#onLoad()
+   */
   private void getProgressInfo() {
     service.getMaleFemaleProgress(new AsyncCallback<Map<String, Float>>() {
       @Override
@@ -147,11 +151,11 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
   }
 
   private class MyWaveformExercisePanel extends WaveformExercisePanel<CommonShell, CommonExercise> {
-    private final CommonExercise e; // TODO REMOVE!
+   // private final CommonExercise e; // TODO REMOVE!
 
-    public MyWaveformExercisePanel(CommonExercise e, ExerciseController controller1, ListInterface<CommonShell> exerciseList1, String instance) {
+    MyWaveformExercisePanel(CommonExercise e, ExerciseController controller1, ListInterface<CommonShell> exerciseList1, String instance) {
       super(e, service, controller1, exerciseList1, RecorderNPFHelper.this.doNormalRecording, instance);
-      this.e = e;
+     // this.e = e;
     }
 
     @Override
@@ -179,7 +183,7 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
     @Override
     public void postAnswers(ExerciseController controller, HasID completedExercise) {
       super.postAnswers(controller, completedExercise);
-      tellOtherListExerciseDirty(e);
+      tellOtherListExerciseDirty(exercise);
     }
   }
 }

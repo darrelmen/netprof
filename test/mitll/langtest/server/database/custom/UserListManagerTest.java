@@ -542,9 +542,9 @@ public class UserListManagerTest {
     CommonExercise exercise = database.getCustomOrPredefExercise(next.getID());
     assertNotNull("huh? no exercise by id " + next.getID() + "?", exercise);
 
-    String englishSentence = exercise.getEnglish();
-    assertNotNull("huh? exercise " + exercise + " has no english?", englishSentence);
-    assertTrue("english is " + englishSentence, englishSentence.equals(ENGLISH));
+    String english = exercise.getEnglish();
+    assertNotNull("huh? exercise " + exercise + " has no english?", english);
+    assertTrue("english is " + english, english.equals(ENGLISH));
 
     next.toUserExercise().setEnglish(CHANGED);
     assertTrue(next.getEnglish().equals(CHANGED));

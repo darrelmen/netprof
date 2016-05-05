@@ -22,6 +22,18 @@ import java.util.Date;
 public class BaseTest {
   private static final Logger logger = Logger.getLogger(BaseTest.class);
 
+  protected static DatabaseImpl getDatabase(String config) {
+    File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
+    String parent = file.getParent();
+    String name = file.getName();
+
+    ServerProperties serverProps = new ServerProperties(parent, name);
+    DatabaseImpl database = new DatabaseImpl(parent, name, serverProps.getH2Database(), serverProps, new PathHelper("war"), false, null);
+    database.setInstallPath("war", parent + File.separator + database.getServerProps().getLessonPlan(),
+        serverProps.getMediaDir());
+    return database;
+  }
+
   protected void finish(Statement statement, ResultSet rs) throws SQLException {
     rs.close();
     statement.close();
