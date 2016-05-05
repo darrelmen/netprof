@@ -128,19 +128,22 @@ public class SLFFile {
 
 		  for (String token : tokens) {
 			  String cleanedToken = cleanToken(token);
-			  int next = newNodes++;
-			  linksBuf.append("J=" + (linkCount++) + " S=" + start + " E=" + next +
-					  " l=" +
-					  (cleanedToken.equals(UNKNOWN_MODEL) ? UNKNOWN_MODEL_BIAS : "-1.00") + ";");
-			  nodesBuf.append("I=" +
-					  next +
-					  " W=" +
-					  (cleanedToken.toUpperCase().equals(UNKNOWN_MODEL) ? cleanedToken.toUpperCase() : cleanedToken) +
-					  ";");
-			  if(!cleanedToken.toUpperCase().equals(UNKNOWN_MODEL))
-				  finalSentence += cleanedToken + ";";
 
-			  start = next;
+        if (!cleanedToken.isEmpty()) {
+          int next = newNodes++;
+          linksBuf.append("J=" + (linkCount++) + " S=" + start + " E=" + next +
+              " l=" +
+              (cleanedToken.equals(UNKNOWN_MODEL) ? UNKNOWN_MODEL_BIAS : "-1.00") + ";");
+          nodesBuf.append("I=" +
+              next +
+              " W=" +
+              (cleanedToken.toUpperCase().equals(UNKNOWN_MODEL) ? cleanedToken.toUpperCase() : cleanedToken) +
+              ";");
+          if (!cleanedToken.toUpperCase().equals(UNKNOWN_MODEL))
+            finalSentence += cleanedToken + ";";
+
+          start = next;
+        }
 		  }
 		  linksBuf.append("J=" + (linkCount++) + " S=" + start + " E=1" + " l=-1.00" + (ctr == sentencesToUse.size() - 1 ? "" : ";"));
 		  ctr += 1;

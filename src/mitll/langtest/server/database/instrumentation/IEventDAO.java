@@ -2,6 +2,7 @@ package mitll.langtest.server.database.instrumentation;
 
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.Event;
+import mitll.langtest.shared.instrumentation.SlimEvent;
 
 import java.util.List;
 
@@ -13,7 +14,11 @@ public interface IEventDAO {
 
   List<Event> getAll();
 
+  List<SlimEvent> getAllSlim();
+
   List<Event> getAllDevices();
+
+  List<SlimEvent> getAllDevicesSlim();
 
   void addPlayedMarkings(long userID, CommonExercise firstExercise);
 

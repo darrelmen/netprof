@@ -1,16 +1,10 @@
 package mitll.langtest.server.database.word;
 
-import org.hibernate.annotations.GenericGenerator;
-
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import java.util.Map;
 
 /**
  * Created by go22670 on 3/29/16.
  */
-@Entity
 public class Word {
   private long id;
   private long rid;
@@ -48,9 +42,6 @@ public class Word {
     this.score = score;
   }
 
-  @Id
-  @GeneratedValue(generator = "increment")
-  @GenericGenerator(name = "increment", strategy = "increment")
   public long getId() { return id; }
 
   private void setId(long id) {
