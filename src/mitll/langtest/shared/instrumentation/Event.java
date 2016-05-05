@@ -4,10 +4,6 @@
 
 package mitll.langtest.shared.instrumentation;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
-import org.hibernate.annotations.GenericGenerator;
-
-import javax.persistence.*;
 import java.util.Date;
 
 /**
@@ -17,17 +13,15 @@ import java.util.Date;
  * Time: 11:35 AM
  * To change this template use File | Settings | File Templates.
  */
-@Entity
-@Table(name = "EVENT")
-public class Event implements IsSerializable, Comparable<Event> {
+public class Event extends SlimEvent
+//    implements Comparable<Event>
+{
   private Long id;
-
   private String widgetID;
   private String widgetType;
   private String exerciseID;
   private String context;
-  private long creatorID;
-  private long timestamp;
+
   private String hitID;
   private String device;
 
@@ -44,19 +38,15 @@ public class Event implements IsSerializable, Comparable<Event> {
    */
   public Event(String widgetID, String widgetType, String exerciseID, String context,
                long userID, long timestamp, String hitID, String device) {
+    super(userID,timestamp);
     this.widgetID = widgetID;
     this.widgetType = widgetType;
     this.exerciseID = exerciseID;
     this.context = context;
-    this.creatorID = userID;
-    this.timestamp = timestamp;
     this.hitID = hitID;
     this.device = device;
   }
 
-  @Id
-  @GeneratedValue(generator = "increment")
-  @GenericGenerator(name = "increment", strategy = "increment")
   public Long getId() {
     return id;
   }
@@ -77,20 +67,7 @@ public class Event implements IsSerializable, Comparable<Event> {
     return context;
   }
 
-  public long getCreatorID() {
-    return creatorID;
-  }
-
-  @Transient
-  public long getTimestamp() {
-    return timestamp;
-  }
-
-  public void setTimestamp(long timestamp) {
-    this.timestamp = timestamp;
-  }
-
-  @Temporal(TemporalType.TIMESTAMP)
+/*
   public Date getSQLTimestamp() {
     return new Date(timestamp);
   }
@@ -99,6 +76,7 @@ public class Event implements IsSerializable, Comparable<Event> {
     this.timestamp = timestamp.getTime();
   }
 
+*/
   public String getDevice() {
     return device;
   }
@@ -111,11 +89,6 @@ public class Event implements IsSerializable, Comparable<Event> {
     return hitID;
   }
 
-  @Override
-  public int compareTo(Event o) {
-    return timestamp < o.timestamp ? -1 : timestamp > o.timestamp ? +1 : 0;
-  }
-
   public String toString() {
     long timestamp = getTimestamp();
     if (timestamp == -1) timestamp = System.currentTimeMillis();
@@ -123,6 +96,7 @@ public class Event implements IsSerializable, Comparable<Event> {
         getExerciseID() + "/" + getContext() + " hit " + getHitID() + " from " + device;
   }
 
+/*
   private void setWidgetID(String widgetID) {
     this.widgetID = widgetID;
   }
@@ -134,15 +108,19 @@ public class Event implements IsSerializable, Comparable<Event> {
   private void setExerciseID(String exerciseID) {
     this.exerciseID = exerciseID;
   }
+*/
 
   private void setContext(String context) {
     this.context = context;
   }
 
+/*
   public void setCreatorID(long creatorID) {
     this.creatorID = creatorID;
   }
+*/
 
+/*
   private void setHitID(String hitID) {
     this.hitID = hitID;
   }
@@ -150,6 +128,7 @@ public class Event implements IsSerializable, Comparable<Event> {
   private void setDevice(String device) {
     this.device = device;
   }
+*/
 
   public void truncate() {
     String context = getContext();

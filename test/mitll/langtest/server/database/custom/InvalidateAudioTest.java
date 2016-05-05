@@ -52,10 +52,10 @@ public class InvalidateAudioTest {
       if (newEx == null) {
         logger.warn("no new oldEx for old " + id);
       } else {
-        boolean different = isDifferentContext(id, oldEx, newEx,smallVocabDecoder);
-        if (different) {
-          idsOfDefects.add(id);
-        }
+  //      boolean different = isDifferentContext(id, oldEx, newEx,smallVocabDecoder);
+    //    if (different) {
+      //    idsOfDefects.add(id);
+      //  }
       }
     }
     logger.warn("ids to change - context " + idsOfDefects);
@@ -110,12 +110,12 @@ public class InvalidateAudioTest {
     return isDifferent(id, foreignLanguageNew, foreignLanguageOld,smallVocabDecoder);
   }
 
-  private boolean isDifferentContext(String id, CommonExercise oldEx, CommonExercise newEx, SmallVocabDecoder smallVocabDecoder) {
+/*  private boolean isDifferentContext(String id, CommonExercise oldEx, CommonExercise newEx, SmallVocabDecoder smallVocabDecoder) {
     String foreignLanguageNew = newEx.getContext().toLowerCase().trim();
     String foreignLanguageOld = oldEx.getContext().toLowerCase().trim();
 
     return isDifferent(id, foreignLanguageNew, foreignLanguageOld,smallVocabDecoder);
-  }
+  }*/
 
   private boolean isDifferent(String id, String foreignLanguageNew, String foreignLanguageOld, SmallVocabDecoder smallVocabDecoder) {
     List<String> newTokens = getTokens(foreignLanguageNew,smallVocabDecoder);

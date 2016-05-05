@@ -332,7 +332,7 @@ public class AnnotationDAO extends DAO {
         String exid = rs.getString(1);
         String field = rs.getString(2);
         String status = rs.getString(3);
-        //long modified = rs.getTimestamp(4).getTime();
+        //long modified = rs.getTimestamp(4).getStart();
         long creatorid = rs.getLong(4);
 
         if (prevExid.isEmpty()) {
