@@ -89,7 +89,7 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
    * @see mitll.langtest.server.scoring.ASRScoring#getCollator
    */
   public Collator getCollator() {
-    makeASRScoring();
+   // makeASRScoring();
     return asrScoring.getCollator();
   }
 
@@ -104,7 +104,7 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
       if (!checkedLTS) {
         checkedLTS = true;
         int count = 0;
-        makeASRScoring();
+     //   makeASRScoring();
 
         phoneToCount = new HashMap<String, Integer>();
         for (CommonExercise exercise : exercises) {
@@ -117,6 +117,9 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
             count++;
           } else {
             countPhones(exercise.getMutable());
+          }
+          for (CommonExercise context : exercise.getDirectlyRelated()) {
+            context.getMutable().setSafeToDecode(isInDictOrLTS(context));
           }
         }
 
@@ -153,12 +156,12 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
    * @see mitll.langtest.server.LangTestDatabaseImpl#isValidForeignPhrase(String)
    */
   public boolean checkLTSOnForeignPhrase(String foreignLanguagePhrase) {
-    makeASRScoring();
+  //  makeASRScoring();
     return asrScoring.validLTS(foreignLanguagePhrase);
   }
 
   public SmallVocabDecoder getSmallVocabDecoder() {
-    makeASRScoring();
+  //  makeASRScoring();
     return asrScoring.getSmallVocabDecoder();
   }
 
@@ -598,7 +601,7 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
   private AudioAnswer getAMASAudioAnswer(AmasExerciseImpl exercise,
                                      int qid, int reqid,
                                      File file, AudioCheck.ValidityAndDur validity, String url) {
-    makeASRScoring();
+  //  makeASRScoring();
     AudioAnswer audioAnswer = new AudioAnswer(url, validity.getValidity(), reqid, validity.durationInMillis);
     autoCRT.getAutoCRTDecodeOutput(exercise, qid, file, audioAnswer, true);
     return audioAnswer;
@@ -707,7 +710,7 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
    */
   private PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences, boolean canUseCache,
                                            boolean usePhoneToDisplay, boolean useOldSchool) {
-    makeASRScoring();
+  //  makeASRScoring();
     List<String> unk = new ArrayList<String>();
 
     if (isMacOrWin() || useOldSchoolServiceOnly || useOldSchool) {  // i.e. NOT using cool new jcodr webservice
@@ -794,7 +797,7 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
         "" + testAudioFile + " with sentence '" + sentence + "' req# " + reqid +
         (useCache ? " check cache" : " NO CACHE") + " prefix " + prefix);
 
-    makeASRScoring();
+ //   makeASRScoring();
     if (testAudioFile == null) {
       logger.error("getASRScoreForAudio huh? no test audio file for " + sentence);
       return new PretestScore(); // very defensive
@@ -918,7 +921,7 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
                                      boolean canUseCache, boolean allowAlternates, boolean useOldSchool) {
     AudioAnswer audioAnswer = new AudioAnswer(url, validity.getValidity(), reqid, validity.durationInMillis);
     if (doFlashcard) {
-      makeASRScoring();
+  //    makeASRScoring();
       PretestScore flashcardAnswer = decodeCorrectnessChecker.getFlashcardAnswer(exercise, file, audioAnswer,
           serverProps.getLanguage(),
           canUseCache, allowAlternates, useOldSchool);
@@ -932,16 +935,6 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
   public Map<String, Integer> getPhoneToCount() {
     return phoneToCount;
   }
-
-/*  public static class ScoreAndAnswer {
-    public final PretestScore score;
-    public final AudioAnswer answer;
-
-    public ScoreAndAnswer(PretestScore score, AudioAnswer answer) {
-      this.score = score;
-      this.answer = answer;
-    }
-  }*/
 
   /**
    * @return

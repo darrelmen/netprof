@@ -9,6 +9,7 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.Event;
+import mitll.langtest.shared.instrumentation.SlimEvent;
 import org.apache.log4j.Logger;
 
 import java.sql.*;
@@ -32,6 +33,9 @@ public class EventDAO extends DAO implements IEventDAO {
   private static final String DEVICE = "device";
   // private final UserDAO userDAO;
   long defectDetector = -1;
+  public static final String MODIFIED = "modified";
+  public static final String WHERE_DEVICE = " where length(device)=36";
+//  private final UserDAO userDAO;
 
   /**
    * @param database
@@ -124,6 +128,7 @@ public class EventDAO extends DAO implements IEventDAO {
       if (missingCreator) {
         event.setTimestamp(System.currentTimeMillis());
         // logger.warn("creator is " + creatorID + " for " + event);
+
         creatorID = defectDetector;// userDAO.getDefectDetector();
       }
       statement.setLong(i++, creatorID);
@@ -167,10 +172,35 @@ public class EventDAO extends DAO implements IEventDAO {
     return Collections.emptyList();
   }
 
-  @Override
+  //@Override
+  public List<SlimEvent> getAllSlim() {
+    try {
+      return getSlimEvents("SELECT " +CREATORID+ "," +MODIFIED+
+          " from " + EVENT);
+    } catch (Exception ee) {
+      logger.error("got " + ee, ee);
+      if (logAndNotify != null) {
+        logAndNotify.logAndNotifyServerException(ee);
+      }
+    }
+    return Collections.emptyList();
+  }
+
   public List<Event> getAllDevices() {
     try {
-      return getEvents("SELECT * from " + EVENT + " where length(device)=36");
+      return getEvents("SELECT * from " + EVENT + WHERE_DEVICE);
+    } catch (Exception ee) {
+      logger.error("got " + ee, ee);
+      if (logAndNotify != null) {
+        logAndNotify.logAndNotifyServerException(ee);
+      }
+    }
+    return Collections.emptyList();
+  }
+
+  public List<SlimEvent> getAllDevicesSlim() {
+    try {
+      return getSlimEvents("SELECT " +CREATORID+ "," +MODIFIED+" from " + EVENT + WHERE_DEVICE);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
       if (logAndNotify != null) {
@@ -228,10 +258,27 @@ public class EventDAO extends DAO implements IEventDAO {
           rs.getString(EXERCISEID),
           rs.getString("context"),
           rs.getLong(CREATORID),
-          rs.getTimestamp("modified").getTime(),
+          rs.getTimestamp(MODIFIED).getTime(),
           rs.getString(HITID),
           rs.getString(DEVICE))
       );
+    }
+
+    finish(connection, statement, rs);
+    return lists;
+  }
+
+  private List<SlimEvent> getSlimEvents(String sql) throws SQLException {
+    Connection connection = getConnection();
+    PreparedStatement statement = connection.prepareStatement(sql);
+    ResultSet rs = statement.executeQuery();
+    List<SlimEvent> lists = new ArrayList<>();
+
+    while (rs.next()) {
+      lists.add(new SlimEvent(
+          rs.getLong(CREATORID),
+          rs.getTimestamp(MODIFIED).getTime()
+      ));
     }
 
     finish(connection, statement, rs);

@@ -61,6 +61,8 @@ public class HTTPClient {
    */
   public String readFromGET(String url) {
     try {
+      logger.info("Reading from " + url);
+
       return receive(setupGetHttpConn(url));
     } catch (IOException e) {
       e.printStackTrace();

@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Date;
 
+//import org.apache.logging.log4j.ThreadContext;
 
 /**
  * ForceNocacheFilter: Force the GWT nocache files to not cache.
@@ -31,6 +32,14 @@ public class ForceNocacheFilter implements Filter {
 
     final HttpServletRequest httpRequest = (HttpServletRequest) request;
     final String requestUri = httpRequest.getRequestURI();
+
+/*    String remoteAddr = httpRequest.getHeader("X-FORWARDED-FOR");
+    if (remoteAddr == null || remoteAddr.isEmpty()) {
+      remoteAddr = request.getRemoteAddr();
+    }
+
+    // Add details to the thread context for use in logging.
+    ThreadContext.put("ipAddress", remoteAddr);*/
 
     if (requestUri.contains(".nocache.")) {
       Date now = new Date();
