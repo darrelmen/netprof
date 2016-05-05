@@ -53,6 +53,7 @@ public class SelectionState {
   /**
    * Deals with responseType being on the URL.
    *
+   * Don't trim the section - breaks searching for multi token items
    * @param token
    */
   private void parseToken(String token) {
@@ -68,7 +69,7 @@ public class SelectionState {
         if (DEBUG) logger.info("\tpart " + part + " : " + Arrays.asList(segments));
         if (segments.length > 1) {
           String type = segments[0].trim();
-          String section = segments[1].trim();
+          String section = segments[1]/*.trim()*/;
 
           if (type.equals("#item") || type.equals("item")) {
             setItem(section);
