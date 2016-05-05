@@ -69,7 +69,11 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
   public static final String CORRECT = "correct";
   public static final String INCORRECT = "incorrect";
   public static final String DEFAULT_SPEAKER = "Default Speaker";
-  private static final String DOWNLOAD_YOUR_RECORDING = "Download your recording.";
+
+  /**
+   * @see ASRScorePanel#addTooltip
+   */
+  public static final String DOWNLOAD_YOUR_RECORDING = "Download your recording.";
 
   private final ListInterface listContainer;
   private boolean isBusy = false;
@@ -639,9 +643,11 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     private void setDownloadHref() {
       downloadContainer.setVisible(true);
 
+      String audioPathToUse = audioPath.endsWith(".ogg") ? audioPath.replaceAll(".ogg",".mp3") : audioPath;
+
       String href = DOWNLOAD_AUDIO +
           "?file=" +
-          audioPath +
+          audioPathToUse +
           "&" +
           "exerciseID=" +
           exerciseID +
