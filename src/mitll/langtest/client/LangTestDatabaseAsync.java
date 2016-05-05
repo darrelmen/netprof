@@ -84,7 +84,7 @@ public interface LangTestDatabaseAsync {
   void logMessage(String message, AsyncCallback<Void> async);
 
 
-  void getStartupInfo(AsyncCallback<StartupInfo> async);
+  void getStartupInfo( AsyncCallback<StartupInfo> async);
 
   void getUserListsForText(String search, long userid, AsyncCallback<Collection<UserList<CommonShell>>> async);
 
