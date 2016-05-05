@@ -264,13 +264,6 @@ public class UserManager {
    * @see mitll.langtest.client.LangTest#getUser
    */
   public int getUser() {
-/*    if (USE_COOKIE) {  // TODO : remove!
-      String sid = Cookies.getCookie("sid");
-      if (sid == null || sid.equals("" + NO_USER_SET)) {
-        return NO_USER_SET;
-      }
-      return Integer.parseInt(sid);
-    } else*/
     if (Storage.isLocalStorageSupported()) {
       String sid = getUserFromStorage();
       return (sid == null || sid.equals("" + NO_USER_SET)) ? NO_USER_SET : Integer.parseInt(sid);
