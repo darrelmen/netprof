@@ -457,7 +457,7 @@ public class AudioConversion {
     return writeMP3(pathToWav, realContextPath, overwrite, title, author);
   }
 
-  int spew2 = 0;
+  private int spew2 = 0;
 
   /**
    * @param pathToWav
