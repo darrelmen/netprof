@@ -33,7 +33,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   private static final String CONTEXT = "context";
   private static final String MEANING = "meaning";
   private static final String ID = "id";
-  public static final String WORD = "word";
+  private static final String WORD = "word";
 
   private final List<String> errors = new ArrayList<String>();
   private final String file;
@@ -48,6 +48,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   private int weekIndex;
 
   private final boolean DEBUG = false;
+  private long lastModified;
 
   /**
    * JUST FOR TESTING
@@ -55,9 +56,11 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
    * @param file
    * @param serverProperties
    */
+/*
   public ExcelImport(String file, ServerProperties serverProperties) {
     this(file, serverProperties, null, false);
   }
+*/
 
   /**
    * @param file
@@ -71,7 +74,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     super(serverProps, userListManager, addDefects);
     this.file = file;
 
-    logger.info("Reading from " + file);
+  //  logger.info("Reading from " + file);
     maxExercises = serverProps.getMaxNumExercises();
     // turn off missing fast/slow for classroom
     shouldHaveRefAudio = false;
@@ -85,7 +88,8 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
 
   protected List<CommonExercise> readExercises() {
     File file = new File(this.file);
-    logger.info("readExercises Reading from " + file.getAbsolutePath());
+    lastModified = file.lastModified();
+    logger.info("readExercises Reading from " + file.getAbsolutePath() + " modified " + new Date(lastModified));
 
     return readExercises(file);
   }
@@ -516,8 +520,6 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   }
 
   private void logStatistics(int id, int semis, int skipped, int englishSkipped, int deleted) {
-//    logger.info("max exercise id = " + id);
-    // logger.info("missing audio files = " +c);
     if (skipped > 0) {
       logger.info("Skipped " + skipped + " entries with missing audio. " + getPercent(skipped, id));
     }
@@ -533,7 +535,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   }
 
   private String getPercent(float skipped, float total) {
-    return (100f * skipped / total) + "%";
+    return total == 0 ? "0 %" : (100f * skipped / total) + "%";
   }
 
   private Map<Integer, CellRangeAddress> getRowToRange(Sheet sheet) {
@@ -569,6 +571,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   }
 
   /**
+   * Don't do an overlay if it's older than the file creation date.
    * @param id
    * @param english
    * @param foreignLanguagePhrase
@@ -600,6 +603,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
 //    if (!context.isEmpty()) {
 //      imported.addContext(context,contextTranslation);
 //    }
+    imported.setUpdateTime(lastModified);
     return imported;
   }
 
