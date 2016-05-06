@@ -13,6 +13,7 @@ import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.rest.RestUserManagement;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
+import mitll.langtest.shared.UserAndTime;
 import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
@@ -71,19 +72,24 @@ public class UserManagement {
             Object userid = jsonObject.get(RestUserManagement.USERID);
             Object pc = jsonObject.get(RestUserManagement.PASSWORD_CORRECT);
 
-            if (!userid.toString().equals(NO_USER)) {
-              logger.info(site + " : found user " + userid);
+            if (userid == null) {
+              logger.warn("huh? got back " + json + " for req " + login + " pass " +passwordH);
+            }
+            else {
+              if (!userid.toString().equals(NO_USER)) {
+                logger.info(site + " : found user " + userid);
 
-              if (pc.toString().equals("true")) {
-                logger.info("\tmatching password for " + site);
+                if (pc.toString().equals("true")) {
+                  logger.info("\tmatching password for " + site);
 
-                String ip = getIPInfo(request);
-                Object emailH = jsonObject.get(RestUserManagement.EMAIL_H);
-                Object kind = jsonObject.get(RestUserManagement.KIND);
-                User.Kind realKind = kind == null ? User.Kind.STUDENT : User.Kind.valueOf(kind.toString());
+                  String ip = getIPInfo(request);
+                  Object emailH = jsonObject.get(RestUserManagement.EMAIL_H);
+                  Object kind = jsonObject.get(RestUserManagement.KIND);
+                  User.Kind realKind = kind == null ? User.Kind.STUDENT : User.Kind.valueOf(kind.toString());
 
-                user = addUser(login, passwordH, emailH.toString(), "browser", ip, realKind, true);
-                break;
+                  user = addUser(login, passwordH, emailH.toString(), "browser", ip, realKind, true);
+                  break;
+                }
               }
             }
           } catch (Exception e) {
@@ -205,8 +211,8 @@ public class UserManagement {
    * @see mitll.langtest.server.database.DatabaseImpl#usersToXLSX(OutputStream)
    * @param out
    */
-  public void usersToXLSX(OutputStream out) {  userDAO.toXLSX(out, getUsers());  }
-  public JSON usersToJSON() { return userDAO.toJSON(getUsers());  }
+  void usersToXLSX(OutputStream out) {  userDAO.toXLSX(out, getUsers());  }
+  JSON usersToJSON() { return userDAO.toJSON(getUsers());  }
 
   /**
    * Adds some sugar -- sets the answers and rate per user, and joins with dli experience data
@@ -248,18 +254,22 @@ public class UserManagement {
   /**
    * So multiple recordings for the same item are counted as 1.
    * @return
+   * @see #getUsers
    */
   private Pair populateUserToNumAnswers() {
     Map<Long, Integer> idToCount = new HashMap<Long, Integer>();
     Map<Long, Set<String>> idToUniqueCount = new HashMap<Long, Set<String>>();
-    for (Result r : resultDAO.getResults()) {
-      Integer count = idToCount.get(r.getUserid());
-      if (count == null) idToCount.put(r.getUserid(), 1);
-      else idToCount.put(r.getUserid(), count + 1);
+    for (UserAndTime result : resultDAO.getUserAndTimes()) {
+      long userid = result.getUserid();
+      String exerciseID = result.getExid();
 
-      Set<String> uniqueForUser = idToUniqueCount.get(r.getUserid());
-      if (uniqueForUser == null) idToUniqueCount.put(r.getUserid(), uniqueForUser = new HashSet<String>());
-      uniqueForUser.add(r.getExerciseID());
+      Integer count = idToCount.get(userid);
+      if (count == null) idToCount.put(userid, 1);
+      else idToCount.put(userid, count + 1);
+
+      Set<String> uniqueForUser = idToUniqueCount.get(userid);
+      if (uniqueForUser == null) idToUniqueCount.put(userid, uniqueForUser = new HashSet<String>());
+      uniqueForUser.add(exerciseID);
     }
     return new Pair(idToCount, idToUniqueCount);
   }
