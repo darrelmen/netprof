@@ -5,8 +5,11 @@
 package mitll.langtest.client.list;
 
 import com.github.gwtbootstrap.client.ui.Button;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -20,15 +23,13 @@ import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.user.UserFeedback;
+import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
 import mitll.langtest.shared.exercise.STATE;
 import mitll.langtest.shared.exercise.Shell;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -40,7 +41,9 @@ import java.util.logging.Logger;
  * Time: 5:35 PM
  * To change this template use File | Settings | File Templates.
  */
-public class PagingExerciseList<T extends CommonShell, U extends Shell> extends ExerciseList<T, U> {
+public abstract class PagingExerciseList<T extends CommonShell, U extends Shell> extends ExerciseList<T, U> {
+  private static final String SEARCH = "Search";
+  private static final int TEN_SECONDS = 10 * 60 * 1000;
   private final Logger logger = Logger.getLogger("PagingExerciseList");
 
   protected final ExerciseController controller;
@@ -52,6 +55,11 @@ public class PagingExerciseList<T extends CommonShell, U extends Shell> extends 
   private int unaccountedForVertical = 160;
   private boolean unrecorded, defaultAudioFilter;
   private boolean onlyExamples;
+
+  private Timer waitTimer = null;
+  private final SafeUri animated = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "animated_progress28.gif");
+  private final SafeUri white = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "white_32x32.png");
+  private final com.github.gwtbootstrap.client.ui.Image waitCursor = new com.github.gwtbootstrap.client.ui.Image(white);
 
   /**
    * @param currentExerciseVPanel
@@ -82,8 +90,7 @@ public class PagingExerciseList<T extends CommonShell, U extends Shell> extends 
 
   @Override
   public void setState(String id, STATE state) {
-    T t = byID(id);
-    t.setState(state);
+    byID(id).setState(state);
   }
 
   @Override
@@ -106,21 +113,23 @@ public class PagingExerciseList<T extends CommonShell, U extends Shell> extends 
    * @param selectionState
    * @param prefix
    * @param onlyWithAudioAnno
+   * @param setTypeAheadText
    * @see #addTypeAhead(com.google.gwt.user.client.ui.Panel)
    */
   void loadExercises(String selectionState, String prefix, boolean onlyWithAudioAnno) {
     scheduleWaitTimer();
 
-    lastReqID++;
-    logger.info("PagingExerciseList.loadExercises : looking for " +
+/*    logger.info("PagingExerciseList.loadExercises : looking for " +
         "'" + prefix + "' (" + prefix.length() + " chars) in list id " + userListID + " instance " + getInstance());
+        */
+    ExerciseListRequest request = getRequest(prefix);
     service.getExerciseIds(
-        getRequest(prefix),
-        new SetExercisesCallback(""));
+        request,
+        new SetExercisesCallback("", prefix, "", request));
   }
 
   ExerciseListRequest getRequest(String prefix) {
-    return new ExerciseListRequest(lastReqID, controller.getUser())
+    return new ExerciseListRequest(incrRequest(), controller.getUser())
         .setPrefix(prefix)
         .setUserListID(userListID)
         .setRole(getRole())
@@ -132,7 +141,7 @@ public class PagingExerciseList<T extends CommonShell, U extends Shell> extends 
 
   /**
    * @return
-   * @see mitll.langtest.client.list.HistoryExerciseList#loadExercises
+   * @see PagingExerciseList#loadExercises
    */
   protected String getPrefix() {
     return typeAhead.getText();
@@ -202,13 +211,8 @@ public class PagingExerciseList<T extends CommonShell, U extends Shell> extends 
     // row 2
     add(pagingContainer.getTableWithPager());
   }
-
-  private Timer waitTimer = null;
-  private final SafeUri animated = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "animated_progress28.gif");
-  private final SafeUri white = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "white_32x32.png");
-  private final com.github.gwtbootstrap.client.ui.Image waitCursor = new com.github.gwtbootstrap.client.ui.Image(white);
-
   /**
+   * Called on keypress
    * Show wait cursor if the type ahead takes too long.
    *
    * @param column
@@ -216,11 +220,11 @@ public class PagingExerciseList<T extends CommonShell, U extends Shell> extends 
    */
   protected void addTypeAhead(Panel column) {
     if (showTypeAhead) {
-      typeAhead = new TypeAhead(column, waitCursor, "Search", true) {
+      typeAhead = new TypeAhead(column, waitCursor, SEARCH, true) {
         @Override
         public void gotTypeAheadEntry(String text) {
+          gotTypeAheadEvent(text, false);
           controller.logEvent(getTypeAhead(), "TypeAhead", "UserList_" + userListID, "User search ='" + text + "'");
-          loadExercises(getHistoryToken(text, ""), text, false);
         }
       };
     }
@@ -232,9 +236,20 @@ public class PagingExerciseList<T extends CommonShell, U extends Shell> extends 
    */
   public void searchBoxEntry(String text) {
     if (showTypeAhead) {
-      typeAhead.setText(text);
-      pushNewItem(text, "");
+   //   logger.info("searchBoxEntry type ahead '" + text + "'");
+      gotTypeAheadEvent(text, true);
     }
+  }
+
+  private Stack<Long> pendingRequests = new Stack<>();
+ // private int typeRequestID = 0;
+
+  private void gotTypeAheadEvent(String text, boolean setTypeAheadText) {
+  //  logger.info("got type ahead '" + text + "' at " + new Date(keypressTimestamp));
+    if (!setTypeAheadText) {
+      pendingRequests.add(System.currentTimeMillis());
+    }
+    loadExercises(getHistoryTokenFromUIState(text, ""), text, false);
   }
 
   protected void scheduleWaitTimer() {
@@ -254,8 +269,35 @@ public class PagingExerciseList<T extends CommonShell, U extends Shell> extends 
     return typeAhead != null ? typeAhead.getText() : "";
   }
 
+  /**
+   * @see HistoryExerciseList#restoreUIState(SelectionState)
+   * @param t
+   */
   void setTypeAheadText(String t) {
-    typeAhead.setText(t);
+    if (pendingRequests.isEmpty()) {
+      if (typeAhead != null) {
+     //   logger.info("Set type ahead to '" + t + "'");
+        typeAhead.setText(t);
+      }
+    }
+    else {
+      popRequest();
+     // logger.info("setTypeAheadText pendingRequests now" + pendingRequests);
+    }
+  }
+
+  /**
+   * @see HistoryExerciseList#onValueChange(ValueChangeEvent)
+   * @see HistoryExerciseList#ignoreStaleRequest(ExerciseListWrapper)
+   */
+  void popRequest() {
+    if (!pendingRequests.isEmpty()) {
+      pendingRequests.pop();
+      List<Long> toRemove = new ArrayList<>();
+      long now = System.currentTimeMillis();
+      for (Long pending : pendingRequests) if (pending < now - TEN_SECONDS) toRemove.add(pending);
+      pendingRequests.removeAll(toRemove);
+    }
   }
 
   @Override
@@ -270,11 +312,17 @@ public class PagingExerciseList<T extends CommonShell, U extends Shell> extends 
    * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#gotEmptyExerciseList
    */
   protected void showEmptySelection() {
+/*
     logger.info("for " + getInstance() +
-        " showing no items match relative to " + typeAhead.getWidget().getElement().getId() + " parent " + typeAhead.getWidget().getParent());
-    showPopup("No items match the selection and search.", "Try clearing one of your selections or changing the search.", typeAhead.getWidget());
-    createdPanel = new SimplePanel();
-    createdPanel.getElement().setId("placeHolderWhenNoExercises");
+        " showing no items match relative to " + typeAhead.getWidget().getElement().getId() + " parent " + typeAhead.getWidget().getParent().getElement().getId());
+*/
+
+    Scheduler.get().scheduleDeferred(new Command() {
+      public void execute() {
+        showPopup("No items match the selection and search.", "Try clearing one of your selections or changing the search.", typeAhead.getWidget());
+        showEmptyExercise();
+      }
+    });
   }
 
   private void showPopup(String toShow, String toShow2, Widget over) {
@@ -288,7 +336,7 @@ public class PagingExerciseList<T extends CommonShell, U extends Shell> extends 
     Window.alert("Please stop recording before changing items.");
   }
 
-  String getHistoryToken(String search, String id) {
+  String getHistoryTokenFromUIState(String search, String id) {
     return "search=" + search + ";item=" + id;
   }
 
@@ -298,7 +346,6 @@ public class PagingExerciseList<T extends CommonShell, U extends Shell> extends 
       markCurrentExercise(pagingContainer.getCurrentSelection().getID());
     } else {
       controller.logEvent(this, "ExerciseList", e.getID(), "Clicked on item '" + e.toString() + "'");
-
       pushNewItem(getTypeAheadText(), e.getID());
     }
   }
@@ -325,7 +372,7 @@ public class PagingExerciseList<T extends CommonShell, U extends Shell> extends 
   public Collection<T> rememberExercises(Collection<T> result) {
     inOrderResult = result;
     if (doShuffle) {
-      logger.info(getInstance() + " : rememberExercises - shuffling " + result.size() + " items");
+     // logger.info(getInstance() + " : rememberExercises - shuffling " + result.size() + " items");
 
       ArrayList<T> ts = new ArrayList<>(result);
       result = ts;
@@ -451,7 +498,7 @@ public class PagingExerciseList<T extends CommonShell, U extends Shell> extends 
 
   /**
    * @return
-   * @see HistoryExerciseList#loadExercisesUsingPrefix(java.util.Map, String, boolean)
+   * @see HistoryExerciseList#loadExercisesUsingPrefix(Map, String, boolean, String)
    */
   boolean getUnrecorded() {
     return unrecorded;
