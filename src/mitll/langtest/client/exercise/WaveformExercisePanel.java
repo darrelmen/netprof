@@ -44,8 +44,8 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
    * @param instance
    * @see mitll.langtest.client.custom.SimpleChapterNPFHelper#getFactory(mitll.langtest.client.list.PagingExerciseList)
    */
-  public WaveformExercisePanel(final T e, final LangTestDatabaseAsync service,
-                               final ExerciseController controller, ListInterface<L> exerciseList,
+  public WaveformExercisePanel(T e, LangTestDatabaseAsync service,
+                               ExerciseController controller, ListInterface<L> exerciseList,
                                boolean doNormalRecording, String instance) {
     super(e, service, controller, exerciseList, doNormalRecording ? "" : EXAMPLE_RECORD, instance);
     getElement().setId("WaveformExercisePanel");
@@ -78,10 +78,10 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
     add(new Heading(4, isExampleRecord() ? RECORD_PROMPT2 : RECORD_PROMPT));
   }
 
+  private boolean isNormalRecord()  { return !isExampleRecord(); }
   private boolean isExampleRecord() {
     return message.equals(EXAMPLE_RECORD);
   }
-  private boolean isNormalRecord() { return !isExampleRecord(); }
 
   /**
    * TODO : support recording audio for multiple context sentences...?
@@ -129,7 +129,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
   private void addExampleSentenceRecorder(T exercise, LangTestDatabaseAsync service, ExerciseController controller,
                                           int index, Panel vp) {
     RecordAudioPanel fast = new RecordAudioPanel<T>(exercise, controller, this, service, index, false,
-        CONTEXT + Result.AUDIO_TYPE_REGULAR, instance);
+        AudioAttribute.CONTEXT_AUDIO_TYPE, instance);
     audioPanels.add(fast);
     vp.add(fast);
 
@@ -139,7 +139,6 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
 
   private VerticalPanel addRecordAudioPanelNoCaption(T exercise, LangTestDatabaseAsync service,
                                             ExerciseController controller, int index, Panel vp, String audioType) {
-//    System.out.println("addRecordAudioPanel " + exercise + " audioType " +audioType);
     RecordAudioPanel fast = new RecordAudioPanel<T>(exercise, controller, this, service, index, false, audioType, instance);
     audioPanels.add(fast);
     vp.add(fast);

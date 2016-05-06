@@ -29,7 +29,7 @@ public class PathWriter {
    * @param overwrite
    * @param id
    * @param title            mark the mp3 meta data with this title
-   * @param artist
+   * @param artist mark the mp3 meta data with this artist
    * @param serverProperties
    * @return path of file under bestAudio directory
    * @see mitll.langtest.server.database.custom.UserListManager#getRefAudioPath
@@ -47,8 +47,8 @@ public class PathWriter {
     }
     File destination = new File(bestDirForExercise, destFileName);
     //logger.debug("getPermanentAudioPath : copying from " + fileRef +  " to " + destination.getAbsolutePath());
-    String s = BEST_AUDIO + File.separator + id + File.separator + destFileName;
-    //logger.debug("getPermanentAudioPath : dest path    " + bestDirForExercise.getPath() + " vs " +s);
+    String bestAudioPath = BEST_AUDIO + File.separator + id + File.separator + destFileName;
+    //logger.debug("getPermanentAudioPath : dest path    " + bestDirForExercise.getPath() + " vs " +bestAudioPath);
     if (!fileRef.equals(destination) && !destFileName.equals(AudioConversion.FILE_MISSING)) {
       try {
         FileUtils.copyFile(fileRef, destination);
@@ -64,8 +64,8 @@ public class PathWriter {
       }
       logger.debug("getPermanentAudioPath : *not* normalizing levels for " + destination.getAbsolutePath());
     }
-    ensureMP3(pathHelper, s, overwrite, title, artist, serverProperties);
-    return s;
+    ensureMP3(pathHelper, bestAudioPath, overwrite, title, artist, serverProperties);
+    return bestAudioPath;
   }
 
   private void ensureMP3(PathHelper pathHelper, String wavFile, boolean overwrite, String title, String artist,

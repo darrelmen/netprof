@@ -48,11 +48,7 @@ public interface ListInterface<T extends Shell> extends RequiresResize, Reloadab
      */
   boolean getExercises(long userID);
 
-  /**
-   * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#doAfterEditComplete(ListInterface, boolean)
-   * @param id
-   */
-  void reloadWith(String id);
+  boolean isRTL();
 
   /**
    * @see mitll.langtest.client.custom.content.NPFHelper#doInternalLayout(UserList, String)
