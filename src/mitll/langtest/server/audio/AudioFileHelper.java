@@ -4,6 +4,7 @@
 
 package mitll.langtest.server.audio;
 
+import corpus.HTKDictionary;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.LogAndNotify;
@@ -13,7 +14,6 @@ import mitll.langtest.server.autocrt.AutoCRT;
 import mitll.langtest.server.autocrt.DecodeCorrectnessChecker;
 import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.export.Export;
 import mitll.langtest.server.scoring.*;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Result;
@@ -41,7 +41,7 @@ import java.util.*;
 public class AudioFileHelper implements CollationSort, AlignDecode {
   private static final Logger logger = Logger.getLogger(AudioFileHelper.class);
   private static final String POSTED_AUDIO = "postedAudio";
-//  private static final int MIN_WARN_DUR = 30;
+  //  private static final int MIN_WARN_DUR = 30;
   private static final String REG = "reg";
   private static final String SLOW = "slow";
   private static final int SUFFIX_LENGTH = ("." + AudioTag.COMPRESSED_TYPE).length();
@@ -112,7 +112,7 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
           if (!validForeignPhrase) {
             if (count < 10) {
               logger.error("huh? for " + exercise.getID() + " we can't parse " + exercise.getID() +
-                  " " + exercise.getEnglish() + " fl " + exercise.getForeignLanguage());
+                  " " + exercise.getEnglish() + " fl '" + exercise.getForeignLanguage() + "'");
             }
             count++;
           } else {
@@ -226,9 +226,9 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
   }
 
   public AudioAnswer writeAMASAudioFile(String base64EncodedString,
-                                    AmasExerciseImpl exercise1,
-                                    AudioContext audioContext,
-                                    AnswerInfo.RecordingInfo recordingInfoInitial) {
+                                        AmasExerciseImpl exercise1,
+                                        AudioContext audioContext,
+                                        AnswerInfo.RecordingInfo recordingInfoInitial) {
     String wavPath = pathHelper.getLocalPathToAnswer(audioContext);
     File file = pathHelper.getAbsoluteFile(wavPath);
 
@@ -256,9 +256,7 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
   /**
    * TODO : this is misleading - if doFlashcard is true, it does decoding, otherwise it does *not* do alignment
    *
-   * @paramx reqid
    * @param exercise1
-   * @paramx exerciseID
    * @param wavPath
    * @param file
    * @param deviceType
@@ -267,6 +265,8 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
    * @param doFlashcard
    * @param allowAlternates
    * @return
+   * @paramx reqid
+   * @paramx exerciseID
    * @see mitll.langtest.server.ScoreServlet#getAnswer
    */
   public AudioAnswer getAnswer(
@@ -303,12 +303,12 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
 
   private AudioAnswer getAMASAudioAnswerDecoding(AmasExerciseImpl exercise1,
 
-                                             AudioContext context,
-                                             AnswerInfo.RecordingInfo recordingInfo,
+                                                 AudioContext context,
+                                                 AnswerInfo.RecordingInfo recordingInfo,
 
-                                             String wavPath, File file,
+                                                 String wavPath, File file,
 
-                                             AudioCheck.ValidityAndDur validity) {
+                                                 AudioCheck.ValidityAndDur validity) {
     logValidity(context, file, validity);
     AudioAnswer answer = getAMASAudioAnswer(exercise1,
         context.getQuestionID(),
@@ -316,8 +316,8 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
         wavPath, file, validity);
 
 //    if (recordInResults) {
-      recordInResults(context, recordingInfo, validity, answer);
-  //  }
+    recordInResults(context, recordingInfo, validity, answer);
+    //  }
     return answer;
   }
 
@@ -559,15 +559,14 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
   }
 
 
-
   /**
    * @param exercise1
    * @param reqid
    * @param wavPath
    * @param file
    * @param validity
-   * @paramxx isValid
    * @return
+   * @paramxx isValid
    * @see #getAudioAnswerDecoding
    */
   private AudioAnswer getAMASAudioAnswer(AmasExerciseImpl exercise1,
@@ -601,7 +600,6 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
   private AudioAnswer getAMASAudioAnswer(AmasExerciseImpl exercise,
                                      int qid, int reqid,
                                      File file, AudioCheck.ValidityAndDur validity, String url) {
-  //  makeASRScoring();
     AudioAnswer audioAnswer = new AudioAnswer(url, validity.getValidity(), reqid, validity.durationInMillis);
     autoCRT.getAutoCRTDecodeOutput(exercise, qid, file, audioAnswer, true);
     return audioAnswer;
@@ -718,11 +716,11 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
     }
 
     String vocab = asrScoring.getUsedTokens(lmSentences, unk); // this is basically the transcript
-  //  logger.info("from '" + lmSentences + "' to '" + vocab +"'");
+    //  logger.info("from '" + lmSentences + "' to '" + vocab +"'");
     String prefix = usePhoneToDisplay ? "phoneToDisplay" : "";
     String path = testAudioFile.getPath();
 
-  //  logger.info("getASRScoreForAudio audio file path is " + path);
+    //  logger.info("getASRScoreForAudio audio file path is " + path);
     return getASRScoreForAudio(0, path, vocab, lmSentences, 128, 128, false, true,
         canUseCache && serverProps.useScoreCache(), prefix, null, usePhoneToDisplay, useOldSchool);
   }
@@ -820,8 +818,9 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
     if (isEnglishSite()) {
       sentence = sentence.toUpperCase();  // hack for English
     }
-    sentence = sentence.replaceAll(","," ");
+    sentence = sentence.replaceAll(",", " ");
     sentence = getSentenceToUse(sentence);
+    sentence = sentence.trim();
 
     ASR asrScoring = useOldSchool || serverProps.getOldSchoolService() ? oldschoolScoring : getASRScoring();
 
@@ -836,7 +835,7 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
 
     if (!pretestScore.isRanNormally() && isWebservice(asrScoring)) {
       logger.warn("getASRScoreForAudio Using hydec as fallback for " + (decode ? " decoding " : " aligning ") + testAudioFile + " against '" +
-          sentence+
+          sentence +
           "'");
       pretestScore = oldschoolScoring.scoreRepeat(
           testAudioDir, removeSuffix(testAudioName),
@@ -867,7 +866,7 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
       //logger.info("convert " +sentence + " to percent");
     } else {
       //boolean english1 = getLanguage().equalsIgnoreCase("English");
-     // boolean equals = sentence.equals("%") || sentence.equals("％");
+      // boolean equals = sentence.equals("%") || sentence.equals("％");
       //logger.info("NOT convert '" +sentence + "' to percent : " +english1 + " equals " + equals);
     }
     return english ? "percent" : sentence;
@@ -956,15 +955,42 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
   // TODO: gross
   private void makeASRScoring() {
     if (webserviceScoring == null) {
-      webserviceScoring = new ASRWebserviceScoring(pathHelper.getInstallPath(), serverProps, logAndNotify);
-      oldschoolScoring  = new ASRScoring(pathHelper.getInstallPath(), serverProps, logAndNotify);
+      String installPath = pathHelper.getInstallPath();
+      HTKDictionary htkDictionary = makeDict(installPath);
+      webserviceScoring = new ASRWebserviceScoring(installPath, serverProps, logAndNotify, htkDictionary);
+      oldschoolScoring = new ASRScoring(installPath, serverProps, logAndNotify, htkDictionary);
     }
     asrScoring = oldschoolScoring;
   }
 
   /**
-   * @paramx studentAnswersDB
+   * @return
+   * @see #makeASRScoring
+   */
+  private HTKDictionary makeDict(String installPath) {
+    String dictFile = new ConfigFileCreator(serverProps.getProperties(), null, Scoring.getScoringDir(installPath)).getDictFile();
+    if (dictFile != null && new File(dictFile).exists()) {
+      long then = System.currentTimeMillis();
+      HTKDictionary htkDictionary = new HTKDictionary(dictFile);
+      long now = System.currentTimeMillis();
+      int size = htkDictionary.size(); // force read from lazy val
+      if (now - then > 300) {
+        logger.info("for " + serverProps.getLanguage() + " read dict " + dictFile + " of size " + size + " took " + (now - then) + " millis");
+      }
+      return htkDictionary;
+    } else {
+      if (serverProps.isNoModel()) {
+        logger.info("---> makeDict : Can't find dict file at " + dictFile);
+      } else {
+        logger.error("\n\n\n---> makeDict : Can't find dict file at " + dictFile);
+      }
+      return new HTKDictionary();
+    }
+  }
+
+  /**
    * @param relativeConfigDir
+   * @paramx studentAnswersDB
    * @paramx crtScoring
    * @see LangTestDatabaseImpl#init()
    */
@@ -982,7 +1008,7 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
   }
 
   private AutoCRT makeClassifier(String relativeConfigDir) {
-  //  Export export = studentAnswersDB.getExport();
+    //  Export export = studentAnswersDB.getExport();
     autoCRT = new AutoCRT(null, this, new InDictFilter(this),
         pathHelper.getInstallPath(), relativeConfigDir,
         serverProps.getMinPronScore(), serverProps.getMiraFlavor(), serverProps.getMiraClassifierURL(),

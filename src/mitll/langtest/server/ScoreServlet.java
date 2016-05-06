@@ -113,7 +113,8 @@ public class ScoreServlet extends DatabaseServlet {
     if (queryString == null) queryString = ""; // how could this happen???
     if (!queryString.contains(NESTED_CHAPTERS)) { // quiet output for polling from status webapp
       String pathInfo = request.getPathInfo();
-      logger.debug("ScoreServlet.doGet : Request '" + queryString + "' path " + pathInfo +
+      logger.debug("ScoreServlet.doGet (" +getLanguage() +
+          "): Request '" + queryString + "' path " + pathInfo +
           " uri " + request.getRequestURI() + "  " + request.getRequestURL() + "  " + request.getServletPath());
     }
 
@@ -154,7 +155,7 @@ public class ScoreServlet extends DatabaseServlet {
           toReturn = nestedChapters;
         }
       } else if (userManagement.doGet(request, response, queryString, toReturn)) {
-        logger.info("doGet handled user command for " + queryString);
+        logger.info("doGet " + getLanguage() + " handled user command for " + queryString);
       } else if (matchesRequest(queryString, CHAPTER_HISTORY)) {
         queryString = removePrefix(queryString, CHAPTER_HISTORY);
         toReturn = getChapterHistory(queryString, toReturn);
@@ -252,17 +253,16 @@ public class ScoreServlet extends DatabaseServlet {
    */
   private int getYear(String queryString) {
     String[] split1 = queryString.split("&");
-    int year;
+    int year = -1;
     if (split1.length == 2) {
       String param = split1[1];
 //      logger.info("Got param " + param);
-      year = getParamIntValue(param, YEAR);
-      if (year == -1) {
-        year = Calendar.getInstance().get(Calendar.YEAR);
-      }
-    } else {
-      year = Calendar.getInstance().get(Calendar.YEAR);
+      int paramIntValue = getParamIntValue(param, YEAR);
+      if (paramIntValue > 0) year = paramIntValue;
     }
+   // else {
+   //   year = Calendar.getInstance().get(Calendar.YEAR);
+   // }
     return year;
   }
 
@@ -310,7 +310,7 @@ public class ScoreServlet extends DatabaseServlet {
       }
     } catch (NumberFormatException e) {
       logger.warn("got " + e + " on " + arg);
-      return -1;
+      return 0;
     }
   }
 
@@ -342,6 +342,8 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   private String getLanguage() {
+    getAudioFileHelper();
+
     return serverProps.getLanguage();
   }
 
@@ -448,7 +450,9 @@ public class ScoreServlet extends DatabaseServlet {
 
     JSONObject jsonObject = new JSONObject();
     if (requestType != null) {
-      logger.debug("doPost got request " + requestType + " device " + deviceType + "/" + device);
+      if (!requestType.startsWith(EVENT)) {
+        logger.debug("doPost got request " + requestType + " device " + deviceType + "/" + device);
+      }
 
       if (requestType.startsWith(ADD_USER)) {
         userManagement.addUser(request, requestType, deviceType, device, jsonObject);
@@ -533,7 +537,10 @@ public class ScoreServlet extends DatabaseServlet {
     response.setContentType("test/html; charset=UTF-8");
     response.setCharacterEncoding("UTF-8");
 
-    response.setHeader("Content-disposition", "attachment; filename=reportForYear" + year + ".html");
+    String fileName = year == -1 ? "reportFor" + getLanguage() : ("reportFor" +getLanguage()+"_forYear" + year);
+
+    response.setHeader("Content-disposition", "attachment; filename=" +
+        fileName + ".html");
   }
 
   /**
@@ -553,18 +560,21 @@ public class ScoreServlet extends DatabaseServlet {
       logger.warn("getJsonNestedChapters " + getLanguage() + " getJSONExport took " + (now-then) + " millis");
     }
     then = now;
-    JSONArray contentAsJson = jsonExport.getContentAsJson(removeExercisesWithMissingAudio);
 
+    jsonObject.put(CONTENT, jsonExport.getContentAsJson(removeExercisesWithMissingAudio));
     now = System.currentTimeMillis();
     if (now-then>1000) {
       logger.warn("getJsonNestedChapters " + getLanguage() + " getContentAsJson took " + (now-then) + " millis");
     }
-    jsonObject.put(CONTENT, contentAsJson);
     addVersion(jsonObject);
 
     return jsonObject;
   }
 
+  /**
+   * @see #doGet(HttpServletRequest, HttpServletResponse)
+   * @return
+   */
   private JSONObject getJSONForExercises() {
     return getJSONExerciseExport(getJSONExport());
   }
@@ -584,7 +594,8 @@ public class ScoreServlet extends DatabaseServlet {
     JsonExport jsonExport = new JsonExport(
         audioFileHelper == null ? stringIntegerMap : audioFileHelper.getPhoneToCount(),
         db.getSectionHelper(),
-        serverProps.getPreferredVoices()
+        serverProps.getPreferredVoices(),
+        serverProps.getLanguage().equalsIgnoreCase("english")
     );
 
     db.attachAllAudio();
@@ -898,7 +909,6 @@ public class ScoreServlet extends DatabaseServlet {
         serverProps = db.getServerProps();
         audioFileHelper = getAudioFileHelperRef();
         this.userManagement = new RestUserManagement(db, serverProps, pathHelper);
-        //loadTesting = getLoadTesting();
         removeExercisesWithMissingAudioDefault = serverProps.removeExercisesWithMissingAudio();
       }
     }

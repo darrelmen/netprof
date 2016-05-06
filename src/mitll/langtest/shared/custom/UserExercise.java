@@ -173,6 +173,11 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
     return !getDirectlyRelated().isEmpty();
   }
 
+  @Override
+  public String getContext() {
+    return directlyRelated.iterator().next().getForeignLanguage();
+  }
+
   public Collection<CommonExercise> getDirectlyRelated() {
     return directlyRelated;
   }
