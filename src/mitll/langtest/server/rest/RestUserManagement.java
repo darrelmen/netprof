@@ -134,7 +134,7 @@ public class RestUserManagement {
 
         String rep = (getUserIDForToken(token) == -1) ?
             getHTML("Note : your password has already been reset. Please go back to NetProF.", "Password has already been reset") :
-            getHTML("OK, your password has been reset. Please go back to NetProF and login.", "Password has been reset");
+            getHTML("OK, your password has been reset. Please go back to NetProF and login.",  "Password has been reset");
         reply(response, rep);
       }
       return true;
