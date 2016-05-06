@@ -20,7 +20,6 @@ import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.pretest.PretestGauge;
-import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.scoring.ScoreListener;
 import mitll.langtest.client.sound.PlayAudioWidget;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
@@ -49,7 +48,6 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   private static final int HEIGHT = 18;
   private static final int ROW_LEFT_MARGIN = 18 + 5;
   private static final String PLAY_REFERENCE = "";
-  //private static final String DOWNLOAD_YOUR_RECORDING = "Download your recording.";
 
   private final PretestGauge ASRGauge;
   private final Panel phoneList;
@@ -190,7 +188,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     TooltipHelper tooltipHelper = new TooltipHelper();
     for (CorrectAndScore scoreAndPath : scoreAndPaths) {
       int i = scores2.indexOf(scoreAndPath);
-      Panel hp = getAudioAndScore(tooltipHelper, scoreAndPath, "Score #" + (i + 1),i);
+      Panel hp = getAudioAndScore(tooltipHelper, scoreAndPath, "Score #" + (i + 1), i);
       vp.add(hp);
     }
 
@@ -205,8 +203,8 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   }
 
   /**
-   * @see #showChart(boolean)
    * @return
+   * @see #showChart(boolean)
    */
   private Panel getRefAudio() {
     Widget audioWidget = getAudioWidget(new CorrectAndScore(classAvg, refAudio), PLAY_REFERENCE);
@@ -241,10 +239,9 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   }
 
   /**
-   *
    * @param tooltipHelper to make tooltips
-   * @param scoreAndPath the audio path and score for the audio
-   * @param title link title
+   * @param scoreAndPath  the audio path and score for the audio
+   * @param title         link title
    * @return
    * @see #showChart(boolean)
    */
@@ -261,12 +258,13 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     container.add(row);
     hp.add(container);
     long timestamp = scoreAndPath.getTimestamp();
-   // logger.info("timestamp " + timestamp);
-    String format = this.format.format(new Date(timestamp));
-    hp.add(getDownload(scoreAndPath.getPath(),i,format));
+    // logger.info("timestamp " + timestamp);
+    String format = timestamp > 0 ?  this.format.format(new Date(timestamp)) : "";
+    hp.add(getDownload(scoreAndPath.getPath(), i, format));
 
     return hp;
   }
+
   private final DateTimeFormat format = DateTimeFormat.getFormat("MMM d");
 
   private void makeChildGreen(Widget w) {
@@ -276,13 +274,13 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   }
 
   /**
-   * @see #getAudioAndScore
    * @param audioPath
    * @return link for this audio
+   * @see #getAudioAndScore
    */
   private IconAnchor getDownload(final String audioPath, int i, String dateFormat) {
     final IconAnchor download = new IconAnchor();
-    download.getElement().setId("Download_user_audio_link_"+i);
+    download.getElement().setId("Download_user_audio_link_" + i);
     download.setIcon(IconType.DOWNLOAD);
     download.setIconSize(IconSize.LARGE);
     download.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
@@ -294,7 +292,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
       @Override
       public void onClick(ClickEvent event) {
         controller.logEvent(download, "DownloadUserAudio_History",
-            exerciseID, "downloading audio file " +audioPath);
+            exerciseID, "downloading audio file " + audioPath);
       }
     });
 
@@ -302,34 +300,36 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   }
 
   /**
-   * @see #getDownload
    * @param download
    * @param audioPath
+   * @see #getDownload
    */
   private void setDownloadHref(IconAnchor download, String audioPath) {
-    audioPath = audioPath.endsWith(".ogg") ? audioPath.replaceAll(".ogg",".mp3") : audioPath;
+    audioPath = audioPath.endsWith(".ogg") ? audioPath.replaceAll(".ogg", ".mp3") : audioPath;
 
     String href = "downloadAudio?" +
-        "file="       + audioPath + "&" +
+        "file=" + audioPath + "&" +
         "exerciseID=" + exerciseID + "&" +
-        "userID="     + controller.getUser();
+        "userID=" + controller.getUser();
     download.setHref(href);
   }
 
   /**
-   * @see #getDownload
    * @param w
+   * @see #getDownload
    */
   private void addTooltip(Widget w, String dateFormat) {
-    new TooltipHelper().createAddTooltip(w, "Download your recording from " + dateFormat, Placement.LEFT);
+    String tip = "Download your recording" + (dateFormat.isEmpty()
+        ? "" : " from " + dateFormat);
+    new TooltipHelper().createAddTooltip(w, tip, Placement.LEFT);
   }
 
   /**
-   * @see #getAudioAndScore(TooltipHelper, CorrectAndScore, String, int)
-   * @see #getRefAudio()
    * @param scoreAndPath
    * @param title
    * @return
+   * @see #getAudioAndScore(TooltipHelper, CorrectAndScore, String, int)
+   * @see #getRefAudio()
    */
   private Anchor getAudioWidget(CorrectAndScore scoreAndPath, String title) {
     return new PlayAudioWidget().getAudioWidgetWithEventRecording(scoreAndPath.getPath(), title,
