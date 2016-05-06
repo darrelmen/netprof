@@ -167,14 +167,19 @@ public class DownloadServlet extends DatabaseServlet {
     String[] split = queryString.split("&");
 
     String file = split[0].split("=")[1];
+
+    // better be mp3 lying around - see ensureCompressedAudio
+
+    if (file.endsWith(".wav")) file = file.replaceAll(".wav",".mp3");
+
     String exercise = split[1].split("=")[1];
     String useridString = split[2].split("=")[1];
 
     String underscores = getFilenameForDownload(db, exercise, useridString);
 
-    logger.debug("returnAudioFile query is " + queryString + " file " + file + " ex " + exercise + " user " + useridString + " so name is " + underscores);
+    logger.debug("returnAudioFile query is " + queryString + " file " + file + " exercise " + exercise + " user " + useridString + " so name is " + underscores);
 
-    response.setContentType("application/octet-stream");
+    response.setContentType("audio/mpeg");
     response.setCharacterEncoding("UTF-8");
     response.setHeader("Content-Disposition", "attachment; filename*=UTF-8''" + underscores);
 
