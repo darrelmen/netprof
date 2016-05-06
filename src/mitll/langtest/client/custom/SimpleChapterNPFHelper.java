@@ -24,6 +24,8 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
 
+import java.util.logging.Logger;
+
 /**
  * Lets you show a user list with a paging container...
  * User: GO22670
@@ -33,7 +35,8 @@ import mitll.langtest.shared.exercise.HasID;
  */
 public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends CommonExercise>
     implements ReloadableContainer, RequiresResize {
-  //private final Logger logger = Logger.getLogger("SimpleChapterNPFHelper");
+  private final Logger logger = Logger.getLogger("SimpleChapterNPFHelper");
+
   private boolean madeNPFContent = false;
 
   protected final LangTestDatabaseAsync service;
@@ -84,7 +87,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
     int widgetCount = content.getWidgetCount();
     if (!madeNPFContent || widgetCount == 0) {
       madeNPFContent = true;
-      //logger.info("\t: adding npf content instanceName = " + instanceName + " loadExercises " + loadExercises);
+      logger.info("\t: adding npf content instanceName = " + instanceName);
       addNPFToContent(content, instanceName);
     }
   }
