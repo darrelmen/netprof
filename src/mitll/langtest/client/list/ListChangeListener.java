@@ -11,9 +11,9 @@ import java.util.Collection;
  */
 public interface ListChangeListener<T> {
   /**
-   * @see mitll.langtest.client.list.ExerciseList#rememberAndLoadFirst(java.util.List, mitll.langtest.shared.exercise.CommonExercise, String)
+   * @see mitll.langtest.client.list.ExerciseList#rememberAndLoadFirst
    * @param items
    * @param selectionID
    */
-  public void listChanged(Collection<T> items, String selectionID);
+  void listChanged(Collection<T> items, String selectionID);
 }

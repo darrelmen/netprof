@@ -16,9 +16,11 @@ public interface IEventDAO {
 
   List<SlimEvent> getAllSlim();
 
-  List<Event> getAllDevices();
+//  List<Event> getAllDevices();
 
   List<SlimEvent> getAllDevicesSlim();
+
+  SlimEvent getFirstSlim();
 
   void addPlayedMarkings(long userID, CommonExercise firstExercise);
 

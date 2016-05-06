@@ -3,10 +3,7 @@ package mitll.langtest.client.amas;
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
-import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
@@ -33,7 +30,7 @@ import java.util.logging.Logger;
  * Time: 5:32 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasExerciseImpl, AmasExerciseImpl> {
+public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasExerciseImpl, AmasExerciseImpl, ButtonBarSectionWidget> {
   private final Logger logger = Logger.getLogger("SingleSelectExerciseList");
   private static final int NUM_CHOICES = 3;
 
@@ -126,10 +123,10 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
     addButtonRow(controller.getStartupInfo().getSectionNodes(), container, typeOrder);
   }
 
-  @Override
+/*  @Override
   protected Collection<String> getTypeOrder(Map<String, Collection<String>> selectionState2) {
     return typeOrder;
-  }
+  }*/
 
   Panel firstTypeRow;
 
@@ -158,7 +155,7 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
       Collection<String> sectionsInType = new ItemSorter().getSortedItems(getLabels(rootNodes));
 
       ButtonBarSectionWidget value = new ButtonBarSectionWidget(type);
-      typeToBox.put(type, value);
+      sectionWidgetContainer.setWidget(type, value);
       value.getButtonBar(firstTypeRow, type, sectionsInType, type, buttonTypes.get(index++), this);
 
       List<SectionNode> newNodes = new ArrayList<>();
@@ -294,7 +291,7 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
   @Override
   protected void gotEmptyExerciseList() {
     logger.info("gotEmptyExerciseList");
-    SectionWidget quiz = typeToBox.get("Quiz");
+    SectionWidget quiz = getSectionWidget("Quiz");
     int numChoices = getNumChoices();
     if (getNumSelections() < numChoices) {
       showMessage(quiz == null || quiz.hasOnlyOne() ? PLEASE_SELECT2 : PLEASE_SELECT, false);
@@ -304,7 +301,7 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
   }
 
   private int getNumChoices() {
-    return typeToBox.get("Quiz") == null ? NUM_CHOICES-1:NUM_CHOICES;
+    return getSectionWidget("Quiz") == null ? NUM_CHOICES-1:NUM_CHOICES;
   }
 
   /**
@@ -378,9 +375,9 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
    * @see #addButtonRow
    */
   private void makeDefaultSelections() {
-    for (SectionWidget v : typeToBox.values()) {
-      ButtonBarSectionWidget value = (ButtonBarSectionWidget) v;
-      value.simpleSelectOnlyOne();
+    for (ButtonBarSectionWidget v : sectionWidgetContainer.getValues()) {
+     // ButtonBarSectionWidget value = (ButtonBarSectionWidget) v;
+      v.simpleSelectOnlyOne();
     }
   }
 
@@ -404,9 +401,9 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
       // logger.info("gotSelection : got type " + type + " and " + text);
       int count = getNumSelections();
       if (count == 3) {
-        //    logger.info("push new token " + getHistoryToken());
+        //    logger.info("push new token " + getHistoryTokenFromUIState());
         logger.info("gotSelection count = " + count);
-        loadExercisesUsingPrefix(selectionState.getTypeToSection(), getPrefix(), false);
+        loadExercisesUsingPrefix(selectionState.getTypeToSection(), getPrefix(), false, "");
       } else {
         // logger.warning("not enough selections " +count);
         gotEmptyExerciseList();

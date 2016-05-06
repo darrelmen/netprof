@@ -10,6 +10,7 @@ import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.instrumentation.SlimEvent;
+import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import java.sql.*;
@@ -172,7 +173,10 @@ public class EventDAO extends DAO implements IEventDAO {
     return Collections.emptyList();
   }
 
-  //@Override
+  /**
+   * @see mitll.langtest.server.database.Report#getReport
+   * @return
+   */
   public List<SlimEvent> getAllSlim() {
     try {
       return getSlimEvents("SELECT " +CREATORID+ "," +MODIFIED+
@@ -186,7 +190,22 @@ public class EventDAO extends DAO implements IEventDAO {
     return Collections.emptyList();
   }
 
-  public List<Event> getAllDevices() {
+  public SlimEvent getFirstSlim() {
+    try {
+      List<SlimEvent> slimEvents = getSlimEvents("SELECT " + CREATORID + "," + MODIFIED +
+          " from " + EVENT + " limit 1");
+      return slimEvents.isEmpty() ? null : slimEvents.iterator().next();
+    } catch (Exception ee) {
+      logger.error("got " + ee, ee);
+      if (logAndNotify != null) {
+        logAndNotify.logAndNotifyServerException(ee);
+      }
+    }
+    return null;
+  }
+
+
+/*  public List<Event> getAllDevices() {
     try {
       return getEvents("SELECT * from " + EVENT + WHERE_DEVICE);
     } catch (Exception ee) {
@@ -196,8 +215,12 @@ public class EventDAO extends DAO implements IEventDAO {
       }
     }
     return Collections.emptyList();
-  }
+  }*/
 
+  /**
+   * @see mitll.langtest.server.database.Report#getEventsDevices(StringBuilder, Set, JSONObject, int)
+   * @return
+   */
   public List<SlimEvent> getAllDevicesSlim() {
     try {
       return getSlimEvents("SELECT " +CREATORID+ "," +MODIFIED+" from " + EVENT + WHERE_DEVICE);

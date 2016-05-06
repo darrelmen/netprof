@@ -93,11 +93,30 @@ import java.util.logging.Logger;
  * - allows you to filter out Default (no gender mark) audio in mark defects, and associated fixes
  * 1.2.8
  * - Added About NetProF dialog that shows model info, etc. and small tweaks to audio trimming, etc.
+ * 1.2.9
+ * - Updated reporting to show all years, fill in month/week gaps with zeros
+ * 1.2.10
+ * - More small report changes
+ * 1.2.11
+ * - Fixed bugs with browser history forwards/backwards and clicking on characters
+ * - Better support for keeping track of transcripts on audio files and noticing when they're out of sync with current content
+ * 1.2.12
+ * - Fix for lookup for ref audio, fix for sending meaning back in nested chapters score servlet call
+ * 1.2.13
+ * - fix for highlight on context sentence where now does max coverage, remove email cc to ltea,
+ * looks at content to determine whether RTL language, bug where exercise lists wouldn't come up,
+ * bug where didn't use cached alignment from refresult table, fix for sending meaning for english in nestedChapters
+ * 1.3.0
+ * - fixes for history stack
+ * 1.3.1
+ * - fix for bug where couldn't jump from word in analysis
+ * 1.3.2
+ * - report updates
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private final Logger logger = Logger.getLogger("LangTest");
 
-  public static final String VERSION_INFO = "1.2.8";
+  public static final String VERSION_INFO = "1.3.2";
 
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
@@ -153,11 +172,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         }
       }
 
-      public void onSuccess(StartupInfo startupInfo2) {
+      public void onSuccess(StartupInfo startupInfo) {
         long now = System.currentTimeMillis();
-        startupInfo = startupInfo2;
-        //   logger.info("Got startup info " + startupInfo2);
-        props = new PropertyHandler(startupInfo2.getProperties());
+        LangTest.this.startupInfo = startupInfo;
+        //   logger.info("Got startup info " + startupInfo);
+        props = new PropertyHandler(startupInfo.getProperties());
         if (isLogClientMessages()) {
           String message = "onModuleLoad.getProperties : (success) took " + (now - then) + " millis";
           logMessageOnServer(message);
@@ -304,7 +323,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   /**
-   *
+   * @see #onModuleLoad()
    */
   private void onModuleLoad2() {
     setupSoundManager();
@@ -673,7 +692,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   public boolean isRightAlignContent() {
-    return props.isRightAlignContent();
+    return props.isRightAlignContent() || initialUI.isRTL();
   }
 
   public LangTestDatabaseAsync getService() {
