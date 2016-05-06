@@ -14,6 +14,7 @@ import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
+import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -39,11 +40,13 @@ import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.ScoredExercise;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
+import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * User: GO22670
@@ -53,7 +56,8 @@ import java.util.List;
  */
 public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & ScoredExercise> extends HorizontalPanel
     implements BusyPanel, RequiresResize, ProvidesResize, CommentAnnotator {
-  //private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
+  public static final String CONTEXT = "Context";
+  private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
 
   private static final String MANDARIN = "Mandarin";
   private static final String KOREAN = "Korean";
@@ -65,7 +69,11 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
   public static final String CORRECT = "correct";
   public static final String INCORRECT = "incorrect";
   public static final String DEFAULT_SPEAKER = "Default Speaker";
-  private static final String DOWNLOAD_YOUR_RECORDING = "Download your recording.";
+
+  /**
+   * @see ASRScorePanel#addTooltip
+   */
+  public static final String DOWNLOAD_YOUR_RECORDING = "Download your recording.";
 
   private final ListInterface listContainer;
   private boolean isBusy = false;
@@ -112,6 +120,10 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     addContent();
   }
 
+  protected boolean isRTL(T exercise) {
+    return isRTLContent(exercise.getForeignLanguage());
+  }
+
   private void addContent() {
     final Panel center = new VerticalPanel();
     center.getElement().setId("GoodwaveVerticalCenter");
@@ -137,7 +149,6 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
       center.add(navigationHelper);
     }
   }
-
 
   protected NavigationHelper<CommonShell> getNavigationHelper(ExerciseController controller,
                                                               final ListInterface<CommonShell> listContainer, boolean addKeyHandler) {
@@ -347,7 +358,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
 
     // TODO : for now, since we need to deal with underline... somehow...
     // and when clicking inside dialog, seems like we need to dismiss dialog...
-    if (label.contains("Context")) {
+    if (label.contains(CONTEXT)) {
       InlineHTML englishPhrase = new InlineHTML(value, WordCountDirectionEstimator.get().estimateDirection(value));
       englishPhrase.addStyleName("Instruction-data-with-wrap");
       if (label.contains("Meaning")) {
@@ -391,7 +402,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
       tokens = Arrays.asList(value.split(CommentNPFExercise.SPACE_REGEX));
     }
 
-    if (controller.isRightAlignContent() && flLine) {
+    if (isRTL(exercise) && flLine) {
       Collections.reverse(tokens);
     }
     for (String token : tokens) {
@@ -400,6 +411,10 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
 
     nameValueRow.add(horizontal);
     horizontal.addStyleName("leftFiveMargin");
+  }
+
+  protected boolean isRTLContent(String content) {
+    return controller.isRightAlignContent() || WordCountDirectionEstimator.get().estimateDirection(content) == HasDirection.Direction.RTL;
   }
 
   private boolean hasClickableCharacters(String language) {
@@ -417,10 +432,8 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
         public void onClick(ClickEvent clickEvent) {
           Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             public void execute() {
-              // String test = "{man’s}";
               String s1 = html.replaceAll(CommentNPFExercise.PUNCT_REGEX, " ").replaceAll("’", " ");
               String s2 = s1.split(CommentNPFExercise.SPACE_REGEX)[0].toLowerCase();
-              //   logger.warning("search on {" +s2 +"}");
               listContainer.searchBoxEntry(s2);
             }
           });
@@ -494,6 +507,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
    * An ASR scoring panel with a record button.
    */
   private class ASRRecordAudioPanel extends ASRScoringAudioPanel<T> {
+    public static final String DOWNLOAD_AUDIO = "downloadAudio";
     private final int index;
     private PostAudioRecordButton postAudioRecordButton;
     private PlayAudioPanel playAudioPanel;
@@ -624,12 +638,16 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
 
     /**
      * @see mitll.langtest.server.DownloadServlet#returnAudioFile(javax.servlet.http.HttpServletResponse, mitll.langtest.server.database.DatabaseImpl, String)
+     * @see #useResult(PretestScore, ImageAndCheck, ImageAndCheck, boolean, String)
      */
     private void setDownloadHref() {
       downloadContainer.setVisible(true);
 
-      String href = "downloadAudio?file=" +
-          audioPath +
+      String audioPathToUse = audioPath.endsWith(".ogg") ? audioPath.replaceAll(".ogg",".mp3") : audioPath;
+
+      String href = DOWNLOAD_AUDIO +
+          "?file=" +
+          audioPathToUse +
           "&" +
           "exerciseID=" +
           exerciseID +
@@ -644,7 +662,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
      * @see #makePlayAudioPanel(com.google.gwt.user.client.ui.Widget, String, String, String)
      */
     private class MyPostAudioRecordButton extends PostAudioRecordButton {
-      public MyPostAudioRecordButton(ExerciseController controller) {
+      MyPostAudioRecordButton(ExerciseController controller) {
         super(getLocalExercise().getID(), controller, ASRRecordAudioPanel.this.service, ASRRecordAudioPanel.this.index,
             true,
             RECORD_YOURSELF, controller.getProps().doClickAndHold() ? RELEASE_TO_STOP : "Stop");

@@ -31,7 +31,11 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   public static final String SLOW = "slow";
   public static final String REGULAR = "regular";
   public static final String REGULAR_AND_SLOW = "regular and slow";
-  public static final String CONTEXT = "context";
+  private static final String CONTEXT = "context";
+  /**
+   * TODO : if every have slow recordings of context audio we'll need to add another type or an enum
+   */
+  public static final String CONTEXT_AUDIO_TYPE = "context=" + Result.AUDIO_TYPE_REGULAR;
 
   private MiniUser user;
 
@@ -111,6 +115,11 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
 
   public String getExid() {
     return exid;
+  }
+
+  @Override
+  public String getID() {
+    return exid +"/1";
   }
 
   public void setAudioRef(String audioRef) {

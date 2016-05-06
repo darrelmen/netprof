@@ -48,7 +48,6 @@ public class Result implements IsSerializable, UserAndTime {
   public static final String AUDIO_TYPE_PRACTICE = "practice";
   public static final String AUDIO_TYPE_REVIEW = "review";
   public static final String AUDIO_TYPE_RECORDER = "recorder";
-  //private Long userID;
 
   public Result() {}
 
@@ -85,6 +84,12 @@ public class Result implements IsSerializable, UserAndTime {
     this.pronScore = pronScore;
     this.device = device;
   }
+
+  /**
+   * Compound key of exercise id and question id within that exercise.
+   * @return
+   */
+  public String getID() {  return getExerciseID() + "/" + qid;  }
 
   /**
    * Compound key of exercise id and question id within that exercise.
@@ -133,6 +138,11 @@ public class Result implements IsSerializable, UserAndTime {
 
   public long getTimestamp() {
     return timestamp;
+  }
+
+  @Override
+  public String getExid() {
+    return id;
   }
 
   public int getDurationInMillis() {

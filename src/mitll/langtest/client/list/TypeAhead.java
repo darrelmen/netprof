@@ -21,13 +21,14 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 
+import java.util.logging.Logger;
+
 /**
  * Created by go22670 on 9/25/14.
  */
 public class TypeAhead {
-//  private Logger logger = Logger.getLogger("TypeAhead");
+  private Logger logger = Logger.getLogger("TypeAhead");
   private final SafeUri white = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "white_32x32.png");
-
   private final TextBox typeAhead = new TextBox();
 
   /**
@@ -37,11 +38,9 @@ public class TypeAhead {
    * @param hasFirstFocus
    * @see mitll.langtest.client.list.PagingExerciseList#addTypeAhead(com.google.gwt.user.client.ui.Panel)
    */
-  public TypeAhead(Panel column, Image waitCursor, String title, boolean hasFirstFocus) {
+  TypeAhead(Panel column, Image waitCursor, String title, boolean hasFirstFocus) {
     makeTypeAhead();
-
     column.add(getControlGroup(waitCursor, title));
-
     checkFocus(hasFirstFocus);
   }
 
@@ -74,8 +73,8 @@ public class TypeAhead {
     getTypeAhead().setDirectionEstimator(true);   // automatically detect whether text is RTL
     getTypeAhead().addKeyUpHandler(new KeyUpHandler() {
       public void onKeyUp(KeyUpEvent event) {
-        String text = getTypeAhead().getText();
-        gotTypeAheadEntry(text);
+      //  logger.info("got key up " + event);
+        gotTypeAheadEntry(getTypeAhead().getText());
       }
     });
   }
@@ -85,8 +84,7 @@ public class TypeAhead {
    *
    * @param text
    */
-  public void gotTypeAheadEntry(String text) {
-  }
+  public void gotTypeAheadEntry(String text) {}
 
   private Widget getControlGroup(Image waitCursor, String title) {
     Panel flow = new HorizontalPanel();
@@ -119,11 +117,13 @@ public class TypeAhead {
     return userGroup;
   }
 
-  public TextBox getTypeAhead() {
+  /**
+   * @see PagingExerciseList#addTypeAhead(Panel)
+   * @return
+   */
+  TextBox getTypeAhead() {
     return typeAhead;
   }
 
-  public void setText(String text) {
-    typeAhead.setText(text);
-  }
+  public void setText(String text) { typeAhead.setText(text);  }
 }

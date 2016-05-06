@@ -9,6 +9,7 @@ import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.Event;
+import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -34,11 +35,7 @@ public class ReportTest {
 
   @BeforeClass
   public static void setup() {
-    logger.debug("setup called");
-
     String config = "spanish";//"mandarin";
-   // dbName = "npfSpanish";//"mandarin";// "mandarin";
-
     getDatabase(config, "npfSpanish");
   }
 
@@ -64,7 +61,12 @@ public class ReportTest {
 
   @Test
   public void testReport() {
-    database.doReport(new PathHelper("war"), "", 2016);
+    //database.doReport(new PathHelper("war"), "", 2016);
+   // database.doReport(new PathHelper("war"));
+
+    JSONObject jsonObject = new JSONObject();
+    database.getReport(-1, jsonObject);
+    logger.info("got " +jsonObject);
   }
 
   @Test
