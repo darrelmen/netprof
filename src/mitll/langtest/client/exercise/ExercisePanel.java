@@ -10,6 +10,7 @@ import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.Shell;
 
@@ -27,7 +28,7 @@ import java.util.logging.Logger;
  * Time: 1:39 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class ExercisePanel<L extends Shell, T extends Shell> extends VerticalPanel implements
+abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends VerticalPanel implements
     BusyPanel, PostAnswerProvider, ProvidesResize, RequiresResize {
   private final Logger logger = Logger.getLogger("ExercisePanel");
 
@@ -65,12 +66,7 @@ public abstract class ExercisePanel<L extends Shell, T extends Shell> extends Ve
 
     this.navigationHelper = getNavigationHelper(controller);
 
-    // attempt to left justify
-    //HorizontalPanel hp = ;
-   // boolean showInstructions = !(getExerciseContent(e).toLowerCase().contains("listen"));   // hack
-   // if (showInstructions) {
-      addInstructions();
-   // }
+    addInstructions();
     add(getQuestionContent(e, controller));
 
     addQuestions(e, service, controller);
@@ -83,6 +79,7 @@ public abstract class ExercisePanel<L extends Shell, T extends Shell> extends Ve
 
   /**
    * Worry about RTL
+   *
    * @param e
    * @param controller
    * @return
@@ -90,11 +87,11 @@ public abstract class ExercisePanel<L extends Shell, T extends Shell> extends Ve
   private Widget getQuestionContent(T e, ExerciseController controller) {
     HorizontalPanel hp = new HorizontalPanel();
     hp.setWidth("100%");
-    boolean rightAlignContent = controller.isRightAlignContent();
-    if (rightAlignContent) {
+    boolean isRTL = isRTL(e);
+    if (isRTL) {
       setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
     }
-    hp.setHorizontalAlignment(rightAlignContent ? HasHorizontalAlignment.ALIGN_RIGHT : HasHorizontalAlignment.ALIGN_LEFT);
+    hp.setHorizontalAlignment(isRTL ? HasHorizontalAlignment.ALIGN_RIGHT : HasHorizontalAlignment.ALIGN_LEFT);
     hp.add(getQuestionContent(e));
     return hp;
   }
@@ -139,7 +136,7 @@ public abstract class ExercisePanel<L extends Shell, T extends Shell> extends Ve
   private HTML getMaybeRTLContent(String content) {
     boolean rightAlignContent = controller.isRightAlignContent();
     HasDirection.Direction direction =
-        rightAlignContent ? HasDirection.Direction.RTL : WordCountDirectionEstimator.get().estimateDirection(content);
+        rightAlignContent ? HasDirection.Direction.RTL : getDirection(content);
 
     HTML html = new HTML(content, direction);
     html.setWidth("100%");
@@ -154,6 +151,18 @@ public abstract class ExercisePanel<L extends Shell, T extends Shell> extends Ve
       html.addStyleName("xlargeFont");
     }
     return html;
+  }
+
+  private HasDirection.Direction getDirection(String content) {
+    return WordCountDirectionEstimator.get().estimateDirection(content);
+  }
+
+  protected boolean isRTLContent(String content) {
+    return controller.isRightAlignContent() || getDirection(content) == HasDirection.Direction.RTL;
+  }
+
+  protected boolean isRTL(T exercise) {
+    return isRTLContent(exercise.getForeignLanguage());
   }
 
   private boolean isPashto() {
