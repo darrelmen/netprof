@@ -2,13 +2,7 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.database.hibernate.HDAO;
-import mitll.langtest.server.database.hibernate.SessionManagement;
-import mitll.langtest.server.database.instrumentation.HEventDAO;
 import mitll.langtest.server.database.instrumentation.IEventDAO;
-import mitll.langtest.server.database.phone.HPhoneDAO;
-import mitll.langtest.server.database.phone.Phone;
-import mitll.langtest.server.database.word.Word;
 import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.instrumentation.Event;
 import org.apache.log4j.Logger;
@@ -50,21 +44,21 @@ public class EventReaderTest {
   @Test
   public void testReadOne() {
     IEventDAO eventDAO = database.getEventDAO();
-    boolean empty = ((HEventDAO) eventDAO).isEmpty();
+   // boolean empty = ((HEventDAO) eventDAO).isEmpty();
 
-    logger.info("is empty " +empty);
+    //logger.info("is empty " +empty);
 
     Number numRows = eventDAO.getNumRows();
     logger.info("num rows " + numRows);
 
     Event next = eventDAO.getAll().iterator().next();
     logger.info("first event " + next);
-
+/*
     List<Event> all = eventDAO.getAllDevices();
-    logger.info("first device " + all.iterator().next());
+    logger.info("first device " + all.iterator().next());*/
   }
 
-
+/*
   @Test
   public void testReadOnePhone() {
     HPhoneDAO hPhoneDAO = new HPhoneDAO(database);
@@ -135,5 +129,5 @@ public class EventReaderTest {
     }
 
     logger.info("\n\ngot " + ret);
-  }
+  }*/
 }

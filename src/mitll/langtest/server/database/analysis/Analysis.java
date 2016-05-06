@@ -28,6 +28,7 @@ public class Analysis extends DAO {
 
   private static final int FIVE_MINUTES = 5 * 60 * 1000;
   private static final float MIN_SCORE_TO_SHOW = 0.20f;
+  private static final String EMPTY_JSON = "{}";
   private final ParseResultJson parseResultJson;
   private final PhoneDAO phoneDAO;
   private Map<String, String> exToRef;
@@ -441,6 +442,7 @@ public class Analysis extends DAO {
     int missing = 0;
     Set<String> missingAudio = new TreeSet<>();
 
+    int emptyCount =0;
     while (rs.next()) {
       count++;
       String exid = rs.getString(Database.EXID);
@@ -456,8 +458,9 @@ public class Analysis extends DAO {
       if (pronScore < 0) logger.warn("huh? got " + pronScore + " for " + exid + " and " + id);
 
       String json = rs.getString(ResultDAO.SCORE_JSON);
-      if (json != null && json.equals("{}")) {
-        logger.warn("getUserToResults : Got empty json " + json + " for " + exid + " : " + id);
+      if (json != null && json.equals(EMPTY_JSON)) {
+        //logger.warn("getUserToResults : Got empty json " + json + " for " + exid + " : " + id);
+        emptyCount++;
       }
       String device = rs.getString(ResultDAO.DEVICE_TYPE);
       String path = rs.getString(ResultDAO.ANSWER);
@@ -482,9 +485,10 @@ public class Analysis extends DAO {
     }
 
     if (DEBUG || true) {
-      logger.info("total " + count + " missing audio " + missing +
+      logger.info("getUserToResults total " + count + " missing audio " + missing +
           " iPad = " + iPad + " flashcard " + flashcard + " learn " + learn + " exToRef " + exToRef.size());
       if (!missingAudio.isEmpty()) logger.info("missing audio " + missingAudio);
+      if (emptyCount > 0) logger.info("missing score json count " + emptyCount + "/" + count);
     }
 
     finish(connection, statement, rs);
@@ -515,7 +519,7 @@ public class Analysis extends DAO {
       if (json == null) {
         //c++;
         logger.error("getWordScore huh? no json for " + bs);
-      } else if (json.equals("{}")) {
+      } else if (json.equals(EMPTY_JSON)) {
         logger.warn("getWordScore json is empty for " + bs);
         // skip low scores
       } else if (bs.getScore() > MIN_SCORE_TO_SHOW) {

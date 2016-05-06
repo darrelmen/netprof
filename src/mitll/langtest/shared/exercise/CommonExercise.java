@@ -21,6 +21,12 @@ public interface CommonExercise extends CommonAudioExercise, ScoredExercise {
 
   boolean hasContext();
 
+  /**
+   * Get the first context sentence.
+   * @return
+   */
+  String getContext();
+
   Collection<CommonExercise> getDirectlyRelated();
 
   Collection<CommonExercise> getMentions();

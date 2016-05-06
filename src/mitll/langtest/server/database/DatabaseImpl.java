@@ -456,26 +456,13 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       synchronized (this) {
         boolean isURL = serverProps.getLessonPlan().startsWith("http");
         boolean amas = isAmas();
-        if (amas) {
-          int numExercises;
-//          logger.info("Got " + lessonPlanFile);
-          if (isURL) {
-            this.fileExerciseDAO = new AMASJSONURLExerciseDAO(getServerProps());
-            numExercises = fileExerciseDAO.getNumExercises();
-          } else {
-            fileExerciseDAO = new FileExerciseDAO<>(mediaDir, serverProps.getLanguage(), absConfigDir, lessonPlanFile, installPath);
-            numExercises = fileExerciseDAO.getNumExercises();
-          }
-          userManagement = new UserManagement(userDAO, numExercises, resultDAO, userListManager);
+        int numExercises;
 
+        if (amas) {
+//          logger.info("Got " + lessonPlanFile);
+          numExercises = readAMASExercises(lessonPlanFile, mediaDir, installPath, isURL);
         } else {
-          if (isURL) {
-            this.exerciseDAO = new JSONURLExerciseDAO(getServerProps(), userListManager, ADD_DEFECTS);
-          } else if (lessonPlanFile.endsWith(".json")) {
-            this.exerciseDAO = new JSONExerciseDAO(lessonPlanFile, getServerProps(), userListManager, ADD_DEFECTS);
-          } else {
-            this.exerciseDAO = new ExcelImport(lessonPlanFile, getServerProps(), userListManager, ADD_DEFECTS);
-          }
+          makeExerciseDAO(lessonPlanFile, isURL);
 
           userExerciseDAO.setExerciseDAO(exerciseDAO);
           setDependencies(mediaDir, installPath);
@@ -485,16 +472,39 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
           userDAO.checkForFavorites(userListManager);
           userExerciseDAO.setAudioDAO(audioDAO);
 
-          userManagement = new UserManagement(userDAO, exerciseDAO.getNumExercises(), resultDAO, userListManager);
+          numExercises = exerciseDAO.getNumExercises();
 
           analysis = new Analysis(this, phoneDAO, getExerciseIDToRefAudio());
         }
+        userManagement = new UserManagement(userDAO, numExercises, resultDAO, userListManager);
 
         audioDAO.setExerciseDAO(exerciseDAO);
 
         audioDAO.markTranscripts();
       }
     }
+  }
+
+  private void makeExerciseDAO(String lessonPlanFile, boolean isURL) {
+    if (isURL) {
+      this.exerciseDAO = new JSONURLExerciseDAO(getServerProps(), userListManager, ADD_DEFECTS);
+    } else if (lessonPlanFile.endsWith(".json")) {
+      this.exerciseDAO = new JSONExerciseDAO(lessonPlanFile, getServerProps(), userListManager, ADD_DEFECTS);
+    } else {
+      this.exerciseDAO = new ExcelImport(lessonPlanFile, getServerProps(), userListManager, ADD_DEFECTS);
+    }
+  }
+
+  private int readAMASExercises(String lessonPlanFile, String mediaDir, String installPath, boolean isURL) {
+    int numExercises;
+    if (isURL) {
+      this.fileExerciseDAO = new AMASJSONURLExerciseDAO(getServerProps());
+      numExercises = fileExerciseDAO.getNumExercises();
+    } else {
+      fileExerciseDAO = new FileExerciseDAO<>(mediaDir, serverProps.getLanguage(), absConfigDir, lessonPlanFile, installPath);
+      numExercises = fileExerciseDAO.getNumExercises();
+    }
+    return numExercises;
   }
 
   public void reloadExercises() {
@@ -1177,7 +1187,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   }
 
   public Map<String, Map<Integer, Map<Integer, Integer>>> getDesiredCounts() {
-    return monitoringSupport.getDesiredCounts(getExercises());
+    return monitoringSupport.getDesiredCounts(getExercises(), resultDAO.getUserAndTimes());
   }
 
   /**
@@ -1256,6 +1266,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   }
 
   /**
+   * allow custom items to mask out non-custom items
    * Special code to mask out unit/chapter from database in userexercise table.
    * <p>
    * Must check update times to make sure we don't mask out a newer entry.
@@ -1391,6 +1402,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
   /**
    * Expensive ?
+   *
    * @see ScoreServlet#getJSONExport
    */
   public void attachAllAudio() {
@@ -1409,7 +1421,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       // exercises.add(getJsonForExercise(exercise));
     }
     long now = System.currentTimeMillis();
-    logger.info(getLanguage() + " took " + (now-then) + " millis to attachAllAudio to " + exercises.size()+ " exercises");
+    logger.info(getLanguage() + " took " + (now - then) + " millis to attachAllAudio to " + exercises.size() + " exercises");
   }
 
   public String getUserListName(long listid) {
@@ -1449,11 +1461,27 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @see mitll.langtest.server.ScoreServlet#getReport(JSONObject, int)
    */
   public String getReport(int year, JSONObject jsonObject) {
-    return getReport("").getReport(jsonObject, year);
+    return getReport("").getReport(serverProps.getLanguage(), jsonObject, year);
   }
 
+  private Report reportCache;
+
   private Report getReport(String prefix) {
-    return new Report(userDAO, resultDAO, eventDAO, audioDAO, serverProps.getLanguage(), prefix);
+    if (reportCache == null) {
+      Report report = new Report(userDAO, resultDAO, eventDAO, audioDAO, serverProps.getLanguage(), prefix);
+      this.reportCache = report;
+    }
+    return reportCache;
+  }
+
+  /**
+   * FOR TESTING
+   *
+   * @param pathHelper
+   * @return
+   */
+  public JSONObject doReport(PathHelper pathHelper) {
+    return doReport(pathHelper, "", -1);
   }
 
   /**
@@ -1464,7 +1492,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    */
   public JSONObject doReport(PathHelper pathHelper, String prefix, int year) {
     try {
-      return getReport(prefix).writeReportToFile(pathHelper, serverProps.getLanguage(), year);
+      Report report = getReport(prefix);
+      return report.writeReportToFile(pathHelper, serverProps.getLanguage(), year);
     } catch (IOException e) {
       logger.error("got " + e);
       return null;
@@ -1533,14 +1562,16 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    */
   public Map<String, Float> getMaleFemaleProgress() {
     UserDAO userDAO = getUserDAO();
-    Map<Long, User> userMapMales = userDAO.getUserMap(true);
+    Map<Long, User> userMapMales   = userDAO.getUserMap(true);
     Map<Long, User> userMapFemales = userDAO.getUserMap(false);
 
-    Collection<? extends CommonShell> exercises = getExercises();
+    Collection<CommonExercise> exercises = getExercises();
     float total = exercises.size();
     Set<String> uniqueIDs = new HashSet<String>();
 
-    for (CommonShell shell : exercises) {
+    int context = 0;
+    for (CommonExercise shell : exercises) {
+      if (shell.hasContext()) context++;
       boolean add = uniqueIDs.add(shell.getID());
       if (!add) {
         logger.warn("getMaleFemaleProgress found duplicate id " + shell.getID() + " : " + shell);
@@ -1550,7 +1581,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         uniqueIDs.size() +
         " unique");*/
 
-    return getAudioDAO().getRecordedReport(userMapMales, userMapFemales, total, uniqueIDs);
+    return getAudioDAO().getRecordedReport(userMapMales, userMapFemales, total, uniqueIDs, context);
   }
 
   public String toString() {
