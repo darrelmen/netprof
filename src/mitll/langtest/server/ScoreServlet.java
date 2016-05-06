@@ -534,7 +534,7 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   private void configureResponseHTML(HttpServletResponse response, int year) {
-    response.setContentType("test/html; charset=UTF-8");
+    response.setContentType("text/html; charset=UTF-8");
     response.setCharacterEncoding("UTF-8");
 
     String fileName = year == -1 ? "reportFor" + getLanguage() : ("reportFor" +getLanguage()+"_forYear" + year);
