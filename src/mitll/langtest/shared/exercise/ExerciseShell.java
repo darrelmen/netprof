@@ -17,7 +17,6 @@ import java.util.Collections;
  * Time: 3:00 PM
  * To change this template use File | Settings | File Templates.
  * <p>
- * TODO : UserList should not extend this
  */
 public class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
   protected String english;
@@ -34,7 +33,7 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
    * @see AudioExercise#AudioExercise(String)
    * @see UserList#UserList()
    */
-  public ExerciseShell(String id) {
+  ExerciseShell(String id) {
     this(id, "", "", "", "", id);
   }
 

@@ -55,7 +55,6 @@ public class InitialUI {
 
   protected final LangTest langTest;
   protected final PropertyHandler props;
-  protected AutoCRTChapterNPFHelper learnHelper;
 
   protected final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
 
@@ -129,7 +128,7 @@ public class InitialUI {
         });
       }
     };
-    logger.info("talks to domino " + props.talksToDomino());
+   // logger.info("talks to domino " + props.talksToDomino());
     reload = (props.talksToDomino()) ?reload:null;
     Widget title = banner.makeNPFHeaderRow(props.getSplash(), props.isBeta(), getGreeting(),
         getReleaseStatus(),
@@ -166,6 +165,10 @@ public class InitialUI {
     return new HTML(langTest.getInfoLine());
   }
 
+  public boolean isRTL() {
+    return navigation != null && navigation.isRTL();
+  }
+
   private class LogoutClickHandler implements ClickHandler {
     public void onClick(ClickEvent event) {
       langTest.logEvent("No widget", "UserLoging", "N/A", "User Logout by " + lastUser);
@@ -177,6 +180,7 @@ public class InitialUI {
    * @seex mitll.langtest.client.LangTest.LogoutClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)
    */
   private void resetState() {
+    //logger.info("clearing current history token");
     History.newItem(""); // clear history!
     userManager.clearUser();
     lastUser = NO_USER_INITIAL;
@@ -348,7 +352,7 @@ public class InitialUI {
   }
 
   /**
-   * @see LangTest#addResizeHandler()
+   * @see #addResizeHandler
    */
   protected void onResize() {
     if (navigation != null) navigation.onResize();

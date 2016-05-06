@@ -14,7 +14,8 @@ import mitll.langtest.client.user.UserManager;
  * Created by go22670 on 1/26/16.
  */
 public class NPFlexSectionExerciseList extends FlexSectionExerciseList {
-  //private FlexListLayout flexListLayout;
+  private static final String COMPLETE = "Complete";
+  private static final String LIST_COMPLETE = "List complete!";
 
   /**
    * @param topRow
@@ -28,12 +29,11 @@ public class NPFlexSectionExerciseList extends FlexSectionExerciseList {
                                    boolean incorrectFirst) {
     super(topRow, currentExercisePanel, flexListLayout.service, flexListLayout.feedback,
         flexListLayout.controller, instanceName, incorrectFirst);
-    //this.flexListLayout = flexListLayout;
   }
 
   @Override
   protected void onLastItem() {
-    new ModalInfoDialog("Complete", "List complete!", new HiddenHandler() {
+    new ModalInfoDialog(COMPLETE, LIST_COMPLETE, new HiddenHandler() {
       @Override
       public void onHidden(HiddenEvent hiddenEvent) {
         reloadExercises();
@@ -43,6 +43,6 @@ public class NPFlexSectionExerciseList extends FlexSectionExerciseList {
 
   @Override
   protected void noSectionsGetExercises(long userID) {
-    loadExercises(getHistoryToken("", ""), getPrefix(), false);
+    loadExercises(getHistoryTokenFromUIState("", ""), getPrefix(), false);
   }
 }

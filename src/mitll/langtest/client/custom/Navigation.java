@@ -38,6 +38,8 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.ContextPractice;
 import mitll.langtest.shared.User;
+import mitll.langtest.shared.analysis.WordAndScore;
+import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -161,6 +163,10 @@ public class Navigation implements RequiresResize, ShowTab {
     practiceHelper = new PracticeHelper(service, feedback, userManager, controller);
     recorderHelper = new RecorderNPFHelper(service, feedback, userManager, controller, true, learnHelper);
     recordExampleHelper = new RecorderNPFHelper(service, feedback, userManager, controller, false, learnHelper);
+  }
+
+  public boolean isRTL() {
+    return controller.getProps().isRightAlignContent() || (learnHelper.getExerciseList() != null && learnHelper.getExerciseList().isRTL());
   }
 
   private void makeDialogWindow(final LangTestDatabaseAsync service, final ExerciseController controller) {
@@ -538,7 +544,7 @@ public class Navigation implements RequiresResize, ShowTab {
     TabAndContent tabAndContent = nameToTab.get(value);
     Integer tabIndex = nameToIndex.get(value);
 
-//    logger.info("selectPreviousTab '" + value + "' index " + tabIndex + " tabAndContent " + tabAndContent);
+    logger.info("selectPreviousTab '" + value + "' index " + tabIndex + " tabAndContent " + tabAndContent);
 
     String orig = value;
     if (tabIndex == null) {
@@ -619,6 +625,11 @@ public class Navigation implements RequiresResize, ShowTab {
     clickOnTab(tabAndContent);
   }
 
+  /**
+   * @see mitll.langtest.client.analysis.PhoneExampleContainer#gotClickOnItem(WordAndScore)
+   * @see mitll.langtest.client.analysis.WordContainer#gotClickOnItem(WordScore)
+   * @param id
+   */
   @Override
   public void showLearnAndItem(String id) {
     if (id.startsWith(CUSTOM)) {
@@ -648,7 +659,7 @@ public class Navigation implements RequiresResize, ShowTab {
     } else if (toUse.getTab() == null) {
       logger.warning("huh? toUse has a null tab? " + toUse);
     } else {
-      // logger.info("click on tab " + toUse);
+     // logger.info("click on tab " + toUse);
       toUse.clickOnTab();
     }
   }
@@ -666,15 +677,9 @@ public class Navigation implements RequiresResize, ShowTab {
 
   @Override
   public void onResize() {
-    //  logger.info("got onResize");
     learnHelper.onResize();
-    //npfHelper.onResize();
-    //   avpHelper.onResize();
-    // defectHelper.onResize();
-    // reviewItem.onResize();
     recorderHelper.onResize();
     recordExampleHelper.onResize();
-    //editItem.onResize();
     markDefectsHelper.onResize();
     practiceHelper.onResize();
     listManager.onResize();

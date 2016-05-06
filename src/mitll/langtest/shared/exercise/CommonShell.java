@@ -19,6 +19,10 @@ public interface CommonShell extends Shell {
 
   MutableShell getMutableShell();
 
+/*  boolean hasContext();
+
+  String getContext();*/
+
   /**
    * @see mitll.langtest.server.autocrt.DecodeCorrectnessChecker#getRefSentences
    * @return
