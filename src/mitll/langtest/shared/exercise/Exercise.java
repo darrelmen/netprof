@@ -230,6 +230,10 @@ public class Exercise extends AudioExercise implements CommonExercise,
         " unit->lesson " + getUnitToValue();
   }
 
+  /**
+   * @see mitll.langtest.server.database.exercise.JSONURLExerciseDAO#toExercise
+   * @param updateTime
+   */
   public void setUpdateTime(long updateTime) {
     this.updateTime = updateTime;
   }
@@ -249,6 +253,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
   public boolean hasContext() {
     return !getDirectlyRelated().isEmpty();
   }
+
+  public String getContext() { return getDirectlyRelated().iterator().next().getForeignLanguage(); }
 
   public Collection<CommonExercise> getDirectlyRelated() {
     return directlyRelated;
