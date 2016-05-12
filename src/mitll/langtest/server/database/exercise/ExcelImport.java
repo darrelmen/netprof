@@ -235,7 +235,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
               idIndex = columns.indexOf(col);
             } else if (contextTransMatch(colNormalized)) { //be careful of ordering wrt this and the next item
               contextTranslationIndex = columns.indexOf(col);
-            } else if (colNormalized.contains(CONTEXT)) {
+            } else if (contextColMatch(colNormalized)) {
               contextIndex = columns.indexOf(col);
             } else if (colNormalized.contains("audio_index")) {
               audioIndex = columns.indexOf(col);
@@ -386,7 +386,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   }
 
   private boolean contextTransMatch(String colNormalized) {
-    return colNormalized.contains(CONTEXT_TRANSLATION) || colNormalized.contains(TRANSLATION_OF_CONTEXT.toLowerCase());
+    return colNormalized.contains(CONTEXT_TRANSLATION.toLowerCase()) || colNormalized.contains(TRANSLATION_OF_CONTEXT.toLowerCase());
   }
 
   private Collection<CommonExercise> readFromSheetSkips(Sheet sheet, int id) {
@@ -430,7 +430,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
               meaningIndex = columns.indexOf(col);
             } else if (colNormalized.contains(ID)) {
               idIndex = columns.indexOf(col);
-            } else if (colNormalized.contains(CONTEXT)) {
+            } else if (contextColMatch(colNormalized)) {
               contextIndex = columns.indexOf(col);
             } else if (contextTransMatch(colNormalized)) {
               contextTranslationIndex = columns.indexOf(col);
@@ -500,6 +500,10 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
 
     logStatistics(id, semis, skipped, englishSkipped, deleted);
     return exercises;
+  }
+
+  private boolean contextColMatch(String colNormalized) {
+    return colNormalized.contains(CONTEXT) && colNormalized.contains("sentence");
   }
 
   private boolean isDeletedRow(Sheet sheet, Row next, int colIndex) {
