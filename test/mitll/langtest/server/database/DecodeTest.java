@@ -19,6 +19,17 @@ public class DecodeTest extends BaseTest {
   private static final Logger logger = Logger.getLogger(DecodeTest.class);
   //public static final boolean DO_ONE = false;
 
+
+  @Test
+  public void testRussianContext() {
+    DatabaseImpl<CommonExercise> russian = getDatabase("russian");
+    CommonExercise exercise = russian.getExercise("2600");
+    String context = exercise.getContext();
+
+
+    logger.info("got\n" + context);
+  }
+
   @Test
   public void testSpanishReport() {
     JSONObject jsonObject = getDatabase("spanish").doReport(new PathHelper("war"), "", 2016);
