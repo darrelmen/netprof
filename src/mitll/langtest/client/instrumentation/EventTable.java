@@ -162,14 +162,14 @@ public class EventTable extends PagerTable {
     gender.setSortable(true);
     table.addColumn(gender, "User ID");
 
-    TextColumn<Event> hit = new TextColumn<Event>() {
+/*    TextColumn<Event> hit = new TextColumn<Event>() {
       @Override
       public String getValue(Event contact) {
         return "" +contact.getHitID();
       }
     };
     hit.setSortable(true);
-    table.addColumn(hit, "Hit ID");
+    table.addColumn(hit, "Hit ID");*/
 
     TextColumn<Event> device = new TextColumn<Event>() {
       @Override
