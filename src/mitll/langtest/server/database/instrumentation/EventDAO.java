@@ -32,11 +32,11 @@ public class EventDAO extends DAO implements IEventDAO {
   private static final String HITID = "hitid";
   private static final String EXERCISEID = "exerciseid";
   private static final String DEVICE = "device";
-  // private final UserDAO userDAO;
+  public static final String WIDGETID = "widgetid";
+  public static final String CONTEXT = "context";
   long defectDetector = -1;
   public static final String MODIFIED = "modified";
   public static final String WHERE_DEVICE = " where length(device)=36";
-//  private final UserDAO userDAO;
 
   /**
    * @param database
@@ -115,8 +115,8 @@ public class EventDAO extends DAO implements IEventDAO {
               "(" +
               CREATORID + "," +
               EXERCISEID + "," +
-              "context" + "," +
-              "widgetid" + "," +
+              CONTEXT + "," +
+              WIDGETID + "," +
               WIDGETTYPE + "," +
               HITID + "," +
               DEVICE + "," +
@@ -137,7 +137,7 @@ public class EventDAO extends DAO implements IEventDAO {
       statement.setString(i++, event.getContext());
       statement.setString(i++, event.getWidgetID());
       statement.setString(i++, event.getWidgetType());
-      statement.setString(i++, event.getHitID());
+     // statement.setString(i++, event.getHitID());
       statement.setString(i++, event.getDevice());
       statement.setTimestamp(i++, new Timestamp(System.currentTimeMillis()));
 
@@ -218,7 +218,7 @@ public class EventDAO extends DAO implements IEventDAO {
   }*/
 
   /**
-   * @see mitll.langtest.server.database.Report#getEventsDevices(StringBuilder, Set, JSONObject, int)
+   * @see mitll.langtest.server.database.Report#getEventsDevices
    * @return
    */
   public List<SlimEvent> getAllDevicesSlim() {
@@ -276,13 +276,13 @@ public class EventDAO extends DAO implements IEventDAO {
 
     while (rs.next()) {
       lists.add(new Event(//rs.getLong(ID),
-          rs.getString("widgetid"),
+          rs.getString(WIDGETID),
           rs.getString(WIDGETTYPE),
           rs.getString(EXERCISEID),
-          rs.getString("context"),
+          rs.getString(CONTEXT),
           rs.getLong(CREATORID),
           rs.getTimestamp(MODIFIED).getTime(),
-          rs.getString(HITID),
+        //  rs.getString(HITID),
           rs.getString(DEVICE))
       );
     }
