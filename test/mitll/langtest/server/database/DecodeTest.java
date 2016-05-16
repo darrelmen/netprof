@@ -20,6 +20,11 @@ public class DecodeTest extends BaseTest {
   //public static final boolean DO_ONE = false;
 
   @Test
+  public void testSpanishEventCopy() {
+     getDatabase("spanish");
+  }
+
+  @Test
   public void testSpanishReport() {
     JSONObject jsonObject = getDatabase("spanish").doReport(new PathHelper("war"), "", 2016);
     logger.info("got\n" + jsonObject);
