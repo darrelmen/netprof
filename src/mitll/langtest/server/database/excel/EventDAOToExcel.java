@@ -83,8 +83,8 @@ public class EventDAOToExcel {
       cell = row.createCell(j++);
       cell.setCellValue(event.getTimestamp());
 
-      cell = row.createCell(j++);
-      cell.setCellValue(event.getHitID());
+//      cell = row.createCell(j++);
+//      cell.setCellValue(event.getHitID());
 
       cell = row.createCell(j++);
       cell.setCellValue(event.getDevice());
