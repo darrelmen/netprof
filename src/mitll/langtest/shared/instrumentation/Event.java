@@ -13,16 +13,14 @@ import java.util.Date;
  * Time: 11:35 AM
  * To change this template use File | Settings | File Templates.
  */
-public class Event extends SlimEvent
-//    implements Comparable<Event>
-{
+public class Event extends SlimEvent {
   private Long id;
   private String widgetID;
   private String widgetType;
   private String exerciseID;
   private String context;
 
-  private String hitID;
+//  private String hitID;
   private String device;
 
   public Event() {
@@ -32,18 +30,20 @@ public class Event extends SlimEvent
    * @param exerciseID
    * @param userID
    * @param timestamp
-   * @param hitID
+   * @paramx hitID
    * @param device
    * @see mitll.langtest.server.database.custom.AnnotationDAO#getUserAnnotations(String)
    */
   public Event(String widgetID, String widgetType, String exerciseID, String context,
-               long userID, long timestamp, String hitID, String device) {
+               long userID, long timestamp,
+               //String hitID,
+               String device) {
     super(userID,timestamp);
     this.widgetID = widgetID;
     this.widgetType = widgetType;
     this.exerciseID = exerciseID;
     this.context = context;
-    this.hitID = hitID;
+  //  this.hitID = hitID;
     this.device = device;
   }
 
@@ -85,15 +85,19 @@ public class Event extends SlimEvent
     return widgetType;
   }
 
+/*
   public String getHitID() {
     return hitID;
   }
+*/
 
   public String toString() {
     long timestamp = getTimestamp();
     if (timestamp == -1) timestamp = System.currentTimeMillis();
     return "Event on " + getWidgetID() + " by " + getCreatorID() + " at " + new Date(timestamp) + " info " +
-        getExerciseID() + "/" + getContext() + " hit " + getHitID() + " from " + device;
+        getExerciseID() + "/" + getContext() +
+        //" hit " + getHitID() +
+        " from " + device;
   }
 
 /*

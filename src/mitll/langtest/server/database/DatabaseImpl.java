@@ -16,7 +16,9 @@ import mitll.langtest.server.database.connection.PostgreSQLConnection;
 import mitll.langtest.server.database.contextPractice.ContextPracticeImport;
 import mitll.langtest.server.database.custom.*;
 import mitll.langtest.server.database.exercise.*;
+import mitll.langtest.server.database.instrumentation.EventDAO;
 import mitll.langtest.server.database.instrumentation.IEventDAO;
+import mitll.langtest.server.database.instrumentation.SlickEventImpl;
 import mitll.langtest.server.database.phone.Phone;
 import mitll.langtest.server.database.phone.PhoneDAO;
 import mitll.langtest.server.database.word.Word;
@@ -213,6 +215,14 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       }
       eventDAO = heventDAO;
     }*/
+
+    SlickEventImpl slickEventDAO = new SlickEventImpl(getLanguage());
+    long defectDetector = userDAO.getDefectDetector();
+    if (slickEventDAO.getNumRows().intValue() == 0) {
+      slickEventDAO.copyTableOnlyOnce(new EventDAO(this, defectDetector));
+      eventDAO = slickEventDAO;
+    }
+//    eventDAO = new EventDAO(this, defectDetector);
 
     Connection connection1 = getConnection();
     try {
@@ -940,7 +950,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
   public boolean logEvent(String id, String widgetType, String exid, String context, long userid, String hitID,
                           String device) {
-    return eventDAO != null && eventDAO.add(new Event(id, widgetType, exid, context, userid, -1, hitID, device));
+    return eventDAO != null && eventDAO.add(new Event(id, widgetType, exid, context, userid, -1, /*hitID,*/ device));
   }
 
   public void logAndNotify(Exception e) {
