@@ -16,8 +16,6 @@ public interface IEventDAO {
 
   List<SlimEvent> getAllSlim();
 
-//  List<Event> getAllDevices();
-
   List<SlimEvent> getAllDevicesSlim();
 
   SlimEvent getFirstSlim();
