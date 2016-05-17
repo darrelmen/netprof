@@ -92,6 +92,12 @@ public class AudioCheck {
     return (frames + 0.0d) / format.getFrameRate();
   }
 
+  /**
+   * @see AudioConversion#isValid(File, boolean, boolean)
+   * @param file
+   * @param quietAudioOK
+   * @return
+   */
   ValidityAndDur checkWavFileRejectAnyTooLoud(File file, boolean quietAudioOK) {
     ValidityAndDur validityAndDur = checkWavFileWithClipThreshold(file, false, quietAudioOK);
     if (validityAndDur.isValid()) {
