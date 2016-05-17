@@ -209,7 +209,7 @@ public class DAO {
     return database.getConnection(this.getClass().toString());
   }
 
-  protected <T> String getInList(Collection<T> ids) {
+  <T> String getInList(Collection<T> ids) {
     StringBuilder b = new StringBuilder();
     for (T id : ids) b.append("'").append(id).append("'").append(",");
     String list = b.toString();

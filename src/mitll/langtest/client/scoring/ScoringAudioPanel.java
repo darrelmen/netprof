@@ -41,7 +41,6 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
   private PretestScore result;
   private boolean showOnlyOneExercise = false; // true for when called from the headstart website
   private static final boolean debug = false;
- // public static final float MP3_HEADER_OFFSET = 0f;//0.048f;
 
   /**
    * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, LangTestDatabaseAsync, ExerciseController, ScoreListener, String, String, T, String)
