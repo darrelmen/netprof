@@ -434,7 +434,8 @@ public class ASRWebserviceScoring extends Scoring implements CollationSort, ASR 
       String[] split = results[0].split(sep);
       Scores scores = new Scores(split);
       // clean up tmp directory if above score threshold
-      logger.debug(languageProperty + " : Took " + timeToRunHydra + " millis to run hydra - overall score: " + split[0]);
+      logger.debug(languageProperty + " : Took " + timeToRunHydra + " millis to run " +(decode ? "decode":"align")+
+          " hydra on " + audioPath+ " - score: " + split[0]);
     /*if (Float.parseFloat(split[0]) > lowScoreThresholdKeepTempDir) {   // keep really bad scores for now
       try {
 				logger.debug("deleting " + tmpDir + " since score is " + split[0]);
