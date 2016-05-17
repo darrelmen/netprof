@@ -8,6 +8,7 @@
     <property environment="env"/>
     <property name="ECLIPSE_HOME" value="../../../eclipse_juno"/>
     <property name="imagewriter.location" value="imagewriter"/>
+    <property name="npdata.location" value="npdata/target/scala-2.11"/>
     <property name="debuglevel" value="source,lines,vars"/>
     <property name="target" value="1.8"/>
     <property name="source" value="1.8"/>
@@ -432,7 +433,7 @@
         </jar>
     </target>
 
-    <target name="build-subprojects" depends="cleanall">
+    <target name="build-subprojects" depends="cleanall,assembly">
         <ant antfile="build.xml" dir="${imagewriter.location}" inheritAll="false" target="build-project">
             <propertyset>
                 <propertyref name="build.compiler"/>
@@ -440,6 +441,15 @@
         </ant>
         <copy todir="war/WEB-INF/lib">
             <fileset dir="${imagewriter.location}" includes="imagewriter.jar"/>
+        </copy>
+    </target>
+
+    <target name="assembly" description="call sbt">
+        <exec dir="npdata" executable="sbt">
+            <arg value="assembly"></arg>
+        </exec>
+        <copy todir="war/WEB-INF/lib">
+            <fileset dir="${npdata.location}" includes="npdata-assembly-1.0.jar"/>
         </copy>
     </target>
 
