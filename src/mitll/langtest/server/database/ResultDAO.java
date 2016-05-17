@@ -782,7 +782,6 @@ public class ResultDAO extends DAO {
    * @see mitll.langtest.server.database.AnswerDAO#addAnswerToTable
    */
   synchronized void invalidateCachedResults() {
-    //cachedResultsForQuery = null;
     cachedResultsForQuery2 = null;
     cachedMonitorResultsForQuery = null;
   }
