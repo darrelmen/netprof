@@ -413,7 +413,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */
   private void showSelectionState(SelectionState selectionState) {
-    logger.info("FlexSectionExerciseList.showSelectionState : state '" + selectionState +"'");
+   // logger.info("FlexSectionExerciseList.showSelectionState : state '" + selectionState +"'");
 
     // keep the download link info in sync with the selection
     Map<String, Collection<String>> typeToSection = selectionState.getTypeToSection();
