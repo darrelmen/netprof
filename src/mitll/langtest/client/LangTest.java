@@ -112,11 +112,13 @@ import java.util.logging.Logger;
  * - fix for bug where couldn't jump from word in analysis
  * 1.3.2
  * - report updates
+ * 1.3.3
+ * - fixes for generated keys bug on result table
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private final Logger logger = Logger.getLogger("LangTest");
 
-  public static final String VERSION_INFO = "1.3.2";
+  public static final String VERSION_INFO = "1.3.3";
 
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
