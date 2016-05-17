@@ -685,6 +685,14 @@ public class ListManager implements RequiresResize {
         includeAddItem));
   }
 
+  /**
+   * @see #getImportTab(UserList, TabPanel, TabAndContent, String)
+   * @param ul
+   * @param container
+   * @param learnTab
+   * @param instanceName
+   * @param tabPanel
+   */
   private void showImportItem(final UserList ul, final TabAndContent container, final TabAndContent learnTab, final String instanceName,
                               final TabPanel tabPanel) {
     container.getContent().clear();
