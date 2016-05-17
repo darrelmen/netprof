@@ -5,6 +5,7 @@
 package mitll.langtest.server.audio;
 
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonExercise;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
@@ -60,7 +61,7 @@ public class AudioConversion {
   public AudioConversion(ServerProperties props) {
     this.language = props.getLanguage();
     trimMillisBefore = props.getTrimBefore();
-    trimMillisAfter  = props.getTrimAfter();
+    trimMillisAfter = props.getTrimAfter();
     soxPath = getSox();
     audioCheck = new AudioCheck(props);
     this.props = props;
@@ -78,7 +79,7 @@ public class AudioConversion {
    * @see mitll.langtest.server.audio.AudioFileHelper#getAlignment
    */
   AudioCheck.ValidityAndDur convertBase64ToAudioFiles(String base64EncodedString, File file,
-                                                             boolean useSensitiveTooLoudCheck, boolean quietAudioOK) {
+                                                      boolean useSensitiveTooLoudCheck, boolean quietAudioOK) {
     long then = System.currentTimeMillis();
     file.getParentFile().mkdirs();
     writeToFile(getBytesFromBase64String(base64EncodedString), file);
@@ -94,7 +95,8 @@ public class AudioConversion {
     long now = System.currentTimeMillis();
     long diff = now - then;
     if (diff > MIN_WARN_DUR) {
-      logger.debug("writeAudioFile: took " + diff + " millis to write wav file " + valid.durationInMillis + " millis long");
+      logger.debug("writeAudioFile: took " + diff + " millis to write wav file (" +file.getName()+
+          ") " + valid.durationInMillis + " millis long");
     }
     return valid;
   }
@@ -138,10 +140,15 @@ public class AudioConversion {
    */
   public AudioCheck.ValidityAndDur isValid(File file, boolean useSensitiveTooLoudCheck, boolean quietAudioOK) {
     try {
-      AudioCheck.ValidityAndDur validityAndDur =
-          useSensitiveTooLoudCheck ? audioCheck.checkWavFileRejectAnyTooLoud(file, quietAudioOK) :
-              audioCheck.checkWavFile(file, quietAudioOK);
-      return validityAndDur;
+      if (file.length() < 44) {
+        logger.warn("isValid : audio file " + file.getAbsolutePath() + " length was " + file.length() + " bytes.");
+        return new AudioCheck.ValidityAndDur(AudioAnswer.Validity.TOO_SHORT, 0, false);
+      } else {
+        AudioCheck.ValidityAndDur validityAndDur =
+            useSensitiveTooLoudCheck ? audioCheck.checkWavFileRejectAnyTooLoud(file, quietAudioOK) :
+                audioCheck.checkWavFile(file, quietAudioOK);
+        return validityAndDur;
+      }
     } catch (Exception e) {
       logger.error("isValid got " + e, e);
     }
@@ -232,7 +239,7 @@ public class AudioConversion {
 
         long now = System.currentTimeMillis();
         if (now - then > 0) {
-          logger.debug("trimSilence (" +props.getLanguage() +
+          logger.debug("trimSilence (" + props.getLanguage() +
               "): took " + (now - then) + " millis to convert original " + wavFile.getName() +
               " to trim wav file : " + durationInSeconds + " before, " + durationInSecondsTrimmed + " after.");
         }
@@ -378,9 +385,9 @@ public class AudioConversion {
   private String doTrimSilence(String pathToAudioFile) throws IOException {
     final String tempTrimmed = makeTempFile("doTrimSilence");
 
-   // logger.info("doTrimSilence running sox on " + new File(pathToAudioFile).getAbsolutePath() + " to produce " + new File(tempTrimmed).getAbsolutePath());
+    // logger.info("doTrimSilence running sox on " + new File(pathToAudioFile).getAbsolutePath() + " to produce " + new File(tempTrimmed).getAbsolutePath());
     String trimBefore = "0.30";// + trimMillisBefore;
-    String trimAfter  = "0.30";// + trimMillisAfter;
+    String trimAfter = "0.30";// + trimMillisAfter;
     ProcessBuilder soxFirst = new ProcessBuilder(
         getSox(),
         pathToAudioFile,
@@ -389,7 +396,7 @@ public class AudioConversion {
 
 //    logger.error("doTrimSilence trim silence on " + pathToAudioFile);
 //    String asRunnable = soxFirst.command().toString().replaceAll(",", " ");
- //   logger.info("doTrimSilence " + asRunnable);
+    //   logger.info("doTrimSilence " + asRunnable);
 
     if (!new ProcessRunner().runProcess(soxFirst)) {
       // logger.info("tempDir Exists " + exists);
