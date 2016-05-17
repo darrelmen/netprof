@@ -79,7 +79,9 @@ public class AnswerDAO extends DAO {
       long then = System.currentTimeMillis();
       long newid = addAnswerToTable(connection, answerInfo);
       long now = System.currentTimeMillis();
-      if (now - then > 100) logger.debug("took " + (now - then) + " millis to record answer.");
+      if (now - then > 100) {
+        logger.debug(getLanguage() + " : took " + (now - then) + " millis to record answer for " + answerInfo + " and was given id " + newid);
+      }
       return newid;
     } catch (Exception ee) {
       logger.error("addAnswer got " + ee, ee);
@@ -89,10 +91,17 @@ public class AnswerDAO extends DAO {
     return -1;
   }
 
-  public long addResultToTable(MonitorResult info) throws SQLException {
+  /**
+   * JUST for MergeSites.
+   * TODO : remove
+   * @param info
+   * @return
+   * @throws SQLException
+   */
+  long addResultToTable(MonitorResult info) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
 
-    logger.debug("addAnswerToTable : adding answer for " + info);
+    logger.debug("addResultToTable : adding answer for monitor result " + info);
 
     PreparedStatement statement = connection.prepareStatement("INSERT INTO " +
         ResultDAO.RESULTS +
@@ -121,8 +130,6 @@ public class AnswerDAO extends DAO {
         ") VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
 
     int i = 1;
-
- //   boolean isAudioAnswer = info.getAnswer() == null || info.getAnswer().length() == 0;
 
     statement.setInt(i++, (int)info.getUserid());
     statement.setString(i++, PLAN); // obsolete
@@ -147,8 +154,6 @@ public class AnswerDAO extends DAO {
     statement.setString(i++, info.getValidity());
     statement.setFloat(i++, info.getSnr());
 
-//    resultDAO.invalidateCachedResults();
-
     statement.executeUpdate();
 
     long newID = getGeneratedKey(statement);
@@ -159,6 +164,8 @@ public class AnswerDAO extends DAO {
   }
 
   /**
+   * Need to protect call to get generated keys.
+   *
    * Add a row to the table.
    * Each insert is marked with a timestamp.
    * This allows us to determine user completion rate.
@@ -169,69 +176,78 @@ public class AnswerDAO extends DAO {
    * @see #addAnswer
    */
   private long addAnswerToTable(Connection connection, AnswerInfo info) throws SQLException {
-    logger.debug("addAnswerToTable : adding answer for " + info);
 
-    PreparedStatement statement = connection.prepareStatement("INSERT INTO " +
-        ResultDAO.RESULTS +
-        "(" +
-        "userid," +
-        "plan," +
-        Database.EXID + "," +
-        "qid," +
-        Database.TIME + "," +
-        "answer," +
-        "valid," +
-        ResultDAO.FLQ + "," +
-        ResultDAO.SPOKEN + "," +
-        ResultDAO.AUDIO_TYPE + "," +
-        ResultDAO.DURATION + "," +
-        ResultDAO.CORRECT + "," +
-        ResultDAO.PRON_SCORE + "," +
-        ResultDAO.DEVICE_TYPE + "," +
-        ResultDAO.DEVICE + "," +
-        ResultDAO.SCORE_JSON + "," +
-        ResultDAO.WITH_FLASH + "," +
-        ResultDAO.PROCESS_DUR + "," +
-        ResultDAO.ROUND_TRIP_DUR + "," +
-        ResultDAO.VALIDITY + "," +
-        ResultDAO.SNR +
-        ") VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+    long newID = -1;
+    synchronized (this) {
+      long then = System.currentTimeMillis();
+      logger.debug(getLanguage() + " : START : addAnswerToTable : adding answer for " + info);
+      PreparedStatement statement = connection.prepareStatement("INSERT INTO " +
+          ResultDAO.RESULTS +
+          "(" +
+          "userid," +
+          "plan," +
+          Database.EXID + "," +
+          "qid," +
+          Database.TIME + "," +
+          "answer," +
+          "valid," +
+          ResultDAO.FLQ + "," +
+          ResultDAO.SPOKEN + "," +
+          ResultDAO.AUDIO_TYPE + "," +
+          ResultDAO.DURATION + "," +
+          ResultDAO.CORRECT + "," +
+          ResultDAO.PRON_SCORE + "," +
+          ResultDAO.DEVICE_TYPE + "," +
+          ResultDAO.DEVICE + "," +
+          ResultDAO.SCORE_JSON + "," +
+          ResultDAO.WITH_FLASH + "," +
+          ResultDAO.PROCESS_DUR + "," +
+          ResultDAO.ROUND_TRIP_DUR + "," +
+          ResultDAO.VALIDITY + "," +
+          ResultDAO.SNR +
+          ") VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
 
-    int i = 1;
+      int i = 1;
 
-    boolean isAudioAnswer = info.getAnswer() == null || info.getAnswer().length() == 0;
-    String answerInserted = isAudioAnswer ? info.getAudioFile() : info.getAnswer();
+      boolean isAudioAnswer = info.getAnswer() == null || info.getAnswer().length() == 0;
+      String answerInserted = isAudioAnswer ? info.getAudioFile() : info.getAnswer();
 
-    statement.setInt(i++, info.getUserid());
-    statement.setString(i++, PLAN); // obsolete
-    statement.setString(i++, copyStringChar(info.getId()));
-    statement.setInt(i++, info.getQuestionID());
-    statement.setTimestamp(i++, new Timestamp(System.currentTimeMillis()));
-    statement.setString(i++, copyStringChar(answerInserted));
-    statement.setBoolean(i++, info.isValid());
-    statement.setBoolean(i++, true); // obsolete
-    statement.setBoolean(i++, true); // obsolete
-    statement.setString(i++, copyStringChar(info.getAudioType()));
-    statement.setInt(i++, (int) info.getDurationInMillis());
+      statement.setInt(i++, info.getUserid());
+      statement.setString(i++, PLAN); // obsolete
+      statement.setString(i++, copyStringChar(info.getId()));
+      statement.setInt(i++, info.getQuestionID());
+      statement.setTimestamp(i++, new Timestamp(System.currentTimeMillis()));
+      statement.setString(i++, copyStringChar(answerInserted));
+      statement.setBoolean(i++, info.isValid());
+      statement.setBoolean(i++, true); // obsolete
+      statement.setBoolean(i++, true); // obsolete
+      statement.setString(i++, copyStringChar(info.getAudioType()));
+      statement.setInt(i++, (int) info.getDurationInMillis());
 
-    statement.setBoolean(i++, info.isCorrect());
-    statement.setFloat(i++, info.getPronScore());
-    statement.setString(i++, info.getDeviceType());
-    statement.setString(i++, info.getDevice());
-    statement.setString(i++, info.getScoreJson());
-    statement.setBoolean(i++, info.isWithFlash());
-    statement.setInt(i++, info.getProcessDur());
-    statement.setInt(i++, info.getRoundTripDur()); // always zero?
-    statement.setString(i++, info.getValidity());
-    statement.setFloat(i++, (float) info.getSnr());
+      statement.setBoolean(i++, info.isCorrect());
+      statement.setFloat(i++, info.getPronScore());
+      statement.setString(i++, info.getDeviceType());
+      statement.setString(i++, info.getDevice());
+      statement.setString(i++, info.getScoreJson());
+      statement.setBoolean(i++, info.isWithFlash());
+      statement.setInt(i++, info.getProcessDur());
+      statement.setInt(i++, info.getRoundTripDur()); // always zero?
+      statement.setString(i++, info.getValidity());
+      statement.setFloat(i++, (float) info.getSnr());
+
+      statement.executeUpdate();
+
+      newID = getGeneratedKey(statement);
+
+      connection.commit();
+      statement.close();
+      long now = System.currentTimeMillis();
+
+      logger.debug(getLanguage() + " : END   : addAnswerToTable : adding answer for (" + (now-then)+
+          ") millis : " + info + " result id " + newID);
+    }
 
     resultDAO.invalidateCachedResults();
-
-    statement.executeUpdate();
-
-    long newID = getGeneratedKey(statement);
-
-    statement.close();
 
     return newID;
   }
