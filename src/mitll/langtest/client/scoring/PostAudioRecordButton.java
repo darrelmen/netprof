@@ -61,6 +61,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     controller.register(this, exerciseID);
     getElement().getStyle().setMarginTop(1, Style.Unit.PX);
     getElement().getStyle().setMarginBottom(1, Style.Unit.PX);
+    setWidth("68px");
   }
 
   public void setExercise(String exercise) {
@@ -107,7 +108,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
             long now = System.currentTimeMillis();
             long roundtrip = now - then;
 
-            logger.info("PostAudioRecordButton : Got audio answer " + result + " platform is " + getPlatform());
+          //  logger.info("PostAudioRecordButton : Got audio answer " + result + " platform is " + getPlatform());
 
             if (result.getReqid() != reqid) {
               logger.info("ignoring old response " + result);
