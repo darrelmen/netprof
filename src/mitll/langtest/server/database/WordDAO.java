@@ -105,7 +105,7 @@ public class WordDAO extends DAO {
    * @return id of new row
    * @see mitll.langtest.server.database.DatabaseImpl#recordWordAndPhoneInfo
    */
-  public long addWord(Word word) {
+  long addWord(Word word) {
     Connection connection = getConnection();
     try {
       // there are much better ways of doing this...
@@ -116,7 +116,6 @@ public class WordDAO extends DAO {
               WORD + "," +
               SEQ + "," +
               SCORE +
-              //"," +
               ") " +
               "VALUES(?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
       int i = 1;
