@@ -19,7 +19,6 @@ import mitll.langtest.shared.exercise.Shell;
  */
 public abstract class ExercisePanelFactory <T extends Shell, U extends Shell> {
   protected final LangTestDatabaseAsync service;
-  private final UserFeedback userFeedback;
   protected final ExerciseController controller;
   protected ListInterface<T> exerciseList;
 
@@ -34,7 +33,6 @@ public abstract class ExercisePanelFactory <T extends Shell, U extends Shell> {
                               final ExerciseController controller,
                               ListInterface<T> exerciseList) {
     this.service = service;
-    this.userFeedback = userFeedback;
     this.controller = controller;
     this.exerciseList = exerciseList;
   }
