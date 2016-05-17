@@ -1176,7 +1176,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    * @see mitll.langtest.client.scoring.ASRScoringAudioPanel#scoreAudio(String, long, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
    */
-  // JESS: this is entered for the normal stuff (I think this is alignment)
   public PretestScore getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence,
                                           int width, int height, boolean useScoreToColorBkg, String exerciseID) {
     return getPretestScore(reqid, resultID, testAudioFile, sentence, width, height, useScoreToColorBkg, exerciseID, false);
@@ -1205,9 +1204,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String wavEndingAudio = answer.replaceAll(".mp3", ".wav").replaceAll(".ogg", ".wav");
     Result cachedResult = db.getRefResultDAO().getResult(exerciseID, wavEndingAudio);
     if (cachedResult != null) {
-      logger.debug("getASRScoreForAudio Cache HIT  : align exercise id = " + exerciseID + " file " + answer + " found previous " + cachedResult.getUniqueID());
+      logger.debug("getPretestScore Cache HIT  : align exercise id = " + exerciseID + " file " + answer + " found previous " + cachedResult.getUniqueID());
     } else {
-      logger.debug("getASRScoreForAudio Cache MISS : align exercise id = " + exerciseID + " file " + answer);
+      logger.debug("getPretestScore Cache MISS : align exercise id = " + exerciseID + " file " + answer);
     }
 
     boolean usePhoneToDisplay1 = usePhoneToDisplay || serverProps.usePhoneToDisplay();
@@ -1217,7 +1216,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     long timeToRunHydec = System.currentTimeMillis() - then;
 
-    logger.debug("getASRScoreForAudio : scoring file " + testAudioFile + " for " +
+    logger.debug("getPretestScore : scoring file " + testAudioFile + " for " +
         " exid " + exerciseID +
         " sentence " + sentence.length() + " characters long : " +
         " score " + asrScoreForAudio.getHydecScore() +
