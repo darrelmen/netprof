@@ -195,11 +195,11 @@ public class ReviewedDAO extends DAO {
    * @see mitll.langtest.server.database.custom.UserListManager#setStateOnExercises()
    * @param skipUnset
    */
-  public Map<String, StateCreator> getExerciseToState(boolean skipUnset) {
+  Map<String, StateCreator> getExerciseToState(boolean skipUnset) {
     return getExerciseToState(skipUnset, false, "");
   }
 
-  public STATE getCurrentState(String exerciseID) {
+  STATE getCurrentState(String exerciseID) {
     Map<String, StateCreator> exerciseToState = getExerciseToState(false, true, exerciseID);
     if (exerciseToState.isEmpty()) return STATE.UNSET;
     else return exerciseToState.values().iterator().next().getState();
@@ -261,7 +261,7 @@ public class ReviewedDAO extends DAO {
     return ids;
   }
 
-  public static class StateCreator {
+  static class StateCreator {
     private STATE state;
     private long creatorID;
     private long when;
