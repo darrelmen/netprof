@@ -219,7 +219,7 @@ public abstract class Scoring {
     String phoneLabFile = prependDeploy(audioFileNoSuffix + ".phones.lab");
     Map<ImageType, String> typeToFile = new HashMap<>();
     if (new File(phoneLabFile).exists()) {
-      logger.info("using " + phoneLabFile);
+//      logger.info("using " + phoneLabFile);
       typeToFile.put(ImageType.PHONE_TRANSCRIPT, phoneLabFile);
       foundATranscript = true;
     } else {
@@ -228,8 +228,7 @@ public abstract class Scoring {
 
     String wordLabFile = prependDeploy(audioFileNoSuffix + ".words.lab");
     if (new File(wordLabFile).exists()) {
-      logger.info("using " + wordLabFile);
-
+//      logger.info("using " + wordLabFile);
       typeToFile.put(ImageType.WORD_TRANSCRIPT, wordLabFile);
       foundATranscript = true;
     } else {
