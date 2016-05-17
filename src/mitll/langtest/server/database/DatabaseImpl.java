@@ -6,6 +6,7 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.*;
 import mitll.langtest.server.amas.FileExerciseDAO;
+import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.DecodeAlignOutput;
 import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.database.analysis.Analysis;
@@ -29,6 +30,7 @@ import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.monitoring.Session;
+import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 import net.sf.json.JSON;
@@ -1442,6 +1444,11 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     }
   }
 
+  /**
+   * @see LangTestDatabaseImpl#getPretestScore(int, long, String, String, int, int, boolean, String, boolean)
+   * @param resultID
+   * @param asrScoreForAudio
+   */
   public void rememberScore(long resultID, PretestScore asrScoreForAudio) {
     getAnswerDAO().changeAnswer(resultID, asrScoreForAudio.getHydecScore(), asrScoreForAudio.getProcessDur(), asrScoreForAudio.getJson());
     recordWordAndPhoneInfo(resultID, asrScoreForAudio);
@@ -1450,22 +1457,26 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   /**
    * @param answer
    * @param answerID
-   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswerDecoding
+   * @see mitll.langtest.server.audio.AudioFileHelper#recordInResults(AudioContext, AnswerInfo.RecordingInfo, AudioCheck.ValidityAndDur, AudioAnswer)
    */
   public void recordWordAndPhoneInfo(AudioAnswer answer, long answerID) {
     PretestScore pretestScore = answer.getPretestScore();
     if (pretestScore == null) {
-      logger.debug("recordWordAndPhoneInfo pretest score is null for " + answer + " and " + answerID);
+      logger.debug(getLanguage() + " : recordWordAndPhoneInfo pretest score is null for " + answer + " and result id " + answerID);
     } else {
-      logger.debug("recordWordAndPhoneInfo pretest score is " + pretestScore + " for " + answer + " and " + answerID);
+      logger.debug(getLanguage() + " : recordWordAndPhoneInfo pretest score is " + pretestScore + " for " + answer + " and result id " + answerID);
     }
     recordWordAndPhoneInfo(answerID, pretestScore);
   }
 
+  /**
+   * @see #rememberScore(long, PretestScore)
+   * @param answerID
+   * @param pretestScore
+   */
   private void recordWordAndPhoneInfo(long answerID, PretestScore pretestScore) {
     if (pretestScore != null) {
-      Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = pretestScore.getsTypeToEndTimes();
-      recordWordAndPhoneInfo(answerID, netPronImageTypeListMap);
+      recordWordAndPhoneInfo(answerID, pretestScore.getsTypeToEndTimes());
     }
   }
 
@@ -1473,6 +1484,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @param answerID
    * @param netPronImageTypeListMap
    * @see #putBackWordAndPhone()
+   * @see #recordWordAndPhoneInfo(long, PretestScore)
    */
   private void recordWordAndPhoneInfo(long answerID, Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap) {
     List<TranscriptSegment> words = netPronImageTypeListMap.get(NetPronImageType.WORD_TRANSCRIPT);
