@@ -45,8 +45,10 @@ import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
- * User: GO22670
- * Date: 12/9/13
+ * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
+ * @since 12/9/13
  * Time: 2:23 PM
  * To change this template use File | Settings | File Templates.
  */
@@ -56,7 +58,7 @@ public class UserListDAO extends DAO {
 
   private static final String NAME = "name";
 
-  public static final String USER_EXERCISE_LIST = "userexerciselist";
+  static final String USER_EXERCISE_LIST = "userexerciselist";
   private static final String ISPRIVATE = "isprivate";
   private final UserDAO userDAO;
   private UserExerciseDAO userExerciseDAO;
