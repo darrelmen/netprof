@@ -15,7 +15,10 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
- * Created by go22670 on 2/17/16.
+ * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
+ * @since 2/17/16.
  */
 public class AMASReaderTest {
   private static final Logger logger = Logger.getLogger(AMASReaderTest.class);
