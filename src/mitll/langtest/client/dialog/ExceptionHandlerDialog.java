@@ -37,17 +37,15 @@ import mitll.langtest.client.BrowserCheck;
 
 /**
  * Show javascript exceptions
- * User: GO22670
- * Date: 1/30/13
+ * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
+ * @since 1/30/13
  * Time: 7:10 PM
  * To change this template use File | Settings | File Templates.
  */
 public class ExceptionHandlerDialog {
   public ExceptionHandlerDialog(Throwable throwable) { showException(null, throwable);  }
-
-/*
-  public ExceptionHandlerDialog(){}
-*/
 
   private void showException(BrowserCheck browserCheck, Throwable throwable) {
     String text = getExceptionAsString(throwable);
