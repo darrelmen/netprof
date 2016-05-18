@@ -32,14 +32,10 @@
 
 package mitll.langtest.server.database;
 
-import mitll.langtest.client.LangTest;
-import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.HTTPClient;
 import mitll.langtest.server.database.custom.UserListManager;
-import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.rest.RestUserManagement;
-import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.UserAndTime;
 import net.sf.json.JSON;
@@ -52,7 +48,10 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
- * Created by go22670 on 9/18/15.
+ * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
+ * @since 9/18/15.
  */
 public class UserManagement {
   private static final Logger logger = Logger.getLogger(UserManagement.class);
