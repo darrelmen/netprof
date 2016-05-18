@@ -13,7 +13,10 @@ import java.io.File;
 import java.util.*;
 
 /**
- * Created by GO22670 on 1/30/14.
+ * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
+ * @since 1/30/14.
  */
 public class ReportAllTest extends BaseTest {
   private static final Logger logger = Logger.getLogger(ReportAllTest.class);
