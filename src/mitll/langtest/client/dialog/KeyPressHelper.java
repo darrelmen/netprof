@@ -45,8 +45,10 @@ import java.util.logging.Logger;
 
 /**
  * Created with IntelliJ IDEA.
- * User: GO22670
- * Date: 9/19/13
+ * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
+ * @since 9/19/13
  * Time: 3:19 PM
  * To change this template use File | Settings | File Templates.
  */
