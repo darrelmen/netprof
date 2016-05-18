@@ -1,107 +1,44 @@
 /*
- * Copyright © 2011-2015 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
+ * and their contractors; 2015. Other request for this document shall be referred
+ * to DLIFLC.
+ *
+ * WARNING: This document may contain technical data whose export is restricted
+ * by the Arms Export Control Act (AECA) or the Export Administration Act (EAA).
+ * Transfer of this data by any means to a non-US person who is not eligible to
+ * obtain export-controlled data is prohibited. By accepting this data, the consignee
+ * agrees to honor the requirements of the AECA and EAA. DESTRUCTION NOTICE: For
+ * unclassified, limited distribution documents, destroy by any method that will
+ * prevent disclosure of the contents or reconstruction of the document.
+ *
+ * This material is based upon work supported under Air Force Contract No.
+ * FA8721-05-C-0002 and/or FA8702-15-D-0001. Any opinions, findings, conclusions
+ * or recommendations expressed in this material are those of the author(s) and
+ * do not necessarily reflect the views of the U.S. Air Force.
+ *
+ * © 2015 Massachusetts Institute of Technology.
+ *
+ * The software/firmware is provided to you on an As-Is basis
+ *
+ * Delivered to the US Government with Unlimited Rights, as defined in DFARS
+ * Part 252.227-7013 or 7014 (Feb 2014). Notwithstanding any copyright notice,
+ * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
+ * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
+ * authorized by the U.S. Government may violate any copyrights that exist in this work.
+ *
+ *
  */
 
 package mitll.langtest.client.gauge;
 
 /**
- * Created by GO22670 on 5/21/2014.
+ * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
+ * @since 5/21/2014.
  */
 public class SimpleColumnChart {
-/*  private static final float HALF = 2f;
-  public static final float GRAPH_MAX = 100f;*/
-
-  /**
-   *
-   * @param showOnlyOneExercise
-   * @param scores
-   * @param height
-   * @return
-   */
-/*  public Widget getChart(boolean showOnlyOneExercise, List<Float> scores, int height) {
-    Chart chart = new Chart()
-      .setType(Series.Type.COLUMN)
-      .setChartTitleText("")
-      .setOption("/credits/enabled", false)
-      .setOption("/plotOptions/series/pointStart", 0)
-      .setOption("/legend/enabled", false).setHeight(height);
-
-    if (showOnlyOneExercise) chart.setBackgroundColor("#efefef");
-
-    String[] colors = new String[scores.size()];
-    for (int i = 0; i < scores.size(); i++) {
-      colors[i] = getColor(scores.get(i));
-    }
-    chart.setColors(colors);
-
-    for (int i = 0; i < scores.size(); i++) {
-      int round = Math.round(scores.get(i) * 100);
-      if (round == 0) round = 1;
-      Integer [] single = new Integer[1];
-      single[0] = round;
-      Series series = chart.createSeries()
-        .setName("Score #" +(i+1))
-        .setPoints(single);
-      chart.addSeries(series);
-    }
-*//*    chart.getYAxis().setPlotBands(
-      getAvgScore(classAvg*100,chart)
-    );*//*
-
-    chart.getYAxis().setAxisTitleText("")
-      .setMin(0)
-      .setMax(100).setLabels(new YAxisLabels().setEnabled(false)).setGridLineWidth(0);
-
-    chart.getXAxis().setAllowDecimals(false).setLabels(new XAxisLabels().setEnabled(false));
-    return chart;
-  }*/
-
-/*  private <T extends SetScore> PlotBand getAvgScore(float avg, Chart chart) {
-    return getPlotBand(avg, chart, "#2031ff", LeaderboardPlot.AVERAGE);
-  }*/
-
-/*  private PlotBand getPlotBand(float pbCorrect, Chart chart, String color, String labelText) {
-    Range range = getRange(pbCorrect);
-    PlotBand personalBest = chart.getYAxis().createPlotBand()
-      .setColor(color)
-      .setFrom(range.from)
-      .setTo(range.to);
-
-    personalBest.setLabel(new PlotBandLabel().setAlign(PlotBandLabel.Align.LEFT).setText(labelText));
-    return personalBest;
-  }
-
-  private Range getRange(float pbCorrect) {
-    float from = under(pbCorrect);
-    float to = over(pbCorrect);
-    if (pbCorrect > GRAPH_MAX - HALF) {
-      to = GRAPH_MAX;
-      from = GRAPH_MAX - 2 * HALF;
-    }
-    if (pbCorrect < HALF) {
-      to = 2 * HALF;
-      from = 0;
-    }
-    return new Range(from, to);
-  }
-
-  private float over(float pbCorrect) {
-    return pbCorrect + HALF;
-  }
-
-  private float under(float pbCorrect) {
-    return pbCorrect - HALF;
-  }
-
-  private static class Range {
-    float from, to;
-
-    public Range(float from, float to) {
-      this.from = from;
-      this.to = to;
-    }
-  }*/
-
   /**
    * This gives a smooth range red->yellow->green:
    *  on green 0->255 over score 0->0.5, 255 for > 0.5 and
