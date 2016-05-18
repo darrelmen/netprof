@@ -24,7 +24,10 @@ import java.util.*;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Created by GO22670 on 1/30/14.
+ * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
+ * @since 1/30/14.
  */
 public class ReportTest {
   //private static final String CHANGED = "changed";
