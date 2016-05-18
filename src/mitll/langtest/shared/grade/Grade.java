@@ -56,8 +56,10 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  *
  * Show question, with table of responses. Note which have been graded so far.
  *
- * User: go22670
- * Date: 5/18/12
+ * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
+ * @since 5/18/12
  * Time: 5:45 PM
  * To change this template use File | Settings | File Templates.
  */
