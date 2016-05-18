@@ -22,7 +22,10 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * Created by go22670 on 2/9/16.
+ * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
+ * @since 2/9/16.
  */
 public class JSONExportTest extends JsonExport {
   private static final Logger logger = Logger.getLogger(JSONExportTest.class);
