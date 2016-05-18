@@ -57,7 +57,11 @@ import java.util.logging.Logger;
 /**
  * Creates a dialog that lets you edit an item
  * <p>
- * Created by GO22670 on 3/28/2014. <T extends CommonShell & AudioRefExercise & CombinedMutableUserExercise, UL extends UserList<?>>
+ * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
+ * @since 3/28/2014.
+ * <T extends CommonShell & AudioRefExercise & CombinedMutableUserExercise, UL extends UserList<?>>
  */
 class EditableExerciseDialog extends NewUserExercise {
   private final Logger logger = Logger.getLogger("EditableExerciseDialog");
