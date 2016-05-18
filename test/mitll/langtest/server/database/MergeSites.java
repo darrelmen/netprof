@@ -15,7 +15,10 @@ import java.sql.SQLException;
 import java.util.*;
 
 /**
- * Created by GO22670 on 5/6/2014.
+ * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
+ * @since 5/6/2014.
  */
 public class MergeSites extends BaseTest {
   private static final Logger logger = Logger.getLogger(MergeSites.class);

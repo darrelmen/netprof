@@ -13,7 +13,10 @@ import java.io.File;
 import java.util.List;
 
 /**
- * Created by go22670 on 2/17/16.
+ * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
+ * @since 2/17/16.
  */
 public class AnalysisAgainTest {
   private static final Logger logger = Logger.getLogger(AnalysisAgainTest.class);
