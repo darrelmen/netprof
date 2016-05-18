@@ -23,8 +23,10 @@ import java.sql.SQLException;
  * H2 will return "new" connections that have already been closed.   <br></br>
  * * it's not a good idea to reuse one connection...?  <br></br>
  * <p>
- * User: go22670
- * Date: 5/14/12
+ * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
+ * @since 5/14/12
  * Time: 11:44 PM
  * To change this template use File | Settings | File Templates.
  */
