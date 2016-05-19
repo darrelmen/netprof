@@ -62,7 +62,7 @@ class WebAudioRecorder {
    *
    * The user can easily ignore the dialog by clicking away.
    */
-  public void tryWebAudio() {
+  void tryWebAudio() {
     if (!tried) {
       tried = true;
       logger.info("webAudioMicAvailable -- tryWebAudio!");
@@ -138,7 +138,8 @@ class WebAudioRecorder {
     console("webAudioMicNotAvailable!");
 
     webAudioMicAvailable = false;
-    FlashRecordPanelHeadless.micPermission.noRecordingMethodAvailable();
+//    FlashRecordPanelHeadless.micPermission.noRecordingMethodAvailable();
+    FlashRecordPanelHeadless.micPermission.noWebRTCAvailable();
   }
 
   public static void webAudioPermissionDenied() {
@@ -147,7 +148,8 @@ class WebAudioRecorder {
     console("webAudioPermissionDenied!");
 
     webAudioMicAvailable = false;
-   // FlashRecordPanelHeadless.micPermission.noRecordingMethodAvailable();
+    FlashRecordPanelHeadless.micPermission.noWebRTCAvailable();
+    // FlashRecordPanelHeadless.micPermission.noRecordingMethodAvailable();
   }
 
   /**

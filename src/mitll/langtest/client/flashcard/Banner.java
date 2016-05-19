@@ -343,13 +343,14 @@ public class Banner implements RequiresResize {
         try {
           String versionInfo = LangTest.VERSION_INFO;
           String releaseDate = props.getReleaseDate();
-          String s = FlashRecordPanelHeadless.usingWebRTC() ? " Browser recording" : "Flash recording";
+          String recordingInfo = FlashRecordPanelHeadless.usingWebRTC() ? " Browser recording" : "Flash recording";
           String model = props.getModelDir().replaceAll("models.", "");
           values = java.util.Arrays.asList(
               props.getLanguage(),
               versionInfo,
               releaseDate,
-              model, s
+              model,
+              recordingInfo
           );
         } catch (Exception e) {
           logger.warning("got " + e);
