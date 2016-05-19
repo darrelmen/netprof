@@ -599,7 +599,7 @@ public class InitialUI {
     banner.reflectPermissions(langTest.getPermissions());
   }
 
-  public void setSplash() {
+  void setSplash() {
     banner.setSubtitle();
   }
 }
