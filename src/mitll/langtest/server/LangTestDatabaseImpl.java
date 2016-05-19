@@ -875,7 +875,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (byID != null) {
       //logger.debug("returning (" + language + ") exercise " + byID.getID() + " : " + byID);
     } else {
-      logger.info(getLanguage() + " : couldn't find exercise with id '" + id + "'");
+      logger.warn(getLanguage() + " : couldn't find exercise with id '" + id + "'");
     }
     // return byID;
     // TODO : why doesn't this work?
