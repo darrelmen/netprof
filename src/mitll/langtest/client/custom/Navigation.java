@@ -102,7 +102,7 @@ public class Navigation implements RequiresResize, ShowTab {
   private static final String FIX_DEFECTS = "Fix Defects";
   private static final String CREATE = "Create a New List";
   private static final String BROWSE = "Browse Lists";
-  public static final String CLICKED_USER_LIST = "clickedUserList";
+  static final String CLICKED_USER_LIST = "clickedUserList";
   private static final String CLICKED_TAB = "clickedTab";
 
   private static final String LEARN = "learn";
@@ -260,6 +260,7 @@ public class Navigation implements RequiresResize, ShowTab {
 
   /**
    * Defines order of tabs...
+   * Show student analysis by default.
    *
    * @return
    * @see #showInitialState()
@@ -275,8 +276,9 @@ public class Navigation implements RequiresResize, ShowTab {
     addPracticeTab();
     addStudyLists();
 
+    addAnalysis();
+
     if (controller.getProps().useAnalysis()) {
-      addAnalysis();
       if (userManager.isTeacher()) {
         addTeacherAnalysis();
       }
