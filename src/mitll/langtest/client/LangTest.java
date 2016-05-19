@@ -142,6 +142,8 @@ import java.util.logging.Logger;
  * - report updates
  * 1.3.3
  * - fixes for generated keys bug on result table
+ * 1.3.4
+ * - student analysis tab visible, html5 audio preferred
  *
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -151,7 +153,7 @@ import java.util.logging.Logger;
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private final Logger logger = Logger.getLogger("LangTest");
 
-  public static final String VERSION_INFO = "1.3.3";
+  public static final String VERSION_INFO = "1.3.4";
 
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
@@ -313,7 +315,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private void getImage(int reqid, final String key, String path, final String type, int toUse, int height,
                         String exerciseID, final AsyncCallback<ImageResponse> client) {
-
   //  ImageResponse ifPresent = imageCache.getIfPresent(key);
     ImageResponse ifPresent = imageCache.get(key);
     if (ifPresent != null) {
@@ -346,7 +347,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         .expireAfterWrite(7, TimeUnit.DAYS)
         .build();
   */
-  Map<String, ImageResponse> imageCache = lruCache(MAX_CACHE_SIZE);
+  private Map<String, ImageResponse> imageCache = lruCache(MAX_CACHE_SIZE);
 
   private static <K, V> Map<K, V> lruCache(final int maxSize) {
     return new LinkedHashMap<K, V>(maxSize * 4 / 3, 0.75f, true) {
@@ -404,7 +405,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     initialUI.populateRootPanel();
   }
 
-
   /**
    * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser(int)
    * @see mitll.langtest.client.user.UserManager#login()
@@ -450,7 +450,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private boolean usingWebRTC() {
-    return flashRecordPanel.usingWebRTC();
+    return FlashRecordPanelHeadless.usingWebRTC();
   }
 
   private void setupSoundManager() {
@@ -540,6 +540,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         initialUI.setSplash();
         isMicConnected = false;
       }
+
+      @Override
+      public void noWebRTCAvailable() {
+        flashRecordPanel.initFlash();
+      }
     });
   }
 
@@ -580,9 +585,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       checkLogin();
     } else {
       logger.info("checkInitFlash : initFlash - no permission yet");
-      if (flashRecordPanel.initFlash()) {
+      flashRecordPanel.tryWebAudio();
+
+/*      if (flashRecordPanel.initFlash()) {
         checkLogin();
-      }
+      }*/
     }
   }
 
