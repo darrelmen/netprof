@@ -5,6 +5,7 @@ import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.instrumentation.SlimEvent;
 import mitll.npdata.dao.EventDAOExample;
 import mitll.npdata.dao.SlickEvent;
+import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.List;
  * Created by go22670 on 5/13/16.
  */
 public class SlickEventImpl implements IEventDAO {
+  private static final Logger logger = Logger.getLogger(SlickEventImpl.class);
   EventDAOExample eventDAOExample;
 
   public SlickEventImpl(String language) {
@@ -22,7 +24,11 @@ public class SlickEventImpl implements IEventDAO {
   public void copyTableOnlyOnce(IEventDAO other) {
     if (getNumRows().intValue() == 0) {
       List<SlickEvent> copy = new ArrayList<>();
-      for (Event event : other.getAll()) copy.add(getSlickEvent(event));
+      List<Event> all = other.getAll();
+
+      logger.info("copyTableOnlyOnce " + all.size() + " events ");
+
+      for (Event event : all) copy.add(getSlickEvent(event));
       eventDAOExample.addBulk(copy);
     }
   }
@@ -37,16 +43,18 @@ public class SlickEventImpl implements IEventDAO {
     return new SlickEvent(-1,
         event.getCreatorID(),
         event.getExerciseID(),
-        event.getContext(),
+        event.getContext() == null ? "":event.getContext(),
         event.getWidgetID(),
         event.getWidgetType(),
-        event.getDevice(),
+        event.getDevice() == null ? "" :event.getDevice(),
         event.getTimestamp());
   }
 
   @Override
   public List<Event> getAll() {
     List<SlickEvent> all = eventDAOExample.getAll();
+
+    logger.info("getting " + all.size() + " events to ");
     List<Event> copy = new ArrayList<>();
     for (SlickEvent event : all) {
       copy.add(new Event(

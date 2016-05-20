@@ -24,10 +24,14 @@ public class BaseTest {
   private static final Logger logger = Logger.getLogger(BaseTest.class);
 
   protected static DatabaseImpl<CommonExercise> getDatabase(String config) {
+
     File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
     String parent = file.getParent();
     String name = file.getName();
 
+    parent = file.getParentFile().getAbsolutePath();
+
+    logger.info("path is "+ parent);
     ServerProperties serverProps = new ServerProperties(parent, name);
     DatabaseImpl<CommonExercise> database = new DatabaseImpl<CommonExercise>(parent, name, serverProps.getH2Database(), serverProps, new PathHelper("war"), false, null);
     database.setInstallPath("war", parent + File.separator + database.getServerProps().getLessonPlan(),
