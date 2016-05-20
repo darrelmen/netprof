@@ -240,13 +240,13 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
     float wavFileLengthInSeconds = result.getWavFileLengthInSeconds();//transcriptSegments.get(transcriptSegments.size() - 1);
     float horizOffset = (float) eventXPos / (float) phones.getImage().getWidth();
     float mouseClickTime = wavFileLengthInSeconds * horizOffset;
-    if (debug) System.out.println("got client at " + eventXPos + " or " + horizOffset + " or time " + mouseClickTime +
-      " duration " + wavFileLengthInSeconds + " secs or " + wavFileLengthInSeconds * 1000 + " millis");
+//    if (debug) System.out.println("got client at " + eventXPos + " or " + horizOffset + " or time " + mouseClickTime +
+//      " duration " + wavFileLengthInSeconds + " secs or " + wavFileLengthInSeconds * 1000 + " millis");
 
     for (TranscriptSegment segment : transcriptSegments) {
      // TranscriptSegment next = transcriptSegments.get(Math.min(transcriptSegments.size() - 1, index + 1));
       if (mouseClickTime > segment.getStart() && mouseClickTime <= segment.getEnd()) {
-        if (debug) System.out.println("\t playing " + segment);
+//        if (debug) System.out.println("\t playing " + segment);
      //   result.getsTypeToEndTimes();
         onClick.onSegmentClick(segment);
         break;
