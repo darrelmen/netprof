@@ -735,7 +735,8 @@ public class AnalysisPlot extends TimeSeriesPlot {
           for (CommonShell shell : commonShells) idToEx.put(shell.getID(), shell);
         }
       });
-    } else {
+    }
+    else {
       //logger.info("rawBest is empty?");
     }
   }
@@ -744,7 +745,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
    * @return
    * @see WordContainer#getShell(String)
    */
-  public Map<String, CommonShell> getIdToEx() {
+  Map<String, CommonShell> getIdToEx() {
     return idToEx;
   }
 
@@ -753,7 +754,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
    * @return
    * @see AnalysisTab#getClickHandler(AnalysisTab.TIME_HORIZON)
    */
-  public long setTimeHorizon(AnalysisTab.TIME_HORIZON timeHorizon) {
+  long setTimeHorizon(AnalysisTab.TIME_HORIZON timeHorizon) {
     this.timeHorizon = timeHorizon;
     Long x = goToLast(timeHorizon);
     if (x != null) return x;
