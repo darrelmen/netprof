@@ -495,9 +495,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see mitll.langtest.client.recorder.FlashRecordPanelHeadless#micConnected()
    */
   private void makeFlashContainer() {
-    flashRecordPanel = new FlashRecordPanelHeadless();
 
-    FlashRecordPanelHeadless.setMicPermission(new MicPermission() {
+    MicPermission micPermission = new MicPermission() {
+      /**
+       * @see mitll.langtest.client.recorder.WebAudioRecorder
+       */
       public void gotPermission() {
         logger.info("makeFlashContainer - got permission!");
         hideFlash();
@@ -505,14 +507,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       }
 
       /**
-       * @see mitll.langtest.client.recorder.FlashRecordPanelHeadless#noMicrophoneFound()
+       * @see FlashRecordPanelHeadless#noMicrophoneFound()
        */
       public void noMicAvailable() {
         if (!showingPlugInNotice) {
           showingPlugInNotice = true;
           List<String> messages = Arrays.asList("If you want to record audio, ",
               "plug in or enable your mic and reload the page.");
-          new ModalInfoDialog("Plug in microphone", messages, Collections.emptyList() ,
+          new ModalInfoDialog("Plug in microphone", messages, Collections.emptyList(),
               null,
               new HiddenHandler() {
                 @Override
@@ -527,6 +529,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         }
       }
 
+      /**
+       * @see
+       */
       public void noRecordingMethodAvailable() {
         logger.info(" : makeFlashContainer - no way to record");
         hideFlash();
@@ -545,7 +550,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       public void noWebRTCAvailable() {
         flashRecordPanel.initFlash();
       }
-    });
+    };
+    flashRecordPanel = new FlashRecordPanelHeadless(micPermission);
+//    FlashRecordPanelHeadless.setMicPermission(micPermission);
   }
 
   private void hideFlash() {
