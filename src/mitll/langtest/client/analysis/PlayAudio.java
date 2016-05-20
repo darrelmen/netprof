@@ -76,30 +76,37 @@ class PlayAudio {
   }
 
   /**
+   * @see AnalysisPlot#getSeriesClickEventHandler
    * @param id
    * @param userid
    */
   public void playLast(String id, long userid) {
-    service.getExercise(id, userid, false, new AsyncCallback<CommonExercise>() {
+    service.getExercise(id+"DUDE", userid, false, new AsyncCallback<CommonExercise>() {
       @Override
       public void onFailure(Throwable throwable) {
       }
 
       @Override
       public void onSuccess(CommonExercise commonExercise) {
-        List<CorrectAndScore> scores = commonExercise.getScores();
-        CorrectAndScore correctAndScore = scores.get(scores.size() - 1);
-        String refAudio = commonExercise.getRefAudio();
-
-        if (t != null) {
-         // logger.info("cancel timer");
-          t.cancel();
+        if (commonExercise == null) {
+          // if the exercise has been deleted...?
+          // show popup?
         }
-        if (refAudio != null) {
-          playLastThenRef(correctAndScore, refAudio);
-        } else {
-          playUserAudio(correctAndScore);
-       //   logger.info("no ref audio for " + commonExercise.getID());
+        else {
+          List<CorrectAndScore> scores = commonExercise.getScores();
+          CorrectAndScore correctAndScore = scores.get(scores.size() - 1);
+          String refAudio = commonExercise.getRefAudio();
+
+          if (t != null) {
+            // logger.info("cancel timer");
+            t.cancel();
+          }
+          if (refAudio != null) {
+            playLastThenRef(correctAndScore, refAudio);
+          } else {
+            playUserAudio(correctAndScore);
+            //   logger.info("no ref audio for " + commonExercise.getID());
+          }
         }
       }
     });
