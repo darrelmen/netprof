@@ -593,7 +593,7 @@ public class Navigation implements RequiresResize, ShowTab {
         Widget widget = content.getWidget(0);
 
         int tab = orig.equals(YOUR_LISTS) ? 0 : orig.equals(OTHERS_LISTS) ? 1 : orig.equals(CREATE) ? 2 : orig.equals(BROWSE) ? 3 : 0;
-        logger.info("selectPreviousTab Select tab " + tab + " orig " + orig);
+      //  logger.info("selectPreviousTab Select tab " + tab + " orig " + orig);
         listManager.showFirstUserListTab((TabPanel) widget, tab);
         if (tab == 0) {
           listManager.showMyLists(true, false);
