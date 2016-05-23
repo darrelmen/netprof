@@ -8,6 +8,8 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.database.excel.ResultDAOToExcel;
 import mitll.langtest.server.database.phone.PhoneDAO;
+import mitll.langtest.server.database.user.UserDAO;
+import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.MonitorResult;
 import mitll.langtest.shared.Result;
@@ -114,17 +116,8 @@ public class ResultDAO extends DAO {
    */
   public List<Result> getResults() {
     try {
-/*      synchronized (this) {
-        if (cachedResultsForQuery != null) {
-          return cachedResultsForQuery;
-        }
-      }*/
       String sql = "SELECT * FROM " + RESULTS;
       List<Result> resultsForQuery = getResultsSQL(sql);
-
-/*      synchronized (this) {
-        cachedResultsForQuery = resultsForQuery;
-      }*/
       return resultsForQuery;
     } catch (Exception ee) {
       logException(ee);
@@ -132,7 +125,7 @@ public class ResultDAO extends DAO {
     return new ArrayList<>();
   }
 
-  Collection<UserAndTime> getUserAndTimes() {
+  public Collection<UserAndTime> getUserAndTimes() {
     try {
       String sql = "SELECT " + USERID + "," + EXID + "," + Database.TIME + ", "
           + QID + " FROM " + RESULTS;
@@ -145,17 +138,8 @@ public class ResultDAO extends DAO {
 
   List<Result> getResultsForPractice() {
     try {
-/*      synchronized (this) {
-        if (cachedResultsForQuery != null) {
-          return cachedResultsForQuery;
-        }
-      }*/
       String sql = "SELECT * FROM " + RESULTS + " where " + AUDIO_TYPE + " is not null";
       List<Result> resultsForQuery = getResultsSQL(sql);
-
-/*      synchronized (this) {
-        cachedResultsForQuery = resultsForQuery;
-      }*/
       return resultsForQuery;
     } catch (Exception ee) {
       logException(ee);
@@ -231,8 +215,8 @@ public class ResultDAO extends DAO {
   }
 
   /**
-   * @see DatabaseImpl#getMonitorResults()
    * @return
+   * @see DatabaseImpl#getMonitorResults()
    */
   List<MonitorResult> getMonitorResults() {
     try {
@@ -819,7 +803,7 @@ public class ResultDAO extends DAO {
     long then = System.currentTimeMillis();
     while (rs.next()) {
       int uniqueID = rs.getInt(ID);
-      long userID = rs.getLong(USERID);
+      int userID = rs.getInt(USERID);
       String plan = rs.getString(PLAN);
       String exid = rs.getString(EXID);
       int qid = rs.getInt(QID);
@@ -857,7 +841,7 @@ public class ResultDAO extends DAO {
     ResultSet rs = statement.executeQuery();
     List<UserAndTime> results = new ArrayList<>();
     while (rs.next()) {
-      long userID = rs.getLong(USERID);
+      int userID = rs.getInt(USERID);
       String exid = rs.getString(EXID);
       Timestamp timestamp = rs.getTimestamp(Database.TIME);
 
@@ -1385,15 +1369,15 @@ public class ResultDAO extends DAO {
    * @param userDAO
    * @return
    */
-  public Map<Long, Map<String, Result>> getUserToResults(boolean isRegular, UserDAO userDAO) {
+  public Map<Integer, Map<String, Result>> getUserToResults(boolean isRegular, UserDAO userDAO) {
     String typeToUse = isRegular ? Result.AUDIO_TYPE_REGULAR : Result.AUDIO_TYPE_SLOW;
     return getUserToResults(typeToUse, userDAO);
   }
 
-  private Map<Long, Map<String, Result>> getUserToResults(String typeToUse, UserDAO userDAO) {
-    Map<Long, Map<String, Result>> userToResult = new HashMap<>();
+  private Map<Integer, Map<String, Result>> getUserToResults(String typeToUse, UserDAO userDAO) {
+    Map<Integer, Map<String, Result>> userToResult = new HashMap<>();
 
-    Map<Long, User> userMap = userDAO.getUserMap();
+    Map<Integer, User> userMap = userDAO.getUserMap();
 
     for (Result r : getResults()) {
       if (r.isValid() && r.getAudioType().equals(typeToUse)) {
@@ -1423,12 +1407,12 @@ public class ResultDAO extends DAO {
   }
 
   private static class MyUserAndTime implements UserAndTime {
-    private final long userID;
+    private final int userID;
     private final String exid;
     private final long time;
     private final int qid;
 
-    MyUserAndTime(long userID, String exid, long time, int qid) {
+    MyUserAndTime(int userID, String exid, long time, int qid) {
       this.userID = userID;
       this.exid = exid;
       this.time = time;
@@ -1436,7 +1420,7 @@ public class ResultDAO extends DAO {
     }
 
     @Override
-    public long getUserid() {
+    public int getUserid() {
       return userID;
     }
 

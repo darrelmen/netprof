@@ -6,9 +6,9 @@ package mitll.langtest.server.database.custom;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.UserDAO;
+import mitll.langtest.server.database.user.IUserDAO;
+import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.apache.log4j.Logger;
 
@@ -30,11 +30,11 @@ public class UserListDAO extends DAO {
 
   public static final String USER_EXERCISE_LIST = "userexerciselist";
   private static final String ISPRIVATE = "isprivate";
-  private final UserDAO userDAO;
+  private final IUserDAO userDAO;
   private UserExerciseDAO userExerciseDAO;
   private final UserListVisitorJoinDAO userListVisitorJoinDAO;
 
-  public UserListDAO(Database database, UserDAO userDAO) {
+  public UserListDAO(Database database, IUserDAO userDAO) {
     super(database);
     try {
       createUserListTable(database);
@@ -47,11 +47,10 @@ public class UserListDAO extends DAO {
 
   /**
    * @see UserListManager#addVisitor(long, long)
-   * @see mitll.langtest.client.custom.Navigation#addVisitor(mitll.langtest.shared.custom.UserList)
    * @param listid
    * @param userid
    */
-  public void addVisitor(long listid, long userid) {
+  void addVisitor(long listid, long userid) {
     userListVisitorJoinDAO.add(listid, userid);
   }
 
@@ -95,7 +94,7 @@ public class UserListDAO extends DAO {
    * <p/>
    * Uses return generated keys to get the user id
    *
-   * @see UserListManager#reallyCreateNewItem(long, mitll.langtest.shared.custom.UserExercise, String)
+   * @see UserListManager#reallyCreateNewItem
    */
   public void add(UserList userList) {
     long id = 0;
