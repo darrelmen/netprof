@@ -19,8 +19,6 @@ public class Event extends SlimEvent {
   private String widgetType;
   private String exerciseID;
   private String context;
-
-//  private String hitID;
   private String device;
 
   public Event() {
@@ -30,14 +28,14 @@ public class Event extends SlimEvent {
    * @param exerciseID
    * @param userID
    * @param timestamp
-   * @paramx hitID
    * @param device
+   * @paramx hitID
    * @see mitll.langtest.server.database.custom.AnnotationDAO#getUserAnnotations(String)
    */
   public Event(String widgetID, String widgetType, String exerciseID, String context,
                long userID, long timestamp,
                String device) {
-    super(userID,timestamp);
+    super(userID, timestamp);
     this.widgetID = widgetID;
     this.widgetType = widgetType;
     this.exerciseID = exerciseID;
@@ -47,10 +45,6 @@ public class Event extends SlimEvent {
 
   public Long getId() {
     return id;
-  }
-
-  private void setId(Long id) {
-    this.id = id;
   }
 
   public String getWidgetID() {
@@ -65,16 +59,6 @@ public class Event extends SlimEvent {
     return context;
   }
 
-/*
-  public Date getSQLTimestamp() {
-    return new Date(timestamp);
-  }
-
-  private void setSQLTimestamp(Date timestamp) {
-    this.timestamp = timestamp.getTime();
-  }
-
-*/
   public String getDevice() {
     return device;
   }
@@ -83,54 +67,17 @@ public class Event extends SlimEvent {
     return widgetType;
   }
 
-/*
-  public String getHitID() {
-    return hitID;
-  }
-*/
-
   public String toString() {
     long timestamp = getTimestamp();
     if (timestamp == -1) timestamp = System.currentTimeMillis();
     return "Event on " + getWidgetID() + " by " + getUserID() + " at " + new Date(timestamp) + " info " +
         getExerciseID() + "/" + getContext() +
-        //" hit " + getHitID() +
         " from " + device;
   }
-
-/*
-  private void setWidgetID(String widgetID) {
-    this.widgetID = widgetID;
-  }
-
-  private void setWidgetType(String widgetType) {
-    this.widgetType = widgetType;
-  }
-
-  private void setExerciseID(String exerciseID) {
-    this.exerciseID = exerciseID;
-  }
-*/
 
   private void setContext(String context) {
     this.context = context;
   }
-
-/*
-  public void setCreatorID(long creatorID) {
-    this.creatorID = creatorID;
-  }
-*/
-
-/*
-  private void setHitID(String hitID) {
-    this.hitID = hitID;
-  }
-
-  private void setDevice(String device) {
-    this.device = device;
-  }
-*/
 
   public void truncate() {
     String context = getContext();
