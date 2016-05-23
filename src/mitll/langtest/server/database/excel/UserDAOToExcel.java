@@ -1,5 +1,6 @@
 package mitll.langtest.server.database.excel;
 
+import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.User;
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
@@ -81,7 +82,7 @@ public class UserDAOToExcel {
   );
 
   /**
-   * @see mitll.langtest.server.database.UserDAO#toJSON(List)
+   * @see UserDAO#toJSON(List)
    * @param users
    * @return
    */

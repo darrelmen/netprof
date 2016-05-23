@@ -24,7 +24,8 @@ import mitll.langtest.server.audio.PathWriter;
 import mitll.langtest.server.autocrt.AutoCRT;
 import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.UserDAO;
+import mitll.langtest.server.database.user.BaseUserDAO;
+import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.decoder.RefResultDecoder;
@@ -450,7 +451,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       List<CommonExercise> copy = new ArrayList<CommonExercise>();
       for (CommonExercise exercise : exercises) {
         for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) {
-          if (audioAttribute.getUserid() == UserDAO.DEFAULT_USER_ID) {
+          if (audioAttribute.getUserid() == BaseUserDAO.DEFAULT_USER_ID) {
             copy.add(exercise);
             break;
           }
@@ -1584,7 +1585,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public void markGender(AudioAttribute attr, boolean isMale) {
-    db.getAudioDAO().addOrUpdateUser(isMale ? UserDAO.DEFAULT_MALE_ID : UserDAO.DEFAULT_FEMALE_ID, attr);
+    db.getAudioDAO().addOrUpdateUser(isMale ? BaseUserDAO.DEFAULT_MALE_ID : BaseUserDAO.DEFAULT_FEMALE_ID, attr);
 
     String exid = attr.getExid();
     CommonExercise byID = db.getCustomOrPredefExercise(exid);

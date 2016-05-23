@@ -5,6 +5,7 @@
 package mitll.langtest.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.server.database.user.UserDAO;
 
 import java.util.Collection;
 
@@ -60,14 +61,14 @@ public class User extends MiniUser {
    * @param enabled
    * @param permissions
    */
-  public User(long id, int age, int gender, int experience, String ipaddr, String password,
+  public User(int id, int age, int gender, int experience, String ipaddr, String password,
               boolean enabled, Collection<Permission> permissions) {
     this(id, age, gender, experience, ipaddr, password, NOT_SET, NOT_SET, NOT_SET, enabled, false, permissions,
         Kind.STUDENT, "", "", "", "", System.currentTimeMillis());
   }
 
   /**
-   * @see mitll.langtest.server.database.UserDAO#getUsers()
+   * @see UserDAO#getUsers()
    * @param id
    * @param age
    * @param gender
@@ -85,7 +86,7 @@ public class User extends MiniUser {
    * @param cdEnableKey
    * @param timestamp
    */
-  public User(long id, int age, int gender, int experience, String ipaddr, String passwordH,
+  public User(int id, int age, int gender, int experience, String ipaddr, String passwordH,
               String nativeLang, String dialect, String userID, boolean enabled, boolean isAdmin,
               Collection<Permission> permissions, Kind userKind, String emailHash, String device, String resetPassKey,
               String cdEnableKey, long timestamp) {

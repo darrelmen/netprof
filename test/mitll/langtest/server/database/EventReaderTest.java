@@ -10,7 +10,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
-import java.util.List;
 
 /**
  * Created by go22670 on 2/17/16.
@@ -48,10 +47,10 @@ public class EventReaderTest {
 
     //logger.info("is empty " +empty);
 
-    Number numRows = eventDAO.getNumRows();
+    Number numRows = eventDAO.getNumRows("spanish");
     logger.info("num rows " + numRows);
 
-    Event next = eventDAO.getAll().iterator().next();
+    Event next = eventDAO.getAll("spanish").iterator().next();
     logger.info("first event " + next);
 /*
     List<Event> all = eventDAO.getAllDevices();
