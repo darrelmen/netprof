@@ -104,7 +104,7 @@ public class EventDAO extends DAO implements IEventDAO {
    * @see mitll.langtest.server.database.DatabaseImpl#logEvent(String, String, String, String, long, String, String)
    */
   @Override
-  public boolean add(Event event) {
+  public boolean add(Event event, String language) {
     Connection connection = getConnection();
     boolean val = true;
     try {
@@ -161,7 +161,7 @@ public class EventDAO extends DAO implements IEventDAO {
   }
 
   @Override
-  public List<Event> getAll() {
+  public List<Event> getAll(String language) {
     try {
       return getEvents("SELECT * from " + EVENT);
     } catch (Exception ee) {
@@ -176,8 +176,9 @@ public class EventDAO extends DAO implements IEventDAO {
   /**
    * @return
    * @see mitll.langtest.server.database.Report#getReport
+   * @param language
    */
-  public List<SlickSlimEvent> getAllSlim() {
+  public List<SlickSlimEvent> getAllSlim(String language) {
     try {
       List<SlimEvent> slimEvents = getSlimEvents("SELECT " + CREATORID + "," + MODIFIED +
           " from " + EVENT);
@@ -194,11 +195,11 @@ public class EventDAO extends DAO implements IEventDAO {
   private List<SlickSlimEvent> getSlickSlimEvents(List<SlimEvent> slimEvents) {
     List<SlickSlimEvent> copy = new ArrayList<>();
     for (SlimEvent slimEvent : slimEvents)
-      copy.add(new SlickSlimEvent(slimEvent.getUserID()).setTimeWithLong(slimEvent.getTimestamp()));
+      copy.add(new SlickSlimEvent(slimEvent.getUserID(),slimEvent.getTimestamp()));
     return copy;
   }
 
-  public SlickSlimEvent getFirstSlim() {
+  public SlickSlimEvent getFirstSlim(String language) {
     try {
       List<SlimEvent> slimEvents = getSlimEvents("SELECT " + CREATORID + "," + MODIFIED +
           " from " + EVENT + " limit 1");
@@ -212,24 +213,12 @@ public class EventDAO extends DAO implements IEventDAO {
     return null;
   }
 
-
-/*  public List<Event> getAllDevices() {
-    try {
-      return getEvents("SELECT * from " + EVENT + WHERE_DEVICE);
-    } catch (Exception ee) {
-      logger.error("got " + ee, ee);
-      if (logAndNotify != null) {
-        logAndNotify.logAndNotifyServerException(ee);
-      }
-    }
-    return Collections.emptyList();
-  }*/
-
   /**
    * @return
    * @see mitll.langtest.server.database.Report#getEventsDevices
+   * @param language
    */
-  public List<SlickSlimEvent> getAllDevicesSlim() {
+  public List<SlickSlimEvent> getAllDevicesSlim(String language) {
     try {
       return getSlickSlimEvents(getSlimEvents("SELECT " + CREATORID + "," + MODIFIED + " from " + EVENT + WHERE_DEVICE));
     } catch (Exception ee) {
@@ -256,7 +245,7 @@ public class EventDAO extends DAO implements IEventDAO {
   }
 
   @Override
-  public Number getNumRows() {
+  public Number getNumRows(String language) {
     return getCount("EVENT");
   }
 
