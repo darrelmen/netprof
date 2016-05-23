@@ -125,7 +125,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         configDir, relativeConfigDir, dbName,
         serverProps,
         pathHelper, logAndNotify);
-  //  this.dbName = dbName;
+    //  this.dbName = dbName;
   }
 
   public DatabaseImpl(DatabaseConnection connection,
@@ -182,7 +182,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       try {
         String dbName = serverProps.getH2Database();
         logger.info("dbname " + dbName);
-       // sessionManagement = new SessionManagement(dbName);
+        // sessionManagement = new SessionManagement(dbName);
       } catch (Exception e) {
         logger.error("Making session management, got " + e, e);
       }
@@ -216,7 +216,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       eventDAO = heventDAO;
     }*/
 
-    SlickEventImpl slickEventDAO = new SlickEventImpl(getLanguage());
+    SlickEventImpl slickEventDAO = new SlickEventImpl();
     oneTimeDataCopy(slickEventDAO);
     eventDAO = slickEventDAO;
 //    eventDAO = new EventDAO(this, defectDetector);
@@ -247,11 +247,11 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   }
 
   private void oneTimeDataCopy(SlickEventImpl slickEventDAO) {
-    Number numRows = slickEventDAO.getNumRows();
+    Number numRows = slickEventDAO.getNumRows(getLanguage());
     logger.info("got " + numRows + " rows from slick");
     if (numRows.intValue() == 0) {
       long defectDetector = userDAO.getDefectDetector();
-      slickEventDAO.copyTableOnlyOnce(new EventDAO(this, defectDetector));
+      slickEventDAO.copyTableOnlyOnce(new EventDAO(this, defectDetector), getLanguage());
     }
   }
 
@@ -937,7 +937,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
   public void logEvent(String exid, String context, long userid, String device) {
     if (context.length() > 100) context = context.substring(0, 100).replace("\n", " ");
-    logEvent(UNKNOWN, "server", exid, context, userid, UNKNOWN, device);
+    logEvent(UNKNOWN, "server", exid, context, userid, device);
   }
 
   /**
@@ -951,12 +951,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @see mitll.langtest.server.ScoreServlet#doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
   public boolean logEvent(String id, String widgetType, String exid, String context, long userid, String device) {
-    return logEvent(id, widgetType, exid, context, userid, UNKNOWN, device);
-  }
-
-  public boolean logEvent(String id, String widgetType, String exid, String context, long userid, String hitID,
-                          String device) {
-    return eventDAO != null && eventDAO.add(new Event(id, widgetType, exid, context, userid, -1, /*hitID,*/ device));
+    return eventDAO != null && eventDAO.add(new Event(id, widgetType, exid, context, userid, -1, device), getLanguage());
   }
 
   public void logAndNotify(Exception e) {
@@ -1578,7 +1573,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    */
   public Map<String, Float> getMaleFemaleProgress() {
     UserDAO userDAO = getUserDAO();
-    Map<Long, User> userMapMales   = userDAO.getUserMap(true);
+    Map<Long, User> userMapMales = userDAO.getUserMap(true);
     Map<Long, User> userMapFemales = userDAO.getUserMap(false);
 
     Collection<CommonExercise> exercises = getExercises();
