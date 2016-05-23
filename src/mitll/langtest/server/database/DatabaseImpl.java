@@ -217,11 +217,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     }*/
 
     SlickEventImpl slickEventDAO = new SlickEventImpl(getLanguage());
-    long defectDetector = userDAO.getDefectDetector();
-    if (slickEventDAO.getNumRows().intValue() == 0) {
-      slickEventDAO.copyTableOnlyOnce(new EventDAO(this, defectDetector));
-      eventDAO = slickEventDAO;
-    }
+    oneTimeDataCopy(slickEventDAO);
+    eventDAO = slickEventDAO;
 //    eventDAO = new EventDAO(this, defectDetector);
 
     Connection connection1 = getConnection();
@@ -247,6 +244,15 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
     long now = System.currentTimeMillis();
     if (now - then > 1000) logger.info("took " + (now - then) + " millis to put back word and phone");
+  }
+
+  private void oneTimeDataCopy(SlickEventImpl slickEventDAO) {
+    Number numRows = slickEventDAO.getNumRows();
+    logger.info("got " + numRows + " rows from slick");
+    if (numRows.intValue() == 0) {
+      long defectDetector = userDAO.getDefectDetector();
+      slickEventDAO.copyTableOnlyOnce(new EventDAO(this, defectDetector));
+    }
   }
 
   public ResultDAO getResultDAO() {
@@ -804,9 +810,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @return unmodifiable list of exercises
    * @see mitll.langtest.server.LangTestDatabaseImpl#init
    */
-  public void preloadExercises() {
+/*  public void preloadExercises() {
     getExercises();
-  }
+  }*/
 
   /**
    * @see LangTestDatabaseImpl#init()

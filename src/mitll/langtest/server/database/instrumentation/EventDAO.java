@@ -10,7 +10,7 @@ import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.instrumentation.SlimEvent;
-import net.sf.json.JSONObject;
+import mitll.npdata.dao.SlickSlimEvent;
 import org.apache.log4j.Logger;
 
 import java.sql.*;
@@ -124,7 +124,7 @@ public class EventDAO extends DAO implements IEventDAO {
               "VALUES(?,?,?,?,?,?,?,?);");
       int i = 1;
 
-      long creatorID = event.getCreatorID();
+      long creatorID = event.getUserID();
       boolean missingCreator = creatorID == -1;
       if (missingCreator) {
         event.setTimestamp(System.currentTimeMillis());
@@ -137,7 +137,7 @@ public class EventDAO extends DAO implements IEventDAO {
       statement.setString(i++, event.getContext());
       statement.setString(i++, event.getWidgetID());
       statement.setString(i++, event.getWidgetType());
-     // statement.setString(i++, event.getHitID());
+      // statement.setString(i++, event.getHitID());
       statement.setString(i++, event.getDevice());
       statement.setTimestamp(i++, new Timestamp(System.currentTimeMillis()));
 
@@ -174,13 +174,14 @@ public class EventDAO extends DAO implements IEventDAO {
   }
 
   /**
-   * @see mitll.langtest.server.database.Report#getReport
    * @return
+   * @see mitll.langtest.server.database.Report#getReport
    */
-  public List<SlimEvent> getAllSlim() {
+  public List<SlickSlimEvent> getAllSlim() {
     try {
-      return getSlimEvents("SELECT " +CREATORID+ "," +MODIFIED+
+      List<SlimEvent> slimEvents = getSlimEvents("SELECT " + CREATORID + "," + MODIFIED +
           " from " + EVENT);
+      return getSlickSlimEvents(slimEvents);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
       if (logAndNotify != null) {
@@ -190,11 +191,18 @@ public class EventDAO extends DAO implements IEventDAO {
     return Collections.emptyList();
   }
 
-  public SlimEvent getFirstSlim() {
+  private List<SlickSlimEvent> getSlickSlimEvents(List<SlimEvent> slimEvents) {
+    List<SlickSlimEvent> copy = new ArrayList<>();
+    for (SlimEvent slimEvent : slimEvents)
+      copy.add(new SlickSlimEvent(slimEvent.getUserID()).setTimeWithLong(slimEvent.getTimestamp()));
+    return copy;
+  }
+
+  public SlickSlimEvent getFirstSlim() {
     try {
       List<SlimEvent> slimEvents = getSlimEvents("SELECT " + CREATORID + "," + MODIFIED +
           " from " + EVENT + " limit 1");
-      return slimEvents.isEmpty() ? null : slimEvents.iterator().next();
+      return slimEvents.isEmpty() ? null : getSlickSlimEvents(slimEvents).iterator().next();
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
       if (logAndNotify != null) {
@@ -218,12 +226,12 @@ public class EventDAO extends DAO implements IEventDAO {
   }*/
 
   /**
-   * @see mitll.langtest.server.database.Report#getEventsDevices
    * @return
+   * @see mitll.langtest.server.database.Report#getEventsDevices
    */
-  public List<SlimEvent> getAllDevicesSlim() {
+  public List<SlickSlimEvent> getAllDevicesSlim() {
     try {
-      return getSlimEvents("SELECT " +CREATORID+ "," +MODIFIED+" from " + EVENT + WHERE_DEVICE);
+      return getSlickSlimEvents(getSlimEvents("SELECT " + CREATORID + "," + MODIFIED + " from " + EVENT + WHERE_DEVICE));
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
       if (logAndNotify != null) {
@@ -282,7 +290,7 @@ public class EventDAO extends DAO implements IEventDAO {
           rs.getString(CONTEXT),
           rs.getLong(CREATORID),
           rs.getTimestamp(MODIFIED).getTime(),
-        //  rs.getString(HITID),
+          //  rs.getString(HITID),
           rs.getString(DEVICE))
       );
     }

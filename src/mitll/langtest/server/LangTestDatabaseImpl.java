@@ -2437,91 +2437,32 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public void init() {
-    this.pathHelper = new PathHelper(getServletContext());
-    readProperties(getServletContext());
-    setInstallPath(db);
-    audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, this);
+    try {
+      this.pathHelper = new PathHelper(getServletContext());
+      readProperties(getServletContext());
+      setInstallPath(db);
+      audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, this);
+    } catch (Exception e) {
+      logger.error("Got " + e,e);
+    }
 
     try {
-      db.preloadExercises();
+      db.getExercises();
       db.preloadContextPractice();
       getUserListManager().setStateOnExercises();
       db.doReport(serverProps, getServletContext().getRealPath(""), getMailSupport(), pathHelper);
     } catch (Exception e) {
       logger.error("couldn't load database " + e, e);
     }
-    this.refResultDecoder = new RefResultDecoder(db, serverProps, pathHelper, audioFileHelper);
-    refResultDecoder.doRefDecode(getExercises(), relativeConfigDir);
-    if (serverProps.isAMAS()) audioFileHelper.makeAutoCRT(relativeConfigDir);
 
-    //checkForOgg(getExercises());
-  }
-
-  /**
-   * Make sure we have ogg versions of files.
-   *
-   * @paramx exercises
-   */
-/*  private void checkForOgg(final Collection<CommonExercise> exercises) {
-    new Thread(new Runnable() {
-      @Override
-      public void run() {
-        sleep(1000);
-        ensureMP3ForAll(exercises);
-      }
-    }).start();
-
-    new Thread(new Runnable() {
-      @Override
-      public void run() {
-        ensureMP3ForAnswers();
-      }
-    }).start();
-  }*/
-
-/*  private void ensureMP3ForAnswers() {
-    Map<Long, User> userMap = db.getUserDAO().getUserMap();
-    String installPath = pathHelper.getInstallPath();
-    List<Result> results = db.getResultDAO().getResults();
-    logger.info("checkForOgg checking " + results.size() + " results");
-    int c = 0;
-    for (Result r : results) {
-      if (stopOggCheck) break;
-
-      if (r.getAnswer().endsWith(".wav") || r.getAnswer().endsWith(".mp3")) {
-//        if (c++ < 10) logger.info("checking " + r.getExerciseID() + " : " + r.getAnswer());
-        CommonExercise byID = db.getCustomOrPredefExercise(r.getExerciseID());  // allow custom items to mask out non-custom items
-        User user = userMap.get(r.getUserid());
-        boolean isThere = ensureMP3(r.getAnswer(), byID == null ? "" : byID.getForeignLanguage(), user == null ? "unk" : user.getUserID(), installPath);
-        if (c++ < 10 && !isThere) logger.info("no file at " + r.getAnswer() + " for " + r.getExerciseID());
-        sleep(50);
-      }
-    }
-  }*/
-
-/*  private void ensureMP3ForAll(Collection<CommonExercise> exercises) {
-    String installPath = pathHelper.getInstallPath();
-    int c = 0;
-    for (CommonExercise ex : exercises) {
-      if (stopOggCheck) break;
-      // if (c++ < 10) logger.info("checking audio attr for " + ex.getID());
-
-      try {
-        ensureMP3s(ex, installPath);
-      } catch (Exception e) {
-        logger.info("got " + e.getMessage() + " for " + ex.getID());
-      }
-      sleep(50);
-    }
-  }*/
-  private void sleep(int millis) {
     try {
-      Thread.sleep(millis); // ???
-    } catch (InterruptedException e) {
-      e.printStackTrace();
+      this.refResultDecoder = new RefResultDecoder(db, serverProps, pathHelper, audioFileHelper);
+      refResultDecoder.doRefDecode(getExercises(), relativeConfigDir);
+      if (serverProps.isAMAS()) audioFileHelper.makeAutoCRT(relativeConfigDir);
+    } catch (Exception e) {
+      logger.error("Got " + e,e);
     }
   }
-
 
   private String getLanguage() {
     return serverProps.getLanguage();
