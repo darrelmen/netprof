@@ -1,5 +1,7 @@
 package mitll.langtest.server.database;
 
+import mitll.langtest.server.database.user.IUserDAO;
+import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.grade.Grade;
 import org.apache.log4j.Logger;
@@ -21,10 +23,10 @@ public class GradeDAO extends DAO {
 
   private static final String GRADES = "grades";
  // private final boolean debug = false;
-  private final UserDAO userDAO;
+  private final IUserDAO userDAO;
 //  private final ResultDAO resultDAO;
 
-  public GradeDAO(Database database, UserDAO userDAO, ResultDAO resultDAO) {
+  public GradeDAO(Database database, IUserDAO userDAO, ResultDAO resultDAO) {
     super(database);
     this.userDAO = userDAO;
  //   this.resultDAO = resultDAO;

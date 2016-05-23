@@ -35,7 +35,8 @@ import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayListener;
-import mitll.langtest.server.database.UserDAO;
+import mitll.langtest.server.database.user.BaseUserDAO;
+import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.MiniUser;
@@ -419,7 +420,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
         tabAndContent.addWidget(panelForAudio1.audioPanel);
         toResize.add(panelForAudio1.audioPanel);
 
-        if (user.getId() == UserDAO.DEFAULT_USER_ID) {    // add widgets to mark gender on default audio
+        if (user.getId() == BaseUserDAO.DEFAULT_USER_ID) {    // add widgets to mark gender on default audio
           addGenderAssignmentButtons(tabAndContent, audioAttributes, audio, panelForAudio);
         } else {
           tabAndContent.getContent().add(panelForAudio);
@@ -585,7 +586,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
   }
 
   private boolean isDefaultNoGenderUser(MiniUser user) {
-    return user.getId() == UserDAO.DEFAULT_USER_ID;
+    return user.getId() == BaseUserDAO.DEFAULT_USER_ID;
   }
 
   private Button makeGroupButton(ButtonGroup buttonGroup, String title) {
@@ -598,9 +599,9 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
 
   private String getUserTitle(int me, MiniUser user) {
     long id = user.getId();
-    if (id == UserDAO.DEFAULT_USER_ID)        return GoodwaveExercisePanel.DEFAULT_SPEAKER;
-    else if (id == UserDAO.DEFAULT_MALE_ID)   return "Default Male";
-    else if (id == UserDAO.DEFAULT_FEMALE_ID) return "Default Female";
+    if (id == BaseUserDAO.DEFAULT_USER_ID)        return GoodwaveExercisePanel.DEFAULT_SPEAKER;
+    else if (id == BaseUserDAO.DEFAULT_MALE_ID)   return "Default Male";
+    else if (id == BaseUserDAO.DEFAULT_FEMALE_ID) return "Default Female";
     else return
           (user.getId() == me) ? "by You (" + user.getUserID() + ")" : getUserTitle(user);
   }

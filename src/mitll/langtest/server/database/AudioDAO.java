@@ -7,12 +7,14 @@ package mitll.langtest.server.database;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
+import mitll.langtest.server.database.user.BaseUserDAO;
+import mitll.langtest.server.database.user.IUserDAO;
+import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.MutableAudioExercise;
 import org.apache.log4j.Logger;
 
@@ -58,7 +60,7 @@ public class AudioDAO extends DAO {
 
   private final boolean DEBUG = false;
   private final Connection connection;
-  private final UserDAO userDAO;
+  private final IUserDAO userDAO;
   private ExerciseDAO<CommonExercise> exerciseDAO;
 
   private static final boolean DEBUG_ATTACH = false;
@@ -68,7 +70,7 @@ public class AudioDAO extends DAO {
    * @param userDAO
    * @see DatabaseImpl#initializeDAOs(PathHelper)
    */
-  public AudioDAO(Database database, UserDAO userDAO) {
+  public AudioDAO(Database database, IUserDAO userDAO) {
     super(database);
     connection = database.getConnection(this.getClass().toString());
 
@@ -455,7 +457,7 @@ public class AudioDAO extends DAO {
     return new ArrayList<>();
   }
 
-  public Set<String> getRecordedRegularForUser(long userid) {
+  public Set<String> getRecordedRegularForUser(int userid) {
     return getAudioForGender(Collections.singleton(userid), REGULAR);
   }
 
@@ -466,8 +468,8 @@ public class AudioDAO extends DAO {
    * @return ids with both regular and slow speed recordings
    * @see mitll.langtest.server.LangTestDatabaseImpl#filterByUnrecorded
    */
-  public Set<String> getRecordedBy(long userid) {
-    Map<Long, User> userMap = getUserMap(userid);
+  public Set<String> getRecordedBy(int userid) {
+    Map<Integer, User> userMap = getUserMap(userid);
     //logger.debug("found " + (isMale ? " male " : " female ") + " users : " + userMap.keySet());
     // find set of users of same gender
     Set<String> validAudioAtReg = getAudioForGender(userMap, REGULAR);
@@ -481,17 +483,17 @@ public class AudioDAO extends DAO {
     return validAudioAtReg;
   }
 
-  private Map<Long, User> getUserMap(long userid) {
+  private Map<Integer, User> getUserMap(int userid) {
     User user = userDAO.getUserMap().get(userid);
     boolean isMale = (user != null && user.isMale());
     return userDAO.getUserMap(isMale);
   }
 
-  public Set<String> getWithContext(long userid) {
+  public Set<String> getWithContext(int userid) {
     return getWithContext(getUserMap(userid));
   }
 
-  private Set<String> getWithContext(Map<Long, User> userMap) {
+  private Set<String> getWithContext(Map<Integer, User> userMap) {
     return getAudioForGender(userMap.keySet(), CONTEXT_REGULAR);
   }
 
@@ -503,12 +505,12 @@ public class AudioDAO extends DAO {
    * @return
    * @see #getRecordedBy
    */
-  private Set<String> getAudioForGender(Map<Long, User> userMap, String audioSpeed) {
-    Set<Long> userIDs = userMap.keySet();
+  private Set<String> getAudioForGender(Map<Integer, User> userMap, String audioSpeed) {
+    Set<Integer> userIDs = userMap.keySet();
     return getAudioForGender(userIDs, audioSpeed);
   }
 
-  private Set<String> getAudioForGender(Set<Long> userIDs, String audioSpeed) {
+  private Set<String> getAudioForGender(Set<Integer> userIDs, String audioSpeed) {
     Set<String> results = new HashSet<>();
     try {
       Connection connection = database.getConnection(this.getClass().toString());
@@ -569,22 +571,22 @@ public class AudioDAO extends DAO {
    * @return
    * @see DatabaseImpl#getMaleFemaleProgress()
    */
-  public Map<String, Float> getRecordedReport(Map<Long, User> userMapMales,
-                                              Map<Long, User> userMapFemales,
+  public Map<String, Float> getRecordedReport(Map<Integer, User> userMapMales,
+                                              Map<Integer, User> userMapFemales,
                                               float total,
                                               Set<String> uniqueIDs,
                                               float totalContext) {
-    Set<Long> maleIDs = userMapMales.keySet();
+    Set<Integer> maleIDs = userMapMales.keySet();
     maleIDs = new HashSet<>(maleIDs);
-    maleIDs.add((long) UserDAO.DEFAULT_MALE_ID);
+    maleIDs.add(BaseUserDAO.DEFAULT_MALE_ID);
 
     float maleFast = getCountForGender(maleIDs, REGULAR, uniqueIDs);
     float maleSlow = getCountForGender(maleIDs, SLOW, uniqueIDs);
     float male = getCountBothSpeeds(maleIDs, uniqueIDs);
 
-    Set<Long> femaleIDs = userMapFemales.keySet();
+    Set<Integer> femaleIDs = userMapFemales.keySet();
     femaleIDs = new HashSet<>(femaleIDs);
-    femaleIDs.add((long) UserDAO.DEFAULT_FEMALE_ID);
+    femaleIDs.add(BaseUserDAO.DEFAULT_FEMALE_ID);
 
     float femaleFast = getCountForGender(femaleIDs, REGULAR, uniqueIDs);
     float femaleSlow = getCountForGender(femaleIDs, SLOW, uniqueIDs);
@@ -613,9 +615,9 @@ public class AudioDAO extends DAO {
    * @param userIds
    * @param audioSpeed
    * @return
-   * @see #getRecordedReport(Map, Map, float, Set)
+   * @see #getRecordedReport
    */
-  private int getCountForGender(Set<Long> userIds, String audioSpeed,
+  private int getCountForGender(Set<Integer> userIds, String audioSpeed,
                                 Set<String> uniqueIDs) {
     Set<String> idsOfRecordedExercises = new HashSet<>();
 
@@ -653,7 +655,7 @@ public class AudioDAO extends DAO {
     return idsOfRecordedExercises.size();
   }
 
-  private int getCountBothSpeeds(Set<Long> userIds,
+  private int getCountBothSpeeds(Set<Integer> userIds,
                                  Set<String> uniqueIDs) {
     Set<String> results = new HashSet<>();
 
@@ -695,9 +697,9 @@ public class AudioDAO extends DAO {
     return results.size();
   }
 
-  private String getInClause(Set<Long> longs) {
+  private String getInClause(Set<Integer> longs) {
     StringBuilder buffer = new StringBuilder();
-    for (long id : longs) {
+    for (int id : longs) {
       buffer.append(id).append(",");
     }
     return buffer.toString();
@@ -779,11 +781,11 @@ public class AudioDAO extends DAO {
   private List<AudioAttribute> getResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
     ResultSet rs = statement.executeQuery();
     List<AudioAttribute> results = new ArrayList<>();
-    Map<Long, MiniUser> miniUsers = userDAO.getMiniUsers();
+    Map<Integer, MiniUser> miniUsers = userDAO.getMiniUsers();
 
     while (rs.next()) {
       int uniqueID = rs.getInt(ID);
-      long userID = rs.getLong(USERID);
+      Integer userID = rs.getInt(USERID);
       String exid = rs.getString(Database.EXID);
       Timestamp timestamp = rs.getTimestamp(Database.TIME);
       String audioRef = rs.getString(AUDIO_REF);
@@ -817,12 +819,12 @@ public class AudioDAO extends DAO {
   }
 
   private MiniUser checkDefaultUser(long userID, MiniUser user) {
-    if (userID == UserDAO.DEFAULT_USER_ID) {
-      user = UserDAO.DEFAULT_USER;
-    } else if (userID == UserDAO.DEFAULT_MALE_ID) {
-      user = UserDAO.DEFAULT_MALE;
-    } else if (userID == UserDAO.DEFAULT_FEMALE_ID) {
-      user = UserDAO.DEFAULT_FEMALE;
+    if (userID == BaseUserDAO.DEFAULT_USER_ID) {
+      user = BaseUserDAO.DEFAULT_USER;
+    } else if (userID == BaseUserDAO.DEFAULT_MALE_ID) {
+      user = BaseUserDAO.DEFAULT_MALE;
+    } else if (userID == BaseUserDAO.DEFAULT_FEMALE_ID) {
+      user = BaseUserDAO.DEFAULT_FEMALE;
     }
     return user;
   }
@@ -1256,7 +1258,7 @@ public class AudioDAO extends DAO {
   }
 
   private boolean isBadUser(int userid) {
-    return userid < UserDAO.DEFAULT_FEMALE_ID;
+    return userid < BaseUserDAO.DEFAULT_FEMALE_ID;
   }
 
   /**

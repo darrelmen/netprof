@@ -5,6 +5,7 @@
 package mitll.langtest.shared.exercise;
 
 import mitll.langtest.server.database.ResultDAO;
+import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import net.sf.json.JSONObject;
 
@@ -112,7 +113,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   /**
    * @return
-   * @see mitll.langtest.server.database.UserDAO#DEFAULT_USER_ID
+   * @see UserDAO#DEFAULT_USER_ID
    */
   @Override
   public long getCreator() {
