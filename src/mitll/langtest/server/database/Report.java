@@ -6,14 +6,13 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.database.instrumentation.EventDAO;
 import mitll.langtest.server.database.instrumentation.IEventDAO;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.instrumentation.SlimEvent;
+import mitll.npdata.dao.SlickSlimEvent;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.uadetector.OperatingSystemFamily;
@@ -167,7 +166,7 @@ public class Report {
       try {
         String message = writeReportToFile(file, pathHelper, language, new JSONObject(), year);
         sendEmails(language, site, mailSupport, reportEmails, message);
-      } catch (IOException e) {
+      } catch (Exception e) {
         logger.error("got " + e, e);
       }
     }
@@ -263,16 +262,16 @@ public class Report {
     builder.append(getHeader());
     jsonObject.put("host", getHostInfo());
     JSONArray dataArray = new JSONArray();
-    List<SlimEvent> allSlim = eventDAO.getAllSlim();
-    List<SlimEvent> allDevicesSlim = eventDAO.getAllDevicesSlim();
+    List<SlickSlimEvent> allSlim = eventDAO.getAllSlim();
+    List<SlickSlimEvent> allDevicesSlim = eventDAO.getAllDevicesSlim();
     Map<String, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
     Collection<AudioAttribute> audioAttributes = audioDAO.getAudioAttributes();
     List<Result> results = resultDAO.getResults();
     List<Result> resultsDevices = resultDAO.getResultsDevices();
 
     if (year == -1) {
-      SlimEvent firstSlim = eventDAO.getFirstSlim();
-      long timestamp = firstSlim.getTimestamp();
+      SlickSlimEvent firstSlim = eventDAO.getFirstSlim();
+      long timestamp = firstSlim.modified();
       Calendar instance = Calendar.getInstance();
       instance.clear();
       instance.setTimeInMillis(timestamp);
@@ -293,8 +292,8 @@ public class Report {
   }
 
   private void addYear(JSONArray dataArray, StringBuilder builder, int i,
-                       List<SlimEvent> allSlim,
-                       List<SlimEvent> allDevicesSlim,
+                       List<SlickSlimEvent> allSlim,
+                       List<SlickSlimEvent> allDevicesSlim,
                        Map<String, List<AudioAttribute>> exToAudio,
                        Collection<AudioAttribute> audioAttributes,
                        List<Result> results, List<Result> resultsDevices) {
@@ -312,8 +311,8 @@ public class Report {
    * @see DatabaseImpl#getReport(int, JSONObject)
    */
   private String getReport(JSONObject jsonObject, int year,
-                           List<SlimEvent> allSlim,
-                           List<SlimEvent> allDevicesSlim,
+                           List<SlickSlimEvent> allSlim,
+                           List<SlickSlimEvent> allDevicesSlim,
                            Map<String, List<AudioAttribute>> exToAudio,
                            Collection<AudioAttribute> audioAttributes,
                            List<Result> results,
@@ -671,7 +670,7 @@ public class Report {
     }
   }
 
-  private void ensureYTDEntries3(int year, Map<Integer, Map<Long, Set<SlimEvent>>> monthToCount, Map<Integer, Map<Long, Set<SlimEvent>>> weekToCount) {
+  private void ensureYTDEntries3(int year, Map<Integer, Map<Long, Set<SlickSlimEvent>>> monthToCount, Map<Integer, Map<Long, Set<SlickSlimEvent>>> weekToCount) {
     Calendar today = getCalendarForYearOrNow();
     int thisMonth = today.get(Calendar.MONTH);
     int thisWeek = today.get(Calendar.WEEK_OF_YEAR);
@@ -1246,7 +1245,7 @@ public class Report {
    * @param jsonObject
    * @see #doReport
    */
-  private Set<Long> getEvents(StringBuilder builder, Set<Long> students, JSONObject jsonObject, int year, Collection<SlimEvent> all) {
+  private Set<Long> getEvents(StringBuilder builder, Set<Long> students, JSONObject jsonObject, int year, Collection<SlickSlimEvent> all) {
     return getEvents(builder, students, all, ACTIVE_USERS, TIME_ON_TASK, jsonObject, year);
   }
 
@@ -1254,10 +1253,10 @@ public class Report {
    * Look at the event table to determine the first moment a user did anything
    * There was a bug where the user timestamp was not set properly.
    */
-  private void setUserStart(Collection<SlimEvent> all) {
-    for (SlimEvent event : all) {
-      long creatorID = event.getCreatorID();
-      long timestamp = event.getTimestamp();
+  private void setUserStart(Collection<SlickSlimEvent> all) {
+    for (SlickSlimEvent event : all) {
+      long creatorID = event.userid();
+      long timestamp = event.modified();
       if (!userToStart.containsKey(creatorID) || timestamp < userToStart.get(creatorID)) {
         userToStart.put(creatorID, timestamp);
       }
@@ -1272,7 +1271,7 @@ public class Report {
    * @return
    * @see #getReport
    */
-  private Set<Long> getEventsDevices(StringBuilder builder, Set<Long> students, JSONObject jsonObject, int year, List<SlimEvent> allDevicesSlim) {
+  private Set<Long> getEventsDevices(StringBuilder builder, Set<Long> students, JSONObject jsonObject, int year, List<SlickSlimEvent> allDevicesSlim) {
     String activeUsers = ACTIVE_I_PAD;
     String tableLabel = "iPad/iPhone Time on Task";
     return getEvents(builder, students, allDevicesSlim, activeUsers, tableLabel, jsonObject, year);
@@ -1288,15 +1287,15 @@ public class Report {
    * @param year
    * @see #getEvents
    */
-  private Set<Long> getEvents(StringBuilder builder, Set<Long> students, Collection<SlimEvent> all, String activeUsers,
+  private Set<Long> getEvents(StringBuilder builder, Set<Long> students, Collection<SlickSlimEvent> all, String activeUsers,
                               String tableLabel, JSONObject jsonObject, int year) {
     Map<Integer, Set<Long>> monthToCount = new TreeMap<>();
     Map<Integer, Set<Long>> weekToCount = new TreeMap<>();
     ensureYTDEntries2(year, monthToCount, weekToCount);
 //    logger.info("now " + monthToCount.keySet() + " " + weekToCount.keySet());
 
-    Map<Integer, Map<Long, Set<SlimEvent>>> monthToCount2 = new TreeMap<>();
-    Map<Integer, Map<Long, Set<SlimEvent>>> weekToCount2 = new TreeMap<>();
+    Map<Integer, Map<Long, Set<SlickSlimEvent>>> monthToCount2 = new TreeMap<>();
+    Map<Integer, Map<Long, Set<SlickSlimEvent>>> weekToCount2 = new TreeMap<>();
     ensureYTDEntries3(year, monthToCount2, weekToCount2);
   //  logger.info("now " + monthToCount2.keySet() + " " + weekToCount2.keySet());
 
@@ -1307,9 +1306,9 @@ public class Report {
 
     Set<Long> users = new HashSet<>();
 
-    for (SlimEvent event : all) {
-      long creatorID = event.getCreatorID();
-      long timestamp = event.getTimestamp();
+    for (SlickSlimEvent event : all) {
+      long creatorID = event.userid();
+      long timestamp = event.modified();
       if (yearTimeRange.inYear(timestamp) && students.contains(creatorID)) {
         if (isValidUser(creatorID)) {
           users.add(creatorID);
@@ -1385,17 +1384,17 @@ public class Report {
   private void statsForEvent(Calendar calendar,
 
                              Map<Integer, Set<Long>> monthToCount,
-                             Map<Integer, Map<Long, Set<SlimEvent>>> monthToUserToEvents,
+                             Map<Integer, Map<Long, Set<SlickSlimEvent>>> monthToUserToEvents,
 
                              Map<Integer, Set<Long>> weekToCount,
-                             Map<Integer, Map<Long, Set<SlimEvent>>> weekToUserToEvents,
-                             SlimEvent event, long creatorID) {
-    calendar.setTimeInMillis(event.getTimestamp());
+                             Map<Integer, Map<Long, Set<SlickSlimEvent>>> weekToUserToEvents,
+                             SlickSlimEvent event, long creatorID) {
+    calendar.setTimeInMillis(event.modified());
 
     // months
     int month = calendar.get(Calendar.MONTH);
 
-    Map<Long, Set<SlimEvent>> userToEvents = monthToUserToEvents.get(month);
+    Map<Long, Set<SlickSlimEvent>> userToEvents = monthToUserToEvents.get(month);
     Set<Long> users = monthToCount.get(month);
     if (users == null) {
       monthToCount.put(month, users = new HashSet<>());
@@ -1407,7 +1406,7 @@ public class Report {
     }
 
     rememberEvent(event, creatorID, userToEvents);
-//    Set<SlimEvent> events;
+//    Set<SlickSlimEvent> events;
 
 
     // weeks
@@ -1430,8 +1429,8 @@ public class Report {
 
   }
 
-  private void rememberEvent(SlimEvent event, long creatorID, Map<Long, Set<SlimEvent>> userToEvents) {
-    Set<SlimEvent> events = userToEvents.get(creatorID);
+  private void rememberEvent(SlickSlimEvent event, long creatorID, Map<Long, Set<SlickSlimEvent>> userToEvents) {
+    Set<SlickSlimEvent> events = userToEvents.get(creatorID);
     if (events == null) userToEvents.put(creatorID, events = new TreeSet<>());
     events.add(event);
   }
@@ -1454,23 +1453,23 @@ public class Report {
    * @param monthToCount2
    * @return in minutes
    */
-  private Map<Integer, Long> getMonthToDur(Map<Integer, Map<Long, Set<SlimEvent>>> monthToCount2, int year) {
+  private Map<Integer, Long> getMonthToDur(Map<Integer, Map<Long, Set<SlickSlimEvent>>> monthToCount2, int year) {
     Map<Integer, Long> monthToDur = new TreeMap<>();
     ensureYTDEntries0(year, monthToDur);
-    for (Map.Entry<Integer, Map<Long, Set<SlimEvent>>> monthToUserToEvents : monthToCount2.entrySet()) {
+    for (Map.Entry<Integer, Map<Long, Set<SlickSlimEvent>>> monthToUserToEvents : monthToCount2.entrySet()) {
       Integer month = monthToUserToEvents.getKey();
       //logger.debug("month " + month);
 
-      Map<Long, Set<SlimEvent>> userToEvents = monthToUserToEvents.getValue();
+      Map<Long, Set<SlickSlimEvent>> userToEvents = monthToUserToEvents.getValue();
 
-      for (Map.Entry<Long, Set<SlimEvent>> eventsForUser : userToEvents.entrySet()) {
+      for (Map.Entry<Long, Set<SlickSlimEvent>> eventsForUser : userToEvents.entrySet()) {
 //        Long user = eventsForUser.getKey();
         long start = 0;
         long dur = 0;
         long last = 0;
         //      Event sevent = null, levent = null;
-        for (SlimEvent event : eventsForUser.getValue()) {
-          long now = event.getTimestamp();
+        for (SlickSlimEvent event : eventsForUser.getValue()) {
+          long now = event.modified();
           if (start == 0) {
             start = now;
             //        sevent = event;
@@ -1505,23 +1504,23 @@ public class Report {
    * @return
    * @see #getEvents(StringBuilder, Set, Collection, String, String, JSONObject, int)
    */
-  private Map<Integer, Long> getWeekToDur(Map<Integer, Map<Long, Set<SlimEvent>>> weekToCount, int year) {
+  private Map<Integer, Long> getWeekToDur(Map<Integer, Map<Long, Set<SlickSlimEvent>>> weekToCount, int year) {
     Map<Integer, Long> weekToDur = new TreeMap<>();
     ensureYTDEntriesW(year, weekToDur);
-    for (Map.Entry<Integer, Map<Long, Set<SlimEvent>>> weekToUserToEvents : weekToCount.entrySet()) {
+    for (Map.Entry<Integer, Map<Long, Set<SlickSlimEvent>>> weekToUserToEvents : weekToCount.entrySet()) {
       Integer week = weekToUserToEvents.getKey();
       //logger.debug("week " + week);
 
-      Map<Long, Set<SlimEvent>> userToEvents = weekToUserToEvents.getValue();
+      Map<Long, Set<SlickSlimEvent>> userToEvents = weekToUserToEvents.getValue();
 
-      for (Map.Entry<Long, Set<SlimEvent>> eventsForUser : userToEvents.entrySet()) {
+      for (Map.Entry<Long, Set<SlickSlimEvent>> eventsForUser : userToEvents.entrySet()) {
         //  Long user = eventsForUser.getKey();
         //logger.debug("\tuser " + user);
         long start = 0;
         long dur = 0;
         long last = 0;
-        for (SlimEvent event : eventsForUser.getValue()) {
-          long now = event.getTimestamp();
+        for (SlickSlimEvent event : eventsForUser.getValue()) {
+          long now = event.modified();
           if (start == 0) {
             start = now;
           } else if (now - last > 1000 * 300) {
