@@ -6,15 +6,11 @@ package mitll.langtest.server.database.custom;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.UserDAO;
+import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.ExerciseAnnotation;
 import org.apache.log4j.Logger;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.*;
 
 /**
@@ -42,7 +38,7 @@ public class AnnotationDAO extends DAO {
    * @param database
    * @param userDAO
    */
-  public AnnotationDAO(Database database, UserDAO userDAO) {
+  public AnnotationDAO(Database database, IUserDAO userDAO) {
     super(database);
     try {
       createTable(database);

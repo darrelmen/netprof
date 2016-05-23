@@ -79,14 +79,10 @@ public class ReviewedDAO extends DAO {
       tableName +
       " (" +
       "uniqueid IDENTITY, " +
-      CREATORID +
-      " LONG, " +
-      EXERCISEID +
-      " VARCHAR, " +
-      STATE_COL +
-      " VARCHAR, " +
-      MODIFIED +
-      " TIMESTAMP," +
+      CREATORID +" LONG, " +
+      EXERCISEID + " VARCHAR, " +
+      STATE_COL + " VARCHAR, " +
+      MODIFIED + " TIMESTAMP," +
       "FOREIGN KEY(" +
       CREATORID +
       ") REFERENCES " +
@@ -106,7 +102,6 @@ public class ReviewedDAO extends DAO {
     try {
       // there are much better ways of doing this...
 //      logger.info("add : exid " + exerciseID + " = " + state + " by " + creatorID);
-
       Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement = connection.prepareStatement(
         "INSERT INTO " + tableName +
@@ -147,11 +142,7 @@ public class ReviewedDAO extends DAO {
       int before = getCount();
       Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement = connection.prepareStatement(
-        "DELETE FROM " + tableName +
-          " WHERE " +
-          EXERCISEID +
-          "='" + exerciseID +
-          "'"
+        "DELETE FROM " + tableName + " WHERE " + EXERCISEID +"='" + exerciseID + "'"
       );
 
       int j = statement.executeUpdate();

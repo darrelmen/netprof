@@ -32,17 +32,15 @@
 
 package mitll.langtest.server.database;
 
-import mitll.langtest.client.user.Md5Hash;
 import mitll.langtest.server.PathHelper;
-import mitll.langtest.server.audio.AudioFileHelper;
-import mitll.langtest.shared.User;
-import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.server.database.instrumentation.IEventDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
-import net.sf.json.JSONObject;
+import mitll.langtest.shared.instrumentation.Event;
+import mitll.npdata.dao.SlickSlimEvent;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.List;
 
 /**
  * Created by GO22670 on 1/30/14.
@@ -53,7 +51,39 @@ public class PostgresTest extends BaseTest {
 
   @Test
   public void testSpanishEventCopy() {
-     getDatabase("spanish");
+    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
+
+    IEventDAO eventDAO = spanish.getEventDAO();
+    List<Event> all = eventDAO.getAll("spanish");
+    for (Event event : all.subList(0, getMin(all))) logger.info("Got " + event);
+
+    List<SlickSlimEvent> spanish1 = eventDAO.getAllSlim("spanish");
+    for (SlickSlimEvent event : spanish1.subList(0, getMin(spanish1))) logger.info("Got " + event);
+
+    List<SlickSlimEvent> allDevicesSlim = eventDAO.getAllDevicesSlim("spanish");
+    for (SlickSlimEvent event : allDevicesSlim.subList(0, getMin(allDevicesSlim))) logger.info("Got " + event);
+
+    eventDAO.addPlayedMarkings(1,spanish.getExercises().iterator().next());
+
+      logger.info("Got " + eventDAO.getFirstSlim("spanish"));
+
+  //  spanish.doReport(new PathHelper("war"));
+  }
+
+  int getMin(List<?> all) {
+    return Math.min(all.size(),10);
+  }
+
+  @Test
+  public void testEvent() {
+    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
+
+    IEventDAO eventDAO = spanish.getEventDAO();
+
+    eventDAO.add(new Event("123","button","2334","testing",1,System.currentTimeMillis(),"device"),"spanish");
+    logger.info("Got " + eventDAO.getFirstSlim("spanish"));
+
+    //  spanish.doReport(new PathHelper("war"));
   }
 
 }
