@@ -13,5 +13,5 @@ public interface SetScore {
   float getAvgScore();
   float getCorrectPercent();
 
-  long getUserid();
+  int getUserid();
 }

@@ -1,68 +1,50 @@
 /*
- * Copyright © 2011-2015 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
+ * and their contractors; 2015. Other request for this document shall be referred
+ * to DLIFLC.
+ *
+ * WARNING: This document may contain technical data whose export is restricted
+ * by the Arms Export Control Act (AECA) or the Export Administration Act (EAA).
+ * Transfer of this data by any means to a non-US person who is not eligible to
+ * obtain export-controlled data is prohibited. By accepting this data, the consignee
+ * agrees to honor the requirements of the AECA and EAA. DESTRUCTION NOTICE: For
+ * unclassified, limited distribution documents, destroy by any method that will
+ * prevent disclosure of the contents or reconstruction of the document.
+ *
+ * This material is based upon work supported under Air Force Contract No.
+ * FA8721-05-C-0002 and/or FA8702-15-D-0001. Any opinions, findings, conclusions
+ * or recommendations expressed in this material are those of the author(s) and
+ * do not necessarily reflect the views of the U.S. Air Force.
+ *
+ * © 2015 Massachusetts Institute of Technology.
+ *
+ * The software/firmware is provided to you on an As-Is basis
+ *
+ * Delivered to the US Government with Unlimited Rights, as defined in DFARS
+ * Part 252.227-7013 or 7014 (Feb 2014). Notwithstanding any copyright notice,
+ * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
+ * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
+ * authorized by the U.S. Government may violate any copyrights that exist in this work.
+ *
+ *
  */
 
-package mitll.langtest.server.database;
+package mitll.langtest.server.database.user;
 
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.database.custom.UserListManager;
-import mitll.langtest.server.database.excel.UserDAOToExcel;
+import mitll.langtest.server.database.AudioDAO;
+import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.User;
-import net.sf.json.JSON;
-import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
-import java.io.OutputStream;
 import java.sql.*;
 import java.util.*;
 
-public class UserDAO extends DAO {
+public class UserDAO extends BaseUserDAO implements IUserDAO {
   private static final Logger logger = Logger.getLogger(UserDAO.class);
-
-  private static final String DEFECT_DETECTOR = "defectDetector";
-  public static final String USERS = "users";
-  public static final String MALE = "male";
-  public static final String FEMALE = "female";
-  private static final String PERMISSIONS = "permissions";
-  private static final String KIND = "kind";
-  private static final String PASS = "passwordH";
-  private static final String EMAIL = "emailH";
-  private static final String DEVICE = "device";
-  private static final String USER_ID = "userID";
-  private static final List<User.Permission> CD_PERMISSIONS = Arrays.asList(User.Permission.QUALITY_CONTROL, User.Permission.RECORD_AUDIO);
-  private static final List<User.Permission> EMPTY_PERM = new ArrayList<>();
-  private static final String ENABLED = "enabled";
-  private static final String RESET_PASSWORD_KEY = "resetPasswordKey";
-  private static final String ENABLED_REQ_KEY = "enabledReqKey";
-  private static final String NATIVE_LANG = "nativeLang";
-  private static final String UNKNOWN = "unknown";
-  private String language;
-  private long defectDetector;
-  private boolean enableAllUsers;
-
-  private static final String ID = "id";
-  private static final String AGE = "age";
-  private static final String GENDER = "gender";
-  private static final String EXPERIENCE = "experience";
-  private static final String IPADDR = "ipaddr";
-  private static final String DIALECT = "dialect";
-  private static final String TIMESTAMP = "timestamp";
-  public static final int DEFAULT_USER_ID = -1;
-  /**
-   * After a default user has been marked male
-   */
-  public static final int DEFAULT_MALE_ID = -2;
-  /**
-   * After a default user has been marked female
-   */
-  public static final int DEFAULT_FEMALE_ID = -3;
-  public static MiniUser DEFAULT_USER = new MiniUser(DEFAULT_USER_ID, 99, 0, "default", false);
-
-  static MiniUser DEFAULT_MALE   = new MiniUser(DEFAULT_MALE_ID,   99, 0, "Male", false);
-  static MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 99, 1, "Female", false);
-
-  private Collection<String> admins;
 
   /**
    * @param database
@@ -79,7 +61,7 @@ public class UserDAO extends DAO {
       defectDetector = userExists(DEFECT_DETECTOR);
       if (defectDetector == -1) {
         List<User.Permission> permissions = Collections.emptyList();
-        defectDetector = addUser(89, MALE, 0, "", UNKNOWN, UNKNOWN, DEFECT_DETECTOR, false, permissions, User.Kind.STUDENT, "", "", "");
+        defectDetector = addUser(89, MALE, 0, "", "", UNKNOWN, UNKNOWN, DEFECT_DETECTOR, false, permissions, User.Kind.STUDENT, "", "", "");
       }
     } catch (Exception e) {
       logger.error("got " + e, e);
@@ -91,74 +73,24 @@ public class UserDAO extends DAO {
    * @param manager
    * @see mitll.langtest.server.database.DatabaseImpl#makeDAO
    */
-  public void checkForFavorites(UserListManager manager) {
+/*  public void checkForFavorites(UserListManager manager) {
     for (User u : getUsers()) {
       if (manager.getListsForUser(u.getId(), true, false).isEmpty()) {
         manager.createFavorites(u.getId());
       }
     }
-  }
+  }*/
 
-  /**
-   * @return
-   * @see mitll.langtest.server.database.custom.UserListManager#addDefect(String, String, String)
-   * @see mitll.langtest.server.database.custom.AnnotationDAO#AnnotationDAO(Database, UserDAO)
-   */
-  public long getDefectDetector() {
-    return defectDetector;
-  }
-
-  /**
-   * Check if the user exists already, and return null if so.
-   * If it exists but is a legacy user, update its fields.
-   *
-   * @param userID
-   * @param passwordH
-   * @param emailH
-   * @param kind
-   * @param ipAddr
-   * @param isMale
-   * @param age
-   * @param dialect
-   * @param device
-   * @return null if existing, valid user (email and password)
-   * @see mitll.langtest.server.database.DatabaseImpl#addUser
-   */
-  public User addUser(String userID, String passwordH, String emailH, User.Kind kind, String ipAddr, boolean isMale, int age, String dialect, String device) {
-    User userByID = getUserByID(userID);
-    if (userByID != null && kind != User.Kind.ANONYMOUS) {
-      // user exists!
-      if (userByID.getEmailHash() != null && userByID.getPasswordHash() != null &&
-          !userByID.getEmailHash().isEmpty() && !userByID.getPasswordHash().isEmpty()) {
-        logger.debug(language + " : addUser : user " + userID + " is an existing user.");
-        return null; // existing user!
-      } else {
-        updateUser(userByID.getId(), kind, passwordH, emailH);
-        User userWhere = getUserWhere(userByID.getId());
-        logger.debug(language + " : addUser : returning updated user " + userWhere);
-        return userWhere;
-      }
-    } else {
-      Collection<User.Permission> perms = (kind == User.Kind.CONTENT_DEVELOPER) ? CD_PERMISSIONS : EMPTY_PERM;
-      boolean enabled = (kind != User.Kind.CONTENT_DEVELOPER) || isAdmin(userID) || enableAllUsers;
-
-      long l = addUser(age, isMale ? MALE : FEMALE, 0, ipAddr, "", dialect, userID, enabled, perms, kind, passwordH, emailH, device);
-      User userWhere = getUserWhere(l);
-      logger.debug(language + " : addUser : added new user " + userWhere);
-
-      return userWhere;
-    }
-  }
 
   /**
    * Somehow on subsequent runs, the ids skip by 30 or so?
    * <p>
    * Uses return generated keys to get the user id
-   *
-   * @param age
+   *  @param age
    * @param gender
    * @param experience
-   * @param ipAddr
+   * @param userAgent
+   * @param trueIP
    * @param nativeLang
    * @param dialect
    * @param userID
@@ -167,17 +99,18 @@ public class UserDAO extends DAO {
    * @param kind
    * @param passwordH
    * @param emailH
-   * @param device
-   * @return newly inserted user id, or 0 if something goes horribly wrong
-   * @see DatabaseImpl#addUser
+   * @param device          @return newly inserted user id, or 0 if something goes horribly wrong
+   * @see UserManagement#addUser(User)
    */
-  public long addUser(int age, String gender, int experience, String ipAddr,
-                      String nativeLang, String dialect, String userID, boolean enabled, Collection<User.Permission> permissions,
-                      User.Kind kind, String passwordH, String emailH, String device) {
+  @Override
+  public int addUser(int age, String gender, int experience, String userAgent,
+                     String trueIP, String nativeLang, String dialect, String userID, boolean enabled,
+                     Collection<User.Permission> permissions,
+                     User.Kind kind, String passwordH, String emailH, String device) {
     if (passwordH == null) new Exception().printStackTrace();
     try {
       // there are much better ways of doing this...
-      long max = 0;
+      int max = 0;
       for (User u : getUsers()) if (u.getId() > max) max = u.getId();
 //      logger.info("addUser : max is " + max + " new user '" + userID + "' age " + age + " gender " + gender + " pass " + passwordH);
 
@@ -198,12 +131,12 @@ public class UserDAO extends DAO {
               ") " +
               "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
       int i = 1;
-      long newID = max + 1;
+      int newID = max + 1;
       statement.setLong(i++, newID);
       statement.setInt(i++, age);
       statement.setInt(i++, gender.equalsIgnoreCase(MALE) ? 0 : 1);
       statement.setInt(i++, experience);
-      statement.setString(i++, ipAddr);
+      statement.setString(i++, userAgent);
       statement.setString(i++, nativeLang);
       statement.setString(i++, dialect);
       statement.setString(i++, userID);
@@ -239,7 +172,7 @@ public class UserDAO extends DAO {
    * @param emailH
    * @see #addUser(String, String, String, mitll.langtest.shared.User.Kind, String, boolean, int, String, String)
    */
-  private void updateUser(long id, User.Kind kind, String passwordH, String emailH) {
+  protected void updateUser(long id, User.Kind kind, String passwordH, String emailH) {
     try {
       if (passwordH == null) {
         logger.error("Got null password Hash?", new Exception("empty password hash"));
@@ -282,6 +215,7 @@ public class UserDAO extends DAO {
    * @return
    * @see mitll.langtest.server.mail.EmailHelper#enableCDUser(String, String, String)
    */
+  @Override
   public boolean enableUser(long id) {
     try {
       Connection connection = getConnection();
@@ -306,6 +240,7 @@ public class UserDAO extends DAO {
     return false;
   }
 
+  @Override
   public User isValidEmail(String emailH) {
     String sql = "SELECT " +
         ID +
@@ -319,6 +254,7 @@ public class UserDAO extends DAO {
     return i == -1 ? null : getUserWhere(i);
   }
 
+  @Override
   public User isValidUserAndEmail(String user, String emailH) {
     String sql = "SELECT " +
         ID +
@@ -338,6 +274,7 @@ public class UserDAO extends DAO {
    * @return
    * @see DatabaseImpl#userExists(String)
    */
+  @Override
   public int userExists(String id) {
     String sql = "SELECT id from users where UPPER(userID)='" + id.toUpperCase() + "'";
     return userExistsSQL(id, sql);
@@ -353,6 +290,7 @@ public class UserDAO extends DAO {
    * @see mitll.langtest.server.LangTestDatabaseImpl#userExists(String, String)
    * @see mitll.langtest.server.ScoreServlet#doGet
    */
+  @Override
   public User getUser(String id, String passwordHash) {
     User userWhere = getUserWithPass(id, passwordHash);
     if (userWhere == null) {
@@ -364,6 +302,7 @@ public class UserDAO extends DAO {
     return userWhere;
   }
 
+  @Override
   public User getUserWithPass(String id, String passwordHash) {
     logger.debug(language + " : getUser getting user with id '" + id + "' and pass '" + passwordHash + "'");
     String sql = "SELECT * from " +
@@ -386,6 +325,7 @@ public class UserDAO extends DAO {
    * @param id
    * @return
    */
+  @Override
   public User getUserByID(String id) {
     return getUserWhere(-1, "SELECT * from users where UPPER(" + USER_ID + ")='" + id.toUpperCase() + "'");
   }
@@ -415,9 +355,7 @@ public class UserDAO extends DAO {
 
     try {
       String sql = "CREATE TABLE IF NOT EXISTS users (" +
-          ID +
-          " " + getIdentity() +
-          ", " +
+          ID +" " + getIdentity() + ", " +
           "age INT, " +
           "gender INT, " +
           "experience INT, " +
@@ -491,10 +429,12 @@ public class UserDAO extends DAO {
    *
    * @return
    */
+  @Override
   public List<User> getUsers() {
     return getUsers("SELECT * from users order by " + ID + " ASC");
   }
 
+  @Override
   public List<User> getUsersDevices() {
     return getUsers("SELECT * from users" +
         " where device like 'i%'" +
@@ -506,9 +446,10 @@ public class UserDAO extends DAO {
    * @return
    * @see AudioDAO#getResultsForQuery(java.sql.Connection, java.sql.PreparedStatement)
    */
-  public Map<Long, MiniUser> getMiniUsers() {
+  @Override
+  public Map<Integer, MiniUser> getMiniUsers() {
     List<User> users = getUsers();
-    Map<Long, MiniUser> mini = new HashMap<>();
+    Map<Integer, MiniUser> mini = new HashMap<>();
     for (User user : users) mini.put(user.getId(), new MiniUser(user));
     return mini;
   }
@@ -518,11 +459,13 @@ public class UserDAO extends DAO {
    * @return
    * @see AudioDAO#getAudioAttribute
    */
+  @Override
   public MiniUser getMiniUser(long userid) {
     User userWhere = getUserWhere(userid);
     return userWhere == null ? null : new MiniUser(userWhere);
   }
 
+  @Override
   public User getUserWhereResetKey(String resetKey) {
     String sql = "SELECT * from users where " +
         RESET_PASSWORD_KEY +
@@ -535,6 +478,7 @@ public class UserDAO extends DAO {
    * @return
    * @see mitll.langtest.server.mail.EmailHelper#enableCDUser(String, String, String)
    */
+  @Override
   public User getUserWhereEnabledReq(String resetKey) {
     String sql = "SELECT * from users where " +
         ENABLED_REQ_KEY +
@@ -547,6 +491,7 @@ public class UserDAO extends DAO {
    * @return null if no user with that id else the user object
    * @see mitll.langtest.server.LangTestDatabaseImpl#getUserBy(long)
    */
+  @Override
   public User getUserWhere(long userid) {
     String sql = "SELECT * from users where " + ID + "=" + userid + ";";
     //long then = System.currentTimeMillis();
@@ -626,7 +571,7 @@ public class UserDAO extends DAO {
       boolean isAdmin = isAdmin(userid);
       String userKind = rs.getString(KIND);
 
-      long id = rs.getLong(ID);
+      int id = rs.getInt(ID);
 
       String password = rs.getString(PASS);
       String userID = rs.getString(USER_ID);
@@ -665,20 +610,24 @@ public class UserDAO extends DAO {
     return users;
   }
 
+/*
   private boolean isAdmin(String userid) {
     return userid != null && (admins.contains(userid));
   }
+*/
 
-  public Map<Long, User> getUserMap(boolean getMale) {
+  @Override
+  public Map<Integer, User> getUserMap(boolean getMale) {
     return getUserMap(getMale, getUsers());
   }
 
-  public Map<Long, User> getUserMap() {
+  @Override
+  public Map<Integer, User> getUserMap() {
     return getMap(getUsers());
   }
 
-  private Map<Long, User> getUserMap(boolean getMale, List<User> users) {
-    Map<Long, User> idToUser = new HashMap<>();
+  private Map<Integer, User> getUserMap(boolean getMale, List<User> users) {
+    Map<Integer, User> idToUser = new HashMap<>();
     for (User u : users) {
       if (u.isMale() && getMale || (!u.isMale() && !getMale)) {
         idToUser.put(u.getId(), u);
@@ -691,8 +640,8 @@ public class UserDAO extends DAO {
    * @param users
    * @return
    */
-  private Map<Long, User> getMap(List<User> users) {
-    Map<Long, User> idToUser = new HashMap<>();
+  private Map<Integer, User> getMap(List<User> users) {
+    Map<Integer, User> idToUser = new HashMap<>();
     for (User u : users) {
       idToUser.put(u.getId(), u);
     }
@@ -700,6 +649,7 @@ public class UserDAO extends DAO {
   }
 
 
+  @Override
   public boolean changePassword(Long remove, String passwordH) {
     try {
       Connection connection = getConnection();
@@ -736,7 +686,8 @@ public class UserDAO extends DAO {
    * @return
    * @see #clearKey(Long, boolean)
    */
-  public boolean updateKey(Long userid, boolean resetKey, String key) {
+  @Override
+  public boolean updateKey(Integer userid, boolean resetKey, String key) {
     try {
       Connection connection = getConnection();
       String s = resetKey ? RESET_PASSWORD_KEY : ENABLED_REQ_KEY;
@@ -767,10 +718,12 @@ public class UserDAO extends DAO {
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#changePFor(String, String)
    */
+  @Override
   public boolean clearKey(Long remove, boolean resetKey) {
     return updateKey(remove, resetKey, "");
   }
 
+  @Override
   public boolean changeEnabled(int userid, boolean enabled) {
     try {
       Connection connection = getConnection();
@@ -796,11 +749,4 @@ public class UserDAO extends DAO {
     return false;
   }
 
-  public void toXLSX(OutputStream out, List<User> users) {
-    new UserDAOToExcel().toXLSX(out, users, language);
-  }
-
-  public JSON toJSON(List<User> users) {
-    return new UserDAOToExcel().toJSON(users);
-  }
 }

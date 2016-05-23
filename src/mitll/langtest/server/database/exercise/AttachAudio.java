@@ -4,7 +4,8 @@
 
 package mitll.langtest.server.database.exercise;
 
-import mitll.langtest.server.database.UserDAO;
+import mitll.langtest.server.database.user.BaseUserDAO;
+import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.AudioExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -79,7 +80,7 @@ public class AttachAudio {
 			exists = test.exists();
 		}
 		if (exists) {
-			imported.addAudioForUser(ensureForwardSlashes(fastAudioRef), UserDAO.DEFAULT_USER);
+			imported.addAudioForUser(ensureForwardSlashes(fastAudioRef), BaseUserDAO.DEFAULT_USER);
 		}
 
 		test = new File(slowAudioRef);
@@ -89,7 +90,7 @@ public class AttachAudio {
 			exists = test.exists();
 		}
 		if (exists) {
-			imported.addAudio(new AudioAttribute(ensureForwardSlashes(slowAudioRef), UserDAO.DEFAULT_USER).markSlow());
+			imported.addAudio(new AudioAttribute(ensureForwardSlashes(slowAudioRef), BaseUserDAO.DEFAULT_USER).markSlow());
 		}
 	}
 
