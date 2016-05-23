@@ -262,15 +262,15 @@ public class Report {
     builder.append(getHeader());
     jsonObject.put("host", getHostInfo());
     JSONArray dataArray = new JSONArray();
-    List<SlickSlimEvent> allSlim = eventDAO.getAllSlim();
-    List<SlickSlimEvent> allDevicesSlim = eventDAO.getAllDevicesSlim();
+    List<SlickSlimEvent> allSlim = eventDAO.getAllSlim(language);
+    List<SlickSlimEvent> allDevicesSlim = eventDAO.getAllDevicesSlim(language);
     Map<String, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
     Collection<AudioAttribute> audioAttributes = audioDAO.getAudioAttributes();
     List<Result> results = resultDAO.getResults();
     List<Result> resultsDevices = resultDAO.getResultsDevices();
 
     if (year == -1) {
-      SlickSlimEvent firstSlim = eventDAO.getFirstSlim();
+      SlickSlimEvent firstSlim = eventDAO.getFirstSlim(language);
       long timestamp = firstSlim.modified();
       Calendar instance = Calendar.getInstance();
       instance.clear();
