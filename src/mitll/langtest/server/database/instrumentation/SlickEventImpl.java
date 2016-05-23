@@ -3,7 +3,6 @@ package mitll.langtest.server.database.instrumentation;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.Event;
-import mitll.langtest.shared.instrumentation.SlimEvent;
 import mitll.npdata.dao.EventDAOExample;
 import mitll.npdata.dao.SlickEvent;
 import mitll.npdata.dao.SlickSlimEvent;
@@ -19,47 +18,53 @@ import java.util.Map;
  */
 public class SlickEventImpl implements IEventDAO {
   private static final Logger logger = Logger.getLogger(SlickEventImpl.class);
-  EventDAOExample eventDAOExample;
+  private EventDAOExample eventDAOExample;
 
-  public SlickEventImpl(String language) {
-
-    eventDAOExample = new EventDAOExample("localhost", 5432, language);
+  public SlickEventImpl() {
+    eventDAOExample = new EventDAOExample("localhost", 5432, "netprof");
   }
 
-  public void copyTableOnlyOnce(IEventDAO other) {
-    if (getNumRows().intValue() == 0) {
+  public void copyTableOnlyOnce(IEventDAO other, String language) {
+    if (getNumRows(language).intValue() == 0) {
       List<SlickEvent> copy = new ArrayList<>();
-      List<Event> all = other.getAll();
-
+      List<Event> all = other.getAll(language);
       logger.info("copyTableOnlyOnce " + all.size() + " events ");
 
-      for (Event event : all) copy.add(getSlickEvent(event));
+      for (Event event : all) copy.add(getSlickEvent(event, language));
       eventDAOExample.addBulk(copy);
     }
   }
 
   @Override
-  public boolean add(Event event) {
-    eventDAOExample.add(getSlickEvent(event));
+  public boolean add(Event event, String language) {
+    eventDAOExample.add(getSlickEvent(event, language.toLowerCase()));
     return true;
   }
 
-  private SlickEvent getSlickEvent(Event event) {
+  private SlickEvent getSlickEvent(Event event, String language) {
     long timestamp = event.getTimestamp();
-    if (timestamp == 0) timestamp = System.currentTimeMillis();
-    return new SlickEvent(-1,
+    if (timestamp < 1) timestamp = System.currentTimeMillis();
+    Timestamp modified = new Timestamp(timestamp);
+
+    SlickEvent slickEvent = new SlickEvent(-1,
         event.getUserID(),
         event.getExerciseID(),
-        event.getContext() == null ? "":event.getContext(),
+        event.getContext() == null ? "" : event.getContext(),
         event.getWidgetID(),
         event.getWidgetType(),
-        event.getDevice() == null ? "" :event.getDevice(),
-        new Timestamp(timestamp));
+        event.getDevice() == null ? "" : event.getDevice(),
+        modified,
+        language.toLowerCase());
+
+    logger.info("insert " +event);
+    logger.info("insert " +slickEvent);
+
+    return slickEvent;
   }
 
   @Override
-  public List<Event> getAll() {
-    List<SlickEvent> all = eventDAOExample.getAll();
+  public List<Event> getAll(String language) {
+    List<SlickEvent> all = eventDAOExample.getAll(language.toLowerCase());
 
 //    logger.info("getting " + all.size() + " events to ");
     List<Event> copy = new ArrayList<>();
@@ -78,18 +83,18 @@ public class SlickEventImpl implements IEventDAO {
   }
 
   @Override
-  public List<SlickSlimEvent> getAllSlim() {
-    return eventDAOExample.getAllSlim();
+  public List<SlickSlimEvent> getAllSlim(String language) {
+    return eventDAOExample.getAllSlim(language.toLowerCase());
   }
 
   @Override
-  public List<SlickSlimEvent> getAllDevicesSlim() {
-    return eventDAOExample.getAllSlim();
+  public List<SlickSlimEvent> getAllDevicesSlim(String language) {
+    return eventDAOExample.getAllSlim(language.toLowerCase());
   }
 
   @Override
-  public SlickSlimEvent getFirstSlim() {
-    return eventDAOExample.getFirstSlim();
+  public SlickSlimEvent getFirstSlim(String language) {
+    return eventDAOExample.getFirstSlim(language.toLowerCase());
   }
 
   @Override
@@ -107,7 +112,7 @@ public class SlickEventImpl implements IEventDAO {
   }
 
   @Override
-  public Number getNumRows() {
-    return eventDAOExample.getNumRows();
+  public Number getNumRows(String language) {
+    return eventDAOExample.getNumRows(language.toLowerCase());
   }
 }
