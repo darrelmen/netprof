@@ -7,6 +7,8 @@ package mitll.langtest.server.database;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.instrumentation.IEventDAO;
+import mitll.langtest.server.database.user.IUserDAO;
+import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
@@ -81,7 +83,7 @@ public class Report {
   public static final int EVIL_LAST_WEEK = 54;
   public static final String SKIP_USER = "gvidaver";
 
-  private final UserDAO userDAO;
+  private final IUserDAO userDAO;
   private final ResultDAO resultDAO;
   private final IEventDAO eventDAO;
   private final AudioDAO audioDAO;
@@ -99,7 +101,7 @@ public class Report {
       "WagnerSandy",
       "rbtrbt"));
 
-  Report(UserDAO userDAO, ResultDAO resultDAO, IEventDAO eventDAO, AudioDAO audioDAO, String language,
+  Report(IUserDAO userDAO, ResultDAO resultDAO, IEventDAO eventDAO, AudioDAO audioDAO, String language,
          String prefix) {
     this.userDAO = userDAO;
     this.resultDAO = resultDAO;
@@ -570,7 +572,7 @@ public class Report {
     Map<Integer, Integer> monthToCount = counts.getMonthToCount();
     Map<Integer, Integer> weekToCount = counts.getWeekToCount();
 
-    Set<Long> students = new HashSet<>();
+    Set<Integer> students = new HashSet<>();
 
     for (User user : users) {
       boolean isStudent = (user.getAge() == 89 && user.getUserID().isEmpty()) || user.getAge() == 0 ||
