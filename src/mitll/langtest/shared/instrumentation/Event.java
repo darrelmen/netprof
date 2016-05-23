@@ -36,14 +36,12 @@ public class Event extends SlimEvent {
    */
   public Event(String widgetID, String widgetType, String exerciseID, String context,
                long userID, long timestamp,
-               //String hitID,
                String device) {
     super(userID,timestamp);
     this.widgetID = widgetID;
     this.widgetType = widgetType;
     this.exerciseID = exerciseID;
     this.context = context;
-  //  this.hitID = hitID;
     this.device = device;
   }
 
@@ -94,7 +92,7 @@ public class Event extends SlimEvent {
   public String toString() {
     long timestamp = getTimestamp();
     if (timestamp == -1) timestamp = System.currentTimeMillis();
-    return "Event on " + getWidgetID() + " by " + getCreatorID() + " at " + new Date(timestamp) + " info " +
+    return "Event on " + getWidgetID() + " by " + getUserID() + " at " + new Date(timestamp) + " info " +
         getExerciseID() + "/" + getContext() +
         //" hit " + getHitID() +
         " from " + device;
