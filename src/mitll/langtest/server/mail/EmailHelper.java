@@ -8,7 +8,8 @@ import com.google.gwt.util.tools.shared.Md5Utils;
 import com.google.gwt.util.tools.shared.StringUtils;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.database.UserDAO;
+import mitll.langtest.server.database.user.IUserDAO;
+import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
 
@@ -35,12 +36,13 @@ public class EmailHelper {
   private static final String REPLY_TO = "admin@" + NP_SERVER;
 
   private final String language;
-  private final UserDAO userDAO;
+  private final IUserDAO userDAO;
   private final MailSupport mailSupport;
   private ServerProperties serverProperties;
   private PathHelper pathHelper;
 
-  public EmailHelper(ServerProperties serverProperties, UserDAO userDAO, MailSupport mailSupport, PathHelper pathHelper) {
+  public EmailHelper(ServerProperties serverProperties, IUserDAO userDAO,
+                     MailSupport mailSupport, PathHelper pathHelper) {
     this.language = serverProperties.getLanguage();
     this.serverProperties = serverProperties;
     this.userDAO = userDAO;
