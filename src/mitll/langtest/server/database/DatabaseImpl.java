@@ -21,6 +21,10 @@ import mitll.langtest.server.database.instrumentation.IEventDAO;
 import mitll.langtest.server.database.instrumentation.SlickEventImpl;
 import mitll.langtest.server.database.phone.Phone;
 import mitll.langtest.server.database.phone.PhoneDAO;
+import mitll.langtest.server.database.user.IUserDAO;
+import mitll.langtest.server.database.user.SlickUserDAOImpl;
+import mitll.langtest.server.database.user.UserDAO;
+import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.server.database.word.Word;
 import mitll.langtest.server.database.word.WordDAO;
 import mitll.langtest.server.mail.MailSupport;
@@ -75,7 +79,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   private String installPath;
   private ExerciseDAO<CommonExercise> exerciseDAO = null;
 
-  private UserDAO userDAO;
+  private IUserDAO userDAO;
   private ResultDAO resultDAO;
   private RefResultDAO refresultDAO;
   private WordDAO wordDAO;
@@ -182,13 +186,24 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       try {
         String dbName = serverProps.getH2Database();
         logger.info("dbname " + dbName);
-        // sessionManagement = new SessionManagement(dbName);
       } catch (Exception e) {
         logger.error("Making session management, got " + e, e);
       }
     }
 
-    userDAO = new UserDAO(this, getServerProps());
+    SlickEventImpl slickEventDAO = new SlickEventImpl();
+
+    SlickUserDAOImpl slickUserDAO = new SlickUserDAOImpl(this);
+
+
+    UserDAO userDAO = new UserDAO(this, getServerProps());
+    this.userDAO = userDAO;
+    try {
+      userDAO.createTable(this);
+    } catch (Exception e) {
+      logger.error("Got " +e,e);
+    }
+
     addRemoveDAO = new AddRemoveDAO(this);
 
     userExerciseDAO = new UserExerciseDAO(this);
@@ -197,10 +212,10 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     refresultDAO = new RefResultDAO(this, getServerProps().shouldDropRefResult());
     wordDAO = new WordDAO(this);
     phoneDAO = new PhoneDAO(this);
-    audioDAO = new AudioDAO(this, userDAO);
+    audioDAO = new AudioDAO(this, this.userDAO);
     answerDAO = new AnswerDAO(this, resultDAO);
-    userListManager = new UserListManager(userDAO, new UserListDAO(this, userDAO), userListExerciseJoinDAO,
-        new AnnotationDAO(this, userDAO),
+    userListManager = new UserListManager(this.userDAO, new UserListDAO(this, this.userDAO), userListExerciseJoinDAO,
+        new AnnotationDAO(this, this.userDAO),
         new ReviewedDAO(this, ReviewedDAO.REVIEWED),
         new ReviewedDAO(this, ReviewedDAO.SECOND_STATE),
         pathHelper);
@@ -216,7 +231,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       eventDAO = heventDAO;
     }*/
 
-    SlickEventImpl slickEventDAO = new SlickEventImpl();
     oneTimeDataCopy(slickEventDAO);
     eventDAO = slickEventDAO;
 //    eventDAO = new EventDAO(this, defectDetector);
@@ -233,7 +247,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     }
 
     try {
-      userDAO.createTable(this);
+     // this.userDAO.createTable(this);
       userListManager.setUserExerciseDAO(userExerciseDAO);
     } catch (Exception e) {
       logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
@@ -246,6 +260,10 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     if (now - then > 1000) logger.info("took " + (now - then) + " millis to put back word and phone");
   }
 
+  /**
+   * TODO : This will not work when we move to multiple languages in one db.
+   * @param slickEventDAO
+   */
   private void oneTimeDataCopy(SlickEventImpl slickEventDAO) {
     Number numRows = slickEventDAO.getNumRows(getLanguage());
     logger.info("got " + numRows + " rows from slick");
@@ -270,7 +288,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return refresultDAO;
   }
 
-  public UserDAO getUserDAO() {
+  public IUserDAO getUserDAO() {
     return userDAO;
   }
 
@@ -485,7 +503,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
           exerciseDAO.getRawExercises();
 
-          userDAO.checkForFavorites(userListManager);
+       //   userDAO.checkForFavorites(userListManager);
           userExerciseDAO.setAudioDAO(audioDAO);
 
           numExercises = exerciseDAO.getNumExercises();
@@ -721,7 +739,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     ResultDAO.SessionsAndScores sessionsAndScores = resultDAO.getSessionsForUserIn2(ids, latestResultID, userid, allIDs, idToKey);
     List<Session> sessionsForUserIn2 = sessionsAndScores.sessions;
 
-    Map<Long, User> userMap = userDAO.getUserMap();
+    Map<Integer, User> userMap = userDAO.getUserMap();
 
     AVPHistoryForList sessionAVPHistoryForList = new AVPHistoryForList(sessionsForUserIn2, userid, true);
     AVPHistoryForList sessionAVPHistoryForList2 = new AVPHistoryForList(sessionsForUserIn2, userid, false);
@@ -789,9 +807,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return o1.getTimestamp() < o2.getTimestamp() ? +1 : o1.getTimestamp() > o2.getTimestamp() ? -1 : 0;
   }
 
-  private AVPHistoryForList.UserScore makeScore(int count, Map<Long, User> userMap, Session session, boolean useCorrect) {
+  private AVPHistoryForList.UserScore makeScore(int count, Map<Integer, User> userMap, Session session, boolean useCorrect) {
     float value = useCorrect ? session.getCorrectPercent() : 100f * session.getAvgScore();
-    long userid = session.getUserid();
+    int userid = session.getUserid();
     User user = userMap.get(userid);
     String userID;
     if (user == null) {
@@ -854,7 +872,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @param deviceType
    * @param device
    * @return
-   * @see mitll.langtest.server.ScoreServlet#doPost
+   * @see mitll.langtest.server.rest.RestUserManagement#addUser(HttpServletRequest, String, String, String, JSONObject)
    */
   public User addUser(String userID, String passwordH, String emailH, String deviceType, String device) {
     return userManagement.addUser(userID, passwordH, emailH, deviceType, device);
@@ -908,17 +926,19 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @param device
    * @return assigned id
    */
+/*
   public long addUser(int age, String gender, int experience, String ipAddr,
                       String nativeLang, String dialect, String userID, Collection<User.Permission> permissions, String device) {
     return userManagement.addUser(age, gender, experience, ipAddr, nativeLang, dialect, userID, permissions, device);
   }
+*/
 
   /**
    * @param out
    * @see mitll.langtest.server.DownloadServlet#returnSpreadsheet(HttpServletResponse, DatabaseImpl, String)
    */
   public void usersToXLSX(OutputStream out) {
-    userManagement.usersToXLSX(out);
+    userManagement.usersToXLSX(out, getLanguage());
   }
 
   public JSON usersToJSON() {
@@ -1572,9 +1592,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @see LangTestDatabaseImpl#getMaleFemaleProgress()
    */
   public Map<String, Float> getMaleFemaleProgress() {
-    UserDAO userDAO = getUserDAO();
-    Map<Long, User> userMapMales = userDAO.getUserMap(true);
-    Map<Long, User> userMapFemales = userDAO.getUserMap(false);
+    IUserDAO userDAO = getUserDAO();
+    Map<Integer, User> userMapMales   = userDAO.getUserMap(true);
+    Map<Integer, User> userMapFemales = userDAO.getUserMap(false);
 
     Collection<CommonExercise> exercises = getExercises();
     float total = exercises.size();

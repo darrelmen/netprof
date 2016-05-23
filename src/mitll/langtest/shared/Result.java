@@ -26,7 +26,7 @@ import java.util.Date;
  */
 public class Result implements IsSerializable, UserAndTime {
   private int uniqueID;
-  private long userid;
+  private int userid;
   private String plan;
   private String id;
   private int qid;
@@ -65,7 +65,8 @@ public class Result implements IsSerializable, UserAndTime {
    * @param pronScore
    * @param device
    */
-  public Result(int uniqueID, long userid, String plan, String id,
+  public Result(int uniqueID,
+                int userid, String plan, String id,
                 int qid,
                 String answer,
                 boolean valid, long timestamp,
@@ -112,11 +113,13 @@ public class Result implements IsSerializable, UserAndTime {
     return uniqueID;
   }
 
+/*
   private void setUniqueID(int uniqueID) {
     this.uniqueID = uniqueID;
   }
+*/
 
-  public long getUserid() {
+  public int getUserid() {
     return userid;
   }
 
@@ -213,7 +216,7 @@ public class Result implements IsSerializable, UserAndTime {
   private void setDevice(String device) {
     this.device = device;
   }*/
-  public void setUserID(Long userID) {
+  public void setUserID(Integer userID) {
     this.userid = userID;
   }
 }

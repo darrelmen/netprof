@@ -4,7 +4,7 @@ import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.UserDAO;
+import mitll.langtest.server.database.user.UserDAO;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletContext;

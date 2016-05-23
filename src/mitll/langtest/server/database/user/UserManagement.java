@@ -1,17 +1,44 @@
 /*
- * Copyright © 2011-2015 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
+ * and their contractors; 2015. Other request for this document shall be referred
+ * to DLIFLC.
+ *
+ * WARNING: This document may contain technical data whose export is restricted
+ * by the Arms Export Control Act (AECA) or the Export Administration Act (EAA).
+ * Transfer of this data by any means to a non-US person who is not eligible to
+ * obtain export-controlled data is prohibited. By accepting this data, the consignee
+ * agrees to honor the requirements of the AECA and EAA. DESTRUCTION NOTICE: For
+ * unclassified, limited distribution documents, destroy by any method that will
+ * prevent disclosure of the contents or reconstruction of the document.
+ *
+ * This material is based upon work supported under Air Force Contract No.
+ * FA8721-05-C-0002 and/or FA8702-15-D-0001. Any opinions, findings, conclusions
+ * or recommendations expressed in this material are those of the author(s) and
+ * do not necessarily reflect the views of the U.S. Air Force.
+ *
+ * © 2015 Massachusetts Institute of Technology.
+ *
+ * The software/firmware is provided to you on an As-Is basis
+ *
+ * Delivered to the US Government with Unlimited Rights, as defined in DFARS
+ * Part 252.227-7013 or 7014 (Feb 2014). Notwithstanding any copyright notice,
+ * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
+ * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
+ * authorized by the U.S. Government may violate any copyrights that exist in this work.
+ *
+ *
  */
 
-package mitll.langtest.server.database;
+package mitll.langtest.server.database.user;
 
-import mitll.langtest.client.LangTest;
-import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.HTTPClient;
+import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.ResultDAO;
 import mitll.langtest.server.database.custom.UserListManager;
-import mitll.langtest.server.database.exercise.ExerciseDAO;
+import mitll.langtest.server.database.excel.UserDAOToExcel;
 import mitll.langtest.server.rest.RestUserManagement;
-import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.UserAndTime;
 import net.sf.json.JSON;
@@ -28,15 +55,25 @@ import java.util.*;
  */
 public class UserManagement {
   private static final Logger logger = Logger.getLogger(UserManagement.class);
+  /**
+   * @see #userExists(HttpServletRequest, String, String, ServerProperties)
+   */
   private static final String NPF_CLASSROOM_PREFIX = "https://np.ll.mit.edu/npfClassroom";
   private static final String NO_USER = "-1";
 
   private final int numExercises;
-  private final UserDAO userDAO;
+  private final IUserDAO userDAO;
   private final ResultDAO resultDAO;
   private final UserListManager userListManager;
 
-  UserManagement(UserDAO userDAO, int numExercises, ResultDAO resultDAO, UserListManager userListManager) {
+  /**
+   * @see DatabaseImpl#makeDAO(String, String, String)
+   * @param userDAO
+   * @param numExercises
+   * @param resultDAO
+   * @param userListManager
+   */
+  public UserManagement(IUserDAO userDAO, int numExercises, ResultDAO resultDAO, UserListManager userListManager) {
     this.userDAO = userDAO;
     this.numExercises = numExercises;
     this.resultDAO = resultDAO;
@@ -48,6 +85,7 @@ public class UserManagement {
    * here.
    *
    * TODO : read the list of sites from a file
+   * TODO : don't do this.
    *
    * @param login
    * @param passwordH
@@ -118,13 +156,27 @@ public class UserManagement {
     return addUser(userID, passwordH, emailH, deviceType, device, kind, isMale);
   }
 
-  private User addUser(String userID, String passwordH, String emailH, String deviceType, String device, User.Kind kind,
+  private User addUser(String userID, String passwordH, String emailH, String deviceType, String device,
+                       User.Kind kind,
                        boolean isMale) {
     int age = 89;
     String dialect = "unk";
     return addUser(userID, passwordH, emailH, deviceType, device, kind, isMale, age, dialect);
   }
 
+  /**
+   * @see DatabaseImpl#addUser
+   * @param userID
+   * @param passwordH
+   * @param emailH
+   * @param deviceType
+   * @param device
+   * @param kind
+   * @param isMale
+   * @param age
+   * @param dialect
+   * @return
+   */
   public User addUser(String userID, String passwordH, String emailH, String deviceType, String device, User.Kind kind,
                       boolean isMale, int age, String dialect) {
     return addAndGetUser(userID, passwordH, emailH, kind, isMale, age, dialect, deviceType, device);
@@ -166,8 +218,8 @@ public class UserManagement {
     long l;
     if ((l = userDAO.userExists(user.getUserID())) == -1) {
       logger.debug("addUser " + user);
-      l = userDAO.addUser(user.getAge(), user.getGender() == 0 ? UserDAO.MALE : UserDAO.FEMALE,
-          user.getExperience(), user.getIpaddr(), user.getNativeLang(), user.getDialect(), user.getUserID(), false,
+      l = userDAO.addUser(user.getAge(), user.getGender() == 0 ? BaseUserDAO.MALE : BaseUserDAO.FEMALE,
+          user.getExperience(), user.getIpaddr(), "", user.getNativeLang(), user.getDialect(), user.getUserID(), false,
           user.getPermissions(), User.Kind.STUDENT, "", "", "");
     }
     return l;
@@ -180,16 +232,16 @@ public class UserManagement {
    *
    * JUST FOR TESTING
    *
-   * @param age
-   * @param gender
-   * @param experience
-   * @param ipAddr      user agent info
-   * @param dialect     speaker dialect
-   * @param permissions
-   * @param device
+   * @paramx age
+   * @paramx gender
+   * @paramx experience
+   * @paramx ipAddr      user agent info
+   * @paramx dialect     speaker dialect
+   * @paramx permissions
+   * @paramx device
    * @return assigned id
    */
-  public long addUser(int age, String gender, int experience, String ipAddr,
+/*  public long addUser(int age, String gender, int experience, String ipAddr,
                       String nativeLang, String dialect, String userID, Collection<User.Permission> permissions,
                       String device) {
     logger.debug("addUser " + userID);
@@ -197,7 +249,7 @@ public class UserManagement {
         User.Kind.STUDENT, "", "", device);
     userListManager.createFavorites(l);
     return l;
-  }
+  }*/
 
   private String getIPInfo(HttpServletRequest request) {
     String header = request.getHeader("User-Agent");
@@ -210,16 +262,17 @@ public class UserManagement {
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#usersToXLSX(OutputStream)
    * @param out
+   * @param language
    */
-  void usersToXLSX(OutputStream out) {  userDAO.toXLSX(out, getUsers());  }
-  JSON usersToJSON() { return userDAO.toJSON(getUsers());  }
+  public void usersToXLSX(OutputStream out, String language) { new UserDAOToExcel().toXLSX(out, getUsers(), language); }
+  public JSON usersToJSON() { return new UserDAOToExcel().toJSON(getUsers());  }
 
   /**
    * Adds some sugar -- sets the answers and rate per user, and joins with dli experience data
    *
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getUsers()
-   * @see #usersToXLSX(OutputStream)
+   * @see #usersToXLSX(OutputStream, String)
    */
   public List<User> getUsers() {
     Map<Long, Float> userToRate = resultDAO.getSessions().userToRate;
@@ -278,7 +331,7 @@ public class UserManagement {
     final Map<Long, Integer> idToCount;
     final Map<Long, Set<String>> idToUniqueCount;
 
-    public Pair(Map<Long, Integer> idToCount, Map<Long, Set<String>> idToUniqueCount) {
+    Pair(Map<Long, Integer> idToCount, Map<Long, Set<String>> idToUniqueCount) {
       this.idToCount = idToCount;
       this.idToUniqueCount = idToUniqueCount;
     }

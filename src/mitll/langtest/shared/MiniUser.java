@@ -5,6 +5,7 @@
 package mitll.langtest.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.server.database.user.UserDAO;
 
 /**
  * Much of the time the UI doesn't need to know a lot about a user so just send the little it needs.
@@ -12,7 +13,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * Created by GO22670 on 4/9/2014.
  */
 public class MiniUser implements IsSerializable, Comparable<MiniUser> {
-  private long id;
+  private int id;
   private int age;
   private int gender;
   private String userID;
@@ -28,7 +29,7 @@ public class MiniUser implements IsSerializable, Comparable<MiniUser> {
    * @param userID
    * @param isAdmin
    */
-  public MiniUser(long id, int age, int gender, String userID, boolean isAdmin) {
+  public MiniUser(int id, int age, int gender, String userID, boolean isAdmin) {
     this.id = id;
     this.age = age;
     this.gender = gender;
@@ -43,7 +44,7 @@ public class MiniUser implements IsSerializable, Comparable<MiniUser> {
    * It seems strange to copy the string here, but I think it will help the RPC code not try to serialize
    * the User this object is made from.
    *
-   * @see mitll.langtest.server.database.UserDAO#getMiniUsers()
+   * @see UserDAO#getMiniUsers()
    * @param user
    */
   public MiniUser(User user) {
@@ -71,7 +72,7 @@ public class MiniUser implements IsSerializable, Comparable<MiniUser> {
 
   public int getGender() { return gender;  }
 
-  public long getId() {
+  public int getId() {
     return id;
   }
 
@@ -84,7 +85,7 @@ public class MiniUser implements IsSerializable, Comparable<MiniUser> {
   }
 
   /**
-   * @see mitll.langtest.server.database.UserDAO#getUsers
+   * @see UserDAO#getUsers
    * @param userID
    */
   public void setUserID(String userID) {
