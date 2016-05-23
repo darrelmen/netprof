@@ -74,7 +74,7 @@ public class EventDAOToExcel {
       cell.setCellValue(event.getContext());
 
       cell = row.createCell(j++);
-      cell.setCellValue(event.getCreatorID());
+      cell.setCellValue(event.getUserID());
 
       cell = row.createCell(j++);
       cell.setCellValue(new Date(event.getTimestamp()));
