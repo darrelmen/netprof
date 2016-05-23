@@ -156,7 +156,7 @@ public class EventTable extends PagerTable {
     TextColumn<Event> gender = new TextColumn<Event>() {
       @Override
       public String getValue(Event contact) {
-        return "" +contact.getCreatorID();
+        return "" +contact.getUserID();
       }
     };
     gender.setSortable(true);
