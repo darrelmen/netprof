@@ -209,7 +209,7 @@ public class UserListManagerTest {
 
     int ytd = 0;
 
-    List<Event> all = database.getEventDAO().getAll();
+    List<Event> all = database.getEventDAO().getAll("spanish");
     Map<String, Set<Long>> monthToCount = new TreeMap<String, Set<Long>>();
 
     Map<String, Map<Long, Set<Event>>> monthToCount2 = new TreeMap<String, Map<Long, Set<Event>>>();
@@ -225,7 +225,7 @@ public class UserListManagerTest {
         // months
         int i = calendar.get(Calendar.MONTH);
         String month1 = getMonth(i);
-        long creatorID = event.getCreatorID();
+        long creatorID = event.getUserID();
         Set<Long> users = monthToCount.get(month1);
         if (users == null) {
           monthToCount.put(month1, users = new HashSet<Long>());

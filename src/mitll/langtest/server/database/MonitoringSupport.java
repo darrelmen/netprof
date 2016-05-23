@@ -4,6 +4,8 @@
 
 package mitll.langtest.server.database;
 
+import mitll.langtest.server.database.user.IUserDAO;
+import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.UserAndTime;
@@ -29,14 +31,14 @@ class MonitoringSupport {
   private static final int MINUTE_MILLIS = 60 * 1000;
   private static final float MINUTE_MILLIS_FLOAT = (float) MINUTE_MILLIS;
 
-  private final UserDAO userDAO;
+  private final IUserDAO userDAO;
   private final ResultDAO resultDAO;
 
   private MonitoringSupport() {
     this(null, null);
   }
 
-  MonitoringSupport(UserDAO userDAO, ResultDAO resultDAO) {
+  MonitoringSupport(IUserDAO userDAO, ResultDAO resultDAO) {
     this.userDAO = userDAO;
     this.resultDAO = resultDAO;
   }
@@ -50,7 +52,7 @@ class MonitoringSupport {
     List<User> users = getUsers();
 
     Map<User, Integer> idToCount = new HashMap<User, Integer>();
-    Map<Long, User> idToUser = new HashMap<Long, User>();
+    Map<Integer, User> idToUser = new HashMap<>();
     for (User u : users) {
       idToUser.put(u.getId(), u);
       idToCount.put(u, 0);
@@ -180,13 +182,13 @@ class MonitoringSupport {
   }*/
   private Map<String, Integer> getExToCount(Collection<CommonExercise> exercises, Collection<UserAndTime> results) {
     Map<String, Integer> idToCount = getInitialIdToCount(exercises);
-    Map<String, Set<Long>> keyToUsers = new HashMap<String, Set<Long>>();
+    Map<String, Set<Integer>> keyToUsers = new HashMap<>();
     for (UserAndTime r : results) {
       String key = r.getID();//getExerciseID() + "/" + r.getQid();
-      Set<Long> usersForResult = keyToUsers.get(key);
+      Set<Integer> usersForResult = keyToUsers.get(key);
 
       if (usersForResult == null) {
-        keyToUsers.put(key, usersForResult = new HashSet<Long>());
+        keyToUsers.put(key, usersForResult = new HashSet<>());
       }
       if (!usersForResult.contains(r.getUserid())) {
         usersForResult.add(r.getUserid());
@@ -249,11 +251,10 @@ class MonitoringSupport {
    */
   private Map<String, Integer> getExToCountMaleOrFemale(Collection<CommonExercise> exercises, boolean isMale, Collection<UserAndTime> results) {
     // List<Result> results = getResults();
-
     Map<String, Integer> idToCount = getInitialIdToCount(exercises);
 
-    Map<Long, User> userMap = userDAO.getUserMap(isMale);
-    Map<String, Set<Long>> keyToUsers = new HashMap<String, Set<Long>>();
+    Map<Integer, User> userMap = userDAO.getUserMap(isMale);
+    Map<String, Set<Integer>> keyToUsers = new HashMap<>();
 
     // logger.debug("results " + results.size() + ","+(isMale ? "male":"female") + " users num = " + userMap.size());
     SortedSet<String> resultKeys = new TreeSet<String>();
@@ -261,10 +262,10 @@ class MonitoringSupport {
       if (userMap.containsKey(r.getUserid())) {   // filter for just results by males or females
         String key = r.getExid();
         resultKeys.add(key);
-        Set<Long> usersForResult = keyToUsers.get(key);
+        Set<Integer> usersForResult = keyToUsers.get(key);
 
         if (usersForResult == null) {
-          keyToUsers.put(key, usersForResult = new HashSet<Long>());
+          keyToUsers.put(key, usersForResult = new HashSet<>());
         }
         if (!usersForResult.contains(r.getUserid())) {
           usersForResult.add(r.getUserid());
