@@ -2,7 +2,6 @@ package mitll.langtest.server.database.instrumentation;
 
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.Event;
-import mitll.langtest.shared.instrumentation.SlimEvent;
 import mitll.npdata.dao.SlickSlimEvent;
 
 import java.util.List;
@@ -11,17 +10,17 @@ import java.util.List;
  * Created by go22670 on 3/28/16.
  */
 public interface IEventDAO {
-  boolean add(Event event);
+  boolean add(Event event, String language);
 
-  List<Event> getAll();
+  List<Event> getAll(String language);
 
-  List<SlickSlimEvent> getAllSlim();
+  List<SlickSlimEvent> getAllSlim(String language);
 
-  List<SlickSlimEvent> getAllDevicesSlim();
+  List<SlickSlimEvent> getAllDevicesSlim(String language);
 
-  SlickSlimEvent getFirstSlim();
+  SlickSlimEvent getFirstSlim(String language);
 
   void addPlayedMarkings(long userID, CommonExercise firstExercise);
 
-  Number getNumRows();
+  Number getNumRows(String language);
 }
