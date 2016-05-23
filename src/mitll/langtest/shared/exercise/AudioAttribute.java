@@ -42,7 +42,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   private int uniqueID;
   private String audioRef;
   private String exid;
-  private long userid;
+  private int userid;
   private long timestamp;
   private long durationInMillis;
   /**
@@ -70,7 +70,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
    * @see mitll.langtest.server.database.AudioDAO#getAudioAttribute
    * @see mitll.langtest.server.database.AudioDAO#getResultsForQuery(java.sql.Connection, java.sql.PreparedStatement)
    */
-  public AudioAttribute(int uniqueID, long userid,
+  public AudioAttribute(int uniqueID, int userid,
                         String exid,
                         String audioRef,
                         long timestamp, long durationInMillis, String type, MiniUser user, String transcript) {
@@ -244,7 +244,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     this.user = user;
   }
 
-  public long getUserid() {
+  public int getUserid() {
     return userid;
   }
 

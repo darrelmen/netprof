@@ -19,7 +19,7 @@ import java.util.*;
 public class Session implements IsSerializable, SetScore {
   private int numAnswers;
   public long duration;
-  private long userid;
+  private int userid;
   private int correct;
   private float correctPercent;
   private float avgScore;
@@ -107,11 +107,11 @@ public class Session implements IsSerializable, SetScore {
   }
 
   @Override
-  public long getUserid() {
+  public int getUserid() {
     return userid;
   }
 
-  public void setUserid(long userid) {
+  public void setUserid(int userid) {
     this.userid = userid;
   }
 
