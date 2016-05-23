@@ -1530,14 +1530,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID, String device) {
     try {
-      db.logEvent(id, widgetType, exid, context, userid, hitID, device);
+      db.logEvent(id, widgetType, exid, context, userid, device);
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
   }
 
   public List<Event> getEvents() {
-    return db.getEventDAO().getAll();
+    return db.getEventDAO().getAll(getLanguage());
   }
 
   /**
