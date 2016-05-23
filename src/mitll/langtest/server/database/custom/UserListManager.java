@@ -6,7 +6,8 @@ package mitll.langtest.server.database.custom;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.audio.PathWriter;
-import mitll.langtest.server.database.UserDAO;
+import mitll.langtest.server.database.user.IUserDAO;
+import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.User;
@@ -48,7 +49,7 @@ public class UserListManager {
 
   private static final String DUP = "_dup_";
 
-  private final UserDAO userDAO;
+  private final IUserDAO userDAO;
   private final ReviewedDAO reviewedDAO, secondStateDAO;
   private int i = 0;
 
@@ -67,7 +68,7 @@ public class UserListManager {
    * @param pathHelper
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(mitll.langtest.server.PathHelper)
    */
-  public UserListManager(UserDAO userDAO, UserListDAO userListDAO, UserListExerciseJoinDAO userListExerciseJoinDAO,
+  public UserListManager(IUserDAO userDAO, UserListDAO userListDAO, UserListExerciseJoinDAO userListExerciseJoinDAO,
                          AnnotationDAO annotationDAO, ReviewedDAO reviewedDAO, ReviewedDAO secondStateDAO, PathHelper pathHelper) {
     this.userDAO = userDAO;
     this.userListDAO = userListDAO;
@@ -350,7 +351,7 @@ public class UserListManager {
   /**
    * @param userid
    * @return
-   * @see mitll.langtest.server.database.DatabaseImpl#addUser(int, String, int, String, String, String, String, java.util.Collection, String)
+   * @see mitll.langtest.server.database.user.UserManagement#addAndGetUser(String, String, String, User.Kind, boolean, int, String, String, String)
    */
   public UserList createFavorites(long userid) {
     return createUserList(userid, UserList.MY_LIST, MY_FAVORITES, "", true);
@@ -666,7 +667,8 @@ public class UserListManager {
    * @return new, permanent audio path
    * @see #fixAudioPaths
    */
-  private String getRefAudioPath(String id, File fileRef, String destFileName, boolean overwrite, String title, String artist) {
+  private String getRefAudioPath(String id, File fileRef, String destFileName, boolean overwrite, String title,
+                                 String artist) {
     return new PathWriter().getPermanentAudioPath(pathHelper, fileRef, destFileName, overwrite, id, title, artist,
         userDAO.getDatabase().getServerProps());
   }
@@ -834,7 +836,7 @@ public class UserListManager {
     reviewedDAO.remove(exerciseid);
   }
 
-  void markAllFieldsFixed(CommonExercise userExercise, long userID) {
+  private void markAllFieldsFixed(CommonExercise userExercise, long userID) {
     Collection<String> fields = userExercise.getFields();
     logger.debug("setExerciseState " + userExercise + "  has " + fields + " user " + userID);
     addAnnotations(userExercise);

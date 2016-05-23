@@ -4,6 +4,8 @@
 
 package mitll.langtest.server.mail;
 
+import mitll.langtest.server.database.user.UserDAO;
+
 import java.util.*;
 
 /**
@@ -106,7 +108,7 @@ public class EmailList {
 
   /**
    * @return
-   * @see mitll.langtest.server.database.UserDAO#UserDAO
+   * @see UserDAO#UserDAO
    */
   public Set<String> getAdmins() {
     return admins;
