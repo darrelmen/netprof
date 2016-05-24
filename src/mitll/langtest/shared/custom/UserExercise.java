@@ -22,7 +22,7 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
   public static final String CUSTOM_PREFIX = "Custom_";
   private long uniqueID = -1; //set by database
 
-  private long creator;
+  private int creator;
   private boolean isPredef;
   private boolean isOverride;
   private long modifiedTimestamp = 0;
@@ -49,7 +49,7 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
    * @see mitll.langtest.client.custom.dialog.EditItem#createNewItem(long)
    * @see mitll.langtest.client.custom.dialog.EditItem#getNewItem
    */
-  public UserExercise(long uniqueID, String exerciseID, long creator, String english, String foreignLanguage,
+  public UserExercise(long uniqueID, String exerciseID, int creator, String english, String foreignLanguage,
                       String transliteration) {
     super(exerciseID);
     this.creator = creator;
@@ -57,7 +57,7 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
     this.english = english;
     this.foreignLanguage = foreignLanguage;
     this.transliteration = transliteration;
-    isPredef = checkPredef();//!exerciseID.startsWith(CUSTOM_PREFIX);
+    isPredef = checkPredef();
   }
 
   /**
@@ -73,7 +73,7 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
    * @param modifiedTimestamp
    * @see mitll.langtest.server.database.custom.UserExerciseDAO#getUserExercises
    */
-  public UserExercise(long uniqueID, String exerciseID, long creator, String english, String foreignLanguage,
+  public UserExercise(long uniqueID, String exerciseID, int creator, String english, String foreignLanguage,
                       String transliteration, String context, String contextTranslation,
                       boolean isOverride,
                       Map<String, String> unitToValue, long modifiedTimestamp
@@ -90,7 +90,7 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
    * @param creatorID
    * @see FlexListLayout#getFactory(PagingExerciseList)
    */
-  public <T extends CommonExercise> UserExercise(T exercise, long creatorID) {
+  public <T extends CommonExercise> UserExercise(T exercise, int creatorID) {
     super(exercise.getID());
     this.isPredef = true;
     this.english = exercise.getEnglish();
@@ -125,11 +125,11 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
   }
 
   @Override
-  public long getCreator() {
+  public int getCreator() {
     return creator;
   }
 
-  public void setCreator(long id) {
+  public void setCreator(int id) {
     creator = id;
   }
 

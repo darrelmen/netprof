@@ -58,13 +58,13 @@ public class ImportCourseExamples {
     DatabaseImpl courseExamples = makeDatabaseImpl(importH2, configDir);
     ResultDAO resultDAO1 = courseExamples.getResultDAO();
     System.out.println("got num results " + resultDAO1.getNumResults());
-    Map<Long, Map<String, Result>> userToResultsRegular = resultDAO1.getUserToResults(true, courseExamples.getUserDAO());
-  //  Map<Long, Map<String, Result>> userToResultsRegular = resultDAO1.getUserToResults(Result.AUDIO_TYPE_FAST_AND_SLOW, courseExamples.getUserDAO());
+    Map<Integer, Map<String, Result>> userToResultsRegular = resultDAO1.getUserToResults(true, courseExamples.getUserDAO());
+  //  Map<Integer, Map<String, Result>> userToResultsRegular = resultDAO1.getUserToResults(Result.AUDIO_TYPE_FAST_AND_SLOW, courseExamples.getUserDAO());
     System.out.println("regular speed got users " + userToResultsRegular.size() + " keys " + userToResultsRegular.keySet());
 
     //  System.out.println("got " + result);
 
-    Map<Long, Map<String, Result>> userToResultsSlow = resultDAO1.getUserToResults(false, courseExamples.getUserDAO());
+    Map<Integer, Map<String, Result>> userToResultsSlow = resultDAO1.getUserToResults(false, courseExamples.getUserDAO());
     System.out.println("slow speed    got users " + userToResultsSlow.size() + " keys " + userToResultsSlow.keySet());
 
     // so now we have the latest audio
@@ -73,14 +73,14 @@ public class ImportCourseExamples {
     // copy users to real database
 
     DatabaseImpl npfRussian = makeDatabaseImpl(destinationH2, configDir);
-    Map<Long, User> userMap = courseExamples.getUserDAO().getUserMap();
-    Map<Long, Long> oldToNew = new HashMap<Long, Long>();
+    Map<Integer, User> userMap = courseExamples.getUserDAO().getUserMap();
+    Map<Integer, Integer> oldToNew = new HashMap<Integer, Integer>();
 
-    for (long userid : userToResultsRegular.keySet()) {
+    for (int userid : userToResultsRegular.keySet()) {
       copyUser(npfRussian, userMap, oldToNew, userid);
     }
 
-    for (long userid : userToResultsSlow.keySet()) {
+    for (int userid : userToResultsSlow.keySet()) {
       copyUser(npfRussian, userMap, oldToNew, userid);
     }
 
@@ -98,11 +98,11 @@ public class ImportCourseExamples {
     return new DatabaseImpl(configDir, configDir, h2DatabaseFile, serverProps, null, true, null);
   }
 
-  private static void copyUser(DatabaseImpl npfRussian, Map<Long, User> userMap, Map<Long, Long> oldToNew, long userid) {
+  private static void copyUser(DatabaseImpl npfRussian, Map<Integer, User> userMap, Map<Integer, Integer> oldToNew, int userid) {
     User user = userMap.get(userid);
     int i = npfRussian.userExists(user.getUserID());
     if (i > 0) logger.debug("found duplicate " + user);
-    long l = i != -1 ? i : npfRussian.addUser(user);
+    int l = i != -1 ? i : npfRussian.addUser(user);
     oldToNew.put(user.getId(), l);
   }
 
@@ -121,12 +121,12 @@ public class ImportCourseExamples {
   }
 */
 
-  private static void copyAudio(Map<Long, Map<String, Result>> userToResultsRegular, Map<Long, Long> oldToNew,
+  private static void copyAudio(Map<Integer, Map<String, Result>> userToResultsRegular, Map<Integer, Integer> oldToNew,
                                 AudioDAO audioDAO,
                                 String destAudioDir, String candidateAudioDir) {
     int count = 0;
     int bad = 0;
-    for (Map.Entry<Long, Map<String, Result>> userToExIdToResult : userToResultsRegular.entrySet()) {
+    for (Map.Entry<Integer, Map<String, Result>> userToExIdToResult : userToResultsRegular.entrySet()) {
       //for (Long userid : userToExIdToResult.getKey())
       logger.debug("User " +userToExIdToResult.getKey());
       Map<String, Result> exIdToResult = userToExIdToResult.getValue();

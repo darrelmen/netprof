@@ -76,12 +76,12 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return assignedID;
   }
 
-  protected void updateUser(long id, User.Kind kind, String passwordH, String emailH) {
+  protected void updateUser(int id, User.Kind kind, String passwordH, String emailH) {
 
   }
 
   @Override
-  public boolean enableUser(long id) {
+  public boolean enableUser(int id) {
     return false;
   }
 
@@ -131,7 +131,7 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }
 
   @Override
-  public MiniUser getMiniUser(long userid) {
+  public MiniUser getMiniUser(int userid) {
     return null;
   }
 
@@ -146,7 +146,7 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }
 
   @Override
-  public User getUserWhere(long userid) {
+  public User getUserWhere(int userid) {
     return null;
   }
 
@@ -161,7 +161,7 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }
 
   @Override
-  public boolean changePassword(Long remove, String passwordH) {
+  public boolean changePassword(Integer remove, String passwordH) {
     return false;
   }
 
@@ -171,7 +171,7 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }
 
   @Override
-  public boolean clearKey(Long remove, boolean resetKey) {
+  public boolean clearKey(Integer remove, boolean resetKey) {
     return false;
   }
 

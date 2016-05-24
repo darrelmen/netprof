@@ -143,9 +143,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       String prefixedMessage = prefix + "for " + pathHelper.getInstallPath() +
           (e != null ? " got " + "Server Exception : " + ExceptionUtils.getStackTrace(e) : "");
       String subject = "Server Exception on " + pathHelper.getInstallPath();
-      sendEmail(subject, prefixedMessage);
+      sendEmail(subject, getInfo(prefixedMessage));
 
-      logger.debug(prefixedMessage);
+      logger.debug(getInfo(prefixedMessage));
     }
   }
 
@@ -687,7 +687,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @seex LoadTesting#getExercise(String, long, boolean)
    * @see #makeExerciseListWrapper
    */
-  private void addAnnotationsAndAudio(long userID, CommonExercise firstExercise, boolean isFlashcardReq) {
+  private void addAnnotationsAndAudio(int userID, CommonExercise firstExercise, boolean isFlashcardReq) {
     long then = System.currentTimeMillis();
 
     addAnnotations(firstExercise); // todo do this in a better way
@@ -739,7 +739,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param isFlashcardReq
    * @see #addAnnotationsAndAudio(long, mitll.langtest.shared.exercise.CommonExercise, boolean)
    */
-  private void attachScoreHistory(long userID, CommonExercise firstExercise, boolean isFlashcardReq) {
+  private void attachScoreHistory(int userID, CommonExercise firstExercise, boolean isFlashcardReq) {
     db.getResultDAO().attachScoreHistory(userID, firstExercise, isFlashcardReq);
   }
 
@@ -760,7 +760,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param firstExercise
    * @see #addAnnotationsAndAudio(long, mitll.langtest.shared.exercise.CommonExercise, boolean)
    */
-  private void addPlayedMarkings(long userID, CommonExercise firstExercise) {
+  private void addPlayedMarkings(int userID, CommonExercise firstExercise) {
     db.getEventDAO().addPlayedMarkings(userID, firstExercise);
   }
 
@@ -794,7 +794,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.list.ExerciseList#goGetNextAndCacheIt(String)
    * @see mitll.langtest.client.analysis.PlayAudio#playLast(String, long)
    */
-  public <T extends Shell> T getExercise(String id, long userID, boolean isFlashcardReq) {
+  public <T extends Shell> T getExercise(String id, int userID, boolean isFlashcardReq) {
     if (serverProps.isAMAS()) { // TODO : HOW TO AVOID CAST???
       return (T) db.getAMASExercise(id);
     }
@@ -1281,7 +1281,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.custom.dialog.CreateListDialog#doCreate
    */
   @Override
-  public long addUserList(long userid, String name, String description, String dliClass, boolean isPublic) {
+  public long addUserList(int userid, String name, String description, String dliClass, boolean isPublic) {
     return getUserListManager().addUserList(userid, name, description, dliClass, isPublic);
   }
 
@@ -1300,7 +1300,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param user
    * @see mitll.langtest.client.custom.ListManager#addVisitor(mitll.langtest.shared.custom.UserList)
    */
-  public void addVisitor(long userListID, long user) {
+  public void addVisitor(long userListID, int user) {
     getUserListManager().addVisitor(userListID, user);
   }
 
@@ -1313,7 +1313,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.custom.ListManager#viewLessons
    * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    */
-  public Collection<UserList<CommonShell>> getListsForUser(long userid, boolean onlyCreated, boolean visited) {
+  public Collection<UserList<CommonShell>> getListsForUser(int userid, boolean onlyCreated, boolean visited) {
     //  if (!onlyCreated && !visited) logger.error("getListsForUser huh? asking for neither your lists nor  your visited lists.");
     return getUserListManager().getListsForUser(userid, onlyCreated, visited);
   }
@@ -1325,7 +1325,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.custom.ListManager#viewLessons
    */
   @Override
-  public Collection<UserList<CommonShell>> getUserListsForText(String search, long userid) {
+  public Collection<UserList<CommonShell>> getUserListsForText(String search, int userid) {
     return getUserListManager().getUserListsForText(search, userid);
   }
 
@@ -1348,7 +1348,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addAnnotation(String, String, String)
    */
   @Override
-  public void addAnnotation(String exerciseID, String field, String status, String comment, long userID) {
+  public void addAnnotation(String exerciseID, String field, String status, String comment, int userID) {
     getUserListManager().addAnnotation(exerciseID, field, status, comment, userID);
   }
 
@@ -1358,7 +1358,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param creatorID
    * @see mitll.langtest.client.qc.QCNPFExercise#markReviewed
    */
-  public void markReviewed(String id, boolean isCorrect, long creatorID) {
+  public void markReviewed(String id, boolean isCorrect, int creatorID) {
     getUserListManager().markCorrectness(id, isCorrect, creatorID);
   }
 
@@ -1368,7 +1368,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param creatorID
    * @see mitll.langtest.client.qc.QCNPFExercise#markAttentionLL
    */
-  public void markState(String id, STATE state, long creatorID) {
+  public void markState(String id, STATE state, int creatorID) {
     getUserListManager().markState(id, state, creatorID);
   }
 
@@ -1379,7 +1379,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#doAfterEditComplete(mitll.langtest.client.list.ListInterface, boolean)
    */
   @Override
-  public void setExerciseState(String id, STATE state, long userID) {
+  public void setExerciseState(String id, STATE state, int userID) {
     getUserListManager().markState(id, state, userID);
   }
 
@@ -1457,7 +1457,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   @Override
-  public Collection<CommonExercise> reallyCreateNewItems(long creator, long userListID, String userExerciseText) {
+  public Collection<CommonExercise> reallyCreateNewItems(int creator, long userListID, String userExerciseText) {
     String[] lines = userExerciseText.split("\n");
     logger.info("got " + lines.length + " lines");
     List<CommonExercise> newItems = new ArrayList<>();
@@ -1529,7 +1529,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.instrumentation.ButtonFactory#logEvent(String, String, String, String, long)
    */
   @Override
-  public void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID, String device) {
+  public void logEvent(String id, String widgetType, String exid, String context, int userid, String hitID, String device) {
     try {
       db.logEvent(id, widgetType, exid, context, userid, device);
     } catch (Exception e) {
@@ -1668,7 +1668,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser(int)
    */
   @Override
-  public User getUserBy(long id) {
+  public User getUserBy(int id) {
     return db.getUserDAO().getUserWhere(id);
   }
 
@@ -1760,7 +1760,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.result.ResultManager#createProvider(int, com.google.gwt.user.cellview.client.CellTable)
    */
   @Override
-  public ResultAndTotal getResults(int start, int end, String sortInfo, Map<String, String> unitToValue, long userid, String flText, int req) {
+  public ResultAndTotal getResults(int start, int end, String sortInfo, Map<String, String> unitToValue, int userid, String flText, int req) {
     List<MonitorResult> results = getResults(unitToValue, userid, flText);
     if (!results.isEmpty()) {
       Comparator<MonitorResult> comparator = results.get(0).getComparator(Arrays.asList(sortInfo.split(",")));
@@ -1780,7 +1780,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     List<MonitorResult> resultList = results.subList(start, min);
     logger.info("ensure compressed audio for " + resultList.size() + " items.");
     for (MonitorResult result : resultList) {
-      ensureCompressedAudio((int) result.getUserid(), db.getCustomOrPredefExercise(result.getId()), result.getAnswer());
+      ensureCompressedAudio( result.getUserid(), db.getCustomOrPredefExercise(result.getId()), result.getAnswer());
     }
     return new ResultAndTotal(new ArrayList<MonitorResult>(resultList), n, req);
   }
@@ -1800,7 +1800,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    * @see #getResults(int, int, String, java.util.Map, long, String, int)
    */
-  private List<MonitorResult> getResults(Map<String, String> unitToValue, long userid, String flText) {
+  private List<MonitorResult> getResults(Map<String, String> unitToValue, int userid, String flText) {
     //logger.debug("getResults : request " + unitToValue + " " + userid + " " + flText);
     boolean isNumber = false;
     try {
@@ -1885,7 +1885,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.result.ResultManager#getTypeaheadUsing(String, TextBox)
    */
   @Override
-  public Collection<String> getResultAlternatives(Map<String, String> unitToValue, long userid, String flText, String which) {
+  public Collection<String> getResultAlternatives(Map<String, String> unitToValue, int userid, String flText, String which) {
     Collection<MonitorResult> results = db.getMonitorResults();
 
     logger.debug("getResultAlternatives request " + unitToValue + " userid=" + userid + " fl '" + flText + "' :'" + which + "'");
@@ -1961,7 +1961,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       }
       trie.endMakingNodes();
 
-      Set<Long> imatches = new TreeSet<Long>();
+      Set<Integer> imatches = new TreeSet<>();
       Collection<MonitorResult> matchesLC = trie.getMatchesLC(Long.toString(userid));
 
       // stop!
@@ -1971,7 +1971,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         }
         //logger.debug("returning " + imatches);
 
-        for (Long m : imatches) matches.add(Long.toString(m));
+        for (Integer m : imatches) matches.add(Long.toString(m));
         matches = getLimitedSizeList(matches);
         return matches;
       } else {
@@ -2351,7 +2351,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete()
    */
   @Override
-  public AVPScoreReport getUserHistoryForList(long userid, Collection<String> ids, long latestResultID,
+  public AVPScoreReport getUserHistoryForList(int userid, Collection<String> ids, long latestResultID,
                                               Map<String, Collection<String>> typeToSection, long userListID) {
     //logger.debug("getUserHistoryForList " + userid + " and " + ids + " type to section " + typeToSection);
     UserList<CommonShell> userListByID = userListID != -1 ? db.getUserListByID(userListID) : null;
@@ -2389,7 +2389,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot
    */
   @Override
-  public UserPerformance getPerformanceForUser(long id, int minRecordings) {
+  public UserPerformance getPerformanceForUser(int id, int minRecordings) {
     return db.getResultDAO().getPerformanceForUser(id, db.getPhoneDAO(), minRecordings, db.getExerciseIDToRefAudio());
   }
 
@@ -2400,14 +2400,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.analysis.AnalysisTab#getWordScores
    */
   @Override
-  public List<WordScore> getWordScores(long id, int minRecordings) {
+  public List<WordScore> getWordScores(int id, int minRecordings) {
     List<WordScore> wordScoresForUser = db.getAnalysis().getWordScoresForUser(id, minRecordings);
 //    for (WordScore ws : wordScoresForUser) if (ws.getNativeAudio() != null) logger.info("got " +ws.getId() + " " + ws.getNativeAudio());
     return wordScoresForUser;
   }
 
   @Override
-  public PhoneReport getPhoneScores(long id, int minRecordings) {
+  public PhoneReport getPhoneScores(int id, int minRecordings) {
     return db.getAnalysis().getPhonesForUser(id, minRecordings);
   }
 
@@ -2417,8 +2417,25 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     logger.debug(prefixedMessage);
 
     if (message.startsWith("got browser exception")) {
-      sendEmail("Javascript Exception", prefixedMessage);
+      sendEmail("Javascript Exception", getInfo(prefixedMessage));
     }
+  }
+
+  private String getInfo(String message) {
+    HttpServletRequest request = getThreadLocalRequest();
+    String remoteAddr = request.getHeader("X-FORWARDED-FOR");
+    if (remoteAddr == null || remoteAddr.isEmpty()) {
+      remoteAddr = request.getRemoteAddr();
+    }
+    String userAgent = request.getHeader("User-Agent");
+
+    String strongName = getPermutationStrongName();
+    String serverName = getThreadLocalRequest().getServerName();
+    String msgStr = message +"\n" + "remoteAddr=" + remoteAddr + "\nuser agent: " + userAgent +
+        "\ngwt: " + strongName+
+         "\nserver: " + serverName;
+
+    return msgStr;
   }
 
   private MailSupport getMailSupport() {

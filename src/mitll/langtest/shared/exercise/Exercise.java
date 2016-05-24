@@ -116,7 +116,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @see UserDAO#DEFAULT_USER_ID
    */
   @Override
-  public long getCreator() {
+  public int getCreator() {
     return -5;
   }
 

@@ -37,7 +37,7 @@ public interface LangTestDatabase extends RemoteService {
 
   List<CommonShell> getShells(List<String> ids);
 
-  <T extends Shell> T getExercise(String id, long userID, boolean isFlashcardReq);
+  <T extends Shell> T getExercise(String id, int userID, boolean isFlashcardReq);
 
 
   void markAudioDefect(AudioAttribute audioAttribute, String exid);
@@ -49,7 +49,7 @@ public interface LangTestDatabase extends RemoteService {
 
   List<User> getUsers();
   User userExists(String login, String passwordH);
-  User getUserBy(long id);
+  User getUserBy(int id);
 
   // answer DAO
   AudioAnswer writeAudioFile(String base64EncodedString,
@@ -73,7 +73,7 @@ public interface LangTestDatabase extends RemoteService {
   void addStudentAnswer(long resultID, boolean correct);
   QuizCorrectAndScore getScoresForUser(Map<String, Collection<String>> typeToSection, int userID, Collection<String> exids);
 
-  Collection<String> getResultAlternatives(Map<String, String> unitToValue, long userid, String flText, String which);
+  Collection<String> getResultAlternatives(Map<String, String> unitToValue, int userid, String flText, String which);
 
 
   ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, String exerciseID);
@@ -118,33 +118,33 @@ public interface LangTestDatabase extends RemoteService {
 
   boolean forgotUsername(String emailH, String email, String url);
 
-  ResultAndTotal getResults(int start, int end, String sortInfo,Map<String, String> unitToValue, long userid, String flText, int req);
+  ResultAndTotal getResults(int start, int end, String sortInfo,Map<String, String> unitToValue, int userid, String flText, int req);
 
   Map<String,Number> getResultStats();
 
   Map<String, Map<Integer, Integer>> getResultCountsByGender();
   Map<String, Map<Integer, Map<Integer, Integer>>> getDesiredCounts();
 
-  UserPerformance getPerformanceForUser(long id, int minRecordings);
+  UserPerformance getPerformanceForUser(int id, int minRecordings);
 
-  List<WordScore> getWordScores(long id, int minRecordings);
+  List<WordScore> getWordScores(int id, int minRecordings);
 
-  PhoneReport getPhoneScores(long id, int minRecordings);
+  PhoneReport getPhoneScores(int id, int minRecordings);
 
   void logMessage(String message);
-  void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID, String device);
+  void logEvent(String id, String widgetType, String exid, String context, int userid, String hitID, String device);
 
-  AVPScoreReport getUserHistoryForList(long userid, Collection<String> ids, long latestResultID,
+  AVPScoreReport getUserHistoryForList(int userid, Collection<String> ids, long latestResultID,
                                        Map<String, Collection<String>> typeToSection, long userListID);
 
   StartupInfo getStartupInfo();
-  long addUserList(long userid, String name, String description, String dliClass, boolean isPublic);
+  long addUserList(int userid, String name, String description, String dliClass, boolean isPublic);
   void setPublicOnList(long userListID, boolean isPublic);
-  void addVisitor(long userListID, long user);
+  void addVisitor(long userListID, int user);
 
 
-  Collection<UserList<CommonShell>> getListsForUser(long userid, boolean onlyCreated, boolean visited);
-  Collection<UserList<CommonShell>> getUserListsForText(String search, long userid);
+  Collection<UserList<CommonShell>> getListsForUser(int userid, boolean onlyCreated, boolean visited);
+  Collection<UserList<CommonShell>> getUserListsForText(String search, int userid);
   List<UserList<CommonShell>> getReviewLists();
 
 
@@ -153,17 +153,17 @@ public interface LangTestDatabase extends RemoteService {
   boolean isValidForeignPhrase(String foreign);
 
   CommonExercise reallyCreateNewItem(long userListID, CommonExercise userExercise);
-  Collection<CommonExercise> reallyCreateNewItems(long creator,long userListID, String userExerciseText);
+  Collection<CommonExercise> reallyCreateNewItems(int creator,long userListID, String userExerciseText);
 
   CommonExercise duplicateExercise(CommonExercise id);
 
   void editItem(CommonExercise userExercise);
 
-  void addAnnotation(String exerciseID, String field, String status, String comment, long userID);
-  void markReviewed(String exid, boolean isCorrect, long creatorID);
-  void markState(String id, STATE state, long creatorID);
+  void addAnnotation(String exerciseID, String field, String status, String comment, int userID);
+  void markReviewed(String exid, boolean isCorrect, int creatorID);
+  void markState(String id, STATE state, int creatorID);
 
-  void setExerciseState(String id, STATE state, long userID);
+  void setExerciseState(String id, STATE state, int userID);
 
   boolean deleteList(long id);
   boolean deleteItemFromList(long listid, String exid);

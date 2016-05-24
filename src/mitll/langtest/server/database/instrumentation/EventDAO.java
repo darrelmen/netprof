@@ -231,7 +231,7 @@ public class EventDAO extends DAO implements IEventDAO {
   }
 
   @Override
-  public void addPlayedMarkings(long userID, CommonExercise firstExercise) {
+  public void addPlayedMarkings(int userID, CommonExercise firstExercise) {
     List<Event> allForUserAndExercise = getAllForUserAndExercise(userID, firstExercise.getID());
     Map<String, AudioAttribute> audioToAttr = firstExercise.getAudioRefToAttr();
     for (Event event : allForUserAndExercise) {
@@ -272,12 +272,12 @@ public class EventDAO extends DAO implements IEventDAO {
     List<Event> lists = new ArrayList<Event>();
 
     while (rs.next()) {
-      lists.add(new Event(//rs.getLong(ID),
+      lists.add(new Event(
           rs.getString(WIDGETID),
           rs.getString(WIDGETTYPE),
           rs.getString(EXERCISEID),
           rs.getString(CONTEXT),
-          rs.getLong(CREATORID),
+          rs.getInt(CREATORID),
           rs.getTimestamp(MODIFIED).getTime(),
           //  rs.getString(HITID),
           rs.getString(DEVICE))
@@ -296,7 +296,7 @@ public class EventDAO extends DAO implements IEventDAO {
 
     while (rs.next()) {
       lists.add(new SlimEvent(
-          rs.getLong(CREATORID),
+          rs.getInt(CREATORID),
           rs.getTimestamp(MODIFIED).getTime()
       ));
     }
