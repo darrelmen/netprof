@@ -56,7 +56,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
    * @param deployPath
    * @param serverProperties
    * @param langTestDatabase
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio
+   * @see mitll.langtest.server.audio.AudioFileHelper#makeASRScoring
    */
   public ASRScoring(String deployPath, ServerProperties serverProperties, LogAndNotify langTestDatabase, HTKDictionary htkDictionary) {
     super(deployPath, serverProperties, langTestDatabase, htkDictionary);
@@ -327,6 +327,7 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
 /*    if (false) logger.debug("dirs is " + dirs +
       " audio dir " + testAudioDir + " audio " + testAudioFileNoSuffix + " sentence " + sentence + " decode " + decode + " scoring dir " + scoringDir);
 */
+
       Audio testAudio = Audio$.MODULE$.apply(
           testAudioDir, testAudioFileNoSuffix,
           false /* notForScoring */, dirs);
@@ -489,8 +490,9 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
   private Scores getScoresFromHydec(Audio testAudio, String sentence, String configFile) {
     sentence = svd.getTrimmed(sentence);
     long then = System.currentTimeMillis();
-//    logger.debug("getScoresFromHydec scoring '" + sentence +"' (" +sentence.length()+ " ) with " +
-//            "LTS " + letterToSoundClass + " against " + testAudio + " with " + configFile);
+    logger.debug("getScoresFromHydec scoring '" + sentence +"' (" +sentence.length()+ " ) with " +
+            "LTS " + getLTS() +
+        " against " + testAudio + " with " + configFile);
 
     try {
       Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut =
@@ -511,9 +513,11 @@ public class ASRScoring extends Scoring implements CollationSort, ASR {
       return new Scores((int) (System.currentTimeMillis() - then));
     } catch (Exception ee) {
       String msg = "getScoresFromHydec : Running align/decode on " + sentence;
-      logger.warn(msg + " Got " + ee.getMessage());
+      logger.warn(msg + " Got " + ee.getMessage(),ee);
 
-      langTestDatabase.logAndNotifyServerException(ee, msg);
+      if (langTestDatabase != null) {
+        langTestDatabase.logAndNotifyServerException(ee, msg);
+      }
     }
 
     long timeToRunHydec = System.currentTimeMillis() - then;
