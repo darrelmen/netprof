@@ -216,7 +216,7 @@ public class DownloadServlet extends DatabaseServlet {
     if (!englishPart.isEmpty()) englishPart = "_" + englishPart;
 
     // user part
-    String userPart = getUserPart(db, Long.parseLong(useridString));
+    String userPart = getUserPart(db, Integer.parseInt(useridString));
 
     String fileName = foreignPart + englishPart + userPart;
     fileName = fileName.replaceAll("\\.","");
@@ -228,7 +228,7 @@ public class DownloadServlet extends DatabaseServlet {
     return underscores;
   }
 
-  private String getUserPart(DatabaseImpl db, long userid) {
+  private String getUserPart(DatabaseImpl db, int userid) {
     User userWhere = db.getUserDAO().getUserWhere(userid);
     return userWhere != null ? (userWhere.getUserID().isEmpty() ? "":"_by_" + userWhere.getUserID()) : "";
   }

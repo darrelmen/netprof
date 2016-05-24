@@ -35,7 +35,7 @@ public class MonitorResult implements IsSerializable {
   private static final String VALIDITY = "Validity";
 
   private int uniqueID;
-  private long userid;
+  private int userid;
   private String id;
 
   private String foreignText;
@@ -80,7 +80,7 @@ public class MonitorResult implements IsSerializable {
    * @param roundTripDur
    * @see mitll.langtest.server.database.ResultDAO#getMonitorResultsForQuery(Connection, PreparedStatement)
    */
-  public MonitorResult(int uniqueID, long userid, String id, String answer,
+  public MonitorResult(int uniqueID, int userid, String id, String answer,
                        boolean valid, long timestamp, String answerType, int durationInMillis,
                        boolean correct, float pronScore, String device, boolean withFlash, int processDur,
                        int roundTripDur, String validity, float snr) {
@@ -106,7 +106,7 @@ public class MonitorResult implements IsSerializable {
     return uniqueID;
   }
 
-  public long getUserid() {
+  public int getUserid() {
     return userid;
   }
 

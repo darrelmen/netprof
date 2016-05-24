@@ -48,7 +48,7 @@ class PlayAudio {
    * @param id
    * @param userid
    */
-  public void playLast(String id, long userid) {
+  void playLast(String id, int userid) {
     service.getExercise(id, userid, false, new AsyncCallback<CommonExercise>() {
       @Override
       public void onFailure(Throwable throwable) {
