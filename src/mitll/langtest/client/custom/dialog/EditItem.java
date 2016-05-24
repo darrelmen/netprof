@@ -277,7 +277,7 @@ public class EditItem {
    * @param userid
    * @return
    */
-  private UserExercise createNewItem(long userid) {
+  private UserExercise createNewItem(int userid) {
     return new UserExercise(-1, UserExercise.CUSTOM_PREFIX + Long.MAX_VALUE, userid, "", "", "");
   }
 

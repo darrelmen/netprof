@@ -368,8 +368,8 @@ public class UserListDAO extends DAO {
 
     while (rs.next()) {
       long uniqueid = rs.getLong("uniqueid");
-      lists.add(new UserList<CommonShell>(uniqueid, //id
-        userDAO.getUserWhere(rs.getLong(CREATORID)), // age
+      lists.add(new UserList<>(uniqueid, //id
+        userDAO.getUserWhere(rs.getInt(CREATORID)), // age
         rs.getString(NAME), // exp
         rs.getString("description"), // exp
         rs.getString("classmarker"), // exp

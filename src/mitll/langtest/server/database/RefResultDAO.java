@@ -401,7 +401,7 @@ public class RefResultDAO extends DAO {
     long then = System.currentTimeMillis();
     while (rs.next()) {
       int uniqueID = rs.getInt(ID);
-      long userID = rs.getLong(USERID);
+      int userID = rs.getInt(USERID);
       String exid = rs.getString(EXID);
       Timestamp timestamp = rs.getTimestamp(Database.TIME);
       String answer = rs.getString(ANSWER);
