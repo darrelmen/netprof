@@ -172,7 +172,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    * @param emailH
    * @see #addUser(String, String, String, mitll.langtest.shared.User.Kind, String, boolean, int, String, String)
    */
-  protected void updateUser(long id, User.Kind kind, String passwordH, String emailH) {
+  protected void updateUser(int id, User.Kind kind, String passwordH, String emailH) {
     try {
       if (passwordH == null) {
         logger.error("Got null password Hash?", new Exception("empty password hash"));
@@ -194,7 +194,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
       statement.setString(i++, emailH);
       String kind1 = kind == User.Kind.CONTENT_DEVELOPER ? CD_PERMISSIONS.toString() : EMPTY_PERM.toString();
       statement.setString(i++, kind1);
-      statement.setLong(i++, id);
+      statement.setInt(i++, id);
 
       int i1 = statement.executeUpdate();
 
@@ -216,7 +216,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    * @see mitll.langtest.server.mail.EmailHelper#enableCDUser(String, String, String)
    */
   @Override
-  public boolean enableUser(long id) {
+  public boolean enableUser(int id) {
     try {
       Connection connection = getConnection();
       PreparedStatement statement = connection.prepareStatement(
@@ -225,7 +225,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
               " WHERE " +
               ID + "=?");
       int i = 1;
-      statement.setLong(i++, id);
+      statement.setInt(i++, id);
 
       int i1 = statement.executeUpdate();
 
@@ -414,10 +414,6 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     }
   }
 
-/*  private void addVarcharColumn(Connection connection, String column) throws SQLException {
-    addColumn(connection, column, "VARCHAR");
-  }*/
-
   private void addColumn(Connection connection, String column, String type) throws SQLException {
     PreparedStatement statement = connection.prepareStatement("ALTER TABLE users ADD " + column + " " + type);
     statement.execute();
@@ -460,7 +456,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    * @see AudioDAO#getAudioAttribute
    */
   @Override
-  public MiniUser getMiniUser(long userid) {
+  public MiniUser getMiniUser(int userid) {
     User userWhere = getUserWhere(userid);
     return userWhere == null ? null : new MiniUser(userWhere);
   }
@@ -492,7 +488,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getUserBy(long)
    */
   @Override
-  public User getUserWhere(long userid) {
+  public User getUserWhere(int userid) {
     String sql = "SELECT * from users where " + ID + "=" + userid + ";";
     //long then = System.currentTimeMillis();
     Collection<User> users = getUsers(sql);
@@ -511,7 +507,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     return users.iterator().next();
   }
 
-  private User getUserWhere(long userid, String sql) {
+  private User getUserWhere(int userid, String sql) {
     List<User> users = getUsers(sql);
     if (users.isEmpty()) {
       if (userid > 0) {
@@ -610,12 +606,6 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     return users;
   }
 
-/*
-  private boolean isAdmin(String userid) {
-    return userid != null && (admins.contains(userid));
-  }
-*/
-
   @Override
   public Map<Integer, User> getUserMap(boolean getMale) {
     return getUserMap(getMale, getUsers());
@@ -650,7 +640,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
 
 
   @Override
-  public boolean changePassword(Long remove, String passwordH) {
+  public boolean changePassword(Integer remove, String passwordH) {
     try {
       Connection connection = getConnection();
       PreparedStatement statement;
@@ -684,7 +674,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    * @param resetKey
    * @param key
    * @return
-   * @see #clearKey(Long, boolean)
+   * @see #clearKey(Integer, boolean)
    */
   @Override
   public boolean updateKey(Integer userid, boolean resetKey, String key) {
@@ -719,7 +709,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    * @see mitll.langtest.server.LangTestDatabaseImpl#changePFor(String, String)
    */
   @Override
-  public boolean clearKey(Long remove, boolean resetKey) {
+  public boolean clearKey(Integer remove, boolean resetKey) {
     return updateKey(remove, resetKey, "");
   }
 

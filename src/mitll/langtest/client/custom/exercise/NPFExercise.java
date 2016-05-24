@@ -192,10 +192,9 @@ abstract class NPFExercise<T extends CommonShell & AudioRefExercise & ScoredExer
    * @param textBox
    * @see #makeANewList(com.github.gwtbootstrap.client.ui.TextBox)
    */
-  private void addUserList(long userID, String title, final TextBox textBox) {
-    logger.info("user " + userID + " adding list " + title);
-    String audioType = controller.getAudioType();
-    boolean isStudent = audioType.equalsIgnoreCase(PRACTICE);
+  private void addUserList(int userID, String title, final TextBox textBox) {
+//    logger.info("user " + userID + " adding list " + title);
+    boolean isStudent = controller.getAudioType().equalsIgnoreCase(PRACTICE);
     service.addUserList(userID,
         title,
         "",

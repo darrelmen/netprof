@@ -20,7 +20,7 @@ public interface IEventDAO {
 
   SlickSlimEvent getFirstSlim(String language);
 
-  void addPlayedMarkings(long userID, CommonExercise firstExercise);
+  void addPlayedMarkings(int userID, CommonExercise firstExercise);
 
   Number getNumRows(String language);
 }

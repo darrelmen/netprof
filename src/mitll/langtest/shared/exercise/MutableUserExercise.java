@@ -22,7 +22,7 @@ public interface MutableUserExercise {
    * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#reallyChange(ListInterface, boolean)
    * @param id
    */
-  void setCreator(long id);
+  void setCreator(int id);
 
   /**
    * @see mitll.langtest.server.database.custom.UserExerciseDAO#add(CommonExercise, boolean)

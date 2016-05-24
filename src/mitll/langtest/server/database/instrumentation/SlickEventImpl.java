@@ -56,8 +56,8 @@ public class SlickEventImpl implements IEventDAO {
         modified,
         language.toLowerCase());
 
-    logger.info("insert " +event);
-    logger.info("insert " +slickEvent);
+//    logger.info("insert " +event);
+ //   logger.info("insert " +slickEvent);
 
     return slickEvent;
   }
@@ -98,7 +98,7 @@ public class SlickEventImpl implements IEventDAO {
   }
 
   @Override
-  public void addPlayedMarkings(long userID, CommonExercise firstExercise) {
+  public void addPlayedMarkings(int userID, CommonExercise firstExercise) {
     List<String> forUserAndExercise = eventDAOExample.getForUserAndExercise(userID, firstExercise.getID());
     Map<String, AudioAttribute> audioToAttr = firstExercise.getAudioRefToAttr();
     for (String eventContext : forUserAndExercise) {

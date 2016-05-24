@@ -41,7 +41,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface IUserDAO {
-  long getDefectDetector();
+  int getDefectDetector();
 
   Database getDatabase();
 
@@ -53,7 +53,7 @@ public interface IUserDAO {
                Collection<User.Permission> permissions,
                User.Kind kind, String passwordH, String emailH, String device);
 
-  boolean enableUser(long id);
+  boolean enableUser(int id);
 
   User isValidEmail(String emailH);
 
@@ -73,23 +73,23 @@ public interface IUserDAO {
 
   Map<Integer, MiniUser> getMiniUsers();
 
-  MiniUser getMiniUser(long userid);
+  MiniUser getMiniUser(int userid);
 
   User getUserWhereResetKey(String resetKey);
 
   User getUserWhereEnabledReq(String resetKey);
 
-  User getUserWhere(long userid);
+  User getUserWhere(int userid);
 
   Map<Integer, User> getUserMap(boolean getMale);
 
   Map<Integer, User> getUserMap();
 
-  boolean changePassword(Long remove, String passwordH);
+  boolean changePassword(Integer remove, String passwordH);
 
   boolean updateKey(Integer userid, boolean resetKey, String key);
 
-  boolean clearKey(Long remove, boolean resetKey);
+  boolean clearKey(Integer remove, boolean resetKey);
 
   boolean changeEnabled(int userid, boolean enabled);
 }
