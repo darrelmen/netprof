@@ -969,8 +969,10 @@ public class AudioFileHelper implements CollationSort, AlignDecode {
    */
   private HTKDictionary makeDict(String installPath) {
     String dictFile = new ConfigFileCreator(serverProps.getProperties(), null, Scoring.getScoringDir(installPath)).getDictFile();
-    if (dictFile != null && new File(dictFile).exists()) {
+    File file = new File(dictFile);
+    if (dictFile != null && file.exists()) {
       long then = System.currentTimeMillis();
+      logger.info("read " + file.getAbsolutePath());
       HTKDictionary htkDictionary = new HTKDictionary(dictFile);
       long now = System.currentTimeMillis();
       int size = htkDictionary.size(); // force read from lazy val
