@@ -38,7 +38,7 @@ public class Session implements IsSerializable, SetScore {
    * @param userid
    * @param timestamp
    */
-  public Session(int id, long userid, long timestamp) {
+  public Session(int id, int userid, long timestamp) {
     this.userid = userid;
     this.id = id;
     this.timestamp = timestamp;
