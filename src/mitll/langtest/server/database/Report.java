@@ -330,7 +330,7 @@ public class Report {
 
     // all users
     JSONObject allUsers = new JSONObject();
-    Set<Long> users = getUsers(builder, allUsers, year);
+    Set<Integer> users = getUsers(builder, allUsers, year);
     jsonObject.put(ALL_USERS, allUsers);
 
     // ipad users
@@ -339,11 +339,11 @@ public class Report {
     jsonObject.put(I_PAD_USERS, iPadUsers);
 
     JSONObject timeOnTaskJSON = new JSONObject();
-    Set<Long> events = getEvents(builder, users, timeOnTaskJSON, year, allSlim);
+    Set<Integer> events = getEvents(builder, users, timeOnTaskJSON, year, allSlim);
     jsonObject.put(OVERALL_TIME_ON_TASK, timeOnTaskJSON);
 
     JSONObject deviceTimeOnTaskJSON = new JSONObject();
-    Set<Long> eventsDevices = getEventsDevices(builder, users, deviceTimeOnTaskJSON, year, allDevicesSlim);
+    Set<Integer> eventsDevices = getEventsDevices(builder, users, deviceTimeOnTaskJSON, year, allDevicesSlim);
     jsonObject.put(DEVICE_TIME_ON_TASK, deviceTimeOnTaskJSON);
 
     events.addAll(eventsDevices);
@@ -512,7 +512,7 @@ public class Report {
    * @return
    * @see #getReport
    */
-  private Set<Long> getUsers(StringBuilder builder, JSONObject jsonObject, int year) {
+  private Set<Integer> getUsers(StringBuilder builder, JSONObject jsonObject, int year) {
     return getUsers(builder, fixUserStarts(), ALL_NEW_USERS, jsonObject, year);
   }
 
@@ -563,7 +563,7 @@ public class Report {
    * @see #doReport
    * @see #getUsers
    */
-  private Set<Long> getUsers(StringBuilder builder, Collection<User> users, String users1, JSONObject jsonObject, int year) {
+  private Set<Integer> getUsers(StringBuilder builder, Collection<User> users, String users1, JSONObject jsonObject, int year) {
     Calendar calendar = getCalendarForYear(year);
     YearTimeRange yearTimeRange = new YearTimeRange(year, calendar).invoke();
     int ytd = 0;
@@ -951,20 +951,21 @@ public class Report {
    * @paramx language
    * @see #doReport
    */
-  private void getResults(StringBuilder builder, Set<Long> students,
+  private void getResults(StringBuilder builder,
+                          Set<Integer> students,
                           JSONObject jsonObject, int year, Map<String, List<AudioAttribute>> exToAudio,
                           List<Result> results) {
     getResultsForSet(builder, students, results, ALL_RECORDINGS, jsonObject, year, exToAudio);
   }
 
-  private void getResultsDevices(StringBuilder builder, Set<Long> students,
+  private void getResultsDevices(StringBuilder builder, Set<Integer> students,
                                  JSONObject jsonObject, int year, Map<String,
       List<AudioAttribute>> exToAudio,
                                  List<Result> results) {
     getResultsForSet(builder, students, results, DEVICE_RECORDINGS, jsonObject, year, exToAudio);
   }
 
-  private void getResultsForSet(StringBuilder builder, Set<Long> students,
+  private void getResultsForSet(StringBuilder builder, Set<Integer> students,
                                 Collection<Result> results,
                                 String recordings,
                                 JSONObject jsonObject, int year,
@@ -1247,7 +1248,7 @@ public class Report {
    * @param jsonObject
    * @see #doReport
    */
-  private Set<Long> getEvents(StringBuilder builder, Set<Long> students, JSONObject jsonObject, int year, Collection<SlickSlimEvent> all) {
+  private Set<Integer> getEvents(StringBuilder builder, Set<Integer> students, JSONObject jsonObject, int year, Collection<SlickSlimEvent> all) {
     return getEvents(builder, students, all, ACTIVE_USERS, TIME_ON_TASK, jsonObject, year);
   }
 
@@ -1273,7 +1274,7 @@ public class Report {
    * @return
    * @see #getReport
    */
-  private Set<Long> getEventsDevices(StringBuilder builder, Set<Long> students, JSONObject jsonObject, int year, List<SlickSlimEvent> allDevicesSlim) {
+  private Set<Integer> getEventsDevices(StringBuilder builder, Set<Integer> students, JSONObject jsonObject, int year, List<SlickSlimEvent> allDevicesSlim) {
     String activeUsers = ACTIVE_I_PAD;
     String tableLabel = "iPad/iPhone Time on Task";
     return getEvents(builder, students, allDevicesSlim, activeUsers, tableLabel, jsonObject, year);
@@ -1289,7 +1290,7 @@ public class Report {
    * @param year
    * @see #getEvents
    */
-  private Set<Long> getEvents(StringBuilder builder, Set<Long> students, Collection<SlickSlimEvent> all, String activeUsers,
+  private Set<Integer> getEvents(StringBuilder builder, Set<Integer> students, Collection<SlickSlimEvent> all, String activeUsers,
                               String tableLabel, JSONObject jsonObject, int year) {
     Map<Integer, Set<Long>> monthToCount = new TreeMap<>();
     Map<Integer, Set<Long>> weekToCount = new TreeMap<>();
@@ -1301,15 +1302,15 @@ public class Report {
     ensureYTDEntries3(year, monthToCount2, weekToCount2);
   //  logger.info("now " + monthToCount2.keySet() + " " + weekToCount2.keySet());
 
-    Set<Long> teachers = new HashSet<>();
+    Set<Integer> teachers = new HashSet<>();
 //    int skipped = 0;
     Calendar calendar = getCalendarForYear(year);
     YearTimeRange yearTimeRange = new YearTimeRange(year, calendar).invoke();
 
-    Set<Long> users = new HashSet<>();
+    Set<Integer> users = new HashSet<>();
 
     for (SlickSlimEvent event : all) {
-      long creatorID = event.userid();
+      Integer creatorID = event.userid();
       long timestamp = event.modified();
       if (yearTimeRange.inYear(timestamp) && students.contains(creatorID)) {
         if (isValidUser(creatorID)) {
