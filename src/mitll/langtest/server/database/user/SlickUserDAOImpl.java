@@ -39,6 +39,7 @@ import mitll.npdata.dao.user.SlickUser;
 import mitll.npdata.dao.user.UserDAOWrapper;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -117,7 +118,11 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
   @Override
   public List<User> getUsers() {
-    return null;
+    List<SlickUser> all = dao.getAll();
+    List<User> copy = new ArrayList<>();
+
+    for (SlickUser s : all) copy.add(new User());
+
   }
 
   @Override
