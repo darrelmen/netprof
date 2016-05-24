@@ -33,7 +33,7 @@ public interface LangTestDatabaseAsync {
 
   void getUsers(AsyncCallback<List<User>> async);
 
-  void getUserBy(long id, AsyncCallback<User> async);
+  void getUserBy(int id, AsyncCallback<User> async);
 
   void writeAudioFile(String base64EncodedString,
                       AudioContext audioContext,
@@ -58,7 +58,7 @@ public interface LangTestDatabaseAsync {
   void getScoresForUser(Map<String, Collection<String>> typeToSection, int userID, Collection<String> exids,
                         AsyncCallback<QuizCorrectAndScore> async);
 
-  <T extends Shell> void getExercise(String id, long userID, boolean isFlashcardReq, AsyncCallback<T> async);
+  <T extends Shell> void getExercise(String id, int userID, boolean isFlashcardReq, AsyncCallback<T> async);
 
   void getUserToResultCount(AsyncCallback<Map<User, Integer>> async);
 
@@ -72,7 +72,7 @@ public interface LangTestDatabaseAsync {
 
   void getSessions(AsyncCallback<List<Session>> async);
 
-  void getResults(int start, int end, String sortInfo, Map<String, String> unitToValue, long userid, String flText,
+  void getResults(int start, int end, String sortInfo, Map<String, String> unitToValue, int userid, String flText,
                   int req, AsyncCallback<ResultAndTotal> async);
 
   void getResultStats(AsyncCallback<Map<String, Number>> async);
@@ -86,25 +86,25 @@ public interface LangTestDatabaseAsync {
 
   void getStartupInfo( AsyncCallback<StartupInfo> async);
 
-  void getUserListsForText(String search, long userid, AsyncCallback<Collection<UserList<CommonShell>>> async);
+  void getUserListsForText(String search, int userid, AsyncCallback<Collection<UserList<CommonShell>>> async);
 
-  void getListsForUser(long userid, boolean onlyCreated, boolean visited, AsyncCallback<Collection<UserList<CommonShell>>> async);
+  void getListsForUser(int userid, boolean onlyCreated, boolean visited, AsyncCallback<Collection<UserList<CommonShell>>> async);
 
   void addItemToUserList(long userListID, String exID, AsyncCallback<Void> async);
 
   void reallyCreateNewItem(long userListID, CommonExercise userExercise, AsyncCallback<CommonExercise> async);
 
-  void addUserList(long userid, String name, String description, String dliClass, boolean isPublic, AsyncCallback<Long> async);
+  void addUserList(int userid, String name, String description, String dliClass, boolean isPublic, AsyncCallback<Long> async);
 
-  void addVisitor(long userListID, long user, AsyncCallback<Void> asyncCallback);
+  void addVisitor(long userListID, int user, AsyncCallback<Void> asyncCallback);
 
   void editItem(CommonExercise userExercise, AsyncCallback<Void> async);
 
-  void addAnnotation(String exerciseID, String field, String status, String comment, long userID, AsyncCallback<Void> async);
+  void addAnnotation(String exerciseID, String field, String status, String comment, int userID, AsyncCallback<Void> async);
 
-  void markReviewed(String id, boolean isCorrect, long creatorID, AsyncCallback<Void> asyncCallback);
+  void markReviewed(String id, boolean isCorrect, int creatorID, AsyncCallback<Void> asyncCallback);
 
-  void setExerciseState(String id, STATE state, long userID, AsyncCallback<Void> async);
+  void setExerciseState(String id, STATE state, int userID, AsyncCallback<Void> async);
 
   void isValidForeignPhrase(String foreign, AsyncCallback<Boolean> async);
 
@@ -116,15 +116,15 @@ public interface LangTestDatabaseAsync {
 
   void deleteItem(String exid, AsyncCallback<Boolean> async);
 
-  void getUserHistoryForList(long userid, Collection<String> ids, long latestResultID,
+  void getUserHistoryForList(int userid, Collection<String> ids, long latestResultID,
                              Map<String, Collection<String>> typeToSection, long userListID, AsyncCallback<AVPScoreReport> async);
 
-  void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID, String device,
+  void logEvent(String id, String widgetType, String exid, String context, int userid, String hitID, String device,
                 AsyncCallback<Void> async);
 
   void getEvents(AsyncCallback<List<Event>> async);
 
-  void markState(String id, STATE state, long creatorID, AsyncCallback<Void> async);
+  void markState(String id, STATE state, int creatorID, AsyncCallback<Void> async);
 
   void getReviewLists(AsyncCallback<List<UserList<CommonShell>>> async);
 
@@ -167,7 +167,7 @@ public interface LangTestDatabaseAsync {
 
   void getNumResults(AsyncCallback<Integer> async);
 
-  void getResultAlternatives(Map<String, String> unitToValue, long userid, String flText, String which,
+  void getResultAlternatives(Map<String, String> unitToValue, int userid, String flText, String which,
                              AsyncCallback<Collection<String>> async);
 
   void addRoundTrip(long resultid, int roundTrip, AsyncCallback<Void> async);
@@ -182,17 +182,17 @@ public interface LangTestDatabaseAsync {
 
   void getContextPractice(AsyncCallback<ContextPractice> async);
 
-  void getPerformanceForUser(long id, int minRecordings, AsyncCallback<UserPerformance> async);
+  void getPerformanceForUser(int id, int minRecordings, AsyncCallback<UserPerformance> async);
 
-  void getWordScores(long id, int minRecordings, AsyncCallback<List<WordScore>> async);
+  void getWordScores(int id, int minRecordings, AsyncCallback<List<WordScore>> async);
 
-  void getPhoneScores(long id, int minRecordings, AsyncCallback<PhoneReport> async);
+  void getPhoneScores(int id, int minRecordings, AsyncCallback<PhoneReport> async);
 
   void getUsersWithRecordings(AsyncCallback<Collection<UserInfo>> async);
 
   void getShells(List<String> ids, AsyncCallback<List<CommonShell>> async);
 
-  void reallyCreateNewItems(long creator, long userListID, String userExerciseText, AsyncCallback<Collection<CommonExercise>> async);
+  void reallyCreateNewItems(int creator, long userListID, String userExerciseText, AsyncCallback<Collection<CommonExercise>> async);
 
   void reloadExercises(AsyncCallback<Void> async);
 }

@@ -214,8 +214,8 @@ public class UserManagement {
    * @return
    * @seex mitll.langtest.server.database.ImportCourseExamples#copyUser
    */
-  public long addUser(User user) {
-    long l;
+  public int addUser(User user) {
+    int l;
     if ((l = userDAO.userExists(user.getUserID())) == -1) {
       logger.debug("addUser " + user);
       l = userDAO.addUser(user.getAge(), user.getGender() == 0 ? BaseUserDAO.MALE : BaseUserDAO.FEMALE,

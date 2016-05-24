@@ -247,7 +247,7 @@ public class UserListManager {
    * @see mitll.langtest.server.LangTestDatabaseImpl#addUserList
    * @see mitll.langtest.client.custom.dialog.CreateListDialog#doCreate
    */
-  public long addUserList(long userid, String name, String description, String dliClass, boolean isPublic) {
+  public long addUserList(int userid, String name, String description, String dliClass, boolean isPublic) {
     UserList userList = createUserList(userid, name, description, dliClass, !isPublic);
     if (userList == null) {
       logger.info("no user list??? for " + userid + " " + name);
@@ -263,7 +263,7 @@ public class UserListManager {
    * @param isPrivate
    * @return null if user already has a list with this name
    */
-  private UserList createUserList(long userid, String name, String description, String dliClass, boolean isPrivate) {
+  private UserList createUserList(int userid, String name, String description, String dliClass, boolean isPrivate) {
     User userWhere = userDAO.getUserWhere(userid);
     if (userWhere == null) {
       logger.error("huh? no user with id " + userid);
@@ -281,11 +281,11 @@ public class UserListManager {
     }
   }
 
-  public boolean hasByName(long userid, String name) {
+  private boolean hasByName(int userid, String name) {
     return userListDAO.hasByName(userid, name);
   }
 
-  public UserList<CommonShell> getByName(long userid, String name) {
+  public UserList<CommonShell> getByName(int userid, String name) {
     List<UserList<CommonShell>> byName = userListDAO.getByName(userid, name);
     return byName == null ? null : byName.iterator().next();
   }
@@ -300,7 +300,7 @@ public class UserListManager {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getListsForUser
    * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    */
-  public Collection<UserList<CommonShell>> getListsForUser(long userid, boolean listsICreated, boolean visitedLists) {
+  public Collection<UserList<CommonShell>> getListsForUser(int userid, boolean listsICreated, boolean visitedLists) {
     if (userid == -1) {
       return Collections.emptyList();
     }
@@ -353,7 +353,7 @@ public class UserListManager {
    * @return
    * @see mitll.langtest.server.database.user.UserManagement#addAndGetUser(String, String, String, User.Kind, boolean, int, String, String, String)
    */
-  public UserList createFavorites(long userid) {
+  public UserList createFavorites(int userid) {
     return createUserList(userid, UserList.MY_LIST, MY_FAVORITES, "", true);
   }
 
@@ -412,7 +412,7 @@ public class UserListManager {
    * @param typeOrder used by sorter to sort first in unit & chapter order
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getReviewLists()
-   * @see #markCorrectness(String, boolean, long)
+   * @see #markCorrectness
    */
   public UserList<CommonShell> getDefectList(Collection<String> typeOrder) {
     Set<String> defectIds = new HashSet<String>();
@@ -517,7 +517,7 @@ public class UserListManager {
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getUserListsForText
    */
-  public List<UserList<CommonShell>> getUserListsForText(String search, long userid) {
+  public List<UserList<CommonShell>> getUserListsForText(String search, int userid) {
     return userListDAO.getAllPublic(userid);
   }
 
@@ -725,9 +725,8 @@ public class UserListManager {
    */
   public boolean addDefect(String exerciseID, String field, String comment) {
     if (!annotationDAO.hasAnnotation(exerciseID, field, INCORRECT, comment)) {
-      long defectDetector = userDAO.getDefectDetector();
-      addAnnotation(exerciseID, field, INCORRECT, comment, defectDetector);
-      markState(exerciseID, STATE.DEFECT, defectDetector);
+      addAnnotation(exerciseID, field, INCORRECT, comment, userDAO.getDefectDetector());
+      markState(exerciseID, STATE.DEFECT, userDAO.getDefectDetector());
       return true;
     } else {
       return false;
@@ -739,11 +738,11 @@ public class UserListManager {
    * @param field
    * @param status
    * @param comment
-   * @param userID
+   * @param userid
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addAnnotation(String, String, String)
    */
-  public void addAnnotation(String exerciseID, String field, String status, String comment, long userID) {
-    UserAnnotation annotation = new UserAnnotation(exerciseID, field, status, comment, userID, System.currentTimeMillis());
+  public void addAnnotation(String exerciseID, String field, String status, String comment, int userid) {
+    UserAnnotation annotation = new UserAnnotation(exerciseID, field, status, comment, userid, System.currentTimeMillis());
     //logger.debug("addAnnotation " + annotation);
     annotationDAO.add(annotation);
   }
@@ -773,7 +772,7 @@ public class UserListManager {
    * @see #addAnnotation(String, String, String, String, long)
    * @see mitll.langtest.client.qc.QCNPFExercise#markReviewed
    */
-  public void markState(String id, STATE state, long creatorID) {
+  public void markState(String id, STATE state, int creatorID) {
     //logger.debug("mark state " + id + " = " + state + " by " +creatorID);
     CommonExercise predefExercise = userExerciseDAO.getPredefExercise(id);
 
@@ -836,16 +835,16 @@ public class UserListManager {
     reviewedDAO.remove(exerciseid);
   }
 
-  private void markAllFieldsFixed(CommonExercise userExercise, long userID) {
+  private void markAllFieldsFixed(CommonExercise userExercise, int userid) {
     Collection<String> fields = userExercise.getFields();
-    logger.debug("setExerciseState " + userExercise + "  has " + fields + " user " + userID);
+   // logger.debug("setExerciseState " + userExercise + "  has " + fields + " user " + userid);
     addAnnotations(userExercise);
     for (String field : fields) {
       ExerciseAnnotation annotation1 = userExercise.getAnnotation(field);
       if (!annotation1.isCorrect()) {
         logger.debug("\tsetExerciseState " + userExercise.getID() + "  has " + annotation1);
 
-        addAnnotation(userExercise.getID(), field, CORRECT, FIXED, userID);
+        addAnnotation(userExercise.getID(), field, CORRECT, FIXED, userid);
       }
     }
   }
@@ -853,12 +852,12 @@ public class UserListManager {
   /**
    * @param id
    * @param correct
-   * @param userID
+   * @param userid
    * @see mitll.langtest.server.LangTestDatabaseImpl#markReviewed(String, boolean, long)
    * @see mitll.langtest.client.qc.QCNPFExercise#markReviewed
    */
-  public void markCorrectness(String id, boolean correct, long userID) {
-    markState(id, correct ? STATE.APPROVED : STATE.DEFECT, userID);
+  public void markCorrectness(String id, boolean correct, int userid) {
+    markState(id, correct ? STATE.APPROVED : STATE.DEFECT, userid);
   }
 
   /**

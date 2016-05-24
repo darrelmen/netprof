@@ -47,7 +47,7 @@ public class RefResultTest {
     System.out.println(jsonRefResult);
 
 
-    Map<Long, Map<String, Result>> userToResults = war.getResultDAO().getUserToResults(true, war.getUserDAO());
+    Map<Integer, Map<String, Result>> userToResults = war.getResultDAO().getUserToResults(true, war.getUserDAO());
     Map<String, Result> stringResultMap = userToResults.get(71l);
 
   //  Collection<CorrectAndScore> copy = getFirstCorrectAndScore(resultsForUser);
