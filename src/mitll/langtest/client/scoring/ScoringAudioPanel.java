@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.UIObject;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.instrumentation.EventContext;
 import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
@@ -313,7 +314,7 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
      * @see mitll.langtest.client.scoring.ScoringAudioPanel#addClickHandlers
      * @param type
      */
-    public TranscriptEventClickHandler(UIObject widget, NetPronImageType type) {
+    TranscriptEventClickHandler(UIObject widget, NetPronImageType type) {
       super(type);
       this.widget =widget;
     }
@@ -322,8 +323,7 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
     public void onSegmentClick(TranscriptSegment segment) {
    //   playSegment(MP3_HEADER_OFFSET+segment.getStart(), MP3_HEADER_OFFSET+segment.getEnd());
       playSegment(segment.getStart(), segment.getEnd());
-      long user = (long) controller.getUser();
-      controller.getButtonFactory().logEvent(widget, type.toString(), exerciseID, "Clicked on " + segment.getEvent(), user);
+      controller.getButtonFactory().logEvent(widget, type.toString(), new EventContext(exerciseID, "Clicked on " + segment.getEvent(), controller.getUser()));
     }
   }
 

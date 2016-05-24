@@ -382,10 +382,10 @@ public class RestUserManagement {
     }
   }
 
-  public long getUserFromParam2(String user) {
-    long userid;
+  public int getUserFromParam2(String user) {
+    int userid;
     try {
-      userid = Long.parseLong(user);
+      userid = Integer.parseInt(user);
     } catch (NumberFormatException e) {
       logger.warn("couldn't parse event userid " + user);
       userid = -1;

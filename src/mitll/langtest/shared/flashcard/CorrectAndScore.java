@@ -11,7 +11,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public class CorrectAndScore implements IsSerializable, Comparable<CorrectAndScore> {
   private int uniqueID;
-  private long userid;
+  private int userid;
 
   private String id;
   /**
@@ -56,7 +56,7 @@ public class CorrectAndScore implements IsSerializable, Comparable<CorrectAndSco
    * @param path
    * @param scoreJson
    */
-  public CorrectAndScore(int uniqueID, long userid, String exerciseID, boolean correct, float score, long timestamp,
+  public CorrectAndScore(int uniqueID, int userid, String exerciseID, boolean correct, float score, long timestamp,
                          String path, String scoreJson) {
     this.uniqueID = uniqueID;
     this.id = exerciseID;
@@ -104,7 +104,7 @@ public class CorrectAndScore implements IsSerializable, Comparable<CorrectAndSco
     return uniqueID;
   }
 
-  public long getUserid() {
+  public int getUserid() {
     return userid;
   }
 

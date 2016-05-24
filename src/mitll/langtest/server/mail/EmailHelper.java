@@ -176,7 +176,7 @@ public class EmailHelper {
    */
   public String enableCDUser(String token, String emailR, String url) {
     User userWhereEnabledReq = userDAO.getUserWhereEnabledReq(token);
-    Long userID;
+    Integer userID;
     if (userWhereEnabledReq == null) {
       logger.debug("enableCDUser user id null for token " + token + " email " + emailR + " url " + url);
       userID = null;

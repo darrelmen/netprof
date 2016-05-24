@@ -489,9 +489,8 @@ public class ListManager implements RequiresResize {
    * @see #showList
    */
   private void addVisitor(UserList ul) {
-    long user = (long) controller.getUser();
-    if (ul.getCreator().getId() != user) {
-      service.addVisitor(ul.getUniqueID(), user, new AsyncCallback<Void>() {
+    if (ul.getCreator().getId() != controller.getUser()) {
+      service.addVisitor(ul.getUniqueID(), controller.getUser(), new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
         }

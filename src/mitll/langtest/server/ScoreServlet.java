@@ -488,7 +488,7 @@ public class ScoreServlet extends DatabaseServlet {
   private void gotLogEvent(HttpServletRequest request, String device, JSONObject jsonObject) {
     String user = request.getHeader(USER);
 
-    long userid = userManagement.getUserFromParam2(user);
+    int userid = userManagement.getUserFromParam2(user);
     if (getUser(userid) == null) {
       jsonObject.put(ERROR, "unknown user " + userid);
     } else {
@@ -507,11 +507,11 @@ public class ScoreServlet extends DatabaseServlet {
     }
   }
 
-  private User getUser(long userid) {
+  private User getUser(int userid) {
     return db.getUserDAO().getUserWhere(userid);
   }
 
-  private String getUserID(long userid) {
+  private String getUserID(int userid) {
     User userWhere = db.getUserDAO().getUserWhere(userid);
     if (userWhere == null) logger.error("huh? can't find user by " + userid);
     return userWhere == null ? "" + userid : userWhere.getUserID();

@@ -421,7 +421,7 @@ public class UserExerciseDAO extends DAO {
         UserExercise e = new UserExercise(
             rs.getLong("uniqueid"),
             rs.getString(EXERCISEID),
-            rs.getLong("creatorid"),
+            rs.getInt("creatorid"),
             rs.getString("english"),
             rs.getString("foreignLanguage"),
             rs.getString(TRANSLITERATION),

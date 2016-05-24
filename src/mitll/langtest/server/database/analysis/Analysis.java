@@ -8,6 +8,7 @@ import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.*;
 import mitll.langtest.server.database.phone.PhoneDAO;
+import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.User;
@@ -63,13 +64,13 @@ public class Analysis extends DAO {
    * @return
    * @see LangTestDatabaseImpl#getUsersWithRecordings()
    */
-  public List<UserInfo> getUserInfo(UserDAO userDAO, int minRecordings) {
+  public List<UserInfo> getUserInfo(IUserDAO userDAO, int minRecordings) {
     String sql = getPerfSQL();
     try {
-      Map<Long, UserInfo> best = getBest(sql, minRecordings);
-      Map<Long, User> userMap = userDAO.getUserMap();
+      Map<Integer, UserInfo> best = getBest(sql, minRecordings);
+      Map<Integer, User> userMap = userDAO.getUserMap();
       List<UserInfo> userInfos = new ArrayList<>();
-      for (Map.Entry<Long, UserInfo> pair : best.entrySet()) {
+      for (Map.Entry<Integer, UserInfo> pair : best.entrySet()) {
         User user = userMap.get(pair.getKey());
 
         if (user == null) {
@@ -169,12 +170,12 @@ public class Analysis extends DAO {
    * @see #getPhonesForUser(long, int)
    * @see #getWordScoresForUser(long, int)
    */
-  private Map<Long, UserInfo> getBest(String sql, int minRecordings) throws SQLException {
+  private Map<Integer, UserInfo> getBest(String sql, int minRecordings) throws SQLException {
     if (DEBUG) logger.info("getBest sql =\n" + sql);
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
     long then = System.currentTimeMillis();
-    Map<Long, UserInfo> bestForQuery = getBestForQuery(connection, statement, minRecordings);
+    Map<Integer, UserInfo> bestForQuery = getBestForQuery(connection, statement, minRecordings);
     long now = System.currentTimeMillis();
     logger.debug(getLanguage() + " : getBest took " + (now - then) + " millis to return\t" + bestForQuery.size() + " items");
 
@@ -216,7 +217,7 @@ public class Analysis extends DAO {
    */
   public UserPerformance getPerformanceForUser(long id, int minRecordings) {
     try {
-      Map<Long, UserInfo> best = getBest(getPerfSQL(id), minRecordings);
+      Map<Integer, UserInfo> best = getBest(getPerfSQL(id), minRecordings);
 
       Collection<UserInfo> values = best.values();
       if (values.isEmpty()) {
@@ -248,8 +249,7 @@ public class Analysis extends DAO {
    */
   public List<WordScore> getWordScoresForUser(long id, int minRecordings) {
     try {
-      String sql = getPerfSQL(id);
-      Map<Long, UserInfo> best = getBest(sql, minRecordings);
+      Map<Integer, UserInfo> best = getBest(getPerfSQL(id), minRecordings);
 
       Collection<UserInfo> values = best.values();
       if (values.isEmpty()) {
@@ -259,10 +259,10 @@ public class Analysis extends DAO {
       } else {
         UserInfo next = values.iterator().next();
         List<BestScore> resultsForQuery = next.getBestScores();
-        if (DEBUG) logger.warn("resultsForQuery " + resultsForQuery.size());
+      //  if (DEBUG) logger.warn("resultsForQuery " + resultsForQuery.size());
 
         List<WordScore> wordScore = getWordScore(resultsForQuery);
-        if (DEBUG || true) logger.warn("getWordScoresForUser for # " +id +" min " +minRecordings + " wordScore " + wordScore.size());
+       // if (DEBUG || true) logger.warn("getWordScoresForUser for # " +id +" min " +minRecordings + " wordScore " + wordScore.size());
 
         return wordScore;
       }
@@ -284,7 +284,7 @@ public class Analysis extends DAO {
       long then = System.currentTimeMillis();
       long start = System.currentTimeMillis();
 
-      Map<Long, UserInfo> best = getBest(sql, minRecordings);
+      Map<Integer, UserInfo> best = getBest(sql, minRecordings);
       long now = System.currentTimeMillis();
 
       if (DEBUG)
@@ -334,22 +334,22 @@ public class Analysis extends DAO {
    * @throws SQLException
    * @see #getBest(String, int)
    */
-  private Map<Long, UserInfo> getBestForQuery(Connection connection, PreparedStatement statement, int minRecordings)
+  private Map<Integer, UserInfo> getBestForQuery(Connection connection, PreparedStatement statement, int minRecordings)
       throws SQLException {
-    Map<Long, List<BestScore>> userToBest = getUserToResults(connection, statement);
+    Map<Integer, List<BestScore>> userToBest = getUserToResults(connection, statement);
 
     if (DEBUG) logger.info("getBestForQuery got " + userToBest.values().iterator().next().size());
 
-    Map<Long, List<BestScore>> userToBest2 = new HashMap<>();
-    Map<Long, Long> userToEarliest = new HashMap<>();
+    Map<Integer, List<BestScore>> userToBest2 = new HashMap<>();
+    Map<Integer, Long> userToEarliest = new HashMap<>();
 
-    for (Long key : userToBest.keySet()) {
+    for (Integer key : userToBest.keySet()) {
       List<BestScore> value = new ArrayList<>();
       userToBest2.put(key, value);
     }
 
-    for (Map.Entry<Long, List<BestScore>> pair : userToBest.entrySet()) {
-      Long userID = pair.getKey();
+    for (Map.Entry<Integer, List<BestScore>> pair : userToBest.entrySet()) {
+      Integer userID = pair.getKey();
       List<BestScore> bestScores = userToBest2.get(userID);
 
       String last = null;
@@ -406,12 +406,12 @@ public class Analysis extends DAO {
       }
     }*/
 
-    Map<Long, UserInfo> userToUserInfo = new HashMap<>();
+    Map<Integer, UserInfo> userToUserInfo = new HashMap<>();
     int userInitialScores = database.getServerProps().getUserInitialScores();
 
-    for (Map.Entry<Long, List<BestScore>> pair : userToBest2.entrySet()) {
+    for (Map.Entry<Integer, List<BestScore>> pair : userToBest2.entrySet()) {
       List<BestScore> value = pair.getValue();
-      Long userID = pair.getKey();
+      Integer userID = pair.getKey();
       if (value.size() >= minRecordings) {
         Long aLong = userToEarliest.get(userID);
         userToUserInfo.put(userID, new UserInfo(value, aLong, userInitialScores));
@@ -432,9 +432,9 @@ public class Analysis extends DAO {
    * @throws SQLException
    * @see #getBestForQuery(Connection, PreparedStatement, int)
    */
-  private Map<Long, List<BestScore>> getUserToResults(Connection connection, PreparedStatement statement) throws SQLException {
+  private Map<Integer, List<BestScore>> getUserToResults(Connection connection, PreparedStatement statement) throws SQLException {
     ResultSet rs = statement.executeQuery();
-    Map<Long, List<BestScore>> userToBest = new HashMap<>();
+    Map<Integer, List<BestScore>> userToBest = new HashMap<>();
 
     int iPad = 0;
     int flashcard = 0;
@@ -450,7 +450,7 @@ public class Analysis extends DAO {
       Timestamp timestamp = rs.getTimestamp(Database.TIME);
       float pronScore = rs.getFloat(ResultDAO.PRON_SCORE);
       int id = rs.getInt(ResultDAO.ID);
-      long userid = rs.getLong(ResultDAO.USERID);
+      int userid = rs.getInt(ResultDAO.USERID);
       String type = rs.getString(ResultDAO.AUDIO_TYPE);
 
       List<BestScore> results = userToBest.get(userid);
