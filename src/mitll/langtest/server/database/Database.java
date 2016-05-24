@@ -24,13 +24,11 @@ public interface Database {
 
   void closeConnection(Connection connection);
 
-  void logEvent(String exid, String context, long userid, String device);
+  void logEvent(String exid, String context, int userid, String device);
 
   ServerProperties getServerProps();
 
   String getLanguage();
 
   LogAndNotify getLogAndNotify();
-
- // SessionManagement getSessionManagement();
 }

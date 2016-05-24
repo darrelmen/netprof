@@ -581,7 +581,7 @@ public class UserListManagerTest {
 
   private int userExerciseCount = 0;
 
-  private UserExercise createNewItem(long userid) {
+  private UserExercise createNewItem(int userid) {
     int uniqueID = userExerciseCount++;
     return new UserExercise(uniqueID, UserExercise.CUSTOM_PREFIX + uniqueID, userid, " ", "", "");
   }
@@ -600,22 +600,22 @@ public class UserListManagerTest {
     //    userListManager.markApproved();
   }
 
-  private List<User> addAndGetUsers(String test2) {
+/*  private List<User> addAndGetUsers(String test2) {
     List<User> users;
     long l = getUser(test2);
     users = database.getUsers();
 //    assertTrue(users.size() == 1);
     assertTrue(database.userExists(test2) == l);
     return users;
-  }
+  }*/
 
-  private long getUser(String test2) {
+/*  private long getUser(String test2) {
     long l = database.userExists(test2);
     if (l == -1) {
       l = database.addUser(89, "male", 1, "", ENGLISH, "boston", test2, new ArrayList<User.Permission>(), "browser");
     }
     return l;
-  }
+  }*/
 
 /*  private long addListCheck(long user, UserListManager userListManager, String name) {
     return addListCheck(user, userListManager, name, true);
