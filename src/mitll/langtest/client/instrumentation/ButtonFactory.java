@@ -43,42 +43,42 @@ public class ButtonFactory implements EventLogger {
     registerButton(button, exid, controller.getUser());
   }
 
-  private void registerButton(final Button button, final String exid, final long userid) {
-    registerButton(button, exid, button.getText(), userid);
+  private void registerButton(final Button button, final String exid, final int userid) {
+    registerButton(button, new EventContext(exid,button.getText(),userid));
   }
 
   @Override
-  public void registerButton(final Button button, final String exid, final String context, final long userid) {
+  public void registerButton(final Button button, EventContext context) {
     button.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        logEvent(button, "button", exid, context, userid);
+        logEvent(button, "button", context);
       }
     });
   }
 
   @Override
-  public void registerWidget(final HasClickHandlers clickable, final UIObject uiObject, final String exid, final String context, final long userid) {
+  public void registerWidget(final HasClickHandlers clickable, final UIObject uiObject, EventContext context) {
     clickable.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         String widgetType = uiObject.getClass().toString();
         widgetType = widgetType.substring(widgetType.lastIndexOf(".") + 1);
-        logEvent(uiObject, widgetType, exid, context, userid);
+        logEvent(uiObject, widgetType, context);
       }
     });
   }
 
   @Override
-  public void logEvent(final UIObject button, String widgetType, String exid, String context, long userid) {
+  public void logEvent(final UIObject button, String widgetType, EventContext context) {
     final String id = button.getElement().getId();
-    logEvent(id, widgetType, exid, context, userid);
+    logEvent(id, widgetType, context);
   }
 
   @Override
-  public void logEvent(final Tab tab, String widgetType, String exid, String context, long userid) {
+  public void logEvent(final Tab tab, String widgetType, EventContext context) {
     final String id = tab.asWidget().getElement().getId();
-    logEvent(id, widgetType, exid, context, userid);
+    logEvent(id, widgetType, context);
   }
 
   /**
@@ -91,10 +91,8 @@ public class ButtonFactory implements EventLogger {
    * @param userid
    */
   @Override
-  public void logEvent(final String widgetID, final String widgetType, final String exid, final String context,
-                       final long userid) {
+  public void logEvent(final String widgetID, final String widgetType, EventContext context) {
     // System.out.println("logEvent event for " + widgetID + " " + widgetType + " exid " + exid + " context " + context + " user " + userid);
-
     final ButtonFactory outer = this;
 
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
@@ -108,7 +106,7 @@ public class ButtonFactory implements EventLogger {
             String browserInfo = controller.getBrowserInfo();
 
             if (turkID != null && browserInfo != null) {
-              service.logEvent(widgetID, widgetType, exid, context, userid, turkID, browserInfo,
+              service.logEvent(widgetID, widgetType, context.exid, context.context, context.userid, turkID, browserInfo,
                   new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {

@@ -231,7 +231,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       eventDAO = heventDAO;
     }*/
 
-    oneTimeDataCopy(slickEventDAO);
+  //  oneTimeDataCopy(slickEventDAO);
     eventDAO = slickEventDAO;
 //    eventDAO = new EventDAO(this, defectDetector);
 
@@ -906,7 +906,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @return
    * @seex mitll.langtest.server.database.ImportCourseExamples#copyUser
    */
-  public long addUser(User user) {
+  public int addUser(User user) {
     return userManagement.addUser(user);
   }
 
@@ -955,7 +955,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return userManagement.getUsers();
   }
 
-  public void logEvent(String exid, String context, long userid, String device) {
+  public void logEvent(String exid, String context, int userid, String device) {
     if (context.length() > 100) context = context.substring(0, 100).replace("\n", " ");
     logEvent(UNKNOWN, "server", exid, context, userid, device);
   }
@@ -970,7 +970,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @return
    * @see mitll.langtest.server.ScoreServlet#doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
-  public boolean logEvent(String id, String widgetType, String exid, String context, long userid, String device) {
+  public boolean logEvent(String id, String widgetType, String exid, String context, int userid, String device) {
     return eventDAO != null && eventDAO.add(new Event(id, widgetType, exid, context, userid, -1, device), getLanguage());
   }
 

@@ -37,7 +37,7 @@ public interface CommonExercise extends CommonAudioExercise, ScoredExercise {
    * @see mitll.langtest.client.custom.dialog.EditItem#didICreateThisItem(CommonExercise)
    * @return
    */
-  long getCreator();
+  int getCreator();
 
   long getUpdateTime();
 

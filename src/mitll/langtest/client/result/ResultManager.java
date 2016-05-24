@@ -369,10 +369,10 @@ public class ResultManager extends PagerTable {
     }
   }
 
-  private long getUserID() {
+  private int getUserID() {
     String textFromTypeahead = getTextFromTypeahead(userIDSuggest);
     try {
-      return userIDSuggest == null ? -1 : textFromTypeahead.isEmpty() ? -1 : Long.parseLong(textFromTypeahead);
+      return userIDSuggest == null ? -1 : textFromTypeahead.isEmpty() ? -1 : Integer.parseInt(textFromTypeahead);
     } catch (NumberFormatException e) {
       new PopupHelper().showPopup("Please enter a number", userIDSuggest.getWidget());
     }
@@ -485,14 +485,14 @@ public class ResultManager extends PagerTable {
         StringBuilder builder = getColumnSortedState(table);
         final Map<String, String> unitToValue = getUnitToValue();
 
-        final long userID = getUserID();
-        final String text = getText();
+        //final int userID = ;
+       // final String text = getText();
 
         int val = req++;
         // logger.info("getResults req " + unitToValue + " user " + userID + " text " + text + " val " + val);
         logger.info("got " + builder.toString());
 
-        service.getResults(start, end, builder.toString(), unitToValue, userID, text, val, new AsyncCallback<ResultAndTotal>() {
+        service.getResults(start, end, builder.toString(), unitToValue, getUserID(), getText(), val, new AsyncCallback<ResultAndTotal>() {
           @Override
           public void onFailure(Throwable caught) {
             Window.alert("Can't contact server.");
