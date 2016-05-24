@@ -8,6 +8,7 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.database.excel.ResultDAOToExcel;
 import mitll.langtest.server.database.phone.PhoneDAO;
+import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.server.sorter.ExerciseSorter;
@@ -527,7 +528,7 @@ public class ResultDAO extends DAO {
     final List<Session> sessions;
     final List<ExerciseCorrectAndScore> sortedResults;
 
-    public SessionsAndScores(List<Session> sessions, List<ExerciseCorrectAndScore> sortedResults) {
+    SessionsAndScores(List<Session> sessions, List<ExerciseCorrectAndScore> sortedResults) {
       this.sessions = sessions;
       this.sortedResults = sortedResults;
     }
@@ -539,7 +540,7 @@ public class ResultDAO extends DAO {
    * @param isFlashcardRequest
    * @see mitll.langtest.server.LangTestDatabaseImpl#attachScoreHistory(long, mitll.langtest.shared.exercise.CommonExercise, boolean)
    */
-  public void attachScoreHistory(long userID, CommonExercise firstExercise, boolean isFlashcardRequest) {
+  public void attachScoreHistory(int userID, CommonExercise firstExercise, boolean isFlashcardRequest) {
     List<CorrectAndScore> resultsForExercise = getCorrectAndScores(userID, firstExercise, isFlashcardRequest);
 
     //logger.debug("score history " + resultsForExercise);
@@ -564,7 +565,7 @@ public class ResultDAO extends DAO {
    * @return
    * @see #attachScoreHistory
    */
-  private List<CorrectAndScore> getCorrectAndScores(long userID, HasID firstExercise, boolean isFlashcardRequest) {
+  private List<CorrectAndScore> getCorrectAndScores(int userID, HasID firstExercise, boolean isFlashcardRequest) {
     return getResultsForExIDInForUser(userID, isFlashcardRequest, firstExercise.getID());
   }
 
@@ -859,7 +860,7 @@ public class ResultDAO extends DAO {
     List<MonitorResult> results = new ArrayList<>();
     while (rs.next()) {
       int uniqueID = rs.getInt(ID);
-      long userID = rs.getLong(USERID);
+      int userID = rs.getInt(USERID);
       String exid = rs.getString(EXID);
       Timestamp timestamp = rs.getTimestamp(Database.TIME);
       String answer = rs.getString(ANSWER);
@@ -916,7 +917,7 @@ public class ResultDAO extends DAO {
 
     while (rs.next()) {
       int uniqueID = rs.getInt(ID);
-      long userid = rs.getInt(USERID);
+      int userid = rs.getInt(USERID);
       String id = rs.getString(EXID);
       Timestamp timestamp = rs.getTimestamp(Database.TIME);
       boolean correct = rs.getBoolean(CORRECT);
@@ -1369,12 +1370,12 @@ public class ResultDAO extends DAO {
    * @param userDAO
    * @return
    */
-  public Map<Integer, Map<String, Result>> getUserToResults(boolean isRegular, UserDAO userDAO) {
+  public Map<Integer, Map<String, Result>> getUserToResults(boolean isRegular, IUserDAO userDAO) {
     String typeToUse = isRegular ? Result.AUDIO_TYPE_REGULAR : Result.AUDIO_TYPE_SLOW;
     return getUserToResults(typeToUse, userDAO);
   }
 
-  private Map<Integer, Map<String, Result>> getUserToResults(String typeToUse, UserDAO userDAO) {
+  private Map<Integer, Map<String, Result>> getUserToResults(String typeToUse, IUserDAO userDAO) {
     Map<Integer, Map<String, Result>> userToResult = new HashMap<>();
 
     Map<Integer, User> userMap = userDAO.getUserMap();

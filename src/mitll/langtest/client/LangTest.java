@@ -32,6 +32,7 @@ import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.instrumentation.ButtonFactory;
+import mitll.langtest.client.instrumentation.EventContext;
 import mitll.langtest.client.instrumentation.EventLogger;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.client.recorder.MicPermission;
@@ -230,7 +231,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (toSend.length() > MAX_EXCEPTION_STRING) {
       toSend = toSend.substring(0, MAX_EXCEPTION_STRING) + "...";
     }
-    getButtonFactory().logEvent(UNKNOWN, UNKNOWN, exerciseID, toSend, user);
+    getButtonFactory().logEvent(UNKNOWN, UNKNOWN, new EventContext(exerciseID, toSend, user));
   }
 
   private void logMessageOnServer(String message) {
@@ -279,7 +280,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private void getImage(int reqid, final String key, String path, final String type, int toUse, int height,
                         String exerciseID, final AsyncCallback<ImageResponse> client) {
 
-  //  ImageResponse ifPresent = imageCache.getIfPresent(key);
+    //  ImageResponse ifPresent = imageCache.getIfPresent(key);
     ImageResponse ifPresent = imageCache.get(key);
     if (ifPresent != null) {
       //logger.info("getImage for key " + key+ " found  " + ifPresent);
@@ -477,7 +478,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
           showingPlugInNotice = true;
           List<String> messages = Arrays.asList("If you want to record audio, ",
               "plug in or enable your mic and reload the page.");
-          new ModalInfoDialog("Plug in microphone", messages, Collections.emptyList() ,
+          new ModalInfoDialog("Plug in microphone", messages, Collections.emptyList(),
               null,
               new HiddenHandler() {
                 @Override
@@ -568,31 +569,31 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   @Override
   public void register(Button button, String exid, String context) {
-    buttonFactory.registerButton(button, exid, context, getUser());
+    buttonFactory.registerButton(button, new EventContext(exid, context, getUser()));
   }
 
   @Override
   public void registerWidget(HasClickHandlers clickable, UIObject uiObject, String exid, String context) {
-    buttonFactory.registerWidget(clickable, uiObject, exid, context, getUser());
+    buttonFactory.registerWidget(clickable, uiObject, new EventContext(exid, context, getUser()));
   }
 
   @Override
   public void logEvent(UIObject button, String widgetType, Shell ex, String context) {
-    buttonFactory.logEvent(button, widgetType, ex.getID(), context, getUser());
+    buttonFactory.logEvent(button, widgetType, new EventContext(ex.getID(), context, getUser()));
   }
 
   @Override
   public void logEvent(UIObject button, String widgetType, String exid, String context) {
-    buttonFactory.logEvent(button, widgetType, exid, context, getUser());
+    buttonFactory.logEvent(button, widgetType, new EventContext(exid, context, getUser()));
   }
 
   @Override
   public void logEvent(Tab button, String widgetType, String exid, String context) {
-    buttonFactory.logEvent(button, widgetType, exid, context, getUser());
+    buttonFactory.logEvent(button, widgetType, new EventContext(exid, context, getUser()));
   }
 
   void logEvent(String widgetID, String widgetType, String exid, String context) {
-    buttonFactory.logEvent(widgetID, widgetType, exid, context, getUser());
+    buttonFactory.logEvent(widgetID, widgetType, new EventContext(exid, context, getUser()));
   }
 
   /**
@@ -710,8 +711,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   long then = 0;
+
   /**
    * Recording interface
+   *
    * @see RecordButtonPanel#startRecording()
    * @see PostAudioRecordButton#startRecording()
    */

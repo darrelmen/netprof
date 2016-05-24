@@ -67,7 +67,7 @@ public abstract class BaseUserDAO extends DAO {
   static final String NATIVE_LANG = "nativeLang";
   static final String UNKNOWN = "unknown";
   String language;
-  long defectDetector;
+  int defectDetector;
   boolean enableAllUsers;
 
   static final String ID = "id";
@@ -95,16 +95,16 @@ public abstract class BaseUserDAO extends DAO {
 
   Collection<String> admins;
   
-  public BaseUserDAO(Database database) {
+  BaseUserDAO(Database database) {
     super(database);
   }
 
   /**
    * @return
    * @see mitll.langtest.server.database.custom.UserListManager#addDefect(String, String, String)
-   * @see mitll.langtest.server.database.custom.AnnotationDAO#AnnotationDAO(Database, UserDAO)
+   * @see mitll.langtest.server.database.custom.AnnotationDAO#AnnotationDAO
    */
-  public long getDefectDetector() {
+  public int getDefectDetector() {
     return defectDetector;
   }
 
@@ -152,7 +152,7 @@ public abstract class BaseUserDAO extends DAO {
       Collection<User.Permission> perms = (kind == User.Kind.CONTENT_DEVELOPER) ? CD_PERMISSIONS : EMPTY_PERM;
       boolean enabled = (kind != User.Kind.CONTENT_DEVELOPER) || isAdmin(userID) || enableAllUsers;
 
-      long l = addUser(age, isMale ? MALE : FEMALE, 0, ipAddr, "", "", dialect, userID, enabled, perms, kind, passwordH, emailH, device);
+      int l = addUser(age, isMale ? MALE : FEMALE, 0, ipAddr, "", "", dialect, userID, enabled, perms, kind, passwordH, emailH, device);
       User userWhere = getUserWhere(l);
       logger.debug(language + " : addUser : added new user " + userWhere);
 
@@ -161,8 +161,8 @@ public abstract class BaseUserDAO extends DAO {
   }
 
   abstract User getUserByID(String id);
-  abstract  void updateUser(long id, User.Kind kind, String passwordH, String emailH);
-  abstract User getUserWhere(long userid);
+  abstract void updateUser(int id, User.Kind kind, String passwordH, String emailH);
+  abstract User getUserWhere(int userid);
   boolean isAdmin(String userid) {
     return userid != null && (admins.contains(userid));
   }

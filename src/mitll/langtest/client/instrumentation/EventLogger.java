@@ -16,13 +16,13 @@ import mitll.langtest.client.exercise.ExerciseController;
 public interface EventLogger {
   void register(ExerciseController controller, Button button, String exid);
 
-  void registerButton(Button button, String exid, String context, long userid);
+  void registerButton(Button button, EventContext context);
 
-  void registerWidget(HasClickHandlers clickable, UIObject uiObject, String exid, String context, long userid);
+  void registerWidget(HasClickHandlers clickable, UIObject uiObject, EventContext context);
 
-  void logEvent(UIObject button, String widgetType, String exid, String context, long userid);
+  void logEvent(UIObject button, String widgetType, EventContext context);
 
-  void logEvent(Tab tab, String widgetType, String exid, String context, long userid);
+  void logEvent(Tab tab, String widgetType, EventContext context);
 
-  void logEvent(String widgetID, String widgetType, String exid, String context, long userid);
+  void logEvent(String widgetID, String widgetType, EventContext context);
 }

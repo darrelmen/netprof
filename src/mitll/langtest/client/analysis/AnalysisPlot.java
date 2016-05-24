@@ -66,7 +66,7 @@ class AnalysisPlot extends TimeSeriesPlot {
 
   private final Map<Long, String> timeToId = new TreeMap<>();
   private final Map<String, CommonShell> idToEx = new TreeMap<>();
-  private final long userid;
+  private final int userid;
   private final LangTestDatabaseAsync service;
   private final PlayAudio playAudio;
   private Map<Long, String> granToLabel;
@@ -94,7 +94,7 @@ class AnalysisPlot extends TimeSeriesPlot {
    * @param minRecordings
    * @see AnalysisTab#AnalysisTab
    */
-  public AnalysisPlot(LangTestDatabaseAsync service, long userid, final String userChosenID, final int minRecordings,
+  public AnalysisPlot(LangTestDatabaseAsync service, int userid, final String userChosenID, final int minRecordings,
                       SoundManagerAPI soundManagerAPI, Icon playFeedback) {
     getElement().setId("AnalysisPlot");
     int minHeight = isShort() ? CHART_HEIGHT_SHORT : CHART_HEIGHT;
@@ -124,7 +124,7 @@ class AnalysisPlot extends TimeSeriesPlot {
     granToLabel.put(FIVEMIN, "Minute");
   }
 
-  private void getPerformanceForUser(LangTestDatabaseAsync service, long userid,
+  private void getPerformanceForUser(LangTestDatabaseAsync service, int userid,
                                      final String userChosenID, int minRecordings) {
     service.getPerformanceForUser(userid, minRecordings, new AsyncCallback<UserPerformance>() {
       @Override
