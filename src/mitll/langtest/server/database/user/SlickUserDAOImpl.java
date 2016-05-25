@@ -35,8 +35,10 @@ package mitll.langtest.server.database.user;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.User;
-import mitll.npdata.dao.user.SlickUser;
+import mitll.npdata.dao.DBConnection;
+import mitll.npdata.dao.SlickUser;
 import mitll.npdata.dao.user.UserDAOWrapper;
+import org.apache.log4j.Logger;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -45,11 +47,12 @@ import java.util.List;
 import java.util.Map;
 
 public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
+  private static final Logger logger = Logger.getLogger(SlickUserDAOImpl.class);
   UserDAOWrapper dao;
 
-  public SlickUserDAOImpl(Database database) {
+  public SlickUserDAOImpl(Database database, DBConnection dbConnection) {
     super(database);
-    dao = new UserDAOWrapper("localhost", 5432, "netprof");
+    dao = new UserDAOWrapper(dbConnection);
   }
 
 /*  @Override
@@ -121,8 +124,53 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
     List<SlickUser> all = dao.getAll();
     List<User> copy = new ArrayList<>();
 
-    for (SlickUser s : all) copy.add(new User());
+    for (SlickUser s : all) copy.add(new User(
+        s.id(),
+        89,
+        s.ismale()?0:1,
+        0,
+        s.ipaddr(),
+        s.passhash(),
+        "",
+        s.dialect(),
+        s.userid(),
+        s.enabled(),
+        isAdmin(s.userid()),
+        getPerm(s.permissions()),
+        User.Kind.valueOf(s.kind()),
+        s.emailhash(),
+        s.device(),
+        s.resetpasswordkey(),
+        s.enabledreqkey(),
+        s.modified().getTime()
+        ));
+    return copy;
+  }
 
+  /**
+   * OK this is kind of a hack, should be a separate table.
+   * @param perms
+   * @return
+   */
+  private  Collection<User.Permission> getPerm(String perms) {
+    Collection<User.Permission> permissions = new ArrayList<>();
+
+    if (perms != null) {
+      perms = perms.replaceAll("\\[", "").replaceAll("\\]", "");
+      for (String perm : perms.split(",")) {
+        perm = perm.trim();
+        try {
+          if (!perm.isEmpty()) {
+            permissions.add(User.Permission.valueOf(perm));
+          }
+        } catch (IllegalArgumentException e) {
+          logger.warn(language + " : huh, for user " +// userid +
+              " perm '" + perm +
+              "' is not a permission?");
+        }
+      }
+    }
+    return permissions;
   }
 
   @Override
