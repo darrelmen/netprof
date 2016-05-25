@@ -41,6 +41,7 @@ import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
+import mitll.npdata.dao.DBConnection;
 import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
@@ -191,9 +192,11 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       }
     }
 
-    SlickEventImpl slickEventDAO = new SlickEventImpl();
+    DBConnection dbConnection = new DBConnection("localhost",5432,"netprof");
 
-    SlickUserDAOImpl slickUserDAO = new SlickUserDAOImpl(this);
+    SlickEventImpl slickEventDAO = new SlickEventImpl(dbConnection);
+
+    SlickUserDAOImpl slickUserDAO = new SlickUserDAOImpl(this,dbConnection);
 
 
     UserDAO userDAO = new UserDAO(this, getServerProps());
