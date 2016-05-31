@@ -605,12 +605,12 @@ public class UserListManagerTest {
     long l = getUser(test2);
     users = database.getUsers();
 //    assertTrue(users.size() == 1);
-    assertTrue(database.userExists(test2) == l);
+    assertTrue(database.getIdForUserID(test2) == l);
     return users;
   }*/
 
 /*  private long getUser(String test2) {
-    long l = database.userExists(test2);
+    long l = database.getIdForUserID(test2);
     if (l == -1) {
       l = database.addUser(89, "male", 1, "", ENGLISH, "boston", test2, new ArrayList<User.Permission>(), "browser");
     }
