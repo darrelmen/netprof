@@ -1,8 +1,10 @@
 package mitll.langtest.server.database.instrumentation;
 
+import mitll.langtest.server.PathHelper;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.Event;
+import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.EventDAOExample;
 import mitll.npdata.dao.SlickEvent;
 import mitll.npdata.dao.SlickSlimEvent;
@@ -20,8 +22,11 @@ public class SlickEventImpl implements IEventDAO {
   private static final Logger logger = Logger.getLogger(SlickEventImpl.class);
   private EventDAOExample eventDAOExample;
 
-  public SlickEventImpl() {
-    eventDAOExample = new EventDAOExample("localhost", 5432, "netprof");
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(PathHelper)
+   */
+  public SlickEventImpl(DBConnection dbConnection) {
+    eventDAOExample = new EventDAOExample(dbConnection);
   }
 
   public void copyTableOnlyOnce(IEventDAO other, String language) {
