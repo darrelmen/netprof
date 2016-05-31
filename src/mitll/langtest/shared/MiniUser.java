@@ -15,24 +15,25 @@ import mitll.langtest.server.database.user.UserDAO;
 public class MiniUser implements IsSerializable, Comparable<MiniUser> {
   private int id;
   private int age;
-  private int gender;
+  private boolean isMale;
   private String userID;
   private boolean isAdmin;
 
   public MiniUser() {
   } // for serialization
 
+
   /**
    * @param id
    * @param age
-   * @param gender
+   * @param isMale
    * @param userID
    * @param isAdmin
    */
-  public MiniUser(int id, int age, int gender, String userID, boolean isAdmin) {
+  public MiniUser(int id, int age, boolean isMale, String userID, boolean isAdmin) {
     this.id = id;
     this.age = age;
-    this.gender = gender;
+    this.isMale = isMale;
     this.userID = userID;
     this.isAdmin = isAdmin;
   }
@@ -48,11 +49,11 @@ public class MiniUser implements IsSerializable, Comparable<MiniUser> {
    * @param user
    */
   public MiniUser(User user) {
-    this(user.getId(), user.getAge(), user.getGender(), new String(user.getUserID()), user.isAdmin());
+    this(user.getId(), user.getAge(), user.isMale(), new String(user.getUserID()), user.isAdmin());
   }
 
   public boolean isMale() {
-    return gender == 0;
+    return isMale;
   }
 
   @Override
@@ -70,7 +71,7 @@ public class MiniUser implements IsSerializable, Comparable<MiniUser> {
     return new Long(id).hashCode();
   }
 
-  public int getGender() { return gender;  }
+  public int getGender() { return isMale?0:1;  }
 
   public int getId() {
     return id;
