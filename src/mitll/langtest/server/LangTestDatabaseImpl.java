@@ -1739,9 +1739,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public boolean forgotUsername(String emailH, String email, String url) {
-    User valid = db.getUserDAO().isValidEmail(emailH);
-    getEmailHelper().getUserNameEmail(email, url, valid);
-    return valid != null;
+    String userChosenIDIfValid = db.getUserDAO().isValidEmail(emailH);
+    getEmailHelper().getUserNameEmail(email, url, userChosenIDIfValid);
+    return userChosenIDIfValid != null;
   }
 
   // Results ---------------------
