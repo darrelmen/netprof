@@ -463,10 +463,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
 
   @Override
   public User getUserWhereResetKey(String resetKey) {
-    String sql = "SELECT * from users where " +
-        RESET_PASSWORD_KEY +
-        "='" + resetKey + "';";
-    return getUserWhere(-1, sql);
+    return getUserWhere(-1, "SELECT * from users where " + RESET_PASSWORD_KEY + "='" + resetKey);
   }
 
   /**
@@ -476,9 +473,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    */
   @Override
   public User getUserWhereEnabledReq(String resetKey) {
-    String sql = "SELECT * from users where " +
-        ENABLED_REQ_KEY +
-        "='" + resetKey + "';";
+    String sql = "SELECT * from users where " + ENABLED_REQ_KEY + "='" + resetKey;
     return getUserWhere(-1, sql);
   }
 
