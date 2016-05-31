@@ -55,11 +55,11 @@ public interface IUserDAO {
 
   boolean enableUser(int id);
 
-  User isValidEmail(String emailH);
+  String isValidEmail(String emailH);
 
-  User isValidUserAndEmail(String user, String emailH);
+  Integer getIDForUserAndEmail(String user, String emailH);
 
-  int userExists(String id);
+  int getIdForUserID(String id);
 
   User getUser(String id, String passwordHash);
 
