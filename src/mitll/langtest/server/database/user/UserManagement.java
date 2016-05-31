@@ -98,7 +98,7 @@ public class UserManagement {
     User user = userDAO.getUser(login, passwordH);
 
     if (user == null && !passwordH.isEmpty()) {
-      logger.debug("userExists : checking '" + login + "'");
+      logger.debug("getIdForUserID : checking '" + login + "'");
 
       for (String site : props.getSites()) {
         String url = NPF_CLASSROOM_PREFIX + site.replaceAll("Mandarin", "CM") + "/scoreServlet";
@@ -216,7 +216,7 @@ public class UserManagement {
    */
   public int addUser(User user) {
     int l;
-    if ((l = userDAO.userExists(user.getUserID())) == -1) {
+    if ((l = userDAO.getIdForUserID(user.getUserID())) == -1) {
       logger.debug("addUser " + user);
       l = userDAO.addUser(user.getAge(), user.getGender() == 0 ? BaseUserDAO.MALE : BaseUserDAO.FEMALE,
           user.getExperience(), user.getIpaddr(), "", user.getNativeLang(), user.getDialect(), user.getUserID(), false,

@@ -1150,7 +1150,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
 
   public int userExists(String login) {
-    return userDAO.userExists(login);
+    return userDAO.getIdForUserID(login);
   }
 
   /**
