@@ -40,13 +40,14 @@ import mitll.npdata.dao.SlickMiniUser;
 import mitll.npdata.dao.SlickUser;
 import mitll.npdata.dao.user.UserDAOWrapper;
 import org.apache.log4j.Logger;
+import scala.collection.Seq;
 
 import java.sql.Timestamp;
 import java.util.*;
 
 public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
   private static final Logger logger = Logger.getLogger(SlickUserDAOImpl.class);
-  private UserDAOWrapper dao;
+  private final UserDAOWrapper dao;
 
   public SlickUserDAOImpl(Database database, DBConnection dbConnection) {
     super(database);
@@ -90,7 +91,7 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
   @Override
   public Integer getIDForUserAndEmail(String user, String emailH) {
     List<Integer> idForUserAndEmail = dao.getIDForUserAndEmail(user, emailH);
-    return idForUserAndEmail.isEmpty() ? null:idForUserAndEmail.get(0);
+    return idForUserAndEmail.isEmpty() ? null : idForUserAndEmail.get(0);
   }
 
   @Override
@@ -100,46 +101,60 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
   @Override
   public User getUser(String id, String passwordHash) {
-    return null;
+    Seq<SlickUser> userByIDAndPass = dao.getUserByIDAndPassOrFallback(id, passwordHash);
+    return convertOrNull(userByIDAndPass);
+  }
+
+  private User convertOrNull(Seq<SlickUser> userByIDAndPass) {
+    return userByIDAndPass.isEmpty() ? null : toUser(userByIDAndPass.head());
   }
 
   @Override
   public User getUserWithPass(String id, String passwordHash) {
-    return null;
+    Seq<SlickUser> userByIDAndPass = dao.getUserByIDAndPass(id, passwordHash);
+    return convertOrNull(userByIDAndPass);
   }
 
   @Override
   public User getUserByID(String id) {
-    return null;
+    Seq<SlickUser> byUserID = dao.getByUserID(id);
+    return convertOrNull(byUserID);
   }
 
   @Override
   public List<User> getUsers() {
     List<SlickUser> all = dao.getAll();
-    List<User> copy = new ArrayList<>();
+    return toUsers(all);
+  }
 
+  private List<User> toUsers(List<SlickUser> all) {
+    List<User> copy = new ArrayList<>();
     for (SlickUser s : all)
-      copy.add(new User(
-          s.id(),
-          89,
-          s.ismale() ? 0 : 1,
-          0,
-          s.ipaddr(),
-          s.passhash(),
-          "",
-          s.dialect(),
-          s.userid(),
-          s.enabled(),
-          isAdmin(s.userid()),
-          getPerm(s.permissions()),
-          User.Kind.valueOf(s.kind()),
-          s.emailhash(),
-          s.device(),
-          s.resetpasswordkey(),
-          s.enabledreqkey(),
-          s.modified().getTime()
-      ));
+      copy.add(toUser(s));
     return copy;
+  }
+
+  private User toUser(SlickUser s) {
+    return new User(
+        s.id(),
+        89,
+        s.ismale() ? 0 : 1,
+        0,
+        s.ipaddr(),
+        s.passhash(),
+        "",
+        s.dialect(),
+        s.userid(),
+        s.enabled(),
+        isAdmin(s.userid()),
+        getPerm(s.permissions()),
+        User.Kind.valueOf(s.kind()),
+        s.emailhash(),
+        s.device(),
+        s.resetpasswordkey(),
+        s.enabledreqkey(),
+        s.modified().getTime()
+    );
   }
 
   /**
@@ -171,7 +186,7 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
   @Override
   public List<User> getUsersDevices() {
-    return null;
+    return toUsers(dao.getUsersFromDevices());
   }
 
   @Override
@@ -193,46 +208,51 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
   @Override
   public User getUserWhereResetKey(String resetKey) {
-    return null;
+    return convertOrNull(dao.getByReset(resetKey));
   }
 
   @Override
   public User getUserWhereEnabledReq(String resetKey) {
-    return null;
+    return convertOrNull(dao.getByEnabledReq(resetKey));
   }
 
   @Override
   public User getUserWhere(int userid) {
-    return null;
+    return convertOrNull(dao.byID(userid));
   }
 
   @Override
   public Map<Integer, User> getUserMap(boolean getMale) {
-    return null;
+    Map<Integer, SlickUser> byMale = dao.getByMaleMap(getMale);
+    Map<Integer, User> idToUser = new HashMap<>();
+    byMale.forEach((k, v) -> idToUser.put(k, toUser(v)));
+    return idToUser;
   }
 
   @Override
   public Map<Integer, User> getUserMap() {
-    return null;
+    Map<Integer, User> idToUser = new HashMap<>();
+    dao.getIdToUser().forEach((k, v) -> idToUser.put(k, toUser(v)));
+    return idToUser;
   }
 
   @Override
   public boolean changePassword(Integer remove, String passwordH) {
-    return false;
+    return dao.setPassword(remove, passwordH);
   }
 
   @Override
   public boolean updateKey(Integer userid, boolean resetKey, String key) {
-    return false;
+    return dao.updateKey(userid,resetKey,key);
   }
 
   @Override
   public boolean clearKey(Integer remove, boolean resetKey) {
-    return false;
+    return dao.updateKey(remove,resetKey,"");
   }
 
   @Override
   public boolean changeEnabled(int userid, boolean enabled) {
-    return false;
+    return dao.changeEnabled(userid,enabled);
   }
 }
