@@ -90,6 +90,7 @@ public class PostgresTest extends BaseTest {
   public void testUser() {
     DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
 
+<<<<<<< HEAD
     IUserDAO eventDAO = spanish.getUserDAO();
 
     eventDAO.getUsers();
@@ -99,4 +100,13 @@ public class PostgresTest extends BaseTest {
 
     //  spanish.doReport(new PathHelper("war"));
   }
+
+=======
+    IUserDAO userDAO = spanish.getUserDAO();
+
+    logger.info("Got " + userDAO.getUsers());
+
+    //  spanish.doReport(new PathHelper("war"));
+  }
+>>>>>>> 3476f045ac0137bc9068f7670c0b26ef71cca32e
 }
