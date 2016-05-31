@@ -34,6 +34,7 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.instrumentation.IEventDAO;
+import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.npdata.dao.SlickSlimEvent;
@@ -65,8 +66,7 @@ public class PostgresTest extends BaseTest {
 
     eventDAO.addPlayedMarkings(1,spanish.getExercises().iterator().next());
 
-      logger.info("Got " + eventDAO.getFirstSlim("spanish"));
-
+    logger.info("Got " + eventDAO.getFirstSlim("spanish"));
   //  spanish.doReport(new PathHelper("war"));
   }
 
@@ -79,6 +79,20 @@ public class PostgresTest extends BaseTest {
     DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
 
     IEventDAO eventDAO = spanish.getEventDAO();
+
+    eventDAO.add(new Event("123","button","2334","testing",1,System.currentTimeMillis(),"device"),"spanish");
+    logger.info("Got " + eventDAO.getFirstSlim("spanish"));
+
+    //  spanish.doReport(new PathHelper("war"));
+  }
+
+  @Test
+  public void testUser() {
+    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
+
+    IUserDAO eventDAO = spanish.getUserDAO();
+
+    eventDAO.getUsers();
 
     eventDAO.add(new Event("123","button","2334","testing",1,System.currentTimeMillis(),"device"),"spanish");
     logger.info("Got " + eventDAO.getFirstSlim("spanish"));
