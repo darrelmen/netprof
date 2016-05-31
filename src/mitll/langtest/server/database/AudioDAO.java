@@ -15,6 +15,7 @@ import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.ExerciseListRequest;
 import mitll.langtest.shared.exercise.MutableAudioExercise;
 import org.apache.log4j.Logger;
 
@@ -484,11 +485,16 @@ public class AudioDAO extends DAO {
   }
 
   private Map<Integer, User> getUserMap(int userid) {
-    User user = userDAO.getUserMap().get(userid);
+    User user = userDAO.getUserWhere(userid);
     boolean isMale = (user != null && user.isMale());
     return userDAO.getUserMap(isMale);
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#filterByUnrecorded(ExerciseListRequest, Collection)
+   * @param userid
+   * @return
+   */
   public Set<String> getWithContext(int userid) {
     return getWithContext(getUserMap(userid));
   }
