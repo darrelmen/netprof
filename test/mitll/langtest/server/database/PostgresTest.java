@@ -35,6 +35,7 @@ package mitll.langtest.server.database;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.instrumentation.IEventDAO;
 import mitll.langtest.server.database.user.IUserDAO;
+import mitll.langtest.shared.User;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.npdata.dao.SlickSlimEvent;
@@ -92,11 +93,9 @@ public class PostgresTest extends BaseTest {
 
     IUserDAO eventDAO = spanish.getUserDAO();
 
-    eventDAO.getUsers();
+    List<User> users = eventDAO.getUsers();
 
-    eventDAO.add(new Event("123","button","2334","testing",1,System.currentTimeMillis(),"device"),"spanish");
-    logger.info("Got " + eventDAO.getFirstSlim("spanish"));
-
+    logger.info("got " +users);
     //  spanish.doReport(new PathHelper("war"));
   }
 }
