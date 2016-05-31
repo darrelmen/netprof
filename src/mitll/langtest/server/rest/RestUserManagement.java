@@ -265,7 +265,7 @@ public class RestUserManagement {
 
   private boolean forgotUsername(String email) {
     String emailH = Md5Hash.getHash(email);
-    User valid = db.getUserDAO().isValidEmail(emailH);
+    String valid = db.getUserDAO().isValidEmail(emailH);
     if (valid != null) {
       getEmailHelper().getUserNameEmailDevice(email, valid);
       return true;
@@ -277,7 +277,7 @@ public class RestUserManagement {
   private String resetPassword(String user, String email, String requestURL) {
     logger.debug(serverProps.getLanguage() + " resetPassword for " + user);
     String emailH = Md5Hash.getHash(email);
-    User validUserAndEmail = db.getUserDAO().isValidUserAndEmail(user, emailH);
+    Integer validUserAndEmail = db.getUserDAO().getIDForUserAndEmail(user, emailH);
 
     if (validUserAndEmail != null) {
       if (getEmailHelper().resetPassword(user, email, requestURL)) {

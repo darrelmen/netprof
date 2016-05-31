@@ -9,7 +9,6 @@ import com.google.gwt.util.tools.shared.StringUtils;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.user.IUserDAO;
-import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
 
@@ -22,8 +21,8 @@ import java.util.List;
 public class EmailHelper {
   private static final Logger logger = Logger.getLogger(EmailHelper.class);
 
-  public static final String NP_SERVER = "np.ll.mit.edu";
-  public static final String MY_EMAIL = "gordon.vidaver@ll.mit.edu";
+  private static final String NP_SERVER = "np.ll.mit.edu";
+  private static final String MY_EMAIL = "gordon.vidaver@ll.mit.edu";
   private static final String CLOSING = "Regards, Administrator";
   private static final String GORDON = "Gordon";
 
@@ -34,6 +33,7 @@ public class EmailHelper {
   private static final String PASSWORD_RESET = "Password Reset";
   private static final String RESET_PASSWORD = "Reset Password";
   private static final String REPLY_TO = "admin@" + NP_SERVER;
+  private static final String YOUR_USER_NAME = "Your user name";
 
   private final String language;
   private final IUserDAO userDAO;
@@ -55,41 +55,41 @@ public class EmailHelper {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#forgotUsername(String, String, String)
    * @param email
    * @param url
-   * @param valid
+   * @param userID
+   * @see mitll.langtest.server.LangTestDatabaseImpl#forgotUsername(String, String, String)
    */
-  public void getUserNameEmail(String email, String url, User valid) {
+  public void getUserNameEmail(String email, String url, String userID) {
     url = trimURL(url);
 
-    if (valid != null) {
-      logger.debug("Sending user email...");
-      String message = "Hi " + valid.getUserID() + ",<br/>" +
-          "Your user name is " + valid.getUserID() + "." +
-          "<br/><br/>" +
-          CLOSING;
+    if (userID != null) {
+      //logger.debug("Sending user email...");
       sendEmail(url // baseURL
           ,
           email, // destination email
-          "Your user name", // subject
-          message,
+          YOUR_USER_NAME, // subject
+          getUserNameMessage(userID),
           "Click here to return to the site." // link text
       );
     }
   }
 
-  public void getUserNameEmailDevice(String email, User valid) {
-    logger.debug("Sending user email...");
-    String message = "Hi " + valid.getUserID() + ",<br/>" +
-        "Your user name is " + valid.getUserID() + "." +
+  private String getUserNameMessage(String userID) {
+    return "Hi " + userID + ",<br/>" +
+        YOUR_USER_NAME +
+        " is " + userID + "." +
         "<br/><br/>" +
         CLOSING;
+  }
+
+  public void getUserNameEmailDevice(String email, String userID) {
+    //logger.debug("Sending user email...");
     sendEmail(null // baseURL
         ,
         email, // destination email
-        "Your user name", // subject
-        message,
+        YOUR_USER_NAME, // subject
+        getUserNameMessage(userID),
         null // link text
     );
   }
@@ -103,23 +103,23 @@ public class EmailHelper {
    * @see mitll.langtest.server.ScoreServlet#resetPassword
    */
   public boolean resetPassword(String user, String email, String url) {
-    logger.debug(serverProperties.getLanguage() +" resetPassword for " + user + " url " + url);
+    logger.debug(serverProperties.getLanguage() + " resetPassword for " + user + " url " + url);
 
     String hash1 = getHash(email);
-    User validUserAndEmail = userDAO.isValidUserAndEmail(user, hash1);
+    Integer validUserAndEmail = userDAO.getIDForUserAndEmail(user, hash1);
 
     if (validUserAndEmail != null) {
       logger.debug("resetPassword for " + user + " sending reset password email.");
       String toHash = user + "_" + System.currentTimeMillis();
       String hash = getHash(toHash);
-      if (!userDAO.updateKey(validUserAndEmail.getId(), true, hash)) {
-        logger.error("huh? couldn't add the reset password key to " + validUserAndEmail);
+      if (!userDAO.updateKey(validUserAndEmail, true, hash)) {
+        logger.error("huh? couldn't add the reset password key to user id = " + validUserAndEmail);
       }
 
       String message = "Hi " + user + ",<br/><br/>" +
           "Click the link below to reset your password." +
           "<br/>" +
-          "In NetProF, click the login button to enter a new password."+
+          "In NetProF, click the login button to enter a new password." +
           "<br/>" +
           CLOSING;
 
@@ -127,7 +127,7 @@ public class EmailHelper {
       if (!url.startsWith("https")) {
         url = url.replaceAll("http", "https");
       }
-      logger.debug("url is " +url);
+      logger.debug("url is " + url);
       sendEmail(url + "?" + RP + "=" + hash,
           email,
           PASSWORD_RESET,
@@ -147,14 +147,14 @@ public class EmailHelper {
   }
 
   /**
-   * @see #sendUserApproval(String, String, String)
-   * @see #resetPassword(String, String, String)
-   * @see #getUserNameEmail(String, String, User)
    * @param link
    * @param to
    * @param subject
    * @param message
    * @param linkText
+   * @see #sendUserApproval(String, String, String)
+   * @see #resetPassword(String, String, String)
+   * @see #getUserNameEmail(String, String, User)
    */
   private void sendEmail(String link, String to, String subject, String message, String linkText) {
     List<String> ccEmails = Collections.emptyList();
@@ -197,7 +197,7 @@ public class EmailHelper {
         User userWhere = userDAO.getUserWhere(userID);
         url = trimURL(url);
 
-        logger.debug("Sending enable CD User email for " + userID + " and " +userWhere);
+        logger.debug("Sending enable CD User email for " + userID + " and " + userWhere);
         userID1 = userWhere.getUserID();
         sendUserApproval(url, email, userID1);
 
@@ -225,8 +225,7 @@ public class EmailHelper {
             subject,
             getApprovalAck(userID1, GORDON)
         );
-      }
-      else {
+      } else {
         logger.debug("NOT sending enable CD User email for " + userID);
       }
       return (b ? userID1 : null);
