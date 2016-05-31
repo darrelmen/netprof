@@ -42,15 +42,11 @@ import mitll.npdata.dao.user.UserDAOWrapper;
 import org.apache.log4j.Logger;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
   private static final Logger logger = Logger.getLogger(SlickUserDAOImpl.class);
-  UserDAOWrapper dao;
+  private UserDAOWrapper dao;
 
   public SlickUserDAOImpl(Database database, DBConnection dbConnection) {
     super(database);
@@ -76,27 +72,30 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }
 
   protected void updateUser(int id, User.Kind kind, String passwordH, String emailH) {
-    dao.updateUser
+    dao.updateUser(id, kind.name(), passwordH, emailH,
+        kind == User.Kind.CONTENT_DEVELOPER ? CD_PERMISSIONS.toString() : EMPTY_PERM.toString());
   }
 
   @Override
   public boolean enableUser(int id) {
-    return false;
+    return dao.enableUser(id);
   }
 
   @Override
-  public User isValidEmail(String emailH) {
-    return null;
+  public String isValidEmail(String emailH) {
+    List<String> usersWithEmail = dao.isValidEmail(emailH);
+    return usersWithEmail.isEmpty() ? null : usersWithEmail.get(0);
   }
 
   @Override
-  public User isValidUserAndEmail(String user, String emailH) {
-    return null;
+  public Integer getIDForUserAndEmail(String user, String emailH) {
+    List<Integer> idForUserAndEmail = dao.getIDForUserAndEmail(user, emailH);
+    return idForUserAndEmail.isEmpty() ? null:idForUserAndEmail.get(0);
   }
 
   @Override
-  public int userExists(String id) {
-    return 0;
+  public int getIdForUserID(String id) {
+    return dao.idForUser(id);
   }
 
   @Override

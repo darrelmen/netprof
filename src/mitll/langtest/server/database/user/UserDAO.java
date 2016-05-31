@@ -58,7 +58,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
       enableAllUsers = serverProperties.enableAllUsers();
       createTable(database);
 
-      defectDetector = userExists(DEFECT_DETECTOR);
+      defectDetector = getIdForUserID(DEFECT_DETECTOR);
       if (defectDetector == -1) {
         List<User.Permission> permissions = Collections.emptyList();
         defectDetector = addUser(89, MALE, 0, "", "", UNKNOWN, UNKNOWN, DEFECT_DETECTOR, false, permissions, User.Kind.STUDENT, "", "", "");
@@ -241,7 +241,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   }
 
   @Override
-  public User isValidEmail(String emailH) {
+  public String isValidEmail(String emailH) {
     String sql = "SELECT " +
         ID +
         " from " + USERS +
@@ -251,11 +251,11 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
         "'";
 
     int i = userExistsSQL("N/A", sql);
-    return i == -1 ? null : getUserWhere(i);
+    return i == -1 ? null : getUserWhere(i).getUserID();
   }
 
   @Override
-  public User isValidUserAndEmail(String user, String emailH) {
+  public Integer getIDForUserAndEmail(String user, String emailH) {
     String sql = "SELECT " +
         ID +
         " from " + USERS +
@@ -264,7 +264,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
         USER_ID + ")='" + user.toUpperCase() + "'";
 
     int i = userExistsSQL("N/A", sql);
-    return i == -1 ? null : getUserWhere(i);
+    return i == -1 ? null : getUserWhere(i).getId();
   }
 
   /**
@@ -275,7 +275,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    * @see DatabaseImpl#userExists(String)
    */
   @Override
-  public int userExists(String id) {
+  public int getIdForUserID(String id) {
     String sql = "SELECT id from users where UPPER(userID)='" + id.toUpperCase() + "'";
     return userExistsSQL(id, sql);
   }
@@ -345,7 +345,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
 
     } catch (Exception e) {
       logger.error("Got " + e, e);
-      database.logEvent(id, "userExists: " + e.toString(), 0, UNKNOWN);
+      database.logEvent(id, "getIdForUserID: " + e.toString(), 0, UNKNOWN);
     }
     return val;
   }
@@ -485,7 +485,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   /**
    * @param userid
    * @return null if no user with that id else the user object
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getUserBy(long)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getUserBy
    */
   @Override
   public User getUserWhere(int userid) {
