@@ -80,9 +80,9 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
   private static final int DEFAULT_MALE_ID = -2;
   private static final int DEFAULT_FEMALE_ID = -3;
   public static final String MALE = "Male";
-  private static final MiniUser DEFAULT_MALE = new MiniUser(DEFAULT_MALE_ID, 30, 0, MALE, false);
+  private static final MiniUser DEFAULT_MALE = new MiniUser(DEFAULT_MALE_ID, 30, true, MALE, false);
   public static final String FEMALE = "Female";
-  private static final MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 30, 1, FEMALE, false);
+  private static final MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 30, false, FEMALE, false);
 
   private Set<String> incorrectFields;
   private List<RequiresResize> toResize;
@@ -91,7 +91,6 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
   private Button approvedButton;
   private Tooltip approvedTooltip;
   private Tooltip nextTooltip;
-  //private CompressedAudio compressedAudio = new CompressedAudio();
 
   /**
    * @param e
