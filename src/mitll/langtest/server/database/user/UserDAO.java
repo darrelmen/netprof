@@ -452,7 +452,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
 
   /**
    * @param userid
-   * @return
+   * @return null if can't find by id
    * @see AudioDAO#getAudioAttribute
    */
   @Override
