@@ -11,7 +11,7 @@ import java.util.Collection;
 
 /**
  * Object representing a user.
- *
+ * <p>
  * UserManager: go22670
  * Date: 5/17/12
  * Time: 3:54 PM
@@ -21,8 +21,8 @@ public class User extends MiniUser {
   private static final String NOT_SET = "NOT_SET";
   private int experience;
   private String ipaddr;
-  private String  passwordHash;
-  private String  emailHash;
+  private String passwordHash;
+  private String emailHash;
   private boolean enabled;
   private boolean admin;
   private int numResults;
@@ -41,17 +41,19 @@ public class User extends MiniUser {
   public boolean isTeacher() {
     return getUserKind().equals(Kind.TEACHER);
   }
+
   public boolean isCD() {
     return getUserKind().equals(Kind.CONTENT_DEVELOPER);
   }
 
-  public enum Kind implements IsSerializable { UNSET, STUDENT, TEACHER, CONTENT_DEVELOPER, ANONYMOUS }
-  public enum Permission implements IsSerializable { QUALITY_CONTROL, RECORD_AUDIO, ENABLE_DEVELOPER }
+  public enum Kind implements IsSerializable {UNSET, STUDENT, TEACHER, CONTENT_DEVELOPER, ANONYMOUS}
 
-  public User() {} // for serialization
+  public enum Permission implements IsSerializable {QUALITY_CONTROL, RECORD_AUDIO, ENABLE_DEVELOPER}
+
+  public User() {
+  } // for serialization
 
   /**
-   * @see mitll.langtest.server.database.custom.UserListManager#getQCUser()
    * @param id
    * @param age
    * @param gender
@@ -60,6 +62,7 @@ public class User extends MiniUser {
    * @param password
    * @param enabled
    * @param permissions
+   * @see mitll.langtest.server.database.custom.UserListManager#getQCUser()
    */
   public User(int id, int age, int gender, int experience, String ipaddr, String password,
               boolean enabled, Collection<Permission> permissions) {
@@ -68,7 +71,6 @@ public class User extends MiniUser {
   }
 
   /**
-   * @see UserDAO#getUsers()
    * @param id
    * @param age
    * @param gender
@@ -85,12 +87,13 @@ public class User extends MiniUser {
    * @param resetPassKey
    * @param cdEnableKey
    * @param timestamp
+   * @see UserDAO#getUsers()
    */
   public User(int id, int age, int gender, int experience, String ipaddr, String passwordH,
               String nativeLang, String dialect, String userID, boolean enabled, boolean isAdmin,
               Collection<Permission> permissions, Kind userKind, String emailHash, String device, String resetPassKey,
               String cdEnableKey, long timestamp) {
-    super(id, age, gender, userID, isAdmin);
+    super(id, age, gender == 0, userID, isAdmin);
     this.experience = experience;
     this.ipaddr = ipaddr;
     this.passwordHash = passwordH;
@@ -110,24 +113,30 @@ public class User extends MiniUser {
   public Collection<Permission> getPermissions() {
     return permissions;
   }
-  public long getTimestampMillis() { return timestamp; }
+
+  public long getTimestampMillis() {
+    return timestamp;
+  }
 
   public void setTimestampMillis(long timestampMillis) {
     this.timestamp = timestampMillis;
   }
+
   /**
-   * @see mitll.langtest.client.user.UserTable#getTable
    * @return
+   * @see mitll.langtest.client.user.UserTable#getTable
    */
   public int getNumResults() {
     return numResults;
   }
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#getUsers
    * @param numResults
+   * @see mitll.langtest.server.database.DatabaseImpl#getUsers
    */
-  public void setNumResults(int numResults) { this.numResults = numResults; }
+  public void setNumResults(int numResults) {
+    this.numResults = numResults;
+  }
 
   public boolean isAdmin() {
     return admin;
@@ -154,8 +163,8 @@ public class User extends MiniUser {
   }
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#getUsers()
    * @param completePercent
+   * @see mitll.langtest.server.database.DatabaseImpl#getUsers()
    */
   public void setCompletePercent(float completePercent) {
     this.completePercent = completePercent;
@@ -217,12 +226,12 @@ public class User extends MiniUser {
   }
 
   public String toString() {
-    return "user " + getId() +  "/" + getUserID() +
+    return "user " + getId() + "/" + getUserID() +
         " is a " + getGender() + " age " + getAge() +
         " dialect " + getDialect() +
         " emailH " + getEmailHash() +
         " passH " + getPasswordHash() +
-        " kind " + getUserKind()+
+        " kind " + getUserKind() +
         " perms " + getPermissions() +
         " device " + getDevice() +
         " reset '" + resetKey + "'" +
