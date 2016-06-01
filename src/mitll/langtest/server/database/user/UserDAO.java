@@ -50,19 +50,13 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    * @param database
    * @param serverProperties
    */
-  public UserDAO(Database database, ServerProperties serverProperties) {
+  public UserDAO(Database database) {
     super(database);
     try {
-      admins = serverProperties.getAdmins();
-      language = serverProperties.getLanguage();
-      enableAllUsers = serverProperties.enableAllUsers();
+
       createTable(database);
 
-      defectDetector = getIdForUserID(DEFECT_DETECTOR);
-      if (defectDetector == -1) {
-        List<User.Permission> permissions = Collections.emptyList();
-        defectDetector = addUser(89, MALE, 0, "", "", UNKNOWN, UNKNOWN, DEFECT_DETECTOR, false, permissions, User.Kind.STUDENT, "", "", "");
-      }
+      findOrMakeDefectDetector();
     } catch (Exception e) {
       logger.error("got " + e, e);
       database.logEvent("unk", "create user table " + e.toString(), 0, UNKNOWN);
@@ -80,7 +74,6 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
       }
     }
   }*/
-
 
   /**
    * Somehow on subsequent runs, the ids skip by 30 or so?
