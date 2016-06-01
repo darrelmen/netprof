@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.user;
 
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.excel.UserDAOToExcel;
@@ -40,11 +41,7 @@ import mitll.langtest.shared.User;
 import net.sf.json.JSON;
 import org.apache.log4j.Logger;
 
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 public abstract class BaseUserDAO extends DAO {
   private static final Logger logger = Logger.getLogger(BaseUserDAO.class);
@@ -90,13 +87,16 @@ public abstract class BaseUserDAO extends DAO {
   public static final int DEFAULT_FEMALE_ID = -3;
   public static MiniUser DEFAULT_USER = new MiniUser(DEFAULT_USER_ID, 99, true, "default", false);
 
-  public static MiniUser DEFAULT_MALE   = new MiniUser(DEFAULT_MALE_ID,   99, true, "Male", false);
+  public static MiniUser DEFAULT_MALE = new MiniUser(DEFAULT_MALE_ID, 99, true, "Male", false);
   public static MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 99, false, "Female", false);
 
-  Collection<String> admins;
-  
+  private Collection<String> admins;
+
   BaseUserDAO(Database database) {
     super(database);
+    admins = database.getServerProps().getAdmins();
+    language = database.getServerProps().getLanguage();
+    enableAllUsers = database.getServerProps().enableAllUsers();
   }
 
   /**
@@ -108,9 +108,11 @@ public abstract class BaseUserDAO extends DAO {
     return defectDetector;
   }
 
+/*
   public void toXLSX(OutputStream out, List<User> users) {
     new UserDAOToExcel().toXLSX(out, users, language);
   }
+*/
 
   public JSON toJSON(List<User> users) {
     return new UserDAOToExcel().toJSON(users);
@@ -161,11 +163,24 @@ public abstract class BaseUserDAO extends DAO {
   }
 
   abstract User getUserByID(String id);
+
   abstract void updateUser(int id, User.Kind kind, String passwordH, String emailH);
+
   abstract User getUserWhere(int userid);
+
   boolean isAdmin(String userid) {
     return userid != null && (admins.contains(userid));
   }
+
+  void findOrMakeDefectDetector() {
+    defectDetector = getIdForUserID(DEFECT_DETECTOR);
+    if (defectDetector == -1) {
+      List<User.Permission> permissions = Collections.emptyList();
+      defectDetector = addUser(89, MALE, 0, "", "", UNKNOWN, UNKNOWN, DEFECT_DETECTOR, false, permissions, User.Kind.STUDENT, "", "", "");
+    }
+  }
+
+  abstract int getIdForUserID(String id);
 
   abstract int addUser(int age, String gender, int experience, String userAgent,
                        String trueIP, String nativeLang, String dialect, String userID, boolean enabled, Collection<User.Permission> permissions,
