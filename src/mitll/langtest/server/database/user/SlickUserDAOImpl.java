@@ -52,6 +52,7 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
   public SlickUserDAOImpl(Database database, DBConnection dbConnection) {
     super(database);
     dao = new UserDAOWrapper(dbConnection);
+    findOrMakeDefectDetector();
   }
 
   @Override
@@ -218,7 +219,13 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
   @Override
   public User getUserWhere(int userid) {
-    return convertOrNull(dao.byID(userid));
+    logger.info("getUserWhere ask for user " + userid);
+    Seq<SlickUser> userByIDAndPass = dao.byID(userid);
+    logger.info("getUserWhere got " + userByIDAndPass);
+    User user = convertOrNull(userByIDAndPass);
+    logger.info("getUserWhere got " + user);
+
+    return user;
   }
 
   @Override
@@ -243,16 +250,16 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
   @Override
   public boolean updateKey(Integer userid, boolean resetKey, String key) {
-    return dao.updateKey(userid,resetKey,key);
+    return dao.updateKey(userid, resetKey, key);
   }
 
   @Override
   public boolean clearKey(Integer remove, boolean resetKey) {
-    return dao.updateKey(remove,resetKey,"");
+    return dao.updateKey(remove, resetKey, "");
   }
 
   @Override
   public boolean changeEnabled(int userid, boolean enabled) {
-    return dao.changeEnabled(userid,enabled);
+    return dao.changeEnabled(userid, enabled);
   }
 }
