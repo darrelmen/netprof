@@ -198,8 +198,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
     SlickUserDAOImpl slickUserDAO = new SlickUserDAOImpl(this,dbConnection);
 
-
-    UserDAO userDAO = new UserDAO(this, getServerProps());
+    UserDAO userDAO = new UserDAO(this);
     this.userDAO = slickUserDAO;
     try {
       userDAO.createTable(this);
