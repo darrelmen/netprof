@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database;
 
+import mitll.langtest.client.user.Md5Hash;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.instrumentation.IEventDAO;
 import mitll.langtest.server.database.user.IUserDAO;
@@ -91,11 +92,43 @@ public class PostgresTest extends BaseTest {
   public void testUser() {
     DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
 
-    IUserDAO eventDAO = spanish.getUserDAO();
+    IUserDAO dao = spanish.getUserDAO();
 
-    List<User> users = eventDAO.getUsers();
+    List<User> users = dao.getUsers();
 
     logger.info("got " +users);
+
+    String userid = "userid";
+    String hash = Md5Hash.getHash("g@gmail.com");
+    String password = Md5Hash.getHash("password");
+    User user = dao.addUser(userid, password, hash, User.Kind.STUDENT, "128.0.0.1", true, 89, "midest", "browser");
+    User user2 = dao.addUser(userid, password, hash, User.Kind.STUDENT, "128.0.0.1", true, 89, "midest", "iPad");
+
+    logger.info("made " + user);
+    logger.info("made " + user2);
+    User user3 = dao.addUser(userid +"ipad", password, hash, User.Kind.STUDENT, "128.0.0.1", true, 89, "midest", "iPad");
+
+    if (user == null) {
+      user = dao.getUserByID(userid);
+      logger.info("found " +user);
+    }
+
+    logger.info("before " +user.isEnabled());
+
+    boolean b = dao.enableUser(user.getId());
+
+    logger.info("enable user " +b);
+
+    logger.info("valid email " +dao.isValidEmail(hash));
+    logger.info("valid email " +dao.isValidEmail(password));
+    logger.info("user " +dao.getIDForUserAndEmail(userid,hash));
+    logger.info("user " +dao.getIDForUserAndEmail(userid,password));
+    logger.info("user id " +dao.getIdForUserID(userid));
+    logger.info("user " +dao.getUser(userid,password));
+    logger.info("user " +dao.getUser(userid,hash));
+    logger.info("user " +dao.getUserWithPass(userid,password));
+    logger.info("user " +dao.getUserWithPass(userid,hash));
+    logger.info("user devices " +dao.getUsersDevices());
     //  spanish.doReport(new PathHelper("war"));
   }
 }
