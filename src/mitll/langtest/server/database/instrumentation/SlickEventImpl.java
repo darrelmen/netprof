@@ -29,6 +29,11 @@ public class SlickEventImpl implements IEventDAO {
     eventDAOExample = new EventDAOExample(dbConnection);
   }
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#oneTimeDataCopy(SlickEventImpl)
+   * @param other
+   * @param language
+   */
   public void copyTableOnlyOnce(IEventDAO other, String language) {
     if (getNumRows(language).intValue() == 0) {
       List<SlickEvent> copy = new ArrayList<>();
