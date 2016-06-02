@@ -32,7 +32,6 @@
 
 package mitll.langtest.shared;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
