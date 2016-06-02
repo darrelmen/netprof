@@ -79,11 +79,6 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }
 
   @Override
-  public boolean enableUser(int id) {
-    return dao.enableUser(id);
-  }
-
-  @Override
   public String isValidEmail(String emailH) {
     List<String> usersWithEmail = dao.isValidEmail(emailH);
     return usersWithEmail.isEmpty() ? null : usersWithEmail.get(0);
@@ -106,10 +101,6 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return convertOrNull(userByIDAndPass);
   }
 
-  private User convertOrNull(Seq<SlickUser> userByIDAndPass) {
-    return userByIDAndPass.isEmpty() ? null : toUser(userByIDAndPass.head());
-  }
-
   @Override
   public User getUserWithPass(String id, String passwordHash) {
     Seq<SlickUser> userByIDAndPass = dao.getUserByIDAndPass(id, passwordHash);
@@ -120,6 +111,10 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
   public User getUserByID(String id) {
     Seq<SlickUser> byUserID = dao.getByUserID(id);
     return convertOrNull(byUserID);
+  }
+
+  private User convertOrNull(Seq<SlickUser> userByIDAndPass) {
+    return userByIDAndPass.isEmpty() ? null : toUser(userByIDAndPass.head());
   }
 
   @Override
@@ -208,12 +203,12 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }
 
   @Override
-  public User getUserWhereResetKey(String resetKey) {
+  public User getUserWithResetKey(String resetKey) {
     return convertOrNull(dao.getByReset(resetKey));
   }
 
   @Override
-  public User getUserWhereEnabledReq(String resetKey) {
+  public User getUserWithEnabledKey(String resetKey) {
     return convertOrNull(dao.getByEnabledReq(resetKey));
   }
 
@@ -244,22 +239,29 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }
 
   @Override
-  public boolean changePassword(Integer remove, String passwordH) {
-    return dao.setPassword(remove, passwordH);
+  public boolean changePassword(int user, String passwordH) {
+    return dao.setPassword(user, passwordH);
   }
 
   @Override
-  public boolean updateKey(Integer userid, boolean resetKey, String key) {
+  public boolean updateKey(int userid, boolean resetKey, String key) {
     return dao.updateKey(userid, resetKey, key);
   }
 
   @Override
-  public boolean clearKey(Integer remove, boolean resetKey) {
-    return dao.updateKey(remove, resetKey, "");
+  public boolean clearKey(int user, boolean resetKey) {
+    return dao.updateKey(user, resetKey, "");
+  }
+
+
+  @Override
+  public boolean enableUser(int id) {
+    return changeEnabled(id,true);
   }
 
   @Override
   public boolean changeEnabled(int userid, boolean enabled) {
     return dao.changeEnabled(userid, enabled);
   }
+
 }
