@@ -1,5 +1,33 @@
 /*
- * Copyright © 2011-2015 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
+ * and their contractors; 2015. Other request for this document shall be referred
+ * to DLIFLC.
+ *
+ * WARNING: This document may contain technical data whose export is restricted
+ * by the Arms Export Control Act (AECA) or the Export Administration Act (EAA).
+ * Transfer of this data by any means to a non-US person who is not eligible to
+ * obtain export-controlled data is prohibited. By accepting this data, the consignee
+ * agrees to honor the requirements of the AECA and EAA. DESTRUCTION NOTICE: For
+ * unclassified, limited distribution documents, destroy by any method that will
+ * prevent disclosure of the contents or reconstruction of the document.
+ *
+ * This material is based upon work supported under Air Force Contract No.
+ * FA8721-05-C-0002 and/or FA8702-15-D-0001. Any opinions, findings, conclusions
+ * or recommendations expressed in this material are those of the author(s) and
+ * do not necessarily reflect the views of the U.S. Air Force.
+ *
+ * © 2015 Massachusetts Institute of Technology.
+ *
+ * The software/firmware is provided to you on an As-Is basis
+ *
+ * Delivered to the US Government with Unlimited Rights, as defined in DFARS
+ * Part 252.227-7013 or 7014 (Feb 2014). Notwithstanding any copyright notice,
+ * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
+ * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
+ * authorized by the U.S. Government may violate any copyrights that exist in this work.
+ *
+ *
  */
 
 package mitll.langtest.client;
@@ -113,11 +141,20 @@ import java.util.logging.Logger;
  * - fix for bug where couldn't jump from word in analysis
  * 1.3.2
  * - report updates
- */
+ * 1.3.3
+ * - fixes for generated keys bug on result table
+ * 1.3.4
+ * - student analysis tab visible, html5 audio preferred
+ *
+ * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
+ * @since
+ * */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private final Logger logger = Logger.getLogger("LangTest");
 
-  public static final String VERSION_INFO = "1.3.2";
+  public static final String VERSION_INFO = "1.3.4";
 
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
@@ -267,7 +304,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private void getImage(int reqid, String key, AsyncCallback<ImageResponse> client) {
     String[] split = key.split("\\|");
-
     String path = split[0];
     String type = split[1];
     int toUse = Integer.parseInt(split[2]);
@@ -279,8 +315,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private void getImage(int reqid, final String key, String path, final String type, int toUse, int height,
                         String exerciseID, final AsyncCallback<ImageResponse> client) {
-
-    //  ImageResponse ifPresent = imageCache.getIfPresent(key);
     ImageResponse ifPresent = imageCache.get(key);
     if (ifPresent != null) {
       //logger.info("getImage for key " + key+ " found  " + ifPresent);
@@ -312,7 +346,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         .expireAfterWrite(7, TimeUnit.DAYS)
         .build();
   */
-  Map<String, ImageResponse> imageCache = lruCache(MAX_CACHE_SIZE);
+  private Map<String, ImageResponse> imageCache = lruCache(MAX_CACHE_SIZE);
 
   private static <K, V> Map<K, V> lruCache(final int maxSize) {
     return new LinkedHashMap<K, V>(maxSize * 4 / 3, 0.75f, true) {
@@ -370,7 +404,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     initialUI.populateRootPanel();
   }
 
-
   /**
    * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser(int)
    * @see mitll.langtest.client.user.UserManager#login()
@@ -416,7 +449,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private boolean usingWebRTC() {
-    return flashRecordPanel.usingWebRTC();
+    return FlashRecordPanelHeadless.usingWebRTC();
   }
 
   private void setupSoundManager() {
@@ -461,9 +494,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see mitll.langtest.client.recorder.FlashRecordPanelHeadless#micConnected()
    */
   private void makeFlashContainer() {
-    flashRecordPanel = new FlashRecordPanelHeadless();
 
-    FlashRecordPanelHeadless.setMicPermission(new MicPermission() {
+    MicPermission micPermission = new MicPermission() {
+      /**
+       * @see mitll.langtest.client.recorder.WebAudioRecorder
+       */
       public void gotPermission() {
         logger.info("makeFlashContainer - got permission!");
         hideFlash();
@@ -471,7 +506,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       }
 
       /**
-       * @see mitll.langtest.client.recorder.FlashRecordPanelHeadless#noMicrophoneFound()
+       * @see FlashRecordPanelHeadless#noMicrophoneFound()
        */
       public void noMicAvailable() {
         if (!showingPlugInNotice) {
@@ -493,6 +528,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         }
       }
 
+      /**
+       * @see
+       */
       public void noRecordingMethodAvailable() {
         logger.info(" : makeFlashContainer - no way to record");
         hideFlash();
@@ -506,7 +544,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
         initialUI.setSplash();
         isMicConnected = false;
       }
-    });
+
+      @Override
+      public void noWebRTCAvailable() {
+        flashRecordPanel.initFlash();
+      }
+    };
+    flashRecordPanel = new FlashRecordPanelHeadless(micPermission);
+//    FlashRecordPanelHeadless.setMicPermission(micPermission);
   }
 
   private void hideFlash() {
@@ -546,9 +591,11 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       checkLogin();
     } else {
       logger.info("checkInitFlash : initFlash - no permission yet");
-      if (flashRecordPanel.initFlash()) {
+      flashRecordPanel.tryWebAudio();
+
+/*      if (flashRecordPanel.initFlash()) {
         checkLogin();
-      }
+      }*/
     }
   }
 
