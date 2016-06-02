@@ -34,12 +34,9 @@ package mitll.langtest.server;
 
 import audio.image.ImageType;
 import audio.imagewriter.SimpleImageWriter;
-import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.TextBox;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabase;
-import mitll.langtest.client.custom.dialog.ReviewEditableExercise;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.server.amas.QuizCorrect;
 import mitll.langtest.server.audio.AudioCheck;
@@ -60,7 +57,6 @@ import mitll.langtest.server.trie.TextEntityValue;
 import mitll.langtest.server.trie.Trie;
 import mitll.langtest.shared.*;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
-import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
@@ -538,7 +534,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     Answer answer1 = new Answer(scoreForAnswer, correct, resultID);
     return answer1;
   }
-
 
   /**
    * Marks each exercise - first state - with whether this user has recorded audio for this item
@@ -1260,73 +1255,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   // Users ---------------------
 
 
-  /**
-   * @param userid
-   * @param name
-   * @param description
-   * @param dliClass
-   * @param isPublic
-   * @return
-   * @see mitll.langtest.client.custom.dialog.CreateListDialog#doCreate
-   */
-  @Override
-  public long addUserList(int userid, String name, String description, String dliClass, boolean isPublic) {
-    return getUserListManager().addUserList(userid, name, description, dliClass, isPublic);
-  }
-
-  /**
-   * @param userListID
-   * @param isPublic
-   * @see mitll.langtest.client.custom.ListManager#setPublic
-   */
-  @Override
-  public void setPublicOnList(long userListID, boolean isPublic) {
-    getUserListManager().setPublicOnList(userListID, isPublic);
-  }
-
-  /**
-   * @param userListID
-   * @param user
-   * @see mitll.langtest.client.custom.ListManager#addVisitor(mitll.langtest.shared.custom.UserList)
-   */
-  public void addVisitor(long userListID, int user) {
-    getUserListManager().addVisitor(userListID, user);
-  }
-
-  /**
-   * @param userid
-   * @param onlyCreated
-   * @param visited
-   * @return
-   * @see mitll.langtest.client.custom.Navigation#showInitialState()
-   * @see mitll.langtest.client.custom.ListManager#viewLessons
-   * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
-   */
-  public Collection<UserList<CommonShell>> getListsForUser(int userid, boolean onlyCreated, boolean visited) {
-    //  if (!onlyCreated && !visited) logger.error("getListsForUser huh? asking for neither your lists nor  your visited lists.");
-    return getUserListManager().getListsForUser(userid, onlyCreated, visited);
-  }
-
-  /**
-   * @param search
-   * @param userid
-   * @return
-   * @see mitll.langtest.client.custom.ListManager#viewLessons
-   */
-  @Override
-  public Collection<UserList<CommonShell>> getUserListsForText(String search, int userid) {
-    return getUserListManager().getUserListsForText(search, userid);
-  }
-
-  /**
-   * @param userListID
-   * @param exID
-   * @return
-   * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
-   */
-  public void addItemToUserList(long userListID, String exID) {
-    getUserListManager().addItemToUserList(userListID, exID);
-  }
 
   /**
    * @param exerciseID
@@ -1373,45 +1301,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @return
-   * @see mitll.langtest.client.custom.ListManager#viewReview
-   */
-  @Override
-  public List<UserList<CommonShell>> getReviewLists() {
-    List<UserList<CommonShell>> lists = new ArrayList<>();
-    UserListManager userListManager = getUserListManager();
-    UserList<CommonShell> defectList = userListManager.getDefectList(db.getTypeOrder());
-    lists.add(defectList);
-
-    lists.add(userListManager.getCommentedList(db.getTypeOrder()));
-    if (!serverProps.isNoModel()) {
-      lists.add(userListManager.getAttentionList(db.getTypeOrder()));
-    }
-    return lists;
-  }
-
-  /**
-   * @param id
-   * @return
-   * @see mitll.langtest.client.custom.ListManager#deleteList(Button, UserList, boolean)
-   */
-  @Override
-  public boolean deleteList(long id) {
-    return getUserListManager().deleteList(id);
-  }
-
-  /**
-   * @param listid
-   * @param exid
-   * @return
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#deleteItem
-   */
-  @Override
-  public boolean deleteItemFromList(long listid, String exid) {
-    return getUserListManager().deleteItemFromList(listid, exid, db.getTypeOrder());
-  }
-
-  /**
    * Can't check if it's valid if we don't have a model.
    *
    * @param foreign
@@ -1423,74 +1312,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return audioFileHelper.checkLTSOnForeignPhrase(foreign);
   }
 
-  /**
-   * Put the new item in the database,
-   * copy the audio under bestAudio
-   * assign the item to a user list
-   *
-   * @param userListID
-   * @param userExercise
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
-   */
-  public CommonExercise reallyCreateNewItem(long userListID, CommonExercise userExercise) {
-    //logger.debug("reallyCreateNewItem : made user exercise " + userExercise + " on list " + userListID);
-    getUserListManager().reallyCreateNewItem(userListID, userExercise, serverProps.getMediaDir());
-
-    for (AudioAttribute audioAttribute : userExercise.getAudioAttributes()) {
-//      logger.debug("\treallyCreateNewItem : update " + audioAttribute + " to " + userExercise.getID());
-      db.getAudioDAO().updateExerciseID(audioAttribute.getUniqueID(), userExercise.getID());
-    }
-    //  logger.debug("\treallyCreateNewItem : made user exercise " + userExercise + " on list " + userListID);
-
-    return userExercise;
-  }
-
-  @Override
-  public Collection<CommonExercise> reallyCreateNewItems(int creator, long userListID, String userExerciseText) {
-    String[] lines = userExerciseText.split("\n");
-    logger.info("got " + lines.length + " lines");
-    List<CommonExercise> newItems = new ArrayList<>();
-    UserList<CommonShell> userListByID = db.getUserListManager().getUserListByID(userListID, Collections.emptyList());
-    int n = userListByID.getExercises().size();
-    Set<String> unique = new HashSet<>();
-    for (CommonShell shell : userListByID.getExercises()) unique.add(shell.getForeignLanguage());
-    for (String line : lines) {
-      String[] parts = line.split("\\t");
-      logger.info("\tgot " + parts.length + " parts");
-      if (parts.length > 1) {
-        UserExercise newItem = new UserExercise(-1, UserExercise.CUSTOM_PREFIX + "_" + (n++), creator, parts[1], parts[0], "");
-        newItems.add(newItem);
-        logger.info("new " + newItem);
-      }
-    }
-
-    List<CommonExercise> actualItems = new ArrayList<>();
-    for (CommonExercise candidate : newItems) {
-      String foreignLanguage = candidate.getForeignLanguage();
-      if (!unique.contains(foreignLanguage)) {
-        if (isValidForeignPhrase(foreignLanguage)) {
-          getUserListManager().reallyCreateNewItem(userListID, candidate, serverProps.getMediaDir());
-          actualItems.add(candidate);
-        }
-      }
-    }
-    logger.info("Returning " + actualItems.size());
-    return actualItems;
-  }
-
   UserListManager getUserListManager() {
     return db.getUserListManager();
-  }
-
-
-  /**
-   * @param exercise
-   * @return
-   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#duplicateExercise
-   */
-  @Override
-  public CommonExercise duplicateExercise(CommonExercise exercise) {
-    return db.duplicateExercise(exercise);
   }
 
   /**
@@ -1530,15 +1353,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getEventDAO().getAll(getLanguage());
   }
 
-  /**
-   * @param userExercise
-   * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#postEditItem
-   */
-  @Override
-  public void editItem(CommonExercise userExercise) {
-    db.editItem(userExercise);
-    logger.debug("editItem : now user exercise " + userExercise);
-  }
 
   /**
    * @param audioAttribute
@@ -1754,7 +1568,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param flText
    * @param which
    * @return
-   * @see mitll.langtest.client.result.ResultManager#getTypeaheadUsing(String, TextBox)
+   * @see mitll.langtest.client.result.ResultManager#getTypeaheadUsing
    */
   @Override
   public Collection<String> getResultAlternatives(Map<String, String> unitToValue, int userid, String flText, String which) {

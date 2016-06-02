@@ -35,6 +35,7 @@ package mitll.langtest.client.custom.dialog;
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.BlurEvent;
@@ -48,6 +49,8 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.ListManager;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.services.ListService;
+import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.UserManager;
 
@@ -72,6 +75,8 @@ public class CreateListDialog extends BasicDialog {
 
   private final ListManager navigation;
   private final LangTestDatabaseAsync service;
+  final ListServiceAsync listService = GWT.create(ListService.class);
+
   private final UserManager userManager;
   private final ExerciseController controller;
 
@@ -201,7 +206,7 @@ public class CreateListDialog extends BasicDialog {
 
   private void addUserList(final FormField titleBox, TextArea area, FormField classBox, boolean isPublic) {
     int user = userManager.getUser();
-    service.addUserList(user,
+    listService.addUserList(user,
       titleBox.getText(),
       area.getText(),
       classBox.getText(), isPublic, new AsyncCallback<Long>() {
