@@ -62,7 +62,6 @@ import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.server.database.user.BaseUserDAO;
-import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.MiniUser;

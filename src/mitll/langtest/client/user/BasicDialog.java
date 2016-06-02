@@ -34,7 +34,6 @@ package mitll.langtest.client.user;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.*;
-import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.PasswordTextBox;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
@@ -51,7 +50,6 @@ import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.recorder.RecordButton;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;

@@ -37,7 +37,6 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Shell;
 
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Includes a reqID so if the client gets responses out of order it can ignore responses to old requests.

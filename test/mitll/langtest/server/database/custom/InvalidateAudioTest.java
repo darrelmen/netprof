@@ -3,8 +3,9 @@ package mitll.langtest.server.database.custom;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioFileHelper;
-import mitll.langtest.server.database.AudioDAO;
+import mitll.langtest.server.database.audio.AudioDAO;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.exercise.*;
 import org.apache.log4j.Logger;
@@ -161,7 +162,7 @@ public class InvalidateAudioTest {
   }
 
   public static void markDefects(DatabaseImpl war, Map<String, CommonExercise> idToEx, Collection<String> exs) {
-    AudioDAO audioDAO = war.getAudioDAO();
+    IAudioDAO audioDAO = war.getAudioDAO();
 
     logger.warn("ids " + exs);
     int c = 0;
@@ -183,7 +184,7 @@ public class InvalidateAudioTest {
   }
 
   public static void markContextDefects(DatabaseImpl war, Map<String, CommonExercise> idToEx, Collection<String> exs) {
-    AudioDAO audioDAO = war.getAudioDAO();
+    IAudioDAO audioDAO = war.getAudioDAO();
 
     logger.warn("ids " + exs);
     int c = 0;
