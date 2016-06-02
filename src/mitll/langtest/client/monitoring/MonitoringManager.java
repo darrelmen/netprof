@@ -47,7 +47,6 @@ import com.google.gwt.visualization.client.visualizations.corechart.ColumnChart;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
 import mitll.langtest.client.BrowserCheck;
-import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.custom.RecordingProgressTable;
 import mitll.langtest.client.services.MonitoringService;

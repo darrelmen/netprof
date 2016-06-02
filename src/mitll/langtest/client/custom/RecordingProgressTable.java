@@ -33,7 +33,7 @@
 package mitll.langtest.client.custom;
 
 import com.google.gwt.user.client.ui.FlexTable;
-import mitll.langtest.server.database.AudioDAO;
+import mitll.langtest.server.database.audio.BaseAudioDAO;
 
 import java.util.Arrays;
 import java.util.List;
@@ -47,14 +47,14 @@ import java.util.Map;
  * @since 3/2/16.
  */
 public class RecordingProgressTable extends FlexTable {
-  private static final String MALE_CONTEXT = AudioDAO.MALE_CONTEXT;
-  private static final String FEMALE_SLOW = AudioDAO.FEMALE_SLOW;
-  private static final String FEMALE_FAST = AudioDAO.FEMALE_FAST;
-  private static final String FEMALE_CONTEXT = AudioDAO.FEMALE_CONTEXT;
-  private static final String FEMALE = AudioDAO.FEMALE;
-  private static final String MALE_SLOW = AudioDAO.MALE_SLOW;
-  private static final String MALE = AudioDAO.MALE;
-  private static final String MALE_FAST = AudioDAO.MALE_FAST;
+  private static final String MALE_CONTEXT = BaseAudioDAO.MALE_CONTEXT;
+  private static final String FEMALE_SLOW = BaseAudioDAO.FEMALE_SLOW;
+  private static final String FEMALE_FAST = BaseAudioDAO.FEMALE_FAST;
+  private static final String FEMALE_CONTEXT = BaseAudioDAO.FEMALE_CONTEXT;
+  private static final String FEMALE = BaseAudioDAO.FEMALE;
+  private static final String MALE_SLOW = BaseAudioDAO.MALE_SLOW;
+  private static final String MALE = BaseAudioDAO.MALE;
+  private static final String MALE_FAST = BaseAudioDAO.MALE_FAST;
 
   /**
    * @see RecorderNPFHelper#getProgressInfo
