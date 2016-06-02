@@ -34,11 +34,14 @@ package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.services.AnalysisService;
+import mitll.langtest.client.services.AnalysisServiceAsync;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.analysis.UserInfo;
 
@@ -60,8 +63,9 @@ public class StudentAnalysis extends DivWidget {
   private static final String STUDENTS = "Students";
   private static final String OR_MORE_RECORDINGS = "5 or more recordings";
   private static final int STUDENT_WIDTH = 300;
+  private final AnalysisServiceAsync service = GWT.create(AnalysisService.class);
 
-  public StudentAnalysis(final LangTestDatabaseAsync service, final ExerciseController controller,
+  public StudentAnalysis(final LangTestDatabaseAsync vanillaService, final ExerciseController controller,
                          final ShowTab showTab) {
     String appTitle = controller.getProps().getAppTitle();
     final String selectedUserKey = getSelectedUserKey(controller, appTitle);
@@ -83,7 +87,7 @@ public class StudentAnalysis extends DivWidget {
         DivWidget bottom = new DivWidget();
         bottom.addStyleName("floatLeftList");
 
-        UserContainer userContainer = new UserContainer(service, controller, rightSide, bottom, showTab, selectedUserKey);
+        UserContainer userContainer = new UserContainer(vanillaService, controller, rightSide, bottom, showTab, selectedUserKey);
 
         Panel tableWithPager = userContainer.getTableWithPager(getUserInfos(users));
 
