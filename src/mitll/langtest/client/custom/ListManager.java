@@ -38,6 +38,7 @@ import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.InlineLabel;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style;
@@ -55,6 +56,8 @@ import mitll.langtest.client.custom.dialog.CreateListDialog;
 import mitll.langtest.client.custom.dialog.EditItem;
 import mitll.langtest.client.custom.tabs.TabAndContent;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.services.ListService;
+import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.custom.UserList;
@@ -82,6 +85,8 @@ public class ListManager implements RequiresResize {
 
   private final ExerciseController controller;
   private final LangTestDatabaseAsync service;
+  private final ListServiceAsync listService = GWT.create(ListService.class);
+
   private final UserManager userManager;
   private TabAndContent yourStuff;
   private TabAndContent othersStuff;
@@ -338,14 +343,14 @@ public class ListManager implements RequiresResize {
 
     if (getAll) {
       // logger.info("viewLessons----> getAll optional " + optionalExercise);
-      service.getUserListsForText("", controller.getUser(),
+      listService.getUserListsForText("", controller.getUser(),
           new UserListCallback(this, contentPanel, insideContentPanel, listScrollPanel,
               LESSONS + "_All",
               false, true,
               userManager, onlyMine, optionalExercise));
     } else {
       //     logger.info("viewLessons for user #" + userManager.getUser());
-      service.getListsForUser(userManager.getUser(), onlyMine,
+      listService.getListsForUser(userManager.getUser(), onlyMine,
           onlyVisited,
           new UserListCallback(this, contentPanel, insideContentPanel, listScrollPanel,
               LESSONS + (onlyMine ? "_Mine" : "_Others"),
@@ -365,7 +370,7 @@ public class ListManager implements RequiresResize {
     final ListManager outer = this;
     final Panel child = getContentChild(contentPanel);
 //    logger.info("------> viewReview : reviewLessons for " + userManager.getUser());
-    service.getReviewLists(new AsyncCallback<List<UserList<CommonShell>>>() {
+    listService.getReviewLists(new AsyncCallback<List<UserList<CommonShell>>>() {
       @Override
       public void onFailure(Throwable caught) {
       }
@@ -521,7 +526,7 @@ public class ListManager implements RequiresResize {
    */
   private void addVisitor(UserList ul) {
     if (ul.getCreator().getId() != controller.getUser()) {
-      service.addVisitor(ul.getUniqueID(), controller.getUser(), new AsyncCallback<Void>() {
+      listService.addVisitor(ul.getUniqueID(), controller.getUser(), new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
         }
@@ -663,7 +668,7 @@ public class ListManager implements RequiresResize {
     controller.logEvent(delete, "Button", "UserList_" + ul.getID(), "Delete");
     final long uniqueID = ul.getUniqueID();
 
-    service.deleteList(uniqueID, new AsyncCallback<Boolean>() {
+    listService.deleteList(uniqueID, new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
         logger.warning("delete list call failed?");
@@ -687,7 +692,7 @@ public class ListManager implements RequiresResize {
    * @see UserListCallback#getIsPublic(UserList, long)
    */
   void setPublic(long uniqueID, boolean isPublic) {
-    service.setPublicOnList(uniqueID, isPublic, new AsyncCallback<Void>() {
+    listService.setPublicOnList(uniqueID, isPublic, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
       }
@@ -716,12 +721,12 @@ public class ListManager implements RequiresResize {
   }
 
   /**
-   * @see #getImportTab(UserList, TabPanel, TabAndContent, String)
    * @param ul
    * @param container
    * @param learnTab
    * @param instanceName
    * @param tabPanel
+   * @see #getImportTab(UserList, TabPanel, TabAndContent, String)
    */
   private void showImportItem(final UserList ul, final TabAndContent container, final TabAndContent learnTab, final String instanceName,
                               final TabPanel tabPanel) {
@@ -737,26 +742,27 @@ public class ListManager implements RequiresResize {
     w.setVisibleLines(20);
     w.setCharacterWidth(150);
 
-    inner.add(new Heading(4, "Copy and paste tab separated lines with pairs of " +controller.getLanguage() + " item and its translation."));
+    inner.add(new Heading(4, "Copy and paste tab separated lines with pairs of " + controller.getLanguage() + " item and its translation."));
     inner.add(new Heading(4, "(Quizlet export format.)"));
     Button anImport = new Button("Import");
     anImport.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        service.reallyCreateNewItems(userManager.getUser(), ul.getUniqueID(), w.getText(), new AsyncCallback<Collection<CommonExercise>>() {
-          @Override
-          public void onFailure(Throwable caught) {
-          }
+        listService.reallyCreateNewItems(userManager.getUser(), ul.getUniqueID(), w.getText(),
+            new AsyncCallback<Collection<CommonExercise>>() {
+              @Override
+              public void onFailure(Throwable caught) {
+              }
 
-          @Override
-          public void onSuccess(Collection<CommonExercise> newExercise) {
-            logger.info("before " + ul.getExercises().size());
-            for (CommonExercise exercise : newExercise) ul.addExercise(exercise);
-            logger.info("after  " + ul.getExercises().size());
+              @Override
+              public void onSuccess(Collection<CommonExercise> newExercise) {
+                logger.info("before " + ul.getExercises().size());
+                for (CommonExercise exercise : newExercise) ul.addExercise(exercise);
+                logger.info("after  " + ul.getExercises().size());
 
-            reallyShowLearnTab(tabPanel, learnTab, ul, instanceName);
-          }
-        });
+                reallyShowLearnTab(tabPanel, learnTab, ul, instanceName);
+              }
+            });
       }
     });
     DivWidget bottom = new DivWidget();

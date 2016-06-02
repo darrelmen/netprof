@@ -70,6 +70,17 @@
         <url-pattern>/langtest/analysis-manager</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>listService</servlet-name>
+        <servlet-class>mitll.langtest.server.services.ListServiceImpl</servlet-class>
+        <load-on-startup>3</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>listService</servlet-name>
+        <url-pattern>/langtest/list-manager</url-pattern>
+    </servlet-mapping>
+
     <!-- ==================================================================== -->
     <!-- End RPC mappings                                                     -->
     <!-- ==================================================================== -->

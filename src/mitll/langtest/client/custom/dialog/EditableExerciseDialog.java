@@ -429,7 +429,7 @@ class EditableExerciseDialog extends NewUserExercise {
 
     grabInfoFromFormAndStuffInfoExercise(newUserExercise.getMutable());
 
-    service.editItem(newUserExercise, new AsyncCallback<Void>() {
+    listService.editItem(newUserExercise, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
       }

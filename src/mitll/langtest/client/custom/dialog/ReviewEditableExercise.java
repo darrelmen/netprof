@@ -533,7 +533,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
       newUserExercise.setSecondState(commonShell.getSecondState());
     }
     //logger.info("to duplicate " + newUserExercise + " state " + newUserExercise.getState());
-    service.duplicateExercise(newUserExercise, new AsyncCallback<CommonExercise>() {
+    listService.duplicateExercise(newUserExercise, new AsyncCallback<CommonExercise>() {
       @Override
       public void onFailure(Throwable caught) {
         duplicate.setEnabled(true);
