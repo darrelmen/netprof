@@ -33,16 +33,10 @@
 package mitll.langtest.server;
 
 import mitll.langtest.server.audio.AudioConversion;
-import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.AudioRefExercise;
-import mitll.langtest.shared.exercise.CommonExercise;
-import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServlet;
 import java.io.*;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory

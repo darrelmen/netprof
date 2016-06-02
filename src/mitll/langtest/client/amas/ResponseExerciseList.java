@@ -67,7 +67,10 @@ import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.exercise.STATE;
 import mitll.langtest.shared.flashcard.QuizCorrectAndScore;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 /**

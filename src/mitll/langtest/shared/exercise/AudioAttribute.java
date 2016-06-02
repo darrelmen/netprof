@@ -97,8 +97,8 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
    * @param type
    * @param user
    * @param transcript       what the speaker read at the time of recording
-   * @see mitll.langtest.server.database.AudioDAO#getAudioAttribute
-   * @see mitll.langtest.server.database.AudioDAO#getResultsForQuery(java.sql.Connection, java.sql.PreparedStatement)
+   * @see mitll.langtest.server.database.audio.BaseAudioDAO#getAudioAttribute
+   * @seex mitll.langtest.server.database.audio.BaseAudioDAO#getResultsForQuery
    */
   public AudioAttribute(int uniqueID, int userid,
                         String exid,
