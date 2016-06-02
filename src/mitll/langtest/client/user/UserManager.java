@@ -32,13 +32,17 @@
 
 package mitll.langtest.client.user;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.flashcard.ControlState;
+import mitll.langtest.client.services.UserService;
+import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 
@@ -76,7 +80,8 @@ public class UserManager {
   private static final String USER_CHOSEN_ID = "userChosenID";
   private static final String AUDIO_TYPE = "audioType";
 
-  private final LangTestDatabaseAsync service;
+ // private final LangTestDatabaseAsync service;
+  private final UserServiceAsync service;// = GWT.create(UserService.class);;
   private final UserNotification userNotification;
  // private final static boolean USE_COOKIE = false;
   private long userID = NO_USER_SET;
@@ -94,7 +99,7 @@ public class UserManager {
    * @param props
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
    */
-  public UserManager(UserNotification lt, LangTestDatabaseAsync service, PropertyHandler props) {
+  public UserManager(UserNotification lt, UserServiceAsync service, PropertyHandler props) {
     this.userNotification = lt;
     this.service = service;
     this.props = props;
