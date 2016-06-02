@@ -35,6 +35,7 @@ package mitll.langtest.client.user;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.SafeHtmlCell;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -49,6 +50,8 @@ import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.ListDataProvider;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.services.UserService;
+import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.client.table.PagerTable;
 import mitll.langtest.shared.User;
 
@@ -98,11 +101,11 @@ public class UserTable extends PagerTable {
   /**
    * @see mitll.langtest.client.LangTest.UsersClickHandler
    */
-  public void showUsers(final LangTestDatabaseAsync service) {
+  public void showUsers(final UserServiceAsync service) {
     showDialog(service);
   }
 
-  private void showDialog(final LangTestDatabaseAsync service) {
+  private void showDialog(final UserServiceAsync service) {
     // Create the resetEmailPopup dialog box
     final DialogBox dialogBox = new DialogBox();
     dialogBox.setText(REGISTERED_USERS);
@@ -159,7 +162,14 @@ public class UserTable extends PagerTable {
     return getAnchorHTML("downloadUsers", "Download Excel");
   }
 
-  private Widget getTable(List<User> users, final LangTestDatabaseAsync service, Widget rightOfPager) {
+  /**
+   * @see #showDialog(UserServiceAsync)
+   * @param users
+   * @param service
+   * @param rightOfPager
+   * @return
+   */
+  private Widget getTable(List<User> users, final UserServiceAsync service, Widget rightOfPager) {
     final CellTable<User> table = getTable();
 
     List<User> list = getDataProvider(users, table);
@@ -373,7 +383,12 @@ public class UserTable extends PagerTable {
     return list;
   }
 
-  private void addAdminCol(final LangTestDatabaseAsync service, CellTable<User> table) {
+  /**
+   * @see UserTable#getTable(List, LangTestDatabaseAsync, Widget)
+   * @param servicex
+   * @param table
+   */
+  private void addAdminCol(final UserServiceAsync service, CellTable<User> table) {
     CheckboxCell checkboxCell = new CheckboxCell(true, false);
 
     Column<User, Boolean> checkColumn = new Column<User, Boolean>(checkboxCell) {
@@ -386,6 +401,8 @@ public class UserTable extends PagerTable {
     checkColumn.setFieldUpdater(new FieldUpdater<User, Boolean>() {
       @Override
       public void update(int index, User object, Boolean value) {
+     //   UserServiceAsync service = GWT.create(UserService.class);;
+
 //          logger.info("update " + object.getUserID() + " " + value);
         service.changeEnabledFor((int) object.getId(), value, new AsyncCallback<Void>() {
           @Override
