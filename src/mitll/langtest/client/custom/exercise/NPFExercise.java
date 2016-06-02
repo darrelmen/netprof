@@ -225,7 +225,7 @@ abstract class NPFExercise<T extends CommonShell & AudioRefExercise & ScoredExer
   private void addUserList(int userID, String title, final TextBox textBox) {
 //    logger.info("user " + userID + " adding list " + title);
     boolean isStudent = controller.getAudioType().equalsIgnoreCase(PRACTICE);
-    service.addUserList(userID,
+    listService.addUserList(userID,
         title,
         "",
         "", !isStudent, new AsyncCallback<Long>() {
@@ -268,7 +268,7 @@ abstract class NPFExercise<T extends CommonShell & AudioRefExercise & ScoredExer
    * @see #wasRevealed()
    */
   private void populateListChoices(final String id, final ExerciseController controller, final DropdownBase w1) {
-    service.getListsForUser(controller.getUser(), true, false, new AsyncCallback<Collection<UserList<CommonShell>>>() {
+    listService.getListsForUser(controller.getUser(), true, false, new AsyncCallback<Collection<UserList<CommonShell>>>() {
       @Override
       public void onFailure(Throwable caught) {
       }
@@ -291,7 +291,7 @@ abstract class NPFExercise<T extends CommonShell & AudioRefExercise & ScoredExer
               public void onClick(ClickEvent event) {
                 controller.logEvent(w1, "DropUp", id, ADDING_TO_LIST + ul.getID() + "/" + ul.getName());
 
-                service.addItemToUserList(ul.getUniqueID(), id, new AsyncCallback<Void>() {
+                listService.addItemToUserList(ul.getUniqueID(), id, new AsyncCallback<Void>() {
                   @Override
                   public void onFailure(Throwable caught) {
                   }
