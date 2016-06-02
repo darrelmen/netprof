@@ -33,7 +33,6 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.client.user.Md5Hash;
-import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.instrumentation.IEventDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.User;
@@ -66,14 +65,14 @@ public class PostgresTest extends BaseTest {
     List<SlickSlimEvent> allDevicesSlim = eventDAO.getAllDevicesSlim("spanish");
     for (SlickSlimEvent event : allDevicesSlim.subList(0, getMin(allDevicesSlim))) logger.info("Got " + event);
 
-    eventDAO.addPlayedMarkings(1,spanish.getExercises().iterator().next());
+    eventDAO.addPlayedMarkings(1, spanish.getExercises().iterator().next());
 
     logger.info("Got " + eventDAO.getFirstSlim("spanish"));
-  //  spanish.doReport(new PathHelper("war"));
+    //  spanish.doReport(new PathHelper("war"));
   }
 
   int getMin(List<?> all) {
-    return Math.min(all.size(),10);
+    return Math.min(all.size(), 10);
   }
 
   @Test
@@ -82,7 +81,7 @@ public class PostgresTest extends BaseTest {
 
     IEventDAO eventDAO = spanish.getEventDAO();
 
-    eventDAO.add(new Event("123","button","2334","testing",1,System.currentTimeMillis(),"device"),"spanish");
+    eventDAO.add(new Event("123", "button", "2334", "testing", 1, System.currentTimeMillis(), "device"), "spanish");
     logger.info("Got " + eventDAO.getFirstSlim("spanish"));
 
     //  spanish.doReport(new PathHelper("war"));
@@ -96,39 +95,77 @@ public class PostgresTest extends BaseTest {
 
     List<User> users = dao.getUsers();
 
-    logger.info("got " +users);
+    logger.info("got " + users);
 
     String userid = "userid";
     String hash = Md5Hash.getHash("g@gmail.com");
     String password = Md5Hash.getHash("password");
+    String bueller = Md5Hash.getHash("bueller");
     User user = dao.addUser(userid, password, hash, User.Kind.STUDENT, "128.0.0.1", true, 89, "midest", "browser");
     User user2 = dao.addUser(userid, password, hash, User.Kind.STUDENT, "128.0.0.1", true, 89, "midest", "iPad");
 
     logger.info("made " + user);
     logger.info("made " + user2);
-    User user3 = dao.addUser(userid +"ipad", password, hash, User.Kind.STUDENT, "128.0.0.1", true, 89, "midest", "iPad");
+    User user3 = dao.addUser(userid + "ipad", password, hash, User.Kind.STUDENT, "128.0.0.1", true, 89, "midest", "iPad");
 
     if (user == null) {
       user = dao.getUserByID(userid);
-      logger.info("found " +user);
+      logger.info("found " + user);
     }
 
-    logger.info("before " +user.isEnabled());
+    logger.info("before " + user.isEnabled());
 
-    boolean b = dao.enableUser(user.getId());
+    int id = user.getId();
+    boolean b = dao.enableUser(id);
 
-    logger.info("enable user " +b);
+    logger.info("enable user " + b);
 
-    logger.info("valid email " +dao.isValidEmail(hash));
-    logger.info("valid email " +dao.isValidEmail(password));
-    logger.info("user " +dao.getIDForUserAndEmail(userid,hash));
-    logger.info("user " +dao.getIDForUserAndEmail(userid,password));
-    logger.info("user id " +dao.getIdForUserID(userid));
-    logger.info("user " +dao.getUser(userid,password));
-    logger.info("user " +dao.getUser(userid,hash));
-    logger.info("user " +dao.getUserWithPass(userid,password));
-    logger.info("user " +dao.getUserWithPass(userid,hash));
-    logger.info("user devices " +dao.getUsersDevices());
+    logger.info("change enabled " + dao.changeEnabled(id, true) + " : " + dao.getUserWhere(id).isEnabled());
+    logger.info("change enabled " + dao.changeEnabled(id, false) + " : " + dao.getUserWhere(id).isEnabled());
+    int bogusID = 123456789;
+    logger.info("change enabled " + dao.changeEnabled(bogusID, false) + " : " + dao.getUserWhere(id).isEnabled());
+
+
+    logger.info("user " + dao.getIDForUserAndEmail(userid, hash));
+    logger.info("user " + dao.getIDForUserAndEmail(userid, password));
+    logger.info("user id " + dao.getIdForUserID(userid));
+    logger.info("user " + dao.getUser(userid, password));
+    logger.info("user " + dao.getUser(userid, hash));
+    logger.info("user " + dao.getUserWithPass(userid, password));
+    logger.info("user " + dao.getUserWithPass(userid, hash));
+    logger.info("user devices " + dao.getUsersDevices());
+    logger.info("mini " + dao.getMiniUsers());
+    logger.info("mini first " + dao.getMiniUser(dao.getMiniUsers().keySet().iterator().next()));
+    logger.info("males " + dao.getUserMap(true));
+    logger.info("females " + dao.getUserMap(false));
+    logger.info("all " + dao.getUserMap());
+
+    logger.info("valid email " + dao.isValidEmail(hash));
+    logger.info("valid email " + dao.isValidEmail(password));
+    logger.info("change password\n" +
+        dao.getUserWithPass(userid, password) + " :\n" +
+        dao.changePassword(id, bueller) + "\n" +
+        dao.getUserWithPass(userid, password) + " :\n" +
+        dao.getUserWithPass(userid, bueller));
+
+    logger.info("reset key " +
+        dao.getUserWithResetKey("reset") +
+        ":\n" + dao.updateKey(id, true, "reset") +
+        " :\n" + dao.getUserWithResetKey("reset") +
+        ":\n" + dao.clearKey(id, true) +
+        " :\n" + dao.getUserWithResetKey("reset")
+    );
+
+    logger.info("enabled key " +
+        dao.getUserWithResetKey("enabled") +
+        ":\n" + dao.updateKey(id, false, "enabled") +
+        " :\n" + dao.getUserWithEnabledKey("enabled") +
+        ":\n" + dao.clearKey(id, false) +
+        ":\n" + dao.clearKey(bogusID, false) +
+        " :\n" + dao.getUserWithEnabledKey("enabled")
+    );
+
+
     //  spanish.doReport(new PathHelper("war"));
   }
 }
