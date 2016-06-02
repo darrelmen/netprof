@@ -263,24 +263,10 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
 /*  public Set<String> getRecordedRegularForUser(int userid) {
-    return getAudioForGender(Collections.singleton(userid), REGULAR);
+    return getAudioExercisesForGender(Collections.singleton(userid), REGULAR);
   }*/
 
-  /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#filterByUnrecorded(ExerciseListRequest, Collection)
-   * @param userid
-   * @return
-   */
-  @Override
-  public Set<String> getWithContext(int userid) {
-    return getWithContext(getUserMap(userid));
-  }
-
-  private Set<String> getWithContext(Map<Integer, User> userMap) {
-    return getAudioForGender(userMap.keySet(), CONTEXT_REGULAR);
-  }
-
-  protected Set<String> getAudioForGender(Set<Integer> userIDs, String audioSpeed) {
+  protected Set<String> getAudioExercisesForGender(Set<Integer> userIDs, String audioSpeed) {
     Set<String> results = new HashSet<>();
     try {
       Connection connection = database.getConnection(this.getClass().toString());
