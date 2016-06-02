@@ -25,7 +25,6 @@ import mitll.langtest.server.autocrt.AutoCRT;
 import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.user.BaseUserDAO;
-import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.decoder.RefResultDecoder;
@@ -1702,7 +1701,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public long getUserIDForToken(String token) {
-    User user = db.getUserDAO().getUserWhereResetKey(token);
+    User user = db.getUserDAO().getUserWithResetKey(token);
     long l = (user == null) ? -1 : user.getId();
     // logger.info("for token " + token + " got user id " + l);
     return l;
@@ -1710,7 +1709,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   @Override
   public boolean changePFor(String token, String passwordH) {
-    User userWhereResetKey = db.getUserDAO().getUserWhereResetKey(token);
+    User userWhereResetKey = db.getUserDAO().getUserWithResetKey(token);
     if (userWhereResetKey != null) {
       db.getUserDAO().clearKey(userWhereResetKey.getId(), true);
 
