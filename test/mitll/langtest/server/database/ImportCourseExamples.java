@@ -1,6 +1,8 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.database.audio.AudioDAO;
+import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 import org.apache.commons.io.FileUtils;
@@ -90,10 +92,12 @@ public class ImportCourseExamples {
     // so now we have the users in the database
 
     // add a audio reference to the audio ref table for each recording
-    AudioDAO audioDAO = npfRussian.getAudioDAO();
+    IAudioDAO audioDAO = npfRussian.getAudioDAO();
     //audioDAO.drop();
-    copyAudio(userToResultsRegular, oldToNew, audioDAO, destAudioDir, candidateAudioDir);
-    copyAudio(userToResultsSlow, oldToNew, audioDAO, destAudioDir, candidateAudioDir);
+
+    // TODO : put these back if we ever need this again
+    //  copyAudio(userToResultsRegular, oldToNew, audioDAO, destAudioDir, candidateAudioDir);
+  //  copyAudio(userToResultsSlow, oldToNew, audioDAO, destAudioDir, candidateAudioDir);
   }
 
   private static DatabaseImpl makeDatabaseImpl(String h2DatabaseFile, String configDir) {
@@ -124,8 +128,8 @@ public class ImportCourseExamples {
   }
 */
 
-  private static void copyAudio(Map<Integer, Map<String, Result>> userToResultsRegular, Map<Integer, Integer> oldToNew,
-                                AudioDAO audioDAO,
+/*  private static void copyAudio(Map<Integer, Map<String, Result>> userToResultsRegular, Map<Integer, Integer> oldToNew,
+                                IAudioDAO audioDAO,
                                 String destAudioDir, String candidateAudioDir) {
     int count = 0;
     int bad = 0;
@@ -162,7 +166,7 @@ public class ImportCourseExamples {
       }
     }
     logger.debug("copied " + count + " files, found " + bad + " bad src audio paths");
-  }
+  }*/
 
   public static void main(String []arg){
     //importCourseExamplesJapanese();

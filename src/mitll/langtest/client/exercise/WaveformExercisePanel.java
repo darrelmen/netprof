@@ -34,10 +34,12 @@ package mitll.langtest.client.exercise;
 
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.scoring.UnitChapterItemHelper;
 import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.Result;
@@ -45,7 +47,6 @@ import mitll.langtest.shared.exercise.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.logging.Logger;
 
 /**
  * Does fancy flashing record bulb while recording.

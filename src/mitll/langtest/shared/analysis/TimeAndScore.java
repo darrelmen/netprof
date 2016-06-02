@@ -32,8 +32,6 @@
 
 package mitll.langtest.shared.analysis;
 
-import mitll.langtest.server.database.phone.PhoneDAO;
-
 import java.util.List;
 
 /**

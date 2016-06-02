@@ -33,7 +33,6 @@
 package mitll.langtest.server.sorter;
 
 import mitll.langtest.server.LangTestDatabaseImpl;
-import mitll.langtest.server.database.AudioDAO;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.sorter.ExerciseComparator;
@@ -83,7 +82,6 @@ public class SimpleSorter extends ExerciseComparator {
    * NOTE:  be careful to use collation order when it's not "english-foreign language"
    *
    * @param exerciseShells
-   * @see mitll.langtest.server.database.AudioExport#writeZip(OutputStream, String, SectionHelper, Collection, String, AudioDAO, String, String, boolean)
    * @see mitll.langtest.server.database.AudioExport#writeZipJustOneAudio(OutputStream, SectionHelper, Collection, String)
    */
   public <T extends CommonShell> void sortByTooltip(List<T> exerciseShells) {

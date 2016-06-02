@@ -35,7 +35,6 @@ package mitll.langtest.shared;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-import java.beans.Transient;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.*;

@@ -34,8 +34,8 @@ package mitll.langtest.server;
 
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.excel.EventDAOToExcel;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.User;
+import mitll.langtest.shared.exercise.CommonExercise;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
