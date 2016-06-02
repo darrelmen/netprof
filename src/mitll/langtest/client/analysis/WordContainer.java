@@ -54,8 +54,8 @@ import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.scoring.WordTable;
 import mitll.langtest.client.sound.PlayAudioWidget;
-import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.analysis.WordScore;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.sorter.ExerciseComparator;
 
 import java.util.*;

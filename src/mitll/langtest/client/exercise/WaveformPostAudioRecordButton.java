@@ -38,7 +38,6 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.exercise.Shell;
 
 /**
 * Tells playAudioPanel to be enabled/disabled in response to recording states

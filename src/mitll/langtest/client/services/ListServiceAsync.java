@@ -66,6 +66,4 @@ public interface ListServiceAsync {
   void deleteItemFromList(long listid, String exid, AsyncCallback<Boolean> async);
 
   void duplicateExercise(CommonExercise id, AsyncCallback<CommonExercise> async);
-
-  //void deleteItem(String exid, AsyncCallback<Boolean> async);
 }

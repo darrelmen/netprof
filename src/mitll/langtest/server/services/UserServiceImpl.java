@@ -32,20 +32,13 @@
 
 package mitll.langtest.server.services;
 
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.services.UserService;
-import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.PathHelper;
-import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.User;
-import mitll.langtest.shared.exercise.CommonExercise;
 import org.apache.log4j.Logger;
 
-import javax.servlet.ServletContext;
-import java.io.File;
 import java.util.List;
 
 @SuppressWarnings("serial")

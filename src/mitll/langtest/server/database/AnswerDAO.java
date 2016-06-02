@@ -34,7 +34,6 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.shared.MonitorResult;
-import mitll.langtest.shared.Result;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.log4j.Logger;
