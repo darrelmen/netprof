@@ -1638,50 +1638,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @param userID
-   * @param passwordH
-   * @param emailH
-   * @param kind
-   * @param url
-   * @param email
-   * @param isMale
-   * @param age
-   * @param dialect
-   * @param isCD
-   * @param device
-   * @return null if existing user
-   * @see mitll.langtest.client.user.UserPassLogin#gotSignUp(String, String, String, mitll.langtest.shared.User.Kind)
-   */
-/*  @Override
-  public User addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, String email,
-                      boolean isMale, int age, String dialect, boolean isCD, String device) {
-    User user = db.addUser(getThreadLocalRequest(), userID, passwordH, emailH, kind, isMale, age, dialect, "browser");
-    if (user != null && !user.isEnabled()) { // user = null means existing user.
-      logger.debug("user " + userID + "/" + user +
-          " wishes to be a content developer. Asking for approval.");
-      getEmailHelper().addContentDeveloper(url, email, user, getMailSupport());
-    } else if (user == null) {
-      logger.debug("no user found for id " + userID);
-    } else {
-      logger.debug("user " + userID + "/" + user + " is enabled.");
-    }
-    return user;
-  }
-
-  private EmailHelper getEmailHelper() {
-    return new EmailHelper(serverProps, db.getUserDAO(), getMailSupport(), pathHelper);
-  }*/
-
-  /**
-   * @return
-   * @see mitll.langtest.client.user.UserTable#showDialog(mitll.langtest.client.LangTestDatabaseAsync)
-   */
-  /*public List<User> getUsers() {
-    return db.getUsers();
-  }
-
-  */
-  /**
    * @param id
    * @return
    * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser(int)
@@ -1689,80 +1645,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private User getUserBy(int id) {
     return db.getUserDAO().getUserWhere(id);
   }
-/*
-
-  *//**
-   * @param user
-   * @param email
-   * @param url
-   * @return true if there's a user with this email
-   * @see mitll.langtest.client.user.UserPassLogin#getForgotPassword()
-   *//*
-  public boolean resetPassword(String user, String email, String url) {
-    logger.debug("resetPassword for " + user);
-    return getEmailHelper().resetPassword(user, email, url);
-  }
-
-  *//**
-   * @param token
-   * @param emailR - email encoded by rot13
-   * @return
-   * @see mitll.langtest.client.InitialUI#handleCDToken
-   *//*
-  public String enableCDUser(String token, String emailR, String url) {
-    logger.info("enabling token " + token + " for email " + emailR + " and url " + url);
-    return getEmailHelper().enableCDUser(token, emailR, url);
-  }
-
-  *//**
-   * @param token
-   * @return
-   * @see mitll.langtest.client.LangTest#showLogin()
-   *//*
-  @Override
-  public long getUserIDForToken(String token) {
-    User user = db.getUserDAO().getUserWithResetKey(token);
-    long l = (user == null) ? -1 : user.getId();
-    // logger.info("for token " + token + " got user id " + l);
-    return l;
-  }
-
-  @Override
-  public boolean changePFor(String token, String passwordH) {
-    User userWhereResetKey = db.getUserDAO().getUserWithResetKey(token);
-    if (userWhereResetKey != null) {
-      db.getUserDAO().clearKey(userWhereResetKey.getId(), true);
-
-      if (!db.getUserDAO().changePassword(userWhereResetKey.getId(), passwordH)) {
-        logger.error("couldn't update user password for user " + userWhereResetKey);
-      }
-      return true;
-    } else return false;
-  }
-
-  @Override
-  public void changeEnabledFor(int userid, boolean enabled) {
-    User userWhere = db.getUserDAO().getUserWhere(userid);
-    if (userWhere == null) logger.error("couldn't find " + userid);
-    else {
-      db.getUserDAO().changeEnabled(userid, enabled);
-    }
-  }
-
-  *//**
-   * @param emailH
-   * @param email
-   * @param url
-   * @return
-   * @see mitll.langtest.client.user.UserPassLogin#getForgotUser()
-   *//*
-  @Override
-  public boolean forgotUsername(String emailH, String email, String url) {
-    String userChosenIDIfValid = db.getUserDAO().isValidEmail(emailH);
-    getEmailHelper().getUserNameEmail(email, url, userChosenIDIfValid);
-    return userChosenIDIfValid != null;
-  }
-*/
   // Results ---------------------
 
   /**
@@ -2282,11 +2164,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
-  @Override
-  public Map<User, Integer> getUserToResultCount() {
-    return db.getUserToResultCount();
-  }
-
   /**
    * @return
    * @see mitll.langtest.client.analysis.StudentAnalysis#StudentAnalysis(LangTestDatabaseAsync, ExerciseController, ShowTab)
@@ -2294,20 +2171,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public Collection<UserInfo> getUsersWithRecordings() {
     return db.getAnalysis().getUserInfo(db.getUserDAO(), MIN_RECORDINGS);
-  }
-
-  public Map<Integer, Integer> getResultCountToCount() {
-    return db.getResultCountToCount();
-  }
-
-  @Override
-  public Map<String, Integer> getResultByDay() {
-    return db.getResultByDay();
-  }
-
-  @Override
-  public Map<String, Integer> getResultByHourOfDay() {
-    return db.getResultByHourOfDay();
   }
 
   /**
@@ -2321,44 +2184,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getMaleFemaleProgress();
   }
 
-  /**
-   * Map of overall, male, female to list of counts (ex 0 had 7, ex 1, had 5, etc.)
-   *
-   * @return
-   * @see mitll.langtest.client.monitoring.MonitoringManager#doResultLineQuery
-   */
-  public Map<String, Map<String, Integer>> getResultPerExercise() {
-    return db.getResultPerExercise();
-  }
-
-  /**
-   * @return
-   * @see mitll.langtest.client.monitoring.MonitoringManager#doGenderQuery(com.google.gwt.user.client.ui.Panel)
-   */
-  @Override
-  public Map<String, Map<Integer, Integer>> getResultCountsByGender() {
-    return db.getResultCountsByGender();
-  }
-
-  public Map<String, Map<Integer, Map<Integer, Integer>>> getDesiredCounts() {
-    return db.getDesiredCounts();
-  }
-
-  /**
-   * @return
-   * @see mitll.langtest.client.monitoring.MonitoringManager#doSessionQuery
-   */
-  public List<Session> getSessions() {
-    return db.getSessions();
-  }
-
-  /**
-   * @return
-   * @see mitll.langtest.client.monitoring.MonitoringManager#doSessionQuery
-   */
-  public Map<String, Number> getResultStats() {
-    return db.getResultStats();
-  }
 
   /**
    * @param userid         who's asking?
