@@ -34,10 +34,12 @@ package mitll.langtest.server.database.analysis;
 
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.PathHelper;
-import mitll.langtest.server.database.*;
+import mitll.langtest.server.database.DAO;
+import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.ResultDAO;
 import mitll.langtest.server.database.phone.PhoneDAO;
 import mitll.langtest.server.database.user.IUserDAO;
-import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.analysis.*;

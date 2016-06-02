@@ -1,6 +1,7 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.database.audio.AudioDAO;
 import mitll.langtest.shared.MonitorResult;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
@@ -159,10 +160,10 @@ public class MergeSites extends BaseTest {
     // so now we have the users in the database
 
     // add a audio reference to the audio ref table for each recording
-    AudioDAO audioDAO = npfRussian.getAudioDAO();
-    //audioDAO.drop();
-    copyAudio(userToResultsRegular, oldToNew, audioDAO, destAudioDir, candidateAudioDir);
-    copyAudio(userToResultsSlow, oldToNew, audioDAO, destAudioDir, candidateAudioDir);
+//    AudioDAO audioDAO = npfRussian.getAudioDAO();
+//    //audioDAO.drop();
+//    copyAudio(userToResultsRegular, oldToNew, audioDAO, destAudioDir, candidateAudioDir);
+//    copyAudio(userToResultsSlow, oldToNew, audioDAO, destAudioDir, candidateAudioDir);
   }
 
   private static DatabaseImpl makeDatabaseImpl(String h2DatabaseFile, String configDir) {
