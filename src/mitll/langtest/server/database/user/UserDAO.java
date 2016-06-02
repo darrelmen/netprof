@@ -42,6 +42,12 @@ import org.apache.log4j.Logger;
 import java.sql.*;
 import java.util.*;
 
+/**
+ * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
+ * @since
+ */
 public class UserDAO extends BaseUserDAO implements IUserDAO {
   private static final Logger logger = Logger.getLogger(UserDAO.class);
 

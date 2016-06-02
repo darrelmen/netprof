@@ -12,7 +12,10 @@ import java.io.IOException;
 /**
  * String highPassFilterFile = conversion.getHighPassFilterFile(file.getAbsolutePath());
  * DynamicRange.RMSInfo dynamicRange = new DynamicRange().getDynamicRange(new File(highPassFilterFile));
- * Created by go22670 on 10/30/15.
+ * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
+ * @since 10/30/15.
  */
 public class AudioTest {
 
