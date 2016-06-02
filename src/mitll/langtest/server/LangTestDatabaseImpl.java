@@ -1,5 +1,33 @@
 /*
- * Copyright © 2011-2015 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
+ * and their contractors; 2015. Other request for this document shall be referred
+ * to DLIFLC.
+ *
+ * WARNING: This document may contain technical data whose export is restricted
+ * by the Arms Export Control Act (AECA) or the Export Administration Act (EAA).
+ * Transfer of this data by any means to a non-US person who is not eligible to
+ * obtain export-controlled data is prohibited. By accepting this data, the consignee
+ * agrees to honor the requirements of the AECA and EAA. DESTRUCTION NOTICE: For
+ * unclassified, limited distribution documents, destroy by any method that will
+ * prevent disclosure of the contents or reconstruction of the document.
+ *
+ * This material is based upon work supported under Air Force Contract No.
+ * FA8721-05-C-0002 and/or FA8702-15-D-0001. Any opinions, findings, conclusions
+ * or recommendations expressed in this material are those of the author(s) and
+ * do not necessarily reflect the views of the U.S. Air Force.
+ *
+ * © 2015 Massachusetts Institute of Technology.
+ *
+ * The software/firmware is provided to you on an As-Is basis
+ *
+ * Delivered to the US Government with Unlimited Rights, as defined in DFARS
+ * Part 252.227-7013 or 7014 (Feb 2014). Notwithstanding any copyright notice,
+ * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
+ * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
+ * authorized by the U.S. Government may violate any copyrights that exist in this work.
+ *
+ *
  */
 
 package mitll.langtest.server;
@@ -66,8 +94,10 @@ import java.util.*;
 
 /**
  * Supports all the database interactions.
- * User: GO22670
- * Date: 5/7/12
+ * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
+ * @since 5/7/12
  * Time: 5:49 PM
  */
 @SuppressWarnings("serial")
@@ -844,7 +874,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (byID != null) {
       //logger.debug("returning (" + language + ") exercise " + byID.getID() + " : " + byID);
     } else {
-      logger.info(getLanguage() + " : couldn't find exercise with id '" + id + "'");
+      logger.warn(getLanguage() + " : couldn't find exercise with id '" + id + "'");
     }
     // return byID;
     // TODO : why doesn't this work?
@@ -1180,7 +1210,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    * @see mitll.langtest.client.scoring.ASRScoringAudioPanel#scoreAudio(String, long, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
    */
-  // JESS: this is entered for the normal stuff (I think this is alignment)
   public PretestScore getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence,
                                           int width, int height, boolean useScoreToColorBkg, String exerciseID) {
     return getPretestScore(reqid, resultID, testAudioFile, sentence, width, height, useScoreToColorBkg, exerciseID, false);
@@ -1209,9 +1238,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String wavEndingAudio = answer.replaceAll(".mp3", ".wav").replaceAll(".ogg", ".wav");
     Result cachedResult = db.getRefResultDAO().getResult(exerciseID, wavEndingAudio);
     if (cachedResult != null) {
-      logger.debug("getASRScoreForAudio Cache HIT  : align exercise id = " + exerciseID + " file " + answer + " found previous " + cachedResult.getUniqueID());
+      logger.debug("getPretestScore Cache HIT  : align exercise id = " + exerciseID + " file " + answer + " found previous " + cachedResult.getUniqueID());
     } else {
-      logger.debug("getASRScoreForAudio Cache MISS : align exercise id = " + exerciseID + " file " + answer);
+      logger.debug("getPretestScore Cache MISS : align exercise id = " + exerciseID + " file " + answer);
     }
 
     boolean usePhoneToDisplay1 = usePhoneToDisplay || serverProps.usePhoneToDisplay();
@@ -1221,7 +1250,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     long timeToRunHydec = System.currentTimeMillis() - then;
 
-    logger.debug("getASRScoreForAudio : scoring file " + testAudioFile + " for " +
+    logger.debug("getPretestScore : scoring file " + testAudioFile + " for " +
         " exid " + exerciseID +
         " sentence " + sentence.length() + " characters long : " +
         " score " + asrScoreForAudio.getHydecScore() +

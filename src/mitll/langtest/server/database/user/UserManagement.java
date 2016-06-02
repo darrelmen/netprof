@@ -51,7 +51,10 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
- * Created by go22670 on 9/18/15.
+ * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
+ * @since 9/18/15.
  */
 public class UserManagement {
   private static final Logger logger = Logger.getLogger(UserManagement.class);
