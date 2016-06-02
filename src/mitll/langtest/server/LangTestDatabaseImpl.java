@@ -1288,16 +1288,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   // Users ---------------------
 
-  /**
-   * @param login
-   * @param passwordH
-   * @return
-   * @see mitll.langtest.client.user.UserPassLogin#gotLogin
-   * @see mitll.langtest.client.user.UserPassLogin#makeSignInUserName(com.github.gwtbootstrap.client.ui.Fieldset)
-   */
-  public User userExists(String login, String passwordH) {
-    return db.userExists(getThreadLocalRequest(), login, passwordH);
-  }
 
   /**
    * @param userid
@@ -1662,7 +1652,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return null if existing user
    * @see mitll.langtest.client.user.UserPassLogin#gotSignUp(String, String, String, mitll.langtest.shared.User.Kind)
    */
-  @Override
+/*  @Override
   public User addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, String email,
                       boolean isMale, int age, String dialect, boolean isCD, String device) {
     User user = db.addUser(getThreadLocalRequest(), userID, passwordH, emailH, kind, isMale, age, dialect, "browser");
@@ -1680,54 +1670,55 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   private EmailHelper getEmailHelper() {
     return new EmailHelper(serverProps, db.getUserDAO(), getMailSupport(), pathHelper);
-  }
+  }*/
 
   /**
    * @return
    * @see mitll.langtest.client.user.UserTable#showDialog(mitll.langtest.client.LangTestDatabaseAsync)
    */
-  public List<User> getUsers() {
+  /*public List<User> getUsers() {
     return db.getUsers();
   }
 
+  */
   /**
    * @param id
    * @return
    * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser(int)
    */
-  @Override
-  public User getUserBy(int id) {
+  private User getUserBy(int id) {
     return db.getUserDAO().getUserWhere(id);
   }
+/*
 
-  /**
+  *//**
    * @param user
    * @param email
    * @param url
    * @return true if there's a user with this email
    * @see mitll.langtest.client.user.UserPassLogin#getForgotPassword()
-   */
+   *//*
   public boolean resetPassword(String user, String email, String url) {
     logger.debug("resetPassword for " + user);
     return getEmailHelper().resetPassword(user, email, url);
   }
 
-  /**
+  *//**
    * @param token
    * @param emailR - email encoded by rot13
    * @return
    * @see mitll.langtest.client.InitialUI#handleCDToken
-   */
+   *//*
   public String enableCDUser(String token, String emailR, String url) {
     logger.info("enabling token " + token + " for email " + emailR + " and url " + url);
     return getEmailHelper().enableCDUser(token, emailR, url);
   }
 
-  /**
+  *//**
    * @param token
    * @return
    * @see mitll.langtest.client.LangTest#showLogin()
-   */
+   *//*
   @Override
   public long getUserIDForToken(String token) {
     User user = db.getUserDAO().getUserWithResetKey(token);
@@ -1758,20 +1749,20 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
-  /**
+  *//**
    * @param emailH
    * @param email
    * @param url
    * @return
    * @see mitll.langtest.client.user.UserPassLogin#getForgotUser()
-   */
+   *//*
   @Override
   public boolean forgotUsername(String emailH, String email, String url) {
     String userChosenIDIfValid = db.getUserDAO().isValidEmail(emailH);
     getEmailHelper().getUserNameEmail(email, url, userChosenIDIfValid);
     return userChosenIDIfValid != null;
   }
-
+*/
   // Results ---------------------
 
   /**

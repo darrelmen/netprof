@@ -66,6 +66,8 @@ import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.client.recorder.MicPermission;
 import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
+import mitll.langtest.client.services.UserService;
+import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.sound.SoundManagerStatic;
 import mitll.langtest.client.user.UserFeedback;
@@ -170,6 +172,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private String audioType = Result.AUDIO_TYPE_UNSET;
 
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
+  private final UserServiceAsync userService = GWT.create(UserService.class);
   private final BrowserCheck browserCheck = new BrowserCheck();
   private SoundManagerStatic soundManager;
   private PropertyHandler props;
@@ -365,7 +368,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
     buttonFactory = new ButtonFactory(service, props, this);
 
-    userManager = new UserManager(this, service, props);
+    userManager = new UserManager(this, userService, props);
 
     RootPanel.get().getElement().getStyle().setPaddingTop(2, Style.Unit.PX);
 
