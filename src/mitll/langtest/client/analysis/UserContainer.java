@@ -55,6 +55,8 @@ import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
+import mitll.langtest.client.services.AnalysisService;
+import mitll.langtest.client.services.AnalysisServiceAsync;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.analysis.UserInfo;
 
@@ -78,7 +80,7 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
   private static final int MAX_LENGTH_ID = 13;
 
   private static final int ID_WIDTH = 130;
-  public static final int TABLE_WIDTH = 420;
+  static final int TABLE_WIDTH = 420;
   private static final int SIGNED_UP = 95;
   private static final String CURRENT = "Curr.";
   private static final int CURRENT_WIDTH = 60;
@@ -99,9 +101,9 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
   /**
    * @param controller
    * @param rightSide
-   * @see StudentAnalysis#StudentAnalysis(LangTestDatabaseAsync, ExerciseController, ShowTab)
+   * @see StudentAnalysis#StudentAnalysis(ExerciseController, ShowTab)
    */
-  public UserContainer(LangTestDatabaseAsync service, ExerciseController controller,
+  UserContainer(LangTestDatabaseAsync service, ExerciseController controller,
                        DivWidget rightSide,
                        DivWidget overallBottom,
                        ShowTab learnTab,
