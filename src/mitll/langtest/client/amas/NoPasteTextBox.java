@@ -30,16 +30,27 @@
  *
  */
 
-package mitll.langtest.shared.exercise;
+package mitll.langtest.client.amas;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import com.github.gwtbootstrap.client.ui.TextBox;
+import com.google.gwt.user.client.Event;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 2/2/16.
+ * @since
  */
-public interface HasID extends IsSerializable {
-  String getID();
+class NoPasteTextBox extends TextBox {
+  NoPasteTextBox() {
+    sinkEvents(Event.ONPASTE);
+  }
+  public void onBrowserEvent(Event event) {
+    super.onBrowserEvent(event);
+
+    if (event.getTypeInt() == Event.ONPASTE) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+  }
 }
