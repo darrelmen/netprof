@@ -35,7 +35,6 @@ package mitll.langtest.client.sound;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Anchor;
-import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.instrumentation.EventRegistration;
 
 import java.util.logging.Logger;

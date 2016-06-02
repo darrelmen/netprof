@@ -38,6 +38,9 @@ import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.DecodeAlignOutput;
 import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.database.analysis.Analysis;
+import mitll.langtest.server.database.audio.AudioDAO;
+import mitll.langtest.server.database.audio.IAudioDAO;
+import mitll.langtest.server.database.audio.SlickAudioDAO;
 import mitll.langtest.server.database.connection.DatabaseConnection;
 import mitll.langtest.server.database.connection.H2Connection;
 import mitll.langtest.server.database.connection.MySQLConnection;
@@ -117,7 +120,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   private RefResultDAO refresultDAO;
   private WordDAO wordDAO;
   private PhoneDAO phoneDAO;
-  private AudioDAO audioDAO;
+  private IAudioDAO audioDAO;
   private AnswerDAO answerDAO;
   private UserListManager userListManager;
   private UserExerciseDAO userExerciseDAO;
@@ -246,7 +249,11 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     refresultDAO = new RefResultDAO(this, getServerProps().shouldDropRefResult());
     wordDAO = new WordDAO(this);
     phoneDAO = new PhoneDAO(this);
+
     audioDAO = new AudioDAO(this, this.userDAO);
+
+    SlickAudioDAO slickAudioDAO = new SlickAudioDAO(this, this.userDAO);
+
     answerDAO = new AnswerDAO(this, resultDAO);
     userListManager = new UserListManager(this.userDAO, new UserListDAO(this, this.userDAO), userListExerciseJoinDAO,
         new AnnotationDAO(this, this.userDAO),
@@ -546,9 +553,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         }
         userManagement = new UserManagement(userDAO, numExercises, resultDAO, userListManager);
 
-        audioDAO.setExerciseDAO(exerciseDAO);
+     //   audioDAO.setExerciseDAO(exerciseDAO);
 
-        audioDAO.markTranscripts();
+     //   audioDAO.markTranscripts();
       }
     }
   }
@@ -893,7 +900,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @return
    * @see mitll.langtest.client.user.UserPassLogin#gotLogin
    * @see mitll.langtest.client.user.UserPassLogin#makeSignInUserName(com.github.gwtbootstrap.client.ui.Fieldset)
-   * @see mitll.langtest.server.LangTestDatabaseImpl#userExists(String, String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#userExists
    */
   public User userExists(HttpServletRequest request, String login, String passwordH) {
     return userManagement.userExists(request, login, passwordH, serverProps);
@@ -1016,7 +1023,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return eventDAO;
   }
 
-  public AudioDAO getAudioDAO() {
+  public IAudioDAO getAudioDAO() {
     return audioDAO;
   }
 
@@ -1101,56 +1108,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   public AnswerDAO getAnswerDAO() {
     return answerDAO;
   }
-
-  /**
-   * @param userID
-   * @param exerciseID
-   * @param questionID
-   * @param audioFile
-   * @param valid
-   * @param audioType
-   * @param durationInMillis
-   * @param correct
-   * @param score
-   * @param recordedWithFlash
-   * @param deviceType
-   * @param device
-   * @param scoreJson
-   * @param processDur
-   * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
-   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer
-   */
-/*  public long addAudioAnswer(int userID, String exerciseID, int questionID,
-                             String audioFile,
-                             boolean valid,
-                             String audioType, long durationInMillis, boolean correct, float score,
-                             boolean recordedWithFlash, String deviceType, String device, String scoreJson, int processDur
-      , String validity, double snr) {
-    //logger.debug("addAudioAnser json = " + scoreJson);
-    if (valid && scoreJson.isEmpty()) {
-      logger.warn("huh? no score json for valid audio " + audioFile + " on " + exerciseID);
-    }
-*//*    AnswerInfo info =new AnswerInfo(userID,
-        exerciseID,
-        questionID,
-        "",
-        audioFile,
-        valid,
-        audioType,
-        durationInMillis,
-        correct,
-        score,
-        deviceType,
-        device,
-        scoreJson,
-        recordedWithFlash,
-        processDur,
-     //   0,
-        validity,
-        snr);*//*
-
-    return answerDAO.addAnswer(this, info);
-  }*/
 
   /**
    * @param userID
@@ -1471,7 +1428,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @see ScoreServlet#getJSONExport
    */
   public void attachAllAudio() {
-    AudioDAO audioDAO = getAudioDAO();
+    IAudioDAO audioDAO = getAudioDAO();
 
     Map<String, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
 

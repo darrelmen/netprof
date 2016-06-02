@@ -33,17 +33,14 @@
 package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.shared.User;
 import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.analysis.UserPerformance;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.monitoring.Session;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 public interface AnalysisServiceAsync {
   void getUsersWithRecordings(AsyncCallback<Collection<UserInfo>> async);
