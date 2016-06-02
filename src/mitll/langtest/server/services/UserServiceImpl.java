@@ -49,50 +49,14 @@ import java.io.File;
 import java.util.List;
 
 @SuppressWarnings("serial")
-public class UserServiceImpl extends RemoteServiceServlet implements UserService {
+public class UserServiceImpl extends MyRemoteServiceServlet implements UserService {
   private static final Logger logger = Logger.getLogger(UserServiceImpl.class);
-  private DatabaseImpl<CommonExercise> db;
-  private ServerProperties serverProps;
-
-  private DatabaseImpl<CommonExercise> getDatabase() {
-    DatabaseImpl<CommonExercise> db = null;
-
-    Object databaseReference = getServletContext().getAttribute(LangTestDatabaseImpl.DATABASE_REFERENCE);
-    if (databaseReference != null) {
-      db = (DatabaseImpl<CommonExercise>) databaseReference;
-      // logger.debug("found existing database reference " + db + " under " +getServletContext());
-    } else {
-      logger.info("getDatabase : no existing db reference yet...");
-    }
-    return db;
-  }
 
   @Override
   public void init() {
     logger.info("init called for UserServiceImpl");
     findSharedDatabase();
     readProperties(getServletContext());
-  }
-
-  void findSharedDatabase() {
-    if (db == null) db = getDatabase();
-  }
-
-  /**
-   * The config web.xml file.
-   * As a final step, creates the DatabaseImpl!<br></br>
-   * <p>
-   * NOTE : makes the database available to other servlets via the databaseReference servlet context attribute.
-   * Note that this will only ever be called once.
-   *
-   * @param servletContext
-   * @see #init()
-   */
-  private void readProperties(ServletContext servletContext) {
-    String relativeConfigDir = "config" + File.separator + servletContext.getInitParameter("config");
-    PathHelper pathHelper = new PathHelper(getServletContext());
-    String configDir = pathHelper.getInstallPath() + File.separator + relativeConfigDir;
-    serverProps = new ServerProperties(servletContext, configDir);
   }
 
   /**
