@@ -55,7 +55,7 @@ public interface IUserDAO {
 
   boolean enableUser(int id);
 
-  String isValidEmail(String emailH);
+  boolean changeEnabled(int userid, boolean enabled);
 
   Integer getIDForUserAndEmail(String user, String emailH);
 
@@ -67,6 +67,9 @@ public interface IUserDAO {
 
   User getUserByID(String id);
 
+  User getUserWhere(int userid);
+
+
   List<User> getUsers();
 
   List<User> getUsersDevices();
@@ -75,21 +78,25 @@ public interface IUserDAO {
 
   MiniUser getMiniUser(int userid);
 
-  User getUserWhereResetKey(String resetKey);
-
-  User getUserWhereEnabledReq(String resetKey);
-
-  User getUserWhere(int userid);
 
   Map<Integer, User> getUserMap(boolean getMale);
 
   Map<Integer, User> getUserMap();
 
-  boolean changePassword(Integer remove, String passwordH);
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#forgotUsername(String, String, String)
+   * @param emailH
+   * @return
+   */
+  String isValidEmail(String emailH);
 
-  boolean updateKey(Integer userid, boolean resetKey, String key);
+  boolean changePassword(int user, String passwordH);
 
-  boolean clearKey(Integer remove, boolean resetKey);
+  User getUserWithResetKey(String key);
 
-  boolean changeEnabled(int userid, boolean enabled);
+  User getUserWithEnabledKey(String key);
+
+  boolean updateKey(int userid, boolean resetKey, String key);
+
+  boolean clearKey(int userid, boolean resetKey);
 }
