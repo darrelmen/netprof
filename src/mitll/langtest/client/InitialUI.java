@@ -54,6 +54,8 @@ import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.instrumentation.EventTable;
 import mitll.langtest.client.monitoring.MonitoringManager;
 import mitll.langtest.client.result.ResultManager;
+import mitll.langtest.client.services.UserService;
+import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.client.user.ResetPassword;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserPassLogin;
@@ -92,6 +94,7 @@ public class InitialUI {
   protected final PropertyHandler props;
 
   protected final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
+  private final UserServiceAsync userService = GWT.create(UserService.class);
 
   private final Banner banner;
 
@@ -230,7 +233,7 @@ public class InitialUI {
         }
 
         public void onSuccess() {
-          new UserTable(props, userManager.isAdmin()).showUsers(service);
+          new UserTable(props, userManager.isAdmin()).showUsers(userService);
         }
       });
     }
@@ -442,7 +445,7 @@ public class InitialUI {
   private void handleResetPass(final Container verticalContainer, final Panel firstRow,
                                final EventRegistration eventRegistration, final String resetPassToken) {
     //logger.info("showLogin token '" + resetPassToken + "' for password reset");
-    service.getUserIDForToken(resetPassToken, new AsyncCallback<Long>() {
+    userService.getUserIDForToken(resetPassToken, new AsyncCallback<Long>() {
       @Override
       public void onFailure(Throwable caught) {
       }
@@ -476,7 +479,7 @@ public class InitialUI {
    */
   private void handleCDToken(final Container verticalContainer, final Panel firstRow, final String cdToken, String emailR) {
     logger.info("enabling token " + cdToken + " for email " + emailR);
-    service.enableCDUser(cdToken, emailR, Window.Location.getHref(), new AsyncCallback<String>() {
+    userService.enableCDUser(cdToken, emailR, Window.Location.getHref(), new AsyncCallback<String>() {
       @Override
       public void onFailure(Throwable caught) {
       }
