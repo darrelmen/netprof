@@ -175,7 +175,7 @@ public class EmailHelper {
    * @see mitll.langtest.server.LangTestDatabaseImpl#enableCDUser(String, String, String)
    */
   public String enableCDUser(String token, String emailR, String url) {
-    User userWhereEnabledReq = userDAO.getUserWhereEnabledReq(token);
+    User userWhereEnabledReq = userDAO.getUserWithEnabledKey(token);
     Integer userID;
     if (userWhereEnabledReq == null) {
       logger.debug("enableCDUser user id null for token " + token + " email " + emailR + " url " + url);
