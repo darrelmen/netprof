@@ -63,9 +63,9 @@ public interface LangTestDatabaseAsync {
                                               ExerciseListRequest request,
                                               AsyncCallback<ExerciseListWrapper<T>> async);
 
-  void getUsers(AsyncCallback<List<User>> async);
+  /*void getUsers(AsyncCallback<List<User>> async);
 
-  void getUserBy(int id, AsyncCallback<User> async);
+  void getUserBy(int id, AsyncCallback<User> async);*/
 
   void writeAudioFile(String base64EncodedString,
                       AudioContext audioContext,
@@ -182,7 +182,7 @@ public interface LangTestDatabaseAsync {
                     String identifier,
                     int reqid, String device, AsyncCallback<AudioAnswer> async);
 
-  void userExists(String login, String passwordH, AsyncCallback<User> async);
+/*  void userExists(String login, String passwordH, AsyncCallback<User> async);
 
   void addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, String email, boolean isMale,
                int age, String dialect, boolean isCD, String device, AsyncCallback<User> async);
@@ -195,7 +195,7 @@ public interface LangTestDatabaseAsync {
 
   void changePFor(String token, String first, AsyncCallback<Boolean> asyncCallback);
 
-  void enableCDUser(String cdToken, String emailR, String url, AsyncCallback<String> asyncCallback);
+  void enableCDUser(String cdToken, String emailR, String url, AsyncCallback<String> asyncCallback);*/
 
   void getNumResults(AsyncCallback<Integer> async);
 
@@ -207,7 +207,6 @@ public interface LangTestDatabaseAsync {
 
   void getResultASRInfo(long resultID, int width, int height, AsyncCallback<PretestScore> async);
 
-  void changeEnabledFor(int userid, boolean enabled, AsyncCallback<Void> async);
 
   void getASRScoreForAudioPhonemes(int reqid, long resultID, String testAudioFile, String sentence,
                                    int width, int height, boolean useScoreToColorBkg, String exerciseID,
