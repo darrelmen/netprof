@@ -210,10 +210,7 @@ public interface LangTestDatabase extends RemoteService {
                            String identifier,
                            int reqid, String device);
 
-  Collection<UserInfo> getUsersWithRecordings();
   Map<String, Float> getMaleFemaleProgress();
-
-
 
   // Admin dialogs ---
 
@@ -236,38 +233,6 @@ public interface LangTestDatabase extends RemoteService {
    */
   ResultAndTotal getResults(int start, int end, String sortInfo,Map<String, String> unitToValue, int userid, String flText, int req);
 
-  // Analysis support
-
-  /**
-   * @see mitll.langtest.client.analysis.AnalysisPlot#setRawBestScores(List)
-   * @param ids
-   * @return
-   */
-  List<CommonShell> getShells(List<String> ids);
-
-  /**
-   * @see mitll.langtest.client.analysis.AnalysisPlot#getPerformanceForUser(LangTestDatabaseAsync, long, String, int)
-   * @param id
-   * @param minRecordings
-   * @return
-   */
-  UserPerformance getPerformanceForUser(int id, int minRecordings);
-
-  /**
-   * @see mitll.langtest.client.analysis.AnalysisTab#getWordScores(LangTestDatabaseAsync, ExerciseController, int, ShowTab, AnalysisPlot, Panel, int)
-   * @param id
-   * @param minRecordings
-   * @return
-   */
-  List<WordScore> getWordScores(int id, int minRecordings);
-
-  /**
-   * @see mitll.langtest.client.analysis.AnalysisTab#getPhoneReport(LangTestDatabaseAsync, ExerciseController, int, Panel, AnalysisPlot, ShowTab, int)
-   * @param id
-   * @param minRecordings
-   * @return
-   */
-  PhoneReport getPhoneScores(int id, int minRecordings);
 
   /**
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete

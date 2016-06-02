@@ -39,10 +39,7 @@ import com.github.gwtbootstrap.client.ui.TextBox;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabase;
-import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.analysis.ShowTab;
 import mitll.langtest.client.custom.dialog.ReviewEditableExercise;
-import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.server.amas.QuizCorrect;
 import mitll.langtest.server.audio.AudioCheck;
@@ -52,11 +49,10 @@ import mitll.langtest.server.audio.PathWriter;
 import mitll.langtest.server.autocrt.AutoCRT;
 import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.exercise.SectionHelper;
+import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.decoder.RefResultDecoder;
-import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.server.trie.ExerciseTrie;
@@ -64,17 +60,12 @@ import mitll.langtest.server.trie.TextEntityValue;
 import mitll.langtest.server.trie.Trie;
 import mitll.langtest.shared.*;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
-import mitll.langtest.shared.analysis.PhoneReport;
-import mitll.langtest.shared.analysis.UserInfo;
-import mitll.langtest.shared.analysis.UserPerformance;
-import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.flashcard.QuizCorrectAndScore;
 import mitll.langtest.shared.instrumentation.Event;
-import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -114,7 +105,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private static final int MAX = 30;
   private static final int SLOW_MILLIS = 40;
   private static final int WARN_DUR = 100;
-  private static final int MIN_RECORDINGS = 5;
   private static final String WAV1 = "wav";
   private RefResultDecoder refResultDecoder;
 
@@ -791,25 +781,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   private void addPlayedMarkings(int userID, CommonExercise firstExercise) {
     db.getEventDAO().addPlayedMarkings(userID, firstExercise);
-  }
-
-  /**
-   * @param ids
-   * @return
-   * @see mitll.langtest.client.analysis.AnalysisPlot#setRawBestScores(List)
-   */
-  @Override
-  public List<CommonShell> getShells(List<String> ids) {
-    List<CommonShell> shells = new ArrayList<>();
-    for (String id : ids) {
-      CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(id);
-      if (customOrPredefExercise == null) {
-        logger.warn("Couldn't find exercise for " + id);
-      } else {
-        shells.add(customOrPredefExercise.getShell());
-      }
-    }
-    return shells;
   }
 
   /**
@@ -2165,15 +2136,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @return
-   * @see mitll.langtest.client.analysis.StudentAnalysis#StudentAnalysis(LangTestDatabaseAsync, ExerciseController, ShowTab)
-   */
-  @Override
-  public Collection<UserInfo> getUsersWithRecordings() {
-    return db.getAnalysis().getUserInfo(db.getUserDAO(), MIN_RECORDINGS);
-  }
-
-  /**
    * Filter out the default audio recordings...
    *
    * @return
@@ -2226,34 +2188,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     idToKey.put(id, collationKey);
   }
 
-  /**
-   * @param id
-   * @param minRecordings
-   * @return
-   * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot
-   */
-  @Override
-  public UserPerformance getPerformanceForUser(int id, int minRecordings) {
-    return db.getResultDAO().getPerformanceForUser(id, db.getPhoneDAO(), minRecordings, db.getExerciseIDToRefAudio());
-  }
-
-  /**
-   * @param id
-   * @param minRecordings
-   * @return
-   * @see mitll.langtest.client.analysis.AnalysisTab#getWordScores
-   */
-  @Override
-  public List<WordScore> getWordScores(int id, int minRecordings) {
-    List<WordScore> wordScoresForUser = db.getAnalysis().getWordScoresForUser(id, minRecordings);
-//    for (WordScore ws : wordScoresForUser) if (ws.getNativeAudio() != null) logger.info("got " +ws.getId() + " " + ws.getNativeAudio());
-    return wordScoresForUser;
-  }
-
-  @Override
-  public PhoneReport getPhoneScores(int id, int minRecordings) {
-    return db.getAnalysis().getPhonesForUser(id, minRecordings);
-  }
 
   public void logMessage(String message) {
     if (message.length() > 10000) message = message.substring(0, 10000);
