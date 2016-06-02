@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.database.user;
 
-import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.AudioDAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
@@ -203,35 +202,6 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     }
   }
 
-  /**
-   * @param id
-   * @return
-   * @see mitll.langtest.server.mail.EmailHelper#enableCDUser(String, String, String)
-   */
-  @Override
-  public boolean enableUser(int id) {
-    try {
-      Connection connection = getConnection();
-      PreparedStatement statement = connection.prepareStatement(
-          "UPDATE " + USERS + " SET " +
-              ENABLED + "=TRUE" +
-              " WHERE " +
-              ID + "=?");
-      int i = 1;
-      statement.setInt(i++, id);
-
-      int i1 = statement.executeUpdate();
-
-      statement.close();
-      database.closeConnection(connection);
-
-      return i1 != 0;
-    } catch (Exception ee) {
-      logger.error("Got " + ee, ee);
-      database.logEvent("unk", "enableUser: " + ee.toString(), 0, UNKNOWN);
-    }
-    return false;
-  }
 
   @Override
   public String isValidEmail(String emailH) {
@@ -455,8 +425,8 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   }
 
   @Override
-  public User getUserWhereResetKey(String resetKey) {
-    return getUserWhere(-1, "SELECT * from users where " + RESET_PASSWORD_KEY + "='" + resetKey);
+  public User getUserWithResetKey(String resetKey) {
+    return getUserWhere(-1, "SELECT * from users where " + RESET_PASSWORD_KEY + "='" + resetKey + "'");
   }
 
   /**
@@ -465,9 +435,8 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    * @see mitll.langtest.server.mail.EmailHelper#enableCDUser(String, String, String)
    */
   @Override
-  public User getUserWhereEnabledReq(String resetKey) {
-    String sql = "SELECT * from users where " + ENABLED_REQ_KEY + "='" + resetKey;
-    return getUserWhere(-1, sql);
+  public User getUserWithEnabledKey(String resetKey) {
+    return getUserWhere(-1, "SELECT * from users where " + ENABLED_REQ_KEY + "='" + resetKey +"'");
   }
 
   /**
@@ -477,7 +446,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    */
   @Override
   public User getUserWhere(int userid) {
-    String sql = "SELECT * from users where " + ID + "=" + userid + ";";
+    String sql = "SELECT * from users where " + ID + "=" + userid;
     //long then = System.currentTimeMillis();
     Collection<User> users = getUsers(sql);
    // long now = System.currentTimeMillis();
@@ -628,7 +597,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
 
 
   @Override
-  public boolean changePassword(Integer remove, String passwordH) {
+  public boolean changePassword(int user, String passwordH) {
     try {
       Connection connection = getConnection();
       PreparedStatement statement;
@@ -640,14 +609,14 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
               ID + "=?");
       int i = 1;
       statement.setString(i++, passwordH);
-      statement.setLong(i++, remove);
+      statement.setLong(i++, user);
 
       int i1 = statement.executeUpdate();
 
       statement.close();
       database.closeConnection(connection);
 
-      User userByID = getUserWhere(remove);
+      User userByID = getUserWhere(user);
       logger.debug("after password set to " + passwordH + " user now " + userByID);
       return i1 != 0;
     } catch (Exception ee) {
@@ -662,10 +631,10 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    * @param resetKey
    * @param key
    * @return
-   * @see #clearKey(Integer, boolean)
+   * @see IUserDAO#clearKey(int, boolean)
    */
   @Override
-  public boolean updateKey(Integer userid, boolean resetKey, String key) {
+  public boolean updateKey(int userid, boolean resetKey, String key) {
     try {
       Connection connection = getConnection();
       String s = resetKey ? RESET_PASSWORD_KEY : ENABLED_REQ_KEY;
@@ -691,14 +660,14 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   }
 
   /**
-   * @param remove
+   * @param user
    * @param resetKey
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#changePFor(String, String)
    */
   @Override
-  public boolean clearKey(Integer remove, boolean resetKey) {
-    return updateKey(remove, resetKey, "");
+  public boolean clearKey(int user, boolean resetKey) {
+    return updateKey(user, resetKey, "");
   }
 
   @Override
@@ -727,4 +696,11 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     return false;
   }
 
+  /**
+   * @param id
+   * @return
+   * @see mitll.langtest.server.mail.EmailHelper#enableCDUser(String, String, String)
+   */
+  @Override
+  public boolean enableUser(int id) {  return changeEnabled(id,true);  }
 }
