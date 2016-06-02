@@ -58,6 +58,18 @@
         <url-pattern>/langtest/monitoring-manager</url-pattern>
     </servlet-mapping>
 
+
+    <servlet>
+        <servlet-name>analysisService</servlet-name>
+        <servlet-class>mitll.langtest.server.services.AnalysisServiceImpl</servlet-class>
+        <load-on-startup>3</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>analysisService</servlet-name>
+        <url-pattern>/langtest/analysis-manager</url-pattern>
+    </servlet-mapping>
+
     <!-- ==================================================================== -->
     <!-- End RPC mappings                                                     -->
     <!-- ==================================================================== -->

@@ -33,11 +33,7 @@
 package mitll.langtest.server.services;
 
 import mitll.langtest.client.services.MonitoringService;
-import mitll.langtest.server.LangTestDatabaseImpl;
-import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.shared.User;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.monitoring.Session;
 import org.apache.log4j.Logger;
 
@@ -48,31 +44,11 @@ import java.util.Map;
 public class MonitoringServiceImpl extends MyRemoteServiceServlet implements MonitoringService {
   private static final Logger logger = Logger.getLogger(MonitoringServiceImpl.class);
 
-  private DatabaseImpl<CommonExercise> db;
-  private ServerProperties serverProps;
-
-  private DatabaseImpl<CommonExercise> getDatabase() {
-    DatabaseImpl<CommonExercise> db = null;
-
-    Object databaseReference = getServletContext().getAttribute(LangTestDatabaseImpl.DATABASE_REFERENCE);
-    if (databaseReference != null) {
-      db = (DatabaseImpl<CommonExercise>) databaseReference;
-      // logger.debug("found existing database reference " + db + " under " +getServletContext());
-    } else {
-      logger.info("getDatabase : no existing db reference yet...");
-    }
-    return db;
-  }
-
   @Override
   public void init() {
-    logger.info("init called for UserServiceImpl");
+    logger.info("init called for MonitoringServiceImpl");
     findSharedDatabase();
     readProperties(getServletContext());
-  }
-
-  void findSharedDatabase() {
-    if (db == null) db = getDatabase();
   }
 
   @Override
