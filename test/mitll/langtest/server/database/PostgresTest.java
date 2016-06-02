@@ -90,6 +90,9 @@ public class PostgresTest extends BaseTest {
     //  spanish.doReport(new PathHelper("war"));
   }
 
+  /**
+   * TODO : add option to get mock db to use
+   */
   @Test
   public void testUser() {
     DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
