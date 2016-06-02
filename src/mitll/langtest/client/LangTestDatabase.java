@@ -123,78 +123,78 @@ public interface LangTestDatabase extends RemoteService {
    * @param device
    * @return
    */
-  User addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, String email, boolean isMale,
+/*  User addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, String email, boolean isMale,
                int age, String dialect, boolean isCD, String device);
 
-  /**
+  *//**
    * @see mitll.langtest.client.user.UserTable#showDialog(LangTestDatabaseAsync)
    * @return
-   */
+   *//*
   List<User> getUsers();
 
-  /**
+  *//**
    * @see mitll.langtest.client.user.UserPassLogin#gotLogin(String, String, boolean)
    * @param login
    * @param passwordH
    * @return
-   */
+   *//*
   User userExists(String login, String passwordH);
 
-  /**
+  *//**
    * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser(int)
    * @param id
    * @return
-   */
+   *//*
   User getUserBy(int id);
 
-  /**
+  *//**
    * @see mitll.langtest.client.user.ResetPassword#getChangePasswordButton(String, Fieldset, BasicDialog.FormField, BasicDialog.FormField)
    * @param token
    * @param first
    * @return
-   */
+   *//*
   boolean changePFor(String token, String first);
 
-  /**
+  *//**
    * @see InitialUI#handleResetPass(Container, Panel, EventRegistration, String)
    * @param token
    * @return
-   */
+   *//*
   long getUserIDForToken(String token);
 
-  /**
+  *//**
    * @see mitll.langtest.client.user.UserTable#addAdminCol(LangTestDatabaseAsync, CellTable)
    * @param userid
    * @param enabled
-   */
+   *//*
   void changeEnabledFor(int userid, boolean enabled);
 
-  /**
+  *//**
    * @see UserPassLogin#getForgotUser()
    * @param emailH
    * @param email
    * @param url
    * @return
-   */
+   *//*
   boolean forgotUsername(String emailH, String email, String url);
 
-  /**
+  *//**
    * @see UserPassLogin#getForgotPassword()
    * @param userid
    * @param text
    * @param url
    * @return
-   */
+   *//*
   boolean resetPassword(String userid, String text, String url);
 
-  /**
+  *//**
    * @see InitialUI#handleCDToken(Container, Panel, String, String)
    * @param cdToken
    * @param emailR
    * @param url
    * @return
-   */
-  String enableCDUser(String cdToken, String emailR, String url);
+   *//*
+  String enableCDUser(String cdToken, String emailR, String url);*/
 
   // answer DAO
 
