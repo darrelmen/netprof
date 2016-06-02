@@ -1,11 +1,40 @@
 /*
- * Copyright © 2011-2015 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
+ * and their contractors; 2015. Other request for this document shall be referred
+ * to DLIFLC.
+ *
+ * WARNING: This document may contain technical data whose export is restricted
+ * by the Arms Export Control Act (AECA) or the Export Administration Act (EAA).
+ * Transfer of this data by any means to a non-US person who is not eligible to
+ * obtain export-controlled data is prohibited. By accepting this data, the consignee
+ * agrees to honor the requirements of the AECA and EAA. DESTRUCTION NOTICE: For
+ * unclassified, limited distribution documents, destroy by any method that will
+ * prevent disclosure of the contents or reconstruction of the document.
+ *
+ * This material is based upon work supported under Air Force Contract No.
+ * FA8721-05-C-0002 and/or FA8702-15-D-0001. Any opinions, findings, conclusions
+ * or recommendations expressed in this material are those of the author(s) and
+ * do not necessarily reflect the views of the U.S. Air Force.
+ *
+ * © 2015 Massachusetts Institute of Technology.
+ *
+ * The software/firmware is provided to you on an As-Is basis
+ *
+ * Delivered to the US Government with Unlimited Rights, as defined in DFARS
+ * Part 252.227-7013 or 7014 (Feb 2014). Notwithstanding any copyright notice,
+ * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
+ * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
+ * authorized by the U.S. Government may violate any copyrights that exist in this work.
+ *
+ *
  */
 
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.*;
 import mitll.langtest.server.amas.FileExerciseDAO;
+import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.DecodeAlignOutput;
 import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.database.analysis.Analysis;
@@ -39,6 +68,7 @@ import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.monitoring.Session;
+import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 import mitll.npdata.dao.DBConnection;
@@ -65,8 +95,10 @@ import java.util.*;
  * H2 will return "new" connections that have already been closed.   <br></br>
  * * it's not a good idea to reuse one connection...?  <br></br>
  * <p>
- * User: go22670
- * Date: 5/14/12
+ * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
+ * @since 5/14/12
  * Time: 11:44 PM
  * To change this template use File | Settings | File Templates.
  */
@@ -1533,6 +1565,11 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     }
   }
 
+  /**
+   * @see LangTestDatabaseImpl#getPretestScore(int, long, String, String, int, int, boolean, String, boolean)
+   * @param resultID
+   * @param asrScoreForAudio
+   */
   public void rememberScore(long resultID, PretestScore asrScoreForAudio) {
     getAnswerDAO().changeAnswer(resultID, asrScoreForAudio.getHydecScore(), asrScoreForAudio.getProcessDur(), asrScoreForAudio.getJson());
     recordWordAndPhoneInfo(resultID, asrScoreForAudio);
@@ -1541,22 +1578,26 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   /**
    * @param answer
    * @param answerID
-   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswerDecoding
+   * @see mitll.langtest.server.audio.AudioFileHelper#recordInResults(AudioContext, AnswerInfo.RecordingInfo, AudioCheck.ValidityAndDur, AudioAnswer)
    */
   public void recordWordAndPhoneInfo(AudioAnswer answer, long answerID) {
     PretestScore pretestScore = answer.getPretestScore();
     if (pretestScore == null) {
-      logger.debug("recordWordAndPhoneInfo pretest score is null for " + answer + " and " + answerID);
+      logger.debug(getLanguage() + " : recordWordAndPhoneInfo pretest score is null for " + answer + " and result id " + answerID);
     } else {
-      logger.debug("recordWordAndPhoneInfo pretest score is " + pretestScore + " for " + answer + " and " + answerID);
+      logger.debug(getLanguage() + " : recordWordAndPhoneInfo pretest score is " + pretestScore + " for " + answer + " and result id " + answerID);
     }
     recordWordAndPhoneInfo(answerID, pretestScore);
   }
 
+  /**
+   * @see #rememberScore(long, PretestScore)
+   * @param answerID
+   * @param pretestScore
+   */
   private void recordWordAndPhoneInfo(long answerID, PretestScore pretestScore) {
     if (pretestScore != null) {
-      Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = pretestScore.getsTypeToEndTimes();
-      recordWordAndPhoneInfo(answerID, netPronImageTypeListMap);
+      recordWordAndPhoneInfo(answerID, pretestScore.getsTypeToEndTimes());
     }
   }
 
@@ -1564,6 +1605,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @param answerID
    * @param netPronImageTypeListMap
    * @see #putBackWordAndPhone()
+   * @see #recordWordAndPhoneInfo(long, PretestScore)
    */
   private void recordWordAndPhoneInfo(long answerID, Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap) {
     List<TranscriptSegment> words = netPronImageTypeListMap.get(NetPronImageType.WORD_TRANSCRIPT);
