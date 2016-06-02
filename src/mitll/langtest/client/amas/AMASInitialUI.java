@@ -39,7 +39,6 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootPanel;
 import mitll.langtest.client.InitialUI;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.user.UserManager;
 
 import java.util.logging.Logger;

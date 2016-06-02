@@ -30,52 +30,73 @@
  *
  */
 
-package mitll.langtest.shared;
+package mitll.langtest.server.database.audio;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.user.IUserDAO;
+import mitll.langtest.shared.exercise.AudioAttribute;
 
 import java.util.Collection;
-import java.util.Map;
+import java.util.Set;
 
-/**
- * Created with IntelliJ IDEA.
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 11/19/13
- * Time: 7:01 PM
- * To change this template use File | Settings | File Templates.
- */
-public class StartupInfo implements IsSerializable {
-  private Map<String, String> properties;
-  private Collection<String> typeOrder;
-  private Collection<SectionNode> sectionNodes;
+public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
-  public StartupInfo() {} // for serialization
-
-  /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getStartupInfo()
-   * @param properties
-   * @param typeOrder
-   * @param sectionNodes
-   */
-  public StartupInfo(Map<String, String> properties, Collection<String> typeOrder, Collection<SectionNode> sectionNodes) {
-    this.properties = properties;
-    this.typeOrder = typeOrder;
-    this.sectionNodes = sectionNodes;
+  public SlickAudioDAO(Database database, IUserDAO userDAO) {
+    super(database, userDAO);
   }
 
-  public Map<String, String> getProperties() {
-    return properties;
+  @Override
+  public Collection<AudioAttribute> getAudioAttributes() {
+    return null;
   }
 
-  public Collection<String> getTypeOrder() {
-    return typeOrder;
+  @Override
+  public Set<String> getWithContext(int userid) {
+    return null;
   }
 
-  public Collection<SectionNode> getSectionNodes() {
-    return sectionNodes;
+  @Override
+  public AudioAttribute addOrUpdate(int userid, String exerciseID, String audioType, String audioRef, long timestamp, long durationInMillis, String transcript) {
+    return null;
   }
 
-  public String toString() { return "Order " + getTypeOrder() + " nodes " + getSectionNodes(); }
+  @Override
+  public void updateExerciseID(int uniqueID, String exerciseID) {
+
+  }
+
+  @Override
+  Collection<AudioAttribute> getAudioAttributes(String exid) {
+    return null;
+  }
+
+  @Override
+  int getCountForGender(Set<Integer> userIds, String audioSpeed, Set<String> uniqueIDs) {
+    return 0;
+  }
+
+  @Override
+  Set<String> getValidAudioOfType(long userid, String audioType) {
+    return null;
+  }
+
+  @Override
+  void addOrUpdateUser(int userid, String audioRef, String exerciseID, long timestamp, String audioType, int durationInMillis, String transcript) {
+
+  }
+
+  @Override
+  int markDefect(int userid, String exerciseID, String audioType) {
+    return 0;
+  }
+
+  @Override
+  Set<String> getAudioForGender(Set<Integer> userIDs, String audioSpeed) {
+    return null;
+  }
+
+  @Override
+  int getCountBothSpeeds(Set<Integer> userIds, Set<String> uniqueIDs) {
+    return 0;
+  }
 }

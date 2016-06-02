@@ -45,7 +45,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.Answer;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.amas.AmasExerciseImpl;

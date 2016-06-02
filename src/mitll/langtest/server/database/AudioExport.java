@@ -34,6 +34,7 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioConversion;
+import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.scoring.LTSFactory;
 import mitll.langtest.server.sorter.ExerciseSorter;
@@ -99,7 +100,7 @@ public class AudioExport {
                        SectionHelper<?> sectionHelper,
                        Collection<CommonExercise> exercisesForSelectionState,
                        String language1,
-                       AudioDAO audioDAO,
+                       IAudioDAO audioDAO,
                        String installPath,
                        String relPath,
                        boolean isDefectList) throws Exception {
@@ -126,12 +127,12 @@ public class AudioExport {
    * @throws Exception
    * @see mitll.langtest.server.database.DatabaseImpl#writeContextZip
    */
-  public void writeContextZip(OutputStream out,
+  void writeContextZip(OutputStream out,
                               Map<String, Collection<String>> typeToSection,
                               SectionHelper<?> sectionHelper,
                               Collection<CommonExercise> exercisesForSelectionState,
                               String language1,
-                              AudioDAO audioDAO,
+                              IAudioDAO audioDAO,
                               String installPath,
                               String relPath) throws Exception {
     List<CommonExercise> copy = getSortedExercises(sectionHelper, exercisesForSelectionState);
@@ -156,12 +157,12 @@ public class AudioExport {
    * @throws Exception
    * @see mitll.langtest.server.database.DatabaseImpl#writeZip
    */
-  public void writeZip(OutputStream out,
+  void writeZip(OutputStream out,
                        String prefix,
                        SectionHelper<?> sectionHelper,
                        Collection<? extends CommonExercise> exercisesForSelectionState,
                        String language1,
-                       AudioDAO audioDAO,
+                       IAudioDAO audioDAO,
                        String installPath,
                        String relPath, boolean isDefectList) throws Exception {
     List<CommonExercise> copy = getSortableExercises(sectionHelper, exercisesForSelectionState);
@@ -453,7 +454,7 @@ public class AudioExport {
    * @throws Exception
    * @see #writeZip
    */
-  private void writeToStream(Collection<CommonExercise> toWrite, AudioDAO audioDAO, String installPath,
+  private void writeToStream(Collection<CommonExercise> toWrite, IAudioDAO audioDAO, String installPath,
                              String relativeConfigDir1, String name, Collection<String> typeOrder,
                              String language1, OutputStream out, boolean skipAudio, boolean isDefectList) throws Exception {
     ZipOutputStream zOut = new ZipOutputStream(out);
@@ -469,7 +470,7 @@ public class AudioExport {
     addSpreadsheetToZip(toWrite, typeOrder, language1, zOut, overallName, isDefectList);
   }
 
-  private void writeContextToStream(Collection<CommonExercise> toWrite, AudioDAO audioDAO, String installPath,
+  private void writeContextToStream(Collection<CommonExercise> toWrite, IAudioDAO audioDAO, String installPath,
                                     String relativeConfigDir1, String name, Collection<String> typeOrder,
                                     String language1, OutputStream out) throws Exception {
     ZipOutputStream zOut = new ZipOutputStream(out);
@@ -513,7 +514,7 @@ public class AudioExport {
    */
   private void writeFolderContents(ZipOutputStream zOut,
                                    Collection<CommonExercise> toWrite,
-                                   AudioDAO audioDAO,
+                                   IAudioDAO audioDAO,
                                    String installPath,
                                    String relativeConfigDir1,
                                    String overallName,
@@ -595,7 +596,7 @@ public class AudioExport {
 
   private void writeFolderContentsContextOnly(ZipOutputStream zOut,
                                               Collection<CommonExercise> toWrite,
-                                              AudioDAO audioDAO,
+                                              IAudioDAO audioDAO,
                                               String installPath,
                                               String relativeConfigDir1,
                                               String overallName,
