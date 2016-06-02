@@ -209,7 +209,7 @@ public class RestUserManagement {
   }
 
   private long getUserIDForToken(String token) {
-    User user = db.getUserDAO().getUserWhereResetKey(token);
+    User user = db.getUserDAO().getUserWithResetKey(token);
     return (user == null) ? -1 : user.getId();
   }
 
@@ -291,7 +291,7 @@ public class RestUserManagement {
   }
 
   private boolean changePFor(String token, String passwordH) {
-    User userWhereResetKey = db.getUserDAO().getUserWhereResetKey(token);
+    User userWhereResetKey = db.getUserDAO().getUserWithResetKey(token);
     if (userWhereResetKey != null) {
       logger.debug("clearing key for " + userWhereResetKey);
       db.getUserDAO().clearKey(userWhereResetKey.getId(), true);
