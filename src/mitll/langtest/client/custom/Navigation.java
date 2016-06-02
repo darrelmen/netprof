@@ -62,6 +62,8 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
+import mitll.langtest.client.services.ListService;
+import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.ContextPractice;
@@ -116,6 +118,7 @@ public class Navigation implements RequiresResize, ShowTab {
 
   private final ExerciseController controller;
   private final LangTestDatabaseAsync service;
+  private final ListServiceAsync listService = GWT.create(ListService.class);
   private final UserManager userManager;
   private final SimpleChapterNPFHelper practiceHelper;
 
@@ -513,7 +516,7 @@ public class Navigation implements RequiresResize, ShowTab {
   }
 
   private void reallyShowInitialState() {
-    service.getListsForUser(userManager.getUser(), true, true, new AsyncCallback<Collection<UserList<CommonShell>>>() {
+    listService.getListsForUser(userManager.getUser(), true, true, new AsyncCallback<Collection<UserList<CommonShell>>>() {
       @Override
       public void onFailure(Throwable caught) {
       }
