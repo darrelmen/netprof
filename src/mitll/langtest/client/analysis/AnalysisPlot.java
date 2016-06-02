@@ -34,12 +34,15 @@ package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.Icon;
 import com.github.gwtbootstrap.client.ui.Label;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.services.AnalysisService;
+import mitll.langtest.client.services.AnalysisServiceAsync;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.sound.SoundPlayer;
 import mitll.langtest.shared.ExerciseListWrapper;
@@ -98,7 +101,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
   private final Map<Long, String> timeToId = new TreeMap<>();
   private final Map<String, CommonShell> idToEx = new TreeMap<>();
   private final int userid;
-  private final LangTestDatabaseAsync service;
+  private final AnalysisServiceAsync service;
   private final PlayAudio playAudio;
   private Map<Long, String> granToLabel;
 
@@ -134,14 +137,14 @@ public class AnalysisPlot extends TimeSeriesPlot {
     getElement().getStyle().setMargin(10, Style.Unit.PX);
     addStyleName("cardBorderShadow");
 
-    this.service = service;
+    this.service = GWT.create(AnalysisService.class);
     this.userid = userid;
     populateGranToLabel();
 
     this.playAudio = new PlayAudio(service, new SoundPlayer(soundManagerAPI), playFeedback);
-    populateExerciseMap(service, (int) userid);
+    populateExerciseMap(service, userid);
 
-    getPerformanceForUser(service, userid, userChosenID, minRecordings);
+    getPerformanceForUser(this.service, userid, userChosenID, minRecordings);
   }
 
   private void populateGranToLabel() {
@@ -155,7 +158,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
     granToLabel.put(FIVEMIN, "Minute");
   }
 
-  private void getPerformanceForUser(LangTestDatabaseAsync service, int userid,
+  private void getPerformanceForUser(AnalysisServiceAsync service, int userid,
                                      final String userChosenID, int minRecordings) {
     service.getPerformanceForUser(userid, minRecordings, new AsyncCallback<UserPerformance>() {
       @Override
