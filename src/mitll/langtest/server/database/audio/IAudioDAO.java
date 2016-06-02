@@ -30,42 +30,47 @@
  *
  */
 
-package mitll.langtest.shared.exercise;
+package mitll.langtest.server.database.audio;
 
-import com.github.gwtbootstrap.client.ui.Button;
-import mitll.langtest.client.exercise.PagingContainer;
+import mitll.langtest.shared.User;
+import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.CommonExercise;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-/**
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 1/4/16.
- */
-public interface Shell extends HasID {
-  /**
-   * @see PagingContainer#getEnglishColumn()
-   * @return
-   */
-  STATE getState();
-  void setState(STATE state);
+public interface IAudioDAO {
+  Map<String, List<AudioAttribute>> getExToAudio();
 
-  /**
-   * @see PagingContainer#getEnglishColumn()
-   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#duplicateExercise(Button)
-   * @return
-   */
-  STATE getSecondState();
+  Collection<AudioAttribute> getAudioAttributes();
 
-  void setSecondState(STATE state);
+  int attachAudio(CommonExercise firstExercise, String installPath, String relativeConfigDir);
 
-  Map<String, String> getUnitToValue();
+  boolean attachAudio(CommonExercise firstExercise, String installPath, String relativeConfigDir,
+                      Collection<AudioAttribute> audioAttributes);
 
-  /**
-   * @see mitll.langtest.server.database.exercise.SectionHelper#addExerciseToLesson
-   * @param unit
-   * @param value
-   */
-  void addUnitToValue(String unit, String value);
+  Set<String> getRecordedBy(int userid);
+
+  Set<String> getWithContext(int userid);
+
+  Map<String, Float> getRecordedReport(Map<Integer, User> userMapMales,
+                                       Map<Integer, User> userMapFemales,
+                                       float total,
+                                       Set<String> uniqueIDs,
+                                       float totalContext);
+
+  Set<String> getRecordedForUser(long userid);
+
+  Set<String> getRecordedExampleForUser(long userid);
+
+  void addOrUpdateUser(int userid, AudioAttribute attr);
+
+  AudioAttribute addOrUpdate(int userid, String exerciseID, String audioType, String audioRef, long timestamp,
+                             long durationInMillis, String transcript);
+
+  int markDefect(AudioAttribute attribute);
+
+  void updateExerciseID(int uniqueID, String exerciseID);
 }

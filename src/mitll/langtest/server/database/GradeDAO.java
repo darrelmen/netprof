@@ -33,7 +33,6 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.database.user.IUserDAO;
-import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.grade.Grade;
 import org.apache.log4j.Logger;

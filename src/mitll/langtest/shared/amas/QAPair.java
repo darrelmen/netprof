@@ -35,7 +35,6 @@ package mitll.langtest.shared.amas;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory

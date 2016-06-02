@@ -38,7 +38,6 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.shared.Result;
 import net.sf.json.JSONObject;
-import org.apache.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -3,6 +3,8 @@ package mitll.langtest.server.database;
 import mitll.langtest.client.user.Md5Hash;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.audio.AudioFileHelper;
+import mitll.langtest.server.database.audio.AudioDAO;
+import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -75,12 +77,11 @@ public class DecodeTest extends BaseTest {
   public void testSpanish() {
     DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
 
-
     Map<String, Float> maleFemaleProgress = spanish.getMaleFemaleProgress();
 
     logger.info("got " +maleFemaleProgress);
     Set<String> failed = new TreeSet<>();
-    AudioDAO audioDAO = spanish.getAudioDAO();
+    IAudioDAO audioDAO = spanish.getAudioDAO();
     Map<String, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
     Collection<CommonExercise> exercises = spanish.getExercises();
 
