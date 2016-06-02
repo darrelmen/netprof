@@ -63,10 +63,6 @@ public interface LangTestDatabaseAsync {
                                               ExerciseListRequest request,
                                               AsyncCallback<ExerciseListWrapper<T>> async);
 
-  /*void getUsers(AsyncCallback<List<User>> async);
-
-  void getUserBy(int id, AsyncCallback<User> async);*/
-
   void writeAudioFile(String base64EncodedString,
                       AudioContext audioContext,
 
@@ -92,26 +88,9 @@ public interface LangTestDatabaseAsync {
 
   <T extends Shell> void getExercise(String id, int userID, boolean isFlashcardReq, AsyncCallback<T> async);
 
-  void getUserToResultCount(AsyncCallback<Map<User, Integer>> async);
-
-  void getResultCountToCount(AsyncCallback<Map<Integer, Integer>> async);
-
-  void getResultByDay(AsyncCallback<Map<String, Integer>> async);
-
-  void getResultByHourOfDay(AsyncCallback<Map<String, Integer>> async);
-
-  void getResultPerExercise(AsyncCallback<Map<String, Map<String, Integer>>> async);
-
-  void getSessions(AsyncCallback<List<Session>> async);
-
   void getResults(int start, int end, String sortInfo, Map<String, String> unitToValue, int userid, String flText,
                   int req, AsyncCallback<ResultAndTotal> async);
 
-  void getResultStats(AsyncCallback<Map<String, Number>> async);
-
-  void getResultCountsByGender(AsyncCallback<Map<String, Map<Integer, Integer>>> async);
-
-  void getDesiredCounts(AsyncCallback<Map<String, Map<Integer, Map<Integer, Integer>>>> async);
 
   void logMessage(String message, AsyncCallback<Void> async);
 
@@ -181,21 +160,6 @@ public interface LangTestDatabaseAsync {
                     String textToAlign,
                     String identifier,
                     int reqid, String device, AsyncCallback<AudioAnswer> async);
-
-/*  void userExists(String login, String passwordH, AsyncCallback<User> async);
-
-  void addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, String email, boolean isMale,
-               int age, String dialect, boolean isCD, String device, AsyncCallback<User> async);
-
-  void resetPassword(String userid, String text, String url, AsyncCallback<Boolean> asyncCallback);
-
-  void forgotUsername(String emailH, String email, String url, AsyncCallback<Boolean> async);
-
-  void getUserIDForToken(String token, AsyncCallback<Long> async);
-
-  void changePFor(String token, String first, AsyncCallback<Boolean> asyncCallback);
-
-  void enableCDUser(String cdToken, String emailR, String url, AsyncCallback<String> asyncCallback);*/
 
   void getNumResults(AsyncCallback<Integer> async);
 
