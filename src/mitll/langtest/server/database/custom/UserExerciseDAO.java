@@ -32,9 +32,10 @@
 
 package mitll.langtest.server.database.custom;
 
-import mitll.langtest.server.database.AudioDAO;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.audio.AudioDAO;
+import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -394,7 +395,7 @@ public class UserExerciseDAO extends DAO {
   /**
    * @return
    * @see mitll.langtest.server.database.exercise.ExcelImport#getRawExercises()
-   * @see #setAudioDAO(mitll.langtest.server.database.AudioDAO)
+   * @see #setAudioDAO(AudioDAO)
    */
   public Collection<CommonExercise> getOverrides() {
     return getCommonExercises("SELECT * from " + USEREXERCISE + " where " + OVERRIDE + "=true");
@@ -526,7 +527,7 @@ public class UserExerciseDAO extends DAO {
 
 //  private Map<String, List<AudioAttribute>> exToAudio;
 //  private AudioDAO audioDAO;
-  public void setAudioDAO(AudioDAO audioDAO) {
+  public void setAudioDAO(IAudioDAO audioDAO) {
     //  exToAudio = audioDAO.getExToAudio();
     //  this.audioDAO = audioDAO;
 /*    if (ADD_MISSING_AUDIO) {

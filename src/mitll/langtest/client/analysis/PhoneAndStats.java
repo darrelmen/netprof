@@ -33,7 +33,6 @@
 package mitll.langtest.client.analysis;
 
 import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.client.Command;
 
 import java.util.List;
 

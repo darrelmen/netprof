@@ -33,18 +33,10 @@
 package mitll.langtest.server.services;
 
 import com.github.gwtbootstrap.client.ui.Button;
-import mitll.langtest.client.analysis.ShowTab;
-import mitll.langtest.client.custom.dialog.ReviewEditableExercise;
-import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.ListService;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.custom.UserListManager;
-import mitll.langtest.shared.analysis.PhoneReport;
-import mitll.langtest.shared.analysis.UserInfo;
-import mitll.langtest.shared.analysis.UserPerformance;
-import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.AudioAttribute;

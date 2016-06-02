@@ -34,9 +34,9 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.instrumentation.IEventDAO;
 import mitll.langtest.server.database.user.IUserDAO;
-import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
@@ -117,7 +117,7 @@ public class Report {
   private final IUserDAO userDAO;
   private final ResultDAO resultDAO;
   private final IEventDAO eventDAO;
-  private final AudioDAO audioDAO;
+  private final IAudioDAO audioDAO;
 
   private final String prefix;
   private final String language;
@@ -132,7 +132,7 @@ public class Report {
       "WagnerSandy",
       "rbtrbt"));
 
-  Report(IUserDAO userDAO, ResultDAO resultDAO, IEventDAO eventDAO, AudioDAO audioDAO, String language,
+  Report(IUserDAO userDAO, ResultDAO resultDAO, IEventDAO eventDAO, IAudioDAO audioDAO, String language,
          String prefix) {
     this.userDAO = userDAO;
     this.resultDAO = resultDAO;
@@ -140,22 +140,6 @@ public class Report {
     this.audioDAO = audioDAO;
     this.language = language;
     this.prefix = prefix;
-
-
-/*    Date now = new Date();
-    Calendar c =Calendar.getInstance();
-    c.setTimeInMillis(now.getTime());
-    int thisWeek = c.get(Calendar.WEEK_OF_YEAR);
-    logger.info ("now " +now + " " + thisWeek);
-
-    Calendar calendarForYear = getCalendarForYear(2016);
-    logger.info("before " + calendarForYear.getTime());
-    calendarForYear.set(Calendar.WEEK_OF_YEAR,thisWeek);
-    calendarForYear.set(Calendar.DAY_OF_WEEK,1);
-
-    int thisWeek2 = calendarForYear.get(Calendar.WEEK_OF_YEAR);
-
-    logger.info("after " + thisWeek2 + " : " + calendarForYear.getTime());*/
   }
 
   /**

@@ -33,7 +33,6 @@
 package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.database.user.BaseUserDAO;
-import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.AudioExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
