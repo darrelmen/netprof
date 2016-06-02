@@ -1,5 +1,33 @@
 /*
- * Copyright © 2011-2015 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
+ * and their contractors; 2015. Other request for this document shall be referred
+ * to DLIFLC.
+ *
+ * WARNING: This document may contain technical data whose export is restricted
+ * by the Arms Export Control Act (AECA) or the Export Administration Act (EAA).
+ * Transfer of this data by any means to a non-US person who is not eligible to
+ * obtain export-controlled data is prohibited. By accepting this data, the consignee
+ * agrees to honor the requirements of the AECA and EAA. DESTRUCTION NOTICE: For
+ * unclassified, limited distribution documents, destroy by any method that will
+ * prevent disclosure of the contents or reconstruction of the document.
+ *
+ * This material is based upon work supported under Air Force Contract No.
+ * FA8721-05-C-0002 and/or FA8702-15-D-0001. Any opinions, findings, conclusions
+ * or recommendations expressed in this material are those of the author(s) and
+ * do not necessarily reflect the views of the U.S. Air Force.
+ *
+ * © 2015 Massachusetts Institute of Technology.
+ *
+ * The software/firmware is provided to you on an As-Is basis
+ *
+ * Delivered to the US Government with Unlimited Rights, as defined in DFARS
+ * Part 252.227-7013 or 7014 (Feb 2014). Notwithstanding any copyright notice,
+ * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
+ * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
+ * authorized by the U.S. Government may violate any copyrights that exist in this work.
+ *
+ *
  */
 
 /**
@@ -22,7 +50,10 @@ import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
  * Only the way it works here allows it to do normal width.
  * Updating the library to gauge.js 4.6 breaks the coloring...
  * Sigh.
- * @author gregbramble, sharontam
+ * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
+ * @since
  *
  */
 public class PretestGauge extends HTML{
@@ -32,24 +63,6 @@ public class PretestGauge extends HTML{
   private JavaScriptObject gaugeObject;   // referenced in native js
 
 	private final PopupPanel tooltip;
-
-/*	float[][] colormap = {
-      {255f, 0f, 0f},
-      {255f, 32f, 0f},
-      {255f, 64f, 0f},
-      {255f, 128f, 0f},
-      {255f, 192f, 0f},
-      {255f, 255f, 0f},
-      {192f, 255f, 0f},
-      {128f, 255f, 0f},
-      {64f, 255f, 0f},
-      {32f, 255f, 0f},
-      {32f, 255f, 0f},
-      {32f, 255f, 0f},
-      {32f, 255f, 0f},
-      {0f, 255f, 0f},
-      {0f, 255f, 0f},
-      {0f, 255f, 0f}};*/
 
   /**
    * @see mitll.langtest.client.gauge.ASRScorePanel#ASRScorePanel(String, mitll.langtest.client.exercise.ExerciseController, Exercise)
@@ -73,22 +86,6 @@ public class PretestGauge extends HTML{
     this.addMouseOverHandler(new PretestGaugeMouseOverHandler());
     this.addMouseOutHandler(new PretestGaugeMouseOutHandler());
 	}
-
-/*  public String getColor(float score){
-    if (score > 1.0f) {
-      Window.alert("ERROR: getColor: score > 1");
-      return "#000000";
-    }
-    float nf = Math.max(score, 0.0f) * (float) (colors.length-1);
-    int idx = (int) Math.floor(nf);
-   // System.out.println("score " + score + " colors " + colors.length + " " + idx);
-    if (idx > colors.length-1) {
-      System.out.println("huh? score " + score + " colors " + colors.length + " " + idx + " had to make sure it didn't go over");
-
-      idx = colors.length-1;
-    }
-    return colors[idx];
-  }*/
 
   /**
    * @see mitll.langtest.client.gauge.ASRScorePanel#onLoad()
@@ -197,18 +194,12 @@ public class PretestGauge extends HTML{
 		this.@mitll.langtest.client.pretest.PretestGauge::gaugeObject.setValue(value);
 	}-*/;
 
-/*	public native float getValue() *//*-{
-		return this.@mitll.langtest.client.pretest.PretestGauge::gaugeObject.getValue()
-	}-*//*;*/
-
 	private class PretestGaugeMouseOverHandler implements MouseOverHandler{
 		/* (non-Javadoc)
 		 * @see com.google.gwt.event.dom.client.MouseOverHandler#onMouseOver(com.google.gwt.event.dom.client.MouseOverEvent)
 		 */
-		//@Override
 		public void onMouseOver(final MouseOverEvent event){
 			tooltip.setPopupPositionAndShow(new PositionCallback(){
-				//@Override
 				public void setPosition(int offsetWidth, int offsetHeight){
 					int x = event.getClientX();
 					int y = event.getClientY() + 20;

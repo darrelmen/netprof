@@ -1,5 +1,33 @@
 /*
- * Copyright © 2011-2015 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
+ * and their contractors; 2015. Other request for this document shall be referred
+ * to DLIFLC.
+ *
+ * WARNING: This document may contain technical data whose export is restricted
+ * by the Arms Export Control Act (AECA) or the Export Administration Act (EAA).
+ * Transfer of this data by any means to a non-US person who is not eligible to
+ * obtain export-controlled data is prohibited. By accepting this data, the consignee
+ * agrees to honor the requirements of the AECA and EAA. DESTRUCTION NOTICE: For
+ * unclassified, limited distribution documents, destroy by any method that will
+ * prevent disclosure of the contents or reconstruction of the document.
+ *
+ * This material is based upon work supported under Air Force Contract No.
+ * FA8721-05-C-0002 and/or FA8702-15-D-0001. Any opinions, findings, conclusions
+ * or recommendations expressed in this material are those of the author(s) and
+ * do not necessarily reflect the views of the U.S. Air Force.
+ *
+ * © 2015 Massachusetts Institute of Technology.
+ *
+ * The software/firmware is provided to you on an As-Is basis
+ *
+ * Delivered to the US Government with Unlimited Rights, as defined in DFARS
+ * Part 252.227-7013 or 7014 (Feb 2014). Notwithstanding any copyright notice,
+ * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
+ * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
+ * authorized by the U.S. Government may violate any copyrights that exist in this work.
+ *
+ *
  */
 
 package mitll.langtest.client.recorder;
@@ -13,10 +41,13 @@ import java.util.logging.Logger;
 /**
  * Tries to do initWebaudio, and if no response has been received in 5 seconds, tries again.
  *
- * Created by GO22670 on 5/27/2014.
+ * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
+ * @since 5/27/2014.
  */
 class WebAudioRecorder {
-  private final Logger logger = Logger.getLogger("WebAudioRecorder");
+//  private final Logger logger = Logger.getLogger("WebAudioRecorder");
   private static final int DELAY_MILLIS = 5000;
 
   private static boolean webAudioMicAvailable;
@@ -31,10 +62,10 @@ class WebAudioRecorder {
    *
    * The user can easily ignore the dialog by clicking away.
    */
-  public void tryWebAudio() {
+  void tryWebAudio() {
     if (!tried) {
       tried = true;
-      logger.info("webAudioMicAvailable -- tryWebAudio!");
+      //logger.info("webAudioMicAvailable -- tryWebAudio!");
       initWebaudio();
 
       if (theTimer != null) theTimer.cancel();
@@ -88,16 +119,13 @@ class WebAudioRecorder {
       console.log( "WebAudioRecorder:" + message );
   }-*/;
 
-  //public boolean isMicConnected() { return micConnected; }
   public boolean isWebAudioMicAvailable() { return webAudioMicAvailable; }
 
   public static void webAudioMicAvailable() {
     gotResponse = true;
 
     console("webAudioMicAvailable -- connected!");
-
     webAudioMicAvailable = true;
-//    logger.info("webAudioMicAvailable -- connected!");
     FlashRecordPanelHeadless.micPermission.gotPermission();
   }
 
@@ -106,8 +134,13 @@ class WebAudioRecorder {
 
     console("webAudioMicNotAvailable!");
 
+    noWebRTC();
+  }
+
+  static void noWebRTC() {
     webAudioMicAvailable = false;
-    FlashRecordPanelHeadless.micPermission.noRecordingMethodAvailable();
+//    FlashRecordPanelHeadless.micPermission.noRecordingMethodAvailable();
+    FlashRecordPanelHeadless.micPermission.noWebRTCAvailable();
   }
 
   public static void webAudioPermissionDenied() {
@@ -115,8 +148,7 @@ class WebAudioRecorder {
 
     console("webAudioPermissionDenied!");
 
-    webAudioMicAvailable = false;
-   // FlashRecordPanelHeadless.micPermission.noRecordingMethodAvailable();
+    noWebRTC();
   }
 
   /**
@@ -124,7 +156,6 @@ class WebAudioRecorder {
    * @param encoded
    */
   public static void getBase64(String encoded) {
-    //logger.info("WebAudioRecorder.getBase64 " + encoded.length());
     if (encoded.length() < 100) {
       console("bytes = '" + encoded + "'");
     }

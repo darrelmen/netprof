@@ -1,5 +1,33 @@
 /*
- * Copyright © 2011-2015 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
+ * and their contractors; 2015. Other request for this document shall be referred
+ * to DLIFLC.
+ *
+ * WARNING: This document may contain technical data whose export is restricted
+ * by the Arms Export Control Act (AECA) or the Export Administration Act (EAA).
+ * Transfer of this data by any means to a non-US person who is not eligible to
+ * obtain export-controlled data is prohibited. By accepting this data, the consignee
+ * agrees to honor the requirements of the AECA and EAA. DESTRUCTION NOTICE: For
+ * unclassified, limited distribution documents, destroy by any method that will
+ * prevent disclosure of the contents or reconstruction of the document.
+ *
+ * This material is based upon work supported under Air Force Contract No.
+ * FA8721-05-C-0002 and/or FA8702-15-D-0001. Any opinions, findings, conclusions
+ * or recommendations expressed in this material are those of the author(s) and
+ * do not necessarily reflect the views of the U.S. Air Force.
+ *
+ * © 2015 Massachusetts Institute of Technology.
+ *
+ * The software/firmware is provided to you on an As-Is basis
+ *
+ * Delivered to the US Government with Unlimited Rights, as defined in DFARS
+ * Part 252.227-7013 or 7014 (Feb 2014). Notwithstanding any copyright notice,
+ * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
+ * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
+ * authorized by the U.S. Government may violate any copyrights that exist in this work.
+ *
+ *
  */
 
 package mitll.langtest.client.scoring;
@@ -25,8 +53,10 @@ import java.util.Map;
 /**
  * Asks server to score the audio.  Gets back transcript image URLs, phonem scores and end times.
  * Supports clicking on a phoneme or word and playing that audio.
- * User: GO22670
- * Date: 10/9/12
+ * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
+ * @since 10/9/12
  * Time: 11:17 AM
  * To change this template use File | Settings | File Templates.
  */
@@ -42,7 +72,6 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
   private PretestScore result;
   private boolean showOnlyOneExercise = false; // true for when called from the headstart website
   private static final boolean debug = false;
- // public static final float MP3_HEADER_OFFSET = 0f;//0.048f;
 
   /**
    * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, LangTestDatabaseAsync, ExerciseController, ScoreListener, String, String, T, String)
@@ -212,13 +241,13 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
     float wavFileLengthInSeconds = result.getWavFileLengthInSeconds();//transcriptSegments.get(transcriptSegments.size() - 1);
     float horizOffset = (float) eventXPos / (float) phones.getImage().getWidth();
     float mouseClickTime = wavFileLengthInSeconds * horizOffset;
-    if (debug) System.out.println("got client at " + eventXPos + " or " + horizOffset + " or time " + mouseClickTime +
-      " duration " + wavFileLengthInSeconds + " secs or " + wavFileLengthInSeconds * 1000 + " millis");
+//    if (debug) System.out.println("got client at " + eventXPos + " or " + horizOffset + " or time " + mouseClickTime +
+//      " duration " + wavFileLengthInSeconds + " secs or " + wavFileLengthInSeconds * 1000 + " millis");
 
     for (TranscriptSegment segment : transcriptSegments) {
      // TranscriptSegment next = transcriptSegments.get(Math.min(transcriptSegments.size() - 1, index + 1));
       if (mouseClickTime > segment.getStart() && mouseClickTime <= segment.getEnd()) {
-        if (debug) System.out.println("\t playing " + segment);
+//        if (debug) System.out.println("\t playing " + segment);
      //   result.getsTypeToEndTimes();
         onClick.onSegmentClick(segment);
         break;
