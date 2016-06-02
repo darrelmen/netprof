@@ -32,6 +32,7 @@
 
 package mitll.langtest.client.monitoring;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -49,6 +50,8 @@ import mitll.langtest.client.BrowserCheck;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.custom.RecordingProgressTable;
+import mitll.langtest.client.services.MonitoringService;
+import mitll.langtest.client.services.MonitoringServiceAsync;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.monitoring.Session;
 
@@ -77,7 +80,7 @@ public class MonitoringManager {
   private static final String NUMBER_AT_RATE = "Number at Rate";
   // private static final int MAX_GRADE_ROUNDS = 3;
 
-  private final LangTestDatabaseAsync service;
+  private final MonitoringServiceAsync service;
   private String item = "Item";
   private final String items = item + "s";
   private String answer = "Answer";
@@ -86,12 +89,12 @@ public class MonitoringManager {
   private String users = user + "s";
 
   /**
-   * @param s
+   * @paramx s
    * @param props
    * @see mitll.langtest.client.LangTest#onModuleLoad2
    */
-  public MonitoringManager(LangTestDatabaseAsync s, PropertyHandler props) {
-    this.service = s;
+  public MonitoringManager( PropertyHandler props) {
+    this.service = GWT.create(MonitoringService.class);
     this.item = props.getNameForItem();
     this.answer = props.getNameForAnswer();
     this.answers = props.getNameForAnswer() + "s";
@@ -793,8 +796,6 @@ public class MonitoringManager {
         if (null != null) ((DoIt) null).go();
       }
     });
-
-
   }
 
   private void doMaleFemale(final Panel vp) {
