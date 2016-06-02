@@ -178,15 +178,6 @@ public interface LangTestDatabaseAsync {
 
   void getContextPractice(AsyncCallback<ContextPractice> async);
 
-  void getPerformanceForUser(int id, int minRecordings, AsyncCallback<UserPerformance> async);
-
-  void getWordScores(int id, int minRecordings, AsyncCallback<List<WordScore>> async);
-
-  void getPhoneScores(int id, int minRecordings, AsyncCallback<PhoneReport> async);
-
-  void getUsersWithRecordings(AsyncCallback<Collection<UserInfo>> async);
-
-  void getShells(List<String> ids, AsyncCallback<List<CommonShell>> async);
 
   void reallyCreateNewItems(int creator, long userListID, String userExerciseText, AsyncCallback<Collection<CommonExercise>> async);
 

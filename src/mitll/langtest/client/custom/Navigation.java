@@ -399,9 +399,7 @@ public class Navigation implements RequiresResize, ShowTab {
     learnHelper.showNPF(chapters, LEARN);
 
     studentAnalysis.getContent().clear();
-    ShowTab showTab = this;
-    StudentAnalysis w = new StudentAnalysis(service, controller, showTab);
-    studentAnalysis.getContent().add(w);
+    studentAnalysis.getContent().add(new StudentAnalysis(service, controller, (ShowTab) this));
   }
 
   private void addStudyLists() {

@@ -36,6 +36,7 @@ import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.ToggleType;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -47,6 +48,8 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.services.AnalysisService;
+import mitll.langtest.client.services.AnalysisServiceAsync;
 import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.WordScore;
 
@@ -67,6 +70,7 @@ public class AnalysisTab extends DivWidget {
   private static final String SOUNDS = "Sounds";
   private static final String SUBTITLE = "scores > 20";
   private boolean isNarrow = false;
+  final AnalysisServiceAsync service = GWT.create(AnalysisService.class);
 
   enum TIME_HORIZON {WEEK, MONTH, ALL}
 
@@ -113,7 +117,7 @@ public class AnalysisTab extends DivWidget {
       add(bottom); // student
     }
 
-    getWordScores(service, controller, userid, showTab, analysisPlot, bottom, minRecordings);
+    getWordScores(this.service, controller, userid, showTab, analysisPlot, bottom, minRecordings);
   }
 
   /**
@@ -247,7 +251,7 @@ public class AnalysisTab extends DivWidget {
    * @param lowerHalf
    * @param minRecordings
    */
-  private void getWordScores(final LangTestDatabaseAsync service, final ExerciseController controller,
+  private void getWordScores(final AnalysisServiceAsync service, final ExerciseController controller,
                              final int userid, final ShowTab showTab, final AnalysisPlot analysisPlot,
                              final Panel lowerHalf, final int minRecordings) {
     service.getWordScores(userid, minRecordings, new AsyncCallback<List<WordScore>>() {
@@ -296,7 +300,7 @@ public class AnalysisTab extends DivWidget {
     return wordsContainer;
   }
 
-  private void getPhoneReport(LangTestDatabaseAsync service,
+  private void getPhoneReport(AnalysisServiceAsync service,
                               final ExerciseController controller,
                               int userid,
                               final Panel lowerHalf,
