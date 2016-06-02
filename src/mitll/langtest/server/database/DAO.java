@@ -227,7 +227,6 @@ public class DAO {
 
   protected long getGeneratedKey(PreparedStatement statement) throws SQLException {
     ResultSet rs = statement.getGeneratedKeys(); // will return the ID in ID_COLUMN
-
     long newID = -1;
     if (rs.next()) {
       newID = rs.getLong(1);
