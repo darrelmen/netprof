@@ -39,6 +39,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.IconAnchor;
 import com.github.gwtbootstrap.client.ui.constants.IconSize;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
@@ -58,6 +59,8 @@ import mitll.langtest.client.exercise.NavigationHelper;
 import mitll.langtest.client.exercise.PostAnswerProvider;
 import mitll.langtest.client.gauge.ASRScorePanel;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.services.ListService;
+import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
@@ -103,7 +106,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
   /**
    * @see ASRScorePanel#addTooltip
    */
-  public static final String DOWNLOAD_YOUR_RECORDING = "Download your recording.";
+  private static final String DOWNLOAD_YOUR_RECORDING = "Download your recording.";
 
   private final ListInterface listContainer;
   private boolean isBusy = false;
@@ -113,7 +116,10 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
 
   protected final T exercise;
   protected final ExerciseController controller;
+
   protected final LangTestDatabaseAsync service;
+  protected final ListServiceAsync listService = GWT.create(ListService.class);
+
   protected ScoreListener scorePanel;
   private AudioPanel contentAudio, answerAudio;
   protected final NavigationHelper navigationHelper;
@@ -551,7 +557,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
      * @param exercise
      * @param instance   @see GoodwaveExercisePanel#getAnswerWidget
      */
-    public ASRRecordAudioPanel(LangTestDatabaseAsync service, ExerciseController controller, T exercise, String instance) {
+    ASRRecordAudioPanel(LangTestDatabaseAsync service, ExerciseController controller, T exercise, String instance) {
       super(exercise.getForeignLanguage(), service, controller, scorePanel, REFERENCE, exercise.getID(), exercise, instance);
       this.index = 1;
       getElement().setId("ASRRecordAudioPanel");
