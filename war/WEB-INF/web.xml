@@ -20,9 +20,14 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
+    <!-- ==================================================================== -->
+    <!-- Start RPC mappings                                                   -->
+    <!-- ==================================================================== -->
+
     <servlet>
         <servlet-name>databaseServlet</servlet-name>
         <servlet-class>mitll.langtest.server.LangTestDatabaseImpl</servlet-class>
+        <load-on-startup>1</load-on-startup>
     </servlet>
 
     <servlet-mapping>
@@ -31,13 +36,42 @@
     </servlet-mapping>
 
     <servlet>
+        <servlet-name>userService</servlet-name>
+        <servlet-class>mitll.langtest.server.services.UserServiceImpl</servlet-class>
+        <load-on-startup>3</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>userService</servlet-name>
+        <url-pattern>/langtest/user-manager</url-pattern>
+    </servlet-mapping>
+
+
+    <servlet>
+        <servlet-name>monitoringService</servlet-name>
+        <servlet-class>mitll.langtest.server.services.MonitoringServiceImpl</servlet-class>
+        <load-on-startup>3</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>monitoringService</servlet-name>
+        <url-pattern>/langtest/monitoring-manager</url-pattern>
+    </servlet-mapping>
+
+    <!-- ==================================================================== -->
+    <!-- End RPC mappings                                                     -->
+    <!-- ==================================================================== -->
+
+    <servlet>
         <servlet-name>downloadServlet</servlet-name>
         <servlet-class>mitll.langtest.server.DownloadServlet</servlet-class>
+        <load-on-startup>2</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>scoreServlet</servlet-name>
         <servlet-class>mitll.langtest.server.ScoreServlet</servlet-class>
+        <load-on-startup>2</load-on-startup>
     </servlet>
 
 
