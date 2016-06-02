@@ -1,5 +1,33 @@
 /*
- * Copyright © 2011-2015 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
+ * and their contractors; 2015. Other request for this document shall be referred
+ * to DLIFLC.
+ *
+ * WARNING: This document may contain technical data whose export is restricted
+ * by the Arms Export Control Act (AECA) or the Export Administration Act (EAA).
+ * Transfer of this data by any means to a non-US person who is not eligible to
+ * obtain export-controlled data is prohibited. By accepting this data, the consignee
+ * agrees to honor the requirements of the AECA and EAA. DESTRUCTION NOTICE: For
+ * unclassified, limited distribution documents, destroy by any method that will
+ * prevent disclosure of the contents or reconstruction of the document.
+ *
+ * This material is based upon work supported under Air Force Contract No.
+ * FA8721-05-C-0002 and/or FA8702-15-D-0001. Any opinions, findings, conclusions
+ * or recommendations expressed in this material are those of the author(s) and
+ * do not necessarily reflect the views of the U.S. Air Force.
+ *
+ * © 2015 Massachusetts Institute of Technology.
+ *
+ * The software/firmware is provided to you on an As-Is basis
+ *
+ * Delivered to the US Government with Unlimited Rights, as defined in DFARS
+ * Part 252.227-7013 or 7014 (Feb 2014). Notwithstanding any copyright notice,
+ * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
+ * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
+ * authorized by the U.S. Government may violate any copyrights that exist in this work.
+ *
+ *
  */
 
 package mitll.langtest.client.custom;
@@ -49,8 +77,10 @@ import java.util.logging.Logger;
 
 /**
  * Created with IntelliJ IDEA.
- * User: GO22670
- * Date: 9/27/13
+ * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
+ * @since 9/27/13
  * Time: 8:50 PM
  * To change this template use File | Settings | File Templates.
  */
@@ -73,7 +103,7 @@ public class Navigation implements RequiresResize, ShowTab {
   private static final String FIX_DEFECTS = "Fix Defects";
   private static final String CREATE = "Create a New List";
   private static final String BROWSE = "Browse Lists";
-  public static final String CLICKED_USER_LIST = "clickedUserList";
+  static final String CLICKED_USER_LIST = "clickedUserList";
   private static final String CLICKED_TAB = "clickedTab";
 
   private static final String LEARN = "learn";
@@ -236,6 +266,7 @@ public class Navigation implements RequiresResize, ShowTab {
 
   /**
    * Defines order of tabs...
+   * Show student analysis by default.
    *
    * @return
    * @see #showInitialState()
@@ -251,8 +282,9 @@ public class Navigation implements RequiresResize, ShowTab {
     addPracticeTab();
     addStudyLists();
 
+    addAnalysis();
+
     if (controller.getProps().useAnalysis()) {
-      addAnalysis();
       if (userManager.isTeacher()) {
         addTeacherAnalysis();
       }
@@ -567,7 +599,7 @@ public class Navigation implements RequiresResize, ShowTab {
         Widget widget = content.getWidget(0);
 
         int tab = orig.equals(YOUR_LISTS) ? 0 : orig.equals(OTHERS_LISTS) ? 1 : orig.equals(CREATE) ? 2 : orig.equals(BROWSE) ? 3 : 0;
-        logger.info("selectPreviousTab Select tab " + tab + " orig " + orig);
+      //  logger.info("selectPreviousTab Select tab " + tab + " orig " + orig);
         listManager.showFirstUserListTab((TabPanel) widget, tab);
         if (tab == 0) {
           listManager.showMyLists(true, false);

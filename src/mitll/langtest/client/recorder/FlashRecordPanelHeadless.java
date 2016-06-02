@@ -1,9 +1,37 @@
 /*
- * Copyright © 2011-2015 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
+ * and their contractors; 2015. Other request for this document shall be referred
+ * to DLIFLC.
+ *
+ * WARNING: This document may contain technical data whose export is restricted
+ * by the Arms Export Control Act (AECA) or the Export Administration Act (EAA).
+ * Transfer of this data by any means to a non-US person who is not eligible to
+ * obtain export-controlled data is prohibited. By accepting this data, the consignee
+ * agrees to honor the requirements of the AECA and EAA. DESTRUCTION NOTICE: For
+ * unclassified, limited distribution documents, destroy by any method that will
+ * prevent disclosure of the contents or reconstruction of the document.
+ *
+ * This material is based upon work supported under Air Force Contract No.
+ * FA8721-05-C-0002 and/or FA8702-15-D-0001. Any opinions, findings, conclusions
+ * or recommendations expressed in this material are those of the author(s) and
+ * do not necessarily reflect the views of the U.S. Air Force.
+ *
+ * © 2015 Massachusetts Institute of Technology.
+ *
+ * The software/firmware is provided to you on an As-Is basis
+ *
+ * Delivered to the US Government with Unlimited Rights, as defined in DFARS
+ * Part 252.227-7013 or 7014 (Feb 2014). Notwithstanding any copyright notice,
+ * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
+ * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
+ * authorized by the U.S. Government may violate any copyrights that exist in this work.
+ *
+ *
  */
 
 /**
- * 
+ *
  */
 package mitll.langtest.client.recorder;
 
@@ -19,13 +47,15 @@ import java.util.logging.Logger;
 
 /**
  * Somewhat related to Cykod example at <a href='https://github.com/cykod/FlashWavRecorder/blob/master/html/index.html'>Cykod example html</a><p></p>
- *
+ * <p>
  * Remember when recompiling the flash to do:
- *
+ * <p>
  * mxmlc Recorder.as -static-link-runtime-shared-libraries=true -output test.swf;
- *
+ * <p>
  * Download flash from <a href=''>Flash Download</a>
- * @author Gordon Vidaver *
+ * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class FlashRecordPanelHeadless extends AbsolutePanel {
   private final Logger logger = Logger.getLogger("FlashRecordPanelHeadless");
@@ -45,7 +75,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   /**
    * @see mitll.langtest.client.LangTest#makeFlashContainer()
    */
-  public FlashRecordPanelHeadless() {
+  public FlashRecordPanelHeadless(MicPermission micPermission) {
     SimplePanel flashContent = new SimplePanel();
     flashContent.getElement().setId(id); // indicates the place for flash player to install in the page
     add(flashContent);
@@ -54,38 +84,35 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     webAudio = new WebAudioRecorder();
     webAudio.advertise();
     selfPointer = this;
+    FlashRecordPanelHeadless.micPermission = micPermission;
   }
 
-/*  private void console(String message) {
-    int ieVersion = BrowserCheck.getIEVersion();
-    if (ieVersion == -1 || ieVersion > 9) {
-      consoleLog(message);
-    }
-  }*/
 
+  /**
+   * @param micPermission
+   * @see mitll.langtest.client.LangTest#makeFlashContainer
+   */
 /*
-  private native static void consoleLog( String message) */
-/*-{
-      console.log( "FlashRecordPanelHeadless:" + message );
-  }-*//*
-;
+  public static void setMicPermission(MicPermission micPermission) {
+    FlashRecordPanelHeadless.micPermission = micPermission;
+  }
 */
+
 
   /**
    * Show this widget (make it big enough to accommodate the permission dialog) and install the flash player.
+   *
    * @see mitll.langtest.client.LangTest#checkInitFlash()
-   * @seex mitll.langtest.client.LangTest#showPopupOnDenial()
    */
   public boolean initFlash() {
-  //  logger.info("initFlash");
+    //  logger.info("initFlash");
     if (!didPopup) {
       show();
       installFlash();
       logger.info("initFlash : did   installFlash");
       didPopup = true;
       return false;
-    }
-    else {
+    } else {
       logger.info("initFlash didPopup " + didPopup);
       return true;
     }
@@ -103,45 +130,8 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   }
 
   /**
-   * @see mitll.langtest.client.LangTest#makeFlashContainer
-   * @param micPermission
-   */
-  public static void setMicPermission(MicPermission micPermission) {
-    FlashRecordPanelHeadless.micPermission = micPermission;
-  }
-
-  /**
-   * @see LangTest#startRecording()
-   */
-  public void recordOnClick() {
-    if (permissionReceived) {
-/*      if (!isMicAvailable()) {
-        logger.warning("recordOnClick mic is not available");
-      }
-      else {
-        //logger.info("recordOnClick mic IS  available");
-      }*/
-      flashRecordOnClick();
-    } else if (webAudio.isWebAudioMicAvailable()) {
-      webAudio.startRecording();
-    }
-  }
-
-  public native boolean isMicAvailable() /*-{
-      return $wnd.FlashRecorderLocal.isMicrophoneAvailable();
-  }-*/;
-
-  public native void flashRecordOnClick() /*-{
-    $wnd.FlashRecorderLocal.record('audio', 'audio.wav');
-  }-*/;
-
-  public native void flashStopRecording() /*-{
-      $wnd.FlashRecorderLocal.stop();
-  }-*/;
-
-  /**
    * @see mitll.langtest.client.LangTest#hideFlash()
-   * @see #FlashRecordPanelHeadless()
+   * @see #FlashRecordPanelHeadless
    */
   public void hide() {
     //logger.info("hide...");
@@ -152,15 +142,11 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    * @see mitll.langtest.client.LangTest#makeFlashContainer
    */
   public void hide2() {
-    if (permissionReceived) {
+    if (usingFlash()) {
       //logger.info("hide2...");
       flashHide2();
     }
   }
-
-  public native void flashHide2() /*-{
-    $wnd.FlashRecorderLocal.hide2();
-  }-*/;
 
   /**
    * @see FlashRecordPanelHeadless#initFlash()
@@ -168,44 +154,77 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   private void installFlash() {
     if (gotPermission()) {
       logger.info("installFlash :  got permission!");
-
       micPermission.gotPermission();
     } else {
-    //  logger.info("installFlash : didn't get Flash Player permission!");
+      //  logger.info("installFlash : didn't get Flash Player permission!");
       if (checkIfFlashInstalled()) {
-      //  logger.info("installFlash : looking for " + id);
+        //  logger.info("installFlash : looking for " + id);
         installFlash(GWT.getModuleBaseURL(), id);
-      }
-      else {
+      } else {
         logger.info("installFlash : no flash, trying web audio");
-
-        webAudio.tryWebAudio(); // kick web audio!
+        // webAudio.tryWebAudio(); // kick web audio!
+        micPermission.noRecordingMethodAvailable();
       }
     }
   }
 
+  // web audio calls
+  public void tryWebAudio() {
+    webAudio.tryWebAudio();
+  }
+
   /**
-   * @see #installFlash()
    * @return
+   * @see LangTest#usingWebRTC
+   */
+  public static boolean usingWebRTC() {
+    return webAudio.isWebAudioMicAvailable();
+  }
+
+  /**
+   * @see LangTest#startRecording()
+   */
+  public void recordOnClick() {
+    if (usingWebRTC()) {
+      webAudio.startRecording();
+    } else if (usingFlash()) {
+      flashRecordOnClick();
+    }
+  }
+
+  private void stopWebRTCRecording(WavCallback wavCallback) {
+    webAudio.stopRecording(wavCallback);
+  }
+
+  /*
+  public native boolean isMicAvailable() *//*-{
+      return $wnd.FlashRecorderLocal.isMicrophoneAvailable();
+  }-*//*;*/
+
+
+  /**
+   * @return
+   * @see #installFlash()
    */
   public native boolean checkIfFlashInstalled() /*-{
       var hasFlash = false;
       try {
           var fo = new ActiveXObject('ShockwaveFlash.ShockwaveFlash');
-          if(fo) hasFlash = true;
-      } catch(e){
-          if(navigator.mimeTypes ["application/x-shockwave-flash"] != undefined) hasFlash = true;
+          if (fo) hasFlash = true;
+      } catch (e) {
+          if (navigator.mimeTypes ["application/x-shockwave-flash"] != undefined) hasFlash = true;
       }
       return hasFlash;
   }-*/;
 
   /**
    * Uses SWFObject to embed flash -- <a href='http://code.google.com/p/swfobject/'>SWFObject</a>
-   * @see #initFlash
+   *
    * @param moduleBaseURL where to get the swf file the player will run
-   * @param id marks the div that the flash player will live inside
+   * @param id            marks the div that the flash player will live inside
+   * @see #initFlash
    */
-	private native void installFlash(String moduleBaseURL, String id) /*-{
+  private native void installFlash(String moduleBaseURL, String id) /*-{
       var appWidth = 240;
       var appHeight = 160;
 
@@ -237,13 +256,13 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
               $wnd.swfCallbackCalled();
 
               if (typeof e.ref.PercentLoaded !== "undefined") {
-    //              if (recorderHasConsole) {
-      //                console.log("got percent loaded " + e.ref.PercentLoaded() );
-        //          }
+                  //              if (recorderHasConsole) {
+                  //                console.log("got percent loaded " + e.ref.PercentLoaded() );
+                  //          }
 
 //                  if (e.ref.PercentLoaded() < 100) {
-                      //$wnd.installFailure();
-  //                }
+                  //$wnd.installFailure();
+                  //                }
               }
               else {
                   $wnd.installFailure2();
@@ -264,13 +283,13 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   }-*/;
 
   public static native void installFailure2() /*-{
-        //var recorderHasConsole = (window.console || console.log);
-        //if (recorderHasConsole) {
-        //    console.log("got event installFailure2");
-        //}
+      //var recorderHasConsole = (window.console || console.log);
+      //if (recorderHasConsole) {
+      //    console.log("got event installFailure2");
+      //}
 
-    //    $wnd.micNotConnected();
-    }-*/;
+      //    $wnd.micNotConnected();
+  }-*/;
 
   public static native void swfCallbackCalled() /*-{
       //var recorderHasConsole = (window.console || console.log);
@@ -283,69 +302,88 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    * Event from flash when user clicks Accept
    */
   public static void micConnected() {
-   // consoleLog("micConnected!");
+    // consoleLog("micConnected!");
     permissionReceived = true;
+
     micPermission.gotPermission();
   }
 
   /**
-   * Event from flash when user clicks Deny
+   * Event from flash when user clicks Deny or
+   * if security settings in mms.cfg don't permit recording
    */
   public static void micNotConnected() {
-  //  consoleLog("---> mic *NOT* Connected! <--- ");
+    //  consoleLog("---> mic *NOT* Connected! <--- ");
     permissionReceived = false;
 
     selfPointer.hide();
     selfPointer.hide2(); // must be a separate call!
 
-    webAudio.tryWebAudio();
+    micPermission.noRecordingMethodAvailable();
   }
 
   public static void noMicrophoneFound() {
 //    consoleLog("no mic available");
     permissionReceived = false;
-
     micPermission.noMicAvailable();
   }
 
-  public boolean gotPermission()  {
-    boolean b = permissionReceived || usingWebRTC();
+  public static boolean usingFlash() {
+    return permissionReceived;
+  }
+
+  public boolean gotPermission() {
+    boolean b = usingFlash() || usingWebRTC();
     if (!b) {
-      logger.info("gotPermission permission received " + permissionReceived + " usingWebRTC " + usingWebRTC());
+      logger.info("gotPermission permission received " + usingFlash() + " usingWebRTC " + usingWebRTC());
     }
     return b;
   }
 
-  public boolean usingFlash()  { return permissionReceived; }
-  public static boolean usingWebRTC() { return webAudio.isWebAudioMicAvailable(); }
-
   /**
    * Handles either state - either we have flash, in which case we ask flash for the wav file,
-   * otherwisse we ask webRTC to stop recording and post the audio to us.
+   * otherwise we ask webRTC to stop recording and post the audio to us.
    *
    * @see mitll.langtest.client.LangTest#stopRecording(mitll.langtest.client.WavCallback)
    */
   public void stopRecording(final WavCallback wavCallback) {
-    if (permissionReceived) {
-      final long then = System.currentTimeMillis();
-//      logger.info("stopRecording - initial ");
-
-      Timer t = new Timer() {
-        @Override
-        public void run() {
-//          long now = System.currentTimeMillis();
-//          logger.info("stopRecording timer at " + now + " diff " + (now - then));
-
-          flashStopRecording();
-          wavCallback.getBase64EncodedWavFile(flashGetWav());
-        }
-      };
-      t.schedule(FLASH_RECORDING_STOP_DELAY); // add flash delay
-    }
-    else if (webAudio.isWebAudioMicAvailable()) {
-      webAudio.stopRecording(wavCallback);
+    if (usingWebRTC()) {
+      stopWebRTCRecording(wavCallback);
+    } else if (usingFlash()) {
+      stopFlashRecording(wavCallback);
     }
   }
+
+  private void stopFlashRecording(final WavCallback wavCallback) {
+    final long then = System.currentTimeMillis();
+//      logger.info("stopRecording - initial ");
+
+    Timer t = new Timer() {
+      @Override
+      public void run() {
+//          long now = System.currentTimeMillis();
+//          logger.info("stopRecording timer at " + now + " diff " + (now - then));
+        flashStopRecording();
+        wavCallback.getBase64EncodedWavFile(flashGetWav());
+      }
+    };
+    t.schedule(FLASH_RECORDING_STOP_DELAY); // add flash delay
+  }
+
+  public native void flashHide2() /*-{
+      $wnd.FlashRecorderLocal.hide2();
+  }-*/;
+
+  /**
+   * TODO : remove arguments
+   */
+  public native void flashRecordOnClick() /*-{
+      $wnd.FlashRecorderLocal.record('audio', 'audio.wav');
+  }-*/;
+
+  public native void flashStopRecording() /*-{
+      $wnd.FlashRecorderLocal.stop();
+  }-*/;
 
   /**
    * Base64 encoded byte array from action script.

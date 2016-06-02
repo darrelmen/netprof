@@ -14,7 +14,10 @@ import java.util.List;
 
 
 /**
- * Created by go22670 on 2/12/16.
+ * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
+ * @since 2/12/16.
  */
 public class SiteExport {
   private static final Logger logger = Logger.getLogger(SiteExport.class);
