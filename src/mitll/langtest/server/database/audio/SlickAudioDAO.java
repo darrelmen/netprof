@@ -34,28 +34,32 @@ package mitll.langtest.server.database.audio;
 
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.user.IUserDAO;
+import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.npdata.dao.DBConnection;
+import mitll.npdata.dao.SlickAudio;
+import mitll.npdata.dao.audio.AudioDAOWrapper;
+import scala.collection.Seq;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
+  private final AudioDAOWrapper dao;
 
-  public SlickAudioDAO(Database database, IUserDAO userDAO) {
+  public SlickAudioDAO(Database database, DBConnection dbConnection, IUserDAO userDAO) {
     super(database, userDAO);
+    dao = new AudioDAOWrapper(dbConnection);
   }
 
   @Override
   public Collection<AudioAttribute> getAudioAttributes() {
-    return null;
+    return toAudioAttribute(dao.getAll());
   }
 
-  @Override
-  public Set<String> getWithContext(int userid) {
-    return null;
-  }
-
-  @Override
+   @Override
   public AudioAttribute addOrUpdate(int userid, String exerciseID, String audioType, String audioRef, long timestamp, long durationInMillis, String transcript) {
     return null;
   }
@@ -67,12 +71,12 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
   @Override
   Collection<AudioAttribute> getAudioAttributes(String exid) {
-    return null;
+    return toAudioAttributes(dao.getByExerciseID(exid));
   }
 
   @Override
   int getCountForGender(Set<Integer> userIds, String audioSpeed, Set<String> uniqueIDs) {
-    return 0;
+    return dao.getCountForGender(userIds,audioSpeed,uniqueIDs);
   }
 
   @Override
@@ -91,12 +95,40 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   @Override
-  Set<String> getAudioForGender(Set<Integer> userIDs, String audioSpeed) {
-    return null;
+  Set<String> getAudioExercisesForGender(Set<Integer> userIDs, String audioSpeed) {
+    return dao.getAudioForGender(userIDs,audioSpeed);
   }
 
   @Override
   int getCountBothSpeeds(Set<Integer> userIds, Set<String> uniqueIDs) {
     return 0;
+  }
+
+  private List<AudioAttribute> toAudioAttributes(Collection<SlickAudio> all) {
+    List<AudioAttribute> copy = new ArrayList<>();
+    for (SlickAudio s : all)
+      copy.add(toAudioAttribute(s));
+    return copy;
+  }
+
+  private AudioAttribute toAudioAttribute(SlickAudio s) {
+    MiniUser miniUser = userDAO.getMiniUser(s.userid());
+    return new AudioAttribute(
+        s.id(),
+        s.userid(),
+        s.exid(),
+        s.audioref(),
+        s.modified().getTime(),
+        s.duration(),
+        s.audiotype(),
+        miniUser,
+        s.transcript());
+
+  }
+  private List<AudioAttribute> toAudioAttribute(List<SlickAudio> all) {
+    List<AudioAttribute> copy = new ArrayList<>();
+    for (SlickAudio s : all)
+      copy.add(toAudioAttribute(s));
+    return copy;
   }
 }
