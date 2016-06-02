@@ -94,22 +94,7 @@ public interface LangTestDatabaseAsync {
 
   void logMessage(String message, AsyncCallback<Void> async);
 
-
   void getStartupInfo( AsyncCallback<StartupInfo> async);
-
-  void getUserListsForText(String search, int userid, AsyncCallback<Collection<UserList<CommonShell>>> async);
-
-  void getListsForUser(int userid, boolean onlyCreated, boolean visited, AsyncCallback<Collection<UserList<CommonShell>>> async);
-
-  void addItemToUserList(long userListID, String exID, AsyncCallback<Void> async);
-
-  void reallyCreateNewItem(long userListID, CommonExercise userExercise, AsyncCallback<CommonExercise> async);
-
-  void addUserList(int userid, String name, String description, String dliClass, boolean isPublic, AsyncCallback<Long> async);
-
-  void addVisitor(long userListID, int user, AsyncCallback<Void> asyncCallback);
-
-  void editItem(CommonExercise userExercise, AsyncCallback<Void> async);
 
   void addAnnotation(String exerciseID, String field, String status, String comment, int userID, AsyncCallback<Void> async);
 
@@ -118,12 +103,6 @@ public interface LangTestDatabaseAsync {
   void setExerciseState(String id, STATE state, int userID, AsyncCallback<Void> async);
 
   void isValidForeignPhrase(String foreign, AsyncCallback<Boolean> async);
-
-  void deleteList(long id, AsyncCallback<Boolean> async);
-
-  void deleteItemFromList(long listid, String exid, AsyncCallback<Boolean> async);
-
-  void duplicateExercise(CommonExercise id, AsyncCallback<CommonExercise> async);
 
   void deleteItem(String exid, AsyncCallback<Boolean> async);
 
@@ -137,11 +116,7 @@ public interface LangTestDatabaseAsync {
 
   void markState(String id, STATE state, int creatorID, AsyncCallback<Void> async);
 
-  void getReviewLists(AsyncCallback<List<UserList<CommonShell>>> async);
-
   void markAudioDefect(AudioAttribute audioAttribute, String exid, AsyncCallback<Void> async);
-
-  void setPublicOnList(long userListID, boolean isPublic, AsyncCallback<Void> async);
 
   void markGender(AudioAttribute attr, boolean isMale, AsyncCallback<Void> async);
 
@@ -177,9 +152,6 @@ public interface LangTestDatabaseAsync {
                                    AsyncCallback<PretestScore> async);
 
   void getContextPractice(AsyncCallback<ContextPractice> async);
-
-
-  void reallyCreateNewItems(int creator, long userListID, String userExerciseText, AsyncCallback<Collection<CommonExercise>> async);
 
   void reloadExercises(AsyncCallback<Void> async);
 }
