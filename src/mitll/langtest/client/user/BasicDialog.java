@@ -1,5 +1,33 @@
 /*
- * Copyright © 2011-2015 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
+ * and their contractors; 2015. Other request for this document shall be referred
+ * to DLIFLC.
+ *
+ * WARNING: This document may contain technical data whose export is restricted
+ * by the Arms Export Control Act (AECA) or the Export Administration Act (EAA).
+ * Transfer of this data by any means to a non-US person who is not eligible to
+ * obtain export-controlled data is prohibited. By accepting this data, the consignee
+ * agrees to honor the requirements of the AECA and EAA. DESTRUCTION NOTICE: For
+ * unclassified, limited distribution documents, destroy by any method that will
+ * prevent disclosure of the contents or reconstruction of the document.
+ *
+ * This material is based upon work supported under Air Force Contract No.
+ * FA8721-05-C-0002 and/or FA8702-15-D-0001. Any opinions, findings, conclusions
+ * or recommendations expressed in this material are those of the author(s) and
+ * do not necessarily reflect the views of the U.S. Air Force.
+ *
+ * © 2015 Massachusetts Institute of Technology.
+ *
+ * The software/firmware is provided to you on an As-Is basis
+ *
+ * Delivered to the US Government with Unlimited Rights, as defined in DFARS
+ * Part 252.227-7013 or 7014 (Feb 2014). Notwithstanding any copyright notice,
+ * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
+ * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
+ * authorized by the U.S. Government may violate any copyrights that exist in this work.
+ *
+ *
  */
 
 package mitll.langtest.client.user;
@@ -30,8 +58,10 @@ import java.util.logging.Logger;
 
 /**
  * Created with IntelliJ IDEA.
- * User: GO22670
- * Date: 10/2/13
+ * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
+ * @since 10/2/13
  * Time: 7:09 PM
  * To change this template use File | Settings | File Templates.
  */
@@ -73,16 +103,6 @@ public class BasicDialog {
     return new FormField(user, userGroup, minLength);
   }
 
-/*  ListBoxFormField getListBoxFormField(Panel dialogBox, String label, ListBox user) {
-    ControlGroup group = addControlGroupEntry(dialogBox, label, user, "");
-    return new ListBoxFormField(user, group);
-  }
-
-  ListBoxFormField getListBoxFormFieldNoLabel(Panel dialogBox, String label, ListBox user) {
-    ControlGroup group = addControlGroupEntryNoLabel(dialogBox, user);
-    return new ListBoxFormField(user, group);
-  }*/
-
   private ControlGroup addControlGroupEntryNoLabel(Panel dialogBox, Widget widget) {
     final ControlGroup userGroup = new ControlGroup();
     userGroup.addStyleName("leftFiveMargin");
@@ -92,18 +112,6 @@ public class BasicDialog {
     dialogBox.add(userGroup);
     return userGroup;
   }
-
-
-/*  protected ControlGroup addControlGroupEntryNoLabel(Widget widget) {
-    final ControlGroup userGroup = new ControlGroup();
-    userGroup.addStyleName("leftFiveMargin");
-    widget.addStyleName("leftFiveMargin");
-
-    userGroup.add(widget);
-    //dialogBox.add(userGroup);
-    return userGroup;
-  }*/
-
 
   /**
    * Make a control group with a label, a widget, and an optional hint under the widget.
@@ -195,19 +203,6 @@ public class BasicDialog {
     return userGroup;
   }
 
-  ListBox getListBox2(Collection<String> values) {
-    return getListBox2(values, BasicDialog.ILR_CHOICE_WIDTH);
-  }
-
-  private ListBox getListBox2(Collection<String> values, int ilrChoiceWidth) {
-    final ListBox listBox = new ListBox(false);
-    for (String s : values) {
-      listBox.addItem(s);
-    }
-    listBox.setWidth(ilrChoiceWidth + "px");
-    return listBox;
-  }
-
   protected void markError(FormField dialectGroup, String message) {
     if (DEBUG) logger.info("mark error " + message + " on " + dialectGroup.getWidget().getElement().getId());
     markError(dialectGroup, TRY_AGAIN, message);
@@ -215,10 +210,6 @@ public class BasicDialog {
 
   protected void markError(FormField dialectGroup, String header, String message) {
     markError(dialectGroup.group, dialectGroup.box, dialectGroup.box, header, message, Placement.RIGHT);
-  }
-
-  protected void markError(FormField dialectGroup, String header, String message, Placement right) {
-    markError(dialectGroup.group, dialectGroup.box, dialectGroup.box, header, message, right);
   }
 
   void markErrorBlur(FormField dialectGroup, String header, String message, Placement right) {
@@ -247,15 +238,8 @@ public class BasicDialog {
     dialect.setFocus(true);
     setupPopoverBlur(dialect, header, message, right, new MyPopover(false), dialectGroup);
   }
+
 /*
-  boolean highlightIntegerBox(FormField ageEntryGroup, int min, int max) {
-    return highlightIntegerBox(ageEntryGroup, min, max, Integer.MAX_VALUE);
-  }*/
-
-/*  boolean highlightIntegerBox(FormField ageEntryGroup) {
-    return highlightIntegerBox(ageEntryGroup, 7, 97, -1);
-  }*/
-
   boolean highlightIntegerBox(FormField ageEntryGroup, int min, int max, int exception) {
     String text = ageEntryGroup.box.getText();
     boolean validAge = false;
@@ -275,6 +259,7 @@ public class BasicDialog {
 
     return validAge;
   }
+*/
 
   boolean isValidAge(FormField ageEntryGroup) {
     return isValidAge(ageEntryGroup, UserDialog.MIN_AGE, UserDialog.MAX_AGE + 1);
@@ -305,10 +290,6 @@ public class BasicDialog {
     setupPopoverThatHidesItself(dialectGroup.getWidget(1), header, message, placement);
   }
 
-  void markError(ControlGroup dialectGroup, FocusWidget dialect, String header, String message) {
-    markError(dialectGroup, dialect, header, message, Placement.RIGHT);
-  }
-
   void markError(ControlGroup dialectGroup, FocusWidget dialect, String header, String message, Placement placement) {
     // if (DEBUG) logger.info("markError on '" + dialect.getElement().getId() + "' with " + header + "/" + message);
     dialectGroup.setType(ControlGroupType.ERROR);
@@ -324,19 +305,6 @@ public class BasicDialog {
     setupPopoverThatHidesItself(widget, header, message, placement);
   }
 
-/*  void markError(Widget dialect, String message) {
-    // if (DEBUG) logger.info("markError on '" + dialect.getElement().getId() + "' with " + header + "/" + message);
-    // dialect.setFocus(true);
-//    setupPopover(dialect, header, message, placement);
-    setupPopoverThatHidesItself(dialect, "Error", message, Placement.RIGHT);
-  }*/
-
-/*
-  void markErrorBlur(FocusWidget focusWidget, String message) {
-    markErrorBlurFocus(focusWidget, focusWidget, "Try Again", message, Placement.RIGHT);
-  }
-*/
-
   void markErrorBlur(FocusWidget focusWidget, String message, Placement placement) {
     markErrorBlurFocus(focusWidget, focusWidget, "Try Again", message, placement, false);
   }
@@ -344,10 +312,6 @@ public class BasicDialog {
   void markErrorBlur(Button button, String message) {
     markErrorBlurFocus(button, button, "Try Again", message, Placement.RIGHT, false);
   }
-/*
-  void markErrorBlur(Button button, String message, Placement placement) {
-    markErrorBlurFocus(button, button, "Try Again", message, placement);
-  }*/
 
   void markErrorBlur(Button button, String heading, String message, Placement placement) {
     markErrorBlurFocus(button, button, heading, message, placement, false);
@@ -364,14 +328,6 @@ public class BasicDialog {
 //    setupPopover(dialect, header, message, placement);
     return setupPopoverBlurNoControl(widget, dialect, heading, message, placement, new MyPopover(showOnlyOnce));
   }
-
-/*
-  void markError(Widget dialect, String header, String message, Placement placement) {
-    // if (DEBUG) logger.info("markError on '" + dialect.getElement().getId() + "' with " + header + "/" + message);
-    Widget widget = dialect;
-    setupPopoverThatHidesItself(widget, header, message, placement);
-  }
-*/
 
   private void setupPopoverThatHidesItself(final Widget w, String heading, final String message, Placement placement) {
     if (DEBUG) logger.info("\tsetupPopoverThatHidesItself triggering popover on '" + w.getTitle() + "' with " + heading + "/" + message);
@@ -494,10 +450,6 @@ public class BasicDialog {
     popover.show();
   }
 
-/*  void simplePopover(Widget w, String heading, String message, Placement placement, boolean isHTML) {
-    simplePopover(new Popover(), w, heading, message, placement, isHTML);
-  }*/
-
   private void simplePopover(Popover popover, Widget w, String heading, String message, Placement placement, boolean isHTML) {
     if (DEBUG) logger.info("simplePopover : triggering popover on " + w.getElement().getId() + " with " + heading + "/" + message + " " + placement);
     popover.setWidget(w);
@@ -527,24 +479,6 @@ public class BasicDialog {
     return getFormField(dialogBox, user, minLength);
   }
 
-/*  protected FormField addDecoratedControlFormFieldWithPlaceholder(Panel dialogBox, boolean isPassword,
-                                                                  int minLength, int maxLength, String hint) {
-    final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
-    user.setMaxLength(maxLength);
-    user.setPlaceholder(hint);
-    return getDecoratedFormField(dialogBox, user, minLength);
-  }*/
-
-/*
-  protected FormField addControlFormFieldWithPlaceholder(boolean isPassword, int minLength, int maxLength, String hint) {
-    final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
-    user.setMaxLength(maxLength);
-    user.setPlaceholder(hint);
-    final ControlGroup userGroup = addControlGroupEntryNoLabel(user);
-    return new FormField(user, userGroup, minLength);
-  }
-*/
-
   private final Map<Widget, Popover> widgetToPopover = new HashMap<Widget, Popover>();
 
   void addPopover(Widget widget, String header, String htmlStr) {
@@ -568,72 +502,23 @@ public class BasicDialog {
     return new FormField(user, userGroup, minLength);
   }
 
-/*  private FormField getDecoratedFormField(Panel dialogBox, TextBox user, int minLength*//*, String helpMsg*//*) {
-    //  final ControlGroup userGroup = addControlGroupEntryNoLabel(dialogBox, user);
-    DecoratedFields decoratedFields = new DecoratedFields(null, user, null, null);
-    ControlGroup ctrlGroup = decoratedFields.getCtrlGroup();
-    ctrlGroup.addStyleName("leftFiveMargin");
-
-    dialogBox.add(ctrlGroup);
-
-    return new FormField(user, ctrlGroup, minLength, decoratedFields);
-  }*/
-
-/*  protected boolean highlightIntegerBox(FormField ageEntryGroup) {
-    return highlightIntegerBox(ageEntryGroup, UserDialog.MIN_AGE, UserDialog.MAX_AGE + 1, UserDialog.TEST_AGE);
-  }*/
-//static int pid = 0;
-
   static class MyPopover extends Popover {
-  //  boolean wasShown = false;
-   // boolean showOnlyOnce = false;
-   // boolean disabled = false;
-  //  int id = pid++;
-
     public MyPopover() {
-      //  this.showOnlyOnce = showOnlyOnce;
     }
     public MyPopover(boolean showOnlyOnce) {
-    //  this.showOnlyOnce = showOnlyOnce;
     }
     public void dontFireAgain() {
     //  if (DEBUG) logger.info(this + " dontFireAgain ...");
-
       hide();
       setTrigger(Trigger.MANUAL);
       reconfigure();
     }
-
-/*    @Override
-    public void show() {
-      super.show();
-      wasShown = true;
-      if (DEBUG) logger.info(this + " got show...");
-    }
-
-    @Override
-    public void hide() {
-      super.hide();
-      if (DEBUG) logger.info(this + " got hide...");
-      if (wasShown && showOnlyOnce && !disabled) {
-        if (DEBUG) logger.info(this + " \tdisabling...");
-        disabled = true;
-        wasShown = false;
-        dontFireAgain();
-      }
-      else {
-        if (DEBUG) logger.info(this + " not disabling...");
-
-      }
-    }
-    public String toString() { return "Popover #"+id;}*/
   }
 
   protected static class FormField {
     public final TextBoxBase box;
     public final ControlGroup group;
     public Widget rightSide;
-    DecoratedFields decoratedFields;
 
     public FormField(final TextBoxBase box, final ControlGroup group, final int minLength) {
       this.box = box;
@@ -642,7 +527,6 @@ public class BasicDialog {
         public void onKeyUp(KeyUpEvent event) {
           if (box.getText().length() >= minLength) {
             group.setType(ControlGroupType.NONE);
-            if (decoratedFields != null) decoratedFields.clearError();
           }
         }
       });
