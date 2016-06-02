@@ -55,8 +55,6 @@ import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
-import mitll.langtest.client.services.AnalysisService;
-import mitll.langtest.client.services.AnalysisServiceAsync;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.analysis.UserInfo;
 

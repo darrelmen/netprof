@@ -32,9 +32,9 @@
 
 package mitll.langtest.server.database.user;
 
-import mitll.langtest.server.database.AudioDAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.audio.AudioDAO;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;

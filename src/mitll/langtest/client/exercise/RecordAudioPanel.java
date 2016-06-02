@@ -45,8 +45,11 @@ import mitll.langtest.client.scoring.PostAudioRecordButton;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.Result;
+import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.AudioRefExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.Shell;
 
 import java.util.Map;
 

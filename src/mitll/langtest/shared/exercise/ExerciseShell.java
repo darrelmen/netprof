@@ -34,7 +34,6 @@ package mitll.langtest.shared.exercise;
 
 import mitll.langtest.shared.custom.UserList;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 

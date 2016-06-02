@@ -37,7 +37,10 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import org.apache.log4j.Logger;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * Makes PostgreSQL Connections.

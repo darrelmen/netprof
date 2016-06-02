@@ -36,7 +36,6 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.HTTPClient;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.amas.QAPair;
-import mitll.langtest.shared.exercise.CommonExercise;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
