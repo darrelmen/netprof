@@ -36,9 +36,12 @@ import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.PasswordTextBox;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.services.UserService;
+import mitll.langtest.client.services.UserServiceAsync;
 
 /**
  * Created with IntelliJ IDEA.
@@ -52,14 +55,15 @@ import mitll.langtest.client.PropertyHandler;
 public abstract class UserDialog extends BasicDialog {
   static final int USER_ID_MAX_LENGTH = 35;
 
-  public static final int MIN_AGE = 12;
-  public static final int MAX_AGE = 90;
+  static final int MIN_AGE = 12;
+  static final int MAX_AGE = 90;
 
   final PropertyHandler props;
-  final LangTestDatabaseAsync service;
+  //final LangTestDatabaseAsync service;
+  protected final UserServiceAsync service = GWT.create(UserService.class);;
 
   UserDialog(LangTestDatabaseAsync service, PropertyHandler props) {
-    this.service = service;
+    //this.service = service;
     this.props = props;
   }
 

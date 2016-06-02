@@ -426,7 +426,9 @@ public class AudioDAO extends DAO {
                                         String relativeConfigDir,
                                         AudioConversion audioConversion,
                                         AudioAttribute attr) {
-    String against = attr.isContextAudio() ? firstExercise.getDirectlyRelated().iterator().next().getForeignLanguage() : firstExercise.getForeignLanguage();
+    Collection<CommonExercise> directlyRelated = firstExercise.getDirectlyRelated();
+    String against = attr.isContextAudio() && !directlyRelated.isEmpty() ?
+        directlyRelated.iterator().next().getForeignLanguage() : firstExercise.getForeignLanguage();
     if (attr.hasMatchingTranscript(against)) {
       firstExercise.getMutableAudio().addAudio(attr);
 
