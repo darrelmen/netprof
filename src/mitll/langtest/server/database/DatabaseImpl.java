@@ -227,19 +227,19 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       }
     }
 
-    DBConnection dbConnection = new DBConnection("localhost",5432,"netprof");
+    DBConnection dbConnection = new DBConnection("localhost", 5432, "netprof");
 
     SlickEventImpl slickEventDAO = new SlickEventImpl(dbConnection);
 
-    SlickUserDAOImpl slickUserDAO = new SlickUserDAOImpl(this,dbConnection);
+    SlickUserDAOImpl slickUserDAO = new SlickUserDAOImpl(this, dbConnection);
 
-    UserDAO userDAO = new UserDAO(this);
-    this.userDAO = userDAO;//slickUserDAO;
-    try {
-      userDAO.createTable(this);
-    } catch (Exception e) {
-      logger.error("Got " +e,e);
-    }
+   // UserDAO userDAO = new UserDAO(this);
+    this.userDAO = slickUserDAO;
+//    try {
+//      userDAO.createTable(this);
+//    } catch (Exception e) {
+//      logger.error("Got " + e, e);
+//    }
 
     addRemoveDAO = new AddRemoveDAO(this);
 
@@ -252,7 +252,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
     audioDAO = new AudioDAO(this, this.userDAO);
 
-    SlickAudioDAO slickAudioDAO = new SlickAudioDAO(this, this.userDAO);
+    SlickAudioDAO slickAudioDAO = new SlickAudioDAO(this, dbConnection, this.userDAO);
 
     answerDAO = new AnswerDAO(this, resultDAO);
     userListManager = new UserListManager(this.userDAO, new UserListDAO(this, this.userDAO), userListExerciseJoinDAO,
@@ -272,7 +272,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       eventDAO = heventDAO;
     }*/
 
-  //  oneTimeDataCopy(slickEventDAO);
+    //  oneTimeDataCopy(slickEventDAO);
     eventDAO = slickEventDAO;
 //    eventDAO = new EventDAO(this, defectDetector);
 
@@ -288,7 +288,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     }
 
     try {
-     // this.userDAO.createTable(this);
+      // this.userDAO.createTable(this);
       userListManager.setUserExerciseDAO(userExerciseDAO);
     } catch (Exception e) {
       logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
@@ -303,6 +303,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
   /**
    * TODO : This will not work when we move to multiple languages in one db.
+   *
    * @param slickEventDAO
    */
   private void oneTimeDataCopy(SlickEventImpl slickEventDAO) {
@@ -544,7 +545,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
           exerciseDAO.getRawExercises();
 
-       //   userDAO.checkForFavorites(userListManager);
+          //   userDAO.checkForFavorites(userListManager);
           userExerciseDAO.setAudioDAO(audioDAO);
 
           numExercises = exerciseDAO.getNumExercises();
@@ -553,9 +554,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         }
         userManagement = new UserManagement(userDAO, numExercises, resultDAO, userListManager);
 
-     //   audioDAO.setExerciseDAO(exerciseDAO);
+        //   audioDAO.setExerciseDAO(exerciseDAO);
 
-     //   audioDAO.markTranscripts();
+        //   audioDAO.markTranscripts();
       }
     }
   }
@@ -1523,9 +1524,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   }
 
   /**
-   * @see LangTestDatabaseImpl#getPretestScore(int, long, String, String, int, int, boolean, String, boolean)
    * @param resultID
    * @param asrScoreForAudio
+   * @see LangTestDatabaseImpl#getPretestScore(int, long, String, String, int, int, boolean, String, boolean)
    */
   public void rememberScore(long resultID, PretestScore asrScoreForAudio) {
     getAnswerDAO().changeAnswer(resultID, asrScoreForAudio.getHydecScore(), asrScoreForAudio.getProcessDur(), asrScoreForAudio.getJson());
@@ -1548,9 +1549,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   }
 
   /**
-   * @see #rememberScore(long, PretestScore)
    * @param answerID
    * @param pretestScore
+   * @see #rememberScore(long, PretestScore)
    */
   private void recordWordAndPhoneInfo(long answerID, PretestScore pretestScore) {
     if (pretestScore != null) {
@@ -1594,7 +1595,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    */
   public Map<String, Float> getMaleFemaleProgress() {
     IUserDAO userDAO = getUserDAO();
-    Map<Integer, User> userMapMales   = userDAO.getUserMap(true);
+    Map<Integer, User> userMapMales = userDAO.getUserMap(true);
     Map<Integer, User> userMapFemales = userDAO.getUserMap(false);
 
     Collection<CommonExercise> exercises = getExercises();
