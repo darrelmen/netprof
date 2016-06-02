@@ -37,6 +37,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.Window;
@@ -51,6 +52,8 @@ import mitll.langtest.client.exercise.WaveformPostAudioRecordButton;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.recorder.RecordButton;
+import mitll.langtest.client.services.ListService;
+import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.shared.AudioAnswer;
@@ -90,6 +93,8 @@ class NewUserExercise extends BasicDialog {
 
   final ExerciseController controller;
   final LangTestDatabaseAsync service;
+
+  protected final ListServiceAsync listService = GWT.create(ListService.class);
   private final HasText itemMarker;
   BasicDialog.FormField english;
   BasicDialog.FormField foreignLang;
@@ -275,7 +280,7 @@ class NewUserExercise extends BasicDialog {
                   final UserList<?> ul,
                   final PagingExerciseList<?,?> exerciseList,
                   final ReloadableContainer learnContainer) {
-    service.deleteItemFromList(uniqueID, id, new AsyncCallback<Boolean>() {
+    listService.deleteItemFromList(uniqueID, id, new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
       }
@@ -337,7 +342,6 @@ class NewUserExercise extends BasicDialog {
     container.add(row);
     translit = addControlFormField(row, TRANSLITERATION_OPTIONAL, false, 0, 150, "");
   }
-
 /*
   private void focusOn(final FormField form) {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
@@ -543,7 +547,7 @@ class NewUserExercise extends BasicDialog {
                                final Panel toAddTo,
                                boolean onClick) {
  //   logger.info("user list is " + ul);
-    service.reallyCreateNewItem(ul.getUniqueID(), newUserExercise, new AsyncCallback<CommonExercise>() {
+    listService.reallyCreateNewItem(ul.getUniqueID(), newUserExercise, new AsyncCallback<CommonExercise>() {
       @Override
       public void onFailure(Throwable caught) {
       }
