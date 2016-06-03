@@ -398,7 +398,7 @@ public abstract class BaseAudioDAO extends DAO {
     return new HashSet<>();
   }
 
-  abstract Set<String> getValidAudioOfType(long userid, String audioType);
+  abstract Set<String> getValidAudioOfType(int userid, String audioType);
 
   protected MiniUser checkDefaultUser(long userID, MiniUser user) {
     if (userID == BaseUserDAO.DEFAULT_USER_ID) {
@@ -474,11 +474,11 @@ public abstract class BaseAudioDAO extends DAO {
   public void addOrUpdateUser(int userid, AudioAttribute attr) {
     long timestamp = attr.getTimestamp();
     if (timestamp == 0) timestamp = System.currentTimeMillis();
-    addOrUpdateUser(userid, attr.getAudioRef(), attr.getExid(), timestamp, attr.getAudioType(),
+    addOrUpdateUser(userid, attr.getExid(), attr.getAudioType(), attr.getAudioRef(), timestamp,
         (int) attr.getDurationInMillis(), BaseAudioDAO.UNKNOWN);
   }
 
-  abstract void addOrUpdateUser(int userid, String audioRef, String exerciseID, long timestamp, String audioType,
+  abstract void addOrUpdateUser(int userid, String exerciseID, String audioType, String audioRef, long timestamp,
                                 int durationInMillis, String transcript);
 
   abstract int markDefect(int userid, String exerciseID, String audioType);
