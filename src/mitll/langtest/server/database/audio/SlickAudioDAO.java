@@ -39,7 +39,6 @@ import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickAudio;
 import mitll.npdata.dao.audio.AudioDAOWrapper;
-import scala.collection.Seq;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -59,14 +58,31 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     return toAudioAttribute(dao.getAll());
   }
 
-   @Override
-  public AudioAttribute addOrUpdate(int userid, String exerciseID, String audioType, String audioRef, long timestamp, long durationInMillis, String transcript) {
-    return null;
+  @Override
+  public AudioAttribute addOrUpdate(int userid, String exerciseID, String audioType, String audioRef,
+                                    long timestamp, long durationInMillis, String transcript) {
+    return toAudioAttribute(dao.addOrUpdate(userid, exerciseID, audioType, audioRef, timestamp, durationInMillis, transcript));
+  }
+
+  /**
+   * Update the user if the audio is already there.
+   * @param userid
+   * @param exerciseID
+   * @param audioType
+   * @param audioRef
+   * @param timestamp
+   * @param durationInMillis
+   * @param transcript
+   */
+  @Override
+  void addOrUpdateUser(int userid, String exerciseID, String audioType, String audioRef, long timestamp,
+                       int durationInMillis, String transcript) {
+    dao.addOrUpdate(userid, exerciseID, audioType, audioRef, timestamp, durationInMillis, transcript);
   }
 
   @Override
   public void updateExerciseID(int uniqueID, String exerciseID) {
-
+    dao.updateAudioID(uniqueID, exerciseID);
   }
 
   @Override
@@ -76,18 +92,14 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
   @Override
   int getCountForGender(Set<Integer> userIds, String audioSpeed, Set<String> uniqueIDs) {
-    return dao.getCountForGender(userIds,audioSpeed,uniqueIDs);
+    return dao.getCountForGender(userIds, audioSpeed, uniqueIDs);
   }
 
   @Override
-  Set<String> getValidAudioOfType(long userid, String audioType) {
-    return null;
+  Set<String> getValidAudioOfType(int userid, String audioType) {
+    return dao.getExerciseIDsOfValidAudioOfType(userid, audioType);
   }
 
-  @Override
-  void addOrUpdateUser(int userid, String audioRef, String exerciseID, long timestamp, String audioType, int durationInMillis, String transcript) {
-
-  }
 
   @Override
   int markDefect(int userid, String exerciseID, String audioType) {
@@ -96,7 +108,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
   @Override
   Set<String> getAudioExercisesForGender(Set<Integer> userIDs, String audioSpeed) {
-    return dao.getAudioForGender(userIDs,audioSpeed);
+    return dao.getAudioForGender(userIDs, audioSpeed);
   }
 
   @Override
@@ -125,6 +137,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
         s.transcript());
 
   }
+
   private List<AudioAttribute> toAudioAttribute(List<SlickAudio> all) {
     List<AudioAttribute> copy = new ArrayList<>();
     for (SlickAudio s : all)
