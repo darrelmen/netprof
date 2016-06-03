@@ -40,9 +40,7 @@ import mitll.langtest.server.database.ResultDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.Result;
-import mitll.langtest.shared.User;
 import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.ExerciseListRequest;
 import org.apache.log4j.Logger;
 
 import java.sql.*;
@@ -364,6 +362,12 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
     return idsOfRecordedExercises.size();
   }
 
+  /**
+   * @see BaseAudioDAO#getRecordedReport(Map, Map, float, Set, float)
+   * @param userIds
+   * @param uniqueIDs
+   * @return
+   */
   protected int getCountBothSpeeds(Set<Integer> userIds,
                                  Set<String> uniqueIDs) {
     Set<String> results = new HashSet<>();
@@ -415,7 +419,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
 
-  protected Set<String> getValidAudioOfType(long userid, String audioType)  {
+  protected Set<String> getValidAudioOfType(int userid, String audioType)  {
     String sql = "SELECT " + Database.EXID +
         " FROM " + AUDIO + " WHERE " + USERID + "=" + userid +
         " AND " + DEFECT + "<>true " +
@@ -564,18 +568,18 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
    * Why does this have to be so schizo? add or update -- should just choose
    *
    * @param userid           part of unique id
-   * @param audioRef
    * @param exerciseID       part of unique id
-   * @param timestamp
    * @param audioType        part of unique id
+   * @param audioRef
+   * @param timestamp
    * @param durationInMillis
    * @param transcript
    * @return AudioAttribute that represents the audio that has been added to the exercise
    * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable
    * @see #addOrUpdateUser(int, AudioAttribute)
    */
-  protected void addOrUpdateUser(int userid, String audioRef, String exerciseID, long timestamp, String audioType,
-                               int durationInMillis, String transcript) {
+  protected void addOrUpdateUser(int userid, String exerciseID, String audioType, String audioRef, long timestamp,
+                                 int durationInMillis, String transcript) {
     if (isBadUser(userid)) {
       logger.error("huh? userid is " + userid);
       new Exception().printStackTrace();
