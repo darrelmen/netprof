@@ -171,6 +171,9 @@ public abstract class BaseUserDAO extends DAO {
     return userid != null && (admins.contains(userid));
   }
 
+  /**
+   *
+   */
   void findOrMakeDefectDetector() {
     logger.info("findOrMakeDefectDetector ");
     defectDetector = getIdForUserID(DEFECT_DETECTOR);
