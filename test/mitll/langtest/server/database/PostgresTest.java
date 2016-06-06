@@ -33,16 +33,21 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.client.user.Md5Hash;
+import mitll.langtest.server.database.audio.IAudioDAO;
+import mitll.langtest.server.database.audio.SlickAudioDAO;
 import mitll.langtest.server.database.instrumentation.IEventDAO;
 import mitll.langtest.server.database.user.IUserDAO;
+import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.User;
+import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.Event;
+import mitll.npdata.dao.SlickAudio;
 import mitll.npdata.dao.SlickSlimEvent;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
-import java.util.List;
+import java.util.*;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -170,8 +175,69 @@ public class PostgresTest extends BaseTest {
         ":\n" + dao.clearKey(bogusID, false) +
         " :\n" + dao.getUserWithEnabledKey("enabled")
     );
-
-
     //  spanish.doReport(new PathHelper("war"));
+  }
+
+  @Test
+  public void testWriteAudio() {
+    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
+
+    IAudioDAO dao = spanish.getAudioDAO();
+
+    //if (dao.getAudioAttributes().size() == 0) {
+//     spanish.copyToPostgres();
+   // }
+
+    Collection<AudioAttribute> audio = dao.getAudioAttributes();
+
+    logger.info("Got back " + audio.size());
+
+    AudioAttribute audioAttribute = dao.addOrUpdate(1, "1", "regular", "file.wav", System.currentTimeMillis(), 1000, "dude");
+    logger.info("Got audioAttribute " + audioAttribute);
+    logger.info("Got now " + dao.getAudioAttributes().size());
+
+    audioAttribute = dao.addOrUpdate(1, "2", "slow", "file2.wav", System.currentTimeMillis(), 1000, "dude");
+
+    audioAttribute = dao.addOrUpdate(2, "1", "regular", "file3.wav", System.currentTimeMillis(), 1000, "dude");
+
+    logger.info("Got now " + dao.getAudioAttributes().size());
+    logger.info("Got ex to audio " + dao.getExToAudio().size());
+
+    CommonExercise exercise = spanish.getExercise("1");
+    logger.info("before attach " + exercise.getAudioAttributes().size());
+    logger.info("attach " + dao.attachAudio(exercise, ".", "."));
+    logger.info("after  attach  " + exercise.getAudioAttributes().size());
+    logger.info("getRecorded " + dao.getRecordedBy(1));
+    logger.info("getRecorded " + dao.getRecordedBy(3));
+  }
+
+  @Test
+  public void testImportAudio() {
+    getDatabase("spanish").copyToPostgres();
+  }
+
+  @Test
+  public void testReadAudio() {
+    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
+
+    IAudioDAO h2AudioDAO = spanish.getH2AudioDAO();
+
+    Map<Integer,Integer> truth = new HashMap<>();
+    for (User user : new UserDAO(spanish).getUsers()) {
+//      Collection<String> recordedBy = dao.getRecordedBy(user.getId());
+      Collection<String> recordedBy = h2AudioDAO.getRecordedForUser(user.getId());
+      if (!recordedBy.isEmpty()) {
+        logger.info("h2  for " + user.getUserID() + " recorded\t" + recordedBy.size());
+      }
+    }
+
+    IAudioDAO dao = spanish.getAudioDAO();
+    for (User user : spanish.getUsers()) {
+//      Collection<String> recordedBy = dao.getRecordedBy(user.getId());
+      Collection<String> recordedBy = dao.getRecordedForUser(user.getId());
+      if (!recordedBy.isEmpty()) {
+        logger.info("postgres for " + user.getUserID() + " recorded " + recordedBy.size());
+      }
+    }
   }
 }
