@@ -75,6 +75,7 @@ import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 import mitll.npdata.dao.DBConnection;
+import mitll.npdata.dao.SlickAudio;
 import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
@@ -233,7 +234,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
     SlickUserDAOImpl slickUserDAO = new SlickUserDAOImpl(this, dbConnection);
 
-   // UserDAO userDAO = new UserDAO(this);
+    // UserDAO userDAO = new UserDAO(this);
     this.userDAO = slickUserDAO;
 //    try {
 //      userDAO.createTable(this);
@@ -250,9 +251,10 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     wordDAO = new WordDAO(this);
     phoneDAO = new PhoneDAO(this);
 
-    audioDAO = new AudioDAO(this, this.userDAO);
+    // audioDAO = new AudioDAO(this, this.userDAO);
 
     SlickAudioDAO slickAudioDAO = new SlickAudioDAO(this, dbConnection, this.userDAO);
+    audioDAO = slickAudioDAO;
 
     answerDAO = new AnswerDAO(this, resultDAO);
     userListManager = new UserListManager(this.userDAO, new UserListDAO(this, this.userDAO), userListExerciseJoinDAO,
@@ -313,6 +315,10 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       long defectDetector = userDAO.getDefectDetector();
       slickEventDAO.copyTableOnlyOnce(new EventDAO(this, defectDetector), getLanguage());
     }
+  }
+
+  public IAudioDAO getH2AudioDAO() {
+    return new AudioDAO(this, this.userDAO);
   }
 
   public ResultDAO getResultDAO() {
@@ -1036,6 +1042,50 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return phoneDAO;
   }
 
+  public void copyToPostgres() {
+
+    // first add the user table
+    SlickUserDAOImpl slickUserDAO = (SlickUserDAOImpl) getUserDAO();
+    logger.info("Drop user table!!! ");
+    slickUserDAO.dropTable();
+
+    UserDAO userDAO = new UserDAO(this);
+    List<User> users = userDAO.getUsers();
+    logger.info("h2 users  " + users.size());
+    for (User user : users) {
+      if (user.getId() != userDAO.getDefectDetector()) {
+        slickUserDAO.add(slickUserDAO.toSlick(user));
+      }
+    }
+    logger.info("after, postgres users " + slickUserDAO.getUsers().size());
+
+    Map<Integer, Integer> oldToNew = slickUserDAO.getOldToNew();
+    logger.info("oldToNew " + oldToNew.size());
+
+    // add the audio table
+    {
+      SlickAudioDAO slickAudioDAO = (SlickAudioDAO) getAudioDAO();
+      logger.info("Drop audio table!!! ");
+
+      slickAudioDAO.dropTable();
+
+    int num =   slickAudioDAO.getNumRows();
+   logger.info("after drop " + num);
+
+      List<SlickAudio> bulk = new ArrayList<>();
+      Collection<AudioAttribute> audioAttributes = getH2AudioDAO().getAudioAttributes();
+      logger.info("h2 audio  " + audioAttributes.size());
+
+      for (AudioAttribute att : audioAttributes) {
+        SlickAudio slickAudio = slickAudioDAO.getSlickAudio(att, oldToNew);
+        bulk.add(slickAudio);
+      }
+      slickAudioDAO.addBulk(bulk);
+
+      logger.info("after, postgres audio " + slickAudioDAO.getAudioAttributes().size());
+    }
+  }
+
   /**
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getResultAlternatives(java.util.Map, long, String, String)
@@ -1625,10 +1675,4 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   public LogAndNotify getLogAndNotify() {
     return logAndNotify;
   }
-
-/*
-  public SessionManagement getSessionManagement() {
-    return sessionManagement;
-  }
-*/
 }
