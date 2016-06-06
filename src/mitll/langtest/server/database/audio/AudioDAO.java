@@ -264,7 +264,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
     return getAudioExercisesForGender(Collections.singleton(userid), REGULAR);
   }*/
 
-  protected Set<String> getAudioExercisesForGender(Set<Integer> userIDs, String audioSpeed) {
+  protected Set<String> getAudioExercisesForGender(Collection<Integer> userIDs, String audioSpeed) {
     Set<String> results = new HashSet<>();
     try {
       Connection connection = database.getConnection(this.getClass().toString());
@@ -386,7 +386,8 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
 //              ") where length(exid) > 0 group by exid) where count1 = 2";
 ////        ;
 
-      String sql = "select exid from (select exid,count(*) as count1 from " +
+      String sql = "select exid from " +
+          "(select exid,count(*) as count1 from " +
           "(select DISTINCT exid, audiotype from audio " +
           "where length(exid) > 0 and audiotype='regular' OR audiotype='slow' and defect<>true " +
           (s.isEmpty() ? "" : "AND " + USERID + " IN (" + s + ") ") +
@@ -410,7 +411,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
     return results.size();
   }
 
-  private String getInClause(Set<Integer> longs) {
+  private String getInClause(Collection<Integer> longs) {
     StringBuilder buffer = new StringBuilder();
     for (int id : longs) {
       buffer.append(id).append(",");

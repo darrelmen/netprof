@@ -39,6 +39,7 @@ import mitll.langtest.shared.User;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface IUserDAO {
   int getDefectDetector();
@@ -78,8 +79,8 @@ public interface IUserDAO {
 
   MiniUser getMiniUser(int userid);
 
-
   Map<Integer, User> getUserMap(boolean getMale);
+  Collection<Integer> getUserIDs(boolean getMale);
 
   Map<Integer, User> getUserMap();
 
