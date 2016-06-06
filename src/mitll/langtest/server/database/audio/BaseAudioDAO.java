@@ -317,7 +317,7 @@ public abstract class BaseAudioDAO extends DAO {
     return userDAO.getUserMap(isMale);
   }
 
-  protected Collection<Integer> getUserIDs(int userid) {
+  Collection<Integer> getUserIDs(int userid) {
     User user = userDAO.getUserWhere(userid);
     boolean isMale = (user != null && user.isMale());
     return userDAO.getUserIDs(isMale);
@@ -408,7 +408,7 @@ public abstract class BaseAudioDAO extends DAO {
 
   abstract Set<String> getValidAudioOfType(int userid, String audioType);
 
-  protected MiniUser checkDefaultUser(long userID, MiniUser user) {
+  MiniUser checkDefaultUser(long userID, MiniUser user) {
     if (userID == BaseUserDAO.DEFAULT_USER_ID) {
       user = BaseUserDAO.DEFAULT_USER;
     } else if (userID == BaseUserDAO.DEFAULT_MALE_ID) {

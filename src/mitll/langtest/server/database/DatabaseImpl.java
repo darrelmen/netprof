@@ -74,8 +74,9 @@ import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
-import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickAudio;
+import mitll.npdata.dao.SlickEvent;
+import mitll.npdata.dao.event.DBConnection;
 import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
@@ -230,17 +231,17 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
     DBConnection dbConnection = new DBConnection("localhost", 5432, "netprof");
 
-    SlickEventImpl slickEventDAO = new SlickEventImpl(dbConnection);
+    SlickEventImpl slickEventDAO  = new SlickEventImpl(dbConnection);
+    eventDAO = slickEventDAO;
 
     SlickUserDAOImpl slickUserDAO = new SlickUserDAOImpl(this, dbConnection);
-
-    // UserDAO userDAO = new UserDAO(this);
     this.userDAO = slickUserDAO;
-//    try {
-//      userDAO.createTable(this);
-//    } catch (Exception e) {
-//      logger.error("Got " + e, e);
-//    }
+
+    SlickAudioDAO slickAudioDAO = new SlickAudioDAO(this, dbConnection, this.userDAO);
+    audioDAO = slickAudioDAO;
+
+    createTables();
+
 
     addRemoveDAO = new AddRemoveDAO(this);
 
@@ -251,11 +252,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     wordDAO = new WordDAO(this);
     phoneDAO = new PhoneDAO(this);
 
-    // audioDAO = new AudioDAO(this, this.userDAO);
-
-    SlickAudioDAO slickAudioDAO = new SlickAudioDAO(this, dbConnection, this.userDAO);
-    audioDAO = slickAudioDAO;
-
     answerDAO = new AnswerDAO(this, resultDAO);
     userListManager = new UserListManager(this.userDAO, new UserListDAO(this, this.userDAO), userListExerciseJoinDAO,
         new AnnotationDAO(this, this.userDAO),
@@ -263,19 +259,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         new ReviewedDAO(this, ReviewedDAO.SECOND_STATE),
         pathHelper);
 
-/*    if (sessionManagement != null) {
-
-      HEventDAO heventDAO = new HEventDAO(this, userDAO.getDefectDetector());
-
-      if (heventDAO.isEmpty()) { // need the old DAO initially
-        eventDAO = new EventDAO(this, userDAO.getDefectDetector());
-        heventDAO.addAll(eventDAO.getAll());
-      }
-      eventDAO = heventDAO;
-    }*/
-
     //  oneTimeDataCopy(slickEventDAO);
-    eventDAO = slickEventDAO;
 //    eventDAO = new EventDAO(this, defectDetector);
 
     Connection connection1 = getConnection();
@@ -308,14 +292,20 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    *
    * @param slickEventDAO
    */
-  private void oneTimeDataCopy(SlickEventImpl slickEventDAO) {
+/*  private void oneTimeDataCopy(SlickEventImpl slickEventDAO) {
     Number numRows = slickEventDAO.getNumRows(getLanguage());
     logger.info("got " + numRows + " rows from slick");
     if (numRows.intValue() == 0) {
       long defectDetector = userDAO.getDefectDetector();
       slickEventDAO.copyTableOnlyOnce(new EventDAO(this, defectDetector), getLanguage());
+      List<SlickEvent> copy = new ArrayList<>();
+      List<Event> all = other.getAll(language);
+      logger.info("copyTableOnlyOnce " + all.size() + " events ");
+
+      for (Event event : all) copy.add(getSlickEvent(event, language));
+      eventDAOExample.addBulk(copy);
     }
-  }
+  }*/
 
   public IAudioDAO getH2AudioDAO() {
     return new AudioDAO(this, this.userDAO);
@@ -1042,12 +1032,30 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return phoneDAO;
   }
 
-  public void copyToPostgres() {
+  private void createTables() {
+    SlickUserDAOImpl slickUserDAO = (SlickUserDAOImpl) getUserDAO();
+    SlickAudioDAO slickAudioDAO = (SlickAudioDAO) getAudioDAO();
+    SlickEventImpl slickEventDAO = (SlickEventImpl) getEventDAO();
 
+    slickUserDAO.createTable();
+
+    slickAudioDAO.createTable();
+    slickEventDAO.createTable();
+  }
+
+  public void copyToPostgres() {
     // first add the user table
     SlickUserDAOImpl slickUserDAO = (SlickUserDAOImpl) getUserDAO();
+    SlickAudioDAO slickAudioDAO   = (SlickAudioDAO) getAudioDAO();
+    SlickEventImpl slickEventDAO  = (SlickEventImpl) getEventDAO();
+
+    logger.info("Drop audio table!!! ");
+    slickAudioDAO.dropTable();
     logger.info("Drop user table!!! ");
     slickUserDAO.dropTable();
+    slickEventDAO.dropTable();
+
+    createTables();
 
     UserDAO userDAO = new UserDAO(this);
     List<User> users = userDAO.getUsers();
@@ -1064,13 +1072,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
     // add the audio table
     {
-      SlickAudioDAO slickAudioDAO = (SlickAudioDAO) getAudioDAO();
-      logger.info("Drop audio table!!! ");
-
-      slickAudioDAO.dropTable();
-
-    int num =   slickAudioDAO.getNumRows();
-   logger.info("after drop " + num);
+      int num = slickAudioDAO.getNumRows();
+      logger.info("after drop " + num);
 
       List<SlickAudio> bulk = new ArrayList<>();
       Collection<AudioAttribute> audioAttributes = getH2AudioDAO().getAudioAttributes();
@@ -1083,6 +1086,12 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       slickAudioDAO.addBulk(bulk);
 
       logger.info("after, postgres audio " + slickAudioDAO.getAudioAttributes().size());
+    }
+
+    // add event table
+    {
+      long defectDetector = userDAO.getDefectDetector();
+      slickEventDAO.copyTableOnlyOnce(new EventDAO(this, defectDetector), getLanguage(),oldToNew);
     }
   }
 
@@ -1645,7 +1654,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    */
   public Map<String, Float> getMaleFemaleProgress() {
     IUserDAO userDAO = getUserDAO();
-    Map<Integer, User> userMapMales = userDAO.getUserMap(true);
+    Map<Integer, User> userMapMales   = userDAO.getUserMap(true);
     Map<Integer, User> userMapFemales = userDAO.getUserMap(false);
 
     Collection<CommonExercise> exercises = getExercises();
@@ -1665,6 +1674,34 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         " unique");*/
 
     return getAudioDAO().getRecordedReport(userMapMales, userMapFemales, total, uniqueIDs, context);
+  }
+
+  /**
+   * @return
+   * @see LangTestDatabaseImpl#getMaleFemaleProgress()
+   */
+  public Map<String, Float> getH2MaleFemaleProgress() {
+    IUserDAO userDAO = getUserDAO();
+    Map<Integer, User> userMapMales   = userDAO.getUserMap(true);
+    Map<Integer, User> userMapFemales = userDAO.getUserMap(false);
+
+    Collection<CommonExercise> exercises = getExercises();
+    float total = exercises.size();
+    Set<String> uniqueIDs = new HashSet<String>();
+
+    int context = 0;
+    for (CommonExercise shell : exercises) {
+      if (shell.hasContext()) context++;
+      boolean add = uniqueIDs.add(shell.getID());
+      if (!add) {
+        logger.warn("getMaleFemaleProgress found duplicate id " + shell.getID() + " : " + shell);
+      }
+    }
+/*    logger.info("found " + total + " total exercises, " +
+        uniqueIDs.size() +
+        " unique");*/
+
+    return new AudioDAO(this,new UserDAO(this)).getRecordedReport(userMapMales, userMapFemales, total, uniqueIDs, context);
   }
 
   public String toString() {
