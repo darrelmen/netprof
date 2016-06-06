@@ -54,7 +54,7 @@ public interface IAudioDAO {
   boolean attachAudio(CommonExercise firstExercise, String installPath, String relativeConfigDir,
                       Collection<AudioAttribute> audioAttributes);
 
-  Set<String> getRecordedBy(int userid);
+  Collection<String> getRecordedBy(int userid);
 
   Set<String> getWithContext(int userid);
 
@@ -64,13 +64,20 @@ public interface IAudioDAO {
                                        Set<String> uniqueIDs,
                                        float totalContext);
 
-  Set<String> getRecordedForUser(long userid);
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#markRecordedState(int, String, Collection, boolean)
+   * @param userid
+   * @return
+   */
+  Collection<String> getRecordedForUser(int userid);
 
-  Set<String> getRecordedExampleForUser(long userid);
+  Collection<String> getRecordedExampleForUser(int userid);
 
   void addOrUpdateUser(int userid, AudioAttribute attr);
 
   int markDefect(AudioAttribute attribute);
 
   void updateExerciseID(int uniqueID, String exerciseID);
+
+//  int size();
 }

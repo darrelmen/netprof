@@ -35,17 +35,19 @@ package mitll.langtest.server.database.audio;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.MiniUser;
+import mitll.langtest.shared.Result;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickAudio;
 import mitll.npdata.dao.audio.AudioDAOWrapper;
+import org.apache.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.sql.Timestamp;
+import java.util.*;
 
 public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
+  private static final Logger logger = Logger.getLogger(SlickAudioDAO.class);
+
   private final AudioDAOWrapper dao;
 
   public SlickAudioDAO(Database database, DBConnection dbConnection, IUserDAO userDAO) {
@@ -55,17 +57,23 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
   @Override
   public Collection<AudioAttribute> getAudioAttributes() {
-    return toAudioAttribute(dao.getAll());
+    return toAudioAttribute(dao.getAll(), userDAO.getMiniUsers());
   }
 
   @Override
   public AudioAttribute addOrUpdate(int userid, String exerciseID, String audioType, String audioRef,
                                     long timestamp, long durationInMillis, String transcript) {
-    return toAudioAttribute(dao.addOrUpdate(userid, exerciseID, audioType, audioRef, timestamp, durationInMillis, transcript));
+    MiniUser miniUser = userDAO.getMiniUser(userid);
+    Map<Integer, MiniUser> mini = new HashMap<>();
+    mini.put(userid, miniUser);
+    return toAudioAttribute(
+        dao.addOrUpdate(userid, exerciseID, audioType, audioRef, timestamp, durationInMillis, transcript),
+        mini);
   }
 
   /**
    * Update the user if the audio is already there.
+   *
    * @param userid
    * @param exerciseID
    * @param audioType
@@ -100,31 +108,61 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     return dao.getExerciseIDsOfValidAudioOfType(userid, audioType);
   }
 
-
-  @Override
-  int markDefect(int userid, String exerciseID, String audioType) {
-    return 0;
+  /**
+   * Items that are recorded must have both regular and slow speed audio.
+   *
+   * @param userid
+   * @return
+   * @see mitll.langtest.server.LangTestDatabaseImpl#markRecordedState
+   */
+  public Collection<String> getRecordedForUser(int userid) {
+    try {
+      return dao.getRecordedForUser(userid);
+    } catch (Exception ee) {
+      logger.error("got " + ee, ee);
+    }
+    return new HashSet<>();
   }
 
   @Override
-  Set<String> getAudioExercisesForGender(Set<Integer> userIDs, String audioSpeed) {
+  int markDefect(int userid, String exerciseID, String audioType) {
+    if (audioType.equals(AudioAttribute.REGULAR_AND_SLOW)) {
+      audioType = Result.AUDIO_TYPE_FAST_AND_SLOW;
+    }
+    return dao.markDefect(userid, exerciseID, audioType);
+  }
+
+  public Collection<String> getRecordedBy(int userid) {
+    Collection<Integer> userIDs = getUserIDs(userid);
+    return dao.getAudioForGenderBothSpeeds(userIDs);
+  }
+
+  @Override
+  Set<String> getAudioExercisesForGender(Collection<Integer> userIDs, String audioSpeed) {
     return dao.getAudioForGender(userIDs, audioSpeed);
   }
 
   @Override
   int getCountBothSpeeds(Set<Integer> userIds, Set<String> uniqueIDs) {
+    dao.getCountBothSpeeds(userIds, uniqueIDs);
     return 0;
   }
 
   private List<AudioAttribute> toAudioAttributes(Collection<SlickAudio> all) {
     List<AudioAttribute> copy = new ArrayList<>();
+    Map<Integer, MiniUser> idToMini = userDAO.getMiniUsers();
     for (SlickAudio s : all)
-      copy.add(toAudioAttribute(s));
+      copy.add(toAudioAttribute(s, idToMini));
     return copy;
   }
 
-  private AudioAttribute toAudioAttribute(SlickAudio s) {
-    MiniUser miniUser = userDAO.getMiniUser(s.userid());
+  int spew = 0;
+
+  private AudioAttribute toAudioAttribute(SlickAudio s, Map<Integer, MiniUser> idToMini) {
+    MiniUser miniUser = idToMini.get(s.userid());
+
+    if (miniUser == null && spew++ < 20) logger.error("no user for " +s.userid());
+
     return new AudioAttribute(
         s.id(),
         s.userid(),
@@ -135,13 +173,45 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
         s.audiotype(),
         miniUser,
         s.transcript());
-
   }
 
-  private List<AudioAttribute> toAudioAttribute(List<SlickAudio> all) {
+  public SlickAudio getSlickAudio(AudioAttribute orig, Map<Integer, Integer> oldToNewUser) {
+    String audioType = orig.getAudioType();
+    if (audioType == null) {
+      audioType = BaseAudioDAO.REGULAR;
+      logger.error("found " + orig);
+    }
+    Integer userid = oldToNewUser.get(orig.getUserid());
+    if (userid == null) {
+      logger.error("huh? no user id for " + orig.getUserid() + " for " + orig);
+    }
+
+    return new SlickAudio(
+        orig.getUniqueID(),
+        userid,
+        orig.getExid(),
+        new Timestamp(orig.getTimestamp()),
+        orig.getAudioRef(),
+        audioType,
+        orig.getDurationInMillis(),
+        false,
+        orig.getTranscript());
+  }
+
+  private List<AudioAttribute> toAudioAttribute(List<SlickAudio> all, Map<Integer, MiniUser> idToMini) {
     List<AudioAttribute> copy = new ArrayList<>();
     for (SlickAudio s : all)
-      copy.add(toAudioAttribute(s));
+      copy.add(toAudioAttribute(s, idToMini));
     return copy;
   }
+
+  public void addBulk(List<SlickAudio> bulk) {
+    dao.addBulk(bulk);
+  }
+
+  public void dropTable() {
+    dao.drop();
+  }
+
+  public int getNumRows() { return dao.getNumRows(); }
 }

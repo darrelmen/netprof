@@ -53,9 +53,11 @@ import java.io.OutputStream;
 import java.util.*;
 
 public abstract class BaseAudioDAO extends DAO {
+  private static final Logger logger = Logger.getLogger(BaseAudioDAO.class);
+
   public static final String UNKNOWN = "unknown";
-  public static final String TOTAL = "total";
-  public static final String TOTAL_CONTEXT = "totalContext";
+  private static final String TOTAL = "total";
+  private static final String TOTAL_CONTEXT = "totalContext";
   public static final String MALE = "male";
   public static final String FEMALE = "female";
   public static final String MALE_FAST = "maleFast";
@@ -66,7 +68,6 @@ public abstract class BaseAudioDAO extends DAO {
   public static final String FEMALE_CONTEXT = "femaleContext";
   protected static final String REGULAR = "regular";
   protected static final String SLOW = "slow";
-  private static final Logger logger = Logger.getLogger(BaseAudioDAO.class);
   private static final String AUDIO_TYPE1 = "context=" + REGULAR;
   protected static final String CONTEXT_REGULAR = AUDIO_TYPE1;
   private static final boolean DEBUG_ATTACH = false;
@@ -191,7 +192,8 @@ public abstract class BaseAudioDAO extends DAO {
       //  logger.debug("skipping " + attr + " on " +firstExercise);
       //}
       //else {
-      if (attr.getUser().isUnknownDefault()) {
+      MiniUser user = attr.getUser();
+      if (user.isUnknownDefault()) {
         defaultAudio.add(attr);
       } else {
         audioPaths.add(attr.getAudioRef());
@@ -293,14 +295,15 @@ public abstract class BaseAudioDAO extends DAO {
    * @return ids with both regular and slow speed recordings
    * @see mitll.langtest.server.LangTestDatabaseImpl#filterByUnrecorded
    */
-  public Set<String> getRecordedBy(int userid) {
-    Map<Integer, User> userMap = getUserMap(userid);
+  public Collection<String> getRecordedBy(int userid) {
+    //Map<Integer, User> userMap = getUserMap(userid);
+    Collection<Integer> userIDs = getUserIDs(userid);
     //logger.debug("found " + (isMale ? " male " : " female ") + " users : " + userMap.keySet());
     // find set of users of same gender
-    Set<String> validAudioAtReg = getAudioExercisesForGender(userMap, REGULAR);
+    Set<String> validAudioAtReg = getAudioExercisesForGender(userIDs, REGULAR);
     //logger.debug(" regular speed for " + userMap.keySet() + " " + validAudioAtReg.size());
 
-    Set<String> validAudioAtSlow = getAudioExercisesForGender(userMap, SLOW);
+    Set<String> validAudioAtSlow = getAudioExercisesForGender(userIDs, SLOW);
 //    logger.debug(" slow speed for " + userMap.keySet() + " " + validAudioAtSlow.size());
 
     boolean b = validAudioAtReg.retainAll(validAudioAtSlow);
@@ -312,6 +315,12 @@ public abstract class BaseAudioDAO extends DAO {
     User user = userDAO.getUserWhere(userid);
     boolean isMale = (user != null && user.isMale());
     return userDAO.getUserMap(isMale);
+  }
+
+  protected Collection<Integer> getUserIDs(int userid) {
+    User user = userDAO.getUserWhere(userid);
+    boolean isMale = (user != null && user.isMale());
+    return userDAO.getUserIDs(isMale);
   }
 
   /**
@@ -369,11 +378,10 @@ public abstract class BaseAudioDAO extends DAO {
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#markRecordedState
    */
-  public Set<String> getRecordedForUser(long userid) {
+  public Collection<String> getRecordedForUser(int userid) {
     try {
-      Set<String> validAudioAtReg = getValidAudioOfType(userid, REGULAR);
+      Set<String> validAudioAtReg  = getValidAudioOfType(userid, REGULAR);
       Set<String> validAudioAtSlow = getValidAudioOfType(userid, SLOW);
-      /*boolean b =*/
       validAudioAtReg.retainAll(validAudioAtSlow);
       return validAudioAtReg;
     } catch (Exception ee) {
@@ -389,7 +397,7 @@ public abstract class BaseAudioDAO extends DAO {
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#markRecordedState(int, String, Collection, boolean)
    */
-  public Set<String> getRecordedExampleForUser(long userid) {
+  public Collection<String> getRecordedExampleForUser(int userid) {
     try {
       return getValidAudioOfType(userid, AUDIO_TYPE1);
     } catch (Exception ee) {
@@ -495,10 +503,10 @@ public abstract class BaseAudioDAO extends DAO {
    * @return
    * @see #getRecordedBy
    */
-  private Set<String> getAudioExercisesForGender(Map<Integer, User> userMap, String audioSpeed) {
+/*  private Set<String> getAudioExercisesForGender(Map<Integer, User> userMap, String audioSpeed) {
     Set<Integer> userIDs = userMap.keySet();
     return getAudioExercisesForGender(userIDs, audioSpeed);
-  }
+  }*/
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#filterByUnrecorded(ExerciseListRequest, Collection)
@@ -513,7 +521,7 @@ public abstract class BaseAudioDAO extends DAO {
     return getAudioExercisesForGender(userMap.keySet(), CONTEXT_REGULAR);
   }
 
-  abstract Set<String> getAudioExercisesForGender(Set<Integer> userIDs, String audioSpeed);
+  abstract Set<String> getAudioExercisesForGender(Collection<Integer> userIDs, String audioSpeed);
 
   abstract int getCountBothSpeeds(Set<Integer> userIds,
                                   Set<String> uniqueIDs);
