@@ -172,10 +172,14 @@ public abstract class BaseUserDAO extends DAO {
   }
 
   void findOrMakeDefectDetector() {
+    logger.info("findOrMakeDefectDetector ");
     defectDetector = getIdForUserID(DEFECT_DETECTOR);
     if (defectDetector == -1) {
       List<User.Permission> permissions = Collections.emptyList();
       defectDetector = addUser(89, MALE, 0, "", "", UNKNOWN, UNKNOWN, DEFECT_DETECTOR, false, permissions, User.Kind.STUDENT, "", "", "");
+    }
+    else {
+      logger.debug("found defect detector " + defectDetector);
     }
   }
 
