@@ -240,4 +240,30 @@ public class PostgresTest extends BaseTest {
       }
     }
   }
+
+  @Test
+  public void testAllAudio() {
+    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
+
+    IAudioDAO dao = spanish.getAudioDAO();
+    for (User user : spanish.getUsers()) {
+      Collection<String> recordedBy = dao.getWithContext(user.getId());
+      if (!recordedBy.isEmpty()) {
+        logger.info("postgres for " + user.getUserID() + " recorded " + recordedBy.size());
+      }
+    }
+
+    Map<String, Float> maleFemaleProgress = spanish.getMaleFemaleProgress();
+    logger.info("got " +maleFemaleProgress);
+    Map<String, Float> maleFemaleProgressH2 = spanish.getH2MaleFemaleProgress();
+
+    logger.info("got  h2 " +maleFemaleProgressH2);
+
+    for (User user : spanish.getUsers()) {
+      Collection<String> recordedBy = dao.getRecordedExampleForUser(user.getId());
+      if (!recordedBy.isEmpty()) {
+        logger.info("postgres for " + user.getUserID() + " getRecordedExampleForUser " + recordedBy.size());
+      }
+    }
+  }
 }

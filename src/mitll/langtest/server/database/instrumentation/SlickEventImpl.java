@@ -4,10 +4,10 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.Event;
-import mitll.npdata.dao.DBConnection;
-import mitll.npdata.dao.EventDAOExample;
 import mitll.npdata.dao.SlickEvent;
 import mitll.npdata.dao.SlickSlimEvent;
+import mitll.npdata.dao.event.DBConnection;
+import mitll.npdata.dao.event.EventDAOWrapper;
 import org.apache.log4j.Logger;
 
 import java.sql.Timestamp;
@@ -20,27 +20,40 @@ import java.util.Map;
  */
 public class SlickEventImpl implements IEventDAO {
   private static final Logger logger = Logger.getLogger(SlickEventImpl.class);
-  private EventDAOExample eventDAOExample;
+  private EventDAOWrapper eventDAOExample;
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(PathHelper)
    */
   public SlickEventImpl(DBConnection dbConnection) {
-    eventDAOExample = new EventDAOExample(dbConnection);
+    eventDAOExample = new EventDAOWrapper(dbConnection);
+  }
+
+  public void createTable() {
+    eventDAOExample.createTable();
+  }
+
+  public void dropTable() {
+    eventDAOExample.drop();
   }
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#oneTimeDataCopy(SlickEventImpl)
    * @param other
    * @param language
+   * @see mitll.langtest.server.database.DatabaseImpl#oneTimeDataCopy(SlickEventImpl)
    */
-  public void copyTableOnlyOnce(IEventDAO other, String language) {
+  public void copyTableOnlyOnce(IEventDAO other, String language, Map<Integer, Integer> oldToNew) {
     if (getNumRows(language).intValue() == 0) {
       List<SlickEvent> copy = new ArrayList<>();
       List<Event> all = other.getAll(language);
       logger.info("copyTableOnlyOnce " + all.size() + " events ");
 
-      for (Event event : all) copy.add(getSlickEvent(event, language));
+      for (Event event : all) {
+        SlickEvent slickEvent = getSlickEvent(event, language, oldToNew);
+        if (slickEvent != null) {
+          copy.add(slickEvent);
+        }
+      }
       eventDAOExample.addBulk(copy);
     }
   }
@@ -51,7 +64,7 @@ public class SlickEventImpl implements IEventDAO {
     return true;
   }
 
-  private SlickEvent getSlickEvent(Event event, String language) {
+  public SlickEvent getSlickEvent(Event event, String language) {
     long timestamp = event.getTimestamp();
     if (timestamp < 1) timestamp = System.currentTimeMillis();
     Timestamp modified = new Timestamp(timestamp);
@@ -67,9 +80,34 @@ public class SlickEventImpl implements IEventDAO {
         language.toLowerCase());
 
 //    logger.info("insert " +event);
- //   logger.info("insert " +slickEvent);
+    //   logger.info("insert " +slickEvent);
 
     return slickEvent;
+  }
+
+  public SlickEvent getSlickEvent(Event event, String language, Map<Integer, Integer> oldToNew) {
+    long timestamp = event.getTimestamp();
+    if (timestamp < 1) timestamp = System.currentTimeMillis();
+    Timestamp modified = new Timestamp(timestamp);
+
+    Integer userid = oldToNew.get(event.getUserID());
+    if (userid == null) return null;
+    else {
+      SlickEvent slickEvent = new SlickEvent(-1,
+          userid,
+          event.getExerciseID(),
+          event.getContext() == null ? "" : event.getContext(),
+          event.getWidgetID(),
+          event.getWidgetType(),
+          event.getDevice() == null ? "" : event.getDevice(),
+          modified,
+          language.toLowerCase());
+
+//    logger.info("insert " +event);
+      //   logger.info("insert " +slickEvent);
+
+      return slickEvent;
+    }
   }
 
   @Override
