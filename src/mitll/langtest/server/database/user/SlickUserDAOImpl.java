@@ -35,9 +35,9 @@ package mitll.langtest.server.database.user;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.User;
-import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickMiniUser;
 import mitll.npdata.dao.SlickUser;
+import mitll.npdata.dao.event.DBConnection;
 import mitll.npdata.dao.user.UserDAOWrapper;
 import org.apache.log4j.Logger;
 import scala.collection.Seq;
@@ -52,6 +52,15 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
   public SlickUserDAOImpl(Database database, DBConnection dbConnection) {
     super(database);
     dao = new UserDAOWrapper(dbConnection);
+    //findOrMakeDefectDetector();
+  }
+
+  public void dropTable() {
+    dao.drop();
+  }
+
+  public void createTable() {
+    dao.createTable();
     findOrMakeDefectDetector();
   }
 
@@ -297,7 +306,4 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return oldToNew;
   }
 
-  public void dropTable() {
-    dao.drop();
-  }
 }

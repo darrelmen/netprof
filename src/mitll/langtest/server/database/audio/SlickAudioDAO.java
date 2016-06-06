@@ -37,7 +37,7 @@ import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.npdata.dao.DBConnection;
+import mitll.npdata.dao.event.DBConnection;
 import mitll.npdata.dao.SlickAudio;
 import mitll.npdata.dao.audio.AudioDAOWrapper;
 import org.apache.log4j.Logger;
@@ -54,6 +54,8 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     super(database, userDAO);
     dao = new AudioDAOWrapper(dbConnection);
   }
+
+  public void createTable() {  dao.createTable();  }
 
   @Override
   public Collection<AudioAttribute> getAudioAttributes() {
