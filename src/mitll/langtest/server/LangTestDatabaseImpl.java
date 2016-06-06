@@ -552,7 +552,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private int markRecordedState(int userID, String role, Collection<? extends CommonShell> exercises, boolean onlyExample) {
     int c = 0;
     if (role.equals(Result.AUDIO_TYPE_RECORDER)) {
-      Collection<String> recordedForUser = onlyExample ? db.getAudioDAO().getRecordedExampleForUser(userID) : db.getAudioDAO().getRecordedForUser(userID);
+      Collection<String> recordedForUser = onlyExample ?
+          db.getAudioDAO().getRecordedExampleForUser(userID) : db.getAudioDAO().getRecordedForUser(userID);
       //logger.debug("\tfound " + recordedForUser.size() + " recordings by " + userID + " only example " + onlyExample);
       for (CommonShell shell : exercises) {
         if (recordedForUser.contains(shell.getID())) {
