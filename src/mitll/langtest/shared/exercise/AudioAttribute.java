@@ -197,7 +197,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     return getAttributes().get(SPEED);
   }
 
-  public boolean hasOnlySpeed() {
+  private boolean hasOnlySpeed() {
     return attributes.size() == 1 && attributes.containsKey(SPEED);
   }
 
@@ -262,9 +262,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     }
   }
 
-  public MiniUser getUser() {
-    return user;
-  }
+  public MiniUser getUser() { return user;  }
 
   /**
    * @param user
