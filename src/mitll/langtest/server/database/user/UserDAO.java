@@ -575,6 +575,11 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   }
 
   @Override
+  public Set<Integer> getUserIDs(boolean getMale) {
+    return getUserMap(getMale).keySet();
+  }
+
+  @Override
   public Map<Integer, User> getUserMap() {
     return getMap(getUsers());
   }

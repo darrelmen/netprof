@@ -55,6 +55,10 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
     findOrMakeDefectDetector();
   }
 
+  public int add(SlickUser user) {
+    return dao.add(user);
+  }
+
   @Override
   public int addUser(int age, String gender, int experience, String userAgent, String trueIP,
                      String nativeLang,
@@ -70,7 +74,7 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
         dialect,
         new Timestamp(System.currentTimeMillis()),
         enabled, "", "", builder.toString(),
-        kind.toString(), passwordH, emailH, device));
+        kind.toString(), passwordH, emailH, device, -1));
   }
 
   protected void updateUser(int id, User.Kind kind, String passwordH, String emailH) {
@@ -119,15 +123,33 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
   @Override
   public List<User> getUsers() {
-    List<SlickUser> all = dao.getAll();
-    return toUsers(all);
+    return toUsers(dao.getAll());
   }
 
   private List<User> toUsers(List<SlickUser> all) {
     List<User> copy = new ArrayList<>();
-    for (SlickUser s : all)
-      copy.add(toUser(s));
+    for (SlickUser s : all) copy.add(toUser(s));
     return copy;
+  }
+
+  public SlickUser toSlick(User user) {
+    return new SlickUser(user.getId(),
+        user.getUserID(),
+        user.isMale(),
+        user.getIpaddr(),
+        "",
+        user.getDialect(),
+        new Timestamp(user.getTimestampMillis()),
+        user.isEnabled(),
+        user.getResetKey() == null ? "" : user.getResetKey(),
+        "",
+        user.getPermissions().toString(),
+        user.getUserKind().name(),
+        user.getPasswordHash() == null ? "" : user.getPasswordHash(),
+        user.getEmailHash() == null ? "" : user.getEmailHash(),
+        user.getDevice() == null ? "" : user.getDevice(),
+        user.getId()
+    );
   }
 
   private User toUser(SlickUser s) {
@@ -214,11 +236,11 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
   @Override
   public User getUserWhere(int userid) {
-    logger.info("getUserWhere ask for user " + userid);
+//    logger.info("getUserWhere ask for user " + userid);
     Seq<SlickUser> userByIDAndPass = dao.byID(userid);
-    logger.info("getUserWhere got " + userByIDAndPass);
+//    logger.info("getUserWhere got " + userByIDAndPass);
     User user = convertOrNull(userByIDAndPass);
-    logger.info("getUserWhere got " + user);
+    //  logger.info("getUserWhere got " + user);
 
     return user;
   }
@@ -229,6 +251,11 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
     Map<Integer, User> idToUser = new HashMap<>();
     byMale.forEach((k, v) -> idToUser.put(k, toUser(v)));
     return idToUser;
+  }
+
+  @Override
+  public Collection<Integer> getUserIDs(boolean getMale) {
+    return dao.getByMaleIDs(getMale);
   }
 
   @Override
@@ -256,7 +283,7 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
   @Override
   public boolean enableUser(int id) {
-    return changeEnabled(id,true);
+    return changeEnabled(id, true);
   }
 
   @Override
@@ -264,4 +291,13 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return dao.changeEnabled(userid, enabled);
   }
 
+  public Map<Integer, Integer> getOldToNew() {
+    Map<Integer, Integer> oldToNew = new HashMap<>();
+    for (SlickUser user : dao.getAll()) oldToNew.put(user.legacyid(), user.id());
+    return oldToNew;
+  }
+
+  public void dropTable() {
+    dao.drop();
+  }
 }
