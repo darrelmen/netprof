@@ -36,6 +36,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.shared.monitoring.Session;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -64,7 +65,7 @@ public class AVPHistoryForList implements IsSerializable {
    * @param userID
    * @param useCorrect when false get score percentages true for percentage correct
    */
-  public AVPHistoryForList(List<Session> scores, long userID, boolean useCorrect) {
+  public AVPHistoryForList(Collection<Session> scores, long userID, boolean useCorrect) {
     this.useCorrect = useCorrect;
     numScores = scores.size();
     calc(scores,userID);
@@ -93,7 +94,7 @@ public class AVPHistoryForList implements IsSerializable {
     return yValuesForUser;
   }
 
-  public void calc(List<Session> scores, long userID) {
+  private void calc(Collection<Session> scores, long userID) {
     pbCorrect = 0;
     top = 0;
     totalCorrect = 0;
