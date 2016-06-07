@@ -33,6 +33,7 @@
 package mitll.langtest.shared.monitoring;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.shared.flashcard.SetScore;
 
 import java.util.*;
@@ -64,7 +65,7 @@ public class Session implements IsSerializable, SetScore {
   public Session(){} // required
 
   /**
-   * @see mitll.langtest.server.database.ResultDAO#partitionIntoSessions2
+   * @see ResultDAO#partitionIntoSessions2
    * @param userid
    * @param timestamp
    */
@@ -78,7 +79,7 @@ public class Session implements IsSerializable, SetScore {
   public long getSecAverage() { return (duration/ getNumAnswers())/1000; }
 
   /**
-   * @see mitll.langtest.server.database.ResultDAO#partitionIntoSessions2
+   * @see ResultDAO#partitionIntoSessions2
    * @param id
    */
   public void addExerciseID(String id) { exids.add(id);  }
@@ -154,7 +155,7 @@ public class Session implements IsSerializable, SetScore {
   }
 
   /**
-   * @see mitll.langtest.server.database.ResultDAO#partitionIntoSessions2(java.util.List, java.util.Collection, long)
+   * @see ResultDAO#partitionIntoSessions2(java.util.List, java.util.Collection, long)
    * @param latest
    */
   public void setLatest(boolean latest) {

@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database;
 
+import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.grade.Grade;
@@ -59,9 +60,9 @@ public class GradeDAO extends DAO {
   private static final String GRADES = "grades";
  // private final boolean debug = false;
   private final IUserDAO userDAO;
-//  private final ResultDAO resultDAO;
+//  private final IResultDAO resultDAO;
 
-  public GradeDAO(Database database, IUserDAO userDAO, ResultDAO resultDAO) {
+  public GradeDAO(Database database, IUserDAO userDAO, IResultDAO resultDAO) {
     super(database);
     this.userDAO = userDAO;
  //   this.resultDAO = resultDAO;
@@ -226,7 +227,7 @@ public class GradeDAO extends DAO {
   }*/
 
   /**
-   * @see ResultDAO#getResultsForExercise
+   * @see IResultDAO#getResultsForExercise
    * @param exerciseID
    * @return
    */

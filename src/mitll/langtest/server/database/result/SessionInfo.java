@@ -30,41 +30,27 @@
  *
  */
 
-package mitll.langtest.shared.exercise;
+package mitll.langtest.server.database.result;
 
-import mitll.langtest.server.database.result.ResultDAO;
-import mitll.langtest.shared.flashcard.CorrectAndScore;
+import mitll.langtest.shared.monitoring.Session;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
-/**
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 2/1/16.
- */
-public interface MutableExercise extends CommonShell, MutableShell {
-  void setBagOfPhones(Set<String> bagOfPhones);
+public class SessionInfo {
+  private final List<Session> sessions;
+  private final Map<Long, Float> userToRate;
 
-  void setFirstPron(List<String> phones);
+  public SessionInfo(List<Session> sessions, Map<Long, Float> userToRate) {
+    this.sessions = sessions;
+    this.userToRate = userToRate;
+  }
 
-  void setTransliteration(String transliteration);
+  public List<Session> getSessions() {
+    return sessions;
+  }
 
-  /**
-   * @see ResultDAO#attachScoreHistory(long, CommonExercise, boolean)
-   * @param scoreTotal
-   */
-  void setScores(List<CorrectAndScore> scoreTotal);
-
-  /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addAnnotationsAndAudio
-   * @param v
-   */
-  void setAvgScore(float v);
-
-  void setRefSentences(Collection<String> orDefault);
-
-  void setSafeToDecode(boolean isSafeToDecode);
+  public Map<Long, Float> getUserToRate() {
+    return userToRate;
+  }
 }

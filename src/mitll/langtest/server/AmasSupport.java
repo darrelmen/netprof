@@ -32,7 +32,7 @@
 
 package mitll.langtest.server;
 
-import mitll.langtest.server.database.ResultDAO;
+import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.exercise.HasID;
@@ -81,7 +81,7 @@ class AmasSupport {
       Map<String, Collection<String>> typeToSection, String prefix,
       long userID,
       SectionHelper<AmasExerciseImpl> sectionHelper,
-      ResultDAO resultDAO
+      IResultDAO resultDAO
   ) {
     Collection<AmasExerciseImpl> exercisesForState = sectionHelper.getExercisesForSelectionState(typeToSection);
     exercisesForState = filterByUnrecorded(userID, exercisesForState, typeToSection, resultDAO);
@@ -104,7 +104,7 @@ class AmasSupport {
   public Collection<AmasExerciseImpl> filterByUnrecorded(long userID,
                                                          Collection<AmasExerciseImpl> exercises,
                                                          Map<String, Collection<String>> typeToSection,
-                                                         ResultDAO resultDAO) {
+                                                         IResultDAO resultDAO) {
     Collection<String> allIDs = new ArrayList<String>();
 
     for (HasID exercise : exercises) {
@@ -164,7 +164,7 @@ class AmasSupport {
    */
   private QuizCorrectAndScore getQuizCorrectAndScore(Map<String, Collection<String>> typeToSection, int userID,
                                                      Collection<String> allIDs,
-                                                     ResultDAO resultDAO) {
+                                                     IResultDAO resultDAO) {
     String session = getLatestSession(typeToSection, userID);
     //  logger.info("exercises " +allIDs.size() + " for session " + session);
 
