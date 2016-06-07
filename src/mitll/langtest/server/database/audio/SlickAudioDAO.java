@@ -146,8 +146,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
   @Override
   int getCountBothSpeeds(Set<Integer> userIds, Set<String> uniqueIDs) {
-    dao.getCountBothSpeeds(userIds, uniqueIDs);
-    return 0;
+    return dao.getCountBothSpeeds(userIds, uniqueIDs);
   }
 
   private List<AudioAttribute> toAudioAttributes(Collection<SlickAudio> all) {
