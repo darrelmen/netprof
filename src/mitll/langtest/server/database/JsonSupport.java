@@ -35,6 +35,7 @@ package mitll.langtest.server.database;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.phone.PhoneDAO;
+import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -57,7 +58,7 @@ public class JsonSupport {
   private static final Logger logger = Logger.getLogger(JsonSupport.class);
 
   private final SectionHelper<CommonExercise> sectionHelper;
-  private final ResultDAO resultDAO;
+  private final IResultDAO resultDAO;
   private final RefResultDAO refResultDAO;
   private final IAudioDAO audioDAO;
   private final PhoneDAO phoneDAO;
@@ -74,7 +75,7 @@ public class JsonSupport {
    * @param installPath
    * @see mitll.langtest.server.database.DatabaseImpl#setInstallPath(String, String, String)
    */
-  public JsonSupport(SectionHelper<CommonExercise> sectionHelper, ResultDAO resultDAO, RefResultDAO refResultDAO,
+  public JsonSupport(SectionHelper<CommonExercise> sectionHelper, IResultDAO resultDAO, RefResultDAO refResultDAO,
                      IAudioDAO audioDAO,
                      PhoneDAO phoneDAO, String configDir, String installPath) {
     this.sectionHelper = sectionHelper;

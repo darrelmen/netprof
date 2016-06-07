@@ -30,41 +30,25 @@
  *
  */
 
-package mitll.langtest.shared.exercise;
+package mitll.langtest.server.database.result;
 
-import mitll.langtest.server.database.result.ResultDAO;
-import mitll.langtest.shared.flashcard.CorrectAndScore;
+import mitll.langtest.server.database.AnswerInfo;
+import mitll.langtest.shared.scoring.AudioContext;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+public interface IAnswerDAO {
+  long addTextAnswer(AudioContext audioContext,
+                     String answer,
+                     boolean correct,
+                     float pronScore,
 
-/**
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 2/1/16.
- */
-public interface MutableExercise extends CommonShell, MutableShell {
-  void setBagOfPhones(Set<String> bagOfPhones);
+                     float classifierScore,
+                     String session, long timeSpent);
 
-  void setFirstPron(List<String> phones);
+  long addAnswer(AnswerInfo answerInfo);
 
-  void setTransliteration(String transliteration);
+  void addRoundTrip(long resultID, int roundTrip);
 
-  /**
-   * @see ResultDAO#attachScoreHistory(long, CommonExercise, boolean)
-   * @param scoreTotal
-   */
-  void setScores(List<CorrectAndScore> scoreTotal);
+  void addUserScore(long id, float score);
 
-  /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addAnnotationsAndAudio
-   * @param v
-   */
-  void setAvgScore(float v);
-
-  void setRefSentences(Collection<String> orDefault);
-
-  void setSafeToDecode(boolean isSafeToDecode);
+  void changeAnswer(long id, float score, int processDur, String json);
 }

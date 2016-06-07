@@ -32,7 +32,7 @@
 
 package mitll.langtest.shared.exercise;
 
-import mitll.langtest.server.database.ResultDAO;
+import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import net.sf.json.JSONObject;
