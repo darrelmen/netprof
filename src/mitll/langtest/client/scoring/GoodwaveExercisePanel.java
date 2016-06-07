@@ -65,6 +65,7 @@ import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.AudioType;
 import mitll.langtest.shared.exercise.AudioRefExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
@@ -569,12 +570,12 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
      *
      * @param toTheRightWidget
      * @param buttonTitle
-     * @param recordButtonTitle
-     * @return
+     * @param audioType
+     *@param recordButtonTitle  @return
      * @see AudioPanel#getPlayButtons
      */
     @Override
-    protected PlayAudioPanel makePlayAudioPanel(Widget toTheRightWidget, String buttonTitle, String audioType, String recordButtonTitle) {
+    protected PlayAudioPanel makePlayAudioPanel(Widget toTheRightWidget, String buttonTitle, AudioType audioType, String recordButtonTitle) {
       recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
       recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
       postAudioRecordButton = new MyPostAudioRecordButton(controller);
@@ -694,7 +695,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     }
 
     /**
-     * @see #makePlayAudioPanel(com.google.gwt.user.client.ui.Widget, String, String, String)
+     * @see AudioPanel#makePlayAudioPanel(Widget, String, AudioType, String)
      */
     private class MyPostAudioRecordButton extends PostAudioRecordButton {
       MyPostAudioRecordButton(ExerciseController controller) {
