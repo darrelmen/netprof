@@ -42,6 +42,7 @@ import mitll.langtest.client.WavCallback;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.AudioType;
 import mitll.langtest.shared.scoring.AudioContext;
 
 import java.util.Collection;
@@ -251,7 +252,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
    * Like not what you want - should be based on tab it's recorded in.
    * @return
    */
-  private String getAudioType() {
+  private AudioType getAudioType() {
     return controller.getAudioType();
   }
 

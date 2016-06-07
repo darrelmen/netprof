@@ -34,6 +34,7 @@ package mitll.langtest.server.database.audio;
 
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.user.IUserDAO;
+import mitll.langtest.shared.AudioType;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.exercise.AudioAttribute;
@@ -127,11 +128,8 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   @Override
-  int markDefect(int userid, String exerciseID, String audioType) {
-    if (audioType.equals(AudioAttribute.REGULAR_AND_SLOW)) {
-      audioType = Result.AUDIO_TYPE_FAST_AND_SLOW;
-    }
-    return dao.markDefect(userid, exerciseID, audioType);
+  int markDefect(int userid, String exerciseID, AudioType audioType) {
+     return dao.markDefect(userid, exerciseID, audioType.toString());
   }
 
   public Collection<String> getRecordedBy(int userid) {
