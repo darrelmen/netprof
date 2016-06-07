@@ -133,8 +133,8 @@ public class ResultDAOToExcel {
       cell.setCellStyle(cellStyle);
 
       cell = row.createCell(j++);
-      String audioType = result.getAudioType();
-      cell.setCellValue(audioType.equals("avp") ? "flashcard" : audioType);
+      String audioType = result.getAudioType().toString();
+      cell.setCellValue(audioType);
 
       cell = row.createCell(j++);
       cell.setCellValue(result.getDurationInMillis());

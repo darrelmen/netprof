@@ -37,14 +37,10 @@ import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.Report;
-import mitll.langtest.server.database.excel.ResultDAOToExcel;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.server.sorter.ExerciseSorter;
-import mitll.langtest.shared.MonitorResult;
-import mitll.langtest.shared.Result;
-import mitll.langtest.shared.User;
-import mitll.langtest.shared.UserAndTime;
+import mitll.langtest.shared.*;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
@@ -55,7 +51,6 @@ import mitll.langtest.shared.monitoring.Session;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
-import java.io.OutputStream;
 import java.sql.*;
 import java.text.CollationKey;
 import java.text.Collator;
@@ -906,6 +901,13 @@ public class ResultDAO extends DAO implements IResultDAO {
       int processDur = rs.getInt(PROCESS_DUR);
       int roundTripDur = rs.getInt(ROUND_TRIP_DUR);
       //  String json = rs.getString(SCORE_JSON);
+      AudioType audioType;
+
+      try {
+        audioType = AudioType.valueOf(type);
+      } catch (IllegalArgumentException e) {
+        audioType = AudioType.AUDIO_TYPE_UNSET;
+      }
 
       MonitorResult result = new MonitorResult(uniqueID, userID, //id
           exid,
@@ -913,7 +915,7 @@ public class ResultDAO extends DAO implements IResultDAO {
           valid, // valid
           timestamp.getTime(),
           type, dur, correct, pronScore, device, rs.getBoolean(WITH_FLASH),
-          processDur, roundTripDur, validity, snr);
+          processDur, roundTripDur, validity, snr, audioType);
 
 /*      result.setDeviceType(dtype);
       result.setSimpleDevice(simpleDevice);

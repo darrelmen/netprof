@@ -41,6 +41,7 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.UnitChapterItemHelper;
+import mitll.langtest.shared.AudioType;
 import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.exercise.*;
@@ -142,9 +143,9 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
 
     // add normal speed recording widget
     if (isNormalRecord()) {
-      addRecordAudioPanelNoCaption(exercise, service, controller, index, vp, Result.AUDIO_TYPE_REGULAR);
+      addRecordAudioPanelNoCaption(exercise, service, controller, index, vp, AudioType.AUDIO_TYPE_REGULAR);
       // add slow speed recording widget
-      VerticalPanel widgets = addRecordAudioPanelNoCaption(exercise, service, controller, index + 1, vp, Result.AUDIO_TYPE_SLOW);
+      VerticalPanel widgets = addRecordAudioPanelNoCaption(exercise, service, controller, index + 1, vp, AudioType.AUDIO_TYPE_SLOW);
       widgets.addStyleName("topFiveMargin");
     } else {
       addExampleSentenceRecorder(exercise, service, controller, index, vp);
@@ -169,7 +170,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
   }
 
   private VerticalPanel addRecordAudioPanelNoCaption(T exercise, LangTestDatabaseAsync service,
-                                            ExerciseController controller, int index, Panel vp, String audioType) {
+                                            ExerciseController controller, int index, Panel vp, AudioType audioType) {
     RecordAudioPanel fast = new RecordAudioPanel<T>(exercise, controller, this, service, index, false, audioType, instance);
     audioPanels.add(fast);
     vp.add(fast);
