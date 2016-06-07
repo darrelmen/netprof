@@ -34,6 +34,7 @@ package mitll.langtest.shared;
 
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.server.database.result.ResultDAO;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -108,7 +109,7 @@ public class MonitorResult implements IsSerializable {
    * @param withFlash
    * @param processDur
    * @param roundTripDur
-   * @see mitll.langtest.server.database.ResultDAO#getMonitorResultsForQuery(Connection, PreparedStatement)
+   * @see ResultDAO#getMonitorResultsForQuery(Connection, PreparedStatement)
    */
   public MonitorResult(int uniqueID, int userid, String id, String answer,
                        boolean valid, long timestamp, String answerType, int durationInMillis,

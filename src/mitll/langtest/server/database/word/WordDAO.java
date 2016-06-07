@@ -35,7 +35,8 @@ package mitll.langtest.server.database.word;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.ResultDAO;
+import mitll.langtest.server.database.result.IResultDAO;
+import mitll.langtest.server.database.result.ResultDAO;
 import org.apache.log4j.Logger;
 
 import java.sql.*;

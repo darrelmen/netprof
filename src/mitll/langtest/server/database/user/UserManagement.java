@@ -35,7 +35,7 @@ package mitll.langtest.server.database.user;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.HTTPClient;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.ResultDAO;
+import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.excel.UserDAOToExcel;
 import mitll.langtest.server.rest.RestUserManagement;
@@ -66,7 +66,7 @@ public class UserManagement {
 
   private final int numExercises;
   private final IUserDAO userDAO;
-  private final ResultDAO resultDAO;
+  private final IResultDAO resultDAO;
   private final UserListManager userListManager;
 
   /**
@@ -76,7 +76,7 @@ public class UserManagement {
    * @param resultDAO
    * @param userListManager
    */
-  public UserManagement(IUserDAO userDAO, int numExercises, ResultDAO resultDAO, UserListManager userListManager) {
+  public UserManagement(IUserDAO userDAO, int numExercises, IResultDAO resultDAO, UserListManager userListManager) {
     this.userDAO = userDAO;
     this.numExercises = numExercises;
     this.resultDAO = resultDAO;
@@ -278,7 +278,7 @@ public class UserManagement {
    * @see #usersToXLSX(OutputStream, String)
    */
   public List<User> getUsers() {
-    Map<Long, Float> userToRate = resultDAO.getSessions().userToRate;
+    Map<Long, Float> userToRate = resultDAO.getSessions().getUserToRate();
     List<User> users = null;
     try {
       Pair idToCount = populateUserToNumAnswers();

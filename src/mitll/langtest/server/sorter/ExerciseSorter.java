@@ -33,6 +33,7 @@
 package mitll.langtest.server.sorter;
 
 import mitll.langtest.server.LangTestDatabaseImpl;
+import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import org.apache.log4j.Logger;
 
@@ -84,7 +85,7 @@ public class ExerciseSorter extends SimpleSorter {
      * @param o1
      * @param o2
      * @return
-     * @see mitll.langtest.server.database.ResultDAO#getSortedAVPHistoryByPhones
+     * @see IResultDAO#getSortedAVPHistoryByPhones
      */
   public int phoneCompByFirst(CommonExercise o1, CommonExercise o2) { return phoneCompFirst(o1, o2, phoneToCount);  }
 
