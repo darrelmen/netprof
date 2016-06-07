@@ -75,7 +75,6 @@ import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 import mitll.npdata.dao.SlickAudio;
-import mitll.npdata.dao.SlickEvent;
 import mitll.npdata.dao.event.DBConnection;
 import net.sf.json.JSON;
 import net.sf.json.JSONObject;
@@ -231,7 +230,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
     DBConnection dbConnection = new DBConnection("localhost", 5432, "netprof");
 
-    SlickEventImpl slickEventDAO  = new SlickEventImpl(dbConnection);
+    SlickEventImpl slickEventDAO = new SlickEventImpl(dbConnection);
     eventDAO = slickEventDAO;
 
     SlickUserDAOImpl slickUserDAO = new SlickUserDAOImpl(this, dbConnection);
@@ -306,7 +305,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       eventDAOExample.addBulk(copy);
     }
   }*/
-
   public IAudioDAO getH2AudioDAO() {
     return new AudioDAO(this, this.userDAO);
   }
@@ -1046,8 +1044,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   public void copyToPostgres() {
     // first add the user table
     SlickUserDAOImpl slickUserDAO = (SlickUserDAOImpl) getUserDAO();
-    SlickAudioDAO slickAudioDAO   = (SlickAudioDAO) getAudioDAO();
-    SlickEventImpl slickEventDAO  = (SlickEventImpl) getEventDAO();
+    SlickAudioDAO slickAudioDAO = (SlickAudioDAO) getAudioDAO();
+    SlickEventImpl slickEventDAO = (SlickEventImpl) getEventDAO();
 
     logger.info("Drop audio table!!! ");
     slickAudioDAO.dropTable();
@@ -1091,7 +1089,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     // add event table
     {
       long defectDetector = userDAO.getDefectDetector();
-      slickEventDAO.copyTableOnlyOnce(new EventDAO(this, defectDetector), getLanguage(),oldToNew);
+      slickEventDAO.copyTableOnlyOnce(new EventDAO(this, defectDetector), getLanguage(), oldToNew);
     }
   }
 
@@ -1654,7 +1652,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    */
   public Map<String, Float> getMaleFemaleProgress() {
     IUserDAO userDAO = getUserDAO();
-    Map<Integer, User> userMapMales   = userDAO.getUserMap(true);
+    Map<Integer, User> userMapMales = userDAO.getUserMap(true);
     Map<Integer, User> userMapFemales = userDAO.getUserMap(false);
 
     Collection<CommonExercise> exercises = getExercises();
@@ -1669,9 +1667,10 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         logger.warn("getMaleFemaleProgress found duplicate id " + shell.getID() + " : " + shell);
       }
     }
-/*    logger.info("found " + total + " total exercises, " +
+    logger.info("getMaleFemaleProgress found " + total + " total exercises, " +
         uniqueIDs.size() +
-        " unique");*/
+        " unique" +
+        " males " + userMapMales.size() + " females " + userMapFemales.size());
 
     return getAudioDAO().getRecordedReport(userMapMales, userMapFemales, total, uniqueIDs, context);
   }
@@ -1682,7 +1681,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    */
   public Map<String, Float> getH2MaleFemaleProgress() {
     IUserDAO userDAO = getUserDAO();
-    Map<Integer, User> userMapMales   = userDAO.getUserMap(true);
+    Map<Integer, User> userMapMales = userDAO.getUserMap(true);
     Map<Integer, User> userMapFemales = userDAO.getUserMap(false);
 
     Collection<CommonExercise> exercises = getExercises();
@@ -1697,11 +1696,12 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         logger.warn("getMaleFemaleProgress found duplicate id " + shell.getID() + " : " + shell);
       }
     }
-/*    logger.info("found " + total + " total exercises, " +
+    logger.info("getH2MaleFemaleProgress found " + total + " total exercises, " +
         uniqueIDs.size() +
-        " unique");*/
+        " unique" +
+        " males " + userMapMales.size() + " females " + userMapFemales.size());
 
-    return new AudioDAO(this,new UserDAO(this)).getRecordedReport(userMapMales, userMapFemales, total, uniqueIDs, context);
+    return new AudioDAO(this, new UserDAO(this)).getRecordedReport(userMapMales, userMapFemales, total, uniqueIDs, context);
   }
 
   public String toString() {
