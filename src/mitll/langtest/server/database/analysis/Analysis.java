@@ -37,8 +37,9 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.ResultDAO;
+import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.database.phone.PhoneDAO;
+import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.User;
@@ -216,15 +217,17 @@ public class Analysis extends DAO {
   }
 
   private String getPerfSQL() {
-    return getPerfSQL(0, false);
+    return getPerfSQL(
+        0,  // IGNORED VALUE!
+        false);
   }
 
-  private String getPerfSQL(long id) {
-    return getPerfSQL(id, true);
+  private String getPerfSQL(long userid) {
+    return getPerfSQL(userid, true);
   }
 
-  private String getPerfSQL(long id, boolean addUserID) {
-    String useridClause = addUserID ? ResultDAO.USERID + "=" + id + " AND " : "";
+  private String getPerfSQL(long userid, boolean addUserID) {
+    String useridClause = addUserID ? ResultDAO.USERID + "=" + userid + " AND " : "";
     return "SELECT " +
         Database.EXID + "," +
         ResultDAO.PRON_SCORE + "," +
@@ -245,7 +248,7 @@ public class Analysis extends DAO {
    * @param id
    * @param minRecordings
    * @return
-   * @see ResultDAO#getPerformanceForUser(long, PhoneDAO, int, Map)
+   * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceForUser(int, int)
    * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot
    */
   public UserPerformance getPerformanceForUser(long id, int minRecordings) {

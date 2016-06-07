@@ -3,6 +3,7 @@ package mitll.langtest.server.database.custom;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -37,7 +38,7 @@ public class AnalysisTest {
     Map<String,CommonExercise> idToEx = new HashMap<String,CommonExercise>();
     for (CommonExercise ex : exercises) idToEx.put(ex.getID(),ex);
 
-    Map<Integer, Map<String, Result>> userToResults = war.getResultDAO().getUserToResults(true, war.getUserDAO());
+    Map<Integer, Map<String, Result>> userToResults = ((ResultDAO)war.getResultDAO()).getUserToResults(true, war.getUserDAO());
     Map<String, Result> stringResultMap = userToResults.get(71l);
 
   //  Collection<CorrectAndScore> copy = getFirstCorrectAndScore(resultsForUser);

@@ -409,7 +409,7 @@ public class AudioFileHelper implements AlignDecode {
         new AnswerInfo.ScoreInfo(answer.isCorrect(), (float) answer.getScore(),
             new ScoreToJSON().getJsonFromAnswer(answer).toString(), processDur));
 
-    long answerID = db.getAnswerDAO().addAnswer(db, info);
+    long answerID = db.getAnswerDAO().addAnswer(info);
     answer.setResultID(answerID);
     db.recordWordAndPhoneInfo(answer, answerID);
   }
@@ -581,7 +581,7 @@ public class AudioFileHelper implements AlignDecode {
       AnswerInfo info = new AnswerInfo(infoOrig,
           new AnswerInfo.ScoreInfo(true, score, new ScoreToJSON().getJsonFromAnswer(answer).toString(), processDur));
 
-      long answerID = db.getAnswerDAO().addAnswer(db, info);
+      long answerID = db.getAnswerDAO().addAnswer(info);
       answer.setResultID(answerID);
     }
     logger.debug("getAudioAnswerAlignment answer " + answer);

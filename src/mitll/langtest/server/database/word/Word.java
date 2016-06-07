@@ -44,40 +44,20 @@ public class Word {
 
   public long getId() { return id; }
 
-  private void setId(long id) {
-    this.id = id;
-  }
-
   public long getRid() {
     return rid;
-  }
-
-  private void setRid(long rid) {
-    this.rid = rid;
   }
 
   public String getWord() {
     return word;
   }
 
-  private void setWord(String word) {
-    this.word = word;
-  }
-
   public int getSeq() {
     return seq;
   }
 
-  private void setSeq(int seq) {
-    this.seq = seq;
-  }
-
   public float getScore() {
     return score;
-  }
-
-  private void setScore(float score) {
-    this.score = score;
   }
 
   public String toString() {
