@@ -33,6 +33,7 @@
 package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.shared.AudioType;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.UserAndTime;
@@ -58,14 +59,14 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   private static final String FILE_MISSING = "FILE_MISSING";
 
   private static final String SPEED = "speed";
-  public static final String SLOW = "slow";
-  public static final String REGULAR = "regular";
+  public static final String SLOW = AudioType.AUDIO_TYPE_SLOW.toString();
+  public static final String REGULAR = AudioType.AUDIO_TYPE_REGULAR.toString();
   public static final String REGULAR_AND_SLOW = "regular and slow";
   private static final String CONTEXT = "context";
   /**
    * TODO : if every have slow recordings of context audio we'll need to add another type or an enum
    */
-  public static final String CONTEXT_AUDIO_TYPE = "context=" + Result.AUDIO_TYPE_REGULAR;
+  public static final AudioType CONTEXT_AUDIO_TYPE = AudioType.CONTEXT_REGULAR;//"context=" + AudioType.AUDIO_TYPE_REGULAR.toString();
 
   private MiniUser user;
 
@@ -83,6 +84,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   // 9/24/14 : setting it here may stop intermittent gwt rpc exceptions
   private Map<String, String> attributes = new HashMap<String, String>();
   private boolean hasBeenPlayed;
+  private AudioType audioType;
 
   public AudioAttribute() {
   }
@@ -103,7 +105,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   public AudioAttribute(int uniqueID, int userid,
                         String exid,
                         String audioRef,
-                        long timestamp, long durationInMillis, String type, MiniUser user, String transcript) {
+                        long timestamp, long durationInMillis, AudioType type, MiniUser user, String transcript) {
     this.uniqueID = uniqueID;
     this.userid = userid;
     this.exid = exid;
@@ -113,13 +115,18 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     this.transcript = transcript;
 
     this.setUser(user);
-    if (type.equals(Result.AUDIO_TYPE_REGULAR)) markRegular();
-    else if (type.equals(Result.AUDIO_TYPE_SLOW)) markSlow();
-    else if (type.equals(Result.AUDIO_TYPE_FAST_AND_SLOW)) {
+    this.audioType = type;
+
+    if (type.equals(AudioType.AUDIO_TYPE_REGULAR)) {
+      markRegular();
+    }
+    else if (type.equals(AudioType.AUDIO_TYPE_SLOW)) {
+      markSlow();
+    }
+    else if (type.equals(AudioType.AUDIO_TYPE_FAST_AND_SLOW)) {
       addAttribute(SPEED, REGULAR_AND_SLOW);
-    } else if (type.contains("=")) { // e.g. context=regular or context=slow - or any key-value pair
-      String[] split = type.split("=");
-      addAttribute(split[0], split[1]);
+    } else {
+      addAttribute(type.getType(), type.getSpeed());
     }
   }
 
@@ -180,6 +187,10 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     }
   }
 
+  public AudioType getRealAudioType() {
+    return audioType;
+  }
+
   public boolean isMale() {
     return user != null && user.isMale();
   }
@@ -205,17 +216,23 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     return attributes.containsKey(name) && attributes.get(name).equals(value);
   }
 
+  /**
+   * Or potentially we'd want to look at an attribute - context = true?
+   * @return
+   */
   public boolean isContextAudio() {
-    return getAudioType().startsWith(CONTEXT);
+    return audioType.isContext();
   }
 
   /**
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#filterByUnrecorded
    */
+/*
   public boolean isExampleSentence() {
     return attributes.containsKey(CONTEXT);
   }
+*/
 
   public void addAttribute(String name, String value) {
     if (attributes.containsKey(name)) {

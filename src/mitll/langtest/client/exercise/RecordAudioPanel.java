@@ -45,7 +45,7 @@ import mitll.langtest.client.scoring.PostAudioRecordButton;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.Result;
+import mitll.langtest.shared.AudioType;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.AudioRefExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -72,7 +72,7 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
   private final Image recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
   private final Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
   protected T exercise;
-  protected String audioType;
+  protected AudioType audioType;
 
   /**
    *
@@ -87,7 +87,7 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
    * @see mitll.langtest.client.exercise.WaveformExercisePanel#getAnswerWidget(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
    */
   public RecordAudioPanel(T exercise, ExerciseController controller, Panel widgets,
-                          LangTestDatabaseAsync service, int index, boolean showSpectrogram, String audioType, String instance) {
+                          LangTestDatabaseAsync service, int index, boolean showSpectrogram, AudioType audioType, String instance) {
     super(service,
       // use full screen width
       // use keyboard
@@ -116,10 +116,10 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
    * @see #RecordAudioPanel(Shell, ExerciseController, Panel, LangTestDatabaseAsync, int, boolean, String, String)
    */
   public AudioAttribute getAudioAttribute() {
-    AudioAttribute audioAttribute = audioType.equals(Result.AUDIO_TYPE_REGULAR) ? exercise.getRecordingsBy(controller.getUser(), true) :
-        audioType.equals(Result.AUDIO_TYPE_SLOW) ? exercise.getRecordingsBy(controller.getUser(), false) : null;
+    AudioAttribute audioAttribute = audioType.equals(AudioType.AUDIO_TYPE_REGULAR) ? exercise.getRecordingsBy(controller.getUser(), true) :
+        audioType.equals(AudioType.AUDIO_TYPE_SLOW) ? exercise.getRecordingsBy(controller.getUser(), false) : null;
 
-    if (audioType.startsWith("context")) {
+    if (audioType.isContext()) {
       for (AudioAttribute audioAttribute1 : exercise.getAudioAttributes()) {
         Map<String, String> attributes = audioAttribute1.getAttributes();
         if (attributes.containsKey("context") && audioAttribute1.getUserid() == controller.getUser()) {
@@ -135,20 +135,20 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
 
   private String getRecordButtonTitle() {
     return
-      audioType.equals(Result.AUDIO_TYPE_REGULAR) ? "Record regular"
+      audioType.equals(AudioType.AUDIO_TYPE_REGULAR) ? "Record regular"
         :
-        audioType.equals(Result.AUDIO_TYPE_SLOW)    ? "Record slow"  : "Record";
+        audioType.equals(AudioType.AUDIO_TYPE_SLOW)    ? "Record slow"  : "Record";
   }
 
   /**
    * @see mitll.langtest.client.scoring.AudioPanel#getPlayButtons
    * @param toTheRightWidget
    * @param buttonTitle
-   * @param recordButtonTitle
-   * @return
+   * @param audioType
+   *@param recordButtonTitle  @return
    */
   @Override
-  protected PlayAudioPanel makePlayAudioPanel(Widget toTheRightWidget, String buttonTitle, String audioType, String recordButtonTitle) {
+  protected PlayAudioPanel makePlayAudioPanel(Widget toTheRightWidget, String buttonTitle, AudioType audioType, String recordButtonTitle) {
     WaveformPostAudioRecordButton myPostAudioRecordButton = makePostAudioRecordButton(audioType, recordButtonTitle);
     postAudioRecordButton = myPostAudioRecordButton;
 
@@ -168,12 +168,12 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
   }
 
   /**
-   * @see #makePlayAudioPanel(com.google.gwt.user.client.ui.Widget, String, String, String)
+   * @see AudioPanel#makePlayAudioPanel(Widget, String, AudioType, String)
    * @param audioType
    * @param recordButtonTitle
    * @return
    */
-  protected WaveformPostAudioRecordButton makePostAudioRecordButton(String audioType, String recordButtonTitle) {
+  protected WaveformPostAudioRecordButton makePostAudioRecordButton(AudioType audioType, String recordButtonTitle) {
     return new MyWaveformPostAudioRecordButton(audioType, recordButtonTitle);
   }
 
@@ -247,11 +247,11 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
    // private long then,now;
 
     /**
-     * @see #makePostAudioRecordButton(String, String)
+     * @see #makePostAudioRecordButton(AudioType, String)
      * @param audioType
      * @param recordButtonTitle
      */
-    public MyWaveformPostAudioRecordButton(String audioType, String recordButtonTitle) {
+    public MyWaveformPostAudioRecordButton(AudioType audioType, String recordButtonTitle) {
       super(RecordAudioPanel.this.exercise.getID(),
         RecordAudioPanel.this.controller,
         RecordAudioPanel.this.exercisePanel,
