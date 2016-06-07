@@ -41,6 +41,7 @@ import mitll.langtest.client.WavCallback;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.AudioType;
 import mitll.langtest.shared.scoring.AudioContext;
 
 import java.util.logging.Logger;
@@ -118,7 +119,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     final long then = System.currentTimeMillis();
     // logger.info("PostAudioRecordButton.postAudioFile : " +  getAudioType());
 
-    AudioContext audioContext   = new AudioContext(reqid, controller.getUser(), getExerciseID(), index, getAudioType());
+    AudioContext audioContext = new AudioContext(reqid, controller.getUser(), getExerciseID(), index, getAudioType());
 
     service.writeAudioFile(base64EncodedWavFile,
         audioContext,
@@ -177,7 +178,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     return false;
   }
 
-  protected String getAudioType() {
+  protected AudioType getAudioType() {
     return controller.getAudioType();
   }
 

@@ -63,9 +63,9 @@ import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.AudioType;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.MiniUser;
-import mitll.langtest.shared.Result;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 
@@ -159,13 +159,13 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
 
   private DivWidget getRecordingWidget() {
     DivWidget widget = new DivWidget();
-    widget.add(getRecordAudioWithAnno(widget, Result.AUDIO_TYPE_REGULAR));
-    widget.add(getRecordAudioWithAnno(widget, Result.AUDIO_TYPE_SLOW));
+    widget.add(getRecordAudioWithAnno(widget, AudioType.AUDIO_TYPE_REGULAR));
+    widget.add(getRecordAudioWithAnno(widget, AudioType.AUDIO_TYPE_SLOW));
 
     return widget;
   }
 
-  private Panel getRecordAudioWithAnno(DivWidget widget, String audioTypeRegular) {
+  private Panel getRecordAudioWithAnno(DivWidget widget, AudioType audioTypeRegular) {
     MyRecordAudioPanel w = new MyRecordAudioPanel(widget, audioTypeRegular, instance);
 
     if (w.getAudioAttribute() == null) {
@@ -301,7 +301,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     ) {
 
       /**
-       * @see mitll.langtest.client.scoring.AudioPanel#addWidgets(String, String, String)
+       * @see mitll.langtest.client.scoring.AudioPanel#addWidgets(String, mitll.langtest.shared.AudioType, String)
        * @return
        */
       @Override
@@ -637,7 +637,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     private Button deleteButton;
     private Widget comment;
 
-    public MyRecordAudioPanel(DivWidget widget, String audioType, String instance) {
+    public MyRecordAudioPanel(DivWidget widget, AudioType audioType, String instance) {
       super(ReviewEditableExercise.this.newUserExercise, ReviewEditableExercise.this.controller, widget,
           ReviewEditableExercise.this.service, 0, false, audioType, instance);
       this.audioType = audioType;
@@ -647,7 +647,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
       this.comment = comment;
     }
 
-    protected WaveformPostAudioRecordButton makePostAudioRecordButton(String audioType, final String recordButtonTitle) {
+    protected WaveformPostAudioRecordButton makePostAudioRecordButton(AudioType audioType, final String recordButtonTitle) {
       return new MyWaveformPostAudioRecordButton(audioType, recordButtonTitle) {
         @Override
         public void useResult(AudioAnswer result) {
@@ -662,7 +662,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
 
     /**
      * @return
-     * @see mitll.langtest.client.scoring.AudioPanel#addWidgets(String, String, String)
+     * @see mitll.langtest.client.scoring.AudioPanel#addWidgets(String, mitll.langtest.shared.AudioType, String)
      */
     @Override
     protected Widget getAfterPlayWidget() {

@@ -72,13 +72,13 @@ public class Result implements IsSerializable, UserAndTime {
   private String device;
   private transient String jsonScore;
 
-  public static final String AUDIO_TYPE_UNSET = "unset";
+/*  public static final String AUDIO_TYPE_UNSET = "unset";
   public static final String AUDIO_TYPE_REGULAR = "regular";
   public static final String AUDIO_TYPE_SLOW = "slow";
   public static final String AUDIO_TYPE_FAST_AND_SLOW = "fastAndSlow";
   public static final String AUDIO_TYPE_PRACTICE = "practice";
   public static final String AUDIO_TYPE_REVIEW = "review";
-  public static final String AUDIO_TYPE_RECORDER = "recorder";
+  public static final String AUDIO_TYPE_RECORDER = "recorder";*/
 
   public Result() {}
 
@@ -110,7 +110,7 @@ public class Result implements IsSerializable, UserAndTime {
     this.answer = answer;
     this.valid = valid;
     this.timestamp = timestamp;
-    this.audioType = answerType == null || answerType.length() == 0 ? AUDIO_TYPE_UNSET : answerType;
+    this.audioType = answerType == null || answerType.length() == 0 ? AudioType.AUDIO_TYPE_UNSET.toString() : answerType;
     this.durationInMillis = durationInMillis;
     this.correct = correct;
     this.pronScore = pronScore;

@@ -36,8 +36,8 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.Report;
-import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.database.user.IUserDAO;
+import mitll.langtest.shared.AudioType;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.exercise.AudioAttribute;
@@ -458,12 +458,18 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
 
       MiniUser user = miniUsers.get(userID);
       user = checkDefaultUser(userID, user);
+      AudioType realType;
+      try {
+        realType = AudioType.valueOf(type);
+      } catch (IllegalArgumentException e) {
+        realType = AudioType.AUDIO_TYPE_UNSET;
+      }
 
       AudioAttribute audioAttr = new AudioAttribute(uniqueID, userID, //id
           exid, // id
           audioRef, // answer
           timestamp.getTime(),
-          dur, type,
+          dur, realType,
           user, transcript);
 
       if (user == null) {
@@ -714,11 +720,8 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @see mitll.langtest.server.database.DatabaseImpl#editItem
    * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#postEditItem
    */
-  protected int markDefect(int userid, String exerciseID, String audioType) {
+  protected int markDefect(int userid, String exerciseID, AudioType audioType) {
     try {
-      if (audioType.equals(AudioAttribute.REGULAR_AND_SLOW)) {
-        audioType = Result.AUDIO_TYPE_FAST_AND_SLOW;
-      }
       Connection connection = database.getConnection(this.getClass().toString());
       String sql = "UPDATE " + AUDIO +
           " " +
@@ -735,7 +738,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
 
       statement.setString(ii++, exerciseID);
       statement.setInt(ii++, userid);
-      statement.setString(ii++, audioType);
+      statement.setString(ii++, audioType.toString());
 
       int i = statement.executeUpdate();
 

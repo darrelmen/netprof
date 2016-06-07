@@ -355,7 +355,7 @@ public class RefResultDecoder {
     boolean doHydec = serverProps.shouldDoDecodeWithHydec();
     List<AudioAttribute> toDecode = new ArrayList<>();
     for (AudioAttribute attribute : audioAttributes) {
-      if (!attribute.isExampleSentence()) {
+      if (!attribute.isContextAudio()) {
         String bestAudio = getFile(attribute);
         if (!decodedFiles.contains(bestAudio)) {
           toDecode.add(attribute);

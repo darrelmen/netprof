@@ -62,7 +62,7 @@ import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.instrumentation.EventRegistration;
-import mitll.langtest.shared.Result;
+import mitll.langtest.shared.AudioType;
 import mitll.langtest.shared.User;
 
 import java.util.Arrays;
@@ -1113,12 +1113,12 @@ public class UserPassLogin extends UserDialog {
   private void storeUser(User result) {
     //logger.info("UserPassLogin.storeUser - " + result);
     enterKeyButtonHelper.removeKeyHandler();
-    userManager.storeUser(result, getAudioTypeFromPurpose(result.getUserKind()));
+    userManager.storeUser(result, getAudioTypeFromUserType(result.getUserKind()));
   }
 
-  private String getAudioTypeFromPurpose(User.Kind kind) {
-    if (kind == User.Kind.STUDENT || kind == User.Kind.TEACHER) return Result.AUDIO_TYPE_PRACTICE;
-    else if (kind == User.Kind.CONTENT_DEVELOPER) return Result.AUDIO_TYPE_RECORDER;
-    else return Result.AUDIO_TYPE_REVIEW;
+  private AudioType getAudioTypeFromUserType(User.Kind kind) {
+    if (kind == User.Kind.STUDENT || kind == User.Kind.TEACHER) return AudioType.AUDIO_TYPE_PRACTICE;
+    else if (kind == User.Kind.CONTENT_DEVELOPER) return AudioType.AUDIO_TYPE_RECORDER;
+    else return AudioType.AUDIO_TYPE_REVIEW;
   }
 }

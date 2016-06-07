@@ -38,6 +38,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.AudioType;
 
 /**
 * Tells playAudioPanel to be enabled/disabled in response to recording states
@@ -53,11 +54,11 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
   private final RecordAudioPanel recordAudioPanel;
   private PlayAudioPanel playAudioPanel;
   private final Panel parentPanel;
-  private final String audioType;
+  private final AudioType audioType;
 
   /**
-   * @see RecordAudioPanel#makePostAudioRecordButton(String, String)
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise.CreateFirstRecordAudioPanel#makePostAudioRecordButton(String, String)
+   * @see RecordAudioPanel#makePostAudioRecordButton(mitll.langtest.shared.AudioType, String)
+   * @see RecordAudioPanel#makePostAudioRecordButton(mitll.langtest.shared.AudioType, String)
    * @param exerciseID
    * @param controller
    * @param widgets
@@ -67,12 +68,14 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
    * @param recordInResults
    * @param playButtonSuffix
    * @param stopButtonText
+   * @param audioType
    */
   protected WaveformPostAudioRecordButton(String exerciseID,
-                                       ExerciseController controller,
-                                       Panel widgets,
-                                       RecordAudioPanel recordAudioPanel, LangTestDatabaseAsync service, int index,
-                                       boolean recordInResults, String playButtonSuffix, String stopButtonText, String audioType) {
+                                          ExerciseController controller,
+                                          Panel widgets,
+                                          RecordAudioPanel recordAudioPanel, LangTestDatabaseAsync service, int index,
+                                          boolean recordInResults, String playButtonSuffix, String stopButtonText,
+                                          AudioType audioType) {
     super(exerciseID, controller, service, index, recordInResults, playButtonSuffix, stopButtonText);
     this.recordAudioPanel = recordAudioPanel;
     this.parentPanel = widgets;
@@ -128,7 +131,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
    * @return
    */
   @Override
-  protected String getAudioType() {
+  protected AudioType getAudioType() {
     return audioType;
   }
 

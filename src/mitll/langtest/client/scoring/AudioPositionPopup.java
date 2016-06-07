@@ -55,7 +55,7 @@ class AudioPositionPopup extends SimplePanel implements AudioControl  {
   private final Panel imageContainer;
 
   /**
-   * @see AudioPanel#addWidgets(String, String, String)
+   * @see AudioPanel#addWidgets(String, mitll.langtest.shared.AudioType, String)
    */
   public AudioPositionPopup(Panel imageContainer) {
     id = counter++;
