@@ -57,7 +57,7 @@ import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.Result;
+import mitll.langtest.shared.AudioType;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 
@@ -664,7 +664,7 @@ class NewUserExercise extends BasicDialog {
      * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel
      */
     @Override
-    protected WaveformPostAudioRecordButton makePostAudioRecordButton(String audioType, String recordButtonTitle) {
+    protected WaveformPostAudioRecordButton makePostAudioRecordButton(AudioType audioType, String recordButtonTitle) {
       postAudioButton =
           new WaveformPostAudioRecordButton(exercise.getID(), controller, exercisePanel, this, service,
               recordRegularSpeed ? 0 : 1,
@@ -695,8 +695,8 @@ class NewUserExercise extends BasicDialog {
             }
 
             @Override
-            protected String getAudioType() {
-              return recordRegularSpeed ? Result.AUDIO_TYPE_REGULAR : Result.AUDIO_TYPE_SLOW;
+            protected AudioType getAudioType() {
+              return recordRegularSpeed ? AudioType.AUDIO_TYPE_REGULAR : AudioType.AUDIO_TYPE_SLOW;
             }
 
             @Override

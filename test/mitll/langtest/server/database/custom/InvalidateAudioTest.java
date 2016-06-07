@@ -196,7 +196,7 @@ public class InvalidateAudioTest {
       } else {
         i += war.attachAudio(exercise);
         for (AudioAttribute att : exercise.getAudioAttributes()) {
-          if (att.isExampleSentence()) {
+          if (att.isContextAudio()) {
             audioDAO.markDefect(att);
             logger.debug("\t for " + ex + " marked " + att);
             c++;

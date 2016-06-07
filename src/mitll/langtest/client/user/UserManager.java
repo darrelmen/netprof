@@ -39,6 +39,7 @@ import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.flashcard.ControlState;
 import mitll.langtest.client.services.UserServiceAsync;
+import mitll.langtest.shared.AudioType;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 
@@ -252,7 +253,7 @@ public class UserManager {
       @Override
       public void onSuccess(User result) {
         setDefaultControlValues((int) result.getId());
-        storeUser(result, Result.AUDIO_TYPE_PRACTICE);
+        storeUser(result, AudioType.AUDIO_TYPE_PRACTICE);
       }
     });
   }
@@ -283,10 +284,11 @@ public class UserManager {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
 
       String audioType = localStorageIfSupported.getItem(getAudioType());
-      if (audioType == null) {
-        audioType = Result.AUDIO_TYPE_FAST_AND_SLOW;
-      }
-      userNotification.rememberAudioType(audioType);
+//      if (audioType == null) {
+//        audioType = AudioType.AUDIO_TYPE_FAST_AND_SLOW;
+//      }
+      AudioType realAudioType = (audioType == null) ? AudioType.AUDIO_TYPE_FAST_AND_SLOW : AudioType.valueOf(audioType);
+      userNotification.rememberAudioType(realAudioType);
     }
   }
 
@@ -401,7 +403,7 @@ public class UserManager {
   }
 
   private void clearCookieState() {
-    userNotification.rememberAudioType(Result.AUDIO_TYPE_UNSET);
+    userNotification.rememberAudioType(AudioType.AUDIO_TYPE_UNSET);
 /*
     if (USE_COOKIE) {
       Cookies.setCookie("sid", "" + NO_USER_SET);
@@ -423,7 +425,7 @@ public class UserManager {
    * @param audioType
    * @see mitll.langtest.client.user.UserPassLogin#storeUser(mitll.langtest.shared.User)
    */
-  void storeUser(User user, String audioType) {
+  void storeUser(User user, AudioType audioType) {
     logger.info("storeUser : user now " + user + " audio type '" + audioType + "'");
     final long DURATION = getUserSessionDuration();
     long futureMoment = getUserSessionEnd(DURATION);

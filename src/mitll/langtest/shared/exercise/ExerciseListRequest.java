@@ -32,6 +32,8 @@
 
 package mitll.langtest.shared.exercise;
 
+import mitll.langtest.client.list.PagingExerciseList;
+
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
@@ -120,6 +122,11 @@ public class ExerciseListRequest implements Serializable {
     return role;
   }
 
+  /**
+   * @see PagingExerciseList#getRequest() 
+   * @param role
+   * @return
+   */
   public ExerciseListRequest setRole(String role) {
     this.role = role;
     return this;
