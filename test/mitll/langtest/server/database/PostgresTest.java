@@ -33,8 +33,8 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.client.user.Md5Hash;
+import mitll.langtest.server.database.audio.AudioDAO;
 import mitll.langtest.server.database.audio.IAudioDAO;
-import mitll.langtest.server.database.audio.SlickAudioDAO;
 import mitll.langtest.server.database.instrumentation.IEventDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.UserDAO;
@@ -42,12 +42,14 @@ import mitll.langtest.shared.User;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.Event;
-import mitll.npdata.dao.SlickAudio;
 import mitll.npdata.dao.SlickSlimEvent;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -186,7 +188,7 @@ public class PostgresTest extends BaseTest {
 
     //if (dao.getAudioAttributes().size() == 0) {
 //     spanish.copyToPostgres();
-   // }
+    // }
 
     Collection<AudioAttribute> audio = dao.getAudioAttributes();
 
@@ -222,7 +224,7 @@ public class PostgresTest extends BaseTest {
 
     IAudioDAO h2AudioDAO = spanish.getH2AudioDAO();
 
-    Map<Integer,Integer> truth = new HashMap<>();
+    Map<Integer, Integer> truth = new HashMap<>();
     for (User user : new UserDAO(spanish).getUsers()) {
 //      Collection<String> recordedBy = dao.getRecordedBy(user.getId());
       Collection<String> recordedBy = h2AudioDAO.getRecordedForUser(user.getId());
@@ -246,23 +248,89 @@ public class PostgresTest extends BaseTest {
     DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
 
     IAudioDAO dao = spanish.getAudioDAO();
-    for (User user : spanish.getUsers()) {
+    List<User> users = spanish.getUsers();
+    long then = System.currentTimeMillis();
+    for (User user : users) {
       Collection<String> recordedBy = dao.getWithContext(user.getId());
       if (!recordedBy.isEmpty()) {
-        logger.info("postgres for " + user.getUserID() + " recorded " + recordedBy.size());
+        logger.info("postgres for " + user.getUserID() + " with context " + recordedBy.size());
       }
     }
+    long now = System.currentTimeMillis();
+
+    logger.info("took " + (now - then) + " millis");
+
+    UserDAO h2UserDAO = new UserDAO(spanish);
+    AudioDAO audioDAO = new AudioDAO(spanish, h2UserDAO);
+    then = System.currentTimeMillis();
+    for (User user : h2UserDAO.getUsers()) {
+      Collection<String> recordedBy = audioDAO.getWithContext(user.getId());
+      if (!recordedBy.isEmpty()) {
+        logger.info("h2 for " + user.getUserID() + " with context " + recordedBy.size());
+      }
+    }
+    now = System.currentTimeMillis();
+    logger.info("took " + (now - then) + " millis");
 
     Map<String, Float> maleFemaleProgress = spanish.getMaleFemaleProgress();
-    logger.info("got " +maleFemaleProgress);
+    logger.info("got " + maleFemaleProgress);
     Map<String, Float> maleFemaleProgressH2 = spanish.getH2MaleFemaleProgress();
 
-    logger.info("got  h2 " +maleFemaleProgressH2);
+    logger.info("got  h2 " + maleFemaleProgressH2);
 
-    for (User user : spanish.getUsers()) {
+    for (User user : users) {
       Collection<String> recordedBy = dao.getRecordedExampleForUser(user.getId());
       if (!recordedBy.isEmpty()) {
         logger.info("postgres for " + user.getUserID() + " getRecordedExampleForUser " + recordedBy.size());
+      }
+    }
+  }
+
+  @Test
+  public void testDefect() {
+    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
+
+    IAudioDAO dao = spanish.getAudioDAO();
+    List<AudioAttribute> audioAttributes = dao.getExToAudio().get("2");
+    for (AudioAttribute audioAttribute : audioAttributes) {
+      logger.info("found " + audioAttribute);
+    }
+    for (AudioAttribute audioAttribute : audioAttributes) {
+      logger.info("defects " + dao.markDefect(audioAttribute));
+    }
+    audioAttributes = dao.getExToAudio().get("2");
+    if (audioAttributes != null) {
+      for (AudioAttribute audioAttribute : audioAttributes) {
+        logger.info("found " + audioAttribute);
+      }
+    }
+  }
+
+  @Test
+  public void testUpdate() {
+    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
+
+    UserDAO h2UserDAO = new UserDAO(spanish);
+    AudioDAO audioDAO = new AudioDAO(spanish, h2UserDAO);
+
+    audioDAO.getExToAudio();
+
+    IAudioDAO dao = spanish.getAudioDAO();
+    List<AudioAttribute> audioAttributes = dao.getExToAudio().get("3");
+    if (audioAttributes != null) {
+      for (AudioAttribute audioAttribute : audioAttributes) {
+        logger.info("found " + audioAttribute);
+      }
+      for (AudioAttribute audioAttribute : audioAttributes) {
+        dao.updateExerciseID(audioAttribute.getUniqueID(), "dude");
+      }
+    } else logger.info("no exercises under 3");
+
+
+    audioAttributes = dao.getExToAudio().get("dude");
+    if (audioAttributes != null) {
+      for (AudioAttribute audioAttribute : audioAttributes) {
+        logger.info("found " + audioAttribute);
       }
     }
   }
