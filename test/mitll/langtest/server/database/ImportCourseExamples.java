@@ -1,15 +1,13 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.database.audio.AudioDAO;
 import mitll.langtest.server.database.audio.IAudioDAO;
+import mitll.langtest.server.database.result.IResultDAO;
+import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,7 +20,7 @@ import java.util.Map;
 public class ImportCourseExamples {
   private static final Logger logger = Logger.getLogger(ImportCourseExamples.class);
 
-  protected static void importCourseExamplesRussian() {
+/*  protected static void importCourseExamplesRussian() {
     String configDir = "war/config/russian";
     String importH2 = "russianCourseExamples_04_16";
     String destinationH2 = "npfRussian";
@@ -42,15 +40,15 @@ public class ImportCourseExamples {
     String language = "korean";
     String destinationH2 = "npfKorean";
     importExamples(language, destinationH2);
-  }
+  }*/
 
-  protected static void importCourseExamplesLevantine() {
+  /*protected static void importCourseExamplesLevantine() {
     String language = "levantine";
     String destinationH2 = "npfLevantine";
     importExamples(language, destinationH2);
   }
-
-  private static void importExamples(String language, String destinationH2) {
+*/
+/*  private static void importExamples(String language, String destinationH2) {
     String configDir = "war/config/" + language;
     String importH2 = language;
     String destAudioDir = "war/config/" +language+ "/bestAudio";
@@ -61,7 +59,7 @@ public class ImportCourseExamples {
 
   private static void importExamples(String configDir, String importH2, String destinationH2, String destAudioDir, String candidateAudioDir) {
     DatabaseImpl courseExamples = makeDatabaseImpl(importH2, configDir);
-    ResultDAO resultDAO1 = courseExamples.getResultDAO();
+    IResultDAO resultDAO1 = courseExamples.getResultDAO();
     System.out.println("got num results " + resultDAO1.getNumResults());
     Map<Integer, Map<String, Result>> userToResultsRegular = resultDAO1.getUserToResults(true, courseExamples.getUserDAO());
   //  Map<Integer, Map<String, Result>> userToResultsRegular = resultDAO1.getUserToResults(Result.AUDIO_TYPE_FAST_AND_SLOW, courseExamples.getUserDAO());
@@ -98,7 +96,7 @@ public class ImportCourseExamples {
     // TODO : put these back if we ever need this again
     //  copyAudio(userToResultsRegular, oldToNew, audioDAO, destAudioDir, candidateAudioDir);
   //  copyAudio(userToResultsSlow, oldToNew, audioDAO, destAudioDir, candidateAudioDir);
-  }
+  }*/
 
   private static DatabaseImpl makeDatabaseImpl(String h2DatabaseFile, String configDir) {
     ServerProperties serverProps = new ServerProperties(configDir, "quizlet.properties");
@@ -168,9 +166,9 @@ public class ImportCourseExamples {
     logger.debug("copied " + count + " files, found " + bad + " bad src audio paths");
   }*/
 
-  public static void main(String []arg){
+/*  public static void main(String []arg){
     //importCourseExamplesJapanese();
    // importCourseExamplesKorean();
     importCourseExamplesLevantine();
-  }
+  }*/
 }

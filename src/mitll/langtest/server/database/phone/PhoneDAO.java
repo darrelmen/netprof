@@ -7,6 +7,8 @@ package mitll.langtest.server.database.phone;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.*;
 import mitll.langtest.server.database.analysis.Analysis;
+import mitll.langtest.server.database.result.IResultDAO;
+import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.server.database.word.WordDAO;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.analysis.PhoneAndScore;
