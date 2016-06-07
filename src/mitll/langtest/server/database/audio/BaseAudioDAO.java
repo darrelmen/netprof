@@ -112,7 +112,7 @@ public abstract class BaseAudioDAO extends DAO {
     }
     long now = System.currentTimeMillis();
     logger.info("getExToAudio (" + database.getLanguage() +
-        ") took " + (now - then) + " millis to get  " + audioAttributes1.size() + " audio entries");
+        ") took " + (now - then) + " millis to get  " + audioAttributes1.size() + " audio entries " + this);
 //    logger.debug("map size is " + exToAudio.size());
     return exToAudio;
   }
@@ -491,31 +491,16 @@ public abstract class BaseAudioDAO extends DAO {
 
   abstract int markDefect(int userid, String exerciseID, String audioType);
 
-  protected boolean isBadUser(int userid) {
+  boolean isBadUser(int userid) {
     return userid < BaseUserDAO.DEFAULT_FEMALE_ID;
   }
-
-  /**
-   * select count(distinct exid) from audio where audiotype='regular';
-   *
-   * @param userMap
-   * @param audioSpeed
-   * @return
-   * @see #getRecordedBy
-   */
-/*  private Set<String> getAudioExercisesForGender(Map<Integer, User> userMap, String audioSpeed) {
-    Set<Integer> userIDs = userMap.keySet();
-    return getAudioExercisesForGender(userIDs, audioSpeed);
-  }*/
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#filterByUnrecorded(ExerciseListRequest, Collection)
    * @param userid
    * @return
    */
-  public Set<String> getWithContext(int userid) {
-    return getWithContext(getUserMap(userid));
-  }
+  public Set<String> getWithContext(int userid) { return getWithContext(getUserMap(userid));  }
 
   private Set<String> getWithContext(Map<Integer, User> userMap) {
     return getAudioExercisesForGender(userMap.keySet(), CONTEXT_REGULAR);
