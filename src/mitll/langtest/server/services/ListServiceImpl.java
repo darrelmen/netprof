@@ -174,6 +174,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * copy the audio under bestAudio
    * assign the item to a user list
    *
+   * So here we set the exercise id to the final id, not a provisional id, as assigned earlier.
    * @param userListID
    * @param userExercise
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
