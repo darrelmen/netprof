@@ -34,6 +34,7 @@ package mitll.langtest.server;
 
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.excel.EventDAOToExcel;
+import mitll.langtest.server.database.excel.ResultDAOToExcel;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.exercise.CommonExercise;
 import org.apache.commons.io.IOUtils;
@@ -275,7 +276,7 @@ public class DownloadServlet extends DatabaseServlet {
    * @param encodedFileName
    * @throws IOException
    */
-  private void returnSpreadsheet(HttpServletResponse response, DatabaseImpl db, String encodedFileName) throws IOException {
+  private void returnSpreadsheet(HttpServletResponse response, DatabaseImpl<?> db, String encodedFileName) throws IOException {
     response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     ServletOutputStream outputStream = response.getOutputStream();
     if (encodedFileName.toLowerCase().contains("users")) {
@@ -283,7 +284,7 @@ public class DownloadServlet extends DatabaseServlet {
       db.usersToXLSX(outputStream);
     } else if (encodedFileName.toLowerCase().contains("results")) {
       setResponseHeader(response, "results.xlsx");
-      db.getResultDAO().writeExcelToStream(db.getMonitorResults(), db.getTypeOrder(), outputStream);
+      new ResultDAOToExcel().writeExcelToStream(db.getMonitorResults(), db.getTypeOrder(), outputStream);
     } else if (encodedFileName.toLowerCase().contains("events")) {
       setResponseHeader(response, "events.xlsx");
       new EventDAOToExcel(db).toXLSX(db.getEventDAO().getAll(db.getLanguage()), outputStream);

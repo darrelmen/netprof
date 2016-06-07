@@ -33,7 +33,8 @@
 package mitll.langtest.server.database.excel;
 
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.ResultDAO;
+import mitll.langtest.server.database.result.IResultDAO;
+import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.shared.MonitorResult;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.*;

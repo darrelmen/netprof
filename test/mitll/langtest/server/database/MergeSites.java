@@ -2,6 +2,8 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.audio.AudioDAO;
+import mitll.langtest.server.database.result.IResultDAO;
+import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.shared.MonitorResult;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
@@ -30,7 +32,7 @@ public class MergeSites extends BaseTest {
    * <p>
    * Map old exercise id 900 to new 12887
    */
-  @Test
+/*  @Test
   public void testMerge() {
     DatabaseImpl egyptianCurrent = getDatabase("egyptian");
     DatabaseImpl<CommonExercise> candidate = getDatabase("egyptianCandidate");
@@ -125,11 +127,11 @@ public class MergeSites extends BaseTest {
     logger.info("before " + before + " after " + after);
     logger.info("unknown " + new TreeSet<>(unk));
     logger.info("added " + n);
-  }
+  }*/
 
-  private static void importExamples(String configDir, String importH2, String destinationH2, String destAudioDir, String candidateAudioDir) {
+/*  private static void importExamples(String configDir, String importH2, String destinationH2, String destAudioDir, String candidateAudioDir) {
     DatabaseImpl courseExamples = makeDatabaseImpl(importH2, configDir);
-    ResultDAO resultDAO1 = courseExamples.getResultDAO();
+    IResultDAO resultDAO1 = courseExamples.getResultDAO();
     System.out.println("got num results " + resultDAO1.getNumResults());
     Map<Integer, Map<String, Result>> userToResultsRegular = resultDAO1.getUserToResults(true, courseExamples.getUserDAO());
     //  Map<Integer, Map<String, Result>> userToResultsRegular = resultDAO1.getUserToResults(Result.AUDIO_TYPE_FAST_AND_SLOW, courseExamples.getUserDAO());
@@ -164,7 +166,7 @@ public class MergeSites extends BaseTest {
 //    //audioDAO.drop();
 //    copyAudio(userToResultsRegular, oldToNew, audioDAO, destAudioDir, candidateAudioDir);
 //    copyAudio(userToResultsSlow, oldToNew, audioDAO, destAudioDir, candidateAudioDir);
-  }
+  }*/
 
   private static DatabaseImpl makeDatabaseImpl(String h2DatabaseFile, String configDir) {
     ServerProperties serverProps = new ServerProperties(configDir, "quizlet.properties");

@@ -53,6 +53,7 @@ import mitll.langtest.server.database.instrumentation.IEventDAO;
 import mitll.langtest.server.database.instrumentation.SlickEventImpl;
 import mitll.langtest.server.database.phone.Phone;
 import mitll.langtest.server.database.phone.PhoneDAO;
+import mitll.langtest.server.database.result.*;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.SlickUserDAOImpl;
 import mitll.langtest.server.database.user.UserDAO;
@@ -117,12 +118,12 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   private ExerciseDAO<CommonExercise> exerciseDAO = null;
 
   private IUserDAO userDAO;
-  private ResultDAO resultDAO;
+  private IResultDAO resultDAO;
   private RefResultDAO refresultDAO;
   private WordDAO wordDAO;
   private PhoneDAO phoneDAO;
   private IAudioDAO audioDAO;
-  private AnswerDAO answerDAO;
+  private IAnswerDAO answerDAO;
   private UserListManager userListManager;
   private UserExerciseDAO userExerciseDAO;
   private AddRemoveDAO addRemoveDAO;
@@ -211,10 +212,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return getConnection(this.getClass().toString());
   }
 
-//  public void createDatabase() {
-//    PostgreSQLConnection postgreSQLConnection = new PostgreSQLConnection(dbName, logAndNotify);
-//  }
-
   /**
    * Create or alter tables as needed.
    */
@@ -246,12 +243,15 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
     userExerciseDAO = new UserExerciseDAO(this);
     UserListExerciseJoinDAO userListExerciseJoinDAO = new UserListExerciseJoinDAO(this);
+
     resultDAO = new ResultDAO(this);
+
     refresultDAO = new RefResultDAO(this, getServerProps().shouldDropRefResult());
     wordDAO = new WordDAO(this);
     phoneDAO = new PhoneDAO(this);
 
     answerDAO = new AnswerDAO(this, resultDAO);
+
     userListManager = new UserListManager(this.userDAO, new UserListDAO(this, this.userDAO), userListExerciseJoinDAO,
         new AnnotationDAO(this, this.userDAO),
         new ReviewedDAO(this, ReviewedDAO.REVIEWED),
@@ -263,11 +263,11 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
     Connection connection1 = getConnection();
     try {
-      resultDAO.createResultTable(connection1);
+     // resultDAO.createResultTable(connection1);
       refresultDAO.createResultTable(connection1);
       connection1 = getConnection();  // huh? why?
     } catch (Exception e) {
-      logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
+      logger.error("got " + e, e);
     } finally {
       closeConnection(connection1);
     }
@@ -276,7 +276,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       // this.userDAO.createTable(this);
       userListManager.setUserExerciseDAO(userExerciseDAO);
     } catch (Exception e) {
-      logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
+      logger.error("got " + e, e);
     }
 
     long then = System.currentTimeMillis();
@@ -289,7 +289,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   /**
    * TODO : This will not work when we move to multiple languages in one db.
    *
-   * @param slickEventDAO
+   * @paramx slickEventDAO
    */
 /*  private void oneTimeDataCopy(SlickEventImpl slickEventDAO) {
     Number numRows = slickEventDAO.getNumRows(getLanguage());
@@ -309,7 +309,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return new AudioDAO(this, this.userDAO);
   }
 
-  public ResultDAO getResultDAO() {
+  public IResultDAO getResultDAO() {
     return resultDAO;
   }
 
@@ -772,12 +772,12 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
                                               Collection<String> allIDs, Map<String, CollationKey> idToKey) {
     logger.debug("getUserHistoryForList " + userid + " and " + ids.size() + " ids, latest " + latestResultID);
 
-    ResultDAO.SessionsAndScores sessionsAndScores = resultDAO.getSessionsForUserIn2(ids, latestResultID, userid, allIDs, idToKey);
-    List<Session> sessionsForUserIn2 = sessionsAndScores.sessions;
+    SessionsAndScores sessionsAndScores = resultDAO.getSessionsForUserIn2(ids, latestResultID, userid, allIDs, idToKey);
+    List<Session> sessionsForUserIn2 = sessionsAndScores.getSessions();
 
     Map<Integer, User> userMap = userDAO.getUserMap();
 
-    AVPHistoryForList sessionAVPHistoryForList = new AVPHistoryForList(sessionsForUserIn2, userid, true);
+    AVPHistoryForList sessionAVPHistoryForList  = new AVPHistoryForList(sessionsForUserIn2, userid, true);
     AVPHistoryForList sessionAVPHistoryForList2 = new AVPHistoryForList(sessionsForUserIn2, userid, false);
 
     // sort by correct %
@@ -836,7 +836,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
 //    logger.debug("returning " + historyForLists);
 //    logger.debug("correct/incorrect history " + sessionsAndScores.sortedResults);
-    return new AVPScoreReport(historyForLists, sessionsAndScores.sortedResults);
+    return new AVPScoreReport(historyForLists, sessionsAndScores.getSortedResults());
   }
 
   private int compareTimestamps(Session o1, Session o2) {
@@ -1163,7 +1163,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     if (join.isEmpty()) logger.warn("huh? no ref audio on " + all.size() + " exercises???");
   }
 
-  public AnswerDAO getAnswerDAO() {
+  public IAnswerDAO getAnswerDAO() {
     return answerDAO;
   }
 
@@ -1209,7 +1209,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   }
 
   /**
-   * Determine sessions per user.  If two consecutive items are more than {@link ResultDAO#SESSION_GAP} seconds
+   * Determine sessions per user.  If two consecutive items are more than {@link IResultDAO#SESSION_GAP} seconds
    * apart, then we've reached a session boundary.
    * Remove all sessions that have just one answer - must be test sessions.
    *
@@ -1217,7 +1217,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getSessions()
    */
   public List<Session> getSessions() {
-    return monitoringSupport.getSessions().sessions;
+    return monitoringSupport.getSessions().getSessions();
   }
 
   /**

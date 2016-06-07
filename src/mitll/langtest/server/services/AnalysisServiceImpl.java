@@ -35,6 +35,7 @@ package mitll.langtest.server.services;
 import mitll.langtest.client.analysis.ShowTab;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.AnalysisService;
+import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.analysis.UserPerformance;
@@ -59,7 +60,6 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
     readProperties(getServletContext());
   }
 
-
   /**
    * @param ids
    * @return
@@ -81,7 +81,7 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
 
   /**
    * @return
-   * @see mitll.langtest.client.analysis.StudentAnalysis#StudentAnalysis(ExerciseController, ShowTab)
+   * @see mitll.langtest.client.analysis.StudentAnalysis#StudentAnalysis
    */
   @Override
   public Collection<UserInfo> getUsersWithRecordings() {
@@ -96,7 +96,7 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
    */
   @Override
   public UserPerformance getPerformanceForUser(int id, int minRecordings) {
-    return db.getResultDAO().getPerformanceForUser(id, db.getPhoneDAO(), minRecordings, db.getExerciseIDToRefAudio());
+   return new Analysis(db, db.getPhoneDAO(), db.getExerciseIDToRefAudio()).getPerformanceForUser(id, minRecordings);
   }
 
   /**

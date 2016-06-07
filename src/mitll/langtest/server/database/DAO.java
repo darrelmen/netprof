@@ -66,7 +66,7 @@ public class DAO {
     isPostgreSQL = database.getServerProps().usePostgres();
   }
 
-  int getNumColumns(Connection connection, String table) throws SQLException {
+  protected int getNumColumns(Connection connection, String table) throws SQLException {
     Statement stmt = connection.createStatement();
     ResultSet rs = stmt.executeQuery("SELECT * FROM " + table + " LIMIT 1");
 
