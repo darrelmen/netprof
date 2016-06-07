@@ -30,30 +30,24 @@
  *
  */
 
-package mitll.langtest.server.database;
+package mitll.langtest.server.database.result;
 
 import mitll.langtest.server.audio.AudioCheck;
-import mitll.langtest.shared.MonitorResult;
+import mitll.langtest.server.database.AnswerInfo;
+import mitll.langtest.server.database.DAO;
+import mitll.langtest.server.database.Database;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.log4j.Logger;
 
 import java.sql.*;
 
-/**
- * Does writing to the results table.
- * Reading, etc. happens in {@link ResultDAO} - might be a little confusing... :)
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since
- */
-public class AnswerDAO extends DAO {
+public class AnswerDAO extends DAO implements IAnswerDAO {
   private static final Logger logger = Logger.getLogger(AnswerDAO.class);
   private static final String PLAN = "plan";
-  private final ResultDAO resultDAO;
+  private final IResultDAO resultDAO;
 
-  public AnswerDAO(Database database, ResultDAO resultDAO) {
+  public AnswerDAO(Database database, IResultDAO resultDAO) {
     super(database);
     this.resultDAO = resultDAO;
   }
@@ -61,11 +55,7 @@ public class AnswerDAO extends DAO {
   /**
    * TODO : consider moving device type through...
    *
-   * @param userID
-   * @param exerciseID
-   * @param questionID
    * @param answer
-   * @param answerType
    * @param correct
    * @param pronScore
    * @param classifierScore
@@ -74,37 +64,30 @@ public class AnswerDAO extends DAO {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAnswer
    * @see mitll.langtest.client.amas.TextResponse#getScoreForGuess
    */
+  @Override
   public long addTextAnswer(AudioContext audioContext,
-                            //int userID,
-                            // String exerciseID, int questionID,
-
                             String answer,
-//                            String answerType,
-
                             boolean correct,
-
                             float pronScore,
 
                             float classifierScore,
-
                             String session, long timeSpent) {
     AnswerInfo answerInfo = new AnswerInfo(
         audioContext,
         new AnswerInfo.RecordingInfo(answer, answer, "", "", true),
         new AudioCheck.ValidityAndDur(0));
 
-    return addAnswer(database,
+    return addAnswer(
         new AnswerInfo(answerInfo, new AnswerInfo.ScoreInfo(correct, pronScore, "", 0)));
   }
 
   /**
-   * @param database
    * @param answerInfo
    * @return id of new row in result table
    * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
    */
-  public long addAnswer(Database database,
-                        AnswerInfo answerInfo) {
+  @Override
+  public long addAnswer(AnswerInfo answerInfo) {
     Connection connection = database.getConnection(this.getClass().toString());
     try {
       long then = System.currentTimeMillis();
@@ -129,7 +112,7 @@ public class AnswerDAO extends DAO {
    * @return
    * @throws SQLException
    */
-  long addResultToTable(MonitorResult info) throws SQLException {
+/*  public long addResultToTable(MonitorResult info) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
 
     logger.debug("addResultToTable : adding answer for monitor result " + info);
@@ -176,9 +159,9 @@ public class AnswerDAO extends DAO {
 
     statement.setBoolean(i++, info.isCorrect());
     statement.setFloat(i++, info.getPronScore());
-/*    statement.setString(i++, info.getDeviceType());
+*//*    statement.setString(i++, info.getDeviceType());
     statement.setString(i++, info.getSimpleDevice());
-    statement.setString(i++, info.getScoreJSON());*/
+    statement.setString(i++, info.getScoreJSON());*//*
     statement.setBoolean(i++, info.isWithFlash());
     statement.setInt(i++, info.getProcessDur());
     statement.setInt(i++, info.getRoundTripDur()); // always zero?
@@ -192,7 +175,7 @@ public class AnswerDAO extends DAO {
     statement.close();
 
     return newID;
-  }
+  }*/
 
   /**
    * Need to protect call to get generated keys.
@@ -204,7 +187,7 @@ public class AnswerDAO extends DAO {
    * @param connection
    * @param info
    * @throws java.sql.SQLException
-   * @see #addAnswer
+   * @see AnswerDAO#addAnswer
    */
   private long addAnswerToTable(Connection connection, AnswerInfo info) throws SQLException {
 
@@ -283,6 +266,7 @@ public class AnswerDAO extends DAO {
     return newID;
   }
 
+  @Override
   public void addRoundTrip(long resultID, int roundTrip) {
     Connection connection = getConnection();
     try {
@@ -308,6 +292,7 @@ public class AnswerDAO extends DAO {
     }
   }
 
+  @Override
   public void addUserScore(long id, float score) {
     changeScore(id, score, ResultDAO.USER_SCORE);
   }
@@ -343,6 +328,7 @@ public class AnswerDAO extends DAO {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getPretestScore(int, long, String, String, int, int, boolean, String, boolean)
    * @see mitll.langtest.server.database.DatabaseImpl#rememberScore(long, PretestScore)
    */
+  @Override
   public void changeAnswer(long id, float score, int processDur, String json) {
     //logger.info("Setting id " + id + " score " + score + " process dur " + processDur + " json " + json);
     Connection connection = getConnection();

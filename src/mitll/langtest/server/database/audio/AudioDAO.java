@@ -36,7 +36,7 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.Report;
-import mitll.langtest.server.database.ResultDAO;
+import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.Result;
@@ -295,27 +295,6 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
     return results;
   }
 
-/*  public Map<String, Integer> getExToCount() {
-    String sql = "select exid, count(exid) from (select distinct exid,userid from audio where defect=false and audiotype='regular')  group by exid\n";
-
-    Map<String, Integer> results = new HashMap<>();
-    try {
-      Connection connection = database.getConnection(this.getClass().toString());
-      PreparedStatement statement = connection.prepareStatement(sql);
-      ResultSet rs = statement.executeQuery();
-      while (rs.next()) {
-        String trim = rs.getString(1).trim();
-        results.put(trim, rs.getInt(2));
-      }
-      //    logger.debug("for " + audioSpeed + " " + sql + " yielded " + results.size());
-      finish(connection, statement, rs);
-      logger.debug("results returned " + results.size());
-
-    } catch (Exception ee) {
-      logger.error("got " + ee, ee);
-    }
-    return results;
-  }*/
 
   /**
    * select count(*) from (select count(*) from (select DISTINCT exid, audiotype from audio where length(exid) > 0 and audiotype='regular' OR audiotype='slow' and defect<>true) where length(exid) > 0 group by exid)
@@ -651,7 +630,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
           " SET " +
           AUDIO_REF + "=?," +
           Database.TIME + "=?," +
-          ResultDAO.DURATION + "=?, " +
+          DURATION + "=?, " +
           TRANSCRIPT + "=? " +
 
           "WHERE " +
@@ -803,8 +782,8 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
         Database.EXID + "," +
         Database.TIME + "," +
         AUDIO_REF + "," +
-        ResultDAO.AUDIO_TYPE + "," +
-        ResultDAO.DURATION + "," +
+        AUDIO_TYPE + "," +
+        DURATION + "," +
         TRANSCRIPT + "," +
         DEFECT +
         ") VALUES(?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);

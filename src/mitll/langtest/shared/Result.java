@@ -33,6 +33,7 @@
 package mitll.langtest.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.server.database.result.ResultDAO;
 
 import java.beans.Transient;
 import java.util.Date;
@@ -82,7 +83,7 @@ public class Result implements IsSerializable, UserAndTime {
   public Result() {}
 
   /**
-   * @see mitll.langtest.server.database.ResultDAO#getResultsForQuery(java.sql.Connection, java.sql.PreparedStatement)
+   * @see ResultDAO#getResultsForQuery(java.sql.Connection, java.sql.PreparedStatement)
    * @param userid
    * @param plan
    * @param id

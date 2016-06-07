@@ -33,6 +33,7 @@
 package mitll.langtest.shared.flashcard;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.server.database.result.ResultDAO;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -77,7 +78,7 @@ public class CorrectAndScore implements IsSerializable, Comparable<CorrectAndSco
   }
 
   /**
-   * @see mitll.langtest.server.database.ResultDAO#getScoreResultsForQuery(java.sql.Connection, java.sql.PreparedStatement)
+   * @see ResultDAO#getScoreResultsForQuery(java.sql.Connection, java.sql.PreparedStatement)
    * @param uniqueID
    * @param userid
    * @param exerciseID

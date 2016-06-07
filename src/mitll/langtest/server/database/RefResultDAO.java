@@ -34,6 +34,7 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.audio.DecodeAlignOutput;
+import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.decoder.RefResultDecoder;
 import mitll.langtest.shared.Result;
 import net.sf.json.JSONArray;
@@ -186,11 +187,11 @@ public class RefResultDAO extends DAO {
             EXID + "," +
             Database.TIME + "," +
             ANSWER + "," +
-            ResultDAO.DURATION + "," +
-            ResultDAO.CORRECT + "," +
+            DURATION + "," +
+            CORRECT + "," +
 
-            ResultDAO.PRON_SCORE + "," +
-            ResultDAO.SCORE_JSON + "," +
+            PRON_SCORE + "," +
+            SCORE_JSON + "," +
             NUMDECODE_PHONES + "," +
             DECODE_PROCESS_DUR + "," +
 

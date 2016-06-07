@@ -36,6 +36,7 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.instrumentation.IEventDAO;
+import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.Result;
@@ -115,7 +116,7 @@ public class Report {
   public static final String SKIP_USER = "gvidaver";
 
   private final IUserDAO userDAO;
-  private final ResultDAO resultDAO;
+  private final IResultDAO resultDAO;
   private final IEventDAO eventDAO;
   private final IAudioDAO audioDAO;
 
@@ -132,7 +133,7 @@ public class Report {
       "WagnerSandy",
       "rbtrbt"));
 
-  Report(IUserDAO userDAO, ResultDAO resultDAO, IEventDAO eventDAO, IAudioDAO audioDAO, String language,
+  Report(IUserDAO userDAO, IResultDAO resultDAO, IEventDAO eventDAO, IAudioDAO audioDAO, String language,
          String prefix) {
     this.userDAO = userDAO;
     this.resultDAO = resultDAO;
@@ -1266,7 +1267,8 @@ public class Report {
    * @param jsonObject
    * @see #doReport
    */
-  private Set<Integer> getEvents(StringBuilder builder, Set<Integer> students, JSONObject jsonObject, int year, Collection<SlickSlimEvent> all) {
+  private Set<Integer> getEvents(StringBuilder builder, Set<Integer> students, JSONObject jsonObject, int year,
+                                 Collection<SlickSlimEvent> all) {
     return getEvents(builder, students, all, ACTIVE_USERS, TIME_ON_TASK, jsonObject, year);
   }
 
@@ -1292,7 +1294,8 @@ public class Report {
    * @return
    * @see #getReport
    */
-  private Set<Integer> getEventsDevices(StringBuilder builder, Set<Integer> students, JSONObject jsonObject, int year, List<SlickSlimEvent> allDevicesSlim) {
+  private Set<Integer> getEventsDevices(StringBuilder builder, Set<Integer> students, JSONObject jsonObject, int year,
+                                        List<SlickSlimEvent> allDevicesSlim) {
     String activeUsers = ACTIVE_I_PAD;
     String tableLabel = "iPad/iPhone Time on Task";
     return getEvents(builder, students, allDevicesSlim, activeUsers, tableLabel, jsonObject, year);
