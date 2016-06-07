@@ -491,7 +491,6 @@ class NewUserExercise extends BasicDialog {
                                     final ListInterface<CommonShell> pagingContainer, final Panel toAddTo,
                                     final boolean onClick) {
   //  logger.info("isValidForeignPhrase : checking phrase " + foreignLang.getText() + " before adding/changing " + newUserExercise);
-
     service.isValidForeignPhrase(foreignLang.getText(), new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
