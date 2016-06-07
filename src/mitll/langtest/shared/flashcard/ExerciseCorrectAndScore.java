@@ -33,7 +33,7 @@
 package mitll.langtest.shared.flashcard;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.server.database.ResultDAO;
+import mitll.langtest.server.database.result.ResultDAO;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -55,7 +55,7 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
   public ExerciseCorrectAndScore() {}
 
   /**
-   * @see mitll.langtest.server.database.ResultDAO#getSortedAVPHistory
+   * @see ResultDAO#getSortedAVPHistory
    * @param id
    */
   public ExerciseCorrectAndScore(String id) {
@@ -74,7 +74,7 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
   }
 
   /**
-   * @see mitll.langtest.server.database.ResultDAO#getSortedAVPHistory
+   * @see ResultDAO#getSortedAVPHistory
    * @param o
    * @param fl
    * @param otherFL

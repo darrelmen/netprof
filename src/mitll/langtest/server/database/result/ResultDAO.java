@@ -30,12 +30,14 @@
  *
  */
 
-package mitll.langtest.server.database;
+package mitll.langtest.server.database.result;
 
 import mitll.langtest.server.PathHelper;
-import mitll.langtest.server.database.analysis.Analysis;
+import mitll.langtest.server.database.DAO;
+import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.Report;
 import mitll.langtest.server.database.excel.ResultDAOToExcel;
-import mitll.langtest.server.database.phone.PhoneDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.server.sorter.ExerciseSorter;
@@ -43,7 +45,6 @@ import mitll.langtest.shared.MonitorResult;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.UserAndTime;
-import mitll.langtest.shared.analysis.UserPerformance;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
@@ -62,15 +63,7 @@ import java.util.*;
 
 import static mitll.langtest.server.database.Database.EXID;
 
-/**
- * Create, drop, alter, read from the results table.
- * Note that writing to the table takes place in the {@link AnswerDAO}. Not sure if that's a good idea or not. :)
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since
- */
-public class ResultDAO extends DAO {
+public class ResultDAO extends DAO implements IResultDAO {
   private static final Logger logger = Logger.getLogger(ResultDAO.class);
 
   private static final Map<String, String> EMPTY_MAP = new HashMap<>();
@@ -107,7 +100,6 @@ public class ResultDAO extends DAO {
   public static final String SNR = "SNR";
   private static final String SESSION = "session"; // from ODA
 
-
   public static final String USER_SCORE = "userscore";
   //public static final String CLASSIFIER_SCORE = "classifierscore";
 
@@ -134,9 +126,9 @@ public class ResultDAO extends DAO {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getPerformanceForUser
    * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot
    */
-  public UserPerformance getPerformanceForUser(long id, PhoneDAO phoneDAO, int minRecordings, Map<String, String> exToRef) {
+/*  public UserPerformance getPerformanceForUser(long id, PhoneDAO phoneDAO, int minRecordings, Map<String, String> exToRef) {
     return new Analysis(database, phoneDAO, exToRef).getPerformanceForUser(id, minRecordings);
-  }
+  }*/
 
   /**
    * Pulls the list of results out of the database.
@@ -146,6 +138,7 @@ public class ResultDAO extends DAO {
    * @see #getUserToResults
    * @see Report#getResults(StringBuilder, Set, JSONObject, int)
    */
+  @Override
   public List<Result> getResults() {
     try {
       String sql = "SELECT * FROM " + RESULTS;
@@ -157,6 +150,7 @@ public class ResultDAO extends DAO {
     return new ArrayList<>();
   }
 
+  @Override
   public Collection<UserAndTime> getUserAndTimes() {
     try {
       String sql = "SELECT " + USERID + "," + EXID + "," + Database.TIME + ", "
@@ -168,7 +162,8 @@ public class ResultDAO extends DAO {
     return new ArrayList<>();
   }
 
-  List<Result> getResultsForPractice() {
+  @Override
+  public List<Result> getResultsForPractice() {
     try {
       String sql = "SELECT * FROM " + RESULTS + " where " + AUDIO_TYPE + " is not null";
       List<Result> resultsForQuery = getResultsSQL(sql);
@@ -179,7 +174,8 @@ public class ResultDAO extends DAO {
     return new ArrayList<>();
   }
 
-  List<Result> getResultsDevices() {
+  @Override
+  public List<Result> getResultsDevices() {
     try {
       String sql = "SELECT * FROM " + RESULTS + " where " + DEVICETYPE + " like 'i%'";
       return getResultsSQL(sql);
@@ -196,6 +192,7 @@ public class ResultDAO extends DAO {
    * @return to re-process
    * @see mitll.langtest.server.decoder.RefResultDecoder#doMissingInfo
    */
+  @Override
   public List<Result> getResultsToDecode() {
     try {
       String scoreJsonClause = " AND " +
@@ -250,7 +247,8 @@ public class ResultDAO extends DAO {
    * @return
    * @see DatabaseImpl#getMonitorResults()
    */
-  List<MonitorResult> getMonitorResults() {
+  @Override
+  public List<MonitorResult> getMonitorResults() {
     try {
       synchronized (this) {
         if (cachedMonitorResultsForQuery != null) {
@@ -270,6 +268,7 @@ public class ResultDAO extends DAO {
     return new ArrayList<>();
   }
 
+  @Override
   public Result getResultByID(long id) {
     String sql = "SELECT * FROM " + RESULTS + " WHERE " + ID + "='" + id + "'";
     try {
@@ -294,6 +293,7 @@ public class ResultDAO extends DAO {
    * @param join
    * @see mitll.langtest.server.database.DatabaseImpl#getMonitorResultsWithText(java.util.List)
    */
+  @Override
   public void addUnitAndChapterToResults(List<MonitorResult> monitorResults, Map<String, CommonExercise> join) {
     int n = 0;
     Set<String> unknownIDs = new HashSet<>();
@@ -320,6 +320,7 @@ public class ResultDAO extends DAO {
     }
   }
 
+  @Override
   public List<MonitorResult> getMonitorResultsByID(String id) {
     try {
       String sql = "SELECT * FROM " + RESULTS + " WHERE " + EXID + "='" + id + "'";
@@ -345,6 +346,7 @@ public class ResultDAO extends DAO {
    * @see mitll.langtest.server.database.DatabaseImpl#getUserHistoryForList
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete()
    */
+  @Override
   public SessionsAndScores getSessionsForUserIn2(Collection<String> ids, long latestResultID, long userid,
                                                  Collection<String> allIds, Map<String, CollationKey> idToKey) {
     List<Session> sessions = new ArrayList<>();
@@ -374,6 +376,7 @@ public class ResultDAO extends DAO {
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds
    */
+  @Override
   public <T extends CommonShell> List<T> getExercisesSortedIncorrectFirst(Collection<T> exercises, long userid, Collator collator) {
     List<String> allIds = new ArrayList<>();
     Map<String, T> idToEx = new HashMap<>();
@@ -402,7 +405,7 @@ public class ResultDAO extends DAO {
    * @param idToKey
    * @return
    * @see mitll.langtest.server.database.DatabaseImpl#getJsonScoreHistory
-   * @see ResultDAO#getExercisesSortedIncorrectFirst
+   * @see IResultDAO#getExercisesSortedIncorrectFirst
    */
   private List<ExerciseCorrectAndScore> getExerciseCorrectAndScores(long userid, List<String> allIds,
                                                                     Map<String, CollationKey> idToKey) {
@@ -411,6 +414,7 @@ public class ResultDAO extends DAO {
     return getSortedAVPHistory(results, allIds, idToKey);
   }
 
+  @Override
   public List<ExerciseCorrectAndScore> getExerciseCorrectAndScoresByPhones(long userid, List<String> allIds,
                                                                            Map<String, CommonExercise> idToEx,
                                                                            ExerciseSorter sorter) {
@@ -555,22 +559,13 @@ public class ResultDAO extends DAO {
     return new ArrayList<>(idToScores.values());
   }
 
-  public static class SessionsAndScores {
-    final List<Session> sessions;
-    final List<ExerciseCorrectAndScore> sortedResults;
-
-    SessionsAndScores(List<Session> sessions, List<ExerciseCorrectAndScore> sortedResults) {
-      this.sessions = sessions;
-      this.sortedResults = sortedResults;
-    }
-  }
-
   /**
    * @param userID
    * @param firstExercise
    * @param isFlashcardRequest
    * @see mitll.langtest.server.LangTestDatabaseImpl#attachScoreHistory(long, mitll.langtest.shared.exercise.CommonExercise, boolean)
    */
+  @Override
   public void attachScoreHistory(int userID, CommonExercise firstExercise, boolean isFlashcardRequest) {
     List<CorrectAndScore> resultsForExercise = getCorrectAndScores(userID, firstExercise, isFlashcardRequest);
 
@@ -678,6 +673,7 @@ public class ResultDAO extends DAO {
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getScoresForUser
    */
+  @Override
   public List<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, long userid, String session) {
     try {
       String list = getInList(ids);
@@ -796,9 +792,10 @@ public class ResultDAO extends DAO {
   }
 
   /**
-   * @see mitll.langtest.server.database.AnswerDAO#addAnswerToTable
+   * @see AnswerDAO#addAnswerToTable
    */
-  synchronized void invalidateCachedResults() {
+  @Override
+  public synchronized void invalidateCachedResults() {
     cachedResultsForQuery2 = null;
     cachedMonitorResultsForQuery = null;
   }
@@ -1061,6 +1058,7 @@ public class ResultDAO extends DAO {
    *
    * @return list of duration and numAnswer pairs
    */
+  @Override
   public SessionInfo getSessions() {
     Map<Long, List<CorrectAndScore>> userToAnswers = populateUserToAnswers(getCorrectAndScores());
     List<Session> sessions = new ArrayList<>();
@@ -1184,16 +1182,6 @@ public class ResultDAO extends DAO {
 //    logger.debug("\tpartitionIntoSessions2 made " +sessions.size() + " from " + answersForUser.size() + " answers");
 
     return sessions;
-  }
-
-  public static class SessionInfo {
-    public final List<Session> sessions;
-    public final Map<Long, Float> userToRate;
-
-    public SessionInfo(List<Session> sessions, Map<Long, Float> userToRate) {
-      this.sessions = sessions;
-      this.userToRate = userToRate;
-    }
   }
 
   private void sortByTime(List<CorrectAndScore> answersForUser) {
@@ -1433,9 +1421,9 @@ public class ResultDAO extends DAO {
    * @param out
    * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
-  public void writeExcelToStream(Collection<MonitorResult> results, Collection<String> typeOrder, OutputStream out) {
+/*  public void writeExcelToStream(Collection<MonitorResult> results, Collection<String> typeOrder, OutputStream out) {
     new ResultDAOToExcel().writeExcelToStream(results, typeOrder, out);
-  }
+  }*/
 
   private static class MyUserAndTime implements UserAndTime {
     private final int userID;
