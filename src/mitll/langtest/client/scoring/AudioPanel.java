@@ -47,6 +47,7 @@ import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
+import mitll.langtest.shared.AudioType;
 import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.exercise.Shell;
 
@@ -122,14 +123,14 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
    * @param gaugePanel
    * @param rightMargin
    * @param playButtonSuffix
-   * @param exerciseID
+   * @param audioType
+   *@param exerciseID
    * @param exercise
-   * @param instance
-   * @see ScoringAudioPanel#ScoringAudioPanel
+   * @param instance    @see ScoringAudioPanel#ScoringAudioPanel
    */
   public AudioPanel(String path, LangTestDatabaseAsync service,
-             ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin,
-             String playButtonSuffix, String audioType, String exerciseID, T exercise, String instance) {
+                    ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin,
+                    String playButtonSuffix, AudioType audioType, String exerciseID, T exercise, String instance) {
     this(service, controller, showSpectrogram, gaugePanel, 1.0f, rightMargin, exerciseID, exercise, instance);
     this.audioPath = path;
 
@@ -185,12 +186,12 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
    * Replace the html 5 audio tag with our fancy waveform widget.
    *
    * @param playButtonSuffix
-   * @param recordButtonTitle
-   * @return
+   * @param audioType
+   *@param recordButtonTitle  @return
    * @see mitll.langtest.client.exercise.RecordAudioPanel#RecordAudioPanel(T, ExerciseController, Panel, LangTestDatabaseAsync, int, boolean, String, String)
    * @see mitll.langtest.client.scoring.AudioPanel#AudioPanel
    */
-  protected void addWidgets(String playButtonSuffix, String audioType, String recordButtonTitle) {
+  protected void addWidgets(String playButtonSuffix, AudioType audioType, String recordButtonTitle) {
 //    logger.info("AudioPanel.addWidgets " + audioType + " title " + recordButtonTitle +
 //        " suffix = " + playButtonSuffix + " has audio " + hasAudio());
 
@@ -412,15 +413,15 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
    * Adds a listener to the audio panel - this way it can update its position as the audio plays
    *
    * @return PlayAudioPanel
-   * @see #addWidgets(String, String, String)
+   * @see #addWidgets(String, AudioType, String)
    */
-  private PlayAudioPanel getPlayButtons(Widget toTheRightWidget, String playButtonSuffix, String audioType, String recordButtonTitle) {
+  private PlayAudioPanel getPlayButtons(Widget toTheRightWidget, String playButtonSuffix, AudioType audioType, String recordButtonTitle) {
     PlayAudioPanel playAudio = makePlayAudioPanel(toTheRightWidget, playButtonSuffix, audioType, recordButtonTitle);
     playAudio.addListener(audioPositionPopup);
     return playAudio;
   }
 
-  protected PlayAudioPanel makePlayAudioPanel(final Widget toTheRightWidget, String buttonTitle, String audioType,
+  protected PlayAudioPanel makePlayAudioPanel(final Widget toTheRightWidget, String buttonTitle, AudioType audioType,
                                               String recordButtonTitle) {
     return new PlayAudioPanel(soundManager, buttonTitle, toTheRightWidget);
   }

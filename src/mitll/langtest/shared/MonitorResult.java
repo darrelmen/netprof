@@ -74,7 +74,7 @@ public class MonitorResult implements IsSerializable {
   private String answer;
   private boolean valid;
   private long timestamp;
-  private String audioType;
+  private AudioType audioType;
   private int durationInMillis;
   private boolean correct;
   private float pronScore;
@@ -109,19 +109,20 @@ public class MonitorResult implements IsSerializable {
    * @param withFlash
    * @param processDur
    * @param roundTripDur
+   * @param audioType
    * @see ResultDAO#getMonitorResultsForQuery(Connection, PreparedStatement)
    */
   public MonitorResult(int uniqueID, int userid, String id, String answer,
                        boolean valid, long timestamp, String answerType, int durationInMillis,
                        boolean correct, float pronScore, String device, boolean withFlash, int processDur,
-                       int roundTripDur, String validity, float snr) {
+                       int roundTripDur, String validity, float snr, AudioType audioType) {
     this.uniqueID = uniqueID;
     this.userid = userid;
     this.id = id;
     this.answer = answer;
     this.valid = valid;
     this.timestamp = timestamp;
-    this.audioType = answerType == null || answerType.length() == 0 ? Result.AUDIO_TYPE_UNSET : answerType;
+    this.audioType = audioType;//answerType == null || answerType.length() == 0 ? AudioType.AUDIO_TYPE_UNSET : answerType;
     this.durationInMillis = durationInMillis;
     this.correct = correct;
     this.pronScore = pronScore;
@@ -161,9 +162,7 @@ public class MonitorResult implements IsSerializable {
     return timestamp;
   }
 
-  public String getAudioType() {
-    return audioType;
-  }
+  public AudioType getAudioType() { return audioType;  }
 
   public int getDurationInMillis() {
     return durationInMillis;
