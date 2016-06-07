@@ -85,14 +85,14 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @param transcript
    */
   @Override
-  void addOrUpdateUser(int userid, String exerciseID, String audioType, String audioRef, long timestamp,
+  public void addOrUpdateUser(int userid, String exerciseID, String audioType, String audioRef, long timestamp,
                        int durationInMillis, String transcript) {
     dao.addOrUpdate(userid, exerciseID, audioType, audioRef, timestamp, durationInMillis, transcript);
   }
 
   @Override
   public void updateExerciseID(int uniqueID, String exerciseID) {
-    dao.updateAudioID(uniqueID, exerciseID);
+    dao.updateExerciseID(uniqueID, exerciseID);
   }
 
   @Override
