@@ -73,10 +73,7 @@ import mitll.langtest.client.sound.SoundManagerStatic;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserNotification;
-import mitll.langtest.shared.ImageResponse;
-import mitll.langtest.shared.Result;
-import mitll.langtest.shared.StartupInfo;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.*;
 import mitll.langtest.shared.exercise.Shell;
 
 import java.util.*;
@@ -169,7 +166,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private UserManager userManager;
   private FlashRecordPanelHeadless flashRecordPanel;
 
-  private String audioType = Result.AUDIO_TYPE_UNSET;
+  private AudioType audioType = AudioType.AUDIO_TYPE_UNSET;
 
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
   private final UserServiceAsync userService = GWT.create(UserService.class);
@@ -669,12 +666,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   @Override
-  public void rememberAudioType(String audioType) {
+  public void rememberAudioType(AudioType audioType) {
     this.audioType = audioType;
   }
 
   public boolean showCompleted() {
-    return isReviewMode() || getAudioType().equals(Result.AUDIO_TYPE_RECORDER);
+    return isReviewMode() || getAudioType().equals(AudioType.AUDIO_TYPE_RECORDER);
   }
 
   /**
@@ -683,13 +680,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @return
    */
   @Override
-  public String getAudioType() {
-    if (permissions.contains(User.Permission.RECORD_AUDIO)) return Result.AUDIO_TYPE_RECORDER;
+  public AudioType getAudioType() {
+    if (permissions.contains(User.Permission.RECORD_AUDIO)) return AudioType.AUDIO_TYPE_RECORDER;
     else return audioType;
   }
 
   private boolean isReviewMode() {
-    return audioType.equals(Result.AUDIO_TYPE_REVIEW);
+    return audioType.equals(AudioType.AUDIO_TYPE_REVIEW);
   }
 
   private final Set<User.Permission> permissions = new HashSet<User.Permission>();

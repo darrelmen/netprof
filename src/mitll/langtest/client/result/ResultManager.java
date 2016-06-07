@@ -686,7 +686,7 @@ public class ResultManager extends PagerTable {
     TextColumn<MonitorResult> audioType = new TextColumn<MonitorResult>() {
       @Override
       public String getValue(MonitorResult answer) {
-        return answer.getAudioType().equals("avp") ? "flashcard" : answer.getAudioType();
+        return /*answer.getAudioType().equals("avp") ? "flashcard" :*/ answer.getAudioType().toString();
       }
     };
     audioType.setSortable(true);

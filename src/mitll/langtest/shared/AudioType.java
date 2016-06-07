@@ -30,27 +30,50 @@
  *
  */
 
-package mitll.langtest.client.user;
+package mitll.langtest.shared;
 
-import mitll.langtest.shared.AudioType;
-import mitll.langtest.shared.User;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
-import java.util.Collection;
+public enum AudioType implements IsSerializable {
+  AUDIO_TYPE_UNSET("unset"),
+  AUDIO_TYPE_REGULAR("regular"),
+  AUDIO_TYPE_SLOW("slow"),
+  AUDIO_TYPE_FAST_AND_SLOW("fastAndSlow"),
+  AUDIO_TYPE_PRACTICE("practice"),
+  AUDIO_TYPE_REVIEW("review"),
+  AUDIO_TYPE_RECORDER("recorder"),
+  CONTEXT_REGULAR("context=regular", "context", "regular"),
+  CONTEXT_SLOW("context=slow", "context", "slow");
 
-/**
- * Created with IntelliJ IDEA.
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 5/16/12
- * Time: 12:54 PM
- * To change this template use File | Settings | File Templates.
- */
-public interface UserNotification {
-  void showLogin();
+  private final String text;
+  private final String type;
+  private final String speed;
 
-  void gotUser(User user);
-  void rememberAudioType(AudioType audioType);
-  void setPermission(User.Permission permission, boolean on);
-  Collection<User.Permission> getPermissions();
+  AudioType(final String text) {
+    this.text = text;
+    type = "";
+    speed = "";
+  }
+
+  AudioType(final String text, String type, String speed) {
+    this.text = text;
+    this.type = type;
+    this.speed = speed;
+  }
+
+  @Override
+  public String toString() {
+    return text;
+  }
+
+  public String getType() {
+    return type;
+  }
+
+  public String getSpeed() {
+    return speed;
+  }
+  public boolean isContext() {
+    return this == CONTEXT_REGULAR || this == CONTEXT_SLOW;
+  }
 }

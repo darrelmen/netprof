@@ -33,6 +33,7 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.audio.AudioCheck;
+import mitll.langtest.shared.AudioType;
 import mitll.langtest.shared.scoring.AudioContext;
 
 /**
@@ -48,7 +49,7 @@ public class AnswerInfo {
   private String answer;
   private String audioFile;
   private boolean valid;
-  private String audioType;
+  private AudioType audioType;
   private long durationInMillis;
   private boolean correct;
   private float pronScore;
@@ -126,7 +127,7 @@ public class AnswerInfo {
   public AnswerInfo(int userid,
                     String id,
                     int questionID,
-                    String audioType,
+                    AudioType audioType,
 
                     String answer,
                     String audioFile,
@@ -184,7 +185,7 @@ public class AnswerInfo {
   }
 
   public AnswerInfo(int userid, String id, int questionID,
-                    String audioType, String answer, String audioFile,
+                    AudioType audioType, String answer, String audioFile,
                     String deviceType, String device, boolean withFlash,
 
                     long durationInMillis,
@@ -239,7 +240,7 @@ public class AnswerInfo {
     return valid;
   }
 
-  public String getAudioType() {
+  public AudioType getAudioType() {
     return audioType;
   }
 

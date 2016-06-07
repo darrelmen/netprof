@@ -40,7 +40,9 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.database.user.IUserDAO;
+import mitll.langtest.shared.AudioType;
 import mitll.langtest.shared.MiniUser;
+import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -450,7 +452,7 @@ public abstract class BaseAudioDAO extends DAO {
    */
   protected AudioAttribute getAudioAttribute(int i,
                                              int userid, String audioRef, String exerciseID, long timestamp,
-                                             String audioType, long durationInMillis, String transcript) {
+                                             AudioType audioType, long durationInMillis, String transcript) {
     MiniUser miniUser = userDAO.getMiniUser(userid);
 
     return new AudioAttribute(i, userid,
@@ -468,7 +470,11 @@ public abstract class BaseAudioDAO extends DAO {
    * @see DatabaseImpl#markAudioDefect(AudioAttribute)
    */
   public int markDefect(AudioAttribute attribute) {
-    return markDefect((int) attribute.getUserid(), attribute.getExid(), attribute.getAudioType());
+    AudioType audioType = attribute.getRealAudioType();
+    if (attribute.getAudioType().equals(AudioAttribute.REGULAR_AND_SLOW)) {
+      audioType = AudioType.AUDIO_TYPE_FAST_AND_SLOW;
+    }
+    return markDefect(attribute.getUserid(), attribute.getExid(), audioType);
   }
 
   /**
@@ -489,7 +495,7 @@ public abstract class BaseAudioDAO extends DAO {
   abstract void addOrUpdateUser(int userid, String exerciseID, String audioType, String audioRef, long timestamp,
                                 int durationInMillis, String transcript);
 
-  abstract int markDefect(int userid, String exerciseID, String audioType);
+  abstract int markDefect(int userid, String exerciseID, AudioType audioType);
 
   boolean isBadUser(int userid) {
     return userid < BaseUserDAO.DEFAULT_FEMALE_ID;

@@ -40,6 +40,7 @@ import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.user.UserFeedback;
+import mitll.langtest.shared.AudioType;
 import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.User;
@@ -80,7 +81,7 @@ public interface ExerciseController extends EventRegistration {
   int getRecordTimeout();
 
   boolean isLogClientMessages();
-  String getAudioType();
+  AudioType getAudioType();
   Collection<User.Permission> getPermissions();
 
   boolean showCompleted();
