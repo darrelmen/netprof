@@ -32,6 +32,9 @@
 
 package mitll.langtest.server.database;
 
+import mitll.langtest.server.database.result.IResultDAO;
+import mitll.langtest.server.database.result.ResultDAO;
+import mitll.langtest.server.database.result.SessionInfo;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
@@ -61,13 +64,13 @@ class MonitoringSupport {
   private static final float MINUTE_MILLIS_FLOAT = (float) MINUTE_MILLIS;
 
   private final IUserDAO userDAO;
-  private final ResultDAO resultDAO;
+  private final IResultDAO resultDAO;
 
   private MonitoringSupport() {
     this(null, null);
   }
 
-  MonitoringSupport(IUserDAO userDAO, ResultDAO resultDAO) {
+  MonitoringSupport(IUserDAO userDAO, IResultDAO resultDAO) {
     this.userDAO = userDAO;
     this.resultDAO = resultDAO;
   }
@@ -123,7 +126,7 @@ class MonitoringSupport {
    *
    * @return list of duration and numAnswer pairs
    */
-  public ResultDAO.SessionInfo getSessions() {
+  public SessionInfo getSessions() {
     return resultDAO.getSessions();
   }
 
@@ -506,7 +509,7 @@ class MonitoringSupport {
     typeToNumAnswerToCount.put("desiredToMale", maleDesiredToPeopleToNumPer);
     typeToNumAnswerToCount.put("desiredToFemale", femaleDesiredToPeopleToNumPer);
     //  logger.info("got " + maleDesiredToPeopleToNumPer);
-    long rateInMillis = getRateInMillis(getSessions().sessions);// logger.info("total at");
+    long rateInMillis = getRateInMillis(getSessions().getSessions());// logger.info("total at");
     float rateInHours = ((float) rateInMillis) / MINUTE_MILLIS_FLOAT;
 
     Map<Integer, Map<Integer, Integer>> maleDesiredToPeopleToHours = getResourceCounts(maleAnswerToCount, rateInHours);

@@ -35,7 +35,7 @@ package mitll.langtest.server.database.export;
 import mitll.langtest.server.amas.FileExerciseDAO;
 import mitll.langtest.server.autocrt.AutoCRT;
 import mitll.langtest.server.database.GradeDAO;
-import mitll.langtest.server.database.ResultDAO;
+import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.export.ExerciseExport;
 import mitll.langtest.server.export.ResponseAndGrade;
 import mitll.langtest.shared.Result;
@@ -68,10 +68,10 @@ public class Export {
   public static final int MIN_LENGTH = 2;
 
   private FileExerciseDAO exerciseDAO = null;
-  private ResultDAO resultDAO = null;
+  private IResultDAO resultDAO = null;
   private GradeDAO gradeDAO = null;
 
-  public Export(FileExerciseDAO exerciseDAO, ResultDAO resultDAO, GradeDAO gradeDAO) {
+  public Export(FileExerciseDAO exerciseDAO, IResultDAO resultDAO, GradeDAO gradeDAO) {
     this.exerciseDAO = exerciseDAO;
     this.resultDAO = resultDAO;
     this.gradeDAO = gradeDAO;
