@@ -168,7 +168,7 @@ class AmasSupport {
     String session = getLatestSession(typeToSection, userID);
     //  logger.info("exercises " +allIDs.size() + " for session " + session);
 
-    List<CorrectAndScore> resultsForExIDInForUser = resultDAO.getResultsForExIDInForUser(allIDs, userID, session);
+    Collection<CorrectAndScore> resultsForExIDInForUser = resultDAO.getResultsForExIDInForUser(allIDs, userID, session);
     //  for (CorrectAndScore cs:resultsForExIDInForUser) logger.info("found " +cs );
     Collection<CorrectAndScore> copy = getFirstCorrectAndScore(resultsForExIDInForUser);
 
@@ -250,7 +250,7 @@ class AmasSupport {
    * @return
    * @see #getQuizCorrectAndScore(Map, int, Collection)
    */
-  private Collection<CorrectAndScore> getFirstCorrectAndScore(List<CorrectAndScore> resultsForUser) {
+  private Collection<CorrectAndScore> getFirstCorrectAndScore(Collection<CorrectAndScore> resultsForUser) {
     Map<String, CorrectAndScore> idToCorrect = new HashMap<String, CorrectAndScore>();
 
     for (CorrectAndScore correctAndScore : resultsForUser) {
