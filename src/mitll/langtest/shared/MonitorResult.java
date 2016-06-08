@@ -86,13 +86,8 @@ public class MonitorResult implements IsSerializable {
   private int roundTripDur;
 
   private Map<String, String> unitToValue;
-/*
-  private String deviceType;
-  private String simpleDevice;
-  private String scoreJSON;*/
 
-  public MonitorResult() {
-  }
+  public MonitorResult() {}
 
   /**
    * @param uniqueID
@@ -382,38 +377,4 @@ public class MonitorResult implements IsSerializable {
   public void setDisplayID(String displayID) {
     this.id = displayID;
   }
-
-/*  @Transient
-  public void setDeviceType(String deviceType) {
-    this.deviceType = deviceType;
-  }
-
-  @Transient
-  public String getDeviceType() {
-    return deviceType;
-  }
-
-  @Transient
-  public void setSimpleDevice(String simpleDevice) {
-    this.simpleDevice = simpleDevice;
-  }
-
-  @Transient
-  public String getSimpleDevice() {
-    return simpleDevice;
-  }
-
-  @Transient
-  public void setScoreJSON(String scoreJSON) {
-    this.scoreJSON = scoreJSON;
-  }
-
-  @Transient
-  public String getScoreJSON() {
-    return scoreJSON;
-  }
-
-  public void setUserID(Long userID) {
-    this.userid = userID;
-  }*/
 }
