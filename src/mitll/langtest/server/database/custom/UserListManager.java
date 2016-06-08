@@ -508,6 +508,7 @@ public class UserListManager {
   private List<CommonShell> getReviewedUserExercises(Map<String, CommonExercise> idToUserExercise, Collection<String> ids) {
     List<CommonShell> onList = new ArrayList<>();
 
+    int c = 0;
     for (String id : ids) {
       if (id.startsWith(UserExercise.CUSTOM_PREFIX)) {   // add user defined exercises
         if (idToUserExercise.containsKey(id)) {
@@ -525,10 +526,14 @@ public class UserListManager {
           //e.setTooltip(byID.getCombinedTooltip());
           //logger.debug("getReviewedUserExercises : found " + e.getID() + " tooltip " + e.getTooltip());
         } else {
-          logger.warn("getReviewedUserExercises : huh? can't find predef exercise " + id);
+          if (c++ < 10) {
+            logger.warn("getReviewedUserExercises : huh? can't find predef exercise " + id);
+          }
         }
       }
     }
+    logger.warn("getReviewedUserExercises : huh? couldn't find " + c + " predef exercises.");
+
     Collections.sort(onList, new Comparator<HasID>() {
       @Override
       public int compare(HasID o1, HasID o2) {
