@@ -157,6 +157,7 @@ public class ResultDAO extends DAO implements IResultDAO {
     return new ArrayList<>();
   }
 
+/*
   @Override
   public List<Result> getResultsForPractice() {
     try {
@@ -168,9 +169,10 @@ public class ResultDAO extends DAO implements IResultDAO {
     }
     return new ArrayList<>();
   }
+*/
 
   @Override
-  public List<Result> getResultsDevices() {
+  public Collection<Result> getResultsDevices() {
     try {
       String sql = "SELECT * FROM " + RESULTS + " where " + DEVICETYPE + " like 'i%'";
       return getResultsSQL(sql);
@@ -188,7 +190,7 @@ public class ResultDAO extends DAO implements IResultDAO {
    * @see mitll.langtest.server.decoder.RefResultDecoder#doMissingInfo
    */
   @Override
-  public List<Result> getResultsToDecode() {
+  public Collection<Result> getResultsToDecode() {
     try {
       String scoreJsonClause = " AND " +
           "(" +
@@ -286,10 +288,10 @@ public class ResultDAO extends DAO implements IResultDAO {
    *
    * @param monitorResults
    * @param join
-   * @see mitll.langtest.server.database.DatabaseImpl#getMonitorResultsWithText(java.util.List)
+   * @see DatabaseImpl#getMonitorResultsWithText(Collection)
    */
   @Override
-  public void addUnitAndChapterToResults(List<MonitorResult> monitorResults, Map<String, CommonExercise> join) {
+  public void addUnitAndChapterToResults(Collection<MonitorResult> monitorResults, Map<String, CommonExercise> join) {
     int n = 0;
     Set<String> unknownIDs = new HashSet<>();
     for (MonitorResult result : monitorResults) {
@@ -410,9 +412,9 @@ public class ResultDAO extends DAO implements IResultDAO {
   }
 
   @Override
-  public List<ExerciseCorrectAndScore> getExerciseCorrectAndScoresByPhones(long userid, List<String> allIds,
-                                                                           Map<String, CommonExercise> idToEx,
-                                                                           ExerciseSorter sorter) {
+  public Collection<ExerciseCorrectAndScore> getExerciseCorrectAndScoresByPhones(long userid, List<String> allIds,
+                                                                                 Map<String, CommonExercise> idToEx,
+                                                                                 ExerciseSorter sorter) {
     List<CorrectAndScore> results = getResultsForExIDInForUser(allIds, true, userid);
     // if (debug) logger.debug("found " + results.size() + " results for " + allIds.size() + " items");
     return getSortedAVPHistoryByPhones(results, allIds, idToEx, sorter);
@@ -669,7 +671,7 @@ public class ResultDAO extends DAO implements IResultDAO {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getScoresForUser
    */
   @Override
-  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, long userid, String session) {
+  public Collection<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, long userid, String session) {
     try {
       String list = getInList(ids);
 
@@ -904,8 +906,9 @@ public class ResultDAO extends DAO implements IResultDAO {
       AudioType audioType;
 
       try {
-        audioType = AudioType.valueOf(type);
+        audioType = AudioType.valueOf(type.toUpperCase());
       } catch (IllegalArgumentException e) {
+        logger.info("no audio type for " + type);
         audioType = AudioType.UNSET;
       }
 

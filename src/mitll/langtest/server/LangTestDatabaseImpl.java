@@ -48,6 +48,7 @@ import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.exercise.SectionHelper;
+import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.decoder.RefResultDecoder;
 import mitll.langtest.server.mail.MailSupport;
@@ -742,7 +743,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param userID
    * @param firstExercise
    * @param isFlashcardReq
-   * @see #addAnnotationsAndAudio(long, mitll.langtest.shared.exercise.CommonExercise, boolean)
+   * @see #addAnnotationsAndAudio(int, mitll.langtest.shared.exercise.CommonExercise, boolean)
    */
   private void attachScoreHistory(int userID, CommonExercise firstExercise, boolean isFlashcardReq) {
     db.getResultDAO().attachScoreHistory(userID, firstExercise, isFlashcardReq);
@@ -870,7 +871,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * @param byID
-   * @see #addAnnotationsAndAudio(long, mitll.langtest.shared.exercise.CommonExercise, boolean)
+   * @see #addAnnotationsAndAudio(int, mitll.langtest.shared.exercise.CommonExercise, boolean)
    */
   private void addAnnotations(CommonExercise byID) {
     getUserListManager().addAnnotations(byID);
@@ -880,7 +881,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param byID
    * @param parentDir
    * @seex LoadTesting#getExercise
-   * @see #makeExerciseListWrapper(int, java.util.Collection, long, String, boolean, boolean)
+   * @see #makeExerciseListWrapper(int, java.util.Collection, int, String, boolean, boolean)
    */
   private void ensureMP3s(CommonExercise byID, String parentDir) {
     Collection<AudioAttribute> audioAttributes = byID.getAudioAttributes();
@@ -948,7 +949,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return exercises;
   }
 
+  /**
+   * @see #getExercises()
+   * @param <T>
+   */
   private <T extends CommonShell> void buildExerciseTrie() {
+    logger.info("db " + db);
+    logger.info("audioFileHelper " + audioFileHelper);
     fullTrie = new ExerciseTrie<CommonExercise>(db.getExercises(), getLanguage(), audioFileHelper.getSmallVocabDecoder());
   }
 

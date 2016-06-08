@@ -2,19 +2,13 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.audio.AudioDAO;
-import mitll.langtest.server.database.result.IResultDAO;
-import mitll.langtest.server.database.result.ResultDAO;
-import mitll.langtest.shared.MonitorResult;
-import mitll.langtest.shared.Result;
+import mitll.langtest.server.database.result.Result;
 import mitll.langtest.shared.User;
-import mitll.langtest.shared.exercise.CommonExercise;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
-import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.*;
 
 /**
