@@ -66,6 +66,7 @@ import mitll.langtest.client.services.ListService;
 import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
+import mitll.langtest.shared.AudioType;
 import mitll.langtest.shared.ContextPractice;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.analysis.WordAndScore;
@@ -89,6 +90,7 @@ import java.util.logging.Logger;
 public class Navigation implements RequiresResize, ShowTab {
   private static final String STUDENT_ANALYSIS = "Student Analysis";
   private static final String CUSTOM = "Custom";
+  public static final String CLASSROOM = "classroom";
   private final Logger logger = Logger.getLogger("Navigation");
 
   private static final String CHAPTERS = "Learn Pronunciation";
@@ -163,11 +165,16 @@ public class Navigation implements RequiresResize, ShowTab {
     learnHelper = new SimpleChapterNPFHelper<CommonShell, CommonExercise>(service, feedback, userManager, controller, null
     ) {
       @Override
-      protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
-                                                                            UserManager userManager, ExerciseController controller, SimpleChapterNPFHelper<CommonShell, CommonExercise> outer) {
+      protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(LangTestDatabaseAsync service,
+                                                                            UserFeedback feedback,
+                                                                            UserManager userManager,
+                                                                            ExerciseController controller,
+                                                                            SimpleChapterNPFHelper<CommonShell, CommonExercise> outer) {
         return new MyFlexListLayout<CommonShell, CommonExercise>(service, feedback, controller, outer) {
           @Override
-          protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName, boolean incorrectFirst) {
+          protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow,
+                                                                                     Panel currentExercisePanel,
+                                                                                     String instanceName, boolean incorrectFirst) {
             return new NPFlexSectionExerciseList(this, topRow, currentExercisePanel, instanceName, incorrectFirst);
           }
         };
@@ -178,10 +185,10 @@ public class Navigation implements RequiresResize, ShowTab {
           @Override
           public Panel getExercisePanel(CommonExercise e) {
             if (controller.getProps().canPracticeContext()) {
-              return new ContextCommentNPFExercise<>(e, controller, exerciseList, false, "classroom");
+              return new ContextCommentNPFExercise<>(e, controller, exerciseList, false, CLASSROOM);
             }
             else {
-              return new CommentNPFExercise<>(e, controller, exerciseList, false, "classroom");
+              return new CommentNPFExercise<>(e, controller, exerciseList, false, CLASSROOM);
             }
           }
         };
@@ -620,9 +627,9 @@ public class Navigation implements RequiresResize, ShowTab {
       } else if (value.equals(CHAPTERS)) {
         learnHelper.showNPF(chapters, LEARN);
       } else if (value.equals(RECORD_AUDIO)) {
-        recorderHelper.showNPF(recorderTab, "record_audio");
+        recorderHelper.showNPF(recorderTab, AudioType.AUDIO_TYPE_RECORDER.toString());
       } else if (value.equals(RECORD_EXAMPLE)) {
-        recordExampleHelper.showNPF(recordExampleTab, "record_example_audio");
+        recordExampleHelper.showNPF(recordExampleTab, AudioType.CONTEXT_REGULAR.toString());
       } else if (value.equals(MARK_DEFECTS) && markDefectsTab != null) {
         markDefectsHelper.showNPF(markDefectsTab, CONTENT1);
       } else if (value.equals(PRACTICE) && practiceTab != null) {
