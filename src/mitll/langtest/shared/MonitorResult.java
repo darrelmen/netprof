@@ -122,7 +122,7 @@ public class MonitorResult implements IsSerializable {
     this.answer = answer;
     this.valid = valid;
     this.timestamp = timestamp;
-    this.audioType = audioType;//answerType == null || answerType.length() == 0 ? AudioType.AUDIO_TYPE_UNSET : answerType;
+    this.audioType = audioType;//answerType == null || answerType.length() == 0 ? AudioType.UNSET : answerType;
     this.durationInMillis = durationInMillis;
     this.correct = correct;
     this.pronScore = pronScore;
