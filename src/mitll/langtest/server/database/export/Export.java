@@ -38,7 +38,7 @@ import mitll.langtest.server.database.GradeDAO;
 import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.export.ExerciseExport;
 import mitll.langtest.server.export.ResponseAndGrade;
-import mitll.langtest.shared.Result;
+import mitll.langtest.server.database.result.Result;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.amas.QAPair;
 import mitll.langtest.shared.grade.Grade;

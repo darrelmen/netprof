@@ -36,7 +36,7 @@ import audio.image.ImageType;
 import audio.image.TranscriptEvent;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.SLFFile;
-import mitll.langtest.shared.Result;
+import mitll.langtest.server.database.result.Result;
 import net.sf.json.JSONObject;
 
 import java.util.HashMap;
