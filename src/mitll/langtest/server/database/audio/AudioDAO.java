@@ -544,10 +544,10 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   private long add(Connection connection, Result result, int userid, String audioRef, String transcript) throws SQLException {
     String exerciseID = result.getExerciseID();
     long timestamp = result.getTimestamp();
-    String audioType = result.getAudioType();
-    int durationInMillis = result.getDurationInMillis();
+    AudioType audioType = result.getAudioType();
+    long durationInMillis = result.getDurationInMillis();
     logger.debug("add result - " + result.getCompoundID() + " for " + userid + " ref " + audioRef);
-    return addAudio(connection, userid, audioRef, exerciseID, timestamp, audioType, durationInMillis, transcript);
+    return addAudio(connection, userid, audioRef, exerciseID, timestamp, audioType.toString(), durationInMillis, transcript);
   }
 
 
@@ -798,7 +798,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
     statement.setString(i++, exerciseID);
     statement.setTimestamp(i++, new Timestamp(timestamp));
     statement.setString(i++, audioRef);
-    statement.setString(i++, audioType);
+    statement.setString(i++, audioType.toString());
     statement.setLong(i++, durationInMillis);
     statement.setString(i++, transcript);
     statement.setBoolean(i++, false);
