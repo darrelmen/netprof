@@ -161,6 +161,9 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
     if (miniUser == null && spew++ < 20) logger.error("no user for " +s.userid());
 
+    String audiotype = s.audiotype();
+    // for the enum!
+    if (audiotype.contains("=")) audiotype = audiotype.replaceAll("=","_");
     return new AudioAttribute(
         s.id(),
         s.userid(),
@@ -168,7 +171,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
         s.audioref(),
         s.modified().getTime(),
         s.duration(),
-        AudioType.valueOf(s.audiotype()),
+        AudioType.valueOf(audiotype.toUpperCase()),
         miniUser,
         s.transcript());
   }
