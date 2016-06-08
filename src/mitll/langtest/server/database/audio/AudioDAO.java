@@ -462,7 +462,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
       try {
         realType = AudioType.valueOf(type);
       } catch (IllegalArgumentException e) {
-        realType = AudioType.AUDIO_TYPE_UNSET;
+        realType = AudioType.UNSET;
       }
 
       AudioAttribute audioAttr = new AudioAttribute(uniqueID, userID, //id
