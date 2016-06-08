@@ -18,21 +18,8 @@
       <configuration>
         <setting name="compilerMaxHeapSize" value="1024" />
         <setting name="gwtScriptOutputStyle" value="OBF" />
-        <setting name="gwtSdkUrl" value="file://$MODULE_DIR$/../gwt_2_8_03_17" />
+        <setting name="gwtSdkUrl" value="file://$MODULE_DIR$/gwt" />
         <setting name="webFacet" value="Web" />
-      </configuration>
-    </facet>
-    <facet type="web" name="Web2">
-      <configuration>
-        <descriptors>
-          <deploymentDescriptor name="web.xml" url="file://$MODULE_DIR$/web/WEB-INF/web.xml" />
-        </descriptors>
-        <webroots>
-          <root url="file://$MODULE_DIR$/web" relative="/" />
-        </webroots>
-        <sourceRoots>
-          <root url="file://$MODULE_DIR$/src" />
-        </sourceRoots>
       </configuration>
     </facet>
   </component>
@@ -65,7 +52,6 @@
       <excludeFolder url="file://$MODULE_DIR$/war/config/crtDari" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/crtPashto" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/crtPashtoJune" />
-      <excludeFolder url="file://$MODULE_DIR$/war/config/dari" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/dataCollectAdmin" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/farsi" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/farsi2" />
