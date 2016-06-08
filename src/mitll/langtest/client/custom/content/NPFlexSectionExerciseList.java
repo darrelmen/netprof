@@ -60,7 +60,8 @@ public class NPFlexSectionExerciseList extends FlexSectionExerciseList {
    * @see mitll.langtest.client.custom.Navigation#makePracticeHelper(LangTestDatabaseAsync, UserManager, ExerciseController, UserFeedback)
    * @see FlexListLayout#makeExerciseList(Panel, Panel, String, boolean)
    */
-  public NPFlexSectionExerciseList(FlexListLayout flexListLayout, Panel topRow, Panel currentExercisePanel, String instanceName,
+  public NPFlexSectionExerciseList(FlexListLayout flexListLayout, Panel topRow, Panel currentExercisePanel,
+                                   String instanceName,
                                    boolean incorrectFirst) {
     super(topRow, currentExercisePanel, flexListLayout.service, flexListLayout.feedback,
         flexListLayout.controller, instanceName, incorrectFirst);

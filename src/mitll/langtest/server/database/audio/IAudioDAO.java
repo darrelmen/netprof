@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.audio;
 
+import mitll.langtest.shared.AudioType;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -42,7 +43,7 @@ import java.util.Map;
 import java.util.Set;
 
 public interface IAudioDAO {
-  AudioAttribute addOrUpdate(int userid, String exerciseID, String audioType, String audioRef, long timestamp,
+  AudioAttribute addOrUpdate(int userid, String exerciseID, AudioType audioType, String audioRef, long timestamp,
                              long durationInMillis, String transcript);
 
   Map<String, List<AudioAttribute>> getExToAudio();
