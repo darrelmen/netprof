@@ -163,7 +163,7 @@ class TextResponse {
     boolean allowPaste = controller.getProps().isDemoMode();
     final TextBox noPasteAnswer = getAnswerBox(controller, allowPaste, answerButton, getFocus);
     noPasteAnswer.setWidth(TEXT_BOX_WIDTH + "px");
-    setupSubmitButton(exerciseID, service, answerButton, noPasteAnswer, scoreFeedback, AudioType.AUDIO_TYPE_TEXT,
+    setupSubmitButton(exerciseID, service, answerButton, noPasteAnswer, scoreFeedback, AudioType.TEXT,
         addEnterKeyBinding,
         questionID);
 

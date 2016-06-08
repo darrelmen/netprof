@@ -1274,7 +1274,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * Return some statistics related to the hours of audio that have been collected
    *
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getResultStats()
+   * @see mitll.langtest.server.services.MonitoringServiceImpl#getResultStats
    */
   public Map<String, Number> getResultStats() {
     return monitoringSupport.getResultStats();

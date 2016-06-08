@@ -51,7 +51,6 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.AudioType;
 import mitll.langtest.shared.ExerciseListWrapper;
-import mitll.langtest.shared.Result;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
 import mitll.langtest.shared.exercise.HasID;
@@ -249,7 +248,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @return
    */
   String getRole() {
-    AudioType audioTypeRecorder = AudioType.AUDIO_TYPE_RECORDER;
+    AudioType audioTypeRecorder = AudioType.RECORDER;
     return getInstance() == null || getInstance().startsWith("record") ? audioTypeRecorder.toString() : getInstance();
   }
 

@@ -627,7 +627,7 @@ public class Navigation implements RequiresResize, ShowTab {
       } else if (value.equals(CHAPTERS)) {
         learnHelper.showNPF(chapters, LEARN);
       } else if (value.equals(RECORD_AUDIO)) {
-        recorderHelper.showNPF(recorderTab, AudioType.AUDIO_TYPE_RECORDER.toString());
+        recorderHelper.showNPF(recorderTab, AudioType.RECORDER.toString());
       } else if (value.equals(RECORD_EXAMPLE)) {
         recordExampleHelper.showNPF(recordExampleTab, AudioType.CONTEXT_REGULAR.toString());
       } else if (value.equals(MARK_DEFECTS) && markDefectsTab != null) {

@@ -159,8 +159,8 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
 
   private DivWidget getRecordingWidget() {
     DivWidget widget = new DivWidget();
-    widget.add(getRecordAudioWithAnno(widget, AudioType.AUDIO_TYPE_REGULAR));
-    widget.add(getRecordAudioWithAnno(widget, AudioType.AUDIO_TYPE_SLOW));
+    widget.add(getRecordAudioWithAnno(widget, AudioType.REGULAR));
+    widget.add(getRecordAudioWithAnno(widget, AudioType.SLOW));
 
     return widget;
   }
