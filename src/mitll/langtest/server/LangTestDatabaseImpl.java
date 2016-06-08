@@ -549,9 +549,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    * @see #getExerciseIds
    */
-  private int markRecordedState(int userID, String role, Collection<? extends CommonShell> exercises, boolean onlyExample) {
+  private int markRecordedState(int userID, String role, Collection<? extends CommonShell> exercises,
+                                boolean onlyExample) {
     int c = 0;
-    if (role.equals(Result.AUDIO_TYPE_RECORDER)) {
+    if (role.equals(AudioType.AUDIO_TYPE_RECORDER)) {
       Collection<String> recordedForUser = onlyExample ?
           db.getAudioDAO().getRecordedExampleForUser(userID) : db.getAudioDAO().getRecordedForUser(userID);
       //logger.debug("\tfound " + recordedForUser.size() + " recordings by " + userID + " only example " + onlyExample);
@@ -675,9 +676,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     List<CommonShell> exerciseShells = getExerciseShells(exercises);
 
     //   logger.debug("makeExerciseListWrapper : userID " +userID + " Role is " + role);
-    if (role.equals(Result.AUDIO_TYPE_RECORDER)) {
+    if (role.equals(AudioType.AUDIO_TYPE_RECORDER)) {
       markRecordedState((int) userID, role, exerciseShells, onlyExamples);
-    } else if (role.equalsIgnoreCase(User.Permission.QUALITY_CONTROL.toString()) || role.startsWith(Result.AUDIO_TYPE_REVIEW)) {
+    } else if (role.equalsIgnoreCase(User.Permission.QUALITY_CONTROL.toString()) ||
+        role.startsWith(AudioType.AUDIO_TYPE_REVIEW.toString())) {
       getUserListManager().markState(exerciseShells);
     }
 
@@ -760,7 +762,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * @param firstExercise
-   * @see #addAnnotationsAndAudio(long, mitll.langtest.shared.exercise.CommonExercise, boolean)
+   * @see #addAnnotationsAndAudio(int, mitll.langtest.shared.exercise.CommonExercise, boolean)
    */
   private void attachAudio(CommonExercise firstExercise) {
     db.getAudioDAO().attachAudio(firstExercise, pathHelper.getInstallPath(), relativeConfigDir);
@@ -773,7 +775,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    *
    * @param userID
    * @param firstExercise
-   * @see #addAnnotationsAndAudio(long, mitll.langtest.shared.exercise.CommonExercise, boolean)
+   * @see #addAnnotationsAndAudio(int, mitll.langtest.shared.exercise.CommonExercise, boolean)
    */
   private void addPlayedMarkings(int userID, CommonExercise firstExercise) {
     db.getEventDAO().addPlayedMarkings(userID, firstExercise);
@@ -1890,7 +1892,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return AudioAttribute that represents the audio that has been added to the exercise
    * @see #writeAudioFile
    */
-  private AudioAttribute addToAudioTable(int user, String audioType,
+  private AudioAttribute addToAudioTable(int user,
+                                         AudioType audioType,
                                          CommonExercise exercise1,
                                          String exerciseID,
                                          AudioAnswer audioAnswer) {
@@ -1907,7 +1910,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         db.getAudioDAO().addOrUpdate(user, idToUse, audioType, permanentAudioPath, System.currentTimeMillis(),
             audioAnswer.getDurationInMillis(), audioTranscript);
     audioAnswer.setPath(audioAttribute.getAudioRef());
-    logger.debug("addToAudioTable user " + user + " ex " + exerciseID + " for " + audioType + " audio answer has " + audioAttribute);
+    logger.debug("addToAudioTable user " + user + " ex " + exerciseID + " for " + audioType + " audio answer has " +
+        audioAttribute);
 
     // what state should we mark recorded audio?
     setExerciseState(idToUse, user, exercise1);
@@ -1918,13 +1922,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return pathHelper.getAbsoluteFile(path);
   }
 
-  private String getAudioTranscript(String audioType, CommonExercise exercise1) {
+  private String getAudioTranscript(AudioType audioType, CommonExercise exercise1) {
     return exercise1 == null ? "" :
         audioType.equals(AudioAttribute.CONTEXT_AUDIO_TYPE) ? exercise1.getContext() : exercise1.getForeignLanguage();
   }
 
-  private String getPermanentName(int user, String audioType) {
-    return audioType + "_" + System.currentTimeMillis() + "_by_" + user + ".wav";
+  private String getPermanentName(int user, AudioType audioType) {
+    return audioType.toString() + "_" + System.currentTimeMillis() + "_by_" + user + ".wav";
   }
 
   private String getArtist(int user) {
