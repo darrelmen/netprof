@@ -696,7 +696,7 @@ class NewUserExercise extends BasicDialog {
 
             @Override
             protected AudioType getAudioType() {
-              return recordRegularSpeed ? AudioType.AUDIO_TYPE_REGULAR : AudioType.AUDIO_TYPE_SLOW;
+              return recordRegularSpeed ? AudioType.REGULAR : AudioType.SLOW;
             }
 
             @Override
