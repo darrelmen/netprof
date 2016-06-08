@@ -34,9 +34,8 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.audio.DecodeAlignOutput;
-import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.decoder.RefResultDecoder;
-import mitll.langtest.shared.Result;
+import mitll.langtest.server.database.result.Result;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;

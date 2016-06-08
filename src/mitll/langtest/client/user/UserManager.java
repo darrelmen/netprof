@@ -287,7 +287,7 @@ public class UserManager {
 //      if (audioType == null) {
 //        audioType = AudioType.FAST_AND_SLOW;
 //      }
-      AudioType realAudioType = (audioType == null) ? AudioType.FAST_AND_SLOW : AudioType.valueOf(audioType);
+      AudioType realAudioType = (audioType == null) ? AudioType.FAST_AND_SLOW : AudioType.valueOf(audioType.toUpperCase());
       userNotification.rememberAudioType(realAudioType);
     }
   }

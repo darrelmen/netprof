@@ -32,7 +32,7 @@
 
 package mitll.langtest.server.scoring;
 
-import mitll.langtest.shared.Result;
+import mitll.langtest.server.database.result.Result;
 import mitll.langtest.shared.scoring.PretestScore;
 
 import java.text.Collator;
