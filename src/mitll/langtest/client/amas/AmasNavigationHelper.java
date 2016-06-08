@@ -51,7 +51,7 @@ import mitll.langtest.shared.exercise.Shell;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 8/6/13
  */
-public class AmasNavigationHelper extends HorizontalPanel {
+class AmasNavigationHelper extends HorizontalPanel {
   private static final String CONTINUE = "Continue";
 
   private Button next;
@@ -59,7 +59,7 @@ public class AmasNavigationHelper extends HorizontalPanel {
   private final PostAnswerProvider provider;
   private final ListInterface listContainer;
 
-  public AmasNavigationHelper(Shell exercise, ExerciseController controller, PostAnswerProvider provider,
+  AmasNavigationHelper(Shell exercise, ExerciseController controller, PostAnswerProvider provider,
                               ListInterface listContainer, boolean addButtons,
                               boolean enableNextOnlyWhenAllCompleted) {
     this.provider = provider;
