@@ -40,7 +40,6 @@ import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.flashcard.ControlState;
 import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.shared.AudioType;
-import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 
 import java.util.Date;
@@ -253,8 +252,8 @@ public class UserManager {
 
       @Override
       public void onSuccess(User result) {
-        setDefaultControlValues((int) result.getId());
-        storeUser(result, AudioType.AUDIO_TYPE_PRACTICE);
+        setDefaultControlValues(result.getId());
+        storeUser(result, AudioType.PRACTICE);
       }
     });
   }
@@ -286,9 +285,9 @@ public class UserManager {
 
       String audioType = localStorageIfSupported.getItem(getAudioType());
 //      if (audioType == null) {
-//        audioType = AudioType.AUDIO_TYPE_FAST_AND_SLOW;
+//        audioType = AudioType.FAST_AND_SLOW;
 //      }
-      AudioType realAudioType = (audioType == null) ? AudioType.AUDIO_TYPE_FAST_AND_SLOW : AudioType.valueOf(audioType);
+      AudioType realAudioType = (audioType == null) ? AudioType.FAST_AND_SLOW : AudioType.valueOf(audioType);
       userNotification.rememberAudioType(realAudioType);
     }
   }
@@ -404,7 +403,7 @@ public class UserManager {
   }
 
   private void clearCookieState() {
-    userNotification.rememberAudioType(AudioType.AUDIO_TYPE_UNSET);
+    userNotification.rememberAudioType(AudioType.UNSET);
 /*
     if (USE_COOKIE) {
       Cookies.setCookie("sid", "" + NO_USER_SET);

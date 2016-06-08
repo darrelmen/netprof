@@ -1117,8 +1117,8 @@ public class UserPassLogin extends UserDialog {
   }
 
   private AudioType getAudioTypeFromUserType(User.Kind kind) {
-    if (kind == User.Kind.STUDENT || kind == User.Kind.TEACHER) return AudioType.AUDIO_TYPE_PRACTICE;
-    else if (kind == User.Kind.CONTENT_DEVELOPER) return AudioType.AUDIO_TYPE_RECORDER;
-    else return AudioType.AUDIO_TYPE_REVIEW;
+    if (kind == User.Kind.STUDENT || kind == User.Kind.TEACHER) return AudioType.PRACTICE;
+    else if (kind == User.Kind.CONTENT_DEVELOPER) return AudioType.RECORDER;
+    else return AudioType.REVIEW;
   }
 }
