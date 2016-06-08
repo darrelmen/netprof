@@ -235,7 +235,7 @@ public class AnswerDAO extends DAO implements IAnswerDAO {
       statement.setBoolean(i++, info.isValid());
       statement.setBoolean(i++, true); // obsolete
       statement.setBoolean(i++, true); // obsolete
-      statement.setString(i++, copyStringChar(info.getAudioType()));
+      statement.setString(i++, copyStringChar(info.getAudioType().toString()));
       statement.setInt(i++, (int) info.getDurationInMillis());
 
       statement.setBoolean(i++, info.isCorrect());
