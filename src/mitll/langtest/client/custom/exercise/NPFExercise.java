@@ -53,6 +53,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.NavigationHelper;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
+import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.AudioRefExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -224,11 +225,12 @@ abstract class NPFExercise<T extends CommonShell & AudioRefExercise & ScoredExer
    */
   private void addUserList(int userID, String title, final TextBox textBox) {
 //    logger.info("user " + userID + " adding list " + title);
-    boolean isStudent = controller.getAudioType().equalsIgnoreCase(PRACTICE);
+    boolean isPublic = !controller.getCurrent().isStudent();
     listService.addUserList(userID,
         title,
         "",
-        "", !isStudent, new AsyncCallback<Long>() {
+        "",
+        isPublic, new AsyncCallback<Long>() {
           @Override
           public void onFailure(Throwable caught) {
           }
@@ -236,7 +238,7 @@ abstract class NPFExercise<T extends CommonShell & AudioRefExercise & ScoredExer
           @Override
           public void onSuccess(Long result) {
             if (result == -1) {
-              System.err.println("should never happen!");
+              logger.warning("should never happen!");
             } else {
               textBox.setText("");
               wasRevealed();

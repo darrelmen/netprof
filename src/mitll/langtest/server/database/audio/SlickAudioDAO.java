@@ -36,7 +36,6 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.AudioType;
 import mitll.langtest.shared.MiniUser;
-import mitll.langtest.shared.Result;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.npdata.dao.event.DBConnection;
 import mitll.npdata.dao.SlickAudio;
@@ -64,13 +63,13 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   @Override
-  public AudioAttribute addOrUpdate(int userid, String exerciseID, String audioType, String audioRef,
+  public AudioAttribute addOrUpdate(int userid, String exerciseID, AudioType audioType, String audioRef,
                                     long timestamp, long durationInMillis, String transcript) {
     MiniUser miniUser = userDAO.getMiniUser(userid);
     Map<Integer, MiniUser> mini = new HashMap<>();
     mini.put(userid, miniUser);
     return toAudioAttribute(
-        dao.addOrUpdate(userid, exerciseID, audioType, audioRef, timestamp, durationInMillis, transcript),
+        dao.addOrUpdate(userid, exerciseID, audioType.toString(), audioRef, timestamp, durationInMillis, transcript),
         mini);
   }
 
@@ -169,7 +168,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
         s.audioref(),
         s.modified().getTime(),
         s.duration(),
-        s.audiotype(),
+        AudioType.valueOf(s.audiotype()),
         miniUser,
         s.transcript());
   }

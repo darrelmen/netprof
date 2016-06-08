@@ -50,6 +50,7 @@ import mitll.langtest.client.PopupHelper;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.Answer;
+import mitll.langtest.shared.AudioType;
 import mitll.langtest.shared.scoring.AudioContext;
 
 import java.util.Collection;
@@ -162,8 +163,9 @@ class TextResponse {
     boolean allowPaste = controller.getProps().isDemoMode();
     final TextBox noPasteAnswer = getAnswerBox(controller, allowPaste, answerButton, getFocus);
     noPasteAnswer.setWidth(TEXT_BOX_WIDTH + "px");
-    String answerType = controller.getAudioType();
-    setupSubmitButton(exerciseID, service, answerButton, noPasteAnswer, scoreFeedback, answerType, addEnterKeyBinding, questionID);
+    setupSubmitButton(exerciseID, service, answerButton, noPasteAnswer, scoreFeedback, AudioType.AUDIO_TYPE_TEXT,
+        addEnterKeyBinding,
+        questionID);
 
     // button then text box
     Panel row = new HorizontalPanel();
@@ -204,7 +206,8 @@ class TextResponse {
    * @see #getTextResponseWidget
    */
   private void setupSubmitButton(final String exerciseID, final LangTestDatabaseAsync service, final Button check,
-                                 final TextBox noPasteAnswer, final ScoreFeedback scoreFeedback, final String answerType,
+                                 final TextBox noPasteAnswer, final ScoreFeedback scoreFeedback,
+                                 final AudioType answerType,
                                  boolean addEnterKeyBinding, final int questionID) {
     check.setType(ButtonType.PRIMARY);
     check.setEnabled(false);
@@ -285,7 +288,8 @@ class TextResponse {
    * @see #setupSubmitButton
    */
   private void getScoreForGuess(final String guess, LangTestDatabaseAsync service, String exerciseID, final Button check,
-                                final ScoreFeedback scoreFeedback, String answerType, int questionID) {
+                                final ScoreFeedback scoreFeedback,
+                                AudioType answerType, int questionID) {
     if (guess.isEmpty() || removePunct(guess.trim()).isEmpty()) {
       new PopupHelper().showPopup
           ("Try again.", "Please type a non-empty response.", textResponseWidget);
@@ -296,7 +300,8 @@ class TextResponse {
       long timeSpent = System.currentTimeMillis() - timeShown;
       timeShown = System.currentTimeMillis();
 
-      AudioContext audioContext = new AudioContext(0, user, exerciseID, questionID, answerType);
+      AudioContext audioContext =
+          new AudioContext(0, user, exerciseID, questionID, answerType);
 
       logger.info("contexxt " + audioContext);
       service.getScoreForAnswer(
