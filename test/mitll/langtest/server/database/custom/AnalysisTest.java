@@ -4,7 +4,7 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.result.ResultDAO;
-import mitll.langtest.shared.Result;
+import mitll.langtest.server.database.result.Result;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import org.apache.log4j.Logger;

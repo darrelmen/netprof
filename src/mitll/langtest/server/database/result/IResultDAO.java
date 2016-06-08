@@ -34,7 +34,6 @@ package mitll.langtest.server.database.result;
 
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.MonitorResult;
-import mitll.langtest.shared.Result;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -50,36 +49,39 @@ import java.util.Map;
 public interface IResultDAO {
   List<Result> getResults();
 
-  Collection<UserAndTime> getUserAndTimes();
+  Collection<Result> getResultsDevices();
 
-  List<Result> getResultsForPractice();
-
-  List<Result> getResultsDevices();
-
-  List<Result> getResultsToDecode();
-
-  List<MonitorResult> getMonitorResults();
+  Collection<Result> getResultsToDecode();
 
   Result getResultByID(long id);
 
-  void addUnitAndChapterToResults(List<MonitorResult> monitorResults, Map<String, CommonExercise> join);
+
+
+  List<MonitorResult> getMonitorResults();
 
   List<MonitorResult> getMonitorResultsByID(String id);
+
+  Collection<UserAndTime> getUserAndTimes();
+
+//  List<Result> getResultsForPractice();
+
+  void addUnitAndChapterToResults(Collection<MonitorResult> monitorResults, Map<String, CommonExercise> join);
+
 
   SessionsAndScores getSessionsForUserIn2(Collection<String> ids, long latestResultID, long userid,
                                           Collection<String> allIds, Map<String, CollationKey> idToKey);
 
   <T extends CommonShell> List<T> getExercisesSortedIncorrectFirst(Collection<T> exercises, long userid, Collator collator);
 
-  List<ExerciseCorrectAndScore> getExerciseCorrectAndScoresByPhones(long userid, List<String> allIds,
-                                                                    Map<String, CommonExercise> idToEx,
-                                                                    ExerciseSorter sorter);
+  Collection<ExerciseCorrectAndScore> getExerciseCorrectAndScoresByPhones(long userid, List<String> allIds,
+                                                                          Map<String, CommonExercise> idToEx,
+                                                                          ExerciseSorter sorter);
 
   SessionInfo getSessions();
 
   void attachScoreHistory(int userID, CommonExercise firstExercise, boolean isFlashcardRequest);
 
-  List<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, long userid, String session);
+  Collection<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, long userid, String session);
 
   void invalidateCachedResults();
 

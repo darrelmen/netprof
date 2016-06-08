@@ -39,7 +39,7 @@ import mitll.langtest.server.database.instrumentation.IEventDAO;
 import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.mail.MailSupport;
-import mitll.langtest.shared.Result;
+import mitll.langtest.server.database.result.Result;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.exercise.AudioAttribute;
@@ -285,7 +285,7 @@ public class Report {
     Map<String, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
     Collection<AudioAttribute> audioAttributes = audioDAO.getAudioAttributes();
     List<Result> results = resultDAO.getResults();
-    List<Result> resultsDevices = resultDAO.getResultsDevices();
+    Collection<Result> resultsDevices = resultDAO.getResultsDevices();
 
     if (year == -1) {
       SlickSlimEvent firstSlim = eventDAO.getFirstSlim(language);
@@ -314,7 +314,8 @@ public class Report {
                        List<SlickSlimEvent> allDevicesSlim,
                        Map<String, List<AudioAttribute>> exToAudio,
                        Collection<AudioAttribute> audioAttributes,
-                       List<Result> results, List<Result> resultsDevices) {
+                       Collection<Result> results,
+                       Collection<Result> resultsDevices) {
     JSONObject forYear = new JSONObject();
     builder.append("<h1>" + i + "</h1>");
     builder.append(getReport(forYear, i, allSlim, allDevicesSlim, exToAudio, audioAttributes, results, resultsDevices));
@@ -333,12 +334,12 @@ public class Report {
                            List<SlickSlimEvent> allDevicesSlim,
                            Map<String, List<AudioAttribute>> exToAudio,
                            Collection<AudioAttribute> audioAttributes,
-                           List<Result> results,
-                           List<Result> resultsDevices) {
+                           Collection<Result> results,
+                           Collection<Result> resultsDevices) {
     jsonObject.put("forYear", year);
 
     long then = System.currentTimeMillis();
- //   logger.info(language + " : doing year " + year);
+    //   logger.info(language + " : doing year " + year);
 
     setUserStart(allSlim);
 
@@ -663,9 +664,9 @@ public class Report {
   }
 
   private Calendar getCalendarForYearOrNow() {
-      Calendar today = Calendar.getInstance();
-      today.setTimeInMillis(System.currentTimeMillis());
-      return today;
+    Calendar today = Calendar.getInstance();
+    today.setTimeInMillis(System.currentTimeMillis());
+    return today;
   }
 
   private void ensureYTDEntriesW(int year, Map<Integer, Long> weekToCount) {
@@ -683,7 +684,7 @@ public class Report {
     int thisMonth = today.get(Calendar.MONTH);
     int thisWeek = today.get(Calendar.WEEK_OF_YEAR);
     for (int i = 0; i <= thisMonth; i++) monthToCount.put(i, new HashSet<>());
-    for (int i = 0; i <= thisWeek; i++)  weekToCount.put(i,  new HashSet<>());
+    for (int i = 0; i <= thisWeek; i++) weekToCount.put(i, new HashSet<>());
 
     if (isNotThisYear(year)) {
       for (int i = 0; i < 12; i++) monthToCount.put(i, new HashSet<>());
@@ -701,7 +702,8 @@ public class Report {
     if (isNotThisYear(year)) {
       for (int i = 0; i < 12; i++) monthToCount.put(i, new HashMap<>());
       for (int i = 0; i < EVIL_LAST_WEEK; i++) weekToCount.put(i, new HashMap<>());
-    } }
+    }
+  }
 
   private boolean shouldSkipUser(User user) {
     return user.getId() == 3 || user.getId() == 1 ||
@@ -927,7 +929,7 @@ public class Report {
         value = ((Collection<?>) value).size();
       }
 
-   //   logger.info("getWC before week " +week + " = " + calendar.getTime() + " or " + df.format(calendar.getTime()));
+      //   logger.info("getWC before week " +week + " = " + calendar.getTime() + " or " + df.format(calendar.getTime()));
 
       calendar.set(Calendar.WEEK_OF_YEAR, week);
       calendar.set(Calendar.DAY_OF_WEEK, 1);
@@ -942,12 +944,12 @@ public class Report {
       JSONObject jsonObject = new JSONObject();
       jsonObject.put("weekOfYear", week);
       jsonObject.put(COUNT, value);
-      jsonObject.put("date",fullFormat.format(time));
+      jsonObject.put("date", fullFormat.format(time));
 
       jsonArray.add(jsonObject);
 
       s += "<tr><td>" +
-           "<span>" + format1 +
+          "<span>" + format1 +
           "</span>" +
           "</td><td>" + value + "</td></tr>";
     }
@@ -972,15 +974,17 @@ public class Report {
    */
   private void getResults(StringBuilder builder,
                           Set<Integer> students,
-                          JSONObject jsonObject, int year, Map<String, List<AudioAttribute>> exToAudio,
-                          List<Result> results) {
+                          JSONObject jsonObject,
+                          int year,
+                          Map<String, List<AudioAttribute>> exToAudio,
+                          Collection<Result> results) {
     getResultsForSet(builder, students, results, ALL_RECORDINGS, jsonObject, year, exToAudio);
   }
 
   private void getResultsDevices(StringBuilder builder, Set<Integer> students,
-                                 JSONObject jsonObject, int year, Map<String,
-      List<AudioAttribute>> exToAudio,
-                                 List<Result> results) {
+                                 JSONObject jsonObject, int year,
+                                 Map<String, List<AudioAttribute>> exToAudio,
+                                 Collection<Result> results) {
     getResultsForSet(builder, students, results, DEVICE_RECORDINGS, jsonObject, year, exToAudio);
   }
 
@@ -1113,9 +1117,8 @@ public class Report {
     Counts(int year) {
       if (year == getThisYear()) {
         ensureYTDEntries(monthToCount, weekToCount);
-  //      logger.info("months " + monthToCount.keySet() + " weeks " + weekToCount.keySet());
-      }
-      else {
+        //      logger.info("months " + monthToCount.keySet() + " weeks " + weekToCount.keySet());
+      } else {
         for (int i = 0; i < 12; i++) monthToCount.put(i, 0);
         for (int i = 0; i < EVIL_LAST_WEEK; i++) weekToCount.put(i, 0);
 //        logger.info("months " + monthToCount.keySet() + " weeks " + weekToCount.keySet());
@@ -1123,9 +1126,9 @@ public class Report {
     }
 
     private Calendar getCalendarForYearOrNow() {
-        Calendar today = Calendar.getInstance();
-        today.setTimeInMillis(System.currentTimeMillis());
-        return today;
+      Calendar today = Calendar.getInstance();
+      today.setTimeInMillis(System.currentTimeMillis());
+      return today;
     }
 
     private int getThisYear() {
@@ -1137,7 +1140,7 @@ public class Report {
       int thisMonth = today.get(Calendar.MONTH);
       for (int i = 0; i <= thisMonth; i++) monthToCount.put(i, 0);
       int thisWeek = today.get(Calendar.WEEK_OF_YEAR);
-    //  logger.info("week " +thisWeek);
+      //  logger.info("week " +thisWeek);
       for (int i = 0; i <= thisWeek; i++) weekToCount.put(i, 0);
     }
 
@@ -1149,6 +1152,7 @@ public class Report {
       return weekToCount;
     }
   }
+
   /**
    * @param calendar
    * @param monthToCount
@@ -1312,7 +1316,7 @@ public class Report {
    * @see #getEvents
    */
   private Set<Integer> getEvents(StringBuilder builder, Set<Integer> students, Collection<SlickSlimEvent> all, String activeUsers,
-                              String tableLabel, JSONObject jsonObject, int year) {
+                                 String tableLabel, JSONObject jsonObject, int year) {
     Map<Integer, Set<Long>> monthToCount = new TreeMap<>();
     Map<Integer, Set<Long>> weekToCount = new TreeMap<>();
     ensureYTDEntries2(year, monthToCount, weekToCount);
@@ -1321,7 +1325,7 @@ public class Report {
     Map<Integer, Map<Long, Set<SlickSlimEvent>>> monthToCount2 = new TreeMap<>();
     Map<Integer, Map<Long, Set<SlickSlimEvent>>> weekToCount2 = new TreeMap<>();
     ensureYTDEntries3(year, monthToCount2, weekToCount2);
-  //  logger.info("now " + monthToCount2.keySet() + " " + weekToCount2.keySet());
+    //  logger.info("now " + monthToCount2.keySet() + " " + weekToCount2.keySet());
 
     Set<Integer> teachers = new HashSet<>();
 //    int skipped = 0;
