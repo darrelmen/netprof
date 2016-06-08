@@ -273,7 +273,7 @@ public class UserListManager {
    * @param dliClass
    * @param isPublic
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addUserList
+   * @see mitll.langtest.server.services.ListServiceImpl#addUserList
    * @see mitll.langtest.client.custom.dialog.CreateListDialog#doCreate
    */
   public long addUserList(int userid, String name, String description, String dliClass, boolean isPublic) {
