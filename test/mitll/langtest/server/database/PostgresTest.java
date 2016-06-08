@@ -38,6 +38,7 @@ import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.instrumentation.IEventDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.UserDAO;
+import mitll.langtest.shared.AudioType;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -194,13 +195,13 @@ public class PostgresTest extends BaseTest {
 
     logger.info("Got back " + audio.size());
 
-    AudioAttribute audioAttribute = dao.addOrUpdate(1, "1", "regular", "file.wav", System.currentTimeMillis(), 1000, "dude");
+    AudioAttribute audioAttribute = dao.addOrUpdate(1, "1", AudioType.AUDIO_TYPE_REGULAR, "file.wav", System.currentTimeMillis(), 1000, "dude");
     logger.info("Got audioAttribute " + audioAttribute);
     logger.info("Got now " + dao.getAudioAttributes().size());
 
-    audioAttribute = dao.addOrUpdate(1, "2", "slow", "file2.wav", System.currentTimeMillis(), 1000, "dude");
+    audioAttribute = dao.addOrUpdate(1, "2", AudioType.AUDIO_TYPE_SLOW, "file2.wav", System.currentTimeMillis(), 1000, "dude");
 
-    audioAttribute = dao.addOrUpdate(2, "1", "regular", "file3.wav", System.currentTimeMillis(), 1000, "dude");
+    audioAttribute = dao.addOrUpdate(2, "1", AudioType.AUDIO_TYPE_REGULAR, "file3.wav", System.currentTimeMillis(), 1000, "dude");
 
     logger.info("Got now " + dao.getAudioAttributes().size());
     logger.info("Got ex to audio " + dao.getExToAudio().size());

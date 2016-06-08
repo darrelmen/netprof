@@ -47,7 +47,8 @@ public interface ListServiceAsync {
 
   void addItemToUserList(long userListID, String exID, AsyncCallback<Void> async);
 
-  void addUserList(int userid, String name, String description, String dliClass, boolean isPublic, AsyncCallback<Long> async);
+  void addUserList(int userid, String name, String description, String dliClass,
+                   boolean isPublic, AsyncCallback<Long> async);
 
   void addVisitor(long userListID, int user, AsyncCallback<Void> asyncCallback);
 

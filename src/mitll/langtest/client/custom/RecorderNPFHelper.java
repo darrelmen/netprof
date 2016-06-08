@@ -109,7 +109,8 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
       final FlexListLayout outerLayout = this;
 
       @Override
-      protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName,
+      protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow, Panel currentExercisePanel,
+                                                                                 String instanceName,
                                                                                  boolean incorrectFirst) {
         return new NPFlexSectionExerciseList(outerLayout, topRow, currentExercisePanel, instanceName, incorrectFirst) {
           private CheckBox filterOnly;
