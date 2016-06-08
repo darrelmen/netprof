@@ -43,7 +43,6 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.UnitChapterItemHelper;
 import mitll.langtest.shared.AudioType;
 import mitll.langtest.shared.ExerciseFormatter;
-import mitll.langtest.shared.Result;
 import mitll.langtest.shared.exercise.*;
 
 import java.util.ArrayList;
@@ -143,9 +142,9 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
 
     // add normal speed recording widget
     if (isNormalRecord()) {
-      addRecordAudioPanelNoCaption(exercise, service, controller, index, vp, AudioType.AUDIO_TYPE_REGULAR);
+      addRecordAudioPanelNoCaption(exercise, service, controller, index, vp, AudioType.REGULAR);
       // add slow speed recording widget
-      VerticalPanel widgets = addRecordAudioPanelNoCaption(exercise, service, controller, index + 1, vp, AudioType.AUDIO_TYPE_SLOW);
+      VerticalPanel widgets = addRecordAudioPanelNoCaption(exercise, service, controller, index + 1, vp, AudioType.SLOW);
       widgets.addStyleName("topFiveMargin");
     } else {
       addExampleSentenceRecorder(exercise, service, controller, index, vp);

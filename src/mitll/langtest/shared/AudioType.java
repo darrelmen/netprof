@@ -35,16 +35,18 @@ package mitll.langtest.shared;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public enum AudioType implements IsSerializable {
-  AUDIO_TYPE_UNSET("unset"),
-  AUDIO_TYPE_REGULAR("regular"),
-  AUDIO_TYPE_SLOW("slow"),
-  AUDIO_TYPE_FAST_AND_SLOW("fastAndSlow"),
-  AUDIO_TYPE_PRACTICE("practice"),
-  AUDIO_TYPE_FLASHCARD("flashcard"),
-  AUDIO_TYPE_LEARN("learn"),
-  AUDIO_TYPE_TEXT("text"),
-  AUDIO_TYPE_REVIEW("review"),
-  AUDIO_TYPE_RECORDER("recorder"),
+  UNSET("unset"),
+  REGULAR("regular"),
+  SLOW("slow"),
+  FAST_AND_SLOW("fastAndSlow"),
+  PRACTICE("practice"),
+ // FLASHCARD("flashcard"),
+  LEARN("learn"),
+  TEXT("text"),
+
+  REVIEW("review"),
+  RECORDER("recorder"),
+
   CONTEXT_REGULAR("context=regular", "context", "regular"),
   CONTEXT_SLOW("context=slow", "context", "slow");
 

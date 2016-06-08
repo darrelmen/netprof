@@ -116,8 +116,8 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
    * @see #RecordAudioPanel(Shell, ExerciseController, Panel, LangTestDatabaseAsync, int, boolean, String, String)
    */
   public AudioAttribute getAudioAttribute() {
-    AudioAttribute audioAttribute = audioType.equals(AudioType.AUDIO_TYPE_REGULAR) ? exercise.getRecordingsBy(controller.getUser(), true) :
-        audioType.equals(AudioType.AUDIO_TYPE_SLOW) ? exercise.getRecordingsBy(controller.getUser(), false) : null;
+    AudioAttribute audioAttribute = audioType.equals(AudioType.REGULAR) ? exercise.getRecordingsBy(controller.getUser(), true) :
+        audioType.equals(AudioType.SLOW) ? exercise.getRecordingsBy(controller.getUser(), false) : null;
 
     if (audioType.isContext()) {
       for (AudioAttribute audioAttribute1 : exercise.getAudioAttributes()) {
@@ -135,9 +135,9 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
 
   private String getRecordButtonTitle() {
     return
-      audioType.equals(AudioType.AUDIO_TYPE_REGULAR) ? "Record regular"
+      audioType.equals(AudioType.REGULAR) ? "Record regular"
         :
-        audioType.equals(AudioType.AUDIO_TYPE_SLOW)    ? "Record slow"  : "Record";
+        audioType.equals(AudioType.SLOW)    ? "Record slow"  : "Record";
   }
 
   /**

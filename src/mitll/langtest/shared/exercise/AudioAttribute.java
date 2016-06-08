@@ -35,7 +35,6 @@ package mitll.langtest.shared.exercise;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.shared.AudioType;
 import mitll.langtest.shared.MiniUser;
-import mitll.langtest.shared.Result;
 import mitll.langtest.shared.UserAndTime;
 
 import java.util.HashMap;
@@ -59,14 +58,14 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   private static final String FILE_MISSING = "FILE_MISSING";
 
   private static final String SPEED = "speed";
-  public static final String SLOW = AudioType.AUDIO_TYPE_SLOW.toString();
-  public static final String REGULAR = AudioType.AUDIO_TYPE_REGULAR.toString();
+  public static final String SLOW = AudioType.SLOW.toString();
+  public static final String REGULAR = AudioType.REGULAR.toString();
   public static final String REGULAR_AND_SLOW = "regular and slow";
   private static final String CONTEXT = "context";
   /**
    * TODO : if every have slow recordings of context audio we'll need to add another type or an enum
    */
-  public static final AudioType CONTEXT_AUDIO_TYPE = AudioType.CONTEXT_REGULAR;//"context=" + AudioType.AUDIO_TYPE_REGULAR.toString();
+  public static final AudioType CONTEXT_AUDIO_TYPE = AudioType.CONTEXT_REGULAR;//"context=" + AudioType.REGULAR.toString();
 
   private MiniUser user;
 
@@ -117,13 +116,13 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     this.setUser(user);
     this.audioType = type;
 
-    if (type.equals(AudioType.AUDIO_TYPE_REGULAR)) {
+    if (type.equals(AudioType.REGULAR)) {
       markRegular();
     }
-    else if (type.equals(AudioType.AUDIO_TYPE_SLOW)) {
+    else if (type.equals(AudioType.SLOW)) {
       markSlow();
     }
-    else if (type.equals(AudioType.AUDIO_TYPE_FAST_AND_SLOW)) {
+    else if (type.equals(AudioType.FAST_AND_SLOW)) {
       addAttribute(SPEED, REGULAR_AND_SLOW);
     } else {
       addAttribute(type.getType(), type.getSpeed());
