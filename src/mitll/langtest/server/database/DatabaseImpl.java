@@ -1555,7 +1555,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
     int context = 0;
     for (CommonShell shell : exercises) {
-      if (!shell.getContext().isEmpty()) context++;
+      if (shell.getContext() != null &&
+          !shell.getContext().isEmpty()) context++;
       boolean add = uniqueIDs.add(shell.getID());
       if (!add) {
         logger.warn("getMaleFemaleProgress found duplicate id " + shell.getID() + " : " + shell);

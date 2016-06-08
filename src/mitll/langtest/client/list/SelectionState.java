@@ -47,12 +47,15 @@ import java.util.logging.Logger;
 public class SelectionState {
   private final Logger logger = Logger.getLogger("SelectionState");
 
+  public static final String ONLY_WITH_AUDIO_DEFECTS = "onlyWithAudioDefects";
+
   static final String INSTANCE = "instance";
   private String item = "";
   private final Map<String, Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
   private String instance = "";
   private String search = "";
   private static final boolean DEBUG = false;
+  private boolean onlyWithAudioDefects;
 
   /**
    * @param token
@@ -105,6 +108,8 @@ public class SelectionState {
             setItem(section);
           } else if (type.equals("#search") || type.equals("search")) {
             search = section;
+          } else if (type.equals("#" +ONLY_WITH_AUDIO_DEFECTS) || type.equals(ONLY_WITH_AUDIO_DEFECTS)) {
+            onlyWithAudioDefects = section.equals("true");
           } else {
             String[] split = section.split(",");
             List<String> sections = Arrays.asList(split);
@@ -162,6 +167,11 @@ public class SelectionState {
     return search;
   }
 
+
+  boolean isOnlyWithAudioDefects() {
+    return onlyWithAudioDefects;
+  }
+
   public String toString() {
     StringBuilder builder = new StringBuilder();
     for (Collection<String> section : getTypeToSection().values()) {
@@ -172,6 +182,10 @@ public class SelectionState {
   }
 
   public String getInfo() {
-    return "parseToken : instance " + instance + " : search " + search + " : item " + item + " : unit->chapter " + getTypeToSection();
+    return "parseToken : instance " + instance + " : " +
+        "search " + search + ", " +
+        "item " + item + ", " +
+        "unit->chapter " + getTypeToSection() +
+        " onlyWithAudioDefects="+isOnlyWithAudioDefects();
   }
 }
