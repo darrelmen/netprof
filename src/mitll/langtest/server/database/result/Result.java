@@ -32,65 +32,90 @@
 
 package mitll.langtest.server.database.result;
 
-import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.shared.AudioType;
 import mitll.langtest.shared.UserAndTime;
 
 import java.beans.Transient;
 import java.util.Date;
 
-public class Result implements /*IsSerializable,*/ UserAndTime {
+public class Result implements  UserAndTime {
   private int uniqueID;
   private int userid;
- // private String plan;
+
   private String id;
   private int qid;
   private String answer;
   private boolean valid;
   private long timestamp;
 
-  private String audioType;
-  private int durationInMillis;
+  private AudioType audioType;
+  private long durationInMillis;
   private boolean correct;
   private float pronScore;
+
+  private String deviceType;
   private String device;
+
   private transient String jsonScore;
+
+  private long processDur;
+  private long roundTrip;
+  private boolean withFlash;
+  private float dynamicRange;
+  private String validity;
 
   public Result() {}
 
   /**
    * @see ResultDAO#getResultsForQuery(java.sql.Connection, java.sql.PreparedStatement)
+   * @param answerType
    * @param userid
    * @param plan
    * @param id
    * @param answer
    * @param valid
    * @param timestamp
-   * @param answerType
+   * @param audioType
    * @param durationInMillis
    * @param correct
    * @param pronScore
    * @param device
+   * @param deviceType
+   * @param processDur
+   * @param roundTripDur
+   * @param withFlash
+   * @param dynamicRange
    */
   public Result(int uniqueID,
-                int userid, String plan, String id,
+                int userid,
+                //String plan,
+                String id,
                 int qid,
                 String answer,
-                boolean valid, long timestamp,
-                String answerType, int durationInMillis, boolean correct, float pronScore, String device) {
+                boolean valid,
+                long timestamp,
+                AudioType audioType,
+                long durationInMillis, boolean correct, float pronScore, String device,
+                String deviceType, long processDur, long roundTripDur, boolean withFlash, float dynamicRange,
+                String validity) {
     this.uniqueID = uniqueID;
     this.userid = userid;
-  //  this.plan = plan;
     this.id = id;
     this.qid = qid;
     this.answer = answer;
     this.valid = valid;
     this.timestamp = timestamp;
-    this.audioType = answerType == null || answerType.length() == 0 ? AudioType.UNSET.toString() : answerType;
+    this.audioType = audioType;
     this.durationInMillis = durationInMillis;
     this.correct = correct;
     this.pronScore = pronScore;
     this.device = device;
+    this.deviceType = deviceType;
+    this.processDur = processDur;
+    this.roundTrip = roundTripDur;
+    this.withFlash = withFlash;
+    this.dynamicRange = dynamicRange;
+    this.validity = validity;
   }
 
   /**
@@ -106,7 +131,7 @@ public class Result implements /*IsSerializable,*/ UserAndTime {
   @Transient
   public String getCompoundID() {  return getExerciseID() + "/" + qid;  }
 
-  public String getAudioType() {
+  public AudioType getAudioType() {
     return audioType;
   }
 
@@ -119,12 +144,6 @@ public class Result implements /*IsSerializable,*/ UserAndTime {
   public int getUniqueID() {
     return uniqueID;
   }
-
-/*
-  private void setUniqueID(int uniqueID) {
-    this.uniqueID = uniqueID;
-  }
-*/
 
   public int getUserid() {
     return userid;
@@ -155,7 +174,7 @@ public class Result implements /*IsSerializable,*/ UserAndTime {
     return id;
   }
 
-  public int getDurationInMillis() {
+  public long getDurationInMillis() {
     return durationInMillis;
   }
 
@@ -176,54 +195,63 @@ public class Result implements /*IsSerializable,*/ UserAndTime {
     this.jsonScore = jsonScore;
   }
 
-/*  private void setUserid(long userid) {
-    this.userid = userid;
-  }
-
-  private void setPlan(String plan) {
-    this.plan = plan;
-  }
-
-  private void setExerciseID(String id) {
-    this.id = id;
-  }
-
-  private void setQid(int qid) {
-    this.qid = qid;
-  }
-
-  private void setAnswer(String answer) {
-    this.answer = answer;
-  }
-
-  private void setValid(boolean valid) {
-    this.valid = valid;
-  }
-
-  private void setTimestamp(long timestamp) {
-    this.timestamp = timestamp;
-  }
-
-  private void setAudioType(String audioType) {
-    this.audioType = audioType;
-  }
-
-  private void setDurationInMillis(int durationInMillis) {
-    this.durationInMillis = durationInMillis;
-  }
-
-  private void setCorrect(boolean correct) {
-    this.correct = correct;
-  }
-
-  private void setPronScore(float pronScore) {
-    this.pronScore = pronScore;
-  }
-
-  private void setDevice(String device) {
-    this.device = device;
-  }*/
   public void setUserID(Integer userID) {
     this.userid = userID;
+  }
+
+  public long getProcessDur() {
+    return processDur;
+  }
+
+  public void setProcessDur(long processDur) {
+    this.processDur = processDur;
+  }
+
+  public long getRoundTrip() {
+    return roundTrip;
+  }
+
+  public void setRoundTrip(long roundTrip) {
+    this.roundTrip = roundTrip;
+  }
+
+  public String getDeviceType() {
+    return deviceType;
+  }
+
+  public void setDeviceType(String deviceType) {
+    this.deviceType = deviceType;
+  }
+
+  public String getDevice() {
+    return device;
+  }
+
+  public void setDevice(String device) {
+    this.device = device;
+  }
+
+  public boolean isWithFlash() {
+    return withFlash;
+  }
+
+  public void setWithFlash(boolean withFlash) {
+    this.withFlash = withFlash;
+  }
+
+  public float getDynamicRange() {
+    return dynamicRange;
+  }
+
+  public void setDynamicRange(float dynamicRange) {
+    this.dynamicRange = dynamicRange;
+  }
+
+  public String getValidity() {
+    return validity;
+  }
+
+  public void setValidity(String validity) {
+    this.validity = validity;
   }
 }

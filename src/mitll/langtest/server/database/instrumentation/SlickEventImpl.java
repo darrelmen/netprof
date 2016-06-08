@@ -1,6 +1,7 @@
 package mitll.langtest.server.database.instrumentation;
 
 import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.database.ISchema;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.Event;
@@ -18,7 +19,7 @@ import java.util.Map;
 /**
  * Created by go22670 on 5/13/16.
  */
-public class SlickEventImpl implements IEventDAO {
+public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
   private static final Logger logger = Logger.getLogger(SlickEventImpl.class);
   private EventDAOWrapper eventDAOExample;
 
@@ -36,6 +37,7 @@ public class SlickEventImpl implements IEventDAO {
   public void dropTable() {
     eventDAOExample.drop();
   }
+
 
   /**
    * @param other
@@ -60,10 +62,10 @@ public class SlickEventImpl implements IEventDAO {
 
   @Override
   public boolean add(Event event, String language) {
-    eventDAOExample.add(getSlickEvent(event, language.toLowerCase()));
+    eventDAOExample.add(toSlick(event, language.toLowerCase()));
     return true;
   }
-
+/*
   public SlickEvent getSlickEvent(Event event, String language) {
     long timestamp = event.getTimestamp();
     if (timestamp < 1) timestamp = System.currentTimeMillis();
@@ -83,7 +85,39 @@ public class SlickEventImpl implements IEventDAO {
     //   logger.info("insert " +slickEvent);
 
     return slickEvent;
+  }*/
+
+
+  @Override
+  public SlickEvent toSlick(Event event, String language) {
+    long timestamp = event.getTimestamp();
+    if (timestamp < 1) timestamp = System.currentTimeMillis();
+    Timestamp modified = new Timestamp(timestamp);
+    SlickEvent slickEvent = new SlickEvent(-1,
+        event.getUserID(),
+        event.getExerciseID(),
+        event.getContext() == null ? "" : event.getContext(),
+        event.getWidgetID(),
+        event.getWidgetType(),
+        event.getDevice() == null ? "" : event.getDevice(),
+        modified,
+        language.toLowerCase());
+
+    return slickEvent;
   }
+
+  @Override
+  public Event fromSlick(SlickEvent event) {
+    return new Event(
+        event.widgetid(),
+        event.widgettype(),
+        event.exerciseid(),
+        event.context(),
+        event.userid(),
+        event.modified().getTime(),
+        event.device());
+  }
+
 
   public SlickEvent getSlickEvent(Event event, String language, Map<Integer, Integer> oldToNew) {
     long timestamp = event.getTimestamp();
@@ -93,7 +127,7 @@ public class SlickEventImpl implements IEventDAO {
     Integer userid = oldToNew.get(event.getUserID());
     if (userid == null) return null;
     else {
-      SlickEvent slickEvent = new SlickEvent(-1,
+      SlickEvent slickEvent = /*new SlickEvent(-1,
           userid,
           event.getExerciseID(),
           event.getContext() == null ? "" : event.getContext(),
@@ -101,7 +135,8 @@ public class SlickEventImpl implements IEventDAO {
           event.getWidgetType(),
           event.getDevice() == null ? "" : event.getDevice(),
           modified,
-          language.toLowerCase());
+          language.toLowerCase());*/
+          toSlick(event, language);
 
 //    logger.info("insert " +event);
       //   logger.info("insert " +slickEvent);
@@ -117,15 +152,7 @@ public class SlickEventImpl implements IEventDAO {
 //    logger.info("getting " + all.size() + " events to ");
     List<Event> copy = new ArrayList<>();
     for (SlickEvent event : all) {
-      copy.add(new Event(
-          event.widgetid(),
-          event.widgettype(),
-          event.exerciseid(),
-          event.context(),
-          event.userid(),
-          event.modified().getTime(),
-          event.device())
-      );
+      copy.add(fromSlick(event));
     }
     return copy;
   }
