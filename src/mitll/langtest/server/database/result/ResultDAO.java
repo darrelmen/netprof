@@ -906,7 +906,7 @@ public class ResultDAO extends DAO implements IResultDAO {
       try {
         audioType = AudioType.valueOf(type);
       } catch (IllegalArgumentException e) {
-        audioType = AudioType.AUDIO_TYPE_UNSET;
+        audioType = AudioType.UNSET;
       }
 
       MonitorResult result = new MonitorResult(uniqueID, userID, //id
@@ -1391,7 +1391,7 @@ public class ResultDAO extends DAO implements IResultDAO {
    * @return
    */
   public Map<Integer, Map<String, Result>> getUserToResults(boolean isRegular, IUserDAO userDAO) {
-    AudioType typeToUse = isRegular ? AudioType.AUDIO_TYPE_REGULAR : AudioType.AUDIO_TYPE_SLOW;
+    AudioType typeToUse = isRegular ? AudioType.REGULAR : AudioType.SLOW;
     return getUserToResults(typeToUse, userDAO);
   }
 
