@@ -323,7 +323,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   private <T extends CommonShell> void sortExercises(String role, List<T> commonExercises) {
-    new ExerciseSorter(db.getTypeOrder()).getSortedByUnitThenAlpha(commonExercises, role.equals(AudioType.AUDIO_TYPE_RECORDER));
+    new ExerciseSorter(db.getTypeOrder()).getSortedByUnitThenAlpha(commonExercises,
+        role.equals(AudioType.RECORDER.toString()));
   }
 
   private <T extends CommonShell> Collection<T> getExercisesForSearch(String prefix, int userID, Collection<T> exercises, boolean predefExercises) {
@@ -376,8 +377,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see #getExercisesForSelectionState
    */
   private Collection<CommonExercise> filterByUnrecorded(
-                                                        ExerciseListRequest request,
-                                                        Collection<CommonExercise> exercises) {
+      ExerciseListRequest request,
+      Collection<CommonExercise> exercises) {
 
     // boolean onlyUnrecordedByMyGender = request.isOnlyUnrecordedByMe();
     boolean onlyExamples = request.isOnlyExamples();
@@ -552,7 +553,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private int markRecordedState(int userID, String role, Collection<? extends CommonShell> exercises,
                                 boolean onlyExample) {
     int c = 0;
-    if (role.equals(AudioType.AUDIO_TYPE_RECORDER)) {
+    if (role.equals(AudioType.RECORDER.toString())) {
       Collection<String> recordedForUser = onlyExample ?
           db.getAudioDAO().getRecordedExampleForUser(userID) : db.getAudioDAO().getRecordedForUser(userID);
       //logger.debug("\tfound " + recordedForUser.size() + " recordings by " + userID + " only example " + onlyExample);
@@ -586,18 +587,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.list.HistoryExerciseList#loadExercises
    * @see #getExerciseIds
    */
-  private <T extends CommonShell> ExerciseListWrapper<T> getExercisesForSelectionState(/*int reqID,
-                                                                                       Map<String, Collection<String>> typeToSection, String prefix,
-                                                                                       long userID, String role, boolean onlyUnrecordedByMe,
-                                                                                       boolean onlyExamples, boolean incorrectFirst*/
-                                                                                       ExerciseListRequest request) {
+  private <T extends CommonShell> ExerciseListWrapper<T> getExercisesForSelectionState(ExerciseListRequest request) {
     Collection<CommonExercise> exercisesForState = db.getSectionHelper().getExercisesForSelectionState(request.getTypeToSelection());
     exercisesForState = filterExercises(request, exercisesForState);
-    return getExerciseListWrapperForPrefix(request,
-        //  reqID, prefix,
-        exercisesForState
-        //    , userID, role, onlyExamples, incorrectFirst
-    );
+    return getExerciseListWrapperForPrefix(request, exercisesForState);
   }
 
   /**
@@ -622,7 +615,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       logger.debug("getExerciseListWrapperForPrefix userID " + userID + " prefix '" + prefix + "' role " + role);
     }
 
-    int i = markRecordedState((int) userID, role, exercisesForState, onlyExamples);
+    int i = markRecordedState(userID, role, exercisesForState, onlyExamples);
     //logger.debug("marked " +i + " as recorded role " +role);
 
     if (hasPrefix) {
@@ -652,11 +645,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    *
    * @param exercises
    * @return
-   * @paramx reqID
-   * @paramx userID
-   * @paramx role
-   * @paramx onlyExamples
-   * @paramx isFlashcardReq
    * @see #getExerciseIds
    * @see #getExerciseListWrapperForPrefix
    */
@@ -676,10 +664,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     List<CommonShell> exerciseShells = getExerciseShells(exercises);
 
     //   logger.debug("makeExerciseListWrapper : userID " +userID + " Role is " + role);
-    if (role.equals(AudioType.AUDIO_TYPE_RECORDER)) {
+    if (role.equals(AudioType.RECORDER.toString())) {
       markRecordedState((int) userID, role, exerciseShells, onlyExamples);
     } else if (role.equalsIgnoreCase(User.Permission.QUALITY_CONTROL.toString()) ||
-        role.startsWith(AudioType.AUDIO_TYPE_REVIEW.toString())) {
+        role.startsWith(AudioType.REVIEW.toString())) {
       getUserListManager().markState(exerciseShells);
     }
 
@@ -1112,8 +1100,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * Get properties (first time called read properties file -- e.g. see war/config/levantine/config.properties).
    *
    * @return
-   * @see mitll.langtest.client.LangTest#onModuleLoad
    * @paramx userID
+   * @see mitll.langtest.client.LangTest#onModuleLoad
    */
   @Override
   public StartupInfo getStartupInfo() {
@@ -1186,6 +1174,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * Be careful - we lookup audio file by .wav extension
+   *
    * @param reqid
    * @param resultID
    * @param testAudioFile
@@ -1256,7 +1245,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   // Users ---------------------
-
 
 
   /**
@@ -1469,7 +1457,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     List<MonitorResult> resultList = results.subList(start, min);
     logger.info("ensure compressed audio for " + resultList.size() + " items.");
     for (MonitorResult result : resultList) {
-      ensureCompressedAudio( result.getUserid(), db.getCustomOrPredefExercise(result.getId()), result.getAnswer());
+      ensureCompressedAudio(result.getUserid(), db.getCustomOrPredefExercise(result.getId()), result.getAnswer());
     }
     return new ResultAndTotal(new ArrayList<MonitorResult>(resultList), n, req);
   }
@@ -1792,7 +1780,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     boolean amas = serverProps.isAMAS();
 
-    CommonExercise commonExercise = amas? null:db.getCustomOrPredefExercise(exerciseID);
+    CommonExercise commonExercise = amas ? null : db.getCustomOrPredefExercise(exerciseID);
     CommonShell exercise1 = amas ? db.getAMASExercise(exerciseID) : commonExercise;
 
     if (exercise1 == null) {
@@ -1834,7 +1822,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   private void ensureCompressedEquivalent(int user, CommonShell exercise1, AudioAnswer audioAnswer) {
-    ensureCompressedAudio(user, exercise1,  audioAnswer.getPath());
+    ensureCompressedAudio(user, exercise1, audioAnswer.getPath());
   }
 
   private void ensureCompressedAudio(int user, CommonShell exercise1, String path) {
@@ -2028,9 +2016,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     String strongName = getPermutationStrongName();
     String serverName = getThreadLocalRequest().getServerName();
-    String msgStr = message +"\n" + "remoteAddr=" + remoteAddr + "\nuser agent: " + userAgent +
-        "\ngwt: " + strongName+
-         "\nserver: " + serverName;
+    String msgStr = message + "\n" + "remoteAddr=" + remoteAddr + "\nuser agent: " + userAgent +
+        "\ngwt: " + strongName +
+        "\nserver: " + serverName;
 
     return msgStr;
   }
@@ -2058,7 +2046,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       setInstallPath(db);
       audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, this);
     } catch (Exception e) {
-      logger.error("Got " + e,e);
+      logger.error("Got " + e, e);
     }
 
     try {
@@ -2075,7 +2063,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       refResultDecoder.doRefDecode(getExercises(), relativeConfigDir);
       if (serverProps.isAMAS()) audioFileHelper.makeAutoCRT(relativeConfigDir);
     } catch (Exception e) {
-      logger.error("Got " + e,e);
+      logger.error("Got " + e, e);
     }
   }
 
