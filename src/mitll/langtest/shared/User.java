@@ -69,10 +69,8 @@ public class User extends MiniUser {
   private long timestamp;
   private Collection<Permission> permissions;
 
-  public boolean isTeacher() {
-    return getUserKind().equals(Kind.TEACHER);
-  }
-
+  public boolean isStudent() { return getUserKind().equals(Kind.STUDENT);  }
+  public boolean isTeacher() { return getUserKind().equals(Kind.TEACHER);  }
   public boolean isCD() {
     return getUserKind().equals(Kind.CONTENT_DEVELOPER);
   }

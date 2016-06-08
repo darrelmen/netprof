@@ -38,6 +38,7 @@ import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.server.rest.RestUserManagement;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.AudioType;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
@@ -63,7 +64,6 @@ import java.util.*;
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since
  */
 @SuppressWarnings("serial")
 public class ScoreServlet extends DatabaseServlet {
@@ -144,7 +144,7 @@ public class ScoreServlet extends DatabaseServlet {
     if (queryString == null) queryString = ""; // how could this happen???
     if (!queryString.contains(NESTED_CHAPTERS)) { // quiet output for polling from status webapp
       String pathInfo = request.getPathInfo();
-      logger.debug("ScoreServlet.doGet (" +getLanguage() +
+      logger.debug("ScoreServlet.doGet (" + getLanguage() +
           "): Request '" + queryString + "' path " + pathInfo +
           " uri " + request.getRequestURI() + "  " + request.getRequestURL() + "  " + request.getServletPath());
     }
@@ -171,8 +171,7 @@ public class ScoreServlet extends DatabaseServlet {
                 whenCachedEverything = System.currentTimeMillis();
               }
               toReturn = nestedChaptersEverything;
-            }
-            else {
+            } else {
               toReturn = getJsonNestedChapters(true);
             }
           } else {
@@ -225,14 +224,14 @@ public class ScoreServlet extends DatabaseServlet {
     long now = System.currentTimeMillis();
     long l = now - then;
     if (l > 10) {
-      logger.info("doGet : (" +getLanguage()+ ") took " + l + " millis to do " + request.getQueryString());
+      logger.info("doGet : (" + getLanguage() + ") took " + l + " millis to do " + request.getQueryString());
     }
     then = now;
     String x = toReturn.toString();
     now = System.currentTimeMillis();
     l = now - then;
     if (l > 50) {
-      logger.info("doGet : (" +getLanguage()+ ") took " + l + " millis to do " + request.getQueryString() + " and to do toString on json");
+      logger.info("doGet : (" + getLanguage() + ") took " + l + " millis to do " + request.getQueryString() + " and to do toString on json");
     }
 
     reply(response, x);
@@ -241,6 +240,7 @@ public class ScoreServlet extends DatabaseServlet {
   /**
    * Worries about sql injection attack.
    * Remove ref result entry for an exercise, helpful if you want to clear the ref result for just one exercise
+   *
    * @param queryString
    * @return
    */
@@ -249,20 +249,18 @@ public class ScoreServlet extends DatabaseServlet {
     if (split.length != 2) {
       JSONObject jsonObject = new JSONObject();
       jsonObject.put("success", Boolean.valueOf(false).toString());
-      jsonObject.put("error","Expecting exid");
+      jsonObject.put("error", "Expecting exid");
       return jsonObject;
-    }
-    else {
+    } else {
       String exid = split[1];
 
       CommonExercise exercise = db.getExercise(exid);
       if (exercise == null) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("success", Boolean.valueOf(false).toString());
-        jsonObject.put("error","no exercise with that id");
+        jsonObject.put("error", "no exercise with that id");
         return jsonObject;
-      }
-      else {
+      } else {
         boolean b = db.getRefResultDAO().removeForExercise(exid);
         //logger.info("Remove ref for " + exid + " got " + b);
         JSONObject jsonObject = new JSONObject();
@@ -291,9 +289,9 @@ public class ScoreServlet extends DatabaseServlet {
       int paramIntValue = getParamIntValue(param, YEAR);
       if (paramIntValue > 0) year = paramIntValue;
     }
-   // else {
-   //   year = Calendar.getInstance().get(Calendar.YEAR);
-   // }
+    // else {
+    //   year = Calendar.getInstance().get(Calendar.YEAR);
+    // }
     return year;
   }
 
@@ -568,7 +566,7 @@ public class ScoreServlet extends DatabaseServlet {
     response.setContentType("text/html; charset=UTF-8");
     response.setCharacterEncoding("UTF-8");
 
-    String fileName = year == -1 ? "reportFor" + getLanguage() : ("reportFor" +getLanguage()+"_forYear" + year);
+    String fileName = year == -1 ? "reportFor" + getLanguage() : ("reportFor" + getLanguage() + "_forYear" + year);
 
     response.setHeader("Content-disposition", "attachment; filename=" +
         fileName + ".html");
@@ -587,15 +585,15 @@ public class ScoreServlet extends DatabaseServlet {
     long then = System.currentTimeMillis();
     JsonExport jsonExport = getJSONExport();
     long now = System.currentTimeMillis();
-    if (now-then>1000) {
-      logger.warn("getJsonNestedChapters " + getLanguage() + " getJSONExport took " + (now-then) + " millis");
+    if (now - then > 1000) {
+      logger.warn("getJsonNestedChapters " + getLanguage() + " getJSONExport took " + (now - then) + " millis");
     }
     then = now;
 
     jsonObject.put(CONTENT, jsonExport.getContentAsJson(removeExercisesWithMissingAudio));
     now = System.currentTimeMillis();
-    if (now-then>1000) {
-      logger.warn("getJsonNestedChapters " + getLanguage() + " getContentAsJson took " + (now-then) + " millis");
+    if (now - then > 1000) {
+      logger.warn("getJsonNestedChapters " + getLanguage() + " getContentAsJson took " + (now - then) + " millis");
     }
     addVersion(jsonObject);
 
@@ -603,8 +601,8 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
-   * @see #doGet(HttpServletRequest, HttpServletResponse)
    * @return
+   * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
   private JSONObject getJSONForExercises() {
     return getJSONExerciseExport(getJSONExport());
@@ -856,11 +854,14 @@ public class ScoreServlet extends DatabaseServlet {
    * @return
    * @see #getJsonForAudioForUser
    */
-  private AudioAnswer getAnswer(int reqid, String exerciseID, int user, boolean doFlashcard, String wavPath, File file, float score,
+  private AudioAnswer getAnswer(int reqid, String exerciseID, int user, boolean doFlashcard, String wavPath, File file,
+                                float score,
                                 String deviceType, String device, boolean allowAlternates) {
     CommonExercise exercise1 = db.getCustomOrPredefExercise(exerciseID);  // allow custom items to mask out non-custom items
 
-    AudioContext audioContext = new AudioContext(reqid, user, exerciseID, 0, doFlashcard ? "flashcard" : "learn");
+    AudioContext audioContext =
+        new AudioContext(reqid, user, exerciseID, 0,
+            doFlashcard ? AudioType.AUDIO_TYPE_PRACTICE : AudioType.AUDIO_TYPE_LEARN);
 
     AudioAnswer answer = audioFileHelper.getAnswer(exercise1,
         audioContext,
