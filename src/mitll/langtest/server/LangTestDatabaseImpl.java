@@ -1136,7 +1136,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
       // maintain backward compatibility - so we can show old recordings of ref audio for the context sentence
       String sentence = isAMAS ? exercise.getForeignLanguage() :
-          (result.getAudioType().contains("context")) ? db.getExercise(exerciseID).getDirectlyRelated().iterator().next().getForeignLanguage() : exercise.getForeignLanguage();
+          (result.getAudioType().isContext()) ?
+              db.getExercise(exerciseID).getDirectlyRelated().iterator().next().getForeignLanguage() :
+              exercise.getForeignLanguage();
 
       if (exercise == null) {
         logger.warn(getLanguage() + " can't find exercise id " + exerciseID);
