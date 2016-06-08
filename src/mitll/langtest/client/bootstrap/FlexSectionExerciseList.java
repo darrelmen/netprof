@@ -117,7 +117,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
     buttonTypes.add(ButtonType.INFO);
     buttonTypes.add(ButtonType.WARNING);
     setUnaccountedForVertical(CLASSROOM_VERTICAL_EXTRA);
-    downloadHelper = new DownloadHelper(controller, instance, this, controller.isTeacher());
+    downloadHelper = new DownloadHelper(controller, instance, this, controller.getCurrent().isTeacher());
   }
 
   protected SectionWidgetContainer<ButtonGroupSectionWidget> getSectionWidgetContainer() {
@@ -252,7 +252,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
 
     long now = System.currentTimeMillis();
     if (now - then > 300)
-      System.out.println("\taddButtonRow took " + (now - then) + " millis" + " instance " + getInstance());
+      logger.info("\taddButtonRow took " + (now - then) + " millis" + " instance " + getInstance());
 
     if (last != null) setSizesAndPushFirst();
 
