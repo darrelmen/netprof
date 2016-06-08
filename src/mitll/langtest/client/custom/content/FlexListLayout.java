@@ -112,7 +112,8 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
     long uniqueID = ul == null ? -1 : ul.getUniqueID();
 
     // TODO : only has to be paging b/c it needs to setUserListID
-    PagingExerciseList<T, U> widgets = makeNPFExerciseList(topRow, currentExerciseVPanel, instanceName, uniqueID, incorrectFirst);
+    PagingExerciseList<T, U> widgets = makeNPFExerciseList(topRow, currentExerciseVPanel, instanceName, uniqueID,
+        incorrectFirst);
     npfExerciseList = widgets;
 
     addThirdColumn(bottomRow);

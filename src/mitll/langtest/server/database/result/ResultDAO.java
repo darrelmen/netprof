@@ -1391,11 +1391,11 @@ public class ResultDAO extends DAO implements IResultDAO {
    * @return
    */
   public Map<Integer, Map<String, Result>> getUserToResults(boolean isRegular, IUserDAO userDAO) {
-    String typeToUse = isRegular ? Result.AUDIO_TYPE_REGULAR : Result.AUDIO_TYPE_SLOW;
+    AudioType typeToUse = isRegular ? AudioType.AUDIO_TYPE_REGULAR : AudioType.AUDIO_TYPE_SLOW;
     return getUserToResults(typeToUse, userDAO);
   }
 
-  private Map<Integer, Map<String, Result>> getUserToResults(String typeToUse, IUserDAO userDAO) {
+  private Map<Integer, Map<String, Result>> getUserToResults(AudioType typeToUse, IUserDAO userDAO) {
     Map<Integer, Map<String, Result>> userToResult = new HashMap<>();
 
     Map<Integer, User> userMap = userDAO.getUserMap();
