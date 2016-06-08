@@ -335,4 +335,9 @@ public class PostgresTest extends BaseTest {
       }
     }
   }
+
+  @Test
+  public void testResult() {
+    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
+  }
 }

@@ -75,6 +75,7 @@ import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 import mitll.npdata.dao.SlickAudio;
+import mitll.npdata.dao.SlickResult;
 import mitll.npdata.dao.event.DBConnection;
 import net.sf.json.JSON;
 import net.sf.json.JSONObject;
@@ -235,6 +236,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     SlickAudioDAO slickAudioDAO = new SlickAudioDAO(this, dbConnection, this.userDAO);
     audioDAO = slickAudioDAO;
 
+    SlickResultDAO slickResultDAO = new SlickResultDAO(this, dbConnection, this.userDAO);
+    resultDAO = slickResultDAO;
+
     createTables();
 
 
@@ -243,7 +247,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     userExerciseDAO = new UserExerciseDAO(this);
     UserListExerciseJoinDAO userListExerciseJoinDAO = new UserListExerciseJoinDAO(this);
 
-    resultDAO = new ResultDAO(this);
+   // resultDAO = new ResultDAO(this);
 
     refresultDAO = new RefResultDAO(this, getServerProps().shouldDropRefResult());
     wordDAO = new WordDAO(this);
@@ -1038,6 +1042,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
     slickAudioDAO.createTable();
     slickEventDAO.createTable();
+
+    ((ISchema)getResultDAO()).createTable();
   }
 
   public void copyToPostgres() {
@@ -1045,12 +1051,14 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     SlickUserDAOImpl slickUserDAO = (SlickUserDAOImpl) getUserDAO();
     SlickAudioDAO slickAudioDAO = (SlickAudioDAO) getAudioDAO();
     SlickEventImpl slickEventDAO = (SlickEventImpl) getEventDAO();
+    SlickResultDAO slickResultDAO = (SlickResultDAO) getResultDAO();
 
     logger.info("Drop audio table!!! ");
     slickAudioDAO.dropTable();
     logger.info("Drop user table!!! ");
     slickUserDAO.dropTable();
     slickEventDAO.dropTable();
+    slickResultDAO.dropTable();
 
     createTables();
 
@@ -1087,8 +1095,17 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
     // add event table
     {
-      long defectDetector = userDAO.getDefectDetector();
-      slickEventDAO.copyTableOnlyOnce(new EventDAO(this, defectDetector), getLanguage(), oldToNew);
+      slickEventDAO.copyTableOnlyOnce(new EventDAO(this, userDAO.getDefectDetector()), getLanguage(), oldToNew);
+    }
+
+    {
+      ResultDAO resultDAO = new ResultDAO(this);
+      List<SlickResult> bulk = new ArrayList<>();
+
+      for (Result result : resultDAO.getResults()) {
+        bulk.add(slickResultDAO.toSlick(result, getLanguage()));
+      }
+      slickResultDAO.addBulk(bulk);
     }
   }
 
