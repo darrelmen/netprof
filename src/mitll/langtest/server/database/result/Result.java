@@ -30,35 +30,19 @@
  *
  */
 
-package mitll.langtest.shared;
+package mitll.langtest.server.database.result;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.server.database.result.ResultDAO;
+import mitll.langtest.shared.AudioType;
+import mitll.langtest.shared.UserAndTime;
 
 import java.beans.Transient;
 import java.util.Date;
 
-/**
- * An answer to a question. <br></br>
- * Records who answered it, which plan, which exercise, which question within a multi-question exercise, and
- *  the answer, which may either be a) the text of a written response or b) a path to an audio file response
- * <br></br>
- * May be marked with whether the audio file was "valid" - long enough and not silence.<br></br>
- * Also records the timestamp, and optionally whether the result was to a fl/english and spoken/written question.
- * These may be added later via enrichment (joining) against the schedule, which says for a specific user, which
- * of these two flags was presented.
- *
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 5/18/12
- * Time: 5:45 PM
- * To change this template use File | Settings | File Templates.
- */
-public class Result implements IsSerializable, UserAndTime {
+public class Result implements /*IsSerializable,*/ UserAndTime {
   private int uniqueID;
   private int userid;
-  private String plan;
+ // private String plan;
   private String id;
   private int qid;
   private String answer;
@@ -96,7 +80,7 @@ public class Result implements IsSerializable, UserAndTime {
                 String answerType, int durationInMillis, boolean correct, float pronScore, String device) {
     this.uniqueID = uniqueID;
     this.userid = userid;
-    this.plan = plan;
+  //  this.plan = plan;
     this.id = id;
     this.qid = qid;
     this.answer = answer;

@@ -195,13 +195,13 @@ public class PostgresTest extends BaseTest {
 
     logger.info("Got back " + audio.size());
 
-    AudioAttribute audioAttribute = dao.addOrUpdate(1, "1", AudioType.AUDIO_TYPE_REGULAR, "file.wav", System.currentTimeMillis(), 1000, "dude");
+    AudioAttribute audioAttribute = dao.addOrUpdate(1, "1", AudioType.REGULAR, "file.wav", System.currentTimeMillis(), 1000, "dude");
     logger.info("Got audioAttribute " + audioAttribute);
     logger.info("Got now " + dao.getAudioAttributes().size());
 
-    audioAttribute = dao.addOrUpdate(1, "2", AudioType.AUDIO_TYPE_SLOW, "file2.wav", System.currentTimeMillis(), 1000, "dude");
+    audioAttribute = dao.addOrUpdate(1, "2", AudioType.SLOW, "file2.wav", System.currentTimeMillis(), 1000, "dude");
 
-    audioAttribute = dao.addOrUpdate(2, "1", AudioType.AUDIO_TYPE_REGULAR, "file3.wav", System.currentTimeMillis(), 1000, "dude");
+    audioAttribute = dao.addOrUpdate(2, "1", AudioType.REGULAR, "file3.wav", System.currentTimeMillis(), 1000, "dude");
 
     logger.info("Got now " + dao.getAudioAttributes().size());
     logger.info("Got ex to audio " + dao.getExToAudio().size());

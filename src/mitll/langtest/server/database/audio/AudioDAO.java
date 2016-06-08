@@ -39,7 +39,7 @@ import mitll.langtest.server.database.Report;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.AudioType;
 import mitll.langtest.shared.MiniUser;
-import mitll.langtest.shared.Result;
+import mitll.langtest.server.database.result.Result;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import org.apache.log4j.Logger;
 
@@ -460,8 +460,9 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
       user = checkDefaultUser(userID, user);
       AudioType realType;
       try {
-        realType = AudioType.valueOf(type);
+        realType = AudioType.valueOf(type.toUpperCase());
       } catch (IllegalArgumentException e) {
+        logger.warn("no audio type for " + type);
         realType = AudioType.UNSET;
       }
 
@@ -538,7 +539,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @param connection
    * @param transcript
    * @throws java.sql.SQLException
-   * @see #add(mitll.langtest.shared.Result, int, String)
+   * @see #add(Result, int, String)
    */
   private long add(Connection connection, Result result, int userid, String audioRef, String transcript) throws SQLException {
     String exerciseID = result.getExerciseID();
