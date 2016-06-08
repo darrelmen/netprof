@@ -116,7 +116,7 @@ public class JsonSupport {
     }
 
     //List<ExerciseCorrectAndScore> exerciseCorrectAndScores = resultDAO.getExerciseCorrectAndScores(userid, allIDs, idToKey);
-    List<ExerciseCorrectAndScore> exerciseCorrectAndScores =
+    Collection<ExerciseCorrectAndScore> exerciseCorrectAndScores =
         resultDAO.getExerciseCorrectAndScoresByPhones(userid, allIDs, idToEx, sorter);
 
     return addJsonHistory(exerciseCorrectAndScores);
@@ -127,15 +127,15 @@ public class JsonSupport {
    * @return
    * @see DatabaseImpl#getJsonRefResult(Map)
    */
-  public JSONObject getJsonRefResults(Map<String, Collection<String>> typeToSection) {
+  JSONObject getJsonRefResults(Map<String, Collection<String>> typeToSection) {
     Collection<CommonExercise> exercisesForState = sectionHelper.getExercisesForSelectionState(typeToSection);
     List<String> allIDs = new ArrayList<String>();
 
-    Map<String, CommonExercise> idToEx = new HashMap<String, CommonExercise>();
+   // Map<String, CommonExercise> idToEx = new HashMap<String, CommonExercise>();
     for (CommonExercise exercise : exercisesForState) {
       String id = exercise.getID();
       allIDs.add(id);
-      idToEx.put(id, exercise);
+     // idToEx.put(id, exercise);
     }
     return refResultDAO.getJSONScores(allIDs);
   }

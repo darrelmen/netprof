@@ -1,14 +1,9 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.database.audio.IAudioDAO;
-import mitll.langtest.server.database.result.IResultDAO;
-import mitll.langtest.server.database.result.ResultDAO;
-import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
