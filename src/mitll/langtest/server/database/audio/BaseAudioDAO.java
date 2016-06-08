@@ -42,7 +42,6 @@ import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.AudioType;
 import mitll.langtest.shared.MiniUser;
-import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -472,7 +471,7 @@ public abstract class BaseAudioDAO extends DAO {
   public int markDefect(AudioAttribute attribute) {
     AudioType audioType = attribute.getRealAudioType();
     if (attribute.getAudioType().equals(AudioAttribute.REGULAR_AND_SLOW)) {
-      audioType = AudioType.AUDIO_TYPE_FAST_AND_SLOW;
+      audioType = AudioType.FAST_AND_SLOW;
     }
     return markDefect(attribute.getUserid(), attribute.getExid(), audioType);
   }

@@ -502,11 +502,11 @@ public class UserExerciseDAO extends DAO {
     if (audioAttributes != null) {
       for (AudioAttribute attribute : audioAttributes) {
         if (attribute.getUserid() == e.getCreator()) {
-          if ((attribute.getAudioType().equalsIgnoreCase(Result.AUDIO_TYPE_REGULAR) && hasRef)) {
+          if ((attribute.getAudioType().equalsIgnoreCase(Result.REGULAR) && hasRef)) {
             foundReg = true;
           }
         }
-        if (attribute.getAudioType().equalsIgnoreCase(Result.AUDIO_TYPE_SLOW) && hasSRef) {
+        if (attribute.getAudioType().equalsIgnoreCase(Result.SLOW) && hasSRef) {
           foundSlow = true;
         }
       }
@@ -515,11 +515,11 @@ public class UserExerciseDAO extends DAO {
     long time = e.getModifiedDateTimestamp();
     if (time == 0) time = System.currentTimeMillis();
     if (!foundReg && hasRef) {
-      audioDAO.add((int) e.getCreator(), ref, e.getID(), time, Result.AUDIO_TYPE_REGULAR, 0);
+      audioDAO.add((int) e.getCreator(), ref, e.getID(), time, Result.REGULAR, 0);
       logger.warn("adding missing reg  audio ref -- only first time " + ref + " by " + e.getCreator());
     }
     if (!foundSlow && hasSRef) {
-      audioDAO.add((int) e.getCreator(), sref, e.getID(), time, Result.AUDIO_TYPE_SLOW, 0);
+      audioDAO.add((int) e.getCreator(), sref, e.getID(), time, Result.SLOW, 0);
       logger.warn("adding missing slow audio ref -- only first time " + ref + " by " + e.getCreator());
 
     }
