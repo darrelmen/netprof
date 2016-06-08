@@ -861,7 +861,7 @@ public class ScoreServlet extends DatabaseServlet {
 
     AudioContext audioContext =
         new AudioContext(reqid, user, exerciseID, 0,
-            doFlashcard ? AudioType.AUDIO_TYPE_PRACTICE : AudioType.AUDIO_TYPE_LEARN);
+            doFlashcard ? AudioType.PRACTICE : AudioType.LEARN);
 
     AudioAnswer answer = audioFileHelper.getAnswer(exercise1,
         audioContext,

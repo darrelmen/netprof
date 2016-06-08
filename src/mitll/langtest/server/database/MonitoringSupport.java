@@ -648,7 +648,7 @@ class MonitoringSupport {
       if (r.getDurationInMillis() > 0) {
         count++;
       } else if (true
-        //r.spoken /*|| r.audioType.equals(Result.AUDIO_TYPE_UNSET)*/
+        //r.spoken /*|| r.audioType.equals(Result.UNSET)*/
           ) {
         if (r.getAnswer().endsWith(".wav")) {
           badDur++;
