@@ -101,7 +101,7 @@ public class QuizCorrect {
     String session = "";//getLatestSession(typeToSection, userID);
     //  logger.info("exercises " +allIDs.size() + " for session " + session);
 
-    List<CorrectAndScore> resultsForExIDInForUser = db.getResultDAO().getResultsForExIDInForUser(allIDs, userID, session);
+    Collection<CorrectAndScore> resultsForExIDInForUser = db.getResultDAO().getResultsForExIDInForUser(allIDs, userID, session);
     //  for (CorrectAndScore cs:resultsForExIDInForUser) logger.info("found " +cs );
     Collection<CorrectAndScore> copy = getFirstCorrectAndScore(resultsForExIDInForUser);
 
@@ -178,7 +178,7 @@ public class QuizCorrect {
    * @return
    * @see #getQuizCorrectAndScore(Map, int, Collection)
    */
-  private Collection<CorrectAndScore> getFirstCorrectAndScore(List<CorrectAndScore> resultsForUser) {
+  private Collection<CorrectAndScore> getFirstCorrectAndScore(Collection<CorrectAndScore> resultsForUser) {
     Map<String, CorrectAndScore> idToCorrect = new HashMap<String, CorrectAndScore>();
 
     for (CorrectAndScore correctAndScore : resultsForUser) {

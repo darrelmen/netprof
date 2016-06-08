@@ -61,7 +61,6 @@ import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.server.database.word.Word;
 import mitll.langtest.server.database.word.WordDAO;
 import mitll.langtest.server.mail.MailSupport;
-import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.*;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
@@ -280,7 +279,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     }
 
     long then = System.currentTimeMillis();
-    putBackWordAndPhone();
+    //putBackWordAndPhone();
 
     long now = System.currentTimeMillis();
     if (now - then > 1000) logger.info("took " + (now - then) + " millis to put back word and phone");
@@ -378,7 +377,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    *
    * @see #initializeDAOs(PathHelper)
    */
-  private void putBackWordAndPhone() {
+/*  private void putBackWordAndPhone() {
     List<Result> results = resultDAO.getResultsForPractice();
     Map<Integer, Result> idToResult = new HashMap<>();
     //int skipped = 0;
@@ -419,7 +418,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     if (count > 0) {
       logger.debug("putBackWordAndPhone fixed " + count);
     }
-  }
+  }*/
 
   private MonitoringSupport getMonitoringSupport() {
     return new MonitoringSupport(userDAO, resultDAO);
@@ -1098,7 +1097,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getResultAlternatives(java.util.Map, long, String, String)
    * @see mitll.langtest.server.LangTestDatabaseImpl#getResults(java.util.Map, long, String)
    */
-  public List<MonitorResult> getMonitorResults() {
+  public Collection<MonitorResult> getMonitorResults() {
     List<MonitorResult> monitorResults = resultDAO.getMonitorResults();
 
     for (MonitorResult result : monitorResults) {

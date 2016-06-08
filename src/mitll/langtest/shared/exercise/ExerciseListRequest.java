@@ -123,7 +123,7 @@ public class ExerciseListRequest implements Serializable {
   }
 
   /**
-   * @see PagingExerciseList#getRequest() 
+   * @see PagingExerciseList#getRequest()
    * @param role
    * @return
    */

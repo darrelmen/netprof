@@ -2,7 +2,7 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.database.connection.H2Connection;
 import mitll.langtest.server.database.result.ResultDAO;
-import mitll.langtest.shared.Result;
+import mitll.langtest.server.database.result.Result;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 

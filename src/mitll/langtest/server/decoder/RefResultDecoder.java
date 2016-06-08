@@ -39,10 +39,9 @@ import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.shared.MiniUser;
-import mitll.langtest.shared.Result;
+import mitll.langtest.server.database.result.Result;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
@@ -116,18 +115,15 @@ public class RefResultDecoder {
 
   /**
    * @param exercises
-   * @see #runMissingInfo
+   * @seex #runMissingInfo
    */
-  private void doMissingInfo(final Collection<CommonExercise> exercises) {
-    List<Result> resultsToDecode = db.getResultDAO().getResultsToDecode();
+/*  private void doMissingInfo(final Collection<CommonExercise> exercises) {
     int count = 0;
 
-    Map<String, CommonExercise> idToEx = new HashMap<>();
-    for (CommonExercise exercise : exercises) {
-      if (stopDecode) return;
-      idToEx.put(exercise.getID(), exercise);
-    }
+    Map<String, CommonExercise> idToEx = getIdToExercise(exercises);
+    if (idToEx == null) return;
 
+    Collection<Result> resultsToDecode = db.getResultDAO().getResultsToDecode();
     int size = resultsToDecode.size();
     logger.info("doMissingInfo found " + size + " with missing info");
 
@@ -150,6 +146,15 @@ public class RefResultDecoder {
       //	logger.debug("previously found " + res);
       //  }
     }
+  }*/
+
+  private Map<String, CommonExercise> getIdToExercise(Collection<CommonExercise> exercises) {
+    Map<String, CommonExercise> idToEx = new HashMap<>();
+    for (CommonExercise exercise : exercises) {
+      if (stopDecode) return null;
+      idToEx.put(exercise.getID(), exercise);
+    }
+    return idToEx;
   }
 
   private void trimRef(Collection<CommonExercise> exercises, String relativeConfigDir) {
@@ -297,15 +302,15 @@ public class RefResultDecoder {
       logger.debug("writeRefDecode : Out of " + attrc + " best audio files, " + maleAudio + " male, " + femaleAudio + " female, " +
           defaultAudio + " default " + "decoded " + count);
 
-      if (serverProps.addMissingInfo()) {
+/*      if (serverProps.addMissingInfo()) {
         runMissingInfo(exercises);
       } else {
         logger.debug("not looking for missing info");
-      }
+      }*/
     }
   }
 
-  private void runMissingInfo(final Collection<CommonExercise> exercises) {
+/*  private void runMissingInfo(final Collection<CommonExercise> exercises) {
     new Thread(new Runnable() {
       @Override
       public void run() {
@@ -313,7 +318,7 @@ public class RefResultDecoder {
         doMissingInfo(exercises);
       }
     }).start();
-  }
+  }*/
 
   private void sleep(int millis) {
     try {
@@ -348,7 +353,7 @@ public class RefResultDecoder {
    * @param exercise
    * @param audioAttributes
    * @return
-   * @see #writeRefDecode(List, String)
+   * @see #writeRefDecode
    */
   private int doDecode(Set<String> decodedFiles, CommonExercise exercise, Collection<AudioAttribute> audioAttributes) {
     int count = 0;
@@ -395,7 +400,7 @@ public class RefResultDecoder {
    * @param title
    * @param exid
    * @return
-   * @see #trimRef(List, String)
+   * @see #trimRef
    */
   private Info doTrim(Collection<AudioAttribute> audioAttributes, String title, String exid) {
     int count = 0;
