@@ -77,8 +77,7 @@ public class UserManager {
   private static final String USER_CHOSEN_ID = "userChosenID";
   private static final String AUDIO_TYPE = "audioType";
 
- // private final LangTestDatabaseAsync service;
-  private final UserServiceAsync service;// = GWT.create(UserService.class);;
+  private final UserServiceAsync service;
   private final UserNotification userNotification;
  // private final static boolean USE_COOKIE = false;
   private long userID = NO_USER_SET;
@@ -87,8 +86,9 @@ public class UserManager {
   private final PropertyHandler.LOGIN_TYPE loginType;
   private final String appTitle;
   private final PropertyHandler props;
-  private boolean isMale;
-  private boolean isTeacher, isAdmin;
+//  private boolean isMale;
+//  private boolean isTeacher, isAdmin;
+  private User current;
 
   /**
    * @param lt
@@ -199,18 +199,19 @@ public class UserManager {
 //    logger.info("UserManager.gotNewUser " + result);
     userNotification.getPermissions().clear();
     if (result != null) {
-      boolean isCD = result.getUserKind() == User.Kind.CONTENT_DEVELOPER;
+      //boolean isCD = result.getUserKind() == User.Kind.CONTENT_DEVELOPER;
       for (User.Permission permission : result.getPermissions()) {
         boolean valid = true;
         if (permission == User.Permission.QUALITY_CONTROL ||
-            permission == User.Permission.RECORD_AUDIO) valid = isCD;
+            permission == User.Permission.RECORD_AUDIO) {
+          valid = result.isCD();
+        }
         if (valid) {
           userNotification.setPermission(permission, true);
         }
       }
-      isMale = result.isMale();
-      isTeacher = (result.getUserKind() == User.Kind.TEACHER) || isCD;
-      isAdmin = result.isAdmin();
+
+      this.current = result;
       //logger.info("\t is male " + isMale + " is CD " + isCD + " is teacher " + isTeacher);
 
       userNotification.gotUser(result);
@@ -491,14 +492,18 @@ public class UserManager {
   }
 
   public boolean isMale() {
-    return isMale;
+    return current.isMale();
   }
 
   public boolean isTeacher() {
-    return isTeacher;
+    return current.isTeacher() || current.isCD();
   }
 
   public boolean isAdmin() {
-    return isAdmin;
+    return current.isAdmin();
+  }
+
+  public User getCurrent() {
+    return current;
   }
 }

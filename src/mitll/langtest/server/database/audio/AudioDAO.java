@@ -624,7 +624,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable
    */
   @Override
-  public AudioAttribute addOrUpdate(int userid, String exerciseID, String audioType, String audioRef, long timestamp,
+  public AudioAttribute addOrUpdate(int userid, String exerciseID, AudioType audioType, String audioRef, long timestamp,
                                     long durationInMillis, String transcript) {
     if (isBadUser(userid)) {
       logger.error("huh? userid is " + userid, new Exception("huh? userid is " + userid));
@@ -655,7 +655,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
 
       statement.setString(ii++, exerciseID);
       statement.setInt(ii++, userid);
-      statement.setString(ii++, audioType);
+      statement.setString(ii++, audioType.toString());
 
       int i = statement.executeUpdate();
 
@@ -664,12 +664,12 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
         logger.debug("\taddOrUpdate *adding* entry for  " + userid + " " + audioRef + " ex " + exerciseID +// " at " + new Date(timestamp) +
             " type " + audioType + " dur " + durationInMillis);
 
-        long l = addAudio(connection, userid, audioRef, exerciseID, timestamp, audioType, durationInMillis, transcript);
+        long l = addAudio(connection, userid, audioRef, exerciseID, timestamp, audioType.toString(), durationInMillis, transcript);
         audioAttr = getAudioAttribute((int) l, userid, audioRef, exerciseID, timestamp, audioType, durationInMillis, transcript);
       } else {
         logger.debug("\taddOrUpdate updating entry for  " + userid + " " + audioRef + " ex " + exerciseID +
             " type " + audioType + " dur " + durationInMillis);
-        audioAttr = getAudioAttribute(userid, exerciseID, audioType);
+        audioAttr = getAudioAttribute(userid, exerciseID, audioType.toString());
       }
       //  logger.debug("returning " + audioAttr);
       finish(connection, statement);
