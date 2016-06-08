@@ -36,7 +36,7 @@ import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.server.database.result.SessionInfo;
 import mitll.langtest.server.database.user.IUserDAO;
-import mitll.langtest.shared.Result;
+import mitll.langtest.server.database.result.Result;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.exercise.CommonExercise;
