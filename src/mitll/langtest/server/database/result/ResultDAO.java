@@ -829,7 +829,7 @@ public class ResultDAO extends DAO implements IResultDAO {
     while (rs.next()) {
       int uniqueID = rs.getInt(ID);
       int userID = rs.getInt(USERID);
-      String plan = rs.getString(PLAN);
+    //  String plan = rs.getString(PLAN);
       String exid = rs.getString(EXID);
       int qid = rs.getInt(QID);
       Timestamp timestamp = rs.getTimestamp(Database.TIME);
@@ -842,16 +842,27 @@ public class ResultDAO extends DAO implements IResultDAO {
       float pronScore = rs.getFloat(PRON_SCORE);
       String json = rs.getString(SCORE_JSON);
       String device = rs.getString(DEVICE);
+      AudioType realAudioType = AudioType.UNSET;
+      if (type != null && type.equals("avp")) type = "practice";
+      try {
+        realAudioType = type == null ? AudioType.UNSET : AudioType.valueOf(type.toUpperCase());
+      } catch (IllegalArgumentException e) {
+        logger.warn("unknown audio type " + type + " at " +uniqueID);
+      }
 
       Result result = new Result(uniqueID, userID, //id
-          plan, // plan
+      //    plan, // plan
           exid, // id
           qid, // qid
           trimPathForWebPage2(answer), // answer
           valid, // valid
           timestamp.getTime(),
 
-          type, dur, correct, pronScore, device);
+          realAudioType, dur, correct, pronScore, device,
+          rs.getString(DEVICE_TYPE), rs.getLong(PROCESS_DUR), rs.getLong(ROUND_TRIP_DUR), rs.getBoolean(WITH_FLASH),
+          rs.getFloat(SNR),
+          rs.getString(VALIDITY));
+
       result.setJsonScore(json);
       results.add(result);
     }

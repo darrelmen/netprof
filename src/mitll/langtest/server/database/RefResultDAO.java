@@ -36,6 +36,7 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.audio.DecodeAlignOutput;
 import mitll.langtest.server.decoder.RefResultDecoder;
 import mitll.langtest.server.database.result.Result;
+import mitll.langtest.shared.AudioType;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
@@ -459,13 +460,16 @@ public class RefResultDAO extends DAO {
         float pronScore1 = validDecodeJSON ? pronScore : alignScore;
         String scoreJson1 = validDecodeJSON ? scoreJson : alignJSON;
         Result result = new Result(uniqueID, userID, //id
-            "", // plan
+           // "", // plan
             exid, // id
             0, // qid
             trimPathForWebPage2(answer), // answer
             true, // valid
             timestamp.getTime(),
-            "", dur, correct, pronScore1, "browser");
+            AudioType.UNSET, dur,
+            correct, pronScore1,
+            "browser", "",
+            0, 0, false, 30,"");
         result.setJsonScore(scoreJson1);
         results.add(result);
       } else {
