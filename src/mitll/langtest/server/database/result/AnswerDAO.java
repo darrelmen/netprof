@@ -65,13 +65,13 @@ public class AnswerDAO extends DAO implements IAnswerDAO {
    * @see mitll.langtest.client.amas.TextResponse#getScoreForGuess
    */
   @Override
-  public long addTextAnswer(AudioContext audioContext,
-                            String answer,
-                            boolean correct,
-                            float pronScore,
+  public int addTextAnswer(AudioContext audioContext,
+                           String answer,
+                           boolean correct,
+                           float pronScore,
 
-                            float classifierScore,
-                            String session, long timeSpent) {
+                           float classifierScore,
+                           String session, long timeSpent) {
     AnswerInfo answerInfo = new AnswerInfo(
         audioContext,
         new AnswerInfo.RecordingInfo(answer, answer, "", "", true),
@@ -87,7 +87,7 @@ public class AnswerDAO extends DAO implements IAnswerDAO {
    * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
    */
   @Override
-  public long addAnswer(AnswerInfo answerInfo) {
+  public int addAnswer(AnswerInfo answerInfo) {
     Connection connection = database.getConnection(this.getClass().toString());
     try {
       long then = System.currentTimeMillis();
@@ -96,7 +96,7 @@ public class AnswerDAO extends DAO implements IAnswerDAO {
       if (now - then > 100) {
         logger.debug(getLanguage() + " : took " + (now - then) + " millis to record answer for " + answerInfo + " and was given id " + newid);
       }
-      return newid;
+      return (int)newid;
     } catch (Exception ee) {
       logger.error("addAnswer got " + ee, ee);
     } finally {
@@ -267,7 +267,7 @@ public class AnswerDAO extends DAO implements IAnswerDAO {
   }
 
   @Override
-  public void addRoundTrip(long resultID, int roundTrip) {
+  public void addRoundTrip(int resultID, int roundTrip) {
     Connection connection = getConnection();
     try {
       String sql = "UPDATE " +

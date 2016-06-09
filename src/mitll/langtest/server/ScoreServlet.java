@@ -76,7 +76,8 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String SCORE = "score";
   private static final String CHAPTER_HISTORY = "chapterHistory";
   private static final String REF_INFO = "refInfo";
-  private static final String ROUND_TRIP = "roundTrip";
+  public static final String ROUND_TRIP1 = "roundTrip";
+  private static final String ROUND_TRIP = ROUND_TRIP1;
   private static final String PHONE_REPORT = "phoneReport";
 
   private static final String ERROR = "ERROR";
@@ -109,6 +110,7 @@ public class ScoreServlet extends DatabaseServlet {
   public static final String VERSION_NOW = "1.0";
   public static final String EXPORT = "export";
   public static final String REMOVE_REF_RESULT = "removeRefResult";
+  public static final String RESULT_ID = "resultID";
   private boolean removeExercisesWithMissingAudioDefault = true;
 
   private RestUserManagement userManagement;
@@ -492,11 +494,11 @@ public class ScoreServlet extends DatabaseServlet {
         // log event
         gotLogEvent(request, device, jsonObject);
       } else if (requestType.startsWith(ROUND_TRIP)) {
-        String resultID = request.getHeader("resultID");
-        String roundTripMillis = request.getHeader("roundTrip");
+        String resultID        = request.getHeader(RESULT_ID);
+        String roundTripMillis = request.getHeader(ROUND_TRIP1);
 
         try {
-          addRT(Long.parseLong(resultID), Integer.parseInt(roundTripMillis), jsonObject);
+          addRT(Integer.parseInt(resultID), Integer.parseInt(roundTripMillis), jsonObject);
         } catch (NumberFormatException e) {
           jsonObject.put(ERROR, "bad param format " + e.getMessage());
         }
@@ -552,7 +554,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @param jsonObject
    * @see #doPost(HttpServletRequest, HttpServletResponse)
    */
-  private void addRT(long resultID, int roundTripMillis, JSONObject jsonObject) {
+  private void addRT(int resultID, int roundTripMillis, JSONObject jsonObject) {
     db.getAnswerDAO().addRoundTrip(resultID, roundTripMillis);
     jsonObject.put("OK", "OK");
   }
