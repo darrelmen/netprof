@@ -33,12 +33,9 @@
 package mitll.langtest.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.autocrt.DecodeCorrectnessChecker;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.scoring.PretestScore;
-
-import java.io.File;
 
 /**
  * What a client might want to know about some audio that was just posted.
@@ -65,7 +62,7 @@ public class AudioAnswer implements IsSerializable {
   private boolean correct = false;
   private boolean saidAnswer = false;
   private long durationInMillis;
-  private long resultID;
+  private int resultID;
   private AudioAttribute audioAttribute;
   private PretestScore pretestScore;
 
@@ -134,7 +131,7 @@ public class AudioAnswer implements IsSerializable {
     this.correct = correct;
   }
 
-  public long getResultID() {
+  public int getResultID() {
     return resultID;
   }
 
@@ -142,7 +139,7 @@ public class AudioAnswer implements IsSerializable {
    * @see mitll.langtest.server.audio.AudioFileHelper#writeAudioFile
    * @param resultID
    */
-  public void setResultID(long resultID) {
+  public void setResultID(int resultID) {
     this.resultID = resultID;
   }
 
@@ -192,8 +189,8 @@ public class AudioAnswer implements IsSerializable {
 
   /**
    * @see mitll.langtest.server.audio.AudioFileHelper#getAlignment
-   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer(CommonExercise, int, File, AudioCheck.ValidityAndDur, String, boolean, boolean, boolean, boolean)
-   * @see mitll.langtest.server.ScoreServlet#getAudioAnswer(int, String, int, boolean, String, File, String, String, CommonExercise, boolean, boolean)
+   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer
+   * @see mitll.langtest.server.ScoreServlet#getAudioAnswer
    * @param pretestScore
    */
   public void setPretestScore(PretestScore pretestScore) {
