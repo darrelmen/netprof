@@ -90,7 +90,7 @@ import java.util.logging.Logger;
 public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & ScoredExercise> extends HorizontalPanel
     implements BusyPanel, RequiresResize, ProvidesResize, CommentAnnotator {
   public static final String CONTEXT = "Context";
-  private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
+//  private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
 
   private static final String MANDARIN = "Mandarin";
   private static final String KOREAN = "Korean";
@@ -449,7 +449,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     horizontal.addStyleName("leftFiveMargin");
   }
 
-  protected boolean isRTLContent(String content) {
+  private boolean isRTLContent(String content) {
     return controller.isRightAlignContent() || WordCountDirectionEstimator.get().estimateDirection(content) == HasDirection.Direction.RTL;
   }
 
