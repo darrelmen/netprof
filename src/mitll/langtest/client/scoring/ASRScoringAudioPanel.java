@@ -109,7 +109,7 @@ public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> 
    * @param height of images returned
    * @param reqid so if many requests are made quickly and the returns are out of order, we can ignore older requests
    */
-  protected void scoreAudio(final String path, long resultID, String refSentence,
+  protected void scoreAudio(final String path, int resultID, String refSentence,
                             final ImageAndCheck wordTranscript, final ImageAndCheck phoneTranscript,
                             int toUse, int height, final int reqid) {
     if (path == null) return;
