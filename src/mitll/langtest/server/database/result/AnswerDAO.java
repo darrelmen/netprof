@@ -32,17 +32,14 @@
 
 package mitll.langtest.server.database.result;
 
-import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.database.AnswerInfo;
-import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.log4j.Logger;
 
 import java.sql.*;
 
-public class AnswerDAO extends DAO implements IAnswerDAO {
+public class AnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
   private static final Logger logger = Logger.getLogger(AnswerDAO.class);
   private static final String PLAN = "plan";
   private final IResultDAO resultDAO;
@@ -50,35 +47,6 @@ public class AnswerDAO extends DAO implements IAnswerDAO {
   public AnswerDAO(Database database, IResultDAO resultDAO) {
     super(database);
     this.resultDAO = resultDAO;
-  }
-
-  /**
-   * TODO : consider moving device type through...
-   *
-   * @param answer
-   * @param correct
-   * @param pronScore
-   * @param classifierScore
-   * @param session
-   * @param timeSpent
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAnswer
-   * @see mitll.langtest.client.amas.TextResponse#getScoreForGuess
-   */
-  @Override
-  public int addTextAnswer(AudioContext audioContext,
-                           String answer,
-                           boolean correct,
-                           float pronScore,
-
-                           float classifierScore,
-                           String session, long timeSpent) {
-    AnswerInfo answerInfo = new AnswerInfo(
-        audioContext,
-        new AnswerInfo.RecordingInfo(answer, answer, "", "", true),
-        new AudioCheck.ValidityAndDur(0));
-
-    return addAnswer(
-        new AnswerInfo(answerInfo, new AnswerInfo.ScoreInfo(correct, pronScore, "", 0)));
   }
 
   /**
@@ -293,11 +261,11 @@ public class AnswerDAO extends DAO implements IAnswerDAO {
   }
 
   @Override
-  public void addUserScore(long id, float score) {
+  public void addUserScore(int id, float score) {
     changeScore(id, score, ResultDAO.USER_SCORE);
   }
 
-  private void changeScore(long id, float score, String scoreColumn) {
+  private void changeScore(int id, float score, String scoreColumn) {
     Connection connection = getConnection();
     // logger.debug("changing " +scoreColumn + " for " +id + " to " + score);
     try {
@@ -326,10 +294,10 @@ public class AnswerDAO extends DAO implements IAnswerDAO {
    * @param id
    * @param processDur
    * @see mitll.langtest.server.LangTestDatabaseImpl#getPretestScore(int, long, String, String, int, int, boolean, String, boolean)
-   * @see mitll.langtest.server.database.DatabaseImpl#rememberScore(long, PretestScore)
+   * @see mitll.langtest.server.database.DatabaseImpl#rememberScore(int, PretestScore)
    */
   @Override
-  public void changeAnswer(long id, float score, int processDur, String json) {
+  public void changeAnswer(int id, float score, int processDur, String json) {
     //logger.info("Setting id " + id + " score " + score + " process dur " + processDur + " json " + json);
     Connection connection = getConnection();
     try {
