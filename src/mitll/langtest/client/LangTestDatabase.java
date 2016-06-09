@@ -45,6 +45,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.result.ResultManager;
 import mitll.langtest.client.scoring.AudioPanel;
+import mitll.langtest.client.scoring.ScoringAudioPanel;
 import mitll.langtest.shared.*;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
@@ -138,16 +139,16 @@ public interface LangTestDatabase extends RemoteService {
   ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, String exerciseID);
 
   /**
-   * @see mitll.langtest.client.scoring.ReviewScoringPanel#scoreAudio(String, long, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
+   * @see ScoringAudioPanel#scoreAudio(String, int, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
    * @param resultID
    * @param width
    * @param height
    * @return
    */
-  PretestScore getResultASRInfo(long resultID, int width, int height);
+  PretestScore getResultASRInfo(int resultID, int width, int height);
 
   /**
-   * @see mitll.langtest.client.scoring.ASRScoringAudioPanel#scoreAudio(String, long, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
+   * @see ScoringAudioPanel#scoreAudio(String, int, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
    * @param reqid
    * @param resultID
    * @param testAudioFile
@@ -162,7 +163,7 @@ public interface LangTestDatabase extends RemoteService {
                                    int width, int height, boolean useScoreToColorBkg, String exerciseID);
 
   /**
-   * @see mitll.langtest.client.scoring.ASRScoringAudioPanel#scoreAudio(String, long, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
+   * @see ScoringAudioPanel#scoreAudio(String, int, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
    * @param reqid
    * @param resultID
    * @param testAudioFile

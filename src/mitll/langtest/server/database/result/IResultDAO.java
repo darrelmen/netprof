@@ -51,9 +51,11 @@ public interface IResultDAO {
 
   Collection<Result> getResultsDevices();
 
+/*
   Collection<Result> getResultsToDecode();
+*/
 
-  Result getResultByID(long id);
+  Result getResultByID(int id);
 
 
 
@@ -65,8 +67,7 @@ public interface IResultDAO {
 
 //  List<Result> getResultsForPractice();
 
-  void addUnitAndChapterToResults(Collection<MonitorResult> monitorResults, Map<String, CommonExercise> join);
-
+//  void addUnitAndChapterToResults(Collection<MonitorResult> monitorResults, Map<String, CommonExercise> join);
 
   SessionsAndScores getSessionsForUserIn2(Collection<String> ids, long latestResultID, long userid,
                                           Collection<String> allIds, Map<String, CollationKey> idToKey);

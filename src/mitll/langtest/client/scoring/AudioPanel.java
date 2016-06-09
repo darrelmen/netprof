@@ -350,7 +350,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     }
 
     /**
-     * @see ASRScoringAudioPanel#scoreAudio(String, long, String, ImageAndCheck, ImageAndCheck, int, int, int)
+     * @see ScoringAudioPanel#scoreAudio(String, int, String, ImageAndCheck, ImageAndCheck, int, int, int)
      * @return
      */
     public Image getImage() {
