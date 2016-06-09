@@ -32,32 +32,26 @@
 
 package mitll.langtest.server.database.result;
 
-import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.ISchema;
 import mitll.langtest.server.database.user.IUserDAO;
-import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.AudioType;
 import mitll.langtest.shared.MonitorResult;
 import mitll.langtest.shared.UserAndTime;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
-import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import mitll.npdata.dao.SlickResult;
 import mitll.npdata.dao.event.DBConnection;
 import mitll.npdata.dao.result.ResultDAOWrapper;
+import mitll.npdata.dao.result.SlickCorrectAndScore;
+import mitll.npdata.dao.result.SlickUserAndTime;
 import org.apache.log4j.Logger;
 
 import java.sql.Timestamp;
-import java.text.CollationKey;
-import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
-public class SlickResultDAO extends DAO implements IResultDAO, ISchema<Result, SlickResult> {
+public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema<Result, SlickResult> {
   private static final Logger logger = Logger.getLogger(SlickResultDAO.class);
 
   private final ResultDAOWrapper dao;
@@ -118,7 +112,30 @@ public class SlickResultDAO extends DAO implements IResultDAO, ISchema<Result, S
         slick.validity());
   }
 
-  public void insert(SlickResult result) { dao.insert(result); }
+  private MonitorResult fromSlick2(SlickResult slick) {
+    return new MonitorResult(slick.id(),
+        slick.userid(),
+        slick.exid(),
+        // slick.qid(),
+        slick.answer(),
+        slick.valid(),
+        slick.modified().getTime(),
+        AudioType.valueOf(slick.audiotype().toUpperCase()),
+        slick.duration(),
+        slick.correct(),
+        slick.pronscore(),
+        slick.device(),
+        //slick.devicetype(),
+        slick.processdur(),
+        slick.roundtripdur(),
+        slick.withflash(),
+        slick.dynamicrange(),
+        slick.validity());
+  }
+
+  public void insert(SlickResult result) {
+    dao.insert(result);
+  }
 
   public void addBulk(List<SlickResult> bulk) {
     dao.addBulk(bulk);
@@ -140,7 +157,9 @@ public class SlickResultDAO extends DAO implements IResultDAO, ISchema<Result, S
     return copy;
   }
 
-  List<SlickResult> getAll() { return dao.getAll();  }
+  List<SlickResult> getAll() {
+    return dao.getAll();
+  }
 
   @Override
   public Collection<Result> getResultsDevices() {
@@ -148,58 +167,34 @@ public class SlickResultDAO extends DAO implements IResultDAO, ISchema<Result, S
   }
 
   @Override
-  public Collection<Result> getResultsToDecode() {
-    return null;
-  }
-
-  @Override
-  public Result getResultByID(long id) {
-    return null;
+  public Result getResultByID(int id) {
+    return fromSlick(dao.byID(id));
   }
 
   @Override
   public List<MonitorResult> getMonitorResults() {
-    return null;
+    return getMonitorResults(getAll());
+  }
+
+  List<MonitorResult> getMonitorResults(Collection<SlickResult> all) {
+    List<MonitorResult> copy = new ArrayList<>();
+    for (SlickResult result : all) copy.add(fromSlick2(result));
+    return copy;
   }
 
   @Override
   public List<MonitorResult> getMonitorResultsByID(String id) {
-    return null;
+    return getMonitorResults(dao.byExID(id));
   }
 
   @Override
   public Collection<UserAndTime> getUserAndTimes() {
-    return null;
-  }
-
-  @Override
-  public void addUnitAndChapterToResults(Collection<MonitorResult> monitorResults, Map<String, CommonExercise> join) {
-
-  }
-
-  @Override
-  public SessionsAndScores getSessionsForUserIn2(Collection<String> ids, long latestResultID, long userid, Collection<String> allIds, Map<String, CollationKey> idToKey) {
-    return null;
-  }
-
-  @Override
-  public <T extends CommonShell> List<T> getExercisesSortedIncorrectFirst(Collection<T> exercises, long userid, Collator collator) {
-    return null;
-  }
-
-  @Override
-  public Collection<ExerciseCorrectAndScore> getExerciseCorrectAndScoresByPhones(long userid, List<String> allIds, Map<String, CommonExercise> idToEx, ExerciseSorter sorter) {
-    return null;
-  }
-
-  @Override
-  public SessionInfo getSessions() {
-    return null;
-  }
-
-  @Override
-  public void attachScoreHistory(int userID, CommonExercise firstExercise, boolean isFlashcardRequest) {
-
+    List<SlickUserAndTime> tuple4s = dao.userAndTime();
+    List<UserAndTime> userAndTimes = new ArrayList<>();
+    for (SlickUserAndTime tuple : tuple4s) {
+      userAndTimes.add(new MyUserAndTime(tuple.userid(), tuple.exerciseid(), tuple.modified(), tuple.qid()));
+    }
+    return userAndTimes;
   }
 
   @Override
@@ -207,13 +202,29 @@ public class SlickResultDAO extends DAO implements IResultDAO, ISchema<Result, S
     return null;
   }
 
-  @Override
-  public void invalidateCachedResults() {
-
+  CorrectAndScore fromSlickCS(SlickCorrectAndScore cs) {
+    return new CorrectAndScore(cs.id(), cs.userid(), cs.exerciseid(), cs.correct(), cs.pronscore(), cs.modified(), cs.path(), cs.json());
   }
 
   @Override
   public int getNumResults() {
-    return 0;
+    return dao.getNumRows();
+  }
+
+  @Override
+  List<CorrectAndScore> getCorrectAndScoresForReal() {
+    List<CorrectAndScore> cs = new ArrayList<>();
+    for (SlickCorrectAndScore scs : dao.correctAndScore()) cs.add(fromSlickCS(scs));
+    return cs;
+  }
+
+  @Override
+  List<CorrectAndScore> getResultsForExIDIn(Collection<String> ids, boolean matchAVP) {
+    return null;
+  }
+
+  @Override
+  List<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, boolean matchAVP, long userid) {
+    return null;
   }
 }

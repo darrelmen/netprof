@@ -94,7 +94,7 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
   }
 
   /**
-   * @see #scoreAudio(String, long, String, ImageAndCheck, ImageAndCheck, int, int, int)
+   * @see ScoringAudioPanel#scoreAudio(String, int, String, ImageAndCheck, ImageAndCheck, int, int, int)
    * @param label
    * @param scoreColHeader
    * @param scores
@@ -192,7 +192,7 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
    * @see ScoringAudioPanel#getTranscriptImageURLForAudio(String, String, int, ImageAndCheck, ImageAndCheck)
    */
   @Override
-  protected void scoreAudio(String path, long resultID, String refSentence, final ImageAndCheck wordTranscript,
+  protected void scoreAudio(String path, int resultID, String refSentence, final ImageAndCheck wordTranscript,
                             final ImageAndCheck phoneTranscript, int width, int height, int reqid) {
     // logger.info("ReviewScoringPanel.scoreAudio : path " + path + " width " + width + " height " + height);
     boolean wasVisible = wordTranscript.getImage().isVisible();
@@ -267,7 +267,7 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
   }
 
   /**
-   * @see #scoreAudio(String, long, String, ImageAndCheck, ImageAndCheck, int, int, int)
+   * @see ScoringAudioPanel#scoreAudio(String, int, String, ImageAndCheck, ImageAndCheck, int, int, int)
    * @param score
    * @return
    */
