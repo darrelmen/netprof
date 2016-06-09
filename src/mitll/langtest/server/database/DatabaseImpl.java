@@ -119,14 +119,19 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
   private IUserDAO userDAO;
   private IResultDAO resultDAO;
+
   private RefResultDAO refresultDAO;
   private WordDAO wordDAO;
   private PhoneDAO phoneDAO;
+
   private IAudioDAO audioDAO;
   private IAnswerDAO answerDAO;
   private UserListManager userListManager;
+
   private UserExerciseDAO userExerciseDAO;
+
   private AddRemoveDAO addRemoveDAO;
+
   private IEventDAO eventDAO;
 
   private ContextPractice contextPractice;
@@ -239,6 +244,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     SlickResultDAO slickResultDAO = new SlickResultDAO(this, dbConnection, this.userDAO);
     resultDAO = slickResultDAO;
 
+    SlickAnswerDAO slickAnswerDAO = new SlickAnswerDAO(this, dbConnection);
+    answerDAO = slickAnswerDAO;
+
     createTables();
 
 
@@ -247,13 +255,13 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     userExerciseDAO = new UserExerciseDAO(this);
     UserListExerciseJoinDAO userListExerciseJoinDAO = new UserListExerciseJoinDAO(this);
 
-   // resultDAO = new ResultDAO(this);
+    // resultDAO = new ResultDAO(this);
 
     refresultDAO = new RefResultDAO(this, getServerProps().shouldDropRefResult());
     wordDAO = new WordDAO(this);
     phoneDAO = new PhoneDAO(this);
 
-    answerDAO = new AnswerDAO(this, resultDAO);
+    //answerDAO = new AnswerDAO(this, resultDAO);
 
     userListManager = new UserListManager(this.userDAO, new UserListDAO(this, this.userDAO), userListExerciseJoinDAO,
         new AnnotationDAO(this, this.userDAO),
@@ -266,7 +274,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
     Connection connection1 = getConnection();
     try {
-     // resultDAO.createResultTable(connection1);
+      // resultDAO.createResultTable(connection1);
       refresultDAO.createResultTable(connection1);
       connection1 = getConnection();  // huh? why?
     } catch (Exception e) {
@@ -289,25 +297,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     if (now - then > 1000) logger.info("took " + (now - then) + " millis to put back word and phone");
   }
 
-  /**
-   * TODO : This will not work when we move to multiple languages in one db.
-   *
-   * @paramx slickEventDAO
-   */
-/*  private void oneTimeDataCopy(SlickEventImpl slickEventDAO) {
-    Number numRows = slickEventDAO.getNumRows(getLanguage());
-    logger.info("got " + numRows + " rows from slick");
-    if (numRows.intValue() == 0) {
-      long defectDetector = userDAO.getDefectDetector();
-      slickEventDAO.copyTableOnlyOnce(new EventDAO(this, defectDetector), getLanguage());
-      List<SlickEvent> copy = new ArrayList<>();
-      List<Event> all = other.getAll(language);
-      logger.info("copyTableOnlyOnce " + all.size() + " events ");
-
-      for (Event event : all) copy.add(getSlickEvent(event, language));
-      eventDAOExample.addBulk(copy);
-    }
-  }*/
   public IAudioDAO getH2AudioDAO() {
     return new AudioDAO(this, this.userDAO);
   }
@@ -423,7 +412,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       logger.debug("putBackWordAndPhone fixed " + count);
     }
   }*/
-
   private MonitoringSupport getMonitoringSupport() {
     return new MonitoringSupport(userDAO, resultDAO);
   }
@@ -731,7 +719,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @paramx collator
    * @see mitll.langtest.server.ScoreServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
-  public JSONObject getJsonScoreHistory(long userid,
+  public JSONObject getJsonScoreHistory(int userid,
                                         Map<String, Collection<String>> typeToSection,
                                         ExerciseSorter sorter) {
     return jsonSupport.getJsonScoreHistory(userid, typeToSection, sorter);
@@ -771,7 +759,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getUserHistoryForList
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete
    */
-  public AVPScoreReport getUserHistoryForList(long userid, Collection<String> ids, long latestResultID,
+  public AVPScoreReport getUserHistoryForList(int userid, Collection<String> ids, int latestResultID,
                                               Collection<String> allIDs, Map<String, CollationKey> idToKey) {
     logger.debug("getUserHistoryForList " + userid + " and " + ids.size() + " ids, latest " + latestResultID);
 
@@ -780,7 +768,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
     Map<Integer, User> userMap = userDAO.getUserMap();
 
-    AVPHistoryForList sessionAVPHistoryForList  = new AVPHistoryForList(sessionsForUserIn2, userid, true);
+    AVPHistoryForList sessionAVPHistoryForList = new AVPHistoryForList(sessionsForUserIn2, userid, true);
     AVPHistoryForList sessionAVPHistoryForList2 = new AVPHistoryForList(sessionsForUserIn2, userid, false);
 
     // sort by correct %
@@ -1043,7 +1031,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     slickAudioDAO.createTable();
     slickEventDAO.createTable();
 
-    ((ISchema)getResultDAO()).createTable();
+    ((ISchema) getResultDAO()).createTable();
   }
 
   public void copyToPostgres() {
@@ -1634,7 +1622,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @param asrScoreForAudio
    * @see LangTestDatabaseImpl#getPretestScore(int, long, String, String, int, int, boolean, String, boolean)
    */
-  public void rememberScore(long resultID, PretestScore asrScoreForAudio) {
+  public void rememberScore(int resultID, PretestScore asrScoreForAudio) {
     getAnswerDAO().changeAnswer(resultID, asrScoreForAudio.getHydecScore(), asrScoreForAudio.getProcessDur(), asrScoreForAudio.getJson());
     recordWordAndPhoneInfo(resultID, asrScoreForAudio);
   }
@@ -1657,7 +1645,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   /**
    * @param answerID
    * @param pretestScore
-   * @see #rememberScore(long, PretestScore)
+   * @see #rememberScore(int, PretestScore)
    */
   private void recordWordAndPhoneInfo(long answerID, PretestScore pretestScore) {
     if (pretestScore != null) {

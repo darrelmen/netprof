@@ -32,23 +32,44 @@
 
 package mitll.langtest.server.database.result;
 
+import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.database.AnswerInfo;
+import mitll.langtest.server.database.DAO;
+import mitll.langtest.server.database.Database;
 import mitll.langtest.shared.scoring.AudioContext;
 
-public interface IAnswerDAO {
-  int addTextAnswer(AudioContext audioContext,
-                    String answer,
-                    boolean correct,
-                    float pronScore,
+public abstract class BaseAnswerDAO extends DAO {
+  protected BaseAnswerDAO(Database database) {
+    super(database);
+  }
 
-                    float classifierScore,
-                    String session, long timeSpent);
+  /**
+   * TODO : consider moving device type through...
+   *
+   * @param answer
+   * @param correct
+   * @param pronScore
+   * @param classifierScore
+   * @param session
+   * @param timeSpent
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getScoreForAnswer
+   * @see mitll.langtest.client.amas.TextResponse#getScoreForGuess
+   */
+  public int addTextAnswer(AudioContext audioContext,
+                           String answer,
+                           boolean correct,
+                           float pronScore,
 
-  int addAnswer(AnswerInfo answerInfo);
+                           float classifierScore,
+                           String session, long timeSpent) {
+    AnswerInfo answerInfo = new AnswerInfo(
+        audioContext,
+        new AnswerInfo.RecordingInfo(answer, answer, "", "", true),
+        new AudioCheck.ValidityAndDur(0));
 
-  void addRoundTrip(int resultID, int roundTrip);
+    return addAnswer(
+        new AnswerInfo(answerInfo, new AnswerInfo.ScoreInfo(correct, pronScore, "", 0)));
+  }
 
-  void addUserScore(int id, float score);
-
-  void changeAnswer(int id, float score, int processDur, String json);
+  abstract int addAnswer(AnswerInfo answerInfo);
 }

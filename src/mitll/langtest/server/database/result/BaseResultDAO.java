@@ -76,7 +76,7 @@ public abstract class BaseResultDAO extends DAO {
    * @see mitll.langtest.server.database.DatabaseImpl#getUserHistoryForList
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete()
    */
-  public SessionsAndScores getSessionsForUserIn2(Collection<String> ids, long latestResultID, long userid,
+  public SessionsAndScores getSessionsForUserIn2(Collection<String> ids, int latestResultID, int userid,
                                                  Collection<String> allIds, Map<String, CollationKey> idToKey) {
     List<Session> sessions = new ArrayList<>();
     Map<Long, List<CorrectAndScore>> userToAnswers = populateUserToAnswers(getResultsForExIDIn(ids, true));
@@ -182,7 +182,7 @@ public abstract class BaseResultDAO extends DAO {
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds
    */
-  public <T extends CommonShell> List<T> getExercisesSortedIncorrectFirst(Collection<T> exercises, long userid, Collator collator) {
+  public <T extends CommonShell> List<T> getExercisesSortedIncorrectFirst(Collection<T> exercises, int userid, Collator collator) {
     List<String> allIds = new ArrayList<>();
     Map<String, T> idToEx = new HashMap<>();
     Map<String, CollationKey> idToKey = new HashMap<>();
@@ -212,7 +212,7 @@ public abstract class BaseResultDAO extends DAO {
    * @see mitll.langtest.server.database.DatabaseImpl#getJsonScoreHistory
    * @see IResultDAO#getExercisesSortedIncorrectFirst
    */
-  private List<ExerciseCorrectAndScore> getExerciseCorrectAndScores(long userid, List<String> allIds,
+  private List<ExerciseCorrectAndScore> getExerciseCorrectAndScores(int userid, List<String> allIds,
                                                                     Map<String, CollationKey> idToKey) {
     List<CorrectAndScore> results = getResultsForExIDInForUser(allIds, true, userid);
     // if (debug) logger.debug("found " + results.size() + " results for " + allIds.size() + " items");
@@ -278,7 +278,7 @@ public abstract class BaseResultDAO extends DAO {
     }
   }
 
-  public Collection<ExerciseCorrectAndScore> getExerciseCorrectAndScoresByPhones(long userid, List<String> allIds,
+  public Collection<ExerciseCorrectAndScore> getExerciseCorrectAndScoresByPhones(int userid, List<String> allIds,
                                                                                  Map<String, CommonExercise> idToEx,
                                                                                  ExerciseSorter sorter) {
     List<CorrectAndScore> results = getResultsForExIDInForUser(allIds, true, userid);
@@ -380,13 +380,13 @@ public abstract class BaseResultDAO extends DAO {
     return getResultsForExIDInForUser(userID, isFlashcardRequest, firstExercise.getID());
   }
 
-  private List<CorrectAndScore> getResultsForExIDInForUser(long userID, boolean isFlashcardRequest, String id) {
+  private List<CorrectAndScore> getResultsForExIDInForUser(int userID, boolean isFlashcardRequest, String id) {
     return getResultsForExIDInForUser(Collections.singleton(id), isFlashcardRequest, userID);
   }
 
   abstract List<CorrectAndScore> getResultsForExIDIn(Collection<String> ids, boolean matchAVP);
 
-  abstract List<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, boolean matchAVP, long userid);
+  abstract List<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, boolean matchAVP, int userid);
 
   protected Map<Long, List<CorrectAndScore>> populateUserToAnswers(List<CorrectAndScore> results) {
     Map<Long, List<CorrectAndScore>> userToAnswers = new HashMap<>();
