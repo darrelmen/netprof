@@ -182,7 +182,7 @@ public interface LangTestDatabase extends RemoteService {
    * @param resultid
    * @param roundTrip
    */
-  void addRoundTrip(long resultid, int roundTrip);
+  void addRoundTrip(int resultid, int roundTrip);
 
   /**
    * @see mitll.langtest.client.scoring.SimplePostAudioRecordButton#postAudioFile(String)
