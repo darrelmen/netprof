@@ -72,7 +72,7 @@ import java.util.logging.Logger;
 public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     extends VerticalPanel
     implements ListInterface<T>, ProvidesResize {
-  public static final String EMPTY_PANEL = "placeHolderWhenNoExercises";
+  private static final String EMPTY_PANEL = "placeHolderWhenNoExercises";
   private final Logger logger = Logger.getLogger("ExerciseList");
 
   private static final int MAX_MSG_LEN = 200;
@@ -85,7 +85,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   private final ExerciseController controller;
 
   protected Panel createdPanel;
-  protected int lastReqID = 0;
+  private int lastReqID = 0;
   final boolean allowPlusInURL;
   private final String instance;
   private final List<ListChangeListener<T>> listeners = new ArrayList<>();
@@ -93,7 +93,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   private U cachedNext = null;
   private boolean pendingReq = false;
-  protected ExerciseListRequest lastSuccessfulRequest = null;
+  ExerciseListRequest lastSuccessfulRequest = null;
 
   private static final boolean DEBUG = false;
 
