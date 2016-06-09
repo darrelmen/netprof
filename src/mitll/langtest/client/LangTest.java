@@ -144,6 +144,8 @@ import java.util.logging.Logger;
  * - fixes for generated keys bug on result table
  * 1.3.4
  * - student analysis tab visible, html5 audio preferred
+ * 1.3.5
+ * - bug fix for issue where prev next buttons on empty list would throw exception, event dialog wouldn't come up on big tables
  *
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -153,7 +155,7 @@ import java.util.logging.Logger;
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private final Logger logger = Logger.getLogger("LangTest");
 
-  public static final String VERSION_INFO = "1.3.4";
+  public static final String VERSION_INFO = "1.3.5";
 
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
