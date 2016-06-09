@@ -94,7 +94,7 @@ public class JsonSupport {
    * @paramx collator
    * @see mitll.langtest.server.ScoreServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
-  public JSONObject getJsonScoreHistory(long userid,
+  JSONObject getJsonScoreHistory(int userid,
                                         Map<String, Collection<String>> typeToSection,
                                         ExerciseSorter sorter) {
     Collection<CommonExercise> exercisesForState = sectionHelper.getExercisesForSelectionState(typeToSection);
