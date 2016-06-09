@@ -198,12 +198,8 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
   }
 
   @Override
-  public Collection<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, long userid, String session) {
-    return null;
-  }
-
-  CorrectAndScore fromSlickCS(SlickCorrectAndScore cs) {
-    return new CorrectAndScore(cs.id(), cs.userid(), cs.exerciseid(), cs.correct(), cs.pronscore(), cs.modified(), cs.path(), cs.json());
+  public Collection<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, int userid, String session) {
+    return getCorrectAndScores(dao.correctAndScoreWhere(userid, ids));
   }
 
   @Override
@@ -213,18 +209,27 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
 
   @Override
   List<CorrectAndScore> getCorrectAndScoresForReal() {
-    List<CorrectAndScore> cs = new ArrayList<>();
-    for (SlickCorrectAndScore scs : dao.correctAndScore()) cs.add(fromSlickCS(scs));
-    return cs;
+    List<SlickCorrectAndScore> slickCorrectAndScores = dao.correctAndScore();
+    return getCorrectAndScores(slickCorrectAndScores);
   }
 
   @Override
   List<CorrectAndScore> getResultsForExIDIn(Collection<String> ids, boolean matchAVP) {
-    return null;
+    return getCorrectAndScores(dao.correctAndScoreMatchAVP(ids, matchAVP));
   }
 
   @Override
-  List<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, boolean matchAVP, long userid) {
-    return null;
+  List<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, boolean matchAVP, int userid) {
+    return getCorrectAndScores(dao.correctAndScoreMatchAVPUser(ids, matchAVP, userid));
+  }
+
+  private List<CorrectAndScore> getCorrectAndScores(Collection<SlickCorrectAndScore> slickCorrectAndScores) {
+    List<CorrectAndScore> cs = new ArrayList<>();
+    for (SlickCorrectAndScore scs : slickCorrectAndScores) cs.add(fromSlickCS(scs));
+    return cs;
+  }
+
+  CorrectAndScore fromSlickCS(SlickCorrectAndScore cs) {
+    return new CorrectAndScore(cs.id(), cs.userid(), cs.exerciseid(), cs.correct(), cs.pronscore(), cs.modified(), cs.path(), cs.json());
   }
 }

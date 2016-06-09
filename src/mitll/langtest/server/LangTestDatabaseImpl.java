@@ -506,7 +506,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   @Override
   public void addStudentAnswer(long resultID, boolean correct) {
-    db.getAnswerDAO().addUserScore(resultID, correct ? 1.0f : 0.0f);
+    db.getAnswerDAO().addUserScore((int)resultID, correct ? 1.0f : 0.0f);
   }
 
   /**
@@ -1173,7 +1173,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   public PretestScore getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence,
                                           int width, int height, boolean useScoreToColorBkg, String exerciseID) {
-    return getPretestScore(reqid, resultID, testAudioFile, sentence, width, height, useScoreToColorBkg, exerciseID, false);
+    return getPretestScore(reqid, (int)resultID, testAudioFile, sentence, width, height, useScoreToColorBkg, exerciseID, false);
   }
 
   /**
@@ -1190,7 +1190,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param usePhoneToDisplay
    * @return
    */
-  private PretestScore getPretestScore(int reqid, long resultID, String testAudioFile, String sentence,
+  private PretestScore getPretestScore(int reqid, int resultID, String testAudioFile, String sentence,
                                        int width, int height, boolean useScoreToColorBkg, String exerciseID, boolean usePhoneToDisplay) {
     if (testAudioFile.equals(AudioConversion.FILE_MISSING)) return new PretestScore(-1);
     long then = System.currentTimeMillis();
@@ -1240,7 +1240,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public PretestScore getASRScoreForAudioPhonemes(int reqid, long resultID, String testAudioFile, String sentence,
                                                   int width, int height, boolean useScoreToColorBkg, String exerciseID) {
-    return getPretestScore(reqid, resultID, testAudioFile, sentence, width, height, useScoreToColorBkg, exerciseID, true);
+    return getPretestScore(reqid, (int)resultID, testAudioFile, sentence, width, height, useScoreToColorBkg, exerciseID, true);
   }
 
   @Override
@@ -1989,7 +1989,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       }
     }
     //logger.debug("for " + typeToSection + " found " + allIDs.size());
-    return db.getUserHistoryForList(userid, ids, latestResultID, allIDs, idToKey);
+    return db.getUserHistoryForList(userid, ids, (int)latestResultID, allIDs, idToKey);
   }
 
   private void populateCollatorMap(List<String> allIDs, Map<String, CollationKey> idToKey, Collator collator, CommonShell exercise) {
