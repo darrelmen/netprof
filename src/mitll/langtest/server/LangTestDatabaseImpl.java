@@ -38,6 +38,7 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.client.scoring.AudioPanel;
+import mitll.langtest.client.scoring.ScoringAudioPanel;
 import mitll.langtest.server.amas.QuizCorrect;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
@@ -907,12 +908,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       amasFullTrie = new ExerciseTrie<AmasExerciseImpl>(exercises, serverProps.getLanguage(), audioFileHelper.getSmallVocabDecoder());
     }
 
-//    try {
-    // audioFileHelper.checkLTS(exercises);
-    //  } catch (Exception e) {
-    //  logger.error("Got " + e, e);
-    // }
-
     if (getServletContext().getAttribute(AUDIO_FILE_HELPER_REFERENCE) == null) {
       shareAudioFileHelper(getServletContext());
     }
@@ -1120,10 +1115,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param width
    * @param height
    * @return
-   * @see mitll.langtest.client.scoring.ReviewScoringPanel#scoreAudio(String, long, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
+   * @see ScoringAudioPanel#scoreAudio(String, int, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
    */
   @Override
-  public PretestScore getResultASRInfo(long resultID, int width, int height) {
+  public PretestScore getResultASRInfo(int resultID, int width, int height) {
     PretestScore asrScoreForAudio = null;
     try {
       Result result = db.getResultDAO().getResultByID(resultID);
@@ -1174,7 +1169,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param useScoreToColorBkg
    * @param exerciseID
    * @return
-   * @see mitll.langtest.client.scoring.ASRScoringAudioPanel#scoreAudio(String, long, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
+   * @see ScoringAudioPanel#scoreAudio(String, int, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
    */
   public PretestScore getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence,
                                           int width, int height, boolean useScoreToColorBkg, String exerciseID) {
@@ -1240,7 +1235,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param useScoreToColorBkg
    * @param exerciseID
    * @return
-   * @see mitll.langtest.client.scoring.ASRScoringAudioPanel#scoreAudio(String, long, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
+   * @see ScoringAudioPanel#scoreAudio(String, int, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
    */
   @Override
   public PretestScore getASRScoreForAudioPhonemes(int reqid, long resultID, String testAudioFile, String sentence,
