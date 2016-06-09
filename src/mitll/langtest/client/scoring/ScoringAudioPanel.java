@@ -67,7 +67,7 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
   private static final boolean SHOW_SPECTROGRAM = false;
 
   private final String refSentence;
-  private long resultID = -1;
+  private int resultID = -1;
   private ScoreListener scoreListener;
   private PretestScore result;
   private boolean showOnlyOneExercise = false; // true for when called from the headstart website
@@ -161,7 +161,7 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.ASRRecordAudioPanel.MyPostAudioRecordButton#useResult(PretestScore, ImageAndCheck, ImageAndCheck, boolean, String)
    * @param resultID
    */
-  public void setResultID(long resultID) { this.resultID = resultID;}
+  public void setResultID(int resultID) { this.resultID = resultID;}
 
   /**
    * @see mitll.langtest.client.scoring.AudioPanel#getImages()
@@ -191,7 +191,7 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
       scoreAudio(path, resultID, refSentence, wordTranscript, phoneTranscript, widthToUse, ANNOTATION_HEIGHT, getReqID("score"));
   }
 
-  protected abstract void scoreAudio(final String path, long resultID, String refSentence,
+  protected abstract void scoreAudio(final String path, int resultID, String refSentence,
                                      final ImageAndCheck wordTranscript, final ImageAndCheck phoneTranscript,
                                      int toUse, int height, int reqid);
 
@@ -199,7 +199,7 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
 
   /**
    * Record the image URLs in the Image widgets and enable the check boxes
-   * @see ScoringAudioPanel#scoreAudio(String, long, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
+   * @see ScoringAudioPanel#scoreAudio(String, int, String, ImageAndCheck, ImageAndCheck, int, int, int)
    * @param result
    * @param wordTranscript
    * @param phoneTranscript
