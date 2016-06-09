@@ -782,7 +782,7 @@ public class AudioFileHelper implements AlignDecode {
    * @see LangTestDatabaseImpl#getPretestScore(int, long, String, String, int, int, boolean, String, boolean)
    * @see LangTestDatabaseImpl#getResultASRInfo(long, int, int)
    * @see AlignDecode#getASRScoreForAudio
-   * @see mitll.langtest.client.scoring.ScoringAudioPanel#scoreAudio(String, long, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
+   * @see mitll.langtest.client.scoring.ScoringAudioPanel#scoreAudio(String, int, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
    **/
   public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
                                           int width, int height, boolean useScoreToColorBkg,
