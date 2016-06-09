@@ -1244,7 +1244,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   @Override
-  public void addRoundTrip(long resultID, int roundTrip) {
+  public void addRoundTrip(int resultID, int roundTrip) {
     db.getAnswerDAO().addRoundTrip(resultID, roundTrip);
   }
 
