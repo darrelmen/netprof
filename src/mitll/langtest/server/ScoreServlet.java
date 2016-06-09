@@ -394,7 +394,7 @@ public class ScoreServlet extends DatabaseServlet {
 
       //logger.debug("chapterHistory " + user + " selection " + selection);
       try {
-        long l = Long.parseLong(userAndSelection.getUser());
+        int l = Integer.parseInt(userAndSelection.getUser());
         toReturn = db.getJsonScoreHistory(l, selection, getExerciseSorter());
       } catch (NumberFormatException e) {
         toReturn.put(ERROR, "User id should be a number");
@@ -737,7 +737,7 @@ public class ScoreServlet extends DatabaseServlet {
         if (doFlashcard) {
           jsonForScore.put(IS_CORRECT, answer.isCorrect());
           jsonForScore.put(SAID_WORD, answer.isSaidAnswer());
-          long decodeResultID = answer.getResultID();
+          int decodeResultID = answer.getResultID();
           jsonForScore.put("resultID", decodeResultID);
 
           // attempt to get more feedback when we're too sensitive and match the unknown model
