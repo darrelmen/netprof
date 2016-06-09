@@ -1133,8 +1133,41 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @see #getMonitorResults()
    */
   public List<MonitorResult> getMonitorResultsWithText(List<MonitorResult> monitorResults) {
-    resultDAO.addUnitAndChapterToResults(monitorResults, getIdToExerciseMap());
+    addUnitAndChapterToResults(monitorResults, getIdToExerciseMap());
     return monitorResults;
+  }
+
+  /**
+   * Add info from exercises.
+   *
+   * @param monitorResults
+   * @param join
+   * @see DatabaseImpl#getMonitorResultsWithText
+   */
+  private void addUnitAndChapterToResults(Collection<MonitorResult> monitorResults, Map<String, CommonExercise> join) {
+    int n = 0;
+    Set<String> unknownIDs = new HashSet<>();
+    for (MonitorResult result : monitorResults) {
+      String id = result.getId();
+      if (id.contains("\\/")) id = id.substring(0, id.length() - 2);
+      CommonExercise exercise = join.get(id);
+      if (exercise == null) {
+        if (n < 5) {
+          logger.error("addUnitAndChapterToResults : for exid " + id + " couldn't find " + result);
+        }
+        unknownIDs.add(id);
+        n++;
+        result.setUnitToValue(Collections.emptyMap());
+        result.setForeignText("");
+      } else {
+        result.setUnitToValue(exercise.getUnitToValue());
+        result.setForeignText(exercise.getForeignLanguage());
+      }
+    }
+    if (n > 0) {
+      logger.warn("addUnitAndChapterToResults : skipped " + n + " out of " + monitorResults.size() +
+          " # bad join ids = " + unknownIDs.size());
+    }
   }
 
   private Map<String, CommonExercise> getIdToExerciseMap() {

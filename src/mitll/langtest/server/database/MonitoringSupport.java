@@ -478,7 +478,8 @@ class MonitoringSupport {
     return typeToNumAnswerToCount;
   }
 
-  public Map<String, Map<Integer, Map<Integer, Integer>>> getDesiredCounts(Collection<CommonExercise> exercises, Collection<UserAndTime> userAndTimes) {
+  public Map<String, Map<Integer, Map<Integer, Integer>>> getDesiredCounts(Collection<CommonExercise> exercises,
+                                                                           Collection<UserAndTime> userAndTimes) {
     Map<String, Map<Integer, Map<Integer, Integer>>> typeToNumAnswerToCount = new HashMap<String, Map<Integer, Map<Integer, Integer>>>();
 
     List<Integer> male = getCountArray(getExToCountMaleOrFemale(exercises, true, userAndTimes));

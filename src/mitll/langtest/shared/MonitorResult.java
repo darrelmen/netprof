@@ -75,15 +75,15 @@ public class MonitorResult implements IsSerializable {
   private boolean valid;
   private long timestamp;
   private AudioType audioType;
-  private int durationInMillis;
+  private long durationInMillis;
   private boolean correct;
   private float pronScore;
   private String device;
   private String validity;
   private float snr;
   private boolean withFlash;
-  private int processDur;
-  private int roundTripDur;
+  private long processDur;
+  private long roundTripDur;
 
   private Map<String, String> unitToValue;
 
@@ -96,21 +96,22 @@ public class MonitorResult implements IsSerializable {
    * @param answer
    * @param valid
    * @param timestamp
-   * @param answerType
+   * @param audioType
    * @param durationInMillis
    * @param correct
    * @param pronScore
    * @param device
-   * @param withFlash
    * @param processDur
    * @param roundTripDur
-   * @param audioType
+   * @param withFlash
    * @see ResultDAO#getMonitorResultsForQuery(Connection, PreparedStatement)
    */
   public MonitorResult(int uniqueID, int userid, String id, String answer,
-                       boolean valid, long timestamp, String answerType, int durationInMillis,
-                       boolean correct, float pronScore, String device, boolean withFlash, int processDur,
-                       int roundTripDur, String validity, float snr, AudioType audioType) {
+                       boolean valid, long timestamp,
+                       AudioType audioType, long durationInMillis,
+                       boolean correct, float pronScore, String device,
+                       long processDur, long roundTripDur, boolean withFlash, float dynamicRange,
+                       String validity) {
     this.uniqueID = uniqueID;
     this.userid = userid;
     this.id = id;
@@ -126,7 +127,7 @@ public class MonitorResult implements IsSerializable {
     this.processDur = processDur;
     this.roundTripDur = roundTripDur;
     this.validity = validity;
-    this.snr = snr;
+    this.snr = dynamicRange;
   }
 
   public int getUniqueID() {
@@ -159,7 +160,7 @@ public class MonitorResult implements IsSerializable {
 
   public AudioType getAudioType() { return audioType;  }
 
-  public int getDurationInMillis() {
+  public long getDurationInMillis() {
     return durationInMillis;
   }
 
@@ -358,11 +359,11 @@ public class MonitorResult implements IsSerializable {
     return withFlash;
   }
 
-  public int getProcessDur() {
+  public long getProcessDur() {
     return processDur;
   }
 
-  public int getRoundTripDur() {
+  public long getRoundTripDur() {
     return roundTripDur;
   }
 
