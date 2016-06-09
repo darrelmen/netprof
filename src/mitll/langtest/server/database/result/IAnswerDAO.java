@@ -36,17 +36,17 @@ import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.shared.scoring.AudioContext;
 
 public interface IAnswerDAO {
-  long addTextAnswer(AudioContext audioContext,
-                     String answer,
-                     boolean correct,
-                     float pronScore,
+  int addTextAnswer(AudioContext audioContext,
+                    String answer,
+                    boolean correct,
+                    float pronScore,
 
-                     float classifierScore,
-                     String session, long timeSpent);
+                    float classifierScore,
+                    String session, long timeSpent);
 
-  long addAnswer(AnswerInfo answerInfo);
+  int addAnswer(AnswerInfo answerInfo);
 
-  void addRoundTrip(long resultID, int roundTrip);
+  void addRoundTrip(int resultID, int roundTrip);
 
   void addUserScore(long id, float score);
 

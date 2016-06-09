@@ -93,7 +93,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
   private final Map<String, Boolean> exToCorrect = new HashMap<>();
   private final Map<String, Double> exToScore = new HashMap<>();
-  private final Set<Long> resultIDs = new HashSet<>();
+ // private final Set<Integer> resultIDs = new HashSet<>();
   private String selectionID = "";
   private final String instance;
   private final StickyState sticky;
@@ -204,7 +204,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     exToCorrect.clear();
     exToScore.clear();
     latestResultID = -1;
-    resultIDs.clear();
+    //resultIDs.clear();
     sticky.clearCurrent();
   }
 
@@ -313,7 +313,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       logger.info("StatsPracticePanel.receivedAudioAnswer: result " + result);
 
       if (result.getValidity() == AudioAnswer.Validity.OK) {
-        resultIDs.add(result.getResultID());
+        //resultIDs.add(result.getResultID());
         exToScore.put(exercise.getID(), result.getScore());
         exToCorrect.put(exercise.getID(), result.isCorrect());
 
