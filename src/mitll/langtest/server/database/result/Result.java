@@ -68,9 +68,9 @@ public class Result implements  UserAndTime {
 
   /**
    * @see ResultDAO#getResultsForQuery(java.sql.Connection, java.sql.PreparedStatement)
-   * @param answerType
+   * @paramx answerType
    * @param userid
-   * @param plan
+   * @paramx plan
    * @param id
    * @param answer
    * @param valid
@@ -88,7 +88,6 @@ public class Result implements  UserAndTime {
    */
   public Result(int uniqueID,
                 int userid,
-                //String plan,
                 String id,
                 int qid,
                 String answer,
@@ -96,7 +95,8 @@ public class Result implements  UserAndTime {
                 long timestamp,
                 AudioType audioType,
                 long durationInMillis, boolean correct, float pronScore, String device,
-                String deviceType, long processDur, long roundTripDur, boolean withFlash, float dynamicRange,
+                String deviceType,
+                long processDur, long roundTripDur, boolean withFlash, float dynamicRange,
                 String validity) {
     this.uniqueID = uniqueID;
     this.userid = userid;
