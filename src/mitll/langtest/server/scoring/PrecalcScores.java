@@ -37,6 +37,7 @@ import audio.image.TranscriptEvent;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.database.result.Result;
+import mitll.langtest.shared.AudioType;
 import net.sf.json.JSONObject;
 
 import java.util.HashMap;
@@ -91,7 +92,7 @@ class PrecalcScores {
     Map<String, Float> stringFloatMap = scores.eventScores.get(Scores.WORDS);
     boolean avp = scores.eventScores.isEmpty() ||
         (stringFloatMap.isEmpty() &&
-            (!precalcResult.getAudioType().equals("avp") || precalcResult.isCorrect())
+            (precalcResult.getAudioType() != AudioType.PRACTICE || precalcResult.isCorrect())
         );
 
 //    boolean onlyUnknown = stringFloatMap != null && stringFloatMap.size() == 1 && stringFloatMap.containsKey(SLFFile.UNKNOWN_MODEL);
