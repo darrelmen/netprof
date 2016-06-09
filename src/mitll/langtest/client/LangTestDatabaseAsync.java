@@ -136,7 +136,7 @@ public interface LangTestDatabaseAsync {
                              int userid, String flText, String which,
                              AsyncCallback<Collection<String>> async);
 
-  void addRoundTrip(long resultid, int roundTrip, AsyncCallback<Void> async);
+  void addRoundTrip(int resultid, int roundTrip, AsyncCallback<Void> async);
 
   void getResultASRInfo(int resultID, int width, int height, AsyncCallback<PretestScore> async);
 
