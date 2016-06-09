@@ -38,21 +38,12 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.Report;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.UserManagement;
-import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.*;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.HasID;
-import mitll.langtest.shared.exercise.MutableExercise;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
-import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
-import mitll.langtest.shared.monitoring.Session;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import java.sql.*;
-import java.text.CollationKey;
-import java.text.Collator;
 import java.util.*;
 
 import static mitll.langtest.server.database.Database.EXID;
@@ -317,7 +308,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getScoresForUser
    */
   @Override
-  public Collection<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, long userid, String session) {
+  public Collection<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, int userid, String session) {
     try {
       String list = getInList(ids);
 
@@ -363,7 +354,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
    * @see #attachScoreHistory
    * @see mitll.langtest.server.database.DatabaseImpl#getJsonScoreHistory
    */
-  List<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, boolean matchAVP, long userid) {
+  List<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, boolean matchAVP, int userid) {
     try {
       String list = getInList(ids);
 
@@ -398,7 +389,8 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
   }
 
   private String getAVPClause(boolean matchAVP) {
-    return "(" + AUDIO_TYPE + (matchAVP ? "" : " NOT ") + " LIKE " + "'avp%'" + " OR " + AUDIO_TYPE + (matchAVP ? "=" : "<>") + " 'flashcard' " + ")";
+    return "(" + AUDIO_TYPE + (matchAVP ? "" : " NOT ") + " LIKE " + "'avp%'" +
+        " OR " + AUDIO_TYPE + (matchAVP ? "=" : "<>") + " 'flashcard' " + ")";
   }
 
   private String getCSSelect() {
@@ -589,7 +581,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
    * @param statement
    * @return
    * @throws SQLException
-   * @see #getResultsForExIDInForUser(java.util.Collection, boolean, long)
+   * @see BaseResultDAO#getResultsForExIDInForUser(Collection, boolean, int)
    */
   private List<CorrectAndScore> getScoreResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
     ResultSet rs = statement.executeQuery();
