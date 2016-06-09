@@ -51,13 +51,7 @@ public interface IResultDAO {
 
   Collection<Result> getResultsDevices();
 
-/*
-  Collection<Result> getResultsToDecode();
-*/
-
   Result getResultByID(int id);
-
-
 
   List<MonitorResult> getMonitorResults();
 
@@ -65,16 +59,12 @@ public interface IResultDAO {
 
   Collection<UserAndTime> getUserAndTimes();
 
-//  List<Result> getResultsForPractice();
-
-//  void addUnitAndChapterToResults(Collection<MonitorResult> monitorResults, Map<String, CommonExercise> join);
-
-  SessionsAndScores getSessionsForUserIn2(Collection<String> ids, long latestResultID, long userid,
+  SessionsAndScores getSessionsForUserIn2(Collection<String> ids, int latestResultID, int userid,
                                           Collection<String> allIds, Map<String, CollationKey> idToKey);
 
-  <T extends CommonShell> List<T> getExercisesSortedIncorrectFirst(Collection<T> exercises, long userid, Collator collator);
+  <T extends CommonShell> List<T> getExercisesSortedIncorrectFirst(Collection<T> exercises, int userid, Collator collator);
 
-  Collection<ExerciseCorrectAndScore> getExerciseCorrectAndScoresByPhones(long userid, List<String> allIds,
+  Collection<ExerciseCorrectAndScore> getExerciseCorrectAndScoresByPhones(int userid, List<String> allIds,
                                                                           Map<String, CommonExercise> idToEx,
                                                                           ExerciseSorter sorter);
 
@@ -82,7 +72,7 @@ public interface IResultDAO {
 
   void attachScoreHistory(int userID, CommonExercise firstExercise, boolean isFlashcardRequest);
 
-  Collection<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, long userid, String session);
+  Collection<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, int userid, String session);
 
   void invalidateCachedResults();
 
