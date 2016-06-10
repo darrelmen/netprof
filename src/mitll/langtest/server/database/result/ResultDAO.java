@@ -38,7 +38,10 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.Report;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.UserManagement;
-import mitll.langtest.shared.*;
+import mitll.langtest.shared.AudioType;
+import mitll.langtest.shared.MonitorResult;
+import mitll.langtest.shared.User;
+import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
@@ -53,7 +56,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
 
   public static final String ID = "id";
   public static final String USERID = "userid";
- // private static final String PLAN = "plan";
+  // private static final String PLAN = "plan";
   private static final String QID = "qid";
   public static final String ANSWER = "answer";
   public static final String SCORE_JSON = "scoreJson";
@@ -165,7 +168,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
     return new ArrayList<>();
   }
 
-  List<CorrectAndScore> getCorrectAndScoresForReal()  {
+  List<CorrectAndScore> getCorrectAndScoresForReal() {
     try {
       return getScoreResultsSQL(getCSSelect() + " FROM " + RESULTS);
     } catch (SQLException e) {
@@ -458,7 +461,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
     while (rs.next()) {
       int uniqueID = rs.getInt(ID);
       int userID = rs.getInt(USERID);
-    //  String plan = rs.getString(PLAN);
+      //  String plan = rs.getString(PLAN);
       String exid = rs.getString(EXID);
       int qid = rs.getInt(QID);
       Timestamp timestamp = rs.getTimestamp(Database.TIME);
@@ -472,16 +475,29 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
       String json = rs.getString(SCORE_JSON);
       String device = rs.getString(DEVICE);
       AudioType realAudioType = AudioType.UNSET;
-      if (type != null && type.equals("avp")) type = "practice";
-      if (type != null && type.equals("flashcard")) type = "practice";
+      boolean withFlash = rs.getBoolean(WITH_FLASH);
+
+      if (type != null) {
+        if (type.equals("avp")) type = "practice";
+        else if (type.equals("flashcard")) type = "practice";
+        else if (type.equals("regular_by_WebRTC")) {
+          if (withFlash) logger.error("huh? says with flash but also " + type);
+          type = "regular";
+        }
+        else if (type.equals("slow_by_WebRTC")) {
+          if (withFlash) logger.error("huh? says with flash but also " + type);
+          type = "slow";
+        }
+      }
       try {
+
         realAudioType = type == null ? AudioType.UNSET : AudioType.valueOf(type.toUpperCase());
       } catch (IllegalArgumentException e) {
-        logger.warn("unknown audio type " + type + " at " +uniqueID);
+        logger.warn("unknown audio type " + type + " at " + uniqueID);
       }
 
       Result result = new Result(uniqueID, userID, //id
-      //    plan, // plan
+          //    plan, // plan
           exid, // id
           qid, // qid
           trimPathForWebPage2(answer), // answer
@@ -489,7 +505,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
           timestamp.getTime(),
 
           realAudioType, dur, correct, pronScore, device,
-          rs.getString(DEVICE_TYPE), rs.getLong(PROCESS_DUR), rs.getLong(ROUND_TRIP_DUR), rs.getBoolean(WITH_FLASH),
+          rs.getString(DEVICE_TYPE), rs.getLong(PROCESS_DUR), rs.getLong(ROUND_TRIP_DUR), withFlash,
           rs.getFloat(SNR),
           rs.getString(VALIDITY));
 

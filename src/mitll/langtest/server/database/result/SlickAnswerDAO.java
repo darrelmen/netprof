@@ -35,7 +35,7 @@ package mitll.langtest.server.database.result;
 import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.Database;
 import mitll.npdata.dao.SlickResult;
-import mitll.npdata.dao.event.DBConnection;
+import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.result.ResultDAOWrapper;
 import org.apache.log4j.Logger;
 
