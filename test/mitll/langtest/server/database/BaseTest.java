@@ -27,6 +27,24 @@ public class BaseTest {
   private static final Logger logger = Logger.getLogger(BaseTest.class);
 
   protected static DatabaseImpl<CommonExercise> getDatabase(String config) {
+    String installPath = "war";
+    File file = new File(installPath + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
+    String parent = file.getParent();
+    String name = file.getName();
+
+    parent = file.getParentFile().getAbsolutePath();
+
+    logger.info("path is "+ parent);
+    ServerProperties serverProps = new ServerProperties(parent, name);
+    DatabaseImpl<CommonExercise> database = new DatabaseImpl<CommonExercise>(parent, name, serverProps.getH2Database(), serverProps, new PathHelper(installPath), false, null);
+    String mediaDir = serverProps.getMediaDir();
+    database.setInstallPath(installPath, parent + File.separator + database.getServerProps().getLessonPlan(),
+        mediaDir);
+   // database.setDependencies(mediaDir, installPath);
+    return database;
+  }
+
+  protected static DatabaseImpl<CommonExercise> getDatabaseLight(String config) {
     File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
     String parent = file.getParent();
     String name = file.getName();
