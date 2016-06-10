@@ -219,6 +219,17 @@ public class PostgresTest extends BaseTest {
     getDatabaseLight("spanish").copyToPostgres();
   }
 
+
+  @Test
+  public void testDrop() {
+    getDatabaseVeryLight("spanish").dropTables();
+  }
+
+  @Test
+  public void testCreate() {
+    getDatabaseVeryLight("spanish").createTables();
+  }
+
   @Test
   public void testReadAudio() {
     DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
@@ -338,8 +349,6 @@ public class PostgresTest extends BaseTest {
 
   @Test
   public void testResult() {
-
     DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
-
   }
 }

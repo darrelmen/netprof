@@ -40,7 +40,7 @@ import mitll.langtest.shared.MonitorResult;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.npdata.dao.SlickResult;
-import mitll.npdata.dao.event.DBConnection;
+import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.result.ResultDAOWrapper;
 import mitll.npdata.dao.result.SlickCorrectAndScore;
 import mitll.npdata.dao.result.SlickUserAndTime;
@@ -71,7 +71,9 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
 
   @Override
   public SlickResult toSlick(Result shared, String language) {
-    return new SlickResult(-1, shared.getUserid(), shared.getExid(), shared.getQid(), shared.getAudioType().toString(),
+    return new SlickResult(-1,
+        shared.getUserid(), shared.getExid(), shared.getQid(),
+        shared.getAudioType().toString(),
         shared.getAnswer(),
         new Timestamp(shared.getTimestamp()),
         shared.isValid(),
