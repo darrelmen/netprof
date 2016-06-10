@@ -37,7 +37,7 @@ import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.User;
 import mitll.npdata.dao.SlickMiniUser;
 import mitll.npdata.dao.SlickUser;
-import mitll.npdata.dao.event.DBConnection;
+import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.user.UserDAOWrapper;
 import org.apache.log4j.Logger;
 import scala.collection.Seq;
@@ -55,6 +55,7 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
     //findOrMakeDefectDetector();
   }
 
+  public void dropAll() { dao.dropAll();}
   public void dropTable() {
     dao.drop();
   }

@@ -44,7 +44,7 @@ public class BaseTest {
     return database;
   }
 
-  protected static DatabaseImpl<CommonExercise> getDatabaseLight(String config) {
+  protected static DatabaseImpl<CommonExercise> getDatabaseVeryLight(String config) {
     File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
     String parent = file.getParent();
     String name = file.getName();
@@ -54,6 +54,19 @@ public class BaseTest {
     logger.info("path is "+ parent);
     ServerProperties serverProps = new ServerProperties(parent, name);
     DatabaseImpl<CommonExercise> database = new DatabaseImpl<CommonExercise>(parent, name, serverProps.getH2Database(), serverProps, new PathHelper("war"), false, null);
+    return database;
+  }
+
+  protected static DatabaseImpl<CommonExercise> getDatabaseLight(String config) {
+    File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
+    String parent = file.getParent();
+    String name = file.getName();
+
+    parent = file.getParentFile().getAbsolutePath();
+
+    logger.info("path is "+ parent);
+    ServerProperties serverProps = new ServerProperties(parent, name);
+    DatabaseImpl<CommonExercise> database = getDatabaseVeryLight(config);
     database.setInstallPath("war", parent + File.separator + database.getServerProps().getLessonPlan(),
         serverProps.getMediaDir());
     return database;
