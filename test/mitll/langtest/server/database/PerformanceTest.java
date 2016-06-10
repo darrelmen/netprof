@@ -349,7 +349,7 @@ public class PerformanceTest extends BaseTest {
     // for (WordScore ws : wordScoresForUser) logger.debug("Got " + ws);
   }
 
-  @Test
+/*  @Test
   public void testMissingInfo() {
     String path = "npfSpanish";//.replaceAll(".h2.db", "");
     String spanish = "spanish";
@@ -369,9 +369,9 @@ public class PerformanceTest extends BaseTest {
       if (count++ > 1000) break;
       // }
     }
-  }
+  }*/
 
-  @Test
+ /* @Test
   public void testMissingUrdu() {
     String path = "npfUrdu";//.replaceAll(".h2.db", "");
     String urdu = "urdu";
@@ -389,7 +389,7 @@ public class PerformanceTest extends BaseTest {
       // }
     }
   }
-
+*/
   @Test
   public void testRussian() {
     String path = "../dbs/" + "npfRussian";//.replaceAll(".h2.db", "");
