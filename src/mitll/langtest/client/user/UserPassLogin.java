@@ -1113,12 +1113,6 @@ public class UserPassLogin extends UserDialog {
   private void storeUser(User result) {
     //logger.info("UserPassLogin.storeUser - " + result);
     enterKeyButtonHelper.removeKeyHandler();
-    userManager.storeUser(result, getAudioTypeFromUserType(result.getUserKind()));
-  }
-
-  private AudioType getAudioTypeFromUserType(User.Kind kind) {
-    if (kind == User.Kind.STUDENT || kind == User.Kind.TEACHER) return AudioType.PRACTICE;
-    else if (kind == User.Kind.CONTENT_DEVELOPER) return AudioType.RECORDER;
-    else return AudioType.REVIEW;
+    userManager.storeUser(result);
   }
 }

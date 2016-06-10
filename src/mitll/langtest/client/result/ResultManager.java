@@ -483,7 +483,7 @@ public class ResultManager extends PagerTable {
       reviewContainer.add(w.getTables());
     } else {
       AudioPanel w = new AudioPanel<>(selectedObject.getAnswer(), service, controller, false, null, 10, "",
-          controller.getAudioType(), selectedObject.getId(), null, "instance");
+          selectedObject.getId(), null, "instance");
       reviewContainer.add(w);
     }
   }
