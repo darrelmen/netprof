@@ -230,7 +230,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       }
     }
 
-    DBConnection dbConnection = new DBConnection("localhost", 5432, "netprof");
+    DBConnection dbConnection = new DBConnection(serverProps.getDatabaseType(),
+        serverProps.getDatabaseHost(), serverProps.getDatabasePort(), serverProps.getDatabaseName());
 
     SlickEventImpl slickEventDAO = new SlickEventImpl(dbConnection);
     eventDAO = slickEventDAO;
@@ -297,7 +298,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     if (now - then > 1000) logger.info("took " + (now - then) + " millis to put back word and phone");
   }
 
-  public IAudioDAO getH2AudioDAO() {
+  IAudioDAO getH2AudioDAO() {
     return new AudioDAO(this, this.userDAO);
   }
 
@@ -526,11 +527,11 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
           makeExerciseDAO(lessonPlanFile, isURL);
 
           userExerciseDAO.setExerciseDAO(exerciseDAO);
+
           setDependencies(mediaDir, installPath);
 
           exerciseDAO.getRawExercises();
 
-          //   userDAO.checkForFavorites(userListManager);
           userExerciseDAO.setAudioDAO(audioDAO);
 
           numExercises = exerciseDAO.getNumExercises();
@@ -540,7 +541,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         userManagement = new UserManagement(userDAO, numExercises, resultDAO, userListManager);
 
         //   audioDAO.setExerciseDAO(exerciseDAO);
-
         //   audioDAO.markTranscripts();
       }
     }
@@ -588,9 +588,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @param installPath
    * @see #makeDAO(String, String, String)
    */
-  private void setDependencies(String mediaDir, String installPath) {
-    ExerciseDAO exerciseDAO = this.exerciseDAO;
-    setDependencies(mediaDir, installPath, exerciseDAO);
+  public void setDependencies(String mediaDir, String installPath) {
+    setDependencies(mediaDir, installPath, this.exerciseDAO);
   }
 
   /**
@@ -1027,11 +1026,12 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     SlickEventImpl slickEventDAO = (SlickEventImpl) getEventDAO();
 
     slickUserDAO.createTable();
-
     slickAudioDAO.createTable();
     slickEventDAO.createTable();
 
     ((ISchema) getResultDAO()).createTable();
+
+    logger.info("created slick tables...");
   }
 
   public void copyToPostgres() {
@@ -1041,12 +1041,28 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     SlickEventImpl slickEventDAO = (SlickEventImpl) getEventDAO();
     SlickResultDAO slickResultDAO = (SlickResultDAO) getResultDAO();
 
-    logger.info("Drop audio table!!! ");
-    slickAudioDAO.dropTable();
+    logger.info("copyToPostgres Drop audio table!!!\n\n\n\n");
+    try {
+      slickAudioDAO.dropTable();
+    } catch (Exception e) {
+      logger.warn("drop " + e);
+    }
     logger.info("Drop user table!!! ");
-    slickUserDAO.dropTable();
-    slickEventDAO.dropTable();
-    slickResultDAO.dropTable();
+    try {
+      slickUserDAO.dropTable();
+    } catch (Exception e) {
+      logger.warn("drop " + e);
+    }
+    try {
+      slickEventDAO.dropTable();
+    } catch (Exception e) {
+      logger.warn("drop " + e);
+    }
+    try {
+      slickResultDAO.dropTable();
+    } catch (Exception e) {
+      logger.warn("drop " + e);
+    }
 
     createTables();
 
