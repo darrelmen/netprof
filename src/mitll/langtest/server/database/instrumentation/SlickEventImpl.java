@@ -7,7 +7,7 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.npdata.dao.SlickEvent;
 import mitll.npdata.dao.SlickSlimEvent;
-import mitll.npdata.dao.event.DBConnection;
+import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.event.EventDAOWrapper;
 import org.apache.log4j.Logger;
 
@@ -21,28 +21,28 @@ import java.util.Map;
  */
 public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
   private static final Logger logger = Logger.getLogger(SlickEventImpl.class);
-  private EventDAOWrapper eventDAOExample;
+  private EventDAOWrapper eventDAOWrapper;
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(PathHelper)
    */
   public SlickEventImpl(DBConnection dbConnection) {
-    eventDAOExample = new EventDAOWrapper(dbConnection);
+    eventDAOWrapper = new EventDAOWrapper(dbConnection);
   }
 
   public void createTable() {
-    eventDAOExample.createTable();
+    eventDAOWrapper.createTable();
   }
 
   public void dropTable() {
-    eventDAOExample.drop();
+    eventDAOWrapper.drop();
   }
 
 
   /**
    * @param other
    * @param language
-   * @see mitll.langtest.server.database.DatabaseImpl#oneTimeDataCopy(SlickEventImpl)
+   * @see mitll.langtest.server.database.DatabaseImpl#oneTimeDataCopy
    */
   public void copyTableOnlyOnce(IEventDAO other, String language, Map<Integer, Integer> oldToNew) {
     if (getNumRows(language).intValue() == 0) {
@@ -56,13 +56,13 @@ public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
           copy.add(slickEvent);
         }
       }
-      eventDAOExample.addBulk(copy);
+      eventDAOWrapper.addBulk(copy);
     }
   }
 
   @Override
   public boolean add(Event event, String language) {
-    eventDAOExample.add(toSlick(event, language.toLowerCase()));
+    eventDAOWrapper.add(toSlick(event, language.toLowerCase()));
     return true;
   }
 /*
@@ -147,7 +147,7 @@ public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
 
   @Override
   public List<Event> getAll(String language) {
-    List<SlickEvent> all = eventDAOExample.getAll(language.toLowerCase());
+    List<SlickEvent> all = eventDAOWrapper.getAll(language.toLowerCase());
 
 //    logger.info("getting " + all.size() + " events to ");
     List<Event> copy = new ArrayList<>();
@@ -159,22 +159,22 @@ public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
 
   @Override
   public List<SlickSlimEvent> getAllSlim(String language) {
-    return eventDAOExample.getAllSlim(language.toLowerCase());
+    return eventDAOWrapper.getAllSlim(language.toLowerCase());
   }
 
   @Override
   public List<SlickSlimEvent> getAllDevicesSlim(String language) {
-    return eventDAOExample.getAllSlim(language.toLowerCase());
+    return eventDAOWrapper.getAllSlim(language.toLowerCase());
   }
 
   @Override
   public SlickSlimEvent getFirstSlim(String language) {
-    return eventDAOExample.getFirstSlim(language.toLowerCase());
+    return eventDAOWrapper.getFirstSlim(language.toLowerCase());
   }
 
   @Override
   public void addPlayedMarkings(int userID, CommonExercise firstExercise) {
-    List<String> forUserAndExercise = eventDAOExample.getForUserAndExercise(userID, firstExercise.getID());
+    List<String> forUserAndExercise = eventDAOWrapper.getForUserAndExercise(userID, firstExercise.getID());
     Map<String, AudioAttribute> audioToAttr = firstExercise.getAudioRefToAttr();
     for (String eventContext : forUserAndExercise) {
       AudioAttribute audioAttribute = audioToAttr.get(eventContext);
@@ -188,6 +188,10 @@ public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
 
   @Override
   public Number getNumRows(String language) {
-    return eventDAOExample.getNumRows(language.toLowerCase());
+    return eventDAOWrapper.getNumRows(language.toLowerCase());
+  }
+
+  public int getNumRows() {
+    return eventDAOWrapper.getNumRows();
   }
 }
