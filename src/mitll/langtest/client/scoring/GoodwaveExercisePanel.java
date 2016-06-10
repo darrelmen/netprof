@@ -77,7 +77,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -89,8 +88,9 @@ import java.util.logging.Logger;
  */
 public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & ScoredExercise> extends HorizontalPanel
     implements BusyPanel, RequiresResize, ProvidesResize, CommentAnnotator {
+  //  private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
+
   public static final String CONTEXT = "Context";
-//  private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
 
   private static final String MANDARIN = "Mandarin";
   private static final String KOREAN = "Korean";
@@ -543,7 +543,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
    * An ASR scoring panel with a record button.
    */
   private class ASRRecordAudioPanel extends ASRScoringAudioPanel<T> {
-    public static final String DOWNLOAD_AUDIO = "downloadAudio";
+    static final String DOWNLOAD_AUDIO = "downloadAudio";
     private final int index;
     private PostAudioRecordButton postAudioRecordButton;
     private PlayAudioPanel playAudioPanel;
@@ -555,7 +555,8 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
      * @param service
      * @param controller
      * @param exercise
-     * @param instance   @see GoodwaveExercisePanel#getAnswerWidget
+     * @param instance
+     * @see GoodwaveExercisePanel#getAnswerWidget
      */
     ASRRecordAudioPanel(LangTestDatabaseAsync service, ExerciseController controller, T exercise, String instance) {
       super(exercise.getForeignLanguage(), service, controller, scorePanel, REFERENCE, exercise.getID(), exercise, instance);
@@ -567,15 +568,13 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
      * So here we're trying to make the record and play buttons know about each other
      * to the extent that when we're recording, we can't play audio, and when we're playing
      * audio, we can't record. We also mark the widget as busy so we can't move on to a different exercise.
-     *
-     * @param toTheRightWidget
+     *  @param toTheRightWidget
      * @param buttonTitle
-     * @param audioType
-     *@param recordButtonTitle  @return
+     * @param recordButtonTitle  @return
      * @see AudioPanel#getPlayButtons
      */
     @Override
-    protected PlayAudioPanel makePlayAudioPanel(Widget toTheRightWidget, String buttonTitle, AudioType audioType, String recordButtonTitle) {
+    protected PlayAudioPanel makePlayAudioPanel(Widget toTheRightWidget, String buttonTitle, String recordButtonTitle) {
       recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
       recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
       postAudioRecordButton = new MyPostAudioRecordButton(controller);
@@ -695,7 +694,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     }
 
     /**
-     * @see AudioPanel#makePlayAudioPanel(Widget, String, AudioType, String)
+     * @see AudioPanel#makePlayAudioPanel(Widget, String, String)
      */
     private class MyPostAudioRecordButton extends PostAudioRecordButton {
       MyPostAudioRecordButton(ExerciseController controller) {
@@ -732,6 +731,11 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
         recordImage1.setVisible(false);
         recordImage2.setVisible(false);
 
+      }
+
+      @Override
+      protected AudioType getAudioType() {
+        return AudioType.LEARN;
       }
 
       @Override
