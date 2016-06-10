@@ -420,15 +420,22 @@ public abstract class BaseAudioDAO extends DAO {
     return user;
   }
 
-  protected AudioAttribute getAudioAttribute(int userid, String exerciseID, String audioType) {
+  /**
+   * @see AudioDAO#addOrUpdate(int, String, AudioType, String, long, long, String)
+   * @param userid
+   * @param exerciseID
+   * @param audioType
+   * @return
+   */
+  protected AudioAttribute getAudioAttribute(int userid, String exerciseID, AudioType audioType) {
     AudioAttribute audioAttr = null;
     Collection<AudioAttribute> audioAttributes = getAudioAttributes(exerciseID);
     //logger.debug("for  " +exerciseID + " found " + audioAttributes);
 
     for (AudioAttribute audioAttribute : audioAttributes) {
-      String audioType1 = audioAttribute.getAudioType();
+      AudioType audioType1 = audioAttribute.getAudioType();
       //logger.debug("\tfor  " +audioAttribute + " against " + userid + "/" + audioType  + " audio type " + audioType1);
-      if (audioAttribute.getUserid() == userid && audioType1.equalsIgnoreCase(audioType)) {
+      if (audioAttribute.getUserid() == userid && audioType1 == audioType) {
         //logger.debug("\tfound  " +audioAttribute + " for " + userid + "/" + audioType );
         audioAttr = audioAttribute;
         break;
@@ -469,10 +476,10 @@ public abstract class BaseAudioDAO extends DAO {
    * @see DatabaseImpl#markAudioDefect(AudioAttribute)
    */
   public int markDefect(AudioAttribute attribute) {
-    AudioType audioType = attribute.getRealAudioType();
-    if (attribute.getAudioType().equals(AudioAttribute.REGULAR_AND_SLOW)) {
-      audioType = AudioType.FAST_AND_SLOW;
-    }
+    AudioType audioType = attribute.getAudioType();
+//    if (attribute.getAudioType() == AudioAttribute.REGULAR_AND_SLOW) {
+//      audioType = AudioType.FAST_AND_SLOW;
+//    }
     return markDefect(attribute.getUserid(), attribute.getExid(), audioType);
   }
 
@@ -491,7 +498,7 @@ public abstract class BaseAudioDAO extends DAO {
         (int) attr.getDurationInMillis(), BaseAudioDAO.UNKNOWN);
   }
 
-  abstract void addOrUpdateUser(int userid, String exerciseID, String audioType, String audioRef, long timestamp,
+  abstract void addOrUpdateUser(int userid, String exerciseID, AudioType audioType, String audioRef, long timestamp,
                                 int durationInMillis, String transcript);
 
   abstract int markDefect(int userid, String exerciseID, AudioType audioType);

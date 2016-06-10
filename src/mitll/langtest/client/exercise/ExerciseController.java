@@ -82,7 +82,7 @@ public interface ExerciseController extends EventRegistration {
   int getRecordTimeout();
 
   boolean isLogClientMessages();
-  AudioType getAudioType();
+//  AudioType getAudioType();
   Collection<User.Permission> getPermissions();
 
   boolean showCompleted();
