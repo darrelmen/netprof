@@ -55,12 +55,11 @@ import java.util.Map;
 
 /**
  * A waveform record button and a play audio button.
- *
+ * <p>
  * The record audio and play buttons are tied to each other in that when playing audio, you can't record, and vice-versa.
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since
  */
 public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioPanel<Shell> {
   private final int index;
@@ -75,7 +74,6 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
   protected AudioType audioType;
 
   /**
-   *
    * @param exercise
    * @param controller
    * @param service
@@ -89,11 +87,11 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
   public RecordAudioPanel(T exercise, ExerciseController controller, Panel widgets,
                           LangTestDatabaseAsync service, int index, boolean showSpectrogram, AudioType audioType, String instance) {
     super(service,
-      // use full screen width
-      // use keyboard
-      controller, showSpectrogram,
-      null // no gauge panel
-      , 1.0f, 23, exercise.getID(), exercise, instance);
+        // use full screen width
+        // use keyboard
+        controller, showSpectrogram,
+        null // no gauge panel
+        , 1.0f, 23, exercise.getID(), exercise, instance);
     this.exercisePanel = widgets;
     this.index = index;
     this.exercise = exercise;
@@ -106,12 +104,13 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
       this.audioPath = attribute.getAudioRef();
     }
 
-    addWidgets("", audioType, getRecordButtonTitle());
+    addWidgets("", getRecordButtonTitle());
     getElement().setId("RecordAudioPanel_" + exerciseID + "_" + index + "_" + audioType);
   }
 
   /**
    * Worries about context type audio too.
+   *
    * @return
    * @see #RecordAudioPanel(Shell, ExerciseController, Panel, LangTestDatabaseAsync, int, boolean, String, String)
    */
@@ -127,32 +126,31 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
         }
       }
       return null;
-    }
-    else {
+    } else {
       return audioAttribute;
     }
   }
 
   private String getRecordButtonTitle() {
     return
-      audioType.equals(AudioType.REGULAR) ? "Record regular"
-        :
-        audioType.equals(AudioType.SLOW)    ? "Record slow"  : "Record";
+        audioType.equals(AudioType.REGULAR) ? "Record regular"
+            :
+            audioType.equals(AudioType.SLOW) ? "Record slow" : "Record";
   }
 
   /**
-   * @see mitll.langtest.client.scoring.AudioPanel#getPlayButtons
    * @param toTheRightWidget
    * @param buttonTitle
-   * @param audioType
-   *@param recordButtonTitle  @return
+   * @param recordButtonTitle
+   * @return
+   * @see mitll.langtest.client.scoring.AudioPanel#getPlayButtons
    */
   @Override
-  protected PlayAudioPanel makePlayAudioPanel(Widget toTheRightWidget, String buttonTitle, AudioType audioType, String recordButtonTitle) {
+  protected PlayAudioPanel makePlayAudioPanel(Widget toTheRightWidget, String buttonTitle, String recordButtonTitle) {
     WaveformPostAudioRecordButton myPostAudioRecordButton = makePostAudioRecordButton(audioType, recordButtonTitle);
     postAudioRecordButton = myPostAudioRecordButton;
 
-   // System.out.println("makePlayAudioPanel : audio type " + audioType + " suffix '" +playButtonSuffix +"'");
+    // System.out.println("makePlayAudioPanel : audio type " + audioType + " suffix '" +playButtonSuffix +"'");
     playAudioPanel = new MyPlayAudioPanel(recordImage1, recordImage2, exercisePanel, buttonTitle, toTheRightWidget);
     myPostAudioRecordButton.setPlayAudioPanel(playAudioPanel);
 
@@ -168,10 +166,10 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
   }
 
   /**
-   * @see AudioPanel#makePlayAudioPanel(Widget, String, AudioType, String)
    * @param audioType
    * @param recordButtonTitle
    * @return
+   * @see AudioPanel#makePlayAudioPanel(Widget, String, String)
    */
   protected WaveformPostAudioRecordButton makePostAudioRecordButton(AudioType audioType, String recordButtonTitle) {
     return new MyWaveformPostAudioRecordButton(audioType, recordButtonTitle);
@@ -191,7 +189,9 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
     recordImage2.setVisible(!first);
   }
 
-  public Button getButton() { return postAudioRecordButton; }
+  public Button getButton() {
+    return postAudioRecordButton;
+  }
 
   public void setEnabled(boolean val) {
     //System.out.println("RecordAudioPanel.setEnabled " + val);
@@ -212,14 +212,14 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
       super(RecordAudioPanel.this.soundManager, new PlayListener() {
         public void playStarted() {
           if (panel instanceof BusyPanel) {
-            ((BusyPanel)panel).setBusy(true);
+            ((BusyPanel) panel).setBusy(true);
           }
           postAudioRecordButton.setEnabled(false);
         }
 
         public void playStopped() {
           if (panel instanceof BusyPanel) {
-            ((BusyPanel)panel).setBusy(false);
+            ((BusyPanel) panel).setBusy(false);
           }
           postAudioRecordButton.setEnabled(true);
         }
@@ -232,8 +232,8 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
     }
 
     /**
-     * @see mitll.langtest.client.sound.PlayAudioPanel#PlayAudioPanel(mitll.langtest.client.sound.SoundManagerAPI, String, com.google.gwt.user.client.ui.Widget)
      * @param optionalToTheRight
+     * @see mitll.langtest.client.sound.PlayAudioPanel#PlayAudioPanel(mitll.langtest.client.sound.SoundManagerAPI, String, com.google.gwt.user.client.ui.Widget)
      */
     @Override
     protected void addButtons(Widget optionalToTheRight) {
@@ -244,18 +244,19 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
   }
 
   protected class MyWaveformPostAudioRecordButton extends WaveformPostAudioRecordButton {
-   // private long then,now;
+    // private long then,now;
 
     /**
-     * @see #makePostAudioRecordButton(AudioType, String)
      * @param audioType
      * @param recordButtonTitle
+     * @see #makePostAudioRecordButton(AudioType, String)
      */
     public MyWaveformPostAudioRecordButton(AudioType audioType, String recordButtonTitle) {
       super(RecordAudioPanel.this.exercise.getID(),
-        RecordAudioPanel.this.controller,
-        RecordAudioPanel.this.exercisePanel,
-        RecordAudioPanel.this, RecordAudioPanel.this.service, RecordAudioPanel.this.index, true, recordButtonTitle, RecordButton.STOP1, audioType);
+          RecordAudioPanel.this.controller,
+          RecordAudioPanel.this.exercisePanel,
+          RecordAudioPanel.this, RecordAudioPanel.this.service, RecordAudioPanel.this.index, true,
+          recordButtonTitle, RecordButton.STOP1, audioType);
       setWidth("110px");
     }
 
@@ -264,15 +265,15 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
      */
     @Override
     public void startRecording() {
-     /// then = System.currentTimeMillis();
+      /// then = System.currentTimeMillis();
       super.startRecording();
       showStart();
     }
 
     @Override
     public void stopRecording() {
-    //  now = System.currentTimeMillis();
-     // System.out.println("stopRecording " + now + " diff " + (now-then) + " millis");
+      //  now = System.currentTimeMillis();
+      // System.out.println("stopRecording " + now + " diff " + (now-then) + " millis");
       super.stopRecording();
       showStop();
     }
@@ -286,7 +287,7 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
     public void useResult(AudioAnswer result) {
       super.useResult(result);
       if (result.isValid()) {
-       // System.out.println("tell other tabs that audio has arrived!");
+        // System.out.println("tell other tabs that audio has arrived!");
       }
     }
   }

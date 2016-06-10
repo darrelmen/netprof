@@ -41,9 +41,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.shared.AudioAnswer;
-
-import java.util.Collection;
-import java.util.Map;
+import mitll.langtest.shared.AudioType;
 
 /**
  * Created with IntelliJ IDEA.
@@ -60,7 +58,7 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
   private IconAnchor waiting;
   private IconAnchor correctIcon;
   private IconAnchor incorrect;
-  private final String instance;
+  //private final String instance;
 
   /**
    * @param exercisePanel
@@ -68,18 +66,15 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
    * @param controller
    * @param exerciseID
    * @param index
-   * @param instance
    * @see BootstrapExercisePanel#getAnswerWidget(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, String)
    */
   public FlashcardRecordButtonPanel(AudioAnswerListener exercisePanel,
                                     LangTestDatabaseAsync service,
                                     ExerciseController controller,
                                     String exerciseID,
-                                    int index,
-                                    String instance,
-                                    Map<String, Collection<String>> typeToSelection) {
-    super(service, controller, exerciseID, index, true, "avp", "Record", typeToSelection);
-    this.instance = instance;
+                                    int index) {
+    super(service, controller, exerciseID, index, true, AudioType.PRACTICE, "Record");
+   // this.instance = instance;
     this.exercisePanel = exercisePanel;
   }
 
@@ -142,7 +137,6 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
    */
   @Override
   protected void receivedAudioAnswer(final AudioAnswer result, Panel outer) {
-    // System.out.println("FlashcardRecordButtonPanel.receivedAudioAnswer " + result);
     recordButton.setVisible(false);
     waiting.setVisible(false);
     if (result.isCorrect()) {
@@ -150,7 +144,6 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
     } else {
       incorrect.setVisible(true);
     }
-
     exercisePanel.receivedAudioAnswer(result);
   }
 

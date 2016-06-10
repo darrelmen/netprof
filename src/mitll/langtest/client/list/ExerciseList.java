@@ -248,8 +248,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @return
    */
   String getRole() {
-    AudioType audioTypeRecorder = AudioType.RECORDER;
-    return getInstance() == null || getInstance().startsWith("record") ? audioTypeRecorder.toString() : getInstance();
+    return getInstance() == null || getInstance().startsWith("record") ? AudioType.RECORDER.toString() : getInstance();
   }
 
   public String getInstance() {

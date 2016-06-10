@@ -54,6 +54,7 @@ import mitll.langtest.shared.scoring.NetPronImageType;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * This binds a record button with the act of posting recorded audio to the server.
@@ -68,6 +69,8 @@ import java.util.Map;
  *  TODO : make PostAudioRecordButton extend this class.
  */
 public abstract class SimplePostAudioRecordButton extends RecordButton implements RecordButton.RecordingListener {
+  private Logger logger = Logger.getLogger("SimplePostAudioRecordButton");
+
   private static final String RELEASE_TO_STOP = "Release";// to stop";
   private boolean validAudio = false;
   private static final int LOG_ROUNDTRIP_THRESHOLD = 3000;
@@ -85,7 +88,7 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
    * @param service     to post the audio to
    * @param textToAlign to align the audio to
    */
-  public SimplePostAudioRecordButton(final ExerciseController controller, LangTestDatabaseAsync service,
+  protected SimplePostAudioRecordButton(final ExerciseController controller, LangTestDatabaseAsync service,
                                      String textToAlign) {
     this(controller, service, textToAlign, "item");
   }
@@ -149,7 +152,7 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
     return new AsyncCallback<AudioAnswer>() {
       public void onFailure(Throwable caught) {
         long now = System.currentTimeMillis();
-        System.out.println("PostAudioRecordButton : (failure) posting audio took " + (now - then) + " millis");
+        logger.info("PostAudioRecordButton : (failure) posting audio took " + (now - then) + " millis");
 
         logMessage("failed to post audio for " + controller.getUser());// + " exercise " + exercise.getID());
         showPopup(AudioAnswer.Validity.INVALID.getPrompt());
@@ -167,9 +170,9 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
         long now = System.currentTimeMillis();
         long roundtrip = now - then;
 
-        System.out.println("PostAudioRecordButton : Got audio answer " + result);
+        logger.info("PostAudioRecordButton : Got audio answer " + result);
         if (result.getReqid() != reqid) {
-          System.out.println("ignoring old response " + result);
+          logger.info("ignoring old response " + result);
           return;
         }
         if (result.getValidity() == AudioAnswer.Validity.OK) {
@@ -187,16 +190,6 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
         }
       }
     };
-  }
-
-/*
-  protected boolean shouldAddToAudioTable() {
-    return false;
-  }
-*/
-
-  protected AudioType getAudioType() {
-    return controller.getAudioType();
   }
 
   private Widget getOuter() {
@@ -232,12 +225,6 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
   }
 
   public abstract void useResult(AudioAnswer result);
-
-/*
-  public boolean hasValidAudio() {
-    return validAudio;
-  }
-*/
 
   public HorizontalPanel getSentColors(String sentToColor){
 	  HorizontalPanel colorfulSent = new HorizontalPanel();
@@ -286,5 +273,4 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
 	  tooltipHelper.createAddTooltip(bar, "Score " + score + "%", Placement.BOTTOM);
 	  return bar;
   }
-
 }

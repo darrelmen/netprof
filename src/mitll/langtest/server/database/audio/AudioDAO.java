@@ -65,7 +65,6 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   private final boolean DEBUG = false;
   private final Connection connection;
   private final IUserDAO userDAO;
-//  private ExerciseDAO<CommonExercise> exerciseDAO;
 
   /**
    * @param database
@@ -74,6 +73,9 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
    */
   public AudioDAO(Database database, IUserDAO userDAO) {
     super(database,userDAO);
+
+    logger.info("making audio dao -------\n\n\n");
+
     connection = database.getConnection(this.getClass().toString());
 
     this.userDAO = userDAO;
@@ -460,7 +462,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
       user = checkDefaultUser(userID, user);
       AudioType realType;
       try {
-        realType = AudioType.valueOf(type.toUpperCase());
+        realType = AudioType.valueOf(type.toUpperCase().replace("=","_"));
       } catch (IllegalArgumentException e) {
         logger.warn("no audio type for " + type);
         realType = AudioType.UNSET;
@@ -547,7 +549,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
     AudioType audioType = result.getAudioType();
     long durationInMillis = result.getDurationInMillis();
     logger.debug("add result - " + result.getCompoundID() + " for " + userid + " ref " + audioRef);
-    return addAudio(connection, userid, audioRef, exerciseID, timestamp, audioType.toString(), durationInMillis, transcript);
+    return addAudio(connection, userid, audioRef, exerciseID, timestamp, audioType, durationInMillis, transcript);
   }
 
 
@@ -565,7 +567,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable
    * @see #addOrUpdateUser(int, AudioAttribute)
    */
-  protected void addOrUpdateUser(int userid, String exerciseID, String audioType, String audioRef, long timestamp,
+  protected void addOrUpdateUser(int userid, String exerciseID, AudioType audioType, String audioRef, long timestamp,
                                  int durationInMillis, String transcript) {
     if (isBadUser(userid)) {
       logger.error("huh? userid is " + userid);
@@ -589,7 +591,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
 
       statement.setInt(ii++, userid);
       statement.setString(ii++, exerciseID);
-      statement.setString(ii++, audioType);
+      statement.setString(ii++, audioType.toString());
       statement.setString(ii++, audioRef);
 
       int i = statement.executeUpdate();
@@ -665,12 +667,12 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
         logger.debug("\taddOrUpdate *adding* entry for  " + userid + " " + audioRef + " ex " + exerciseID +// " at " + new Date(timestamp) +
             " type " + audioType + " dur " + durationInMillis);
 
-        long l = addAudio(connection, userid, audioRef, exerciseID, timestamp, audioType.toString(), durationInMillis, transcript);
+        long l = addAudio(connection, userid, audioRef, exerciseID, timestamp, audioType, durationInMillis, transcript);
         audioAttr = getAudioAttribute((int) l, userid, audioRef, exerciseID, timestamp, audioType, durationInMillis, transcript);
       } else {
         logger.debug("\taddOrUpdate updating entry for  " + userid + " " + audioRef + " ex " + exerciseID +
             " type " + audioType + " dur " + durationInMillis);
-        audioAttr = getAudioAttribute(userid, exerciseID, audioType.toString());
+        audioAttr = getAudioAttribute(userid, exerciseID, audioType);
       }
       //  logger.debug("returning " + audioAttr);
       finish(connection, statement);
@@ -771,7 +773,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @see #add(Connection, Result, int, String, String)
    */
   private long addAudio(Connection connection, int userid, String audioRef, String exerciseID, long timestamp,
-                        String audioType, long durationInMillis, String transcript) throws SQLException {
+                        AudioType audioType, long durationInMillis, String transcript) throws SQLException {
     if (isBadUser(userid)) {
       logger.error("huh? userid is " + userid);
       new Exception().printStackTrace();
