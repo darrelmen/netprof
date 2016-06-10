@@ -248,7 +248,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     SlickAnswerDAO slickAnswerDAO = new SlickAnswerDAO(this, dbConnection);
     answerDAO = slickAnswerDAO;
 
-  //  createTables();
+    createTables();
 
 
     addRemoveDAO = new AddRemoveDAO(this);
@@ -1021,6 +1021,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   }
 
   public void createTables() {
+    logger.info("createTables create slick tables...");
+
     SlickUserDAOImpl slickUserDAO = (SlickUserDAOImpl) getUserDAO();
     SlickAudioDAO slickAudioDAO = (SlickAudioDAO) getAudioDAO();
     SlickEventImpl slickEventDAO = (SlickEventImpl) getEventDAO();
@@ -1080,9 +1082,14 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     SlickEventImpl slickEventDAO = (SlickEventImpl) getEventDAO();
     SlickResultDAO slickResultDAO = (SlickResultDAO) getResultDAO();
 
-    dropTables();
-
-    createTables();
+//    try {
+//      logger.info("drop tables");
+//      dropTables();
+//    } catch (Exception e) {
+//      logger.warn("drop got " + e);
+//    }
+//
+//    createTables();
 
     UserDAO userDAO = new UserDAO(this);
     List<User> users = userDAO.getUsers();
