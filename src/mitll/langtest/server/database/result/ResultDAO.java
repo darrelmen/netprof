@@ -473,6 +473,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
       String device = rs.getString(DEVICE);
       AudioType realAudioType = AudioType.UNSET;
       if (type != null && type.equals("avp")) type = "practice";
+      if (type != null && type.equals("flashcard")) type = "practice";
       try {
         realAudioType = type == null ? AudioType.UNSET : AudioType.valueOf(type.toUpperCase());
       } catch (IllegalArgumentException e) {

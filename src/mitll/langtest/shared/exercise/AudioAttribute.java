@@ -122,9 +122,10 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     else if (type.equals(AudioType.SLOW)) {
       markSlow();
     }
-    else if (type.equals(AudioType.FAST_AND_SLOW)) {
-      addAttribute(SPEED, REGULAR_AND_SLOW);
-    } else {
+    //else if (type.equals(AudioType.FAST_AND_SLOW)) {
+    //  addAttribute(SPEED, REGULAR_AND_SLOW);
+    //}
+    else {
       addAttribute(type.getType(), type.getSpeed());
     }
   }
@@ -176,7 +177,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     return matches(SPEED, SLOW);
   }
 
-  public String getAudioType() {
+/*  public String getAudioType() {
     String speed = getSpeed();
     if (speed == null && !attributes.isEmpty()) {
       String s = attributes.toString();
@@ -184,9 +185,9 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     } else {
       return speed;
     }
-  }
+  }*/
 
-  public AudioType getRealAudioType() {
+  public AudioType getAudioType() {
     return audioType;
   }
 

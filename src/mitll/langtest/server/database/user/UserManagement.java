@@ -274,11 +274,11 @@ public class UserManagement {
    * Adds some sugar -- sets the answers and rate per user, and joins with dli experience data
    *
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getUsers()
+   * @see mitll.langtest.server.database.DatabaseImpl#getUsers
    * @see #usersToXLSX(OutputStream, String)
    */
   public List<User> getUsers() {
-    Map<Long, Float> userToRate = resultDAO.getSessions().getUserToRate();
+    Map<Integer, Float> userToRate = resultDAO.getSessions().getUserToRate();
     List<User> users = null;
     try {
       Pair idToCount = populateUserToNumAnswers();

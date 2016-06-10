@@ -75,7 +75,8 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
    * @param exercise
    *@param instance @see mitll.langtest.client.result.ResultManager#getAsyncTable(int, Widget)
    */
-  public ReviewScoringPanel(String path, String refSentence, LangTestDatabaseAsync service, ExerciseController controller, String exerciseID, CommonExercise exercise, String instance) {
+  public ReviewScoringPanel(String path, String refSentence, LangTestDatabaseAsync service,
+                            ExerciseController controller, String exerciseID, CommonExercise exercise, String instance) {
     super(path, refSentence, service, controller, false, new EmptyScoreListener(), 23, "", exerciseID, exercise, instance);
     tablesContainer = new HorizontalPanel();
     tablesContainer.getElement().setId("TablesContainer");
