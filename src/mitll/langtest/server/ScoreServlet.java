@@ -575,7 +575,7 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
-   * join against audio dao ex->audio map again to get user exercise audio! {@link JsonExport#getJsonArray(java.util.List)}
+   * join against audio dao ex->audio map again to get user exercise audio! {@link JsonExport#getJsonArray}
    *
    * @param removeExercisesWithMissingAudio
    * @return json for content
@@ -617,8 +617,12 @@ public class ScoreServlet extends DatabaseServlet {
     return jsonObject;
   }
 
+  /**
+   * Install path, etc. should have been done by now
+   * @return
+   */
   private JsonExport getJSONExport() {
-    setInstallPath(db);
+    //setInstallPath(db);
     db.getExercises();
 
     Map<String, Integer> stringIntegerMap = Collections.emptyMap();
@@ -1032,17 +1036,17 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
-   * @param db
+   * @paramz db
    * @return
    * @see #getJsonNestedChapters(boolean)
    */
-  private void setInstallPath(DatabaseImpl db) {
+/*  private void setInstallPath(DatabaseImpl db) {
     String lessonPlanFile = getLessonPlan();
     if (!new File(lessonPlanFile).exists()) logger.error("couldn't find lesson plan file " + lessonPlanFile);
 
     db.setInstallPath(pathHelper.getInstallPath(), lessonPlanFile,
         relativeConfigDir + File.separator + serverProps.getMediaDir());
-  }
+  }*/
 
   private String getLessonPlan() {
     return configDir + File.separator + serverProps.getLessonPlan();

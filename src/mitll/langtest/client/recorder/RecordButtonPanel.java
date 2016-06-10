@@ -45,9 +45,6 @@ import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.AudioType;
 import mitll.langtest.shared.scoring.AudioContext;
 
-import java.util.Collection;
-import java.util.Map;
-
 /**
  * Just a single record button for the UI component.
  * <br></br>
@@ -74,6 +71,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
   private final Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
   private boolean doFlashcardAudio = false;
   private boolean allowAlternates = false;
+  private AudioType audioType;
 
   /**
    * Has three parts -- record/stop button, audio validity feedback icon, and the audio control widget that allows playback.
@@ -82,13 +80,13 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
    */
   protected RecordButtonPanel(final LangTestDatabaseAsync service, final ExerciseController controller,
                               final String exerciseID, final int index,
-                              boolean doFlashcardAudio, String audioType, String recordButtonTitle
-      , Map<String, Collection<String>> typeToSelection) {
+                              boolean doFlashcardAudio, AudioType audioType, String recordButtonTitle) {
     this.service = service;
     this.controller = controller;
     this.exerciseID = exerciseID;
     this.index = index;
     this.doFlashcardAudio = doFlashcardAudio;
+    this.audioType = audioType;
     layoutRecordButton(recordButton = makeRecordButton(controller, recordButtonTitle));
   }
 
@@ -180,7 +178,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
     String device = controller.getBrowserInfo();
     final int len = base64EncodedWavFile.length();
 
-    AudioContext audioContext = new AudioContext(reqid, controller.getUser(), exerciseID, index, getAudioType());
+    AudioContext audioContext = new AudioContext(reqid, controller.getUser(), exerciseID, index, audioType);
 
     service.writeAudioFile(base64EncodedWavFile,
         audioContext,
@@ -248,14 +246,6 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
     });
   }
 
-  /**
-   * Like not what you want - should be based on tab it's recorded in.
-   * @return
-   */
-  private AudioType getAudioType() {
-    return controller.getAudioType();
-  }
-
   public Widget getRecordButton() {
     return recordButton;
   }
@@ -264,8 +254,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
     return recordButton;
   }
 
-  protected void receivedAudioAnswer(AudioAnswer result, final Panel outer) {
-  }
+  protected void receivedAudioAnswer(AudioAnswer result, final Panel outer) {}
 
   public void setAllowAlternates(boolean allowAlternates) {
     this.allowAlternates = allowAlternates;

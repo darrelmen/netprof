@@ -157,7 +157,7 @@ public class ServerProperties {
   private final Set<Long> preferredVoices = new HashSet<Long>();
   private EmailList emailList;
   private final int userInitialScores = 20;
-//  private boolean RTL;
+  //  private boolean RTL;
   private String fontFamily;
   private String fontFaceURL;
   //private boolean RTL;
@@ -315,8 +315,8 @@ public class ServerProperties {
   }
 
   /**
-   * @see mitll.langtest.server.decoder.RefResultDecoder#doRefDecode(Collection, String)
    * @return
+   * @see mitll.langtest.server.decoder.RefResultDecoder#doRefDecode(Collection, String)
    */
   public boolean shouldTrimAudio() {
     return getDefaultTrue(DO_TRIM);
@@ -413,7 +413,7 @@ public class ServerProperties {
     }
     miraClassifierURL = props.getProperty(MIRA_CLASSIFIER_URL, MIRA_DEFAULT);
 
-    props.put("scoringModel",props.getProperty("MODELS_DIR",""));
+    props.put("scoringModel", props.getProperty("MODELS_DIR", ""));
 
     if (getLessonPlan().startsWith("http")) props.setProperty("talksToDomino", TRUE);
 
@@ -660,17 +660,19 @@ public class ServerProperties {
 
   /**
    * Something like : "https://domino-devel/dominoNP/attach/"
+   *
    * @return
    */
   public String getAudioAttachPrefix() {
     return props.getProperty("audioAttachPrefix");//,"https://domino-devel/dominoNP/attach/");
   }
+
   public int getSleepBetweenDecodes() {
     return getIntPropertyDef(SLEEP_BETWEEN_DECODES_MILLIS, "" + SLEEP_BETWEEN_DECODES_DEFAULT);
   }
 
   private static final long TRIM_SILENCE_BEFORE = 300;
-  private static final long TRIM_SILENCE_AFTER  = 300;
+  private static final long TRIM_SILENCE_AFTER = 300;
 
   public long getTrimBefore() {
     return getIntPropertyDef("trimBeforeMillis", "" + TRIM_SILENCE_BEFORE);
@@ -678,5 +680,21 @@ public class ServerProperties {
 
   public long getTrimAfter() {
     return getIntPropertyDef("trimAfterMillis", "" + TRIM_SILENCE_AFTER);
+  }
+
+  public String getDatabaseType() {
+    return props.getProperty("databaseType", "postgresql");
+  }
+
+  public String getDatabaseHost() {
+    return props.getProperty("databaseHost", "localhost");
+  }
+
+  public int getDatabasePort() {
+    return getIntPropertyDef("databasePort", "5432");
+  }
+
+  public String getDatabaseName() {
+    return props.getProperty("databaseName", "netprof");
   }
 }

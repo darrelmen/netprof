@@ -178,9 +178,11 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     return false;
   }
 
-  protected AudioType getAudioType() {
-    return controller.getAudioType();
-  }
+  /**
+   * @see #postAudioFile(String)
+   * @return
+   */
+  abstract protected AudioType getAudioType();
 
   private Widget getOuter() {
     return this;
