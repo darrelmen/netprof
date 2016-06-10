@@ -39,9 +39,14 @@ import java.util.Map;
 
 public class SessionInfo {
   private final List<Session> sessions;
-  private final Map<Long, Float> userToRate;
+  private final Map<Integer, Float> userToRate;
 
-  public SessionInfo(List<Session> sessions, Map<Long, Float> userToRate) {
+  /**
+   * @see mitll.langtest.server.database.result.BaseResultDAO#getSessions
+   * @param sessions
+   * @param userToRate
+   */
+  SessionInfo(List<Session> sessions, Map<Integer, Float> userToRate) {
     this.sessions = sessions;
     this.userToRate = userToRate;
   }
@@ -50,7 +55,7 @@ public class SessionInfo {
     return sessions;
   }
 
-  public Map<Long, Float> getUserToRate() {
+  public Map<Integer, Float> getUserToRate() {
     return userToRate;
   }
 }

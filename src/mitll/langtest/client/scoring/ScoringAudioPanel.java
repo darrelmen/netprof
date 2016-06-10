@@ -106,7 +106,7 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
                     boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin, String playButtonSuffix,
                     String exerciseID, T exercise, String instance) {
     super(path, service, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix,
-        controller.getAudioType(), exerciseID, exercise, instance);
+        exerciseID, exercise, instance);
     this.refSentence = refSentence;
     showOnlyOneExercise = controller.showOnlyOneExercise();
     addClickHandlers();

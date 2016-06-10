@@ -79,9 +79,9 @@ public abstract class BaseResultDAO extends DAO {
   public SessionsAndScores getSessionsForUserIn2(Collection<String> ids, int latestResultID, int userid,
                                                  Collection<String> allIds, Map<String, CollationKey> idToKey) {
     List<Session> sessions = new ArrayList<>();
-    Map<Long, List<CorrectAndScore>> userToAnswers = populateUserToAnswers(getResultsForExIDIn(ids, true));
+    Map<Integer, List<CorrectAndScore>> userToAnswers = populateUserToAnswers(getResultsForExIDIn(ids, true));
     if (debug) logger.debug("Got " + userToAnswers.size() + " user->answer map");
-    for (Map.Entry<Long, List<CorrectAndScore>> userToResults : userToAnswers.entrySet()) {
+    for (Map.Entry<Integer, List<CorrectAndScore>> userToResults : userToAnswers.entrySet()) {
       List<Session> c = partitionIntoSessions2(userToResults.getValue(), ids, latestResultID);
       if (debug)
         logger.debug("\tfound " + c.size() + " sessions for " + userToResults.getKey() + " " + ids + " given  " + userToResults.getValue().size());
@@ -323,7 +323,6 @@ public abstract class BaseResultDAO extends DAO {
     }
     return new ArrayList<>();
   }*/
-
   private List<CorrectAndScore> getCorrectAndScores() {
     try {
       synchronized (this) {
@@ -388,10 +387,10 @@ public abstract class BaseResultDAO extends DAO {
 
   abstract List<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, boolean matchAVP, int userid);
 
-  protected Map<Long, List<CorrectAndScore>> populateUserToAnswers(List<CorrectAndScore> results) {
-    Map<Long, List<CorrectAndScore>> userToAnswers = new HashMap<>();
+  private Map<Integer, List<CorrectAndScore>> populateUserToAnswers(List<CorrectAndScore> results) {
+    Map<Integer, List<CorrectAndScore>> userToAnswers = new HashMap<>();
     for (CorrectAndScore r : results) {
-      long userid = r.getUserid();
+      int userid = r.getUserid();
       List<CorrectAndScore> results1 = userToAnswers.get(userid);
       if (results1 == null) userToAnswers.put(userid, results1 = new ArrayList<>());
       results1.add(r);
@@ -399,8 +398,8 @@ public abstract class BaseResultDAO extends DAO {
     return userToAnswers;
   }
 
-  protected List<Session> partitionIntoSessions(Map<Long, List<Session>> userToSessions,
-                                                Long userid, List<CorrectAndScore> answersForUser) {
+  private List<Session> partitionIntoSessions(Map<Integer, List<Session>> userToSessions,
+                                              Integer userid, List<CorrectAndScore> answersForUser) {
     Session s = null;
     long last = 0;
 
@@ -484,19 +483,19 @@ public abstract class BaseResultDAO extends DAO {
    * @return list of duration and numAnswer pairs
    */
   public SessionInfo getSessions() {
-    Map<Long, List<CorrectAndScore>> userToAnswers = populateUserToAnswers(getCorrectAndScores());
+    Map<Integer, List<CorrectAndScore>> userToAnswers = populateUserToAnswers(getCorrectAndScores());
     List<Session> sessions = new ArrayList<>();
 
-    Map<Long, List<Session>> userToSessions = new HashMap<>();
-    Map<Long, Float> userToRate = new HashMap<>();
+    Map<Integer, List<Session>> userToSessions = new HashMap<>();
+    Map<Integer, Float> userToRate = new HashMap<>();
 
-    for (Map.Entry<Long, List<CorrectAndScore>> userToAnswersEntry : userToAnswers.entrySet()) {
+    for (Map.Entry<Integer, List<CorrectAndScore>> userToAnswersEntry : userToAnswers.entrySet()) {
       sessions.addAll(makeSessionsForUser(userToSessions, userToAnswersEntry));
     }
     for (Session session : sessions) session.setNumAnswers();
     removeShortSessions(sessions);
 
-    for (Map.Entry<Long, List<Session>> sessionPair : userToSessions.entrySet()) {
+    for (Map.Entry<Integer, List<Session>> sessionPair : userToSessions.entrySet()) {
       removeShortSessions(sessionPair.getValue());
       long dur = 0;
       int num = 0;
@@ -517,16 +516,16 @@ public abstract class BaseResultDAO extends DAO {
     return new SessionInfo(sessions, userToRate);
   }
 
-  private List<Session> makeSessionsForUser(Map<Long, List<Session>> userToSessions,
-                                            Map.Entry<Long, List<CorrectAndScore>> userToAnswersEntry) {
-    Long userid = userToAnswersEntry.getKey();
+  private List<Session> makeSessionsForUser(Map<Integer, List<Session>> userToSessions,
+                                            Map.Entry<Integer, List<CorrectAndScore>> userToAnswersEntry) {
+    Integer userid = userToAnswersEntry.getKey();
     List<CorrectAndScore> answersForUser = userToAnswersEntry.getValue();
 
     return makeSessionsForUser(userToSessions, userid, answersForUser);
   }
 
-  private List<Session> makeSessionsForUser(Map<Long, List<Session>> userToSessions,
-                                            Long userid,
+  private List<Session> makeSessionsForUser(Map<Integer, List<Session>> userToSessions,
+                                            Integer userid,
                                             List<CorrectAndScore> answersForUser) {
     sortByTime(answersForUser);
 
