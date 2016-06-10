@@ -490,12 +490,15 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
         }
       }
       try {
+        type = type.replace("=","_");
 
         realAudioType = type == null ? AudioType.UNSET : AudioType.valueOf(type.toUpperCase());
       } catch (IllegalArgumentException e) {
         logger.warn("unknown audio type " + type + " at " + uniqueID);
       }
 
+      String validity = rs.getString(VALIDITY);
+      if (validity == null) validity = "";
       Result result = new Result(uniqueID, userID, //id
           //    plan, // plan
           exid, // id
@@ -507,7 +510,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
           realAudioType, dur, correct, pronScore, device,
           rs.getString(DEVICE_TYPE), rs.getLong(PROCESS_DUR), rs.getLong(ROUND_TRIP_DUR), withFlash,
           rs.getFloat(SNR),
-          rs.getString(VALIDITY));
+          validity);
 
       result.setJsonScore(json);
       results.add(result);
