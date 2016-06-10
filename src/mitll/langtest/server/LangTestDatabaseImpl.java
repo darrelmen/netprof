@@ -328,7 +328,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
-  Collection<CommonExercise> filterExercises(ExerciseListRequest request,
+  /**
+   *
+   * @param request
+   * @param exercises
+   * @return
+   */
+  private Collection<CommonExercise> filterExercises(ExerciseListRequest request,
                                              Collection<CommonExercise> exercises) {
     exercises = filterByUnrecorded(request, exercises);
     exercises = filterByOnlyAudioAnno(request.isOnlyWithAudioAnno(), exercises);
@@ -843,7 +849,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
 
     if (byID == null) {
-      logger.error("getExercise : huh? couldn't find exercise with id '" + id + "' when examining " + exercises.size() + " items");
+      String message = "getExercise : huh? couldn't find exercise with id '" + id + "' when examining " + exercises.size() + " items";
+      logger.error(message);
+      logAndNotifyServerException(new IllegalArgumentException(message));
     } else {
       then2 = System.currentTimeMillis();
       addAnnotationsAndAudio(userID, byID, isFlashcardReq);
@@ -1618,11 +1626,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       logAndNotifyServerException(new Exception("couldn't find exercise " + exid));
     } else {
       byID.getAudioAttributes().clear();
-
 //      logger.debug("re-attach " + attr + " given isMale " + isMale);
-
       attachAudio(byID);
-
 /*
       String addr = Integer.toHexString(byID.hashCode());
       for (AudioAttribute audioAttribute : byID.getAudioAttributes()) {
