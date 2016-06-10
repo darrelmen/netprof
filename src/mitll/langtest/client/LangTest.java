@@ -166,7 +166,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private UserManager userManager;
   private FlashRecordPanelHeadless flashRecordPanel;
 
-  private AudioType audioType = AudioType.UNSET;
+//  private AudioType audioType = AudioType.UNSET;
 
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
   private final UserServiceAsync userService = GWT.create(UserService.class);
@@ -665,13 +665,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
   }
 
-  @Override
+/*  @Override
   public void rememberAudioType(AudioType audioType) {
     this.audioType = audioType;
-  }
+  }*/
 
   public boolean showCompleted() {
-    return isReviewMode() || getAudioType().equals(AudioType.RECORDER);
+    return isReviewMode() || permissions.contains(User.Permission.RECORD_AUDIO);
   }
 
   /**
@@ -679,14 +679,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    *
    * @return
    */
-  @Override
+/*  @Override
   public AudioType getAudioType() {
     if (permissions.contains(User.Permission.RECORD_AUDIO)) return AudioType.RECORDER;
     else return audioType;
-  }
+  }*/
 
   private boolean isReviewMode() {
-    return audioType.equals(AudioType.REVIEW);
+    return permissions.contains(User.Permission.QUALITY_CONTROL);
   }
 
   private final Set<User.Permission> permissions = new HashSet<User.Permission>();

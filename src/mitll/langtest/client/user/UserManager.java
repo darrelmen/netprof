@@ -128,7 +128,6 @@ public class UserManager {
     if (user != NO_USER_SET) {
      // logger.info("UserManager.login : current user : " + user);
       //console("UserManager.login : current user : " + user);
-      rememberAudioType();
       getPermissionsAndSetUser(user);
     } else {
       userNotification.showLogin();
@@ -230,7 +229,6 @@ public class UserManager {
     int user = getUser();
     if (user != NO_USER_SET) {
       //logger.info("UserManager.anonymousLogin : current user : " + user);
-      rememberAudioType(); // TODO : necessary?
       getPermissionsAndSetUser(user);
     } else {
       logger.info("UserManager.anonymousLogin : make new user, since user = " + user);
@@ -253,7 +251,7 @@ public class UserManager {
       @Override
       public void onSuccess(User result) {
         setDefaultControlValues(result.getId());
-        storeUser(result, AudioType.PRACTICE);
+        storeUser(result);
       }
     });
   }
@@ -276,19 +274,6 @@ public class UserManager {
       return Storage.getLocalStorageIfSupported().getItem(getUserChosenID());
     } else {
       return userChosenID;
-    }
-  }
-
-  private void rememberAudioType() {
-    if (Storage.isLocalStorageSupported()) {
-      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-
-      String audioType = localStorageIfSupported.getItem(getAudioType());
-//      if (audioType == null) {
-//        audioType = AudioType.FAST_AND_SLOW;
-//      }
-      AudioType realAudioType = (audioType == null) ? AudioType.FAST_AND_SLOW : AudioType.valueOf(audioType.toUpperCase());
-      userNotification.rememberAudioType(realAudioType);
     }
   }
 
@@ -403,7 +388,7 @@ public class UserManager {
   }
 
   private void clearCookieState() {
-    userNotification.rememberAudioType(AudioType.UNSET);
+   // userNotification.rememberAudioType(AudioType.UNSET);
 /*
     if (USE_COOKIE) {
       Cookies.setCookie("sid", "" + NO_USER_SET);
@@ -422,11 +407,11 @@ public class UserManager {
 
   /**
    * @param user
-   * @param audioType
    * @see mitll.langtest.client.user.UserPassLogin#storeUser(mitll.langtest.shared.User)
    */
-  void storeUser(User user, AudioType audioType) {
-    logger.info("storeUser : user now " + user + " audio type '" + audioType + "'");
+  void storeUser(User user) {
+    logger.info("storeUser : user now " + user);
+
     final long DURATION = getUserSessionDuration();
     long futureMoment = getUserSessionEnd(DURATION);
     if (Storage.isLocalStorageSupported()) {
@@ -435,14 +420,10 @@ public class UserManager {
       localStorageIfSupported.setItem(getUserIDCookie(), "" + user.getId());
       localStorageIfSupported.setItem(getUserChosenID(), "" + userChosenID);
       rememberUserSessionEnd(localStorageIfSupported, futureMoment);
-      localStorageIfSupported.setItem(getAudioType(), "" + audioType);
       // localStorageIfSupported.setItem(getLoginType(), "" + userType);
-      logger.info("storeUser : user now " + user.getId() + " / " + getUser() + " audio '" + audioType +
-          "' expires in " + (DURATION / 1000) + " seconds");
-      userNotification.rememberAudioType(audioType);
+      logger.info("storeUser : user now " + user.getId() + " / " + getUser() + "' expires in " + (DURATION / 1000) + " seconds");
 
       gotNewUser(user);
-
     } else {  // not sure what we could possibly do here...
       userID = user.getId();
       userNotification.gotUser(user);

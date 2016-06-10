@@ -184,7 +184,7 @@ public class AudioExercise extends ExerciseShell {
     long latestTime = 0;
     AudioAttribute latest = null;
     for (AudioAttribute audioAttribute : getAudioAttributes()) {
-      if (audioAttribute.getAudioType().startsWith(CONTEXT) &&
+      if (audioAttribute.getAudioType().isContext() &&
           ((isMale && audioAttribute.isMale()) || (!isMale && !audioAttribute.isMale()))
           ) {
         if (audioAttribute.getTimestamp() >= latestTime) {

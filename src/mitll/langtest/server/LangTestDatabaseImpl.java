@@ -2151,10 +2151,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
 
     String mediaDir = relativeConfigDir + File.separator + serverProps.getMediaDir();
-    logger.debug("setInstallPath " + pathHelper.getInstallPath() + " " + lessonPlanFile + " media " + serverProps.getMediaDir() + " rel media " + mediaDir);
-    db.setInstallPath(pathHelper.getInstallPath(),
+    String installPath = pathHelper.getInstallPath();
+    logger.debug("setInstallPath " + installPath + " " + lessonPlanFile + " media " + serverProps.getMediaDir() + " rel media " + mediaDir);
+    db.setInstallPath(installPath,
         lessonPlanFile,
         mediaDir);
+   // db.setDependencies(mediaDir, installPath);
   }
 
   private String getLessonPlan() {
