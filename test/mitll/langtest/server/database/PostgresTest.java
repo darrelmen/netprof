@@ -216,7 +216,7 @@ public class PostgresTest extends BaseTest {
 
   @Test
   public void testImportAudio() {
-    getDatabase("spanish").copyToPostgres();
+    getDatabaseLight("spanish").copyToPostgres();
   }
 
   @Test
@@ -338,6 +338,8 @@ public class PostgresTest extends BaseTest {
 
   @Test
   public void testResult() {
+
     DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
+
   }
 }
