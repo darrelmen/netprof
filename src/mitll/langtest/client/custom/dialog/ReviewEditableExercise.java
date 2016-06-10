@@ -301,7 +301,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     ) {
 
       /**
-       * @see mitll.langtest.client.scoring.AudioPanel#addWidgets(String, mitll.langtest.shared.AudioType, String)
+       * @see mitll.langtest.client.scoring.AudioPanel#addWidgets(String, String)
        * @return
        */
       @Override
@@ -662,7 +662,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
 
     /**
      * @return
-     * @see mitll.langtest.client.scoring.AudioPanel#addWidgets(String, mitll.langtest.shared.AudioType, String)
+     * @see mitll.langtest.client.scoring.AudioPanel#addWidgets(String, String)
      */
     @Override
     protected Widget getAfterPlayWidget() {
