@@ -405,9 +405,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @see #deleteItem(String)
    * @see #getCustomOrPredefExercise(String)
    */
-  public CommonExercise getExercise(String id) {
-    return exerciseDAO.getExercise(id);
-  }
+  public CommonExercise getExercise(String id) {  return exerciseDAO.getExercise(id);  }
 
   /**
    * @return
@@ -1257,12 +1255,16 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     if (userEx == null) {
       toRet = getExercise(id);
     } else {
-      //logger.info("got user ex for " + id);
+      //logger.info("getCustomOrPredefExercise got user ex for " + id);
       long updateTime = userEx.getUpdateTime();
       CommonExercise predef = getExercise(id);
 
       boolean usePredef = predef != null && predef.getUpdateTime() > updateTime;
+
+      //logger.info("getCustomOrPredefExercise usePredef " + usePredef);
+
       toRet = usePredef ? predef : userEx;
+      //logger.info("getCustomOrPredefExercise toRet " + toRet);
 
       if (predef != null && !usePredef) {
         // DON'T use the unit/chapter from database, at least for now
