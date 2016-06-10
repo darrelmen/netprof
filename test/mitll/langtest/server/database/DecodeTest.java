@@ -22,6 +22,16 @@ public class DecodeTest extends BaseTest {
   private static final Logger logger = Logger.getLogger(DecodeTest.class);
   //public static final boolean DO_ONE = false;
 
+  @Test
+  public void testKorean() {
+    DatabaseImpl<CommonExercise> russian = getDatabase("korean");
+    CommonExercise exercise = russian.getExercise("2127");
+    //String context = exercise.getContext();
+
+    logger.info("got\n" + exercise);
+  }
+
+
 
   @Test
   public void testRussianContext() {
