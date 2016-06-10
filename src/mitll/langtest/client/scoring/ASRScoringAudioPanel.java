@@ -60,7 +60,7 @@ public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> 
   private boolean useScoreToColorBkg = true;
 
   /**
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.FastAndSlowASRScoringAudioPanel#FastAndSlowASRScoringAudioPanel
+   * @see mitll.langtest.client.scoring.FastAndSlowASRScoringAudioPanel#FastAndSlowASRScoringAudioPanel
    * @param refSentence
    * @param service
    * @param gaugePanel
