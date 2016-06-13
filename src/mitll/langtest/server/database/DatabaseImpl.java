@@ -80,6 +80,7 @@ import mitll.npdata.dao.DBConnection;
 import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
+import org.apache.xmlbeans.impl.common.SystemCache;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -1117,9 +1118,12 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         SlickAudio slickAudio = slickAudioDAO.getSlickAudio(att, oldToNew);
         bulk.add(slickAudio);
       }
+      long then = System.currentTimeMillis();
       slickAudioDAO.addBulk(bulk);
+      long now = System.currentTimeMillis();
 
-      logger.info("after, postgres audio " + slickAudioDAO.getAudioAttributes().size());
+      logger.info("took " + (now-then) +
+          " , postgres audio " + slickAudioDAO.getAudioAttributes().size());
     }
 
     // add event table
