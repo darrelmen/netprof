@@ -35,7 +35,7 @@ package mitll.langtest.server.database.custom;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.audio.PathWriter;
 import mitll.langtest.server.database.user.IUserDAO;
-import mitll.langtest.server.database.userexercise.UserExerciseDAO;
+import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.User;
@@ -83,7 +83,7 @@ public class UserListManager {
   private final ReviewedDAO reviewedDAO, secondStateDAO;
   private int i = 0;
 
-  private UserExerciseDAO userExerciseDAO;
+  private IUserExerciseDAO userExerciseDAO;
   private final UserListDAO userListDAO;
   private final UserListExerciseJoinDAO userListExerciseJoinDAO;
   private final AnnotationDAO annotationDAO;
@@ -99,7 +99,8 @@ public class UserListManager {
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(mitll.langtest.server.PathHelper)
    */
   public UserListManager(IUserDAO userDAO, UserListDAO userListDAO, UserListExerciseJoinDAO userListExerciseJoinDAO,
-                         AnnotationDAO annotationDAO, ReviewedDAO reviewedDAO, ReviewedDAO secondStateDAO, PathHelper pathHelper) {
+                         AnnotationDAO annotationDAO, ReviewedDAO reviewedDAO, ReviewedDAO secondStateDAO,
+                         PathHelper pathHelper) {
     this.userDAO = userDAO;
     this.userListDAO = userListDAO;
     this.userListExerciseJoinDAO = userListExerciseJoinDAO;
@@ -703,7 +704,7 @@ public class UserListManager {
         userDAO.getDatabase().getServerProps());
   }
 
-  public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {
+  public void setUserExerciseDAO(IUserExerciseDAO userExerciseDAO) {
     this.userExerciseDAO = userExerciseDAO;
     userListDAO.setUserExerciseDAO(userExerciseDAO);
   }

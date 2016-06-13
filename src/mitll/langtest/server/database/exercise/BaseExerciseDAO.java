@@ -37,8 +37,8 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.custom.AddRemoveDAO;
-import mitll.langtest.server.database.userexercise.UserExerciseDAO;
 import mitll.langtest.server.database.custom.UserListManager;
+import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.exercise.AudioExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -68,7 +68,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 
 	private List<CommonExercise> exercises = null;
 	private AddRemoveDAO addRemoveDAO;
-	private UserExerciseDAO userExerciseDAO;
+	private IUserExerciseDAO userExerciseDAO;
 	private AttachAudio attachAudio;
 	private IAudioDAO audioDAO;
 
@@ -375,9 +375,9 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 	 * @param userExerciseDAO
 	 * @param addRemoveDAO
 	 * @param audioDAO
-   */
+	 */
 	public void setDependencies(String mediaDir, String installPath,
-															UserExerciseDAO userExerciseDAO, AddRemoveDAO addRemoveDAO, IAudioDAO audioDAO) {
+															IUserExerciseDAO userExerciseDAO, AddRemoveDAO addRemoveDAO, IAudioDAO audioDAO) {
 		this.userExerciseDAO = userExerciseDAO;
 		this.addRemoveDAO = addRemoveDAO;
 		setAudioDAO(audioDAO, mediaDir, installPath);
