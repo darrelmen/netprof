@@ -55,11 +55,15 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
     //findOrMakeDefectDetector();
   }
 
-  public void dropAll() { dao.dropAll();}
+  //public void dropAll() { dao.dropAll();}
+/*
   public void dropTable() {
     dao.drop();
   }
-
+*/
+/*
+public boolean tableExists() { return dao.hasTable(); }
+*/
   public void createTable() {
     dao.createTable();
     findOrMakeDefectDetector();
