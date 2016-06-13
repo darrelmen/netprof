@@ -95,6 +95,8 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
    */
   public ResultDAO(Database database) {
     super(database);
+
+    logger.info("\n\n\n\nmade h2 result dao " + this);
   }
 
   /**
