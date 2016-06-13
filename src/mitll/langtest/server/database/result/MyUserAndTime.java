@@ -34,14 +34,8 @@ package mitll.langtest.server.database.result;
 
 import mitll.langtest.shared.UserAndTime;
 
-/**
- * @param typeOrder
- * @param out
- * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
- */
-/*  public void writeExcelToStream(Collection<MonitorResult> results, Collection<String> typeOrder, OutputStream out) {
-  new ResultDAOToExcel().writeExcelToStream(results, typeOrder, out);
-}*/
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 
 class MyUserAndTime implements UserAndTime {
   private final int userID;
@@ -49,6 +43,13 @@ class MyUserAndTime implements UserAndTime {
   private final long time;
   private final int qid;
 
+  /**
+   * @see ResultDAO#getUserAndTimeForQuery(Connection, PreparedStatement)
+   * @param userID
+   * @param exid
+   * @param time
+   * @param qid
+   */
   MyUserAndTime(int userID, String exid, long time, int qid) {
     this.userID = userID;
     this.exid = exid;
@@ -75,4 +76,6 @@ class MyUserAndTime implements UserAndTime {
   public String getID() {
     return getExid() + "/" + qid;
   }
+
+  public String toString () { return "user " + userID + " exid " + exid + " time " + time; }
 }
