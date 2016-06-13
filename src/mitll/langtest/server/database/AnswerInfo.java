@@ -124,7 +124,7 @@ public class AnswerInfo {
         validity);
   }
 
-  public AnswerInfo(int userid,
+  private AnswerInfo(int userid,
                     String id,
                     int questionID,
                     AudioType audioType,
@@ -156,7 +156,7 @@ public class AnswerInfo {
     this(other, scoreInfo.correct, scoreInfo.pronScore, scoreInfo.scoreJson, scoreInfo.processDur);
   }
 
-  public AnswerInfo(AnswerInfo other,
+  private AnswerInfo(AnswerInfo other,
 
                     boolean correct,
                     float pronScore,
@@ -184,7 +184,7 @@ public class AnswerInfo {
     );
   }
 
-  public AnswerInfo(int userid, String id, int questionID,
+  private AnswerInfo(int userid, String id, int questionID,
                     AudioType audioType, String answer, String audioFile,
                     String deviceType, String device, boolean withFlash,
 

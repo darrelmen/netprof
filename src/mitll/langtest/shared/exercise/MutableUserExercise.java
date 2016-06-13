@@ -35,6 +35,7 @@ package mitll.langtest.shared.exercise;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.server.database.userexercise.UserExerciseDAO;
 import mitll.langtest.shared.custom.UserList;
 
 import java.util.Map;
@@ -47,7 +48,7 @@ import java.util.Map;
  */
 public interface MutableUserExercise {
   /**
-   * @see mitll.langtest.server.database.custom.UserExerciseDAO#add(CommonExercise, boolean)
+   * @see UserExerciseDAO#add(CommonExercise, boolean)
    * @see mitll.langtest.server.database.custom.UserListManager#duplicate(CommonExercise)
    * @param id
    */
@@ -60,13 +61,13 @@ public interface MutableUserExercise {
   void setCreator(int id);
 
   /**
-   * @see mitll.langtest.server.database.custom.UserExerciseDAO#add(CommonExercise, boolean)
+   * @see UserExerciseDAO#add(CommonExercise, boolean)
    * @param uniqueID
    */
   void setUniqueID(long uniqueID);
 
   /**
-   * @see mitll.langtest.server.database.custom.UserExerciseDAO#add(CommonExercise, boolean)
+   * @see UserExerciseDAO#add(CommonExercise, boolean)
    * @return
    */
   long getUniqueID();

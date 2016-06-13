@@ -37,7 +37,7 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.custom.AddRemoveDAO;
-import mitll.langtest.server.database.custom.UserExerciseDAO;
+import mitll.langtest.server.database.userexercise.UserExerciseDAO;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.shared.exercise.AudioExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
