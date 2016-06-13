@@ -35,6 +35,7 @@ package mitll.langtest.server.database.custom;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.audio.PathWriter;
 import mitll.langtest.server.database.user.IUserDAO;
+import mitll.langtest.server.database.userexercise.UserExerciseDAO;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.User;
