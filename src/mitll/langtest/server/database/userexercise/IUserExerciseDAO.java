@@ -30,38 +30,29 @@
  *
  */
 
-package mitll.langtest.server.database;
+package mitll.langtest.server.database.userexercise;
 
-import mitll.langtest.server.LogAndNotify;
-import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.database.exercise.ExerciseDAO;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 
-import java.sql.Connection;
 import java.util.Collection;
+import java.util.List;
 
-/**
- * Created with IntelliJ IDEA.
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 6/26/12
- * Time: 3:54 PM
- * To change this template use File | Settings | File Templates.
- */
-public interface Database {
-  String TIME = "time";
-  String EXID = "exid";
+public interface IUserExerciseDAO {
+  void add(CommonExercise userExercise, boolean isOverride);
 
-  Connection getConnection(String who);
+  List<CommonShell> getOnList(long listID);
 
-  void closeConnection(Connection connection);
+  CommonExercise getWhere(String exid);
 
-  void logEvent(String exid, String context, int userid, String device);
+  Collection<CommonExercise> getAll();
 
-  ServerProperties getServerProps();
+  Collection<CommonExercise> getOverrides();
 
-  String getLanguage();
+  Collection<CommonExercise> getWhere(Collection<String> exids);
 
-  LogAndNotify getLogAndNotify();
+  void update(CommonExercise userExercise, boolean createIfDoesntExist);
 
-  Collection<String> getTypeOrder();
+  void setExerciseDAO(ExerciseDAO<CommonExercise> exerciseDAO);
 }
