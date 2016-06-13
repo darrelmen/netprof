@@ -34,6 +34,7 @@ package mitll.langtest.shared.custom;
 
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.server.database.userexercise.UserExerciseDAO;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 
@@ -101,7 +102,7 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
    * @param contextTranslation
    * @param isOverride
    * @param modifiedTimestamp
-   * @see mitll.langtest.server.database.custom.UserExerciseDAO#getUserExercises
+   * @see UserExerciseDAO#getUserExercises
    */
   public UserExercise(long uniqueID, String exerciseID, int creator, String english, String foreignLanguage,
                       String transliteration, String context, String contextTranslation,
@@ -165,7 +166,7 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
 
   /**
    * @param uniqueID
-   * @see mitll.langtest.server.database.custom.UserExerciseDAO#add
+   * @see UserExerciseDAO#add
    */
   public void setUniqueID(long uniqueID) {
     this.uniqueID = uniqueID;
@@ -320,5 +321,9 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
 
   public long getUpdateTime() {
     return modifiedTimestamp;
+  }
+
+  public boolean isOverride() {
+    return isOverride;
   }
 }
