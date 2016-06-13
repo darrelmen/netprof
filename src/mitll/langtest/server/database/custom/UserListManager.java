@@ -939,4 +939,8 @@ public class UserListManager {
   public Set<String> getAudioAnnos() {
     return annotationDAO.getAudioAnnos();
   }
+
+  public UserExerciseDAO getUserExerciseDAO() {
+    return userExerciseDAO;
+  }
 }
