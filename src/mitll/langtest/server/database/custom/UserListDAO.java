@@ -35,7 +35,7 @@ package mitll.langtest.server.database.custom;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.user.IUserDAO;
-import mitll.langtest.server.database.userexercise.UserExerciseDAO;
+import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.apache.log4j.Logger;
@@ -61,7 +61,7 @@ public class UserListDAO extends DAO {
   static final String USER_EXERCISE_LIST = "userexerciselist";
   private static final String ISPRIVATE = "isprivate";
   private final IUserDAO userDAO;
-  private UserExerciseDAO userExerciseDAO;
+  private IUserExerciseDAO userExerciseDAO;
   private final UserListVisitorJoinDAO userListVisitorJoinDAO;
 
   public UserListDAO(Database database, IUserDAO userDAO) {
@@ -424,7 +424,7 @@ public class UserListDAO extends DAO {
     where.setExercises(onList);
   }
 
-  public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {
+  public void setUserExerciseDAO(IUserExerciseDAO userExerciseDAO) {
     this.userExerciseDAO = userExerciseDAO;
   }
 

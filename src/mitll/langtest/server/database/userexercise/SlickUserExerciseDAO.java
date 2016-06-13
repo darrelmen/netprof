@@ -42,11 +42,13 @@ import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickUserExercise;
 import mitll.npdata.dao.userexercise.UserExerciseDAOWrapper;
 import org.apache.log4j.Logger;
+import scala.collection.Seq;
 
 import java.sql.Timestamp;
 import java.util.*;
 
-public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserExerciseDAO, ISchema<UserExercise, SlickUserExercise> {
+public class SlickUserExerciseDAO
+    extends BaseUserExerciseDAO implements IUserExerciseDAO, ISchema<UserExercise, SlickUserExercise> {
   private static final Logger logger = Logger.getLogger(SlickUserExerciseDAO.class);
 
   private final UserExerciseDAOWrapper dao;
@@ -176,7 +178,10 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
   @Override
   public CommonExercise getWhere(String exid) {
-    return null;
+    exid = exid.replaceAll("\'", "");
+
+    Seq<SlickUserExercise> byExid = dao.getByExid(exid);
+    return byExid.isEmpty() ? null : fromSlick(byExid.iterator().next());
   }
 
   public List<CommonExercise> getAll() {
@@ -185,17 +190,20 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
   @Override
   public Collection<CommonExercise> getOverrides() {
-    return null;
+    return getUserExercises(dao.getOverrides());
   }
 
   @Override
   public Collection<CommonExercise> getWhere(Collection<String> exids) {
-    return null;
+    return getUserExercises(dao.byExids(exids));
   }
 
   @Override
   public void update(CommonExercise userExercise, boolean createIfDoesntExist) {
-
+    SlickUserExercise slickUserExercise = toSlick(userExercise, true);
+    int rows = dao.update(slickUserExercise);
+    if (rows == 0 && createIfDoesntExist) {
+      dao.insert(slickUserExercise);
+    }
   }
-
 }

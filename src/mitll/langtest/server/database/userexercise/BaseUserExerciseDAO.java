@@ -72,19 +72,19 @@ public class BaseUserExerciseDAO extends DAO {
           userExercises2.add(new UserExercise(byID, byID.getCreator())); // all predefined references
 
           /// TODO : put this back???
-        // if (isEnglish) {
-        //    e.setEnglish(exercise.getMeaning());
-        //  }
+          // if (isEnglish) {
+          //    e.setEnglish(exercise.getMeaning());
+          //  }
 
         } else {
-          if (c++< 10)
-          logger.error("getOnList: huh can't find user exercise '" + ue.getID() + "'");
+          if (c++ < 10)
+            logger.error("getOnList: huh can't find user exercise '" + ue.getID() + "'");
         }
       } else {
         userExercises2.add(ue);
       }
     }
-    if (c > 0) logger.warn("huh? can't find " +c+"/"+userExercises.size() + " items???");
+    if (c > 0) logger.warn("huh? can't find " + c + "/" + userExercises.size() + " items???");
   }
 
   /**
@@ -101,7 +101,7 @@ public class BaseUserExerciseDAO extends DAO {
    * @return
    * @see UserListManager#getReviewedUserExercises(java.util.Map, Collection)
    */
-  CommonExercise getPredefExercise(String id) {
+  public CommonExercise getPredefExercise(String id) {
     return exerciseDAO.getExercise(id);
   }
 
