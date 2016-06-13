@@ -478,20 +478,12 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
       boolean withFlash = rs.getBoolean(WITH_FLASH);
 
       if (type != null) {
-        if (type.equals("avp")) type = "practice";
-        else if (type.equals("flashcard")) type = "practice";
-        else if (type.equals("regular_by_WebRTC")) {
-          if (withFlash) logger.error("huh? says with flash but also " + type);
-          type = "regular";
-        }
-        else if (type.equals("slow_by_WebRTC")) {
-          if (withFlash) logger.error("huh? says with flash but also " + type);
-          type = "slow";
-        }
+        type = normalizeAudioType(type, withFlash);
       }
       try {
-        type = type.replace("=","_");
-
+        if (type != null) {
+          type = type.replaceAll("=", "_");
+        }
         realAudioType = type == null ? AudioType.UNSET : AudioType.valueOf(type.toUpperCase());
       } catch (IllegalArgumentException e) {
         logger.warn("unknown audio type " + type + " at " + uniqueID);
@@ -520,6 +512,31 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
     long diff = now - then;
     if (diff > 100) logger.warn("took " + diff + " to get " + results.size() + " results");
     return results;
+  }
+
+  private String normalizeAudioType(String type, boolean withFlash) {
+    if (type.equals("avp")) {
+      type = AudioType.PRACTICE.toString();
+    }
+    else if (type.equals("flashcard")) {
+      type = AudioType.PRACTICE.toString();
+    }
+    else if (type.equals("regular_by_WebRTC")) {
+      if (withFlash) logger.error("huh? says with flash but also " + type);
+      type = AudioType.REGULAR.toString();
+    }
+    else if (type.equals("slow_by_WebRTC")) {
+      if (withFlash) logger.error("huh? says with flash but also " + type);
+      type = AudioType.SLOW.toString();
+    }
+    else if (type.equals("practice_by_WebRTC")) {
+      if (withFlash) logger.error("huh? says with flash but also " + type);
+      type = AudioType.PRACTICE.toString();
+    }
+    else {
+      type = type.replaceAll("=", "_");
+    }
+    return type;
   }
 
   private List<UserAndTime> getUserAndTimeForQuery(Connection connection, PreparedStatement statement) throws SQLException {
