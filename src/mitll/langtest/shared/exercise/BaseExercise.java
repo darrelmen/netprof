@@ -33,6 +33,7 @@
 package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.server.database.userexercise.UserExerciseDAO;
 import mitll.langtest.shared.custom.UserExercise;
 
 import java.util.HashMap;
@@ -59,7 +60,7 @@ public class BaseExercise implements IsSerializable, Shell  {
   }
 
   /**
-   * @see mitll.langtest.server.database.custom.UserExerciseDAO#add(CommonExercise, boolean)
+   * @see UserExerciseDAO#add(CommonExercise, boolean)
    * @param id
    */
   public void setID(String id) {

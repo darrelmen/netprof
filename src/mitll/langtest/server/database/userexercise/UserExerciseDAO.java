@@ -49,13 +49,7 @@ import java.sql.*;
 import java.util.*;
 import java.util.Date;
 
-/**
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since
- */
-public class UserExerciseDAO extends DAO {
+public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExerciseDAO {
   private static final Logger logger = Logger.getLogger(UserExerciseDAO.class);
 
   private static final String EXERCISEID = "exerciseid";
@@ -71,7 +65,6 @@ public class UserExerciseDAO extends DAO {
   private static final String CONTEXT = "context";
   private static final String CONTEXT_TRANSLATION = "contextTranslation";
 
-  private ExerciseDAO<CommonExercise> exerciseDAO;
   private static final boolean DEBUG = false;
 
   public UserExerciseDAO(Database database) {
@@ -265,6 +258,7 @@ public class UserExerciseDAO extends DAO {
    * @return
    * @see mitll.langtest.server.database.custom.UserListDAO#populateList
    */
+  @Override
   public List<CommonShell> getOnList(long listID) {
     String sql = getJoin(listID);
     List<CommonShell> userExercises2 = new ArrayList<>();
@@ -282,23 +276,7 @@ public class UserExerciseDAO extends DAO {
       }
 
 
-      int c = 0;
-      for (CommonExercise ue : userExercises) {
-        // if (DEBUG) logger.debug("\ton list " + listID + " " + ue.getID() + " / " + ue.getUniqueID() + " : " + ue);
-        if (ue.isPredefined()) {
-          CommonExercise byID = getExercise(ue);
-
-          if (byID != null) {
-            userExercises2.add(new UserExercise(byID, byID.getCreator())); // all predefined references
-          } else {
-            if (c++< 10)
-            logger.error("getOnList: huh can't find user exercise '" + ue.getID() + "'");
-          }
-        } else {
-          userExercises2.add(ue);
-        }
-      }
-      if (c > 0) logger.warn("huh? can't find " +c+"/"+userExercises.size() + " items???");
+      enrichWithPredefInfo(userExercises2, userExercises);
 
       boolean isEnglish = database.getLanguage().equalsIgnoreCase("english");
       String join2 = getJoin2(listID);
@@ -331,6 +309,11 @@ public class UserExerciseDAO extends DAO {
     return userExercises2;
   }
 
+  /**
+   * @see #getOnList(long)
+   * @param listID
+   * @return
+   */
   private String getJoin(long listID) {
     return "SELECT " +
         "ue.* from " + USEREXERCISE + " ue, " + UserListExerciseJoinDAO.USER_EXERCISE_LIST_EXERCISE + " uele " +
@@ -359,30 +342,13 @@ public class UserExerciseDAO extends DAO {
   }
 
   /**
-   * @param ue
-   * @return
-   * @see #getOnList(long)
-   */
-  private CommonExercise getExercise(HasID ue) {
-    return getPredefExercise(ue.getID());
-  }
-
-  /**
-   * @param id
-   * @return
-   * @see UserListManager#getReviewedUserExercises(java.util.Map, java.util.Collection)
-   */
-  CommonExercise getPredefExercise(String id) {
-    return exerciseDAO.getExercise(id);
-  }
-
-  /**
    * Remove single ticks which break the sql.
    *
    * @param exid
    * @return
    * @see mitll.langtest.server.database.DatabaseImpl#getUserExerciseWhere(String)
    */
+  @Override
   public CommonExercise getWhere(String exid) {
     exid = exid.replaceAll("\'", "");
     String sql = "SELECT * from " + USEREXERCISE + " where " + EXERCISEID + "='" + exid + "'";
@@ -390,6 +356,7 @@ public class UserExerciseDAO extends DAO {
     return commonExercises.isEmpty() ? null : commonExercises.iterator().next();
   }
 
+  @Override
   public Collection<CommonExercise> getAll() {
     return getCommonExercises(GET_ALL_SQL);
   }
@@ -399,6 +366,7 @@ public class UserExerciseDAO extends DAO {
    * @see mitll.langtest.server.database.exercise.ExcelImport#getRawExercises()
    * @see #setAudioDAO(AudioDAO)
    */
+  @Override
   public Collection<CommonExercise> getOverrides() {
     return getCommonExercises("SELECT * from " + USEREXERCISE + " where " + OVERRIDE + "=true");
   }
@@ -417,6 +385,7 @@ public class UserExerciseDAO extends DAO {
    * @return
    * @see UserListManager#getDefectList(java.util.Collection)
    */
+  @Override
   public Collection<CommonExercise> getWhere(Collection<String> exids) {
     if (exids.isEmpty()) return new ArrayList<>();
     String sql = "SELECT * from " + USEREXERCISE + " where " + EXERCISEID + " in (" + getIds(exids) + ")";
@@ -573,6 +542,7 @@ public class UserExerciseDAO extends DAO {
    * @param createIfDoesntExist
    * @see UserListManager#editItem
    */
+  @Override
   public void update(CommonExercise userExercise, boolean createIfDoesntExist) {
     try {
       Connection connection = database.getConnection(this.getClass().toString());
@@ -642,9 +612,5 @@ public class UserExerciseDAO extends DAO {
 
   private void addColumnToTable6(Connection connection) throws SQLException {
     addVarchar(connection, USEREXERCISE, CONTEXT_TRANSLATION);
-  }
-
-  public void setExerciseDAO(ExerciseDAO exerciseDAO) {
-    this.exerciseDAO = exerciseDAO;
   }
 }
