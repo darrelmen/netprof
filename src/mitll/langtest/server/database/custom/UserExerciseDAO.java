@@ -67,6 +67,7 @@ public class UserExerciseDAO extends DAO {
   private static final String STATE = "state";
   private static final String CONTEXT = "context";
   private static final String CONTEXT_TRANSLATION = "contextTranslation";
+  public static final String CREATORID = "creatorid";
 
   private ExerciseDAO<CommonExercise> exerciseDAO;
   private static final boolean DEBUG = false;
@@ -133,7 +134,7 @@ public class UserExerciseDAO extends DAO {
               "english" + "," +
               "foreignLanguage" + "," +
               TRANSLITERATION + "," +
-              "creatorid" + "," +
+              CREATORID + "," +
               CONTEXT + "," + CONTEXT_TRANSLATION +
               ",override," + UNIT +
               "," + LESSON +
@@ -224,7 +225,7 @@ public class UserExerciseDAO extends DAO {
         "english VARCHAR, " +
         "foreignLanguage VARCHAR, " +
         TRANSLITERATION + " VARCHAR, " +
-        "creatorid INT, " +
+        CREATORID + " INT, " +
         CONTEXT + " VARCHAR, " +
         CONTEXT_TRANSLATION + " VARCHAR, " +
         OVERRIDE + " BOOLEAN, " +
@@ -252,7 +253,7 @@ public class UserExerciseDAO extends DAO {
    * @return
    * @see mitll.langtest.server.database.custom.UserListDAO#populateList
    */
-  public List<CommonShell> getOnList(long listID) {
+  List<CommonShell> getOnList(long listID) {
     String sql = getJoin(listID);
     List<CommonShell> userExercises2 = new ArrayList<>();
 
@@ -377,6 +378,12 @@ public class UserExerciseDAO extends DAO {
     return commonExercises.isEmpty() ? null : commonExercises.iterator().next();
   }
 
+  public Collection<CommonExercise> getByUser(int user) {
+    String sql = "SELECT * from " + USEREXERCISE + " where " + CREATORID + "=" + user;
+    Collection<CommonExercise> commonExercises = getCommonExercises(sql);
+    return commonExercises;
+  }
+
   public Collection<CommonExercise> getAll() {
     return getCommonExercises(GET_ALL_SQL);
   }
@@ -404,7 +411,7 @@ public class UserExerciseDAO extends DAO {
    * @return
    * @see UserListManager#getDefectList(java.util.Collection)
    */
-  public Collection<CommonExercise> getWhere(Collection<String> exids) {
+  Collection<CommonExercise> getWhere(Collection<String> exids) {
     if (exids.isEmpty()) return new ArrayList<>();
     String sql = "SELECT * from " + USEREXERCISE + " where " + EXERCISEID + " in (" + getIds(exids) + ")";
     return getCommonExercises(sql);
@@ -445,7 +452,7 @@ public class UserExerciseDAO extends DAO {
         UserExercise e = new UserExercise(
             rs.getLong("uniqueid"),
             rs.getString(EXERCISEID),
-            rs.getLong("creatorid"),
+            rs.getLong(CREATORID),
             rs.getString("english"),
             rs.getString("foreignLanguage"),
             rs.getString(TRANSLITERATION),
