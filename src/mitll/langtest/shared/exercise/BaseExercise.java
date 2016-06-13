@@ -33,7 +33,6 @@
 package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.server.database.userexercise.UserExerciseDAO;
 import mitll.langtest.shared.custom.UserExercise;
 
 import java.util.HashMap;

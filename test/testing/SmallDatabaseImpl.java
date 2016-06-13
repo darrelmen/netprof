@@ -13,6 +13,7 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Collection;
 
 /**
  * Note with H2 that :  <br></br>
@@ -72,6 +73,11 @@ public class SmallDatabaseImpl implements Database {
 
   @Override
   public LogAndNotify getLogAndNotify() {
+    return null;
+  }
+
+  @Override
+  public Collection<String> getTypeOrder() {
     return null;
   }
 

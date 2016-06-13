@@ -58,6 +58,8 @@ import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.SlickUserDAOImpl;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.database.user.UserManagement;
+import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
+import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.server.database.userexercise.UserExerciseDAO;
 import mitll.langtest.server.database.word.Word;
 import mitll.langtest.server.database.word.WordDAO;
@@ -65,6 +67,7 @@ import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.*;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
+import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
@@ -78,6 +81,7 @@ import mitll.langtest.shared.scoring.PretestScore;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickAudio;
 import mitll.npdata.dao.SlickResult;
+import mitll.npdata.dao.SlickUserExercise;
 import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
@@ -129,7 +133,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   private IAnswerDAO answerDAO;
   private UserListManager userListManager;
 
-  private UserExerciseDAO userExerciseDAO;
+  private IUserExerciseDAO userExerciseDAO;
 
   private AddRemoveDAO addRemoveDAO;
 
@@ -151,8 +155,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   private Analysis analysis;
   private final String absConfigDir;
   private SimpleExerciseDAO<AmasExerciseImpl> fileExerciseDAO;
-//  private SessionManagement sessionManagement;
-//  private String dbName;
 
   /**
    * @param configDir
@@ -257,10 +259,10 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       logger.warn("has tables ------> " + dbConnection.getTables());
     }
 
-
     addRemoveDAO = new AddRemoveDAO(this);
 
-    userExerciseDAO = new UserExerciseDAO(this);
+    userExerciseDAO = new SlickUserExerciseDAO(this,dbConnection);
+
     UserListExerciseJoinDAO userListExerciseJoinDAO = new UserListExerciseJoinDAO(this);
 
     // resultDAO = new ResultDAO(this);
@@ -271,7 +273,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
     //answerDAO = new AnswerDAO(this, resultDAO);
 
-    userListManager = new UserListManager(this.userDAO, new UserListDAO(this, this.userDAO), userListExerciseJoinDAO,
+    UserListDAO userListDAO = new UserListDAO(this, this.userDAO);
+    userListManager = new UserListManager(this.userDAO, userListDAO,
+        userListExerciseJoinDAO,
         new AnnotationDAO(this, this.userDAO),
         new ReviewedDAO(this, ReviewedDAO.REVIEWED),
         new ReviewedDAO(this, ReviewedDAO.SECOND_STATE),
@@ -539,7 +543,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
           exerciseDAO.getRawExercises();
 
-          userExerciseDAO.setAudioDAO(audioDAO);
+          //userExerciseDAO.setAudioDAO(audioDAO);
 
           numExercises = exerciseDAO.getNumExercises();
 
@@ -1038,6 +1042,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     slickAudioDAO.createTable();
     slickEventDAO.createTable();
     ((ISchema) getResultDAO()).createTable();
+    ((ISchema) userExerciseDAO).createTable();
     logger.info("created slick tables...");
   }
 
@@ -1088,6 +1093,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     SlickAudioDAO slickAudioDAO = (SlickAudioDAO) getAudioDAO();
     SlickEventImpl slickEventDAO = (SlickEventImpl) getEventDAO();
     SlickResultDAO slickResultDAO = (SlickResultDAO) getResultDAO();
+    SlickUserExerciseDAO slickUEDAO = (SlickUserExerciseDAO) userExerciseDAO;
 
 //    try {
 //      logger.info("drop tables");
@@ -1139,7 +1145,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       slickEventDAO.copyTableOnlyOnce(new EventDAO(this, userDAO.getDefectDetector()), getLanguage(), oldToNew);
     }
 
-    {
+    if (false){
       ResultDAO resultDAO = new ResultDAO(this);
       List<SlickResult> bulk = new ArrayList<>();
 
@@ -1153,6 +1159,27 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         }
       }
       slickResultDAO.addBulk(bulk);
+    }
+
+    // copy user exercises
+    {
+      UserExerciseDAO ueDAO = new UserExerciseDAO(this);
+      List<SlickUserExercise> bulk = new ArrayList<>();
+
+      try {
+        for (UserExercise result : ueDAO.getUserExercisesList()) {
+          Integer userID = oldToNew.get(result.getCreator());
+          if (userID == null) {
+            logger.error("no user " + result.getCreator());
+          } else {
+            result.setCreator(userID);
+            bulk.add(slickUEDAO.toSlick(result, getLanguage()));
+          }
+        }
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
+      slickUEDAO.addBulk(bulk);
     }
   }
 

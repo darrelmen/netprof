@@ -32,17 +32,14 @@
 
 package mitll.langtest.server.database.userexercise;
 
-import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.audio.AudioDAO;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.custom.UserListExerciseJoinDAO;
 import mitll.langtest.server.database.custom.UserListManager;
-import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.HasID;
 import org.apache.log4j.Logger;
 
 import java.sql.*;
@@ -380,6 +377,28 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
     return Collections.emptyList();
   }
 
+  public Collection<UserExercise> getUserExercisesList() throws SQLException{
+    Connection connection = database.getConnection(this.getClass().toString());
+    List<UserExercise> exercises = new ArrayList<>();
+    try {
+      PreparedStatement statement = connection.prepareStatement(GET_ALL_SQL);
+      //logger.debug("getUserExercises sql = " + sql);
+      ResultSet rs = statement.executeQuery();
+
+      List<String> typeOrder = exerciseDAO.getSectionHelper().getTypeOrder();
+      while (rs.next()) {
+        UserExercise e = getUserExercise(rs, typeOrder);
+
+       exercises.add(e);
+      }
+      finish(connection, statement, rs);
+    } finally {
+      database.closeConnection(connection);
+    }
+
+    return exercises;
+  }
+
   /**
    * @param exids
    * @return
@@ -418,25 +437,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
 
       List<String> typeOrder = exerciseDAO.getSectionHelper().getTypeOrder();
       while (rs.next()) {
-        Map<String, String> unitToValue = getUnitToValue(rs, typeOrder);
-
-        Timestamp timestamp = rs.getTimestamp(MODIFIED);
-
-        Date date = (timestamp != null) ? new Date(timestamp.getTime()) : new Date(0);
-
-        UserExercise e = new UserExercise(
-            rs.getLong("uniqueid"),
-            rs.getString(EXERCISEID),
-            rs.getInt("creatorid"),
-            rs.getString("english"),
-            rs.getString("foreignLanguage"),
-            rs.getString(TRANSLITERATION),
-            rs.getString(CONTEXT),
-            rs.getString(CONTEXT_TRANSLATION),
-            rs.getBoolean(OVERRIDE),
-            unitToValue,
-            date.getTime()
-        );
+        UserExercise e = getUserExercise(rs, typeOrder);
 
 
 //        logger.info("getUserExercises " + e);
@@ -454,6 +455,28 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
     }
 
     return exercises;
+  }
+
+  private UserExercise getUserExercise(ResultSet rs, List<String> typeOrder) throws SQLException {
+    Map<String, String> unitToValue = getUnitToValue(rs, typeOrder);
+
+    Timestamp timestamp = rs.getTimestamp(MODIFIED);
+
+    Date date = (timestamp != null) ? new Date(timestamp.getTime()) : new Date(0);
+
+    return new UserExercise(
+        rs.getLong("uniqueid"),
+        rs.getString(EXERCISEID),
+        rs.getInt("creatorid"),
+        rs.getString("english"),
+        rs.getString("foreignLanguage"),
+        rs.getString(TRANSLITERATION),
+        rs.getString(CONTEXT),
+        rs.getString(CONTEXT_TRANSLATION),
+        rs.getBoolean(OVERRIDE),
+        unitToValue,
+        date.getTime()
+    );
   }
 
   /**
