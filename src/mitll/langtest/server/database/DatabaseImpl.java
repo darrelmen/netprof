@@ -74,13 +74,12 @@ import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
+import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickAudio;
 import mitll.npdata.dao.SlickResult;
-import mitll.npdata.dao.DBConnection;
 import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
-import org.apache.xmlbeans.impl.common.SystemCache;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -218,6 +217,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return getConnection(this.getClass().toString());
   }
 
+  DBConnection dbConnection;
+
   /**
    * Create or alter tables as needed.
    */
@@ -231,7 +232,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       }
     }
 
-    DBConnection dbConnection = new DBConnection(serverProps.getDatabaseType(),
+    dbConnection = new DBConnection(serverProps.getDatabaseType(),
         serverProps.getDatabaseHost(), serverProps.getDatabasePort(), serverProps.getDatabaseName());
 
     SlickEventImpl slickEventDAO = new SlickEventImpl(dbConnection);
@@ -249,7 +250,11 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     SlickAnswerDAO slickAnswerDAO = new SlickAnswerDAO(this, dbConnection);
     answerDAO = slickAnswerDAO;
 
-    createTables();
+    if (!dbConnection.hasTable("user")) {
+      createTables();
+    } else {
+      logger.warn("has tables ------> " + dbConnection.getTables());
+    }
 
 
     addRemoveDAO = new AddRemoveDAO(this);
@@ -1036,8 +1041,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   }
 
   public void dropTables() {
-    SlickUserDAOImpl slickUserDAO = (SlickUserDAOImpl) getUserDAO();
-    slickUserDAO.dropAll();
+    //  SlickUserDAOImpl slickUserDAO = (SlickUserDAOImpl) getUserDAO();
+    dbConnection.dropAll();
 /*
     SlickAudioDAO slickAudioDAO = (SlickAudioDAO) getAudioDAO();
     SlickEventImpl slickEventDAO = (SlickEventImpl) getEventDAO();
@@ -1092,21 +1097,23 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 //
 //    createTables();
 
-    UserDAO userDAO = new UserDAO(this);
-    List<User> users = userDAO.getUsers();
-    logger.info("h2 users  " + users.size());
-    for (User user : users) {
-      if (user.getId() != userDAO.getDefectDetector()) {
-        slickUserDAO.add(slickUserDAO.toSlick(user));
+    if (false) {
+      UserDAO userDAO = new UserDAO(this);
+      List<User> users = userDAO.getUsers();
+      logger.info("h2 users  " + users.size());
+      for (User user : users) {
+        if (user.getId() != userDAO.getDefectDetector()) {
+          slickUserDAO.add(slickUserDAO.toSlick(user));
+        }
       }
+      logger.info("after, postgres users " + slickUserDAO.getUsers().size());
     }
-    logger.info("after, postgres users " + slickUserDAO.getUsers().size());
 
     Map<Integer, Integer> oldToNew = slickUserDAO.getOldToNew();
     logger.info("oldToNew " + oldToNew.size());
 
     // add the audio table
-    {
+    if (false) {
       int num = slickAudioDAO.getNumRows();
       logger.info("after drop slickAudioDAO " + num);
 
@@ -1122,12 +1129,12 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       slickAudioDAO.addBulk(bulk);
       long now = System.currentTimeMillis();
 
-      logger.info("took " + (now-then) +
+      logger.info("took " + (now - then) +
           " , postgres audio " + slickAudioDAO.getAudioAttributes().size());
     }
 
     // add event table
-    {
+    if (false) {
       slickEventDAO.copyTableOnlyOnce(new EventDAO(this, userDAO.getDefectDetector()), getLanguage(), oldToNew);
     }
 
@@ -1139,8 +1146,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         Integer userID = oldToNew.get(result.getUserid());
         if (userID == null) {
           logger.error("no user " + result.getUserid());
-        }
-        else {
+        } else {
           result.setUserID(userID);
           bulk.add(slickResultDAO.toSlick(result, getLanguage()));
         }
