@@ -83,17 +83,31 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
         shared.getRoundTrip(),
         shared.isCorrect(),
         shared.getPronScore(),
-        shared.getDeviceType(),
-        shared.getDevice(),
-        shared.getJsonScore(),
+        checkNull(shared.getDeviceType()),
+        checkNull(shared.getDevice()),
+        checkNull(shared.getJsonScore()),
         shared.isWithFlash(),
         shared.getDynamicRange(),
         getLanguage(),
         shared.getUniqueID());
   }
 
+/*
+  String checkNull(Result shared) {
+    String deviceType = shared.getDeviceType();
+    return checkNull(deviceType);
+  }
+*/
+
+  private String checkNull(String deviceType) {
+    return deviceType == null?"": deviceType;
+  }
+
   @Override
   public Result fromSlick(SlickResult slick) {
+
+    String audiotype = slick.audiotype();
+    audiotype = audiotype.replaceAll("=","_");
     return new Result(slick.id(),
         slick.userid(),
         slick.exid(),
@@ -101,7 +115,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
         slick.answer(),
         slick.valid(),
         slick.modified().getTime(),
-        AudioType.valueOf(slick.audiotype().toUpperCase()),
+        AudioType.valueOf(audiotype.toUpperCase()),
         slick.duration(),
         slick.correct(),
         slick.pronscore(),
@@ -115,6 +129,8 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
   }
 
   private MonitorResult fromSlick2(SlickResult slick) {
+    String audiotype = slick.audiotype();
+    audiotype = audiotype.replaceAll("=","_");
     return new MonitorResult(slick.id(),
         slick.userid(),
         slick.exid(),
@@ -122,7 +138,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
         slick.answer(),
         slick.valid(),
         slick.modified().getTime(),
-        AudioType.valueOf(slick.audiotype().toUpperCase()),
+        AudioType.valueOf(audiotype.toUpperCase()),
         slick.duration(),
         slick.correct(),
         slick.pronscore(),

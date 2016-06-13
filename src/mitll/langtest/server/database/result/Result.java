@@ -122,14 +122,14 @@ public class Result implements  UserAndTime {
    * Compound key of exercise id and question id within that exercise.
    * @return
    */
-  public String getID() {  return getExerciseID() + "/" + qid;  }
+  public String getID() {  return getCompoundID();  }
 
   /**
    * Compound key of exercise id and question id within that exercise.
    * @return
    */
   @Transient
-  public String getCompoundID() {  return getExerciseID() + "/" + qid;  }
+  public String getCompoundID() {  return getExid() + "/" + qid;  }
 
   public AudioType getAudioType() {
     return audioType;
@@ -171,7 +171,7 @@ public class Result implements  UserAndTime {
 
   @Override
   public String getExid() {
-    return id;
+    return getExerciseID();
   }
 
   public long getDurationInMillis() {
@@ -180,7 +180,7 @@ public class Result implements  UserAndTime {
 
   @Override
   public String toString() {
-    return "Result #" + getUniqueID() + "\t\tby user " + getUserid() + "\texid " + getExerciseID() + " " +
+    return "Result #" + getUniqueID() + "\t\tby user " + getUserid() + "\texid " + getExid() + " " +
         " at " + new Date(getTimestamp())+
         "  ans " + getAnswer() +
         " audioType : " + getAudioType() +" device " + device+
