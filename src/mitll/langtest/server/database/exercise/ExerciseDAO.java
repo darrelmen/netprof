@@ -35,7 +35,7 @@ package mitll.langtest.server.database.exercise;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.custom.AddRemoveDAO;
-import mitll.langtest.server.database.userexercise.UserExerciseDAO;
+import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
@@ -79,7 +79,10 @@ public interface ExerciseDAO<T extends CommonShell> extends SimpleExerciseDAO<T>
    * @param userExerciseDAO
    * @see mitll.langtest.server.database.DatabaseImpl#makeDAO(String, String, String)
    */
-  void setDependencies(String mediaDir, String installPath, UserExerciseDAO userExerciseDAO, AddRemoveDAO addRemoveDAO,
+  void setDependencies(String mediaDir,
+                       String installPath,
+                       IUserExerciseDAO userExerciseDAO,
+                       AddRemoveDAO addRemoveDAO,
                        IAudioDAO audioDAO);
 
   /**
