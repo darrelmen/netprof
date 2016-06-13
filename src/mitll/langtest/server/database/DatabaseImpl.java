@@ -58,6 +58,7 @@ import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.SlickUserDAOImpl;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.database.user.UserManagement;
+import mitll.langtest.server.database.userexercise.UserExerciseDAO;
 import mitll.langtest.server.database.word.Word;
 import mitll.langtest.server.database.word.WordDAO;
 import mitll.langtest.server.mail.MailSupport;
