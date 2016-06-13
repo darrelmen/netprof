@@ -36,6 +36,7 @@ import mitll.langtest.client.user.Md5Hash;
 import mitll.langtest.server.database.audio.AudioDAO;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.instrumentation.IEventDAO;
+import mitll.langtest.server.database.result.IAnswerDAO;
 import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.database.user.IUserDAO;
@@ -372,6 +373,12 @@ public class PostgresTest extends BaseTest {
     logger.info("Got " + resultDAO.getSessions());
     logger.info("Got " + resultDAO.getResultsForExIDInForUser(Collections.singleton(exid),1,""));
     logger.info("Got " + resultDAO.getNumResults());
-
   }
+
+  @Test
+  public void testAnswerDAO() {
+    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
+  }
+
+
 }
