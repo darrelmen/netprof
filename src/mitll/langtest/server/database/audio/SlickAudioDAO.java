@@ -219,6 +219,8 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
   public void addBulk(List<SlickAudio> bulk) {
     dao.addBulk(bulk);
+  }  public void addBulk2(List<SlickAudio> bulk) {
+    dao.addBulk2(bulk);
   }
 
   public void dropTable() {
