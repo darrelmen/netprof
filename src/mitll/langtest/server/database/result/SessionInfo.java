@@ -58,4 +58,6 @@ public class SessionInfo {
   public Map<Integer, Float> getUserToRate() {
     return userToRate;
   }
+
+  public String toString() { return "SessionInfo " + sessions.size() + " rate table size " + getUserToRate().size(); }
 }
