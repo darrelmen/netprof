@@ -30,12 +30,14 @@
  *
  */
 
-package mitll.langtest.server.database.custom;
+package mitll.langtest.server.database.userexercise;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.audio.AudioDAO;
 import mitll.langtest.server.database.audio.IAudioDAO;
+import mitll.langtest.server.database.custom.UserListExerciseJoinDAO;
+import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
