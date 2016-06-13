@@ -55,4 +55,6 @@ public interface IUserExerciseDAO {
   void update(CommonExercise userExercise, boolean createIfDoesntExist);
 
   void setExerciseDAO(ExerciseDAO<CommonExercise> exerciseDAO);
+
+  CommonExercise getPredefExercise(String id);
 }
