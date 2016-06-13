@@ -36,10 +36,13 @@ import mitll.langtest.client.user.Md5Hash;
 import mitll.langtest.server.database.audio.AudioDAO;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.instrumentation.IEventDAO;
+import mitll.langtest.server.database.result.IResultDAO;
+import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.AudioType;
 import mitll.langtest.shared.User;
+import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.Event;
@@ -47,10 +50,7 @@ import mitll.npdata.dao.SlickSlimEvent;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -350,5 +350,28 @@ public class PostgresTest extends BaseTest {
   @Test
   public void testResult() {
     DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
+
+    IResultDAO resultDAO = spanish.getResultDAO();
+
+    List<Result> results = resultDAO.getResults();
+    int size = results.size();
+    Result first = results.get(0);
+    logger.info("got " + size + " first " + first);
+
+    Collection<Result> resultsDevices = resultDAO.getResultsDevices();
+    logger.info("got " + resultsDevices.size() + " first " + resultsDevices.iterator().next());
+
+    int uniqueID = first.getUniqueID();
+    logger.info("Got " + resultDAO.getResultByID(uniqueID));
+    logger.info("Got " + resultDAO.getMonitorResults().size());
+    String exid = first.getExid();
+    logger.info("Got " + resultDAO.getMonitorResultsByID(exid));
+    Collection<UserAndTime> userAndTimes = resultDAO.getUserAndTimes();
+    logger.info("Got " + userAndTimes.size() + " " + userAndTimes.iterator().next());
+
+    logger.info("Got " + resultDAO.getSessions());
+    logger.info("Got " + resultDAO.getResultsForExIDInForUser(Collections.singleton(exid),1,""));
+    logger.info("Got " + resultDAO.getNumResults());
+
   }
 }
