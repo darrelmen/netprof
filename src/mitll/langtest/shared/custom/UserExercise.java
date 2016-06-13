@@ -34,7 +34,6 @@ package mitll.langtest.shared.custom;
 
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.list.PagingExerciseList;
-import mitll.langtest.server.database.userexercise.UserExerciseDAO;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 
@@ -77,7 +76,7 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
    * @param english
    * @param foreignLanguage
    * @param transliteration
-   * @see mitll.langtest.client.custom.dialog.EditItem#createNewItem(long)
+   * @see mitll.langtest.client.custom.dialog.EditItem#createNewItem
    * @see mitll.langtest.client.custom.dialog.EditItem#getNewItem
    */
   public UserExercise(long uniqueID, String exerciseID, int creator, String english, String foreignLanguage,
@@ -166,7 +165,7 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
 
   /**
    * @param uniqueID
-   * @see UserExerciseDAO#add
+   * @see IUserExerciseDAO#add
    */
   public void setUniqueID(long uniqueID) {
     this.uniqueID = uniqueID;
