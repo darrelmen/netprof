@@ -30,11 +30,21 @@
  *
  */
 
-package mitll.langtest.server.database;
+package mitll.langtest.server.database.annotation;
 
-public interface ISchema<T,U>  {
-  void createTable();
-  //void dropTable();
-  U toSlick(T shared, String language);
-  T fromSlick(U slick);
+import mitll.langtest.shared.ExerciseAnnotation;
+
+import java.util.Map;
+import java.util.Set;
+
+public interface IAnnotationDAO {
+  void add(UserAnnotation annotation);
+
+  boolean hasAnnotation(String exerciseID, String field, String status, String comment);
+
+  Set<String> getAudioAnnos();
+
+  Map<String, ExerciseAnnotation> getLatestByExerciseID(String exerciseID);
+
+  Map<String, Long> getAnnotatedExerciseToCreator();
 }

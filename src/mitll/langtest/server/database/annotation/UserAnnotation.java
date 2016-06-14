@@ -30,20 +30,11 @@
  *
  */
 
-package mitll.langtest.server.database.custom;
+package mitll.langtest.server.database.annotation;
 
 import java.util.Date;
 
-/**
- * Created with IntelliJ IDEA.
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 12/13/13
- * Time: 11:35 AM
- * To change this template use File | Settings | File Templates.
- */
-class UserAnnotation {
+public class UserAnnotation {
   private final String exerciseID;
   private final String field;
   private final String status;
@@ -59,7 +50,7 @@ class UserAnnotation {
    * @param comment
    * @param userID
    * @param timestamp
-   * @see mitll.langtest.server.database.custom.AnnotationDAO#getUserAnnotations(String)
+   * @see AnnotationDAO#getUserAnnotations(String)
    */
   public UserAnnotation(String exerciseID, String field, String status, String comment, long userID, long timestamp) {
     this.exerciseID = exerciseID;
