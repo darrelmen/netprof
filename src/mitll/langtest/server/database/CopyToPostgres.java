@@ -32,6 +32,8 @@
 
 package mitll.langtest.server.database;
 
+import mitll.langtest.server.database.annotation.AnnotationDAO;
+import mitll.langtest.server.database.annotation.SlickAnnotationDAO;
 import mitll.langtest.server.database.audio.SlickAudioDAO;
 import mitll.langtest.server.database.instrumentation.EventDAO;
 import mitll.langtest.server.database.instrumentation.SlickEventImpl;
@@ -73,6 +75,7 @@ public class CopyToPostgres {
     SlickUserExerciseDAO slickUEDAO = (SlickUserExerciseDAO) db.getUserExerciseDAO();
     SlickPhoneDAO slickPhoneAO = (SlickPhoneDAO) db.getPhoneDAO();
     SlickWordDAO slickWordDAO = (SlickWordDAO) db.getWordDAO();
+    SlickAnnotationDAO annotationDAO = (SlickAnnotationDAO) db.getAnnotationDAO();
 
 //    try {
 //      logger.info("drop tables");
@@ -163,6 +166,7 @@ public class CopyToPostgres {
       slickUEDAO.addBulk(bulk);
     }
 
+    // phone DAO
     if (true) {
       PhoneDAO ueDAO = new PhoneDAO(db);
       List<SlickPhone> bulk = new ArrayList<>();
@@ -178,6 +182,12 @@ public class CopyToPostgres {
       }
 
       slickPhoneAO.addBulk(bulk);
+    }
+
+    // word DAO
+    // anno DAO
+    if (true) {
+      AnnotationDAO dao = new AnnotationDAO(db,slickUserDAO);
     }
   }
 }
