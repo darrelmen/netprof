@@ -34,7 +34,7 @@ package mitll.langtest.server.database.custom;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.audio.PathWriter;
-import mitll.langtest.server.database.annotation.AnnotationDAO;
+import mitll.langtest.server.database.annotation.IAnnotationDAO;
 import mitll.langtest.server.database.annotation.UserAnnotation;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
@@ -88,7 +88,7 @@ public class UserListManager {
   private IUserExerciseDAO userExerciseDAO;
   private final UserListDAO userListDAO;
   private final UserListExerciseJoinDAO userListExerciseJoinDAO;
-  private final AnnotationDAO annotationDAO;
+  private final IAnnotationDAO annotationDAO;
   private final PathHelper pathHelper;
 
   /**
@@ -100,8 +100,12 @@ public class UserListManager {
    * @param pathHelper
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(mitll.langtest.server.PathHelper)
    */
-  public UserListManager(IUserDAO userDAO, UserListDAO userListDAO, UserListExerciseJoinDAO userListExerciseJoinDAO,
-                         AnnotationDAO annotationDAO, ReviewedDAO reviewedDAO, ReviewedDAO secondStateDAO,
+  public UserListManager(IUserDAO userDAO,
+                         UserListDAO userListDAO,
+                         UserListExerciseJoinDAO userListExerciseJoinDAO,
+                         IAnnotationDAO annotationDAO,
+                         ReviewedDAO reviewedDAO,
+                         ReviewedDAO secondStateDAO,
                          PathHelper pathHelper) {
     this.userDAO = userDAO;
     this.userListDAO = userListDAO;
@@ -118,7 +122,7 @@ public class UserListManager {
    * @see mitll.langtest.server.LangTestDatabaseImpl#init()
    */
   public void setStateOnExercises() {
-    getAmmendedStateMap();
+   // getAmmendedStateMap();
 
     Map<String, ReviewedDAO.StateCreator> exerciseToState = getExerciseToState(false);
 
@@ -189,7 +193,7 @@ public class UserListManager {
    *
    * @return
    */
-  private void getAmmendedStateMap() {
+/*  private void getAmmendedStateMap() {
     Map<String, ReviewedDAO.StateCreator> stateMap = getExerciseToState(false);
     // logger.debug("got " + stateMap.size() +" in state map");
     Map<String, Long> exerciseToCreator = annotationDAO.getAnnotatedExerciseToCreator();
@@ -214,7 +218,7 @@ public class UserListManager {
       logger.info("updated " + count + " rows in review table");
     }
     //  return stateMap;
-  }
+  }*/
 
   /**
    * So this returns a map of exercise id to current (latest) state.  The exercise may have gone through
@@ -403,20 +407,20 @@ public class UserListManager {
     //Map<String, ReviewedDAO.StateCreator> exerciseToState = getExerciseToState(true); // skip unset items!
 
     Collection<String> defectExercises = reviewedDAO.getDefectExercises();
-    Map<String, Long> idToCreator = annotationDAO.getAnnotatedExerciseToCreator();
+    Collection<String> incorrectAnnotations = annotationDAO.getExercisesWithIncorrectAnnotations();
     //logger.debug("getCommentedList There are " + defectExercises.size() + " defect items ");
     // logger.debug("getCommentedList There are " + idToCreator.size() + " idToCreator items ");
 
     // if it's on the defect list, remove it
-    for (String id : defectExercises) {
-      idToCreator.remove(id);// what's left are items that are not reviewed
+    for (String exid : defectExercises) {
+      incorrectAnnotations.remove(exid);// what's left are items that are not reviewed
     }
     //logger.debug("getCommentedList After there are " + idToCreator.size() + " idToCreator items ");
 
-    Collection<CommonExercise> include = userExerciseDAO.getWhere(idToCreator.keySet());
+    Collection<CommonExercise> include = userExerciseDAO.getWhere(incorrectAnnotations);
     //logger.debug("getCommentedList include " + include.size() + " included ");
 
-    UserList<CommonShell> reviewList = getReviewList(include, COMMENTS, ALL_ITEMS_WITH_COMMENTS, idToCreator.keySet(), COMMENT_MAGIC_ID, typeOrder);
+    UserList<CommonShell> reviewList = getReviewList(include, COMMENTS, ALL_ITEMS_WITH_COMMENTS, incorrectAnnotations, COMMENT_MAGIC_ID, typeOrder);
     reviewList.setUniqueID(COMMENT_MAGIC_ID);
     return reviewList;
   }
@@ -746,7 +750,7 @@ public class UserListManager {
     }
   }
 
-  public boolean listExists(long id) {
+  private boolean listExists(long id) {
     return userListDAO.getWhere(id, false) != null;
   }
 
@@ -757,7 +761,7 @@ public class UserListManager {
    * @see mitll.langtest.server.database.exercise.ExcelImport#addDefects
    */
   public boolean addDefect(String exerciseID, String field, String comment) {
-    if (!annotationDAO.hasAnnotation(exerciseID, field, INCORRECT, comment)) {
+    if (!annotationDAO.hasDefect(exerciseID, field, INCORRECT, comment)) {
       addAnnotation(exerciseID, field, INCORRECT, comment, userDAO.getDefectDetector());
       markState(exerciseID, STATE.DEFECT, userDAO.getDefectDetector());
       return true;
@@ -935,7 +939,11 @@ public class UserListManager {
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#filterByOnlyAudioAnno
    */
-  public Set<String> getAudioAnnos() {
+  public Collection<String> getAudioAnnos() {
     return annotationDAO.getAudioAnnos();
+  }
+
+  public IAnnotationDAO getAnnotationDAO() {
+    return annotationDAO;
   }
 }
