@@ -34,17 +34,20 @@ package mitll.langtest.server.database.annotation;
 
 import mitll.langtest.shared.ExerciseAnnotation;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
 public interface IAnnotationDAO {
   void add(UserAnnotation annotation);
 
-  boolean hasAnnotation(String exerciseID, String field, String status, String comment);
+  boolean hasDefect(String exerciseID, String field, String status, String comment);
 
-  Set<String> getAudioAnnos();
+  Collection<String> getAudioAnnos();
 
   Map<String, ExerciseAnnotation> getLatestByExerciseID(String exerciseID);
 
-  Map<String, Long> getAnnotatedExerciseToCreator();
+  //Map<String, Long> getAnnotatedExerciseToCreator();
+
+  Set<String> getExercisesWithIncorrectAnnotations();
 }
