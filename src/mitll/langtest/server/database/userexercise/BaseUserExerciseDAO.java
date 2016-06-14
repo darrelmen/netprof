@@ -48,7 +48,7 @@ import java.util.List;
 public class BaseUserExerciseDAO extends DAO {
   private static final Logger logger = Logger.getLogger(BaseUserExerciseDAO.class);
 
-  protected ExerciseDAO<CommonExercise> exerciseDAO;
+  ExerciseDAO<CommonExercise> exerciseDAO;
 
   protected BaseUserExerciseDAO(Database database) {
     super(database);
