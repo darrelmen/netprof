@@ -30,11 +30,66 @@
  *
  */
 
-package mitll.langtest.server.database;
+package mitll.langtest.server.database.word;
 
-public interface ISchema<T,U>  {
-  void createTable();
-  //void dropTable();
-  U toSlick(T shared, String language);
-  T fromSlick(U slick);
+import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.ISchema;
+import mitll.langtest.server.database.userexercise.BaseUserExerciseDAO;
+import mitll.npdata.dao.DBConnection;
+import mitll.npdata.dao.SlickWord;
+import mitll.npdata.dao.word.WordDAOWrapper;
+import org.apache.log4j.Logger;
+
+import java.util.List;
+
+public class SlickWordDAO
+    extends BaseUserExerciseDAO implements IWordDAO, ISchema<Word, SlickWord> {
+  private static final Logger logger = Logger.getLogger(SlickWordDAO.class);
+
+  private final WordDAOWrapper dao;
+
+  public SlickWordDAO(Database database, DBConnection dbConnection) {
+    super(database);
+    dao = new WordDAOWrapper(dbConnection);
+  }
+
+  public void createTable() {
+    dao.createTable();
+  }
+
+/*  public void dropTable() {
+    dao.drop();
+  }*/
+
+  @Override
+  public SlickWord toSlick(Word shared, String language) {
+    return new SlickWord(-1,
+        (int) shared.getRid(),
+        shared.getWord(),
+        shared.getSeq(),
+        shared.getScore());
+  }
+
+  @Override
+  public Word fromSlick(SlickWord slick) {
+    return new Word(
+        slick.id(),
+        slick.rid(),
+        slick.word(),
+        slick.seq(),
+        slick.score());
+  }
+
+  public void insert(SlickWord word) {
+    dao.insert(word);
+  }
+
+  public void addBulk(List<SlickWord> bulk) {
+    dao.addBulk(bulk);
+  }
+
+  @Override
+  public long addWord(Word word) {
+    return dao.insert(toSlick(word, ""));
+  }
 }

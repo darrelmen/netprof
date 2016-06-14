@@ -41,15 +41,14 @@ import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.npdata.dao.SlickResult;
 import mitll.npdata.dao.DBConnection;
+import mitll.npdata.dao.SlickUser;
 import mitll.npdata.dao.result.ResultDAOWrapper;
 import mitll.npdata.dao.result.SlickCorrectAndScore;
 import mitll.npdata.dao.result.SlickUserAndTime;
 import org.apache.log4j.Logger;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema<Result, SlickResult> {
   private static final Logger logger = Logger.getLogger(SlickResultDAO.class);
@@ -249,5 +248,11 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
 
   CorrectAndScore fromSlickCS(SlickCorrectAndScore cs) {
     return new CorrectAndScore(cs.id(), cs.userid(), cs.exerciseid(), cs.correct(), cs.pronscore(), cs.modified(), cs.path(), cs.json());
+  }
+
+  public Map<Integer, Integer> getOldToNew() {
+    Map<Integer, Integer> oldToNew = new HashMap<>();
+    for (SlickResult user : dao.getAll()) oldToNew.put(user.legacyid(), user.id());
+    return oldToNew;
   }
 }

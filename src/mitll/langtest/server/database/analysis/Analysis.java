@@ -37,6 +37,7 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.phone.IPhoneDAO;
 import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.database.phone.PhoneDAO;
 import mitll.langtest.server.database.result.ResultDAO;
@@ -66,7 +67,7 @@ public class Analysis extends DAO {
   private static final float MIN_SCORE_TO_SHOW = 0.20f;
   private static final String EMPTY_JSON = "{}";
   private final ParseResultJson parseResultJson;
-  private final PhoneDAO phoneDAO;
+  private final IPhoneDAO phoneDAO;
   private Map<String, String> exToRef;
 
   /**
@@ -75,7 +76,7 @@ public class Analysis extends DAO {
    * @see DatabaseImpl#getAnalysis()
    * @see DatabaseImpl#makeDAO(String, String, String)
    */
-  public Analysis(Database database, PhoneDAO phoneDAO, Map<String, String> exToRef) {
+  public Analysis(Database database, IPhoneDAO phoneDAO, Map<String, String> exToRef) {
     super(database);
     parseResultJson = new ParseResultJson(database.getServerProps());
     this.phoneDAO = phoneDAO;
