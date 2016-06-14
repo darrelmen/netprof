@@ -38,6 +38,7 @@ import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.DecodeAlignOutput;
 import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.database.analysis.Analysis;
+import mitll.langtest.server.database.annotation.AnnotationDAO;
 import mitll.langtest.server.database.audio.AudioDAO;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.audio.SlickAudioDAO;
@@ -48,11 +49,11 @@ import mitll.langtest.server.database.connection.PostgreSQLConnection;
 import mitll.langtest.server.database.contextPractice.ContextPracticeImport;
 import mitll.langtest.server.database.custom.*;
 import mitll.langtest.server.database.exercise.*;
-import mitll.langtest.server.database.instrumentation.EventDAO;
 import mitll.langtest.server.database.instrumentation.IEventDAO;
 import mitll.langtest.server.database.instrumentation.SlickEventImpl;
+import mitll.langtest.server.database.phone.IPhoneDAO;
 import mitll.langtest.server.database.phone.Phone;
-import mitll.langtest.server.database.phone.PhoneDAO;
+import mitll.langtest.server.database.phone.SlickPhoneDAO;
 import mitll.langtest.server.database.result.*;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.SlickUserDAOImpl;
@@ -60,14 +61,13 @@ import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
-import mitll.langtest.server.database.userexercise.UserExerciseDAO;
+import mitll.langtest.server.database.word.IWordDAO;
+import mitll.langtest.server.database.word.SlickWordDAO;
 import mitll.langtest.server.database.word.Word;
-import mitll.langtest.server.database.word.WordDAO;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.*;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
-import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
@@ -79,9 +79,6 @@ import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 import mitll.npdata.dao.DBConnection;
-import mitll.npdata.dao.SlickAudio;
-import mitll.npdata.dao.SlickResult;
-import mitll.npdata.dao.SlickUserExercise;
 import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
@@ -126,8 +123,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   private IResultDAO resultDAO;
 
   private RefResultDAO refresultDAO;
-  private WordDAO wordDAO;
-  private PhoneDAO phoneDAO;
+  private IWordDAO wordDAO;
+  private IPhoneDAO phoneDAO;
 
   private IAudioDAO audioDAO;
   private IAnswerDAO answerDAO;
@@ -261,15 +258,15 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
     addRemoveDAO = new AddRemoveDAO(this);
 
-    userExerciseDAO = new SlickUserExerciseDAO(this,dbConnection);
+    userExerciseDAO = new SlickUserExerciseDAO(this, dbConnection);
 
     UserListExerciseJoinDAO userListExerciseJoinDAO = new UserListExerciseJoinDAO(this);
 
     // resultDAO = new ResultDAO(this);
 
     refresultDAO = new RefResultDAO(this, getServerProps().shouldDropRefResult());
-    wordDAO = new WordDAO(this);
-    phoneDAO = new PhoneDAO(this);
+    wordDAO = new SlickWordDAO(this,dbConnection);
+    phoneDAO = new SlickPhoneDAO(this,dbConnection);
 
     //answerDAO = new AnswerDAO(this, resultDAO);
 
@@ -1023,11 +1020,11 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return audioDAO;
   }
 
-  private WordDAO getWordDAO() {
+  public IWordDAO getWordDAO() {
     return wordDAO;
   }
 
-  public PhoneDAO getPhoneDAO() {
+  public IPhoneDAO getPhoneDAO() {
     return phoneDAO;
   }
 
@@ -1054,7 +1051,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     SlickEventImpl slickEventDAO = (SlickEventImpl) getEventDAO();
     SlickResultDAO slickResultDAO = (SlickResultDAO) getResultDAO();
 
-    logger.info("copyToPostgres Drop audio table!!!\n\n\n\n");
+    logger.info("cxopyToPostgres Drop audio table!!!\n\n\n\n");
     try {
       slickAudioDAO.dropTable();
       int num = slickAudioDAO.getNumRows();
@@ -1088,99 +1085,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   }
 
   public void copyToPostgres() {
-    // first add the user table
-    SlickUserDAOImpl slickUserDAO = (SlickUserDAOImpl) getUserDAO();
-    SlickAudioDAO slickAudioDAO = (SlickAudioDAO) getAudioDAO();
-    SlickEventImpl slickEventDAO = (SlickEventImpl) getEventDAO();
-    SlickResultDAO slickResultDAO = (SlickResultDAO) getResultDAO();
-    SlickUserExerciseDAO slickUEDAO = (SlickUserExerciseDAO) userExerciseDAO;
-
-//    try {
-//      logger.info("drop tables");
-//      dropTables();
-//    } catch (Exception e) {
-//      logger.warn("drop got " + e);
-//    }
-//
-//    createTables();
-
-    if (false) {
-      UserDAO userDAO = new UserDAO(this);
-      List<User> users = userDAO.getUsers();
-      logger.info("h2 users  " + users.size());
-      for (User user : users) {
-        if (user.getId() != userDAO.getDefectDetector()) {
-          slickUserDAO.add(slickUserDAO.toSlick(user));
-        }
-      }
-      logger.info("after, postgres users " + slickUserDAO.getUsers().size());
-    }
-
-    Map<Integer, Integer> oldToNew = slickUserDAO.getOldToNew();
-    logger.info("oldToNew " + oldToNew.size());
-
-    // add the audio table
-    if (false) {
-      int num = slickAudioDAO.getNumRows();
-      logger.info("after drop slickAudioDAO " + num);
-
-      List<SlickAudio> bulk = new ArrayList<>();
-      Collection<AudioAttribute> audioAttributes = getH2AudioDAO().getAudioAttributes();
-      logger.info("h2 audio  " + audioAttributes.size());
-
-      for (AudioAttribute att : audioAttributes) {
-        SlickAudio slickAudio = slickAudioDAO.getSlickAudio(att, oldToNew);
-        bulk.add(slickAudio);
-      }
-      long then = System.currentTimeMillis();
-      slickAudioDAO.addBulk(bulk);
-      long now = System.currentTimeMillis();
-
-      logger.info("took " + (now - then) +
-          " , postgres audio " + slickAudioDAO.getAudioAttributes().size());
-    }
-
-    // add event table
-    if (false) {
-      slickEventDAO.copyTableOnlyOnce(new EventDAO(this, userDAO.getDefectDetector()), getLanguage(), oldToNew);
-    }
-
-    if (false){
-      ResultDAO resultDAO = new ResultDAO(this);
-      List<SlickResult> bulk = new ArrayList<>();
-
-      for (Result result : resultDAO.getResults()) {
-        Integer userID = oldToNew.get(result.getUserid());
-        if (userID == null) {
-          logger.error("no user " + result.getUserid());
-        } else {
-          result.setUserID(userID);
-          bulk.add(slickResultDAO.toSlick(result, getLanguage()));
-        }
-      }
-      slickResultDAO.addBulk(bulk);
-    }
-
-    // copy user exercises
-    {
-      UserExerciseDAO ueDAO = new UserExerciseDAO(this);
-      List<SlickUserExercise> bulk = new ArrayList<>();
-
-      try {
-        for (UserExercise result : ueDAO.getUserExercisesList()) {
-          Integer userID = oldToNew.get(result.getCreator());
-          if (userID == null) {
-            logger.error("no user " + result.getCreator());
-          } else {
-            result.setCreator(userID);
-            bulk.add(slickUEDAO.toSlick(result, getLanguage()));
-          }
-        }
-      } catch (SQLException e) {
-        e.printStackTrace();
-      }
-      slickUEDAO.addBulk(bulk);
-    }
+    new CopyToPostgres().copyToPostgres(this);
   }
 
   /**
@@ -1742,7 +1647,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   /**
    * @param answerID
    * @param netPronImageTypeListMap
-   * @see #putBackWordAndPhone()
+   * @seex #putBackWordAndPhone
    * @see #recordWordAndPhoneInfo(long, PretestScore)
    */
   private void recordWordAndPhoneInfo(long answerID, Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap) {
@@ -1834,5 +1739,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   @Override
   public LogAndNotify getLogAndNotify() {
     return logAndNotify;
+  }
+
+  public IUserExerciseDAO getUserExerciseDAO() {
+    return userExerciseDAO;
   }
 }
