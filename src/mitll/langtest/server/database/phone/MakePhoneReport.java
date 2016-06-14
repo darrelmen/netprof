@@ -10,13 +10,13 @@ import java.util.*;
  * Created by go22670 on 3/29/16.
  */
 public class MakePhoneReport {
-  private static final Logger logger = Logger.getLogger(PhoneDAO.class);
+  private static final Logger logger = Logger.getLogger(MakePhoneReport.class);
 
-  private static final String PHONE = "phone";
-  private static final String RID = "rid";
-  private static final String WID = "wid";
-  private static final String SEQ = "seq";
-  private static final String SCORE = "score";
+//  private static final String PHONE = "phone";
+//  private static final String RID = "rid";
+//  private static final String WID = "wid";
+//  private static final String SEQ = "seq";
+//  private static final String SCORE = "score";
 
   private static final boolean DEBUG = false;
 

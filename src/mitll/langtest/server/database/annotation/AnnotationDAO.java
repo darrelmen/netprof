@@ -30,10 +30,11 @@
  *
  */
 
-package mitll.langtest.server.database.custom;
+package mitll.langtest.server.database.annotation;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.ExerciseAnnotation;
 import org.apache.log4j.Logger;
@@ -41,16 +42,7 @@ import org.apache.log4j.Logger;
 import java.sql.*;
 import java.util.*;
 
-/**
- * Created with IntelliJ IDEA.
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 12/9/13
- * Time: 2:23 PM
- * To change this template use File | Settings | File Templates.
- */
-public class AnnotationDAO extends DAO {
+public class AnnotationDAO extends DAO implements IAnnotationDAO {
   private static final Logger logger = Logger.getLogger(AnnotationDAO.class);
 
   private static final String ANNOTATION = "annotation";
@@ -121,6 +113,7 @@ public class AnnotationDAO extends DAO {
    *
    * @see UserListManager#reallyCreateNewItem(long, mitll.langtest.shared.custom.UserExercise, String)
    */
+  @Override
   public void add(UserAnnotation annotation) {
     try {
       Connection connection = database.getConnection(this.getClass().toString());
@@ -194,6 +187,7 @@ public class AnnotationDAO extends DAO {
    * @param comment
    * @return
    */
+  @Override
   public boolean hasAnnotation(String exerciseID, String field, String status, String comment) {
     List<UserAnnotation> userAnnotations = exerciseToAnnos.get(exerciseID);
     if (userAnnotations == null) {
@@ -209,6 +203,7 @@ public class AnnotationDAO extends DAO {
    * @return
    * @see mitll.langtest.server.database.custom.UserListManager#getAudioAnnos
    */
+  @Override
   public Set<String> getAudioAnnos() {
 /*    String sql = "SELECT " +
         EXERCISEID+ "," +
@@ -252,6 +247,7 @@ public class AnnotationDAO extends DAO {
    * @param exerciseID
    * @return
    */
+  @Override
   public Map<String, ExerciseAnnotation> getLatestByExerciseID(String exerciseID) {
     String sql = "SELECT * from " + ANNOTATION + " where " +
         EXERCISEID +
@@ -331,6 +327,7 @@ public class AnnotationDAO extends DAO {
    * @see mitll.langtest.server.database.custom.UserListManager#getCommentedList(java.util.Collection)
    * @see mitll.langtest.server.database.custom.UserListManager#getAmmendedStateMap
    */
+  @Override
   public Map<String, Long> getAnnotatedExerciseToCreator() {
     long then = System.currentTimeMillis();
     Map<String, Long> stateIds = getAnnotationToCreator(true);
