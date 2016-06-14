@@ -452,7 +452,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private Collection<CommonExercise> filterByOnlyAudioAnno(boolean onlyAudioAnno,
                                                            Collection<CommonExercise> exercises) {
     if (onlyAudioAnno) {
-      Set<String> audioAnnos = getUserListManager().getAudioAnnos();
+      Collection<String> audioAnnos = getUserListManager().getAudioAnnos();
       List<CommonExercise> copy = new ArrayList<CommonExercise>();
       for (CommonExercise exercise : exercises) {
         if (audioAnnos.contains(exercise.getID())) copy.add(exercise);
