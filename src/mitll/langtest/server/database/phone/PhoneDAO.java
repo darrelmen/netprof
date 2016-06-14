@@ -4,13 +4,12 @@
 
 package mitll.langtest.server.database.phone;
 
-import mitll.langtest.server.PathHelper;
-import mitll.langtest.server.database.*;
+import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.JsonSupport;
 import mitll.langtest.server.database.analysis.Analysis;
-import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.server.database.word.WordDAO;
-import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.analysis.PhoneAndScore;
 import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.WordAndScore;
@@ -20,10 +19,7 @@ import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -32,19 +28,12 @@ import java.util.Map;
  * Time: 2:23 PM
  * To change this template use File | Settings | File Templates.
  */
-public class PhoneDAO extends DAO implements IPhoneDAO<Phone> {
-  //  private static final int MAX_EXAMPLES = 30;
+public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   private static final Logger logger = Logger.getLogger(PhoneDAO.class);
+  //  private static final int MAX_EXAMPLES = 30;
 
-  private static final String PHONE = "phone";
   private static final String RID = "rid";
   private static final String WID = "wid";
-  private static final String SEQ = "seq";
-  private static final String SCORE = "score";
-
-  //private static final boolean DEBUG = false;
-  private static final String RID1 = "RID";
-  private ParseResultJson parseResultJson;
 
   /**
    * @param database
@@ -52,17 +41,15 @@ public class PhoneDAO extends DAO implements IPhoneDAO<Phone> {
    */
   public PhoneDAO(Database database) {
     super(database);
-    parseResultJson = new ParseResultJson(database.getServerProps());
     initialSetup(database);
   }
 
-  protected void initialSetup(Database database) {
+  private void initialSetup(Database database) {
     try {
       createTable(database);
       createIndex(database, RID, PHONE);
       createIndex(database, WID, PHONE);
-      Connection connection = database.getConnection(this.getClass().toString());
-      database.closeConnection(connection);
+      database.closeConnection(database.getConnection(this.getClass().toString())); //why?
     } catch (SQLException e) {
       logger.error("got " + e, e);
     }
@@ -155,6 +142,19 @@ public class PhoneDAO extends DAO implements IPhoneDAO<Phone> {
 
   /**
    * @param userid
+   * @param ids
+   * @param idToRef
+   * @return
+   * @throws SQLException
+   * @see Analysis#getPhonesForUser
+   */
+  @Override
+  public PhoneReport getWorstPhonesForResults(long userid, List<Integer> ids, Map<String, String> idToRef) throws SQLException {
+    return getPhoneReport(getResultIDJoinSQL(userid, ids), idToRef, true, false);
+  }
+
+  /**
+   * @param userid
    * @param exids
    * @param idToRef
    * @return
@@ -171,7 +171,7 @@ public class PhoneDAO extends DAO implements IPhoneDAO<Phone> {
    * @param idToRef
    * @return
    */
-  private PhoneReport getPhoneReport(long userid, List<String> exids, Map<String, String> idToRef) {
+  protected PhoneReport getPhoneReport(long userid, List<String> exids, Map<String, String> idToRef) {
     PhoneReport worstPhonesAndScore = null;
     try {
       worstPhonesAndScore = getPhoneReport(getJoinSQL(userid, exids), idToRef, false, true);
@@ -180,30 +180,6 @@ public class PhoneDAO extends DAO implements IPhoneDAO<Phone> {
     }
     return worstPhonesAndScore;
   }
-
-  /**
-   * @param userid
-   * @param ids
-   * @param idToRef
-   * @return
-   * @throws SQLException
-   * @see Analysis#getPhonesForUser
-   */
-  public PhoneReport getWorstPhonesForResults(long userid, List<Integer> ids, Map<String, String> idToRef) throws SQLException {
-    return getPhoneReport(getResultIDJoinSQL(userid, ids), idToRef, true, false);
-  }
-
-  /**
-   * @param userid
-   * @param exids
-   * @param sortByLatestExample
-   * @return
-   * @throws SQLException
-   * @see #getPhoneReport(long, List, Map)
-   */
-/*  private PhoneReport getWorstPhones(long userid, List<String> exids, Map<String, String> idToRef) throws SQLException {
-    return getPhoneReport(getJoinSQL(userid, exids), idToRef, false, true);
-  }*/
 
   /**
    * TODO : huh? doesn't seem to add last item to total score or total items?
@@ -217,17 +193,19 @@ public class PhoneDAO extends DAO implements IPhoneDAO<Phone> {
    * @see #getWorstPhonesForResults(long, List, Map)
    * @see #getPhoneReport(String, Map, boolean, boolean)
    */
-  private PhoneReport getPhoneReport(String sql, Map<String, String> idToRef,
-                                     boolean addTranscript, boolean sortByLatestExample) throws SQLException {
+  protected PhoneReport getPhoneReport(String sql,
+                                       Map<String, String> idToRef,
+                                       boolean addTranscript,
+                                       boolean sortByLatestExample) throws SQLException {
     // logger.debug("getPhoneReport query is " + sql);
     Connection connection = getConnection();
     PreparedStatement statement = connection.prepareStatement(sql);
     ResultSet rs = statement.executeQuery();
 
-    Map<String, List<PhoneAndScore>> phoneToScores = new HashMap<String, List<PhoneAndScore>>();
+    Map<String, List<PhoneAndScore>> phoneToScores = new HashMap<>();
 
     String currentExercise = "";
-    Map<String, List<WordAndScore>> phoneToWordAndScore = new HashMap<String, List<WordAndScore>>();
+    Map<String, List<WordAndScore>> phoneToWordAndScore = new HashMap<>();
 
     float totalScore = 0;
     float totalItems = 0;
@@ -283,55 +261,17 @@ public class PhoneDAO extends DAO implements IPhoneDAO<Phone> {
     return new MakePhoneReport().getPhoneReport(phoneToScores, phoneToWordAndScore, totalScore, totalItems, sortByLatestExample);
   }
 
-  private void addTranscript(Map<String, Map<NetPronImageType, List<TranscriptSegment>>> stringToMap, String scoreJson, WordAndScore wordAndScore) {
-    Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = stringToMap.get(scoreJson);
-    if (netPronImageTypeListMap == null) {
-      netPronImageTypeListMap = parseResultJson.parseJson(scoreJson);
-      stringToMap.put(scoreJson, netPronImageTypeListMap);
-    } else {
-      // logger.debug("cache hit " + scoreJson.length());
-    }
-
-    setTranscript(wordAndScore, netPronImageTypeListMap);
-  }
-
-  private WordAndScore getAndRememberWordAndScore(Map<String, String> idToRef,
-                                                  Map<String, List<PhoneAndScore>> phoneToScores,
-                                                  Map<String, List<WordAndScore>> phoneToWordAndScore,
-                                                  String exid,
-                                                  String audioAnswer,
-                                                  String scoreJson,
-                                                  long resultTime,
-                                                  int wseq, String word,
-                                                  long rid, String phone, int seq, float phoneScore) {
-    PhoneAndScore phoneAndScore = getAndRememberPhoneAndScore(phoneToScores, phone, phoneScore, resultTime);
-
-    List<WordAndScore> wordAndScores = phoneToWordAndScore.get(phone);
-    if (wordAndScores == null) {
-      phoneToWordAndScore.put(phone, wordAndScores = new ArrayList<WordAndScore>());
-    }
-
-    WordAndScore wordAndScore = new WordAndScore(exid, word, phoneScore, rid, wseq, seq, trimPathForWebPage(audioAnswer),
-        idToRef.get(exid), scoreJson, resultTime);
-
-    wordAndScores.add(wordAndScore);
-    phoneAndScore.setWordAndScore(wordAndScore);
-    return wordAndScore;
-  }
-
-  private PhoneAndScore getAndRememberPhoneAndScore(Map<String, List<PhoneAndScore>> phoneToScores,
-                                                    String phone, float phoneScore, long resultTime) {
-    List<PhoneAndScore> scores = phoneToScores.get(phone);
-    if (scores == null) phoneToScores.put(phone, scores = new ArrayList<PhoneAndScore>());
-    PhoneAndScore phoneAndScore = new PhoneAndScore(phoneScore, resultTime);
-    scores.add(phoneAndScore);
-    return phoneAndScore;
-  }
-
-  private void setTranscript(WordAndScore wordAndScore, Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap) {
-    wordAndScore.setTranscript(netPronImageTypeListMap);
-    wordAndScore.clearJSON();
-  }
+  /**
+   * @param userid
+   * @paramx exids
+   * @paramx sortByLatestExample
+   * @return
+   * @throws SQLException
+   * @see #getPhoneReport(long, List, Map)
+   */
+/*  private PhoneReport getWorstPhones(long userid, List<String> exids, Map<String, String> idToRef) throws SQLException {
+    return getPhoneReport(getJoinSQL(userid, exids), idToRef, false, true);
+  }*/
 
   private String getResultIDJoinSQL(long userid, List<Integer> ids) {
     String filterClause = ResultDAO.RESULTS + "." + ResultDAO.ID + " in (" + getInList(ids) + ")";
@@ -370,8 +310,26 @@ public class PhoneDAO extends DAO implements IPhoneDAO<Phone> {
         " order by results.exid, results.time desc";
   }
 
-  private String trimPathForWebPage(String path) {
-    int answer = path.indexOf(PathHelper.ANSWERS);
-    return (answer == -1) ? path : path.substring(answer);
+  public Collection<Phone> getAll() {
+    Connection connection = getConnection();
+
+    List<Phone> all = new ArrayList<>();
+    try {
+      PreparedStatement statement = connection.prepareStatement("select * from " + PHONE);
+      ResultSet rs = statement.executeQuery();
+      while (rs.next()) {
+        long rid = rs.getLong(RID1);
+        long wid = rs.getLong(WID);
+        //      logger.info("Got " + exid + " rid " + rid + " word " + word);
+        String phone = rs.getString(PHONE);
+        int seq = rs.getInt(SEQ);
+        float phoneScore = rs.getFloat(SCORE);
+        all.add(new Phone(rid, wid, phone, seq, phoneScore));
+      }
+      finish(connection, statement, rs);
+    } catch (SQLException e) {
+      logger.error("Got " + e, e);
+    }
+    return all;
   }
 }
