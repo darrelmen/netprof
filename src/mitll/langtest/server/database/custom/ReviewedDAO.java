@@ -278,7 +278,7 @@ public class ReviewedDAO extends DAO {
     private long creatorID;
     private long when;
 
-    public StateCreator(STATE state, long creatorID, long when) {
+    StateCreator(STATE state, long creatorID, long when) {
       this.state = state;
       this.creatorID = creatorID;
       this.when = when;
