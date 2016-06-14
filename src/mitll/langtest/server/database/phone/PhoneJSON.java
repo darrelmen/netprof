@@ -16,7 +16,7 @@ import java.util.Map;
  */
 public class PhoneJSON {
   private static final int MAX_EXAMPLES = 30;
-  private static final Logger logger = Logger.getLogger(PhoneDAO.class);
+  private static final Logger logger = Logger.getLogger(PhoneJSON.class);
 
   private static final String WID = "wid";
 
