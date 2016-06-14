@@ -11,6 +11,7 @@ public class Phone {
   private String phone;
   private int seq;
   private float score;
+  private Integer RID;
 
   public Phone() {}
 
@@ -54,6 +55,10 @@ public class Phone {
 
   public float getScore() {
     return score;
+  }
+
+  public void setRID(Integer RID) {
+    this.RID = RID;
   }
 
 /*
