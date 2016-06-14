@@ -35,14 +35,19 @@ package mitll.langtest.server.database.phone;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.ISchema;
 import mitll.langtest.server.database.userexercise.BaseUserExerciseDAO;
+import mitll.langtest.shared.analysis.PhoneAndScore;
 import mitll.langtest.shared.analysis.PhoneReport;
+import mitll.langtest.shared.analysis.WordAndScore;
+import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickPhone;
 import mitll.npdata.dao.phone.PhoneDAOWrapper;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -99,13 +104,102 @@ public class SlickPhoneDAO
     return dao.insert(toSlick(word, "")) > 0;
   }
 
+  /**
+   * TODO : fill in!
+   * @param userid
+   * @param exids
+   * @param idToRef
+   * @return
+   */
   @Override
   public JSONObject getWorstPhonesJson(long userid, List<String> exids, Map<String, String> idToRef) {
-    return null;
+    PhoneReport report = new PhoneReport();
+    return new PhoneJSON().getWorstPhonesJson(report);
   }
 
   @Override
   public PhoneReport getWorstPhonesForResults(long userid, List<Integer> ids, Map<String, String> idToRef) throws SQLException {
     return null;
   }
+
+  /**
+   * TODO : huh? doesn't seem to add last item to total score or total items?
+   *
+   * @paramx sql
+   * @param idToRef
+   * @param addTranscript       true if going to analysis tab
+   * @param sortByLatestExample
+   * @return
+   * @throws SQLException
+   * @see #getWorstPhonesForResults(long, List, Map)
+   * @seex #getPhoneReport(String, Map, boolean, boolean)
+   */
+  protected PhoneReport getPhoneReport(
+                                       Map<String, String> idToRef,
+                                       boolean addTranscript,
+                                       boolean sortByLatestExample) throws SQLException {
+    // logger.debug("getPhoneReport query is " + sql);
+    Connection connection = getConnection();
+    PreparedStatement statement = null;//connection.prepareStatement(sql);
+    ResultSet rs = statement.executeQuery();
+
+    Map<String, List<PhoneAndScore>> phoneToScores = new HashMap<>();
+
+    String currentExercise = "";
+    Map<String, List<WordAndScore>> phoneToWordAndScore = new HashMap<>();
+
+    float totalScore = 0;
+    float totalItems = 0;
+
+    Map<String, Map<NetPronImageType, List<TranscriptSegment>>> stringToMap = new HashMap<>();
+    while (rs.next()) {
+      int i = 1;
+
+      // info from result table
+      String exid = rs.getString(i++);
+      String audioAnswer = rs.getString(i++);
+      String scoreJson = rs.getString(i++);
+      float pronScore = rs.getFloat(i++);
+
+      long resultTime = -1;
+      Timestamp timestamp = rs.getTimestamp(i++);
+      if (timestamp != null) resultTime = timestamp.getTime();
+
+      // info from word table
+      int wseq = rs.getInt(i++);
+      String word = rs.getString(i++);
+      /*float wscore =*/ //rs.getFloat(i++);
+
+      // info from phone table
+      long rid = rs.getLong(RID1);
+//      logger.info("Got " + exid + " rid " + rid + " word " + word);
+      String phone = rs.getString(PHONE);
+      int seq = rs.getInt(SEQ);
+      float phoneScore = rs.getFloat(SCORE);
+
+      if (!exid.equals(currentExercise)) {
+        currentExercise = exid;
+        //logger.debug("adding " + exid + " score " + pronScore);
+        totalScore += pronScore;
+        totalItems++;
+      }
+
+      WordAndScore wordAndScore = getAndRememberWordAndScore(idToRef, phoneToScores, phoneToWordAndScore,
+          exid, audioAnswer, scoreJson, resultTime,
+          wseq, word,
+          rid, phone, seq, phoneScore);
+
+      if (addTranscript) {
+        addTranscript(stringToMap, scoreJson, wordAndScore);
+      }
+      //    } else {
+     /*   logger.debug("------> current " + currentRID +
+            " skipping " + exid + " " + rid + " word " + word + "<-------------- ");*/
+      //  }
+    }
+    finish(connection, statement, rs);
+
+    return new MakePhoneReport().getPhoneReport(phoneToScores, phoneToWordAndScore, totalScore, totalItems, sortByLatestExample);
+  }
+
 }

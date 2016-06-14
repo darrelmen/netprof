@@ -38,7 +38,8 @@ import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.DecodeAlignOutput;
 import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.database.analysis.Analysis;
-import mitll.langtest.server.database.annotation.AnnotationDAO;
+import mitll.langtest.server.database.annotation.IAnnotationDAO;
+import mitll.langtest.server.database.annotation.SlickAnnotationDAO;
 import mitll.langtest.server.database.audio.AudioDAO;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.audio.SlickAudioDAO;
@@ -265,15 +266,18 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     // resultDAO = new ResultDAO(this);
 
     refresultDAO = new RefResultDAO(this, getServerProps().shouldDropRefResult());
-    wordDAO = new SlickWordDAO(this,dbConnection);
-    phoneDAO = new SlickPhoneDAO(this,dbConnection);
+    wordDAO = new SlickWordDAO(this, dbConnection);
+    phoneDAO = new SlickPhoneDAO(this, dbConnection);
 
     //answerDAO = new AnswerDAO(this, resultDAO);
 
     UserListDAO userListDAO = new UserListDAO(this, this.userDAO);
-    userListManager = new UserListManager(this.userDAO, userListDAO,
+    //   IAnnotationDAO annotationDAO = new AnnotationDAO(this, this.userDAO);
+    IAnnotationDAO annotationDAO = new SlickAnnotationDAO(this, dbConnection, this.userDAO.getDefectDetector());
+    userListManager = new UserListManager(this.userDAO,
+        userListDAO,
         userListExerciseJoinDAO,
-        new AnnotationDAO(this, this.userDAO),
+        annotationDAO,
         new ReviewedDAO(this, ReviewedDAO.REVIEWED),
         new ReviewedDAO(this, ReviewedDAO.SECOND_STATE),
         pathHelper);
@@ -1743,5 +1747,10 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
   public IUserExerciseDAO getUserExerciseDAO() {
     return userExerciseDAO;
+  }
+
+
+  public IAnnotationDAO getAnnotationDAO() {
+    return userListManager.getAnnotationDAO();
   }
 }
