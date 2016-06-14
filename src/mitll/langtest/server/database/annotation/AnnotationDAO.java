@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.database.annotation;
 
-import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.user.IUserDAO;
@@ -42,7 +41,7 @@ import org.apache.log4j.Logger;
 import java.sql.*;
 import java.util.*;
 
-public class AnnotationDAO extends DAO implements IAnnotationDAO {
+public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
   private static final Logger logger = Logger.getLogger(AnnotationDAO.class);
 
   private static final String ANNOTATION = "annotation";
@@ -52,8 +51,6 @@ public class AnnotationDAO extends DAO implements IAnnotationDAO {
   private static final String FIELD1 = "field";
   private static final String FIELD = FIELD1;
   private static final String MODIFIED = "modified";
-
-  private final Map<String,List<UserAnnotation>> exerciseToAnnos = new HashMap<String, List<UserAnnotation>>();
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
@@ -111,7 +108,7 @@ public class AnnotationDAO extends DAO implements IAnnotationDAO {
    * <p/>
    * Uses return generated keys to get the user id
    *
-   * @see UserListManager#reallyCreateNewItem(long, mitll.langtest.shared.custom.UserExercise, String)
+   * @see UserListManager#addAnnotation(String, String, String, String, int)
    */
   @Override
   public void add(UserAnnotation annotation) {
@@ -148,27 +145,12 @@ public class AnnotationDAO extends DAO implements IAnnotationDAO {
   }
 
   /**
-   * TODO : this seems like a bad idea...
-   * @see #AnnotationDAO
-   * @param userid
-   */
-  private void populate(long userid) {
-    List<UserAnnotation> all = getAll(userid);
-    for (UserAnnotation userAnnotation : all) {
-      List<UserAnnotation> userAnnotations = exerciseToAnnos.get(userAnnotation.getExerciseID());
-      if (userAnnotations == null) {
-        exerciseToAnnos.put(userAnnotation.getExerciseID(),userAnnotations = new ArrayList<UserAnnotation>());
-      }
-      userAnnotations.add(userAnnotation);
-    }
-  }
-
-  /**
    * Pulls the list of users out of the database.
    *
    * @return
+   * @param userid
    */
-  private List<UserAnnotation> getAll(long userid) {
+  protected List<UserAnnotation> getAll(int userid) {
     try {
       String sql = "SELECT * from " + ANNOTATION + " where " + CREATORID +"="+userid;
       return getUserAnnotations(sql);
@@ -179,32 +161,12 @@ public class AnnotationDAO extends DAO implements IAnnotationDAO {
   }
 
   /**
-   * TODO : this seems like a bad idea...
-   * @see mitll.langtest.server.database.custom.UserListManager#addDefect
-   * @param exerciseID
-   * @param field
-   * @param status
-   * @param comment
-   * @return
-   */
-  @Override
-  public boolean hasAnnotation(String exerciseID, String field, String status, String comment) {
-    List<UserAnnotation> userAnnotations = exerciseToAnnos.get(exerciseID);
-    if (userAnnotations == null) {
-      return false;
-    }
-    Map<String, ExerciseAnnotation> latestByExerciseID = getFieldToAnnotationMap(userAnnotations);
-    ExerciseAnnotation annotation = latestByExerciseID.get(field);
-    return (annotation != null) && (annotation.getStatus().equals(status) && annotation.getComment().equals(comment));
-  }
-
-  /**
    * TODO: Ought to be able to make a sql query that only returns the latest item for a exercise-field pair...
    * @return
    * @see mitll.langtest.server.database.custom.UserListManager#getAudioAnnos
    */
   @Override
-  public Set<String> getAudioAnnos() {
+  public Collection<String> getAudioAnnos() {
 /*    String sql = "SELECT " +
         EXERCISEID+ "," +
         FIELD+ "," +
@@ -220,8 +182,12 @@ public class AnnotationDAO extends DAO implements IAnnotationDAO {
 
     String sql3 = "select a.exerciseid, a.status, r.MaxTime \n" +
         "from (\n" +
-        "select exerciseid, field, MAX(modified) as MaxTime from annotation where field like'%.wav' group by exerciseid, field) r \n" +
-        "inner join annotation a on a.exerciseid = r.exerciseid AND a.modified = r.MaxTime and a.status = 'incorrect' order by a.exerciseid, a.field";
+        "select exerciseid, field, MAX(modified) as MaxTime " +
+        " from annotation" +
+        " where field like'%.wav' group by exerciseid, field) r \n" +
+        "inner join annotation a on a.exerciseid = r.exerciseid " +
+        "AND a.modified = r.MaxTime and a.status = 'incorrect' " +
+        "order by a.exerciseid, a.field";
     try {
       Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement = connection.prepareStatement(sql3);
@@ -260,43 +226,20 @@ public class AnnotationDAO extends DAO implements IAnnotationDAO {
     return null;
   }
 
-  private Map<String, ExerciseAnnotation> getFieldToAnnotationMap(String sql) throws SQLException {
-    return getFieldToAnnotationMap(getUserAnnotations(sql));
+  @Override
+  public Set<String> getExercisesWithIncorrectAnnotations() {
+    return getAnnotationExToCreator(true).keySet();
   }
 
-  /**
-   * Always return the latest annotation.
-   * @param lists
-   * @return
-   */
-  private Map<String, ExerciseAnnotation> getFieldToAnnotationMap(List<UserAnnotation> lists) {
-    Map<String, UserAnnotation> fieldToAnno = new HashMap<String, UserAnnotation>();
-
-    for (UserAnnotation annotation : lists) {
-      UserAnnotation prevAnnotation = fieldToAnno.get(annotation.getField());
-      if (prevAnnotation == null) fieldToAnno.put(annotation.getField(), annotation);
-      else if (prevAnnotation.getTimestamp() < annotation.getTimestamp()) {
-        fieldToAnno.put(annotation.getField(), annotation);
-      }
-    }
-    if (lists.isEmpty()) {
-      //logger.error("huh? no annotation with id " + unique);
-      return Collections.emptyMap();
-    } else {
-      Map<String, ExerciseAnnotation> fieldToAnnotation = new HashMap<String, ExerciseAnnotation>();
-      for (Map.Entry<String, UserAnnotation> pair : fieldToAnno.entrySet()) {
-        fieldToAnnotation.put(pair.getKey(), new ExerciseAnnotation(pair.getValue().getStatus(), pair.getValue().getComment()));
-      }
-      //logger.debug("field->anno " + fieldToAnno);
-      return fieldToAnnotation;
-    }
+  private Map<String, ExerciseAnnotation> getFieldToAnnotationMap(String sql) throws SQLException {
+    return getFieldToAnnotationMap(getUserAnnotations(sql));
   }
 
   /**
    * @param sql
    * @return
    * @throws SQLException
-   * @see #getAll(long)
+   * @see BaseAnnotationDAO#getAll(int)
    * @see #getFieldToAnnotationMap(String)
    */
   private List<UserAnnotation> getUserAnnotations(String sql) throws SQLException {
@@ -322,25 +265,13 @@ public class AnnotationDAO extends DAO implements IAnnotationDAO {
     return lists;
   }
 
-  /**
-   * @return
-   * @see mitll.langtest.server.database.custom.UserListManager#getCommentedList(java.util.Collection)
-   * @see mitll.langtest.server.database.custom.UserListManager#getAmmendedStateMap
-   */
-  @Override
-  public Map<String, Long> getAnnotatedExerciseToCreator() {
-    long then = System.currentTimeMillis();
-    Map<String, Long> stateIds = getAnnotationToCreator(true);
-    long now = System.currentTimeMillis();
-    if (now - then > 200) logger.debug("getAnnotatedExerciseToCreator took " +(now-then) + " millis to find " + stateIds.size());
-    return stateIds;
-  }
-
-  private Map<String, Long> getAnnotationToCreator(boolean forDefects) {
+  protected Map<String, Long> getAnnotationExToCreator(boolean forDefects) {
     Connection connection = database.getConnection(this.getClass().toString());
 
     String sql2 = "select exerciseid,field," +STATUS +"," +CREATORID +
-      " from annotation group by exerciseid,field," + STATUS +",modified order by exerciseid,field,modified;";
+      " from annotation " +
+        "group by exerciseid,field," + STATUS +",modified " +
+        "order by exerciseid,field,modified;";
 
     Map<String,Long> exToCreator = Collections.emptyMap();
     try {
@@ -391,27 +322,4 @@ public class AnnotationDAO extends DAO implements IAnnotationDAO {
     return exToCreator;
   }
 
-  private boolean examineFields(boolean forDefects, Map<String, String> fieldToStatus) {
-    String statusToLookFor = "correct";
-    boolean foundIncorrect = false;
-    for (String latest : fieldToStatus.values()) {
-      if (!latest.equals(statusToLookFor)) {
-        //lists.add(prevExid);
-        foundIncorrect = true;
-        break;
-      }
-    }
-    if (forDefects) {
-      if (foundIncorrect) {
-       // lists.add(prevExid);
-        return true;
-      }
-    } else {
-      if (!foundIncorrect) {
-        //lists.add(prevExid);
-        return true;
-      }
-    }
-    return false;
-  }
 }
