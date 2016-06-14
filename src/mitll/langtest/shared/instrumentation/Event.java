@@ -32,6 +32,8 @@
 
 package mitll.langtest.shared.instrumentation;
 
+import mitll.langtest.server.database.annotation.AnnotationDAO;
+
 import java.util.Date;
 
 /**
@@ -60,7 +62,7 @@ public class Event extends SlimEvent {
    * @param timestamp
    * @param device
    * @paramx hitID
-   * @see mitll.langtest.server.database.custom.AnnotationDAO#getUserAnnotations(String)
+   * @see AnnotationDAO#getUserAnnotations(String)
    */
   public Event(String widgetID, String widgetType, String exerciseID, String context,
                int userID, long timestamp,
