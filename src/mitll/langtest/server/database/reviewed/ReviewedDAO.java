@@ -30,16 +30,16 @@
  *
  */
 
-package mitll.langtest.server.database.custom;
+package mitll.langtest.server.database.reviewed;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.shared.exercise.STATE;
 import org.apache.log4j.Logger;
 
 import java.sql.*;
 import java.util.*;
-import java.util.Date;
 
 /**
  * Records {@link STATE} transitions of each exercise as it is marked by quality control reviewers.
@@ -56,7 +56,7 @@ import java.util.Date;
  * Time: 2:23 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ReviewedDAO extends DAO {
+public class ReviewedDAO extends DAO implements IReviewedDAO {
   private static final Logger logger = Logger.getLogger(ReviewedDAO.class);
 
   public static final String REVIEWED = "reviewed";
@@ -158,6 +158,7 @@ public class ReviewedDAO extends DAO {
    * @see mitll.langtest.server.database.custom.UserListManager#removeReviewed(String)
    * @see mitll.langtest.server.database.DatabaseImpl#deleteItem(String)
    */
+  @Override
   public void remove(String exerciseID) {
     try {
       int before = getCount();
@@ -188,6 +189,7 @@ public class ReviewedDAO extends DAO {
    * @param state
    * @param creatorID
    */
+  @Override
   public void setState(String exerciseID, STATE state, long creatorID) {
     try {
       add(exerciseID, state, creatorID);
@@ -207,11 +209,13 @@ public class ReviewedDAO extends DAO {
    * @see mitll.langtest.server.database.custom.UserListManager#setStateOnExercises()
    * @param skipUnset
    */
-  Map<String, StateCreator> getExerciseToState(boolean skipUnset) {
+  @Override
+  public Map<String, StateCreator> getExerciseToState(boolean skipUnset) {
     return getExerciseToState(skipUnset, false, "");
   }
 
-  STATE getCurrentState(String exerciseID) {
+ @Override
+ public  STATE getCurrentState(String exerciseID) {
     Map<String, StateCreator> exerciseToState = getExerciseToState(false, true, exerciseID);
     if (exerciseToState.isEmpty()) return STATE.UNSET;
     else return exerciseToState.values().iterator().next().getState();
@@ -262,6 +266,7 @@ public class ReviewedDAO extends DAO {
     return Collections.emptyMap();
   }
 
+  @Override
   public Collection<String> getDefectExercises() {
     Map<String, StateCreator> exerciseToState = getExerciseToState(true);
     Set<String> ids = new HashSet<String>();
@@ -273,37 +278,6 @@ public class ReviewedDAO extends DAO {
     return ids;
   }
 
-  static class StateCreator {
-    private STATE state;
-    private long creatorID;
-    private long when;
-
-    StateCreator(STATE state, long creatorID, long when) {
-      this.state = state;
-      this.creatorID = creatorID;
-      this.when = when;
-    }
-
-    public STATE getState() {
-      return state;
-    }
-
-    /**
-     * @see UserListManager#getAmmendedStateMap()
-     * @return
-     */
-    public long getCreatorID() {
-      return creatorID;
-    }
-
-    public long getWhen() {
-      return when;
-    }
-
-    public String toString() {
-      return "["+state.toString() + " by " + creatorID +" at " + new Date(when)+ "]";
-    }
-  }
-
+  @Override
   public int getCount() { return getCount(tableName); }
 }

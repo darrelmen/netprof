@@ -56,6 +56,8 @@ import mitll.langtest.server.database.phone.IPhoneDAO;
 import mitll.langtest.server.database.phone.Phone;
 import mitll.langtest.server.database.phone.SlickPhoneDAO;
 import mitll.langtest.server.database.result.*;
+import mitll.langtest.server.database.reviewed.IReviewedDAO;
+import mitll.langtest.server.database.reviewed.ReviewedDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.SlickUserDAOImpl;
 import mitll.langtest.server.database.user.UserDAO;
@@ -268,11 +270,12 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     UserListDAO userListDAO = new UserListDAO(this, this.userDAO);
     IAnnotationDAO annotationDAO = new SlickAnnotationDAO(this, dbConnection, this.userDAO.getDefectDetector());
 
+    IReviewedDAO reviewedDAO = new ReviewedDAO(this, ReviewedDAO.REVIEWED);
     userListManager = new UserListManager(this.userDAO,
         userListDAO,
         userListExerciseJoinDAO,
         annotationDAO,
-        new ReviewedDAO(this, ReviewedDAO.REVIEWED),
+        reviewedDAO,
         new ReviewedDAO(this, ReviewedDAO.SECOND_STATE),
         pathHelper);
 
