@@ -11,8 +11,6 @@ public class Phone {
   private String phone;
   private int seq;
   private float score;
-  private Integer RID;
-
   public Phone() {}
 
   public Phone(long rid, long wid, String phone, int seq, float score) {
@@ -26,9 +24,9 @@ public class Phone {
   public Long getId() {
     return id;
   }
-  private void setId(Long id) {
-    this.id = id;
-  }
+//  private void setId(Long id) {
+//    this.id = id;
+//  }
 
   public String toString() {
     return // "# " + id +
@@ -39,8 +37,6 @@ public class Phone {
     return wid;
   }
 
-//  @ManyToOne
-//  @JoinColumn(name="result_id",foreignKey = @ForeignKey(name = "RESULT_ID_FK"))
   public long getRid() {
     return rid;
   }
@@ -58,28 +54,8 @@ public class Phone {
   }
 
   public void setRID(Integer RID) {
-    this.RID = RID;
+    this.rid = RID;
   }
 
-/*
-  private void setWid(long wid) {
-    this.wid = wid;
-  }
-
-  private void setRid(long rid) {
-    this.rid = rid;
-  }
-
-  private void setPhone(String phone) {
-    this.phone = phone;
-  }
-
-  private void setSeq(int seq) {
-    this.seq = seq;
-  }
-
-  private void setScore(float score) {
-    this.score = score;
-  }
-*/
+  public void setWID(Integer WID) { this.wid = WID;  }
 }
