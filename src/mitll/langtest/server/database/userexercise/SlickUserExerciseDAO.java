@@ -53,27 +53,30 @@ public class SlickUserExerciseDAO
 
   private final UserExerciseDAOWrapper dao;
 
-  Collection<String> typeOrder;
-  ExerciseDAO exerciseDAO;
+  // Collection<String> typeOrder;
+  private ExerciseDAO<CommonExercise> exerciseDAO;
 
   public SlickUserExerciseDAO(Database database, DBConnection dbConnection) {
     super(database);
     dao = new UserExerciseDAOWrapper(dbConnection);
-    this.typeOrder = database.getTypeOrder();
-    this.exerciseDAO = exerciseDAO;
+    //   this.typeOrder = database.getTypeOrder();
+    //   this.exerciseDAO = exerciseDAO;
   }
 
   public void createTable() {
     dao.createTable();
   }
 
+/*
   public void dropTable() {
     dao.drop();
   }
+*/
 
   @Override
   public SlickUserExercise toSlick(UserExercise shared, String language) {
     Map<String, String> unitToValue = shared.getUnitToValue();
+    List<String> typeOrder = getTypeOrder();
     Iterator<String> iterator = typeOrder.iterator();
     String first = iterator.next();
     String second = iterator.hasNext() ? iterator.next() : "";
@@ -91,9 +94,13 @@ public class SlickUserExerciseDAO
         (int) shared.getUniqueID());
   }
 
+  List<String> getTypeOrder() {
+    return exerciseDAO.getSectionHelper().getTypeOrder();
+  }
+
   public SlickUserExercise toSlick(CommonExercise shared, boolean isOverride) {
     Map<String, String> unitToValue = shared.getUnitToValue();
-    Iterator<String> iterator = typeOrder.iterator();
+    Iterator<String> iterator = getTypeOrder().iterator();
     String first = iterator.next();
     String second = iterator.hasNext() ? iterator.next() : "";
 
@@ -113,7 +120,7 @@ public class SlickUserExerciseDAO
   @Override
   public UserExercise fromSlick(SlickUserExercise slick) {
     Map<String, String> unitToValue = new HashMap<>();
-    Iterator<String> iterator = typeOrder.iterator();
+    Iterator<String> iterator = getTypeOrder().iterator();
     String first = iterator.next();
     String second = iterator.hasNext() ? iterator.next() : "";
     unitToValue.put(first, slick.unit());
@@ -205,5 +212,9 @@ public class SlickUserExerciseDAO
     if (rows == 0 && createIfDoesntExist) {
       dao.insert(slickUserExercise);
     }
+  }
+
+  public void setExerciseDAO(ExerciseDAO exerciseDAO) {
+    this.exerciseDAO = exerciseDAO;
   }
 }
