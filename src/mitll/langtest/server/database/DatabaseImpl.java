@@ -173,7 +173,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         configDir, relativeConfigDir, dbName,
         serverProps,
         pathHelper, logAndNotify);
-    //  this.dbName = dbName;
   }
 
   public DatabaseImpl(DatabaseConnection connection,
@@ -222,6 +221,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
   /**
    * Create or alter tables as needed.
+   * @see #DatabaseImpl(DatabaseConnection, String, String, String, ServerProperties, PathHelper, LogAndNotify)
    */
   private void initializeDAOs(PathHelper pathHelper) {
     if (serverProps.useORM()) {
@@ -233,8 +233,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       }
     }
 
-    dbConnection = new DBConnection(serverProps.getDatabaseType(),
-        serverProps.getDatabaseHost(), serverProps.getDatabasePort(), serverProps.getDatabaseName());
+    dbConnection = getDbConnection();
 
     SlickEventImpl slickEventDAO = new SlickEventImpl(dbConnection);
     eventDAO = slickEventDAO;
@@ -251,11 +250,10 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     SlickAnswerDAO slickAnswerDAO = new SlickAnswerDAO(this, dbConnection);
     answerDAO = slickAnswerDAO;
 
-    if (!dbConnection.hasTable("user")) {
-      createTables();
-    } else {
-      logger.warn("has tables ------> " + dbConnection.getTables());
-    }
+   // if (!dbConnection.hasTable("user")) {
+  //  } else {
+   //   logger.warn("initializeDAOs has tables ------> " + dbConnection.getTables());
+   // }
 
     addRemoveDAO = new AddRemoveDAO(this);
 
@@ -263,17 +261,13 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
     UserListExerciseJoinDAO userListExerciseJoinDAO = new UserListExerciseJoinDAO(this);
 
-    // resultDAO = new ResultDAO(this);
-
     refresultDAO = new RefResultDAO(this, getServerProps().shouldDropRefResult());
-    wordDAO = new SlickWordDAO(this, dbConnection);
+    wordDAO  = new SlickWordDAO(this, dbConnection);
     phoneDAO = new SlickPhoneDAO(this, dbConnection);
 
-    //answerDAO = new AnswerDAO(this, resultDAO);
-
     UserListDAO userListDAO = new UserListDAO(this, this.userDAO);
-    //   IAnnotationDAO annotationDAO = new AnnotationDAO(this, this.userDAO);
     IAnnotationDAO annotationDAO = new SlickAnnotationDAO(this, dbConnection, this.userDAO.getDefectDetector());
+
     userListManager = new UserListManager(this.userDAO,
         userListDAO,
         userListExerciseJoinDAO,
@@ -282,12 +276,13 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         new ReviewedDAO(this, ReviewedDAO.SECOND_STATE),
         pathHelper);
 
+    createTables();
+
     //  oneTimeDataCopy(slickEventDAO);
 //    eventDAO = new EventDAO(this, defectDetector);
 
     Connection connection1 = getConnection();
     try {
-      // resultDAO.createResultTable(connection1);
       refresultDAO.createResultTable(connection1);
       connection1 = getConnection();  // huh? why?
     } catch (Exception e) {
@@ -297,17 +292,20 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     }
 
     try {
-      // this.userDAO.createTable(this);
       userListManager.setUserExerciseDAO(userExerciseDAO);
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
 
     long then = System.currentTimeMillis();
-    //putBackWordAndPhone();
 
     long now = System.currentTimeMillis();
     if (now - then > 1000) logger.info("took " + (now - then) + " millis to put back word and phone");
+  }
+
+  private DBConnection getDbConnection() {
+    return new DBConnection(serverProps.getDatabaseType(),
+        serverProps.getDatabaseHost(), serverProps.getDatabasePort(), serverProps.getDatabaseName());
   }
 
   IAudioDAO getH2AudioDAO() {
@@ -1039,11 +1037,14 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     SlickAudioDAO slickAudioDAO = (SlickAudioDAO) getAudioDAO();
     SlickEventImpl slickEventDAO = (SlickEventImpl) getEventDAO();
 
-    slickUserDAO.createTable();
-    slickAudioDAO.createTable();
-    slickEventDAO.createTable();
-    ((ISchema) getResultDAO()).createTable();
-    ((ISchema) userExerciseDAO).createTable();
+    if (!dbConnection.hasTable("user")) slickUserDAO.createTable();
+    if (!dbConnection.hasTable("audio")) slickAudioDAO.createTable();
+    if (!dbConnection.hasTable("event"))  slickEventDAO.createTable();
+    if (!dbConnection.hasTable("result"))  ((ISchema) getResultDAO()).createTable();
+    if (!dbConnection.hasTable("userexercise"))  ((ISchema) userExerciseDAO).createTable();
+    if (!dbConnection.hasTable("annotation"))  ((ISchema) getAnnotationDAO()).createTable();
+    if (!dbConnection.hasTable("word"))  ((ISchema) getWordDAO()).createTable();
+    if (!dbConnection.hasTable("phone"))  ((ISchema) getPhoneDAO()).createTable();
     logger.info("created slick tables...");
   }
 
@@ -1748,7 +1749,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   public IUserExerciseDAO getUserExerciseDAO() {
     return userExerciseDAO;
   }
-
 
   public IAnnotationDAO getAnnotationDAO() {
     return userListManager.getAnnotationDAO();
