@@ -41,33 +41,18 @@ import java.util.*;
 
 public abstract class BaseAnnotationDAO extends DAO {
   private static final Logger logger = Logger.getLogger(BaseAnnotationDAO.class);
+  int defectDetector;
 
-  protected final Map<String, List<UserAnnotation>> exerciseToAnnos = new HashMap<>();
+  private Map<String, List<UserAnnotation>> exerciseToAnnos = null;
 
-  protected BaseAnnotationDAO(Database database) {
+  BaseAnnotationDAO(Database database, int defectDetector) {
     super(database);
-  }
-
-  /**
-   * TODO : this seems like a bad idea...
-   *
-   * @param userid
-   * @seez #AnnotationDAO
-   */
-  protected void populate(int userid) {
-    List<UserAnnotation> all = getAll(userid);
-    for (UserAnnotation userAnnotation : all) {
-      List<UserAnnotation> userAnnotations = getDefectsForExercise(userAnnotation.getExerciseID());
-      if (userAnnotations == null) {
-        exerciseToAnnos.put(userAnnotation.getExerciseID(), userAnnotations = new ArrayList<UserAnnotation>());
-      }
-      userAnnotations.add(userAnnotation);
-    }
+    this.defectDetector = defectDetector;
   }
 
   abstract List<UserAnnotation> getAll(int userid);
 
-  abstract Collection<String> getAudioAnnos();
+  //abstract Collection<String> getAudioAnnos();
 
   /**
    * TODO : this seems like a bad idea...
@@ -89,7 +74,26 @@ public abstract class BaseAnnotationDAO extends DAO {
     return (annotation != null) && (annotation.getStatus().equals(status) && annotation.getComment().equals(comment));
   }
 
-  protected List<UserAnnotation> getDefectsForExercise(String exerciseID) {
+  /**
+   * TODO : this seems like a bad idea...
+   *
+   * @param userid
+   * @seez #AnnotationDAO
+   */
+  protected void populate(int userid) {
+    exerciseToAnnos = new HashMap<>();
+    List<UserAnnotation> all = getAll(userid);
+    for (UserAnnotation userAnnotation : all) {
+      List<UserAnnotation> userAnnotations = getDefectsForExercise(userAnnotation.getExerciseID());
+      if (userAnnotations == null) {
+        exerciseToAnnos.put(userAnnotation.getExerciseID(), userAnnotations = new ArrayList<>());
+      }
+      userAnnotations.add(userAnnotation);
+    }
+  }
+
+  private List<UserAnnotation> getDefectsForExercise(String exerciseID) {
+    if (exerciseToAnnos == null) populate(defectDetector);
     return exerciseToAnnos.get(exerciseID);
   }
 
