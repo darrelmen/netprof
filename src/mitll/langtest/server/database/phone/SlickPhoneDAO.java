@@ -117,6 +117,14 @@ public class SlickPhoneDAO
     return new PhoneJSON().getWorstPhonesJson(report);
   }
 
+  /**
+   * TODO complete this!
+   * @param userid
+   * @param ids
+   * @param idToRef
+   * @return
+   * @throws SQLException
+   */
   @Override
   public PhoneReport getWorstPhonesForResults(long userid, List<Integer> ids, Map<String, String> idToRef) throws SQLException {
     return null;
