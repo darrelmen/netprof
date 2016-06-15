@@ -37,6 +37,7 @@ import mitll.langtest.server.database.ISchema;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickAnnotation;
+import mitll.npdata.dao.SlickResult;
 import mitll.npdata.dao.annotation.AnnotationDAOWrapper;
 import org.apache.log4j.Logger;
 import scala.Tuple4;
@@ -52,9 +53,10 @@ public class SlickAnnotationDAO
   private final AnnotationDAOWrapper dao;
 
   public SlickAnnotationDAO(Database database, DBConnection dbConnection, int defectDetector) {
-    super(database);
+    super(database,defectDetector);
     dao = new AnnotationDAOWrapper(dbConnection);
-    populate(defectDetector);
+    //populate(defectDetector);
+  //  this.defectDetector = defectDetector;
   }
 
   public void createTable() {
@@ -98,6 +100,7 @@ public class SlickAnnotationDAO
 
   @Override
   List<UserAnnotation> getAll(int userid) {
+    logger.info("getAll - " + userid);
     Collection<SlickAnnotation> slickAnnotations = dao.byUser(userid);
 
     List<UserAnnotation> copy = new ArrayList<>();
@@ -238,5 +241,6 @@ public class SlickAnnotationDAO
   }
 
 */
+
 
 }
