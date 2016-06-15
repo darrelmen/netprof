@@ -126,7 +126,7 @@ public class SlickAnnotationDAO
 
     Set<String> incorrect = new HashSet<>();
 
-    Map<String, String> fieldToStatus = new HashMap<String, String>();
+    Map<String, String> fieldToStatus = new HashMap<>();
     for (Tuple4<String, String, String, Timestamp> tuple4 : annoToCreator) {
       String exid = tuple4._1();
       String field = tuple4._2();
