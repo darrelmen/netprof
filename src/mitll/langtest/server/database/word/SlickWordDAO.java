@@ -40,10 +40,11 @@ import mitll.npdata.dao.SlickWord;
 import mitll.npdata.dao.word.WordDAOWrapper;
 import org.apache.log4j.Logger;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public class SlickWordDAO
-    extends BaseUserExerciseDAO implements IWordDAO, ISchema<Word, SlickWord> {
+public class SlickWordDAO extends BaseUserExerciseDAO implements IWordDAO, ISchema<Word, SlickWord> {
   private static final Logger logger = Logger.getLogger(SlickWordDAO.class);
 
   private final WordDAOWrapper dao;
@@ -67,7 +68,8 @@ public class SlickWordDAO
         (int) shared.getRid(),
         shared.getWord(),
         shared.getSeq(),
-        shared.getScore());
+        shared.getScore(),
+        (int) shared.getId());
   }
 
   @Override
@@ -91,5 +93,12 @@ public class SlickWordDAO
   @Override
   public long addWord(Word word) {
     return dao.insert(toSlick(word, ""));
+  }
+
+
+  public Map<Integer, Integer> getOldToNew() {
+    Map<Integer, Integer> oldToNew = new HashMap<>();
+    for (SlickWord word : dao.getAll()) oldToNew.put(word.legacyid(), word.id());
+    return oldToNew;
   }
 }

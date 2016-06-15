@@ -159,7 +159,7 @@ public class WordDAO extends DAO implements IWordDAO {
    * @see DatabaseImpl#putBackWordAndPhone
    * @return
    */
-/*  public List<Word> getAll() {
+  public List<Word> getAll() {
     try {
       return getWords("SELECT * from " + WORD);
     } catch (Exception ee) {
@@ -188,5 +188,5 @@ public class WordDAO extends DAO implements IWordDAO {
 
     finish(connection, statement, rs);
     return lists;
-  }*/
+  }
 }
