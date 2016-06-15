@@ -39,7 +39,7 @@ public class UserAnnotation {
   private final String field;
   private final String status;
   private final String comment;
-  private final long creatorID;
+  private long creatorID;
   private long timestamp;
 
   /**
@@ -60,7 +60,6 @@ public class UserAnnotation {
     this.creatorID = userID;
     this.timestamp = timestamp;
   }
-
 
   public String getExerciseID() {
     return exerciseID;
@@ -87,5 +86,9 @@ public class UserAnnotation {
   public String toString() {
     return "Annotation " + getExerciseID() + "/" + getField() + " : " + getStatus() + "/" + getComment() +
       " by " + getCreatorID() + " at " + new Date(getTimestamp());
+  }
+
+  public void setCreatorID(Integer creatorID) {
+    this.creatorID = (long) creatorID;
   }
 }
