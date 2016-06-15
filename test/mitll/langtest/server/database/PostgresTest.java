@@ -33,6 +33,8 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.client.user.Md5Hash;
+import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.audio.AudioDAO;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.instrumentation.IEventDAO;
@@ -47,10 +49,12 @@ import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.Event;
+import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickSlimEvent;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
+import java.io.File;
 import java.util.*;
 
 /**
@@ -216,16 +220,25 @@ public class PostgresTest extends BaseTest {
   }
 
   @Test
-  public void testImportAudio() {
-    getDatabaseLight("spanish").copyToPostgres();
-  }
-
+  public void testCopy() {   getDatabaseLight("spanish").copyToPostgres();  }
 
   @Test
   public void testDrop() {
-    getDatabaseVeryLight("spanish").dropTables();
+    getConnection("spanish").dropAll();
   }
 
+  protected static DBConnection getConnection(String config) {
+    File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
+    String parent = file.getParent();
+    String name = file.getName();
+
+    parent = file.getParentFile().getAbsolutePath();
+
+    logger.info("path is "+ parent);
+    ServerProperties serverProps = new ServerProperties(parent, name);
+    return new DBConnection(serverProps.getDatabaseType(),
+        serverProps.getDatabaseHost(), serverProps.getDatabasePort(), serverProps.getDatabaseName());
+  }
   @Test
   public void testCreate() {
     getDatabaseVeryLight("spanish").createTables();

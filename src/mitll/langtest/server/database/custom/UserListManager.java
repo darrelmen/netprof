@@ -36,6 +36,8 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.audio.PathWriter;
 import mitll.langtest.server.database.annotation.IAnnotationDAO;
 import mitll.langtest.server.database.annotation.UserAnnotation;
+import mitll.langtest.server.database.reviewed.IReviewedDAO;
+import mitll.langtest.server.database.reviewed.StateCreator;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.sorter.ExerciseSorter;
@@ -82,7 +84,7 @@ public class UserListManager {
   private static final String DUP = "_dup_";
 
   private final IUserDAO userDAO;
-  private final ReviewedDAO reviewedDAO, secondStateDAO;
+  private final IReviewedDAO reviewedDAO, secondStateDAO;
   private int i = 0;
 
   private IUserExerciseDAO userExerciseDAO;
@@ -104,8 +106,8 @@ public class UserListManager {
                          UserListDAO userListDAO,
                          UserListExerciseJoinDAO userListExerciseJoinDAO,
                          IAnnotationDAO annotationDAO,
-                         ReviewedDAO reviewedDAO,
-                         ReviewedDAO secondStateDAO,
+                         IReviewedDAO reviewedDAO,
+                         IReviewedDAO secondStateDAO,
                          PathHelper pathHelper) {
     this.userDAO = userDAO;
     this.userListDAO = userListDAO;
@@ -124,13 +126,13 @@ public class UserListManager {
   public void setStateOnExercises() {
    // getAmmendedStateMap();
 
-    Map<String, ReviewedDAO.StateCreator> exerciseToState = getExerciseToState(false);
+    Map<String, StateCreator> exerciseToState = getExerciseToState(false);
 
     setStateOnExercises(exerciseToState, true);
     //setStateOnExercises(secondStateDAO.getExerciseToState(false), false);
   }
 
-  private void setStateOnExercises(Map<String, ReviewedDAO.StateCreator> exerciseToState, boolean firstState) {
+  private void setStateOnExercises(Map<String, StateCreator> exerciseToState, boolean firstState) {
     //logger.debug("found " + exerciseToState.size() + " state markings");
     Set<String> userExercisesRemaining = setStateOnPredefExercises(exerciseToState, firstState);
     setStateOnUserExercises(exerciseToState, userExercisesRemaining, firstState);
@@ -143,10 +145,10 @@ public class UserListManager {
    * @see #setStateOnExercises(java.util.Map, boolean)
    */
   // set state on predef exercises
-  private Set<String> setStateOnPredefExercises(Map<String, ReviewedDAO.StateCreator> exerciseToState, boolean firstState) {
+  private Set<String> setStateOnPredefExercises(Map<String, StateCreator> exerciseToState, boolean firstState) {
     int count = 0;
     Set<String> userExercisesRemaining = new HashSet<String>(exerciseToState.keySet());
-    for (Map.Entry<String, ReviewedDAO.StateCreator> pair : exerciseToState.entrySet()) {
+    for (Map.Entry<String, StateCreator> pair : exerciseToState.entrySet()) {
       CommonExercise predefExercise = userExerciseDAO.getPredefExercise(pair.getKey());
       if (predefExercise != null) {
         userExercisesRemaining.remove(pair.getKey());
@@ -165,13 +167,13 @@ public class UserListManager {
   }
 
   // set states on user exercises
-  private void setStateOnUserExercises(Map<String, ReviewedDAO.StateCreator> exerciseToState,
+  private void setStateOnUserExercises(Map<String, StateCreator> exerciseToState,
                                        Set<String> userExercisesRemaining, boolean firstState) {
     int count = 0;
     Collection<CommonExercise> userExercises = userExerciseDAO.getWhere(userExercisesRemaining);
 
     for (Shell commonUserExercise : userExercises) {
-      ReviewedDAO.StateCreator state = exerciseToState.get(commonUserExercise.getID());
+      StateCreator state = exerciseToState.get(commonUserExercise.getID());
       if (state == null) {
         logger.error("huh? can't find ex id " + commonUserExercise.getID());
       } else {
@@ -230,7 +232,7 @@ public class UserListManager {
    * @return
    * @see #getCommentedList(java.util.Collection)
    */
-  private Map<String, ReviewedDAO.StateCreator> getExerciseToState(boolean skipUnset) {
+  private Map<String, StateCreator> getExerciseToState(boolean skipUnset) {
     return reviewedDAO.getExerciseToState(skipUnset);
   }
 
@@ -242,12 +244,12 @@ public class UserListManager {
    * @see mitll.langtest.server.LangTestDatabaseImpl#makeExerciseListWrapper
    */
   public void markState(Collection<? extends CommonShell> shells) {
-    Map<String, ReviewedDAO.StateCreator> exerciseToState = reviewedDAO.getExerciseToState(false);
+    Map<String, StateCreator> exerciseToState = reviewedDAO.getExerciseToState(false);
 
     //logger.debug("markState " + shells.size() + " shells, " + exerciseToState.size() + " states");
     //int c = 0;
     for (CommonShell shell : shells) {
-      ReviewedDAO.StateCreator stateCreator = exerciseToState.get(shell.getID());
+      StateCreator stateCreator = exerciseToState.get(shell.getID());
       if (stateCreator != null) {
         shell.setState(stateCreator.getState());
         //  logger.debug("\t for " + shell.getID() + " state " + stateCreator.getState());
@@ -426,12 +428,12 @@ public class UserListManager {
   }
 
   public UserList<CommonShell> getAttentionList(Collection<String> typeOrder) {
-    Map<String, ReviewedDAO.StateCreator> exerciseToState = secondStateDAO.getExerciseToState(false);
+    Map<String, StateCreator> exerciseToState = secondStateDAO.getExerciseToState(false);
 
     //logger.debug("attention " + exerciseToState);
 
     Set<String> defectIds = new HashSet<String>();
-    for (Map.Entry<String, ReviewedDAO.StateCreator> pair : exerciseToState.entrySet()) {
+    for (Map.Entry<String, StateCreator> pair : exerciseToState.entrySet()) {
       if (pair.getValue().getState().equals(STATE.ATTN_LL)) {
         defectIds.add(pair.getKey());
       }
@@ -453,10 +455,10 @@ public class UserListManager {
    */
   public UserList<CommonShell> getDefectList(Collection<String> typeOrder) {
     Set<String> defectIds = new HashSet<String>();
-    Map<String, ReviewedDAO.StateCreator> exerciseToState = reviewedDAO.getExerciseToState(false);
+    Map<String, StateCreator> exerciseToState = reviewedDAO.getExerciseToState(false);
     //logger.debug("\tgetDefectList exerciseToState=" + exerciseToState.size());
 
-    for (Map.Entry<String, ReviewedDAO.StateCreator> pair : exerciseToState.entrySet()) {
+    for (Map.Entry<String, StateCreator> pair : exerciseToState.entrySet()) {
       if (pair.getValue().getState().equals(STATE.DEFECT)) {
         defectIds.add(pair.getKey());
       }
