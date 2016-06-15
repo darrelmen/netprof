@@ -30,10 +30,23 @@
  *
  */
 
-package mitll.langtest.server.database;
+package mitll.langtest.server.database.reviewed;
 
-public interface ISchema<T,U>  {
-  void createTable();
-  U toSlick(T shared, String language);
-  T fromSlick(U slick);
+import mitll.langtest.shared.exercise.STATE;
+
+import java.util.Collection;
+import java.util.Map;
+
+public interface IReviewedDAO {
+  void remove(String exerciseID);
+
+  void setState(String exerciseID, STATE state, long creatorID);
+
+  Map<String, StateCreator> getExerciseToState(boolean skipUnset);
+
+  STATE getCurrentState(String exerciseID);
+
+  Collection<String> getDefectExercises();
+
+  int getCount();
 }

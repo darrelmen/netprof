@@ -53,7 +53,7 @@ public class BaseTest {
 
     logger.info("path is "+ parent);
     ServerProperties serverProps = new ServerProperties(parent, name);
-    DatabaseImpl<CommonExercise> database = new DatabaseImpl<CommonExercise>(parent, name, serverProps.getH2Database(), serverProps, new PathHelper("war"), false, null);
+    DatabaseImpl<CommonExercise> database = new DatabaseImpl<>(parent, name, serverProps.getH2Database(), serverProps, new PathHelper("war"), false, null);
     return database;
   }
 
