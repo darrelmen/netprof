@@ -63,4 +63,8 @@ public class Word {
   public String toString() {
     return "# " + id + " rid " + rid + " " + word + " at " + seq + " score " + score;
   }
+
+  public void setRid(int rid) {
+    this.rid = rid;
+  }
 }
