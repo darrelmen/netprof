@@ -30,10 +30,41 @@
  *
  */
 
-package mitll.langtest.server.database;
+package mitll.langtest.server.database.reviewed;
 
-public interface ISchema<T,U>  {
-  void createTable();
-  U toSlick(T shared, String language);
-  T fromSlick(U slick);
+import mitll.langtest.server.database.custom.UserListManager;
+import mitll.langtest.shared.exercise.STATE;
+
+import java.util.Date;
+
+public class StateCreator {
+  private STATE state;
+  private long creatorID;
+  private long when;
+
+  StateCreator(STATE state, long creatorID, long when) {
+    this.state = state;
+    this.creatorID = creatorID;
+    this.when = when;
+  }
+
+  public STATE getState() {
+    return state;
+  }
+
+  /**
+   * @return
+   * @see UserListManager#getAmmendedStateMap()
+   */
+  public long getCreatorID() {
+    return creatorID;
+  }
+
+  public long getWhen() {
+    return when;
+  }
+
+  public String toString() {
+    return "[" + state.toString() + " by " + creatorID + " at " + new Date(when) + "]";
+  }
 }
