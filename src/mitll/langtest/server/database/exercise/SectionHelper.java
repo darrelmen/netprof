@@ -91,7 +91,7 @@ public class SectionHelper<T extends Shell> {
     }
   }
 
-  public boolean allKeysValid() {
+  boolean allKeysValid() {
     for (String type : typeToUnitToLesson.keySet()) {
       if (type == null || type.equals("null")) {
         logger.error("ERROR ERROR \n\n - the tierIndex property is out of sync with the spreadsheet columns! - " +

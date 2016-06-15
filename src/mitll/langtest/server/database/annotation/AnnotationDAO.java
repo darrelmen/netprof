@@ -58,10 +58,10 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
    * @param userDAO
    */
   public AnnotationDAO(Database database, IUserDAO userDAO) {
-    super(database);
+    super(database,userDAO.getDefectDetector());
     try {
       createTable(database);
-      populate(userDAO.getDefectDetector());
+//      populate(userDAO.getDefectDetector());
     } catch (SQLException e) {
       logger.error("got " + e, e);
     }
@@ -142,6 +142,15 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
+  }
+
+  public Collection<UserAnnotation> getAll() {
+    try {
+      return getUserAnnotations("select * from " + ANNOTATION);
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return Collections.emptyList();
   }
 
   /**
