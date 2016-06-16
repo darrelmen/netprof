@@ -40,6 +40,8 @@ import mitll.langtest.server.database.reviewed.IReviewedDAO;
 import mitll.langtest.server.database.reviewed.StateCreator;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
+import mitll.langtest.server.database.userlist.IUserListDAO;
+import mitll.langtest.server.database.userlist.IUserListExerciseJoinDAO;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.User;
@@ -88,8 +90,8 @@ public class UserListManager {
   private int i = 0;
 
   private IUserExerciseDAO userExerciseDAO;
-  private final UserListDAO userListDAO;
-  private final UserListExerciseJoinDAO userListExerciseJoinDAO;
+  private final IUserListDAO userListDAO;
+  private final IUserListExerciseJoinDAO userListExerciseJoinDAO;
   private final IAnnotationDAO annotationDAO;
   private final PathHelper pathHelper;
 
@@ -103,8 +105,8 @@ public class UserListManager {
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(mitll.langtest.server.PathHelper)
    */
   public UserListManager(IUserDAO userDAO,
-                         UserListDAO userListDAO,
-                         UserListExerciseJoinDAO userListExerciseJoinDAO,
+                         IUserListDAO userListDAO,
+                         IUserListExerciseJoinDAO userListExerciseJoinDAO,
                          IAnnotationDAO annotationDAO,
                          IReviewedDAO reviewedDAO,
                          IReviewedDAO secondStateDAO,
@@ -492,7 +494,7 @@ public class UserListManager {
     // logger.debug("getReviewList '" +name+ "' ids size = " + allKnown.size() + " yielded " + onList.size());
     User user = getQCUser();
     UserList<CommonShell> userList = new UserList<CommonShell>(userListMaginID, user, name, description, "", false);
-    userList.setReview(true);
+    //userList.setReview(true);
 
     new ExerciseSorter(typeOrder).getSortedByUnitThenAlpha(onList, false);
 

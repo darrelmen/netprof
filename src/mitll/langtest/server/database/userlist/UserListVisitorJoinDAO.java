@@ -30,7 +30,7 @@
  *
  */
 
-package mitll.langtest.server.database.custom;
+package mitll.langtest.server.database.userlist;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
@@ -41,16 +41,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created with IntelliJ IDEA.
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 12/9/13
- * Time: 2:23 PM
- * To change this template use File | Settings | File Templates.
- */
-public class UserListVisitorJoinDAO extends DAO {
+public class UserListVisitorJoinDAO extends DAO implements IUserListVisitorJoinDAO {
   private static final String UNIQUEID = "uniqueid";
   private static final String USERLISTID = "userlistid";
   private static final String VISITORID = "visitorid";
@@ -70,32 +61,32 @@ public class UserListVisitorJoinDAO extends DAO {
   }
 
   private void createUserListTable(Database database) throws SQLException {
-   // logger.debug("create user list table ");
+    // logger.debug("create user list table ");
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement("CREATE TABLE if not exists " +
-      USER_EXERCISE_LIST_VISITOR +
-      " (" +
-      UNIQUEID +
-      " IDENTITY, " +
-      USERLISTID +
-      " BIGINT, " +
-      VISITORID +
-      " BIGINT, " +
-      MODIFIED +
-      " TIMESTAMP,"+
-      "FOREIGN KEY(" +
-      USERLISTID +
-      ") REFERENCES " +
-      UserListDAO.USER_EXERCISE_LIST +
-      "(" +
-      UNIQUEID +
-      ")," +
-      "FOREIGN KEY(" +
-      VISITORID +
-      ") REFERENCES " +
-      UserDAO.USERS +
-      "(ID)" +
-      ")");
+        USER_EXERCISE_LIST_VISITOR +
+        " (" +
+        UNIQUEID +
+        " IDENTITY, " +
+        USERLISTID +
+        " BIGINT, " +
+        VISITORID +
+        " BIGINT, " +
+        MODIFIED +
+        " TIMESTAMP," +
+        "FOREIGN KEY(" +
+        USERLISTID +
+        ") REFERENCES " +
+        UserListDAO.USER_EXERCISE_LIST +
+        "(" +
+        UNIQUEID +
+        ")," +
+        "FOREIGN KEY(" +
+        VISITORID +
+        ") REFERENCES " +
+        UserDAO.USERS +
+        "(ID)" +
+        ")");
     statement.execute();
     statement.close();
 
@@ -111,6 +102,7 @@ public class UserListVisitorJoinDAO extends DAO {
    *
    * @see UserListDAO#addVisitor(long, long)
    */
+  @Override
   public void add(long listID, long visitor) {
     if (!update(listID, visitor)) {
       try {
@@ -119,13 +111,13 @@ public class UserListVisitorJoinDAO extends DAO {
 
         Connection connection = database.getConnection(this.getClass().toString());
         PreparedStatement statement = connection.prepareStatement(
-          "INSERT INTO " + USER_EXERCISE_LIST_VISITOR +
-            "(" +
-            USERLISTID + "," +
-            VISITORID + "," +
-            MODIFIED +
-            ") " +
-            "VALUES(?,?,?);");
+            "INSERT INTO " + USER_EXERCISE_LIST_VISITOR +
+                "(" +
+                USERLISTID + "," +
+                VISITORID + "," +
+                MODIFIED +
+                ") " +
+                "VALUES(?,?,?);");
         int i = 1;
 
         statement.setLong(i++, listID);
@@ -148,7 +140,7 @@ public class UserListVisitorJoinDAO extends DAO {
 
   /**
    *
-   * @see mitll.langtest.server.database.custom.UserListDAO#populateList(mitll.langtest.shared.custom.UserList)
+   * @see UserListDAO#populateList(mitll.langtest.shared.custom.UserList)
    * @param listid
    * @return
    */
@@ -165,15 +157,16 @@ public class UserListVisitorJoinDAO extends DAO {
   }*/
 
   /**
-   * @see mitll.langtest.server.database.custom.UserListDAO#getListsForUser(long)
    * @param userid
    * @return
+   * @see UserListDAO#getListsForUser(long)
    */
+  @Override
   public List<Long> getListsForVisitor(long userid) {
     String sql = "SELECT * from " + USER_EXERCISE_LIST_VISITOR + " where " +
-      VISITORID +
-      "=" + userid +
-      " ORDER BY " +MODIFIED + " DESC";
+        VISITORID +
+        "=" + userid +
+        " ORDER BY " + MODIFIED + " DESC";
     try {
       return getVisitors(sql);
     } catch (SQLException e) {
@@ -197,21 +190,21 @@ public class UserListVisitorJoinDAO extends DAO {
   }
 
   /**
-   * @see #add
    * @param userListID
    * @param visitor
    * @return
+   * @see #add
    */
   private boolean update(long userListID, long visitor) {
     try {
       Connection connection = database.getConnection(this.getClass().toString());
       String sql = "UPDATE " + USER_EXERCISE_LIST_VISITOR +
-        " " +
-        "SET " +
-        "modified=?" +
-        "WHERE " +USERLISTID +
-        "=" + userListID+
-        " AND " +VISITORID + "=" +visitor;
+          " " +
+          "SET " +
+          "modified=?" +
+          "WHERE " + USERLISTID +
+          "=" + userListID +
+          " AND " + VISITORID + "=" + visitor;
 
       PreparedStatement statement = connection.prepareStatement(sql);
       statement.setTimestamp(1, new Timestamp(System.currentTimeMillis()));  // smarter way to do this...?
@@ -221,8 +214,7 @@ public class UserListVisitorJoinDAO extends DAO {
       boolean b = i > 0;
       if (b) {
         logger.debug("did update for list " + userListID + " and " + visitor + " in " + USER_EXERCISE_LIST_VISITOR);
-      }
-      else {
+      } else {
         logger.warn("did NOT update for list " + userListID + " and " + visitor + " in " + USER_EXERCISE_LIST_VISITOR);
       }
       return b;
@@ -232,13 +224,14 @@ public class UserListVisitorJoinDAO extends DAO {
     return false;
   }
 
+  @Override
   public boolean remove(long listid) {
     return remove(USER_EXERCISE_LIST_VISITOR, USERLISTID, listid);
   }
 
   private void addColumnToTable(Connection connection) throws SQLException {
     PreparedStatement statement = connection.prepareStatement("ALTER TABLE " +
-      USER_EXERCISE_LIST_VISITOR + " ADD " + MODIFIED + " TIMESTAMP ");
+        USER_EXERCISE_LIST_VISITOR + " ADD " + MODIFIED + " TIMESTAMP ");
     statement.execute();
     statement.close();
   }
