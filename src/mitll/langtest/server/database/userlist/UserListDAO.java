@@ -30,10 +30,11 @@
  *
  */
 
-package mitll.langtest.server.database.custom;
+package mitll.langtest.server.database.userlist;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.custom.UserList;
@@ -43,26 +44,17 @@ import org.apache.log4j.Logger;
 import java.sql.*;
 import java.util.*;
 
-/**
- * Created with IntelliJ IDEA.
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 12/9/13
- * Time: 2:23 PM
- * To change this template use File | Settings | File Templates.
- */
-public class UserListDAO extends DAO {
+public class UserListDAO extends DAO implements IUserListDAO {
   private static final String CREATORID = "creatorid";
   private static final Logger logger = Logger.getLogger(UserListDAO.class);
 
   private static final String NAME = "name";
 
-  static final String USER_EXERCISE_LIST = "userexerciselist";
+  public static final String USER_EXERCISE_LIST = "userexerciselist";
   private static final String ISPRIVATE = "isprivate";
   private final IUserDAO userDAO;
   private IUserExerciseDAO userExerciseDAO;
-  private final UserListVisitorJoinDAO userListVisitorJoinDAO;
+  private final IUserListVisitorJoinDAO userListVisitorJoinDAO;
 
   public UserListDAO(Database database, IUserDAO userDAO) {
     super(database);
@@ -80,7 +72,8 @@ public class UserListDAO extends DAO {
    * @param listid
    * @param userid
    */
-  void addVisitor(long listid, long userid) {
+  @Override
+  public void addVisitor(long listid, long userid) {
     userListVisitorJoinDAO.add(listid, userid);
   }
 
@@ -95,7 +88,6 @@ public class UserListDAO extends DAO {
 
   private void createUserListTable(Database database) throws SQLException {
 //    logger.debug("createUserListTable --- ");
-
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement("CREATE TABLE if not exists " +
       USER_EXERCISE_LIST +
@@ -113,11 +105,9 @@ public class UserListDAO extends DAO {
       "USERS" +
       "(ID)" +
       ")");
-
    // createIndex(database, CREATORID, USER_EXERCISE_LIST);
     finish(database, connection, statement);
   }
-
 
   /**
    * Somehow on subsequent runs, the ids skip by 30 or so?
@@ -126,13 +116,13 @@ public class UserListDAO extends DAO {
    *
    * @see UserListManager#reallyCreateNewItem
    */
+  @Override
   public void add(UserList userList) {
     long id = 0;
 
     try {
       // there are much better ways of doing this...
 //      logger.info("add :userList " + userList);
-
       Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement = connection.prepareStatement(
         "INSERT INTO " + USER_EXERCISE_LIST +
@@ -162,7 +152,6 @@ public class UserListDAO extends DAO {
       id = getGeneratedKey(statement);
       if (id == -1) {  logger.error("huh? no key was generated?");  }
      // logger.debug("unique id = " + id);
-
       userList.setUniqueID(id);
 
       finish(connection, statement);
@@ -173,14 +162,12 @@ public class UserListDAO extends DAO {
     }
   }
 
+  @Override
   public void updateModified(long uniqueID) {
     try {
       Connection connection = database.getConnection(this.getClass().toString());
-
-      String sql = "UPDATE " + USER_EXERCISE_LIST +
-        " " +
-        "SET " +
-        "modified=? "+
+      String sql = "UPDATE " + USER_EXERCISE_LIST +" " +
+        "SET " + "modified=? "+
         "WHERE uniqueid=?";
 
       PreparedStatement statement = connection.prepareStatement(sql);
@@ -188,7 +175,6 @@ public class UserListDAO extends DAO {
       statement.setLong(2, uniqueID);
       int i = statement.executeUpdate();
 
-      //if (false) logger.debug("UPDATE " + i);
       if (i == 0) {
         logger.error("huh? didn't update the userList for " + uniqueID + " sql " + sql);
       }
@@ -199,13 +185,15 @@ public class UserListDAO extends DAO {
     }
   }
 
+  @Override
   public int getCount() { return getCount(USER_EXERCISE_LIST); }
 
   /**
-   * @see UserListManager#getListsForUser(long, boolean, boolean)
+   * @see UserListManager#getListsForUser
    * @param userid
    * @return
    */
+  @Override
   public List<UserList<CommonShell>> getAllByUser(long userid) {
     try {
       String sql = "SELECT * from " + USER_EXERCISE_LIST + " where " +
@@ -232,6 +220,7 @@ public class UserListDAO extends DAO {
    * @param userid
    * @return
    */
+  @Override
   public List<UserList<CommonShell>> getAllPublic(long userid) {
     try {
       String sql = "SELECT * from " + USER_EXERCISE_LIST + " where " +
@@ -260,6 +249,7 @@ public class UserListDAO extends DAO {
     return Collections.emptyList();
   }
 
+  @Override
   public boolean hasByName(long userid, String name) {
     try {
       return !getByName(userid,name).isEmpty();
@@ -269,6 +259,7 @@ public class UserListDAO extends DAO {
     return false;
   }
 
+  @Override
   public List<UserList<CommonShell>> getByName(long userid, String name) {
     try {
       String sql = "SELECT * from " + USER_EXERCISE_LIST + " where " +
@@ -284,6 +275,7 @@ public class UserListDAO extends DAO {
     return Collections.emptyList();
   }
 
+  @Override
   public boolean remove(long unique) {
     removeVisitor(unique);
     logger.debug("remove from " + USER_EXERCISE_LIST + " = " +unique);
@@ -296,6 +288,7 @@ public class UserListDAO extends DAO {
    * @param unique
    * @return
    */
+  @Override
   public UserList<CommonShell> getWithExercises(long unique) {
     UserList<CommonShell> where = getWhere(unique, true);
     if (where == null) {
@@ -313,6 +306,7 @@ public class UserListDAO extends DAO {
    * @param warnIfMissing
    * @return
    */
+  @Override
   public UserList<CommonShell> getWhere(long unique, boolean warnIfMissing) {
     if (unique < 0) return null;
     String sql = "SELECT * from " + USER_EXERCISE_LIST + " where uniqueid=" + unique + " order by modified";
@@ -331,10 +325,11 @@ public class UserListDAO extends DAO {
   }
 
   /**
-   * @see mitll.langtest.server.database.custom.UserListManager#getListsForUser(long, boolean, boolean)
+   * @see mitll.langtest.server.database.custom.UserListManager#getListsForUser
    * @param userid
    * @return
    */
+  @Override
   public Collection<UserList<CommonShell>> getListsForUser(long userid) {
     final List<Long> listsForVisitor = userListVisitorJoinDAO.getListsForVisitor(userid);
     List<UserList<CommonShell>> objects = Collections.emptyList();
@@ -369,7 +364,6 @@ public class UserListDAO extends DAO {
     return Collections.emptyList();
   }
 
-
   /**
    * @seex #getAll(long)
    * @see #getAllPublic
@@ -381,7 +375,6 @@ public class UserListDAO extends DAO {
    */
   private List<UserList<CommonShell>> getUserLists(String sql, long userid) throws SQLException {
     List<UserList<CommonShell>> lists = getWhere(sql);
-
     for (UserList<CommonShell> ul : lists) {
       if (userid == -1 || ul.getCreator().getId() == userid || !ul.isFavorite()) {   // skip other's favorites
         populateList(ul);
@@ -424,19 +417,17 @@ public class UserListDAO extends DAO {
     where.setExercises(onList);
   }
 
+  @Override
   public void setUserExerciseDAO(IUserExerciseDAO userExerciseDAO) {
     this.userExerciseDAO = userExerciseDAO;
   }
 
+  @Override
   public void setPublicOnList(long userListID, boolean isPublic) {
     try {
       Connection connection = database.getConnection(this.getClass().toString());
-
-      String sql = "UPDATE " + USER_EXERCISE_LIST +
-        " " +
-        "SET " +
-        ISPRIVATE +
-        "=? " +
+      String sql = "UPDATE " + USER_EXERCISE_LIST + " " +
+        "SET " + ISPRIVATE + "=? " +
         "WHERE uniqueid=?";
 
       PreparedStatement statement = connection.prepareStatement(sql);
@@ -444,7 +435,6 @@ public class UserListDAO extends DAO {
       statement.setLong(2, userListID);
       int i = statement.executeUpdate();
 
-      //if (false) logger.debug("UPDATE " + i);
       if (i == 0) {
         logger.error("huh? didn't update the userList for " + userListID + " sql " + sql);
       }
