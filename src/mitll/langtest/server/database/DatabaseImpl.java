@@ -200,6 +200,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     userDAO = new UserDAO(this, getServerProps());
     addRemoveDAO = new AddRemoveDAO(this);
 
+    UserListDAO userListDAO = new UserListDAO(this, userDAO);
     userExerciseDAO = new UserExerciseDAO(this);
     UserListExerciseJoinDAO userListExerciseJoinDAO = new UserListExerciseJoinDAO(this);
     resultDAO = new ResultDAO(this);
@@ -208,7 +209,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     phoneDAO = new PhoneDAO(this);
     audioDAO = new AudioDAO(this, userDAO);
     answerDAO = new AnswerDAO(this, resultDAO);
-    userListManager = new UserListManager(userDAO, new UserListDAO(this, userDAO), userListExerciseJoinDAO,
+    userListManager = new UserListManager(userDAO, userListDAO, userListExerciseJoinDAO,
         new AnnotationDAO(this, userDAO),
         new ReviewedDAO(this, ReviewedDAO.REVIEWED),
         new ReviewedDAO(this, ReviewedDAO.SECOND_STATE),
