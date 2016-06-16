@@ -64,6 +64,10 @@ import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
+import mitll.langtest.server.database.userlist.IUserListDAO;
+import mitll.langtest.server.database.userlist.IUserListExerciseJoinDAO;
+import mitll.langtest.server.database.userlist.SlickUserListExerciseJoinDAO;
+import mitll.langtest.server.database.userlist.UserListDAO;
 import mitll.langtest.server.database.word.IWordDAO;
 import mitll.langtest.server.database.word.SlickWordDAO;
 import mitll.langtest.server.database.word.Word;
@@ -261,13 +265,14 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
     userExerciseDAO = new SlickUserExerciseDAO(this, dbConnection);
 
-    UserListExerciseJoinDAO userListExerciseJoinDAO = new UserListExerciseJoinDAO(this);
+    //UserListExerciseJoinDAO userListExerciseJoinDAO = new UserListExerciseJoinDAO(this);
+    IUserListExerciseJoinDAO userListExerciseJoinDAO = new SlickUserListExerciseJoinDAO(this,dbConnection);
 
     refresultDAO = new RefResultDAO(this, getServerProps().shouldDropRefResult());
     wordDAO  = new SlickWordDAO(this, dbConnection);
     phoneDAO = new SlickPhoneDAO(this, dbConnection);
 
-    UserListDAO userListDAO = new UserListDAO(this, this.userDAO);
+    IUserListDAO userListDAO = new UserListDAO(this, this.userDAO);
     IAnnotationDAO annotationDAO = new SlickAnnotationDAO(this, dbConnection, this.userDAO.getDefectDetector());
 
     IReviewedDAO reviewedDAO = new ReviewedDAO(this, ReviewedDAO.REVIEWED);
