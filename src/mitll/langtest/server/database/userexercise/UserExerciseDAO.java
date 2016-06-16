@@ -35,8 +35,9 @@ package mitll.langtest.server.database.userexercise;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.audio.AudioDAO;
 import mitll.langtest.server.database.audio.IAudioDAO;
-import mitll.langtest.server.database.custom.UserListExerciseJoinDAO;
+import mitll.langtest.server.database.userlist.UserListExerciseJoinDAO;
 import mitll.langtest.server.database.custom.UserListManager;
+import mitll.langtest.server.database.userlist.UserListDAO;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -253,7 +254,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   /**
    * @param listID
    * @return
-   * @see mitll.langtest.server.database.custom.UserListDAO#populateList
+   * @see UserListDAO#populateList
    */
   @Override
   public List<CommonShell> getOnList(long listID) {
