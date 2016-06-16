@@ -30,10 +30,11 @@
  *
  */
 
-package mitll.langtest.server.database.custom;
+package mitll.langtest.server.database.userlist;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.shared.custom.UserList;
 import org.apache.log4j.Logger;
 
@@ -41,16 +42,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-/**
- * Created with IntelliJ IDEA.
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 12/9/13
- * Time: 2:23 PM
- * To change this template use File | Settings | File Templates.
- */
-public class UserListExerciseJoinDAO extends DAO {
+public class UserListExerciseJoinDAO extends DAO implements IUserListExerciseJoinDAO {
   private static final Logger logger = Logger.getLogger(UserListExerciseJoinDAO.class);
 
   private static final String USERLISTID = "userlistid";
@@ -105,6 +97,7 @@ public class UserListExerciseJoinDAO extends DAO {
    *
    * @see UserListManager#addItemToList
    */
+  @Override
   public void add(UserList userList, String uniqueID) {
     try {
       // there are much better ways of doing this...
@@ -136,6 +129,7 @@ public class UserListExerciseJoinDAO extends DAO {
     }
   }
 
+  @Override
   public void removeListRefs(long listid) {
     remove(USER_EXERCISE_LIST_EXERCISE, USERLISTID, listid);
   }
@@ -146,6 +140,7 @@ public class UserListExerciseJoinDAO extends DAO {
    * @return
    * @see UserListManager#deleteItemFromList(long, String, java.util.Collection)
    */
+  @Override
   public boolean remove(long listid, String exid) {
     String sql = getRemoveSQL(listid, exid);
     return doSqlOn(sql, USER_EXERCISE_LIST_EXERCISE, true);
