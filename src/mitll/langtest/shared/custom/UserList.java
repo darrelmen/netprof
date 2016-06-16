@@ -35,6 +35,7 @@ package mitll.langtest.shared.custom;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.server.database.userlist.UserListDAO;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.exercise.BaseExercise;
 import mitll.langtest.shared.exercise.HasID;
@@ -63,7 +64,7 @@ public class UserList<T extends HasID> extends BaseExercise {
   private String description;
   private String classMarker;
   private boolean isPrivate;
-  private boolean isReview;
+//  private boolean isReview;
   private List<T> exercises = new ArrayList<>();
 
   public UserList() {
@@ -76,7 +77,7 @@ public class UserList<T extends HasID> extends BaseExercise {
    * @param description
    * @param classMarker
    * @see mitll.langtest.server.database.custom.UserListManager#createUserList(long, String, String, String, boolean)
-   * @see mitll.langtest.server.database.custom.UserListDAO#getWhere(long, boolean)
+   * @see UserListDAO#getWhere(long, boolean)
    */
   public UserList(long uniqueID, User user, String name, String description, String classMarker, boolean isPrivate) {
     super("" + uniqueID);
@@ -144,7 +145,7 @@ public class UserList<T extends HasID> extends BaseExercise {
 
   /**
    * @param exercises
-   * @see mitll.langtest.server.database.custom.UserListDAO#populateList(UserList)
+   * @see UserListDAO#populateList(UserList)
    */
   public void setExercises(List<T> exercises) {
     this.exercises = exercises;
@@ -178,7 +179,7 @@ public class UserList<T extends HasID> extends BaseExercise {
 
   /**
    * @param uniqueID
-   * @see mitll.langtest.server.database.custom.UserListDAO#add(UserList)
+   * @see UserListDAO#add(UserList)
    * @see mitll.langtest.server.database.custom.UserListManager#getCommentedList(Collection)
    */
   public void setUniqueID(long uniqueID) {
@@ -214,15 +215,15 @@ public class UserList<T extends HasID> extends BaseExercise {
     return getName().equals(MY_LIST);
   }
 
-  public void setReview(boolean isReview) {
+/*  public void setReview(boolean isReview) {
     this.isReview = isReview;
-  }
+  }*/
 
   @Override
   public String toString() {
     long id = creator == null ? -1 : creator.getId();
     return "UserList #" + getUniqueID() + " '" + name + "' by " + id +
-        " : " + (isReview ? " REVIEW " : "") +
+        //" : " + (isReview ? " REVIEW " : "") +
         " :" +
         " with " + getExercises().size() + " exercises.";
   }
