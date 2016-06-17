@@ -39,19 +39,20 @@ import org.apache.log4j.Logger;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
-public class UserListVisitorJoinDAO extends DAO implements IUserListVisitorJoinDAO {
+public class UserExerciseListVisitorDAO extends DAO implements IUserExerciseListVisitorDAO {
   private static final String UNIQUEID = "uniqueid";
   private static final String USERLISTID = "userlistid";
   private static final String VISITORID = "visitorid";
   private static final String MODIFIED = "modified";
 
-  private static final Logger logger = Logger.getLogger(UserListVisitorJoinDAO.class);
+  private static final Logger logger = Logger.getLogger(UserExerciseListVisitorDAO.class);
 
   private static final String USER_EXERCISE_LIST_VISITOR = "userexerciselist_visitor";
 
-  public UserListVisitorJoinDAO(Database database) {
+  public UserExerciseListVisitorDAO(Database database) {
     super(database);
     try {
       createUserListTable(database);
@@ -131,7 +132,7 @@ public class UserListVisitorJoinDAO extends DAO implements IUserListVisitorJoinD
 
         finish(connection, statement);
 
-        logger.debug("UserListVisitorJoinDAO.add: now " + getCount(USER_EXERCISE_LIST_VISITOR) + " in " + USER_EXERCISE_LIST_VISITOR);
+        logger.debug("UserExerciseListVisitorDAO.add: now " + getCount(USER_EXERCISE_LIST_VISITOR) + " in " + USER_EXERCISE_LIST_VISITOR);
       } catch (Exception ee) {
         logger.error("got " + ee, ee);
       }
@@ -159,10 +160,10 @@ public class UserListVisitorJoinDAO extends DAO implements IUserListVisitorJoinD
   /**
    * @param userid
    * @return
-   * @see UserListDAO#getListsForUser(long)
+   * @see IUserListDAO#getListsForUser(int)
    */
   @Override
-  public List<Long> getListsForVisitor(long userid) {
+  public Collection<Integer> getListsForVisitor(int userid) {
     String sql = "SELECT * from " + USER_EXERCISE_LIST_VISITOR + " where " +
         VISITORID +
         "=" + userid +
@@ -175,14 +176,14 @@ public class UserListVisitorJoinDAO extends DAO implements IUserListVisitorJoinD
     return null;
   }
 
-  private List<Long> getVisitors(String sql) throws SQLException {
+  private Collection<Integer> getVisitors(String sql) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
     ResultSet rs = statement.executeQuery();
-    List<Long> visitors = new ArrayList<Long>();
+    List<Integer> visitors = new ArrayList<>();
 
     while (rs.next()) {
-      visitors.add(rs.getLong(UserListVisitorJoinDAO.USERLISTID));
+      visitors.add(rs.getInt(UserExerciseListVisitorDAO.USERLISTID));
     }
     finish(connection, statement, rs);
 

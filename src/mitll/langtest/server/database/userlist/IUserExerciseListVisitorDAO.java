@@ -32,44 +32,12 @@
 
 package mitll.langtest.server.database.userlist;
 
-import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
-import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.CommonShell;
-
 import java.util.Collection;
-import java.util.List;
 
-public interface IUserListDAO {
-  /**
-   * @see mitll.langtest.server.database.custom.UserListManager#addVisitor(long, long)
-   * @param listid
-   * @param userid
-   */
-  void addVisitor(long listid, long userid);
+public interface IUserExerciseListVisitorDAO {
+  void add(long listID, long visitor);
 
-  void add(UserList userList);
+  Collection<Integer> getListsForVisitor(int userid);
 
-  void updateModified(long uniqueID);
-
-  int getCount();
-
-  List<UserList<CommonShell>> getAllByUser(long userid);
-
-  List<UserList<CommonShell>> getAllPublic(long userid);
-
-  boolean hasByName(long userid, String name);
-
-  List<UserList<CommonShell>> getByName(long userid, String name);
-
-  boolean remove(long unique);
-
-  UserList<CommonShell> getWithExercises(long unique);
-
-  UserList<CommonShell> getWhere(long unique, boolean warnIfMissing);
-
-  Collection<UserList<CommonShell>> getListsForUser(int userid);
-
-  void setUserExerciseDAO(IUserExerciseDAO userExerciseDAO);
-
-  void setPublicOnList(long userListID, boolean isPublic);
+  boolean remove(long listid);
 }
