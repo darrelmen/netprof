@@ -34,19 +34,11 @@ package mitll.langtest.server.database.userlist;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.ISchema;
 import mitll.langtest.server.database.user.IUserDAO;
-import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.CommonShell;
 import mitll.npdata.dao.DBConnection;
-import mitll.npdata.dao.SlickUserExerciseList;
-import mitll.npdata.dao.userexercise.UserExerciseListDAOWrapper;
+import mitll.npdata.dao.userexercise.UserExerciseListJoinDAOWrapper;
 import org.apache.log4j.Logger;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 public class SlickUserListExerciseJoinDAO
     extends DAO implements IUserListExerciseJoinDAO {
@@ -60,48 +52,15 @@ public class SlickUserListExerciseJoinDAO
   public SlickUserListExerciseJoinDAO(Database database, DBConnection dbConnection) {
     super(database);
     dao = new UserExerciseListJoinDAOWrapper(dbConnection);
-    this.userDAO = userDAO;
-    //   this.typeOrder = database.getTypeOrder();
-    //   this.exerciseDAO = exerciseDAO;
   }
 
   public void createTable() {
     dao.createTable();
   }
 
-  public SlickUserExerciseList toSlick(UserList shared, String language) {
-    return new SlickUserExerciseList(-1,
-        shared.getCreator().getId(),
-        shared.getName(),
-        shared.getDescription(),
-        shared.getClassMarker(),
-        shared.isPrivate(),
-        false,
-        (int) shared.getUniqueID());
-  }
-
-  public UserList fromSlick(SlickUserExerciseList slick) {
-    return new UserList(
-        (long) slick.id(),
-        userDAO.getUserWhere(slick.userid()),
-        slick.name(),
-        slick.description(),
-        slick.classmarker(),
-        slick.isprivate());
-  }
-
-  public void insert(SlickUserExerciseList UserExercise) {
-    dao.insert(UserExercise);
-  }
-
-  public void addBulk(List<SlickUserExerciseList> bulk) {
-    dao.addBulk(bulk);
-  }
-
-
   @Override
   public void add(UserList userList, String uniqueID) {
-
+    dao.insert((int) userList.getUniqueID(), uniqueID);
   }
 
   @Override
@@ -111,6 +70,6 @@ public class SlickUserListExerciseJoinDAO
 
   @Override
   public boolean remove(long listid, String exid) {
-    return false;
+    return dao.remove((int) listid, exid) == 1;
   }
 }
