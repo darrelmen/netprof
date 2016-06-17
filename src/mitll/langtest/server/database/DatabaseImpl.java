@@ -48,7 +48,8 @@ import mitll.langtest.server.database.connection.H2Connection;
 import mitll.langtest.server.database.connection.MySQLConnection;
 import mitll.langtest.server.database.connection.PostgreSQLConnection;
 import mitll.langtest.server.database.contextPractice.ContextPracticeImport;
-import mitll.langtest.server.database.custom.*;
+import mitll.langtest.server.database.custom.AddRemoveDAO;
+import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.exercise.*;
 import mitll.langtest.server.database.instrumentation.IEventDAO;
 import mitll.langtest.server.database.instrumentation.SlickEventImpl;
@@ -65,9 +66,8 @@ import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.server.database.userlist.IUserListDAO;
-import mitll.langtest.server.database.userlist.IUserListExerciseJoinDAO;
+import mitll.langtest.server.database.userlist.SlickUserListDAO;
 import mitll.langtest.server.database.userlist.SlickUserListExerciseJoinDAO;
-import mitll.langtest.server.database.userlist.UserListDAO;
 import mitll.langtest.server.database.word.IWordDAO;
 import mitll.langtest.server.database.word.SlickWordDAO;
 import mitll.langtest.server.database.word.Word;
@@ -227,6 +227,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
   /**
    * Create or alter tables as needed.
+   *
    * @see #DatabaseImpl(DatabaseConnection, String, String, String, ServerProperties, PathHelper, LogAndNotify)
    */
   private void initializeDAOs(PathHelper pathHelper) {
@@ -256,38 +257,27 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     SlickAnswerDAO slickAnswerDAO = new SlickAnswerDAO(this, dbConnection);
     answerDAO = slickAnswerDAO;
 
-   // if (!dbConnection.hasTable("user")) {
-  //  } else {
-   //   logger.warn("initializeDAOs has tables ------> " + dbConnection.getTables());
-   // }
-
     addRemoveDAO = new AddRemoveDAO(this);
 
     userExerciseDAO = new SlickUserExerciseDAO(this, dbConnection);
 
-    //UserListExerciseJoinDAO userListExerciseJoinDAO = new UserListExerciseJoinDAO(this);
-    IUserListExerciseJoinDAO userListExerciseJoinDAO = new SlickUserListExerciseJoinDAO(this,dbConnection);
-
     refresultDAO = new RefResultDAO(this, getServerProps().shouldDropRefResult());
-    wordDAO  = new SlickWordDAO(this, dbConnection);
+    wordDAO = new SlickWordDAO(this, dbConnection);
     phoneDAO = new SlickPhoneDAO(this, dbConnection);
 
-    IUserListDAO userListDAO = new UserListDAO(this, this.userDAO);
+    IUserListDAO userListDAO = new SlickUserListDAO(this, dbConnection, this.userDAO, userExerciseDAO);
     IAnnotationDAO annotationDAO = new SlickAnnotationDAO(this, dbConnection, this.userDAO.getDefectDetector());
 
     IReviewedDAO reviewedDAO = new ReviewedDAO(this, ReviewedDAO.REVIEWED);
     userListManager = new UserListManager(this.userDAO,
         userListDAO,
-        userListExerciseJoinDAO,
+        new SlickUserListExerciseJoinDAO(this, dbConnection),
         annotationDAO,
         reviewedDAO,
         new ReviewedDAO(this, ReviewedDAO.SECOND_STATE),
         pathHelper);
 
     createTables();
-
-    //  oneTimeDataCopy(slickEventDAO);
-//    eventDAO = new EventDAO(this, defectDetector);
 
     Connection connection1 = getConnection();
     try {
@@ -1047,12 +1037,15 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
     if (!dbConnection.hasTable("user")) slickUserDAO.createTable();
     if (!dbConnection.hasTable("audio")) slickAudioDAO.createTable();
-    if (!dbConnection.hasTable("event"))  slickEventDAO.createTable();
-    if (!dbConnection.hasTable("result"))  ((ISchema) getResultDAO()).createTable();
-    if (!dbConnection.hasTable("userexercise"))  ((ISchema) userExerciseDAO).createTable();
-    if (!dbConnection.hasTable("annotation"))  ((ISchema) getAnnotationDAO()).createTable();
-    if (!dbConnection.hasTable("word"))  ((ISchema) getWordDAO()).createTable();
-    if (!dbConnection.hasTable("phone"))  ((ISchema) getPhoneDAO()).createTable();
+    if (!dbConnection.hasTable("event")) slickEventDAO.createTable();
+    if (!dbConnection.hasTable("result")) ((ISchema) getResultDAO()).createTable();
+    if (!dbConnection.hasTable("userexercise")) ((ISchema) userExerciseDAO).createTable();
+    if (!dbConnection.hasTable("userexerciselist")) ((ISchema) userListManager.getUserListDAO()).createTable();
+    if (!dbConnection.hasTable("userexerciselistjoin"))
+      ((ISchema) userListManager.getUserListExerciseJoinDAO()).createTable();
+    if (!dbConnection.hasTable("annotation")) ((ISchema) getAnnotationDAO()).createTable();
+    if (!dbConnection.hasTable("word")) ((ISchema) getWordDAO()).createTable();
+    if (!dbConnection.hasTable("phone")) ((ISchema) getPhoneDAO()).createTable();
     logger.info("created slick tables...");
   }
 

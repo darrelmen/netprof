@@ -34,6 +34,7 @@ package mitll.langtest.server.database.custom;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.audio.PathWriter;
+import mitll.langtest.server.database.ISchema;
 import mitll.langtest.server.database.annotation.IAnnotationDAO;
 import mitll.langtest.server.database.annotation.UserAnnotation;
 import mitll.langtest.server.database.reviewed.IReviewedDAO;
@@ -42,12 +43,14 @@ import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.database.userlist.IUserListDAO;
 import mitll.langtest.server.database.userlist.IUserListExerciseJoinDAO;
+import mitll.langtest.server.database.userlist.SlickUserListDAO;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
+import mitll.npdata.dao.DBConnection;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -949,5 +952,23 @@ public class UserListManager {
 
   public IAnnotationDAO getAnnotationDAO() {
     return annotationDAO;
+  }
+
+  public IUserListDAO getUserListDAO() {
+    return userListDAO;
+  }
+
+  public IUserListExerciseJoinDAO getUserListExerciseJoinDAO() {
+    return userListExerciseJoinDAO;
+  }
+
+//  public IUserExerciseListVisitorDAO getUserListVisitorJoinDAO() {
+//    return userListDAO.getUserListVisitorJoinDAO();
+//  }
+
+  public void createTables(DBConnection dbConnection) {
+    if (!dbConnection.hasTable("userexerciselist"))  ((ISchema) userListDAO).createTable();
+    if (!dbConnection.hasTable("userexerciselistjoin"))  ((ISchema) userListExerciseJoinDAO).createTable();
+    if (!dbConnection.hasTable("userexerciselistvisitor"))  ((ISchema) ((SlickUserListDAO) userListDAO).getVisitorDAOWrapper()).createTable();
   }
 }
