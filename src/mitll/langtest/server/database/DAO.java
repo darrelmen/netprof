@@ -33,7 +33,7 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.LogAndNotify;
-import mitll.langtest.server.database.userlist.UserListVisitorJoinDAO;
+import mitll.langtest.server.database.userlist.UserExerciseListVisitorDAO;
 import org.apache.log4j.Logger;
 
 import java.sql.*;
@@ -83,7 +83,7 @@ public class DAO {
   /**
    * @param table
    * @return column names, all lower case
-   * @see UserListVisitorJoinDAO#createUserListTable(Database)
+   * @see UserExerciseListVisitorDAO#createUserListTable(Database)
    */
   protected Collection<String> getColumns(String table) {
     Set<String> columns = new HashSet<String>();

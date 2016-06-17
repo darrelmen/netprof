@@ -54,7 +54,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
   private static final String ISPRIVATE = "isprivate";
   private final IUserDAO userDAO;
   private IUserExerciseDAO userExerciseDAO;
-  private final IUserListVisitorJoinDAO userListVisitorJoinDAO;
+  private final IUserExerciseListVisitorDAO userListVisitorJoinDAO;
 
   public UserListDAO(Database database, IUserDAO userDAO) {
     super(database);
@@ -64,7 +64,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
       logger.error("got " + e, e);
     }
     this.userDAO = userDAO;
-    userListVisitorJoinDAO = new UserListVisitorJoinDAO(database);
+    userListVisitorJoinDAO = new UserExerciseListVisitorDAO(database);
   }
 
   /**
@@ -93,12 +93,10 @@ public class UserListDAO extends DAO implements IUserListDAO {
       USER_EXERCISE_LIST +
       " (" +
       "uniqueid IDENTITY, " +
-      CREATORID +
-      " INT, " +
-      NAME +
-      " VARCHAR, description VARCHAR, classmarker VARCHAR, modified TIMESTAMP, " +
-      ISPRIVATE +
-      " BOOLEAN, " +
+      CREATORID + " INT, " +
+      NAME + " VARCHAR, " +
+        "description VARCHAR, classmarker VARCHAR, modified TIMESTAMP, " +
+      ISPRIVATE + " BOOLEAN, " +
       "FOREIGN KEY(" +
       CREATORID +
       ") REFERENCES " +
@@ -330,25 +328,26 @@ public class UserListDAO extends DAO implements IUserListDAO {
    * @return
    */
   @Override
-  public Collection<UserList<CommonShell>> getListsForUser(long userid) {
-    final List<Long> listsForVisitor = userListVisitorJoinDAO.getListsForVisitor(userid);
+  public Collection<UserList<CommonShell>> getListsForUser(int userid) {
+    Collection<Integer> listsForVisitor = userListVisitorJoinDAO.getListsForVisitor(userid);
+  //  final List<Long> listsForVisitor = (List<Long>) listsForVisitor1;
     List<UserList<CommonShell>> objects = Collections.emptyList();
     List<UserList<CommonShell>> userLists = listsForVisitor.isEmpty() ? objects : getIn(listsForVisitor);
-    Collections.sort(userLists, new Comparator<UserList<?>>() {
-      @Override
-      public int compare(UserList<?> o1, UserList<?> o2) {
-        int i1 = listsForVisitor.indexOf(o1.getUniqueID());
-        int i2 = listsForVisitor.indexOf(o2.getUniqueID());
-        return i1 < i2 ? -1 : i2 > i1 ? +1 : 0;
-      }
-    });
+//    Collections.sort(userLists, new Comparator<UserList<?>>() {
+//      @Override
+//      public int compare(UserList<?> o1, UserList<?> o2) {
+//        int i1 = listsForVisitor.indexOf((int)o1.getUniqueID());
+//        int i2 = listsForVisitor.indexOf((int)o2.getUniqueID());
+//        return i1 < i2 ? -1 : i2 > i1 ? +1 : 0;
+//      }
+//    });
     return userLists;
   }
 
-  private List<UserList<CommonShell>> getIn(Collection<Long> ids) {
+  private List<UserList<CommonShell>> getIn(Collection<Integer> ids) {
     String s = ids.toString();
     s = s.replaceAll("\\[","").replaceAll("\\]","");
-    String sql = "SELECT * from " + USER_EXERCISE_LIST + " where uniqueid in (" + s + ") order by modified";
+    String sql = "SELECT * from " + USER_EXERCISE_LIST + " where uniqueid in (" + s + ") order by modified, uniqueid";
     //logger.debug("sql for get in " + sql);
     try {
       List<UserList<CommonShell>> lists = getUserLists(sql,-1);
@@ -413,8 +412,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
    * @param where
    */
   private void populateList(UserList<CommonShell> where) {
-    List<CommonShell> onList = userExerciseDAO.getOnList(where.getUniqueID());
-    where.setExercises(onList);
+    where.setExercises(userExerciseDAO.getOnList(where.getUniqueID()));
   }
 
   @Override
@@ -446,5 +444,9 @@ public class UserListDAO extends DAO implements IUserListDAO {
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
+  }
+
+  public IUserExerciseListVisitorDAO getUserListVisitorJoinDAO() {
+    return userListVisitorJoinDAO;
   }
 }
