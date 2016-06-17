@@ -33,12 +33,10 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.client.user.Md5Hash;
-import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.audio.AudioDAO;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.instrumentation.IEventDAO;
-import mitll.langtest.server.database.result.IAnswerDAO;
 import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.database.user.IUserDAO;

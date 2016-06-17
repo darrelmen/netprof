@@ -322,10 +322,6 @@ public class AnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
     }
   }
 
-  protected Connection getConnection() {
-    return database.getConnection(this.getClass().toString());
-  }
-
   private String copyStringChar(String plan) {
     return new String(plan.toCharArray());
   }
