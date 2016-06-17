@@ -53,7 +53,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
 
   /**
    * @param database
-   * @param serverProperties
+   * @paramx serverProperties
    */
   public UserDAO(Database database) {
     super(database);
