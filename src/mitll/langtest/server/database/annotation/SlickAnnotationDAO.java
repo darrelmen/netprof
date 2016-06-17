@@ -37,12 +37,10 @@ import mitll.langtest.server.database.ISchema;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickAnnotation;
-import mitll.npdata.dao.SlickResult;
 import mitll.npdata.dao.annotation.AnnotationDAOWrapper;
 import org.apache.log4j.Logger;
 import scala.Tuple4;
 
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -120,8 +118,9 @@ public class SlickAnnotationDAO
 
   @Override
   public Set<String> getExercisesWithIncorrectAnnotations() {
-    Collection<Tuple4<String, String, String, Timestamp>> annoToCreator = dao.getAnnoToCreator();
+    Collection<Tuple4<String, String, String, Timestamp>> annoToCreator = dao.getAnnosGrouped();
 
+    logger.info("getExercisesWithIncorrectAnnotations " + annoToCreator.size());
     String prevExid = "";
 
     Set<String> incorrect = new HashSet<>();
@@ -132,6 +131,7 @@ public class SlickAnnotationDAO
       String field = tuple4._2();
       String status = tuple4._3();
 
+      logger.info("Got " + tuple4);
       if (prevExid.isEmpty()) {
         prevExid = exid;
       } else if (!prevExid.equals(exid)) {
