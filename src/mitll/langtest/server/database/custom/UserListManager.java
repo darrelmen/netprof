@@ -44,6 +44,7 @@ import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.database.userlist.IUserListDAO;
 import mitll.langtest.server.database.userlist.IUserListExerciseJoinDAO;
 import mitll.langtest.server.database.userlist.SlickUserListDAO;
+import mitll.langtest.server.database.userlist.SlickUserListExerciseJoinDAO;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.User;
@@ -968,7 +969,7 @@ public class UserListManager {
 
   public void createTables(DBConnection dbConnection) {
     if (!dbConnection.hasTable("userexerciselist"))  ((ISchema) userListDAO).createTable();
-    if (!dbConnection.hasTable("userexerciselistjoin"))  ((ISchema) userListExerciseJoinDAO).createTable();
-    if (!dbConnection.hasTable("userexerciselistvisitor"))  ((ISchema) ((SlickUserListDAO) userListDAO).getVisitorDAOWrapper()).createTable();
+    if (!dbConnection.hasTable("userexerciselistjoin"))  ((SlickUserListExerciseJoinDAO)userListExerciseJoinDAO).createTable();
+    if (!dbConnection.hasTable("userexerciselistvisitor"))  (((SlickUserListDAO) userListDAO).getVisitorDAOWrapper()).createTable();
   }
 }
