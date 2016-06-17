@@ -1040,9 +1040,11 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     if (!dbConnection.hasTable("event")) slickEventDAO.createTable();
     if (!dbConnection.hasTable("result")) ((ISchema) getResultDAO()).createTable();
     if (!dbConnection.hasTable("userexercise")) ((ISchema) userExerciseDAO).createTable();
-    if (!dbConnection.hasTable("userexerciselist")) ((ISchema) userListManager.getUserListDAO()).createTable();
-    if (!dbConnection.hasTable("userexerciselistjoin"))
-      ((ISchema) userListManager.getUserListExerciseJoinDAO()).createTable();
+//    if (!dbConnection.hasTable("userexerciselist")) ((ISchema) userListManager.getUserListDAO()).createTable();
+//    if (!dbConnection.hasTable("userexerciselistjoin"))
+//      ((SlickUserListExerciseJoinDAO)userListManager.getUserListExerciseJoinDAO()).createTable();
+
+    userListManager.createTables(dbConnection);
     if (!dbConnection.hasTable("annotation")) ((ISchema) getAnnotationDAO()).createTable();
     if (!dbConnection.hasTable("word")) ((ISchema) getWordDAO()).createTable();
     if (!dbConnection.hasTable("phone")) ((ISchema) getPhoneDAO()).createTable();

@@ -52,8 +52,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class SlickUserListDAO
-    extends DAO implements IUserListDAO, ISchema<UserList<CommonShell>, SlickUserExerciseList> {
+public class SlickUserListDAO extends DAO implements IUserListDAO, ISchema<UserList<CommonShell>, SlickUserExerciseList> {
   private static final Logger logger = Logger.getLogger(SlickUserListDAO.class);
 
   private final UserExerciseListDAOWrapper dao;
