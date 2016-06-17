@@ -34,7 +34,6 @@ package mitll.langtest.server.database.phone;
 
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.ISchema;
-import mitll.langtest.server.database.userexercise.BaseUserExerciseDAO;
 import mitll.langtest.shared.analysis.PhoneAndScore;
 import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.WordAndScore;
@@ -42,17 +41,18 @@ import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickPhone;
+import mitll.npdata.dao.SlickPhoneReport;
 import mitll.npdata.dao.phone.PhoneDAOWrapper;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
-import java.sql.*;
+import java.sql.SQLException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SlickPhoneDAO
-    extends BasePhoneDAO implements IPhoneDAO<Phone>, ISchema<Phone, SlickPhone> {
+public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone>, ISchema<Phone, SlickPhone> {
   private static final Logger logger = Logger.getLogger(SlickPhoneDAO.class);
 
   private final PhoneDAOWrapper dao;
@@ -106,19 +106,25 @@ public class SlickPhoneDAO
 
   /**
    * TODO : fill in!
+   *
    * @param userid
    * @param exids
    * @param idToRef
    * @return
    */
   @Override
-  public JSONObject getWorstPhonesJson(long userid, List<String> exids, Map<String, String> idToRef) {
-    PhoneReport report = new PhoneReport();
+  public JSONObject getWorstPhonesJson(long userid, Collection<String> exids, Map<String, String> idToRef) {
+    Collection<SlickPhoneReport> phoneReportByResult = dao.getPhoneReportByExercises((int) userid, exids);
+    PhoneReport report = getPhoneReport(phoneReportByResult, idToRef, false, true);
+
+   // logger.info("getWorstPhonesJson phone report " + report);
+
     return new PhoneJSON().getWorstPhonesJson(report);
   }
 
   /**
    * TODO complete this!
+   *
    * @param userid
    * @param ids
    * @param idToRef
@@ -126,31 +132,27 @@ public class SlickPhoneDAO
    * @throws SQLException
    */
   @Override
-  public PhoneReport getWorstPhonesForResults(long userid, List<Integer> ids, Map<String, String> idToRef) throws SQLException {
-    return null;
+  public PhoneReport getWorstPhonesForResults(long userid, Collection<Integer> ids, Map<String, String> idToRef) {
+    Collection<SlickPhoneReport> phoneReportByResult = dao.getPhoneReportByResult((int) userid, ids);
+    return getPhoneReport(phoneReportByResult, idToRef, true, false);
   }
 
   /**
    * TODO : huh? doesn't seem to add last item to total score or total items?
    *
-   * @paramx sql
    * @param idToRef
    * @param addTranscript       true if going to analysis tab
    * @param sortByLatestExample
    * @return
    * @throws SQLException
-   * @see #getWorstPhonesForResults(long, List, Map)
+   * @paramx sql
    * @seex #getPhoneReport(String, Map, boolean, boolean)
+   * @see IPhoneDAO#getWorstPhonesForResults(long, Collection, Map)
    */
-  protected PhoneReport getPhoneReport(
+  protected PhoneReport getPhoneReport(Collection<SlickPhoneReport> phoneReportByResult,
                                        Map<String, String> idToRef,
                                        boolean addTranscript,
-                                       boolean sortByLatestExample) throws SQLException {
-    // logger.debug("getPhoneReport query is " + sql);
-    Connection connection = getConnection();
-    PreparedStatement statement = null;//connection.prepareStatement(sql);
-    ResultSet rs = statement.executeQuery();
-
+                                       boolean sortByLatestExample) {
     Map<String, List<PhoneAndScore>> phoneToScores = new HashMap<>();
 
     String currentExercise = "";
@@ -160,42 +162,28 @@ public class SlickPhoneDAO
     float totalItems = 0;
 
     Map<String, Map<NetPronImageType, List<TranscriptSegment>>> stringToMap = new HashMap<>();
-    while (rs.next()) {
+    int c = 0;
+    for (SlickPhoneReport report : phoneReportByResult) {
       int i = 1;
+      c++;
 
+     // logger.info("#"+ c + " : " + report);
       // info from result table
-      String exid = rs.getString(i++);
-      String audioAnswer = rs.getString(i++);
-      String scoreJson = rs.getString(i++);
-      float pronScore = rs.getFloat(i++);
-
-      long resultTime = -1;
-      Timestamp timestamp = rs.getTimestamp(i++);
-      if (timestamp != null) resultTime = timestamp.getTime();
-
-      // info from word table
-      int wseq = rs.getInt(i++);
-      String word = rs.getString(i++);
-      /*float wscore =*/ //rs.getFloat(i++);
-
-      // info from phone table
-      long rid = rs.getLong(RID1);
-//      logger.info("Got " + exid + " rid " + rid + " word " + word);
-      String phone = rs.getString(PHONE);
-      int seq = rs.getInt(SEQ);
-      float phoneScore = rs.getFloat(SCORE);
+      String exid = report.exid();
+      String scoreJson = report.scorejson();
+      float pronScore = report.pronScore();
 
       if (!exid.equals(currentExercise)) {
         currentExercise = exid;
-        //logger.debug("adding " + exid + " score " + pronScore);
+      //  logger.debug("#" +c+  " adding " + exid + " score " + pronScore);
         totalScore += pronScore;
         totalItems++;
       }
 
       WordAndScore wordAndScore = getAndRememberWordAndScore(idToRef, phoneToScores, phoneToWordAndScore,
-          exid, audioAnswer, scoreJson, resultTime,
-          wseq, word,
-          rid, phone, seq, phoneScore);
+          exid, report.answer(), scoreJson, report.modified(),
+          report.wseq(), report.word(),
+          report.rid(), report.phone(), report.pseq(), report.pscore());
 
       if (addTranscript) {
         addTranscript(stringToMap, scoreJson, wordAndScore);
@@ -205,9 +193,9 @@ public class SlickPhoneDAO
             " skipping " + exid + " " + rid + " word " + word + "<-------------- ");*/
       //  }
     }
-    finish(connection, statement, rs);
 
     return new MakePhoneReport().getPhoneReport(phoneToScores, phoneToWordAndScore, totalScore, totalItems, sortByLatestExample);
   }
 
+  public int getNumRows() { return dao.getNumRows(); }
 }
