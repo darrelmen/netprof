@@ -52,14 +52,14 @@ public class SlickUserListExerciseJoinDAO
     extends DAO implements IUserListExerciseJoinDAO {
   private static final Logger logger = Logger.getLogger(SlickUserListExerciseJoinDAO.class);
 
-  private final UserExerciseListDAOWrapper dao;
+  private final UserExerciseListJoinDAOWrapper dao;
 
   // Collection<String> typeOrder;
   IUserDAO userDAO;
 
   public SlickUserListExerciseJoinDAO(Database database, DBConnection dbConnection) {
     super(database);
-    dao = new UserExerciseListDAOWrapper(dbConnection);
+    dao = new UserExerciseListJoinDAOWrapper(dbConnection);
     this.userDAO = userDAO;
     //   this.typeOrder = database.getTypeOrder();
     //   this.exerciseDAO = exerciseDAO;
