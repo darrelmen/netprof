@@ -67,12 +67,6 @@ public class SlickUserExerciseDAO
     dao.createTable();
   }
 
-/*
-  public void dropTable() {
-    dao.drop();
-  }
-*/
-
   @Override
   public SlickUserExercise toSlick(UserExercise shared, String language) {
     Map<String, String> unitToValue = shared.getUnitToValue();
@@ -168,10 +162,7 @@ public class SlickUserExerciseDAO
   }
 
   @Override
-  public void add(CommonExercise userExercise, boolean isOverride) {
-    SlickUserExercise user = toSlick(userExercise, isOverride);
-    insert(user);
-  }
+  public void add(CommonExercise userExercise, boolean isOverride) { insert(toSlick(userExercise, isOverride));  }
 
   @Override
   public List<CommonShell> getOnList(long listID) {
@@ -196,9 +187,7 @@ public class SlickUserExerciseDAO
   }
 
   @Override
-  public Collection<CommonExercise> getOverrides() {
-    return getUserExercises(dao.getOverrides());
-  }
+  public Collection<CommonExercise> getOverrides() {   return getUserExercises(dao.getOverrides());  }
 
   @Override
   public Collection<CommonExercise> getWhere(Collection<String> exids) {

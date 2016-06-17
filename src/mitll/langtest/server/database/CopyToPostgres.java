@@ -65,6 +65,15 @@ import java.util.Map;
 
 public class CopyToPostgres {
   private static final Logger logger = Logger.getLogger(CopyToPostgres.class);
+  public static final boolean COPY_ANNO = false;
+  public static final boolean USERS = false;
+  public static final boolean AUDIO = false;
+  public static final boolean EVENT = false;
+  public static final boolean RESULT = false;
+
+  public static final boolean USER_EXERCISE = false;
+  public static final boolean COPY_PHONE = true;
+  public static final boolean WORD = true;
 
   public void copyToPostgres(DatabaseImpl db) {
     // first add the user table
@@ -80,7 +89,7 @@ public class CopyToPostgres {
 //
 //    createTables();
 
-    if (false) {
+    if (USERS) {
       UserDAO userDAO = new UserDAO(db);
       List<User> users = userDAO.getUsers();
       logger.info("h2 users  " + users.size());
@@ -95,9 +104,10 @@ public class CopyToPostgres {
     Map<Integer, Integer> oldToNewUser = slickUserDAO.getOldToNew();
     logger.info("oldToNewUser " + oldToNewUser.size());
     Map<Integer, Integer> oldToNewResult = slickResultDAO.getOldToNew();
+    logger.info("oldToNewResult " + oldToNewResult.size());
 
     // add the audio table
-    if (false) {
+    if (AUDIO) {
       SlickAudioDAO slickAudioDAO = (SlickAudioDAO) db.getAudioDAO();
       int num = slickAudioDAO.getNumRows();
       logger.info("after drop slickAudioDAO " + num);
@@ -120,12 +130,12 @@ public class CopyToPostgres {
 
     // add event table
     String language = db.getLanguage();
-    if (false) {
+    if (EVENT) {
       SlickEventImpl slickEventDAO = (SlickEventImpl) db.getEventDAO();
       slickEventDAO.copyTableOnlyOnce(new EventDAO(db, db.getUserDAO().getDefectDetector()), language, oldToNewUser);
     }
 
-    if (false) {
+    if (RESULT) {
       ResultDAO resultDAO = new ResultDAO(db);
       List<SlickResult> bulk = new ArrayList<>();
 
@@ -142,16 +152,18 @@ public class CopyToPostgres {
     }
 
     // copy user exercises
-    if (true) {
+    if (USER_EXERCISE) {
       UserExerciseDAO ueDAO = new UserExerciseDAO(db);
+      ueDAO.setExerciseDAO(db.getExerciseDAO());
       SlickUserExerciseDAO slickUEDAO = (SlickUserExerciseDAO) db.getUserExerciseDAO();
       List<SlickUserExercise> bulk = new ArrayList<>();
 
       try {
+        int c = 0;
         for (UserExercise result : ueDAO.getUserExercisesList()) {
           Integer userID = oldToNewUser.get(result.getCreator());
           if (userID == null) {
-            logger.error("user exercise : no user " + result.getCreator());
+            if (c++ < 50) logger.error("user exercise : no user " + result.getCreator());
           } else {
             result.setCreator(userID);
             bulk.add(slickUEDAO.toSlick(result, language));
@@ -164,80 +176,71 @@ public class CopyToPostgres {
     }
 
     SlickWordDAO slickWordDAO = (SlickWordDAO) db.getWordDAO();
-    Map<Integer, Integer> oldToNewWordID = slickWordDAO.getOldToNew();
+
 
     // word DAO
 
-    if (true) {
+    if (WORD) {
+      int c = 0;
       WordDAO ueDAO = new WordDAO(db);
       List<SlickWord> bulk = new ArrayList<>();
 
       for (Word word : ueDAO.getAll()) {
         Integer rid = oldToNewResult.get((int) word.getRid());
         if (rid == null) {
-          logger.error("no user " + word.getRid());
+          if (c++ < 50) logger.error("word has no rid " + word.getRid());
         } else {
           word.setRid(rid);
           bulk.add(slickWordDAO.toSlick(word, language));
         }
       }
+      if ( c >0) logger.warn("word : missing " + c + " result id fk references");
 
       slickWordDAO.addBulk(bulk);
     }
 
+    Map<Integer, Integer> oldToNewWordID = slickWordDAO.getOldToNew();
+    logger.info("old to new word id  " + oldToNewWordID.size());
 
     // phone DAO
-    if (true) {
+    if (COPY_PHONE) {
       SlickPhoneDAO slickPhoneAO = (SlickPhoneDAO) db.getPhoneDAO();
       PhoneDAO ueDAO = new PhoneDAO(db);
       List<SlickPhone> bulk = new ArrayList<>();
-
+      int c = 0;
+      int d = 0;
+      int added = 0;
       for (Phone phone : ueDAO.getAll()) {
         Integer rid = oldToNewResult.get((int) phone.getRid());
         if (rid == null) {
-          logger.error("no user " + phone.getRid());
+          if (c++ < 50) logger.error("phone : no rid " + phone.getRid());
         } else {
           Integer wid = oldToNewWordID.get((int) phone.getWid());
 
           if (wid == null) {
-            logger.error("no word " + phone.getWid());
-          }
-          else {
+            if (d++ < 50) logger.error("phone : no word id " + phone.getWid());
+          } else {
             phone.setRID(rid);
             phone.setWID(wid);
             bulk.add(slickPhoneAO.toSlick(phone, language));
           }
         }
       }
+      if (c > 0) logger.warn("missing result id fks " + c);
+      if (d > 0) logger.warn("missing word   id fks " + d);
 
+      logger.info("adding " + bulk.size());
       slickPhoneAO.addBulk(bulk);
+      logger.info("added " + slickPhoneAO.getNumRows());
     }
 
-    // word DAO
-
-    if (true) {
-      WordDAO ueDAO = new WordDAO(db);
-      List<SlickWord> bulk = new ArrayList<>();
-
-      for (Word word : ueDAO.getAll()) {
-        Integer rid = oldToNewResult.get((int) word.getRid());
-        if (rid == null) {
-          logger.error("no user " + word.getRid());
-        } else {
-          word.setRid(rid);
-          bulk.add(slickWordDAO.toSlick(word, language));
-        }
-      }
-
-      slickWordDAO.addBulk(bulk);
-    }
     // anno DAO
-    if (true) {
+    if (COPY_ANNO) {
       SlickAnnotationDAO annotationDAO = (SlickAnnotationDAO) db.getAnnotationDAO();
       AnnotationDAO dao = new AnnotationDAO(db, slickUserDAO);
       List<SlickAnnotation> bulk = new ArrayList<>();
       for (UserAnnotation annotation : dao.getAll()) {
-        Integer userID = oldToNewUser.get((int)annotation.getCreatorID());
+        Integer userID = oldToNewUser.get((int) annotation.getCreatorID());
         if (userID == null) {
           logger.error("no user " + annotation.getCreatorID());
         } else {
