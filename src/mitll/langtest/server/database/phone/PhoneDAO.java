@@ -149,8 +149,13 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
    * @see Analysis#getPhonesForUser
    */
   @Override
-  public PhoneReport getWorstPhonesForResults(long userid, List<Integer> ids, Map<String, String> idToRef) throws SQLException {
-    return getPhoneReport(getResultIDJoinSQL(userid, ids), idToRef, true, false);
+  public PhoneReport getWorstPhonesForResults(long userid, Collection<Integer> ids, Map<String, String> idToRef) {
+    try {
+      return getPhoneReport(getResultIDJoinSQL(userid, ids), idToRef, true, false);
+    } catch (Exception e) {
+      logAndNotify.logAndNotifyServerException(e,"sql exception for user " +userid + " and result ids "  + ids);
+      return new PhoneReport();
+    }
   }
 
   /**
@@ -161,8 +166,10 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
    * @see mitll.langtest.server.database.DatabaseImpl#getJsonPhoneReport
    * @see JsonSupport#getJsonPhoneReport(long, Map)
    */
-  public JSONObject getWorstPhonesJson(long userid, List<String> exids, Map<String, String> idToRef) {
-    return new PhoneJSON().getWorstPhonesJson(getPhoneReport(userid, exids, idToRef));
+  public JSONObject getWorstPhonesJson(long userid, Collection<String> exids, Map<String, String> idToRef) {
+    PhoneReport phoneReport = getPhoneReport(userid, exids, idToRef);
+    logger.info("getWorstPhonesJson phone report " + phoneReport);
+    return new PhoneJSON().getWorstPhonesJson(phoneReport);
   }
 
   /**
@@ -171,7 +178,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
    * @param idToRef
    * @return
    */
-  protected PhoneReport getPhoneReport(long userid, List<String> exids, Map<String, String> idToRef) {
+  protected PhoneReport getPhoneReport(long userid, Collection<String> exids, Map<String, String> idToRef) {
     PhoneReport worstPhonesAndScore = null;
     try {
       worstPhonesAndScore = getPhoneReport(getJoinSQL(userid, exids), idToRef, false, true);
@@ -190,14 +197,14 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
    * @param sortByLatestExample
    * @return
    * @throws SQLException
-   * @see #getWorstPhonesForResults(long, List, Map)
+   * @see IPhoneDAO#getWorstPhonesForResults(long, Collection, Map)
    * @see #getPhoneReport(String, Map, boolean, boolean)
    */
   protected PhoneReport getPhoneReport(String sql,
                                        Map<String, String> idToRef,
                                        boolean addTranscript,
                                        boolean sortByLatestExample) throws SQLException {
-    // logger.debug("getPhoneReport query is " + sql);
+ //   logger.debug("getPhoneReport query is\n" + sql);
     Connection connection = getConnection();
     PreparedStatement statement = connection.prepareStatement(sql);
     ResultSet rs = statement.executeQuery();
@@ -210,15 +217,19 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     float totalScore = 0;
     float totalItems = 0;
 
+    int c = 0;
     Map<String, Map<NetPronImageType, List<TranscriptSegment>>> stringToMap = new HashMap<>();
     while (rs.next()) {
       int i = 1;
 
+      c++;
       // info from result table
       String exid = rs.getString(i++);
       String audioAnswer = rs.getString(i++);
       String scoreJson = rs.getString(i++);
       float pronScore = rs.getFloat(i++);
+
+   //   logger.info("#"+ c + " : " + exid + " audio " + audioAnswer);
 
       long resultTime = -1;
       Timestamp timestamp = rs.getTimestamp(i++);
@@ -238,7 +249,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 
       if (!exid.equals(currentExercise)) {
         currentExercise = exid;
-        //logger.debug("adding " + exid + " score " + pronScore);
+        if (false)  logger.debug("#" +c+ " adding " + exid + " score " + pronScore);
         totalScore += pronScore;
         totalItems++;
       }
@@ -267,18 +278,18 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
    * @paramx sortByLatestExample
    * @return
    * @throws SQLException
-   * @see #getPhoneReport(long, List, Map)
+   * @see #getPhoneReport
    */
 /*  private PhoneReport getWorstPhones(long userid, List<String> exids, Map<String, String> idToRef) throws SQLException {
     return getPhoneReport(getJoinSQL(userid, exids), idToRef, false, true);
   }*/
 
-  private String getResultIDJoinSQL(long userid, List<Integer> ids) {
+  private String getResultIDJoinSQL(long userid, Collection<Integer> ids) {
     String filterClause = ResultDAO.RESULTS + "." + ResultDAO.ID + " in (" + getInList(ids) + ")";
     return getJoinSQL(userid, filterClause);
   }
 
-  private String getJoinSQL(long userid, List<String> exids) {
+  private String getJoinSQL(long userid, Collection<String> exids) {
     String filterClause = ResultDAO.RESULTS + "." + Database.EXID + " in (" + getInList(exids) + ")";
     return getJoinSQL(userid, filterClause);
   }
