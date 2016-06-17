@@ -32,12 +32,46 @@
 
 package mitll.langtest.server.database.userlist;
 
-import java.util.List;
+import mitll.langtest.server.database.DAO;
+import mitll.langtest.server.database.Database;
+import mitll.npdata.dao.DBConnection;
+import mitll.npdata.dao.userexercise.UserExerciseListVisitorDAOWrapper;
+import org.apache.log4j.Logger;
 
-public interface IUserListVisitorJoinDAO {
-  void add(long listID, long visitor);
+import java.util.Collection;
 
-  List<Long> getListsForVisitor(long userid);
+public class SlickUserListExerciseVisitorDAO
+    extends DAO implements IUserExerciseListVisitorDAO {
+  private static final Logger logger = Logger.getLogger(SlickUserListExerciseVisitorDAO.class);
 
-  boolean remove(long listid);
+  private final UserExerciseListVisitorDAOWrapper dao;
+
+  public SlickUserListExerciseVisitorDAO(Database database, DBConnection dbConnection) {
+    super(database);
+    dao = new UserExerciseListVisitorDAOWrapper(dbConnection);
+  }
+
+  public void createTable() {
+    dao.createTable();
+  }
+
+  @Override
+  public void add(long listID, long visitor) {
+    dao.insert((int)listID,(int)visitor);
+  }
+
+  @Override
+  public Collection<Integer> getListsForVisitor(int userid) {
+    return dao.byUser(userid);
+  }
+
+  /**
+   * Now that we just mark lists as deleted this is moot
+   * @param listid
+   * @return
+   */
+  @Override
+  public boolean remove(long listid) {
+    return false;
+  }
 }
