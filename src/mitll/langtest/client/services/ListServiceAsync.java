@@ -41,6 +41,12 @@ import java.util.Collection;
 import java.util.List;
 
 public interface ListServiceAsync {
+  /**
+   * TODO : add ability to search through list text...
+   * @param search
+   * @param userid
+   * @param async
+   */
   void getUserListsForText(String search, int userid, AsyncCallback<Collection<UserList<CommonShell>>> async);
 
   void getListsForUser(int userid, boolean onlyCreated, boolean visited, AsyncCallback<Collection<UserList<CommonShell>>> async);

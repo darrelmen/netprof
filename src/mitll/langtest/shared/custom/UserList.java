@@ -64,6 +64,7 @@ public class UserList<T extends HasID> extends BaseExercise {
   private String description;
   private String classMarker;
   private boolean isPrivate;
+  private long modified;
 //  private boolean isReview;
   private List<T> exercises = new ArrayList<>();
 
@@ -226,5 +227,13 @@ public class UserList<T extends HasID> extends BaseExercise {
         //" : " + (isReview ? " REVIEW " : "") +
         " :" +
         " with " + getExercises().size() + " exercises.";
+  }
+
+  public long getModified() {
+    return modified;
+  }
+
+  public void setModified(long modified) {
+    this.modified = modified;
   }
 }
