@@ -168,8 +168,7 @@ public class SlickUserExerciseDAO
   public List<CommonShell> getOnList(long listID) {
     List<CommonShell> userExercises2 = new ArrayList<>();
 
-    List<SlickUserExercise> onList = dao.getOnList((int) listID);
-    enrichWithPredefInfo(userExercises2, getUserExercises(onList));
+    enrichWithPredefInfo(userExercises2, getUserExercises(dao.getOnList((int) listID)));
 
     return userExercises2;
   }
