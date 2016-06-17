@@ -46,9 +46,6 @@ public class SlickUserListExerciseJoinDAO
 
   private final UserExerciseListJoinDAOWrapper dao;
 
-  // Collection<String> typeOrder;
-  IUserDAO userDAO;
-
   public SlickUserListExerciseJoinDAO(Database database, DBConnection dbConnection) {
     super(database);
     dao = new UserExerciseListJoinDAOWrapper(dbConnection);
