@@ -50,10 +50,7 @@ public class BaseUserExerciseDAO extends DAO {
 
   ExerciseDAO<CommonExercise> exerciseDAO;
 
-  protected BaseUserExerciseDAO(Database database) {
-    super(database);
-    //this.exerciseDAO = exerciseDAO;
-  }
+  protected BaseUserExerciseDAO(Database database) { super(database);  }
 
   /**
    * TODO : Do we need to set the english field to meaning for english items???
@@ -105,6 +102,10 @@ public class BaseUserExerciseDAO extends DAO {
     return exerciseDAO.getExercise(id);
   }
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#makeDAO(String, String, String)
+   * @param exerciseDAO
+   */
   public void setExerciseDAO(ExerciseDAO<CommonExercise> exerciseDAO) {
     this.exerciseDAO = exerciseDAO;
   }

@@ -534,6 +534,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         } else {
           makeExerciseDAO(lessonPlanFile, isURL);
 
+          logger.info("set exercise dao " + exerciseDAO + " on " + userExerciseDAO);
           userExerciseDAO.setExerciseDAO(exerciseDAO);
 
           setDependencies(mediaDir, installPath);
@@ -547,7 +548,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
           analysis = new Analysis(this, phoneDAO, getExerciseIDToRefAudio());
         }
         userManagement = new UserManagement(userDAO, numExercises, resultDAO, userListManager);
-
         //   audioDAO.setExerciseDAO(exerciseDAO);
         //   audioDAO.markTranscripts();
       }
@@ -1749,9 +1749,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return logAndNotify;
   }
 
-  public IUserExerciseDAO getUserExerciseDAO() {
-    return userExerciseDAO;
-  }
+  public IUserExerciseDAO getUserExerciseDAO() { return userExerciseDAO;  }
 
   public IAnnotationDAO getAnnotationDAO() {
     return userListManager.getAnnotationDAO();

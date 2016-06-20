@@ -58,10 +58,6 @@ public class SlickWordDAO extends BaseUserExerciseDAO implements IWordDAO, ISche
     dao.createTable();
   }
 
-/*  public void dropTable() {
-    dao.drop();
-  }*/
-
   @Override
   public SlickWord toSlick(Word shared, String language) {
     return new SlickWord(-1,
@@ -95,10 +91,11 @@ public class SlickWordDAO extends BaseUserExerciseDAO implements IWordDAO, ISche
     return dao.insert(toSlick(word, ""));
   }
 
-
   public Map<Integer, Integer> getOldToNew() {
     Map<Integer, Integer> oldToNew = new HashMap<>();
     for (SlickWord word : dao.getAll()) oldToNew.put(word.legacyid(), word.id());
     return oldToNew;
   }
+
+  public boolean isEmpty() { return dao.getNumRows() == 0; }
 }
