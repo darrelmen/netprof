@@ -91,13 +91,6 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
         shared.getUniqueID());
   }
 
-/*
-  String checkNull(Result shared) {
-    String deviceType = shared.getDeviceType();
-    return checkNull(deviceType);
-  }
-*/
-
   private String checkNull(String deviceType) {
     return deviceType == null?"": deviceType;
   }
@@ -255,4 +248,6 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
     for (SlickResult user : dao.getAll()) oldToNew.put(user.legacyid(), user.id());
     return oldToNew;
   }
+
+  public boolean isEmpty() { return dao.getNumRows() == 0; }
 }
