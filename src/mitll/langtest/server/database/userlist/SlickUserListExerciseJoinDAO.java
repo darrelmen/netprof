@@ -60,6 +60,11 @@ public class SlickUserListExerciseJoinDAO
     addPair((int) userList.getUniqueID(), uniqueID);
   }
 
+  /**
+   * Just for copying from h2 initially
+   * @param userlistid
+   * @param exerciseID
+   */
   public void addPair(int  userlistid, String exerciseID) {
     dao.insert(userlistid, exerciseID);
   }
