@@ -1048,6 +1048,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     if (!dbConnection.hasTable("annotation")) ((ISchema) getAnnotationDAO()).createTable();
     if (!dbConnection.hasTable("word")) ((ISchema) getWordDAO()).createTable();
     if (!dbConnection.hasTable("phone")) ((ISchema) getPhoneDAO()).createTable();
+
+    // if (!dbConnection.hasTable("reviewed")) ((ISchema) getReviewedDAO()).createTable();
     logger.info("created slick tables...");
   }
 
