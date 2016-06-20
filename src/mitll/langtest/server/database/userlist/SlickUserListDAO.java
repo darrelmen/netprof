@@ -32,12 +32,14 @@
 
 package mitll.langtest.server.database.userlist;
 
+import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.ISchema;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickUser;
@@ -60,13 +62,23 @@ public class SlickUserListDAO extends DAO implements IUserListDAO, ISchema<UserL
   private final IUserExerciseDAO userExerciseDAO;
 
   private final IUserDAO userDAO;
+  SlickUserListExerciseJoinDAO userListExerciseJoinDAO;
 
-  public SlickUserListDAO(Database database, DBConnection dbConnection, IUserDAO userDAO, IUserExerciseDAO userExerciseDAO) {
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(PathHelper)
+   * @param database
+   * @param dbConnection
+   * @param userDAO
+   * @param userExerciseDAO
+   */
+  public SlickUserListDAO(Database database, DBConnection dbConnection, IUserDAO userDAO, IUserExerciseDAO userExerciseDAO,
+                          SlickUserListExerciseJoinDAO userListExerciseJoinDAO) {
     super(database);
     dao = new UserExerciseListDAOWrapper(dbConnection);
     this.userDAO = userDAO;
     this.visitorDAOWrapper = new UserExerciseListVisitorDAOWrapper(dbConnection);
     this.userExerciseDAO = userExerciseDAO;
+    this.userListExerciseJoinDAO = userListExerciseJoinDAO;
   }
 
   public void createTable() {
@@ -188,9 +200,20 @@ public class SlickUserListDAO extends DAO implements IUserListDAO, ISchema<UserL
    * @see #getAllByUser(long)
    */
   private void populateList(UserList<CommonShell> where) {
-    where.setExercises(userExerciseDAO.getOnList(where.getUniqueID()));
+    List<CommonShell> onList = userExerciseDAO.getOnList(where.getUniqueID());
+    where.setExercises(onList);
+    Set<String> userExIDs = new HashSet<>();
+    for (CommonShell shell : onList) userExIDs.add(shell.getID());
 
+    Collection<String> exidsFor = userListExerciseJoinDAO.getExidsFor((int) where.getUniqueID());
 
+    for (String exid: exidsFor) {
+      if (!userExIDs.contains(exid)) {
+        CommonExercise predefExercise = userExerciseDAO.getPredefExercise(exid);
+        if (exid == null) logger.warn("can't find " + exid + " for list " + where);
+        else onList.add(predefExercise);
+      }
+    }
   }
 
   /**
