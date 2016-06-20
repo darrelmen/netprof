@@ -214,6 +214,8 @@ public class AnswerInfo {
     this.processDur = processDur;
     this.roundTripDur = 0;//roundTripDur;
     this.snr = snr;
+
+    if (answer.isEmpty()) System.err.println("answer is not set?");
   }
 
   public int getUserid() {

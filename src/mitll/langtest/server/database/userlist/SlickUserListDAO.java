@@ -166,6 +166,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO, ISchema<UserL
   /**
    * Side effect is to add user exercises to lists.
    *
+   * @see mitll.langtest.server.database.custom.UserListManager#getListsForUser(int, boolean, boolean)
    * @param userid
    * @return
    */
@@ -181,11 +182,15 @@ public class SlickUserListDAO extends DAO implements IUserListDAO, ISchema<UserL
 
   /**
    * Could get slow.
+   * Why would we need to copy the exercise as in UserListDAO?
    *
    * @param where
+   * @see #getAllByUser(long)
    */
   private void populateList(UserList<CommonShell> where) {
     where.setExercises(userExerciseDAO.getOnList(where.getUniqueID()));
+
+
   }
 
   /**

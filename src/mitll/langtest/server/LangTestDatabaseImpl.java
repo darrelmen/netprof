@@ -506,7 +506,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   @Override
   public void addStudentAnswer(long resultID, boolean correct) {
-    db.getAnswerDAO().addUserScore((int)resultID, correct ? 1.0f : 0.0f);
+    db.getAnswerDAO().addUserScore((int) resultID, correct ? 1.0f : 0.0f);
   }
 
   /**
@@ -945,8 +945,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @see #getExercises()
    * @param <T>
+   * @see #getExercises()
    */
   private <T extends CommonShell> void buildExerciseTrie() {
     logger.info("db " + db);
@@ -1019,7 +1019,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return path to an image file
    * @see mitll.langtest.client.scoring.AudioPanel#getImageURLForAudio
    */
-  public ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, String exerciseID) {
+  public ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height,
+                                            String exerciseID) {
+    if (audioFile.isEmpty()) logger.error("huh? audio file is empty for req id " + reqid + " exid " + exerciseID);
+
     SimpleImageWriter imageWriter = new SimpleImageWriter();
 
     String wavAudioFile = getWavAudioFile(audioFile);
@@ -1173,7 +1176,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   public PretestScore getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence,
                                           int width, int height, boolean useScoreToColorBkg, String exerciseID) {
-    return getPretestScore(reqid, (int)resultID, testAudioFile, sentence, width, height, useScoreToColorBkg, exerciseID, false);
+    return getPretestScore(reqid, (int) resultID, testAudioFile, sentence, width, height, useScoreToColorBkg, exerciseID, false);
   }
 
   /**
@@ -1240,7 +1243,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public PretestScore getASRScoreForAudioPhonemes(int reqid, long resultID, String testAudioFile, String sentence,
                                                   int width, int height, boolean useScoreToColorBkg, String exerciseID) {
-    return getPretestScore(reqid, (int)resultID, testAudioFile, sentence, width, height, useScoreToColorBkg, exerciseID, true);
+    return getPretestScore(reqid, (int) resultID, testAudioFile, sentence, width, height, useScoreToColorBkg, exerciseID, true);
   }
 
   @Override
@@ -1459,11 +1462,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       start = 0;
     }
     List<MonitorResult> resultList = results.subList(start, min);
-    logger.info("ensure compressed audio for " + resultList.size() + " items.");
+    logger.info("getResults ensure compressed audio for " + resultList.size() + " items.");
     for (MonitorResult result : resultList) {
       ensureCompressedAudio(result.getUserid(), db.getCustomOrPredefExercise(result.getId()), result.getAnswer());
     }
-    return new ResultAndTotal(new ArrayList<MonitorResult>(resultList), n, req);
+    return new ResultAndTotal(new ArrayList<>(resultList), n, req);
   }
 
   @Override
@@ -1552,7 +1555,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       results = trie.getMatchesLC(flText);
     }
     logger.debug("getResults : request " + unitToValue + " " + userid + " " + flText + " returning " + results.size() + " results...");
-    return new ArrayList<MonitorResult>(results);
+    return new ArrayList<>(results);
   }
 
   /**
@@ -1989,7 +1992,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       }
     }
     //logger.debug("for " + typeToSection + " found " + allIDs.size());
-    return db.getUserHistoryForList(userid, ids, (int)latestResultID, allIDs, idToKey);
+    return db.getUserHistoryForList(userid, ids, (int) latestResultID, allIDs, idToKey);
   }
 
   private void populateCollatorMap(List<String> allIDs, Map<String, CollationKey> idToKey, Collator collator, CommonShell exercise) {
@@ -2036,7 +2039,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     refResultDecoder.setStopDecode(true);
     //stopOggCheck = true;
     super.destroy();
-    db.destroy(); // TODO : redundant with h2 shutdown hook?
+    if (db == null) {
+      logger.error("DatabaseImpl was never made properly...");
+    } else {
+      db.destroy(); // TODO : redundant with h2 shutdown hook?
+    }
   }
 
   /**
@@ -2156,7 +2163,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     db.setInstallPath(installPath,
         lessonPlanFile,
         mediaDir);
-   // db.setDependencies(mediaDir, installPath);
+    // db.setDependencies(mediaDir, installPath);
   }
 
   private String getLessonPlan() {
