@@ -40,7 +40,11 @@ import org.apache.log4j.Logger;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class UserListExerciseJoinDAO extends DAO implements IUserListExerciseJoinDAO {
   private static final Logger logger = Logger.getLogger(UserListExerciseJoinDAO.class);
@@ -101,7 +105,7 @@ public class UserListExerciseJoinDAO extends DAO implements IUserListExerciseJoi
   public void add(UserList userList, String uniqueID) {
     try {
       // there are much better ways of doing this...
-      logger.info("UserListExerciseJoinDAO.add :userList #" + userList.getUniqueID() + " exercise id '" + uniqueID +"'");
+      logger.info("UserListExerciseJoinDAO.add :userList #" + userList.getUniqueID() + " exercise id '" + uniqueID + "'");
 
       Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement = connection.prepareStatement(
@@ -126,6 +130,37 @@ public class UserListExerciseJoinDAO extends DAO implements IUserListExerciseJoi
       logger.debug("\tUserListExerciseJoinDAO.add : now " + getCount(USER_EXERCISE_LIST_EXERCISE) + " and user exercise is " + userList);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
+    }
+  }
+
+  public Collection<Join> getAll() {
+    List<Join> all = new ArrayList<>();
+    Connection connection = database.getConnection(this.getClass().toString());
+    try {
+      PreparedStatement statement = connection.prepareStatement("select * from " + USER_EXERCISE_LIST_EXERCISE);
+      //logger.debug("getUserExercises sql = " + sql);
+      ResultSet rs = statement.executeQuery();
+
+      while (rs.next()) {
+        all.add(new Join(rs.getInt(2), rs.getString(3)));
+      }
+      finish(connection, statement, rs);
+    } catch (Exception e) {
+      logger.error("Got " + e, e);
+    } finally {
+      database.closeConnection(connection);
+    }
+
+    return all;
+  }
+
+  public static class Join {
+    public int userlistid;
+    public String exerciseID;
+
+    public Join(int userlistid, String exerciseID) {
+      this.userlistid = userlistid;
+      this.exerciseID = exerciseID;
     }
   }
 
