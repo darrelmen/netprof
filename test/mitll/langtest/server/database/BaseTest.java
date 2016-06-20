@@ -34,13 +34,14 @@ public class BaseTest {
 
     parent = file.getParentFile().getAbsolutePath();
 
-    logger.info("path is "+ parent);
+    logger.info("path is " + parent);
     ServerProperties serverProps = new ServerProperties(parent, name);
-    DatabaseImpl<CommonExercise> database = new DatabaseImpl<CommonExercise>(parent, name, serverProps.getH2Database(), serverProps, new PathHelper(installPath), false, null);
+    DatabaseImpl<CommonExercise> database = new DatabaseImpl<CommonExercise>(parent, name, serverProps.getH2Database(),
+        serverProps, new PathHelper(installPath), false, null, false);
     String mediaDir = serverProps.getMediaDir();
     database.setInstallPath(installPath, parent + File.separator + database.getServerProps().getLessonPlan(),
         mediaDir);
-   // database.setDependencies(mediaDir, installPath);
+    // database.setDependencies(mediaDir, installPath);
     return database;
   }
 
@@ -51,9 +52,10 @@ public class BaseTest {
 
     parent = file.getParentFile().getAbsolutePath();
 
-    logger.info("path is "+ parent);
+    logger.info("path is " + parent);
     ServerProperties serverProps = new ServerProperties(parent, name);
-    DatabaseImpl<CommonExercise> database = new DatabaseImpl<>(parent, name, serverProps.getH2Database(), serverProps, new PathHelper("war"), false, null);
+    DatabaseImpl<CommonExercise> database = new DatabaseImpl<>(parent, name, serverProps.getH2Database(), serverProps,
+        new PathHelper("war"), false, null, false);
     return database;
   }
 
@@ -64,7 +66,7 @@ public class BaseTest {
 
     parent = file.getParentFile().getAbsolutePath();
 
-    logger.info("path is "+ parent);
+    logger.info("path is " + parent);
     ServerProperties serverProps = new ServerProperties(parent, name);
     DatabaseImpl<CommonExercise> database = getDatabaseVeryLight(config);
     database.setInstallPath("war", parent + File.separator + database.getServerProps().getLessonPlan(),
@@ -98,12 +100,12 @@ public class BaseTest {
   }
 
   /**
-   * @see ReportAllTest#testReports()
-   * @see ReportAllTest#testYTD()
    * @param connection
    * @param config
    * @param dbName
    * @return
+   * @see ReportAllTest#testReports()
+   * @see ReportAllTest#testYTD()
    */
   protected DatabaseImpl getDatabase(DatabaseConnection connection, String config, String dbName) {
     File file = getPropertiesFile(config);
@@ -129,6 +131,6 @@ public class BaseTest {
   }
 
   protected H2Connection getH2Connection(String path) {
-    return new H2Connection(".", path, true,null);
+    return new H2Connection(".", path, true, null, false);
   }
 }

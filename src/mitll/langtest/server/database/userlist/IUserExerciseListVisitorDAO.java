@@ -35,6 +35,11 @@ package mitll.langtest.server.database.userlist;
 import java.util.Collection;
 
 public interface IUserExerciseListVisitorDAO {
+  /**
+   * @see UserListDAO#addVisitor(long, long)
+   * @param listID
+   * @param visitor
+   */
   void add(long listID, long visitor);
 
   Collection<Integer> getListsForVisitor(int userid);

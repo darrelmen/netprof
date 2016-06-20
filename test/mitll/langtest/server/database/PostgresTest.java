@@ -235,7 +235,7 @@ public class PostgresTest extends BaseTest {
     logger.info("path is "+ parent);
     ServerProperties serverProps = new ServerProperties(parent, name);
     return new DBConnection(serverProps.getDatabaseType(),
-        serverProps.getDatabaseHost(), serverProps.getDatabasePort(), serverProps.getDatabaseName());
+        serverProps.getDatabaseHost(), serverProps.getDatabasePort(), serverProps.getDatabaseName(),serverProps.getDatabaseUser(),serverProps.getDatabasePassword());
   }
   @Test
   public void testCreate() {
