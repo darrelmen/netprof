@@ -37,7 +37,7 @@ public class AMASReaderTest {
     logger.debug("config     " + file.getName());
     ServerProperties serverProps = new ServerProperties(parent, file.getName());
     String dbName = serverProps.getH2Database();
-    database = new DatabaseImpl(parent, file.getName(), dbName, serverProps, new PathHelper("war"), false, null);
+    database = new DatabaseImpl(parent, file.getName(), dbName, serverProps, new PathHelper("war"), false, null, true);
     logger.debug("made " + database);
     database.setInstallPath("war", parent + File.separator + database.getServerProps().getLessonPlan(),
         serverProps.getMediaDir());

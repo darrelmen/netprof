@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+java -cp WEB-INF/lib/dom4j-1.6.1.jar:WEB-INF/lib/xmlbeans-2.3.0.jar:WEB-INF/lib/poi-3.10-FINAL-20140208.jar:WEB-INF/lib/poi-ooxml-3.10-FINAL-20140208.jar:WEB-INF/lib/poi-ooxml-schemas-3.10-FINAL-20140208.jar:WEB-INF/lib/npdata-assembly-1.0.jar:WEB-INF/lib/h2-1.3.176.jar:WEB-INF/lib/gwt-servlet.jar:WEB-INF/classes:WEB-INF/lib/log4j-1.2.17.jar:WEB-INF/lib/servlet-api.jar mitll.langtest.server.database.CopyToPostgres copy $1
