@@ -303,7 +303,11 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
   private DBConnection getDbConnection() {
     return new DBConnection(serverProps.getDatabaseType(),
-        serverProps.getDatabaseHost(), serverProps.getDatabasePort(), serverProps.getDatabaseName());
+        serverProps.getDatabaseHost(),
+        serverProps.getDatabasePort(),
+        serverProps.getDatabaseName(),
+        serverProps.getDatabaseUser(),
+        serverProps.getDatabasePassword());
   }
 
   IAudioDAO getH2AudioDAO() {
@@ -1324,6 +1328,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   public void destroy() {
     try {
       connection.contextDestroyed();
+      logger.info("closing db connection : " + dbConnection);
+      dbConnection.close();
       //sessionManagement.close();
     } catch (Exception e) {
       logger.error("got " + e, e);
