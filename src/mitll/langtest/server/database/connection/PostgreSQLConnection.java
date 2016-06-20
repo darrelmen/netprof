@@ -63,7 +63,7 @@ public class PostgreSQLConnection implements DatabaseConnection {
    * @param dbName
    * @paramx configDir
    * @paramx mustAlreadyExist
-   * @see mitll.langtest.server.database.DatabaseImpl#DatabaseImpl(String, String, String, ServerProperties, PathHelper, boolean, LogAndNotify)
+   * @see mitll.langtest.server.database.DatabaseImpl#DatabaseImpl(String, String, String, ServerProperties, PathHelper, boolean, LogAndNotify, boolean)
    */
   public PostgreSQLConnection(String dbName, LogAndNotify logAndNotify) {
     this.logAndNotify = logAndNotify;
