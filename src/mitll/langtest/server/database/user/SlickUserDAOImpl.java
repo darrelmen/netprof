@@ -301,5 +301,5 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return oldToNew;
   }
 
-  public boolean isEmpty() { return dao.getNumRows() == 0; }
+  public boolean isEmpty() { return dao.getNumRows() < 2; }
 }
