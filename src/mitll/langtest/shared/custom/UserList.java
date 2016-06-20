@@ -65,7 +65,7 @@ public class UserList<T extends HasID> extends BaseExercise {
   private String classMarker;
   private boolean isPrivate;
   private long modified;
-//  private boolean isReview;
+  //  private boolean isReview;
   private List<T> exercises = new ArrayList<>();
 
   public UserList() {
@@ -77,10 +77,11 @@ public class UserList<T extends HasID> extends BaseExercise {
    * @param name
    * @param description
    * @param classMarker
-   * @see mitll.langtest.server.database.custom.UserListManager#createUserList(long, String, String, String, boolean)
+   * @see mitll.langtest.server.database.custom.UserListManager#createUserList(int, String, String, String, boolean)
    * @see UserListDAO#getWhere(long, boolean)
    */
-  public UserList(long uniqueID, User user, String name, String description, String classMarker, boolean isPrivate) {
+  public UserList(long uniqueID, User user, String name, String description, String classMarker, boolean isPrivate,
+                  long modified) {
     super("" + uniqueID);
     this.uniqueID = uniqueID;
     this.creator = user;
@@ -88,6 +89,7 @@ public class UserList<T extends HasID> extends BaseExercise {
     this.description = description;
     this.classMarker = classMarker;
     this.isPrivate = isPrivate;
+    this.modified = modified;
   }
 
   /**
@@ -95,7 +97,7 @@ public class UserList<T extends HasID> extends BaseExercise {
    * @see mitll.langtest.client.custom.dialog.EditItem#makeListOfOnlyYourItems(UserList)
    */
   public UserList(UserList<T> ul) {
-    this(ul.uniqueID, ul.getCreator(), ul.getName(), ul.getDescription(), ul.getClassMarker(), ul.isPrivate());
+    this(ul.uniqueID, ul.getCreator(), ul.getName(), ul.getDescription(), ul.getClassMarker(), ul.isPrivate(), ul.getModified());
   }
 
   public UserList<T> getCopy() {

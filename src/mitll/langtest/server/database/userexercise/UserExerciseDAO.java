@@ -252,6 +252,8 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   }
 
   /**
+   * Handles both userexercise items and predefined exercises.
+   *
    * @param listID
    * @return
    * @see UserListDAO#populateList

@@ -57,7 +57,11 @@ public class SlickUserListExerciseJoinDAO
 
   @Override
   public void add(UserList userList, String uniqueID) {
-    dao.insert((int) userList.getUniqueID(), uniqueID);
+    addPair((int) userList.getUniqueID(), uniqueID);
+  }
+
+  public void addPair(int  userlistid, String exerciseID) {
+    dao.insert(userlistid, exerciseID);
   }
 
   @Override
@@ -69,4 +73,6 @@ public class SlickUserListExerciseJoinDAO
   public boolean remove(long listid, String exid) {
     return dao.remove((int) listid, exid) == 1;
   }
+
+  public boolean isEmpty() { return dao.getNumRows() == 0; }
 }
