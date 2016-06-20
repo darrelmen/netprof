@@ -41,7 +41,7 @@
         <pathelement location="war/WEB-INF/lib/guava-19.0.jar"/>
         <pathelement location="war/WEB-INF/lib/log4j-1.2.17.jar"/>
         <path refid="imagewriter.classpath"/>
-        <pathelement location="war/WEB-INF/lib/pronz.jar"/>
+        <pathelement location="war/WEB-INF/lib/pronz-assembly-1.0.jar"/>
         <pathelement location="war/WEB-INF/lib/mira.jar"/>
         <pathelement location="war/WEB-INF/lib/gwt-visualization.jar"/>
         <pathelement location="war/WEB-INF/lib/poi-3.10-FINAL-20140208.jar"/>
@@ -61,6 +61,7 @@
         <pathelement location="war/WEB-INF/lib/slf4j-log4j12-1.7.21.jar"/>
         <pathelement location="war/WEB-INF/lib/slf4j-api-1.7.21.jar"/>
         <pathelement location="war/WEB-INF/lib/quality-check-1.3.jar"/>
+        <pathelement location="war/WEB-INF/lib/npdata-assembly-1.0.jar"/>
     </path>
     <target name="init" depends="clean">
         <mkdir dir="war/WEB-INF/classes"/>
@@ -289,6 +290,16 @@
     </target>
 
 
+    <target depends="build" name="postgresSpanish">
+        <jar destfile="postgresSpanish.war" basedir="war"
+             includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/spanish/**,scoring/bin.linux64/**,scoring/configurations/**"
+        >
+
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
+        </jar>
+    </target>
 
     <target depends="build" name="classroomTagalog">
         <jar destfile="npfClassroomTagalog.war" basedir="war"
