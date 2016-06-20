@@ -51,11 +51,22 @@ public class SlickAnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
     dao = new ResultDAOWrapper(dbConnection);
   }
 
+  /**
+   * Cheesy thing where audio file path is actually in the audio file slot and not the answer.
+   * @param answerInfo
+   * @return
+   */
   public int addAnswer(AnswerInfo answerInfo) {
+
+    boolean isAudioAnswer = answerInfo.getAnswer() == null || answerInfo.getAnswer().length() == 0;
+    String answerInserted = isAudioAnswer ? answerInfo.getAudioFile() : answerInfo.getAnswer();
+
     SlickResult res = new SlickResult(-1,
         answerInfo.getUserid(),
-        answerInfo.getId(), answerInfo.getQuestionID(), answerInfo.getAudioType().toString(),
-        answerInfo.getAnswer(),
+        answerInfo.getId(),
+        answerInfo.getQuestionID(),
+        answerInfo.getAudioType().toString(),
+        answerInserted,
         new Timestamp(System.currentTimeMillis()),
         answerInfo.isValid(),
         answerInfo.getValidity(),
@@ -71,6 +82,8 @@ public class SlickAnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
         (float) answerInfo.getSnr(),
         getLanguage(),
         -1);
+
+    logger.info("inserting answer by " + answerInfo.getUserid() + " to " + answerInfo.getId() + " :  " + answerInfo.getAnswer() + " :\n" +res);
 
     return dao.insert(res).id();
   }

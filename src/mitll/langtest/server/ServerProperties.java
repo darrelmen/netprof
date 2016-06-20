@@ -694,7 +694,7 @@ public class ServerProperties {
     return getIntPropertyDef("databasePort", "5432");
   }
 
-  public String getDatabaseName() {
-    return props.getProperty("databaseName", "netprof");
-  }
+  public String getDatabaseName() { return props.getProperty("databaseName", "netprof");  }
+  public String getDatabaseUser() { return props.getProperty("databaseUser", "postgres");  }
+  public String getDatabasePassword() { return props.getProperty("databasePassword", "pgadmin");  }
 }
