@@ -95,7 +95,7 @@ public class ImportCourseExamples {
 
   private static DatabaseImpl makeDatabaseImpl(String h2DatabaseFile, String configDir) {
     ServerProperties serverProps = new ServerProperties(configDir, "quizlet.properties");
-    return new DatabaseImpl(configDir, configDir, h2DatabaseFile, serverProps, null, true, null);
+    return new DatabaseImpl(configDir, configDir, h2DatabaseFile, serverProps, null, true, null, true);
   }
 
   private static void copyUser(DatabaseImpl npfRussian, Map<Integer, User> userMap, Map<Integer, Integer> oldToNew, int userid) {
