@@ -271,13 +271,14 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     wordDAO = new SlickWordDAO(this, dbConnection);
     phoneDAO = new SlickPhoneDAO(this, dbConnection);
 
-    IUserListDAO userListDAO = new SlickUserListDAO(this, dbConnection, this.userDAO, userExerciseDAO);
+    SlickUserListExerciseJoinDAO userListExerciseJoinDAO = new SlickUserListExerciseJoinDAO(this, dbConnection);
+    IUserListDAO userListDAO = new SlickUserListDAO(this, dbConnection, this.userDAO, userExerciseDAO,userListExerciseJoinDAO);
     IAnnotationDAO annotationDAO = new SlickAnnotationDAO(this, dbConnection, this.userDAO.getDefectDetector());
 
     IReviewedDAO reviewedDAO = new ReviewedDAO(this, ReviewedDAO.REVIEWED);
     userListManager = new UserListManager(this.userDAO,
         userListDAO,
-        new SlickUserListExerciseJoinDAO(this, dbConnection),
+        userListExerciseJoinDAO,
         annotationDAO,
         reviewedDAO,
         new ReviewedDAO(this, ReviewedDAO.SECOND_STATE),
