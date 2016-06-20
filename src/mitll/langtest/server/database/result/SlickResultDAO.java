@@ -32,16 +32,15 @@
 
 package mitll.langtest.server.database.result;
 
+import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.ISchema;
-import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.AudioType;
 import mitll.langtest.shared.MonitorResult;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
-import mitll.npdata.dao.SlickResult;
 import mitll.npdata.dao.DBConnection;
-import mitll.npdata.dao.SlickUser;
+import mitll.npdata.dao.SlickResult;
 import mitll.npdata.dao.result.ResultDAOWrapper;
 import mitll.npdata.dao.result.SlickCorrectAndScore;
 import mitll.npdata.dao.result.SlickUserAndTime;
@@ -55,17 +54,13 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
 
   private final ResultDAOWrapper dao;
 
-  public SlickResultDAO(Database database, DBConnection dbConnection, IUserDAO userDAO) {
+  public SlickResultDAO(Database database, DBConnection dbConnection) {
     super(database);
     dao = new ResultDAOWrapper(dbConnection);
   }
 
   public void createTable() {
     dao.createTable();
-  }
-
-  public void dropTable() {
-    dao.drop();
   }
 
   @Override
@@ -104,7 +99,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
         slick.userid(),
         slick.exid(),
         slick.qid(),
-        slick.answer(),
+        getRelativePath(slick),
         slick.valid(),
         slick.modified().getTime(),
         AudioType.valueOf(audiotype.toUpperCase()),
@@ -127,7 +122,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
         slick.userid(),
         slick.exid(),
         // slick.qid(),
-        slick.answer(),
+        getRelativePath(slick),
         slick.valid(),
         slick.modified().getTime(),
         AudioType.valueOf(audiotype.toUpperCase()),
@@ -143,17 +138,23 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
         slick.validity());
   }
 
-  public void insert(SlickResult result) {
-    dao.insert(result);
+  private String getRelativePath(SlickResult slick) {
+    return trimPathForWebPage2( slick.answer());
   }
+
+/*  public void insert(SlickResult result) {
+    dao.insert(result);
+  }*/
 
   public void addBulk(List<SlickResult> bulk) {
     dao.addBulk(bulk);
   }
 
+/*
   public int getNumRows() {
     return dao.getNumRows();
   }
+*/
 
   @Override
   public List<Result> getResults() {
@@ -161,13 +162,13 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
     return getResults(all);
   }
 
-  List<Result> getResults(List<SlickResult> all) {
+  private List<Result> getResults(List<SlickResult> all) {
     List<Result> copy = new ArrayList<>();
     for (SlickResult result : all) copy.add(fromSlick(result));
     return copy;
   }
 
-  List<SlickResult> getAll() {
+  private List<SlickResult> getAll() {
     return dao.getAll();
   }
 
@@ -186,7 +187,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
     return getMonitorResults(getAll());
   }
 
-  List<MonitorResult> getMonitorResults(Collection<SlickResult> all) {
+  private List<MonitorResult> getMonitorResults(Collection<SlickResult> all) {
     List<MonitorResult> copy = new ArrayList<>();
     for (SlickResult result : all) copy.add(fromSlick2(result));
     return copy;
@@ -239,14 +240,20 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
     return cs;
   }
 
-  CorrectAndScore fromSlickCS(SlickCorrectAndScore cs) {
-    return new CorrectAndScore(cs.id(), cs.userid(), cs.exerciseid(), cs.correct(), cs.pronscore(), cs.modified(), cs.path(), cs.json());
+  private CorrectAndScore fromSlickCS(SlickCorrectAndScore cs) {
+    return new CorrectAndScore(cs.id(), cs.userid(), cs.exerciseid(), cs.correct(), cs.pronscore(), cs.modified(),
+        trimPathForWebPage2(cs.path()), cs.json());
   }
 
   public Map<Integer, Integer> getOldToNew() {
     Map<Integer, Integer> oldToNew = new HashMap<>();
     for (SlickResult user : dao.getAll()) oldToNew.put(user.legacyid(), user.id());
     return oldToNew;
+  }
+
+  private String trimPathForWebPage2(String path) {
+    int answer = path.indexOf(PathHelper.ANSWERS);
+    return (answer == -1) ? path : path.substring(answer);
   }
 
   public boolean isEmpty() { return dao.getNumRows() == 0; }

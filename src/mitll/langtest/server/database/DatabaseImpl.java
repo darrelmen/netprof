@@ -160,6 +160,11 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   private final String absConfigDir;
   private SimpleExerciseDAO<AmasExerciseImpl> fileExerciseDAO;
 
+  public DatabaseImpl(String configDir, String relativeConfigDir, String dbName, ServerProperties serverProps,
+                      PathHelper pathHelper, boolean mustAlreadyExist, LogAndNotify logAndNotify) {
+    this(configDir,relativeConfigDir,dbName,serverProps,pathHelper,mustAlreadyExist,logAndNotify,false);
+  }
+
   /**
    * @param configDir
    * @param relativeConfigDir
@@ -168,12 +173,13 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @param pathHelper
    * @param mustAlreadyExist
    * @param logAndNotify
+   * @param readOnly
    * @see mitll.langtest.server.LangTestDatabaseImpl#makeDatabaseImpl(String)
    */
   public DatabaseImpl(String configDir, String relativeConfigDir, String dbName, ServerProperties serverProps,
-                      PathHelper pathHelper, boolean mustAlreadyExist, LogAndNotify logAndNotify) {
+                      PathHelper pathHelper, boolean mustAlreadyExist, LogAndNotify logAndNotify, boolean readOnly) {
     this(serverProps.useH2() ?
-            new H2Connection(configDir, dbName, mustAlreadyExist, logAndNotify) :
+            new H2Connection(configDir, dbName, mustAlreadyExist, logAndNotify, readOnly) :
             serverProps.usePostgres() ?
                 new PostgreSQLConnection(dbName, logAndNotify) : new MySQLConnection(dbName, logAndNotify),
         configDir, relativeConfigDir, dbName,
@@ -251,7 +257,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     SlickAudioDAO slickAudioDAO = new SlickAudioDAO(this, dbConnection, this.userDAO);
     audioDAO = slickAudioDAO;
 
-    SlickResultDAO slickResultDAO = new SlickResultDAO(this, dbConnection, this.userDAO);
+    SlickResultDAO slickResultDAO = new SlickResultDAO(this, dbConnection);
     resultDAO = slickResultDAO;
 
     SlickAnswerDAO slickAnswerDAO = new SlickAnswerDAO(this, dbConnection);
