@@ -52,18 +52,8 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
   public SlickUserDAOImpl(Database database, DBConnection dbConnection) {
     super(database);
     dao = new UserDAOWrapper(dbConnection);
-    //findOrMakeDefectDetector();
   }
 
-  //public void dropAll() { dao.dropAll();}
-/*
-  public void dropTable() {
-    dao.drop();
-  }
-*/
-/*
-public boolean tableExists() { return dao.hasTable(); }
-*/
   public void createTable() {
     dao.createTable();
     findOrMakeDefectDetector();
@@ -311,4 +301,5 @@ public boolean tableExists() { return dao.hasTable(); }
     return oldToNew;
   }
 
+  public boolean isEmpty() { return dao.getNumRows() == 0; }
 }
