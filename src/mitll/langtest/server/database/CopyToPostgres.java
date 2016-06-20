@@ -92,7 +92,7 @@ public class CopyToPostgres {
   }
 
   protected static DBConnection getConnection(String config) {
-    File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
+    File file = new File( "config" + File.separator + config + File.separator + "quizlet.properties");
     String parent = file.getParent();
     String name = file.getName();
 
@@ -109,7 +109,7 @@ public class CopyToPostgres {
   }
 
   protected static DatabaseImpl<CommonExercise> getDatabaseLight(String config) {
-    File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
+    File file = new File( "config" + File.separator + config + File.separator + "quizlet.properties");
     String parent = file.getParent();
     String name = file.getName();
 
@@ -118,13 +118,13 @@ public class CopyToPostgres {
     logger.info("path is " + parent);
     ServerProperties serverProps = new ServerProperties(parent, name);
     DatabaseImpl<CommonExercise> database = getDatabaseVeryLight(config);
-    database.setInstallPath("war", parent + File.separator + database.getServerProps().getLessonPlan(),
+    database.setInstallPath(".", parent + File.separator + database.getServerProps().getLessonPlan(),
         serverProps.getMediaDir());
     return database;
   }
 
   protected static DatabaseImpl<CommonExercise> getDatabaseVeryLight(String config) {
-    File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
+    File file = new File( "config" + File.separator + config + File.separator + "quizlet.properties");
     String parent = file.getParent();
     String name = file.getName();
 
@@ -132,7 +132,8 @@ public class CopyToPostgres {
 
     logger.info("path is " + parent);
     ServerProperties serverProps = new ServerProperties(parent, name);
-    DatabaseImpl<CommonExercise> database = new DatabaseImpl<>(parent, name, serverProps.getH2Database(), serverProps, new PathHelper("war"), false, null);
+    DatabaseImpl<CommonExercise> database = new DatabaseImpl<>(parent, name, serverProps.getH2Database(), serverProps,
+        new PathHelper("."), false, null, true);
     return database;
   }
 
