@@ -53,6 +53,7 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.npdata.dao.DBConnection;
 import org.apache.log4j.Logger;
+import org.apache.xmlbeans.impl.common.SystemCache;
 
 import java.io.File;
 import java.util.*;
@@ -131,9 +132,7 @@ public class UserListManager {
    */
   public void setStateOnExercises() {
    // getAmmendedStateMap();
-
     Map<String, StateCreator> exerciseToState = getExerciseToState(false);
-
     setStateOnExercises(exerciseToState, true);
     //setStateOnExercises(secondStateDAO.getExerciseToState(false), false);
   }
@@ -317,7 +316,7 @@ public class UserListManager {
       if (hasByName(userid, name)) {
         return null;
       } else {
-        UserList e = new UserList(i++, userWhere, name, description, dliClass, isPrivate);
+        UserList e = new UserList(i++, userWhere, name, description, dliClass, isPrivate, System.currentTimeMillis());
 
         userListDAO.add(e);
         logger.debug("createUserList : now there are " + userListDAO.getCount() + " lists total, for " + userid);
@@ -330,10 +329,12 @@ public class UserListManager {
     return userListDAO.hasByName(userid, name);
   }
 
+/*
   public UserList<CommonShell> getByName(int userid, String name) {
     List<UserList<CommonShell>> byName = userListDAO.getByName(userid, name);
     return byName == null ? null : byName.iterator().next();
   }
+*/
 
   /**
    * TODO : expensive -- could just be a query against your own lists and/or against visited lists...
@@ -342,7 +343,7 @@ public class UserListManager {
    * @param listsICreated
    * @param visitedLists
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getListsForUser
+   * @see mitll.langtest.server.services.ListServiceImpl#getListsForUser
    * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    */
   public Collection<UserList<CommonShell>> getListsForUser(int userid, boolean listsICreated, boolean visitedLists) {
@@ -497,7 +498,8 @@ public class UserListManager {
 
     // logger.debug("getReviewList '" +name+ "' ids size = " + allKnown.size() + " yielded " + onList.size());
     User user = getQCUser();
-    UserList<CommonShell> userList = new UserList<CommonShell>(userListMaginID, user, name, description, "", false);
+    UserList<CommonShell> userList = new UserList<CommonShell>(userListMaginID, user, name, description, "", false,
+        System.currentTimeMillis());
     //userList.setReview(true);
 
     new ExerciseSorter(typeOrder).getSortedByUnitThenAlpha(onList, false);
@@ -594,18 +596,18 @@ public class UserListManager {
 
   /**
    * @param userListID
-   * @param userExercise
+   * @param exerciseID
    * @see #addItemToUserList
    */
-  private void addItemToList(long userListID, String userExercise) {
+  private void addItemToList(long userListID, String exerciseID) {
     UserList where = userListDAO.getWhere(userListID, true);
 
     if (where == null) {
-      logger.warn("addItemToList: couldn't find ul with id " + userListID + " and '" + userExercise +"'");
+      logger.warn("addItemToList: couldn't find ul with id " + userListID + " and '" + exerciseID +"'");
     }
 
     if (where != null) {
-      userListExerciseJoinDAO.add(where, userExercise);
+      userListExerciseJoinDAO.add(where, exerciseID);
       userListDAO.updateModified(userListID);
     }
     if (where == null) {
@@ -718,6 +720,10 @@ public class UserListManager {
         userDAO.getDatabase().getServerProps());
   }
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(PathHelper)
+   * @param userExerciseDAO
+   */
   public void setUserExerciseDAO(IUserExerciseDAO userExerciseDAO) {
     this.userExerciseDAO = userExerciseDAO;
     userListDAO.setUserExerciseDAO(userExerciseDAO);
