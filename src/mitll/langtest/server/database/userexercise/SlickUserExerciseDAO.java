@@ -53,14 +53,9 @@ public class SlickUserExerciseDAO
 
   private final UserExerciseDAOWrapper dao;
 
-  // Collection<String> typeOrder;
-  private ExerciseDAO<CommonExercise> exerciseDAO;
-
   public SlickUserExerciseDAO(Database database, DBConnection dbConnection) {
     super(database);
     dao = new UserExerciseDAOWrapper(dbConnection);
-    //   this.typeOrder = database.getTypeOrder();
-    //   this.exerciseDAO = exerciseDAO;
   }
 
   public void createTable() {
@@ -143,12 +138,9 @@ public class SlickUserExerciseDAO
     dao.addBulk(bulk);
   }
 
-/*
-  public int getNumRows() {
-    return dao.getNumRows();
-  }
-*/
+  public int getNumRows() { return dao.getNumRows();  }
 
+  public boolean isEmpty() { return dao.getNumRows() == 0; }
 /*  @Override
   public List<UserExercise> getUserExercises() {
     List<SlickUserExercise> all = getAll();
@@ -202,7 +194,7 @@ public class SlickUserExerciseDAO
     }
   }
 
-  public void setExerciseDAO(ExerciseDAO exerciseDAO) {
+/*  public void setExerciseDAO(ExerciseDAO<CommonExercise> exerciseDAO) {
     this.exerciseDAO = exerciseDAO;
-  }
+  }*/
 }

@@ -66,10 +66,6 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone>, ISc
     dao.createTable();
   }
 
-/*  public void dropTable() {
-    dao.drop();
-  }*/
-
   @Override
   public SlickPhone toSlick(Phone shared, String language) {
     return new SlickPhone(-1,
@@ -198,4 +194,5 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone>, ISc
   }
 
   public int getNumRows() { return dao.getNumRows(); }
+  public boolean isEmpty() { return getNumRows() == 0; }
 }
