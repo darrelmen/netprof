@@ -42,9 +42,9 @@ import mitll.langtest.server.autocrt.AutoCRT;
 import mitll.langtest.server.autocrt.DecodeCorrectnessChecker;
 import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.scoring.*;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.server.database.result.Result;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -119,7 +119,7 @@ public class AudioFileHelper implements AlignDecode {
    * @see mitll.langtest.server.scoring.ASRScoring#getCollator
    */
   public Collator getCollator() {
-   // makeASRScoring();
+    // makeASRScoring();
     return asrScoring.getCollator();
   }
 
@@ -134,7 +134,7 @@ public class AudioFileHelper implements AlignDecode {
       if (!checkedLTS) {
         checkedLTS = true;
         int count = 0;
-     //   makeASRScoring();
+        //   makeASRScoring();
 
         phoneToCount = new HashMap<String, Integer>();
         for (CommonExercise exercise : exercises) {
@@ -186,12 +186,12 @@ public class AudioFileHelper implements AlignDecode {
    * @see mitll.langtest.server.LangTestDatabaseImpl#isValidForeignPhrase(String)
    */
   public boolean checkLTSOnForeignPhrase(String foreignLanguagePhrase) {
-  //  makeASRScoring();
+    //  makeASRScoring();
     return asrScoring.validLTS(foreignLanguagePhrase);
   }
 
   public SmallVocabDecoder getSmallVocabDecoder() {
-  //  makeASRScoring();
+    //  makeASRScoring();
     return asrScoring.getSmallVocabDecoder();
   }
 
@@ -369,7 +369,8 @@ public class AudioFileHelper implements AlignDecode {
                                              AudioContext context,
                                              AnswerInfo.RecordingInfo recordingInfo,
 
-                                             String wavPath, File file,
+                                             String wavPath,
+                                             File file,
 
                                              AudioCheck.ValidityAndDur validity,
 
@@ -384,11 +385,12 @@ public class AudioFileHelper implements AlignDecode {
     if (recordInResults) {
       recordInResults(context, recordingInfo, validity, answer);
     }
-    //   logger.debug("getAudioAnswerDecoding answer " + answer);
+    logger.debug("getAudioAnswerDecoding answer " + answer);
     return answer;
   }
 
-  private void recordInResults(AudioContext context, AnswerInfo.RecordingInfo recordingInfo,
+  private void recordInResults(AudioContext context,
+                               AnswerInfo.RecordingInfo recordingInfo,
                                AudioCheck.ValidityAndDur validity, AudioAnswer answer) {
     int processDur = answer.getPretestScore() == null ? 0 : answer.getPretestScore().getProcessDur();
 
@@ -628,8 +630,8 @@ public class AudioFileHelper implements AlignDecode {
    * @see #writeAudioFile
    */
   private AudioAnswer getAMASAudioAnswer(AmasExerciseImpl exercise,
-                                     int qid, int reqid,
-                                     File file, AudioCheck.ValidityAndDur validity, String url) {
+                                         int qid, int reqid,
+                                         File file, AudioCheck.ValidityAndDur validity, String url) {
     AudioAnswer audioAnswer = new AudioAnswer(url, validity.getValidity(), reqid, validity.durationInMillis);
     autoCRT.getAutoCRTDecodeOutput(exercise, qid, file, audioAnswer, true);
     return audioAnswer;
@@ -738,7 +740,7 @@ public class AudioFileHelper implements AlignDecode {
    */
   private PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences, boolean canUseCache,
                                            boolean usePhoneToDisplay, boolean useOldSchool) {
-  //  makeASRScoring();
+    //  makeASRScoring();
     List<String> unk = new ArrayList<String>();
 
     if (isMacOrWin() || useOldSchoolServiceOnly || useOldSchool) {  // i.e. NOT using cool new jcodr webservice
@@ -825,7 +827,7 @@ public class AudioFileHelper implements AlignDecode {
         "" + testAudioFile + " with sentence '" + sentence + "' req# " + reqid +
         (useCache ? " check cache" : " NO CACHE") + " prefix " + prefix);
 
- //   makeASRScoring();
+    //   makeASRScoring();
     if (testAudioFile == null) {
       logger.error("getASRScoreForAudio huh? no test audio file for " + sentence);
       return new PretestScore(); // very defensive
@@ -950,7 +952,7 @@ public class AudioFileHelper implements AlignDecode {
                                      boolean canUseCache, boolean allowAlternates, boolean useOldSchool) {
     AudioAnswer audioAnswer = new AudioAnswer(url, validity.getValidity(), reqid, validity.durationInMillis);
     if (doFlashcard) {
-  //    makeASRScoring();
+      //    makeASRScoring();
       PretestScore flashcardAnswer = decodeCorrectnessChecker.getFlashcardAnswer(exercise, file, audioAnswer,
           serverProps.getLanguage(),
           canUseCache, allowAlternates, useOldSchool);
