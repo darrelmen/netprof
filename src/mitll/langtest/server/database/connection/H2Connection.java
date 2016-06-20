@@ -68,37 +68,39 @@ public class H2Connection implements DatabaseConnection {
   /**
    *
    *
-   * @see mitll.langtest.server.database.DatabaseImpl#DatabaseImpl(String, String, String, ServerProperties, PathHelper, boolean, LogAndNotify)
+   * @see mitll.langtest.server.database.DatabaseImpl#DatabaseImpl(String, String, String, ServerProperties, PathHelper, boolean, LogAndNotify, boolean)
    * @param configDir
    * @param dbName
    * @param mustAlreadyExist
+   * @param readOnly
    */
-  public H2Connection(String configDir, String dbName, boolean mustAlreadyExist, LogAndNotify logAndNotify) {
-    this(configDir, dbName, CACHE_SIZE_KB, QUERY_CACHE_SIZE, mustAlreadyExist, logAndNotify);
+  public H2Connection(String configDir, String dbName, boolean mustAlreadyExist, LogAndNotify logAndNotify, boolean readOnly) {
+    this(configDir, dbName, CACHE_SIZE_KB, QUERY_CACHE_SIZE, mustAlreadyExist, logAndNotify, readOnly);
   }
 
   /**
    * @param configDir
    * @param dbName
+   * @param readOnly
    * @see mitll.langtest.server.database.DatabaseImpl#DatabaseImpl
    */
   private H2Connection(String configDir, String dbName, int cacheSizeKB, int queryCacheSize, boolean mustAlreadyExist,
-                       LogAndNotify logAndNotify) {
+                       LogAndNotify logAndNotify, boolean readOnly) {
     this.cacheSizeKB = cacheSizeKB;
     this.queryCacheSize = queryCacheSize;
     this.logAndNotify = logAndNotify;
-    connect(configDir + File.separator + dbName, mustAlreadyExist);
+    connect(configDir + File.separator + dbName, mustAlreadyExist, readOnly);
   }
 
   /**
    * h2 db must exist - don't try to make an empty one if it's not there.
    * <p>
    * //jdbc:h2:file:/Users/go22670/DLITest/clean/netPron2/war/config/urdu/vlr-parle;IFEXISTS=TRUE;CACHE_SIZE=30000
-   *
-   * @param h2FilePath
+   *  @param h2FilePath
    * @param mustAlreadyExist
+   * @param readOnly
    */
-  private void connect(String h2FilePath, boolean mustAlreadyExist) {
+  private void connect(String h2FilePath, boolean mustAlreadyExist, boolean readOnly) {
     String url = "jdbc:h2:file:" + h2FilePath +
         ";" +
         (mustAlreadyExist ? "IFEXISTS=TRUE;" : "") +
@@ -106,6 +108,7 @@ public class H2Connection implements DatabaseConnection {
         "CACHE_SIZE=" + cacheSizeKB + ";" +
         "MAX_MEMORY_ROWS=" + maxMemoryRows + ";" +
         "AUTOCOMMIT=ON" + ";" +
+        (readOnly ? "ACCESS_MODE_DATA=r;" : "")+
         (USE_MVCC ? "MVCC=true" : "");
 
     File test = new File(h2FilePath + ".h2.db");
