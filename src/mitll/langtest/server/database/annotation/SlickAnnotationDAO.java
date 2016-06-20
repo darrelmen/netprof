@@ -51,10 +51,8 @@ public class SlickAnnotationDAO
   private final AnnotationDAOWrapper dao;
 
   public SlickAnnotationDAO(Database database, DBConnection dbConnection, int defectDetector) {
-    super(database,defectDetector);
+    super(database, defectDetector);
     dao = new AnnotationDAOWrapper(dbConnection);
-    //populate(defectDetector);
-  //  this.defectDetector = defectDetector;
   }
 
   public void createTable() {
@@ -242,5 +240,7 @@ public class SlickAnnotationDAO
 
 */
 
-
+  public boolean isEmpty() {
+    return dao.getNumRows() == 0;
+  }
 }
