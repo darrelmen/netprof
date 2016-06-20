@@ -32,6 +32,8 @@
 
 package mitll.langtest.server.database;
 
+import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.annotation.AnnotationDAO;
 import mitll.langtest.server.database.annotation.SlickAnnotationDAO;
 import mitll.langtest.server.database.annotation.UserAnnotation;
@@ -57,10 +59,12 @@ import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.npdata.dao.*;
 import org.apache.log4j.Logger;
 
+import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -78,6 +82,59 @@ public class CopyToPostgres {
   public static final boolean USER_EXERCISE = true;
   public static final boolean COPY_PHONE = true;
   public static final boolean WORD = true;
+
+  public void copyToPostgres(String config) {
+    getDatabaseLight(config).copyToPostgres();
+  }
+
+  public void testDrop(String config) {
+    getConnection(config).dropAll();
+  }
+
+  protected static DBConnection getConnection(String config) {
+    File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
+    String parent = file.getParent();
+    String name = file.getName();
+
+    parent = file.getParentFile().getAbsolutePath();
+
+    logger.info("path is " + parent);
+    ServerProperties serverProps = new ServerProperties(parent, name);
+    return new DBConnection(serverProps.getDatabaseType(),
+        serverProps.getDatabaseHost(),
+        serverProps.getDatabasePort(),
+        serverProps.getDatabaseName(),
+        serverProps.getDatabaseUser(),
+        serverProps.getDatabasePassword());
+  }
+
+  protected static DatabaseImpl<CommonExercise> getDatabaseLight(String config) {
+    File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
+    String parent = file.getParent();
+    String name = file.getName();
+
+    parent = file.getParentFile().getAbsolutePath();
+
+    logger.info("path is " + parent);
+    ServerProperties serverProps = new ServerProperties(parent, name);
+    DatabaseImpl<CommonExercise> database = getDatabaseVeryLight(config);
+    database.setInstallPath("war", parent + File.separator + database.getServerProps().getLessonPlan(),
+        serverProps.getMediaDir());
+    return database;
+  }
+
+  protected static DatabaseImpl<CommonExercise> getDatabaseVeryLight(String config) {
+    File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
+    String parent = file.getParent();
+    String name = file.getName();
+
+    parent = file.getParentFile().getAbsolutePath();
+
+    logger.info("path is " + parent);
+    ServerProperties serverProps = new ServerProperties(parent, name);
+    DatabaseImpl<CommonExercise> database = new DatabaseImpl<>(parent, name, serverProps.getH2Database(), serverProps, new PathHelper("war"), false, null);
+    return database;
+  }
 
   public void copyToPostgres(DatabaseImpl db) {
     // first add the user table
@@ -110,8 +167,9 @@ public class CopyToPostgres {
     copyUserExercises(db, oldToNewUser, language);
 
     SlickUserListDAO slickUserListDAO = (SlickUserListDAO) db.getUserListManager().getUserListDAO();
-    Map<Integer, Integer> oldToNewUserList = slickUserListDAO.getOldToNew();
     copyUserExerciseList(db, oldToNewUser, slickUserListDAO);
+
+    Map<Integer, Integer> oldToNewUserList = slickUserListDAO.getOldToNew();
     copyUserExerciseListJoin(db, oldToNewUserList);
 
     SlickWordDAO slickWordDAO = (SlickWordDAO) db.getWordDAO();
@@ -221,8 +279,7 @@ public class CopyToPostgres {
         logger.info("adding " + bulk.size());
         slickPhoneAO.addBulk(bulk);
         logger.info("added " + slickPhoneAO.getNumRows());
-      }
-      else {
+      } else {
 
       }
     }
@@ -261,7 +318,9 @@ public class CopyToPostgres {
         for (UserListExerciseJoinDAO.Join join : all) {
           int oldID = join.userlistid;
           Integer integer = oldToNewUserList.get(oldID);
-          if (integer == null) logger.error("UserListManager join can't find user list " + oldID);
+          if (integer == null) {
+            logger.error("UserListManager join can't find user list " + oldID + " in " + oldToNewUserList.size());
+          }
           else slickUserListExerciseJoinDAO.addPair(integer, join.exerciseID);
         }
       }
@@ -332,6 +391,23 @@ public class CopyToPostgres {
         }
         slickResultDAO.addBulk(bulk);
       }
+    }
+  }
+
+  public static void main(String[] arg) {
+    if (arg.length < 2) {
+      logger.error("expecting either copy or drop followed by config, e.g. copy spanish");
+      return;
+    }
+    String action = arg[0];
+    String config = arg[1];
+    if (action.equals("drop")) {
+      logger.info("drop " + config);
+      new CopyToPostgres().testDrop(config);
+    }
+    else if (action.equals("copy")) {
+      logger.info("copying " + config);
+      new CopyToPostgres().copyToPostgres(config);
     }
   }
 }
