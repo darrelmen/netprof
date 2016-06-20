@@ -34,11 +34,12 @@ package mitll.langtest.server.database.userlist;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.custom.UserList;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.userexercise.UserExerciseListJoinDAOWrapper;
 import org.apache.log4j.Logger;
+
+import java.util.Collection;
 
 public class SlickUserListExerciseJoinDAO
     extends DAO implements IUserListExerciseJoinDAO {
@@ -62,10 +63,11 @@ public class SlickUserListExerciseJoinDAO
 
   /**
    * Just for copying from h2 initially
+   *
    * @param userlistid
    * @param exerciseID
    */
-  public void addPair(int  userlistid, String exerciseID) {
+  public void addPair(int userlistid, String exerciseID) {
     dao.insert(userlistid, exerciseID);
   }
 
@@ -74,10 +76,16 @@ public class SlickUserListExerciseJoinDAO
 
   }
 
+  public Collection<String> getExidsFor(int listid) {
+    return dao.exids(listid);
+  }
+
   @Override
   public boolean remove(long listid, String exid) {
     return dao.remove((int) listid, exid) == 1;
   }
 
-  public boolean isEmpty() { return dao.getNumRows() == 0; }
+  public boolean isEmpty() {
+    return dao.getNumRows() == 0;
+  }
 }
