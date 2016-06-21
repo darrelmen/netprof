@@ -47,6 +47,9 @@ import mitll.langtest.server.database.phone.SlickPhoneDAO;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.server.database.result.SlickResultDAO;
+import mitll.langtest.server.database.reviewed.ReviewedDAO;
+import mitll.langtest.server.database.reviewed.SlickReviewedDAO;
+import mitll.langtest.server.database.reviewed.StateCreator;
 import mitll.langtest.server.database.user.SlickUserDAOImpl;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
@@ -73,26 +76,26 @@ import java.util.Map;
 
 public class CopyToPostgres {
   private static final Logger logger = Logger.getLogger(CopyToPostgres.class);
-  public static final boolean COPY_ANNO = true;
-  public static final boolean USERS = true;
-  public static final boolean AUDIO = true;
-  public static final boolean EVENT = true;
-  public static final boolean RESULT = true;
+  private static final boolean COPY_ANNO = true;
+  private static final boolean USERS = true;
+  private static final boolean AUDIO = true;
+  private static final boolean EVENT = true;
+  private static final boolean RESULT = true;
 
-  public static final boolean USER_EXERCISE = true;
-  public static final boolean COPY_PHONE = true;
-  public static final boolean WORD = true;
+  private static final boolean USER_EXERCISE = true;
+  private static final boolean COPY_PHONE = true;
+  private static final boolean WORD = true;
 
-  public void copyToPostgres(String config) {
-    getDatabaseLight(config).copyToPostgres();
+  private void copyToPostgres(String config, boolean inTest) {
+    getDatabaseLight(config, inTest).copyToPostgres();
   }
 
-  public void testDrop(String config) {
-    getConnection(config).dropAll();
+  private void testDrop(String config, boolean inTest) {
+    getConnection(config, inTest).dropAll();
   }
 
-  protected static DBConnection getConnection(String config) {
-    File file = new File( "config" + File.separator + config + File.separator + "quizlet.properties");
+  private static DBConnection getConnection(String config, boolean inTest) {
+    File file = getConfigFile(config, inTest);
     String parent = file.getParent();
     String name = file.getName();
 
@@ -108,8 +111,8 @@ public class CopyToPostgres {
         serverProps.getDatabasePassword());
   }
 
-  protected static DatabaseImpl<CommonExercise> getDatabaseLight(String config) {
-    File file = new File( "config" + File.separator + config + File.separator + "quizlet.properties");
+  private static DatabaseImpl<CommonExercise> getDatabaseLight(String config, boolean inTest) {
+    File file = getConfigFile(config, inTest);
     String parent = file.getParent();
     String name = file.getName();
 
@@ -117,14 +120,23 @@ public class CopyToPostgres {
 
     logger.info("path is " + parent);
     ServerProperties serverProps = new ServerProperties(parent, name);
-    DatabaseImpl<CommonExercise> database = getDatabaseVeryLight(config);
-    database.setInstallPath(".", parent + File.separator + database.getServerProps().getLessonPlan(),
+    DatabaseImpl<CommonExercise> database = getDatabaseVeryLight(config, inTest);
+    String installPath = getInstallPath(inTest);
+    database.setInstallPath(installPath, parent + File.separator + database.getServerProps().getLessonPlan(),
         serverProps.getMediaDir());
     return database;
   }
 
-  protected static DatabaseImpl<CommonExercise> getDatabaseVeryLight(String config) {
-    File file = new File( "config" + File.separator + config + File.separator + "quizlet.properties");
+  private static File getConfigFile(String config, boolean inTest) {
+    return new File((inTest ? "war" + File.separator : "") + "config" + File.separator + config + File.separator + "quizlet.properties");
+  }
+
+  private static String getInstallPath(boolean inTest) {
+    return inTest ? "war" : ".";
+  }
+
+  private static DatabaseImpl<CommonExercise> getDatabaseVeryLight(String config, boolean inTest) {
+    File file = getConfigFile(config, inTest);
     String parent = file.getParent();
     String name = file.getName();
 
@@ -132,9 +144,8 @@ public class CopyToPostgres {
 
     logger.info("path is " + parent);
     ServerProperties serverProps = new ServerProperties(parent, name);
-    DatabaseImpl<CommonExercise> database = new DatabaseImpl<>(parent, name, serverProps.getH2Database(), serverProps,
-        new PathHelper("."), false, null, true);
-    return database;
+    return new DatabaseImpl<>(parent, name, serverProps.getH2Database(), serverProps,
+        new PathHelper(getInstallPath(inTest)), false, null, true);
   }
 
   public void copyToPostgres(DatabaseImpl db) {
@@ -186,9 +197,12 @@ public class CopyToPostgres {
 
     // anno DAO
     copyAnno(db, slickUserDAO, oldToNewUser, language);
+
+    copyReviewed(db, oldToNewUser, true);
+    copyReviewed(db, oldToNewUser, false);
   }
 
-  void copyUsers(DatabaseImpl db, SlickUserDAOImpl slickUserDAO) {
+  private void copyUsers(DatabaseImpl db, SlickUserDAOImpl slickUserDAO) {
     if (USERS) {
       if (slickUserDAO.isEmpty()) {
         UserDAO userDAO = new UserDAO(db);
@@ -204,7 +218,7 @@ public class CopyToPostgres {
     }
   }
 
-  void copyAudio(DatabaseImpl db, Map<Integer, Integer> oldToNewUser) {
+  private void copyAudio(DatabaseImpl db, Map<Integer, Integer> oldToNewUser) {
     if (AUDIO) {
       SlickAudioDAO slickAudioDAO = (SlickAudioDAO) db.getAudioDAO();
       int num = slickAudioDAO.getNumRows();
@@ -229,7 +243,7 @@ public class CopyToPostgres {
     }
   }
 
-  void copyAnno(DatabaseImpl db, SlickUserDAOImpl slickUserDAO, Map<Integer, Integer> oldToNewUser, String language) {
+  private void copyAnno(DatabaseImpl db, SlickUserDAOImpl slickUserDAO, Map<Integer, Integer> oldToNewUser, String language) {
     if (COPY_ANNO) {
       SlickAnnotationDAO annotationDAO = (SlickAnnotationDAO) db.getAnnotationDAO();
       if (annotationDAO.isEmpty()) {
@@ -249,7 +263,7 @@ public class CopyToPostgres {
     }
   }
 
-  void copyPhone(DatabaseImpl db, Map<Integer, Integer> oldToNewResult, String language, Map<Integer, Integer> oldToNewWordID) {
+  private void copyPhone(DatabaseImpl db, Map<Integer, Integer> oldToNewResult, String language, Map<Integer, Integer> oldToNewWordID) {
     if (COPY_PHONE) {
       SlickPhoneDAO slickPhoneAO = (SlickPhoneDAO) db.getPhoneDAO();
       if (slickPhoneAO.isEmpty()) {
@@ -286,7 +300,7 @@ public class CopyToPostgres {
     }
   }
 
-  void copyWord(DatabaseImpl db, Map<Integer, Integer> oldToNewResult, String language, SlickWordDAO slickWordDAO) {
+  private void copyWord(DatabaseImpl db, Map<Integer, Integer> oldToNewResult, String language, SlickWordDAO slickWordDAO) {
     if (WORD) {
       if (slickWordDAO.isEmpty()) {
         int c = 0;
@@ -309,7 +323,7 @@ public class CopyToPostgres {
     }
   }
 
-  void copyUserExerciseListJoin(DatabaseImpl db, Map<Integer, Integer> oldToNewUserList) {
+  private void copyUserExerciseListJoin(DatabaseImpl db, Map<Integer, Integer> oldToNewUserList) {
     if (true) {
       UserListManager userListManager = db.getUserListManager();
       IUserListExerciseJoinDAO dao = userListManager.getUserListExerciseJoinDAO();
@@ -321,14 +335,13 @@ public class CopyToPostgres {
           Integer integer = oldToNewUserList.get(oldID);
           if (integer == null) {
             logger.error("UserListManager join can't find user list " + oldID + " in " + oldToNewUserList.size());
-          }
-          else slickUserListExerciseJoinDAO.addPair(integer, join.exerciseID);
+          } else slickUserListExerciseJoinDAO.addPair(integer, join.exerciseID);
         }
       }
     }
   }
 
-  void copyUserExerciseList(DatabaseImpl db, Map<Integer, Integer> oldToNewUser, SlickUserListDAO slickUserListDAO) {
+  private void copyUserExerciseList(DatabaseImpl db, Map<Integer, Integer> oldToNewUser, SlickUserListDAO slickUserListDAO) {
     if (true) {
       UserListManager userListManager = db.getUserListManager();
 
@@ -347,7 +360,7 @@ public class CopyToPostgres {
     }
   }
 
-  void copyUserExercises(DatabaseImpl db, Map<Integer, Integer> oldToNewUser, String language) {
+  private void copyUserExercises(DatabaseImpl db, Map<Integer, Integer> oldToNewUser, String language) {
     if (USER_EXERCISE) {
       UserExerciseDAO ueDAO = new UserExerciseDAO(db);
       ueDAO.setExerciseDAO(db.getExerciseDAO());
@@ -375,7 +388,7 @@ public class CopyToPostgres {
     }
   }
 
-  void copyResult(DatabaseImpl db, SlickResultDAO slickResultDAO, Map<Integer, Integer> oldToNewUser, String language) {
+  private void copyResult(DatabaseImpl db, SlickResultDAO slickResultDAO, Map<Integer, Integer> oldToNewUser, String language) {
     if (RESULT) {
       if (slickResultDAO.isEmpty()) {
         ResultDAO resultDAO = new ResultDAO(db);
@@ -395,6 +408,27 @@ public class CopyToPostgres {
     }
   }
 
+  private void copyReviewed(DatabaseImpl db, Map<Integer, Integer> oldToNewUser, boolean isReviewed) {
+    SlickReviewedDAO dao = (SlickReviewedDAO) (isReviewed ? db.getReviewedDAO() : db.getSecondStateDAO());
+    if (dao.isEmpty()) {
+      String tableName = isReviewed ? ReviewedDAO.REVIEWED : ReviewedDAO.SECOND_STATE;
+      ReviewedDAO originalDAO = new ReviewedDAO(db, tableName);
+      List<SlickReviewed> bulk = new ArrayList<>();
+      Collection<StateCreator> all = originalDAO.getAll();
+      logger.info("found " + all.size() + " for " + tableName);
+      for (StateCreator stateCreator : all) {
+        Integer userID = oldToNewUser.get((int) stateCreator.getCreatorID());
+        if (userID == null) {
+          logger.error("copyReviewed no user " + stateCreator.getCreatorID());
+        } else {
+          stateCreator.setCreatorID(userID);
+          bulk.add(dao.toSlick(stateCreator));
+        }
+      }
+      dao.addBulk(bulk);
+    }
+  }
+
   public static void main(String[] arg) {
     if (arg.length < 2) {
       logger.error("expecting either copy or drop followed by config, e.g. copy spanish");
@@ -404,11 +438,10 @@ public class CopyToPostgres {
     String config = arg[1];
     if (action.equals("drop")) {
       logger.info("drop " + config);
-      new CopyToPostgres().testDrop(config);
-    }
-    else if (action.equals("copy")) {
+      new CopyToPostgres().testDrop(config, false);
+    } else if (action.equals("copy")) {
       logger.info("copying " + config);
-      new CopyToPostgres().copyToPostgres(config);
+      new CopyToPostgres().copyToPostgres(config, false);
     }
   }
 }
