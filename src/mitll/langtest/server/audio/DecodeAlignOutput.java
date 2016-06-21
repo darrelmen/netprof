@@ -75,9 +75,20 @@ public class DecodeAlignOutput {
   DecodeAlignOutput(float score, String json,
                     long processDurInMillis, boolean isCorrect,
                     PretestScore pretestScore) {
+    //this(score,json,numPhones(pretestScore),processDurInMillis,isCorrect);
     this.score = score;
     this.json = json;
     this.numPhones = numPhones(pretestScore);
+    this.processDurInMillis = processDurInMillis;
+    this.isCorrect = isCorrect;
+  }
+
+  public DecodeAlignOutput(float score, String json,
+                    long processDurInMillis, boolean isCorrect,
+                    int numPhones) {
+    this.score = score;
+    this.json = json;
+    this.numPhones = numPhones;
     this.processDurInMillis = processDurInMillis;
     this.isCorrect = isCorrect;
   }
