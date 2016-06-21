@@ -57,7 +57,6 @@ import mitll.langtest.server.database.phone.IPhoneDAO;
 import mitll.langtest.server.database.phone.Phone;
 import mitll.langtest.server.database.phone.SlickPhoneDAO;
 import mitll.langtest.server.database.refaudio.IRefResultDAO;
-import mitll.langtest.server.database.refaudio.RefResultDAO;
 import mitll.langtest.server.database.refaudio.SlickRefResultDAO;
 import mitll.langtest.server.database.result.*;
 import mitll.langtest.server.database.reviewed.IReviewedDAO;
@@ -210,7 +209,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
     try {
       Connection connection1 = getConnection();
-      if (connection1 == null) {
+      if (connection1 == null && serverProps.useH2()) {
         logger.warn("couldn't open connection to database at " + relativeConfigDir + " : " + dbName);
         return;
       } else {
@@ -272,7 +271,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     SlickAnswerDAO slickAnswerDAO = new SlickAnswerDAO(this, dbConnection);
     answerDAO = slickAnswerDAO;
 
-    addRemoveDAO = new AddRemoveDAO(this);
+//    addRemoveDAO = new AddRemoveDAO(this);
 
     userExerciseDAO = new SlickUserExerciseDAO(this, dbConnection);
 
@@ -284,7 +283,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     IUserListDAO userListDAO = new SlickUserListDAO(this, dbConnection, this.userDAO, userExerciseDAO, userListExerciseJoinDAO);
     IAnnotationDAO annotationDAO = new SlickAnnotationDAO(this, dbConnection, this.userDAO.getDefectDetector());
 
-    IReviewedDAO reviewedDAO    = new SlickReviewedDAO(this, dbConnection, true);
+    IReviewedDAO reviewedDAO = new SlickReviewedDAO(this, dbConnection, true);
     IReviewedDAO secondStateDAO = new SlickReviewedDAO(this, dbConnection, false);
 
     userListManager = new UserListManager(this.userDAO,
@@ -570,7 +569,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
           setDependencies(mediaDir, installPath);
 
           exerciseDAO.getRawExercises();
-
           //userExerciseDAO.setAudioDAO(audioDAO);
 
           numExercises = exerciseDAO.getNumExercises();
@@ -1391,7 +1389,12 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     }
     sectionHelper.addAssociations(pairs);
 
-    getAddRemoveDAO().add(duplicate.getID(), AddRemoveDAO.ADD);
+    AddRemoveDAO addRemoveDAO = getAddRemoveDAO();
+    if (addRemoveDAO != null) {
+      addRemoveDAO.add(duplicate.getID(), AddRemoveDAO.ADD);
+    } else {
+      logger.warn("add remove not implemented yet!");
+    }
     getExerciseDAO().add(duplicate);
 
     logger.debug("exercise state " + exercise.getState());
@@ -1410,7 +1413,12 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#deleteItem
    */
   public boolean deleteItem(String id) {
-    getAddRemoveDAO().add(id, AddRemoveDAO.REMOVE);
+    AddRemoveDAO addRemoveDAO = getAddRemoveDAO();
+    if (addRemoveDAO != null)
+      addRemoveDAO.add(id, AddRemoveDAO.REMOVE);
+    else {
+      logger.warn("add remove not implemented yet!");
+    }
     getUserListManager().removeReviewed(id);
     getSectionHelper().removeExercise(getExercise(id));
     return getExerciseDAO().remove(id);
@@ -1784,13 +1792,17 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return logAndNotify;
   }
 
-  public IUserExerciseDAO getUserExerciseDAO() {  return userExerciseDAO;  }
+  public IUserExerciseDAO getUserExerciseDAO() {
+    return userExerciseDAO;
+  }
 
   public IAnnotationDAO getAnnotationDAO() {
     return userListManager.getAnnotationDAO();
   }
 
-  public IReviewedDAO getReviewedDAO() {  return userListManager.getReviewedDAO();  }
+  public IReviewedDAO getReviewedDAO() {
+    return userListManager.getReviewedDAO();
+  }
 
   public IReviewedDAO getSecondStateDAO() {
     return userListManager.getSecondStateDAO();
