@@ -48,7 +48,7 @@ import java.util.*;
  * <p/>
  * All state changes are recorded, nothing is overwritten. To get the current state you have to get the latest
  * entry.
- *
+ * <p>
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
@@ -97,24 +97,23 @@ public class ReviewedDAO extends DAO implements IReviewedDAO {
   private void createTable(Database database) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement("CREATE TABLE if not exists " +
-      tableName +
-      " (" +
-      "uniqueid IDENTITY, " +
-      CREATORID +" LONG, " +
-      EXERCISEID + " VARCHAR, " +
-      STATE_COL + " VARCHAR, " +
-      MODIFIED + " TIMESTAMP," +
-      "FOREIGN KEY(" +
-      CREATORID +
-      ") REFERENCES " +
-      "USERS" +
-      "(ID)" +
-      ")");
+        tableName +
+        " (" +
+        "uniqueid IDENTITY, " +
+        CREATORID + " LONG, " +
+        EXERCISEID + " VARCHAR, " +
+        STATE_COL + " VARCHAR, " +
+        MODIFIED + " TIMESTAMP," +
+        "FOREIGN KEY(" +
+        CREATORID +
+        ") REFERENCES " +
+        "USERS" +
+        "(ID)" +
+        ")");
     finish(database, connection, statement);
   }
 
   /**
-   *
    * <p/>
    *
    * @see #setState
@@ -125,14 +124,14 @@ public class ReviewedDAO extends DAO implements IReviewedDAO {
 //      logger.info("add : exid " + exerciseID + " = " + state + " by " + creatorID);
       Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement = connection.prepareStatement(
-        "INSERT INTO " + tableName +
-          "(" +
-          CREATORID + "," +
-          EXERCISEID + "," +
-          MODIFIED + "," +
-          STATE_COL +
-          ") " +
-          "VALUES(?,?,?,?);"
+          "INSERT INTO " + tableName +
+              "(" +
+              CREATORID + "," +
+              EXERCISEID + "," +
+              MODIFIED + "," +
+              STATE_COL +
+              ") " +
+              "VALUES(?,?,?,?);"
       );
       int i = 1;
       statement.setLong(i++, creatorID);
@@ -164,7 +163,7 @@ public class ReviewedDAO extends DAO implements IReviewedDAO {
       int before = getCount();
       Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement = connection.prepareStatement(
-        "DELETE FROM " + tableName + " WHERE " + EXERCISEID +"='" + exerciseID + "'"
+          "DELETE FROM " + tableName + " WHERE " + EXERCISEID + "='" + exerciseID + "'"
       );
 
       int j = statement.executeUpdate();
@@ -172,7 +171,7 @@ public class ReviewedDAO extends DAO implements IReviewedDAO {
       if (j != 1) {
         logger.error("remove : huh? didn't remove row for " + exerciseID);
         int count = getCount();
-       // logger.debug("now " + count + " reviewed");
+        // logger.debug("now " + count + " reviewed");
         if (before - count != 1) logger.error("ReviewedDAO : huh? there were " + before + " before");
       }
 
@@ -183,11 +182,11 @@ public class ReviewedDAO extends DAO implements IReviewedDAO {
   }
 
   /**
-   * @see mitll.langtest.server.database.custom.UserListManager#setState(mitll.langtest.shared.exercise.CommonShell, mitll.langtest.shared.exercise.STATE, long)
-   * @see mitll.langtest.server.database.custom.UserListManager#setSecondState(mitll.langtest.shared.exercise.CommonShell, mitll.langtest.shared.exercise.STATE, long)
    * @param exerciseID
    * @param state
    * @param creatorID
+   * @see mitll.langtest.server.database.custom.UserListManager#setState(mitll.langtest.shared.exercise.CommonShell, mitll.langtest.shared.exercise.STATE, long)
+   * @see mitll.langtest.server.database.custom.UserListManager#setSecondState(mitll.langtest.shared.exercise.CommonShell, mitll.langtest.shared.exercise.STATE, long)
    */
   @Override
   public void setState(String exerciseID, STATE state, long creatorID) {
@@ -202,20 +201,20 @@ public class ReviewedDAO extends DAO implements IReviewedDAO {
    * So this returns a map of exercise id to current (latest) state.  The exercise may have gone through
    * many states, but this should return the latest one.
    *
+   * @param skipUnset
    * @return
    * @see UserListManager#getDefectList(java.util.Collection)
    * @see UserListManager#getExerciseToState
    * @see UserListManager#markState
    * @see mitll.langtest.server.database.custom.UserListManager#setStateOnExercises()
-   * @param skipUnset
    */
   @Override
   public Map<String, StateCreator> getExerciseToState(boolean skipUnset) {
     return getExerciseToState(skipUnset, false, "");
   }
 
- @Override
- public  STATE getCurrentState(String exerciseID) {
+  @Override
+  public STATE getCurrentState(String exerciseID) {
     Map<String, StateCreator> exerciseToState = getExerciseToState(false, true, exerciseID);
     if (exerciseToState.isEmpty()) return STATE.UNSET;
     else return exerciseToState.values().iterator().next().getState();
@@ -228,15 +227,15 @@ public class ReviewedDAO extends DAO implements IReviewedDAO {
     String whereClause = selectSingleExercise ? " where " + EXERCISEID + "='" + exerciseIDToFind + "'" : "";
 
     String sql3 = "select * from " +
-      "(select " +
-      EXERCISEID + "," +
-      STATE_COL + "," +
-      CREATORID + ", " +
-      "max(" + MODIFIED + ") as " + latest +
-      " from " + tableName +
-      whereClause +
-      " group by " + EXERCISEID + "," + STATE_COL + "," + CREATORID +
-      " order by " + EXERCISEID + ") order by " + EXERCISEID + "," + latest;
+        "(select " +
+        EXERCISEID + "," +
+        STATE_COL + "," +
+        CREATORID + ", " +
+        "max(" + MODIFIED + ") as " + latest +
+        " from " + tableName +
+        whereClause +
+        " group by " + EXERCISEID + "," + STATE_COL + "," + CREATORID +
+        " order by " + EXERCISEID + ") order by " + EXERCISEID + "," + latest;
 
     try {
       //logger.debug("Running " + sql3);
@@ -256,8 +255,8 @@ public class ReviewedDAO extends DAO implements IReviewedDAO {
       }
 
       finish(connection, statement, rs);
-     // int count = getCount();
-     // if (count % 10 == 0) logger.debug("now " + count + " reviewed");
+      // int count = getCount();
+      // if (count % 10 == 0) logger.debug("now " + count + " reviewed");
       //logger.debug("query " + sql3 + " returned " + exidToState.size() + " exercise->state items");
       return exidToState;
     } catch (SQLException e) {
@@ -266,18 +265,64 @@ public class ReviewedDAO extends DAO implements IReviewedDAO {
     return Collections.emptyMap();
   }
 
+  public Collection<StateCreator> getAll() {
+    Connection connection = database.getConnection(this.getClass().toString());
+
+    List<StateCreator> all = new ArrayList<>();
+
+    String latest = "latest";
+
+    String sql3 = "select * from " +
+        "(select " +
+        EXERCISEID + "," +
+        STATE_COL + "," +
+        CREATORID + ", " +
+        "max(" + MODIFIED + ") as " + latest +
+        " from " + tableName +
+        " group by " + EXERCISEID + "," + STATE_COL + "," + CREATORID +
+        " order by " + EXERCISEID + ") order by " + EXERCISEID + "," + latest;
+
+    try {
+      //logger.debug("Running " + sql3);
+      PreparedStatement statement = connection.prepareStatement(sql3);
+      ResultSet rs = statement.executeQuery();
+      while (rs.next()) {
+        String exerciseID = rs.getString(EXERCISEID);
+        String state = rs.getString(STATE_COL);
+        long creator = rs.getLong(CREATORID);
+        long when = rs.getTimestamp(4).getTime();
+        STATE stateFromTable = (state == null) ? STATE.UNSET : STATE.valueOf(state);
+
+        StateCreator e = new StateCreator(stateFromTable, creator, when);
+        e.setExerciseID(exerciseID);
+        all.add(e);
+      }
+
+      finish(connection, statement, rs);
+      // int count = getCount();
+      // if (count % 10 == 0) logger.debug("now " + count + " reviewed");
+      //logger.debug("query " + sql3 + " returned " + exidToState.size() + " exercise->state items");
+      return all;
+    } catch (SQLException e) {
+      logger.error("Got " + e + " doing " + sql3, e);
+    }
+    return Collections.emptyList();
+  }
+
   @Override
   public Collection<String> getDefectExercises() {
     Map<String, StateCreator> exerciseToState = getExerciseToState(true);
     Set<String> ids = new HashSet<String>();
-    for (Map.Entry<String,StateCreator> pair : exerciseToState.entrySet()) {
+    for (Map.Entry<String, StateCreator> pair : exerciseToState.entrySet()) {
       if (pair.getValue().getState() == STATE.DEFECT) {
-          ids.add(pair.getKey());
+        ids.add(pair.getKey());
       }
     }
     return ids;
   }
 
   @Override
-  public int getCount() { return getCount(tableName); }
+  public int getCount() {
+    return getCount(tableName);
+  }
 }
