@@ -44,6 +44,8 @@ import mitll.langtest.server.database.instrumentation.SlickEventImpl;
 import mitll.langtest.server.database.phone.Phone;
 import mitll.langtest.server.database.phone.PhoneDAO;
 import mitll.langtest.server.database.phone.SlickPhoneDAO;
+import mitll.langtest.server.database.refaudio.RefResultDAO;
+import mitll.langtest.server.database.refaudio.SlickRefResultDAO;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.server.database.result.SlickResultDAO;
@@ -200,6 +202,7 @@ public class CopyToPostgres {
 
     copyReviewed(db, oldToNewUser, true);
     copyReviewed(db, oldToNewUser, false);
+    copyRefResult(db, oldToNewUser);
   }
 
   private void copyUsers(DatabaseImpl db, SlickUserDAOImpl slickUserDAO) {
@@ -426,6 +429,30 @@ public class CopyToPostgres {
         }
       }
       dao.addBulk(bulk);
+    }
+  }
+
+  private void copyRefResult(DatabaseImpl db, Map<Integer, Integer> oldToNewUser) {
+    SlickRefResultDAO dao = (SlickRefResultDAO) db.getRefResultDAO();
+    if (dao.isEmpty()) {
+      RefResultDAO originalDAO = new RefResultDAO(db, false);
+      List<SlickRefResult> bulk = new ArrayList<>();
+      Collection<Result> all = originalDAO.getResults();
+      logger.info("copyRefResult found " + all.size());
+      for (Result result : all) {
+        Integer userID = oldToNewUser.get((int) result.getUserid());
+        if (userID == null) {
+          logger.error("copyReviewed no user " + result.getUserid());
+        } else {
+          result.setUserID(userID);
+          bulk.add(dao.toSlick(result));
+        }
+      }
+      dao.addBulk(bulk);
+      logger.info("copyRefResult added " + dao.getNumResults());
+    } else {
+      logger.info("copyRefResult already has " + dao.getNumResults());
+
     }
   }
 
