@@ -32,13 +32,14 @@
 
 package mitll.langtest.server.database.result;
 
+import mitll.langtest.server.audio.DecodeAlignOutput;
 import mitll.langtest.shared.AudioType;
 import mitll.langtest.shared.UserAndTime;
 
 import java.beans.Transient;
 import java.util.Date;
 
-public class Result implements  UserAndTime {
+public class Result implements UserAndTime {
   private int uniqueID;
   private int userid;
 
@@ -63,14 +64,15 @@ public class Result implements  UserAndTime {
   private boolean withFlash;
   private float dynamicRange;
   private String validity;
+private boolean isMale;
+  private DecodeAlignOutput alignOutput;
+  private DecodeAlignOutput decodeOutput;
 
-  public Result() {}
+  public Result() {
+  }
 
   /**
-   * @see ResultDAO#getResultsForQuery(java.sql.Connection, java.sql.PreparedStatement)
-   * @paramx answerType
    * @param userid
-   * @paramx plan
    * @param id
    * @param answer
    * @param valid
@@ -85,6 +87,9 @@ public class Result implements  UserAndTime {
    * @param roundTripDur
    * @param withFlash
    * @param dynamicRange
+   * @paramx answerType
+   * @paramx plan
+   * @see ResultDAO#getResultsForQuery(java.sql.Connection, java.sql.PreparedStatement)
    */
   public Result(int uniqueID,
                 int userid,
@@ -120,16 +125,22 @@ public class Result implements  UserAndTime {
 
   /**
    * Compound key of exercise id and question id within that exercise.
+   *
    * @return
    */
-  public String getID() {  return getCompoundID();  }
+  public String getID() {
+    return getCompoundID();
+  }
 
   /**
    * Compound key of exercise id and question id within that exercise.
+   *
    * @return
    */
   @Transient
-  public String getCompoundID() {  return getExid() + "/" + qid;  }
+  public String getCompoundID() {
+    return getExid() + "/" + qid;
+  }
 
   public AudioType getAudioType() {
     return audioType;
@@ -139,7 +150,9 @@ public class Result implements  UserAndTime {
     return correct;
   }
 
-  public float getPronScore() { return pronScore;  }
+  public float getPronScore() {
+    return pronScore;
+  }
 
   public int getUniqueID() {
     return uniqueID;
@@ -149,13 +162,18 @@ public class Result implements  UserAndTime {
     return userid;
   }
 
-  public String getExerciseID() { return id;  }
+  public String getExerciseID() {
+    return id;
+  }
 
   /**
    * TODO : make sure this is set
+   *
    * @return
    */
-  public int getQid() {   return qid;  }
+  public int getQid() {
+    return qid;
+  }
 
   public String getAnswer() {
     return answer;
@@ -181,10 +199,10 @@ public class Result implements  UserAndTime {
   @Override
   public String toString() {
     return "Result #" + getUniqueID() + "\t\tby user " + getUserid() + "\texid " + getExid() + " " +
-        " at " + new Date(getTimestamp())+
+        " at " + new Date(getTimestamp()) +
         "  ans " + getAnswer() +
-        " audioType : " + getAudioType() +" device " + device+
-        " valid " + isValid() + " " + (isCorrect() ? "correct":"incorrect") + " score " + getPronScore();
+        " audioType : " + getAudioType() + " device " + device +
+        " valid " + isValid() + " " + (isCorrect() ? "correct" : "incorrect") + " score " + getPronScore();
   }
 
   public String getJsonScore() {
@@ -211,9 +229,11 @@ public class Result implements  UserAndTime {
     return roundTrip;
   }
 
+/*
   public void setRoundTrip(long roundTrip) {
     this.roundTrip = roundTrip;
   }
+*/
 
   public String getDeviceType() {
     return deviceType;
@@ -235,17 +255,21 @@ public class Result implements  UserAndTime {
     return withFlash;
   }
 
+/*
   public void setWithFlash(boolean withFlash) {
     this.withFlash = withFlash;
   }
+*/
 
   public float getDynamicRange() {
     return dynamicRange;
   }
 
+/*
   public void setDynamicRange(float dynamicRange) {
     this.dynamicRange = dynamicRange;
   }
+*/
 
   public String getValidity() {
     return validity;
@@ -253,5 +277,29 @@ public class Result implements  UserAndTime {
 
   public void setValidity(String validity) {
     this.validity = validity;
+  }
+
+  public DecodeAlignOutput getAlignOutput() {
+    return alignOutput;
+  }
+
+  public void setAlignOutput(DecodeAlignOutput alignOutput) {
+    this.alignOutput = alignOutput;
+  }
+
+  public DecodeAlignOutput getDecodeOutput() {
+    return decodeOutput;
+  }
+
+  public void setDecodeOutput(DecodeAlignOutput decodeOutput) {
+    this.decodeOutput = decodeOutput;
+  }
+
+  public boolean isMale() {
+    return isMale;
+  }
+
+  public void setMale(boolean male) {
+    isMale = male;
   }
 }

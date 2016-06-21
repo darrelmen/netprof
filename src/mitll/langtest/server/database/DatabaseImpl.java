@@ -56,6 +56,9 @@ import mitll.langtest.server.database.instrumentation.SlickEventImpl;
 import mitll.langtest.server.database.phone.IPhoneDAO;
 import mitll.langtest.server.database.phone.Phone;
 import mitll.langtest.server.database.phone.SlickPhoneDAO;
+import mitll.langtest.server.database.refaudio.IRefResultDAO;
+import mitll.langtest.server.database.refaudio.RefResultDAO;
+import mitll.langtest.server.database.refaudio.SlickRefResultDAO;
 import mitll.langtest.server.database.result.*;
 import mitll.langtest.server.database.reviewed.IReviewedDAO;
 import mitll.langtest.server.database.reviewed.SlickReviewedDAO;
@@ -129,7 +132,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   private IUserDAO userDAO;
   private IResultDAO resultDAO;
 
-  private RefResultDAO refresultDAO;
+  private IRefResultDAO refresultDAO;
   private IWordDAO wordDAO;
   private IPhoneDAO phoneDAO;
 
@@ -273,7 +276,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
     userExerciseDAO = new SlickUserExerciseDAO(this, dbConnection);
 
-    refresultDAO = new RefResultDAO(this, getServerProps().shouldDropRefResult());
+    refresultDAO = new SlickRefResultDAO(this, dbConnection, serverProps.shouldDropRefResult());
     wordDAO = new SlickWordDAO(this, dbConnection);
     phoneDAO = new SlickPhoneDAO(this, dbConnection);
 
@@ -294,6 +297,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
     createTables();
 
+/*
     Connection connection1 = getConnection();
     try {
       refresultDAO.createResultTable(connection1);
@@ -303,6 +307,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     } finally {
       closeConnection(connection1);
     }
+*/
 
     try {
       userListManager.setUserExerciseDAO(userExerciseDAO);
@@ -340,7 +345,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return analysis;
   }
 
-  public RefResultDAO getRefResultDAO() {
+  public IRefResultDAO getRefResultDAO() {
     return refresultDAO;
   }
 
@@ -1073,6 +1078,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     if (!dbConnection.hasTable("annotation")) ((ISchema) getAnnotationDAO()).createTable();
     if (!dbConnection.hasTable("word")) ((ISchema) getWordDAO()).createTable();
     if (!dbConnection.hasTable("phone")) ((ISchema) getPhoneDAO()).createTable();
+    if (!dbConnection.hasTable("refresult")) ((SlickRefResultDAO) getRefResultDAO()).createTable();
 
     // if (!dbConnection.hasTable("reviewed")) ((ISchema) getReviewedDAO()).createTable();
     logger.info("created slick tables...");
@@ -1251,7 +1257,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
                            DecodeAlignOutput decodeOutputOld,
 
                            boolean isMale, String speed) {
-    return refresultDAO.addAnswer(this, userID, exerciseID, audioFile, durationInMillis, correct,
+    return refresultDAO.addAnswer(userID, exerciseID, audioFile, durationInMillis, correct,
         alignOutput, decodeOutput,
         alignOutputOld, decodeOutputOld,
         isMale, speed);
