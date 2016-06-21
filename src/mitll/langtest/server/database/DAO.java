@@ -33,6 +33,7 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.LogAndNotify;
+import mitll.langtest.server.database.refaudio.RefResultDAO;
 import mitll.langtest.server.database.userlist.UserExerciseListVisitorDAO;
 import org.apache.log4j.Logger;
 
@@ -250,7 +251,7 @@ public class DAO {
   /**
    * @see RefResultDAO#createResultTable(Connection)
    */
-  void drop(String table, Connection connection) {
+  protected void drop(String table, Connection connection) {
     try {
       PreparedStatement statement = connection.prepareStatement("DROP TABLE " + table + " IF EXISTS ");
       if (!statement.execute()) {
