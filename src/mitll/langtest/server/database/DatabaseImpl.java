@@ -58,7 +58,6 @@ import mitll.langtest.server.database.phone.Phone;
 import mitll.langtest.server.database.phone.SlickPhoneDAO;
 import mitll.langtest.server.database.result.*;
 import mitll.langtest.server.database.reviewed.IReviewedDAO;
-import mitll.langtest.server.database.reviewed.ReviewedDAO;
 import mitll.langtest.server.database.reviewed.SlickReviewedDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.SlickUserDAOImpl;
@@ -1745,7 +1744,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @return
    * @see LangTestDatabaseImpl#getMaleFemaleProgress()
    */
-  public Map<String, Float> getH2MaleFemaleProgress() {
+  Map<String, Float> getH2MaleFemaleProgress() {
     IUserDAO userDAO = getUserDAO();
     Map<Integer, User> userMapMales = userDAO.getUserMap(true);
     Map<Integer, User> userMapFemales = userDAO.getUserMap(false);
@@ -1779,17 +1778,13 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return logAndNotify;
   }
 
-  public IUserExerciseDAO getUserExerciseDAO() {
-    return userExerciseDAO;
-  }
+  public IUserExerciseDAO getUserExerciseDAO() {  return userExerciseDAO;  }
 
   public IAnnotationDAO getAnnotationDAO() {
     return userListManager.getAnnotationDAO();
   }
 
-  public IReviewedDAO getReviewedDAO() {
-    return userListManager.getReviewedDAO();
-  }
+  public IReviewedDAO getReviewedDAO() {  return userListManager.getReviewedDAO();  }
 
   public IReviewedDAO getSecondStateDAO() {
     return userListManager.getSecondStateDAO();
