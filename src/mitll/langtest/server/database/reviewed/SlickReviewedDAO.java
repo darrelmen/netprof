@@ -38,6 +38,7 @@ import mitll.langtest.shared.exercise.STATE;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickReviewed;
 import mitll.npdata.dao.reviewed.ReviewedDAOWrapper;
+import mitll.npdata.dao.reviewed.SecondStateDAOWrapper;
 import org.apache.log4j.Logger;
 
 import java.sql.Timestamp;
@@ -48,9 +49,9 @@ public class SlickReviewedDAO extends DAO implements IReviewedDAO {
 
   private final ReviewedDAOWrapper dao;
 
-  public SlickReviewedDAO(Database database, DBConnection dbConnection) {
+  public SlickReviewedDAO(Database database, DBConnection dbConnection, boolean isReviewed) {
     super(database);
-    dao = new ReviewedDAOWrapper(dbConnection);
+    dao = isReviewed ? new ReviewedDAOWrapper(dbConnection) : new SecondStateDAOWrapper(dbConnection);
   }
 
   public void createTable() {
@@ -73,7 +74,17 @@ public class SlickReviewedDAO extends DAO implements IReviewedDAO {
 
   @Override
   public void setState(String exerciseID, STATE state, long creatorID) {
-    dao.insert(new SlickReviewed(-1, (int) creatorID, exerciseID, state.toString(), new Timestamp(System.currentTimeMillis())));
+    dao.insert(toSlick(exerciseID, state, (int) creatorID));
+  }
+
+  SlickReviewed toSlick(String exerciseID, STATE state, int creatorID) {
+    long time = System.currentTimeMillis();
+    return new SlickReviewed(-1, creatorID, exerciseID, state.toString(), new Timestamp(time));
+  }
+
+  public SlickReviewed toSlick(StateCreator stateCreator) {
+    return new SlickReviewed(-1, (int) stateCreator.getCreatorID(), stateCreator.getExerciseID(),
+        stateCreator.getState().toString(), new Timestamp(stateCreator.getWhen()));
   }
 
   @Override
@@ -90,6 +101,7 @@ public class SlickReviewedDAO extends DAO implements IReviewedDAO {
 
   /**
    * TODO Fill in
+   *
    * @param skipUnset
    * @param selectSingleExercise
    * @param exerciseIDToFind
@@ -105,7 +117,7 @@ public class SlickReviewedDAO extends DAO implements IReviewedDAO {
   public Collection<String> getDefectExercises() {
     Map<String, StateCreator> exerciseToState = getExerciseToState(true);
     Set<String> ids = new HashSet<String>();
-    for (Map.Entry<String,StateCreator> pair : exerciseToState.entrySet()) {
+    for (Map.Entry<String, StateCreator> pair : exerciseToState.entrySet()) {
       if (pair.getValue().getState() == STATE.DEFECT) {
         ids.add(pair.getKey());
       }
@@ -116,5 +128,9 @@ public class SlickReviewedDAO extends DAO implements IReviewedDAO {
   @Override
   public int getCount() {
     return dao.getNumRows();
+  }
+
+  public boolean isEmpty() {
+    return dao.getNumRows() == 0;
   }
 }
