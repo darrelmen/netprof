@@ -30,64 +30,46 @@
  *
  */
 
-package mitll.langtest.server.database.reviewed;
+package mitll.langtest.server.database;
 
 import mitll.langtest.server.database.custom.UserListManager;
+import mitll.langtest.server.database.reviewed.StateCreator;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.STATE;
+import org.apache.log4j.Logger;
+import org.junit.Test;
 
-import java.util.Date;
+import java.util.*;
 
-public class StateCreator implements Comparable<StateCreator> {
-  private STATE state;
-  private long creatorID;
-  private long when;
+public class ReviewedExTest extends BaseTest {
+  private static final Logger logger = Logger.getLogger(ReviewedExTest.class);
 
-  private String exerciseID = "";
-  StateCreator(STATE state, long creatorID, long when) {
-    this.state = state;
-    this.creatorID = creatorID;
-    this.when = when;
+  @Test
+  public void testReviewed() {
+    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
+
+//    IUserExerciseDAO dao = spanish.getUserExerciseDAO();
+    UserListManager userListManager = spanish.getUserListManager();
+
+    STATE currentState = userListManager.getCurrentState("1");
+    logger.info("Got " + currentState + " for ");
+
+    Map<String, StateCreator> exerciseToState = userListManager.getExerciseToState(true);
+    logger.info("got " + exerciseToState.keySet().size());
+
+    Collection<StateCreator> values = exerciseToState.values();
+    List<StateCreator> stateCreators = new ArrayList<>(values);
+    Collections.sort(stateCreators);
+    for (StateCreator stateCreator : stateCreators) logger.info("Got " + stateCreator);
+
+    {
+      Map<String, StateCreator> exerciseToState2 = userListManager.getExerciseToState(false);
+      logger.info("got " + exerciseToState2.keySet().size());
+      stateCreators = new ArrayList<>(exerciseToState2.values());
+      Collections.sort(stateCreators);
+
+      for (StateCreator stateCreator : stateCreators) logger.info("Got " + stateCreator);
+    }
   }
 
-
-  public STATE getState() {
-    return state;
-  }
-
-  /**
-   * @return
-   * @see UserListManager#getAmmendedStateMap()
-   */
-  public long getCreatorID() {
-    return creatorID;
-  }
-
-  public long getWhen() {
-    return when;
-  }
-
-  public String toString() {
-    return exerciseID +" = [" + state.toString() + " by " + creatorID + " at " + new Date(when) + "]";
-  }
-
-  public String getExerciseID() {
-    return exerciseID;
-  }
-
-  public void setExerciseID(String exerciseID) {
-    this.exerciseID = exerciseID;
-  }
-
-  public void setCreatorID(long creatorID) {
-    this.creatorID = creatorID;
-  }
-
-  @Override
-  public int compareTo(StateCreator o) {
-    int i = exerciseID.compareTo(o.exerciseID);
-    if (i == 0) i = Long.valueOf(creatorID).compareTo(o.creatorID);
-    if (i == 0) i = state.compareTo(o.state);
-    if (i == 0) i = Long.valueOf(when).compareTo(o.when);
-    return i;
-  }
 }
