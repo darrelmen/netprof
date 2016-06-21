@@ -74,9 +74,7 @@ public class UserExTest extends BaseTest {
     logger.info("predef " + predefExercise);
 
     logger.info("got " + dao.getWhere(Arrays.asList("1959","1962")));
-
   }
-
 
 
   @Test
@@ -117,4 +115,30 @@ public class UserExTest extends BaseTest {
     }
   }
 
+  @Test
+  public void testDelete() {
+    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
+
+    int user = 6;
+
+    UserListManager userListManager = spanish.getUserListManager();
+
+    Collection<UserList<CommonShell>> before = userListManager.getListsForUser(user, false, true);
+    logger.info("before " + before);
+    userListManager.addVisitor(337, user);
+    Collection<UserList<CommonShell>> after = userListManager.getListsForUser(user, false, true);
+    logger.info("after " + after);
+
+    Collection<UserList<CommonShell>> createdLists = userListManager.getListsForUser(316, true, false);
+    logger.info("createdLists " + createdLists);
+
+    boolean b = userListManager.deleteList(337);
+    logger.info("did delete " + b);
+    Collection<UserList<CommonShell>> afterDelete = userListManager.getListsForUser(user, false, true);
+    logger.info("afterDelete " + afterDelete);
+
+    Collection<UserList<CommonShell>> afterCreatedLists = userListManager.getListsForUser(316, true, false);
+    logger.info("afterCreatedLists " + afterCreatedLists);
+
+  }
 }
