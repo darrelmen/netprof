@@ -30,14 +30,16 @@
  *
  */
 
-package mitll.langtest.server.database;
+package mitll.langtest.server.database.refaudio;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.audio.DecodeAlignOutput;
-import mitll.langtest.server.decoder.RefResultDecoder;
+import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.JsonSupport;
 import mitll.langtest.server.database.result.Result;
+import mitll.langtest.server.decoder.RefResultDecoder;
 import mitll.langtest.shared.AudioType;
-import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
@@ -46,14 +48,7 @@ import java.util.*;
 
 import static mitll.langtest.server.database.Database.EXID;
 
-/**
- * Create, drop, alter, read from the results table.
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since
- */
-public class RefResultDAO extends DAO {
+public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
   private static final Logger logger = Logger.getLogger(RefResultDAO.class);
 
   private static final String ID = "id";
@@ -68,34 +63,33 @@ public class RefResultDAO extends DAO {
   private static final String CORRECT = "correct";
   private static final String PRON_SCORE = "pronscore";
 
-  static final String ALIGNSCORE = "ALIGNSCORE";
+  public static final String ALIGNSCORE = "ALIGNSCORE";
   private static final String ALIGNJSON = "ALIGNJSON";
   private static final String NUMDECODE_PHONES = "NUMDECODEPHONES";
   private static final String NUM_ALIGN_PHONES = "NUMALIGNPHONES";
   private static final String MALE = "male";
-  static final String SPEED = "speed";
-  static final String DECODE_PROCESS_DUR = "decodeProcessDur";
-  static final String ALIGN_PROCESS_DUR = "alignProcessDur";
-  static final String HYDEC_DECODE_PRON_SCORE = "hydecDecodePronScore";
-  static final String HYDEC_DECODE_PROCESS_DUR = "hydecDecodeProcessDur";
+  public static final String SPEED = "speed";
+  public static final String DECODE_PROCESS_DUR = "decodeProcessDur";
+  public static final String ALIGN_PROCESS_DUR = "alignProcessDur";
+  public static final String HYDEC_DECODE_PRON_SCORE = "hydecDecodePronScore";
+  public static final String HYDEC_DECODE_PROCESS_DUR = "hydecDecodeProcessDur";
   private static final String HYDEC_DECODE_NUM_PHONES = "hydecDecodeNumPhones";
-  static final String HYDEC_ALIGN_PRON_SCORE = "hydecAlignPronScore";
-  static final String HYDEC_ALIGN_PROCESS_DUR = "hydecAlignProcessDur";
+  public static final String HYDEC_ALIGN_PRON_SCORE = "hydecAlignPronScore";
+  public static final String HYDEC_ALIGN_PROCESS_DUR = "hydecAlignProcessDur";
   private static final String HYDEC_ALIGN_NUM_PHONES = "hydecAlignNumPhones";
   private static final String WORDS = "{\"words\":[]}";
-  private final boolean dropTable;
-//  private final boolean debug = false;
+  //  private final boolean debug = false;
 
   /**
    * @param database
    * @param dropTable
    * @see DatabaseImpl#initializeDAOs(PathHelper)
    */
-  RefResultDAO(Database database, boolean dropTable) {
-    super(database);
-    this.dropTable = dropTable;
+  public RefResultDAO(Database database, boolean dropTable) {
+    super(database, dropTable);
   }
 
+  @Override
   public boolean removeForExercise(String exid) {
     return remove(REFRESULT, EXID, exid, true);
   }
@@ -103,7 +97,6 @@ public class RefResultDAO extends DAO {
   private List<Result> cachedResultsForQuery = null;
 
   /**
-   * @param database
    * @param userID
    * @param id
    * @param audioFile
@@ -113,8 +106,8 @@ public class RefResultDAO extends DAO {
    * @return id of new row in result table
    * @see DatabaseImpl#addRefAnswer
    */
-  long addAnswer(Database database,
-                        int userID, String id,
+  @Override
+  public long addAnswer(int userID, String id,
                         String audioFile,
                         long durationInMillis,
                         boolean correct,
@@ -260,6 +253,7 @@ public class RefResultDAO extends DAO {
     return newID;
   }
 
+  @Override
   public boolean removeForAudioFile(String audioFile) {
     return remove(REFRESULT, ANSWER, audioFile, false);
   }
@@ -274,6 +268,7 @@ public class RefResultDAO extends DAO {
    * @return
    * @see RefResultDecoder#getDecodedFiles()
    */
+  @Override
   public List<Result> getResults() {
     try {
       synchronized (this) {
@@ -297,8 +292,9 @@ public class RefResultDAO extends DAO {
    * @param exid
    * @param answer
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getPretestScore(int, long, String, String, int, int, boolean, String, boolean)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getPretestScore
    */
+  @Override
   public Result getResult(String exid, String answer) {
     String sql = SELECT_ALL +
         " WHERE " + EXID + "='" + exid + "' AND " + ANSWER + " like '%" + answer + "'";
@@ -319,6 +315,7 @@ public class RefResultDAO extends DAO {
    * @return
    * @see JsonSupport#getJsonRefResults(Map)
    */
+  @Override
   public JSONObject getJSONScores(Collection<String> ids) {
     try {
       String list = getInList(ids);
@@ -340,37 +337,11 @@ public class RefResultDAO extends DAO {
         String answer = rs.getString(ANSWER);
         String json = rs.getString(SCORE_JSON);
 
-        List<String> orDefault = idToAnswers.get(exid);
-        if (orDefault == null) {
-          idToAnswers.put(exid, orDefault = new ArrayList<>());
-          int i = answer.lastIndexOf("/");
-          String fileName = (i > -1) ? answer.substring(i + 1) : answer;
-          orDefault.add(fileName);
-        }
-
-        List<String> orDefault2 = idToJSONs.get(exid);
-        if (orDefault2 == null) {
-          idToJSONs.put(exid, orDefault2 = new ArrayList<>());
-          orDefault2.add(json);
-        }
+        addToAnswers(idToAnswers, exid, answer);
+        addToJSONs(idToJSONs, exid, json);
       }
 
-      JSONObject jsonObject = new JSONObject();
-      for (Map.Entry<String, List<String>> pair : idToAnswers.entrySet()) {
-        String exid = pair.getKey();
-        List<String> answers = pair.getValue();
-        List<String> jsons = idToJSONs.get(exid);
-
-        JSONArray array = new JSONArray();
-
-        for (int i = 0; i < answers.size(); i++) {
-          JSONObject jsonObject1 = new JSONObject();
-          jsonObject1.put("file", answers.get(i));
-          jsonObject1.put("scoreJSON", jsons.get(i));
-          array.add(jsonObject1);
-        }
-        jsonObject.put(exid, array);
-      }
+      JSONObject jsonObject = getJsonObject(idToAnswers, idToJSONs);
 
       finish(connection, statement, rs);
 
@@ -396,6 +367,7 @@ public class RefResultDAO extends DAO {
     return resultsForQuery;
   }
 
+  @Override
   public int getNumResults() {
     int numResults = 0;
     try {
@@ -439,12 +411,14 @@ public class RefResultDAO extends DAO {
       String answer = rs.getString(ANSWER);
       int dur = rs.getInt(DURATION);
 
+      boolean isMale = rs.getBoolean(MALE);
       boolean correct = rs.getBoolean(CORRECT);
 
       float pronScore = rs.getFloat(PRON_SCORE);
       String scoreJson = rs.getString(SCORE_JSON);
       boolean validDecodeJSON = pronScore > 0 && !scoreJson.equals(WORDS);
 
+      String speed = rs.getString(SPEED);
       if (!validDecodeJSON) {
         if (count++ < 10) {
           logger.info("getResultsForQuery got invalid decode result, score " + pronScore +
@@ -459,17 +433,25 @@ public class RefResultDAO extends DAO {
       if (validAlignJSON || validDecodeJSON) {
         float pronScore1 = validDecodeJSON ? pronScore : alignScore;
         String scoreJson1 = validDecodeJSON ? scoreJson : alignJSON;
+        AudioType audioType = speed.equals("reg") ? AudioType.REGULAR : speed.equals("slow") ? AudioType.SLOW : AudioType.UNSET;
         Result result = new Result(uniqueID, userID, //id
-           // "", // plan
+            // "", // plan
             exid, // id
             0, // qid
             trimPathForWebPage2(answer), // answer
             true, // valid
             timestamp.getTime(),
-            AudioType.UNSET, dur,
+            audioType, dur,
             correct, pronScore1,
             "browser", "",
-            0, 0, false, 30,"");
+            0, 0, false, 30, "");
+        result.setMale(isMale);
+
+        long hydraDecodeDur = rs.getLong(RefResultDAO.DECODE_PROCESS_DUR);
+        long hydraAlignDur = rs.getLong(RefResultDAO.ALIGN_PROCESS_DUR);
+
+        result.setDecodeOutput(new DecodeAlignOutput(pronScore, scoreJson, hydraDecodeDur, correct, rs.getInt(NUMDECODE_PHONES)));
+        result.setAlignOutput(new DecodeAlignOutput(alignScore, alignJSON, hydraAlignDur, true, rs.getInt(NUM_ALIGN_PHONES)));
         result.setJsonScore(scoreJson1);
         results.add(result);
       } else {
@@ -487,11 +469,6 @@ public class RefResultDAO extends DAO {
     finish(connection, statement, rs);
 
     return results;
-  }
-
-  private String trimPathForWebPage2(String path) {
-    int answer = path.indexOf(PathHelper.ANSWERS);
-    return (answer == -1) ? path : path.substring(answer);
   }
 
   /**
