@@ -238,7 +238,7 @@ public class UserListManager {
    * @return
    * @see #getCommentedList(java.util.Collection)
    */
-  private Map<String, StateCreator> getExerciseToState(boolean skipUnset) {
+  public Map<String, StateCreator> getExerciseToState(boolean skipUnset) {
     return reviewedDAO.getExerciseToState(skipUnset);
   }
 

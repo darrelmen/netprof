@@ -40,6 +40,9 @@ import mitll.npdata.dao.SlickReviewed;
 import mitll.npdata.dao.reviewed.ReviewedDAOWrapper;
 import mitll.npdata.dao.reviewed.SecondStateDAOWrapper;
 import org.apache.log4j.Logger;
+import scala.Option;
+import scala.Tuple3;
+import scala.Tuple4;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -109,7 +112,34 @@ public class SlickReviewedDAO extends DAO implements IReviewedDAO {
    */
   private Map<String, StateCreator> getExerciseToState(boolean skipUnset,
                                                        boolean selectSingleExercise, String exerciseIDToFind) {
-    return new HashMap<>();
+    Map<String, StateCreator> exidToState = new HashMap<>();
+    if (selectSingleExercise) {
+      Collection<Tuple3<String, Integer, Option<Timestamp>>> byEx = dao.getByEx(exerciseIDToFind);
+    //  Collection<Tuple3<String, Object, Option<Timestamp>>> byEx = byEx1;
+      for (Tuple3<String, Integer, Option<Timestamp>> three : byEx) {
+        String state = three._1();
+        STATE stateFromTable = (state == null) ? STATE.UNSET : STATE.valueOf(state);
+
+        if (!skipUnset || stateFromTable != STATE.UNSET) {
+          exidToState.put(exerciseIDToFind, new StateCreator(stateFromTable, three._2(), three._3().get().getTime()));
+        }
+      }
+    }
+    else {
+      Collection<Tuple4<String, String, Integer, Option<Timestamp>>> tuple4s = dao.groupBy(skipUnset);
+      for (Tuple4<String, String, Integer, Option<Timestamp>> four : tuple4s) {
+        String exid = four._1();
+        String state = four._2();
+        STATE stateFromTable = (state == null) ? STATE.UNSET : STATE.valueOf(state);
+
+        if (!skipUnset || stateFromTable != STATE.UNSET) {
+          StateCreator value = new StateCreator(stateFromTable, four._3(), four._4().get().getTime());
+          value.setExerciseID(exid);
+          exidToState.put(exid, value);
+        }
+      }
+    }
+    return exidToState;
   }
 
 
