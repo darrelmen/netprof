@@ -42,11 +42,13 @@ public class StateCreator {
   private long creatorID;
   private long when;
 
+  private String exerciseID;
   StateCreator(STATE state, long creatorID, long when) {
     this.state = state;
     this.creatorID = creatorID;
     this.when = when;
   }
+
 
   public STATE getState() {
     return state;
@@ -66,5 +68,17 @@ public class StateCreator {
 
   public String toString() {
     return "[" + state.toString() + " by " + creatorID + " at " + new Date(when) + "]";
+  }
+
+  public String getExerciseID() {
+    return exerciseID;
+  }
+
+  public void setExerciseID(String exerciseID) {
+    this.exerciseID = exerciseID;
+  }
+
+  public void setCreatorID(long creatorID) {
+    this.creatorID = creatorID;
   }
 }
