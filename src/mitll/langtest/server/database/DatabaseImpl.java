@@ -59,6 +59,7 @@ import mitll.langtest.server.database.phone.SlickPhoneDAO;
 import mitll.langtest.server.database.result.*;
 import mitll.langtest.server.database.reviewed.IReviewedDAO;
 import mitll.langtest.server.database.reviewed.ReviewedDAO;
+import mitll.langtest.server.database.reviewed.SlickReviewedDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.SlickUserDAOImpl;
 import mitll.langtest.server.database.user.UserDAO;
@@ -162,7 +163,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
   public DatabaseImpl(String configDir, String relativeConfigDir, String dbName, ServerProperties serverProps,
                       PathHelper pathHelper, boolean mustAlreadyExist, LogAndNotify logAndNotify) {
-    this(configDir,relativeConfigDir,dbName,serverProps,pathHelper,mustAlreadyExist,logAndNotify,false);
+    this(configDir, relativeConfigDir, dbName, serverProps, pathHelper, mustAlreadyExist, logAndNotify, false);
   }
 
   /**
@@ -181,7 +182,10 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     this(serverProps.useH2() ?
             new H2Connection(configDir, dbName, mustAlreadyExist, logAndNotify, readOnly) :
             serverProps.usePostgres() ?
-                new PostgreSQLConnection(dbName, logAndNotify) : new MySQLConnection(dbName, logAndNotify),
+                new PostgreSQLConnection(dbName, logAndNotify) :
+                serverProps.useMYSQL() ?
+                    new MySQLConnection(dbName, logAndNotify) :
+                    null,
         configDir, relativeConfigDir, dbName,
         serverProps,
         pathHelper, logAndNotify);
@@ -229,7 +233,10 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return getConnection(this.getClass().toString());
   }
 
-  DBConnection dbConnection;
+  /**
+   * Slick db connection.
+   */
+  private DBConnection dbConnection;
 
   /**
    * Create or alter tables as needed.
@@ -272,16 +279,18 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     phoneDAO = new SlickPhoneDAO(this, dbConnection);
 
     SlickUserListExerciseJoinDAO userListExerciseJoinDAO = new SlickUserListExerciseJoinDAO(this, dbConnection);
-    IUserListDAO userListDAO = new SlickUserListDAO(this, dbConnection, this.userDAO, userExerciseDAO,userListExerciseJoinDAO);
+    IUserListDAO userListDAO = new SlickUserListDAO(this, dbConnection, this.userDAO, userExerciseDAO, userListExerciseJoinDAO);
     IAnnotationDAO annotationDAO = new SlickAnnotationDAO(this, dbConnection, this.userDAO.getDefectDetector());
 
-    IReviewedDAO reviewedDAO = new ReviewedDAO(this, ReviewedDAO.REVIEWED);
+    IReviewedDAO reviewedDAO    = new SlickReviewedDAO(this, dbConnection, true);
+    IReviewedDAO secondStateDAO = new SlickReviewedDAO(this, dbConnection, false);
+
     userListManager = new UserListManager(this.userDAO,
         userListDAO,
         userListExerciseJoinDAO,
         annotationDAO,
         reviewedDAO,
-        new ReviewedDAO(this, ReviewedDAO.SECOND_STATE),
+        secondStateDAO,
         pathHelper);
 
     createTables();
@@ -342,7 +351,12 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
   @Override
   public Connection getConnection(String who) {
-    return connection.getConnection(who);
+    if (connection == null) {
+      logger.warn("no connection created " + who);
+      return null;
+    } else {
+      return connection.getConnection(who);
+    }
   }
 
   /**
@@ -353,19 +367,20 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    */
   public void closeConnection(Connection conn) {
     try {
-      int before = connection.connectionsOpen();
-      if (conn != null && !conn.isClosed()) {
-        if (connection.usingCP()) {
-          conn.close();
+      if (connection != null) {
+        int before = connection.connectionsOpen();
+        if (conn != null && !conn.isClosed()) {
+          if (connection.usingCP()) {
+            conn.close();
+          }
+        }
+        //else {
+        //logger.warn("trying to close a null connection...");
+        // }
+        if (connection.connectionsOpen() > LOG_THRESHOLD) {
+          logger.debug("closeConnection : now " + connection.connectionsOpen() + " open vs before " + before);
         }
       }
-      //else {
-      //logger.warn("trying to close a null connection...");
-      // }
-      if (connection.connectionsOpen() > LOG_THRESHOLD) {
-        logger.debug("closeConnection : now " + connection.connectionsOpen() + " open vs before " + before);
-      }
-
     } catch (SQLException e) {
       logger.error("Got " + e, e);
     }
@@ -1764,9 +1779,19 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return logAndNotify;
   }
 
-  public IUserExerciseDAO getUserExerciseDAO() { return userExerciseDAO;  }
+  public IUserExerciseDAO getUserExerciseDAO() {
+    return userExerciseDAO;
+  }
 
   public IAnnotationDAO getAnnotationDAO() {
     return userListManager.getAnnotationDAO();
+  }
+
+  public IReviewedDAO getReviewedDAO() {
+    return userListManager.getReviewedDAO();
+  }
+
+  public IReviewedDAO getSecondStateDAO() {
+    return userListManager.getSecondStateDAO();
   }
 }
