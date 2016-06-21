@@ -444,17 +444,19 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 	 * @see #getRawExercises()
 	 */
 	private void addNewExercises() {
-		for (AddRemoveDAO.IdAndTime id : addRemoveDAO.getAdds()) {
-			CommonExercise where = userExerciseDAO.getWhere(id.getId());
-			if (where == null) {
-				logger.error("getRawExercises huh? couldn't find user exercise from add exercise table in user exercise table : " + id);
-			} else {
-				if (isKnownExercise(id.getId())) {
-					logger.debug("addNewExercises SKIPPING new user exercise " + where.getID() + " since already added from spreadsheet : " + where);
+		if (addRemoveDAO != null) {
+			for (AddRemoveDAO.IdAndTime id : addRemoveDAO.getAdds()) {
+				CommonExercise where = userExerciseDAO.getWhere(id.getId());
+				if (where == null) {
+					logger.error("getRawExercises huh? couldn't find user exercise from add exercise table in user exercise table : " + id);
 				} else {
-					logger.debug("addNewExercises adding new user exercise " + where.getID() + " : " + where);
-					add(where);
-					getSectionHelper().addExercise(where);
+					if (isKnownExercise(id.getId())) {
+						logger.debug("addNewExercises SKIPPING new user exercise " + where.getID() + " since already added from spreadsheet : " + where);
+					} else {
+						logger.debug("addNewExercises adding new user exercise " + where.getID() + " : " + where);
+						add(where);
+						getSectionHelper().addExercise(where);
+					}
 				}
 			}
 		}
