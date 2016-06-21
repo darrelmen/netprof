@@ -36,7 +36,7 @@ public class BaseTest {
 
     logger.info("path is " + parent);
     ServerProperties serverProps = new ServerProperties(parent, name);
-    DatabaseImpl<CommonExercise> database = new DatabaseImpl<CommonExercise>(parent, name, serverProps.getH2Database(),
+    DatabaseImpl<CommonExercise> database = new DatabaseImpl<>(parent, name, serverProps.getH2Database(),
         serverProps, new PathHelper(installPath), false, null, false);
     String mediaDir = serverProps.getMediaDir();
     database.setInstallPath(installPath, parent + File.separator + database.getServerProps().getLessonPlan(),
