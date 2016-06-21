@@ -38,6 +38,7 @@ import mitll.langtest.server.database.ISchema;
 import mitll.langtest.server.database.annotation.IAnnotationDAO;
 import mitll.langtest.server.database.annotation.UserAnnotation;
 import mitll.langtest.server.database.reviewed.IReviewedDAO;
+import mitll.langtest.server.database.reviewed.SlickReviewedDAO;
 import mitll.langtest.server.database.reviewed.StateCreator;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
@@ -969,13 +970,14 @@ public class UserListManager {
     return userListExerciseJoinDAO;
   }
 
-//  public IUserExerciseListVisitorDAO getUserListVisitorJoinDAO() {
-//    return userListDAO.getUserListVisitorJoinDAO();
-//  }
+  public IReviewedDAO getReviewedDAO() { return reviewedDAO; }
+  public IReviewedDAO getSecondStateDAO() { return secondStateDAO; }
 
   public void createTables(DBConnection dbConnection) {
     if (!dbConnection.hasTable("userexerciselist"))  ((ISchema) userListDAO).createTable();
     if (!dbConnection.hasTable("userexerciselistjoin"))  ((SlickUserListExerciseJoinDAO)userListExerciseJoinDAO).createTable();
     if (!dbConnection.hasTable("userexerciselistvisitor"))  (((SlickUserListDAO) userListDAO).getVisitorDAOWrapper()).createTable();
+    if (!dbConnection.hasTable("reviewed"))    (((SlickReviewedDAO) reviewedDAO)).createTable();
+    if (!dbConnection.hasTable("secondstate")) (((SlickReviewedDAO) secondStateDAO)).createTable();
   }
 }
