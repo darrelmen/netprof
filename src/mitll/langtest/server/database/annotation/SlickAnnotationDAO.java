@@ -80,23 +80,22 @@ public class SlickAnnotationDAO
     );
   }
 
-  public void insert(SlickAnnotation word) {
-    dao.insert(word);
-  }
+//  public void insert(SlickAnnotation word) {
+//    dao.insert(word);
+//  }
 
   public void addBulk(List<SlickAnnotation> bulk) {
     dao.addBulk(bulk);
   }
 
-  //  @Override
+  @Override
   public void add(UserAnnotation word) {
     dao.insert(toSlick(word, ""));
   }
 
-
   @Override
   List<UserAnnotation> getAll(int userid) {
-    logger.info("getAll - " + userid);
+ //   logger.info("getAll - " + userid);
     Collection<SlickAnnotation> slickAnnotations = dao.byUser(userid);
 
     List<UserAnnotation> copy = new ArrayList<>();
@@ -118,7 +117,7 @@ public class SlickAnnotationDAO
   public Set<String> getExercisesWithIncorrectAnnotations() {
     Collection<Tuple4<String, String, String, Timestamp>> annoToCreator = dao.getAnnosGrouped();
 
-    logger.info("getExercisesWithIncorrectAnnotations " + annoToCreator.size());
+  //  logger.info("getExercisesWithIncorrectAnnotations " + annoToCreator.size());
     String prevExid = "";
 
     Set<String> incorrect = new HashSet<>();
@@ -128,8 +127,7 @@ public class SlickAnnotationDAO
       String exid = tuple4._1();
       String field = tuple4._2();
       String status = tuple4._3();
-
-      logger.info("Got " + tuple4);
+//      logger.info("Got " + tuple4);
       if (prevExid.isEmpty()) {
         prevExid = exid;
       } else if (!prevExid.equals(exid)) {
@@ -160,7 +158,7 @@ public class SlickAnnotationDAO
     return incorrect;
   }
 
-  protected Map<String, ExerciseAnnotation> getFieldToAnnotationMapSlick(Collection<SlickAnnotation> lists) {
+  private Map<String, ExerciseAnnotation> getFieldToAnnotationMapSlick(Collection<SlickAnnotation> lists) {
     Map<String, SlickAnnotation> fieldToAnno = new HashMap<>();
 
     for (SlickAnnotation annotation : lists) {
