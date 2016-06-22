@@ -65,6 +65,7 @@ public class EmailHelper {
   private static final String RESET_PASSWORD = "Reset Password";
   private static final String REPLY_TO = "admin@" + NP_SERVER;
   private static final String YOUR_USER_NAME = "Your user name";
+  public static final String NETPROF_HELP_DLIFLC_EDU = "netprof-help@dliflc.edu";
 
   private final String language;
   private final IUserDAO userDAO;
@@ -349,6 +350,16 @@ public class EmailHelper {
         "Click the link to allow them." +
         "<br/><br/>" +
         CLOSING;
+  }
+
+  public void sendConfirmationEmail(String email, String userID1, MailSupport mailSupport) {
+    mailSupport.sendEmail(NP_SERVER, email, NETPROF_HELP_DLIFLC_EDU, "Welcome to NetProF", getUserConfirmationEmail(userID1));
+  }
+
+  private String getUserConfirmationEmail(String userID1) {
+    return "Hi " +
+        userID1 + ",<br/><br/>" +
+        "You are now a user of NetProF.<br/>";
   }
 
   private String trimURL(String url) {
