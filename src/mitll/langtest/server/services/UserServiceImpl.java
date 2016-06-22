@@ -65,6 +65,8 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   }
 
   /**
+   * Send confirmation to your email too.
+   *
    * @param userID
    * @param passwordH
    * @param emailH
@@ -84,14 +86,18 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
                       boolean isMale, int age, String dialect, boolean isCD, String device) {
     findSharedDatabase();
     User user = db.addUser(getThreadLocalRequest(), userID, passwordH, emailH, kind, isMale, age, dialect, "browser");
+    MailSupport mailSupport = getMailSupport();
+
     if (user != null && !user.isEnabled()) { // user = null means existing user.
       logger.debug("user " + userID + "/" + user +
           " wishes to be a content developer. Asking for approval.");
-      getEmailHelper().addContentDeveloper(url, email, user, getMailSupport());
+      getEmailHelper().addContentDeveloper(url, email, user, mailSupport);
+      getEmailHelper().sendConfirmationEmail(email,userID, mailSupport);
     } else if (user == null) {
       logger.debug("no user found for id " + userID);
     } else {
       logger.debug("user " + userID + "/" + user + " is enabled.");
+      getEmailHelper().sendConfirmationEmail(email,userID, mailSupport);
     }
     return user;
   }
@@ -106,7 +112,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
 
   /**
    * @return
-   * @see mitll.langtest.client.user.UserTable#showDialog(mitll.langtest.client.LangTestDatabaseAsync)
+   * @see mitll.langtest.client.user.UserTable#showDialog
    */
   public List<User> getUsers() {
     findSharedDatabase();
