@@ -61,6 +61,24 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return dao.add(user);
   }
 
+  /**
+   * @see UserManagement#addUser(User)
+   * @param age
+   * @param gender
+   * @param experience
+   * @param userAgent
+   * @param trueIP
+   * @param nativeLang
+   * @param dialect
+   * @param userID
+   * @param enabled
+   * @param permissions
+   * @param kind
+   * @param passwordH
+   * @param emailH
+   * @param device
+   * @return
+   */
   @Override
   public int addUser(int age, String gender, int experience, String userAgent, String trueIP,
                      String nativeLang,
