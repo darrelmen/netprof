@@ -1353,10 +1353,11 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    */
   public void destroy() {
     try {
-      connection.contextDestroyed();
+      if (connection != null) {
+        connection.contextDestroyed();
+      }
       logger.info("closing db connection : " + dbConnection);
       dbConnection.close();
-      //sessionManagement.close();
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
