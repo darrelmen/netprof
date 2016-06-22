@@ -218,7 +218,7 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
       }
 
       public void onSuccess(PretestScore result) {
-        logger.info("scoreAudio : req " + result);
+       // logger.info("scoreAudio : req " + result);
 
         t.cancel();
         if (result != null) {
