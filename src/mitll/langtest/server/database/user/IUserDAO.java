@@ -100,4 +100,6 @@ public interface IUserDAO {
   boolean updateKey(int userid, boolean resetKey, String key);
 
   boolean clearKey(int userid, boolean resetKey);
+
+  int getBeforeLoginUser();
 }
