@@ -36,6 +36,8 @@ import mitll.langtest.client.analysis.ShowTab;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.server.database.analysis.Analysis;
+import mitll.langtest.server.database.analysis.SlickAnalysis;
+import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.analysis.UserPerformance;
@@ -96,7 +98,9 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
    */
   @Override
   public UserPerformance getPerformanceForUser(int id, int minRecordings) {
-   return new Analysis(db, db.getPhoneDAO(), db.getExerciseIDToRefAudio()).getPerformanceForUser(id, minRecordings);
+    SlickAnalysis slickAnalysis =
+        new SlickAnalysis(db, db.getPhoneDAO(), db.getExerciseIDToRefAudio(), (SlickResultDAO) db.getResultDAO());
+    return slickAnalysis.getPerformanceForUser(id, minRecordings);
   }
 
   /**
