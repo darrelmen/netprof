@@ -108,9 +108,9 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
 
   private static final int DEFAULT_MALE_ID = -2;
   private static final int DEFAULT_FEMALE_ID = -3;
-  public static final String MALE = "Male";
+  private static final String MALE = "Male";
   private static final MiniUser DEFAULT_MALE = new MiniUser(DEFAULT_MALE_ID, 30, true, MALE, false);
-  public static final String FEMALE = "Female";
+  private static final String FEMALE = "Female";
   private static final MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 30, false, FEMALE, false);
 
   private Set<String> incorrectFields;
@@ -424,8 +424,9 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
   private void addTabsForUsers(T e, TabPanel tabPanel, Map<MiniUser, List<AudioAttribute>> malesMap, List<MiniUser> maleUsers) {
     if (logger == null) logger = Logger.getLogger("QCNPFExercise");
     int me = controller.getUser();
+    UserTitle userTitle = new UserTitle();
     for (MiniUser user : maleUsers) {
-      String tabTitle = getUserTitle(me, user);
+      String tabTitle = userTitle.getUserTitle(me, user);
 
      // logger.info("addTabsForUsers for user " + user + " got " + tabTitle);
 
@@ -623,22 +624,6 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
     controller.register(onButton, exercise.getID());
     buttonGroup.add(onButton);
     return onButton;
-  }
-
-  private String getUserTitle(int me, MiniUser user) {
-    long id = user.getId();
-    if (id == BaseUserDAO.DEFAULT_USER_ID)        return GoodwaveExercisePanel.DEFAULT_SPEAKER;
-    else if (id == BaseUserDAO.DEFAULT_MALE_ID)   return "Default Male";
-    else if (id == BaseUserDAO.DEFAULT_FEMALE_ID) return "Default Female";
-    else return
-          (user.getId() == me) ? "by You (" + user.getUserID() + ")" : getUserTitle(user);
-  }
-
-  private String getUserTitle(MiniUser user) {
-    return (user.isMale() ? MALE : FEMALE) +
-        (user.isAdmin()
-            ? " (" + user.getUserID() + ")" : "") +
-        " age " + user.getAge();
   }
 
   /**
