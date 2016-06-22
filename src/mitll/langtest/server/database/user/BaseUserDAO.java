@@ -35,10 +35,8 @@ package mitll.langtest.server.database.user;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.annotation.AnnotationDAO;
-import mitll.langtest.server.database.excel.UserDAOToExcel;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.User;
-import net.sf.json.JSON;
 import org.apache.log4j.Logger;
 
 import java.util.*;
@@ -46,11 +44,12 @@ import java.util.*;
 public abstract class BaseUserDAO extends DAO {
   private static final Logger logger = Logger.getLogger(BaseUserDAO.class);
 
-  static final String DEFECT_DETECTOR = "defectDetector";
+  private static final String DEFECT_DETECTOR = "defectDetector";
+  private static final String BEFORE_LOGIN_USER = "beforeLogin";
   public static final String USERS = "users";
   public static final String MALE = "male";
   public static final String FEMALE = "female";
-  static final String PERMISSIONS = "permissions";
+  static final String PERMISSIONS = "EMPTY_PERMISSIONS";
   static final String KIND = "kind";
   static final String PASS = "passwordH";
   static final String EMAIL = "emailH";
@@ -63,9 +62,9 @@ public abstract class BaseUserDAO extends DAO {
   static final String ENABLED_REQ_KEY = "enabledReqKey";
   static final String NATIVE_LANG = "nativeLang";
   static final String UNKNOWN = "unknown";
-  String language;
-  int defectDetector;
-  boolean enableAllUsers;
+  final String language;
+  private int defectDetector,beforeLoginUser;
+  private final boolean enableAllUsers;
 
   static final String ID = "id";
   static final String AGE = "age";
@@ -90,7 +89,7 @@ public abstract class BaseUserDAO extends DAO {
   public static MiniUser DEFAULT_MALE = new MiniUser(DEFAULT_MALE_ID, 99, true, "Male", false);
   public static MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 99, false, "Female", false);
 
-  private Collection<String> admins;
+  private final Collection<String> admins;
 
   BaseUserDAO(Database database) {
     super(database);
@@ -108,15 +107,7 @@ public abstract class BaseUserDAO extends DAO {
     return defectDetector;
   }
 
-/*
-  public void toXLSX(OutputStream out, List<User> users) {
-    new UserDAOToExcel().toXLSX(out, users, language);
-  }
-*/
-
-  public JSON toJSON(List<User> users) {
-    return new UserDAOToExcel().toJSON(users);
-  }
+  public int getBeforeLoginUser() { return beforeLoginUser; }
 
   /**
    * Check if the user exists already, and return null if so.
@@ -172,19 +163,26 @@ public abstract class BaseUserDAO extends DAO {
     return userid != null && (admins.contains(userid));
   }
 
+  private static final List<User.Permission> EMPTY_PERMISSIONS = Collections.emptyList();
+
   /**
    *
    */
   void findOrMakeDefectDetector() {
-    logger.info("findOrMakeDefectDetector ");
-    defectDetector = getIdForUserID(DEFECT_DETECTOR);
-    if (defectDetector == -1) {
-      List<User.Permission> permissions = Collections.emptyList();
-      defectDetector = addUser(89, MALE, 0, "", "", UNKNOWN, UNKNOWN, DEFECT_DETECTOR, false, permissions, User.Kind.STUDENT, "", "", "");
+    //logger.info("findOrMakeDefectDetector ");
+    this.defectDetector = getIdForUserID(DEFECT_DETECTOR);
+    if (this.defectDetector == -1) {
+      this.defectDetector = addShellUser(DEFECT_DETECTOR);
     }
-    else {
-      logger.debug("found defect detector " + defectDetector);
+    this.beforeLoginUser = getIdForUserID(BEFORE_LOGIN_USER);
+    if (this.beforeLoginUser == -1) {
+      this.beforeLoginUser = addShellUser(BEFORE_LOGIN_USER);
     }
+  }
+
+  private int addShellUser(String defectDetector) {
+    return addUser(89, MALE, 0, "", "", UNKNOWN, UNKNOWN, defectDetector, false, EMPTY_PERMISSIONS,
+        User.Kind.STUDENT, "", "", "");
   }
 
   abstract int getIdForUserID(String id);

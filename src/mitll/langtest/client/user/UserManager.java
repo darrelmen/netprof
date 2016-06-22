@@ -78,15 +78,12 @@ public class UserManager {
 
   private final UserServiceAsync service;
   private final UserNotification userNotification;
- // private final static boolean USE_COOKIE = false;
   private long userID = NO_USER_SET;
   private String userChosenID = "";
 
   private final PropertyHandler.LOGIN_TYPE loginType;
   private final String appTitle;
   private final PropertyHandler props;
-//  private boolean isMale;
-//  private boolean isTeacher, isAdmin;
   private User current;
 
   /**

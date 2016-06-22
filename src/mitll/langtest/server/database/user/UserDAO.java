@@ -160,7 +160,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   }
 
   /**
-   * Will set the permissions according to the user kind.
+   * Will set the EMPTY_PERMISSIONS according to the user kind.
    *
    * @param id
    * @param kind
