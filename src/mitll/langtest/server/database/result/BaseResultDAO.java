@@ -79,7 +79,7 @@ public abstract class BaseResultDAO extends DAO {
   public SessionsAndScores getSessionsForUserIn2(Collection<String> ids, int latestResultID, int userid,
                                                  Collection<String> allIds, Map<String, CollationKey> idToKey) {
     List<Session> sessions = new ArrayList<>();
-    Map<Integer, List<CorrectAndScore>> userToAnswers = populateUserToAnswers(getResultsForExIDIn(ids, true));
+    Map<Integer, List<CorrectAndScore>> userToAnswers = populateUserToAnswers(getResultsForExIDIn(ids));
     if (debug) logger.debug("Got " + userToAnswers.size() + " user->answer map");
     for (Map.Entry<Integer, List<CorrectAndScore>> userToResults : userToAnswers.entrySet()) {
       List<Session> c = partitionIntoSessions2(userToResults.getValue(), ids, latestResultID);
@@ -353,7 +353,8 @@ public abstract class BaseResultDAO extends DAO {
   public void attachScoreHistory(int userID, CommonExercise firstExercise, boolean isFlashcardRequest) {
     List<CorrectAndScore> resultsForExercise = getCorrectAndScores(userID, firstExercise, isFlashcardRequest);
 
-    //logger.debug("score history " + resultsForExercise);
+    logger.debug("attachScoreHistory score history " + resultsForExercise);
+
     int total = 0;
     float scoreTotal = 0f;
     for (CorrectAndScore r : resultsForExercise) {
@@ -380,10 +381,13 @@ public abstract class BaseResultDAO extends DAO {
   }
 
   private List<CorrectAndScore> getResultsForExIDInForUser(int userID, boolean isFlashcardRequest, String id) {
+//    if (isFlashcardRequest) {
+//      getResultsForExIDInForUser(userID,)
+//    }
     return getResultsForExIDInForUser(Collections.singleton(id), isFlashcardRequest, userID);
   }
 
-  abstract List<CorrectAndScore> getResultsForExIDIn(Collection<String> ids, boolean matchAVP);
+  abstract List<CorrectAndScore> getResultsForExIDIn(Collection<String> ids);
 
   abstract List<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, boolean matchAVP, int userid);
 

@@ -690,7 +690,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    *
    * @param userID
    * @param firstExercise
-   * @param isFlashcardReq
+   * @param isFlashcardReq if true, filter for only recordings made during avp
    * @seex LoadTesting#getExercise(String, long, boolean)
    * @see #makeExerciseListWrapper
    */
@@ -727,7 +727,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     then = now;
 
-    attachScoreHistory(userID, firstExercise, isFlashcardReq);
+    db.getResultDAO().attachScoreHistory(userID, firstExercise, isFlashcardReq);
 
     now = System.currentTimeMillis();
     if (now - then > SLOW_MILLIS) {
@@ -738,16 +738,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       for (AudioAttribute audioAttribute : firstExercise.getAudioAttributes())
         logger.debug("\t addAnnotationsAndAudio ret ex " + firstExercise.getID() + " audio " + audioAttribute);
     }
-  }
-
-  /**
-   * @param userID
-   * @param firstExercise
-   * @param isFlashcardReq
-   * @see #addAnnotationsAndAudio(int, mitll.langtest.shared.exercise.CommonExercise, boolean)
-   */
-  private void attachScoreHistory(int userID, CommonExercise firstExercise, boolean isFlashcardReq) {
-    db.getResultDAO().attachScoreHistory(userID, firstExercise, isFlashcardReq);
   }
 
   /**
