@@ -74,7 +74,7 @@ public interface IResultDAO {
 
   void attachScoreHistory(int userID, CommonExercise firstExercise, boolean isFlashcardRequest);
 
-  Collection<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, int userid, String session);
+  List<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, int userid, String session);
 
   void invalidateCachedResults();
 

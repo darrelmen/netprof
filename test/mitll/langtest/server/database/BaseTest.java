@@ -27,6 +27,10 @@ public class BaseTest {
   private static final Logger logger = Logger.getLogger(BaseTest.class);
 
   protected static DatabaseImpl<CommonExercise> getDatabase(String config) {
+    return getDatabase(config, false);
+  }
+
+  protected static DatabaseImpl<CommonExercise> getDatabase(String config, boolean useH2) {
     String installPath = "war";
     File file = new File(installPath + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
     String parent = file.getParent();
@@ -36,6 +40,7 @@ public class BaseTest {
 
     logger.info("path is " + parent);
     ServerProperties serverProps = new ServerProperties(parent, name);
+    if (useH2) serverProps.setH2(useH2);
     DatabaseImpl<CommonExercise> database = new DatabaseImpl<>(parent, name, serverProps.getH2Database(),
         serverProps, new PathHelper(installPath), false, null, false);
     String mediaDir = serverProps.getMediaDir();

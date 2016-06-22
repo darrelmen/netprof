@@ -45,6 +45,7 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -53,19 +54,17 @@ import java.util.List;
  * @since 11/20/15.
  */
 class PlayAudio {
-//  private final Logger logger = Logger.getLogger("PlayAudio");
-
+  private final Logger logger = Logger.getLogger("PlayAudio");
   private final LangTestDatabaseAsync service;
   private final SoundPlayer soundFeedback;
   private final Widget playFeedback;
-
   private Timer t;
 
   /**
    * @param service
    * @param soundFeedback
    * @param playFeedback
-   * @see AnalysisPlot#AnalysisPlot(LangTestDatabaseAsync, long, String, int, SoundManagerAPI, Icon)
+   * @see AnalysisPlot#AnalysisPlot
    */
   PlayAudio(LangTestDatabaseAsync service, SoundPlayer soundFeedback, Widget playFeedback) {
     this.service = service;
@@ -87,23 +86,39 @@ class PlayAudio {
       @Override
       public void onSuccess(CommonExercise commonExercise) {
         if (commonExercise == null) {
+          logger.info("playLast no exercise " +id + " for " + userid);
           // if the exercise has been deleted...?
           // show popup?
         }
         else {
           List<CorrectAndScore> scores = commonExercise.getScores();
-          CorrectAndScore correctAndScore = scores.get(scores.size() - 1);
-          String refAudio = commonExercise.getRefAudio();
+          if (scores.isEmpty()) {
+            String msg = "playLast no Correct and scores for exercise : " + id + " and user " + userid;
+            logger.warning(msg);
+            service.logMessage(msg, new AsyncCallback<Void>() {
+              @Override
+              public void onFailure(Throwable throwable) {
+              }
 
-          if (t != null) {
-            // logger.info("cancel timer");
-            t.cancel();
+              @Override
+              public void onSuccess(Void aVoid) {
+              }
+            });
           }
-          if (refAudio != null) {
-            playLastThenRef(correctAndScore, refAudio);
-          } else {
-            playUserAudio(correctAndScore);
-            //   logger.info("no ref audio for " + commonExercise.getID());
+          else {
+            CorrectAndScore correctAndScore = scores.get(scores.size() - 1);
+            String refAudio = commonExercise.getRefAudio();
+
+            if (t != null) {
+              // logger.info("cancel timer");
+              t.cancel();
+            }
+            if (refAudio != null) {
+              playLastThenRef(correctAndScore, refAudio);
+            } else {
+              playUserAudio(correctAndScore);
+              //   logger.info("no ref audio for " + commonExercise.getID());
+            }
           }
         }
       }
@@ -127,13 +142,11 @@ class PlayAudio {
       @Override
       public void songEnded() {
         playFeedback.setVisible(false);
-
       //  logger.info("\t songEnded song " + path1 + " -------  " + System.currentTimeMillis());
         t = new Timer() {
           @Override
           public void run() {
          //   logger.info("\t songEnded queue song " + path + " -------  " + System.currentTimeMillis());
-
             soundFeedback.queueSong(path, new SoundFeedback.EndListener() {
               @Override
               public void songStarted() {
@@ -149,7 +162,6 @@ class PlayAudio {
         };
         t.schedule(100);
       }
-
     });
   }
 
@@ -169,8 +181,5 @@ class PlayAudio {
       }
     });
   }
-
-  //private CompressedAudio compressedAudio = new CompressedAudio();
-
   private String getPath(String path) { return CompressedAudio.getPath(path);  }
 }
