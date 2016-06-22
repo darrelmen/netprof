@@ -40,6 +40,7 @@ import mitll.langtest.shared.MonitorResult;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.npdata.dao.DBConnection;
+import mitll.npdata.dao.SlickPerfResult;
 import mitll.npdata.dao.SlickResult;
 import mitll.npdata.dao.result.ResultDAOWrapper;
 import mitll.npdata.dao.result.SlickCorrectAndScore;
@@ -87,14 +88,14 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
   }
 
   private String checkNull(String deviceType) {
-    return deviceType == null?"": deviceType;
+    return deviceType == null ? "" : deviceType;
   }
 
   @Override
   public Result fromSlick(SlickResult slick) {
 
     String audiotype = slick.audiotype();
-    audiotype = audiotype.replaceAll("=","_");
+    audiotype = audiotype.replaceAll("=", "_");
     return new Result(slick.id(),
         slick.userid(),
         slick.exid(),
@@ -117,7 +118,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
 
   private MonitorResult fromSlick2(SlickResult slick) {
     String audiotype = slick.audiotype();
-    audiotype = audiotype.replaceAll("=","_");
+    audiotype = audiotype.replaceAll("=", "_");
     return new MonitorResult(slick.id(),
         slick.userid(),
         slick.exid(),
@@ -139,22 +140,12 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
   }
 
   private String getRelativePath(SlickResult slick) {
-    return trimPathForWebPage2( slick.answer());
+    return trimPathForWebPage2(slick.answer());
   }
-
-/*  public void insert(SlickResult result) {
-    dao.insert(result);
-  }*/
 
   public void addBulk(List<SlickResult> bulk) {
     dao.addBulk(bulk);
   }
-
-/*
-  public int getNumRows() {
-    return dao.getNumRows();
-  }
-*/
 
   @Override
   public List<Result> getResults() {
@@ -162,7 +153,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
     return getResults(all);
   }
 
-  private List<Result> getResults(List<SlickResult> all) {
+  private List<Result> getResults(Collection<SlickResult> all) {
     List<Result> copy = new ArrayList<>();
     for (SlickResult result : all) copy.add(fromSlick(result));
     return copy;
@@ -256,5 +247,15 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
     return (answer == -1) ? path : path.substring(answer);
   }
 
-  public boolean isEmpty() { return dao.getNumRows() == 0; }
+  public Collection<SlickPerfResult> getPerf() {
+    return dao.perf();
+  }
+
+  public Collection<SlickPerfResult> getPerfForUser(int userid) {
+    return dao.perfForUser(userid);
+  }
+
+  public boolean isEmpty() {
+    return dao.getNumRows() == 0;
+  }
 }
