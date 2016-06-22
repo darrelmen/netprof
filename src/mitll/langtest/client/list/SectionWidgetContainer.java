@@ -80,13 +80,13 @@ public class SectionWidgetContainer<T extends SectionWidget> {
     boolean hasNonClearSelection = false;
     List<String> typesWithSelections = new ArrayList<>();
     if (typeOrder == null) {
-      logger.warning("huh? type order is null for " + selectionState2);
+      if (DEBUG) logger.warning("huh? type order is null for " + selectionState2);
       typeOrder = Collections.emptyList();
     }
     for (String type : typeOrder) {
       Collection<String> selections = selectionState2.get(type);
       if (selections == null) {
-        logger.warning("huh? no selection in selection state " + selectionState2.keySet() + " for " + type);
+        if (DEBUG)  logger.warning("huh? no selection in selection state " + selectionState2.keySet() + " for " + type);
       }
       if (selections != null && selections.iterator().next().equals(HistoryExerciseList.ANY)) {
         if (hasNonClearSelection) {
