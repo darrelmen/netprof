@@ -200,9 +200,24 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
   }
 
   @Override
-  public Collection<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, int userid, String session) {
+  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, int userid, String ignoredSession) {
     return getCorrectAndScores(dao.correctAndScoreWhere(userid, ids));
   }
+
+  @Override
+  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, boolean matchAVP, int userid) {
+    if (!matchAVP) {
+      return getResultsForExIDInForUser(ids, userid, "");
+    } else {
+      return getCorrectAndScores(dao.correctAndScoreMatchAVPUser(ids, matchAVP, userid));
+    }
+  }
+
+  @Override
+  List<CorrectAndScore> getResultsForExIDIn(Collection<String> ids) {
+    return getCorrectAndScores(dao.correctAndScoreMatchAVP(ids, true));
+  }
+
 
   @Override
   public int getNumResults() {
@@ -215,15 +230,6 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
     return getCorrectAndScores(slickCorrectAndScores);
   }
 
-  @Override
-  List<CorrectAndScore> getResultsForExIDIn(Collection<String> ids, boolean matchAVP) {
-    return getCorrectAndScores(dao.correctAndScoreMatchAVP(ids, matchAVP));
-  }
-
-  @Override
-  List<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, boolean matchAVP, int userid) {
-    return getCorrectAndScores(dao.correctAndScoreMatchAVPUser(ids, matchAVP, userid));
-  }
 
   private List<CorrectAndScore> getCorrectAndScores(Collection<SlickCorrectAndScore> slickCorrectAndScores) {
     List<CorrectAndScore> cs = new ArrayList<>();

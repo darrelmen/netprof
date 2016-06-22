@@ -203,6 +203,10 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return scores;
   }
 
+  /**
+   * @see mitll.langtest.server.database.result.BaseResultDAO#attachScoreHistory(int, CommonExercise, boolean)
+   * @param scores
+   */
   @Override
   public void setScores(List<CorrectAndScore> scores) {
     this.scores = scores;
