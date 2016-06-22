@@ -30,22 +30,31 @@
  *
  */
 
-package mitll.langtest.server.database.annotation;
+package mitll.langtest.client.qc;
 
-import mitll.langtest.shared.ExerciseAnnotation;
+import mitll.langtest.client.scoring.GoodwaveExercisePanel;
+import mitll.langtest.server.database.user.BaseUserDAO;
+import mitll.langtest.shared.MiniUser;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
+public class UserTitle {
+  private static final String MALE = "Male";
+  private static final String FEMALE = "Female";
 
-public interface IAnnotationDAO {
-  void add(UserAnnotation annotation);
+  public String getUserTitle(int me, MiniUser user) {
+    long id = user.getId();
+    if (id == BaseUserDAO.DEFAULT_USER_ID)        return GoodwaveExercisePanel.DEFAULT_SPEAKER;
+    else if (id == BaseUserDAO.DEFAULT_MALE_ID)   return "Default Male";
+    else if (id == BaseUserDAO.DEFAULT_FEMALE_ID) return "Default Female";
+    else return
+          (user.getId() == me) ? "by You (" + user.getUserID() + ")" : getUserTitle(user);
+  }
 
-  boolean hasDefect(String exerciseID, String field, String status, String comment);
-
-  Collection<String> getAudioAnnos();
-
-  Map<String, ExerciseAnnotation> getLatestByExerciseID(String exerciseID);
-
-  Set<String> getExercisesWithIncorrectAnnotations();
+  private String getUserTitle(MiniUser user) {
+    return (user.isMale() ? MALE : FEMALE) +
+        (user.isAdmin()
+            ? " (" + user.getUserID() + ")" : "")
+        + " #" + user.getId()
+        ;
+    //+  " age " + user.getAge();
+  }
 }
