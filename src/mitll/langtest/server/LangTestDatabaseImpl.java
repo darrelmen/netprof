@@ -37,6 +37,7 @@ import audio.imagewriter.SimpleImageWriter;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabase;
+import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.ScoringAudioPanel;
 import mitll.langtest.server.amas.QuizCorrect;
@@ -1326,7 +1327,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param userid
    * @param hitID
    * @param device
-   * @see mitll.langtest.client.instrumentation.ButtonFactory#logEvent(String, String, String, String, long)
+   * @see mitll.langtest.client.instrumentation.ButtonFactory#logEvent
    */
   @Override
   public void logEvent(String id, String widgetType, String exid, String context, int userid, String hitID, String device) {
@@ -1337,10 +1338,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
+  /**
+   * @see mitll.langtest.client.instrumentation.EventTable#showDialog(LangTestDatabaseAsync)
+   * @return
+   */
   public List<Event> getEvents() {
-    return db.getEventDAO().getAll(getLanguage());
+    return db.getEventDAO().getAllMax(getLanguage());
   }
-
 
   /**
    * @param audioAttribute
@@ -1350,7 +1354,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public void markAudioDefect(AudioAttribute audioAttribute, String exid) {
     logger.debug("markAudioDefect mark audio defect for " + exid + " on " + audioAttribute);
-
     //CommonExercise before = db.getCustomOrPredefExercise(exid);  // allow custom items to mask out non-custom items
     //int beforeNumAudio = before.getAudioAttributes().size();
     db.markAudioDefect(audioAttribute);
