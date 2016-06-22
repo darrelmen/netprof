@@ -474,6 +474,7 @@ public class UserTable extends PagerTable {
     userID.setSortable(true);
     table.addColumn(userID, USER_ID);
     table.addColumnSortHandler(getUserIDSorter(userID, list));
+    table.setColumnWidth(userID, 200, Style.Unit.PX);
   }
 
   private ColumnSortEvent.ListHandler<User> getAgeSorter(TextColumn<User> englishCol,

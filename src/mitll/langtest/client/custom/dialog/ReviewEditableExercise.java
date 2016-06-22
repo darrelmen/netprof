@@ -56,6 +56,7 @@ import mitll.langtest.client.exercise.WaveformPostAudioRecordButton;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.list.Reloadable;
+import mitll.langtest.client.qc.UserTitle;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.scoring.EmptyScoreListener;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
@@ -93,9 +94,8 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   private static final String SLOW_SPEED = " Slow speed";
   private static final int DELAY_MILLIS = 5000;
   private static final String ADD_AUDIO = "Add audio";
-  private static final String MALE = "Male";
-  private static final String FEMALE = "Female";
 
+  private final Set<Widget> audioWasPlayed = new HashSet<>();
   private final PagingExerciseList<CommonShell, CommonExercise> exerciseList;
 
   /**
@@ -151,9 +151,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     tabAndContent.getContent().add(widget);
     tabAndContent.getTab().setIcon(IconType.PLUS);
 
-    /*if (!maleUsers.isEmpty() || !femaleUsers.isEmpty())*/
     tabPanel.selectTab(0);
-
     return tabPanel;
   }
 
@@ -191,15 +189,17 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    * @param users
    * @see #makeAudioRow()
    */
-  private <X extends CommonShell & AnnotationExercise> void addTabsForUsers(X commonExercise, TabPanel tabPanel,
+  private <X extends CommonShell & AnnotationExercise> void addTabsForUsers(X commonExercise,
+                                                                            TabPanel tabPanel,
                                                                             Map<MiniUser, List<AudioAttribute>> userToAudio,
                                                                             List<MiniUser> users) {
     int me = controller.getUser();
+    UserTitle userTitle = new UserTitle();
     for (MiniUser user : users) {
 
       boolean byMe = (user.getId() == me);
       if (!byMe) {
-        String tabTitle = getUserTitle(me, user);
+        String tabTitle = userTitle.getUserTitle(me, user);
 
         RememberTabAndContent tabAndContent = getRememberTabAndContent(tabPanel, tabTitle, true);
 
@@ -236,28 +236,6 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     if (addRightMargin) tabAndContent.getContent().getElement().getStyle().setMarginRight(70, Style.Unit.PX);
     return tabAndContent;
   }
-
-/*  private String getUserTitle(int me, MiniUser user) {
-    return (user.isDefault()) ? GoodwaveExercisePanel.DEFAULT_SPEAKER : (user.getId() == me) ? "by You (" + user.getUserID() + ")" : getUserTitle(user);
-  }*/
-
-  private String getUserTitle(int me, MiniUser user) {
-    long id = user.getId();
-    if (id == BaseUserDAO.DEFAULT_USER_ID)        return GoodwaveExercisePanel.DEFAULT_SPEAKER;
-    else if (id == BaseUserDAO.DEFAULT_MALE_ID)   return "Default Male";
-    else if (id == BaseUserDAO.DEFAULT_FEMALE_ID) return "Default Female";
-    else return
-          (user.getId() == me) ? "by You (" + user.getUserID() + ")" : getUserTitle(user);
-  }
-
-  private String getUserTitle(MiniUser user) {
-    return (user.isMale() ? MALE : FEMALE) +
-        (
-            user.isAdmin()
-                ? " (" + user.getUserID() + ")" : "") +
-        " age " + user.getAge();
-  }
-
   /**
    * Don't warn user to check if audio is consistent if there isn't any.
    *
@@ -278,14 +256,6 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     return didChange;
   }
 
-  private final Set<Widget> audioWasPlayed = new HashSet<>();
- // private final Set<Widget> toResize = new HashSet<>();
-
-  //private CompressedAudio compressedAudio = new CompressedAudio();
-
-  private String getPath(String path) {
-    return CompressedAudio.getPath(path);
-  }
 
   private <X extends CommonShell & AnnotationExercise> Widget getPanelForAudio(final X exercise,
                                                                                final AudioAttribute audio,
@@ -297,7 +267,6 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<X>(audioRef, exercise.getForeignLanguage(), service, controller,
         controller.getProps().showSpectrogram(), new EmptyScoreListener(), 70, audio.isRegularSpeed() ? REGULAR_SPEED : SLOW_SPEED, exercise.getID(),
         exercise, instance
-        //npfHelper.getInstanceName()
     ) {
 
       /**
