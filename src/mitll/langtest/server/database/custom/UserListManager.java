@@ -458,7 +458,7 @@ public class UserListManager {
    *
    * @param typeOrder used by sorter to sort first in unit & chapter order
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getReviewLists()
+   * @see mitll.langtest.server.services.ListServiceImpl#getReviewLists
    * @see #markCorrectness
    */
   public UserList<CommonShell> getDefectList(Collection<String> typeOrder) {

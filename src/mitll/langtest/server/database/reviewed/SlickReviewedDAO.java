@@ -91,68 +91,55 @@ public class SlickReviewedDAO extends DAO implements IReviewedDAO {
   }
 
   @Override
-  public Map<String, StateCreator> getExerciseToState(boolean skipUnset) {
-    return getExerciseToState(skipUnset, false, "");
-  }
-
-  @Override
   public STATE getCurrentState(String exerciseID) {
-    Map<String, StateCreator> exerciseToState = getExerciseToState(false, true, exerciseID);
+    Map<String, StateCreator> exerciseToState = getStateForEx(false, exerciseID);
     if (exerciseToState.isEmpty()) return STATE.UNSET;
     else return exerciseToState.values().iterator().next().getState();
   }
 
-  /**
-   * TODO Fill in
-   *
-   * @param skipUnset
-   * @param selectSingleExercise
-   * @param exerciseIDToFind
-   * @return
-   */
-  private Map<String, StateCreator> getExerciseToState(boolean skipUnset,
-                                                       boolean selectSingleExercise, String exerciseIDToFind) {
+  private Map<String, StateCreator> getStateForEx(boolean skipUnset, String exerciseIDToFind) {
     Map<String, StateCreator> exidToState = new HashMap<>();
-    if (selectSingleExercise) {
-      Collection<Tuple3<String, Integer, Option<Timestamp>>> byEx = dao.getByEx(exerciseIDToFind);
+    Collection<Tuple3<String, Integer, Option<Timestamp>>> byEx = dao.getByEx(exerciseIDToFind);
     //  Collection<Tuple3<String, Object, Option<Timestamp>>> byEx = byEx1;
-      for (Tuple3<String, Integer, Option<Timestamp>> three : byEx) {
-        String state = three._1();
-        STATE stateFromTable = (state == null) ? STATE.UNSET : STATE.valueOf(state);
+    for (Tuple3<String, Integer, Option<Timestamp>> three : byEx) {
+      String state = three._1();
+      STATE stateFromTable = (state == null) ? STATE.UNSET : STATE.valueOf(state);
 
-        if (!skipUnset || stateFromTable != STATE.UNSET) {
-          exidToState.put(exerciseIDToFind, new StateCreator(stateFromTable, three._2(), three._3().get().getTime()));
-        }
-      }
-    }
-    else {
-      Collection<Tuple4<String, String, Integer, Option<Timestamp>>> tuple4s = dao.groupBy(skipUnset);
-      for (Tuple4<String, String, Integer, Option<Timestamp>> four : tuple4s) {
-        String exid = four._1();
-        String state = four._2();
-        STATE stateFromTable = (state == null) ? STATE.UNSET : STATE.valueOf(state);
-
-        if (!skipUnset || stateFromTable != STATE.UNSET) {
-          StateCreator value = new StateCreator(stateFromTable, four._3(), four._4().get().getTime());
-          value.setExerciseID(exid);
-          exidToState.put(exid, value);
-        }
+      if (!skipUnset || stateFromTable != STATE.UNSET) {
+        exidToState.put(exerciseIDToFind, new StateCreator(stateFromTable, three._2(), three._3().get().getTime()));
       }
     }
     return exidToState;
   }
 
-
   @Override
   public Collection<String> getDefectExercises() {
     Map<String, StateCreator> exerciseToState = getExerciseToState(true);
-    Set<String> ids = new HashSet<String>();
+    Set<String> ids = new HashSet<>();
     for (Map.Entry<String, StateCreator> pair : exerciseToState.entrySet()) {
       if (pair.getValue().getState() == STATE.DEFECT) {
         ids.add(pair.getKey());
       }
     }
     return ids;
+  }
+
+  @Override
+  public Map<String, StateCreator> getExerciseToState(boolean skipUnset) {
+    Map<String, StateCreator> exidToState = new HashMap<>();
+    Collection<Tuple4<String, String, Integer, Option<Timestamp>>> tuple4s = dao.groupBy(skipUnset);
+    for (Tuple4<String, String, Integer, Option<Timestamp>> four : tuple4s) {
+      String exid = four._1();
+      String state = four._2();
+      STATE stateFromTable = (state == null) ? STATE.UNSET : STATE.valueOf(state);
+
+      if (!skipUnset || stateFromTable != STATE.UNSET) {
+        StateCreator value = new StateCreator(stateFromTable, four._3(), four._4().get().getTime());
+        value.setExerciseID(exid);
+        exidToState.put(exid, value);
+      }
+    }
+    return exidToState;
   }
 
   @Override
