@@ -215,7 +215,7 @@ public class UserManagement {
   /**
    * @param user
    * @return
-   * @seex mitll.langtest.server.database.ImportCourseExamples#copyUser
+   * @see DatabaseImpl#addUser(User)
    */
   public int addUser(User user) {
     int l;

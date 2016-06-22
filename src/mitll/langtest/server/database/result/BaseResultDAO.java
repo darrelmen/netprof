@@ -353,8 +353,7 @@ public abstract class BaseResultDAO extends DAO {
   public void attachScoreHistory(int userID, CommonExercise firstExercise, boolean isFlashcardRequest) {
     List<CorrectAndScore> resultsForExercise = getCorrectAndScores(userID, firstExercise, isFlashcardRequest);
 
-    logger.debug("attachScoreHistory score history " + resultsForExercise);
-
+ //   logger.debug("attachScoreHistory score history " + resultsForExercise);
     int total = 0;
     float scoreTotal = 0f;
     for (CorrectAndScore r : resultsForExercise) {
@@ -381,9 +380,6 @@ public abstract class BaseResultDAO extends DAO {
   }
 
   private List<CorrectAndScore> getResultsForExIDInForUser(int userID, boolean isFlashcardRequest, String id) {
-//    if (isFlashcardRequest) {
-//      getResultsForExIDInForUser(userID,)
-//    }
     return getResultsForExIDInForUser(Collections.singleton(id), isFlashcardRequest, userID);
   }
 
