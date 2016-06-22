@@ -287,9 +287,7 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
   }
 
   @Override
-  public void setSafeToDecode(boolean isSafeToDecode) {
-
-  }
+  public void setSafeToDecode(boolean isSafeToDecode) {}
 
   @Override
   public String getRefAudioIndex() {
