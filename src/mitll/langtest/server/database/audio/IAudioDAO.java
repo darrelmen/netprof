@@ -79,6 +79,4 @@ public interface IAudioDAO {
   int markDefect(AudioAttribute attribute);
 
   void updateExerciseID(int uniqueID, String exerciseID);
-
-//  int size();
 }
