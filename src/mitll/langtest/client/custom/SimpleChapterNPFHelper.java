@@ -164,7 +164,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    * @see Navigation#addPracticeTab()
    * @see mitll.langtest.client.custom.Navigation#selectPreviousTab
    */
-  public void hideList() {
+  protected void hideList() {
     npfExerciseList.hide();
   }
 

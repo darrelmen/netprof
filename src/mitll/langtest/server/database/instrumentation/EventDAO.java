@@ -203,6 +203,11 @@ public class EventDAO extends DAO implements IEventDAO {
     return Collections.emptyList();
   }
 
+  @Override
+  public List<Event> getAllMax(String language) {
+    return getAll(language);
+  }
+
   /**
    * @return
    * @see mitll.langtest.server.database.Report#getReport

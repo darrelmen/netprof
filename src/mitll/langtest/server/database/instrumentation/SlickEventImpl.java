@@ -21,6 +21,7 @@ import java.util.Map;
  */
 public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
   private static final Logger logger = Logger.getLogger(SlickEventImpl.class);
+  public static final int MAX_EVENTS_TO_SHOW = 20000;
   private EventDAOWrapper eventDAOWrapper;
 
   /**
@@ -148,8 +149,16 @@ public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
   @Override
   public List<Event> getAll(String language) {
     List<SlickEvent> all = eventDAOWrapper.getAll(language.toLowerCase());
+    return getEvents(all);
+  }
 
-//    logger.info("getting " + all.size() + " events to ");
+  @Override
+  public List<Event> getAllMax(String language) {
+    List<SlickEvent> all = eventDAOWrapper.getAllMax(language.toLowerCase(), MAX_EVENTS_TO_SHOW);
+    return getEvents(all);
+  }
+
+  List<Event> getEvents(List<SlickEvent> all) {
     List<Event> copy = new ArrayList<>();
     for (SlickEvent event : all) {
       copy.add(fromSlick(event));

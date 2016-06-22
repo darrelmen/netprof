@@ -34,7 +34,6 @@ package mitll.langtest.server.database.userexercise;
 
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.ISchema;
-import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -138,23 +137,30 @@ public class SlickUserExerciseDAO
     dao.addBulk(bulk);
   }
 
-  public int getNumRows() { return dao.getNumRows();  }
+  public int getNumRows() {
+    return dao.getNumRows();
+  }
 
-  public boolean isEmpty() { return dao.getNumRows() == 0; }
-/*  @Override
-  public List<UserExercise> getUserExercises() {
-    List<SlickUserExercise> all = getAll();
-    return getUserExercises(all);
-  }*/
+  public boolean isEmpty() {
+    return dao.getNumRows() == 0;
+  }
 
-  List<CommonExercise> getUserExercises(List<SlickUserExercise> all) {
+  private List<CommonExercise> getUserExercises(List<SlickUserExercise> all) {
     List<CommonExercise> copy = new ArrayList<>();
     for (SlickUserExercise UserExercise : all) copy.add(fromSlick(UserExercise));
     return copy;
   }
 
+  /**
+   * @see mitll.langtest.server.database.custom.UserListManager#reallyCreateNewItem(long, CommonExercise, String)
+   * @param userExercise
+   * @param isOverride
+   */
   @Override
-  public void add(CommonExercise userExercise, boolean isOverride) { insert(toSlick(userExercise, isOverride));  }
+  public void add(CommonExercise userExercise, boolean isOverride) {
+    logger.info("adding " + userExercise);
+    insert(toSlick(userExercise, isOverride));
+  }
 
   @Override
   public List<CommonShell> getOnList(long listID) {
@@ -178,7 +184,9 @@ public class SlickUserExerciseDAO
   }
 
   @Override
-  public Collection<CommonExercise> getOverrides() {   return getUserExercises(dao.getOverrides());  }
+  public Collection<CommonExercise> getOverrides() {
+    return getUserExercises(dao.getOverrides());
+  }
 
   @Override
   public Collection<CommonExercise> getWhere(Collection<String> exids) {
