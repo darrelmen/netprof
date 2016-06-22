@@ -77,7 +77,6 @@ class EditableExerciseDialog extends NewUserExercise {
 
   private final PagingExerciseList<CommonShell, CommonExercise> exerciseList;
   final ReloadableContainer predefinedContentList;
-  //  protected final NPFHelper npfHelper;
   private static final boolean DEBUG = false;
 
   /**
@@ -297,7 +296,6 @@ class EditableExerciseDialog extends NewUserExercise {
                                boolean onClick) {
 //    if (DEBUG) logger.info("EditItem.afterValidForeignPhrase : exercise id " + newUserExercise.getID());
     checkForForeignChange();
-
     postChangeIfDirty(exerciseList, onClick);
   }
 
@@ -568,7 +566,6 @@ class EditableExerciseDialog extends NewUserExercise {
 
   private void useAnnotation(ExerciseAnnotation anno, final HTML annoField) {
     final boolean isIncorrect = anno != null && !anno.isCorrect();
-
     // if (DEBUG) logger.info("useAnnotation anno for " + anno + " = " + isIncorrect + " : " + annoField);
 
     if (isIncorrect) {

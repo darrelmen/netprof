@@ -49,18 +49,17 @@ import java.util.*;
 @SuppressWarnings("serial")
 public class ListServiceImpl extends MyRemoteServiceServlet implements ListService {
   private static final Logger logger = Logger.getLogger(ListServiceImpl.class);
-  private static final int MIN_RECORDINGS = 5;
-  AudioFileHelper audioFileHelper;
+  private AudioFileHelper audioFileHelper;
+  private static final boolean DEBUG = false;
 
   @Override
   public void init() {
-    logger.info("init called for MonitoringServiceImpl");
+//    logger.info("init called for ListServiceImpl");
     findSharedDatabase();
     readProperties(getServletContext());
     PathHelper pathHelper = new PathHelper(getServletContext());
     audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, null);
   }
-
 
   /**
    * @param userid
@@ -173,22 +172,24 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * Put the new item in the database,
    * copy the audio under bestAudio
    * assign the item to a user list
-   *
+   * <p>
    * So here we set the exercise id to the final id, not a provisional id, as assigned earlier.
+   *
    * @param userListID
    * @param userExercise
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
    */
   @Override
   public CommonExercise reallyCreateNewItem(long userListID, CommonExercise userExercise) {
-    //logger.debug("reallyCreateNewItem : made user exercise " + userExercise + " on list " + userListID);
+    if (DEBUG) logger.debug("reallyCreateNewItem : made user exercise " + userExercise + " on list " + userListID);
     getUserListManager().reallyCreateNewItem(userListID, userExercise, serverProps.getMediaDir());
+    String id = userExercise.getID();
 
     for (AudioAttribute audioAttribute : userExercise.getAudioAttributes()) {
-//      logger.debug("\treallyCreateNewItem : update " + audioAttribute + " to " + userExercise.getID());
-      db.getAudioDAO().updateExerciseID(audioAttribute.getUniqueID(), userExercise.getID());
+      if (DEBUG) logger.debug("\treallyCreateNewItem : update " + audioAttribute + " to " + id);
+      db.getAudioDAO().updateExerciseID(audioAttribute.getUniqueID(), id);
     }
-    //  logger.debug("\treallyCreateNewItem : made user exercise " + userExercise + " on list " + userListID);
+    if (DEBUG) logger.debug("\treallyCreateNewItem : made user exercise " + userExercise + " on list " + userListID);
 
     return userExercise;
   }
@@ -196,7 +197,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   @Override
   public Collection<CommonExercise> reallyCreateNewItems(int creator, long userListID, String userExerciseText) {
     String[] lines = userExerciseText.split("\n");
-    logger.info("got " + lines.length + " lines");
+    if (DEBUG) logger.info("got " + lines.length + " lines");
     List<CommonExercise> newItems = new ArrayList<>();
     UserList<CommonShell> userListByID = db.getUserListManager().getUserListByID(userListID, Collections.emptyList());
     int n = userListByID.getExercises().size();
@@ -204,11 +205,12 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     for (CommonShell shell : userListByID.getExercises()) unique.add(shell.getForeignLanguage());
     for (String line : lines) {
       String[] parts = line.split("\\t");
-      logger.info("\tgot " + parts.length + " parts");
+      if (DEBUG) logger.info("\tgot " + parts.length + " parts");
       if (parts.length > 1) {
-        UserExercise newItem = new UserExercise(-1, UserExercise.CUSTOM_PREFIX + "_" + (n++), creator, parts[1], parts[0], "");
+        String exerciseID = UserExercise.CUSTOM_PREFIX + "_" + creator + "_" + userListByID + "_" + (n++);
+        UserExercise newItem = new UserExercise(-1, exerciseID, creator, parts[1], parts[0], "");
         newItems.add(newItem);
-        logger.info("new " + newItem);
+        if (DEBUG) logger.info("new " + newItem);
       }
     }
 
@@ -256,7 +258,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   @Override
   public void editItem(CommonExercise userExercise) {
     db.editItem(userExercise);
-    logger.debug("editItem : now user exercise " + userExercise);
+    if (DEBUG)  logger.debug("editItem : now user exercise " + userExercise);
   }
 
   UserListManager getUserListManager() {
