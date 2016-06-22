@@ -37,7 +37,8 @@ import mitll.langtest.server.amas.FileExerciseDAO;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.DecodeAlignOutput;
 import mitll.langtest.server.audio.SLFFile;
-import mitll.langtest.server.database.analysis.Analysis;
+import mitll.langtest.server.database.analysis.IAnalysis;
+import mitll.langtest.server.database.analysis.SlickAnalysis;
 import mitll.langtest.server.database.annotation.IAnnotationDAO;
 import mitll.langtest.server.database.annotation.SlickAnnotationDAO;
 import mitll.langtest.server.database.audio.AudioDAO;
@@ -158,7 +159,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
   private static final boolean ADD_DEFECTS = true;
   private UserManagement userManagement;
-  private Analysis analysis;
+  private IAnalysis analysis;
   private final String absConfigDir;
   private SimpleExerciseDAO<AmasExerciseImpl> fileExerciseDAO;
 
@@ -340,7 +341,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   /**
    * @return
    */
-  public Analysis getAnalysis() {
+  public IAnalysis getAnalysis() {
     return analysis;
   }
 
@@ -569,11 +570,10 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
           setDependencies(mediaDir, installPath);
 
           exerciseDAO.getRawExercises();
-          //userExerciseDAO.setAudioDAO(audioDAO);
 
           numExercises = exerciseDAO.getNumExercises();
 
-          analysis = new Analysis(this, phoneDAO, getExerciseIDToRefAudio());
+          analysis = new SlickAnalysis(this, phoneDAO, getExerciseIDToRefAudio(), (SlickResultDAO) resultDAO);
         }
         userManagement = new UserManagement(userDAO, numExercises, resultDAO, userListManager);
         //   audioDAO.setExerciseDAO(exerciseDAO);
@@ -956,7 +956,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @param dialect
    * @param device
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addUser
+   * @see mitll.langtest.server.services.UserServiceImpl#addUser
    */
   public User addUser(HttpServletRequest request, String userID, String passwordH, String emailH, User.Kind kind,
                       boolean isMale, int age, String dialect, String device) {
@@ -1011,7 +1011,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * Adds some sugar -- sets the answers and rate per user, and joins with dli experience data
    *
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getUsers()
+   * @see mitll.langtest.server.services.UserServiceImpl#getUsers()
    */
   public List<User> getUsers() {
     return userManagement.getUsers();
@@ -1033,7 +1033,11 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @see mitll.langtest.server.ScoreServlet#doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
   public boolean logEvent(String id, String widgetType, String exid, String context, int userid, String device) {
-    return eventDAO != null && eventDAO.add(new Event(id, widgetType, exid, context, userid, -1, device), getLanguage());
+    if (userid == -1) {
+      userid = userDAO.getBeforeLoginUser();
+    }
+    Event event = new Event(id, widgetType, exid, context, userid, System.currentTimeMillis(), device);
+    return eventDAO != null && eventDAO.add(event, getLanguage());
   }
 
   public void logAndNotify(Exception e) {
@@ -1048,7 +1052,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return audioDAO;
   }
 
-  public IWordDAO getWordDAO() {
+  IWordDAO getWordDAO() {
     return wordDAO;
   }
 
@@ -1056,7 +1060,10 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return phoneDAO;
   }
 
-  public void createTables() {
+  /**
+   * TODO : add get tablename method to slick DAOs.
+   */
+  void createTables() {
     logger.info("createTables create slick tables...");
 
     SlickUserDAOImpl slickUserDAO = (SlickUserDAOImpl) getUserDAO();
@@ -1068,18 +1075,12 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     if (!dbConnection.hasTable("event")) slickEventDAO.createTable();
     if (!dbConnection.hasTable("result")) ((ISchema) getResultDAO()).createTable();
     if (!dbConnection.hasTable("userexercise")) ((ISchema) userExerciseDAO).createTable();
-//    if (!dbConnection.hasTable("userexerciselist")) ((ISchema) userListManager.getUserListDAO()).createTable();
-//    if (!dbConnection.hasTable("userexerciselistjoin"))
-//      ((SlickUserListExerciseJoinDAO)userListManager.getUserListExerciseJoinDAO()).createTable();
-
     userListManager.createTables(dbConnection);
     if (!dbConnection.hasTable("annotation")) ((ISchema) getAnnotationDAO()).createTable();
     if (!dbConnection.hasTable("word")) ((ISchema) getWordDAO()).createTable();
     if (!dbConnection.hasTable("phone")) ((ISchema) getPhoneDAO()).createTable();
     if (!dbConnection.hasTable("refresult")) ((SlickRefResultDAO) getRefResultDAO()).createTable();
-
-    // if (!dbConnection.hasTable("reviewed")) ((ISchema) getReviewedDAO()).createTable();
-    logger.info("created slick tables...");
+    logger.info("createTables created slick tables...");
   }
 
   public void dropTables() {
@@ -1129,8 +1130,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
   /**
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getResultAlternatives(java.util.Map, long, String, String)
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getResults(java.util.Map, long, String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getResultAlternatives
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getResults
    */
   public Collection<MonitorResult> getMonitorResults() {
     List<MonitorResult> monitorResults = resultDAO.getMonitorResults();

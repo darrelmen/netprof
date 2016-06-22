@@ -75,12 +75,6 @@ public class Event extends SlimEvent {
     this.device = device;
   }
 
-/*
-  public Long getId() {
-    return id;
-  }
-*/
-
   public String getWidgetID() {
     return widgetID;
   }
