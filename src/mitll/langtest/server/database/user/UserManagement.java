@@ -240,15 +240,15 @@ public class UserManagement {
    * @paramx experience
    * @paramx ipAddr      user agent info
    * @paramx dialect     speaker dialect
-   * @paramx permissions
+   * @paramx EMPTY_PERMISSIONS
    * @paramx device
    * @return assigned id
    */
 /*  public long addUser(int age, String gender, int experience, String ipAddr,
-                      String nativeLang, String dialect, String userID, Collection<User.Permission> permissions,
+                      String nativeLang, String dialect, String userID, Collection<User.Permission> EMPTY_PERMISSIONS,
                       String device) {
     logger.debug("addUser " + userID);
-    long l = userDAO.addUser(age, gender, experience, ipAddr, nativeLang, dialect, userID, false, permissions,
+    long l = userDAO.addUser(age, gender, experience, ipAddr, nativeLang, dialect, userID, false, EMPTY_PERMISSIONS,
         User.Kind.STUDENT, "", "", device);
     userListManager.createFavorites(l);
     return l;

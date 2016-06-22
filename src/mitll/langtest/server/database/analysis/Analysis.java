@@ -32,15 +32,11 @@
 
 package mitll.langtest.server.database.analysis;
 
-import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.phone.IPhoneDAO;
-import mitll.langtest.server.database.result.IResultDAO;
-import mitll.langtest.server.database.phone.PhoneDAO;
-import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.User;
@@ -49,7 +45,6 @@ import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import org.apache.log4j.Logger;
 
-import java.sql.*;
 import java.util.*;
 
 /**
@@ -58,17 +53,17 @@ import java.util.*;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 10/21/15.
  */
-public class Analysis extends DAO {
+public abstract class Analysis extends DAO {
   private static final Logger logger = Logger.getLogger(Analysis.class);
 
   private static final boolean DEBUG = false;
 
   private static final int FIVE_MINUTES = 5 * 60 * 1000;
   private static final float MIN_SCORE_TO_SHOW = 0.20f;
-  private static final String EMPTY_JSON = "{}";
+  protected static final String EMPTY_JSON = "{}";
   private final ParseResultJson parseResultJson;
   private final IPhoneDAO phoneDAO;
-  private Map<String, String> exToRef;
+  protected Map<String, String> exToRef;
 
   /**
    * @param database
@@ -84,8 +79,15 @@ public class Analysis extends DAO {
     logger.info("Analysis : exToRef has " + exToRef.size());
   }
 
-  private final Set<String> lincoln = new HashSet<>(Arrays.asList("gvidaver", "rbudd", "jmelot", "esalesky", "gatewood",
-      "testing", "grading", "fullperm",
+  private final Set<String> lincoln = new HashSet<>(Arrays.asList(
+      "gvidaver",
+      "rbudd",
+      "jmelot",
+      "esalesky",
+      "gatewood",
+      "testing",
+      "grading",
+      "fullperm",
       //"0001abcd",
       "egodoy",
       "rb2rb2",
@@ -93,61 +95,48 @@ public class Analysis extends DAO {
       //"WagnerSandy",
       "rbtrbt"));
 
-  /**
-   * @param userDAO
-   * @param minRecordings
-   * @return
-   * @see LangTestDatabaseImpl#getUsersWithRecordings()
-   */
-  public List<UserInfo> getUserInfo(IUserDAO userDAO, int minRecordings) {
-    String sql = getPerfSQL();
-    try {
-      Map<Integer, UserInfo> best = getBest(sql, minRecordings);
-      Map<Integer, User> userMap = userDAO.getUserMap();
-      List<UserInfo> userInfos = new ArrayList<>();
-      for (Map.Entry<Integer, UserInfo> pair : best.entrySet()) {
-        User user = userMap.get(pair.getKey());
+  List<UserInfo> getUserInfos(IUserDAO userDAO, Map<Integer, UserInfo> best) {
+    Map<Integer, User> userMap = userDAO.getUserMap();
+    List<UserInfo> userInfos = new ArrayList<>();
+    for (Map.Entry<Integer, UserInfo> pair : best.entrySet()) {
+      User user = userMap.get(pair.getKey());
 
-        if (user == null) {
-          logger.warn("huh? no user for " + pair.getKey());
-        } else {
-          boolean isLL = lincoln.contains(user.getUserID());
-          if (!isLL) {
-            pair.getValue().setUser(user);
-            userInfos.add(pair.getValue());
-          }
+      if (user == null) {
+        logger.warn("huh? no user for " + pair.getKey());
+      } else {
+        boolean isLL = lincoln.contains(user.getUserID());
+        if (!isLL) {
+          pair.getValue().setUser(user);
+          userInfos.add(pair.getValue());
         }
       }
-      Collections.sort(userInfos, new Comparator<UserInfo>() {
-        @Override
-        public int compare(UserInfo o1, UserInfo o2) {
-          return -1 * Long.valueOf(o1.getTimestampMillis()).compareTo(o2.getTimestampMillis());
-        }
-      });
-
-      // TODO : choose the initial granularity and set initial and current to those values
-      for (UserInfo userInfo : userInfos) {
-        Map<Long, List<PhoneSession>> granularityToSessions =
-            new PhoneAnalysis().getGranularityToSessions(userInfo.getBestScores());
-
-        List<PhoneSession> phoneSessions = chooseGran(granularityToSessions);
-        if (!phoneSessions.isEmpty()) {
-          PhoneSession first = phoneSessions.get(0);
-          PhoneSession last  = phoneSessions.get(phoneSessions.size() - 1);
-          if (phoneSessions.size() > 2 && last.getCount() < 10) {
-            last = phoneSessions.get(phoneSessions.size() - 2);
-          }
-
-          userInfo.setStart(  (int) Math.round(first.getMean() * 100d));
-          userInfo.setCurrent((int) Math.round( last.getMean() * 100d));
-        }
-      }
-
-      return userInfos;
-    } catch (SQLException e) {
-      logger.error("Got " + e, e);
     }
-    return Collections.emptyList();
+    Collections.sort(userInfos, new Comparator<UserInfo>() {
+      @Override
+      public int compare(UserInfo o1, UserInfo o2) {
+        return -1 * Long.valueOf(o1.getTimestampMillis()).compareTo(o2.getTimestampMillis());
+      }
+    });
+
+    // TODO : choose the initial granularity and set initial and current to those values
+    for (UserInfo userInfo : userInfos) {
+      Map<Long, List<PhoneSession>> granularityToSessions =
+          new PhoneAnalysis().getGranularityToSessions(userInfo.getBestScores());
+
+      List<PhoneSession> phoneSessions = chooseGran(granularityToSessions);
+      if (!phoneSessions.isEmpty()) {
+        PhoneSession first = phoneSessions.get(0);
+        PhoneSession last  = phoneSessions.get(phoneSessions.size() - 1);
+        if (phoneSessions.size() > 2 && last.getCount() < 10) {
+          last = phoneSessions.get(phoneSessions.size() - 2);
+        }
+
+        userInfo.setStart(  (int) Math.round(first.getMean() * 100d));
+        userInfo.setCurrent((int) Math.round( last.getMean() * 100d));
+      }
+    }
+
+    return userInfos;
   }
 
   private List<PhoneSession> chooseGran(Map<Long, List<PhoneSession>> granularityToSessions) {
@@ -197,85 +186,33 @@ public class Analysis extends DAO {
   }
 
   /**
-   * @param sql
-   * @param minRecordings
-   * @return
-   * @throws SQLException
-   * @see #getPerformanceForUser(long, int)
-   * @see #getPhonesForUser(long, int)
-   * @see #getWordScoresForUser(long, int)
-   */
-  private Map<Integer, UserInfo> getBest(String sql, int minRecordings) throws SQLException {
-    if (DEBUG) logger.info("getBest sql =\n" + sql);
-    Connection connection = database.getConnection(this.getClass().toString());
-    PreparedStatement statement = connection.prepareStatement(sql);
-    long then = System.currentTimeMillis();
-    Map<Integer, UserInfo> bestForQuery = getBestForQuery(connection, statement, minRecordings);
-    long now = System.currentTimeMillis();
-    logger.debug(getLanguage() + " : getBest took " + (now - then) + " millis to return\t" + bestForQuery.size() + " items");
-
-    return bestForQuery;
-  }
-
-  private String getPerfSQL() {
-    return getPerfSQL(
-        0,  // IGNORED VALUE!
-        false);
-  }
-
-  private String getPerfSQL(long userid) {
-    return getPerfSQL(userid, true);
-  }
-
-  private String getPerfSQL(long userid, boolean addUserID) {
-    String useridClause = addUserID ? ResultDAO.USERID + "=" + userid + " AND " : "";
-    return "SELECT " +
-        Database.EXID + "," +
-        ResultDAO.PRON_SCORE + "," +
-        Database.TIME + "," +
-        ResultDAO.ID + "," +
-        ResultDAO.DEVICE_TYPE + "," +
-        ResultDAO.SCORE_JSON + "," +
-        ResultDAO.ANSWER + "," +
-        ResultDAO.AUDIO_TYPE + "," +
-        ResultDAO.USERID +
-        " FROM " + ResultDAO.RESULTS +
-        " where " + useridClause +
-        ResultDAO.PRON_SCORE + ">0" + // discard when they got it wrong in avp
-        " order by " + Database.EXID + ", " + Database.TIME;
-  }
-
-  /**
    * @param id
    * @param minRecordings
    * @return
    * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceForUser(int, int)
    * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot
    */
-  public UserPerformance getPerformanceForUser(long id, int minRecordings) {
-    try {
-      Map<Integer, UserInfo> best = getBest(getPerfSQL(id), minRecordings);
+  abstract public UserPerformance getPerformanceForUser(long id, int minRecordings);
 
-      Collection<UserInfo> values = best.values();
-      if (values.isEmpty()) {
-        if (DEBUG) logger.debug("no results for " + id);
-        return new UserPerformance();
-      } else {
-        if (values.size() > 1) logger.error("only expecting one user for " + id);
-        UserInfo next = values.iterator().next();
-        if (DEBUG) logger.debug(" results for " + values.size() + "  first  " + next);
-        List<BestScore> resultsForQuery = next.getBestScores();
-        if (DEBUG) logger.debug(" resultsForQuery for " + resultsForQuery.size());
+ // abstract protected Map<Integer, UserInfo> getBest(int minRecordings);
 
-        UserPerformance userPerformance = new UserPerformance(id, resultsForQuery);
-        userPerformance.setGranularityToSessions(
-            new PhoneAnalysis().getGranularityToSessions(userPerformance.getRawBestScores()));
-        return userPerformance;
-      }
-    } catch (Exception ee) {
-      logException(ee);
+  protected UserPerformance getUserPerformance(long id, Map<Integer, UserInfo> best) {
+    Collection<UserInfo> values = best.values();
+    if (values.isEmpty()) {
+      if (DEBUG) logger.debug("no results for " + id);
+      return new UserPerformance();
+    } else {
+      if (values.size() > 1) logger.error("only expecting one user for " + id);
+      UserInfo next = values.iterator().next();
+      if (DEBUG) logger.debug(" results for " + values.size() + "  first  " + next);
+      List<BestScore> resultsForQuery = next.getBestScores();
+      if (DEBUG) logger.debug(" resultsForQuery for " + resultsForQuery.size());
+
+      UserPerformance userPerformance = new UserPerformance(id, resultsForQuery);
+      userPerformance.setGranularityToSessions(
+          new PhoneAnalysis().getGranularityToSessions(userPerformance.getRawBestScores()));
+      return userPerformance;
     }
-    return new UserPerformance(id);
   }
 
   /**
@@ -284,29 +221,24 @@ public class Analysis extends DAO {
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getWordScores
    */
-  public List<WordScore> getWordScoresForUser(long id, int minRecordings) {
-    try {
-      Map<Integer, UserInfo> best = getBest(getPerfSQL(id), minRecordings);
+  public abstract List<WordScore> getWordScoresForUser(long id, int minRecordings);
 
-      Collection<UserInfo> values = best.values();
-      if (values.isEmpty()) {
-        //logger.warn("no best values for " + id);
-        List<BestScore> bestScores = Collections.emptyList();
-        return getWordScore(bestScores);
-      } else {
-        UserInfo next = values.iterator().next();
-        List<BestScore> resultsForQuery = next.getBestScores();
-      //  if (DEBUG) logger.warn("resultsForQuery " + resultsForQuery.size());
+  List<WordScore> getWordScores(Map<Integer, UserInfo> best) {
+    Collection<UserInfo> values = best.values();
+    if (values.isEmpty()) {
+      //logger.warn("no best values for " + id);
+      List<BestScore> bestScores = Collections.emptyList();
+      return getWordScore(bestScores);
+    } else {
+      UserInfo next = values.iterator().next();
+      List<BestScore> resultsForQuery = next.getBestScores();
+    //  if (DEBUG) logger.warn("resultsForQuery " + resultsForQuery.size());
 
-        List<WordScore> wordScore = getWordScore(resultsForQuery);
-       // if (DEBUG || true) logger.warn("getWordScoresForUser for # " +id +" min " +minRecordings + " wordScore " + wordScore.size());
+      List<WordScore> wordScore = getWordScore(resultsForQuery);
+     // if (DEBUG || true) logger.warn("getWordScoresForUser for # " +id +" min " +minRecordings + " wordScore " + wordScore.size());
 
-        return wordScore;
-      }
-    } catch (Exception ee) {
-      logException(ee);
+      return wordScore;
     }
-    return new ArrayList<>();
   }
 
   /**
@@ -315,66 +247,49 @@ public class Analysis extends DAO {
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getPhoneScores
    */
-  public PhoneReport getPhonesForUser(long id, int minRecordings) {
-    try {
-      String sql = getPerfSQL(id);
-      long then = System.currentTimeMillis();
-      long start = System.currentTimeMillis();
+  public abstract PhoneReport getPhonesForUser(long id, int minRecordings);
 
-      Map<Integer, UserInfo> best = getBest(sql, minRecordings);
-      long now = System.currentTimeMillis();
+  PhoneReport getPhoneReport(long id,   Map<Integer, UserInfo> best) {
+    long then = System.currentTimeMillis();
+    long start = System.currentTimeMillis();
+    long now = System.currentTimeMillis();
 
-      if (DEBUG)
-        logger.debug(getLanguage() + " getPhonesForUser " + id + " took " + (now - then) + " millis to get " + best.size());
+    if (DEBUG)
+      logger.debug(getLanguage() + " getPhonesForUser " + id + " took " + (now - then) + " millis to get " + best.size());
 
-      if (best.isEmpty()) return new PhoneReport();
+    if (best.isEmpty()) return new PhoneReport();
 
-      UserInfo next = best.values().iterator().next();
-      List<BestScore> resultsForQuery = next.getBestScores();
+    UserInfo next = best.values().iterator().next();
+    List<BestScore> resultsForQuery = next.getBestScores();
 
-      List<Integer> ids = new ArrayList<>();
-      for (BestScore bs : resultsForQuery) {
-        ids.add(bs.getResultID());
-      }
-
-      if (DEBUG) logger.info("getPhonesForUser from " + resultsForQuery.size() + " added " + ids.size() + " ids ");
-      then = System.currentTimeMillis();
-      PhoneReport phoneReport = phoneDAO.getWorstPhonesForResults(id, ids, exToRef);
-
-      now = System.currentTimeMillis();
-
-      if (DEBUG)
-        logger.debug(getLanguage() + " getPhonesForUser " + id + " took " + (now - then) + " millis to phone report");
-      if (DEBUG) logger.info("getPhonesForUser report phoneReport " + phoneReport);
-
-      if (DEBUG) {
-        now = System.currentTimeMillis();
-        logger.debug(getLanguage() + " getPhonesForUser " + id + " took " + (now - start) + " millis to get " +
-            /*phonesForUser.size() +*/ " phones");
-      }
-      setSessions(phoneReport.getPhoneToAvgSorted());
-
-      return phoneReport;
-    } catch (Exception ee) {
-      logException(ee);
+    List<Integer> ids = new ArrayList<>();
+    for (BestScore bs : resultsForQuery) {
+      ids.add(bs.getResultID());
     }
-    return null;
+
+    if (DEBUG) logger.info("getPhonesForUser from " + resultsForQuery.size() + " added " + ids.size() + " ids ");
+    then = System.currentTimeMillis();
+    PhoneReport phoneReport = phoneDAO.getWorstPhonesForResults(id, ids, exToRef);
+
+    now = System.currentTimeMillis();
+
+    if (DEBUG)
+      logger.debug(getLanguage() + " getPhonesForUser " + id + " took " + (now - then) + " millis to phone report");
+    if (DEBUG) logger.info("getPhonesForUser report phoneReport " + phoneReport);
+
+    if (DEBUG) {
+      now = System.currentTimeMillis();
+      logger.debug(getLanguage() + " getPhonesForUser " + id + " took " + (now - start) + " millis to get " +
+          /*phonesForUser.size() +*/ " phones");
+    }
+    setSessions(phoneReport.getPhoneToAvgSorted());
+
+    return phoneReport;
   }
 
   private void setSessions(Map<String, PhoneStats> phoneToAvgSorted) { new PhoneAnalysis().setSessions(phoneToAvgSorted);  }
 
-  /**
-   * @param connection
-   * @param statement
-   * @param minRecordings
-   * @return
-   * @throws SQLException
-   * @see #getBest(String, int)
-   */
-  private Map<Integer, UserInfo> getBestForQuery(Connection connection, PreparedStatement statement, int minRecordings)
-      throws SQLException {
-    Map<Integer, List<BestScore>> userToBest = getUserToResults(connection, statement);
-
+  protected Map<Integer, UserInfo> getBestForQuery(int minRecordings, Map<Integer, List<BestScore>> userToBest) {
     if (DEBUG) logger.info("getBestForQuery got " + userToBest.values().iterator().next().size());
 
     Map<Integer, List<BestScore>> userToBest2 = new HashMap<>();
@@ -462,78 +377,7 @@ public class Analysis extends DAO {
     return userToUserInfo;
   }
 
-  /**
-   * @param connection
-   * @param statement
-   * @return
-   * @throws SQLException
-   * @see #getBestForQuery(Connection, PreparedStatement, int)
-   */
-  private Map<Integer, List<BestScore>> getUserToResults(Connection connection, PreparedStatement statement) throws SQLException {
-    ResultSet rs = statement.executeQuery();
-    Map<Integer, List<BestScore>> userToBest = new HashMap<>();
-
-    int iPad = 0;
-    int flashcard = 0;
-    int learn = 0;
-    int count = 0;
-    int missing = 0;
-    Set<String> missingAudio = new TreeSet<>();
-
-    int emptyCount =0;
-    while (rs.next()) {
-      count++;
-      String exid = rs.getString(Database.EXID);
-      Timestamp timestamp = rs.getTimestamp(Database.TIME);
-      float pronScore = rs.getFloat(ResultDAO.PRON_SCORE);
-      int id = rs.getInt(ResultDAO.ID);
-      int userid = rs.getInt(ResultDAO.USERID);
-      String type = rs.getString(ResultDAO.AUDIO_TYPE);
-
-      List<BestScore> results = userToBest.get(userid);
-      if (results == null) userToBest.put(userid, results = new ArrayList<BestScore>());
-
-      if (pronScore < 0) logger.warn("huh? got " + pronScore + " for " + exid + " and " + id);
-
-      String json = rs.getString(ResultDAO.SCORE_JSON);
-      if (json != null && json.equals(EMPTY_JSON)) {
-        //logger.warn("getUserToResults : Got empty json " + json + " for " + exid + " : " + id);
-        emptyCount++;
-      }
-      String device = rs.getString(ResultDAO.DEVICE_TYPE);
-      String path = rs.getString(ResultDAO.ANSWER);
-      boolean isiPad = device != null && device.startsWith("i");
-      if (isiPad) iPad++;
-      boolean isFlashcard = !isiPad && (type.startsWith("avp") || type.startsWith("flashcard"));
-      if (!isiPad) {
-        if (isFlashcard) flashcard++;
-        else learn++;
-      }
-      long time = timestamp.getTime();
-
-      String nativeAudio = exToRef.get(exid);
-      if (nativeAudio == null) {
-        if (exid.startsWith("Custom")) {
-//          logger.debug("missing audio for " + exid);
-          missingAudio.add(exid);
-        }
-        missing++;
-      }
-      results.add(new BestScore(exid, pronScore, time, id, json, isiPad, isFlashcard, trimPathForWebPage(path), nativeAudio));
-    }
-
-    if (DEBUG || true) {
-      logger.info("getUserToResults total " + count + " missing audio " + missing +
-          " iPad = " + iPad + " flashcard " + flashcard + " learn " + learn + " exToRef " + exToRef.size());
-      if (!missingAudio.isEmpty()) logger.info("missing audio " + missingAudio);
-      if (emptyCount > 0) logger.info("missing score json count " + emptyCount + "/" + count);
-    }
-
-    finish(connection, statement, rs);
-    return userToBest;
-  }
-
-  private String trimPathForWebPage(String path) {
+  protected String trimPathForWebPage(String path) {
     int answer = path.indexOf(PathHelper.ANSWERS);
     return (answer == -1) ? path : path.substring(answer);
   }
