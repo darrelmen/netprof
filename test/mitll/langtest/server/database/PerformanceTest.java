@@ -2,6 +2,7 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.analysis.Analysis;
+import mitll.langtest.server.database.analysis.IAnalysis;
 import mitll.langtest.server.database.connection.H2Connection;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.shared.analysis.*;
@@ -296,7 +297,7 @@ public class PerformanceTest extends BaseTest {
     String path = "npfUrdu";
     H2Connection connection = getH2Connection(path);
     DatabaseImpl database = getDatabase(connection, "urdu", path);
-    Analysis analysis = database.getAnalysis();
+    IAnalysis analysis = database.getAnalysis();
     // int id = 117;
     int id = 104;
     UserPerformance performanceForUser = analysis.getPerformanceForUser(id, 1);
@@ -317,7 +318,7 @@ public class PerformanceTest extends BaseTest {
 
     H2Connection connection = getH2Connection(path);
     DatabaseImpl database = getDatabase(connection, urdu, path);
-    Analysis analysis = database.getAnalysis();
+    IAnalysis analysis = database.getAnalysis();
     // int id = 117;
     int id = 285;
     UserPerformance performanceForUser = analysis.getPerformanceForUser(id, 1);
@@ -336,7 +337,7 @@ public class PerformanceTest extends BaseTest {
 
     H2Connection connection = getH2Connection(path);
     DatabaseImpl database = getDatabase(connection, urdu, path);
-    Analysis analysis = database.getAnalysis();
+    IAnalysis analysis = database.getAnalysis();
     // int id = 117;
     int id = 171;
     UserPerformance performanceForUser = analysis.getPerformanceForUser(id, 1);
@@ -397,7 +398,7 @@ public class PerformanceTest extends BaseTest {
 
     H2Connection connection = getH2Connection(path);
     DatabaseImpl database = getDatabase(connection, urdu, path);
-    Analysis analysis = database.getAnalysis();
+    IAnalysis analysis = database.getAnalysis();
     // int id = 117;
     int id = 155;
     UserPerformance performanceForUser = analysis.getPerformanceForUser(id, 1);
@@ -420,7 +421,7 @@ public class PerformanceTest extends BaseTest {
 
     H2Connection connection = getH2Connection(path);
     DatabaseImpl database = getDatabase(connection, urdu, path);
-    Analysis analysis = database.getAnalysis();
+    IAnalysis analysis = database.getAnalysis();
     // int id = 117;
     int id = 162;
     UserPerformance performanceForUser = analysis.getPerformanceForUser(id, 1);
@@ -437,7 +438,7 @@ public class PerformanceTest extends BaseTest {
     String urdu = "egyptian";
 
     DatabaseImpl database = getDatabase(getH2Connection(path), urdu, path);
-    Analysis analysis = database.getAnalysis();
+    IAnalysis analysis = database.getAnalysis();
 
     List<UserInfo> userInfo = analysis.getUserInfo(database.getUserDAO(), 5);
     for (UserInfo userInfo1 : userInfo) logger.warn("Got " + userInfo1);
