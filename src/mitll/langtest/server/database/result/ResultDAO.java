@@ -87,7 +87,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
   public static final String USER_SCORE = "userscore";
   //public static final String CLASSIFIER_SCORE = "classifierscore";
 
-  private final boolean debug = false;
+  private final boolean debug = true;
 
   /**
    * @param database
@@ -96,7 +96,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
   public ResultDAO(Database database) {
     super(database);
 
-    logger.info("\n\n\n\nmade h2 result dao " + this);
+    logger.warn("\n\n\n\nmade h2 result dao " + this);
   }
 
   /**
@@ -275,19 +275,18 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
    * Only take avp audio type and *valid* audio.
    *
    * @param ids
-   * @param matchAVP
    * @return
    * @see #getSessionsForUserIn2
    */
 
-  List<CorrectAndScore> getResultsForExIDIn(Collection<String> ids, boolean matchAVP) {
+  public List<CorrectAndScore> getResultsForExIDIn(Collection<String> ids) {
     try {
       String list = getInList(ids);
 
       String sql = getCSSelect() + " FROM " + RESULTS + " WHERE " +
           VALID + "=true" + " AND " +
           //AUDIO_TYPE + (matchAVP?"=":"<>") + "'avp'" +" AND " +
-          getAVPClause(matchAVP) + " AND " +
+          getAVPClause(true) + " AND " +
 
           EXID + " in (" + list + ")" +
           " order by " + Database.TIME + " asc";
@@ -313,7 +312,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getScoresForUser
    */
   @Override
-  public Collection<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, int userid, String session) {
+  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, int userid, String session) {
     try {
       String list = getInList(ids);
 
@@ -359,7 +358,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
    * @see #attachScoreHistory
    * @see mitll.langtest.server.database.DatabaseImpl#getJsonScoreHistory
    */
-  List<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, boolean matchAVP, int userid) {
+  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, boolean matchAVP, int userid) {
     try {
       String list = getInList(ids);
 
@@ -383,7 +382,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
             " query for " + ids.size() + " and userid " + userid + " returned " + scores.size() + " scores");
       }
       if (debug) {
-        logger.debug("getResultsForExIDInForUser for  " + sql + " got\n\t" + scores.size());
+        logger.debug("getResultsForExIDInForUser for\n" + sql + "\ngot\n\t" + scores.size());
       }
       return scores;
     } catch (Exception ee) {
@@ -393,6 +392,11 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
     return new ArrayList<>();
   }
 
+  /**
+   *
+   * @param matchAVP
+   * @return
+   */
   private String getAVPClause(boolean matchAVP) {
     return "(" + AUDIO_TYPE + (matchAVP ? "" : " NOT ") + " LIKE " + "'avp%'" +
         " OR " + AUDIO_TYPE + (matchAVP ? "=" : "<>") + " 'flashcard' " + ")";
