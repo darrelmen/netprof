@@ -142,7 +142,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
   private IUserExerciseDAO userExerciseDAO;
 
-  private AddRemoveDAO addRemoveDAO;
+ // private AddRemoveDAO addRemoveDAO;
 
   private IEventDAO eventDAO;
 
@@ -296,7 +296,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         pathHelper);
 
     createTables();
-
 /*
     Connection connection1 = getConnection();
     try {
@@ -887,14 +886,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   }
 
   /**
-   * @return unmodifiable list of exercises
-   * @see mitll.langtest.server.LangTestDatabaseImpl#init
-   */
-/*  public void preloadExercises() {
-    getExercises();
-  }*/
-
-  /**
    * @see LangTestDatabaseImpl#init()
    */
   public void preloadContextPractice() {
@@ -971,29 +962,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   public int addUser(User user) {
     return userManagement.addUser(user);
   }
-
-  /**
-   * Somehow on subsequent runs, the ids skip by 30 or so?
-   * <p>
-   * Uses return generated keys to get the user id
-   * <p>
-   * JUST FOR TESTING
-   *
-   * @param age
-   * @param gender
-   * @param experience
-   * @param ipAddr      user agent info
-   * @param dialect     speaker dialect
-   * @param permissions
-   * @param device
-   * @return assigned id
-   */
-/*
-  public long addUser(int age, String gender, int experience, String ipAddr,
-                      String nativeLang, String dialect, String userID, Collection<User.Permission> permissions, String device) {
-    return userManagement.addUser(age, gender, experience, ipAddr, nativeLang, dialect, userID, permissions, device);
-  }
-*/
 
   /**
    * @param out
@@ -1083,46 +1051,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     logger.info("createTables created slick tables...");
   }
 
-  public void dropTables() {
-    //  SlickUserDAOImpl slickUserDAO = (SlickUserDAOImpl) getUserDAO();
-    dbConnection.dropAll();
-/*
-    SlickAudioDAO slickAudioDAO = (SlickAudioDAO) getAudioDAO();
-    SlickEventImpl slickEventDAO = (SlickEventImpl) getEventDAO();
-    SlickResultDAO slickResultDAO = (SlickResultDAO) getResultDAO();
-
-    logger.info("cxopyToPostgres Drop audio table!!!\n\n\n\n");
-    try {
-      slickAudioDAO.dropTable();
-      int num = slickAudioDAO.getNumRows();
-      logger.info("after drop slickAudioDAO " + num);
-    } catch (Exception e) {
-      logger.warn("drop " + e);
-    }
-    try {
-      slickEventDAO.dropTable();
-      int num = slickEventDAO.getNumRows();
-      logger.info("after drop slickEventDAO " + num);
-    } catch (Exception e) {
-      logger.warn("drop " + e);
-    }
-    try {
-      slickResultDAO.dropTable();
-      int num = slickResultDAO.getNumRows();
-      logger.info("after drop slickResultDAO " + num);
-    } catch (Exception e) {
-      logger.warn("drop " + e);
-    }
-    logger.info("Drop user table!!! ");
-    try {
-      slickUserDAO.dropTable();
-      int num = slickUserDAO.getUsers().size();
-      logger.info("after drop slickUserDAO " + num);
-    } catch (Exception e) {
-      logger.warn("drop " + e);
-    }
-*/
-  }
+  public void dropTables() { dbConnection.dropAll();  }
 
   public void copyToPostgres() {
     new CopyToPostgres().copyToPostgres(this);
