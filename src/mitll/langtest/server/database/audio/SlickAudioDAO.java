@@ -209,7 +209,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
   private List<AudioAttribute> toAudioAttribute(List<SlickAudio> all, Map<Integer, MiniUser> idToMini) {
     List<AudioAttribute> copy = new ArrayList<>();
-    logger.info("table has " + dao.getNumRows());
+//    logger.info("table has " + dao.getNumRows());
     for (SlickAudio s : all) {
 //      logger.info("got " + s);
       copy.add(toAudioAttribute(s, idToMini));
@@ -221,10 +221,6 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     dao.addBulk(bulk);
   }  public void addBulk2(List<SlickAudio> bulk) {
     dao.addBulk2(bulk);
-  }
-
-  public void dropTable() {
-    dao.drop();
   }
 
   public int getNumRows() {

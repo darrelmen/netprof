@@ -167,6 +167,10 @@ public class User extends MiniUser {
     this.numResults = numResults;
   }
 
+  /**
+   * @see mitll.langtest.client.InitialUI#gotUser(User)
+   * @return
+   */
   public boolean isAdmin() {
     return admin;
   }
@@ -257,6 +261,7 @@ public class User extends MiniUser {
   public String toString() {
     return "user " + getId() + "/" + getUserID() +
         " is a " + getGender() + " age " + getAge() +
+        " admin " + isAdmin() +
         " dialect " + getDialect() +
         " emailH " + getEmailHash() +
         " passH " + getPasswordHash() +

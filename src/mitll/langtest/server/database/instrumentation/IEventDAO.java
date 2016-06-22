@@ -13,7 +13,7 @@ public interface IEventDAO {
   boolean add(Event event, String language);
 
   List<Event> getAll(String language);
-
+  List<Event> getAllMax(String language);
   List<SlickSlimEvent> getAllSlim(String language);
 
   List<SlickSlimEvent> getAllDevicesSlim(String language);

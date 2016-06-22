@@ -290,7 +290,7 @@ public class EditItem {
                              final ListInterface<CommonShell> pagingContainer) {
     if (exercise.getID().equals(NEW_EXERCISE_ID)) {
       if (newExercise == null) {
-        newExercise = createNewItem(userManager.getUser());
+        newExercise = createNewItem(userManager.getUser(), ul.getName().replaceAll("\\s+", "_"));
         addEditOrAddPanel(newExercise, itemMarker, originalList, right, ul, pagingContainer, true, false);
 
       } else {
@@ -306,9 +306,11 @@ public class EditItem {
    *
    * @param userid
    * @return
+   * @see #populatePanel(CommonExercise, Panel, UserList, UserList, HasText, ListInterface)
    */
-  private UserExercise createNewItem(int userid) {
-    return new UserExercise(-1, UserExercise.CUSTOM_PREFIX + Long.MAX_VALUE, userid, "", "", "");
+  private UserExercise createNewItem(int userid, String listName) {
+    long now = System.currentTimeMillis();
+    return new UserExercise(-1, UserExercise.CUSTOM_PREFIX + "_" + listName + "_" + userid + "_" + now, userid, "", "", "");
   }
 
   /**
@@ -333,7 +335,7 @@ public class EditItem {
     if (setFields) editableExercise.setFields(newExercise);
   }
 
-  public void clearNewExercise() {
+  void clearNewExercise() {
     this.newExercise = null;
   }
 
@@ -374,7 +376,7 @@ public class EditItem {
   }
 
   private String getInstance() {
-    return instanceName;//npfHelper.getInstanceName();
+    return instanceName;
   }
 
   /**
@@ -385,12 +387,12 @@ public class EditItem {
    */
   private boolean didICreateThisItem(CommonExercise exercise) {
     boolean isMine = exercise.getCreator() == controller.getUser();
-    logger.info("for " + exercise + " vs " + controller.getUser() + " is Mine " + isMine);
+  //  logger.info("for " + exercise + " vs " + controller.getUser() + " is Mine " + isMine);
     return isMine;
   }
 
   private class RemoveFromListOnlyExercise extends NewUserExercise {
-    public RemoveFromListOnlyExercise(HasText itemMarker, CommonExercise exercise, UserList<CommonShell> originalList) {
+    RemoveFromListOnlyExercise(HasText itemMarker, CommonExercise exercise, UserList<CommonShell> originalList) {
       super(EditItem.this.service, EditItem.this.controller, itemMarker, EditItem.this, exercise, EditItem.this.getInstance(), originalList);
     }
 
@@ -399,21 +401,17 @@ public class EditItem {
                         UserList<CommonShell> originalList,
                         ListInterface<CommonShell> listInterface,
                         Panel toAddTo) {
-      final FluidContainer container = new FluidContainer();
-
       this.ul = ul;
       this.originalList = originalList;
       this.listInterface = listInterface;
 
-      Button delete = makeDeleteButton(ul, originalList.getUniqueID());
-
-      container.add(delete);
+      final FluidContainer container = new FluidContainer();
+      container.add(makeDeleteButton(ul, originalList.getUniqueID()));
       return container;
     }
 
-    public Button makeDeleteButton(final UserList<CommonShell> ul, final long uniqueID) {
+    Button makeDeleteButton(final UserList<CommonShell> ul, final long uniqueID) {
       Button delete = makeDeleteButton(ul);
-
       delete.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
@@ -421,7 +419,6 @@ public class EditItem {
           deleteItem(newUserExercise.getID(), uniqueID, ul, exerciseList, predefinedContentList);
         }
       });
-
       delete.addStyleName("topFiftyMargin");
       return delete;
     }

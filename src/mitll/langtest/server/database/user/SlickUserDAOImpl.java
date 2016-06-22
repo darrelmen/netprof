@@ -52,12 +52,10 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
   public SlickUserDAOImpl(Database database, DBConnection dbConnection) {
     super(database);
     dao = new UserDAOWrapper(dbConnection);
-  }
-
-  public void createTable() {
-    dao.createTable();
     findOrMakeDefectDetector();
   }
+
+  public void createTable() { dao.createTable(); }
 
   public int add(SlickUser user) {
     return dao.add(user);
@@ -157,7 +155,9 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }
 
   private User toUser(SlickUser s) {
-    return new User(
+    boolean admin = isAdmin(s.userid());
+
+    User user = new User(
         s.id(),
         89,
         s.ismale() ? 0 : 1,
@@ -168,7 +168,7 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
         s.dialect(),
         s.userid(),
         s.enabled(),
-        isAdmin(s.userid()),
+        admin,
         getPerm(s.permissions()),
         User.Kind.valueOf(s.kind()),
         s.emailhash(),
@@ -177,6 +177,8 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
         s.enabledreqkey(),
         s.modified().getTime()
     );
+
+    return user;
   }
 
   /**
