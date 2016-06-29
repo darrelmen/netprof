@@ -129,5 +129,8 @@
     <orderEntry type="library" name="commons-lang-2.6" level="project" />
     <orderEntry type="library" name="quality-check-1.3" level="project" />
     <orderEntry type="library" name="pronz-assembly-1.0" level="project" />
+    <orderEntry type="library" name="pronz_2.11-1.0 (2)" level="project" />
+    <orderEntry type="library" name="hydec_2.11-1.0 (2)" level="project" />
+    <orderEntry type="library" name="utils_2.11-1.0.0-SNAPSHOT (2)" level="project" />
   </component>
 </module>
