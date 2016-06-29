@@ -700,7 +700,7 @@ public class UserDAO extends DAO {
   }
 
   private boolean isAdmin(String userid) {
-    return userid != null && (admins.contains(userid));
+    return userid != null && (admins.contains(userid.toLowerCase()));
   }
 
   public Map<Long, User> getUserMap(boolean getMale) {
