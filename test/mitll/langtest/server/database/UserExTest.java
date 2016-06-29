@@ -78,6 +78,24 @@ public class UserExTest extends BaseTest {
 
 
   @Test
+  public void testUserListAgain() {
+    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
+
+    IUserExerciseDAO dao = spanish.getUserExerciseDAO();
+    UserListManager userListManager = spanish.getUserListManager();
+
+    Collection<UserList<CommonShell>> listsForUser = userListManager.getListsForUser(1, true, false);
+
+    for (UserList<CommonShell> list : listsForUser) {
+      logger.info("got " + list);
+      for (CommonShell ex : list.getExercises()) {
+        logger.info("\t" + list + " has " + ex);
+      }
+    }
+
+
+  }
+    @Test
   public void testUserList2() {
     DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
 
