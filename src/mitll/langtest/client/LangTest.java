@@ -146,6 +146,8 @@ import java.util.logging.Logger;
  * - student analysis tab visible, html5 audio preferred
  * 1.3.5
  * - bug fix for issue where prev next buttons on empty list would throw exception, event dialog wouldn't come up on big tables
+ * 1.3.6
+ * - admin test on userid was case sensitive
  *
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -155,7 +157,7 @@ import java.util.logging.Logger;
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private final Logger logger = Logger.getLogger("LangTest");
 
-  public static final String VERSION_INFO = "1.3.5";
+  public static final String VERSION_INFO = "1.3.6";
 
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
