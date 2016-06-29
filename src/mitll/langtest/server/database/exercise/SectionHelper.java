@@ -66,7 +66,7 @@ public class SectionHelper<T extends Shell> {
    * @see mitll.langtest.server.database.DatabaseImpl#getTypeOrder
    */
   public List<String> getTypeOrder() {
-    logger.info("getTypeOrder predefinedTypeOrder : " + predefinedTypeOrder);
+//    logger.info("getTypeOrder predefinedTypeOrder : " + predefinedTypeOrder);
     if (predefinedTypeOrder.isEmpty()) {
       List<String> types = new ArrayList<String>();
       types.addAll(typeToSectionToTypeToSections.keySet());
