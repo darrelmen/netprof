@@ -153,7 +153,6 @@ public class ServerProperties {
   private final Set<Long> preferredVoices = new HashSet<Long>();
   private EmailList emailList;
   private final int userInitialScores = 20;
-  //private boolean RTL;
 /*  private int sleepBetweenDecodes;
   private long trimBeforeAndAfter;
   private long trimBefore;
