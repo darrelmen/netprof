@@ -1,0 +1,156 @@
+/*
+ *
+ * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
+ * and their contractors; 2015. Other request for this document shall be referred
+ * to DLIFLC.
+ *
+ * WARNING: This document may contain technical data whose export is restricted
+ * by the Arms Export Control Act (AECA) or the Export Administration Act (EAA).
+ * Transfer of this data by any means to a non-US person who is not eligible to
+ * obtain export-controlled data is prohibited. By accepting this data, the consignee
+ * agrees to honor the requirements of the AECA and EAA. DESTRUCTION NOTICE: For
+ * unclassified, limited distribution documents, destroy by any method that will
+ * prevent disclosure of the contents or reconstruction of the document.
+ *
+ * This material is based upon work supported under Air Force Contract No.
+ * FA8721-05-C-0002 and/or FA8702-15-D-0001. Any opinions, findings, conclusions
+ * or recommendations expressed in this material are those of the author(s) and
+ * do not necessarily reflect the views of the U.S. Air Force.
+ *
+ * © 2015 Massachusetts Institute of Technology.
+ *
+ * The software/firmware is provided to you on an As-Is basis
+ *
+ * Delivered to the US Government with Unlimited Rights, as defined in DFARS
+ * Part 252.227-7013 or 7014 (Feb 2014). Notwithstanding any copyright notice,
+ * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
+ * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
+ * authorized by the U.S. Government may violate any copyrights that exist in this work.
+ *
+ *
+ */
+
+package mitll.langtest.server.database;
+
+import mitll.langtest.client.user.Md5Hash;
+import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.database.audio.AudioDAO;
+import mitll.langtest.server.database.audio.IAudioDAO;
+import mitll.langtest.server.database.instrumentation.IEventDAO;
+import mitll.langtest.server.database.result.IResultDAO;
+import mitll.langtest.server.database.result.Result;
+import mitll.langtest.server.database.user.IUserDAO;
+import mitll.langtest.server.database.user.UserDAO;
+import mitll.langtest.shared.AudioType;
+import mitll.langtest.shared.User;
+import mitll.langtest.shared.UserAndTime;
+import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.instrumentation.Event;
+import mitll.npdata.dao.DBConnection;
+import mitll.npdata.dao.SlickSlimEvent;
+import org.apache.log4j.Logger;
+import org.junit.Test;
+
+import java.io.File;
+import java.util.*;
+
+public class UserTest extends BaseTest {
+  private static final Logger logger = Logger.getLogger(UserTest.class);
+
+  @Test
+  public void testAdmin() {
+    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
+
+    IUserDAO dao = spanish.getUserDAO();
+
+    List<User> users = dao.getUsers();
+    for (User user : users) if (user.isAdmin()) logger.info(user);
+
+  }
+
+  /**
+   * TODO : add option to get mock db to use
+   */
+  @Test
+  public void testUser() {
+    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
+
+    IUserDAO dao = spanish.getUserDAO();
+
+    List<User> users = dao.getUsers();
+
+    logger.info("got " + users);
+
+    String userid = "userid";
+    String hash = Md5Hash.getHash("g@gmail.com");
+    String password = Md5Hash.getHash("password");
+    String bueller = Md5Hash.getHash("bueller");
+    User user = dao.addUser(userid, password, hash, User.Kind.STUDENT, "128.0.0.1", true, 89, "midest", "browser");
+    User user2 = dao.addUser(userid, password, hash, User.Kind.STUDENT, "128.0.0.1", true, 89, "midest", "iPad");
+
+    logger.info("made " + user);
+    logger.info("made " + user2);
+    User user3 = dao.addUser(userid + "ipad", password, hash, User.Kind.STUDENT, "128.0.0.1", true, 89, "midest", "iPad");
+
+    if (user == null) {
+      user = dao.getUserByID(userid);
+      logger.info("found " + user);
+    }
+
+    logger.info("before " + user.isEnabled());
+
+    int id = user.getId();
+    boolean b = dao.enableUser(id);
+
+    logger.info("enable user " + b);
+
+    logger.info("change enabled " + dao.changeEnabled(id, true) + " : " + dao.getUserWhere(id).isEnabled());
+    logger.info("change enabled " + dao.changeEnabled(id, false) + " : " + dao.getUserWhere(id).isEnabled());
+    int bogusID = 123456789;
+    logger.info("change enabled " + dao.changeEnabled(bogusID, false) + " : " + dao.getUserWhere(id).isEnabled());
+
+
+    logger.info("user " + dao.getIDForUserAndEmail(userid, hash));
+    logger.info("user " + dao.getIDForUserAndEmail(userid, password));
+    logger.info("user id " + dao.getIdForUserID(userid));
+    logger.info("user " + dao.getUser(userid, password));
+    logger.info("user " + dao.getUser(userid, hash));
+    logger.info("user " + dao.getUserWithPass(userid, password));
+    logger.info("user " + dao.getUserWithPass(userid, hash));
+    logger.info("user devices " + dao.getUsersDevices());
+    logger.info("mini " + dao.getMiniUsers());
+    logger.info("mini first " + dao.getMiniUser(dao.getMiniUsers().keySet().iterator().next()));
+    logger.info("males " + dao.getUserMap(true));
+    logger.info("females " + dao.getUserMap(false));
+    logger.info("all " + dao.getUserMap());
+
+    logger.info("valid email " + dao.isValidEmail(hash));
+    logger.info("valid email " + dao.isValidEmail(password));
+    logger.info("change password\n" +
+        dao.getUserWithPass(userid, password) + " :\n" +
+        dao.changePassword(id, bueller) + "\n" +
+        dao.getUserWithPass(userid, password) + " :\n" +
+        dao.getUserWithPass(userid, bueller));
+
+    logger.info("reset key " +
+        dao.getUserWithResetKey("reset") +
+        ":\n" + dao.updateKey(id, true, "reset") +
+        " :\n" + dao.getUserWithResetKey("reset") +
+        ":\n" + dao.clearKey(id, true) +
+        " :\n" + dao.getUserWithResetKey("reset")
+    );
+
+    logger.info("enabled key " +
+        dao.getUserWithResetKey("enabled") +
+        ":\n" + dao.updateKey(id, false, "enabled") +
+        " :\n" + dao.getUserWithEnabledKey("enabled") +
+        ":\n" + dao.clearKey(id, false) +
+        ":\n" + dao.clearKey(bogusID, false) +
+        " :\n" + dao.getUserWithEnabledKey("enabled")
+    );
+    //  spanish.doReport(new PathHelper("war"));
+  }
+
+
+}
