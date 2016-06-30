@@ -924,7 +924,7 @@ public class UserPassLogin extends UserDialog {
             } else {
               if (result.isEnabled()) {
                 eventRegistration.logEvent(signUp, "signing up", "N/A", getSignUpEvent(result));
-                logger.info("Got valid, enabled new user " + user + " and so we're letting them in.");
+               // logger.info("Got valid, enabled new user " + user + " and so we're letting them in.");
 
                 storeUser(result);
               } else {
@@ -1006,7 +1006,7 @@ public class UserPassLogin extends UserDialog {
    */
   private void gotLogin(final String user, final String pass, final boolean emptyPassword) {
     final String hashedPass = Md5Hash.getHash(pass);
-    logger.info("gotLogin : user is '" + user + "' pass '" + pass + "' or '" + hashedPass + "'");
+  //  logger.info("gotLogin : user is '" + user + "' pass '" + pass + "' or '" + hashedPass + "'");
 
     signIn.setEnabled(false);
     service.userExists(user, hashedPass, new AsyncCallback<User>() {
@@ -1025,7 +1025,7 @@ public class UserPassLogin extends UserDialog {
           markErrorBlur(password, emptyPassword ? PLEASE_ENTER_YOUR_PASSWORD : BAD_PASSWORD);
           signIn.setEnabled(true);
         } else {
-          logger.info("Found user " + result);
+         // logger.info("Found user " + result);
           foundExistingUser(result, emptyPassword, hashedPass);
         }
       }
@@ -1046,7 +1046,7 @@ public class UserPassLogin extends UserDialog {
       copyInfoToSignUp(result);
       signIn.setEnabled(true);
     } else {
-      logger.info("Got valid user " + result);
+     // logger.info("Got valid user " + result);
       if (emptyPassword) {
         eventRegistration.logEvent(signIn, "sign in", "N/A", "empty password");
 
@@ -1055,7 +1055,7 @@ public class UserPassLogin extends UserDialog {
       } else if (result.getPasswordHash().equalsIgnoreCase(hashedPass)) {
         if (result.isEnabled() || result.getUserKind() != User.Kind.CONTENT_DEVELOPER || props.enableAllUsers()) {
           eventRegistration.logEvent(signIn, "sign in", "N/A", "successful sign in for " + user);
-          logger.info("Got valid user " + user + " and matching password, so we're letting them in.");
+      //    logger.info("Got valid user " + user + " and matching password, so we're letting them in.");
 
           storeUser(result);
         } else {
