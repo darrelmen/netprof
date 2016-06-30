@@ -160,7 +160,7 @@ public abstract class BaseUserDAO extends DAO {
   abstract User getUserWhere(int userid);
 
   boolean isAdmin(String userid) {
-    return userid != null && (admins.contains(userid));
+    return userid != null && (admins.contains(userid.toLowerCase()));
   }
 
   private static final List<User.Permission> EMPTY_PERMISSIONS = Collections.emptyList();
