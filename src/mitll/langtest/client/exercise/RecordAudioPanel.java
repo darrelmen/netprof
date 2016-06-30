@@ -86,8 +86,6 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
   public RecordAudioPanel(T exercise, ExerciseController controller, Panel widgets,
                           LangTestDatabaseAsync service, int index, boolean showSpectrogram, String audioType, String instance) {
     super(service,
-      // use full screen width
-      // use keyboard
       controller, showSpectrogram,
       null // no gauge panel
       , 1.0f, 23, exercise.getID(), exercise, instance);
@@ -96,9 +94,6 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
     this.exercise = exercise;
     this.audioType = audioType;
     AudioAttribute attribute = getAudioAttribute();
-/*    System.out.println("RecordAudioPanel for " + exercise.getID() +
-      " audio type " + audioType + " ref " + exercise.getRefAudio() + " path " + attribute);
-  */
     if (attribute != null) {
       this.audioPath = attribute.getAudioRef();
     }
@@ -242,7 +237,6 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
 
   protected class MyWaveformPostAudioRecordButton extends WaveformPostAudioRecordButton {
    // private long then,now;
-
     /**
      * @see #makePostAudioRecordButton(String, String)
      * @param audioType
@@ -277,14 +271,6 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
     @Override
     public void flip(boolean first) {
       flipRecordImages(first);
-    }
-
-    @Override
-    public void useResult(AudioAnswer result) {
-      super.useResult(result);
-      if (result.isValid()) {
-       // System.out.println("tell other tabs that audio has arrived!");
-      }
     }
   }
 }

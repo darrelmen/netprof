@@ -36,6 +36,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.autocrt.DecodeCorrectnessChecker;
 import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.scoring.PretestScore;
 
 import java.io.File;
@@ -162,6 +163,10 @@ public class AudioAnswer implements IsSerializable {
 
   public String getPath() { return path; }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable(int, String, CommonShell, String, AudioAnswer)
+   * @param path
+   */
   public void setPath(String path) { this.path = path;  }
 
   public Validity getValidity() {
