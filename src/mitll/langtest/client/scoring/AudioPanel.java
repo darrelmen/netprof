@@ -39,7 +39,6 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
-import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
@@ -113,7 +112,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
   protected final T exercise;
   final String instance;
 
-  private static final boolean debug = false;
+  private static final boolean DEBUG = false;
   private static final boolean DEBUG_GET_IMAGES = false;
 
   /**
@@ -164,7 +163,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     this.logMessages = controller.isLogClientMessages();
     this.controller = controller;
     this.gaugePanel = gaugePanel;
-    if (debug) logger.info("AudioPanel : gauge panel " + gaugePanel);
+    if (DEBUG) logger.info("AudioPanel : gauge panel " + gaugePanel);
     this.showSpectrogram = showSpectrogram;
     this.rightMargin = rightMargin;
     this.exerciseID = exerciseID;
@@ -285,7 +284,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
 
   @Override
   public void onLoad() {
-    if (debug) logger.info("onLoad : id=" + getElement().getId() + " audio path is " + audioPath);
+    if (DEBUG) logger.info("onLoad : id=" + getElement().getId() + " audio path is " + audioPath);
     if (audioPath != null) {
       Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
         public void execute() {
@@ -301,7 +300,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
   }
 
   public void setScreenPortion(float screenPortion) {
-    if (debug) logger.info("AudioPanel.setScreenPortion : screenPortion " + screenPortion);
+    if (DEBUG) logger.info("AudioPanel.setScreenPortion : screenPortion " + screenPortion);
     this.screenPortion = screenPortion;
   }
 
@@ -368,7 +367,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
    */
   public String getImagesForPath(String path) {
     path = getPath(path);
-    if (debug) logger.info("AudioPanel : " + getElement().getId() + " getImagesForPath " + path);
+    if (DEBUG) logger.info("AudioPanel : " + getElement().getId() + " getImagesForPath " + path);
     if (path != null) {
       this.audioPath = path;
     }
@@ -485,7 +484,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
    * @see #getImages()
    */
   protected void getEachImage(int width) {
-    //logger.info("AudioPanel.getEachImage : " + getElement().getId()+ " path " + audioPath);
+    logger.info("AudioPanel.getEachImage : " + getElement().getId()+ " path " + audioPath);
     getImageURLForAudio(audioPath, WAVEFORM, width, getWaveform());
     if (showSpectrogram) {
       getImageURLForAudio(audioPath, SPECTROGRAM, width, getSpectrogram());
