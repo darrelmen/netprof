@@ -78,9 +78,18 @@ public class EmailList {
       SANDY,
       GORDON_VIDAVER);
 
-  private static final Set<String> ADMINLIST = new HashSet<>(Arrays.asList("gvidaver", "tmarius",
+  private static final Set<String> ADMINLIST = new HashSet<>(Arrays.asList(
+      "gvidaver",
+
+      "tmarius",
       "mgrimmer",
-      "swagner", "gmarkovic", "djones", "jmelot", "rbudd", "pgatewood"));
+      "swagner",
+      "gmarkovic",
+
+      "djones",
+      "jmelot",
+      "rbudd",
+      "pgatewood"));
 
   /**
    * Set this property for non-DLI deployments.
