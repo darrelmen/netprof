@@ -849,9 +849,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
 
     if (byID == null) {
-      String message = "getExercise : huh? couldn't find exercise with id '" + id + "' when examining " + exercises.size() + " items";
-      logger.error(message);
-      logAndNotifyServerException(new IllegalArgumentException(message));
+      if (!id.isEmpty()) {
+        String message = "getExercise : huh? couldn't find exercise with id '" + id + "' when examining " + exercises.size() + " items";
+        logger.error(message);
+        logAndNotifyServerException(new IllegalArgumentException(message));
+      }
     } else {
       then2 = System.currentTimeMillis();
       addAnnotationsAndAudio(userID, byID, isFlashcardReq);
@@ -2126,7 +2128,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
                                     boolean recordedWithFlash, String deviceType, String device,
 
                                     boolean doFlashcard,
-                                    boolean recordInResults, boolean addToAudioTable,
+                                    boolean recordInResults,
+                                    boolean addToAudioTable,
                                     boolean allowAlternates) {
     String exercise = audioContext.getId();
 
@@ -2224,6 +2227,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * Remember this audio as reference audio for this exercise, and possibly clear the APRROVED (inspected) state
    * on the exercise indicating it needs to be inspected again (we've added new audio).
    *
+   * Don't return a path to the normalized audio, since this doesn't let the recorder have feedback about how soft
+   * or loud they are : https://gh.ll.mit.edu/DLI-LTEA/Development/issues/601
+   *
    * @param user        who recorded audio
    * @param audioType   regular or slow
    * @param exercise1   for which exercise - how could this be null?
@@ -2240,6 +2246,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     String audioTranscript = getAudioTranscript(audioType, exercise1);
 
+  //  logger.debug("addToAudioTable user " + user + " ex " + exerciseID + " for " + audioType + " path before " + audioAnswer.getPath());
+
     String permanentAudioPath = new PathWriter().
         getPermanentAudioPath(pathHelper,
             getAbsoluteFile(audioAnswer.getPath()),
@@ -2248,8 +2256,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     AudioAttribute audioAttribute =
         db.getAudioDAO().addOrUpdate(user, idToUse, audioType, permanentAudioPath, System.currentTimeMillis(),
             audioAnswer.getDurationInMillis(), audioTranscript);
-    audioAnswer.setPath(audioAttribute.getAudioRef());
-    logger.debug("addToAudioTable user " + user + " ex " + exerciseID + " for " + audioType + " audio answer has " + audioAttribute);
+   // audioAnswer.setPath(audioAttribute.getAudioRef());
+    logger.debug("addToAudioTable user " + user + " ex " + exerciseID + " for " + audioType + " path after " + audioAnswer.getPath()+
+        " audio answer has " + audioAttribute);
 
     // what state should we mark recorded audio?
     setExerciseState(idToUse, user, exercise1);
