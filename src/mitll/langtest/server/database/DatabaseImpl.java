@@ -563,10 +563,10 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         } else {
           makeExerciseDAO(lessonPlanFile, isURL);
 
-          logger.info("set exercise dao " + exerciseDAO + " on " + userExerciseDAO);
+   //       logger.info("set exercise dao " + exerciseDAO + " on " + userExerciseDAO);
           userExerciseDAO.setExerciseDAO(exerciseDAO);
 
-          setDependencies(mediaDir, installPath);
+          setDependencies(mediaDir, installPath, this.exerciseDAO);
 
           exerciseDAO.getRawExercises();
 
@@ -619,15 +619,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   }
 
   /**
-   * @param mediaDir
-   * @param installPath
-   * @see #makeDAO(String, String, String)
-   */
-  public void setDependencies(String mediaDir, String installPath) {
-    setDependencies(mediaDir, installPath, this.exerciseDAO);
-  }
-
-  /**
    * Public for testing only...
    *
    * @param mediaDir
@@ -635,7 +626,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @param exerciseDAO
    */
   public void setDependencies(String mediaDir, String installPath, ExerciseDAO exerciseDAO) {
-    exerciseDAO.setDependencies(mediaDir, installPath, userExerciseDAO, addRemoveDAO, audioDAO);
+    exerciseDAO.setDependencies(mediaDir, installPath, userExerciseDAO, null /*addRemoveDAO*/, audioDAO);
   }
 
   private void makeContextPractice(String contextPracticeFile, String installPath) {
@@ -1404,7 +1395,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   }
 
   private AddRemoveDAO getAddRemoveDAO() {
-    return addRemoveDAO;
+    return null;//addRemoveDAO;
   }
 
   public ExerciseDAO getExerciseDAO() {
