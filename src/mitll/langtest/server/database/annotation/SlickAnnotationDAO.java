@@ -110,7 +110,14 @@ public class SlickAnnotationDAO
 
   @Override
   public Map<String, ExerciseAnnotation> getLatestByExerciseID(String exerciseID) {
-    return getFieldToAnnotationMapSlick(dao.getLatestByExerciseID(exerciseID));
+    long then = System.currentTimeMillis();
+
+    Collection<SlickAnnotation> latestByExerciseID = dao.getLatestByExerciseID(exerciseID);
+
+    long now = System.currentTimeMillis();
+    logger.info("took " + (now-then) + " millis to get ex->anno map for " + exerciseID);
+
+    return getFieldToAnnotationMapSlick(latestByExerciseID);
   }
 
   @Override

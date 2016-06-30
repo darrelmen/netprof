@@ -218,7 +218,9 @@ public class PostgresTest extends BaseTest {
   }
 
   @Test
-  public void testCopy() {   getDatabaseLight("spanish").copyToPostgres();  }
+  public void testCopy() {
+    getDatabaseLight("spanish").copyToPostgres();
+  }
 
   @Test
   public void testDrop() {
@@ -232,11 +234,12 @@ public class PostgresTest extends BaseTest {
 
     parent = file.getParentFile().getAbsolutePath();
 
-    logger.info("path is "+ parent);
+    logger.info("path is " + parent);
     ServerProperties serverProps = new ServerProperties(parent, name);
     return new DBConnection(serverProps.getDatabaseType(),
-        serverProps.getDatabaseHost(), serverProps.getDatabasePort(), serverProps.getDatabaseName(),serverProps.getDatabaseUser(),serverProps.getDatabasePassword());
+        serverProps.getDatabaseHost(), serverProps.getDatabasePort(), serverProps.getDatabaseName(), serverProps.getDatabaseUser(), serverProps.getDatabasePassword());
   }
+
   @Test
   public void testCreate() {
     getDatabaseVeryLight("spanish").createTables();
@@ -244,7 +247,7 @@ public class PostgresTest extends BaseTest {
 
   @Test
   public void testReadAudio() {
-    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
+    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish", true);
 
     IAudioDAO h2AudioDAO = spanish.getH2AudioDAO();
 
@@ -382,7 +385,7 @@ public class PostgresTest extends BaseTest {
     logger.info("Got " + userAndTimes.size() + " " + userAndTimes.iterator().next());
 
     logger.info("Got " + resultDAO.getSessions());
-    logger.info("Got " + resultDAO.getResultsForExIDInForUser(Collections.singleton(exid),1,""));
+    logger.info("Got " + resultDAO.getResultsForExIDInForUser(Collections.singleton(exid), 1, ""));
     logger.info("Got " + resultDAO.getNumResults());
   }
 
