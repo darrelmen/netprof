@@ -64,7 +64,7 @@ public class PathWriter {
    * @param serverProperties
    * @return path of file under bestAudio directory
    * @see mitll.langtest.server.database.custom.UserListManager#getRefAudioPath
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable(int, String, mitll.langtest.shared.exercise.CommonExercise, String, mitll.langtest.shared.AudioAnswer)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable
    */
   public String getPermanentAudioPath(PathHelper pathHelper, File fileRef, String destFileName, boolean overwrite,
                                       String id, String title, String artist, ServerProperties serverProperties) {
@@ -87,7 +87,7 @@ public class PathWriter {
         logger.error("couldn't copy " +fileRef.getAbsolutePath() + " to " + destination.getAbsolutePath());
       }
 
-      //logger.debug("getPermanentAudioPath : normalizing levels for " + destination.getAbsolutePath());
+     // logger.debug("getPermanentAudioPath : normalizing levels for " + destination.getAbsolutePath());
       new AudioConversion(serverProperties).normalizeLevels(destination);
     } else {
       if (FileUtils.sizeOf(destination) == 0) {
