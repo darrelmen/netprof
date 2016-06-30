@@ -76,7 +76,6 @@ public class UserExTest extends BaseTest {
     logger.info("got " + dao.getWhere(Arrays.asList("1959","1962")));
   }
 
-
   @Test
   public void testUserListAgain() {
     DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");

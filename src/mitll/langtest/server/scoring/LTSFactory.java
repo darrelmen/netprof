@@ -79,7 +79,7 @@ public class LTSFactory {
    */
   private LTSFactory(Language thisLanguage) {
     this.thisLanguage = thisLanguage;
-    logger.info("got " +thisLanguage + " " + thisLanguage.name());
+   // logger.info("got " +thisLanguage + " " + thisLanguage.name());
     String name = thisLanguage.name();
     String classPrefix = name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
     String className = "corpus." + classPrefix + "LTS";
