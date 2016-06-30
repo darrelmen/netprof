@@ -109,9 +109,13 @@ class WebAudioRecorder {
   }-*/;
 
   private static void console(String message) {
-    int ieVersion = BrowserCheck.getIEVersion();
-    if (ieVersion == -1 || ieVersion > 9) {
-      consoleLog(message);
+    try {
+      int ieVersion = BrowserCheck.getIEVersion();
+      if (ieVersion == -1 || ieVersion > 9) {
+        consoleLog(message);
+      }
+    } catch (Exception e) {
+      //e.printStackTrace();
     }
   }
 
