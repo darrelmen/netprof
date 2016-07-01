@@ -52,7 +52,7 @@ import java.util.logging.Logger;
 * To change this template use File | Settings | File Templates.
 */
 public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
-  private final Logger logger = Logger.getLogger("WaveformPostAudioRecordButton");
+//  private final Logger logger = Logger.getLogger("WaveformPostAudioRecordButton");
 
   private static final String RECORD_BUTTON = "RecordButton";
   private final RecordAudioPanel recordAudioPanel;
@@ -153,15 +153,13 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
   @Override
   protected void useInvalidResult(AudioAnswer result) {
     super.useInvalidResult(result);
-
-    logger.info("WaveformPostAudioRecordButton : " + getElement().getId() + " : got invalid result " +result);
+//    logger.info("WaveformPostAudioRecordButton : " + getElement().getId() + " : got invalid result " +result);
     recordAudioPanel.getWaveform().setVisible(false);
     recordAudioPanel.getSpectrogram().setVisible(false);
     if (parentPanel instanceof ExercisePanel) {
       ((ExercisePanel) parentPanel).recordIncomplete(recordAudioPanel);
     }
   //  controller.logEvent(recordAudioPanel.getButton(), "recordButton", getExercise().getID(), "invalid recording " + result.getValidity());
-
     setPlayEnabled(false);
   }
 
