@@ -638,7 +638,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     private Button deleteButton;
     private Widget comment;
 
-    public MyRecordAudioPanel(DivWidget widget, String audioType, String instance) {
+    MyRecordAudioPanel(DivWidget widget, String audioType, String instance) {
       super(ReviewEditableExercise.this.newUserExercise, ReviewEditableExercise.this.controller, widget,
           ReviewEditableExercise.this.service, 0, false, audioType, instance);
       this.audioType = audioType;
