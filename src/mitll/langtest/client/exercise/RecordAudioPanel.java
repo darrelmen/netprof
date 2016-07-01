@@ -34,7 +34,12 @@ package mitll.langtest.client.exercise;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Image;
+import com.github.gwtbootstrap.client.ui.ProgressBar;
+import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.safehtml.shared.UriUtils;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
@@ -45,21 +50,28 @@ import mitll.langtest.client.scoring.PostAudioRecordButton;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.Result;
+import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.AudioRefExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.Shell;
 
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * A waveform record button and a play audio button.
- *
+ * <p>
  * The record audio and play buttons are tied to each other in that when playing audio, you can't record, and vice-versa.
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since
  */
 public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioPanel<Shell> {
+  private static final int MIN_VALID_DYNAMIC_RANGE = 32;
+  private static final int MIN_GOOD_DYNAMIC_RANGE = 40;
+  private final Logger logger = Logger.getLogger("RecordAudioPanel");
+
   private final int index;
 
   private PostAudioRecordButton postAudioRecordButton;
@@ -72,7 +84,6 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
   protected String audioType;
 
   /**
-   *
    * @param exercise
    * @param controller
    * @param service
@@ -86,9 +97,9 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
   public RecordAudioPanel(T exercise, ExerciseController controller, Panel widgets,
                           LangTestDatabaseAsync service, int index, boolean showSpectrogram, String audioType, String instance) {
     super(service,
-      controller, showSpectrogram,
-      null // no gauge panel
-      , 1.0f, 23, exercise.getID(), exercise, instance);
+        controller, showSpectrogram,
+        null // no gauge panel
+        , 1.0f, 23, exercise.getID(), exercise, instance);
     this.exercisePanel = widgets;
     this.index = index;
     this.exercise = exercise;
@@ -102,10 +113,34 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
     getElement().setId("RecordAudioPanel_" + exerciseID + "_" + index + "_" + audioType);
   }
 
+  private final ProgressBar progressBar = new ProgressBar(ProgressBarBase.Style.DEFAULT);
+  private final HorizontalPanel afterPlayWidget = new HorizontalPanel();
+
+  /**
+   * Add dynamic range feedback to the right of the play button.
+   *
+   * @return
+   * @see mitll.langtest.client.scoring.AudioPanel#addWidgets(String, String, String)
+   */
+  @Override
+  protected Widget getAfterPlayWidget() {
+    HTML w = new HTML("Dynamic Range");
+    w.addStyleName("leftTenMargin");
+    w.addStyleName("topBarMargin");
+    afterPlayWidget.add(w);
+    afterPlayWidget.add(progressBar);
+
+    afterPlayWidget.setVisible(false);
+    progressBar.setWidth("300px");
+    progressBar.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
+    progressBar.addStyleName("topBarMargin");
+    return afterPlayWidget;
+  }
+
   /**
    * Worries about context type audio too.
+   *
    * @return
-   * @see #RecordAudioPanel(Shell, ExerciseController, Panel, LangTestDatabaseAsync, int, boolean, String, String)
    */
   public AudioAttribute getAudioAttribute() {
     AudioAttribute audioAttribute = audioType.equals(Result.AUDIO_TYPE_REGULAR) ? exercise.getRecordingsBy(controller.getUser(), true) :
@@ -119,32 +154,31 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
         }
       }
       return null;
-    }
-    else {
+    } else {
       return audioAttribute;
     }
   }
 
   private String getRecordButtonTitle() {
     return
-      audioType.equals(Result.AUDIO_TYPE_REGULAR) ? "Record regular"
-        :
-        audioType.equals(Result.AUDIO_TYPE_SLOW)    ? "Record slow"  : "Record";
+        audioType.equals(Result.AUDIO_TYPE_REGULAR) ? "Record regular"
+            :
+            audioType.equals(Result.AUDIO_TYPE_SLOW) ? "Record slow" : "Record";
   }
 
   /**
-   * @see mitll.langtest.client.scoring.AudioPanel#getPlayButtons
    * @param toTheRightWidget
    * @param buttonTitle
    * @param recordButtonTitle
    * @return
+   * @see mitll.langtest.client.scoring.AudioPanel#getPlayButtons
    */
   @Override
   protected PlayAudioPanel makePlayAudioPanel(Widget toTheRightWidget, String buttonTitle, String audioType, String recordButtonTitle) {
     WaveformPostAudioRecordButton myPostAudioRecordButton = makePostAudioRecordButton(audioType, recordButtonTitle);
     postAudioRecordButton = myPostAudioRecordButton;
 
-   // System.out.println("makePlayAudioPanel : audio type " + audioType + " suffix '" +playButtonSuffix +"'");
+    // logger.info("makePlayAudioPanel : audio type " + audioType + " suffix '" +playButtonSuffix +"'");
     playAudioPanel = new MyPlayAudioPanel(recordImage1, recordImage2, exercisePanel, buttonTitle, toTheRightWidget);
     myPostAudioRecordButton.setPlayAudioPanel(playAudioPanel);
 
@@ -160,10 +194,10 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
   }
 
   /**
-   * @see #makePlayAudioPanel(com.google.gwt.user.client.ui.Widget, String, String, String)
    * @param audioType
    * @param recordButtonTitle
    * @return
+   * @see #makePlayAudioPanel(com.google.gwt.user.client.ui.Widget, String, String, String)
    */
   protected WaveformPostAudioRecordButton makePostAudioRecordButton(String audioType, String recordButtonTitle) {
     return new MyWaveformPostAudioRecordButton(audioType, recordButtonTitle);
@@ -183,10 +217,12 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
     recordImage2.setVisible(!first);
   }
 
-  public Button getButton() { return postAudioRecordButton; }
+  public Button getButton() {
+    return postAudioRecordButton;
+  }
 
   public void setEnabled(boolean val) {
-    //System.out.println("RecordAudioPanel.setEnabled " + val);
+    //logger.info("RecordAudioPanel.setEnabled " + val);
     postAudioRecordButton.setEnabled(val);
     if (postAudioRecordButton.hasValidAudio()) playAudioPanel.setEnabled(val);
   }
@@ -204,17 +240,18 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
       super(RecordAudioPanel.this.soundManager, new PlayListener() {
         public void playStarted() {
           if (panel instanceof BusyPanel) {
-            ((BusyPanel)panel).setBusy(true);
+            ((BusyPanel) panel).setBusy(true);
           }
           postAudioRecordButton.setEnabled(false);
         }
 
         public void playStopped() {
           if (panel instanceof BusyPanel) {
-            ((BusyPanel)panel).setBusy(false);
+            ((BusyPanel) panel).setBusy(false);
           }
           postAudioRecordButton.setEnabled(true);
         }
+
       }, suffix, toTheRightWidget);
       add(recordImage1);
       recordImage1.setVisible(false);
@@ -224,29 +261,30 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
     }
 
     /**
-     * @see mitll.langtest.client.sound.PlayAudioPanel#PlayAudioPanel(mitll.langtest.client.sound.SoundManagerAPI, String, com.google.gwt.user.client.ui.Widget)
      * @param optionalToTheRight
+     * @see mitll.langtest.client.sound.PlayAudioPanel#PlayAudioPanel(mitll.langtest.client.sound.SoundManagerAPI, String, com.google.gwt.user.client.ui.Widget)
      */
     @Override
     protected void addButtons(Widget optionalToTheRight) {
-      if (postAudioRecordButton == null) System.err.println("huh? postAudioRecordButton is null???");
+      if (postAudioRecordButton == null) logger.warning("huh? postAudioRecordButton is null???");
       else add(postAudioRecordButton);
       super.addButtons(optionalToTheRight);
     }
   }
 
   protected class MyWaveformPostAudioRecordButton extends WaveformPostAudioRecordButton {
-   // private long then,now;
+    // private long then,now;
+
     /**
-     * @see #makePostAudioRecordButton(String, String)
      * @param audioType
      * @param recordButtonTitle
+     * @see #makePostAudioRecordButton(String, String)
      */
     public MyWaveformPostAudioRecordButton(String audioType, String recordButtonTitle) {
       super(RecordAudioPanel.this.exercise.getID(),
-        RecordAudioPanel.this.controller,
-        RecordAudioPanel.this.exercisePanel,
-        RecordAudioPanel.this, RecordAudioPanel.this.service, RecordAudioPanel.this.index, true, recordButtonTitle, RecordButton.STOP1, audioType);
+          RecordAudioPanel.this.controller,
+          RecordAudioPanel.this.exercisePanel,
+          RecordAudioPanel.this, RecordAudioPanel.this.service, RecordAudioPanel.this.index, true, recordButtonTitle, RecordButton.STOP1, audioType);
       setWidth("110px");
     }
 
@@ -255,15 +293,15 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
      */
     @Override
     public void startRecording() {
-     /// then = System.currentTimeMillis();
+      /// then = System.currentTimeMillis();
       super.startRecording();
       showStart();
     }
 
     @Override
     public void stopRecording() {
-    //  now = System.currentTimeMillis();
-     // System.out.println("stopRecording " + now + " diff " + (now-then) + " millis");
+      //  now = System.currentTimeMillis();
+      // logger.info("stopRecording " + now + " diff " + (now-then) + " millis");
       super.stopRecording();
       showStop();
     }
@@ -271,6 +309,51 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
     @Override
     public void flip(boolean first) {
       flipRecordImages(first);
+    }
+
+    /**
+     * From Paul Gatewood:
+     * 
+     * Reasonable upper limit outside of an acoustic isolation room is 70dB Dynamic Range
+     * <p>
+     * I would put
+     * 40-70dB in the Green
+     * From (29for iOS and 32 for lptp) to 40 in the Yellow
+     * Below the threshold is in the red.
+     *
+     * @param result
+     */
+    @Override
+    public void useResult(AudioAnswer result) {
+      super.useResult(result);
+      showDynamicRange(result);
+    }
+
+    @Override
+    protected void useInvalidResult(AudioAnswer result) {
+      super.useInvalidResult(result);
+      showDynamicRange(result);
+    }
+
+    /**
+     * Set the value on the progress bar to reflect the dynamic range we measure on the audio.
+     *
+     * @param result
+     */
+    private void showDynamicRange(AudioAnswer result) {
+      double dynamicRange = result.getDynamicRange();
+      double percent = dynamicRange / 70;
+      progressBar.setPercent(100 * percent);
+      progressBar.setText("" + roundToHundredth(dynamicRange));
+      progressBar.setColor(dynamicRange > MIN_GOOD_DYNAMIC_RANGE ?
+          ProgressBarBase.Color.SUCCESS : dynamicRange > MIN_VALID_DYNAMIC_RANGE ?
+          ProgressBarBase.Color.WARNING :
+          ProgressBarBase.Color.DANGER);
+      afterPlayWidget.setVisible(true);
+    }
+
+    private float roundToHundredth(double totalHours) {
+      return ((float) ((Math.round(totalHours * 100d)))) / 100f;
     }
   }
 }
