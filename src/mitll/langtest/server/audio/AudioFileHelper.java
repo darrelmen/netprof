@@ -380,6 +380,7 @@ public class AudioFileHelper implements AlignDecode {
 
     if (recordInResults) {
       recordInResults(context, recordingInfo, validity, answer);
+      answer.setDynamicRange(validity.getMaxMinRange());
     }
     //   logger.debug("getAudioAnswerDecoding answer " + answer);
     return answer;
@@ -993,7 +994,7 @@ public class AudioFileHelper implements AlignDecode {
 
   /**
    * @return
-   * @see #readDictionary()
+   * @see #readDictionary
    */
   private HTKDictionary makeDict(String installPath) {
     String dictFile = new ConfigFileCreator(serverProps.getProperties(), null, Scoring.getScoringDir(installPath)).getDictFile();
