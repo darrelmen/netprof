@@ -65,12 +65,18 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
   }
 
   @Override
+  public String getName() {
+    return dao.dao().name();
+  }
+
+  @Override
   public SlickResult toSlick(Result shared, String language) {
     return new SlickResult(-1,
-        shared.getUserid(), shared.getExid(), shared.getQid(),
+        shared.getUserid(), shared.getExid(),
+        new Timestamp(shared.getTimestamp()),
+        shared.getQid(),
         shared.getAudioType().toString(),
         shared.getAnswer(),
-        new Timestamp(shared.getTimestamp()),
         shared.isValid(),
         shared.getValidity(),
         shared.getDurationInMillis(),

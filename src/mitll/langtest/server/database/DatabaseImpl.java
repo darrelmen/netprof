@@ -71,6 +71,7 @@ import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.server.database.userlist.IUserListDAO;
 import mitll.langtest.server.database.userlist.SlickUserListDAO;
 import mitll.langtest.server.database.userlist.SlickUserListExerciseJoinDAO;
+import mitll.langtest.server.database.userlist.SlickUserListExerciseVisitorDAO;
 import mitll.langtest.server.database.word.IWordDAO;
 import mitll.langtest.server.database.word.SlickWordDAO;
 import mitll.langtest.server.database.word.Word;
@@ -293,9 +294,11 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         annotationDAO,
         reviewedDAO,
         secondStateDAO,
+        new SlickUserListExerciseVisitorDAO(this,dbConnection),
         pathHelper);
 
     createTables();
+    userDAO.findOrMakeDefectDetector();
 /*
     Connection connection1 = getConnection();
     try {
@@ -355,7 +358,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   @Override
   public Connection getConnection(String who) {
     if (connection == null) {
-      logger.warn("no connection created " + who);
+      logger.warn("no connection created " + who + " use h2 property = " + serverProps.useH2());
       return null;
     } else {
       return connection.getConnection(who);
@@ -1011,9 +1014,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return audioDAO;
   }
 
-  IWordDAO getWordDAO() {
-    return wordDAO;
-  }
+  public IWordDAO getWordDAO() {  return wordDAO;  }
 
   public IPhoneDAO getPhoneDAO() {
     return phoneDAO;
@@ -1022,24 +1023,44 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   /**
    * TODO : add get tablename method to slick DAOs.
    */
-  void createTables() {
+  public void createTables() {
     logger.info("createTables create slick tables...");
 
-    SlickUserDAOImpl slickUserDAO = (SlickUserDAOImpl) getUserDAO();
-    SlickAudioDAO slickAudioDAO = (SlickAudioDAO) getAudioDAO();
-    SlickEventImpl slickEventDAO = (SlickEventImpl) getEventDAO();
+//    SlickUserDAOImpl slickUserDAO = (SlickUserDAOImpl) getUserDAO();
+//    SlickAudioDAO slickAudioDAO = (SlickAudioDAO) getAudioDAO();
+//    SlickEventImpl slickEventDAO = (SlickEventImpl) getEventDAO();
 
-    if (!dbConnection.hasTable("user")) slickUserDAO.createTable();
-    if (!dbConnection.hasTable("audio")) slickAudioDAO.createTable();
-    if (!dbConnection.hasTable("event")) slickEventDAO.createTable();
+    List<String> created = new ArrayList<>();
+
+    List<IDAO> idaos = Arrays.asList(
+        getUserDAO(),
+        getAudioDAO(),
+        getEventDAO(),
+        getResultDAO(),
+        userExerciseDAO,
+        getAnnotationDAO(),
+        getWordDAO(),
+        getPhoneDAO(),
+        getRefResultDAO()
+        );
+    for (IDAO dao: idaos) createIfNotThere(dao,created);
+
     if (!dbConnection.hasTable("result")) ((ISchema) getResultDAO()).createTable();
     if (!dbConnection.hasTable("userexercise")) ((ISchema) userExerciseDAO).createTable();
-    userListManager.createTables(dbConnection);
+    userListManager.createTables(dbConnection, created);
     if (!dbConnection.hasTable("annotation")) ((ISchema) getAnnotationDAO()).createTable();
     if (!dbConnection.hasTable("word")) ((ISchema) getWordDAO()).createTable();
     if (!dbConnection.hasTable("phone")) ((ISchema) getPhoneDAO()).createTable();
     if (!dbConnection.hasTable("refresult")) ((SlickRefResultDAO) getRefResultDAO()).createTable();
-    logger.info("createTables created slick tables...");
+    logger.info("createTables created slick tables : " + created);
+  }
+
+  void createIfNotThere(IDAO slickUserDAO, List<String> created) {
+    String name = slickUserDAO.getName();
+    if (!dbConnection.hasTable(name)) {
+      slickUserDAO.createTable();
+      created.add(name);
+    }
   }
 
   public void dropTables() { dbConnection.dropAll();  }
@@ -1680,7 +1701,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @return
    * @see LangTestDatabaseImpl#getMaleFemaleProgress()
    */
-  Map<String, Float> getH2MaleFemaleProgress() {
+  public Map<String, Float> getH2MaleFemaleProgress() {
     IUserDAO userDAO = getUserDAO();
     Map<Integer, User> userMapMales = userDAO.getUserMap(true);
     Map<Integer, User> userMapFemales = userDAO.getUserMap(false);
