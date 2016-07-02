@@ -61,6 +61,11 @@ public class SlickReviewedDAO extends DAO implements IReviewedDAO {
     dao.createTable();
   }
 
+  @Override
+  public String getName() {
+    return dao.dao().name();
+  }
+
   public void insert(SlickReviewed word) {
     dao.insert(word);
   }

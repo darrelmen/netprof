@@ -60,6 +60,11 @@ public class SlickAnnotationDAO
   }
 
   @Override
+  public String getName() {
+    return dao.dao().name();
+  }
+
+  @Override
   public SlickAnnotation toSlick(UserAnnotation shared, String language) {
     return new SlickAnnotation(-1,
         (int) shared.getCreatorID(),
