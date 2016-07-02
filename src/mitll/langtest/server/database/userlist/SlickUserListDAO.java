@@ -62,7 +62,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO, ISchema<UserL
   private final IUserExerciseDAO userExerciseDAO;
 
   private final IUserDAO userDAO;
-  SlickUserListExerciseJoinDAO userListExerciseJoinDAO;
+  private SlickUserListExerciseJoinDAO userListExerciseJoinDAO;
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(PathHelper)
@@ -83,6 +83,11 @@ public class SlickUserListDAO extends DAO implements IUserListDAO, ISchema<UserL
 
   public void createTable() {
     dao.createTable();
+  }
+
+  @Override
+  public String getName() {
+    return dao.getName();
   }
 
   @Override
@@ -150,7 +155,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO, ISchema<UserL
 
   @Override
   public void addVisitor(long listid, long userid) {
-    visitorDAOWrapper.insert((int) listid, (int) userid);
+    visitorDAOWrapper.insert((int) listid, (int) userid,System.currentTimeMillis());
   }
 
   @Override
@@ -316,7 +321,6 @@ public class SlickUserListDAO extends DAO implements IUserListDAO, ISchema<UserL
     for (SlickUserExerciseList word : dao.getAll()) oldToNew.put(word.legacyid(), word.id());
     return oldToNew;
   }
-
 
   public boolean isEmpty() { return dao.getNumRows() == 0; }
 }

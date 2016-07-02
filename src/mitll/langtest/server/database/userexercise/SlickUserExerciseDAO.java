@@ -62,6 +62,11 @@ public class SlickUserExerciseDAO
   }
 
   @Override
+  public String getName() {
+    return dao.dao().name();
+  }
+
+  @Override
   public SlickUserExercise toSlick(UserExercise shared, String language) {
     Map<String, String> unitToValue = shared.getUnitToValue();
     List<String> typeOrder = getTypeOrder();

@@ -71,10 +71,7 @@ import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class CopyToPostgres {
   private static final Logger logger = Logger.getLogger(CopyToPostgres.class);
@@ -98,13 +95,8 @@ public class CopyToPostgres {
 
   private static DBConnection getConnection(String config, boolean inTest) {
     File file = getConfigFile(config, inTest);
-    String parent = file.getParent();
-    String name = file.getName();
-
-    parent = file.getParentFile().getAbsolutePath();
-
-    logger.info("path is " + parent);
-    ServerProperties serverProps = new ServerProperties(parent, name);
+    String parent = file.getParentFile().getAbsolutePath();
+    ServerProperties serverProps = new ServerProperties(parent, file.getName());
     return new DBConnection(serverProps.getDatabaseType(),
         serverProps.getDatabaseHost(),
         serverProps.getDatabasePort(),
@@ -115,13 +107,8 @@ public class CopyToPostgres {
 
   private static DatabaseImpl<CommonExercise> getDatabaseLight(String config, boolean inTest) {
     File file = getConfigFile(config, inTest);
-    String parent = file.getParent();
-    String name = file.getName();
-
-    parent = file.getParentFile().getAbsolutePath();
-
-    logger.info("path is " + parent);
-    ServerProperties serverProps = new ServerProperties(parent, name);
+    String parent = file.getParentFile().getAbsolutePath();
+    ServerProperties serverProps = new ServerProperties(parent, file.getName());
     DatabaseImpl<CommonExercise> database = getDatabaseVeryLight(config, inTest);
     String installPath = getInstallPath(inTest);
     database.setInstallPath(installPath, parent + File.separator + database.getServerProps().getLessonPlan(),
@@ -150,14 +137,14 @@ public class CopyToPostgres {
         new PathHelper(getInstallPath(inTest)), false, null, true);
   }
 
-  public void copyToPostgres(DatabaseImpl db) {
+  void copyToPostgres(DatabaseImpl db) {
     // first add the user table
     SlickUserDAOImpl slickUserDAO = (SlickUserDAOImpl) db.getUserDAO();
     SlickResultDAO slickResultDAO = (SlickResultDAO) db.getResultDAO();
 
-    copyUsers(db, slickUserDAO);
+    Map<Integer, Integer> oldToNewUser = copyUsers(db, slickUserDAO);
 
-    Map<Integer, Integer> oldToNewUser = slickUserDAO.getOldToNew();
+    //Map<Integer, Integer> oldToNewUser = slickUserDAO.getOldToNew();
     copyResult(db, slickResultDAO, oldToNewUser, db.getLanguage());
 
     logger.info("oldToNewUser " + oldToNewUser.size());
@@ -184,6 +171,7 @@ public class CopyToPostgres {
     copyUserExerciseList(db, oldToNewUser, slickUserListDAO);
 
     Map<Integer, Integer> oldToNewUserList = slickUserListDAO.getOldToNew();
+    copyUserExerciseListVisitor(db, oldToNewUser, oldToNewUserList, (SlickUserListExerciseVisitorDAO) db.getUserListManager().getVisitorDAO());
     copyUserExerciseListJoin(db, oldToNewUserList);
 
     SlickWordDAO slickWordDAO = (SlickWordDAO) db.getWordDAO();
@@ -205,20 +193,79 @@ public class CopyToPostgres {
     copyRefResult(db, oldToNewUser);
   }
 
-  private void copyUsers(DatabaseImpl db, SlickUserDAOImpl slickUserDAO) {
-    if (USERS) {
-      if (slickUserDAO.isEmpty()) {
-        UserDAO userDAO = new UserDAO(db);
-        List<User> users = userDAO.getUsers();
-        logger.info("h2 users  " + users.size());
-        for (User user : users) {
-          if (user.getId() != userDAO.getDefectDetector()) {
-            slickUserDAO.add(slickUserDAO.toSlick(user));
+  /**
+   * Worry about how to merge two or more user tables -
+   * find existing ids in postgres...
+   * if some from import db aren't there, add them
+   * return map of old ids -> new ids
+   * <p>
+   * For collisions -- must reset password -- someone loses.
+   * <p>
+   * ??? Also, going forward, we must store emails, since we need to be able to send the sign up message?
+   *
+   * @param db
+   * @param slickUserDAO
+   * @see
+   */
+  private Map<Integer, Integer> copyUsers(DatabaseImpl db, SlickUserDAOImpl slickUserDAO) {
+    Map<Integer, Integer> oldToNew = new HashMap<>();
+//  if (USERS) {
+    //    if (slickUserDAO.isEmpty()) {
+    UserDAO userDAO = new UserDAO(db);
+    List<User> importUsers = userDAO.getUsers();
+    logger.info("h2 importUsers  " + importUsers.size());
+    int numAdded = 0;
+    int unresolved = 0;
+    int collisions = 0;
+    for (User toImport : importUsers) {
+      if (toImport.getId() != userDAO.getDefectDetector()) {
+        //   int idForUserID = slickUserDAO.getIdForUserID(toImport.getUserID());
+        String toImportUserID = toImport.getUserID();
+        User userByID = slickUserDAO.getUserByID(toImportUserID);
+
+        if (userByID != null) { // exists - collision?
+          String passwordHash = userByID.getPasswordHash();
+          String importPass = toImport.getPasswordHash();
+
+          if (passwordHash.equals(importPass) || importPass == null) {  // same person, multiple accounts on different npf instances
+            oldToNew.put(toImport.getId(), userByID.getId());
+          } else { // collision.
+            logger.warn("collision : user '" + toImportUserID +
+                "' import '" + importPass + "' vs existing '" + passwordHash +
+                "'");
+
+            String candidate = db.getLanguage() + "_" + toImportUserID;
+            User candidateUser = slickUserDAO.getUserByID(candidate);
+            if (candidateUser != null) { // this should be unique
+              logger.warn("----->");
+              logger.warn("Collision on '" + candidate + "' ?");
+              logger.warn("----->");
+              unresolved++;
+            } else {
+              // OK, we'll have to find this person when they log in and warn them their data has been moved to a new name
+              // or deal silently
+              toImport.setUserID(candidate);
+              addUser(slickUserDAO, oldToNew, toImport);
+              collisions++;
+            }
           }
+        } else { // new user across all instances imported to this point
+          addUser(slickUserDAO, oldToNew, toImport);
+          numAdded++;
         }
-        logger.info("after, postgres users " + slickUserDAO.getUsers().size());
       }
     }
+    logger.info("after, postgres importUsers num = " + slickUserDAO.getUsers().size() +
+        " added " + numAdded +
+        " collisions " + collisions +
+        " unresolved " + unresolved);
+    //  }
+    // }
+    return oldToNew;
+  }
+
+  private void addUser(SlickUserDAOImpl slickUserDAO, Map<Integer, Integer> oldToNew, User toImport) {
+    oldToNew.put(toImport.getId(), slickUserDAO.add(slickUserDAO.toSlick(toImport)));
   }
 
   private void copyAudio(DatabaseImpl db, Map<Integer, Integer> oldToNewUser) {
@@ -294,15 +341,25 @@ public class CopyToPostgres {
         if (c > 0) logger.warn("missing result id fks " + c);
         if (d > 0) logger.warn("missing word   id fks " + d);
 
-        logger.info("adding " + bulk.size());
+        logger.info("copyPhone adding " + bulk.size());
         slickPhoneAO.addBulk(bulk);
-        logger.info("added " + slickPhoneAO.getNumRows());
+        logger.info("copyPhone added " + slickPhoneAO.getNumRows());
       } else {
+        logger.info("copyPhone not empty, still num rows = " + slickPhoneAO.getNumRows());
 
       }
     }
   }
 
+  /**
+   * TODO empty table checks are bogus going forward
+   *
+   * @param db
+   * @param oldToNewResult
+   * @param language
+   * @param slickWordDAO
+   * @see #copyToPostgres(DatabaseImpl)
+   */
   private void copyWord(DatabaseImpl db, Map<Integer, Integer> oldToNewResult, String language, SlickWordDAO slickWordDAO) {
     if (WORD) {
       if (slickWordDAO.isEmpty()) {
@@ -324,6 +381,7 @@ public class CopyToPostgres {
         slickWordDAO.addBulk(bulk);
       }
     }
+    logger.info("copy word - complete");
   }
 
   private void copyUserExerciseListJoin(DatabaseImpl db, Map<Integer, Integer> oldToNewUserList) {
@@ -346,10 +404,6 @@ public class CopyToPostgres {
 
   private void copyUserExerciseList(DatabaseImpl db, Map<Integer, Integer> oldToNewUser, SlickUserListDAO slickUserListDAO) {
     if (true) {
-      UserListManager userListManager = db.getUserListManager();
-
-//      IUserListDAO userListDAO = userListManager.getUserListDAO();
-
       if (slickUserListDAO.isEmpty()) {
         UserDAO userDAO = new UserDAO(db);
         UserListDAO uelDAO = new UserListDAO(db, userDAO);
@@ -358,6 +412,31 @@ public class CopyToPostgres {
           Integer integer = oldToNewUser.get(oldID);
           if (integer == null) logger.error("UserListManager can't find user " + oldID);
           else slickUserListDAO.addWithUser(list, integer);
+        }
+      }
+    }
+  }
+
+  private void copyUserExerciseListVisitor(DatabaseImpl db,
+                                           Map<Integer, Integer> oldToNewUser,
+                                           Map<Integer, Integer> oldToNewUserList,
+                                           SlickUserListExerciseVisitorDAO visitorDAO) {
+    if (true) {
+      if (visitorDAO.isEmpty()) {
+        UserExerciseListVisitorDAO uelDAO = new UserExerciseListVisitorDAO(db);
+        for (UserExerciseListVisitorDAO.Pair pair : uelDAO.getAll()) {
+          int oldID = pair.getUser();
+          Integer currentUser = oldToNewUser.get(oldID);
+          if (currentUser == null) {
+            logger.error("UserListManager can't find user " + oldID);
+          } else {
+            int olduserlist = pair.getListid();
+            Integer current = oldToNewUserList.get(olduserlist);
+            if (current == null) logger.error("can't find user list id " + olduserlist);
+            else {
+              visitorDAO.add(current, currentUser, pair.getWhen());
+            }
+          }
         }
       }
     }
