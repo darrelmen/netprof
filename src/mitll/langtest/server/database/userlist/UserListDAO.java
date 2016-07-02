@@ -77,7 +77,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
    */
   @Override
   public void addVisitor(long listid, long userid) {
-    userListVisitorJoinDAO.add(listid, userid);
+    userListVisitorJoinDAO.add(listid, userid, System.currentTimeMillis());
   }
 
   /**

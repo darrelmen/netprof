@@ -30,32 +30,48 @@
  *
  */
 
-package mitll.langtest.server.database.userexercise;
+package mitll.langtest.server.database.postgres;
 
-import mitll.langtest.server.database.IDAO;
-import mitll.langtest.server.database.exercise.ExerciseDAO;
+import mitll.langtest.server.database.BaseTest;
+import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.custom.UserListManager;
+import mitll.langtest.server.database.reviewed.StateCreator;
 import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.STATE;
+import org.apache.log4j.Logger;
+import org.junit.Test;
 
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
-public interface IUserExerciseDAO extends IDAO {
-  void add(CommonExercise userExercise, boolean isOverride);
+public class ReviewedExTest extends BaseTest {
+  private static final Logger logger = Logger.getLogger(ReviewedExTest.class);
 
-  List<CommonShell> getOnList(long listID);
+  @Test
+  public void testReviewed() {
+    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
 
-  CommonExercise getWhere(String exid);
+//    IUserExerciseDAO dao = spanish.getUserExerciseDAO();
+    UserListManager userListManager = spanish.getUserListManager();
 
-  Collection<CommonExercise> getAll();
+    STATE currentState = userListManager.getCurrentState("1");
+    logger.info("Got " + currentState + " for ");
 
-  Collection<CommonExercise> getOverrides();
+    Map<String, StateCreator> exerciseToState = userListManager.getExerciseToState(true);
+    logger.info("got " + exerciseToState.keySet().size());
 
-  Collection<CommonExercise> getWhere(Collection<String> exids);
+    Collection<StateCreator> values = exerciseToState.values();
+    List<StateCreator> stateCreators = new ArrayList<>(values);
+    Collections.sort(stateCreators);
+    for (StateCreator stateCreator : stateCreators) logger.info("Got " + stateCreator);
 
-  void update(CommonExercise userExercise, boolean createIfDoesntExist);
+    {
+      Map<String, StateCreator> exerciseToState2 = userListManager.getExerciseToState(false);
+      logger.info("got " + exerciseToState2.keySet().size());
+      stateCreators = new ArrayList<>(exerciseToState2.values());
+      Collections.sort(stateCreators);
 
-  void setExerciseDAO(ExerciseDAO<CommonExercise> exerciseDAO);
+      for (StateCreator stateCreator : stateCreators) logger.info("Got " + stateCreator);
+    }
+  }
 
-  CommonExercise getPredefExercise(String id);
 }
