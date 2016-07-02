@@ -168,7 +168,7 @@ public abstract class BaseUserDAO extends DAO {
   /**
    *
    */
-  void findOrMakeDefectDetector() {
+  public void findOrMakeDefectDetector() {
     //logger.info("findOrMakeDefectDetector ");
     this.defectDetector = getIdForUserID(DEFECT_DETECTOR);
     if (this.defectDetector == -1) {
