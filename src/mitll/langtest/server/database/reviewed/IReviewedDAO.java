@@ -32,12 +32,13 @@
 
 package mitll.langtest.server.database.reviewed;
 
+import mitll.langtest.server.database.IDAO;
 import mitll.langtest.shared.exercise.STATE;
 
 import java.util.Collection;
 import java.util.Map;
 
-public interface IReviewedDAO {
+public interface IReviewedDAO  extends IDAO {
   void remove(String exerciseID);
 
   void setState(String exerciseID, STATE state, long creatorID);

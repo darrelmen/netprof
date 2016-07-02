@@ -33,13 +33,14 @@
 package mitll.langtest.server.database.refaudio;
 
 import mitll.langtest.server.audio.DecodeAlignOutput;
+import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.result.Result;
 import net.sf.json.JSONObject;
 
 import java.util.Collection;
 import java.util.List;
 
-public interface IRefResultDAO {
+public interface IRefResultDAO  extends IDAO {
   boolean removeForExercise(String exid);
 
   long addAnswer(int userID, String id,
