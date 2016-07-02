@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.user;
 
+import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.User;
@@ -49,17 +50,25 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
   private static final Logger logger = Logger.getLogger(SlickUserDAOImpl.class);
   private final UserDAOWrapper dao;
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(PathHelper)
+   * @param database
+   * @param dbConnection
+   */
   public SlickUserDAOImpl(Database database, DBConnection dbConnection) {
     super(database);
     dao = new UserDAOWrapper(dbConnection);
-    findOrMakeDefectDetector();
+  //  findOrMakeDefectDetector();
   }
 
   public void createTable() { dao.createTable(); }
 
-  public int add(SlickUser user) {
-    return dao.add(user);
+  @Override
+  public String getName() {
+    return dao.dao().name();
   }
+
+  public int add(SlickUser user) { return dao.add(user);  }
 
   /**
    * @see UserManagement#addUser(User)
@@ -304,7 +313,6 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return dao.updateKey(user, resetKey, "");
   }
 
-
   @Override
   public boolean enableUser(int id) {
     return changeEnabled(id, true);
@@ -315,11 +323,13 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return dao.changeEnabled(userid, enabled);
   }
 
-  public Map<Integer, Integer> getOldToNew() {
+/*  public Map<Integer, Integer> getOldToNew() {
     Map<Integer, Integer> oldToNew = new HashMap<>();
     for (SlickUser user : dao.getAll()) oldToNew.put(user.legacyid(), user.id());
     return oldToNew;
-  }
+  }*/
 
+/*
   public boolean isEmpty() { return dao.getNumRows() < 2; }
+*/
 }

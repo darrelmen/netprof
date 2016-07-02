@@ -32,44 +32,16 @@
 
 package mitll.langtest.server.database;
 
-import mitll.langtest.server.database.custom.UserListManager;
-import mitll.langtest.server.database.reviewed.StateCreator;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.STATE;
-import org.apache.log4j.Logger;
-import org.junit.Test;
+import mitll.npdata.dao.BaseWrapper;
 
-import java.util.*;
+public class SlickDAO extends DAO {
+  private BaseWrapper baseOps;
 
-public class ReviewedExTest extends BaseTest {
-  private static final Logger logger = Logger.getLogger(ReviewedExTest.class);
-
-  @Test
-  public void testReviewed() {
-    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
-
-//    IUserExerciseDAO dao = spanish.getUserExerciseDAO();
-    UserListManager userListManager = spanish.getUserListManager();
-
-    STATE currentState = userListManager.getCurrentState("1");
-    logger.info("Got " + currentState + " for ");
-
-    Map<String, StateCreator> exerciseToState = userListManager.getExerciseToState(true);
-    logger.info("got " + exerciseToState.keySet().size());
-
-    Collection<StateCreator> values = exerciseToState.values();
-    List<StateCreator> stateCreators = new ArrayList<>(values);
-    Collections.sort(stateCreators);
-    for (StateCreator stateCreator : stateCreators) logger.info("Got " + stateCreator);
-
-    {
-      Map<String, StateCreator> exerciseToState2 = userListManager.getExerciseToState(false);
-      logger.info("got " + exerciseToState2.keySet().size());
-      stateCreators = new ArrayList<>(exerciseToState2.values());
-      Collections.sort(stateCreators);
-
-      for (StateCreator stateCreator : stateCreators) logger.info("Got " + stateCreator);
-    }
+  protected SlickDAO(Database database) {
+    super(database);
   }
 
+  protected void setWrapper(BaseWrapper wrapper) { this.baseOps = wrapper;}
+
+  public void createTable() { baseOps.createTable(); }
 }

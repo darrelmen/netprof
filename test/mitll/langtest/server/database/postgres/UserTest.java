@@ -30,29 +30,17 @@
  *
  */
 
-package mitll.langtest.server.database;
+package mitll.langtest.server.database.postgres;
 
 import mitll.langtest.client.user.Md5Hash;
-import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.database.audio.AudioDAO;
-import mitll.langtest.server.database.audio.IAudioDAO;
-import mitll.langtest.server.database.instrumentation.IEventDAO;
-import mitll.langtest.server.database.result.IResultDAO;
-import mitll.langtest.server.database.result.Result;
+import mitll.langtest.server.database.BaseTest;
+import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.user.IUserDAO;
-import mitll.langtest.server.database.user.UserDAO;
-import mitll.langtest.shared.AudioType;
 import mitll.langtest.shared.User;
-import mitll.langtest.shared.UserAndTime;
-import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.instrumentation.Event;
-import mitll.npdata.dao.DBConnection;
-import mitll.npdata.dao.SlickSlimEvent;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
-import java.io.File;
 import java.util.*;
 
 public class UserTest extends BaseTest {
