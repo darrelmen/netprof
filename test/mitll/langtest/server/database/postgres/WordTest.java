@@ -30,32 +30,25 @@
  *
  */
 
-package mitll.langtest.server.database.userexercise;
+package mitll.langtest.server.database.postgres;
 
-import mitll.langtest.server.database.IDAO;
-import mitll.langtest.server.database.exercise.ExerciseDAO;
+import mitll.langtest.server.database.BaseTest;
+import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.word.IWordDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
+import org.apache.log4j.Logger;
+import org.junit.Test;
 
-import java.util.Collection;
-import java.util.List;
+public class WordTest extends BaseTest {
+  private static final Logger logger = Logger.getLogger(WordTest.class);
 
-public interface IUserExerciseDAO extends IDAO {
-  void add(CommonExercise userExercise, boolean isOverride);
+  @Test
+  public void testAnno() {
+    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
 
-  List<CommonShell> getOnList(long listID);
+    IWordDAO dao = spanish.getWordDAO();
 
-  CommonExercise getWhere(String exid);
 
-  Collection<CommonExercise> getAll();
+  }
 
-  Collection<CommonExercise> getOverrides();
-
-  Collection<CommonExercise> getWhere(Collection<String> exids);
-
-  void update(CommonExercise userExercise, boolean createIfDoesntExist);
-
-  void setExerciseDAO(ExerciseDAO<CommonExercise> exerciseDAO);
-
-  CommonExercise getPredefExercise(String id);
 }

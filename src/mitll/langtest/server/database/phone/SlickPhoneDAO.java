@@ -39,10 +39,12 @@ import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.WordAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
+import mitll.npdata.dao.BaseOps;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickPhone;
 import mitll.npdata.dao.SlickPhoneReport;
 import mitll.npdata.dao.phone.PhoneDAOWrapper;
+import mitll.npdata.dao.phone.PhoneTable;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
@@ -64,6 +66,12 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone>, ISc
 
   public void createTable() {
     dao.createTable();
+  }
+
+  @Override
+  public String getName() {
+    BaseOps dao = this.dao.dao();
+    return dao.name();
   }
 
   @Override

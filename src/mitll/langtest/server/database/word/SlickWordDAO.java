@@ -59,6 +59,11 @@ public class SlickWordDAO extends BaseUserExerciseDAO implements IWordDAO, ISche
   }
 
   @Override
+  public String getName() {
+    return dao.dao().name();
+  }
+
+  @Override
   public SlickWord toSlick(Word shared, String language) {
     return new SlickWord(-1,
         (int) shared.getRid(),

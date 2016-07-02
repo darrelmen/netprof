@@ -32,13 +32,14 @@
 
 package mitll.langtest.server.database.annotation;
 
+import mitll.langtest.server.database.IDAO;
 import mitll.langtest.shared.ExerciseAnnotation;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-public interface IAnnotationDAO {
+public interface IAnnotationDAO extends IDAO {
   void add(UserAnnotation annotation);
 
   boolean hasDefect(String exerciseID, String field, String status, String comment);

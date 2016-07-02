@@ -1,5 +1,6 @@
 package mitll.langtest.server.database.instrumentation;
 
+import mitll.langtest.server.database.IDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.npdata.dao.SlickSlimEvent;
@@ -9,7 +10,7 @@ import java.util.List;
 /**
  * Created by go22670 on 3/28/16.
  */
-public interface IEventDAO {
+public interface IEventDAO extends IDAO {
   boolean add(Event event, String language);
 
   List<Event> getAll(String language);

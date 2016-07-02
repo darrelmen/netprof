@@ -33,6 +33,7 @@
 package mitll.langtest.server.database.user;
 
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.IDAO;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.User;
 
@@ -41,7 +42,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public interface IUserDAO {
+public interface IUserDAO extends IDAO {
+
+  void findOrMakeDefectDetector();
+
   int getDefectDetector();
 
   Database getDatabase();
@@ -69,7 +73,6 @@ public interface IUserDAO {
   User getUserByID(String id);
 
   User getUserWhere(int userid);
-
 
   List<User> getUsers();
 
