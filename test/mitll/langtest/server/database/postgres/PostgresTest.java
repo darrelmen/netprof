@@ -30,32 +30,43 @@
  *
  */
 
-package mitll.langtest.server.database.userexercise;
+package mitll.langtest.server.database.postgres;
 
-import mitll.langtest.server.database.IDAO;
-import mitll.langtest.server.database.exercise.ExerciseDAO;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.database.BaseTest;
+import mitll.npdata.dao.DBConnection;
+import org.apache.log4j.Logger;
+import org.junit.Test;
 
-import java.util.Collection;
-import java.util.List;
+import java.io.File;
 
-public interface IUserExerciseDAO extends IDAO {
-  void add(CommonExercise userExercise, boolean isOverride);
+public class PostgresTest extends BaseTest {
+  private static final Logger logger = Logger.getLogger(PostgresTest.class);
 
-  List<CommonShell> getOnList(long listID);
+  @Test
+  public void testCreate() {
+    getDatabaseVeryLight("spanish", false).createTables();
+  }
 
-  CommonExercise getWhere(String exid);
+  @Test
+  public void testDrop() {
+    getConnection("spanish").dropAll();
+  }
 
-  Collection<CommonExercise> getAll();
+  @Test
+  public void testCopy() {
+    testCreate();
+    getDatabaseLight("spanish", true).copyToPostgres();
+  }
 
-  Collection<CommonExercise> getOverrides();
+  private static DBConnection getConnection(String config) {
+    File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
+    String parent = file.getParentFile().getAbsolutePath();
+    logger.info("path is " + parent);
+    ServerProperties serverProps = new ServerProperties(parent, file.getName());
+    return new DBConnection(serverProps.getDatabaseType(),
+        serverProps.getDatabaseHost(), serverProps.getDatabasePort(), serverProps.getDatabaseName(), serverProps.getDatabaseUser(), serverProps.getDatabasePassword());
+  }
 
-  Collection<CommonExercise> getWhere(Collection<String> exids);
 
-  void update(CommonExercise userExercise, boolean createIfDoesntExist);
-
-  void setExerciseDAO(ExerciseDAO<CommonExercise> exerciseDAO);
-
-  CommonExercise getPredefExercise(String id);
 }

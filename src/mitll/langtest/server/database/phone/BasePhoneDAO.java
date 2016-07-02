@@ -35,6 +35,7 @@ package mitll.langtest.server.database.phone;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.SlickDAO;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.analysis.PhoneAndScore;
 import mitll.langtest.shared.analysis.WordAndScore;

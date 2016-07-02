@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.userlist;
 
+import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -39,7 +40,7 @@ import mitll.langtest.shared.exercise.CommonShell;
 import java.util.Collection;
 import java.util.List;
 
-public interface IUserListDAO {
+public interface IUserListDAO extends IDAO {
   /**
    * @see mitll.langtest.server.database.custom.UserListManager#addVisitor(long, long)
    * @param listid

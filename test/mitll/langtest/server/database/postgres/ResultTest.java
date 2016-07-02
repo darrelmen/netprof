@@ -30,8 +30,10 @@
  *
  */
 
-package mitll.langtest.server.database;
+package mitll.langtest.server.database.postgres;
 
+import mitll.langtest.server.database.BaseTest;
+import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.database.result.ResultDAO;
