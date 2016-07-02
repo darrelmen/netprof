@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.result;
 
+import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.MonitorResult;
 import mitll.langtest.shared.UserAndTime;
@@ -46,7 +47,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public interface IResultDAO {
+public interface IResultDAO extends IDAO {
   List<Result> getResults();
 
   Collection<Result> getResultsDevices();
