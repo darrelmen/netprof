@@ -34,18 +34,14 @@ package mitll.langtest.server.database.custom;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.audio.PathWriter;
-import mitll.langtest.server.database.ISchema;
+import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.annotation.IAnnotationDAO;
 import mitll.langtest.server.database.annotation.UserAnnotation;
 import mitll.langtest.server.database.reviewed.IReviewedDAO;
-import mitll.langtest.server.database.reviewed.SlickReviewedDAO;
 import mitll.langtest.server.database.reviewed.StateCreator;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
-import mitll.langtest.server.database.userlist.IUserListDAO;
-import mitll.langtest.server.database.userlist.IUserListExerciseJoinDAO;
-import mitll.langtest.server.database.userlist.SlickUserListDAO;
-import mitll.langtest.server.database.userlist.SlickUserListExerciseJoinDAO;
+import mitll.langtest.server.database.userlist.*;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.User;
@@ -54,7 +50,6 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.npdata.dao.DBConnection;
 import org.apache.log4j.Logger;
-import org.apache.xmlbeans.impl.common.SystemCache;
 
 import java.io.File;
 import java.util.*;
@@ -97,6 +92,7 @@ public class UserListManager {
 
   private IUserExerciseDAO userExerciseDAO;
   private final IUserListDAO userListDAO;
+  private final IUserExerciseListVisitorDAO visitorDAO;
   private final IUserListExerciseJoinDAO userListExerciseJoinDAO;
   private final IAnnotationDAO annotationDAO;
   private final PathHelper pathHelper;
@@ -116,6 +112,7 @@ public class UserListManager {
                          IAnnotationDAO annotationDAO,
                          IReviewedDAO reviewedDAO,
                          IReviewedDAO secondStateDAO,
+                         IUserExerciseListVisitorDAO visitorDAO,
                          PathHelper pathHelper) {
     this.userDAO = userDAO;
     this.userListDAO = userListDAO;
@@ -124,6 +121,7 @@ public class UserListManager {
     this.reviewedDAO = reviewedDAO;
     this.secondStateDAO = secondStateDAO;
     this.pathHelper = pathHelper;
+    this.visitorDAO = visitorDAO;
   }
 
   /**
@@ -132,7 +130,7 @@ public class UserListManager {
    * @see mitll.langtest.server.LangTestDatabaseImpl#init()
    */
   public void setStateOnExercises() {
-   // getAmmendedStateMap();
+    // getAmmendedStateMap();
     Map<String, StateCreator> exerciseToState = getExerciseToState(false);
     setStateOnExercises(exerciseToState, true);
     //setStateOnExercises(secondStateDAO.getExerciseToState(false), false);
@@ -604,7 +602,7 @@ public class UserListManager {
     UserList where = userListDAO.getWhere(userListID, true);
 
     if (where == null) {
-      logger.warn("addItemToList: couldn't find ul with id " + userListID + " and '" + exerciseID +"'");
+      logger.warn("addItemToList: couldn't find ul with id " + userListID + " and '" + exerciseID + "'");
     }
 
     if (where != null) {
@@ -722,8 +720,8 @@ public class UserListManager {
   }
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(PathHelper)
    * @param userExerciseDAO
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(PathHelper)
    */
   public void setUserExerciseDAO(IUserExerciseDAO userExerciseDAO) {
     this.userExerciseDAO = userExerciseDAO;
@@ -889,7 +887,7 @@ public class UserListManager {
 
   private void markAllFieldsFixed(CommonExercise userExercise, int userid) {
     Collection<String> fields = userExercise.getFields();
-   // logger.debug("setExerciseState " + userExercise + "  has " + fields + " user " + userid);
+    // logger.debug("setExerciseState " + userExercise + "  has " + fields + " user " + userid);
     addAnnotations(userExercise);
     for (String field : fields) {
       ExerciseAnnotation annotation1 = userExercise.getAnnotation(field);
@@ -927,11 +925,11 @@ public class UserListManager {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#deleteItemFromList(long, String)
    * @param listid
    * @param exid
    * @param typeOrder
    * @return
+   * @see mitll.langtest.server.LangTestDatabaseImpl#deleteItemFromList(long, String)
    */
   public boolean deleteItemFromList(long listid, String exid, Collection<String> typeOrder) {
     logger.debug("deleteItemFromList " + listid + " " + exid);
@@ -970,14 +968,41 @@ public class UserListManager {
     return userListExerciseJoinDAO;
   }
 
-  public IReviewedDAO getReviewedDAO() { return reviewedDAO; }
-  public IReviewedDAO getSecondStateDAO() { return secondStateDAO; }
+  public IReviewedDAO getReviewedDAO() {
+    return reviewedDAO;
+  }
 
-  public void createTables(DBConnection dbConnection) {
-    if (!dbConnection.hasTable("userexerciselist"))  ((ISchema) userListDAO).createTable();
-    if (!dbConnection.hasTable("userexerciselistjoin"))  ((SlickUserListExerciseJoinDAO)userListExerciseJoinDAO).createTable();
-    if (!dbConnection.hasTable("userexerciselistvisitor"))  (((SlickUserListDAO) userListDAO).getVisitorDAOWrapper()).createTable();
-    if (!dbConnection.hasTable("reviewed"))    (((SlickReviewedDAO) reviewedDAO)).createTable();
-    if (!dbConnection.hasTable("secondstate")) (((SlickReviewedDAO) secondStateDAO)).createTable();
+  public IReviewedDAO getSecondStateDAO() {
+    return secondStateDAO;
+  }
+
+  public void createTables(DBConnection dbConnection, List<String> created) {
+    List<IDAO> idaos = Arrays.asList(
+        userListDAO,
+        userListExerciseJoinDAO,
+//        ((SlickUserListDAO) userListDAO).getVisitorDAOWrapper(),
+        reviewedDAO,
+        secondStateDAO
+    );
+
+    for (IDAO dao : idaos) createIfNotThere(dbConnection, dao, created);
+
+    String userexerciselistvisitor = "userexerciselistvisitor";
+    if (!dbConnection.hasTable(userexerciselistvisitor)) {
+      (((SlickUserListDAO) userListDAO).getVisitorDAOWrapper()).createTable();
+      created.add(userexerciselistvisitor);
+    }
+  }
+
+  void createIfNotThere(DBConnection dbConnection, IDAO slickUserDAO, List<String> created) {
+    String name = slickUserDAO.getName();
+    if (!dbConnection.hasTable(name)) {
+      slickUserDAO.createTable();
+      created.add(name);
+    }
+  }
+
+  public IUserExerciseListVisitorDAO getVisitorDAO() {
+    return visitorDAO;
   }
 }

@@ -104,7 +104,7 @@ public class UserExerciseListVisitorDAO extends DAO implements IUserExerciseList
    * @see UserListDAO#addVisitor(long, long)
    */
   @Override
-  public void add(long listID, long visitor) {
+  public void add(long listID, long visitor,long modified) {
     if (!update(listID, visitor)) {
       try {
         // there are much better ways of doing this...
@@ -123,7 +123,7 @@ public class UserExerciseListVisitorDAO extends DAO implements IUserExerciseList
 
         statement.setLong(i++, listID);
         statement.setLong(i++, visitor);
-        statement.setTimestamp(i++, new Timestamp(System.currentTimeMillis()));  // smarter way to do this...?
+        statement.setTimestamp(i++, new Timestamp(modified));  // smarter way to do this...?
 
         int j = statement.executeUpdate();
 
@@ -235,5 +235,51 @@ public class UserExerciseListVisitorDAO extends DAO implements IUserExerciseList
         USER_EXERCISE_LIST_VISITOR + " ADD " + MODIFIED + " TIMESTAMP ");
     statement.execute();
     statement.close();
+  }
+
+  public Collection<Pair> getAll() {
+    List<Pair> visitors = new ArrayList<>();
+    try {
+      Connection connection = database.getConnection(this.getClass().toString());
+      PreparedStatement statement = connection.prepareStatement("select * from " + USER_EXERCISE_LIST_VISITOR);
+      ResultSet rs = statement.executeQuery();
+
+      while (rs.next()) {
+        visitors.add(new Pair(
+            rs.getInt(UserExerciseListVisitorDAO.VISITORID),
+            rs.getInt(UserExerciseListVisitorDAO.USERLISTID),
+            rs.getTimestamp(UserExerciseListVisitorDAO.MODIFIED).getTime()
+        ));
+      }
+      finish(connection, statement, rs);
+
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return visitors;
+  }
+
+  public static class Pair {
+    private int user;
+    private int listid;
+    private long when;
+
+    public Pair(int user, int listid, long when) {
+      this.user = user;
+      this.listid = listid;
+      this.when = when;
+    }
+
+    public int getUser() {
+      return user;
+    }
+
+    public int getListid() {
+      return listid;
+    }
+
+    public long getWhen() {
+      return when;
+    }
   }
 }

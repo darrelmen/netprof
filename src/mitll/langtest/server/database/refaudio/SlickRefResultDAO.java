@@ -61,6 +61,11 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
     dao.createTable();
   }
 
+  @Override
+  public String getName() {
+    return dao.dao().name();
+  }
+
   public void insert(SlickRefResult word) {
     dao.insert(word);
   }

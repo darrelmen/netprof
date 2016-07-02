@@ -32,50 +32,42 @@ public class BaseTest {
 
   protected static DatabaseImpl<CommonExercise> getDatabase(String config, boolean useH2) {
     String installPath = "war";
+    return getDatabase(installPath, config, useH2);
+  }
+
+  private static DatabaseImpl<CommonExercise> getDatabase(String installPath, String config, boolean useH2) {
     File file = new File(installPath + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
-    String parent = file.getParent();
     String name = file.getName();
-
-    parent = file.getParentFile().getAbsolutePath();
-
-    logger.info("path is " + parent);
+    String parent = file.getParentFile().getAbsolutePath();
     ServerProperties serverProps = new ServerProperties(parent, name);
-    if (useH2) serverProps.setH2(useH2);
+    serverProps.setH2(useH2);
     DatabaseImpl<CommonExercise> database = new DatabaseImpl<>(parent, name, serverProps.getH2Database(),
         serverProps, new PathHelper(installPath), false, null, false);
-    String mediaDir = serverProps.getMediaDir();
+
     database.setInstallPath(installPath, parent + File.separator + database.getServerProps().getLessonPlan(),
-        mediaDir);
+        serverProps.getMediaDir());
     // database.setDependencies(mediaDir, installPath);
     return database;
   }
 
-  protected static DatabaseImpl<CommonExercise> getDatabaseVeryLight(String config) {
-    File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
-    String parent = file.getParent();
-    String name = file.getName();
-
-    parent = file.getParentFile().getAbsolutePath();
-
-    logger.info("path is " + parent);
-    ServerProperties serverProps = new ServerProperties(parent, name);
-    DatabaseImpl<CommonExercise> database = new DatabaseImpl<>(parent, name, serverProps.getH2Database(), serverProps,
-        new PathHelper("war"), false, null, false);
+  protected static DatabaseImpl<CommonExercise> getDatabaseLight(String config, boolean useH2) {
+    String installPath = "war";
+    File file = new File(installPath + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
+    String parent = file.getParentFile().getAbsolutePath();
+    ServerProperties serverProps = new ServerProperties(parent, file.getName());
+    DatabaseImpl<CommonExercise> database = getDatabaseVeryLight(config, useH2);
+    database.setInstallPath(installPath, parent + File.separator + database.getServerProps().getLessonPlan(), serverProps.getMediaDir());
     return database;
   }
 
-  protected static DatabaseImpl<CommonExercise> getDatabaseLight(String config) {
+  protected static DatabaseImpl<CommonExercise> getDatabaseVeryLight(String config, boolean useH2) {
     File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
-    String parent = file.getParent();
     String name = file.getName();
-
-    parent = file.getParentFile().getAbsolutePath();
-
-    logger.info("path is " + parent);
+    String parent = file.getParentFile().getAbsolutePath();
     ServerProperties serverProps = new ServerProperties(parent, name);
-    DatabaseImpl<CommonExercise> database = getDatabaseVeryLight(config);
-    database.setInstallPath("war", parent + File.separator + database.getServerProps().getLessonPlan(),
-        serverProps.getMediaDir());
+    serverProps.setH2(useH2);
+    DatabaseImpl<CommonExercise> database = new DatabaseImpl<>(parent, name, serverProps.getH2Database(), serverProps,
+        new PathHelper("war"), false, null, false);
     return database;
   }
 
