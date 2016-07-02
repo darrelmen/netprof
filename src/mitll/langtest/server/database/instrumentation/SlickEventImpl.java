@@ -35,10 +35,10 @@ public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
     eventDAOWrapper.createTable();
   }
 
-  public void dropTable() {
-    eventDAOWrapper.drop();
+  @Override
+  public String getName() {
+    return eventDAOWrapper.dao().name();
   }
-
 
   /**
    * @param other
@@ -97,11 +97,11 @@ public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
     SlickEvent slickEvent = new SlickEvent(-1,
         event.getUserID(),
         event.getExerciseID(),
+        modified,
         event.getContext() == null ? "" : event.getContext(),
         event.getWidgetID(),
         event.getWidgetType(),
         event.getDevice() == null ? "" : event.getDevice(),
-        modified,
         language.toLowerCase());
 
     return slickEvent;
@@ -112,15 +112,14 @@ public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
     return new Event(
         event.widgetid(),
         event.widgettype(),
-        event.exerciseid(),
+        event.exid(),
         event.context(),
         event.userid(),
         event.modified().getTime(),
         event.device());
   }
 
-
-  public SlickEvent getSlickEvent(Event event, String language, Map<Integer, Integer> oldToNew) {
+  private SlickEvent getSlickEvent(Event event, String language, Map<Integer, Integer> oldToNew) {
     long timestamp = event.getTimestamp();
     if (timestamp < 1) timestamp = System.currentTimeMillis();
     Timestamp modified = new Timestamp(timestamp);
@@ -158,7 +157,7 @@ public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
     return getEvents(all);
   }
 
-  List<Event> getEvents(List<SlickEvent> all) {
+  private List<Event> getEvents(List<SlickEvent> all) {
     List<Event> copy = new ArrayList<>();
     for (SlickEvent event : all) {
       copy.add(fromSlick(event));

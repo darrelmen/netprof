@@ -61,6 +61,10 @@ public class DAO {
 
   protected final Database database;
 
+  public String getName() { throw new IllegalArgumentException("not to be called"); }
+
+  public void createTable() {}
+
   protected DAO(Database database) {
     this.database = database;
     this.logAndNotify = database.getLogAndNotify();
