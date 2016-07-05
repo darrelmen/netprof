@@ -851,8 +851,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (byID == null) {
       if (!id.isEmpty()) {
         String message = "getExercise : huh? couldn't find exercise with id '" + id + "' when examining " + exercises.size() + " items";
-        logger.error(message);
-        logAndNotifyServerException(new IllegalArgumentException(message));
+        logger.warn(message);
+      //  logAndNotifyServerException(new IllegalArgumentException(message));
       }
     } else {
       then2 = System.currentTimeMillis();
