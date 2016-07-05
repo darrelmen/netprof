@@ -34,7 +34,6 @@ package mitll.langtest.server.database.project;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.annotation.SlickAnnotationDAO;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickProject;
 import mitll.npdata.dao.project.ProjectDAOWrapper;
@@ -42,19 +41,26 @@ import org.apache.log4j.Logger;
 
 import java.sql.Timestamp;
 import java.util.Collection;
+import java.util.List;
 
 public class ProjectDAO extends DAO implements IProjectDAO {
   private static final Logger logger = Logger.getLogger(ProjectDAO.class);
 
   private ProjectDAOWrapper dao;
+  private ProjectPropertyDAO propertyDAO;
 
   public ProjectDAO(Database database, DBConnection dbConnection) {
     super(database);
+    propertyDAO = new ProjectPropertyDAO(database, dbConnection);
     dao = new ProjectDAOWrapper(dbConnection);
   }
 
+  public ProjectPropertyDAO getProjectPropertyDAO() {
+    return propertyDAO;
+  }
+
   public void createTable() {
-   // logger.info("create table  " + getName());
+    // logger.info("create table  " + getName());
     dao.createTable();
   }
 
@@ -63,15 +69,16 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     return dao.dao().name();
   }
 
-  public void add(SlickProject project) {
-    dao.insert(project);
-  }
+/*  public int add(SlickProject project) {
+    return dao.insert(project);
+  }*/
 
   @Override
-  public void add(int userid, long modified, String language, String course, ProjectType type, ProjectStatus status) {
-    dao.insert(new SlickProject(-1,
+  public int add(int userid, long modified, String name, String language, String course, ProjectType type, ProjectStatus status) {
+    return dao.insert(new SlickProject(-1,
         userid,
-        new Timestamp(System.currentTimeMillis()),
+        new Timestamp(modified),
+        name,
         language,
         course,
         ProjectType.NP.toString(),
@@ -80,6 +87,16 @@ public class ProjectDAO extends DAO implements IProjectDAO {
 
   @Override
   public Collection<SlickProject> getAll() {
-    return dao.getAll();
+    List<SlickProject> all = dao.getAll();
+//    Collection<SlickProjectProperty> props = propertyDAO.getAll();
+//Map<Int,>
+//    for (SlickProject project : all) {
+//
+//    }
+    return all;
+  }
+
+  public void addProperty(int project, String key, String value) {
+    propertyDAO.add(project, System.currentTimeMillis(), key, value);
   }
 }
