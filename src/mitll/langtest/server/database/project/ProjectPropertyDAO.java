@@ -32,15 +32,48 @@
 
 package mitll.langtest.server.database.project;
 
+import mitll.langtest.server.database.DAO;
+import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.IDAO;
+import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickProject;
+import mitll.npdata.dao.SlickProjectProperty;
+import mitll.npdata.dao.project.ProjectDAOWrapper;
+import mitll.npdata.dao.project.ProjectPropertyDAOWrapper;
+import org.apache.log4j.Logger;
 
+import java.sql.Timestamp;
 import java.util.Collection;
 
-public interface IProjectDAO extends IDAO {
-  int add(int userid, long modified, String name, String language, String course, ProjectType type, ProjectStatus status);
+public class ProjectPropertyDAO extends DAO implements IDAO {
+  private static final Logger logger = Logger.getLogger(ProjectPropertyDAO.class);
 
-  Collection<SlickProject> getAll();
+  private ProjectPropertyDAOWrapper dao;
 
-  void addProperty(int projid, String key, String value);
+  public ProjectPropertyDAO(Database database, DBConnection dbConnection) {
+    super(database);
+    dao = new ProjectPropertyDAOWrapper(dbConnection);
+  }
+
+  public void createTable() {
+   // logger.info("create table  " + getName());
+    dao.createTable();
+  }
+
+  @Override
+  public String getName() {
+    return dao.dao().name();
+  }
+
+  public void add(int projid, long modified, String key, String value) {
+    dao.insert(new SlickProjectProperty(-1,
+        new Timestamp(modified),
+        projid,
+        key,
+        value));
+  }
+
+  public Collection<SlickProjectProperty> getAll() {
+    return dao.getAll();
+  }
 }
