@@ -77,7 +77,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet {
    * @param servletContext
    * @see #init()
    */
-  protected void readProperties(ServletContext servletContext) {
+   void readProperties(ServletContext servletContext) {
     String relativeConfigDir = "config" + File.separator + servletContext.getInitParameter("config");
     PathHelper pathHelper = new PathHelper(getServletContext());
     String configDir = pathHelper.getInstallPath() + File.separator + relativeConfigDir;

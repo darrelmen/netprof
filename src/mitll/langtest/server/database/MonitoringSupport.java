@@ -187,7 +187,7 @@ public class MonitoringSupport {
    *
    * @return
    */
-  Map<Integer, Integer> getResultCountToCount(Collection<CommonExercise> exercises) {
+  public Map<Integer, Integer> getResultCountToCount(Collection<CommonExercise> exercises) {
     Map<String, Integer> idToCount = getExToCount(exercises, resultDAO.getUserAndTimes());
     Map<Integer, Integer> resCountToCount = new HashMap<Integer, Integer>();
 
