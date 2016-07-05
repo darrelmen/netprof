@@ -69,10 +69,11 @@ public class SlickAnnotationDAO
     return new SlickAnnotation(-1,
         (int) shared.getCreatorID(),
         shared.getExerciseID(),
+        new Timestamp(shared.getTimestamp()),
         shared.getField(),
         shared.getStatus(),
-        shared.getComment(),
-        new Timestamp(shared.getTimestamp()));
+        shared.getComment()
+    );
   }
 
   @Override
@@ -81,13 +82,11 @@ public class SlickAnnotationDAO
         slick.exid(),
         slick.field(),
         slick.status(),
-        slick.comment(), slick.userid(), slick.modified().getTime()
+        slick.comment(),
+        slick.userid(),
+        slick.modified().getTime()
     );
   }
-
-//  public void insert(SlickAnnotation word) {
-//    dao.insert(word);
-//  }
 
   public void addBulk(List<SlickAnnotation> bulk) {
     dao.addBulk(bulk);
@@ -102,7 +101,6 @@ public class SlickAnnotationDAO
   List<UserAnnotation> getAll(int userid) {
  //   logger.info("getAll - " + userid);
     Collection<SlickAnnotation> slickAnnotations = dao.byUser(userid);
-
     List<UserAnnotation> copy = new ArrayList<>();
     for (SlickAnnotation annotation : slickAnnotations) copy.add(fromSlick(annotation));
     return copy;
