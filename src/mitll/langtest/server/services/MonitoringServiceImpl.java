@@ -68,7 +68,7 @@ public class MonitoringServiceImpl extends MyRemoteServiceServlet implements Mon
 
   @Override
   public Map<String, Integer> getResultByHourOfDay() {
-    return db.getResultByHourOfDay();
+    return db.getMonitoringSupport().getResultByHourOfDay();
   }
 
   /**
@@ -107,7 +107,7 @@ public class MonitoringServiceImpl extends MyRemoteServiceServlet implements Mon
    * @see mitll.langtest.client.monitoring.MonitoringManager#doSessionQuery
    */
   public Map<String, Number> getResultStats() {
-    return db.getResultStats();
+    return db.getMonitoringSupport().getResultStats();
   }
 
   /**
