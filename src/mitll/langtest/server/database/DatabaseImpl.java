@@ -144,7 +144,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   private UserListManager userListManager;
 
   private IUserExerciseDAO userExerciseDAO;
-
  // private AddRemoveDAO addRemoveDAO;
 
   private IEventDAO eventDAO;
@@ -986,7 +985,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         getWordDAO(),
         getPhoneDAO(),
         getRefResultDAO(),
-        getProjectDAO()
+        getProjectDAO(),
+        ((ProjectDAO)getProjectDAO()).getProjectPropertyDAO()
         );
     for (IDAO dao: idaos) createIfNotThere(dao,created);
 
@@ -1152,91 +1152,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   public int userExists(String login) {
     return userDAO.getIdForUserID(login);
   }
-
-  /**
-   * TODO : worry about duplicate userid?
-   *
-   * @return map of user to number of answers the user entered
-   */
-  public Map<User, Integer> getUserToResultCount() {
-    return monitoringSupport.getUserToResultCount();
-  }
-
-  /**
-   * Determine sessions per user.  If two consecutive items are more than {@link IResultDAO#SESSION_GAP} seconds
-   * apart, then we've reached a session boundary.
-   * Remove all sessions that have just one answer - must be test sessions.
-   *
-   * @return list of duration and numAnswer pairs
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getSessions
-   */
-  public List<Session> getSessions() {
-    return monitoringSupport.getSessions().getSessions();
-  }
-
-  /**
-   * TODO : worry about duplicate userid?
-   *
-   * @return
-   */
-  public Map<Integer, Integer> getResultCountToCount() {
-    return monitoringSupport.getResultCountToCount(getExercises());
-  }
-
-  /**
-   * Get counts of answers by date
-   * TODO : worry about duplicate userid?
-   *
-   * @return
-   */
-  public Map<String, Integer> getResultByDay() {
-    return monitoringSupport.getResultByDay();
-  }
-
-  /**
-   * get counts of answers by hours of the day
-   *
-   * @return
-   */
-/*
-  public Map<String, Integer> getResultByHourOfDay() {
-    return monitoringSupport.getResultByHourOfDay();
-  }
-*/
-
-  /**
-   * Split exid->count by gender.
-   *
-   * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getResultPerExercise
-   */
-  public Map<String, Map<String, Integer>> getResultPerExercise() {
-    return monitoringSupport.getResultPerExercise(getExercises());
-  }
-
-  /**
-   * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getResultCountsByGender()
-   */
-  public Map<String, Map<Integer, Integer>> getResultCountsByGender() {
-    return monitoringSupport.getResultCountsByGender(getExercises());
-  }
-
-  public Map<String, Map<Integer, Map<Integer, Integer>>> getDesiredCounts() {
-    return monitoringSupport.getDesiredCounts(getExercises(), resultDAO.getUserAndTimes());
-  }
-
-  /**
-   * Return some statistics related to the hours of audio that have been collected
-   *
-   * @return
-   * @see mitll.langtest.server.services.MonitoringServiceImpl#getResultStats
-   */
-/*
-  public Map<String, Number> getResultStats() {
-    return monitoringSupport.getResultStats();
-  }
-*/
 
   /**
    * @see LangTestDatabaseImpl#destroy()

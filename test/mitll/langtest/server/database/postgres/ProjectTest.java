@@ -40,9 +40,11 @@ import mitll.langtest.server.database.project.ProjectType;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.npdata.dao.SlickProject;
+import mitll.npdata.dao.SlickProjectProperty;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
+import java.sql.Timestamp;
 import java.util.Collection;
 
 public class ProjectTest extends BaseTest {
@@ -58,13 +60,36 @@ public class ProjectTest extends BaseTest {
     projectDAO.add(
         gvidaver.getId(),
         System.currentTimeMillis(),
+        "my Spanish",
         spanish.getLanguage(),
         "ALL",
         ProjectType.NP,
         ProjectStatus.PRODUCTION);
-
-    Collection<SlickProject> all = projectDAO.getAll();
-    for (SlickProject project : all) logger.info("Got " + project);
   }
 
+  @Test
+  public void testListProjects() {
+    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
+
+    IProjectDAO projectDAO = spanish.getProjectDAO();
+    Collection<SlickProject> all = projectDAO.getAll();
+    for (SlickProject project : all) {
+      logger.info("Got " + project);
+      logger.info("\t props " + project.getProps());
+    }
+  }
+
+  @Test
+  public void testAddProperty() {
+    DatabaseImpl<CommonExercise> spanish = getDatabaseVeryLight("spanish", false);
+
+    IProjectDAO projectDAO = spanish.getProjectDAO();
+    SlickProject next = projectDAO.getAll().iterator().next();
+
+    projectDAO.addProperty(next.id(),"key","value");
+
+    testListProjects();
+
+//    next.addProp(new SlickProjectProperty(-1, new Timestamp(System.currentTimeMillis()), next.id(), "test", "test"));
+  }
 }
