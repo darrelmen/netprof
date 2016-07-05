@@ -980,7 +980,6 @@ public class UserListManager {
     List<IDAO> idaos = Arrays.asList(
         userListDAO,
         userListExerciseJoinDAO,
-//        ((SlickUserListDAO) userListDAO).getVisitorDAOWrapper(),
         reviewedDAO,
         secondStateDAO
     );
@@ -994,7 +993,7 @@ public class UserListManager {
     }
   }
 
-  void createIfNotThere(DBConnection dbConnection, IDAO slickUserDAO, List<String> created) {
+  private void createIfNotThere(DBConnection dbConnection, IDAO slickUserDAO, List<String> created) {
     String name = slickUserDAO.getName();
     if (!dbConnection.hasTable(name)) {
       slickUserDAO.createTable();
