@@ -44,6 +44,7 @@ import mitll.langtest.server.database.instrumentation.SlickEventImpl;
 import mitll.langtest.server.database.phone.Phone;
 import mitll.langtest.server.database.phone.PhoneDAO;
 import mitll.langtest.server.database.phone.SlickPhoneDAO;
+import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.refaudio.RefResultDAO;
 import mitll.langtest.server.database.refaudio.SlickRefResultDAO;
 import mitll.langtest.server.database.result.Result;
@@ -138,8 +139,16 @@ public class CopyToPostgres {
   }
 
   void copyToPostgres(DatabaseImpl db) {
+    IProjectDAO projectDAO = db.getProjectDAO();
+    int byName = projectDAO.getByName(db.getLanguage());
+
     // first add the user table
     SlickUserDAOImpl slickUserDAO = (SlickUserDAOImpl) db.getUserDAO();
+
+    if (byName == -1) {
+      createProject(db, projectDAO, slickUserDAO);
+    }
+
     SlickResultDAO slickResultDAO = (SlickResultDAO) db.getResultDAO();
 
     Map<Integer, Integer> oldToNewUser = copyUsers(db, slickUserDAO);
@@ -191,6 +200,17 @@ public class CopyToPostgres {
     copyReviewed(db, oldToNewUser, true);
     copyReviewed(db, oldToNewUser, false);
     copyRefResult(db, oldToNewUser);
+  }
+
+  private void createProject(DatabaseImpl db, IProjectDAO projectDAO, SlickUserDAOImpl slickUserDAO) {
+    int byName;
+    byName = projectDAO.add(slickUserDAO.getBeforeLoginUser(), db.getLanguage(), db.getLanguage());
+    Properties props = db.getServerProps().getProps();
+
+    for (String prop : ServerProperties.CORE_PROPERTIES) {
+      String o = props.getProperty(prop);
+      projectDAO.add(byName, prop, o);
+    }
   }
 
   /**
