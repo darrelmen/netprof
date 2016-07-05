@@ -52,8 +52,8 @@ import java.util.List;
 public class EmailHelper {
   private static final Logger logger = Logger.getLogger(EmailHelper.class);
 
-  public static final String NP_SERVER = "np.ll.mit.edu";
-  public static final String MY_EMAIL = "gordon.vidaver@ll.mit.edu";
+  private static final String NP_SERVER = "np.ll.mit.edu";
+  private static final String MY_EMAIL = "gordon.vidaver@ll.mit.edu";
   private static final String CLOSING = "Regards, Administrator";
   private static final String GORDON = "Gordon";
 
@@ -91,9 +91,8 @@ public class EmailHelper {
    */
   public void getUserNameEmail(String email, String url, User valid) {
     url = trimURL(url);
-
     if (valid != null) {
-      logger.debug("Sending user email...");
+//      logger.debug("Sending user email...");
       String message = "Hi " + valid.getUserID() + ",<br/>" +
           "Your user name is " + valid.getUserID() + "." +
           "<br/><br/>" +
@@ -134,6 +133,9 @@ public class EmailHelper {
   public boolean resetPassword(String user, String email, String url) {
     logger.debug(serverProperties.getLanguage() +" resetPassword for " + user + " url " + url);
 
+    user = user.trim();
+    email = email.trim();
+
     String hash1 = getHash(email);
     User validUserAndEmail = userDAO.isValidUserAndEmail(user, hash1);
 
@@ -166,8 +168,8 @@ public class EmailHelper {
 
       return true;
     } else {
-      logger.error(serverProperties.getLanguage() + " couldn't find user " + user + " and email " + email + " " + hash1);
-      String message = "User " + user + " with email " + email + " tried to reset password - but they're not valid.";
+      logger.error(serverProperties.getLanguage() + " couldn't find user '" + user + "' and email '" + email + "' hash = " + hash1);
+      String message = "User '" + user + "' with email '" + email + "' tried to reset password - but they're not valid.";
       String prefixedMessage = "for " + pathHelper.getInstallPath() + " got " + message;
       logger.debug(prefixedMessage);
       mailSupport.email(serverProperties.getEmailAddress(), "Invalid password reset for " + serverProperties.getLanguage(), prefixedMessage);
