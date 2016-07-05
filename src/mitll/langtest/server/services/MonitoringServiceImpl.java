@@ -33,10 +33,14 @@
 package mitll.langtest.server.services;
 
 import mitll.langtest.client.services.MonitoringService;
+import mitll.langtest.server.database.MonitoringSupport;
+import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.shared.User;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.monitoring.Session;
 import org.apache.log4j.Logger;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -53,53 +57,69 @@ public class MonitoringServiceImpl extends MyRemoteServiceServlet implements Mon
 
   @Override
   public Map<User, Integer> getUserToResultCount() {
-    return db.getUserToResultCount();
+    return getMonitoringSupport().getUserToResultCount();
   }
-
-  public Map<Integer, Integer> getResultCountToCount() {
-    return db.getResultCountToCount();
-  }
-
 
   @Override
   public Map<String, Integer> getResultByDay() {
-    return db.getResultByDay();
+    return getMonitoringSupport().getResultByDay();
   }
 
   @Override
   public Map<String, Integer> getResultByHourOfDay() {
-    return db.getMonitoringSupport().getResultByHourOfDay();
+    return getMonitoringSupport().getResultByHourOfDay();
+  }
+
+  MonitoringSupport getMonitoringSupport() {
+    return db.getMonitoringSupport();
+  }
+
+  /**
+   * TODO : worry about duplicate userid?
+   *
+   * @return
+   */
+  public Map<Integer, Integer> getResultCountToCount() {
+    return getMonitoringSupport().getResultCountToCount(getExercises());
+  }
+
+  Collection<CommonExercise> getExercises() {
+    return db.getExercises();
   }
 
   /**
    * Map of overall, male, female to list of counts (ex 0 had 7, ex 1, had 5, etc.)
+   * Split exid->count by gender.
    *
    * @return
-   * @see mitll.langtest.client.monitoring.MonitoringManager#doResultLineQuery
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getResultPerExercise
    */
   public Map<String, Map<String, Integer>> getResultPerExercise() {
-    return db.getResultPerExercise();
+    return getMonitoringSupport().getResultPerExercise(getExercises());
   }
 
   /**
    * @return
    * @see mitll.langtest.client.monitoring.MonitoringManager#doGenderQuery(com.google.gwt.user.client.ui.Panel)
    */
-  @Override
   public Map<String, Map<Integer, Integer>> getResultCountsByGender() {
-    return db.getResultCountsByGender();
+    return getMonitoringSupport().getResultCountsByGender(getExercises());
   }
 
   public Map<String, Map<Integer, Map<Integer, Integer>>> getDesiredCounts() {
-    return db.getDesiredCounts();
+    return getMonitoringSupport().getDesiredCounts(getExercises(), db.getResultDAO().getUserAndTimes());
   }
 
   /**
-   * @return
+   * Determine sessions per user.  If two consecutive items are more than {@link IResultDAO#SESSION_GAP} seconds
+   * apart, then we've reached a session boundary.
+   * Remove all sessions that have just one answer - must be test sessions.
+   *
+   * @return list of duration and numAnswer pairs
    * @see mitll.langtest.client.monitoring.MonitoringManager#doSessionQuery
    */
   public List<Session> getSessions() {
-    return db.getSessions();
+    return getMonitoringSupport().getSessions().getSessions();
   }
 
   /**
@@ -107,7 +127,7 @@ public class MonitoringServiceImpl extends MyRemoteServiceServlet implements Mon
    * @see mitll.langtest.client.monitoring.MonitoringManager#doSessionQuery
    */
   public Map<String, Number> getResultStats() {
-    return db.getMonitoringSupport().getResultStats();
+    return getMonitoringSupport().getResultStats();
   }
 
   /**
