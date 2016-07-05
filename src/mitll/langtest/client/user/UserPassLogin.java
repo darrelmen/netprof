@@ -436,7 +436,6 @@ public class UserPassLogin extends UserDialog {
                 String passwordHash = result.getPasswordHash();
                 if (emailHash == null || passwordHash == null || emailHash.isEmpty() || passwordHash.isEmpty()) {
                   eventRegistration.logEvent(user.box, "UserNameBox", "N/A", "existing legacy user " + result.toStringShort());
-
                   copyInfoToSignUp(result);
                 }
               }
@@ -595,7 +594,7 @@ public class UserPassLogin extends UserDialog {
   }
 
   private boolean isValidEmail(String text) {
-    return text.toUpperCase().matches("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$");
+    return text.trim().toUpperCase().matches("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$");
   }
 
   /**
@@ -1006,7 +1005,7 @@ public class UserPassLogin extends UserDialog {
    */
   private void gotLogin(final String user, final String pass, final boolean emptyPassword) {
     final String hashedPass = Md5Hash.getHash(pass);
-  //  logger.info("gotLogin : user is '" + user + "' pass '" + pass + "' or '" + hashedPass + "'");
+    logger.info("gotLogin : user is '" + user + "' pass '" + pass + "' or '" + hashedPass + "'");
 
     signIn.setEnabled(false);
     service.userExists(user, hashedPass, new AsyncCallback<User>() {
