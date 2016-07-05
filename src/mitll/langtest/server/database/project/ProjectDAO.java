@@ -69,9 +69,9 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     return dao.dao().name();
   }
 
-/*  public int add(SlickProject project) {
-    return dao.insert(project);
-  }*/
+  public int add(int userid, String name, String language) {
+    return add(userid, System.currentTimeMillis(), name, language, "", ProjectType.NP, ProjectStatus.PRODUCTION);
+  }
 
   @Override
   public int add(int userid, long modified, String name, String language, String course, ProjectType type, ProjectStatus status) {
@@ -81,8 +81,8 @@ public class ProjectDAO extends DAO implements IProjectDAO {
         name,
         language,
         course,
-        ProjectType.NP.toString(),
-        ProjectStatus.PRODUCTION.toString()));
+        type.toString(),
+        status.toString()));
   }
 
   @Override
@@ -98,5 +98,10 @@ public class ProjectDAO extends DAO implements IProjectDAO {
 
   public void addProperty(int project, String key, String value) {
     propertyDAO.add(project, System.currentTimeMillis(), key, value);
+  }
+
+  @Override
+  public int getByName(String name) {
+    return dao.byName(name);
   }
 }
