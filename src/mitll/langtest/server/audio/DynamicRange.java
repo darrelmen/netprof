@@ -95,6 +95,9 @@ import java.text.DecimalFormat;
 public class DynamicRange {
   private static final Logger logger = Logger.getLogger(DynamicRange.class);
   private static final double MAX_VALUE = 32768.0f;
+  private static final double SILENCE_THRESHOLD = 0.000032;
+
+  private static final boolean DEBUG = false;
 
   /**
    * Verify audio messages
@@ -106,8 +109,6 @@ public class DynamicRange {
   public RMSInfo getDynamicRange(File file) {
     AudioInputStream ais = null;
     try {
-//      logger.info("opening " + file.getName());
-
       ais = AudioSystem.getAudioInputStream(file);
       AudioFormat format = ais.getFormat();
   //    logger.info("file " + file.getName() + " sample rate " + format.getSampleRate());
@@ -207,13 +208,13 @@ public class DynamicRange {
 //                logger.info("c " + c + " " + sIndex + " fres " + fres + " currTotal " + currTotal +
 //                    " currentBuf " + currentBuf);
 
-                if (fres < 0.000032) { // start over
-                  logger.info("start over first ----------> ");
+                if (fres < SILENCE_THRESHOLD) { // start over
+                  if (DEBUG) logger.info("start over first ----------> ");
                 } else {
                   double lres = srms(lastTotal, slide);
                   lastTotal = 0;
-                  if (lres < 0.000032) { // start over
-                    logger.info("start over last -------> ");
+                  if (lres < SILENCE_THRESHOLD) { // start over
+                    if (DEBUG) logger.info("start over last -------> ");
                   } else {
                     double res = srms(windowTotal, window);
   /*                  if (false) {
@@ -288,7 +289,7 @@ public class DynamicRange {
     final double maxRMS;
     final DecimalFormat decimalFormat = new DecimalFormat("##.##");
 
-    public RMSInfo(double maxMin, int max, int min, double totalRMS, double minRMS, double maxRMS) {
+    RMSInfo(double maxMin, int max, int min, double totalRMS, double minRMS, double maxRMS) {
       this.maxMin = maxMin;
       this.max = max;
       this.min = min;
