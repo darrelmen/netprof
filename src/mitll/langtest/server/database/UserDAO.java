@@ -38,7 +38,6 @@ import mitll.langtest.server.database.excel.UserDAOToExcel;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.User;
 import net.sf.json.JSON;
-import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import java.io.OutputStream;
@@ -49,12 +48,13 @@ import java.util.*;
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since
  */
 public class UserDAO extends DAO {
   private static final Logger logger = Logger.getLogger(UserDAO.class);
 
   private static final String DEFECT_DETECTOR = "defectDetector";
+  private static final String BEFORE_LOGIN_USER = "beforeLoginUser";
+
   public static final String USERS = "users";
   public static final String MALE = "male";
   public static final String FEMALE = "female";
@@ -72,7 +72,7 @@ public class UserDAO extends DAO {
   private static final String NATIVE_LANG = "nativeLang";
   private static final String UNKNOWN = "unknown";
   private String language;
-  private long defectDetector;
+  private long defectDetector, beforeLoginUser;
   private boolean enableAllUsers;
 
   private static final String ID = "id";
@@ -93,7 +93,7 @@ public class UserDAO extends DAO {
   public static final int DEFAULT_FEMALE_ID = -3;
   public static MiniUser DEFAULT_USER = new MiniUser(DEFAULT_USER_ID, 99, 0, "default", false);
 
-  static MiniUser DEFAULT_MALE   = new MiniUser(DEFAULT_MALE_ID,   99, 0, "Male", false);
+  static MiniUser DEFAULT_MALE = new MiniUser(DEFAULT_MALE_ID, 99, 0, "Male", false);
   static MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 99, 1, "Female", false);
 
   private Collection<String> admins;
@@ -110,15 +110,23 @@ public class UserDAO extends DAO {
       enableAllUsers = serverProperties.enableAllUsers();
       createTable(database);
 
-      defectDetector = userExists(DEFECT_DETECTOR);
-      if (defectDetector == -1) {
-        List<User.Permission> permissions = Collections.emptyList();
-        defectDetector = addUser(89, MALE, 0, "", UNKNOWN, UNKNOWN, DEFECT_DETECTOR, false, permissions, User.Kind.STUDENT, "", "", "");
-      }
+      this.defectDetector = getPredefUser(DEFECT_DETECTOR);
+      this.beforeLoginUser = getPredefUser(BEFORE_LOGIN_USER);
     } catch (Exception e) {
       logger.error("got " + e, e);
       database.logEvent("unk", "create user table " + e.toString(), 0, UNKNOWN);
     }
+  }
+
+  private long getPredefUser(String defectDetector) {
+    // = DEFECT_DETECTOR;
+    long i = userExists(defectDetector);
+    // this.defectDetector = i;
+    if (i == -1) {
+      List<User.Permission> permissions = Collections.emptyList();
+      i = addUser(89, MALE, 0, "", UNKNOWN, UNKNOWN, defectDetector, false, permissions, User.Kind.STUDENT, "", "", "");
+    }
+    return i;
   }
 
   /**
@@ -358,10 +366,12 @@ public class UserDAO extends DAO {
         ID +
         " from " + USERS +
         " where " +
-        EMAIL + "='" + emailH + "' AND UPPER(" +
-        USER_ID + ")='" + user.toUpperCase() + "'";
+        EMAIL + "='" + emailH + "' AND " +
+        getUserIDMatchClause(user);
 
-    int i = userExistsSQL("N/A", sql);
+//    logger.debug("using sql:\n"+sql);
+
+    int i = userExistsSQL(user, sql);
     return i == -1 ? null : getUserWhere(i);
   }
 
@@ -398,20 +408,38 @@ public class UserDAO extends DAO {
     return userWhere;
   }
 
+  /**
+   * @param id
+   * @param passwordHash
+   * @return
+   * @see #getUser(String, String)
+   */
   public User getUserWithPass(String id, String passwordHash) {
-    logger.debug(language + " : getUser getting user with id '" + id + "' and pass '" + passwordHash + "'");
+    String idNoSuffix = id.split("@")[0];
+    logger.debug(language + " : getUserWithPass getting user with id '" + id + "' and pass '" + passwordHash + "'");
     String sql = "SELECT * from " +
         USERS +
         " where " +
-        "(UPPER(" +
-        USER_ID +
-        ")='" + id.toUpperCase() + "' OR " +
-        EMAIL + "='" + id.toUpperCase() +
-
-        "') and UPPER(" + PASS + ")='" + passwordHash.toUpperCase() +
+        getUserIDMatchClause(id) +
+        "and UPPER(" + PASS + ")='" + passwordHash.toUpperCase() +
         "'";
 
     return getUserWhere(-1, sql);
+  }
+
+  private String getUserIDMatchClause(String id) {
+    return "(UPPER(" +
+        USER_ID +
+        ")='" + id.toUpperCase() + "' OR " +
+        "UPPER(" +
+        USER_ID +
+        ")='" + id.split("@")[0].toUpperCase() + "'" +
+
+        //" OR " +
+        //EMAIL + "='" + id.toUpperCase() +
+        //"'" +
+
+        ") ";
   }
 
   /**
@@ -424,7 +452,7 @@ public class UserDAO extends DAO {
     return getUserWhere(-1, "SELECT * from users where UPPER(" + USER_ID + ")='" + id.toUpperCase() + "'");
   }
 
-  private int userExistsSQL(String id, String sql) {
+  private int userExistsSQL(String exid, String sql) {
     int val = -1;
     try {
       Connection connection = getConnection();
@@ -439,7 +467,7 @@ public class UserDAO extends DAO {
 
     } catch (Exception e) {
       logger.error("Got " + e, e);
-      database.logEvent(id, "userExists: " + e.toString(), 0, UNKNOWN);
+      database.logEvent(exid, "userExists: " + e.toString(), 0, UNKNOWN);
     }
     return val;
   }
@@ -472,7 +500,7 @@ public class UserDAO extends DAO {
           //getPrimaryKey() +
           "CONSTRAINT pkusers PRIMARY KEY (id))";
 
-  //    logger.info("sql\n"+sql);
+      //    logger.info("sql\n"+sql);
       PreparedStatement statement = connection.prepareStatement(sql);
       statement.execute();
       statement.close();
@@ -585,7 +613,7 @@ public class UserDAO extends DAO {
     String sql = "SELECT * from users where " + ID + "=" + userid + ";";
     //long then = System.currentTimeMillis();
     Collection<User> users = getUsers(sql);
-   // long now = System.currentTimeMillis();
+    // long now = System.currentTimeMillis();
     //logger.debug("getUserWhere took " +(now-then) + " millis.");
 
     if (users.isEmpty()) {
@@ -786,7 +814,7 @@ public class UserDAO extends DAO {
 
       statement.close();
       database.closeConnection(connection);
-      logger.debug("for " + language + " update " + key + "/" + s + " for " + userid);
+     // logger.debug("updateKey : for " + language + " update " + key + "/" + s + " for " + userid);
       return i1 != 0;
     } catch (Exception ee) {
       logger.error("Got " + ee, ee);
@@ -808,7 +836,6 @@ public class UserDAO extends DAO {
   public boolean changeEnabled(int userid, boolean enabled) {
     try {
       Connection connection = getConnection();
-
       PreparedStatement statement = connection.prepareStatement(
           "UPDATE " + USERS + " SET " +
               ENABLED + "=?" +
@@ -837,4 +864,6 @@ public class UserDAO extends DAO {
   public JSON toJSON(List<User> users) {
     return new UserDAOToExcel().toJSON(users);
   }
+
+  public long getBeforeLoginUser() {   return beforeLoginUser;  }
 }

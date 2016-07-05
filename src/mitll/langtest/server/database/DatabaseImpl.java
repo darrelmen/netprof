@@ -918,6 +918,10 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
   public boolean logEvent(String id, String widgetType, String exid, String context, long userid, String hitID,
                           String device) {
+    if (userid == -1) {
+    //  logger.debug("logEvent for user " + userid);
+      userid = userDAO.getBeforeLoginUser();
+    }
     return eventDAO != null && eventDAO.add(new Event(id, widgetType, exid, context, userid, -1, hitID, device));
   }
 
