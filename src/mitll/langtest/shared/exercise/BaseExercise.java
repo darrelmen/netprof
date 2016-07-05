@@ -33,7 +33,6 @@
 package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.shared.custom.UserExercise;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -50,7 +49,7 @@ public class BaseExercise implements IsSerializable, Shell  {
   private STATE state = STATE.UNSET;
   private STATE secondState = STATE.UNSET;
 
-  public BaseExercise() {}
+  protected BaseExercise() {}
 
   protected BaseExercise(String id ) { this.id = id;}
 
@@ -59,7 +58,7 @@ public class BaseExercise implements IsSerializable, Shell  {
   }
 
   /**
-   * @see UserExerciseDAO#add(CommonExercise, boolean)
+   * @see mitll.langtest.server.database.userexercise.UserExerciseDAO#add(CommonExercise, boolean)
    * @param id
    */
   public void setID(String id) {
@@ -99,7 +98,7 @@ public class BaseExercise implements IsSerializable, Shell  {
   }
 
   /**
-   * @see UserExercise#UserExercise
+   * @see mitll.langtest.shared.custom.UserExercise#UserExercise
    * @param unitToValue
    */
   public void setUnitToValue(Map<String, String> unitToValue) {
