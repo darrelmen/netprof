@@ -57,6 +57,8 @@ import mitll.langtest.server.database.instrumentation.SlickEventImpl;
 import mitll.langtest.server.database.phone.IPhoneDAO;
 import mitll.langtest.server.database.phone.Phone;
 import mitll.langtest.server.database.phone.SlickPhoneDAO;
+import mitll.langtest.server.database.project.IProjectDAO;
+import mitll.langtest.server.database.project.ProjectDAO;
 import mitll.langtest.server.database.refaudio.IRefResultDAO;
 import mitll.langtest.server.database.refaudio.SlickRefResultDAO;
 import mitll.langtest.server.database.result.*;
@@ -146,6 +148,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
  // private AddRemoveDAO addRemoveDAO;
 
   private IEventDAO eventDAO;
+  private IProjectDAO projectDAO;
 
   private ContextPractice contextPractice;
 
@@ -229,7 +232,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       logger.info("took " + (now - then) + " millis to initialize DAOs for " + serverProps.getLanguage());
     }
 
-    monitoringSupport = getMonitoringSupport();
+    monitoringSupport = new MonitoringSupport(userDAO, resultDAO);
   }
 
   private Connection getConnection() {
@@ -297,19 +300,11 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         new SlickUserListExerciseVisitorDAO(this,dbConnection),
         pathHelper);
 
+    projectDAO = new ProjectDAO(this,dbConnection);
+
     createTables();
+
     userDAO.findOrMakeDefectDetector();
-/*
-    Connection connection1 = getConnection();
-    try {
-      refresultDAO.createResultTable(connection1);
-      connection1 = getConnection();  // huh? why?
-    } catch (Exception e) {
-      logger.error("got " + e, e);
-    } finally {
-      closeConnection(connection1);
-    }
-*/
 
     try {
       userListManager.setUserExerciseDAO(userExerciseDAO);
@@ -406,55 +401,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 */
   }
 
-  /**
-   * Fixes after the fact a bug where we didn't record info in the phone and word tables.
-   *
-   * @see #initializeDAOs(PathHelper)
-   */
-/*  private void putBackWordAndPhone() {
-    List<Result> results = resultDAO.getResultsForPractice();
-    Map<Integer, Result> idToResult = new HashMap<>();
-    //int skipped = 0;
-    for (Result r : results) {
-      if (r.getJsonScore() != null && r.getJsonScore().length() > 13) {
-        idToResult.put(r.getUniqueID(), r);
-      } else {
-        //  skipped++;
-      }
-    }
-
-    //logger.info("skipped " + skipped);
-
-    List<Word> all = wordDAO.getAll();
-    Set<Integer> already = new HashSet<>();
-    for (Word word : all) {
-      already.add((int) word.getRid());
-    }
-    //  logger.debug("putBackWordAndPhone current word results " + already.size());
-    Set<Integer> allKeys = new HashSet<>(idToResult.keySet());
-    //  logger.debug("putBackWordAndPhone before " + allKeys.size());
-    allKeys.removeAll(already);
-//    logger.debug("putBackWordAndPhone after " + allKeys.size());
-    ParseResultJson parseResultJson = new ParseResultJson(getServerProps());
-    int count = 0;
-    for (Integer key : allKeys) {
-      count++;
-      Result result = idToResult.get(key);
-      String jsonScore = result.getJsonScore();
-
-      if (jsonScore != null && !jsonScore.isEmpty() && !jsonScore.equals("{}")) {
-        Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.parseJson(jsonScore);
-        recordWordAndPhoneInfo(result.getUniqueID(), netPronImageTypeListMap);
-      } else {
-        logger.warn("skipping empty json for " + key);
-      }
-    }
-    if (count > 0) {
-      logger.debug("putBackWordAndPhone fixed " + count);
-    }
-  }*/
-  private MonitoringSupport getMonitoringSupport() {
-    return new MonitoringSupport(userDAO, resultDAO);
+  public MonitoringSupport getMonitoringSupport() {
+    return monitoringSupport;
   }
 
   /**
@@ -1026,10 +974,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   public void createTables() {
     logger.info("createTables create slick tables...");
 
-//    SlickUserDAOImpl slickUserDAO = (SlickUserDAOImpl) getUserDAO();
-//    SlickAudioDAO slickAudioDAO = (SlickAudioDAO) getAudioDAO();
-//    SlickEventImpl slickEventDAO = (SlickEventImpl) getEventDAO();
-
     List<String> created = new ArrayList<>();
 
     List<IDAO> idaos = Arrays.asList(
@@ -1041,17 +985,18 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         getAnnotationDAO(),
         getWordDAO(),
         getPhoneDAO(),
-        getRefResultDAO()
+        getRefResultDAO(),
+        getProjectDAO()
         );
     for (IDAO dao: idaos) createIfNotThere(dao,created);
 
-    if (!dbConnection.hasTable("result")) ((ISchema) getResultDAO()).createTable();
-    if (!dbConnection.hasTable("userexercise")) ((ISchema) userExerciseDAO).createTable();
+//    if (!dbConnection.hasTable("result")) ((ISchema) getResultDAO()).createTable();
+//    if (!dbConnection.hasTable("userexercise")) ((ISchema) userExerciseDAO).createTable();
     userListManager.createTables(dbConnection, created);
-    if (!dbConnection.hasTable("annotation")) ((ISchema) getAnnotationDAO()).createTable();
-    if (!dbConnection.hasTable("word")) ((ISchema) getWordDAO()).createTable();
-    if (!dbConnection.hasTable("phone")) ((ISchema) getPhoneDAO()).createTable();
-    if (!dbConnection.hasTable("refresult")) ((SlickRefResultDAO) getRefResultDAO()).createTable();
+//    if (!dbConnection.hasTable("annotation")) ((ISchema) getAnnotationDAO()).createTable();
+ //   if (!dbConnection.hasTable("word")) ((ISchema) getWordDAO()).createTable();
+  //  if (!dbConnection.hasTable("phone")) ((ISchema) getPhoneDAO()).createTable();
+   // if (!dbConnection.hasTable("refresult")) ((SlickRefResultDAO) getRefResultDAO()).createTable();
     logger.info("createTables created slick tables : " + created);
   }
 
@@ -1223,7 +1168,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * Remove all sessions that have just one answer - must be test sessions.
    *
    * @return list of duration and numAnswer pairs
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getSessions()
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getSessions
    */
   public List<Session> getSessions() {
     return monitoringSupport.getSessions().getSessions();
@@ -1253,9 +1198,11 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    *
    * @return
    */
+/*
   public Map<String, Integer> getResultByHourOfDay() {
     return monitoringSupport.getResultByHourOfDay();
   }
+*/
 
   /**
    * Split exid->count by gender.
@@ -1285,9 +1232,11 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @return
    * @see mitll.langtest.server.services.MonitoringServiceImpl#getResultStats
    */
+/*
   public Map<String, Number> getResultStats() {
     return monitoringSupport.getResultStats();
   }
+*/
 
   /**
    * @see LangTestDatabaseImpl#destroy()
@@ -1750,4 +1699,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   public IReviewedDAO getSecondStateDAO() {
     return userListManager.getSecondStateDAO();
   }
+
+  public IProjectDAO getProjectDAO() { return projectDAO; }
 }
