@@ -55,7 +55,7 @@ import java.util.*;
  * Time: 11:18 AM
  * To change this template use File | Settings | File Templates.
  */
-class MonitoringSupport {
+public class MonitoringSupport {
   private static final int MIN_DESIRED = 2;
   private static final int MAX_PEOPLE = 21;
   private static final Logger logger = Logger.getLogger(MonitoringSupport.class);
@@ -639,7 +639,7 @@ class MonitoringSupport {
    * @return
    * @see mitll.langtest.server.database.DatabaseImpl#getResultStats()
    */
-  Map<String, Number> getResultStats() {
+  public Map<String, Number> getResultStats() {
     double total = 0;
     int count = 0;
     int badDur = 0;
