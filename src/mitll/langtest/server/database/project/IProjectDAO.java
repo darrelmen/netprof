@@ -38,9 +38,14 @@ import mitll.npdata.dao.SlickProject;
 import java.util.Collection;
 
 public interface IProjectDAO extends IDAO {
+
+  int add(int userid, String name, String language);
+
   int add(int userid, long modified, String name, String language, String course, ProjectType type, ProjectStatus status);
 
   Collection<SlickProject> getAll();
 
   void addProperty(int projid, String key, String value);
+
+  int getByName(String name);
 }
