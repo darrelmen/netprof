@@ -108,6 +108,7 @@ public class ServerProperties {
   private static final String TYPE_ORDER = "typeOrder";
   public static final String FONT_FAMILY = "fontFamily";
   private static final String SLEEP_BETWEEN_DECODES_MILLIS = "sleepBetweenDecodesMillis";
+  public static final String MODELS_DIR = "MODELS_DIR";
   private String miraClassifierURL = MIRA_DEVEL;// MIRA_LEN; //MIRA_DEVEL;
 
   /**
@@ -167,6 +168,11 @@ public class ServerProperties {
   private long trimBefore;
   private long trimAfter;
 */
+
+  public static List<String> CORE_PROPERTIES = Arrays.asList(
+      ServerProperties.MODELS_DIR,
+      "N_OUTPUT", "N_HIDDEN", "webserviceHostPort"
+  );
 
   /**
    * @param servletContext
@@ -413,7 +419,7 @@ public class ServerProperties {
     }
     miraClassifierURL = props.getProperty(MIRA_CLASSIFIER_URL, MIRA_DEFAULT);
 
-    props.put("scoringModel", props.getProperty("MODELS_DIR", ""));
+    props.put("scoringModel", props.getProperty(MODELS_DIR, ""));
 
     if (getLessonPlan().startsWith("http")) props.setProperty("talksToDomino", TRUE);
 
@@ -708,5 +714,9 @@ public class ServerProperties {
 
   public String getDatabasePassword() {
     return props.getProperty("databasePassword", "pgadmin");
+  }
+
+  public Properties getProps() {
+    return props;
   }
 }
