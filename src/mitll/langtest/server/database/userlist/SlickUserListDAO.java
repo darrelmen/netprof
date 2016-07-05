@@ -42,9 +42,7 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.npdata.dao.DBConnection;
-import mitll.npdata.dao.SlickUser;
 import mitll.npdata.dao.SlickUserExerciseList;
-import mitll.npdata.dao.SlickWord;
 import mitll.npdata.dao.userexercise.UserExerciseListDAOWrapper;
 import mitll.npdata.dao.userexercise.UserExerciseListVisitorDAOWrapper;
 import org.apache.log4j.Logger;
@@ -94,10 +92,9 @@ public class SlickUserListDAO extends DAO implements IUserListDAO, ISchema<UserL
   public SlickUserExerciseList toSlick(UserList<CommonShell> shared, String language) {
     return new SlickUserExerciseList(-1,
         shared.getCreator().getId(),
-        shared.getName(),
+        new Timestamp(shared.getModified()), shared.getName(),
         shared.getDescription(),
         shared.getClassMarker(),
-        new Timestamp(shared.getModified()),
         shared.isPrivate(),
         false,
         (int) shared.getUniqueID());
@@ -106,10 +103,9 @@ public class SlickUserListDAO extends DAO implements IUserListDAO, ISchema<UserL
   public SlickUserExerciseList toSlick2(UserList<CommonShell> shared, String language, int userid) {
     return new SlickUserExerciseList(-1,
         userid,
-        shared.getName(),
+        new Timestamp(shared.getModified()), shared.getName(),
         shared.getDescription(),
         shared.getClassMarker(),
-        new Timestamp(shared.getModified()),
         shared.isPrivate(),
         false,
         (int) shared.getUniqueID());

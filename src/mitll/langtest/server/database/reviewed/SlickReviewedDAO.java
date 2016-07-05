@@ -87,12 +87,12 @@ public class SlickReviewedDAO extends DAO implements IReviewedDAO {
 
   SlickReviewed toSlick(String exerciseID, STATE state, int creatorID) {
     long time = System.currentTimeMillis();
-    return new SlickReviewed(-1, creatorID, exerciseID, state.toString(), new Timestamp(time));
+    return new SlickReviewed(-1, creatorID, exerciseID, new Timestamp(time), state.toString());
   }
 
   public SlickReviewed toSlick(StateCreator stateCreator) {
     return new SlickReviewed(-1, (int) stateCreator.getCreatorID(), stateCreator.getExerciseID(),
-        stateCreator.getState().toString(), new Timestamp(stateCreator.getWhen()));
+        new Timestamp(stateCreator.getWhen()), stateCreator.getState().toString());
   }
 
   @Override
