@@ -148,6 +148,8 @@ import java.util.logging.Logger;
  * - bug fix for issue where prev next buttons on empty list would throw exception, event dialog wouldn't come up on big tables
  * 1.3.6
  * - admin test on userid was case sensitive
+ * 1.4.0
+ * - fix for user password reset issue where people have trouble resetting their password - allow user@host.edu as login for user
  *
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -157,7 +159,7 @@ import java.util.logging.Logger;
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private final Logger logger = Logger.getLogger("LangTest");
 
-  public static final String VERSION_INFO = "1.3.6";
+  public static final String VERSION_INFO = "1.4.0";
 
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
