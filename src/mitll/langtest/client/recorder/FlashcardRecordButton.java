@@ -110,13 +110,13 @@ public class FlashcardRecordButton extends RecordButton {
 
     tooltip = new TooltipHelper().addTooltip(this, addKeyBinding ? NO_SPACE_WARNING : PROMPT);
 
-//    System.out.println("FlashcardRecordButton : using " + getElement().getId());
+//    System.out.println("FlashcardRecordButton : using " + getElement().getExID());
   }
 
   private void addKeyListener(ExerciseController controller, final String instance) {
 
 
-  //     System.out.println("FlashcardRecordButton.addKeyListener : using " + getElement().getId() + " for " + instance);
+  //     System.out.println("FlashcardRecordButton.addKeyListener : using " + getElement().getExID() + " for " + instance);
 
     KeyPressHelper.KeyListener listener = new KeyPressHelper.KeyListener() {
       @Override
@@ -202,7 +202,7 @@ public class FlashcardRecordButton extends RecordButton {
     boolean b = !isAttached() || checkHidden(getElement().getId()) || controller.getUser() == -1;
    //if (b) {
       //System.out.println("attached " + isAttached());
-   //   System.out.println("hidden   " + checkHidden(getElement().getId()));
+   //   System.out.println("hidden   " + checkHidden(getElement().getExID()));
     //  System.out.println("user     " + controller.getUser());
    // }
     return b;
