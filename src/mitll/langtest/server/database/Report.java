@@ -575,7 +575,7 @@ public class Report {
       Long aLong = userToStart.get(user.getId());
       if (aLong != null) user.setTimestampMillis(aLong);
       //else {
-      //  logger.error("no events for " + user.getId());
+      //  logger.error("no events for " + user.getExID());
       //  }
     }
     return users;
