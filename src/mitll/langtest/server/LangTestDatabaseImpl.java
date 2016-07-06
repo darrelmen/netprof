@@ -1811,7 +1811,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     List<MonitorResult> resultList = results.subList(start, min);
     logger.info("ensure compressed audio for " + resultList.size() + " items.");
     for (MonitorResult result : resultList) {
-      ensureCompressedAudio((int) result.getUserid(), db.getCustomOrPredefExercise(result.getId()), result.getAnswer());
+      ensureCompressedAudio((int) result.getUserid(), db.getCustomOrPredefExercise(result.getExID()), result.getAnswer());
     }
     return new ResultAndTotal(new ArrayList<MonitorResult>(resultList), n, req);
   }
@@ -2016,7 +2016,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     //logger.debug("text searching over " + results.size());
     for (MonitorResult result : results) {
       trie.addEntryToTrie(new ResultWrapper(result.getForeignText(), result));
-      trie.addEntryToTrie(new ResultWrapper(result.getId(), result));
+      trie.addEntryToTrie(new ResultWrapper(result.getExID(), result));
     }
     trie.endMakingNodes();
 
@@ -2032,7 +2032,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     if (isNumber) {
       for (MonitorResult result : matchesLC) {
-        matches.add(result.getId().trim());
+        matches.add(result.getExID().trim());
       }
     } else {
       for (MonitorResult result : matchesLC) {
@@ -2090,7 +2090,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
 
     public String toString() {
-      return "result " + e.getId() + " : " + value;
+      return "result " + e.getExID() + " : " + value;
     }
   }
 
@@ -2440,7 +2440,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public List<WordScore> getWordScores(long id, int minRecordings) {
     List<WordScore> wordScoresForUser = db.getAnalysis().getWordScoresForUser(id, minRecordings);
-//    for (WordScore ws : wordScoresForUser) if (ws.getNativeAudio() != null) logger.info("got " +ws.getId() + " " + ws.getNativeAudio());
+//    for (WordScore ws : wordScoresForUser) if (ws.getNativeAudio() != null) logger.info("got " +ws.getExID() + " " + ws.getNativeAudio());
     return wordScoresForUser;
   }
 

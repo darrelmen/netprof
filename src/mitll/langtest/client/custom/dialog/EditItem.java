@@ -217,7 +217,7 @@ public class EditItem {
         };
     setFactory(exerciseList, ul, originalList);
     exerciseList.setUnaccountedForVertical(280);   // TODO do something better here
-    // logger.info("setting vertical on " +exerciseList.getElement().getId());
+    // logger.info("setting vertical on " +exerciseList.getElement().getExID());
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       @Override
       public void execute() {

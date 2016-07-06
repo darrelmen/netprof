@@ -160,14 +160,14 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
 
     inner.add(threePartContent);
 
-    //  logger.info("Adding recording widgets to " + inner2.getElement().getId());
+    //  logger.info("Adding recording widgets to " + inner2.getElement().getExID());
     Scheduler.get().scheduleDeferred(new Command() {
       public void execute() {
         addRecordingAndFeedbackWidgets(exercise.getID(), service, controller, inner2);
       }
     });
 
-    //  logger.info("After adding recording widgets to " + inner2.getElement().getId());
+    //  logger.info("After adding recording widgets to " + inner2.getElement().getExID());
 
     inner2.add(getFinalWidgets());
 
@@ -864,7 +864,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
    * @see #playRef()
    */
   String getRefAudioToPlay() {
-    //System.out.println(getElement().getId() + " playing audio for " +exercise.getID());
+    //System.out.println(getElement().getExID() + " playing audio for " +exercise.getID());
     String path = exercise.getRefAudio();
     if (path == null) {
       path = exercise.getSlowAudioRef(); // fall back to slow audio
