@@ -68,7 +68,7 @@ public class MonitorResult implements IsSerializable {
   private long userid;
   private String exid;
 
-  private String foreignText;
+  private String foreignText = "";
 
   private String answer;
   private boolean valid;
@@ -113,7 +113,8 @@ public class MonitorResult implements IsSerializable {
   public MonitorResult(int uniqueID, long userid, String exid, String answer,
                        boolean valid, long timestamp, String answerType, int durationInMillis,
                        boolean correct, float pronScore, String device, boolean withFlash, int processDur,
-                       int roundTripDur, String validity, float snr, String deviceType, String simpleDevice, String scoreJSON
+                       int roundTripDur, String validity, float snr, String deviceType, String simpleDevice, String scoreJSON,
+                       String transcript
   ) {
     this.uniqueID = uniqueID;
     this.userid = userid;
@@ -134,6 +135,7 @@ public class MonitorResult implements IsSerializable {
     this.deviceType = deviceType;
     this.simpleDevice = simpleDevice;
     this.scoreJSON = scoreJSON;
+    this.foreignText = transcript;
   }
 
   public int getUniqueID() {
