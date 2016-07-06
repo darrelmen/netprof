@@ -44,12 +44,27 @@ public class MergeSites extends BaseTest {
     doMerge(current, destination);
   }
 
+  @Test
+  public void testOldData() {
+    String current = "sudaneseEval";
+
+    DatabaseImpl<CommonExercise> currentSite = getDatabase(current);
+    List<MonitorResult> monitorResults = currentSite.getMonitorResults();
+
+    int i = 10;
+    List<MonitorResult> monitorResults1 = monitorResults.subList(monitorResults.size() - i, monitorResults.size());
+    for (MonitorResult result : monitorResults) {
+      if (result.getExID().equals("1")) {
+        logger.info("res " + result.getUniqueID() + " " + result.getExID() + " " + result.getForeignText());
+      }
+    }
+  }
+
   private void doMerge(String current, String destination) {
     DatabaseImpl<CommonExercise> currentSite = getDatabase(current);
     DatabaseImpl<CommonExercise> destinationSite = getDatabase(destination);
 
     Map<Long, Long> oldToNewUserIDs = mergeUsers(currentSite, destinationSite);
-
 
     try {
       mergeResults(currentSite, destinationSite, oldToNewUserIDs);
@@ -121,7 +136,8 @@ public class MergeSites extends BaseTest {
 
     logger.info("fl --> id     " + newFLToID.size() + " e.g. " + newFLToID.entrySet().iterator().next());
     logger.info("old id --> fl " + oldIDToFL.size() + " e.g. " + oldIDToFL.entrySet().iterator().next());
-
+    int fix = 0;
+    int nofix = 0;
     for (MonitorResult oldR : oldResults) {
       if (!knownFiles.contains(oldR.getAnswer())) {
         n++;
@@ -133,6 +149,7 @@ public class MergeSites extends BaseTest {
           if (userMap.containsKey(oldUserID)) {
             try {
               String foreignText = oldIDToFL.get(oldR.getExID());
+
               if (foreignText == null || foreignText.isEmpty()) logger.warn("no transcript on " + oldR);
               else {
                 foreignText = foreignText.trim();
@@ -144,6 +161,14 @@ public class MergeSites extends BaseTest {
                   noExIDMatch++;
                 }
               }
+              if (oldR.getForeignText().isEmpty()) {
+                oldR.setForeignText(foreignText);
+                fix++;
+                if (oldR.getExID().equals("1"))
+                  logger.info("fixed " + oldR.getUniqueID() + " : " + oldR.getForeignText());
+              } else {
+                nofix++;
+              }
               destinationSite.getAnswerDAO().addResultToTable(oldR);
             } catch (SQLException e1) {
               e1.printStackTrace();
@@ -154,24 +179,41 @@ public class MergeSites extends BaseTest {
             unk.add(oldUserID);
           }
         } else {
-          //  oldR.setUserID(newUserID);
-          //if (n < 10)
-//          logger.warn("adding with fixed id " + oldR);
 
-          //try {
+          String foreignText = oldIDToFL.get(oldR.getExID());
+
+          if (foreignText == null || foreignText.isEmpty()) logger.warn("no transcript on " + oldR);
+          else {
+            foreignText = foreignText.trim();
+            String exID = newFLToID.get(foreignText);
+            if (exID != null) {
+              oldR.setExID(exID);
+              exidCount++;
+            } else {
+              noExIDMatch++;
+            }
+          }
+          if (oldR.getForeignText().isEmpty()) {
+            oldR.setForeignText(foreignText);
+            fix++;
+            if (oldR.getExID().equals("1"))
+              logger.info("fixed " + oldR.getUniqueID() + " : " + oldR.getForeignText());
+          } else {
+            nofix++;
+          }
+
           destinationSite.getAnswerDAO().addResultToTable(oldR);
-          // } catch (SQLException e1) {
-          //   e1.printStackTrace();
-          //  }
-
         }
       }
     }
     int after = destinationSite.getResultDAO().getNumResults();
     logger.info("dest before " + before + " after " + after);
-    logger.info("unknown users " + new TreeSet<>(unk));
+    if (!unk.isEmpty()) {
+      logger.info("unknown users " + new TreeSet<>(unk));
+    }
     logger.info("added to dest " + n);
     logger.info("exids copied " + exidCount + " no match " + noExIDMatch);
+    logger.info("fix " + fix + " no fix " + nofix);
   }
 
   private Set<String> getKnownAnswerFiles(DatabaseImpl<CommonExercise> destinationSite) {
@@ -201,8 +243,10 @@ public class MergeSites extends BaseTest {
       }
     }
     logger.info("added " + c + " old users to destinationSite");
-    for (User current : destinationSite.getUserDAO().getUsers()) {
-      logger.info("destinationSite user " + current.getUserID() + "\t: " + new Date(current.getTimestampMillis()) + "\t: " + current.getPasswordHash());
+    if (false) {
+      for (User current : destinationSite.getUserDAO().getUsers()) {
+        logger.info("destinationSite user " + current.getUserID() + "\t: " + new Date(current.getTimestampMillis()) + "\t: " + current.getPasswordHash());
+      }
     }
   }
 
