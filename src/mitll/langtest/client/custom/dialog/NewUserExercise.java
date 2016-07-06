@@ -182,7 +182,7 @@ class NewUserExercise extends BasicDialog {
     container.add(getCreateButton(ul, listInterface, toAddTo, normalSpeedRecording));
 
 //    logger.info("addNew (" +this.getClass()+
-//        ") : adding blur handler to " +foreignLang.getWidget().getElement().getId());
+//        ") : adding blur handler to " +foreignLang.getWidget().getElement().getExID());
 
     foreignLang.box.addBlurHandler(new BlurHandler() {
       @Override
