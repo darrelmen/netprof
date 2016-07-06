@@ -291,7 +291,7 @@ public class BasicDialog {
   }
 
   void markError(ControlGroup dialectGroup, FocusWidget dialect, String header, String message, Placement placement) {
-    // if (DEBUG) logger.info("markError on '" + dialect.getElement().getId() + "' with " + header + "/" + message);
+    // if (DEBUG) logger.info("markError on '" + dialect.getElement().getExID() + "' with " + header + "/" + message);
     dialectGroup.setType(ControlGroupType.ERROR);
     dialect.setFocus(true);
 //    setupPopover(dialect, header, message, placement);
@@ -323,7 +323,7 @@ public class BasicDialog {
 
   private Popover markErrorBlurFocus(Widget widget, HasBlurHandlers dialect, String heading, String message,
                                      Placement placement, boolean showOnlyOnce) {
-    // if (DEBUG) logger.info("markError on '" + dialect.getElement().getId() + "' with " + header + "/" + message);
+    // if (DEBUG) logger.info("markError on '" + dialect.getElement().getExID() + "' with " + header + "/" + message);
     // dialect.setFocus(true);
 //    setupPopover(dialect, header, message, placement);
     return setupPopoverBlurNoControl(widget, dialect, heading, message, placement, new MyPopover(showOnlyOnce));
