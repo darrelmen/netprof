@@ -157,8 +157,9 @@ public class AnswerDAO extends DAO {
         ResultDAO.PROCESS_DUR + "," +
         ResultDAO.ROUND_TRIP_DUR + "," +
         ResultDAO.VALIDITY + "," +
+        ResultDAO.TRANSCRIPT + "," +
         ResultDAO.SNR +
-        ") VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+        ") VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
 
     int i = 1;
 
@@ -183,6 +184,7 @@ public class AnswerDAO extends DAO {
     statement.setInt(i++, info.getProcessDur());
     statement.setInt(i++, info.getRoundTripDur()); // always zero?
     statement.setString(i++, info.getValidity());
+    statement.setString(i++, info.getForeignText());
     statement.setFloat(i++, info.getSnr());
 
     statement.executeUpdate();
