@@ -133,7 +133,7 @@ class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise>
 
       @Override
       protected void styleBottomRow(Panel bottomRow) {
-        //    logger.info("-----\n\n Adding style to " + bottomRow.getElement().getId());
+        //    logger.info("-----\n\n Adding style to " + bottomRow.getElement().getExID());
         bottomRow.addStyleName("centerPractice");
         outerBottomRow = bottomRow;
       }
