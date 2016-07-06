@@ -302,9 +302,8 @@ public class UserListManager {
         return null;
       } else {
         UserList e = new UserList(i++, userWhere, name, description, dliClass, isPrivate);
-
         userListDAO.add(e);
-        logger.debug("createUserList : now there are " + userListDAO.getCount() + " lists total, for " + userid);
+//        logger.debug("createUserList : now there are " + userListDAO.getCount() + " lists total, for " + userid);
         return e;
       }
     }
@@ -359,7 +358,9 @@ public class UserListManager {
     }
 
     if (listsForUser.isEmpty()) {
-      logger.warn("getListsForUser - list is empty for " + userid + " only created " + listsICreated + " visited " + visitedLists);
+      if (DEBUG) {
+        logger.warn("getListsForUser - list is empty for " + userid + " only created " + listsICreated + " visited " + visitedLists);
+      }
     } else if (favorite != null) {
       listsForUser.remove(favorite);
       listsForUser.add(0, favorite);// put at front

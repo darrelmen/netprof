@@ -34,7 +34,6 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.shared.MonitorResult;
-import mitll.langtest.shared.Result;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.log4j.Logger;
@@ -133,7 +132,7 @@ public class AnswerDAO extends DAO {
   long addResultToTable(MonitorResult info) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
 
-    logger.debug("addResultToTable : adding answer for monitor result " + info);
+//    logger.debug("addResultToTable : adding answer for monitor result " + info);
 
     PreparedStatement statement = connection.prepareStatement("INSERT INTO " +
         ResultDAO.RESULTS +
@@ -165,7 +164,7 @@ public class AnswerDAO extends DAO {
 
     statement.setInt(i++, (int)info.getUserid());
     statement.setString(i++, PLAN); // obsolete
-    statement.setString(i++, copyStringChar(info.getId()));
+    statement.setString(i++, copyStringChar(info.getExID()));
     statement.setInt(i++, 1);
     statement.setTimestamp(i++, new Timestamp(info.getTimestamp()));
     statement.setString(i++, copyStringChar(info.getAnswer()));
@@ -177,9 +176,9 @@ public class AnswerDAO extends DAO {
 
     statement.setBoolean(i++, info.isCorrect());
     statement.setFloat(i++, info.getPronScore());
-/*    statement.setString(i++, info.getDeviceType());
+    statement.setString(i++, info.getDeviceType());
     statement.setString(i++, info.getSimpleDevice());
-    statement.setString(i++, info.getScoreJSON());*/
+    statement.setString(i++, info.getScoreJSON());
     statement.setBoolean(i++, info.isWithFlash());
     statement.setInt(i++, info.getProcessDur());
     statement.setInt(i++, info.getRoundTripDur()); // always zero?
