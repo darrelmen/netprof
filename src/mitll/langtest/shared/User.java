@@ -141,6 +141,10 @@ public class User extends MiniUser {
   }
   public long getTimestampMillis() { return timestamp; }
 
+  /**
+   *
+   * @param timestampMillis
+   */
   public void setTimestampMillis(long timestampMillis) {
     this.timestamp = timestampMillis;
   }

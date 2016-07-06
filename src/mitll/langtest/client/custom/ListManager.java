@@ -579,7 +579,7 @@ public class ListManager implements RequiresResize {
         @Override
         public void onClick(ClickEvent event) {
           storage.storeValue(SUB_TAB, PRACTICE1);
-          //       logger.info("getListOperations : got click on practice " + fpractice.getContent().getElement().getId());
+          //       logger.info("getListOperations : got click on practice " + fpractice.getContent().getElement().getExID());
           avpHelper.setContentPanel(fpractice.getContent());
           avpHelper.showNPF(ul, fpractice, PRACTICE1, true, toSelect);
           controller.logEvent(fpractice.getTab(), "Tab", "UserList_" + ul.getID(), PRACTICE1);
