@@ -225,7 +225,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   public void setUnaccountedForVertical(int v) {
     unaccountedForVertical = v;
     pagingContainer.setUnaccountedForVertical(v);
-    //logger.info("setUnaccountedForVertical : vert " + v + " for " +getElement().getId());
+    //logger.info("setUnaccountedForVertical : vert " + v + " for " +getElement().getExID());
   }
 
   /**
@@ -345,7 +345,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   protected void showEmptySelection() {
 /*
     logger.info("for " + getInstance() +
-        " showing no items match relative to " + typeAhead.getWidget().getElement().getId() + " parent " + typeAhead.getWidget().getParent().getElement().getId());
+        " showing no items match relative to " + typeAhead.getWidget().getElement().getExID() + " parent " + typeAhead.getWidget().getParent().getElement().getExID());
 */
 
     Scheduler.get().scheduleDeferred(new Command() {
