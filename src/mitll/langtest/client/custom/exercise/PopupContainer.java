@@ -159,7 +159,7 @@ class PopupContainer {
         public void onKeyPress(KeyPressEvent event) {
           int keyCode = event.getNativeEvent().getKeyCode();
           if (keyCode == KeyCodes.KEY_ENTER) {
-            // System.out.println("HidePopupTextBox : got key press on " + getElement().getId());
+            // System.out.println("HidePopupTextBox : got key press on " + getElement().getExID());
             //popupAboutToBeHidden();
             popup.hide();
             onEnter();
