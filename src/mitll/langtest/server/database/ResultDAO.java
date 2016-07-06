@@ -65,7 +65,6 @@ import static mitll.langtest.server.database.Database.EXID;
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since
  */
 public class ResultDAO extends DAO {
   private static final Logger logger = Logger.getLogger(ResultDAO.class);
@@ -106,6 +105,7 @@ public class ResultDAO extends DAO {
 
 
   public static final String USER_SCORE = "userscore";
+  public static final String TRANSCRIPT = "transcript";
   //public static final String CLASSIFIER_SCORE = "classifierscore";
 
   private final boolean debug = false;
@@ -262,8 +262,8 @@ public class ResultDAO extends DAO {
   }
 
   /**
-   * @see DatabaseImpl#getMonitorResults()
    * @return
+   * @see DatabaseImpl#getMonitorResults()
    */
   List<MonitorResult> getMonitorResults() {
     try {
@@ -309,9 +309,12 @@ public class ResultDAO extends DAO {
    * @param join
    * @see mitll.langtest.server.database.DatabaseImpl#getMonitorResultsWithText(java.util.List)
    */
-  public void addUnitAndChapterToResults(List<MonitorResult> monitorResults, Map<String, CommonExercise> join) {
+  void addUnitAndChapterToResults(List<MonitorResult> monitorResults, Map<String, CommonExercise> join) {
     int n = 0;
     Set<String> unknownIDs = new HashSet<>();
+    logger.info("addUnitAndChapterToResults  " + monitorResults.size());
+    int c = 0;
+    int t = 0;
     for (MonitorResult result : monitorResults) {
       String id = result.getExID();
       if (id.contains("\\/")) id = id.substring(0, id.length() - 2);
@@ -323,16 +326,25 @@ public class ResultDAO extends DAO {
         unknownIDs.add(id);
         n++;
         result.setUnitToValue(EMPTY_MAP);
-        result.setForeignText("");
+        //result.setForeignText("");
       } else {
         result.setUnitToValue(exercise.getUnitToValue());
-        result.setForeignText(exercise.getForeignLanguage());
+        if (result.getForeignText().isEmpty()) {
+          result.setForeignText(exercise.getForeignLanguage());
+          if (c <10) logger.info("setting fl for " + result.getUniqueID() + " " + result.getExID() + " to " + exercise.getForeignLanguage());
+          c++;
+        }
+        else {
+          t++;
+        }
       }
     }
     if (n > 0) {
       logger.warn("addUnitAndChapterToResults : skipped " + n + " out of " + monitorResults.size() +
           " # bad join ids = " + unknownIDs.size());
     }
+    logger.info("addUnitAndChapterToResults set " + c + " results, used transcript for " + t);
+
   }
 
   public List<MonitorResult> getMonitorResultsByID(String id) {
@@ -923,7 +935,9 @@ public class ResultDAO extends DAO {
 
       int processDur = rs.getInt(PROCESS_DUR);
       int roundTripDur = rs.getInt(ROUND_TRIP_DUR);
-       String json = rs.getString(SCORE_JSON);
+      String json = rs.getString(SCORE_JSON);
+      String transcript = rs.getString(TRANSCRIPT);
+      if (transcript == null) transcript = "";
 
       MonitorResult result = new MonitorResult(uniqueID, userID, //id
           exid,
@@ -934,11 +948,9 @@ public class ResultDAO extends DAO {
           processDur, roundTripDur, validity, snr,
           dtype,
           simpleDevice,
-          json);
+          json,
+          transcript);
 
-/*      result.setDeviceType(dtype);
-      result.setSimpleDevice(simpleDevice);
-      result.setScoreJSON(json);*/
       results.add(result);
     }
     finish(connection, statement, rs);
@@ -1287,6 +1299,10 @@ public class ResultDAO extends DAO {
       addFloat(connection, RESULTS, SNR);
     }
 
+    if (!columns.contains(TRANSCRIPT.toLowerCase())) {
+      addVarchar(connection, RESULTS, TRANSCRIPT);
+    }
+
     database.closeConnection(connection);
 
     createIndex(database, EXID, RESULTS);
@@ -1331,6 +1347,7 @@ public class ResultDAO extends DAO {
         PROCESS_DUR + " INT," +
         ROUND_TRIP_DUR + " INT, " +
         VALIDITY + " VARCHAR, " +
+        TRANSCRIPT + " VARCHAR, " +
         SNR + " FLOAT" +
         ")");
     statement.execute();
