@@ -181,10 +181,10 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     add(warnNoFlash);
 
     if (optionalToTheRight != null) {
-      //  logger.info("adding " + optionalToTheRight.getElement().getId() + " to " + getElement().getId());
+      //  logger.info("adding " + optionalToTheRight.getElement().getExID() + " to " + getElement().getExID());
       add(optionalToTheRight);
     } else {
-      // logger.info("NOT adding right optional thing  to " + getElement().getId());
+      // logger.info("NOT adding right optional thing  to " + getElement().getExID());
     }
   }
 
@@ -201,7 +201,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     }
 
     if (minWidth > 0) {
-//      logger.info("setting min width " + minWidth + " on " + playButton.getElement().getId());
+//      logger.info("setting min width " + minWidth + " on " + playButton.getElement().getExID());
       if (minWidth == 12) offsetWidth = 12;
       playButton.getElement().getStyle().setProperty("minWidth", offsetWidth + "px");
     }
