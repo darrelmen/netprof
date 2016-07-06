@@ -127,7 +127,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @see #ExerciseList
    */
   private void addWidgets(final Panel currentExerciseVPanel) {
-//    if (DEBUG) logger.info("ExerciseList.addWidgets for currentExerciseVPanel " + currentExerciseVPanel.getElement().getId() + " instance " + getInstance());
+//    if (DEBUG) logger.info("ExerciseList.addWidgets for currentExerciseVPanel " + currentExerciseVPanel.getElement().getExID() + " instance " + getInstance());
     this.innerContainer = new SimplePanel();
     innerContainer.getElement().setId("ExerciseList_innerContainer");
     currentExerciseVPanel.add(innerContainer);
@@ -531,7 +531,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 //      if (//!getCurrentExerciseID().equals(id) ||
 //          createdPanel == null ||
 //          (
-//              createdPanel.getElement().getId().equals(EMPTY_PANEL))) {
+//              createdPanel.getElement().getExID().equals(EMPTY_PANEL))) {
         askServerForExercise(id);
 //      } else {
 //        logger.info("got " + hasExercise(id) + " current " + getCurrentExerciseID() + " vs " + id);
