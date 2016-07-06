@@ -153,7 +153,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
   @Override
   protected void useInvalidResult(AudioAnswer result) {
     super.useInvalidResult(result);
-//    logger.info("WaveformPostAudioRecordButton : " + getElement().getId() + " : got invalid result " +result);
+//    logger.info("WaveformPostAudioRecordButton : " + getElement().getExID() + " : got invalid result " +result);
     recordAudioPanel.getWaveform().setVisible(false);
     recordAudioPanel.getSpectrogram().setVisible(false);
     if (parentPanel instanceof ExercisePanel) {
@@ -164,7 +164,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
   }
 
   private void setPlayEnabled(boolean val) {
-    //logger.info("setPlayEnabled -- " + getElement().getId() + " : valid audio ? " + hasValidAudio() + " enable " + val);
+    //logger.info("setPlayEnabled -- " + getElement().getExID() + " : valid audio ? " + hasValidAudio() + " enable " + val);
     playAudioPanel.setEnabled(val && hasValidAudio());
   }
 

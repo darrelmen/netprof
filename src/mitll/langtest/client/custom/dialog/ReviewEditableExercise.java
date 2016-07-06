@@ -239,7 +239,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   }
 
 /*  private String getUserTitle(int me, MiniUser user) {
-    return (user.isDefault()) ? GoodwaveExercisePanel.DEFAULT_SPEAKER : (user.getId() == me) ? "by You (" + user.getUserID() + ")" : getUserTitle(user);
+    return (user.isDefault()) ? GoodwaveExercisePanel.DEFAULT_SPEAKER : (user.getExID() == me) ? "by You (" + user.getUserID() + ")" : getUserTitle(user);
   }*/
 
   private String getUserTitle(int me, MiniUser user) {
