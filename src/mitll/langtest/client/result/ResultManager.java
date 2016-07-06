@@ -542,9 +542,11 @@ public class ResultManager extends PagerTable {
               updateRowData(start, result.results);
               if (numTotal > 0) {
                 MonitorResult object = result.results.get(0);
-//                    logger.info("--->getResults req " + result.req +
-//                            " " + unitToValue + " user " + userID + " text '" + text + "' : " +
-//                            "got back " + result.results.size() + " of total " + result.numTotal + " selecting "+ object);
+/*
+                    logger.info("--->getResults req " + result.req +
+                            " " + unitToValue + " user " + userID + " text '" + text + "' : " +
+                            "got back " + result.results.size() + " of total " + result.numTotal + " selecting "+ object);
+*/
                 cellTable.getSelectionModel().setSelected(object, true);
               }
             }
