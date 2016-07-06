@@ -313,7 +313,7 @@ public class ResultDAO extends DAO {
     int n = 0;
     Set<String> unknownIDs = new HashSet<>();
     for (MonitorResult result : monitorResults) {
-      String id = result.getId();
+      String id = result.getExID();
       if (id.contains("\\/")) id = id.substring(0, id.length() - 2);
       CommonExercise exercise = join.get(id);
       if (exercise == null) {
@@ -923,7 +923,7 @@ public class ResultDAO extends DAO {
 
       int processDur = rs.getInt(PROCESS_DUR);
       int roundTripDur = rs.getInt(ROUND_TRIP_DUR);
-      //  String json = rs.getString(SCORE_JSON);
+       String json = rs.getString(SCORE_JSON);
 
       MonitorResult result = new MonitorResult(uniqueID, userID, //id
           exid,
@@ -931,7 +931,10 @@ public class ResultDAO extends DAO {
           valid, // valid
           timestamp.getTime(),
           type, dur, correct, pronScore, device, rs.getBoolean(WITH_FLASH),
-          processDur, roundTripDur, validity, snr);
+          processDur, roundTripDur, validity, snr,
+          dtype,
+          simpleDevice,
+          json);
 
 /*      result.setDeviceType(dtype);
       result.setSimpleDevice(simpleDevice);
