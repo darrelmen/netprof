@@ -849,9 +849,10 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @param user
    * @return
    * @seex mitll.langtest.server.database.ImportCourseExamples#copyUser
+   * @see MergeSites#addUsersToDest
    */
   public long addUser(User user) {
-    return userManagement.addUser(user);
+    return userManagement.addUser(user, true);
   }
 
   /**
@@ -954,7 +955,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     List<MonitorResult> monitorResults = resultDAO.getMonitorResults();
 
     for (MonitorResult result : monitorResults) {
-      CommonExercise exercise = getExercise(result.getId());
+      CommonExercise exercise = getExercise(result.getExID());
       if (exercise != null) {
         result.setDisplayID(exercise.getDisplayID());
       }
