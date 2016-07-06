@@ -44,6 +44,7 @@ import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.OutputStream;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -186,16 +187,33 @@ public class UserManagement {
 
   /**
    * @param user
+   * @param doThrow
    * @return
-   * @seex mitll.langtest.server.database.ImportCourseExamples#copyUser
+   * @see DatabaseImpl#addUser(User)
    */
-  public long addUser(User user) {
+  public long addUser(User user, boolean doThrow) {
     long l;
-    if ((l = userDAO.userExists(user.getUserID())) == -1) {
-      logger.debug("addUser " + user);
-      l = userDAO.addUser(user.getAge(), user.getGender() == 0 ? UserDAO.MALE : UserDAO.FEMALE,
-          user.getExperience(), user.getIpaddr(), user.getNativeLang(), user.getDialect(), user.getUserID(), false,
-          user.getPermissions(), User.Kind.STUDENT, "", "", "");
+    String userID = user.getUserID();
+    if ((l = userDAO.userExists(userID)) == -1) {
+      logger.debug("addUser " + userID + " : " +new Date(user.getTimestampMillis()));
+      try {
+        l = userDAO.addUser(user.getAge(),
+            user.getGender() == 0 ? UserDAO.MALE : UserDAO.FEMALE,
+            user.getExperience(),
+            user.getIpaddr(),
+            user.getNativeLang(),
+            user.getDialect(),
+            userID,
+            user.isEnabled(),
+            user.getPermissions(),
+            user.getUserKind(),
+            user.getPasswordHash(),
+            user.getEmailHash(),
+            user.getDevice(),
+            user.getTimestampMillis(), doThrow);
+      } catch (SQLException e) {
+        logger.error("Got " + e,e);
+      }
     }
     return l;
   }
@@ -220,8 +238,13 @@ public class UserManagement {
                       String nativeLang, String dialect, String userID, Collection<User.Permission> permissions,
                       String device) {
     logger.debug("addUser " + userID);
-    long l = userDAO.addUser(age, gender, experience, ipAddr, nativeLang, dialect, userID, false, permissions,
-        User.Kind.STUDENT, "", "", device);
+    long l = 0;
+    try {
+      l = userDAO.addUser(age, gender, experience, ipAddr, nativeLang, dialect, userID, false, permissions,
+          User.Kind.STUDENT, "", "", device, System.currentTimeMillis(), false);
+    } catch (SQLException e) {
+      logger.error("got " +e,e);
+    }
     userListManager.createFavorites(l);
     return l;
   }
