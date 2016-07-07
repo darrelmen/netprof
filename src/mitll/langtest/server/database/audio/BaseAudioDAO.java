@@ -41,12 +41,10 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.AudioType;
+import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.User;
-import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.ExerciseListRequest;
-import mitll.langtest.shared.exercise.MutableAudioExercise;
+import mitll.langtest.shared.exercise.*;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -71,6 +69,7 @@ public abstract class BaseAudioDAO extends DAO {
   protected static final String SLOW = "slow";
   private static final String AUDIO_TYPE1 = "context=" + REGULAR;
   protected static final String CONTEXT_REGULAR = AUDIO_TYPE1;
+  private static final String TRANSLITERATION = "transliteration";
   private static final boolean DEBUG_ATTACH = false;
 
   protected final IUserDAO userDAO;
@@ -469,6 +468,31 @@ public abstract class BaseAudioDAO extends DAO {
         miniUser, transcript);
   }
 
+  public Set<AudioAttribute> getAndMarkDefects(AudioAttributeExercise userExercise,
+                                                Map<String, ExerciseAnnotation> fieldToAnnotation) {
+    Set<AudioAttribute> defects = new HashSet<AudioAttribute>();
+
+    for (Map.Entry<String, ExerciseAnnotation> fieldAnno : fieldToAnnotation.entrySet()) {
+      if (!fieldAnno.getValue().isCorrect()) {  // i.e. defect
+        AudioAttribute audioAttribute = userExercise.getAudioRefToAttr().get(fieldAnno.getKey());
+        if (audioAttribute != null) {
+          logger.debug("getAndMarkDefects : found defect " + audioAttribute +
+              " anno : " + fieldAnno.getValue() +
+              " field  " + fieldAnno.getKey());
+          // logger.debug("\tmarking defect on audio");
+          defects.add(audioAttribute);
+          markDefect(audioAttribute);
+        } else if (!fieldAnno.getKey().equals(TRANSLITERATION)) {
+          logger.warn("\tcan't mark defect on audio : looking for field '" + fieldAnno.getKey() +
+              "' in " + userExercise.getAudioRefToAttr().keySet());
+        }
+      }
+    }
+
+    return defects;
+  }
+
+
   /**
    * @param attribute
    * @return
@@ -482,6 +506,7 @@ public abstract class BaseAudioDAO extends DAO {
 //    }
     return markDefect(attribute.getUserid(), attribute.getExid(), audioType);
   }
+
 
   /**
    * Go back and mark gender on really old audio that had no user info on it.

@@ -585,6 +585,7 @@ public class AudioFileHelper implements AlignDecode {
 
       int answerID = db.getAnswerDAO().addAnswer(info);
       answer.setResultID(answerID);
+      answer.setTranscript(exercise1.getForeignLanguage());
     }
     logger.debug("getAudioAnswerAlignment answer " + answer);
     return answer;

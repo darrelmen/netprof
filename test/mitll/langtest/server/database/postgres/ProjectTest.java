@@ -40,12 +40,11 @@ import mitll.langtest.server.database.project.ProjectType;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.npdata.dao.SlickProject;
-import mitll.npdata.dao.SlickProjectProperty;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
-import java.sql.Timestamp;
 import java.util.Collection;
+import java.util.Iterator;
 
 public class ProjectTest extends BaseTest {
   private static final Logger logger = Logger.getLogger(ProjectTest.class);
@@ -54,9 +53,12 @@ public class ProjectTest extends BaseTest {
   public void testProject() {
     DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
 
+
     IProjectDAO projectDAO = spanish.getProjectDAO();
 
     User gvidaver = spanish.getUserDAO().getUserByID("gvidaver");
+
+    Iterator<String> iterator = spanish.getTypeOrder().iterator();
     projectDAO.add(
         gvidaver.getId(),
         System.currentTimeMillis(),
@@ -64,7 +66,7 @@ public class ProjectTest extends BaseTest {
         spanish.getLanguage(),
         "ALL",
         ProjectType.NP,
-        ProjectStatus.PRODUCTION);
+        ProjectStatus.PRODUCTION, iterator.next(), iterator.next());
   }
 
   @Test

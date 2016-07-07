@@ -58,6 +58,7 @@ public class AudioAnswer implements IsSerializable {
   private String path;
   private Validity validity;
   private String decodeOutput = "";
+  private String transcript = "";
   private double score = -1;
   private boolean correct = false;
   private boolean saidAnswer = false;
@@ -65,6 +66,7 @@ public class AudioAnswer implements IsSerializable {
   private int resultID;
   private AudioAttribute audioAttribute;
   private PretestScore pretestScore;
+
 
   /**
    * @see mitll.langtest.server.audio.AudioCheck.ValidityAndDur
@@ -79,22 +81,28 @@ public class AudioAnswer implements IsSerializable {
     INVALID("There was a problem with the audio. Please record again.");
     private String prompt;
 
-    Validity() {} // for gwt serialization
+    Validity() {
+    } // for gwt serialization
+
     Validity(String p) {
       prompt = p;
     }
-    public String getPrompt() { return prompt; }
+
+    public String getPrompt() {
+      return prompt;
+    }
   }
 
-  public AudioAnswer() {}
+  public AudioAnswer() {
+  }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
-   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer
    * @param path
    * @param validity
    * @param reqid
    * @param duration
+   * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
+   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer
    */
   public AudioAnswer(String path, Validity validity, int reqid, long duration) {
     this.path = path;
@@ -103,29 +111,37 @@ public class AudioAnswer implements IsSerializable {
     this.durationInMillis = duration;
   }
 
-  public void setDecodeOutput(String decodeOutput) { this.decodeOutput = decodeOutput; }
+  public void setDecodeOutput(String decodeOutput) {
+    this.decodeOutput = decodeOutput;
+  }
 
   /**
-   * @see DecodeCorrectnessChecker#getFlashcardAnswer
    * @param score
-   */
-  public void setScore(double score) { this.score = score; }
-
-  /**
-   * @see mitll.langtest.client.recorder.RecordButtonPanel#receivedAudioAnswer(AudioAnswer, com.google.gwt.user.client.ui.Panel)
-   * @return score from hydec (see nnscore)
-   */
-  public double getScore() { return score; }
-
-  /**
-   * @see mitll.langtest.client.recorder.RecordButtonPanel#receivedAudioAnswer(AudioAnswer, com.google.gwt.user.client.ui.Panel)
-   * @return
-   */
-  public boolean isCorrect() { return correct; }
-
-  /**
    * @see DecodeCorrectnessChecker#getFlashcardAnswer
+   */
+  public void setScore(double score) {
+    this.score = score;
+  }
+
+  /**
+   * @return score from hydec (see nnscore)
+   * @see mitll.langtest.client.recorder.RecordButtonPanel#receivedAudioAnswer(AudioAnswer, com.google.gwt.user.client.ui.Panel)
+   */
+  public double getScore() {
+    return score;
+  }
+
+  /**
+   * @return
+   * @see mitll.langtest.client.recorder.RecordButtonPanel#receivedAudioAnswer(AudioAnswer, com.google.gwt.user.client.ui.Panel)
+   */
+  public boolean isCorrect() {
+    return correct;
+  }
+
+  /**
    * @param correct
+   * @see DecodeCorrectnessChecker#getFlashcardAnswer
    */
   public void setCorrect(boolean correct) {
     this.correct = correct;
@@ -136,8 +152,8 @@ public class AudioAnswer implements IsSerializable {
   }
 
   /**
-   * @see mitll.langtest.server.audio.AudioFileHelper#writeAudioFile
    * @param resultID
+   * @see mitll.langtest.server.audio.AudioFileHelper#writeAudioFile
    */
   public void setResultID(int resultID) {
     this.resultID = resultID;
@@ -151,15 +167,21 @@ public class AudioAnswer implements IsSerializable {
     this.saidAnswer = saidAnswer;
   }
 
-  public boolean isValid() { return validity == Validity.OK; }
+  public boolean isValid() {
+    return validity == Validity.OK;
+  }
 
   public int getReqid() {
     return reqid;
   }
 
-  public String getPath() { return path; }
+  public String getPath() {
+    return path;
+  }
 
-  public void setPath(String path) { this.path = path;  }
+  public void setPath(String path) {
+    this.path = path;
+  }
 
   public Validity getValidity() {
     return validity;
@@ -175,6 +197,7 @@ public class AudioAnswer implements IsSerializable {
 
   /**
    * Audio information that is attached to the exercise.
+   *
    * @return
    */
   public AudioAttribute getAudioAttribute() {
@@ -185,22 +208,40 @@ public class AudioAnswer implements IsSerializable {
     this.audioAttribute = audioAttribute;
   }
 
-  public PretestScore getPretestScore() {  return pretestScore;  }
+  public PretestScore getPretestScore() {
+    return pretestScore;
+  }
 
   /**
+   * @param pretestScore
    * @see mitll.langtest.server.audio.AudioFileHelper#getAlignment
    * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer
    * @see mitll.langtest.server.ScoreServlet#getAudioAnswer
-   * @param pretestScore
    */
   public void setPretestScore(PretestScore pretestScore) {
     this.pretestScore = pretestScore;
     this.score = pretestScore.getHydecScore();
   }
 
+  public String getTranscript() {
+    return transcript;
+  }
+
+  public void setTranscript(String transcript) {
+    this.transcript = transcript;
+  }
+
   public String toString() {
-    return "Answer id " + getResultID() + " : audio attr " +audioAttribute+
-      " Path " + path + " duration " + durationInMillis + " id " + reqid + " validity " + validity +
-      " correct " + correct + " score " + score + " said answer " + saidAnswer + " pretest "+ pretestScore;
+    return "Answer id " + getResultID() +
+        " : audio attr " + audioAttribute +
+        " Path " + path +
+        " duration " + durationInMillis +
+        " id " + reqid +
+        " validity " + validity +
+        " correct " + correct +
+        " score " + score +
+        " said answer " + saidAnswer +
+        " pretest " + pretestScore +
+        " transcript " + transcript;
   }
 }
