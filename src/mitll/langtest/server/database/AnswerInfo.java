@@ -60,7 +60,10 @@ public class AnswerInfo {
   private int processDur;
   private int roundTripDur;
   private String validity;
+  private String transcript;
   private double snr;
+
+
 
   public static class RecordingInfo {
     String answer;
@@ -290,10 +293,19 @@ public class AnswerInfo {
     return snr;
   }
 
+  public String getTranscript() { return transcript; }
+  public void setTranscript(String transcript) {
+    this.transcript = transcript;
+  }
   public String toString() {
-    return "answer for exid #" + id + " correct " + correct + " score " + pronScore +
-        " audio type " + audioType + " answer " + answer + " process " + processDur +
-        " validity " + validity + " snr " + snr +
+    return "answer for exid #" + id +
+        " correct " + correct +
+        " score " + pronScore +
+        " audio type " + audioType +
+        " answer " + answer +
+        " process " + processDur +
+        " validity " + validity +
+        " snr " + snr +
         " json " + scoreJson;
   }
 }
