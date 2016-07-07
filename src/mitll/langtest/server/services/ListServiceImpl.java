@@ -42,6 +42,7 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.MutableAudioExercise;
 import org.apache.log4j.Logger;
 
 import java.util.*;
