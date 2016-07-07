@@ -53,6 +53,9 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   }
 
   /**
+   * Check other sites to see if the user exists somewhere else, and if so go ahead and use that person
+   * here.
+   *
    * @param login
    * @param passwordH
    * @return
@@ -61,7 +64,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    */
   public User userExists(String login, String passwordH) {
     findSharedDatabase();
-    return db.userExists(getThreadLocalRequest(), login, passwordH);
+    return db.getUserManagement().userExists(getThreadLocalRequest(), login, passwordH, serverProps);
   }
 
   /**

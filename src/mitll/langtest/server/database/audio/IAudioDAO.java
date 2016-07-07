@@ -34,8 +34,10 @@ package mitll.langtest.server.database.audio;
 
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.shared.AudioType;
+import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.AudioAttributeExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 
 import java.util.Collection;
@@ -78,6 +80,9 @@ public interface IAudioDAO extends IDAO {
   void addOrUpdateUser(int userid, AudioAttribute attr);
 
   int markDefect(AudioAttribute attribute);
+
+  Set<AudioAttribute> getAndMarkDefects(AudioAttributeExercise userExercise,
+                                        Map<String, ExerciseAnnotation> fieldToAnnotation);
 
   void updateExerciseID(int uniqueID, String exerciseID);
 }
