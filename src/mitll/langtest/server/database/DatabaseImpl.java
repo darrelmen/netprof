@@ -599,7 +599,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     getUserListManager().editItem(userExercise, true, getServerProps().getMediaDir());
 
     Set<AudioAttribute> original = new HashSet<>(userExercise.getAudioAttributes());
-    Set<AudioAttribute> defects = getAndMarkDefects(userExercise, userExercise.getFieldToAnnotation());
+    Set<AudioAttribute> defects = audioDAO.getAndMarkDefects(userExercise, userExercise.getFieldToAnnotation());
 
     logger.debug("originally had " + original.size() + " attribute, and " + defects.size() + " defects");
 
@@ -642,38 +642,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     }
 
     getSectionHelper().refreshExercise(exercise);
-  }
-
-  /**
-   * Marks defects too...?
-   *
-   * @param userExercise
-   * @param fieldToAnnotation
-   * @return
-   * @see #editItem
-   */
-  private Set<AudioAttribute> getAndMarkDefects(AudioAttributeExercise userExercise,
-                                                Map<String, ExerciseAnnotation> fieldToAnnotation) {
-    Set<AudioAttribute> defects = new HashSet<AudioAttribute>();
-
-    for (Map.Entry<String, ExerciseAnnotation> fieldAnno : fieldToAnnotation.entrySet()) {
-      if (!fieldAnno.getValue().isCorrect()) {  // i.e. defect
-        AudioAttribute audioAttribute = userExercise.getAudioRefToAttr().get(fieldAnno.getKey());
-        if (audioAttribute != null) {
-          logger.debug("getAndMarkDefects : found defect " + audioAttribute +
-              " anno : " + fieldAnno.getValue() +
-              " field  " + fieldAnno.getKey());
-          // logger.debug("\tmarking defect on audio");
-          defects.add(audioAttribute);
-          audioDAO.markDefect(audioAttribute);
-        } else if (!fieldAnno.getKey().equals(TRANSLITERATION)) {
-          logger.warn("\tcan't mark defect on audio : looking for field '" + fieldAnno.getKey() +
-              "' in " + userExercise.getAudioRefToAttr().keySet());
-        }
-      }
-    }
-
-    return defects;
   }
 
   /**
@@ -845,39 +813,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   }
 
   /**
-   * Check other sites to see if the user exists somewhere else, and if so go ahead and use that person
-   * here.
-   *
-   * @param login
-   * @param passwordH
-   * @return
-   * @see mitll.langtest.client.user.UserPassLogin#gotLogin
-   * @see mitll.langtest.client.user.UserPassLogin#makeSignInUserName(com.github.gwtbootstrap.client.ui.Fieldset)
-   * @see mitll.langtest.server.LangTestDatabaseImpl#userExists
-   */
-  public User userExists(HttpServletRequest request, String login, String passwordH) {
-    return userManagement.userExists(request, login, passwordH, serverProps);
-  }
-
-  /**
-   * @param userID
-   * @param passwordH
-   * @param emailH
-   * @param deviceType
-   * @param device
-   * @return
-   * @see mitll.langtest.server.rest.RestUserManagement#addUser(HttpServletRequest, String, String, String, JSONObject)
-   */
-  public User addUser(String userID, String passwordH, String emailH, String deviceType, String device) {
-    return userManagement.addUser(userID, passwordH, emailH, deviceType, device);
-  }
-
-  public User addUser(String userID, String passwordH, String emailH, String deviceType, String device, User.Kind kind,
-                      boolean isMale, int age, String dialect) {
-    return userManagement.addUser(userID, passwordH, emailH, deviceType, device, kind, isMale, age, dialect);
-  }
-
-  /**
    * @param request
    * @param userID
    * @param passwordH
@@ -1023,7 +958,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     List<MonitorResult> monitorResults = resultDAO.getMonitorResults();
 
     for (MonitorResult result : monitorResults) {
-      CommonShell exercise = isAmas() ? getAMASExercise(result.getId()) : getExercise(result.getId());
+      CommonShell exercise = isAmas() ? getAMASExercise(result.getExID()) : getExercise(result.getExID());
       if (exercise != null) {
         result.setDisplayID(exercise.getDisplayID());
       }
@@ -1053,7 +988,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     int n = 0;
     Set<String> unknownIDs = new HashSet<>();
     for (MonitorResult result : monitorResults) {
-      String id = result.getId();
+      String id = result.getExID();
       if (id.contains("\\/")) id = id.substring(0, id.length() - 2);
       CommonExercise exercise = join.get(id);
       if (exercise == null) {
@@ -1616,4 +1551,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   }
 
   public IProjectDAO getProjectDAO() { return projectDAO; }
+
+  public UserManagement getUserManagement() {
+    return userManagement;
+  }
 }

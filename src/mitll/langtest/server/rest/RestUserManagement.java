@@ -36,6 +36,7 @@ import mitll.langtest.client.user.Md5Hash;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.User;
@@ -73,20 +74,20 @@ public class RestUserManagement {
   private static final String PASSWORD_H = "passwordH";
 
   /**
-   * @see DatabaseImpl#userExists(HttpServletRequest, String, String)
+   * @see mitll.langtest.server.database.user.UserManagement#userExists
    */
   public static final String EMAIL_H = "emailH";
   /**
-   * @see DatabaseImpl#userExists(HttpServletRequest, String, String)
+   * @see mitll.langtest.server.database.user.UserManagement#userExists
    */
   public static final String USERID = "userid";
-  private static final String HAS_RESET = "hasReset";
-  private static final String TOKEN = "token";
-
   /**
-   * @see DatabaseImpl#userExists(HttpServletRequest, String, String)
+   * @see mitll.langtest.server.database.user.UserManagement#userExists
    */
   public static final String PASSWORD_CORRECT = "passwordCorrect";
+
+  private static final String HAS_RESET = "hasReset";
+  private static final String TOKEN = "token";
   private static final String PASSWORD_EMAIL_SENT = "PASSWORD_EMAIL_SENT";
   private static final String NOT_VALID = "NOT_VALID";
   private static final String FALSE = "false";
@@ -384,13 +385,14 @@ public class RestUserManagement {
         if (age != null && gender != null && dialect != null) {
           try {
             int age1 = Integer.parseInt(age);
-            user1 = db.addUser(user, passwordH, emailH, deviceType, device, User.Kind.CONTENT_DEVELOPER, gender.equalsIgnoreCase("male"), age1, dialect);
+            user1 = getUserManagement().addUser(user, passwordH, emailH, deviceType, device, User.Kind.CONTENT_DEVELOPER, gender.equalsIgnoreCase("male"), age1, dialect);
+
           } catch (NumberFormatException e) {
             logger.warn("couldn't parse age " + age);
             jsonObject.put(ERROR, "bad age");
           }
         } else {
-          user1 = db.addUser(user, passwordH, emailH, deviceType, device);
+          user1 = getUserManagement().addUser(user, passwordH, emailH, deviceType, device);
         }
 
         if (user1 == null) { // how could this happen?
@@ -411,6 +413,10 @@ public class RestUserManagement {
         jsonObject.put(USERID, exactMatch.getId());
       }
     }
+  }
+
+  private UserManagement getUserManagement() {
+    return db.getUserManagement();
   }
 
   public int getUserFromParam2(String user) {
