@@ -40,6 +40,7 @@ import mitll.langtest.server.database.project.ProjectType;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.npdata.dao.SlickProject;
+import mitll.npdata.dao.SlickProjectProperty;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
@@ -77,7 +78,9 @@ public class ProjectTest extends BaseTest {
     Collection<SlickProject> all = projectDAO.getAll();
     for (SlickProject project : all) {
       logger.info("Got " + project);
-      logger.info("\t props " + project.getProps());
+      for (SlickProjectProperty prop:project.getProps()) {
+        logger.info("\t prop " + prop);
+      }
     }
   }
 
