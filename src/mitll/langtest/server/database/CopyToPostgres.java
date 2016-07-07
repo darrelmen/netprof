@@ -138,16 +138,11 @@ public class CopyToPostgres {
         new PathHelper(getInstallPath(inTest)), false, null, true);
   }
 
-  void copyToPostgres(DatabaseImpl db) {
-    IProjectDAO projectDAO = db.getProjectDAO();
-    int byName = projectDAO.getByName(db.getLanguage());
+  public void copyToPostgres(DatabaseImpl db) {
+    createProjectIfNotExists(db);
 
     // first add the user table
     SlickUserDAOImpl slickUserDAO = (SlickUserDAOImpl) db.getUserDAO();
-
-    if (byName == -1) {
-      createProject(db, projectDAO, slickUserDAO);
-    }
 
     SlickResultDAO slickResultDAO = (SlickResultDAO) db.getResultDAO();
 
@@ -202,14 +197,32 @@ public class CopyToPostgres {
     copyRefResult(db, oldToNewUser);
   }
 
-  private void createProject(DatabaseImpl db, IProjectDAO projectDAO, SlickUserDAOImpl slickUserDAO) {
-    int byName;
-    byName = projectDAO.add(slickUserDAO.getBeforeLoginUser(), db.getLanguage(), db.getLanguage());
+  public void createProjectIfNotExists(DatabaseImpl db) {
+    IProjectDAO projectDAO = db.getProjectDAO();
+    int byName = projectDAO.getByName(db.getLanguage());
+
+    if (byName == -1) {
+      createProject(db, projectDAO);
+    }
+  }
+
+  /**
+   * Ask the database for what the type order should be, e.g. [Unit, Chapter] or [Week, Unit] (from Dari)
+   * @param db
+   * @param projectDAO
+   */
+  private void createProject(DatabaseImpl<?> db, IProjectDAO projectDAO) {
+    SlickUserDAOImpl slickUserDAO = (SlickUserDAOImpl) db.getUserDAO();
+
+    Iterator<String> iterator = db.getTypeOrder().iterator();
+    String firstType = iterator.hasNext() ? iterator.next() : "";
+    String secondType = iterator.hasNext() ? iterator.next() : "";
+
+    int byName = projectDAO.add(slickUserDAO.getBeforeLoginUser(), db.getLanguage(), db.getLanguage(), firstType, secondType);
     Properties props = db.getServerProps().getProps();
 
     for (String prop : ServerProperties.CORE_PROPERTIES) {
-      String o = props.getProperty(prop);
-      projectDAO.add(byName, prop, o);
+      projectDAO.addProperty(byName, prop, props.getProperty(prop));
     }
   }
 
