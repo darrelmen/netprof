@@ -69,32 +69,28 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     return dao.dao().name();
   }
 
-  public int add(int userid, String name, String language) {
-    return add(userid, System.currentTimeMillis(), name, language, "", ProjectType.NP, ProjectStatus.PRODUCTION);
+  public int add(int userid, String name, String language, String firstType, String secondType) {
+    return add(userid, System.currentTimeMillis(), name, language, "", ProjectType.NP, ProjectStatus.PRODUCTION, firstType, secondType);
   }
 
   @Override
-  public int add(int userid, long modified, String name, String language, String course, ProjectType type, ProjectStatus status) {
-    return dao.insert(new SlickProject(-1,
+  public int add(int userid, long modified, String name, String language, String course,
+                 ProjectType type, ProjectStatus status, String firstType, String secondType) {
+    return dao.insert(new SlickProject(
+        -1,
         userid,
         new Timestamp(modified),
         name,
         language,
         course,
         type.toString(),
-        status.toString()));
+        status.toString(),
+        firstType,
+        secondType));
   }
 
   @Override
-  public Collection<SlickProject> getAll() {
-    List<SlickProject> all = dao.getAll();
-//    Collection<SlickProjectProperty> props = propertyDAO.getAll();
-//Map<Int,>
-//    for (SlickProject project : all) {
-//
-//    }
-    return all;
-  }
+  public Collection<SlickProject> getAll() {  return dao.getAll();  }
 
   public void addProperty(int project, String key, String value) {
     propertyDAO.add(project, System.currentTimeMillis(), key, value);
