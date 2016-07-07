@@ -98,6 +98,7 @@ public class ImportCourseExamples {
     return new DatabaseImpl(configDir, configDir, h2DatabaseFile, serverProps, null, true, null, true);
   }
 
+/*
   private static void copyUser(DatabaseImpl npfRussian, Map<Integer, User> userMap, Map<Integer, Integer> oldToNew, int userid) {
     User user = userMap.get(userid);
     int i = npfRussian.userExists(user.getUserID());
@@ -105,6 +106,7 @@ public class ImportCourseExamples {
     int l = i != -1 ? i : npfRussian.addUser(user);
     oldToNew.put(user.getId(), l);
   }
+*/
 
   /*
    * TODO : deal with the user ids being the same after toLowerCase

@@ -39,9 +39,9 @@ import java.util.Collection;
 
 public interface IProjectDAO extends IDAO {
 
-  int add(int userid, String name, String language);
+  int add(int userid, String name, String language, String firstType, String secondType);
 
-  int add(int userid, long modified, String name, String language, String course, ProjectType type, ProjectStatus status);
+  int add(int userid, long modified, String name, String language, String course, ProjectType type, ProjectStatus status, String firstType, String secondType);
 
   Collection<SlickProject> getAll();
 

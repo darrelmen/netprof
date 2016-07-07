@@ -34,6 +34,9 @@ package mitll.langtest.server.database.postgres;
 
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.BaseTest;
+import mitll.langtest.server.database.CopyToPostgres;
+import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.npdata.dao.DBConnection;
 import org.apache.log4j.Logger;
 import org.junit.Test;
@@ -57,6 +60,13 @@ public class PostgresTest extends BaseTest {
   public void testCopy() {
     testCreate();
     getDatabaseLight("spanish", true).copyToPostgres();
+  }
+
+  @Test
+  public void testCopyProject() {
+    testCreate();
+    DatabaseImpl<CommonExercise> spanish = getDatabaseLight("spanish", true);
+    new CopyToPostgres().createProjectIfNotExists(spanish);
   }
 
   private static DBConnection getConnection(String config) {
