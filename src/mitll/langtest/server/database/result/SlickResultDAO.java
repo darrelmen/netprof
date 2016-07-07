@@ -90,7 +90,9 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
         shared.isWithFlash(),
         shared.getDynamicRange(),
         getLanguage(),
-        shared.getUniqueID());
+        shared.getUniqueID(),
+        ""
+    );
   }
 
   private String checkNull(String deviceType) {
@@ -125,6 +127,10 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
   private MonitorResult fromSlick2(SlickResult slick) {
     String audiotype = slick.audiotype();
     audiotype = audiotype.replaceAll("=", "_");
+    String simpleDevice = slick.device();
+    String dtype = slick.devicetype();
+    String device = dtype == null ? "Unk" : dtype.equals("browser") ? simpleDevice : (dtype + "/" + simpleDevice);
+
     return new MonitorResult(slick.id(),
         slick.userid(),
         slick.exid(),
@@ -136,13 +142,17 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
         slick.duration(),
         slick.correct(),
         slick.pronscore(),
-        slick.device(),
+        simpleDevice,
         //slick.devicetype(),
         slick.processdur(),
         slick.roundtripdur(),
         slick.withflash(),
         slick.dynamicrange(),
-        slick.validity());
+        slick.validity(),
+        slick.devicetype(),
+        simpleDevice,
+        "",
+        slick.transcript());
   }
 
   private String getRelativePath(SlickResult slick) {
