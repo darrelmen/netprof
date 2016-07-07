@@ -1,15 +1,6 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.database.audio.AudioDAO;
-import mitll.langtest.server.database.result.Result;
-import mitll.langtest.shared.User;
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -162,7 +153,7 @@ public class MergeSites extends BaseTest {
 //    copyAudio(userToResultsSlow, oldToNew, audioDAO, destAudioDir, candidateAudioDir);
   }*/
 
-  private static DatabaseImpl makeDatabaseImpl(String h2DatabaseFile, String configDir) {
+/*  private static DatabaseImpl makeDatabaseImpl(String h2DatabaseFile, String configDir) {
     ServerProperties serverProps = new ServerProperties(configDir, "quizlet.properties");
     return new DatabaseImpl(configDir, configDir, h2DatabaseFile, serverProps, null, true, null, true);
   }
@@ -173,7 +164,7 @@ public class MergeSites extends BaseTest {
     if (i > 0) logger.debug("found duplicate " + user);
     int l = i != -1 ? i : npfRussian.addUser(user);
     oldToNew.put(user.getId(), l);
-  }
+  }*/
 
   /*
    * TODO : deal with the user ids being the same after toLowerCase
@@ -189,7 +180,7 @@ public class MergeSites extends BaseTest {
     copyAudio(userToResultsRegular, oldToNew, audioDAO, destAudioDir, candidateAudioDir);
   }
 */
-
+/*
   private static void copyAudio(Map<Integer, Map<String, Result>> userToResultsRegular, Map<Integer, Integer> oldToNew,
                                 AudioDAO audioDAO,
                                 String destAudioDir, String candidateAudioDir) {
@@ -228,5 +219,5 @@ public class MergeSites extends BaseTest {
       }
     }
     logger.debug("copied " + count + " files, found " + bad + " bad src audio paths");
-  }
+  }*/
 }
