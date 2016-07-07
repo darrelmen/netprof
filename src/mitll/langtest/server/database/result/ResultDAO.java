@@ -585,7 +585,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
 
       int processDur = rs.getInt(PROCESS_DUR);
       int roundTripDur = rs.getInt(ROUND_TRIP_DUR);
-      //  String json = rs.getString(SCORE_JSON);
+      String json = rs.getString(SCORE_JSON);
       AudioType audioType;
 
       try {
@@ -601,7 +601,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
           valid, // valid
           timestamp.getTime(),
           audioType, dur, correct, pronScore, device, processDur, roundTripDur, rs.getBoolean(WITH_FLASH),
-          snr, validity);
+          snr, validity,dtype,simpleDevice,json,"");
 
 /*      result.setDeviceType(dtype);
       result.setSimpleDevice(simpleDevice);
