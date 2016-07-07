@@ -57,7 +57,6 @@ public class SlickAnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
    * @return
    */
   public int addAnswer(AnswerInfo answerInfo) {
-
     boolean isAudioAnswer = answerInfo.getAnswer() == null || answerInfo.getAnswer().length() == 0;
     String answerInserted = isAudioAnswer ? answerInfo.getAudioFile() : answerInfo.getAnswer();
 
@@ -81,7 +80,8 @@ public class SlickAnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
         answerInfo.isWithFlash(),
         (float) answerInfo.getSnr(),
         getLanguage(),
-        -1);
+        -1,
+        answerInfo.getTranscript());
 
     logger.info("inserting answer by " + answerInfo.getUserid() + " to " + answerInfo.getId() + " :  " + answerInfo.getAnswer() + " :\n" +res);
 
