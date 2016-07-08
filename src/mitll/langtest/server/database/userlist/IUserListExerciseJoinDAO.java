@@ -36,7 +36,12 @@ import mitll.langtest.server.database.IDAO;
 import mitll.langtest.shared.custom.UserList;
 
 public interface IUserListExerciseJoinDAO  extends IDAO {
-  void add(UserList userList, String uniqueID);
+  /**
+   *  @param userList
+   * @param uniqueID
+   * @param exid
+   */
+  void add(UserList userList, String uniqueID, int exid);
 
   /**
    * TODO : remove

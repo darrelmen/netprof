@@ -12,7 +12,7 @@ public class MergeSites extends BaseTest {
   private static final Logger logger = Logger.getLogger(MergeSites.class);
 
   /**
-   * Take the users from the current site and add them to the candidate site
+   * Take the users from the current site and addExerciseToList them to the candidate site
    * Add Result table entries from current site to new site - fixing the user id references for the result entries.
    * <p>
    * Map old exercise id 900 to new 12887
@@ -33,7 +33,7 @@ public class MergeSites extends BaseTest {
     Set<String> candidateIDs = new HashSet<>();
     for (User newUser : candidateUsers) {
       String userID = newUser.getUserID();
-      candidateIDs.add(userID);
+      candidateIDs.addExerciseToList(userID);
       if (!userID.isEmpty()) {
         if (chosenToUser.containsKey(userID)) {
           User oldUser = chosenToUser.get(userID);
@@ -49,7 +49,7 @@ public class MergeSites extends BaseTest {
     for (User old : oldUsers) {
       if (!candidateIDs.contains(old.getUserID())) {
         int l1 = candidate.addUser(old);
-        if (l1 < 0) logger.warn("huh - couldn't add " + old);
+        if (l1 < 0) logger.warn("huh - couldn't addExerciseToList " + old);
         else {
           logger.info("Adding " + old);
           oldToNew.put(old.getId(), l1);
@@ -65,7 +65,7 @@ public class MergeSites extends BaseTest {
     Set<String> knownFiles = new HashSet<>();
     List<Result> toAdd = new ArrayList<>();
     for (Result r : newResults) {
-      knownFiles.add(r.getAnswer());
+      knownFiles.addExerciseToList(r.getAnswer());
     }
 
     int n = 0;
@@ -77,7 +77,7 @@ public class MergeSites extends BaseTest {
     for (MonitorResult oldR : oldResults) {
       if (!knownFiles.contains(oldR.getAnswer())) {
         n++;
-        if (n < 10) logger.info("add " + oldR.getAnswer());
+        if (n < 10) logger.info("addExerciseToList " + oldR.getAnswer());
         Integer oldUserID = oldR.getUserid();
         Integer newUserID = oldToNew.get(oldUserID);
 
@@ -92,7 +92,7 @@ public class MergeSites extends BaseTest {
           else {
             e++;
             logger.error("huh? can't find user id " + oldUserID);
-            unk.add(oldUserID);
+            unk.addExerciseToList(oldUserID);
           }
         } else {
         //  oldR.setUserID(newUserID);
@@ -146,7 +146,7 @@ public class MergeSites extends BaseTest {
 
     // so now we have the users in the database
 
-    // add a audio reference to the audio ref table for each recording
+    // addExerciseToList a audio reference to the audio ref table for each recording
 //    AudioDAO audioDAO = npfRussian.getAudioDAO();
 //    //audioDAO.drop();
 //    copyAudio(userToResultsRegular, oldToNew, audioDAO, destAudioDir, candidateAudioDir);
@@ -197,7 +197,7 @@ public class MergeSites extends BaseTest {
               " result = " + r.getUniqueID() + " type " + r.getAudioType() + " path " + r.getAnswer());
         }
 
-        audioDAO.add(r, oldToNew.get(r.getUserid()).intValue(), "bestAudio/" + r.getAnswer());
+        audioDAO.addExerciseToList(r, oldToNew.get(r.getUserid()).intValue(), "bestAudio/" + r.getAnswer());
 
         try {
           File destFile = new File(destAudioDir, r.getAnswer());

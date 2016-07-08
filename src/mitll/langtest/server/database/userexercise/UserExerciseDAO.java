@@ -33,7 +33,6 @@
 package mitll.langtest.server.database.userexercise;
 
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.audio.AudioDAO;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.userlist.UserListExerciseJoinDAO;
 import mitll.langtest.server.database.custom.UserListManager;
@@ -179,13 +178,13 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
       if (j != 1)
         logger.error("huh? didn't insert row for ");// + grade + " grade for " + resultID + " and " + grader + " and " + gradeID + " and " + gradeType);
 
-      long id = getGeneratedKey(statement);
+      int id = getGeneratedKey(statement);
       if (id == -1) {
         logger.error("huh? no key was generated?");
       }
       //logger.debug("unique id = " + id);
 
-      userExercise.getCombinedMutableUserExercise().setUniqueID(id);
+      userExercise.getCombinedMutableUserExercise().setRealID(id);
 
       // TODO : consider making this an actual prepared statement?
       boolean predefined = userExercise.isPredefined();
@@ -196,7 +195,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
             "SET " +
             EXERCISEID +
             "='" + customID + "' " +
-            "WHERE uniqueid=" + userExercise.getCombinedMutableUserExercise().getUniqueID();
+            "WHERE uniqueid=" + userExercise.getCombinedMutableUserExercise().getRealID();
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.executeUpdate();
         preparedStatement.close();
@@ -364,7 +363,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   /**
    * @return
    * @see mitll.langtest.server.database.exercise.ExcelImport#getRawExercises()
-   * @see #setAudioDAO(AudioDAO)
+   * @seex #setAudioDAO(AudioDAO)
    */
   @Override
   public Collection<CommonExercise> getOverrides() {
@@ -442,7 +441,6 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
       while (rs.next()) {
         UserExercise e = getUserExercise(rs, typeOrder);
 
-
 //        logger.info("getUserExercises " + e);
 
 /*        if (addMissingAudio) {
@@ -468,59 +466,17 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
     Date date = (timestamp != null) ? new Date(timestamp.getTime()) : new Date(0);
 
     return new UserExercise(
-        rs.getLong("uniqueid"),
+        rs.getInt("uniqueid"),
         rs.getString(EXERCISEID),
         rs.getInt("creatorid"),
         rs.getString("english"),
         rs.getString("foreignLanguage"),
         rs.getString(TRANSLITERATION),
-        rs.getString(CONTEXT),
-        rs.getString(CONTEXT_TRANSLATION),
         rs.getBoolean(OVERRIDE),
         unitToValue,
         date.getTime()
     );
   }
-
-  /**
-   * @paramx e
-   * @paramx ref
-   * @paramx sref
-   * @see #getUserExercises(String)
-   */
-/*  private void addMissingAudio(UserExercise e, String ref, String sref) {
-    boolean hasRef = (ref != null && !ref.isEmpty());
-    boolean hasSRef = (sref != null && !sref.isEmpty());
-
-    boolean foundReg = false;
-    boolean foundSlow = false;
-
-    List<AudioAttribute> audioAttributes = exToAudio.get(e.getID());
-    if (audioAttributes != null) {
-      for (AudioAttribute attribute : audioAttributes) {
-        if (attribute.getUserid() == e.getCreator()) {
-          if ((attribute.getAudioType().equalsIgnoreCase(Result.REGULAR) && hasRef)) {
-            foundReg = true;
-          }
-        }
-        if (attribute.getAudioType().equalsIgnoreCase(Result.SLOW) && hasSRef) {
-          foundSlow = true;
-        }
-      }
-    }
-
-    long time = e.getModifiedDateTimestamp();
-    if (time == 0) time = System.currentTimeMillis();
-    if (!foundReg && hasRef) {
-      audioDAO.add((int) e.getCreator(), ref, e.getID(), time, Result.REGULAR, 0);
-      logger.warn("adding missing reg  audio ref -- only first time " + ref + " by " + e.getCreator());
-    }
-    if (!foundSlow && hasSRef) {
-      audioDAO.add((int) e.getCreator(), sref, e.getID(), time, Result.SLOW, 0);
-      logger.warn("adding missing slow audio ref -- only first time " + ref + " by " + e.getCreator());
-
-    }
-  }*/
 
 //  private Map<String, List<AudioAttribute>> exToAudio;
 //  private AudioDAO audioDAO;

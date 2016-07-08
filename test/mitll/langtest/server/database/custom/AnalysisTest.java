@@ -93,7 +93,7 @@ public class AnalysisTest {
 
 //        if (!removePunct(foreignLanguage.toLowerCase()).equals(removePunct(foreignLanguage1.toLowerCase()))) {
 //          logger.warn("Diff " + id + " new " + foreignLanguage + " vs " + foreignLanguage1);
-//          exs.add(id);
+//          exs.addExerciseToList(id);
 //        }
       }
       //idToEx2.put(ex.getID(),ex);

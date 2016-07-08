@@ -34,6 +34,7 @@ package mitll.langtest.shared.custom;
 
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.server.database.userexercise.UserExerciseDAO;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 
@@ -50,7 +51,7 @@ import java.util.*;
  */
 public class UserExercise extends AudioExercise implements CombinedMutableUserExercise, CommonAnnotatable {
   public static final String CUSTOM_PREFIX = "Custom_";
-  private long uniqueID = -1; //set by database
+  //private long uniqueID = -1; //set by database
 
   private int creator;
   private boolean isPredef;
@@ -79,11 +80,11 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
    * @see mitll.langtest.client.custom.dialog.EditItem#createNewItem
    * @see mitll.langtest.client.custom.dialog.EditItem#getNewItem
    */
-  public UserExercise(long uniqueID, String exerciseID, int creator, String english, String foreignLanguage,
+  public UserExercise(int uniqueID, String exerciseID, int creator, String english, String foreignLanguage,
                       String transliteration) {
-    super(exerciseID);
+    super(exerciseID, uniqueID);
     this.creator = creator;
-    this.uniqueID = uniqueID;
+    //  this.uniqueID = uniqueID;
     this.english = english;
     this.foreignLanguage = foreignLanguage;
     this.transliteration = transliteration;
@@ -97,14 +98,12 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
    * @param english
    * @param foreignLanguage
    * @param transliteration
-   * @param context
-   * @param contextTranslation
    * @param isOverride
    * @param modifiedTimestamp
-   * @see UserExerciseDAO#getUserExercises
+   * @see UserExerciseDAO#getUserExercise
    */
-  public UserExercise(long uniqueID, String exerciseID, int creator, String english, String foreignLanguage,
-                      String transliteration, String context, String contextTranslation,
+  public UserExercise(int uniqueID, String exerciseID, int creator, String english, String foreignLanguage,
+                      String transliteration,
                       boolean isOverride,
                       Map<String, String> unitToValue, long modifiedTimestamp
   ) {
@@ -112,7 +111,7 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
     setUnitToValue(unitToValue);
     this.isOverride = isOverride;
     this.modifiedTimestamp = modifiedTimestamp;
-    addContext(context, contextTranslation);
+  //  addContext(context, contextTranslation);
   }
 
   /**
@@ -121,7 +120,7 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
    * @see FlexListLayout#getFactory(PagingExerciseList)
    */
   public <T extends CommonExercise> UserExercise(T exercise, int creatorID) {
-    super(exercise.getID());
+    super(exercise.getID(), exercise.getRealID());
     this.isPredef = true;
     this.english = exercise.getEnglish();
     this.foreignLanguage = exercise.getForeignLanguage();
@@ -167,24 +166,26 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
    * @param uniqueID
    * @see IUserExerciseDAO#add
    */
-  public void setUniqueID(long uniqueID) {
-    this.uniqueID = uniqueID;
+  public void setRealID(int uniqueID) {
+    this.realID = uniqueID;
   }
 
+/*
   public long getUniqueID() {
     return uniqueID;
   }
+*/
 
   public void setTransliteration(String transliteration) {
     this.transliteration = transliteration;
   }
 
-  protected void addContext(String context, String contextTranslation) {
+/*  protected void addContext(String context, String contextTranslation) {
     if (context != null && !context.isEmpty()) {
       UserExercise contextExercise = new UserExercise(-1, "c" + id, getCreator(), contextTranslation, english, "");
       addContextExercise(contextExercise);
     }
-  }
+  }*/
 
   @Override
   public boolean isPredefined() {
@@ -287,7 +288,8 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
   }
 
   @Override
-  public void setSafeToDecode(boolean isSafeToDecode) {}
+  public void setSafeToDecode(boolean isSafeToDecode) {
+  }
 
   @Override
   public String getRefAudioIndex() {
@@ -298,9 +300,17 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
     this.avgScore = avgScore;
   }
 
+  public long getUpdateTime() {
+    return modifiedTimestamp;
+  }
+
+  public boolean isOverride() {
+    return isOverride;
+  }
+
   public String toString() {
     return "UserExercise" +
-        " #" + uniqueID + "/" + getID() +
+        " #" + getRealID() + "/" + getID() +
         (isPredef ? " <Predef>" : " <User>") +
         (isOverride ? " <Override>" : "") +
         " creator " + getCreator() +
@@ -314,13 +324,5 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
         " unit/lesson " + getUnitToValue() +
         " state " + getState() + "/" + getSecondState() +
         " modified " + new Date(modifiedTimestamp);
-  }
-
-  public long getUpdateTime() {
-    return modifiedTimestamp;
-  }
-
-  public boolean isOverride() {
-    return isOverride;
   }
 }

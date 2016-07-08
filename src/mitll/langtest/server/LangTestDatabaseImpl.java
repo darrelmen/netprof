@@ -176,7 +176,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    *
    * @param exercises
    * @return
-   * @see #makeExerciseListWrapper(int, Collection, long, String, boolean, boolean)
+   * @see #makeExerciseListWrapper
    */
   private <T extends CommonShell> List<CommonShell> getExerciseShells(Collection<? extends CommonExercise> exercises) {
     List<CommonShell> ids = new ArrayList<>();
