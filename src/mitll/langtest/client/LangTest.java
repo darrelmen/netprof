@@ -150,7 +150,8 @@ import java.util.logging.Logger;
  * - admin test on userid was case sensitive
  * 1.4.0
  * - fix for user password reset issue where people have trouble resetting their password - allow user@host.edu as login for user
- *
+ * 1.4.1
+ * - fixes for AVP - doesn't return scores at end of practice, english doesn't show meaning, english doesn't show hide options, english doesn't highlight right text box when click to play audio
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
@@ -159,7 +160,7 @@ import java.util.logging.Logger;
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private final Logger logger = Logger.getLogger("LangTest");
 
-  public static final String VERSION_INFO = "1.4.0";
+  public static final String VERSION_INFO = "1.4.1";
 
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
