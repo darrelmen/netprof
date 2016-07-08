@@ -171,6 +171,10 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return scores;
   }
 
+  /**
+   * @see ResultDAO#attachScoreHistory
+   * @param scores
+   */
   @Override
   public void setScores(List<CorrectAndScore> scores) {
     this.scores = scores;
