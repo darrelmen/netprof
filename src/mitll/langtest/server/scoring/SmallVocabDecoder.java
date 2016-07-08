@@ -203,7 +203,7 @@ public class SmallVocabDecoder {
    * @return
    * @see mitll.langtest.server.scoring.CheckLTS#checkLTS(LTS, String)
    */
-  //warning -- this will filter out UNKNOWNMODEL - where this matters, add it 
+  //warning -- this will filter out UNKNOWNMODEL - where this matters, add it
   //back in
   String segmentation(String phrase) {
     String s = longest_prefix(phrase, 0);

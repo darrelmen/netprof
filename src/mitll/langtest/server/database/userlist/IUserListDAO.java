@@ -48,7 +48,7 @@ public interface IUserListDAO extends IDAO {
    */
   void addVisitor(long listid, long userid);
 
-  void add(UserList userList);
+  void add(UserList<CommonShell> userList);
 
   void updateModified(long uniqueID);
 

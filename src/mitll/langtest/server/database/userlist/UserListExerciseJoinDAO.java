@@ -102,10 +102,10 @@ public class UserListExerciseJoinDAO extends DAO implements IUserListExerciseJoi
    * @see UserListManager#addItemToList
    */
   @Override
-  public void add(UserList userList, String uniqueID) {
+  public void add(UserList userList, String uniqueID, int exid) {
     try {
       // there are much better ways of doing this...
-      logger.info("UserListExerciseJoinDAO.add :userList #" + userList.getUniqueID() + " exercise id '" + uniqueID + "'");
+      logger.info("UserListExerciseJoinDAO.add :userList #" + userList.getRealID() + " exercise id '" + uniqueID + "'");
 
       Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement = connection.prepareStatement(
@@ -117,7 +117,7 @@ public class UserListExerciseJoinDAO extends DAO implements IUserListExerciseJoi
               ") " +
               "VALUES(?,?);");
       int i = 1;
-      statement.setLong(i++, userList.getUniqueID());
+      statement.setLong(i++, userList.getRealID());
       statement.setString(i++, uniqueID);
 
       int j = statement.executeUpdate();

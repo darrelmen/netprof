@@ -960,7 +960,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     for (MonitorResult result : monitorResults) {
       CommonShell exercise = isAmas() ? getAMASExercise(result.getExID()) : getExercise(result.getExID());
       if (exercise != null) {
-        result.setDisplayID(exercise.getDisplayID());
+        result.setDisplayID(""+exercise.getDominoID());
       }
     }
     return getMonitorResultsWithText(monitorResults);
@@ -1174,7 +1174,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    *
    * @param id
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercise(String, long, boolean)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercise
    */
   public CommonExercise getCustomOrPredefExercise(String id) {
     CommonExercise userEx = getUserExerciseWhere(id);  // allow custom items to mask out non-custom items

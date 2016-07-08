@@ -69,6 +69,13 @@ public class PostgresTest extends BaseTest {
     new CopyToPostgres().createProjectIfNotExists(spanish);
   }
 
+  @Test
+  public void testCopyUserExercises() {
+    testCreate();
+    DatabaseImpl<CommonExercise> spanish = getDatabaseLight("spanish", true);
+    new CopyToPostgres().copyOnlyUserExercises(spanish);
+  }
+
   private static DBConnection getConnection(String config) {
     File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
     String parent = file.getParentFile().getAbsolutePath();
@@ -77,6 +84,4 @@ public class PostgresTest extends BaseTest {
     return new DBConnection(serverProps.getDatabaseType(),
         serverProps.getDatabaseHost(), serverProps.getDatabasePort(), serverProps.getDatabaseName(), serverProps.getDatabaseUser(), serverProps.getDatabasePassword());
   }
-
-
 }

@@ -41,5 +41,6 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * @since 2/2/16.
  */
 public interface HasID extends IsSerializable {
-  String getID();
+  /*@Deprecated */String getID();
+  int getRealID();
 }

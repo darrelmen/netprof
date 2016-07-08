@@ -46,7 +46,7 @@ import java.util.Map;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 2/1/16.
  */
-public interface MutableUserExercise {
+interface MutableUserExercise {
   /**
    * @see UserExerciseDAO#add(CommonExercise, boolean)
    * @see mitll.langtest.server.database.custom.UserListManager#duplicate(CommonExercise)
@@ -64,13 +64,13 @@ public interface MutableUserExercise {
    * @see UserExerciseDAO#add(CommonExercise, boolean)
    * @param uniqueID
    */
-  void setUniqueID(long uniqueID);
+  void setRealID(int uniqueID);
 
   /**
    * @see UserExerciseDAO#add(CommonExercise, boolean)
    * @return
    */
-  long getUniqueID();
+  int getRealID();
 
   /**
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getCreateButton(UserList, ListInterface, Panel, ControlGroup)
@@ -79,5 +79,4 @@ public interface MutableUserExercise {
   boolean checkPredef();
 
   void setUnitToValue(Map<String, String> unitToValue);
-
 }
