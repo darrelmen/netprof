@@ -547,7 +547,7 @@ class NewUserExercise extends BasicDialog {
                                final Panel toAddTo,
                                boolean onClick) {
     //   logger.info("user list is " + ul);
-    listService.reallyCreateNewItem(ul.getUniqueID(), newUserExercise, new AsyncCallback<CommonExercise>() {
+    listService.reallyCreateNewItem(ul.getRealID(), newUserExercise, new AsyncCallback<CommonExercise>() {
       @Override
       public void onFailure(Throwable caught) {
       }

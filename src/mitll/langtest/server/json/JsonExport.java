@@ -384,7 +384,7 @@ public class JsonExport {
         jsonObject.getString(FL),
         jsonObject.getString(MN),
         jsonObject.getString(TL),
-        id);
+        -1);
 
     try {
       for (String type : types) {

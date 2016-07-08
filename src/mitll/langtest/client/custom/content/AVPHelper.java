@@ -80,7 +80,7 @@ public class AVPHelper extends NPFHelper {
     Panel npfContentPanel = new SimplePanel();
     npfContentPanel.getElement().setId("AVPHelper_internalLayout_RightSideContent");
     this.ul = ul;
-    npfExerciseList = makeNPFExerciseList(npfContentPanel, instanceName + "_"+ul.getUniqueID());
+    npfExerciseList = makeNPFExerciseList(npfContentPanel, instanceName + "_"+ul.getRealID());
     return npfContentPanel;
   }
 

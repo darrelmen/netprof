@@ -38,6 +38,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.custom.UserListManager;
+import mitll.langtest.server.database.userexercise.BaseUserExerciseDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.exercise.AudioExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -186,6 +187,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 	}
 
 	/**
+	 * TODO : make it easy to look up by domino id.
 	 * Populate the lookup map.
 	 * @see #afterReadingExercises
 	 */
@@ -193,7 +195,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 //    logger.info("populateIdToExercise Examining " + exercises.size() + " exercises");
 		for (CommonExercise e : exercises) {
 			idToExercise.put(e.getID(), e);
-			idToExercise.put(e.getDisplayID(), e);
+			idToExercise.put(""+e.getDominoID(), e);
 		}
 
 		int listSize = exercises.size();
@@ -387,7 +389,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 	 * Worries about colliding with add and remove on the idToExercise map.
 	 * @param id
 	 * @return
-	 * @see UserExerciseDAO#getPredefExercise(String)
+	 * @see BaseUserExerciseDAO#getPredefExercise
 	 * @see DatabaseImpl#getExercise(String)
 	 */
 	public CommonExercise getExercise(String id) {
