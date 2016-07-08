@@ -155,7 +155,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     if (scoreHistory != null && scoreHistory instanceof RequiresResize) {
       ((RequiresResize) scoreHistory).onResize();
     } else {
-      System.err.println("huh? score history doesn't implement requires resize????\\n\n");
+      logger.warning("huh? score history doesn't implement requires resize????\\n\n");
     }
   }
 
@@ -362,7 +362,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
       sticky.resetStorage();
       if (exercise == null) {
-        System.err.println("StatsPracticePanel.onSetComplete. : err : no exercise?");
+        logger.warning("StatsPracticePanel.onSetComplete. : err : no exercise?");
       } else {
         sticky.storeCurrent(exercise);
       }
@@ -384,7 +384,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       service.getUserHistoryForList(user, copies, latestResultID, selection, ul == null ? -1 : ul.getUniqueID(), new AsyncCallback<AVPScoreReport>() {
         @Override
         public void onFailure(Throwable caught) {
-          //System.err.println("StatsPracticePanel.onSetComplete. : got failure " + caught);
+          //logger.warning("StatsPracticePanel.onSetComplete. : got failure " + caught);
         }
 
         @Override
