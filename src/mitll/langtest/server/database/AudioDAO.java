@@ -208,7 +208,7 @@ public class AudioDAO extends DAO {
               (!fl.isEmpty() && !fl.equals(transcript))
               ) {
             audio.setTranscript(fl);
-            logger.info("update " + exercise.getID() + "/" +audio.getUniqueID()+" to " + fl + " from " + exercise.getEnglish());
+//            logger.info("update " + exercise.getID() + "/" +audio.getUniqueID()+" to " + fl + " from " + exercise.getEnglish());
 
             toUpdate.add(audio);
           }
