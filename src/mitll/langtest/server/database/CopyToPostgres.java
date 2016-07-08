@@ -127,10 +127,8 @@ public class CopyToPostgres {
 
   private static DatabaseImpl<CommonExercise> getDatabaseVeryLight(String config, boolean inTest) {
     File file = getConfigFile(config, inTest);
-    String parent = file.getParent();
     String name = file.getName();
-
-    parent = file.getParentFile().getAbsolutePath();
+    String parent = file.getParentFile().getAbsolutePath();
 
     logger.info("path is " + parent);
     ServerProperties serverProps = new ServerProperties(parent, name);
@@ -139,8 +137,9 @@ public class CopyToPostgres {
   }
 
   public void copyToPostgres(DatabaseImpl db) {
-    createProjectIfNotExists(db);
+    int projectID = createProjectIfNotExists(db);
 
+    logger.info("project is " + projectID);
     // first add the user table
     SlickUserDAOImpl slickUserDAO = (SlickUserDAOImpl) db.getUserDAO();
 
@@ -163,20 +162,12 @@ public class CopyToPostgres {
 
     // add event table
     String language = db.getLanguage();
-    if (EVENT) {
-      SlickEventImpl slickEventDAO = (SlickEventImpl) db.getEventDAO();
-      slickEventDAO.copyTableOnlyOnce(new EventDAO(db, db.getUserDAO().getDefectDetector()), language, oldToNewUser);
-    }
+
+    SlickEventImpl slickEventDAO = (SlickEventImpl) db.getEventDAO();
+    slickEventDAO.copyTableOnlyOnce(new EventDAO(db, db.getUserDAO().getDefectDetector()), language, oldToNewUser);
 
     // copy user exercises
-    copyUserExercises(db, oldToNewUser, language);
-
-    SlickUserListDAO slickUserListDAO = (SlickUserListDAO) db.getUserListManager().getUserListDAO();
-    copyUserExerciseList(db, oldToNewUser, slickUserListDAO);
-
-    Map<Integer, Integer> oldToNewUserList = slickUserListDAO.getOldToNew();
-    copyUserExerciseListVisitor(db, oldToNewUser, oldToNewUserList, (SlickUserListExerciseVisitorDAO) db.getUserListManager().getVisitorDAO());
-    copyUserExerciseListJoin(db, oldToNewUserList);
+    copyUserExercises(db, projectID, oldToNewUser);
 
     SlickWordDAO slickWordDAO = (SlickWordDAO) db.getWordDAO();
     // word DAO
@@ -197,21 +188,41 @@ public class CopyToPostgres {
     copyRefResult(db, oldToNewUser);
   }
 
-  public void createProjectIfNotExists(DatabaseImpl db) {
+  public void copyOnlyUserExercises(DatabaseImpl db) {
+    int projectID = createProjectIfNotExists(db);
+    SlickUserDAOImpl slickUserDAO = (SlickUserDAOImpl) db.getUserDAO();
+    Map<Integer, Integer> oldToNewUser = copyUsers(db, slickUserDAO);
+    copyUserExercises(db,projectID,oldToNewUser);
+  }
+
+  void copyUserExercises(DatabaseImpl db, int projectID, Map<Integer, Integer> oldToNewUser) {
+    copyUserExercises(db, oldToNewUser, projectID);
+
+    SlickUserListDAO slickUserListDAO = (SlickUserListDAO) db.getUserListManager().getUserListDAO();
+    copyUserExerciseList(db, oldToNewUser, slickUserListDAO);
+
+    Map<Integer, Integer> oldToNewUserList = slickUserListDAO.getOldToNew();
+    copyUserExerciseListVisitor(db, oldToNewUser, oldToNewUserList, (SlickUserListExerciseVisitorDAO) db.getUserListManager().getVisitorDAO());
+    copyUserExerciseListJoin(db, oldToNewUserList);
+  }
+
+  public int createProjectIfNotExists(DatabaseImpl db) {
     IProjectDAO projectDAO = db.getProjectDAO();
     int byName = projectDAO.getByName(db.getLanguage());
 
     if (byName == -1) {
-      createProject(db, projectDAO);
+      byName = createProject(db, projectDAO);
     }
+    return byName;
   }
 
   /**
    * Ask the database for what the type order should be, e.g. [Unit, Chapter] or [Week, Unit] (from Dari)
+   *
    * @param db
    * @param projectDAO
    */
-  private void createProject(DatabaseImpl<?> db, IProjectDAO projectDAO) {
+  private int createProject(DatabaseImpl<?> db, IProjectDAO projectDAO) {
     SlickUserDAOImpl slickUserDAO = (SlickUserDAOImpl) db.getUserDAO();
 
     Iterator<String> iterator = db.getTypeOrder().iterator();
@@ -224,6 +235,8 @@ public class CopyToPostgres {
     for (String prop : ServerProperties.CORE_PROPERTIES) {
       projectDAO.addProperty(byName, prop, props.getProperty(prop));
     }
+
+    return byName;
   }
 
   /**
@@ -418,7 +431,7 @@ public class CopyToPostgres {
   }
 
   private void copyUserExerciseListJoin(DatabaseImpl db, Map<Integer, Integer> oldToNewUserList) {
-    if (true) {
+    //if (true) {
       UserListManager userListManager = db.getUserListManager();
       IUserListExerciseJoinDAO dao = userListManager.getUserListExerciseJoinDAO();
       SlickUserListExerciseJoinDAO slickUserListExerciseJoinDAO = (SlickUserListExerciseJoinDAO) dao;
@@ -429,14 +442,17 @@ public class CopyToPostgres {
           Integer integer = oldToNewUserList.get(oldID);
           if (integer == null) {
             logger.error("UserListManager join can't find user list " + oldID + " in " + oldToNewUserList.size());
-          } else slickUserListExerciseJoinDAO.addPair(integer, join.exerciseID);
+          } else {
+            CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(join.exerciseID);
+            slickUserListExerciseJoinDAO.addPair(integer, join.exerciseID, customOrPredefExercise.getRealID());
+          }
         }
       }
-    }
+  //  }
   }
 
   private void copyUserExerciseList(DatabaseImpl db, Map<Integer, Integer> oldToNewUser, SlickUserListDAO slickUserListDAO) {
-    if (true) {
+    //if (true) {
       if (slickUserListDAO.isEmpty()) {
         UserDAO userDAO = new UserDAO(db);
         UserListDAO uelDAO = new UserListDAO(db, userDAO);
@@ -447,7 +463,7 @@ public class CopyToPostgres {
           else slickUserListDAO.addWithUser(list, integer);
         }
       }
-    }
+    //}
   }
 
   private void copyUserExerciseListVisitor(DatabaseImpl db,
@@ -475,14 +491,14 @@ public class CopyToPostgres {
     }
   }
 
-  private void copyUserExercises(DatabaseImpl db, Map<Integer, Integer> oldToNewUser, String language) {
+  private void copyUserExercises(DatabaseImpl db, Map<Integer, Integer> oldToNewUser, int projectID) {
     if (USER_EXERCISE) {
       UserExerciseDAO ueDAO = new UserExerciseDAO(db);
       ueDAO.setExerciseDAO(db.getExerciseDAO());
       SlickUserExerciseDAO slickUEDAO = (SlickUserExerciseDAO) db.getUserExerciseDAO();
 
       if (slickUEDAO.isEmpty()) {
-        List<SlickUserExercise> bulk = new ArrayList<>();
+        List<SlickExercise> bulk = new ArrayList<>();
 
         try {
           int c = 0;
@@ -492,7 +508,9 @@ public class CopyToPostgres {
               if (c++ < 50) logger.error("user exercise : no user " + result.getCreator());
             } else {
               result.setCreator(userID);
-              bulk.add(slickUEDAO.toSlick(result, language));
+              SlickExercise e = slickUEDAO.toSlick(result, projectID);
+
+              bulk.add(e);
             }
           }
         } catch (SQLException e) {

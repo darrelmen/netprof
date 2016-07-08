@@ -261,8 +261,9 @@ public class EditItem {
    * @param npfExerciseList
    * @see #editItem
    */
-  private void rememberAndLoadFirst(final UserList<CommonShell> ul, PagingExerciseList<CommonShell, CommonExercise> npfExerciseList) {
-    npfExerciseList.setUserListID(ul.getUniqueID());
+  private void rememberAndLoadFirst(final UserList<CommonShell> ul,
+                                    PagingExerciseList<CommonShell, CommonExercise> npfExerciseList) {
+    npfExerciseList.setUserListID(ul.getRealID());
     List<CommonShell> userExercises = new ArrayList<>();
     Collection<CommonShell> exercises = ul.getExercises();
     for (CommonShell e : exercises) {
@@ -406,7 +407,7 @@ public class EditItem {
       this.listInterface = listInterface;
 
       final FluidContainer container = new FluidContainer();
-      container.add(makeDeleteButton(ul, originalList.getUniqueID()));
+      container.add(makeDeleteButton(ul, originalList.getRealID()));
       return container;
     }
 

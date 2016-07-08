@@ -76,14 +76,20 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @see mitll.langtest.server.database.exercise.ExcelImport#getExercise
    */
   public Exercise(String id, String context, String contextTranslation, String meaning, String refAudioIndex) {
-    super(id);
+    super(id, -1);
     this.meaning = meaning;
     this.refAudioIndex = refAudioIndex;
     addContext(context, contextTranslation);
   }
 
+  /**
+   * @Deprecated - use related exercise join table
+   * @param id
+   * @param context
+   * @param contextTranslation
+   */
   public Exercise(String id, String context, String contextTranslation) {
-    super(id);
+    super(id, -1);
     this.foreignLanguage = context;
     this.english = contextTranslation;
   }
@@ -94,7 +100,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @param foreignLanguage
    * @param meaning
    * @param transliteration
-   * @param displayID
+   * @param dominoID
    * @see mitll.langtest.server.database.exercise.JSONURLExerciseDAO#toExercise(JSONObject)
    * @see mitll.langtest.server.json.JsonExport#toExercise(JSONObject, Collection)
    */
@@ -103,13 +109,13 @@ public class Exercise extends AudioExercise implements CommonExercise,
                   String foreignLanguage,
                   String meaning,
                   String transliteration,
-                  String displayID) {
-    super(id);
+                  int dominoID) {
+    super(id, -1);
     setEnglishSentence(englishSentence);
     this.meaning = meaning;
     setForeignLanguage(foreignLanguage);
     setTransliteration(transliteration);
-    this.displayID = displayID;
+    this.dominoID = dominoID;
   }
 
   @Override
@@ -253,7 +259,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
       }
     }
 
-    return "Exercise " + Integer.toHexString(hashCode()) + " " + getID() + "/" + getDisplayID() +
+    return "Exercise " + Integer.toHexString(hashCode()) + " " + getID() + "/" + getDominoID() +
         " english '" + getEnglish() +
         "'/'" + getForeignLanguage() + "' " +
         "meaning '" + getMeaning() +

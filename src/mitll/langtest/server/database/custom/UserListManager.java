@@ -78,9 +78,9 @@ public class UserListManager {
   private static final String REVIEW = "Defects";
   private static final String ATTENTION = "AttentionLL";
   private static final String ITEMS_TO_REVIEW = "Possible defects to fix";
-  public static final long REVIEW_MAGIC_ID = -100;
-  public static final long COMMENT_MAGIC_ID = -200;
-  private static final long ATTN_LL_MAGIC_ID = -300;
+  public static final int REVIEW_MAGIC_ID = -100;
+  public static final int COMMENT_MAGIC_ID = -200;
+  private static final int ATTN_LL_MAGIC_ID = -300;
 
   private static final boolean DEBUG = false;
 
@@ -295,7 +295,9 @@ public class UserListManager {
     if (userList == null) {
       logger.info("no user list??? for " + userid + " " + name);
       return -1;
-    } else return userList.getUniqueID();
+    } else {
+      return userList.getRealID();
+    }
   }
 
   /**
@@ -335,7 +337,11 @@ public class UserListManager {
   }
 */
 
-  /**
+  public Collection<UserList<CommonShell>> getMyLists(int userid) {
+    return getListsForUser(userid,true,false);
+  }
+
+   /**
    * TODO : expensive -- could just be a query against your own lists and/or against visited lists...
    *
    * @param userid
@@ -353,22 +359,22 @@ public class UserListManager {
       logger.debug("getListsForUser for user #" + userid + " only created " + listsICreated + " visited " + visitedLists);
 
     List<UserList<CommonShell>> listsForUser = new ArrayList<>();
-    UserList favorite = null;
-    Set<Long> ids = new HashSet<Long>();
+    UserList<CommonShell> favorite = null;
+    Set<Integer> ids = new HashSet<>();
     if (listsICreated) {
       listsForUser = userListDAO.getAllByUser(userid);
-      for (UserList userList : listsForUser) {
+      for (UserList<CommonShell> userList : listsForUser) {
         if (userList.isFavorite()) {
           favorite = userList;
         } else {
           //      logger.debug("not favorite " + userList + " " + userList.getName());
         }
-        ids.add(userList.getUniqueID());
+        ids.add(userList.getRealID());
       }
     }
     if (visitedLists) {
-      for (UserList userList : userListDAO.getListsForUser(userid)) {
-        if (!ids.contains(userList.getUniqueID())) {
+      for (UserList<CommonShell> userList : userListDAO.getListsForUser(userid)) {
+        if (!ids.contains(userList.getRealID())) {
           listsForUser.add(userList);
         }
       }
@@ -489,7 +495,7 @@ public class UserListManager {
    * @see #getDefectList(java.util.Collection)
    */
   private UserList<CommonShell> getReviewList(Collection<CommonExercise> allKnown, String name, String description,
-                                              Collection<String> ids, long userListMaginID, Collection<String> typeOrder) {
+                                              Collection<String> ids, int userListMaginID, Collection<String> typeOrder) {
     Map<String, CommonExercise> idToUser = new HashMap<>();
     for (CommonExercise ue : allKnown) idToUser.put(ue.getID(), ue);
 
@@ -520,7 +526,7 @@ public class UserListManager {
    * @param idToUserExercise
    * @param ids
    * @return
-   * @see #getReviewList(java.util.Collection, String, String, java.util.Collection, long, java.util.Collection)
+   * @see #getReviewList(Collection, String, String, Collection, int, Collection)
    */
   private List<CommonShell> getReviewedUserExercises(Map<String, CommonExercise> idToUserExercise, Collection<String> ids) {
     List<CommonShell> onList = new ArrayList<>();
@@ -574,9 +580,9 @@ public class UserListManager {
    * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    * @see mitll.langtest.server.LangTestDatabaseImpl#addItemToUserList
    */
-  public void addItemToUserList(long userListID, String userExercise) {
-    addItemToList(userListID, userExercise);
-  }
+/*  public void addItemToUserList(long userListID, String userExercise) {
+    addItemToList(userListID, userExercise, );
+  }*/
 
   /**
    * @param userListID
@@ -589,16 +595,17 @@ public class UserListManager {
   public void reallyCreateNewItem(long userListID, CommonExercise userExercise, String mediaDir) {
     userExerciseDAO.add(userExercise, false);
 
-    addItemToList(userListID, userExercise.getID());
+    addItemToList(userListID, userExercise.getID(), userExercise.getRealID());
     editItem(userExercise, false, mediaDir);
   }
 
   /**
    * @param userListID
    * @param exerciseID
+   * @param exid
    * @see #addItemToUserList
    */
-  private void addItemToList(long userListID, String exerciseID) {
+  public void addItemToList(long userListID, String exerciseID, int exid) {
     UserList where = userListDAO.getWhere(userListID, true);
 
     if (where == null) {
@@ -606,7 +613,7 @@ public class UserListManager {
     }
 
     if (where != null) {
-      userListExerciseJoinDAO.add(where, exerciseID);
+      userListExerciseJoinDAO.add(where, exerciseID, exid);
       userListDAO.updateModified(userListID);
     }
     if (where == null) {
@@ -618,7 +625,7 @@ public class UserListManager {
    * @param userExercise
    * @param createIfDoesntExist
    * @param mediaDir
-   * @see mitll.langtest.server.LangTestDatabaseImpl#editItem
+   * @see mitll.langtest.server.database.DatabaseImpl#editItem
    * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#postEditItem
    */
   public void editItem(CommonExercise userExercise,
@@ -629,18 +636,13 @@ public class UserListManager {
   }
 
   /**
+   * TODO : why all this foolishness with the id?
    * @param userExercise
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#duplicateExercise
    */
   public CommonExercise duplicate(CommonExercise userExercise) {
-    String id = userExercise.getID();
-    String newid;
-    if (id.contains("dup")) {
-      newid = id.split("dup")[0] + DUP + System.currentTimeMillis();
-    } else {
-      newid = id + DUP + System.currentTimeMillis();
-    }
+    String newid = getDupID(userExercise);
 
     logger.debug("duplicating " + userExercise + " with id " + newid);
     userExercise.getCombinedMutableUserExercise().setID(newid);
@@ -654,6 +656,17 @@ public class UserListManager {
     }
 
     return userExercise;
+  }
+
+  String getDupID(CommonExercise userExercise) {
+    String id = userExercise.getID();
+    String newid;
+    if (id.contains("dup")) {
+      newid = id.split("dup")[0] + DUP + System.currentTimeMillis();
+    } else {
+      newid = id + DUP + System.currentTimeMillis();
+    }
+    return newid;
   }
 
   /**
@@ -754,10 +767,10 @@ public class UserListManager {
    * @see mitll.langtest.server.LangTestDatabaseImpl#addVisitor
    */
   public void addVisitor(long userListID, long user) {
-    //logger.debug("addVisitor - user " + user + " visits " + userList.getUniqueID());
+    //logger.debug("addVisitor - user " + user + " visits " + userList.getRealID());
     UserList where = userListDAO.getWhere(userListID, true);
     if (where != null) {
-      userListDAO.addVisitor(where.getUniqueID(), user);
+      userListDAO.addVisitor(where.getRealID(), user);
     } else if (userListID > 0) {
       logger.warn("addVisitor - can't find list with id " + userListID);
     }

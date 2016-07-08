@@ -381,7 +381,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 /*      logger.info("StatsPracticePanel.onSetComplete. : calling  getUserHistoryForList for " + user +
         " with " + exToCorrect + " and latest " + latestResultID + " and ids " +copies);*/
 
-      service.getUserHistoryForList(user, copies, latestResultID, selection, ul == null ? -1 : ul.getUniqueID(), new AsyncCallback<AVPScoreReport>() {
+      service.getUserHistoryForList(user, copies, latestResultID, selection, ul == null ? -1 : ul.getRealID(), new AsyncCallback<AVPScoreReport>() {
         @Override
         public void onFailure(Throwable caught) {
           //System.err.println("StatsPracticePanel.onSetComplete. : got failure " + caught);

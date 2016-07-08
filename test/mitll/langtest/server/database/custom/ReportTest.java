@@ -88,7 +88,7 @@ public class ReportTest {
 //
 //    List<String> strings = Arrays.asList("1", "2", "3", "4", "5");
 //    List<CommonExercise> commonExercises = new ArrayList<CommonExercise>();
-//    for (String id : strings) commonExercises.add(database.getExercise(id));
+//    for (String id : strings) commonExercises.addExerciseToList(database.getExercise(id));
 //    List<CommonExercise> exercisesSortedIncorrectFirst = database.getResultDAO().getExercisesSortedIncorrectFirst(commonExercises, 1, );
 //    logger.debug("got " + exercisesSortedIncorrectFirst);
 //
@@ -395,10 +395,10 @@ public class ReportTest {
     assertTrue("size is " + size, size >= 1);
     assertTrue("first is favorite", listsForUser.iterator().next().isFavorite());
 
-    // add
+    // addExerciseToList
     String test1 = "test";
     long listid = addListCheck(user, userListManager, test1);
-    // what happens if add list a second time?
+    // what happens if addExerciseToList list a second time?
     long listid2 = addListCheck(user, userListManager, test1, false);
 
     // remove

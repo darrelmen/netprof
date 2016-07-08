@@ -204,7 +204,7 @@ public class NPFHelper implements RequiresResize {
     npfContentPanel.addStyleName("floatRight");
     npfContentPanel.getElement().setId("internalLayout_RightContent");
 
-    npfExerciseList = makeNPFExerciseList(npfContentPanel, instanceName + "_" + ul.getUniqueID());
+    npfExerciseList = makeNPFExerciseList(npfContentPanel, instanceName + "_" + ul.getRealID());
     return npfContentPanel;
   }
 
@@ -235,7 +235,7 @@ public class NPFHelper implements RequiresResize {
    * @see #showNPF
    */
   private void rememberAndLoadFirst(final UserList<CommonShell> ul, HasID toSelect) {
-    npfExerciseList.setUserListID(ul.getUniqueID());
+    npfExerciseList.setUserListID(ul.getRealID());
 
     List<CommonShell> copy = new ArrayList<>();
     for (CommonShell ex : ul.getExercises()) {
