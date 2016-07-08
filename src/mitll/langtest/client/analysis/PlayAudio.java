@@ -55,7 +55,7 @@ import java.util.logging.Logger;
  * @since 11/20/15.
  */
 class PlayAudio {
-//  private final Logger logger = Logger.getLogger("PlayAudio");
+  private final Logger logger = Logger.getLogger("PlayAudio");
 
   private final LangTestDatabaseAsync service;
   private final SoundPlayer soundFeedback;
@@ -94,18 +94,23 @@ class PlayAudio {
         }
         else {
           List<CorrectAndScore> scores = commonExercise.getScores();
-          CorrectAndScore correctAndScore = scores.get(scores.size() - 1);
-          String refAudio = commonExercise.getRefAudio();
-
-          if (t != null) {
-            // logger.info("cancel timer");
-            t.cancel();
+          if (scores.isEmpty()) {
+            logger.warning("no scores for " + id + " by user " + userid);
           }
-          if (refAudio != null) {
-            playLastThenRef(correctAndScore, refAudio);
-          } else {
-            playUserAudio(correctAndScore);
-            //   logger.info("no ref audio for " + commonExercise.getID());
+          else {
+            CorrectAndScore correctAndScore = scores.get(scores.size() - 1);
+            String refAudio = commonExercise.getRefAudio();
+
+            if (t != null) {
+              // logger.info("cancel timer");
+              t.cancel();
+            }
+            if (refAudio != null) {
+              playLastThenRef(correctAndScore, refAudio);
+            } else {
+              playUserAudio(correctAndScore);
+              //   logger.info("no ref audio for " + commonExercise.getID());
+            }
           }
         }
       }
