@@ -2389,28 +2389,33 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete()
    */
   @Override
-  public AVPScoreReport getUserHistoryForList(long userid, Collection<String> ids, long latestResultID,
-                                              Map<String, Collection<String>> typeToSection, long userListID) {
-    //logger.debug("getUserHistoryForList " + userid + " and " + ids + " type to section " + typeToSection);
+  public AVPScoreReport getUserHistoryForList(long userid,
+                                              Collection<String> ids,
+                                              long latestResultID,
+                                              Map<String, Collection<String>> typeToSection,
+                                              long userListID) {
+    if (DEBUG) logger.debug("getUserHistoryForList " + userid + " and " + ids + " type to section " + typeToSection);
     UserList<CommonShell> userListByID = userListID != -1 ? db.getUserListByID(userListID) : null;
     List<String> allIDs = new ArrayList<String>();
     Map<String, CollationKey> idToKey = new HashMap<String, CollationKey>();
 
     Collator collator = audioFileHelper.getCollator();
-    if (userListByID != null) {
+    if (userListByID != null) { // get exercises off the user list
       for (CommonShell exercise : userListByID.getExercises()) {
         populateCollatorMap(allIDs, idToKey, collator, exercise);
       }
     } else {
       Collection<CommonExercise> exercisesForState = (typeToSection == null || typeToSection.isEmpty()) ? getExercises() :
           db.getSectionHelper().getExercisesForSelectionState(typeToSection);
+      if (DEBUG) logger.debug("\tgetUserHistoryForList found " + exercisesForState.size() + " exercises");
 
       for (CommonExercise exercise : exercisesForState) {
         populateCollatorMap(allIDs, idToKey, collator, exercise);
       }
     }
-    //logger.debug("for " + typeToSection + " found " + allIDs.size());
-    return db.getUserHistoryForList(userid, ids, latestResultID, allIDs, idToKey);
+    AVPScoreReport userHistoryForList = db.getUserHistoryForList(userid, ids, latestResultID, allIDs, idToKey);
+    if (DEBUG) logger.debug("getUserHistoryForList for " + typeToSection + " found " + allIDs.size() + " : "+ userHistoryForList);
+    return userHistoryForList;
   }
 
   private void populateCollatorMap(List<String> allIDs, Map<String, CollationKey> idToKey, Collator collator, CommonShell exercise) {
