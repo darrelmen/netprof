@@ -87,7 +87,7 @@ public class BaseUserExerciseDAO extends DAO {
   /**
    * @param ue
    * @return
-   * @see #getOnList(long)
+   * @see #getOnList
    */
   private CommonExercise getExercise(HasID ue) {
     return getPredefExercise(ue.getID());

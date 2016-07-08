@@ -43,24 +43,37 @@ import java.util.Map;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 1/5/16.
  */
-public class BaseExercise implements IsSerializable, Shell  {
+public class BaseExercise implements IsSerializable, Shell {
+  @Deprecated
   protected String id;
+  protected int realID;
   protected Map<String, String> unitToValue = new HashMap<>();
   private STATE state = STATE.UNSET;
   private STATE secondState = STATE.UNSET;
 
-  protected BaseExercise() {}
+  protected BaseExercise() {
+  }
 
-  protected BaseExercise(String id ) { this.id = id;}
+  protected BaseExercise(String id, int realID) {
+    this.id = id;
+    this.realID = realID;
+  }
 
+ // @Deprecated
   public String getID() {
     return id;
   }
 
+  @Override
+  public int getRealID() {
+    return realID;
+  }
+
   /**
-   * @see mitll.langtest.server.database.userexercise.UserExerciseDAO#add(CommonExercise, boolean)
    * @param id
+   * @see mitll.langtest.server.database.userexercise.UserExerciseDAO#add(CommonExercise, boolean)
    */
+  @Deprecated
   public void setID(String id) {
     this.id = id;
   }
@@ -85,12 +98,14 @@ public class BaseExercise implements IsSerializable, Shell  {
     this.secondState = state;
   }
 
-  public Map<String, String> getUnitToValue() { return unitToValue; }
+  public Map<String, String> getUnitToValue() {
+    return unitToValue;
+  }
 
   /**
-   * @see mitll.langtest.server.database.exercise.SectionHelper#addExerciseToLesson
    * @param unit
    * @param value
+   * @see mitll.langtest.server.database.exercise.SectionHelper#addExerciseToLesson
    */
   public void addUnitToValue(String unit, String value) {
     if (value == null) return;
@@ -98,8 +113,8 @@ public class BaseExercise implements IsSerializable, Shell  {
   }
 
   /**
-   * @see mitll.langtest.shared.custom.UserExercise#UserExercise
    * @param unitToValue
+   * @see mitll.langtest.shared.custom.UserExercise#UserExercise
    */
   public void setUnitToValue(Map<String, String> unitToValue) {
     this.unitToValue = unitToValue;

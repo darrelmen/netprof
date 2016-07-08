@@ -33,12 +33,11 @@
 package mitll.langtest.server.database.userexercise;
 
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.ISchema;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.npdata.dao.DBConnection;
-import mitll.npdata.dao.SlickUserExercise;
+import mitll.npdata.dao.SlickExercise;
 import mitll.npdata.dao.userexercise.UserExerciseDAOWrapper;
 import org.apache.log4j.Logger;
 import scala.collection.Seq;
@@ -47,7 +46,7 @@ import java.sql.Timestamp;
 import java.util.*;
 
 public class SlickUserExerciseDAO
-    extends BaseUserExerciseDAO implements IUserExerciseDAO, ISchema<UserExercise, SlickUserExercise> {
+    extends BaseUserExerciseDAO implements IUserExerciseDAO/*, ISchema<UserExercise, SlickExercise>*/ {
   private static final Logger logger = Logger.getLogger(SlickUserExerciseDAO.class);
 
   private final UserExerciseDAOWrapper dao;
@@ -66,50 +65,62 @@ public class SlickUserExerciseDAO
     return dao.dao().name();
   }
 
-  @Override
-  public SlickUserExercise toSlick(UserExercise shared, String language) {
+//  @Override
+  public SlickExercise toSlick(UserExercise shared, int projectID) {
     Map<String, String> unitToValue = shared.getUnitToValue();
     List<String> typeOrder = getTypeOrder();
     Iterator<String> iterator = typeOrder.iterator();
     String first = iterator.next();
     String second = iterator.hasNext() ? iterator.next() : "";
 
-    return new SlickUserExercise(-1,
+    return new SlickExercise(-1,
         shared.getCreator(),
         shared.getID(),
-        new Timestamp(shared.getUpdateTime()), shared.getEnglish(),
+        new Timestamp(shared.getUpdateTime()),
+        shared.getEnglish(),
+        shared.getMeaning(),
         shared.getForeignLanguage(),
         shared.getTransliteration(),
         shared.isOverride(),
         unitToValue.getOrDefault(first, ""),
         unitToValue.getOrDefault(second, ""),
-        (int) shared.getUniqueID());
+        projectID,  // project id fk
+        (int) shared.getRealID());
   }
 
   List<String> getTypeOrder() {
     return exerciseDAO.getSectionHelper().getTypeOrder();
   }
 
-  public SlickUserExercise toSlick(CommonExercise shared, boolean isOverride) {
+  /**
+   * @see SlickUserExerciseDAO#add(CommonExercise, boolean)
+   * @param shared
+   * @param isOverride
+   * @return
+   */
+  public SlickExercise toSlick(CommonExercise shared, boolean isOverride) {
     Map<String, String> unitToValue = shared.getUnitToValue();
     Iterator<String> iterator = getTypeOrder().iterator();
-    String first = iterator.next();
+    String first  = iterator.next();
     String second = iterator.hasNext() ? iterator.next() : "";
 
-    return new SlickUserExercise(-1,
+    return new SlickExercise(-1,
         shared.getCreator(),
         shared.getID(),
-        new Timestamp(shared.getUpdateTime()), shared.getEnglish(),
+        new Timestamp(shared.getUpdateTime()),
+        shared.getEnglish(),
+        shared.getMeaning(),
         shared.getForeignLanguage(),
         shared.getTransliteration(),
         isOverride,
         unitToValue.getOrDefault(first, ""),
         unitToValue.getOrDefault(second, ""),
+        -1,  // project id fk
         -1);
   }
 
-  @Override
-  public UserExercise fromSlick(SlickUserExercise slick) {
+//  @Override
+  public UserExercise fromSlick(SlickExercise slick) {
     Map<String, String> unitToValue = new HashMap<>();
     Iterator<String> iterator = getTypeOrder().iterator();
     String first = iterator.next();
@@ -125,18 +136,16 @@ public class SlickUserExerciseDAO
         slick.english(),
         slick.foreignlanguage(),
         slick.transliteration(),
-        "",
-        "",
         slick.isoverride(),
         unitToValue,
         slick.modified().getTime());
   }
 
-  public void insert(SlickUserExercise UserExercise) {
+  public void insert(SlickExercise UserExercise) {
     dao.insert(UserExercise);
   }
 
-  public void addBulk(List<SlickUserExercise> bulk) {
+  public void addBulk(List<SlickExercise> bulk) {
     dao.addBulk(bulk);
   }
 
@@ -148,9 +157,9 @@ public class SlickUserExerciseDAO
     return dao.getNumRows() == 0;
   }
 
-  private List<CommonExercise> getUserExercises(List<SlickUserExercise> all) {
+  private List<CommonExercise> getUserExercises(List<SlickExercise> all) {
     List<CommonExercise> copy = new ArrayList<>();
-    for (SlickUserExercise UserExercise : all) copy.add(fromSlick(UserExercise));
+    for (SlickExercise UserExercise : all) copy.add(fromSlick(UserExercise));
     return copy;
   }
 
@@ -161,7 +170,7 @@ public class SlickUserExerciseDAO
    */
   @Override
   public void add(CommonExercise userExercise, boolean isOverride) {
-    logger.info("adding " + userExercise);
+  //  logger.info("adding " + userExercise);
     insert(toSlick(userExercise, isOverride));
   }
 
@@ -178,7 +187,7 @@ public class SlickUserExerciseDAO
   public CommonExercise getWhere(String exid) {
     exid = exid.replaceAll("\'", "");
 
-    Seq<SlickUserExercise> byExid = dao.getByExid(exid);
+    Seq<SlickExercise> byExid = dao.getByExid(exid);
     return byExid.isEmpty() ? null : fromSlick(byExid.iterator().next());
   }
 
@@ -196,16 +205,17 @@ public class SlickUserExerciseDAO
     return getUserExercises(dao.byExids(exids));
   }
 
+  /**
+   * @see mitll.langtest.server.database.custom.UserListManager#editItem(CommonExercise, boolean, String)
+   * @param userExercise
+   * @param createIfDoesntExist
+   */
   @Override
   public void update(CommonExercise userExercise, boolean createIfDoesntExist) {
-    SlickUserExercise slickUserExercise = toSlick(userExercise, true);
+    SlickExercise slickUserExercise = toSlick(userExercise, true);
     int rows = dao.update(slickUserExercise);
     if (rows == 0 && createIfDoesntExist) {
       dao.insert(slickUserExercise);
     }
   }
-
-/*  public void setExerciseDAO(ExerciseDAO<CommonExercise> exerciseDAO) {
-    this.exerciseDAO = exerciseDAO;
-  }*/
 }
