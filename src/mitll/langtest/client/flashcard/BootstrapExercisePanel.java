@@ -390,7 +390,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
     final double score = result.getScore();
 
     boolean badAudioRecording = result.getValidity() != AudioAnswer.Validity.OK;
-    logger.info("BootstrapExercisePanel.receivedAudioAnswer: correct " + correct + " pron score : " + score +
+    if (false) logger.info("BootstrapExercisePanel.receivedAudioAnswer: correct " + correct + " pron score : " + score +
         " has ref " + hasRefAudio + " bad audio " + badAudioRecording + " result " + result);
 
     String feedback = "";
