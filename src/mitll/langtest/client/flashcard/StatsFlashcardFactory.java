@@ -310,7 +310,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
      * @see mitll.langtest.client.recorder.RecordButtonPanel#receivedAudioAnswer(mitll.langtest.shared.AudioAnswer, com.google.gwt.user.client.ui.Panel)
      */
     public void receivedAudioAnswer(final AudioAnswer result) {
-      logger.info("StatsPracticePanel.receivedAudioAnswer: result " + result);
+      if (false) logger.info("StatsPracticePanel.receivedAudioAnswer: result " + result);
 
       if (result.getValidity() == AudioAnswer.Validity.OK) {
         resultIDs.add(result.getResultID());
