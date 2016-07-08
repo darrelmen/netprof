@@ -129,6 +129,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   private Analysis analysis;
   private final String absConfigDir;
   private SimpleExerciseDAO<AmasExerciseImpl> fileExerciseDAO;
+  private static final boolean DEBUG = false;
 
   /**
    * @param configDir
@@ -406,7 +407,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @see #deleteItem(String)
    * @see #getCustomOrPredefExercise(String)
    */
-  public CommonExercise getExercise(String id) {  return exerciseDAO.getExercise(id);  }
+  public CommonExercise getExercise(String id) {
+    return exerciseDAO.getExercise(id);
+  }
 
   /**
    * @return
@@ -678,10 +681,18 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    */
   public AVPScoreReport getUserHistoryForList(long userid, Collection<String> ids, long latestResultID,
                                               Collection<String> allIDs, Map<String, CollationKey> idToKey) {
-    logger.debug("getUserHistoryForList " + userid + " and " + ids.size() + " ids, latest " + latestResultID);
-
+    if (DEBUG) {
+      logger.debug("getUserHistoryForList " + userid + " and " + ids.size() + " ids, latest " + latestResultID);
+    }
     ResultDAO.SessionsAndScores sessionsAndScores = resultDAO.getSessionsForUserIn2(ids, latestResultID, userid, allIDs, idToKey);
+    if (DEBUG) {
+      logger.debug("getUserHistoryForList " + userid + " and " + ids.size() + " sessions " + sessionsAndScores);
+    }
     List<Session> sessionsForUserIn2 = sessionsAndScores.sessions;
+
+    if (sessionsForUserIn2.isEmpty()) {
+      logger.warn("getUserHistoryForList " + userid + " and " + ids.size() + " no sessions?");
+    }
 
     Map<Long, User> userMap = userDAO.getUserMap();
 
@@ -708,7 +719,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       }
     }
 
-    logger.debug("getUserHistoryForList correct scores " + scores);
+    if (DEBUG) logger.debug("getUserHistoryForList correct scores " + scores);
 
     if (scores.size() == 11) {
       scores.remove(9);
@@ -730,7 +741,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         scores.add(makeScore(count, userMap, session, false));
       }
     }
-    logger.debug("getUserHistoryForList pron    scores " + scores);
+    if (DEBUG) logger.debug("getUserHistoryForList pron    scores " + scores);
 
     if (scores.size() == 11) {
       scores.remove(9);
@@ -920,7 +931,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   public boolean logEvent(String id, String widgetType, String exid, String context, long userid, String hitID,
                           String device) {
     if (userid == -1) {
-    //  logger.debug("logEvent for user " + userid);
+      //  logger.debug("logEvent for user " + userid);
       userid = userDAO.getBeforeLoginUser();
     }
     return eventDAO != null && eventDAO.add(new Event(id, widgetType, exid, context, userid, -1, hitID, device));
@@ -1483,9 +1494,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   }
 
   /**
-   * @see LangTestDatabaseImpl#getPretestScore(int, long, String, String, int, int, boolean, String, boolean)
    * @param resultID
    * @param asrScoreForAudio
+   * @see LangTestDatabaseImpl#getPretestScore(int, long, String, String, int, int, boolean, String, boolean)
    */
   public void rememberScore(long resultID, PretestScore asrScoreForAudio) {
     getAnswerDAO().changeAnswer(resultID, asrScoreForAudio.getHydecScore(), asrScoreForAudio.getProcessDur(), asrScoreForAudio.getJson());
@@ -1508,9 +1519,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   }
 
   /**
-   * @see #rememberScore(long, PretestScore)
    * @param answerID
    * @param pretestScore
+   * @see #rememberScore(long, PretestScore)
    */
   private void recordWordAndPhoneInfo(long answerID, PretestScore pretestScore) {
     if (pretestScore != null) {
@@ -1554,7 +1565,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    */
   public Map<String, Float> getMaleFemaleProgress() {
     UserDAO userDAO = getUserDAO();
-    Map<Long, User> userMapMales   = userDAO.getUserMap(true);
+    Map<Long, User> userMapMales = userDAO.getUserMap(true);
     Map<Long, User> userMapFemales = userDAO.getUserMap(false);
 
     Collection<? extends CommonShell> exercises = getExercises();
