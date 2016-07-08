@@ -158,31 +158,31 @@ public class PerformanceTest extends BaseTest {
         ListContainer baseObject = new ListContainer();
         Field list = new Field("list", baseObject);
         dbExercise.addField("list", list);
-        list.add(new StringObject("first"));
-        list.add(new StringObject("second"));
-        list.add(new StringObject("third"));
+        list.addExerciseToList(new StringObject("first"));
+        list.addExerciseToList(new StringObject("second"));
+        list.addExerciseToList(new StringObject("third"));
       }
 
       ListContainer baseObject = new ListContainer();
       Field list = new Field("list", baseObject);
       dbExercise.addField("questions", list);
       BaseObject question = new BaseObject(1, dbExercise.getID());
-      list.add(question);
+      list.addExerciseToList(question);
       question.addField("Question", "Test Question");
       ListContainer answerKey = new ListContainer(2);
       question.addField("Answer Key", new Field("Answer Key", answerKey));
-      answerKey.add(new StringObject("First"));
-      answerKey.add(new StringObject("Second"));
-      answerKey.add(new StringObject("Third"));
+      answerKey.addExerciseToList(new StringObject("First"));
+      answerKey.addExerciseToList(new StringObject("Second"));
+      answerKey.addExerciseToList(new StringObject("Third"));
 
 //      MapContainer mapContainer = new MapContainer();
-//      Field unitToValue = new Field(UNIT_TO_VALUE, mapContainer); // TODO add easy method on exobject
+//      Field unitToValue = new Field(UNIT_TO_VALUE, mapContainer); // TODO addExerciseToList easy method on exobject
 //      dbExercise.addField(UNIT_TO_VALUE, unitToValue);
       for (Map.Entry<String, String> pair : ex.getUnitToValue().entrySet()) {
         dbExercise.addUnitToValue(pair.getKey(), pair.getValue());
       }
 
-      objects.add(dbExercise);
+      objects.addExerciseToList(dbExercise);
       oldToNew.put(ex, dbExercise);
     }
   }*/

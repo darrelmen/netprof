@@ -84,7 +84,7 @@ public class ImportCourseExamples {
 
     // so now we have the users in the database
 
-    // add a audio reference to the audio ref table for each recording
+    // addExerciseToList a audio reference to the audio ref table for each recording
     IAudioDAO audioDAO = npfRussian.getAudioDAO();
     //audioDAO.drop();
 
@@ -139,7 +139,7 @@ public class ImportCourseExamples {
             " result = " + r.getUniqueID() + " for " + r.getCompoundID() + " type " + r.getAudioType() + " path " + r.getAnswer());
         }
 
-        audioDAO.add(r, oldToNew.get(r.getUserid()).intValue(), "bestAudio/" + r.getAnswer());
+        audioDAO.addExerciseToList(r, oldToNew.get(r.getUserid()).intValue(), "bestAudio/" + r.getAnswer());
 
         try {
           File destFile = new File(destAudioDir, r.getAnswer());

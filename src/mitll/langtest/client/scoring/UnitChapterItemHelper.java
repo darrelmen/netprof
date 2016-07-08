@@ -81,9 +81,8 @@ public class UnitChapterItemHelper<T extends CommonShell> {
    * @see GoodwaveExercisePanel#getQuestionContent
    */
   private Widget getItemHeader(T e) {
-   // logger.info("got " + e + " and " + e.getDisplayID());
-
-    Heading w = new Heading(HEADING_FOR_UNIT_LESSON, ITEM, e.getDisplayID());
+   // logger.info("got " + e + " and " + e.getDominoID());
+    Heading w = new Heading(HEADING_FOR_UNIT_LESSON, ITEM, ""+e.getDominoID());
     w.getElement().setId("ItemHeading");
     return w;
   }

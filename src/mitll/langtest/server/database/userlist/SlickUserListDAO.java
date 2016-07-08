@@ -97,10 +97,10 @@ public class SlickUserListDAO extends DAO implements IUserListDAO, ISchema<UserL
         shared.getClassMarker(),
         shared.isPrivate(),
         false,
-        (int) shared.getUniqueID());
+         shared.getRealID());
   }
 
-  public SlickUserExerciseList toSlick2(UserList<CommonShell> shared, String language, int userid) {
+  public SlickUserExerciseList toSlick2(UserList<CommonShell> shared, int userid) {
     return new SlickUserExerciseList(-1,
         userid,
         new Timestamp(shared.getModified()), shared.getName(),
@@ -108,13 +108,13 @@ public class SlickUserListDAO extends DAO implements IUserListDAO, ISchema<UserL
         shared.getClassMarker(),
         shared.isPrivate(),
         false,
-        (int) shared.getUniqueID());
+        shared.getRealID());
   }
 
   @Override
   public UserList<CommonShell> fromSlick(SlickUserExerciseList slick) {
     return new UserList<CommonShell>(
-        (long) slick.id(),
+        slick.id(),
         userDAO.getUserWhere(slick.userid()),
         slick.name(),
         slick.description(),
@@ -131,18 +131,6 @@ public class SlickUserListDAO extends DAO implements IUserListDAO, ISchema<UserL
     dao.addBulk(bulk);
   }
 
-/*
-  public int getNumRows() {
-    return dao.getNumRows();
-  }
-*/
-
-/*  @Override
-  public List<UserExercise> getUserExercises() {
-    List<SlickUserExercise> all = getAll();
-    return getUserExercises(all);
-  }*/
-
   private List<UserList<CommonShell>> fromSlick(Collection<SlickUserExerciseList> all) {
     List<UserList<CommonShell>> copy = new ArrayList<>();
     for (SlickUserExerciseList list : all) copy.add(fromSlick(list));
@@ -155,13 +143,13 @@ public class SlickUserListDAO extends DAO implements IUserListDAO, ISchema<UserL
   }
 
   @Override
-  public void add(UserList userList) {
+  public void add(UserList<CommonShell> userList) {
     int assignedID = dao.insert(toSlick(userList, getLanguage()));
     userList.setUniqueID(assignedID);
   }
 
-  public void addWithUser(UserList userList,int userid) {
-    SlickUserExerciseList user = toSlick2(userList, getLanguage(),userid);
+  public void addWithUser(UserList<CommonShell> userList, int userid) {
+    SlickUserExerciseList user = toSlick2(userList, userid);
     int assignedID = dao.insert(user);
     userList.setUniqueID(assignedID);
   }
@@ -201,12 +189,12 @@ public class SlickUserListDAO extends DAO implements IUserListDAO, ISchema<UserL
    * @see #getAllByUser(long)
    */
   private void populateList(UserList<CommonShell> where) {
-    List<CommonShell> onList = userExerciseDAO.getOnList(where.getUniqueID());
+    List<CommonShell> onList = userExerciseDAO.getOnList(where.getRealID());
     where.setExercises(onList);
     Set<String> userExIDs = new HashSet<>();
     for (CommonShell shell : onList) userExIDs.add(shell.getID());
 
-    Collection<String> exidsFor = userListExerciseJoinDAO.getExidsFor((int) where.getUniqueID());
+    Collection<String> exidsFor = userListExerciseJoinDAO.getExidsFor(where.getRealID());
 
     for (String exid: exidsFor) {
       if (!userExIDs.contains(exid)) {

@@ -293,7 +293,7 @@ abstract class NPFExercise<T extends CommonShell & AudioRefExercise & ScoredExer
               public void onClick(ClickEvent event) {
                 controller.logEvent(w1, "DropUp", id, ADDING_TO_LIST + ul.getID() + "/" + ul.getName());
 
-                listService.addItemToUserList(ul.getUniqueID(), id, new AsyncCallback<Void>() {
+                listService.addItemToUserList(ul.getRealID(), id, new AsyncCallback<Void>() {
                   @Override
                   public void onFailure(Throwable caught) {
                   }
