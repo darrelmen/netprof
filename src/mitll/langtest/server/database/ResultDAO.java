@@ -684,9 +684,10 @@ public class ResultDAO extends DAO {
       String list = getInList(ids);
 
       String sql = getCSSelect() + " FROM " + RESULTS + " WHERE " +
-          VALID + "=true" + " AND " +
-          //AUDIO_TYPE + (matchAVP?"=":"<>") + "'avp'" +" AND " +
-          getAVPClause(matchAVP) + " AND " +
+          VALID + "=true" +
+
+          (matchAVP ? " AND " + getAVPClause(matchAVP) : "") +
+          " AND " +
 
           EXID + " in (" + list + ")" +
           " order by " + Database.TIME + " asc";
@@ -763,8 +764,8 @@ public class ResultDAO extends DAO {
 
       String sql = getCSSelect() + " FROM " + RESULTS + " WHERE " +
           USERID + "=? AND " +
-          VALID + "=true" + " AND " +
-          getAVPClause(matchAVP) +
+          VALID + "=true" +
+          (matchAVP ? " AND " + getAVPClause(matchAVP) : "") +
           " AND " +
           EXID + " in (" + list + ")";
 
@@ -794,14 +795,14 @@ public class ResultDAO extends DAO {
   private String getAVPClause(boolean matchAVP) {
     return matchAVP ?
         "(" +
-            AUDIO_TYPE + " LIKE " + "'avp%' OR " +
+            AUDIO_TYPE + " LIKE 'avp%' OR " +
             AUDIO_TYPE + " = 'flashcard' OR " +
             AUDIO_TYPE + " = 'practice' " +
             ")" :
         "(" +
             AUDIO_TYPE + " NOT LIKE 'avp%' AND " +
-            AUDIO_TYPE + "<> 'flashcard' AND" +
-            AUDIO_TYPE + "<> 'practice' " +
+            AUDIO_TYPE + " <> 'flashcard' AND " +
+            AUDIO_TYPE + " <> 'practice' " +
             ")";
   }
 
