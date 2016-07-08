@@ -72,6 +72,7 @@ public class AmasExerciseImpl implements CommonShell {
   private Map<String, List<QAPair>> langToQuestion = null;
 
   private String id;
+  int realID;
   private STATE state = STATE.UNSET;
   private String altID;
 
@@ -222,6 +223,11 @@ public class AmasExerciseImpl implements CommonShell {
   }
 
   @Override
+  public int getRealID() {
+    return realID;
+  }
+
+  @Override
   public STATE getState() {
     return state;
   }
@@ -270,9 +276,8 @@ public class AmasExerciseImpl implements CommonShell {
     return null;
   }
 
-  @Override
-  public String getDisplayID() {
-    return id;
+  public int getDominoID() {
+    return realID;
   }
 
   @Override
