@@ -144,8 +144,8 @@ public class JSONURLExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<C
     JSONObject metadata = jsonObject.getJSONObject("metadata");
     JSONObject content  = jsonObject.getJSONObject("content");
     String updateTime   = jsonObject.getString("updateTime");
-    String dominoID     = "" + jsonObject.getInt("id");
-    String npDID = isLegacyExercise(metadata) ? metadata.getString("npDID") : dominoID;
+    int dominoID     = jsonObject.getInt("id");
+    String npDID = isLegacyExercise(metadata) ? metadata.getString("npDID") : ""+dominoID;
 
     String fl = noMarkup(content.getString("pass"));
     String english = noMarkup(content.getString("trans"));

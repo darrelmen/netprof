@@ -484,7 +484,8 @@ public class ListManager implements RequiresResize {
     Panel r1 = new FluidRow();
     r1.addStyleName("userListDarkerBlueColor");
 
-    Anchor downloadLink = new DownloadLink(controller).getDownloadLink(ul.getUniqueID(), instanceName + "_" + ul.getUniqueID(), ul.getName());
+    int realID = ul.getRealID();
+    Anchor downloadLink = new DownloadLink(controller).getDownloadLink(realID, instanceName + "_" + realID, ul.getName());
     Node child = downloadLink.getElement().getChild(0);
     AnchorElement.as(child).getStyle().setColor("#333333");
 
@@ -508,8 +509,7 @@ public class ListManager implements RequiresResize {
   }
 
   private String storeCurrentClickedList(UserList ul) {
-    long uniqueID = ul.getUniqueID();
-    return storeCurrentClickedList(uniqueID);
+    return storeCurrentClickedList(ul.getRealID());
   }
 
   private String storeCurrentClickedList(long uniqueID) {
@@ -526,7 +526,7 @@ public class ListManager implements RequiresResize {
    */
   private void addVisitor(UserList ul) {
     if (ul.getCreator().getId() != controller.getUser()) {
-      listService.addVisitor(ul.getUniqueID(), controller.getUser(), new AsyncCallback<Void>() {
+      listService.addVisitor(ul.getRealID(), controller.getUser(), new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
         }
@@ -666,7 +666,7 @@ public class ListManager implements RequiresResize {
 
   void deleteList(Button delete, final UserList ul, final boolean onlyMyLists) {
     controller.logEvent(delete, "Button", "UserList_" + ul.getID(), "Delete");
-    final long uniqueID = ul.getUniqueID();
+    final long uniqueID = ul.getRealID();
 
     listService.deleteList(uniqueID, new AsyncCallback<Boolean>() {
       @Override
@@ -748,7 +748,7 @@ public class ListManager implements RequiresResize {
     anImport.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        listService.reallyCreateNewItems(userManager.getUser(), ul.getUniqueID(), w.getText(),
+        listService.reallyCreateNewItems(userManager.getUser(), ul.getRealID(), w.getText(),
             new AsyncCallback<Collection<CommonExercise>>() {
               @Override
               public void onFailure(Throwable caught) {

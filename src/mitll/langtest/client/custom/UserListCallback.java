@@ -180,7 +180,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
 
   private void showList(Collection<UserList<CommonShell>> result, long id) {
     for (UserList ul : result) {
-      if (ul.getUniqueID() == id) {
+      if (ul.getRealID() == id) {
         listManager.showList(ul, contentPanel, instanceName, null);
         break;
       }
@@ -322,7 +322,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
     }
 
     if (!ul.isFavorite()) {
-      final long uniqueID = ul.getUniqueID();
+      final long uniqueID = ul.getRealID();
 
       if (showIsPublic) {
         r1.add(getIsPublic(ul, uniqueID));

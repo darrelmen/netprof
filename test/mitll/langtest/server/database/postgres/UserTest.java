@@ -58,7 +58,7 @@ public class UserTest extends BaseTest {
   }
 
   /**
-   * TODO : add option to get mock db to use
+   * TODO : addExerciseToList option to get mock db to use
    */
   @Test
   public void testUser() {
