@@ -46,6 +46,7 @@ public abstract class BaseUserDAO extends DAO {
 
   private static final String DEFECT_DETECTOR = "defectDetector";
   private static final String BEFORE_LOGIN_USER = "beforeLogin";
+  private static final String IMPORT_USER = "importUser";
   public static final String USERS = "users";
   public static final String MALE = "male";
   public static final String FEMALE = "female";
@@ -63,7 +64,7 @@ public abstract class BaseUserDAO extends DAO {
   static final String NATIVE_LANG = "nativeLang";
   static final String UNKNOWN = "unknown";
   final String language;
-  private int defectDetector,beforeLoginUser;
+  private int defectDetector,beforeLoginUser, importUser;
   private final boolean enableAllUsers;
 
   static final String ID = "id";
@@ -84,9 +85,8 @@ public abstract class BaseUserDAO extends DAO {
    * After a default user has been marked female
    */
   public static final int DEFAULT_FEMALE_ID = -3;
-  public static MiniUser DEFAULT_USER = new MiniUser(DEFAULT_USER_ID, 99, true, "default", false);
-
-  public static MiniUser DEFAULT_MALE = new MiniUser(DEFAULT_MALE_ID, 99, true, "Male", false);
+  public static MiniUser DEFAULT_USER   = new MiniUser(DEFAULT_USER_ID,   99, true, "default", false);
+  public static MiniUser DEFAULT_MALE   = new MiniUser(DEFAULT_MALE_ID,   99, true, "Male", false);
   public static MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 99, false, "Female", false);
 
   private final Collection<String> admins;
@@ -108,6 +108,8 @@ public abstract class BaseUserDAO extends DAO {
   }
 
   public int getBeforeLoginUser() { return beforeLoginUser; }
+
+  public int getImportUser() { return importUser; }
 
   /**
    * Check if the user exists already, and return null if so.
@@ -166,18 +168,20 @@ public abstract class BaseUserDAO extends DAO {
   private static final List<User.Permission> EMPTY_PERMISSIONS = Collections.emptyList();
 
   /**
-   *
+   * public for test access... for now
    */
   public void findOrMakeDefectDetector() {
-    //logger.info("findOrMakeDefectDetector ");
-    this.defectDetector = getIdForUserID(DEFECT_DETECTOR);
-    if (this.defectDetector == -1) {
-      this.defectDetector = addShellUser(DEFECT_DETECTOR);
+    this.defectDetector = getOrAdd(DEFECT_DETECTOR);
+    this.beforeLoginUser = getOrAdd(BEFORE_LOGIN_USER);
+    this.importUser = getOrAdd(IMPORT_USER);
+  }
+
+  private int getOrAdd(String beforeLoginUser) {
+    int beforeLoginUserID = getIdForUserID(beforeLoginUser);
+    if (beforeLoginUserID == -1) {
+      beforeLoginUserID = addShellUser(beforeLoginUser);
     }
-    this.beforeLoginUser = getIdForUserID(BEFORE_LOGIN_USER);
-    if (this.beforeLoginUser == -1) {
-      this.beforeLoginUser = addShellUser(BEFORE_LOGIN_USER);
-    }
+    return beforeLoginUserID;
   }
 
   private int addShellUser(String defectDetector) {
