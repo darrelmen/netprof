@@ -168,7 +168,7 @@ class EditableExerciseDialog extends NewUserExercise {
     prevNext.addStyleName("rightFiveMargin");
     row.add(prevNext);
 
-    Button delete = makeDeleteButton(ul.getUniqueID());
+    Button delete = makeDeleteButton(ul.getRealID());
 
     configureButtonRow(row);
     row.add(delete);

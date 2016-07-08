@@ -57,7 +57,7 @@ import java.util.Map;
 public class UserList<T extends HasID> extends BaseExercise {
   public static final String MY_LIST = "Favorites";
 
-  private long uniqueID;
+ // private long uniqueID;
 
   private User creator;
   private String name;
@@ -80,10 +80,10 @@ public class UserList<T extends HasID> extends BaseExercise {
    * @see mitll.langtest.server.database.custom.UserListManager#createUserList(int, String, String, String, boolean)
    * @see UserListDAO#getWhere(long, boolean)
    */
-  public UserList(long uniqueID, User user, String name, String description, String classMarker, boolean isPrivate,
+  public UserList(int uniqueID, User user, String name, String description, String classMarker, boolean isPrivate,
                   long modified) {
-    super("" + uniqueID);
-    this.uniqueID = uniqueID;
+    super("" + uniqueID, uniqueID);
+   // this.uniqueID = uniqueID;
     this.creator = user;
     this.name = name;
     this.description = description;
@@ -97,7 +97,7 @@ public class UserList<T extends HasID> extends BaseExercise {
    * @see mitll.langtest.client.custom.dialog.EditItem#makeListOfOnlyYourItems(UserList)
    */
   public UserList(UserList<T> ul) {
-    this(ul.uniqueID, ul.getCreator(), ul.getName(), ul.getDescription(), ul.getClassMarker(), ul.isPrivate(), ul.getModified());
+    this(ul.getRealID(), ul.getCreator(), ul.getName(), ul.getDescription(), ul.getClassMarker(), ul.isPrivate(), ul.getModified());
   }
 
   public UserList<T> getCopy() {
@@ -111,7 +111,7 @@ public class UserList<T extends HasID> extends BaseExercise {
   /**
    * @param toAdd
    * @see mitll.langtest.client.custom.dialog.EditItem#makeExerciseList(Panel, String, UserList, UserList, boolean)
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterItemCreated(UserExercise, UserList, ListInterface, Panel)
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterItemCreated
    */
   public void addExercise(T toAdd) {
     exercises.add(toAdd);
@@ -176,17 +176,20 @@ public class UserList<T extends HasID> extends BaseExercise {
     return creator;
   }
 
+/*
   public long getUniqueID() {
     return uniqueID;
   }
+*/
 
   /**
-   * @param uniqueID
+   * @paramx uniqueID
    * @see UserListDAO#add(UserList)
    * @see mitll.langtest.server.database.custom.UserListManager#getCommentedList(Collection)
    */
-  public void setUniqueID(long uniqueID) {
-    this.uniqueID = uniqueID;
+
+  public void setUniqueID(int uniqueID) {
+    this.realID = uniqueID;
   }
 
   public boolean contains(T userExercise) {
@@ -225,7 +228,7 @@ public class UserList<T extends HasID> extends BaseExercise {
   @Override
   public String toString() {
     long id = creator == null ? -1 : creator.getId();
-    return "UserList #" + getUniqueID() + " '" + name + "' by " + id +
+    return "UserList #" + getRealID() + " '" + name + "' by " + id +
         //" : " + (isReview ? " REVIEW " : "") +
         " :" +
         " with " + getExercises().size() + " exercises.";

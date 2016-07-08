@@ -57,9 +57,9 @@ public class UserExTest extends BaseTest {
 
     Collection<UserList<CommonShell>> listsForUser = userListManager.getListsForUser(2, true, false);
 
-    for(UserList<CommonShell> list :listsForUser) {
+    for (UserList<CommonShell> list : listsForUser) {
       logger.info("got " + list);
-      for (CommonShell ex: list.getExercises()) {
+      for (CommonShell ex : list.getExercises()) {
         logger.info("\t" + list + " has " + ex);
       }
     }
@@ -74,7 +74,7 @@ public class UserExTest extends BaseTest {
 
     logger.info("predef " + predefExercise);
 
-    logger.info("got " + dao.getWhere(Arrays.asList("1959","1962")));
+    logger.info("got " + dao.getWhere(Arrays.asList("1959", "1962")));
   }
 
   @Test
@@ -95,39 +95,39 @@ public class UserExTest extends BaseTest {
 
 
   }
-    @Test
-  public void testUserList2() {
+
+  @Test
+  public void testUserListAddVisitor() {
     DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
 
-    IUserExerciseDAO dao = spanish.getUserExerciseDAO();
     UserListManager userListManager = spanish.getUserListManager();
 
     Collection<UserList<CommonShell>> listsForUser = userListManager.getListsForUser(2, true, false);
 
-    for(UserList<CommonShell> list :listsForUser) {
+    for (UserList<CommonShell> list : listsForUser) {
       logger.info("got " + list);
-      for (CommonShell ex: list.getExercises()) {
+      for (CommonShell ex : list.getExercises()) {
         logger.info("\t" + list + " has " + ex);
       }
     }
 
     Collection<UserList<CommonShell>> before = userListManager.getListsForUser(2, false, true);
 
-    for(UserList<CommonShell> list :before) {
+    for (UserList<CommonShell> list : before) {
       logger.info("before " + list);
-      for (CommonShell ex: list.getExercises()) {
+      for (CommonShell ex : list.getExercises()) {
         logger.info("\t" + list + " has " + ex);
       }
     }
     UserList<CommonShell> next = listsForUser.iterator().next();
     int user = 6;
-    userListManager.addVisitor(next.getUniqueID(), user);
+    userListManager.addVisitor(next.getRealID(), user);
 
     Collection<UserList<CommonShell>> after = userListManager.getListsForUser(user, false, true);
 
-    for(UserList<CommonShell> list :after) {
+    for (UserList<CommonShell> list : after) {
       logger.info("after " + list);
-      for (CommonShell ex: list.getExercises()) {
+      for (CommonShell ex : list.getExercises()) {
         logger.info("\t" + list + " has " + ex);
       }
     }
