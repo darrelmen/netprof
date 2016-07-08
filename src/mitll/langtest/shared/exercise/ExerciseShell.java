@@ -32,8 +32,6 @@
 
 package mitll.langtest.shared.exercise;
 
-import mitll.langtest.shared.custom.UserList;
-
 import java.util.Collection;
 import java.util.Collections;
 
@@ -47,23 +45,22 @@ import java.util.Collections;
  * To change this template use File | Settings | File Templates.
  * <p>
  */
-public class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
+class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
   protected String english;
   protected String meaning;
   protected String foreignLanguage;
   protected String transliteration;
-  String displayID;
+  int dominoID;
 
   public ExerciseShell() {
   }
 
   /**
    * @param id
-   * @see AudioExercise#AudioExercise(String)
-   * @see UserList#UserList()
+   * @see AudioExercise#AudioExercise(String, int)
    */
-  ExerciseShell(String id) {
-    this(id, "", "", "", "", id);
+  ExerciseShell(String id, int realID) {
+    this(id, "", "", "", "", -1, realID);
   }
 
   /**
@@ -72,20 +69,25 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
    * @param meaning
    * @param foreignLanguage
    * @param transliteration
-   * @param displayID
+   * @param dominoID
+   * @param realID
    * @paramx context
    * @paramx contextTranslation
    * @see #getShell()
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseShells
    */
-  private ExerciseShell(String id, String english, String meaning, String foreignLanguage,
-                        String transliteration, String displayID) {
-    super(id);
+  private ExerciseShell(String id,
+                        String english,
+                        String meaning,
+                        String foreignLanguage,
+                        String transliteration,
+                        int dominoID, int realID) {
+    super(id, realID);
     this.english = english;
     this.meaning = meaning;
     this.foreignLanguage = foreignLanguage;
     this.transliteration = transliteration;
-    this.displayID = displayID;
+    this.dominoID = dominoID;
   }
 
   /**
@@ -93,7 +95,7 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseShells(java.util.Collection)
    */
   public CommonShell getShell() {
-    return new ExerciseShell(getID(), english, meaning, foreignLanguage, transliteration, displayID);
+    return new ExerciseShell(getID(), english, meaning, foreignLanguage, transliteration, dominoID, getRealID());
   }
 
   public String getEnglish() {
@@ -112,13 +114,13 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
 
   @Override
   public boolean equals(Object other) {
-    return other instanceof ExerciseShell && getID().equals(((ExerciseShell) other).getID());
+    return other instanceof ExerciseShell &&
+        (getID().equals(((ExerciseShell) other).getID()) ||
+            (getRealID() == ((ExerciseShell) other).getRealID())
+        );
   }
 
-  @Override
-  public String getDisplayID() {
-    return displayID;
-  }
+  public int getDominoID() { return dominoID;  }
 
   @Override
   public MutableShell getMutableShell() {
@@ -145,6 +147,6 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
   }
 
   public String toString() {
-    return "Exercise id = " + getID() + "/" + getEnglish() + " states " + getState() + "/" + getSecondState();
+    return "Exercise id = " + getID() + "/" + getRealID() + " : " + getEnglish() + " states " + getState() + "/" + getSecondState();
   }
 }

@@ -119,7 +119,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
    */
   @Override
   public void add(UserList userList) {
-    long id = 0;
+    int id = 0;
 
     try {
       // there are much better ways of doing this...
@@ -397,8 +397,9 @@ public class UserListDAO extends DAO implements IUserListDAO {
     List<UserList<CommonShell>> lists = new ArrayList<>();
 
     while (rs.next()) {
-      long uniqueid = rs.getLong("uniqueid");
-      lists.add(new UserList<CommonShell>(uniqueid, //id
+      int uniqueid = rs.getInt("uniqueid");
+      lists.add(new UserList<>(
+              uniqueid, //id
               userDAO.getUserWhere(rs.getInt(CREATORID)), // age
               rs.getString(NAME), // exp
               rs.getString("description"), // exp
@@ -422,7 +423,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
    * @see #getAllByUser(long)
    */
   private void populateList(UserList<CommonShell> where) {
-    where.setExercises(userExerciseDAO.getOnList(where.getUniqueID()));
+    where.setExercises(userExerciseDAO.getOnList(where.getRealID()));
   }
 
   @Override

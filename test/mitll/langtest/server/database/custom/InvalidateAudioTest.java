@@ -57,7 +57,7 @@ public class InvalidateAudioTest {
       } else {
   //      boolean different = isDifferentContext(id, oldEx, newEx,smallVocabDecoder);
     //    if (different) {
-      //    idsOfDefects.add(id);
+      //    idsOfDefects.addExerciseToList(id);
       //  }
       }
     }

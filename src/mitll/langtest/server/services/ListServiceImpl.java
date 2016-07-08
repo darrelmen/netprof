@@ -148,7 +148,8 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    */
   public void addItemToUserList(long userListID, String exID) {
-    getUserListManager().addItemToUserList(userListID, exID);
+    CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(exID);
+    getUserListManager().addItemToList(userListID, exID, customOrPredefExercise.getRealID());
   }
 
   /**
