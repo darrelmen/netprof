@@ -63,7 +63,9 @@ public class SlickReviewedDAO extends DAO implements IReviewedDAO {
 
   @Override
   public String getName() {
-    return dao.dao().name();
+    String name = dao.dao().name();
+    logger.info("SlickReviewedDAO for " + this + " got " + name);
+    return name;
   }
 
   public void insert(SlickReviewed word) {
@@ -85,7 +87,7 @@ public class SlickReviewedDAO extends DAO implements IReviewedDAO {
     dao.insert(toSlick(exerciseID, state, (int) creatorID));
   }
 
-  SlickReviewed toSlick(String exerciseID, STATE state, int creatorID) {
+  private SlickReviewed toSlick(String exerciseID, STATE state, int creatorID) {
     long time = System.currentTimeMillis();
     return new SlickReviewed(-1, creatorID, exerciseID, new Timestamp(time), state.toString());
   }
