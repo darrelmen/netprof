@@ -76,6 +76,13 @@ public class PostgresTest extends BaseTest {
     new CopyToPostgres().copyOnlyUserExercises(spanish);
   }
 
+  @Test
+  public void testCopyUserJoinExercises() {
+    testCreate();
+    DatabaseImpl<CommonExercise> spanish = getDatabaseLight("spanish", true);
+    new CopyToPostgres().copyUserExListJoin(spanish);
+  }
+
   private static DBConnection getConnection(String config) {
     File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
     String parent = file.getParentFile().getAbsolutePath();
