@@ -33,9 +33,12 @@
 package mitll.langtest.server.database.userexercise;
 
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.exercise.SectionHelper;
+import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.Exercise;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickExercise;
 import mitll.npdata.dao.userexercise.UserExerciseDAOWrapper;
@@ -65,7 +68,7 @@ public class SlickUserExerciseDAO
     return dao.dao().name();
   }
 
-//  @Override
+  //  @Override
   public SlickExercise toSlick(UserExercise shared, int projectID) {
     Map<String, String> unitToValue = shared.getUnitToValue();
     List<String> typeOrder = getTypeOrder();
@@ -85,27 +88,49 @@ public class SlickUserExerciseDAO
         unitToValue.getOrDefault(first, ""),
         unitToValue.getOrDefault(second, ""),
         projectID,  // project id fk
-        (int) shared.getRealID());
+        false,
+        shared.getRealID());
   }
 
+  /**
+   * TODO : type order depends on project
+   *
+   * @return
+   */
   List<String> getTypeOrder() {
     return exerciseDAO.getSectionHelper().getTypeOrder();
   }
 
   /**
-   * @see SlickUserExerciseDAO#add(CommonExercise, boolean)
+   * TODO : we won't do override items soon, since they will just be domino edits...
+   *
    * @param shared
    * @param isOverride
    * @return
    */
-  public SlickExercise toSlick(CommonExercise shared, boolean isOverride) {
+  public SlickExercise toSlick(CommonExercise shared, @Deprecated boolean isOverride) {
+    return toSlick(shared, isOverride, -1, false, BaseUserDAO.DEFAULT_USER_ID);
+  }
+
+  /**
+   * @param shared
+   * @param isOverride
+   * @param isPredef
+   * @return
+   * @see SlickUserExerciseDAO#add(CommonExercise, boolean)
+   */
+  public SlickExercise toSlick(CommonExercise shared, @Deprecated boolean isOverride, int projectID, boolean isPredef,
+                               int importUser
+                               ) {
     Map<String, String> unitToValue = shared.getUnitToValue();
     Iterator<String> iterator = getTypeOrder().iterator();
-    String first  = iterator.next();
+    String first = iterator.next();
     String second = iterator.hasNext() ? iterator.next() : "";
 
+    int creator = shared.getCreator();
+    if (creator == BaseUserDAO.UNDEFINED_USER) creator = importUser;
     return new SlickExercise(-1,
-        shared.getCreator(),
+        creator,
         shared.getID(),
         new Timestamp(shared.getUpdateTime()),
         shared.getEnglish(),
@@ -115,12 +140,13 @@ public class SlickUserExerciseDAO
         isOverride,
         unitToValue.getOrDefault(first, ""),
         unitToValue.getOrDefault(second, ""),
-        -1,  // project id fk
+        projectID,  // project id fk
+        isPredef,
         -1);
   }
 
-//  @Override
-  public UserExercise fromSlick(SlickExercise slick) {
+  //  @Override
+  private UserExercise fromSlick(SlickExercise slick) {
     Map<String, String> unitToValue = new HashMap<>();
     Iterator<String> iterator = getTypeOrder().iterator();
     String first = iterator.next();
@@ -141,6 +167,53 @@ public class SlickUserExerciseDAO
         slick.modified().getTime());
   }
 
+  long lastModified = System.currentTimeMillis();
+
+  /**
+   * TODO : add context sentences
+   * TODO : connect context sentences
+   *
+   * @param slick
+   * @return
+   */
+  private Exercise fromSlickToExercise(SlickExercise slick, List<String> typeOrder, SectionHelper<CommonExercise> sectionHelper) {
+    Map<String, String> unitToValue = new HashMap<>();
+    // List<String> typeOrder = getTypeOrder();
+    Iterator<String> iterator = typeOrder.iterator();
+    String first = iterator.next();
+    String second = iterator.hasNext() ? iterator.next() : "";
+    unitToValue.put(first, slick.unit());
+    if (!second.isEmpty())
+      unitToValue.put(second, slick.lesson());
+
+    Exercise exercise = new Exercise(
+        slick.exid(),
+        slick.english(),
+        slick.meaning(),
+        slick.foreignlanguage(),
+        slick.transliteration(),
+        -1);
+
+    List<String> translations = new ArrayList<String>();
+    if (slick.foreignlanguage().length() > 0) {
+      translations.add(slick.foreignlanguage());
+    }
+    exercise.setRefSentences(translations);
+
+//    if (!context.isEmpty()) {
+//      imported.addContext(context,contextTranslation);
+//    }
+    exercise.setUpdateTime(lastModified);
+
+    List<SectionHelper.Pair> pairs = new ArrayList<SectionHelper.Pair>();
+    for (Map.Entry<String, String> pair : unitToValue.entrySet()) {
+      pairs.add(sectionHelper.addExerciseToLesson(exercise, pair.getKey(), pair.getValue()));
+    }
+    sectionHelper.addAssociations(pairs);
+
+    return exercise;
+  }
+
   public void insert(SlickExercise UserExercise) {
     dao.insert(UserExercise);
   }
@@ -159,40 +232,48 @@ public class SlickUserExerciseDAO
 
   private List<CommonExercise> getUserExercises(List<SlickExercise> all) {
     List<CommonExercise> copy = new ArrayList<>();
-    for (SlickExercise UserExercise : all) copy.add(fromSlick(UserExercise));
+    for (SlickExercise userExercise : all) copy.add(fromSlick(userExercise));
+    return copy;
+  }
+
+  private List<CommonExercise> getExercises(List<SlickExercise> all, List<String> typeOrder,
+                                            SectionHelper<CommonExercise> sectionHelper) {
+    List<CommonExercise> copy = new ArrayList<>();
+    for (SlickExercise userExercise : all) copy.add(fromSlickToExercise(userExercise, typeOrder, sectionHelper));
     return copy;
   }
 
   /**
-   * @see mitll.langtest.server.database.custom.UserListManager#reallyCreateNewItem(long, CommonExercise, String)
    * @param userExercise
    * @param isOverride
+   * @see mitll.langtest.server.database.custom.UserListManager#reallyCreateNewItem(long, CommonExercise, String)
    */
   @Override
   public void add(CommonExercise userExercise, boolean isOverride) {
-  //  logger.info("adding " + userExercise);
+    //  logger.info("adding " + userExercise);
     insert(toSlick(userExercise, isOverride));
   }
 
   @Override
   public List<CommonShell> getOnList(long listID) {
     List<CommonShell> userExercises2 = new ArrayList<>();
-
     enrichWithPredefInfo(userExercises2, getUserExercises(dao.getOnList((int) listID)));
-
     return userExercises2;
   }
 
   @Override
   public CommonExercise getWhere(String exid) {
     exid = exid.replaceAll("\'", "");
-
     Seq<SlickExercise> byExid = dao.getByExid(exid);
     return byExid.isEmpty() ? null : fromSlick(byExid.iterator().next());
   }
 
   public List<CommonExercise> getAll() {
-    return getUserExercises(dao.getAll());
+    return getUserExercises(dao.getAllUserEx());
+  }
+
+  public List<CommonExercise> getAllExercises(List<String> typeOrder, SectionHelper<CommonExercise> sectionHelper) {
+    return getExercises(dao.getAllPredefEx(), typeOrder, sectionHelper);
   }
 
   @Override
@@ -206,9 +287,9 @@ public class SlickUserExerciseDAO
   }
 
   /**
-   * @see mitll.langtest.server.database.custom.UserListManager#editItem(CommonExercise, boolean, String)
    * @param userExercise
    * @param createIfDoesntExist
+   * @see mitll.langtest.server.database.custom.UserListManager#editItem(CommonExercise, boolean, String)
    */
   @Override
   public void update(CommonExercise userExercise, boolean createIfDoesntExist) {
