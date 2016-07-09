@@ -127,7 +127,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   private static final int LOG_THRESHOLD = 10;
   private static final String UNKNOWN = "unknown";
   private static final String SIL = "sil";
-  private static final String TRANSLITERATION = "transliteration";
+  // private static final String TRANSLITERATION = "transliteration";
 
   private String installPath;
   private ExerciseDAO<CommonExercise> exerciseDAO = null;
@@ -144,7 +144,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   private UserListManager userListManager;
 
   private IUserExerciseDAO userExerciseDAO;
- // private AddRemoveDAO addRemoveDAO;
+  // private AddRemoveDAO addRemoveDAO;
 
   private IEventDAO eventDAO;
   private IProjectDAO projectDAO;
@@ -287,7 +287,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     IUserListDAO userListDAO = new SlickUserListDAO(this, dbConnection, this.userDAO, userExerciseDAO, userListExerciseJoinDAO);
     IAnnotationDAO annotationDAO = new SlickAnnotationDAO(this, dbConnection, this.userDAO.getDefectDetector());
 
-    IReviewedDAO reviewedDAO = new SlickReviewedDAO(this, dbConnection, true);
+    IReviewedDAO reviewedDAO    = new SlickReviewedDAO(this, dbConnection, true);
     IReviewedDAO secondStateDAO = new SlickReviewedDAO(this, dbConnection, false);
 
     userListManager = new UserListManager(this.userDAO,
@@ -296,10 +296,10 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         annotationDAO,
         reviewedDAO,
         secondStateDAO,
-        new SlickUserListExerciseVisitorDAO(this,dbConnection),
+        new SlickUserListExerciseVisitorDAO(this, dbConnection),
         pathHelper);
 
-    projectDAO = new ProjectDAO(this,dbConnection);
+    projectDAO = new ProjectDAO(this, dbConnection);
 
     createTables();
 
@@ -513,7 +513,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         } else {
           makeExerciseDAO(lessonPlanFile, isURL);
 
-   //       logger.info("set exercise dao " + exerciseDAO + " on " + userExerciseDAO);
+          //       logger.info("set exercise dao " + exerciseDAO + " on " + userExerciseDAO);
           userExerciseDAO.setExerciseDAO(exerciseDAO);
 
           setDependencies(mediaDir, installPath, this.exerciseDAO);
@@ -536,6 +536,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       this.exerciseDAO = new JSONURLExerciseDAO(getServerProps(), userListManager, ADD_DEFECTS);
     } else if (lessonPlanFile.endsWith(".json")) {
       this.exerciseDAO = new JSONExerciseDAO(lessonPlanFile, getServerProps(), userListManager, ADD_DEFECTS);
+    } else if (!serverProps.useH2()) {
+      this.exerciseDAO = new DBExerciseDAO(getServerProps(), userListManager, ADD_DEFECTS, (SlickUserExerciseDAO) getUserExerciseDAO());
     } else {
       this.exerciseDAO = new ExcelImport(lessonPlanFile, getServerProps(), userListManager, ADD_DEFECTS);
     }
@@ -896,7 +898,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return audioDAO;
   }
 
-  public IWordDAO getWordDAO() {  return wordDAO;  }
+  public IWordDAO getWordDAO() {
+    return wordDAO;
+  }
 
   public IPhoneDAO getPhoneDAO() {
     return phoneDAO;
@@ -906,11 +910,12 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * TODO : add get tablename method to slick DAOs.
    */
   public void createTables() {
-    logger.info("createTables create slick tables...");
+    logger.info("createTables create slick tables - has " +dbConnection.getTables());
 
     List<String> created = new ArrayList<>();
 
     List<IDAO> idaos = Arrays.asList(
+        getProjectDAO(),
         getUserDAO(),
         getAudioDAO(),
         getEventDAO(),
@@ -920,19 +925,22 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         getWordDAO(),
         getPhoneDAO(),
         getRefResultDAO(),
-        getProjectDAO(),
-        ((ProjectDAO)getProjectDAO()).getProjectPropertyDAO()
-        );
-    for (IDAO dao: idaos) createIfNotThere(dao,created);
+        getReviewedDAO(),
+        getSecondStateDAO(),
+        ((ProjectDAO) getProjectDAO()).getProjectPropertyDAO()
+    );
+    for (IDAO dao : idaos) createIfNotThere(dao, created);
 
 //    if (!dbConnection.hasTable("result")) ((ISchema) getResultDAO()).createTable();
 //    if (!dbConnection.hasTable("userexercise")) ((ISchema) userExerciseDAO).createTable();
     userListManager.createTables(dbConnection, created);
 //    if (!dbConnection.hasTable("annotation")) ((ISchema) getAnnotationDAO()).createTable();
- //   if (!dbConnection.hasTable("word")) ((ISchema) getWordDAO()).createTable();
-  //  if (!dbConnection.hasTable("phone")) ((ISchema) getPhoneDAO()).createTable();
-   // if (!dbConnection.hasTable("refresult")) ((SlickRefResultDAO) getRefResultDAO()).createTable();
+    //   if (!dbConnection.hasTable("word")) ((ISchema) getWordDAO()).createTable();
+    //  if (!dbConnection.hasTable("phone")) ((ISchema) getPhoneDAO()).createTable();
+    // if (!dbConnection.hasTable("refresult")) ((SlickRefResultDAO) getRefResultDAO()).createTable();
     logger.info("createTables created slick tables : " + created);
+    logger.info("createTables after create slick tables - has " +dbConnection.getTables());
+
   }
 
   void createIfNotThere(IDAO slickUserDAO, List<String> created) {
@@ -943,7 +951,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     }
   }
 
-  public void dropTables() { dbConnection.dropAll();  }
+//  public void dropTables() {
+//    dbConnection.dropAll();
+//  }
 
   public void copyToPostgres() {
     new CopyToPostgres().copyToPostgres(this);
@@ -960,7 +970,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     for (MonitorResult result : monitorResults) {
       CommonShell exercise = isAmas() ? getAMASExercise(result.getExID()) : getExercise(result.getExID());
       if (exercise != null) {
-        result.setDisplayID(""+exercise.getDominoID());
+        result.setDisplayID("" + exercise.getDominoID());
       }
     }
     return getMonitorResultsWithText(monitorResults);
@@ -1550,7 +1560,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return userListManager.getSecondStateDAO();
   }
 
-  public IProjectDAO getProjectDAO() { return projectDAO; }
+  public IProjectDAO getProjectDAO() {
+    return projectDAO;
+  }
 
   public UserManagement getUserManagement() {
     return userManagement;
