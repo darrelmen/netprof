@@ -85,6 +85,7 @@ public abstract class BaseUserDAO extends DAO {
    * After a default user has been marked female
    */
   public static final int DEFAULT_FEMALE_ID = -3;
+  public static final int UNDEFINED_USER = -5;
   public static MiniUser DEFAULT_USER   = new MiniUser(DEFAULT_USER_ID,   99, true, "default", false);
   public static MiniUser DEFAULT_MALE   = new MiniUser(DEFAULT_MALE_ID,   99, true, "Male", false);
   public static MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 99, false, "Female", false);
