@@ -44,9 +44,12 @@ import java.util.Map;
  * @since 1/5/16.
  */
 public class BaseExercise implements IsSerializable, Shell {
-  @Deprecated
-  protected String id;
+  @Deprecated protected String id;
   protected int realID;
+
+  /**
+   * TODO : why do we need to carry this around?
+   */
   protected Map<String, String> unitToValue = new HashMap<>();
   private STATE state = STATE.UNSET;
   private STATE secondState = STATE.UNSET;

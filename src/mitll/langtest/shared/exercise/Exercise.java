@@ -37,10 +37,9 @@ import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import net.sf.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+
+import static mitll.langtest.server.database.user.BaseUserDAO.UNDEFINED_USER;
 
 /**
  * Representation of a individual item of work the user sees.  Could be a pronunciation exercise or a question(s)
@@ -118,6 +117,19 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.dominoID = dominoID;
   }
 
+  public Exercise(int exid,
+                  String oldid,
+                  String englishSentence,
+                  String foreignLanguage,
+                  String meaning,
+                  String transliteration) {
+    super(oldid, exid);
+    setEnglishSentence(englishSentence);
+    this.meaning = meaning;
+    setForeignLanguage(foreignLanguage);
+    setTransliteration(transliteration);
+  }
+
   @Override
   public Collection<String> getRefSentences() {
     return refSentences;
@@ -152,7 +164,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
    */
   @Override
   public int getCreator() {
-    return -5;
+    return UNDEFINED_USER;
   }
 
   @Override
