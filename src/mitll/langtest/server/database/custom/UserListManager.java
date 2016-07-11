@@ -174,7 +174,7 @@ public class UserListManager {
   private void setStateOnUserExercises(Map<String, StateCreator> exerciseToState,
                                        Set<String> userExercisesRemaining, boolean firstState) {
     int count = 0;
-    Collection<CommonExercise> userExercises = userExerciseDAO.getWhere(userExercisesRemaining);
+    Collection<CommonExercise> userExercises = userExerciseDAO.getByExID(userExercisesRemaining);
 
     for (Shell commonUserExercise : userExercises) {
       StateCreator state = exerciseToState.get(commonUserExercise.getID());
@@ -431,7 +431,7 @@ public class UserListManager {
     }
     //logger.debug("getCommentedList After there are " + idToCreator.size() + " idToCreator items ");
 
-    Collection<CommonExercise> include = userExerciseDAO.getWhere(incorrectAnnotations);
+    Collection<CommonExercise> include = userExerciseDAO.getByExID(incorrectAnnotations);
     //logger.debug("getCommentedList include " + include.size() + " included ");
 
     UserList<CommonShell> reviewList = getReviewList(include, COMMENTS, ALL_ITEMS_WITH_COMMENTS, incorrectAnnotations, COMMENT_MAGIC_ID, typeOrder);
@@ -451,7 +451,7 @@ public class UserListManager {
       }
     }
 
-    Collection<CommonExercise> allKnown = userExerciseDAO.getWhere(defectIds);
+    Collection<CommonExercise> allKnown = userExerciseDAO.getByExID(defectIds);
     logger.debug("\tgetAttentionList ids #=" + allKnown.size());
 
     return getReviewList(allKnown, ATTENTION, "Items for LL review", defectIds, ATTN_LL_MAGIC_ID, typeOrder);
@@ -476,7 +476,7 @@ public class UserListManager {
       }
     }
 
-    Collection<CommonExercise> allKnown = userExerciseDAO.getWhere(defectIds);
+    Collection<CommonExercise> allKnown = userExerciseDAO.getByExID(defectIds);
     //logger.debug("\tgetDefectList ids #=" + allKnown.size() + " vs " + defectIds.size());
 
     return getReviewList(allKnown, REVIEW, ITEMS_TO_REVIEW, defectIds, REVIEW_MAGIC_ID, typeOrder);
@@ -840,7 +840,7 @@ public class UserListManager {
     CommonExercise predefExercise = userExerciseDAO.getPredefExercise(id);
 
     if (predefExercise == null) {
-      predefExercise = userExerciseDAO.getWhere(id);
+      predefExercise = userExerciseDAO.getByExID(id);
     }
     if (predefExercise != null) {
       if (state.equals(STATE.ATTN_LL)) {

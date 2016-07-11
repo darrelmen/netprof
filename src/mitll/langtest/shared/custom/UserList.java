@@ -35,6 +35,7 @@ package mitll.langtest.shared.custom;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.server.database.userlist.SlickUserListDAO;
 import mitll.langtest.server.database.userlist.UserListDAO;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.exercise.BaseExercise;
@@ -149,6 +150,7 @@ public class UserList<T extends HasID> extends BaseExercise {
   /**
    * @param exercises
    * @see UserListDAO#populateList(UserList)
+   * @see SlickUserListDAO#populateList(UserList)
    */
   public void setExercises(List<T> exercises) {
     this.exercises = exercises;

@@ -43,15 +43,20 @@ import java.util.List;
 public interface IUserExerciseDAO extends IDAO {
   void add(CommonExercise userExercise, boolean isOverride);
 
-  List<CommonShell> getOnList(long listID);
+  List<CommonShell> getOnList(int listID);
 
-  CommonExercise getWhere(String exid);
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#getUserExerciseWhere(String)
+   * @param exid
+   * @return
+   */
+  CommonExercise getByExID(String exid);
 
   Collection<CommonExercise> getAll();
 
   Collection<CommonExercise> getOverrides();
 
-  Collection<CommonExercise> getWhere(Collection<String> exids);
+  Collection<CommonExercise> getByExID(Collection<String> exids);
 
   void update(CommonExercise userExercise, boolean createIfDoesntExist);
 
