@@ -67,4 +67,6 @@ public interface MutableExercise extends CommonShell, MutableShell {
   void setRefSentences(Collection<String> orDefault);
 
   void setSafeToDecode(boolean isSafeToDecode);
+
+  void addContextExercise(CommonExercise contextExercise);
 }
