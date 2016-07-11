@@ -199,8 +199,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
    */
   public void addContext(String context, String contextTranslation) {
     if (!context.isEmpty()) {
-      Exercise contextExercise = new Exercise("c" + id, context, contextTranslation);
-      addContextExercise(contextExercise);
+      addContextExercise(new Exercise("c" + id, context, contextTranslation));
     }
   }
 
@@ -294,7 +293,11 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return updateTime;
   }
 
-  private void addContextExercise(CommonExercise contextExercise) {
+  /**
+   * @see #addContext(String, String)
+   * @param contextExercise
+   */
+  public void addContextExercise(CommonExercise contextExercise) {
     directlyRelated.add(contextExercise);
   }
 

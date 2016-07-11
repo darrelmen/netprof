@@ -49,6 +49,13 @@ public class UserExTest extends BaseTest {
   private static final Logger logger = Logger.getLogger(UserExTest.class);
 
   @Test
+  public void testExercise() {
+    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
+    CommonExercise next = spanish.getExercises().iterator().next();
+    logger.info("got " + next.getDirectlyRelated());
+  }
+
+  @Test
   public void testUserList() {
     DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
 
@@ -74,7 +81,7 @@ public class UserExTest extends BaseTest {
 
     logger.info("predef " + predefExercise);
 
-    logger.info("got " + dao.getWhere(Arrays.asList("1959", "1962")));
+    logger.info("got " + dao.getByExID(Arrays.asList("1959", "1962")));
   }
 
   @Test
@@ -87,7 +94,7 @@ public class UserExTest extends BaseTest {
     for (UserList<CommonShell> list : listsForUser) {
       logger.info("got " + list);
       for (CommonShell ex : list.getExercises()) {
-        logger.info("\t" + list + " has " + ex);
+        logger.info("\t" + list.getRealID() +"/" +list.getID() + " has " + ex);
       }
     }
   }
