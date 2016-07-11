@@ -36,15 +36,14 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.npdata.dao.SlickRelatedExercise;
 import org.apache.log4j.Logger;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<CommonExercise> {
   private static final Logger logger = Logger.getLogger(DBExerciseDAO.class);
- // private final Collection<String> typeOrder;
+  // private final Collection<String> typeOrder;
   SlickUserExerciseDAO userExerciseDAO;
 
   /**
@@ -56,21 +55,37 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       boolean addDefects,
       SlickUserExerciseDAO userExerciseDAO) {
     super(serverProps, userListManager, addDefects);
-   // this.typeOrder = serverProps.getTypes();
+    // this.typeOrder = serverProps.getTypes();
     this.userExerciseDAO = userExerciseDAO;
     //  new DominoReader().readProjectInfo(serverProps);
   }
 
   /**
+   * Does join with related exercise table - maybe better way to do this in scala side?
    * TODO : type order is from the project
-   * @see #getRawExercises()
+   *
    * @return
+   * @see #getRawExercises()
    */
   @Override
   List<CommonExercise> readExercises() {
     try {
-      List<String> typeOrder   = Arrays.asList("Unit", "Chapter");
+      List<String> typeOrder = Arrays.asList("Unit", "Chapter");
       List<CommonExercise> allExercises = userExerciseDAO.getAllExercises(typeOrder, getSectionHelper());
+
+      Collection<SlickRelatedExercise> related = userExerciseDAO.getAllRelated();
+
+      Map<Integer, CommonExercise> idToEx = new HashMap<>();
+      for (CommonExercise ex : allExercises) {
+        idToEx.put(ex.getRealID(), ex);
+      }
+
+      for (SlickRelatedExercise relatedExercise : related) {
+        CommonExercise root = idToEx.get(relatedExercise.id());
+        CommonExercise context = idToEx.get(relatedExercise.contextexid());
+        if (root != null && context != null) root.getMutable().addContextExercise(context);
+      }
+      logger.info("Read " + allExercises.size() + " exercises from database");
       //  List<CommonExercise> exercises = getExercisesFromArray(getJSON());
       return allExercises;
     } catch (Exception e) {

@@ -258,7 +258,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
    * @see UserListDAO#populateList
    */
   @Override
-  public List<CommonShell> getOnList(long listID) {
+  public List<CommonShell> getOnList(int listID) {
     String sql = getJoin(listID);
     List<CommonShell> userExercises2 = new ArrayList<>();
 
@@ -309,7 +309,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   }
 
   /**
-   * @see #getOnList(long)
+   * @see IUserExerciseDAO#getOnList(int)
    * @param listID
    * @return
    */
@@ -348,7 +348,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
    * @see mitll.langtest.server.database.DatabaseImpl#getUserExerciseWhere(String)
    */
   @Override
-  public CommonExercise getWhere(String exid) {
+  public CommonExercise getByExID(String exid) {
     exid = exid.replaceAll("\'", "");
     String sql = "SELECT * from " + USEREXERCISE + " where " + EXERCISEID + "='" + exid + "'";
     Collection<CommonExercise> commonExercises = getCommonExercises(sql);
@@ -407,7 +407,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
    * @see UserListManager#getDefectList(java.util.Collection)
    */
   @Override
-  public Collection<CommonExercise> getWhere(Collection<String> exids) {
+  public Collection<CommonExercise> getByExID(Collection<String> exids) {
     if (exids.isEmpty()) return new ArrayList<>();
     String sql = "SELECT * from " + USEREXERCISE + " where " + EXERCISEID + " in (" + getIds(exids) + ")";
     return getCommonExercises(sql);
@@ -425,9 +425,9 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
    * @param sql
    * @return user exercises without annotations
    * @throws SQLException
-   * @see #getOnList(long)
+   * @see IUserExerciseDAO#getOnList(int)
    * @see #getOverrides()
-   * @see #getWhere(java.lang.String)
+   * @see #getByExID(java.lang.String)
    */
   private Collection<CommonExercise> getUserExercises(String sql) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
