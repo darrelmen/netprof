@@ -609,7 +609,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     boolean notOverlay = exercise == null;
     if (notOverlay) {
       // not an overlay! it's a new user exercise
-      exercise = getUserExerciseWhere(userExercise.getID());
+      exercise = getUserExerciseByExID(userExercise.getID());
       logger.debug("not an overlay " + exercise);
     } else {
       exercise = userExercise;
@@ -921,6 +921,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         getEventDAO(),
         getResultDAO(),
         userExerciseDAO,
+        ((SlickUserExerciseDAO)userExerciseDAO).getRelatedExercise(),
         getAnnotationDAO(),
         getWordDAO(),
         getPhoneDAO(),
@@ -1187,7 +1188,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExercise
    */
   public CommonExercise getCustomOrPredefExercise(String id) {
-    CommonExercise userEx = getUserExerciseWhere(id);  // allow custom items to mask out non-custom items
+    CommonExercise userEx = getUserExerciseByExID(id);  // allow custom items to mask out non-custom items
 
     CommonExercise toRet;
 
@@ -1215,9 +1216,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @see #editItem
    * @see #getCustomOrPredefExercise(String)
    */
-  private CommonExercise getUserExerciseWhere(String id) {
-    return userExerciseDAO.getWhere(id);
-  }
+  private CommonExercise getUserExerciseByExID(String id) { return userExerciseDAO.getByExID(id);  }
 
   @Override
   public ServerProperties getServerProps() {

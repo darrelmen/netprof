@@ -110,6 +110,7 @@ public class CopyToPostgres {
     File file = getConfigFile(config, inTest);
     String parent = file.getParentFile().getAbsolutePath();
     ServerProperties serverProps = new ServerProperties(parent, file.getName());
+    serverProps.setH2(true);
     DatabaseImpl<CommonExercise> database = getDatabaseVeryLight(config, inTest);
     String installPath = getInstallPath(inTest);
     database.setInstallPath(installPath, parent + File.separator + database.getServerProps().getLessonPlan(),
@@ -132,6 +133,7 @@ public class CopyToPostgres {
 
     logger.info("path is " + parent);
     ServerProperties serverProps = new ServerProperties(parent, name);
+    serverProps.setH2(true);
     return new DatabaseImpl<>(parent, name, serverProps.getH2Database(), serverProps,
         new PathHelper(getInstallPath(inTest)), false, null, true);
   }
@@ -203,7 +205,7 @@ public class CopyToPostgres {
 
     Map<Integer, Integer> oldToNewUserList = slickUserListDAO.getOldToNew();
     copyUserExerciseListVisitor(db, oldToNewUser, oldToNewUserList, (SlickUserListExerciseVisitorDAO) db.getUserListManager().getVisitorDAO());
- //   copyUserExerciseListJoin(db, oldToNewUserList);
+    //   copyUserExerciseListJoin(db, oldToNewUserList);
 
     copyUserExListJoin(db);
   }
@@ -457,8 +459,7 @@ public class CopyToPostgres {
 //          logger.info("Adding user exercise join : " +join.userlistid + " adding " + exerciseID + " : " +customOrPredefExercise);
           if (customOrPredefExercise == null) {
             logger.error("can't find " + exerciseID + " in " + db.getExercises().size() + " exercises");
-          }
-          else {
+          } else {
             slickUserListExerciseJoinDAO.addPair(integer, exerciseID, customOrPredefExercise.getRealID());
           }
         }
@@ -523,12 +524,21 @@ public class CopyToPostgres {
 
     List<SlickExercise> bulk = new ArrayList<>();
 
-    if (slickUEDAO.isEmpty()) {
+    int n = 0;
+    int ct = 0;
+    if (slickUEDAO.isProjectEmpty(projectID)) {
       for (CommonExercise ex : db.getExercises()) {
-        bulk.add(slickUEDAO.toSlick(ex, false, projectID, true, slickUserDAO.getImportUser()));
+        //     bulk.add(slickUEDAO.toSlick(ex, false, projectID, true, slickUserDAO.getImportUser(), false));
+        int id = slickUEDAO.insert(slickUEDAO.toSlick(ex, false, projectID, true, slickUserDAO.getImportUser(), false));
+        for (CommonExercise context : ex.getDirectlyRelated()) {
+          int contextid = slickUEDAO.insert(slickUEDAO.toSlick(context, false, projectID, true, slickUserDAO.getImportUser(), true));
+          slickUEDAO.insertRelated(id, contextid);
+          ct++;
+        }
+        n++;
       }
 
-      logger.info("importing " + bulk.size() + " predef exercises");
+      logger.info("importing " + n + " predef exercises and " + ct+ " context exercises");
 
       try {
         int c = 0;
@@ -621,12 +631,13 @@ public class CopyToPostgres {
     }
     String action = arg[0];
     String config = arg[1];
+    boolean inTest = arg.length > 2;
     if (action.equals("drop")) {
       logger.info("drop " + config);
-      new CopyToPostgres().testDrop(config, false);
+      new CopyToPostgres().testDrop(config, inTest);
     } else if (action.equals("copy")) {
       logger.info("copying " + config);
-      new CopyToPostgres().copyToPostgres(config, false);
+      new CopyToPostgres().copyToPostgres(config, inTest);
     }
   }
 }

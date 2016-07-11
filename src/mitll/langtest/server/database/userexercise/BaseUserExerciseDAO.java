@@ -57,6 +57,7 @@ public class BaseUserExerciseDAO extends DAO {
    *
    * @param userExercises2
    * @param userExercises
+   * @deprecated not needed with postgres
    */
   void enrichWithPredefInfo(List<CommonShell> userExercises2, Collection<CommonExercise> userExercises) {
     int c = 0;
