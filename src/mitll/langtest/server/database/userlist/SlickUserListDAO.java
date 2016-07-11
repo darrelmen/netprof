@@ -63,11 +63,11 @@ public class SlickUserListDAO extends DAO implements IUserListDAO, ISchema<UserL
   private SlickUserListExerciseJoinDAO userListExerciseJoinDAO;
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(PathHelper)
    * @param database
    * @param dbConnection
    * @param userDAO
    * @param userExerciseDAO
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(PathHelper)
    */
   public SlickUserListDAO(Database database, DBConnection dbConnection, IUserDAO userDAO, IUserExerciseDAO userExerciseDAO,
                           SlickUserListExerciseJoinDAO userListExerciseJoinDAO) {
@@ -97,7 +97,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO, ISchema<UserL
         shared.getClassMarker(),
         shared.isPrivate(),
         false,
-         shared.getRealID());
+        shared.getRealID());
   }
 
   public SlickUserExerciseList toSlick2(UserList<CommonShell> shared, int userid) {
@@ -139,7 +139,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO, ISchema<UserL
 
   @Override
   public void addVisitor(long listid, long userid) {
-    visitorDAOWrapper.insert((int) listid, (int) userid,System.currentTimeMillis());
+    visitorDAOWrapper.insert((int) listid, (int) userid, System.currentTimeMillis());
   }
 
   @Override
@@ -150,8 +150,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO, ISchema<UserL
 
   public void addWithUser(UserList<CommonShell> userList, int userid) {
     SlickUserExerciseList user = toSlick2(userList, userid);
-    int assignedID = dao.insert(user);
-    userList.setUniqueID(assignedID);
+    userList.setUniqueID(dao.insert(user));
   }
 
   @Override
@@ -167,9 +166,9 @@ public class SlickUserListDAO extends DAO implements IUserListDAO, ISchema<UserL
   /**
    * Side effect is to add user exercises to lists.
    *
-   * @see mitll.langtest.server.database.custom.UserListManager#getListsForUser(int, boolean, boolean)
    * @param userid
    * @return
+   * @see mitll.langtest.server.database.custom.UserListManager#getListsForUser(int, boolean, boolean)
    */
   @Override
   public List<UserList<CommonShell>> getAllByUser(long userid) {
@@ -191,18 +190,21 @@ public class SlickUserListDAO extends DAO implements IUserListDAO, ISchema<UserL
   private void populateList(UserList<CommonShell> where) {
     List<CommonShell> onList = userExerciseDAO.getOnList(where.getRealID());
     where.setExercises(onList);
+
+    for (CommonShell shell : onList) logger.info("for " + where.getID() + " found " + shell);
+/*
     Set<String> userExIDs = new HashSet<>();
     for (CommonShell shell : onList) userExIDs.add(shell.getID());
 
     Collection<String> exidsFor = userListExerciseJoinDAO.getExidsFor(where.getRealID());
 
-    for (String exid: exidsFor) {
+    for (String exid : exidsFor) {
       if (!userExIDs.contains(exid)) {
         CommonExercise predefExercise = userExerciseDAO.getPredefExercise(exid);
         if (exid == null) logger.warn("can't find " + exid + " for list " + where);
         else onList.add(predefExercise);
       }
-    }
+    }*/
   }
 
   /**
@@ -269,7 +271,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO, ISchema<UserL
     if (slickUserExerciseListOption.isDefined()) {
       return fromSlick(slickUserExerciseListOption.get());
     } else {
-      if (warnIfMissing) logger.error("getWhere : huh? no user list with id " + unique);
+      if (warnIfMissing) logger.error("getByExID : huh? no user list with id " + unique);
       return null;
     }
   }
@@ -283,6 +285,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO, ISchema<UserL
 
   /**
    * TODO : not needed?
+   *
    * @param userExerciseDAO
    */
   @Override
@@ -293,7 +296,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO, ISchema<UserL
   @Override
   public void setPublicOnList(long userListID, boolean isPublic) {
     int i = dao.setPublic((int) userListID, isPublic);
-    if (i == 0) logger.error("setPublicOnList : huh? didn't update the userList for " + userListID );
+    if (i == 0) logger.error("setPublicOnList : huh? didn't update the userList for " + userListID);
   }
 
   public UserExerciseListVisitorDAOWrapper getVisitorDAOWrapper() {
@@ -306,5 +309,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO, ISchema<UserL
     return oldToNew;
   }
 
-  public boolean isEmpty() { return dao.getNumRows() == 0; }
+  public boolean isEmpty() {
+    return dao.getNumRows() == 0;
+  }
 }

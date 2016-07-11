@@ -448,7 +448,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 	private void addNewExercises() {
 		if (addRemoveDAO != null) {
 			for (AddRemoveDAO.IdAndTime id : addRemoveDAO.getAdds()) {
-				CommonExercise where = userExerciseDAO.getWhere(id.getId());
+				CommonExercise where = userExerciseDAO.getByExID(id.getId());
 				if (where == null) {
 					logger.error("getRawExercises huh? couldn't find user exercise from add exercise table in user exercise table : " + id);
 				} else {
