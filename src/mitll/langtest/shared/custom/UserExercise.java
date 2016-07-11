@@ -192,7 +192,7 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
     return isPredef;
   }
 
-  protected void addContextExercise(CommonExercise contextExercise) {
+  public void addContextExercise(CommonExercise contextExercise) {
     directlyRelated.add(contextExercise);
   }
 
@@ -248,6 +248,7 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
   }
 
   /**
+   * @deprecated
    * @return
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getCreateButton(UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, com.github.gwtbootstrap.client.ui.ControlGroup)
    */

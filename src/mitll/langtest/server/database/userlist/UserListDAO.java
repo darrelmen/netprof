@@ -409,7 +409,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
           )
       );
     }
-    //logger.debug("getWhere : got " + lists);
+    //logger.debug("getByExID : got " + lists);
     finish(connection, statement, rs);
     return lists;
   }
