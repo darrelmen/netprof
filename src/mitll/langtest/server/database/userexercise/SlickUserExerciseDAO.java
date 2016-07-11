@@ -33,15 +33,20 @@
 package mitll.langtest.server.database.userexercise;
 
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.shared.custom.UserExercise;
+import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Exercise;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickExercise;
-import mitll.npdata.dao.userexercise.UserExerciseDAOWrapper;
+import mitll.npdata.dao.SlickRelatedExercise;
+import mitll.npdata.dao.SlickUser;
+import mitll.npdata.dao.userexercise.ExerciseDAOWrapper;
+import mitll.npdata.dao.userexercise.RelatedExerciseDAOWrapper;
 import org.apache.log4j.Logger;
 import scala.collection.Seq;
 
@@ -52,11 +57,13 @@ public class SlickUserExerciseDAO
     extends BaseUserExerciseDAO implements IUserExerciseDAO/*, ISchema<UserExercise, SlickExercise>*/ {
   private static final Logger logger = Logger.getLogger(SlickUserExerciseDAO.class);
 
-  private final UserExerciseDAOWrapper dao;
+  private final ExerciseDAOWrapper dao;
+  private final RelatedExerciseDAOWrapper relatedExerciseDAOWrapper;
 
   public SlickUserExerciseDAO(Database database, DBConnection dbConnection) {
     super(database);
-    dao = new UserExerciseDAOWrapper(dbConnection);
+    dao = new ExerciseDAOWrapper(dbConnection);
+    relatedExerciseDAOWrapper = new RelatedExerciseDAOWrapper(dbConnection);
   }
 
   public void createTable() {
@@ -88,7 +95,7 @@ public class SlickUserExerciseDAO
         unitToValue.getOrDefault(first, ""),
         unitToValue.getOrDefault(second, ""),
         projectID,  // project id fk
-        false,
+        false, false,
         shared.getRealID());
   }
 
@@ -109,19 +116,20 @@ public class SlickUserExerciseDAO
    * @return
    */
   public SlickExercise toSlick(CommonExercise shared, @Deprecated boolean isOverride) {
-    return toSlick(shared, isOverride, -1, false, BaseUserDAO.DEFAULT_USER_ID);
+    return toSlick(shared, isOverride, -1, false, BaseUserDAO.DEFAULT_USER_ID, false);
   }
 
   /**
    * @param shared
    * @param isOverride
    * @param isPredef
+   * @param isContext
    * @return
    * @see SlickUserExerciseDAO#add(CommonExercise, boolean)
    */
   public SlickExercise toSlick(CommonExercise shared, @Deprecated boolean isOverride, int projectID, boolean isPredef,
-                               int importUser
-                               ) {
+                               int importUser,
+                               boolean isContext) {
     Map<String, String> unitToValue = shared.getUnitToValue();
     Iterator<String> iterator = getTypeOrder().iterator();
     String first = iterator.next();
@@ -129,6 +137,8 @@ public class SlickUserExerciseDAO
 
     int creator = shared.getCreator();
     if (creator == BaseUserDAO.UNDEFINED_USER) creator = importUser;
+
+
     return new SlickExercise(-1,
         creator,
         shared.getID(),
@@ -142,9 +152,15 @@ public class SlickUserExerciseDAO
         unitToValue.getOrDefault(second, ""),
         projectID,  // project id fk
         isPredef,
+        isContext,
         -1);
   }
 
+  /**
+   * @param slick
+   * @return
+   * @see #getUserExercises(Collection)
+   */
   //  @Override
   private UserExercise fromSlick(SlickExercise slick) {
     Map<String, String> unitToValue = new HashMap<>();
@@ -155,7 +171,7 @@ public class SlickUserExerciseDAO
     if (!second.isEmpty())
       unitToValue.put(second, slick.lesson());
 
-    return new UserExercise(
+    UserExercise userExercise = new UserExercise(
         slick.id(),
         slick.exid(),
         slick.userid(),
@@ -165,6 +181,9 @@ public class SlickUserExerciseDAO
         slick.isoverride(),
         unitToValue,
         slick.modified().getTime());
+
+    logger.info("created " + userExercise);
+    return userExercise;
   }
 
   long lastModified = System.currentTimeMillis();
@@ -176,7 +195,9 @@ public class SlickUserExerciseDAO
    * @param slick
    * @return
    */
-  private Exercise fromSlickToExercise(SlickExercise slick, List<String> typeOrder, SectionHelper<CommonExercise> sectionHelper) {
+  private Exercise fromSlickToExercise(SlickExercise slick,
+                                       Collection<String> typeOrder,
+                                       SectionHelper<CommonExercise> sectionHelper) {
     Map<String, String> unitToValue = new HashMap<>();
     // List<String> typeOrder = getTypeOrder();
     Iterator<String> iterator = typeOrder.iterator();
@@ -187,12 +208,12 @@ public class SlickUserExerciseDAO
       unitToValue.put(second, slick.lesson());
 
     Exercise exercise = new Exercise(
+        slick.id(),
         slick.exid(),
         slick.english(),
         slick.meaning(),
         slick.foreignlanguage(),
-        slick.transliteration(),
-        -1);
+        slick.transliteration());
 
     List<String> translations = new ArrayList<String>();
     if (slick.foreignlanguage().length() > 0) {
@@ -214,8 +235,8 @@ public class SlickUserExerciseDAO
     return exercise;
   }
 
-  public void insert(SlickExercise UserExercise) {
-    dao.insert(UserExercise);
+  public int insert(SlickExercise UserExercise) {
+    return dao.insert(UserExercise);
   }
 
   public void addBulk(List<SlickExercise> bulk) {
@@ -230,13 +251,20 @@ public class SlickUserExerciseDAO
     return dao.getNumRows() == 0;
   }
 
-  private List<CommonExercise> getUserExercises(List<SlickExercise> all) {
+  /**
+   * @param all
+   * @return
+   * @see
+   * @see IUserExerciseDAO#getOnList(int)
+   */
+  private List<CommonExercise> getUserExercises(Collection<SlickExercise> all) {
     List<CommonExercise> copy = new ArrayList<>();
     for (SlickExercise userExercise : all) copy.add(fromSlick(userExercise));
     return copy;
   }
 
-  private List<CommonExercise> getExercises(List<SlickExercise> all, List<String> typeOrder,
+  private List<CommonExercise> getExercises(Collection<SlickExercise> all,
+                                            Collection<String> typeOrder,
                                             SectionHelper<CommonExercise> sectionHelper) {
     List<CommonExercise> copy = new ArrayList<>();
     for (SlickExercise userExercise : all) copy.add(fromSlickToExercise(userExercise, typeOrder, sectionHelper));
@@ -254,15 +282,24 @@ public class SlickUserExerciseDAO
     insert(toSlick(userExercise, isOverride));
   }
 
+  /**
+   * @param listID
+   * @return
+   * @see mitll.langtest.server.database.userlist.SlickUserListDAO#populateList(UserList)
+   */
   @Override
-  public List<CommonShell> getOnList(long listID) {
+  public List<CommonShell> getOnList(int listID) {
+    List<CommonExercise> userExercises = getUserExercises(dao.getOnList(listID));
     List<CommonShell> userExercises2 = new ArrayList<>();
-    enrichWithPredefInfo(userExercises2, getUserExercises(dao.getOnList((int) listID)));
+    userExercises2.addAll(userExercises);
     return userExercises2;
+//    List<CommonShell> userExercises2 = new ArrayList<>();
+//    enrichWithPredefInfo(userExercises2, userExercises);
+//    return userExercises2;
   }
 
   @Override
-  public CommonExercise getWhere(String exid) {
+  public CommonExercise getByExID(String exid) {
     exid = exid.replaceAll("\'", "");
     Seq<SlickExercise> byExid = dao.getByExid(exid);
     return byExid.isEmpty() ? null : fromSlick(byExid.iterator().next());
@@ -282,7 +319,7 @@ public class SlickUserExerciseDAO
   }
 
   @Override
-  public Collection<CommonExercise> getWhere(Collection<String> exids) {
+  public Collection<CommonExercise> getByExID(Collection<String> exids) {
     return getUserExercises(dao.byExids(exids));
   }
 
@@ -299,4 +336,24 @@ public class SlickUserExerciseDAO
       dao.insert(slickUserExercise);
     }
   }
+
+  public boolean isProjectEmpty(int projectid) {
+    return dao.isProjectEmpty(projectid);
+  }
+
+  private RelatedExerciseDAOWrapper getRelatedExerciseDAOWrapper() {
+    return relatedExerciseDAOWrapper;
+  }
+
+  public IDAO getRelatedExercise() {
+    return new IDAO() {
+      public void createTable() { relatedExerciseDAOWrapper.createTable(); }
+      public String getName()   { return relatedExerciseDAOWrapper.getName(); }
+    };
+  }
+  public void insertRelated(int id, int contextid) {
+    relatedExerciseDAOWrapper.insert(new SlickRelatedExercise(-1, id, contextid));
+  }
+
+  public Collection<SlickRelatedExercise> getAllRelated() { return relatedExerciseDAOWrapper.all();}
 }
