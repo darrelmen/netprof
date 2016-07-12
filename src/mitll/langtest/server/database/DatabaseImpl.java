@@ -915,8 +915,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     List<String> created = new ArrayList<>();
 
     List<IDAO> idaos = Arrays.asList(
-        getProjectDAO(),
         getUserDAO(),
+        getProjectDAO(),
         getAudioDAO(),
         getEventDAO(),
         getResultDAO(),
@@ -941,10 +941,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     // if (!dbConnection.hasTable("refresult")) ((SlickRefResultDAO) getRefResultDAO()).createTable();
     logger.info("createTables created slick tables : " + created);
     logger.info("createTables after create slick tables - has " +dbConnection.getTables());
-
   }
 
-  void createIfNotThere(IDAO slickUserDAO, List<String> created) {
+  private void createIfNotThere(IDAO slickUserDAO, List<String> created) {
     String name = slickUserDAO.getName();
     if (!dbConnection.hasTable(name)) {
       logger.info("createIfNotThere create " + name);
