@@ -313,10 +313,6 @@ public class Navigation implements RequiresResize, ShowTab {
     }
   }
 
-  private boolean permittedToRecord() {
-    return controller.getPermissions().contains(User.Permission.RECORD_AUDIO);
-  }
-
   /**
    * @see #addTabs()
    */
@@ -476,7 +472,11 @@ public class Navigation implements RequiresResize, ShowTab {
   }
 
   private boolean isQC() {
-    return controller.getPermissions().contains(User.Permission.QUALITY_CONTROL);
+    return controller.getPermissions().contains(User.Permission.QUALITY_CONTROL) || controller.isAdmin();
+  }
+
+  private boolean permittedToRecord() {
+    return controller.getPermissions().contains(User.Permission.RECORD_AUDIO)    || controller.isAdmin();
   }
 
   private void logEvent(TabAndContent yourStuff, String context) {
