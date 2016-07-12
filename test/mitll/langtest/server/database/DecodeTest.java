@@ -32,6 +32,18 @@ public class DecodeTest extends BaseTest {
   }
 
 
+  //public static final boolean DO_ONE = false;
+
+  @Test
+  public void testEgyptianReadOneExercise() {
+    DatabaseImpl<CommonExercise> db = getDatabase("egyptian");
+    CommonExercise exercise = db.getExercises().iterator().next();
+
+    //String context = exercise.getContext();
+
+    logger.info("got\n" + exercise);
+  }
+
 
   @Test
   public void testRussianContext() {
