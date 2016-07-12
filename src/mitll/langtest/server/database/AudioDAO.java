@@ -198,7 +198,7 @@ public class AudioDAO extends DAO {
               ) {
             audio.setTranscript(context);
             toUpdate.add(audio);
-            logger.info("context update " + exercise.getID() + "/" +audio.getUniqueID()+" to " + context);
+          //  logger.info("context update " + exercise.getID() + "/" +audio.getUniqueID()+" to " + context);
           }
         }
         else {
