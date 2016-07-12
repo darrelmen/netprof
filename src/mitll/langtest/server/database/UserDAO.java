@@ -611,7 +611,7 @@ public class UserDAO extends DAO {
 
       statement = connection.prepareStatement(sql
       );
-      logger.info("drop default on " + this);
+     // logger.info("drop default on " + this);
 
       statement.execute();
       statement.close();
