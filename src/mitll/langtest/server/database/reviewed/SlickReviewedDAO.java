@@ -58,6 +58,7 @@ public class SlickReviewedDAO extends DAO implements IReviewedDAO {
   }
 
   public void createTable() {
+    logger.info("dao is " + dao.getClass());
     dao.createTable();
   }
 
