@@ -726,6 +726,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public boolean isTeacher() {
     return userManager.isTeacher();
   }
+  public boolean isAdmin() {
+    return userManager.isAdmin();
+  }
 
   public PropertyHandler getProps() {
     return props;
