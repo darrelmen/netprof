@@ -91,7 +91,8 @@ public class CopyToPostgres {
   }
 
   private void testDrop(String config, boolean inTest) {
-    getConnection(config, inTest).dropAll();
+    DBConnection connection = getConnection(config, inTest);
+    connection.dropAll();
   }
 
   private static DBConnection getConnection(String config, boolean inTest) {
@@ -632,12 +633,15 @@ public class CopyToPostgres {
     String action = arg[0];
     String config = arg[1];
     boolean inTest = arg.length > 2;
+    CopyToPostgres copyToPostgres = new CopyToPostgres();
+
+
     if (action.equals("drop")) {
       logger.info("drop " + config);
-      new CopyToPostgres().testDrop(config, inTest);
+      copyToPostgres.testDrop(config, inTest);
     } else if (action.equals("copy")) {
       logger.info("copying " + config);
-      new CopyToPostgres().copyToPostgres(config, inTest);
+      copyToPostgres.copyToPostgres(config, inTest);
     }
   }
 }
