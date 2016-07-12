@@ -457,7 +457,7 @@
             <!-- Additional arguments like -style PRETTY or -logLevel DEBUG -->
             <arg value="OBF"/>
             <arg line="-localWorkers"/>
-            <arg value="6"/>
+            <arg value="4"/>
             <!--
                         <arg value="-compileReport"/>
             -->
