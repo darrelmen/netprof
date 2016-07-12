@@ -237,7 +237,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     }
 
     long then = System.currentTimeMillis();
-    putBackWordAndPhone();
+    if (false) {
+      putBackWordAndPhone();
+    }
     long now = System.currentTimeMillis();
     if (now - then > 1000) logger.info("took " + (now - then) + " millis to put back word and phone");
   }
