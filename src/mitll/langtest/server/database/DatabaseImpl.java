@@ -947,6 +947,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   void createIfNotThere(IDAO slickUserDAO, List<String> created) {
     String name = slickUserDAO.getName();
     if (!dbConnection.hasTable(name)) {
+      logger.info("createIfNotThere create " + name);
       slickUserDAO.createTable();
       created.add(name);
     }
