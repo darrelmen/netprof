@@ -134,11 +134,11 @@
 
     <context-param>
         <param-name>config</param-name>
-        <param-value>spanish</param-value>
+        <param-value>netProf</param-value>
     </context-param>
 
     <context-param>
         <param-name>configFile</param-name>
-        <param-value>quizlet.properties</param-value>
+        <param-value>config.properties</param-value>
     </context-param>
 </web-app>
