@@ -297,7 +297,6 @@ class EditableExerciseDialog extends NewUserExercise {
                                boolean onClick) {
 //    if (DEBUG) logger.info("EditItem.afterValidForeignPhrase : exercise id " + newUserExercise.getID());
     checkForForeignChange();
-
     postChangeIfDirty(exerciseList, onClick);
   }
 
@@ -377,7 +376,6 @@ class EditableExerciseDialog extends NewUserExercise {
   private boolean foreignChanged() {
     //    if (b)
 //      logger.info("foreignChanged : foreign '" + foreignLang.box.getText() + "' != original '" + originalForeign + "'");
-
     return !foreignLang.box.getText().equals(originalForeign);
   }
 
