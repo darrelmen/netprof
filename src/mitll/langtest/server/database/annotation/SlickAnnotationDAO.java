@@ -45,7 +45,7 @@ import java.sql.Timestamp;
 import java.util.*;
 
 public class SlickAnnotationDAO
-    extends BaseAnnotationDAO implements IAnnotationDAO, ISchema<UserAnnotation, SlickAnnotation> {
+    extends BaseAnnotationDAO implements IAnnotationDAO {
   private static final Logger logger = Logger.getLogger(SlickAnnotationDAO.class);
 
   private final AnnotationDAOWrapper dao;
@@ -64,8 +64,7 @@ public class SlickAnnotationDAO
     return dao.dao().name();
   }
 
-  @Override
-  public SlickAnnotation toSlick(UserAnnotation shared, String language) {
+  public SlickAnnotation toSlick(UserAnnotation shared) {
     return new SlickAnnotation(-1,
         (int) shared.getCreatorID(),
         shared.getExerciseID(),
@@ -76,8 +75,7 @@ public class SlickAnnotationDAO
     );
   }
 
-  @Override
-  public UserAnnotation fromSlick(SlickAnnotation slick) {
+  private UserAnnotation fromSlick(SlickAnnotation slick) {
     return new UserAnnotation(
         slick.exid(),
         slick.field(),
@@ -94,7 +92,7 @@ public class SlickAnnotationDAO
 
   @Override
   public void add(UserAnnotation word) {
-    dao.insert(toSlick(word, ""));
+    dao.insert(toSlick(word));
   }
 
   @Override

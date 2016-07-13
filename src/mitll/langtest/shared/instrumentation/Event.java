@@ -61,13 +61,14 @@ public class Event extends SlimEvent {
    * @param userID
    * @param timestamp
    * @param device
+   * @param exid
    * @paramx hitID
    * @see AnnotationDAO#getUserAnnotations(String)
    */
   public Event(String widgetID, String widgetType, String exerciseID, String context,
                int userID, long timestamp,
-               String device) {
-    super(userID, timestamp);
+               String device, int exid) {
+    super(userID, timestamp, exid);
     this.widgetID = widgetID;
     this.widgetType = widgetType;
     this.exerciseID = exerciseID;
@@ -79,6 +80,7 @@ public class Event extends SlimEvent {
     return widgetID;
   }
 
+  @Deprecated
   public String getExerciseID() {
     return exerciseID;
   }
@@ -98,8 +100,10 @@ public class Event extends SlimEvent {
   public String toString() {
     long timestamp = getTimestamp();
     if (timestamp == -1) timestamp = System.currentTimeMillis();
-    return "Event on " + getWidgetID() + " by " + getUserID() + " at " + new Date(timestamp) + " info " +
-        getExerciseID() + "/" + getContext() +
+    return "Event on " + getWidgetID() +
+        " by " + getUserID() +
+        " at " + new Date(timestamp) +
+        " info " + getExerciseID() + "/" + getExid() + " : " + getContext() +
         " from " + device;
   }
 

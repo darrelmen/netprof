@@ -59,7 +59,7 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public interface ListInterface<T extends Shell> extends RequiresResize, Reloadable {
-  T byID(String name);
+  T byID(int name);
 
   void addExercise(T es);
 
@@ -104,7 +104,7 @@ public interface ListInterface<T extends Shell> extends RequiresResize, Reloadab
 
   boolean loadPreviousExercise(HasID current);
 
-  void checkAndAskServer(String id);
+  void checkAndAskServer(int id);
 
   /**
    * @see Navigation#showLearnAndItem(String)
