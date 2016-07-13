@@ -42,7 +42,6 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.MutableAudioExercise;
 import org.apache.log4j.Logger;
 
 import java.util.*;
@@ -93,7 +92,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#deleteItem
    */
   @Override
-  public boolean deleteItemFromList(long listid, String exid) {
+  public boolean deleteItemFromList(long listid, int exid) {
     return getUserListManager().deleteItemFromList(listid, exid, db.getTypeOrder());
   }
 

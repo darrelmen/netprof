@@ -85,14 +85,14 @@ public interface LangTestDatabase extends RemoteService {
   <T extends CommonShell> ExerciseListWrapper<T> getExerciseIds(ExerciseListRequest request);
 
   /**
-   * @see mitll.langtest.client.list.ExerciseList#askServerForExercise(String)
-   * @param id
+   * @see mitll.langtest.client.list.ExerciseList#askServerForExercise(int)
+   * @param <T>
+   * @param exid
    * @param userID
    * @param isFlashcardReq
-   * @param <T>
    * @return
    */
-  <T extends Shell> T getExercise(String id, int userID, boolean isFlashcardReq);
+  <T extends Shell> T getExercise(int exid, int userID, boolean isFlashcardReq);
 
   // answer DAO
 

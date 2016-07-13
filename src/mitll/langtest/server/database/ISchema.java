@@ -32,8 +32,10 @@
 
 package mitll.langtest.server.database;
 
+import java.util.Map;
+
 public interface ISchema<T,U>  {
   void createTable();
-  U toSlick(T shared, String language);
+  U toSlick(T shared, int projid, Map<String, Integer> exToInt);
   T fromSlick(U slick);
 }

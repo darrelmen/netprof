@@ -659,7 +659,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   /**
-   * @see mitll.langtest.client.list.ExerciseList#askServerForExercise(String)
+   * @see mitll.langtest.client.list.ExerciseList#askServerForExercise(int)
    */
   public void checkUser() {
     if (userManager.isUserExpired()) {

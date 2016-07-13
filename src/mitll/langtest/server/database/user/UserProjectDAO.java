@@ -30,24 +30,54 @@
  *
  */
 
-package mitll.langtest.server.database.userlist;
+package mitll.langtest.server.database.user;
 
-import mitll.langtest.server.database.IDAO;
-import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.server.database.DAO;
+import mitll.langtest.server.database.Database;
+import mitll.npdata.dao.DBConnection;
+import mitll.npdata.dao.SlickUserProject;
+import mitll.npdata.dao.word.UserProjectDAOWrapper;
+import org.apache.log4j.Logger;
 
-public interface IUserListExerciseJoinDAO  extends IDAO {
-  /**
-   *  @param userList
-   * @param uniqueID
-   * @param exid
-   */
-  void add(UserList userList, String uniqueID, int exid);
+import java.sql.Timestamp;
+import java.util.Collection;
+import java.util.List;
 
-  /**
-   * TODO : remove
-   * @param listid
-   */
-  void removeListRefs(long listid);
+public class UserProjectDAO extends DAO implements IUserProjectDAO {
+  private static final Logger logger = Logger.getLogger(UserProjectDAO.class);
 
-  boolean remove(long listid, int exid);
+  private UserProjectDAOWrapper dao;
+
+  public UserProjectDAO(Database database, DBConnection dbConnection) {
+    super(database);
+    dao = new UserProjectDAOWrapper(dbConnection);
+  }
+
+  public void createTable() {
+    dao.createTable();
+  }
+
+  @Override
+  public String getName() {
+    return dao.dao().name();
+  }
+
+
+  @Override
+  public int add(int userid, int projid) {
+    return dao.insert(new SlickUserProject(-1, userid, projid, new Timestamp(System.currentTimeMillis())));
+  }
+
+  @Override
+  public Collection<SlickUserProject> getAll() {
+    return dao.getAll();
+  }
+
+  @Override
+  public int mostRecentByUser(int user) {
+    List<SlickUserProject> slickUserProjects = dao.byUser(user);
+    return slickUserProjects.isEmpty() ? -1 : slickUserProjects.iterator().next().projid();
+  }
+
+
 }
