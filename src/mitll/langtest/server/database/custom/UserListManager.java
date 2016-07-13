@@ -171,15 +171,16 @@ public class UserListManager {
   }
 
   // set states on user exercises
-  private void setStateOnUserExercises(Map<String, StateCreator> exerciseToState,
-                                       Set<String> userExercisesRemaining, boolean firstState) {
+  private void setStateOnUserExercises(Map<Integer, StateCreator> exerciseToState,
+                                       Set<Integer> userExercisesRemaining,
+                                       boolean firstState) {
     int count = 0;
     Collection<CommonExercise> userExercises = userExerciseDAO.getByExID(userExercisesRemaining);
 
     for (Shell commonUserExercise : userExercises) {
-      StateCreator state = exerciseToState.get(commonUserExercise.getID());
+      StateCreator state = exerciseToState.get(commonUserExercise.getRealID());
       if (state == null) {
-        logger.error("huh? can't find ex id " + commonUserExercise.getID());
+        logger.error("huh? can't find ex id " + commonUserExercise.getRealID());
       } else {
         if (firstState) {
           commonUserExercise.setState(state.getState());
@@ -603,7 +604,7 @@ public class UserListManager {
    * @param userListID
    * @param exerciseID
    * @param exid
-   * @see #addItemToUserList
+   * @see mitll.langtest.server.services.ListServiceImpl#addItemToUserList
    */
   public void addItemToList(long userListID, String exerciseID, int exid) {
     UserList where = userListDAO.getWhere(userListID, true);
@@ -942,9 +943,9 @@ public class UserListManager {
    * @param exid
    * @param typeOrder
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#deleteItemFromList(long, String)
+   * @see  mitll.langtest.server.services.ListServiceImpl#deleteItemFromList(long, String)
    */
-  public boolean deleteItemFromList(long listid, String exid, Collection<String> typeOrder) {
+  public boolean deleteItemFromList(long listid, int exid, Collection<String> typeOrder) {
     logger.debug("deleteItemFromList " + listid + " " + exid);
 
     UserList<?> userListByID = getUserListByID(listid, typeOrder);
