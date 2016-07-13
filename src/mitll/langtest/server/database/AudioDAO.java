@@ -413,6 +413,15 @@ public class AudioDAO extends DAO {
     return allSucceeded;
   }
 
+  /**
+   * @see #attachAudio(CommonExercise, String, String)
+   * @param firstExercise
+   * @param installPath
+   * @param relativeConfigDir
+   * @param audioConversion
+   * @param attr
+   * @return
+   */
   private boolean attachAudioAndFixPath(CommonExercise firstExercise,
                                         String installPath,
                                         String relativeConfigDir,
