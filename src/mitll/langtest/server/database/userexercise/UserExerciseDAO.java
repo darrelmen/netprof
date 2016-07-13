@@ -34,9 +34,9 @@ package mitll.langtest.server.database.userexercise;
 
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.audio.IAudioDAO;
-import mitll.langtest.server.database.userlist.UserListExerciseJoinDAO;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.userlist.UserListDAO;
+import mitll.langtest.server.database.userlist.UserListExerciseJoinDAO;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -105,7 +105,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
 
   /**
    * TODO : Consider how to add multiple context sentences?
-   *
+   * <p>
    * Somehow on subsequent runs, the ids skip by 30 or so?
    * <p>
    * Uses return generated keys to get the user id
@@ -147,8 +147,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
         CommonExercise next = userExercise.getDirectlyRelated().iterator().next();
         statement.setString(i++, fixSingleQuote(next.getForeignLanguage()));
         statement.setString(i++, fixSingleQuote(next.getEnglish()));
-      }
-      else {
+      } else {
         statement.setString(i++, "");
         statement.setString(i++, "");
       }
@@ -309,9 +308,9 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   }
 
   /**
-   * @see IUserExerciseDAO#getOnList(int)
    * @param listID
    * @return
+   * @see IUserExerciseDAO#getOnList(int)
    */
   private String getJoin(long listID) {
     return "SELECT " +
@@ -348,7 +347,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
    * @see mitll.langtest.server.database.DatabaseImpl#getUserExerciseWhere(String)
    */
   @Override
-  public CommonExercise getByExID(String exid) {
+  public CommonExercise getByExID(int exid) {
     exid = exid.replaceAll("\'", "");
     String sql = "SELECT * from " + USEREXERCISE + " where " + EXERCISEID + "='" + exid + "'";
     Collection<CommonExercise> commonExercises = getCommonExercises(sql);
@@ -362,8 +361,8 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
 
   /**
    * @return
-   * @see mitll.langtest.server.database.exercise.ExcelImport#getRawExercises()
    * @seex #setAudioDAO(AudioDAO)
+   * @see mitll.langtest.server.database.exercise.ExcelImport#getRawExercises()
    */
   @Override
   public Collection<CommonExercise> getOverrides() {
@@ -379,7 +378,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
     return Collections.emptyList();
   }
 
-  public Collection<UserExercise> getUserExercisesList() throws SQLException{
+  public Collection<UserExercise> getAllUserExercises() throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
     List<UserExercise> exercises = new ArrayList<>();
     try {
@@ -389,9 +388,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
 
       List<String> typeOrder = exerciseDAO.getSectionHelper().getTypeOrder();
       while (rs.next()) {
-        UserExercise e = getUserExercise(rs, typeOrder);
-
-       exercises.add(e);
+        exercises.add(getUserExercise(rs, typeOrder));
       }
       finish(connection, statement, rs);
     } finally {
@@ -407,7 +404,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
    * @see UserListManager#getDefectList(java.util.Collection)
    */
   @Override
-  public Collection<CommonExercise> getByExID(Collection<String> exids) {
+  public Collection<CommonExercise> getByExID(Collection<Integer> exids) {
     if (exids.isEmpty()) return new ArrayList<>();
     String sql = "SELECT * from " + USEREXERCISE + " where " + EXERCISEID + " in (" + getIds(exids) + ")";
     return getCommonExercises(sql);
@@ -427,7 +424,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
    * @throws SQLException
    * @see IUserExerciseDAO#getOnList(int)
    * @see #getOverrides()
-   * @see #getByExID(java.lang.String)
+   * @see IUserExerciseDAO#getByExID(int)
    */
   private Collection<CommonExercise> getUserExercises(String sql) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
@@ -478,7 +475,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
     );
   }
 
-//  private Map<String, List<AudioAttribute>> exToAudio;
+  //  private Map<String, List<AudioAttribute>> exToAudio;
 //  private AudioDAO audioDAO;
   public void setAudioDAO(IAudioDAO audioDAO) {
     //  exToAudio = audioDAO.getExToAudio();

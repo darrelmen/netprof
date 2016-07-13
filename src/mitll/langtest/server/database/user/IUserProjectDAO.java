@@ -30,24 +30,20 @@
  *
  */
 
-package mitll.langtest.server.database.userlist;
+package mitll.langtest.server.database.user;
 
 import mitll.langtest.server.database.IDAO;
-import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.server.database.project.ProjectStatus;
+import mitll.langtest.server.database.project.ProjectType;
+import mitll.npdata.dao.SlickProject;
+import mitll.npdata.dao.SlickUserProject;
 
-public interface IUserListExerciseJoinDAO  extends IDAO {
-  /**
-   *  @param userList
-   * @param uniqueID
-   * @param exid
-   */
-  void add(UserList userList, String uniqueID, int exid);
+import java.util.Collection;
 
-  /**
-   * TODO : remove
-   * @param listid
-   */
-  void removeListRefs(long listid);
+public interface IUserProjectDAO extends IDAO {
+  int add(int userid, int projid);
 
-  boolean remove(long listid, int exid);
+  Collection<SlickUserProject> getAll();
+
+  int mostRecentByUser(int user);
 }

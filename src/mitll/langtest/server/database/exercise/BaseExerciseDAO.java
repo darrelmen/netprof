@@ -60,7 +60,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 	private static final String ENGLISH = "english";
 	private static final String MISSING_ENGLISH = "missing english";
 
-	private final Map<String, CommonExercise> idToExercise = new HashMap<>();
+	private final Map<Integer, CommonExercise> idToExercise = new HashMap<>();
 	protected final SectionHelper<CommonExercise> sectionHelper = new SectionHelper<>();
 	protected final String language;
 	protected final ServerProperties serverProps;
@@ -194,8 +194,8 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 	private void populateIdToExercise() {
 //    logger.info("populateIdToExercise Examining " + exercises.size() + " exercises");
 		for (CommonExercise e : exercises) {
-			idToExercise.put(e.getID(), e);
-			idToExercise.put(""+e.getDominoID(), e);
+			idToExercise.put(e.getRealID(), e);
+			idToExercise.put(e.getDominoID(), e);
 		}
 
 		int listSize = exercises.size();
@@ -261,7 +261,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 		int removedSoSkipped = 0;
 		SortedSet<String> staleOverrides = new TreeSet<String>();
 		for (CommonExercise userExercise : overrides) {
-			String overrideID = userExercise.getID();
+			int overrideID = userExercise.getRealID();
 			if (removes.contains(overrideID)) {
 				removedSoSkipped++;
 			} else {
@@ -392,7 +392,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 	 * @see BaseUserExerciseDAO#getPredefExercise
 	 * @see DatabaseImpl#getExercise(String)
 	 */
-	public CommonExercise getExercise(String id) {
+	public CommonExercise getExercise(int id) {
 		synchronized (this) {
 			return idToExercise.get(id);
 		}
@@ -464,7 +464,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 		}
 	}
 
-	private boolean isKnownExercise(String id) {
+	private boolean isKnownExercise(int id) {
 		return idToExercise.containsKey(id);
 	}
 

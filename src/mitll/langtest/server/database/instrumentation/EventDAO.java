@@ -131,10 +131,10 @@ public class EventDAO extends DAO implements IEventDAO {
    * <p/>
    * Uses return generated keys to get the user id
    *
-   * @see mitll.langtest.server.database.DatabaseImpl#logEvent(String, String, String, String, long, String, String)
+   * @see mitll.langtest.server.database.DatabaseImpl#logEvent
    */
   @Override
-  public boolean add(Event event, String language) {
+  public boolean add(Event event, int projid) {
     Connection connection = getConnection();
     boolean val = true;
     try {
@@ -191,7 +191,7 @@ public class EventDAO extends DAO implements IEventDAO {
   }
 
   @Override
-  public List<Event> getAll(String language) {
+  public List<Event> getAll(Integer projid) {
     try {
       return getEvents("SELECT * from " + EVENT);
     } catch (Exception ee) {
@@ -204,19 +204,18 @@ public class EventDAO extends DAO implements IEventDAO {
   }
 
   @Override
-  public List<Event> getAllMax(String language) {
-    return getAll(language);
+  public List<Event> getAllMax(int projid) {
+    return getAll(projid);
   }
 
   /**
    * @return
    * @see mitll.langtest.server.database.Report#getReport
-   * @param language
+   * @param projid
    */
-  public List<SlickSlimEvent> getAllSlim(String language) {
+  public List<SlickSlimEvent> getAllSlim(int projid) {
     try {
-      List<SlimEvent> slimEvents = getSlimEvents("SELECT " + CREATORID + "," + MODIFIED +
-          " from " + EVENT);
+      List<SlimEvent> slimEvents = getSlimEvents("SELECT " + CREATORID + "," + MODIFIED + " from " + EVENT);
       return getSlickSlimEvents(slimEvents);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
@@ -234,7 +233,7 @@ public class EventDAO extends DAO implements IEventDAO {
     return copy;
   }
 
-  public SlickSlimEvent getFirstSlim(String language) {
+  public SlickSlimEvent getFirstSlim(int projid) {
     try {
       List<SlimEvent> slimEvents = getSlimEvents("SELECT " + CREATORID + "," + MODIFIED +
           " from " + EVENT + " limit 1");
@@ -251,9 +250,9 @@ public class EventDAO extends DAO implements IEventDAO {
   /**
    * @return
    * @see mitll.langtest.server.database.Report#getEventsDevices
-   * @param language
+   * @param projid
    */
-  public List<SlickSlimEvent> getAllDevicesSlim(String language) {
+  public List<SlickSlimEvent> getAllDevicesSlim(int projid) {
     try {
       return getSlickSlimEvents(getSlimEvents("SELECT " + CREATORID + "," + MODIFIED + " from " + EVENT + WHERE_DEVICE));
     } catch (Exception ee) {
@@ -280,7 +279,7 @@ public class EventDAO extends DAO implements IEventDAO {
   }
 
   @Override
-  public Number getNumRows(String language) {
+  public Number getNumRows(int projid) {
     return getCount("EVENT");
   }
 
@@ -315,7 +314,7 @@ public class EventDAO extends DAO implements IEventDAO {
           rs.getInt(CREATORID),
           rs.getTimestamp(MODIFIED).getTime(),
           //  rs.getString(HITID),
-          rs.getString(DEVICE))
+          rs.getString(DEVICE), -1)
       );
     }
 
@@ -332,8 +331,8 @@ public class EventDAO extends DAO implements IEventDAO {
     while (rs.next()) {
       lists.add(new SlimEvent(
           rs.getInt(CREATORID),
-          rs.getTimestamp(MODIFIED).getTime()
-      ));
+          rs.getTimestamp(MODIFIED).getTime(),
+          -1));
     }
 
     finish(connection, statement, rs);

@@ -425,14 +425,15 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     }
 
     // hack for Headstart support -- if we still do.
-    String exercise_title1 = controller.getProps().getExercise_title();
+/*    String exercise_title1 = controller.getProps().getExercise_title();
     if (exercise_title1 != null) {
       Shell headstartExercise = byID(exercise_title1);
       if (headstartExercise != null) {
         loadExercise(exercise_title1);
         return;
       }
-    }
+    }*/
+
     if (exerciseID.isEmpty()) {
       loadFirstExercise();
     } else {
@@ -454,7 +455,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * Worry about deleting the currently visible item.
    *
    * @param es
-   * @see mitll.langtest.client.list.PagingExerciseList#forgetExercise(String)
+   * @see PagingExerciseList#forgetExercise(int)
    */
   public T removeExercise(T es) {
     String id = es.getID();
@@ -505,11 +506,11 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   protected abstract T getFirst();
 
-  protected boolean hasExercise(String id) {
+  protected boolean hasExercise(int id) {
     return byID(id) != null;
   }
 
-  public abstract T byID(String name);
+  public abstract T byID(int name);
 
   /**
    * @param itemID
@@ -523,7 +524,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   }
 
   @Override
-  public void checkAndAskServer(String id) {
+  public void checkAndAskServer(int id) {
     if (DEBUG)
       logger.info(getClass() + " : (" + instance + ") ExerciseList.checkAndAskServer - askServerForExercise = " + id);
     if (hasExercise(id)) {
@@ -557,11 +558,11 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * goes ahead and asks the server for the next item so we don't have to wait for it.
    *
    * @param itemID
-   * @see #checkAndAskServer(String)
+   * @see ListInterface#checkAndAskServer(int)
    */
-  protected void askServerForExercise(String itemID) {
+  protected void askServerForExercise(int itemID) {
     controller.checkUser();
-    if (cachedNext != null && cachedNext.getID().equals(itemID)) {
+    if (cachedNext != null && cachedNext.getRealID() == itemID) {
       if (DEBUG)
         logger.info("\tExerciseList.askServerForExercise using cached id = " + itemID + " instance " + instance);
       useExercise(cachedNext);
