@@ -104,7 +104,7 @@ public class FileExerciseDAO<T extends CommonShell> implements SimpleExerciseDAO
   }
 
   @Override
-  public T getExercise(String id) {
+  public T getExercise(int id) {
     if (idToExercise.isEmpty()) logger.warn("huh? couldn't find any exercises..?");
     if (!idToExercise.containsKey(id)) {
       logger.warn("couldn't find " + id + " in " + idToExercise.size() + " exercises...");

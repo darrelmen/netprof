@@ -64,10 +64,7 @@ import mitll.langtest.server.database.refaudio.SlickRefResultDAO;
 import mitll.langtest.server.database.result.*;
 import mitll.langtest.server.database.reviewed.IReviewedDAO;
 import mitll.langtest.server.database.reviewed.SlickReviewedDAO;
-import mitll.langtest.server.database.user.IUserDAO;
-import mitll.langtest.server.database.user.SlickUserDAOImpl;
-import mitll.langtest.server.database.user.UserDAO;
-import mitll.langtest.server.database.user.UserManagement;
+import mitll.langtest.server.database.user.*;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.server.database.userlist.IUserListDAO;
@@ -92,6 +89,7 @@ import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 import mitll.npdata.dao.DBConnection;
+import mitll.npdata.dao.SlickProject;
 import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
@@ -148,6 +146,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
   private IEventDAO eventDAO;
   private IProjectDAO projectDAO;
+  private IUserProjectDAO userProjectDAO;
 
   private ContextPractice contextPractice;
 
@@ -287,7 +286,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     IUserListDAO userListDAO = new SlickUserListDAO(this, dbConnection, this.userDAO, userExerciseDAO, userListExerciseJoinDAO);
     IAnnotationDAO annotationDAO = new SlickAnnotationDAO(this, dbConnection, this.userDAO.getDefectDetector());
 
-    IReviewedDAO reviewedDAO    = new SlickReviewedDAO(this, dbConnection, true);
+    IReviewedDAO reviewedDAO = new SlickReviewedDAO(this, dbConnection, true);
     IReviewedDAO secondStateDAO = new SlickReviewedDAO(this, dbConnection, false);
 
     userListManager = new UserListManager(this.userDAO,
@@ -300,7 +299,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         pathHelper);
 
     projectDAO = new ProjectDAO(this, dbConnection);
-
+    userProjectDAO = new UserProjectDAO(this, dbConnection);
     createTables();
 
     userDAO.findOrMakeDefectDetector();
@@ -454,9 +453,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getResultASRInfo(long, int, int)
    * @see mitll.langtest.server.DownloadServlet#getFilenameForDownload(DatabaseImpl, String, String)
    * @see #deleteItem(String)
-   * @see #getCustomOrPredefExercise(String)
+   * @see #getCustomOrPredefExercise(int)
    */
-  public CommonExercise getExercise(String id) {
+  public CommonExercise getExercise(int id) {
     return exerciseDAO.getExercise(id);
   }
 
@@ -484,7 +483,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return fileExerciseDAO.getRawExercises();
   }
 
-  public AmasExerciseImpl getAMASExercise(String id) {
+  public AmasExerciseImpl getAMASExercise(int id) {
     return fileExerciseDAO.getExercise(id);
   }
 
@@ -609,7 +608,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     boolean notOverlay = exercise == null;
     if (notOverlay) {
       // not an overlay! it's a new user exercise
-      exercise = getUserExerciseByExID(userExercise.getID());
+      exercise = getUserExerciseByExID(userExercise.getRealID());
       logger.debug("not an overlay " + exercise);
     } else {
       exercise = userExercise;
@@ -882,8 +881,12 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     if (userid == -1) {
       userid = userDAO.getBeforeLoginUser();
     }
-    Event event = new Event(id, widgetType, exid, context, userid, System.currentTimeMillis(), device);
-    return eventDAO != null && eventDAO.add(event, getLanguage());
+    SlickProject next = getProjectDAO().getAll().iterator().next();
+
+    logger.warn("using the first project! " +next);
+
+    Event event = new Event(id, widgetType, exid, context, userid, System.currentTimeMillis(), device, -1);
+    return eventDAO != null && eventDAO.add(event, next.id());
   }
 
   public void logAndNotify(Exception e) {
@@ -910,7 +913,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * TODO : add get tablename method to slick DAOs.
    */
   public void createTables() {
-    logger.info("createTables create slick tables - has " +dbConnection.getTables());
+    logger.info("createTables create slick tables - has " + dbConnection.getTables());
 
     List<String> created = new ArrayList<>();
 
@@ -921,14 +924,15 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         getEventDAO(),
         getResultDAO(),
         userExerciseDAO,
-        ((SlickUserExerciseDAO)userExerciseDAO).getRelatedExercise(),
+        ((SlickUserExerciseDAO) userExerciseDAO).getRelatedExercise(),
         getAnnotationDAO(),
         getWordDAO(),
         getPhoneDAO(),
         getRefResultDAO(),
         getReviewedDAO(),
         getSecondStateDAO(),
-        ((ProjectDAO) getProjectDAO()).getProjectPropertyDAO()
+        ((ProjectDAO) getProjectDAO()).getProjectPropertyDAO(),
+        getUserProjectDAO()
     );
     for (IDAO dao : idaos) createIfNotThere(dao, created);
 
@@ -940,7 +944,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     //  if (!dbConnection.hasTable("phone")) ((ISchema) getPhoneDAO()).createTable();
     // if (!dbConnection.hasTable("refresult")) ((SlickRefResultDAO) getRefResultDAO()).createTable();
     logger.info("createTables created slick tables : " + created);
-    logger.info("createTables after create slick tables - has " +dbConnection.getTables());
+    logger.info("createTables after create slick tables - has " + dbConnection.getTables());
   }
 
   private void createIfNotThere(IDAO slickUserDAO, List<String> created) {
@@ -1094,7 +1098,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         isMale, speed);
   }
 
-
   public int userExists(String login) {
     return userDAO.getIdForUserID(login);
   }
@@ -1187,7 +1190,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExercise
    */
-  public CommonExercise getCustomOrPredefExercise(String id) {
+  public CommonExercise getCustomOrPredefExercise(int id) {
     CommonExercise userEx = getUserExerciseByExID(id);  // allow custom items to mask out non-custom items
 
     CommonExercise toRet;
@@ -1214,9 +1217,11 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @param id
    * @return
    * @see #editItem
-   * @see #getCustomOrPredefExercise(String)
+   * @see #getCustomOrPredefExercise(int)
    */
-  private CommonExercise getUserExerciseByExID(String id) { return userExerciseDAO.getByExID(id);  }
+  private CommonExercise getUserExerciseByExID(int id) {
+    return userExerciseDAO.getByExID(id);
+  }
 
   @Override
   public ServerProperties getServerProps() {
@@ -1371,7 +1376,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @see mitll.langtest.server.ScoreServlet#getReport(JSONObject, int)
    */
   public String getReport(int year, JSONObject jsonObject) {
-    return getReport("").getReport(serverProps.getLanguage(), jsonObject, year);
+    //  return getReport("").getReport(serverProps.getLanguage(), jsonObject, year);
+    return getReport("").getAllReports(getProjectDAO().getAll(), jsonObject, year);
   }
 
   private Report reportCache;
@@ -1389,6 +1395,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    *
    * @param pathHelper
    * @return
+   * @deprecated
    */
   public JSONObject doReport(PathHelper pathHelper) {
     return doReport(pathHelper, "", -1);
@@ -1399,6 +1406,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    *
    * @param pathHelper
    * @param prefix
+   * @deprecated JUST FOR TESTING
    */
   public JSONObject doReport(PathHelper pathHelper, String prefix, int year) {
     try {
@@ -1561,6 +1569,10 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
   public IProjectDAO getProjectDAO() {
     return projectDAO;
+  }
+
+  public IUserProjectDAO getUserProjectDAO() {
+    return userProjectDAO;
   }
 
   public UserManagement getUserManagement() {

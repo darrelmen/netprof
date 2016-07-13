@@ -765,7 +765,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * Joins with annotation data when doing QC.
    *
-   * @param id
+   * @param exid
    * @param userID
    * @param isFlashcardReq
    * @return
@@ -773,9 +773,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.list.ExerciseList#goGetNextAndCacheIt(String)
    * @see mitll.langtest.client.analysis.PlayAudio#playLast(String, long)
    */
-  public <T extends Shell> T getExercise(String id, int userID, boolean isFlashcardReq) {
+  public <T extends Shell> T getExercise(int exid, int userID, boolean isFlashcardReq) {
     if (serverProps.isAMAS()) { // TODO : HOW TO AVOID CAST???
-      return (T) db.getAMASExercise(id);
+      return (T) db.getAMASExercise(""+exid);
     }
 
     long then = System.currentTimeMillis();
@@ -783,22 +783,22 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     long then2 = System.currentTimeMillis();
 
-    CommonExercise byID = db.getCustomOrPredefExercise(id);  // allow custom items to mask out non-custom items
+    CommonExercise byID = db.getCustomOrPredefExercise(exid);  // allow custom items to mask out non-custom items
 
     long now = System.currentTimeMillis();
     String language = getLanguage();
     if (now - then2 > WARN_DUR) {
-      logger.debug("getExercise : (" + language + ") took " + (now - then2) + " millis to find exercise " + id + " for " + userID);
+      logger.debug("getExercise : (" + language + ") took " + (now - then2) + " millis to find exercise " + exid + " for " + userID);
     }
 
     if (byID == null) {
-      logger.error("getExercise : huh? couldn't find exercise with id '" + id + "' when examining " + exercises.size() + " items");
+      logger.error("getExercise : huh? couldn't find exercise with id '" + exid + "' when examining " + exercises.size() + " items");
     } else {
       then2 = System.currentTimeMillis();
       addAnnotationsAndAudio(userID, byID, isFlashcardReq);
       now = System.currentTimeMillis();
       if (now - then2 > WARN_DUR) {
-        logger.debug("getExercise : (" + language + ") took " + (now - then2) + " millis to add annotations to exercise " + id + " for " + userID);
+        logger.debug("getExercise : (" + language + ") took " + (now - then2) + " millis to add annotations to exercise " + exid + " for " + userID);
       }
       then2 = System.currentTimeMillis();
 
@@ -815,16 +815,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       if (now - then2 > WARN_DUR) {
         if (WARN_MISSING_FILE) {
           logger.debug("getExercise : (" + language + ") took " + (now - then2) + " millis " +
-              "to ensure there are mp3s for exercise " + id + " for " + userID);
+              "to ensure there are mp3s for exercise " + exid + " for " + userID);
         }
       }
     }
-    checkPerformance(id, then);
+    checkPerformance(exid, then);
 
     if (byID != null) {
       //logger.debug("returning (" + language + ") exercise " + byID.getID() + " : " + byID);
     } else {
-      logger.warn(getLanguage() + " : couldn't find exercise with id '" + id + "'");
+      logger.warn(getLanguage() + " : couldn't find exercise with id '" + exid + "'");
     }
     // return byID;
     // TODO : why doesn't this work?
