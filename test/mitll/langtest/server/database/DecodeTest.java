@@ -31,20 +31,41 @@ public class DecodeTest extends BaseTest {
     logger.info("got\n" + exercise);
   }
 
-
   //public static final boolean DO_ONE = false;
 
   @Test
   public void testEgyptianReadOneExercise() {
     DatabaseImpl<CommonExercise> db = getDatabase("egyptian");
     CommonExercise exercise = db.getExercises().iterator().next();
+    //String context = exercise.getContext();
+    logger.info("got\n" + exercise);
+  }
+
+  @Test
+  public void testJapaneseReadOneExercise() {
+    DatabaseImpl<CommonExercise> db = getDatabase("japanese");
+    CommonExercise exercise = db.getExercises().iterator().next();
 
     //String context = exercise.getContext();
 
     logger.info("got\n" + exercise);
+    logger.info("got\n" + db.getCustomOrPredefExercise("1826"));
   }
 
+  @Test
+  public void testDefect() {
+    DatabaseImpl<CommonExercise> db = getDatabase("msa");
+    CommonExercise exercise = db.getExercises().iterator().next();
 
+    //String context = exercise.getContext();
+
+    CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise("3069");
+    db.attachAudio(customOrPredefExercise);
+    logger.info("got\n" + customOrPredefExercise);
+    for (AudioAttribute audioAttribute : customOrPredefExercise.getAudioAttributes()) {
+      logger.info("\t" + audioAttribute);
+    }
+  }
   @Test
   public void testRussianContext() {
     DatabaseImpl<CommonExercise> russian = getDatabase("russian");
