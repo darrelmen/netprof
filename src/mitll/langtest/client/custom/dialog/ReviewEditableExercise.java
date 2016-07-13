@@ -80,6 +80,7 @@ import java.util.logging.Logger;
  * @since 3/28/2014.
  */
 public class ReviewEditableExercise extends EditableExerciseDialog {
+  public static final String MARK_FIXED_TOOLTIP = "Mark item as fixed, removed defective audio, and remove item from the review list.";
   private final Logger logger = Logger.getLogger("ReviewEditableExercise");
 
   private static final String FIXED = "Mark Fixed";
@@ -282,11 +283,11 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   private final Set<Widget> audioWasPlayed = new HashSet<>();
  // private final Set<Widget> toResize = new HashSet<>();
 
-  //private CompressedAudio compressedAudio = new CompressedAudio();
-
+/*
   private String getPath(String path) {
     return CompressedAudio.getPath(path);
   }
+*/
 
   private <X extends CommonShell & AnnotationExercise> Widget getPanelForAudio(final X exercise,
                                                                                final AudioAttribute audio,
@@ -439,29 +440,33 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     prevNext.addStyleName("floatLeft");
     row.add(prevNext);
 
-    final Button fixed = makeFixedButton();
 
-//    if (logger != null) {
-//      logger.info(this.getClass() + " adding create button - review editable.");
-//    }
-
-    fixed.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        validateThenPost(foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo, true, true);
-      }
-    });
 
     if (newUserExercise.getCombinedMutableUserExercise().checkPredef()) {   // for now, only the owner of the list can remove or add to their list
       row.add(getRemove());
       row.add(getDuplicate());
     }
 
+    final Button fixed = getFixedButton(ul, pagingContainer, toAddTo, normalSpeedRecording);
     row.add(fixed);
 
     configureButtonRow(row);
 
     return row;
+  }
+
+  private Button getFixedButton(final UserList<CommonShell> ul, final ListInterface<CommonShell> pagingContainer, final Panel toAddTo, final ControlGroup normalSpeedRecording) {
+    final Button fixed = makeFixedButton();
+//    if (logger != null) {
+//      logger.info(this.getClass() + " adding create button - review editable.");
+//    }
+    fixed.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        validateThenPost(foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo, true, true);
+      }
+    });
+    return fixed;
   }
 
   private Button getRemove() {
@@ -504,6 +509,10 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     });
   }
 
+  /**
+   *
+   * @return
+   */
   private Button getDuplicate() {
     final Button duplicate = new Button(DUPLICATE);
     duplicate.setType(ButtonType.SUCCESS);
@@ -568,7 +577,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
         checkForForeignChange();
       }
     });
-    addTooltip(fixed, "Mark item as fixed, removed defective audio, and remove item from the review list.");
+    addTooltip(fixed, MARK_FIXED_TOOLTIP);
     return fixed;
   }
 
