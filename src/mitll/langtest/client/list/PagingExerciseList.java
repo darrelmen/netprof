@@ -71,9 +71,10 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class PagingExerciseList<T extends CommonShell, U extends Shell> extends ExerciseList<T, U> {
+  private final Logger logger = Logger.getLogger("PagingExerciseList");
+
   private static final String SEARCH = "Search";
   private static final int TEN_SECONDS = 10 * 60 * 1000;
-  private final Logger logger = Logger.getLogger("PagingExerciseList");
 
   protected final ExerciseController controller;
   protected ClickablePagingContainer<T> pagingContainer;
@@ -437,7 +438,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
   @Override
-  public T byID(String name) {
+  public T byID(int name) {
     return pagingContainer.byID(name);
   }
 
@@ -474,7 +475,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     pagingContainer.addExerciseAfter(after, es);
   }
 
-  public T forgetExercise(String id) {
+  public T forgetExercise(int id) {
     T es = byID(id);
     if (es != null) {
       return removeExercise(es);

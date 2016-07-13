@@ -95,12 +95,12 @@ public class BaseUserExerciseDAO extends DAO {
   }
 
   /**
-   * @param id
+   * @param exid
    * @return
    * @see UserListManager#getReviewedUserExercises(java.util.Map, Collection)
    */
-  public CommonExercise getPredefExercise(String id) {
-    return exerciseDAO.getExercise(id);
+  public CommonExercise getPredefExercise(int exid) {
+    return exerciseDAO.getExercise(exid);
   }
 
   /**

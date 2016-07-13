@@ -461,7 +461,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
           @Override
           public void onSuccess(Boolean result) {
             exerciseList.removeExercise(newUserExercise);
-            originalList.remove(newUserExercise.getID());
+            originalList.remove(newUserExercise.getRealID());
           }
         });
       }

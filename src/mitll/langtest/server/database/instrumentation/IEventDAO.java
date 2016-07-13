@@ -11,17 +11,17 @@ import java.util.List;
  * Created by go22670 on 3/28/16.
  */
 public interface IEventDAO extends IDAO {
-  boolean add(Event event, String language);
+  boolean add(Event event, int projid);
 
-  List<Event> getAll(String language);
-  List<Event> getAllMax(String language);
-  List<SlickSlimEvent> getAllSlim(String language);
+  List<Event> getAll(Integer projid);
+  List<Event> getAllMax(int projid);
+  List<SlickSlimEvent> getAllSlim(int projid);
 
-  List<SlickSlimEvent> getAllDevicesSlim(String language);
+  List<SlickSlimEvent> getAllDevicesSlim(int projid);
 
-  SlickSlimEvent getFirstSlim(String language);
+  SlickSlimEvent getFirstSlim(int projid);
+  Number getNumRows(int projid);
 
   void addPlayedMarkings(int userID, CommonExercise firstExercise);
 
-  Number getNumRows(String language);
 }
