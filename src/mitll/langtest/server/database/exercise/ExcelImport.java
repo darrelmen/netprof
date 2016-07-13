@@ -34,7 +34,8 @@ package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.custom.UserListManager;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.Exercise;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -103,16 +104,16 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     super(serverProps, userListManager, addDefects);
     this.file = file;
 
-  //  logger.info("Reading from " + file);
+    //  logger.info("Reading from " + file);
     maxExercises = serverProps.getMaxNumExercises();
     // turn off missing fast/slow for classroom
     shouldHaveRefAudio = false;
     this.usePredefinedTypeOrder = serverProps.usePredefinedTypeOrder();
     this.skipSemicolons = serverProps.shouldSkipSemicolonEntries();
     // from the tier index property
-    this.unitIndex    = serverProps.getUnitChapterWeek()[0];
+    this.unitIndex = serverProps.getUnitChapterWeek()[0];
     this.chapterIndex = serverProps.getUnitChapterWeek()[1];
-    this.weekIndex    = serverProps.getUnitChapterWeek()[2];
+    this.weekIndex = serverProps.getUnitChapterWeek()[2];
     if (DEBUG) logger.debug("unit " + unitIndex + " chapter " + chapterIndex + " week " + weekIndex);
   }
 
@@ -257,7 +258,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
           List<String> predefinedTypeOrder = new ArrayList<String>();
           for (String col : columns) {
             String colNormalized = col.toLowerCase();
-            if (DEBUG) logger.info("col " +colNormalized + "/" +col);
+            if (DEBUG) logger.info("col " + colNormalized + "/" + col);
 
             if (colNormalized.startsWith(WORD)) {
               gotHeader = true;
@@ -419,14 +420,29 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     return exercises;
   }
 
-  private List<String> getHeader( Row next) {
+  private String doTrim(String s) {
+    String trim = s.trim();
+    String s1 = trim.replaceAll("\\p{Z}+", " ");
+    String trim1 = s1.trim();
+/*    if (!trim1.equals(s)) {
+      logger.info("trim  '" + trim +
+          "'");
+      logger.info("s1    '" + s1 +
+          "'");
+      logger.info("trim1 '" + trim1 +
+          "'");
+    }*/
+    return trim1;
+  }
+
+  private List<String> getHeader(Row next) {
     List<String> columns = new ArrayList<String>();
 
-      Iterator<Cell> cellIterator = next.cellIterator();
-      while (cellIterator.hasNext()) {
-        Cell next1 = cellIterator.next();
-        columns.add(next1.toString().trim());
-      }
+    Iterator<Cell> cellIterator = next.cellIterator();
+    while (cellIterator.hasNext()) {
+      Cell next1 = cellIterator.next();
+      columns.add(next1.toString().trim());
+    }
 
     return columns;
   }
@@ -601,9 +617,9 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   }
 
   /**
-   * @see #readFromSheet(Sheet)
    * @param exercises
    * @param imported
+   * @see #readFromSheet(Sheet)
    */
   private void rememberExercise(Collection<CommonExercise> exercises,
                                 CommonExercise imported) {
@@ -616,11 +632,12 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     }
     if (foreignLanguagePhrase.endsWith("\'"))
       foreignLanguagePhrase = foreignLanguagePhrase.substring(0, foreignLanguagePhrase.length() - 1);
-    return foreignLanguagePhrase;
+    return doTrim(foreignLanguagePhrase);
   }
 
   /**
    * Don't do an overlay if it's older than the file creation date.
+   *
    * @param id
    * @param english
    * @param foreignLanguagePhrase
