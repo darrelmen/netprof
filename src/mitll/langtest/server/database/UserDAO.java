@@ -797,9 +797,10 @@ public class UserDAO extends DAO {
       if (timestamp == null) {
         long timestampMillis = newUser.getTimestampMillis();
         logger.error("timestamp null for " + newUser.getUserID() + " time " + new Date(timestampMillis));
-      } else {
+      } else if (false) {
         long timestampMillis = newUser.getTimestampMillis();
         long now = System.currentTimeMillis();
+
         if (now - timestampMillis < 60 * 60 * 1000 && !newUser.getUserID().equals(UserDAO.BEFORE_LOGIN_USER)) {
           logger.warn("timestamp for " + newUser.getUserID() + " time " + new Date(newUser.getTimestampMillis()));
         }
