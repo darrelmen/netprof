@@ -548,7 +548,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     Set<AudioAttribute> original = new HashSet<>(userExercise.getAudioAttributes());
     Set<AudioAttribute> defects = getAndMarkDefects(userExercise, userExercise.getFieldToAnnotation());
 
-    logger.debug("originally had " + original.size() + " attribute, and " + defects.size() + " defects");
+    logger.debug("editItem originally had " + original.size() + " attribute, and " + defects.size() + " defects");
 
     CommonExercise exercise = exerciseDAO.addOverlay(userExercise);
     boolean notOverlay = exercise == null;
@@ -630,7 +630,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    */
   public void markAudioDefect(AudioAttribute audioAttribute) {
     if (audioDAO.markDefect(audioAttribute) < 1) {
-      logger.error("huh? couldn't mark error on " + audioAttribute);
+      logger.error("markAudioDefect huh? couldn't mark error on " + audioAttribute);
     }
   }
 
