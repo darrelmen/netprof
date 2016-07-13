@@ -121,7 +121,7 @@ public class PropertyHandler {
   private static final String AMAS_PRONUNCIATION_FEEDBACK = "AMAS — Automatic Multi-Skilled Assessment System";
 
   private static final String INITIAL_PROMPT = "Practice pronunciation and learn vocabulary.";//"Learn how to pronounce words and practice vocabulary.";
-  private static final String AMAS_INITIAL_PROMPT = "Test your Listening and Reading Skills.";//"Learn how to pronounce words and practice vocabulary.";
+  private static final String AMAS_INITIAL_PROMPT = "Test your Listening and Reading Skills.";
 
   private static final List<String> SITE_LIST = Arrays.asList(
       "Dari",
@@ -131,6 +131,7 @@ public class PropertyHandler {
       "German",
       "Korean",
       "Iraqi",
+      "Japanese",
       "Levantine",
       "Mandarin",
       "MSA",
@@ -143,7 +144,8 @@ public class PropertyHandler {
       "Tagalog",
       "Urdu");
 
-  private static final List<String> AMAS_SITES = Arrays.asList("Dari", "Farsi", "Korean", "Mandarin", "MSA", "Pashto", "Russian", "Spanish", "Urdu");
+  private static final List<String> AMAS_SITES = Arrays.asList("Dari", "Farsi", "Korean", "Mandarin", "MSA", "Pashto",
+      "Russian", "Spanish", "Urdu");
   private String modelDir;
   private int afterStopDelayMillis;
 
@@ -152,7 +154,8 @@ public class PropertyHandler {
    * @see mitll.langtest.client.recorder.RecordButton#showTooLoud
    */
   public String getTooLoudMessage() {
-    return "If your recording is too loud, please follow the following steps to adjust your microphone level settings in Windows on your MacBook: <br/>" +
+    return "If your recording is too loud, please follow the following steps to adjust your microphone level settings in" +
+        " Windows on your MacBook: <br/>" +
         "1.\tClick on ‘Control Panel’<br/>" +
         "2.\tSelect ‘Sound’<br/>" +
         "3.\tClick on ‘Recording’<br/>" +
