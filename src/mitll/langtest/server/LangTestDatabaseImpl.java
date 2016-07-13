@@ -1602,9 +1602,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     if (!byID.getMutableAudio().removeAudio(audioAttribute)) {
       String key = audioAttribute.getKey();
-      logger.warn("huh? couldn't remove key '" + key +
-          "' : " + audioAttribute + " from " + exid +
-          " keys were " + byID.getAudioRefToAttr().keySet() + " contains " + byID.getAudioRefToAttr().containsKey(key));
+      logger.warn("markAudioDefect huh? couldn't remove key '" + key +
+          "' : " + audioAttribute + " from ex #" + exid +
+          "\n\tkeys were " + byID.getAudioRefToAttr().keySet() + " contains " + byID.getAudioRefToAttr().containsKey(key));
     }
     /*   int afterNumAudio = byID.getAudioAttributes().size();
     if (afterNumAudio != beforeNumAudio - 1) {
