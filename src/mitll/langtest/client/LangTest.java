@@ -155,6 +155,8 @@ import java.util.logging.Logger;
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  * 1.4.2
  * - fix for bug where column header for "context" got skipped for egyptian
+ * 1.4.3
+ * - Added Japanese, allows you to click on characters in transliteration (hiragana)
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since
