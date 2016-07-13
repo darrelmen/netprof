@@ -33,7 +33,6 @@
 package mitll.langtest.server.database.word;
 
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.ISchema;
 import mitll.langtest.server.database.userexercise.BaseUserExerciseDAO;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickWord;
@@ -44,8 +43,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SlickWordDAO extends BaseUserExerciseDAO implements IWordDAO, ISchema<Word, SlickWord> {
-  private static final Logger logger = Logger.getLogger(SlickWordDAO.class);
+public class SlickWordDAO extends BaseUserExerciseDAO implements IWordDAO {
+ // private static final Logger logger = Logger.getLogger(SlickWordDAO.class);
 
   private final WordDAOWrapper dao;
 
@@ -63,8 +62,7 @@ public class SlickWordDAO extends BaseUserExerciseDAO implements IWordDAO, ISche
     return dao.dao().name();
   }
 
-  @Override
-  public SlickWord toSlick(Word shared, String language) {
+  public SlickWord toSlick(Word shared) {
     return new SlickWord(-1,
         (int) shared.getRid(),
         shared.getWord(),
@@ -73,7 +71,6 @@ public class SlickWordDAO extends BaseUserExerciseDAO implements IWordDAO, ISche
         (int) shared.getId());
   }
 
-  @Override
   public Word fromSlick(SlickWord slick) {
     return new Word(
         slick.id(),
@@ -93,7 +90,7 @@ public class SlickWordDAO extends BaseUserExerciseDAO implements IWordDAO, ISche
 
   @Override
   public long addWord(Word word) {
-    return dao.insert(toSlick(word, ""));
+    return dao.insert(toSlick(word));
   }
 
   public Map<Integer, Integer> getOldToNew() {
@@ -102,5 +99,7 @@ public class SlickWordDAO extends BaseUserExerciseDAO implements IWordDAO, ISche
     return oldToNew;
   }
 
-  public boolean isEmpty() { return dao.getNumRows() == 0; }
+  public boolean isEmpty() {
+    return dao.getNumRows() == 0;
+  }
 }

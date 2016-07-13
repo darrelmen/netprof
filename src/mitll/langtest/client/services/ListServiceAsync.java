@@ -70,7 +70,7 @@ public interface ListServiceAsync {
 
   void deleteList(long id, AsyncCallback<Boolean> async);
 
-  void deleteItemFromList(long listid, String exid, AsyncCallback<Boolean> async);
+  void deleteItemFromList(long listid, int exid, AsyncCallback<Boolean> async);
 
   void duplicateExercise(CommonExercise id, AsyncCallback<CommonExercise> async);
 }

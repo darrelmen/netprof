@@ -43,6 +43,7 @@ import mitll.langtest.server.database.result.Result;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.npdata.dao.SlickProject;
 import mitll.npdata.dao.SlickSlimEvent;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -173,8 +174,11 @@ public class Report {
    * @param year         which year you want data for
    * @see #doReport(ServerProperties, String, MailSupport, PathHelper)
    */
-  private void writeAndSendReport(String language, String site, MailSupport mailSupport,
-                                  PathHelper pathHelper, List<String> reportEmails, int year) {
+  private void writeAndSendReport(String language,
+                                  String site,
+                                  MailSupport mailSupport,
+                                  PathHelper pathHelper,
+                                  List<String> reportEmails, int year) {
     String today = new SimpleDateFormat("MM_dd_yy").format(new Date());
     File file = getReportFile(pathHelper, today, language);
     if (file.exists()) {
@@ -195,6 +199,7 @@ public class Report {
    * @param language
    * @throws IOException
    * @see DatabaseImpl#doReport
+   * @deprecated
    */
   JSONObject writeReportToFile(PathHelper pathHelper, String language, int year) throws IOException {
     File file = getReportPath(pathHelper, language);
@@ -275,38 +280,66 @@ public class Report {
     return getReport(language, jsonObject, year);
   }
 
+  public String getAllReports(Collection<SlickProject> projects, JSONObject jsonObject, int year) {
+    StringBuilder builder = new StringBuilder();
+    builder.append(getHeader(this.language));
+
+    for (SlickProject project:projects) {
+      getReportForProject(language, jsonObject, year, builder, project.id());
+    }
+
+    builder.append(getFooter());
+    return builder.toString();
+  }
+  /**
+   *
+   * @param language
+   * @param jsonObject
+   * @param year
+   * @return
+   */
   String getReport(String language, JSONObject jsonObject, int year) {
     StringBuilder builder = new StringBuilder();
-    builder.append(getHeader());
-    jsonObject.put("host", getHostInfo());
-    JSONArray dataArray = new JSONArray();
-    List<SlickSlimEvent> allSlim = eventDAO.getAllSlim(language);
-    List<SlickSlimEvent> allDevicesSlim = eventDAO.getAllDevicesSlim(language);
+    builder.append(getHeader(this.language));
+
+    int projid = 0;
+
+    getReportForProject(language, jsonObject, year, builder, projid);
+
+    builder.append(getFooter());
+    return builder.toString();
+  }
+
+  private void getReportForProject(String language, JSONObject jsonObject, int year, StringBuilder builder, int projid) {
+    List<SlickSlimEvent> allSlim = eventDAO.getAllSlim(projid);
+    List<SlickSlimEvent> allDevicesSlim = eventDAO.getAllDevicesSlim(projid);
     Map<String, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
     Collection<AudioAttribute> audioAttributes = audioDAO.getAudioAttributes();
     List<Result> results = resultDAO.getResults();
     Collection<Result> resultsDevices = resultDAO.getResultsDevices();
 
-    if (year == -1) {
-      SlickSlimEvent firstSlim = eventDAO.getFirstSlim(language);
-      long timestamp = firstSlim.modified();
-      Calendar instance = Calendar.getInstance();
-      instance.clear();
-      instance.setTimeInMillis(timestamp);
-      int firstYear = instance.get(Calendar.YEAR);
-      int thisYear = Calendar.getInstance().get(Calendar.YEAR);
-      logger.info(language + " doReport for " + firstYear + "->" + thisYear);
+    {
+      jsonObject.put("host", getHostInfo());
 
-      for (int i = firstYear; i <= thisYear; i++) {
-        addYear(dataArray, builder, i, allSlim, allDevicesSlim, exToAudio, audioAttributes, results, resultsDevices);
+      JSONArray dataArray = new JSONArray();
+      if (year == -1) {
+        SlickSlimEvent firstSlim = eventDAO.getFirstSlim(projid);
+        long timestamp = firstSlim.modified();
+        Calendar instance = Calendar.getInstance();
+        instance.clear();
+        instance.setTimeInMillis(timestamp);
+        int firstYear = instance.get(Calendar.YEAR);
+        int thisYear = Calendar.getInstance().get(Calendar.YEAR);
+        logger.info(language + " doReport for " + firstYear + "->" + thisYear);
+
+        for (int i = firstYear; i <= thisYear; i++) {
+          addYear(dataArray, builder, i, allSlim, allDevicesSlim, exToAudio, audioAttributes, results, resultsDevices);
+        }
+      } else {
+        addYear(dataArray, builder, year, allSlim, allDevicesSlim, exToAudio, audioAttributes, results, resultsDevices);
       }
-    } else {
-      addYear(dataArray, builder, year, allSlim, allDevicesSlim, exToAudio, audioAttributes, results, resultsDevices);
+      jsonObject.put("data", dataArray);
     }
-
-    jsonObject.put("data", dataArray);
-    builder.append(getFooter());
-    return builder.toString();
   }
 
   private void addYear(JSONArray dataArray, StringBuilder builder, int i,
@@ -401,8 +434,9 @@ public class Report {
     return "</body></head></html>";
   }
 
-  private String getHeader() {
+  private String getHeader(String language) {
     String hostInfo = getHostInfo();
+    //String language = this.language;
     return "<html><head>" +
         "<title>Report for " + language + " on " + hostInfo + "</title>" +
         "<body><h2>Host : " + hostInfo + "</h2>\n";

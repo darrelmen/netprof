@@ -58,7 +58,7 @@ public interface SimpleExerciseDAO<T extends CommonShell> {
    * @return
    * @see DatabaseImpl#getExercise(String)
    */
-  T getExercise(String id);
+  T getExercise(int id);
 
   int getNumExercises();
 

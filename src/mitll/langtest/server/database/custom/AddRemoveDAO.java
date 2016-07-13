@@ -153,6 +153,7 @@ public class AddRemoveDAO extends DAO {
 
   private Collection<IdAndTime> getIds(String operation) {
     String sql = "SELECT DISTINCT " +
+        "uniqueid" + "," +
         EXERCISEID + "," +
         MODIFIED +
         " from " + ADDREMOVE +
@@ -170,8 +171,9 @@ public class AddRemoveDAO extends DAO {
       lists = new TreeSet<>();
 
       while (rs.next()) {
-        String id = rs.getString(1);
-        long mod = rs.getTimestamp(2).getTime();
+        int id = rs.getInt(1);
+    //    String id = rs.getString(1);
+        long mod = rs.getTimestamp(3).getTime();
         lists.add(new IdAndTime(id, mod));
       }
 
@@ -185,15 +187,15 @@ public class AddRemoveDAO extends DAO {
   }
 
   public static class IdAndTime implements Comparable<IdAndTime> {
-    private final String id;
+    private final int id;
     private final long timestamp;
 
-    public IdAndTime(String id, long timestamp) {
+    IdAndTime(int id, long timestamp) {
       this.id = id;
       this.timestamp = timestamp;
     }
 
-    public String getId() {
+    public int getId() {
       return id;
     }
 
@@ -203,7 +205,7 @@ public class AddRemoveDAO extends DAO {
 
     @Override
     public int compareTo(IdAndTime o) {
-      int i = id.compareTo(o.id);
+      int i = Integer.valueOf(id).compareTo(o.id);
       return i == 0 ? Long.valueOf(timestamp).compareTo(o.getTimestamp()) : i;
     }
 
