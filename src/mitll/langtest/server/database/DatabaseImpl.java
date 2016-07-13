@@ -1386,7 +1386,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   }
 
   /**
-   * JUST FOR TESTING?
+   * JUST FOR TESTING
    *
    * @param ex
    * @return
