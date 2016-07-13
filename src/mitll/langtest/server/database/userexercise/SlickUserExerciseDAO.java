@@ -41,10 +41,7 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Exercise;
-import mitll.npdata.dao.DBConnection;
-import mitll.npdata.dao.SlickExercise;
-import mitll.npdata.dao.SlickRelatedExercise;
-import mitll.npdata.dao.SlickUser;
+import mitll.npdata.dao.*;
 import mitll.npdata.dao.userexercise.ExerciseDAOWrapper;
 import mitll.npdata.dao.userexercise.RelatedExerciseDAOWrapper;
 import org.apache.log4j.Logger;
@@ -137,7 +134,6 @@ public class SlickUserExerciseDAO
 
     int creator = shared.getCreator();
     if (creator == BaseUserDAO.UNDEFINED_USER) creator = importUser;
-
 
     return new SlickExercise(-1,
         creator,
@@ -299,7 +295,7 @@ public class SlickUserExerciseDAO
   }
 
   @Override
-  public CommonExercise getByExID(String exid) {
+  public CommonExercise getByExID(int exid) {
     exid = exid.replaceAll("\'", "");
     Seq<SlickExercise> byExid = dao.getByExid(exid);
     return byExid.isEmpty() ? null : fromSlick(byExid.iterator().next());
@@ -319,7 +315,7 @@ public class SlickUserExerciseDAO
   }
 
   @Override
-  public Collection<CommonExercise> getByExID(Collection<String> exids) {
+  public Collection<CommonExercise> getByExID(Collection<Integer> exids) {
     return getUserExercises(dao.byExids(exids));
   }
 
@@ -356,4 +352,10 @@ public class SlickUserExerciseDAO
   }
 
   public Collection<SlickRelatedExercise> getAllRelated() { return relatedExerciseDAOWrapper.all();}
+
+  public Map<String, Integer> getOldToNew() {
+    Map<String, Integer> oldToNew = new HashMap<>();
+    for (SlickExercise exercise : dao.getAllPredefEx()) oldToNew.put(exercise.exid(), exercise.id());
+    return oldToNew;
+  }
 }

@@ -244,7 +244,7 @@ public class AMASJSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImp
    * @return
    */
   @Override
-  public AmasExerciseImpl getExercise(String id) {
+  public AmasExerciseImpl getExercise(int id) {
     if (idToExercise.isEmpty()) logger.warn("huh? couldn't find any exercises..?");
     if (!idToExercise.containsKey(id)) {
       logger.warn("couldn't find " + id + " in " + idToExercise.size() + " exercises...");

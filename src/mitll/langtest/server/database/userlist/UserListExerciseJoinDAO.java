@@ -173,10 +173,10 @@ public class UserListExerciseJoinDAO extends DAO implements IUserListExerciseJoi
    * @param listid
    * @param exid
    * @return
-   * @see UserListManager#deleteItemFromList(long, String, java.util.Collection)
+   * @see UserListManager#deleteItemFromList(long, int, Collection)
    */
   @Override
-  public boolean remove(long listid, String exid) {
+  public boolean remove(long listid, int exid) {
     String sql = getRemoveSQL(listid, exid);
     return doSqlOn(sql, USER_EXERCISE_LIST_EXERCISE, true);
   }

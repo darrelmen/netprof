@@ -186,7 +186,7 @@ public class EditItem {
           }
 
           @Override
-          protected void askServerForExercise(String itemID) {
+          protected void askServerForExercise(int itemID) {
             if (itemID.equals(NEW_EXERCISE_ID)) {
               useExercise(getNewItem());
             } else {

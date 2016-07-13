@@ -80,7 +80,7 @@ public interface LangTestDatabaseAsync {
   void getScoresForUser(Map<String, Collection<String>> typeToSection, int userID, Collection<String> exids,
                         AsyncCallback<QuizCorrectAndScore> async);
 
-  <T extends Shell> void getExercise(String id, int userID, boolean isFlashcardReq, AsyncCallback<T> async);
+  <T extends Shell> void getExercise(int exid, int userID, boolean isFlashcardReq, AsyncCallback<T> async);
 
   void getResults(int start, int end, String sortInfo, Map<String, String> unitToValue, int userid, String flText,
                   int req, AsyncCallback<ResultAndTotal> async);

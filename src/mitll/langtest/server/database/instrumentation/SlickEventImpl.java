@@ -1,13 +1,14 @@
 package mitll.langtest.server.database.instrumentation;
 
 import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.ISchema;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.Event;
+import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickEvent;
 import mitll.npdata.dao.SlickSlimEvent;
-import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.event.EventDAOWrapper;
 import org.apache.log4j.Logger;
 
@@ -21,7 +22,7 @@ import java.util.Map;
  */
 public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
   private static final Logger logger = Logger.getLogger(SlickEventImpl.class);
-  public static final int MAX_EVENTS_TO_SHOW = 20000;
+  private static final int MAX_EVENTS_TO_SHOW = 20000;
   private EventDAOWrapper eventDAOWrapper;
 
   /**
@@ -42,17 +43,18 @@ public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
 
   /**
    * @param other
-   * @param language
-   * @see mitll.langtest.server.database.DatabaseImpl#oneTimeDataCopy
+   * @param projid
+   * @param exToInt
+   * @see mitll.langtest.server.database.CopyToPostgres#copyToPostgres(DatabaseImpl)
    */
-  public void copyTableOnlyOnce(IEventDAO other, String language, Map<Integer, Integer> oldToNew) {
-    if (getNumRows(language).intValue() == 0) {
+  public void copyTableOnlyOnce(IEventDAO other, int projid, Map<Integer, Integer> oldToNew, Map<String, Integer> exToInt) {
+    if (getNumRows(projid).intValue() == 0) {
       List<SlickEvent> copy = new ArrayList<>();
-      List<Event> all = other.getAll(language);
+      List<Event> all = other.getAll(projid);
       logger.info("copyTableOnlyOnce " + all.size() + " events ");
 
       for (Event event : all) {
-        SlickEvent slickEvent = getSlickEvent(event, language, oldToNew);
+        SlickEvent slickEvent = getSlickEvent(event, projid, oldToNew, exToInt);
         if (slickEvent != null) {
           copy.add(slickEvent);
         }
@@ -61,50 +63,38 @@ public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
     }
   }
 
+  /**
+   * @param event
+   * @param projid
+   * @return true always - deal with possiblity it might fail???
+   */
   @Override
-  public boolean add(Event event, String language) {
-    eventDAOWrapper.add(toSlick(event, language.toLowerCase()));
+  public boolean add(Event event, int projid) {
+    eventDAOWrapper.add(getSlickEvent(event, projid, event.getExid()));
     return true;
   }
-/*
-  public SlickEvent getSlickEvent(Event event, String language) {
-    long timestamp = event.getTimestamp();
-    if (timestamp < 1) timestamp = System.currentTimeMillis();
-    Timestamp modified = new Timestamp(timestamp);
-
-    SlickEvent slickEvent = new SlickEvent(-1,
-        event.getUserID(),
-        event.getExerciseID(),
-        event.getContext() == null ? "" : event.getContext(),
-        event.getWidgetID(),
-        event.getWidgetType(),
-        event.getDevice() == null ? "" : event.getDevice(),
-        modified,
-        language.toLowerCase());
-
-//    logger.info("insert " +event);
-    //   logger.info("insert " +slickEvent);
-
-    return slickEvent;
-  }*/
-
 
   @Override
-  public SlickEvent toSlick(Event event, String language) {
+  public SlickEvent toSlick(Event event, int projid, Map<String, Integer> exToInt) {
+    Integer exid = exToInt.get(event.getExerciseID());
+    SlickEvent slickEvent = getSlickEvent(event, projid, exid);
+
+    return slickEvent;
+  }
+
+  SlickEvent getSlickEvent(Event event, int projid, Integer exid) {
     long timestamp = event.getTimestamp();
     if (timestamp < 1) timestamp = System.currentTimeMillis();
     Timestamp modified = new Timestamp(timestamp);
-    SlickEvent slickEvent = new SlickEvent(-1,
+    return new SlickEvent(-1,
         event.getUserID(),
-        event.getExerciseID(),
+        exid,
         modified,
         event.getContext() == null ? "" : event.getContext(),
         event.getWidgetID(),
         event.getWidgetType(),
         event.getDevice() == null ? "" : event.getDevice(),
-        language.toLowerCase());
-
-    return slickEvent;
+        projid.toLowerCase());
   }
 
   @Override
@@ -112,48 +102,37 @@ public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
     return new Event(
         event.widgetid(),
         event.widgettype(),
-        event.exid(),
+        "" + event.exid(),
         event.context(),
         event.userid(),
         event.modified().getTime(),
-        event.device());
+        event.device(), event.exid());
   }
 
-  private SlickEvent getSlickEvent(Event event, String language, Map<Integer, Integer> oldToNew) {
-    long timestamp = event.getTimestamp();
-    if (timestamp < 1) timestamp = System.currentTimeMillis();
-    Timestamp modified = new Timestamp(timestamp);
-
-    Integer userid = oldToNew.get(event.getUserID());
-    if (userid == null) return null;
-    else {
-      SlickEvent slickEvent = /*new SlickEvent(-1,
-          userid,
-          event.getExerciseID(),
-          event.getContext() == null ? "" : event.getContext(),
-          event.getWidgetID(),
-          event.getWidgetType(),
-          event.getDevice() == null ? "" : event.getDevice(),
-          modified,
-          language.toLowerCase());*/
-          toSlick(event, language);
-
-//    logger.info("insert " +event);
-      //   logger.info("insert " +slickEvent);
-
-      return slickEvent;
-    }
+  /**
+   * @param event
+   * @param projid
+   * @param oldToNew
+   * @param exToID
+   * @return
+   * @see #copyTableOnlyOnce(IEventDAO, int, Map, Map)
+   */
+  private SlickEvent getSlickEvent(Event event, int projid, Map<Integer, Integer> oldToNew, Map<String, Integer> exToID) {
+//    long timestamp = event.getTimestamp();
+//    if (timestamp < 1) timestamp = System.currentTimeMillis();
+//    Timestamp modified = new Timestamp(timestamp);
+    return (oldToNew.containsKey(event.getUserID())) ? null : toSlick(event, projid, exToID);
   }
 
   @Override
-  public List<Event> getAll(String language) {
-    List<SlickEvent> all = eventDAOWrapper.getAll(language.toLowerCase());
+  public List<Event> getAll(Integer projid) {
+    List<SlickEvent> all = eventDAOWrapper.getAll(projid);
     return getEvents(all);
   }
 
   @Override
-  public List<Event> getAllMax(String language) {
-    List<SlickEvent> all = eventDAOWrapper.getAllMax(language.toLowerCase(), MAX_EVENTS_TO_SHOW);
+  public List<Event> getAllMax(int projid) {
+    List<SlickEvent> all = eventDAOWrapper.getAllMax(projid, MAX_EVENTS_TO_SHOW);
     return getEvents(all);
   }
 
@@ -166,23 +145,23 @@ public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
   }
 
   @Override
-  public List<SlickSlimEvent> getAllSlim(String language) {
-    return eventDAOWrapper.getAllSlim(language.toLowerCase());
+  public List<SlickSlimEvent> getAllSlim(int projid) {
+    return eventDAOWrapper.getAllSlim(projid);
   }
 
   @Override
-  public List<SlickSlimEvent> getAllDevicesSlim(String language) {
-    return eventDAOWrapper.getAllSlim(language.toLowerCase());
+  public List<SlickSlimEvent> getAllDevicesSlim(int projid) {
+    return eventDAOWrapper.getAllSlim(projid);
   }
 
   @Override
-  public SlickSlimEvent getFirstSlim(String language) {
-    return eventDAOWrapper.getFirstSlim(language.toLowerCase());
+  public SlickSlimEvent getFirstSlim(int projid) {
+    return eventDAOWrapper.getFirstSlim(projid);
   }
 
   @Override
   public void addPlayedMarkings(int userID, CommonExercise firstExercise) {
-    List<String> forUserAndExercise = eventDAOWrapper.getForUserAndExercise(userID, firstExercise.getID());
+    List<String> forUserAndExercise = eventDAOWrapper.getForUserAndExercise(userID, firstExercise.getRealID());
     Map<String, AudioAttribute> audioToAttr = firstExercise.getAudioRefToAttr();
     for (String eventContext : forUserAndExercise) {
       AudioAttribute audioAttribute = audioToAttr.get(eventContext);
@@ -195,8 +174,8 @@ public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
   }
 
   @Override
-  public Number getNumRows(String language) {
-    return eventDAOWrapper.getNumRows(language.toLowerCase());
+  public Number getNumRows(int projid) {
+    return eventDAOWrapper.getNumRows(projid);
   }
 
   public int getNumRows() {
