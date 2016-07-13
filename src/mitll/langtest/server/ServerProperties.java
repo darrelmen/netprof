@@ -75,6 +75,7 @@ public class ServerProperties {
       "German",
       "Korean",
       "Iraqi",
+      "Japanese",
       "Levantine",
       "Mandarin",
       "MSA",
