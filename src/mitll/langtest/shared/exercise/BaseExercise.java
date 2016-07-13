@@ -62,7 +62,7 @@ public class BaseExercise implements IsSerializable, Shell {
     this.realID = realID;
   }
 
- // @Deprecated
+  @Deprecated
   public String getID() {
     return id;
   }

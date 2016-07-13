@@ -39,8 +39,6 @@ import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.userexercise.UserExerciseListJoinDAOWrapper;
 import org.apache.log4j.Logger;
 
-import java.util.Collection;
-
 public class SlickUserListExerciseJoinDAO
     extends DAO implements IUserListExerciseJoinDAO {
   private static final Logger logger = Logger.getLogger(SlickUserListExerciseJoinDAO.class);
@@ -62,25 +60,25 @@ public class SlickUserListExerciseJoinDAO
   }
 
   /**
-   * @see mitll.langtest.server.database.custom.UserListManager#addItemToList
    * @param userList
    * @param uniqueID
    * @param exid
+   * @see mitll.langtest.server.database.custom.UserListManager#addItemToList
    */
   @Override
   public void add(UserList userList, String uniqueID, int exid) {
-    addPair(userList.getRealID(), uniqueID, exid);
- //   dao.insert((int) userList.getUniqueID(), uniqueID,exid);
+    addPair(userList.getRealID(), /*uniqueID,*/ exid);
+    //   dao.insert((int) userList.getUniqueID(), uniqueID,exid);
   }
 
   /**
    * Just for copying from h2 initially
    *
    * @param userlistid
-   * @param exerciseID
+   * @paramz exerciseID
    */
-  public void addPair(int userlistid, String exerciseID, int exid) {
-    dao.insert(userlistid, exerciseID,exid);
+  public void addPair(int userlistid, /*String exerciseID,*/ int exid) {
+    dao.insert(userlistid, /*exerciseID,*/ exid);
   }
 
   @Override
@@ -88,12 +86,14 @@ public class SlickUserListExerciseJoinDAO
 
   }
 
+/*
   public Collection<String> getExidsFor(int listid) {
     return dao.exids(listid);
   }
+*/
 
   @Override
-  public boolean remove(long listid, String exid) {
+  public boolean remove(long listid, int exid) {
     return dao.remove((int) listid, exid) == 1;
   }
 

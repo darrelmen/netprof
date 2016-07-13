@@ -192,7 +192,8 @@ class EditableExerciseDialog extends NewUserExercise {
     delete.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        deleteItem(newUserExercise.getID(), uniqueID, ul, exerciseList, predefinedContentList);
+       // deleteItem(newUserExercise.getID(), uniqueID, ul, exerciseList, predefinedContentList);
+        deleteItem(newUserExercise.getRealID(), uniqueID, ul, exerciseList, predefinedContentList);
       }
     });
 

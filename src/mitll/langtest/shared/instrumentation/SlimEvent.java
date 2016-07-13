@@ -43,11 +43,13 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class SlimEvent implements IsSerializable, Comparable<SlimEvent> {
   private int userID;
   private long timestamp;
+  private int exid;
 
   public SlimEvent() {}
-  public SlimEvent(int userID, long timestamp) {
+  public SlimEvent(int userID, long timestamp, int exid) {
     this.userID = userID;
     this.timestamp = timestamp;
+    this.exid = exid;
   }
 
   @Override
@@ -65,5 +67,9 @@ public class SlimEvent implements IsSerializable, Comparable<SlimEvent> {
 
   public void setTimestamp(long timestamp) {
     this.timestamp = timestamp;
+  }
+
+  public int getExid() {
+    return exid;
   }
 }
