@@ -44,7 +44,6 @@ import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickPhone;
 import mitll.npdata.dao.SlickPhoneReport;
 import mitll.npdata.dao.phone.PhoneDAOWrapper;
-import mitll.npdata.dao.phone.PhoneTable;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
@@ -54,8 +53,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone>, ISchema<Phone, SlickPhone> {
-  private static final Logger logger = Logger.getLogger(SlickPhoneDAO.class);
+public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
+//  private static final Logger logger = Logger.getLogger(SlickPhoneDAO.class);
 
   private final PhoneDAOWrapper dao;
 
@@ -74,8 +73,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone>, ISc
     return dao.name();
   }
 
-  @Override
-  public SlickPhone toSlick(Phone shared, String language) {
+  public SlickPhone toSlick(Phone shared) {
     return new SlickPhone(-1,
         (int) shared.getRid(),
         (int) shared.getWid(),
@@ -84,7 +82,6 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone>, ISc
         shared.getScore());
   }
 
-  @Override
   public Phone fromSlick(SlickPhone slick) {
     return new Phone(
 //        (long)slick.id(),
@@ -105,7 +102,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone>, ISc
 
   @Override
   public boolean addPhone(Phone word) {
-    return dao.insert(toSlick(word, "")) > 0;
+    return dao.insert(toSlick(word)) > 0;
   }
 
   /**
@@ -120,9 +117,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone>, ISc
   public JSONObject getWorstPhonesJson(long userid, Collection<String> exids, Map<String, String> idToRef) {
     Collection<SlickPhoneReport> phoneReportByResult = dao.getPhoneReportByExercises((int) userid, exids);
     PhoneReport report = getPhoneReport(phoneReportByResult, idToRef, false, true);
-
    // logger.info("getWorstPhonesJson phone report " + report);
-
     return new PhoneJSON().getWorstPhonesJson(report);
   }
 

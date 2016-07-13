@@ -34,7 +34,6 @@ package mitll.langtest.shared.custom;
 
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.Navigation;
-import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.server.database.userlist.SlickUserListDAO;
 import mitll.langtest.server.database.userlist.UserListDAO;
 import mitll.langtest.shared.User;
@@ -58,15 +57,13 @@ import java.util.Map;
 public class UserList<T extends HasID> extends BaseExercise {
   public static final String MY_LIST = "Favorites";
 
- // private long uniqueID;
-
+  // private long uniqueID;
   private User creator;
   private String name;
   private String description;
   private String classMarker;
   private boolean isPrivate;
   private long modified;
-  //  private boolean isReview;
   private List<T> exercises = new ArrayList<>();
 
   public UserList() {
@@ -84,7 +81,6 @@ public class UserList<T extends HasID> extends BaseExercise {
   public UserList(int uniqueID, User user, String name, String description, String classMarker, boolean isPrivate,
                   long modified) {
     super("" + uniqueID, uniqueID);
-   // this.uniqueID = uniqueID;
     this.creator = user;
     this.name = name;
     this.description = description;
@@ -160,15 +156,17 @@ public class UserList<T extends HasID> extends BaseExercise {
     return exercises.remove(newUserExercise);
   }
 
-  public boolean removeAndCheck(String id) {
+  public boolean removeAndCheck(int id) {
     return remove(id) != null;
   }
 
-  public T remove(String id) {
+  public T remove(int id) {
     T toRemove = null;
     for (T ue : exercises) {
-      if (id.equals(ue.getID())) {
+      //   if (id.equals(ue.getID())) {
+      if (id == ue.getRealID()) {
         toRemove = ue;
+        break;
       }
     }
     return toRemove != null && exercises.remove(toRemove) ? toRemove : null;
@@ -198,9 +196,10 @@ public class UserList<T extends HasID> extends BaseExercise {
     return getExercises().contains(userExercise);
   }
 
-  public boolean containsByID(String id) {
+  public boolean containsByID(int id) {
     for (T ex : getExercises()) {
-      if (ex.getID().equals(id)) return true;
+//      if (ex.getID().equals(id)) return true;
+      if (ex.getRealID() == id) return true;
     }
     return false;
   }

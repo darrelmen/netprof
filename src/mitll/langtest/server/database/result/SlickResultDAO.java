@@ -70,9 +70,11 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
   }
 
   @Override
-  public SlickResult toSlick(Result shared, String language) {
+  public SlickResult toSlick(Result shared, int projid, Map<String, Integer> exToInt) {
+    String exid = shared.getExid();
+    int realExID = exToInt.get(shared.getExid());
     return new SlickResult(-1,
-        shared.getUserid(), shared.getExid(),
+        shared.getUserid(), exid,
         new Timestamp(shared.getTimestamp()),
         shared.getQid(),
         shared.getAudioType().toString(),

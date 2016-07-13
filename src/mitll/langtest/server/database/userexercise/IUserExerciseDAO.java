@@ -46,21 +46,21 @@ public interface IUserExerciseDAO extends IDAO {
   List<CommonShell> getOnList(int listID);
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#getUserExerciseWhere(String)
+   * @see mitll.langtest.server.database.DatabaseImpl#getUserExerciseByExID(String)
    * @param exid
    * @return
    */
-  CommonExercise getByExID(String exid);
+  CommonExercise getByExID(int exid);
 
   Collection<CommonExercise> getAll();
 
   Collection<CommonExercise> getOverrides();
 
-  Collection<CommonExercise> getByExID(Collection<String> exids);
+  Collection<CommonExercise> getByExID(Collection<Integer> exids);
 
   void update(CommonExercise userExercise, boolean createIfDoesntExist);
 
   void setExerciseDAO(ExerciseDAO<CommonExercise> exerciseDAO);
 
-  CommonExercise getPredefExercise(String id);
+  CommonExercise getPredefExercise(int exid);
 }

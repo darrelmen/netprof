@@ -89,7 +89,7 @@ public interface ListService extends RemoteService {
    * @param exid
    * @return
    */
-  boolean deleteItemFromList(long listid, String exid);
+  boolean deleteItemFromList(long listid, int exid);
 
   /**
    * @see ReviewEditableExercise#confirmThenDeleteItem()

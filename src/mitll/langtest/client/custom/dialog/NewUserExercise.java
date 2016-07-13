@@ -270,32 +270,34 @@ class NewUserExercise extends BasicDialog {
   /**
    * Removes from 4 lists!
    *
-   * @param id
+   * @param exid
    * @param uniqueID
    * @param ul
    * @param exerciseList
    * @param learnContainer
+   * @see EditableExerciseDialog#makeDeleteButton(long)
    */
-  void deleteItem(final String id, final long uniqueID,
+  void deleteItem(final int exid,
+                  final long uniqueID,
                   final UserList<?> ul,
                   final PagingExerciseList<?, ?> exerciseList,
                   final ReloadableContainer learnContainer) {
-    listService.deleteItemFromList(uniqueID, id, new AsyncCallback<Boolean>() {
+    listService.deleteItemFromList(uniqueID, exid, new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
       }
 
       @Override
       public void onSuccess(Boolean result) {
-        if (!result) logger.warning("deleteItem huh? id " + id + " not in list " + uniqueID);
+        if (!result) logger.warning("deleteItem huh? id " + exid + " not in list " + uniqueID);
 
-        exerciseList.forgetExercise(id);
+        exerciseList.forgetExercise(exid);
 
-        if (!ul.removeAndCheck(id)) {
-          logger.warning("deleteItem huh? didn't remove the item " + id);
+        if (!ul.removeAndCheck(exid)) {
+          logger.warning("deleteItem huh? didn't remove the item " + exid);
         }
-        if (!originalList.removeAndCheck(id)) {
-          logger.warning("deleteItem huh? didn't remove the item " + id + " from " + originalList);
+        if (!originalList.removeAndCheck(exid)) {
+          logger.warning("deleteItem huh? didn't remove the item " + exid + " from " + originalList);
         }
         if (learnContainer != null && learnContainer.getReloadable() != null) {
           learnContainer.getReloadable().redraw();   // TODO : or reload???
