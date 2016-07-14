@@ -94,7 +94,7 @@ public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
         event.getWidgetID(),
         event.getWidgetType(),
         event.getDevice() == null ? "" : event.getDevice(),
-        projid.toLowerCase());
+        projid);
   }
 
   @Override
@@ -161,7 +161,7 @@ public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
 
   @Override
   public void addPlayedMarkings(int userID, CommonExercise firstExercise) {
-    List<String> forUserAndExercise = eventDAOWrapper.getForUserAndExercise(userID, firstExercise.getRealID());
+    List<String> forUserAndExercise = eventDAOWrapper.getForUserAndExercise(userID, firstExercise.getID());
     Map<String, AudioAttribute> audioToAttr = firstExercise.getAudioRefToAttr();
     for (String eventContext : forUserAndExercise) {
       AudioAttribute audioAttribute = audioToAttr.get(eventContext);

@@ -71,7 +71,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
 
   private int uniqueID;
   private String audioRef;
-  private String exid;
+  private int exid;
   private int userid;
   private long timestamp;
   private long durationInMillis;
@@ -102,7 +102,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
    * @seex mitll.langtest.server.database.audio.BaseAudioDAO#getResultsForQuery
    */
   public AudioAttribute(int uniqueID, int userid,
-                        String exid,
+                        int exid,
                         String audioRef,
                         long timestamp, long durationInMillis, AudioType type, MiniUser user, String transcript) {
     this.uniqueID = uniqueID;
@@ -150,7 +150,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     return audioRef != null && !audioRef.contains(FILE_MISSING);
   }
 
-  public String getExid() {
+  public int getExid() {
     return exid;
   }
 
@@ -304,7 +304,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
 
   /**
    * @param hasBeenPlayed
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addPlayedMarkings(long, CommonExercise)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addPlayedMarkings
    */
   public void setHasBeenPlayed(boolean hasBeenPlayed) {
     this.hasBeenPlayed = hasBeenPlayed;
@@ -322,7 +322,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     return uniqueID;
   }
 
-  public void setExid(String exid) {
+  public void setExid(int exid) {
     this.exid = exid;
   }
 

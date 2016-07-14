@@ -33,7 +33,6 @@
 package mitll.langtest.server.database.annotation;
 
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.ISchema;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickAnnotation;
@@ -82,7 +81,8 @@ public class SlickAnnotationDAO
         slick.status(),
         slick.comment(),
         slick.userid(),
-        slick.modified().getTime()
+        slick.modified().getTime(),
+        ""+slick.exid()
     );
   }
 
@@ -105,12 +105,10 @@ public class SlickAnnotationDAO
   }
 
   @Override
-  public Collection<String> getAudioAnnos() {
-    return dao.getOnlyAudioAnnos();
-  }
+  public Collection<Integer> getAudioAnnos() { return dao.getOnlyAudioAnnos(); }
 
   @Override
-  public Map<String, ExerciseAnnotation> getLatestByExerciseID(String exerciseID) {
+  public Map<String, ExerciseAnnotation> getLatestByExerciseID(int exerciseID) {
     long then = System.currentTimeMillis();
 
     Collection<SlickAnnotation> latestByExerciseID = dao.getLatestByExerciseID(exerciseID);
@@ -122,21 +120,21 @@ public class SlickAnnotationDAO
   }
 
   @Override
-  public Set<String> getExercisesWithIncorrectAnnotations() {
-    Collection<Tuple4<String, String, String, Timestamp>> annoToCreator = dao.getAnnosGrouped();
+  public Set<Integer> getExercisesWithIncorrectAnnotations() {
+    Collection<Tuple4<Integer, String, String, Timestamp>> annoToCreator = dao.getAnnosGrouped();
 
   //  logger.info("getExercisesWithIncorrectAnnotations " + annoToCreator.size());
-    String prevExid = "";
+    Integer prevExid = -1;
 
-    Set<String> incorrect = new HashSet<>();
+    Set<Integer> incorrect = new HashSet<>();
 
     Map<String, String> fieldToStatus = new HashMap<>();
-    for (Tuple4<String, String, String, Timestamp> tuple4 : annoToCreator) {
-      String exid = tuple4._1();
+    for (Tuple4<Integer, String, String, Timestamp> tuple4 : annoToCreator) {
+      Integer exid = tuple4._1();
       String field = tuple4._2();
       String status = tuple4._3();
 //      logger.info("Got " + tuple4);
-      if (prevExid.isEmpty()) {
+      if (prevExid == -1) {
         prevExid = exid;
       } else if (!prevExid.equals(exid)) {
         // go through all the fields -- if the latest is "incorrect" on any field, it's a defect

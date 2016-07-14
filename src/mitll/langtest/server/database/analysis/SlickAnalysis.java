@@ -48,7 +48,7 @@ import java.util.*;
 
 public class SlickAnalysis extends Analysis implements IAnalysis {
   private static final Logger logger = Logger.getLogger(Analysis.class);
-  SlickResultDAO resultDAO;
+  private SlickResultDAO resultDAO;
   private static final boolean DEBUG = true;
 
   /**
@@ -58,7 +58,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    * @see DatabaseImpl#getAnalysis()
    * @see DatabaseImpl#makeDAO(String, String, String)
    */
-  public SlickAnalysis(Database database, IPhoneDAO phoneDAO, Map<String, String> exToRef,
+  public SlickAnalysis(Database database, IPhoneDAO phoneDAO, Map<Integer, String> exToRef,
                        SlickResultDAO resultDAO) {
     super(database, phoneDAO, exToRef);
     this.resultDAO = resultDAO;

@@ -185,7 +185,7 @@ public class JsonExport {
     Collections.sort(copy, new Comparator<T>() {
       @Override
       public int compare(T o1, T o2) {
-        return o1.getID().compareTo(o2.getID());
+        return Integer.valueOf(o1.getID()).compareTo(o2.getID());
       }
     });
     return copy;

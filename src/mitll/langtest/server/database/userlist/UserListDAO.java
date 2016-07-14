@@ -34,7 +34,6 @@ package mitll.langtest.server.database.userlist;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.custom.UserList;
@@ -423,7 +422,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
    * @see #getAllByUser(long)
    */
   private void populateList(UserList<CommonShell> where) {
-    where.setExercises(userExerciseDAO.getOnList(where.getRealID()));
+    where.setExercises(userExerciseDAO.getOnList(where.getID()));
   }
 
   @Override

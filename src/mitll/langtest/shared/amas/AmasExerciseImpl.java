@@ -218,12 +218,12 @@ public class AmasExerciseImpl implements CommonShell {
     this.unitToValue = unitToValue;
   }
 
-  public String getID() {
+  public String getOldID() {
     return id;
   }
 
   @Override
-  public int getRealID() {
+  public int getID() {
     return realID;
   }
 
@@ -251,7 +251,7 @@ public class AmasExerciseImpl implements CommonShell {
   public void setSecondState(STATE state) {}
 
   public String toString() {
-    return "Exercise " + getID() + (getAltID().isEmpty() ? "" : "/" + getAltID()) +
+    return "Exercise " + getOldID() + (getAltID().isEmpty() ? "" : "/" + getAltID()) +
         " Questions " + getQuestions() + " unit->lesson " + getUnitToValue();
   }
 

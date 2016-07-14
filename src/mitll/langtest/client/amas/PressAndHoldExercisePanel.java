@@ -70,7 +70,7 @@ public class PressAndHoldExercisePanel extends VerticalPanel implements AudioAns
   private Heading recoOutput;
   private static final int HIDE_DELAY = 2500;
 
-  private final String exerciseID;
+  private final int exerciseID;
 
   private final MySoundFeedback soundFeedback;
   private final ExerciseController controller;
@@ -95,7 +95,7 @@ public class PressAndHoldExercisePanel extends VerticalPanel implements AudioAns
    * @param typeToSelection
    * @see mitll.langtest.client.recorder.FeedbackRecordPanel.AnswerPanel#addComboAnswer
    */
-  public PressAndHoldExercisePanel(final String exerciseID,
+  public PressAndHoldExercisePanel(final int exerciseID,
                                    final LangTestDatabaseAsync service,
                                    final ExerciseController controller,
                                    MySoundFeedback soundFeedback,
@@ -120,7 +120,7 @@ public class PressAndHoldExercisePanel extends VerticalPanel implements AudioAns
    * @param qid
    * @seex #FlashcardPanel
    */
-  private void addRecordingAndFeedbackWidgets(String e, LangTestDatabaseAsync service, ExerciseController controller,
+  private void addRecordingAndFeedbackWidgets(int e, LangTestDatabaseAsync service, ExerciseController controller,
                                               Panel toAddTo, int qid, Map<String, Collection<String>> typeToSelection) {
     Widget answerAndRecordButtonRow = getAnswerAndRecordButtonRow(e, service, controller, qid,typeToSelection);
     answerAndRecordButtonRow.addStyleName("topFiveMargin");
@@ -138,7 +138,7 @@ public class PressAndHoldExercisePanel extends VerticalPanel implements AudioAns
    * @return
    * @see #addRecordingAndFeedbackWidgets(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, int)
    */
-  private Widget getAnswerAndRecordButtonRow(String exerciseID, LangTestDatabaseAsync service,
+  private Widget getAnswerAndRecordButtonRow(int exerciseID, LangTestDatabaseAsync service,
                                              ExerciseController controller, int qid, Map<String, Collection<String>> typeToSelection) {
     RecordButtonPanel answerWidget = getAnswerWidget(exerciseID, service, controller, false // = DO NOT add key binding! - bad for now for multi-question responses
         , instance, qid,typeToSelection);
@@ -230,8 +230,9 @@ public class PressAndHoldExercisePanel extends VerticalPanel implements AudioAns
    * @return
    * @see #getAnswerAndRecordButtonRow(mitll.langtest.shared.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, int)
    */
-  private RecordButtonPanel getAnswerWidget(final String exercise, LangTestDatabaseAsync service,
-                                            final ExerciseController controller, final boolean addKeyBinding, String instance,
+  private RecordButtonPanel getAnswerWidget(final int exercise, LangTestDatabaseAsync service,
+                                            final ExerciseController controller, final boolean addKeyBinding,
+                                            String instance,
                                             int qid,
                                             Map<String, Collection<String>> typeToSelection) {
     PressAndHoldExercisePanel widgets = this;

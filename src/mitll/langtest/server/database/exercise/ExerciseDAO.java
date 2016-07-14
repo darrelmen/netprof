@@ -71,9 +71,9 @@ public interface ExerciseDAO<T extends CommonShell> extends SimpleExerciseDAO<T>
   /**
    * @param id
    * @return
-   * @see mitll.langtest.server.database.DatabaseImpl#deleteItem(String)
+   * @see DatabaseImpl#deleteItem(int)
    */
-  boolean remove(String id);
+  boolean remove(int id);
 
   /**
    * @param userExerciseDAO

@@ -59,10 +59,8 @@ import mitll.langtest.client.list.Reloadable;
 import mitll.langtest.client.qc.UserTitle;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.scoring.EmptyScoreListener;
-import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayListener;
-import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.AudioType;
 import mitll.langtest.shared.ExerciseAnnotation;
@@ -265,7 +263,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
       audioRef = CompressedAudio.getPathNoSlashChange(audioRef);   // todo why do we have to do this?
     }
     final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<X>(audioRef, exercise.getForeignLanguage(), service, controller,
-        controller.getProps().showSpectrogram(), new EmptyScoreListener(), 70, audio.isRegularSpeed() ? REGULAR_SPEED : SLOW_SPEED, exercise.getID(),
+        controller.getProps().showSpectrogram(), new EmptyScoreListener(), 70, audio.isRegularSpeed() ? REGULAR_SPEED : SLOW_SPEED, exercise.getOldID(),
         exercise, instance
     ) {
 
@@ -275,12 +273,12 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
        */
       @Override
       protected Widget getAfterPlayWidget() {
-        return getDeleteButton(this, audio, exercise.getID(), "Delete this audio cut.  Original recorder can re-record.");
+        return getDeleteButton(this, audio, exercise.getOldID(), "Delete this audio cut.  Original recorder can re-record.");
       }
     };
     audioPanel.setShowColor(true);
     audioPanel.getElement().setId("ASRScoringAudioPanel");
-    noteAudioHasBeenPlayed(exercise.getID(), audio, audioPanel);
+    noteAudioHasBeenPlayed(exercise.getOldID(), audio, audioPanel);
     tabAndContent.addWidget(audioPanel);
   //  toResize.add(audioPanel);
 
@@ -453,7 +451,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     dialogHelper.show(ARE_YOU_SURE, MSGS, new DialogHelper.CloseListener() {
       @Override
       public void gotYes() {
-        service.deleteItem(newUserExercise.getID(), new AsyncCallback<Boolean>() {
+        service.deleteItem(newUserExercise.getOldID(), new AsyncCallback<Boolean>() {
           @Override
           public void onFailure(Throwable caught) {
           }
@@ -461,7 +459,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
           @Override
           public void onSuccess(Boolean result) {
             exerciseList.removeExercise(newUserExercise);
-            originalList.remove(newUserExercise.getRealID());
+            originalList.remove(newUserExercise.getID());
           }
         });
       }
@@ -495,7 +493,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   private void duplicateExercise(final Button duplicate) {
     duplicate.setEnabled(false);
     newUserExercise.getCombinedMutableUserExercise().setCreator(controller.getUser());
-    CommonShell commonShell = exerciseList.byID(newUserExercise.getID());
+    CommonShell commonShell = exerciseList.byID(newUserExercise.getOldID());
     if (commonShell != null) {
       newUserExercise.setState(commonShell.getState());
       newUserExercise.setSecondState(commonShell.getSecondState());
@@ -563,7 +561,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     super.doAfterEditComplete(pagingContainer, buttonClicked);
 
     if (buttonClicked) {
-      final String id = newUserExercise.getID();
+      final String id = newUserExercise.getOldID();
       int user = controller.getUser();
 
       logger.info("doAfterEditComplete : forgetting " + id + " user " + user);

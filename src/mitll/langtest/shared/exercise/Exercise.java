@@ -272,7 +272,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
       }
     }
 
-    return "Exercise " + Integer.toHexString(hashCode()) + " " + getID() + "/" + getDominoID() +
+    return "Exercise " + Integer.toHexString(hashCode()) + " " + getOldID() + "/" + getDominoID() +
         " english '" + getEnglish() +
         "'/'" + getForeignLanguage() + "' " +
         "meaning '" + getMeaning() +
