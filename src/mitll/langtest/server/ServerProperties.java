@@ -396,7 +396,7 @@ public class ServerProperties {
       for (String userid : property.split(",")) {
         try {
           preferredVoices.add(Long.parseLong(userid));
-          logger.info("pref users " + preferredVoices);
+          logger.info("preferredVoices pref users " + preferredVoices);
         } catch (NumberFormatException e) {
           logger.error("couldn't parse userid " + userid);
         }
