@@ -154,9 +154,9 @@ public class FeedbackRecordPanel extends AmasExercisePanel {
     }
     Boolean listening = e.getUnitToValue().containsValue("Listening");
 
-    logger.info(e.getID() + " has listening " + listening);
+    logger.info(e.getOldID() + " has listening " + listening);
     if (listening) {
-      int index = exerciseList.getIndex(e.getID());
+      int index = exerciseList.getIndex(e.getOldID());
       return new AudioExerciseContent().getQuestionContent(e, controller, INCLUDE_EXERCISE_ID, false, content, index,
           exerciseList.getSize());
     } else {
@@ -229,7 +229,7 @@ public class FeedbackRecordPanel extends AmasExercisePanel {
 
   private void makeTabStateReflectHistory(QuizCorrectAndScore correctAndScores) {
     for (CorrectAndScore cs : correctAndScores.getCorrectAndScoreCollection()) {
-      if (cs.getId().equals(exercise.getID())) {
+      if (cs.getExid().equals(exercise.getOldID())) {
         int qid = cs.getQid();
     //    logger.info("makeTabStateReflectHistory found " + cs.getId() + " :  " + qid + " : " + cs);
         markTabComplete(qid);
@@ -248,7 +248,7 @@ public class FeedbackRecordPanel extends AmasExercisePanel {
     amasNavigationHelper.enableNextButton(wasSelfScored);
 
     if (isCompleted()) {
-      exerciseList.setState(exercise.getID(), STATE.APPROVED);
+      exerciseList.setState(exercise.getOldID(), STATE.APPROVED);
       exerciseList.redraw();
     }
   }
@@ -273,7 +273,7 @@ public class FeedbackRecordPanel extends AmasExercisePanel {
       Button onButton = new Button(title);
 
       onButton.getElement().setId("Choice_" + title);
-      controller.register(onButton, exercise.getID());
+      controller.register(onButton, exercise.getOldID());
       onButton.addClickHandler(handler);
       onButton.setActive(false);
       return onButton;
@@ -294,7 +294,7 @@ public class FeedbackRecordPanel extends AmasExercisePanel {
                                   final ExerciseController controller, final int index, String responseType,
                                   String buttonTitle, boolean getFocus) {
       if (responseType.equalsIgnoreCase(AUDIO)) {
-        PressAndHoldExercisePanel autoCRTRecordPanel = new PressAndHoldExercisePanel(exercise.getID(),
+        PressAndHoldExercisePanel autoCRTRecordPanel = new PressAndHoldExercisePanel(exercise.getOldID(),
             service,
             controller,
             new MySoundFeedback(controller), "Feedback", index, exerciseList.getTypeToSelection()) {
@@ -458,7 +458,7 @@ public class FeedbackRecordPanel extends AmasExercisePanel {
       Panel row1 = new VerticalPanel();
       row1.getElement().setId("text_row1");
       outerContainer.add(row1);
-      Widget widget = textResponse.addWidgets(row1, exercise.getID(), service, controller, false, true, false, index,
+      Widget widget = textResponse.addWidgets(row1, exercise.getOldID(), service, controller, false, true, false, index,
           buttonTitle, getFocus);
       widget.getElement().setId("textResponse_" + index);
 

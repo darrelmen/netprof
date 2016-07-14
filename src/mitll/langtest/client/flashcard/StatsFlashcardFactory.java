@@ -276,7 +276,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
           soundFeedback,
           soundFeedback.getEndListener(),
           StatsFlashcardFactory.this.instance, exerciseListToUse);
-      // logger.info("made " + this.getElement().getId() + " for " + e.getID());
+      // logger.info("made " + this.getElement().getId() + " for " + e.getOldID());
     }
 
     @Override
@@ -295,7 +295,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       if (exerciseList.onLast()) {
         onSetComplete();
       } else {
-        exerciseList.loadNextExercise(currentExercise.getID());
+        exerciseList.loadNextExercise(currentExercise.getOldID());
       }
     }
 
@@ -314,8 +314,8 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
       if (result.getValidity() == AudioAnswer.Validity.OK) {
         //resultIDs.add(result.getResultID());
-        exToScore.put(exercise.getID(), result.getScore());
-        exToCorrect.put(exercise.getID(), result.isCorrect());
+        exToScore.put(exercise.getOldID(), result.getScore());
+        exToCorrect.put(exercise.getOldID(), result.isCorrect());
 
         StringBuilder builder = new StringBuilder();
         StringBuilder builder2 = new StringBuilder();
@@ -374,14 +374,14 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       Set<String> copies = new HashSet<>(ids);
       if (copies.isEmpty()) {
         for (CommonShell t : allExercises) {
-          copies.add(t.getID());
+          copies.add(t.getOldID());
         }
       }
 
 /*      logger.info("StatsPracticePanel.onSetComplete. : calling  getUserHistoryForList for " + user +
         " with " + exToCorrect + " and latest " + latestResultID + " and ids " +copies);*/
 
-      service.getUserHistoryForList(user, copies, latestResultID, selection, ul == null ? -1 : ul.getRealID(), new AsyncCallback<AVPScoreReport>() {
+      service.getUserHistoryForList(user, copies, latestResultID, selection, ul == null ? -1 : ul.getID(), new AsyncCallback<AVPScoreReport>() {
         @Override
         public void onFailure(Throwable caught) {
           //System.err.println("StatsPracticePanel.onSetComplete. : got failure " + caught);
@@ -520,9 +520,9 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
       String lastID = "";
       for (L ex : allExercises) {
-        lastID = ex.getID();
+        lastID = ex.getOldID();
       }
-//      String lastID = allExercises.get(allExercises.size() - 1).getID();
+//      String lastID = allExercises.get(allExercises.size() - 1).getOldID();
       String currentExerciseID = sticky.getCurrentExerciseID();
 
       logger.info("startOver : current " + currentExerciseID);
@@ -534,7 +534,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
         sticky.resetStorage();
 
-        String first = allExercises.iterator().next().getID();
+        String first = allExercises.iterator().next().getOldID();
         exerciseList.loadExercise(first);
       }
     }
@@ -642,7 +642,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         public void onClick(ClickEvent event) {
           abortPlayback();
           seeScores.setEnabled(false);
-          //currentExerciseID = currentExercise.getID();
+          //currentExerciseID = currentExercise.getOldID();
           onSetComplete();
         }
       });

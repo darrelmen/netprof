@@ -34,7 +34,6 @@ package mitll.langtest.server.database.userexercise;
 
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.audio.IAudioDAO;
-import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.userlist.UserListDAO;
 import mitll.langtest.server.database.userlist.UserListExerciseJoinDAO;
 import mitll.langtest.shared.custom.UserExercise;
@@ -137,7 +136,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
               "VALUES(?,?,?,?,?,?,?,?,?,?,?" +
               ")");
       int i = 1;
-      statement.setString(i++, userExercise.getID());
+      statement.setString(i++, userExercise.getOldID());
       statement.setString(i++, fixSingleQuote(userExercise.getEnglish()));
       statement.setString(i++, fixSingleQuote(userExercise.getForeignLanguage()));
       statement.setString(i++, fixSingleQuote(userExercise.getTransliteration()));
@@ -194,7 +193,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
             "SET " +
             EXERCISEID +
             "='" + customID + "' " +
-            "WHERE uniqueid=" + userExercise.getCombinedMutableUserExercise().getRealID();
+            "WHERE uniqueid=" + userExercise.getCombinedMutableUserExercise().getID();
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.executeUpdate();
         preparedStatement.close();
@@ -544,7 +543,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
       statement.setString(ii++, userExercise.getForeignLanguage());
       statement.setString(ii++, userExercise.getTransliteration());
       statement.setTimestamp(ii++, new Timestamp(System.currentTimeMillis()));
-      statement.setString(ii++, userExercise.getID());
+      statement.setString(ii++, userExercise.getOldID());
 
       int i = statement.executeUpdate();
 

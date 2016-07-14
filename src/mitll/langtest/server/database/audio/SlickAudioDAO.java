@@ -82,8 +82,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
   /**
    * Update the user if the audio is already there.
-   *
-   * @param userid
+   *  @param userid
    * @param exerciseID
    * @param audioType
    * @param audioRef
@@ -92,7 +91,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @param transcript
    */
   @Override
-  public void addOrUpdateUser(int userid, String exerciseID, AudioType audioType, String audioRef, long timestamp,
+  public void addOrUpdateUser(int userid, int exerciseID, AudioType audioType, String audioRef, long timestamp,
                               int durationInMillis, String transcript) {
     dao.addOrUpdate(userid, exerciseID, audioType.toString(), audioRef, timestamp, durationInMillis, transcript);
   }
@@ -108,7 +107,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   @Override
-  int getCountForGender(Set<Integer> userIds, String audioSpeed, Set<String> uniqueIDs) {
+  int getCountForGender(Set<Integer> userIds, String audioSpeed, Set<Integer> uniqueIDs) {
     return dao.getCountForGender(userIds, audioSpeed, uniqueIDs);
   }
 
@@ -134,7 +133,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   @Override
-  int markDefect(int userid, String exerciseID, AudioType audioType) {
+  int markDefect(int userid, int exerciseID, AudioType audioType) {
     return dao.markDefect(userid, exerciseID, audioType.toString());
   }
 
@@ -149,7 +148,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   @Override
-  int getCountBothSpeeds(Set<Integer> userIds, Set<String> uniqueIDs) {
+  int getCountBothSpeeds(Set<Integer> userIds, Set<Integer> uniqueIDs) {
     return dao.getCountBothSpeeds(userIds, uniqueIDs);
   }
 

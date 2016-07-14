@@ -36,7 +36,6 @@ import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.phone.IPhoneDAO;
 import mitll.langtest.server.database.refaudio.IRefResultDAO;
-import mitll.langtest.server.database.refaudio.RefResultDAO;
 import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.exercise.AudioAttribute;
@@ -102,19 +101,19 @@ public class JsonSupport {
                                         Map<String, Collection<String>> typeToSection,
                                         ExerciseSorter sorter) {
     Collection<CommonExercise> exercisesForState = sectionHelper.getExercisesForSelectionState(typeToSection);
-    List<String> allIDs = new ArrayList<String>();
+    List<Integer> allIDs = new ArrayList<>();
 
 /*    Map<String, CollationKey> idToKey = new HashMap<String, CollationKey>();
     for (CommonExercise exercise : exercisesForState) {
-      String id = exercise.getID();
+      String id = exercise.getOldID();
       allIDs.add(id);
       CollationKey collationKey = collator.getCollationKey(exercise.getForeignLanguage());
       idToKey.put(id, collationKey);
     }*/
 
-    Map<String, CommonExercise> idToEx = new HashMap<String, CommonExercise>();
+    Map<Integer, CommonExercise> idToEx = new HashMap<>();
     for (CommonExercise exercise : exercisesForState) {
-      String id = exercise.getID();
+      int id = exercise.getID();
       allIDs.add(id);
       idToEx.put(id, exercise);
     }
@@ -133,12 +132,12 @@ public class JsonSupport {
    */
   JSONObject getJsonRefResults(Map<String, Collection<String>> typeToSection) {
     Collection<CommonExercise> exercisesForState = sectionHelper.getExercisesForSelectionState(typeToSection);
-    List<String> allIDs = new ArrayList<String>();
+    List<Integer> allIDs = new ArrayList<>();
 
    // Map<String, CommonExercise> idToEx = new HashMap<String, CommonExercise>();
     for (CommonExercise exercise : exercisesForState) {
-      String id = exercise.getID();
-      allIDs.add(id);
+     // String id = exercise.getOldID();
+      allIDs.add(exercise.getID());
      // idToEx.put(id, exercise);
     }
     return refResultDAO.getJSONScores(allIDs);
@@ -160,7 +159,7 @@ public class JsonSupport {
 
     final Map<String, CollationKey> idToKey = new HashMap<String, CollationKey>();
     for (CommonExercise exercise : exercisesForState) {
-      String id = exercise.getID();
+      String id = exercise.getOldID();
       idToKey.put(id, collator.getCollationKey(exercise.getForeignLanguage()));
     }
 
@@ -170,8 +169,8 @@ public class JsonSupport {
     Collections.sort(copy, new Comparator<CommonExercise>() {
       @Override
       public int compare(CommonExercise o1, CommonExercise o2) {
-        String id = o1.getID();
-        String id1 = o2.getID();
+        String id = o1.getOldID();
+        String id1 = o2.getOldID();
 
         boolean firstRecorded = recordedForUser.contains(id);
         boolean secondRecorded = recordedForUser.contains(id1);
@@ -192,8 +191,8 @@ public class JsonSupport {
     for (CommonExercise ex : copy) {
       //logger.debug("for " + ex);
       JSONObject exAndScores = new JSONObject();
-      exAndScores.put("ex", ex.getID());
-      boolean wasRecorded = recordedForUser.contains(ex.getID());
+      exAndScores.put("ex", ex.getOldID());
+      boolean wasRecorded = recordedForUser.contains(ex.getOldID());
       exAndScores.put("s", wasRecorded ? "100" : "0");
 
       JSONArray history = new JSONArray();
@@ -311,19 +310,19 @@ public class JsonSupport {
     Collection<CommonExercise> exercisesForState = sectionHelper.getExercisesForSelectionState(typeToValues);
 
     long then = System.currentTimeMillis();
-    Map<String, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
+    Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
     long now = System.currentTimeMillis();
 
     if (now - then > 500) logger.warn("took " + (now - then) + " millis to get ex->audio map");
 
-    List<String> ids = new ArrayList<String>();
-    Map<String, String> exidToRefAudio = new HashMap<String, String>();
+    List<Integer> ids = new ArrayList<>();
+    Map<Integer, String> exidToRefAudio = new HashMap<>();
     for (CommonExercise exercise : exercisesForState) {
       List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
       if (audioAttributes != null) {
         audioDAO.attachAudio(exercise, installPath, configDir, audioAttributes);
       }
-      String id = exercise.getID();
+      int id = exercise.getID();
       ids.add(id);
       exidToRefAudio.put(id, exercise.getRefAudio());
     }

@@ -176,7 +176,7 @@ public class SectionWidgetContainer<T extends SectionWidget> {
 
   /**
    * @return
-   * @see ExerciseList#pushNewItem(String, String)
+   * @see ExerciseList#pushNewItem(String, int)
    * @see HistoryExerciseList#pushNewSectionHistoryToken()
    */
   String getHistoryToken() {

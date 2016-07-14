@@ -33,7 +33,6 @@
 package mitll.langtest.server;
 
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.mail.EmailList;
 import mitll.langtest.server.mail.MailSupport;

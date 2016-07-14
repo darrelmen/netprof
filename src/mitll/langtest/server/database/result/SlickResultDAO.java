@@ -71,10 +71,11 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
 
   @Override
   public SlickResult toSlick(Result shared, int projid, Map<String, Integer> exToInt) {
-    String exid = shared.getExid();
-    int realExID = exToInt.get(shared.getExid());
+//    String exid = shared.getExid();
+//    int realExID = exToInt.get(shared.getExid());
     return new SlickResult(-1,
-        shared.getUserid(), exid,
+        shared.getUserid(),
+        shared.getExid(),
         new Timestamp(shared.getTimestamp()),
         shared.getQid(),
         shared.getAudioType().toString(),
@@ -135,7 +136,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
 
     return new MonitorResult(slick.id(),
         slick.userid(),
-        slick.exid(),
+        "",
         // slick.qid(),
         getRelativePath(slick),
         slick.valid(),
@@ -154,7 +155,8 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
         slick.devicetype(),
         simpleDevice,
         "",
-        slick.transcript());
+        slick.transcript(),
+        slick.exid() );
   }
 
   private String getRelativePath(SlickResult slick) {
