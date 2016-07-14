@@ -137,14 +137,14 @@ class AudioExerciseContent {
     Panel horiz = new FlowPanel();
     horiz.getElement().setId("item_and_content");
     container.add(horiz);
-    logger.info("for " + e.getID() + " include " + includeExerciseID);
+    logger.info("for " + e.getOldID() + " include " + includeExerciseID);
 
     if (includeExerciseID && e.getOrient() == null) {
       DivWidget itemHeaderContainer = new DivWidget();
      // itemHeaderContainer.setWidth("100%");
       itemHeaderContainer.setHeight("20px");
       itemHeaderContainer.getElement().setId("itemHeaderContainer");
-      Heading child = getItemHeader(index, totalInQuiz, e.getID());
+      Heading child = getItemHeader(index, totalInQuiz, e.getOldID());
       itemHeaderContainer.add(child);
       horiz.add(itemHeaderContainer);
     }

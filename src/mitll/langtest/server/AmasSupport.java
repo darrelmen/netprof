@@ -108,7 +108,7 @@ class AmasSupport {
     Collection<String> allIDs = new ArrayList<String>();
 
     for (HasID exercise : exercises) {
-      allIDs.add(exercise.getID());
+      allIDs.add(exercise.getOldID());
     }
 
     QuizCorrectAndScore correctAndScores = getQuizCorrectAndScore(typeToSection, (int) userID, allIDs, resultDAO);
@@ -121,8 +121,8 @@ class AmasSupport {
 
     for (CorrectAndScore cs : correctAndScoreCollection) {
       if (cs.hasUserScore()) {
-        List<Integer> answered = exToQIDs.get(cs.getId());
-        if (answered == null) exToQIDs.put(cs.getId(), answered = new ArrayList<>());
+        List<Integer> answered = exToQIDs.get(cs.getExid());
+        if (answered == null) exToQIDs.put(cs.getExid(), answered = new ArrayList<>());
         answered.add(cs.getQid());
         //  logger.info("Adding " + cs.getId() + "/" + cs.getQid());
       } else {
@@ -139,7 +139,7 @@ class AmasSupport {
     int marked = 0;
     // mark with answered
     for (AmasExerciseImpl ex : exercises) {
-      List<Integer> integers = exToQIDs.get(ex.getID());
+      List<Integer> integers = exToQIDs.get(ex.getOldID());
       if (integers == null) {
         ex.setState(STATE.UNSET);
       } else {
@@ -254,7 +254,7 @@ class AmasSupport {
     Map<String, CorrectAndScore> idToCorrect = new HashMap<String, CorrectAndScore>();
 
     for (CorrectAndScore correctAndScore : resultsForUser) {
-      String key = correctAndScore.getId() + "/" + correctAndScore.getQid();
+      String key = correctAndScore.getExid() + "/" + correctAndScore.getQid();
       idToCorrect.put(key, correctAndScore);
     }
     return new ArrayList<CorrectAndScore>(idToCorrect.values()); // required since can't send a values set

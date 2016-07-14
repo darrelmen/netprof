@@ -90,7 +90,7 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
   }
 
   @Override
-  public boolean removeForExercise(String exid) {
+  public boolean removeForExercise(int exid) {
     return remove(REFRESULT, EXID, exid, true);
   }
 
@@ -98,7 +98,7 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
 
   /**
    * @param userID
-   * @param id
+   * @param exid
    * @param audioFile
    * @param correct
    * @param isMale
@@ -107,7 +107,7 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
    * @see DatabaseImpl#addRefAnswer
    */
   @Override
-  public long addAnswer(int userID, String id,
+  public long addAnswer(int userID, int exid,
                         String audioFile,
                         long durationInMillis,
                         boolean correct,
@@ -122,7 +122,7 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
     Connection connection = database.getConnection(this.getClass().toString());
     try {
       long then = System.currentTimeMillis();
-      long newid = addAnswerToTable(connection, userID, id, audioFile, durationInMillis, correct,
+      long newid = addAnswerToTable(connection, userID, exid, audioFile, durationInMillis, correct,
           alignOutput,
           decodeOutput,
 
@@ -156,7 +156,7 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
    * @param isMale
    * @param speed
    * @throws java.sql.SQLException
-   * @see #addAnswer
+   * @see IRefResultDAO#addAnswer
    */
   private long addAnswerToTable(Connection connection,
                                 int userid, String id,
@@ -295,7 +295,7 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getPretestScore
    */
   @Override
-  public Result getResult(String exid, String answer) {
+  public Result getResult(int exid, String answer) {
     String sql = SELECT_ALL +
         " WHERE " + EXID + "='" + exid + "' AND " + ANSWER + " like '%" + answer + "'";
     try {
@@ -316,7 +316,7 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
    * @see JsonSupport#getJsonRefResults(Map)
    */
   @Override
-  public JSONObject getJSONScores(Collection<String> ids) {
+  public JSONObject getJSONScores(Collection<Integer> ids) {
     try {
       String list = getInList(ids);
 

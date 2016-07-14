@@ -36,7 +36,7 @@ import com.github.gwtbootstrap.client.ui.Button;
 import mitll.langtest.client.services.ListService;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.audio.AudioFileHelper;
-import mitll.langtest.server.database.custom.UserListManager;
+import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.AudioAttribute;
@@ -148,7 +148,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    */
   public void addItemToUserList(long userListID, String exID) {
     CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(exID);
-    getUserListManager().addItemToList(userListID, exID, customOrPredefExercise.getRealID());
+    getUserListManager().addItemToList(userListID, exID, customOrPredefExercise.getID());
   }
 
   /**
@@ -184,7 +184,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   public CommonExercise reallyCreateNewItem(long userListID, CommonExercise userExercise) {
     if (DEBUG) logger.debug("reallyCreateNewItem : made user exercise " + userExercise + " on list " + userListID);
     getUserListManager().reallyCreateNewItem(userListID, userExercise, serverProps.getMediaDir());
-    String id = userExercise.getID();
+    String id = userExercise.getOldID();
 
     for (AudioAttribute audioAttribute : userExercise.getAudioAttributes()) {
       if (DEBUG) logger.debug("\treallyCreateNewItem : update " + audioAttribute + " to " + id);
@@ -262,7 +262,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     if (DEBUG)  logger.debug("editItem : now user exercise " + userExercise);
   }
 
-  UserListManager getUserListManager() {
+  IUserListManager getUserListManager() {
     return db.getUserListManager();
   }
 }

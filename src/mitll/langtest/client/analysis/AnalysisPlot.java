@@ -280,7 +280,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
           @Override
           public void onSuccess(ExerciseListWrapper<CommonShell> exerciseListWrapper) {
             for (CommonShell shell : exerciseListWrapper.getExercises()) {
-              getIdToEx().put(shell.getID(), shell);
+              getIdToEx().put(shell.getOldID(), shell);
             }
           }
         });
@@ -735,7 +735,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
 
         @Override
         public void onSuccess(List<CommonShell> commonShells) {
-          for (CommonShell shell : commonShells) idToEx.put(shell.getID(), shell);
+          for (CommonShell shell : commonShells) idToEx.put(shell.getOldID(), shell);
         }
       });
     }
