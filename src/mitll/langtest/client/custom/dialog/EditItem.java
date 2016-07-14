@@ -188,7 +188,7 @@ public class EditItem {
 
           @Override
           protected void askServerForExercise(int itemID) {
-            if (itemID.equals(NEW_EXERCISE_ID)) {
+            if (itemID == NEW_EXERCISE_ID) {
               useExercise(getNewItem());
             } else {
               logger.info("EditItem.makeExerciseList - askServerForExercise = " + itemID);
@@ -204,7 +204,7 @@ public class EditItem {
 
             for (final CommonShell es : result) {
               addExercise(es);
-              if (includeAddItem && es.getOldID().equals(NEW_EXERCISE_ID)) {
+              if (includeAddItem && es.getID() == NEW_EXERCISE_ID) {
                 addNewItem = false;
               }
             }
@@ -236,7 +236,7 @@ public class EditItem {
    * @return
    */
   private CommonExercise getNewItem() {
-    return new UserExercise(-1, NEW_EXERCISE_ID, userManager.getUser(), NEW_ITEM, "", "");
+    return new UserExercise(-1, ""+NEW_EXERCISE_ID, userManager.getUser(), NEW_ITEM, "", "");
   }
 
   private void setFactory(final PagingExerciseList<CommonShell, CommonExercise> exerciseList,
