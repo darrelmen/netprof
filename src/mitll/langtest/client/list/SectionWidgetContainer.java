@@ -202,7 +202,7 @@ public class SectionWidgetContainer<T extends SectionWidget> {
   /**
    * @param type
    * @return
-   * @see PagingExerciseList#getHistoryTokenFromUIState(String, String)
+   * @see PagingExerciseList#getHistoryTokenFromUIState(String, int)
    */
   private String getCurrentSelection(String type) {
     return typeToBox.get(type).getCurrentSelection();

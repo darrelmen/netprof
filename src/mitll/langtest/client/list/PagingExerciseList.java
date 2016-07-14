@@ -279,7 +279,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     if (!setTypeAheadText) {
       pendingRequests.add(System.currentTimeMillis());
     }
-    loadExercises(getHistoryTokenFromUIState(text, ""), text, false);
+    loadExercises(getHistoryTokenFromUIState(text, -1), text, false);
   }
 
   protected void scheduleWaitTimer() {
@@ -366,7 +366,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     Window.alert("Please stop recording before changing items.");
   }
 
-  String getHistoryTokenFromUIState(String search, String id) {
+  String getHistoryTokenFromUIState(String search, int id) {
     return "search=" + search + ";item=" + id;
   }
 

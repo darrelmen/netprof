@@ -265,7 +265,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
       markReviewed(completedExercise);
       boolean allCorrect = incorrectFields.isEmpty();
 
-      listContainer.setState(completedExercise.getOldID(), allCorrect ? STATE.APPROVED : STATE.DEFECT);
+      listContainer.setState(completedExercise.getID(), allCorrect ? STATE.APPROVED : STATE.DEFECT);
       listContainer.redraw();
     }
   }
@@ -289,7 +289,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
             }
           });
 
-      listContainer.setSecondState(completedExercise.getOldID(), STATE.ATTN_LL);
+      listContainer.setSecondState(completedExercise.getID(), STATE.ATTN_LL);
       listContainer.redraw();
     }
   }
