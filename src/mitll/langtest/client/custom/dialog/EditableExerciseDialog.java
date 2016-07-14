@@ -128,7 +128,7 @@ class EditableExerciseDialog extends NewUserExercise {
         flow.add(child);
       }
 
-      Heading child = new Heading(4, "Item", newUserExercise.getOldID());
+      Heading child = new Heading(4, "Item", ""+newUserExercise.getID());
       child.addStyleName("rightFiveMargin");
       flow.add(child);
 
@@ -182,7 +182,7 @@ class EditableExerciseDialog extends NewUserExercise {
    * @see #getCreateButton(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, com.github.gwtbootstrap.client.ui.ControlGroup)
    */
   PrevNextList<CommonShell> getPrevNext(ListInterface<CommonShell> pagingContainer) {
-    CommonShell shell = pagingContainer.byID(newUserExercise.getOldID());
+    CommonShell shell = pagingContainer.byID(newUserExercise.getID());
     return new PrevNextList<>(shell, exerciseList, shouldDisableNext(), controller);
   }
 
@@ -478,16 +478,16 @@ class EditableExerciseDialog extends NewUserExercise {
    * @see #doAfterEditComplete(ListInterface, boolean)
    */
   private void changeTooltip(ListInterface<CommonShell> pagingContainer) {
-    CommonShell byID = pagingContainer.byID(newUserExercise.getOldID());
+    CommonShell byID = pagingContainer.byID(newUserExercise.getID());
     if (DEBUG) logger.info("changeTooltip " + byID);
     if (byID == null) {
-      logger.warning("changeTooltip : huh? can't find exercise with id " + newUserExercise.getOldID());
+      logger.warning("changeTooltip : huh? can't find exercise with id " + newUserExercise.getID());
     } else {
       MutableShell mutableShell = byID.getMutableShell();
       mutableShell.setEnglish(newUserExercise.getEnglish());
       mutableShell.setForeignLanguage(newUserExercise.getForeignLanguage());
 
-      if (DEBUG || true) logger.info("\tchangeTooltip : for " + newUserExercise.getOldID() + " now " + newUserExercise);
+      if (DEBUG || true) logger.info("\tchangeTooltip : for " + newUserExercise.getID() + " now " + newUserExercise);
 
       pagingContainer.redraw();   // show change to tooltip!
     }
@@ -523,7 +523,7 @@ class EditableExerciseDialog extends NewUserExercise {
 
     if (rap != null) {
       // regular speed audio
-      String id = newUserExercise.getOldID();
+      int id = newUserExercise.getID();
       rap.getPostAudioButton().setExercise(id);
       String refAudio = newUserExercise.getRefAudio();
 

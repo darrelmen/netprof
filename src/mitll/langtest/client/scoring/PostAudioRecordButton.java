@@ -63,7 +63,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   private static final int LOG_ROUNDTRIP_THRESHOLD = 3000;
   private final int index;
   private int reqid = 0;
-  private String exerciseID;
+  private int exerciseID;
   protected final ExerciseController controller;
   private final LangTestDatabaseAsync service;
   private final boolean recordInResults;
@@ -78,7 +78,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
    * @param stopButtonTitle
    * @see GoodwaveExercisePanel.ASRRecordAudioPanel.MyPostAudioRecordButton
    */
-  public PostAudioRecordButton(String exerciseID, final ExerciseController controller, LangTestDatabaseAsync service,
+  public PostAudioRecordButton(int exerciseID, final ExerciseController controller, LangTestDatabaseAsync service,
                                int index, boolean recordInResults, String recordButtonTitle, String stopButtonTitle) {
     super(controller.getRecordTimeout(), controller.getProps().doClickAndHold(), recordButtonTitle, stopButtonTitle,
         controller.getProps());
@@ -89,16 +89,16 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     this.service = service;
     this.recordInResults = recordInResults;
     getElement().setId("PostAudioRecordButton");
-    controller.register(this, exerciseID);
+    controller.register(this, ""+exerciseID);
     getElement().getStyle().setMarginTop(1, Style.Unit.PX);
     getElement().getStyle().setMarginBottom(1, Style.Unit.PX);
     setWidth("68px");
   }
 
-  public void setExercise(String exercise) {
+  public void setExercise(int exercise) {
     this.exerciseID = exercise;
   }
-  protected String getExerciseID() {
+  protected int getExerciseID() {
     return exerciseID;
   }
 
@@ -213,7 +213,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   }
 
   protected void useInvalidResult(AudioAnswer result) {
-    controller.logEvent(this, "recordButton", exerciseID, "invalid recording " + result.getValidity());
+    controller.logEvent(this, "recordButton", ""+ exerciseID, "invalid recording " + result.getValidity());
     //  logger.info("useInvalidResult platform is " + getPlatform());
     if (!checkAndShowTooLoud(result.getValidity())) {
       showPopup(result.getValidity().getPrompt());
