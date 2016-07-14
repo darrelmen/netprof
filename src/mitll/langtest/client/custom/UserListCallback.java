@@ -43,7 +43,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
@@ -150,7 +149,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
         logger.info("onSuccess find list for " + optionalExercise);
         for (UserList<? extends HasID> ul : result) {
           for (HasID ex : ul.getExercises()) {
-            if (ex.getID().equals(optionalExercise)) {
+            if (ex.getOldID().equals(optionalExercise)) {
               logger.info("onSuccess ex " + optionalExercise + " is on " + ul);
               listManager.showList(ul, contentPanel, instanceName, ex);
               break;
@@ -180,7 +179,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
 
   private void showList(Collection<UserList<CommonShell>> result, long id) {
     for (UserList ul : result) {
-      if (ul.getRealID() == id) {
+      if (ul.getID() == id) {
         listManager.showList(ul, contentPanel, instanceName, null);
         break;
       }
@@ -322,7 +321,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
     }
 
     if (!ul.isFavorite()) {
-      final long uniqueID = ul.getRealID();
+      final long uniqueID = ul.getID();
 
       if (showIsPublic) {
         r1.add(getIsPublic(ul, uniqueID));
@@ -405,7 +404,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
    */
   private Button makeDeleteButton(final UserList ul, final boolean onlyMyLists) {
     final Button delete = new Button(DELETE);
-    delete.getElement().setId("UserList_" + ul.getID() + "_delete");
+    delete.getElement().setId("UserList_" + ul.getOldID() + "_delete");
     delete.addStyleName("topMargin");
     delete.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
 

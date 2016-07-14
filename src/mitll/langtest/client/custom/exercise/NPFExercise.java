@@ -53,7 +53,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.NavigationHelper;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
-import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.AudioRefExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -106,7 +105,7 @@ abstract class NPFExercise<T extends CommonShell & AudioRefExercise & ScoredExer
   protected NavigationHelper<CommonShell> getNavigationHelper(ExerciseController controller,
                                                               ListInterface<CommonShell> listContainer, boolean addKeyHandler) {
     NavigationHelper<CommonShell> navigationHelper = super.getNavigationHelper(controller, listContainer, addKeyHandler);
-    navigationHelper.add(makeAddToList(getLocalExercise().getID(), controller));
+    navigationHelper.add(makeAddToList(getLocalExercise().getOldID(), controller));
     navigationHelper.add(getNextListButton());
     return navigationHelper;
   }
@@ -181,7 +180,7 @@ abstract class NPFExercise<T extends CommonShell & AudioRefExercise & ScoredExer
     popupButton.setType(ButtonType.PRIMARY);
     popupButton.addStyleName("leftFiveMargin");
     popupButton.getElement().setId("NPFExercise_popup");
-    controller.register(popupButton, exercise.getID(), "show new list");
+    controller.register(popupButton, exercise.getOldID(), "show new list");
 
     new PopupContainer().configurePopupButton(popupButton, popup, textEntry, addTooltip(popupButton, "Make a new list"));
     popupButton.addClickHandler(new ClickHandler() {
@@ -196,7 +195,7 @@ abstract class NPFExercise<T extends CommonShell & AudioRefExercise & ScoredExer
   private void makeANewList(TextBox textEntry) {
     String newListName = textEntry.getValue();
     if (!newListName.isEmpty()) {
-      controller.logEvent(textEntry, "NewList_TextBox", exercise.getID(), "make new list called '" + newListName + "'");
+      controller.logEvent(textEntry, "NewList_TextBox", exercise.getOldID(), "make new list called '" + newListName + "'");
       boolean duplicateName = isDuplicateName(newListName);
       if (duplicateName) {
         logger.info("---> not adding duplicate list " + newListName);
@@ -255,7 +254,7 @@ abstract class NPFExercise<T extends CommonShell & AudioRefExercise & ScoredExer
    */
   @Override
   public void wasRevealed() {
-    populateListChoices(exercise.getID(), controller, addToList);
+    populateListChoices(exercise.getOldID(), controller, addToList);
   }
 
   /**
@@ -291,9 +290,9 @@ abstract class NPFExercise<T extends CommonShell & AudioRefExercise & ScoredExer
             widget.addClickHandler(new ClickHandler() {
               @Override
               public void onClick(ClickEvent event) {
-                controller.logEvent(w1, "DropUp", id, ADDING_TO_LIST + ul.getID() + "/" + ul.getName());
+                controller.logEvent(w1, "DropUp", id, ADDING_TO_LIST + ul.getOldID() + "/" + ul.getName());
 
-                listService.addItemToUserList(ul.getRealID(), id, new AsyncCallback<Void>() {
+                listService.addItemToUserList(ul.getID(), id, new AsyncCallback<Void>() {
                   @Override
                   public void onFailure(Throwable caught) {
                   }

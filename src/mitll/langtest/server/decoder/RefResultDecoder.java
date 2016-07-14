@@ -136,7 +136,7 @@ public class RefResultDecoder {
       //    if (bestAudios.length > 1) {
       CommonExercise exercise = idToEx.get(res.getExerciseID());
       if (exercise != null) {
-        logger.info("doMissingInfo #" + count + " of " + size + " align " + exercise.getID() + " and result " + res.getUniqueID());
+        logger.info("doMissingInfo #" + count + " of " + size + " align " + exercise.getOldID() + " and result " + res.getUniqueID());
         PretestScore alignmentScore = audioFileHelper.getAlignmentScore(exercise, res.getAnswer(), serverProps.usePhoneToDisplay(), false);
         db.rememberScore(res.getUniqueID(), alignmentScore);
       } else {
@@ -152,7 +152,7 @@ public class RefResultDecoder {
     Map<String, CommonExercise> idToEx = new HashMap<>();
     for (CommonExercise exercise : exercises) {
       if (stopDecode) return null;
-      idToEx.put(exercise.getID(), exercise);
+      idToEx.put(exercise.getOldID(), exercise);
     }
     return idToEx;
   }
@@ -180,13 +180,13 @@ public class RefResultDecoder {
       for (CommonExercise exercise : exercises) {
         if (stopDecode) return;
 
-        List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
+        List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getOldID());
         if (audioAttributes != null) {
 //					logger.warn("hmm - audio recorded for " + )
           boolean didAll = db.getAudioDAO().attachAudio(exercise, installPath, relativeConfigDir, audioAttributes);
           attrc += audioAttributes.size();
           if (!didAll) {
-            failed.add(exercise.getID());
+            failed.add(exercise.getOldID());
           }
         }
 
@@ -203,7 +203,7 @@ public class RefResultDecoder {
         if (!maleEmpty) {
           List<AudioAttribute> audioAttributes1 = malesMap.get(maleUsers.get(0));
           maleAudio += audioAttributes1.size();
-          Info info = doTrim(audioAttributes1, title, exercise.getID());
+          Info info = doTrim(audioAttributes1, title, exercise.getOldID());
           trimmed += info.trimmed;
           count += info.count;
           changed += info.changed;
@@ -212,14 +212,14 @@ public class RefResultDecoder {
           List<AudioAttribute> audioAttributes1 = femalesMap.get(femaleUsers.get(0));
           femaleAudio += audioAttributes1.size();
 
-          Info info = doTrim(audioAttributes1, title, exercise.getID());
+          Info info = doTrim(audioAttributes1, title, exercise.getOldID());
           trimmed += info.trimmed;
           count += info.count;
           changed += info.changed;
         } else if (maleEmpty) {
           Collection<AudioAttribute> defaultUserAudio = exercise.getDefaultUserAudio();
           defaultAudio += defaultUserAudio.size();
-          Info info = doTrim(defaultUserAudio, title, exercise.getID());
+          Info info = doTrim(defaultUserAudio, title, exercise.getOldID());
           trimmed += info.trimmed;
           count += info.count;
           changed += info.changed;
@@ -266,7 +266,7 @@ public class RefResultDecoder {
       for (CommonExercise exercise : exercises) {
         if (stopDecode) return;
 
-        List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
+        List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getOldID());
         if (audioAttributes != null) {
           db.getAudioDAO().attachAudio(exercise, installPath, relativeConfigDir, audioAttributes);
           attrc += audioAttributes.size();

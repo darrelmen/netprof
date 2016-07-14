@@ -94,7 +94,7 @@ public class UserExTest extends BaseTest {
     for (UserList<CommonShell> list : listsForUser) {
       logger.info("got " + list);
       for (CommonShell ex : list.getExercises()) {
-        logger.info("\t" + list.getRealID() +"/" +list.getID() + " has " + ex);
+        logger.info("\t" + list.getID() +"/" +list.getOldID() + " has " + ex);
       }
     }
   }
@@ -124,7 +124,7 @@ public class UserExTest extends BaseTest {
     }
     UserList<CommonShell> next = listsForUser.iterator().next();
     int user = 6;
-    userListManager.addVisitor(next.getRealID(), user);
+    userListManager.addVisitor(next.getID(), user);
 
     Collection<UserList<CommonShell>> after = userListManager.getListsForUser(user, false, true);
 

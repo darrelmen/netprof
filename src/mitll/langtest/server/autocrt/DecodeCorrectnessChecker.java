@@ -96,7 +96,7 @@ public class DecodeCorrectnessChecker {
     return flashcardAnswer;
   }
 
-  private void logDecodeOutput(AudioAnswer answer, Collection<String> foregroundSentences, String id) {
+  private void logDecodeOutput(AudioAnswer answer, Collection<String> foregroundSentences, int id) {
     String decodeOutput = answer.getDecodeOutput();
     double score = answer.getScore();
 
@@ -206,7 +206,7 @@ public class DecodeCorrectnessChecker {
     } else {
       String phraseToDecode = getPhraseToDecode(other.getForeignLanguage(), language);
 /*      logger.debug("(" + language +
-          ") for " + other.getID() + " fl is '" + other.getForeignLanguage() + "' / '" +other.getForeignLanguage().trim()+
+          ") for " + other.getOldID() + " fl is '" + other.getForeignLanguage() + "' / '" +other.getForeignLanguage().trim()+
           "' -> '" + phraseToDecode +          "'");*/
       return Collections.singleton(phraseToDecode);
     }

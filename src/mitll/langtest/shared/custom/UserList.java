@@ -94,7 +94,7 @@ public class UserList<T extends HasID> extends BaseExercise {
    * @see mitll.langtest.client.custom.dialog.EditItem#makeListOfOnlyYourItems(UserList)
    */
   public UserList(UserList<T> ul) {
-    this(ul.getRealID(), ul.getCreator(), ul.getName(), ul.getDescription(), ul.getClassMarker(), ul.isPrivate(), ul.getModified());
+    this(ul.getID(), ul.getCreator(), ul.getName(), ul.getDescription(), ul.getClassMarker(), ul.isPrivate(), ul.getModified());
   }
 
   public UserList<T> getCopy() {
@@ -163,8 +163,8 @@ public class UserList<T extends HasID> extends BaseExercise {
   public T remove(int id) {
     T toRemove = null;
     for (T ue : exercises) {
-      //   if (id.equals(ue.getID())) {
-      if (id == ue.getRealID()) {
+      //   if (id.equals(ue.getOldID())) {
+      if (id == ue.getID()) {
         toRemove = ue;
         break;
       }
@@ -198,8 +198,8 @@ public class UserList<T extends HasID> extends BaseExercise {
 
   public boolean containsByID(int id) {
     for (T ex : getExercises()) {
-//      if (ex.getID().equals(id)) return true;
-      if (ex.getRealID() == id) return true;
+//      if (ex.getOldID().equals(id)) return true;
+      if (ex.getID() == id) return true;
     }
     return false;
   }
@@ -229,7 +229,7 @@ public class UserList<T extends HasID> extends BaseExercise {
   @Override
   public String toString() {
     long id = creator == null ? -1 : creator.getId();
-    return "UserList #" + getRealID() + " '" + name + "' by " + id +
+    return "UserList #" + getID() + " '" + name + "' by " + id +
         //" : " + (isReview ? " REVIEW " : "") +
         " :" +
         " with " + getExercises().size() + " exercises.";

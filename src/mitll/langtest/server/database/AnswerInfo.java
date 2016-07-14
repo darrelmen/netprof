@@ -44,7 +44,7 @@ import mitll.langtest.shared.scoring.AudioContext;
  */
 public class AnswerInfo {
   private int userid;
-  private String id;
+  private int id;
   private int questionID;
   private String answer;
   private String audioFile;
@@ -114,7 +114,7 @@ public class AnswerInfo {
                     AudioCheck.ValidityAndDur validity
   ) {
     this(audioContext.getUserid(),
-        audioContext.getId(),
+        audioContext.getExid(),
         audioContext.getQuestionID(),
         audioContext.getAudioType(),
 
@@ -128,7 +128,7 @@ public class AnswerInfo {
   }
 
   private AnswerInfo(int userid,
-                    String id,
+                     int id,
                     int questionID,
                     AudioType audioType,
 
@@ -187,7 +187,7 @@ public class AnswerInfo {
     );
   }
 
-  private AnswerInfo(int userid, String id, int questionID,
+  private AnswerInfo(int userid, int id, int questionID,
                     AudioType audioType, String answer, String audioFile,
                     String deviceType, String device, boolean withFlash,
 
@@ -225,7 +225,7 @@ public class AnswerInfo {
     return userid;
   }
 
-  public String getId() {
+  public int getId() {
     return id;
   }
 

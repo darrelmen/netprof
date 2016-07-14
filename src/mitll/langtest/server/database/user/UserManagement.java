@@ -35,8 +35,8 @@ package mitll.langtest.server.database.user;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.HTTPClient;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.result.IResultDAO;
-import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.excel.UserDAOToExcel;
 import mitll.langtest.server.rest.RestUserManagement;
 import mitll.langtest.shared.User;
@@ -67,7 +67,7 @@ public class UserManagement {
   private final int numExercises;
   private final IUserDAO userDAO;
   private final IResultDAO resultDAO;
-  private final UserListManager userListManager;
+  private final IUserListManager userListManager;
 
   /**
    * @see DatabaseImpl#makeDAO(String, String, String)
@@ -76,7 +76,7 @@ public class UserManagement {
    * @param resultDAO
    * @param userListManager
    */
-  public UserManagement(IUserDAO userDAO, int numExercises, IResultDAO resultDAO, UserListManager userListManager) {
+  public UserManagement(IUserDAO userDAO, int numExercises, IResultDAO resultDAO, IUserListManager userListManager) {
     this.userDAO = userDAO;
     this.numExercises = numExercises;
     this.resultDAO = resultDAO;
@@ -314,17 +314,17 @@ public class UserManagement {
    */
   private Pair populateUserToNumAnswers() {
     Map<Long, Integer> idToCount = new HashMap<Long, Integer>();
-    Map<Long, Set<String>> idToUniqueCount = new HashMap<Long, Set<String>>();
+    Map<Long, Set<Integer>> idToUniqueCount = new HashMap<>();
     for (UserAndTime result : resultDAO.getUserAndTimes()) {
       long userid = result.getUserid();
-      String exerciseID = result.getExid();
+      int exerciseID = result.getExid();
 
       Integer count = idToCount.get(userid);
       if (count == null) idToCount.put(userid, 1);
       else idToCount.put(userid, count + 1);
 
-      Set<String> uniqueForUser = idToUniqueCount.get(userid);
-      if (uniqueForUser == null) idToUniqueCount.put(userid, uniqueForUser = new HashSet<String>());
+      Set<Integer> uniqueForUser = idToUniqueCount.get(userid);
+      if (uniqueForUser == null) idToUniqueCount.put(userid, uniqueForUser = new HashSet<>());
       uniqueForUser.add(exerciseID);
     }
     return new Pair(idToCount, idToUniqueCount);
@@ -332,9 +332,9 @@ public class UserManagement {
 
   private static class Pair {
     final Map<Long, Integer> idToCount;
-    final Map<Long, Set<String>> idToUniqueCount;
+    final Map<Long, Set<Integer>> idToUniqueCount;
 
-    Pair(Map<Long, Integer> idToCount, Map<Long, Set<String>> idToUniqueCount) {
+    Pair(Map<Long, Integer> idToCount, Map<Long, Set<Integer>> idToUniqueCount) {
       this.idToCount = idToCount;
       this.idToUniqueCount = idToUniqueCount;
     }

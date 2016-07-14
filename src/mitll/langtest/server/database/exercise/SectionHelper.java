@@ -292,12 +292,12 @@ public class SectionHelper<T extends Shell> {
 
   /**
    * @param exercise
-   * @see mitll.langtest.server.database.DatabaseImpl#deleteItem(String)
+   * @see mitll.langtest.server.database.DatabaseImpl#deleteItem(int)
    * @see BaseExerciseDAO#removeExercises()
    */
   public boolean removeExercise(T exercise) {
     Map<String, String> unitToValue = exercise.getUnitToValue();
-    //  logger.debug("Removing " + exercise.getID() + " with " +unitToValue);
+    //  logger.debug("Removing " + exercise.getOldID() + " with " +unitToValue);
     boolean didRemove = false;
     if (unitToValue != null) {
       didRemove = true;
@@ -321,7 +321,7 @@ public class SectionHelper<T extends Shell> {
    * @param type
    * @param unitName
    * @return
-   * @see mitll.langtest.server.database.DatabaseImpl#deleteItem(String)
+   * @see mitll.langtest.server.database.DatabaseImpl#deleteItem(int)
    */
   private boolean removeExerciseToLesson(T exercise, String type, String unitName) {
     Map<String, Lesson<T>> unit = getSectionToLesson(type);
