@@ -54,7 +54,7 @@ public class AMASReaderTest {
     //database.getAMASSectionHelper().report();
 
     Collection<AmasExerciseImpl> exercises = database.getAMASExercises();
-    Stream<AmasExerciseImpl> amasExerciseStream = exercises.stream().filter(ex -> ex.getID().equals("AM-LA-004"));
+    Stream<AmasExerciseImpl> amasExerciseStream = exercises.stream().filter(ex -> ex.getOldID().equals("AM-LA-004"));
     Optional<AmasExerciseImpl> first = amasExerciseStream.findFirst();
     AmasExerciseImpl amasExercise = first.get();
     logger.info("first " + first+  " audio '" + amasExercise.getAudioURL() + "'");

@@ -35,7 +35,6 @@ package mitll.langtest.server.database.userlist;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.ISchema;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.custom.UserList;
@@ -97,7 +96,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO/*, ISchema<Use
         shared.getClassMarker(),
         shared.isPrivate(),
         false,
-        shared.getRealID());
+        shared.getID());
   }
 
   public SlickUserExerciseList toSlick2(UserList<CommonShell> shared, int userid) {
@@ -108,7 +107,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO/*, ISchema<Use
         shared.getClassMarker(),
         shared.isPrivate(),
         false,
-        shared.getRealID());
+        shared.getID());
   }
 
   public UserList<CommonShell> fromSlick(SlickUserExerciseList slick) {
@@ -187,13 +186,13 @@ public class SlickUserListDAO extends DAO implements IUserListDAO/*, ISchema<Use
    * @see #getAllByUser(long)
    */
   private void populateList(UserList<CommonShell> where) {
-    List<CommonShell> onList = userExerciseDAO.getOnList(where.getRealID());
+    List<CommonShell> onList = userExerciseDAO.getOnList(where.getID());
     where.setExercises(onList);
 
-    for (CommonShell shell : onList) logger.info("for " + where.getID() + " found " + shell);
+    for (CommonShell shell : onList) logger.info("for " + where.getOldID() + " found " + shell);
 /*
     Set<String> userExIDs = new HashSet<>();
-    for (CommonShell shell : onList) userExIDs.add(shell.getID());
+    for (CommonShell shell : onList) userExIDs.add(shell.getOldID());
 
     Collection<String> exidsFor = userListExerciseJoinDAO.getExidsFor(where.getRealID());
 

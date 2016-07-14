@@ -63,7 +63,7 @@ public interface ListInterface<T extends Shell> extends RequiresResize, Reloadab
 
   void addExercise(T es);
 
-  T simpleRemove(String id);
+  T simpleRemove(int id);
 
   /**
    * @see mitll.langtest.client.custom.content.AVPHelper#makeExerciseList(Panel, String)
@@ -98,7 +98,11 @@ public interface ListInterface<T extends Shell> extends RequiresResize, Reloadab
    */
   boolean loadNextExercise(HasID current);
 
-  boolean loadNextExercise(String id);
+//  default boolean loadNextExercise(int id) {
+//    return loadNextExercise(id);
+//  }
+
+  boolean loadNextExercise(int id);
 
   boolean loadPrev();
 
@@ -111,7 +115,7 @@ public interface ListInterface<T extends Shell> extends RequiresResize, Reloadab
    * @param id
    * @return
    */
-  boolean loadByID(String id);
+  boolean loadByID(int id);
 
 
   /**
@@ -124,7 +128,7 @@ public interface ListInterface<T extends Shell> extends RequiresResize, Reloadab
   boolean onLast();
   boolean onLast(HasID current);
   /**
-   * @see mitll.langtest.client.LangTest#resetState()
+   * @see mitll.langtest.client.LangTest#resetState
    */
   void clear();
 
@@ -151,8 +155,8 @@ public interface ListInterface<T extends Shell> extends RequiresResize, Reloadab
    */
   Panel getCreatedPanel();
 
-  void setState(String id, STATE state);
-  void setSecondState(String id, STATE state);
+  void setState(int id, STATE state);
+  void setSecondState(int id, STATE state);
 
   void addListChangedListener(ListChangeListener<T> listener);
 
@@ -167,5 +171,5 @@ public interface ListInterface<T extends Shell> extends RequiresResize, Reloadab
    */
   void searchBoxEntry(String text);
 
-  int getIndex(String currentID);
+  int getIndex(int currentID);
 }

@@ -34,7 +34,6 @@ package mitll.langtest.server.database.userlist;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.shared.custom.UserList;
 import org.apache.log4j.Logger;
 
@@ -105,7 +104,7 @@ public class UserListExerciseJoinDAO extends DAO implements IUserListExerciseJoi
   public void add(UserList userList, String uniqueID, int exid) {
     try {
       // there are much better ways of doing this...
-      logger.info("UserListExerciseJoinDAO.add :userList #" + userList.getRealID() + " exercise id '" + uniqueID + "'");
+      logger.info("UserListExerciseJoinDAO.add :userList #" + userList.getID() + " exercise id '" + uniqueID + "'");
 
       Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement = connection.prepareStatement(
@@ -117,7 +116,7 @@ public class UserListExerciseJoinDAO extends DAO implements IUserListExerciseJoi
               ") " +
               "VALUES(?,?);");
       int i = 1;
-      statement.setLong(i++, userList.getRealID());
+      statement.setLong(i++, userList.getID());
       statement.setString(i++, uniqueID);
 
       int j = statement.executeUpdate();
@@ -158,7 +157,7 @@ public class UserListExerciseJoinDAO extends DAO implements IUserListExerciseJoi
     public int userlistid;
     public String exerciseID;
 
-    public Join(int userlistid, String exerciseID) {
+    Join(int userlistid, String exerciseID) {
       this.userlistid = userlistid;
       this.exerciseID = exerciseID;
     }
@@ -177,7 +176,7 @@ public class UserListExerciseJoinDAO extends DAO implements IUserListExerciseJoi
    */
   @Override
   public boolean remove(long listid, int exid) {
-    String sql = getRemoveSQL(listid, exid);
+    String sql = getRemoveSQL(listid, ""+exid);
     return doSqlOn(sql, USER_EXERCISE_LIST_EXERCISE, true);
   }
 

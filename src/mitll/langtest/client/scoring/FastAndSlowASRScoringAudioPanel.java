@@ -89,7 +89,7 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
         exercise.getForeignLanguage(),
         service,
         controller1,
-        controller1.getProps().showSpectrogram(), scoreListener, RIGHT_MARGIN, REFERENCE, exercise.getID(), exercise, instance);
+        controller1.getProps().showSpectrogram(), scoreListener, RIGHT_MARGIN, REFERENCE, exercise.getOldID(), exercise, instance);
   }
 
   /**
@@ -131,7 +131,7 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
         container = getGenderChoices(rightSide, malesMap, femalesMap, defaultUserAudio, instance);
       }
       Collection<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
-      //logger.info("getAfterPlayWidget : for ex " + exercise.getID() + " found " + audioAttributes);
+      //logger.info("getAfterPlayWidget : for ex " + exercise.getOldID() + " found " + audioAttributes);
 
       // first choice here is for default audio (where we don't know the gender)
       final Collection<AudioAttribute> initialAudioChoices = maleEmpty ?
@@ -233,7 +233,7 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
    * @see #getGenderChoices(Panel, Map, Map, Collection, String)
    */
   private void addRegularAndSlow(Panel vp, Collection<AudioAttribute> audioAttributes, String instance) {
-/*      System.out.println("getAfterPlayWidget : for exercise " +exercise.getID() +
+/*      System.out.println("getAfterPlayWidget : for exercise " +exercise.getOldID() +
         " path "+ audioPath + " attributes were " + audioAttributes);*/
 
     RadioButton regular = null;

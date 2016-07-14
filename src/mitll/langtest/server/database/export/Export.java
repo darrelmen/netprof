@@ -89,7 +89,7 @@ public class Export {
     Map<Integer, List<Grade>> idToGrade = getIdToGrade(grades);
     logger.debug("getExport : got " + idToGrade.size() + " grades, max was " + max);
 
-    Map<String, List<Result>> exerciseToResult = populateMapOfExerciseIdToResults();
+    Map<Integer, List<Result>> exerciseToResult = populateMapOfExerciseIdToResults();
     logger.debug("getExport : got " + exerciseToResult.size() + " exercise with results");
 
     List<AmasExerciseImpl> exercises = getExercises();
@@ -115,20 +115,21 @@ public class Export {
    * @return
    * @see #getExport()
    */
-  private List<Result> getResultsForExercise(Map<String, List<Result>> exerciseToResult, AmasExerciseImpl e) {
+  private List<Result> getResultsForExercise(Map<Integer, List<Result>> exerciseToResult, AmasExerciseImpl e) {
     List<Result> results1 = exerciseToResult.get(e.getID());
-    Set<String> strings = exerciseToResult.keySet();
+    Set<Integer> strings = exerciseToResult.keySet();
     if (results1 == null) {
       results1 = exerciseToResult.get(e.getAltID());
+      logger.error("getResultsForExercise Probably not what you want " +e.getAltID());
       if (results1 == null) {
-        if (!e.getID().startsWith("AM") /*&& c++ < 40*/ && !exerciseToResult.isEmpty()) {
-          logger.debug("couldn't find '" + e.getID() + "'/'" + e.getAltID() + "' in (" + strings.size() + ") " + strings);
+        if (!e.getOldID().startsWith("AM") /*&& c++ < 40*/ && !exerciseToResult.isEmpty()) {
+          logger.debug("couldn't find '" + e.getOldID() + "'/'" + e.getAltID() + "' in (" + strings.size() + ") " + strings);
         }
         results1 = Collections.emptyList();
       }
     } else {
 //        if (c++ < 20) {
-//         logger.debug("found match for " +e.getID() + " - student answers = " + results1.size());
+//         logger.debug("found match for " +e.getOldID() + " - student answers = " + results1.size());
 //      }
     }
     return results1;
@@ -158,8 +159,8 @@ public class Export {
    * @return
    * @see #getExport
    */
-  private Map<String, List<Result>> populateMapOfExerciseIdToResults() {
-    Map<String, List<Result>> exerciseToResult = new HashMap<String, List<Result>>();
+  private Map<Integer, List<Result>> populateMapOfExerciseIdToResults() {
+    Map<Integer, List<Result>> exerciseToResult = new HashMap<>();
     Collection<Result> results = resultDAO.getResults();
     logger.debug("populateMapOfExerciseIdToResults : got " + results.size() + " results");
 
@@ -200,10 +201,10 @@ public class Export {
     //  boolean debug = false;
     Map<Integer, ExerciseExport> qidToExport = populateIdToExportMap(exercise);
     Map<Integer, ExerciseExport> preDefqidToExport = populateIdToExportMap(exercise);
-    //  logger.debug("exercise " + exercise.getID() + "/" +exercise.getAltID() + " got qid->export " +qidToExport.size() + " items ");
+    //  logger.debug("exercise " + exercise.getOldID() + "/" +exercise.getAltID() + " got qid->export " +qidToExport.size() + " items ");
     Set<String> predefinedAnswers = addPredefinedAnswers(exercise, useFLQ, qidToExport, preDefqidToExport, correctGrade);
-/*    if (exercise.getID().contains("012")) {
-      logger.debug("exercise " + exercise.getID() + "/" + exercise.getAltID() + " got qid->export " + qidToExport.size() + " items, got " + resultsForExercise.size() + " resultsForExercise, predef " + predefinedAnswers.size());
+/*    if (exercise.getOldID().contains("012")) {
+      logger.debug("exercise " + exercise.getOldID() + "/" + exercise.getAltID() + " got qid->export " + qidToExport.size() + " items, got " + resultsForExercise.size() + " resultsForExercise, predef " + predefinedAnswers.size());
     }*/
 
     List<ExerciseExport> ret = new ArrayList<ExerciseExport>();
@@ -225,11 +226,11 @@ public class Export {
         List<Grade> gradesForResult = idToGrade.get(rid);
         if (gradesForResult == null) {
           if (r.getAudioType().equals("arabic_text")) {
-            if (count++ < 100) logger.warn("for " + exercise.getID() + " no grades for result " + r);
+            if (count++ < 100) logger.warn("for " + exercise.getOldID() + " no grades for result " + r);
           }
         } else {
           if (gradesForResult.size() > 1) {
-            logger.warn("for " + exercise.getID() + " only expecting one grade for " + r + " but there were " + gradesForResult.size());
+            logger.warn("for " + exercise.getOldID() + " only expecting one grade for " + r + " but there were " + gradesForResult.size());
           }
           for (Grade g : gradesForResult) {
             if (g.grade > 0) {  // filter out bad items (valid grades are 1-5)
@@ -270,7 +271,7 @@ public class Export {
     }
     if (ret.isEmpty()) {
       Set<ExerciseExport> toExport = new HashSet<ExerciseExport>(qidToExport.values());
-      logger.warn("Adding " + toExport.size() + " predef answers for " + exercise.getID());
+      logger.warn("Adding " + toExport.size() + " predef answers for " + exercise.getOldID());
       ret.addAll(toExport);
     }
 
@@ -350,10 +351,10 @@ public class Export {
 //      String answer = qaPair.getAnswer();
 //      String key = collapseWhitespace(answer);
 //      if (answer.isEmpty()) {
-//        logger.warn("huh? answer for " + exercise.getID() + " is empty.");
+//        logger.warn("huh? answer for " + exercise.getOldID() + " is empty.");
 //        for (String alt : qaPair.getAlternateAnswers()) {
 //          if (!removePunct(alt).isEmpty()) {
-//            ExerciseExport e1 = new ExerciseExport(exercise.getID() + "_" + ++qid, key);
+//            ExerciseExport e1 = new ExerciseExport(exercise.getOldID() + "_" + ++qid, key);
 //            qidToExport.put(qid, e1);
 //            addAlternates(qaPair, e1);
 //            break;
@@ -366,7 +367,7 @@ public class Export {
       for (String a : qaPair.getAlternateAnswers()) builder.append(a).append("||");
       String key = builder.toString();
       if (!key.isEmpty()) key = key.substring(0, key.length() - 2);
-      ExerciseExport e1 = new ExerciseExport(exercise.getID() + "_" + ++qid, key);
+      ExerciseExport e1 = new ExerciseExport(exercise.getOldID() + "_" + ++qid, key);
       qidToExport.put(qid, e1);
       addAlternates(qaPair, e1);
 //      }
@@ -421,7 +422,7 @@ public class Export {
         String question = q.getQuestion();
         //  String answer1 = q.getAnswer();
         if (question.trim().isEmpty()) {
-          logger.warn("huh? question is empty for " + q + " in " + exercise.getID());
+          logger.warn("huh? question is empty for " + q + " in " + exercise.getOldID());
         } else {
           if (question.length() < 3) {
             logger.warn("added " + new ResponseAndGrade(question, 1, correctGrade) + " for " + q);
@@ -434,7 +435,7 @@ public class Export {
 
         // key answers are correct
   /*      if (answer1.trim().isEmpty()) {
-          logger.warn("huh? answer is empty for " + q + " in " + exercise.getID());
+          logger.warn("huh? answer is empty for " + q + " in " + exercise.getOldID());
         } else {
           if (answer1.length() < 3) {
             logger.warn("note, short answer (" + answer1 + ") added " + new ResponseAndGrade(answer1, correctGrade, correctGrade) + " for " + q);
@@ -449,7 +450,7 @@ public class Export {
         for (String answer : q.getAlternateAnswers()) {
           String removed = removePunct(answer.trim());
           if (answer.trim().isEmpty() || removed.isEmpty()) {
-            logger.warn("huh? alternate answer is empty??? for " + q + " in " + exercise.getID());
+            logger.warn("huh? alternate answer is empty??? for " + q + " in " + exercise.getOldID());
             logger.warn("exercise " + exercise);
           } else {
             if (answer.length() < MIN_LENGTH) {
@@ -463,14 +464,14 @@ public class Export {
 //            count++;
           }
         }
-        //logger.debug("for " + exercise.getID() + " export is " + exerciseExport);
+        //logger.debug("for " + exercise.getOldID() + " export is " + exerciseExport);
       }
       qid++;
     }
     if (answers.size() == 0) {
-      logger.warn("for " + exercise.getID() + " added " + answers.size() + " predefined answers from " + qaPairs);
+      logger.warn("for " + exercise.getOldID() + " added " + answers.size() + " predefined answers from " + qaPairs);
     } else {
-//      logger.info("for " + exercise.getID() + " added " + count + " predefined answers from " + qaPairs);
+//      logger.info("for " + exercise.getOldID() + " added " + count + " predefined answers from " + qaPairs);
     }
     return answers;
   }

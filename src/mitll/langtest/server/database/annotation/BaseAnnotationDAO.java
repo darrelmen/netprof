@@ -43,7 +43,7 @@ public abstract class BaseAnnotationDAO extends DAO {
   private static final Logger logger = Logger.getLogger(BaseAnnotationDAO.class);
   int defectDetector;
 
-  private Map<String, List<UserAnnotation>> exerciseToAnnos = null;
+  private Map<Integer, List<UserAnnotation>> exerciseToAnnos = null;
 
   BaseAnnotationDAO(Database database, int defectDetector) {
     super(database);
@@ -51,8 +51,6 @@ public abstract class BaseAnnotationDAO extends DAO {
   }
 
   abstract List<UserAnnotation> getAll(int userid);
-
-  //abstract Collection<String> getAudioAnnos();
 
   /**
    * TODO : this seems like a bad idea...
@@ -64,7 +62,7 @@ public abstract class BaseAnnotationDAO extends DAO {
    * @return
    * @see mitll.langtest.server.database.custom.UserListManager#addDefect
    */
-  public boolean hasDefect(String exerciseID, String field, String status, String comment) {
+  public boolean hasDefect(int exerciseID, String field, String status, String comment) {
     List<UserAnnotation> userAnnotations = getDefectsForExercise(exerciseID);
     if (userAnnotations == null) {
       return false;
@@ -92,7 +90,7 @@ public abstract class BaseAnnotationDAO extends DAO {
     }
   }
 
-  private List<UserAnnotation> getDefectsForExercise(String exerciseID) {
+  private List<UserAnnotation> getDefectsForExercise(int exerciseID) {
     if (exerciseToAnnos == null) populate(defectDetector);
     return exerciseToAnnos.get(exerciseID);
   }
@@ -126,7 +124,7 @@ public abstract class BaseAnnotationDAO extends DAO {
     }
   }
 
-  protected boolean examineFields(boolean forDefects, Map<String, String> fieldToStatus) {
+  boolean examineFields(boolean forDefects, Map<String, String> fieldToStatus) {
     String statusToLookFor = "correct";
     boolean foundIncorrect = false;
     for (String latest : fieldToStatus.values()) {

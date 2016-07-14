@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.database.reviewed;
 
-import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.shared.exercise.STATE;
 
 import java.util.Date;
@@ -41,14 +40,13 @@ public class StateCreator implements Comparable<StateCreator> {
   private STATE state;
   private long creatorID;
   private long when;
+  private int exerciseID =-1;
 
-  private String exerciseID = "";
   StateCreator(STATE state, long creatorID, long when) {
     this.state = state;
     this.creatorID = creatorID;
     this.when = when;
   }
-
 
   public STATE getState() {
     return state;
@@ -56,7 +54,7 @@ public class StateCreator implements Comparable<StateCreator> {
 
   /**
    * @return
-   * @see UserListManager#getAmmendedStateMap()
+   * @seex UserListManager#getAmmendedStateMap
    */
   public long getCreatorID() {
     return creatorID;
@@ -70,11 +68,11 @@ public class StateCreator implements Comparable<StateCreator> {
     return exerciseID +" = [" + state.toString() + " by " + creatorID + " at " + new Date(when) + "]";
   }
 
-  public String getExerciseID() {
+  public int getExerciseID() {
     return exerciseID;
   }
 
-  public void setExerciseID(String exerciseID) {
+  public void setExerciseID(int exerciseID) {
     this.exerciseID = exerciseID;
   }
 
@@ -84,7 +82,7 @@ public class StateCreator implements Comparable<StateCreator> {
 
   @Override
   public int compareTo(StateCreator o) {
-    int i = exerciseID.compareTo(o.exerciseID);
+    int i = Integer.valueOf(exerciseID).compareTo(o.exerciseID);
     if (i == 0) i = Long.valueOf(creatorID).compareTo(o.creatorID);
     if (i == 0) i = state.compareTo(o.state);
     if (i == 0) i = Long.valueOf(when).compareTo(o.when);

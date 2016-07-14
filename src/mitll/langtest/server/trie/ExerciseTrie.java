@@ -208,7 +208,7 @@ public class ExerciseTrie<T extends CommonShell> extends Trie<T> {
     }
 
     public String toString() {
-      return "e " + e.getID() + " : " + value;
+      return "e " + e.getOldID() + " : " + value;
     }
   }
 

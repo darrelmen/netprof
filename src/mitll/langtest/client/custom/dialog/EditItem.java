@@ -80,7 +80,8 @@ public class EditItem {
   private final Logger logger = Logger.getLogger("EditItem");
 
   public static final String NEW_ITEM = "*New Item*";
-  public static final String NEW_EXERCISE_ID = "NewExerciseID";
+  //public static final String NEW_EXERCISE_ID = "NewExerciseID";
+  public static final int NEW_EXERCISE_ID = -100;
   private static final String EDIT_ITEM = "editItem";
 
   private final ExerciseController controller;
@@ -203,7 +204,7 @@ public class EditItem {
 
             for (final CommonShell es : result) {
               addExercise(es);
-              if (includeAddItem && es.getID().equals(NEW_EXERCISE_ID)) {
+              if (includeAddItem && es.getOldID().equals(NEW_EXERCISE_ID)) {
                 addNewItem = false;
               }
             }
@@ -263,7 +264,7 @@ public class EditItem {
    */
   private void rememberAndLoadFirst(final UserList<CommonShell> ul,
                                     PagingExerciseList<CommonShell, CommonExercise> npfExerciseList) {
-    npfExerciseList.setUserListID(ul.getRealID());
+    npfExerciseList.setUserListID(ul.getID());
     List<CommonShell> userExercises = new ArrayList<>();
     Collection<CommonShell> exercises = ul.getExercises();
     for (CommonShell e : exercises) {
@@ -289,7 +290,7 @@ public class EditItem {
                              final UserList<CommonShell> originalList,
                              final HasText itemMarker,
                              final ListInterface<CommonShell> pagingContainer) {
-    if (exercise.getID().equals(NEW_EXERCISE_ID)) {
+    if (exercise.getOldID().equals(NEW_EXERCISE_ID)) {
       if (newExercise == null) {
         newExercise = createNewItem(userManager.getUser(), ul.getName().replaceAll("\\s+", "_"));
         addEditOrAddPanel(newExercise, itemMarker, originalList, right, ul, pagingContainer, true, false);
@@ -407,7 +408,7 @@ public class EditItem {
       this.listInterface = listInterface;
 
       final FluidContainer container = new FluidContainer();
-      container.add(makeDeleteButton(ul, originalList.getRealID()));
+      container.add(makeDeleteButton(ul, originalList.getID()));
       return container;
     }
 
@@ -417,7 +418,7 @@ public class EditItem {
         @Override
         public void onClick(ClickEvent event) {
 //          logger.info(getClass() + " : makeDeleteButton npfHelperList (2) " + npfHelper);
-          deleteItem(newUserExercise.getID(), uniqueID, ul, exerciseList, predefinedContentList);
+          deleteItem(newUserExercise.getOldID(), uniqueID, ul, exerciseList, predefinedContentList);
         }
       });
       delete.addStyleName("topFiftyMargin");

@@ -67,7 +67,7 @@ public class SlickUserListExerciseJoinDAO
    */
   @Override
   public void add(UserList userList, String uniqueID, int exid) {
-    addPair(userList.getRealID(), /*uniqueID,*/ exid);
+    addPair(userList.getID(), /*uniqueID,*/ exid);
     //   dao.insert((int) userList.getUniqueID(), uniqueID,exid);
   }
 

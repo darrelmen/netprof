@@ -79,7 +79,7 @@ public class QuizCorrect {
     if (exids == null || exids.isEmpty()) {
       Collection<CommonExercise> exercisesForState = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
       for (CommonExercise exercise : exercisesForState) {
-        allIDs.add(exercise.getID());
+        allIDs.add(exercise.getOldID());
       }
     } else {
       allIDs = exids;
@@ -182,7 +182,7 @@ public class QuizCorrect {
     Map<String, CorrectAndScore> idToCorrect = new HashMap<String, CorrectAndScore>();
 
     for (CorrectAndScore correctAndScore : resultsForUser) {
-      String key = correctAndScore.getId() + "/" + correctAndScore.getQid();
+      String key = correctAndScore.getExid() + "/" + correctAndScore.getQid();
       idToCorrect.put(key, correctAndScore);
     }
     return new ArrayList<CorrectAndScore>(idToCorrect.values()); // required since can't send a values set

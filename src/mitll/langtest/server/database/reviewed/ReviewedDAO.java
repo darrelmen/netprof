@@ -34,7 +34,6 @@ package mitll.langtest.server.database.reviewed;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.shared.exercise.STATE;
 import org.apache.log4j.Logger;
 
@@ -116,7 +115,7 @@ public class ReviewedDAO extends DAO implements IReviewedDAO {
   /**
    * <p/>
    *
-   * @see #setState
+   * @see IReviewedDAO#setState
    */
   private void add(String exerciseID, STATE state, long creatorID) {
     try {
@@ -155,10 +154,10 @@ public class ReviewedDAO extends DAO implements IReviewedDAO {
   /**
    * @param exerciseID
    * @see mitll.langtest.server.database.custom.UserListManager#removeReviewed(String)
-   * @see mitll.langtest.server.database.DatabaseImpl#deleteItem(String)
+   * @see mitll.langtest.server.database.DatabaseImpl#deleteItem(int)
    */
   @Override
-  public void remove(String exerciseID) {
+  public void remove(int exerciseID) {
     try {
       int before = getCount();
       Connection connection = database.getConnection(this.getClass().toString());
@@ -189,7 +188,7 @@ public class ReviewedDAO extends DAO implements IReviewedDAO {
    * @see mitll.langtest.server.database.custom.UserListManager#setSecondState(mitll.langtest.shared.exercise.CommonShell, mitll.langtest.shared.exercise.STATE, long)
    */
   @Override
-  public void setState(String exerciseID, STATE state, long creatorID) {
+  public void setState(int exerciseID, STATE state, long creatorID) {
     try {
       add(exerciseID, state, creatorID);
     } catch (Exception ee) {
@@ -209,18 +208,18 @@ public class ReviewedDAO extends DAO implements IReviewedDAO {
    * @see mitll.langtest.server.database.custom.UserListManager#setStateOnExercises()
    */
   @Override
-  public Map<String, StateCreator> getExerciseToState(boolean skipUnset) {
+  public Map<Integer, StateCreator> getExerciseToState(boolean skipUnset) {
     return getExerciseToState(skipUnset, false, "");
   }
 
   @Override
-  public STATE getCurrentState(String exerciseID) {
-    Map<String, StateCreator> exerciseToState = getExerciseToState(false, true, exerciseID);
+  public STATE getCurrentState(int exerciseID) {
+    Map<Integer, StateCreator> exerciseToState = getExerciseToState(false, true, exerciseID);
     if (exerciseToState.isEmpty()) return STATE.UNSET;
     else return exerciseToState.values().iterator().next().getState();
   }
 
-  private Map<String, StateCreator> getExerciseToState(boolean skipUnset, boolean selectSingleExercise, String exerciseIDToFind) {
+  private Map<Integer, StateCreator> getExerciseToState(boolean skipUnset, boolean selectSingleExercise, String exerciseIDToFind) {
     Connection connection = database.getConnection(this.getClass().toString());
 
     String latest = "latest";
@@ -241,7 +240,7 @@ public class ReviewedDAO extends DAO implements IReviewedDAO {
       //logger.debug("Running " + sql3);
       PreparedStatement statement = connection.prepareStatement(sql3);
       ResultSet rs = statement.executeQuery();
-      Map<String, StateCreator> exidToState = new HashMap<String, StateCreator>();
+      Map<Integer, StateCreator> exidToState = new HashMap<>();
       while (rs.next()) {
         String exerciseID = rs.getString(EXERCISEID);
         String state = rs.getString(STATE_COL);
@@ -250,7 +249,11 @@ public class ReviewedDAO extends DAO implements IReviewedDAO {
         STATE stateFromTable = (state == null) ? STATE.UNSET : STATE.valueOf(state);
 
         if (!skipUnset || stateFromTable != STATE.UNSET) {
-          exidToState.put(exerciseID, new StateCreator(stateFromTable, creator, when));
+          try {
+            exidToState.put(Integer.parseInt(exerciseID), new StateCreator(stateFromTable, creator, when));
+          } catch (NumberFormatException e) {
+            logger.error("Got " + e,e);
+          }
         }
       }
 
@@ -310,8 +313,8 @@ public class ReviewedDAO extends DAO implements IReviewedDAO {
   }
 
   @Override
-  public Collection<String> getDefectExercises() {
-    Map<String, StateCreator> exerciseToState = getExerciseToState(true);
+  public Collection<Integer> getDefectExercises() {
+    Map<Integer, StateCreator> exerciseToState = getExerciseToState(true);
     Set<String> ids = new HashSet<String>();
     for (Map.Entry<String, StateCreator> pair : exerciseToState.entrySet()) {
       if (pair.getValue().getState() == STATE.DEFECT) {
