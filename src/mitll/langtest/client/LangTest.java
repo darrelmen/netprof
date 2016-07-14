@@ -73,7 +73,9 @@ import mitll.langtest.client.sound.SoundManagerStatic;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserNotification;
-import mitll.langtest.shared.*;
+import mitll.langtest.shared.ImageResponse;
+import mitll.langtest.shared.StartupInfo;
+import mitll.langtest.shared.User;
 import mitll.langtest.shared.exercise.Shell;
 
 import java.util.*;
@@ -146,12 +148,11 @@ import java.util.logging.Logger;
  * - student analysis tab visible, html5 audio preferred
  * 2.0.0
  * - uses postgres for database
- *
+ * <p>
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since
- * */
+ */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private final Logger logger = Logger.getLogger("LangTest");
 
@@ -637,12 +638,18 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   @Override
+  public void logEvent(UIObject button, String widgetType, int exid, String context) {
+    logEvent(button, widgetType, "" + exid, context);
+  }
+
+  @Override
   public void logEvent(Tab button, String widgetType, String exid, String context) {
     buttonFactory.logEvent(button, widgetType, new EventContext(exid, context, getUser()));
   }
 
   /**
    * TODO : consider exid as an int
+   *
    * @param widgetID
    * @param widgetType
    * @param exid
@@ -693,7 +700,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     if (permissions.contains(User.Permission.RECORD_AUDIO)) return AudioType.RECORDER;
     else return audioType;
   }*/
-
   private boolean isReviewMode() {
     return permissions.contains(User.Permission.QUALITY_CONTROL);
   }
