@@ -113,7 +113,7 @@ public class FileExerciseDAO<T extends CommonShell> implements SimpleExerciseDAO
   }
 
   private void populateIDToExercise(List<T> exercises) {
-    for (T e : exercises) idToExercise.put(e.getID(), e);
+    for (T e : exercises) idToExercise.put(e.getOldID(), e);
   }
 
   /**
@@ -184,7 +184,7 @@ public class FileExerciseDAO<T extends CommonShell> implements SimpleExerciseDAO
 
           if (amasExerciseImpl != null) {
             //   id++;
-            if (amasExerciseImpl.getID().equals(lastID)) {
+            if (amasExerciseImpl.getOldID().equals(lastID)) {
               //logger.debug("readExercises ex " + lastID + " adding " + exercise.getEnglishQuestions());
               if (lastAmasExerciseImpl != null) {
                 lastAmasExerciseImpl.addQuestions(AmasExerciseImpl.EN, amasExerciseImpl.getEnglishQuestions());
@@ -193,11 +193,11 @@ public class FileExerciseDAO<T extends CommonShell> implements SimpleExerciseDAO
             } else {
               T something = (T)amasExerciseImpl; // TODO : how not to force this???
               exercises.add(something);
-              ilrMapping.addMappingAssoc(amasExerciseImpl.getID(), amasExerciseImpl);
+              ilrMapping.addMappingAssoc(amasExerciseImpl.getOldID(), amasExerciseImpl);
               lastAmasExerciseImpl = amasExerciseImpl;
             }
 
-            lastID = amasExerciseImpl.getID();
+            lastID = amasExerciseImpl.getOldID();
           } else {
             logger.warn("readExercises Skipping line " + line2);
             qid = 0;
@@ -240,8 +240,8 @@ public class FileExerciseDAO<T extends CommonShell> implements SimpleExerciseDAO
         String refAudio = e.getRefAudio();
         File file = new File(refAudio);
         if (!file.exists()) {
-          writer.write(e.getID() + "\n");
-          if (c++ < 10) logger.warn("missing audio " + e.getID() + " at " + file.getAbsolutePath());
+          writer.write(e.getOldID() + "\n");
+          if (c++ < 10) logger.warn("missing audio " + e.getOldID() + " at " + file.getAbsolutePath());
         }
       }
       writer.close();
@@ -506,14 +506,14 @@ public class FileExerciseDAO<T extends CommonShell> implements SimpleExerciseDAO
     for (String answer : alternateAnswers) {
       List<String> c = Arrays.asList(answer.split(";"));
       for (String ans : c) {
-        dealWithAnswer(amasExerciseImpl.getID(), qid, copy, ans, isFLQ);
+        dealWithAnswer(amasExerciseImpl.getOldID(), qid, copy, ans, isFLQ);
       }
     }
     alternateAnswers = copy;
-    //  logger.info("For " + exercise.getID() + " found " + alternateAnswers.size() + " alt answers");
+    //  logger.info("For " + exercise.getOldID() + " found " + alternateAnswers.size() + " alt answers");
     //List<String> objects = alternateAnswers.size() > 1 ? alternateAnswers.subList(1, alternateAnswers.size()) : EMPTY_LIST;
 
-    // logger.debug("to " + exercise.getID() + " adding " + question + " lang " + lang);
+    // logger.debug("to " + exercise.getOldID() + " adding " + question + " lang " + lang);
     List<String> serializableCollection = new ArrayList<>(alternateAnswers);
 
     String lang = isFLQ ? AmasExerciseImpl.FL : AmasExerciseImpl.EN;

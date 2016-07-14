@@ -88,13 +88,13 @@ public abstract class BaseAudioDAO extends DAO {
    * @see AudioExport#writeFolderContentsContextOnly
    * @see DatabaseImpl#attachAllAudio
    */
-  public Map<String, List<AudioAttribute>> getExToAudio() {
+  public Map<Integer, List<AudioAttribute>> getExToAudio() {
     long then = System.currentTimeMillis();
-    Map<String, List<AudioAttribute>> exToAudio = new HashMap<>();
-    Map<String, Set<String>> idToPaths = new HashMap<>();
+    Map<Integer, List<AudioAttribute>> exToAudio = new HashMap<>();
+    Map<Integer, Set<String>> idToPaths = new HashMap<>();
     Collection<AudioAttribute> audioAttributes1 = getAudioAttributes();
     for (AudioAttribute audio : audioAttributes1) {
-      String exid = audio.getExid();
+      Integer exid = audio.getExid();
       List<AudioAttribute> audioAttributes = exToAudio.get(exid);
       Set<String> paths = idToPaths.get(exid);
       if (audioAttributes == null) {
@@ -128,26 +128,26 @@ public abstract class BaseAudioDAO extends DAO {
    * @see DatabaseImpl#writeZip(OutputStream, long, PathHelper)
    */
   public int attachAudio(CommonExercise firstExercise, String installPath, String relativeConfigDir) {
-    Collection<AudioAttribute> audioAttributes = getAudioAttributes(firstExercise.getID());
+    Collection<AudioAttribute> audioAttributes = getAudioAttributes(firstExercise.getOldID());
 
 /*    if (DEBUG) {
-      logger.debug("\attachAudio : found " + audioAttributes.size() + " for " + firstExercise.getID());
+      logger.debug("\attachAudio : found " + audioAttributes.size() + " for " + firstExercise.getOldID());
       for (AudioAttribute attribute : audioAttributes) {
-        logger.debug("\t\attachAudio : exid " + firstExercise.getID() + " audio " + attribute);
+        logger.debug("\t\attachAudio : exid " + firstExercise.getOldID() + " audio " + attribute);
       }
 
       for (AudioAttribute attribute : firstExercise.getAudioAttributes()) {
-        logger.debug("\t\tbefore attachAudio on ex : exid " + firstExercise.getID() + " audio " + attribute);
+        logger.debug("\t\tbefore attachAudio on ex : exid " + firstExercise.getOldID() + " audio " + attribute);
       }
     }*/
 
     boolean attachedAll = attachAudio(firstExercise, installPath, relativeConfigDir, audioAttributes);
 
     if (!attachedAll)
-      logger.info("didn't attach all audio to " + firstExercise.getID() + " " + firstExercise.getForeignLanguage());
+      logger.info("didn't attach all audio to " + firstExercise.getOldID() + " " + firstExercise.getForeignLanguage());
 /*    if (DEBUG) {
       for (AudioAttribute attribute : firstExercise.getAudioAttributes()) {
-        logger.debug("\t\tafter attachAudio : after on ex exid " + firstExercise.getID() + " audio " + attribute);
+        logger.debug("\t\tafter attachAudio : after on ex exid " + firstExercise.getOldID() + " audio " + attribute);
       }
     }*/
 
@@ -181,7 +181,7 @@ public abstract class BaseAudioDAO extends DAO {
 
     // get all the audio on the exercise initially
     //for (AudioAttribute initial : firstExercise.getAudioAttributes()) {
-    // logger.debug("predef audio " +initial + " for " + firstExercise.getID());
+    // logger.debug("predef audio " +initial + " for " + firstExercise.getOldID());
     //   initialPaths.add(initial.getAudioRef());
     // }
 
@@ -201,7 +201,7 @@ public abstract class BaseAudioDAO extends DAO {
         if (!didIt) {
           if (DEBUG_ATTACH && allSucceeded) {
             String foreignLanguage = attr.isContextAudio() ? firstExercise.getContext() : firstExercise.getForeignLanguage();
-            logger.info("not attaching audio\t" + attr.getUniqueID() + " to\t" + firstExercise.getID() +
+            logger.info("not attaching audio\t" + attr.getUniqueID() + " to\t" + firstExercise.getOldID() +
                 "\tsince transcript has changed : old '" +
                 attr.getTranscript() +
                 "' vs new '" + foreignLanguage +
@@ -209,7 +209,7 @@ public abstract class BaseAudioDAO extends DAO {
           }
           allSucceeded = false;
         }
-        // logger.debug("\tadding path '" + attr.getAudioRef() + "' " + attr + " to " + firstExercise.getID());
+        // logger.debug("\tadding path '" + attr.getAudioRef() + "' " + attr + " to " + firstExercise.getOldID());
       }
       //}
     }
@@ -219,7 +219,7 @@ public abstract class BaseAudioDAO extends DAO {
         boolean didIt = attachAudioAndFixPath(firstExercise, installPath, relativeConfigDir, audioConversion, attr);
         if (!didIt) {
           if (DEBUG_ATTACH && allSucceeded) {
-            logger.info("not attaching audio\t" + attr.getUniqueID() + " to\t" + firstExercise.getID() +
+            logger.info("not attaching audio\t" + attr.getUniqueID() + " to\t" + firstExercise.getOldID() +
                 "\tsince transcript has changed : old '" + attr.getTranscript() +
                 "' vs new '" + firstExercise.getForeignLanguage() +
                 "'");
@@ -276,7 +276,7 @@ public abstract class BaseAudioDAO extends DAO {
       return true;
     } else {
 /*
-      logger.info("not attaching audio " + attr.getUniqueID() + " to " + firstExercise.getID() + " since transcript has changed. Audio '" +
+      logger.info("not attaching audio " + attr.getUniqueID() + " to " + firstExercise.getOldID() + " since transcript has changed. Audio '" +
           attr.getTranscript()+
           "' vs exercise '" +foreignLanguage+
           "'");
@@ -334,7 +334,7 @@ public abstract class BaseAudioDAO extends DAO {
   public Map<String, Float> getRecordedReport(Map<Integer, User> userMapMales,
                                               Map<Integer, User> userMapFemales,
                                               float total,
-                                              Set<String> uniqueIDs,
+                                              Set<Integer> uniqueIDs,
                                               float totalContext) {
     Set<Integer> maleIDs = userMapMales.keySet();
     maleIDs = new HashSet<>(maleIDs);
@@ -369,7 +369,7 @@ public abstract class BaseAudioDAO extends DAO {
     return report;
   }
 
-  abstract int getCountForGender(Set<Integer> userIds, String audioSpeed, Set<String> uniqueIDs);
+  abstract int getCountForGender(Set<Integer> userIds, String audioSpeed, Set<Integer> uniqueIDs);
 
   /**
    * Items that are recorded must have both regular and slow speed audio.
@@ -456,7 +456,7 @@ public abstract class BaseAudioDAO extends DAO {
    * @see #addOrUpdate
    */
   protected AudioAttribute getAudioAttribute(int i,
-                                             int userid, String audioRef, String exerciseID, long timestamp,
+                                             int userid, String audioRef, int exerciseID, long timestamp,
                                              AudioType audioType, long durationInMillis, String transcript) {
     MiniUser miniUser = userDAO.getMiniUser(userid);
 
@@ -523,10 +523,10 @@ public abstract class BaseAudioDAO extends DAO {
         (int) attr.getDurationInMillis(), BaseAudioDAO.UNKNOWN);
   }
 
-  abstract void addOrUpdateUser(int userid, String exerciseID, AudioType audioType, String audioRef, long timestamp,
+  abstract void addOrUpdateUser(int userid, int exerciseID, AudioType audioType, String audioRef, long timestamp,
                                 int durationInMillis, String transcript);
 
-  abstract int markDefect(int userid, String exerciseID, AudioType audioType);
+  abstract int markDefect(int userid, int exerciseID, AudioType audioType);
 
   boolean isBadUser(int userid) {
     return userid < BaseUserDAO.DEFAULT_FEMALE_ID;
@@ -545,6 +545,13 @@ public abstract class BaseAudioDAO extends DAO {
 
   abstract Set<String> getAudioExercisesForGender(Collection<Integer> userIDs, String audioSpeed);
 
+/*
+  int getCountBothSpeeds(Set<Integer> userIds,
+                         Set<String> uniqueIDs) {
+    return getCountBothSpeeds(userIds, uniqueIDs);
+  }
+*/
+
   abstract int getCountBothSpeeds(Set<Integer> userIds,
-                                  Set<String> uniqueIDs);
+                                  Set<Integer> uniqueIDs);
 }

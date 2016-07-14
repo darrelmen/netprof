@@ -58,7 +58,7 @@ public class AttachAudio {
 	private final int audioOffset;
 	private final String mediaDir, mediaDir1;
 	private final File installPath;
-	private Map<String, List<AudioAttribute>> exToAudio;
+	private Map<Integer, List<AudioAttribute>> exToAudio;
 
 	/**
 	 * @param mediaDir
@@ -72,7 +72,7 @@ public class AttachAudio {
 										 String mediaDir1,
 										 File installPath,
 										 int audioOffset,
-										 Map<String, List<AudioAttribute>> exToAudio) {
+										 Map<Integer, List<AudioAttribute>> exToAudio) {
 		this.mediaDir = mediaDir;
 		this.mediaDir1 = mediaDir1;
 		this.installPath = installPath;
@@ -93,7 +93,7 @@ public class AttachAudio {
 	 * @see ExcelImport#getExercise
 	 */
 	public <T extends AudioExercise> void addOldSchoolAudio(String refAudioIndex, T imported) {
-		String id = imported.getID();
+		String id = imported.getOldID();
 		String audioDir = refAudioIndex.length() > 0 ? findBest(refAudioIndex) : id;
 		if (audioOffset != 0) {
 			audioDir = "" + (Integer.parseInt(audioDir.trim()) + audioOffset);
@@ -136,7 +136,7 @@ public class AttachAudio {
 	 * @see ExcelImport#getRawExercises()
 	 */
 	public <T extends CommonExercise> int attachAudio(T imported, Collection<String> transcriptChanged) {
-		String id = imported.getID();
+		String id = imported.getOldID();
 		int missing = 0;
 		if (exToAudio.containsKey(id) || exToAudio.containsKey(id + "/1") || exToAudio.containsKey(id + "/2")) {
 			List<AudioAttribute> audioAttributes = exToAudio.get(id);
@@ -162,7 +162,7 @@ public class AttachAudio {
 		if (audioAttributes == null) {
 			missingExerciseCount++;
 			if (missingExerciseCount < 10) {
-				String id = imported.getID();
+				String id = imported.getOldID();
 				logger.error("attachAudio can't find " + id);
 			}
 		} else if (!audioAttributes.isEmpty()) {
@@ -189,7 +189,7 @@ public class AttachAudio {
 
 						if (audio.isContextAudio()) {
 							Collection<CommonExercise> directlyRelated = imported.getDirectlyRelated();
-							if (directlyRelated.isEmpty()) logger.warn("huh? no context exercise on " +imported.getID());
+							if (directlyRelated.isEmpty()) logger.warn("huh? no context exercise on " +imported.getOldID());
 							else {
 								if (directlyRelated.size() == 1) {
 									audio.setAudioRef(child);   // remember to prefix the path
@@ -209,7 +209,7 @@ public class AttachAudio {
 							}*/
 						}
 						previouslyAttachedAudio.add(child);
-//            logger.debug("imported " +imported.getID()+ " now " + imported.getAudioAttributes());
+//            logger.debug("imported " +imported.getOldID()+ " now " + imported.getAudioAttributes());
 					} else {
 						logger.debug("skipping " + child);
 					}
@@ -243,7 +243,7 @@ public class AttachAudio {
 		return wavPath.replaceAll("\\\\", "/");
 	}
 
-	public void setExToAudio(Map<String, List<AudioAttribute>> exToAudio) {
+	public void setExToAudio(Map<Integer, List<AudioAttribute>> exToAudio) {
 		this.exToAudio = exToAudio;
 	}
 }

@@ -82,7 +82,7 @@ public class SlickUserExerciseDAO
 
     return new SlickExercise(-1,
         shared.getCreator(),
-        shared.getID(),
+        shared.getOldID(),
         new Timestamp(shared.getUpdateTime()),
         shared.getEnglish(),
         shared.getMeaning(),
@@ -93,7 +93,7 @@ public class SlickUserExerciseDAO
         unitToValue.getOrDefault(second, ""),
         projectID,  // project id fk
         false, false,
-        shared.getRealID());
+        shared.getID());
   }
 
   /**
@@ -137,7 +137,7 @@ public class SlickUserExerciseDAO
 
     return new SlickExercise(-1,
         creator,
-        shared.getID(),
+        shared.getOldID(),
         new Timestamp(shared.getUpdateTime()),
         shared.getEnglish(),
         shared.getMeaning(),

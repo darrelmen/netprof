@@ -35,60 +35,81 @@ package mitll.langtest.server.database.annotation;
 import java.util.Date;
 
 public class UserAnnotation {
-  private final String exerciseID;
+  private final int exerciseID;
   private final String field;
   private final String status;
   private final String comment;
   private long creatorID;
   private long timestamp;
+  private String oldExID;
+
+
+  public UserAnnotation(int exerciseID, String field, String status, String comment, long userID, long timestamp) {
+    this(exerciseID, field, status, comment, userID, timestamp, "" + exerciseID);
+  }
 
   /**
-   * @paramx uniqueID
    * @param exerciseID
    * @param field
    * @param status
    * @param comment
    * @param userID
    * @param timestamp
+   * @param oldExID
+   * @paramx uniqueID
    * @see AnnotationDAO#getUserAnnotations(String)
    */
-  public UserAnnotation(String exerciseID, String field, String status, String comment, long userID, long timestamp) {
+  public UserAnnotation(int exerciseID, String field, String status, String comment, long userID, long timestamp, String oldExID) {
     this.exerciseID = exerciseID;
     this.field = field;
     this.status = status;
     this.comment = comment;
     this.creatorID = userID;
     this.timestamp = timestamp;
+    this.oldExID = oldExID;
   }
 
-  public String getExerciseID() {
+  public int getExerciseID() {
     return exerciseID;
   }
+
   public String getField() {
     return field;
   }
+
   public String getStatus() {
     return status;
   }
+
   public String getComment() {
     return comment;
   }
+
   public long getCreatorID() {
     return creatorID;
   }
+
   public long getTimestamp() {
     return timestamp;
   }
+
   public void setTimestamp(long timestamp) {
     this.timestamp = timestamp;
   }
 
-  public String toString() {
-    return "Annotation " + getExerciseID() + "/" + getField() + " : " + getStatus() + "/" + getComment() +
-      " by " + getCreatorID() + " at " + new Date(getTimestamp());
-  }
-
   public void setCreatorID(Integer creatorID) {
     this.creatorID = (long) creatorID;
+  }
+
+  public String toString() {
+    return "Annotation " + getExerciseID() + "/" + getField() +
+        " : " + getStatus() +
+        "/" + getComment() +
+        " by " + getCreatorID() +
+        " at " + new Date(getTimestamp());
+  }
+
+  public String getOldExID() {
+    return oldExID;
   }
 }

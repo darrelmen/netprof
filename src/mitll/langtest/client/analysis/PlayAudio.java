@@ -117,7 +117,7 @@ class PlayAudio {
               playLastThenRef(correctAndScore, refAudio);
             } else {
               playUserAudio(correctAndScore);
-              //   logger.info("no ref audio for " + commonExercise.getID());
+              //   logger.info("no ref audio for " + commonExercise.getOldID());
             }
           }
         }

@@ -154,7 +154,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
   private Button makeGroupButton(ButtonGroup buttonGroup,String title) {
     Button onButton = new Button(title);
     onButton.getElement().setId(FEEDBACK+"_"+title);
-    controller.register(onButton, exercise.getID());
+    controller.register(onButton, exercise.getOldID());
     buttonGroup.add(onButton);
     return onButton;
   }
@@ -182,7 +182,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
     }
   //  logger.info("called  addRecordingAndFeedbackWidgets ");
     // add answer widget to do the recording
-  //  String exerciseID = exerciseID.getID();
+  //  String exerciseID = exerciseID.getOldID();
     Widget answerAndRecordButtonRow = getAnswerAndRecordButtonRow(exerciseID, service, controller);
     toAddTo.add(answerAndRecordButtonRow);
 
@@ -395,7 +395,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
 
     String feedback = "";
     if (badAudioRecording) {
-      controller.logEvent(button, "Button", exercise.getID(), "bad recording");
+      controller.logEvent(button, "Button", exercise.getOldID(), "bad recording");
       putBackText();
       if (!realRecordButton.checkAndShowTooLoud(result.getValidity())) {
         //logger.info("receivedAudioAnswer: show popup for " + result.getValidity());
@@ -408,10 +408,10 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
       String heard = result.getDecodeOutput();
 
       if (correct) {
-        controller.logEvent(button, "Button", exercise.getID(), "correct response - score " + round);
+        controller.logEvent(button, "Button", exercise.getOldID(), "correct response - score " + round);
         showCorrectFeedback(score, heard);
       } else {   // incorrect!!
-        controller.logEvent(button, "Button", exercise.getID(), "incorrect response - score " + round);
+        controller.logEvent(button, "Button", exercise.getOldID(), "incorrect response - score " + round);
         feedback = showIncorrectFeedback(result, score, hasRefAudio, heard);
       }
     }

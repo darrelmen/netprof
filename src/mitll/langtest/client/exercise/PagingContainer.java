@@ -180,7 +180,7 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
         if (!controller.showCompleted()) {
           return getColumnToolTip(columnText);
         } else {
-          String html = shell.getID();
+          String html = ""+shell.getID();
           if (columnText != null) {
             columnText = truncate(columnText);
             STATE state = shell.getState();
@@ -263,9 +263,9 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
    * @return
    */
   private String getEnglishText(CommonShell shell) {
-//    logger.info("getEnglishText " + shell.getID() + " en " + shell.getEnglish() + " fl " + shell.getForeignLanguage() + " mn " + shell.getMeaning());
+//    logger.info("getEnglishText " + shell.getOldID() + " en " + shell.getEnglish() + " fl " + shell.getForeignLanguage() + " mn " + shell.getMeaning());
     String s = english && !shell.getEnglish().equals(EditItem.NEW_ITEM) ? shell.getForeignLanguage() : shell.getEnglish();
-    if (s.isEmpty()) s = shell.getID();
+    if (s.isEmpty()) s = ""+shell.getID();
     return s;
   }
 
@@ -280,7 +280,7 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
       String meaning = shell.getMeaning();
       toShow = meaning.isEmpty() ? shell.getEnglish() : meaning;
     }
-    if (toShow.isEmpty()) toShow = shell.getID();
+    if (toShow.isEmpty()) toShow = ""+shell.getID();
     return toShow;
   }
 }

@@ -45,7 +45,7 @@ public class CorrectAndScore implements IsSerializable, Comparable<CorrectAndSco
   private int uniqueID;
   private int userid;
 
-  private String id;
+  private int exid;
   /**
    * For AMAS
    */
@@ -88,10 +88,10 @@ public class CorrectAndScore implements IsSerializable, Comparable<CorrectAndSco
    * @param path
    * @param scoreJson
    */
-  public CorrectAndScore(int uniqueID, int userid, String exerciseID, boolean correct, float score, long timestamp,
+  public CorrectAndScore(int uniqueID, int userid, int exerciseID, boolean correct, float score, long timestamp,
                          String path, String scoreJson) {
     this.uniqueID = uniqueID;
-    this.id = exerciseID;
+    this.exid = exerciseID;
     this.userid = userid;
     this.correct = correct;
     this.score = score;
@@ -120,8 +120,8 @@ public class CorrectAndScore implements IsSerializable, Comparable<CorrectAndSco
     return Math.round(100f * score);
   }
 
-  public String getId() {
-    return id;
+  public int getExid() {
+    return exid;
   }
 
   public long getTimestamp() {
@@ -151,12 +151,14 @@ public class CorrectAndScore implements IsSerializable, Comparable<CorrectAndSco
   public float getUserScore() {
     return userScore;
   }
+/*
   public float getClassifierScore() {
     return classifierScore;
   }
+*/
 
 
   public String toString() {
-    return "id " + getId() + " " + (isCorrect() ? "C" : "I") + " score " + getPercentScore();
+    return "id " + getExid() + " " + (isCorrect() ? "C" : "I") + " score " + getPercentScore();
   }
 }

@@ -272,7 +272,7 @@ public class AudioExport {
 
       int j = 0;
 
-      row.createCell(j++).setCellValue(exercise.getID());
+      row.createCell(j++).setCellValue(exercise.getOldID());
 
       // logger.warn("English " + exercise.getEnglish() + " getMeaning " + exercise.getMeaning() + " getForeignLanguage " + exercise.getForeignLanguage() + " ref " + exercise.getRefSentence());
 
@@ -308,7 +308,7 @@ public class AudioExport {
       }
 
       if (isDefectList) {
-//        logger.debug("annos for " + exercise.getID() + "\tfields : " + exercise.getFieldToAnnotation());
+//        logger.debug("annos for " + exercise.getOldID() + "\tfields : " + exercise.getFieldToAnnotation());
         ExerciseAnnotation annotation = exercise.getAnnotation("english");
         row.createCell(j++).setCellValue(annotation == null || annotation.isCorrect() ? "" : annotation.getComment());
 
@@ -324,18 +324,18 @@ public class AudioExport {
         row.createCell(j++).setCellValue(annotation == null || annotation.isCorrect() ? "" : annotation.getComment());
 
         Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(true, preferredVoices);
-//        logger.debug("for ex " + exercise.getID() + " males " + malesMap);
+//        logger.debug("for ex " + exercise.getOldID() + " males " + malesMap);
 //        if (malesMap.isEmpty()) {
-//          logger.debug("ex " + exercise.getID() + " males   " + exercise.getUserMap(true));
+//          logger.debug("ex " + exercise.getOldID() + " males   " + exercise.getUserMap(true));
 //        }
         Collection<AudioAttribute> defaultUserAudio = exercise.getDefaultUserAudio();
 
         addColsForGender(exercise, row, j, malesMap, exercise.getSortedUsers(malesMap), defaultUserAudio);
 
         Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false, preferredVoices);
-//        logger.debug("for ex " + exercise.getID() + " females " + femalesMap);
+//        logger.debug("for ex " + exercise.getOldID() + " females " + femalesMap);
 //        if (femalesMap.isEmpty()) {
-//          logger.debug("ex " + exercise.getID() + " females " + exercise.getUserMap(false));
+//          logger.debug("ex " + exercise.getOldID() + " females " + exercise.getUserMap(false));
 //        }
 
         addColsForGender(exercise, row, j, femalesMap, exercise.getSortedUsers(femalesMap), defaultUserAudio);
@@ -357,7 +357,7 @@ public class AudioExport {
       row.createCell(j++).setCellValue("");//sCorrect() ? "":annotation.getComment());
     } else {
       Collection<AudioAttribute> audioAttributes = maleUsers.isEmpty() ? defaultUserAudio : malesMap.get(maleUsers.iterator().next());
-//      logger.debug("for ex " + exercise.getID() + " first male " + maleUsers.get(0) +  " = " + audioAttributes);
+//      logger.debug("for ex " + exercise.getOldID() + " first male " + maleUsers.get(0) +  " = " + audioAttributes);
       if (audioAttributes == null || audioAttributes.isEmpty()) audioAttributes = defaultUserAudio;
       addColsForAudio(exercise, row, j, audioAttributes);
     }
@@ -367,7 +367,7 @@ public class AudioExport {
                                Collection<AudioAttribute> audioAttributes) {
     AudioAttribute regAttr = null;
     AudioAttribute slowAttr = null;
-    if (audioAttributes.isEmpty()) logger.debug("huh? no audio for " + exercise.getID());
+    if (audioAttributes.isEmpty()) logger.debug("huh? no audio for " + exercise.getOldID());
     for (final AudioAttribute audioAttribute : audioAttributes) {
       if (audioAttribute.isRegularSpeed()) {
         regAttr = audioAttribute;
@@ -533,7 +533,7 @@ public class AudioExport {
     int numAttach = 0;
     Map<String, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
     for (CommonExercise ex : toWrite) {
-      Collection<AudioAttribute> audioAttributes = exToAudio.get(ex.getID());
+      Collection<AudioAttribute> audioAttributes = exToAudio.get(ex.getOldID());
       if (audioAttributes != null) {
         audioDAO.attachAudio(ex, installPath, relativeConfigDir1, audioAttributes);
         numAttach++;
@@ -561,7 +561,7 @@ public class AudioExport {
           if (recording != null) {
             // logger.debug("found " + recording + " by " + recording.getUser());
             String name = overallName + File.separator + getUniqueName(ex, !isEnglish);
-            copyAudio(zOut, names, name, speed, installPath, audioConversion, recording, ex.getID(), ex.getForeignLanguage());
+            copyAudio(zOut, names, name, speed, installPath, audioConversion, recording, ex.getOldID(), ex.getForeignLanguage());
             someAudio = true;
           }
         }
@@ -581,7 +581,7 @@ public class AudioExport {
 
       if (!someAudio) {
         if (numMissing < 10) {
-          logger.debug("no audio for exercise " + ex.getID());
+          logger.debug("no audio for exercise " + ex.getOldID());
         }
         numMissing++;
       }
@@ -608,7 +608,7 @@ public class AudioExport {
     int numAttach = 0;
     Map<String, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
     for (CommonExercise ex : toWrite) {
-      Collection<AudioAttribute> audioAttributes = exToAudio.get(ex.getID());
+      Collection<AudioAttribute> audioAttributes = exToAudio.get(ex.getOldID());
       if (audioAttributes != null) {
         audioDAO.attachAudio(ex, installPath, relativeConfigDir1, audioAttributes);
         numAttach++;
@@ -702,10 +702,10 @@ public class AudioExport {
         builder.append("_");
       }
       builder.append("e");
-      builder.append(ex.getID());
+      builder.append(ex.getOldID());
       name = folder + builder.toString();
     }
-    copyAudio(zOut, names, name, speed == null ? "" : speed, installPath, audioConversion, latestContext, ex.getID(),
+    copyAudio(zOut, names, name, speed == null ? "" : speed, installPath, audioConversion, latestContext, ex.getOldID(),
         ex.getForeignLanguage());
   }
 

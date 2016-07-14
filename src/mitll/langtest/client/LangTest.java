@@ -628,7 +628,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   @Override
   public void logEvent(UIObject button, String widgetType, Shell ex, String context) {
-    buttonFactory.logEvent(button, widgetType, new EventContext(ex.getID(), context, getUser()));
+    buttonFactory.logEvent(button, widgetType, new EventContext(ex.getOldID(), context, getUser()));
   }
 
   @Override
@@ -641,6 +641,13 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     buttonFactory.logEvent(button, widgetType, new EventContext(exid, context, getUser()));
   }
 
+  /**
+   * TODO : consider exid as an int
+   * @param widgetID
+   * @param widgetType
+   * @param exid
+   * @param context
+   */
   void logEvent(String widgetID, String widgetType, String exid, String context) {
     buttonFactory.logEvent(widgetID, widgetType, new EventContext(exid, context, getUser()));
   }

@@ -554,7 +554,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
    * @return
    */
   @Override
-  public boolean loadByID(String id) {
+  public boolean loadByID(int id) {
    // logger.info("loadByID loading exercise " + id);
     if (hasExercise(id)) {
       //  logger.info("loadByID found exercise " + id);

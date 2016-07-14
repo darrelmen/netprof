@@ -41,9 +41,10 @@ import java.util.Collection;
 import java.util.List;
 
 public interface IRefResultDAO  extends IDAO {
-  boolean removeForExercise(String exid);
+  boolean removeForExercise(int exid);
 
-  long addAnswer(int userID, String id,
+  long addAnswer(int userID,
+                 int exid,
                  String audioFile,
                  long durationInMillis,
                  boolean correct,
@@ -60,9 +61,9 @@ public interface IRefResultDAO  extends IDAO {
 
   List<Result> getResults();
 
-  Result getResult(String exid, String answer);
+  Result getResult(int exid, String answer);
 
-  JSONObject getJSONScores(Collection<String> ids);
+  JSONObject getJSONScores(Collection<Integer> ids);
 
   int getNumResults();
 }

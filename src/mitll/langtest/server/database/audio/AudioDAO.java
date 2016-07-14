@@ -139,7 +139,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
                 ) {
               audio.setTranscript(context);
               toUpdate.add(audio);
-              logger.info("context update " + exercise.getID() + "/" + audio.getUniqueID() + " to " + context);
+              logger.info("context update " + exercise.getOldID() + "/" + audio.getUniqueID() + " to " + context);
             }
           }
         }
@@ -150,7 +150,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
               (!fl.isEmpty() && !fl.equals(transcript))
               ) {
             audio.setTranscript(fl);
-            logger.info("update " + exercise.getID() + "/" +audio.getUniqueID()+" to " + fl + " from " + exercise.getEnglish());
+            logger.info("update " + exercise.getOldID() + "/" +audio.getUniqueID()+" to " + fl + " from " + exercise.getEnglish());
 
             toUpdate.add(audio);
           }
@@ -303,10 +303,11 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
    *
    * @param userIds
    * @param audioSpeed
+   * @param uniqueIDs
    * @return
    * @see #getRecordedReport
    */
-  protected int getCountForGender(Set<Integer> userIds, String audioSpeed, Set<String> uniqueIDs) {
+  protected int getCountForGender(Set<Integer> userIds, String audioSpeed, Set<Integer> uniqueIDs) {
     Set<String> idsOfRecordedExercises = new HashSet<>();
 
     Set<String> idsOfStaleExercises = new HashSet<>();
@@ -350,7 +351,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @return
    */
   protected int getCountBothSpeeds(Set<Integer> userIds,
-                                 Set<String> uniqueIDs) {
+                                   Set<Integer> uniqueIDs) {
     Set<String> results = new HashSet<>();
 
     try {
@@ -567,7 +568,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable
    * @see #addOrUpdateUser(int, AudioAttribute)
    */
-  protected void addOrUpdateUser(int userid, String exerciseID, AudioType audioType, String audioRef, long timestamp,
+  protected void addOrUpdateUser(int userid, int exerciseID, AudioType audioType, String audioRef, long timestamp,
                                  int durationInMillis, String transcript) {
     if (isBadUser(userid)) {
       logger.error("huh? userid is " + userid);
@@ -723,7 +724,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @see mitll.langtest.server.database.DatabaseImpl#editItem
    * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#postEditItem
    */
-  protected int markDefect(int userid, String exerciseID, AudioType audioType) {
+  protected int markDefect(int userid, int exerciseID, AudioType audioType) {
     try {
       Connection connection = database.getConnection(this.getClass().toString());
       String sql = "UPDATE " + AUDIO +
