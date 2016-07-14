@@ -33,7 +33,7 @@
 package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.database.custom.UserListManager;
+import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.npdata.dao.SlickRelatedExercise;
@@ -44,14 +44,14 @@ import java.util.*;
 public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<CommonExercise> {
   private static final Logger logger = Logger.getLogger(DBExerciseDAO.class);
   // private final Collection<String> typeOrder;
-  SlickUserExerciseDAO userExerciseDAO;
+  private SlickUserExerciseDAO userExerciseDAO;
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#makeDAO
    */
   public DBExerciseDAO(
       ServerProperties serverProps,
-      UserListManager userListManager,
+      IUserListManager userListManager,
       boolean addDefects,
       SlickUserExerciseDAO userExerciseDAO) {
     super(serverProps, userListManager, addDefects);
@@ -77,7 +77,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 
       Map<Integer, CommonExercise> idToEx = new HashMap<>();
       for (CommonExercise ex : allExercises) {
-        idToEx.put(ex.getRealID(), ex);
+        idToEx.put(ex.getID(), ex);
       }
 
       for (SlickRelatedExercise relatedExercise : related) {

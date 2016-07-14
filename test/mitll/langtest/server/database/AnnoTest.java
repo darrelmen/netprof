@@ -53,23 +53,22 @@ public class AnnoTest extends BaseTest {
 
     IAnnotationDAO annotationDAO = spanish.getAnnotationDAO();
 
-    Collection<String> exids = annotationDAO.getAudioAnnos();
+    Collection<Integer> exids = annotationDAO.getAudioAnnos();
     int size = exids.size();
-    String first = exids.iterator().next();
+    Integer first = exids.iterator().next();
     logger.info("got " + size + " first " + first);
-    for (String exid : exids) logger.info("got " + exid);
+    for (Integer exid : exids) logger.info("got " + exid);
 
-    Set<String> incorrectAnnotations = annotationDAO.getExercisesWithIncorrectAnnotations();
+    Set<Integer> incorrectAnnotations = annotationDAO.getExercisesWithIncorrectAnnotations();
     logger.info("incorrect : got " + incorrectAnnotations.size() + " first " + incorrectAnnotations.iterator().next());
-
 
     AnnotationDAO dao = new AnnotationDAO(spanish, new UserDAO(spanish));
 
-    Collection<String> audioAnnos = dao.getAudioAnnos();
+    Collection<Integer> audioAnnos = dao.getAudioAnnos();
     logger.info("got " + audioAnnos.size() + " first " + audioAnnos.iterator().next());
-    for (String exid : audioAnnos) logger.info("truth " + exid);
+    for (Integer exid : audioAnnos) logger.info("truth " + exid);
 
-    Set<String> incorrectAnnotations2 = dao.getExercisesWithIncorrectAnnotations();
+    Set<Integer> incorrectAnnotations2 = dao.getExercisesWithIncorrectAnnotations();
     logger.info("incorrect truth: got " + incorrectAnnotations2.size() + " first " + incorrectAnnotations2.iterator().next());
   }
 
@@ -78,12 +77,12 @@ public class AnnoTest extends BaseTest {
     DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
 
     IAnnotationDAO annotationDAO = spanish.getAnnotationDAO();
-    Set<String> incorrectAnnotations = annotationDAO.getExercisesWithIncorrectAnnotations();
+    Set<Integer> incorrectAnnotations = annotationDAO.getExercisesWithIncorrectAnnotations();
     logger.info("incorrect : got " + incorrectAnnotations.size() + " first " + incorrectAnnotations.iterator().next());
 
     AnnotationDAO dao = new AnnotationDAO(spanish, new UserDAO(spanish));
 
-    Set<String> incorrectAnnotations2 = dao.getExercisesWithIncorrectAnnotations();
+    Set<Integer> incorrectAnnotations2 = dao.getExercisesWithIncorrectAnnotations();
     logger.info("incorrect truth: got " + incorrectAnnotations2.size() + " first " + incorrectAnnotations2.iterator().next());
   }
 
@@ -92,20 +91,17 @@ public class AnnoTest extends BaseTest {
     DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
 
     IAnnotationDAO annotationDAO = spanish.getAnnotationDAO();
-    Map<String, ExerciseAnnotation> latestByExerciseID = annotationDAO.getLatestByExerciseID("1");
+    Map<String, ExerciseAnnotation> latestByExerciseID = annotationDAO.getLatestByExerciseID(1);
     logger.info("incorrect : got " + latestByExerciseID.size() + " first " + latestByExerciseID);
 
     AnnotationDAO dao = new AnnotationDAO(spanish, new UserDAO(spanish));
 
-    Map<String, ExerciseAnnotation> latestByExerciseID2 =  dao.getLatestByExerciseID("1");
+    Map<String, ExerciseAnnotation> latestByExerciseID2 =  dao.getLatestByExerciseID(1);
     logger.info("incorrect truth: got " + latestByExerciseID2.size() + " first " + latestByExerciseID2);
   }
-
 
   @Test
   public void testAnswerDAO() {
     DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
   }
-
-
 }

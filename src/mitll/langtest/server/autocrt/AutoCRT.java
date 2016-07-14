@@ -196,7 +196,7 @@ public class AutoCRT {
    */
   public void getAutoCRTDecodeOutput(AmasExerciseImpl exercise, int questionID, File audioFile, AudioAnswer answer,
                                      boolean useCache) {
-    String exerciseID = exercise.getID();
+    String exerciseID = exercise.getOldID();
     PretestScore asrScoreForAudio = getScoreForAudio(exercise, exerciseID, questionID, audioFile, useCache);
     if (asrScoreForAudio == null) {
       logger.error("can't find pretest for " + exerciseID + "/" + questionID);
@@ -216,7 +216,7 @@ public class AutoCRT {
    */
   private void markCorrectnessOnAnswer(AmasExerciseImpl exercise, int questionID, PretestScore asrScoreForAudio,
                                        AudioAnswer answer) {
-    String exerciseID = exercise.getID();
+    String exerciseID = exercise.getOldID();
     String recoSentence = asrScoreForAudio.getRecoSentence();
     boolean lowPronScore = asrScoreForAudio.getHydecScore() < minPronScore;
     boolean matchedUnknown = recoSentence.equals(SLFFile.UNKNOWN_MODEL);
@@ -314,7 +314,7 @@ public class AutoCRT {
     for (String answer : q.getAlternateAnswers()) {
       String removed = removePunct(answer.trim());
       if (answer.trim().isEmpty() || removed.isEmpty()) {
-        logger.warn("huh? alternate answer is empty??? for " + q + " in " + exercise.getID());
+        logger.warn("huh? alternate answer is empty??? for " + q + " in " + exercise.getOldID());
         logger.warn("exercise " + exercise);
       } else {
 //        if (answer.length() < MIN_LENGTH) {
@@ -345,12 +345,12 @@ public class AutoCRT {
 
     // log what happened
     if (answer.isCorrect()) {
-      logger.info("correct response for exercise #" + commonExercise.getID() +
+      logger.info("correct response for exercise #" + commonExercise.getOldID() +
           " reco sentence was '" + answer.getDecodeOutput() + "' vs " + "'" + foregroundSentences + "' " +
           "pron score was " + answer.getScore() + " answer " + answer);
     } else {
       int length = foregroundSentences.isEmpty() ? 0 : foregroundSentences.iterator().next().length();
-      logger.info("getFlashcardAnswer : incorrect response for exercise #" + commonExercise.getID() +
+      logger.info("getFlashcardAnswer : incorrect response for exercise #" + commonExercise.getOldID() +
           " reco sentence was '" + answer.getDecodeOutput() + "' (" + answer.getDecodeOutput().length() +
           ") vs " + "'" + foregroundSentences + "' (" + length +
           ") pron score was " + answer.getScore());
@@ -532,7 +532,7 @@ public class AutoCRT {
    */
   public CRTScores getScoreForExercise(AmasExerciseImpl exercise, int questionID, String answer, float expectedGrade) {
     getClassifier();
-    String id = exercise.getID();
+    String id = exercise.getOldID();
     String key = id + "_" + questionID;
     ExerciseExport exerciseExport = getExportForExercise(key);
 

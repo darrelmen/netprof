@@ -41,6 +41,6 @@ package mitll.langtest.shared;
 public interface UserAndTime {
   int getUserid();
   long getTimestamp();
-  String getExid();
+  int getExid();
   String getID();
 }

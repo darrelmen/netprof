@@ -4,7 +4,6 @@ import mitll.langtest.server.database.IDAO;
 import mitll.langtest.shared.analysis.PhoneReport;
 import net.sf.json.JSONObject;
 
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Map;
 
@@ -14,7 +13,7 @@ import java.util.Map;
 public interface IPhoneDAO<T>  extends IDAO {
   boolean addPhone(T phone);
 
-  JSONObject getWorstPhonesJson(long userid, Collection<String> exids, Map<String, String> idToRef);
+  JSONObject getWorstPhonesJson(long userid, Collection<Integer> exids, Map<Integer, String> idToRef);
 
-  PhoneReport getWorstPhonesForResults(long userid, Collection<Integer> ids, Map<String, String> idToRef);
+  PhoneReport getWorstPhonesForResults(long userid, Collection<Integer> ids, Map<Integer, String> idToRef);
 }

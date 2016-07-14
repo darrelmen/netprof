@@ -34,7 +34,7 @@ package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.HTTPClient;
-import mitll.langtest.server.database.custom.UserListManager;
+import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
 import net.sf.json.JSONArray;
@@ -64,7 +64,7 @@ public class JSONURLExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<C
    */
   public JSONURLExerciseDAO(
       ServerProperties serverProps,
-      UserListManager userListManager,
+      IUserListManager userListManager,
       boolean addDefects) {
     super(serverProps, userListManager, addDefects);
     this.typeOrder = serverProps.getTypes();

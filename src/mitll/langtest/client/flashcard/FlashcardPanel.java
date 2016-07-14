@@ -162,7 +162,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
     //  logger.info("Adding recording widgets to " + inner2.getElement().getId());
     Scheduler.get().scheduleDeferred(new Command() {
       public void execute() {
-        addRecordingAndFeedbackWidgets(exercise.getID(), service, controller, inner2);
+        addRecordingAndFeedbackWidgets(exercise.getOldID(), service, controller, inner2);
       }
     });
 
@@ -192,7 +192,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
    * @see #FlashcardPanel
    */
   DivWidget getFirstRow(ExerciseController controller) {
-    commentBox = new CommentBox(exercise.getID(), controller, new CommentAnnotator() {
+    commentBox = new CommentBox(exercise.getOldID(), controller, new CommentAnnotator() {
       @Override
       public void addIncorrectComment(String commentToPost, String field) {
         addAnnotation(field, GoodwaveExercisePanel.INCORRECT, commentToPost);
@@ -217,14 +217,14 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
   }
 
   private void addAnnotation(final String field, final String status, final String commentToPost) {
-    service.addAnnotation(exercise.getID(), field, status, commentToPost, controller.getUser(), new AsyncCallback<Void>() {
+    service.addAnnotation(exercise.getOldID(), field, status, commentToPost, controller.getUser(), new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
       }
 
       @Override
       public void onSuccess(Void result) {
-/*        System.out.println("\t" + new Date() + " : onSuccess : posted to server " + exercise.getID() +
+/*        System.out.println("\t" + new Date() + " : onSuccess : posted to server " + exercise.getOldID() +
             " field '" + field + "' commentLabel '" + commentToPost + "' is " + status);*/
       }
     });
@@ -439,7 +439,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
 
   private Button getPrevButton() {
     final Button left = new Button();
-    controller.register(left, exercise.getID(), "prev button");
+    controller.register(left, exercise.getOldID(), "prev button");
     left.setIcon(IconType.CARET_LEFT);
     left.addStyleName("floatLeft");
     left.setSize(ButtonSize.LARGE);
@@ -475,7 +475,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
     final Button right = new Button();
     right.setIcon(IconType.CARET_RIGHT);
     new TooltipHelper().addTooltip(right, "Right Arrow Key");
-    controller.register(right, exercise.getID(), "next button");
+    controller.register(right, exercise.getOldID(), "next button");
 
     right.addStyleName("floatRight");
     right.setSize(ButtonSize.LARGE);
@@ -538,7 +538,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
   private Button getAudioOnButton(final ControlState controlState) {
     Button onButton = new Button(ON);
     onButton.getElement().setId(PLAY + "_On");
-    controller.register(onButton, exercise.getID());
+    controller.register(onButton, exercise.getOldID());
 
     onButton.addClickHandler(new ClickHandler() {
       @Override
@@ -563,7 +563,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
       }
     });
     offButton.setActive(!controlState.isAudioOn());
-    controller.register(offButton, exercise.getID());
+    controller.register(offButton, exercise.getOldID());
     return offButton;
   }
 
@@ -587,7 +587,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
   private Button getOn(final ControlState controlState) {
     Button onButton = new Button(controller.getLanguage());
     onButton.getElement().setId("Show_On_" + controller.getLanguage());
-    controller.register(onButton, exercise.getID());
+    controller.register(onButton, exercise.getOldID());
 
     onButton.addClickHandler(new ClickHandler() {
       @Override
@@ -606,7 +606,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
   private Button getOff(final ControlState controlState) {
     Button showEnglish = new Button(ENGLISH);
     showEnglish.getElement().setId("Show_English");
-    controller.register(showEnglish, exercise.getID());
+    controller.register(showEnglish, exercise.getOldID());
 
     showEnglish.addClickHandler(new ClickHandler() {
       @Override
@@ -625,7 +625,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
   private Button getBoth(final ControlState controlState) {
     Button both = new Button(BOTH);
     both.getElement().setId("Show_Both_" + controller.getLanguage() + "_and_English");
-    controller.register(both, exercise.getID());
+    controller.register(both, exercise.getOldID());
 
     both.addClickHandler(new ClickHandler() {
       @Override
@@ -863,7 +863,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
    * @see #playRef()
    */
   String getRefAudioToPlay() {
-    //System.out.println(getElement().getId() + " playing audio for " +exercise.getID());
+    //System.out.println(getElement().getId() + " playing audio for " +exercise.getOldID());
     String path = exercise.getRefAudio();
     if (path == null) {
       path = exercise.getSlowAudioRef(); // fall back to slow audio
@@ -876,7 +876,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
    * @see #playRef()
    */
   private void playRef(String path) {
-    //  System.out.println("playRef... ---------- " + exercise.getID() + " path " + path );
+    //  System.out.println("playRef... ---------- " + exercise.getOldID() + " path " + path );
     path = getPath(path);
     final Widget textWidget = isSiteEnglish() ? english : foreign;
     getSoundFeedback().queueSong(path, new SoundFeedback.EndListener() {

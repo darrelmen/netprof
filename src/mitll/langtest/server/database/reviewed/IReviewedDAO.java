@@ -39,15 +39,15 @@ import java.util.Collection;
 import java.util.Map;
 
 public interface IReviewedDAO  extends IDAO {
-  void remove(String exerciseID);
+  void remove(int exerciseID);
 
-  void setState(String exerciseID, STATE state, long creatorID);
+  void setState(int exerciseID, STATE state, long creatorID);
 
-  Map<String, StateCreator> getExerciseToState(boolean skipUnset);
+  Map<Integer, StateCreator> getExerciseToState(boolean skipUnset);
 
-  STATE getCurrentState(String exerciseID);
+  STATE getCurrentState(int exerciseID);
 
-  Collection<String> getDefectExercises();
+  Collection<Integer> getDefectExercises();
 
   int getCount();
 }

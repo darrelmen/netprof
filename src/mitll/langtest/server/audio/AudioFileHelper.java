@@ -141,7 +141,7 @@ public class AudioFileHelper implements AlignDecode {
           boolean validForeignPhrase = isInDictOrLTS(exercise);
           if (!validForeignPhrase) {
             if (count < 10) {
-              logger.error("huh? for " + exercise.getID() + " we can't parse " + exercise.getID() +
+              logger.error("huh? for " + exercise.getID() +
                   " " + exercise.getEnglish() + " fl '" + exercise.getForeignLanguage() + "'");
             }
             count++;
@@ -208,13 +208,6 @@ public class AudioFileHelper implements AlignDecode {
    * @param allowAlternates
    * @param isRefRecording
    * @return URL to audio on server and if audio is valid (not too short, etc.)
-   * @paramx user                answering the question
-   * @paramx exerciseID
-   * @paramx questionID          question within the exerciseID
-   * @paramx audioType           regular or fast then slow audio recording
-   * @paramx recordedWithFlash   true if recorded with Flash, false if via webRTC
-   * @paramx deviceType          browser or iPad or iPhone
-   * @paramx device              browser make and version or iPad unique id
    * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording()
    * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
    * @see LangTestDatabaseImpl#writeAudioFile
@@ -524,10 +517,10 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   private void logValidity(AudioContext context, File file, AudioCheck.ValidityAndDur validity) {
-    logValidity(context.getId(), context.getQuestionID(), context.getUserid(), file, validity);
+    logValidity(context.getExid(), context.getQuestionID(), context.getUserid(), file, validity);
   }
 
-  private void logValidity(String exerciseID, int questionID, int user, File file, AudioCheck.ValidityAndDur validity) {
+  private void logValidity(int exerciseID, int questionID, int user, File file, AudioCheck.ValidityAndDur validity) {
     if (!validity.isValid()) {
       logger.warn("logValidity : got invalid audio file (" + validity +
           ") user = " + user + " exerciseID " + exerciseID +
@@ -545,14 +538,6 @@ public class AudioFileHelper implements AlignDecode {
    * @param doFlashcard
    * @param useOldSchool
    * @return
-   * @paramx user
-   * @paramx exerciseID
-   * @paramx questionID
-   * @paramx audioType
-   * @paramx deviceType
-   * @paramx device
-   * @paramx recordedWithFlash
-   * @paramx isValid
    * @see #getAnswer
    */
   private AudioAnswer getAudioAnswerAlignment(CommonExercise exercise1,
@@ -762,9 +747,9 @@ public class AudioFileHelper implements AlignDecode {
    * @return
    * @see #decodeOneAttribute(CommonExercise, AudioAttribute, boolean)
    */
-  public PretestScore getAlignmentScore(CommonExercise exercise, String testAudioPath, boolean usePhoneToDisplay, boolean useOldSchool) {
+  private PretestScore getAlignmentScore(CommonExercise exercise, String testAudioPath, boolean usePhoneToDisplay, boolean useOldSchool) {
     return getASRScoreForAudio(0, testAudioPath, exercise.getForeignLanguage(), 128, 128, false,
-        false, serverProps.useScoreCache(), exercise.getID(), null, usePhoneToDisplay, useOldSchool);
+        false, serverProps.useScoreCache(), ""+exercise.getID(), null, usePhoneToDisplay, useOldSchool);
   }
 
   /**
@@ -787,12 +772,16 @@ public class AudioFileHelper implements AlignDecode {
    * @see AlignDecode#getASRScoreForAudio
    * @see mitll.langtest.client.scoring.ScoringAudioPanel#scoreAudio(String, int, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
    **/
-  public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
+  public PretestScore getASRScoreForAudio(int reqid,
+                                          String testAudioFile,
+                                          String sentence,
                                           int width, int height, boolean useScoreToColorBkg,
 
-                                          boolean decode, boolean useCache, String prefix,
+                                          boolean decode, boolean useCache,
+                                          String prefix,
                                           Result precalcResult,
-                                          boolean usePhoneToDisplay, boolean useOldSchool) {
+                                          boolean usePhoneToDisplay,
+                                          boolean useOldSchool) {
     return getASRScoreForAudio(reqid, testAudioFile, sentence, null, width, height, useScoreToColorBkg, decode,
         useCache, prefix, precalcResult, usePhoneToDisplay, useOldSchool);
   }
@@ -822,7 +811,9 @@ public class AudioFileHelper implements AlignDecode {
                                            Collection<String> lmSentences,
 
                                            int width, int height, boolean useScoreToColorBkg,
-                                           boolean decode, boolean useCache, String prefix, Result precalcResult,
+                                           boolean decode, boolean useCache,
+                                           String prefix,
+                                           Result precalcResult,
                                            boolean usePhoneToDisplay, boolean useOldSchool) {
     logger.debug("getASRScoreForAudio (" + serverProps.getLanguage() + ")" + (decode ? " Decoding " : " Aligning ") +
         "" + testAudioFile + " with sentence '" + sentence + "' req# " + reqid +

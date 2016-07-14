@@ -63,7 +63,7 @@ public abstract class Analysis extends DAO {
   protected static final String EMPTY_JSON = "{}";
   private final ParseResultJson parseResultJson;
   private final IPhoneDAO phoneDAO;
-  protected Map<String, String> exToRef;
+  protected Map<Integer, String> exToRef;
 
   /**
    * @param database
@@ -71,7 +71,7 @@ public abstract class Analysis extends DAO {
    * @see DatabaseImpl#getAnalysis()
    * @see DatabaseImpl#makeDAO(String, String, String)
    */
-  public Analysis(Database database, IPhoneDAO phoneDAO, Map<String, String> exToRef) {
+  public Analysis(Database database, IPhoneDAO phoneDAO, Map<Integer, String> exToRef) {
     super(database);
     parseResultJson = new ParseResultJson(database.getServerProps());
     this.phoneDAO = phoneDAO;

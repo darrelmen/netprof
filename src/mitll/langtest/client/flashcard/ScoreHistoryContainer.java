@@ -84,7 +84,7 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
     sorter = new ExerciseComparator(controller.getStartupInfo().getTypeOrder());
 
     for (CommonShell commonShell : allExercises) {
-      idToExercise.put(commonShell.getID(), commonShell);
+      idToExercise.put(commonShell.getOldID(), commonShell);
     }
   }
 
@@ -342,7 +342,7 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
    * @return
    */
   private String getEnglishText(CommonShell shell) {
-//    logger.info("getEnglishText " + shell.getID() + " en " + shell.getEnglish() + " fl " + shell.getForeignLanguage() + " mn " + shell.getMeaning());
+//    logger.info("getEnglishText " + shell.getOldID() + " en " + shell.getEnglish() + " fl " + shell.getForeignLanguage() + " mn " + shell.getMeaning());
     return english && !shell.getEnglish().equals(EditItem.NEW_ITEM) ? shell.getForeignLanguage() : shell.getEnglish();
   }
 

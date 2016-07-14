@@ -38,7 +38,7 @@ import mitll.langtest.server.database.annotation.AnnotationDAO;
 import mitll.langtest.server.database.annotation.SlickAnnotationDAO;
 import mitll.langtest.server.database.annotation.UserAnnotation;
 import mitll.langtest.server.database.audio.SlickAudioDAO;
-import mitll.langtest.server.database.custom.UserListManager;
+import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.instrumentation.EventDAO;
 import mitll.langtest.server.database.instrumentation.SlickEventImpl;
 import mitll.langtest.server.database.phone.Phone;
@@ -193,14 +193,16 @@ public class CopyToPostgres {
     }
   }
 
-  public Map<String, Integer> copyOnlyUserExercises(DatabaseImpl db) {
+  public Map<String, Integer> copyOnlyUserExercises(DatabaseImpl<CommonExercise> db) {
     int projectID = createProjectIfNotExists(db);
     SlickUserDAOImpl slickUserDAO = (SlickUserDAOImpl) db.getUserDAO();
     Map<Integer, Integer> oldToNewUser = copyUsers(db, slickUserDAO);
     return copyUserAndPredefExercisesAndLists(db, projectID, oldToNewUser);
   }
 
-  private Map<String, Integer> copyUserAndPredefExercisesAndLists(DatabaseImpl db, int projectID, Map<Integer, Integer> oldToNewUser) {
+  private Map<String, Integer> copyUserAndPredefExercisesAndLists(DatabaseImpl<CommonExercise> db,
+                                                                  int projectID,
+                                                                  Map<Integer, Integer> oldToNewUser) {
     Map<String, Integer> exToID = copyUserAndPredefExercises(db, oldToNewUser, projectID);
 
     SlickUserListDAO slickUserListDAO = (SlickUserListDAO) db.getUserListManager().getUserListDAO();
@@ -209,14 +211,14 @@ public class CopyToPostgres {
     Map<Integer, Integer> oldToNewUserList = slickUserListDAO.getOldToNew();
     copyUserExerciseListVisitor(db, oldToNewUser, oldToNewUserList, (SlickUserListExerciseVisitorDAO) db.getUserListManager().getVisitorDAO());
     //   copyUserExerciseListJoin(db, oldToNewUserList);
-    copyUserExListJoin(db);
+    copyUserExListJoin(db, exToID);
     return exToID;
   }
 
-  public void copyUserExListJoin(DatabaseImpl db) {
+  public void copyUserExListJoin(DatabaseImpl db, Map<String, Integer> exToInt) {
     SlickUserListDAO slickUserListDAO = (SlickUserListDAO) db.getUserListManager().getUserListDAO();
     Map<Integer, Integer> oldToNewUserList = slickUserListDAO.getOldToNew();
-    copyUserExerciseListJoin(db, oldToNewUserList);
+    copyUserExerciseListJoin(db, oldToNewUserList, exToInt);
   }
 
   public int createProjectIfNotExists(DatabaseImpl db) {
@@ -239,7 +241,7 @@ public class CopyToPostgres {
     SlickUserDAOImpl slickUserDAO = (SlickUserDAOImpl) db.getUserDAO();
 
     Iterator<String> iterator = db.getTypeOrder().iterator();
-    String firstType  = iterator.hasNext() ? iterator.next() : "";
+    String firstType = iterator.hasNext() ? iterator.next() : "";
     String secondType = iterator.hasNext() ? iterator.next() : "";
 
     String language = db.getLanguage();
@@ -367,7 +369,7 @@ public class CopyToPostgres {
         logger.error("no user " + annotation.getCreatorID());
       } else {
         annotation.setCreatorID(userID);
-        Integer realID = exToID.get(annotation.getExerciseID());
+        Integer realID = exToID.get(annotation.getOldExID());
         //annotation.setExID(realID);
         bulk.add(annotationDAO.toSlick(annotation));
       }
@@ -435,9 +437,10 @@ public class CopyToPostgres {
    * @param db
    * @param oldToNewUserList
    */
-  private void copyUserExerciseListJoin(DatabaseImpl db, Map<Integer, Integer> oldToNewUserList) {
+  private void copyUserExerciseListJoin(DatabaseImpl db, Map<Integer, Integer> oldToNewUserList,
+                                        Map<String, Integer> exToInt) {
     //if (true) {
-    UserListManager userListManager = db.getUserListManager();
+    IUserListManager userListManager = db.getUserListManager();
     IUserListExerciseJoinDAO dao = userListManager.getUserListExerciseJoinDAO();
     SlickUserListExerciseJoinDAO slickUserListExerciseJoinDAO = (SlickUserListExerciseJoinDAO) dao;
     if (slickUserListExerciseJoinDAO.isEmpty()) {
@@ -449,12 +452,15 @@ public class CopyToPostgres {
         } else {
 
           String exerciseID = join.exerciseID;
-          CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(exerciseID);
+          Integer id = exToInt.get(exerciseID);
+          CommonExercise customOrPredefExercise = null;
+          if (id == null) logger.error("Can't find " + exerciseID);
+          else customOrPredefExercise = db.getCustomOrPredefExercise(id);
 //          logger.info("Adding user exercise join : " +join.userlistid + " adding " + exerciseID + " : " +customOrPredefExercise);
           if (customOrPredefExercise == null) {
             logger.error("can't find " + exerciseID + " in " + db.getExercises().size() + " exercises");
           } else {
-            slickUserListExerciseJoinDAO.addPair(userListID, /*exerciseID,*/ customOrPredefExercise.getRealID());
+            slickUserListExerciseJoinDAO.addPair(userListID, /*exerciseID,*/ customOrPredefExercise.getID());
           }
         }
       }
@@ -539,7 +545,7 @@ public class CopyToPostgres {
     for (CommonExercise ex : db.getExercises()) {
       //     bulk.add(slickUEDAO.toSlick(ex, false, projectID, true, slickUserDAO.getImportUser(), false));
       int id = slickUEDAO.insert(slickUEDAO.toSlick(ex, false, projectID, true, importUser, false));
-      exToInt.put(ex.getID(), id);
+      exToInt.put(ex.getOldID(), id);
       for (CommonExercise context : ex.getDirectlyRelated()) {
         int contextid = slickUEDAO.insert(slickUEDAO.toSlick(context, false, projectID, true, importUser, true));
         slickUEDAO.insertRelated(id, contextid);

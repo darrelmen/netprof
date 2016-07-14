@@ -36,7 +36,7 @@ public class AnalysisTest {
     logger.warn("found " + exercises.size() + " exercises");
 
     Map<String,CommonExercise> idToEx = new HashMap<String,CommonExercise>();
-    for (CommonExercise ex : exercises) idToEx.put(ex.getID(),ex);
+    for (CommonExercise ex : exercises) idToEx.put(ex.getOldID(),ex);
 
     Map<Integer, Map<String, Result>> userToResults = ((ResultDAO)war.getResultDAO()).getUserToResults(true, war.getUserDAO());
     Map<String, Result> stringResultMap = userToResults.get(71l);
@@ -54,7 +54,7 @@ public class AnalysisTest {
   //  Map<String,CommonExercise> idToEx2 = new HashMap<String,CommonExercise>();
     List<String> exs = new ArrayList<String>();
     for (CommonExercise ex : oldExercises) {
-      String id = ex.getID();
+      String id = ex.getOldID();
       CommonExercise newEx = idToEx.get(id);
 
       if (newEx == null) {
@@ -96,7 +96,7 @@ public class AnalysisTest {
 //          exs.addExerciseToList(id);
 //        }
       }
-      //idToEx2.put(ex.getID(),ex);
+      //idToEx2.put(ex.getOldID(),ex);
     }
     logger.warn("ids " + exs);
     int c = 0;
