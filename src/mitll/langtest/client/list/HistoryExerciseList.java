@@ -100,7 +100,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
     return sectionWidgetContainer.getWidget(type);
   }
 
-  protected String getHistoryToken(String id) {
+  protected String getHistoryToken(int id) {
     return getHistoryTokenFromUIState("", id);
   }
 
@@ -111,12 +111,12 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
    * @see ExerciseList#pushNewItem(String, int)
    * @see #pushNewSectionHistoryToken()
    */
-  protected String getHistoryTokenFromUIState(String search, String id) {
+  protected String getHistoryTokenFromUIState(String search, int id) {
     String unitAndChapterSelection = sectionWidgetContainer.getHistoryToken();
 
     //logger.info("\tgetHistoryToken for " + id + " is '" +unitAndChapterSelection.toString() + "'");
     String instanceSuffix = getInstance().isEmpty() ? "" : ";" + SelectionState.INSTANCE + "=" + getInstance();
-    boolean hasItemID = id != null && id.length() > 0;
+    boolean hasItemID = id != -1;//id != null && id.length() > 0;
 
     String s = (hasItemID ? super.getHistoryTokenFromUIState(search, id) + ";" : "search=" + search + ";") +
         unitAndChapterSelection + instanceSuffix;
@@ -160,7 +160,8 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
   void pushFirstSelection(int exerciseID, String searchIfAny) {
     String token = History.getToken();
     //String idFromToken = ;
-    int exidFromToken = Integer.parseInt(getIDFromToken(token));
+ //   int exidFromToken = Integer.parseInt(getIDFromToken(token));
+    int exidFromToken = getIDFromToken(token);
 /*    if (DEBUG) logger.info("ExerciseList.pushFirstSelection : current token '" + token + "' id from token '" + idFromToken +
         "' vs new exercise " + exerciseID + " instance " + getInstance());*/
 
@@ -171,7 +172,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
     } else {
       if (DEBUG)
         logger.info("pushFirstSelection : (" + getInstance() + ") pushNewItem " + exerciseID + " vs " + exidFromToken);
-      String toUse = getValidExerciseID(exerciseID);
+      int toUse = getValidExerciseID(exerciseID);
       pushNewItem(searchIfAny, toUse);
     }
   }
@@ -181,29 +182,29 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
    * @return
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */
-  private String getIDFromToken(String token) {
+  private int getIDFromToken(String token) {
     if (token.startsWith("#item=") || token.startsWith("item=")) {
       SelectionState selectionState = new SelectionState(token, !allowPlusInURL);
       if (!selectionState.getInstance().equals(getInstance())) {
         //if (DEBUG) logger.info("got history item for another instance '" + selectionState.getInstance() + "' vs me '" + instance +"'");
       } else {
-        String item = selectionState.getItem();
+        int item = selectionState.getItem();
         // if (DEBUG) logger.info("got history item for instance '" + selectionState.getInstance() + " : '" + item+"'");
         return item;
       }
     }
-    return "";
+    return -1;
   }
 
   /**
    * @param exerciseID
-   * @see #loadExercisesUsingPrefix(Map, String, boolean, String)
+   * @see #loadExercisesUsingPrefix
    * @see ExerciseList#pushFirstSelection(int, String)
    * @see ExerciseList#pushNewItem(String, int)
    */
 
   private void checkAndAskOrFirst(int exerciseID) {
-    String toUse = getValidExerciseID(exerciseID);
+    int toUse = getValidExerciseID(exerciseID);
     if (hasExercise(toUse)) {
       checkAndAskServer(toUse);
     }
@@ -213,7 +214,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
   }
 
   private int getValidExerciseID(int exerciseID) {
-    return hasExercise(exerciseID) ? exerciseID : isEmpty() ? "" : getFirst().getID();
+    return hasExercise(exerciseID) ? exerciseID : isEmpty() ? -1 : getFirst().getID();
   }
 
   /**
@@ -304,7 +305,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
    */
   @Override
   public void gotClickOnItem(T e) {
-    loadByID(e.getOldID());
+    loadByID(e.getID());
   }
 
   public void loadExercise(int itemID) {
@@ -396,7 +397,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
     Map<String, Collection<String>> typeToSection = getSelectionState(selectionState).getTypeToSection();
 /*    logger.info("HistoryExerciseList.loadExercises : looking for " +
       "'" + prefix + "' (" + prefix.length() + " chars) in list id "+userListID + " instance " + getInstance());*/
-    loadExercisesUsingPrefix(typeToSection, prefix, onlyWithAudioAnno, "");
+    loadExercisesUsingPrefix(typeToSection, prefix, onlyWithAudioAnno, -1);
   }
 
   /**
@@ -408,7 +409,8 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
    */
   protected void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection,
                                           String prefix,
-                                          boolean onlyWithAudioAnno, String exerciseID) {
+                                          boolean onlyWithAudioAnno,
+                                          int exerciseID) {
     ExerciseListRequest request = getRequest(prefix)
         .setTypeToSelection(typeToSection)
         .setOnlyWithAudioAnno(onlyWithAudioAnno);
@@ -434,7 +436,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
         logger.info("skipping request for current list" +
             "\n" + request + " vs\n" +lastSuccessfulRequest);
       }
-      if (exerciseID != null) {
+      if (exerciseID != -1) {
         checkAndAskOrFirst(exerciseID);
       } else {
         logger.warning("Not doing anything as response to " + request);
@@ -444,7 +446,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
 
   @Override
   public void reload(Map<String, Collection<String>> typeToSection) {
-    loadExercisesUsingPrefix(typeToSection, getTypeAheadText(), false, "");
+    loadExercisesUsingPrefix(typeToSection, getTypeAheadText(), false, -1);
   }
 
   /**
