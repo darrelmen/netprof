@@ -528,8 +528,8 @@ public class ReportTest {
 
     List<CommonExercise> exercises1 = database.getExercises();
     assertTrue(!exercises1.isEmpty());
-    CommonExercise exercise = database.getCustomOrPredefExercise(next.getID());
-    assertNotNull("huh? no exercise by id " + next.getID() + "?", exercise);
+    CommonExercise exercise = database.getCustomOrPredefExercise(next.getOldID());
+    assertNotNull("huh? no exercise by id " + next.getOldID() + "?", exercise);
 
     String english = exercise.getEnglish();
     assertNotNull("huh? exercise " + exercise + " has no english?", english);
@@ -548,7 +548,7 @@ public class ReportTest {
   public UserExercise addAndDelete(User owner, UserListManager userListManager, long listid, UserList testList) {
     UserExercise english = addExercise(owner, userListManager, listid, testList);
 
-    boolean b = userListManager.deleteItemFromList(listid, english.getID(), new ArrayList<String>());
+    boolean b = userListManager.deleteItemFromList(listid, english.getOldID(), new ArrayList<String>());
     assertTrue(b);
     return english;
   }
@@ -584,7 +584,7 @@ public class ReportTest {
     UserList reviewList = userListManager.getDefectList(new ArrayList<String>());
     //userListManager.getReviewedExercises();
     //UserExercise english = addExercise(owner, userListManager, listid, testList);
-    //boolean b = userListManager.deleteItemFromList(listid, english.getID());
+    //boolean b = userListManager.deleteItemFromList(listid, english.getOldID());
     // assertTrue(b);
     //    userListManager.markApproved();
   }

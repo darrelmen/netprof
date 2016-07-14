@@ -166,7 +166,7 @@ class NewUserExercise extends BasicDialog {
     container.add(upper);
 
     makeForeignLangRow(upper);
-    final String id1 = ul.getID();
+    final String id1 = ul.getOldID();
 
     foreignLang.box.getElement().setId("NewUserExercise_ForeignLang_entry_for_list_" + id1);
 
@@ -313,7 +313,7 @@ class NewUserExercise extends BasicDialog {
 
     delete.setType(ButtonType.WARNING);
     delete.addStyleName("floatRight");
-    controller.register(delete, newUserExercise.getID(), "Remove from list " + ul.getID() + "/" + ul.getName());
+    controller.register(delete, newUserExercise.getOldID(), "Remove from list " + ul.getOldID() + "/" + ul.getName());
     return delete;
   }
 
@@ -373,7 +373,7 @@ class NewUserExercise extends BasicDialog {
     translit.box.setText(newUserExercise.getTransliteration());
 
     // regular speed audio
-    rap.getPostAudioButton().setExercise(newUserExercise.getID());
+    rap.getPostAudioButton().setExercise(newUserExercise.getOldID());
     String refAudio = newUserExercise.getRefAudio();
 
     if (refAudio != null) {
@@ -381,7 +381,7 @@ class NewUserExercise extends BasicDialog {
     }
 
     // slow speed audio
-    rapSlow.getPostAudioButton().setExercise(newUserExercise.getID());
+    rapSlow.getPostAudioButton().setExercise(newUserExercise.getOldID());
     String slowAudioRef = newUserExercise.getSlowAudioRef();
 
     if (slowAudioRef != null) {
@@ -424,8 +424,8 @@ class NewUserExercise extends BasicDialog {
                                   final ControlGroup normalSpeedRecording) {
     final Button submit = new Button(NewUserExercise.CREATE);
     submit.setType(ButtonType.SUCCESS);
-    submit.getElement().setId("CreateButton_NewExercise_for_" + ul.getID());
-    controller.register(submit, "UserList_" + ul.getID());
+    submit.getElement().setId("CreateButton_NewExercise_for_" + ul.getOldID());
+    controller.register(submit, "UserList_" + ul.getOldID());
     submit.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
@@ -549,7 +549,7 @@ class NewUserExercise extends BasicDialog {
                                final Panel toAddTo,
                                boolean onClick) {
     //   logger.info("user list is " + ul);
-    listService.reallyCreateNewItem(ul.getRealID(), newUserExercise, new AsyncCallback<CommonExercise>() {
+    listService.reallyCreateNewItem(ul.getID(), newUserExercise, new AsyncCallback<CommonExercise>() {
       @Override
       public void onFailure(Throwable caught) {
       }
@@ -591,7 +591,7 @@ class NewUserExercise extends BasicDialog {
     Shell toMoveToEnd = moveNewExerciseToEndOfList(newExercise, exerciseList);
 
     exerciseList.clearCachedExercise(); // if we don't it will just use the cached exercise, if it's the current one
-    String id = toMoveToEnd.getID();
+    String id = toMoveToEnd.getOldID();
 
     logger.info("afterItemCreated checkAndAskServer " + id);
 
@@ -650,7 +650,7 @@ class NewUserExercise extends BasicDialog {
       String speed = (recordRegularSpeed ? "Regular" : "Slow") + "_speed";
       getPostAudioButton().getElement().setId(id + speed);
       getPlayButton().getElement().setId(id + "Play_" + speed);
-      controller.register(getPlayButton(), newExercise.getID());
+      controller.register(getPlayButton(), newExercise.getOldID());
     }
 
     @Override
@@ -670,7 +670,7 @@ class NewUserExercise extends BasicDialog {
     @Override
     protected WaveformPostAudioRecordButton makePostAudioRecordButton(AudioType audioType, String recordButtonTitle) {
       postAudioButton =
-          new WaveformPostAudioRecordButton(exercise.getID(), controller, exercisePanel, this, service,
+          new WaveformPostAudioRecordButton(exercise.getOldID(), controller, exercisePanel, this, service,
               recordRegularSpeed ? 0 : 1,
               false // don't record in results table
               ,

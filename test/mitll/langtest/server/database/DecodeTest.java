@@ -3,7 +3,6 @@ package mitll.langtest.server.database;
 import mitll.langtest.client.user.Md5Hash;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.audio.AudioFileHelper;
-import mitll.langtest.server.database.audio.AudioDAO;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.exercise.AudioAttribute;
@@ -87,13 +86,13 @@ public class DecodeTest extends BaseTest {
 
     for (CommonExercise exercise : exercises) {
 
-      List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
+      List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getOldID());
       if (audioAttributes != null) {
 //					logger.warn("hmm - audio recorded for " + )
         boolean didAll = audioDAO.attachAudio(exercise, "war", "config/spanish", audioAttributes);
        // attrc += audioAttributes.size();
         if (!didAll) {
-          failed.add(exercise.getID());
+          failed.add(exercise.getOldID());
         }
       }
     }

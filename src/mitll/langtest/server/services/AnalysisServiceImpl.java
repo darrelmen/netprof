@@ -32,10 +32,7 @@
 
 package mitll.langtest.server.services;
 
-import mitll.langtest.client.analysis.ShowTab;
-import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.AnalysisService;
-import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.database.analysis.SlickAnalysis;
 import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.shared.analysis.PhoneReport;
@@ -68,9 +65,9 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
    * @see mitll.langtest.client.analysis.AnalysisPlot#setRawBestScores(List)
    */
   @Override
-  public List<CommonShell> getShells(List<String> ids) {
+  public List<CommonShell> getShells(List<Integer> ids) {
     List<CommonShell> shells = new ArrayList<>();
-    for (String id : ids) {
+    for (Integer id : ids) {
       CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(id);
       if (customOrPredefExercise == null) {
         logger.warn("Couldn't find exercise for " + id);

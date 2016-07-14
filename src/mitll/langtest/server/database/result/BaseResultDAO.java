@@ -159,7 +159,7 @@ public abstract class BaseResultDAO extends DAO {
     SortedMap<String, ExerciseCorrectAndScore> idToScores = new TreeMap<>();
     if (results != null) {
       for (CorrectAndScore r : results) {
-        String id = r.getId();
+        String id = r.getExid();
         ExerciseCorrectAndScore correctAndScores = idToScores.get(id);
         if (correctAndScores == null) idToScores.put(id, correctAndScores = new ExerciseCorrectAndScore(id));
         correctAndScores.add(r);
@@ -187,7 +187,7 @@ public abstract class BaseResultDAO extends DAO {
     Map<String, T> idToEx = new HashMap<>();
     Map<String, CollationKey> idToKey = new HashMap<>();
     for (T exercise : exercises) {
-      String id = exercise.getID();
+      String id = exercise.getOldID();
       allIds.add(id);
       idToEx.put(id, exercise);
       //  idToKey.put(id,exercise.getForeignLanguage());
@@ -278,8 +278,8 @@ public abstract class BaseResultDAO extends DAO {
     }
   }
 
-  public Collection<ExerciseCorrectAndScore> getExerciseCorrectAndScoresByPhones(int userid, List<String> allIds,
-                                                                                 Map<String, CommonExercise> idToEx,
+  public Collection<ExerciseCorrectAndScore> getExerciseCorrectAndScoresByPhones(int userid, List<Integer> allIds,
+                                                                                 Map<Integer, CommonExercise> idToEx,
                                                                                  ExerciseSorter sorter) {
     List<CorrectAndScore> results = getResultsForExIDInForUser(allIds, true, userid);
     // if (debug) logger.debug("found " + results.size() + " results for " + allIds.size() + " items");
@@ -376,7 +376,7 @@ public abstract class BaseResultDAO extends DAO {
    * @see #attachScoreHistory
    */
   private List<CorrectAndScore> getCorrectAndScores(int userID, HasID firstExercise, boolean isFlashcardRequest) {
-    return getResultsForExIDInForUser(userID, isFlashcardRequest, firstExercise.getID());
+    return getResultsForExIDInForUser(userID, isFlashcardRequest, firstExercise.getOldID());
   }
 
   private List<CorrectAndScore> getResultsForExIDInForUser(int userID, boolean isFlashcardRequest, String id) {
@@ -417,7 +417,7 @@ public abstract class BaseResultDAO extends DAO {
       } else {
         s.duration += timestamp - last;
       }
-      s.addExerciseID(r.getId());
+      s.addExerciseID(r.getExid());
       last = timestamp;
     }
     return sessions;
@@ -439,7 +439,7 @@ public abstract class BaseResultDAO extends DAO {
     int id = 0;
     for (CorrectAndScore r : answersForUser) {
       //logger.debug("got " + r);
-      String id1 = r.getId();
+      String id1 = r.getExid();
       long timestamp = r.getTimestamp();
       if (s == null || timestamp - lastTimestamp > SESSION_GAP || !expected.contains(id1)) {
         sessions.add(s = new Session(id++, r.getUserid(), timestamp));

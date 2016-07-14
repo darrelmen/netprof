@@ -39,7 +39,7 @@ import java.sql.PreparedStatement;
 
 class MyUserAndTime implements UserAndTime {
   private final int userID;
-  private final String exid;
+  private final int exid;
   private final long time;
   private final int qid;
 
@@ -50,7 +50,7 @@ class MyUserAndTime implements UserAndTime {
    * @param time
    * @param qid
    */
-  MyUserAndTime(int userID, String exid, long time, int qid) {
+  MyUserAndTime(int userID, int exid, long time, int qid) {
     this.userID = userID;
     this.exid = exid;
     this.time = time;
@@ -68,7 +68,7 @@ class MyUserAndTime implements UserAndTime {
   }
 
   @Override
-  public String getExid() {
+  public int getExid() {
     return exid;
   }
 

@@ -63,7 +63,7 @@ public class ClickablePagingContainer<T extends Shell> extends SimplePagingConta
 
   private T getByID(int id) {
     for (T t : getList()) {
-      if (t.getRealID() ==id) {
+      if (t.getID() ==id) {
         return t;
       }
     }
@@ -72,20 +72,20 @@ public class ClickablePagingContainer<T extends Shell> extends SimplePagingConta
 
   /**
    * @param es
-   * @see mitll.langtest.client.list.PagingExerciseList#simpleRemove(String)
+   * @see ListInterface#simpleRemove(int)
    */
   public void forgetExercise(T es) {
     List<T> list = getList();
     int before = getList().size();
 
     if (!list.remove(es)) {
-      if (!list.remove(getByID(es.getRealID()))) {
+      if (!list.remove(getByID(es.getID()))) {
         logger.warning("forgetExercise couldn't remove " + es);
 //        for (T t : list) {
-//          logger.info("\tnow has " + t.getID());
+//          logger.info("\tnow has " + t.getOldID());
 //        }
       } else {
-        idToExercise.remove(es.getRealID());
+        idToExercise.remove(es.getID());
       }
     } else {
       if (list.size() == before - 1) {
@@ -93,7 +93,7 @@ public class ClickablePagingContainer<T extends Shell> extends SimplePagingConta
       } else {
         logger.warning("\tPagingContainer.forgetExercise : now has " + list.size() + " items vs " + before);
       }
-      idToExercise.remove(es.getRealID());
+      idToExercise.remove(es.getID());
     }
     redraw();
   }
@@ -158,7 +158,7 @@ public class ClickablePagingContainer<T extends Shell> extends SimplePagingConta
    * @see ListInterface#addExercise(Shell)
    */
   public void addExercise(T exercise) {
-    idToExercise.put(exercise.getRealID(), exercise);
+    idToExercise.put(exercise.getID(), exercise);
     getList().add(exercise);
   }
 
@@ -171,12 +171,12 @@ public class ClickablePagingContainer<T extends Shell> extends SimplePagingConta
     //logger.info("addExercise adding " + exercise);
     List<T> list = getList();
     int before = list.size();
-//    String id = exercise.getID();
-    idToExercise.put(exercise.getRealID(), exercise);
+//    String id = exercise.getOldID();
+    idToExercise.put(exercise.getID(), exercise);
     int i = list.indexOf(afterThisOne);
     list.add(i + 1, exercise);
     int after = list.size();
-    // logger.info("data now has "+ after + " after adding " + exercise.getID());
+    // logger.info("data now has "+ after + " after adding " + exercise.getOldID());
     if (before + 1 != after) logger.warning("didn't add " + exercise.getID());
   }
 
@@ -186,7 +186,7 @@ public class ClickablePagingContainer<T extends Shell> extends SimplePagingConta
 
   private void markCurrent(T currentExercise) {
     if (currentExercise != null) {
-      markCurrentExercise(currentExercise.getRealID());
+      markCurrentExercise(currentExercise.getID());
     }
   }
 
@@ -194,7 +194,7 @@ public class ClickablePagingContainer<T extends Shell> extends SimplePagingConta
     if (dataProvider != null && getList() != null && !getList().isEmpty()) {
       T toLoad = getList().get(0);
 
-      if (toLoad.getID().length() > ID_LINE_WRAP_LENGTH) {
+      if (toLoad.getOldID().length() > ID_LINE_WRAP_LENGTH) {
         ratio /= 2; // hack for long ids
       }
     }

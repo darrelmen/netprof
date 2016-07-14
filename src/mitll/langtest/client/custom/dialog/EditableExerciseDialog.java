@@ -128,7 +128,7 @@ class EditableExerciseDialog extends NewUserExercise {
         flow.add(child);
       }
 
-      Heading child = new Heading(4, "Item", newUserExercise.getID());
+      Heading child = new Heading(4, "Item", newUserExercise.getOldID());
       child.addStyleName("rightFiveMargin");
       flow.add(child);
 
@@ -168,7 +168,7 @@ class EditableExerciseDialog extends NewUserExercise {
     prevNext.addStyleName("rightFiveMargin");
     row.add(prevNext);
 
-    Button delete = makeDeleteButton(ul.getRealID());
+    Button delete = makeDeleteButton(ul.getID());
 
     configureButtonRow(row);
     row.add(delete);
@@ -182,7 +182,7 @@ class EditableExerciseDialog extends NewUserExercise {
    * @see #getCreateButton(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, com.github.gwtbootstrap.client.ui.ControlGroup)
    */
   PrevNextList<CommonShell> getPrevNext(ListInterface<CommonShell> pagingContainer) {
-    CommonShell shell = pagingContainer.byID(newUserExercise.getID());
+    CommonShell shell = pagingContainer.byID(newUserExercise.getOldID());
     return new PrevNextList<>(shell, exerciseList, shouldDisableNext(), controller);
   }
 
@@ -192,8 +192,8 @@ class EditableExerciseDialog extends NewUserExercise {
     delete.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-       // deleteItem(newUserExercise.getID(), uniqueID, ul, exerciseList, predefinedContentList);
-        deleteItem(newUserExercise.getRealID(), uniqueID, ul, exerciseList, predefinedContentList);
+       // deleteItem(newUserExercise.getOldID(), uniqueID, ul, exerciseList, predefinedContentList);
+        deleteItem(newUserExercise.getID(), uniqueID, ul, exerciseList, predefinedContentList);
       }
     });
 
@@ -295,7 +295,7 @@ class EditableExerciseDialog extends NewUserExercise {
                                final ListInterface<CommonShell> exerciseList,
                                final Panel toAddTo,
                                boolean onClick) {
-//    if (DEBUG) logger.info("EditItem.afterValidForeignPhrase : exercise id " + newUserExercise.getID());
+//    if (DEBUG) logger.info("EditItem.afterValidForeignPhrase : exercise id " + newUserExercise.getOldID());
     checkForForeignChange();
     postChangeIfDirty(exerciseList, onClick);
   }
@@ -478,16 +478,16 @@ class EditableExerciseDialog extends NewUserExercise {
    * @see #doAfterEditComplete(ListInterface, boolean)
    */
   private void changeTooltip(ListInterface<CommonShell> pagingContainer) {
-    CommonShell byID = pagingContainer.byID(newUserExercise.getID());
+    CommonShell byID = pagingContainer.byID(newUserExercise.getOldID());
     if (DEBUG) logger.info("changeTooltip " + byID);
     if (byID == null) {
-      logger.warning("changeTooltip : huh? can't find exercise with id " + newUserExercise.getID());
+      logger.warning("changeTooltip : huh? can't find exercise with id " + newUserExercise.getOldID());
     } else {
       MutableShell mutableShell = byID.getMutableShell();
       mutableShell.setEnglish(newUserExercise.getEnglish());
       mutableShell.setForeignLanguage(newUserExercise.getForeignLanguage());
 
-      if (DEBUG || true) logger.info("\tchangeTooltip : for " + newUserExercise.getID() + " now " + newUserExercise);
+      if (DEBUG || true) logger.info("\tchangeTooltip : for " + newUserExercise.getOldID() + " now " + newUserExercise);
 
       pagingContainer.redraw();   // show change to tooltip!
     }
@@ -523,7 +523,7 @@ class EditableExerciseDialog extends NewUserExercise {
 
     if (rap != null) {
       // regular speed audio
-      String id = newUserExercise.getID();
+      String id = newUserExercise.getOldID();
       rap.getPostAudioButton().setExercise(id);
       String refAudio = newUserExercise.getRefAudio();
 

@@ -49,7 +49,7 @@ public class InvalidateAudioTest {
 
     Set<String> idsOfDefects = new TreeSet<String>();
     for (CommonExercise oldEx : oldExercises) {
-      String id = oldEx.getID();
+      String id = oldEx.getOldID();
       CommonExercise newEx = idToNewEx.get(id);
 
       if (newEx == null) {
@@ -90,7 +90,7 @@ public class InvalidateAudioTest {
 
     Set<String> idsOfDefects = new TreeSet<String>();
     for (CommonExercise oldEx : oldExercises) {
-      String id = oldEx.getID();
+      String id = oldEx.getOldID();
       CommonExercise newEx = idToNewEx.get(id);
 
       if (newEx == null) {
@@ -156,7 +156,7 @@ public class InvalidateAudioTest {
     Map<String, CommonExercise> idToNewEx = new HashMap<String, CommonExercise>();
     Collection<CommonExercise> currentExercises = newDB.getExercises();
     logger.warn("found " + currentExercises.size() + " exercises");
-    for (CommonExercise ex : currentExercises) idToNewEx.put(ex.getID(), ex);
+    for (CommonExercise ex : currentExercises) idToNewEx.put(ex.getOldID(), ex);
     return idToNewEx;
   }
 

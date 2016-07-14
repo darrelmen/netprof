@@ -114,17 +114,17 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
   @Override
-  protected Set<String> getKeys() {
+  protected Set<Integer> getKeys() {
     return pagingContainer.getKeys();
   }
 
   @Override
-  public void setState(String id, STATE state) {
+  public void setState(int id, STATE state) {
     byID(id).setState(state);
   }
 
   @Override
-  public void setSecondState(String id, STATE state) {
+  public void setSecondState(int id, STATE state) {
     byID(id).setSecondState(state);
   }
 
@@ -143,7 +143,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * @param selectionState
    * @param prefix
    * @param onlyWithAudioAnno
-   * @param setTypeAheadText
+   * @paramz setTypeAheadText
    * @see #addTypeAhead(com.google.gwt.user.client.ui.Panel)
    */
   void loadExercises(String selectionState, String prefix, boolean onlyWithAudioAnno) {
@@ -155,7 +155,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     ExerciseListRequest request = getRequest(prefix);
     service.getExerciseIds(
         request,
-        new SetExercisesCallback("", prefix, "", request));
+        new SetExercisesCallback("", prefix, -1, request));
   }
 
   ExerciseListRequest getRequest(String prefix) {
@@ -375,7 +375,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
       tellUserPanelIsBusy();
       markCurrentExercise(pagingContainer.getCurrentSelection().getID());
     } else {
-      controller.logEvent(this, "ExerciseList", e.getID(), "Clicked on item '" + e.toString() + "'");
+      controller.logEvent(this, "ExerciseList", ""+e.getID(), "Clicked on item '" + e.toString() + "'");
       pushNewItem(getTypeAheadText(), e.getID());
     }
   }
@@ -491,7 +491,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * @see mitll.langtest.client.list.ExerciseList#removeExercise
    */
   @Override
-  public T simpleRemove(String id) {
+  public T simpleRemove(int id) {
     T es = byID(id);
     pagingContainer.forgetExercise(es);
 
@@ -512,7 +512,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * @param itemID
    * @see #useExercise
    */
-  protected void markCurrentExercise(String itemID) {
+  protected void markCurrentExercise(int itemID) {
     pagingContainer.markCurrentExercise(itemID);
   }
 

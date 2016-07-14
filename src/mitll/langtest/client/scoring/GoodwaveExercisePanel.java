@@ -200,18 +200,18 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
   }
 
   protected ASRScorePanel makeScorePanel(T e, String instance) {
-    ASRScorePanel widgets = new ASRScorePanel("GoodwaveExercisePanel_" + instance, controller, e.getID());
+    ASRScorePanel widgets = new ASRScorePanel("GoodwaveExercisePanel_" + instance, controller, e.getOldID());
     scorePanel = widgets;
     return widgets;
   }
 
   protected void loadNext() {
-    listContainer.loadNextExercise(exercise.getID());
+    listContainer.loadNextExercise(exercise.getOldID());
   }
 
   protected void nextWasPressed(ListInterface listContainer, HasID completedExercise) {
     navigationHelper.enableNextButton(false);
-    listContainer.loadNextExercise(completedExercise.getID());
+    listContainer.loadNextExercise(completedExercise.getOldID());
   }
 
   protected void addQuestionContentRow(T e, Panel hp) {
@@ -358,14 +358,14 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
   }
 
   private void addAnnotation(final String field, final String status, final String commentToPost) {
-    service.addAnnotation(getLocalExercise().getID(), field, status, commentToPost, controller.getUser(), new AsyncCallback<Void>() {
+    service.addAnnotation(getLocalExercise().getOldID(), field, status, commentToPost, controller.getUser(), new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
       }
 
       @Override
       public void onSuccess(Void result) {
-//        System.out.println("\t" + new Date() + " : onSuccess : posted to server " + getExercise().getID() +
+//        System.out.println("\t" + new Date() + " : onSuccess : posted to server " + getExercise().getOldID() +
 //            " field '" + field + "' commentLabel '" + commentToPost + "' is " + status);//, took " + (now - then) + " millis");
       }
     });
@@ -559,7 +559,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
      * @see GoodwaveExercisePanel#getAnswerWidget
      */
     ASRRecordAudioPanel(LangTestDatabaseAsync service, ExerciseController controller, T exercise, String instance) {
-      super(exercise.getForeignLanguage(), service, controller, scorePanel, REFERENCE, exercise.getID(), exercise, instance);
+      super(exercise.getForeignLanguage(), service, controller, scorePanel, REFERENCE, exercise.getOldID(), exercise, instance);
       this.index = 1;
       getElement().setId("ASRRecordAudioPanel");
     }
@@ -698,7 +698,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
      */
     private class MyPostAudioRecordButton extends PostAudioRecordButton {
       MyPostAudioRecordButton(ExerciseController controller) {
-        super(getLocalExercise().getID(), controller, ASRRecordAudioPanel.this.service, ASRRecordAudioPanel.this.index,
+        super(getLocalExercise().getOldID(), controller, ASRRecordAudioPanel.this.service, ASRRecordAudioPanel.this.index,
             true,
             RECORD_YOURSELF, controller.getProps().doClickAndHold() ? RELEASE_TO_STOP : "Stop");
       }

@@ -43,7 +43,7 @@ public class Result implements UserAndTime {
   private int uniqueID;
   private int userid;
 
-  private String id;
+  private int exid;
   private int qid;
   private String answer;
   private boolean valid;
@@ -64,7 +64,7 @@ public class Result implements UserAndTime {
   private boolean withFlash;
   private float dynamicRange;
   private String validity;
-private boolean isMale;
+  private boolean isMale;
   private DecodeAlignOutput alignOutput;
   private DecodeAlignOutput decodeOutput;
 
@@ -73,7 +73,7 @@ private boolean isMale;
 
   /**
    * @param userid
-   * @param id
+   * @param exid
    * @param answer
    * @param valid
    * @param timestamp
@@ -93,7 +93,7 @@ private boolean isMale;
    */
   public Result(int uniqueID,
                 int userid,
-                String id,
+                int exid,
                 int qid,
                 String answer,
                 boolean valid,
@@ -105,7 +105,7 @@ private boolean isMale;
                 String validity) {
     this.uniqueID = uniqueID;
     this.userid = userid;
-    this.id = id;
+    this.exid = exid;
     this.qid = qid;
     this.answer = answer;
     this.valid = valid;
@@ -162,8 +162,8 @@ private boolean isMale;
     return userid;
   }
 
-  public String getExerciseID() {
-    return id;
+  public int getExerciseID() {
+    return exid;
   }
 
   /**
@@ -188,8 +188,8 @@ private boolean isMale;
   }
 
   @Override
-  public String getExid() {
-    return getExerciseID();
+  public int getExid() {
+    return exid;
   }
 
   public long getDurationInMillis() {
