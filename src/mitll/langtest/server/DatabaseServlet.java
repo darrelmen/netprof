@@ -154,7 +154,7 @@ public class DatabaseServlet extends HttpServlet {
    */
 /*  protected JSONObject getJsonForExercise(CommonExercise exercise) {
     JSONObject ex = new JSONObject();
-    ex.put("id", exercise.getID());
+    ex.put("id", exercise.getOldID());
     ex.put("fl", exercise.getForeignLanguage());
     ex.put("tl", exercise.getTransliteration());
     ex.put("en", exercise.getEnglish());

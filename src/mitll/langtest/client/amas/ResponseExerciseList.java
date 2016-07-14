@@ -163,8 +163,8 @@ public class ResponseExerciseList extends SingleSelectExerciseList {
 
           @Override
           public SafeHtml getValue(AmasExerciseImpl shell) {
-            String columnText = shell.getID();
-            String html = shell.getID();
+            String columnText = shell.getOldID();
+            String html = shell.getOldID();
             if (columnText != null) {
               if (columnText.length() > MAX_LENGTH_ID) columnText = columnText.substring(0, MAX_LENGTH_ID - 3) + "...";
               STATE state = shell.getState();
@@ -384,7 +384,7 @@ public class ResponseExerciseList extends SingleSelectExerciseList {
    */
 /*
   public boolean loadNextExercise(AmasExerciseImpl current) {
-    //logger.info("loadNextExercise " + current.getID() );
+    //logger.info("loadNextExercise " + current.getOldID() );
     boolean b = super.loadNextExercise(current);
     // controller.showAdvance(this);
     return b;

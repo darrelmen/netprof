@@ -35,7 +35,6 @@ package mitll.langtest.server.database.phone;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.SlickDAO;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.analysis.PhoneAndScore;
 import mitll.langtest.shared.analysis.WordAndScore;
@@ -74,15 +73,15 @@ public class BasePhoneDAO extends DAO {
     setTranscript(wordAndScore, netPronImageTypeListMap);
   }
 
-  protected WordAndScore getAndRememberWordAndScore(Map<String, String> idToRef,
-                                                  Map<String, List<PhoneAndScore>> phoneToScores,
-                                                  Map<String, List<WordAndScore>> phoneToWordAndScore,
-                                                  String exid,
-                                                  String audioAnswer,
-                                                  String scoreJson,
-                                                  long resultTime,
-                                                  int wseq, String word,
-                                                  long rid, String phone, int seq, float phoneScore) {
+  WordAndScore getAndRememberWordAndScore(Map<Integer, String> idToRef,
+                                          Map<String, List<PhoneAndScore>> phoneToScores,
+                                          Map<String, List<WordAndScore>> phoneToWordAndScore,
+                                          int exid,
+                                          String audioAnswer,
+                                          String scoreJson,
+                                          long resultTime,
+                                          int wseq, String word,
+                                          long rid, String phone, int seq, float phoneScore) {
     PhoneAndScore phoneAndScore = getAndRememberPhoneAndScore(phoneToScores, phone, phoneScore, resultTime);
 
     List<WordAndScore> wordAndScores = phoneToWordAndScore.get(phone);

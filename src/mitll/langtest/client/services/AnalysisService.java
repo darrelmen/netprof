@@ -59,7 +59,7 @@ public interface AnalysisService extends RemoteService {
    * @return
    * @see mitll.langtest.client.analysis.AnalysisPlot#setRawBestScores(List)
    */
-  List<CommonShell> getShells(List<String> ids);
+  List<CommonShell> getShells(List<Integer> ids);
 
   /**
    * @param id

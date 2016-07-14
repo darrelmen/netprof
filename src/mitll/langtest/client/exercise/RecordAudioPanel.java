@@ -91,13 +91,13 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
         // use keyboard
         controller, showSpectrogram,
         null // no gauge panel
-        , 1.0f, 23, exercise.getID(), exercise, instance);
+        , 1.0f, 23, exercise.getOldID(), exercise, instance);
     this.exercisePanel = widgets;
     this.index = index;
     this.exercise = exercise;
     this.audioType = audioType;
     AudioAttribute attribute = getAudioAttribute();
-/*    System.out.println("RecordAudioPanel for " + exercise.getID() +
+/*    System.out.println("RecordAudioPanel for " + exercise.getOldID() +
       " audio type " + audioType + " ref " + exercise.getRefAudio() + " path " + attribute);
   */
     if (attribute != null) {
@@ -201,7 +201,7 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
 
   public void setExercise(T exercise) {
     this.exercise = exercise;
-    postAudioRecordButton.setExercise(exercise.getID());
+    postAudioRecordButton.setExercise(exercise.getOldID());
   }
 
   /**
@@ -252,7 +252,7 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
      * @see #makePostAudioRecordButton(AudioType, String)
      */
     public MyWaveformPostAudioRecordButton(AudioType audioType, String recordButtonTitle) {
-      super(RecordAudioPanel.this.exercise.getID(),
+      super(RecordAudioPanel.this.exercise.getOldID(),
           RecordAudioPanel.this.controller,
           RecordAudioPanel.this.exercisePanel,
           RecordAudioPanel.this, RecordAudioPanel.this.service, RecordAudioPanel.this.index, true,

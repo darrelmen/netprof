@@ -63,12 +63,12 @@ public class BaseExercise implements IsSerializable, Shell {
   }
 
   @Deprecated
-  public String getID() {
+  public String getOldID() {
     return id;
   }
 
   @Override
-  public int getRealID() {
+  public int getID() {
     return realID;
   }
 

@@ -440,7 +440,7 @@ public class ListManager implements RequiresResize {
    */
   void showList(final UserList ul, Panel contentPanel, final String instanceName, HasID toSelect) {
     logger.info("showList " + ul + " instance '" + instanceName + "'");
-    controller.logEvent(contentPanel, "Tab", "UserList_" + ul.getID(), "Show List");
+    controller.logEvent(contentPanel, "Tab", "UserList_" + ul.getOldID(), "Show List");
 
     String previousList = storage.getValue(CLICKED_USER_LIST);
     String currentValue = storeCurrentClickedList(ul);
@@ -484,7 +484,7 @@ public class ListManager implements RequiresResize {
     Panel r1 = new FluidRow();
     r1.addStyleName("userListDarkerBlueColor");
 
-    int realID = ul.getRealID();
+    int realID = ul.getID();
     Anchor downloadLink = new DownloadLink(controller).getDownloadLink(realID, instanceName + "_" + realID, ul.getName());
     Node child = downloadLink.getElement().getChild(0);
     AnchorElement.as(child).getStyle().setColor("#333333");
@@ -509,7 +509,7 @@ public class ListManager implements RequiresResize {
   }
 
   private String storeCurrentClickedList(UserList ul) {
-    return storeCurrentClickedList(ul.getRealID());
+    return storeCurrentClickedList(ul.getID());
   }
 
   private String storeCurrentClickedList(long uniqueID) {
@@ -526,7 +526,7 @@ public class ListManager implements RequiresResize {
    */
   private void addVisitor(UserList ul) {
     if (ul.getCreator().getId() != controller.getUser()) {
-      listService.addVisitor(ul.getRealID(), controller.getUser(), new AsyncCallback<Void>() {
+      listService.addVisitor(ul.getID(), controller.getUser(), new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
         }
@@ -565,7 +565,7 @@ public class ListManager implements RequiresResize {
     learn.getTab().addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        controller.logEvent(learn.getTab(), "Tab", "UserList_" + ul.getID(), LEARN);
+        controller.logEvent(learn.getTab(), "Tab", "UserList_" + ul.getOldID(), LEARN);
         storage.storeValue(SUB_TAB, LEARN);
         showLearnTab(learn, ul, instanceName1, null);
       }
@@ -586,7 +586,7 @@ public class ListManager implements RequiresResize {
           //       logger.info("getListOperations : got click on practice " + fpractice.getContent().getElement().getId());
           avpHelper.setContentPanel(fpractice.getContent());
           avpHelper.showNPF(ul, fpractice, PRACTICE1, true, toSelect);
-          controller.logEvent(fpractice.getTab(), "Tab", "UserList_" + ul.getID(), PRACTICE1);
+          controller.logEvent(fpractice.getTab(), "Tab", "UserList_" + ul.getOldID(), PRACTICE1);
         }
       });
     }
@@ -621,7 +621,7 @@ public class ListManager implements RequiresResize {
       public void onClick(ClickEvent event) {
         //    logger.info("getListOperations : got click on edit tab ");
         storage.storeValue(SUB_TAB, EDIT_ITEM);
-        controller.logEvent(editTab.getTab(), "Tab", "UserList_" + ul.getID(), EDIT_ITEM);
+        controller.logEvent(editTab.getTab(), "Tab", "UserList_" + ul.getOldID(), EDIT_ITEM);
         if ((isReview || isComment)) {
           //    logger.info("getListOperations : showNPF ");
           reviewItem.showNPF(ul, editTab, getInstanceName(isReview), false, toSelect);
@@ -643,7 +643,7 @@ public class ListManager implements RequiresResize {
       public void onClick(ClickEvent event) {
         //    logger.info("getListOperations : got click on edit tab ");
         storage.storeValue(SUB_TAB, IMPORT_ITEM);
-        controller.logEvent(importTab.getTab(), "Tab", "UserList_" + ul.getID(), IMPORT_ITEM);
+        controller.logEvent(importTab.getTab(), "Tab", "UserList_" + ul.getOldID(), IMPORT_ITEM);
         showImportItem(ul, importTab, learnTab, instanceName, tabPanel);
       }
     });
@@ -665,8 +665,8 @@ public class ListManager implements RequiresResize {
   }
 
   void deleteList(Button delete, final UserList ul, final boolean onlyMyLists) {
-    controller.logEvent(delete, "Button", "UserList_" + ul.getID(), "Delete");
-    final long uniqueID = ul.getRealID();
+    controller.logEvent(delete, "Button", "UserList_" + ul.getOldID(), "Delete");
+    final long uniqueID = ul.getID();
 
     listService.deleteList(uniqueID, new AsyncCallback<Boolean>() {
       @Override
@@ -748,7 +748,7 @@ public class ListManager implements RequiresResize {
     anImport.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        listService.reallyCreateNewItems(userManager.getUser(), ul.getRealID(), w.getText(),
+        listService.reallyCreateNewItems(userManager.getUser(), ul.getID(), w.getText(),
             new AsyncCallback<Collection<CommonExercise>>() {
               @Override
               public void onFailure(Throwable caught) {

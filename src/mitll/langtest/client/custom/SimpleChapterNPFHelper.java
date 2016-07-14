@@ -199,11 +199,11 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
     if (predefinedContentList != null &&
         predefinedContentList.getReloadable() != null &&
         predefinedContentList.getReloadable().getCurrentExerciseID() != null &&
-        e.getID().equals(predefinedContentList.getReloadable().getCurrentExerciseID())) {
-      // logger.info("SimpleChapterNPFHelper.reloading " + e.getID());
-      predefinedContentList.getReloadable().loadExercise(e.getID());
+        e.getOldID().equals(predefinedContentList.getReloadable().getCurrentExerciseID())) {
+      // logger.info("SimpleChapterNPFHelper.reloading " + e.getOldID());
+      predefinedContentList.getReloadable().loadExercise(e.getOldID());
     } else {
-  //    logger.info("\n\n\n--> SimpleChapterNPFHelper.not reloading " + e.getID());
+  //    logger.info("\n\n\n--> SimpleChapterNPFHelper.not reloading " + e.getOldID());
     }
   }
 

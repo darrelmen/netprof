@@ -42,9 +42,9 @@ import java.util.*;
 
 /**
  * So egyptian monitoring needs to show :
- * user id/exid/unit/chapter/exercise text/audio/time/valid/duration/correct/score
+ * user id/oldExID/unit/chapter/exercise text/audio/time/valid/duration/correct/score
  * <p>
- * Search on user, exid,unit,chapter,exer
+ * Search on user, oldExID,unit,chapter,exer
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
@@ -53,7 +53,7 @@ import java.util.*;
 public class MonitorResult implements IsSerializable {
   private static final String ASC = "ASC";
   public static final String USERID = "userid";
-  public static final String ID = "exid";
+  public static final String ID = "oldExID";
   public static final String VALID = "valid";
   public static final String TIMESTAMP = "timestamp";
   public static final String AUDIO_TYPE = "audioType";
@@ -67,7 +67,8 @@ public class MonitorResult implements IsSerializable {
 
   private int uniqueID;
   private int userid;
-  private String exid;
+  @Deprecated  private String oldExID;
+  private int exid;
 
   private String foreignText = "";
 
@@ -108,19 +109,20 @@ public class MonitorResult implements IsSerializable {
    * @param processDur
    * @param roundTripDur
    * @param withFlash
+   * @param exid
    * @see ResultDAO#getMonitorResultsForQuery(Connection, PreparedStatement)
    */
-  public MonitorResult(int uniqueID, int userid, String exid, String answer,
+  public MonitorResult(int uniqueID, int userid, String oldExID, String answer,
                        boolean valid, long timestamp,
                        AudioType audioType, long durationInMillis,
                        boolean correct, float pronScore, String device,
                        long processDur, long roundTripDur, boolean withFlash, float dynamicRange,
                        String validity,
                        String deviceType, String simpleDevice, String scoreJSON,
-                       String transcript) {
+                       String transcript, int exid) {
     this.uniqueID = uniqueID;
     this.userid = userid;
-    this.exid = exid;
+    this.oldExID = oldExID;
     this.answer = answer;
     this.valid = valid;
     this.timestamp = timestamp;
@@ -138,6 +140,7 @@ public class MonitorResult implements IsSerializable {
     this.simpleDevice = simpleDevice;
     this.scoreJSON = scoreJSON;
     this.foreignText = transcript;
+    this.exid = exid;
   }
 
   public int getUniqueID() {
@@ -148,12 +151,8 @@ public class MonitorResult implements IsSerializable {
     return userid;
   }
 
-  public String getExID() {
+  public int getExID() {
     return exid;
-  }
-
-  public void setExID(String exID) {
-    exid = exID;
   }
 
   public String getForeignText() {
@@ -237,10 +236,10 @@ public class MonitorResult implements IsSerializable {
           }
           if (comp != 0) return getComp(asc, comp);
 
-          // exid
+          // oldExID
           if (field.equals(ID)) {
-            String id1 = o1.exid;
-            String id2 = o2.exid;
+            String id1 = o1.oldExID;
+            String id2 = o2.oldExID;
             comp = compareTwoMaybeInts(id1, id2);
           }
           if (comp != 0) return getComp(asc, comp);
@@ -361,7 +360,7 @@ public class MonitorResult implements IsSerializable {
 
   @Override
   public String toString() {
-    return "MonitorResult #" + uniqueID + "\t\tby user " + userid + "\texid " + exid + " " +
+    return "MonitorResult #" + uniqueID + "\t\tby user " + userid + "\toldExID " + oldExID + " " +
         " at " + new Date(timestamp) +
         "  ans " + answer +
         " audioType : " + audioType +
@@ -390,12 +389,13 @@ public class MonitorResult implements IsSerializable {
   }
 
   public void setDisplayID(String displayID) {
-    this.exid = displayID;
+    this.oldExID = displayID;
   }
 
   public String getDeviceType() {
     return deviceType;
   }
+/*
 
   public String getSimpleDevice() {
     return simpleDevice;
@@ -404,4 +404,5 @@ public class MonitorResult implements IsSerializable {
   public String getScoreJSON() {
     return scoreJSON;
   }
+*/
 }

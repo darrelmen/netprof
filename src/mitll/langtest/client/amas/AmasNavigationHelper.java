@@ -69,7 +69,7 @@ public class AmasNavigationHelper extends HorizontalPanel {
     getNextAndPreviousButtons(exercise, controller, addButtons);
     getElement().setId("AmasNavigationHelper");
     addStyleName("rightTenMargin");
-    controller.register(next, exercise.getID());
+    controller.register(next, exercise.getOldID());
   }
 
   /**

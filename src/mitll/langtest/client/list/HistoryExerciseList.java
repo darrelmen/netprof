@@ -108,7 +108,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
    * @param search
    * @param id
    * @return
-   * @see ExerciseList#pushNewItem(String, String)
+   * @see ExerciseList#pushNewItem(String, int)
    * @see #pushNewSectionHistoryToken()
    */
   protected String getHistoryTokenFromUIState(String search, String id) {
@@ -157,19 +157,20 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
    * @param searchIfAny
    * @see #loadFirstExercise()
    */
-  void pushFirstSelection(String exerciseID, String searchIfAny) {
+  void pushFirstSelection(int exerciseID, String searchIfAny) {
     String token = History.getToken();
-    String idFromToken = getIDFromToken(token);
+    //String idFromToken = ;
+    int exidFromToken = Integer.parseInt(getIDFromToken(token));
 /*    if (DEBUG) logger.info("ExerciseList.pushFirstSelection : current token '" + token + "' id from token '" + idFromToken +
         "' vs new exercise " + exerciseID + " instance " + getInstance());*/
 
-    if (idFromToken.equals(exerciseID)) {
+    if (exidFromToken == exerciseID) {
       if (DEBUG)
         logger.info("pushFirstSelection : (" + getInstance() + ") current token " + token + " same as new " + exerciseID);
       checkAndAskOrFirst(exerciseID);
     } else {
       if (DEBUG)
-        logger.info("pushFirstSelection : (" + getInstance() + ") pushNewItem " + exerciseID + " vs " + idFromToken);
+        logger.info("pushFirstSelection : (" + getInstance() + ") pushNewItem " + exerciseID + " vs " + exidFromToken);
       String toUse = getValidExerciseID(exerciseID);
       pushNewItem(searchIfAny, toUse);
     }
@@ -197,11 +198,11 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
   /**
    * @param exerciseID
    * @see #loadExercisesUsingPrefix(Map, String, boolean, String)
-   * @see #pushFirstSelection(String, String)
-   * @see #pushNewItem(String, String)
+   * @see ExerciseList#pushFirstSelection(int, String)
+   * @see ExerciseList#pushNewItem(String, int)
    */
 
-  private void checkAndAskOrFirst(String exerciseID) {
+  private void checkAndAskOrFirst(int exerciseID) {
     String toUse = getValidExerciseID(exerciseID);
     if (hasExercise(toUse)) {
       checkAndAskServer(toUse);
@@ -211,18 +212,18 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
     }
   }
 
-  private String getValidExerciseID(String exerciseID) {
+  private int getValidExerciseID(int exerciseID) {
     return hasExercise(exerciseID) ? exerciseID : isEmpty() ? "" : getFirst().getID();
   }
 
   /**
    * @param search
    * @param exerciseID
-   * @see #loadExercise(String)
-   * @see #pushFirstSelection(String, String)
+   * @see Reloadable#loadExercise(int)
+   * @see ExerciseList#pushFirstSelection(int, String)
    * @see PagingExerciseList#gotClickOnItem(CommonShell)
    */
-  void pushNewItem(String search, String exerciseID) {
+  void pushNewItem(String search, int exerciseID) {
 //    if (DEBUG) {
 //      logger.info("HistoryExerciseList.pushNewItem : search '" + search + "' : item '" + exerciseID + "'");
 //    }
@@ -303,10 +304,10 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
    */
   @Override
   public void gotClickOnItem(T e) {
-    loadByID(e.getID());
+    loadByID(e.getOldID());
   }
 
-  public void loadExercise(String itemID) {
+  public void loadExercise(int itemID) {
     pushNewItem(getTypeAheadText(), itemID);
   }
 

@@ -38,7 +38,7 @@ public class RefResultTest {
 
 
     Map<String,CommonExercise> idToEx = new HashMap<String,CommonExercise>();
-    for (CommonExercise ex : exercises) idToEx.put(ex.getID(),ex);
+    for (CommonExercise ex : exercises) idToEx.put(ex.getOldID(),ex);
 
 
     TreeMap<String, Collection<String>> typeToSection = new TreeMap<>();
@@ -67,7 +67,7 @@ public class RefResultTest {
   //  Map<String,CommonExercise> idToEx2 = new HashMap<String,CommonExercise>();
     List<String> exs = new ArrayList<String>();
     for (CommonExercise ex : oldExercises) {
-      String id = ex.getID();
+      String id = ex.getOldID();
       CommonExercise newEx = idToEx.get(id);
 
       if (newEx == null) {
@@ -109,7 +109,7 @@ public class RefResultTest {
 //          exs.addExerciseToList(id);
 //        }
       }
-      //idToEx2.put(ex.getID(),ex);
+      //idToEx2.put(ex.getOldID(),ex);
     }
     logger.warn("ids " + exs);
     int c = 0;

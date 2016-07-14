@@ -80,24 +80,25 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
   }
 
   @Override
-  public boolean removeForExercise(String exid) {
+  public boolean removeForExercise(int exid) {
     return dao.deleteByExID(exid) > 0;
   }
 
   @Override
-  public long addAnswer(int userID, String id, String audioFile, long durationInMillis, boolean correct,
+  public long addAnswer(int userID, int exid,
+                        String audioFile, long durationInMillis, boolean correct,
                         DecodeAlignOutput alignOutput, DecodeAlignOutput decodeOutput,
                         DecodeAlignOutput alignOutputOld, DecodeAlignOutput decodeOutputOld,
                         boolean isMale, String speed) {
-    SlickRefResult insert = dao.insert(toSlick(userID, id, audioFile, durationInMillis, correct, alignOutput, decodeOutput, isMale, speed));
+    SlickRefResult insert = dao.insert(toSlick(userID, exid, audioFile, durationInMillis, correct, alignOutput, decodeOutput, isMale, speed));
     return insert.id();
   }
 
 
-  SlickRefResult toSlick(int userID, String id, String audioFile, long durationInMillis, boolean correct,
+  SlickRefResult toSlick(int userID, int exid, String audioFile, long durationInMillis, boolean correct,
                          DecodeAlignOutput alignOutput, DecodeAlignOutput decodeOutput, boolean isMale, String speed) {
     return new SlickRefResult(-1,
-        userID, id, new Timestamp(System.currentTimeMillis()), audioFile, durationInMillis,
+        userID, exid, new Timestamp(System.currentTimeMillis()), audioFile, durationInMillis,
         correct,
         decodeOutput.getScore(), decodeOutput.getJson(), decodeOutput.getNumPhones(), decodeOutput.getProcessDurInMillis(),
         alignOutput.getScore(), alignOutput.getJson(), alignOutput.getNumPhones(), alignOutput.getProcessDurInMillis(),
@@ -136,14 +137,14 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
   }
 
   @Override
-  public Result getResult(String exid, String answer) {
+  public Result getResult(int exid, String answer) {
     Collection<SlickRefResult> slickRefResults = dao.byExAndAnswer(exid, answer);
     if (slickRefResults.isEmpty()) return null;
     else return fromSlick(slickRefResults.iterator().next());
   }
 
   @Override
-  public JSONObject getJSONScores(Collection<String> ids) {
+  public JSONObject getJSONScores(Collection<Integer> ids) {
     Collection<Tuple3<String, String, String>> tuple3s = dao.jsonByExIDs(ids);
     Map<String, List<String>> idToAnswers = new HashMap<>();
     Map<String, List<String>> idToJSONs = new HashMap<>();

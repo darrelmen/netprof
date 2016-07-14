@@ -46,7 +46,7 @@ public interface Reloadable {
 
   void clearCachedExercise();
 
-  String getCurrentExerciseID();
+  int getCurrentExerciseID();
 
-  void loadExercise(String itemID);
+  void loadExercise(int itemID);
 }

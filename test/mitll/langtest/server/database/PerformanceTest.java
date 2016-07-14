@@ -149,7 +149,7 @@ public class PerformanceTest extends BaseTest {
     List<CommonExercise> exercises1 = exercises;
     exercises1 = exercises.subList(0, 2);
     for (CommonExercise ex : exercises1) {
-      DBExercise dbExercise = new DBExercise(id++, ex.getID());
+      DBExercise dbExercise = new DBExercise(id++, ex.getOldID());
       dbExercise.setEnglish(ex);
       dbExercise.setMeaning(ex);
       dbExercise.setForeignLanguage(ex);
@@ -166,7 +166,7 @@ public class PerformanceTest extends BaseTest {
       ListContainer baseObject = new ListContainer();
       Field list = new Field("list", baseObject);
       dbExercise.addField("questions", list);
-      BaseObject question = new BaseObject(1, dbExercise.getID());
+      BaseObject question = new BaseObject(1, dbExercise.getOldID());
       list.addExerciseToList(question);
       question.addField("Question", "Test Question");
       ListContainer answerKey = new ListContainer(2);

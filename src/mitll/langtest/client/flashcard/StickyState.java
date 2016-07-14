@@ -64,8 +64,8 @@ class StickyState {
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete()
    */
   void storeCurrent(Shell e) {
- //   System.out.println("StickyState.storeCurrent store current " + e.getID());
-    storage.storeValue(CURRENT_EXERCISE, e.getID());
+ //   System.out.println("StickyState.storeCurrent store current " + e.getOldID());
+    storage.storeValue(CURRENT_EXERCISE, e.getOldID());
   }
 
   public String getCurrentExerciseID() {

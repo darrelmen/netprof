@@ -33,7 +33,7 @@
 package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.database.custom.UserListManager;
+import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
 import org.apache.log4j.Logger;
@@ -89,7 +89,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
    */
 /*
   public ExcelImport(String file, ServerProperties serverProperties) {
-    this(file, serverProperties, null, false);
+    this(file, serverProperties, nuæll, false);
   }
 */
 
@@ -100,7 +100,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
    * @see mitll.langtest.server.database.DatabaseImpl#makeDAO
    */
   public ExcelImport(String file, ServerProperties serverProps,
-                     UserListManager userListManager,
+                     IUserListManager userListManager,
                      boolean addDefects) {
     super(serverProps, userListManager, addDefects);
     this.file = file;
@@ -363,10 +363,10 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
                   (imported.hasRefAudio() || !shouldHaveRefAudio)) {  // skip items without ref audio, for now.
                 recordUnitChapterWeek(unitIndex, chapterIndex, weekIndex, next, imported, unitName, chapterName, weekName);
 
-                if (knownIds.contains(imported.getID())) {
-                  logger.warn("readFromSheet : found duplicate entry under " + imported.getID() + " " + imported);
+                if (knownIds.contains(imported.getOldID())) {
+                  logger.warn("readFromSheet : found duplicate entry under " + imported.getOldID() + " " + imported);
                 } else {
-                  knownIds.add(imported.getID());
+                  knownIds.add(imported.getOldID());
                   exercises.add(imported);
                 }
               } else {
@@ -374,7 +374,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
                   deleted++;
                 } else {
                   if (logging++ < 3) {
-                    logger.info("skipping exercise " + imported.getID() + " : '" + imported.getEnglish() + "' since no audio.");
+                    logger.info("skipping exercise " + imported.getOldID() + " : '" + imported.getEnglish() + "' since no audio.");
                   }
                   skipped++;
                 }

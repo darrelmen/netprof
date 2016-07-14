@@ -249,7 +249,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
 
   @Override
   protected void nextWasPressed(ListInterface listContainer, HasID completedExercise) {
-    //System.out.println("nextWasPressed : load next exercise " + completedExercise.getID() + " instance " +instance);
+    //System.out.println("nextWasPressed : load next exercise " + completedExercise.getOldID() + " instance " +instance);
     super.nextWasPressed(listContainer, completedExercise);
     markReviewed(listContainer, completedExercise);
   }
@@ -265,7 +265,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
       markReviewed(completedExercise);
       boolean allCorrect = incorrectFields.isEmpty();
 
-      listContainer.setState(completedExercise.getID(), allCorrect ? STATE.APPROVED : STATE.DEFECT);
+      listContainer.setState(completedExercise.getOldID(), allCorrect ? STATE.APPROVED : STATE.DEFECT);
       listContainer.redraw();
     }
   }
@@ -278,7 +278,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
    */
   private void markAttentionLL(ListInterface listContainer, HasID completedExercise) {
     if (isCourseContent()) {
-      service.markState(completedExercise.getID(), STATE.ATTN_LL, controller.getUser(),
+      service.markState(completedExercise.getOldID(), STATE.ATTN_LL, controller.getUser(),
           new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -289,7 +289,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
             }
           });
 
-      listContainer.setSecondState(completedExercise.getID(), STATE.ATTN_LL);
+      listContainer.setSecondState(completedExercise.getOldID(), STATE.ATTN_LL);
       listContainer.redraw();
     }
   }
@@ -305,9 +305,9 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
    */
   private void markReviewed(final HasID completedExercise) {
     boolean allCorrect = incorrectFields.isEmpty();
-    //System.out.println("markReviewed : exercise " + completedExercise.getID() + " instance " + instance + " allCorrect " + allCorrect);
+    //System.out.println("markReviewed : exercise " + completedExercise.getOldID() + " instance " + instance + " allCorrect " + allCorrect);
 
-    service.markReviewed(completedExercise.getID(), allCorrect, controller.getUser(),
+    service.markReviewed(completedExercise.getOldID(), allCorrect, controller.getUser(),
         new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
@@ -315,7 +315,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
 
           @Override
           public void onSuccess(Void result) {
-            //System.out.println("\tmarkReviewed.onSuccess exercise " + completedExercise.getID() + " marked reviewed!");
+            //System.out.println("\tmarkReviewed.onSuccess exercise " + completedExercise.getOldID() + " marked reviewed!");
           }
         }
     );
@@ -441,7 +441,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
 
       List<AudioAttribute> audioAttributes = malesMap.get(user);
       for (AudioAttribute audio : audioAttributes) {
-     //   logger.info("addTabsForUsers for " + e.getID() + " got " + audio);
+     //   logger.info("addTabsForUsers for " + e.getOldID() + " got " + audio);
         if (!audio.isHasBeenPlayed()) allHaveBeenPlayed = false;
         Pair panelForAudio1 = getPanelForAudio(e, audio);
 
@@ -521,7 +521,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
 
     final Button male = makeGroupButton(buttonGroup, "MALE");
 
-    if (audio.getExid() == null) {
+    if (audio.getExid() == -1) {
       audio.setExid(exercise.getID());
     }
     male.addClickHandler(new ClickHandler() {
@@ -621,7 +621,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
   private Button makeGroupButton(ButtonGroup buttonGroup, String title) {
     Button onButton = new Button(title);
     onButton.getElement().setId("MaleFemale" + "_" + title);
-    controller.register(onButton, exercise.getID());
+    controller.register(onButton, exercise.getOldID());
     buttonGroup.add(onButton);
     return onButton;
   }
@@ -639,13 +639,13 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
     String audioRef = audio.getAudioRef();
     if (audioRef != null) {
       // if (logger == null) logger = Logger.getLogger("QCNPFExercise");
-      //   logger.info("getPanelForAudio path before for " + e.getID() + " : " +audioRef + " and " +audio);
+      //   logger.info("getPanelForAudio path before for " + e.getOldID() + " : " +audioRef + " and " +audio);
       audioRef = CompressedAudio.getPathNoSlashChange(audioRef);   // todo why do we have to do this?
       // logger.info("getPanelForAudio path after  " + audioRef);
     }
     String speed = audio.isRegularSpeed() ? " Regular speed" : " Slow speed";
     final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<T>(audioRef, e.getForeignLanguage(), service, controller,
-        controller.getProps().showSpectrogram(), scorePanel, 70, speed, e.getID(), e, instance);
+        controller.getProps().showSpectrogram(), scorePanel, 70, speed, e.getOldID(), e, instance);
     audioPanel.setShowColor(true);
     audioPanel.getElement().setId("ASRScoringAudioPanel");
     audioPanel.addPlayListener(new PlayListener() {
@@ -660,7 +660,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
         for (RememberTabAndContent tabAndContent : tabs) {
           tabAndContent.checkAllPlayed(audioWasPlayed);
         }
-        controller.logEvent(audioPanel, "qcPlayAudio", e.getID(), audio.getAudioRef());
+        controller.logEvent(audioPanel, "qcPlayAudio", e.getOldID(), audio.getAudioRef());
       }
 
       @Override
@@ -829,7 +829,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
     //System.out.println("checkBoxWasClicked : instance = '" +instance +"'");
 
     if (isCourseContent()) {
-      String id = exercise.getID();
+      String id = exercise.getOldID();
       // System.out.println("\tcheckBoxWasClicked : instance = '" +instance +"'");
       //if (instance.equalsIgnoreCase(Navigation.CLASSROOM)) {
       STATE state = incorrectFields.isEmpty() ? STATE.UNSET : STATE.DEFECT;
