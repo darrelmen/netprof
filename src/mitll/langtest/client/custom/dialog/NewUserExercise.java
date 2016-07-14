@@ -313,7 +313,7 @@ class NewUserExercise extends BasicDialog {
 
     delete.setType(ButtonType.WARNING);
     delete.addStyleName("floatRight");
-    controller.register(delete, newUserExercise.getOldID(), "Remove from list " + ul.getOldID() + "/" + ul.getName());
+    controller.register(delete, ""+ newUserExercise.getID(), "Remove from list " + ul.getID() + "/" + ul.getName());
     return delete;
   }
 
@@ -373,7 +373,7 @@ class NewUserExercise extends BasicDialog {
     translit.box.setText(newUserExercise.getTransliteration());
 
     // regular speed audio
-    rap.getPostAudioButton().setExercise(newUserExercise.getOldID());
+    rap.getPostAudioButton().setExercise(newUserExercise.getID());
     String refAudio = newUserExercise.getRefAudio();
 
     if (refAudio != null) {
@@ -381,7 +381,7 @@ class NewUserExercise extends BasicDialog {
     }
 
     // slow speed audio
-    rapSlow.getPostAudioButton().setExercise(newUserExercise.getOldID());
+    rapSlow.getPostAudioButton().setExercise(newUserExercise.getID());
     String slowAudioRef = newUserExercise.getSlowAudioRef();
 
     if (slowAudioRef != null) {
@@ -591,7 +591,7 @@ class NewUserExercise extends BasicDialog {
     Shell toMoveToEnd = moveNewExerciseToEndOfList(newExercise, exerciseList);
 
     exerciseList.clearCachedExercise(); // if we don't it will just use the cached exercise, if it's the current one
-    String id = toMoveToEnd.getOldID();
+    int id = toMoveToEnd.getID();
 
     logger.info("afterItemCreated checkAndAskServer " + id);
 
