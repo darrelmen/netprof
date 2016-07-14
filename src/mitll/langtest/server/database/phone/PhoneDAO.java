@@ -149,7 +149,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
    * @see Analysis#getPhonesForUser
    */
   @Override
-  public PhoneReport getWorstPhonesForResults(long userid, Collection<Integer> ids, Map<String, String> idToRef) {
+  public PhoneReport getWorstPhonesForResults(long userid, Collection<Integer> ids, Map<Integer, String> idToRef) {
     try {
       return getPhoneReport(getResultIDJoinSQL(userid, ids), idToRef, true, false);
     } catch (Exception e) {
@@ -166,7 +166,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
    * @see mitll.langtest.server.database.DatabaseImpl#getJsonPhoneReport
    * @see JsonSupport#getJsonPhoneReport(long, Map)
    */
-  public JSONObject getWorstPhonesJson(long userid, Collection<String> exids, Map<String, String> idToRef) {
+  public JSONObject getWorstPhonesJson(long userid, Collection<Integer> exids, Map<Integer, String> idToRef) {
     PhoneReport phoneReport = getPhoneReport(userid, exids, idToRef);
     logger.info("getWorstPhonesJson phone report " + phoneReport);
     return new PhoneJSON().getWorstPhonesJson(phoneReport);
@@ -178,7 +178,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
    * @param idToRef
    * @return
    */
-  protected PhoneReport getPhoneReport(long userid, Collection<String> exids, Map<String, String> idToRef) {
+  protected PhoneReport getPhoneReport(long userid, Collection<Integer> exids, Map<Integer, String> idToRef) {
     PhoneReport worstPhonesAndScore = null;
     try {
       worstPhonesAndScore = getPhoneReport(getJoinSQL(userid, exids), idToRef, false, true);
@@ -201,7 +201,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
    * @see #getPhoneReport(String, Map, boolean, boolean)
    */
   protected PhoneReport getPhoneReport(String sql,
-                                       Map<String, String> idToRef,
+                                       Map<Integer, String> idToRef,
                                        boolean addTranscript,
                                        boolean sortByLatestExample) throws SQLException {
  //   logger.debug("getPhoneReport query is\n" + sql);
@@ -254,13 +254,17 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
         totalItems++;
       }
 
-      WordAndScore wordAndScore = getAndRememberWordAndScore(idToRef, phoneToScores, phoneToWordAndScore,
-          exid, audioAnswer, scoreJson, resultTime,
-          wseq, word,
-          rid, phone, seq, phoneScore);
+      try {
+        WordAndScore wordAndScore = getAndRememberWordAndScore(idToRef, phoneToScores, phoneToWordAndScore,
+            Integer.parseInt(exid), audioAnswer, scoreJson, resultTime,
+            wseq, word,
+            rid, phone, seq, phoneScore);
 
-      if (addTranscript) {
-        addTranscript(stringToMap, scoreJson, wordAndScore);
+        if (addTranscript) {
+          addTranscript(stringToMap, scoreJson, wordAndScore);
+        }
+      } catch (NumberFormatException e) {
+        logger.warn("got " +e + " for " + exid);
       }
       //    } else {
      /*   logger.debug("------> current " + currentRID +
@@ -289,7 +293,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     return getJoinSQL(userid, filterClause);
   }
 
-  private String getJoinSQL(long userid, Collection<String> exids) {
+  private String getJoinSQL(long userid, Collection<Integer> exids) {
     String filterClause = ResultDAO.RESULTS + "." + Database.EXID + " in (" + getInList(exids) + ")";
     return getJoinSQL(userid, filterClause);
   }

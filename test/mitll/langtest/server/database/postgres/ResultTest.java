@@ -81,7 +81,7 @@ public class ResultTest extends BaseTest {
     logger.info(dao.getMonitorResults().size());
 
     List<String> ids = new ArrayList<>();
-    for (CommonExercise ex : spanish.getExercises()) ids.add(ex.getID());
+    for (CommonExercise ex : spanish.getExercises()) ids.add(ex.getOldID());
     List<String> strings = ids.subList(0, 100);
     logger.info(dao.getResultsForExIDInForUser(strings, 2, "").size());
     logger.info("match avp " +dao.getResultsForExIDInForUser(strings, true, 2).size());
@@ -102,7 +102,7 @@ public class ResultTest extends BaseTest {
     SlickResultDAO dao = (SlickResultDAO) spanish.getResultDAO();
 
     List<String> ids = new ArrayList<>();
-    for (CommonExercise ex : spanish.getExercises()) ids.add(ex.getID());
+    for (CommonExercise ex : spanish.getExercises()) ids.add(ex.getOldID());
     List<String> strings = ids.subList(0, 100);
 
     logger.info(dao.getResultsForExIDInForUser(strings, 2, "").size());

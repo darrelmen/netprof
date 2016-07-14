@@ -495,11 +495,13 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
         logger.warn("unknown audio type " + type + " at " + uniqueID);
       }
 
+      // NOTE : exercise id is not set - no backwards compatibility
+
       String validity = rs.getString(VALIDITY);
       if (validity == null) validity = "";
       Result result = new Result(uniqueID, userID, //id
           //    plan, // plan
-          exid, // id
+          -1,//exid, // id
           qid, // qid
           trimPathForWebPage2(answer), // answer
           valid, // valid
@@ -553,7 +555,8 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
       String exid = rs.getString(EXID);
       Timestamp timestamp = rs.getTimestamp(Database.TIME);
 
-      UserAndTime userAndTime = new MyUserAndTime(userID, exid, timestamp.getTime(), rs.getInt(QID));
+      int exid1 = -1; // NO backwards compatibility
+      UserAndTime userAndTime = new MyUserAndTime(userID, exid1, timestamp.getTime(), rs.getInt(QID));
 
       results.add(userAndTime);
     }
@@ -601,7 +604,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
           valid, // valid
           timestamp.getTime(),
           audioType, dur, correct, pronScore, device, processDur, roundTripDur, rs.getBoolean(WITH_FLASH),
-          snr, validity,dtype,simpleDevice,json,"");
+          snr, validity,dtype,simpleDevice,json,"", -1);
 
 /*      result.setDeviceType(dtype);
       result.setSimpleDevice(simpleDevice);
@@ -620,6 +623,8 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
   }
 
   /**
+   * NOTE: exercise id here is *not* set - no backward compatibility...
+   *
    * @param connection
    * @param statement
    * @return
@@ -640,7 +645,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
       String path = rs.getString(ANSWER);
       String json = rs.getString(SCORE_JSON);
 
-      CorrectAndScore result = new CorrectAndScore(uniqueID, userid, id, correct, pronScore, timestamp.getTime(),
+      CorrectAndScore result = new CorrectAndScore(uniqueID, userid, -1, correct, pronScore, timestamp.getTime(),
           trimPathForWebPage2(path), json);
       results.add(result);
     }
@@ -662,7 +667,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
    * @see DatabaseImpl#getNextUngradedExerciseSlow
    */
 /*  public boolean areAnyResultsLeftToGradeFor(CommonExercise e, int expected, boolean englishOnly) {
-    String exerciseID = e.getID();
+    String exerciseID = e.getOldID();
     GradeDAO.GradesAndIDs resultIDsForExercise = gradeDAO.getResultIDsForExercise(exerciseID);
     return !areAllResultsGraded(exerciseID, resultIDsForExercise.grades, expected, englishOnly);
   }*/

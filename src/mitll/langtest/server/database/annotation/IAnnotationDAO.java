@@ -42,11 +42,11 @@ import java.util.Set;
 public interface IAnnotationDAO extends IDAO {
   void add(UserAnnotation annotation);
 
-  boolean hasDefect(String exerciseID, String field, String status, String comment);
+  boolean hasDefect(int exerciseID, String field, String status, String comment);
 
-  Collection<String> getAudioAnnos();
+  Collection<Integer> getAudioAnnos();
 
-  Map<String, ExerciseAnnotation> getLatestByExerciseID(String exerciseID);
+  Map<String, ExerciseAnnotation> getLatestByExerciseID(int exerciseID);
 
-  Set<String> getExercisesWithIncorrectAnnotations();
+  Set<Integer> getExercisesWithIncorrectAnnotations();
 }

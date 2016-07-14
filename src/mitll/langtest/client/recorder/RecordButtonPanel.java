@@ -63,7 +63,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
   protected final RecordButton recordButton;
   private final LangTestDatabaseAsync service;
   private final ExerciseController controller;
-  private final String exerciseID;
+  private final int exerciseID;
   private final int index;
   private int reqid = 0;
   private Panel panel;
@@ -79,7 +79,8 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
    * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#FlashcardRecordButtonPanel
    */
   protected RecordButtonPanel(final LangTestDatabaseAsync service, final ExerciseController controller,
-                              final String exerciseID, final int index,
+                              final int exerciseID,
+                              final int index,
                               boolean doFlashcardAudio, AudioType audioType, String recordButtonTitle) {
     this.service = service;
     this.controller = controller;

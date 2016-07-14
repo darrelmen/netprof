@@ -120,7 +120,7 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
       addInstructions(numQuestions);
     } else if (e.getOrient() != null) {
       addInstructions("Orientation : " + e.getOrient(), true);
-      logger.info("AmasExercisePanel for " + e.getID() + " audio " + e.getAudioURL());
+      logger.info("AmasExercisePanel for " + e.getOldID() + " audio " + e.getAudioURL());
       add(new Heading(4, LISTEN_TO_THIS));
       add(getAudioTag(e));
     }
@@ -163,8 +163,8 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
 
   private void addInstructions(String text, boolean useLanguage) {
     DivWidget idInfoOnLeft = new DivWidget();
-    Widget itemHeader = AudioExerciseContent.getItemHeader(exerciseList.getIndex(exercise.getID()),
-        exerciseList.getSize(), exercise.getID());
+    Widget itemHeader = AudioExerciseContent.getItemHeader(exerciseList.getIndex(exercise.getOldID()),
+        exerciseList.getSize(), exercise.getOldID());
     idInfoOnLeft.add(itemHeader);
     itemHeader.addStyleName("floatLeft");
 
@@ -302,7 +302,7 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
     TabPanel tabPanel = new TabPanel();
     tabPanel.getWidget(0).getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
 
-    // logger.info("for " +e.getID() + " got " + e.getQuestions().size());
+    // logger.info("for " +e.getOldID() + " got " + e.getQuestions().size());
     for (QAPair pair : e.getQuestions()) {
       Tab tabPane = new Tab();
       tabPane.setHeading("Question #" + questionNumber);

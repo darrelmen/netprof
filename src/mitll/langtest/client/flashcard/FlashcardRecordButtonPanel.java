@@ -71,7 +71,7 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
   public FlashcardRecordButtonPanel(AudioAnswerListener exercisePanel,
                                     LangTestDatabaseAsync service,
                                     ExerciseController controller,
-                                    String exerciseID,
+                                    int exerciseID,
                                     int index) {
     super(service, controller, exerciseID, index, true, AudioType.PRACTICE, "Record");
    // this.instance = instance;

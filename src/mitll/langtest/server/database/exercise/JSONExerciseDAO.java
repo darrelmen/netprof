@@ -33,7 +33,7 @@
 package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.database.custom.UserListManager;
+import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.shared.exercise.CommonExercise;
 import org.apache.log4j.Logger;
@@ -67,7 +67,7 @@ public class JSONExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Comm
    */
   public JSONExerciseDAO(String file,
                          ServerProperties serverProps,
-                         UserListManager userListManager,
+                         IUserListManager userListManager,
                          boolean addDefects) {
     super(serverProps, userListManager, addDefects);
     this.jsonFile = file;

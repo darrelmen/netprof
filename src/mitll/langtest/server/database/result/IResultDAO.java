@@ -60,15 +60,16 @@ public interface IResultDAO extends IDAO {
 
   Collection<UserAndTime> getUserAndTimes();
 
-  SessionsAndScores getSessionsForUserIn2(Collection<String> ids, int latestResultID, int userid,
+  SessionsAndScores getSessionsForUserIn2(Collection<String> ids,
+                                          int latestResultID, int userid,
                                           Collection<String> allIds,
                                           Map<String, CollationKey> idToKey);
 
   <T extends CommonShell> List<T> getExercisesSortedIncorrectFirst(Collection<T> exercises, int userid, Collator collator);
 
   Collection<ExerciseCorrectAndScore> getExerciseCorrectAndScoresByPhones(int userid,
-                                                                          List<String> allIds,
-                                                                          Map<String, CommonExercise> idToEx,
+                                                                          List<Integer> allIds,
+                                                                          Map<Integer, CommonExercise> idToEx,
                                                                           ExerciseSorter sorter);
 
   SessionInfo getSessions();

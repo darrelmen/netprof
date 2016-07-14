@@ -45,11 +45,11 @@ import java.util.Map;
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 10/22/15.
  * @see mitll.langtest.client.analysis.PhoneExampleContainer
+ * @since 10/22/15.
  */
 public class WordAndScore implements Comparable<WordAndScore>, Serializable {
-  private String exid;
+  private int exid;
   private int wseq;
   private int seq;
   private String word;
@@ -73,7 +73,7 @@ public class WordAndScore implements Comparable<WordAndScore>, Serializable {
    * @param timestamp
    * @see PhoneDAO#getAndRememberWordAndScore(Map, Map, Map, String, String, String, long, int, String, long, String, int, float)
    */
-  public WordAndScore(String exid, String word, float score, long resultID, int wseq, int seq, String answerAudio,
+  public WordAndScore(int exid, String word, float score, long resultID, int wseq, int seq, String answerAudio,
                       String refAudio, String scoreJson, long timestamp) {
     this.exid = exid;
     this.word = word;
@@ -87,10 +87,12 @@ public class WordAndScore implements Comparable<WordAndScore>, Serializable {
     this.timestamp = timestamp;
   }
 
-  public WordAndScore() {}
+  public WordAndScore() {
+  }
 
   /**
    * Sort first by score
+   *
    * @param o
    * @return
    */
@@ -122,8 +124,8 @@ public class WordAndScore implements Comparable<WordAndScore>, Serializable {
   }
 
   /**
-   * @see PhoneExampleContainer#getItemColumn()
    * @return
+   * @see PhoneExampleContainer#getItemColumn()
    */
   public float getScore() {
     return score;
@@ -146,16 +148,16 @@ public class WordAndScore implements Comparable<WordAndScore>, Serializable {
   }
 
   /**
-   * @see PhoneDAO#setTranscript(WordAndScore, Map)
    * @param transcript
+   * @see PhoneDAO#setTranscript(WordAndScore, Map)
    */
   public void setTranscript(Map<NetPronImageType, List<TranscriptSegment>> transcript) {
     this.transcript = transcript;
   }
 
   /**
-   * @see PhoneExampleContainer#getItemColumn
    * @return
+   * @see PhoneExampleContainer#getItemColumn
    */
   public Map<NetPronImageType, List<TranscriptSegment>> getTranscript() {
     return transcript;
@@ -165,12 +167,7 @@ public class WordAndScore implements Comparable<WordAndScore>, Serializable {
     scoreJson = "";
   }
 
-  public String toString() {
-    return exid + " #" + getWseq() + " : " + getWord() + "\ts " + getScore() + "\tres " + getResultID() +
-        "\tanswer " + answerAudio + " ref " + refAudio;
-  }
-
-  public String getExid() {
+  public int getExid() {
     return exid;
   }
 
@@ -178,7 +175,8 @@ public class WordAndScore implements Comparable<WordAndScore>, Serializable {
     return timestamp;
   }
 
-//  public String getNativeAudio() {
-//    return nativeAudio;
-//  }
+  public String toString() {
+    return exid + " #" + getWseq() + " : " + getWord() + "\ts " + getScore() + "\tres " + getResultID() +
+        "\tanswer " + answerAudio + " ref " + refAudio;
+  }
 }

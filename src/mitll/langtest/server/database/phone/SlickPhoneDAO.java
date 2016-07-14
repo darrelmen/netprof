@@ -33,7 +33,6 @@
 package mitll.langtest.server.database.phone;
 
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.ISchema;
 import mitll.langtest.shared.analysis.PhoneAndScore;
 import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.WordAndScore;
@@ -45,7 +44,6 @@ import mitll.npdata.dao.SlickPhone;
 import mitll.npdata.dao.SlickPhoneReport;
 import mitll.npdata.dao.phone.PhoneDAOWrapper;
 import net.sf.json.JSONObject;
-import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 import java.util.Collection;
@@ -114,7 +112,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
    * @return
    */
   @Override
-  public JSONObject getWorstPhonesJson(long userid, Collection<String> exids, Map<String, String> idToRef) {
+  public JSONObject getWorstPhonesJson(long userid, Collection<Integer> exids, Map<Integer, String> idToRef) {
     Collection<SlickPhoneReport> phoneReportByResult = dao.getPhoneReportByExercises((int) userid, exids);
     PhoneReport report = getPhoneReport(phoneReportByResult, idToRef, false, true);
    // logger.info("getWorstPhonesJson phone report " + report);
@@ -131,7 +129,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
    * @throws SQLException
    */
   @Override
-  public PhoneReport getWorstPhonesForResults(long userid, Collection<Integer> ids, Map<String, String> idToRef) {
+  public PhoneReport getWorstPhonesForResults(long userid, Collection<Integer> ids, Map<Integer, String> idToRef) {
     Collection<SlickPhoneReport> phoneReportByResult = dao.getPhoneReportByResult((int) userid, ids);
     return getPhoneReport(phoneReportByResult, idToRef, true, false);
   }
@@ -149,12 +147,12 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
    * @see IPhoneDAO#getWorstPhonesForResults(long, Collection, Map)
    */
   protected PhoneReport getPhoneReport(Collection<SlickPhoneReport> phoneReportByResult,
-                                       Map<String, String> idToRef,
+                                       Map<Integer, String> idToRef,
                                        boolean addTranscript,
                                        boolean sortByLatestExample) {
     Map<String, List<PhoneAndScore>> phoneToScores = new HashMap<>();
 
-    String currentExercise = "";
+    int currentExercise = -1;
     Map<String, List<WordAndScore>> phoneToWordAndScore = new HashMap<>();
 
     float totalScore = 0;
@@ -168,11 +166,11 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 
      // logger.info("#"+ c + " : " + report);
       // info from result table
-      String exid = report.exid();
+      int exid = report.exid();
       String scoreJson = report.scorejson();
       float pronScore = report.pronScore();
 
-      if (!exid.equals(currentExercise)) {
+      if (exid != currentExercise) {
         currentExercise = exid;
       //  logger.debug("#" +c+  " adding " + exid + " score " + pronScore);
         totalScore += pronScore;
