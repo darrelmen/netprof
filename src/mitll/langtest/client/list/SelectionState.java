@@ -48,7 +48,7 @@ public class SelectionState {
   private final Logger logger = Logger.getLogger("SelectionState");
 
   static final String INSTANCE = "instance";
-  private String item = "";
+  private int item = -1;
   private final Map<String, Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
   private String instance = "";
   private String search = "";
@@ -102,7 +102,11 @@ public class SelectionState {
           String section = segments[1]/*.trim()*/;
 
           if (type.equals("#item") || type.equals("item")) {
-            setItem(section);
+            try {
+              setItem(Integer.parseInt(section));
+            } catch (NumberFormatException e) {
+              e.printStackTrace();
+            }
           } else if (type.equals("#search") || type.equals("search")) {
             search = section;
           } else {
@@ -142,11 +146,11 @@ public class SelectionState {
     getTypeToSection().put(type, copy);
   }
 
-  public String getItem() {
+  public int getItem() {
     return item;
   }
 
-  private void setItem(String item) {
+  private void setItem(int item) {
     this.item = item;
   }
 

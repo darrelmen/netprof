@@ -59,4 +59,5 @@ public interface EventRegistration {
   void logEvent(UIObject button, String widgetType, Shell ex, String context);
 
   void logEvent(UIObject button, String widgetType, String exid, String context);
+  void logEvent(UIObject button, String widgetType, int exid, String context);
 }

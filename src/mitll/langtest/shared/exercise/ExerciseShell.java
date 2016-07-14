@@ -81,7 +81,8 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
                         String meaning,
                         String foreignLanguage,
                         String transliteration,
-                        int dominoID, int realID) {
+                        int dominoID,
+                        int realID) {
     super(id, realID);
     this.english = english;
     this.meaning = meaning;
