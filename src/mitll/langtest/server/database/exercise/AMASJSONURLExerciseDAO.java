@@ -82,7 +82,7 @@ public class AMASJSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImp
    * @param exercises
    */
   private void populateIDToExercise(Collection<AmasExerciseImpl> exercises) {
-    for (AmasExerciseImpl e : exercises) idToExercise.put(e.getID(), e);
+    for (AmasExerciseImpl e : exercises) idToExercise.put(e.getOldID(), e);
   }
 
   /**

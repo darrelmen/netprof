@@ -313,7 +313,7 @@ public class Report {
   private void getReportForProject(String language, JSONObject jsonObject, int year, StringBuilder builder, int projid) {
     List<SlickSlimEvent> allSlim = eventDAO.getAllSlim(projid);
     List<SlickSlimEvent> allDevicesSlim = eventDAO.getAllDevicesSlim(projid);
-    Map<String, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
+    Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
     Collection<AudioAttribute> audioAttributes = audioDAO.getAudioAttributes();
     List<Result> results = resultDAO.getResults();
     Collection<Result> resultsDevices = resultDAO.getResultsDevices();
@@ -345,7 +345,7 @@ public class Report {
   private void addYear(JSONArray dataArray, StringBuilder builder, int i,
                        List<SlickSlimEvent> allSlim,
                        List<SlickSlimEvent> allDevicesSlim,
-                       Map<String, List<AudioAttribute>> exToAudio,
+                       Map<Integer, List<AudioAttribute>> exToAudio,
                        Collection<AudioAttribute> audioAttributes,
                        Collection<Result> results,
                        Collection<Result> resultsDevices) {
@@ -365,7 +365,7 @@ public class Report {
   private String getReport(JSONObject jsonObject, int year,
                            List<SlickSlimEvent> allSlim,
                            List<SlickSlimEvent> allDevicesSlim,
-                           Map<String, List<AudioAttribute>> exToAudio,
+                           Map<Integer, List<AudioAttribute>> exToAudio,
                            Collection<AudioAttribute> audioAttributes,
                            Collection<Result> results,
                            Collection<Result> resultsDevices) {
@@ -1010,23 +1010,24 @@ public class Report {
                           Set<Integer> students,
                           JSONObject jsonObject,
                           int year,
-                          Map<String, List<AudioAttribute>> exToAudio,
+                          Map<Integer, List<AudioAttribute>> exToAudio,
                           Collection<Result> results) {
     getResultsForSet(builder, students, results, ALL_RECORDINGS, jsonObject, year, exToAudio);
   }
 
   private void getResultsDevices(StringBuilder builder, Set<Integer> students,
                                  JSONObject jsonObject, int year,
-                                 Map<String, List<AudioAttribute>> exToAudio,
+                                 Map<Integer, List<AudioAttribute>> exToAudio,
                                  Collection<Result> results) {
     getResultsForSet(builder, students, results, DEVICE_RECORDINGS, jsonObject, year, exToAudio);
   }
 
-  private void getResultsForSet(StringBuilder builder, Set<Integer> students,
+  private void getResultsForSet(StringBuilder builder,
+                                Set<Integer> students,
                                 Collection<Result> results,
                                 String recordings,
                                 JSONObject jsonObject, int year,
-                                Map<String, List<AudioAttribute>> exToAudio) {
+                                Map<Integer, List<AudioAttribute>> exToAudio) {
     YearTimeRange yearTimeRange = new YearTimeRange(year, getCalendarForYear(year)).invoke();
 
     int ytd = 0;
@@ -1041,7 +1042,7 @@ public class Report {
     int invalidScore = 0;
 
     int beforeJanuary = 0;
-    Set<Long> skipped = new TreeSet<>();
+    Set<Integer> skipped = new TreeSet<>();
     try {
       BufferedWriter writer = null;
       teacherAudio = 0;
@@ -1054,7 +1055,7 @@ public class Report {
         if (yearTimeRange.inYear(timestamp)) {
           if (result.isValid()) {
             if (!isRefAudioResult(exToAudio, result)) {
-              long userid = result.getUserid();
+              int userid = result.getUserid();
               if (students.contains(userid)) {
                 //if (result.getAudioType().equals("unset") || result.getAudioType().equals("_by_WebRTC")) {
                 if (result.getPronScore() > -1) {
@@ -1236,7 +1237,7 @@ public class Report {
    * @return
    * @see #getResults
    */
-  private boolean isRefAudioResult(Map<String, List<AudioAttribute>> exToAudio, Result result) {
+  private boolean isRefAudioResult(Map<Integer, List<AudioAttribute>> exToAudio, Result result) {
     boolean skip = false;
     List<AudioAttribute> audioAttributes = exToAudio.get(result.getExerciseID());
     if (audioAttributes != null) {

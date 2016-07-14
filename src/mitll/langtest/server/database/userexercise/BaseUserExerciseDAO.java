@@ -34,7 +34,7 @@ package mitll.langtest.server.database.userexercise;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.custom.UserListManager;
+import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -62,7 +62,7 @@ public class BaseUserExerciseDAO extends DAO {
   void enrichWithPredefInfo(List<CommonShell> userExercises2, Collection<CommonExercise> userExercises) {
     int c = 0;
     for (CommonExercise ue : userExercises) {
-      // if (DEBUG) logger.debug("\ton list " + listID + " " + ue.getID() + " / " + ue.getUniqueID() + " : " + ue);
+      // if (DEBUG) logger.debug("\ton list " + listID + " " + ue.getOldID() + " / " + ue.getUniqueID() + " : " + ue);
       if (ue.isPredefined()) {
         CommonExercise byID = getExercise(ue);
 
@@ -76,7 +76,7 @@ public class BaseUserExerciseDAO extends DAO {
 
         } else {
           if (c++ < 10)
-            logger.error("getOnList: huh can't find user exercise '" + ue.getID() + "'");
+            logger.error("getOnList: huh can't find user exercise '" + ue.getOldID() + "'");
         }
       } else {
         userExercises2.add(ue);
@@ -88,7 +88,7 @@ public class BaseUserExerciseDAO extends DAO {
   /**
    * @param ue
    * @return
-   * @see #getOnList
+   * @see #enrichWithPredefInfo
    */
   private CommonExercise getExercise(HasID ue) {
     return getPredefExercise(ue.getID());
@@ -97,7 +97,7 @@ public class BaseUserExerciseDAO extends DAO {
   /**
    * @param exid
    * @return
-   * @see UserListManager#getReviewedUserExercises(java.util.Map, Collection)
+   * @see IUserListManager#getReviewedUserExercises
    */
   public CommonExercise getPredefExercise(int exid) {
     return exerciseDAO.getExercise(exid);

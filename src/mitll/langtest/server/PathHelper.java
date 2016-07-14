@@ -137,14 +137,14 @@ public class PathHelper {
    */
 
   public String getLocalPathToAnswer(AudioContext audioContext) {
-    return getLocalPathToAnswer(audioContext.getId(), audioContext.getQuestionID(), audioContext.getUserid());
+    return getLocalPathToAnswer(audioContext.getExid(), audioContext.getQuestionID(), audioContext.getUserid());
   }
 
-  private String getLocalPathToAnswer(String exercise, int question, int user) {
+  private String getLocalPathToAnswer(int exercise, int question, int user) {
     return getLocalPathToAnswer(PLAN, exercise, question, user);
   }
 
-  String getLocalPathToAnswer(String plan, String exercise, int question, int user) {
+  String getLocalPathToAnswer(String plan, int exercise, int question, int user) {
     String planAndTestPath = plan + File.separator + exercise + File.separator + question + File.separator + "subject-" + user;
     return getWavPath(getTomcatDir(), planAndTestPath);
   }

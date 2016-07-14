@@ -49,7 +49,7 @@ public interface IAudioDAO extends IDAO {
   AudioAttribute addOrUpdate(int userid, String exerciseID, AudioType audioType, String audioRef, long timestamp,
                              long durationInMillis, String transcript);
 
-  Map<String, List<AudioAttribute>> getExToAudio();
+  Map<Integer, List<AudioAttribute>> getExToAudio();
 
   Collection<AudioAttribute> getAudioAttributes();
 
@@ -65,7 +65,7 @@ public interface IAudioDAO extends IDAO {
   Map<String, Float> getRecordedReport(Map<Integer, User> userMapMales,
                                        Map<Integer, User> userMapFemales,
                                        float total,
-                                       Set<String> uniqueIDs,
+                                       Set<Integer> uniqueIDs,
                                        float totalContext);
 
   /**

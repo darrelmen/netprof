@@ -120,7 +120,7 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
    * @see FlexListLayout#getFactory(PagingExerciseList)
    */
   public <T extends CommonExercise> UserExercise(T exercise, int creatorID) {
-    super(exercise.getID(), exercise.getRealID());
+    super(exercise.getOldID(), exercise.getID());
     this.isPredef = true;
     this.english = exercise.getEnglish();
     this.foreignLanguage = exercise.getForeignLanguage();
@@ -253,7 +253,7 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getCreateButton(UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, com.github.gwtbootstrap.client.ui.ControlGroup)
    */
   public boolean checkPredef() {
-    return !getID().startsWith(CUSTOM_PREFIX);
+    return !getOldID().startsWith(CUSTOM_PREFIX);
   }
 
   public List<CorrectAndScore> getScores() {
@@ -311,7 +311,7 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
 
   public String toString() {
     return "UserExercise" +
-        " #" + getRealID() + "/" + getID() +
+        " #" + getID() + "/" + getOldID() +
         (isPredef ? " <Predef>" : " <User>") +
         (isOverride ? " <Override>" : "") +
         " creator " + getCreator() +

@@ -154,7 +154,7 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
         long now = System.currentTimeMillis();
         logger.info("PostAudioRecordButton : (failure) posting audio took " + (now - then) + " millis");
 
-        logMessage("failed to post audio for " + controller.getUser());// + " exercise " + exercise.getID());
+        logMessage("failed to post audio for " + controller.getUser());// + " exercise " + exercise.getOldID());
         showPopup(AudioAnswer.Validity.INVALID.getPrompt());
       }
 
