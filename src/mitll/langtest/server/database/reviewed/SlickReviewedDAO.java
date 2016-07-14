@@ -78,17 +78,17 @@ public class SlickReviewedDAO extends DAO implements IReviewedDAO {
   }
 
   @Override
-  public void remove(String exerciseID) {
+  public void remove(int exerciseID) {
     int i = dao.deleteByExID(exerciseID);
     if (i == 0) logger.error("didn't delete reviewed by exercise " + exerciseID);
   }
 
   @Override
-  public void setState(String exerciseID, STATE state, long creatorID) {
+  public void setState(int exerciseID, STATE state, long creatorID) {
     dao.insert(toSlick(exerciseID, state, (int) creatorID));
   }
 
-  private SlickReviewed toSlick(String exerciseID, STATE state, int creatorID) {
+  private SlickReviewed toSlick(int exerciseID, STATE state, int creatorID) {
     long time = System.currentTimeMillis();
     return new SlickReviewed(-1, creatorID, exerciseID, new Timestamp(time), state.toString());
   }
@@ -99,7 +99,7 @@ public class SlickReviewedDAO extends DAO implements IReviewedDAO {
   }
 
   @Override
-  public STATE getCurrentState(String exerciseID) {
+  public STATE getCurrentState(int exerciseID) {
     Map<String, StateCreator> exerciseToState = getStateForEx(false, exerciseID);
     if (exerciseToState.isEmpty()) return STATE.UNSET;
     else return exerciseToState.values().iterator().next().getState();
@@ -121,7 +121,7 @@ public class SlickReviewedDAO extends DAO implements IReviewedDAO {
   }
 
   @Override
-  public Collection<String> getDefectExercises() {
+  public Collection<Integer> getDefectExercises() {
     Map<String, StateCreator> exerciseToState = getExerciseToState(true);
     Set<String> ids = new HashSet<>();
     for (Map.Entry<String, StateCreator> pair : exerciseToState.entrySet()) {

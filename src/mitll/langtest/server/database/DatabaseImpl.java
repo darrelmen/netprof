@@ -50,6 +50,7 @@ import mitll.langtest.server.database.connection.MySQLConnection;
 import mitll.langtest.server.database.connection.PostgreSQLConnection;
 import mitll.langtest.server.database.contextPractice.ContextPracticeImport;
 import mitll.langtest.server.database.custom.AddRemoveDAO;
+import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.exercise.*;
 import mitll.langtest.server.database.instrumentation.IEventDAO;
@@ -139,7 +140,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
   private IAudioDAO audioDAO;
   private IAnswerDAO answerDAO;
-  private UserListManager userListManager;
+  private IUserListManager userListManager;
 
   private IUserExerciseDAO userExerciseDAO;
   // private AddRemoveDAO addRemoveDAO;
@@ -305,7 +306,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     userDAO.findOrMakeDefectDetector();
 
     try {
-      userListManager.setUserExerciseDAO(userExerciseDAO);
+      ((UserListManager)userListManager).setUserExerciseDAO(userExerciseDAO);
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
@@ -450,9 +451,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   /**
    * @param id
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getResultASRInfo(long, int, int)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getResultASRInfo
    * @see mitll.langtest.server.DownloadServlet#getFilenameForDownload(DatabaseImpl, String, String)
-   * @see #deleteItem(String)
+   * @see #deleteItem(int)
    * @see #getCustomOrPredefExercise(int)
    */
   public CommonExercise getExercise(int id) {
@@ -608,7 +609,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     boolean notOverlay = exercise == null;
     if (notOverlay) {
       // not an overlay! it's a new user exercise
-      exercise = getUserExerciseByExID(userExercise.getRealID());
+      exercise = getUserExerciseByExID(userExercise.getID());
       logger.debug("not an overlay " + exercise);
     } else {
       exercise = userExercise;
@@ -629,7 +630,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       }
 
       // why would this make sense to do???
-/*      String overlayID = exercise.getID();
+/*      String overlayID = exercise.getOldID();
 
       logger.debug("editItem copying " + original.size() + " audio attrs under exercise overlay id " + overlayID);
 
@@ -973,7 +974,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     List<MonitorResult> monitorResults = resultDAO.getMonitorResults();
 
     for (MonitorResult result : monitorResults) {
-      CommonShell exercise = isAmas() ? getAMASExercise(result.getExID()) : getExercise(result.getExID());
+      int exID = result.getExID();
+      CommonShell exercise = isAmas() ? getAMASExercise(exID) : getExercise(exID);
       if (exercise != null) {
         result.setDisplayID("" + exercise.getDominoID());
       }
@@ -999,12 +1001,13 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @param join
    * @see DatabaseImpl#getMonitorResultsWithText
    */
-  private void addUnitAndChapterToResults(Collection<MonitorResult> monitorResults, Map<String, CommonExercise> join) {
+  private void addUnitAndChapterToResults(Collection<MonitorResult> monitorResults,
+                                          Map<Integer, CommonExercise> join) {
     int n = 0;
-    Set<String> unknownIDs = new HashSet<>();
+    Set<Integer> unknownIDs = new HashSet<>();
     for (MonitorResult result : monitorResults) {
-      String id = result.getExID();
-      if (id.contains("\\/")) id = id.substring(0, id.length() - 2);
+      int id = result.getExID();
+     // if (id.contains("\\/")) id = id.substring(0, id.length() - 2);
       CommonExercise exercise = join.get(id);
       if (exercise == null) {
         if (n < 5) {
@@ -1025,8 +1028,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     }
   }
 
-  private Map<String, CommonExercise> getIdToExerciseMap() {
-    Map<String, CommonExercise> join = new HashMap<>();
+  private Map<Integer, CommonExercise> getIdToExerciseMap() {
+    Map<Integer, CommonExercise> join = new HashMap<>();
 
     for (CommonExercise exercise : getExercises()) {
       join.put(exercise.getID(), exercise);
@@ -1042,11 +1045,11 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
   /**
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getPerformanceForUser(long, int)
+   * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceForUser
    * @see DatabaseImpl#makeDAO(String, String, String)
    */
-  public Map<String, String> getExerciseIDToRefAudio() {
-    Map<String, String> join = new HashMap<>();
+  public Map<Integer, String> getExerciseIDToRefAudio() {
+    Map<Integer, String> join = new HashMap<>();
     populateIDToRefAudio(join, getExercises());
     Collection<CommonExercise> all = userExerciseDAO.getAll();
     exerciseDAO.attachAudio(all);
@@ -1054,13 +1057,13 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return join;
   }
 
-  private <T extends Shell & AudioAttributeExercise> void populateIDToRefAudio(Map<String, String> join, Collection<CommonExercise> all) {
+  private <T extends Shell & AudioAttributeExercise> void populateIDToRefAudio(Map<Integer, String> join, Collection<CommonExercise> all) {
     for (CommonExercise exercise : all) {
       String refAudio = exercise.getRefAudio();
       if (refAudio == null) {
         //   logger.warn("getExerciseIDToRefAudio huh? user exercise : no ref audio for " +id);
       } else {
-        String id = exercise.getID();
+        int id = exercise.getID();
         join.put(id, refAudio);
       }
     }
@@ -1082,7 +1085,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @return
    * @see mitll.langtest.server.audio.AudioFileHelper#getRefAudioAnswerDecoding
    */
-  public long addRefAnswer(int userID, String exerciseID,
+  public long addRefAnswer(int userID, int exerciseID,
                            String audioFile,
                            long durationInMillis, boolean correct,
                            DecodeAlignOutput alignOutput,
@@ -1117,7 +1120,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     }
   }
 
-  public UserListManager getUserListManager() {
+  public IUserListManager getUserListManager() {
     return userListManager;
   }
 
@@ -1147,7 +1150,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
     AddRemoveDAO addRemoveDAO = getAddRemoveDAO();
     if (addRemoveDAO != null) {
-      addRemoveDAO.add(duplicate.getID(), AddRemoveDAO.ADD);
+      logger.warn("call domino to add the new item");
+      //addRemoveDAO.add(duplicate.getOldID(), AddRemoveDAO.ADD);
     } else {
       logger.warn("add remove not implemented yet!");
     }
@@ -1163,21 +1167,22 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   }
 
   /**
-   * @param id
+   * @param exid
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#deleteItem(String)
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#deleteItem
    */
-  public boolean deleteItem(String id) {
+  public boolean deleteItem(int exid) {
     AddRemoveDAO addRemoveDAO = getAddRemoveDAO();
-    if (addRemoveDAO != null)
-      addRemoveDAO.add(id, AddRemoveDAO.REMOVE);
+    if (addRemoveDAO != null) {
+     // addRemoveDAO.add(exid, AddRemoveDAO.REMOVE);
+    }
     else {
       logger.warn("add remove not implemented yet!");
     }
-    getUserListManager().removeReviewed(id);
-    getSectionHelper().removeExercise(getExercise(id));
-    return getExerciseDAO().remove(id);
+    getUserListManager().removeReviewed(exid);
+    getSectionHelper().removeExercise(getExercise(exid));
+    return getExerciseDAO().remove(exid);
   }
 
   /**
@@ -1300,7 +1305,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       long now = System.currentTimeMillis();
       logger.debug("\nTook " + (now - then) + " millis to annotate and attach.");
       new AudioExport(getServerProps()).writeZip(out, userListByID.getName(), getSectionHelper(), copyAsExercises, language,
-          getAudioDAO(), installPath, configDir, listid == UserListManager.REVIEW_MAGIC_ID);
+          getAudioDAO(), installPath, configDir, listid == IUserListManager.REVIEW_MAGIC_ID);
     }
     return language + "_" + userListByID.getName();
   }
@@ -1323,7 +1328,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   public void attachAllAudio() {
     IAudioDAO audioDAO = getAudioDAO();
 
-    Map<String, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
+    Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
 
     long then = System.currentTimeMillis();
     Collection<CommonExercise> exercises = getExercises();
@@ -1495,7 +1500,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
     Collection<CommonExercise> exercises = getExercises();
     float total = exercises.size();
-    Set<String> uniqueIDs = new HashSet<String>();
+    Set<Integer> uniqueIDs = new HashSet<>();
 
     int context = 0;
     for (CommonExercise shell : exercises) {
@@ -1519,12 +1524,12 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    */
   public Map<String, Float> getH2MaleFemaleProgress() {
     IUserDAO userDAO = getUserDAO();
-    Map<Integer, User> userMapMales = userDAO.getUserMap(true);
+    Map<Integer, User> userMapMales   = userDAO.getUserMap(true);
     Map<Integer, User> userMapFemales = userDAO.getUserMap(false);
 
     Collection<CommonExercise> exercises = getExercises();
     float total = exercises.size();
-    Set<String> uniqueIDs = new HashSet<String>();
+    Set<Integer> uniqueIDs = new HashSet<>();
 
     int context = 0;
     for (CommonExercise shell : exercises) {

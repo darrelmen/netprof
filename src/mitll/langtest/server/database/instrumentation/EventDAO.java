@@ -266,7 +266,7 @@ public class EventDAO extends DAO implements IEventDAO {
 
   @Override
   public void addPlayedMarkings(int userID, CommonExercise firstExercise) {
-    List<Event> allForUserAndExercise = getAllForUserAndExercise(userID, firstExercise.getID());
+    List<Event> allForUserAndExercise = getAllForUserAndExercise(userID, firstExercise.getOldID());
     Map<String, AudioAttribute> audioToAttr = firstExercise.getAudioRefToAttr();
     for (Event event : allForUserAndExercise) {
       AudioAttribute audioAttribute = audioToAttr.get(event.getContext());

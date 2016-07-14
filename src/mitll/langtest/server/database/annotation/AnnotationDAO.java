@@ -33,7 +33,6 @@
 package mitll.langtest.server.database.annotation;
 
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.ExerciseAnnotation;
 import org.apache.log4j.Logger;
@@ -53,12 +52,12 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
   private static final String MODIFIED = "modified";
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    * @param database
    * @param userDAO
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
   public AnnotationDAO(Database database, IUserDAO userDAO) {
-    super(database,userDAO.getDefectDetector());
+    super(database, userDAO.getDefectDetector());
     try {
       createTable(database);
 //      populate(userDAO.getDefectDetector());
@@ -68,8 +67,9 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
   }
 
   /**
-   *   String exerciseID; String field; String status; String comment;
+   * String exerciseID; String field; String status; String comment;
    * String userID;
+   *
    * @param database
    * @throws SQLException
    */
@@ -108,24 +108,24 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
    * <p/>
    * Uses return generated keys to get the user id
    *
-   * @see UserListManager#addAnnotation(String, String, String, String, int)
+   * @see UserListManager#addAnnotation(int, String, String, String, int)
    */
   @Override
   public void add(UserAnnotation annotation) {
     try {
       Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement = connection.prepareStatement(
-        "INSERT INTO " + ANNOTATION +
-          "(" +
-          CREATORID +
-          ",exerciseid,field," +
-          STATUS +
-          ",modified,comment) " +
-          "VALUES(?,?,?,?,?,?);");
+          "INSERT INTO " + ANNOTATION +
+              "(" +
+              CREATORID +
+              ",exerciseid,field," +
+              STATUS +
+              ",modified,comment) " +
+              "VALUES(?,?,?,?,?,?);");
       int i = 1;
 
       statement.setLong(i++, annotation.getCreatorID());
-      statement.setString(i++, annotation.getExerciseID());
+      statement.setString(i++, annotation.getOldExID());
       statement.setString(i++, annotation.getField());
       statement.setString(i++, annotation.getStatus());
       statement.setTimestamp(i++, new Timestamp(System.currentTimeMillis()));
@@ -138,7 +138,7 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
       }
 
       finish(connection, statement);
-    //  logger.debug("now " + getCount(ANNOTATION) + " and user exercise is " + annotation);
+      //  logger.debug("now " + getCount(ANNOTATION) + " and user exercise is " + annotation);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
@@ -156,12 +156,12 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
   /**
    * Pulls the list of users out of the database.
    *
-   * @return
    * @param userid
+   * @return
    */
   protected List<UserAnnotation> getAll(int userid) {
     try {
-      String sql = "SELECT * from " + ANNOTATION + " where " + CREATORID +"="+userid;
+      String sql = "SELECT * from " + ANNOTATION + " where " + CREATORID + "=" + userid;
       return getUserAnnotations(sql);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
@@ -171,11 +171,12 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
 
   /**
    * TODO: Ought to be able to make a sql query that only returns the latest item for a exercise-field pair...
+   *
    * @return
    * @see mitll.langtest.server.database.custom.UserListManager#getAudioAnnos
    */
   @Override
-  public Collection<String> getAudioAnnos() {
+  public Collection<Integer> getAudioAnnos() {
 /*    String sql = "SELECT " +
         EXERCISEID+ "," +
         FIELD+ "," +
@@ -217,13 +218,13 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addAnnotations
-   * @see UserListManager#addAnnotations
    * @param exerciseID
    * @return
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addAnnotations
+   * @see UserListManager#addAnnotations
    */
   @Override
-  public Map<String, ExerciseAnnotation> getLatestByExerciseID(String exerciseID) {
+  public Map<String, ExerciseAnnotation> getLatestByExerciseID(int exerciseID) {
     String sql = "SELECT * from " + ANNOTATION + " where " +
         EXERCISEID +
         "='" + exerciseID + "' order by field,modified desc";
@@ -236,7 +237,7 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
   }
 
   @Override
-  public Set<String> getExercisesWithIncorrectAnnotations() {
+  public Set<Integer> getExercisesWithIncorrectAnnotations() {
     return getAnnotationExToCreator(true).keySet();
   }
 
@@ -259,12 +260,13 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
 
     while (rs.next()) {
       lists.add(new UserAnnotation(
-              rs.getString(EXERCISEID),
+              -1,
               rs.getString(FIELD),
               rs.getString(STATUS),
               rs.getString("comment"),
               rs.getLong(CREATORID),
-              rs.getTimestamp(MODIFIED).getTime()
+              rs.getTimestamp(MODIFIED).getTime(),
+              rs.getString(EXERCISEID)
           )
       );
     }
@@ -277,12 +279,12 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
   protected Map<String, Long> getAnnotationExToCreator(boolean forDefects) {
     Connection connection = database.getConnection(this.getClass().toString());
 
-    String sql2 = "select exerciseid,field," +STATUS +"," +CREATORID +
-      " from annotation " +
-        "group by exerciseid,field," + STATUS +",modified " +
+    String sql2 = "select exerciseid,field," + STATUS + "," + CREATORID +
+        " from annotation " +
+        "group by exerciseid,field," + STATUS + ",modified " +
         "order by exerciseid,field,modified;";
 
-    Map<String,Long> exToCreator = Collections.emptyMap();
+    Map<String, Long> exToCreator = Collections.emptyMap();
     try {
       PreparedStatement statement = connection.prepareStatement(sql2);
       ResultSet rs = statement.executeQuery();
@@ -290,7 +292,7 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
       String prevExid = "";
       long prevCreatorid = -1;
 
-      Map<String,String> fieldToStatus = new HashMap<String, String>();
+      Map<String, String> fieldToStatus = new HashMap<String, String>();
       while (rs.next()) {
         String exid = rs.getString(1);
         String field = rs.getString(2);
@@ -304,7 +306,7 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
           // go through all the fields -- if the latest is "incorrect" on any field, it's a defect
           //examineFields(forDefects, lists, prevExid, fieldToStatus);
           if (examineFields(forDefects, fieldToStatus)) {
-            exToCreator.put(prevExid,creatorid);
+            exToCreator.put(prevExid, creatorid);
           }
           fieldToStatus.clear();
           prevExid = exid;
@@ -315,7 +317,7 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
       }
 
       if (examineFields(forDefects, fieldToStatus)) {
-        exToCreator.put(prevExid,prevCreatorid);
+        exToCreator.put(prevExid, prevCreatorid);
       }
 
       //logger.debug("getUserAnnotations forDefects " +forDefects+ " sql " + sql2 + " yielded " + exToCreator.size());
@@ -326,7 +328,7 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
 
       finish(connection, statement, rs);
     } catch (SQLException e) {
-      logger.error("Got " +e + " doing " + sql2,e);
+      logger.error("Got " + e + " doing " + sql2, e);
     }
     return exToCreator;
   }

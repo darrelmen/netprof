@@ -95,7 +95,7 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseShells(java.util.Collection)
    */
   public CommonShell getShell() {
-    return new ExerciseShell(getID(), english, meaning, foreignLanguage, transliteration, dominoID, getRealID());
+    return new ExerciseShell(getOldID(), english, meaning, foreignLanguage, transliteration, dominoID, getID());
   }
 
   public String getEnglish() {
@@ -115,8 +115,8 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
   @Override
   public boolean equals(Object other) {
     return other instanceof ExerciseShell &&
-        (getID().equals(((ExerciseShell) other).getID()) ||
-            (getRealID() == ((ExerciseShell) other).getRealID())
+        (getOldID().equals(((ExerciseShell) other).getOldID()) ||
+            (getID() == ((ExerciseShell) other).getID())
         );
   }
 
@@ -147,6 +147,6 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
   }
 
   public String toString() {
-    return "Exercise id = " + getID() + "/" + getRealID() + " : " + getEnglish() + " states " + getState() + "/" + getSecondState();
+    return "Exercise id = " + getOldID() + "/" + getID() + " : " + getEnglish() + " states " + getState() + "/" + getSecondState();
   }
 }

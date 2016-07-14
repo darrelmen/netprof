@@ -74,7 +74,7 @@ public class PrevNextList<T extends Shell> extends HorizontalPanel {
     this.prev = new Button("Previous");
     prev.getElement().setId("PrevNextList_Previous");
 
-    controller.register(prev,exercise.getID());
+    controller.register(prev,exercise.getOldID());
     prev.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         clickPrev();
@@ -89,7 +89,7 @@ public class PrevNextList<T extends Shell> extends HorizontalPanel {
   private void makeNextButton(final T exercise) {
     this.next = new Button("Next");
     next.getElement().setId("nextButton");
-    controller.register(next,exercise.getID());
+    controller.register(next,exercise.getOldID());
 
     next.setType(ButtonType.SUCCESS);
     next.setEnabled(!disableNext || !container.onLast(exercise));

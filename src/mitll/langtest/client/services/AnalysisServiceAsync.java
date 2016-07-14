@@ -51,6 +51,6 @@ public interface AnalysisServiceAsync {
 
   void getPhoneScores(int id, int minRecordings, AsyncCallback<PhoneReport> async);
 
-  void getShells(List<String> ids, AsyncCallback<List<CommonShell>> async);
+  void getShells(List<Integer> ids, AsyncCallback<List<CommonShell>> async);
 
 }
