@@ -122,6 +122,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
   private final float screenPortion;
   protected final String instance;
   private boolean hasClickable = false;
+  private boolean isJapanese = false;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -144,7 +145,8 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     this.instance = instance;
     String language = controller.getLanguage();
 
-    this.hasClickable = language.equalsIgnoreCase(MANDARIN) || language.equals(KOREAN) || language.equalsIgnoreCase(JAPANESE);
+    isJapanese = language.equalsIgnoreCase(JAPANESE);
+    this.hasClickable = language.equalsIgnoreCase(MANDARIN) || language.equals(KOREAN) || isJapanese;
     setWidth("100%");
     //   addStyleName("inlineBlockStyle");
     getElement().setId("GoodwaveExercisePanel");
@@ -422,7 +424,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     horizontal.getElement().getStyle().setDisplay(Style.Display.INLINE);
 
     List<String> tokens = new ArrayList<>();
-    boolean flLine = label.contains(SAY) || label.contains(TRANSLITERATION);
+    boolean flLine = label.contains(SAY) || (isJapanese && label.contains(TRANSLITERATION));
     boolean isChineseCharacter = flLine && hasClickable;
     if (isChineseCharacter) {
       for (int i = 0, n = value.length(); i < n; i++) {
