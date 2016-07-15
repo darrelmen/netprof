@@ -74,7 +74,7 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
   private static final int COL_WIDTH = 130;
   private static final String CORRECT_INCORRECT_HISTORY_AND_AVERAGE_PRONUNCIATION_SCORE = "Correct/Incorrect history and average pronunciation score";
 
-  private final Map<String, CommonShell> idToExercise = new HashMap<>();
+  private final Map<Integer, CommonShell> idToExercise = new HashMap<>();
   private final ExerciseComparator sorter;
 
   public ScoreHistoryContainer(ExerciseController controller, Collection<? extends CommonShell> allExercises) {
@@ -84,7 +84,7 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
     sorter = new ExerciseComparator(controller.getStartupInfo().getTypeOrder());
 
     for (CommonShell commonShell : allExercises) {
-      idToExercise.put(commonShell.getOldID(), commonShell);
+      idToExercise.put(commonShell.getID(), commonShell);
     }
   }
 
@@ -230,7 +230,7 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
                 if (i == 0) {
                   CommonShell shell1 = idToExercise.get(o1.getId());
                   CommonShell shell2 = idToExercise.get(o2.getId());
-                  if (o1.getId().equals(o2.getId())) logger.warning("same id " + o1.getId());
+                  if (o1.getId() == o2.getId()) logger.warning("same id " + o1.getId());
                   return shell1.getEnglish().compareTo(shell2.getEnglish());
                 }
                 else {
@@ -294,7 +294,7 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
   }
 
   private SafeHtml getSafeHtml(ExerciseCorrectAndScore shell, String columnText) {
-    String html = shell.getId();
+    String html = ""+shell.getId();
     if (columnText != null) {
       if (columnText.length() > MAX_LENGTH_ID)
         columnText = columnText.substring(0, MAX_LENGTH_ID - 3) + "...";

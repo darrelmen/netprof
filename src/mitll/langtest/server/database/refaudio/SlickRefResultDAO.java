@@ -145,11 +145,11 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
 
   @Override
   public JSONObject getJSONScores(Collection<Integer> ids) {
-    Collection<Tuple3<String, String, String>> tuple3s = dao.jsonByExIDs(ids);
-    Map<String, List<String>> idToAnswers = new HashMap<>();
-    Map<String, List<String>> idToJSONs = new HashMap<>();
-    for (Tuple3<String, String, String> three : tuple3s) {
-      String exid = three._1();
+    Collection<Tuple3<Integer, String, String>> tuple3s = dao.jsonByExIDs(ids);
+    Map<Integer, List<String>> idToAnswers = new HashMap<>();
+    Map<Integer, List<String>> idToJSONs = new HashMap<>();
+    for (Tuple3<Integer, String, String> three : tuple3s) {
+      Integer exid = three._1();
       String answer = three._2();
       String json = three._3();
 

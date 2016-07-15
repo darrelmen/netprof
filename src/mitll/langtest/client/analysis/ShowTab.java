@@ -39,5 +39,5 @@ package mitll.langtest.client.analysis;
  * @since 10/22/15.
  */
 public interface ShowTab {
-  void showLearnAndItem(String id);
+  void showLearnAndItem(int exid);
 }

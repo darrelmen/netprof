@@ -37,6 +37,7 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.analysis.ShowTab;
 import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.custom.dialog.PrevNextList;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -59,6 +60,7 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public interface ListInterface<T extends Shell> extends RequiresResize, Reloadable {
+  T byHasID(HasID hasID);
   T byID(int name);
 
   void addExercise(T es);
@@ -111,7 +113,7 @@ public interface ListInterface<T extends Shell> extends RequiresResize, Reloadab
   void checkAndAskServer(int id);
 
   /**
-   * @see Navigation#showLearnAndItem(String)
+   * @see ShowTab#showLearnAndItem(int)
    * @param id
    * @return
    */

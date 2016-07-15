@@ -162,7 +162,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
     //  logger.info("Adding recording widgets to " + inner2.getElement().getId());
     Scheduler.get().scheduleDeferred(new Command() {
       public void execute() {
-        addRecordingAndFeedbackWidgets(exercise.getOldID(), service, controller, inner2);
+        addRecordingAndFeedbackWidgets(getID(), service, controller, inner2);
       }
     });
 
@@ -184,6 +184,10 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
     }
   }
 
+  int getID() {
+    return exercise.getID();
+  }
+
   private CommentBox commentBox;
 
   /**
@@ -192,7 +196,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
    * @see #FlashcardPanel
    */
   DivWidget getFirstRow(ExerciseController controller) {
-    commentBox = new CommentBox(exercise.getOldID(), controller, new CommentAnnotator() {
+    commentBox = new CommentBox(exercise.getID(), controller, new CommentAnnotator() {
       @Override
       public void addIncorrectComment(String commentToPost, String field) {
         addAnnotation(field, GoodwaveExercisePanel.INCORRECT, commentToPost);
@@ -217,7 +221,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
   }
 
   private void addAnnotation(final String field, final String status, final String commentToPost) {
-    service.addAnnotation(exercise.getOldID(), field, status, commentToPost, controller.getUser(), new AsyncCallback<Void>() {
+    service.addAnnotation(exercise.getID(), field, status, commentToPost, controller.getUser(), new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
       }
@@ -267,7 +271,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
     clickToFlipContainer.setHeight("100px");
   }
 
-  void addRecordingAndFeedbackWidgets(String exerciseID, LangTestDatabaseAsync service, ExerciseController controller, Panel contentMiddle) {
+  void addRecordingAndFeedbackWidgets(int exerciseID, LangTestDatabaseAsync service, ExerciseController controller, Panel contentMiddle) {
     boolean noModel = controller.getProps().isNoModel();
     if (!noModel)
       logger.warning("addRecordingAndFeedbackWidgets : adding empty recording and feedback widgets " + this.getClass());
@@ -280,7 +284,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
    * @param contentMiddle
    * @param belowDiv
    * @return
-   * @see #FlashcardPanel(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, ControlState, MySoundFeedback, mitll.langtest.client.sound.SoundFeedback.EndListener, String, mitll.langtest.client.list.ListInterface)
+   * @see #FlashcardPanel
    */
   private Panel getThreePartContent(ControlState controlState,
                                     Panel contentMiddle,
@@ -439,7 +443,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
 
   private Button getPrevButton() {
     final Button left = new Button();
-    controller.register(left, exercise.getOldID(), "prev button");
+    controller.register(left, getID(), "prev button");
     left.setIcon(IconType.CARET_LEFT);
     left.addStyleName("floatLeft");
     left.setSize(ButtonSize.LARGE);
@@ -475,7 +479,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
     final Button right = new Button();
     right.setIcon(IconType.CARET_RIGHT);
     new TooltipHelper().addTooltip(right, "Right Arrow Key");
-    controller.register(right, exercise.getOldID(), "next button");
+    controller.register(right, getID(), "next button");
 
     right.addStyleName("floatRight");
     right.setSize(ButtonSize.LARGE);
@@ -538,7 +542,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
   private Button getAudioOnButton(final ControlState controlState) {
     Button onButton = new Button(ON);
     onButton.getElement().setId(PLAY + "_On");
-    controller.register(onButton, exercise.getOldID());
+    controller.register(onButton, getID());
 
     onButton.addClickHandler(new ClickHandler() {
       @Override
@@ -563,7 +567,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
       }
     });
     offButton.setActive(!controlState.isAudioOn());
-    controller.register(offButton, exercise.getOldID());
+    controller.register(offButton, getID());
     return offButton;
   }
 
@@ -587,7 +591,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
   private Button getOn(final ControlState controlState) {
     Button onButton = new Button(controller.getLanguage());
     onButton.getElement().setId("Show_On_" + controller.getLanguage());
-    controller.register(onButton, exercise.getOldID());
+    controller.register(onButton, getID());
 
     onButton.addClickHandler(new ClickHandler() {
       @Override
@@ -606,7 +610,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
   private Button getOff(final ControlState controlState) {
     Button showEnglish = new Button(ENGLISH);
     showEnglish.getElement().setId("Show_English");
-    controller.register(showEnglish, exercise.getOldID());
+    controller.register(showEnglish, getID());
 
     showEnglish.addClickHandler(new ClickHandler() {
       @Override
@@ -625,7 +629,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
   private Button getBoth(final ControlState controlState) {
     Button both = new Button(BOTH);
     both.getElement().setId("Show_Both_" + controller.getLanguage() + "_and_English");
-    controller.register(both, exercise.getOldID());
+    controller.register(both, getID());
 
     both.addClickHandler(new ClickHandler() {
       @Override
@@ -661,7 +665,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
    *
    * @param e
    * @return
-   * @see #getCardPrompt(mitll.langtest.shared.exercise.CommonExercise)
+   * @see #getCardPrompt
    */
   private DivWidget getQuestionContent(T e) {
     String foreignSentence = e.getForeignLanguage();
@@ -715,7 +719,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
    * @param foreignSentence
    * @param hasRefAudio
    * @return
-   * @see #getQuestionContent(mitll.langtest.shared.exercise.CommonExercise)
+   * @see #getQuestionContent
    */
   private Widget getForeignLanguageContent(String foreignSentence, boolean hasRefAudio) {
     Heading foreignLanguageContent = new Heading(1, foreignSentence);
@@ -763,7 +767,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
   /**
    * @param focusPanel
    * @see #getForeignLanguageContent(String, boolean)
-   * @see #getQuestionContent(mitll.langtest.shared.exercise.CommonExercise)
+   * @see #getQuestionContent
    */
   private void addAudioBindings(final FocusPanel focusPanel) {
     focusPanel.addClickHandler(new ClickHandler() {

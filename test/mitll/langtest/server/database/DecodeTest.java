@@ -27,7 +27,7 @@ public class DecodeTest extends BaseTest {
   @Test
   public void testRussianContext() {
     DatabaseImpl<CommonExercise> russian = getDatabase("russian");
-    CommonExercise exercise = russian.getExercise("2600");
+    CommonExercise exercise = russian.getExercise(2600);
     String context = exercise.getContext();
 
 
@@ -71,6 +71,7 @@ public class DecodeTest extends BaseTest {
     Collection exercises = russian.getExercises();
     logger.info("First " +exercises.iterator().next());
   }
+/*
 
   @Test
   public void testSpanish() {
@@ -102,6 +103,7 @@ public class DecodeTest extends BaseTest {
 //    JSONObject war = russian.doReport(new PathHelper("war"));
   //  logger.info("json:\n" + war);
   }
+*/
 
   @Test
   public void testMandarin() {
@@ -136,7 +138,7 @@ public class DecodeTest extends BaseTest {
   public void testRussian() {
     DatabaseImpl russian = getDatabase("russian");
     AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), russian.getServerProps(), russian, null);
-    CommonExercise exercise = russian.getExercise("8");
+    CommonExercise exercise = russian.getExercise(8);
     Collection<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
     for (AudioAttribute audioAttribute : audioAttributes)
       audioFileHelper.decodeOneAttribute(exercise, audioAttribute, false);
@@ -146,7 +148,7 @@ public class DecodeTest extends BaseTest {
   public void testEnglish() {
     DatabaseImpl russian = getDatabase("english");
     AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), russian.getServerProps(), russian, null);
-    CommonExercise exercise = russian.getExercise("2253");
+    CommonExercise exercise = russian.getExercise(2253);
     logger.info("got " + exercise);
 
     Collection<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
@@ -159,7 +161,7 @@ public class DecodeTest extends BaseTest {
     DatabaseImpl db = getDatabase("spanish");
     AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), db.getServerProps(), db, null);
 
-    CommonExercise exercise = db.getExercise("50264");
+    CommonExercise exercise = db.getExercise(50264);
     logger.info("got " +exercise);
 
     Collection<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
