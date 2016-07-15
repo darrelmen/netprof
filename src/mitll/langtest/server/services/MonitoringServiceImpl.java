@@ -94,7 +94,7 @@ public class MonitoringServiceImpl extends MyRemoteServiceServlet implements Mon
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getResultPerExercise
    */
-  public Map<String, Map<String, Integer>> getResultPerExercise() {
+  public Map<String, Map<Integer, Integer>> getResultPerExercise() {
     return getMonitoringSupport().getResultPerExercise(getExercises());
   }
 

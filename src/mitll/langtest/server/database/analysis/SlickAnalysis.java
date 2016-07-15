@@ -118,7 +118,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     int emptyCount = 0;
     for (SlickPerfResult perf : perfs) {
       count++;
-      String exid = perf.exid();
+      int exid = perf.exid();
       Timestamp timestamp = perf.modified();
       float pronScore = perf.pronscore();
       int id = perf.id();
@@ -149,10 +149,10 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
 
       String nativeAudio = exToRef.get(exid);
       if (nativeAudio == null) {
-        if (exid.startsWith("Custom")) {
-//          logger.debug("missing audio for " + exid);
-          missingAudio.add(exid);
-        }
+//        if (exid.startsWith("Custom")) {
+////          logger.debug("missing audio for " + exid);
+//          missingAudio.add(exid);
+//        }
         missing++;
       }
       BestScore e = new BestScore(exid, pronScore, time, id, json, isiPad, isFlashcard, trimPathForWebPage(path),

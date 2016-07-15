@@ -50,7 +50,7 @@ public class BaseRefResultDAO extends DAO {
     this.dropTable = dropTable;
   }
 
-  void addToJSONs(Map<String, List<String>> idToJSONs, String exid, String json) {
+  void addToJSONs(Map<Integer, List<String>> idToJSONs, Integer exid, String json) {
     List<String> orDefault2 = idToJSONs.get(exid);
     if (orDefault2 == null) {
       idToJSONs.put(exid, orDefault2 = new ArrayList<>());
@@ -58,7 +58,7 @@ public class BaseRefResultDAO extends DAO {
     }
   }
 
-  void addToAnswers(Map<String, List<String>> idToAnswers, String exid, String answer) {
+  void addToAnswers(Map<Integer, List<String>> idToAnswers, Integer exid, String answer) {
     List<String> orDefault = idToAnswers.get(exid);
     if (orDefault == null) {
       idToAnswers.put(exid, orDefault = new ArrayList<>());
@@ -68,10 +68,10 @@ public class BaseRefResultDAO extends DAO {
     }
   }
 
-  JSONObject getJsonObject(Map<String, List<String>> idToAnswers, Map<String, List<String>> idToJSONs) {
+  JSONObject getJsonObject(Map<Integer, List<String>> idToAnswers, Map<Integer, List<String>> idToJSONs) {
     JSONObject jsonObject = new JSONObject();
-    for (Map.Entry<String, List<String>> pair : idToAnswers.entrySet()) {
-      String exid = pair.getKey();
+    for (Map.Entry<Integer, List<String>> pair : idToAnswers.entrySet()) {
+      Integer exid = pair.getKey();
       List<String> answers = pair.getValue();
       List<String> jsons = idToJSONs.get(exid);
 

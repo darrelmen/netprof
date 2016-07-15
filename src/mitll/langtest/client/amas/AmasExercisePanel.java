@@ -163,7 +163,7 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
 
   private void addInstructions(String text, boolean useLanguage) {
     DivWidget idInfoOnLeft = new DivWidget();
-    Widget itemHeader = AudioExerciseContent.getItemHeader(exerciseList.getIndex(exercise.getOldID()),
+    Widget itemHeader = AudioExerciseContent.getItemHeader(exerciseList.getIndex(exercise.getID()),
         exerciseList.getSize(), exercise.getOldID());
     idInfoOnLeft.add(itemHeader);
     itemHeader.addStyleName("floatLeft");

@@ -51,10 +51,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.ExerciseListWrapper;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.ExerciseListRequest;
-import mitll.langtest.shared.exercise.STATE;
-import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.exercise.*;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -389,7 +386,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     onResize();
   }
 
-  private Collection<T> inOrderResult;
+  private List<T> inOrderResult;
 
   /**
    * A little complicated -- if {@link #doShuffle} is true, shuffles the exercises
@@ -399,11 +396,10 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * @see #simpleSetShuffle(boolean)
    */
   @Override
-  public Collection<T> rememberExercises(Collection<T> result) {
+  public List<T> rememberExercises(List<T> result) {
     inOrderResult = result;
     if (doShuffle) {
      // logger.info(getInstance() + " : rememberExercises - shuffling " + result.size() + " items");
-
       ArrayList<T> ts = new ArrayList<>(result);
       result = ts;
       Shuffler.shuffle(ts);
@@ -418,7 +414,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
   @Override
-  protected Collection<T> getInOrder() {
+  protected List<T> getInOrder() {
     return inOrderResult;
   }
 
@@ -435,6 +431,12 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   @Override
   protected T getFirst() {
     return pagingContainer.getFirst();
+  }
+
+
+  @Override
+  public T byHasID(HasID hasID) {
+    return pagingContainer.byID(hasID.getID());
   }
 
   @Override
@@ -459,7 +461,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
 
   /**
    * @param es
-   * @see ExerciseList#rememberExercises(Collection)
+   * @see ExerciseList#rememberExercises(List)
    */
   @Override
   public void addExercise(T es) {
@@ -528,7 +530,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
 
   /**
    * @return
-   * @see HistoryExerciseList#loadExercisesUsingPrefix(Map, String, boolean, String)
+   * @see HistoryExerciseList#loadExercisesUsingPrefix
    */
   boolean getUnrecorded() {
     return unrecorded;

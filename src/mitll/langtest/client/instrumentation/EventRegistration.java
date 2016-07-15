@@ -47,9 +47,11 @@ import mitll.langtest.shared.exercise.Shell;
 public interface EventRegistration {
   EventLogger getButtonFactory();
 
+  void register(Button button, int exid);
   void register(Button button, String exid);
   void register(Button button);
 
+  void register(Button button, int exid, String context);
   void register(Button button, String exid, String context);
 
   void logEvent(Tab button, String widgetType, String exid, String context);

@@ -43,6 +43,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.user.UserManager;
+import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
@@ -74,7 +75,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
   private final boolean onlyMyLists;
   private final UserManager userManager;
   private final boolean showIsPublic;
-  private final String optionalExercise;
+  private final int optionalExercise;
 
   /**
    * @param contentPanel
@@ -97,7 +98,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
                           boolean allLists,
                           UserManager userManager,
                           boolean showIsPublic,
-                          String optionalExercise) {
+                          int optionalExercise) {
     //logger.info("UserListCallback instance '" + instanceName + "' only my lists " + onlyMyLists);
     this.listManager = listManager;
     this.contentPanel = contentPanel;
@@ -145,11 +146,11 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
       }
       insideContentPanel.add(listScrollPanel);
 
-      if (!optionalExercise.isEmpty()) {
+      if (optionalExercise != -1) {
         logger.info("onSuccess find list for " + optionalExercise);
         for (UserList<? extends HasID> ul : result) {
           for (HasID ex : ul.getExercises()) {
-            if (ex.getOldID().equals(optionalExercise)) {
+            if (ex.getID() == optionalExercise) {
               logger.info("onSuccess ex " + optionalExercise + " is on " + ul);
               listManager.showList(ul, contentPanel, instanceName, ex);
               break;
@@ -329,8 +330,8 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
       //  String prefix = showIsPublic ? "" :
       String html1 = //(ul.isPrivate() ? "" : "Public ") +
           " by " +
-              (uniqueID == UserListManager.COMMENT_MAGIC_ID ? "Students" :
-                  uniqueID == UserListManager.REVIEW_MAGIC_ID ? REVIEWERS :
+              (uniqueID == IUserListManager.COMMENT_MAGIC_ID ? "Students" :
+                  uniqueID == IUserListManager.REVIEW_MAGIC_ID ? REVIEWERS :
                       ul.getCreator().getUserID());
       Heading h4Again = yourList ? new Heading(5, html1) : new Heading(4, "", html1);
 
