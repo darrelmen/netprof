@@ -53,7 +53,7 @@ public class SimpleTimeAndScore implements Serializable {
   /**
    * @param timestamp
    * @param score
-   * @see PhoneDAO#getPhoneTimeSeries(List)
+   * @seex PhoneDAO#getPhoneTimeSeries
    */
   SimpleTimeAndScore(long timestamp, float score, WordAndScore wordAndScore) {
     this.timestamp = timestamp;

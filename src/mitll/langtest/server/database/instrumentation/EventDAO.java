@@ -191,6 +191,11 @@ public class EventDAO extends DAO implements IEventDAO {
   }
 
   @Override
+  public List<Event> getAll() {
+    return getAllMax(-1);
+  }
+
+  @Override
   public List<Event> getAll(Integer projid) {
     try {
       return getEvents("SELECT * from " + EVENT);
@@ -224,6 +229,11 @@ public class EventDAO extends DAO implements IEventDAO {
       }
     }
     return Collections.emptyList();
+  }
+
+  @Override
+  public List<SlickSlimEvent> getAllSlim() {
+    return getAllSlim(-1);
   }
 
   private List<SlickSlimEvent> getSlickSlimEvents(List<SlimEvent> slimEvents) {

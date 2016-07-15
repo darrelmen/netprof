@@ -34,6 +34,7 @@ package mitll.langtest.server.database.annotation;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.shared.ExerciseAnnotation;
 import org.apache.log4j.Logger;
 
@@ -60,7 +61,7 @@ public abstract class BaseAnnotationDAO extends DAO {
    * @param status
    * @param comment
    * @return
-   * @see mitll.langtest.server.database.custom.UserListManager#addDefect
+   * @see IUserListManager#addDefect
    */
   public boolean hasDefect(int exerciseID, String field, String status, String comment) {
     List<UserAnnotation> userAnnotations = getDefectsForExercise(exerciseID);

@@ -208,7 +208,7 @@ public class DownloadServlet extends DatabaseServlet {
     String exercise = split[1].split("=")[1];
     String useridString = split[2].split("=")[1];
 
-    String underscores = getFilenameForDownload(db, exercise, useridString);
+    String underscores = getFilenameForDownload(db, Integer.parseInt(exercise), useridString);
 
     logger.debug("returnAudioFile query is " + queryString + " file " + file + " exercise " + exercise + " user " + useridString + " so name is " + underscores);
 
@@ -239,7 +239,7 @@ public class DownloadServlet extends DatabaseServlet {
    * @return name without spaces
    * @throws UnsupportedEncodingException
    */
-  private String getFilenameForDownload(DatabaseImpl db, String exercise, String useridString) throws UnsupportedEncodingException {
+  private String getFilenameForDownload(DatabaseImpl db, int exercise, String useridString) throws UnsupportedEncodingException {
     CommonExercise exercise1 = db.getExercise(exercise);
     boolean english = db.getServerProps().getLanguage().equalsIgnoreCase("english");
 
@@ -287,7 +287,7 @@ public class DownloadServlet extends DatabaseServlet {
       new ResultDAOToExcel().writeExcelToStream(db.getMonitorResults(), db.getTypeOrder(), outputStream);
     } else if (encodedFileName.toLowerCase().contains("events")) {
       setResponseHeader(response, "events.xlsx");
-      new EventDAOToExcel(db).toXLSX(db.getEventDAO().getAll(db.getLanguage()), outputStream);
+      new EventDAOToExcel(db).toXLSX(db.getEventDAO().getAll(), outputStream);
     } else {
       logger.error("returnSpreadsheet huh? can't handle request " + encodedFileName);
     }

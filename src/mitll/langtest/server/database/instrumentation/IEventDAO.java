@@ -13,9 +13,11 @@ import java.util.List;
 public interface IEventDAO extends IDAO {
   boolean add(Event event, int projid);
 
+  List<Event> getAll();
   List<Event> getAll(Integer projid);
   List<Event> getAllMax(int projid);
   List<SlickSlimEvent> getAllSlim(int projid);
+  List<SlickSlimEvent> getAllSlim();
 
   List<SlickSlimEvent> getAllDevicesSlim(int projid);
 

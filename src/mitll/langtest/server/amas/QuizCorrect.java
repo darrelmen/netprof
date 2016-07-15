@@ -48,9 +48,9 @@ import java.util.*;
  */
 public class QuizCorrect {
   private static final Logger logger = Logger.getLogger(QuizCorrect.class);
-  private static final String QUIZ = "Quiz";
-  private static final String ILR_LEVEL = "ILR Level";
-  private static final String TEST_TYPE = "Test type";
+//  private static final String QUIZ = "Quiz";
+//  private static final String ILR_LEVEL = "ILR Level";
+//  private static final String TEST_TYPE = "Test type";
   private final DatabaseImpl db;
 
   public QuizCorrect(DatabaseImpl db) {
@@ -61,9 +61,9 @@ public class QuizCorrect {
    * @param userID
    * @param exids
    * @return
-   * @see mitll.langtest.client.recorder.FeedbackRecordPanel#getScores
+   * @seex mitll.langtest.client.recorder.FeedbackRecordPanel#getScores
    */
-  public QuizCorrectAndScore getScoresForUser(Map<String, Collection<String>> typeToSection, int userID, Collection<String> exids) {
+  public QuizCorrectAndScore getScoresForUser(Map<String, Collection<String>> typeToSection, int userID, Collection<Integer> exids) {
     //   String session = getLatestSession(typeToSection, userID);
 
 /*    if (typeToSection == null || typeToSection.isEmpty()) {
@@ -75,11 +75,11 @@ public class QuizCorrect {
       logger.error("\n\n\ngetScoresForUser for user " + userID + "/" + session + " and " + typeToSection + " got " + resultsForUser.size() + " vs unique " + bySession.size());
       return new QuizCorrectAndScore(getExercises().size() == resultsForUser.size(), getExercises().size(), bySession);
     } else {*/
-    Collection<String> allIDs = new ArrayList<String>();
+    Collection<Integer> allIDs = new ArrayList<>();
     if (exids == null || exids.isEmpty()) {
       Collection<CommonExercise> exercisesForState = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
       for (CommonExercise exercise : exercisesForState) {
-        allIDs.add(exercise.getOldID());
+        allIDs.add(exercise.getID());
       }
     } else {
       allIDs = exids;
@@ -90,14 +90,14 @@ public class QuizCorrect {
   }
 
   /**
-   * @see #filterByUnrecorded(long, Collection, Map)
+   * @seez #filterByUnrecorded(long, Collection, Map)
    * @param typeToSection
    * @param userID
    * @param allIDs
    * @return
    */
   private QuizCorrectAndScore getQuizCorrectAndScore(Map<String, Collection<String>> typeToSection, int userID,
-                                                     Collection<String> allIDs) {
+                                                     Collection<Integer> allIDs) {
     String session = "";//getLatestSession(typeToSection, userID);
     //  logger.info("exercises " +allIDs.size() + " for session " + session);
 
@@ -187,5 +187,4 @@ public class QuizCorrect {
     }
     return new ArrayList<CorrectAndScore>(idToCorrect.values()); // required since can't send a values set
   }
-
 }

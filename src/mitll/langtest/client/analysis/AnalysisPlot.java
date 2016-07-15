@@ -76,7 +76,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
   private static final int X_OFFSET_LEGEND = 65;
 
   private static final long MINUTE = 60 * 1000;
-  public static final long HOUR = 60 * MINUTE;
+  static final long HOUR = 60 * MINUTE;
   private static final long QUARTER = 6 * HOUR;
 
   private static final long FIVEMIN = 5 * MINUTE;
@@ -98,8 +98,8 @@ public class AnalysisPlot extends TimeSeriesPlot {
 
   private static final int Y_OFFSET_FOR_LEGEND = 20;
 
-  private final Map<Long, String> timeToId = new TreeMap<>();
-  private final Map<String, CommonShell> idToEx = new TreeMap<>();
+  private final Map<Long, Integer> timeToId = new TreeMap<>();
+  private final Map<Integer, CommonShell> idToEx = new TreeMap<>();
   private final int userid;
   private final AnalysisServiceAsync service;
   private final PlayAudio playAudio;
@@ -280,7 +280,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
           @Override
           public void onSuccess(ExerciseListWrapper<CommonShell> exerciseListWrapper) {
             for (CommonShell shell : exerciseListWrapper.getExercises()) {
-              getIdToEx().put(shell.getOldID(), shell);
+              getIdToEx().put(shell.getID(), shell);
             }
           }
         });
@@ -484,7 +484,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
     return new SeriesClickEventHandler() {
       public boolean onClick(SeriesClickEvent clickEvent) {
         long nearestXAsLong = clickEvent.getNearestXAsLong();
-        String s = timeToId.get(nearestXAsLong);
+        Integer s = timeToId.get(nearestXAsLong);
         if (s != null) {
           playAudio.playLast(s, userid);
         } else {
@@ -500,7 +500,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
         .setFormatter(new ToolTipFormatter() {
           public String format(ToolTipData toolTipData) {
             try {
-              String exerciseID = timeToId.get(toolTipData.getXAsLong());
+              Integer exerciseID = timeToId.get(toolTipData.getXAsLong());
               CommonShell commonShell = exerciseID == null ? null : getIdToEx().get(exerciseID);
               return getTooltip(toolTipData, exerciseID, commonShell);
             } catch (Exception e) {
@@ -512,7 +512,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
         });
   }
 
-  private String getTooltip(ToolTipData toolTipData, String s, CommonShell commonShell) {
+  private String getTooltip(ToolTipData toolTipData, Integer exid, CommonShell commonShell) {
     String foreignLanguage = commonShell == null ? "" : commonShell.getForeignLanguage();
     String english = commonShell == null ? "" : commonShell.getEnglish();
 
@@ -541,7 +541,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
             "<br/>" +
             dateToShow +
             (showEx ?
-                "<br/>Exercise " + s + "<br/>" +
+                "<br/>Exercise " + exid + "<br/>" +
                     "<span style='font-size:200%'>" + foreignLanguage + "</span>" +
                     englishTool
                 : "")
@@ -712,9 +712,9 @@ public class AnalysisPlot extends TimeSeriesPlot {
    * @see #addChart(UserPerformance, String)
    */
   private void setRawBestScores(List<TimeAndScore> rawBestScores) {
-    List<String> toGet = new ArrayList<>();
+    List<Integer> toGet = new ArrayList<>();
     for (TimeAndScore timeAndScore : rawBestScores) {
-      String id = timeAndScore.getId();
+      Integer id = timeAndScore.getExid();
       timeToId.put(timeAndScore.getTimestamp(), id);
       if (!getIdToEx().containsKey(id)) {
         toGet.add(id);
@@ -735,11 +735,10 @@ public class AnalysisPlot extends TimeSeriesPlot {
 
         @Override
         public void onSuccess(List<CommonShell> commonShells) {
-          for (CommonShell shell : commonShells) idToEx.put(shell.getOldID(), shell);
+          for (CommonShell shell : commonShells) idToEx.put(shell.getID(), shell);
         }
       });
-    }
-    else {
+    } else {
       //logger.info("rawBest is empty?");
     }
   }
@@ -748,7 +747,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
    * @return
    * @see WordContainer#getShell(String)
    */
-  Map<String, CommonShell> getIdToEx() {
+  Map<Integer, CommonShell> getIdToEx() {
     return idToEx;
   }
 

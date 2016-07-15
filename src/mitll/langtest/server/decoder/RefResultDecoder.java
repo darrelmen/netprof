@@ -148,18 +148,20 @@ public class RefResultDecoder {
     }
   }*/
 
-  private Map<String, CommonExercise> getIdToExercise(Collection<CommonExercise> exercises) {
-    Map<String, CommonExercise> idToEx = new HashMap<>();
+/*
+  private Map<Integer, CommonExercise> getIdToExercise(Collection<CommonExercise> exercises) {
+    Map<Integer, CommonExercise> idToEx = new HashMap<>();
     for (CommonExercise exercise : exercises) {
       if (stopDecode) return null;
-      idToEx.put(exercise.getOldID(), exercise);
+      idToEx.put(exercise.getID(), exercise);
     }
     return idToEx;
   }
+*/
 
   private void trimRef(Collection<CommonExercise> exercises, String relativeConfigDir) {
     if (DO_TRIM) {
-      Map<String, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio();
+      Map<Integer, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio();
       String installPath = pathHelper.getInstallPath();
 
       int numResults = db.getRefResultDAO().getNumResults();
@@ -176,17 +178,17 @@ public class RefResultDecoder {
       int maleAudio = 0;
       int femaleAudio = 0;
       int defaultAudio = 0;
-      Set<String> failed = new TreeSet<>();
+      Set<Integer> failed = new TreeSet<>();
       for (CommonExercise exercise : exercises) {
         if (stopDecode) return;
 
-        List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getOldID());
+        List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
         if (audioAttributes != null) {
 //					logger.warn("hmm - audio recorded for " + )
           boolean didAll = db.getAudioDAO().attachAudio(exercise, installPath, relativeConfigDir, audioAttributes);
           attrc += audioAttributes.size();
           if (!didAll) {
-            failed.add(exercise.getOldID());
+            failed.add(exercise.getID());
           }
         }
 
@@ -200,10 +202,11 @@ public class RefResultDecoder {
         List<MiniUser> femaleUsers = exercise.getSortedUsers(femalesMap);
         boolean femaleEmpty = femaleUsers.isEmpty();
         String title = exercise.getForeignLanguage();
+        int id = exercise.getID();
         if (!maleEmpty) {
           List<AudioAttribute> audioAttributes1 = malesMap.get(maleUsers.get(0));
           maleAudio += audioAttributes1.size();
-          Info info = doTrim(audioAttributes1, title, exercise.getOldID());
+          Info info = doTrim(audioAttributes1, title, id);
           trimmed += info.trimmed;
           count += info.count;
           changed += info.changed;
@@ -212,14 +215,14 @@ public class RefResultDecoder {
           List<AudioAttribute> audioAttributes1 = femalesMap.get(femaleUsers.get(0));
           femaleAudio += audioAttributes1.size();
 
-          Info info = doTrim(audioAttributes1, title, exercise.getOldID());
+          Info info = doTrim(audioAttributes1, title, id);
           trimmed += info.trimmed;
           count += info.count;
           changed += info.changed;
         } else if (maleEmpty) {
           Collection<AudioAttribute> defaultUserAudio = exercise.getDefaultUserAudio();
           defaultAudio += defaultUserAudio.size();
-          Info info = doTrim(defaultUserAudio, title, exercise.getOldID());
+          Info info = doTrim(defaultUserAudio, title, id);
           trimmed += info.trimmed;
           count += info.count;
           changed += info.changed;
@@ -243,7 +246,7 @@ public class RefResultDecoder {
    */
   private void writeRefDecode(Collection<CommonExercise> exercises, String relativeConfigDir) {
     if (DO_REF_DECODE) {
-      Map<String, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio();
+      Map<Integer, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio();
       String installPath = pathHelper.getInstallPath();
 
       int numResults = db.getRefResultDAO().getNumResults();
@@ -266,7 +269,7 @@ public class RefResultDecoder {
       for (CommonExercise exercise : exercises) {
         if (stopDecode) return;
 
-        List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getOldID());
+        List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
         if (audioAttributes != null) {
           db.getAudioDAO().attachAudio(exercise, installPath, relativeConfigDir, audioAttributes);
           attrc += audioAttributes.size();
@@ -402,7 +405,7 @@ public class RefResultDecoder {
    * @return
    * @see #trimRef
    */
-  private Info doTrim(Collection<AudioAttribute> audioAttributes, String title, String exid) {
+  private Info doTrim(Collection<AudioAttribute> audioAttributes, String title, int exid) {
     int count = 0;
     int trimmed = 0;
     int changed = 0;

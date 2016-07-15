@@ -34,6 +34,7 @@ package mitll.langtest.server.database.postgres;
 
 import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.custom.UserList;
@@ -60,7 +61,7 @@ public class UserExTest extends BaseTest {
     DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
 
     IUserExerciseDAO dao = spanish.getUserExerciseDAO();
-    UserListManager userListManager = spanish.getUserListManager();
+    IUserListManager userListManager = spanish.getUserListManager();
 
     Collection<UserList<CommonShell>> listsForUser = userListManager.getListsForUser(2, true, false);
 
@@ -77,18 +78,18 @@ public class UserExTest extends BaseTest {
     Collection<CommonExercise> overrides = dao.getOverrides();
     logger.info("overrides " + overrides.size() + " first " + overrides.iterator().next());
 
-    CommonExercise predefExercise = dao.getPredefExercise("1");
+    CommonExercise predefExercise = dao.getPredefExercise(1);
 
     logger.info("predef " + predefExercise);
 
-    logger.info("got " + dao.getByExID(Arrays.asList("1959", "1962")));
+    logger.info("got " + dao.getByExID(Arrays.asList(1959, 1962)));
   }
 
   @Test
   public void testUserListAgain() {
     DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
 
-    UserListManager userListManager = spanish.getUserListManager();
+    IUserListManager userListManager = spanish.getUserListManager();
     Collection<UserList<CommonShell>> listsForUser = userListManager.getListsForUser(270, true, false);
 
     for (UserList<CommonShell> list : listsForUser) {
@@ -103,7 +104,7 @@ public class UserExTest extends BaseTest {
   public void testUserListAddVisitor() {
     DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
 
-    UserListManager userListManager = spanish.getUserListManager();
+    IUserListManager userListManager = spanish.getUserListManager();
 
     Collection<UserList<CommonShell>> listsForUser = userListManager.getListsForUser(2, true, false);
 
@@ -142,7 +143,7 @@ public class UserExTest extends BaseTest {
 
     int user = 6;
 
-    UserListManager userListManager = spanish.getUserListManager();
+    IUserListManager userListManager = spanish.getUserListManager();
 
     Collection<UserList<CommonShell>> before = userListManager.getListsForUser(user, false, true);
     logger.info("before " + before);
