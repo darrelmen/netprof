@@ -351,7 +351,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
               " b/c before latest " + lastReqID);
       } else {
         gotExercises(result);
-        Collection<T> exercises = result.getExercises();
+        List<T> exercises = result.getExercises();
         exercises = rememberExercises(exercises);
         for (ListChangeListener<T> listener : listeners) {
           listener.listChanged(exercises, "");
@@ -387,7 +387,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   protected void gotEmptyExerciseList() {
   }
 
-  public void rememberAndLoadFirst(Collection<T> exercises) {
+  public void rememberAndLoadFirst(List<T> exercises) {
     rememberAndLoadFirst(exercises, "All", "", -1);
   }
 
@@ -408,9 +408,9 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @param exerciseID
    * @paramx firstExercise - the initial exercise returned from getExercises
    * @see ExerciseList.SetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
-   * @see #rememberAndLoadFirst(Collection)
+   * @see #rememberAndLoadFirst
    */
-  public void rememberAndLoadFirst(Collection<T> exercises,
+  public void rememberAndLoadFirst(List<T> exercises,
                                    String selectionID,
                                    String searchIfAny,
                                    int exerciseID) {
@@ -449,7 +449,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     return result.getReqID() < lastReqID;
   }
 
-  protected abstract Collection<T> rememberExercises(Collection<T> result);
+  protected abstract List<T> rememberExercises(List<T> result);
 
   /**
    * Worry about deleting the currently visible item.
@@ -888,7 +888,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     listeners.add(listener);
   }
 
-  protected abstract Collection<T> getInOrder();
+  protected abstract List<T> getInOrder();
 
   /**
    * @param doShuffle

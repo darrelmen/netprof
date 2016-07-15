@@ -405,7 +405,7 @@ public class ContextCommentNPFExercise<T extends CommonExercise> extends NPFExer
   private Button getChoice(String title, boolean isActive, ClickHandler handler) {
     Button onButton = new Button(title.equals(M) ? "" : title.equals(F) ? "" : title);
     onButton.getElement().setId("Choice_" + title);
-    controller.register(onButton, exercise.getOldID());
+    controller.register(onButton, exercise.getID());
     onButton.addClickHandler(handler);
     onButton.setActive(isActive);
     onButton.getElement().getStyle().setZIndex(0);
@@ -470,6 +470,6 @@ public class ContextCommentNPFExercise<T extends CommonExercise> extends NPFExer
       logger = Logger.getLogger("CommentNPFExercise");
     }
     T exercise = this.exercise;
-    return new CommentBox(this.exercise.getOldID(), controller, this, exercise.getMutableAnnotation());
+    return new CommentBox(this.exercise.getID(), controller, this, exercise.getMutableAnnotation());
   }
 }

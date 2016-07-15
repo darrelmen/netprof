@@ -199,7 +199,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
    */
   public void addContext(String context, String contextTranslation) {
     if (!context.isEmpty()) {
-      Exercise contextExercise = new Exercise("c" + id, context, contextTranslation);
+      Exercise contextExercise = new Exercise("c" + getID(), context, contextTranslation);
       contextExercise.setUnitToValue(getUnitToValue());
       addContextExercise(contextExercise);
     }
@@ -272,7 +272,9 @@ public class Exercise extends AudioExercise implements CommonExercise,
       }
     }
 
-    return "Exercise " + Integer.toHexString(hashCode()) + " " + getOldID() + "/" + getDominoID() +
+    return "Exercise " + Integer.toHexString(hashCode()) +
+        " " + getID() +
+        "/" + getDominoID() +
         " english '" + getEnglish() +
         "'/'" + getForeignLanguage() + "' " +
         "meaning '" + getMeaning() +

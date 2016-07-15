@@ -40,7 +40,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 2/2/16.
  */
-public interface HasID extends IsSerializable {
+public interface HasID extends IsSerializable, Comparable<HasID> {
   @Deprecated String getOldID();
   int getID();
 }

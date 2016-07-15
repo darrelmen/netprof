@@ -34,6 +34,7 @@ package mitll.langtest.server.database.postgres;
 
 import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.reviewed.StateCreator;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -51,12 +52,12 @@ public class ReviewedExTest extends BaseTest {
     DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
 
 //    IUserExerciseDAO dao = spanish.getUserExerciseDAO();
-    UserListManager userListManager = spanish.getUserListManager();
+    IUserListManager userListManager = spanish.getUserListManager();
 
-    STATE currentState = userListManager.getCurrentState("1");
+    STATE currentState = userListManager.getCurrentState(1);
     logger.info("Got " + currentState + " for ");
 
-    Map<String, StateCreator> exerciseToState = userListManager.getExerciseToState(true);
+    Map<Integer, StateCreator> exerciseToState = userListManager.getExerciseToState(true);
     logger.info("got " + exerciseToState.keySet().size());
 
     Collection<StateCreator> values = exerciseToState.values();
@@ -65,7 +66,7 @@ public class ReviewedExTest extends BaseTest {
     for (StateCreator stateCreator : stateCreators) logger.info("Got " + stateCreator);
 
     {
-      Map<String, StateCreator> exerciseToState2 = userListManager.getExerciseToState(false);
+      Map<Integer, StateCreator> exerciseToState2 = userListManager.getExerciseToState(false);
       logger.info("got " + exerciseToState2.keySet().size());
       stateCreators = new ArrayList<>(exerciseToState2.values());
       Collections.sort(stateCreators);

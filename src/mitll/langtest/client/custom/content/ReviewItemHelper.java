@@ -157,8 +157,6 @@ public class ReviewItemHelper extends NPFHelper {
                                                                                String instanceName, boolean incorrectFirst) {
       FlexListLayout outer = this;
       return new NPFlexSectionExerciseList(outer, topRow, currentExercisePanel, instanceName, incorrectFirst) {
-        //com.github.gwtbootstrap.client.ui.CheckBox onlyAudio;
-
         @Override
         protected void addTableWithPager(ClickablePagingContainer pagingContainer) {
           // row 1
@@ -168,11 +166,10 @@ public class ReviewItemHelper extends NPFHelper {
 
           // row 2
           final com.github.gwtbootstrap.client.ui.CheckBox w = new com.github.gwtbootstrap.client.ui.CheckBox(ONLY_WITH_AUDIO_DEFECTS);
-          //onlyAudio = w;
           w.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-              loadExercises(getHistoryToken(""), getTypeAheadText(), w.getValue());
+              loadExercises(getHistoryToken(-1), getTypeAheadText(), w.getValue());
             }
           });
           w.addStyleName("leftFiveMargin");

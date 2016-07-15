@@ -80,7 +80,7 @@ public class PostgresTest extends BaseTest {
   public void testCopyUserJoinExercises() {
     testCreate();
     DatabaseImpl<CommonExercise> spanish = getDatabaseLight("spanish", true);
-    new CopyToPostgres().copyUserExListJoin(spanish);
+ //   new CopyToPostgres().copyUserExListJoin(spanish);
   }
 
   private static DBConnection getConnection(String config) {

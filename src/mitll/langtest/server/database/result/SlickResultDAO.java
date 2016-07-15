@@ -205,7 +205,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
   }
 
   @Override
-  public List<MonitorResult> getMonitorResultsByID(String id) {
+  public List<MonitorResult> getMonitorResultsByID(int id) {
     return getMonitorResults(dao.byExID(id));
   }
 
@@ -220,12 +220,12 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
   }
 
   @Override
-  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, int userid, String ignoredSession) {
+  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, String ignoredSession) {
     return getCorrectAndScores(dao.correctAndScoreWhere(userid, ids));
   }
 
   @Override
-  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, boolean matchAVP, int userid) {
+  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, boolean matchAVP, int userid) {
     if (!matchAVP) {
       return getResultsForExIDInForUser(ids, userid, "");
     } else {
@@ -234,7 +234,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
   }
 
   @Override
-  List<CorrectAndScore> getResultsForExIDIn(Collection<String> ids) {
+  List<CorrectAndScore> getResultsForExIDIn(Collection<Integer> ids) {
     return getCorrectAndScores(dao.correctAndScoreMatchAVP(ids, true));
   }
 

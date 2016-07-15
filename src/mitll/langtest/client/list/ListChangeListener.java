@@ -32,7 +32,7 @@
 
 package mitll.langtest.client.list;
 
-import java.util.Collection;
+import java.util.List;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -46,5 +46,5 @@ public interface ListChangeListener<T> {
    * @param items
    * @param selectionID
    */
-  void listChanged(Collection<T> items, String selectionID);
+  void listChanged(List<T> items, String selectionID);
 }
