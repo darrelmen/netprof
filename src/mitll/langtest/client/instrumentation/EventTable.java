@@ -172,7 +172,7 @@ public class EventTable extends PagerTable {
     TextColumn<Event> dialect = new TextColumn<Event>() {
       @Override
       public String getValue(Event contact) {
-        return "" + contact.getExerciseID();
+        return "" + contact.getExid();
       }
     };
     dialect.setSortable(true);

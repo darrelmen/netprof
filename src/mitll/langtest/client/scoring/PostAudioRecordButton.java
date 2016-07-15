@@ -78,7 +78,8 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
    * @param stopButtonTitle
    * @see GoodwaveExercisePanel.ASRRecordAudioPanel.MyPostAudioRecordButton
    */
-  public PostAudioRecordButton(int exerciseID, final ExerciseController controller, LangTestDatabaseAsync service,
+  public PostAudioRecordButton(int exerciseID,
+                               final ExerciseController controller, LangTestDatabaseAsync service,
                                int index, boolean recordInResults, String recordButtonTitle, String stopButtonTitle) {
     super(controller.getRecordTimeout(), controller.getProps().doClickAndHold(), recordButtonTitle, stopButtonTitle,
         controller.getProps());

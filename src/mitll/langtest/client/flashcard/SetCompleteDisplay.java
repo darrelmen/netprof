@@ -47,8 +47,6 @@ import org.moxieapps.gwt.highcharts.client.Chart;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -57,8 +55,8 @@ import java.util.logging.Logger;
  * @since 9/8/14.
  */
 public class SetCompleteDisplay {
+  //  private final Logger logger = Logger.getLogger("SetCompleteDisplay");
   private static final String PRONUNCIATION = "Pronunciation ";
-  private final Logger logger = Logger.getLogger("SetCompleteDisplay");
 
   private static final String CORRECT_NBSP = "Correct&nbsp;%";
 
@@ -74,8 +72,18 @@ public class SetCompleteDisplay {
   private static final int HORIZ_SPACE_FOR_CHARTS = (1250 - TABLE_WIDTH - TABLE_HISTORY_WIDTH);
   private static final int MAX_TO_SHOW = 5;
 
-  public void addLeftAndRightCharts(List<AVPHistoryForList> result, Map<String, Double> exToScore,
-                                    int numCorrect, int numIncorrect, int numExercises, Panel container) {
+  /**
+   *
+   * @param result
+   * @param scores
+   * @param numCorrect
+   * @param numIncorrect
+   * @param numExercises
+   * @param container
+   */
+  void addLeftAndRightCharts(List<AVPHistoryForList> result,
+                             Collection<Double> scores,
+                             int numCorrect, int numIncorrect, int numExercises, Panel container) {
     // add left chart and table
     AVPHistoryForList sessionAVPHistoryForList = result.get(0);
     Chart chart = makeCorrectChart(result, sessionAVPHistoryForList, numCorrect, numIncorrect, numExercises);
@@ -84,12 +92,13 @@ public class SetCompleteDisplay {
 
     // add right chart and table
     AVPHistoryForList sessionAVPHistoryForListScore = result.get(1);
-    Chart chart2 = makePronChart(getAvgScore(exToScore), sessionAVPHistoryForListScore);
+    Chart chart2 = makePronChart(getAvgScore(scores), sessionAVPHistoryForListScore);
     container.add(chart2);
     container.add(makeTable(sessionAVPHistoryForListScore, SCORE));
   }
 
-  private Chart makeCorrectChart(List<AVPHistoryForList> result, AVPHistoryForList sessionAVPHistoryForList,
+  private Chart makeCorrectChart(List<AVPHistoryForList> result,
+                                 AVPHistoryForList sessionAVPHistoryForList,
                                  int totalCorrect, int totalIncorrect, int numExercises) {
     int all = totalCorrect + totalIncorrect;
 /*    logger.info("onSetComplete.onSuccess : results " + result + " " + (numExercises) +
@@ -266,10 +275,11 @@ public class SetCompleteDisplay {
    * @return
    * @see StatsFlashcardFactory.StatsPracticePanel#showFeedbackCharts
    */
-  private double getAvgScore(Map<String, Double> exToScore) {
+  private double getAvgScore(Collection<Double> scores) {
+    // Collection<Double> scores = exToScore.values();
     double count = 0;
     float num = 0f;
-    for (Double val : exToScore.values()) {
+    for (Double val : scores) {
       if (val > 0) {
         count += val;
         num++;

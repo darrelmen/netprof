@@ -357,14 +357,14 @@ public class ResponseExerciseList extends SingleSelectExerciseList {
     return strings == null ? "" : strings.iterator().next();
   }
 
-  private void quizCompleteDisplay() {
+/*  private void quizCompleteDisplay() {
     showMessage(getQuizStatus(), true);
     getScores();
-  }
+  }*/
 
   // @Override
   public Map<String, Collection<String>> getTypeToSelection() {
-    return getSelectionState(getHistoryToken("")).getTypeToSection();
+    return getSelectionState(getInitialHistoryToken()).getTypeToSection();
   }
 
   /**
@@ -374,12 +374,12 @@ public class ResponseExerciseList extends SingleSelectExerciseList {
    */
 //  @Override
   protected void loadExercises(final Map<String, Collection<String>> typeToSection) {
-    loadExercisesUsingPrefix(typeToSection, getPrefix(), false, "");
+    loadExercisesUsingPrefix(typeToSection, getPrefix(), false, -1);
   }
 
   /**
    * @see FeedbackRecordPanel#postAnswers
-   * @param current
+   * @paramz current
    * @return
    */
 /*

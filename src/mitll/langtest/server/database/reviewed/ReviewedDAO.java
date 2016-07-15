@@ -117,7 +117,7 @@ public class ReviewedDAO extends DAO implements IReviewedDAO {
    *
    * @see IReviewedDAO#setState
    */
-  private void add(String exerciseID, STATE state, long creatorID) {
+  private void add(int exerciseID, STATE state, long creatorID) {
     try {
       // there are much better ways of doing this...
 //      logger.info("add : exid " + exerciseID + " = " + state + " by " + creatorID);
@@ -134,7 +134,7 @@ public class ReviewedDAO extends DAO implements IReviewedDAO {
       );
       int i = 1;
       statement.setLong(i++, creatorID);
-      statement.setString(i++, exerciseID);
+      statement.setString(i++, ""+exerciseID);
       statement.setTimestamp(i++, new Timestamp(System.currentTimeMillis()));
       statement.setString(i++, state.toString());
 
@@ -214,7 +214,7 @@ public class ReviewedDAO extends DAO implements IReviewedDAO {
 
   @Override
   public STATE getCurrentState(int exerciseID) {
-    Map<Integer, StateCreator> exerciseToState = getExerciseToState(false, true, exerciseID);
+    Map<Integer, StateCreator> exerciseToState = getExerciseToState(false, true, ""+exerciseID);
     if (exerciseToState.isEmpty()) return STATE.UNSET;
     else return exerciseToState.values().iterator().next().getState();
   }
@@ -297,7 +297,7 @@ public class ReviewedDAO extends DAO implements IReviewedDAO {
         STATE stateFromTable = (state == null) ? STATE.UNSET : STATE.valueOf(state);
 
         StateCreator e = new StateCreator(stateFromTable, creator, when);
-        e.setExerciseID(exerciseID);
+        e.setExerciseID(Integer.parseInt(exerciseID));
         all.add(e);
       }
 
@@ -315,8 +315,8 @@ public class ReviewedDAO extends DAO implements IReviewedDAO {
   @Override
   public Collection<Integer> getDefectExercises() {
     Map<Integer, StateCreator> exerciseToState = getExerciseToState(true);
-    Set<String> ids = new HashSet<String>();
-    for (Map.Entry<String, StateCreator> pair : exerciseToState.entrySet()) {
+    Set<Integer> ids = new HashSet<>();
+    for (Map.Entry<Integer, StateCreator> pair : exerciseToState.entrySet()) {
       if (pair.getValue().getState() == STATE.DEFECT) {
         ids.add(pair.getKey());
       }

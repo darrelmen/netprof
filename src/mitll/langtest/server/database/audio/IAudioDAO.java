@@ -46,7 +46,7 @@ import java.util.Map;
 import java.util.Set;
 
 public interface IAudioDAO extends IDAO {
-  AudioAttribute addOrUpdate(int userid, String exerciseID, AudioType audioType, String audioRef, long timestamp,
+  AudioAttribute addOrUpdate(int userid, int exerciseID, AudioType audioType, String audioRef, long timestamp,
                              long durationInMillis, String transcript);
 
   Map<Integer, List<AudioAttribute>> getExToAudio();
@@ -58,9 +58,9 @@ public interface IAudioDAO extends IDAO {
   boolean attachAudio(CommonExercise firstExercise, String installPath, String relativeConfigDir,
                       Collection<AudioAttribute> audioAttributes);
 
-  Collection<String> getRecordedBy(int userid);
+  Collection<Integer> getRecordedBy(int userid);
 
-  Set<String> getWithContext(int userid);
+  Set<Integer> getWithContext(int userid);
 
   Map<String, Float> getRecordedReport(Map<Integer, User> userMapMales,
                                        Map<Integer, User> userMapFemales,
@@ -73,9 +73,9 @@ public interface IAudioDAO extends IDAO {
    * @param userid
    * @return
    */
-  Collection<String> getRecordedForUser(int userid);
+  Collection<Integer> getRecordedExForUser(int userid);
 
-  Collection<String> getRecordedExampleForUser(int userid);
+  Collection<Integer> getRecordedExampleForUser(int userid);
 
   void addOrUpdateUser(int userid, AudioAttribute attr);
 
@@ -84,5 +84,5 @@ public interface IAudioDAO extends IDAO {
   Set<AudioAttribute> getAndMarkDefects(AudioAttributeExercise userExercise,
                                         Map<String, ExerciseAnnotation> fieldToAnnotation);
 
-  void updateExerciseID(int uniqueID, String exerciseID);
+  void updateExerciseID(int uniqueID, int exerciseID);
 }

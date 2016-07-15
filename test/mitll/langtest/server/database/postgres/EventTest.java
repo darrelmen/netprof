@@ -45,25 +45,24 @@ import java.util.*;
 
 public class EventTest extends BaseTest {
   private static final Logger logger = Logger.getLogger(EventTest.class);
-  //public static final boolean DO_ONE = false;
 
   @Test
   public void testSpanishEventCopy() {
     DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
 
     IEventDAO eventDAO = spanish.getEventDAO();
-    List<Event> all = eventDAO.getAll("spanish");
+    List<Event> all = eventDAO.getAll();
     for (Event event : all.subList(0, getMin(all))) logger.info("Got " + event);
 
-    List<SlickSlimEvent> spanish1 = eventDAO.getAllSlim("spanish");
+    List<SlickSlimEvent> spanish1 = eventDAO.getAllSlim();
     for (SlickSlimEvent event : spanish1.subList(0, getMin(spanish1))) logger.info("Got " + event);
 
-    List<SlickSlimEvent> allDevicesSlim = eventDAO.getAllDevicesSlim("spanish");
-    for (SlickSlimEvent event : allDevicesSlim.subList(0, getMin(allDevicesSlim))) logger.info("Got " + event);
+   // List<SlickSlimEvent> allDevicesSlim = eventDAO.getAllDevicesSlim("spanish");
+  //  for (SlickSlimEvent event : allDevicesSlim.subList(0, getMin(allDevicesSlim))) logger.info("Got " + event);
 
     eventDAO.addPlayedMarkings(1, spanish.getExercises().iterator().next());
 
-    logger.info("Got " + eventDAO.getFirstSlim("spanish"));
+   // logger.info("Got " + eventDAO.getFirstSlim("spanish"));
     //  spanish.doReport(new PathHelper("war"));
   }
 
@@ -77,11 +76,7 @@ public class EventTest extends BaseTest {
 
     IEventDAO eventDAO = spanish.getEventDAO();
 
-    eventDAO.add(new Event("123", "button", "2334", "testing", 1, System.currentTimeMillis(), "device", -1), "spanish");
-    logger.info("Got " + eventDAO.getFirstSlim("spanish"));
-
-    //  spanish.doReport(new PathHelper("war"));
+    eventDAO.add(new Event("123", "button", "2334", "testing", 1, System.currentTimeMillis(), "device", -1), 0);
+//    logger.info("Got " + eventDAO.getFirstSlim("spanish"));
   }
-
-
 }
