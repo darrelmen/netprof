@@ -70,7 +70,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   @Override
-  public AudioAttribute addOrUpdate(int userid, String exerciseID, AudioType audioType, String audioRef,
+  public AudioAttribute addOrUpdate(int userid, int exerciseID, AudioType audioType, String audioRef,
                                     long timestamp, long durationInMillis, String transcript) {
     MiniUser miniUser = userDAO.getMiniUser(userid);
     Map<Integer, MiniUser> mini = new HashMap<>();
@@ -97,12 +97,12 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   @Override
-  public void updateExerciseID(int uniqueID, String exerciseID) {
+  public void updateExerciseID(int uniqueID, int exerciseID) {
     dao.updateExerciseID(uniqueID, exerciseID);
   }
 
   @Override
-  Collection<AudioAttribute> getAudioAttributes(String exid) {
+  Collection<AudioAttribute> getAudioAttributes(int exid) {
     return toAudioAttributes(dao.getByExerciseID(exid));
   }
 
@@ -112,7 +112,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   @Override
-  Set<String> getValidAudioOfType(int userid, String audioType) {
+  Set<Integer> getValidAudioOfType(int userid, String audioType) {
     return dao.getExerciseIDsOfValidAudioOfType(userid, audioType);
   }
 
@@ -123,7 +123,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#markRecordedState
    */
-  public Collection<String> getRecordedForUser(int userid) {
+  public Collection<Integer> getRecordedExForUser(int userid) {
     try {
       return dao.getRecordedForUser(userid);
     } catch (Exception ee) {
@@ -137,13 +137,13 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     return dao.markDefect(userid, exerciseID, audioType.toString());
   }
 
-  public Collection<String> getRecordedBy(int userid) {
+  public Collection<Integer> getRecordedBy(int userid) {
     Collection<Integer> userIDs = getUserIDs(userid);
     return dao.getAudioForGenderBothSpeeds(userIDs);
   }
 
   @Override
-  Set<String> getAudioExercisesForGender(Collection<Integer> userIDs, String audioSpeed) {
+  Set<Integer> getAudioExercisesForGender(Collection<Integer> userIDs, String audioSpeed) {
     return dao.getAudioForGender(userIDs, audioSpeed);
   }
 

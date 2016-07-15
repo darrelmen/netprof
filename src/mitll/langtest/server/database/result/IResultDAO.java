@@ -56,14 +56,14 @@ public interface IResultDAO extends IDAO {
 
   List<MonitorResult> getMonitorResults();
 
-  List<MonitorResult> getMonitorResultsByID(String id);
+  List<MonitorResult> getMonitorResultsByID(int id);
 
   Collection<UserAndTime> getUserAndTimes();
 
-  SessionsAndScores getSessionsForUserIn2(Collection<String> ids,
+  SessionsAndScores getSessionsForUserIn2(Collection<Integer> ids,
                                           int latestResultID, int userid,
-                                          Collection<String> allIds,
-                                          Map<String, CollationKey> idToKey);
+                                          Collection<Integer> allIds,
+                                          Map<Integer, CollationKey> idToKey);
 
   <T extends CommonShell> List<T> getExercisesSortedIncorrectFirst(Collection<T> exercises, int userid, Collator collator);
 
@@ -76,7 +76,7 @@ public interface IResultDAO extends IDAO {
 
   void attachScoreHistory(int userID, CommonExercise firstExercise, boolean isFlashcardRequest);
 
-  List<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, int userid, String session);
+  List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, String session);
 
   void invalidateCachedResults();
 

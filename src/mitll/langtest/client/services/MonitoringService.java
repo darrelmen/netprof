@@ -44,29 +44,32 @@ import java.util.Map;
 @RemoteServiceRelativePath("monitoring-manager")
 public interface MonitoringService extends RemoteService {
 
-  Map<String,Number> getResultStats();
+  Map<String, Number> getResultStats();
 
   Map<String, Map<Integer, Integer>> getResultCountsByGender();
+
   Map<String, Map<Integer, Map<Integer, Integer>>> getDesiredCounts();
 
   /**
-   * @see mitll.langtest.client.monitoring.MonitoringManager#showUserInfo(Panel)
    * @return
+   * @see mitll.langtest.client.monitoring.MonitoringManager#showUserInfo(Panel)
    */
   Map<User, Integer> getUserToResultCount();
 
 
   Map<Integer, Integer> getResultCountToCount();
 
-  Map<String,Integer> getResultByDay();
-  Map<String,Integer> getResultByHourOfDay();
+  Map<String, Integer> getResultByDay();
+
+  Map<String, Integer> getResultByHourOfDay();
 
   /**
-   * @see mitll.langtest.client.monitoring.MonitoringManager#doResultLineQuery(Panel)
    * @return
+   * @see mitll.langtest.client.monitoring.MonitoringManager#doResultLineQuery(Panel)
    */
-  Map<String, Map<String, Integer>> getResultPerExercise();
-  List<Session> getSessions();
-  Map<String, Float> getMaleFemaleProgress();
+  Map<String, Map<Integer, Integer>> getResultPerExercise();
 
+  List<Session> getSessions();
+
+  Map<String, Float> getMaleFemaleProgress();
 }

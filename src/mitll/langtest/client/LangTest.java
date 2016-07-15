@@ -300,7 +300,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see mitll.langtest.client.scoring.AudioPanel#getImageURLForAudio(String, String, int, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck)
    */
   @Override
-  public void getImage(int reqid, final String path, final String type, int toUse, int height, String exerciseID, AsyncCallback<ImageResponse> client) {
+  public void getImage(int reqid, final String path, final String type, int toUse, int height, int exerciseID,
+                       AsyncCallback<ImageResponse> client) {
     String key = path + DIVIDER + type + DIVIDER + toUse + DIVIDER + height + DIVIDER + exerciseID;
     getImage(reqid, key, client);
   }
@@ -613,8 +614,18 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   @Override
+  public void register(Button button, int exid) {
+    register(button, "" + exid);
+  }
+
+  @Override
   public void register(Button button, String exid) {
     buttonFactory.register(this, button, exid);
+  }
+
+  @Override
+  public void register(Button button, int exid, String context) {
+    register(button, "" + exid, context);
   }
 
   @Override
@@ -629,7 +640,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   @Override
   public void logEvent(UIObject button, String widgetType, Shell ex, String context) {
-    buttonFactory.logEvent(button, widgetType, new EventContext(ex.getOldID(), context, getUser()));
+    buttonFactory.logEvent(button, widgetType, new EventContext("" + ex.getID(), context, getUser()));
   }
 
   @Override

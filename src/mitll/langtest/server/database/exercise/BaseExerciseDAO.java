@@ -139,7 +139,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 	 * Worry about if the audio transcript doesn't match the exercise transcript
 	 */
 	private void attachAudio() {
-		Set<String> transcriptChanged = new HashSet<>();
+		Set<Integer> transcriptChanged = new HashSet<>();
 
 		// logger.info("afterReadingExercises trying to attach audio to " + exercises.size());
 
@@ -220,7 +220,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 		int user = 0;
 		int examined = 0;
 
-		Collection<String> transcriptChanged = new HashSet<>();
+		Collection<Integer> transcriptChanged = new HashSet<>();
 
 		for (CommonExercise ex : all) {
 			if (!ex.hasRefAudio()) {
@@ -277,7 +277,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 						Map<String, String> unitToValue = exercise.getUnitToValue();
 						userExercise.getCombinedMutableUserExercise().setUnitToValue(unitToValue);
 
-						logger.debug("addOverlays refresh exercise for " + userExercise.getOldID() + " '" +userExercise.getForeignLanguage()+
+						logger.debug("addOverlays refresh exercise for " + userExercise.getID() + " '" +userExercise.getForeignLanguage()+
 								"' vs '" +exercise.getForeignLanguage()+
                 "'");
 						sectionHelper.refreshExercise(userExercise);
@@ -391,7 +391,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 	 * @param id
 	 * @return
 	 * @see BaseUserExerciseDAO#getPredefExercise
-	 * @see DatabaseImpl#getExercise(String)
+	 * @see DatabaseImpl#getExercise
 	 */
 	public CommonExercise getExercise(int id) {
 		synchronized (this) {
@@ -403,10 +403,10 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 	 * @see #afterReadingExercises()
 	 * @param exTofieldToDefect
    */
-	private void addDefects(Map<String, Map<String, String>> exTofieldToDefect) {
+	private void addDefects(Map<Integer, Map<String, String>> exTofieldToDefect) {
 		if (addDefects) {
 			int count = 0;
-			for (Map.Entry<String, Map<String, String>> pair : exTofieldToDefect.entrySet()) {
+			for (Map.Entry<Integer, Map<String, String>> pair : exTofieldToDefect.entrySet()) {
 				for (Map.Entry<String, String> fieldToDefect : pair.getValue().entrySet()) {
 					if (userListManager.addDefect(pair.getKey(), fieldToDefect.getKey(), fieldToDefect.getValue())) {
 						count++;
@@ -425,8 +425,8 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 	 * Look at the exercises and automatically flag defects
 	 * @return
    */
-	private Map<String, Map<String, String>> findDefects() {
-		Map<String, Map<String, String>> idToDefectMap = new HashMap<>();
+	private Map<Integer, Map<String, String>> findDefects() {
+		Map<Integer, Map<String, String>> idToDefectMap = new HashMap<>();
 
 		for (CommonShell shell : exercises) {
 			Map<String, String> fieldToDefect = new HashMap<>();
@@ -437,7 +437,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 			}
 
 			if (!fieldToDefect.isEmpty()) {
-				idToDefectMap.put(shell.getOldID(), fieldToDefect);
+				idToDefectMap.put(shell.getID(), fieldToDefect);
 			}
 		}
 		return idToDefectMap;
@@ -453,10 +453,11 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 				if (where == null) {
 					logger.error("getRawExercises huh? couldn't find user exercise from add exercise table in user exercise table : " + id);
 				} else {
+					int id1 = where.getID();
 					if (isKnownExercise(id.getId())) {
-						logger.debug("addNewExercises SKIPPING new user exercise " + where.getOldID() + " since already added from spreadsheet : " + where);
+						logger.debug("addNewExercises SKIPPING new user exercise " + id1 + " since already added from spreadsheet : " + where);
 					} else {
-						logger.debug("addNewExercises adding new user exercise " + where.getOldID() + " : " + where);
+						logger.debug("addNewExercises adding new user exercise " + id1 + " : " + where);
 						add(where);
 						getSectionHelper().addExercise(where);
 					}

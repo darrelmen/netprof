@@ -317,7 +317,7 @@ public class ListManager implements RequiresResize {
     viewLessons(browse.getContent(), true, false, false, "");
   }
 
-  public void findListAndSelect(String exerciseID) {
+  public void findListAndSelect(int exerciseID) {
     viewLessons(browse.getContent(), true, false, false, exerciseID);
   }
 
@@ -332,6 +332,20 @@ public class ListManager implements RequiresResize {
    */
   private void viewLessons(final Panel contentPanel, boolean getAll, boolean onlyMine, boolean onlyVisited,
                            String optionalExercise) {
+    viewLessons(contentPanel, getAll, onlyMine, onlyVisited, optionalExercise);
+  }
+
+  /**
+   * @param contentPanel
+   * @param getAll
+   * @param onlyMine
+   * @param onlyVisited
+   * @param optionalExercise
+   * @see #viewBrowse()
+   * @see #refreshViewLessons(boolean, boolean)
+   */
+  private void viewLessons(final Panel contentPanel, boolean getAll, boolean onlyMine, boolean onlyVisited,
+                           int optionalExercise) {
     contentPanel.clear();
     contentPanel.getElement().setId("contentPanel");
 
@@ -379,7 +393,7 @@ public class ListManager implements RequiresResize {
       public void onSuccess(List<UserList<CommonShell>> reviewLists) {
         // logger.info("\tviewReview : reviewLessons for " + userManager.getUser() + " got " + reviewLists);
         new UserListCallback(outer, contentPanel, child,
-            new ScrollPanel(), REVIEW, false, false, userManager, false, "").onSuccess(reviewLists);
+            new ScrollPanel(), REVIEW, false, false, userManager, false, -1).onSuccess(reviewLists);
       }
     });
   }
@@ -440,7 +454,7 @@ public class ListManager implements RequiresResize {
    */
   void showList(final UserList ul, Panel contentPanel, final String instanceName, HasID toSelect) {
     logger.info("showList " + ul + " instance '" + instanceName + "'");
-    controller.logEvent(contentPanel, "Tab", "UserList_" + ul.getOldID(), "Show List");
+    controller.logEvent(contentPanel, "Tab", getListID(ul), "Show List");
 
     String previousList = storage.getValue(CLICKED_USER_LIST);
     String currentValue = storeCurrentClickedList(ul);
@@ -565,7 +579,7 @@ public class ListManager implements RequiresResize {
     learn.getTab().addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        controller.logEvent(learn.getTab(), "Tab", "UserList_" + ul.getOldID(), LEARN);
+        controller.logEvent(learn.getTab(), "Tab", getListID(ul), LEARN);
         storage.storeValue(SUB_TAB, LEARN);
         showLearnTab(learn, ul, instanceName1, null);
       }
@@ -586,7 +600,7 @@ public class ListManager implements RequiresResize {
           //       logger.info("getListOperations : got click on practice " + fpractice.getContent().getElement().getId());
           avpHelper.setContentPanel(fpractice.getContent());
           avpHelper.showNPF(ul, fpractice, PRACTICE1, true, toSelect);
-          controller.logEvent(fpractice.getTab(), "Tab", "UserList_" + ul.getOldID(), PRACTICE1);
+          controller.logEvent(fpractice.getTab(), "Tab", getListID(ul), PRACTICE1);
         }
       });
     }
@@ -621,7 +635,7 @@ public class ListManager implements RequiresResize {
       public void onClick(ClickEvent event) {
         //    logger.info("getListOperations : got click on edit tab ");
         storage.storeValue(SUB_TAB, EDIT_ITEM);
-        controller.logEvent(editTab.getTab(), "Tab", "UserList_" + ul.getOldID(), EDIT_ITEM);
+        controller.logEvent(editTab.getTab(), "Tab", getListID(ul), EDIT_ITEM);
         if ((isReview || isComment)) {
           //    logger.info("getListOperations : showNPF ");
           reviewItem.showNPF(ul, editTab, getInstanceName(isReview), false, toSelect);
@@ -634,6 +648,10 @@ public class ListManager implements RequiresResize {
     return editTab;
   }
 
+  String getListID(UserList<CommonShell> ul) {
+    return "UserList_" + ul.getID();
+  }
+
   private TabAndContent getImportTab(final UserList<CommonShell> ul, final TabPanel tabPanel,
                                      final TabAndContent learnTab, final String instanceName
   ) {
@@ -643,7 +661,7 @@ public class ListManager implements RequiresResize {
       public void onClick(ClickEvent event) {
         //    logger.info("getListOperations : got click on edit tab ");
         storage.storeValue(SUB_TAB, IMPORT_ITEM);
-        controller.logEvent(importTab.getTab(), "Tab", "UserList_" + ul.getOldID(), IMPORT_ITEM);
+        controller.logEvent(importTab.getTab(), "Tab", getListID(ul), IMPORT_ITEM);
         showImportItem(ul, importTab, learnTab, instanceName, tabPanel);
       }
     });
@@ -665,7 +683,7 @@ public class ListManager implements RequiresResize {
   }
 
   void deleteList(Button delete, final UserList ul, final boolean onlyMyLists) {
-    controller.logEvent(delete, "Button", "UserList_" + ul.getOldID(), "Delete");
+    controller.logEvent(delete, "Button", getListID(ul), "Delete");
     final long uniqueID = ul.getID();
 
     listService.deleteList(uniqueID, new AsyncCallback<Boolean>() {

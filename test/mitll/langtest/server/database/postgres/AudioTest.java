@@ -43,6 +43,7 @@ import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import org.apache.log4j.Logger;
 import org.junit.Test;
+import scala.Int;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -53,7 +54,7 @@ public class AudioTest extends BaseTest {
   private static final Logger logger = Logger.getLogger(AudioTest.class);
   //public static final boolean DO_ONE = false;
 
-  @Test
+/*  @Test
   public void testWriteAudio() {
     DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
 
@@ -84,7 +85,7 @@ public class AudioTest extends BaseTest {
     logger.info("after  attach  " + exercise.getAudioAttributes().size());
     logger.info("getRecorded " + dao.getRecordedBy(1));
     logger.info("getRecorded " + dao.getRecordedBy(3));
-  }
+  }*/
 
   @Test
   public void testReadAudio() {
@@ -96,7 +97,7 @@ public class AudioTest extends BaseTest {
     Map<Integer, Integer> truth = new HashMap<>();
     for (User user : new UserDAO(spanish).getUsers()) {
 //      Collection<String> recordedBy = dao.getRecordedBy(user.getId());
-      Collection<String> recordedBy = h2AudioDAO.getRecordedForUser(user.getId());
+      Collection<Integer> recordedBy = h2AudioDAO.getRecordedExForUser(user.getId());
       if (!recordedBy.isEmpty()) {
         logger.info("h2  for " + user.getUserID() + " recorded\t" + recordedBy.size());
       }
@@ -105,7 +106,7 @@ public class AudioTest extends BaseTest {
     IAudioDAO dao = spanish.getAudioDAO();
     for (User user : spanish.getUsers()) {
 //      Collection<String> recordedBy = dao.getRecordedBy(user.getId());
-      Collection<String> recordedBy = dao.getRecordedForUser(user.getId());
+      Collection<Integer> recordedBy = dao.getRecordedExForUser(user.getId());
       if (!recordedBy.isEmpty()) {
         logger.info("postgres for " + user.getUserID() + " recorded " + recordedBy.size());
       }
@@ -120,7 +121,7 @@ public class AudioTest extends BaseTest {
     List<User> users = spanish.getUsers();
     long then = System.currentTimeMillis();
     for (User user : users) {
-      Collection<String> recordedBy = dao.getWithContext(user.getId());
+      Collection<Integer> recordedBy = dao.getWithContext(user.getId());
       if (!recordedBy.isEmpty()) {
         logger.info("postgres for " + user.getUserID() + " with context " + recordedBy.size());
       }
@@ -133,7 +134,7 @@ public class AudioTest extends BaseTest {
     AudioDAO audioDAO = new AudioDAO(spanish, h2UserDAO);
     then = System.currentTimeMillis();
     for (User user : h2UserDAO.getUsers()) {
-      Collection<String> recordedBy = audioDAO.getWithContext(user.getId());
+      Collection<Integer> recordedBy = audioDAO.getWithContext(user.getId());
       if (!recordedBy.isEmpty()) {
         logger.info("h2 for " + user.getUserID() + " with context " + recordedBy.size());
       }
@@ -148,7 +149,7 @@ public class AudioTest extends BaseTest {
     logger.info("got  h2 " + maleFemaleProgressH2);
 
     for (User user : users) {
-      Collection<String> recordedBy = dao.getRecordedExampleForUser(user.getId());
+      Collection<Integer> recordedBy = dao.getRecordedExampleForUser(user.getId());
       if (!recordedBy.isEmpty()) {
         logger.info("postgres for " + user.getUserID() + " getRecordedExampleForUser " + recordedBy.size());
       }
@@ -185,18 +186,18 @@ public class AudioTest extends BaseTest {
     audioDAO.getExToAudio();
 
     IAudioDAO dao = spanish.getAudioDAO();
-    List<AudioAttribute> audioAttributes = dao.getExToAudio().get("3");
+    List<AudioAttribute> audioAttributes = dao.getExToAudio().get(3);
     if (audioAttributes != null) {
       for (AudioAttribute audioAttribute : audioAttributes) {
         logger.info("found " + audioAttribute);
       }
-      for (AudioAttribute audioAttribute : audioAttributes) {
-        dao.updateExerciseID(audioAttribute.getUniqueID(), "dude");
-      }
+//      for (AudioAttribute audioAttribute : audioAttributes) {
+//        dao.updateExerciseID(audioAttribute.getUniqueID(), "dude");
+//      }
     } else logger.info("no exercises under 3");
 
 
-    audioAttributes = dao.getExToAudio().get("dude");
+    audioAttributes = dao.getExToAudio().get(2222222);
     if (audioAttributes != null) {
       for (AudioAttribute audioAttribute : audioAttributes) {
         logger.info("found " + audioAttribute);

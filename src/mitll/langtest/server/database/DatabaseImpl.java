@@ -452,7 +452,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @param id
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getResultASRInfo
-   * @see mitll.langtest.server.DownloadServlet#getFilenameForDownload(DatabaseImpl, String, String)
+   * @see mitll.langtest.server.DownloadServlet#getFilenameForDownload
    * @see #deleteItem(int)
    * @see #getCustomOrPredefExercise(int)
    */
@@ -480,7 +480,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    *
    * @return
    */
-  public Collection<AmasExerciseImpl> getAMASExercises() {
+  public List<AmasExerciseImpl> getAMASExercises() {
     return fileExerciseDAO.getRawExercises();
   }
 
@@ -591,7 +591,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
   /**
    * @param userExercise
-   * @see mitll.langtest.server.LangTestDatabaseImpl#editItem
+   * @see mitll.langtest.server.services.ListServiceImpl#editItem
    * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#postEditItem
    */
   public void editItem(CommonExercise userExercise) {
@@ -648,7 +648,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
   /**
    * @param audioAttribute
-   * @see mitll.langtest.server.LangTestDatabaseImpl#markAudioDefect(mitll.langtest.shared.exercise.AudioAttribute, String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#markAudioDefect
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getPanelForAudio
    */
   public void markAudioDefect(AudioAttribute audioAttribute) {
@@ -704,8 +704,11 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getUserHistoryForList
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete
    */
-  public AVPScoreReport getUserHistoryForList(int userid, Collection<String> ids, int latestResultID,
-                                              Collection<String> allIDs, Map<String, CollationKey> idToKey) {
+  public AVPScoreReport getUserHistoryForList(int userid,
+                                              Collection<Integer> ids,
+                                              int latestResultID,
+                                              Collection<Integer> allIDs,
+                                              Map<Integer, CollationKey> idToKey) {
     logger.debug("getUserHistoryForList " + userid + " and " + ids.size() + " ids, latest " + latestResultID);
 
     SessionsAndScores sessionsAndScores = resultDAO.getSessionsForUserIn2(ids, latestResultID, userid, allIDs, idToKey);
@@ -986,7 +989,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   /**
    * @param monitorResults
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getResults(java.util.Map, long, String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getResults
    * @see #getMonitorResults()
    */
   public List<MonitorResult> getMonitorResultsWithText(List<MonitorResult> monitorResults) {
@@ -1169,7 +1172,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   /**
    * @param exid
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#deleteItem(String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#deleteItem
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#deleteItem
    */
   public boolean deleteItem(int exid) {
@@ -1426,7 +1429,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   /**
    * @param resultID
    * @param asrScoreForAudio
-   * @see LangTestDatabaseImpl#getPretestScore(int, long, String, String, int, int, boolean, String, boolean)
+   * @see LangTestDatabaseImpl#getPretestScore
    */
   public void rememberScore(int resultID, PretestScore asrScoreForAudio) {
     getAnswerDAO().changeAnswer(resultID, asrScoreForAudio.getHydecScore(), asrScoreForAudio.getProcessDur(), asrScoreForAudio.getJson());

@@ -68,6 +68,11 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
   public UserExercise() {
   }  // just for serialization
 
+
+  public UserExercise(int exid, int creator, String english) {
+    this(exid, ""+exid, creator, english, "", "");
+  }
+
   /**
    * Tooltip is the english phrase, but if it's empty, use the foreign language.
    *
@@ -164,9 +169,9 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
 
   /**
    * @param uniqueID
-   * @see IUserExerciseDAO#add
+   * @see UserExerciseDAO#add
    */
-  public void setRealID(int uniqueID) {
+  public void setID(int uniqueID) {
     this.realID = uniqueID;
   }
 
@@ -311,7 +316,7 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
 
   public String toString() {
     return "UserExercise" +
-        " #" + getID() + "/" + getOldID() +
+        " #" + getID() + //"/" + getOldID() +
         (isPredef ? " <Predef>" : " <User>") +
         (isOverride ? " <Override>" : "") +
         " creator " + getCreator() +

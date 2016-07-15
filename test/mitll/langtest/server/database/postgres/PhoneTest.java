@@ -53,7 +53,7 @@ public class PhoneTest extends BaseTest {
   public void testWorst() {
     DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
 
-    {
+/*    {
       IPhoneDAO dao = spanish.getPhoneDAO();
 
       Result first = spanish.getResultDAO().getResultByID(3754);
@@ -69,8 +69,8 @@ public class PhoneTest extends BaseTest {
         PhoneReport worstPhonesForResults = dao.getWorstPhonesForResults(first.getUserid(), singleton1, new HashMap<>());
         logger.info("got " + worstPhonesForResults);
       }
-    }
-    {
+    }*/
+/*    {
       PhoneDAO phoneDAO = new PhoneDAO(spanish);
 
       ResultDAO resultDAO = new ResultDAO(spanish);
@@ -87,7 +87,7 @@ public class PhoneTest extends BaseTest {
       if (false) {
         logger.info("truth report " + phoneDAO.getWorstPhonesForResults(truth.getUserid(), Arrays.asList(truth.getUniqueID()), new HashMap<>()));
       }
-    }
+    }*/
   }
 
   @Test

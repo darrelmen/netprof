@@ -133,7 +133,7 @@ public interface ListService extends RemoteService {
    * @param userListID
    * @param exID
    */
-  void addItemToUserList(long userListID, String exID);
+  void addItemToUserList(long userListID, int exID);
 
   // Create User Exercises
   /**

@@ -47,10 +47,10 @@ public class EventReaderTest {
 
     //logger.info("is empty " +empty);
 
-    Number numRows = eventDAO.getNumRows("spanish");
+    Number numRows = eventDAO.getNumRows(0);//"spanish");
     logger.info("num rows " + numRows);
 
-    Event next = eventDAO.getAll("spanish").iterator().next();
+    Event next = eventDAO.getAll().iterator().next();
     logger.info("first event " + next);
 /*
     List<Event> all = eventDAO.getAllDevices();

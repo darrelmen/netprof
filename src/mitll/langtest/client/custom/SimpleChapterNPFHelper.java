@@ -192,16 +192,17 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
   }
 
   /**
+   * TODO : make sure this is doing something helpful
    * @param e
    * @see mitll.langtest.client.custom.RecorderNPFHelper.MyWaveformExercisePanel#postAnswers(ExerciseController, HasID)
    */
   void tellOtherListExerciseDirty(HasID e) {
     if (predefinedContentList != null &&
         predefinedContentList.getReloadable() != null &&
-        predefinedContentList.getReloadable().getCurrentExerciseID() != null &&
-        e.getOldID().equals(predefinedContentList.getReloadable().getCurrentExerciseID())) {
+        predefinedContentList.getReloadable().getCurrentExerciseID() != -1 &&
+        e.getID() == predefinedContentList.getReloadable().getCurrentExerciseID()) {
       // logger.info("SimpleChapterNPFHelper.reloading " + e.getOldID());
-      predefinedContentList.getReloadable().loadExercise(e.getOldID());
+      predefinedContentList.getReloadable().loadExercise(e.getID());
     } else {
   //    logger.info("\n\n\n--> SimpleChapterNPFHelper.not reloading " + e.getOldID());
     }

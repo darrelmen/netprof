@@ -14,6 +14,7 @@ import org.apache.log4j.Logger;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -124,6 +125,7 @@ public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
     return (oldToNew.containsKey(event.getUserID())) ? null : toSlick(event, projid, exToID);
   }
 
+  @Override public List<Event> getAll() { return getEvents(eventDAOWrapper.all()); }
   @Override
   public List<Event> getAll(Integer projid) {
     List<SlickEvent> all = eventDAOWrapper.getAll(projid);
@@ -136,7 +138,7 @@ public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
     return getEvents(all);
   }
 
-  private List<Event> getEvents(List<SlickEvent> all) {
+  private List<Event> getEvents(Collection<SlickEvent> all) {
     List<Event> copy = new ArrayList<>();
     for (SlickEvent event : all) {
       copy.add(fromSlick(event));
@@ -144,13 +146,10 @@ public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
     return copy;
   }
 
-  @Override
-  public List<SlickSlimEvent> getAllSlim(int projid) {
-    return eventDAOWrapper.getAllSlim(projid);
-  }
+  @Override public List<SlickSlimEvent> getAllSlim(int projid) { return eventDAOWrapper.getAllSlim(projid);  }
+  @Override public List<SlickSlimEvent> getAllSlim() { return eventDAOWrapper.allSlim();  }
 
-  @Override
-  public List<SlickSlimEvent> getAllDevicesSlim(int projid) {
+  @Override public List<SlickSlimEvent> getAllDevicesSlim(int projid) {
     return eventDAOWrapper.getAllSlim(projid);
   }
 

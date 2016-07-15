@@ -37,6 +37,7 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Shell;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Includes a reqID so if the client gets responses out of order it can ignore responses to old requests.
@@ -55,7 +56,7 @@ public class ExerciseListWrapper<T extends Shell> implements IsSerializable {
   public ExerciseListWrapper() {} // req for serialization
 
   private int reqID;
-  private Collection<T> exercises;
+  private List<T> exercises;
   private CommonExercise firstExercise;
 
   /**
@@ -64,7 +65,7 @@ public class ExerciseListWrapper<T extends Shell> implements IsSerializable {
    * @param ids
    * @param firstExercise
    */
-  public ExerciseListWrapper(int reqID, Collection<T> ids, CommonExercise firstExercise) {
+  public ExerciseListWrapper(int reqID, List<T> ids, CommonExercise firstExercise) {
     this.reqID = reqID;
     this.exercises = ids;
     this.firstExercise = firstExercise;
@@ -73,7 +74,7 @@ public class ExerciseListWrapper<T extends Shell> implements IsSerializable {
   public int getReqID() {
     return reqID;
   }
-  public Collection<T> getExercises() { return exercises;  }
+  public List<T> getExercises() { return exercises;  }
   public CommonExercise getFirstExercise() { return firstExercise;  }
 
   public String toString() {
