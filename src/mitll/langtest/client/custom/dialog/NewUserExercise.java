@@ -166,7 +166,7 @@ class NewUserExercise extends BasicDialog {
     container.add(upper);
 
     makeForeignLangRow(upper);
-    final String id1 = ul.getOldID();
+    final String id1 = ""+ul.getID();
 
     foreignLang.box.getElement().setId("NewUserExercise_ForeignLang_entry_for_list_" + id1);
 
@@ -424,8 +424,8 @@ class NewUserExercise extends BasicDialog {
                                   final ControlGroup normalSpeedRecording) {
     final Button submit = new Button(NewUserExercise.CREATE);
     submit.setType(ButtonType.SUCCESS);
-    submit.getElement().setId("CreateButton_NewExercise_for_" + ul.getOldID());
-    controller.register(submit, "UserList_" + ul.getOldID());
+    submit.getElement().setId("CreateButton_NewExercise_for_" + ul.getID());
+    controller.register(submit, "UserList_" + ul.getID());
     submit.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
@@ -650,7 +650,7 @@ class NewUserExercise extends BasicDialog {
       String speed = (recordRegularSpeed ? "Regular" : "Slow") + "_speed";
       getPostAudioButton().getElement().setId(id + speed);
       getPlayButton().getElement().setId(id + "Play_" + speed);
-      controller.register(getPlayButton(), newExercise.getOldID());
+      controller.register(getPlayButton(), newExercise.getID());
     }
 
     @Override
@@ -670,7 +670,7 @@ class NewUserExercise extends BasicDialog {
     @Override
     protected WaveformPostAudioRecordButton makePostAudioRecordButton(AudioType audioType, String recordButtonTitle) {
       postAudioButton =
-          new WaveformPostAudioRecordButton(exercise.getOldID(), controller, exercisePanel, this, service,
+          new WaveformPostAudioRecordButton(exercise.getID(), controller, exercisePanel, this, service,
               recordRegularSpeed ? 0 : 1,
               false // don't record in results table
               ,

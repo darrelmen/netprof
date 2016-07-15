@@ -91,7 +91,7 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
 
   @Override
   public boolean removeForExercise(int exid) {
-    return remove(REFRESULT, EXID, exid, true);
+    return remove(REFRESULT, EXID, ""+exid, true);
   }
 
   private List<Result> cachedResultsForQuery = null;
@@ -107,7 +107,8 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
    * @see DatabaseImpl#addRefAnswer
    */
   @Override
-  public long addAnswer(int userID, int exid,
+  public long addAnswer(int userID,
+                        int exid,
                         String audioFile,
                         long durationInMillis,
                         boolean correct,
@@ -122,7 +123,7 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
     Connection connection = database.getConnection(this.getClass().toString());
     try {
       long then = System.currentTimeMillis();
-      long newid = addAnswerToTable(connection, userID, exid, audioFile, durationInMillis, correct,
+      long newid = addAnswerToTable(connection, userID, ""+ exid, audioFile, durationInMillis, correct,
           alignOutput,
           decodeOutput,
 
@@ -156,10 +157,11 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
    * @param isMale
    * @param speed
    * @throws java.sql.SQLException
-   * @see IRefResultDAO#addAnswer
+   * @seex IRefResultDAO#addAnswer
    */
   private long addAnswerToTable(Connection connection,
-                                int userid, String id,
+                                int userid,
+                                String id,
                                 String audioFile,
                                 long durationInMillis,
                                 boolean correct,
@@ -330,15 +332,16 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
 
       ResultSet rs = statement.executeQuery();
 
-      Map<String, List<String>> idToAnswers = new HashMap<>();
-      Map<String, List<String>> idToJSONs = new HashMap<>();
+      Map<Integer, List<String>> idToAnswers = new HashMap<>();
+      Map<Integer, List<String>> idToJSONs = new HashMap<>();
       while (rs.next()) {
         String exid = rs.getString(EXID);
+        int i = Integer.parseInt(exid);
         String answer = rs.getString(ANSWER);
         String json = rs.getString(SCORE_JSON);
 
-        addToAnswers(idToAnswers, exid, answer);
-        addToJSONs(idToJSONs, exid, json);
+        addToAnswers(idToAnswers, i, answer);
+        addToJSONs(idToJSONs, i, json);
       }
 
       JSONObject jsonObject = getJsonObject(idToAnswers, idToJSONs);
@@ -434,9 +437,15 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
         float pronScore1 = validDecodeJSON ? pronScore : alignScore;
         String scoreJson1 = validDecodeJSON ? scoreJson : alignJSON;
         AudioType audioType = speed.equals("reg") ? AudioType.REGULAR : speed.equals("slow") ? AudioType.SLOW : AudioType.UNSET;
+        int exid1 = 0;
+        try {
+          exid1 = Integer.parseInt(exid);
+        } catch (NumberFormatException e) {
+          logger.warn("couldn't parse " +exid);
+        }
         Result result = new Result(uniqueID, userID, //id
             // "", // plan
-            exid, // id
+            exid1, // id
             0, // qid
             trimPathForWebPage2(answer), // answer
             true, // valid

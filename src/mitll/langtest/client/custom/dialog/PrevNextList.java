@@ -46,7 +46,7 @@ import mitll.langtest.shared.exercise.Shell;
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 1/9/14.
-*/
+ */
 public class PrevNextList<T extends Shell> extends HorizontalPanel {
   private final ExerciseController controller;
   private Button prev, next;
@@ -54,13 +54,13 @@ public class PrevNextList<T extends Shell> extends HorizontalPanel {
   private boolean disableNext = true;
 
   /**
-   * @see EditableExerciseDialog#addNew
    * @param exerciseShell
    * @param listContainer
    * @param disableNext
    * @param controller
+   * @see EditableExerciseDialog#addNew
    */
-  public PrevNextList(final T exerciseShell, ListInterface<T> listContainer, boolean disableNext, ExerciseController controller) {
+  PrevNextList(final T exerciseShell, ListInterface<T> listContainer, boolean disableNext, ExerciseController controller) {
     this.container = listContainer;
     this.disableNext = disableNext;
     this.controller = controller;
@@ -74,7 +74,7 @@ public class PrevNextList<T extends Shell> extends HorizontalPanel {
     this.prev = new Button("Previous");
     prev.getElement().setId("PrevNextList_Previous");
 
-    controller.register(prev,exercise.getOldID());
+    controller.register(prev, exercise.getID());
     prev.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         clickPrev();
@@ -89,13 +89,12 @@ public class PrevNextList<T extends Shell> extends HorizontalPanel {
   private void makeNextButton(final T exercise) {
     this.next = new Button("Next");
     next.getElement().setId("nextButton");
-    controller.register(next,exercise.getOldID());
+    controller.register(next, exercise.getID());
 
     next.setType(ButtonType.SUCCESS);
     next.setEnabled(!disableNext || !container.onLast(exercise));
 
     add(next);
-
     //DOM.setElementAttribute(next.getElement(), "id", "nextButton");
 
     next.addClickHandler(new ClickHandler() {

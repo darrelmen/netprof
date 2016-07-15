@@ -66,10 +66,10 @@ public class PlayAudioWidget {
    * @param eventRegistration - base class of ExerciseController
    * @return
    */
-  public Anchor getAudioWidgetWithEventRecording(String path, String title, String exerciseID,
+  public Anchor getAudioWidgetWithEventRecording(String path, String title, int exerciseID,
                                                  EventRegistration eventRegistration) {
     Anchor anchor = getAudioWidget(path, title);
-    eventRegistration.registerWidget(anchor, anchor, exerciseID, "playing user audio " + path);
+    eventRegistration.registerWidget(anchor, anchor, ""+exerciseID, "playing user audio " + path);
     if (path.contains(FILE_MISSING)) {
       logger.warning("getAudioWidgetWithEventRecording path is " + path + " title " + title + " ex " + exerciseID);
       anchor.setVisible(false);

@@ -104,6 +104,9 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
     return getHistoryTokenFromUIState("", id);
   }
 
+  protected String getInitialHistoryToken() {
+    return getHistoryTokenFromUIState("",-1);
+  }
   /**
    * @param search
    * @param id

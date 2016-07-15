@@ -68,7 +68,7 @@ public class ResultTest extends BaseTest {
     int uniqueID = first.getUniqueID();
     logger.info("Got " + resultDAO.getResultByID(uniqueID));
     logger.info("Got " + resultDAO.getMonitorResults().size());
-    String exid = first.getExid();
+    int  exid = first.getExid();
     logger.info("Got " + resultDAO.getMonitorResultsByID(exid));
     Collection<UserAndTime> userAndTimes = resultDAO.getUserAndTimes();
     logger.info("Got " + userAndTimes.size() + " " + userAndTimes.iterator().next());
@@ -80,9 +80,9 @@ public class ResultTest extends BaseTest {
     SlickResultDAO dao = (SlickResultDAO) spanish.getResultDAO();
     logger.info(dao.getMonitorResults().size());
 
-    List<String> ids = new ArrayList<>();
-    for (CommonExercise ex : spanish.getExercises()) ids.add(ex.getOldID());
-    List<String> strings = ids.subList(0, 100);
+    List<Integer> ids = new ArrayList<>();
+    for (CommonExercise ex : spanish.getExercises()) ids.add(ex.getID());
+    List<Integer> strings = ids.subList(0, 100);
     logger.info(dao.getResultsForExIDInForUser(strings, 2, "").size());
     logger.info("match avp " +dao.getResultsForExIDInForUser(strings, true, 2).size());
     logger.info("!match avp " +dao.getResultsForExIDInForUser(strings, false, 2).size());
@@ -101,9 +101,9 @@ public class ResultTest extends BaseTest {
 
     SlickResultDAO dao = (SlickResultDAO) spanish.getResultDAO();
 
-    List<String> ids = new ArrayList<>();
-    for (CommonExercise ex : spanish.getExercises()) ids.add(ex.getOldID());
-    List<String> strings = ids.subList(0, 100);
+    List<Integer> ids = new ArrayList<>();
+    for (CommonExercise ex : spanish.getExercises()) ids.add(ex.getID());
+    List<Integer> strings = ids.subList(0, 100);
 
     logger.info(dao.getResultsForExIDInForUser(strings, 2, "").size());
     logger.info("match avp " +dao.getResultsForExIDInForUser(strings, true, 2).size());

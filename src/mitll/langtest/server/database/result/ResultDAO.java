@@ -223,7 +223,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
 
 
   @Override
-  public List<MonitorResult> getMonitorResultsByID(String id) {
+  public List<MonitorResult> getMonitorResultsByID(int id) {
     try {
       String sql = "SELECT * FROM " + RESULTS + " WHERE " + EXID + "='" + id + "'";
       return getMonitorResultsSQL(sql);
@@ -279,7 +279,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
    * @see #getSessionsForUserIn2
    */
 
-  public List<CorrectAndScore> getResultsForExIDIn(Collection<String> ids) {
+  public List<CorrectAndScore> getResultsForExIDIn(Collection<Integer> ids) {
     try {
       String list = getInList(ids);
 
@@ -312,7 +312,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getScoresForUser
    */
   @Override
-  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, int userid, String session) {
+  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, String session) {
     try {
       String list = getInList(ids);
 
@@ -358,7 +358,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
    * @see #attachScoreHistory
    * @see mitll.langtest.server.database.DatabaseImpl#getJsonScoreHistory
    */
-  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<String> ids, boolean matchAVP, int userid) {
+  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, boolean matchAVP, int userid) {
     try {
       String list = getInList(ids);
 
@@ -943,10 +943,10 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
           Map<String, Result> results1 = userToResult.get(r.getUserid());
           if (results1 == null)
             userToResult.put(r.getUserid(), results1 = new HashMap<>());
-          String exerciseID = r.getExerciseID();
+          int exerciseID = r.getExerciseID();
           Result result = results1.get(exerciseID);
           if (result == null || (r.getTimestamp() > result.getTimestamp())) {
-            results1.put(exerciseID, r);
+            results1.put(""+exerciseID, r);
           }
         }
       }

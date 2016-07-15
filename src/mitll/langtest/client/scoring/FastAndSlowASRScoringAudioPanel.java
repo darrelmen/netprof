@@ -89,7 +89,7 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
         exercise.getForeignLanguage(),
         service,
         controller1,
-        controller1.getProps().showSpectrogram(), scoreListener, RIGHT_MARGIN, REFERENCE, exercise.getOldID(), exercise, instance);
+        controller1.getProps().showSpectrogram(), scoreListener, RIGHT_MARGIN, REFERENCE, exercise, instance);
   }
 
   /**
@@ -219,7 +219,7 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
     Button onButton = new Button(title.equals(M) ? "" : title.equals(F) ? "" : title);
 
     onButton.getElement().setId("Choice_" + title);
-    controller.register(onButton, exerciseID);
+    controller.register(onButton, exercise.getID());
     onButton.addClickHandler(handler);
     onButton.setActive(isActive);
     return onButton;
@@ -246,7 +246,7 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
       String display = audioAttribute.getDisplay();
 
       // System.out.println("attri " + audioAttribute + " display " +display);
-      final RadioButton radio = new RadioButton(GROUP + "_" + exerciseID + "_" + instance, display);
+      final RadioButton radio = new RadioButton(GROUP + "_" + exercise.getID() + "_" + instance, display);
       radio.getElement().setId("Radio_" + display);
       if (audioAttribute.isRegularSpeed()) {
         regular = radio;
@@ -267,7 +267,7 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
         @Override
         public void onClick(ClickEvent event) {
           showAudio(innerRegAttr);
-          controller.logEvent(innerRegular, RADIO_BUTTON, exerciseID, SELECTED_AUDIO + innerRegAttr.getAudioRef());
+          controller.logEvent(innerRegular, RADIO_BUTTON, exercise.getID(), SELECTED_AUDIO + innerRegAttr.getAudioRef());
         }
       });
       regular.setValue(true);
@@ -281,7 +281,7 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
         @Override
         public void onClick(ClickEvent event) {
           showAudio(innerSlowAttr);
-          controller.logEvent(innerSlow, RADIO_BUTTON, exerciseID, SELECTED_AUDIO + innerSlowAttr.getAudioRef());
+          controller.logEvent(innerSlow, RADIO_BUTTON, exercise.getID(), SELECTED_AUDIO + innerSlowAttr.getAudioRef());
         }
       });
       if (regular == null)

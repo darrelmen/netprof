@@ -59,7 +59,7 @@ public class AmasNavigationHelper extends HorizontalPanel {
   private final PostAnswerProvider provider;
   private final ListInterface listContainer;
 
-  public AmasNavigationHelper(Shell exercise, ExerciseController controller, PostAnswerProvider provider,
+  AmasNavigationHelper(Shell exercise, ExerciseController controller, PostAnswerProvider provider,
                               ListInterface listContainer, boolean addButtons,
                               boolean enableNextOnlyWhenAllCompleted) {
     this.provider = provider;
@@ -69,7 +69,7 @@ public class AmasNavigationHelper extends HorizontalPanel {
     getNextAndPreviousButtons(exercise, controller, addButtons);
     getElement().setId("AmasNavigationHelper");
     addStyleName("rightTenMargin");
-    controller.register(next, exercise.getOldID());
+    controller.register(next, exercise.getID());
   }
 
   /**

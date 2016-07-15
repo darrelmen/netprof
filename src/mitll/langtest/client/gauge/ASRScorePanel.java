@@ -87,12 +87,12 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
   private float classAvg = 0f;
   private String refAudio;
   private final ExerciseController controller;
-  private final String exerciseID;
+  private final int exerciseID;
 
   /**
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel
    */
-  public ASRScorePanel(String parent, ExerciseController controller, String exerciseID) {
+  public ASRScorePanel(String parent, ExerciseController controller, int exerciseID) {
     this.controller = controller;
     this.exerciseID = exerciseID;
     addStyleName("leftTenMargin");

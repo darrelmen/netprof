@@ -89,7 +89,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
   private static final int IMAGE_WIDTH_SLOP = 70 + WINDOW_SIZE_CHANGE_THRESHOLD / 2;
 
   private final ScoreListener gaugePanel;
-  protected final String exerciseID;
+ // protected final int exerciseID;
   protected String audioPath;
   private final Map<String, Integer> reqs = new HashMap<String, Integer>();
   private int reqid;
@@ -113,7 +113,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
   protected final T exercise;
   final String instance;
 
-  private static final boolean debug = false;
+  private static final boolean DEBUG = false;
   private static final boolean DEBUG_GET_IMAGES = false;
 
   /**
@@ -122,7 +122,6 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
    * @param gaugePanel
    * @param rightMargin
    * @param playButtonSuffix
-   * @param exerciseID
    * @param exercise
    * @param instance
    * @see ScoringAudioPanel#ScoringAudioPanel
@@ -130,13 +129,13 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
   public AudioPanel(String path, LangTestDatabaseAsync service,
                     ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin,
                     String playButtonSuffix,
-                    String exerciseID, T exercise, String instance) {
-    this(service, controller, showSpectrogram, gaugePanel, 1.0f, rightMargin, exerciseID, exercise, instance);
+                    T exercise, String instance) {
+    this(service, controller, showSpectrogram, gaugePanel, 1.0f, rightMargin, /*exercise.getID(), */exercise, instance);
     this.audioPath = path;
 
     addWidgets(playButtonSuffix, "Record");
     if (playAudio != null) {
-      controller.register(getPlayButton(), exerciseID);
+      controller.register(getPlayButton(), exercise.getID());
     }
   }
 
@@ -151,27 +150,30 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
    * @param gaugePanel
    * @param screenPortion
    * @param rightMargin
-   * @param exerciseID
+   * @paramx exerciseID
    * @param exercise
    * @param instance
    * @see mitll.langtest.client.exercise.RecordAudioPanel#RecordAudioPanel
    */
   protected AudioPanel(LangTestDatabaseAsync service,
                        ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel,
-                       float screenPortion, int rightMargin, String exerciseID, T exercise, String instance) {
+                       float screenPortion, int rightMargin,
+                       //int exerciseID,
+                       T exercise,
+                       String instance) {
     this.screenPortion = screenPortion;
     this.soundManager = controller.getSoundManager();
     this.service = service;
     this.logMessages = controller.isLogClientMessages();
     this.controller = controller;
     this.gaugePanel = gaugePanel;
-    if (debug) logger.info("AudioPanel : gauge panel " + gaugePanel);
+    if (DEBUG) logger.info("AudioPanel : gauge panel " + gaugePanel);
     this.showSpectrogram = showSpectrogram;
     this.rightMargin = rightMargin;
-    this.exerciseID = exerciseID;
+   // this.exerciseID = exerciseID;
     this.exercise = exercise;
     this.instance = instance;
-    getElement().setId("AudioPanel_exercise_" + exerciseID);
+    getElement().setId("AudioPanel_exercise_" + exercise.getID());
   }
 
   public void onResize() {
@@ -286,7 +288,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
 
   @Override
   public void onLoad() {
-    if (debug) logger.info("onLoad : id=" + getElement().getId() + " audio path is " + audioPath);
+    if (DEBUG) logger.info("onLoad : id=" + getElement().getId() + " audio path is " + audioPath);
     if (audioPath != null) {
       Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
         public void execute() {
@@ -302,7 +304,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
   }
 
   public void setScreenPortion(float screenPortion) {
-    if (debug) logger.info("AudioPanel.setScreenPortion : screenPortion " + screenPortion);
+    if (DEBUG) logger.info("AudioPanel.setScreenPortion : screenPortion " + screenPortion);
     this.screenPortion = screenPortion;
   }
 
@@ -369,7 +371,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
    */
   public String getImagesForPath(String path) {
     path = getPath(path);
-    if (debug) logger.info("AudioPanel : " + getElement().getId() + " getImagesForPath " + path);
+    if (DEBUG) logger.info("AudioPanel : " + getElement().getId() + " getImagesForPath " + path);
     if (path != null) {
       this.audioPath = path;
     }
@@ -503,7 +505,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
    * @param type
    * @param width
    * @param imageAndCheck
-   * @see mitll.langtest.client.LangTest#getImage(int, String, String, int, int, String, com.google.gwt.user.client.rpc.AsyncCallback)
+   * @see mitll.langtest.client.LangTest#getImage
    */
   private void getImageURLForAudio(final String path, final String type, int width, final ImageAndCheck imageAndCheck) {
     final int toUse = Math.max(MIN_WIDTH, width);
@@ -512,7 +514,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     if (path != null && !path.equals(FILE_MISSING)) {
       final long then = System.currentTimeMillis();
 //      logger.info("getImageURLForAudio : req " + reqid + " path " + path + " type " + type + " width " + width);
-      controller.getImage(getReqID(type), path, type, toUse, height, exerciseID, new AsyncCallback<ImageResponse>() {
+      controller.getImage(getReqID(type), path, type, toUse, height, exercise.getID(), new AsyncCallback<ImageResponse>() {
         public void onFailure(Throwable caught) {
           long now = System.currentTimeMillis();
           logger.info("getImageURLForAudio : (failure) took " + (now - then) + " millis");
@@ -528,7 +530,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
           long roundtrip = now - then;
 
           if (!result.successful) {
-            logger.warning("getImageURLForAudio : got error for request for type " + type + " and " +path + " and exid " + exerciseID);
+            logger.warning("getImageURLForAudio : got error for request for type " + type + " and " +path + " and exid " + exercise.getID());
             if (WARN_ABOUT_MISSING_AUDIO) Window.alert("missing audio file on server " + path);
           } else if (result.req == -1 || isMostRecentRequest(type, result.req)) { // could be cached
             showResult(result, imageAndCheck);

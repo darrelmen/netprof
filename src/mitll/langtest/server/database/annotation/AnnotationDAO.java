@@ -202,10 +202,12 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
       Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement = connection.prepareStatement(sql3);
       ResultSet rs = statement.executeQuery();
-      Set<String> incorrect = new HashSet<String>();
+      Set<Integer> incorrect = new HashSet<>();
 
       while (rs.next()) {
-        incorrect.add(rs.getString(1));
+        String string = rs.getString(1);
+        int i = Integer.parseInt(string);
+        incorrect.add(i);
       }
 
       //logger.debug("getUserAnnotations sql " + sql + " yielded " + lists);
@@ -214,14 +216,14 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
     } catch (SQLException e) {
       logger.error("got " + e, e);
     }
-    return new HashSet<String>();
+    return new HashSet<Integer>();
   }
 
   /**
    * @param exerciseID
    * @return
+   * @seex UserListManager#addAnnotations
    * @see mitll.langtest.server.LangTestDatabaseImpl#addAnnotations
-   * @see UserListManager#addAnnotations
    */
   @Override
   public Map<String, ExerciseAnnotation> getLatestByExerciseID(int exerciseID) {
@@ -276,7 +278,7 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
     return lists;
   }
 
-  protected Map<String, Long> getAnnotationExToCreator(boolean forDefects) {
+  private Map<Integer, Long> getAnnotationExToCreator(boolean forDefects) {
     Connection connection = database.getConnection(this.getClass().toString());
 
     String sql2 = "select exerciseid,field," + STATUS + "," + CREATORID +
@@ -284,11 +286,11 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
         "group by exerciseid,field," + STATUS + ",modified " +
         "order by exerciseid,field,modified;";
 
-    Map<String, Long> exToCreator = Collections.emptyMap();
+    Map<Integer, Long> exToCreator = Collections.emptyMap();
     try {
       PreparedStatement statement = connection.prepareStatement(sql2);
       ResultSet rs = statement.executeQuery();
-      exToCreator = new HashMap<String, Long>();
+      exToCreator = new HashMap<Integer, Long>();
       String prevExid = "";
       long prevCreatorid = -1;
 
@@ -306,7 +308,8 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
           // go through all the fields -- if the latest is "incorrect" on any field, it's a defect
           //examineFields(forDefects, lists, prevExid, fieldToStatus);
           if (examineFields(forDefects, fieldToStatus)) {
-            exToCreator.put(prevExid, creatorid);
+            int i = Integer.parseInt(prevExid);
+            exToCreator.put(i, creatorid);
           }
           fieldToStatus.clear();
           prevExid = exid;
@@ -317,7 +320,9 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
       }
 
       if (examineFields(forDefects, fieldToStatus)) {
-        exToCreator.put(prevExid, prevCreatorid);
+        int i = Integer.parseInt(prevExid);
+
+        exToCreator.put(i, prevCreatorid);
       }
 
       //logger.debug("getUserAnnotations forDefects " +forDefects+ " sql " + sql2 + " yielded " + exToCreator.size());

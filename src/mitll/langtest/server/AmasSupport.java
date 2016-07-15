@@ -65,17 +65,11 @@ class AmasSupport {
 
 
   /**
-   * @param reqID
    * @param typeToSection
    * @param prefix
    * @param userID
-   * @param role
-   * @param onlyUnrecordedByMe
-   * @param onlyExamples
-   * @param incorrectFirst
    * @return
    * @see mitll.langtest.client.list.HistoryExerciseList#loadExercises
-   * @see #getExerciseIds
    */
   public Collection<AmasExerciseImpl> getExercisesForSelectionState(
       Map<String, Collection<String>> typeToSection, String prefix,
@@ -101,19 +95,19 @@ class AmasSupport {
    * @seex #getExerciseIds
    * @see #getExercisesForSelectionState
    */
-  public Collection<AmasExerciseImpl> filterByUnrecorded(long userID,
+  Collection<AmasExerciseImpl> filterByUnrecorded(long userID,
                                                          Collection<AmasExerciseImpl> exercises,
                                                          Map<String, Collection<String>> typeToSection,
                                                          IResultDAO resultDAO) {
-    Collection<String> allIDs = new ArrayList<String>();
+    Collection<Integer> allIDs = new ArrayList<>();
 
     for (HasID exercise : exercises) {
-      allIDs.add(exercise.getOldID());
+      allIDs.add(exercise.getID());
     }
 
     QuizCorrectAndScore correctAndScores = getQuizCorrectAndScore(typeToSection, (int) userID, allIDs, resultDAO);
 
-    Map<String, List<Integer>> exToQIDs = new HashMap<>();
+    Map<Integer, List<Integer>> exToQIDs = new HashMap<>();
 
     Collection<CorrectAndScore> correctAndScoreCollection = correctAndScores.getCorrectAndScoreCollection();
 
@@ -135,11 +129,11 @@ class AmasSupport {
     return exercises;
   }
 
-  private void markExercisesAsComplete(Collection<AmasExerciseImpl> exercises, Map<String, List<Integer>> exToQIDs) {
+  private void markExercisesAsComplete(Collection<AmasExerciseImpl> exercises, Map<Integer, List<Integer>> exToQIDs) {
     int marked = 0;
     // mark with answered
     for (AmasExerciseImpl ex : exercises) {
-      List<Integer> integers = exToQIDs.get(ex.getOldID());
+      List<Integer> integers = exToQIDs.get(ex.getID());
       if (integers == null) {
         ex.setState(STATE.UNSET);
       } else {
@@ -163,7 +157,7 @@ class AmasSupport {
    * @see #filterByUnrecorded(long, Collection, Map)
    */
   private QuizCorrectAndScore getQuizCorrectAndScore(Map<String, Collection<String>> typeToSection, int userID,
-                                                     Collection<String> allIDs,
+                                                     Collection<Integer> allIDs,
                                                      IResultDAO resultDAO) {
     String session = getLatestSession(typeToSection, userID);
     //  logger.info("exercises " +allIDs.size() + " for session " + session);

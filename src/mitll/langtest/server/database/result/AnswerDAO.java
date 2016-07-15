@@ -196,7 +196,7 @@ public class AnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
 
       statement.setInt(i++, info.getUserid());
       statement.setString(i++, PLAN); // obsolete
-      statement.setString(i++, copyStringChar(info.getId()));
+      statement.setString(i++, ""+info.getId());
       statement.setInt(i++, info.getQuestionID());
       statement.setTimestamp(i++, new Timestamp(System.currentTimeMillis()));
       statement.setString(i++, copyStringChar(answerInserted));

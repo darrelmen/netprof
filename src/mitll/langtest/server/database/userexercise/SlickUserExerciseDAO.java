@@ -92,7 +92,8 @@ public class SlickUserExerciseDAO
         unitToValue.getOrDefault(first, ""),
         unitToValue.getOrDefault(second, ""),
         projectID,  // project id fk
-        false, false,
+        false,
+        false,
         shared.getID());
   }
 
@@ -296,8 +297,8 @@ public class SlickUserExerciseDAO
 
   @Override
   public CommonExercise getByExID(int exid) {
-    exid = exid.replaceAll("\'", "");
-    Seq<SlickExercise> byExid = dao.getByExid(exid);
+    //exid = exid.replaceAll("\'", "");
+    Seq<SlickExercise> byExid = dao.byID(exid);
     return byExid.isEmpty() ? null : fromSlick(byExid.iterator().next());
   }
 
@@ -316,7 +317,7 @@ public class SlickUserExerciseDAO
 
   @Override
   public Collection<CommonExercise> getByExID(Collection<Integer> exids) {
-    return getUserExercises(dao.byExids(exids));
+    return getUserExercises(dao.byIDs(exids));
   }
 
   /**
@@ -352,10 +353,9 @@ public class SlickUserExerciseDAO
   }
 
   public Collection<SlickRelatedExercise> getAllRelated() { return relatedExerciseDAOWrapper.all();}
-
-  public Map<String, Integer> getOldToNew() {
+/*  public Map<String, Integer> getOldToNew() {
     Map<String, Integer> oldToNew = new HashMap<>();
     for (SlickExercise exercise : dao.getAllPredefEx()) oldToNew.put(exercise.exid(), exercise.id());
     return oldToNew;
-  }
+  }*/
 }

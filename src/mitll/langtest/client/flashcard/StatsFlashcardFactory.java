@@ -89,11 +89,11 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
   private HasID currentExercise;
   private final ControlState controlState;
-  private Collection<L> allExercises;//, originalExercises;
+  private List<L> allExercises;
 
-  private final Map<String, Boolean> exToCorrect = new HashMap<>();
-  private final Map<String, Double> exToScore = new HashMap<>();
- // private final Set<Integer> resultIDs = new HashSet<>();
+  private final Map<Integer, Boolean> exToCorrect = new HashMap<>();
+  private final Map<Integer, Double> exToScore = new HashMap<>();
+
   private String selectionID = "";
   private final String instance;
   private final StickyState sticky;
@@ -101,7 +101,6 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   private Map<String, Collection<String>> selection = new HashMap<>();
   private final UserList ul;
   private Widget contentPanel;
-
 
   /**
    * @param service
@@ -111,7 +110,6 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
    * @param instance
    * @param ul
    * @see mitll.langtest.client.custom.content.AVPHelper#getFactory
-   * @see mitll.langtest.client.custom.Navigation#makePracticeHelper(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.user.UserFeedback)
    */
   public StatsFlashcardFactory(LangTestDatabaseAsync service, UserFeedback feedback, ExerciseController controller,
                                ListInterface<L> exerciseList, String instance, UserList ul) {
@@ -127,7 +125,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
          * @see mitll.langtest.client.list.ExerciseList#rememberAndLoadFirst
          */
         @Override
-        public void listChanged(Collection<L> items, String selectionID) {
+        public void listChanged(List<L> items, String selectionID) {
           StatsFlashcardFactory.this.selectionID = selectionID;
           allExercises = items;
           //    logger.info("StatsFlashcardFactory : " + selectionID + " got new set of items from list. " + items.size());
@@ -208,20 +206,20 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     sticky.clearCurrent();
   }
 
-  public String getCurrentExerciseID() {
+  public int getCurrentExerciseID() {
     return sticky.getCurrentExerciseID();
   }
 
   /**
    * Pull state out of cache and re-populate correct, incorrect, and score history.
    *
-   * @see mitll.langtest.client.custom.Navigation#makePracticeHelper(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.user.UserFeedback)
+   * @see mitll.langtest.client.custom.PracticeHelper#getMyListLayout
    */
   public void populateCorrectMap() {
     String value = sticky.getCorrect();
     if (value != null && !value.trim().isEmpty()) {
       // logger.info("using correct map " + value);
-      for (String ex : value.split(",")) {
+      for (int ex : getIDsFromStorage(value)) {
         exToCorrect.put(ex, Boolean.TRUE);
       }
     }
@@ -229,20 +227,33 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     value = sticky.getIncorrect();
     if (value != null && !value.trim().isEmpty()) {
       //  logger.info("using incorrect map " + value);
-      for (String ex : value.split(",")) {
+      for (int ex : getIDsFromStorage(value)) {
         exToCorrect.put(ex, Boolean.FALSE);
       }
     }
 
     value = sticky.getScore();
     if (value != null && !value.trim().isEmpty()) {
-      for (String pair : value.split(",")) {
+      for (String pair : getIDsFroStorage(value)) {
         String[] split = pair.split("=");
         if (split.length == 2) {
-          exToScore.put(split[0], Double.parseDouble(split[1]));
+          String s = split[0];
+          int id = Integer.parseInt(s);
+          exToScore.put(id, Double.parseDouble(split[1]));
         }
       }
     }
+  }
+
+  private Collection<Integer> getIDsFromStorage(String value) {
+    String[] split = getIDsFroStorage(value);
+    Collection<Integer> ids = new ArrayList<>();
+    for (String ex : split) ids.add(Integer.parseInt(ex));
+    return ids;
+  }
+
+  private String[] getIDsFroStorage(String value) {
+    return value.split(",");
   }
 
   private long latestResultID = -1;
@@ -295,7 +306,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       if (exerciseList.onLast()) {
         onSetComplete();
       } else {
-        exerciseList.loadNextExercise(currentExercise.getOldID());
+        exerciseList.loadNextExercise(currentExercise.getID());
       }
     }
 
@@ -314,12 +325,13 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
       if (result.getValidity() == AudioAnswer.Validity.OK) {
         //resultIDs.add(result.getResultID());
-        exToScore.put(exercise.getOldID(), result.getScore());
-        exToCorrect.put(exercise.getOldID(), result.isCorrect());
+        int id = exercise.getID();
+        exToScore.put(id, result.getScore());
+        exToCorrect.put(id, result.isCorrect());
 
         StringBuilder builder = new StringBuilder();
         StringBuilder builder2 = new StringBuilder();
-        for (Map.Entry<String, Boolean> pair : exToCorrect.entrySet()) {
+        for (Map.Entry<Integer, Boolean> pair : exToCorrect.entrySet()) {
           if (pair.getValue()) {
             builder.append(pair.getKey()).append(",");
           } else {
@@ -330,7 +342,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         sticky.storeIncorrect(builder2);
 
         StringBuilder builder3 = new StringBuilder();
-        for (Map.Entry<String, Double> pair : exToScore.entrySet()) {
+        for (Map.Entry<Integer, Double> pair : exToScore.entrySet()) {
           builder3.append(pair.getKey()).append("=").append(pair.getValue()).append(",");
         }
         sticky.storeScore(builder3);
@@ -369,12 +381,10 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
       final int user = controller.getUser();
 
-      Set<String> ids = exToCorrect.keySet();
-
-      Set<String> copies = new HashSet<>(ids);
+      Set<Integer> copies = new HashSet<>(exToCorrect.keySet());
       if (copies.isEmpty()) {
         for (CommonShell t : allExercises) {
-          copies.add(t.getOldID());
+          copies.add(t.getID());
         }
       }
 
@@ -407,7 +417,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       scoreHistory = completeDisplay.getScoreHistory(sortedHistory, allExercises, controller);
       scoreHistory.add(getButtonsBelowScoreHistory());
       widgets.add(scoreHistory);
-      completeDisplay.addLeftAndRightCharts(result, exToScore, getCorrect(), getIncorrect(), allExercises.size(), widgets);
+      completeDisplay.addLeftAndRightCharts(result, exToScore.values(), getCorrect(), getIncorrect(), allExercises.size(), widgets);
       belowContentDiv.add(container);
     }
 
@@ -518,24 +528,26 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     void startOver() {
       makeFlashcardButtonsVisible();
 
-      String lastID = "";
-      for (L ex : allExercises) {
-        lastID = ex.getOldID();
-      }
+//      String lastID = "";
+      int lastID = allExercises.isEmpty() ? -1:allExercises.get(allExercises.size()-1).getID();
+//      for (L ex : allExercises) {
+//        lastID = ex.getOldID();
+//      }
 //      String lastID = allExercises.get(allExercises.size() - 1).getOldID();
-      String currentExerciseID = sticky.getCurrentExerciseID();
+      int currentExerciseID = sticky.getCurrentExerciseID();
 
-      logger.info("startOver : current " + currentExerciseID);
+    //  logger.info("startOver : current " + currentExerciseID);
 
-      if (currentExerciseID != null && !currentExerciseID.isEmpty() && !currentExerciseID.equals(lastID)) {
+      if (currentExerciseID != -1 && currentExerciseID != lastID) {
         exerciseList.loadExercise(currentExerciseID);
       } else {
         reset();
-
         sticky.resetStorage();
 
-        String first = allExercises.iterator().next().getOldID();
-        exerciseList.loadExercise(first);
+        if (!allExercises.isEmpty()) {
+          int first = allExercises.iterator().next().getID();
+          exerciseList.loadExercise(first);
+        }
       }
     }
 
@@ -561,8 +573,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       if (exerciseList.onLast()) {
         onSetComplete();
       } else {
-        int delayMillis = DELAY_MILLIS;
-        loadNextOnTimer(delayMillis);
+        loadNextOnTimer(DELAY_MILLIS);
       }
     }
 
@@ -732,5 +743,4 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       pronScore.setText("" + itotal);
     }
   }
-
 }
