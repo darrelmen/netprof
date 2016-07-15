@@ -141,14 +141,15 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   }
 
   /**
+   * TODO : maybe remove second arg
    * @param userListID
    * @param exID
    * @return
    * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    */
-  public void addItemToUserList(long userListID, String exID) {
+  public void addItemToUserList(long userListID, int exID) {
     CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(exID);
-    getUserListManager().addItemToList(userListID, exID, customOrPredefExercise.getID());
+    getUserListManager().addItemToList(userListID, ""+exID, customOrPredefExercise.getID());
   }
 
   /**
@@ -158,7 +159,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   @Override
   public List<UserList<CommonShell>> getReviewLists() {
     List<UserList<CommonShell>> lists = new ArrayList<>();
-    UserListManager userListManager = getUserListManager();
+    IUserListManager userListManager = getUserListManager();
     UserList<CommonShell> defectList = userListManager.getDefectList(db.getTypeOrder());
     lists.add(defectList);
 
@@ -184,7 +185,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   public CommonExercise reallyCreateNewItem(long userListID, CommonExercise userExercise) {
     if (DEBUG) logger.debug("reallyCreateNewItem : made user exercise " + userExercise + " on list " + userListID);
     getUserListManager().reallyCreateNewItem(userListID, userExercise, serverProps.getMediaDir());
-    String id = userExercise.getOldID();
+    int id = userExercise.getID();
 
     for (AudioAttribute audioAttribute : userExercise.getAudioAttributes()) {
       if (DEBUG) logger.debug("\treallyCreateNewItem : update " + audioAttribute + " to " + id);

@@ -93,8 +93,8 @@ public class AttachAudio {
 	 * @see ExcelImport#getExercise
 	 */
 	public <T extends AudioExercise> void addOldSchoolAudio(String refAudioIndex, T imported) {
-		String id = imported.getOldID();
-		String audioDir = refAudioIndex.length() > 0 ? findBest(refAudioIndex) : id;
+		int id = imported.getID();
+		String audioDir = refAudioIndex.length() > 0 ? findBest(refAudioIndex) : ""+id;
 		if (audioOffset != 0) {
 			audioDir = "" + (Integer.parseInt(audioDir.trim()) + audioOffset);
 		}
@@ -135,10 +135,10 @@ public class AttachAudio {
 	 * @see ExcelImport#attachAudio
 	 * @see ExcelImport#getRawExercises()
 	 */
-	public <T extends CommonExercise> int attachAudio(T imported, Collection<String> transcriptChanged) {
-		String id = imported.getOldID();
+	public <T extends CommonExercise> int attachAudio(T imported, Collection<Integer> transcriptChanged) {
+		int id = imported.getID();
 		int missing = 0;
-		if (exToAudio.containsKey(id) || exToAudio.containsKey(id + "/1") || exToAudio.containsKey(id + "/2")) {
+		if (exToAudio.containsKey(id) /*|| exToAudio.containsKey(id + "/1") || exToAudio.containsKey(id + "/2")*/) {
 			List<AudioAttribute> audioAttributes = exToAudio.get(id);
 			//   if (audioAttributes.isEmpty()) logger.info("huh? audio attr empty for " + id);
 			missing = attachAudio(imported, missing, audioAttributes, transcriptChanged);
@@ -156,14 +156,13 @@ public class AttachAudio {
 	 */
 	private <T extends CommonExercise> int attachAudio(T imported, int missing,
 																										 Collection<AudioAttribute> audioAttributes,
-																										 Collection<String> transcriptChangedIDs) {
+																										 Collection<Integer> transcriptChangedIDs) {
 		MutableAudioExercise mutableAudio = imported.getMutableAudio();
 
 		if (audioAttributes == null) {
 			missingExerciseCount++;
 			if (missingExerciseCount < 10) {
-				String id = imported.getOldID();
-				logger.error("attachAudio can't find " + id);
+				logger.error("attachAudio can't find " + imported.getID());
 			}
 		} else if (!audioAttributes.isEmpty()) {
 			Set<String> previouslyAttachedAudio = new HashSet<>();
@@ -189,7 +188,7 @@ public class AttachAudio {
 
 						if (audio.isContextAudio()) {
 							Collection<CommonExercise> directlyRelated = imported.getDirectlyRelated();
-							if (directlyRelated.isEmpty()) logger.warn("huh? no context exercise on " +imported.getOldID());
+							if (directlyRelated.isEmpty()) logger.warn("huh? no context exercise on " +imported.getID());
 							else {
 								if (directlyRelated.size() == 1) {
 									audio.setAudioRef(child);   // remember to prefix the path

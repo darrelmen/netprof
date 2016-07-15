@@ -74,22 +74,21 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
   private static final boolean debug = false;
 
   /**
-   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, LangTestDatabaseAsync, ExerciseController, ScoreListener, String, String, T, String)
+   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, LangTestDatabaseAsync, ExerciseController, ScoreListener, String, Shell, String)
    * @param refSentence
    * @param service
    * @param gaugePanel
    * @param playButtonSuffix
-   * @param exerciseID
    * @param exercise
    * @param instance
    */
   ScoringAudioPanel(String refSentence, LangTestDatabaseAsync service, ExerciseController controller,
-                    ScoreListener gaugePanel, String playButtonSuffix, String exerciseID, T exercise, String instance) {
-    this(null, refSentence, service, controller, SHOW_SPECTROGRAM, gaugePanel, 23, playButtonSuffix, exerciseID, exercise, instance);
+                    ScoreListener gaugePanel, String playButtonSuffix, T exercise, String instance) {
+    this(null, refSentence, service, controller, SHOW_SPECTROGRAM, gaugePanel, 23, playButtonSuffix, exercise, instance);
   }
 
   /**
-   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, String, LangTestDatabaseAsync, ExerciseController, boolean, ScoreListener, int, String, String, T, String)
+   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, String, LangTestDatabaseAsync, ExerciseController, boolean, ScoreListener, int, String, Shell, String)
    * @param path
    * @param refSentence
    * @param service
@@ -97,16 +96,15 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
    * @param gaugePanel
    * @param rightMargin
    * @param playButtonSuffix
-   * @param exerciseID
    * @param exercise
    * @param instance
    */
   ScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service,
                     ExerciseController controller,
                     boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin, String playButtonSuffix,
-                    String exerciseID, T exercise, String instance) {
+                    T exercise, String instance) {
     super(path, service, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix,
-        exerciseID, exercise, instance);
+        exercise, instance);
     this.refSentence = refSentence;
     showOnlyOneExercise = controller.showOnlyOneExercise();
     addClickHandlers();
@@ -352,7 +350,7 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
     public void onSegmentClick(TranscriptSegment segment) {
    //   playSegment(MP3_HEADER_OFFSET+segment.getStart(), MP3_HEADER_OFFSET+segment.getEnd());
       playSegment(segment.getStart(), segment.getEnd());
-      controller.getButtonFactory().logEvent(widget, type.toString(), new EventContext(exerciseID, "Clicked on " + segment.getEvent(), controller.getUser()));
+      controller.getButtonFactory().logEvent(widget, type.toString(), new EventContext(""+exercise.getID(), "Clicked on " + segment.getEvent(), controller.getUser()));
     }
   }
 

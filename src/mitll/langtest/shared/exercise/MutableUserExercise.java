@@ -52,7 +52,7 @@ interface MutableUserExercise {
    * @see mitll.langtest.server.database.custom.UserListManager#duplicate(CommonExercise)
    * @param id
    */
-  void setID(String id);
+  void setOldID(String id);
 
   /**
    * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#reallyChange(ListInterface, boolean)
@@ -64,13 +64,13 @@ interface MutableUserExercise {
    * @see UserExerciseDAO#add(CommonExercise, boolean)
    * @param uniqueID
    */
-  void setRealID(int uniqueID);
+  void setID(int uniqueID);
 
-  /**
+/*  *//**
    * @see UserExerciseDAO#add(CommonExercise, boolean)
    * @return
-   */
-  int getRealID();
+   *//*
+  int getRealID();*/
 
   /**
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getCreateButton(UserList, ListInterface, Panel, ControlGroup)

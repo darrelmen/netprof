@@ -471,7 +471,7 @@ public class ResultManager extends PagerTable {
       String foreignText = selectedObject.getForeignText();
 
       ReviewScoringPanel w = new ReviewScoringPanel(selectedObject.getAnswer(), foreignText, service, controller,
-          selectedObject.getExID(), null, "instance");
+          null, "instance");
 
       w.setResultID(selectedObject.getUniqueID());
 
@@ -483,7 +483,7 @@ public class ResultManager extends PagerTable {
       reviewContainer.add(w.getTables());
     } else {
       AudioPanel w = new AudioPanel<>(selectedObject.getAnswer(), service, controller, false, null, 10, "",
-          selectedObject.getExID(), null, "instance");
+          null, "instance");
       reviewContainer.add(w);
     }
   }
@@ -646,7 +646,7 @@ public class ResultManager extends PagerTable {
     TextColumn<MonitorResult> exercise = new TextColumn<MonitorResult>() {
       @Override
       public String getValue(MonitorResult answer) {
-        return answer.getExID();
+        return ""+answer.getExID();
       }
     };
     exercise.setSortable(true);

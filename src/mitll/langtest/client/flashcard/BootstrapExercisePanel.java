@@ -58,10 +58,7 @@ import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -154,7 +151,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
   private Button makeGroupButton(ButtonGroup buttonGroup,String title) {
     Button onButton = new Button(title);
     onButton.getElement().setId(FEEDBACK+"_"+title);
-    controller.register(onButton, exercise.getOldID());
+    controller.register(onButton, exercise.getID());
     buttonGroup.add(onButton);
     return onButton;
   }
@@ -174,7 +171,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
    * @see #BootstrapExercisePanel
    */
   @Override
-  protected void addRecordingAndFeedbackWidgets(String exerciseID, LangTestDatabaseAsync service,
+  protected void addRecordingAndFeedbackWidgets(int exerciseID, LangTestDatabaseAsync service,
                                                 ExerciseController controller,
                                                 Panel toAddTo) {
     if (logger == null) {
@@ -205,9 +202,9 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
    * @param service
    * @param controller
    * @return
-   * @see FlashcardPanel#addRecordingAndFeedbackWidgets(String, LangTestDatabaseAsync, ExerciseController, Panel)
+   * @see FlashcardPanel#addRecordingAndFeedbackWidgets(int, LangTestDatabaseAsync, ExerciseController, Panel)
    */
-  private Widget getAnswerAndRecordButtonRow(String exerciseID, LangTestDatabaseAsync service, ExerciseController controller) {
+  private Widget getAnswerAndRecordButtonRow(int exerciseID, LangTestDatabaseAsync service, ExerciseController controller) {
    // logger.info("BootstrapExercisePanel.getAnswerAndRecordButtonRow = " + instance);
     RecordButtonPanel answerWidget = getAnswerWidget(exerciseID, service, controller, addKeyBinding, instance);
     this.answerWidget = answerWidget;
@@ -230,8 +227,8 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
    *
    * @param recordButton
    * @return
-   * @see #getAnswerAndRecordButtonRow(String, LangTestDatabaseAsync, ExerciseController)
-   * @see FlashcardPanel#addRecordingAndFeedbackWidgets(String, LangTestDatabaseAsync, ExerciseController, Panel)
+   * @see #getAnswerAndRecordButtonRow
+   * @see FlashcardPanel#addRecordingAndFeedbackWidgets(int, LangTestDatabaseAsync, ExerciseController, Panel)
    */
   private Panel getRecordButtonRow(Widget recordButton) {
     Panel recordButtonRow = getCenteredWrapper(recordButton);
@@ -286,9 +283,10 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
    * @return
    * @see #getAnswerAndRecordButtonRow(String, LangTestDatabaseAsync, ExerciseController)
    */
-  private RecordButtonPanel getAnswerWidget(final String exerciseID, LangTestDatabaseAsync service,
-                                            ExerciseController controller, final boolean addKeyBinding, String instance) {
-    Map<String, Collection<String>> typeToSelection = Collections.emptyMap();
+  private RecordButtonPanel getAnswerWidget(final int exerciseID, LangTestDatabaseAsync service,
+                                            ExerciseController controller, final boolean addKeyBinding,
+                                            String instance) {
+   // Map<String, Collection<String>> typeToSelection = Collections.emptyMap();
     AudioAnswerListener exercisePanel = this;
     return new FlashcardRecordButtonPanel(exercisePanel, service, controller, exerciseID, 1) {
       final FlashcardRecordButtonPanel outer = this;
@@ -395,7 +393,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
 
     String feedback = "";
     if (badAudioRecording) {
-      controller.logEvent(button, "Button", exercise.getOldID(), "bad recording");
+      controller.logEvent(button, "Button", exercise.getID(), "bad recording");
       putBackText();
       if (!realRecordButton.checkAndShowTooLoud(result.getValidity())) {
         //logger.info("receivedAudioAnswer: show popup for " + result.getValidity());
@@ -407,11 +405,12 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
       long round = Math.round(score * 100f);
       String heard = result.getDecodeOutput();
 
+      int oldID = exercise.getID();
       if (correct) {
-        controller.logEvent(button, "Button", exercise.getOldID(), "correct response - score " + round);
+        controller.logEvent(button, "Button", oldID, "correct response - score " + round);
         showCorrectFeedback(score, heard);
       } else {   // incorrect!!
-        controller.logEvent(button, "Button", exercise.getOldID(), "incorrect response - score " + round);
+        controller.logEvent(button, "Button", oldID, "incorrect response - score " + round);
         feedback = showIncorrectFeedback(result, score, hasRefAudio, heard);
       }
     }
