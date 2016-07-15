@@ -114,7 +114,8 @@ class TextResponse {
    * @return
    * @see mitll.langtest.client.amas.FeedbackRecordPanel.AnswerPanel#doText
    */
-  public Widget addWidgets(Panel toAddTo, String exerciseID, LangTestDatabaseAsync service, ExerciseController controller,
+  public Widget addWidgets(Panel toAddTo,
+                           int exerciseID, LangTestDatabaseAsync service, ExerciseController controller,
                            boolean centered, boolean useWhite, boolean addKeyBinding, int questionID,
                            String buttonTitle, boolean getFocus) {
     textScoreFeedback = new ScoreFeedback(useWhite);
@@ -155,7 +156,8 @@ class TextResponse {
    * @return
    * @see #addWidgets
    */
-  private Widget getTextResponseWidget(String exerciseID, LangTestDatabaseAsync service, ExerciseController controller,
+  private Widget getTextResponseWidget(int exerciseID,
+                                       LangTestDatabaseAsync service, ExerciseController controller,
                                        ScoreFeedback scoreFeedback, boolean centered, boolean addEnterKeyBinding,
                                        int questionID, String buttonTitle, boolean getFocus) {
     final Button answerButton = getAnswerButton(buttonTitle);
@@ -205,7 +207,7 @@ class TextResponse {
    * @param questionID
    * @see #getTextResponseWidget
    */
-  private void setupSubmitButton(final String exerciseID, final LangTestDatabaseAsync service, final Button check,
+  private void setupSubmitButton(final int exerciseID, final LangTestDatabaseAsync service, final Button check,
                                  final TextBox noPasteAnswer, final ScoreFeedback scoreFeedback,
                                  final AudioType answerType,
                                  boolean addEnterKeyBinding, final int questionID) {
@@ -287,7 +289,8 @@ class TextResponse {
    * @param questionID
    * @see #setupSubmitButton
    */
-  private void getScoreForGuess(final String guess, LangTestDatabaseAsync service, String exerciseID, final Button check,
+  private void getScoreForGuess(final String guess, LangTestDatabaseAsync service,
+                                int exerciseID, final Button check,
                                 final ScoreFeedback scoreFeedback,
                                 AudioType answerType, int questionID) {
     if (guess.isEmpty() || removePunct(guess.trim()).isEmpty()) {

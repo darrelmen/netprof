@@ -50,7 +50,7 @@ import java.util.Map;
 public class WordScore implements Serializable, Comparable<WordScore> {
   private String fileRef;
   private String nativeAudio;
-  private String id;
+  private int id;
   private long timestamp;
   private float pronScore;
   private int resultID;
@@ -68,7 +68,7 @@ public class WordScore implements Serializable, Comparable<WordScore> {
     this(bs.getExId(), bs.getScore(), bs.getTimestamp(), bs.getResultID(), bs.getFileRef(), bs.getNativeAudio(), netPronImageTypeListMap);
   }
 
-  private WordScore(String id, float pronScore, long timestamp, int resultID, String fileRef, String nativeAudio,
+  private WordScore(int id, float pronScore, long timestamp, int resultID, String fileRef, String nativeAudio,
                     Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap) {
     this.id = id;
     this.pronScore = (pronScore < 0) ? 0 : pronScore;
@@ -88,7 +88,7 @@ public class WordScore implements Serializable, Comparable<WordScore> {
     return i;
   }
 
-  public String getId() {
+  public int getId() {
     return id;
   }
 

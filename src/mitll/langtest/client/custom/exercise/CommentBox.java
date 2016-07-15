@@ -63,7 +63,7 @@ public class CommentBox extends PopupContainer {
   //private final Logger logger = Logger.getLogger("CommentBox");
 
   private static final String COMMENT_BUTTON_GROUP_NEW = "comment-button-group-new";
-  private final String exerciseID;
+  private final int exerciseID;
   private final CommentAnnotator commentAnnotator;
   private final EventRegistration registration;
   private MyPopup commentPopup;
@@ -76,7 +76,8 @@ public class CommentBox extends PopupContainer {
    * @see GoodwaveExercisePanel#getQuestionContent(mitll.langtest.shared.exercise.CommonShell)
    * @see mitll.langtest.client.flashcard.FlashcardPanel#getFirstRow(mitll.langtest.client.exercise.ExerciseController)
    */
-  public CommentBox(String exerciseID, EventRegistration registration, CommentAnnotator commentAnnotator, MutableAnnotationExercise annotationExercise) {
+  public CommentBox(int exerciseID, EventRegistration registration, CommentAnnotator commentAnnotator,
+                    MutableAnnotationExercise annotationExercise) {
     this.exerciseID = exerciseID;
     this.registration = registration;
     this.commentAnnotator = commentAnnotator;
@@ -202,7 +203,7 @@ public class CommentBox extends PopupContainer {
      * @param commentButton
      * @param clearButton
      */
-    public void configure(final TextBox commentBox, final Widget commentButton, final Widget clearButton) {
+    void configure(final TextBox commentBox, final Widget commentButton, final Widget clearButton) {
       addCloseHandler(new CloseHandler<PopupPanel>() {
         @Override
         public void onClose(CloseEvent<PopupPanel> event) {
@@ -295,7 +296,6 @@ public class CommentBox extends PopupContainer {
       fieldToComment.put(field, comment);
       boolean isCorrect = comment.length() == 0;
 //      System.out.println("commentComplete " + field + " comment '" + comment +"' correct = " +isCorrect);
-
       setButtonTitle(commentButton, isCorrect, comment);
       showOrHideCommentButton(commentButton, clearButton, isCorrect);
       if (isCorrect) {

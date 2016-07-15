@@ -188,8 +188,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO/*, ISchema<Use
   private void populateList(UserList<CommonShell> where) {
     List<CommonShell> onList = userExerciseDAO.getOnList(where.getID());
     where.setExercises(onList);
-
-    for (CommonShell shell : onList) logger.info("for " + where.getOldID() + " found " + shell);
+   // for (CommonShell shell : onList) logger.info("for " + where.getOldID() + " found " + shell);
 /*
     Set<String> userExIDs = new HashSet<>();
     for (CommonShell shell : onList) userExIDs.add(shell.getOldID());

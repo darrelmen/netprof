@@ -55,7 +55,7 @@ public class H2Analysis extends Analysis implements IAnalysis {
    * @see DatabaseImpl#getAnalysis()
    * @see DatabaseImpl#makeDAO(String, String, String)
    */
-  public H2Analysis(Database database, IPhoneDAO phoneDAO, Map<String, String> exToRef) {
+  public H2Analysis(Database database, IPhoneDAO phoneDAO, Map<Integer, String> exToRef) {
     super(database, phoneDAO, exToRef);
   }
 
@@ -253,7 +253,7 @@ public class H2Analysis extends Analysis implements IAnalysis {
         }
         missing++;
       }
-      results.add(new BestScore(exid, pronScore, time, id, json, isiPad, isFlashcard, trimPathForWebPage(path),
+      results.add(new BestScore(Integer.parseInt(exid), pronScore, time, id, json, isiPad, isFlashcard, trimPathForWebPage(path),
           nativeAudio));
     }
 
