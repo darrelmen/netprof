@@ -238,7 +238,7 @@ public class ServerProperties {
   }
 
   public String getLessonPlan() {
-    return props.getProperty(LESSON_PLAN_FILE, props.getProperty(LANGUAGE) + ".json");
+    return props.getProperty(LESSON_PLAN_FILE);//, props.getProperty(LANGUAGE) + ".json");
   }
 
   public boolean useScoreCache() {
@@ -631,7 +631,7 @@ public class ServerProperties {
   }
 
   public boolean useH2() {
-    return getDefaultTrue(USE_H_2);
+    return getDefaultFalse(USE_H_2);
   }
 
   public void setH2(boolean val) {

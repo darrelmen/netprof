@@ -411,7 +411,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#setInstallPath
    */
   public void setInstallPath(String installPath, String lessonPlanFile, String mediaDir) {
-    //  logger.debug("got install path " + installPath + " media " + mediaDir);
+    logger.debug("got install path " + installPath + " media " + mediaDir);
     this.installPath = installPath;
     makeDAO(lessonPlanFile, mediaDir, installPath);
     this.jsonSupport = new JsonSupport(getSectionHelper(), getResultDAO(), getRefResultDAO(), getAudioDAO(),
@@ -532,6 +532,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   }
 
   private void makeExerciseDAO(String lessonPlanFile, boolean isURL) {
+    logger.info("got " + lessonPlanFile + " " + isURL);
     if (isURL) {
       this.exerciseDAO = new JSONURLExerciseDAO(getServerProps(), userListManager, ADD_DEFECTS);
     } else if (lessonPlanFile.endsWith(".json")) {
