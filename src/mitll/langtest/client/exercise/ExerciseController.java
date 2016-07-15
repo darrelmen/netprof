@@ -87,7 +87,7 @@ public interface ExerciseController extends EventRegistration {
 
   boolean showCompleted();
 
-  void getImage(int reqid, String path, String type, int toUse, int height, String exerciseID, AsyncCallback<ImageResponse> client);
+  void getImage(int reqid, String path, String type, int toUse, int height, int exerciseID, AsyncCallback<ImageResponse> client);
 
   String getLanguage();
   boolean isRightAlignContent();

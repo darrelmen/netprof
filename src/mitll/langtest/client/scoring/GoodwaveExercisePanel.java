@@ -200,18 +200,18 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
   }
 
   protected ASRScorePanel makeScorePanel(T e, String instance) {
-    ASRScorePanel widgets = new ASRScorePanel("GoodwaveExercisePanel_" + instance, controller, e.getOldID());
+    ASRScorePanel widgets = new ASRScorePanel("GoodwaveExercisePanel_" + instance, controller, e.getID());
     scorePanel = widgets;
     return widgets;
   }
 
   protected void loadNext() {
-    listContainer.loadNextExercise(exercise.getOldID());
+    listContainer.loadNextExercise(exercise.getID());
   }
 
   protected void nextWasPressed(ListInterface listContainer, HasID completedExercise) {
     navigationHelper.enableNextButton(false);
-    listContainer.loadNextExercise(completedExercise.getOldID());
+    listContainer.loadNextExercise(completedExercise.getID());
   }
 
   protected void addQuestionContentRow(T e, Panel hp) {
@@ -358,7 +358,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
   }
 
   private void addAnnotation(final String field, final String status, final String commentToPost) {
-    service.addAnnotation(getLocalExercise().getOldID(), field, status, commentToPost, controller.getUser(), new AsyncCallback<Void>() {
+    service.addAnnotation(getLocalExercise().getID(), field, status, commentToPost, controller.getUser(), new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
       }
@@ -559,7 +559,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
      * @see GoodwaveExercisePanel#getAnswerWidget
      */
     ASRRecordAudioPanel(LangTestDatabaseAsync service, ExerciseController controller, T exercise, String instance) {
-      super(exercise.getForeignLanguage(), service, controller, scorePanel, REFERENCE, exercise.getOldID(), exercise, instance);
+      super(exercise.getForeignLanguage(), service, controller, scorePanel, REFERENCE, exercise, instance);
       this.index = 1;
       getElement().setId("ASRRecordAudioPanel");
     }
@@ -646,11 +646,12 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
         @Override
         public void onClick(ClickEvent event) {
           controller.logEvent(downloadAnchor, "DownloadUserAudio_Anchor",
-              exerciseID, "downloading audio file " + audioPath);
+              exercise, "downloading audio file " + audioPath);
         }
       });
       return downloadAnchor;
     }
+
 
     private IconAnchor getDownloadIcon() {
       download = new IconAnchor();
@@ -664,7 +665,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
       download.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          controller.logEvent(download, "DownloadUserAudio_Icon", exerciseID,
+          controller.logEvent(download, "DownloadUserAudio_Icon", exercise,
               "downloading audio file " + audioPath);
         }
       });
@@ -685,7 +686,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
           audioPathToUse +
           "&" +
           "exerciseID=" +
-          exerciseID +
+          exercise.getID() +
           "&" +
           "userID=" +
           controller.getUser();
@@ -698,7 +699,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
      */
     private class MyPostAudioRecordButton extends PostAudioRecordButton {
       MyPostAudioRecordButton(ExerciseController controller) {
-        super(getLocalExercise().getOldID(), controller, ASRRecordAudioPanel.this.service, ASRRecordAudioPanel.this.index,
+        super(getLocalExercise().getID(), controller, ASRRecordAudioPanel.this.service, ASRRecordAudioPanel.this.index,
             true,
             RECORD_YOURSELF, controller.getProps().doClickAndHold() ? RELEASE_TO_STOP : "Stop");
       }

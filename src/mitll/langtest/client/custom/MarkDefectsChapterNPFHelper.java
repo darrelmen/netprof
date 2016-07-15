@@ -95,7 +95,7 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
               public void onClick(ClickEvent event) {
                 setDefaultAudioFilter(filterOnly.getValue());
                 scheduleWaitTimer();
-                loadExercises(getHistoryToken(""), getTypeAheadText(), false);
+                loadExercises(getInitialHistoryToken(), getTypeAheadText(), false);
               }
             });
             filterOnly.addStyleName("leftFiveMargin");
@@ -106,9 +106,9 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
             //setOnlyExamples(!doNormalRecording);
           }
 
-          private String setCheckboxTitle(UserManager userManager) {
+    /*      private String setCheckboxTitle(UserManager userManager) {
             return SHOW_ONLY_UNRECORDED;// + (userManager.isMale() ? " by Males" : " by Females");
-          }
+          }*/
         };
       }
     };

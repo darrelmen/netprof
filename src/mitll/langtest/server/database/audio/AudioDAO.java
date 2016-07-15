@@ -234,7 +234,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @return
    * @see #attachAudio
    */
-  protected Collection<AudioAttribute> getAudioAttributes(String exid) {
+  protected Collection<AudioAttribute> getAudioAttributes(int exid) {
     try {
       String sql = SELECT_ALL + " WHERE " + Database.EXID + "='" + exid + "' AND " + DEFECT + "=false";
       Collection<AudioAttribute> resultsSQL = getResultsSQL(sql);
@@ -266,8 +266,8 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
     return getAudioExercisesForGender(Collections.singleton(userid), REGULAR);
   }*/
 
-  protected Set<String> getAudioExercisesForGender(Collection<Integer> userIDs, String audioSpeed) {
-    Set<String> results = new HashSet<>();
+  protected Set<Integer> getAudioExercisesForGender(Collection<Integer> userIDs, String audioSpeed) {
+    Set<Integer> results = new HashSet<>();
     try {
       Connection connection = database.getConnection(this.getClass().toString());
       String s = getInClause(userIDs);
@@ -286,7 +286,13 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
       while (rs.next()) {
         String trim = rs.getString(1).trim();
         if (trim.isEmpty()) logger.warn("huh? got empty exid");
-        results.add(trim);
+        int e = 0;
+        try {
+          e = Integer.parseInt(trim);
+        } catch (NumberFormatException e1) {
+          e1.printStackTrace();
+        }
+        results.add(e);
       }
       //    logger.debug("for " + audioSpeed + " " + sql + " yielded " + results.size());
       finish(connection, statement, rs);
@@ -402,7 +408,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
 
-  protected Set<String> getValidAudioOfType(int userid, String audioType)  {
+  protected Set<Integer> getValidAudioOfType(int userid, String audioType)  {
     String sql = "SELECT " + Database.EXID +
         " FROM " + AUDIO + " WHERE " + USERID + "=" + userid +
         " AND " + DEFECT + "<>true " +
@@ -424,7 +430,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @return
    * @throws SQLException
    * @see #getAudioAttributes()
-   * @see #getAudioAttributes(String)
+   * @see BaseAudioDAO#getAudioAttributes(int)
    */
   private List<AudioAttribute> getResultsSQL(String sql) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
@@ -469,8 +475,14 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
         realType = AudioType.UNSET;
       }
 
+      int exid1 = 0;
+      try {
+        exid1 = Integer.parseInt(exid);
+      } catch (NumberFormatException e) {
+        logger.warn("got " +e + " for " +exid);
+      }
       AudioAttribute audioAttr = new AudioAttribute(uniqueID, userID, //id
-          exid, // id
+          exid1, // id
           audioRef, // answer
           timestamp.getTime(),
           dur, realType,
@@ -490,11 +502,12 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
     return results;
   }
 
-  private Set<String> getExidResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
+  private Set<Integer> getExidResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
     ResultSet rs = statement.executeQuery();
-    Set<String> results = new HashSet<>();
+    Set<Integer> results = new HashSet<>();
     while (rs.next()) {
-      results.add(rs.getString(Database.EXID));
+      String string = rs.getString(Database.EXID);
+      results.add(Integer.parseInt(string));
     }
     finish(connection, statement, rs);
 
@@ -545,7 +558,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @see #add(Result, int, String)
    */
   private long add(Connection connection, Result result, int userid, String audioRef, String transcript) throws SQLException {
-    String exerciseID = result.getExerciseID();
+    int exerciseID = result.getExerciseID();
     long timestamp = result.getTimestamp();
     AudioType audioType = result.getAudioType();
     long durationInMillis = result.getDurationInMillis();
@@ -591,7 +604,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
       int ii = 1;
 
       statement.setInt(ii++, userid);
-      statement.setString(ii++, exerciseID);
+      statement.setString(ii++, ""+exerciseID);
       statement.setString(ii++, audioType.toString());
       statement.setString(ii++, audioRef);
 
@@ -628,7 +641,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable
    */
   @Override
-  public AudioAttribute addOrUpdate(int userid, String exerciseID, AudioType audioType, String audioRef, long timestamp,
+  public AudioAttribute addOrUpdate(int userid, int exerciseID, AudioType audioType, String audioRef, long timestamp,
                                     long durationInMillis, String transcript) {
     if (isBadUser(userid)) {
       logger.error("huh? userid is " + userid, new Exception("huh? userid is " + userid));
@@ -657,7 +670,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
       statement.setInt(ii++, (int) durationInMillis);
       statement.setString(ii++, transcript);
 
-      statement.setString(ii++, exerciseID);
+      statement.setString(ii++, ""+exerciseID);
       statement.setInt(ii++, userid);
       statement.setString(ii++, audioType.toString());
 
@@ -686,7 +699,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   @Override
-  public void updateExerciseID(int uniqueID, String exerciseID) {
+  public void updateExerciseID(int uniqueID, int exerciseID) {
     try {
       Connection connection = database.getConnection(this.getClass().toString());
       String sql = "UPDATE " + AUDIO +
@@ -699,7 +712,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
 
       int ii = 1;
 
-      statement.setString(ii++, exerciseID);
+      statement.setString(ii++, ""+exerciseID);
       statement.setInt(ii++, uniqueID);
 
       int i = statement.executeUpdate();
@@ -740,7 +753,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
 
       int ii = 1;
 
-      statement.setString(ii++, exerciseID);
+      statement.setString(ii++, ""+exerciseID);
       statement.setInt(ii++, userid);
       statement.setString(ii++, audioType.toString());
 
@@ -773,7 +786,8 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @throws SQLException
    * @see #add(Connection, Result, int, String, String)
    */
-  private long addAudio(Connection connection, int userid, String audioRef, String exerciseID, long timestamp,
+  private long addAudio(Connection connection, int userid, String audioRef,
+                        int exerciseID, long timestamp,
                         AudioType audioType, long durationInMillis, String transcript) throws SQLException {
     if (isBadUser(userid)) {
       logger.error("huh? userid is " + userid);
@@ -798,7 +812,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
     int i = 1;
 
     statement.setInt(i++, userid);
-    statement.setString(i++, exerciseID);
+    statement.setString(i++, ""+exerciseID);
     statement.setTimestamp(i++, new Timestamp(timestamp));
     statement.setString(i++, audioRef);
     statement.setString(i++, audioType.toString());

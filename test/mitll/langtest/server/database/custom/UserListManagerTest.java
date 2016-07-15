@@ -212,7 +212,7 @@ public class UserListManagerTest {
 
     int ytd = 0;
 
-    List<Event> all = database.getEventDAO().getAll("spanish");
+    List<Event> all = database.getEventDAO().getAll();
     Map<String, Set<Long>> monthToCount = new TreeMap<String, Set<Long>>();
 
     Map<String, Map<Long, Set<Event>>> monthToCount2 = new TreeMap<String, Map<Long, Set<Event>>>();
@@ -559,6 +559,7 @@ public class UserListManagerTest {
     assertTrue(next.getEnglish().equals(CHANGED));
   }*/
 
+/*
   private UserExercise addAndDelete(User owner, UserListManager userListManager, long listid, UserList testList) {
     UserExercise english = addExercise(owner, userListManager, listid, testList);
 
@@ -566,6 +567,7 @@ public class UserListManagerTest {
     assertTrue(b);
     return english;
   }
+*/
 
   private UserExercise addExercise(User owner, UserListManager userListManager, long listid, UserList testList) {
     UserExercise english = createNewItem(owner.getId());
@@ -592,7 +594,7 @@ public class UserListManagerTest {
   /**
    * TODO exercise other methods
    */
-  @Test
+ /* @Test
   public void testReview() {
     UserListManager userListManager = database.getUserListManager();
     UserList reviewList = userListManager.getDefectList(new ArrayList<String>());
@@ -601,7 +603,7 @@ public class UserListManagerTest {
     //boolean b = userListManager.deleteItemFromList(listid, english.getOldID());
     // assertTrue(b);
     //    userListManager.markApproved();
-  }
+  }*/
 
 /*  private List<User> addAndGetUsers(String test2) {
     List<User> users;

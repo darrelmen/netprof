@@ -134,7 +134,7 @@ class WordContainer extends SimplePagingContainer<WordScore> implements Analysis
       @Override
       public int compare(WordScore o1, WordScore o2) {
         int i = new Long(o1.getTimestamp()).compareTo(o2.getTimestamp());
-        return i == 0 ? o1.getId().compareTo(o2.getId()) : i;
+        return i == 0 ? Integer.valueOf(o1.getId()).compareTo(o2.getId()) : i;
       }
     });
 
@@ -200,8 +200,7 @@ class WordContainer extends SimplePagingContainer<WordScore> implements Analysis
             if (o1 != null) {
               if (o2 == null) return 1;
               else {
-                String id = o1.getId();
-                CommonShell shell1 = getShell(id);
+                CommonShell shell1 = getShell(o1.getId());
                 CommonShell shell2 = getShell(o2.getId());
                 return sorter.compareStrings(shell1.getForeignLanguage(), shell2.getForeignLanguage());
               }
@@ -212,7 +211,7 @@ class WordContainer extends SimplePagingContainer<WordScore> implements Analysis
     return columnSortHandler;
   }
 
-  private CommonShell getShell(String id) {
+  private CommonShell getShell(int id) {
     return plot.getIdToEx().get(id);
   }
 

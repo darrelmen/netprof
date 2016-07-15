@@ -49,7 +49,7 @@ import java.util.List;
 public class ExerciseCorrectAndScore implements IsSerializable, Comparable<ExerciseCorrectAndScore> {
   private static final int MAX_TO_USE = 5;
   private List<CorrectAndScore> correctAndScores = new ArrayList<CorrectAndScore>();
-  private String id;
+  private int id;
 
   // required for rpc
   public ExerciseCorrectAndScore() {}
@@ -58,19 +58,23 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
    * @see ResultDAO#getSortedAVPHistory
    * @param id
    */
-  public ExerciseCorrectAndScore(String id) {
+  public ExerciseCorrectAndScore(int id) {
     this.id = id;
   }
 
   @Override
   public int compareTo(ExerciseCorrectAndScore o) {
     if (isEmpty() && o.isEmpty()) {
-      return getId().compareTo(o.getId()); // TODO : consider compare on tooltip
+      return compareIDs(o); // TODO : consider compare on tooltip
     } else if (isEmpty()) return -1;
     else if (o.isEmpty()) return +1;
     else { // neither is empty
       return compScores(o);
     }
+  }
+
+  private int compareIDs(ExerciseCorrectAndScore o) {
+    return Integer.valueOf(getId()).compareTo(o.getId());
   }
 
   /**
@@ -98,7 +102,7 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
       float myScore = getAvgScore();
       float otherScore = o.getAvgScore();
 
-      return myScore < otherScore ? -1 : myScore > otherScore ? +1 : getId().compareTo(o.getId());
+      return myScore < otherScore ? -1 : myScore > otherScore ? +1 : compareIDs(o);
     } else {
       return i;
     }
@@ -176,7 +180,7 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
     Collections.sort(getCorrectAndScores());
   }
 
-  public String getId() {
+  public int getId() {
     return id;
   }
 

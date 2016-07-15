@@ -35,6 +35,7 @@ package mitll.langtest.server.database.user;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.annotation.AnnotationDAO;
+import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
@@ -101,7 +102,7 @@ public abstract class BaseUserDAO extends DAO {
 
   /**
    * @return
-   * @see mitll.langtest.server.database.custom.UserListManager#addDefect(String, String, String)
+   * @see IUserListManager#addDefect(int, String, String)
    * @see AnnotationDAO#AnnotationDAO
    */
   public int getDefectDetector() {

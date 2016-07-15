@@ -87,7 +87,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
   private Collection<String> typeOrder;
   private final Panel sectionPanel;
   private final DownloadHelper downloadHelper;
-  private String rememberedID = null;
+  private int rememberedID = -1;
 
   /**
    * @param secondRow             add the section panel to this row
@@ -280,7 +280,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
   }
 
   SelectionState getSelectionState() {
-    return getSelectionState(getHistoryTokenFromUIState("", ""));
+    return getSelectionState(getHistoryTokenFromUIState("", -1));
   }
 
   /**
@@ -308,7 +308,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
    * @param firstType
    * @param firstTypeRow
    * @param buttonGroupSectionWidget
-   * @see #addButtonRow(java.util.List, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection)
+   * @see #addButtonRow
    */
   private Panel makeClearColumn(boolean usuallyThereWillBeAHorizScrollbar, Collection<String> types, String firstType,
                                 FlexTable firstTypeRow,
@@ -348,7 +348,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
 
   /**
    * @param firstTypeRow
-   * @see #addButtonRow(java.util.List, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection)
+   * @see #addButtonRow
    */
   private void makePanelInsideScrollPanel(FlexTable firstTypeRow) {
     panelInsideScrollPanel = new HorizontalPanel();
@@ -568,15 +568,15 @@ public class FlexSectionExerciseList extends NPExerciseList {
   }
 
   protected void listLoaded() {
-    if (rememberedID != null) {
+    if (rememberedID != -1) {
       if (hasExercise(rememberedID)) {
         // logger.info("loading exercise " + id);
         loadExercise(rememberedID);
       } else {
-        logger.warning("no exercise with " + rememberedID);
+        logger.warning("listLoaded no exercise with " + rememberedID);
       }
     }
-    rememberedID = null;
+    rememberedID = -1;
   }
 
   /**

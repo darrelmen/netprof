@@ -263,7 +263,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
       audioRef = CompressedAudio.getPathNoSlashChange(audioRef);   // todo why do we have to do this?
     }
     final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<X>(audioRef, exercise.getForeignLanguage(), service, controller,
-        controller.getProps().showSpectrogram(), new EmptyScoreListener(), 70, audio.isRegularSpeed() ? REGULAR_SPEED : SLOW_SPEED, exercise.getOldID(),
+        controller.getProps().showSpectrogram(), new EmptyScoreListener(), 70, audio.isRegularSpeed() ? REGULAR_SPEED : SLOW_SPEED,
         exercise, instance
     ) {
 
@@ -273,12 +273,12 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
        */
       @Override
       protected Widget getAfterPlayWidget() {
-        return getDeleteButton(this, audio, exercise.getOldID(), "Delete this audio cut.  Original recorder can re-record.");
+        return getDeleteButton(this, audio, exercise, "Delete this audio cut.  Original recorder can re-record.");
       }
     };
     audioPanel.setShowColor(true);
     audioPanel.getElement().setId("ASRScoringAudioPanel");
-    noteAudioHasBeenPlayed(exercise.getOldID(), audio, audioPanel);
+    noteAudioHasBeenPlayed(exercise, audio, audioPanel);
     tabAndContent.addWidget(audioPanel);
   //  toResize.add(audioPanel);
 
@@ -292,12 +292,12 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     return vert;
   }
 
-  private Widget getDeleteButton(final Panel widgets, final AudioAttribute audio, final String exerciseID, String tip) {
+  private Widget getDeleteButton(final Panel widgets, final AudioAttribute audio, final HasID exercise, String tip) {
     ClickHandler handler = new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        logger.info("marking audio defect for " + audio + " on " + exerciseID);
-        service.markAudioDefect(audio, exerciseID, new AsyncCallback<Void>() {    // delete comment too?
+        logger.info("marking audio defect for " + audio + " on " + exercise.getID());
+        service.markAudioDefect(audio, exercise, new AsyncCallback<Void>() {    // delete comment too?
           @Override
           public void onFailure(Throwable caught) {
           }
@@ -343,7 +343,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    * @param audioPanel
    * @see #getPanelForAudio
    */
-  private void noteAudioHasBeenPlayed(final String id, final AudioAttribute audio, final ASRScoringAudioPanel audioPanel) {
+  private void noteAudioHasBeenPlayed(final HasID id, final AudioAttribute audio, final ASRScoringAudioPanel audioPanel) {
     audioPanel.addPlayListener(new PlayListener() {
       @Override
       public void playStarted() {
@@ -351,7 +351,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
         for (RememberTabAndContent tabAndContent : tabs) {
           tabAndContent.checkAllPlayed(audioWasPlayed);
         }
-        controller.logEvent(audioPanel, "qcPlayAudio", id, audio.getAudioRef());
+        controller.logEvent(audioPanel, "qcPlayAudio", id.getID(), audio.getAudioRef());
       }
 
       @Override
@@ -451,7 +451,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     dialogHelper.show(ARE_YOU_SURE, MSGS, new DialogHelper.CloseListener() {
       @Override
       public void gotYes() {
-        service.deleteItem(newUserExercise.getOldID(), new AsyncCallback<Boolean>() {
+        service.deleteItem(newUserExercise.getID(), new AsyncCallback<Boolean>() {
           @Override
           public void onFailure(Throwable caught) {
           }
@@ -493,7 +493,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   private void duplicateExercise(final Button duplicate) {
     duplicate.setEnabled(false);
     newUserExercise.getCombinedMutableUserExercise().setCreator(controller.getUser());
-    CommonShell commonShell = exerciseList.byID(newUserExercise.getOldID());
+    CommonShell commonShell = exerciseList.byHasID(newUserExercise);
     if (commonShell != null) {
       newUserExercise.setState(commonShell.getState());
       newUserExercise.setSecondState(commonShell.getSecondState());
@@ -561,7 +561,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     super.doAfterEditComplete(pagingContainer, buttonClicked);
 
     if (buttonClicked) {
-      final String id = newUserExercise.getOldID();
+      final int id = newUserExercise.getID();
       int user = controller.getUser();
 
       logger.info("doAfterEditComplete : forgetting " + id + " user " + user);
@@ -573,7 +573,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
         logger.warning("\ndoAfterEditComplete : error - didn't remove " + id + " from original " + originalList);
       }
 
-      service.setExerciseState(id, STATE.FIXED, user, new AsyncCallback<Void>() {
+      service.markState(id, STATE.FIXED, user, new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
         }
@@ -581,7 +581,6 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
         @Override
         public void onSuccess(Void result) {
           reloadLearnList();
-
           exerciseList.forgetExercise(id);
         }
       });
@@ -637,8 +636,9 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
         @Override
         public void onClick(ClickEvent event) {
           deleteButton.setEnabled(false);
-          logger.info("marking audio defect for " + getAudioAttribute() + " on " + exerciseID);
-          service.markAudioDefect(getAudioAttribute(), exerciseID, new AsyncCallback<Void>() {    // delete comment too?
+          int id = exercise.getID();
+          logger.info("marking audio defect for " + getAudioAttribute() + " on " + id);
+          service.markAudioDefect(getAudioAttribute(), exercise, new AsyncCallback<Void>() {    // delete comment too?
             @Override
             public void onFailure(Throwable caught) {
             }

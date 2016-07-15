@@ -54,11 +54,11 @@ public class Session implements IsSerializable, SetScore {
   private int correct;
   private float correctPercent;
   private float avgScore;
-  private Map<String,Boolean> exidToCorrect = new HashMap<String,Boolean>();
-  private Map<String,Float> exidToScore = new HashMap<String,Float>();
+  private Map<Integer,Boolean> exidToCorrect = new HashMap<>();
+  private Map<Integer,Float>   exidToScore = new HashMap<>();
   private long timestamp;
 
-  private Set<String> exids = new HashSet<String>();
+  private Set<Integer> exids = new HashSet<>();
   private boolean latest;
   private int id;
 
@@ -75,14 +75,14 @@ public class Session implements IsSerializable, SetScore {
     this.timestamp = timestamp;
   }
 
-  public long getAverageDurMillis() { return duration/ getNumAnswers(); }
-  public long getSecAverage() { return (duration/ getNumAnswers())/1000; }
+  private long getAverageDurMillis() { return duration/ getNumAnswers(); }
+  public  long getSecAverage() { return (duration/ getNumAnswers())/1000; }
 
   /**
    * @see ResultDAO#partitionIntoSessions2
    * @param id
    */
-  public void addExerciseID(String id) { exids.add(id);  }
+  public void addExerciseID(int id) { exids.add(id);  }
 
   public int getNumAnswers() {
     return exids == null? numAnswers : exids.size();
@@ -93,9 +93,7 @@ public class Session implements IsSerializable, SetScore {
     this.avgScore = calcAvgScore();
     this.correct = calcCorrect();
     correctPercent = 100f*((float)correct/(float)numAnswers);
-
    // System.out.println("setNumAnswers correct "+ correct + "total "  +exidToCorrect.size() + " % = " + correctPercent);
-
     exids = null;
     exidToCorrect = null;
     exidToScore = null;
@@ -133,8 +131,12 @@ public class Session implements IsSerializable, SetScore {
   @Override
   public float getAvgScore() { return avgScore; }
 
-  public void incrementCorrect(String id, boolean correct) {
+  public void incrementCorrect(int id, boolean correct) {
     exidToCorrect.put(id, correct);
+  }
+
+  public void setScore(int id, float pronScore) {
+    exidToScore.put(id, pronScore);
   }
 
   @Override
@@ -144,10 +146,6 @@ public class Session implements IsSerializable, SetScore {
 
   public void setUserid(int userid) {
     this.userid = userid;
-  }
-
-  public void setScore(String id, float pronScore) {
-    exidToScore.put(id, pronScore);
   }
 
   public float getCorrectPercent() {
