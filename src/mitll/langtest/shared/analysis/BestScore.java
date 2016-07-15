@@ -41,7 +41,7 @@ import java.util.Date;
  * @since 10/19/15.
  */
 public class BestScore extends SimpleTimeAndScore implements Comparable<BestScore> {
-  private String exid;
+  private int exid;
   private String fileRef;
   private String nativeAudio;
   private int resultID;
@@ -60,7 +60,7 @@ public class BestScore extends SimpleTimeAndScore implements Comparable<BestScor
    * @param nativeAudio
    * @see mitll.langtest.server.database.analysis.Analysis#getUserToResults
    */
-  public BestScore(String id, float pronScore, long timestamp, int resultID, String json, boolean isiPad,
+  public BestScore(int id, float pronScore, long timestamp, int resultID, String json, boolean isiPad,
                    boolean isFlashcard, String fileRef, String nativeAudio) {
     super(timestamp, (pronScore < 0) ? 0 : pronScore);
     this.exid = id;
@@ -74,7 +74,7 @@ public class BestScore extends SimpleTimeAndScore implements Comparable<BestScor
 
   @Override
   public int compareTo(BestScore o) {
-    int c = getExId().compareTo(o.getExId());
+    int c = Integer.valueOf(getExId()).compareTo(o.getExId());
     if (c == 0) return -1 * Long.valueOf(getTimestamp()).compareTo(o.getTimestamp());
     else return c;
   }
@@ -86,7 +86,7 @@ public class BestScore extends SimpleTimeAndScore implements Comparable<BestScor
         " : " + getScore() + " native " + nativeAudio + " ref " + fileRef;
   }
 
-  public String getExId() {
+  public int getExId() {
     return exid;
   }
 

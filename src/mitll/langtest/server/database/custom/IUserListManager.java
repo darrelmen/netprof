@@ -90,23 +90,25 @@ public interface IUserListManager {
 
   void addVisitor(long userListID, long user);
 
-  boolean addDefect(String exerciseID, String field, String comment);
+
+  boolean addDefect(int exerciseID, String field, String comment);
 
   void addAnnotation(int exerciseID, String field, String status, String comment, int userid);
-
-  void addAnnotations(CommonExercise exercise);
-
-  void markState(String id, STATE state, int creatorID);
-
-  void setState(Shell shell, STATE state, long creatorID);
-
-  void setSecondState(Shell shell, STATE state, long creatorID);
 
   STATE getCurrentState(int exerciseID);
 
   void removeReviewed(int exerciseid);
 
-  void markCorrectness(String id, boolean correct, int userid);
+
+  void addAnnotations(CommonExercise exercise);
+
+  void markState(int exid, STATE state, int creatorID);
+
+  void setState(Shell shell, STATE state, long creatorID);
+
+  void setSecondState(Shell shell, STATE state, long creatorID);
+
+  void markCorrectness(int id, boolean correct, int userid);
 
   boolean deleteList(long id);
 

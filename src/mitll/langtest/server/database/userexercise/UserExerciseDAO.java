@@ -182,7 +182,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
       }
       //logger.debug("unique id = " + id);
 
-      userExercise.getCombinedMutableUserExercise().setRealID(id);
+      userExercise.getCombinedMutableUserExercise().setID(id);
 
       // TODO : consider making this an actual prepared statement?
       boolean predefined = userExercise.isPredefined();
@@ -197,7 +197,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.executeUpdate();
         preparedStatement.close();
-        userExercise.getCombinedMutableUserExercise().setID(customID);
+        userExercise.getCombinedMutableUserExercise().setOldID(customID);
 
         logger.debug("\tuserExercise= " + userExercise);
       }
@@ -279,7 +279,13 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
       String join2 = getJoin2(listID);
       if (DEBUG) logger.debug("\tusing exercise = " + join2);
       for (String exid : getExercises(join2)) {
-        CommonExercise exercise = getPredefExercise(exid);
+        int exid1 = 0;
+        try {
+          exid1 = Integer.parseInt(exid);
+        } catch (NumberFormatException e) {
+          e.printStackTrace();
+        }
+        CommonExercise exercise = getPredefExercise(exid1);
         if (exercise != null) {
           UserExercise e = new UserExercise(exercise, exercise.getCreator());
           userExercises2.add(e);
@@ -347,7 +353,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
    */
   @Override
   public CommonExercise getByExID(int exid) {
-    exid = exid.replaceAll("\'", "");
+    //exid = exid.replaceAll("\'", "");
     String sql = "SELECT * from " + USEREXERCISE + " where " + EXERCISEID + "='" + exid + "'";
     Collection<CommonExercise> commonExercises = getCommonExercises(sql);
     return commonExercises.isEmpty() ? null : commonExercises.iterator().next();
@@ -409,9 +415,9 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
     return getCommonExercises(sql);
   }
 
-  private String getIds(Collection<String> exids) {
+  private String getIds(Collection<Integer> exids) {
     StringBuilder builder = new StringBuilder();
-    for (String id : exids) builder.append("'" + id + "'").append(",");
+    for (Integer id : exids) builder.append("'" + id + "'").append(",");
     String s = builder.toString();
     s = s.substring(0, s.length() - 1);
     return s;

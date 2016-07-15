@@ -272,7 +272,7 @@ public class AudioExport {
 
       int j = 0;
 
-      row.createCell(j++).setCellValue(exercise.getOldID());
+      row.createCell(j++).setCellValue(exercise.getID());
 
       // logger.warn("English " + exercise.getEnglish() + " getMeaning " + exercise.getMeaning() + " getForeignLanguage " + exercise.getForeignLanguage() + " ref " + exercise.getRefSentence());
 
@@ -367,7 +367,7 @@ public class AudioExport {
                                Collection<AudioAttribute> audioAttributes) {
     AudioAttribute regAttr = null;
     AudioAttribute slowAttr = null;
-    if (audioAttributes.isEmpty()) logger.debug("huh? no audio for " + exercise.getOldID());
+    if (audioAttributes.isEmpty()) logger.debug("huh? no audio for " + exercise.getID());
     for (final AudioAttribute audioAttribute : audioAttributes) {
       if (audioAttribute.isRegularSpeed()) {
         regAttr = audioAttribute;
@@ -531,9 +531,9 @@ public class AudioExport {
 
     // attach audio
     int numAttach = 0;
-    Map<String, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
+    Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
     for (CommonExercise ex : toWrite) {
-      Collection<AudioAttribute> audioAttributes = exToAudio.get(ex.getOldID());
+      Collection<AudioAttribute> audioAttributes = exToAudio.get(ex.getID());
       if (audioAttributes != null) {
         audioDAO.attachAudio(ex, installPath, relativeConfigDir1, audioAttributes);
         numAttach++;
@@ -561,7 +561,7 @@ public class AudioExport {
           if (recording != null) {
             // logger.debug("found " + recording + " by " + recording.getUser());
             String name = overallName + File.separator + getUniqueName(ex, !isEnglish);
-            copyAudio(zOut, names, name, speed, installPath, audioConversion, recording, ex.getOldID(), ex.getForeignLanguage());
+            copyAudio(zOut, names, name, speed, installPath, audioConversion, recording, ex.getID(), ex.getForeignLanguage());
             someAudio = true;
           }
         }
@@ -606,9 +606,9 @@ public class AudioExport {
 
     // attach audio
     int numAttach = 0;
-    Map<String, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
+    Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
     for (CommonExercise ex : toWrite) {
-      Collection<AudioAttribute> audioAttributes = exToAudio.get(ex.getOldID());
+      Collection<AudioAttribute> audioAttributes = exToAudio.get(ex.getID());
       if (audioAttributes != null) {
         audioDAO.attachAudio(ex, installPath, relativeConfigDir1, audioAttributes);
         numAttach++;
@@ -705,7 +705,7 @@ public class AudioExport {
       builder.append(ex.getOldID());
       name = folder + builder.toString();
     }
-    copyAudio(zOut, names, name, speed == null ? "" : speed, installPath, audioConversion, latestContext, ex.getOldID(),
+    copyAudio(zOut, names, name, speed == null ? "" : speed, installPath, audioConversion, latestContext, ex.getID(),
         ex.getForeignLanguage());
   }
 
@@ -832,7 +832,7 @@ public class AudioExport {
    */
   private void copyAudio(ZipOutputStream zOut, Set<String> names, String parent, String speed,
                          String realContextPath, AudioConversion audioConversion, AudioAttribute attribute,
-                         String exid, String title) throws IOException {
+                         int exid, String title) throws IOException {
     String audioRef = attribute.getAudioRef();
 /*    logger.debug("\tfor ex id " +exid +
       " writing audio under context path " + realContextPath + " at " + audioRef);*/

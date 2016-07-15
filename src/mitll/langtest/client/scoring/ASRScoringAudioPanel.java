@@ -65,13 +65,12 @@ public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> 
    * @param service
    * @param gaugePanel
    * @param playButtonSuffix
-   * @param exerciseID
    * @param exercise
    * @param instance
    */
   public ASRScoringAudioPanel(String refSentence, LangTestDatabaseAsync service, ExerciseController controller, ScoreListener gaugePanel,
-                              String playButtonSuffix, String exerciseID, T exercise, String instance) {
-    super(refSentence, service, controller, gaugePanel, playButtonSuffix, exerciseID, exercise, instance);
+                              String playButtonSuffix, T exercise, String instance) {
+    super(refSentence, service, controller, gaugePanel, playButtonSuffix, exercise, instance);
   }
 
   /**
@@ -84,14 +83,13 @@ public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> 
    * @param gaugePanel
    * @param rightMargin
    * @param playButtonSuffix
-   * @param exerciseID
    * @param exercise
    * @param instance
    */
   public ASRScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service,
                               ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel,
-                              int rightMargin, String playButtonSuffix, String exerciseID, T exercise, String instance) {
-    super(path, refSentence, service, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix, exerciseID, exercise, instance);
+                              int rightMargin, String playButtonSuffix, T exercise, String instance) {
+    super(path, refSentence, service, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix, exercise, instance);
     this.useScoreToColorBkg = controller.useBkgColorForRef();
   }
 
@@ -154,10 +152,11 @@ public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> 
       }
     };
 
+    int id = exercise.getID();
     if (controller.getProps().shouldUsePhoneToDisplay()) {
-      service.getASRScoreForAudioPhonemes(reqid, resultID, path, refSentence, toUse, height, useScoreToColorBkg, exerciseID, async);
+      service.getASRScoreForAudioPhonemes(reqid, resultID, path, refSentence, toUse, height, useScoreToColorBkg, id, async);
     } else {
-      service.getASRScoreForAudio(reqid, resultID, path, refSentence, toUse, height, useScoreToColorBkg, exerciseID, async);
+      service.getASRScoreForAudio(reqid, resultID, path, refSentence, toUse, height, useScoreToColorBkg, id, async);
     }
   }
 }

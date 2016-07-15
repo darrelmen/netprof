@@ -160,7 +160,7 @@ public interface LangTestDatabase extends RemoteService {
    * @return
    */
   PretestScore getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence,
-                                   int width, int height, boolean useScoreToColorBkg, String exerciseID);
+                                   int width, int height, boolean useScoreToColorBkg, int exerciseID);
 
   /**
    * @see ScoringAudioPanel#scoreAudio(String, int, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
@@ -175,7 +175,7 @@ public interface LangTestDatabase extends RemoteService {
    * @return
    */
   PretestScore getASRScoreForAudioPhonemes(int reqid, long resultID, String testAudioFile, String sentence,
-                                   int width, int height, boolean useScoreToColorBkg, String exerciseID);
+                                           int width, int height, boolean useScoreToColorBkg, int exerciseID);
 
   /**
    * @see mitll.langtest.client.scoring.PostAudioRecordButton#addRT(AudioAnswer, int)
@@ -232,7 +232,7 @@ public interface LangTestDatabase extends RemoteService {
    * @param userListID
    * @return
    */
-  AVPScoreReport getUserHistoryForList(int userid, Collection<String> ids, long latestResultID,
+  AVPScoreReport getUserHistoryForList(int userid, Collection<Integer> ids, long latestResultID,
                                        Map<String, Collection<String>> typeToSection, long userListID);
 
   // User Exercise Lists -
@@ -252,7 +252,7 @@ public interface LangTestDatabase extends RemoteService {
    * @param comment
    * @param userID
    */
-  void addAnnotation(String exerciseID, String field, String status, String comment, int userID);
+  void addAnnotation(int exerciseID, String field, String status, String comment, int userID);
 
   // QC State changes
 
@@ -261,7 +261,7 @@ public interface LangTestDatabase extends RemoteService {
    * @param audioAttribute
    * @param exid
    */
-  void markAudioDefect(AudioAttribute audioAttribute, String exid);
+  void markAudioDefect(AudioAttribute audioAttribute, HasID exid);
 
   /**
    * @see mitll.langtest.client.qc.QCNPFExercise#markGender(MiniUser, Button, AudioAttribute, RememberTabAndContent, List, Button, boolean)
@@ -276,15 +276,15 @@ public interface LangTestDatabase extends RemoteService {
    * @param isCorrect
    * @param creatorID
    */
-  void markReviewed(String exid, boolean isCorrect, int creatorID);
+  void markReviewed(int exid, boolean isCorrect, int creatorID);
 
   /**
    * @see mitll.langtest.client.qc.QCNPFExercise#markAttentionLL(ListInterface, HasID)
-   * @param id
+   * @param exid
    * @param state
    * @param creatorID
    */
-  void markState(String id, STATE state, int creatorID);
+  void markState(int exid, STATE state, int creatorID);
 
   /**
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#doAfterEditComplete(ListInterface, boolean)
@@ -292,14 +292,16 @@ public interface LangTestDatabase extends RemoteService {
    * @param state
    * @param userID
    */
+/*
   void setExerciseState(String id, STATE state, int userID);
+*/
 
   /**
    * @see ReviewEditableExercise#confirmThenDeleteItem()
    * @param exid
    * @return
    */
-  boolean deleteItem(String exid);
+  boolean deleteItem(int exid);
 
   // Telemetry ---
 
@@ -363,5 +365,5 @@ public interface LangTestDatabase extends RemoteService {
    * @param exids
    * @return
    */
-  QuizCorrectAndScore getScoresForUser(Map<String, Collection<String>> typeToSection, int userID, Collection<String> exids);
+  QuizCorrectAndScore getScoresForUser(Map<String, Collection<String>> typeToSection, int userID, Collection<Integer> exids);
 }

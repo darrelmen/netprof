@@ -34,6 +34,7 @@ package mitll.langtest.shared.amas;
 
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.MutableShell;
 import mitll.langtest.shared.exercise.STATE;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
@@ -318,5 +319,10 @@ public class AmasExerciseImpl implements CommonShell {
    */
   public String getAudioURL() {
     return audioURL;
+  }
+
+  @Override
+  public int compareTo(HasID o) {
+    return Integer.valueOf(getID()).compareTo(o.getID());
   }
 }

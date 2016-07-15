@@ -60,6 +60,7 @@ import mitll.langtest.client.custom.exercise.ContextCommentNPFExercise;
 import mitll.langtest.client.custom.tabs.TabAndContent;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.services.ListService;
@@ -186,8 +187,7 @@ public class Navigation implements RequiresResize, ShowTab {
           public Panel getExercisePanel(CommonExercise e) {
             if (controller.getProps().canPracticeContext()) {
               return new ContextCommentNPFExercise<>(e, controller, exerciseList, false, CLASSROOM);
-            }
-            else {
+            } else {
               return new CommentNPFExercise<>(e, controller, exerciseList, false, CLASSROOM);
             }
           }
@@ -233,6 +233,7 @@ public class Navigation implements RequiresResize, ShowTab {
 
   /**
    * TODO : clean this up - why a horrible hack for learn tab?
+   *
    * @return
    * @see #getTabPanel
    * @see mitll.langtest.client.LangTest#populateRootPanel()
@@ -568,7 +569,7 @@ public class Navigation implements RequiresResize, ShowTab {
 
   private boolean noPrevClickedTab() {
     String value = getClickedTab();
-  //  logger.info("selected tab = " + value);
+    //  logger.info("selected tab = " + value);
     return value.isEmpty();
   }
 
@@ -607,7 +608,7 @@ public class Navigation implements RequiresResize, ShowTab {
         Widget widget = content.getWidget(0);
 
         int tab = orig.equals(YOUR_LISTS) ? 0 : orig.equals(OTHERS_LISTS) ? 1 : orig.equals(CREATE) ? 2 : orig.equals(BROWSE) ? 3 : 0;
-      //  logger.info("selectPreviousTab Select tab " + tab + " orig " + orig);
+        //  logger.info("selectPreviousTab Select tab " + tab + " orig " + orig);
         listManager.showFirstUserListTab((TabPanel) widget, tab);
         if (tab == 0) {
           listManager.showMyLists(true, false);
@@ -652,6 +653,7 @@ public class Navigation implements RequiresResize, ShowTab {
   /**
    * What to do when we don't know which tab to select
    * Right now show the learn pronunciation tab.
+   *
    * @param setClickedStorage
    */
   private void showDefaultInitialTab(boolean setClickedStorage) {
@@ -666,23 +668,26 @@ public class Navigation implements RequiresResize, ShowTab {
   }
 
   /**
+   * Horrible hack - how do we know where to jump to from clicking on an item in analysis?
+   * Is the item in a user list?
+   *
+   * @param exid
    * @see mitll.langtest.client.analysis.PhoneExampleContainer#gotClickOnItem(WordAndScore)
    * @see mitll.langtest.client.analysis.WordContainer#gotClickOnItem(WordScore)
-   * @param id
    */
   @Override
-  public void showLearnAndItem(String id) {
-    if (id.startsWith(CUSTOM)) {
+  public void showLearnAndItem(int exid) {
+    ListInterface exerciseList = learnHelper.getExerciseList();
+    if (exerciseList.byID(exid) != null) {
+      showDefaultInitialTab(true);
+      boolean b = exerciseList.loadByID(exid);
+    } else {
       tabPanel.selectTab(STUDY_LISTS_INDEX);
       DivWidget content = studyLists.getContent();
       Widget widget = content.getWidget(0);
       ((TabPanel) widget).selectTab(3);
 
-      listManager.findListAndSelect(id);
-    } else {
-      showDefaultInitialTab(true);
-
-      boolean b = learnHelper.getExerciseList().loadByID(id);
+      listManager.findListAndSelect(exid);
     }
   }
 
@@ -699,7 +704,7 @@ public class Navigation implements RequiresResize, ShowTab {
     } else if (toUse.getTab() == null) {
       logger.warning("huh? toUse has a null tab? " + toUse);
     } else {
-     // logger.info("click on tab " + toUse);
+      // logger.info("click on tab " + toUse);
       toUse.clickOnTab();
     }
   }

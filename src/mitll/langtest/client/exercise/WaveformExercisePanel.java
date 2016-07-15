@@ -202,7 +202,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
   //  completedExercise.setState(STATE.RECORDED);
     // TODO : gah = do we really need to do this???
    // logger.info("Not setting state on " +completedExercise.getOldID());
-    exerciseList.setState(completedExercise.getOldID(), STATE.RECORDED);
+    exerciseList.setState(completedExercise.getID(), STATE.RECORDED);
     exerciseList.redraw();
     exerciseList.loadNextExercise(completedExercise);
   }
