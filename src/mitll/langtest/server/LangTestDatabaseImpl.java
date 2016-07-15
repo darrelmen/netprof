@@ -2184,6 +2184,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   private String getLessonPlan() {
-    return configDir + File.separator + serverProps.getLessonPlan();
+    return serverProps.getLessonPlan() == null ? null : configDir + File.separator + serverProps.getLessonPlan();
   }
 }
