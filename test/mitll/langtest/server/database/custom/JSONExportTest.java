@@ -32,9 +32,9 @@ public class JSONExportTest extends JsonExport {
   private static DatabaseImpl database;
 
   /**
-   * @param phoneToCount
-   * @param sectionHelper
-   * @param preferredVoices
+   * @paramx phoneToCount
+   * @paramx sectionHelper
+   * @paramx preferredVoices
    * @see ScoreServlet#getJsonNestedChapters(boolean)
    */
   public JSONExportTest() {
@@ -67,7 +67,7 @@ public class JSONExportTest extends JsonExport {
   public void testRead() {
     database.getSectionHelper();
 
-    CommonExercise exercise = database.getExercise("724");
+    CommonExercise exercise = database.getExercise(724);
     logger.warn("\n\ntestRead got " +exercise);
   }
 

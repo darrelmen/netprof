@@ -278,7 +278,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
    */
   private void markAttentionLL(ListInterface listContainer, HasID completedExercise) {
     if (isCourseContent()) {
-      service.markState(completedExercise.getOldID(), STATE.ATTN_LL, controller.getUser(),
+      service.markState(completedExercise.getID(), STATE.ATTN_LL, controller.getUser(),
           new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -307,7 +307,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
     boolean allCorrect = incorrectFields.isEmpty();
     //System.out.println("markReviewed : exercise " + completedExercise.getOldID() + " instance " + instance + " allCorrect " + allCorrect);
 
-    service.markReviewed(completedExercise.getOldID(), allCorrect, controller.getUser(),
+    service.markReviewed(completedExercise.getID(), allCorrect, controller.getUser(),
         new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
@@ -621,7 +621,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
   private Button makeGroupButton(ButtonGroup buttonGroup, String title) {
     Button onButton = new Button(title);
     onButton.getElement().setId("MaleFemale" + "_" + title);
-    controller.register(onButton, exercise.getOldID());
+    controller.register(onButton, exercise.getID());
     buttonGroup.add(onButton);
     return onButton;
   }
@@ -645,7 +645,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
     }
     String speed = audio.isRegularSpeed() ? " Regular speed" : " Slow speed";
     final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<T>(audioRef, e.getForeignLanguage(), service, controller,
-        controller.getProps().showSpectrogram(), scorePanel, 70, speed, e.getOldID(), e, instance);
+        controller.getProps().showSpectrogram(), scorePanel, 70, speed, e, instance);
     audioPanel.setShowColor(true);
     audioPanel.getElement().setId("ASRScoringAudioPanel");
     audioPanel.addPlayListener(new PlayListener() {
@@ -660,7 +660,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
         for (RememberTabAndContent tabAndContent : tabs) {
           tabAndContent.checkAllPlayed(audioWasPlayed);
         }
-        controller.logEvent(audioPanel, "qcPlayAudio", e.getOldID(), audio.getAudioRef());
+        controller.logEvent(audioPanel, "qcPlayAudio", e.getID(), audio.getAudioRef());
       }
 
       @Override
@@ -827,14 +827,13 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
     }
 
     //System.out.println("checkBoxWasClicked : instance = '" +instance +"'");
-
     if (isCourseContent()) {
-      String id = exercise.getOldID();
+      //String id = ;
       // System.out.println("\tcheckBoxWasClicked : instance = '" +instance +"'");
       //if (instance.equalsIgnoreCase(Navigation.CLASSROOM)) {
       STATE state = incorrectFields.isEmpty() ? STATE.UNSET : STATE.DEFECT;
       exercise.setState(state);
-      listContainer.setState(id, state);
+      listContainer.setState(exercise.getID(), state);
       //   System.out.println("\tcheckBoxWasClicked : state now = '" +state +"'");
 
       listContainer.redraw();
@@ -853,8 +852,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
    */
   private void setApproveButtonState() {
     boolean allCorrect = incorrectFields.isEmpty();
-    boolean allPlayed = audioWasPlayed.size() == toResize.size();
-
+    boolean allPlayed  = audioWasPlayed.size() == toResize.size();
     //System.out.println("\tsetApproveButtonState : allPlayed= '" +allPlayed +"' allCorrect " + allCorrect + " audio played " + audioWasPlayed.size() + " total " + toResize.size());
 
     if (approvedButton != null) {   // comment tab doesn't have it...!

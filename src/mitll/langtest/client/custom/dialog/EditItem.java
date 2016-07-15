@@ -198,7 +198,7 @@ public class EditItem {
           }
 
           @Override
-          public Collection<CommonShell> rememberExercises(Collection<CommonShell> result) {
+          public List<CommonShell> rememberExercises(List<CommonShell> result) {
             clear();
             boolean addNewItem = includeAddItem;
 
@@ -235,9 +235,7 @@ public class EditItem {
    *
    * @return
    */
-  private CommonExercise getNewItem() {
-    return new UserExercise(-1, ""+NEW_EXERCISE_ID, userManager.getUser(), NEW_ITEM, "", "");
-  }
+  private CommonExercise getNewItem() { return new UserExercise(NEW_EXERCISE_ID, userManager.getUser(), NEW_ITEM); }
 
   private void setFactory(final PagingExerciseList<CommonShell, CommonExercise> exerciseList,
                           final UserList<CommonShell> ul,
@@ -290,7 +288,7 @@ public class EditItem {
                              final UserList<CommonShell> originalList,
                              final HasText itemMarker,
                              final ListInterface<CommonShell> pagingContainer) {
-    if (exercise.getOldID().equals(NEW_EXERCISE_ID)) {
+    if (exercise.getID() == NEW_EXERCISE_ID) {
       if (newExercise == null) {
         newExercise = createNewItem(userManager.getUser(), ul.getName().replaceAll("\\s+", "_"));
         addEditOrAddPanel(newExercise, itemMarker, originalList, right, ul, pagingContainer, true, false);
@@ -418,7 +416,7 @@ public class EditItem {
         @Override
         public void onClick(ClickEvent event) {
 //          logger.info(getClass() + " : makeDeleteButton npfHelperList (2) " + npfHelper);
-          deleteItem(newUserExercise.getOldID(), uniqueID, ul, exerciseList, predefinedContentList);
+          deleteItem(newUserExercise.getID(), uniqueID, ul, exerciseList, predefinedContentList);
         }
       });
       delete.addStyleName("topFiftyMargin");

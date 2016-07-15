@@ -77,7 +77,7 @@ public class BaseExercise implements IsSerializable, Shell {
    * @see mitll.langtest.server.database.userexercise.UserExerciseDAO#add(CommonExercise, boolean)
    */
   @Deprecated
-  public void setID(String id) {
+  public void setOldID(String id) {
     this.id = id;
   }
 
@@ -121,5 +121,10 @@ public class BaseExercise implements IsSerializable, Shell {
    */
   public void setUnitToValue(Map<String, String> unitToValue) {
     this.unitToValue = unitToValue;
+  }
+
+  @Override
+  public int compareTo(HasID o) {
+    return Integer.valueOf(getID()).compareTo(o.getID());
   }
 }

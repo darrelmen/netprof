@@ -129,7 +129,7 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
               public void onClick(ClickEvent event) {
                 setUnrecorded(filterOnly.getValue());
                 scheduleWaitTimer();
-                loadExercises(getHistoryToken(""), getTypeAheadText(), false);
+                loadExercises(getInitialHistoryToken(), getTypeAheadText(), false);
               }
             });
             filterOnly.addStyleName("leftFiveMargin");
@@ -141,7 +141,10 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
           }
 
           @Override
-          protected void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection, String prefix, boolean onlyWithAudioAnno, String exerciseID) {
+          protected void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection,
+                                                  String prefix,
+                                                  boolean onlyWithAudioAnno,
+                                                  int exerciseID) {
             super.loadExercisesUsingPrefix(typeToSection, prefix, onlyWithAudioAnno, exerciseID);
             filterOnly.setText(setCheckboxTitle(userManager));
           }

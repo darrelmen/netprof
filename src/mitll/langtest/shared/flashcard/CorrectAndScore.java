@@ -34,6 +34,7 @@ package mitll.langtest.shared.flashcard;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.server.database.result.ResultDAO;
+import mitll.langtest.shared.exercise.HasID;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -65,12 +66,13 @@ public class CorrectAndScore implements IsSerializable, Comparable<CorrectAndSco
   private String path;
   private transient String scoreJson;
 
-  public CorrectAndScore() {}
+  public CorrectAndScore() {
+  }
 
   /**
-   * @see mitll.langtest.client.gauge.ASRScorePanel#gotScore(mitll.langtest.shared.scoring.PretestScore, boolean, String)
    * @param score
    * @param path
+   * @see mitll.langtest.client.gauge.ASRScorePanel#gotScore(mitll.langtest.shared.scoring.PretestScore, boolean, String)
    */
   public CorrectAndScore(float score, String path) {
     this.score = score;
@@ -78,7 +80,6 @@ public class CorrectAndScore implements IsSerializable, Comparable<CorrectAndSco
   }
 
   /**
-   * @see ResultDAO#getScoreResultsForQuery(java.sql.Connection, java.sql.PreparedStatement)
    * @param uniqueID
    * @param userid
    * @param exerciseID
@@ -87,6 +88,7 @@ public class CorrectAndScore implements IsSerializable, Comparable<CorrectAndSco
    * @param timestamp
    * @param path
    * @param scoreJson
+   * @see ResultDAO#getScoreResultsForQuery(java.sql.Connection, java.sql.PreparedStatement)
    */
   public CorrectAndScore(int uniqueID, int userid, int exerciseID, boolean correct, float score, long timestamp,
                          String path, String scoreJson) {
@@ -140,13 +142,17 @@ public class CorrectAndScore implements IsSerializable, Comparable<CorrectAndSco
     return userid;
   }
 
-  public String getScoreJson() { return scoreJson;  }
+  public String getScoreJson() {
+    return scoreJson;
+  }
 
   public int getQid() {
     return qid;
   }
 
-  public boolean hasUserScore() { return userScore > -1; }
+  public boolean hasUserScore() {
+    return userScore > -1;
+  }
 
   public float getUserScore() {
     return userScore;
@@ -157,6 +163,9 @@ public class CorrectAndScore implements IsSerializable, Comparable<CorrectAndSco
   }
 */
 
+  public boolean isMatch(HasID ex) {
+    return getExid() == ex.getID();
+  }
 
   public String toString() {
     return "id " + getExid() + " " + (isCorrect() ? "C" : "I") + " score " + getPercentScore();

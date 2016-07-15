@@ -44,7 +44,7 @@ import java.util.List;
  */
 
 public class TimeAndScore extends SimpleTimeAndScore implements Comparable<SimpleTimeAndScore> {
-  private String id;
+  private int exid;
   private float cumulativeAverage;
 
   /**
@@ -57,15 +57,15 @@ public class TimeAndScore extends SimpleTimeAndScore implements Comparable<Simpl
   }
 
   /**
-   * @param id
+   * @param exid
    * @param timestamp
    * @param score
    * @param cumulativeAverage
    * @see mitll.langtest.server.database.phone.MakePhoneReport#getPhoneTimeSeries(List)
    */
-  public TimeAndScore(String id, long timestamp, float score, float cumulativeAverage, WordAndScore wordAndScore) {
+  public TimeAndScore(int exid, long timestamp, float score, float cumulativeAverage, WordAndScore wordAndScore) {
     super(timestamp, score, wordAndScore);
-    this.id = id;
+    this.exid = exid;
     this.cumulativeAverage = cumulativeAverage;
   }
 
@@ -94,13 +94,13 @@ public class TimeAndScore extends SimpleTimeAndScore implements Comparable<Simpl
    * @return
    * @see mitll.langtest.client.analysis.AnalysisPlot#setRawBestScores(List)
    */
-  public String getId() {
-    return id;
+  public int getExid() {
+    return exid;
   }
 
   public String toString() {
     String format = getTimeString();
-    return id + "\tat\t" + format + " avg score for " + //getWordAndScore().getWord() +
+    return exid + "\tat\t" + format + " avg score for " + //getWordAndScore().getWord() +
         //count + "\t" +
         " =\t" + getScore() + "\t" + getCumulativeAverage();
   }

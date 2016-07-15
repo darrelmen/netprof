@@ -55,7 +55,7 @@ class StickyState {
    * @see StatsFlashcardFactory
    * @param storage
    */
-  public StickyState(KeyStorage storage) { this.storage = storage; }
+  StickyState(KeyStorage storage) { this.storage = storage; }
 
   /**
    *
@@ -65,16 +65,16 @@ class StickyState {
    */
   void storeCurrent(Shell e) {
  //   System.out.println("StickyState.storeCurrent store current " + e.getOldID());
-    storage.storeValue(CURRENT_EXERCISE, e.getOldID());
+    storage.storeValue(CURRENT_EXERCISE, ""+e.getID());
   }
 
-  public String getCurrentExerciseID() {
+  int getCurrentExerciseID() {
     String value = storage.getValue(CURRENT_EXERCISE);
   //  System.out.println("StickyState.getCurrentExerciseID '" + value +"'");
-    return value;
+    return Integer.parseInt(value);
   }
 
-  public void clearCurrent() { storage.removeValue(CURRENT_EXERCISE); }
+  void clearCurrent() { storage.removeValue(CURRENT_EXERCISE); }
 
   String getIncorrect() {
     return storage.getValue(INCORRECT);
@@ -100,7 +100,7 @@ class StickyState {
     storage.storeValue(CORRECT1, builder.toString());
   }
 
-  public void resetStorage() {
+  void resetStorage() {
 //    System.out.println("StickyState : reset storage for "+ storage);
     storage.removeValue(CORRECT1);
     storage.removeValue(INCORRECT);

@@ -304,7 +304,7 @@ public abstract class Analysis extends DAO {
       Integer userID = pair.getKey();
       List<BestScore> bestScores = userToBest2.get(userID);
 
-      String last = null;
+      int last = -1;
 
       long lastTimestamp = 0;
       // int count = 0;
@@ -313,13 +313,13 @@ public abstract class Analysis extends DAO {
 
       for (BestScore bs : pair.getValue()) {
         int id = bs.getResultID();
-        String exid = bs.getExId();
+        int exid = bs.getExId();
         long time = bs.getTimestamp();
 
         Long aLong = userToEarliest.get(userID);
         if (aLong == null || time < aLong) userToEarliest.put(userID, time);
 
-        if ((last != null && !last.equals(exid)) || (lastTimestamp > 0 && time - lastTimestamp > FIVE_MINUTES)) {
+        if ((last != -1 && last != exid) || (lastTimestamp > 0 && time - lastTimestamp > FIVE_MINUTES)) {
           if (seen.contains(id)) {
 //            logger.warn("skipping " + id);
           } else {
