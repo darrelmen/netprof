@@ -245,9 +245,7 @@ public class ServerProperties {
     return getDefaultTrue(USE_SCORE_CACHE);
   }
 
-  public String getLanguage() {
-    return props.getProperty(LANGUAGE);
-  }
+  public String getLanguage() { return props.getProperty(LANGUAGE);  }
 
   //specify this in  in config file like: tierIndex=5,4,-1. That
   //tells us to treat (zero-indexed) column 5 like the "unit" column,
@@ -420,7 +418,8 @@ public class ServerProperties {
 
     props.put("scoringModel", props.getProperty(MODELS_DIR, ""));
 
-    if (getLessonPlan().startsWith("http")) props.setProperty("talksToDomino", TRUE);
+    String lessonPlan = getLessonPlan();
+    if (lessonPlan != null && lessonPlan.startsWith("http")) props.setProperty("talksToDomino", TRUE);
 
     if (getFontFamily() != null) {
       props.setProperty(FONT_FAMILY, getFontFamily());
