@@ -44,6 +44,7 @@ public class Result implements UserAndTime {
   private int userid;
 
   private int exid;
+  @Deprecated  private String oldExID;
   private int qid;
   private String answer;
   private boolean valid;
@@ -162,10 +163,6 @@ public class Result implements UserAndTime {
     return userid;
   }
 
-  public int getExerciseID() {
-    return exid;
-  }
-
   /**
    * TODO : make sure this is set
    *
@@ -185,6 +182,10 @@ public class Result implements UserAndTime {
 
   public long getTimestamp() {
     return timestamp;
+  }
+
+  public int getExerciseID() {
+    return exid;
   }
 
   @Override
@@ -229,12 +230,6 @@ public class Result implements UserAndTime {
     return roundTrip;
   }
 
-/*
-  public void setRoundTrip(long roundTrip) {
-    this.roundTrip = roundTrip;
-  }
-*/
-
   public String getDeviceType() {
     return deviceType;
   }
@@ -255,21 +250,9 @@ public class Result implements UserAndTime {
     return withFlash;
   }
 
-/*
-  public void setWithFlash(boolean withFlash) {
-    this.withFlash = withFlash;
-  }
-*/
-
   public float getDynamicRange() {
     return dynamicRange;
   }
-
-/*
-  public void setDynamicRange(float dynamicRange) {
-    this.dynamicRange = dynamicRange;
-  }
-*/
 
   public String getValidity() {
     return validity;
@@ -301,5 +284,17 @@ public class Result implements UserAndTime {
 
   public void setMale(boolean male) {
     isMale = male;
+  }
+
+  public String getOldExID() {
+    return oldExID;
+  }
+
+  public void setOldExID(String oldExID) {
+    this.oldExID = oldExID;
+  }
+
+  public void setExid(int exid) {
+    this.exid = exid;
   }
 }

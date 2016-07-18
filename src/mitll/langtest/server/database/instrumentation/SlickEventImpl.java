@@ -13,10 +13,7 @@ import mitll.npdata.dao.event.EventDAOWrapper;
 import org.apache.log4j.Logger;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by go22670 on 5/13/16.
@@ -52,13 +49,27 @@ public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
     if (getNumRows(projid).intValue() == 0) {
       List<SlickEvent> copy = new ArrayList<>();
       List<Event> all = other.getAll(projid);
-      logger.info("copyTableOnlyOnce " + all.size() + " events ");
-
+      logger.info("copyTableOnlyOnce " + all.size() + " events, ex->int size " + exToInt.size());
+      Set<String> missingEx = new TreeSet<>();
+      Set<String> ex = new TreeSet<>();
+      int missing = 0;
       for (Event event : all) {
         SlickEvent slickEvent = getSlickEvent(event, projid, oldToNew, exToInt);
+        String exerciseID = event.getExerciseID();
         if (slickEvent != null) {
+          ex.add(exerciseID);
           copy.add(slickEvent);
+        } else {
+          missing++;
+          boolean add = missingEx.add(exerciseID);
+          if (add && missing < 100 && !exerciseID.isEmpty()) {
+            logger.warn("missing '" + exerciseID + "'");
+          }
         }
+      }
+      if (missing > 0) {
+        logger.warn("skipped " + missing + " out of " + all.size() + " : " + missingEx.size() + " missing " + missingEx);
+        logger.warn("found   " + ex.size() + " ex " + ex);
       }
       eventDAOWrapper.addBulk(copy);
     }
@@ -75,12 +86,21 @@ public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
     return true;
   }
 
+  Set<String> missing = new TreeSet<>();
+
   @Override
   public SlickEvent toSlick(Event event, int projid, Map<String, Integer> exToInt) {
-    Integer exid = exToInt.get(event.getExerciseID());
-    SlickEvent slickEvent = getSlickEvent(event, projid, exid);
-
-    return slickEvent;
+    String trim = event.getExerciseID().trim();
+    Integer exid = exToInt.get(trim);
+    if (exid == null) {
+      if (missing.add(trim) && missing.size() < 100) {
+        logger.warn("toSlick missing ex " + event.getExerciseID() + " : " + event);
+      }
+      return null;
+    } else {
+      SlickEvent slickEvent = getSlickEvent(event, projid, exid);
+      return slickEvent;
+    }
   }
 
   SlickEvent getSlickEvent(Event event, int projid, Integer exid) {
@@ -119,13 +139,14 @@ public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
    * @see #copyTableOnlyOnce(IEventDAO, int, Map, Map)
    */
   private SlickEvent getSlickEvent(Event event, int projid, Map<Integer, Integer> oldToNew, Map<String, Integer> exToID) {
-//    long timestamp = event.getTimestamp();
-//    if (timestamp < 1) timestamp = System.currentTimeMillis();
-//    Timestamp modified = new Timestamp(timestamp);
-    return (oldToNew.containsKey(event.getUserID())) ? null : toSlick(event, projid, exToID);
+    return (oldToNew.containsKey(event.getUserID())) ? toSlick(event, projid, exToID) : null;
   }
 
-  @Override public List<Event> getAll() { return getEvents(eventDAOWrapper.all()); }
+  @Override
+  public List<Event> getAll() {
+    return getEvents(eventDAOWrapper.all());
+  }
+
   @Override
   public List<Event> getAll(Integer projid) {
     List<SlickEvent> all = eventDAOWrapper.getAll(projid);
@@ -146,10 +167,18 @@ public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
     return copy;
   }
 
-  @Override public List<SlickSlimEvent> getAllSlim(int projid) { return eventDAOWrapper.getAllSlim(projid);  }
-  @Override public List<SlickSlimEvent> getAllSlim() { return eventDAOWrapper.allSlim();  }
+  @Override
+  public List<SlickSlimEvent> getAllSlim(int projid) {
+    return eventDAOWrapper.getAllSlim(projid);
+  }
 
-  @Override public List<SlickSlimEvent> getAllDevicesSlim(int projid) {
+  @Override
+  public List<SlickSlimEvent> getAllSlim() {
+    return eventDAOWrapper.allSlim();
+  }
+
+  @Override
+  public List<SlickSlimEvent> getAllDevicesSlim(int projid) {
     return eventDAOWrapper.getAllSlim(projid);
   }
 
