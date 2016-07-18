@@ -63,8 +63,6 @@ public class AnswerInfo {
   private String transcript;
   private double snr;
 
-
-
   public static class RecordingInfo {
     String answer;
     String audioFile;

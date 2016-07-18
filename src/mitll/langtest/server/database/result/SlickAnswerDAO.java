@@ -32,13 +32,18 @@
 
 package mitll.langtest.server.database.result;
 
+import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.scoring.AudioContext;
 import mitll.npdata.dao.SlickResult;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.result.ResultDAOWrapper;
 import org.apache.log4j.Logger;
 
+import java.io.File;
 import java.sql.Timestamp;
 
 public class SlickAnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
@@ -55,6 +60,8 @@ public class SlickAnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
    * Cheesy thing where audio file path is actually in the audio file slot and not the answer.
    * @param answerInfo
    * @return
+   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswerAlignment(CommonExercise, AudioContext, AnswerInfo.RecordingInfo, String, File, AudioCheck.ValidityAndDur, float, boolean, boolean, boolean)
+   * @see mitll.langtest.server.audio.AudioFileHelper#recordInResults(AudioContext, AnswerInfo.RecordingInfo, AudioCheck.ValidityAndDur, AudioAnswer)
    */
   public int addAnswer(AnswerInfo answerInfo) {
     boolean isAudioAnswer = answerInfo.getAnswer() == null || answerInfo.getAnswer().length() == 0;
@@ -79,7 +86,7 @@ public class SlickAnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
         answerInfo.getScoreJson(),
         answerInfo.isWithFlash(),
         (float) answerInfo.getSnr(),
-        getLanguage(),
+       // getLanguage(),
         -1,
         answerInfo.getTranscript());
 
