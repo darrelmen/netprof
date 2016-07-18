@@ -63,10 +63,10 @@ class CheckLTS {
    * @param languageProperty
    * @see Scoring#Scoring(String, ServerProperties, LogAndNotify)
    */
-  public CheckLTS(LTS lts, HTKDictionary htkDictionary, String languageProperty, boolean hasModel) {
+  CheckLTS(LTS lts, HTKDictionary htkDictionary, String languageProperty, boolean hasModel) {
     this.letterToSoundClass = lts;
     this.htkDictionary = htkDictionary;
-    if (htkDictionary.isEmpty() && hasModel) {
+    if (htkDictionary == null || (htkDictionary.isEmpty() && hasModel)) {
       logger.warn("\n\n\n dict is empty?");
     }
     String language = languageProperty != null ? languageProperty : "";
