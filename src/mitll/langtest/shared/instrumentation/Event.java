@@ -65,7 +65,8 @@ public class Event extends SlimEvent {
    * @paramx hitID
    * @see AnnotationDAO#getUserAnnotations(String)
    */
-  public Event(String widgetID, String widgetType, String exerciseID, String context,
+  public Event(String widgetID, String widgetType,
+               String exerciseID, String context,
                int userID, long timestamp,
                String device, int exid) {
     super(userID, timestamp, exid);
