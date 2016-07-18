@@ -2159,7 +2159,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   private DatabaseImpl makeDatabaseImpl(String h2DatabaseFile) {
     //logger.debug("word pairs " +  serverProps.isWordPairs() + " language " + serverProps.getLanguage() + " config dir " + relativeConfigDir);
-    return new DatabaseImpl(configDir, relativeConfigDir, h2DatabaseFile, serverProps, pathHelper, true, this, false);
+    return new DatabaseImpl<CommonExercise>(configDir, relativeConfigDir, h2DatabaseFile, serverProps, pathHelper, true, this, false);
   }
 
   /**
@@ -2169,7 +2169,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   private void setInstallPath(DatabaseImpl db) {
     String lessonPlanFile = getLessonPlan();
-    if (!serverProps.getLessonPlan().startsWith("http") &&
+    if (lessonPlanFile != null &&
+        !serverProps.getLessonPlan().startsWith("http") &&
         !new File(lessonPlanFile).exists()) {
       logger.error("couldn't find lesson plan file " + lessonPlanFile);
     }
