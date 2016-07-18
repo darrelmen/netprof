@@ -82,18 +82,6 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   private long lastModified;
 
   /**
-   * JUST FOR TESTING
-   *
-   * @param file
-   * @param serverProperties
-   */
-/*
-  public ExcelImport(String file, ServerProperties serverProperties) {
-    this(file, serverProperties, nuæll, false);
-  }
-*/
-
-  /**
    * @param file
    * @param userListManager
    * @param addDefects
