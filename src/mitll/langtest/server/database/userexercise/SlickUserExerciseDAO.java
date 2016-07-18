@@ -236,9 +236,7 @@ public class SlickUserExerciseDAO
     return dao.insert(UserExercise);
   }
 
-  public void addBulk(List<SlickExercise> bulk) {
-    dao.addBulk(bulk);
-  }
+  public void addBulk(List<SlickExercise> bulk) {  dao.addBulk(bulk);  }
 
   public int getNumRows() {
     return dao.getNumRows();
@@ -353,9 +351,10 @@ public class SlickUserExerciseDAO
   }
 
   public Collection<SlickRelatedExercise> getAllRelated() { return relatedExerciseDAOWrapper.all();}
-/*  public Map<String, Integer> getOldToNew() {
+
+  public Map<String, Integer> getOldToNew(int projectid) {
     Map<String, Integer> oldToNew = new HashMap<>();
-    for (SlickExercise exercise : dao.getAllPredefEx()) oldToNew.put(exercise.exid(), exercise.id());
+    for (SlickExercise exercise : dao.getAllPredefByProject(projectid)) oldToNew.put(exercise.exid(), exercise.id());
     return oldToNew;
-  }*/
+  }
 }
