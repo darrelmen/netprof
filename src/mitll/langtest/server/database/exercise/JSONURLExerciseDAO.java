@@ -85,13 +85,15 @@ public class JSONURLExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<C
   }
 
   /**
+   * TODO : make this not use the server props lesson plan
    * E.g read from http://domino-devel:9000/domino-ws/v1/projects/354/documents
    * @return
    */
   private String getJSON() {
-    logger.info(serverProps.getLanguage() + " Reading from " + serverProps.getLessonPlan());
+    String lessonPlan = serverProps.getLessonPlan();
+    logger.info(serverProps.getLanguage() + " Reading from " + lessonPlan);
     this.now = System.currentTimeMillis();
-    return new HTTPClient().readFromGET(serverProps.getLessonPlan());
+    return new HTTPClient().readFromGET(lessonPlan);
   }
 
   private List<CommonExercise> getExercisesFromArray(String json) {
