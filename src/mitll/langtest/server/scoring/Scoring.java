@@ -37,6 +37,7 @@ import audio.image.TranscriptEvent;
 import audio.image.TranscriptReader;
 import audio.imagewriter.EventAndFileInfo;
 import audio.imagewriter.TranscriptWriter;
+import corpus.EmptyLTS;
 import corpus.HTKDictionary;
 import corpus.LTS;
 import mitll.langtest.server.LogAndNotify;
@@ -102,7 +103,7 @@ public abstract class Scoring {
    * If the score was below a threshold, or the magic -1, we keep it around for future study.
    */
   double lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
-  private final LTSFactory ltsFactory;
+  private LTSFactory ltsFactory;
   final String languageProperty;
 
   /**
@@ -125,7 +126,12 @@ public abstract class Scoring {
 
     isMandarin = language.equalsIgnoreCase("mandarin");
     if (isMandarin) logger.warn("using mandarin segmentation.");
-    ltsFactory = new LTSFactory(languageProperty);
+    try {
+      ltsFactory = new LTSFactory(languageProperty);
+    } catch (Exception e) {
+      ltsFactory = null;
+      logger.error("for " +languageProperty+ " got " +e);
+    }
     this.configFileCreator = new ConfigFileCreator(properties, getLTS(), scoringDir);
 
    // readDictionary();
@@ -134,7 +140,7 @@ public abstract class Scoring {
   }
 
   LTS getLTS() {
-    return ltsFactory.getLTSClass();
+    return ltsFactory == null ? new EmptyLTS() : ltsFactory.getLTSClass();
   }
 
   public static String getScoringDir(String deployPath) {
