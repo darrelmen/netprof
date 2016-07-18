@@ -37,6 +37,8 @@ import mitll.langtest.shared.AudioType;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.UserAndTime;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -72,6 +74,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   private int uniqueID;
   private String audioRef;
   private int exid;
+  private String oldexid;
   private int userid;
   private long timestamp;
   private long durationInMillis;
@@ -152,6 +155,10 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
 
   public int getExid() {
     return exid;
+  }
+
+  public void setExid(int exid) {
+    this.exid = exid;
   }
 
   @Override
@@ -322,9 +329,6 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     return uniqueID;
   }
 
-  public void setExid(int exid) {
-    this.exid = exid;
-  }
 
   /**
    * Check to see if the audio transcript matches the vocabulary item.
@@ -348,7 +352,11 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
 
   @Override
   public String toString() {
-    return "Audio id " + uniqueID + " : " + audioRef + " attrs " + attributes + " by " + userid + "/" + user +
+    return "Audio id " + uniqueID +
+        " for ex " + getOldexid()+
+        " : " + audioRef +
+        " attrs " + attributes +
+        " by " + userid + "/" + user +
         " transcript '" + transcript +
         "' ";
   }
@@ -359,5 +367,17 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
 
   public void setTranscript(String transcript) {
     this.transcript = transcript;
+  }
+
+  public String getOldexid() {
+    return oldexid;
+  }
+
+  /**
+   * @see mitll.langtest.server.database.audio.AudioDAO#getResultsForQuery(Connection, PreparedStatement)
+   * @param oldexid
+   */
+  public void setOldexid(String oldexid) {
+    this.oldexid = oldexid;
   }
 }
