@@ -73,7 +73,7 @@ public class PostgresTest extends BaseTest {
   public void testCopyUserExercises() {
     testCreate();
     DatabaseImpl<CommonExercise> spanish = getDatabaseLight("spanish", true);
-    new CopyToPostgres().copyOnlyUserExercises(spanish);
+   // new CopyToPostgres().copyOnlyUserExercises(spanish);
   }
 
   @Test

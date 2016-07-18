@@ -35,14 +35,13 @@ package mitll.langtest.server.database.annotation;
 import java.util.Date;
 
 public class UserAnnotation {
-  private final int exerciseID;
+  private int exerciseID;
   private final String field;
   private final String status;
   private final String comment;
   private long creatorID;
   private long timestamp;
   private String oldExID;
-
 
   public UserAnnotation(int exerciseID, String field, String status, String comment, long userID, long timestamp) {
     this(exerciseID, field, status, comment, userID, timestamp, "" + exerciseID);
@@ -72,6 +71,7 @@ public class UserAnnotation {
   public int getExerciseID() {
     return exerciseID;
   }
+  public void setExerciseID(int exerciseID) { this.exerciseID = exerciseID;}
 
   public String getField() {
     return field;

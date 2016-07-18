@@ -34,7 +34,6 @@ package mitll.langtest.server.database.result;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.ISchema;
 import mitll.langtest.shared.AudioType;
 import mitll.langtest.shared.MonitorResult;
@@ -71,39 +70,42 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
   }
 
   /**
-   * @see mitll.langtest.server.database.CopyToPostgres#copyResult
    * @param shared
    * @param projid
    * @param exToInt
    * @return
+   * @see mitll.langtest.server.database.CopyToPostgres#copyResult
    */
   @Override
   public SlickResult toSlick(Result shared, int projid, Map<String, Integer> exToInt) {
-//    String exid = shared.getExid();
-//    int realExID = exToInt.get(shared.getExid());
-    return new SlickResult(-1,
-        shared.getUserid(),
-        shared.getExid(),
-        new Timestamp(shared.getTimestamp()),
-        shared.getQid(),
-        shared.getAudioType().toString(),
-        shared.getAnswer(),
-        shared.isValid(),
-        shared.getValidity(),
-        shared.getDurationInMillis(),
-        shared.getProcessDur(),
-        shared.getRoundTrip(),
-        shared.isCorrect(),
-        shared.getPronScore(),
-        checkNull(shared.getDeviceType()),
-        checkNull(shared.getDevice()),
-        checkNull(shared.getJsonScore()),
-        shared.isWithFlash(),
-        shared.getDynamicRange(),
-    //    getLanguage(),
-        shared.getUniqueID(),
-        ""
-    );
+    String exid = shared.getOldExID();
+    Integer realExID = exToInt.get(exid);
+
+    if (realExID == null) return null;
+    else
+      return new SlickResult(-1,
+          shared.getUserid(),
+          realExID,
+          new Timestamp(shared.getTimestamp()),
+          shared.getQid(),
+          shared.getAudioType().toString(),
+          shared.getAnswer(),
+          shared.isValid(),
+          shared.getValidity(),
+          shared.getDurationInMillis(),
+          shared.getProcessDur(),
+          shared.getRoundTrip(),
+          shared.isCorrect(),
+          shared.getPronScore(),
+          checkNull(shared.getDeviceType()),
+          checkNull(shared.getDevice()),
+          checkNull(shared.getJsonScore()),
+          shared.isWithFlash(),
+          shared.getDynamicRange(),
+          //    getLanguage(),
+          shared.getUniqueID(),
+          ""
+      );
   }
 
   private String checkNull(String deviceType) {
@@ -164,7 +166,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
         simpleDevice,
         "",
         slick.transcript(),
-        slick.exid() );
+        slick.exid());
   }
 
   private String getRelativePath(SlickResult slick) {
