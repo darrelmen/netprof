@@ -179,7 +179,7 @@ public class SlickUserExerciseDAO
         unitToValue,
         slick.modified().getTime());
 
-    logger.info("created " + userExercise);
+//    logger.info("created " + userExercise);
     return userExercise;
   }
 
@@ -354,7 +354,7 @@ public class SlickUserExerciseDAO
 
   public Map<String, Integer> getOldToNew(int projectid) {
     Map<String, Integer> oldToNew = new HashMap<>();
-    for (SlickExercise exercise : dao.getAllPredefByProject(projectid)) oldToNew.put(exercise.exid(), exercise.id());
+    for (SlickExercise exercise : dao.getAllByProject(projectid)) oldToNew.put(exercise.exid(), exercise.id());
     return oldToNew;
   }
 }
