@@ -237,8 +237,12 @@ public class ServerProperties {
     return props.getProperty(H2_DATABASE, "npf" + props.getProperty(LANGUAGE));
   }
 
+  /**
+   * @Deprecated only for use when importing data from old site
+   * @return
+   */
   public String getLessonPlan() {
-    return props.getProperty(LESSON_PLAN_FILE);//, props.getProperty(LANGUAGE) + ".json");
+    return props.getProperty(LESSON_PLAN_FILE,"");//, props.getProperty(LANGUAGE) + ".json");
   }
 
   public boolean useScoreCache() {
@@ -256,7 +260,7 @@ public class ServerProperties {
 
   /**
    * @return
-   * @see mitll.langtest.server.database.exercise.ExcelImport#ExcelImport(String, ServerProperties, UserListManager, boolean)
+   * @see mitll.langtest.server.database.exercise.ExcelImport#ExcelImport
    */
   public int[] getUnitChapterWeek() {
     int[] parsedUCW = new int[]{-1, -1, -1};
@@ -268,6 +272,10 @@ public class ServerProperties {
     return parsedUCW;
   }
 
+  /**
+   * @Deprecated each project will have it's types and type order
+   * @return
+   */
   public Collection<String> getTypes() {
     String property = props.getProperty(TYPE_ORDER, "Unit,Chapter");
     return Arrays.asList(property.split(","));
