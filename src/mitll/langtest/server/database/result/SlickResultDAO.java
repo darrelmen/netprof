@@ -34,6 +34,7 @@ package mitll.langtest.server.database.result;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.ISchema;
 import mitll.langtest.shared.AudioType;
 import mitll.langtest.shared.MonitorResult;
@@ -69,6 +70,13 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
     return dao.dao().name();
   }
 
+  /**
+   * @see mitll.langtest.server.database.CopyToPostgres#copyResult
+   * @param shared
+   * @param projid
+   * @param exToInt
+   * @return
+   */
   @Override
   public SlickResult toSlick(Result shared, int projid, Map<String, Integer> exToInt) {
 //    String exid = shared.getExid();
@@ -92,7 +100,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
         checkNull(shared.getJsonScore()),
         shared.isWithFlash(),
         shared.getDynamicRange(),
-        getLanguage(),
+    //    getLanguage(),
         shared.getUniqueID(),
         ""
     );

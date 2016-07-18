@@ -46,7 +46,7 @@ public interface IUserExerciseDAO extends IDAO {
   List<CommonShell> getOnList(int listID);
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#getUserExerciseByExID(String)
+   * @see mitll.langtest.server.database.DatabaseImpl#getUserExerciseByExID
    * @param exid
    * @return
    */
