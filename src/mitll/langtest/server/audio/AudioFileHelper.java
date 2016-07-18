@@ -980,9 +980,14 @@ public class AudioFileHelper implements AlignDecode {
   private void makeASRScoring() {
     if (webserviceScoring == null) {
       String installPath = pathHelper.getInstallPath();
-      HTKDictionary htkDictionary = makeDict(installPath);
+      HTKDictionary htkDictionary = null;
+      try {
+        htkDictionary = makeDict(installPath);
+      } catch (Exception e) {
+        logger.error("for now got " +e,e);
+      }
       webserviceScoring = new ASRWebserviceScoring(installPath, serverProps, logAndNotify, htkDictionary);
-      oldschoolScoring = new ASRScoring(installPath, serverProps, logAndNotify, htkDictionary);
+      oldschoolScoring   = new ASRScoring(installPath, serverProps, logAndNotify, htkDictionary);
     }
     asrScoring = oldschoolScoring;
   }
@@ -993,9 +998,9 @@ public class AudioFileHelper implements AlignDecode {
    */
   private HTKDictionary makeDict(String installPath) {
     String dictFile = new ConfigFileCreator(serverProps.getProperties(), null, Scoring.getScoringDir(installPath)).getDictFile();
-    File file = new File(dictFile);
-    if (dictFile != null && file.exists()) {
+    if (dictFile != null && new File(dictFile).exists()) {
       long then = System.currentTimeMillis();
+      File file = new File(dictFile);
       logger.info("read " + file.getAbsolutePath());
       HTKDictionary htkDictionary = new HTKDictionary(dictFile);
       long now = System.currentTimeMillis();
