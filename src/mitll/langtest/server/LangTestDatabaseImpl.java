@@ -54,6 +54,7 @@ import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.decoder.RefResultDecoder;
 import mitll.langtest.server.mail.MailSupport;
+import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.server.trie.TextEntityValue;
@@ -958,7 +959,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private <T extends CommonShell> void buildExerciseTrie() {
     logger.info("db " + db);
     logger.info("audioFileHelper " + audioFileHelper);
-    fullTrie = new ExerciseTrie<CommonExercise>(db.getExercises(), getLanguage(), audioFileHelper.getSmallVocabDecoder());
+    SmallVocabDecoder smallVocabDecoder = audioFileHelper.getSmallVocabDecoder();
+    fullTrie = new ExerciseTrie<CommonExercise>(db.getExercises(), getLanguage(), smallVocabDecoder);
   }
 
   public ContextPractice getContextPractice() {
