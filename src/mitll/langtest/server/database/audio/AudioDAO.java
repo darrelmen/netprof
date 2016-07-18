@@ -479,7 +479,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
       try {
         exid1 = Integer.parseInt(exid);
       } catch (NumberFormatException e) {
-        logger.warn("got " +e + " for " +exid);
+       // logger.warn("got " +e + " for " +exid);
       }
       AudioAttribute audioAttr = new AudioAttribute(uniqueID, userID, //id
           exid1, // id
@@ -487,6 +487,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
           timestamp.getTime(),
           dur, realType,
           user, transcript);
+      audioAttr.setOldexid(exid);
 
       if (user == null) {
         if (c++ < 20) {
