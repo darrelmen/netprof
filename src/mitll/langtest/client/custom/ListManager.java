@@ -330,10 +330,10 @@ public class ListManager implements RequiresResize {
    * @see #viewBrowse()
    * @see #refreshViewLessons(boolean, boolean)
    */
-  private void viewLessons(final Panel contentPanel, boolean getAll, boolean onlyMine, boolean onlyVisited,
+/*  private void viewLessons(final Panel contentPanel, boolean getAll, boolean onlyMine, boolean onlyVisited,
                            String optionalExercise) {
     viewLessons(contentPanel, getAll, onlyMine, onlyVisited, optionalExercise);
-  }
+  }*/
 
   /**
    * @param contentPanel
