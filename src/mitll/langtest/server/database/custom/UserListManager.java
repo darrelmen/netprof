@@ -476,7 +476,7 @@ public class UserListManager implements IUserListManager {
    * @param typeOrder used by sorter to sort first in unit & chapter order
    * @return
    * @see mitll.langtest.server.services.ListServiceImpl#getReviewLists
-   * @see IUserListManager#markCorrectness
+   * @see #getUserListByID
    */
   @Override
   public UserList<CommonShell> getDefectList(Collection<String> typeOrder) {
@@ -926,7 +926,7 @@ public class UserListManager implements IUserListManager {
    * @param state
    * @param creatorID
    * @see mitll.langtest.server.LangTestDatabaseImpl#setExerciseState
-   * @see mitll.langtest.server.database.custom.UserListManager#markState(String, mitll.langtest.shared.exercise.STATE, long)
+   * @see mitll.langtest.server.database.custom.UserListManager#markState
    */
   @Override
   public void setSecondState(Shell shell, STATE state, long creatorID) {

@@ -41,6 +41,7 @@ public class StateCreator implements Comparable<StateCreator> {
   private long creatorID;
   private long when;
   private int exerciseID =-1;
+  private String oldExID;
 
   StateCreator(STATE state, long creatorID, long when) {
     this.state = state;
@@ -87,5 +88,13 @@ public class StateCreator implements Comparable<StateCreator> {
     if (i == 0) i = state.compareTo(o.state);
     if (i == 0) i = Long.valueOf(when).compareTo(o.when);
     return i;
+  }
+
+  public String getOldExID() {
+    return oldExID;
+  }
+
+  public void setOldExID(String oldExID) {
+    this.oldExID = oldExID;
   }
 }
