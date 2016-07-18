@@ -55,6 +55,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       boolean addDefects,
       SlickUserExerciseDAO userExerciseDAO) {
     super(serverProps, userListManager, addDefects);
+    logger.info("reading from database--------- ");
     // this.typeOrder = serverProps.getTypes();
     this.userExerciseDAO = userExerciseDAO;
     //  new DominoReader().readProjectInfo(serverProps);

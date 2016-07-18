@@ -74,7 +74,7 @@ import java.io.File;
 import java.sql.SQLException;
 import java.util.*;
 
-public class CopyToPostgres {
+public class CopyToPostgres<T extends CommonShell> {
   private static final Logger logger = Logger.getLogger(CopyToPostgres.class);
   private static final boolean COPY_ANNO = true;
   private static final boolean USERS = true;
@@ -139,7 +139,7 @@ public class CopyToPostgres {
         new PathHelper(getInstallPath(inTest)), false, null, true);
   }
 
-  public void copyToPostgres(DatabaseImpl db) {
+  public void copyToPostgres(DatabaseImpl<T> db) {
     int projectID = createProjectIfNotExists(db);
 
     logger.info("project is " + projectID);
@@ -193,14 +193,14 @@ public class CopyToPostgres {
     }
   }
 
-  public Map<String, Integer> copyOnlyUserExercises(DatabaseImpl<CommonExercise> db) {
+  public Map<String, Integer> copyOnlyUserExercises(DatabaseImpl<T> db) {
     int projectID = createProjectIfNotExists(db);
     SlickUserDAOImpl slickUserDAO = (SlickUserDAOImpl) db.getUserDAO();
     Map<Integer, Integer> oldToNewUser = copyUsers(db, slickUserDAO);
     return copyUserAndPredefExercisesAndLists(db, projectID, oldToNewUser);
   }
 
-  private Map<String, Integer> copyUserAndPredefExercisesAndLists(DatabaseImpl<CommonExercise> db,
+  private Map<String, Integer> copyUserAndPredefExercisesAndLists(DatabaseImpl<T> db,
                                                                   int projectID,
                                                                   Map<Integer, Integer> oldToNewUser) {
     Map<String, Integer> exToID = copyUserAndPredefExercises(db, oldToNewUser, projectID);
@@ -443,28 +443,30 @@ public class CopyToPostgres {
     IUserListManager userListManager = db.getUserListManager();
     IUserListExerciseJoinDAO dao = userListManager.getUserListExerciseJoinDAO();
     SlickUserListExerciseJoinDAO slickUserListExerciseJoinDAO = (SlickUserListExerciseJoinDAO) dao;
-    if (slickUserListExerciseJoinDAO.isEmpty()) {
-      for (UserListExerciseJoinDAO.Join join : new UserListExerciseJoinDAO(db).getAll()) {
-        int oldID = join.userlistid;
-        Integer userListID = oldToNewUserList.get(oldID);
-        if (userListID == null) {
-          logger.error("UserListManager join can't find user list " + oldID + " in " + oldToNewUserList.size());
-        } else {
+    // if (slickUserListExerciseJoinDAO.isEmpty()) {
+    Collection<UserListExerciseJoinDAO.Join> all = new UserListExerciseJoinDAO(db).getAll();
+    logger.info("copying " + all.size() + " exercise->list joins");
+    for (UserListExerciseJoinDAO.Join join : all) {
+      int oldID = join.userlistid;
+      Integer userListID = oldToNewUserList.get(oldID);
+      if (userListID == null) {
+        logger.error("UserListManager join can't find user list " + oldID + " in " + oldToNewUserList.size());
+      } else {
 
-          String exerciseID = join.exerciseID;
-          Integer id = exToInt.get(exerciseID);
-          CommonExercise customOrPredefExercise = null;
-          if (id == null) logger.error("Can't find " + exerciseID);
-          else customOrPredefExercise = db.getCustomOrPredefExercise(id);
+        String exerciseID = join.exerciseID;
+        Integer id = exToInt.get(exerciseID);
+        CommonExercise customOrPredefExercise = null;
+        if (id == null) logger.error("Can't find " + exerciseID);
+        else customOrPredefExercise = db.getCustomOrPredefExercise(id);
 //          logger.info("Adding user exercise join : " +join.userlistid + " adding " + exerciseID + " : " +customOrPredefExercise);
-          if (customOrPredefExercise == null) {
-            logger.error("can't find " + exerciseID + " in " + db.getExercises().size() + " exercises");
-          } else {
-            slickUserListExerciseJoinDAO.addPair(userListID, /*exerciseID,*/ customOrPredefExercise.getID());
-          }
+        if (customOrPredefExercise == null) {
+          logger.error("can't find " + exerciseID + " in " + db.getExercises().size() + " exercises");
+        } else {
+          slickUserListExerciseJoinDAO.addPair(userListID, /*exerciseID,*/ customOrPredefExercise.getID());
         }
       }
     }
+    //}
     //  }
   }
 
@@ -478,16 +480,18 @@ public class CopyToPostgres {
    */
   private void copyUserExerciseList(DatabaseImpl db, Map<Integer, Integer> oldToNewUser, SlickUserListDAO slickUserListDAO) {
     //if (true) {
-    if (slickUserListDAO.isEmpty()) {
-      UserDAO userDAO = new UserDAO(db);
-      UserListDAO uelDAO = new UserListDAO(db, userDAO);
-      for (UserList<CommonShell> list : uelDAO.getAll()) {
-        int oldID = list.getCreator().getId();
-        Integer integer = oldToNewUser.get(oldID);
-        if (integer == null) logger.error("UserListManager can't find user " + oldID);
-        else slickUserListDAO.addWithUser(list, integer);
-      }
+    //if (slickUserListDAO.isEmpty()) {
+    UserDAO userDAO = new UserDAO(db);
+    UserListDAO uelDAO = new UserListDAO(db, userDAO);
+    Collection<UserList<CommonShell>> all = uelDAO.getAll();
+    logger.info("copying " + all.size() + " user exercise lists");
+    for (UserList<CommonShell> list : all) {
+      int oldID = list.getCreator().getId();
+      Integer integer = oldToNewUser.get(oldID);
+      if (integer == null) logger.error("UserListManager can't find user " + oldID);
+      else slickUserListDAO.addWithUser(list, integer);
     }
+    //}
     //}
   }
 
@@ -503,23 +507,26 @@ public class CopyToPostgres {
                                            Map<Integer, Integer> oldToNewUser,
                                            Map<Integer, Integer> oldToNewUserList,
                                            SlickUserListExerciseVisitorDAO visitorDAO) {
-    if (visitorDAO.isEmpty()) {
-      UserExerciseListVisitorDAO uelDAO = new UserExerciseListVisitorDAO(db);
-      for (UserExerciseListVisitorDAO.Pair pair : uelDAO.getAll()) {
-        int oldID = pair.getUser();
-        Integer currentUser = oldToNewUser.get(oldID);
-        if (currentUser == null) {
-          logger.error("UserListManager can't find user " + oldID);
-        } else {
-          int olduserlist = pair.getListid();
-          Integer current = oldToNewUserList.get(olduserlist);
-          if (current == null) logger.error("can't find user list id " + olduserlist);
-          else {
-            visitorDAO.add(current, currentUser, pair.getWhen());
-          }
+    //if (visitorDAO.isEmpty()) {
+    UserExerciseListVisitorDAO uelDAO = new UserExerciseListVisitorDAO(db);
+    Collection<UserExerciseListVisitorDAO.Pair> all = uelDAO.getAll();
+    logger.info("copying " + all.size() + " user exercise list visitors");
+
+    for (UserExerciseListVisitorDAO.Pair pair : all) {
+      int oldID = pair.getUser();
+      Integer currentUser = oldToNewUser.get(oldID);
+      if (currentUser == null) {
+        logger.error("UserListManager can't find user " + oldID);
+      } else {
+        int olduserlist = pair.getListid();
+        Integer current = oldToNewUserList.get(olduserlist);
+        if (current == null) logger.error("can't find user list id " + olduserlist);
+        else {
+          visitorDAO.add(current, currentUser, pair.getWhen());
         }
       }
     }
+    //}
   }
 
   /**
@@ -530,7 +537,7 @@ public class CopyToPostgres {
    * @param projectID
    * @see #copyUserAndPredefExercisesAndLists
    */
-  private Map<String, Integer> copyUserAndPredefExercises(DatabaseImpl<CommonExercise> db,
+  private Map<String, Integer> copyUserAndPredefExercises(DatabaseImpl<T> db,
                                                           Map<Integer, Integer> oldToNewUser,
                                                           int projectID) {
     //if (USER_EXERCISE) {
@@ -542,26 +549,45 @@ public class CopyToPostgres {
     int ct = 0;
 //    if (slickUEDAO.isProjectEmpty(projectID)) {
     int importUser = ((SlickUserDAOImpl) db.getUserDAO()).getImportUser();
-    for (CommonExercise ex : db.getExercises()) {
-      //     bulk.add(slickUEDAO.toSlick(ex, false, projectID, true, slickUserDAO.getImportUser(), false));
-      int id = slickUEDAO.insert(slickUEDAO.toSlick(ex, false, projectID, true, importUser, false));
-      exToInt.put(ex.getOldID(), id);
-      for (CommonExercise context : ex.getDirectlyRelated()) {
-        int contextid = slickUEDAO.insert(slickUEDAO.toSlick(context, false, projectID, true, importUser, true));
-        slickUEDAO.insertRelated(id, contextid);
-        ct++;
-      }
-      n++;
-    }
+    {
+      Collection<CommonExercise> exercises = db.getExercises();
 
-    logger.info("importing " + n + " predef exercises and " + ct + " context exercises");
+      List<SlickExercise> bulk = new ArrayList<>();
+      logger.info("copying  " + exercises.size() + " exercises");
+      for (CommonExercise ex : exercises) {
+        //     bulk.add(slickUEDAO.toSlick(ex, false, projectID, true, slickUserDAO.getImportUser(), false));
+        bulk.add(slickUEDAO.toSlick(ex, false, projectID, true, importUser, false));
+        //   exToInt.put(ex.getOldID(), id);
+      }
+      slickUEDAO.addBulk(bulk);
+
+      exToInt = slickUEDAO.getOldToNew(projectID);
+
+      for (CommonExercise ex : exercises) {
+        //     bulk.add(slickUEDAO.toSlick(ex, false, projectID, true, slickUserDAO.getImportUser(), false));
+     //   int id = slickUEDAO.insert(slickUEDAO.toSlick(ex, false, projectID, true, importUser, false));
+       // exToInt.put(ex.getOldID(), id);
+        int id = exToInt.get(ex.getOldID());
+        for (CommonExercise context : ex.getDirectlyRelated()) {
+          context.getMutable().setOldID("c"+id);
+          int contextid = slickUEDAO.insert(slickUEDAO.toSlick(context, false, projectID, true, importUser, true));
+          slickUEDAO.insertRelated(id, contextid);
+          ct++;
+        }
+        n++;
+      }
+      logger.info("imported " + n + " predef exercises and " + ct + " context exercises");
+    }
 
     List<SlickExercise> bulk = new ArrayList<>();
     try {
       int c = 0;
       UserExerciseDAO ueDAO = new UserExerciseDAO(db);
       ueDAO.setExerciseDAO(db.getExerciseDAO());
-      for (UserExercise result : ueDAO.getAllUserExercises()) {
+      Collection<UserExercise> allUserExercises = ueDAO.getAllUserExercises();
+      logger.info("copying  " + allUserExercises.size() + " user exercises");
+
+      for (UserExercise result : allUserExercises) {
         Integer userID = oldToNewUser.get(result.getCreator());
         if (userID == null) {
           if (c++ < 50) logger.error("user exercise : no user " + result.getCreator());
@@ -574,8 +600,8 @@ public class CopyToPostgres {
       logger.error("Got " + e, e);
     }
     slickUEDAO.addBulk(bulk);
-    //  }
-    // }
+
+    logger.info("finished copying exercises");
     return exToInt;
   }
 
@@ -598,49 +624,50 @@ public class CopyToPostgres {
     //}
   }
 
+
   private void copyReviewed(DatabaseImpl db, Map<Integer, Integer> oldToNewUser, boolean isReviewed) {
     SlickReviewedDAO dao = (SlickReviewedDAO) (isReviewed ? db.getReviewedDAO() : db.getSecondStateDAO());
-    if (dao.isEmpty()) {
-      String tableName = isReviewed ? ReviewedDAO.REVIEWED : ReviewedDAO.SECOND_STATE;
-      ReviewedDAO originalDAO = new ReviewedDAO(db, tableName);
-      List<SlickReviewed> bulk = new ArrayList<>();
-      Collection<StateCreator> all = originalDAO.getAll();
-      logger.info("found " + all.size() + " for " + tableName);
-      for (StateCreator stateCreator : all) {
-        Integer userID = oldToNewUser.get((int) stateCreator.getCreatorID());
-        if (userID == null) {
-          logger.error("copyReviewed no user " + stateCreator.getCreatorID());
-        } else {
-          stateCreator.setCreatorID(userID);
-          bulk.add(dao.toSlick(stateCreator));
-        }
+    // if (dao.isEmpty()) {
+    String tableName = isReviewed ? ReviewedDAO.REVIEWED : ReviewedDAO.SECOND_STATE;
+    ReviewedDAO originalDAO = new ReviewedDAO(db, tableName);
+    List<SlickReviewed> bulk = new ArrayList<>();
+    Collection<StateCreator> all = originalDAO.getAll();
+    logger.info("found " + all.size() + " for " + tableName);
+    for (StateCreator stateCreator : all) {
+      Integer userID = oldToNewUser.get((int) stateCreator.getCreatorID());
+      if (userID == null) {
+        logger.error("copyReviewed no user " + stateCreator.getCreatorID());
+      } else {
+        stateCreator.setCreatorID(userID);
+        bulk.add(dao.toSlick(stateCreator));
       }
-      dao.addBulk(bulk);
     }
+    dao.addBulk(bulk);
+    // }
   }
 
   private void copyRefResult(DatabaseImpl db, Map<Integer, Integer> oldToNewUser) {
     SlickRefResultDAO dao = (SlickRefResultDAO) db.getRefResultDAO();
-    if (dao.isEmpty()) {
-      RefResultDAO originalDAO = new RefResultDAO(db, false);
-      List<SlickRefResult> bulk = new ArrayList<>();
-      Collection<Result> all = originalDAO.getResults();
-      logger.info("copyRefResult found " + all.size());
-      for (Result result : all) {
-        Integer userID = oldToNewUser.get((int) result.getUserid());
-        if (userID == null) {
-          logger.error("copyReviewed no user " + result.getUserid());
-        } else {
-          result.setUserID(userID);
-          bulk.add(dao.toSlick(result));
-        }
+    //if (dao.isEmpty()) {
+    RefResultDAO originalDAO = new RefResultDAO(db, false);
+    List<SlickRefResult> bulk = new ArrayList<>();
+    Collection<Result> all = originalDAO.getResults();
+    logger.info("copyRefResult found " + all.size());
+    for (Result result : all) {
+      Integer userID = oldToNewUser.get((int) result.getUserid());
+      if (userID == null) {
+        logger.error("copyReviewed no user " + result.getUserid());
+      } else {
+        result.setUserID(userID);
+        bulk.add(dao.toSlick(result));
       }
-      dao.addBulk(bulk);
-      logger.info("copyRefResult added " + dao.getNumResults());
-    } else {
-      logger.info("copyRefResult already has " + dao.getNumResults());
-
     }
+    dao.addBulk(bulk);
+    logger.info("copyRefResult added " + dao.getNumResults());
+    // } else {
+    //   logger.info("copyRefResult already has " + dao.getNumResults());
+
+    // }
   }
 
   public static void main(String[] arg) {
