@@ -200,6 +200,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
   public void addContext(String context, String contextTranslation) {
     if (!context.isEmpty()) {
       Exercise contextExercise = new Exercise("c" + getID(), context, contextTranslation);
+      contextExercise.setUpdateTime(getUpdateTime());
       contextExercise.setUnitToValue(getUnitToValue());
       addContextExercise(contextExercise);
     }

@@ -110,7 +110,9 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
     DecodeAlignOutput alignOutput = result.getAlignOutput();
     DecodeAlignOutput decodeOutput = result.getDecodeOutput();
     return new SlickRefResult(-1,
-        result.getUserid(), result.getExerciseID(), new Timestamp(result.getTimestamp()),
+        result.getUserid(),
+        result.getExerciseID(),
+        new Timestamp(result.getTimestamp()),
         result.getAnswer(), result.getDurationInMillis(),
         result.isCorrect(),
         decodeOutput.getScore(), decodeOutput.getJson(), decodeOutput.getNumPhones(), decodeOutput.getProcessDurInMillis(),
@@ -174,7 +176,9 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
     if (validAlignJSON || validDecodeJSON) {
       float pronScore1 = validDecodeJSON ? pronScore : alignScore;
       String scoreJson1 = validDecodeJSON ? scoreJson : alignJSON;
-      Result result = new Result(slickRef.id(), slickRef.userid(), //id
+      Result result = new Result(
+          slickRef.id(),
+          slickRef.userid(), //id
           // "", // plan
           slickRef.exid(), // id
           0, // qid

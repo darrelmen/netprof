@@ -441,7 +441,7 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
         try {
           exid1 = Integer.parseInt(exid);
         } catch (NumberFormatException e) {
-          logger.warn("couldn't parse " +exid);
+          //logger.warn("couldn't parse " +exid);
         }
         Result result = new Result(uniqueID, userID, //id
             // "", // plan
@@ -462,6 +462,7 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
         result.setDecodeOutput(new DecodeAlignOutput(pronScore, scoreJson, hydraDecodeDur, correct, rs.getInt(NUMDECODE_PHONES)));
         result.setAlignOutput(new DecodeAlignOutput(alignScore, alignJSON, hydraAlignDur, true, rs.getInt(NUM_ALIGN_PHONES)));
         result.setJsonScore(scoreJson1);
+        result.setOldExID(exid);
         results.add(result);
       } else {
         if (skipped < 20) {
