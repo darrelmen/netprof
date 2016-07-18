@@ -532,14 +532,15 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   }
 
   private void makeExerciseDAO(String lessonPlanFile, boolean isURL) {
-    logger.info("got " + lessonPlanFile + " " + isURL);
     if (isURL) {
       this.exerciseDAO = new JSONURLExerciseDAO(getServerProps(), userListManager, ADD_DEFECTS);
-    } else if (lessonPlanFile.endsWith(".json")) {
-      this.exerciseDAO = new JSONExerciseDAO(lessonPlanFile, getServerProps(), userListManager, ADD_DEFECTS);
     } else if (!serverProps.useH2()) {
       this.exerciseDAO = new DBExerciseDAO(getServerProps(), userListManager, ADD_DEFECTS, (SlickUserExerciseDAO) getUserExerciseDAO());
+    } else if (lessonPlanFile.endsWith(".json")) {
+      logger.info("got " + lessonPlanFile);
+      this.exerciseDAO = new JSONExerciseDAO(lessonPlanFile, getServerProps(), userListManager, ADD_DEFECTS);
     } else {
+      logger.info("got " + lessonPlanFile);
       this.exerciseDAO = new ExcelImport(lessonPlanFile, getServerProps(), userListManager, ADD_DEFECTS);
     }
   }
@@ -925,11 +926,11 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     List<IDAO> idaos = Arrays.asList(
         getUserDAO(),
         getProjectDAO(),
+        userExerciseDAO,
+        ((SlickUserExerciseDAO) userExerciseDAO).getRelatedExercise(),
         getAudioDAO(),
         getEventDAO(),
         getResultDAO(),
-        userExerciseDAO,
-        ((SlickUserExerciseDAO) userExerciseDAO).getRelatedExercise(),
         getAnnotationDAO(),
         getWordDAO(),
         getPhoneDAO(),
@@ -941,15 +942,11 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     );
     for (IDAO dao : idaos) createIfNotThere(dao, created);
 
-//    if (!dbConnection.hasTable("result")) ((ISchema) getResultDAO()).createTable();
-//    if (!dbConnection.hasTable("userexercise")) ((ISchema) userExerciseDAO).createTable();
     userListManager.createTables(dbConnection, created);
-//    if (!dbConnection.hasTable("annotation")) ((ISchema) getAnnotationDAO()).createTable();
-    //   if (!dbConnection.hasTable("word")) ((ISchema) getWordDAO()).createTable();
-    //  if (!dbConnection.hasTable("phone")) ((ISchema) getPhoneDAO()).createTable();
-    // if (!dbConnection.hasTable("refresult")) ((SlickRefResultDAO) getRefResultDAO()).createTable();
-    logger.info("createTables created slick tables : " + created);
-    logger.info("createTables after create slick tables - has " + dbConnection.getTables());
+    if (!created.isEmpty()) {
+      logger.info("createTables created slick tables : " + created);
+      logger.info("createTables after create slick tables - has " + dbConnection.getTables());
+    }
   }
 
   private void createIfNotThere(IDAO slickUserDAO, List<String> created) {
@@ -966,7 +963,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 //  }
 
   public void copyToPostgres() {
-    new CopyToPostgres().copyToPostgres(this);
+    CopyToPostgres<T> copyToPostgres = new CopyToPostgres<T>();
+    copyToPostgres.copyToPostgres(this);
   }
 
   /**
