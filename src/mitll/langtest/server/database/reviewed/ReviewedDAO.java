@@ -34,6 +34,7 @@ package mitll.langtest.server.database.reviewed;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.shared.exercise.STATE;
 import org.apache.log4j.Logger;
 
@@ -184,8 +185,8 @@ public class ReviewedDAO extends DAO implements IReviewedDAO {
    * @param exerciseID
    * @param state
    * @param creatorID
-   * @see mitll.langtest.server.database.custom.UserListManager#setState(mitll.langtest.shared.exercise.CommonShell, mitll.langtest.shared.exercise.STATE, long)
-   * @see mitll.langtest.server.database.custom.UserListManager#setSecondState(mitll.langtest.shared.exercise.CommonShell, mitll.langtest.shared.exercise.STATE, long)
+   * @see mitll.langtest.server.database.custom.UserListManager#setState
+   * @see mitll.langtest.server.database.custom.UserListManager#setSecondState
    */
   @Override
   public void setState(int exerciseID, STATE state, long creatorID) {
@@ -202,7 +203,7 @@ public class ReviewedDAO extends DAO implements IReviewedDAO {
    *
    * @param skipUnset
    * @return
-   * @see UserListManager#getDefectList(java.util.Collection)
+   * @see UserListManager#getDefectList
    * @see UserListManager#getExerciseToState
    * @see UserListManager#markState
    * @see mitll.langtest.server.database.custom.UserListManager#setStateOnExercises()
@@ -297,7 +298,12 @@ public class ReviewedDAO extends DAO implements IReviewedDAO {
         STATE stateFromTable = (state == null) ? STATE.UNSET : STATE.valueOf(state);
 
         StateCreator e = new StateCreator(stateFromTable, creator, when);
-        e.setExerciseID(Integer.parseInt(exerciseID));
+        try {
+          e.setExerciseID(Integer.parseInt(exerciseID));
+        } catch (NumberFormatException e1) {
+          //e1.printStackTrace();
+        }
+        e.setOldExID(exerciseID);
         all.add(e);
       }
 
