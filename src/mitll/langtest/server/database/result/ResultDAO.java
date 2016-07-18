@@ -513,6 +513,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
           validity);
 
       result.setJsonScore(json);
+      result.setOldExID(exid);
       results.add(result);
     }
     finish(connection, statement, rs);
