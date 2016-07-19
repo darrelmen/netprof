@@ -166,6 +166,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   private final String absConfigDir;
   private SimpleExerciseDAO<AmasExerciseImpl> fileExerciseDAO;
 
+  List<Project> projects = new ArrayList<>();
+
   public DatabaseImpl(String configDir, String relativeConfigDir, String dbName, ServerProperties serverProps,
                       PathHelper pathHelper, boolean mustAlreadyExist, LogAndNotify logAndNotify) {
     this(configDir, relativeConfigDir, dbName, serverProps, pathHelper, mustAlreadyExist, logAndNotify, false);
@@ -463,6 +465,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   /**
    * @return
    * @see #getExercises()
+   * @see LangTestDatabaseImpl#buildExerciseTrie()
    */
   public Collection<CommonExercise> getExercises() {
     if (isAmas()) {
