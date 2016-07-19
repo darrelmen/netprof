@@ -8,7 +8,7 @@
     <property environment="env"/>
     <property name="ECLIPSE_HOME" value="../../../eclipse_juno"/>
     <property name="imagewriter.location" value="imagewriter"/>
-    <property name="npdata.location" value="npdata/target/scala-2.11"/>
+    <property name="npdata.location" value="npdata/target/"/>
     <property name="debuglevel" value="source,lines,vars"/>
     <property name="target" value="1.8"/>
     <property name="source" value="1.8"/>
@@ -41,8 +41,11 @@
         <pathelement location="war/WEB-INF/lib/guava-19.0.jar"/>
         <pathelement location="war/WEB-INF/lib/log4j-1.2.17.jar"/>
         <path refid="imagewriter.classpath"/>
-        <pathelement location="war/WEB-INF/lib/pronz-assembly-1.0.jar"/>
+        <pathelement location="war/WEB-INF/lib/pronz_2.11-1.0.jar"/>
+        <pathelement location="war/WEB-INF/lib/hydec_2.11-1.0.jar"/>
+        <pathelement location="war/WEB-INF/lib/utils_2.11-1.0.0-SNAPSHOT.jar"/>
         <pathelement location="war/WEB-INF/lib/mira.jar"/>
+        <pathelement location="war/WEB-INF/lib/mail.jar"/>
         <pathelement location="war/WEB-INF/lib/gwt-visualization.jar"/>
         <pathelement location="war/WEB-INF/lib/poi-3.10-FINAL-20140208.jar"/>
         <pathelement location="war/WEB-INF/lib/poi-ooxml-3.10-FINAL-20140208.jar"/>
