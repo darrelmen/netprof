@@ -306,7 +306,7 @@ public class ListManager implements RequiresResize {
    * @see #clickOnYourLists(long)
    */
   private void refreshViewLessons(boolean onlyMine, boolean onlyVisited) {
-    viewLessons(onlyMine ? yourStuff.getContent() : othersStuff.getContent(), false, onlyMine, onlyVisited, "");
+    viewLessons(onlyMine ? yourStuff.getContent() : othersStuff.getContent(), false, onlyMine, onlyVisited, -1);
   }
 
   /**
@@ -314,7 +314,7 @@ public class ListManager implements RequiresResize {
    * @see #addListTabs(TabPanel)
    */
   public void viewBrowse() {
-    viewLessons(browse.getContent(), true, false, false, "");
+    viewLessons(browse.getContent(), true, false, false, -1);
   }
 
   public void findListAndSelect(int exerciseID) {
