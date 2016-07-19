@@ -940,7 +940,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         ((ProjectDAO) getProjectDAO()).getProjectPropertyDAO(),
         getUserProjectDAO()
     );
-    for (IDAO dao : idaos) createIfNotThere(dao, created);
+    for (IDAO dao : idaos) {
+      createIfNotThere(dao, created);
+    }
 
     userListManager.createTables(dbConnection, created);
     if (!created.isEmpty()) {
@@ -955,6 +957,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       logger.info("createIfNotThere create " + name);
       slickUserDAO.createTable();
       created.add(name);
+    }
+    else {
+   //   logger.debug("createIfNotThere has table " + name);
     }
   }
 
