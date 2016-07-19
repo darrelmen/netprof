@@ -277,7 +277,9 @@ public class DAO {
 
   protected void logException(Exception ee) {
     logger.error("got " + ee, ee);
-    logAndNotify.logAndNotifyServerException(ee);
+    if (logAndNotify != null) {
+      logAndNotify.logAndNotifyServerException(ee);
+    }
   }
 
   protected String getIdentity() {
