@@ -49,6 +49,7 @@ import mitll.langtest.server.autocrt.AutoCRT;
 import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.custom.IUserListManager;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.database.user.BaseUserDAO;
@@ -106,12 +107,17 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private static final int SLOW_MILLIS = 40;
   private static final int WARN_DUR = 100;
   private static final String WAV1 = "wav";
+
   private RefResultDecoder refResultDecoder;
 
   private static final boolean WARN_MISSING_FILE = true;
 
   private DatabaseImpl<CommonExercise> db;
-  private AudioFileHelper audioFileHelper;
+
+  /**
+   * Put inside a Project
+   */
+  @Deprecated  AudioFileHelper audioFileHelper;
   private String relativeConfigDir;
   private String configDir;
   private ServerProperties serverProps;
@@ -124,8 +130,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    *
    * @see #getExercises()
    */
-  private ExerciseTrie fullTrie = null;
+  /**
+   * Put inside a Project
+   */
+ @Deprecated  private ExerciseTrie fullTrie = null;
   private ExerciseTrie<AmasExerciseImpl> amasFullTrie = null;
+
+  List<Project> projects = new ArrayList<>();
 
   private static final boolean DEBUG = true;
 

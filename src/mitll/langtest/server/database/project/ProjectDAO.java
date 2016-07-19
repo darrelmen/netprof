@@ -59,10 +59,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     return propertyDAO;
   }
 
-  public void createTable() {
-    // logger.info("create table  " + getName());
-    dao.createTable();
-  }
+  public void createTable() {  dao.createTable(); }
 
   @Override
   public String getName() {

@@ -101,7 +101,9 @@ public class AudioFileHelper implements AlignDecode {
    * @see mitll.langtest.server.ScoreServlet#getAudioFileHelper()
    * @see LangTestDatabaseImpl#init
    */
-  public AudioFileHelper(PathHelper pathHelper, ServerProperties serverProperties, DatabaseImpl db,
+  public AudioFileHelper(PathHelper pathHelper,
+                         ServerProperties serverProperties,
+                         DatabaseImpl db,
                          LogAndNotify langTestDatabase) {
     this.pathHelper = pathHelper;
     this.serverProps = serverProperties;
@@ -997,6 +999,7 @@ public class AudioFileHelper implements AlignDecode {
    * @see #makeASRScoring
    */
   private HTKDictionary makeDict(String installPath) {
+    logger.info("install path is " +installPath);
     String dictFile = new ConfigFileCreator(serverProps.getProperties(), null, Scoring.getScoringDir(installPath)).getDictFile();
     if (dictFile != null && new File(dictFile).exists()) {
       long then = System.currentTimeMillis();
