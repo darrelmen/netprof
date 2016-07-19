@@ -34,6 +34,7 @@ package mitll.langtest.server.database.userexercise;
 
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.IDAO;
+import mitll.langtest.server.database.exercise.DBExerciseDAO;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.shared.custom.UserExercise;
@@ -208,8 +209,8 @@ public class SlickUserExerciseDAO
         slick.id(),
         slick.exid(),
         slick.english(),
-        slick.meaning(),
         slick.foreignlanguage(),
+        slick.meaning(),
         slick.transliteration());
 
     List<String> translations = new ArrayList<String>();
@@ -304,8 +305,18 @@ public class SlickUserExerciseDAO
     return getUserExercises(dao.getAllUserEx());
   }
 
+  /**
+   * @see DBExerciseDAO#readExercises()
+   * @param typeOrder
+   * @param sectionHelper
+   * @return
+   */
   public List<CommonExercise> getAllExercises(List<String> typeOrder, SectionHelper<CommonExercise> sectionHelper) {
     return getExercises(dao.getAllPredefEx(), typeOrder, sectionHelper);
+  }
+
+  public List<CommonExercise> getByProject(int projectid, List<String> typeOrder, SectionHelper<CommonExercise> sectionHelper) {
+    return getExercises(dao.getAllByProject(projectid), typeOrder, sectionHelper);
   }
 
   @Override
