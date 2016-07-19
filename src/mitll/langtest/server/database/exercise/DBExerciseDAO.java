@@ -36,6 +36,7 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.npdata.dao.SlickProject;
 import mitll.npdata.dao.SlickRelatedExercise;
 import org.apache.log4j.Logger;
 
@@ -45,6 +46,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   private static final Logger logger = Logger.getLogger(DBExerciseDAO.class);
   // private final Collection<String> typeOrder;
   private SlickUserExerciseDAO userExerciseDAO;
+  SlickProject project;
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#makeDAO
@@ -53,17 +55,16 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       ServerProperties serverProps,
       IUserListManager userListManager,
       boolean addDefects,
-      SlickUserExerciseDAO userExerciseDAO) {
+      SlickUserExerciseDAO userExerciseDAO,
+      SlickProject project) {
     super(serverProps, userListManager, addDefects);
     logger.info("reading from database--------- ");
-    // this.typeOrder = serverProps.getTypes();
     this.userExerciseDAO = userExerciseDAO;
-    //  new DominoReader().readProjectInfo(serverProps);
+    this.project = project;
   }
 
   /**
    * Does join with related exercise table - maybe better way to do this in scala side?
-   * TODO : type order is from the project
    *
    * @return
    * @see #getRawExercises()
@@ -71,27 +72,34 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   @Override
   List<CommonExercise> readExercises() {
     try {
-      List<String> typeOrder = Arrays.asList("Unit", "Chapter");
-      List<CommonExercise> allExercises = userExerciseDAO.getAllExercises(typeOrder, getSectionHelper());
+      List<String> typeOrder = Arrays.asList(project.first(), project.second());
+
+      List<CommonExercise> allExercises = userExerciseDAO.getByProject(project.id(), typeOrder, getSectionHelper());
 
       Collection<SlickRelatedExercise> related = userExerciseDAO.getAllRelated();
 
-      Map<Integer, CommonExercise> idToEx = new HashMap<>();
-      for (CommonExercise ex : allExercises) {
-        idToEx.put(ex.getID(), ex);
-      }
+      logger.info("got " + related.size() + " related exercises;");
+
+      Map<Integer, CommonExercise> idToEx = getIDToExercise(allExercises);
 
       for (SlickRelatedExercise relatedExercise : related) {
-        CommonExercise root = idToEx.get(relatedExercise.id());
+        CommonExercise root    = idToEx.get(relatedExercise.id());
         CommonExercise context = idToEx.get(relatedExercise.contextexid());
         if (root != null && context != null) root.getMutable().addContextExercise(context);
       }
       logger.info("Read " + allExercises.size() + " exercises from database");
-      //  List<CommonExercise> exercises = getExercisesFromArray(getJSON());
       return allExercises;
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
     return Collections.emptyList();
+  }
+
+  private Map<Integer, CommonExercise> getIDToExercise(List<CommonExercise> allExercises) {
+    Map<Integer, CommonExercise> idToEx = new HashMap<>();
+    for (CommonExercise ex : allExercises) {
+      idToEx.put(ex.getID(), ex);
+    }
+    return idToEx;
   }
 }
