@@ -36,8 +36,8 @@ import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.annotation.AnnotationDAO;
 import mitll.langtest.server.database.custom.IUserListManager;
-import mitll.langtest.shared.MiniUser;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.user.MiniUser;
+import mitll.langtest.shared.user.User;
 import org.apache.log4j.Logger;
 
 import java.util.*;

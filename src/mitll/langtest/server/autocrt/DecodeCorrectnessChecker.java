@@ -37,7 +37,7 @@ import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.scoring.AlignDecode;
 import mitll.langtest.server.scoring.Scoring;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
-import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.log4j.Logger;
@@ -121,10 +121,10 @@ public class DecodeCorrectnessChecker {
    * Decode result is correct if all the tokens match (ignore case) any of the possibleSentences AND the score is
    * above the {@link #minPronScore} min score, typically in the 30s.
    * <p/>
-   * If you want to see what the decoder output was, that's in {@link mitll.langtest.shared.AudioAnswer#getDecodeOutput()}.
+   * If you want to see what the decoder output was, that's in {@link AudioAnswer#getDecodeOutput()}.
    * For instance if you wanted to show that for debugging purposes.
    * If you want to know whether the said the right word or not (which might have scored too low to be correct)
-   * see {@link mitll.langtest.shared.AudioAnswer#isSaidAnswer()}.
+   * see {@link AudioAnswer#isSaidAnswer()}.
    *
    * @param audioFile         to score against
    * @param possibleSentences any of these can match and we'd call this a correct response

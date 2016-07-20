@@ -37,7 +37,10 @@ import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.security.DominoSessionException;
+import mitll.langtest.server.database.security.UserSecurityManager;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.user.User;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletContext;
@@ -47,15 +50,15 @@ import java.io.File;
 public class MyRemoteServiceServlet extends RemoteServiceServlet {
   private static final Logger logger = Logger.getLogger(MyRemoteServiceServlet.class);
 
-  protected DatabaseImpl<CommonExercise> db;
+  protected DatabaseImpl db;
   protected ServerProperties serverProps;
 
-  private DatabaseImpl<CommonExercise> getDatabase() {
-    DatabaseImpl<CommonExercise> db = null;
+  private DatabaseImpl getDatabase() {
+    DatabaseImpl db = null;
 
     Object databaseReference = getServletContext().getAttribute(LangTestDatabaseImpl.DATABASE_REFERENCE);
     if (databaseReference != null) {
-      db = (DatabaseImpl<CommonExercise>) databaseReference;
+      db = (DatabaseImpl) databaseReference;
       // logger.debug("found existing database reference " + db + " under " +getServletContext());
     } else {
       logger.info("getDatabase : no existing db reference yet...");
@@ -64,7 +67,10 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet {
   }
 
   void findSharedDatabase() {
-    if (db == null) db = getDatabase();
+    if (db == null) {
+      db = getDatabase();
+      securityManager = new UserSecurityManager(db.getUserDAO());
+    }
   }
 
   /**
@@ -82,5 +88,19 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet {
     PathHelper pathHelper = new PathHelper(getServletContext());
     String configDir = pathHelper.getInstallPath() + File.separator + relativeConfigDir;
     serverProps = new ServerProperties(servletContext, configDir);
+  }
+
+  private UserSecurityManager securityManager;
+
+  protected int getProject() {
+    try {
+      User loggedInUser = securityManager.getLoggedInUser(getThreadLocalRequest());
+      if (loggedInUser == null) return -1;
+      int i = db.getUserProjectDAO().mostRecentByUser(loggedInUser.getId());
+      return i;
+    } catch (DominoSessionException e) {
+      logger.error("Got " + e,e);
+      return -1;
+    }
   }
 }

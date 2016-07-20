@@ -39,8 +39,7 @@ import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.flashcard.ControlState;
 import mitll.langtest.client.services.UserServiceAsync;
-import mitll.langtest.shared.AudioType;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.user.User;
 
 import java.util.Date;
 import java.util.logging.Logger;
@@ -404,7 +403,7 @@ public class UserManager {
 
   /**
    * @param user
-   * @see mitll.langtest.client.user.UserPassLogin#storeUser(mitll.langtest.shared.User)
+   * @see mitll.langtest.client.user.UserPassLogin#storeUser(User)
    */
   void storeUser(User user) {
     logger.info("storeUser : user now " + user);

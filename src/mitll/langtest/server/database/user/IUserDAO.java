@@ -34,13 +34,12 @@ package mitll.langtest.server.database.user;
 
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.IDAO;
-import mitll.langtest.shared.MiniUser;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.user.MiniUser;
+import mitll.langtest.shared.user.User;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public interface IUserDAO extends IDAO {
 
@@ -68,9 +67,11 @@ public interface IUserDAO extends IDAO {
 
   User getUser(String id, String passwordHash);
 
-  User getUserWithPass(String id, String passwordHash);
+  User getStrictUserWithPass(String id, String passwordHash);
 
   User getUserByID(String id);
+
+  User getByID(int id);
 
   User getUserWhere(int userid);
 

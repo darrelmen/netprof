@@ -35,8 +35,10 @@ package mitll.langtest.server;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.excel.EventDAOToExcel;
 import mitll.langtest.server.database.excel.ResultDAOToExcel;
-import mitll.langtest.shared.User;
+import mitll.langtest.server.database.security.DominoSessionException;
+import mitll.langtest.server.database.security.UserSecurityManager;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.user.User;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
@@ -71,6 +73,7 @@ public class DownloadServlet extends DatabaseServlet {
   private static final String FILE = "file";
   private static final String CONTEXT = "context";
   private static final String COMPRESSED_SUFFIX = "mp3";
+  UserSecurityManager securityManager;
 
   /**
    * This is getting complicated.
@@ -101,6 +104,7 @@ public class DownloadServlet extends DatabaseServlet {
 
     if (db != null) {
       try {
+        int project = getProject(request);
         String requestURI = request.getRequestURI();
         if (requestURI.toLowerCase().contains(AUDIO)) {
           String pathInfo = request.getPathInfo();
@@ -110,13 +114,13 @@ public class DownloadServlet extends DatabaseServlet {
 
           if (queryString == null) {
             setHeader(response, "allAudio.zip");
-            writeAllAudio(response);
+            writeAllAudio(response, project);
           } else if (queryString.startsWith(LIST)) {
             String[] split = queryString.split("list=");
             if (split.length == 2) {
               String listid = split[1];
               if (!listid.isEmpty()) {
-                writeUserList(response, db, listid);
+                writeUserList(response, db, listid, project);
               }
             }
           } else if (queryString.startsWith(FILE)) {
@@ -127,21 +131,21 @@ public class DownloadServlet extends DatabaseServlet {
 
             queryString = split1.length == 1 ? split1[0] : split1[1];
 
-            logger.debug("request " + requestCommand + " query " +queryString);
+            logger.debug("request " + requestCommand + " query " + queryString);
             if (requestCommand.contains(CONTEXT)) {
               Map<String, Collection<String>> typeToSection = getTypeToSelectionFromRequest(queryString);
-              setHeader(response, getZipFileName(db, typeToSection));
-              writeContextZip(response, typeToSection);
+              setHeader(response, getZipFileName(db, typeToSection, project));
+              writeContextZip(response, typeToSection, project);
             } else {
               Map<String, Collection<String>> typeToSection = getTypeToSelectionFromRequest(queryString);
-              setHeader(response, getZipFileName(db, typeToSection));
-              writeZip(response, typeToSection);
+              setHeader(response, getZipFileName(db, typeToSection, project));
+              writeZip(response, typeToSection, project);
             }
           }
         } else {
           logger.warn("file download request " + requestURI);
 
-          returnSpreadsheet(response, db, requestURI);
+          returnSpreadsheet(response, db, requestURI, project);
         }
       } catch (Exception e) {
         logger.error("Got " + e, e);
@@ -158,28 +162,29 @@ public class DownloadServlet extends DatabaseServlet {
   }
 
   /**
-   * @see #doGet
    * @param response
    * @param typeToSection
+   * @param projectid
+   * @see #doGet
    */
-  private void writeZip(HttpServletResponse response, Map<String, Collection<String>> typeToSection) {
+  private void writeZip(HttpServletResponse response, Map<String, Collection<String>> typeToSection, int projectid) {
     try {
-      getDatabase().writeZip(response.getOutputStream(), typeToSection);
+      getDatabase().writeZip(response.getOutputStream(), typeToSection, projectid);
     } catch (Exception e) {
       logger.error("couldn't write zip?", e);
     }
   }
 
-  private void writeContextZip(HttpServletResponse response, Map<String, Collection<String>> typeToSection) {
+  private void writeContextZip(HttpServletResponse response, Map<String, Collection<String>> typeToSection, int projectid) {
     try {
-      getDatabase().writeContextZip(response.getOutputStream(), typeToSection);
+      getDatabase().writeContextZip(response.getOutputStream(), typeToSection, projectid);
     } catch (Exception e) {
       logger.error("couldn't write zip?", e);
     }
   }
 
-  private String getZipFileName(DatabaseImpl db, Map<String, Collection<String>> typeToSection) {
-    String name = typeToSection.isEmpty() ? AUDIO : db.getPrefix(typeToSection);
+  private String getZipFileName(DatabaseImpl db, Map<String, Collection<String>> typeToSection, int projectid) {
+    String name = typeToSection.isEmpty() ? AUDIO : db.getPrefix(typeToSection, projectid);
     name = name.replaceAll("\\,", "_");
     name += ".zip";
     return db.getServerProps().getLanguage() + "_" + name;
@@ -203,7 +208,7 @@ public class DownloadServlet extends DatabaseServlet {
 
     // better be mp3 lying around - see ensureCompressedAudio
 
-    if (file.endsWith(".wav")) file = file.replaceAll(".wav",".mp3");
+    if (file.endsWith(".wav")) file = file.replaceAll(".wav", ".mp3");
 
     String exercise = split[1].split("=")[1];
     String useridString = split[2].split("=")[1];
@@ -232,9 +237,9 @@ public class DownloadServlet extends DatabaseServlet {
 
   /**
    * Return an attachment that looks like foreign_english_by_user.
-   * 
-   * @param db to talk to
-   * @param exercise id of the exercise
+   *
+   * @param db           to talk to
+   * @param exercise     id of the exercise
    * @param useridString missing is OK, although unexpected
    * @return name without spaces
    * @throws UnsupportedEncodingException
@@ -255,7 +260,7 @@ public class DownloadServlet extends DatabaseServlet {
     String userPart = getUserPart(db, Integer.parseInt(useridString));
 
     String fileName = foreignPart + englishPart + userPart;
-    fileName = fileName.replaceAll("\\.","");
+    fileName = fileName.replaceAll("\\.", "");
     fileName += "." + COMPRESSED_SUFFIX;
 
     //logger.debug("file is '" + fileName + "'");
@@ -266,17 +271,18 @@ public class DownloadServlet extends DatabaseServlet {
 
   private String getUserPart(DatabaseImpl db, int userid) {
     User userWhere = db.getUserDAO().getUserWhere(userid);
-    return userWhere != null ? (userWhere.getUserID().isEmpty() ? "":"_by_" + userWhere.getUserID()) : "";
+    return userWhere != null ? (userWhere.getUserID().isEmpty() ? "" : "_by_" + userWhere.getUserID()) : "";
   }
 
   /**
-   * @see #doGet
    * @param response
    * @param db
    * @param encodedFileName
    * @throws IOException
+   * @see #doGet
    */
-  private void returnSpreadsheet(HttpServletResponse response, DatabaseImpl<?> db, String encodedFileName) throws IOException {
+  private void returnSpreadsheet(HttpServletResponse response, DatabaseImpl db,
+                                 String encodedFileName, int projectid) throws IOException {
     response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     ServletOutputStream outputStream = response.getOutputStream();
     if (encodedFileName.toLowerCase().contains("users")) {
@@ -284,7 +290,7 @@ public class DownloadServlet extends DatabaseServlet {
       db.usersToXLSX(outputStream);
     } else if (encodedFileName.toLowerCase().contains("results")) {
       setResponseHeader(response, "results.xlsx");
-      new ResultDAOToExcel().writeExcelToStream(db.getMonitorResults(), db.getTypeOrder(), outputStream);
+      new ResultDAOToExcel().writeExcelToStream(db.getMonitorResults(), db.getTypeOrder(projectid), outputStream);
     } else if (encodedFileName.toLowerCase().contains("events")) {
       setResponseHeader(response, "events.xlsx");
       new EventDAOToExcel(db).toXLSX(db.getEventDAO().getAll(), outputStream);
@@ -298,24 +304,24 @@ public class DownloadServlet extends DatabaseServlet {
   }
 
   /**
-   * @see #doGet
    * @param response
+   * @see #doGet
    */
-  private void writeAllAudio(HttpServletResponse response) {
+  private void writeAllAudio(HttpServletResponse response, int projectid) {
     try {
-      getDatabase().writeZip(response.getOutputStream());
+      getDatabase().writeZip(response.getOutputStream(), projectid);
     } catch (Exception e) {
       logger.error("Got " + e, e);
     }
   }
 
   /**
-   * @see #doGet(HttpServletRequest, HttpServletResponse)
    * @param response
    * @param db
    * @param listid
+   * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
-  private void writeUserList(HttpServletResponse response, DatabaseImpl db, String listid) {
+  private void writeUserList(HttpServletResponse response, DatabaseImpl db, String listid, int projectid) {
     Integer id = null;
     try {
       id = Integer.parseInt(listid);
@@ -324,12 +330,12 @@ public class DownloadServlet extends DatabaseServlet {
     }
 
     try {
-      String name = id == null ? "unknown" : db.getUserListName(id);
+      String name = id == null ? "unknown" : db.getUserListName(id, projectid);
       name = name.replaceAll("\\,", "_").replaceAll(" ", "_");
       name += ".zip";
       setHeader(response, name);
 
-      db.writeZip(response.getOutputStream(), id == null ? -1 : id, new PathHelper(getServletContext()));
+      db.writeZip(response.getOutputStream(), id == null ? -1 : id, new PathHelper(getServletContext()), projectid);
     } catch (Exception e) {
       logger.error("couldn't write zip?", e);
     }
@@ -346,11 +352,24 @@ public class DownloadServlet extends DatabaseServlet {
     Object databaseReference = getServletContext().getAttribute(LangTestDatabaseImpl.DATABASE_REFERENCE);
     if (databaseReference != null) {
       db = (DatabaseImpl) databaseReference;
+      securityManager = new UserSecurityManager(db.getUserDAO());
       // logger.debug("found existing database reference " + db + " under " +getServletContext());
     } else {
       logger.error("huh? no existing db reference?");
     }
     return db;
+  }
+
+  private int getProject(HttpServletRequest request) {
+    try {
+      User loggedInUser = securityManager.getLoggedInUser(request);
+      if (loggedInUser == null) return -1;
+      int i = getDatabase().getUserProjectDAO().mostRecentByUser(loggedInUser.getId());
+      return i;
+    } catch (DominoSessionException e) {
+      logger.error("Got " + e, e);
+      return -1;
+    }
   }
 
   /**

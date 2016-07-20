@@ -41,7 +41,7 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.UnitChapterItemHelper;
-import mitll.langtest.shared.AudioType;
+import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.exercise.*;
 
