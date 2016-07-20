@@ -45,8 +45,10 @@ import com.google.gwt.user.cellview.client.TextHeader;
 import mitll.langtest.client.custom.dialog.EditItem;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.STATE;
+import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.sorter.ExerciseComparator;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
@@ -75,7 +77,9 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
    */
   public PagingContainer(ExerciseController controller, int verticalUnaccountedFor, boolean isRecorder) {
     super(controller);
-    sorter = new ExerciseComparator(controller.getStartupInfo().getTypeOrder());
+    ProjectStartupInfo startupInfo = controller.getStartupInfo();
+    Collection<String> typeOrder = startupInfo.getTypeOrder();
+    sorter = new ExerciseComparator(typeOrder);
     this.verticalUnaccountedFor = verticalUnaccountedFor;
     this.isRecorder = isRecorder;
     english = controller.getLanguage().equals(ENGLISH);
