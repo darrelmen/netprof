@@ -61,12 +61,12 @@ import mitll.langtest.server.database.userlist.*;
 import mitll.langtest.server.database.word.SlickWordDAO;
 import mitll.langtest.server.database.word.Word;
 import mitll.langtest.server.database.word.WordDAO;
-import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.*;
 import org.apache.log4j.Logger;
 
@@ -215,14 +215,14 @@ public class CopyToPostgres<T extends CommonShell> {
     Map<Integer, Integer> oldToNewUserList = slickUserListDAO.getOldToNew();
     copyUserExerciseListVisitor(db, oldToNewUser, oldToNewUserList, (SlickUserListExerciseVisitorDAO) db.getUserListManager().getVisitorDAO());
     //   copyUserExerciseListJoin(db, oldToNewUserList);
-    copyUserExListJoin(db, exToID);
+    copyUserExListJoin(db, exToID, projectID);
     return exToID;
   }
 
-  public void copyUserExListJoin(DatabaseImpl db, Map<String, Integer> exToInt) {
+  public void copyUserExListJoin(DatabaseImpl db, Map<String, Integer> exToInt, int projectid) {
     SlickUserListDAO slickUserListDAO = (SlickUserListDAO) db.getUserListManager().getUserListDAO();
     Map<Integer, Integer> oldToNewUserList = slickUserListDAO.getOldToNew();
-    copyUserExerciseListJoin(db, oldToNewUserList, exToInt);
+    copyUserExerciseListJoin(db, oldToNewUserList, exToInt, projectid);
   }
 
   public int createProjectIfNotExists(DatabaseImpl db) {
@@ -368,7 +368,7 @@ public class CopyToPostgres<T extends CommonShell> {
     long now = System.currentTimeMillis();
 
     if (missing > 0) {
-      logger.warn("had " + missing + "/" +audioAttributes.size() + " audio att due to missing ex fk : (" +missingExIDs.size()+
+      logger.warn("had " + missing + "/" + audioAttributes.size() + " audio att due to missing ex fk : (" + missingExIDs.size() +
           ") : " +
           "" + missingExIDs);
     }
@@ -402,14 +402,13 @@ public class CopyToPostgres<T extends CommonShell> {
         Integer realID = exToID.get(annotation.getOldExID());
         if (realID == null) {
           missing++;
-        }
-        else {
+        } else {
           annotation.setExerciseID(realID);
           bulk.add(annotationDAO.toSlick(annotation));
         }
       }
     }
-    if (missing>0)logger.warn("missing " + missing + " out of " +all.size());
+    if (missing > 0) logger.warn("missing " + missing + " out of " + all.size());
     annotationDAO.addBulk(bulk);
   }
 
@@ -676,7 +675,7 @@ public class CopyToPostgres<T extends CommonShell> {
       }
     }
     if (missing > 0) {
-      logger.warn("skipped " + missing + "/" + results.size()+
+      logger.warn("skipped " + missing + "/" + results.size() +
           "  results b/c of exercise id fk missing");
     }
     slickResultDAO.addBulk(bulk);
@@ -712,10 +711,10 @@ public class CopyToPostgres<T extends CommonShell> {
   }
 
   /**
-   * @see #copyToPostgres(DatabaseImpl)
    * @param db
    * @param oldToNewUser
    * @param exToID
+   * @see #copyToPostgres(DatabaseImpl)
    */
   private void copyRefResult(DatabaseImpl db, Map<Integer, Integer> oldToNewUser, Map<String, Integer> exToID) {
     SlickRefResultDAO dao = (SlickRefResultDAO) db.getRefResultDAO();

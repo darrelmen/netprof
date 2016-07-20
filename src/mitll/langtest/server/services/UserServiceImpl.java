@@ -237,12 +237,12 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     return userWhere;
   }
 
-  void setStartupInfo(User userWhere) {
+  private void setStartupInfo(User userWhere) {
     int i = db.getUserProjectDAO().mostRecentByUser(userWhere.getId());
     Project<CommonExercise> project = db.getProject(i);
     userWhere.setStartupInfo(
         new ProjectStartupInfo(db.getServerProps().getProperties(),
-            project.getTypeOrder(), project.getSectionHelper().getSectionNodes()));
+            project.getTypeOrder(), project.getSectionHelper().getSectionNodes(), project.getProject().id()));
   }
 
   /**

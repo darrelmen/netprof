@@ -69,8 +69,8 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
   }  // just for serialization
 
 
-  public UserExercise(int exid, int creator, String english) {
-    this(exid, ""+exid, creator, english, "", "");
+  public UserExercise(int exid, int creator, String english, int projectid) {
+    this(exid, ""+exid, creator, english, "", "", projectid);
   }
 
   /**
@@ -82,11 +82,12 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
    * @param english
    * @param foreignLanguage
    * @param transliteration
+   * @param projectid
    * @see mitll.langtest.client.custom.dialog.EditItem#createNewItem
    * @see mitll.langtest.client.custom.dialog.EditItem#getNewItem
    */
   public UserExercise(int uniqueID, String exerciseID, int creator, String english, String foreignLanguage,
-                      String transliteration) {
+                      String transliteration, int projectid) {
     super(exerciseID, uniqueID, projectid);
     this.creator = creator;
     //  this.uniqueID = uniqueID;
@@ -105,14 +106,15 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
    * @param transliteration
    * @param isOverride
    * @param modifiedTimestamp
+   * @param projectid
    * @see UserExerciseDAO#getUserExercise
    */
   public UserExercise(int uniqueID, String exerciseID, int creator, String english, String foreignLanguage,
                       String transliteration,
                       boolean isOverride,
-                      Map<String, String> unitToValue, long modifiedTimestamp
-  ) {
-    this(uniqueID, exerciseID, creator, english, foreignLanguage, transliteration);
+                      Map<String, String> unitToValue, long modifiedTimestamp,
+                      int projectid) {
+    this(uniqueID, exerciseID, creator, english, foreignLanguage, transliteration, projectid);
     setUnitToValue(unitToValue);
     this.isOverride = isOverride;
     this.modifiedTimestamp = modifiedTimestamp;
@@ -125,7 +127,7 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
    * @see FlexListLayout#getFactory(PagingExerciseList)
    */
   public <T extends CommonExercise> UserExercise(T exercise, int creatorID) {
-    super(exercise.getOldID(), exercise.getID(), projectid);
+    super(exercise.getOldID(), exercise.getID(), exercise.getProjectID());
     this.isPredef = true;
     this.english = exercise.getEnglish();
     this.foreignLanguage = exercise.getForeignLanguage();

@@ -235,7 +235,9 @@ public class EditItem {
    *
    * @return
    */
-  private CommonExercise getNewItem() { return new UserExercise(NEW_EXERCISE_ID, userManager.getUser(), NEW_ITEM); }
+  private CommonExercise getNewItem() {
+    return new UserExercise(NEW_EXERCISE_ID, userManager.getUser(), NEW_ITEM, controller.getStartupInfo().getProjectid());
+  }
 
   private void setFactory(final PagingExerciseList<CommonShell, CommonExercise> exerciseList,
                           final UserList<CommonShell> ul,
@@ -310,7 +312,8 @@ public class EditItem {
    */
   private UserExercise createNewItem(int userid, String listName) {
     long now = System.currentTimeMillis();
-    return new UserExercise(-1, UserExercise.CUSTOM_PREFIX + "_" + listName + "_" + userid + "_" + now, userid, "", "", "");
+    return new UserExercise(-1, UserExercise.CUSTOM_PREFIX + "_" + listName + "_" + userid + "_" + now, userid, "", "", "",
+        controller.getStartupInfo().getProjectid());
   }
 
   /**
@@ -387,7 +390,7 @@ public class EditItem {
    */
   private boolean didICreateThisItem(CommonExercise exercise) {
     boolean isMine = exercise.getCreator() == controller.getUser();
-  //  logger.info("for " + exercise + " vs " + controller.getUser() + " is Mine " + isMine);
+    //  logger.info("for " + exercise + " vs " + controller.getUser() + " is Mine " + isMine);
     return isMine;
   }
 
