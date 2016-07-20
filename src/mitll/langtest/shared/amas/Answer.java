@@ -33,6 +33,7 @@
 package mitll.langtest.shared.amas;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.shared.answer.AudioAnswer;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -59,14 +60,14 @@ public class Answer implements IsSerializable {
   public void setScore(double score) { this.score = score; }
 
   /**
-   * @see mitll.langtest.client.recorder.RecordButtonPanel#receivedAudioAnswer(mitll.langtest.shared.AudioAnswer, com.google.gwt.user.client.ui.Panel)
+   * @see mitll.langtest.client.recorder.RecordButtonPanel#receivedAudioAnswer(AudioAnswer, com.google.gwt.user.client.ui.Panel)
    * @return score from hydec (see nnscore)
    */
   double getScore() { return score; }
 
   /**
-   * @see mitll.langtest.client.recorder.RecordButtonPanel#receivedAudioAnswer(mitll.langtest.shared.AudioAnswer, com.google.gwt.user.client.ui.Panel)
-   * @see mitll.langtest.server.autocrt.AutoCRT#getAutoCRTDecodeOutput(String, int, java.io.File, mitll.langtest.shared.AudioAnswer)
+   * @see mitll.langtest.client.recorder.RecordButtonPanel#receivedAudioAnswer(AudioAnswer, com.google.gwt.user.client.ui.Panel)
+   * @see mitll.langtest.server.autocrt.AutoCRT#getAutoCRTDecodeOutput(String, int, java.io.File, AudioAnswer)
    * @return
    */
   boolean isCorrect() { return correct; }

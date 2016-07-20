@@ -61,7 +61,7 @@ import mitll.langtest.server.database.userlist.*;
 import mitll.langtest.server.database.word.SlickWordDAO;
 import mitll.langtest.server.database.word.Word;
 import mitll.langtest.server.database.word.WordDAO;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.AudioAttribute;
@@ -107,12 +107,12 @@ public class CopyToPostgres<T extends CommonShell> {
         serverProps.getDatabasePassword());
   }
 
-  private static DatabaseImpl<CommonExercise> getDatabaseLight(String config, boolean inTest) {
+  private static DatabaseImpl getDatabaseLight(String config, boolean inTest) {
     File file = getConfigFile(config, inTest);
     String parent = file.getParentFile().getAbsolutePath();
     ServerProperties serverProps = new ServerProperties(parent, file.getName());
     serverProps.setH2(true);
-    DatabaseImpl<CommonExercise> database = getDatabaseVeryLight(config, inTest);
+    DatabaseImpl database = getDatabaseVeryLight(config, inTest);
     String installPath = getInstallPath(inTest);
     database.setInstallPath(installPath, parent + File.separator + database.getServerProps().getLessonPlan(),
         serverProps.getMediaDir());
@@ -127,7 +127,7 @@ public class CopyToPostgres<T extends CommonShell> {
     return inTest ? "war" : ".";
   }
 
-  private static DatabaseImpl<CommonExercise> getDatabaseVeryLight(String config, boolean inTest) {
+  private static DatabaseImpl getDatabaseVeryLight(String config, boolean inTest) {
     File file = getConfigFile(config, inTest);
     String name = file.getName();
     String parent = file.getParentFile().getAbsolutePath();
@@ -135,11 +135,11 @@ public class CopyToPostgres<T extends CommonShell> {
     logger.info("path is " + parent);
     ServerProperties serverProps = new ServerProperties(parent, name);
     serverProps.setH2(true);
-    return new DatabaseImpl<>(parent, name, serverProps.getH2Database(), serverProps,
+    return new DatabaseImpl(parent, name, serverProps.getH2Database(), serverProps,
         new PathHelper(getInstallPath(inTest)), false, null, true);
   }
 
-  public void copyToPostgres(DatabaseImpl<T> db) {
+  public void copyToPostgres(DatabaseImpl db) {
     int projectID = createProjectIfNotExists(db);
 
     logger.info("project is " + projectID);
@@ -197,14 +197,14 @@ public class CopyToPostgres<T extends CommonShell> {
     }
   }
 
-  public Map<String, Integer> copyOnlyUserExercises(DatabaseImpl<T> db) {
+  public Map<String, Integer> copyOnlyUserExercises(DatabaseImpl db) {
     int projectID = createProjectIfNotExists(db);
     SlickUserDAOImpl slickUserDAO = (SlickUserDAOImpl) db.getUserDAO();
     Map<Integer, Integer> oldToNewUser = copyUsers(db, slickUserDAO);
     return copyUserAndPredefExercisesAndLists(db, projectID, oldToNewUser);
   }
 
-  private Map<String, Integer> copyUserAndPredefExercisesAndLists(DatabaseImpl<T> db,
+  private Map<String, Integer> copyUserAndPredefExercisesAndLists(DatabaseImpl db,
                                                                   int projectID,
                                                                   Map<Integer, Integer> oldToNewUser) {
     Map<String, Integer> exToID = copyUserAndPredefExercises(db, oldToNewUser, projectID);
@@ -241,14 +241,15 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param db
    * @param projectDAO
    */
-  private int createProject(DatabaseImpl<?> db, IProjectDAO projectDAO) {
-    SlickUserDAOImpl slickUserDAO = (SlickUserDAOImpl) db.getUserDAO();
+  private int createProject(DatabaseImpl db, IProjectDAO projectDAO) {
 
-    Iterator<String> iterator = db.getTypeOrder().iterator();
+    Iterator<String> iterator = db.getTypeOrder(-1).iterator();
     String firstType = iterator.hasNext() ? iterator.next() : "";
     String secondType = iterator.hasNext() ? iterator.next() : "";
 
     String language = db.getLanguage();
+
+    SlickUserDAOImpl slickUserDAO = (SlickUserDAOImpl) db.getUserDAO();
     int byName = projectDAO.add(slickUserDAO.getBeforeLoginUser(), language, language, firstType, secondType);
     Properties props = db.getServerProps().getProps();
 
@@ -339,7 +340,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param oldToNewUser
    * @param exToID
    */
-  private void copyAudio(DatabaseImpl<T> db,
+  private void copyAudio(DatabaseImpl db,
                          Map<Integer, Integer> oldToNewUser,
                          Map<String, Integer> exToID) {
     SlickAudioDAO slickAudioDAO = (SlickAudioDAO) db.getAudioDAO();
@@ -477,7 +478,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param oldToNewUserList
    */
   private void copyUserExerciseListJoin(DatabaseImpl db, Map<Integer, Integer> oldToNewUserList,
-                                        Map<String, Integer> exToInt) {
+                                        Map<String, Integer> exToInt, int projectid) {
     //if (true) {
     IUserListManager userListManager = db.getUserListManager();
     IUserListExerciseJoinDAO dao = userListManager.getUserListExerciseJoinDAO();
@@ -499,7 +500,7 @@ public class CopyToPostgres<T extends CommonShell> {
         else customOrPredefExercise = db.getCustomOrPredefExercise(id);
 //          logger.info("Adding user exercise join : " +join.userlistid + " adding " + exerciseID + " : " +customOrPredefExercise);
         if (customOrPredefExercise == null) {
-          logger.error("can't find " + exerciseID + " in " + db.getExercises().size() + " exercises");
+          logger.error("can't find " + exerciseID + " in " + db.getExercises(projectid).size() + " exercises");
         } else {
           slickUserListExerciseJoinDAO.addPair(userListID, /*exerciseID,*/ customOrPredefExercise.getID());
         }
@@ -573,12 +574,12 @@ public class CopyToPostgres<T extends CommonShell> {
    *
    * @param db
    * @param oldToNewUser
-   * @param projectID
+   * @param projectid
    * @see #copyUserAndPredefExercisesAndLists
    */
-  private Map<String, Integer> copyUserAndPredefExercises(DatabaseImpl<T> db,
+  private Map<String, Integer> copyUserAndPredefExercises(DatabaseImpl db,
                                                           Map<Integer, Integer> oldToNewUser,
-                                                          int projectID) {
+                                                          int projectid) {
     //if (USER_EXERCISE) {
     SlickUserExerciseDAO slickUEDAO = (SlickUserExerciseDAO) db.getUserExerciseDAO();
 
@@ -587,20 +588,20 @@ public class CopyToPostgres<T extends CommonShell> {
 //    if (slickUEDAO.isProjectEmpty(projectID)) {
     int importUser = ((SlickUserDAOImpl) db.getUserDAO()).getImportUser();
     {
-      Collection<CommonExercise> exercises = db.getExercises();
+      Collection<CommonExercise> exercises = db.getExercises(projectid);
 
       List<SlickExercise> bulk = new ArrayList<>();
       logger.info("copying  " + exercises.size() + " exercises");
       for (CommonExercise ex : exercises) {
         //     bulk.add(slickUEDAO.toSlick(ex, false, projectID, true, slickUserDAO.getImportUser(), false));
-        bulk.add(slickUEDAO.toSlick(ex, false, projectID, true, importUser, false));
+        bulk.add(slickUEDAO.toSlick(ex, false, projectid, true, importUser, false));
         //   exToInt.put(ex.getOldID(), id);
       }
       logger.info("add bulk  " + exercises.size() + " exercises");
       slickUEDAO.addBulk(bulk);
 
-      exToInt = slickUEDAO.getOldToNew(projectID);
-      logger.info("predef old->new for " + projectID + " : " + exercises.size() + " exercises");
+      exToInt = slickUEDAO.getOldToNew(projectid);
+      logger.info("predef old->new for " + projectid + " : " + exercises.size() + " exercises");
 
       int n = 0;
       int ct = 0;
@@ -611,7 +612,7 @@ public class CopyToPostgres<T extends CommonShell> {
         int id = exToInt.get(ex.getOldID());
         for (CommonExercise context : ex.getDirectlyRelated()) {
           context.getMutable().setOldID("c" + id);
-          int contextid = slickUEDAO.insert(slickUEDAO.toSlick(context, false, projectID, true, importUser, true));
+          int contextid = slickUEDAO.insert(slickUEDAO.toSlick(context, false, projectid, true, importUser, true));
           slickUEDAO.insertRelated(id, contextid);
           ct++;
           if (ct % 100 == 0) logger.debug("inserted " + ct);
@@ -625,7 +626,7 @@ public class CopyToPostgres<T extends CommonShell> {
     try {
       int c = 0;
       UserExerciseDAO ueDAO = new UserExerciseDAO(db);
-      ueDAO.setExerciseDAO(db.getExerciseDAO());
+      ueDAO.setExerciseDAO(db.getExerciseDAO(projectid));
       Collection<UserExercise> allUserExercises = ueDAO.getAllUserExercises();
       logger.info("copying  " + allUserExercises.size() + " user exercises");
 
@@ -635,14 +636,14 @@ public class CopyToPostgres<T extends CommonShell> {
           if (c++ < 50) logger.error("user exercise : no user " + result.getCreator());
         } else {
           result.setCreator(userID);
-          bulk.add(slickUEDAO.toSlick(result, projectID));
+          bulk.add(slickUEDAO.toSlick(result, projectid));
         }
       }
     } catch (SQLException e) {
       logger.error("Got " + e, e);
     }
     slickUEDAO.addBulk(bulk);
-    exToInt = slickUEDAO.getOldToNew(projectID);
+    exToInt = slickUEDAO.getOldToNew(projectid);
 
     logger.info("finished copying exercises");
     return exToInt;

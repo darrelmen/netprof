@@ -49,12 +49,9 @@ import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.AudioType;
-import mitll.langtest.shared.ExerciseListWrapper;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.ExerciseListRequest;
-import mitll.langtest.shared.exercise.HasID;
-import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.answer.AudioType;
+import mitll.langtest.shared.exercise.ExerciseListWrapper;
+import mitll.langtest.shared.exercise.*;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -382,7 +379,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   }
 
   /**
-   * @see mitll.langtest.client.list.ExerciseList.SetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
+   * @see mitll.langtest.client.list.ExerciseList.SetExercisesCallback#onSuccess(ExerciseListWrapper)
    */
   protected void gotEmptyExerciseList() {
   }
@@ -399,7 +396,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * Previously we would first ask the server for the exercise list and then ask for the first exercise on
    * the list, making the user/client wait for both calls to finish before displaying the first item.
    * <p>
-   * Now the first exercise is in the {@link mitll.langtest.shared.ExerciseListWrapper#getFirstExercise()} returned
+   * Now the first exercise is in the {@link ExerciseListWrapper#getFirstExercise()} returned
    * with the exercise list on the first call.
    *
    * @param exercises   - exercise list
@@ -407,7 +404,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @param searchIfAny
    * @param exerciseID
    * @paramx firstExercise - the initial exercise returned from getExercises
-   * @see ExerciseList.SetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
+   * @see ExerciseList.SetExercisesCallback#onSuccess(ExerciseListWrapper)
    * @see #rememberAndLoadFirst
    */
   public void rememberAndLoadFirst(List<T> exercises,
@@ -880,7 +877,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   /**
    * @param listener
-   * @see mitll.langtest.client.list.ExerciseList.SetExercisesCallbackWithID#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
+   * @see mitll.langtest.client.list.ExerciseList.SetExercisesCallbackWithID#onSuccess(ExerciseListWrapper)
    * @see #rememberAndLoadFirst
    */
   @Override

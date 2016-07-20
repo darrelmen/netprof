@@ -73,9 +73,10 @@ import mitll.langtest.client.sound.SoundManagerStatic;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserNotification;
-import mitll.langtest.shared.ImageResponse;
+import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.StartupInfo;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.project.ProjectStartupInfo;
+import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.exercise.Shell;
 
 import java.util.*;
@@ -169,15 +170,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private UserManager userManager;
   private FlashRecordPanelHeadless flashRecordPanel;
 
-//  private AudioType audioType = AudioType.UNSET;
-
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
-  private final UserServiceAsync userService = GWT.create(UserService.class);
+  private final UserServiceAsync userService  = GWT.create(UserService.class);
   private final BrowserCheck browserCheck = new BrowserCheck();
   private SoundManagerStatic soundManager;
   private PropertyHandler props;
 
   private StartupInfo startupInfo;
+  private ProjectStartupInfo projectStartupInfo;
 
   private EventLogger buttonFactory;
   private final KeyPressHelper keyPressHelper = new KeyPressHelper(false, true);
@@ -564,12 +564,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   @Override
-  public StartupInfo getStartupInfo() {
-    return startupInfo;
+  public ProjectStartupInfo getStartupInfo() {
+    return projectStartupInfo;
   }
 
   public Collection<String> getTypeOrder() {
-    return startupInfo.getTypeOrder();
+    return projectStartupInfo.getTypeOrder();
   }
 
   /**
@@ -579,7 +579,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    *
    * @param user
    * @see #makeFlashContainer
-   * @see UserManager#gotNewUser(mitll.langtest.shared.User)
+   * @see UserManager#gotNewUser(User)
    * @see UserManager#storeUser
    */
   public void gotUser(User user) {

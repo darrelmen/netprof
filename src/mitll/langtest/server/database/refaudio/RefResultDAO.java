@@ -39,7 +39,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.JsonSupport;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.decoder.RefResultDecoder;
-import mitll.langtest.shared.AudioType;
+import mitll.langtest.shared.answer.AudioType;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 

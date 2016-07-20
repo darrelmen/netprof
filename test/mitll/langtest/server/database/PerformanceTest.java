@@ -1,10 +1,8 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
-import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.database.analysis.IAnalysis;
 import mitll.langtest.server.database.connection.H2Connection;
-import mitll.langtest.server.database.result.Result;
 import mitll.langtest.shared.analysis.*;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;

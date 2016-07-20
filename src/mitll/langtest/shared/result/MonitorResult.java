@@ -30,26 +30,17 @@
  *
  */
 
-package mitll.langtest.shared;
+package mitll.langtest.shared.result;
 
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.server.database.result.ResultDAO;
+import mitll.langtest.shared.answer.AudioType;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.*;
 
-/**
- * So egyptian monitoring needs to show :
- * user id/oldExID/unit/chapter/exercise text/audio/time/valid/duration/correct/score
- * <p>
- * Search on user, oldExID,unit,chapter,exer
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 9/24/14.
- */
 public class MonitorResult implements IsSerializable {
   private static final String ASC = "ASC";
   public static final String USERID = "userid";

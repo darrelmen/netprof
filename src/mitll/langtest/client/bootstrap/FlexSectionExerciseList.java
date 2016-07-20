@@ -580,7 +580,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
   }
 
   /**
-   * @seex HistoryExerciseList.MySetExercisesCallback#onSuccess(mitll.langtest.shared.ExerciseListWrapper)
+   * @seex HistoryExerciseList.MySetExercisesCallback#onSuccess(mitll.langtest.shared.exercise.ExerciseListWrapper)
    */
   protected void gotEmptyExerciseList() {
     showEmptySelection();

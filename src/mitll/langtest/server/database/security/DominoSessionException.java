@@ -30,57 +30,29 @@
  *
  */
 
-package mitll.langtest.shared;
+package mitll.langtest.server.database.security;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+/**
+ * DominoSessionException
+ *
+ * @author Raymond Budd <a href=mailto:raymond.budd@ll.mit.edu>raymond.budd@ll.mit.edu</a>
+ * @since Nov 23, 2013 12:21:48 PM
+ */
+public class DominoSessionException extends Exception {
+	private static final long serialVersionUID = 1103725499652557690L;
 
-public enum AudioType implements IsSerializable {
-  UNSET("unset"),
+	public DominoSessionException() { super(); }
 
-  REGULAR("regular"),
-  SLOW("slow"),
-  //  FAST_AND_SLOW("fastAndSlow"),  // really old legacy thing
-  PRACTICE("practice"),  // or avp or flashcard
-  // FLASHCARD("flashcard"),
-  LEARN("learn"),
-  TEXT("text"),
+	public DominoSessionException(String message) {
+		super(message);
+	}
 
-  REVIEW("review"),      // TODO: gah - try to remove this
-  RECORDER("recorder"),  // TODO : somehow user role gets expressed with this
+	public DominoSessionException(Throwable cause) {
+		super(cause);
+	}
 
-  CONTEXT_REGULAR("context=regular", "context", "regular"),
-  CONTEXT_SLOW("context=slow", "context", "slow");
-
-  private final String text;
-  private final String type;
-  private final String speed;
-
-  AudioType(final String text) {
-    this.text = text;
-    type = "";
-    speed = "";
-  }
-
-  AudioType(final String text, String type, String speed) {
-    this.text = text;
-    this.type = type;
-    this.speed = speed;
-  }
-
-  @Override
-  public String toString() {
-    return text;
-  }
-
-  public String getType() {
-    return type;
-  }
-
-  public String getSpeed() {
-    return speed;
-  }
-
-  public boolean isContext() {
-    return this == CONTEXT_REGULAR || this == CONTEXT_SLOW;
-  }
+	public DominoSessionException(String message, Throwable cause) {
+		super(message, cause);
+	}
+	
 }
