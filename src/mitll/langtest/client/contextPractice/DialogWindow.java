@@ -54,7 +54,7 @@ import mitll.langtest.client.gauge.SimpleColumnChart;
 import mitll.langtest.client.scoring.SimplePostAudioRecordButton;
 import mitll.langtest.client.sound.AudioControl;
 import mitll.langtest.client.sound.PlayAudioPanel;
-import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.ContextPractice;
 
 import java.util.*;

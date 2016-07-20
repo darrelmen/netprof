@@ -47,13 +47,17 @@ import mitll.langtest.client.result.ResultManager;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.ScoringAudioPanel;
 import mitll.langtest.shared.*;
+import mitll.langtest.shared.answer.Answer;
+import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.flashcard.QuizCorrectAndScore;
+import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.PretestScore;
+import mitll.langtest.shared.user.MiniUser;
 
 import java.util.Collection;
 import java.util.List;

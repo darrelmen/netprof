@@ -51,7 +51,7 @@ import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.custom.RecordingProgressTable;
 import mitll.langtest.client.services.MonitoringService;
 import mitll.langtest.client.services.MonitoringServiceAsync;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.monitoring.Session;
 
 import java.util.*;

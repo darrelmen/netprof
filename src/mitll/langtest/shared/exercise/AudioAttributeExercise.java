@@ -32,7 +32,7 @@
 
 package mitll.langtest.shared.exercise;
 
-import mitll.langtest.shared.MiniUser;
+import mitll.langtest.shared.user.MiniUser;
 import net.sf.json.JSONObject;
 
 import java.util.Collection;

@@ -37,9 +37,9 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.server.rest.RestUserManagement;
 import mitll.langtest.server.sorter.ExerciseSorter;
-import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.AudioType;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.answer.AudioType;
+import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.AudioContext;
@@ -419,7 +419,7 @@ public class ScoreServlet extends DatabaseServlet {
       }
 
       //logger.debug("chapterHistory " + user + " selection " + selection);
-      toReturn = db.getJsonRefResult(selection);
+      toReturn = db.getJsonRefResult(selection, 1);
     }
     return toReturn;
   }
@@ -618,6 +618,7 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
+   * TODO : need to pass in the project id.
    * Install path, etc. should have been done by now
    * @return
    */

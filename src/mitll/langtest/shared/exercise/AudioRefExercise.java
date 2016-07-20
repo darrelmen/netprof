@@ -32,7 +32,7 @@
 
 package mitll.langtest.shared.exercise;
 
-import mitll.langtest.shared.MiniUser;
+import mitll.langtest.shared.user.MiniUser;
 
 import java.util.Collection;
 import java.util.List;

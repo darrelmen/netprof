@@ -37,8 +37,8 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
 import mitll.langtest.client.sound.PlayAudioPanel;
-import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.AudioType;
+import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.answer.AudioType;
 
 /**
 * Tells playAudioPanel to be enabled/disabled in response to recording states
@@ -57,8 +57,8 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
   private final AudioType audioType;
 
   /**
-   * @see RecordAudioPanel#makePostAudioRecordButton(mitll.langtest.shared.AudioType, String)
-   * @see RecordAudioPanel#makePostAudioRecordButton(mitll.langtest.shared.AudioType, String)
+   * @see RecordAudioPanel#makePostAudioRecordButton(AudioType, String)
+   * @see RecordAudioPanel#makePostAudioRecordButton(AudioType, String)
    * @param exerciseID
    * @param controller
    * @param widgets

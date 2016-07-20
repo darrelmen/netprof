@@ -62,8 +62,7 @@ import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.instrumentation.EventRegistration;
-import mitll.langtest.shared.AudioType;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.user.User;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -422,7 +421,7 @@ public class UserPassLogin extends UserDialog {
           eventRegistration.logEvent(user.box, "UserNameBox", "N/A", "left username field '" + user.getText() + "'");
 
           //    logger.info("checking makeSignInUserName " + user.getText());
-          service.userExists(user.getText(), "", new AsyncCallback<User>() {
+          service.userExists(user.getText(), "", 1, new AsyncCallback<User>() {
             @Override
             public void onFailure(Throwable caught) {
 
@@ -1009,7 +1008,7 @@ public class UserPassLogin extends UserDialog {
     logger.info("gotLogin : user is '" + user + "' pass '" + pass + "' or '" + hashedPass + "'");
 
     signIn.setEnabled(false);
-    service.userExists(user, hashedPass, new AsyncCallback<User>() {
+    service.userExists(user, hashedPass, 1, new AsyncCallback<User>() {
       @Override
       public void onFailure(Throwable caught) {
         signIn.setEnabled(true);
@@ -1086,7 +1085,7 @@ public class UserPassLogin extends UserDialog {
    * recorder/not a recorder choice.
    *
    * @param result
-   * @see #foundExistingUser(mitll.langtest.shared.User, boolean, String)
+   * @see #foundExistingUser(User, boolean, String)
    * @see #makeSignInUserName(com.github.gwtbootstrap.client.ui.Fieldset)
    */
   private void copyInfoToSignUp(User result) {
@@ -1107,8 +1106,8 @@ public class UserPassLogin extends UserDialog {
 
   /**
    * @param result
-   * @see #foundExistingUser(mitll.langtest.shared.User, boolean, String)
-   * @see #gotSignUp(String, String, String, mitll.langtest.shared.User.Kind)
+   * @see #foundExistingUser(User, boolean, String)
+   * @see #gotSignUp(String, String, String, User.Kind)
    */
   private void storeUser(User result) {
     //logger.info("UserPassLogin.storeUser - " + result);

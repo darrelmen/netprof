@@ -40,10 +40,10 @@ import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.AudioType;
-import mitll.langtest.shared.ImageResponse;
+import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.StartupInfo;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.project.ProjectStartupInfo;
+import mitll.langtest.shared.user.User;
 
 import java.util.Collection;
 
@@ -67,7 +67,7 @@ public interface ExerciseController extends EventRegistration {
   String getBrowserInfo();
 
   int getUser();
- // boolean isTeacher();
+
   User getCurrent();
 
   void startRecording();
@@ -82,7 +82,7 @@ public interface ExerciseController extends EventRegistration {
   int getRecordTimeout();
 
   boolean isLogClientMessages();
-//  AudioType getAudioType();
+
   Collection<User.Permission> getPermissions();
 
   boolean showCompleted();
@@ -98,7 +98,7 @@ public interface ExerciseController extends EventRegistration {
   String logException(Throwable throwable);
   void logMessageOnServer(String message, String prefix);
 
-  StartupInfo getStartupInfo();
+  ProjectStartupInfo getStartupInfo();
   Collection<String> getTypeOrder();
 
   void addKeyListener(KeyPressHelper.KeyListener listener);
