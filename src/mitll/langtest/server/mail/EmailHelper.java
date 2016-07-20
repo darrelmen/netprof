@@ -37,7 +37,7 @@ import com.google.gwt.util.tools.shared.StringUtils;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.user.IUserDAO;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.user.User;
 import org.apache.log4j.Logger;
 
 import java.util.Collections;
@@ -277,7 +277,7 @@ public class EmailHelper {
    * @param url
    * @param email
    * @param userID1
-   * @seex #enableCDEmail(String, String, mitll.langtest.shared.User)
+   * @seex #enableCDEmail(String, String, mitll.langtest.shared.user.User)
    * @see #enableCDUser(String, String, String)
    */
   private void sendUserApproval(String url, String email, String userID1) {
@@ -303,7 +303,7 @@ public class EmailHelper {
    * @param user
    * @param mailSupport
    * @see mitll.langtest.server.LangTestDatabaseImpl#addUser
-   * @see mitll.langtest.client.user.UserPassLogin#gotSignUp(String, String, String, mitll.langtest.shared.User.Kind)
+   * @see mitll.langtest.client.user.UserPassLogin#gotSignUp(String, String, String, User.Kind)
    */
   public void addContentDeveloper(String url, String email, User user, MailSupport mailSupport) {
     url = trimURL(url);

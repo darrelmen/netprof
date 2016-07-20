@@ -36,7 +36,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.mail.EmailList;
 import mitll.langtest.server.mail.MailSupport;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.log4j.Logger;
 

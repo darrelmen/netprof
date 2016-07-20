@@ -43,7 +43,7 @@ import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.ExerciseListWrapper;
+import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
 import mitll.langtest.shared.exercise.Shell;

@@ -32,6 +32,10 @@
 
 package mitll.langtest.server.database.exercise;
 
+import mitll.langtest.server.database.JsonSupport;
+import mitll.langtest.server.database.analysis.SlickAnalysis;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.npdata.dao.SlickProject;
 
 import java.util.Arrays;
@@ -40,14 +44,57 @@ import java.util.List;
 /**
  * Has everything associated with a project
  */
-public class Project {
-  SlickProject project;
-  List<String> typeOrder;
+public class Project<T extends CommonShell> {
+  private SlickProject project;
+  private List<String> typeOrder;
+  private ExerciseDAO<T> exerciseDAO;
+  private JsonSupport jsonSupport;
+  private SlickAnalysis analysis;
 
   public Project(SlickProject project) {
     this.project = project;
     this.typeOrder = Arrays.asList(project.first(), project.second());
   }
+  public Project(ExerciseDAO<T> exerciseDAO) {
+    this.exerciseDAO = exerciseDAO;
+  }
 
 
+  public SlickProject getProject() {
+    return project;
+  }
+
+  public List<String> getTypeOrder() {
+    return typeOrder;
+  }
+
+  public void setExerciseDAO(ExerciseDAO<T> exerciseDAO) {
+    this.exerciseDAO = exerciseDAO;
+  }
+
+  public ExerciseDAO<T> getExerciseDAO() {
+    return exerciseDAO;
+  }
+
+  public List<T> getRawExercises() { return exerciseDAO.getRawExercises(); }
+
+  public SectionHelper<T> getSectionHelper() {
+    return exerciseDAO.getSectionHelper();
+  }
+
+  public void setJsonSupport(JsonSupport jsonSupport) {
+    this.jsonSupport = jsonSupport;
+  }
+
+  public JsonSupport getJsonSupport() {
+    return jsonSupport;
+  }
+
+  public void setAnalysis(SlickAnalysis analysis) {
+    this.analysis = analysis;
+  }
+
+  public SlickAnalysis getAnalysis() {
+    return analysis;
+  }
 }

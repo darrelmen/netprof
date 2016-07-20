@@ -45,7 +45,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.shared.MiniUser;
+import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.AudioAttributeExercise;
 import mitll.langtest.shared.exercise.CommonShell;

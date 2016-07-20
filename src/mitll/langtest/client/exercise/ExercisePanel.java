@@ -38,6 +38,7 @@ import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.Shell;
@@ -296,7 +297,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
 
   /**
    * @param answer
-   * @see mitll.langtest.client.exercise.WaveformPostAudioRecordButton#useResult(mitll.langtest.shared.AudioAnswer)
+   * @see mitll.langtest.client.exercise.WaveformPostAudioRecordButton#useResult(AudioAnswer)
    */
   public void recordCompleted(Widget answer) {
     completed.add(answer);
