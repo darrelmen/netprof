@@ -30,24 +30,14 @@
  *
  */
 
-package mitll.langtest.shared;
+package mitll.langtest.shared.user;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.server.database.user.UserDAO;
+import mitll.langtest.shared.project.ProjectStartupInfo;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
-/**
- * Object representing a user.
- *
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 5/17/12
- * Time: 3:54 PM
- * To change this template use File | Settings | File Templates.
- */
 public class User extends MiniUser {
   private static final String NOT_SET = "NOT_SET";
   private int experience;
@@ -59,7 +49,7 @@ public class User extends MiniUser {
   private int numResults;
   private float rate = 0.0f;
   private boolean complete;
-  private float completePercent;
+  private float completePercent = 0.0f;
   private Kind userKind;
   private String nativeLang;
   private String dialect;
@@ -68,11 +58,20 @@ public class User extends MiniUser {
   private String cdKey;
   private long timestamp;
   private Collection<Permission> permissions;
+  private ProjectStartupInfo startupInfo;
 
   public boolean isStudent() { return getUserKind().equals(Kind.STUDENT);  }
   public boolean isTeacher() { return getUserKind().equals(Kind.TEACHER);  }
   public boolean isCD() {
     return getUserKind().equals(Kind.CONTENT_DEVELOPER);
+  }
+
+  public void setStartupInfo(ProjectStartupInfo startupInfo) {
+    this.startupInfo = startupInfo;
+  }
+
+  public ProjectStartupInfo getStartupInfo() {
+    return startupInfo;
   }
 
   public enum Kind implements IsSerializable {UNSET, STUDENT, TEACHER, CONTENT_DEVELOPER, ANONYMOUS}

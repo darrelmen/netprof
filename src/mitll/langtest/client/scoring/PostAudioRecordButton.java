@@ -40,8 +40,8 @@ import mitll.langtest.client.PopupHelper;
 import mitll.langtest.client.WavCallback;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.RecordButton;
-import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.AudioType;
+import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.scoring.AudioContext;
 
 import java.util.logging.Logger;

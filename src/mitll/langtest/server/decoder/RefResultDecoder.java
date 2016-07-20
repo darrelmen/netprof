@@ -38,7 +38,7 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.shared.MiniUser;
+import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;

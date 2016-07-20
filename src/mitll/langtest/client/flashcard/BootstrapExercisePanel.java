@@ -54,7 +54,7 @@ import mitll.langtest.client.recorder.FlashcardRecordButton;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.client.sound.SoundFeedback;
-import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 
@@ -429,7 +429,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
   /**
    *
    * @param score
-   * @see #receivedAudioAnswer(mitll.langtest.shared.AudioAnswer)
+   * @see #receivedAudioAnswer(AudioAnswer)
    */
   private void showCorrectFeedback(double score, String heard) {
     showPronScoreFeedback(score);
@@ -599,7 +599,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
    * advance to next should be separate action.
    * @param correct
    * @param feedback make delay dependent on how long the text is
-   * @see #receivedAudioAnswer(mitll.langtest.shared.AudioAnswer)
+   * @see #receivedAudioAnswer(AudioAnswer)
    */
   void nextAfterDelay(boolean correct, String feedback) {
     if (NEXT_ON_BAD_AUDIO) {

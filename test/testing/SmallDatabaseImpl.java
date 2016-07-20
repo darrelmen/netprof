@@ -77,7 +77,7 @@ public class SmallDatabaseImpl implements Database {
   }
 
   @Override
-  public Collection<String> getTypeOrder() {
+  public Collection<String> getTypeOrder(int projectid) {
     return null;
   }
 

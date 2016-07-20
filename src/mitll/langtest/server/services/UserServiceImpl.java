@@ -34,16 +34,38 @@ package mitll.langtest.server.services;
 
 import mitll.langtest.client.services.UserService;
 import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.security.DominoSessionException;
+import mitll.langtest.server.database.security.UserSecurityManager;
 import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.project.ProjectStartupInfo;
+import mitll.langtest.shared.user.LoginResult;
+import mitll.langtest.shared.user.User;
 import org.apache.log4j.Logger;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import java.util.Date;
+import java.util.Enumeration;
 import java.util.List;
 
 @SuppressWarnings("serial")
 public class UserServiceImpl extends MyRemoteServiceServlet implements UserService {
   private static final Logger logger = Logger.getLogger(UserServiceImpl.class);
+  /**
+   * The key to get/set the id of the user stored in the session
+   */
+  private static final String USER_SESSION_ATT = UserSecurityManager.USER_SESSION_ATT;
+
+  /**
+   * The key to get/set the request attribute that holds the
+   * user looked up by the security filter.
+   */
+  private static final String USER_REQUEST_ATT = UserSecurityManager.USER_REQUEST_ATT;
+
+  UserSecurityManager securityManager;
 
   @Override
   public void init() {
@@ -53,18 +75,97 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   }
 
   /**
+   * TODO record additional session info in database.
+   *
+   * @param userId
+   * @param attemptedPassword
+   * @return
+   */
+  public LoginResult loginUser(String userId, String attemptedPassword) {
+    HttpServletRequest request = getThreadLocalRequest();
+    String remoteAddr = request.getHeader("X-FORWARDED-FOR");
+    if (remoteAddr == null || remoteAddr.isEmpty()) {
+      remoteAddr = request.getRemoteAddr();
+    }
+    String userAgent = request.getHeader("User-Agent");
+
+    // ensure a session is created.
+    HttpSession session = getThreadLocalRequest().getSession(true);
+    logger.info("Login session " + session.getId() + " isNew=" + session.isNew()
+        //    + " host is secondary " + properties.isSecondaryHost()
+    );
+    User loggedInUser = db.getUserDAO().getStrictUserWithPass(userId, attemptedPassword);//, remoteAddr, userAgent, session.getId());
+
+    String resultStr = (loggedInUser != null) ? " was successful" : " failed";
+    logger.info(">Session Activity> User login for id " + userId + resultStr +
+        ". IP: " + remoteAddr + ", UA: " + userAgent);
+    if (loggedInUser != null) {
+      session.setAttribute(USER_SESSION_ATT, loggedInUser.getId());
+      StringBuilder atts = new StringBuilder("Atts: [ ");
+      Enumeration<String> attEnum = session.getAttributeNames();
+      while (attEnum.hasMoreElements()) {
+        atts.append(attEnum.nextElement() + ", ");
+      }
+      atts.append("]");
+//      logger.info("acct detail {}", loggedInUser.getAcctDetail());
+      logger.info("Adding user to " + session.getId() +
+          " lookup is " + getThreadLocalRequest().getSession(false).getAttribute(USER_SESSION_ATT) +
+          ", session.isNew=" + getThreadLocalRequest().getSession(false).isNew() +
+          ", created=" + getThreadLocalRequest().getSession(false).getCreationTime() +
+          ", " + atts.toString());
+      return new LoginResult(loggedInUser, new Date(System.currentTimeMillis()));
+    } else {
+      loggedInUser = db.getUserDAO().getUser(userId, attemptedPassword);//, remoteAddr, userAgent, session.getId());
+      if (loggedInUser == null) {
+        return new LoginResult(LoginResult.ResultType.Failed);
+      } else {
+        return new LoginResult(loggedInUser, LoginResult.ResultType.BadPassword);
+      }
+    }
+  }
+
+  public void logoutUser(String userId) {
+    securityManager.logoutUser(getThreadLocalRequest(), userId, false);
+  }
+
+  public User getLoggedInUser() {
+    try {
+      return securityManager.getLoggedInUser(getThreadLocalRequest());
+    } catch (DominoSessionException e) {
+      logger.error("got " + e, e);
+    }
+    return null;
+  }
+
+  /**
    * Check other sites to see if the user exists somewhere else, and if so go ahead and use that person
    * here.
    *
    * @param login
    * @param passwordH
+   * @param projectid - chosen by user in login screen or at signup
    * @return
    * @see mitll.langtest.client.user.UserPassLogin#gotLogin
    * @see mitll.langtest.client.user.UserPassLogin#makeSignInUserName(com.github.gwtbootstrap.client.ui.Fieldset)
    */
-  public User userExists(String login, String passwordH) {
+  public User userExists(String login, String passwordH, int projectid) {
     findSharedDatabase();
-    return db.getUserManagement().userExists(getThreadLocalRequest(), login, passwordH, serverProps);
+    if (passwordH.isEmpty()) {
+      return db.getUserDAO().getUser(login, passwordH);
+    } else {
+      // return db.getUserManagement().userExists(getThreadLocalRequest(), login, passwordH, serverProps);
+      LoginResult loginResult = loginUser(login, passwordH);
+      User loggedInUser = loginResult.getLoggedInUser();
+      if (loginResult.getResultType() == LoginResult.ResultType.Success) {
+        db.getUserProjectDAO().add(loggedInUser.getId(), projectid);
+        setStartupInfo(loggedInUser);
+      }
+      return loggedInUser;
+    }
+  }
+
+  public void logout(String login) {
+    securityManager.logoutUser(getThreadLocalRequest(), login, true);
   }
 
   /**
@@ -82,7 +183,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @param isCD
    * @param device
    * @return null if existing user
-   * @see mitll.langtest.client.user.UserPassLogin#gotSignUp(String, String, String, mitll.langtest.shared.User.Kind)
+   * @see mitll.langtest.client.user.UserPassLogin#gotSignUp(String, String, String, User.Kind)
    */
   @Override
   public User addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, String email,
@@ -95,12 +196,12 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
       logger.debug("user " + userID + "/" + user +
           " wishes to be a content developer. Asking for approval.");
       getEmailHelper().addContentDeveloper(url, email, user, mailSupport);
-      getEmailHelper().sendConfirmationEmail(email,userID, mailSupport);
+      getEmailHelper().sendConfirmationEmail(email, userID, mailSupport);
     } else if (user == null) {
       logger.debug("no user found for id " + userID);
     } else {
       logger.debug("user " + userID + "/" + user + " is enabled.");
-      getEmailHelper().sendConfirmationEmail(email,userID, mailSupport);
+      getEmailHelper().sendConfirmationEmail(email, userID, mailSupport);
     }
     return user;
   }
@@ -130,7 +231,18 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   @Override
   public User getUserBy(int id) {
     findSharedDatabase();
-    return db.getUserDAO().getUserWhere(id);
+    User userWhere = db.getUserDAO().getUserWhere(id);
+    setStartupInfo(userWhere);
+
+    return userWhere;
+  }
+
+  void setStartupInfo(User userWhere) {
+    int i = db.getUserProjectDAO().mostRecentByUser(userWhere.getId());
+    Project<CommonExercise> project = db.getProject(i);
+    userWhere.setStartupInfo(
+        new ProjectStartupInfo(db.getServerProps().getProperties(),
+            project.getTypeOrder(), project.getSectionHelper().getSectionNodes()));
   }
 
   /**

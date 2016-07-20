@@ -42,7 +42,7 @@ import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.Timer;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.user.BasicDialog;
-import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.answer.AudioAnswer;
 
 import java.util.logging.Logger;
 

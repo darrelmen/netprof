@@ -32,19 +32,23 @@
 
 package mitll.langtest.server.filter;
 
+import mitll.langtest.server.database.security.UserSecurityManager;
+import org.apache.logging.log4j.ThreadContext;
+
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * ForceNocacheFilter: Force the GWT nocache files to not cache.
- *
- *
+ * <p>
+ * <p>
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
-
  * @author Raymond Budd <a href=mailto:raymond.budd@ll.mit.edu>raymond.budd@ll.mit.edu</a>
  * @since Feb 6, 2014 8:44:28 AM
  */
@@ -52,18 +56,35 @@ public class ForceNocacheFilter implements Filter {
   @Override
   public void doFilter(final ServletRequest request,
                        final ServletResponse response, final FilterChain chain)
-    throws IOException, ServletException {
+      throws IOException, ServletException {
 
     final HttpServletRequest httpRequest = (HttpServletRequest) request;
     final String requestUri = httpRequest.getRequestURI();
 
-/*    String remoteAddr = httpRequest.getHeader("X-FORWARDED-FOR");
+    HttpSession session = httpRequest.getSession(false);
+    String sessionId = "no-session";
+    String loginId = "no-user";
+    if (session != null) {
+      sessionId = session.getId();
+      Object loginO = session.getAttribute(UserSecurityManager.USER_SESSION_ATT);
+      if (loginO != null) {
+        loginId = loginO.toString();
+      }
+    } else {
+      sessionId = httpRequest.getRequestedSessionId() + " - req-but-missing";
+    }
+
+    String remoteAddr = httpRequest.getHeader("X-FORWARDED-FOR");
     if (remoteAddr == null || remoteAddr.isEmpty()) {
       remoteAddr = request.getRemoteAddr();
     }
 
     // Add details to the thread context for use in logging.
-    ThreadContext.put("ipAddress", remoteAddr);*/
+    ThreadContext.put("sessionId", sessionId);
+    ThreadContext.put("ipAddress", remoteAddr);
+    ThreadContext.put("requestId", UUID.randomUUID().toString()); // Add the fishtag;
+    ThreadContext.put("loginId", loginId);
+    ThreadContext.put("hostName", request.getServerName());
 
     if (requestUri.contains(".nocache.")) {
       Date now = new Date();
@@ -76,11 +97,14 @@ public class ForceNocacheFilter implements Filter {
     }
 
     chain.doFilter(request, response);
+    ThreadContext.clearAll();
   }
 
   @Override
-  public void destroy() {}
+  public void destroy() {
+  }
 
   @Override
-  public void init(FilterConfig arg0) throws ServletException {}
+  public void init(FilterConfig arg0) throws ServletException {
+  }
 }

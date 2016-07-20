@@ -155,7 +155,7 @@ public class ReviewedDAO extends DAO implements IReviewedDAO {
   /**
    * @param exerciseID
    * @see mitll.langtest.server.database.custom.UserListManager#removeReviewed(String)
-   * @see mitll.langtest.server.database.DatabaseImpl#deleteItem(int)
+   * @see mitll.langtest.server.database.DatabaseImpl#deleteItem(int, int)
    */
   @Override
   public void remove(int exerciseID) {

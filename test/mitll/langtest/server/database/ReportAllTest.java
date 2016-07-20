@@ -1,15 +1,10 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
-import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.connection.H2Connection;
-import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.CommonExercise;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
-import java.io.File;
 import java.util.*;
 
 /**

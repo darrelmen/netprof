@@ -35,7 +35,6 @@ package mitll.langtest.server.database.postgres;
 import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.custom.IUserListManager;
-import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
