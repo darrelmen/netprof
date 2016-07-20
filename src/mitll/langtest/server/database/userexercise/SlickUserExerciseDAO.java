@@ -165,7 +165,7 @@ public class SlickUserExerciseDAO
   private UserExercise fromSlick(SlickExercise slick) {
     Map<String, String> unitToValue = new HashMap<>();
     Iterator<String> iterator = getTypeOrder().iterator();
-    String first = iterator.next();
+    String first  = iterator.next();
     String second = iterator.hasNext() ? iterator.next() : "";
     unitToValue.put(first, slick.unit());
     if (!second.isEmpty())
@@ -199,13 +199,25 @@ public class SlickUserExerciseDAO
                                        Collection<String> typeOrder,
                                        SectionHelper<CommonExercise> sectionHelper) {
     Map<String, String> unitToValue = new HashMap<>();
-    // List<String> typeOrder = getTypeOrder();
     Iterator<String> iterator = typeOrder.iterator();
     String first = iterator.next();
     String second = iterator.hasNext() ? iterator.next() : "";
-    unitToValue.put(first, slick.unit());
-    if (!second.isEmpty())
-      unitToValue.put(second, slick.lesson());
+    boolean firstEmpty = slick.unit().isEmpty();
+    if (firstEmpty && slick.ispredef()) {
+      unitToValue.put(first, "1");
+      logger.warn("got empty " + first + " for " + slick);
+
+    }
+    else {
+      unitToValue.put(first, slick.unit());
+    }
+    if (!second.isEmpty()) {
+      if (slick.ispredef()) {
+        boolean empty = slick.lesson().trim().isEmpty();
+        unitToValue.put(second, empty ? "1" : slick.lesson());
+        if (empty) logger.warn("got empty " + second + " for " + slick);
+      }
+    }
 
     Exercise exercise = new Exercise(
         slick.id(),

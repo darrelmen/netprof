@@ -190,7 +190,7 @@ public class UserManager {
    * @see #storeUser
    */
   private void gotNewUser(User result) {
-//    logger.info("UserManager.gotNewUser " + result);
+    logger.info("UserManager.gotNewUser " + result);
     userNotification.getPermissions().clear();
     if (result != null) {
       //boolean isCD = result.getUserKind() == User.Kind.CONTENT_DEVELOPER;
@@ -206,7 +206,7 @@ public class UserManager {
       }
 
       this.current = result;
-      //logger.info("\t is male " + isMale + " is CD " + isCD + " is teacher " + isTeacher);
+      logger.info("\t is male " + current);
 
       userNotification.gotUser(result);
     }
