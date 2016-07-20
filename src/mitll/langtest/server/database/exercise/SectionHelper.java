@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.exercise;
 
+import mitll.langtest.server.database.Database;
 import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.exercise.Shell;
 import org.apache.log4j.Logger;
@@ -62,7 +63,7 @@ public class SectionHelper<T extends Shell> {
 
   /**
    * @return
-   * @see mitll.langtest.server.database.DatabaseImpl#getTypeOrder
+   * @see Database#getTypeOrder
    */
   public List<String> getTypeOrder() {
     //logger.info("getTypeOrder " + predefinedTypeOrder);
@@ -292,7 +293,7 @@ public class SectionHelper<T extends Shell> {
 
   /**
    * @param exercise
-   * @see mitll.langtest.server.database.DatabaseImpl#deleteItem(int)
+   * @see mitll.langtest.server.database.DatabaseImpl#deleteItem(int, int)
    * @see BaseExerciseDAO#removeExercises()
    */
   public boolean removeExercise(T exercise) {
@@ -321,7 +322,7 @@ public class SectionHelper<T extends Shell> {
    * @param type
    * @param unitName
    * @return
-   * @see mitll.langtest.server.database.DatabaseImpl#deleteItem(int)
+   * @see mitll.langtest.server.database.DatabaseImpl#deleteItem(int, int)
    */
   private boolean removeExerciseToLesson(T exercise, String type, String unitName) {
     Map<String, Lesson<T>> unit = getSectionToLesson(type);

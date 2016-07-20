@@ -34,8 +34,8 @@ package mitll.langtest.server.database.user;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.shared.MiniUser;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.user.MiniUser;
+import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickMiniUser;
 import mitll.npdata.dao.SlickUser;
 import mitll.npdata.dao.DBConnection;
@@ -134,15 +134,19 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }
 
   @Override
-  public User getUserWithPass(String id, String passwordHash) {
+  public User getStrictUserWithPass(String id, String passwordHash) {
     Seq<SlickUser> userByIDAndPass = dao.getUserByIDAndPass(id, passwordHash);
     return convertOrNull(userByIDAndPass);
   }
 
   @Override
   public User getUserByID(String id) {
-    Seq<SlickUser> byUserID = dao.getByUserID(id);
-    return convertOrNull(byUserID);
+    return convertOrNull(dao.getByUserID(id));
+  }
+
+  public User getByID(int id) {
+    return convertOrNull(dao.byID(id));
+
   }
 
   private User convertOrNull(Seq<SlickUser> userByIDAndPass) {

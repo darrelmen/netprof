@@ -49,9 +49,10 @@ import mitll.langtest.server.autocrt.AutoCRT;
 import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.custom.IUserListManager;
-import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.result.Result;
+import mitll.langtest.server.database.security.DominoSessionException;
+import mitll.langtest.server.database.security.UserSecurityManager;
 import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.decoder.RefResultDecoder;
 import mitll.langtest.server.mail.MailSupport;
@@ -60,15 +61,25 @@ import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.server.trie.TextEntityValue;
 import mitll.langtest.server.trie.Trie;
-import mitll.langtest.shared.*;
+import mitll.langtest.shared.ContextPractice;
+import mitll.langtest.shared.ResultAndTotal;
+import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
+import mitll.langtest.shared.answer.Answer;
+import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.flashcard.QuizCorrectAndScore;
+import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.instrumentation.Event;
+import mitll.langtest.shared.project.ProjectInfo;
+import mitll.langtest.shared.result.MonitorResult;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.PretestScore;
+import mitll.langtest.shared.user.User;
+import mitll.npdata.dao.SlickProject;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 
@@ -112,12 +123,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   private static final boolean WARN_MISSING_FILE = true;
 
-  private DatabaseImpl<CommonExercise> db;
+  private DatabaseImpl db;
 
   /**
    * Put inside a Project
    */
-  @Deprecated  AudioFileHelper audioFileHelper;
+  @Deprecated
+  AudioFileHelper audioFileHelper;
   private String relativeConfigDir;
   private String configDir;
   private ServerProperties serverProps;
@@ -133,12 +145,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * Put inside a Project
    */
- @Deprecated  private ExerciseTrie fullTrie = null;
+  @Deprecated
+  private ExerciseTrie fullTrie = null;
   private ExerciseTrie<AmasExerciseImpl> amasFullTrie = null;
 
-  List<Project> projects = new ArrayList<>();
+//  List<Project> projects = new ArrayList<>();
 
   private static final boolean DEBUG = true;
+  private UserSecurityManager securityManager;
 
   /**
    * @param request
@@ -284,7 +298,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         " config " + relativeConfigDir + " request " + request);
 
     try {
-      UserList userListByID = request.getUserListID() != -1 ? db.getUserListByID(request.getUserListID()) : null;
+      UserList userListByID = request.getUserListID() != -1 ? db.getUserListByID(request.getUserListID(), getProject()) : null;
 
       if (request.getTypeToSelection().isEmpty()) {   // no unit-chapter filtering
         // get initial exercise set, either from a user list or predefined
@@ -337,12 +351,19 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return exercises;
   }
 
+  /**
+   * TODO : slow?
+   * @param role
+   * @param commonExercises
+   * @param <T>
+   */
   private <T extends CommonShell> void sortExercises(String role, List<T> commonExercises) {
-    new ExerciseSorter(db.getTypeOrder()).getSortedByUnitThenAlpha(commonExercises,
+    new ExerciseSorter(db.getTypeOrder(getProject())).getSortedByUnitThenAlpha(commonExercises,
         role.equals(AudioType.RECORDER.toString()));
   }
 
-  private <T extends CommonShell> Collection<T> getExercisesForSearch(String prefix, int userID, Collection<T> exercises, boolean predefExercises) {
+  private <T extends CommonShell> Collection<T> getExercisesForSearch(String prefix, int userID, Collection<T> exercises,
+                                                                      boolean predefExercises) {
     ExerciseTrie<T> fullTrie = this.fullTrie;
     return getExercisesForSearchWithTrie(prefix, userID, exercises, predefExercises, fullTrie);
   }
@@ -441,11 +462,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         List<CommonExercise> copy = new ArrayList<>();
         Set<Integer> seen = new HashSet<>();
         for (CommonExercise exercise : exercises) {
-         // String trim = exercise.getID().trim();
+          // String trim = exercise.getID().trim();
 
           if (seen.contains(exercise.getID())) logger.warn("saw " + exercise.getID() + " " + exercise + " again!");
           if (hasContext(exercise)) {
-            seen.add(exercise.getID() );
+            seen.add(exercise.getID());
             copy.add(exercise);
           }
         }
@@ -625,8 +646,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
                                                                                          Collection<CommonExercise> exercisesForState
   ) {
     String prefix = request.getPrefix();
-    int userID    = request.getUserID();
-    String role   = request.getRole();
+    int userID = request.getUserID();
+    String role = request.getRole();
     boolean onlyExamples = request.isOnlyExamples();
     boolean incorrectFirst = request.isIncorrectFirstOrder();
 
@@ -788,8 +809,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     } catch (NumberFormatException e) {
       logger.warn("can't parse " + exid);
     }
-    return getExercise(exid1,userID,isFlashcardReq);
+    return getExercise(exid1, userID, isFlashcardReq);
   }
+
   /**
    * Joins with annotation data when doing QC.
    *
@@ -938,14 +960,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * XCalled from the client:
+   * Called from the client:
    *
    * @return
    * @see mitll.langtest.client.list.ListInterface#getExercises
    */
   private Collection<CommonExercise> getExercises() {
     long then = System.currentTimeMillis();
-    Collection<CommonExercise> exercises = db.getExercises();
+    Collection<CommonExercise> exercises = getExercisesForUser();
     long now = System.currentTimeMillis();
     if (now - then > 200) {
       logger.info("getExercises took " + (now - then) + " millis to get the raw exercise list for " + getLanguage());
@@ -963,6 +985,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return exercises;
   }
 
+  private Collection<CommonExercise> getExercisesForUser() {
+    return db.getExercises(getProject());
+  }
+
   /**
    * @param <T>
    * @see #getExercises()
@@ -971,7 +997,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     logger.info("db " + db);
     logger.info("audioFileHelper " + audioFileHelper);
     SmallVocabDecoder smallVocabDecoder = audioFileHelper.getSmallVocabDecoder();
-    fullTrie = new ExerciseTrie<CommonExercise>(db.getExercises(), getLanguage(), smallVocabDecoder);
+    fullTrie = new ExerciseTrie<CommonExercise>(getExercisesForUser(), getLanguage(), smallVocabDecoder);
   }
 
   public ContextPractice getContextPractice() {
@@ -1130,7 +1156,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public StartupInfo getStartupInfo() {
-    return new StartupInfo(serverProps.getProperties(), db.getTypeOrder(), db.getSectionNodes());
+    List<ProjectInfo> projectInfos = new ArrayList<>();
+    for (SlickProject project : db.getProjectDAO().getAll())
+      projectInfos.add(new ProjectInfo(project.language(), project.id()));
+
+    return new StartupInfo(serverProps.getProperties(), projectInfos);//, db.getTypeOrder(projectid), db.getSectionNodes());
   }
 
   /**
@@ -1170,7 +1200,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
             width, height,
             true,  // make transcript images with colored segments
             false, // false = do alignment
-            serverProps.useScoreCache(), ""+exerciseID, result, serverProps.usePhoneToDisplay(), false);
+            serverProps.useScoreCache(), "" + exerciseID, result, serverProps.usePhoneToDisplay(), false);
       }
     } catch (Exception e) {
       logger.error("Got " + e, e);
@@ -1232,7 +1262,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     boolean usePhoneToDisplay1 = usePhoneToDisplay || serverProps.usePhoneToDisplay();
 
     PretestScore asrScoreForAudio = audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg,
-        false, serverProps.useScoreCache(), ""+exerciseID, cachedResult, usePhoneToDisplay1, false);
+        false, serverProps.useScoreCache(), "" + exerciseID, cachedResult, usePhoneToDisplay1, false);
 
     long timeToRunHydec = System.currentTimeMillis() - then;
 
@@ -1341,7 +1371,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @seex ReviewEditableExercise#confirmThenDeleteItem
    */
   public boolean deleteItem(int id) {
-    boolean b = db.deleteItem(id);
+    boolean b = db.deleteItem(id, getProject());
     if (b) {
       // force rebuild of full trie
       buildExerciseTrie();
@@ -1370,8 +1400,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * TODO : how to get per project?
-   * @see mitll.langtest.client.instrumentation.EventTable#showDialog(LangTestDatabaseAsync)
+   *
    * @return
+   * @see mitll.langtest.client.instrumentation.EventTable#showDialog(LangTestDatabaseAsync)
    */
   public List<Event> getEvents() {
     //String language = getLanguage();
@@ -1433,7 +1464,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       }
 */
 
-      db.getExerciseDAO().addOverlay(byID);
+      db.getExerciseDAO(getProject()).addOverlay(byID);
 
 /*      CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(exid);
       String adrr3 = Integer.toHexString(customOrPredefExercise.hashCode());
@@ -1532,7 +1563,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     Trie<MonitorResult> trie;
 
-    for (String type : db.getTypeOrder()) {
+    for (String type : db.getTypeOrder(projectid)) {
       if (unitToValue.containsKey(type)) {
 
         // logger.debug("getResults making trie for " + type);
@@ -1605,7 +1636,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     Collection<String> matches = new TreeSet<>();
     Trie<MonitorResult> trie;
 
-    for (String type : db.getTypeOrder()) {
+    for (String type : db.getTypeOrder(projectid)) {
       if (unitToValue.containsKey(type)) {
 
         //    logger.debug("getResultAlternatives making trie for " + type);
@@ -1697,7 +1728,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     //logger.debug("text searching over " + results.size());
     for (MonitorResult result : results) {
       trie.addEntryToTrie(new ResultWrapper(result.getForeignText(), result));
-      trie.addEntryToTrie(new ResultWrapper(""+result.getExID(), result));
+      trie.addEntryToTrie(new ResultWrapper("" + result.getExID(), result));
     }
     trie.endMakingNodes();
 
@@ -1713,7 +1744,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     if (isNumber) {
       for (MonitorResult result : matchesLC) {
-        matches.add(""+result.getExID());
+        matches.add("" + result.getExID());
       }
     } else {
       for (MonitorResult result : matchesLC) {
@@ -1848,7 +1879,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     if (!audioAnswer.isValid() && audioAnswer.getDurationInMillis() == 0) {
       logger.warn("huh? got zero length recording " + user + " " + exerciseID);
-      logEvent("audioRecording", "writeAudioFile", ""+exerciseID, "Writing audio - got zero duration!", user, "unknown", device);
+      logEvent("audioRecording", "writeAudioFile", "" + exerciseID, "Writing audio - got zero duration!", user, "unknown", device);
     } else {
       ensureCompressedEquivalent(user, exercise1, audioAnswer);
     }
@@ -2004,7 +2035,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
                                               long latestResultID,
                                               Map<String, Collection<String>> typeToSection, long userListID) {
     //logger.debug("getUserHistoryForList " + userid + " and " + ids + " type to section " + typeToSection);
-    UserList<CommonShell> userListByID = userListID != -1 ? db.getUserListByID(userListID) : null;
+    UserList<CommonShell> userListByID = userListID != -1 ? db.getUserListByID(userListID, getProject()) : null;
     List<Integer> allIDs = new ArrayList<>();
     Map<Integer, CollationKey> idToKey = new HashMap<>();
 
@@ -2027,7 +2058,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   private void populateCollatorMap(List<Integer> allIDs, Map<Integer, CollationKey> idToKey, Collator collator,
                                    CommonShell exercise) {
-    allIDs.add( exercise.getID());
+    allIDs.add(exercise.getID());
     CollationKey collationKey = collator.getCollationKey(exercise.getForeignLanguage());
     idToKey.put(exercise.getID(), collationKey);
   }
@@ -2131,6 +2162,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     audioConversion = new AudioConversion(serverProps);
     db = makeDatabaseImpl(serverProps.getH2Database());
     shareDB(servletContext);
+    securityManager = new UserSecurityManager(db.getUserDAO());
 //    shareLoadTesting(servletContext);
   }
 
@@ -2172,7 +2204,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   private DatabaseImpl makeDatabaseImpl(String h2DatabaseFile) {
     //logger.debug("word pairs " +  serverProps.isWordPairs() + " language " + serverProps.getLanguage() + " config dir " + relativeConfigDir);
-    return new DatabaseImpl<CommonExercise>(configDir, relativeConfigDir, h2DatabaseFile, serverProps, pathHelper, true, this, false);
+    return new DatabaseImpl(configDir, relativeConfigDir, h2DatabaseFile, serverProps, pathHelper, true, this, false);
   }
 
   /**
@@ -2197,6 +2229,17 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     // db.setDependencies(mediaDir, installPath);
   }
 
+  private int getProject() {
+    try {
+      User loggedInUser = securityManager.getLoggedInUser(getThreadLocalRequest());
+      if (loggedInUser == null) return -1;
+      int i = db.getUserProjectDAO().mostRecentByUser(loggedInUser.getId());
+      return i;
+    } catch (DominoSessionException e) {
+      logger.error("Got " + e,e);
+      return -1;
+    }
+  }
   private String getLessonPlan() {
     return serverProps.getLessonPlan() == null ? null : configDir + File.separator + serverProps.getLessonPlan();
   }

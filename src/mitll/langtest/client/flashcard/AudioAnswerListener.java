@@ -32,7 +32,7 @@
 
 package mitll.langtest.client.flashcard;
 
-import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.answer.AudioAnswer;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory

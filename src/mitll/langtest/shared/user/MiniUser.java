@@ -30,19 +30,11 @@
  *
  */
 
-package mitll.langtest.shared;
+package mitll.langtest.shared.user;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.server.database.user.UserDAO;
 
-/**
- * Much of the time the UI doesn't need to know a lot about a user so just send the little it needs.
- *
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 4/9/2014.
- */
 public class MiniUser implements IsSerializable, Comparable<MiniUser> {
   private int id;
   private int age;

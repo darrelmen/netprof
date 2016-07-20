@@ -56,6 +56,7 @@ import java.util.Collection;
  */
 public interface ExerciseDAO<T extends CommonShell> extends SimpleExerciseDAO<T> {
   /**
+   * @Deprecated - do we still need this with domino content management?
    * @param userExercise
    * @return
    * @see mitll.langtest.server.database.DatabaseImpl#editItem
@@ -71,7 +72,7 @@ public interface ExerciseDAO<T extends CommonShell> extends SimpleExerciseDAO<T>
   /**
    * @param id
    * @return
-   * @see DatabaseImpl#deleteItem(int)
+   * @see DatabaseImpl#deleteItem(int, int)
    */
   boolean remove(int id);
 
@@ -87,7 +88,7 @@ public interface ExerciseDAO<T extends CommonShell> extends SimpleExerciseDAO<T>
 
   /**
    * @param all
-   * @see DatabaseImpl#getExerciseIDToRefAudio()
+   * @see DatabaseImpl#getExerciseIDToRefAudio(int)
    */
   void attachAudio(Collection<CommonExercise> all);
 }

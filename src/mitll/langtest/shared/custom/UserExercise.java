@@ -87,7 +87,7 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
    */
   public UserExercise(int uniqueID, String exerciseID, int creator, String english, String foreignLanguage,
                       String transliteration) {
-    super(exerciseID, uniqueID);
+    super(exerciseID, uniqueID, projectid);
     this.creator = creator;
     //  this.uniqueID = uniqueID;
     this.english = english;
@@ -125,7 +125,7 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
    * @see FlexListLayout#getFactory(PagingExerciseList)
    */
   public <T extends CommonExercise> UserExercise(T exercise, int creatorID) {
-    super(exercise.getOldID(), exercise.getID());
+    super(exercise.getOldID(), exercise.getID(), projectid);
     this.isPredef = true;
     this.english = exercise.getEnglish();
     this.foreignLanguage = exercise.getForeignLanguage();
@@ -172,7 +172,7 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
    * @see UserExerciseDAO#add
    */
   public void setID(int uniqueID) {
-    this.realID = uniqueID;
+    this.id = uniqueID;
   }
 
 /*

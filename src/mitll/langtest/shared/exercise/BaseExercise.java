@@ -44,8 +44,8 @@ import java.util.Map;
  * @since 1/5/16.
  */
 public class BaseExercise implements IsSerializable, Shell {
-  @Deprecated protected String id;
-  protected int realID;
+  @Deprecated protected String oldid;
+  protected int id;
 
   /**
    * TODO : why do we need to carry this around?
@@ -57,19 +57,19 @@ public class BaseExercise implements IsSerializable, Shell {
   protected BaseExercise() {
   }
 
-  protected BaseExercise(String id, int realID) {
+  protected BaseExercise(String oldid, int id) {
+    this.oldid = oldid;
     this.id = id;
-    this.realID = realID;
   }
 
   @Deprecated
   public String getOldID() {
-    return id;
+    return oldid;
   }
 
   @Override
   public int getID() {
-    return realID;
+    return id;
   }
 
   /**
@@ -78,7 +78,7 @@ public class BaseExercise implements IsSerializable, Shell {
    */
   @Deprecated
   public void setOldID(String id) {
-    this.id = id;
+    this.oldid = id;
   }
 
   @Override

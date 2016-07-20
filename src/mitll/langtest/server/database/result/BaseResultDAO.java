@@ -35,7 +35,7 @@ package mitll.langtest.server.database.result;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.sorter.ExerciseSorter;
-import mitll.langtest.shared.MonitorResult;
+import mitll.langtest.shared.result.MonitorResult;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;

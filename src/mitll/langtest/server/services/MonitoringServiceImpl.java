@@ -35,7 +35,7 @@ package mitll.langtest.server.services;
 import mitll.langtest.client.services.MonitoringService;
 import mitll.langtest.server.database.MonitoringSupport;
 import mitll.langtest.server.database.result.IResultDAO;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.monitoring.Session;
 import org.apache.log4j.Logger;

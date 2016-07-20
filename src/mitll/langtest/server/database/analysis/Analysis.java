@@ -39,7 +39,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.phone.IPhoneDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.scoring.ParseResultJson;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
@@ -68,7 +68,7 @@ public abstract class Analysis extends DAO {
   /**
    * @param database
    * @param phoneDAO
-   * @see DatabaseImpl#getAnalysis()
+   * @see DatabaseImpl#getAnalysis(int)
    * @see DatabaseImpl#makeDAO(String, String, String)
    */
   public Analysis(Database database, IPhoneDAO phoneDAO, Map<Integer, String> exToRef) {

@@ -36,7 +36,7 @@ import mitll.langtest.server.audio.DecodeAlignOutput;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.decoder.RefResultDecoder;
-import mitll.langtest.shared.AudioType;
+import mitll.langtest.shared.answer.AudioType;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickRefResult;
 import mitll.npdata.dao.refaudio.RefResultDAOWrapper;

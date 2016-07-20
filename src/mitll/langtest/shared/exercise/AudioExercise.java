@@ -33,8 +33,8 @@
 package mitll.langtest.shared.exercise;
 
 import mitll.langtest.shared.ExerciseAnnotation;
-import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.custom.UserExercise;
+import mitll.langtest.shared.user.MiniUser;
 import net.sf.json.JSONObject;
 
 import java.util.*;
@@ -58,12 +58,13 @@ public class AudioExercise extends ExerciseShell {
 
   private Map<String, AudioAttribute> audioAttributes = new HashMap<String, AudioAttribute>();
   private Map<String, ExerciseAnnotation> fieldToAnnotation = new HashMap<String, ExerciseAnnotation>();
+  private int projectid;
 
   public AudioExercise() {
   }
 
-  public AudioExercise(@Deprecated String id, int realID) {
-    super(id, realID);
+  public AudioExercise(@Deprecated String oldID, int id, int projectid) {
+    super(oldID, id);
   }
 
   public String getRefAudio() {
@@ -500,5 +501,9 @@ public class AudioExercise extends ExerciseShell {
   public String toString() {
     return super.toString() + " audio attr (" + getAudioAttributes().size() +
         ") :" + getAudioAttributes() + " and " + fieldToAnnotation + " annotations, unit/lesson " + getUnitToValue();
+  }
+
+  public int getProjectID() {
+    return projectid;
   }
 }

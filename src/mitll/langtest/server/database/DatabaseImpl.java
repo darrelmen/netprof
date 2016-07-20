@@ -77,8 +77,10 @@ import mitll.langtest.server.database.word.SlickWordDAO;
 import mitll.langtest.server.database.word.Word;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.sorter.ExerciseSorter;
-import mitll.langtest.shared.*;
+import mitll.langtest.shared.ContextPractice;
+import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
+import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
@@ -86,9 +88,11 @@ import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.monitoring.Session;
+import mitll.langtest.shared.result.MonitorResult;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
+import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickProject;
 import net.sf.json.JSON;
@@ -121,7 +125,7 @@ import java.util.*;
  * Time: 11:44 PM
  * To change this template use File | Settings | File Templates.
  */
-public class DatabaseImpl<T extends CommonShell> implements Database {
+public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   private static final Logger logger = Logger.getLogger(DatabaseImpl.class);
   private static final int LOG_THRESHOLD = 10;
   private static final String UNKNOWN = "unknown";
@@ -129,7 +133,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   // private static final String TRANSLITERATION = "transliteration";
 
   private String installPath;
-  private ExerciseDAO<CommonExercise> exerciseDAO = null;
+//  private ExerciseDAO<CommonExercise> exerciseDAO = null;
 
   private IUserDAO userDAO;
   private IResultDAO resultDAO;
@@ -158,15 +162,16 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   private final ServerProperties serverProps;
   private final LogAndNotify logAndNotify;
 
-  private JsonSupport jsonSupport;
+  //private JsonSupport jsonSupport;
 
   private static final boolean ADD_DEFECTS = true;
-  private UserManagement userManagement;
-  private IAnalysis analysis;
+  private UserManagement userManagement = null;
+ // private IAnalysis analysis;
   private final String absConfigDir;
   private SimpleExerciseDAO<AmasExerciseImpl> fileExerciseDAO;
 
-  List<Project> projects = new ArrayList<>();
+  //private List<Project> projects = new ArrayList<>();
+  Map<Integer, Project<CommonExercise>> idToProject = new HashMap<>();
 
   public DatabaseImpl(String configDir, String relativeConfigDir, String dbName, ServerProperties serverProps,
                       PathHelper pathHelper, boolean mustAlreadyExist, LogAndNotify logAndNotify) {
@@ -213,18 +218,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     this.serverProps = serverProps;
     this.logAndNotify = logAndNotify;
 
-    try {
-      Connection connection1 = getConnection();
-      if (connection1 == null && serverProps.useH2()) {
-        logger.warn("couldn't open connection to database at " + relativeConfigDir + " : " + dbName);
-        return;
-      } else {
-        closeConnection(connection1);
-      }
-    } catch (Exception e) {
-      logger.error("couldn't open connection to database, got " + e.getMessage(), e);
-      return;
-    }
+    if (maybeGetH2Connection(relativeConfigDir, dbName, serverProps)) return;
     then = System.currentTimeMillis();
 
     initializeDAOs(pathHelper);
@@ -234,6 +228,32 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     }
 
     monitoringSupport = new MonitoringSupport(userDAO, resultDAO);
+
+    populateProjects();
+  }
+
+  boolean maybeGetH2Connection(String relativeConfigDir, String dbName, ServerProperties serverProps) {
+    try {
+      Connection connection1 = getConnection();
+      if (connection1 == null && serverProps.useH2()) {
+        logger.warn("couldn't open connection to database at " + relativeConfigDir + " : " + dbName);
+        return true;
+      } else {
+        closeConnection(connection1);
+      }
+    } catch (Exception e) {
+      logger.error("couldn't open connection to database, got " + e.getMessage(), e);
+      return true;
+    }
+    return false;
+  }
+
+  private void populateProjects() {
+    for (SlickProject slickProject : projectDAO.getAll()) {
+      Project e = new Project(slickProject);
+      idToProject.put(e.getProject().id(), e);
+
+    }
   }
 
   private Connection getConnection() {
@@ -308,7 +328,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     userDAO.findOrMakeDefectDetector();
 
     try {
-      ((UserListManager)userListManager).setUserExerciseDAO(userExerciseDAO);
+      ((UserListManager) userListManager).setUserExerciseDAO(userExerciseDAO);
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
@@ -338,9 +358,10 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
   /**
    * @return
+   * @param projectid
    */
-  public IAnalysis getAnalysis() {
-    return analysis;
+  public IAnalysis getAnalysis(int projectid) {
+    return getProject(projectid).getAnalysis();
   }
 
   public IRefResultDAO getRefResultDAO() {
@@ -416,37 +437,45 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     logger.debug("got install path " + installPath + " media " + mediaDir);
     this.installPath = installPath;
     makeDAO(lessonPlanFile, mediaDir, installPath);
-    this.jsonSupport = new JsonSupport(getSectionHelper(), getResultDAO(), getRefResultDAO(), getAudioDAO(),
-        getPhoneDAO(), configDir, installPath);
+//    this.jsonSupport = new JsonSupport(getSectionHelper(), getResultDAO(), getRefResultDAO(), getAudioDAO(),
+//        getPhoneDAO(), configDir, installPath);
   }
 
   /**
+   * TODO : sections are valid in the context of a project.
+   *
+   * @param projectid
    * @return
-   * @see mitll.langtest.server.DownloadServlet#returnSpreadsheet(HttpServletResponse, DatabaseImpl, String)
-   * @see DatabaseImpl#getTypeOrder
+   * @see mitll.langtest.server.DownloadServlet#returnSpreadsheet
+   * @see Database#getTypeOrder
    */
-  public SectionHelper<CommonExercise> getSectionHelper() {
+  public SectionHelper<CommonExercise> getSectionHelper(int projectid) {
     if (isAmas()) {
       return new SectionHelper<>();
     }
 
-    getExercises();
-    return exerciseDAO.getSectionHelper();
+    getExercises(projectid);
+    return getProject(projectid).getSectionHelper();
   }
 
   boolean isAmas() {
     return serverProps.isAMAS();
   }
 
-  public Collection<String> getTypeOrder() {
-    SectionHelper sectionHelper = (isAmas()) ? getAMASSectionHelper() : getSectionHelper();
+  public Collection<String> getTypeOrder(int projectid) {
+    SectionHelper sectionHelper = (isAmas()) ? getAMASSectionHelper() : getSectionHelper(projectid);
     if (sectionHelper == null) logger.warn("no section helper for " + this);
     List<String> objects = Collections.emptyList();
     return (sectionHelper == null) ? objects : sectionHelper.getTypeOrder();
   }
 
-  public Collection<SectionNode> getSectionNodes() {
-    SectionHelper<?> sectionHelper = (isAmas()) ? getAMASSectionHelper() : getSectionHelper();
+  /**
+   *
+   * @param projectid
+   * @return
+   */
+  public Collection<SectionNode> getSectionNodes(int projectid) {
+    SectionHelper<?> sectionHelper = (isAmas()) ? getAMASSectionHelper() : getSectionHelper(projectid);
     return sectionHelper.getSectionNodes();
   }
 
@@ -455,27 +484,54 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getResultASRInfo
    * @see mitll.langtest.server.DownloadServlet#getFilenameForDownload
-   * @see #deleteItem(int)
+   * @see #deleteItem(int, int)
    * @see #getCustomOrPredefExercise(int)
    */
   public CommonExercise getExercise(int id) {
-    return exerciseDAO.getExercise(id);
+    return getFirstExerciseDAO().getExercise(id);
   }
 
   /**
+   * TODO : exercises are in the context of a project
+   *
+   * @param projectid
    * @return
-   * @see #getExercises()
+   * @see #getExercises(int)
    * @see LangTestDatabaseImpl#buildExerciseTrie()
    */
-  public Collection<CommonExercise> getExercises() {
+  public Collection<CommonExercise> getExercises(int projectid) {
     if (isAmas()) {
       return Collections.emptyList();
     }
-    List<CommonExercise> rawExercises = exerciseDAO.getRawExercises();
+    Project<CommonExercise> project = projectid == -1 ? getFirstProject() : getProject(projectid);
+    List<CommonExercise> rawExercises = project.getRawExercises();
     if (rawExercises.isEmpty()) {
       logger.warn("getExercises no exercises in " + getServerProps().getLessonPlan() + " at " + installPath);
     }
     return rawExercises;
+  }
+
+  Project<CommonExercise> getProject(int projectid) {
+    if (projectid == -1) return getFirstProject();
+    return idToProject.get(projectid);
+  }
+
+  public ExerciseDAO<CommonExercise> getExerciseDAO(int projectid) {
+    Project<CommonExercise> project = getProject(projectid);
+    return project.getExerciseDAO();
+  }
+
+  /**
+   * Sometimes any exercise dao will do.
+   *
+   * @return
+   */
+  private ExerciseDAO<CommonExercise> getFirstExerciseDAO() {
+    return getFirstProject().getExerciseDAO();
+  }
+
+  private Project<CommonExercise> getFirstProject() {
+    return idToProject.values().iterator().next();
   }
 
   /**
@@ -502,9 +558,10 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * Special check for amas exercises...
    *
    * @param mediaDir
+   * @see #setInstallPath(String, String, String)
    */
   private void makeDAO(String lessonPlanFile, String mediaDir, String installPath) {
-    if (exerciseDAO == null) {
+    if (userManagement == null) {
       synchronized (this) {
         boolean isURL = serverProps.getLessonPlan().startsWith("http");
         boolean amas = isAmas();
@@ -517,17 +574,23 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
           makeExerciseDAO(lessonPlanFile, isURL);
 
           //       logger.info("set exercise dao " + exerciseDAO + " on " + userExerciseDAO);
+          ExerciseDAO<CommonExercise> exerciseDAO = getProjects().iterator().next().getExerciseDAO();
           userExerciseDAO.setExerciseDAO(exerciseDAO);
 
-          setDependencies(mediaDir, installPath, this.exerciseDAO);
+          for (Project<CommonExercise> project : getProjects()) {
+            ExerciseDAO<?> exerciseDAO1 = project.getExerciseDAO();
+            setDependencies(mediaDir, installPath, exerciseDAO1);
+            project.getRawExercises();
+            project.setJsonSupport(new JsonSupport(project.getSectionHelper(), getResultDAO(), getRefResultDAO(), getAudioDAO(),
+                getPhoneDAO(), configDir, installPath));
+            project.setAnalysis(new SlickAnalysis(this, phoneDAO, getExerciseIDToRefAudio(project.getProject().id()), (SlickResultDAO) resultDAO));
+          }
 
-          exerciseDAO.getRawExercises();
+          // numExercises = this.exerciseDAO.getNumExercises();
 
-          numExercises = exerciseDAO.getNumExercises();
-
-          analysis = new SlickAnalysis(this, phoneDAO, getExerciseIDToRefAudio(), (SlickResultDAO) resultDAO);
+    //      analysis =
         }
-        userManagement = new UserManagement(userDAO, numExercises, resultDAO, userListManager);
+        userManagement = new UserManagement(userDAO, /*numExercises,*/ resultDAO, userListManager);
         //   audioDAO.setExerciseDAO(exerciseDAO);
         //   audioDAO.markTranscripts();
       }
@@ -536,16 +599,29 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
   private void makeExerciseDAO(String lessonPlanFile, boolean isURL) {
     if (isURL) {
-      this.exerciseDAO = new JSONURLExerciseDAO(getServerProps(), userListManager, ADD_DEFECTS);
+      addSingleProject(new JSONURLExerciseDAO(getServerProps(), userListManager, ADD_DEFECTS));
     } else if (!serverProps.useH2()) {
-      this.exerciseDAO = new DBExerciseDAO(getServerProps(), userListManager, ADD_DEFECTS, (SlickUserExerciseDAO) getUserExerciseDAO());
+      for (Project<CommonExercise> project : getProjects()) {
+        DBExerciseDAO dbExerciseDAO = new DBExerciseDAO(getServerProps(), userListManager, ADD_DEFECTS,
+            (SlickUserExerciseDAO) getUserExerciseDAO(), project.getProject());
+        project.setExerciseDAO(dbExerciseDAO);
+      }
     } else if (lessonPlanFile.endsWith(".json")) {
       logger.info("got " + lessonPlanFile);
-      this.exerciseDAO = new JSONExerciseDAO(lessonPlanFile, getServerProps(), userListManager, ADD_DEFECTS);
+      JSONExerciseDAO jsonExerciseDAO = new JSONExerciseDAO(lessonPlanFile, getServerProps(), userListManager, ADD_DEFECTS);
+      addSingleProject(jsonExerciseDAO);
     } else {
       logger.info("got " + lessonPlanFile);
-      this.exerciseDAO = new ExcelImport(lessonPlanFile, getServerProps(), userListManager, ADD_DEFECTS);
+      addSingleProject(new ExcelImport(lessonPlanFile, getServerProps(), userListManager, ADD_DEFECTS));
     }
+  }
+
+  private void addSingleProject(ExerciseDAO<CommonExercise> jsonExerciseDAO) {
+    idToProject.put(1, new Project<CommonExercise>(jsonExerciseDAO));
+  }
+
+  private Collection<Project<CommonExercise>> getProjects() {
+    return idToProject.values();
   }
 
   private int readAMASExercises(String lessonPlanFile, String mediaDir, String installPath, boolean isURL) {
@@ -560,7 +636,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return numExercises;
   }
 
-  public void reloadExercises() {
+  public void reloadExercises(int projectid) {
+    ExerciseDAO<CommonExercise> exerciseDAO = getExerciseDAO(projectid);
     if (exerciseDAO != null) {
       logger.info("reloading from exercise dao");
       exerciseDAO.reload();
@@ -610,7 +687,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
     logger.debug("originally had " + original.size() + " attribute, and " + defects.size() + " defects");
 
-    CommonExercise exercise = exerciseDAO.addOverlay(userExercise);
+    int projectID = userExercise.getProjectID();
+    CommonExercise exercise = getExerciseDAO(projectID).addOverlay(userExercise);
     boolean notOverlay = exercise == null;
     if (notOverlay) {
       // not an overlay! it's a new user exercise
@@ -648,7 +726,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       }*/
     }
 
-    getSectionHelper().refreshExercise(exercise);
+    getSectionHelper(projectID).refreshExercise(exercise);
   }
 
   /**
@@ -672,14 +750,31 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   public JSONObject getJsonScoreHistory(int userid,
                                         Map<String, Collection<String>> typeToSection,
                                         ExerciseSorter sorter) {
-    return jsonSupport.getJsonScoreHistory(userid, typeToSection, sorter);
+    return getJsonSupport(userid).getJsonScoreHistory(userid, typeToSection, sorter);
   }
 
-  public JSONObject getJsonRefResult(Map<String, Collection<String>> typeToSection) {
-    return jsonSupport.getJsonRefResults(typeToSection);
+  JsonSupport getJsonSupport(int userid) {
+    int i = getUserProjectDAO().mostRecentByUser(userid);
+    return getJsonSupportForProject(i);
+  }
+
+  private JsonSupport getJsonSupportForProject(int i) {
+    Project<CommonExercise> project = getProject(i);
+    return project.getJsonSupport();
   }
 
   /**
+   * TODO : pass in projectid...
+   * @param typeToSection
+   * @param projectid
+   * @return
+   */
+  public JSONObject getJsonRefResult(Map<String, Collection<String>> typeToSection, int projectid) {
+    return getJsonSupportForProject(projectid).getJsonRefResults(typeToSection);
+  }
+
+  /**
+   * TODO : make sure that iOS app has same idea of current project as does website
    * For all the exercises in a chapter
    * <p>
    * Get latest results
@@ -698,7 +793,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @see mitll.langtest.server.ScoreServlet#getPhoneReport
    */
   public JSONObject getJsonPhoneReport(long userid, Map<String, Collection<String>> typeToValues) {
-    return jsonSupport.getJsonPhoneReport(userid, typeToValues);
+    return getJsonSupport((int)userid).getJsonPhoneReport(userid, typeToValues);
   }
 
   /**
@@ -851,7 +946,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
   /**
    * @param out
-   * @see mitll.langtest.server.DownloadServlet#returnSpreadsheet(HttpServletResponse, DatabaseImpl, String)
+   * @see mitll.langtest.server.DownloadServlet#returnSpreadsheet
    */
   public void usersToXLSX(OutputStream out) {
     userManagement.usersToXLSX(out, getLanguage());
@@ -892,7 +987,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     }
     SlickProject next = getProjectDAO().getAll().iterator().next();
 
-    logger.warn("using the first project! " +next);
+    logger.warn("using the first project! " + next);
 
     Event event = new Event(id, widgetType, exid, context, userid, System.currentTimeMillis(), device, -1);
     return eventDAO != null && eventDAO.add(event, next.id());
@@ -960,9 +1055,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       logger.info("createIfNotThere create " + name);
       slickUserDAO.createTable();
       created.add(name);
-    }
-    else {
-   //   logger.debug("createIfNotThere has table " + name);
+    } else {
+      //   logger.debug("createIfNotThere has table " + name);
     }
   }
 
@@ -971,7 +1065,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 //  }
 
   public void copyToPostgres() {
-    CopyToPostgres<T> copyToPostgres = new CopyToPostgres<T>();
+    CopyToPostgres copyToPostgres = new CopyToPostgres();
     copyToPostgres.copyToPostgres(this);
   }
 
@@ -1000,7 +1094,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @see #getMonitorResults()
    */
   public List<MonitorResult> getMonitorResultsWithText(List<MonitorResult> monitorResults) {
-    addUnitAndChapterToResults(monitorResults, getIdToExerciseMap());
+    addUnitAndChapterToResults(monitorResults, getIdToExerciseMap(1));
     return monitorResults;
   }
 
@@ -1017,7 +1111,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     Set<Integer> unknownIDs = new HashSet<>();
     for (MonitorResult result : monitorResults) {
       int id = result.getExID();
-     // if (id.contains("\\/")) id = id.substring(0, id.length() - 2);
+      // if (id.contains("\\/")) id = id.substring(0, id.length() - 2);
       CommonExercise exercise = join.get(id);
       if (exercise == null) {
         if (n < 5) {
@@ -1038,14 +1132,19 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     }
   }
 
-  private Map<Integer, CommonExercise> getIdToExerciseMap() {
+  /**
+   *
+   * @return
+   * @param projectid
+   */
+  private Map<Integer, CommonExercise> getIdToExerciseMap(int projectid) {
     Map<Integer, CommonExercise> join = new HashMap<>();
 
-    for (CommonExercise exercise : getExercises()) {
+    for (CommonExercise exercise : getExercises(projectid)) {
       join.put(exercise.getID(), exercise);
     }
 
-    if (userExerciseDAO != null && exerciseDAO != null) {
+    if (userExerciseDAO != null && getExerciseDAO(projectid) != null) {
       for (CommonExercise exercise : userExerciseDAO.getAll()) {
         join.put(exercise.getID(), exercise);
       }
@@ -1057,17 +1156,19 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @return
    * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceForUser
    * @see DatabaseImpl#makeDAO(String, String, String)
+   * @param projectid
    */
-  public Map<Integer, String> getExerciseIDToRefAudio() {
+  public Map<Integer, String> getExerciseIDToRefAudio(int projectid) {
     Map<Integer, String> join = new HashMap<>();
-    populateIDToRefAudio(join, getExercises());
+    populateIDToRefAudio(join, getExercises(projectid));
     Collection<CommonExercise> all = userExerciseDAO.getAll();
-    exerciseDAO.attachAudio(all);
+    getExerciseDAO(projectid).attachAudio(all);
     populateIDToRefAudio(join, all);
     return join;
   }
 
-  private <T extends Shell & AudioAttributeExercise> void populateIDToRefAudio(Map<Integer, String> join, Collection<CommonExercise> all) {
+  private <T extends Shell & AudioAttributeExercise> void populateIDToRefAudio(Map<Integer, String> join,
+                                                                               Collection<CommonExercise> all) {
     for (CommonExercise exercise : all) {
       String refAudio = exercise.getRefAudio();
       if (refAudio == null) {
@@ -1137,8 +1238,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   /**
    * @param exercise
    * @return
+   * @seex mitll.langtest.server.LangTestDatabaseImpl#duplicateExercise
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#duplicateExercise
-   * @see mitll.langtest.server.LangTestDatabaseImpl#duplicateExercise
    */
   public CommonExercise duplicateExercise(CommonExercise exercise) {
     logger.debug("to duplicate  " + exercise);
@@ -1150,7 +1251,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       logger.warn("huh? got non-predef " + exercise);
     }
 
-    SectionHelper sectionHelper = getSectionHelper();
+    SectionHelper sectionHelper = getSectionHelper(exercise.getProjectID());
 
     List<SectionHelper.Pair> pairs = new ArrayList<>();
     for (Map.Entry<String, String> pair : exercise.getUnitToValue().entrySet()) {
@@ -1165,7 +1266,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     } else {
       logger.warn("add remove not implemented yet!");
     }
-    getExerciseDAO().add(duplicate);
+    getExerciseDAO(exercise.getProjectID()).add(duplicate);
 
     logger.debug("exercise state " + exercise.getState());
 
@@ -1178,21 +1279,21 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
   /**
    * @param exid
+   * @param projectid
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#deleteItem
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#deleteItem
    */
-  public boolean deleteItem(int exid) {
+  public boolean deleteItem(int exid, int projectid) {
     AddRemoveDAO addRemoveDAO = getAddRemoveDAO();
     if (addRemoveDAO != null) {
-     // addRemoveDAO.add(exid, AddRemoveDAO.REMOVE);
-    }
-    else {
+      // addRemoveDAO.add(exid, AddRemoveDAO.REMOVE);
+    } else {
       logger.warn("add remove not implemented yet!");
     }
     getUserListManager().removeReviewed(exid);
-    getSectionHelper().removeExercise(getExercise(exid));
-    return getExerciseDAO().remove(exid);
+    getSectionHelper(projectid).removeExercise(getExercise(exid));
+    return getExerciseDAO(projectid).remove(exid);
   }
 
   /**
@@ -1247,39 +1348,56 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return null;//addRemoveDAO;
   }
 
-  public ExerciseDAO getExerciseDAO() {
-    return exerciseDAO;
-  }
+//  public ExerciseDAO getExerciseDAO(int projectid) {
+//    return exerciseDAO;
+//  }
 
   /**
    * @param out
    * @param typeToSection
+   * @param projectid
    * @throws Exception
    * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
-  public void writeZip(OutputStream out, Map<String, Collection<String>> typeToSection) throws Exception {
+  public void writeZip(OutputStream out, Map<String, Collection<String>> typeToSection, int projectid) throws Exception {
     Collection<CommonExercise> exercisesForSelectionState = typeToSection.isEmpty() ?
-        getExercises() :
-        getSectionHelper().getExercisesForSelectionState(typeToSection);
-    new AudioExport(getServerProps()).writeZip(out, typeToSection, getSectionHelper(), exercisesForSelectionState, getLanguage(),
+        getExercises(projectid) :
+        getSectionHelper(projectid).getExercisesForSelectionState(typeToSection);
+    String language = getLanguage(projectid);
+    new AudioExport(getServerProps()).writeZip(out, typeToSection, getSectionHelper(projectid), exercisesForSelectionState,
+        language,
         getAudioDAO(), installPath, configDir, false);
   }
 
+  String getLanguage(int projectid) {
+    return getProject(projectid).getProject().language();
+  }
+
   @Override
-  public String getLanguage() {
+  @Deprecated public String getLanguage() {
     return getServerProps().getLanguage();
   }
 
-  public void writeContextZip(OutputStream out, Map<String, Collection<String>> typeToSection) throws Exception {
+  public void writeContextZip(OutputStream out, Map<String, Collection<String>> typeToSection, int projectid)
+      throws Exception {
+    SectionHelper<CommonExercise> sectionHelper = getSectionHelper(projectid);
     Collection<CommonExercise> exercisesForSelectionState = typeToSection.isEmpty() ?
-        getExercises() :
-        getSectionHelper().getExercisesForSelectionState(typeToSection);
-    new AudioExport(getServerProps()).writeContextZip(out, typeToSection, getSectionHelper(), exercisesForSelectionState, getLanguage(),
+        getExercises(projectid) :
+        sectionHelper.getExercisesForSelectionState(typeToSection);
+    new AudioExport(getServerProps()).writeContextZip(out, typeToSection, sectionHelper, exercisesForSelectionState,
+        getLanguage(projectid),
         getAudioDAO(), installPath, configDir);
   }
 
-  public void writeZip(OutputStream out) throws Exception {
-    new AudioExport(getServerProps()).writeZipJustOneAudio(out, getSectionHelper(), getExercises(), installPath);
+  /**
+   * @param out
+   * @param projectid
+   * @throws Exception
+   * @see DownloadServlet#doGet(HttpServletRequest, HttpServletResponse)
+   */
+  public void writeZip(OutputStream out, int projectid) throws Exception {
+    new AudioExport(getServerProps()).writeZipJustOneAudio(out, getSectionHelper(projectid), getExercises(projectid),
+        installPath);
   }
 
   /**
@@ -1287,15 +1405,16 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    *
    * @param out
    * @param listid
+   * @param projectid
    * @return
    * @throws Exception
-   * @see mitll.langtest.server.DownloadServlet#writeUserList(javax.servlet.http.HttpServletResponse, DatabaseImpl, String)
+   * @see mitll.langtest.server.DownloadServlet#writeUserList
    */
-  public String writeZip(OutputStream out, long listid, PathHelper pathHelper) throws Exception {
-    String language = getLanguage();
+  public String writeZip(OutputStream out, long listid, PathHelper pathHelper, int projectid) throws Exception {
+    String language = getLanguage(projectid);
     if (listid == -1) return language + "_Unknown";
 
-    UserList<CommonShell> userListByID = getUserListByID(listid);
+    UserList<CommonShell> userListByID = getUserListByID(listid, projectid);
 
     if (userListByID == null) {
       logger.error("huh? can't find user list " + listid);
@@ -1314,7 +1433,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       }
       long now = System.currentTimeMillis();
       logger.debug("\nTook " + (now - then) + " millis to annotate and attach.");
-      new AudioExport(getServerProps()).writeZip(out, userListByID.getName(), getSectionHelper(), copyAsExercises, language,
+      new AudioExport(getServerProps()).writeZip(out, userListByID.getName(), getSectionHelper(projectid),
+          copyAsExercises, language,
           getAudioDAO(), installPath, configDir, listid == IUserListManager.REVIEW_MAGIC_ID);
     }
     return language + "_" + userListByID.getName();
@@ -1333,15 +1453,16 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   /**
    * Expensive ?
    *
+   * @param projectid
    * @see ScoreServlet#getJSONExport
    */
-  public void attachAllAudio() {
+  public void attachAllAudio(int projectid) {
     IAudioDAO audioDAO = getAudioDAO();
 
     Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
 
     long then = System.currentTimeMillis();
-    Collection<CommonExercise> exercises = getExercises();
+    Collection<CommonExercise> exercises = getExercises(projectid);
     for (CommonExercise exercise : exercises) {
       List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
       if (audioAttributes != null) {
@@ -1354,9 +1475,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     logger.info(getLanguage() + " took " + (now - then) + " millis to attachAllAudio to " + exercises.size() + " exercises");
   }
 
-  public String getUserListName(long listid) {
-    UserList userListByID = getUserListByID(listid);
-    String language1 = getLanguage();
+  public String getUserListName(long listid, int projectid) {
+    UserList userListByID = getUserListByID(listid, projectid);
+    String language1 = getLanguage(projectid);
     if (userListByID == null) {
       logger.error("huh? can't find user list " + listid);
       return language1 + "_Unknown";
@@ -1365,12 +1486,12 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     }
   }
 
-  public UserList<CommonShell> getUserListByID(long listid) {
-    return getUserListManager().getUserListByID(listid, getSectionHelper().getTypeOrder());
+  public UserList<CommonShell> getUserListByID(long listid, int projectid) {
+    return getUserListManager().getUserListByID(listid, getSectionHelper(projectid).getTypeOrder());
   }
 
-  public String getPrefix(Map<String, Collection<String>> typeToSection) {
-    return new AudioExport(getServerProps()).getPrefix(getSectionHelper(), typeToSection);
+  public String getPrefix(Map<String, Collection<String>> typeToSection, int projectid) {
+    return new AudioExport(getServerProps()).getPrefix(getSectionHelper(projectid), typeToSection);
   }
 
   /**
@@ -1502,13 +1623,14 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   /**
    * @return
    * @see LangTestDatabaseImpl#getMaleFemaleProgress()
+   * @param projectid
    */
-  public Map<String, Float> getMaleFemaleProgress() {
+  public Map<String, Float> getMaleFemaleProgress(int projectid) {
     IUserDAO userDAO = getUserDAO();
     Map<Integer, User> userMapMales = userDAO.getUserMap(true);
     Map<Integer, User> userMapFemales = userDAO.getUserMap(false);
 
-    Collection<CommonExercise> exercises = getExercises();
+    Collection<CommonExercise> exercises = getExercises(projectid);
     float total = exercises.size();
     Set<Integer> uniqueIDs = new HashSet<>();
 
@@ -1531,13 +1653,14 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   /**
    * @return
    * @see LangTestDatabaseImpl#getMaleFemaleProgress()
+   * @param projectid
    */
-  public Map<String, Float> getH2MaleFemaleProgress() {
+  public Map<String, Float> getH2MaleFemaleProgress(int projectid) {
     IUserDAO userDAO = getUserDAO();
-    Map<Integer, User> userMapMales   = userDAO.getUserMap(true);
+    Map<Integer, User> userMapMales = userDAO.getUserMap(true);
     Map<Integer, User> userMapFemales = userDAO.getUserMap(false);
 
-    Collection<CommonExercise> exercises = getExercises();
+    Collection<CommonExercise> exercises = getExercises(projectid);
     float total = exercises.size();
     Set<Integer> uniqueIDs = new HashSet<>();
 

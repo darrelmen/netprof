@@ -51,7 +51,7 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.ListChangeListener;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.AVPHistoryForList;
@@ -318,7 +318,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
     /**
      * @param result
-     * @see mitll.langtest.client.recorder.RecordButtonPanel#receivedAudioAnswer(mitll.langtest.shared.AudioAnswer, com.google.gwt.user.client.ui.Panel)
+     * @see mitll.langtest.client.recorder.RecordButtonPanel#receivedAudioAnswer(AudioAnswer, com.google.gwt.user.client.ui.Panel)
      */
     public void receivedAudioAnswer(final AudioAnswer result) {
       logger.info("StatsPracticePanel.receivedAudioAnswer: result " + result);
@@ -566,7 +566,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     /**
      * @param correct
      * @param feedback
-     * @see #receivedAudioAnswer(mitll.langtest.shared.AudioAnswer)
+     * @see #receivedAudioAnswer(AudioAnswer)
      * @see #showIncorrectFeedback
      */
     protected void nextAfterDelay(boolean correct, String feedback) {
@@ -709,7 +709,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
     /**
      * @see #getLeftState()
-     * @see #receivedAudioAnswer(mitll.langtest.shared.AudioAnswer)
+     * @see #receivedAudioAnswer(AudioAnswer)
      */
     private void setStateFeedback() {
       int totalCorrect = getCorrect();
