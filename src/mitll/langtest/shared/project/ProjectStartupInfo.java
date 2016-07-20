@@ -42,6 +42,7 @@ public class ProjectStartupInfo implements IsSerializable {
   private Map<String, String> properties;
   private Collection<String> typeOrder;
   private Collection<SectionNode> sectionNodes;
+  private int projectid;
 
   public ProjectStartupInfo() {} // for serialization
 
@@ -50,12 +51,14 @@ public class ProjectStartupInfo implements IsSerializable {
    * @param properties
    * @param typeOrder
    * @param sectionNodes
+   * @param projectid
    */
   public ProjectStartupInfo(Map<String, String> properties, Collection<String> typeOrder,
-                            Collection<SectionNode> sectionNodes) {
+                            Collection<SectionNode> sectionNodes, int projectid) {
     this.properties = properties;
     this.typeOrder = typeOrder;
     this.sectionNodes = sectionNodes;
+    this.projectid = projectid;
   }
 
   public Map<String, String> getProperties() {
@@ -71,4 +74,8 @@ public class ProjectStartupInfo implements IsSerializable {
   }
 
   public String toString() { return "Order " + getTypeOrder() + " nodes " + getSectionNodes(); }
+
+  public int getProjectid() {
+    return projectid;
+  }
 }

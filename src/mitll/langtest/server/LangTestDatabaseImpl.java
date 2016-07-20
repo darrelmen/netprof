@@ -149,8 +149,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private ExerciseTrie fullTrie = null;
   private ExerciseTrie<AmasExerciseImpl> amasFullTrie = null;
 
-//  List<Project> projects = new ArrayList<>();
-
   private static final boolean DEBUG = true;
   private UserSecurityManager securityManager;
 
@@ -540,8 +538,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return exercisesForState;
   }
 
-  public QuizCorrectAndScore getScoresForUser(Map<String, Collection<String>> typeToSection, int userID, Collection<Integer> exids) {
-    return new QuizCorrect(db).getScoresForUser(typeToSection, userID, exids);
+  public QuizCorrectAndScore getScoresForUser(Map<String, Collection<String>> typeToSection,
+                                              int userID,
+                                              Collection<Integer> exids) {
+    return new QuizCorrect(db).getScoresForUser(typeToSection, userID, exids, getProject());
   }
 
   @Override
@@ -630,9 +630,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see #getExerciseIds
    */
   private <T extends CommonShell> ExerciseListWrapper<T> getExercisesForSelectionState(ExerciseListRequest request) {
-    Collection<CommonExercise> exercisesForState = db.getSectionHelper().getExercisesForSelectionState(request.getTypeToSelection());
+    Collection<CommonExercise> exercisesForState =
+        getSectionHelper().getExercisesForSelectionState(request.getTypeToSelection());
     exercisesForState = filterExercises(request, exercisesForState);
     return getExerciseListWrapperForPrefix(request, exercisesForState);
+  }
+
+  private SectionHelper<CommonExercise> getSectionHelper() {
+    return db.getSectionHelper(getProject());
   }
 
   /**
@@ -1007,7 +1012,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public void reloadExercises() {
     logger.info("reloadExercises");
-    db.reloadExercises();
+    db.reloadExercises(getProject());
   }
 
   /**
@@ -1474,7 +1479,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       }*/
 
     }
-    db.getSectionHelper().refreshExercise(byID);
+    getSectionHelper().refreshExercise(byID);
   }
 
   /**
@@ -1539,7 +1544,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param userid
    * @param flText
    * @return
-   * @see #getResults(int, int, String, java.util.Map, long, String, int)
+   * @see #getResults(int, int, String, java.util.Map, int, String, int)
    */
   private List<MonitorResult> getResults(Map<String, String> unitToValue, int userid, String flText) {
     //logger.debug("getResults : request " + unitToValue + " " + userid + " " + flText);
@@ -1563,7 +1568,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     Trie<MonitorResult> trie;
 
-    for (String type : db.getTypeOrder(projectid)) {
+    for (String type : db.getTypeOrder(getProject())) {
       if (unitToValue.containsKey(type)) {
 
         // logger.debug("getResults making trie for " + type);
@@ -1628,7 +1633,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.result.ResultManager#getTypeaheadUsing
    */
   @Override
-  public Collection<String> getResultAlternatives(Map<String, String> unitToValue, int userid, String flText, String which) {
+  public Collection<String> getResultAlternatives(Map<String, String> unitToValue, int userid, String flText,
+                                                  String which) {
     Collection<MonitorResult> results = db.getMonitorResults();
 
     logger.debug("getResultAlternatives request " + unitToValue + " userid=" + userid + " fl '" + flText + "' :'" + which + "'");
@@ -1636,7 +1642,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     Collection<String> matches = new TreeSet<>();
     Trie<MonitorResult> trie;
 
-    for (String type : db.getTypeOrder(projectid)) {
+    for (String type : db.getTypeOrder(getProject())) {
       if (unitToValue.containsKey(type)) {
 
         //    logger.debug("getResultAlternatives making trie for " + type);
@@ -2016,7 +2022,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public Map<String, Float> getMaleFemaleProgress() {
-    return db.getMaleFemaleProgress();
+    return db.getMaleFemaleProgress(getProject());
   }
 
 
@@ -2046,7 +2052,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       }
     } else {
       Collection<CommonExercise> exercisesForState = (typeToSection == null || typeToSection.isEmpty()) ? getExercises() :
-          db.getSectionHelper().getExercisesForSelectionState(typeToSection);
+          getSectionHelper().getExercisesForSelectionState(typeToSection);
 
       for (CommonExercise exercise : exercisesForState) {
         populateCollatorMap(allIDs, idToKey, collator, exercise);
@@ -2122,7 +2128,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
 
     try {
-      db.getExercises();
+//      db.getExercises();
       db.preloadContextPractice();
       getUserListManager().setStateOnExercises();
       db.doReport(serverProps, getServletContext().getRealPath(""), getMailSupport(), pathHelper);
@@ -2233,13 +2239,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     try {
       User loggedInUser = securityManager.getLoggedInUser(getThreadLocalRequest());
       if (loggedInUser == null) return -1;
-      int i = db.getUserProjectDAO().mostRecentByUser(loggedInUser.getId());
+      int i = getProjectForUser(loggedInUser);
       return i;
     } catch (DominoSessionException e) {
       logger.error("Got " + e,e);
       return -1;
     }
   }
+
+  private int getProjectForUser(User loggedInUser) {
+    return db.getUserProjectDAO().mostRecentByUser(loggedInUser.getId());
+  }
+
   private String getLessonPlan() {
     return serverProps.getLessonPlan() == null ? null : configDir + File.separator + serverProps.getLessonPlan();
   }

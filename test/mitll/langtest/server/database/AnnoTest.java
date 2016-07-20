@@ -49,7 +49,7 @@ public class AnnoTest extends BaseTest {
 
   @Test
   public void testAnno() {
-    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
+    DatabaseImpl spanish = getDatabase("spanish");
 
     IAnnotationDAO annotationDAO = spanish.getAnnotationDAO();
 
@@ -74,7 +74,7 @@ public class AnnoTest extends BaseTest {
 
   @Test
   public void testAnno2() {
-    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
+    DatabaseImpl spanish = getDatabase("spanish");
 
     IAnnotationDAO annotationDAO = spanish.getAnnotationDAO();
     Set<Integer> incorrectAnnotations = annotationDAO.getExercisesWithIncorrectAnnotations();
@@ -88,7 +88,7 @@ public class AnnoTest extends BaseTest {
 
   @Test
   public void testAnno3() {
-    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
+    DatabaseImpl spanish = getDatabase("spanish");
 
     IAnnotationDAO annotationDAO = spanish.getAnnotationDAO();
     Map<String, ExerciseAnnotation> latestByExerciseID = annotationDAO.getLatestByExerciseID(1);
@@ -102,6 +102,6 @@ public class AnnoTest extends BaseTest {
 
   @Test
   public void testAnswerDAO() {
-    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
+    DatabaseImpl spanish = getDatabase("spanish");
   }
 }

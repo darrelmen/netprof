@@ -73,7 +73,6 @@ public class DownloadServlet extends DatabaseServlet {
   private static final String FILE = "file";
   private static final String CONTEXT = "context";
   private static final String COMPRESSED_SUFFIX = "mp3";
-  UserSecurityManager securityManager;
 
   /**
    * This is getting complicated.
@@ -344,32 +343,6 @@ public class DownloadServlet extends DatabaseServlet {
   private void setHeader(HttpServletResponse response, String fileName) {
     setResponseHeader(response, fileName);
     response.setContentType("application/zip");
-  }
-
-  private DatabaseImpl getDatabase() {
-    DatabaseImpl db = null;
-
-    Object databaseReference = getServletContext().getAttribute(LangTestDatabaseImpl.DATABASE_REFERENCE);
-    if (databaseReference != null) {
-      db = (DatabaseImpl) databaseReference;
-      securityManager = new UserSecurityManager(db.getUserDAO());
-      // logger.debug("found existing database reference " + db + " under " +getServletContext());
-    } else {
-      logger.error("huh? no existing db reference?");
-    }
-    return db;
-  }
-
-  private int getProject(HttpServletRequest request) {
-    try {
-      User loggedInUser = securityManager.getLoggedInUser(request);
-      if (loggedInUser == null) return -1;
-      int i = getDatabase().getUserProjectDAO().mostRecentByUser(loggedInUser.getId());
-      return i;
-    } catch (DominoSessionException e) {
-      logger.error("Got " + e, e);
-      return -1;
-    }
   }
 
   /**

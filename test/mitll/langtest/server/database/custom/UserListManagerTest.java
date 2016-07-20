@@ -588,7 +588,7 @@ public class UserListManagerTest {
 
   private UserExercise createNewItem(int userid) {
     int uniqueID = userExerciseCount++;
-    return new UserExercise(uniqueID, UserExercise.CUSTOM_PREFIX + uniqueID, userid, " ", "", "");
+    return new UserExercise(uniqueID, UserExercise.CUSTOM_PREFIX + uniqueID, userid, " ", "", "", -1);
   }
 
   /**
