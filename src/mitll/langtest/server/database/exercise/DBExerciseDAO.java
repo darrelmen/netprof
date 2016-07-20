@@ -75,10 +75,11 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       List<String> typeOrder = Arrays.asList(project.first(), project.second());
 
       List<CommonExercise> allExercises = userExerciseDAO.getByProject(project.id(), typeOrder, getSectionHelper());
+      logger.info("readExercises got " + allExercises.size() + " predef exercises;");
 
       Collection<SlickRelatedExercise> related = userExerciseDAO.getAllRelated();
 
-      logger.info("got " + related.size() + " related exercises;");
+      logger.info("readExercises got " + related.size() + " related exercises;");
 
       Map<Integer, CommonExercise> idToEx = getIDToExercise(allExercises);
 
