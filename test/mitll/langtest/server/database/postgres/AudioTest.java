@@ -37,13 +37,11 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.audio.AudioDAO;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.user.UserDAO;
-import mitll.langtest.shared.AudioType;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import org.apache.log4j.Logger;
 import org.junit.Test;
-import scala.Int;
 
 import java.util.Collection;
 import java.util.HashMap;

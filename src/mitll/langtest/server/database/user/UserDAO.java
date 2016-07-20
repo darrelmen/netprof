@@ -35,8 +35,8 @@ package mitll.langtest.server.database.user;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.audio.AudioDAO;
-import mitll.langtest.shared.MiniUser;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.user.MiniUser;
+import mitll.langtest.shared.user.User;
 import org.apache.log4j.Logger;
 
 import java.sql.*;
@@ -166,7 +166,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    * @param kind
    * @param passwordH
    * @param emailH
-   * @see #addUser(String, String, String, mitll.langtest.shared.User.Kind, String, boolean, int, String, String)
+   * @see #addUser(String, String, String, User.Kind, String, boolean, int, String, String)
    */
   protected void updateUser(int id, User.Kind kind, String passwordH, String emailH) {
     try {
@@ -259,7 +259,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    */
   @Override
   public User getUser(String id, String passwordHash) {
-    User userWhere = getUserWithPass(id, passwordHash);
+    User userWhere = getStrictUserWithPass(id, passwordHash);
     if (userWhere == null) {
       logger.debug("getUser : no user with id '" + id + "' and pass " + passwordHash);
       userWhere = getUserByID(id);
@@ -270,7 +270,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   }
 
   @Override
-  public User getUserWithPass(String id, String passwordHash) {
+  public User getStrictUserWithPass(String id, String passwordHash) {
     logger.debug(language + " : getUser getting user with id '" + id + "' and pass '" + passwordHash + "'");
     String sql = "SELECT * from " +
         USERS +
@@ -295,6 +295,11 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   @Override
   public User getUserByID(String id) {
     return getUserWhere(-1, "SELECT * from users where UPPER(" + USER_ID + ")='" + id.toUpperCase() + "'");
+  }
+
+  @Override
+  public User getByID(int id) {
+    return null;
   }
 
   private int userExistsSQL(String id, String sql) {

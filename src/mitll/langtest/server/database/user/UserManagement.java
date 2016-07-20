@@ -39,7 +39,7 @@ import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.database.excel.UserDAOToExcel;
 import mitll.langtest.server.rest.RestUserManagement;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.UserAndTime;
 import net.sf.json.JSON;
 import net.sf.json.JSONObject;
@@ -64,7 +64,7 @@ public class UserManagement {
   private static final String NPF_CLASSROOM_PREFIX = "https://np.ll.mit.edu/npfClassroom";
   private static final String NO_USER = "-1";
 
-  private final int numExercises;
+//  private final int numExercises;
   private final IUserDAO userDAO;
   private final IResultDAO resultDAO;
   private final IUserListManager userListManager;
@@ -72,13 +72,13 @@ public class UserManagement {
   /**
    * @see DatabaseImpl#makeDAO(String, String, String)
    * @param userDAO
-   * @param numExercises
+   * @paramz numExercises
    * @param resultDAO
    * @param userListManager
    */
-  public UserManagement(IUserDAO userDAO, int numExercises, IResultDAO resultDAO, IUserListManager userListManager) {
+  public UserManagement(IUserDAO userDAO, /*int numExercises,*/ IResultDAO resultDAO, IUserListManager userListManager) {
     this.userDAO = userDAO;
-    this.numExercises = numExercises;
+  //  this.numExercises = numExercises;
     this.resultDAO = resultDAO;
     this.userListManager = userListManager;
   }
@@ -90,14 +90,15 @@ public class UserManagement {
    * TODO : read the list of sites from a file
    * TODO : don't do this.
    *
+   * @Deprecated - not needed in composite webapp
    * @param login
    * @param passwordH
    * @return
    * @see mitll.langtest.client.user.UserPassLogin#gotLogin
    * @see mitll.langtest.client.user.UserPassLogin#makeSignInUserName(com.github.gwtbootstrap.client.ui.Fieldset)
-   * @see mitll.langtest.server.LangTestDatabaseImpl#userExists(String, String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#userExists
    */
-  public User userExists(HttpServletRequest request, String login, String passwordH, ServerProperties props) {
+  @Deprecated public User userExists(HttpServletRequest request, String login, String passwordH, ServerProperties props) {
     User user = userDAO.getUser(login, passwordH);
 
     if (user == null && !passwordH.isEmpty()) {
@@ -196,7 +197,7 @@ public class UserManagement {
    * @param dialect
    * @param device
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addUser
+   * @seex mitll.langtest.server.LangTestDatabaseImpl#addUser
    */
   public User addUser(HttpServletRequest request, String userID, String passwordH, String emailH, User.Kind kind,
                       boolean isMale, int age, String dialect, String device) {
@@ -271,6 +272,7 @@ public class UserManagement {
   public JSON usersToJSON() { return new UserDAOToExcel().toJSON(getUsers());  }
 
   /**
+   * TODO : come back and re-examine percent complete in context of a project
    * Adds some sugar -- sets the answers and rate per user, and joins with dli experience data
    *
    * @return
@@ -293,9 +295,12 @@ public class UserManagement {
             u.setRate(userToRate.get(u.getId()));
           }
           int size = idToCount.idToUniqueCount.get(u.getId()).size();
-          boolean complete = size >= numExercises;
-          u.setComplete(complete);
-          u.setCompletePercent(Math.min(1.0f, (float) size / (float) numExercises));
+
+          if (false) {
+   /*         boolean complete = size >= numExercises;
+            u.setComplete(complete);
+            u.setCompletePercent(Math.min(1.0f, (float) size / (float) numExercises));*/
+          }
 /*          logger.debug("user " +u + " : results "+numResults + " unique " + size +
             " vs total exercises " + total + " complete " + complete);*/
         }
@@ -313,10 +318,10 @@ public class UserManagement {
    * @see #getUsers
    */
   private Pair populateUserToNumAnswers() {
-    Map<Long, Integer> idToCount = new HashMap<Long, Integer>();
-    Map<Long, Set<Integer>> idToUniqueCount = new HashMap<>();
+    Map<Integer, Integer> idToCount = new HashMap<>();
+    Map<Integer, Set<Integer>> idToUniqueCount = new HashMap<>();
     for (UserAndTime result : resultDAO.getUserAndTimes()) {
-      long userid = result.getUserid();
+      int userid = result.getUserid();
       int exerciseID = result.getExid();
 
       Integer count = idToCount.get(userid);
@@ -331,10 +336,10 @@ public class UserManagement {
   }
 
   private static class Pair {
-    final Map<Long, Integer> idToCount;
-    final Map<Long, Set<Integer>> idToUniqueCount;
+    final Map<Integer, Integer> idToCount;
+    final Map<Integer, Set<Integer>> idToUniqueCount;
 
-    Pair(Map<Long, Integer> idToCount, Map<Long, Set<Integer>> idToUniqueCount) {
+    Pair(Map<Integer, Integer> idToCount, Map<Integer, Set<Integer>> idToUniqueCount) {
       this.idToCount = idToCount;
       this.idToUniqueCount = idToUniqueCount;
     }

@@ -71,11 +71,12 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   /**
    * @param id
+   * @param projectid
    * @paramx content
    * @see mitll.langtest.server.database.exercise.ExcelImport#getExercise
    */
-  public Exercise(String id, String context, String contextTranslation, String meaning, String refAudioIndex) {
-    super(id, -1);
+  public Exercise(String id, String context, String contextTranslation, String meaning, String refAudioIndex, int projectid) {
+    super(id, -1, projectid);
     this.meaning = meaning;
     this.refAudioIndex = refAudioIndex;
     addContext(context, contextTranslation);
@@ -86,9 +87,10 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @param id
    * @param context
    * @param contextTranslation
+   * @param projectid
    */
-  public Exercise(String id, String context, String contextTranslation) {
-    super(id, -1);
+  public Exercise(String id, String context, String contextTranslation, int projectid) {
+    super(id, -1, projectid);
     this.foreignLanguage = context;
     this.english = contextTranslation;
   }
@@ -100,6 +102,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @param meaning
    * @param transliteration
    * @param dominoID
+   * @param projectid
    * @see mitll.langtest.server.database.exercise.JSONURLExerciseDAO#toExercise(JSONObject)
    * @see mitll.langtest.server.json.JsonExport#toExercise(JSONObject, Collection)
    */
@@ -108,8 +111,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
                   String foreignLanguage,
                   String meaning,
                   String transliteration,
-                  int dominoID) {
-    super(id, -1);
+                  int dominoID, int projectid) {
+    super(id, -1, projectid);
     setEnglishSentence(englishSentence);
     this.meaning = meaning;
     setForeignLanguage(foreignLanguage);
@@ -122,8 +125,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
                   String englishSentence,
                   String foreignLanguage,
                   String meaning,
-                  String transliteration) {
-    super(oldid, exid);
+                  String transliteration, int projectid) {
+    super(oldid, exid, projectid);
     setEnglishSentence(englishSentence);
     this.meaning = meaning;
     setForeignLanguage(foreignLanguage);
@@ -199,7 +202,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
    */
   public void addContext(String context, String contextTranslation) {
     if (!context.isEmpty()) {
-      Exercise contextExercise = new Exercise("c" + getID(), context, contextTranslation);
+      Exercise contextExercise = new Exercise("c" + getID(), context, contextTranslation, getProjectID());
       contextExercise.setUpdateTime(getUpdateTime());
       contextExercise.setUnitToValue(getUnitToValue());
       addContextExercise(contextExercise);

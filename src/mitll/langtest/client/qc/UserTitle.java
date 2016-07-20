@@ -34,7 +34,7 @@ package mitll.langtest.client.qc;
 
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.server.database.user.BaseUserDAO;
-import mitll.langtest.shared.MiniUser;
+import mitll.langtest.shared.user.MiniUser;
 
 public class UserTitle {
   private static final String MALE = "Male";

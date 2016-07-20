@@ -48,7 +48,7 @@ import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.SoundFeedback;
-import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.answer.AudioAnswer;
 
 import java.util.Collection;
 import java.util.Map;
@@ -406,7 +406,7 @@ public class PressAndHoldExercisePanel extends VerticalPanel implements AudioAns
 
   /**
    * @param score
-   * @see #receivedAudioAnswer(mitll.langtest.shared.AudioAnswer)
+   * @see #receivedAudioAnswer(AudioAnswer)
    */
   private void showCorrectFeedback(AudioAnswer result, double score) {
     showPronScoreFeedback(score);
@@ -463,7 +463,7 @@ public class PressAndHoldExercisePanel extends VerticalPanel implements AudioAns
   /**
    * @paramx correct
    * @paramx feedback
-   * @see #receivedAudioAnswer(mitll.langtest.shared.AudioAnswer)
+   * @see #receivedAudioAnswer(AudioAnswer)
    */
   private void nextAfterDelay() {
     initRecordButton();

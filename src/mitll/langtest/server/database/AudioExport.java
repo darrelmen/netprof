@@ -39,7 +39,7 @@ import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.scoring.LTSFactory;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.ExerciseAnnotation;
-import mitll.langtest.shared.MiniUser;
+import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import org.apache.commons.io.FileUtils;
@@ -176,7 +176,7 @@ public class AudioExport {
    * @param exercisesForSelectionState
    * @param installPath
    * @throws Exception
-   * @see mitll.langtest.server.database.DatabaseImpl#writeZip(java.io.OutputStream)
+   * @see DatabaseImpl#writeZip(OutputStream, int)
    */
   public void writeZipJustOneAudio(OutputStream out,
                                    SectionHelper<?> sectionHelper,
@@ -191,7 +191,7 @@ public class AudioExport {
    * @param sectionHelper
    * @param typeToSection
    * @return
-   * @see mitll.langtest.server.database.DatabaseImpl#getPrefix(java.util.Map)
+   * @see DatabaseImpl#getPrefix(Map, int)
    */
   public String getPrefix(SectionHelper<?> sectionHelper, Map<String, Collection<String>> typeToSection) {
     return getPrefix(typeToSection, sectionHelper.getTypeOrder());

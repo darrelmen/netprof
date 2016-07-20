@@ -60,7 +60,7 @@ import mitll.langtest.client.user.ResetPassword;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserPassLogin;
 import mitll.langtest.client.user.UserTable;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.user.User;
 
 import java.util.logging.Logger;
 
@@ -535,7 +535,7 @@ public class InitialUI {
    *
    * @param user
    * @see LangTest#makeFlashContainer
-   * @see UserManager#gotNewUser(mitll.langtest.shared.User)
+   * @see UserManager#gotNewUser(User)
    * @see UserManager#storeUser
    */
   public void gotUser(User user) {

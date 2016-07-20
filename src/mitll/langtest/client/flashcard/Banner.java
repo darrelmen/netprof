@@ -48,7 +48,7 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.user.User;
 
 import java.util.Collection;
 import java.util.List;
@@ -242,7 +242,7 @@ public class Banner implements RequiresResize {
 
   /**
    * @param val
-   * @see mitll.langtest.client.InitialUI#gotUser(mitll.langtest.shared.User)
+   * @see mitll.langtest.client.InitialUI#gotUser(User)
    * @see mitll.langtest.client.InitialUI#handleCDToken(com.github.gwtbootstrap.client.ui.Container, com.google.gwt.user.client.ui.Panel, String, String)
    * @see mitll.langtest.client.InitialUI#showLogin
    */
