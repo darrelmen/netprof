@@ -300,8 +300,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
         //Integer.toHexString(hashCode()) +
         " " + getID() +
         "/" + getDominoID() +
-        " old " + getOldID() +
-        " english '" + getEnglish() +
+        " old '" + getOldID() +
+        "' english '" + getEnglish() +
         "'/'" + getForeignLanguage() + "' " +
         "meaning '" + getMeaning() +
         "' transliteration '" + getTransliteration() +

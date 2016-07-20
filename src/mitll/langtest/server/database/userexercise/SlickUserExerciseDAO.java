@@ -186,9 +186,10 @@ public class SlickUserExerciseDAO
     return userExercise;
   }
 
-  long lastModified = System.currentTimeMillis();
+  private long lastModified = System.currentTimeMillis();
 
   /**
+   * So we need to not put the context sentences, at least initially, under the unit-chapter hierarchy.
    * TODO : add context sentences
    * TODO : connect context sentences
    *
@@ -239,11 +240,16 @@ public class SlickUserExerciseDAO
 //    }
     exercise.setUpdateTime(lastModified);
 
-    List<SectionHelper.Pair> pairs = new ArrayList<SectionHelper.Pair>();
-    for (Map.Entry<String, String> pair : unitToValue.entrySet()) {
-      pairs.add(sectionHelper.addExerciseToLesson(exercise, pair.getKey(), pair.getValue()));
+    if (slick.ispredef()) {
+      List<SectionHelper.Pair> pairs = new ArrayList<SectionHelper.Pair>();
+      for (Map.Entry<String, String> pair : unitToValue.entrySet()) {
+        pairs.add(sectionHelper.addExerciseToLesson(exercise, pair.getKey(), pair.getValue()));
+      }
+      sectionHelper.addAssociations(pairs);
     }
-    sectionHelper.addAssociations(pairs);
+    else {
+      exercise.setUnitToValue(unitToValue);
+    }
 
     return exercise;
   }
@@ -333,7 +339,7 @@ public class SlickUserExerciseDAO
   }
 
   public List<CommonExercise> getByProject(int projectid, List<String> typeOrder, SectionHelper<CommonExercise> sectionHelper) {
-    return getExercises(dao.getAllByProject(projectid), typeOrder, sectionHelper);
+    return getExercises(dao.getAllPredefByProject(projectid), typeOrder, sectionHelper);
   }
 
   @Override
@@ -364,9 +370,9 @@ public class SlickUserExerciseDAO
     return dao.isProjectEmpty(projectid);
   }
 
-  private RelatedExerciseDAOWrapper getRelatedExerciseDAOWrapper() {
-    return relatedExerciseDAOWrapper;
-  }
+//  private RelatedExerciseDAOWrapper getRelatedExerciseDAOWrapper() {
+//    return relatedExerciseDAOWrapper;
+//  }
 
   public IDAO getRelatedExercise() {
     return new IDAO() {
@@ -390,7 +396,7 @@ public class SlickUserExerciseDAO
 
   public Map<String, Integer> getOldToNew(int projectid) {
     Map<String, Integer> oldToNew = new HashMap<>();
-    for (SlickExercise exercise : dao.getAllByProject(projectid)) oldToNew.put(exercise.exid(), exercise.id());
+    for (SlickExercise exercise : dao.getAllPredefByProject(projectid)) oldToNew.put(exercise.exid(), exercise.id());
     return oldToNew;
   }
 }
