@@ -40,8 +40,8 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.recorder.RecordButtonPanel;
-import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.AudioType;
+import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.answer.AudioType;
 
 /**
  * Created with IntelliJ IDEA.

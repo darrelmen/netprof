@@ -39,7 +39,7 @@ import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.AudioType;
+import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 

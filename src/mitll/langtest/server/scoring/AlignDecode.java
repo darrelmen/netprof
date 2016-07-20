@@ -33,7 +33,7 @@
 package mitll.langtest.server.scoring;
 
 import mitll.langtest.server.autocrt.DecodeCorrectnessChecker;
-import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.scoring.PretestScore;
 
 import java.io.File;

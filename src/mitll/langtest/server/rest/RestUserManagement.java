@@ -39,7 +39,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.user.User;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
@@ -364,7 +364,7 @@ public class RestUserManagement {
     String passwordH = request.getHeader(PASSWORD_H);
 
     // first check if user exists already with this password -- if so go ahead and log them in.
-    User exactMatch = db.getUserDAO().getUserWithPass(user, passwordH);
+    User exactMatch = db.getUserDAO().getStrictUserWithPass(user, passwordH);
 
     logger.info("addUser user " + user + " pass "+ passwordH + " match " + exactMatch);
 

@@ -39,30 +39,30 @@ public class DominoReaderTest {
         serverProps.getMediaDir());
   }
 
-  public StartupInfo getStartupInfo() {
-    return new StartupInfo(database.getServerProps().getProperties(), database.getTypeOrder(), database.getSectionNodes());
-  }
+//  public StartupInfo getStartupInfo() {
+//    return new StartupInfo(database.getServerProps().getProperties(), database.getTypeOrder(projectid), database.getSectionNodes());
+//  }
 
   @Test
   public void testMe() {
-    Collection<?> exercises = database.getExercises();
-    Iterator<?> iterator = exercises.iterator();
-    Object next2 = iterator.next();
+  //  Collection<?> exercises = database.getExercises();
+  //  Iterator<?> iterator = exercises.iterator();
+  //  Object next2 = iterator.next();
 
-    logger.info("\n\ngot " + exercises.size());
-    logger.info("e.g. " + next2);
-    logger.info("e.g. " + iterator.next());
-    logger.info("e.g. " + iterator.next());
-    logger.info("e.g. " + iterator.next());
-    logger.info("e.g. " + iterator.next());
+//    logger.info("\n\ngot " + exercises.size());
+//    logger.info("e.g. " + next2);
+//    logger.info("e.g. " + iterator.next());
+//    logger.info("e.g. " + iterator.next());
+//    logger.info("e.g. " + iterator.next());
+//    logger.info("e.g. " + iterator.next());
 
-    StartupInfo startupInfo = getStartupInfo();
-    logger.info("Got " + startupInfo);
-    SectionNode next = startupInfo.getSectionNodes().iterator().next();
-    Map<String, Collection<String>> typeToSection = new HashMap<>();
-    typeToSection.put(next.getType(), Collections.singleton(next.getName()));
-    Collection exercisesForSelectionState = database.getSectionHelper().getExercisesForSelectionState(typeToSection);
+//    StartupInfo startupInfo = getStartupInfo();
+  //  logger.info("Got " + startupInfo);
+   // SectionNode next = startupInfo.getSectionNodes().iterator().next();
+  //  Map<String, Collection<String>> typeToSection = new HashMap<>();
+  //  typeToSection.put(next.getType(), Collections.singleton(next.getName()));
+  //  Collection exercisesForSelectionState = database.getSectionHelper().getExercisesForSelectionState(typeToSection);
 
-    logger.info("got " + exercisesForSelectionState.size() + " e.g. " + exercisesForSelectionState.iterator().next());
+   // logger.info("got " + exercisesForSelectionState.size() + " e.g. " + exercisesForSelectionState.iterator().next());
   }
 }

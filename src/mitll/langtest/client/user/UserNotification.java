@@ -32,8 +32,7 @@
 
 package mitll.langtest.client.user;
 
-import mitll.langtest.shared.AudioType;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.user.User;
 
 import java.util.Collection;
 

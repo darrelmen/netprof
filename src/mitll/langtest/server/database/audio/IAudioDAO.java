@@ -33,9 +33,9 @@
 package mitll.langtest.server.database.audio;
 
 import mitll.langtest.server.database.IDAO;
-import mitll.langtest.shared.AudioType;
+import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.ExerciseAnnotation;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.AudioAttributeExercise;
 import mitll.langtest.shared.exercise.CommonExercise;

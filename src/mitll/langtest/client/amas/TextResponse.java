@@ -49,8 +49,8 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PopupHelper;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.shared.Answer;
-import mitll.langtest.shared.AudioType;
+import mitll.langtest.shared.answer.Answer;
+import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.scoring.AudioContext;
 
 import java.util.Collection;
