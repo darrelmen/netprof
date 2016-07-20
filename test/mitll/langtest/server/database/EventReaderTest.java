@@ -36,9 +36,9 @@ public class EventReaderTest {
         serverProps.getMediaDir());
   }
 
-  public StartupInfo getStartupInfo() {
-    return new StartupInfo(database.getServerProps().getProperties(), database.getTypeOrder(projectid), database.getSectionNodes());
-  }
+//  public StartupInfo getStartupInfo() {
+//    return new StartupInfo(database.getServerProps().getProperties(), database.getTypeOrder(projectid), database.getSectionNodes());
+//  }
 
   @Test
   public void testReadOne() {
