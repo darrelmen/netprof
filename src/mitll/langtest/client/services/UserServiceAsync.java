@@ -33,7 +33,7 @@
 package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.user.User;
 
 import java.util.List;
 
@@ -42,7 +42,9 @@ public interface UserServiceAsync {
 
   void getUserBy(int id, AsyncCallback<User> async);
 
-  void userExists(String login, String passwordH, AsyncCallback<User> async);
+  void userExists(String login, String passwordH, int projectid, AsyncCallback<User> async);
+
+  void logout(String login, AsyncCallback<Void> async);
 
   void addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, String email, boolean isMale,
                int age, String dialect, boolean isCD, String device, AsyncCallback<User> async);

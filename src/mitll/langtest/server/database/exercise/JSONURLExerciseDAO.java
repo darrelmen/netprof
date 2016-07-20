@@ -160,7 +160,8 @@ public class JSONURLExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<C
         fl,
         meaning,
         transliteration,
-        dominoID);
+        dominoID,
+        -1);
 
     addContextSentences(content, exercise);
 

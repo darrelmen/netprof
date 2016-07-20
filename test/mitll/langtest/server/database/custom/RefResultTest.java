@@ -46,7 +46,7 @@ public class RefResultTest {
     typeToSection.put("Unit", Collections.singleton("1"));
     typeToSection.put("Chapter", Collections.singleton("1"));
 
-    JSONObject jsonRefResult = war.getJsonRefResult(typeToSection);
+    JSONObject jsonRefResult = war.getJsonRefResult(typeToSection, 1);
 
     System.out.println(jsonRefResult);
 

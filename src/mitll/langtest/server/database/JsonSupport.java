@@ -77,10 +77,10 @@ public class JsonSupport {
    * @see mitll.langtest.server.database.DatabaseImpl#setInstallPath(String, String, String)
    */
   JsonSupport(SectionHelper<CommonExercise> sectionHelper,
-                     IResultDAO resultDAO,
-                     IRefResultDAO refResultDAO,
-                     IAudioDAO audioDAO,
-                     IPhoneDAO phoneDAO, String configDir, String installPath) {
+              IResultDAO resultDAO,
+              IRefResultDAO refResultDAO,
+              IAudioDAO audioDAO,
+              IPhoneDAO phoneDAO, String configDir, String installPath) {
     this.sectionHelper = sectionHelper;
     this.resultDAO = resultDAO;
     this.refResultDAO = refResultDAO;
@@ -98,8 +98,8 @@ public class JsonSupport {
    * @see mitll.langtest.server.ScoreServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
   JSONObject getJsonScoreHistory(int userid,
-                                        Map<String, Collection<String>> typeToSection,
-                                        ExerciseSorter sorter) {
+                                 Map<String, Collection<String>> typeToSection,
+                                 ExerciseSorter sorter) {
     Collection<CommonExercise> exercisesForState = sectionHelper.getExercisesForSelectionState(typeToSection);
     List<Integer> allIDs = new ArrayList<>();
 
@@ -128,17 +128,17 @@ public class JsonSupport {
   /**
    * @param typeToSection
    * @return
-   * @see DatabaseImpl#getJsonRefResult(Map)
+   * @see DatabaseImpl#getJsonRefResult(Map, int)
    */
   JSONObject getJsonRefResults(Map<String, Collection<String>> typeToSection) {
     Collection<CommonExercise> exercisesForState = sectionHelper.getExercisesForSelectionState(typeToSection);
     List<Integer> allIDs = new ArrayList<>();
 
-   // Map<String, CommonExercise> idToEx = new HashMap<String, CommonExercise>();
+    // Map<String, CommonExercise> idToEx = new HashMap<String, CommonExercise>();
     for (CommonExercise exercise : exercisesForState) {
-     // String id = exercise.getOldID();
+      // String id = exercise.getOldID();
       allIDs.add(exercise.getID());
-     // idToEx.put(id, exercise);
+      // idToEx.put(id, exercise);
     }
     return refResultDAO.getJSONScores(allIDs);
   }

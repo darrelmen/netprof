@@ -44,7 +44,6 @@ import java.util.*;
 
 public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<CommonExercise> {
   private static final Logger logger = Logger.getLogger(DBExerciseDAO.class);
-  // private final Collection<String> typeOrder;
   private SlickUserExerciseDAO userExerciseDAO;
   SlickProject project;
 
@@ -56,11 +55,12 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       IUserListManager userListManager,
       boolean addDefects,
       SlickUserExerciseDAO userExerciseDAO,
-      SlickProject project) {
+     SlickProject project
+  ) {
     super(serverProps, userListManager, addDefects);
     logger.info("reading from database--------- ");
     this.userExerciseDAO = userExerciseDAO;
-    this.project = project;
+    //this.project = project;
   }
 
   /**

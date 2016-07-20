@@ -35,7 +35,7 @@ package mitll.langtest.server.database.result;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.npdata.dao.SlickResult;

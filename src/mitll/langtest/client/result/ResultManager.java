@@ -59,7 +59,7 @@ import mitll.langtest.client.list.TypeAhead;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.ReviewScoringPanel;
 import mitll.langtest.client.table.PagerTable;
-import mitll.langtest.shared.MonitorResult;
+import mitll.langtest.shared.result.MonitorResult;
 import mitll.langtest.shared.ResultAndTotal;
 
 import java.util.ArrayList;

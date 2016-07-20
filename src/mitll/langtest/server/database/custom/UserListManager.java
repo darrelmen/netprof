@@ -47,7 +47,7 @@ import mitll.langtest.server.database.userlist.IUserListExerciseJoinDAO;
 import mitll.langtest.server.database.userlist.SlickUserListDAO;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.ExerciseAnnotation;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
@@ -779,7 +779,7 @@ public class UserListManager implements IUserListManager {
    * @param typeOrder
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds
-   * @see mitll.langtest.server.database.DatabaseImpl#getUserListName(long)
+   * @see mitll.langtest.server.database.DatabaseImpl#getUserListName(long, int)
    */
   @Override
   public UserList<CommonShell> getUserListByID(long id, Collection<String> typeOrder) {
@@ -946,7 +946,7 @@ public class UserListManager implements IUserListManager {
 
   /**
    * @param exerciseid
-   * @see mitll.langtest.server.database.DatabaseImpl#deleteItem(int)
+   * @see mitll.langtest.server.database.DatabaseImpl#deleteItem(int, int)
    */
   @Override
   public void removeReviewed(int exerciseid) {

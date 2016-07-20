@@ -37,7 +37,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.project.ProjectStatus;
 import mitll.langtest.server.database.project.ProjectType;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.npdata.dao.SlickProject;
 import mitll.npdata.dao.SlickProjectProperty;
@@ -59,7 +59,7 @@ public class ProjectTest extends BaseTest {
 
     User gvidaver = spanish.getUserDAO().getUserByID("gvidaver");
 
-    Iterator<String> iterator = spanish.getTypeOrder().iterator();
+    Iterator<String> iterator = spanish.getTypeOrder(projectid).iterator();
     projectDAO.add(
         gvidaver.getId(),
         System.currentTimeMillis(),

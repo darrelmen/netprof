@@ -37,7 +37,7 @@ public class EventReaderTest {
   }
 
   public StartupInfo getStartupInfo() {
-    return new StartupInfo(database.getServerProps().getProperties(), database.getTypeOrder(), database.getSectionNodes());
+    return new StartupInfo(database.getServerProps().getProperties(), database.getTypeOrder(projectid), database.getSectionNodes());
   }
 
   @Test
