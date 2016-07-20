@@ -49,7 +49,7 @@ public class ReviewedExTest extends BaseTest {
 
   @Test
   public void testReviewed() {
-    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
+    DatabaseImpl spanish = getDatabase("spanish");
 
 //    IUserExerciseDAO dao = spanish.getUserExerciseDAO();
     IUserListManager userListManager = spanish.getUserListManager();

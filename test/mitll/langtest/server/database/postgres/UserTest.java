@@ -48,7 +48,7 @@ public class UserTest extends BaseTest {
 
   @Test
   public void testAdmin() {
-    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
+    DatabaseImpl spanish = getDatabase("spanish");
 
     IUserDAO dao = spanish.getUserDAO();
 
@@ -62,7 +62,7 @@ public class UserTest extends BaseTest {
    */
   @Test
   public void testUser() {
-    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
+    DatabaseImpl spanish = getDatabase("spanish");
 
     IUserDAO dao = spanish.getUserDAO();
 
