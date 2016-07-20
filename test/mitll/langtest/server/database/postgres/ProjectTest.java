@@ -52,14 +52,14 @@ public class ProjectTest extends BaseTest {
 
   @Test
   public void testProject() {
-    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
+    DatabaseImpl spanish = getDatabase("spanish");
 
 
     IProjectDAO projectDAO = spanish.getProjectDAO();
 
     User gvidaver = spanish.getUserDAO().getUserByID("gvidaver");
 
-    Iterator<String> iterator = spanish.getTypeOrder(projectid).iterator();
+    Iterator<String> iterator = spanish.getTypeOrder(-1).iterator();
     projectDAO.add(
         gvidaver.getId(),
         System.currentTimeMillis(),
@@ -72,7 +72,7 @@ public class ProjectTest extends BaseTest {
 
   @Test
   public void testListProjects() {
-    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
+    DatabaseImpl spanish = getDatabase("spanish");
 
     IProjectDAO projectDAO = spanish.getProjectDAO();
     Collection<SlickProject> all = projectDAO.getAll();
@@ -86,7 +86,7 @@ public class ProjectTest extends BaseTest {
 
   @Test
   public void testAddProperty() {
-    DatabaseImpl<CommonExercise> spanish = getDatabaseVeryLight("spanish", false);
+    DatabaseImpl spanish = getDatabaseVeryLight("spanish", false);
 
     IProjectDAO projectDAO = spanish.getProjectDAO();
     SlickProject next = projectDAO.getAll().iterator().next();

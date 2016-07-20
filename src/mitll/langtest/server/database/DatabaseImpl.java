@@ -166,7 +166,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
 
   private static final boolean ADD_DEFECTS = true;
   private UserManagement userManagement = null;
- // private IAnalysis analysis;
+  // private IAnalysis analysis;
   private final String absConfigDir;
   private SimpleExerciseDAO<AmasExerciseImpl> fileExerciseDAO;
 
@@ -357,8 +357,8 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   }
 
   /**
-   * @return
    * @param projectid
+   * @return
    */
   public IAnalysis getAnalysis(int projectid) {
     return getProject(projectid).getAnalysis();
@@ -442,6 +442,16 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   }
 
   /**
+   * JUST FOR TESTING
+   *
+   * @return
+   */
+  @Deprecated
+  public SectionHelper<CommonExercise> getSectionHelper() {
+    return getSectionHelper(-1);
+  }
+
+  /**
    * TODO : sections are valid in the context of a project.
    *
    * @param projectid
@@ -470,7 +480,6 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   }
 
   /**
-   *
    * @param projectid
    * @return
    */
@@ -489,6 +498,17 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
    */
   public CommonExercise getExercise(int id) {
     return getFirstExerciseDAO().getExercise(id);
+  }
+
+
+  /**
+   * JUST FOR TESTING
+   *
+   * @return
+   */
+  @Deprecated
+  public Collection<CommonExercise> getExercises() {
+    return getExercises(-1);
   }
 
   /**
@@ -511,7 +531,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     return rawExercises;
   }
 
-  Project<CommonExercise> getProject(int projectid) {
+  public Project<CommonExercise> getProject(int projectid) {
     if (projectid == -1) return getFirstProject();
     return idToProject.get(projectid);
   }
@@ -588,7 +608,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
 
           // numExercises = this.exerciseDAO.getNumExercises();
 
-    //      analysis =
+          //      analysis =
         }
         userManagement = new UserManagement(userDAO, /*numExercises,*/ resultDAO, userListManager);
         //   audioDAO.setExerciseDAO(exerciseDAO);
@@ -765,6 +785,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
 
   /**
    * TODO : pass in projectid...
+   *
    * @param typeToSection
    * @param projectid
    * @return
@@ -793,7 +814,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
    * @see mitll.langtest.server.ScoreServlet#getPhoneReport
    */
   public JSONObject getJsonPhoneReport(long userid, Map<String, Collection<String>> typeToValues) {
-    return getJsonSupport((int)userid).getJsonPhoneReport(userid, typeToValues);
+    return getJsonSupport((int) userid).getJsonPhoneReport(userid, typeToValues);
   }
 
   /**
@@ -1133,9 +1154,8 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   }
 
   /**
-   *
-   * @return
    * @param projectid
+   * @return
    */
   private Map<Integer, CommonExercise> getIdToExerciseMap(int projectid) {
     Map<Integer, CommonExercise> join = new HashMap<>();
@@ -1153,10 +1173,10 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   }
 
   /**
+   * @param projectid
    * @return
    * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceForUser
    * @see DatabaseImpl#makeDAO(String, String, String)
-   * @param projectid
    */
   public Map<Integer, String> getExerciseIDToRefAudio(int projectid) {
     Map<Integer, String> join = new HashMap<>();
@@ -1374,7 +1394,8 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   }
 
   @Override
-  @Deprecated public String getLanguage() {
+  @Deprecated
+  public String getLanguage() {
     return getServerProps().getLanguage();
   }
 
@@ -1621,9 +1642,9 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   }
 
   /**
+   * @param projectid
    * @return
    * @see LangTestDatabaseImpl#getMaleFemaleProgress()
-   * @param projectid
    */
   public Map<String, Float> getMaleFemaleProgress(int projectid) {
     IUserDAO userDAO = getUserDAO();
@@ -1651,9 +1672,9 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   }
 
   /**
+   * @param projectid
    * @return
    * @see LangTestDatabaseImpl#getMaleFemaleProgress()
-   * @param projectid
    */
   public Map<String, Float> getH2MaleFemaleProgress(int projectid) {
     IUserDAO userDAO = getUserDAO();
