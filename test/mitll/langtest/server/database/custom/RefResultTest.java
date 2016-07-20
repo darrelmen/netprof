@@ -33,7 +33,7 @@ public class RefResultTest {
     String props = "quizlet.properties";
 
     DatabaseImpl war  = getDatabase(config, dbName, props);
-    Collection<CommonExercise> exercises = war.getExercises();
+    Collection<CommonExercise> exercises = war.getExercises(-1);
     logger.warn("found " + exercises.size() + " exercises");
 
 
@@ -60,7 +60,7 @@ public class RefResultTest {
     logger.warn("got " + stringResultMap.size());
 
     DatabaseImpl war2 = getDatabase(config, "npfSpanishTest", "quizletOld.properties");
-    Collection<CommonExercise> oldExercises = war2.getExercises();
+    Collection<CommonExercise> oldExercises = war2.getExercises(-1);
     logger.warn("OLD found " + oldExercises.size() + " exercises");
 
 
@@ -196,7 +196,7 @@ public class RefResultTest {
     logger.debug("made " + war + " media " + media);
 
     war.setInstallPath(".", parent + File.separator + war.getServerProps().getLessonPlan(), "media");
-    Collection<CommonExercise> exercises = war.getExercises();
+    Collection<CommonExercise> exercises = war.getExercises(-1);
     return war;
   }
 

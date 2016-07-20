@@ -476,8 +476,8 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
         rs.getString(TRANSLITERATION),
         rs.getBoolean(OVERRIDE),
         unitToValue,
-        date.getTime()
-    );
+        date.getTime(),
+        -1);
   }
 
   //  private Map<String, List<AudioAttribute>> exToAudio;
