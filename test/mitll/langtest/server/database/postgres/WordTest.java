@@ -44,7 +44,7 @@ public class WordTest extends BaseTest {
 
   @Test
   public void testAnno() {
-    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
+    DatabaseImpl spanish = getDatabase("spanish");
 
     IWordDAO dao = spanish.getWordDAO();
 
