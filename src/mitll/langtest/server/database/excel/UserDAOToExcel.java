@@ -33,7 +33,7 @@
 package mitll.langtest.server.database.excel;
 
 import mitll.langtest.server.database.user.UserDAO;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.user.User;
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;

@@ -34,8 +34,8 @@ package mitll.langtest.server.database.audio;
 
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.user.IUserDAO;
-import mitll.langtest.shared.AudioType;
-import mitll.langtest.shared.MiniUser;
+import mitll.langtest.shared.answer.AudioType;
+import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.npdata.dao.SlickAudio;
 import mitll.npdata.dao.audio.AudioDAOWrapper;

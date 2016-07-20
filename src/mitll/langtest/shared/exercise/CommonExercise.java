@@ -72,6 +72,8 @@ public interface CommonExercise extends CommonAudioExercise, ScoredExercise {
 
   long getUpdateTime();
 
+  int getProjectID();
+
   MutableExercise getMutable();
   MutableAudioExercise getMutableAudio();
   MutableAnnotationExercise getMutableAnnotation();

@@ -30,55 +30,33 @@
  *
  */
 
-package mitll.langtest.shared;
+package mitll.langtest.shared.image;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.Shell;
 
-import java.util.Collection;
-import java.util.List;
-
-/**
- * Includes a reqID so if the client gets responses out of order it can ignore responses to old requests.
- * Also includes the first exercise.
- * The list of exercises here is just a list of {@link mitll.langtest.shared.exercise.CommonShell} objects to
- * reduce the bytes sent to get the exercise list. Perhaps in the future we could move to an async list.
- * <p/>
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 6/12/13
- * Time: 4:19 PM
- * To change this template use File | Settings | File Templates.
- */
-public class ExerciseListWrapper<T extends Shell> implements IsSerializable {
-  public ExerciseListWrapper() {} // req for serialization
-
-  private int reqID;
-  private List<T> exercises;
-  private CommonExercise firstExercise;
+public class ImageResponse implements IsSerializable {
+  public int req;
+  public String imageURL;
+  public double durationInSeconds;
+  public boolean successful = false;
+  public ImageResponse() {}
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#makeExerciseListWrapper
-   * @param reqID
-   * @param ids
-   * @param firstExercise
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getImageForAudioFile(int, String, String, int, int)
+   * @param req
+   * @param imageURL
+   * @param durationInSeconds
    */
-  public ExerciseListWrapper(int reqID, List<T> ids, CommonExercise firstExercise) {
-    this.reqID = reqID;
-    this.exercises = ids;
-    this.firstExercise = firstExercise;
+  public ImageResponse(int req, String imageURL, double durationInSeconds) {
+    this.req = req;
+    this.imageURL = imageURL;
+    this.successful = true;
+    this.durationInSeconds = durationInSeconds;
   }
-
-  public int getReqID() {
-    return reqID;
-  }
-  public List<T> getExercises() { return exercises;  }
-  public CommonExercise getFirstExercise() { return firstExercise;  }
 
   public String toString() {
-    return "req " + reqID + " has " + exercises.size() + " exercises" +
-        (firstExercise != null ? ", first is " + firstExercise.getID() : "");
+    return successful ?
+        "req id#" + req + " : " + imageURL + " dur " + durationInSeconds + " seconds" :
+        "error for req " + req;
   }
 }

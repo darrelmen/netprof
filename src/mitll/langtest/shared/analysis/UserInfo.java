@@ -32,7 +32,7 @@
 
 package mitll.langtest.shared.analysis;
 
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.user.User;
 
 import java.io.Serializable;
 import java.util.Collections;

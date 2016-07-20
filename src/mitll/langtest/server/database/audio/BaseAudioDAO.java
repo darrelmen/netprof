@@ -40,10 +40,10 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.database.user.IUserDAO;
-import mitll.langtest.shared.AudioType;
+import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.ExerciseAnnotation;
-import mitll.langtest.shared.MiniUser;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.user.MiniUser;
+import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.exercise.*;
 import org.apache.log4j.Logger;
 
@@ -125,7 +125,7 @@ public abstract class BaseAudioDAO extends DAO {
    * @param relativeConfigDir
    * @see mitll.langtest.server.LangTestDatabaseImpl#attachAudio(mitll.langtest.shared.exercise.CommonExercise)
    * @see DatabaseImpl#attachAudio(CommonExercise)
-   * @see DatabaseImpl#writeZip(OutputStream, long, PathHelper)
+   * @see DatabaseImpl#writeZip(OutputStream, long, PathHelper, int)
    */
   public int attachAudio(CommonExercise firstExercise, String installPath, String relativeConfigDir) {
     Collection<AudioAttribute> audioAttributes = getAudioAttributes(firstExercise.getID());
@@ -329,7 +329,7 @@ public abstract class BaseAudioDAO extends DAO {
    * @param total
    * @param uniqueIDs
    * @return
-   * @see DatabaseImpl#getMaleFemaleProgress()
+   * @see DatabaseImpl#getMaleFemaleProgress(int)
    */
   public Map<String, Float> getRecordedReport(Map<Integer, User> userMapMales,
                                               Map<Integer, User> userMapFemales,

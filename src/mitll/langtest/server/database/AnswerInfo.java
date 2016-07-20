@@ -33,7 +33,7 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.audio.AudioCheck;
-import mitll.langtest.shared.AudioType;
+import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.scoring.AudioContext;
 
 /**

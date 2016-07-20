@@ -33,7 +33,7 @@
 package mitll.langtest.server.audio;
 
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonExercise;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
