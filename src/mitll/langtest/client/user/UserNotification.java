@@ -49,7 +49,6 @@ public interface UserNotification {
   void showLogin();
 
   void gotUser(User user);
-//  void rememberAudioType(AudioType audioType);
   void setPermission(User.Permission permission, boolean on);
   Collection<User.Permission> getPermissions();
 }
