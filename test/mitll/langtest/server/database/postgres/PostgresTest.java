@@ -36,12 +36,15 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.CopyToPostgres;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.npdata.dao.DBConnection;
+import mitll.npdata.dao.SlickProject;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import java.io.File;
+import java.util.List;
 
 public class PostgresTest extends BaseTest {
   private static final Logger logger = Logger.getLogger(PostgresTest.class);
@@ -81,6 +84,20 @@ public class PostgresTest extends BaseTest {
     testCreate();
     DatabaseImpl spanish = getDatabaseLight("spanish", true);
  //   new CopyToPostgres().copyUserExListJoin(spanish);
+  }
+
+
+  @Test
+  public void testGetFirst() {
+    DatabaseImpl spanish = getDatabaseLight("spanish", false);
+    SlickProject next = spanish.getProjectDAO().getAll().iterator().next();
+    ExerciseDAO<CommonExercise> exerciseDAO = spanish.getExerciseDAO(next.id());
+    List<CommonExercise> rawExercises = exerciseDAO.getRawExercises();
+    for (CommonExercise ex: rawExercises.subList(0,100)) {
+      logger.info("ex " + ex.getID()+ " '" + ex.getEnglish() + "' '" +ex.getForeignLanguage() +"'");
+    }
+    logger.info("Got " + rawExercises.iterator().next());
+    //   new CopyToPostgres().copyUserExListJoin(spanish);
   }
 
   private static DBConnection getConnection(String config) {
