@@ -149,7 +149,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private ExerciseTrie fullTrie = null;
   private ExerciseTrie<AmasExerciseImpl> amasFullTrie = null;
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private UserSecurityManager securityManager;
 
   /**
