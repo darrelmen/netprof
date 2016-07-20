@@ -48,7 +48,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   SlickProject project;
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#makeDAO
+   * @see mitll.langtest.server.database.DatabaseImpl#makeExerciseDAO(String, boolean)
    */
   public DBExerciseDAO(
       ServerProperties serverProps,
@@ -60,7 +60,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     super(serverProps, userListManager, addDefects);
     logger.info("reading from database--------- ");
     this.userExerciseDAO = userExerciseDAO;
-    //this.project = project;
+    this.project = project;
   }
 
   /**

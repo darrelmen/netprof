@@ -142,6 +142,7 @@ public class UserSecurityManager {
    */
   protected User lookupUser(HttpServletRequest request, boolean throwOnFail)
       throws DominoSessionException {
+    if (request == null) return null;
     long startMS = System.currentTimeMillis();
 
     User sessUser = lookupUserFromHttpSession(request);
@@ -153,6 +154,7 @@ public class UserSecurityManager {
 //		if (sessUser != null && (!sessUser.isActive())) {
 //			sessUser = null;
 //		}
+
     log.info(TIMING, "Lookup User for {} complete in {}", request.getRequestURL(), elapsedMS(startMS));
     if (sessUser == null && throwOnFail) {
       log.error("About to fail due to missing user in session! SID: {}",
@@ -177,7 +179,6 @@ public class UserSecurityManager {
 	}*/
 
   /**
-   *
    * @param request
    * @return
    * @throws DominoSessionException
@@ -185,7 +186,7 @@ public class UserSecurityManager {
   protected User lookupUserFromHttpSession(HttpServletRequest request)
       throws DominoSessionException {
     User sessUser = null;
-    HttpSession session = request.getSession(false);
+    HttpSession session = request != null ? request.getSession(false) : null;
     if (session != null) {
       Integer uidI = (Integer) session.getAttribute(USER_SESSION_ATT);
       log.info("Lookup user from HTTP session. SID={} Request SID={}, Session Created={}, isNew={}, result={}",
@@ -194,7 +195,7 @@ public class UserSecurityManager {
       if (uidI != null) {
         sessUser = userDAO.getByID(uidI);
       }
-    } else {
+    } else if (request != null ){
       log.info("Lookup user from session returning null for null session. Request SID={}",
           request.getRequestedSessionId());
     }

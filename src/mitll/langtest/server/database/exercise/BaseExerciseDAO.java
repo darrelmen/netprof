@@ -141,17 +141,21 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 	private void attachAudio() {
 		Set<Integer> transcriptChanged = new HashSet<>();
 
-		// logger.info("afterReadingExercises trying to attach audio to " + exercises.size());
+		 logger.info("attachAudio afterReadingExercises trying to attach audio to " + exercises.size());
 
+    int n =0;
 		for (CommonExercise ex : exercises) {
 			attachAudio.attachAudio(ex, transcriptChanged);
 			String refAudioIndex = ex.getRefAudioIndex();
 			if (refAudioIndex != null && !refAudioIndex.isEmpty()) {
 				attachAudio.addOldSchoolAudio(refAudioIndex, (AudioExercise) ex);
+        n++;
 			}
 		}
+    logger.info("attachAudio afterReadingExercises finished attaching audio to " + n);
 
-		if (!transcriptChanged.isEmpty()) {
+
+    if (!transcriptChanged.isEmpty()) {
 			logger.info("afterReadingExercises : found " + transcriptChanged.size() + " changed transcripts in set of " + exercises.size() + " items");
 		}
 	}
@@ -406,6 +410,8 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 	private void addDefects(Map<Integer, Map<String, String>> exTofieldToDefect) {
 		if (addDefects) {
 			int count = 0;
+      logger.info("adding defects, num = " + exTofieldToDefect.size());
+
 			for (Map.Entry<Integer, Map<String, String>> pair : exTofieldToDefect.entrySet()) {
 				for (Map.Entry<String, String> fieldToDefect : pair.getValue().entrySet()) {
 					if (userListManager.addDefect(pair.getKey(), fieldToDefect.getKey(), fieldToDefect.getValue())) {

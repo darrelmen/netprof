@@ -43,22 +43,25 @@ public class ProjectStartupInfo implements IsSerializable {
   private Collection<String> typeOrder;
   private Collection<SectionNode> sectionNodes;
   private int projectid;
+  private String language;
 
-  public ProjectStartupInfo() {} // for serialization
+  public ProjectStartupInfo() {
+  } // for serialization
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getStartupInfo()
    * @param properties
    * @param typeOrder
    * @param sectionNodes
    * @param projectid
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getStartupInfo()
    */
   public ProjectStartupInfo(Map<String, String> properties, Collection<String> typeOrder,
-                            Collection<SectionNode> sectionNodes, int projectid) {
+                            Collection<SectionNode> sectionNodes, int projectid, String language) {
     this.properties = properties;
     this.typeOrder = typeOrder;
     this.sectionNodes = sectionNodes;
     this.projectid = projectid;
+    this.language = language;
   }
 
   public Map<String, String> getProperties() {
@@ -73,9 +76,17 @@ public class ProjectStartupInfo implements IsSerializable {
     return sectionNodes;
   }
 
-  public String toString() { return "Order " + getTypeOrder() + " nodes " + getSectionNodes(); }
-
   public int getProjectid() {
     return projectid;
+  }
+
+  public String toString() {
+    return "Project  " + projectid +
+        " Order " + getTypeOrder() +
+        " nodes " + getSectionNodes();
+  }
+
+  public String getLanguage() {
+    return language;
   }
 }
