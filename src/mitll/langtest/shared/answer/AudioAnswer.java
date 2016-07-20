@@ -30,28 +30,13 @@
  *
  */
 
-package mitll.langtest.shared;
+package mitll.langtest.shared.answer;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.server.autocrt.DecodeCorrectnessChecker;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.scoring.PretestScore;
 
-/**
- * What a client might want to know about some audio that was just posted.
- * <p/>
- * For instance, if it was a valid recording and if not, what type of problem (too quiet, too loud, no mic, etc.)
- * <p/>
- * Also returns the score if the audio was scored, and any decode output if it was decoding.
- * <p/>
- * Mainly it the path to the audio on the server so the client can play it as an mp3.
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 7/6/12
- * Time: 7:01 PM
- * To change this template use File | Settings | File Templates.
- */
 public class AudioAnswer implements IsSerializable {
   private static final String PRESS_AND_HOLD = "Press and hold to record, release to stop recording.";
   private int reqid;

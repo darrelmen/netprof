@@ -36,7 +36,7 @@ import mitll.langtest.client.user.Md5Hash;
 import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.user.IUserDAO;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.exercise.CommonExercise;
 import org.apache.log4j.Logger;
 import org.junit.Test;
@@ -104,8 +104,8 @@ public class UserTest extends BaseTest {
     logger.info("user id " + dao.getIdForUserID(userid));
     logger.info("user " + dao.getUser(userid, password));
     logger.info("user " + dao.getUser(userid, hash));
-    logger.info("user " + dao.getUserWithPass(userid, password));
-    logger.info("user " + dao.getUserWithPass(userid, hash));
+    logger.info("user " + dao.getStrictUserWithPass(userid, password));
+    logger.info("user " + dao.getStrictUserWithPass(userid, hash));
     logger.info("user devices " + dao.getUsersDevices());
     logger.info("mini " + dao.getMiniUsers());
     logger.info("mini first " + dao.getMiniUser(dao.getMiniUsers().keySet().iterator().next()));
@@ -116,10 +116,10 @@ public class UserTest extends BaseTest {
     logger.info("valid email " + dao.isValidEmail(hash));
     logger.info("valid email " + dao.isValidEmail(password));
     logger.info("change password\n" +
-        dao.getUserWithPass(userid, password) + " :\n" +
+        dao.getStrictUserWithPass(userid, password) + " :\n" +
         dao.changePassword(id, bueller) + "\n" +
-        dao.getUserWithPass(userid, password) + " :\n" +
-        dao.getUserWithPass(userid, bueller));
+        dao.getStrictUserWithPass(userid, password) + " :\n" +
+        dao.getStrictUserWithPass(userid, bueller));
 
     logger.info("reset key " +
         dao.getUserWithResetKey("reset") +

@@ -51,7 +51,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.client.table.PagerTable;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.user.User;
 
 import java.util.Comparator;
 import java.util.List;

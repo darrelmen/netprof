@@ -211,7 +211,7 @@ public class SlickUserExerciseDAO
         slick.english(),
         slick.foreignlanguage(),
         slick.meaning(),
-        slick.transliteration());
+        slick.transliteration(), projectid);
 
     List<String> translations = new ArrayList<String>();
     if (slick.foreignlanguage().length() > 0) {

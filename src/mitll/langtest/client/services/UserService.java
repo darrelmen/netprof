@@ -43,7 +43,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.UserPassLogin;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.user.User;
 
 import java.util.List;
 
@@ -79,9 +79,11 @@ public interface UserService extends RemoteService {
    * @see mitll.langtest.client.user.UserPassLogin#gotLogin(String, String, boolean)
    * @param login
    * @param passwordH
+   * @param projectid
    * @return
    */
-  User userExists(String login, String passwordH);
+  User userExists(String login, String passwordH, int projectid);
+  void logout(String login);
 
   /**
    * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser(int)

@@ -33,8 +33,10 @@
 package mitll.langtest.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.shared.project.ProjectInfo;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -48,28 +50,35 @@ import java.util.Map;
  */
 public class StartupInfo implements IsSerializable {
   private Map<String, String> properties;
-  private Collection<String> typeOrder;
-  private Collection<SectionNode> sectionNodes;
+  private List<ProjectInfo> projects;
+//  private Collection<String> typeOrder;
+//  private Collection<SectionNode> sectionNodes;
 
   public StartupInfo() {} // for serialization
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getStartupInfo()
    * @param properties
-   * @param typeOrder
-   * @param sectionNodes
+   * @paramx typeOrder
+   * @paramx sectionNodes
    */
-  public StartupInfo(Map<String, String> properties, Collection<String> typeOrder, Collection<SectionNode> sectionNodes) {
+  public StartupInfo(Map<String, String> properties,
+                     List<ProjectInfo> projects/*, Collection<String> typeOrder, Collection<SectionNode> sectionNodes*/) {
     this.properties = properties;
-    this.typeOrder = typeOrder;
-    this.sectionNodes = sectionNodes;
+    this.projects = projects;
+//    this.typeOrder = typeOrder;
+//    this.sectionNodes = sectionNodes;
   }
 
   public Map<String, String> getProperties() {
     return properties;
   }
 
-  public Collection<String> getTypeOrder() {
+  public List<ProjectInfo> getProjects() {
+    return projects;
+  }
+
+/*  public Collection<String> getTypeOrder() {
     return typeOrder;
   }
 
@@ -77,5 +86,5 @@ public class StartupInfo implements IsSerializable {
     return sectionNodes;
   }
 
-  public String toString() { return "Order " + getTypeOrder() + " nodes " + getSectionNodes(); }
+  public String toString() { return "Order " + getTypeOrder() + " nodes " + getSectionNodes(); }*/
 }

@@ -47,7 +47,7 @@ import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
-import mitll.langtest.shared.ImageResponse;
+import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.exercise.Shell;
 
 import java.util.HashMap;
