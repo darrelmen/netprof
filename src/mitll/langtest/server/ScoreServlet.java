@@ -39,12 +39,12 @@ import mitll.langtest.server.rest.RestUserManagement;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
-import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
+import mitll.langtest.shared.user.User;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
@@ -160,6 +160,7 @@ public class ScoreServlet extends DatabaseServlet {
 
     try {
       queryString = URLDecoder.decode(queryString, "UTF-8");
+      int projectid = getProject(request);
       if (matchesRequest(queryString, NESTED_CHAPTERS)) {
         String[] split1 = queryString.split("&");
         if (split1.length == 2) {
@@ -169,19 +170,19 @@ public class ScoreServlet extends DatabaseServlet {
           if (shouldRemoveExercisesWithNoAudio || dontRemove) {
             if (dontRemove) {
               if (nestedChaptersEverything == null || (System.currentTimeMillis() - whenCachedEverything > REFRESH_CONTENT_INTERVAL_THREE)) {
-                nestedChaptersEverything = getJsonNestedChapters(shouldRemoveExercisesWithNoAudio);
+                nestedChaptersEverything = getJsonNestedChapters(shouldRemoveExercisesWithNoAudio, projectid);
                 whenCachedEverything = System.currentTimeMillis();
               }
               toReturn = nestedChaptersEverything;
             } else {
-              toReturn = getJsonNestedChapters(true);
+              toReturn = getJsonNestedChapters(true, projectid);
             }
           } else {
             toReturn.put(ERROR, "expecting param " + REMOVE_EXERCISES_WITH_MISSING_AUDIO);
           }
         } else {
           if (nestedChapters == null || (System.currentTimeMillis() - whenCached > REFRESH_CONTENT_INTERVAL)) {
-            nestedChapters = getJsonNestedChapters(true);
+            nestedChapters = getJsonNestedChapters(true, projectid);
             whenCached = System.currentTimeMillis();
           }
           toReturn = nestedChapters;
@@ -190,7 +191,7 @@ public class ScoreServlet extends DatabaseServlet {
         logger.info("doGet " + getLanguage() + " handled user command for " + queryString);
       } else if (matchesRequest(queryString, CHAPTER_HISTORY)) {
         queryString = removePrefix(queryString, CHAPTER_HISTORY);
-        toReturn = getChapterHistory(queryString, toReturn);
+        toReturn = getChapterHistory(queryString, toReturn, projectid);
       } else if (matchesRequest(queryString, REF_INFO)) {
         queryString = removePrefix(queryString, REF_INFO);
         toReturn = getRefInfo(queryString, toReturn);
@@ -199,7 +200,7 @@ public class ScoreServlet extends DatabaseServlet {
         int year = getYear(queryString);
         getReport(toReturn, year);
       } else if (matchesRequest(queryString, EXPORT)) {
-        toReturn = getJSONForExercises();
+        toReturn = getJSONForExercises(projectid);
       } else if (matchesRequest(queryString, REMOVE_REF_RESULT)) {
         toReturn = removeRefResult(queryString);
       } else if (matchesRequest(queryString, REPORT)) {
@@ -233,7 +234,8 @@ public class ScoreServlet extends DatabaseServlet {
     now = System.currentTimeMillis();
     l = now - then;
     if (l > 50) {
-      logger.info("doGet : (" + getLanguage() + ") took " + l + " millis to do " + request.getQueryString() + " and to do toString on json");
+      logger.info("doGet : (" + getLanguage() + ") took " + l + " millis to do " + request.getQueryString() +
+          " and to do toString on json");
     }
 
     reply(response, x);
@@ -381,10 +383,11 @@ public class ScoreServlet extends DatabaseServlet {
   /**
    * @param queryString
    * @param toReturn
+   * @param projectid
    * @return
    * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
-  private JSONObject getChapterHistory(String queryString, JSONObject toReturn) {
+  private JSONObject getChapterHistory(String queryString, JSONObject toReturn, int projectid) {
     String[] split1 = queryString.split("&");
     if (split1.length < 2) {
       toReturn.put(ERROR, "expecting at least two query parameters");
@@ -395,7 +398,7 @@ public class ScoreServlet extends DatabaseServlet {
       //logger.debug("chapterHistory " + user + " selection " + selection);
       try {
         int l = Integer.parseInt(userAndSelection.getUser());
-        toReturn = db.getJsonScoreHistory(l, selection, getExerciseSorter());
+        toReturn = db.getJsonScoreHistory(l, selection, getExerciseSorter(projectid));
       } catch (NumberFormatException e) {
         toReturn.put(ERROR, "User id should be a number");
       }
@@ -427,14 +430,15 @@ public class ScoreServlet extends DatabaseServlet {
   /**
    * Don't die if audio file helper is not available.
    *
+   * @param projectid
    * @return
    * @see #doGet
-   * @see #getChapterHistory(String, JSONObject)
+   * @see #getChapterHistory(String, JSONObject, int)
    */
-  private ExerciseSorter getExerciseSorter() {
+  private ExerciseSorter getExerciseSorter(int projectid) {
     Map<String, Integer> stringIntegerHashMap = new HashMap<>();
     Map<String, Integer> phoneToCount = audioFileHelper == null ? stringIntegerHashMap : audioFileHelper.getPhoneToCount();
-    return new ExerciseSorter(db.getSectionHelper().getTypeOrder(), phoneToCount);
+    return new ExerciseSorter(db.getSectionHelper(projectid).getTypeOrder(), phoneToCount);
   }
 
   /**
@@ -494,7 +498,7 @@ public class ScoreServlet extends DatabaseServlet {
         // log event
         gotLogEvent(request, device, jsonObject);
       } else if (requestType.startsWith(ROUND_TRIP)) {
-        String resultID        = request.getHeader(RESULT_ID);
+        String resultID = request.getHeader(RESULT_ID);
         String roundTripMillis = request.getHeader(ROUND_TRIP1);
 
         try {
@@ -578,14 +582,15 @@ public class ScoreServlet extends DatabaseServlet {
    * join against audio dao ex->audio map again to get user exercise audio! {@link JsonExport#getJsonArray}
    *
    * @param removeExercisesWithMissingAudio
+   * @param projectid
    * @return json for content
    * @see #doGet
    */
-  private JSONObject getJsonNestedChapters(boolean removeExercisesWithMissingAudio) {
+  private JSONObject getJsonNestedChapters(boolean removeExercisesWithMissingAudio, int projectid) {
     JSONObject jsonObject = new JSONObject();
 
     long then = System.currentTimeMillis();
-    JsonExport jsonExport = getJSONExport();
+    JsonExport jsonExport = getJSONExport(projectid);
     long now = System.currentTimeMillis();
     if (now - then > 1000) {
       logger.warn("getJsonNestedChapters " + getLanguage() + " getJSONExport took " + (now - then) + " millis");
@@ -606,35 +611,37 @@ public class ScoreServlet extends DatabaseServlet {
    * @return
    * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
-  private JSONObject getJSONForExercises() {
-    return getJSONExerciseExport(getJSONExport());
+  private JSONObject getJSONForExercises(int projectid) {
+    return getJSONExerciseExport(getJSONExport(projectid), projectid);
   }
 
-  private JSONObject getJSONExerciseExport(JsonExport jsonExport) {
+  private JSONObject getJSONExerciseExport(JsonExport jsonExport, int projectid) {
     JSONObject jsonObject = new JSONObject();
     addVersion(jsonObject);
-    jsonExport.addJSONExerciseExport(jsonObject, db.getExercises());
+    jsonExport.addJSONExerciseExport(jsonObject, db.getExercises(projectid));
     return jsonObject;
   }
 
   /**
    * TODO : need to pass in the project id.
    * Install path, etc. should have been done by now
+   *
+   * @param projectid
    * @return
    */
-  private JsonExport getJSONExport() {
+  private JsonExport getJSONExport(int projectid) {
     //setInstallPath(db);
-    db.getExercises();
+    db.getExercises(projectid);
 
     Map<String, Integer> stringIntegerMap = Collections.emptyMap();
     JsonExport jsonExport = new JsonExport(
         audioFileHelper == null ? stringIntegerMap : audioFileHelper.getPhoneToCount(),
-        db.getSectionHelper(),
+        db.getSectionHelper(projectid),
         serverProps.getPreferredVoices(),
         serverProps.getLanguage().equalsIgnoreCase("english")
     );
 
-    db.attachAllAudio();
+    db.attachAllAudio(projectid);
     return jsonExport;
   }
 
@@ -958,17 +965,17 @@ public class ScoreServlet extends DatabaseServlet {
    * @return
    * @see #getAudioFileHelper()
    */
-  private DatabaseImpl getDatabase() {
-    DatabaseImpl db = null;
-    Object databaseReference = getServletContext().getAttribute(LangTestDatabaseImpl.DATABASE_REFERENCE);
-    if (databaseReference != null) {
-      db = (DatabaseImpl) databaseReference;
-      // logger.debug("found existing database reference " + db + " under " + getServletContext());
-    } else {
-      logger.error("huh? no existing db reference?");
-    }
-    return db;
-  }
+//  private DatabaseImpl getDatabase() {
+//    DatabaseImpl db = null;
+//    Object databaseReference = getServletContext().getAttribute(LangTestDatabaseImpl.DATABASE_REFERENCE);
+//    if (databaseReference != null) {
+//      db = (DatabaseImpl) databaseReference;
+//      // logger.debug("found existing database reference " + db + " under " + getServletContext());
+//    } else {
+//      logger.error("huh? no existing db reference?");
+//    }
+//    return db;
+//  }
 
   /**
    * @return
@@ -1012,7 +1019,7 @@ public class ScoreServlet extends DatabaseServlet {
   private PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
                                            int exerciseID, boolean usePhoneToDisplay) {
     return audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, 128, 128, false,
-        false, serverProps.useScoreCache(), ""+exerciseID, null, usePhoneToDisplay, false);
+        false, serverProps.useScoreCache(), "" + exerciseID, null, usePhoneToDisplay, false);
   }
 
   /**
@@ -1028,7 +1035,7 @@ public class ScoreServlet extends DatabaseServlet {
                                                   int exerciseID, boolean usePhoneToDisplay) {
     //  logger.debug("getASRScoreForAudioNoCache for " + testAudioFile + " under " + sentence);
     return audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, 128, 128, false,
-        false, false, ""+exerciseID, null, usePhoneToDisplay, false);
+        false, false, "" + exerciseID, null, usePhoneToDisplay, false);
   }
 
   private void addVersion(JSONObject jsonObject) {
@@ -1040,7 +1047,7 @@ public class ScoreServlet extends DatabaseServlet {
   /**
    * @paramz db
    * @return
-   * @see #getJsonNestedChapters(boolean)
+   * @see #getJsonNestedChapters(boolean, int)
    */
 /*  private void setInstallPath(DatabaseImpl db) {
     String lessonPlanFile = getLessonPlan();

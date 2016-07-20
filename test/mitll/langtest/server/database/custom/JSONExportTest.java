@@ -60,7 +60,7 @@ public class JSONExportTest extends JsonExport {
     String media = parent + File.separator + "media";
     logger.debug("media " + media);
     database.setInstallPath(".", parent + File.separator + database.getServerProps().getLessonPlan(), "media");
-     database.getExercises();
+    database.getExercises(-1);
   }
 
   @Test
@@ -68,18 +68,18 @@ public class JSONExportTest extends JsonExport {
     database.getSectionHelper();
 
     CommonExercise exercise = database.getExercise(724);
-    logger.warn("\n\ntestRead got " +exercise);
+    logger.warn("\n\ntestRead got " + exercise);
   }
 
 
   @Test
   public void testExport() {
     JsonExport jsonExport = new JsonExport(null, database.getSectionHelper(), null, false);
-    JSONArray exercisesAsJson = jsonExport.getExercisesAsJson(database.getExercises());
+    JSONArray exercisesAsJson = jsonExport.getExercisesAsJson(database.getExercises(-1));
     logger.info("got " + exercisesAsJson);
 
     JSONObject jsonObject = new JSONObject();
-    jsonExport.addJSONExerciseExport(jsonObject, database.getExercises());
+    jsonExport.addJSONExerciseExport(jsonObject, database.getExercises(-1));
 
     logger.info("got " + jsonObject);
   }
@@ -88,7 +88,7 @@ public class JSONExportTest extends JsonExport {
   public void testExport2() {
     JsonExport jsonExport = new JsonExport(null, database.getSectionHelper(), null, false);
     JSONObject jsonObject = new JSONObject();
-    jsonExport.addJSONExerciseExport(jsonObject, database.getExercises());
+    jsonExport.addJSONExerciseExport(jsonObject, database.getExercises(-1));
     logger.info("got " + jsonObject);
 
   }
@@ -97,7 +97,7 @@ public class JSONExportTest extends JsonExport {
   public void testExport3() {
     JsonExport jsonExport = new JsonExport(null, database.getSectionHelper(), null, false);
     JSONObject jsonObject = new JSONObject();
-    jsonExport.addJSONExerciseExport(jsonObject, database.getExercises());
+    jsonExport.addJSONExerciseExport(jsonObject, database.getExercises(-1));
     //logger.info("got " + jsonObject);
     String s = jsonObject.toString();
 
@@ -108,7 +108,7 @@ public class JSONExportTest extends JsonExport {
   @Test
   public void testExport4() {
     JsonExport jsonExport = new JsonExport(null, database.getSectionHelper(), null, false);
-    Collection<CommonExercise> exercises = database.getExercises();
+    Collection<CommonExercise> exercises = database.getExercises(-1);
     List<CommonExercise> copy = new ArrayList<>(exercises);
     List<CommonExercise> exercises1 = copy.subList(0, 10);
 
@@ -142,7 +142,7 @@ public class JSONExportTest extends JsonExport {
 
   void exportTo(String pathname) {
     JsonExport jsonExport = new JsonExport(null, database.getSectionHelper(), null, false);
-    Collection<CommonExercise> exercises = database.getExercises();
+    Collection<CommonExercise> exercises = database.getExercises(-1);
     List<CommonExercise> copy = new ArrayList<>(exercises);
     List<CommonExercise> exercises1 = copy;//.subList(0, 4000);excel
 
@@ -181,7 +181,7 @@ public class JSONExportTest extends JsonExport {
   @Test
   public void testExport6() {
     JsonExport jsonExport = new JsonExport(null, database.getSectionHelper(), null, false);
-    Collection<CommonExercise> exercises = database.getExercises();
+    Collection<CommonExercise> exercises = database.getExercises(-1);
     //List<CommonExercise> copy = new ArrayList<>(exercises);
     //List<CommonExercise> exercises1 = copy.subList(0, 10);
 
@@ -206,7 +206,7 @@ public class JSONExportTest extends JsonExport {
 
   @Test
   public void testExport5() {
-    Collection<CommonExercise> exercises = database.getExercises();
+    Collection<CommonExercise> exercises = database.getExercises(-1);
     logger.info("Got " + exercises.size());
   }
 

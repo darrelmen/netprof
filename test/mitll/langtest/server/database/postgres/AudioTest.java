@@ -54,7 +54,7 @@ public class AudioTest extends BaseTest {
 
 /*  @Test
   public void testWriteAudio() {
-    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
+    DatabaseImpl spanish = getDatabase("spanish");
 
     IAudioDAO dao = spanish.getAudioDAO();
 
@@ -87,7 +87,7 @@ public class AudioTest extends BaseTest {
 
   @Test
   public void testReadAudio() {
-    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish", true);
+    DatabaseImpl spanish = getDatabase("spanish", true);
 
     // TODO : replace with h2 user dao.
     IAudioDAO h2AudioDAO = new AudioDAO(spanish, spanish.getUserDAO());
@@ -113,7 +113,7 @@ public class AudioTest extends BaseTest {
 
   @Test
   public void testAllAudio() {
-    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
+    DatabaseImpl spanish = getDatabase("spanish");
 
     IAudioDAO dao = spanish.getAudioDAO();
     List<User> users = spanish.getUsers();
@@ -140,9 +140,9 @@ public class AudioTest extends BaseTest {
     now = System.currentTimeMillis();
     logger.info("took " + (now - then) + " millis");
 
-    Map<String, Float> maleFemaleProgress = spanish.getMaleFemaleProgress();
+    Map<String, Float> maleFemaleProgress = spanish.getMaleFemaleProgress(-1);
     logger.info("got " + maleFemaleProgress);
-    Map<String, Float> maleFemaleProgressH2 = spanish.getH2MaleFemaleProgress();
+    Map<String, Float> maleFemaleProgressH2 = spanish.getH2MaleFemaleProgress(-1);
 
     logger.info("got  h2 " + maleFemaleProgressH2);
 
@@ -156,7 +156,7 @@ public class AudioTest extends BaseTest {
 
   @Test
   public void testDefect() {
-    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
+    DatabaseImpl spanish = getDatabase("spanish");
 
     IAudioDAO dao = spanish.getAudioDAO();
     List<AudioAttribute> audioAttributes = dao.getExToAudio().get("2");
@@ -176,7 +176,7 @@ public class AudioTest extends BaseTest {
 
   @Test
   public void testUpdate() {
-    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
+    DatabaseImpl spanish = getDatabase("spanish");
 
     UserDAO h2UserDAO = new UserDAO(spanish);
     AudioDAO audioDAO = new AudioDAO(spanish, h2UserDAO);
