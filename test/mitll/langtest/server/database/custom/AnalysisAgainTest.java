@@ -38,17 +38,17 @@ public class AnalysisAgainTest {
     database = new DatabaseImpl(parent, file.getName(), dbName, serverProps, new PathHelper("war"), false, null);
     logger.debug("made " + database);
     database.setInstallPath("war", parent + File.separator + database.getServerProps().getLessonPlan(), serverProps.getMediaDir());
-    database.getExercises();
+    database.getExercises(-1);
   }
 
   @Test
   public void testMe() {
-    database.getSectionHelper();
+    database.getSectionHelper(-1);
 
-    UserPerformance performance = database.getAnalysis().getPerformanceForUser(1, 1);
+    UserPerformance performance = database.getAnalysis(-1).getPerformanceForUser(1, 1);
     logger.info("got " + performance);
 
-    List<WordScore> wordScoresForUser = database.getAnalysis().getWordScoresForUser(1, 1);
+    List<WordScore> wordScoresForUser = database.getAnalysis(-1).getWordScoresForUser(1, 1);
     for (WordScore ws : wordScoresForUser) {
       //if (ws.getId().equals("50246"))
       logger.info("ws " +ws.getId() + " " + ws.getNativeAudio() + " " + ws.getFileRef());
