@@ -126,6 +126,7 @@ public class InitialUI {
     if (!showLogin()) {
      // logger.info("not show login -");
       populateBelowHeader(verticalContainer, firstRow);
+     // userManager.getCurrent();
     }
   }
 

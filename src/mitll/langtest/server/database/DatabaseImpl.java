@@ -164,7 +164,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
 
   //private JsonSupport jsonSupport;
 
-  private static final boolean ADD_DEFECTS = true;
+  private static final boolean ADD_DEFECTS = false;
   private UserManagement userManagement = null;
   // private IAnalysis analysis;
   private final String absConfigDir;
@@ -600,7 +600,10 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
           for (Project<CommonExercise> project : getProjects()) {
             ExerciseDAO<?> exerciseDAO1 = project.getExerciseDAO();
             setDependencies(mediaDir, installPath, exerciseDAO1);
-            project.getRawExercises();
+            List<CommonExercise> rawExercises = project.getRawExercises();
+            if (!rawExercises.isEmpty()) {
+              logger.debug("first is " + rawExercises.iterator().next());
+            }
             project.setJsonSupport(new JsonSupport(project.getSectionHelper(), getResultDAO(), getRefResultDAO(), getAudioDAO(),
                 getPhoneDAO(), configDir, installPath));
             project.setAnalysis(new SlickAnalysis(this, phoneDAO, getExerciseIDToRefAudio(project.getProject().id()), (SlickResultDAO) resultDAO));

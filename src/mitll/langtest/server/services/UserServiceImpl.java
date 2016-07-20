@@ -43,6 +43,7 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.user.LoginResult;
 import mitll.langtest.shared.user.User;
+import mitll.npdata.dao.SlickProject;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -240,9 +241,12 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   private void setStartupInfo(User userWhere) {
     int i = db.getUserProjectDAO().mostRecentByUser(userWhere.getId());
     Project<CommonExercise> project = db.getProject(i);
+    SlickProject project1 = project.getProject();
+    ProjectStartupInfo startupInfo = new ProjectStartupInfo(db.getServerProps().getProperties(),
+        project.getTypeOrder(), project.getSectionHelper().getSectionNodes(), project1.id(), project1.language());
+    //logger.info("Set startup info " + startupInfo);
     userWhere.setStartupInfo(
-        new ProjectStartupInfo(db.getServerProps().getProperties(),
-            project.getTypeOrder(), project.getSectionHelper().getSectionNodes(), project.getProject().id()));
+        startupInfo);
   }
 
   /**

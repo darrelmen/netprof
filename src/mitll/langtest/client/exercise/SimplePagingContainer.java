@@ -58,7 +58,7 @@ public class SimplePagingContainer<T> implements RequiresResize {
   public static final int MAX_WIDTH = 320;
   private static final int PAGE_SIZE = 10;   // TODO : make this sensitive to vertical real estate?
   private static final int VERTICAL_SLOP = 35;
-  static final int ID_LINE_WRAP_LENGTH = 20;
+ // static final int ID_LINE_WRAP_LENGTH = 20;
   private static final int HEIGHT_OF_CELL_TABLE_WITH_15_ROWS = 395;
   private static final float MAX_PAGES = 2f;
   private static final int MIN_PAGE_SIZE = 3;
