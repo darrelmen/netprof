@@ -583,7 +583,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see UserManager#storeUser
    */
   public void gotUser(User user) {
+    projectStartupInfo = user.getStartupInfo();
     initialUI.gotUser(user);
+  //  logger.info("\n\n\ngotUser Got startup info " + projectStartupInfo);
   }
 
   /**
@@ -762,7 +764,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   public String getLanguage() {
-    return props.getLanguage();
+    return projectStartupInfo != null ? projectStartupInfo.getLanguage() : "";
   }
 
   public boolean isRightAlignContent() {
