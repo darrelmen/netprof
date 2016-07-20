@@ -47,7 +47,7 @@ import java.util.List;
 public interface SimpleExerciseDAO<T extends CommonShell> {
   /**
    * @return
-   * @see DatabaseImpl#getExercise(String)
+   * @see DatabaseImpl#getExercise
    * @see DatabaseImpl#makeDAO(String, String, String)
    * @see UserManagement#getUsers()
    */
@@ -56,7 +56,7 @@ public interface SimpleExerciseDAO<T extends CommonShell> {
   /**
    * @param id
    * @return
-   * @see DatabaseImpl#getExercise(String)
+   * @see DatabaseImpl#getExercise
    */
   T getExercise(int id);
 
