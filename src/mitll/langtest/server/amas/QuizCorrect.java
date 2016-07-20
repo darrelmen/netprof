@@ -60,10 +60,13 @@ public class QuizCorrect {
    * @param typeToSection
    * @param userID
    * @param exids
+   * @param projectid
    * @return
    * @seex mitll.langtest.client.recorder.FeedbackRecordPanel#getScores
    */
-  public QuizCorrectAndScore getScoresForUser(Map<String, Collection<String>> typeToSection, int userID, Collection<Integer> exids) {
+  public QuizCorrectAndScore getScoresForUser(Map<String, Collection<String>> typeToSection,
+                                              int userID,
+                                              Collection<Integer> exids, int projectid) {
     //   String session = getLatestSession(typeToSection, userID);
 
 /*    if (typeToSection == null || typeToSection.isEmpty()) {
@@ -77,7 +80,8 @@ public class QuizCorrect {
     } else {*/
     Collection<Integer> allIDs = new ArrayList<>();
     if (exids == null || exids.isEmpty()) {
-      Collection<CommonExercise> exercisesForState = db.getSectionHelper().getExercisesForSelectionState(typeToSection);
+      Collection<CommonExercise> exercisesForState =
+          db.getSectionHelper(projectid).getExercisesForSelectionState(typeToSection);
       for (CommonExercise exercise : exercisesForState) {
         allIDs.add(exercise.getID());
       }

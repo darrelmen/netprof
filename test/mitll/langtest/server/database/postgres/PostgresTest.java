@@ -65,21 +65,21 @@ public class PostgresTest extends BaseTest {
   @Test
   public void testCopyProject() {
     testCreate();
-    DatabaseImpl<CommonExercise> spanish = getDatabaseLight("spanish", true);
+    DatabaseImpl spanish = getDatabaseLight("spanish", true);
     new CopyToPostgres().createProjectIfNotExists(spanish);
   }
 
   @Test
   public void testCopyUserExercises() {
     testCreate();
-    DatabaseImpl<CommonExercise> spanish = getDatabaseLight("spanish", true);
+    DatabaseImpl spanish = getDatabaseLight("spanish", true);
    // new CopyToPostgres().copyOnlyUserExercises(spanish);
   }
 
   @Test
   public void testCopyUserJoinExercises() {
     testCreate();
-    DatabaseImpl<CommonExercise> spanish = getDatabaseLight("spanish", true);
+    DatabaseImpl spanish = getDatabaseLight("spanish", true);
  //   new CopyToPostgres().copyUserExListJoin(spanish);
   }
 

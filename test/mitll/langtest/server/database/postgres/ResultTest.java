@@ -53,7 +53,7 @@ public class ResultTest extends BaseTest {
 
   @Test
   public void testResult() {
-    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish", true);
+    DatabaseImpl spanish = getDatabase("spanish", true);
 
     IResultDAO resultDAO = spanish.getResultDAO();
 
@@ -97,7 +97,7 @@ public class ResultTest extends BaseTest {
 
   @Test
   public void testAVP() {
-    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish", true);
+    DatabaseImpl spanish = getDatabase("spanish", true);
 
     SlickResultDAO dao = (SlickResultDAO) spanish.getResultDAO();
 
@@ -118,6 +118,6 @@ public class ResultTest extends BaseTest {
 
   @Test
   public void testAnswerDAO() {
-    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
+    DatabaseImpl spanish = getDatabase("spanish");
   }
 }
