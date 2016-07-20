@@ -265,30 +265,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.firstPron = firstPron;
   }
 
-  public String toString() {
-    Collection<AudioAttribute> audioAttributes1 = getAudioAttributes();
-
-    // warn about attr that have no user
-    StringBuilder builder = new StringBuilder();
-    for (AudioAttribute attr : audioAttributes1) {
-      if (attr.getUser() == null) {
-        builder.append("\t").append(attr.toString()).append("\n");
-      }
-    }
-
-    return "Exercise " + Integer.toHexString(hashCode()) +
-        " " + getID() +
-        "/" + getDominoID() +
-        " english '" + getEnglish() +
-        "'/'" + getForeignLanguage() + "' " +
-        "meaning '" + getMeaning() +
-        "' transliteration '" + getTransliteration() +
-        "' context " + getDirectlyRelated() +
-        " audio count = " + audioAttributes1.size() +
-        (builder.toString().isEmpty() ? "" : " \n\tmissing user audio " + builder.toString()) +
-        " unit->lesson " + getUnitToValue();
-  }
-
   /**
    * @see mitll.langtest.server.database.exercise.JSONURLExerciseDAO#toExercise
    * @param updateTime
@@ -307,6 +283,32 @@ public class Exercise extends AudioExercise implements CommonExercise,
    */
   public void addContextExercise(CommonExercise contextExercise) {
     directlyRelated.add(contextExercise);
+  }
+
+  public String toString() {
+    Collection<AudioAttribute> audioAttributes1 = getAudioAttributes();
+
+    // warn about attr that have no user
+    StringBuilder builder = new StringBuilder();
+    for (AudioAttribute attr : audioAttributes1) {
+      if (attr.getUser() == null) {
+        builder.append("\t").append(attr.toString()).append("\n");
+      }
+    }
+
+    return "Exercise " +
+        //Integer.toHexString(hashCode()) +
+        " " + getID() +
+        "/" + getDominoID() +
+        " old " + getOldID() +
+        " english '" + getEnglish() +
+        "'/'" + getForeignLanguage() + "' " +
+        "meaning '" + getMeaning() +
+        "' transliteration '" + getTransliteration() +
+        "' context " + getDirectlyRelated() +
+        " audio count = " + audioAttributes1.size() +
+        (builder.toString().isEmpty() ? "" : " \n\tmissing user audio " + builder.toString()) +
+        " unit->lesson " + getUnitToValue();
   }
 
   public void addMentionedContext(CommonExercise exercise) {
