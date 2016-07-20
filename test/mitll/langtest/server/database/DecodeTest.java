@@ -25,7 +25,7 @@ public class DecodeTest extends BaseTest {
 
   @Test
   public void testRussianContext() {
-    DatabaseImpl<CommonExercise> russian = getDatabase("russian");
+    DatabaseImpl russian = getDatabase("russian");
     CommonExercise exercise = russian.getExercise(2600);
     String context = exercise.getContext();
 
@@ -55,7 +55,7 @@ public class DecodeTest extends BaseTest {
 
   @Test
   public void testUser() {
-    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
+    DatabaseImpl spanish = getDatabase("spanish");
     User userByID = spanish.getUserDAO().getUserByID("Jesse.McDonald");
     logger.info("got " + userByID);
 
@@ -67,14 +67,14 @@ public class DecodeTest extends BaseTest {
   @Test
   public void testDominoSpanish() {
     DatabaseImpl russian = getDatabase("dominoSpanish");
-    Collection exercises = russian.getExercises();
+    Collection exercises = russian.getExercises(-1);
     logger.info("First " +exercises.iterator().next());
   }
 /*
 
   @Test
   public void testSpanish() {
-    DatabaseImpl<CommonExercise> spanish = getDatabase("spanish");
+    DatabaseImpl spanish = getDatabase("spanish");
 
     Map<String, Float> maleFemaleProgress = spanish.getMaleFemaleProgress();
 

@@ -34,7 +34,7 @@ public class PerformanceTest extends BaseTest {
 
       //int id = 1;//116;
 /*
-      List<BestScore> resultForUser = database.getAnalysis().getResultForUser(id);
+      List<BestScore> resultForUser = database.getAnalysis(-1).getResultForUser(id);
       Collections.sort(resultForUser, new Comparator<BestScore>() {
         @Override
         public int compare(BestScore o1, BestScore o2) {
@@ -48,18 +48,18 @@ public class PerformanceTest extends BaseTest {
       writer.close();
 */
 
-/*      UserPerformance performance = database.getAnalysis().getResultForUserByBin(71, ResultDAO.FIVE_MINUTES);
+/*      UserPerformance performance = database.getAnalysis(-1).getResultForUserByBin(71, ResultDAO.FIVE_MINUTES);
       writer = getWriter("UserPerformance_5_Min");
       writer.write(performance.toCSV());
       writer.close();
 
 
-      performance = database.getAnalysis().getResultForUserByBin(71, ResultDAO.HOUR);
+      performance = database.getAnalysis(-1).getResultForUserByBin(71, ResultDAO.HOUR);
       writer = getWriter("UserPerformance_Hour");
       writer.write(performance.toCSV());
       writer.close();
 
-      performance = database.getAnalysis().getResultForUserByBin(71, ResultDAO.DAY);
+      performance = database.getAnalysis(-1).getResultForUserByBin(71, ResultDAO.DAY);
       writer = getWriter("UserPerformance_Day");
       writer.write(performance.toCSV());
       writer.close();*/
@@ -70,12 +70,12 @@ public class PerformanceTest extends BaseTest {
       H2Connection connection = getH2Connection(path);
       DatabaseImpl database = getDatabase(connection, "spanish", path);
 
-      UserPerformance performance = database.getAnalysis().getPerformanceForUser(id, 1);
+      UserPerformance performance = database.getAnalysis(-1).getPerformanceForUser(id, 1);
       writer = getWriter("RawUserPerformance");
       writer.write(performance.toRawCSV());
       writer.close();
 
-      List<WordScore> wordScoresForUser = database.getAnalysis().getWordScoresForUser(id, 1);
+      List<WordScore> wordScoresForUser = database.getAnalysis(-1).getWordScoresForUser(id, 1);
       for (WordScore ws : wordScoresForUser) logger.info("got " + ws);
 
     } catch (IOException e) {
@@ -199,7 +199,7 @@ public class PerformanceTest extends BaseTest {
     DatabaseImpl database = getDatabase(connection, "spanish", path);
     int id = 71;
     //int id = 535;   // tiffany
-    UserPerformance performanceForUser = database.getAnalysis().getPerformanceForUser(id, 1);
+    UserPerformance performanceForUser = database.getAnalysis(-1).getPerformanceForUser(id, 1);
 
     logger.info("perf " + performanceForUser);
     Map<Long, List<PhoneSession>> granularityToSessions = performanceForUser.getGranularityToSessions();
@@ -208,9 +208,9 @@ public class PerformanceTest extends BaseTest {
       logger.info("perf " + granularityToSessions.keySet());
       logger.info("perf " + granularityToSessions.values());
     }
-    // List<WordScore> wordScoresForUser = database.getAnalysis().getWordScoresForUser(id, 1);
+    // List<WordScore> wordScoresForUser = database.getAnalysis(-1).getWordScoresForUser(id, 1);
 
-    PhoneReport report = database.getAnalysis().getPhonesForUser(id, 1);
+    PhoneReport report = database.getAnalysis(-1).getPhonesForUser(id, 1);
 
     Map<String, PhoneStats> phoneToAvgSorted = report.getPhoneToAvgSorted();
     if (phoneToAvgSorted == null) {
@@ -264,7 +264,7 @@ public class PerformanceTest extends BaseTest {
     DatabaseImpl database = getDatabase(connection, "sudanese", path);
     int id = 71;
     //int id = 535;   // tiffany
-    // UserPerformance performanceForUser = database.getAnalysis().getPerformanceForUser(id, 1);
+    // UserPerformance performanceForUser = database.getAnalysis(-1).getPerformanceForUser(id, 1);
     HashMap<String, Collection<String>> stringCollectionHashMap = new HashMap<>();
     stringCollectionHashMap.put("Chapter", Collections.singletonList("7"));
     stringCollectionHashMap.put("Lesson", Collections.singletonList("1"));
@@ -281,7 +281,7 @@ public class PerformanceTest extends BaseTest {
     DatabaseImpl database = getDatabase(connection, "spanish", path);
     int id = 1;
     //int id = 535;   // tiffany
-    // UserPerformance performanceForUser = database.getAnalysis().getPerformanceForUser(id, 1);
+    // UserPerformance performanceForUser = database.getAnalysis(-1).getPerformanceForUser(id, 1);
     Map<String, Collection<String>> stringCollectionHashMap = new HashMap<>();
     stringCollectionHashMap.put("Unit", Collections.singletonList("1"));
     stringCollectionHashMap.put("Chapter", Collections.singletonList("6"));
@@ -295,7 +295,7 @@ public class PerformanceTest extends BaseTest {
     String path = "npfUrdu";
     H2Connection connection = getH2Connection(path);
     DatabaseImpl database = getDatabase(connection, "urdu", path);
-    IAnalysis analysis = database.getAnalysis();
+    IAnalysis analysis = database.getAnalysis(-1);
     // int id = 117;
     int id = 104;
     UserPerformance performanceForUser = analysis.getPerformanceForUser(id, 1);
@@ -316,7 +316,7 @@ public class PerformanceTest extends BaseTest {
 
     H2Connection connection = getH2Connection(path);
     DatabaseImpl database = getDatabase(connection, urdu, path);
-    IAnalysis analysis = database.getAnalysis();
+    IAnalysis analysis = database.getAnalysis(-1);
     // int id = 117;
     int id = 285;
     UserPerformance performanceForUser = analysis.getPerformanceForUser(id, 1);
@@ -335,7 +335,7 @@ public class PerformanceTest extends BaseTest {
 
     H2Connection connection = getH2Connection(path);
     DatabaseImpl database = getDatabase(connection, urdu, path);
-    IAnalysis analysis = database.getAnalysis();
+    IAnalysis analysis = database.getAnalysis(-1);
     // int id = 117;
     int id = 171;
     UserPerformance performanceForUser = analysis.getPerformanceForUser(id, 1);
@@ -396,7 +396,7 @@ public class PerformanceTest extends BaseTest {
 
     H2Connection connection = getH2Connection(path);
     DatabaseImpl database = getDatabase(connection, urdu, path);
-    IAnalysis analysis = database.getAnalysis();
+    IAnalysis analysis = database.getAnalysis(-1);
     // int id = 117;
     int id = 155;
     UserPerformance performanceForUser = analysis.getPerformanceForUser(id, 1);
@@ -419,7 +419,7 @@ public class PerformanceTest extends BaseTest {
 
     H2Connection connection = getH2Connection(path);
     DatabaseImpl database = getDatabase(connection, urdu, path);
-    IAnalysis analysis = database.getAnalysis();
+    IAnalysis analysis = database.getAnalysis(-1);
     // int id = 117;
     int id = 162;
     UserPerformance performanceForUser = analysis.getPerformanceForUser(id, 1);
@@ -436,7 +436,7 @@ public class PerformanceTest extends BaseTest {
     String urdu = "egyptian";
 
     DatabaseImpl database = getDatabase(getH2Connection(path), urdu, path);
-    IAnalysis analysis = database.getAnalysis();
+    IAnalysis analysis = database.getAnalysis(-1);
 
     List<UserInfo> userInfo = analysis.getUserInfo(database.getUserDAO(), 5);
     for (UserInfo userInfo1 : userInfo) logger.warn("Got " + userInfo1);
@@ -447,7 +447,7 @@ public class PerformanceTest extends BaseTest {
     // int id = 71;
     int id = 26;
     DatabaseImpl database = getSpanishDatabase();
-    List<WordScore> wordScoresForUser = database.getAnalysis().getWordScoresForUser(id, 1);
+    List<WordScore> wordScoresForUser = database.getAnalysis(-1).getWordScoresForUser(id, 1);
     for (WordScore ws : wordScoresForUser) logger.info("testWords got " + ws);
   }
 
@@ -463,7 +463,7 @@ public class PerformanceTest extends BaseTest {
     //int id = 41; // big mandarin classroom user
     int id = 1;
     DatabaseImpl database = getSpanishDatabase();
-    PhoneReport phoneReport = database.getAnalysis().getPhonesForUser(id, 1);
+    PhoneReport phoneReport = database.getAnalysis(-1).getPhonesForUser(id, 1);
 
     Map<String, List<WordAndScore>> phonesForUser = phoneReport.getPhoneToWordAndScoreSorted();
     long now = System.currentTimeMillis();
@@ -489,7 +489,7 @@ public class PerformanceTest extends BaseTest {
 //    int id = 71;
     DatabaseImpl database = getSpanishDatabase();
 
-    List<UserInfo> userInfo = database.getAnalysis().getUserInfo(database.getUserDAO(), 5);
+    List<UserInfo> userInfo = database.getAnalysis(-1).getUserInfo(database.getUserDAO(), 5);
     // PhoneReport phoneReport = (PhoneReport) userInfo;
 
     // Map<String, List<WordAndScore>> phonesForUser = phoneReport.getPhoneToWordAndScoreSorted();

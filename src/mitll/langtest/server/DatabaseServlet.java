@@ -33,9 +33,14 @@
 package mitll.langtest.server;
 
 import mitll.langtest.server.audio.AudioConversion;
+import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.security.DominoSessionException;
+import mitll.langtest.server.database.security.UserSecurityManager;
+import mitll.langtest.shared.user.User;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 
 /**
@@ -56,6 +61,7 @@ public class DatabaseServlet extends HttpServlet {
   protected String relativeConfigDir;
   protected String configDir;
   protected PathHelper pathHelper;
+  private UserSecurityManager securityManager;
 
   /**
    * @see #ensureMP3s
@@ -69,12 +75,14 @@ public class DatabaseServlet extends HttpServlet {
   }*/
 
   /**
-   * @see mitll.langtest.server.ScoreServlet#getAnswer
    * @param wavFile
    * @param title
    * @param author
+   * @see mitll.langtest.server.ScoreServlet#getAnswer
    */
-  protected void ensureMP3(String wavFile, String title, String author) { ensureMP3(wavFile, pathHelper, configDir, title, author);  }
+  protected void ensureMP3(String wavFile, String title, String author) {
+    ensureMP3(wavFile, pathHelper, configDir, title, author);
+  }
 
   private boolean ensureMP3(String wavFile, PathHelper pathHelper, String configDir, String title, String author) {
     if (wavFile != null) {
@@ -100,7 +108,7 @@ public class DatabaseServlet extends HttpServlet {
     pathHelper = getPathHelper();
     String config = getServletContext().getInitParameter("config");
     this.relativeConfigDir = "config" + File.separator + config;
-   // logger.debug("setPaths rel " + relativeConfigDir  + " pathHelper " + pathHelper);
+    // logger.debug("setPaths rel " + relativeConfigDir  + " pathHelper " + pathHelper);
     this.configDir = getConfigDir();
   }
 
@@ -126,7 +134,6 @@ public class DatabaseServlet extends HttpServlet {
     ensureMP3(byID, pathHelper, configDir);
   }
 */
-
   protected void writeToFile(InputStream inputStream, File saveFile) throws IOException {
     // opens an output stream for writing file
     copyToOutput(inputStream, new FileOutputStream(saveFile));
@@ -142,6 +149,32 @@ public class DatabaseServlet extends HttpServlet {
 
     outputStream.close();
     inputStream.close();
+  }
+
+  protected int getProject(HttpServletRequest request) {
+    try {
+      User loggedInUser = securityManager.getLoggedInUser(request);
+      if (loggedInUser == null) return -1;
+      int i = getDatabase().getUserProjectDAO().mostRecentByUser(loggedInUser.getId());
+      return i;
+    } catch (DominoSessionException e) {
+      logger.error("Got " + e, e);
+      return -1;
+    }
+  }
+
+  protected DatabaseImpl getDatabase() {
+    DatabaseImpl db = null;
+
+    Object databaseReference = getServletContext().getAttribute(LangTestDatabaseImpl.DATABASE_REFERENCE);
+    if (databaseReference != null) {
+      db = (DatabaseImpl) databaseReference;
+      securityManager = new UserSecurityManager(db.getUserDAO());
+      // logger.debug("found existing database reference " + db + " under " +getServletContext());
+    } else {
+      logger.error("huh? no existing db reference?");
+    }
+    return db;
   }
 
   /**

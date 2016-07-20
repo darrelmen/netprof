@@ -42,7 +42,9 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Exercise;
-import mitll.npdata.dao.*;
+import mitll.npdata.dao.DBConnection;
+import mitll.npdata.dao.SlickExercise;
+import mitll.npdata.dao.SlickRelatedExercise;
 import mitll.npdata.dao.userexercise.ExerciseDAOWrapper;
 import mitll.npdata.dao.userexercise.RelatedExerciseDAOWrapper;
 import org.apache.log4j.Logger;
@@ -178,7 +180,7 @@ public class SlickUserExerciseDAO
         slick.transliteration(),
         slick.isoverride(),
         unitToValue,
-        slick.modified().getTime());
+        slick.modified().getTime(), slick.projectid());
 
 //    logger.info("created " + userExercise);
     return userExercise;
@@ -211,7 +213,8 @@ public class SlickUserExerciseDAO
         slick.english(),
         slick.foreignlanguage(),
         slick.meaning(),
-        slick.transliteration(), projectid);
+        slick.transliteration(),
+        slick.projectid());
 
     List<String> translations = new ArrayList<String>();
     if (slick.foreignlanguage().length() > 0) {
@@ -237,7 +240,9 @@ public class SlickUserExerciseDAO
     return dao.insert(UserExercise);
   }
 
-  public void addBulk(List<SlickExercise> bulk) {  dao.addBulk(bulk);  }
+  public void addBulk(List<SlickExercise> bulk) {
+    dao.addBulk(bulk);
+  }
 
   public int getNumRows() {
     return dao.getNumRows();
@@ -306,10 +311,10 @@ public class SlickUserExerciseDAO
   }
 
   /**
-   * @see DBExerciseDAO#readExercises()
    * @param typeOrder
    * @param sectionHelper
    * @return
+   * @see DBExerciseDAO#readExercises()
    */
   public List<CommonExercise> getAllExercises(List<String> typeOrder, SectionHelper<CommonExercise> sectionHelper) {
     return getExercises(dao.getAllPredefEx(), typeOrder, sectionHelper);
@@ -353,15 +358,23 @@ public class SlickUserExerciseDAO
 
   public IDAO getRelatedExercise() {
     return new IDAO() {
-      public void createTable() { relatedExerciseDAOWrapper.createTable(); }
-      public String getName()   { return relatedExerciseDAOWrapper.getName(); }
+      public void createTable() {
+        relatedExerciseDAOWrapper.createTable();
+      }
+
+      public String getName() {
+        return relatedExerciseDAOWrapper.getName();
+      }
     };
   }
+
   public void insertRelated(int id, int contextid) {
     relatedExerciseDAOWrapper.insert(new SlickRelatedExercise(-1, id, contextid));
   }
 
-  public Collection<SlickRelatedExercise> getAllRelated() { return relatedExerciseDAOWrapper.all();}
+  public Collection<SlickRelatedExercise> getAllRelated() {
+    return relatedExerciseDAOWrapper.all();
+  }
 
   public Map<String, Integer> getOldToNew(int projectid) {
     Map<String, Integer> oldToNew = new HashMap<>();
