@@ -45,7 +45,7 @@ import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.sound.SoundPlayer;
-import mitll.langtest.shared.ExerciseListWrapper;
+import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.analysis.PhoneSession;
 import mitll.langtest.shared.analysis.TimeAndScore;
 import mitll.langtest.shared.analysis.UserPerformance;

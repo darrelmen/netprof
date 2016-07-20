@@ -36,7 +36,7 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.server.database.userlist.SlickUserListDAO;
 import mitll.langtest.server.database.userlist.UserListDAO;
-import mitll.langtest.shared.User;
+import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.exercise.BaseExercise;
 import mitll.langtest.shared.exercise.HasID;
 
@@ -189,7 +189,7 @@ public class UserList<T extends HasID> extends BaseExercise {
    */
 
   public void setUniqueID(int uniqueID) {
-    this.realID = uniqueID;
+    this.id = uniqueID;
   }
 
   public boolean contains(T userExercise) {

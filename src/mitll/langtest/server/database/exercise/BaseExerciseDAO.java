@@ -92,7 +92,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 
 	/**
 	 * @return
-	 * @see DatabaseImpl#getExercises()
+	 * @see DatabaseImpl#getExercises(int)
 	 */
 	public List<CommonExercise> getRawExercises() {
 		synchronized (this) {
@@ -106,7 +106,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 
 	/**
 	 * Mainly to support reading from Domino after edits in Domino
-	 * @see DatabaseImpl#reloadExercises()
+	 * @see DatabaseImpl#reloadExercises(int)
 	 */
 	public void reload() {
     exercises = null;
@@ -158,7 +158,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 
 	/**
 	 * @return
-	 * @see DatabaseImpl#getSectionHelper()
+	 * @see DatabaseImpl#getSectionHelper(int)
 	 */
 	public SectionHelper<CommonExercise> getSectionHelper() {
 		return sectionHelper;
@@ -213,7 +213,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 	 * TODO : also, this a lot of work just to get the one ref audio recording.
 	 *
 	 * @param all
-	 * @see DatabaseImpl#getExerciseIDToRefAudio()
+	 * @see DatabaseImpl#getExerciseIDToRefAudio(int)
 	 */
 	public void attachAudio(Collection<CommonExercise> all) {
 		attachAudio.setExToAudio(audioDAO.getExToAudio());
@@ -359,7 +359,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 
 	/**
 	 * @return true if exercise with this id was removed
-	 * @see DatabaseImpl#deleteItem(int)
+	 * @see DatabaseImpl#deleteItem(int, int)
    * @param id
 	 */
 	public boolean remove(int id) {

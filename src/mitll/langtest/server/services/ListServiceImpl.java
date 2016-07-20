@@ -93,7 +93,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    */
   @Override
   public boolean deleteItemFromList(long listid, int exid) {
-    return getUserListManager().deleteItemFromList(listid, exid, db.getTypeOrder());
+    return getUserListManager().deleteItemFromList(listid, exid, db.getTypeOrder(projectid));
   }
 
   /**
@@ -160,12 +160,12 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   public List<UserList<CommonShell>> getReviewLists() {
     List<UserList<CommonShell>> lists = new ArrayList<>();
     IUserListManager userListManager = getUserListManager();
-    UserList<CommonShell> defectList = userListManager.getDefectList(db.getTypeOrder());
+    UserList<CommonShell> defectList = userListManager.getDefectList(db.getTypeOrder(projectid));
     lists.add(defectList);
 
-    lists.add(userListManager.getCommentedList(db.getTypeOrder()));
+    lists.add(userListManager.getCommentedList(db.getTypeOrder(projectid)));
     if (!serverProps.isNoModel()) {
-      lists.add(userListManager.getAttentionList(db.getTypeOrder()));
+      lists.add(userListManager.getAttentionList(db.getTypeOrder(projectid)));
     }
     return lists;
   }

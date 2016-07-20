@@ -609,7 +609,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
                                      String english, String foreignLanguagePhrase, String translit, String meaning,
                                      String context, String contextTranslation,
                                      String audioIndex) {
-    Exercise imported = new Exercise(id, context, contextTranslation, meaning, audioIndex);
+    Exercise imported = new Exercise(id, context, contextTranslation, meaning, audioIndex, projectid);
 
     imported.setEnglishSentence(english);
     if (translit.length() > 0) {

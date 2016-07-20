@@ -30,42 +30,57 @@
  *
  */
 
-package mitll.langtest.shared;
+package mitll.langtest.shared.answer;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-/**
- * Created with IntelliJ IDEA.
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 9/17/12
- * Time: 1:48 PM
- * To change this template use File | Settings | File Templates.
- */
-public class ImageResponse implements IsSerializable {
-  public int req;
-  public String imageURL;
-  public double durationInSeconds;
-  public boolean successful = false;
-  public ImageResponse() {}
+public enum AudioType implements IsSerializable {
+  UNSET("unset"),
 
-  /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getImageForAudioFile(int, String, String, int, int)
-   * @param req
-   * @param imageURL
-   * @param durationInSeconds
-   */
-  public ImageResponse(int req, String imageURL, double durationInSeconds) {
-    this.req = req;
-    this.imageURL = imageURL;
-    this.successful = true;
-    this.durationInSeconds = durationInSeconds;
+  REGULAR("regular"),
+  SLOW("slow"),
+  //  FAST_AND_SLOW("fastAndSlow"),  // really old legacy thing
+  PRACTICE("practice"),  // or avp or flashcard
+  // FLASHCARD("flashcard"),
+  LEARN("learn"),
+  TEXT("text"),
+
+  REVIEW("review"),      // TODO: gah - try to remove this
+  RECORDER("recorder"),  // TODO : somehow user role gets expressed with this
+
+  CONTEXT_REGULAR("context=regular", "context", "regular"),
+  CONTEXT_SLOW("context=slow", "context", "slow");
+
+  private final String text;
+  private final String type;
+  private final String speed;
+
+  AudioType(final String text) {
+    this.text = text;
+    type = "";
+    speed = "";
   }
 
+  AudioType(final String text, String type, String speed) {
+    this.text = text;
+    this.type = type;
+    this.speed = speed;
+  }
+
+  @Override
   public String toString() {
-    return successful ?
-        "req id#" + req + " : " + imageURL + " dur " + durationInSeconds + " seconds" :
-        "error for req " + req;
+    return text;
+  }
+
+  public String getType() {
+    return type;
+  }
+
+  public String getSpeed() {
+    return speed;
+  }
+
+  public boolean isContext() {
+    return this == CONTEXT_REGULAR || this == CONTEXT_SLOW;
   }
 }

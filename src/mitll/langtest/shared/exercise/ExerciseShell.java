@@ -57,7 +57,7 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
 
   /**
    * @param id
-   * @see AudioExercise#AudioExercise(String, int)
+   * @see AudioExercise#AudioExercise(String, int, int)
    */
   ExerciseShell(String id, int realID) {
     this(id, "", "", "", "", -1, realID);

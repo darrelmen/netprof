@@ -1,10 +1,7 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.shared.User;
 import org.apache.log4j.Logger;
-
-import java.util.Map;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory

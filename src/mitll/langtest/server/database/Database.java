@@ -63,5 +63,5 @@ public interface Database {
 
   LogAndNotify getLogAndNotify();
 
-  Collection<String> getTypeOrder();
+  Collection<String> getTypeOrder(int projectid);
 }
