@@ -2169,6 +2169,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     db = makeDatabaseImpl(serverProps.getH2Database());
     shareDB(servletContext);
     securityManager = new UserSecurityManager(db.getUserDAO());
+    logger.info("made "+ securityManager);
 //    shareLoadTesting(servletContext);
   }
 
@@ -2237,7 +2238,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   private int getProject() {
     try {
-      User loggedInUser = securityManager.getLoggedInUser(getThreadLocalRequest());
+      HttpServletRequest threadLocalRequest = getThreadLocalRequest();
+      logger.info("getProject got request " + threadLocalRequest);
+      User loggedInUser = securityManager.getLoggedInUser(threadLocalRequest);
       if (loggedInUser == null) return -1;
       int i = getProjectForUser(loggedInUser);
       return i;
