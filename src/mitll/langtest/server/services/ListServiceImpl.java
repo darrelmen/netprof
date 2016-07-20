@@ -93,7 +93,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    */
   @Override
   public boolean deleteItemFromList(long listid, int exid) {
-    return getUserListManager().deleteItemFromList(listid, exid, db.getTypeOrder(projectid));
+    return getUserListManager().deleteItemFromList(listid, exid, db.getTypeOrder(getProject()));
   }
 
   /**
@@ -158,14 +158,17 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    */
   @Override
   public List<UserList<CommonShell>> getReviewLists() {
-    List<UserList<CommonShell>> lists = new ArrayList<>();
     IUserListManager userListManager = getUserListManager();
-    UserList<CommonShell> defectList = userListManager.getDefectList(db.getTypeOrder(projectid));
+    Collection<String> typeOrder = db.getTypeOrder(getProject());
+
+    UserList<CommonShell> defectList = userListManager.getDefectList(typeOrder);
+
+    List<UserList<CommonShell>> lists = new ArrayList<>();
     lists.add(defectList);
 
-    lists.add(userListManager.getCommentedList(db.getTypeOrder(projectid)));
+    lists.add(userListManager.getCommentedList(typeOrder));
     if (!serverProps.isNoModel()) {
-      lists.add(userListManager.getAttentionList(db.getTypeOrder(projectid)));
+      lists.add(userListManager.getAttentionList(typeOrder));
     }
     return lists;
   }
@@ -210,7 +213,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
       if (DEBUG) logger.info("\tgot " + parts.length + " parts");
       if (parts.length > 1) {
         String exerciseID = UserExercise.CUSTOM_PREFIX + "_" + creator + "_" + userListByID + "_" + (n++);
-        UserExercise newItem = new UserExercise(-1, exerciseID, creator, parts[1], parts[0], "");
+        UserExercise newItem = new UserExercise(-1, exerciseID, creator, parts[1], parts[0], "", getProject());
         newItems.add(newItem);
         if (DEBUG) logger.info("new " + newItem);
       }

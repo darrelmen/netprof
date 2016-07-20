@@ -44,7 +44,7 @@ public class ReportAllTest extends BaseTest {
 
       H2Connection connection = getH2Connection("war/config/sudanese/" + db);
       DatabaseImpl database = getDatabase(connection, config, db);
-      Map<String, Float> maleFemaleProgress = database.getMaleFemaleProgress();
+      Map<String, Float> maleFemaleProgress = database.getMaleFemaleProgress(-1);
 
       logger.info(maleFemaleProgress.toString());
 
@@ -59,7 +59,7 @@ public class ReportAllTest extends BaseTest {
 
   @Test
   public void testMaleFemaleRefCoverageEgyptian() {
-    Map<String, Float> maleFemaleProgress = getDatabase("egyptian").getMaleFemaleProgress();
+    Map<String, Float> maleFemaleProgress = getDatabase("egyptian").getMaleFemaleProgress(-1);
     logger.info(maleFemaleProgress.toString());
   }
 
@@ -72,7 +72,7 @@ public class ReportAllTest extends BaseTest {
 
       H2Connection connection = getH2Connection("war/config/russian/" + db);
       DatabaseImpl database = getDatabase(connection, config, db);
-      Map<String, Float> maleFemaleProgress = database.getMaleFemaleProgress();
+      Map<String, Float> maleFemaleProgress = database.getMaleFemaleProgress(-1);
 
       logger.info(maleFemaleProgress.toString());
 

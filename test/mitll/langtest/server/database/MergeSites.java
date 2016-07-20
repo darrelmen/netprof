@@ -20,7 +20,7 @@ public class MergeSites extends BaseTest {
 /*  @Test
   public void testMerge() {
     DatabaseImpl egyptianCurrent = getDatabase("egyptian");
-    DatabaseImpl<CommonExercise> candidate = getDatabase("egyptianCandidate");
+    DatabaseImpl candidate = getDatabase("egyptianCandidate");
 
 
     List<User> oldUsers = egyptianCurrent.getUsers();
