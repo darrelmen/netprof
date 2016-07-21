@@ -90,7 +90,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet {
     serverProps = new ServerProperties(servletContext, configDir);
   }
 
-  private UserSecurityManager securityManager;
+  protected UserSecurityManager securityManager;
 
   protected int getProject() {
     try {
