@@ -36,8 +36,8 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.mail.EmailList;
 import mitll.langtest.server.mail.MailSupport;
-import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.scoring.PretestScore;
+import mitll.langtest.shared.user.User;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletContext;
@@ -238,18 +238,20 @@ public class ServerProperties {
   }
 
   /**
-   * @Deprecated only for use when importing data from old site
    * @return
+   * @Deprecated only for use when importing data from old site
    */
   public String getLessonPlan() {
-    return props.getProperty(LESSON_PLAN_FILE,"");//, props.getProperty(LANGUAGE) + ".json");
+    return props.getProperty(LESSON_PLAN_FILE, "");//, props.getProperty(LANGUAGE) + ".json");
   }
 
   public boolean useScoreCache() {
     return getDefaultTrue(USE_SCORE_CACHE);
   }
 
-  public String getLanguage() { return props.getProperty(LANGUAGE,"");  }
+  public String getLanguage() {
+    return props.getProperty(LANGUAGE, "");
+  }
 
   //specify this in  in config file like: tierIndex=5,4,-1. That
   //tells us to treat (zero-indexed) column 5 like the "unit" column,
@@ -273,8 +275,8 @@ public class ServerProperties {
   }
 
   /**
-   * @Deprecated each project will have it's types and type order
    * @return
+   * @Deprecated each project will have it's types and type order
    */
   public Collection<String> getTypes() {
     String property = props.getProperty(TYPE_ORDER, "Unit,Chapter");
@@ -305,6 +307,7 @@ public class ServerProperties {
     return !isNoModel();
   }
 
+  @Deprecated
   public boolean isNoModel() {
     return getDefaultFalse(NO_MODEL);
   }

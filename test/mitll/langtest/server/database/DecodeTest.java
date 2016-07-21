@@ -48,7 +48,7 @@ public class DecodeTest extends BaseTest {
   public void testMSA() {
     DatabaseImpl msa = getDatabase("msa");
     //JSONObject war = msa.doReport(new PathHelper("war"));
-    AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), msa.getServerProps(), msa, null);
+    AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), msa.getServerProps(), msa, null,"");
     audioFileHelper.checkLTSOnForeignPhrase("test");
     // logger.info("json:\n"+war);
   }
@@ -136,17 +136,21 @@ public class DecodeTest extends BaseTest {
   @Test
   public void testRussian() {
     DatabaseImpl russian = getDatabase("russian");
-    AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), russian.getServerProps(), russian, null);
+    AudioFileHelper audioFileHelper = getAudioFileHelper(russian);
     CommonExercise exercise = russian.getExercise(8);
     Collection<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
     for (AudioAttribute audioAttribute : audioAttributes)
       audioFileHelper.decodeOneAttribute(exercise, audioAttribute, false);
   }
 
+  AudioFileHelper getAudioFileHelper(DatabaseImpl russian) {
+    return new AudioFileHelper(new PathHelper("war"), russian.getServerProps(), russian, null, "");
+  }
+
   @Test
   public void testEnglish() {
     DatabaseImpl russian = getDatabase("english");
-    AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), russian.getServerProps(), russian, null);
+    AudioFileHelper audioFileHelper = getAudioFileHelper(russian);
     CommonExercise exercise = russian.getExercise(2253);
     logger.info("got " + exercise);
 
@@ -158,7 +162,7 @@ public class DecodeTest extends BaseTest {
   @Test
   public void testSpanish2() {
     DatabaseImpl db = getDatabase("spanish");
-    AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), db.getServerProps(), db, null);
+    AudioFileHelper audioFileHelper = getAudioFileHelper(db);
 
     CommonExercise exercise = db.getExercise(50264);
     logger.info("got " +exercise);
