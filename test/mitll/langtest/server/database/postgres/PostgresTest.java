@@ -120,6 +120,12 @@ public class PostgresTest extends BaseTest {
 
   }
 
+  @Test
+  public void testProjects() {
+    DatabaseImpl spanish = getDatabaseLight("spanish", false);
+    SlickProject next = spanish.getProjectDAO().getAll().iterator().next();
+
+  }
   private static DBConnection getConnection(String config) {
     File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
     String parent = file.getParentFile().getAbsolutePath();

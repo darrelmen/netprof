@@ -44,8 +44,8 @@ import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.scoring.*;
-import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
+import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -104,7 +104,8 @@ public class AudioFileHelper implements AlignDecode {
   public AudioFileHelper(PathHelper pathHelper,
                          ServerProperties serverProperties,
                          DatabaseImpl db,
-                         LogAndNotify langTestDatabase) {
+                         LogAndNotify langTestDatabase,
+                         String modelsDir) {
     this.pathHelper = pathHelper;
     this.serverProps = serverProperties;
     this.db = db;
@@ -112,7 +113,7 @@ public class AudioFileHelper implements AlignDecode {
     this.useOldSchoolServiceOnly = serverProperties.getOldSchoolService();
     this.mp3Support = new MP3Support(pathHelper, serverProperties);
     audioConversion = new AudioConversion(serverProps);
-    makeASRScoring();
+    makeASRScoring(modelsDir);
     makeDecodeCorrectnessChecker();
   }
 
@@ -751,7 +752,7 @@ public class AudioFileHelper implements AlignDecode {
    */
   private PretestScore getAlignmentScore(CommonExercise exercise, String testAudioPath, boolean usePhoneToDisplay, boolean useOldSchool) {
     return getASRScoreForAudio(0, testAudioPath, exercise.getForeignLanguage(), 128, 128, false,
-        false, serverProps.useScoreCache(), ""+exercise.getID(), null, usePhoneToDisplay, useOldSchool);
+        false, serverProps.useScoreCache(), "" + exercise.getID(), null, usePhoneToDisplay, useOldSchool);
   }
 
   /**
@@ -979,17 +980,17 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   // TODO: gross
-  private void makeASRScoring() {
+  private void makeASRScoring(String modelsDir) {
     if (webserviceScoring == null) {
       String installPath = pathHelper.getInstallPath();
       HTKDictionary htkDictionary = null;
       try {
-        htkDictionary = makeDict(installPath);
+        htkDictionary = makeDict(installPath, modelsDir);
       } catch (Exception e) {
-        logger.error("for now got " +e,e);
+        logger.error("for now got " + e, e);
       }
-      webserviceScoring = new ASRWebserviceScoring(installPath, serverProps, logAndNotify, htkDictionary);
-      oldschoolScoring   = new ASRScoring(installPath, serverProps, logAndNotify, htkDictionary);
+      webserviceScoring = new ASRWebserviceScoring(installPath, serverProps, logAndNotify, htkDictionary, modelsDir);
+      oldschoolScoring  = new ASRScoring(installPath, serverProps, logAndNotify, htkDictionary, modelsDir);
     }
     asrScoring = oldschoolScoring;
   }
@@ -998,9 +999,10 @@ public class AudioFileHelper implements AlignDecode {
    * @return
    * @see #makeASRScoring
    */
-  private HTKDictionary makeDict(String installPath) {
-    logger.info("install path is " +installPath);
-    String dictFile = new ConfigFileCreator(serverProps.getProperties(), null, Scoring.getScoringDir(installPath)).getDictFile();
+  private HTKDictionary makeDict(String installPath, String modelsDir) {
+    logger.info("install path is " + installPath);
+    String dictFile =
+        new ConfigFileCreator(serverProps.getProperties(), null, Scoring.getScoringDir(installPath), modelsDir).getDictFile();
     if (dictFile != null && new File(dictFile).exists()) {
       long then = System.currentTimeMillis();
       File file = new File(dictFile);
