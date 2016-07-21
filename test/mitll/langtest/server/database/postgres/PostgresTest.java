@@ -94,7 +94,10 @@ public class PostgresTest extends BaseTest {
     ExerciseDAO<CommonExercise> exerciseDAO = spanish.getExerciseDAO(next.id());
     List<CommonExercise> rawExercises = exerciseDAO.getRawExercises();
     for (CommonExercise ex: rawExercises.subList(0,100)) {
-      logger.info("ex " + ex.getID()+ " '" + ex.getEnglish() + "' '" +ex.getForeignLanguage() +"'");
+      logger.info("ex " + ex.getID()+ " '" + ex.getEnglish() + "' '" +ex.getForeignLanguage() +"' : " + ex.getDirectlyRelated().size() + " context sentences.");
+      for (CommonExercise cex : ex.getDirectlyRelated()) {
+        logger.info("\t context " + cex.getID()+ " '" + cex.getEnglish() + "' '" +cex.getForeignLanguage() +"'");
+      }
     }
     logger.info("Got " + rawExercises.iterator().next());
     //   new CopyToPostgres().copyUserExListJoin(spanish);

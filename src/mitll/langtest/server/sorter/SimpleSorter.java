@@ -51,8 +51,9 @@ import java.util.List;
  * @since 10/9/15.
  */
 public class SimpleSorter extends ExerciseComparator {
+  protected final Collection<String> typeOrder;
   SimpleSorter(Collection<String> typeOrder) {
-    super(typeOrder);
+    this.typeOrder = typeOrder;
   }
 
   /**

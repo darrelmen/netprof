@@ -170,8 +170,7 @@ public class AttachAudio {
 				previouslyAttachedAudio.add(audioAttribute.getAudioRef());
 			}
 
-		//	int m = 0;
-
+			int m = 0;
 			for (AudioAttribute audio : audioAttributes) {
 				String child = mediaDir1 + File.separator + audio.getAudioRef();
 				File test = new File(installPath, child);
@@ -185,10 +184,13 @@ public class AttachAudio {
 
 				if (exists) {
 					if (!previouslyAttachedAudio.contains(child)) {
-
 						if (audio.isContextAudio()) {
 							Collection<CommonExercise> directlyRelated = imported.getDirectlyRelated();
-							if (directlyRelated.isEmpty()) logger.warn("huh? no context exercise on " +imported.getID());
+							if (directlyRelated.isEmpty()) {
+							  if (m++ <50) {
+								logger.warn("huh? no context exercise on " +imported);
+							  }
+							}
 							else {
 								if (directlyRelated.size() == 1) {
 									audio.setAudioRef(child);   // remember to prefix the path
