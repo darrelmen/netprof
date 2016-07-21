@@ -97,10 +97,11 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio
    * @see mitll.langtest.server.audio.AudioFileHelper#makeASRScoring()
    */
-  public ASRWebserviceScoring(String deployPath, ServerProperties properties, LogAndNotify langTestDatabase, HTKDictionary htkDictionary) {
-    super(deployPath, properties, langTestDatabase, htkDictionary);
+  public ASRWebserviceScoring(String deployPath, ServerProperties properties, LogAndNotify langTestDatabase,
+                              HTKDictionary htkDictionary, String modelsDir) {
+    super(deployPath, properties, langTestDatabase, htkDictionary, modelsDir);
     decodeAudioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
-    alignAudioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
+    alignAudioToScore  = CacheBuilder.newBuilder().maximumSize(1000).build();
     ip = properties.getWebserviceIP();
     port = properties.getWebservicePort();
   }
