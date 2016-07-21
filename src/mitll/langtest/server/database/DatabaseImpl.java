@@ -171,7 +171,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   private final String absConfigDir;
   private SimpleExerciseDAO<AmasExerciseImpl> fileExerciseDAO;
 
-  private Map<Integer, Project<CommonExercise>> idToProject = new HashMap<>();
+  private Map<Integer, Project> idToProject = new HashMap<>();
 
   public DatabaseImpl(String configDir, String relativeConfigDir, String dbName, ServerProperties serverProps,
                       PathHelper pathHelper, boolean mustAlreadyExist, LogAndNotify logAndNotify) {
@@ -229,7 +229,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
 
     monitoringSupport = new MonitoringSupport(userDAO, resultDAO);
 
-    populateProjects(pathHelper, serverProps, logAndNotify);
+    populateProjects(pathHelper, serverProps, logAndNotify, relativeConfigDir);
   }
 
   boolean maybeGetH2Connection(String relativeConfigDir, String dbName, ServerProperties serverProps) {
@@ -252,11 +252,11 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
    * @see #DatabaseImpl(DatabaseConnection, String, String, String, ServerProperties, PathHelper, LogAndNotify)
    */
   private void populateProjects(PathHelper pathHelper, ServerProperties serverProps,
-                                LogAndNotify logAndNotify) {
+                                LogAndNotify logAndNotify, String relativeConfigDir) {
     for (SlickProject slickProject : projectDAO.getAll()) {
-      Project<CommonExercise> e = new Project<CommonExercise>(slickProject, pathHelper, serverProps, this, logAndNotify);
+      Project e = new Project(slickProject, pathHelper, serverProps, this, logAndNotify, relativeConfigDir);
       idToProject.put(e.getProject().id(), e);
-      logger.info("got " +e + " : " +e.getAudioFileHelper());
+      logger.info("got " + e + " : " + e.getAudioFileHelper());
     }
   }
 
@@ -522,13 +522,13 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
    * @param projectid
    * @return
    * @see #getExercises(int)
-   * @see LangTestDatabaseImpl#buildExerciseTrie()
+   * @see Project#buildExerciseTrie
    */
   public Collection<CommonExercise> getExercises(int projectid) {
     if (isAmas()) {
       return Collections.emptyList();
     }
-    Project<CommonExercise> project = projectid == -1 ? getFirstProject() : getProject(projectid);
+    Project project = projectid == -1 ? getFirstProject() : getProject(projectid);
     List<CommonExercise> rawExercises = project.getRawExercises();
     if (rawExercises.isEmpty()) {
       logger.warn("getExercises no exercises in " + getServerProps().getLessonPlan() + " at " + installPath);
@@ -536,13 +536,13 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     return rawExercises;
   }
 
-  public Project<CommonExercise> getProject(int projectid) {
+  private Project getProject(int projectid) {
     if (projectid == -1) return getFirstProject();
     return idToProject.get(projectid);
   }
 
   public ExerciseDAO<CommonExercise> getExerciseDAO(int projectid) {
-    Project<CommonExercise> project = getProject(projectid);
+    Project project = getProject(projectid);
     return project.getExerciseDAO();
   }
 
@@ -554,9 +554,13 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     return getUserProjectDAO().mostRecentByUser(loggedInUser.getId());
   }
 
+  public void stopDecode() {
+    for (Project project : idToProject.values()) project.stopDecode();
+
+  }
 
   public void rememberUserSelectedProject(User loggedInUser, int projectid) {
-    Project<CommonExercise> project = getProject(projectid);
+    Project project = getProject(projectid);
     logger.info("rememberUserSelectedProject user " + loggedInUser + " -> " + projectid + " : " + project);
     getUserProjectDAO().add(loggedInUser.getId(), projectid);
     setStartupInfo(loggedInUser);
@@ -564,11 +568,11 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
 
   public void setStartupInfo(User userWhere) {
     int i = getUserProjectDAO().mostRecentByUser(userWhere.getId());
-    Project<CommonExercise> project = getProject(i);
+    Project project = getProject(i);
     SlickProject project1 = project.getProject();
     ProjectStartupInfo startupInfo = new ProjectStartupInfo(getServerProps().getProperties(),
         project.getTypeOrder(), project.getSectionHelper().getSectionNodes(), project1.id(), project1.language());
-    //logger.info("Set startup info " + startupInfo);
+    logger.info("For " +userWhere + " Set startup info " + startupInfo);
     userWhere.setStartupInfo(startupInfo);
   }
 
@@ -581,7 +585,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     return getFirstProject().getExerciseDAO();
   }
 
-  private Project<CommonExercise> getFirstProject() {
+  private Project getFirstProject() {
     return idToProject.values().iterator().next();
   }
 
@@ -628,34 +632,37 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
           ExerciseDAO<CommonExercise> exerciseDAO = getProjects().iterator().next().getExerciseDAO();
           userExerciseDAO.setExerciseDAO(exerciseDAO);
 
-          for (Project<CommonExercise> project : getProjects()) {
-            ExerciseDAO<?> exerciseDAO1 = project.getExerciseDAO();
-            setDependencies(mediaDir, installPath, exerciseDAO1);
-            List<CommonExercise> rawExercises = project.getRawExercises();
-            if (!rawExercises.isEmpty()) {
-              logger.debug("first is " + rawExercises.iterator().next());
-            }
-            project.setJsonSupport(new JsonSupport(project.getSectionHelper(), getResultDAO(), getRefResultDAO(), getAudioDAO(),
-                getPhoneDAO(), configDir, installPath));
-            project.setAnalysis(new SlickAnalysis(this, phoneDAO, getExerciseIDToRefAudio(project.getProject().id()), (SlickResultDAO) resultDAO));
+          for (Project project : getProjects()) {
+            configureProject(mediaDir, installPath, project);
           }
-
-          // numExercises = this.exerciseDAO.getNumExercises();
-
-          //      analysis =
         }
-        userManagement = new UserManagement(userDAO, /*numExercises,*/ resultDAO, userListManager);
-        //   audioDAO.setExerciseDAO(exerciseDAO);
-        //   audioDAO.markTranscripts();
+        userManagement = new UserManagement(userDAO, resultDAO, userListManager);
       }
     }
+  }
+
+  private void configureProject(String mediaDir, String installPath, Project project) {
+    ExerciseDAO<?> exerciseDAO1 = project.getExerciseDAO();
+    setDependencies(mediaDir, installPath, exerciseDAO1);
+    List<CommonExercise> rawExercises = project.getRawExercises();
+    if (!rawExercises.isEmpty()) {
+      logger.debug("first is " + rawExercises.iterator().next());
+    }
+    project.setJsonSupport(new JsonSupport(project.getSectionHelper(), getResultDAO(), getRefResultDAO(), getAudioDAO(),
+        getPhoneDAO(), configDir, installPath));
+
+    Map<Integer, String> exerciseIDToRefAudio = getExerciseIDToRefAudio(project.getProject().id());
+    project.setAnalysis(
+        new SlickAnalysis(this, phoneDAO,
+            exerciseIDToRefAudio, (SlickResultDAO) resultDAO)
+         );
   }
 
   private void makeExerciseDAO(String lessonPlanFile, boolean isURL) {
     if (isURL) {
       addSingleProject(new JSONURLExerciseDAO(getServerProps(), userListManager, ADD_DEFECTS));
     } else if (!serverProps.useH2()) {
-      for (Project<CommonExercise> project : getProjects()) {
+      for (Project project : getProjects()) {
         DBExerciseDAO dbExerciseDAO = new DBExerciseDAO(getServerProps(), userListManager, ADD_DEFECTS,
             (SlickUserExerciseDAO) getUserExerciseDAO(), project.getProject());
         project.setExerciseDAO(dbExerciseDAO);
@@ -671,10 +678,10 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   }
 
   private void addSingleProject(ExerciseDAO<CommonExercise> jsonExerciseDAO) {
-    idToProject.put(1, new Project<CommonExercise>(jsonExerciseDAO));
+    idToProject.put(1, new Project(jsonExerciseDAO));
   }
 
-  private Collection<Project<CommonExercise>> getProjects() {
+  private Collection<Project> getProjects() {
     return idToProject.values();
   }
 
@@ -813,7 +820,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   }
 
   private JsonSupport getJsonSupportForProject(int i) {
-    Project<CommonExercise> project = getProject(i);
+    Project project = getProject(i);
     return project.getJsonSupport();
   }
 
