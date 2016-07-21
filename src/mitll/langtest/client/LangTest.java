@@ -583,9 +583,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see UserManager#storeUser
    */
   public void gotUser(User user) {
+    logger.info("\n\n\ngotUser Got startup info " + projectStartupInfo);
     projectStartupInfo = user.getStartupInfo();
     initialUI.gotUser(user);
-  //  logger.info("\n\n\ngotUser Got startup info " + projectStartupInfo);
   }
 
   /**
