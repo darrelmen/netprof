@@ -55,7 +55,6 @@ import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.database.security.DominoSessionException;
 import mitll.langtest.server.database.security.UserSecurityManager;
 import mitll.langtest.server.database.user.BaseUserDAO;
-import mitll.langtest.server.decoder.RefResultDecoder;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.sorter.ExerciseSorter;
@@ -108,7 +107,7 @@ import java.util.*;
 public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTestDatabase, LogAndNotify {
   private static final Logger logger = Logger.getLogger(LangTestDatabaseImpl.class);
   public static final String DATABASE_REFERENCE = "databaseReference";
-  public static final String AUDIO_FILE_HELPER_REFERENCE = "audioFileHelperReference";
+  @Deprecated  public static final String AUDIO_FILE_HELPER_REFERENCE = "audioFileHelperReference";
 
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
@@ -120,7 +119,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private static final int WARN_DUR = 100;
   private static final String WAV1 = "wav";
 
-  private RefResultDecoder refResultDecoder;
+ // private RefResultDecoder refResultDecoder;
 
   private static final boolean WARN_MISSING_FILE = true;
 
@@ -129,8 +128,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * Put inside a Project
    */
-  @Deprecated
-  AudioFileHelper audioFileHelper;
+  @Deprecated AudioFileHelper audioFileHelper;
   private String relativeConfigDir;
   private String configDir;
   private ServerProperties serverProps;
@@ -146,8 +144,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * Put inside a Project
    */
-  @Deprecated
-  private ExerciseTrie fullTrie = null;
+//  @Deprecated
+//  private ExerciseTrie fullTrie = null;
   private ExerciseTrie<AmasExerciseImpl> amasFullTrie = null;
 
   private static final boolean DEBUG = false;
@@ -364,7 +362,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   private <T extends CommonShell> Collection<T> getExercisesForSearch(String prefix, int userID, Collection<T> exercises,
                                                                       boolean predefExercises) {
-    ExerciseTrie<T> fullTrie = this.fullTrie;
+    ExerciseTrie<T> fullTrie = getProject().getFullTrie();
     return getExercisesForSearchWithTrie(prefix, userID, exercises, predefExercises, fullTrie);
   }
 
@@ -851,6 +849,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (byID == null) {
       logger.error("getExercise : huh? couldn't find exercise with id '" + exid + "' when examining " + exercises.size() + " items");
     } else {
+      logger.debug("getExercise : find exercise " + exid + " for " + userID + " : " + byID + "\n\tcontext" + byID.getDirectlyRelated() );
       then2 = System.currentTimeMillis();
       addAnnotationsAndAudio(userID, byID, isFlashcardReq);
       now = System.currentTimeMillis();
@@ -888,6 +887,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return (T) byID;
   }
 
+  /**
+   *
+   * @param id
+   * @param then
+   */
   private void checkPerformance(int id, long then) {
     long now;
     now = System.currentTimeMillis();
@@ -970,6 +974,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return getAudioFileHelper().getSmallVocabDecoder();
   }
 
+  boolean didCheckLTS = false;
   /**
    * Called from the client:
    *
@@ -983,10 +988,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (now - then > 200) {
       logger.info("getExercises took " + (now - then) + " millis to get the raw exercise list for " + getLanguage());
     }
-    if (fullTrie == null) {
-      buildExerciseTrie();
+    if (!didCheckLTS) {
+//      buildExerciseTrie();
       getAudioFileHelper().checkLTSAndCountPhones(exercises);
       shareAudioFileHelper(getServletContext());
+      didCheckLTS = true;
     }
 
     now = System.currentTimeMillis();
@@ -1001,15 +1007,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @param <T>
+   * @paramx <T>
    * @see #getExercises()
    */
-  private <T extends CommonShell> void buildExerciseTrie() {
+/*  private <T extends CommonShell> void buildExerciseTrie() {
     logger.info("db " + db);
     logger.info("audioFileHelper " + getAudioFileHelper());
     SmallVocabDecoder smallVocabDecoder = getSmallVocabDecoder();
     fullTrie = new ExerciseTrie<CommonExercise>(getExercisesForUser(), getLanguage(), smallVocabDecoder);
-  }
+  }*/
 
   public ContextPractice getContextPractice() {
     return db.getContextPractice();
@@ -1385,7 +1391,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     boolean b = db.deleteItem(id, getProjectID());
     if (b) {
       // force rebuild of full trie
-      buildExerciseTrie();
+      getProject().buildExerciseTrie(db);
     }
     return b;
   }
@@ -2113,7 +2119,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   @Override
   public void destroy() {
-    refResultDecoder.setStopDecode(true);
+    db.stopDecode();
+//    refResultDecoder.setStopDecode(true);
     //stopOggCheck = true;
     super.destroy();
     if (db == null) {
@@ -2134,7 +2141,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       setInstallPath(db);
       if (serverProps.isAMAS()) {
         audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, this,
-            serverProps.getProps().getProperty(ServerProperties.MODELS_DIR));
+            serverProps.getProps().getProperty(ServerProperties.MODELS_DIR), serverProps.getLanguage());
       }
     } catch (Exception e) {
       logger.error("Got " + e, e);
@@ -2149,21 +2156,21 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
 
     try {
-      this.refResultDecoder = new RefResultDecoder(db, serverProps, pathHelper, getAudioFileHelper());
-      refResultDecoder.doRefDecode(getExercises(), relativeConfigDir);
+//      this.refResultDecoder = new RefResultDecoder(db, serverProps, pathHelper, getAudioFileHelper());
+//      refResultDecoder.doRefDecode(getExercises(), relativeConfigDir);
       if (serverProps.isAMAS()) getAudioFileHelper().makeAutoCRT(relativeConfigDir);
     } catch (Exception e) {
       logger.error("Got " + e, e);
     }
   }
 
-  AudioFileHelper getAudioFileHelper() {
+  private AudioFileHelper getAudioFileHelper() {
     if (serverProps.isAMAS()) {
       return audioFileHelper;
     } else {
       Project project = getProject();
       if (project == null) {
-        logger.warn("no current project???");
+        logger.warn("getAudioFileHelper no current project???");
         return null;
       }
       return project.getAudioFileHelper();
@@ -2171,7 +2178,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   private String getLanguage() {
-    return serverProps.getLanguage();
+    return getProject().getProject().language();
   }
 
   /**
@@ -2292,14 +2299,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       return null;
     }
   }
-
-//  private Project getProjectForUser(int userid) {
-//    return db.getProjectID(db.getUserProjectDAO().mostRecentByUser(userid));
-//  }
-//
-//  private int getProjectIDForUser(User loggedInUser) {
-//    return db.getUserProjectDAO().mostRecentByUser(loggedInUser.getId());
-//  }
 
   private String getLessonPlan() {
     return serverProps.getLessonPlan() == null ? null : configDir + File.separator + serverProps.getLessonPlan();
