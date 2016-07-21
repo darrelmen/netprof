@@ -92,7 +92,7 @@ public class AudioFileHelper implements AlignDecode {
   private Map<String, Integer> phoneToCount;
   private boolean useOldSchoolServiceOnly = false;
   private final AudioConversion audioConversion;
-
+private final boolean isNoModel;
   /**
    * @param pathHelper
    * @param serverProperties
@@ -111,6 +111,7 @@ public class AudioFileHelper implements AlignDecode {
     this.db = db;
     this.logAndNotify = langTestDatabase;
     this.useOldSchoolServiceOnly = serverProperties.getOldSchoolService();
+    isNoModel = modelsDir == null || modelsDir.isEmpty();
     this.mp3Support = new MP3Support(pathHelper, serverProperties);
     audioConversion = new AudioConversion(serverProps);
     makeASRScoring(modelsDir);
@@ -599,12 +600,16 @@ public class AudioFileHelper implements AlignDecode {
                                          AudioCheck.ValidityAndDur validity) {
     String url = pathHelper.ensureForwardSlashes(wavPath);
 
-    return (validity.isValid() && !serverProps.isNoModel()) ?
+    return (validity.isValid() && !isNoModel()) ?
         getAMASAudioAnswer(
             exercise1,
             questionID,
             reqid, file, validity, url) :
         new AudioAnswer(url, validity.getValidity(), reqid, validity.durationInMillis);
+  }
+
+  private boolean isNoModel() {
+    return isNoModel;
   }
 
   /**
@@ -651,7 +656,7 @@ public class AudioFileHelper implements AlignDecode {
                                      boolean useOldSchool) {
     String url = pathHelper.ensureForwardSlashes(wavPath);
 
-    return (validity.isValid() && !serverProps.isNoModel()) ?
+    return (validity.isValid() && !isNoModel()) ?
         getAudioAnswer(
             exercise1,
             reqid, file, validity, url, doFlashcard, canUseCache, allowAlternates, useOldSchool) :
@@ -979,6 +984,10 @@ public class AudioFileHelper implements AlignDecode {
     return property.contains("mac") || property.contains("win");
   }
 
+  /**
+   * @see #AudioFileHelper(PathHelper, ServerProperties, DatabaseImpl, LogAndNotify, String)
+   * @param modelsDir
+   */
   // TODO: gross
   private void makeASRScoring(String modelsDir) {
     if (webserviceScoring == null) {
@@ -1000,7 +1009,7 @@ public class AudioFileHelper implements AlignDecode {
    * @see #makeASRScoring
    */
   private HTKDictionary makeDict(String installPath, String modelsDir) {
-    logger.info("install path is " + installPath);
+    logger.info("install path is " + installPath + " modelsDir " +modelsDir);
     String dictFile =
         new ConfigFileCreator(serverProps.getProperties(), null, Scoring.getScoringDir(installPath), modelsDir).getDictFile();
     if (dictFile != null && new File(dictFile).exists()) {
@@ -1015,7 +1024,7 @@ public class AudioFileHelper implements AlignDecode {
       }
       return htkDictionary;
     } else {
-      if (serverProps.isNoModel()) {
+      if (isNoModel()) {
         logger.info("---> makeDict : Can't find dict file at " + dictFile);
       } else {
         logger.error("\n\n\n---> makeDict : Can't find dict file at " + dictFile);
