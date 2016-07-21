@@ -498,7 +498,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see mitll.langtest.client.recorder.FlashRecordPanelHeadless#micConnected()
    */
   private void makeFlashContainer() {
-
     MicPermission micPermission = new MicPermission() {
       /**
        * @see mitll.langtest.client.recorder.WebAudioRecorder
@@ -583,8 +582,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see UserManager#storeUser
    */
   public void gotUser(User user) {
-    logger.info("\n\n\ngotUser Got startup info " + projectStartupInfo);
     projectStartupInfo = user.getStartupInfo();
+    logger.info("\n\n\ngotUser Got startup info " + projectStartupInfo);
     initialUI.gotUser(user);
   }
 

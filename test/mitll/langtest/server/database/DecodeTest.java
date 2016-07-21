@@ -2,6 +2,7 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.client.user.Md5Hash;
 import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.exercise.AudioAttribute;
@@ -48,7 +49,8 @@ public class DecodeTest extends BaseTest {
   public void testMSA() {
     DatabaseImpl msa = getDatabase("msa");
     //JSONObject war = msa.doReport(new PathHelper("war"));
-    AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), msa.getServerProps(), msa, null,"");
+    ServerProperties serverProps = msa.getServerProps();
+    AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), serverProps, msa, null,"", serverProps.getLanguage());
     audioFileHelper.checkLTSOnForeignPhrase("test");
     // logger.info("json:\n"+war);
   }
@@ -144,7 +146,8 @@ public class DecodeTest extends BaseTest {
   }
 
   AudioFileHelper getAudioFileHelper(DatabaseImpl russian) {
-    return new AudioFileHelper(new PathHelper("war"), russian.getServerProps(), russian, null, "");
+    ServerProperties serverProps = russian.getServerProps();
+    return new AudioFileHelper(new PathHelper("war"), serverProps, russian, null, "", serverProps.getLanguage());
   }
 
   @Test

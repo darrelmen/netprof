@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.database.exercise;
 
-import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
@@ -40,43 +39,80 @@ import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.JsonSupport;
 import mitll.langtest.server.database.analysis.SlickAnalysis;
+import mitll.langtest.server.decoder.RefResultDecoder;
+import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.trie.ExerciseTrie;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.npdata.dao.SlickProject;
 import org.apache.log4j.Logger;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 /**
  * Has everything associated with a project
  */
-public class Project<T extends CommonShell> {
+public class Project {
   private static final Logger logger = Logger.getLogger(Project.class);
 
   private SlickProject project;
   private List<String> typeOrder;
-  private ExerciseDAO<T> exerciseDAO;
+  private ExerciseDAO<CommonExercise> exerciseDAO;
   private JsonSupport jsonSupport;
   private SlickAnalysis analysis;
   private AudioFileHelper audioFileHelper;
-  ExerciseTrie fullTrie = null;
+  private ExerciseTrie<CommonExercise> fullTrie = null;
+  private RefResultDecoder refResultDecoder;
+  private String relativeConfigDir;
+  private PathHelper pathHelper;
+  private DatabaseImpl db;
+  private ServerProperties serverProps;
 
-  public Project(SlickProject project, PathHelper pathHelper, ServerProperties serverProps,
-                 DatabaseImpl db, LogAndNotify logAndNotify) {
-    this.project = project;
-    this.typeOrder = Arrays.asList(project.first(), project.second());
-    String prop = project.getProp(ServerProperties.MODELS_DIR);
-    logger.info("Project got " +ServerProperties.MODELS_DIR + ": "+ prop);
-    audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, logAndNotify, prop);
-  }
-
-  public Project(ExerciseDAO<T> exerciseDAO) {
+  public Project(ExerciseDAO<CommonExercise> exerciseDAO) {
     this.exerciseDAO = exerciseDAO;
   }
 
+  public Project(SlickProject project,
+                 PathHelper pathHelper, ServerProperties serverProps,
+                 DatabaseImpl db, LogAndNotify logAndNotify,
+                 String relativeConfigDir) {
+    this.project = project;
+    this.typeOrder = Arrays.asList(project.first(), project.second());
+    String prop = project.getProp(ServerProperties.MODELS_DIR);
+    logger.info("Project got " + ServerProperties.MODELS_DIR + ": " + prop);
+    audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, logAndNotify, prop, project.language());
+    logger.info("Project got " + audioFileHelper);
+    logger.info("Project got " + audioFileHelper.getCollator());
+
+    this.relativeConfigDir = relativeConfigDir;
+    this.db = db;
+    this.serverProps = serverProps;
+    this.pathHelper = pathHelper;
+    //buildExerciseTrie(db);
+  }
+
+  /**
+   * Only public to support deletes...
+   */
+  public <T extends CommonShell> void buildExerciseTrie(DatabaseImpl db) {
+    logger.info("db " + db);
+    logger.info("audioFileHelper " + getAudioFileHelper());
+    fullTrie = new ExerciseTrie<>(getExercisesForUser(), project.language(), getSmallVocabDecoder());
+  }
+
+  private Collection<CommonExercise> getExercisesForUser() {
+    return getRawExercises();
+  }
+
+  private SmallVocabDecoder getSmallVocabDecoder() {
+    return getAudioFileHelper().getSmallVocabDecoder();
+  }
+
+
   public boolean isNoModel() {
-    return  project.getProp(ServerProperties.MODELS_DIR) == null;
+    return project.getProp(ServerProperties.MODELS_DIR) == null;
   }
 
   public SlickProject getProject() {
@@ -87,19 +123,23 @@ public class Project<T extends CommonShell> {
     return typeOrder;
   }
 
-  public void setExerciseDAO(ExerciseDAO<T> exerciseDAO) {
+  /**
+   * @param exerciseDAO
+   * @see DatabaseImpl#makeExerciseDAO(String, boolean)
+   */
+  public void setExerciseDAO(ExerciseDAO<CommonExercise> exerciseDAO) {
     this.exerciseDAO = exerciseDAO;
   }
 
-  public ExerciseDAO<T> getExerciseDAO() {
+  public ExerciseDAO<CommonExercise> getExerciseDAO() {
     return exerciseDAO;
   }
 
-  public List<T> getRawExercises() {
+  public List<CommonExercise> getRawExercises() {
     return exerciseDAO.getRawExercises();
   }
 
-  public SectionHelper<T> getSectionHelper() {
+  public SectionHelper<CommonExercise> getSectionHelper() {
     return exerciseDAO.getSectionHelper();
   }
 
@@ -111,8 +151,12 @@ public class Project<T extends CommonShell> {
     return jsonSupport;
   }
 
-  public void setAnalysis(SlickAnalysis analysis) {
+  public void setAnalysis(SlickAnalysis analysis
+  ) {
     this.analysis = analysis;
+    fullTrie = new ExerciseTrie<>(getExercisesForUser(), project.language(), getSmallVocabDecoder());
+    this.refResultDecoder = new RefResultDecoder(db, serverProps, pathHelper, getAudioFileHelper());
+    refResultDecoder.doRefDecode(getExercisesForUser(), relativeConfigDir);
   }
 
   public SlickAnalysis getAnalysis() {
@@ -125,5 +169,13 @@ public class Project<T extends CommonShell> {
 
   public AudioFileHelper getAudioFileHelper() {
     return audioFileHelper;
+  }
+
+  public ExerciseTrie getFullTrie() {
+    return fullTrie;
+  }
+
+  public void stopDecode() {
+    refResultDecoder.setStopDecode(true);
   }
 }

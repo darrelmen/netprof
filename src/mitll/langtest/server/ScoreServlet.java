@@ -942,12 +942,13 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
+   * Get audio file helper on project choice
    * Get a reference to the current database object, made in the main LangTestDatabaseImpl servlet
    *
    * @return
    * @see #doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
-  private void getAudioFileHelper() {
+  @Deprecated  private void getAudioFileHelper() {
     if (audioFileHelper == null) {
       setPaths();
 
@@ -982,7 +983,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @return
    * @see #getAudioFileHelper()
    */
-  private AudioFileHelper getAudioFileHelperRef() {
+  @Deprecated  private AudioFileHelper getAudioFileHelperRef() {
     AudioFileHelper fileHelper = null;
     Object databaseReference = getServletContext().getAttribute(LangTestDatabaseImpl.AUDIO_FILE_HELPER_REFERENCE);
     if (databaseReference != null) {
