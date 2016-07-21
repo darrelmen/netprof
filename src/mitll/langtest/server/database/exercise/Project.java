@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.exercise;
 
+import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
@@ -39,8 +40,10 @@ import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.JsonSupport;
 import mitll.langtest.server.database.analysis.SlickAnalysis;
+import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.npdata.dao.SlickProject;
+import org.apache.log4j.Logger;
 
 import java.util.Arrays;
 import java.util.List;
@@ -49,18 +52,22 @@ import java.util.List;
  * Has everything associated with a project
  */
 public class Project<T extends CommonShell> {
+  private static final Logger logger = Logger.getLogger(Project.class);
+
   private SlickProject project;
   private List<String> typeOrder;
   private ExerciseDAO<T> exerciseDAO;
   private JsonSupport jsonSupport;
   private SlickAnalysis analysis;
   private AudioFileHelper audioFileHelper;
+  ExerciseTrie fullTrie = null;
 
   public Project(SlickProject project, PathHelper pathHelper, ServerProperties serverProps,
                  DatabaseImpl db, LogAndNotify logAndNotify) {
     this.project = project;
     this.typeOrder = Arrays.asList(project.first(), project.second());
     String prop = project.getProp(ServerProperties.MODELS_DIR);
+    logger.info("Project got " +ServerProperties.MODELS_DIR + ": "+ prop);
     audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, logAndNotify, prop);
   }
 
