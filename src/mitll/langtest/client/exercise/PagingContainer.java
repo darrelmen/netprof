@@ -49,8 +49,10 @@ import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.sorter.ExerciseComparator;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Created with IntelliJ IDEA.
@@ -62,7 +64,7 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class PagingContainer<T extends CommonShell> extends ClickablePagingContainer<T> {
- // private final Logger logger = Logger.getLogger("PagingContainer");
+  private final Logger logger = Logger.getLogger("PagingContainer");
   private static final int MAX_LENGTH_ID = 17;
   private final boolean isRecorder;
   private final ExerciseComparator sorter;
@@ -78,8 +80,16 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
   public PagingContainer(ExerciseController controller, int verticalUnaccountedFor, boolean isRecorder) {
     super(controller);
     ProjectStartupInfo startupInfo = controller.getStartupInfo();
-    Collection<String> typeOrder = startupInfo.getTypeOrder();
-    sorter = new ExerciseComparator(typeOrder);
+    if (startupInfo == null) {
+      logger.warning("huh? no startup info?");
+//      sorter = new ExerciseComparator(Collections.emptyList());
+    }
+    else {
+  //    Collection<String> typeOrder = startupInfo.getTypeOrder();
+    //  sorter = new ExerciseComparator(typeOrder);
+    }
+    sorter = new ExerciseComparator();
+
     this.verticalUnaccountedFor = verticalUnaccountedFor;
     this.isRecorder = isRecorder;
     english = controller.getLanguage().equals(ENGLISH);
