@@ -76,13 +76,16 @@ public class UnitChapterItemHelper<T extends CommonShell> {
   }
 
   /**
+   * Prefer domino id
    * @param e
    * @return
    * @see GoodwaveExercisePanel#getQuestionContent
    */
   private Widget getItemHeader(T e) {
-   // logger.info("got " + e + " and " + e.getDominoID());
-    Heading w = new Heading(HEADING_FOR_UNIT_LESSON, ITEM, ""+e.getDominoID());
+    // logger.info("got " + e + " and " + e.getDominoID());
+    int dominoID = e.getDominoID();
+    int idToUse = dominoID != -1 ? dominoID : e.getID();
+    Heading w = new Heading(HEADING_FOR_UNIT_LESSON, ITEM, "" + idToUse);
     w.getElement().setId("ItemHeading");
     return w;
   }
