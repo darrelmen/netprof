@@ -22,7 +22,7 @@ import java.util.stream.Stream;
  */
 public class AMASReaderTest {
   private static final Logger logger = Logger.getLogger(AMASReaderTest.class);
-  public static final String AM_LB_002 = "AM-LB-002";
+ // public static final String AM_LB_002 = "AM-LB-002";
   private static DatabaseImpl database;
 
   @BeforeClass
@@ -64,7 +64,8 @@ public class AMASReaderTest {
     logger.info("e.g. " + next);
     logger.info("\n\ngot " + exercises.size());
 
-    AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), database.getServerProps(), database, null,"");
+    ServerProperties serverProps = database.getServerProps();
+    AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), serverProps, database, null,"", serverProps.getLanguage());
 
     audioFileHelper.makeAutoCRT(".");
 

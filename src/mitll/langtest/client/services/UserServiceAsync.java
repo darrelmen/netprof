@@ -33,6 +33,7 @@
 package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import mitll.langtest.shared.user.LoginResult;
 import mitll.langtest.shared.user.User;
 
 import java.util.List;
@@ -60,4 +61,6 @@ public interface UserServiceAsync {
   void changeEnabledFor(int userid, boolean enabled, AsyncCallback<Void> async);
 
   void enableCDUser(String cdToken, String emailR, String url, AsyncCallback<String> asyncCallback);
+
+  void loginUser(String userId, String attemptedPassword, AsyncCallback<LoginResult> async);
 }
