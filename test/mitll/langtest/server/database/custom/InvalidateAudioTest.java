@@ -66,7 +66,8 @@ public class InvalidateAudioTest {
   }
 
   private SmallVocabDecoder getSmallVocabDecoder(DatabaseImpl newDB) {
-    AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), newDB.getServerProps(), newDB, null,"");
+    ServerProperties serverProps = newDB.getServerProps();
+    AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), serverProps, newDB, null,"", serverProps.getLanguage());
     return audioFileHelper.getSmallVocabDecoder();
   }
 

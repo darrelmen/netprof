@@ -105,7 +105,7 @@ public class ServerProperties {
   private static final String USE_POSTGRE_SQL = "usePostgreSQL";
   private static final String USE_ORM = "useORM";
   private static final String TYPE_ORDER = "typeOrder";
-  public static final String FONT_FAMILY = "fontFamily";
+  private static final String FONT_FAMILY = "fontFamily";
   private static final String SLEEP_BETWEEN_DECODES_MILLIS = "sleepBetweenDecodesMillis";
   public static final String MODELS_DIR = "MODELS_DIR";
   private String miraClassifierURL = MIRA_DEVEL;// MIRA_LEN; //MIRA_DEVEL;
@@ -249,7 +249,7 @@ public class ServerProperties {
     return getDefaultTrue(USE_SCORE_CACHE);
   }
 
-  public String getLanguage() {
+  @Deprecated  public String getLanguage() {
     return props.getProperty(LANGUAGE, "");
   }
 

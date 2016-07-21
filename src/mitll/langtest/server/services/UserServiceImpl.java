@@ -80,7 +80,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @param attemptedPassword
    * @return
    */
-  private LoginResult loginUser(String userId, String attemptedPassword) {
+  public LoginResult loginUser(String userId, String attemptedPassword) {
     HttpServletRequest request = getThreadLocalRequest();
     String remoteAddr = request.getHeader("X-FORWARDED-FOR");
     if (remoteAddr == null || remoteAddr.isEmpty()) {
@@ -113,6 +113,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
           ", session.isNew=" + session1.isNew() +
           ", created=" +       session1.getCreationTime() +
           ", " + atts.toString());
+      db.setStartupInfo(loggedInUser);
       return new LoginResult(loggedInUser, new Date(System.currentTimeMillis()));
     } else {
       loggedInUser = db.getUserDAO().getUser(userId, attemptedPassword);//, remoteAddr, userAgent, session.getId());
@@ -226,6 +227,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     findSharedDatabase();
     User userWhere = db.getUserDAO().getUserWhere(id);
     db.setStartupInfo(userWhere);
+
     return userWhere;
   }
 
