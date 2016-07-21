@@ -37,6 +37,7 @@ import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.security.DominoSessionException;
 import mitll.langtest.server.database.security.UserSecurityManager;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -44,6 +45,7 @@ import mitll.langtest.shared.user.User;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 
 @SuppressWarnings("serial")
@@ -90,9 +92,9 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet {
     serverProps = new ServerProperties(servletContext, configDir);
   }
 
-  protected UserSecurityManager securityManager;
+   UserSecurityManager securityManager;
 
-  protected int getProject() {
+  protected int getProjectID() {
     try {
       User loggedInUser = securityManager.getLoggedInUser(getThreadLocalRequest());
       if (loggedInUser == null) return -1;
@@ -101,6 +103,19 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet {
     } catch (DominoSessionException e) {
       logger.error("Got " + e,e);
       return -1;
+    }
+  }
+
+  protected Project getProject() {
+    try {
+      HttpServletRequest threadLocalRequest = getThreadLocalRequest();
+      //   logger.info("getProjectID got request " + threadLocalRequest);
+      User loggedInUser = securityManager.getLoggedInUser(threadLocalRequest);
+      if (loggedInUser == null) return null;
+      else return db.getProjectForUser(loggedInUser.getId());
+    } catch (DominoSessionException e) {
+      logger.error("got " + e, e);
+      return null;
     }
   }
 }

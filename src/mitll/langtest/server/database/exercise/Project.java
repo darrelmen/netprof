@@ -32,9 +32,13 @@
 
 package mitll.langtest.server.database.exercise;
 
+import mitll.langtest.server.LogAndNotify;
+import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.audio.AudioFileHelper;
+import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.JsonSupport;
 import mitll.langtest.server.database.analysis.SlickAnalysis;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.npdata.dao.SlickProject;
 
@@ -50,15 +54,23 @@ public class Project<T extends CommonShell> {
   private ExerciseDAO<T> exerciseDAO;
   private JsonSupport jsonSupport;
   private SlickAnalysis analysis;
+  private AudioFileHelper audioFileHelper;
 
-  public Project(SlickProject project) {
+  public Project(SlickProject project, PathHelper pathHelper, ServerProperties serverProps,
+                 DatabaseImpl db, LogAndNotify logAndNotify) {
     this.project = project;
     this.typeOrder = Arrays.asList(project.first(), project.second());
+    String prop = project.getProp(ServerProperties.MODELS_DIR);
+    audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, logAndNotify, prop);
   }
+
   public Project(ExerciseDAO<T> exerciseDAO) {
     this.exerciseDAO = exerciseDAO;
   }
 
+  public boolean isNoModel() {
+    return  project.getProp(ServerProperties.MODELS_DIR) == null;
+  }
 
   public SlickProject getProject() {
     return project;
@@ -76,7 +88,9 @@ public class Project<T extends CommonShell> {
     return exerciseDAO;
   }
 
-  public List<T> getRawExercises() { return exerciseDAO.getRawExercises(); }
+  public List<T> getRawExercises() {
+    return exerciseDAO.getRawExercises();
+  }
 
   public SectionHelper<T> getSectionHelper() {
     return exerciseDAO.getSectionHelper();
@@ -98,5 +112,11 @@ public class Project<T extends CommonShell> {
     return analysis;
   }
 
-  public String toString() { return "Project " + project + " types " + typeOrder; }
+  public String toString() {
+    return "Project " + project + " types " + typeOrder;
+  }
+
+  public AudioFileHelper getAudioFileHelper() {
+    return audioFileHelper;
+  }
 }
