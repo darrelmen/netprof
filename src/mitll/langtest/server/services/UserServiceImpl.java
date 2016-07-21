@@ -66,8 +66,6 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    */
   private static final String USER_REQUEST_ATT = UserSecurityManager.USER_REQUEST_ATT;
 
-  UserSecurityManager securityManager;
-
   @Override
   public void init() {
     logger.info("init called for UserServiceImpl");
@@ -82,7 +80,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @param attemptedPassword
    * @return
    */
-  public LoginResult loginUser(String userId, String attemptedPassword) {
+  private LoginResult loginUser(String userId, String attemptedPassword) {
     HttpServletRequest request = getThreadLocalRequest();
     String remoteAddr = request.getHeader("X-FORWARDED-FOR");
     if (remoteAddr == null || remoteAddr.isEmpty()) {
@@ -109,10 +107,11 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
       }
       atts.append("]");
 //      logger.info("acct detail {}", loggedInUser.getAcctDetail());
+      HttpSession session1 = getThreadLocalRequest().getSession(false);
       logger.info("Adding user to " + session.getId() +
-          " lookup is " + getThreadLocalRequest().getSession(false).getAttribute(USER_SESSION_ATT) +
-          ", session.isNew=" + getThreadLocalRequest().getSession(false).isNew() +
-          ", created=" + getThreadLocalRequest().getSession(false).getCreationTime() +
+          " lookup is " +      session1.getAttribute(USER_SESSION_ATT) +
+          ", session.isNew=" + session1.isNew() +
+          ", created=" +       session1.getCreationTime() +
           ", " + atts.toString());
       return new LoginResult(loggedInUser, new Date(System.currentTimeMillis()));
     } else {
@@ -125,11 +124,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     }
   }
 
-  public void logoutUser(String userId) {
-    securityManager.logoutUser(getThreadLocalRequest(), userId, false);
-  }
-
-  public User getLoggedInUser() {
+  /*public User getLoggedInUser() {
     try {
       return securityManager.getLoggedInUser(getThreadLocalRequest());
     } catch (DominoSessionException e) {
@@ -137,7 +132,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     }
     return null;
   }
-
+*/
   /**
    * Check other sites to see if the user exists somewhere else, and if so go ahead and use that person
    * here.
@@ -158,6 +153,8 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
       LoginResult loginResult = loginUser(login, passwordH);
       User loggedInUser = loginResult.getLoggedInUser();
       if (loginResult.getResultType() == LoginResult.ResultType.Success) {
+        Project<CommonExercise> project = db.getProject(projectid);
+        logger.info("userExists user " + loggedInUser + " -> " + projectid + " : " + project);
         db.getUserProjectDAO().add(loggedInUser.getId(), projectid);
         setStartupInfo(loggedInUser);
       }
@@ -165,9 +162,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     }
   }
 
-  public void logout(String login) {
-    securityManager.logoutUser(getThreadLocalRequest(), login, true);
-  }
+  public void logout(String login) {  securityManager.logoutUser(getThreadLocalRequest(), login, true);  }
 
   /**
    * Send confirmation to your email too.

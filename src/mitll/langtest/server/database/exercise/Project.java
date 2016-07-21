@@ -97,4 +97,6 @@ public class Project<T extends CommonShell> {
   public SlickAnalysis getAnalysis() {
     return analysis;
   }
+
+  public String toString() { return "Project " + project + " types " + typeOrder; }
 }
