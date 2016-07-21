@@ -211,7 +211,17 @@ public class InitialUI {
   private class LogoutClickHandler implements ClickHandler {
     public void onClick(ClickEvent event) {
       langTest.logEvent("No widget", "UserLoging", "N/A", "User Logout by " + lastUser);
-      resetState();
+      userService.logout(userManager.getUserID(), new AsyncCallback<Void>() {
+        @Override
+        public void onFailure(Throwable throwable) {
+
+        }
+
+        @Override
+        public void onSuccess(Void aVoid) {
+          resetState();
+        }
+      });
     }
   }
 
