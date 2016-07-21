@@ -165,7 +165,7 @@ public class SlickUserExerciseDAO
   private UserExercise fromSlick(SlickExercise slick) {
     Map<String, String> unitToValue = new HashMap<>();
     Iterator<String> iterator = getTypeOrder().iterator();
-    String first  = iterator.next();
+    String first = iterator.next();
     String second = iterator.hasNext() ? iterator.next() : "";
     unitToValue.put(first, slick.unit());
     if (!second.isEmpty())
@@ -208,8 +208,7 @@ public class SlickUserExerciseDAO
       unitToValue.put(first, "1");
       logger.warn("got empty " + first + " for " + slick);
 
-    }
-    else {
+    } else {
       unitToValue.put(first, slick.unit());
     }
     if (!second.isEmpty()) {
@@ -246,8 +245,7 @@ public class SlickUserExerciseDAO
         pairs.add(sectionHelper.addExerciseToLesson(exercise, pair.getKey(), pair.getValue()));
       }
       sectionHelper.addAssociations(pairs);
-    }
-    else {
+    } else {
       exercise.setUnitToValue(unitToValue);
     }
 
@@ -340,6 +338,10 @@ public class SlickUserExerciseDAO
 
   public List<CommonExercise> getByProject(int projectid, List<String> typeOrder, SectionHelper<CommonExercise> sectionHelper) {
     return getExercises(dao.getAllPredefByProject(projectid), typeOrder, sectionHelper);
+  }
+
+  public List<CommonExercise> getContextByProject(int projectid, List<String> typeOrder, SectionHelper<CommonExercise> sectionHelper) {
+    return getExercises(dao.getAllContextPredefByProject(projectid), typeOrder, sectionHelper);
   }
 
   @Override
