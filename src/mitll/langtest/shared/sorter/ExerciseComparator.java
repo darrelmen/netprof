@@ -46,8 +46,8 @@ import java.util.Collection;
  * @since 10/9/15.
  */
 public class ExerciseComparator {
-  protected final Collection<String> typeOrder;
-  public ExerciseComparator(Collection<String> typeOrder) { this.typeOrder = typeOrder; }
+//  protected final Collection<String> typeOrder;
+//  public ExerciseComparator(Collection<String> typeOrder) { this.typeOrder = typeOrder; }
 
   protected String removePunct(String t) {
     return t.replaceAll(CommentNPFExercise.PUNCT_REGEX, "");
@@ -66,7 +66,7 @@ public class ExerciseComparator {
     return tooltipComp(o1, o2);
   }
 
-  public int compare(CommonExercise o1, CommonExercise o2, boolean recordedLast) {
+/*  public int compare(CommonExercise o1, CommonExercise o2, boolean recordedLast) {
     if (recordedLast) {
       if (o1.getState() != STATE.RECORDED && o2.getState() == STATE.RECORDED) {
         return +1;
@@ -80,9 +80,9 @@ public class ExerciseComparator {
 
     // items in same chapter alphabetical by tooltip
     return (i == 0) ? tooltipComp(o1, o2) : i;
-  }
+  }*/
 
-  private int getTypeOrder(CommonExercise o1, CommonExercise o2) {
+/*  private int getTypeOrder(CommonExercise o1, CommonExercise o2) {
     int i = 0;
     for (String type : typeOrder) {
       String type1 = o1.getUnitToValue().get(type);
@@ -102,7 +102,7 @@ public class ExerciseComparator {
       }
     }
     return i;
-  }
+  }*/
 
   protected <T extends CommonShell> int tooltipComp(T o1, T o2) {
     String id1 = o1.getEnglish();

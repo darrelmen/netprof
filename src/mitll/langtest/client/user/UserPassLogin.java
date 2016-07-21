@@ -999,6 +999,7 @@ public class UserPassLogin extends UserDialog {
 
 
   /**
+   * TODO : get list of projects
    * @param user
    * @param pass
    * @see #getRightLogin(com.google.gwt.user.client.ui.Panel)
@@ -1008,7 +1009,8 @@ public class UserPassLogin extends UserDialog {
     logger.info("gotLogin : user is '" + user + "' pass '" + pass + "' or '" + hashedPass + "'");
 
     signIn.setEnabled(false);
-    service.userExists(user, hashedPass, 1, new AsyncCallback<User>() {
+    int projectid = 1;
+    service.userExists(user, hashedPass, projectid, new AsyncCallback<User>() {
       @Override
       public void onFailure(Throwable caught) {
         signIn.setEnabled(true);

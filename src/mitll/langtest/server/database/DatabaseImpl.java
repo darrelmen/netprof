@@ -322,7 +322,8 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
         pathHelper);
 
     projectDAO = new ProjectDAO(this, dbConnection);
-    userProjectDAO = new UserProjectDAO(this, dbConnection);
+    userProjectDAO = new UserProjectDAO(dbConnection);
+
     createTables();
 
     userDAO.findOrMakeDefectDetector();
@@ -333,10 +334,10 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
       logger.error("got " + e, e);
     }
 
-    long then = System.currentTimeMillis();
-
-    long now = System.currentTimeMillis();
-    if (now - then > 1000) logger.info("took " + (now - then) + " millis to put back word and phone");
+//    long then = System.currentTimeMillis();
+//
+//    long now = System.currentTimeMillis();
+//    if (now - then > 1000) logger.info("took " + (now - then) + " millis to put back word and phone");
   }
 
   private DBConnection getDbConnection() {
@@ -1009,12 +1010,22 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     if (userid == -1) {
       userid = userDAO.getBeforeLoginUser();
     }
-    SlickProject next = getProjectDAO().getAll().iterator().next();
 
-    logger.warn("using the first project! " + next);
-
-    Event event = new Event(id, widgetType, exid, context, userid, System.currentTimeMillis(), device, -1);
-    return eventDAO != null && eventDAO.add(event, next.id());
+    IProjectDAO projectDAO = getProjectDAO();
+    SlickProject next = userid != -1 ? projectDAO.mostRecentByUser(userid) : projectDAO.getFirst();
+    if (userid == -1) {
+      logger.warn("logEvent userid : " + userid + " using the first project! " + next);
+    }
+    if (next == null) {
+      next = projectDAO.getFirst();
+    }
+    if (next == null) {
+      logger.error("no projects???");
+      return false;
+    } else {
+      Event event = new Event(id, widgetType, exid, context, userid, System.currentTimeMillis(), device, -1);
+      return eventDAO != null && eventDAO.add(event, next.id());
+    }
   }
 
   public void logAndNotify(Exception e) {
