@@ -42,6 +42,7 @@ import mitll.langtest.server.autocrt.AutoCRT;
 import mitll.langtest.server.autocrt.DecodeCorrectnessChecker;
 import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.scoring.*;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
@@ -92,29 +93,34 @@ public class AudioFileHelper implements AlignDecode {
   private Map<String, Integer> phoneToCount;
   private boolean useOldSchoolServiceOnly = false;
   private final AudioConversion audioConversion;
-private final boolean isNoModel;
+  private final boolean isNoModel;
+  private final String language;
+
   /**
    * @param pathHelper
    * @param serverProperties
    * @param db
    * @param langTestDatabase
+   * @param language
    * @see mitll.langtest.server.ScoreServlet#getAudioFileHelper()
    * @see LangTestDatabaseImpl#init
+   * @see Project#Project
    */
   public AudioFileHelper(PathHelper pathHelper,
                          ServerProperties serverProperties,
                          DatabaseImpl db,
                          LogAndNotify langTestDatabase,
-                         String modelsDir) {
+                         String modelsDir, String language) {
     this.pathHelper = pathHelper;
     this.serverProps = serverProperties;
     this.db = db;
     this.logAndNotify = langTestDatabase;
+    this.language = language;
     this.useOldSchoolServiceOnly = serverProperties.getOldSchoolService();
     isNoModel = modelsDir == null || modelsDir.isEmpty();
     this.mp3Support = new MP3Support(pathHelper, serverProperties);
     audioConversion = new AudioConversion(serverProps);
-    makeASRScoring(modelsDir);
+    makeASRScoring(modelsDir, language);
     makeDecodeCorrectnessChecker();
   }
 
@@ -230,7 +236,7 @@ private final boolean isNoModel;
 
     //long then = System.currentTimeMillis();
     AudioCheck.ValidityAndDur validity =
-        audioConversion.convertBase64ToAudioFiles(base64EncodedString, file, isRefRecording, serverProps.isQuietAudioOK());
+        audioConversion.convertBase64ToAudioFiles(base64EncodedString, file, isRefRecording, isQuietAudioOK());
 
     // logger.debug("writeAudioFile writing to " + file.getAbsolutePath() + " validity " + validity);
 /*    long now = System.currentTimeMillis();
@@ -261,7 +267,7 @@ private final boolean isNoModel;
 
     //long then = System.currentTimeMillis();
     AudioCheck.ValidityAndDur validity =
-        audioConversion.convertBase64ToAudioFiles(base64EncodedString, file, false, serverProps.isQuietAudioOK());
+        audioConversion.convertBase64ToAudioFiles(base64EncodedString, file, false, isQuietAudioOK());
 
     // logger.debug("writeAudioFile writing to " + file.getAbsolutePath() + " validity " + validity);
 /*    long now = System.currentTimeMillis();
@@ -279,6 +285,7 @@ private final boolean isNoModel;
 
         validity);
   }
+
 
   /**
    * TODO : this is misleading - if doFlashcard is true, it does decoding, otherwise it does *not* do alignment
@@ -306,7 +313,7 @@ private final boolean isNoModel;
       float score,
       boolean doFlashcard,
       boolean allowAlternates) {
-    AudioCheck.ValidityAndDur validity = audioConversion.isValid(file, false, serverProps.isQuietAudioOK());
+    AudioCheck.ValidityAndDur validity = audioConversion.isValid(file, false, isQuietAudioOK());
     // AnswerInfo.AudioContext audioContext = new AnswerInfo.AudioContext(reqid, user, exerciseID, 0, doFlashcard ? "flashcard" : "learn");
     AnswerInfo.RecordingInfo recordingInfo = new AnswerInfo.RecordingInfo("", file.getPath(), deviceType, device, true);
 
@@ -430,7 +437,7 @@ private final boolean isNoModel;
         File absoluteFile = pathHelper.getAbsoluteFile(audioRef);
         String absolutePath = absoluteFile.getAbsolutePath();
 
-        PretestScore alignmentScore = getAlignmentScore(exercise, absolutePath, serverProps.usePhoneToDisplay(), false);
+        PretestScore alignmentScore = getAlignmentScore(exercise, absolutePath, isUsePhoneToDisplay(), false);
         DecodeAlignOutput alignOutput = new DecodeAlignOutput(alignmentScore, false);
 
         // Do decoding, and record alignment info we just got in the database ...
@@ -439,7 +446,7 @@ private final boolean isNoModel;
         DecodeAlignOutput decodeOutput = new DecodeAlignOutput(decodeAnswer, true);
 
         PretestScore alignmentScoreOld = doHydec ? getAlignmentScore(exercise, absolutePath,
-            serverProps.usePhoneToDisplay(), true) : new PretestScore();
+            isUsePhoneToDisplay(), true) : new PretestScore();
         DecodeAlignOutput alignOutputOld = new DecodeAlignOutput(alignmentScoreOld, false);
 
         // Do decoding, and record alignment info we just got in the database ...
@@ -464,6 +471,18 @@ private final boolean isNoModel;
     } else {
       logger.warn("skipping " + exercise.getID() + " since can't do decode/align b/c of LTS errors ");
     }
+  }
+
+  private boolean isUsePhoneToDisplay() {
+    return serverProps.usePhoneToDisplay();
+  }
+
+  private boolean isQuietAudioOK() {
+    return serverProps.isQuietAudioOK();
+  }
+
+  private boolean useScoreCache() {
+    return serverProps.useScoreCache();
   }
 
   /**
@@ -677,7 +696,7 @@ private final boolean isNoModel;
 
     if (audioAnswer.isValid()) {
       PretestScore asrScoreForAudio = getASRScoreForAudio(reqid, file.getAbsolutePath(), textToAlign, null, -1, -1, false,
-          false, serverProps.useScoreCache(), identifier, null, usePhoneToDisplay, false);
+          false, useScoreCache(), identifier, null, usePhoneToDisplay, false);
 
       audioAnswer.setPretestScore(asrScoreForAudio);
     } else {
@@ -698,7 +717,7 @@ private final boolean isNoModel;
 
   private AudioAnswer getAudioAnswer(String base64EncodedString, int reqid, File file) {
     AudioCheck.ValidityAndDur validity =
-        audioConversion.convertBase64ToAudioFiles(base64EncodedString, file, false, serverProps.isQuietAudioOK());
+        audioConversion.convertBase64ToAudioFiles(base64EncodedString, file, false, isQuietAudioOK());
     //  logger.debug("getAMASAudioAnswer writing to " + file.getAbsolutePath() + " validity " + validity);
     return new AudioAnswer(pathHelper.ensureForwardSlashes(pathHelper.getWavPathUnder(POSTED_AUDIO)),
         validity.getValidity(), reqid, validity.durationInMillis);
@@ -714,8 +733,9 @@ private final boolean isNoModel;
    * @see DecodeCorrectnessChecker#getFlashcardAnswer(File, Collection, AudioAnswer, boolean, boolean)
    */
   @Override
-  public PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences, boolean canUseCache, boolean useOldSchool) {
-    return getASRScoreForAudio(testAudioFile, lmSentences, canUseCache, serverProps.usePhoneToDisplay(), useOldSchool);
+  public PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences, boolean canUseCache,
+                                          boolean useOldSchool) {
+    return getASRScoreForAudio(testAudioFile, lmSentences, canUseCache, isUsePhoneToDisplay(), useOldSchool);
   }
 
   /**
@@ -748,8 +768,9 @@ private final boolean isNoModel;
 
     //  logger.info("getASRScoreForAudio audio file path is " + path);
     return getASRScoreForAudio(0, path, vocab, lmSentences, 128, 128, false, true,
-        canUseCache && serverProps.useScoreCache(), prefix, null, usePhoneToDisplay, useOldSchool);
+        canUseCache && useScoreCache(), prefix, null, usePhoneToDisplay, useOldSchool);
   }
+
 
   /**
    * @return
@@ -757,7 +778,7 @@ private final boolean isNoModel;
    */
   private PretestScore getAlignmentScore(CommonExercise exercise, String testAudioPath, boolean usePhoneToDisplay, boolean useOldSchool) {
     return getASRScoreForAudio(0, testAudioPath, exercise.getForeignLanguage(), 128, 128, false,
-        false, serverProps.useScoreCache(), "" + exercise.getID(), null, usePhoneToDisplay, useOldSchool);
+        false, useScoreCache(), "" + exercise.getID(), null, usePhoneToDisplay, useOldSchool);
   }
 
   /**
@@ -823,7 +844,7 @@ private final boolean isNoModel;
                                            String prefix,
                                            Result precalcResult,
                                            boolean usePhoneToDisplay, boolean useOldSchool) {
-    logger.debug("getASRScoreForAudio (" + serverProps.getLanguage() + ")" + (decode ? " Decoding " : " Aligning ") +
+    logger.debug("getASRScoreForAudio (" + getLanguage() + ")" + (decode ? " Decoding " : " Aligning ") +
         "" + testAudioFile + " with sentence '" + sentence + "' req# " + reqid +
         (useCache ? " check cache" : " NO CACHE") + " prefix " + prefix);
 
@@ -854,7 +875,7 @@ private final boolean isNoModel;
     sentence = getSentenceToUse(sentence);
     sentence = sentence.trim();
 
-    ASR asrScoring = useOldSchool || serverProps.getOldSchoolService() ? oldschoolScoring : getASRScoring();
+    ASR asrScoring = useOldSchool || isOldSchoolService() ? oldschoolScoring : getASRScoring();
 
 //    logger.debug("getASRScoreForAudio : for " + testAudioName + " sentence '" + sentence + "' lm sentences '" + lmSentences + "'");
 
@@ -885,6 +906,10 @@ private final boolean isNoModel;
     return pretestScore;
   }
 
+  private boolean isOldSchoolService() {
+    return serverProps.getOldSchoolService();
+  }
+
   /**
    * Hack for percent sign in english - must be a better way.
    * Tried adding it to dict but didn't seem to work.
@@ -893,7 +918,7 @@ private final boolean isNoModel;
    * @return
    */
   private String getSentenceToUse(String sentence) {
-    boolean english = serverProps.getLanguage().equalsIgnoreCase("English") && sentence.equals("%") || sentence.equals("％");
+    boolean english = getLanguage().equalsIgnoreCase("English") && sentence.equals("%") || sentence.equals("％");
     if (english) {
       //logger.info("convert " +sentence + " to percent");
     } else {
@@ -904,8 +929,12 @@ private final boolean isNoModel;
     return english ? "percent" : sentence;
   }
 
+  private String getLanguage() {
+    return language;
+  }
+
   private boolean isEnglishSite() {
-    return serverProps.getLanguage().equalsIgnoreCase("English");
+    return getLanguage().equalsIgnoreCase("English");
   }
 
   /**
@@ -954,7 +983,7 @@ private final boolean isNoModel;
     if (doFlashcard) {
       //    makeASRScoring();
       PretestScore flashcardAnswer = decodeCorrectnessChecker.getFlashcardAnswer(exercise, file, audioAnswer,
-          serverProps.getLanguage(),
+          getLanguage(),
           canUseCache, allowAlternates, useOldSchool);
       audioAnswer.setPretestScore(flashcardAnswer);
       return audioAnswer;
@@ -985,11 +1014,11 @@ private final boolean isNoModel;
   }
 
   /**
-   * @see #AudioFileHelper(PathHelper, ServerProperties, DatabaseImpl, LogAndNotify, String)
    * @param modelsDir
+   * @see #AudioFileHelper(PathHelper, ServerProperties, DatabaseImpl, LogAndNotify, String, String)
    */
   // TODO: gross
-  private void makeASRScoring(String modelsDir) {
+  private void makeASRScoring(String modelsDir, String language) {
     if (webserviceScoring == null) {
       String installPath = pathHelper.getInstallPath();
       HTKDictionary htkDictionary = null;
@@ -998,8 +1027,8 @@ private final boolean isNoModel;
       } catch (Exception e) {
         logger.error("for now got " + e, e);
       }
-      webserviceScoring = new ASRWebserviceScoring(installPath, serverProps, logAndNotify, htkDictionary, modelsDir);
-      oldschoolScoring  = new ASRScoring(installPath, serverProps, logAndNotify, htkDictionary, modelsDir);
+      webserviceScoring = new ASRWebserviceScoring(installPath, serverProps, logAndNotify, htkDictionary, modelsDir, language);
+      oldschoolScoring = new ASRScoring(installPath, serverProps, logAndNotify, htkDictionary, modelsDir, language);
     }
     asrScoring = oldschoolScoring;
   }
@@ -1009,7 +1038,7 @@ private final boolean isNoModel;
    * @see #makeASRScoring
    */
   private HTKDictionary makeDict(String installPath, String modelsDir) {
-    logger.info("install path is " + installPath + " modelsDir " +modelsDir);
+    logger.info("install path is " + installPath + " modelsDir " + modelsDir);
     String dictFile =
         new ConfigFileCreator(serverProps.getProperties(), null, Scoring.getScoringDir(installPath), modelsDir).getDictFile();
     if (dictFile != null && new File(dictFile).exists()) {
@@ -1020,7 +1049,7 @@ private final boolean isNoModel;
       long now = System.currentTimeMillis();
       int size = htkDictionary.size(); // force read from lazy val
       if (now - then > 300) {
-        logger.info("for " + serverProps.getLanguage() + " read dict " + dictFile + " of size " + size + " took " + (now - then) + " millis");
+        logger.info("for " + getLanguage() + " read dict " + dictFile + " of size " + size + " took " + (now - then) + " millis");
       }
       return htkDictionary;
     } else {

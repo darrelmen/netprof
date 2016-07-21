@@ -89,7 +89,7 @@ public class ConfigFileCreator {
    * @param properties
    * @param letterToSoundClass
    * @param scoringDir
-   * @see Scoring#Scoring(String, ServerProperties, LogAndNotify, HTKDictionary, String)
+   * @see Scoring#Scoring(String, ServerProperties, LogAndNotify, HTKDictionary, String, String)
    */
   public ConfigFileCreator(Map<String, String> properties, LTS letterToSoundClass, String scoringDir, String modelsDir) {
     this.properties = properties;
@@ -112,8 +112,12 @@ public class ConfigFileCreator {
     boolean onWindows = platform.startsWith("win");
     Map<String, String> kv = new HashMap<String, String>();
 
+    // TODO : get these from passed in values.
     String levantineNOutput = getProp(N_OUTPUT, LEVANTINE_N_OUTPUT);
+    // TODO : get these from passed in values.
     String nHidden = getProp(N_HIDDEN, N_HIDDEN_DEFAULT);
+
+
     String cfgTemplate = getProp(CFG_TEMPLATE_PROP, CFG_TEMPLATE_DEFAULT);
     if (onWindows) {
       tmpDir = doWindowsSlashReplace(tmpDir);

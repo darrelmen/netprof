@@ -47,6 +47,7 @@ import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
 import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.project.ProjectStartupInfo;
 
 import java.util.Collection;
 import java.util.Map;
@@ -326,7 +327,9 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
    */
   protected void restoreListBoxState(SelectionState selectionState) {
 //    logger.info("restoreListBoxState restore " + selectionState);
-    sectionWidgetContainer.restoreListBoxState(selectionState, controller.getStartupInfo().getTypeOrder());
+    ProjectStartupInfo startupInfo = controller.getStartupInfo();
+    Collection<String> typeOrder = startupInfo.getTypeOrder();
+    sectionWidgetContainer.restoreListBoxState(selectionState, typeOrder);
   }
 
   /**
