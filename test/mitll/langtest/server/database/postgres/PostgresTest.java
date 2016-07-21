@@ -88,7 +88,6 @@ public class PostgresTest extends BaseTest {
     //   new CopyToPostgres().copyUserExListJoin(spanish);
   }
 
-
   @Test
   public void testGetFirst() {
     DatabaseImpl spanish = getDatabaseLight("spanish", false);
