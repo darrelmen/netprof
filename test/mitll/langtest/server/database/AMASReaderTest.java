@@ -64,7 +64,7 @@ public class AMASReaderTest {
     logger.info("e.g. " + next);
     logger.info("\n\ngot " + exercises.size());
 
-    AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), database.getServerProps(), database, null);
+    AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), database.getServerProps(), database, null,"");
 
     audioFileHelper.makeAutoCRT(".");
 

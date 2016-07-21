@@ -85,7 +85,7 @@ public class UnitChapterItemHelper<T extends CommonShell> {
     // logger.info("got " + e + " and " + e.getDominoID());
     int dominoID = e.getDominoID();
     int idToUse = dominoID != -1 ? dominoID : e.getID();
-    Heading w = new Heading(HEADING_FOR_UNIT_LESSON, ITEM, "" + idToUse);
+    Heading w = new Heading(HEADING_FOR_UNIT_LESSON, ITEM, "" + idToUse + "/" + e.getOldID());
     w.getElement().setId("ItemHeading");
     return w;
   }
