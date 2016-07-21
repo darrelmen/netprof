@@ -86,10 +86,12 @@ public class ASRScoring extends Scoring implements ASR {
    * @param deployPath
    * @param serverProperties
    * @param langTestDatabase
+   * @param modelsDir
    * @see mitll.langtest.server.audio.AudioFileHelper#makeASRScoring
    */
-  public ASRScoring(String deployPath, ServerProperties serverProperties, LogAndNotify langTestDatabase, HTKDictionary htkDictionary) {
-    super(deployPath, serverProperties, langTestDatabase, htkDictionary);
+  public ASRScoring(String deployPath, ServerProperties serverProperties, LogAndNotify langTestDatabase,
+                    HTKDictionary htkDictionary, String modelsDir) {
+    super(deployPath, serverProperties, langTestDatabase, htkDictionary, modelsDir);
     audioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
   }
 
