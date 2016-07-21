@@ -49,7 +49,7 @@ import java.util.*;
 @SuppressWarnings("serial")
 public class ListServiceImpl extends MyRemoteServiceServlet implements ListService {
   private static final Logger logger = Logger.getLogger(ListServiceImpl.class);
-  private AudioFileHelper audioFileHelper;
+//  private AudioFileHelper audioFileHelper;
   private static final boolean DEBUG = false;
 
   @Override
@@ -57,8 +57,8 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
 //    logger.info("init called for ListServiceImpl");
     findSharedDatabase();
     readProperties(getServletContext());
-    PathHelper pathHelper = new PathHelper(getServletContext());
-    audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, null);
+  //  PathHelper pathHelper = new PathHelper(getServletContext());
+    //audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, null);
   }
 
   /**
@@ -93,7 +93,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    */
   @Override
   public boolean deleteItemFromList(long listid, int exid) {
-    return getUserListManager().deleteItemFromList(listid, exid, db.getTypeOrder(getProject()));
+    return getUserListManager().deleteItemFromList(listid, exid, db.getTypeOrder(getProjectID()));
   }
 
   /**
@@ -159,7 +159,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   @Override
   public List<UserList<CommonShell>> getReviewLists() {
     IUserListManager userListManager = getUserListManager();
-    Collection<String> typeOrder = db.getTypeOrder(getProject());
+    Collection<String> typeOrder = db.getTypeOrder(getProjectID());
 
     UserList<CommonShell> defectList = userListManager.getDefectList(typeOrder);
 
@@ -167,7 +167,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     lists.add(defectList);
 
     lists.add(userListManager.getCommentedList(typeOrder));
-    if (!serverProps.isNoModel()) {
+    if (!getProject().isNoModel()) {
       lists.add(userListManager.getAttentionList(typeOrder));
     }
     return lists;
@@ -187,7 +187,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   @Override
   public CommonExercise reallyCreateNewItem(long userListID, CommonExercise userExercise) {
     if (DEBUG) logger.debug("reallyCreateNewItem : made user exercise " + userExercise + " on list " + userListID);
-    getUserListManager().reallyCreateNewItem(userListID, userExercise, serverProps.getMediaDir());
+    getUserListManager().reallyCreateNewItem(userListID, userExercise, getMediaDir());
     int id = userExercise.getID();
 
     for (AudioAttribute audioAttribute : userExercise.getAudioAttributes()) {
@@ -197,6 +197,10 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     if (DEBUG) logger.debug("\treallyCreateNewItem : made user exercise " + userExercise + " on list " + userListID);
 
     return userExercise;
+  }
+
+  String getMediaDir() {
+    return serverProps.getMediaDir();
   }
 
   @Override
@@ -213,7 +217,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
       if (DEBUG) logger.info("\tgot " + parts.length + " parts");
       if (parts.length > 1) {
         String exerciseID = UserExercise.CUSTOM_PREFIX + "_" + creator + "_" + userListByID + "_" + (n++);
-        UserExercise newItem = new UserExercise(-1, exerciseID, creator, parts[1], parts[0], "", getProject());
+        UserExercise newItem = new UserExercise(-1, exerciseID, creator, parts[1], parts[0], "", getProjectID());
         newItems.add(newItem);
         if (DEBUG) logger.info("new " + newItem);
       }
@@ -224,7 +228,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
       String foreignLanguage = candidate.getForeignLanguage();
       if (!unique.contains(foreignLanguage)) {
         if (isValidForeignPhrase(foreignLanguage)) {
-          getUserListManager().reallyCreateNewItem(userListID, candidate, serverProps.getMediaDir());
+          getUserListManager().reallyCreateNewItem(userListID, candidate, getMediaDir());
           actualItems.add(candidate);
         }
       }
@@ -252,7 +256,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    */
 
   private boolean isValidForeignPhrase(String foreign) {
-    return audioFileHelper.checkLTSOnForeignPhrase(foreign);
+    return getProject().getAudioFileHelper().checkLTSOnForeignPhrase(foreign);
   }
 
 
