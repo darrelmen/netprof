@@ -68,20 +68,19 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
   private static final String ENGLISH = "English";
   private final boolean english;
 
-
   private static final int MAX_LENGTH_ID = 15;
-  public static final int TABLE_HISTORY_WIDTH = 420;
+  static final int TABLE_HISTORY_WIDTH = 420;
   private static final int COL_WIDTH = 130;
   private static final String CORRECT_INCORRECT_HISTORY_AND_AVERAGE_PRONUNCIATION_SCORE = "Correct/Incorrect history and average pronunciation score";
 
   private final Map<Integer, CommonShell> idToExercise = new HashMap<>();
   private final ExerciseComparator sorter;
 
-  public ScoreHistoryContainer(ExerciseController controller, Collection<? extends CommonShell> allExercises) {
+  ScoreHistoryContainer(ExerciseController controller, Collection<? extends CommonShell> allExercises) {
     super(controller);
     english = controller.getLanguage().equals(ENGLISH);
 
-    sorter = new ExerciseComparator(controller.getStartupInfo().getTypeOrder());
+    sorter = new ExerciseComparator();//controller.getStartupInfo().getTypeOrder());
 
     for (CommonShell commonShell : allExercises) {
       idToExercise.put(commonShell.getID(), commonShell);
@@ -109,7 +108,6 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
   @Override
   protected CellTable.Resources chooseResources() {
     CellTable.Resources o;
-
     if (controller.isRightAlignContent()) {   // so when we truncate long entries, the ... appears on the correct end
       o = GWT.create(RTLLocalTableResources.class);
     } else {

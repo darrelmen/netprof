@@ -62,8 +62,8 @@ public class UserSecurityManager {
    * user looked up by the security filter.
    */
   public static final String USER_REQUEST_ATT = "d-user";
-  public static final Marker TIMING = MarkerManager.getMarker("TIMING");
-  private IUserDAO userDAO;
+  private static final Marker TIMING = MarkerManager.getMarker("TIMING");
+  private final IUserDAO userDAO;
 
   public UserSecurityManager(IUserDAO userDAO) {
     this.userDAO = userDAO;
@@ -90,7 +90,7 @@ public class UserSecurityManager {
         () -> elapsedMS(startMS));
   }
 
-  public static final long elapsedMS(long startMS) {
+  private static long elapsedMS(long startMS) {
     return System.currentTimeMillis() - startMS;
   }
 
@@ -101,7 +101,7 @@ public class UserSecurityManager {
   /**
    * Get the currently logged in user.
    */
-  public User getLoggedInUser(HttpServletRequest request, String opName, boolean throwOnFail)
+  private User getLoggedInUser(HttpServletRequest request, String opName, boolean throwOnFail)
       throws RestrictedOperationException, DominoSessionException {
     User user = lookupUser(request, throwOnFail);
     if (user == null && throwOnFail) {
@@ -125,7 +125,7 @@ public class UserSecurityManager {
    * @return The user from the data store. Should not be null.
    * @throws DominoSessionException when session is empty or has no user token.
    */
-  protected User getUser(HttpServletRequest request) throws DominoSessionException {
+  private User getUser(HttpServletRequest request) throws DominoSessionException {
     User user = (User) request.getAttribute(USER_REQUEST_ATT);
     if (user == null) {
       throw new DominoSessionException("No user found");
@@ -140,7 +140,7 @@ public class UserSecurityManager {
    * @return The user from the data store. Should not be null.
    * @throws DominoSessionException when session is empty or has no user token.
    */
-  protected User lookupUser(HttpServletRequest request, boolean throwOnFail)
+  private User lookupUser(HttpServletRequest request, boolean throwOnFail)
       throws DominoSessionException {
     if (request == null) return null;
     long startMS = System.currentTimeMillis();
@@ -183,8 +183,7 @@ public class UserSecurityManager {
    * @return
    * @throws DominoSessionException
    */
-  protected User lookupUserFromHttpSession(HttpServletRequest request)
-      throws DominoSessionException {
+  private User lookupUserFromHttpSession(HttpServletRequest request) {
     User sessUser = null;
     HttpSession session = request != null ? request.getSession(false) : null;
     if (session != null) {
@@ -202,7 +201,7 @@ public class UserSecurityManager {
     return sessUser;
   }
 
-  public void throwException(String opName, User cUser, String checkDesc)
+  private void throwException(String opName, User cUser, String checkDesc)
       throws RestrictedOperationException {
     RestrictedOperationException ex = new RestrictedOperationException(opName, true);
     String uname = (cUser != null) ? cUser.toString() : "null";

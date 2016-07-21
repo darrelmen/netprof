@@ -55,7 +55,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       IUserListManager userListManager,
       boolean addDefects,
       SlickUserExerciseDAO userExerciseDAO,
-     SlickProject project
+      SlickProject project
   ) {
     super(serverProps, userListManager, addDefects);
     logger.info("reading from database--------- ");
@@ -74,29 +74,32 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     try {
       List<String> typeOrder = Arrays.asList(project.first(), project.second());
 
-      List<CommonExercise> allExercises = userExerciseDAO.getByProject(project.id(), typeOrder, getSectionHelper());
-      logger.info("readExercises got " + allExercises.size() + " predef exercises;");
+      int id = project.id();
+      List<CommonExercise> allNonContextExercises = userExerciseDAO.getByProject(id, typeOrder, getSectionHelper());
+      logger.info("readExercises got " + allNonContextExercises.size() + " predef exercises;");
 
       Collection<SlickRelatedExercise> related = userExerciseDAO.getAllRelated();
 
       logger.info("readExercises got " + related.size() + " related exercises;");
 
-      Map<Integer, CommonExercise> idToEx = getIDToExercise(allExercises);
+      Map<Integer, CommonExercise> idToEx = getIDToExercise(allNonContextExercises);
+
+      Map<Integer, CommonExercise> idToContext = getIDToExercise(userExerciseDAO.getContextByProject(id, typeOrder, getSectionHelper()));
 
       for (SlickRelatedExercise relatedExercise : related) {
-        CommonExercise root    = idToEx.get(relatedExercise.id());
-        CommonExercise context = idToEx.get(relatedExercise.contextexid());
+        CommonExercise root = idToEx.get(relatedExercise.id());
+        CommonExercise context = idToContext.get(relatedExercise.contextexid());
         if (root != null && context != null) root.getMutable().addContextExercise(context);
       }
-      logger.info("Read " + allExercises.size() + " exercises from database");
-      return allExercises;
+      logger.info("Read " + allNonContextExercises.size() + " exercises from database");
+      return allNonContextExercises;
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
     return Collections.emptyList();
   }
 
-  private Map<Integer, CommonExercise> getIDToExercise(List<CommonExercise> allExercises) {
+  private Map<Integer, CommonExercise> getIDToExercise(Collection<CommonExercise> allExercises) {
     Map<Integer, CommonExercise> idToEx = new HashMap<>();
     for (CommonExercise ex : allExercises) {
       idToEx.put(ex.getID(), ex);
