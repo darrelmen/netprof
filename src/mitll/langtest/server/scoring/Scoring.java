@@ -71,6 +71,7 @@ public abstract class Scoring {
 
   private static final float SCORE_SCALAR = 1.0f;
   private static final String SCORING = "scoring";
+  public static final String MANDARIN = "mandarin";
 
   final String scoringDir;
   final String deployPath;
@@ -109,10 +110,11 @@ public abstract class Scoring {
   /**
    * @param deployPath
    * @param modelsDir
+   * @param language
    * @see ASRScoring#ASRScoring
    */
   Scoring(String deployPath, ServerProperties props, LogAndNotify langTestDatabase, HTKDictionary htkDictionary,
-          String modelsDir) {
+          String modelsDir, String language) {
     this.deployPath = deployPath;
     this.scoringDir = getScoringDir(deployPath);
     this.props = props;
@@ -122,19 +124,22 @@ public abstract class Scoring {
     // logger.debug("Creating ASRScoring object");
     lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
 
-    Map<String, String> properties = props.getProperties();
-    languageProperty = properties.get("language");
-    String language = languageProperty != null ? languageProperty : "";
+   // Map<String, String> properties = props.getProperties();
+   // languageProperty = properties.get("language");
+    this.languageProperty = language;
+   // String language = languageProperty != null ? languageProperty : "";
 
-    isMandarin = language.equalsIgnoreCase("mandarin");
+    isMandarin = language.equalsIgnoreCase(MANDARIN);
     if (isMandarin) logger.warn("using mandarin segmentation.");
     try {
+      logger.debug("\n" + this +" : Factory for " + languageProperty);
+
       ltsFactory = new LTSFactory(languageProperty);
     } catch (Exception e) {
       ltsFactory = null;
-      logger.error("for " + languageProperty + " got " + e);
+      logger.error("\n" + this +" : Scoring for " + languageProperty + " got " + e);
     }
-    this.configFileCreator = new ConfigFileCreator(properties, getLTS(), scoringDir, modelsDir);
+    this.configFileCreator = new ConfigFileCreator(props.getProperties(), getLTS(), scoringDir, modelsDir);
 
     // readDictionary();
     makeDecoder();
