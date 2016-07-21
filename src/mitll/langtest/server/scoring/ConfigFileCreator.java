@@ -36,6 +36,7 @@ import corpus.HTKDictionary;
 import corpus.LTS;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
+import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.util.HashMap;
@@ -51,12 +52,13 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class ConfigFileCreator {
-//  private static Logger logger = Logger.getLogger(ConfigFileCreator.class);
+  private static Logger logger = Logger.getLogger(ConfigFileCreator.class);
 
   private final String platform = Utils.package$.MODULE$.platform();
   private final Map<String, String> properties;
   private final LTS letterToSoundClass;
   private final String scoringDir;
+  private final String modelsDir;
 
   private static final String DICT_WO_SP = "dict-wo-sp";
   private static final String TEMP_DIR = "TEMP_DIR";
@@ -81,33 +83,34 @@ public class ConfigFileCreator {
   private static final String DECODE_CFG_TEMPLATE_PROP = "decodeConfigTemplate";
   private static final String DECODE_CFG_TEMPLATE_DEFAULT = "arabic-nn-model-decode.cfg.template";
 
- // private static final String DEFAULT_MODELS_DIR = "models.dli-levantine";
+  // private static final String DEFAULT_MODELS_DIR = "models.dli-levantine";
 
   /**
-   * @see Scoring#Scoring(String, ServerProperties, LogAndNotify, HTKDictionary)
    * @param properties
    * @param letterToSoundClass
    * @param scoringDir
+   * @see Scoring#Scoring(String, ServerProperties, LogAndNotify, HTKDictionary, String)
    */
-  public ConfigFileCreator(Map<String, String> properties, LTS letterToSoundClass, String scoringDir) {
+  public ConfigFileCreator(Map<String, String> properties, LTS letterToSoundClass, String scoringDir, String modelsDir) {
     this.properties = properties;
     this.letterToSoundClass = letterToSoundClass;
     this.scoringDir = scoringDir;
+    this.modelsDir = modelsDir;
   }
 
   /**
    * Creates a hydec config file from a template file by doing variable substitution.<br></br>
    * Also use the properties map to look for variables.
    *
-   * @see ASRScoring#computeRepeatExerciseScores
-   * @param tmpDir where hydec will run and where the config file will be
+   * @param tmpDir    where hydec will run and where the config file will be
    * @param modelsDir to point to, for config to use
-   * @param decode if using the decoder cfg
+   * @param decode    if using the decoder cfg
    * @return path to config file
+   * @see ASRScoring#computeRepeatExerciseScores
    */
   public String getHydecConfigFile(String tmpDir, String modelsDir, boolean decode) {
     boolean onWindows = platform.startsWith("win");
-    Map<String,String> kv = new HashMap<String, String>();
+    Map<String, String> kv = new HashMap<String, String>();
 
     String levantineNOutput = getProp(N_OUTPUT, LEVANTINE_N_OUTPUT);
     String nHidden = getProp(N_HIDDEN, N_HIDDEN_DEFAULT);
@@ -118,32 +121,32 @@ public class ConfigFileCreator {
 
     if (decode) {
       cfgTemplate = getProp(DECODE_CFG_TEMPLATE_PROP, DECODE_CFG_TEMPLATE_DEFAULT);
-      kv.put(LM_TO_USE, tmpDir + File.separator +File.separator + SMALL_LM_SLF); // hack! TODO hack replace
+      kv.put(LM_TO_USE, tmpDir + File.separator + File.separator + SMALL_LM_SLF); // hack! TODO hack replace
       if (letterToSoundClass != null) {
         String value = letterToSoundClass.getClass().toString();
         //if (value.endsWith("EmptyLTS")) {
         //  value = EnglishLTS.class.toString();
         //  logger.info("mapping empty lts to " + value);
-       // }
-      //  logger.info("setting lts to " + value);
+        // }
+        //  logger.info("setting lts to " + value);
         kv.put(LTS_CLASS, value);
       }
       // new FileCopier().copy(modelsDir+File.separator+"phones.dict",tmpDir+File.separator +"dict");   // Audio.hscore in pron sets dictionary=this value
     }
     //logger.info("using config from template " + cfgTemplate);
 
-    kv.put(TEMP_DIR,tmpDir);
+    kv.put(TEMP_DIR, tmpDir);
     kv.put(MODELS_DIR_VARIABLE, modelsDir);
     kv.put(N_OUTPUT, levantineNOutput);
     kv.put(N_HIDDEN, nHidden);
     kv.put(OPT_SIL, getProp(OPT_SIL, OPT_SIL_DEFAULT));
     kv.put(HLDA_DIR, getProp(HLDA_DIR, HLDA_DIR_DEFAULT));
-    if (onWindows) kv.put("/","\\\\");
+    if (onWindows) kv.put("/", "\\\\");
 
     // we need to create a custom config file for each run, complicating the caching of the ASRParameters...
     String modelCfg = cfgTemplate.substring(0, cfgTemplate.length() - ".template".length());
 
-    String configFile = tmpDir+ File.separator+ modelCfg;
+    String configFile = tmpDir + File.separator + modelCfg;
     //logger.debug("getHydecConfigFile : tmpDir is " + tmpDir);
 
     String pathToConfigTemplate = scoringDir + File.separator + "configurations" + File.separator + cfgTemplate;
@@ -153,12 +156,18 @@ public class ConfigFileCreator {
   }
 
   /**
-   * @see mitll.langtest.server.scoring.ASRScoring#makeDict()
    * @return null if no model dir defined
+   * @see mitll.langtest.server.scoring.ASRScoring#makeDict()
    */
   public String getDictFile() {
     String modelsDir = getModelsDir();
-    return modelsDir == null ? null :getDictFile(modelsDir);
+    if (modelsDir != null && !new File(modelsDir).exists()) {
+      modelsDir = "scoring" + File.separator + modelsDir;
+      if (!new File(modelsDir).exists()) {
+        logger.warn("can't find model at " + modelsDir);
+      }
+    }
+    return modelsDir == null ? null : getDictFile(modelsDir);
   }
 
   private String getDictFile(String modelsDir) {
@@ -172,12 +181,12 @@ public class ConfigFileCreator {
   }
 
   /**
-   *
    * @return null if no model dir defined
    */
-  public String getModelsDir() {
-    String modelsDirProp = getProp(MODELS_DIR_VARIABLE);
-    return modelsDirProp == null ? null:getModelsDir(modelsDirProp);
+  String getModelsDir() {
+//    String modelsDirProp = getProp(MODELS_DIR_VARIABLE);
+    return modelsDir == null ? null : getModelsDir(modelsDir);
+//    return modelsDir;
   }
 
   private String getModelsDir(String modelsDirProp) {
@@ -189,12 +198,13 @@ public class ConfigFileCreator {
   }
 
   private String doWindowsSlashReplace(String tmpDir) {
-    return tmpDir.replaceAll("\\\\","\\\\\\\\");
+    return tmpDir.replaceAll("\\\\", "\\\\\\\\");
   }
 
   private String getProp(String var, String defaultValue) {
     return properties.containsKey(var) ? properties.get(var) : defaultValue;
   }
+
   private String getProp(String var) {
     return properties.get(var);
   }
