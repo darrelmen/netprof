@@ -153,10 +153,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
       LoginResult loginResult = loginUser(login, passwordH);
       User loggedInUser = loginResult.getLoggedInUser();
       if (loginResult.getResultType() == LoginResult.ResultType.Success) {
-        Project<CommonExercise> project = db.getProject(projectid);
-        logger.info("userExists user " + loggedInUser + " -> " + projectid + " : " + project);
-        db.getUserProjectDAO().add(loggedInUser.getId(), projectid);
-        setStartupInfo(loggedInUser);
+        db.rememberUserSelectedProject(loggedInUser,projectid);
       }
       return loggedInUser;
     }
@@ -228,20 +225,8 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   public User getUserBy(int id) {
     findSharedDatabase();
     User userWhere = db.getUserDAO().getUserWhere(id);
-    setStartupInfo(userWhere);
-
+    db.setStartupInfo(userWhere);
     return userWhere;
-  }
-
-  private void setStartupInfo(User userWhere) {
-    int i = db.getUserProjectDAO().mostRecentByUser(userWhere.getId());
-    Project<CommonExercise> project = db.getProject(i);
-    SlickProject project1 = project.getProject();
-    ProjectStartupInfo startupInfo = new ProjectStartupInfo(db.getServerProps().getProperties(),
-        project.getTypeOrder(), project.getSectionHelper().getSectionNodes(), project1.id(), project1.language());
-    //logger.info("Set startup info " + startupInfo);
-    userWhere.setStartupInfo(
-        startupInfo);
   }
 
   /**
