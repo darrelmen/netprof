@@ -32,8 +32,6 @@
 
 package mitll.langtest.server.database.user;
 
-import mitll.langtest.server.database.DAO;
-import mitll.langtest.server.database.Database;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickUserProject;
 import mitll.npdata.dao.word.UserProjectDAOWrapper;
@@ -43,13 +41,13 @@ import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
 
-public class UserProjectDAO extends DAO implements IUserProjectDAO {
+public class UserProjectDAO implements IUserProjectDAO {
   private static final Logger logger = Logger.getLogger(UserProjectDAO.class);
 
   private UserProjectDAOWrapper dao;
 
-  public UserProjectDAO(Database database, DBConnection dbConnection) {
-    super(database);
+  public UserProjectDAO(DBConnection dbConnection) {
+    // super(database);
     dao = new UserProjectDAOWrapper(dbConnection);
   }
 
@@ -62,9 +60,15 @@ public class UserProjectDAO extends DAO implements IUserProjectDAO {
     return dao.dao().name();
   }
 
-
+  /**
+   * @see mitll.langtest.server.services.UserServiceImpl#userExists(String, String, int)
+   * @param userid
+   * @param projid
+   * @return
+   */
   @Override
   public int add(int userid, int projid) {
+    logger.info("UserProjectDAO adding " + userid + " -> " + projid);
     return dao.insert(new SlickUserProject(-1, userid, projid, new Timestamp(System.currentTimeMillis())));
   }
 
