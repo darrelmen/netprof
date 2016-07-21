@@ -171,7 +171,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
   }
 
   private void getTypeOrder(final FluidContainer container) {
-    typeOrder = controller.getStartupInfo().getTypeOrder();
+    typeOrder = controller.getTypeOrder();
     addButtonRow(controller.getStartupInfo().getSectionNodes(), container, typeOrder);
   }
 
