@@ -88,6 +88,7 @@ import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.monitoring.Session;
+import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.result.MonitorResult;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.NetPronImageType;
@@ -540,6 +541,23 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   public ExerciseDAO<CommonExercise> getExerciseDAO(int projectid) {
     Project<CommonExercise> project = getProject(projectid);
     return project.getExerciseDAO();
+  }
+
+  public void rememberUserSelectedProject(User loggedInUser, int projectid) {
+    Project<CommonExercise> project = getProject(projectid);
+    logger.info("rememberUserSelectedProject user " + loggedInUser + " -> " + projectid + " : " + project);
+    getUserProjectDAO().add(loggedInUser.getId(), projectid);
+    setStartupInfo(loggedInUser);
+  }
+
+  public void setStartupInfo(User userWhere) {
+    int i = getUserProjectDAO().mostRecentByUser(userWhere.getId());
+    Project<CommonExercise> project = getProject(i);
+    SlickProject project1 = project.getProject();
+    ProjectStartupInfo startupInfo = new ProjectStartupInfo(getServerProps().getProperties(),
+        project.getTypeOrder(), project.getSectionHelper().getSectionNodes(), project1.id(), project1.language());
+    //logger.info("Set startup info " + startupInfo);
+    userWhere.setStartupInfo(startupInfo);
   }
 
   /**
