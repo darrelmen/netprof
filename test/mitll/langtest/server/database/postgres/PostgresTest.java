@@ -38,8 +38,10 @@ import mitll.langtest.server.database.CopyToPostgres;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickProject;
+import mitll.npdata.dao.SlickUserProject;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
@@ -76,14 +78,14 @@ public class PostgresTest extends BaseTest {
   public void testCopyUserExercises() {
     testCreate();
     DatabaseImpl spanish = getDatabaseLight("spanish", true);
-   // new CopyToPostgres().copyOnlyUserExercises(spanish);
+    // new CopyToPostgres().copyOnlyUserExercises(spanish);
   }
 
   @Test
   public void testCopyUserJoinExercises() {
     testCreate();
     DatabaseImpl spanish = getDatabaseLight("spanish", true);
- //   new CopyToPostgres().copyUserExListJoin(spanish);
+    //   new CopyToPostgres().copyUserExListJoin(spanish);
   }
 
 
@@ -93,14 +95,29 @@ public class PostgresTest extends BaseTest {
     SlickProject next = spanish.getProjectDAO().getAll().iterator().next();
     ExerciseDAO<CommonExercise> exerciseDAO = spanish.getExerciseDAO(next.id());
     List<CommonExercise> rawExercises = exerciseDAO.getRawExercises();
-    for (CommonExercise ex: rawExercises.subList(0,100)) {
-      logger.info("ex " + ex.getID()+ " '" + ex.getEnglish() + "' '" +ex.getForeignLanguage() +"' : " + ex.getDirectlyRelated().size() + " context sentences.");
+    for (CommonExercise ex : rawExercises.subList(0, 100)) {
+      logger.info("ex " + ex.getID() + " '" + ex.getEnglish() + "' '" + ex.getForeignLanguage() + "' : " + ex.getDirectlyRelated().size() + " context sentences.");
       for (CommonExercise cex : ex.getDirectlyRelated()) {
-        logger.info("\t context " + cex.getID()+ " '" + cex.getEnglish() + "' '" +cex.getForeignLanguage() +"'");
+        logger.info("\t context " + cex.getID() + " '" + cex.getEnglish() + "' '" + cex.getForeignLanguage() + "'");
       }
     }
     logger.info("Got " + rawExercises.iterator().next());
     //   new CopyToPostgres().copyUserExListJoin(spanish);
+  }
+
+
+  @Test
+  public void testAddUserProject() {
+    DatabaseImpl spanish = getDatabaseLight("spanish", false);
+    SlickProject next = spanish.getProjectDAO().getAll().iterator().next();
+    int id = next.id();
+    User byID = spanish.getUserDAO().getUserByID("gvidaver");
+    logger.info("user is " + byID + " project " + next);
+    spanish.rememberUserSelectedProject(byID, id);
+    for (SlickUserProject up : spanish.getUserProjectDAO().getAll()) {
+      logger.info("got " +up);
+    };
+
   }
 
   private static DBConnection getConnection(String config) {
