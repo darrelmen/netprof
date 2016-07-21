@@ -39,6 +39,7 @@ import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.flashcard.ControlState;
 import mitll.langtest.client.services.UserServiceAsync;
+import mitll.langtest.shared.user.LoginResult;
 import mitll.langtest.shared.user.User;
 
 import java.util.Date;
@@ -75,7 +76,7 @@ public class UserManager {
   private static final String USER_CHOSEN_ID = "userChosenID";
   private static final String AUDIO_TYPE = "audioType";
 
-  private final UserServiceAsync service;
+  private final UserServiceAsync userServiceAsync;
   private final UserNotification userNotification;
   private long userID = NO_USER_SET;
   private String userChosenID = "";
@@ -87,13 +88,13 @@ public class UserManager {
 
   /**
    * @param lt
-   * @param service
+   * @param userServiceAsync
    * @param props
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
    */
-  public UserManager(UserNotification lt, UserServiceAsync service, PropertyHandler props) {
+  public UserManager(UserNotification lt, UserServiceAsync userServiceAsync, PropertyHandler props) {
     this.userNotification = lt;
-    this.service = service;
+    this.userServiceAsync = userServiceAsync;
     this.props = props;
     this.loginType = props.getLoginType();
     this.appTitle = props.getAppTitle();
@@ -117,14 +118,15 @@ public class UserManager {
 
   /**
    * TODO : if we have a user id from any site, try to use it to log in to this site.
+   *
    * @see #checkLogin()
    */
   private void login() {
     final int user = getUser();
     if (user != NO_USER_SET) {
-     // logger.info("UserManager.login : current user : " + user);
+      // logger.info("UserManager.login : current user : " + user);
       //console("UserManager.login : current user : " + user);
-      getPermissionsAndSetUser(user);
+      getPermissionsAndSetUser(getUserChosenFromStorage(), getPassFromStorage());
     } else {
       userNotification.showLogin();
     }
@@ -151,31 +153,35 @@ public class UserManager {
    * TODOx : instead have call to get permissions for a user.
    *
    * @param user
+   * @param passwordHash
    * @see #login()
    * @see #storeUser
    */
-  private void getPermissionsAndSetUser(final int user) {
+  private void getPermissionsAndSetUser(final String user, String passwordHash) {
     //console("getPermissionsAndSetUser : " + user);
-    // logger.info("UserManager.getPermissionsAndSetUser " + user + " asking server for info...");
-    service.getUserBy(user, new AsyncCallback<User>() {
+    logger.info("UserManager.getPermissionsAndSetUser " + user + " asking server for info...");
+    if (passwordHash == null) passwordHash = "";
+    userServiceAsync.loginUser(user, passwordHash, new AsyncCallback<LoginResult>() {
       @Override
       public void onFailure(Throwable caught) {
       }
 
       @Override
-      public void onSuccess(User result) {
-//        logger.info("UserManager.getPermissionsAndSetUser : onSuccess " + user + " : " + result);
+      public void onSuccess(LoginResult result) {
+        logger.info("UserManager.getPermissionsAndSetUser : onSuccess " + user + " : " + result);
 //        if (loginType == PropertyHandler.LOGIN_TYPE.ANONYMOUS && result.getUserKind() != User.Kind.ANONYMOUS) {
 //          clearUser();
 //          addAnonymousUser();
 //        } else
 //
         if (result == null || //loginType != PropertyHandler.LOGIN_TYPE.ANONYMOUS &&
-            result.getUserKind() == User.Kind.ANONYMOUS) {
+            result.getResultType() != LoginResult.ResultType.Success
+          //    result.getUserKind() == User.Kind.ANONYMOUS
+            ) {
           clearUser();
           userNotification.showLogin();
         } else {
-          gotNewUser(result);
+          gotNewUser(result.getLoggedInUser());
         }
       }
     });
@@ -206,7 +212,7 @@ public class UserManager {
       }
 
       this.current = result;
-      logger.info("\t is male " + current);
+      logger.info("\tgotNewUser current user " + current);
 
       userNotification.gotUser(result);
     }
@@ -225,7 +231,7 @@ public class UserManager {
     int user = getUser();
     if (user != NO_USER_SET) {
       //logger.info("UserManager.anonymousLogin : current user : " + user);
-      getPermissionsAndSetUser(user);
+      getPermissionsAndSetUser(getUserChosenFromStorage(), getPassFromStorage());
     } else {
       logger.info("UserManager.anonymousLogin : make new user, since user = " + user);
       addAnonymousUser();
@@ -238,7 +244,7 @@ public class UserManager {
   private void addAnonymousUser() {
     logger.info("UserManager.addAnonymousUser : adding anonymous user");
 
-    service.addUser("anonymous", "", "", User.Kind.ANONYMOUS, Window.Location.getHref(), "", true, 0, "unknown", false, "browser", new AsyncCallback<User>() {
+    userServiceAsync.addUser("anonymous", "", "", User.Kind.ANONYMOUS, Window.Location.getHref(), "", true, 0, "unknown", false, "browser", new AsyncCallback<User>() {
       @Override
       public void onFailure(Throwable caught) {
 
@@ -286,6 +292,15 @@ public class UserManager {
     }
   }
 
+  public int getUserPasswordHash() {
+    if (Storage.isLocalStorageSupported()) {
+      String sid = getPassFromStorage();
+      return (sid == null || sid.equals("" + NO_USER_SET)) ? NO_USER_SET : Integer.parseInt(sid);
+    } else {
+      return (int) userID;
+    }
+  }
+
   /**
    * @return
    * @see mitll.langtest.client.LangTest#checkLogin();
@@ -299,6 +314,18 @@ public class UserManager {
   private String getUserFromStorage() {
     Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
     String userIDCookie = getUserIDCookie();
+    return localStorageIfSupported != null ? localStorageIfSupported.getItem(userIDCookie) : NO_USER_SET_STRING;
+  }
+
+  private String getPassFromStorage() {
+    Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
+    String userIDCookie = getPassCookie();
+    return localStorageIfSupported != null ? localStorageIfSupported.getItem(userIDCookie) : NO_USER_SET_STRING;
+  }
+
+  private String getUserChosenFromStorage() {
+    Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
+    String userIDCookie = getUserChosenID();
     return localStorageIfSupported != null ? localStorageIfSupported.getItem(userIDCookie) : NO_USER_SET_STRING;
   }
 
@@ -323,6 +350,10 @@ public class UserManager {
    */
   private String getUserIDCookie() {
     return appTitle + ":" + USER_ID;
+  }
+
+  private String getPassCookie() {
+    return appTitle + ":" + "pwd";
   }
 
   private String getUserChosenID() {
@@ -384,7 +415,7 @@ public class UserManager {
   }
 
   private void clearCookieState() {
-   // userNotification.rememberAudioType(AudioType.UNSET);
+    // userNotification.rememberAudioType(AudioType.UNSET);
 /*
     if (USE_COOKIE) {
       Cookies.setCookie("sid", "" + NO_USER_SET);
@@ -394,6 +425,7 @@ public class UserManager {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
 
       localStorageIfSupported.removeItem(getUserIDCookie());
+      localStorageIfSupported.removeItem(getPassCookie());
       localStorageIfSupported.removeItem(getUserChosenID());
       logger.info("clearUser : removed item " + getUserID() + " user now " + getUser());
     } else {
@@ -414,6 +446,7 @@ public class UserManager {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
       userChosenID = user.getUserID();
       localStorageIfSupported.setItem(getUserIDCookie(), "" + user.getId());
+      localStorageIfSupported.setItem(getPassCookie(), "" + user.getPasswordHash());
       localStorageIfSupported.setItem(getUserChosenID(), "" + userChosenID);
       rememberUserSessionEnd(localStorageIfSupported, futureMoment);
       // localStorageIfSupported.setItem(getLoginType(), "" + userType);
