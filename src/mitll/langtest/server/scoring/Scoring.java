@@ -108,9 +108,11 @@ public abstract class Scoring {
 
   /**
    * @param deployPath
+   * @param modelsDir
    * @see ASRScoring#ASRScoring
    */
-  Scoring(String deployPath, ServerProperties props, LogAndNotify langTestDatabase, HTKDictionary htkDictionary) {
+  Scoring(String deployPath, ServerProperties props, LogAndNotify langTestDatabase, HTKDictionary htkDictionary,
+          String modelsDir) {
     this.deployPath = deployPath;
     this.scoringDir = getScoringDir(deployPath);
     this.props = props;
@@ -130,11 +132,11 @@ public abstract class Scoring {
       ltsFactory = new LTSFactory(languageProperty);
     } catch (Exception e) {
       ltsFactory = null;
-      logger.error("for " +languageProperty+ " got " +e);
+      logger.error("for " + languageProperty + " got " + e);
     }
-    this.configFileCreator = new ConfigFileCreator(properties, getLTS(), scoringDir);
+    this.configFileCreator = new ConfigFileCreator(properties, getLTS(), scoringDir, modelsDir);
 
-   // readDictionary();
+    // readDictionary();
     makeDecoder();
     checkLTSHelper = new CheckLTS(getLTS(), htkDictionary, language, props.hasModel());
   }
@@ -200,7 +202,7 @@ public abstract class Scoring {
       foundATranscript = true;
     }
     if (wordLab != null) {
- //     logger.debug("wordLab: " + wordLab);
+      //     logger.debug("wordLab: " + wordLab);
       typeToFile.put(ImageType.WORD_TRANSCRIPT, wordLab);
       foundATranscript = true;
     }
@@ -247,7 +249,7 @@ public abstract class Scoring {
                                     String audioFileNoSuffix, boolean useScoreToColorBkg,
                                     String prefix, String suffix, boolean decode, boolean useWebservice,
                                     boolean usePhoneToDisplay) {
-   logger.debug("writeTranscripts - decode " + decode + " file " + audioFileNoSuffix + " width " + imageWidth + " height " + imageHeight+
+    logger.debug("writeTranscripts - decode " + decode + " file " + audioFileNoSuffix + " width " + imageWidth + " height " + imageHeight +
         " prefix " + prefix);
 
     boolean foundATranscript = false;
@@ -442,6 +444,7 @@ public abstract class Scoring {
   public SmallVocabDecoder getSmallVocabDecoder() {
     return svDecoderHelper;
   }
+
   public Collator getCollator() {
     return ltsFactory.getCollator();
   }
