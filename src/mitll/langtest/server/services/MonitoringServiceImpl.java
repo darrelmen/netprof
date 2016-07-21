@@ -84,7 +84,7 @@ public class MonitoringServiceImpl extends MyRemoteServiceServlet implements Mon
   }
 
   Collection<CommonExercise> getExercises() {
-    return db.getExercises(getProject());
+    return db.getExercises(getProjectID());
   }
 
   /**
@@ -138,6 +138,6 @@ public class MonitoringServiceImpl extends MyRemoteServiceServlet implements Mon
    */
   @Override
   public Map<String, Float> getMaleFemaleProgress() {
-    return db.getMaleFemaleProgress(getProject());
+    return db.getMaleFemaleProgress(getProjectID());
   }
 }

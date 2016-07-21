@@ -134,7 +134,6 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   // private static final String TRANSLITERATION = "transliteration";
 
   private String installPath;
-//  private ExerciseDAO<CommonExercise> exerciseDAO = null;
 
   private IUserDAO userDAO;
   private IResultDAO resultDAO;
@@ -156,6 +155,10 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
 
   private ContextPractice contextPractice;
 
+  /**
+   * Only for h2
+   */
+  @Deprecated
   private DatabaseConnection connection = null;
   private MonitoringSupport monitoringSupport;
 
@@ -163,16 +166,12 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   private final ServerProperties serverProps;
   private final LogAndNotify logAndNotify;
 
-  //private JsonSupport jsonSupport;
-
   private static final boolean ADD_DEFECTS = false;
   private UserManagement userManagement = null;
-  // private IAnalysis analysis;
   private final String absConfigDir;
   private SimpleExerciseDAO<AmasExerciseImpl> fileExerciseDAO;
 
-  //private List<Project> projects = new ArrayList<>();
-  Map<Integer, Project<CommonExercise>> idToProject = new HashMap<>();
+  private Map<Integer, Project<CommonExercise>> idToProject = new HashMap<>();
 
   public DatabaseImpl(String configDir, String relativeConfigDir, String dbName, ServerProperties serverProps,
                       PathHelper pathHelper, boolean mustAlreadyExist, LogAndNotify logAndNotify) {
@@ -230,7 +229,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
 
     monitoringSupport = new MonitoringSupport(userDAO, resultDAO);
 
-    populateProjects();
+    populateProjects(pathHelper, serverProps, logAndNotify);
   }
 
   boolean maybeGetH2Connection(String relativeConfigDir, String dbName, ServerProperties serverProps) {
@@ -249,11 +248,15 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     return false;
   }
 
-  private void populateProjects() {
+  /**
+   * @see #DatabaseImpl(DatabaseConnection, String, String, String, ServerProperties, PathHelper, LogAndNotify)
+   */
+  private void populateProjects(PathHelper pathHelper, ServerProperties serverProps,
+                                LogAndNotify logAndNotify) {
     for (SlickProject slickProject : projectDAO.getAll()) {
-      Project e = new Project(slickProject);
+      Project<CommonExercise> e = new Project<CommonExercise>(slickProject, pathHelper, serverProps, this, logAndNotify);
       idToProject.put(e.getProject().id(), e);
-
+      logger.info("got " +e + " : " +e.getAudioFileHelper());
     }
   }
 
@@ -542,6 +545,15 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     Project<CommonExercise> project = getProject(projectid);
     return project.getExerciseDAO();
   }
+
+  public Project getProjectForUser(int userid) {
+    return getProject(getUserProjectDAO().mostRecentByUser(userid));
+  }
+
+  public int getProjectIDForUser(User loggedInUser) {
+    return getUserProjectDAO().mostRecentByUser(loggedInUser.getId());
+  }
+
 
   public void rememberUserSelectedProject(User loggedInUser, int projectid) {
     Project<CommonExercise> project = getProject(projectid);

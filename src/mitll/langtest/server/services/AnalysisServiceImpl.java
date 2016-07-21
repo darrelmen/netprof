@@ -84,7 +84,7 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
    */
   @Override
   public Collection<UserInfo> getUsersWithRecordings() {
-    return db.getAnalysis(getProject()).getUserInfo(db.getUserDAO(), MIN_RECORDINGS);
+    return db.getAnalysis(getProjectID()).getUserInfo(db.getUserDAO(), MIN_RECORDINGS);
   }
 
   /**
@@ -96,7 +96,7 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
   @Override
   public UserPerformance getPerformanceForUser(int id, int minRecordings) {
     SlickAnalysis slickAnalysis =
-        new SlickAnalysis(db, db.getPhoneDAO(), db.getExerciseIDToRefAudio(getProject()), (SlickResultDAO) db.getResultDAO());
+        new SlickAnalysis(db, db.getPhoneDAO(), db.getExerciseIDToRefAudio(getProjectID()), (SlickResultDAO) db.getResultDAO());
     return slickAnalysis.getPerformanceForUser(id, minRecordings);
   }
 
@@ -108,13 +108,13 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
    */
   @Override
   public List<WordScore> getWordScores(int id, int minRecordings) {
-    List<WordScore> wordScoresForUser = db.getAnalysis(getProject()).getWordScoresForUser(id, minRecordings);
+    List<WordScore> wordScoresForUser = db.getAnalysis(getProjectID()).getWordScoresForUser(id, minRecordings);
 //    for (WordScore ws : wordScoresForUser) if (ws.getNativeAudio() != null) logger.info("got " +ws.getId() + " " + ws.getNativeAudio());
     return wordScoresForUser;
   }
 
   @Override
   public PhoneReport getPhoneScores(int id, int minRecordings) {
-    return db.getAnalysis(getProject()).getPhonesForUser(id, minRecordings);
+    return db.getAnalysis(getProjectID()).getPhonesForUser(id, minRecordings);
   }
 }
