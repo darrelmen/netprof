@@ -239,7 +239,7 @@ public class SlickUserExerciseDAO
 //    }
     exercise.setUpdateTime(lastModified);
 
-    if (slick.ispredef()) {
+    if (slick.ispredef() && !slick.iscontext()) {
       List<SectionHelper.Pair> pairs = new ArrayList<SectionHelper.Pair>();
       for (Map.Entry<String, String> pair : unitToValue.entrySet()) {
         pairs.add(sectionHelper.addExerciseToLesson(exercise, pair.getKey(), pair.getValue()));
@@ -372,18 +372,12 @@ public class SlickUserExerciseDAO
     return dao.isProjectEmpty(projectid);
   }
 
-//  private RelatedExerciseDAOWrapper getRelatedExerciseDAOWrapper() {
-//    return relatedExerciseDAOWrapper;
-//  }
-
   public IDAO getRelatedExercise() {
     return new IDAO() {
       public void createTable() {
         relatedExerciseDAOWrapper.createTable();
       }
-
-      public String getName() {
-        return relatedExerciseDAOWrapper.getName();
+      public String getName()   { return relatedExerciseDAOWrapper.getName();
       }
     };
   }
