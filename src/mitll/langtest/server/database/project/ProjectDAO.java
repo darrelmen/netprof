@@ -34,8 +34,10 @@ package mitll.langtest.server.database.project;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.user.UserProjectDAO;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickProject;
+import mitll.npdata.dao.SlickUserProject;
 import mitll.npdata.dao.project.ProjectDAOWrapper;
 import org.apache.log4j.Logger;
 
@@ -46,13 +48,15 @@ import java.util.List;
 public class ProjectDAO extends DAO implements IProjectDAO {
   private static final Logger logger = Logger.getLogger(ProjectDAO.class);
 
-  private ProjectDAOWrapper dao;
-  private ProjectPropertyDAO propertyDAO;
+  private final ProjectDAOWrapper dao;
+  private final ProjectPropertyDAO propertyDAO;
+  private final UserProjectDAO userProjectDAO;
 
   public ProjectDAO(Database database, DBConnection dbConnection) {
     super(database);
     propertyDAO = new ProjectPropertyDAO(database, dbConnection);
     dao = new ProjectDAOWrapper(dbConnection);
+    userProjectDAO = new UserProjectDAO(dbConnection);
   }
 
   public ProjectPropertyDAO getProjectPropertyDAO() {
@@ -68,6 +72,12 @@ public class ProjectDAO extends DAO implements IProjectDAO {
 
   public int add(int userid, String name, String language, String firstType, String secondType) {
     return add(userid, System.currentTimeMillis(), name, language, "", ProjectType.NP, ProjectStatus.PRODUCTION, firstType, secondType);
+  }
+
+  private SlickProject first;
+  public SlickProject getFirst() {
+    if (first == null) first = dao.getAll().iterator().next();
+    return first;
   }
 
   @Override
@@ -97,4 +107,16 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   public int getByName(String name) {
     return dao.byName(name);
   }
+
+  /**
+   * TODO : don't do two round trips to database.
+   * @param user
+   * @return
+   */
+  @Override
+  public SlickProject mostRecentByUser(int user) {
+    int i = userProjectDAO.mostRecentByUser(user);
+    return i == -1 ? null : dao.byID(i).headOption().getOrElse(null);
+  }
+
 }

@@ -47,4 +47,8 @@ public interface IProjectDAO extends IDAO {
   void addProperty(int projid, String key, String value);
 
   int getByName(String name);
+
+  SlickProject mostRecentByUser(int user);
+
+  SlickProject getFirst();
 }
