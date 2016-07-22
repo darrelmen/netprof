@@ -60,6 +60,7 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.custom.KeyStorage;
+import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.instrumentation.EventRegistration;
@@ -266,7 +267,7 @@ public class UserPassLogin extends UserDialog {
     container.add(leftAndRight);
     getLeftIntro(leftAndRight);
     getRightLogin(leftAndRight);
-    leftAndRight.add(getLinksToSites());
+  //  leftAndRight.add(getLinksToSites());
     return container;
   }
 
@@ -283,18 +284,17 @@ public class UserPassLogin extends UserDialog {
     rightDiv.add(getSignUpForm());
   }
 
-  private Panel getLinksToSites() {
+ /* private Panel getLinksToSites() {
     Panel hp = new HorizontalPanel();
     hp.getElement().setId("UserPassLogin_linksToSites");
     hp.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
 
     String sitePrefix = "https://np.ll.mit.edu/netProf";
-    for (String site : props.getSites()) {
-      Anchor w = new Anchor(site, sitePrefix);
-      w.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
-      hp.add(w);
-    }
-
+//    for (String site : props.getSites()) {
+//      Anchor w = new Anchor(site, sitePrefix);
+//      w.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
+//      hp.add(w);
+//    }
 
 
     userService.getProjects(new AsyncCallback<Collection<SlimProject>>() {
@@ -308,11 +308,21 @@ public class UserPassLogin extends UserDialog {
         boolean anyAdded = false;
 
         for (final SlimProject project : result) {
-          Anchor w = new Anchor(project.getLanguage(), sitePrefix);
+          Anchor w = new Anchor(project.getLanguage(), "");
           w.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent clickEvent) {
+              userService.setProject(project.getProjectid(), new AsyncCallback<Void>() {
+                @Override
+                public void onFailure(Throwable throwable) {
 
+                }
+
+                @Override
+                public void onSuccess(Void aVoid) {
+                  Window.Location.reload();
+                }
+              });
             }
           });
           w.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
@@ -322,11 +332,8 @@ public class UserPassLogin extends UserDialog {
     });
 
 
-
-
-
     return hp;
-  }
+  }*/
 
   /**
    * @param signInForm
@@ -411,7 +418,7 @@ public class UserPassLogin extends UserDialog {
     hp.addStyleName("topFiveMargin");
 
     projectChoice = new ListBox();
-    addTooltip(projectChoice, "Choose a language");
+    new TooltipHelper().createAddTooltip(projectChoice, "Choose a language", Placement.LEFT);
     populateListChoices(projectChoice);
 
     projectChoice.addStyleName("leftTenMargin");

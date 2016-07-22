@@ -957,7 +957,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     long then = System.currentTimeMillis();
     List<AmasExerciseImpl> exercises = db.getAMASExercises();
     if (amasFullTrie == null) {
-      amasFullTrie = new ExerciseTrie<AmasExerciseImpl>(exercises, serverProps.getLanguage(), getSmallVocabDecoder());
+      amasFullTrie = new ExerciseTrie<AmasExerciseImpl>(exercises, getOldLanguage(), getSmallVocabDecoder());
     }
 
     if (getServletContext().getAttribute(AUDIO_FILE_HELPER_REFERENCE) == null) {
@@ -965,9 +965,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
     long now = System.currentTimeMillis();
     if (now - then > 200) {
-      logger.info("took " + (now - then) + " millis to get the predef exercise list for " + serverProps.getLanguage());
+      logger.info("took " + (now - then) + " millis to get the predef exercise list for " + getOldLanguage());
     }
     return exercises;
+  }
+
+  private String getOldLanguage() {
+    return serverProps.getLanguage();
   }
 
   private SmallVocabDecoder getSmallVocabDecoder() {
@@ -1174,10 +1178,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public StartupInfo getStartupInfo() {
     List<ProjectInfo> projectInfos = new ArrayList<>();
-    for (SlickProject project : db.getProjectDAO().getAll())
-      projectInfos.add(new ProjectInfo(project.language(), project.id()));
+    if (db == null) {
 
-    return new StartupInfo(serverProps.getProperties(), projectInfos);//, db.getTypeOrder(projectid), db.getSectionNodes());
+    }
+    else {
+      for (SlickProject project : db.getProjectDAO().getAll())
+        projectInfos.add(new ProjectInfo(project.language(), project.id()));
+    }
+
+    return new StartupInfo(serverProps.getProperties(), projectInfos, startupMessage);//, db.getTypeOrder(projectid), db.getSectionNodes());
   }
 
   /**
@@ -2130,6 +2139,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
+  private String startupMessage = "";
   /**
    * Reco test option lets you run through and score all the reference audio -- if you want to see model performance
    */
@@ -2141,9 +2151,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       setInstallPath(db);
       if (serverProps.isAMAS()) {
         audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, this,
-            serverProps.getProps().getProperty(ServerProperties.MODELS_DIR), serverProps.getLanguage());
+            serverProps.getProps().getProperty(ServerProperties.MODELS_DIR), getOldLanguage());
       }
     } catch (Exception e) {
+      startupMessage = e.getMessage();
       logger.error("Got " + e, e);
     }
 
