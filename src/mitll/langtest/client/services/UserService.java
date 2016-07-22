@@ -44,13 +44,17 @@ import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.UserPassLogin;
 import mitll.langtest.shared.user.LoginResult;
+import mitll.langtest.shared.user.SlimProject;
 import mitll.langtest.shared.user.User;
 
+import java.util.Collection;
 import java.util.List;
 
 @RemoteServiceRelativePath("user-manager")
 public interface UserService extends RemoteService {
   // User Management --
+
+  Collection<SlimProject> getProjects();
 
   /**
    * @see mitll.langtest.client.user.UserPassLogin#gotSignUp(String, String, String, User.Kind)
