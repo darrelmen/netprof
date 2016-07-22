@@ -67,4 +67,6 @@ public interface UserServiceAsync {
   void loginUser(String userId, String attemptedPassword, AsyncCallback<LoginResult> async);
 
   void getProjects(AsyncCallback<Collection<SlimProject>> async);
+
+  void setProject(int projectid,AsyncCallback<Void> async);
 }
