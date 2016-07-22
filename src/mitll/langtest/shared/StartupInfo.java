@@ -51,8 +51,7 @@ import java.util.Map;
 public class StartupInfo implements IsSerializable {
   private Map<String, String> properties;
   private List<ProjectInfo> projects;
-//  private Collection<String> typeOrder;
-//  private Collection<SectionNode> sectionNodes;
+  private String message = "";
 
   public StartupInfo() {} // for serialization
 
@@ -63,11 +62,12 @@ public class StartupInfo implements IsSerializable {
    * @paramx sectionNodes
    */
   public StartupInfo(Map<String, String> properties,
-                     List<ProjectInfo> projects/*, Collection<String> typeOrder, Collection<SectionNode> sectionNodes*/) {
+                     List<ProjectInfo> projects,
+                     String message/*, Collection<String> typeOrder, Collection<SectionNode> sectionNodes*/) {
     this.properties = properties;
     this.projects = projects;
-//    this.typeOrder = typeOrder;
-//    this.sectionNodes = sectionNodes;
+    this.message = message;
+
   }
 
   public Map<String, String> getProperties() {
@@ -76,6 +76,10 @@ public class StartupInfo implements IsSerializable {
 
   public List<ProjectInfo> getProjects() {
     return projects;
+  }
+
+  public String getMessage() {
+    return message;
   }
 
 /*  public Collection<String> getTypeOrder() {
