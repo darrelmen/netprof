@@ -34,6 +34,7 @@ package mitll.langtest.server.services;
 
 import mitll.langtest.client.services.UserService;
 import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.database.security.DominoSessionException;
 import mitll.langtest.server.database.security.UserSecurityManager;
 import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
@@ -311,5 +312,17 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
       projects.add(new SlimProject(project.name(), project.language(), project.id()));
     }
     return projects;
+  }
+
+  public void setProject(int projectid) {
+    try {
+      User sessionUser = getSessionUser();
+      if (sessionUser != null) {
+        int id = sessionUser.getId();
+        db.getUserProjectDAO().add(id, projectid);
+      }
+    } catch (DominoSessionException e) {
+      logger.error("got " +e,e);
+    }
   }
 }

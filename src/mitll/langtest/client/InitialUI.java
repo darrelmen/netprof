@@ -60,8 +60,10 @@ import mitll.langtest.client.user.ResetPassword;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserPassLogin;
 import mitll.langtest.client.user.UserTable;
+import mitll.langtest.shared.user.SlimProject;
 import mitll.langtest.shared.user.User;
 
+import java.util.Collection;
 import java.util.logging.Logger;
 
 /**
@@ -382,11 +384,51 @@ public class InitialUI {
     style.setMarginLeft(LEFT_LIST_WIDTH, Style.Unit.PX);
     style.setMarginTop(10, Style.Unit.PX);
 
-    for (String site : props.getSites()) {
-      Anchor w = new Anchor(site, "https://np.ll.mit.edu/npfClassroom" + site.replaceAll("Mandarin", "CM"));
-      w.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
-      hp.add(w);
-    }
+    hp.getElement().setId("linksToSites");
+    //hp.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
+
+    String sitePrefix = "https://np.ll.mit.edu/netProf";
+//    for (String site : props.getSites()) {
+//      Anchor w = new Anchor(site, sitePrefix);
+//      w.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
+//      hp.add(w);
+//    }
+
+
+    userService.getProjects(new AsyncCallback<Collection<SlimProject>>() {
+      @Override
+      public void onFailure(Throwable caught) {
+      }
+
+      @Override
+      public void onSuccess(Collection<SlimProject> result) {
+        boolean anyAdded = false;
+
+        for (final SlimProject project : result) {
+          Anchor w = new Anchor(project.getLanguage(), "");
+          w.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent clickEvent) {
+              userService.setProject(project.getProjectid(), new AsyncCallback<Void>() {
+                @Override
+                public void onFailure(Throwable throwable) {
+
+                }
+
+                @Override
+                public void onSuccess(Void aVoid) {
+                  Window.Location.reload();
+                }
+              });
+            }
+          });
+          w.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
+          hp.add(w);
+        }
+      }
+    });
+
+
     return hp;
   }
 
