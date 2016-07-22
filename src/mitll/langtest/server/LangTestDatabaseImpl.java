@@ -2119,7 +2119,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   @Override
   public void destroy() {
-    db.stopDecode();
 //    refResultDecoder.setStopDecode(true);
     //stopOggCheck = true;
     super.destroy();
@@ -2127,6 +2126,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       logger.error("DatabaseImpl was never made properly...");
     } else {
       db.destroy(); // TODO : redundant with h2 shutdown hook?
+      db.stopDecode();
     }
   }
 
