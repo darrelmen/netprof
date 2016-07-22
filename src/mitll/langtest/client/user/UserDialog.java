@@ -52,7 +52,7 @@ import mitll.langtest.client.services.UserServiceAsync;
  * Time: 4:26 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class UserDialog extends BasicDialog {
+abstract class UserDialog extends BasicDialog {
   static final int USER_ID_MAX_LENGTH = 35;
 
   static final int MIN_AGE = 12;

@@ -165,6 +165,13 @@ public class BasicDialog {
     return userGroup;
   }
 
+  /**
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#makeRegularAudioPanel(Panel)
+   * @param dialogBox
+   * @param label
+   * @param widget
+   * @return
+   */
   protected ControlGroup addControlGroupEntrySimple(Panel dialogBox, String label, Widget widget) {
     final ControlGroup userGroup = new ControlGroup();
     userGroup.add(new ControlLabel(label));

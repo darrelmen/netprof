@@ -171,7 +171,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   private final String absConfigDir;
   private SimpleExerciseDAO<AmasExerciseImpl> fileExerciseDAO;
 
-  private Map<Integer, Project> idToProject = new HashMap<>();
+  private final Map<Integer, Project> idToProject = new HashMap<>();
 
   public DatabaseImpl(String configDir, String relativeConfigDir, String dbName, ServerProperties serverProps,
                       PathHelper pathHelper, boolean mustAlreadyExist, LogAndNotify logAndNotify) {
@@ -232,7 +232,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     populateProjects(pathHelper, serverProps, logAndNotify, relativeConfigDir);
   }
 
-  boolean maybeGetH2Connection(String relativeConfigDir, String dbName, ServerProperties serverProps) {
+  private boolean maybeGetH2Connection(String relativeConfigDir, String dbName, ServerProperties serverProps) {
     try {
       Connection connection1 = getConnection();
       if (connection1 == null && serverProps.useH2()) {
@@ -345,6 +345,14 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   }
 
   private DBConnection getDbConnection() {
+    logger.info("getDbConnection : connecting to type \n\t" + serverProps.getDatabaseType() +
+        " host \n\t" + serverProps.getDatabaseHost() +
+        " port \n\t" + serverProps.getDatabasePort() +
+        " name \n\t" + serverProps.getDatabaseName() +
+        " user \n\t" + serverProps.getDatabaseUser() +
+        " pass \n\t" + serverProps.getDatabasePassword().length() + " chars"
+    );
+
     return new DBConnection(serverProps.getDatabaseType(),
         serverProps.getDatabaseHost(),
         serverProps.getDatabasePort(),
@@ -473,7 +481,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     return getProject(projectid).getSectionHelper();
   }
 
-  boolean isAmas() {
+  private boolean isAmas() {
     return serverProps.isAMAS();
   }
 
@@ -488,10 +496,10 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
    * @param projectid
    * @return
    */
-  public Collection<SectionNode> getSectionNodes(int projectid) {
+/*  public Collection<SectionNode> getSectionNodes(int projectid) {
     SectionHelper<?> sectionHelper = (isAmas()) ? getAMASSectionHelper() : getSectionHelper(projectid);
     return sectionHelper.getSectionNodes();
-  }
+  }*/
 
   /**
    * @param id
@@ -572,7 +580,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     SlickProject project1 = project.getProject();
     ProjectStartupInfo startupInfo = new ProjectStartupInfo(getServerProps().getProperties(),
         project.getTypeOrder(), project.getSectionHelper().getSectionNodes(), project1.id(), project1.language());
-    logger.info("For " +userWhere + " Set startup info " + startupInfo);
+    logger.info("For " + userWhere + " Set startup info " + startupInfo);
     userWhere.setStartupInfo(startupInfo);
   }
 
@@ -655,7 +663,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     project.setAnalysis(
         new SlickAnalysis(this, phoneDAO,
             exerciseIDToRefAudio, (SlickResultDAO) resultDAO)
-         );
+    );
   }
 
   private void makeExerciseDAO(String lessonPlanFile, boolean isURL) {
@@ -814,7 +822,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     return getJsonSupport(userid).getJsonScoreHistory(userid, typeToSection, sorter);
   }
 
-  JsonSupport getJsonSupport(int userid) {
+  private JsonSupport getJsonSupport(int userid) {
     int i = getUserProjectDAO().mostRecentByUser(userid);
     return getJsonSupportForProject(i);
   }
@@ -1002,9 +1010,9 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
    * @return
    * @seex mitll.langtest.server.database.ImportCourseExamples#copyUser
    */
-  public int addUser(User user) {
+/*  public int addUser(User user) {
     return userManagement.addUser(user);
-  }
+  }*/
 
   /**
    * @param out
@@ -1283,9 +1291,9 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
         isMale, speed);
   }
 
-  public int userExists(String login) {
+/*  public int userExists(String login) {
     return userDAO.getIdForUserID(login);
-  }
+  }*/
 
   /**
    * @see LangTestDatabaseImpl#destroy()
@@ -1440,7 +1448,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
         getAudioDAO(), installPath, configDir, false);
   }
 
-  String getLanguage(int projectid) {
+  private String getLanguage(int projectid) {
     return getProject(projectid).getProject().language();
   }
 
