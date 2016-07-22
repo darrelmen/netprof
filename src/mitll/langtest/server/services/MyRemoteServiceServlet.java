@@ -96,7 +96,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet {
 
   protected int getProjectID() {
     try {
-      User loggedInUser = securityManager.getLoggedInUser(getThreadLocalRequest());
+      User loggedInUser = getSessionUser();
       if (loggedInUser == null) return -1;
       int i = db.getUserProjectDAO().mostRecentByUser(loggedInUser.getId());
       return i;
@@ -108,14 +108,25 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet {
 
   protected Project getProject() {
     try {
-      HttpServletRequest threadLocalRequest = getThreadLocalRequest();
-      //   logger.info("getProjectID got request " + threadLocalRequest);
-      User loggedInUser = securityManager.getLoggedInUser(threadLocalRequest);
-      if (loggedInUser == null) return null;
-      else return db.getProjectForUser(loggedInUser.getId());
+      User loggedInUser = getSessionUser();
+      if (loggedInUser == null) {
+        return null;
+      }
+      else {
+        return db.getProjectForUser(loggedInUser.getId());
+      }
     } catch (DominoSessionException e) {
       logger.error("got " + e, e);
       return null;
     }
+  }
+
+  /**
+   * Get the current user from the session
+   * @return
+   * @throws DominoSessionException
+   */
+  User getSessionUser() throws DominoSessionException {
+    return securityManager.getLoggedInUser(getThreadLocalRequest());
   }
 }

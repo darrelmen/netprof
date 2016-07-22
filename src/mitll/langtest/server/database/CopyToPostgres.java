@@ -188,12 +188,16 @@ public class CopyToPostgres<T extends CommonShell> {
         copyPhone(db, oldToNewResult, oldToNewWordID);
       }
 
+
       // anno DAO
       copyAnno(db, slickUserDAO, oldToNewUser, exToID);
 
       copyReviewed(db, oldToNewUser, exToID, true);
       copyReviewed(db, oldToNewUser, exToID, false);
       copyRefResult(db, oldToNewUser, exToID);
+    }
+    else {
+      logger.info("Project "+ projectID + " already has exercises in it.");
     }
   }
 
