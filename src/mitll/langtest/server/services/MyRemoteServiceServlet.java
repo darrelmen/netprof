@@ -40,7 +40,6 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.security.DominoSessionException;
 import mitll.langtest.server.database.security.UserSecurityManager;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.User;
 import org.apache.log4j.Logger;
 
@@ -71,7 +70,8 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet {
   void findSharedDatabase() {
     if (db == null) {
       db = getDatabase();
-      securityManager = new UserSecurityManager(db.getUserDAO());
+      if (db == null) logger.error("no database?");
+      else securityManager = new UserSecurityManager(db.getUserDAO());
     }
   }
 
@@ -85,14 +85,14 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet {
    * @param servletContext
    * @see #init()
    */
-   void readProperties(ServletContext servletContext) {
+  void readProperties(ServletContext servletContext) {
     String relativeConfigDir = "config" + File.separator + servletContext.getInitParameter("config");
     PathHelper pathHelper = new PathHelper(getServletContext());
     String configDir = pathHelper.getInstallPath() + File.separator + relativeConfigDir;
     serverProps = new ServerProperties(servletContext, configDir);
   }
 
-   UserSecurityManager securityManager;
+  UserSecurityManager securityManager;
 
   protected int getProjectID() {
     try {
@@ -101,7 +101,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet {
       int i = db.getUserProjectDAO().mostRecentByUser(loggedInUser.getId());
       return i;
     } catch (DominoSessionException e) {
-      logger.error("Got " + e,e);
+      logger.error("Got " + e, e);
       return -1;
     }
   }

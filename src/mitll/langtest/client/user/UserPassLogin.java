@@ -36,6 +36,7 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.Image;
+import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
@@ -62,9 +63,12 @@ import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.instrumentation.EventRegistration;
+import mitll.langtest.client.services.UserServiceAsync;
+import mitll.langtest.shared.user.SlimProject;
 import mitll.langtest.shared.user.User;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
@@ -79,7 +83,7 @@ public class UserPassLogin extends UserDialog {
   private final Logger logger = Logger.getLogger("UserPassLogin");
 
   private static final String IPAD_LINE_1 = "Also consider installing the NetProF app, which is available on the DLI App Store.";// or";
- // private static final String IPAD_LINE_2 = "Or click this link to install <a href='https://np.ll.mit.edu/iOSNetProF/'>iOS NetProF" + "</a>.";
+  // private static final String IPAD_LINE_2 = "Or click this link to install <a href='https://np.ll.mit.edu/iOSNetProF/'>iOS NetProF" + "</a>.";
   private static final String IPAD_LINE_3 = "Otherwise, you will not be able to record yourself practicing vocabulary.";
 
   private static final String WAIT_FOR_APPROVAL = "Wait for approval";
@@ -138,9 +142,11 @@ public class UserPassLogin extends UserDialog {
   private FormField signUpEmail;
   private FormField signUpPassword;
   private FormField password;
+  private ListBox projectChoice;
   private boolean signInHasFocus = true;
   private final EventRegistration eventRegistration;
   private Button signIn;
+  private UserServiceAsync userService;
 
   /**
    * @param service
@@ -149,9 +155,14 @@ public class UserPassLogin extends UserDialog {
    * @param eventRegistration
    * @see mitll.langtest.client.LangTest#showLogin
    */
-  public UserPassLogin(LangTestDatabaseAsync service, PropertyHandler props, UserManager userManager,
+  public UserPassLogin(LangTestDatabaseAsync service,
+                       UserServiceAsync userService,
+                       PropertyHandler props,
+                       UserManager userManager,
                        EventRegistration eventRegistration) {
     super(service, props);
+    this.userService = userService;
+
     keyStorage = new KeyStorage(props.getLanguage(), 1000000);
 
     boolean willShow = checkWelcome();
@@ -212,7 +223,7 @@ public class UserPassLogin extends UserDialog {
    */
   private void showSuggestApp() {
     List<String> messages = Arrays.asList(IPAD_LINE_1,
-       // IPAD_LINE_2,
+        // IPAD_LINE_2,
         IPAD_LINE_3);
     Modal modal = new ModalInfoDialog().getModal(
         "Install App?",
@@ -298,6 +309,23 @@ public class UserPassLogin extends UserDialog {
 
     makeSignInUserName(fieldset);
 
+    Panel hp = new HorizontalPanel();
+    hp.getElement().setId("password_login_box");
+    hp.addStyleName("leftFiveMargin");
+
+    addPasswordField(fieldset, hp);
+
+    //hp.add(getSignInButton());
+
+    fieldset.add(hp);
+    fieldset.add(getProjectChoiceRow());
+    fieldset.add(getForgotRow());
+    setFocusOnUserID();
+
+    return signInForm;
+  }
+
+  private void addPasswordField(Fieldset fieldset, Panel hp) {
     password = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, PASSWORD);
     password.box.addFocusHandler(new FocusHandler() {
       @Override
@@ -307,22 +335,13 @@ public class UserPassLogin extends UserDialog {
       }
     });
 
-    Panel hp = new HorizontalPanel();
     hp.add(password.box);
-    hp.addStyleName("leftFiveMargin");
-
-    hp.add(getSignInButton());
-    fieldset.add(hp);
-
-    Panel hp2 = getForgotRow();
-
-    fieldset.add(hp2);
-
-    setFocusOnUserID();
-
-    return signInForm;
   }
 
+  /**
+   * @return
+   * @see #populateSignInForm(Form)
+   */
   private Panel getForgotRow() {
     Panel hp2 = new HorizontalPanel();
 
@@ -334,7 +353,6 @@ public class UserPassLogin extends UserDialog {
     Anchor forgotPassword = getForgotPassword();
     hp2.add(forgotPassword);
     forgotPassword.addStyleName("topFiveMargin");
-
     forgotPassword.addStyleName("leftFiveMargin");
 
     Button help = new Button(HELP);
@@ -354,6 +372,86 @@ public class UserPassLogin extends UserDialog {
     return hp2;
   }
 
+  /**
+   * @return
+   * @see #populateSignInForm(Form)
+   */
+  private Panel getProjectChoiceRow() {
+    Panel hp = new HorizontalPanel();
+    hp.addStyleName("topFiveMargin");
+
+    projectChoice = new ListBox();
+    addTooltip(projectChoice, "Choose a language");
+    populateListChoices(projectChoice);
+
+    projectChoice.addStyleName("leftTenMargin");
+
+    hp.add(projectChoice);
+    hp.add(getSignInButton());
+
+    return hp;
+  }
+
+  private SlimProject currentProject = null;
+
+  private Collection<SlimProject> projects;
+
+  /**
+   * <p>
+   *
+   * @param projectChoices
+   * @paramx controller
+   */
+  private void populateListChoices(final ListBox projectChoices/*, ExerciseController controller*/) {
+    userService.getProjects(new AsyncCallback<Collection<SlimProject>>() {
+      @Override
+      public void onFailure(Throwable caught) {
+      }
+
+      @Override
+      public void onSuccess(Collection<SlimProject> result) {
+        projects = result;
+        projectChoices.clear();
+        boolean anyAdded = false;
+        //    logger.info("\tpopulateListChoices : found list " + result.size() + " choices");
+        projectChoices.addItem("");
+
+        for (final SlimProject project : result) {
+          anyAdded = true;
+          projectChoices.addItem(project.getName());
+
+          projectChoices.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+              for (SlimProject project1 : projects) {
+                if (project1.getName().equals(projectChoices.getValue())) {
+                  currentProject = project1;
+                  break;
+                }
+              }
+            }
+          });
+//          final NavLink widget = new NavLink(project.getName());
+//          w1.add(widget);
+//          widget.addClickHandler(new ClickHandler() {
+//            @Override
+//            public void onClick(ClickEvent event) {
+//              currentProject = project;
+//              // controller.logEvent(w1, "DropUp", id, ADDING_TO_LIST + ul.getID() + "/" + ul.getName());
+//
+//
+//            }
+//          });
+        }
+        if (!anyAdded) {
+//          NavLink widget = new NavLink("No Projects Yet?");
+//          w1.add(widget);
+
+        }
+      }
+    });
+  }
+
   private Form getSignInForm() {
     Form signInForm = new Form();
     signInForm.addStyleName("topMargin");
@@ -362,6 +460,10 @@ public class UserPassLogin extends UserDialog {
     return signInForm;
   }
 
+  /**
+   * @return
+   * @see #populateSignInForm(Form)
+   */
   private Button getSignInButton() {
     signIn = new Button(SIGN_IN);
     signIn.setWidth("45px");
@@ -378,7 +480,11 @@ public class UserPassLogin extends UserDialog {
           if (!value.isEmpty() && value.length() < MIN_PASSWORD) {
             markErrorBlur(password, BAD_PASSWORD);
           } else {
-            gotLogin(userID, value, value.isEmpty());
+            if (currentProject == null) {
+              markErrorBlur(projectChoice, "Please choose a language", Placement.TOP);
+            } else {
+              gotLogin(userID, value, value.isEmpty(), currentProject.getProjectid());
+            }
           }
         }
 
@@ -923,7 +1029,7 @@ public class UserPassLogin extends UserDialog {
             } else {
               if (result.isEnabled()) {
                 eventRegistration.logEvent(signUp, "signing up", "N/A", getSignUpEvent(result));
-               // logger.info("Got valid, enabled new user " + user + " and so we're letting them in.");
+                // logger.info("Got valid, enabled new user " + user + " and so we're letting them in.");
 
                 storeUser(result);
               } else {
@@ -1000,16 +1106,16 @@ public class UserPassLogin extends UserDialog {
 
   /**
    * TODO : get list of projects
+   *
    * @param user
    * @param pass
    * @see #getRightLogin(com.google.gwt.user.client.ui.Panel)
    */
-  private void gotLogin(final String user, final String pass, final boolean emptyPassword) {
+  private void gotLogin(final String user, final String pass, final boolean emptyPassword, int projectid) {
     final String hashedPass = Md5Hash.getHash(pass);
     logger.info("gotLogin : user is '" + user + "' pass '" + pass + "' or '" + hashedPass + "'");
 
     signIn.setEnabled(false);
-    int projectid = 1;
     service.userExists(user, hashedPass, projectid, new AsyncCallback<User>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -1026,7 +1132,7 @@ public class UserPassLogin extends UserDialog {
           markErrorBlur(password, emptyPassword ? PLEASE_ENTER_YOUR_PASSWORD : BAD_PASSWORD);
           signIn.setEnabled(true);
         } else {
-         // logger.info("Found user " + result);
+          // logger.info("Found user " + result);
           foundExistingUser(result, emptyPassword, hashedPass);
         }
       }
@@ -1047,7 +1153,7 @@ public class UserPassLogin extends UserDialog {
       copyInfoToSignUp(result);
       signIn.setEnabled(true);
     } else {
-     // logger.info("Got valid user " + result);
+      // logger.info("Got valid user " + result);
       if (emptyPassword) {
         eventRegistration.logEvent(signIn, "sign in", "N/A", "empty password");
 
@@ -1056,7 +1162,7 @@ public class UserPassLogin extends UserDialog {
       } else if (result.getPasswordHash().equalsIgnoreCase(hashedPass)) {
         if (result.isEnabled() || result.getUserKind() != User.Kind.CONTENT_DEVELOPER || props.enableAllUsers()) {
           eventRegistration.logEvent(signIn, "sign in", "N/A", "successful sign in for " + user);
-      //    logger.info("Got valid user " + user + " and matching password, so we're letting them in.");
+          //    logger.info("Got valid user " + user + " and matching password, so we're letting them in.");
 
           storeUser(result);
         } else {

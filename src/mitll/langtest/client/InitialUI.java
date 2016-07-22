@@ -440,7 +440,7 @@ public class InitialUI {
     if (show) {
       logger.info("user is not valid : user expired " + userManager.isUserExpired() + " / " + userManager.getUserID());
 
-      firstRow.add(new UserPassLogin(service, props, userManager, eventRegistration).getContent());
+      firstRow.add(new UserPassLogin(service, userService, props, userManager, eventRegistration).getContent());
       clearPadding(verticalContainer);
       RootPanel.get().add(verticalContainer);
       banner.setCogVisible(false);
