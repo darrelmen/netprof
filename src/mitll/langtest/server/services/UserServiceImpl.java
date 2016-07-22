@@ -34,23 +34,18 @@ package mitll.langtest.server.services;
 
 import mitll.langtest.client.services.UserService;
 import mitll.langtest.server.PathHelper;
-import mitll.langtest.server.database.exercise.Project;
-import mitll.langtest.server.database.security.DominoSessionException;
 import mitll.langtest.server.database.security.UserSecurityManager;
 import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.user.LoginResult;
+import mitll.langtest.shared.user.SlimProject;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickProject;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.List;
+import java.util.*;
 
 @SuppressWarnings("serial")
 public class UserServiceImpl extends MyRemoteServiceServlet implements UserService {
@@ -109,9 +104,9 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
 //      logger.info("acct detail {}", loggedInUser.getAcctDetail());
       HttpSession session1 = getThreadLocalRequest().getSession(false);
       logger.info("Adding user to " + session.getId() +
-          " lookup is " +      session1.getAttribute(USER_SESSION_ATT) +
+          " lookup is " + session1.getAttribute(USER_SESSION_ATT) +
           ", session.isNew=" + session1.isNew() +
-          ", created=" +       session1.getCreationTime() +
+          ", created=" + session1.getCreationTime() +
           ", " + atts.toString());
       db.setStartupInfo(loggedInUser);
       return new LoginResult(loggedInUser, new Date(System.currentTimeMillis()));
@@ -134,6 +129,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     return null;
   }
 */
+
   /**
    * Check other sites to see if the user exists somewhere else, and if so go ahead and use that person
    * here.
@@ -154,13 +150,15 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
       LoginResult loginResult = loginUser(login, passwordH);
       User loggedInUser = loginResult.getLoggedInUser();
       if (loginResult.getResultType() == LoginResult.ResultType.Success) {
-        db.rememberUserSelectedProject(loggedInUser,projectid);
+        db.rememberUserSelectedProject(loggedInUser, projectid);
       }
       return loggedInUser;
     }
   }
 
-  public void logout(String login) {  securityManager.logoutUser(getThreadLocalRequest(), login, true);  }
+  public void logout(String login) {
+    securityManager.logoutUser(getThreadLocalRequest(), login, true);
+  }
 
   /**
    * Send confirmation to your email too.
@@ -305,5 +303,13 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     String userChosenIDIfValid = db.getUserDAO().isValidEmail(emailH);
     getEmailHelper().getUserNameEmail(email, url, userChosenIDIfValid);
     return userChosenIDIfValid != null;
+  }
+
+  public Collection<SlimProject> getProjects() {
+    List<SlimProject> projects = new ArrayList<>();
+    for (SlickProject project : db.getProjectDAO().getAll()) {
+      projects.add(new SlimProject(project.name(), project.language(), project.id()));
+    }
+    return projects;
   }
 }

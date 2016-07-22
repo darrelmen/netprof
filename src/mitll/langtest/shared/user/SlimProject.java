@@ -30,41 +30,42 @@
  *
  */
 
-package mitll.langtest.client.services;
+package mitll.langtest.shared.user;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.shared.user.LoginResult;
-import mitll.langtest.shared.user.SlimProject;
-import mitll.langtest.shared.user.User;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
-import java.util.Collection;
-import java.util.List;
+public class SlimProject implements IsSerializable {
+  private String name;
+  private String language;
+  private String course;
+  private int projectid;
 
-public interface UserServiceAsync {
-  void getUsers(AsyncCallback<List<User>> async);
+  public SlimProject() {
+  }
 
-  void getUserBy(int id, AsyncCallback<User> async);
+  public SlimProject(String name, String language, int projectid) {
+    this.name = name;
+    this.language = language;
+    this.projectid = projectid;
+  }
 
-  void userExists(String login, String passwordH, int projectid, AsyncCallback<User> async);
+  public String toString() {
+    return "Project #" + projectid + " " + name + " " + language;
+  }
 
-  void logout(String login, AsyncCallback<Void> async);
+  public String getName() {
+    return name;
+  }
 
-  void addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, String email, boolean isMale,
-               int age, String dialect, boolean isCD, String device, AsyncCallback<User> async);
+  public String getLanguage() {
+    return language;
+  }
 
-  void resetPassword(String userid, String text, String url, AsyncCallback<Boolean> asyncCallback);
+  public String getCourse() {
+    return course;
+  }
 
-  void forgotUsername(String emailH, String email, String url, AsyncCallback<Boolean> async);
-
-  void getUserIDForToken(String token, AsyncCallback<Long> async);
-
-  void changePFor(String token, String first, AsyncCallback<Boolean> asyncCallback);
-
-  void changeEnabledFor(int userid, boolean enabled, AsyncCallback<Void> async);
-
-  void enableCDUser(String cdToken, String emailR, String url, AsyncCallback<String> asyncCallback);
-
-  void loginUser(String userId, String attemptedPassword, AsyncCallback<LoginResult> async);
-
-  void getProjects(AsyncCallback<Collection<SlimProject>> async);
+  public int getProjectid() {
+    return projectid;
+  }
 }
