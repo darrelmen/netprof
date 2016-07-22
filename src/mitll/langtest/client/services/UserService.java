@@ -55,7 +55,7 @@ public interface UserService extends RemoteService {
   // User Management --
 
   Collection<SlimProject> getProjects();
-
+void setProject(int projectid);
   /**
    * @see mitll.langtest.client.user.UserPassLogin#gotSignUp(String, String, String, User.Kind)
    * @param userID
