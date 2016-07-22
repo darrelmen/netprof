@@ -78,7 +78,6 @@ import mitll.langtest.server.database.word.Word;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.ContextPractice;
-import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.custom.UserList;
@@ -640,9 +639,11 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
           ExerciseDAO<CommonExercise> exerciseDAO = getProjects().iterator().next().getExerciseDAO();
           userExerciseDAO.setExerciseDAO(exerciseDAO);
 
+          // if (!serverProps.useH2()) {
           for (Project project : getProjects()) {
             configureProject(mediaDir, installPath, project);
           }
+          //}
         }
         userManagement = new UserManagement(userDAO, resultDAO, userListManager);
       }
@@ -650,6 +651,8 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   }
 
   private void configureProject(String mediaDir, String installPath, Project project) {
+    logger.info("configureProject " + project);
+
     ExerciseDAO<?> exerciseDAO1 = project.getExerciseDAO();
     setDependencies(mediaDir, installPath, exerciseDAO1);
     List<CommonExercise> rawExercises = project.getRawExercises();
@@ -659,11 +662,14 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     project.setJsonSupport(new JsonSupport(project.getSectionHelper(), getResultDAO(), getRefResultDAO(), getAudioDAO(),
         getPhoneDAO(), configDir, installPath));
 
-    Map<Integer, String> exerciseIDToRefAudio = getExerciseIDToRefAudio(project.getProject().id());
-    project.setAnalysis(
-        new SlickAnalysis(this, phoneDAO,
-            exerciseIDToRefAudio, (SlickResultDAO) resultDAO)
-    );
+    SlickProject project1 = project.getProject();
+    if (project1 != null) {
+      Map<Integer, String> exerciseIDToRefAudio = getExerciseIDToRefAudio(project1.id());
+      project.setAnalysis(
+          new SlickAnalysis(this, phoneDAO,
+              exerciseIDToRefAudio, (SlickResultDAO) resultDAO)
+      );
+    }
   }
 
   private void makeExerciseDAO(String lessonPlanFile, boolean isURL) {

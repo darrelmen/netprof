@@ -395,6 +395,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       setPageTitle();
       browserCheck.checkForCompatibleBrowser();
 
+      if (!startupInfo.getMessage().isEmpty()) {
+        showErrorMessage("Configuration Error",  startupInfo.getMessage());
+      }
+
       loadVisualizationPackages();  // Note : this was formerly done in LangTest.html, since it seemed to be intermittently not loaded properly
     }
   }
