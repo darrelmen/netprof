@@ -288,15 +288,45 @@ public class UserPassLogin extends UserDialog {
     hp.getElement().setId("UserPassLogin_linksToSites");
     hp.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
 
-    String sitePrefix = props.getSitePrefix();
+    String sitePrefix = "https://np.ll.mit.edu/netProf";
     for (String site : props.getSites()) {
-      Anchor w = new Anchor(site, sitePrefix + site.replaceAll("Mandarin", "CM"));
+      Anchor w = new Anchor(site, sitePrefix);
       w.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
       hp.add(w);
     }
+
+
+
+    userService.getProjects(new AsyncCallback<Collection<SlimProject>>() {
+      @Override
+      public void onFailure(Throwable caught) {
+      }
+
+      @Override
+      public void onSuccess(Collection<SlimProject> result) {
+        projects = result;
+        boolean anyAdded = false;
+
+        for (final SlimProject project : result) {
+          Anchor w = new Anchor(project.getLanguage(), sitePrefix);
+          w.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent clickEvent) {
+
+            }
+          });
+          w.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
+          hp.add(w);
+        }
+      }
+    });
+
+
+
+
+
     return hp;
   }
-
 
   /**
    * @param signInForm
