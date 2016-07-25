@@ -63,6 +63,9 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     this.project = project;
   }
 
+  public Map<Integer,String> getIDToFL(int projid) {
+    return userExerciseDAO.getIDToFL(projid);
+  }
   /**
    * Does join with related exercise table - maybe better way to do this in scala side?
    *
