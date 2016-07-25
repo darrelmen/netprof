@@ -95,21 +95,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     logger.info(">Session Activity> User login for id " + userId + resultStr +
         ". IP: " + remoteAddr + ", UA: " + userAgent);
     if (loggedInUser != null) {
-      session.setAttribute(USER_SESSION_ATT, loggedInUser.getId());
-      StringBuilder atts = new StringBuilder("Atts: [ ");
-      Enumeration<String> attEnum = session.getAttributeNames();
-      while (attEnum.hasMoreElements()) {
-        atts.append(attEnum.nextElement() + ", ");
-      }
-      atts.append("]");
-//      logger.info("acct detail {}", loggedInUser.getAcctDetail());
-      HttpSession session1 = getThreadLocalRequest().getSession(false);
-      logger.info("Adding user to " + session.getId() +
-          " lookup is " + session1.getAttribute(USER_SESSION_ATT) +
-          ", session.isNew=" + session1.isNew() +
-          ", created=" + session1.getCreationTime() +
-          ", " + atts.toString());
-      db.setStartupInfo(loggedInUser);
+      setSessionUser(session, loggedInUser);
       return new LoginResult(loggedInUser, new Date(System.currentTimeMillis()));
     } else {
       loggedInUser = db.getUserDAO().getUser(userId, attemptedPassword);//, remoteAddr, userAgent, session.getId());
@@ -119,6 +105,24 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
         return new LoginResult(loggedInUser, LoginResult.ResultType.BadPassword);
       }
     }
+  }
+
+  void setSessionUser(HttpSession session, User loggedInUser) {
+    session.setAttribute(USER_SESSION_ATT, loggedInUser.getId());
+    StringBuilder atts = new StringBuilder("Atts: [ ");
+    Enumeration<String> attEnum = session.getAttributeNames();
+    while (attEnum.hasMoreElements()) {
+      atts.append(attEnum.nextElement() + ", ");
+    }
+    atts.append("]");
+//      logger.info("acct detail {}", loggedInUser.getAcctDetail());
+    HttpSession session1 = getThreadLocalRequest().getSession(false);
+    logger.info("Adding user to " + session.getId() +
+        " lookup is " + session1.getAttribute(USER_SESSION_ATT) +
+        ", session.isNew=" + session1.isNew() +
+        ", created=" + session1.getCreationTime() +
+        ", " + atts.toString());
+    db.setStartupInfo(loggedInUser);
   }
 
   /*public User getLoggedInUser() {
@@ -175,28 +179,32 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @param dialect
    * @param isCD
    * @param device
+   * @param projid
    * @return null if existing user
    * @see mitll.langtest.client.user.UserPassLogin#gotSignUp(String, String, String, User.Kind)
    */
   @Override
   public User addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, String email,
-                      boolean isMale, int age, String dialect, boolean isCD, String device) {
+                      boolean isMale, int age, String dialect, boolean isCD, String device, int projid) {
     findSharedDatabase();
-    User user = db.addUser(getThreadLocalRequest(), userID, passwordH, emailH, kind, isMale, age, dialect, "browser");
+    User newUser = db.addUser(getThreadLocalRequest(), userID, passwordH, emailH, kind, isMale, age, dialect, "browser");
     MailSupport mailSupport = getMailSupport();
 
-    if (user != null && !user.isEnabled()) { // user = null means existing user.
-      logger.debug("user " + userID + "/" + user +
-          " wishes to be a content developer. Asking for approval.");
-      getEmailHelper().addContentDeveloper(url, email, user, mailSupport);
+    if (newUser != null && !newUser.isEnabled()) { // newUser = null means existing newUser.
+      logger.debug("newUser " + userID + "/" + newUser + " wishes to be a content developer. Asking for approval.");
+      getEmailHelper().addContentDeveloper(url, email, newUser, mailSupport);
       getEmailHelper().sendConfirmationEmail(email, userID, mailSupport);
-    } else if (user == null) {
-      logger.debug("no user found for id " + userID);
+    } else if (newUser == null) {
+      logger.debug("no newUser found for id " + userID);
     } else {
-      logger.debug("user " + userID + "/" + user + " is enabled.");
+      logger.debug("newUser " + userID + "/" + newUser + " is enabled.");
       getEmailHelper().sendConfirmationEmail(email, userID, mailSupport);
     }
-    return user;
+    if (newUser != null) {
+      setSessionUser(getThreadLocalRequest().getSession(true), newUser);
+      db.rememberUserSelectedProject(newUser, projid);
+    }
+    return newUser;
   }
 
   private EmailHelper getEmailHelper() {
@@ -221,6 +229,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @return
    * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser(int)
    */
+/*
   @Override
   public User getUserBy(int id) {
     findSharedDatabase();
@@ -229,6 +238,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
 
     return userWhere;
   }
+*/
 
   /**
    * @param user

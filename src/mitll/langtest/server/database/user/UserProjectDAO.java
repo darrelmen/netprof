@@ -46,10 +46,7 @@ public class UserProjectDAO implements IUserProjectDAO {
 
   private UserProjectDAOWrapper dao;
 
-  public UserProjectDAO(DBConnection dbConnection) {
-    // super(database);
-    dao = new UserProjectDAOWrapper(dbConnection);
-  }
+  public UserProjectDAO(DBConnection dbConnection) {  dao = new UserProjectDAOWrapper(dbConnection);  }
 
   public void createTable() {
     dao.createTable();
@@ -68,7 +65,7 @@ public class UserProjectDAO implements IUserProjectDAO {
    */
   @Override
   public int add(int userid, int projid) {
-    logger.info("UserProjectDAO adding " + userid + " -> " + projid);
+    //logger.info("UserProjectDAO adding " + userid + " -> " + projid);
     return dao.insert(new SlickUserProject(-1, userid, projid, new Timestamp(System.currentTimeMillis())));
   }
 
