@@ -34,20 +34,30 @@ package mitll.langtest.client.flashcard;
 
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.Image;
+import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconSize;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
+import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.InitialUI;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
+import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
+import mitll.langtest.client.services.UserService;
+import mitll.langtest.client.services.UserServiceAsync;
+import mitll.langtest.shared.user.SlimProject;
 import mitll.langtest.shared.user.User;
 
 import java.util.Collection;
@@ -88,11 +98,12 @@ public class Banner implements RequiresResize {
   private Panel qc, recordAudio;
   private Dropdown cogMenu;
   private final PropertyHandler props;
-
+  private final UserServiceAsync userServiceAsync;
+  ExerciseController controller;
   /**
    * @see mitll.langtest.client.InitialUI#makeHeaderRow
    */
-  public Banner(PropertyHandler props) {
+  public Banner(PropertyHandler props, UserServiceAsync userServiceAsync, ExerciseController controller) {
     this.props = props;
     this.nameForAnswer = props.getNameForAnswer() + "s";
     isAnonymous = props.getLoginType().equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS);
@@ -100,6 +111,8 @@ public class Banner implements RequiresResize {
         NETPROF_HELP_LL_MIT_EDU + "?" +
      //   "cc=" + LTEA_DLIFLC_EDU + "&" +
         "Subject=Question%20about%20" + props.getLanguage() + "%20NetProF";
+    this.userServiceAsync = userServiceAsync;
+    this.controller = controller;
   }
 
   /**
@@ -133,7 +146,7 @@ public class Banner implements RequiresResize {
     appName.addStyleName("bigFont");
 
     flashcard.add(appName);
-    flashcard.add(getSubtitle(splashText));
+    flashcard.add(getProjectChoices());
 
     flashcardImage = new Image(LangTest.LANGTEST_IMAGES + Banner.NEW_PRO_F1_PNG);
     flashcardImage.addStyleName("floatLeft");
@@ -182,6 +195,67 @@ public class Banner implements RequiresResize {
     });
 
     return headerRow;
+  }
+
+  private ListBox getProjectChoices() {
+    ListBox listBox = new ListBox();
+    new TooltipHelper().createAddTooltip(listBox, "Choose a language", Placement.LEFT);
+    populateListChoices(listBox);
+    listBox.addStyleName("leftTenMargin");
+    return listBox;
+  }
+
+
+  /**
+   * <p>
+   *
+   * @param projectChoices
+   * @paramx controller
+   * @see #getProjectChoiceRow
+   */
+  private void populateListChoices(final ListBox projectChoices) {
+    userServiceAsync.getProjects(new AsyncCallback<Collection<SlimProject>>() {
+      @Override
+      public void onFailure(Throwable caught) {
+      }
+
+      @Override
+      public void onSuccess(Collection<SlimProject> projects) {
+        projectChoices.clear();
+        boolean anyAdded = false;
+        //    logger.info("\tpopulateListChoices : found list " + result.size() + " choices");
+        //projectChoices.addItem("Choose a Language");
+
+        for (final SlimProject project : projects) {
+          String name = project.getName();
+          projectChoices.addItem(name);
+          if (project.getProjectid() == controller.getStartupInfo().getProjectid()) {
+            projectChoices.setSelectedValue(name);
+          }
+          projectChoices.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+              for (SlimProject project1 : projects) {
+                if (project1.getName().equals(projectChoices.getValue())) {
+                  userServiceAsync.setProject(project1.getProjectid(), new AsyncCallback<Void>() {
+                    @Override
+                    public void onFailure(Throwable throwable) {
+
+                    }
+
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                      Window.Location.reload();
+                    }
+                  });
+                  break;
+                }
+              }
+            }
+          });
+        }
+      }
+    });
   }
 
   /**

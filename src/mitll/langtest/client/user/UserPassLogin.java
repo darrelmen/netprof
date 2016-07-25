@@ -495,11 +495,11 @@ public class UserPassLogin extends UserDialog {
 //            }
 //          });
         }
-        if (!anyAdded) {
+//        if (!anyAdded) {
 //          NavLink widget = new NavLink("No Projects Yet?");
 //          w1.add(widget);
 
-        }
+  //      }
       }
     });
   }

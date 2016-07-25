@@ -109,7 +109,7 @@ public class InitialUI {
     this.langTest = langTest;
     this.props = langTest.getProps();
     this.userManager = userManager;
-    banner = new Banner(props);
+    banner = new Banner(props, userService, langTest);
   }
 
   private Container verticalContainer;
@@ -126,9 +126,9 @@ public class InitialUI {
     Panel firstRow = makeFirstTwoRows(verticalContainer);
 
     if (!showLogin()) {
-     // logger.info("not show login -");
+      // logger.info("not show login -");
       populateBelowHeader(verticalContainer, firstRow);
-     // userManager.getCurrent();
+      // userManager.getCurrent();
     }
   }
 
@@ -169,8 +169,8 @@ public class InitialUI {
         });
       }
     };
-   // logger.info("talks to domino " + props.talksToDomino());
-    reload = (props.talksToDomino()) ?reload:null;
+    // logger.info("talks to domino " + props.talksToDomino());
+    reload = (props.talksToDomino()) ? reload : null;
     Widget title = banner.makeNPFHeaderRow(props.getSplash(), props.isBeta(), getGreeting(),
         getReleaseStatus(),
         new LogoutClickHandler(),
@@ -290,6 +290,7 @@ public class InitialUI {
         public void onFailure(Throwable caught) {
           downloadFailedAlert();
         }
+
         public void onSuccess() {
           new MonitoringManager(/*service,*/ props).showResults();
         }
@@ -305,7 +306,7 @@ public class InitialUI {
    * @return
    */
   protected Container getRootContainer() {
-   // logger.info("getRootContainer");
+    // logger.info("getRootContainer");
     RootPanel.get().clear();   // necessary?
 
     Container verticalContainer = new FluidContainer();
@@ -346,7 +347,7 @@ public class InitialUI {
     navigation = new Navigation(service, userManager, langTest, langTest);
 
     firstRow.add(navigation.getTabPanel());
-    verticalContainer.add(getLinksToSites());
+    //verticalContainer.add(getLinksToSites());
 
     addResizeHandler();
   }
@@ -378,7 +379,7 @@ public class InitialUI {
     return verticalContainer2;
   }
 
-  private Panel getLinksToSites() {
+/*  private Panel getLinksToSites() {
     Panel hp = new HorizontalPanel();
     Style style = hp.getElement().getStyle();
     style.setMarginLeft(LEFT_LIST_WIDTH, Style.Unit.PX);
@@ -430,7 +431,7 @@ public class InitialUI {
 
 
     return hp;
-  }
+  }*/
 
   private void addResizeHandler() {
     final InitialUI outer = this;
@@ -639,7 +640,7 @@ public class InitialUI {
     if (childCount > 0) {
       Node child = firstRow.getElement().getChild(0);
       Element as = Element.as(child);
-     // logger.info("populateRootPanelIfLogin found : '" + as.getId() +"'");
+      // logger.info("populateRootPanelIfLogin found : '" + as.getId() +"'");
 
       if (as.getId().contains(LOGIN)) {
         logger.info("populateRootPanelIfLogin found login...");
