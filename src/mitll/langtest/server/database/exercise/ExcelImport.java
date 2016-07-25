@@ -609,7 +609,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
                                      String english, String foreignLanguagePhrase, String translit, String meaning,
                                      String context, String contextTranslation,
                                      String audioIndex) {
-    Exercise imported = new Exercise(id, context, contextTranslation, meaning, audioIndex, -1);
+    Exercise imported = new Exercise(id, context, contextTranslation, meaning, audioIndex, -1, lastModified);
 
     imported.setEnglishSentence(english);
     if (translit.length() > 0) {
@@ -626,7 +626,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
 //    if (!context.isEmpty()) {
 //      imported.addContext(context,contextTranslation);
 //    }
-    imported.setUpdateTime(lastModified);
+  //  imported.setUpdateTime(lastModified);
     return imported;
   }
 
