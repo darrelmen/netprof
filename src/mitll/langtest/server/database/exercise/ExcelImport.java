@@ -90,7 +90,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   public ExcelImport(String file, ServerProperties serverProps,
                      IUserListManager userListManager,
                      boolean addDefects) {
-    super(serverProps, userListManager, addDefects);
+    super(serverProps, userListManager, addDefects, serverProps.getLanguage());
     this.file = file;
 
   //  logger.info("Reading from " + file);

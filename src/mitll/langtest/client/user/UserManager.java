@@ -124,7 +124,7 @@ public class UserManager {
   private void login() {
     final int user = getUser();
     if (user != NO_USER_SET) {
-      // logger.info("UserManager.login : current user : " + user);
+      logger.info("UserManager.login : current user : " + user);
       //console("UserManager.login : current user : " + user);
       getPermissionsAndSetUser(getUserChosenFromStorage(), getPassFromStorage());
     } else {
@@ -212,8 +212,7 @@ public class UserManager {
       }
 
       this.current = result;
-      logger.info("\tgotNewUser current user " + current);
-
+    //  logger.info("\tgotNewUser current user " + current);
       userNotification.gotUser(result);
     }
     //console("getPermissionsAndSetUser.onSuccess : " + user);
