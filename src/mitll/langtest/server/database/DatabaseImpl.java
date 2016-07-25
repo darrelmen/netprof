@@ -223,12 +223,16 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     initializeDAOs(pathHelper);
     now = System.currentTimeMillis();
     if (now - then > 300) {
-      logger.info("took " + (now - then) + " millis to initialize DAOs for " + serverProps.getLanguage());
+      logger.info("took " + (now - then) + " millis to initialize DAOs for " + getOldLanguage(serverProps));
     }
 
     monitoringSupport = new MonitoringSupport(userDAO, resultDAO);
 
     populateProjects(pathHelper, serverProps, logAndNotify, relativeConfigDir);
+  }
+
+  private String getOldLanguage(ServerProperties serverProps) {
+    return serverProps.getLanguage();
   }
 
   private boolean maybeGetH2Connection(String relativeConfigDir, String dbName, ServerProperties serverProps) {
@@ -343,13 +347,17 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
 //    if (now - then > 1000) logger.info("took " + (now - then) + " millis to put back word and phone");
   }
 
+  /**
+   * @see #initializeDAOs
+   * @return
+   */
   private DBConnection getDbConnection() {
-    logger.info("getDbConnection : connecting to type \n\t" + serverProps.getDatabaseType() +
-        " host \n\t" + serverProps.getDatabaseHost() +
-        " port \n\t" + serverProps.getDatabasePort() +
-        " name \n\t" + serverProps.getDatabaseName() +
-        " user \n\t" + serverProps.getDatabaseUser() +
-        " pass \n\t" + serverProps.getDatabasePassword().length() + " chars"
+    logger.info("getDbConnection : connecting to " + serverProps.getDatabaseType() +
+        "\n\thost " + serverProps.getDatabaseHost() +
+        "\n\tport " + serverProps.getDatabasePort() +
+        "\n\tname " + serverProps.getDatabaseName() +
+        "\n\tuser " + serverProps.getDatabaseUser() +
+        "\n\tpass " + serverProps.getDatabasePassword().length() + " chars"
     );
 
     return new DBConnection(serverProps.getDatabaseType(),
@@ -705,7 +713,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
       this.fileExerciseDAO = new AMASJSONURLExerciseDAO(getServerProps());
       numExercises = fileExerciseDAO.getNumExercises();
     } else {
-      fileExerciseDAO = new FileExerciseDAO<>(mediaDir, serverProps.getLanguage(), absConfigDir, lessonPlanFile, installPath);
+      fileExerciseDAO = new FileExerciseDAO<>(mediaDir, getOldLanguage(serverProps), absConfigDir, lessonPlanFile, installPath);
       numExercises = fileExerciseDAO.getNumExercises();
     }
     return numExercises;
@@ -1461,7 +1469,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   @Override
   @Deprecated
   public String getLanguage() {
-    return getServerProps().getLanguage();
+    return getOldLanguage(getServerProps());
   }
 
   public void writeContextZip(OutputStream out, Map<String, Collection<String>> typeToSection, int projectid)
@@ -1606,7 +1614,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
 
   private Report getReport(String prefix) {
     if (reportCache == null) {
-      Report report = new Report(userDAO, resultDAO, eventDAO, audioDAO, serverProps.getLanguage(), prefix);
+      Report report = new Report(userDAO, resultDAO, eventDAO, audioDAO, getOldLanguage(serverProps), prefix);
       this.reportCache = report;
     }
     return reportCache;
@@ -1633,7 +1641,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   public JSONObject doReport(PathHelper pathHelper, String prefix, int year) {
     try {
       Report report = getReport(prefix);
-      return report.writeReportToFile(pathHelper, serverProps.getLanguage(), year);
+      return report.writeReportToFile(pathHelper, getOldLanguage(serverProps), year);
     } catch (IOException e) {
       logger.error("got " + e);
       return null;

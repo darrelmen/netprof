@@ -573,16 +573,16 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
    *
    * @param userid           part of unique id
    * @param exerciseID       part of unique id
-   * @param audioType        part of unique id
+   * @param projid
+   *@param audioType        part of unique id
    * @param audioRef
    * @param timestamp
    * @param durationInMillis
-   * @param transcript
-   * @return AudioAttribute that represents the audio that has been added to the exercise
+   * @param transcript      @return AudioAttribute that represents the audio that has been added to the exercise
    * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable
-   * @see #addOrUpdateUser(int, AudioAttribute)
+   * @see BaseAudioDAO#addOrUpdateUser(int, int, AudioAttribute)
    */
-  protected void addOrUpdateUser(int userid, int exerciseID, AudioType audioType, String audioRef, long timestamp,
+  protected void addOrUpdateUser(int userid, int exerciseID, int projid, AudioType audioType, String audioRef, long timestamp,
                                  int durationInMillis, String transcript) {
     if (isBadUser(userid)) {
       logger.error("huh? userid is " + userid);
@@ -633,16 +633,16 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
    *
    * @param userid           part of unique id
    * @param exerciseID       part of unique id
-   * @param audioType        part of unique id
+   * @param projid
+   *@param audioType        part of unique id
    * @param audioRef
    * @param timestamp
    * @param durationInMillis
-   * @param transcript
-   * @return AudioAttribute that represents the audio that has been added to the exercise
+   * @param transcript      @return AudioAttribute that represents the audio that has been added to the exercise
    * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable
    */
   @Override
-  public AudioAttribute addOrUpdate(int userid, int exerciseID, AudioType audioType, String audioRef, long timestamp,
+  public AudioAttribute addOrUpdate(int userid, int exerciseID, int projid, AudioType audioType, String audioRef, long timestamp,
                                     long durationInMillis, String transcript) {
     if (isBadUser(userid)) {
       logger.error("huh? userid is " + userid, new Exception("huh? userid is " + userid));
