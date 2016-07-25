@@ -212,4 +212,9 @@ public class JSONURLExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<C
   private String noMarkup(String source) {
     return source.replaceAll("\\<.*?>", "");
   }
+
+  @Override
+  public Map<Integer, String> getIDToFL(int projid) {
+    return null;
+  }
 }
