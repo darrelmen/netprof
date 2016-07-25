@@ -44,6 +44,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Get exercises from a json file.
@@ -87,5 +88,10 @@ public class JSONExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Comm
       logger.error("got " +e,e);
     }
     return Collections.emptyList();
+  }
+
+  @Override
+  public Map<Integer, String> getIDToFL(int projid) {
+    return null;
   }
 }
