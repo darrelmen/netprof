@@ -81,6 +81,7 @@ public class CopyToPostgres<T extends CommonShell> {
 //  private static final boolean AUDIO = true;
 //  private static final boolean EVENT = true;
   private static final boolean RESULT = true;
+  public static final int WARN_RID_MISSING_THRESHOLD = 50;
 
 //  private static final boolean USER_EXERCISE = true;
 //  private static final boolean COPY_PHONE = true;
@@ -161,7 +162,7 @@ public class CopyToPostgres<T extends CommonShell> {
       logger.info("oldToNewUser " + oldToNewUser.size() + " exToID " + exToID.size());
 
       // add the audio table
-      copyAudio(db, oldToNewUser, exToID);
+      copyAudio(db, oldToNewUser, exToID, projectID);
 
       // add event table
       int defectDetector = db.getUserDAO().getDefectDetector();
@@ -195,9 +196,8 @@ public class CopyToPostgres<T extends CommonShell> {
       copyReviewed(db, oldToNewUser, exToID, true);
       copyReviewed(db, oldToNewUser, exToID, false);
       copyRefResult(db, oldToNewUser, exToID);
-    }
-    else {
-      logger.info("Project "+ projectID + " already has exercises in it.");
+    } else {
+      logger.info("Project " + projectID + " already has exercises in it.");
     }
   }
 
@@ -343,10 +343,12 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param db
    * @param oldToNewUser
    * @param exToID
+   * @param projid
+   * @see #copyToPostgres(DatabaseImpl)
    */
   private void copyAudio(DatabaseImpl db,
                          Map<Integer, Integer> oldToNewUser,
-                         Map<String, Integer> exToID) {
+                         Map<String, Integer> exToID, int projid) {
     SlickAudioDAO slickAudioDAO = (SlickAudioDAO) db.getAudioDAO();
 
     List<SlickAudio> bulk = new ArrayList<>();
@@ -359,7 +361,7 @@ public class CopyToPostgres<T extends CommonShell> {
       Integer id = exToID.get(oldexid);
       if (id != null) {
         att.setExid(id);
-        SlickAudio slickAudio = slickAudioDAO.getSlickAudio(att, oldToNewUser);
+        SlickAudio slickAudio = slickAudioDAO.getSlickAudio(att, oldToNewUser, projid);
         bulk.add(slickAudio);
       } else {
         missingExIDs.add(oldexid);
@@ -450,6 +452,8 @@ public class CopyToPostgres<T extends CommonShell> {
     logger.info("copyPhone added  " + slickPhoneAO.getNumRows());
   }
 
+  Set<Long> missingRIDs = new HashSet<>();
+
   /**
    * @param db
    * @param oldToNewResult
@@ -462,13 +466,14 @@ public class CopyToPostgres<T extends CommonShell> {
     for (Word word : new WordDAO(db).getAll()) {
       Integer rid = oldToNewResult.get((int) word.getRid());
       if (rid == null) {
-        if (c++ < 50) logger.error("word has no rid " + word.getRid());
+        missingRIDs.add(word.getRid());
+        if (missingRIDs.size() < WARN_RID_MISSING_THRESHOLD) logger.error("copyWord word has no rid " + word.getRid());
       } else {
         word.setRid(rid);
         bulk.add(slickWordDAO.toSlick(word));
       }
     }
-    if (c > 0) logger.warn("word : missing " + c + " result id fk references");
+    if (missingRIDs.size() > 0) logger.warn("word : missing " + missingRIDs.size() + " result id fk references");
 
     slickWordDAO.addBulk(bulk);
     logger.info("copy word - complete");
@@ -652,7 +657,10 @@ public class CopyToPostgres<T extends CommonShell> {
     return exToInt;
   }
 
-  private void copyResult(DatabaseImpl db, SlickResultDAO slickResultDAO, Map<Integer, Integer> oldToNewUser, int projid,
+  private void copyResult(DatabaseImpl db,
+                          SlickResultDAO slickResultDAO,
+                          Map<Integer, Integer> oldToNewUser,
+                          int projid,
                           Map<String, Integer> exToID) {
     // if (slickResultDAO.isEmpty()) {
     ResultDAO resultDAO = new ResultDAO(db);
@@ -669,7 +677,11 @@ public class CopyToPostgres<T extends CommonShell> {
         logger.error("no user " + result.getUserid());
       } else {
         result.setUserID(userID);
-        SlickResult e = slickResultDAO.toSlick(result, projid, exToID);
+        Integer realExID = exToID.get(result.getOldExID());
+
+        CommonExercise customOrPredefExercise = realExID == null ? null : db.getCustomOrPredefExercise(realExID);
+        String transcript = customOrPredefExercise == null ? "" : customOrPredefExercise.getForeignLanguage();
+        SlickResult e = slickResultDAO.toSlick(result, projid, exToID, transcript);
         if (e == null) {
           if (missing < 10) logger.warn("missing exid ref " + result.getOldExID());
           missing++;

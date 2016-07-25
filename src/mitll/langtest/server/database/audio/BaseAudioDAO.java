@@ -420,7 +420,7 @@ public abstract class BaseAudioDAO extends DAO {
   }
 
   /**
-   * @see IAudioDAO#addOrUpdate(int, int, AudioType, String, long, long, String)
+   * @see IAudioDAO#addOrUpdate(int, int, int, AudioType, String, long, long, String)
    * @param userid
    * @param exerciseID
    * @param audioType
@@ -492,7 +492,6 @@ public abstract class BaseAudioDAO extends DAO {
     return defects;
   }
 
-
   /**
    * @param attribute
    * @return
@@ -500,30 +499,25 @@ public abstract class BaseAudioDAO extends DAO {
    * @see DatabaseImpl#markAudioDefect(AudioAttribute)
    */
   public int markDefect(AudioAttribute attribute) {
-    AudioType audioType = attribute.getAudioType();
-//    if (attribute.getAudioType() == AudioAttribute.REGULAR_AND_SLOW) {
-//      audioType = AudioType.FAST_AND_SLOW;
-//    }
-    return markDefect(attribute.getUserid(), attribute.getExid(), audioType);
+    return markDefect(attribute.getUserid(), attribute.getExid(), attribute.getAudioType());
   }
-
 
   /**
    * Go back and mark gender on really old audio that had no user info on it.
    *
    * @param userid
-   * @param attr
-   * @return
+   * @param projid
+   *@param attr  @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#markGender(AudioAttribute, boolean)
    */
-  public void addOrUpdateUser(int userid, AudioAttribute attr) {
+  public void addOrUpdateUser(int userid, int projid, AudioAttribute attr) {
     long timestamp = attr.getTimestamp();
     if (timestamp == 0) timestamp = System.currentTimeMillis();
-    addOrUpdateUser(userid, attr.getExid(), attr.getAudioType(), attr.getAudioRef(), timestamp,
+    addOrUpdateUser(userid, attr.getExid(), projid, attr.getAudioType(), attr.getAudioRef(), timestamp,
         (int) attr.getDurationInMillis(), BaseAudioDAO.UNKNOWN);
   }
 
-  abstract void addOrUpdateUser(int userid, int exerciseID, AudioType audioType, String audioRef, long timestamp,
+  abstract void addOrUpdateUser(int userid, int exerciseID, int projid, AudioType audioType, String audioRef, long timestamp,
                                 int durationInMillis, String transcript);
 
   abstract int markDefect(int userid, int exerciseID, AudioType audioType);
@@ -545,13 +539,5 @@ public abstract class BaseAudioDAO extends DAO {
 
   abstract Set<Integer> getAudioExercisesForGender(Collection<Integer> userIDs, String audioSpeed);
 
-/*
-  int getCountBothSpeeds(Set<Integer> userIds,
-                         Set<String> uniqueIDs) {
-    return getCountBothSpeeds(userIds, uniqueIDs);
-  }
-*/
-
-  abstract int getCountBothSpeeds(Set<Integer> userIds,
-                                  Set<Integer> uniqueIDs);
+  abstract int getCountBothSpeeds(Set<Integer> userIds, Set<Integer> uniqueIDs);
 }

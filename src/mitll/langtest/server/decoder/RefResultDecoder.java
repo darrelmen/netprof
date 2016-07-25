@@ -59,8 +59,8 @@ public class RefResultDecoder {
   private static final Logger logger = Logger.getLogger(RefResultDecoder.class);
 
   private static final boolean DO_REF_DECODE = true;
-  private static final boolean DO_TRIM = true;
-  private static final int SLEEP_BETWEEN_DECODES = 2000;
+  private static final boolean DO_TRIM = false;
+ // private static final int SLEEP_BETWEEN_DECODES = 2000;
 
   private final DatabaseImpl db;
   private final ServerProperties serverProps;

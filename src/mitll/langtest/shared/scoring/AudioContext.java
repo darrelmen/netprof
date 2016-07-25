@@ -57,6 +57,9 @@ public class AudioContext implements IsSerializable {
    */
   private int userid;
 
+
+  private int projid;
+
   /**
    * exercise id
    */
@@ -72,6 +75,7 @@ public class AudioContext implements IsSerializable {
 
   /**
    * @param userid
+   * @param projid
    * @param exid
    * @param questionID
    * @param audioType
@@ -79,11 +83,13 @@ public class AudioContext implements IsSerializable {
    */
   public AudioContext(int reqid,
                       int userid,
+                      int projid,
                       int exid,
                       int questionID,
                       AudioType audioType) {
     this.reqid = reqid;
     this.userid = userid;
+    this.projid = projid;
     this.exid = exid;
     this.questionID = questionID;
     this.audioType = audioType;
@@ -114,5 +120,12 @@ public class AudioContext implements IsSerializable {
 
   public String toString() {
     return "user " + userid + " id " + exid + " q " + questionID + " req " + reqid + " type " + audioType;
+  }
+
+  /**
+   * project id
+   */
+  public int getProjid() {
+    return projid;
   }
 }
