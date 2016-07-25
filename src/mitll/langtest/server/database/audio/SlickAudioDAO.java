@@ -35,11 +35,11 @@ package mitll.langtest.server.database.audio;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.answer.AudioType;
-import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.user.MiniUser;
+import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickAudio;
 import mitll.npdata.dao.audio.AudioDAOWrapper;
-import mitll.npdata.dao.DBConnection;
 import org.apache.log4j.Logger;
 
 import java.sql.Timestamp;
@@ -70,20 +70,21 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   @Override
-  public AudioAttribute addOrUpdate(int userid, int exerciseID, AudioType audioType, String audioRef,
+  public AudioAttribute addOrUpdate(int userid, int exerciseID, int projid, AudioType audioType, String audioRef,
                                     long timestamp, long durationInMillis, String transcript) {
     MiniUser miniUser = userDAO.getMiniUser(userid);
     Map<Integer, MiniUser> mini = new HashMap<>();
     mini.put(userid, miniUser);
     return toAudioAttribute(
-        dao.addOrUpdate(userid, exerciseID, audioType.toString(), audioRef, timestamp, durationInMillis, transcript),
+        dao.addOrUpdate(userid, exerciseID, projid, audioType.toString(), audioRef, timestamp, durationInMillis, transcript),
         mini);
   }
 
   /**
    * Update the user if the audio is already there.
-   *  @param userid
+   * @param userid
    * @param exerciseID
+   * @param projid
    * @param audioType
    * @param audioRef
    * @param timestamp
@@ -91,9 +92,9 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @param transcript
    */
   @Override
-  public void addOrUpdateUser(int userid, int exerciseID, AudioType audioType, String audioRef, long timestamp,
+  public void addOrUpdateUser(int userid, int exerciseID, int projid, AudioType audioType, String audioRef, long timestamp,
                               int durationInMillis, String transcript) {
-    dao.addOrUpdate(userid, exerciseID, audioType.toString(), audioRef, timestamp, durationInMillis, transcript);
+    dao.addOrUpdateUser(userid, exerciseID, projid, audioType.toString(), audioRef, timestamp, durationInMillis, transcript);
   }
 
   @Override
@@ -169,10 +170,10 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
     String audiotype = s.audiotype();
 
-   // logger.info("got slick " + s);
+    // logger.info("got slick " + s);
     // for the enum!
     if (audiotype.contains("=")) {
-     // logger.info("Was " + audiotype);
+      // logger.info("Was " + audiotype);
       audiotype = audiotype.replaceAll("=", "_");
     }
     return new AudioAttribute(
@@ -187,7 +188,14 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
         s.transcript());
   }
 
-  public SlickAudio getSlickAudio(AudioAttribute orig, Map<Integer, Integer> oldToNewUser) {
+  /**
+   * @param orig
+   * @param oldToNewUser
+   * @param projid
+   * @return
+   * @see mitll.langtest.server.database.CopyToPostgres#copyAudio
+   */
+  public SlickAudio getSlickAudio(AudioAttribute orig, Map<Integer, Integer> oldToNewUser, int projid) {
     AudioType audioType = orig.getAudioType();
     if (audioType == null) {
       audioType = AudioType.REGULAR;
@@ -207,7 +215,8 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
           audioType.toString(),
           orig.getDurationInMillis(),
           false,
-          orig.getTranscript());
+          orig.getTranscript(),
+          projid);
     }
   }
 
@@ -223,7 +232,9 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
   public void addBulk(List<SlickAudio> bulk) {
     dao.addBulk(bulk);
-  }  public void addBulk2(List<SlickAudio> bulk) {
+  }
+
+  public void addBulk2(List<SlickAudio> bulk) {
     dao.addBulk2(bulk);
   }
 
