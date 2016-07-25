@@ -72,13 +72,16 @@ public class Exercise extends AudioExercise implements CommonExercise,
   /**
    * @param id
    * @param projectid
+   * @param updateTime
    * @paramx content
    * @see mitll.langtest.server.database.exercise.ExcelImport#getExercise
    */
-  public Exercise(String id, String context, String contextTranslation, String meaning, String refAudioIndex, int projectid) {
+  public Exercise(String id, String context, String contextTranslation, String meaning, String refAudioIndex,
+                  int projectid, long updateTime) {
     super(id, -1, projectid);
     this.meaning = meaning;
     this.refAudioIndex = refAudioIndex;
+    this.updateTime = updateTime;
     addContext(context, contextTranslation);
   }
 
