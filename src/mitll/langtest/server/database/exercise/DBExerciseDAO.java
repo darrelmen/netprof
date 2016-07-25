@@ -73,25 +73,44 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   List<CommonExercise> readExercises() {
     try {
       List<String> typeOrder = Arrays.asList(project.first(), project.second());
+      String prefix = "Project " + project.name();
 
       int id = project.id();
       List<CommonExercise> allNonContextExercises = userExerciseDAO.getByProject(id, typeOrder, getSectionHelper());
-      logger.info("readExercises got " + allNonContextExercises.size() + " predef exercises;");
+      logger.info("project " + project +
+          " readExercises got " + allNonContextExercises.size() + " predef exercises;");
 
-      Collection<SlickRelatedExercise> related = userExerciseDAO.getAllRelated();
+      Collection<SlickRelatedExercise> related = userExerciseDAO.getAllRelated(id);
 
-      logger.info("readExercises got " + related.size() + " related exercises;");
+      logger.info(prefix + " readExercises got " + related.size() + " related exercises;");
 
       Map<Integer, CommonExercise> idToEx = getIDToExercise(allNonContextExercises);
+      Map<Integer, CommonExercise> idToContext =
+          getIDToExercise(userExerciseDAO.getContextByProject(id, typeOrder, getSectionHelper()));
 
-      Map<Integer, CommonExercise> idToContext = getIDToExercise(userExerciseDAO.getContextByProject(id, typeOrder, getSectionHelper()));
+      logger.info(prefix + " idToContext " + idToContext.size());
 
+      int attached = 0;
+      int c = 0;
       for (SlickRelatedExercise relatedExercise : related) {
         CommonExercise root = idToEx.get(relatedExercise.id());
-        CommonExercise context = idToContext.get(relatedExercise.contextexid());
-        if (root != null && context != null) root.getMutable().addContextExercise(context);
+        if (root != null) {
+          CommonExercise context = idToContext.get(relatedExercise.contextexid());
+          if (context != null) {
+            root.getMutable().addContextExercise(context);
+            attached++;
+          } else if (c++ < 100) {
+            logger.warn(prefix + " didn't attach " + relatedExercise + "" +
+                " for\n" + root + "\n and " + context);
+          }
+
+        } else if (c++ < 100) {
+          logger.warn(prefix + " didn't attach " + relatedExercise + "" +
+              " for, e.g. " + allNonContextExercises.iterator().next());
+        }
       }
-      logger.info("Read " + allNonContextExercises.size() + " exercises from database");
+      logger.info(prefix +
+          " Read " + allNonContextExercises.size() + " exercises from database, attached " + attached);
       return allNonContextExercises;
     } catch (Exception e) {
       logger.error("got " + e, e);
