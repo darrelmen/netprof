@@ -39,6 +39,7 @@ import mitll.langtest.server.database.annotation.SlickAnnotationDAO;
 import mitll.langtest.server.database.annotation.UserAnnotation;
 import mitll.langtest.server.database.audio.SlickAudioDAO;
 import mitll.langtest.server.database.custom.IUserListManager;
+import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.database.instrumentation.EventDAO;
 import mitll.langtest.server.database.instrumentation.SlickEventImpl;
 import mitll.langtest.server.database.phone.Phone;
@@ -689,6 +690,8 @@ public class CopyToPostgres<T extends CommonShell> {
 
     int missing = 0;
 
+    ExerciseDAO<CommonExercise> exerciseDAO = db.getExerciseDAO(projid);
+    Map<Integer, String> idToFL = exerciseDAO.getIDToFL(projid);
     for (Result result : results) {
       Integer userID = oldToNewUser.get(result.getUserid());
       if (userID == null) {
@@ -697,8 +700,11 @@ public class CopyToPostgres<T extends CommonShell> {
         result.setUserID(userID);
         Integer realExID = exToID.get(result.getOldExID());
 
-        CommonExercise customOrPredefExercise = realExID == null ? null : db.getCustomOrPredefExercise(realExID);
-        String transcript = customOrPredefExercise == null ? "" : customOrPredefExercise.getForeignLanguage();
+        // TODO : don't - this is really slow - since every call hits exercise table with a select
+
+    //    CommonExercise customOrPredefExercise = realExID == null ? null : db.getCustomOrPredefExercise(realExID);
+     //   String transcript = customOrPredefExercise == null ? "" : customOrPredefExercise.getForeignLanguage();
+        String transcript = idToFL.get(realExID);
         SlickResult e = slickResultDAO.toSlick(result, projid, exToID, transcript);
         if (e == null) {
           if (missing < 10) logger.warn("missing exid ref " + result.getOldExID());
