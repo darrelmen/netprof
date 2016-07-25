@@ -1469,7 +1469,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public void markGender(AudioAttribute attr, boolean isMale) {
-    db.getAudioDAO().addOrUpdateUser(isMale ? BaseUserDAO.DEFAULT_MALE_ID : BaseUserDAO.DEFAULT_FEMALE_ID, attr);
+    CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(attr.getExid());
+    int projid = -1;
+    if (customOrPredefExercise == null) {
+      logger.error("markGender can't find exercise id " + attr.getExid() + "?");
+
+    }
+    else {
+      projid = customOrPredefExercise.getProjectID();
+    }
+    db.getAudioDAO().addOrUpdateUser(isMale ? BaseUserDAO.DEFAULT_MALE_ID : BaseUserDAO.DEFAULT_FEMALE_ID, projid, attr);
 
     int exid = attr.getExid();
     CommonExercise byID = db.getCustomOrPredefExercise(exid);
@@ -1506,7 +1515,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * @param id
    * @return
-   * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser(int)
+   * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser
    */
   private User getUserBy(int id) {
     return db.getUserDAO().getUserWhere(id);
@@ -1979,7 +1988,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
                                          int exerciseID,
                                          AudioAnswer audioAnswer) {
     int idToUse = exercise1 == null ? exerciseID : exercise1.getID();
-
+    int projid  = exercise1 == null ? -1 : exercise1.getProjectID();
     String audioTranscript = getAudioTranscript(audioType, exercise1);
 
     String permanentAudioPath = new PathWriter().
@@ -1988,7 +1997,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
             getPermanentName(user, audioType), true, idToUse, audioTranscript, getArtist(user), serverProps);
 
     AudioAttribute audioAttribute =
-        db.getAudioDAO().addOrUpdate(user, idToUse, audioType, permanentAudioPath, System.currentTimeMillis(),
+        db.getAudioDAO().addOrUpdate(user, idToUse, projid, audioType, permanentAudioPath, System.currentTimeMillis(),
             audioAnswer.getDurationInMillis(), audioTranscript);
     audioAnswer.setPath(audioAttribute.getAudioRef());
     logger.debug("addToAudioTable user " + user + " ex " + exerciseID + " for " + audioType + " audio answer has " +

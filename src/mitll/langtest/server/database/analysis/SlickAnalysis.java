@@ -89,6 +89,12 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     return getPhoneReport(id, best);
   }
 
+  /**
+   * TODO : how will this work for users on multiple projects?
+   * @param userDAO
+   * @param minRecordings
+   * @return
+   */
   @Override
   public List<UserInfo> getUserInfo(IUserDAO userDAO, int minRecordings) {
     Collection<SlickPerfResult> perfForUser = resultDAO.getPerf();
@@ -101,11 +107,9 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   }
 
   /**
-   * @param connection
-   * @param statement
    * @return
    * @throws SQLException
-   * @see #getBestForQuery(Connection, PreparedStatement, int)
+   * @see #getBest
    */
   private Map<Integer, List<BestScore>> getUserToResults(Collection<SlickPerfResult> perfs) {
     Map<Integer, List<BestScore>> userToBest = new HashMap<>();
