@@ -81,6 +81,7 @@ import java.util.logging.Logger;
  * @since 8/11/14.
  */
 public class UserPassLogin extends UserDialog {
+  public static final String NEW_USER = "New User?";
   private final Logger logger = Logger.getLogger("UserPassLogin");
 
   private static final String IPAD_LINE_1 = "Also consider installing the NetProF app, which is available on the DLI App Store.";// or";
@@ -143,7 +144,7 @@ public class UserPassLogin extends UserDialog {
   private FormField signUpEmail;
   private FormField signUpPassword;
   private FormField password;
-  private ListBox projectChoice;
+  private ListBox projectChoice, signUpProjectChoice;
   private boolean signInHasFocus = true;
   private final EventRegistration eventRegistration;
   private Button signIn;
@@ -267,7 +268,7 @@ public class UserPassLogin extends UserDialog {
     container.add(leftAndRight);
     getLeftIntro(leftAndRight);
     getRightLogin(leftAndRight);
-  //  leftAndRight.add(getLinksToSites());
+    //  leftAndRight.add(getLinksToSites());
     return container;
   }
 
@@ -417,19 +418,28 @@ public class UserPassLogin extends UserDialog {
     Panel hp = new HorizontalPanel();
     hp.addStyleName("topFiveMargin");
 
-    projectChoice = new ListBox();
-    new TooltipHelper().createAddTooltip(projectChoice, "Choose a language", Placement.LEFT);
-    populateListChoices(projectChoice);
-
-    projectChoice.addStyleName("leftTenMargin");
-
-    hp.add(projectChoice);
+    hp.add(projectChoice = getProjectChoices(false));
     hp.add(getSignInButton());
 
     return hp;
   }
 
+  /**
+   * @see #getProjectChoiceRow()
+   * @see #getSignUpForm()
+   * @param inSignUp
+   * @return
+   */
+  private ListBox getProjectChoices(boolean inSignUp) {
+    ListBox listBox = new ListBox();
+    new TooltipHelper().createAddTooltip(listBox, "Choose a language", Placement.LEFT);
+    populateListChoices(listBox, inSignUp);
+    listBox.addStyleName("leftTenMargin");
+    return listBox;
+  }
+
   private SlimProject currentProject = null;
+  private SlimProject currentSignUpProject = null;
 
   private Collection<SlimProject> projects;
 
@@ -438,8 +448,9 @@ public class UserPassLogin extends UserDialog {
    *
    * @param projectChoices
    * @paramx controller
+   * @see #getProjectChoiceRow
    */
-  private void populateListChoices(final ListBox projectChoices/*, ExerciseController controller*/) {
+  private void populateListChoices(final ListBox projectChoices, boolean inSignUp) {
     userService.getProjects(new AsyncCallback<Collection<SlimProject>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -451,7 +462,7 @@ public class UserPassLogin extends UserDialog {
         projectChoices.clear();
         boolean anyAdded = false;
         //    logger.info("\tpopulateListChoices : found list " + result.size() + " choices");
-        projectChoices.addItem("");
+        projectChoices.addItem("Choose a Language");
 
         for (final SlimProject project : result) {
           anyAdded = true;
@@ -462,7 +473,11 @@ public class UserPassLogin extends UserDialog {
             public void onChange(ChangeEvent event) {
               for (SlimProject project1 : projects) {
                 if (project1.getName().equals(projectChoices.getValue())) {
-                  currentProject = project1;
+                  if (inSignUp) {
+                    currentSignUpProject = project1;
+                  } else {
+                    currentProject = project1;
+                  }
                   break;
                 }
               }
@@ -779,23 +794,19 @@ public class UserPassLogin extends UserDialog {
     Form form = getSignInForm();
 
     Fieldset fieldset = new Fieldset();
-    Heading w = new Heading(3, "New User?", SIGN_UP_SUBTEXT);
+    Heading w = new Heading(3, NEW_USER, SIGN_UP_SUBTEXT);
     w.addStyleName("signUp");
     form.add(w);
     form.add(fieldset);
 
     TextBoxBase userBox = makeSignUpUsername(fieldset);
-
     TextBoxBase emailBox = makeSignUpEmail(fieldset);
 
     makeSignUpPassword(fieldset, emailBox);
 
-    Heading w1 = new Heading(5, ARE_YOU_A);
-    fieldset.add(w1);
-    w1.addStyleName("leftTenMargin");
-    w1.getElement().getStyle().setMarginTop(15, Style.Unit.PX);
-    w1.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
+    fieldset.add(signUpProjectChoice = getProjectChoices(true));
 
+    fieldset.add(getRolesHeader());
     fieldset.add(getRolesChoices());
 
     getContentDevCheckbox();
@@ -806,6 +817,15 @@ public class UserPassLogin extends UserDialog {
     fieldset.add(getSignUpButton(userBox, emailBox));
 
     return form;
+  }
+
+  private Heading getRolesHeader() {
+    Heading w1 = new Heading(5, ARE_YOU_A);
+    w1.addStyleName("leftTenMargin");
+    int value = 5;
+    w1.getElement().getStyle().setMarginTop(value, Style.Unit.PX);
+    w1.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
+    return w1;
   }
 
   private void getContentDevCheckbox() {
@@ -913,6 +933,11 @@ public class UserPassLogin extends UserDialog {
     return emailBox;
   }
 
+  /**
+   * @param fieldset
+   * @param emailBox
+   * @see #getSignUpForm
+   */
   private void makeSignUpPassword(Fieldset fieldset, final UIObject emailBox) {
     signUpPassword = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, PASSWORD);
     signUpPassword.box.addFocusHandler(new FocusHandler() {
@@ -1012,6 +1037,8 @@ public class UserPassLogin extends UserDialog {
         } else if (selectedRole == User.Kind.CONTENT_DEVELOPER && registrationInfo.getDialectGroup().getText().isEmpty()) {
           eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "didn't fill in dialect ");
           markErrorBlur(registrationInfo.getDialectGroup(), "Enter a language dialect.");
+        } else if (currentSignUpProject == null) {
+          markErrorBlur(signUpProjectChoice, "Please choose a language", Placement.TOP);
         } else {
           gotSignUp(userBox.getValue(), signUpPassword.box.getValue(), emailBox.getValue(), selectedRole);
         }
@@ -1048,7 +1075,8 @@ public class UserPassLogin extends UserDialog {
     signUp.setEnabled(false);
 
     service.addUser(user, passH, emailH, kind, Window.Location.getHref(), email,
-        gender.equalsIgnoreCase(MALE), age1, dialect, isCD, "browser", new AsyncCallback<User>() {
+        gender.equalsIgnoreCase(MALE), age1, dialect, isCD, "browser", currentSignUpProject.getProjectid(),
+        new AsyncCallback<User>() {
           @Override
           public void onFailure(Throwable caught) {
             eventRegistration.logEvent(signUp, "signing up", "N/A", "Couldn't contact server...?");
