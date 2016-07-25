@@ -107,7 +107,8 @@ import java.util.*;
 public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTestDatabase, LogAndNotify {
   private static final Logger logger = Logger.getLogger(LangTestDatabaseImpl.class);
   public static final String DATABASE_REFERENCE = "databaseReference";
-  @Deprecated  public static final String AUDIO_FILE_HELPER_REFERENCE = "audioFileHelperReference";
+  @Deprecated
+  public static final String AUDIO_FILE_HELPER_REFERENCE = "audioFileHelperReference";
 
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
@@ -119,7 +120,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private static final int WARN_DUR = 100;
   private static final String WAV1 = "wav";
 
- // private RefResultDecoder refResultDecoder;
+  // private RefResultDecoder refResultDecoder;
 
   private static final boolean WARN_MISSING_FILE = true;
 
@@ -128,7 +129,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * Put inside a Project
    */
-  @Deprecated AudioFileHelper audioFileHelper;
+  @Deprecated
+  AudioFileHelper audioFileHelper;
   private String relativeConfigDir;
   private String configDir;
   private ServerProperties serverProps;
@@ -849,7 +851,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (byID == null) {
       logger.error("getExercise : huh? couldn't find exercise with id '" + exid + "' when examining " + exercises.size() + " items");
     } else {
-      logger.debug("getExercise : find exercise " + exid + " for " + userID + " : " + byID + "\n\tcontext" + byID.getDirectlyRelated() );
+      logger.debug("getExercise : find exercise " + exid + " for " + userID + " : " + byID + "\n\tcontext" + byID.getDirectlyRelated());
       then2 = System.currentTimeMillis();
       addAnnotationsAndAudio(userID, byID, isFlashcardReq);
       now = System.currentTimeMillis();
@@ -888,7 +890,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   *
    * @param id
    * @param then
    */
@@ -979,6 +980,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   boolean didCheckLTS = false;
+
   /**
    * Called from the client:
    *
@@ -1020,7 +1022,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     SmallVocabDecoder smallVocabDecoder = getSmallVocabDecoder();
     fullTrie = new ExerciseTrie<CommonExercise>(getExercisesForUser(), getLanguage(), smallVocabDecoder);
   }*/
-
   public ContextPractice getContextPractice() {
     return db.getContextPractice();
   }
@@ -1179,14 +1180,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public StartupInfo getStartupInfo() {
     List<ProjectInfo> projectInfos = new ArrayList<>();
     if (db == null) {
-
-    }
-    else {
+      logger.info("no db yet...");
+    } else {
       for (SlickProject project : db.getProjectDAO().getAll())
         projectInfos.add(new ProjectInfo(project.language(), project.id()));
     }
 
-    return new StartupInfo(serverProps.getProperties(), projectInfos, startupMessage);//, db.getTypeOrder(projectid), db.getSectionNodes());
+    return new StartupInfo(serverProps.getProperties(), projectInfos, startupMessage);
   }
 
   /**
@@ -1474,8 +1474,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (customOrPredefExercise == null) {
       logger.error("markGender can't find exercise id " + attr.getExid() + "?");
 
-    }
-    else {
+    } else {
       projid = customOrPredefExercise.getProjectID();
     }
     db.getAudioDAO().addOrUpdateUser(isMale ? BaseUserDAO.DEFAULT_MALE_ID : BaseUserDAO.DEFAULT_FEMALE_ID, projid, attr);
@@ -1988,7 +1987,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
                                          int exerciseID,
                                          AudioAnswer audioAnswer) {
     int idToUse = exercise1 == null ? exerciseID : exercise1.getID();
-    int projid  = exercise1 == null ? -1 : exercise1.getProjectID();
+    int projid = exercise1 == null ? -1 : exercise1.getProjectID();
     String audioTranscript = getAudioTranscript(audioType, exercise1);
 
     String permanentAudioPath = new PathWriter().
@@ -2149,6 +2148,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   private String startupMessage = "";
+
   /**
    * Reco test option lets you run through and score all the reference audio -- if you want to see model performance
    */
@@ -2202,8 +2202,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     if (project == null) {
       logger.error("no current project ");
       return "";
-    }
-    else {
+    } else {
       SlickProject project1 = project.getProject();
       return project1.language();
     }

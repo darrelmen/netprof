@@ -69,7 +69,7 @@ public class JSONExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Comm
                          ServerProperties serverProps,
                          IUserListManager userListManager,
                          boolean addDefects) {
-    super(serverProps, userListManager, addDefects);
+    super(serverProps, userListManager, addDefects, serverProps.getLanguage());
     this.jsonFile = file;
   }
 
