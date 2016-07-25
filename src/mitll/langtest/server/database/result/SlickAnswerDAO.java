@@ -88,7 +88,8 @@ public class SlickAnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
         (float) answerInfo.getSnr(),
        // getLanguage(),
         -1,
-        answerInfo.getTranscript());
+        answerInfo.getTranscript(),
+        answerInfo.getProjid());
 
     logger.info("inserting answer by " + answerInfo.getUserid() + " to " + answerInfo.getId() + " :  " + answerInfo.getAnswer() + " :\n" +res);
 

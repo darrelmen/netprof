@@ -45,6 +45,7 @@ import mitll.langtest.shared.scoring.AudioContext;
 public class AnswerInfo {
   private int userid;
   private int id;
+  private int projid;
   private int questionID;
   private String answer;
   private String audioFile;
@@ -62,6 +63,10 @@ public class AnswerInfo {
   private String validity;
   private String transcript;
   private double snr;
+
+  public int getProjid() {
+    return projid;
+  }
 
   public static class RecordingInfo {
     String answer;
@@ -112,31 +117,33 @@ public class AnswerInfo {
                     AudioCheck.ValidityAndDur validity
   ) {
     this(audioContext.getUserid(),
+        audioContext.getProjid(),
         audioContext.getExid(),
         audioContext.getQuestionID(),
-        audioContext.getAudioType(),
 
+        audioContext.getAudioType(),
         recordingInfo.answer,
         recordingInfo.audioFile,
         recordingInfo.deviceType,
         recordingInfo.device,
-        recordingInfo.withFlash,
 
-        validity);
+        recordingInfo.withFlash, validity);
   }
 
   private AnswerInfo(int userid,
+                     int projid,
                      int id,
-                    int questionID,
-                    AudioType audioType,
+                     int questionID,
+                     AudioType audioType,
 
-                    String answer,
-                    String audioFile,
-                    String deviceType, String device,
-                    boolean withFlash,
+                     String answer,
+                     String audioFile,
+                     String deviceType, String device,
+                     boolean withFlash,
 
-                    AudioCheck.ValidityAndDur validity) {
+                     AudioCheck.ValidityAndDur validity) {
     this.userid = userid;
+    this.projid = projid;
     this.id = id;
     this.questionID = questionID;
     this.answer = answer;
@@ -164,6 +171,7 @@ public class AnswerInfo {
                     String scoreJson,
                     int processDur) {
     this(other.getUserid(),
+        other.getProjid(),
         other.getId(),
         other.getQuestionID(),
         other.getAudioType(),
@@ -171,33 +179,33 @@ public class AnswerInfo {
         other.getAudioFile(),
         other.getDeviceType(),
         other.getDevice(),
-        other.isWithFlash(),
 
+        other.isWithFlash(),
         other.getDurationInMillis(),
         other.isValid(),
         other.getValidity(),
-        other.getSnr(),
 
+        other.getSnr(),
         correct,
         pronScore,
         scoreJson,
-        processDur
-    );
+        processDur);
   }
 
-  private AnswerInfo(int userid, int id, int questionID,
-                    AudioType audioType, String answer, String audioFile,
-                    String deviceType, String device, boolean withFlash,
+  private AnswerInfo(int userid, int projid, int id, int questionID,
+                     AudioType audioType, String answer, String audioFile,
+                     String deviceType, String device, boolean withFlash,
 
-                    long durationInMillis,
-                    boolean valid,
-                    String validity,
-                    double snr,
+                     long durationInMillis,
+                     boolean valid,
+                     String validity,
+                     double snr,
 
-                    boolean correct, float pronScore, String scoreJson, int processDur
-                    //  int roundTripDur,
+                     boolean correct, float pronScore, String scoreJson, int processDur
+                     //  int roundTripDur,
   ) {
     this.userid = userid;
+    this.projid = projid;
     this.id = id;
     this.questionID = questionID;
     this.answer = answer;
