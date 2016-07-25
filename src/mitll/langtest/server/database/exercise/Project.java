@@ -164,7 +164,7 @@ public class Project {
   }
 
   public String toString() {
-    return "Project " + project + " types " + typeOrder;
+    return "Project " + project + " types " + typeOrder + " exercise dao " +exerciseDAO;
   }
 
   public AudioFileHelper getAudioFileHelper() {
