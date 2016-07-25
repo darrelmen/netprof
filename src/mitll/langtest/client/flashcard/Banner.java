@@ -57,6 +57,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.client.services.UserService;
 import mitll.langtest.client.services.UserServiceAsync;
+import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.user.SlimProject;
 import mitll.langtest.shared.user.User;
 
@@ -100,6 +101,8 @@ public class Banner implements RequiresResize {
   private final PropertyHandler props;
   private final UserServiceAsync userServiceAsync;
   ExerciseController controller;
+  private ListBox projectChoices;
+
   /**
    * @see mitll.langtest.client.InitialUI#makeHeaderRow
    */
@@ -146,7 +149,7 @@ public class Banner implements RequiresResize {
     appName.addStyleName("bigFont");
 
     flashcard.add(appName);
-    flashcard.add(getProjectChoices());
+    flashcard.add(projectChoices = getProjectChoices());
 
     flashcardImage = new Image(LangTest.LANGTEST_IMAGES + Banner.NEW_PRO_F1_PNG);
     flashcardImage.addStyleName("floatLeft");
@@ -200,18 +203,16 @@ public class Banner implements RequiresResize {
   private ListBox getProjectChoices() {
     ListBox listBox = new ListBox();
     new TooltipHelper().createAddTooltip(listBox, "Choose a language", Placement.LEFT);
-    populateListChoices(listBox);
     listBox.addStyleName("leftTenMargin");
     return listBox;
   }
-
 
   /**
    * <p>
    *
    * @param projectChoices
    * @paramx controller
-   * @see #getProjectChoiceRow
+   * @see #getProjectChoices
    */
   private void populateListChoices(final ListBox projectChoices) {
     userServiceAsync.getProjects(new AsyncCallback<Collection<SlimProject>>() {
@@ -229,7 +230,10 @@ public class Banner implements RequiresResize {
         for (final SlimProject project : projects) {
           String name = project.getName();
           projectChoices.addItem(name);
-          if (project.getProjectid() == controller.getStartupInfo().getProjectid()) {
+          ProjectStartupInfo startupInfo = controller.getStartupInfo();
+
+        //  logger.info("startup " + startupInfo);
+          if (project.getProjectid() == startupInfo.getProjectid()) {
             projectChoices.setSelectedValue(name);
           }
           projectChoices.addChangeHandler(new ChangeHandler() {
@@ -460,8 +464,8 @@ public class Banner implements RequiresResize {
    */
   public void setUserName(String name) {
     this.userNameWidget.setText(name);
+    populateListChoices(projectChoices);
   }
-
 
   @Override
   public void onResize() {
