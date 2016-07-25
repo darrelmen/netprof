@@ -180,7 +180,7 @@ public class SlickUserExerciseDAO
         slick.transliteration(),
         slick.isoverride(),
         unitToValue,
-        slick.modified().getTime(), slick.projectid());
+        slick.modified().getTime(), slick.projid());
 
 //    logger.info("created " + userExercise);
     return userExercise;
@@ -226,7 +226,7 @@ public class SlickUserExerciseDAO
         slick.foreignlanguage(),
         slick.meaning(),
         slick.transliteration(),
-        slick.projectid());
+        slick.projid());
 
     List<String> translations = new ArrayList<String>();
     if (slick.foreignlanguage().length() > 0) {

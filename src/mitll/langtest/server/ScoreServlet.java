@@ -875,7 +875,7 @@ public class ScoreServlet extends DatabaseServlet {
     CommonExercise exercise1 = db.getCustomOrPredefExercise(exerciseID);  // allow custom items to mask out non-custom items
 
     AudioContext audioContext =
-        new AudioContext(reqid, user, exerciseID, 0,
+        new AudioContext(reqid, user, exercise1.getProjectID(), exerciseID, 0,
             doFlashcard ? AudioType.PRACTICE : AudioType.LEARN);
 
     AudioAnswer answer = audioFileHelper.getAnswer(exercise1,
