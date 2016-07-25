@@ -72,6 +72,12 @@ public class PostgresTest extends BaseTest {
   }
 
   @Test
+  public void testCopyRussian() {
+    testCreate();
+    getDatabaseLight("russian", true).copyToPostgres();
+  }
+
+  @Test
   public void testCopyProject() {
     testCreate();
     DatabaseImpl spanish = getDatabaseLight("spanish", true);
@@ -122,6 +128,19 @@ public class PostgresTest extends BaseTest {
     };
 
   }
+
+  @Test
+  public void testMostRecentProject() {
+    DatabaseImpl spanish = getDatabaseLight("spanish", false);
+
+    User byID = spanish.getUserDAO().getUserByID("spanish");
+    logger.info("user is " + byID);
+    int i = spanish.getUserProjectDAO().mostRecentByUser(byID.getId());
+
+    logger.info("most recent is "+ i);
+
+  }
+
 
   @Test
   public void testProjects() {
