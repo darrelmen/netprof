@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.services;
 
+import mitll.langtest.client.flashcard.Banner;
 import mitll.langtest.client.services.UserService;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.security.DominoSessionException;
@@ -60,7 +61,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * The key to get/set the request attribute that holds the
    * user looked up by the security filter.
    */
-  private static final String USER_REQUEST_ATT = UserSecurityManager.USER_REQUEST_ATT;
+//  private static final String USER_REQUEST_ATT = UserSecurityManager.USER_REQUEST_ATT;
 
   @Override
   public void init() {
@@ -108,7 +109,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   }
 
   void setSessionUser(HttpSession session, User loggedInUser) {
-    session.setAttribute(USER_SESSION_ATT, loggedInUser.getId());
+    setUserOnSession(session, loggedInUser);
     StringBuilder atts = new StringBuilder("Atts: [ ");
     Enumeration<String> attEnum = session.getAttributeNames();
     while (attEnum.hasMoreElements()) {
@@ -123,6 +124,10 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
         ", created=" + session1.getCreationTime() +
         ", " + atts.toString());
     db.setStartupInfo(loggedInUser);
+  }
+
+  private void setUserOnSession(HttpSession session, User loggedInUser) {
+    session.setAttribute(USER_SESSION_ATT, loggedInUser.getId());
   }
 
   /*public User getLoggedInUser() {
@@ -324,12 +329,15 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     return projects;
   }
 
+  /**
+   * @see Banner#populateListChoices
+   * @param projectid
+   */
   public void setProject(int projectid) {
     try {
       User sessionUser = getSessionUser();
       if (sessionUser != null) {
-        int id = sessionUser.getId();
-        db.getUserProjectDAO().add(id, projectid);
+        db.getUserProjectDAO().add(sessionUser.getId(), projectid);
       }
     } catch (DominoSessionException e) {
       logger.error("got " +e,e);
