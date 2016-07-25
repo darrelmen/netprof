@@ -46,7 +46,8 @@ import java.util.Map;
 import java.util.Set;
 
 public interface IAudioDAO extends IDAO {
-  AudioAttribute addOrUpdate(int userid, int exerciseID, AudioType audioType, String audioRef, long timestamp,
+  AudioAttribute addOrUpdate(int userid, int exerciseID, int projid,
+                             AudioType audioType, String audioRef, long timestamp,
                              long durationInMillis, String transcript);
 
   Map<Integer, List<AudioAttribute>> getExToAudio();
@@ -77,7 +78,7 @@ public interface IAudioDAO extends IDAO {
 
   Collection<Integer> getRecordedExampleForUser(int userid);
 
-  void addOrUpdateUser(int userid, AudioAttribute attr);
+  void addOrUpdateUser(int userid, int projid, AudioAttribute attr);
 
   int markDefect(AudioAttribute attribute);
 

@@ -58,7 +58,11 @@ public class PostgresTest extends BaseTest {
 
   @Test
   public void testDrop() {
-    getConnection("spanish").dropAll();
+    DBConnection spanish = getConnection("spanish");
+    spanish.dropAll();
+    scala.collection.immutable.List<String> listOfTables = spanish.getListOfTables();
+
+    logger.info("after drop "+ listOfTables);
   }
 
   @Test

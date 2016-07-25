@@ -146,6 +146,10 @@ public class MonitorResult implements IsSerializable {
     return exid;
   }
 
+  /**
+   *
+   * @return
+   */
   public String getForeignText() {
     return foreignText;
   }

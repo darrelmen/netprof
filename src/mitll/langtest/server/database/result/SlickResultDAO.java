@@ -34,7 +34,6 @@ package mitll.langtest.server.database.result;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.ISchema;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.result.MonitorResult;
 import mitll.langtest.shared.UserAndTime;
@@ -50,7 +49,7 @@ import org.apache.log4j.Logger;
 import java.sql.Timestamp;
 import java.util.*;
 
-public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema<Result, SlickResult> {
+public class SlickResultDAO extends BaseResultDAO implements IResultDAO/*, ISchema<Result, SlickResult>*/ {
   private static final Logger logger = Logger.getLogger(SlickResultDAO.class);
 
   private final ResultDAOWrapper dao;
@@ -73,13 +72,12 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
    * @param shared
    * @param projid
    * @param exToInt
+   * @param transcript
    * @return
    * @see mitll.langtest.server.database.CopyToPostgres#copyResult
    */
-  @Override
-  public SlickResult toSlick(Result shared, int projid, Map<String, Integer> exToInt) {
-    String exid = shared.getOldExID();
-    Integer realExID = exToInt.get(exid);
+  public SlickResult toSlick(Result shared, int projid, Map<String, Integer> exToInt, String transcript) {
+    Integer realExID = exToInt.get(shared.getOldExID());
 
     if (realExID == null) return null;
     else
@@ -104,7 +102,8 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
           shared.getDynamicRange(),
           //    getLanguage(),
           shared.getUniqueID(),
-          ""
+          transcript,
+          projid
       );
   }
 
@@ -112,9 +111,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO, ISchema
     return deviceType == null ? "" : deviceType;
   }
 
-  @Override
   public Result fromSlick(SlickResult slick) {
-
     String audiotype = slick.audiotype();
     audiotype = audiotype.replaceAll("=", "_");
     return new Result(slick.id(),
