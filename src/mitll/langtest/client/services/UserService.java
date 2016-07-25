@@ -69,10 +69,11 @@ void setProject(int projectid);
    * @param dialect
    * @param isCD
    * @param device
+   * @param projid
    * @return
    */
   User addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, String email, boolean isMale,
-               int age, String dialect, boolean isCD, String device);
+               int age, String dialect, boolean isCD, String device, int projid);
 
   /**
    * @see mitll.langtest.client.user.UserTable#showDialog(LangTestDatabaseAsync)
@@ -97,7 +98,7 @@ void setProject(int projectid);
    * @param id
    * @return
    */
-  User getUserBy(int id);
+ // User getUserBy(int id);
 
   /**
    * @see mitll.langtest.client.user.ResetPassword#getChangePasswordButton(String, Fieldset, BasicDialog.FormField, BasicDialog.FormField)
