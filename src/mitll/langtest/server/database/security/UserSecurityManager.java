@@ -49,8 +49,7 @@ import javax.servlet.http.HttpSession;
  * @since Oct 31, 2013 6:30:34 PM
  */
 public class UserSecurityManager {
-  //	private static final Logger log = Logger.getLogger(UserSecurityManager.class);
-  private static final Logger log = LogManager.getLogger(SecurityManager.class);
+  private static final Logger log = LogManager.getLogger(UserSecurityManager.class);
 
   /**
    * The key to get/set the id of the user stored in the session
@@ -69,6 +68,12 @@ public class UserSecurityManager {
     this.userDAO = userDAO;
   }
 
+  /**
+   *
+   * @param request
+   * @param userId
+   * @param killAllSessions
+   */
   public void logoutUser(HttpServletRequest request, String userId, boolean killAllSessions) {
     long startMS = System.currentTimeMillis();
     HttpSession session = request.getSession(false);
@@ -113,7 +118,7 @@ public class UserSecurityManager {
   /**
    * Check to see if the user's session is active.
    */
-  public boolean isSessionActive(User user) {
+  private boolean isSessionActive(User user) {
     return true;
   }
 
