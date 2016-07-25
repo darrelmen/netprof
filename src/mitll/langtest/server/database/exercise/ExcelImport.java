@@ -685,4 +685,9 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
       return cell.toString().trim();
     }
   }
+
+  @Override
+  public Map<Integer, String> getIDToFL(int projid) {
+    return null;
+  }
 }
