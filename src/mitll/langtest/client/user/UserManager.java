@@ -244,7 +244,8 @@ public class UserManager {
   private void addAnonymousUser() {
     logger.info("UserManager.addAnonymousUser : adding anonymous user");
 
-    userServiceAsync.addUser("anonymous", "", "", User.Kind.ANONYMOUS, Window.Location.getHref(), "", true, 0, "unknown", false, "browser", new AsyncCallback<User>() {
+    userServiceAsync.addUser("anonymous", "", "", User.Kind.ANONYMOUS, Window.Location.getHref(), "", true, 0,
+        "unknown", false, "browser", -1, new AsyncCallback<User>() {
       @Override
       public void onFailure(Throwable caught) {
 

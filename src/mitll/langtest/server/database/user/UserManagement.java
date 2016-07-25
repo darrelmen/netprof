@@ -205,7 +205,8 @@ public class UserManagement {
     return addUser(userID, passwordH, emailH, device, ip, kind, isMale, age, dialect);
   }
 
-  private User addAndGetUser(String userID, String passwordH, String emailH, User.Kind kind, boolean isMale, int age, String dialect, String device, String ip) {
+  private User addAndGetUser(String userID, String passwordH, String emailH, User.Kind kind, boolean isMale, int age,
+                             String dialect, String device, String ip) {
     User user = userDAO.addUser(userID, passwordH, emailH, kind, ip, isMale, age, dialect, device);
     if (user != null) {
       userListManager.createFavorites(user.getId());
@@ -294,7 +295,7 @@ public class UserManagement {
           if (userToRate.containsKey(u.getId())) {
             u.setRate(userToRate.get(u.getId()));
           }
-          int size = idToCount.idToUniqueCount.get(u.getId()).size();
+        //  int size = idToCount.idToUniqueCount.get(u.getId()).size();
 
           if (false) {
    /*         boolean complete = size >= numExercises;
