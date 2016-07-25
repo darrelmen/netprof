@@ -280,6 +280,8 @@ class TextResponse {
   }
 
   /**
+   * TODO : fill in project id here -
+   *
    * @param guess
    * @param service
    * @param exerciseID
@@ -289,10 +291,13 @@ class TextResponse {
    * @param questionID
    * @see #setupSubmitButton
    */
-  private void getScoreForGuess(final String guess, LangTestDatabaseAsync service,
-                                int exerciseID, final Button check,
+  private void getScoreForGuess(final String guess,
+                                LangTestDatabaseAsync service,
+                                int exerciseID,
+                                final Button check,
                                 final ScoreFeedback scoreFeedback,
-                                AudioType answerType, int questionID) {
+                                AudioType answerType,
+                                int questionID) {
     if (guess.isEmpty() || removePunct(guess.trim()).isEmpty()) {
       new PopupHelper().showPopup
           ("Try again.", "Please type a non-empty response.", textResponseWidget);
@@ -304,7 +309,7 @@ class TextResponse {
       timeShown = System.currentTimeMillis();
 
       AudioContext audioContext =
-          new AudioContext(0, user, exerciseID, questionID, answerType);
+          new AudioContext(0, user, -1, exerciseID, questionID, answerType);
 
       logger.info("contexxt " + audioContext);
       service.getScoreForAnswer(

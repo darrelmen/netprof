@@ -120,7 +120,13 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     final long then = System.currentTimeMillis();
     // logger.info("PostAudioRecordButton.postAudioFile : " +  getAudioType());
 
-    AudioContext audioContext = new AudioContext(reqid, controller.getUser(), getExerciseID(), index, getAudioType());
+    AudioContext audioContext = new AudioContext(
+        reqid,
+        controller.getUser(),
+        controller.getStartupInfo().getProjectid(),
+        getExerciseID(),
+        index,
+        getAudioType());
 
     service.writeAudioFile(base64EncodedWavFile,
         audioContext,
