@@ -571,9 +571,13 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
 
   public void stopDecode() {
     for (Project project : idToProject.values()) project.stopDecode();
-
   }
 
+  /**
+   * @see mitll.langtest.server.services.UserServiceImpl#userExists(String, String, int)
+   * @param loggedInUser
+   * @param projectid
+   */
   public void rememberUserSelectedProject(User loggedInUser, int projectid) {
     Project project = getProject(projectid);
     logger.info("rememberUserSelectedProject user " + loggedInUser + " -> " + projectid + " : " + project);

@@ -2198,7 +2198,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   private String getLanguage() {
-    return getProject().getProject().language();
+    Project project = getProject();
+    if (project == null) {
+      logger.error("no current project ");
+      return "";
+    }
+    else {
+      SlickProject project1 = project.getProject();
+      return project1.language();
+    }
   }
 
   /**
