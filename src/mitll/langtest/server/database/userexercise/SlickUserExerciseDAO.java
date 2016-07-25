@@ -403,4 +403,8 @@ public class SlickUserExerciseDAO
     for (SlickExercise exercise : dao.getAllPredefByProject(projectid)) oldToNew.put(exercise.exid(), exercise.id());
     return oldToNew;
   }
+
+  public Map<Integer, String> getIDToFL(int projid) {
+    return dao.getIDToFL(projid);
+  }
 }

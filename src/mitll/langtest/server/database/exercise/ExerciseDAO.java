@@ -40,6 +40,7 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * Container for exercises for the site.
@@ -91,4 +92,6 @@ public interface ExerciseDAO<T extends CommonShell> extends SimpleExerciseDAO<T>
    * @see DatabaseImpl#getExerciseIDToRefAudio(int)
    */
   void attachAudio(Collection<CommonExercise> all);
+
+  Map<Integer,String> getIDToFL(int projid);
 }
