@@ -1491,10 +1491,6 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     return null;//addRemoveDAO;
   }
 
-//  public ExerciseDAO getExerciseDAO(int projectid) {
-//    return exerciseDAO;
-//  }
-
   /**
    * @param out
    * @param typeToSection
