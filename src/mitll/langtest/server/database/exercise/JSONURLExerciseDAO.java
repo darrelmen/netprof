@@ -66,7 +66,7 @@ public class JSONURLExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<C
       ServerProperties serverProps,
       IUserListManager userListManager,
       boolean addDefects) {
-    super(serverProps, userListManager, addDefects);
+    super(serverProps, userListManager, addDefects, serverProps.getLanguage());
     this.typeOrder = serverProps.getTypes();
 
     new DominoReader().readProjectInfo(serverProps);

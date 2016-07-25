@@ -33,15 +33,12 @@
 package mitll.langtest.server.database.user;
 
 import mitll.langtest.server.database.IDAO;
-import mitll.langtest.server.database.project.ProjectStatus;
-import mitll.langtest.server.database.project.ProjectType;
-import mitll.npdata.dao.SlickProject;
 import mitll.npdata.dao.SlickUserProject;
 
 import java.util.Collection;
 
 public interface IUserProjectDAO extends IDAO {
-  int add(int userid, int projid);
+  void add(int userid, int projid);
 
   Collection<SlickUserProject> getAll();
 
