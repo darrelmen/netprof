@@ -22,7 +22,7 @@ import java.util.stream.Stream;
  */
 public class AMASReaderTest {
   private static final Logger logger = Logger.getLogger(AMASReaderTest.class);
- // public static final String AM_LB_002 = "AM-LB-002";
+  // public static final String AM_LB_002 = "AM-LB-002";
   private static DatabaseImpl database;
 
   @BeforeClass
@@ -57,7 +57,7 @@ public class AMASReaderTest {
     Stream<AmasExerciseImpl> amasExerciseStream = exercises.stream().filter(ex -> ex.getOldID().equals("AM-LA-004"));
     Optional<AmasExerciseImpl> first = amasExerciseStream.findFirst();
     AmasExerciseImpl amasExercise = first.get();
-    logger.info("first " + first+  " audio '" + amasExercise.getAudioURL() + "'");
+    logger.info("first " + first + " audio '" + amasExercise.getAudioURL() + "'");
     QAPair next1 = amasExercise.getForeignLanguageQuestions().iterator().next();
     logger.info("q " + next1);
     AmasExerciseImpl next = exercises.iterator().next();
@@ -65,7 +65,7 @@ public class AMASReaderTest {
     logger.info("\n\ngot " + exercises.size());
 
     ServerProperties serverProps = database.getServerProps();
-    AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), serverProps, database, null,"", serverProps.getLanguage());
+    AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), serverProps, database, null, null);
 
     audioFileHelper.makeAutoCRT(".");
 
