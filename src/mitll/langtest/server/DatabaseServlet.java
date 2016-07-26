@@ -34,13 +34,16 @@ package mitll.langtest.server;
 
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.security.DominoSessionException;
 import mitll.langtest.server.database.security.UserSecurityManager;
 import mitll.langtest.shared.user.User;
+import mitll.npdata.dao.SlickProject;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 
 /**
@@ -52,14 +55,14 @@ import java.io.*;
 public class DatabaseServlet extends HttpServlet {
   private static final Logger logger = Logger.getLogger(DatabaseServlet.class);
   private static final int BUFFER_SIZE = 4096;
-  private static final String NO = "NO";
+ // private static final String NO = "NO";
   // not clear this is a big win currently - this enables us to rewrite the mp3s and possibly mark
   // them with a title
-  private static final Boolean CHECK_FOR_MP3 = false;
+//  private static final Boolean CHECK_FOR_MP3 = false;
 
   protected ServerProperties serverProps;
-  protected String relativeConfigDir;
-  protected String configDir;
+  //private String relativeConfigDir;
+  private String configDir;
   protected PathHelper pathHelper;
   private UserSecurityManager securityManager;
 
@@ -84,7 +87,7 @@ public class DatabaseServlet extends HttpServlet {
     ensureMP3(wavFile, pathHelper, configDir, title, author);
   }
 
-  private boolean ensureMP3(String wavFile, PathHelper pathHelper, String configDir, String title, String author) {
+  private void ensureMP3(String wavFile, PathHelper pathHelper, String configDir, String title, String author) {
     if (wavFile != null) {
       String parent = pathHelper.getInstallPath();
       //logger.debug("ensureMP3 : wav " + wavFile + " under " + parent);
@@ -98,29 +101,29 @@ public class DatabaseServlet extends HttpServlet {
         logger.error("huh? can't find " + wavFile + " under " + parent);
       }
       String filePath = audioConversion.ensureWriteMP3(wavFile, parent, false, title, author);
-      return new File(filePath).exists();
+     // return new File(filePath).exists();
     } else {
-      return false;
+      //return;
     }
   }
 
   protected void setPaths() {
     pathHelper = getPathHelper();
     String config = getServletContext().getInitParameter("config");
-    this.relativeConfigDir = "config" + File.separator + config;
+    //this.relativeConfigDir = "config" + File.separator + config;
     // logger.debug("setPaths rel " + relativeConfigDir  + " pathHelper " + pathHelper);
     this.configDir = getConfigDir();
   }
 
-  protected PathHelper getPathHelper() {
+  private PathHelper getPathHelper() {
     return new PathHelper(getServletContext());
   }
 
-  protected String getConfigDir() {
+  private String getConfigDir() {
     return getConfigDir(pathHelper);
   }
 
-  protected String getConfigDir(PathHelper pathHelper) {
+  private String getConfigDir(PathHelper pathHelper) {
     String config = getServletContext().getInitParameter("config");
     return pathHelper.getInstallPath() + File.separator + "config" + File.separator + config;
   }
@@ -139,7 +142,7 @@ public class DatabaseServlet extends HttpServlet {
     copyToOutput(inputStream, new FileOutputStream(saveFile));
   }
 
-  protected void copyToOutput(InputStream inputStream, OutputStream outputStream) throws IOException {
+  private void copyToOutput(InputStream inputStream, OutputStream outputStream) throws IOException {
     byte[] buffer = new byte[BUFFER_SIZE];
     int bytesRead;
 
@@ -151,7 +154,12 @@ public class DatabaseServlet extends HttpServlet {
     inputStream.close();
   }
 
-  protected int getProject(HttpServletRequest request) {
+  /**
+   * @see #doGet
+   * @param request
+   * @return
+   */
+  int getProject(HttpServletRequest request) {
     try {
       User loggedInUser = securityManager.getLoggedInUser(request);
       if (loggedInUser == null) return -1;
@@ -163,16 +171,29 @@ public class DatabaseServlet extends HttpServlet {
     }
   }
 
-  protected DatabaseImpl getDatabase() {
-    DatabaseImpl db = null;
+  String getProjectLanguage(HttpServletRequest request) {
+    try {
+      int project = getProject(request);
+      Project project1 = getDatabase().getProject(project);
+      return project1.getLanguage();
+    } catch (Exception e) {
+      logger.error("got " +e,e);
+      return "";
+    }
+  }
 
-    Object databaseReference = getServletContext().getAttribute(LangTestDatabaseImpl.DATABASE_REFERENCE);
-    if (databaseReference != null) {
-      db = (DatabaseImpl) databaseReference;
-      securityManager = new UserSecurityManager(db.getUserDAO());
-      // logger.debug("found existing database reference " + db + " under " +getServletContext());
-    } else {
-      logger.error("huh? no existing db reference?");
+  private DatabaseImpl db = null;
+
+  protected DatabaseImpl getDatabase() {
+    if (db == null) {
+      Object databaseReference = getServletContext().getAttribute(LangTestDatabaseImpl.DATABASE_REFERENCE);
+      if (databaseReference != null) {
+        db = (DatabaseImpl) databaseReference;
+        securityManager = new UserSecurityManager(db.getUserDAO());
+        // logger.debug("found existing database reference " + db + " under " +getServletContext());
+      } else {
+        logger.error("huh? no existing db reference?");
+      }
     }
     return db;
   }

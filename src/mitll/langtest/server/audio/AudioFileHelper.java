@@ -110,7 +110,8 @@ public class AudioFileHelper implements AlignDecode {
                          ServerProperties serverProperties,
                          DatabaseImpl db,
                          LogAndNotify langTestDatabase,
-                         String modelsDir, String language) {
+                         String modelsDir,
+                         String language) {
     this.pathHelper = pathHelper;
     this.serverProps = serverProperties;
     this.db = db;
@@ -120,7 +121,7 @@ public class AudioFileHelper implements AlignDecode {
     isNoModel = modelsDir == null || modelsDir.isEmpty();
     this.mp3Support = new MP3Support(pathHelper, serverProperties);
     audioConversion = new AudioConversion(serverProps);
-    makeASRScoring(modelsDir, language);
+    makeASRScoring(modelsDir, language, modelsDir != null);
     makeDecodeCorrectnessChecker();
   }
 
@@ -1015,10 +1016,11 @@ public class AudioFileHelper implements AlignDecode {
 
   /**
    * @param modelsDir
+   * @param hasModel
    * @see #AudioFileHelper(PathHelper, ServerProperties, DatabaseImpl, LogAndNotify, String, String)
    */
   // TODO: gross
-  private void makeASRScoring(String modelsDir, String language) {
+  private void makeASRScoring(String modelsDir, String language, boolean hasModel) {
     if (webserviceScoring == null) {
       String installPath = pathHelper.getInstallPath();
       HTKDictionary htkDictionary = null;
@@ -1027,8 +1029,8 @@ public class AudioFileHelper implements AlignDecode {
       } catch (Exception e) {
         logger.error("for now got " + e, e);
       }
-      webserviceScoring = new ASRWebserviceScoring(installPath, serverProps, logAndNotify, htkDictionary, modelsDir, language);
-      oldschoolScoring = new ASRScoring(installPath, serverProps, logAndNotify, htkDictionary, modelsDir, language);
+      webserviceScoring = new ASRWebserviceScoring(installPath, serverProps, logAndNotify, htkDictionary, modelsDir, language, hasModel);
+      oldschoolScoring = new ASRScoring(installPath, serverProps, logAndNotify, htkDictionary, modelsDir, language, hasModel);
     }
     asrScoring = oldschoolScoring;
   }
