@@ -244,6 +244,7 @@ public class CopyToPostgres<T extends CommonShell> {
   /**
    * Ask the database for what the type order should be, e.g. [Unit, Chapter] or [Week, Unit] (from Dari)
    *
+   * @see
    * @param db
    * @param projectDAO
    */
@@ -251,7 +252,7 @@ public class CopyToPostgres<T extends CommonShell> {
     Iterator<String> iterator = db.getTypeOrder(-1).iterator();
     String firstType  = iterator.hasNext() ? iterator.next() : "";
     String secondType = iterator.hasNext() ? iterator.next() : "";
-    String language   = db.getLanguage();
+    String language = db.getLanguage();
 
     SlickUserDAOImpl slickUserDAO = (SlickUserDAOImpl) db.getUserDAO();
     int byName = projectDAO.add(slickUserDAO.getBeforeLoginUser(), language, language, firstType, secondType);
@@ -322,7 +323,7 @@ public class CopyToPostgres<T extends CommonShell> {
             }*/
 
             SlickUser slickUser = addUser(slickUserDAO, oldToNew, toImport);
-            logger.info("adding " +slickUser);
+            logger.info("adding " + slickUser);
           }
         } else { // new user across all instances imported to this point
           addUser(slickUserDAO, oldToNew, toImport);
@@ -472,8 +473,8 @@ public class CopyToPostgres<T extends CommonShell> {
     for (Word word : new WordDAO(db).getAll()) {
       Integer rid = oldToNewResult.get((int) word.getRid());
       if (rid == null) {
-        missingRIDs.add(word.getRid());
-        if (missingRIDs.size() < WARN_RID_MISSING_THRESHOLD) logger.error("copyWord word has no rid " + word.getRid());
+        boolean add = missingRIDs.add(word.getRid());
+        if (add && missingRIDs.size() < WARN_RID_MISSING_THRESHOLD) logger.error("copyWord word has no rid " + word.getRid());
       } else {
         word.setRid(rid);
         bulk.add(slickWordDAO.toSlick(word));
@@ -547,8 +548,7 @@ public class CopyToPostgres<T extends CommonShell> {
       Integer integer = oldToNewUser.get(oldID);
       if (integer == null) {
         logger.error("UserListManager can't find user " + oldID + " in " + oldToNewUser.size());
-      }
-      else {
+      } else {
         slickUserListDAO.addWithUser(list, integer, projid);
       }
     }
@@ -602,9 +602,11 @@ public class CopyToPostgres<T extends CommonShell> {
                                                           Map<Integer, Integer> oldToNewUser,
                                                           int projectid) {
     SlickUserExerciseDAO slickUEDAO = (SlickUserExerciseDAO) db.getUserExerciseDAO();
-    Map<String, Integer> exToInt;// = new HashMap<>();
+    Map<String, Integer> exToInt;
     {
-      Collection<CommonExercise> exercises = db.getExercises(projectid);
+      Collection<CommonExercise> exercises = db.getExercises(DatabaseImpl.IMPORT_PROJECT_ID);
+      logger.info("found " + exercises.size() + " old exercises.");
+
       int importUser = ((SlickUserDAOImpl) db.getUserDAO()).getImportUser();
       addPredefExercises(projectid, slickUEDAO, importUser, exercises);
       exToInt = slickUEDAO.getOldToNew(projectid);
@@ -647,20 +649,27 @@ public class CopyToPostgres<T extends CommonShell> {
                                    int importUser, Collection<CommonExercise> exercises) {
     int n = 0;
     int ct = 0;
+    List<SlickRelatedExercise> pairs = new ArrayList<>();
+
     for (CommonExercise ex : exercises) {
       //     bulk.add(slickUEDAO.toSlick(ex, false, projectID, true, slickUserDAO.getImportUser(), false));
       //   int id = slickUEDAO.insert(slickUEDAO.toSlick(ex, false, projectID, true, importUser, false));
       // exToInt.put(ex.getOldID(), id);
       int id = exToInt.get(ex.getOldID());
+
       for (CommonExercise context : ex.getDirectlyRelated()) {
         context.getMutable().setOldID("c" + id);
         int contextid = slickUEDAO.insert(slickUEDAO.toSlick(context, false, projectid, true, importUser, true));
-        slickUEDAO.insertRelated(id, contextid, projectid);
+        //slickUEDAO.insertRelated(id, contextid, projectid);
+        pairs.add(new SlickRelatedExercise(-1, id, contextid, projectid));
         ct++;
-        if (ct % 100 == 0) logger.debug("inserted " + ct);
+        if (ct % 400 == 0) logger.debug("addContextExercises inserted " + ct + " context exercises");
       }
       n++;
     }
+
+    slickUEDAO.addBulkRelated(pairs);
+
     logger.info("imported " + n + " predef exercises and " + ct + " context exercises");
   }
 
@@ -669,7 +678,7 @@ public class CopyToPostgres<T extends CommonShell> {
                                   int importUser,
                                   Collection<CommonExercise> exercises) {
     List<SlickExercise> bulk = new ArrayList<>();
-    logger.info("copying  " + exercises.size() + " exercises");
+    logger.info("copying   " + exercises.size() + " exercises");
     for (CommonExercise ex : exercises) {
       //     bulk.add(slickUEDAO.toSlick(ex, false, projectID, true, slickUserDAO.getImportUser(), false));
       bulk.add(slickUEDAO.toSlick(ex, false, projectid, true, importUser, false));
@@ -689,12 +698,17 @@ public class CopyToPostgres<T extends CommonShell> {
     List<SlickResult> bulk = new ArrayList<>();
 
     List<Result> results = resultDAO.getResults();
-    logger.info("copying " + results.size() + " results...");
+    logger.info(projid +" : copying " + results.size() + " results...");
 
     int missing = 0;
+    int missing2 = 0;
 
     ExerciseDAO<CommonExercise> exerciseDAO = db.getExerciseDAO(projid);
+    if (exerciseDAO == null) logger.warn("huh? no project " +projid);
     Map<Integer, String> idToFL = exerciseDAO.getIDToFL(projid);
+
+    logger.info("id-fl has " + idToFL.size() + " items");
+
     for (Result result : results) {
       Integer userID = oldToNewUser.get(result.getUserid());
       if (userID == null) {
@@ -703,23 +717,31 @@ public class CopyToPostgres<T extends CommonShell> {
         result.setUserID(userID);
         Integer realExID = exToID.get(result.getOldExID());
 
-        // TODO : don't - this is really slow - since every call hits exercise table with a select
-
-    //    CommonExercise customOrPredefExercise = realExID == null ? null : db.getCustomOrPredefExercise(realExID);
-     //   String transcript = customOrPredefExercise == null ? "" : customOrPredefExercise.getForeignLanguage();
-        String transcript = idToFL.get(realExID);
-        SlickResult e = slickResultDAO.toSlick(result, projid, exToID, transcript);
-        if (e == null) {
-          if (missing < 10) logger.warn("missing exid ref " + result.getOldExID());
-          missing++;
+        if (realExID == null) {
+          missing2++;
         } else {
-          bulk.add(e);
-          if (bulk.size() % 5000 == 0) logger.debug("made " + bulk.size() + " results...");
+          // TODO : don't - this is really slow - since every call hits exercise table with a select
+
+          //    CommonExercise customOrPredefExercise = realExID == null ? null : db.getCustomOrPredefExercise(realExID);
+          //   String transcript = customOrPredefExercise == null ? "" : customOrPredefExercise.getForeignLanguage();
+          String transcript = idToFL.get(realExID);
+          SlickResult e = slickResultDAO.toSlick(result, projid, exToID, transcript);
+          if (e == null) {
+            if (missing < 10) logger.warn("missing exid ref " + result.getOldExID());
+            missing++;
+          } else {
+            bulk.add(e);
+            if (bulk.size() % 5000 == 0) logger.debug("made " + bulk.size() + " results...");
+          }
         }
       }
     }
     if (missing > 0) {
       logger.warn("skipped " + missing + "/" + results.size() +
+          "  results b/c of exercise id fk missing");
+    }
+    if (missing2 > 0) {
+      logger.warn("skipped " + missing2 + "/" + results.size() +
           "  results b/c of exercise id fk missing");
     }
     logger.debug("adding " + bulk.size() + " results...");
