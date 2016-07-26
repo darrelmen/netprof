@@ -34,8 +34,6 @@ package mitll.langtest.server.services;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import mitll.langtest.client.services.ListService;
-import mitll.langtest.server.PathHelper;
-import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
@@ -49,16 +47,12 @@ import java.util.*;
 @SuppressWarnings("serial")
 public class ListServiceImpl extends MyRemoteServiceServlet implements ListService {
   private static final Logger logger = Logger.getLogger(ListServiceImpl.class);
-//  private AudioFileHelper audioFileHelper;
   private static final boolean DEBUG = false;
 
   @Override
   public void init() {
-//    logger.info("init called for ListServiceImpl");
     findSharedDatabase();
     readProperties(getServletContext());
-  //  PathHelper pathHelper = new PathHelper(getServletContext());
-    //audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, null);
   }
 
   /**
@@ -72,7 +66,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    */
   @Override
   public long addUserList(int userid, String name, String description, String dliClass, boolean isPublic) {
-    return getUserListManager().addUserList(userid, name, description, dliClass, isPublic);
+    return getUserListManager().addUserList(userid, name, description, dliClass, isPublic, getProjectID());
   }
 
   /**
@@ -126,7 +120,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    */
   public Collection<UserList<CommonShell>> getListsForUser(int userid, boolean onlyCreated, boolean visited) {
     //  if (!onlyCreated && !visited) logger.error("getListsForUser huh? asking for neither your lists nor  your visited lists.");
-    return getUserListManager().getListsForUser(userid, onlyCreated, visited);
+    return getUserListManager().getListsForUser(userid, onlyCreated, visited, getProjectID());
   }
 
   /**
@@ -137,7 +131,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    */
   @Override
   public Collection<UserList<CommonShell>> getUserListsForText(String search, int userid) {
-    return getUserListManager().getUserListsForText(search, userid);
+    return getUserListManager().getUserListsForText(search, userid, getProjectID());
   }
 
   /**
@@ -254,11 +248,9 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @return
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, boolean)
    */
-
   private boolean isValidForeignPhrase(String foreign) {
     return getProject().getAudioFileHelper().checkLTSOnForeignPhrase(foreign);
   }
-
 
   /**
    * @param userExercise

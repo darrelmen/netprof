@@ -638,7 +638,7 @@ public class ScoreServlet extends DatabaseServlet {
         audioFileHelper == null ? stringIntegerMap : audioFileHelper.getPhoneToCount(),
         db.getSectionHelper(projectid),
         serverProps.getPreferredVoices(),
-        serverProps.getLanguage().equalsIgnoreCase("english")
+        getLanguage().equalsIgnoreCase("english")
     );
 
     db.attachAllAudio(projectid);
@@ -942,7 +942,7 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
-   * Get audio file helper on project choice
+   * TODO: Get audio file helper on project choice
    * Get a reference to the current database object, made in the main LangTestDatabaseImpl servlet
    *
    * @return

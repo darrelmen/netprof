@@ -145,6 +145,8 @@ public class Report {
   }
 
   /**
+   * TODO : do in reference to projects
+   *
    * Sends a usage report to the email list at property {@link mitll.langtest.server.ServerProperties#getReportEmails()}.
    * Sends it out first thing every monday.
    * Subject disambiguates between multiple sites for the same language.
