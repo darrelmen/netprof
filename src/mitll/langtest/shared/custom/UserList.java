@@ -34,6 +34,7 @@ package mitll.langtest.shared.custom;
 
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.Navigation;
+import mitll.langtest.server.database.userlist.IUserListDAO;
 import mitll.langtest.server.database.userlist.SlickUserListDAO;
 import mitll.langtest.server.database.userlist.UserListDAO;
 import mitll.langtest.shared.user.User;
@@ -57,7 +58,6 @@ import java.util.Map;
 public class UserList<T extends HasID> extends BaseExercise {
   public static final String MY_LIST = "Favorites";
 
-  // private long uniqueID;
   private User creator;
   private String name;
   private String description;
@@ -163,7 +163,6 @@ public class UserList<T extends HasID> extends BaseExercise {
   public T remove(int id) {
     T toRemove = null;
     for (T ue : exercises) {
-      //   if (id.equals(ue.getOldID())) {
       if (id == ue.getID()) {
         toRemove = ue;
         break;
@@ -176,15 +175,9 @@ public class UserList<T extends HasID> extends BaseExercise {
     return creator;
   }
 
-/*
-  public long getUniqueID() {
-    return uniqueID;
-  }
-*/
-
   /**
    * @paramx uniqueID
-   * @see UserListDAO#add(UserList)
+   * @see IUserListDAO#add(UserList, int)
    * @see mitll.langtest.server.database.custom.UserListManager#getCommentedList(Collection)
    */
 
@@ -198,7 +191,6 @@ public class UserList<T extends HasID> extends BaseExercise {
 
   public boolean containsByID(int id) {
     for (T ex : getExercises()) {
-//      if (ex.getOldID().equals(id)) return true;
       if (ex.getID() == id) return true;
     }
     return false;
@@ -222,17 +214,11 @@ public class UserList<T extends HasID> extends BaseExercise {
     return getName().equals(MY_LIST);
   }
 
-/*  public void setReview(boolean isReview) {
-    this.isReview = isReview;
-  }*/
-
   @Override
   public String toString() {
     long id = creator == null ? -1 : creator.getId();
     return "UserList #" + getID() + " '" + name + "' by " + id +
-        //" : " + (isReview ? " REVIEW " : "") +
-        " :" +
-        " with " + getExercises().size() + " exercises.";
+        " : with " + getExercises().size() + " exercises.";
   }
 
   public long getModified() {

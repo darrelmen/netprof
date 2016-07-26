@@ -229,7 +229,7 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
             permissions.add(User.Permission.valueOf(perm));
           }
         } catch (IllegalArgumentException e) {
-          logger.warn(language + " : huh, for user " +// userid +
+          logger.warn(" : huh, for user " +// userid +
               " perm '" + perm +
               "' is not a permission?");
         }

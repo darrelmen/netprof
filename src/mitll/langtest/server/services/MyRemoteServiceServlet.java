@@ -53,6 +53,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet {
 
   protected DatabaseImpl db;
   protected ServerProperties serverProps;
+  UserSecurityManager securityManager;
 
   private DatabaseImpl getDatabase() {
     DatabaseImpl db = null;
@@ -70,8 +71,12 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet {
   void findSharedDatabase() {
     if (db == null) {
       db = getDatabase();
-      if (db == null) logger.error("no database?");
-      else securityManager = new UserSecurityManager(db.getUserDAO());
+      if (db == null) {
+        logger.error("no database?");
+      }
+      else {
+        securityManager = new UserSecurityManager(db.getUserDAO());
+      }
     }
   }
 
@@ -92,7 +97,6 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet {
     serverProps = new ServerProperties(servletContext, configDir);
   }
 
-  UserSecurityManager securityManager;
 
   protected int getProjectID() {
     try {
@@ -126,7 +130,5 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet {
    * @return
    * @throws DominoSessionException
    */
-  User getSessionUser() throws DominoSessionException {
-    return securityManager.getLoggedInUser(getThreadLocalRequest());
-  }
+  User getSessionUser() throws DominoSessionException { return securityManager.getLoggedInUser(getThreadLocalRequest()); }
 }
