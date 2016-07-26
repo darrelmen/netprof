@@ -50,8 +50,8 @@ public class DecodeTest extends BaseTest {
     DatabaseImpl msa = getDatabase("msa");
     //JSONObject war = msa.doReport(new PathHelper("war"));
     ServerProperties serverProps = msa.getServerProps();
-    AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), serverProps, msa, null,"", serverProps.getLanguage());
-    audioFileHelper.checkLTSOnForeignPhrase("test");
+    //AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), serverProps, msa, null,"", serverProps.getLanguage());
+    //audioFileHelper.checkLTSOnForeignPhrase("test");
     // logger.info("json:\n"+war);
   }
 
@@ -147,7 +147,7 @@ public class DecodeTest extends BaseTest {
 
   AudioFileHelper getAudioFileHelper(DatabaseImpl russian) {
     ServerProperties serverProps = russian.getServerProps();
-    return new AudioFileHelper(new PathHelper("war"), serverProps, russian, null, "", serverProps.getLanguage());
+    return new AudioFileHelper(new PathHelper("war"), serverProps, russian, null, null);
   }
 
   @Test
