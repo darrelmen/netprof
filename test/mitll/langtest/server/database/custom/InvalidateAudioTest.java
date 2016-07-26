@@ -6,7 +6,8 @@ import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.CommonExercise;
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -55,10 +56,10 @@ public class InvalidateAudioTest {
       if (newEx == null) {
         logger.warn("no new oldEx for old " + id);
       } else {
-  //      boolean different = isDifferentContext(id, oldEx, newEx,smallVocabDecoder);
-    //    if (different) {
-      //    idsOfDefects.addExerciseToList(id);
-      //  }
+        //      boolean different = isDifferentContext(id, oldEx, newEx,smallVocabDecoder);
+        //    if (different) {
+        //    idsOfDefects.addExerciseToList(id);
+        //  }
       }
     }
     logger.warn("ids to change - context " + idsOfDefects);
@@ -67,7 +68,7 @@ public class InvalidateAudioTest {
 
   private SmallVocabDecoder getSmallVocabDecoder(DatabaseImpl newDB) {
     ServerProperties serverProps = newDB.getServerProps();
-    AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), serverProps, newDB, null,"", serverProps.getLanguage());
+    AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), serverProps, newDB, null, null);
     return audioFileHelper.getSmallVocabDecoder();
   }
 
@@ -97,7 +98,7 @@ public class InvalidateAudioTest {
       if (newEx == null) {
         logger.warn("no new oldEx for old " + id);
       } else {
-        boolean different = isDifferent(id, oldEx, newEx,smallVocabDecoder);
+        boolean different = isDifferent(id, oldEx, newEx, smallVocabDecoder);
         if (different) {
           idsOfDefects.add(id);
         }
@@ -111,7 +112,7 @@ public class InvalidateAudioTest {
     String foreignLanguageNew = newEx.getForeignLanguage().toLowerCase().trim();
     String foreignLanguageOld = oldEx.getForeignLanguage().toLowerCase().trim();
 
-    return isDifferent(id, foreignLanguageNew, foreignLanguageOld,smallVocabDecoder);
+    return isDifferent(id, foreignLanguageNew, foreignLanguageOld, smallVocabDecoder);
   }
 
 /*  private boolean isDifferentContext(String id, CommonExercise oldEx, CommonExercise newEx, SmallVocabDecoder smallVocabDecoder) {
@@ -122,8 +123,8 @@ public class InvalidateAudioTest {
   }*/
 
   private boolean isDifferent(String id, String foreignLanguageNew, String foreignLanguageOld, SmallVocabDecoder smallVocabDecoder) {
-    List<String> newTokens = getTokens(foreignLanguageNew,smallVocabDecoder);
-    List<String> oldTokens = getTokens(foreignLanguageOld,smallVocabDecoder);
+    List<String> newTokens = getTokens(foreignLanguageNew, smallVocabDecoder);
+    List<String> oldTokens = getTokens(foreignLanguageOld, smallVocabDecoder);
 
     return isDifferent(id, foreignLanguageNew, foreignLanguageOld, newTokens, oldTokens);
   }
@@ -142,8 +143,8 @@ public class InvalidateAudioTest {
             newToken = newToken.substring(0, newToken.length() - 1);
           }
           if (!newToken.equals(oldToken)) {
-            logger.warn("3 Diff " + id + " new '" +newToken+
-                "' vs old '" +oldToken+
+            logger.warn("3 Diff " + id + " new '" + newToken +
+                "' vs old '" + oldToken +
                 "' : '" + foreignLanguageNew + "' vs '" + foreignLanguageOld + "'");
             return true;
           }
@@ -207,7 +208,7 @@ public class InvalidateAudioTest {
     logger.warn("marked " + c + "/" + i + " for " + exs.size());
   }
 
-  public List<String> getTokens(String sentence,SmallVocabDecoder smallVocabDecoder) {
+  public List<String> getTokens(String sentence, SmallVocabDecoder smallVocabDecoder) {
     List<String> all = new ArrayList<String>();
     // logger.debug("initial " + sentence);
     String trimmedSent = getTrimmed(sentence);
