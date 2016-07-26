@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.security;
 
+import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
@@ -41,6 +42,8 @@ import org.apache.logging.log4j.MarkerManager;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * UserSecurityManager: Provide top level security management.
@@ -69,7 +72,6 @@ public class UserSecurityManager {
   }
 
   /**
-   *
    * @param request
    * @param userId
    * @param killAllSessions
@@ -99,12 +101,20 @@ public class UserSecurityManager {
     return System.currentTimeMillis() - startMS;
   }
 
+  /**
+   * @see LangTestDatabaseImpl#getProject()
+   * @param request
+   * @return
+   * @throws RestrictedOperationException
+   * @throws DominoSessionException
+   */
   public User getLoggedInUser(HttpServletRequest request) throws RestrictedOperationException, DominoSessionException {
     return getLoggedInUser(request, "", false);
   }
 
   /**
    * Get the currently logged in user.
+   * @see #getLoggedInUser(HttpServletRequest)
    */
   private User getLoggedInUser(HttpServletRequest request, String opName, boolean throwOnFail)
       throws RestrictedOperationException, DominoSessionException {
@@ -183,6 +193,16 @@ public class UserSecurityManager {
 		return userDAO.lookupUser(sid);
 	}*/
 
+  private Map<Integer, User> idToSession = new HashMap<>();
+
+  private synchronized void rememberIDToUser(int id, User user) {
+    idToSession.put(id, user);
+  }
+
+  private synchronized User getUserForID(int id) {
+    return idToSession.get(id);
+  }
+
   /**
    * @param request
    * @return
@@ -197,9 +217,16 @@ public class UserSecurityManager {
           session.getId(), request.getRequestedSessionId(),
           request.getSession().getCreationTime(), request.getSession().isNew(), uidI);
       if (uidI != null) {
-        sessUser = userDAO.getByID(uidI);
+       // User userForID = getUserForID(uidI);
+        //if (userForID == null) {
+          sessUser = userDAO.getByID(uidI);
+        //  rememberIDToUser(uidI, sessUser);
+       // }
+//        else {
+//          return userForID;
+//        }
       }
-    } else if (request != null ){
+    } else if (request != null) {
       log.info("Lookup user from session returning null for null session. Request SID={}",
           request.getRequestedSessionId());
     }

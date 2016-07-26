@@ -333,14 +333,17 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @see Banner#populateListChoices
    * @param projectid
    */
-  public void setProject(int projectid) {
+  public User setProject(int projectid) {
     try {
       User sessionUser = getSessionUser();
       if (sessionUser != null) {
         db.getUserProjectDAO().add(sessionUser.getId(), projectid);
       }
+      db.setStartupInfo(sessionUser,projectid);
+      return sessionUser;
     } catch (DominoSessionException e) {
       logger.error("got " +e,e);
+      return null;
     }
   }
 }
