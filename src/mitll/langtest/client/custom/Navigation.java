@@ -236,7 +236,7 @@ public class Navigation implements RequiresResize, ShowTab {
    *
    * @return
    * @see #getTabPanel
-   * @see mitll.langtest.client.LangTest#populateRootPanel()
+   * @see mitll.langtest.client.InitialUI#populateBelowHeader(Container, Panel)
    */
   public Widget getTabPanel() {
     tabPanel = new TabPanel();
