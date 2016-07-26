@@ -48,7 +48,13 @@ import java.util.Collection;
 public interface UserNotification {
   void showLogin();
 
+  /**
+   * @see UserManager#gotNewUser(User)
+   * @see UserManager#storeUser(User)
+   * @param user
+   */
   void gotUser(User user);
   void setPermission(User.Permission permission, boolean on);
   Collection<User.Permission> getPermissions();
+  void setProjectStartupInfo(User user);
 }

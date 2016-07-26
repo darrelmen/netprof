@@ -51,12 +51,15 @@ import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.InitialUI;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.client.services.UserService;
 import mitll.langtest.client.services.UserServiceAsync;
+import mitll.langtest.client.user.UserManager;
+import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.user.SlimProject;
 import mitll.langtest.shared.user.User;
@@ -100,13 +103,16 @@ public class Banner implements RequiresResize {
   private Dropdown cogMenu;
   private final PropertyHandler props;
   private final UserServiceAsync userServiceAsync;
-  ExerciseController controller;
+  private ExerciseController controller;
   private ListBox projectChoices;
+  private Navigation navigation;
+  private UserNotification userNotification;
 
   /**
-   * @see mitll.langtest.client.InitialUI#makeHeaderRow
+   * @see mitll.langtest.client.InitialUI#InitialUI(LangTest, UserManager)
    */
-  public Banner(PropertyHandler props, UserServiceAsync userServiceAsync, ExerciseController controller) {
+  public Banner(PropertyHandler props, UserServiceAsync userServiceAsync, ExerciseController controller,
+                UserNotification userNotification) {
     this.props = props;
     this.nameForAnswer = props.getNameForAnswer() + "s";
     isAnonymous = props.getLoginType().equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS);
@@ -116,6 +122,7 @@ public class Banner implements RequiresResize {
         "Subject=Question%20about%20" + props.getLanguage() + "%20NetProF";
     this.userServiceAsync = userServiceAsync;
     this.controller = controller;
+    this.userNotification = userNotification;
   }
 
   /**
@@ -125,7 +132,8 @@ public class Banner implements RequiresResize {
    * @return
    * @see InitialUI#makeHeaderRow()
    */
-  public Panel makeNPFHeaderRow(String splashText, boolean isBeta, String userName, HTML browserInfo,
+  public Panel makeNPFHeaderRow(String splashText,
+                                boolean isBeta, String userName, HTML browserInfo,
                                 ClickHandler logoutClickHandler,
                                 ClickHandler users,
                                 ClickHandler results,
@@ -150,6 +158,8 @@ public class Banner implements RequiresResize {
 
     flashcard.add(appName);
     flashcard.add(projectChoices = getProjectChoices());
+
+    projectChoices.setVisible(false);
 
     flashcardImage = new Image(LangTest.LANGTEST_IMAGES + Banner.NEW_PRO_F1_PNG);
     flashcardImage.addStyleName("floatLeft");
@@ -223,9 +233,12 @@ public class Banner implements RequiresResize {
       @Override
       public void onSuccess(Collection<SlimProject> projects) {
         projectChoices.clear();
-        boolean anyAdded = false;
+        logger.info("got " + projects.size() + " projects");
+     //   boolean anyAdded = false;
         //    logger.info("\tpopulateListChoices : found list " + result.size() + " choices");
         //projectChoices.addItem("Choose a Language");
+
+        projectChoices.setVisible(!projects.isEmpty());
 
         for (final SlimProject project : projects) {
           String name = project.getName();
@@ -241,15 +254,17 @@ public class Banner implements RequiresResize {
             public void onChange(ChangeEvent event) {
               for (SlimProject project1 : projects) {
                 if (project1.getName().equals(projectChoices.getValue())) {
-                  userServiceAsync.setProject(project1.getProjectid(), new AsyncCallback<Void>() {
+                  userServiceAsync.setProject(project1.getProjectid(), new AsyncCallback<User>() {
                     @Override
                     public void onFailure(Throwable throwable) {
 
                     }
 
                     @Override
-                    public void onSuccess(Void aVoid) {
-                      Window.Location.reload();
+                    public void onSuccess(User aUser) {
+                      userNotification.setProjectStartupInfo(aUser);
+                      navigation.showInitialState();
+                      //Window.Location.reload();
                     }
                   });
                   break;
@@ -354,7 +369,6 @@ public class Banner implements RequiresResize {
 
   private Anchor getAnchor() {
     Anchor emailAnchor = new Anchor(NEED_HELP_QUESTIONS_CONTACT_US, HREF);
-
     emailAnchor.getElement().setId("emailAnchor");
     emailAnchor.addStyleName("bold");
     emailAnchor.addStyleName("rightTwentyMargin");
@@ -492,5 +506,9 @@ public class Banner implements RequiresResize {
     if (ratio < MIN_RATIO) ratio = MIN_RATIO;
     if (ratio > MAX_FONT_EM) ratio = MAX_FONT_EM;
     appName.getElement().getStyle().setFontSize(ratio, Style.Unit.EM);
+  }
+
+  public void setNavigation(Navigation navigation) {
+    this.navigation = navigation;
   }
 }
