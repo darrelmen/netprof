@@ -69,7 +69,7 @@ public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
       }
       if (missing > 0) {
         logger.warn("skipped " + missing + " out of " + all.size() + " : " + missingEx.size() + " missing " + missingEx);
-        logger.warn("found   " + ex.size() + " ex " + ex);
+        logger.warn("found   " + ex.size());// + " events ex " + ex);
       }
       eventDAOWrapper.addBulk(copy);
     }

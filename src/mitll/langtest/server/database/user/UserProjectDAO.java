@@ -77,9 +77,8 @@ public class UserProjectDAO implements IUserProjectDAO {
   @Override
   public int mostRecentByUser(int user) {
     List<SlickUserProject> slickUserProjects = dao.mostRecentByUser(user);
-    SlickUserProject next = slickUserProjects.iterator().next();
-    logger.info("most recent project for " +user + " is " + next);
-    return slickUserProjects.isEmpty() ? -1 : next.projid();
+//    logger.info("most recent project for " +user + " is " + next);
+    return slickUserProjects.isEmpty() ? -1 : slickUserProjects.iterator().next().projid();
   }
 
 //  @Override
