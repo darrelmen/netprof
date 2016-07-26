@@ -390,8 +390,11 @@ public class SlickUserExerciseDAO
     };
   }
 
-  public void insertRelated(int id, int contextid, int projectid) {
-    relatedExerciseDAOWrapper.insert(new SlickRelatedExercise(-1, id, contextid, projectid));
+//  public void insertRelated(int id, int contextid, int projectid) {
+//    relatedExerciseDAOWrapper.insert(new SlickRelatedExercise(-1, id, contextid, projectid));
+//  }
+  public void addBulkRelated(List<SlickRelatedExercise> relatedExercises) {
+    relatedExerciseDAOWrapper.addBulk(relatedExercises);
   }
 
   public Collection<SlickRelatedExercise> getAllRelated(int projid) {
