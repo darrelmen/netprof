@@ -996,9 +996,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
     if (!didCheckLTS) {
 //      buildExerciseTrie();
-      getAudioFileHelper().checkLTSAndCountPhones(exercises);
-      shareAudioFileHelper(getServletContext());
-      didCheckLTS = true;
+      AudioFileHelper audioFileHelper = getAudioFileHelper();
+
+      if (audioFileHelper == null) logger.error("no audio file helper for " + getProject());
+      else {
+        audioFileHelper.checkLTSAndCountPhones(exercises);
+        shareAudioFileHelper(getServletContext());
+        didCheckLTS = true;
+      }
     }
 
     now = System.currentTimeMillis();
@@ -2301,9 +2306,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   private int getProjectID() {
     try {
-      HttpServletRequest threadLocalRequest = getThreadLocalRequest();
-      //   logger.info("getProjectID got request " + threadLocalRequest);
-      User loggedInUser = securityManager.getLoggedInUser(threadLocalRequest);
+      User loggedInUser = getSessionUser();
       if (loggedInUser == null) return -1;
       int i = db.getProjectIDForUser(loggedInUser);
       return i;
@@ -2313,11 +2316,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
+  private User getSessionUser() throws DominoSessionException {
+    HttpServletRequest threadLocalRequest = getThreadLocalRequest();
+    //   logger.info("getProjectID got request " + threadLocalRequest);
+    return securityManager.getLoggedInUser(threadLocalRequest);
+  }
+
   private Project getProject() {
     try {
-      HttpServletRequest threadLocalRequest = getThreadLocalRequest();
-      //   logger.info("getProjectID got request " + threadLocalRequest);
-      User loggedInUser = securityManager.getLoggedInUser(threadLocalRequest);
+      User loggedInUser = getSessionUser();
       if (loggedInUser == null) return null;
       else return db.getProjectForUser(loggedInUser.getId());
     } catch (DominoSessionException e) {
