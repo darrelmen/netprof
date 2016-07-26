@@ -44,6 +44,7 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.SLFFile;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
@@ -86,14 +87,12 @@ public class ASRScoring extends Scoring implements ASR {
    * @param deployPath
    * @param serverProperties
    * @param langTestDatabase
-   * @param modelsDir
-   * @param language
-   * @param hasModel
+   * @param project
    * @see mitll.langtest.server.audio.AudioFileHelper#makeASRScoring
    */
   public ASRScoring(String deployPath, ServerProperties serverProperties, LogAndNotify langTestDatabase,
-                    HTKDictionary htkDictionary, String modelsDir, String language, boolean hasModel) {
-    super(deployPath, serverProperties, langTestDatabase, htkDictionary, modelsDir, language,hasModel);
+                    HTKDictionary htkDictionary, Project project) {
+    super(deployPath, serverProperties, langTestDatabase, htkDictionary, project);
     audioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
   }
 

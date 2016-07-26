@@ -2164,8 +2164,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       readProperties(getServletContext());
       setInstallPath(db);
       if (serverProps.isAMAS()) {
-        audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, this,
-            serverProps.getProps().getProperty(ServerProperties.MODELS_DIR), getOldLanguage());
+        audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, this, null);
       }
     } catch (Exception e) {
       startupMessage = e.getMessage();
