@@ -62,7 +62,7 @@ public class UserExTest extends BaseTest {
     IUserExerciseDAO dao = spanish.getUserExerciseDAO();
     IUserListManager userListManager = spanish.getUserListManager();
 
-    Collection<UserList<CommonShell>> listsForUser = userListManager.getListsForUser(2, true, false);
+    Collection<UserList<CommonShell>> listsForUser = userListManager.getListsForUser(2, true, false, 1);
 
     for (UserList<CommonShell> list : listsForUser) {
       logger.info("got " + list);
@@ -89,7 +89,7 @@ public class UserExTest extends BaseTest {
     DatabaseImpl spanish = getDatabase("spanish");
 
     IUserListManager userListManager = spanish.getUserListManager();
-    Collection<UserList<CommonShell>> listsForUser = userListManager.getListsForUser(270, true, false);
+    Collection<UserList<CommonShell>> listsForUser = userListManager.getListsForUser(270, true, false, 1);
 
     for (UserList<CommonShell> list : listsForUser) {
       logger.info("got " + list);
@@ -105,7 +105,7 @@ public class UserExTest extends BaseTest {
 
     IUserListManager userListManager = spanish.getUserListManager();
 
-    Collection<UserList<CommonShell>> listsForUser = userListManager.getListsForUser(2, true, false);
+    Collection<UserList<CommonShell>> listsForUser = userListManager.getListsForUser(2, true, false, 1);
 
     for (UserList<CommonShell> list : listsForUser) {
       logger.info("got " + list);
@@ -114,7 +114,7 @@ public class UserExTest extends BaseTest {
       }
     }
 
-    Collection<UserList<CommonShell>> before = userListManager.getListsForUser(2, false, true);
+    Collection<UserList<CommonShell>> before = userListManager.getListsForUser(2, false, true, 1);
 
     for (UserList<CommonShell> list : before) {
       logger.info("before " + list);
@@ -126,7 +126,7 @@ public class UserExTest extends BaseTest {
     int user = 6;
     userListManager.addVisitor(next.getID(), user);
 
-    Collection<UserList<CommonShell>> after = userListManager.getListsForUser(user, false, true);
+    Collection<UserList<CommonShell>> after = userListManager.getListsForUser(user, false, true, 1);
 
     for (UserList<CommonShell> list : after) {
       logger.info("after " + list);
@@ -144,21 +144,21 @@ public class UserExTest extends BaseTest {
 
     IUserListManager userListManager = spanish.getUserListManager();
 
-    Collection<UserList<CommonShell>> before = userListManager.getListsForUser(user, false, true);
+    Collection<UserList<CommonShell>> before = userListManager.getListsForUser(user, false, true, 1);
     logger.info("before " + before);
     userListManager.addVisitor(337, user);
-    Collection<UserList<CommonShell>> after = userListManager.getListsForUser(user, false, true);
+    Collection<UserList<CommonShell>> after = userListManager.getListsForUser(user, false, true, 1);
     logger.info("after " + after);
 
-    Collection<UserList<CommonShell>> createdLists = userListManager.getListsForUser(316, true, false);
+    Collection<UserList<CommonShell>> createdLists = userListManager.getListsForUser(316, true, false, 1);
     logger.info("createdLists " + createdLists);
 
     boolean b = userListManager.deleteList(337);
     logger.info("did delete " + b);
-    Collection<UserList<CommonShell>> afterDelete = userListManager.getListsForUser(user, false, true);
+    Collection<UserList<CommonShell>> afterDelete = userListManager.getListsForUser(user, false, true, 1);
     logger.info("afterDelete " + afterDelete);
 
-    Collection<UserList<CommonShell>> afterCreatedLists = userListManager.getListsForUser(316, true, false);
+    Collection<UserList<CommonShell>> afterCreatedLists = userListManager.getListsForUser(316, true, false, 1);
     logger.info("afterCreatedLists " + afterCreatedLists);
 
   }

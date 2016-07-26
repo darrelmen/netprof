@@ -81,17 +81,18 @@ public class Project {
     this.project = project;
     this.typeOrder = Arrays.asList(project.first(), project.second());
     String prop = project.getProp(ServerProperties.MODELS_DIR);
-    logger.info("Project got " + ServerProperties.MODELS_DIR + ": " + prop);
+   // logger.info("Project got " + ServerProperties.MODELS_DIR + ": " + prop);
     audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, logAndNotify, prop, project.language());
-    logger.info("Project got " + audioFileHelper);
-    logger.info("Project got " + audioFileHelper.getCollator());
+   // logger.info("Project got " + audioFileHelper);
+   // logger.info("Project got " + audioFileHelper.getCollator());
 
     this.relativeConfigDir = relativeConfigDir;
     this.db = db;
     this.serverProps = serverProps;
     this.pathHelper = pathHelper;
-    //buildExerciseTrie(db);
   }
+
+  public String getLanguage() { return project.language(); }
 
   /**
    * Only public to support deletes...
@@ -114,6 +115,8 @@ public class Project {
   public boolean isNoModel() {
     return project.getProp(ServerProperties.MODELS_DIR) == null;
   }
+
+  private boolean hasModel() { return !isNoModel(); }
 
   public SlickProject getProject() {
     return project;
@@ -151,11 +154,10 @@ public class Project {
     return jsonSupport;
   }
 
-  public void setAnalysis(SlickAnalysis analysis
-  ) {
+  public void setAnalysis(SlickAnalysis analysis) {
     this.analysis = analysis;
     fullTrie = new ExerciseTrie<>(getExercisesForUser(), project.language(), getSmallVocabDecoder());
-    this.refResultDecoder = new RefResultDecoder(db, serverProps, pathHelper, getAudioFileHelper());
+    this.refResultDecoder = new RefResultDecoder(db, serverProps, pathHelper, getAudioFileHelper(), hasModel());
     refResultDecoder.doRefDecode(getExercisesForUser(), relativeConfigDir);
   }
 
