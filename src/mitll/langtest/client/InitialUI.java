@@ -81,9 +81,9 @@ public class InitialUI {
   /**
    * How far to the right to shift the list of sites...
    *
-   * @see #getLinksToSites()
+   * @seex #getLinksToSites()
    */
-  private static final int LEFT_LIST_WIDTH = 267;
+ // private static final int LEFT_LIST_WIDTH = 267;
 
   private static final String LANGTEST_IMAGES = "langtest/images/";
   private static final int NO_USER_INITIAL = -2;
@@ -109,7 +109,7 @@ public class InitialUI {
     this.langTest = langTest;
     this.props = langTest.getProps();
     this.userManager = userManager;
-    banner = new Banner(props, userService, langTest);
+    banner = new Banner(props, userService, langTest, langTest);
   }
 
   private Container verticalContainer;
@@ -142,9 +142,10 @@ public class InitialUI {
     headerRow.getElement().setId("headerRow");
 
     Panel firstRow = new DivWidget();
+    firstRow.getElement().setId("firstRow");
+
     verticalContainer.add(firstRow);
     this.firstRow = firstRow;
-    firstRow.getElement().setId("firstRow");
     return firstRow;
   }
 
@@ -346,9 +347,10 @@ public class InitialUI {
 
     navigation = new Navigation(service, userManager, langTest, langTest);
 
+    banner.setNavigation(navigation);
+
     firstRow.add(navigation.getTabPanel());
     //verticalContainer.add(getLinksToSites());
-
     addResizeHandler();
   }
 

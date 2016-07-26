@@ -84,7 +84,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
   private Panel clearColumnContainer;
   private Panel labelColumn;
   private final Heading statusHeader = new Heading(4);
-  private Collection<String> typeOrder;
+ // private Collection<String> typeOrder;
   private final Panel sectionPanel;
   private final DownloadHelper downloadHelper;
   private int rememberedID = -1;
@@ -129,7 +129,6 @@ public class FlexSectionExerciseList extends NPExerciseList {
        */
       protected void selectItem(String type, Collection<String> sections) {
      //   logger.info("FlexSectionExerciseList.selectItem : selecting " + type + "=" + sections);
-
         ButtonGroupSectionWidget listBox = getGroupSection(type);
         listBox.clearSelectionState();
         listBox.selectItem(sections);
@@ -162,7 +161,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
   private Panel getWidgetsForTypes() {
     final FluidContainer container = new FluidContainer();
     container.getElement().setId("typeOrderContainer");
-    container.getElement().getStyle().setPaddingLeft(2, Style.Unit.PX);
+    container.getElement().getStyle().setPaddingLeft (2, Style.Unit.PX);
     container.getElement().getStyle().setPaddingRight(2, Style.Unit.PX);
 
     getTypeOrder(container);
@@ -171,8 +170,8 @@ public class FlexSectionExerciseList extends NPExerciseList {
   }
 
   private void getTypeOrder(final FluidContainer container) {
-    typeOrder = controller.getTypeOrder();
-    addButtonRow(controller.getStartupInfo().getSectionNodes(), container, typeOrder);
+   // typeOrder = ;
+    addButtonRow(controller.getStartupInfo().getSectionNodes(), container, controller.getTypeOrder());
   }
 
   /**
@@ -456,7 +455,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
 
       //System.out.println("showSelectionState : typeOrder " + typeOrder + " selection state " + typeToSection);
 
-      for (String type : typeOrder) {
+      for (String type : controller.getTypeOrder()) {
         Collection<String> selectedItems = typeToSection.get(type);
         if (selectedItems != null) {
           // String statusForType = type + " " + selectedItems.toString().replaceAll("\\[", "").replaceAll("\\]", "");
