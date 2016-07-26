@@ -68,5 +68,5 @@ public interface UserServiceAsync {
 
   void getProjects(AsyncCallback<Collection<SlimProject>> async);
 
-  void setProject(int projectid,AsyncCallback<Void> async);
+  void setProject(int projectid,AsyncCallback<User> async);
 }

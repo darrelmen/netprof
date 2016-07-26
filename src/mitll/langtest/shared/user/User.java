@@ -66,6 +66,10 @@ public class User extends MiniUser {
     return getUserKind().equals(Kind.CONTENT_DEVELOPER);
   }
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#setStartupInfo
+   * @param startupInfo
+   */
   public void setStartupInfo(ProjectStartupInfo startupInfo) {
     this.startupInfo = startupInfo;
   }
