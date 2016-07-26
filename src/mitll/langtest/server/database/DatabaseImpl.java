@@ -274,12 +274,6 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
       if (!idToProject.containsKey(slickProject.id())) {
         Project project = new Project(slickProject, pathHelper, serverProps, this, logAndNotify, relativeConfigDir);
         idToProject.put(project.getProject().id(), project);
-//        if (reload && project.getExerciseDAO() == null) {
-//          setExerciseDAO(project);
-//        }
-//        else {
-//          logger.info("not setting exercise dao on " + project);
-//        }
         logger.info("populateProjects (reload = " + reload + ") : " + project + " : " + project.getAudioFileHelper());
       }
     }
@@ -299,6 +293,10 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     }
     logger.info("populateProjects (reload = " + reload +
         ") now project ids " + idToProject.keySet());
+  }
+
+  private void addSingleProject(ExerciseDAO<CommonExercise> jsonExerciseDAO) {
+    idToProject.put(IMPORT_PROJECT_ID, new Project(jsonExerciseDAO));
   }
 
   private Connection getConnection() {
@@ -621,7 +619,11 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
 
   public void setStartupInfo(User userWhere) {
     int i = getUserProjectDAO().mostRecentByUser(userWhere.getId());
-    Project project = getProject(i);
+    setStartupInfo(userWhere, i);
+  }
+
+  public void setStartupInfo(User userWhere, int projid) {
+    Project project = getProject(projid);
     SlickProject project1 = project.getProject();
     ProjectStartupInfo startupInfo = new ProjectStartupInfo(getServerProps().getProperties(),
         project.getTypeOrder(), project.getSectionHelper().getSectionNodes(), project1.id(), project1.language());
@@ -770,14 +772,12 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     Project project = idToProject.get(projectid);
     if (project == null) {
       Project firstProject = getFirstProject();
-      logger.error("no project with id " + projectid + " returning " + firstProject);
+      logger.error("no project with id " + projectid + " in known projects (" + idToProject.keySet() +
+          ")" +
+          " returning " + firstProject);
       return firstProject;
     }
     return project;
-  }
-
-  private void addSingleProject(ExerciseDAO<CommonExercise> jsonExerciseDAO) {
-    idToProject.put(IMPORT_PROJECT_ID, new Project(jsonExerciseDAO));
   }
 
   private Collection<Project> getProjects() {

@@ -159,10 +159,10 @@ public class ListManager implements RequiresResize {
       }
     });
 
-    npfHelper = new NPFHelper(service, feedback, controller, false);
+    npfHelper  = new NPFHelper(service, feedback, controller, false);
     reviewItem = new ReviewItemHelper(service, feedback, controller, exerciseList);//, npfHelper);
-    avpHelper = new AVPHelper(service, feedback, controller);
-    editItem = new EditItem(service, userManager, controller, exerciseList, feedback);//, npfHelper);
+    avpHelper  = new AVPHelper(service, feedback, controller);
+    editItem   = new EditItem(service, userManager, controller, exerciseList, feedback);//, npfHelper);
   }
 
   public void addStudyLists(final TabAndContent studyLists) {
