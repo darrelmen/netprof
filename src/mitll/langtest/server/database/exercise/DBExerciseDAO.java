@@ -78,37 +78,35 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       List<String> typeOrder = Arrays.asList(project.first(), project.second());
       String prefix = "Project " + project.name();
 
-      int id = project.id();
-      List<CommonExercise> allNonContextExercises = userExerciseDAO.getByProject(id, typeOrder, getSectionHelper());
-      logger.info("project " + project +
-          " readExercises got " + allNonContextExercises.size() + " predef exercises;");
+      int projid = project.id();
+      List<CommonExercise> allNonContextExercises = userExerciseDAO.getByProject(projid, typeOrder, getSectionHelper());
+      logger.info("project " + project +" readExercises got " + allNonContextExercises.size() + " predef exercises;");
 
-      Collection<SlickRelatedExercise> related = userExerciseDAO.getAllRelated(id);
+      Collection<SlickRelatedExercise> related = userExerciseDAO.getAllRelated(projid);
 
       logger.info(prefix + " readExercises got " + related.size() + " related exercises;");
 
       Map<Integer, CommonExercise> idToEx = getIDToExercise(allNonContextExercises);
       Map<Integer, CommonExercise> idToContext =
-          getIDToExercise(userExerciseDAO.getContextByProject(id, typeOrder, getSectionHelper()));
+          getIDToExercise(userExerciseDAO.getContextByProject(projid, typeOrder, getSectionHelper()));
 
       logger.info(prefix + " idToContext " + idToContext.size());
 
       int attached = 0;
       int c = 0;
       for (SlickRelatedExercise relatedExercise : related) {
-        CommonExercise root = idToEx.get(relatedExercise.id());
+        CommonExercise root = idToEx.get(relatedExercise.exid());
         if (root != null) {
           CommonExercise context = idToContext.get(relatedExercise.contextexid());
           if (context != null) {
             root.getMutable().addContextExercise(context);
             attached++;
-          } else if (c++ < 100) {
-            logger.warn(prefix + " didn't attach " + relatedExercise + "" +
+          } else if (c++ < 10) {
+            logger.warn("1 " +prefix + " didn't attach " + relatedExercise + "" +
                 " for\n" + root + "\n and " + context);
           }
-
-        } else if (c++ < 100) {
-          logger.warn(prefix + " didn't attach " + relatedExercise + "" +
+        } else if (c++ < 10) {
+          logger.warn("2 " + prefix + " didn't attach " + relatedExercise + "" +
               " for, e.g. " + allNonContextExercises.iterator().next());
         }
       }

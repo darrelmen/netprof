@@ -102,11 +102,11 @@ public class UserSecurityManager {
   }
 
   /**
-   * @see LangTestDatabaseImpl#getProject()
    * @param request
    * @return
    * @throws RestrictedOperationException
    * @throws DominoSessionException
+   * @see LangTestDatabaseImpl#getProject()
    */
   public User getLoggedInUser(HttpServletRequest request) throws RestrictedOperationException, DominoSessionException {
     return getLoggedInUser(request, "", false);
@@ -114,6 +114,7 @@ public class UserSecurityManager {
 
   /**
    * Get the currently logged in user.
+   *
    * @see #getLoggedInUser(HttpServletRequest)
    */
   private User getLoggedInUser(HttpServletRequest request, String opName, boolean throwOnFail)
@@ -207,6 +208,7 @@ public class UserSecurityManager {
    * @param request
    * @return
    * @throws DominoSessionException
+   * @see #lookupUser(HttpServletRequest, boolean)
    */
   private User lookupUserFromHttpSession(HttpServletRequest request) {
     User sessUser = null;
@@ -217,11 +219,12 @@ public class UserSecurityManager {
           session.getId(), request.getRequestedSessionId(),
           request.getSession().getCreationTime(), request.getSession().isNew(), uidI);
       if (uidI != null) {
-       // User userForID = getUserForID(uidI);
-        //if (userForID == null) {
+        sessUser = getUserForID(uidI);
+        if (sessUser == null) {
+          log.info("lookupUserFromHttpSession got cache miss for " + uidI);
           sessUser = userDAO.getByID(uidI);
-        //  rememberIDToUser(uidI, sessUser);
-       // }
+          rememberIDToUser(uidI, sessUser);
+        }
 //        else {
 //          return userForID;
 //        }
