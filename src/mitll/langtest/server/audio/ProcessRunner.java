@@ -46,15 +46,15 @@ import java.io.InputStreamReader;
  * Time: 4:03 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ProcessRunner {
+class ProcessRunner {
   // private static final Logger logger = Logger.getLogger(ProcessRunner.class);
   //private static final boolean SHOW_OUTPUT = true;
 
-  public boolean runProcess(ProcessBuilder shellProc) throws IOException {
+  boolean runProcess(ProcessBuilder shellProc) throws IOException {
     return runProcess(shellProc, false);
   }
 
-  public boolean runProcess(ProcessBuilder shellProc, boolean showOutput) throws IOException {
+  boolean runProcess(ProcessBuilder shellProc, boolean showOutput) throws IOException {
     //logger.debug(new Date() + " : proc " + shellProc.command() + " started...");
     shellProc.redirectErrorStream(true);
     Process process2 = shellProc.start();
