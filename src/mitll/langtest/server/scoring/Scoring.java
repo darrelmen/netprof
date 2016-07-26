@@ -114,7 +114,7 @@ public abstract class Scoring {
    * @see ASRScoring#ASRScoring
    */
   Scoring(String deployPath, ServerProperties props, LogAndNotify langTestDatabase, HTKDictionary htkDictionary,
-          String modelsDir, String language) {
+          String modelsDir, String language, boolean hasModel) {
     this.deployPath = deployPath;
     this.scoringDir = getScoringDir(deployPath);
     this.props = props;
@@ -143,7 +143,7 @@ public abstract class Scoring {
 
     // readDictionary();
     makeDecoder();
-    checkLTSHelper = new CheckLTS(getLTS(), htkDictionary, language, props.hasModel());
+    checkLTSHelper = new CheckLTS(getLTS(), htkDictionary, language, hasModel);
   }
 
   LTS getLTS() {

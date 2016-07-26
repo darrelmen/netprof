@@ -60,13 +60,13 @@ public interface IUserListManager {
 
   void markState(Collection<? extends CommonShell> shells);
 
-  long addUserList(int userid, String name, String description, String dliClass, boolean isPublic);
+  long addUserList(int userid, String name, String description, String dliClass, boolean isPublic, int projid);
 
-  Collection<UserList<CommonShell>> getMyLists(int userid);
+  Collection<UserList<CommonShell>> getMyLists(int userid, int projid);
 
-  Collection<UserList<CommonShell>> getListsForUser(int userid, boolean listsICreated, boolean visitedLists);
+  Collection<UserList<CommonShell>> getListsForUser(int userid, boolean listsICreated, boolean visitedLists, int projid);
 
-  UserList createFavorites(int userid);
+  UserList createFavorites(int userid, int projid);
 
   UserList<CommonShell> getCommentedList(Collection<String> typeOrder);
 
@@ -74,7 +74,7 @@ public interface IUserListManager {
 
   UserList<CommonShell> getDefectList(Collection<String> typeOrder);
 
-  List<UserList<CommonShell>> getUserListsForText(String search, int userid);
+  List<UserList<CommonShell>> getUserListsForText(String search, int userid, int projid);
 
   void reallyCreateNewItem(long userListID, CommonExercise userExercise, String mediaDir);
 

@@ -192,7 +192,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   public User addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, String email,
                       boolean isMale, int age, String dialect, boolean isCD, String device, int projid) {
     findSharedDatabase();
-    User newUser = db.addUser(getThreadLocalRequest(), userID, passwordH, emailH, kind, isMale, age, dialect, "browser");
+    User newUser = db.addUser(getThreadLocalRequest(), userID, passwordH, emailH, kind, isMale, age, dialect, "browser", projid);
     MailSupport mailSupport = getMailSupport();
 
     if (newUser != null && !newUser.isEnabled()) { // newUser = null means existing newUser.

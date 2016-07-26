@@ -64,7 +64,7 @@ public abstract class BaseUserDAO extends DAO {
   static final String ENABLED_REQ_KEY = "enabledReqKey";
   static final String NATIVE_LANG = "nativeLang";
   static final String UNKNOWN = "unknown";
-  final String language;
+  @Deprecated final String language;
   private int defectDetector,beforeLoginUser, importUser;
   private final boolean enableAllUsers;
 
@@ -128,7 +128,7 @@ public abstract class BaseUserDAO extends DAO {
    * @param device
    * @return null if existing, valid user (email and password)
    * @see mitll.langtest.server.database.DatabaseImpl#addUser
-   * @see UserManagement#addAndGetUser(String, String, String, User.Kind, boolean, int, String, String, String)
+   * @see UserManagement#addAndGetUser
    */
   public User addUser(String userID, String passwordH, String emailH, User.Kind kind, String ipAddr,
                       boolean isMale, int age, String dialect, String device) {
@@ -137,12 +137,12 @@ public abstract class BaseUserDAO extends DAO {
       // user exists!
       if (userByID.getEmailHash() != null && userByID.getPasswordHash() != null &&
           !userByID.getEmailHash().isEmpty() && !userByID.getPasswordHash().isEmpty()) {
-        logger.debug(language + " : addUser : user " + userID + " is an existing user.");
+        logger.debug(" : addUser : user " + userID + " is an existing user.");
         return null; // existing user!
       } else {
         updateUser(userByID.getId(), kind, passwordH, emailH);
         User userWhere = getUserWhere(userByID.getId());
-        logger.debug(language + " : addUser : returning updated user " + userWhere);
+        logger.debug(" : addUser : returning updated user " + userWhere);
         return userWhere;
       }
     } else {
@@ -151,7 +151,7 @@ public abstract class BaseUserDAO extends DAO {
 
       int l = addUser(age, isMale ? MALE : FEMALE, 0, ipAddr, "", "", dialect, userID, enabled, perms, kind, passwordH, emailH, device);
       User userWhere = getUserWhere(l);
-      logger.debug(language + " : addUser : added new user " + userWhere);
+      logger.debug(" : addUser : added new user " + userWhere);
 
       return userWhere;
     }

@@ -202,12 +202,12 @@ public class CopyToPostgres<T extends CommonShell> {
     }
   }
 
-  public Map<String, Integer> copyOnlyUserExercises(DatabaseImpl db) {
+/*  public Map<String, Integer> copyOnlyUserExercises(DatabaseImpl db) {
     int projectID = createProjectIfNotExists(db);
     SlickUserDAOImpl slickUserDAO = (SlickUserDAOImpl) db.getUserDAO();
     Map<Integer, Integer> oldToNewUser = copyUsers(db, slickUserDAO);
     return copyUserAndPredefExercisesAndLists(db, projectID, oldToNewUser);
-  }
+  }*/
 
   private Map<String, Integer> copyUserAndPredefExercisesAndLists(DatabaseImpl db,
                                                                   int projectID,
@@ -215,18 +215,18 @@ public class CopyToPostgres<T extends CommonShell> {
     Map<String, Integer> exToID = copyUserAndPredefExercises(db, oldToNewUser, projectID);
 
     SlickUserListDAO slickUserListDAO = (SlickUserListDAO) db.getUserListManager().getUserListDAO();
-    copyUserExerciseList(db, oldToNewUser, slickUserListDAO);
+    copyUserExerciseList(db, oldToNewUser, slickUserListDAO, projectID);
 
-    Map<Integer, Integer> oldToNewUserList = slickUserListDAO.getOldToNew();
+    Map<Integer, Integer> oldToNewUserList = slickUserListDAO.getOldToNew(projectID);
     copyUserExerciseListVisitor(db, oldToNewUser, oldToNewUserList, (SlickUserListExerciseVisitorDAO) db.getUserListManager().getVisitorDAO());
     //   copyUserExerciseListJoin(db, oldToNewUserList);
     copyUserExListJoin(db, exToID, projectID);
     return exToID;
   }
 
-  public void copyUserExListJoin(DatabaseImpl db, Map<String, Integer> exToInt, int projectid) {
+  private void copyUserExListJoin(DatabaseImpl db, Map<String, Integer> exToInt, int projectid) {
     SlickUserListDAO slickUserListDAO = (SlickUserListDAO) db.getUserListManager().getUserListDAO();
-    Map<Integer, Integer> oldToNewUserList = slickUserListDAO.getOldToNew();
+    Map<Integer, Integer> oldToNewUserList = slickUserListDAO.getOldToNew(projectid);
     copyUserExerciseListJoin(db, oldToNewUserList, exToInt, projectid);
   }
 
@@ -532,7 +532,10 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param slickUserListDAO
    * @see #copyUserAndPredefExercisesAndLists(DatabaseImpl, int, Map)
    */
-  private void copyUserExerciseList(DatabaseImpl db, Map<Integer, Integer> oldToNewUser, SlickUserListDAO slickUserListDAO) {
+  private void copyUserExerciseList(DatabaseImpl db,
+                                    Map<Integer, Integer> oldToNewUser,
+                                    SlickUserListDAO slickUserListDAO,
+                                    int projid) {
     //if (true) {
     //if (slickUserListDAO.isEmpty()) {
     UserDAO userDAO = new UserDAO(db);
@@ -546,7 +549,7 @@ public class CopyToPostgres<T extends CommonShell> {
         logger.error("UserListManager can't find user " + oldID + " in " + oldToNewUser.size());
       }
       else {
-        slickUserListDAO.addWithUser(list, integer);
+        slickUserListDAO.addWithUser(list, integer, projid);
       }
     }
     //}
