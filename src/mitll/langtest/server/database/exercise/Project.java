@@ -57,6 +57,10 @@ import java.util.List;
 public class Project {
   private static final Logger logger = Logger.getLogger(Project.class);
 
+  private static final String WEBSERVICE_HOST_IP1 = "webserviceHostIP";
+  private static final String WEBSERVICE_HOST_PORT = "webserviceHostPort";
+  private static final String WEBSERVICE_HOST_IP = "127.0.0.1";
+
   private SlickProject project;
   private List<String> typeOrder;
   private ExerciseDAO<CommonExercise> exerciseDAO;
@@ -80,11 +84,11 @@ public class Project {
                  String relativeConfigDir) {
     this.project = project;
     this.typeOrder = Arrays.asList(project.first(), project.second());
-    String prop = project.getProp(ServerProperties.MODELS_DIR);
-   // logger.info("Project got " + ServerProperties.MODELS_DIR + ": " + prop);
-    audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, logAndNotify, prop, project.language());
-   // logger.info("Project got " + audioFileHelper);
-   // logger.info("Project got " + audioFileHelper.getCollator());
+   // String prop = project.getProp(ServerProperties.MODELS_DIR);
+    // logger.info("Project got " + ServerProperties.MODELS_DIR + ": " + prop);
+    audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, logAndNotify, this);
+    // logger.info("Project got " + audioFileHelper);
+    // logger.info("Project got " + audioFileHelper.getCollator());
 
     this.relativeConfigDir = relativeConfigDir;
     this.db = db;
@@ -92,7 +96,9 @@ public class Project {
     this.pathHelper = pathHelper;
   }
 
-  public String getLanguage() { return project.language(); }
+  public String getLanguage() {
+    return project.language();
+  }
 
   /**
    * Only public to support deletes...
@@ -116,7 +122,9 @@ public class Project {
     return project.getProp(ServerProperties.MODELS_DIR) == null;
   }
 
-  private boolean hasModel() { return !isNoModel(); }
+  public boolean hasModel() {
+    return !isNoModel();
+  }
 
   public SlickProject getProject() {
     return project;
@@ -165,10 +173,6 @@ public class Project {
     return analysis;
   }
 
-  public String toString() {
-    return "Project project = " + project + " types " + typeOrder + " exercise dao " +exerciseDAO;
-  }
-
   public AudioFileHelper getAudioFileHelper() {
     return audioFileHelper;
   }
@@ -179,5 +183,33 @@ public class Project {
 
   public void stopDecode() {
     refResultDecoder.setStopDecode(true);
+  }
+
+  public String getWebserviceIP() {
+    String webserviceHostIp1 = WEBSERVICE_HOST_IP1;
+    String prop = getProp(webserviceHostIp1);
+    if (prop == null) prop = WEBSERVICE_HOST_IP;
+    return prop;
+  }
+
+  public int getWebservicePort() {
+    String prop = getProp(WEBSERVICE_HOST_PORT);
+    if (prop == null) prop = "-1";
+    int ip = Integer.parseInt(prop);
+    if (ip == 1)
+      logger.error("No webservice host port found.");
+    return ip;
+  }
+
+  public String getModelsDir() {
+    return project.getProp(ServerProperties.MODELS_DIR);
+  }
+
+  String getProp(String webserviceHostIp1) {
+    return getProject().getProp(webserviceHostIp1);
+  }
+
+  public String toString() {
+    return "Project project = " + project + " types " + typeOrder + " exercise dao " + exerciseDAO;
   }
 }
