@@ -34,6 +34,7 @@ package mitll.langtest.server.database.userlist;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.custom.UserList;
@@ -117,7 +118,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
    * @see UserListManager#reallyCreateNewItem
    */
   @Override
-  public void add(UserList userList) {
+  public void add(UserList userList, int projid) {
     int id = 0;
 
     try {
@@ -194,11 +195,12 @@ public class UserListDAO extends DAO implements IUserListDAO {
 
   /**
    * @param userid
+   * @param projectID
    * @return
    * @see UserListManager#getListsForUser
    */
   @Override
-  public List<UserList<CommonShell>> getAllByUser(long userid) {
+  public List<UserList<CommonShell>> getAllByUser(long userid, int projectID) {
     try {
       String sql = "SELECT * from " + USER_EXERCISE_LIST + " where " +
           CREATORID + "=" + userid +
@@ -223,10 +225,11 @@ public class UserListDAO extends DAO implements IUserListDAO {
    * Since your lists will appear under your lists, and visited lists will appear under other's lists.
    *
    * @param userid
+   * @param projectID
    * @return
    */
   @Override
-  public List<UserList<CommonShell>> getAllPublic(long userid) {
+  public List<UserList<CommonShell>> getAllPublic(long userid, int projectID) {
     try {
       String sql = "SELECT * from " + USER_EXERCISE_LIST + " where " +
           ISPRIVATE +
@@ -332,7 +335,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
   /**
    * @param userid
    * @return
-   * @see mitll.langtest.server.database.custom.UserListManager#getListsForUser
+   * @see IUserListManager#getListsForUser
    */
   @Override
   public Collection<UserList<CommonShell>> getListsForUser(int userid) {
@@ -376,7 +379,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
    * @return
    * @throws SQLException
    * @seex #getAll(long)
-   * @see #getAllPublic
+   * @see IUserListDAO#getAllPublic
    * @see #getWhere(long, boolean)
    */
   private List<UserList<CommonShell>> getUserLists(String sql, long userid) throws SQLException {
@@ -419,7 +422,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
    * @param where
    * @see #getUserLists(String, long)
    * @see #getWithExercises(long)
-   * @see #getAllByUser(long)
+   * @see IUserListDAO#getAllByUser(long, int)
    */
   private void populateList(UserList<CommonShell> where) {
     where.setExercises(userExerciseDAO.getOnList(where.getID()));
