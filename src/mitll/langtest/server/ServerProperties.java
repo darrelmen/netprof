@@ -303,9 +303,9 @@ public class ServerProperties {
     return getDefaultTrue(SKIP_SEMICOLONS);
   }
 
-  public boolean hasModel() {
-    return !isNoModel();
-  }
+//  public boolean hasModel() {
+//    return !isNoModel();
+//  }
 
   @Deprecated
   public boolean isNoModel() {

@@ -43,4 +43,6 @@ public interface IUserProjectDAO extends IDAO {
   Collection<SlickUserProject> getAll();
 
   int mostRecentByUser(int user);
+
+  //SlickUserProject mostRecentProjectByUser(int user);
 }
