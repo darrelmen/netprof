@@ -144,11 +144,11 @@ public class CopyToPostgres<T extends CommonShell> {
   public void copyToPostgres(DatabaseImpl db) {
     int projectID = createProjectIfNotExists(db);
 
-    logger.info("project is " + projectID);
+    logger.info("copyToPostgres project is " + projectID);
+
     // first add the user table
     SlickUserDAOImpl slickUserDAO = (SlickUserDAOImpl) db.getUserDAO();
     SlickResultDAO slickResultDAO = (SlickResultDAO) db.getResultDAO();
-
     SlickUserExerciseDAO slickUEDAO = (SlickUserExerciseDAO) db.getUserExerciseDAO();
 
     // check once if we've added it before
@@ -230,29 +230,42 @@ public class CopyToPostgres<T extends CommonShell> {
     copyUserExerciseListJoin(db, oldToNewUserList, exToInt, projectid);
   }
 
+  /**
+   * TODO : what to do about pashto 1,2,3?
+   *
+   * @param db
+   * @return
+   */
   public int createProjectIfNotExists(DatabaseImpl db) {
     IProjectDAO projectDAO = db.getProjectDAO();
-    int byName = projectDAO.getByName(db.getLanguage());
+    String oldLanguage = getOldLanguage(db);
+    int byName = projectDAO.getByName(oldLanguage);
 
     if (byName == -1) {
       byName = createProject(db, projectDAO);
       db.populateProjects(true);
+    } else {
+      logger.info("found project " + byName + " for language '" + oldLanguage + "'");
     }
     return byName;
+  }
+
+  private String getOldLanguage(DatabaseImpl db) {
+    return db.getLanguage();
   }
 
   /**
    * Ask the database for what the type order should be, e.g. [Unit, Chapter] or [Week, Unit] (from Dari)
    *
-   * @see
    * @param db
    * @param projectDAO
+   * @see
    */
   private int createProject(DatabaseImpl db, IProjectDAO projectDAO) {
     Iterator<String> iterator = db.getTypeOrder(-1).iterator();
-    String firstType  = iterator.hasNext() ? iterator.next() : "";
+    String firstType = iterator.hasNext() ? iterator.next() : "";
     String secondType = iterator.hasNext() ? iterator.next() : "";
-    String language = db.getLanguage();
+    String language = getOldLanguage(db);
 
     SlickUserDAOImpl slickUserDAO = (SlickUserDAOImpl) db.getUserDAO();
     int byName = projectDAO.add(slickUserDAO.getBeforeLoginUser(), language, language, firstType, secondType);
@@ -262,6 +275,7 @@ public class CopyToPostgres<T extends CommonShell> {
       projectDAO.addProperty(byName, prop, props.getProperty(prop));
     }
 
+    logger.info("created project " + byName);
     return byName;
   }
 
@@ -474,7 +488,8 @@ public class CopyToPostgres<T extends CommonShell> {
       Integer rid = oldToNewResult.get((int) word.getRid());
       if (rid == null) {
         boolean add = missingRIDs.add(word.getRid());
-        if (add && missingRIDs.size() < WARN_RID_MISSING_THRESHOLD) logger.error("copyWord word has no rid " + word.getRid());
+        if (add && missingRIDs.size() < WARN_RID_MISSING_THRESHOLD)
+          logger.error("copyWord word has no rid " + word.getRid());
       } else {
         word.setRid(rid);
         bulk.add(slickWordDAO.toSlick(word));
@@ -698,13 +713,13 @@ public class CopyToPostgres<T extends CommonShell> {
     List<SlickResult> bulk = new ArrayList<>();
 
     List<Result> results = resultDAO.getResults();
-    logger.info(projid +" : copying " + results.size() + " results...");
+    logger.info(projid + " : copying " + results.size() + " results...");
 
     int missing = 0;
     int missing2 = 0;
 
     ExerciseDAO<CommonExercise> exerciseDAO = db.getExerciseDAO(projid);
-    if (exerciseDAO == null) logger.warn("huh? no project " +projid);
+    if (exerciseDAO == null) logger.warn("huh? no project " + projid);
     Map<Integer, String> idToFL = exerciseDAO.getIDToFL(projid);
 
     logger.info("id-fl has " + idToFL.size() + " items");
