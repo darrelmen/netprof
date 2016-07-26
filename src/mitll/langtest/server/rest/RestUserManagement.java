@@ -76,7 +76,7 @@ public class RestUserManagement {
   /**
    * @see mitll.langtest.server.database.user.UserManagement#userExists
    */
-  public static final String EMAIL_H = "emailH";
+  private static final String EMAIL_H = "emailH";
   /**
    * @see mitll.langtest.server.database.user.UserManagement#userExists
    */
@@ -84,7 +84,7 @@ public class RestUserManagement {
   /**
    * @see mitll.langtest.server.database.user.UserManagement#userExists
    */
-  public static final String PASSWORD_CORRECT = "passwordCorrect";
+  private static final String PASSWORD_CORRECT = "passwordCorrect";
 
   private static final String HAS_RESET = "hasReset";
   private static final String TOKEN = "token";
@@ -96,7 +96,7 @@ public class RestUserManagement {
   private static final String AGE = "age";
   private static final String GENDER = "gender";
   private static final String DIALECT = "dialect";
-  public static final String KIND = "kind";
+  private static final String KIND = "kind";
 
   private DatabaseImpl db;
   private ServerProperties serverProps;
@@ -307,7 +307,7 @@ public class RestUserManagement {
   }
 
   private String resetPassword(String user, String email, String requestURL) {
-    logger.debug(serverProps.getLanguage() + " resetPassword for " + user);
+    logger.debug(" resetPassword for " + user);
     String emailH = Md5Hash.getHash(email);
     Integer validUserAndEmail = db.getUserDAO().getIDForUserAndEmail(user, emailH);
 
@@ -348,6 +348,8 @@ public class RestUserManagement {
   }
 
   /**
+   * TODO : pass in the project id from the iOS app.
+   *
    * So - what can happen - either we have a user and password match, in which case adding a user is equivalent
    * to logging in OR we have an existing user with a different password, in which case either it's a different
    * person with the same userid attempt, or the same person making a password mistake...
@@ -368,14 +370,16 @@ public class RestUserManagement {
 
     logger.info("addUser user " + user + " pass "+ passwordH + " match " + exactMatch);
 
+    int projid = -1; // TODO : figure out which project a user is in right now
+
     if (exactMatch == null) {
       User checkExisting = db.getUserDAO().getUserByID(user);
 
       if (checkExisting == null) { // OK, nobody with matching user and password
-        String age = request.getHeader(AGE);
-        String gender = request.getHeader(GENDER);
+        String age     = request.getHeader(AGE);
+        String gender  = request.getHeader(GENDER);
         String dialect = request.getHeader(DIALECT);
-        String emailH = request.getHeader(EMAIL_H);
+        String emailH  = request.getHeader(EMAIL_H);
 
         logger.debug("addUser : Request " + requestType + " for " + deviceType + " user " + user +
             " adding " + gender +
@@ -385,14 +389,14 @@ public class RestUserManagement {
         if (age != null && gender != null && dialect != null) {
           try {
             int age1 = Integer.parseInt(age);
-            user1 = getUserManagement().addUser(user, passwordH, emailH, deviceType, device, User.Kind.CONTENT_DEVELOPER, gender.equalsIgnoreCase("male"), age1, dialect);
+            user1 = getUserManagement().addUser(user, passwordH, emailH, deviceType, device, User.Kind.CONTENT_DEVELOPER, gender.equalsIgnoreCase("male"), age1, dialect, projid);
 
           } catch (NumberFormatException e) {
             logger.warn("couldn't parse age " + age);
             jsonObject.put(ERROR, "bad age");
           }
         } else {
-          user1 = getUserManagement().addUser(user, passwordH, emailH, deviceType, device);
+          user1 = getUserManagement().addUser(user, passwordH, emailH, deviceType, device, projid);
         }
 
         if (user1 == null) { // how could this happen?
@@ -429,11 +433,6 @@ public class RestUserManagement {
     }
     return userid;
   }
-/*
-  private void configureResponse(HttpServletResponse response) {
-    response.setContentType("application/json; charset=UTF-8");
-    response.setCharacterEncoding("UTF-8");
-  }*/
 
   public int getUserFromParam(String user) {
     int i = -1;

@@ -35,7 +35,7 @@ package mitll.langtest.server;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.excel.EventDAOToExcel;
 import mitll.langtest.server.database.excel.ResultDAOToExcel;
-import mitll.langtest.server.database.security.DominoSessionException;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.security.UserSecurityManager;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.User;
@@ -73,6 +73,7 @@ public class DownloadServlet extends DatabaseServlet {
   private static final String FILE = "file";
   private static final String CONTEXT = "context";
   private static final String COMPRESSED_SUFFIX = "mp3";
+  UserSecurityManager securityManager;
 
   /**
    * This is getting complicated.
@@ -104,6 +105,9 @@ public class DownloadServlet extends DatabaseServlet {
     if (db != null) {
       try {
         int project = getProject(request);
+        Project project1 = getDatabase().getProject(project);
+        String language = project1.getLanguage();
+
         String requestURI = request.getRequestURI();
         if (requestURI.toLowerCase().contains(AUDIO)) {
           String pathInfo = request.getPathInfo();
@@ -123,7 +127,7 @@ public class DownloadServlet extends DatabaseServlet {
               }
             }
           } else if (queryString.startsWith(FILE)) {
-            returnAudioFile(response, db, queryString);
+            returnAudioFile(response, db, queryString, language);
           } else if (queryString.startsWith("request")) {
             String[] split1 = queryString.split("&");
             String requestCommand = split1[0];
@@ -133,11 +137,11 @@ public class DownloadServlet extends DatabaseServlet {
             logger.debug("request " + requestCommand + " query " + queryString);
             if (requestCommand.contains(CONTEXT)) {
               Map<String, Collection<String>> typeToSection = getTypeToSelectionFromRequest(queryString);
-              setHeader(response, getZipFileName(db, typeToSection, project));
+              setHeader(response, getZipFileName(db, typeToSection, project, language));
               writeContextZip(response, typeToSection, project);
             } else {
               Map<String, Collection<String>> typeToSection = getTypeToSelectionFromRequest(queryString);
-              setHeader(response, getZipFileName(db, typeToSection, project));
+              setHeader(response, getZipFileName(db, typeToSection, project, language));
               writeZip(response, typeToSection, project);
             }
           }
@@ -182,11 +186,11 @@ public class DownloadServlet extends DatabaseServlet {
     }
   }
 
-  private String getZipFileName(DatabaseImpl db, Map<String, Collection<String>> typeToSection, int projectid) {
+  private String getZipFileName(DatabaseImpl db, Map<String, Collection<String>> typeToSection, int projectid, String language) {
     String name = typeToSection.isEmpty() ? AUDIO : db.getPrefix(typeToSection, projectid);
     name = name.replaceAll("\\,", "_");
     name += ".zip";
-    return db.getServerProps().getLanguage() + "_" + name;
+    return language + "_" + name;
   }
 
   /**
@@ -200,7 +204,7 @@ public class DownloadServlet extends DatabaseServlet {
    * @throws IOException
    * @see #doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
-  private void returnAudioFile(HttpServletResponse response, DatabaseImpl db, String queryString) throws IOException {
+  private void returnAudioFile(HttpServletResponse response, DatabaseImpl db, String queryString, String language) throws IOException {
     String[] split = queryString.split("&");
 
     String file = split[0].split("=")[1];
@@ -212,7 +216,7 @@ public class DownloadServlet extends DatabaseServlet {
     String exercise = split[1].split("=")[1];
     String useridString = split[2].split("=")[1];
 
-    String underscores = getFilenameForDownload(db, Integer.parseInt(exercise), useridString);
+    String underscores = getFilenameForDownload(db, Integer.parseInt(exercise), useridString, language);
 
     logger.debug("returnAudioFile query is " + queryString + " file " + file + " exercise " + exercise + " user " + useridString + " so name is " + underscores);
 
@@ -243,9 +247,9 @@ public class DownloadServlet extends DatabaseServlet {
    * @return name without spaces
    * @throws UnsupportedEncodingException
    */
-  private String getFilenameForDownload(DatabaseImpl db, int exercise, String useridString) throws UnsupportedEncodingException {
+  private String getFilenameForDownload(DatabaseImpl db, int exercise, String useridString, String language) throws UnsupportedEncodingException {
     CommonExercise exercise1 = db.getExercise(exercise);
-    boolean english = db.getServerProps().getLanguage().equalsIgnoreCase("english");
+    boolean english = language.equalsIgnoreCase("english");
 
     // foreign part
     String foreignPart = english ? "" : exercise1.getForeignLanguage().trim();
@@ -267,6 +271,10 @@ public class DownloadServlet extends DatabaseServlet {
     underscores = URLEncoder.encode(underscores, "UTF-8");
     return underscores;
   }
+
+//  private String getLanguage(DatabaseImpl db, int userid) {
+//    return db.getProjectForUser(userid).getLanguage();
+//  }
 
   private String getUserPart(DatabaseImpl db, int userid) {
     User userWhere = db.getUserDAO().getUserWhere(userid);

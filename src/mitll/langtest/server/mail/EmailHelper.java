@@ -67,7 +67,10 @@ public class EmailHelper {
   private static final String YOUR_USER_NAME = "Your user name";
   public static final String NETPROF_HELP_DLIFLC_EDU = "netprof-help@dliflc.edu";
 
-  private final String language;
+  /**
+   * TODO: Content developer is in context of a project
+   */
+  @Deprecated private final String language;
   private final IUserDAO userDAO;
   private final MailSupport mailSupport;
   private ServerProperties serverProperties;
