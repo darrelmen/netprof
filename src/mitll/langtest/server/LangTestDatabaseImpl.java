@@ -120,8 +120,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private static final int WARN_DUR = 100;
   private static final String WAV1 = "wav";
 
-  // private RefResultDecoder refResultDecoder;
-
   private static final boolean WARN_MISSING_FILE = true;
 
   private DatabaseImpl db;
