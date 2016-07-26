@@ -724,10 +724,16 @@ public class CopyToPostgres<T extends CommonShell> {
 
     logger.info("id-fl has " + idToFL.size() + " items");
 
+    Set<Integer> userids = new HashSet<>();
+
     for (Result result : results) {
-      Integer userID = oldToNewUser.get(result.getUserid());
+      int userid = result.getUserid();
+      Integer userID = oldToNewUser.get(userid);
       if (userID == null) {
-        logger.error("copyResult no user " + result.getUserid());
+        boolean add = userids.add(userid);
+        if (add) {
+          logger.error("copyResult no user " + userid);
+        }
       } else {
         result.setUserID(userID);
         Integer realExID = exToID.get(result.getOldExID());
