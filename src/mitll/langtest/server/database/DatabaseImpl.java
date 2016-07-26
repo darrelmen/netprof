@@ -274,7 +274,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
         if (reload && project.getExerciseDAO() == null) {
           setExerciseDAO(project);
         }
-        logger.info("populateProjects (reload = " + reload+ ") : " + project + " : " + project.getAudioFileHelper());
+        logger.info("populateProjects (reload = " + reload + ") : " + project + " : " + project.getAudioFileHelper());
       }
     }
 
@@ -331,7 +331,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     phoneDAO = new SlickPhoneDAO(this, dbConnection);
 
     SlickUserListExerciseJoinDAO userListExerciseJoinDAO = new SlickUserListExerciseJoinDAO(this, dbConnection);
-    IUserListDAO userListDAO = new SlickUserListDAO(this, dbConnection, this.userDAO, userExerciseDAO, userListExerciseJoinDAO);
+    IUserListDAO userListDAO = new SlickUserListDAO(this, dbConnection, this.userDAO, userExerciseDAO);
     IAnnotationDAO annotationDAO = new SlickAnnotationDAO(this, dbConnection, this.userDAO.getDefectDetector());
 
     IReviewedDAO reviewedDAO = new SlickReviewedDAO(this, dbConnection, true);
@@ -731,14 +731,14 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   }
 
   private void setExerciseDAO(Project project) {
-    logger.info("setExerciseDAO " +project);
+    logger.info("setExerciseDAO " + project);
     SlickProject project1 = project.getProject();
     DBExerciseDAO dbExerciseDAO = new DBExerciseDAO(getServerProps(), userListManager, ADD_DEFECTS,
         (SlickUserExerciseDAO) getUserExerciseDAO(), project1);
     project.setExerciseDAO(dbExerciseDAO);
   }
 
-  private Project getProject(int projectid) {
+  public Project getProject(int projectid) {
     if (projectid == -1) return getFirstProject();
     Project project = idToProject.get(projectid);
     if (project == null) {
@@ -1061,12 +1061,13 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
    * @param age
    * @param dialect
    * @param device
+   * @param projid
    * @return
    * @see mitll.langtest.server.services.UserServiceImpl#addUser
    */
   public User addUser(HttpServletRequest request, String userID, String passwordH, String emailH, User.Kind kind,
-                      boolean isMale, int age, String dialect, String device) {
-    return userManagement.addUser(request, userID, passwordH, emailH, kind, isMale, age, dialect, device);
+                      boolean isMale, int age, String dialect, String device, int projid) {
+    return userManagement.addUser(request, userID, passwordH, emailH, kind, isMale, age, dialect, device, projid);
   }
 
   /**
@@ -1635,6 +1636,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   }
 
   /**
+   * TODO : fix this to do all projects
    * @param serverProps
    * @param site
    * @param mailSupport

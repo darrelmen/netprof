@@ -80,7 +80,7 @@ public class AudioConversion {
   private static final int MIN_WARN_DUR = 30;
 
   private final String soxPath;
-  private final String language;
+  @Deprecated private final String language;
   private final long trimMillisBefore;
   private final long trimMillisAfter;
   private final ServerProperties props;
@@ -269,7 +269,7 @@ public class AudioConversion {
 
         long now = System.currentTimeMillis();
         if (now - then > 0) {
-          logger.debug("trimSilence (" + props.getLanguage() +
+          logger.debug("trimSilence (" + //props.getLanguage() +
               "): took " + (now - then) + " millis to convert original " + wavFile.getName() +
               " to trim wav file : " + durationInSeconds + " before, " + durationInSecondsTrimmed + " after.");
         }
