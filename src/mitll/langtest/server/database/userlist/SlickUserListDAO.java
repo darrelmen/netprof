@@ -35,6 +35,7 @@ package mitll.langtest.server.database.userlist;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.custom.UserList;
@@ -50,7 +51,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
 
-public class SlickUserListDAO extends DAO implements IUserListDAO/*, ISchema<UserList<CommonShell>, SlickUserExerciseList>*/ {
+public class SlickUserListDAO extends DAO implements IUserListDAO {
   private static final Logger logger = Logger.getLogger(SlickUserListDAO.class);
 
   private final UserExerciseListDAOWrapper dao;
@@ -58,7 +59,6 @@ public class SlickUserListDAO extends DAO implements IUserListDAO/*, ISchema<Use
   private final IUserExerciseDAO userExerciseDAO;
 
   private final IUserDAO userDAO;
-  //private SlickUserListExerciseJoinDAO userListExerciseJoinDAO;
 
   /**
    * @param database
@@ -67,16 +67,15 @@ public class SlickUserListDAO extends DAO implements IUserListDAO/*, ISchema<Use
    * @param userExerciseDAO
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(PathHelper)
    */
-  public SlickUserListDAO(Database database, DBConnection dbConnection,
+  public SlickUserListDAO(Database database,
+                          DBConnection dbConnection,
                           IUserDAO userDAO,
-                          IUserExerciseDAO userExerciseDAO,
-                          SlickUserListExerciseJoinDAO userListExerciseJoinDAO) {
+                          IUserExerciseDAO userExerciseDAO) {
     super(database);
     dao = new UserExerciseListDAOWrapper(dbConnection);
     this.userDAO = userDAO;
     this.visitorDAOWrapper = new UserExerciseListVisitorDAOWrapper(dbConnection);
     this.userExerciseDAO = userExerciseDAO;
-//    this.userListExerciseJoinDAO = userListExerciseJoinDAO;
   }
 
   public void createTable() {
@@ -88,7 +87,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO/*, ISchema<Use
     return dao.getName();
   }
 
-  public SlickUserExerciseList toSlick(UserList<CommonShell> shared) {
+  public SlickUserExerciseList toSlick(UserList<CommonShell> shared, int projid) {
     return new SlickUserExerciseList(-1,
         shared.getCreator().getId(),
         new Timestamp(shared.getModified()), shared.getName(),
@@ -96,10 +95,11 @@ public class SlickUserListDAO extends DAO implements IUserListDAO/*, ISchema<Use
         shared.getClassMarker(),
         shared.isPrivate(),
         false,
-        shared.getID());
+        shared.getID(),
+        projid);
   }
 
-  public SlickUserExerciseList toSlick2(UserList<CommonShell> shared, int userid) {
+  private SlickUserExerciseList toSlick2(UserList<CommonShell> shared, int userid, int projid) {
     return new SlickUserExerciseList(-1,
         userid,
         new Timestamp(shared.getModified()), shared.getName(),
@@ -107,10 +107,11 @@ public class SlickUserListDAO extends DAO implements IUserListDAO/*, ISchema<Use
         shared.getClassMarker(),
         shared.isPrivate(),
         false,
-        shared.getID());
+        shared.getID(),
+        projid);
   }
 
-  public UserList<CommonShell> fromSlick(SlickUserExerciseList slick) {
+  private UserList<CommonShell> fromSlick(SlickUserExerciseList slick) {
     return new UserList<CommonShell>(
         slick.id(),
         userDAO.getUserWhere(slick.userid()),
@@ -141,13 +142,13 @@ public class SlickUserListDAO extends DAO implements IUserListDAO/*, ISchema<Use
   }
 
   @Override
-  public void add(UserList<CommonShell> userList) {
-    int assignedID = dao.insert(toSlick(userList));
+  public void add(UserList<CommonShell> userList, int projid) {
+    int assignedID = dao.insert(toSlick(userList, projid));
     userList.setUniqueID(assignedID);
   }
 
-  public void addWithUser(UserList<CommonShell> userList, int userid) {
-    SlickUserExerciseList user = toSlick2(userList, userid);
+  public void addWithUser(UserList<CommonShell> userList, int userid, int projid) {
+    SlickUserExerciseList user = toSlick2(userList, userid, projid);
     userList.setUniqueID(dao.insert(user));
   }
 
@@ -165,12 +166,13 @@ public class SlickUserListDAO extends DAO implements IUserListDAO/*, ISchema<Use
    * Side effect is to add user exercises to lists.
    *
    * @param userid
+   * @param projectID
    * @return
-   * @see mitll.langtest.server.database.custom.UserListManager#getListsForUser(int, boolean, boolean)
+   * @see IUserListManager#getListsForUser(int, boolean, boolean, int)
    */
   @Override
-  public List<UserList<CommonShell>> getAllByUser(long userid) {
-    List<UserList<CommonShell>> userExerciseLists = fromSlick(dao.byUser((int) userid));
+  public List<UserList<CommonShell>> getAllByUser(long userid, int projectID) {
+    List<UserList<CommonShell>> userExerciseLists = fromSlick(dao.byUser((int) userid, projectID));
 
     for (UserList<CommonShell> ul : userExerciseLists) {
       populateList(ul);
@@ -183,12 +185,12 @@ public class SlickUserListDAO extends DAO implements IUserListDAO/*, ISchema<Use
    * Why would we need to copy the exercise as in UserListDAO?
    *
    * @param where
-   * @see #getAllByUser(long)
+   * @see IUserListDAO#getAllByUser(long, int)
    */
   private void populateList(UserList<CommonShell> where) {
     List<CommonShell> onList = userExerciseDAO.getOnList(where.getID());
     where.setExercises(onList);
-   // for (CommonShell shell : onList) logger.info("for " + where.getOldID() + " found " + shell);
+    // for (CommonShell shell : onList) logger.info("for " + where.getOldID() + " found " + shell);
 /*
     Set<String> userExIDs = new HashSet<>();
     for (CommonShell shell : onList) userExIDs.add(shell.getOldID());
@@ -208,11 +210,12 @@ public class SlickUserListDAO extends DAO implements IUserListDAO/*, ISchema<Use
    * Expensive ...?
    *
    * @param userid
+   * @param projectID
    * @return non empty public lists
    */
   @Override
-  public List<UserList<CommonShell>> getAllPublic(long userid) {
-    List<UserList<CommonShell>> userExerciseLists = fromSlick(dao.allPublic());
+  public List<UserList<CommonShell>> getAllPublic(long userid, int projectID) {
+    List<UserList<CommonShell>> userExerciseLists = fromSlick(dao.allPublic(projectID));
     populateLists(userExerciseLists, userid);
 
     List<UserList<CommonShell>> toReturn = new ArrayList<>();
@@ -229,7 +232,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO/*, ISchema<Use
    * @return
    * @throws SQLException
    * @seex #getAll(long)
-   * @see #getAllPublic
+   * @see IUserListDAO#getAllPublic
    * @see #getWhere(long, boolean)
    */
   private void populateLists(Collection<UserList<CommonShell>> lists, long userid) {
@@ -300,9 +303,9 @@ public class SlickUserListDAO extends DAO implements IUserListDAO/*, ISchema<Use
     return visitorDAOWrapper;
   }
 
-  public Map<Integer, Integer> getOldToNew() {
+  public Map<Integer, Integer> getOldToNew(int projid) {
     Map<Integer, Integer> oldToNew = new HashMap<>();
-    for (SlickUserExerciseList word : dao.getAll()) oldToNew.put(word.legacyid(), word.id());
+    for (SlickUserExerciseList word : dao.getAll(projid)) oldToNew.put(word.legacyid(), word.id());
     return oldToNew;
   }
 
