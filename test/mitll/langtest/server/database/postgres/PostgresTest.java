@@ -66,7 +66,7 @@ public class PostgresTest extends BaseTest {
   }
 
   @Test
-  public void testCopy() {
+  public void testCopySpanish() {
     testCreate();
     getDatabaseLight("spanish", true).copyToPostgres();
   }

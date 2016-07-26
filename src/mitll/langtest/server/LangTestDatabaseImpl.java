@@ -2292,7 +2292,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     db.setInstallPath(installPath,
         lessonPlanFile,
         mediaDir);
-    // db.setDependencies(mediaDir, installPath);
   }
 
   /**
