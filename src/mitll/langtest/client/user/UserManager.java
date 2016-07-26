@@ -126,10 +126,14 @@ public class UserManager {
     if (user != NO_USER_SET) {
       logger.info("UserManager.login : current user : " + user);
       //console("UserManager.login : current user : " + user);
-      getPermissionsAndSetUser(getUserChosenFromStorage(), getPassFromStorage());
+      getPermissionsAndSetUser();
     } else {
       userNotification.showLogin();
     }
+  }
+
+  public void getPermissionsAndSetUser() {
+    getPermissionsAndSetUser(getUserChosenFromStorage(), getPassFromStorage());
   }
 
 /*  private void console(String message) {
@@ -147,7 +151,6 @@ public class UserManager {
   }-*//*
 ;
 */
-
 
   /**
    * TODOx : instead have call to get permissions for a user.
@@ -199,7 +202,6 @@ public class UserManager {
     logger.info("UserManager.gotNewUser " + result);
     userNotification.getPermissions().clear();
     if (result != null) {
-      //boolean isCD = result.getUserKind() == User.Kind.CONTENT_DEVELOPER;
       for (User.Permission permission : result.getPermissions()) {
         boolean valid = true;
         if (permission == User.Permission.QUALITY_CONTROL ||
@@ -210,7 +212,6 @@ public class UserManager {
           userNotification.setPermission(permission, true);
         }
       }
-
       this.current = result;
     //  logger.info("\tgotNewUser current user " + current);
       userNotification.gotUser(result);
@@ -230,7 +231,7 @@ public class UserManager {
     int user = getUser();
     if (user != NO_USER_SET) {
       //logger.info("UserManager.anonymousLogin : current user : " + user);
-      getPermissionsAndSetUser(getUserChosenFromStorage(), getPassFromStorage());
+      getPermissionsAndSetUser();
     } else {
       logger.info("UserManager.anonymousLogin : make new user, since user = " + user);
       addAnonymousUser();
