@@ -110,18 +110,17 @@ public class AudioFileHelper implements AlignDecode {
                          ServerProperties serverProperties,
                          DatabaseImpl db,
                          LogAndNotify langTestDatabase,
-                         String modelsDir,
-                         String language) {
+                         Project project) {
     this.pathHelper = pathHelper;
     this.serverProps = serverProperties;
     this.db = db;
     this.logAndNotify = langTestDatabase;
-    this.language = language;
+    this.language = project.getLanguage();
     this.useOldSchoolServiceOnly = serverProperties.getOldSchoolService();
-    isNoModel = modelsDir == null || modelsDir.isEmpty();
+    isNoModel = project.isNoModel();
     this.mp3Support = new MP3Support(pathHelper, serverProperties);
     audioConversion = new AudioConversion(serverProps);
-    makeASRScoring(modelsDir, language, modelsDir != null);
+    makeASRScoring(project);
     makeDecodeCorrectnessChecker();
   }
 
@@ -1015,22 +1014,21 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   /**
-   * @param modelsDir
-   * @param hasModel
+   * @param project
    * @see #AudioFileHelper(PathHelper, ServerProperties, DatabaseImpl, LogAndNotify, String, String)
    */
   // TODO: gross
-  private void makeASRScoring(String modelsDir, String language, boolean hasModel) {
+  private void makeASRScoring(Project project) {
     if (webserviceScoring == null) {
       String installPath = pathHelper.getInstallPath();
       HTKDictionary htkDictionary = null;
       try {
-        htkDictionary = makeDict(installPath, modelsDir);
+        htkDictionary = makeDict(installPath, project.getModelsDir());
       } catch (Exception e) {
         logger.error("for now got " + e, e);
       }
-      webserviceScoring = new ASRWebserviceScoring(installPath, serverProps, logAndNotify, htkDictionary, modelsDir, language, hasModel);
-      oldschoolScoring = new ASRScoring(installPath, serverProps, logAndNotify, htkDictionary, modelsDir, language, hasModel);
+      webserviceScoring = new ASRWebserviceScoring(installPath, serverProps, logAndNotify, htkDictionary,  project);
+      oldschoolScoring = new ASRScoring(installPath, serverProps, logAndNotify, htkDictionary, project);
     }
     asrScoring = oldschoolScoring;
   }

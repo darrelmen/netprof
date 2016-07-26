@@ -218,7 +218,7 @@ public class ServerProperties {
     }
   }
 
-  public String getWebserviceIP() {
+/*  public String getWebserviceIP() {
     return props.getProperty(WEBSERVICE_HOST_IP1, WEBSERVICE_HOST_IP);
   }
 
@@ -227,7 +227,7 @@ public class ServerProperties {
     if (ip == 1)
       logger.error("No webservice host port found.");
     return ip;
-  }
+  }*/
 
   /**
    * @return

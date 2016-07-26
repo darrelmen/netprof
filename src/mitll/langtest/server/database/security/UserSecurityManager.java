@@ -165,13 +165,13 @@ public class UserSecurityManager {
     if (false && sessUser == null) {
       //sessUser = lookupUserFromDBSession(request);
     } else {
-      log.info("User found in HTTP session. User: {}. SID: {}", sessUser, request.getRequestedSessionId());
+//      log.info("User found in HTTP session. User: {}. SID: {}", sessUser, request.getRequestedSessionId());
     }
 //		if (sessUser != null && (!sessUser.isActive())) {
 //			sessUser = null;
 //		}
 
-    log.info(TIMING, "Lookup User for {} complete in {}", request.getRequestURL(), elapsedMS(startMS));
+  //  log.info(TIMING, "Lookup User for {} complete in {}", request.getRequestURL(), elapsedMS(startMS));
     if (sessUser == null && throwOnFail) {
       log.error("About to fail due to missing user in session! SID: {}",
           request.getRequestedSessionId(), new Throwable());
@@ -215,13 +215,19 @@ public class UserSecurityManager {
     HttpSession session = request != null ? request.getSession(false) : null;
     if (session != null) {
       Integer uidI = (Integer) session.getAttribute(USER_SESSION_ATT);
-      log.info("Lookup user from HTTP session. SID={} Request SID={}, Session Created={}, isNew={}, result={}",
+/*      log.info("Lookup user from HTTP session. SID={} Request SID={}, Session Created={}, isNew={}, result={}",
           session.getId(), request.getRequestedSessionId(),
-          request.getSession().getCreationTime(), request.getSession().isNew(), uidI);
+          request.getSession().getCreationTime(), request.getSession().isNew(), uidI);*/
+
       if (uidI != null) {
         sessUser = getUserForID(uidI);
         if (sessUser == null) {
           log.info("lookupUserFromHttpSession got cache miss for " + uidI);
+
+          log.info("Lookup user from HTTP session. SID={} Request SID={}, Session Created={}, isNew={}, result={}",
+              session.getId(), request.getRequestedSessionId(),
+              request.getSession().getCreationTime(), request.getSession().isNew(), uidI);
+
           sessUser = userDAO.getByID(uidI);
           rememberIDToUser(uidI, sessUser);
         }
