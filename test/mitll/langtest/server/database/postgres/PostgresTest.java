@@ -41,11 +41,13 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickProject;
+import mitll.npdata.dao.SlickRelatedExercise;
 import mitll.npdata.dao.SlickUserProject;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.List;
 
 public class PostgresTest extends BaseTest {
@@ -112,6 +114,28 @@ public class PostgresTest extends BaseTest {
     }
     logger.info("Got " + rawExercises.iterator().next());
     //   new CopyToPostgres().copyUserExListJoin(spanish);
+  }
+
+
+  @Test
+  public void testGetContext() {
+    DatabaseImpl database = getDatabaseLight("netProf", false);
+    Collection<SlickProject> all = database.getProjectDAO().getAll();
+    int toIndex = 10;
+    for (SlickProject project : all) {
+      if (project.language().equalsIgnoreCase("russian")) {
+        ExerciseDAO<CommonExercise> exerciseDAO = database.getExerciseDAO(project.id());
+        List<CommonExercise> rawExercises = exerciseDAO.getRawExercises();
+        for (CommonExercise ex : rawExercises.subList(0, toIndex)) {
+          logger.info("ex " + ex.getID() + " '" + ex.getEnglish() + "' '" + ex.getForeignLanguage() + "' : " + ex.getDirectlyRelated().size() + " context sentences.");
+          for (CommonExercise cex : ex.getDirectlyRelated()) {
+            logger.info("\t context " + cex.getID() + " '" + cex.getEnglish() + "' '" + cex.getForeignLanguage() + "'");
+          }
+        }
+        logger.info("Got " + rawExercises.iterator().next());
+
+      }
+    }
   }
 
 

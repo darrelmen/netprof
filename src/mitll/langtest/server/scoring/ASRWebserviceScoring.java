@@ -44,6 +44,7 @@ import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.HTTPClient;
 import mitll.langtest.server.audio.SLFFile;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
@@ -89,21 +90,25 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    */
   private final String ip;
   private final int port;
+  //Project project;
 
   /**
    * @param deployPath
    * @param properties
+   * @param project
    * @paramx langTestDatabase
    * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio
    * @see mitll.langtest.server.audio.AudioFileHelper#makeASRScoring
    */
   public ASRWebserviceScoring(String deployPath, ServerProperties properties, LogAndNotify langTestDatabase,
-                              HTKDictionary htkDictionary, String modelsDir, String language, boolean hasModel) {
-    super(deployPath, properties, langTestDatabase, htkDictionary, modelsDir, language, hasModel);
+                              HTKDictionary htkDictionary,
+                              Project project) {
+    super(deployPath, properties, langTestDatabase, htkDictionary, project);
     decodeAudioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
     alignAudioToScore  = CacheBuilder.newBuilder().maximumSize(1000).build();
-    ip = properties.getWebserviceIP();
-    port = properties.getWebservicePort();
+
+    ip   = project.getWebserviceIP();
+    port = project.getWebservicePort();
   }
 
   /**
