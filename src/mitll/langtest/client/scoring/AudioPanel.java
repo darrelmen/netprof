@@ -173,7 +173,8 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
    // this.exerciseID = exerciseID;
     this.exercise = exercise;
     this.instance = instance;
-    getElement().setId("AudioPanel_exercise_" + exercise.getID());
+    int id = exercise != null ? exercise.getID() : 0;
+    getElement().setId("AudioPanel_exercise_" + id);
   }
 
   public void onResize() {
