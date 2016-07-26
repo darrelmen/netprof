@@ -235,6 +235,10 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     }
   }
 
+  /**
+   * @see CopyToPostgres#createProjectIfNotExists(DatabaseImpl)
+   * @param reload
+   */
   public void populateProjects(boolean reload) {
     populateProjects(pathHelper, serverProps, logAndNotify, configDir, reload);
   }
@@ -268,7 +272,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
                                 String relativeConfigDir,
                                 boolean reload) {
     Collection<SlickProject> all = projectDAO.getAll();
-    logger.info("found " + all.size() + " projects");
+    logger.info("populateProjects : found " + all.size() + " projects");
 
     for (SlickProject slickProject : all) {
       if (!idToProject.containsKey(slickProject.id())) {
@@ -276,6 +280,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
         idToProject.put(project.getProject().id(), project);
         logger.info("populateProjects (reload = " + reload + ") : " + project + " : " + project.getAudioFileHelper());
       }
+
     }
 
     if (reload) {
