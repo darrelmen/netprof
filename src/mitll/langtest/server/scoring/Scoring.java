@@ -43,6 +43,7 @@ import corpus.LTS;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.SLFFile;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
@@ -109,12 +110,10 @@ public abstract class Scoring {
 
   /**
    * @param deployPath
-   * @param modelsDir
-   * @param language
    * @see ASRScoring#ASRScoring
    */
   Scoring(String deployPath, ServerProperties props, LogAndNotify langTestDatabase, HTKDictionary htkDictionary,
-          String modelsDir, String language, boolean hasModel) {
+          Project project) {
     this.deployPath = deployPath;
     this.scoringDir = getScoringDir(deployPath);
     this.props = props;
@@ -124,26 +123,27 @@ public abstract class Scoring {
     // logger.debug("Creating ASRScoring object");
     lowScoreThresholdKeepTempDir = KEEP_THRESHOLD;
 
-   // Map<String, String> properties = props.getProperties();
-   // languageProperty = properties.get("language");
+    // Map<String, String> properties = props.getProperties();
+    // languageProperty = properties.get("language");
+    String language = project.getLanguage();
     this.languageProperty = language;
-   // String language = languageProperty != null ? languageProperty : "";
+    // String language = languageProperty != null ? languageProperty : "";
 
     isMandarin = language.equalsIgnoreCase(MANDARIN);
     if (isMandarin) logger.warn("using mandarin segmentation.");
     try {
-      logger.debug("\n" + this +" : Factory for " + languageProperty);
+      logger.debug("\n" + this + " : Factory for " + languageProperty);
 
       ltsFactory = new LTSFactory(languageProperty);
     } catch (Exception e) {
       ltsFactory = null;
-      logger.error("\n" + this +" : Scoring for " + languageProperty + " got " + e);
+      logger.error("\n" + this + " : Scoring for " + languageProperty + " got " + e);
     }
-    this.configFileCreator = new ConfigFileCreator(props.getProperties(), getLTS(), scoringDir, modelsDir);
+    this.configFileCreator = new ConfigFileCreator(props.getProperties(), getLTS(), scoringDir, project.getModelsDir());
 
     // readDictionary();
     makeDecoder();
-    checkLTSHelper = new CheckLTS(getLTS(), htkDictionary, language, hasModel);
+    checkLTSHelper = new CheckLTS(getLTS(), htkDictionary, language, project.hasModel());
   }
 
   LTS getLTS() {
