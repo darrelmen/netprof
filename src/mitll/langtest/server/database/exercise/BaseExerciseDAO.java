@@ -247,6 +247,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 	 * TODO : better to use a filter
 	 * Don't add overlays for exercises that have been removed.
 	 *
+	 * @see #setDependencies(String, String, IUserExerciseDAO, AddRemoveDAO, IAudioDAO)
 	 * @param removes
 	 */
 	private void addOverlays(Collection<Integer> removes) {

@@ -58,14 +58,14 @@ public class SlickReviewedDAO extends DAO implements IReviewedDAO {
   }
 
   public void createTable() {
-    logger.info("dao is " + dao.getClass());
+    //logger.info("dao is " + dao.getClass());
     dao.createTable();
   }
 
   @Override
   public String getName() {
     String name = dao.dao().name();
-    logger.info("SlickReviewedDAO for " + this + " name = " + name);
+    //logger.info("SlickReviewedDAO for " + this + " name = " + name);
     return name;
   }
 
