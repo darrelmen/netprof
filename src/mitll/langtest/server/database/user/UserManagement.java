@@ -32,17 +32,13 @@
 
 package mitll.langtest.server.database.user;
 
-import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.audio.HTTPClient;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.custom.IUserListManager;
-import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.database.excel.UserDAOToExcel;
-import mitll.langtest.server.rest.RestUserManagement;
-import mitll.langtest.shared.user.User;
+import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.shared.UserAndTime;
+import mitll.langtest.shared.user.User;
 import net.sf.json.JSON;
-import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -59,12 +55,11 @@ import java.util.*;
 public class UserManagement {
   private static final Logger logger = Logger.getLogger(UserManagement.class);
   /**
-   * @see #userExists(HttpServletRequest, String, String, ServerProperties)
+   * @seez #userExists(HttpServletRequest, String, String, ServerProperties)
    */
-  private static final String NPF_CLASSROOM_PREFIX = "https://np.ll.mit.edu/npfClassroom";
-  private static final String NO_USER = "-1";
+//  private static final String NPF_CLASSROOM_PREFIX = "https://np.ll.mit.edu/npfClassroom";
+//  private static final String NO_USER = "-1";
 
-//  private final int numExercises;
   private final IUserDAO userDAO;
   private final IResultDAO resultDAO;
   private final IUserListManager userListManager;
@@ -76,9 +71,8 @@ public class UserManagement {
    * @param resultDAO
    * @param userListManager
    */
-  public UserManagement(IUserDAO userDAO, /*int numExercises,*/ IResultDAO resultDAO, IUserListManager userListManager) {
+  public UserManagement(IUserDAO userDAO, IResultDAO resultDAO, IUserListManager userListManager) {
     this.userDAO = userDAO;
-  //  this.numExercises = numExercises;
     this.resultDAO = resultDAO;
     this.userListManager = userListManager;
   }
@@ -98,7 +92,7 @@ public class UserManagement {
    * @see mitll.langtest.client.user.UserPassLogin#makeSignInUserName(com.github.gwtbootstrap.client.ui.Fieldset)
    * @see mitll.langtest.server.LangTestDatabaseImpl#userExists
    */
-  @Deprecated public User userExists(HttpServletRequest request, String login, String passwordH, ServerProperties props) {
+/*  @Deprecated public User userExists(HttpServletRequest request, String login, String passwordH, ServerProperties props) {
     User user = userDAO.getUser(login, passwordH);
 
     if (user == null && !passwordH.isEmpty()) {
@@ -142,7 +136,7 @@ public class UserManagement {
     }
 
     return user;
-  }
+  }*/
 
   /**
    *
@@ -151,21 +145,20 @@ public class UserManagement {
    * @param emailH
    * @param deviceType
    * @param device
+   * @param projid
    * @return
    * @see mitll.langtest.server.ScoreServlet#doPost
    */
-  public User addUser(String userID, String passwordH, String emailH, String deviceType, String device) {
-    boolean isMale = true;
-    User.Kind kind = User.Kind.STUDENT;
-    return addUser(userID, passwordH, emailH, deviceType, device, kind, isMale);
+  public User addUser(String userID, String passwordH, String emailH, String deviceType, String device, int projid) {
+    return addUser(userID, passwordH, emailH, deviceType, device, User.Kind.STUDENT, true, projid);
   }
 
   private User addUser(String userID, String passwordH, String emailH, String deviceType, String device,
                        User.Kind kind,
-                       boolean isMale) {
+                       boolean isMale, int projid) {
     int age = 89;
     String dialect = "unk";
-    return addUser(userID, passwordH, emailH, deviceType, device, kind, isMale, age, dialect);
+    return addUser(userID, passwordH, emailH, deviceType, device, kind, isMale, age, dialect, projid);
   }
 
   /**
@@ -179,11 +172,12 @@ public class UserManagement {
    * @param isMale
    * @param age
    * @param dialect
+   * @param projid
    * @return
    */
   public User addUser(String userID, String passwordH, String emailH, String deviceType, String device, User.Kind kind,
-                      boolean isMale, int age, String dialect) {
-    return addAndGetUser(userID, passwordH, emailH, kind, isMale, age, dialect, deviceType, device);
+                      boolean isMale, int age, String dialect, int projid) {
+    return addAndGetUser(userID, passwordH, emailH, kind, isMale, age, dialect, deviceType, device, projid);
   }
 
   /**
@@ -200,16 +194,16 @@ public class UserManagement {
    * @seex mitll.langtest.server.LangTestDatabaseImpl#addUser
    */
   public User addUser(HttpServletRequest request, String userID, String passwordH, String emailH, User.Kind kind,
-                      boolean isMale, int age, String dialect, String device) {
+                      boolean isMale, int age, String dialect, String device, int projid) {
     String ip = getIPInfo(request);
-    return addUser(userID, passwordH, emailH, device, ip, kind, isMale, age, dialect);
+    return addUser(userID, passwordH, emailH, device, ip, kind, isMale, age, dialect, projid);
   }
 
   private User addAndGetUser(String userID, String passwordH, String emailH, User.Kind kind, boolean isMale, int age,
-                             String dialect, String device, String ip) {
+                             String dialect, String device, String ip, int projid) {
     User user = userDAO.addUser(userID, passwordH, emailH, kind, ip, isMale, age, dialect, device);
     if (user != null) {
-      userListManager.createFavorites(user.getId());
+      userListManager.createFavorites(user.getId(), projid);
     }
     return user;
   }
@@ -217,7 +211,7 @@ public class UserManagement {
   /**
    * @param user
    * @return
-   * @see DatabaseImpl#addUser(User)
+   * @see DatabaseImpl#addUser
    */
   public int addUser(User user) {
     int l;
@@ -229,32 +223,6 @@ public class UserManagement {
     }
     return l;
   }
-
-  /**
-   * Somehow on subsequent runs, the ids skip by 30 or so?
-   * <p/>
-   * Uses return generated keys to get the user id
-   *
-   * JUST FOR TESTING
-   *
-   * @paramx age
-   * @paramx gender
-   * @paramx experience
-   * @paramx ipAddr      user agent info
-   * @paramx dialect     speaker dialect
-   * @paramx EMPTY_PERMISSIONS
-   * @paramx device
-   * @return assigned id
-   */
-/*  public long addUser(int age, String gender, int experience, String ipAddr,
-                      String nativeLang, String dialect, String userID, Collection<User.Permission> EMPTY_PERMISSIONS,
-                      String device) {
-    logger.debug("addUser " + userID);
-    long l = userDAO.addUser(age, gender, experience, ipAddr, nativeLang, dialect, userID, false, EMPTY_PERMISSIONS,
-        User.Kind.STUDENT, "", "", device);
-    userListManager.createFavorites(l);
-    return l;
-  }*/
 
   private String getIPInfo(HttpServletRequest request) {
     String header = request.getHeader("User-Agent");

@@ -293,13 +293,14 @@ public class UserListManager implements IUserListManager {
    * @param description
    * @param dliClass
    * @param isPublic
+   * @param projid
    * @return
    * @see mitll.langtest.server.services.ListServiceImpl#addUserList
    * @see mitll.langtest.client.custom.dialog.CreateListDialog#doCreate
    */
   @Override
-  public long addUserList(int userid, String name, String description, String dliClass, boolean isPublic) {
-    UserList userList = createUserList(userid, name, description, dliClass, !isPublic);
+  public long addUserList(int userid, String name, String description, String dliClass, boolean isPublic, int projid) {
+    UserList userList = createUserList(userid, name, description, dliClass, !isPublic, projid);
     if (userList == null) {
       logger.info("no user list??? for " + userid + " " + name);
       return -1;
@@ -314,9 +315,10 @@ public class UserListManager implements IUserListManager {
    * @param description
    * @param dliClass
    * @param isPrivate
+   * @param projid
    * @return null if user already has a list with this name
    */
-  private UserList createUserList(int userid, String name, String description, String dliClass, boolean isPrivate) {
+  private UserList createUserList(int userid, String name, String description, String dliClass, boolean isPrivate, int projid) {
     User userWhere = userDAO.getUserWhere(userid);
     if (userWhere == null) {
       logger.error("huh? no user with id " + userid);
@@ -327,7 +329,7 @@ public class UserListManager implements IUserListManager {
       } else {
         UserList e = new UserList(i++, userWhere, name, description, dliClass, isPrivate, System.currentTimeMillis());
 
-        userListDAO.add(e);
+        userListDAO.add(e, projid);
         logger.debug("createUserList : now there are " + userListDAO.getCount() + " lists total, for " + userid);
         return e;
       }
@@ -338,16 +340,9 @@ public class UserListManager implements IUserListManager {
     return userListDAO.hasByName(userid, name);
   }
 
-/*
-  public UserList<CommonShell> getByName(int userid, String name) {
-    List<UserList<CommonShell>> byName = userListDAO.getByName(userid, name);
-    return byName == null ? null : byName.iterator().next();
-  }
-*/
-
   @Override
-  public Collection<UserList<CommonShell>> getMyLists(int userid) {
-    return getListsForUser(userid, true, false);
+  public Collection<UserList<CommonShell>> getMyLists(int userid, int projid) {
+    return getListsForUser(userid, true, false, projid);
   }
 
   /**
@@ -356,12 +351,13 @@ public class UserListManager implements IUserListManager {
    * @param userid
    * @param listsICreated
    * @param visitedLists
+   * @param projid
    * @return
    * @see mitll.langtest.server.services.ListServiceImpl#getListsForUser
    * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    */
   @Override
-  public Collection<UserList<CommonShell>> getListsForUser(int userid, boolean listsICreated, boolean visitedLists) {
+  public Collection<UserList<CommonShell>> getListsForUser(int userid, boolean listsICreated, boolean visitedLists, int projid) {
     if (userid == -1) {
       return Collections.emptyList();
     }
@@ -372,7 +368,7 @@ public class UserListManager implements IUserListManager {
     UserList<CommonShell> favorite = null;
     Set<Integer> ids = new HashSet<>();
     if (listsICreated) {
-      listsForUser = userListDAO.getAllByUser(userid);
+      listsForUser = userListDAO.getAllByUser(userid, projid);
       for (UserList<CommonShell> userList : listsForUser) {
         if (userList.isFavorite()) {
           favorite = userList;
@@ -411,12 +407,13 @@ public class UserListManager implements IUserListManager {
 
   /**
    * @param userid
+   * @param projid
    * @return
    * @see mitll.langtest.server.database.user.UserManagement#addAndGetUser(String, String, String, User.Kind, boolean, int, String, String, String)
    */
   @Override
-  public UserList createFavorites(int userid) {
-    return createUserList(userid, UserList.MY_LIST, MY_FAVORITES, "", true);
+  public UserList createFavorites(int userid, int projid) {
+    return createUserList(userid, UserList.MY_LIST, MY_FAVORITES, "", true, projid);
   }
 
   /**
@@ -592,24 +589,14 @@ public class UserListManager implements IUserListManager {
    *
    * @param search
    * @param userid
+   * @param projid
    * @return
    * @see mitll.langtest.server.services.ListServiceImpl#getUserListsForText
    */
   @Override
-  public List<UserList<CommonShell>> getUserListsForText(String search, int userid) {
-    return userListDAO.getAllPublic(userid);
+  public List<UserList<CommonShell>> getUserListsForText(String search, int userid, int projid) {
+    return userListDAO.getAllPublic(userid, projid);
   }
-
-  /**
-   * @param userListID
-   * @param userExercise
-   * @return
-   * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addItemToUserList
-   */
-/*  public void addItemToUserList(long userListID, String userExercise) {
-    addItemToList(userListID, userExercise, );
-  }*/
 
   /**
    * @param userListID

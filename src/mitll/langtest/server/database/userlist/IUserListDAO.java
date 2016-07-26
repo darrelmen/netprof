@@ -48,15 +48,15 @@ public interface IUserListDAO extends IDAO {
    */
   void addVisitor(long listid, long userid);
 
-  void add(UserList<CommonShell> userList);
+  void add(UserList<CommonShell> userList, int projid);
 
   void updateModified(long uniqueID);
 
   int getCount();
 
-  List<UserList<CommonShell>> getAllByUser(long userid);
+  List<UserList<CommonShell>> getAllByUser(long userid, int projectID);
 
-  List<UserList<CommonShell>> getAllPublic(long userid);
+  List<UserList<CommonShell>> getAllPublic(long userid, int projectID);
 
   boolean hasByName(long userid, String name);
 
