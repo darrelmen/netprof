@@ -38,6 +38,7 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.shared.exercise.AudioAttribute;
@@ -69,21 +70,23 @@ public class RefResultDecoder {
   private boolean stopDecode = false;
   private final PathHelper pathHelper;
   private final AudioConversion audioConversion;
+  private final boolean hasModel;
 
   /**
    * @param db
    * @param serverProperties
    * @param pathHelper
    * @param audioFileHelper
-   * @see LangTestDatabaseImpl#init()
+   * @see Project#setAnalysis
    */
   public RefResultDecoder(DatabaseImpl db, ServerProperties serverProperties, PathHelper pathHelper,
-                          AudioFileHelper audioFileHelper) {
+                          AudioFileHelper audioFileHelper, boolean hasModel) {
     this.db = db;
     this.serverProps = serverProperties;
     this.pathHelper = pathHelper;
     this.audioFileHelper = audioFileHelper;
     this.audioConversion = new AudioConversion(serverProperties);
+    this.hasModel = hasModel;
   }
 
   /**
@@ -101,17 +104,17 @@ public class RefResultDecoder {
         }
         if (serverProps.shouldDoDecode()) {
           sleep(5000);
-          if (!serverProps.isNoModel()) writeRefDecode(exercises, relativeConfigDir);
+          if (hasModel) writeRefDecode(exercises, relativeConfigDir);
         } else {
-          logger.debug(getLanguage() + " not doing decode ref decode");
+          logger.debug(" not doing decode ref decode");
         }
       }
     }).start();
   }
 
-  private String getLanguage() {
+/*  private String getLanguage() {
     return serverProps.getLanguage();
-  }
+  }*/
 
   /**
    * @param exercises
@@ -165,8 +168,8 @@ public class RefResultDecoder {
       String installPath = pathHelper.getInstallPath();
 
       int numResults = db.getRefResultDAO().getNumResults();
-      String language = getLanguage();
-      logger.debug(language + " writeRefDecode : found " +
+      //String language = getLanguage();
+      logger.debug(" writeRefDecode : found " +
           numResults + " in ref results table vs " + exToAudio.size() + " exercises with audio");
 
       if (stopDecode) logger.debug("Stop decode true");
@@ -250,12 +253,12 @@ public class RefResultDecoder {
       String installPath = pathHelper.getInstallPath();
 
       int numResults = db.getRefResultDAO().getNumResults();
-      String language = getLanguage();
-      logger.debug(language + " writeRefDecode : found " +
+      //String language = getLanguage();
+      logger.debug(" writeRefDecode : found " +
           numResults + " in ref results table vs " + exToAudio.size() + " exercises with audio");
 
       Set<String> decodedFiles = getDecodedFiles();
-      logger.debug(language + " found " + decodedFiles.size() + " previous ref results, checking " +
+      logger.debug(" found " + decodedFiles.size() + " previous ref results, checking " +
           exercises.size() + " exercises ");
 
       if (stopDecode) logger.debug("Stop decode true");
@@ -426,7 +429,7 @@ public class RefResultDecoder {
           if (trimInfo.didTrim()) {
             // drop ref result info
             logger.debug("trimmed " + exid + " " + attribute + " audio " + bestAudio);
-            if (!serverProps.isNoModel()) {
+            if (hasModel) {
               boolean b = db.getRefResultDAO().removeForAudioFile(absoluteFile.getAbsolutePath());
               if (!b) {
                 logger.warn("for " + exid + " couldn't remove " + absoluteFile.getAbsolutePath() + " for " + attribute);
