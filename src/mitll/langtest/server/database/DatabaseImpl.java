@@ -1206,7 +1206,6 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
    */
   public void createTables() {
    // logger.info("createTables create slick tables - has " + dbConnection.getTables());
-
     List<String> created = new ArrayList<>();
 
     List<IDAO> idaos = Arrays.asList(
