@@ -51,48 +51,48 @@ import java.util.List;
 public class ResultTest extends BaseTest {
   private static final Logger logger = Logger.getLogger(ResultTest.class);
 
-  @Test
-  public void testResult() {
-    DatabaseImpl spanish = getDatabase("spanish", true);
-
-    IResultDAO resultDAO = spanish.getResultDAO();
-
-    List<Result> results = resultDAO.getResults();
-    int size = results.size();
-    Result first = results.get(0);
-    logger.info("got " + size + " first " + first);
-
-    Collection<Result> resultsDevices = resultDAO.getResultsDevices();
-    logger.info("got " + resultsDevices.size() + " first " + resultsDevices.iterator().next());
-
-    int uniqueID = first.getUniqueID();
-    logger.info("Got " + resultDAO.getResultByID(uniqueID));
-    logger.info("Got " + resultDAO.getMonitorResults(projid).size());
-    int  exid = first.getExid();
-    logger.info("Got " + resultDAO.getMonitorResultsByID(exid));
-    Collection<UserAndTime> userAndTimes = resultDAO.getUserAndTimes();
-    logger.info("Got " + userAndTimes.size() + " " + userAndTimes.iterator().next());
-
-    logger.info("Got " + resultDAO.getSessions());
-    logger.info("Got for ex " + exid + " and user 1 " + resultDAO.getResultsForExIDInForUser(Collections.singleton(exid), 1, ""));
-    logger.info("Got " + resultDAO.getNumResults(projid));
-
-    SlickResultDAO dao = (SlickResultDAO) spanish.getResultDAO();
-    logger.info(dao.getMonitorResults(projid).size());
-
-    List<Integer> ids = new ArrayList<>();
-    for (CommonExercise ex : spanish.getExercises()) ids.add(ex.getID());
-    List<Integer> strings = ids.subList(0, 100);
-    logger.info(dao.getResultsForExIDInForUser(strings, 2, "").size());
-    logger.info("match avp " +dao.getResultsForExIDInForUser(strings, true, 2).size());
-    logger.info("!match avp " +dao.getResultsForExIDInForUser(strings, false, 2).size());
-
-    ResultDAO h2 = new ResultDAO(spanish);
-
-    logger.info(h2.getResultsForExIDInForUser(strings, 1, "").size());
-    logger.info("match avp " +h2.getResultsForExIDInForUser(strings,true,1).size());
-    logger.info("!match avp " +h2.getResultsForExIDInForUser(strings,false,1).size());
-  }
+//  @Test
+//  public void testResult() {
+//    DatabaseImpl spanish = getDatabase("spanish", true);
+//
+//    IResultDAO resultDAO = spanish.getResultDAO();
+//
+//    List<Result> results = resultDAO.getResults();
+//    int size = results.size();
+//    Result first = results.get(0);
+//    logger.info("got " + size + " first " + first);
+//
+//    Collection<Result> resultsDevices = resultDAO.getResultsDevices();
+//    logger.info("got " + resultsDevices.size() + " first " + resultsDevices.iterator().next());
+//
+//    int uniqueID = first.getUniqueID();
+//    logger.info("Got " + resultDAO.getResultByID(uniqueID));
+//    logger.info("Got " + resultDAO.getMonitorResults(projid).size());
+//    int  exid = first.getExid();
+//    logger.info("Got " + resultDAO.getMonitorResultsByID(exid));
+//    Collection<UserAndTime> userAndTimes = resultDAO.getUserAndTimes();
+//    logger.info("Got " + userAndTimes.size() + " " + userAndTimes.iterator().next());
+//
+//    logger.info("Got " + resultDAO.getSessions());
+//    logger.info("Got for ex " + exid + " and user 1 " + resultDAO.getResultsForExIDInForUser(Collections.singleton(exid), 1, ""));
+//    logger.info("Got " + resultDAO.getNumResults(projid));
+//
+//    SlickResultDAO dao = (SlickResultDAO) spanish.getResultDAO();
+//    logger.info(dao.getMonitorResults(projid).size());
+//
+//    List<Integer> ids = new ArrayList<>();
+//    for (CommonExercise ex : spanish.getExercises()) ids.add(ex.getID());
+//    List<Integer> strings = ids.subList(0, 100);
+//    logger.info(dao.getResultsForExIDInForUser(strings, 2, "").size());
+//    logger.info("match avp " +dao.getResultsForExIDInForUser(strings, true, 2).size());
+//    logger.info("!match avp " +dao.getResultsForExIDInForUser(strings, false, 2).size());
+//
+//    ResultDAO h2 = new ResultDAO(spanish);
+//
+//    logger.info(h2.getResultsForExIDInForUser(strings, 1, "").size());
+//    logger.info("match avp " +h2.getResultsForExIDInForUser(strings,true,1).size());
+//    logger.info("!match avp " +h2.getResultsForExIDInForUser(strings,false,1).size());
+//  }
 
 
   @Test
