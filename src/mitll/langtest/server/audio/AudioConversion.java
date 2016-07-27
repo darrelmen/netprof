@@ -616,11 +616,11 @@ public class AudioConversion {
     }
     if (!new File(lamePath).exists()) {
       logger.error("no lame installed at " + lamePath + " or " + LAME_PATH_WINDOWS);
+      lamePath = LAME;
     }
     else {
       logger.info("found  lame at " + new File(lamePath).getAbsolutePath());
     }
-    lamePath = LAME;
     return lamePath;
   }
 
