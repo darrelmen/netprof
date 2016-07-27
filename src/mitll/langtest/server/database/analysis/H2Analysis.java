@@ -43,7 +43,10 @@ import org.apache.log4j.Logger;
 import java.sql.*;
 import java.util.*;
 
-public class H2Analysis extends Analysis implements IAnalysis {
+/**
+ * @
+ */
+class H2Analysis extends Analysis implements IAnalysis {
   private static final Logger logger = Logger.getLogger(H2Analysis.class);
 
   private static final boolean DEBUG = false;
@@ -52,8 +55,8 @@ public class H2Analysis extends Analysis implements IAnalysis {
    * @param database
    * @param phoneDAO
    * @param exToRef
-   * @see DatabaseImpl#getAnalysis()
-   * @see DatabaseImpl#makeDAO(String, String, String)
+   * @seex DatabaseImpl#getAnalysis()
+   * @seex DatabaseImpl#makeDAO(String, String, String)
    */
   public H2Analysis(Database database, IPhoneDAO phoneDAO, Map<Integer, String> exToRef) {
     super(database, phoneDAO, exToRef);
@@ -61,12 +64,12 @@ public class H2Analysis extends Analysis implements IAnalysis {
 
   /**
    * @param id
-   * @param minRecordings
-   * @return
+   * @param projid
+   *@param minRecordings  @return
    * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceForUser(int, int)
    * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot
    */
-  public UserPerformance getPerformanceForUser(long id, int minRecordings) {
+  public UserPerformance getPerformanceForUser(long id, int projid, int minRecordings) {
     try {
       Map<Integer, UserInfo> best = getBest(getPerfSQL(id), minRecordings);
 
@@ -80,10 +83,11 @@ public class H2Analysis extends Analysis implements IAnalysis {
   /**
    * @param userDAO
    * @param minRecordings
+   * @param projid
    * @return
-   * @see LangTestDatabaseImpl#getUsersWithRecordings()
+   * @see LangTestDatabaseImpl#getUsersWithRecordings
    */
-  public List<UserInfo> getUserInfo(IUserDAO userDAO, int minRecordings) {
+  public List<UserInfo> getUserInfo(IUserDAO userDAO, int minRecordings, int projid) {
     String sql = getPerfSQL();
     try {
       Map<Integer, UserInfo> best = getBest(sql, minRecordings);
@@ -146,9 +150,9 @@ public class H2Analysis extends Analysis implements IAnalysis {
    * @param minRecordings
    * @return
    * @throws SQLException
-   * @see #getPerformanceForUser(long, int)
-   * @see #getPhonesForUser(long, int)
-   * @see #getWordScoresForUser(long, int)
+   * @see Analysis#getPerformanceForUser(long, int, int)
+   * @see IAnalysis#getPhonesForUser(long, int, int)
+   * @see Analysis#getWordScoresForUser(long, int, int)
    */
   private Map<Integer, UserInfo> getBest(String sql, int minRecordings) throws SQLException {
     if (DEBUG) logger.info("getBest sql =\n" + sql);
@@ -165,10 +169,11 @@ public class H2Analysis extends Analysis implements IAnalysis {
   /**
    * @param id
    * @param minRecordings
+   * @param projid
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getPhoneScores
    */
-  public PhoneReport getPhonesForUser(long id, int minRecordings) {
+  public PhoneReport getPhonesForUser(long id, int minRecordings, int projid) {
     try {
       String sql = getPerfSQL(id);
 
@@ -181,11 +186,11 @@ public class H2Analysis extends Analysis implements IAnalysis {
   }
   /**
    * @param id
-   * @param minRecordings
-   * @return
+   * @param minRecordings  @return
+   * @param projid
    * @see mitll.langtest.server.LangTestDatabaseImpl#getWordScores
    */
-  public List<WordScore> getWordScoresForUser(long id, int minRecordings) {
+  public List<WordScore> getWordScoresForUser(long id, int minRecordings, int projid) {
     try {
       Map<Integer, UserInfo> best = getBest(getPerfSQL(id), minRecordings);
 
