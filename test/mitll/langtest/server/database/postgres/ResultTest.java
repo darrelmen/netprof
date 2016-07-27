@@ -67,7 +67,7 @@ public class ResultTest extends BaseTest {
 
     int uniqueID = first.getUniqueID();
     logger.info("Got " + resultDAO.getResultByID(uniqueID));
-    logger.info("Got " + resultDAO.getMonitorResults().size());
+    logger.info("Got " + resultDAO.getMonitorResults(projid).size());
     int  exid = first.getExid();
     logger.info("Got " + resultDAO.getMonitorResultsByID(exid));
     Collection<UserAndTime> userAndTimes = resultDAO.getUserAndTimes();
@@ -75,10 +75,10 @@ public class ResultTest extends BaseTest {
 
     logger.info("Got " + resultDAO.getSessions());
     logger.info("Got for ex " + exid + " and user 1 " + resultDAO.getResultsForExIDInForUser(Collections.singleton(exid), 1, ""));
-    logger.info("Got " + resultDAO.getNumResults());
+    logger.info("Got " + resultDAO.getNumResults(projid));
 
     SlickResultDAO dao = (SlickResultDAO) spanish.getResultDAO();
-    logger.info(dao.getMonitorResults().size());
+    logger.info(dao.getMonitorResults(projid).size());
 
     List<Integer> ids = new ArrayList<>();
     for (CommonExercise ex : spanish.getExercises()) ids.add(ex.getID());

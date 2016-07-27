@@ -250,7 +250,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 	 * @see #setDependencies(String, String, IUserExerciseDAO, AddRemoveDAO, IAudioDAO)
 	 * @param removes
 	 */
-	private void addOverlays(Collection<Integer> removes) {
+	protected void addOverlays(Collection<Integer> removes) {
 		Collection<CommonExercise> overrides = userExerciseDAO.getOverrides();
 
 		if (overrides.size() > 0) {

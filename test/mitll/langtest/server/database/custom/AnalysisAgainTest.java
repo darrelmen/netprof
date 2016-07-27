@@ -41,6 +41,7 @@ public class AnalysisAgainTest {
     database.getExercises(-1);
   }
 
+/*
   @Test
   public void testMe() {
     database.getSectionHelper(-1);
@@ -55,5 +56,6 @@ public class AnalysisAgainTest {
     }
 
   }
+*/
 
 }

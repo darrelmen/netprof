@@ -45,7 +45,7 @@ import java.util.*;
 public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<CommonExercise> {
   private static final Logger logger = Logger.getLogger(DBExerciseDAO.class);
   private SlickUserExerciseDAO userExerciseDAO;
-  SlickProject project;
+  private SlickProject project;
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#makeExerciseDAO(String, boolean)
@@ -62,6 +62,12 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     this.userExerciseDAO = userExerciseDAO;
     this.project = project;
   }
+
+  /**
+   * I don't think we're doing user exercise mask out overrides anymore...
+   * @param removes
+   */
+  protected void addOverlays(Collection<Integer> removes) {}
 
   public Map<Integer,String> getIDToFL(int projid) {
     return userExerciseDAO.getIDToFL(projid);
@@ -84,7 +90,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 
       Collection<SlickRelatedExercise> related = userExerciseDAO.getAllRelated(projid);
 
-      logger.info(prefix + " readExercises got " + related.size() + " related exercises;");
+//      logger.info(prefix + " readExercises got " + related.size() + " related exercises;");
 
       Map<Integer, CommonExercise> idToEx = getIDToExercise(allNonContextExercises);
       Map<Integer, CommonExercise> idToContext =

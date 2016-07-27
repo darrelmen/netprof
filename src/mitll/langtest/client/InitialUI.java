@@ -258,7 +258,6 @@ public class InitialUI {
         public void onFailure(Throwable caught) {
           downloadFailedAlert();
         }
-
         public void onSuccess() {
           new EventTable().show(service);
         }

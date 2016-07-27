@@ -85,9 +85,9 @@ public class UserListManager implements IUserListManager {
 //  public static final int COMMENT_MAGIC_ID = -200;
 //  private static final int ATTN_LL_MAGIC_ID = -300;
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
-  private static final String DUP = "_dup_";
+//  private static final String DUP = "_dup_";
 
   private final IUserDAO userDAO;
   private final IReviewedDAO reviewedDAO, secondStateDAO;
@@ -318,17 +318,21 @@ public class UserListManager implements IUserListManager {
    * @param projid
    * @return null if user already has a list with this name
    */
-  private UserList createUserList(int userid, String name, String description, String dliClass, boolean isPrivate, int projid) {
+  private UserList createUserList(int userid,
+                                  String name,
+                                  String description,
+                                  String dliClass,
+                                  boolean isPrivate,
+                                  int projid) {
     User userWhere = userDAO.getUserWhere(userid);
     if (userWhere == null) {
       logger.error("huh? no user with id " + userid);
       return null;
     } else {
-      if (hasByName(userid, name)) {
+      if (hasByName(userid, name,projid)) {
         return null;
       } else {
         UserList e = new UserList(i++, userWhere, name, description, dliClass, isPrivate, System.currentTimeMillis());
-
         userListDAO.add(e, projid);
         logger.debug("createUserList : now there are " + userListDAO.getCount() + " lists total, for " + userid);
         return e;
@@ -336,8 +340,8 @@ public class UserListManager implements IUserListManager {
     }
   }
 
-  private boolean hasByName(int userid, String name) {
-    return userListDAO.hasByName(userid, name);
+  private boolean hasByName(int userid, String name,int projid) {
+    return userListDAO.hasByName(userid, name, projid);
   }
 
   @Override
@@ -357,7 +361,8 @@ public class UserListManager implements IUserListManager {
    * @see mitll.langtest.client.custom.exercise.NPFExercise#populateListChoices
    */
   @Override
-  public Collection<UserList<CommonShell>> getListsForUser(int userid, boolean listsICreated, boolean visitedLists, int projid) {
+  public Collection<UserList<CommonShell>> getListsForUser(int userid, boolean listsICreated, boolean visitedLists,
+                                                           int projid) {
     if (userid == -1) {
       return Collections.emptyList();
     }
@@ -379,7 +384,7 @@ public class UserListManager implements IUserListManager {
       }
     }
     if (visitedLists) {
-      for (UserList<CommonShell> userList : userListDAO.getListsForUser(userid)) {
+      for (UserList<CommonShell> userList : userListDAO.getListsForUser(userid, projid)) {
         if (!ids.contains(userList.getID())) {
           listsForUser.add(userList);
         }
@@ -387,7 +392,10 @@ public class UserListManager implements IUserListManager {
     }
 
     if (listsForUser.isEmpty()) {
-      logger.warn("getListsForUser - list is empty for " + userid + " only created " + listsICreated + " visited " + visitedLists);
+      if (DEBUG) {
+        logger.warn("getListsForUser - list is empty for " + userid + " only created " +
+            listsICreated + " visited " + visitedLists);
+      }
     } else if (favorite != null) {
       listsForUser.remove(favorite);
       listsForUser.add(0, favorite);// put at front
@@ -409,7 +417,7 @@ public class UserListManager implements IUserListManager {
    * @param userid
    * @param projid
    * @return
-   * @see mitll.langtest.server.database.user.UserManagement#addAndGetUser(String, String, String, User.Kind, boolean, int, String, String, String)
+   * @see mitll.langtest.server.database.user.UserManagement#addAndGetUser
    */
   @Override
   public UserList createFavorites(int userid, int projid) {
