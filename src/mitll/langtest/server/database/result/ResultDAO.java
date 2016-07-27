@@ -181,10 +181,11 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
 
   /**
    * @return
-   * @see DatabaseImpl#getMonitorResults()
+   * @see DatabaseImpl#getMonitorResults(int)
+   * @param projid
    */
   @Override
-  public List<MonitorResult> getMonitorResults() {
+  public List<MonitorResult> getMonitorResults(int projid) {
     try {
       synchronized (this) {
         if (cachedMonitorResultsForQuery != null) {
@@ -435,7 +436,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
     return getUserAndTimeForQuery(connection, statement);
   }
 
-  public int getNumResults() {
+  public int getNumResults(int projid) {
     int numResults = 0;
     try {
       Connection connection = database.getConnection(this.getClass().toString());

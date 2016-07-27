@@ -37,7 +37,6 @@ import audio.imagewriter.SimpleImageWriter;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabase;
-import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.ScoringAudioPanel;
 import mitll.langtest.server.amas.QuizCorrect;
@@ -1428,16 +1427,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * TODO : how to get per project?
-   *
    * @return
-   * @see mitll.langtest.client.instrumentation.EventTable#showDialog(LangTestDatabaseAsync)
+   * @see mitll.langtest.client.instrumentation.EventTable#show
    */
-  public List<Event> getEvents() {
-    //String language = getLanguage();
-    int projid = 0;
-    return db.getEventDAO().getAll();
-  }
+  public List<Event> getEvents() { return db.getEventDAO().getAll(getProjectID());  }
 
   /**
    * @param audioAttribute
@@ -1538,7 +1531,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.result.ResultManager#createProvider(int, com.google.gwt.user.cellview.client.CellTable)
    */
   @Override
-  public ResultAndTotal getResults(int start, int end, String sortInfo, Map<String, String> unitToValue, int userid, String flText, int req) {
+  public ResultAndTotal getResults(int start, int end, String sortInfo, Map<String, String> unitToValue, int userid,
+                                   String flText, int req) {
     List<MonitorResult> results = getResults(unitToValue, userid, flText);
     if (!results.isEmpty()) {
       Comparator<MonitorResult> comparator = results.get(0).getComparator(Arrays.asList(sortInfo.split(",")));
@@ -1565,7 +1559,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   @Override
   public int getNumResults() {
-    return db.getResultDAO().getNumResults();
+    return db.getResultDAO().getNumResults(getProjectID());
   }
 
   /**
@@ -1579,7 +1573,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see #getResults(int, int, String, java.util.Map, int, String, int)
    */
   private List<MonitorResult> getResults(Map<String, String> unitToValue, int userid, String flText) {
-    //logger.debug("getResults : request " + unitToValue + " " + userid + " " + flText);
+    logger.debug("getResults : request " + unitToValue + " " + userid + " " + flText);
+    int projectID = getProjectID();
+
     boolean isNumber = false;
     try {
       int i = Integer.parseInt(flText);
@@ -1596,11 +1592,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     boolean filterByUser = userid > -1;
 
-    Collection<MonitorResult> results = db.getMonitorResults();
+    Collection<MonitorResult> results = getMonitorResults();
 
     Trie<MonitorResult> trie;
 
-    for (String type : db.getTypeOrder(getProjectID())) {
+    for (String type : db.getTypeOrder(projectID)) {
       if (unitToValue.containsKey(type)) {
 
         // logger.debug("getResults making trie for " + type);
@@ -1654,6 +1650,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return new ArrayList<>(results);
   }
 
+  private Collection<MonitorResult> getMonitorResults() {
+    return db.getMonitorResults(getProjectID());
+  }
+
   /**
    * Respond to type ahead.
    *
@@ -1665,9 +1665,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.result.ResultManager#getTypeaheadUsing
    */
   @Override
-  public Collection<String> getResultAlternatives(Map<String, String> unitToValue, int userid, String flText,
+  public Collection<String> getResultAlternatives(Map<String, String> unitToValue,
+                                                  int userid,
+                                                  String flText,
                                                   String which) {
-    Collection<MonitorResult> results = db.getMonitorResults();
+    Collection<MonitorResult> results = getMonitorResults();
 
     logger.debug("getResultAlternatives request " + unitToValue + " userid=" + userid + " fl '" + flText + "' :'" + which + "'");
 

@@ -239,7 +239,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
    * @see CopyToPostgres#createProjectIfNotExists(DatabaseImpl)
    * @param reload
    */
-  public void populateProjects(boolean reload) {
+  void populateProjects(boolean reload) {
     populateProjects(pathHelper, serverProps, logAndNotify, configDir, reload);
   }
 
@@ -618,8 +618,19 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   public void rememberUserSelectedProject(User loggedInUser, int projectid) {
     Project project = getProject(projectid);
     logger.info("rememberUserSelectedProject user " + loggedInUser + " -> " + projectid + " : " + project);
-    getUserProjectDAO().add(loggedInUser.getId(), projectid);
+    int id = loggedInUser.getId();
+    rememberProject(id, projectid);
     setStartupInfo(loggedInUser);
+  }
+
+  /**
+   * Make sure there's a favorites list per user per project
+   * @param userid
+   * @param projectid
+   */
+  public void rememberProject(int userid, int projectid) {
+    getUserProjectDAO().add(userid, projectid);
+    getUserListManager().createFavorites(userid,projectid);
   }
 
   public void setStartupInfo(User userWhere) {
@@ -1250,9 +1261,10 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getResultAlternatives
    * @see mitll.langtest.server.LangTestDatabaseImpl#getResults
+   * @param projid
    */
-  public Collection<MonitorResult> getMonitorResults() {
-    List<MonitorResult> monitorResults = resultDAO.getMonitorResults();
+  public Collection<MonitorResult> getMonitorResults(int projid) {
+    List<MonitorResult> monitorResults = resultDAO.getMonitorResults(projid);
 
     for (MonitorResult result : monitorResults) {
       int exID = result.getExID();
@@ -1268,7 +1280,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
    * @param monitorResults
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getResults
-   * @see #getMonitorResults()
+   * @see #getMonitorResults(int)
    */
   public List<MonitorResult> getMonitorResultsWithText(List<MonitorResult> monitorResults) {
     addUnitAndChapterToResults(monitorResults, getIdToExerciseMap(1));

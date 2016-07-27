@@ -524,7 +524,8 @@ public class ResultManager extends PagerTable {
         // logger.info("getResults req " + unitToValue + " user " + userID + " text " + text + " val " + val);
         logger.info("got " + builder.toString());
 
-        service.getResults(start, end, builder.toString(), unitToValue, getUserID(), getText(), val, new AsyncCallback<ResultAndTotal>() {
+        service.getResults(start, end, builder.toString(), unitToValue, getUserID(), getText(), val,
+            new AsyncCallback<ResultAndTotal>() {
           @Override
           public void onFailure(Throwable caught) {
             Window.alert("Can't contact server.");
