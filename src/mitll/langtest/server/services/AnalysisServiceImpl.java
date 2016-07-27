@@ -55,7 +55,7 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
 
   @Override
   public void init() {
-    logger.info("init called for MonitoringServiceImpl");
+ //   logger.info("init called for MonitoringServiceImpl");
     findSharedDatabase();
     readProperties(getServletContext());
   }

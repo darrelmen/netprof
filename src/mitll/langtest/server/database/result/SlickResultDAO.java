@@ -244,7 +244,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO/*, ISche
 
   @Override
   public int getNumResults(int projid) {
-    return dao.getNumRows(projid);
+    return dao.numRowsForProject(projid);
   }
 
   @Override
