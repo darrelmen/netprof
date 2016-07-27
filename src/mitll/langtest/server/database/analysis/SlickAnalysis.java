@@ -33,6 +33,7 @@
 package mitll.langtest.server.database.analysis;
 
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.phone.IPhoneDAO;
 import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.server.database.user.IUserDAO;
@@ -40,8 +41,6 @@ import mitll.langtest.shared.analysis.*;
 import mitll.npdata.dao.SlickPerfResult;
 import org.apache.log4j.Logger;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
@@ -55,8 +54,8 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    * @param database
    * @param phoneDAO
    * @param exToRef
-   * @see DatabaseImpl#getAnalysis()
-   * @see DatabaseImpl#makeDAO(String, String, String)
+   * @see DatabaseImpl#configureProject
+   * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceForUser(int, int)
    */
   public SlickAnalysis(Database database,
                        IPhoneDAO phoneDAO,
@@ -67,25 +66,33 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   }
 
   @Override
-  public UserPerformance getPerformanceForUser(long id, int minRecordings) {
-    Map<Integer, UserInfo> best = getBestForUser((int) id, minRecordings);
-    return getUserPerformance(id, best);
+  public UserPerformance getPerformanceForUser(long userid, int projid, int minRecordings) {
+    Map<Integer, UserInfo> best = getBestForUser((int) userid, projid, minRecordings);
+    return getUserPerformance(userid, best);
   }
 
-  Map<Integer, UserInfo> getBestForUser(int id, int minRecordings) {
-    Collection<SlickPerfResult> perfForUser = resultDAO.getPerfForUser(id);
+  Map<Integer, UserInfo> getBestForUser(int id, int projid, int minRecordings) {
+    Collection<SlickPerfResult> perfForUser = resultDAO.getPerfForUser(id, projid);
+    logger.info("best for " + id + " in " + projid + " were " + perfForUser.size());
     return getBest(perfForUser, minRecordings);
   }
 
   @Override
-  public List<WordScore> getWordScoresForUser(long id, int minRecordings) {
-    Map<Integer, UserInfo> best = getBestForUser((int) id, minRecordings);
+  public List<WordScore> getWordScoresForUser(long id, int projid, int minRecordings) {
+    Map<Integer, UserInfo> best = getBestForUser((int) id, projid, minRecordings);
     return getWordScores(best);
   }
 
+  /**
+   * @see mitll.langtest.server.services.AnalysisServiceImpl#getPhoneScores(int, int)
+   * @param id
+   * @param minRecordings
+   * @param projid
+   * @return
+   */
   @Override
-  public PhoneReport getPhonesForUser(long id, int minRecordings) {
-    Map<Integer, UserInfo> best = getBestForUser((int) id, minRecordings);
+  public PhoneReport getPhonesForUser(long id, int minRecordings, int projid) {
+    Map<Integer, UserInfo> best = getBestForUser((int) id, projid, minRecordings);
     return getPhoneReport(id, best);
   }
 
@@ -93,11 +100,12 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    * TODO : how will this work for users on multiple projects?
    * @param userDAO
    * @param minRecordings
+   * @param projid
    * @return
    */
   @Override
-  public List<UserInfo> getUserInfo(IUserDAO userDAO, int minRecordings) {
-    Collection<SlickPerfResult> perfForUser = resultDAO.getPerf();
+  public List<UserInfo> getUserInfo(IUserDAO userDAO, int minRecordings, int projid) {
+    Collection<SlickPerfResult> perfForUser = resultDAO.getPerf(projid);
     Map<Integer, UserInfo> best = getBest(perfForUser, minRecordings);
     return getUserInfos(userDAO, best);
   }

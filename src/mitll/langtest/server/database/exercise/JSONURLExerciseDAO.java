@@ -91,7 +91,7 @@ public class JSONURLExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<C
    */
   private String getJSON() {
     String lessonPlan = serverProps.getLessonPlan();
-    logger.info(serverProps.getLanguage() + " Reading from " + lessonPlan);
+    logger.info(" Reading from " + lessonPlan);
     this.now = System.currentTimeMillis();
     return new HTTPClient().readFromGET(lessonPlan);
   }

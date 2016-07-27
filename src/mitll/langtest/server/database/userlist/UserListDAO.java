@@ -257,9 +257,9 @@ public class UserListDAO extends DAO implements IUserListDAO {
   }
 
   @Override
-  public boolean hasByName(long userid, String name) {
+  public boolean hasByName(long userid, String name, int projid) {
     try {
-      return !getByName(userid, name).isEmpty();
+      return !getByName(userid, name, projid).isEmpty();
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
@@ -267,7 +267,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
   }
 
   @Override
-  public List<UserList<CommonShell>> getByName(long userid, String name) {
+  public List<UserList<CommonShell>> getByName(long userid, String name, int projid) {
     try {
       String sql = "SELECT * from " + USER_EXERCISE_LIST + " where " +
           NAME +
@@ -334,11 +334,12 @@ public class UserListDAO extends DAO implements IUserListDAO {
 
   /**
    * @param userid
+   * @param projid
    * @return
    * @see IUserListManager#getListsForUser
    */
   @Override
-  public Collection<UserList<CommonShell>> getListsForUser(int userid) {
+  public Collection<UserList<CommonShell>> getListsForUser(int userid, int projid) {
     Collection<Integer> listsForVisitor = userListVisitorJoinDAO.getListsForVisitor(userid);
     //  final List<Long> listsForVisitor = (List<Long>) listsForVisitor1;
     List<UserList<CommonShell>> objects = Collections.emptyList();
