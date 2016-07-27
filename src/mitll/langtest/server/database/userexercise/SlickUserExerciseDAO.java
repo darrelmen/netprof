@@ -168,7 +168,6 @@ public class SlickUserExerciseDAO
    * @return
    * @see #getUserExercises(Collection)
    */
-  //  @Override
   private UserExercise fromSlick(SlickExercise slick) {
     Map<String, String> unitToValue = new HashMap<>();
     Iterator<String> iterator = getTypeOrder().iterator();
@@ -288,6 +287,14 @@ public class SlickUserExerciseDAO
     return copy;
   }
 
+  /**
+   * @see #getByProject(int, List, SectionHelper)
+   * @see #getContextByProject(int, List, SectionHelper)
+   * @param all
+   * @param typeOrder
+   * @param sectionHelper
+   * @return
+   */
   private List<CommonExercise> getExercises(Collection<SlickExercise> all,
                                             Collection<String> typeOrder,
                                             SectionHelper<CommonExercise> sectionHelper) {
@@ -390,9 +397,6 @@ public class SlickUserExerciseDAO
     };
   }
 
-//  public void insertRelated(int id, int contextid, int projectid) {
-//    relatedExerciseDAOWrapper.insert(new SlickRelatedExercise(-1, id, contextid, projectid));
-//  }
   public void addBulkRelated(List<SlickRelatedExercise> relatedExercises) {
     relatedExerciseDAOWrapper.addBulk(relatedExercises);
   }
