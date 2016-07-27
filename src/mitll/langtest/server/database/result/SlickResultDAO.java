@@ -34,10 +34,10 @@ package mitll.langtest.server.database.result;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.shared.answer.AudioType;
-import mitll.langtest.shared.result.MonitorResult;
 import mitll.langtest.shared.UserAndTime;
+import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
+import mitll.langtest.shared.result.MonitorResult;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickPerfResult;
 import mitll.npdata.dao.SlickResult;
@@ -175,10 +175,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO/*, ISche
   }
 
   @Override
-  public List<Result> getResults() {
-    List<SlickResult> all = getAll();
-    return getResults(all);
-  }
+  public List<Result> getResults() {  return getResults(getAll()); }
 
   private List<Result> getResults(Collection<SlickResult> all) {
     List<Result> copy = new ArrayList<>();
@@ -186,9 +183,8 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO/*, ISche
     return copy;
   }
 
-  private List<SlickResult> getAll() {
-    return dao.getAll();
-  }
+  private List<SlickResult> getAll() { return dao.getAll();  }
+  private List<SlickResult> getAllByProject(int projid) { return dao.getAllByProject(projid);  }
 
   @Override
   public Collection<Result> getResultsDevices() {
@@ -201,8 +197,8 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO/*, ISche
   }
 
   @Override
-  public List<MonitorResult> getMonitorResults() {
-    return getMonitorResults(getAll());
+  public List<MonitorResult> getMonitorResults(int projid) {
+    return getMonitorResults(getAllByProject(projid));
   }
 
   private List<MonitorResult> getMonitorResults(Collection<SlickResult> all) {
@@ -247,8 +243,8 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO/*, ISche
 
 
   @Override
-  public int getNumResults() {
-    return dao.getNumRows();
+  public int getNumResults(int projid) {
+    return dao.getNumRows(projid);
   }
 
   @Override
@@ -280,12 +276,12 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO/*, ISche
     return (answer == -1) ? path : path.substring(answer);
   }
 
-  public Collection<SlickPerfResult> getPerf() {
-    return dao.perf();
+  public Collection<SlickPerfResult> getPerf(int projid) {
+    return dao.perf(projid);
   }
 
-  public Collection<SlickPerfResult> getPerfForUser(int userid) {
-    return dao.perfForUser(userid);
+  public Collection<SlickPerfResult> getPerfForUser(int userid, int projid) {
+    return dao.perfForUser(userid, projid);
   }
 
   public boolean isEmpty() {

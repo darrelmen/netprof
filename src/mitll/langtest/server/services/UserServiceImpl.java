@@ -141,8 +141,6 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
 */
 
   /**
-   * Check other sites to see if the user exists somewhere else, and if so go ahead and use that person
-   * here.
    *
    * @param login
    * @param passwordH
@@ -337,7 +335,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     try {
       User sessionUser = getSessionUser();
       if (sessionUser != null) {
-        db.getUserProjectDAO().add(sessionUser.getId(), projectid);
+        db.rememberProject(sessionUser.getId(), projectid);
       }
       db.setStartupInfo(sessionUser,projectid);
       return sessionUser;

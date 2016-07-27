@@ -158,8 +158,10 @@ public class AnalysisPlot extends TimeSeriesPlot {
     granToLabel.put(FIVEMIN, "Minute");
   }
 
-  private void getPerformanceForUser(AnalysisServiceAsync service, int userid,
-                                     final String userChosenID, int minRecordings) {
+  private void getPerformanceForUser(AnalysisServiceAsync service,
+                                     int userid,
+                                     final String userChosenID,
+                                     int minRecordings) {
     service.getPerformanceForUser(userid, minRecordings, new AsyncCallback<UserPerformance>() {
       @Override
       public void onFailure(Throwable throwable) {
@@ -171,8 +173,10 @@ public class AnalysisPlot extends TimeSeriesPlot {
         List<TimeAndScore> rawBestScores = userPerformance.getRawBestScores();
         if (!rawBestScores.isEmpty()) {
           long last = rawBestScores.get(rawBestScores.size() - 1).getTimestamp();
+
           List<PhoneSession> phoneSessions = userPerformance.getGranularityToSessions().get(WEEK);
-          weeks.addAll(getPeriods(phoneSessions, WEEK, last));
+          weeks.addAll( getPeriods(phoneSessions, WEEK, last));
+
           List<PhoneSession> phoneSessions1 = userPerformance.getGranularityToSessions().get(MONTH);
           months.addAll(getPeriods(phoneSessions1, MONTH, last));
         }

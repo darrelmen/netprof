@@ -54,12 +54,6 @@ import java.util.*;
  */
 public class UserManagement {
   private static final Logger logger = Logger.getLogger(UserManagement.class);
-  /**
-   * @seez #userExists(HttpServletRequest, String, String, ServerProperties)
-   */
-//  private static final String NPF_CLASSROOM_PREFIX = "https://np.ll.mit.edu/npfClassroom";
-//  private static final String NO_USER = "-1";
-
   private final IUserDAO userDAO;
   private final IResultDAO resultDAO;
   private final IUserListManager userListManager;

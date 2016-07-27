@@ -135,7 +135,12 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
 
     addWidgets(playButtonSuffix, "Record");
     if (playAudio != null) {
-      controller.register(getPlayButton(), exercise.getID());
+      if (exercise == null) {
+        logger.warning("hmm exercise is null for " + instance);
+      }
+      else {
+        controller.register(getPlayButton(), exercise.getID());
+      }
     }
   }
 

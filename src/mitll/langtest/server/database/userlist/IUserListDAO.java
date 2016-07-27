@@ -58,9 +58,9 @@ public interface IUserListDAO extends IDAO {
 
   List<UserList<CommonShell>> getAllPublic(long userid, int projectID);
 
-  boolean hasByName(long userid, String name);
+  boolean hasByName(long userid, String name, int projid);
 
-  List<UserList<CommonShell>> getByName(long userid, String name);
+  List<UserList<CommonShell>> getByName(long userid, String name, int projid);
 
   boolean remove(long unique);
 
@@ -68,7 +68,7 @@ public interface IUserListDAO extends IDAO {
 
   UserList<CommonShell> getWhere(long unique, boolean warnIfMissing);
 
-  Collection<UserList<CommonShell>> getListsForUser(int userid);
+  Collection<UserList<CommonShell>> getListsForUser(int userid, int projid);
 
   void setUserExerciseDAO(IUserExerciseDAO userExerciseDAO);
 
