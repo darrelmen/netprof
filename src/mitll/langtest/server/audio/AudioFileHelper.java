@@ -1062,7 +1062,7 @@ public class AudioFileHelper implements AlignDecode {
       if (isNoModel()) {
         logger.info("---> makeDict : Can't find dict file at " + dictFile);
       } else {
-        logger.error("\n\n\n---> makeDict : Can't find dict file at " + dictFile);
+        logger.error("\n----->>>> makeDict : Can't find dict file at " + dictFile);
       }
       return new HTKDictionary();
     }
