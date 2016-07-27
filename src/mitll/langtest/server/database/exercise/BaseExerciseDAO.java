@@ -272,29 +272,29 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 			} else {
 				if (isKnownExercise(overrideID)) {
 					//  logger.info("for " + overrideID + " got " + userExercise.getUnitToValue());
-					// don't use the unit->value map stored in the user exercise table...
-					CommonExercise exercise = getExercise(overrideID);
+					// don't use the unit->value map stored in the user originalExercise table...
+					CommonExercise originalExercise = getExercise(overrideID);
 
-					long predefUpdateTime = exercise.getUpdateTime();
+					long predefUpdateTime = originalExercise.getUpdateTime();
 					long userExUpdateTime = userExercise.getUpdateTime();
 
 					if (userExUpdateTime > predefUpdateTime) {
-						Map<String, String> unitToValue = exercise.getUnitToValue();
+						Map<String, String> unitToValue = originalExercise.getUnitToValue();
 						userExercise.getCombinedMutableUserExercise().setUnitToValue(unitToValue);
 
-						logger.debug("addOverlays refresh exercise for " + userExercise.getID() + " '" +userExercise.getForeignLanguage()+
-								"' vs '" +exercise.getForeignLanguage()+
+						logger.debug("addOverlays refresh originalExercise for " + userExercise.getID() + " '" +userExercise.getForeignLanguage()+
+								"' vs '" +originalExercise.getForeignLanguage()+
                 "'");
 						sectionHelper.refreshExercise(userExercise);
 						addOverlay(userExercise);
 
 //          Collection<CommonExercise> exercisesForSimpleSelectionState = sectionHelper.getExercisesForSimpleSelectionState(unitToValue);
-//          for (CommonExercise exercise:exercisesForSimpleSelectionState) if (exercise.getOldID().equals(overrideID)) logger.warn("found " + exercise);
+//          for (CommonExercise originalExercise:exercisesForSimpleSelectionState) if (originalExercise.getOldID().equals(overrideID)) logger.warn("found " + originalExercise);
 						override++;
 					} else {
 						skippedOverride++;
 						if (skippedOverride < 5)
-							logger.info("for " + overrideID + " skipping override, since predef exercise is newer " + new Date(predefUpdateTime) + " > " + new Date(userExUpdateTime));
+							logger.info("for " + overrideID + " skipping override, since predef originalExercise is newer " + new Date(predefUpdateTime) + " > " + new Date(userExUpdateTime));
 					}
 				} else {
 					staleOverrides.add(overrideID);
@@ -451,9 +451,10 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 	}
 
 	/**
+	 * TODO: Need to turn this back on eventually
 	 * @see #getRawExercises()
 	 */
-	private void addNewExercises() {
+	@Deprecated  private void addNewExercises() {
 		if (addRemoveDAO != null) {
 			for (AddRemoveDAO.IdAndTime id : addRemoveDAO.getAdds()) {
 				CommonExercise where = userExerciseDAO.getByExID(id.getId());
