@@ -97,7 +97,8 @@ public class ParseResultJson {
  //   else {
 //      logger.warn("json = " + json);
    // }
-    Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap = parseJson(JSONObject.fromObject(json), "words", "w", usePhones);
+    Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap =
+        parseJson(JSONObject.fromObject(json), "words", "w", usePhones);
 
     if (imageTypeMapMap.isEmpty()) logger.warn("json " + json + " produced empty events map");
     else if (imageTypeMapMap.get(ImageType.WORD_TRANSCRIPT).isEmpty()) {

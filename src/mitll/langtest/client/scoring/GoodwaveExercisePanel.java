@@ -86,7 +86,8 @@ import java.util.List;
  * Time: 11:51 AM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & ScoredExercise> extends HorizontalPanel
+public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & ScoredExercise>
+    extends    HorizontalPanel
     implements BusyPanel, RequiresResize, ProvidesResize, CommentAnnotator {
   //  private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
 
