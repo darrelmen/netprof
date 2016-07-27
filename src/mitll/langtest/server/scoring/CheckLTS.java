@@ -67,7 +67,7 @@ class CheckLTS {
     this.letterToSoundClass = lts;
     this.htkDictionary = htkDictionary;
     if (htkDictionary == null || (htkDictionary.isEmpty() && hasModel)) {
-      logger.warn("\n\n\n dict is empty?");
+      logger.warn("\n ---->>>>> dict is empty?");
     }
     String language = languageProperty != null ? languageProperty : "";
     this.languageProperty = language;

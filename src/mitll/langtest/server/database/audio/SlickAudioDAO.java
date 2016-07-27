@@ -206,11 +206,13 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
       logger.error("huh? no user id for " + orig.getUserid() + " for " + orig + " in " + oldToNewUser.size());
       return null;
     } else {
+      long timestamp = orig.getTimestamp();
+
       return new SlickAudio(
           orig.getUniqueID(),
           userid,
           orig.getExid(),
-          new Timestamp(orig.getTimestamp()),
+          new Timestamp(timestamp),
           orig.getAudioRef(),
           audioType.toString(),
           orig.getDurationInMillis(),
