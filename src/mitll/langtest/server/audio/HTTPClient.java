@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.audio;
 
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.shared.amas.QAPair;
 import org.apache.log4j.Logger;
 
@@ -63,18 +64,6 @@ public class HTTPClient {
 
   /**
    * @see mitll.langtest.server.autocrt.MiraClassifier#getMiraScore(int, String, String, String, Collection, String, QAPair)
-   * @param url
-   */
-  public HTTPClient(String url) {
-    try {
-      httpConn = setupPostHttpConn(url);
-    } catch (IOException e) {
-      logger.error("Error constructing HTTPClient:\n" + e, e);
-    }
-  }
-
-  /**
-   * @see mitll.langtest.server.autocrt.MiraClassifier#getMiraScore(int, String, String, String, Collection, String, QAPair)
    * @param webserviceIP
    */
   public HTTPClient(String webserviceIP, boolean secure) {
@@ -88,17 +77,30 @@ public class HTTPClient {
    */
   public HTTPClient(String webserviceIP, int webservicePort, String service) {
     this("http://" + webserviceIP + ":" + webservicePort + "/" + service);
+
+  }
+
+  /**
+   * @see mitll.langtest.server.autocrt.MiraClassifier#getMiraScore(int, String, String, String, Collection, String, QAPair)
+   * @param url
+   */
+  public HTTPClient(String url) {
+    try {
+      logger.info("URL is : " +url);
+      httpConn = setupPostHttpConn(url);
+    } catch (IOException e) {
+      logger.error("Error constructing HTTPClient:\n" + e, e);
+    }
   }
 
   /**
    * @param url
    * @return
-   * @see mitll.langtest.server.database.DatabaseImpl#userExists(HttpServletRequest, String, String)
+   * @see mitll.langtest.server.database.exercise.DominoReader#readProjectInfo(ServerProperties)
    */
   public String readFromGET(String url) {
     try {
       logger.info("Reading from " + url);
-
       return receive(setupGetHttpConn(url));
     } catch (IOException e) {
       e.printStackTrace();
@@ -158,7 +160,7 @@ public class HTTPClient {
     sender.close();
   }
 
-  public String receive() throws IOException {
+  private String receive() throws IOException {
     return receive(this.httpConn, getReader(this.httpConn));
   }
 
