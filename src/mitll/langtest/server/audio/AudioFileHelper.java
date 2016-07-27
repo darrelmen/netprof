@@ -387,6 +387,7 @@ public class AudioFileHelper implements AlignDecode {
         true, allowAlternates, useOldSchool);
 
     if (recordInResults) {
+      answer.setTranscript(exercise1.getForeignLanguage());
       recordInResults(context, recordingInfo, validity, answer);
     }
     logger.debug("getAudioAnswerDecoding answer " + answer);
@@ -395,7 +396,8 @@ public class AudioFileHelper implements AlignDecode {
 
   private void recordInResults(AudioContext context,
                                AnswerInfo.RecordingInfo recordingInfo,
-                               AudioCheck.ValidityAndDur validity, AudioAnswer answer) {
+                               AudioCheck.ValidityAndDur validity,
+                               AudioAnswer answer) {
     int processDur = answer.getPretestScore() == null ? 0 : answer.getPretestScore().getProcessDur();
 
 /*      if (pretestScore != null) {
@@ -568,7 +570,8 @@ public class AudioFileHelper implements AlignDecode {
                                               AudioContext context,
                                               AnswerInfo.RecordingInfo recordingInfo,
 
-                                              String wavPath, File file,
+                                              String wavPath,
+                                              File file,
                                               AudioCheck.ValidityAndDur validity,
 
                                               float score,
@@ -591,9 +594,9 @@ public class AudioFileHelper implements AlignDecode {
       AnswerInfo info = new AnswerInfo(infoOrig,
           new AnswerInfo.ScoreInfo(true, score, new ScoreToJSON().getJsonFromAnswer(answer).toString(), processDur));
 
+      answer.setTranscript(exercise1.getForeignLanguage());
       int answerID = db.getAnswerDAO().addAnswer(info);
       answer.setResultID(answerID);
-      answer.setTranscript(exercise1.getForeignLanguage());
     }
     logger.debug("getAudioAnswerAlignment answer " + answer);
     return answer;
