@@ -97,8 +97,8 @@ public class ServerProperties {
   private static final String MIRA_DEFAULT = MIRA_LEN;
   private static final String MIRA_CLASSIFIER_URL = "miraClassifierURL";
 
-  private static final String WEBSERVICE_HOST_IP1 = "webserviceHostIP";
-  private static final String WEBSERVICE_HOST_PORT = "webserviceHostPort";
+//  private static final String WEBSERVICE_HOST_IP1 = "webserviceHostIP";
+//  private static final String WEBSERVICE_HOST_PORT = "webserviceHostPort";
   private static final String LESSON_PLAN_FILE = "lessonPlanFile";
   private static final String USE_MYSQL = "useMYSQL";
   private static final String USE_H_2 = "useH2";
@@ -113,7 +113,7 @@ public class ServerProperties {
   /**
    * I.e. the hydra web service for ASR
    */
-  private static final String WEBSERVICE_HOST_IP = "127.0.0.1";
+//  private static final String WEBSERVICE_HOST_IP = "127.0.0.1";
   private static final String USE_SCORE_CACHE = "useScoreCache";
 
   private static final String DEFAULT_PROPERTIES_FILE = "config.properties";
@@ -170,7 +170,9 @@ public class ServerProperties {
 
   public static List<String> CORE_PROPERTIES = Arrays.asList(
       ServerProperties.MODELS_DIR,
-      "N_OUTPUT", "N_HIDDEN", "webserviceHostPort"
+      "N_OUTPUT",
+      "N_HIDDEN",
+      "webserviceHostPort"
   );
 
   /**
@@ -454,7 +456,7 @@ public class ServerProperties {
    * @return true if only use old school hydec decoder
    */
   public boolean getOldSchoolService() {
-    return Boolean.parseBoolean(props.getProperty("oldSchoolService", FALSE)) || props.getProperty("webserviceHostPort") == null;
+    return Boolean.parseBoolean(props.getProperty("oldSchoolService", FALSE));// || props.getProperty("webserviceHostPort") == null;
   }
 
   private String getDateFromManifest(ServletContext servletContext) {
@@ -697,7 +699,7 @@ public class ServerProperties {
     return getIntPropertyDef("trimBeforeMillis", "" + TRIM_SILENCE_BEFORE);
   }
 
-  public long getTrimAfter() {
+  public long getTrimAfter()  {
     return getIntPropertyDef("trimAfterMillis", "" + TRIM_SILENCE_AFTER);
   }
 
