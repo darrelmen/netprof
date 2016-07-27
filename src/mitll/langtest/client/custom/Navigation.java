@@ -516,13 +516,15 @@ public class Navigation implements RequiresResize, ShowTab {
     addTabs();
     if (noPrevClickedTab()) {   // no previous tab
       logger.info("showInitialState show initial state for " + getUser() + " no previous tab selection");
-      reallyShowInitialState();
+//      reallyShowInitialState();
+      showDefaultInitialTab(true);
+
     } else {
       selectPreviousTab();
     }
   }
 
-  private void reallyShowInitialState() {
+  /*private void reallyShowInitialState() {
     listService.getListsForUser(getUser(), true, true, new AsyncCallback<Collection<UserList<CommonShell>>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -546,7 +548,7 @@ public class Navigation implements RequiresResize, ShowTab {
         }
       }
     });
-  }
+  }*/
 
   private int getUser() {
     return userManager.getUser();
