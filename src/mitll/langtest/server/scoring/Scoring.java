@@ -132,7 +132,7 @@ public abstract class Scoring {
     isMandarin = language.equalsIgnoreCase(MANDARIN);
     if (isMandarin) logger.warn("using mandarin segmentation.");
     try {
-      logger.debug("\n" + this + " : Factory for " + languageProperty);
+//      logger.debug("\n" + this + " : Factory for " + languageProperty);
 
       ltsFactory = new LTSFactory(languageProperty);
     } catch (Exception e) {

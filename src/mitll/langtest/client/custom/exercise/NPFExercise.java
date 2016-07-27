@@ -80,7 +80,6 @@ abstract class NPFExercise<T extends CommonShell & AudioRefExercise & ScoredExer
   private static final String NEW_LIST = "New List";
   private static final String ITEM_ADDED = "Item Added!";
   private static final String ADDING_TO_LIST = "Adding to list ";
- // private static final String PRACTICE = "Practice";
 
   private DropdownButton addToList;
   private int activeCount = 0;

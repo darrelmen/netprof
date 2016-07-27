@@ -120,8 +120,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   }
 
   /**
-   * TODO complete this!
-   *
+*
    * @param userid
    * @param ids
    * @param idToRef
