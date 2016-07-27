@@ -66,9 +66,12 @@ public interface LangTestDatabaseAsync {
                       boolean recordedWithFlash,
                       String deviceType,
                       String device,
-                      boolean doFlashcard, boolean recordInResults,
+                      boolean doFlashcard,
+                      boolean recordInResults,
                       boolean addToAudioTable,
-                      boolean allowAlternates, AsyncCallback<AudioAnswer> async);
+                      boolean allowAlternates,
+
+                      AsyncCallback<AudioAnswer> async);
 
 
   void getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence, int width, int height,
