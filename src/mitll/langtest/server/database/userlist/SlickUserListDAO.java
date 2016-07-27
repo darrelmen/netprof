@@ -244,13 +244,13 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
   }
 
   @Override
-  public boolean hasByName(long userid, String name) {
-    return dao.hasByName((int) userid, name);
+  public boolean hasByName(long userid, String name, int projid) {
+    return dao.hasByName((int) userid, name, projid);
   }
 
   @Override
-  public List<UserList<CommonShell>> getByName(long userid, String name) {
-    return fromSlick(dao.getByName((int) userid, name));
+  public List<UserList<CommonShell>> getByName(long userid, String name, int projid) {
+    return fromSlick(dao.getByName((int) userid, name, projid));
   }
 
   @Override
@@ -277,8 +277,8 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
   }
 
   @Override
-  public Collection<UserList<CommonShell>> getListsForUser(int userid) {
-    List<UserList<CommonShell>> userLists = fromSlick(dao.getVisitedBy(userid));
+  public Collection<UserList<CommonShell>> getListsForUser(int userid, int projid) {
+    List<UserList<CommonShell>> userLists = fromSlick(dao.getVisitedBy(userid,projid));
     populateLists(userLists, userid);
     return userLists;
   }

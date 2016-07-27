@@ -83,7 +83,7 @@ public class AudioConversion {
   @Deprecated private final String language;
   private final long trimMillisBefore;
   private final long trimMillisAfter;
-  private final ServerProperties props;
+ // private final ServerProperties props;
 
   /**
    * @param props
@@ -91,10 +91,11 @@ public class AudioConversion {
   public AudioConversion(ServerProperties props) {
     this.language = props.getLanguage();
     trimMillisBefore = props.getTrimBefore();
-    trimMillisAfter = props.getTrimAfter();
+    trimMillisAfter  = props.getTrimAfter();
     soxPath = getSox();
     audioCheck = new AudioCheck(props);
-    this.props = props;
+   // this.props = props;
+    setLame();
   }
 
   /**
@@ -609,7 +610,9 @@ public class AudioConversion {
     return new File(realContextPath, filePath);
   }
 
-  private String getLame() {
+  private String lamePath = null;
+  private String getLame() { return lamePath; }
+  private void setLame() {
     String lamePath = LAME_PATH_WINDOWS;    // Windows
     if (!new File(lamePath).exists()) {
       lamePath = LAME_PATH_LINUX;
@@ -619,9 +622,9 @@ public class AudioConversion {
       lamePath = LAME;
     }
     else {
-      logger.info("found  lame at " + new File(lamePath).getAbsolutePath());
+//      logger.info("found  lame at " + new File(lamePath).getAbsolutePath());
     }
-    return lamePath;
+    this.lamePath = lamePath;
   }
 
   private String getOggenc() {
@@ -683,7 +686,7 @@ public class AudioConversion {
     if (title == null) title = "";
     ProcessBuilder lameProc = new ProcessBuilder(lamePath, pathToAudioFile, mp3File, "--tt", title, "--ta", author);
     try {
-      logger.debug("running lame" + lameProc.command());
+//      logger.debug("running lame" + lameProc.command());
       new ProcessRunner().runProcess(lameProc);
     } catch (IOException e) {
       //  logger.error("Couldn't run " + lameProc);

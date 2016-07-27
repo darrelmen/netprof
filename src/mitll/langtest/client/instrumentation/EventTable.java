@@ -56,7 +56,6 @@ import java.util.List;
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since
  */
 public class EventTable extends PagerTable {
   private static final int PAGE_SIZE = 5;
@@ -64,12 +63,9 @@ public class EventTable extends PagerTable {
   private Button closeButton;
 
   /**
+   * @see mitll.langtest.client.InitialUI.EventsClickHandler#onClick(ClickEvent)
    */
   public void show(final LangTestDatabaseAsync service) {
-    showDialog(service);
-  }
-
-  private void showDialog(final LangTestDatabaseAsync service) {
     // Create the popup dialog box
     final DialogBox dialogBox = new DialogBox();
     dialogBox.setText("Events");
@@ -100,7 +96,7 @@ public class EventTable extends PagerTable {
           dialogVPanel.remove(closeButton);
         }
 
-        Widget table = getTable(result,getDownloadAnchor());
+        Widget table = getTable(result, getDownloadAnchor());
         dialogVPanel.add(table);
         dialogVPanel.add(closeButton);
 
@@ -119,9 +115,9 @@ public class EventTable extends PagerTable {
     });
   }
 
-    @Override
-    protected SafeHtml getURL2() {
-      return getAnchorHTML("downloadEvents", "Download Excel");
+  @Override
+  protected SafeHtml getURL2() {
+    return getAnchorHTML("downloadEvents", "Download Excel");
   }
 
   private Widget getTable(List<Event> result, Widget rightOfPager) {
@@ -163,7 +159,7 @@ public class EventTable extends PagerTable {
     TextColumn<Event> lang = new TextColumn<Event>() {
       @Override
       public String getValue(Event contact) {
-        return  contact.getWidgetType();
+        return contact.getWidgetType();
       }
     };
     lang.setSortable(true);
@@ -190,7 +186,7 @@ public class EventTable extends PagerTable {
     TextColumn<Event> gender = new TextColumn<Event>() {
       @Override
       public String getValue(Event contact) {
-        return "" +contact.getUserID();
+        return "" + contact.getUserID();
       }
     };
     gender.setSortable(true);
@@ -208,7 +204,7 @@ public class EventTable extends PagerTable {
     TextColumn<Event> device = new TextColumn<Event>() {
       @Override
       public String getValue(Event contact) {
-        return "" +contact.getDevice();
+        return "" + contact.getDevice();
       }
     };
     device.setSortable(true);
@@ -220,7 +216,7 @@ public class EventTable extends PagerTable {
 
   private Column<Event, SafeHtml> getDateColumn(CellTable<Event> table) {
     SafeHtmlCell cell = new SafeHtmlCell();
-    Column<Event,SafeHtml> dateCol = new Column<Event, SafeHtml>(cell) {
+    Column<Event, SafeHtml> dateCol = new Column<Event, SafeHtml>(cell) {
       @Override
       public SafeHtml getValue(Event answer) {
         return getSafeHTMLForTimestamp(answer.getTimestamp());

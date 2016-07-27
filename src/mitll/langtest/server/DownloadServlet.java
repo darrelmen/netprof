@@ -297,7 +297,7 @@ public class DownloadServlet extends DatabaseServlet {
       db.usersToXLSX(outputStream);
     } else if (encodedFileName.toLowerCase().contains("results")) {
       setResponseHeader(response, "results.xlsx");
-      new ResultDAOToExcel().writeExcelToStream(db.getMonitorResults(), db.getTypeOrder(projectid), outputStream);
+      new ResultDAOToExcel().writeExcelToStream(db.getMonitorResults(projid), db.getTypeOrder(projectid), outputStream);
     } else if (encodedFileName.toLowerCase().contains("events")) {
       setResponseHeader(response, "events.xlsx");
       new EventDAOToExcel(db).toXLSX(db.getEventDAO().getAll(), outputStream);
