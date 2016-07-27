@@ -86,7 +86,6 @@ public class SlickAnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
         answerInfo.getScoreJson(),
         answerInfo.isWithFlash(),
         (float) answerInfo.getSnr(),
-       // getLanguage(),
         -1,
         answerInfo.getTranscript(),
         answerInfo.getProjid());
