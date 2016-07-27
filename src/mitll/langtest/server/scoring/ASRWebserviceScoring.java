@@ -422,7 +422,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @return
    * @see #scoreRepeatExercise
    */
-  private Object[] runHydra(String audioPath, String transcript, Collection<String> lmSentences, String tmpDir, boolean decode, int end) {
+  private Object[] runHydra(String audioPath, String transcript, Collection<String> lmSentences, String tmpDir,
+                            boolean decode, int end) {
     // reference trans
     String cleaned = slfFile.cleanToken(transcript).trim();
     if (isMandarin) {

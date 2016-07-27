@@ -245,10 +245,13 @@ public class UserExerciseListVisitorDAO extends DAO implements IUserExerciseList
       ResultSet rs = statement.executeQuery();
 
       while (rs.next()) {
+        Timestamp timestamp = rs.getTimestamp(UserExerciseListVisitorDAO.MODIFIED);
+
+        long time = (timestamp != null) ? timestamp.getTime() : System.currentTimeMillis();
         visitors.add(new Pair(
             rs.getInt(UserExerciseListVisitorDAO.VISITORID),
             rs.getInt(UserExerciseListVisitorDAO.USERLISTID),
-            rs.getTimestamp(UserExerciseListVisitorDAO.MODIFIED).getTime()
+            time
         ));
       }
       finish(connection, statement, rs);
