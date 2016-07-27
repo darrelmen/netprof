@@ -65,7 +65,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
 
   @Override
   public void init() {
-    logger.info("init called for UserServiceImpl");
+  //  logger.info("init called for UserServiceImpl");
     findSharedDatabase();
     readProperties(getServletContext());
   }

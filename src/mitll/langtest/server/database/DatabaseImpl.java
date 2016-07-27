@@ -1205,7 +1205,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
    * TODO : add get tablename method to slick DAOs.
    */
   public void createTables() {
-    logger.info("createTables create slick tables - has " + dbConnection.getTables());
+   // logger.info("createTables create slick tables - has " + dbConnection.getTables());
 
     List<String> created = new ArrayList<>();
 
