@@ -288,8 +288,10 @@ public class DownloadServlet extends DatabaseServlet {
    * @throws IOException
    * @see #doGet
    */
-  private void returnSpreadsheet(HttpServletResponse response, DatabaseImpl db,
-                                 String encodedFileName, int projectid) throws IOException {
+  private void returnSpreadsheet(HttpServletResponse response,
+                                 DatabaseImpl db,
+                                 String encodedFileName,
+                                 int projectid) throws IOException {
     response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     ServletOutputStream outputStream = response.getOutputStream();
     if (encodedFileName.toLowerCase().contains("users")) {
@@ -297,7 +299,7 @@ public class DownloadServlet extends DatabaseServlet {
       db.usersToXLSX(outputStream);
     } else if (encodedFileName.toLowerCase().contains("results")) {
       setResponseHeader(response, "results.xlsx");
-      new ResultDAOToExcel().writeExcelToStream(db.getMonitorResults(projid), db.getTypeOrder(projectid), outputStream);
+      new ResultDAOToExcel().writeExcelToStream(db.getMonitorResults(projectid), db.getTypeOrder(projectid), outputStream);
     } else if (encodedFileName.toLowerCase().contains("events")) {
       setResponseHeader(response, "events.xlsx");
       new EventDAOToExcel(db).toXLSX(db.getEventDAO().getAll(), outputStream);

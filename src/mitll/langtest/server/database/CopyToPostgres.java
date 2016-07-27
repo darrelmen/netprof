@@ -772,20 +772,26 @@ public class CopyToPostgres<T extends CommonShell> {
     //}
   }
 
-
-  private void copyReviewed(DatabaseImpl db, Map<Integer, Integer> oldToNewUser, Map<String, Integer> exToID, boolean isReviewed) {
+  private void copyReviewed(DatabaseImpl db,
+                            Map<Integer, Integer> oldToNewUser,
+                            Map<String, Integer> exToID,
+                            boolean isReviewed) {
     SlickReviewedDAO dao = (SlickReviewedDAO) (isReviewed ? db.getReviewedDAO() : db.getSecondStateDAO());
-    // if (dao.isEmpty()) {
+
     String tableName = isReviewed ? ReviewedDAO.REVIEWED : ReviewedDAO.SECOND_STATE;
     ReviewedDAO originalDAO = new ReviewedDAO(db, tableName);
     List<SlickReviewed> bulk = new ArrayList<>();
     Collection<StateCreator> all = originalDAO.getAll();
     logger.info("found " + all.size() + " for " + tableName);
     int missing = 0;
+    Set<Integer> missingUsers = new HashSet<>();
+
     for (StateCreator stateCreator : all) {
-      Integer userID = oldToNewUser.get((int) stateCreator.getCreatorID());
+      int creatorID = (int) stateCreator.getCreatorID();
+      Integer userID = oldToNewUser.get(creatorID);
       if (userID == null) {
-        logger.error("copyReviewed no user " + stateCreator.getCreatorID());
+        boolean add = missingUsers.add(creatorID);
+        if (add)  logger.error("copyReviewed no user " + creatorID);
       } else {
         Integer exid = exToID.get(stateCreator.getOldExID());
         if (exid != null) {
@@ -795,9 +801,10 @@ public class CopyToPostgres<T extends CommonShell> {
         } else missing++;
       }
     }
-    if (missing > 0) logger.warn("missing " + missing + " due to missing ex id fk");
+    if (missing > 0) {
+      logger.warn("missing " + missing + " due to missing ex id fk");
+    }
     dao.addBulk(bulk);
-    // }
   }
 
   /**

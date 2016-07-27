@@ -1282,7 +1282,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String wavEndingAudio = answer.replaceAll(".mp3", ".wav").replaceAll(".ogg", ".wav");
     Result cachedResult = db.getRefResultDAO().getResult(exerciseID, wavEndingAudio);
     if (cachedResult != null) {
-      logger.debug("getPretestScore Cache HIT  : align exercise id = " + exerciseID + " file " + answer + " found previous " + cachedResult.getUniqueID());
+      if (DEBUG) logger.debug("getPretestScore Cache HIT  : align exercise id = " + exerciseID + " file " + answer + " found previous " + cachedResult.getUniqueID());
     } else {
       logger.debug("getPretestScore Cache MISS : align exercise id = " + exerciseID + " file " + answer);
     }
@@ -1294,11 +1294,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     long timeToRunHydec = System.currentTimeMillis() - then;
 
-    logger.debug("getPretestScore : scoring file " + testAudioFile + " for " +
+    logger.debug("getPretestScore : scoring" +
+        " file " + testAudioFile + " for " +
         " exid " + exerciseID +
         " sentence " + sentence.length() + " characters long : " +
         " score " + asrScoreForAudio.getHydecScore() +
-        " took " + timeToRunHydec + " millis " + " usePhoneToDisplay " + usePhoneToDisplay1);
+        " took " + timeToRunHydec + " millis " +
+        " usePhoneToDisplay " + usePhoneToDisplay1);
 
     if (resultID > -1 && cachedResult == null) { // alignment has two steps : 1) post the audio, then 2) do alignment
       db.rememberScore(resultID, asrScoreForAudio);
@@ -1884,6 +1886,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
                                     boolean allowAlternates) {
     int exerciseID = audioContext.getExid();
 
+
+    logger.info("writeAudioFile got request " + audioContext + " payload "+ base64EncodedString.length());
+
     boolean amas = serverProps.isAMAS();
 
     CommonExercise commonExercise = amas ? null : db.getCustomOrPredefExercise(exerciseID);
@@ -2120,19 +2125,24 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   private String getInfo(String message) {
     HttpServletRequest request = getThreadLocalRequest();
-    String remoteAddr = request.getHeader("X-FORWARDED-FOR");
-    if (remoteAddr == null || remoteAddr.isEmpty()) {
-      remoteAddr = request.getRemoteAddr();
+    if (request != null) {
+      String remoteAddr = request.getHeader("X-FORWARDED-FOR");
+      if (remoteAddr == null || remoteAddr.isEmpty()) {
+        remoteAddr = request.getRemoteAddr();
+      }
+      String userAgent = request.getHeader("User-Agent");
+
+      String strongName = getPermutationStrongName();
+      String serverName = getThreadLocalRequest().getServerName();
+      String msgStr = message + "\n" + "remoteAddr=" + remoteAddr + "\nuser agent: " + userAgent +
+          "\ngwt: " + strongName +
+          "\nserver: " + serverName;
+
+      return msgStr;
     }
-    String userAgent = request.getHeader("User-Agent");
-
-    String strongName = getPermutationStrongName();
-    String serverName = getThreadLocalRequest().getServerName();
-    String msgStr = message + "\n" + "remoteAddr=" + remoteAddr + "\nuser agent: " + userAgent +
-        "\ngwt: " + strongName +
-        "\nserver: " + serverName;
-
-    return msgStr;
+    else {
+      return "";
+    }
   }
 
   private MailSupport getMailSupport() {
