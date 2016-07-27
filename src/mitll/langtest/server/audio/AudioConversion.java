@@ -80,21 +80,21 @@ public class AudioConversion {
   private static final int MIN_WARN_DUR = 30;
 
   private final String soxPath;
-  @Deprecated private final String language;
+  //@Deprecated
+  //private final String language;
   private final long trimMillisBefore;
   private final long trimMillisAfter;
- // private final ServerProperties props;
+  // private final ServerProperties props;
 
   /**
    * @param props
    */
   public AudioConversion(ServerProperties props) {
-    this.language = props.getLanguage();
     trimMillisBefore = props.getTrimBefore();
-    trimMillisAfter  = props.getTrimAfter();
+    trimMillisAfter = props.getTrimAfter();
     soxPath = getSox();
     audioCheck = new AudioCheck(props);
-   // this.props = props;
+    // this.props = props;
     setLame();
   }
 
@@ -113,7 +113,12 @@ public class AudioConversion {
                                                       boolean useSensitiveTooLoudCheck, boolean quietAudioOK) {
     long then = System.currentTimeMillis();
     file.getParentFile().mkdirs();
+
+    if (DEBUG)  logger.debug("writeAudioFile: write wav file " + file.getAbsolutePath());
+
     writeToFile(getBytesFromBase64String(base64EncodedString), file);
+
+    if (DEBUG)  logger.debug("writeAudioFile: wrote wav file " + file.getAbsolutePath());
 
     if (!file.exists()) {
       logger.error("writeAudioFile : huh? can't find " + file.getAbsolutePath());
@@ -126,7 +131,7 @@ public class AudioConversion {
     long now = System.currentTimeMillis();
     long diff = now - then;
     if (diff > MIN_WARN_DUR) {
-      logger.debug("writeAudioFile: took " + diff + " millis to write wav file (" +file.getName()+
+      logger.debug("writeAudioFile: took " + diff + " millis to write wav file (" + file.getName() +
           ") " + valid.durationInMillis + " millis long");
     }
     return valid;
@@ -253,7 +258,7 @@ public class AudioConversion {
    * @see #convertBase64ToAudioFiles
    */
   public TrimInfo trimSilence(final File wavFile) {
-    //  logger.info("trimSilence " + wavFile.getAbsolutePath());
+    if (DEBUG) logger.info("trimSilence " + wavFile.getAbsolutePath());
     if (!wavFile.exists()) {
       logger.error("trimSilence " + wavFile + " doesn't exist");
       return new TrimInfo();
@@ -268,6 +273,10 @@ public class AudioConversion {
       if (durationInSecondsTrimmed > 0.1 && diff > DIFF_THRESHOLD) {
         copyAndDeleteOriginal(trimmed, wavFile);
 
+        if (DEBUG) logger.debug("trimSilence (" + //props.getLanguage() +
+            ")  convert original " + wavFile.getName() +
+            " to trim wav file : " + durationInSeconds + " before, " + durationInSecondsTrimmed + " after.");
+
         long now = System.currentTimeMillis();
         if (now - then > 0) {
           logger.debug("trimSilence (" + //props.getLanguage() +
@@ -276,9 +285,8 @@ public class AudioConversion {
         }
         return new TrimInfo(durationInSecondsTrimmed, true);
       } else {
-        //  long now = System.currentTimeMillis();
-/*        logger.info("trimSilence : took " + (now - then) + " millis to NOT convert original " + wavFile.getName() +
-            " to trim wav file : " + durationInSeconds + " before, " + durationInSecondsTrimmed + " after.");*/
+        logger.info("trimSilence : took " + (System.currentTimeMillis() - then) + " millis to NOT convert original " + wavFile.getName() +
+            " to trim wav file : " + durationInSeconds + " before, " + durationInSecondsTrimmed + " after.");
 
         return new TrimInfo(durationInSeconds, false);
       }
@@ -334,14 +342,28 @@ public class AudioConversion {
 
   private void copyAndDeleteOriginal(File srcFile, File replacement) throws IOException {
     FileUtils.copyFile(srcFile, replacement);
-
+    if (DEBUG) logger.debug("copyAndDeleteOriginal " + srcFile.getAbsolutePath() + " to " + replacement.getAbsolutePath());
     // cleanup
     deleteParentTempDir(srcFile);
   }
 
+  /**
+   * @see #makeTempFile(String)
+   * @param prefix
+   * @return
+   * @throws IOException
+   */
   private File makeTempDir(String prefix) throws IOException {
-    Path audioConversion = Files.createTempDirectory("AudioConversion_makeTempDir_" + language + "_for_" + prefix);
-    return audioConversion.toFile();
+    String prefix1 = "AudioConversion_makeTempDir_for_" + prefix;
+    if (DEBUG) logger.info("makeTempDir " +prefix);
+    Path audioConversion = Files.createTempDirectory(prefix1);
+    if (DEBUG) logger.info("makeTempDir made " +audioConversion);
+
+    File file = audioConversion.toFile();
+
+    if (DEBUG) logger.info("makeTempDir made " +file.getAbsolutePath());
+
+    return file;
   }
 
   private void deleteParentTempDir(File srcFile) throws IOException {
@@ -416,7 +438,7 @@ public class AudioConversion {
   private String doTrimSilence(String pathToAudioFile) throws IOException {
     final String tempTrimmed = makeTempFile("doTrimSilence");
 
-    // logger.info("doTrimSilence running sox on " + new File(pathToAudioFile).getAbsolutePath() + " to produce " + new File(tempTrimmed).getAbsolutePath());
+    if (DEBUG) logger.info("doTrimSilence running sox on " + new File(pathToAudioFile).getAbsolutePath() + " to produce " + new File(tempTrimmed).getAbsolutePath());
     String trimBefore = "0.30";// + trimMillisBefore;
     String trimAfter = "0.30";// + trimMillisAfter;
     ProcessBuilder soxFirst = new ProcessBuilder(
@@ -427,16 +449,17 @@ public class AudioConversion {
 
 //    logger.error("doTrimSilence trim silence on " + pathToAudioFile);
 //    String asRunnable = soxFirst.command().toString().replaceAll(",", " ");
-    //   logger.info("doTrimSilence " + asRunnable);
+    if (DEBUG)  logger.info("doTrimSilence " + soxFirst.command());
 
     if (!new ProcessRunner().runProcess(soxFirst)) {
-      // logger.info("tempDir Exists " + exists);
+      //logger.info("tempDir Exists " + exists);
       logger.info("pathToAudioFile exists " + new File(pathToAudioFile).exists());
       logger.info("tempTrimmed exists     " + new File(tempTrimmed).exists());
       logger.error("couldn't do trim silence on " + pathToAudioFile);
       String asRunnable2 = soxFirst.command().toString().replaceAll(",", " ");
       logger.info("path " + asRunnable2);
     }
+    if (DEBUG) logger.info("doTrimSilence finished " + soxFirst.command());
 
     return tempTrimmed;
   }
@@ -611,7 +634,11 @@ public class AudioConversion {
   }
 
   private String lamePath = null;
-  private String getLame() { return lamePath; }
+
+  private String getLame() {
+    return lamePath;
+  }
+
   private void setLame() {
     String lamePath = LAME_PATH_WINDOWS;    // Windows
     if (!new File(lamePath).exists()) {
@@ -620,8 +647,7 @@ public class AudioConversion {
     if (!new File(lamePath).exists()) {
       logger.error("no lame installed at " + lamePath + " or " + LAME_PATH_WINDOWS);
       lamePath = LAME;
-    }
-    else {
+    } else {
 //      logger.info("found  lame at " + new File(lamePath).getAbsolutePath());
     }
     this.lamePath = lamePath;

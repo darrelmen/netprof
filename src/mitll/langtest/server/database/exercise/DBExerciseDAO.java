@@ -58,7 +58,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       SlickProject project
   ) {
     super(serverProps, userListManager, addDefects, project.language());
-    logger.info("reading from database--------- ");
+   // logger.info("reading from database--------- ");
     this.userExerciseDAO = userExerciseDAO;
     this.project = project;
   }

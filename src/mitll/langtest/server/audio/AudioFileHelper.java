@@ -234,6 +234,7 @@ public class AudioFileHelper implements AlignDecode {
     String wavPath = pathHelper.getLocalPathToAnswer(audioContext);
     File file = pathHelper.getAbsoluteFile(wavPath);
 
+    logger.debug("writeAudioFile got req " + exercise1 + " for " + audioContext + " " + recordingInfoInitial + " to " +wavPath + " and " + file.getAbsolutePath());
     //long then = System.currentTimeMillis();
     AudioCheck.ValidityAndDur validity =
         audioConversion.convertBase64ToAudioFiles(base64EncodedString, file, isRefRecording, isQuietAudioOK());
@@ -924,19 +925,17 @@ public class AudioFileHelper implements AlignDecode {
    */
   private String getSentenceToUse(String sentence) {
     boolean english = getLanguage().equalsIgnoreCase("English") && sentence.equals("%") || sentence.equals("％");
-    if (english) {
+    //if (english) {
       //logger.info("convert " +sentence + " to percent");
-    } else {
+    //} else {
       //boolean english1 = getLanguage().equalsIgnoreCase("English");
       // boolean equals = sentence.equals("%") || sentence.equals("％");
       //logger.info("NOT convert '" +sentence + "' to percent : " +english1 + " equals " + equals);
-    }
+   // }
     return english ? "percent" : sentence;
   }
 
-  private String getLanguage() {
-    return language;
-  }
+  private String getLanguage() { return language;  }
 
   private boolean isEnglishSite() {
     return getLanguage().equalsIgnoreCase("English");
@@ -983,10 +982,12 @@ public class AudioFileHelper implements AlignDecode {
                                      String url,
 
                                      boolean doFlashcard,
-                                     boolean canUseCache, boolean allowAlternates, boolean useOldSchool) {
+                                     boolean canUseCache,
+                                     boolean allowAlternates,
+                                     boolean useOldSchool) {
     AudioAnswer audioAnswer = new AudioAnswer(url, validity.getValidity(), reqid, validity.durationInMillis);
     if (doFlashcard) {
-      //    makeASRScoring();
+      logger.debug("getAudioAnswer exercise " + exercise + " : " + file.getAbsolutePath() + " : " + url);
       PretestScore flashcardAnswer = decodeCorrectnessChecker.getFlashcardAnswer(exercise, file, audioAnswer,
           getLanguage(),
           canUseCache, allowAlternates, useOldSchool);

@@ -366,7 +366,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    */
   private void dealWithRPCError(Throwable caught) {
     String message = caught.getMessage();
-    if (message.length() > MAX_MSG_LEN) message = message.substring(0, MAX_MSG_LEN);
+    if (message != null && message.length() > MAX_MSG_LEN) message = message.substring(0, MAX_MSG_LEN);
     if (!message.trim().equals("0")) {
       feedback.showErrorMessage("Server error", "Please clear your cache and reload the page. (" +
           message +

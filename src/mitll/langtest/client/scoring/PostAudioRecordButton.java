@@ -118,7 +118,6 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   private void postAudioFile(String base64EncodedWavFile) {
     reqid++;
     final long then = System.currentTimeMillis();
-    // logger.info("PostAudioRecordButton.postAudioFile : " +  getAudioType());
 
     AudioContext audioContext = new AudioContext(
         reqid,
@@ -128,11 +127,20 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
         index,
         getAudioType());
 
-    service.writeAudioFile(base64EncodedWavFile,
+    logger.info("PostAudioRecordButton.postAudioFile : " +  getAudioType() + " : " + audioContext);
+
+    service.writeAudioFile(
+        base64EncodedWavFile,
         audioContext,
-        controller.usingFlashRecorder(), "browser", controller.getBrowserInfo(),
-        false, recordInResults,
-        shouldAddToAudioTable(), false,
+
+        controller.usingFlashRecorder(),
+        "browser",
+        controller.getBrowserInfo(),
+        false,
+        recordInResults,
+        shouldAddToAudioTable(),
+        false,
+
         new AsyncCallback<AudioAnswer>() {
           public void onFailure(Throwable caught) {
             long now = System.currentTimeMillis();
@@ -146,7 +154,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
             long now = System.currentTimeMillis();
             long roundtrip = now - then;
 
-          //  logger.info("PostAudioRecordButton : Got audio answer " + result + " platform is " + getPlatform());
+            logger.info("PostAudioRecordButton : Got audio answer " + result + " platform is " + getPlatform());
 
             if (result.getReqid() != reqid) {
               logger.info("ignoring old response " + result);
