@@ -37,11 +37,11 @@ import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.CopyToPostgres;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
+import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickProject;
-import mitll.npdata.dao.SlickRelatedExercise;
 import mitll.npdata.dao.SlickUserProject;
 import org.apache.log4j.Logger;
 import org.junit.Test;
@@ -64,7 +64,7 @@ public class PostgresTest extends BaseTest {
     spanish.dropAll();
     scala.collection.immutable.List<String> listOfTables = spanish.getListOfTables();
 
-    logger.info("after drop "+ listOfTables);
+    logger.info("after drop " + listOfTables);
   }
 
   @Test
@@ -123,7 +123,9 @@ public class PostgresTest extends BaseTest {
     Collection<SlickProject> all = database.getProjectDAO().getAll();
     int toIndex = 10;
     for (SlickProject project : all) {
-      if (project.language().equalsIgnoreCase("russian")) {
+      String language = project.language();
+      logger.info("lang " + language);
+      if (language.equalsIgnoreCase("russian")) {
         ExerciseDAO<CommonExercise> exerciseDAO = database.getExerciseDAO(project.id());
         List<CommonExercise> rawExercises = exerciseDAO.getRawExercises();
         for (CommonExercise ex : rawExercises.subList(0, toIndex)) {
@@ -140,6 +142,25 @@ public class PostgresTest extends BaseTest {
 
 
   @Test
+  public void testAnalysisWordsForUser() {
+
+    DatabaseImpl database = getDatabaseLight("netProf", false);
+    Collection<SlickProject> all = database.getProjectDAO().getAll();
+    int toIndex = 10;
+    for (SlickProject project : all) {
+      String language = project.language();
+      logger.info("lang " + language);
+      int id = project.id();
+      List<WordScore> wordScoresForUser = database.getAnalysis(id).getWordScoresForUser(4, id, 1);
+      for (WordScore ws : wordScoresForUser) {
+        logger.info("testWords got " + ws);
+      }
+
+    }
+
+  }
+
+  @Test
   public void testAddUserProject() {
     DatabaseImpl spanish = getDatabaseLight("spanish", false);
     SlickProject next = spanish.getProjectDAO().getAll().iterator().next();
@@ -148,8 +169,9 @@ public class PostgresTest extends BaseTest {
     logger.info("user is " + byID + " project " + next);
     spanish.rememberUserSelectedProject(byID, id);
     for (SlickUserProject up : spanish.getUserProjectDAO().getAll()) {
-      logger.info("got " +up);
-    };
+      logger.info("got " + up);
+    }
+    ;
 
   }
 
@@ -161,7 +183,7 @@ public class PostgresTest extends BaseTest {
     logger.info("user is " + byID);
     int i = spanish.getUserProjectDAO().mostRecentByUser(byID.getId());
 
-    logger.info("most recent is "+ i);
+    logger.info("most recent is " + i);
 
   }
 
@@ -172,6 +194,7 @@ public class PostgresTest extends BaseTest {
     SlickProject next = spanish.getProjectDAO().getAll().iterator().next();
 
   }
+
   private static DBConnection getConnection(String config) {
     File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
     String parent = file.getParentFile().getAbsolutePath();
