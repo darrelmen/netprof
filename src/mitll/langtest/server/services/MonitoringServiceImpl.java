@@ -50,7 +50,7 @@ public class MonitoringServiceImpl extends MyRemoteServiceServlet implements Mon
 
   @Override
   public void init() {
-    logger.info("init called for MonitoringServiceImpl");
+    //logger.info("init called for MonitoringServiceImpl");
     findSharedDatabase();
     readProperties(getServletContext());
   }

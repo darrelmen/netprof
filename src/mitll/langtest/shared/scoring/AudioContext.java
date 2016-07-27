@@ -119,7 +119,13 @@ public class AudioContext implements IsSerializable {
   }
 
   public String toString() {
-    return "user " + userid + " id " + exid + " q " + questionID + " req " + reqid + " type " + audioType;
+    return
+        "user " + userid +
+            " projid " + projid +
+            " id " + exid +
+            //" q " + questionID +
+            " req " + reqid +
+            " type " + audioType;
   }
 
   /**

@@ -275,7 +275,7 @@ public class Banner implements RequiresResize {
       @Override
       public void onSuccess(User aUser) {
         userNotification.setProjectStartupInfo(aUser);
-        logger.info("set project for " +aUser + " show initial state");
+      //  logger.info("set project for " +aUser + " show initial state");
         navigation.showInitialState();
       }
     });
