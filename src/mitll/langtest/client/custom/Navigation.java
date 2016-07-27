@@ -399,7 +399,7 @@ public class Navigation implements RequiresResize, ShowTab {
 
     analysis.getContent().clear();
     ShowTab showTab = this;
-    AnalysisTab w = new AnalysisTab(service, controller, userManager.getUser(), showTab, userManager.getUserID(), 1, null);
+    AnalysisTab w = new AnalysisTab(service, controller, getUser(), showTab, userManager.getUserID(), 1, null);
     analysis.getContent().add(w);
   }
 
@@ -514,9 +514,8 @@ public class Navigation implements RequiresResize, ShowTab {
    */
   public void showInitialState() {
     addTabs();
-/*    logger.info("showInitialState show initial state for " + user +
-        " : getting user lists " + controller.isReviewMode());*/
     if (noPrevClickedTab()) {   // no previous tab
+      logger.info("showInitialState show initial state for " + getUser() + " no previous tab selection");
       reallyShowInitialState();
     } else {
       selectPreviousTab();
@@ -524,7 +523,7 @@ public class Navigation implements RequiresResize, ShowTab {
   }
 
   private void reallyShowInitialState() {
-    listService.getListsForUser(userManager.getUser(), true, true, new AsyncCallback<Collection<UserList<CommonShell>>>() {
+    listService.getListsForUser(getUser(), true, true, new AsyncCallback<Collection<UserList<CommonShell>>>() {
       @Override
       public void onFailure(Throwable caught) {
       }
@@ -549,6 +548,10 @@ public class Navigation implements RequiresResize, ShowTab {
     });
   }
 
+  private int getUser() {
+    return userManager.getUser();
+  }
+
   /**
    *
    */
@@ -569,7 +572,7 @@ public class Navigation implements RequiresResize, ShowTab {
 
   private boolean noPrevClickedTab() {
     String value = getClickedTab();
-    //  logger.info("selected tab = " + value);
+    logger.info("noPrevClickedTab selected tab = " + value);
     return value.isEmpty();
   }
 
@@ -581,28 +584,31 @@ public class Navigation implements RequiresResize, ShowTab {
    * @see #showInitialState()
    */
   private void selectPreviousTab() {
-    String value = getClickedTab();
-    TabAndContent tabAndContent = nameToTab.get(value);
-    Integer tabIndex = nameToIndex.get(value);
+    String clickedTab = getClickedTab();
+    TabAndContent tabAndContent = nameToTab.get(clickedTab);
+    Integer tabIndex = nameToIndex.get(clickedTab);
 
-    logger.info("selectPreviousTab '" + value + "' index " + tabIndex + " tabAndContent " + tabAndContent);
+    logger.info("selectPreviousTab '" + clickedTab + "' index " + tabIndex + " tabAndContent " + tabAndContent);
 
-    String orig = value;
+    String orig = clickedTab;
     if (tabIndex == null) {
-      if (value.equals(OTHERS_LISTS) || value.equals(YOUR_LISTS) || value.equals(CREATE) || value.equals(BROWSE)) {
-        value = STUDY_LISTS;
-        tabIndex = nameToIndex.get(value);
+      if (clickedTab.equals(OTHERS_LISTS) ||
+          clickedTab.equals(YOUR_LISTS) ||
+          clickedTab.equals(CREATE) ||
+          clickedTab.equals(BROWSE)) {
+        clickedTab = STUDY_LISTS;
+        tabIndex = nameToIndex.get(clickedTab);
       }
     }
     if (tabIndex != null) {
       tabPanel.selectTab(tabIndex);
       clickOnTab(tabAndContent);
 
-      if (value.equals(YOUR_LISTS)) {
+      if (clickedTab.equals(YOUR_LISTS)) {
         listManager.showMyLists(true, false);
-      } else if (value.equals(OTHERS_LISTS)) {
+      } else if (clickedTab.equals(OTHERS_LISTS)) {
         listManager.showMyLists(false, true);
-      } else if (value.equals(STUDY_LISTS)) {
+      } else if (clickedTab.equals(STUDY_LISTS)) {
         listManager.clickOnYourStuff();
         DivWidget content = studyLists.getContent();
         Widget widget = content.getWidget(0);
@@ -619,32 +625,32 @@ public class Navigation implements RequiresResize, ShowTab {
         } else {
           listManager.viewBrowse(); // CHAPTERS
         }
-      } else if (value.equals(BROWSE)) {
+      } else if (clickedTab.equals(BROWSE)) {
         listManager.viewBrowse(); // CHAPTERS
-      } else if (value.equals(FIX_DEFECTS)) {
+      } else if (clickedTab.equals(FIX_DEFECTS)) {
         listManager.viewReview(review.getContent());
-      } else if (value.equals(PRACTICE_DIALOG)) {
+      } else if (clickedTab.equals(PRACTICE_DIALOG)) {
         dialogWindow.viewDialog(dialog.getContent());
-      } else if (value.equals(CHAPTERS)) {
+      } else if (clickedTab.equals(CHAPTERS)) {
         learnHelper.showNPF(chapters, LEARN);
-      } else if (value.equals(RECORD_AUDIO)) {
+      } else if (clickedTab.equals(RECORD_AUDIO)) {
         recorderHelper.showNPF(recorderTab, AudioType.RECORDER.toString());
-      } else if (value.equals(RECORD_EXAMPLE)) {
+      } else if (clickedTab.equals(RECORD_EXAMPLE)) {
         recordExampleHelper.showNPF(recordExampleTab, AudioType.CONTEXT_REGULAR.toString());
-      } else if (value.equals(MARK_DEFECTS) && markDefectsTab != null) {
+      } else if (clickedTab.equals(MARK_DEFECTS) && markDefectsTab != null) {
         markDefectsHelper.showNPF(markDefectsTab, CONTENT1);
-      } else if (value.equals(PRACTICE) && practiceTab != null) {
+      } else if (clickedTab.equals(PRACTICE) && practiceTab != null) {
         showPracticeTab();
-      } else if (value.equals(ANALYSIS) && analysis != null) {
+      } else if (clickedTab.equals(ANALYSIS) && analysis != null) {
         showAnalysis();
-      } else if (value.equals(STUDENT_ANALYSIS) && studentAnalysis != null) {
+      } else if (clickedTab.equals(STUDENT_ANALYSIS) && studentAnalysis != null) {
         showStudentAnalysis();
       } else {
-        logger.info("selectPreviousTab got unknown value '" + value + "'");
+        logger.info("selectPreviousTab got unknown clickedTab '" + clickedTab + "'");
         showDefaultInitialTab(true);
       }
     } else {
-      logger.warning("selectPreviousTab : found value  '" + value + "' " +
+      logger.warning("selectPreviousTab : found clickedTab  '" + clickedTab + "' " +
           " but I only know about tabs : " + nameToIndex.keySet());
       showDefaultInitialTab(false);
     }
@@ -736,7 +742,6 @@ public class Navigation implements RequiresResize, ShowTab {
    * @see #showInitialState()
    */
   private boolean createdByYou(UserList ul) {
-    return ul.getCreator().getId() == userManager.getUser();
+    return ul.getCreator().getId() == getUser();
   }
-
 }
