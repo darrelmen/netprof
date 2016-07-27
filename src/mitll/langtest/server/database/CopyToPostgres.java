@@ -376,6 +376,7 @@ public class CopyToPostgres<T extends CommonShell> {
     Collection<AudioAttribute> audioAttributes = db.getH2AudioDAO().getAudioAttributes();
     logger.info("h2 audio  " + audioAttributes.size());
     int missing = 0;
+    int skippedMissingUser = 0;
     Set<String> missingExIDs = new TreeSet<>();
     for (AudioAttribute att : audioAttributes) {
       String oldexid = att.getOldexid();
@@ -383,7 +384,11 @@ public class CopyToPostgres<T extends CommonShell> {
       if (id != null) {
         att.setExid(id);
         SlickAudio slickAudio = slickAudioDAO.getSlickAudio(att, oldToNewUser, projid);
-        bulk.add(slickAudio);
+        if (slickAudio != null) {
+         // logger.info(slickAudio.toString());
+          bulk.add(slickAudio);
+        }
+        else skippedMissingUser++;
       } else {
         missingExIDs.add(oldexid);
         if (missing < 50) logger.warn("missing ex for " + att + " : " + oldexid);
@@ -391,7 +396,10 @@ public class CopyToPostgres<T extends CommonShell> {
       }
     }
     long then = System.currentTimeMillis();
+    logger.debug("add bulk : " + bulk.size() + " audio... " + skippedMissingUser + " were skipped due to missing user");
     slickAudioDAO.addBulk(bulk);
+    logger.debug("finished adding bulk : " + bulk.size() + " audio...");
+
     long now = System.currentTimeMillis();
 
     if (missing > 0) {
