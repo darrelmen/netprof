@@ -70,13 +70,13 @@ public class PerformanceTest extends BaseTest {
       H2Connection connection = getH2Connection(path);
       DatabaseImpl database = getDatabase(connection, "spanish", path);
 
-      UserPerformance performance = database.getAnalysis(-1).getPerformanceForUser(id, 1);
-      writer = getWriter("RawUserPerformance");
-      writer.write(performance.toRawCSV());
-      writer.close();
-
-      List<WordScore> wordScoresForUser = database.getAnalysis(-1).getWordScoresForUser(id, 1);
-      for (WordScore ws : wordScoresForUser) logger.info("got " + ws);
+//      UserPerformance performance = database.getAnalysis(-1).getPerformanceForUser(id, 1);
+//      writer = getWriter("RawUserPerformance");
+//      writer.write(performance.toRawCSV());
+//      writer.close();
+//
+//      List<WordScore> wordScoresForUser = database.getAnalysis(-1).getWordScoresForUser(id, 1);
+//      for (WordScore ws : wordScoresForUser) logger.info("got " + ws);
 
     } catch (IOException e) {
     }
@@ -199,7 +199,7 @@ public class PerformanceTest extends BaseTest {
     DatabaseImpl database = getDatabase(connection, "spanish", path);
     int id = 71;
     //int id = 535;   // tiffany
-    UserPerformance performanceForUser = database.getAnalysis(-1).getPerformanceForUser(id, 1);
+    UserPerformance performanceForUser = database.getAnalysis(-1).getPerformanceForUser(id, 1,1);
 
     logger.info("perf " + performanceForUser);
     Map<Long, List<PhoneSession>> granularityToSessions = performanceForUser.getGranularityToSessions();
@@ -210,7 +210,7 @@ public class PerformanceTest extends BaseTest {
     }
     // List<WordScore> wordScoresForUser = database.getAnalysis(-1).getWordScoresForUser(id, 1);
 
-    PhoneReport report = database.getAnalysis(-1).getPhonesForUser(id, 1);
+    PhoneReport report = database.getAnalysis(-1).getPhonesForUser(id, 1, 1);
 
     Map<String, PhoneStats> phoneToAvgSorted = report.getPhoneToAvgSorted();
     if (phoneToAvgSorted == null) {
@@ -289,7 +289,7 @@ public class PerformanceTest extends BaseTest {
 
     logger.info("jsonPhoneReport " + jsonPhoneReport);
   }
-
+/*
   @Test
   public void testJennifer() {
     String path = "npfUrdu";
@@ -307,9 +307,9 @@ public class PerformanceTest extends BaseTest {
 //    for (WordScore ws : wordScoresForUser) {
 //      logger.debug("Got " + ws);
 //    }
-  }
+  }*/
 
-  @Test
+/*  @Test
   public void testAlexander() {
     String path = "../dbs/" + "msaClassroom";
     String urdu = "msa";
@@ -326,9 +326,9 @@ public class PerformanceTest extends BaseTest {
     List<WordScore> wordScoresForUser = analysis.getWordScoresForUser(id, 1);
 
     for (WordScore ws : wordScoresForUser) logger.debug("Got " + ws);
-  }
+  }*/
 
-  @Test
+/*  @Test
   public void testKarateFighter() {
     String path = "../dbs/" + "msaClassroom";
     String urdu = "msa";
@@ -346,7 +346,7 @@ public class PerformanceTest extends BaseTest {
     logger.info("got " + wordScoresForUser.size());
 
     // for (WordScore ws : wordScoresForUser) logger.debug("Got " + ws);
-  }
+  }*/
 
 /*  @Test
   public void testMissingInfo() {
@@ -389,7 +389,7 @@ public class PerformanceTest extends BaseTest {
     }
   }
 */
-  @Test
+/*  @Test
   public void testRussian() {
     String path = "../dbs/" + "npfRussian";//.replaceAll(".h2.db", "");
     String urdu = "russian";
@@ -428,7 +428,7 @@ public class PerformanceTest extends BaseTest {
     List<WordScore> wordScoresForUser = analysis.getWordScoresForUser(id, 1);
 
     for (WordScore ws : wordScoresForUser) logger.debug("Got WordScore " + ws);
-  }
+  }*/
 
   @Test
   public void testEgyptian() {
@@ -438,18 +438,18 @@ public class PerformanceTest extends BaseTest {
     DatabaseImpl database = getDatabase(getH2Connection(path), urdu, path);
     IAnalysis analysis = database.getAnalysis(-1);
 
-    List<UserInfo> userInfo = analysis.getUserInfo(database.getUserDAO(), 5);
+    List<UserInfo> userInfo = analysis.getUserInfo(database.getUserDAO(), 5, 1);
     for (UserInfo userInfo1 : userInfo) logger.warn("Got " + userInfo1);
   }
-
-  @Test
-  public void testWords() {
-    // int id = 71;
-    int id = 26;
-    DatabaseImpl database = getSpanishDatabase();
-    List<WordScore> wordScoresForUser = database.getAnalysis(-1).getWordScoresForUser(id, 1);
-    for (WordScore ws : wordScoresForUser) logger.info("testWords got " + ws);
-  }
+//
+//  @Test
+//  public void testWords() {
+//    // int id = 71;
+//    int id = 26;
+//    DatabaseImpl database = getSpanishDatabase();
+//    List<WordScore> wordScoresForUser = database.getAnalysis(-1).getWordScoresForUser(id, 1, 1);
+//    for (WordScore ws : wordScoresForUser) logger.info("testWords got " + ws);
+//  }
 
   public DatabaseImpl getSpanishDatabase() {
     String path = "../dbs/" + "npfSpanish";//.replaceAll(".h2.db", "");
@@ -463,7 +463,7 @@ public class PerformanceTest extends BaseTest {
     //int id = 41; // big mandarin classroom user
     int id = 1;
     DatabaseImpl database = getSpanishDatabase();
-    PhoneReport phoneReport = database.getAnalysis(-1).getPhonesForUser(id, 1);
+    PhoneReport phoneReport = database.getAnalysis(-1).getPhonesForUser(id, 1, 1);
 
     Map<String, List<WordAndScore>> phonesForUser = phoneReport.getPhoneToWordAndScoreSorted();
     long now = System.currentTimeMillis();
@@ -489,7 +489,7 @@ public class PerformanceTest extends BaseTest {
 //    int id = 71;
     DatabaseImpl database = getSpanishDatabase();
 
-    List<UserInfo> userInfo = database.getAnalysis(-1).getUserInfo(database.getUserDAO(), 5);
+    List<UserInfo> userInfo = database.getAnalysis(-1).getUserInfo(database.getUserDAO(), 5, 1);
     // PhoneReport phoneReport = (PhoneReport) userInfo;
 
     // Map<String, List<WordAndScore>> phonesForUser = phoneReport.getPhoneToWordAndScoreSorted();

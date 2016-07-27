@@ -54,7 +54,7 @@ public interface IResultDAO extends IDAO {
 
   Result getResultByID(int id);
 
-  List<MonitorResult> getMonitorResults();
+  List<MonitorResult> getMonitorResults(int projid);
 
   List<MonitorResult> getMonitorResultsByID(int id);
 
@@ -80,5 +80,5 @@ public interface IResultDAO extends IDAO {
 
   void invalidateCachedResults();
 
-  int getNumResults();
+  int getNumResults(int projid);
 }

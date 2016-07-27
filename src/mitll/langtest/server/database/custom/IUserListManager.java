@@ -50,9 +50,9 @@ import java.util.List;
 import java.util.Map;
 
 public interface IUserListManager {
-  public static final int REVIEW_MAGIC_ID = -100;
-  public static final int COMMENT_MAGIC_ID = -200;
-  public static final int ATTN_LL_MAGIC_ID = -300;
+  int REVIEW_MAGIC_ID  = -100;
+  int COMMENT_MAGIC_ID = -200;
+  int ATTN_LL_MAGIC_ID = -300;
 
   void setStateOnExercises();
 

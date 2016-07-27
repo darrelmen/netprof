@@ -187,12 +187,12 @@ public abstract class Analysis extends DAO {
 
   /**
    * @param id
-   * @param minRecordings
-   * @return
+   * @param projid
+   *@param minRecordings  @return
    * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceForUser(int, int)
    * @see mitll.langtest.client.analysis.AnalysisPlot#AnalysisPlot
    */
-  abstract public UserPerformance getPerformanceForUser(long id, int minRecordings);
+  abstract public UserPerformance getPerformanceForUser(long id, int projid, int minRecordings);
 
  // abstract protected Map<Integer, UserInfo> getBest(int minRecordings);
 
@@ -217,11 +217,11 @@ public abstract class Analysis extends DAO {
 
   /**
    * @param id
-   * @param minRecordings
-   * @return
+   * @param projid
+   *@param minRecordings  @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getWordScores
    */
-  public abstract List<WordScore> getWordScoresForUser(long id, int minRecordings);
+  public abstract List<WordScore> getWordScoresForUser(long id, int projid, int minRecordings);
 
   List<WordScore> getWordScores(Map<Integer, UserInfo> best) {
     Collection<UserInfo> values = best.values();
@@ -247,15 +247,21 @@ public abstract class Analysis extends DAO {
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getPhoneScores
    */
-  public abstract PhoneReport getPhonesForUser(long id, int minRecordings);
+  public abstract PhoneReport getPhonesForUser(long id, int minRecordings, int projid);
 
-  PhoneReport getPhoneReport(long id,   Map<Integer, UserInfo> best) {
+  /**
+   * @see #getPhonesForUser(long, int)
+   * @param userid
+   * @param best
+   * @return
+   */
+  PhoneReport getPhoneReport(long userid, Map<Integer, UserInfo> best) {
     long then = System.currentTimeMillis();
     long start = System.currentTimeMillis();
     long now = System.currentTimeMillis();
 
     if (DEBUG)
-      logger.debug(getLanguage() + " getPhonesForUser " + id + " took " + (now - then) + " millis to get " + best.size());
+      logger.debug( " getPhonesForUser " + userid + " took " + (now - then) + " millis to get " + best.size());
 
     if (best.isEmpty()) return new PhoneReport();
 
@@ -269,17 +275,17 @@ public abstract class Analysis extends DAO {
 
     if (DEBUG) logger.info("getPhonesForUser from " + resultsForQuery.size() + " added " + ids.size() + " ids ");
     then = System.currentTimeMillis();
-    PhoneReport phoneReport = phoneDAO.getWorstPhonesForResults(id, ids, exToRef);
+    PhoneReport phoneReport = phoneDAO.getWorstPhonesForResults(userid, ids, exToRef);
 
     now = System.currentTimeMillis();
 
     if (DEBUG)
-      logger.debug(getLanguage() + " getPhonesForUser " + id + " took " + (now - then) + " millis to phone report");
+      logger.debug(" getPhonesForUser " + userid + " took " + (now - then) + " millis to phone report");
     if (DEBUG) logger.info("getPhonesForUser report phoneReport " + phoneReport);
 
     if (DEBUG) {
       now = System.currentTimeMillis();
-      logger.debug(getLanguage() + " getPhonesForUser " + id + " took " + (now - start) + " millis to get " +
+      logger.debug(" getPhonesForUser " + userid + " took " + (now - start) + " millis to get " +
           /*phonesForUser.size() +*/ " phones");
     }
     setSessions(phoneReport.getPhoneToAvgSorted());
@@ -289,6 +295,12 @@ public abstract class Analysis extends DAO {
 
   private void setSessions(Map<String, PhoneStats> phoneToAvgSorted) { new PhoneAnalysis().setSessions(phoneToAvgSorted);  }
 
+  /**
+   * @see SlickAnalysis#getBest(Collection, int)
+   * @param minRecordings
+   * @param userToBest
+   * @return
+   */
   protected Map<Integer, UserInfo> getBestForQuery(int minRecordings, Map<Integer, List<BestScore>> userToBest) {
     if (DEBUG) logger.info("getBestForQuery got " + userToBest.values().iterator().next().size());
 
@@ -389,7 +401,7 @@ public abstract class Analysis extends DAO {
    *
    * @param bestScores
    * @return
-   * @see #getWordScoresForUser(long, int)
+   * @see #getWordScoresForUser(long, int, int)
    */
   private List<WordScore> getWordScore(List<BestScore> bestScores) {
     List<WordScore> results = new ArrayList<WordScore>();
