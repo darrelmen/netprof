@@ -61,7 +61,7 @@ public class AnswerInfo {
   private int processDur;
   private int roundTripDur;
   private String validity;
-  private String transcript;
+  private String transcript = "";
   private double snr;
 
   public int getProjid() {
