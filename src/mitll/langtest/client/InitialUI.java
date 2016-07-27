@@ -197,7 +197,6 @@ public class InitialUI {
     return userManager.getUserID() == null ? "" : ("" + userManager.getUserID());
   }
 
-
   /**
    * @return
    * @see #makeHeaderRow()
@@ -601,7 +600,7 @@ public class InitialUI {
       userID = user.getId();
     }
 
-    // logger.info("gotUser : userID " + userID);
+    logger.info("gotUser : userID " + userID);
 
     banner.setUserName(getGreeting());
     if (userID != lastUser) {
@@ -626,7 +625,7 @@ public class InitialUI {
 //    logger.info("configureUIGivenUser : user changed - new " + userID + " vs last " + lastUser +
 //        " audio type " + getAudioType() + " perms " + getPermissions());
     populateRootPanelIfLogin();
-//    logger.info("\tconfigureUIGivenUser : " + userID + " get exercises...");
+    logger.info("\tconfigureUIGivenUser : " + userID + " get exercises...");
     navigation.showInitialState();
     showUserPermissions(userID);
   }
@@ -638,7 +637,7 @@ public class InitialUI {
   protected void populateRootPanelIfLogin() {
     int childCount = firstRow.getElement().getChildCount();
 
-    //logger.info("populateRootPanelIfLogin root " + firstRow.getElement().getNodeName() + " childCount " + childCount);
+    logger.info("populateRootPanelIfLogin root " + firstRow.getElement().getNodeName() + " childCount " + childCount);
     if (childCount > 0) {
       Node child = firstRow.getElement().getChild(0);
       Element as = Element.as(child);

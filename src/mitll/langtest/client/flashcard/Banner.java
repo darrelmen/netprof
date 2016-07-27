@@ -233,7 +233,7 @@ public class Banner implements RequiresResize {
       @Override
       public void onSuccess(Collection<SlimProject> projects) {
         projectChoices.clear();
-        logger.info("got " + projects.size() + " projects");
+     //   logger.info("got " + projects.size() + " projects");
      //   boolean anyAdded = false;
         //    logger.info("\tpopulateListChoices : found list " + result.size() + " choices");
         //projectChoices.addItem("Choose a Language");
@@ -254,25 +254,29 @@ public class Banner implements RequiresResize {
             public void onChange(ChangeEvent event) {
               for (SlimProject project1 : projects) {
                 if (project1.getName().equals(projectChoices.getValue())) {
-                  userServiceAsync.setProject(project1.getProjectid(), new AsyncCallback<User>() {
-                    @Override
-                    public void onFailure(Throwable throwable) {
-
-                    }
-
-                    @Override
-                    public void onSuccess(User aUser) {
-                      userNotification.setProjectStartupInfo(aUser);
-                      navigation.showInitialState();
-                      //Window.Location.reload();
-                    }
-                  });
+                  setProjectForUser(project1);
                   break;
                 }
               }
             }
           });
         }
+      }
+    });
+  }
+
+  private void setProjectForUser(SlimProject project1) {
+    userServiceAsync.setProject(project1.getProjectid(), new AsyncCallback<User>() {
+      @Override
+      public void onFailure(Throwable throwable) {
+
+      }
+
+      @Override
+      public void onSuccess(User aUser) {
+        userNotification.setProjectStartupInfo(aUser);
+        logger.info("set project for " +aUser + " show initial state");
+        navigation.showInitialState();
       }
     });
   }
