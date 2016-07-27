@@ -90,7 +90,6 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    */
   private final String ip;
   private final int port;
-  //Project project;
 
   /**
    * @param deployPath
