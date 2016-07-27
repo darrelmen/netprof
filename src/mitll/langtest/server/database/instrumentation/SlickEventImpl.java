@@ -149,7 +149,10 @@ public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
 
   @Override
   public List<Event> getAll(Integer projid) {
+    logger.info("get events for " + projid);
     List<SlickEvent> all = eventDAOWrapper.getAll(projid);
+    logger.info("got events for " + projid + " num = " + all.size());
+
     return getEvents(all);
   }
 

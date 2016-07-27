@@ -89,11 +89,13 @@ class WordContainer extends SimplePagingContainer<WordScore> implements Analysis
   private final ShowTab learnTab;
   private final Heading heading;
   private final boolean spanish;
+  private List<WordScore> sortedHistory;
+  private SortedSet<WordScore> byTime;
 
   /**
    * @param controller
    * @param plot
-   * @see AnalysisTab#getWordScores(LangTestDatabaseAsync, ExerciseController, int, ShowTab, AnalysisPlot, Panel, int)
+   * @see AnalysisTab#getWordScores
    */
   WordContainer(ExerciseController controller, AnalysisPlot plot, ShowTab learnTab, Heading w) {
     super(controller);
@@ -106,14 +108,11 @@ class WordContainer extends SimplePagingContainer<WordScore> implements Analysis
   }
 
   private final DateTimeFormat superShortFormat = DateTimeFormat.getFormat("MMM d");
-  private final DateTimeFormat noYearFormat = DateTimeFormat.getFormat("E MMM d h:mm a");
+  //private final DateTimeFormat noYearFormat = DateTimeFormat.getFormat("E MMM d h:mm a");
 
   protected int getPageSize() {
     return ROWS_TO_SHOW;
   }
-
-  private List<WordScore> sortedHistory;
-  private SortedSet<WordScore> byTime;
 
   /**
    * @param sortedHistory

@@ -141,13 +141,13 @@ public class UserSecurityManager {
    * @return The user from the data store. Should not be null.
    * @throws DominoSessionException when session is empty or has no user token.
    */
-  private User getUser(HttpServletRequest request) throws DominoSessionException {
+/*  private User getUser(HttpServletRequest request) throws DominoSessionException {
     User user = (User) request.getAttribute(USER_REQUEST_ATT);
     if (user == null) {
       throw new DominoSessionException("No user found");
     }
     return user;
-  }
+  }*/
 
   /**
    * Get the current user out of the HTTP session or DB.
@@ -159,7 +159,7 @@ public class UserSecurityManager {
   private User lookupUser(HttpServletRequest request, boolean throwOnFail)
       throws DominoSessionException {
     if (request == null) return null;
-    long startMS = System.currentTimeMillis();
+    //long startMS = System.currentTimeMillis();
 
     User sessUser = lookupUserFromHttpSession(request);
     if (false && sessUser == null) {
