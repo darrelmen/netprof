@@ -102,10 +102,6 @@ public interface LangTestDatabaseAsync {
 
   void markReviewed(int id, boolean isCorrect, int creatorID, AsyncCallback<Void> asyncCallback);
 
-/*
-  void setExerciseState(String id, STATE state, int userID, AsyncCallback<Void> async);
-*/
-
   void isValidForeignPhrase(String foreign, AsyncCallback<Boolean> async);
 
   void deleteItem(int exid, AsyncCallback<Boolean> async);
@@ -146,7 +142,9 @@ public interface LangTestDatabaseAsync {
   void getNumResults(AsyncCallback<Integer> async);
 
   void getResultAlternatives(Map<String, String> unitToValue,
-                             int userid, String flText, String which,
+                             int userid,
+                             String flText,
+                             String which,
                              AsyncCallback<Collection<String>> async);
 
   void addRoundTrip(int resultid, int roundTrip, AsyncCallback<Void> async);

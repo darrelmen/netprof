@@ -13,7 +13,21 @@ import java.util.Map;
 public interface IPhoneDAO<T>  extends IDAO {
   boolean addPhone(T phone);
 
+  /**
+   * @see mitll.langtest.server.database.JsonSupport#getJsonPhoneReport(long, Map)
+   * @param userid
+   * @param exids
+   * @param idToRef
+   * @return
+   */
   JSONObject getWorstPhonesJson(long userid, Collection<Integer> exids, Map<Integer, String> idToRef);
 
+  /**
+   * @see mitll.langtest.server.database.analysis.Analysis#getPhoneReport(long, Map, int)
+   * @param userid
+   * @param ids
+   * @param idToRef
+   * @return
+   */
   PhoneReport getWorstPhonesForResults(long userid, Collection<Integer> ids, Map<Integer, String> idToRef);
 }

@@ -75,7 +75,7 @@ public class UserList<T extends HasID> extends BaseExercise {
    * @param name
    * @param description
    * @param classMarker
-   * @see mitll.langtest.server.database.custom.UserListManager#createUserList(int, String, String, String, boolean)
+   * @see mitll.langtest.server.database.custom.UserListManager#createUserList
    * @see UserListDAO#getWhere(long, boolean)
    */
   public UserList(int uniqueID, User user, String name, String description, String classMarker, boolean isPrivate,

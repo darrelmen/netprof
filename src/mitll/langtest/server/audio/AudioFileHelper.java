@@ -238,7 +238,7 @@ public class AudioFileHelper implements AlignDecode {
     AudioCheck.ValidityAndDur validity =
         audioConversion.convertBase64ToAudioFiles(base64EncodedString, file, isRefRecording, isQuietAudioOK());
 
-    // logger.debug("writeAudioFile writing to " + file.getAbsolutePath() + " validity " + validity);
+    logger.debug("writeAudioFile writing to " + file.getAbsolutePath() + " validity " + validity);
 /*    long now = System.currentTimeMillis();
     long diff = now - then;
     if (diff > MIN_WARN_DUR) {
@@ -388,6 +388,8 @@ public class AudioFileHelper implements AlignDecode {
 
     if (recordInResults) {
       answer.setTranscript(exercise1.getForeignLanguage());
+      logger.debug("getAudioAnswerDecoding recordInResults answer " + answer);
+
       recordInResults(context, recordingInfo, validity, answer);
     }
     logger.debug("getAudioAnswerDecoding answer " + answer);
