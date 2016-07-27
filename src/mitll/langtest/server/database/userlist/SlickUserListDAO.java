@@ -88,6 +88,8 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
   }
 
   public SlickUserExerciseList toSlick(UserList<CommonShell> shared, int projid) {
+    return toSlick2(shared,shared.getCreator().getId(),projid);
+/*
     return new SlickUserExerciseList(-1,
         shared.getCreator().getId(),
         new Timestamp(shared.getModified()), shared.getName(),
@@ -95,8 +97,10 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
         shared.getClassMarker(),
         shared.isPrivate(),
         false,
+        shared.isFavorite(),
         shared.getID(),
         projid);
+*/
   }
 
   private SlickUserExerciseList toSlick2(UserList<CommonShell> shared, int userid, int projid) {
@@ -107,6 +111,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
         shared.getClassMarker(),
         shared.isPrivate(),
         false,
+        shared.isFavorite(),
         shared.getID(),
         projid);
   }
@@ -126,7 +131,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
     dao.insert(UserExercise);
   }
 
-  public void addBulk(List<SlickUserExerciseList> bulk) {
+  public void addBulk(List<SlickUserExerciseList> bulk)  {
     dao.addBulk(bulk);
   }
 

@@ -47,10 +47,10 @@ import mitll.langtest.server.database.userlist.IUserListExerciseJoinDAO;
 import mitll.langtest.server.database.userlist.SlickUserListDAO;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.ExerciseAnnotation;
-import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.DBConnection;
 import org.apache.log4j.Logger;
 
@@ -329,7 +329,9 @@ public class UserListManager implements IUserListManager {
       logger.error("huh? no user with id " + userid);
       return null;
     } else {
-      if (hasByName(userid, name,projid)) {
+      logger.info("found\n\t" + userListDAO.getAllByUser(userid, projid));
+
+      if (hasByName(userid, name, projid)) {
         return null;
       } else {
         UserList e = new UserList(i++, userWhere, name, description, dliClass, isPrivate, System.currentTimeMillis());
@@ -340,7 +342,7 @@ public class UserListManager implements IUserListManager {
     }
   }
 
-  private boolean hasByName(int userid, String name,int projid) {
+  private boolean hasByName(int userid, String name, int projid) {
     return userListDAO.hasByName(userid, name, projid);
   }
 
@@ -559,11 +561,11 @@ public class UserListManager implements IUserListManager {
       CommonExercise commonExercise = idToUserExercise.get(id);
       if (commonExercise != null && !commonExercise.isPredefined()) {
         onList.add(commonExercise);
-      //}
-      //if (id.startsWith(UserExercise.CUSTOM_PREFIX)) {   // add user defined exercises
-      //  if (idToUserExercise.containsKey(id)) {
-      //    onList.add(idToUserExercise.get(id));
-       // }
+        //}
+        //if (id.startsWith(UserExercise.CUSTOM_PREFIX)) {   // add user defined exercises
+        //  if (idToUserExercise.containsKey(id)) {
+        //    onList.add(idToUserExercise.get(id));
+        // }
         //else {
         //  logger.debug("skipping id " + id + " since no in ");
         //}
@@ -610,8 +612,8 @@ public class UserListManager implements IUserListManager {
    * @param userListID
    * @param userExercise
    * @param mediaDir
-   * @see mitll.langtest.server.services.ListServiceImpl#reallyCreateNewItem
    * @seezz #addItemToUserList
+   * @see mitll.langtest.server.services.ListServiceImpl#reallyCreateNewItem
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
    */
   @Override

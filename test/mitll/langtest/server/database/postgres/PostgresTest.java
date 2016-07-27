@@ -68,6 +68,15 @@ public class PostgresTest extends BaseTest {
   }
 
   @Test
+  public void testDropNetProf() {
+    DBConnection spanish = getConnection("netProf");
+    spanish.dropAll();
+    scala.collection.immutable.List<String> listOfTables = spanish.getListOfTables();
+
+    logger.info("after drop " + listOfTables);
+  }
+
+  @Test
   public void testCopySpanish() {
     testCreate();
     getDatabaseLight("spanish", true).copyToPostgres();
