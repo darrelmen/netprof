@@ -167,7 +167,7 @@ public class UserPassLogin extends UserDialog {
 
     keyStorage = new KeyStorage(props.getLanguage(), 1000000);
 
-    boolean willShow = checkWelcome();
+    boolean willShow = false;// checkWelcome();
     if (!willShow) {
       if (BrowserCheck.isIPad()) {
         showSuggestApp();

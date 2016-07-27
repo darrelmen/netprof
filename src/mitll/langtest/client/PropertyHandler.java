@@ -234,7 +234,7 @@ public class PropertyHandler {
   private String exercise_title;
   private boolean demoMode;
 
-  private boolean showWelcome = true;// default value
+  private boolean showWelcome = false;// default value
   private boolean logClientMessages = false;
   private int numGradesToCollect = NUM_GRADES_TO_COLLECT_DEFAULT;
   private String nameForItem = "Item";
