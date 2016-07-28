@@ -328,7 +328,7 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
 /*  public Map<Integer, Integer> getOldToNew() {
     Map<Integer, Integer> oldToNew = new HashMap<>();
-    for (SlickUser user : dao.getAll()) oldToNew.put(user.legacyid(), user.id());
+    for (SlickUser user : dao.getAllPredef()) oldToNew.put(user.legacyid(), user.id());
     return oldToNew;
   }*/
 /*

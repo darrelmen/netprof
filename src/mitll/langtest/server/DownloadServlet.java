@@ -73,6 +73,7 @@ public class DownloadServlet extends DatabaseServlet {
   private static final String FILE = "file";
   private static final String CONTEXT = "context";
   private static final String COMPRESSED_SUFFIX = "mp3";
+  public static final String UTF_8 = "UTF-8";
   UserSecurityManager securityManager;
 
   /**
@@ -106,6 +107,7 @@ public class DownloadServlet extends DatabaseServlet {
       try {
         int project = getProject(request);
         Project project1 = getDatabase().getProject(project);
+        logger.info("doGet : current session found project " + project1);
         String language = project1.getLanguage();
 
         String requestURI = request.getRequestURI();
@@ -216,12 +218,14 @@ public class DownloadServlet extends DatabaseServlet {
     String exercise = split[1].split("=")[1];
     String useridString = split[2].split("=")[1];
 
+    logger.debug("returnAudioFile download exercise " + exercise + " for " + useridString);
+
     String underscores = getFilenameForDownload(db, Integer.parseInt(exercise), useridString, language);
 
     logger.debug("returnAudioFile query is " + queryString + " file " + file + " exercise " + exercise + " user " + useridString + " so name is " + underscores);
 
     response.setContentType("audio/mpeg");
-    response.setCharacterEncoding("UTF-8");
+    response.setCharacterEncoding(UTF_8);
     response.setHeader("Content-Disposition", "attachment; filename*=UTF-8''" + underscores);
 
     File fileRef = pathHelper.getAbsoluteFile(file);
@@ -249,27 +253,34 @@ public class DownloadServlet extends DatabaseServlet {
    */
   private String getFilenameForDownload(DatabaseImpl db, int exercise, String useridString, String language) throws UnsupportedEncodingException {
     CommonExercise exercise1 = db.getExercise(exercise);
-    boolean english = language.equalsIgnoreCase("english");
 
-    // foreign part
-    String foreignPart = english ? "" : exercise1.getForeignLanguage().trim();
+    if (exercise1 == null) {
+      logger.error("couldn't find exercise " +exercise + " for " + useridString + " and " + language);
+      return "Unknown_Exercise";
+    }
+    else {
+      boolean english = language.equalsIgnoreCase("english");
 
-    // english part
-    String englishPart = exercise1.getEnglish().trim();
-    if (englishPart.equals("N/A")) englishPart = "";
-    if (!englishPart.isEmpty()) englishPart = "_" + englishPart;
+      // foreign part
+      String foreignPart = english ? "" : exercise1.getForeignLanguage().trim();
 
-    // user part
-    String userPart = getUserPart(db, Integer.parseInt(useridString));
+      // english part
+      String englishPart = exercise1.getEnglish().trim();
+      if (englishPart.equals("N/A")) englishPart = "";
+      if (!englishPart.isEmpty()) englishPart = "_" + englishPart;
 
-    String fileName = foreignPart + englishPart + userPart;
-    fileName = fileName.replaceAll("\\.", "");
-    fileName += "." + COMPRESSED_SUFFIX;
+      // user part
+      String userPart = getUserPart(db, Integer.parseInt(useridString));
 
-    //logger.debug("file is '" + fileName + "'");
-    String underscores = fileName.replaceAll("\\p{Z}+", "_");  // split on spaces
-    underscores = URLEncoder.encode(underscores, "UTF-8");
-    return underscores;
+      String fileName = foreignPart + englishPart + userPart;
+      fileName = fileName.replaceAll("\\.", "");
+      fileName += "." + COMPRESSED_SUFFIX;
+
+      //logger.debug("file is '" + fileName + "'");
+      String underscores = fileName.replaceAll("\\p{Z}+", "_");  // split on spaces
+      underscores = URLEncoder.encode(underscores, UTF_8);
+      return underscores;
+    }
   }
 
 //  private String getLanguage(DatabaseImpl db, int userid) {
