@@ -37,6 +37,7 @@ import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.CopyToPostgres;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
+import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.User;
@@ -78,14 +79,34 @@ public class PostgresTest extends BaseTest {
 
   @Test
   public void testCopySpanish() {
-    testCreate();
     getDatabaseLight("spanish", true).copyToPostgres();
   }
 
   @Test
   public void testCopyRussian() {
-    testCreate();
     getDatabaseLight("russian", true).copyToPostgres();
+  }
+
+  @Test
+  public void testCopyEnglish() {
+    getDatabaseLight("english", true).copyToPostgres();
+  }
+  @Test
+  public void testDeleteEnglish() {
+    DatabaseImpl english = getDatabaseLight("english", true);
+    IProjectDAO projectDAO = english.getProjectDAO();
+    Collection<SlickProject> all = projectDAO.getAll();
+    for (SlickProject project :all) {
+      logger.info("found " + project);
+      if (project.language().equalsIgnoreCase("english")) {
+        logger.info("deleting " + project);
+        projectDAO.delete(project.id());
+        break;
+      }
+      else {
+        logger.debug("not deleting " +project);
+      }
+    }
   }
 
   @Test

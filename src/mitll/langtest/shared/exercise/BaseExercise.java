@@ -87,9 +87,7 @@ public class BaseExercise implements IsSerializable, Shell {
   }
 
   @Override
-  public void setState(STATE state) {
-    this.state = state;
-  }
+  public void setState(STATE state) { this.state = state;  }
 
   @Override
   public STATE getSecondState() {
