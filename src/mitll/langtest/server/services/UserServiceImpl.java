@@ -39,6 +39,7 @@ import mitll.langtest.server.database.security.DominoSessionException;
 import mitll.langtest.server.database.security.UserSecurityManager;
 import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
+import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.user.LoginResult;
 import mitll.langtest.shared.user.SlimProject;
 import mitll.langtest.shared.user.User;
@@ -62,10 +63,9 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * user looked up by the security filter.
    */
 //  private static final String USER_REQUEST_ATT = UserSecurityManager.USER_REQUEST_ATT;
-
   @Override
   public void init() {
-  //  logger.info("init called for UserServiceImpl");
+    //  logger.info("init called for UserServiceImpl");
     findSharedDatabase();
     readProperties(getServletContext());
   }
@@ -141,7 +141,6 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
 */
 
   /**
-   *
    * @param login
    * @param passwordH
    * @param projectid - chosen by user in login screen or at signup
@@ -152,7 +151,16 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   public User userExists(String login, String passwordH, int projectid) {
     findSharedDatabase();
     if (passwordH.isEmpty()) {
-      return db.getUserDAO().getUser(login, passwordH);
+
+      User user = db.getUserDAO().getUser(login, passwordH);
+      if (user != null) {
+        int i = db.getUserProjectDAO().mostRecentByUser(user.getId());
+        ProjectStartupInfo startupInfo = new ProjectStartupInfo();
+        user.setStartupInfo(startupInfo);
+        startupInfo.setProjectid(i);
+      }
+
+      return user;
     } else {
       // return db.getUserManagement().userExists(getThreadLocalRequest(), login, passwordH, serverProps);
       LoginResult loginResult = loginUser(login, passwordH);
@@ -328,8 +336,8 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   }
 
   /**
-   * @see Banner#populateListChoices
    * @param projectid
+   * @see Banner#populateListChoices
    */
   public User setProject(int projectid) {
     try {
@@ -337,10 +345,10 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
       if (sessionUser != null) {
         db.rememberProject(sessionUser.getId(), projectid);
       }
-      db.setStartupInfo(sessionUser,projectid);
+      db.setStartupInfo(sessionUser, projectid);
       return sessionUser;
     } catch (DominoSessionException e) {
-      logger.error("got " +e,e);
+      logger.error("got " + e, e);
       return null;
     }
   }
