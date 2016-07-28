@@ -77,7 +77,7 @@ public class EventReaderTest {
 
   @Test
   public void testMe() {
-    List<Event> all = database.getEventDAO().getAll();
+    List<Event> all = database.getEventDAO().getAllPredef();
 
     SessionManagement sessionManagement = database.getSessionManagement();
 
@@ -111,7 +111,7 @@ public class EventReaderTest {
     SessionManagement sessionManagement = database.getSessionManagement();
 
     HEventDAO heventDAO = new HEventDAO(database, database.getUserDAO().getDefectDetector());
-    heventDAO.addAll(database.getEventDAO().getAll());
+    heventDAO.addAll(database.getEventDAO().getAllPredef());
 
     Event ret = sessionManagement.getFromTransaction(new SessionManagement.SessionSupplier<Event>() {
       @Override

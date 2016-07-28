@@ -285,57 +285,6 @@ public class UserPassLogin extends UserDialog {
     rightDiv.add(getSignUpForm());
   }
 
- /* private Panel getLinksToSites() {
-    Panel hp = new HorizontalPanel();
-    hp.getElement().setId("UserPassLogin_linksToSites");
-    hp.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
-
-    String sitePrefix = "https://np.ll.mit.edu/netProf";
-//    for (String site : props.getSites()) {
-//      Anchor w = new Anchor(site, sitePrefix);
-//      w.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
-//      hp.add(w);
-//    }
-
-
-    userService.getProjects(new AsyncCallback<Collection<SlimProject>>() {
-      @Override
-      public void onFailure(Throwable caught) {
-      }
-
-      @Override
-      public void onSuccess(Collection<SlimProject> result) {
-        projects = result;
-        boolean anyAdded = false;
-
-        for (final SlimProject project : result) {
-          Anchor w = new Anchor(project.getLanguage(), "");
-          w.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent clickEvent) {
-              userService.setProject(project.getProjectid(), new AsyncCallback<Void>() {
-                @Override
-                public void onFailure(Throwable throwable) {
-
-                }
-
-                @Override
-                public void onSuccess(Void aVoid) {
-                  Window.Location.reload();
-                }
-              });
-            }
-          });
-          w.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
-          hp.add(w);
-        }
-      }
-    });
-
-
-    return hp;
-  }*/
-
   /**
    * @param signInForm
    * @return
@@ -425,10 +374,10 @@ public class UserPassLogin extends UserDialog {
   }
 
   /**
-   * @see #getProjectChoiceRow()
-   * @see #getSignUpForm()
    * @param inSignUp
    * @return
+   * @see #getProjectChoiceRow()
+   * @see #getSignUpForm()
    */
   private ListBox getProjectChoices(boolean inSignUp) {
     ListBox listBox = new ListBox();
@@ -460,12 +409,9 @@ public class UserPassLogin extends UserDialog {
       public void onSuccess(Collection<SlimProject> result) {
         projects = result;
         projectChoices.clear();
-        boolean anyAdded = false;
-        //    logger.info("\tpopulateListChoices : found list " + result.size() + " choices");
         projectChoices.addItem("Choose a Language");
 
         for (final SlimProject project : result) {
-          anyAdded = true;
           projectChoices.addItem(project.getName());
 
           projectChoices.addChangeHandler(new ChangeHandler() {
@@ -483,23 +429,7 @@ public class UserPassLogin extends UserDialog {
               }
             }
           });
-//          final NavLink widget = new NavLink(project.getName());
-//          w1.add(widget);
-//          widget.addClickHandler(new ClickHandler() {
-//            @Override
-//            public void onClick(ClickEvent event) {
-//              currentProject = project;
-//              // controller.logEvent(w1, "DropUp", id, ADDING_TO_LIST + ul.getID() + "/" + ul.getName());
-//
-//
-//            }
-//          });
         }
-//        if (!anyAdded) {
-//          NavLink widget = new NavLink("No Projects Yet?");
-//          w1.add(widget);
-
-  //      }
       }
     });
   }
@@ -595,6 +525,13 @@ public class UserPassLogin extends UserDialog {
                   eventRegistration.logEvent(user.box, "UserNameBox", "N/A", "existing legacy user " + result.toStringShort());
 
                   copyInfoToSignUp(result);
+                }
+                int projectid = result.getStartupInfo().getProjectid();
+                for (SlimProject project1 : projects) {
+                  if (project1.getProjectid() == projectid) {
+                    projectChoice.setSelectedValue(project1.getLanguage());   // TODO : do something better for pashto
+                    break;
+                  }
                 }
               }
             }
