@@ -188,7 +188,7 @@ public class SlickUserExerciseDAO
         unitToValue,
         slick.modified().getTime(), slick.projid());
 
-//    logger.info("created " + userExercise);
+    logger.info("fromSlick created " + userExercise);
     return userExercise;
   }
 
@@ -282,6 +282,8 @@ public class SlickUserExerciseDAO
    * @see IUserExerciseDAO#getOnList(int)
    */
   private List<CommonExercise> getUserExercises(Collection<SlickExercise> all) {
+    logger.info("getUserExercises for " + all.size());
+
     List<CommonExercise> copy = new ArrayList<>();
     for (SlickExercise userExercise : all) copy.add(fromSlick(userExercise));
     return copy;

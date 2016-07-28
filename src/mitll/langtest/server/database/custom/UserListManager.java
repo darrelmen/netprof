@@ -128,6 +128,8 @@ public class UserListManager implements IUserListManager {
   }
 
   /**
+   * TODO : this doesn't really do anything - doesn't touch the exercises?????
+   *
    * Turned off setting second state for now -- what does it mean?
    *
    * @see mitll.langtest.server.LangTestDatabaseImpl#init()
@@ -136,15 +138,20 @@ public class UserListManager implements IUserListManager {
   public void setStateOnExercises() {
     // getAmmendedStateMap();
     Map<Integer, StateCreator> exerciseToState = getExerciseToState(false);
-    setStateOnExercises(exerciseToState, true);
+    //setStateOnExercises(exerciseToState, true);
     //setStateOnExercises(secondStateDAO.getExerciseToState(false), false);
   }
 
-  private void setStateOnExercises(Map<Integer, StateCreator> exerciseToState, boolean firstState) {
+  /**
+   * @see  #setStateOnExercises()
+   * @param exerciseToState
+   * @param firstState
+   */
+/*  private void setStateOnExercises(Map<Integer, StateCreator> exerciseToState, boolean firstState) {
     //logger.debug("found " + exerciseToState.size() + " state markings");
     Set<Integer> userExercisesRemaining = setStateOnPredefExercises(exerciseToState, firstState);
     setStateOnUserExercises(exerciseToState, userExercisesRemaining, firstState);
-  }
+  }*/
 
   /**
    * @param exerciseToState
@@ -153,7 +160,7 @@ public class UserListManager implements IUserListManager {
    * @see #setStateOnExercises(java.util.Map, boolean)
    */
   // set state on predef exercises
-  private Set<Integer> setStateOnPredefExercises(Map<Integer, StateCreator> exerciseToState, boolean firstState) {
+/*  private Set<Integer> setStateOnPredefExercises(Map<Integer, StateCreator> exerciseToState, boolean firstState) {
     int count = 0;
     Set<Integer> userExercisesRemaining = new HashSet<>(exerciseToState.keySet());
     for (Map.Entry<Integer, StateCreator> pair : exerciseToState.entrySet()) {
@@ -172,19 +179,23 @@ public class UserListManager implements IUserListManager {
       logger.debug("got " + userExercisesRemaining.size() + " in userExercisesRemaining, updated " + count + " predef exercises");
     }
     return userExercisesRemaining;
-  }
+  }*/
 
+  /**
+   * TODO : this should probably do something on the actual exercises in the exercise dao
+   */
   // set states on user exercises
-  private void setStateOnUserExercises(Map<Integer, StateCreator> exerciseToState,
+/*  private void setStateOnUserExercises(Map<Integer, StateCreator> exerciseToState,
                                        Set<Integer> userExercisesRemaining,
                                        boolean firstState) {
     int count = 0;
     Collection<CommonExercise> userExercises = userExerciseDAO.getByExID(userExercisesRemaining);
 
     for (Shell commonUserExercise : userExercises) {
-      StateCreator state = exerciseToState.get(commonUserExercise.getID());
+      int id = commonUserExercise.getID();
+      StateCreator state = exerciseToState.get(id);
       if (state == null) {
-        logger.error("huh? can't find ex id " + commonUserExercise.getID());
+        logger.error("huh? can't find ex id " + id);
       } else {
         if (firstState) {
           commonUserExercise.setState(state.getState());
@@ -197,7 +208,7 @@ public class UserListManager implements IUserListManager {
     if (count > 0) {
       logger.debug("updated " + count + " user exercises");
     }
-  }
+  }*/
 
   /**
    * Update an old db where the review table doesn't have a state column.
