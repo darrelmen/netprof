@@ -379,7 +379,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
    * @param userid
    * @return
    * @throws SQLException
-   * @seex #getAll(long)
+   * @seex #getAllPredef(long)
    * @see IUserListDAO#getAllPublic
    * @see #getWhere(long, boolean)
    */
