@@ -97,7 +97,7 @@ public class SlickAnnotationDAO
 
   @Override
   List<UserAnnotation> getAll(int userid) {
- //   logger.info("getAll - " + userid);
+ //   logger.info("getAllPredef - " + userid);
     Collection<SlickAnnotation> slickAnnotations = dao.byUser(userid);
     List<UserAnnotation> copy = new ArrayList<>();
     for (SlickAnnotation annotation : slickAnnotations) copy.add(fromSlick(annotation));

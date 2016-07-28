@@ -80,13 +80,17 @@ public class ProjectStartupInfo implements IsSerializable {
     return projectid;
   }
 
+  public String getLanguage() {
+    return language;
+  }
+
+  public void setProjectid(int projectid) {
+    this.projectid = projectid;
+  }
+
   public String toString() {
     return "Project  " + projectid +
         " Order " + getTypeOrder() +
         " nodes " + getSectionNodes();
-  }
-
-  public String getLanguage() {
-    return language;
   }
 }

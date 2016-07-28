@@ -323,16 +323,16 @@ public class ListManager implements RequiresResize {
 
   /**
    * @param contentPanel
-   * @param getAll
+   * @param getAllPredef
    * @param onlyMine
    * @param onlyVisited
    * @param optionalExercise
    * @see #viewBrowse()
    * @see #refreshViewLessons(boolean, boolean)
    */
-/*  private void viewLessons(final Panel contentPanel, boolean getAll, boolean onlyMine, boolean onlyVisited,
+/*  private void viewLessons(final Panel contentPanel, boolean getAllPredef, boolean onlyMine, boolean onlyVisited,
                            String optionalExercise) {
-    viewLessons(contentPanel, getAll, onlyMine, onlyVisited, optionalExercise);
+    viewLessons(contentPanel, getAllPredef, onlyMine, onlyVisited, optionalExercise);
   }*/
 
   /**
@@ -356,7 +356,7 @@ public class ListManager implements RequiresResize {
     listScrollPanel = new ScrollPanel();
 
     if (getAll) {
-      // logger.info("viewLessons----> getAll optional " + optionalExercise);
+      // logger.info("viewLessons----> getAllPredef optional " + optionalExercise);
       listService.getUserListsForText("", controller.getUser(),
           new UserListCallback(this, contentPanel, insideContentPanel, listScrollPanel,
               LESSONS + "_All",

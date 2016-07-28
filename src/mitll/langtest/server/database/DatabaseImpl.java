@@ -1321,6 +1321,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   }
 
   /**
+   * @see #getMonitorResultsWithText(List)
    * @param projectid
    * @return
    */
@@ -1331,11 +1332,13 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
       join.put(exercise.getID(), exercise);
     }
 
+    // TODO : why would we want to do this?
     if (userExerciseDAO != null && getExerciseDAO(projectid) != null) {
       for (CommonExercise exercise : userExerciseDAO.getAll()) {
         join.put(exercise.getID(), exercise);
       }
     }
+
     return join;
   }
 
@@ -1348,6 +1351,8 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   public Map<Integer, String> getExerciseIDToRefAudio(int projectid) {
     Map<Integer, String> join = new HashMap<>();
     populateIDToRefAudio(join, getExercises(projectid));
+
+
     Collection<CommonExercise> all = userExerciseDAO.getAll();
     getExerciseDAO(projectid).attachAudio(all);
     populateIDToRefAudio(join, all);
