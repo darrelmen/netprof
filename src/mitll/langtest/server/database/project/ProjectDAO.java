@@ -46,7 +46,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class ProjectDAO extends DAO implements IProjectDAO {
-  private static final Logger logger = Logger.getLogger(ProjectDAO.class);
+ // private static final Logger logger = Logger.getLogger(ProjectDAO.class);
 
   private final ProjectDAOWrapper dao;
   private final ProjectPropertyDAO propertyDAO;
@@ -79,6 +79,8 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     if (first == null) first = dao.getAll().iterator().next();
     return first;
   }
+
+  public void delete(int id) { dao.delete(id); }
 
   @Override
   public int add(int userid, long modified, String name, String language, String course,

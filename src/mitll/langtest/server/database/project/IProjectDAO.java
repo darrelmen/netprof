@@ -42,6 +42,8 @@ public interface IProjectDAO extends IDAO {
 
   int add(int userid, long modified, String name, String language, String course, ProjectType type, ProjectStatus status, String firstType, String secondType);
 
+  void delete(int id);
+
   Collection<SlickProject> getAll();
 
   void addProperty(int projid, String key, String value);
