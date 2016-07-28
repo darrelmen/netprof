@@ -54,6 +54,7 @@ import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.server.database.reviewed.ReviewedDAO;
 import mitll.langtest.server.database.reviewed.SlickReviewedDAO;
 import mitll.langtest.server.database.reviewed.StateCreator;
+import mitll.langtest.server.database.user.IUserProjectDAO;
 import mitll.langtest.server.database.user.SlickUserDAOImpl;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
@@ -154,7 +155,7 @@ public class CopyToPostgres<T extends CommonShell> {
     // check once if we've added it before
     // TODO : how to drop previous data?
     if (slickUEDAO.isProjectEmpty(projectID)) {
-      Map<Integer, Integer> oldToNewUser = copyUsers(db, slickUserDAO);
+      Map<Integer, Integer> oldToNewUser = copyUsers(db, projectID);
 
       Map<String, Integer> exToID = copyUserAndPredefExercisesAndLists(db, projectID, oldToNewUser);
 
@@ -291,12 +292,15 @@ public class CopyToPostgres<T extends CommonShell> {
    *
    * @param db
    * @param slickUserDAO
-   * @see
+   * @see #copyToPostgres(DatabaseImpl)
    */
-  private Map<Integer, Integer> copyUsers(DatabaseImpl db, SlickUserDAOImpl slickUserDAO) {
+  private Map<Integer, Integer> copyUsers(DatabaseImpl db, int projid) {
     Map<Integer, Integer> oldToNew = new HashMap<>();
 //  if (USERS) {
     //    if (slickUserDAO.isEmpty()) {
+    SlickUserDAOImpl slickUserDAO = (SlickUserDAOImpl) db.getUserDAO();
+    IUserProjectDAO slickUserProjectDAO = db.getUserProjectDAO();
+
     UserDAO userDAO = new UserDAO(db);
     List<User> importUsers = userDAO.getUsers();
     logger.info("h2 importUsers  " + importUsers.size());
@@ -337,10 +341,12 @@ public class CopyToPostgres<T extends CommonShell> {
             }*/
 
             SlickUser slickUser = addUser(slickUserDAO, oldToNew, toImport);
+            slickUserProjectDAO.add(slickUser.id(), projid);
             logger.info("adding " + slickUser);
           }
         } else { // new user across all instances imported to this point
-          addUser(slickUserDAO, oldToNew, toImport);
+          SlickUser slickUser = addUser(slickUserDAO, oldToNew, toImport);
+          slickUserProjectDAO.add(slickUser.id(), projid);
           numAdded++;
         }
       }
@@ -385,10 +391,9 @@ public class CopyToPostgres<T extends CommonShell> {
         att.setExid(id);
         SlickAudio slickAudio = slickAudioDAO.getSlickAudio(att, oldToNewUser, projid);
         if (slickAudio != null) {
-         // logger.info(slickAudio.toString());
+          // logger.info(slickAudio.toString());
           bulk.add(slickAudio);
-        }
-        else skippedMissingUser++;
+        } else skippedMissingUser++;
       } else {
         missingExIDs.add(oldexid);
         if (missing < 50) logger.warn("missing ex for " + att + " : " + oldexid);
@@ -427,11 +432,14 @@ public class CopyToPostgres<T extends CommonShell> {
     SlickAnnotationDAO annotationDAO = (SlickAnnotationDAO) db.getAnnotationDAO();
     List<SlickAnnotation> bulk = new ArrayList<>();
     int missing = 0;
+    Set<Long> missingUsers = new HashSet<>();
     Collection<UserAnnotation> all = new AnnotationDAO(db, slickUserDAO).getAll();
     for (UserAnnotation annotation : all) {
-      Integer userID = oldToNewUser.get((int) annotation.getCreatorID());
+      long creatorID = annotation.getCreatorID();
+      Integer userID = oldToNewUser.get((int) creatorID);
       if (userID == null) {
-        logger.error("copyAnno no user " + annotation.getCreatorID());
+        boolean add = missingUsers.add(creatorID);
+        if (add) logger.error("copyAnno no user " + creatorID);
       } else {
         annotation.setCreatorID(userID);
         Integer realID = exToID.get(annotation.getOldExID());
@@ -443,7 +451,7 @@ public class CopyToPostgres<T extends CommonShell> {
         }
       }
     }
-    if (missing > 0) logger.warn("missing " + missing + " out of " + all.size());
+    if (missing > 0) logger.warn("missing " + missing + " out of " + all.size() + " users " + missingUsers);
     annotationDAO.addBulk(bulk);
   }
 
@@ -799,7 +807,7 @@ public class CopyToPostgres<T extends CommonShell> {
       Integer userID = oldToNewUser.get(creatorID);
       if (userID == null) {
         boolean add = missingUsers.add(creatorID);
-        if (add)  logger.error("copyReviewed no user " + creatorID);
+        if (add) logger.error("copyReviewed no user " + creatorID);
       } else {
         Integer exid = exToID.get(stateCreator.getOldExID());
         if (exid != null) {
