@@ -236,7 +236,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
   /**
    * @return
    * @throws SQLException
-   * @seex #getAll(long)
+   * @seex #getAllPredef(long)
    * @see IUserListDAO#getAllPublic
    * @see #getWhere(long, boolean)
    */
