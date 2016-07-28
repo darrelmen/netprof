@@ -36,7 +36,7 @@ public class EventDAOToExcel {
   public void toXLSX(List<Event> all,OutputStream out) {
     long then = System.currentTimeMillis();
 
-    //List<Event> all = getAll();
+    //List<Event> all = getAllPredef();
     long now = System.currentTimeMillis();
     if (now-then > 100) logger.info("toXLSX : took " + (now - then) + " millis to read " + all.size() +
         " events from database");
