@@ -48,6 +48,7 @@ import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -91,20 +92,33 @@ public class PostgresTest extends BaseTest {
   public void testCopyEnglish() {
     getDatabaseLight("english", true).copyToPostgres();
   }
+
+  /**
+   * databaseHost=hydra-dev
+   * databaseUser=netprof
+   * databasePassword=npadmin
+   */
+  @Test
+  public void testCopyAll() {
+    for (String config : Arrays.asList("spanish", "russian", "english")) {
+      logger.info("-------- copy " + config);
+      getDatabaseLight(config, true, "hydra-dev", "netprof", "npadmin").copyToPostgres();
+    }
+  }
+
   @Test
   public void testDeleteEnglish() {
     DatabaseImpl english = getDatabaseLight("english", true);
     IProjectDAO projectDAO = english.getProjectDAO();
     Collection<SlickProject> all = projectDAO.getAll();
-    for (SlickProject project :all) {
+    for (SlickProject project : all) {
       logger.info("found " + project);
       if (project.language().equalsIgnoreCase("english")) {
         logger.info("deleting " + project);
         projectDAO.delete(project.id());
         break;
-      }
-      else {
-        logger.debug("not deleting " +project);
+      } else {
+        logger.debug("not deleting " + project);
       }
     }
   }
