@@ -186,8 +186,7 @@ public class Project {
   }
 
   public String getWebserviceIP() {
-    String webserviceHostIp1 = WEBSERVICE_HOST_IP1;
-    String prop = getProp(webserviceHostIp1);
+    String prop = getProp(WEBSERVICE_HOST_IP1);
     if (prop == null) prop = WEBSERVICE_HOST_IP;
     return prop;
   }
@@ -205,8 +204,12 @@ public class Project {
     return project.getProp(ServerProperties.MODELS_DIR);
   }
 
-  String getProp(String webserviceHostIp1) {
+  private String getProp(String webserviceHostIp1) {
     return getProject().getProp(webserviceHostIp1);
+  }
+
+  public CommonExercise getExercise(int id) {
+    return exerciseDAO.getExercise(id);
   }
 
   public String toString() {
