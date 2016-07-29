@@ -236,8 +236,8 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   }
 
   /**
-   * @see CopyToPostgres#createProjectIfNotExists(DatabaseImpl)
    * @param reload
+   * @see CopyToPostgres#createProjectIfNotExists(DatabaseImpl)
    */
   void populateProjects(boolean reload) {
     populateProjects(pathHelper, serverProps, logAndNotify, configDir, reload);
@@ -287,7 +287,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
       for (Project project : getProjects()) {
         if (project.getExerciseDAO() == null) {
           setExerciseDAO(project);
-          configureProject(mediaDir,installPath,project);
+          configureProject(mediaDir, installPath, project);
           logger.info("\tpopulateProjects (reload = " + reload + ") : " + project + " : " + project.getAudioFileHelper());
         }
       }
@@ -354,10 +354,10 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     phoneDAO = new SlickPhoneDAO(this, dbConnection);
 
     SlickUserListExerciseJoinDAO userListExerciseJoinDAO = new SlickUserListExerciseJoinDAO(this, dbConnection);
-    IUserListDAO userListDAO     = new SlickUserListDAO(this, dbConnection, this.userDAO, userExerciseDAO);
+    IUserListDAO userListDAO = new SlickUserListDAO(this, dbConnection, this.userDAO, userExerciseDAO);
     IAnnotationDAO annotationDAO = new SlickAnnotationDAO(this, dbConnection, this.userDAO.getDefectDetector());
 
-    IReviewedDAO reviewedDAO    = new SlickReviewedDAO(this, dbConnection, true);
+    IReviewedDAO reviewedDAO = new SlickReviewedDAO(this, dbConnection, true);
     IReviewedDAO secondStateDAO = new SlickReviewedDAO(this, dbConnection, false);
 
     userListManager = new UserListManager(this.userDAO,
@@ -489,6 +489,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   }
 
   String mediaDir;
+
   /**
    * @param installPath
    * @param lessonPlanFile
@@ -561,6 +562,10 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     return getFirstExerciseDAO().getExercise(id);
   }
 
+  public CommonExercise getExercise(int projectid, int id) {
+    Project project = getProjectOrFirst(projectid);
+    return project.getExercise(id);
+  }
 
   /**
    * JUST FOR TESTING
@@ -584,12 +589,16 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     if (isAmas()) {
       return Collections.emptyList();
     }
-    Project project = projectid == -1 ? getFirstProject() : getProject(projectid);
+    Project project = getProjectOrFirst(projectid);
     List<CommonExercise> rawExercises = project.getRawExercises();
     if (rawExercises.isEmpty()) {
       logger.warn("getExercises no exercises in " + getServerProps().getLessonPlan() + " at " + installPath);
     }
     return rawExercises;
+  }
+
+  Project getProjectOrFirst(int projectid) {
+    return projectid == -1 ? getFirstProject() : getProject(projectid);
   }
 
 
@@ -625,12 +634,13 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
 
   /**
    * Make sure there's a favorites list per user per project
+   *
    * @param userid
    * @param projectid
    */
   public void rememberProject(int userid, int projectid) {
     getUserProjectDAO().add(userid, projectid);
-    getUserListManager().createFavorites(userid,projectid);
+    getUserListManager().createFavorites(userid, projectid);
   }
 
   public void setStartupInfo(User userWhere) {
@@ -1205,7 +1215,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
    * TODO : add get tablename method to slick DAOs.
    */
   public void createTables() {
-   // logger.info("createTables create slick tables - has " + dbConnection.getTables());
+    // logger.info("createTables create slick tables - has " + dbConnection.getTables());
     List<String> created = new ArrayList<>();
 
     List<IDAO> idaos = Arrays.asList(
@@ -1257,17 +1267,17 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   }
 
   /**
+   * @param projid
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getResultAlternatives
    * @see mitll.langtest.server.LangTestDatabaseImpl#getResults
-   * @param projid
    */
   public Collection<MonitorResult> getMonitorResults(int projid) {
     List<MonitorResult> monitorResults = resultDAO.getMonitorResults(projid);
 
     for (MonitorResult result : monitorResults) {
       int exID = result.getExID();
-      CommonShell exercise = isAmas() ? getAMASExercise(exID) : getExercise(exID);
+      CommonShell exercise = isAmas() ? getAMASExercise(exID) : getExercise(projid, exID);
       if (exercise != null) {
         result.setDisplayID("" + exercise.getDominoID());
       }
@@ -1321,9 +1331,9 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   }
 
   /**
-   * @see #getMonitorResultsWithText(List)
    * @param projectid
    * @return
+   * @see #getMonitorResultsWithText(List)
    */
   private Map<Integer, CommonExercise> getIdToExerciseMap(int projectid) {
     Map<Integer, CommonExercise> join = new HashMap<>();
@@ -1476,7 +1486,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#deleteItem
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#deleteItem
    */
-  public boolean deleteItem(int exid, int projectid) {
+  @Deprecated public boolean deleteItem(int exid, int projectid) {
     AddRemoveDAO addRemoveDAO = getAddRemoveDAO();
     if (addRemoveDAO != null) {
       // addRemoveDAO.add(exid, AddRemoveDAO.REMOVE);
@@ -1489,6 +1499,8 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   }
 
   /**
+   * TODO : Fix this to get the right project first!
+   *
    * allow custom items to mask out non-custom items
    * Special code to mask out unit/chapter from database in userexercise table.
    * <p>
@@ -1498,7 +1510,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExercise
    */
-  public CommonExercise getCustomOrPredefExercise(int id) {
+  @Deprecated public CommonExercise getCustomOrPredefExercise(int id) {
     CommonExercise userEx = getUserExerciseByExID(id);  // allow custom items to mask out non-custom items
 
     CommonExercise toRet;

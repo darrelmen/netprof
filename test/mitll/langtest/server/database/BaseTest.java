@@ -4,7 +4,6 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.connection.DatabaseConnection;
 import mitll.langtest.server.database.connection.H2Connection;
-import mitll.langtest.shared.exercise.CommonExercise;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedWriter;
@@ -53,11 +52,40 @@ public class BaseTest {
   protected static DatabaseImpl getDatabaseLight(String config, boolean useH2) {
     String installPath = "war";
     File file = new File(installPath + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
-    String parent = file.getParentFile().getAbsolutePath();
-    ServerProperties serverProps = new ServerProperties(parent, file.getName());
+    ServerProperties serverProps = getServerProperties(config);
     DatabaseImpl database = getDatabaseVeryLight(config, useH2);
-    database.setInstallPath(installPath, parent + File.separator + database.getServerProps().getLessonPlan(), serverProps.getMediaDir());
+    database.setInstallPath(installPath, file.getParentFile().getAbsolutePath() + File.separator + database.getServerProps().getLessonPlan(), serverProps.getMediaDir());
     return database;
+  }
+
+  protected static DatabaseImpl getDatabaseLight(String config, boolean useH2,
+                                                 String host, String user, String pass) {
+    String installPath = "war";
+    File file = new File(installPath + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
+    ServerProperties serverProps = getServerProperties(config);
+
+    serverProps.getProps().setProperty("databaseHost", host);
+    serverProps.getProps().setProperty("databaseUser", user);
+    serverProps.getProps().setProperty("databasePassword", pass);
+
+    serverProps.setH2(useH2);
+
+    String parent = file.getParentFile().getAbsolutePath();
+    String name = file.getName();
+
+    DatabaseImpl database = new DatabaseImpl(parent, name, serverProps.getH2Database(), serverProps,
+        new PathHelper("war"), false, null, false);
+
+    database.setInstallPath(installPath,
+        file.getParentFile().getAbsolutePath() + File.separator + database.getServerProps().getLessonPlan(),
+        serverProps.getMediaDir());
+
+    return database;
+  }
+
+  protected static ServerProperties getServerProperties(String config) {
+    File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
+    return new ServerProperties(file.getParentFile().getAbsolutePath(), file.getName());
   }
 
   protected static DatabaseImpl getDatabaseVeryLight(String config, boolean useH2) {
