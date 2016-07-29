@@ -188,7 +188,7 @@ public class SlickUserExerciseDAO
         unitToValue,
         slick.modified().getTime(), slick.projid());
 
-    logger.info("fromSlick created " + userExercise);
+//    logger.info("fromSlick created " + userExercise);
     return userExercise;
   }
 
