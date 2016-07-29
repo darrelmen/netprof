@@ -231,7 +231,7 @@ public class ListManager implements RequiresResize {
 
     // create tab
     create = makeTab(tabPanel, IconType.PLUS_SIGN, CREATE);
-    final CreateListDialog createListDialog = new CreateListDialog(this, service, userManager, controller);
+    final CreateListDialog createListDialog = new CreateListDialog(this, userManager, controller);
     create.getTab().addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {

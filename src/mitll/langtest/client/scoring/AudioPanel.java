@@ -520,7 +520,8 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     if (path != null && !path.equals(FILE_MISSING)) {
       final long then = System.currentTimeMillis();
 //      logger.info("getImageURLForAudio : req " + reqid + " path " + path + " type " + type + " width " + width);
-      controller.getImage(getReqID(type), path, type, toUse, height, exercise.getID(), new AsyncCallback<ImageResponse>() {
+      final int id = exercise.getID();
+      controller.getImage(getReqID(type), path, type, toUse, height, id, new AsyncCallback<ImageResponse>() {
         public void onFailure(Throwable caught) {
           long now = System.currentTimeMillis();
           logger.info("getImageURLForAudio : (failure) took " + (now - then) + " millis");
@@ -536,7 +537,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
           long roundtrip = now - then;
 
           if (!result.successful) {
-            logger.warning("getImageURLForAudio : got error for request for type " + type + " and " +path + " and exid " + exercise.getID());
+            logger.warning("getImageURLForAudio : got error for request for type " + type + " and " +path + " and exid " + id);
             if (WARN_ABOUT_MISSING_AUDIO) Window.alert("missing audio file on server " + path);
           } else if (result.req == -1 || isMostRecentRequest(type, result.req)) { // could be cached
             showResult(result, imageAndCheck);
