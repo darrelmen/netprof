@@ -258,19 +258,19 @@ public class ScoreServlet extends DatabaseServlet {
     } else {
       String exid = split[1];
       int i = Integer.parseInt(exid);
-      CommonExercise exercise = db.getExercise(i);
-      if (exercise == null) {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("success", Boolean.valueOf(false).toString());
-        jsonObject.put("error", "no exercise with that id");
-        return jsonObject;
-      } else {
+//      CommonExercise exercise = db.getExercise(i);
+//      if (exercise == null) {
+//        JSONObject jsonObject = new JSONObject();
+//        jsonObject.put("success", Boolean.valueOf(false).toString());
+//        jsonObject.put("error", "no exercise with that id");
+//        return jsonObject;
+//      } else {
         boolean b = db.getRefResultDAO().removeForExercise(i);
         //logger.info("Remove ref for " + exid + " got " + b);
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("success", Boolean.valueOf(b).toString());
         return jsonObject;
-      }
+//      }
     }
   }
 
