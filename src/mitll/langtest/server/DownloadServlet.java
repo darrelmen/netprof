@@ -36,7 +36,6 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.excel.EventDAOToExcel;
 import mitll.langtest.server.database.excel.ResultDAOToExcel;
 import mitll.langtest.server.database.exercise.Project;
-import mitll.langtest.server.database.security.UserSecurityManager;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.User;
 import org.apache.commons.io.IOUtils;
@@ -74,7 +73,7 @@ public class DownloadServlet extends DatabaseServlet {
   private static final String CONTEXT = "context";
   private static final String COMPRESSED_SUFFIX = "mp3";
   public static final String UTF_8 = "UTF-8";
-  UserSecurityManager securityManager;
+  //UserSecurityManager securityManager;
 
   /**
    * This is getting complicated.
@@ -105,9 +104,9 @@ public class DownloadServlet extends DatabaseServlet {
 
     if (db != null) {
       try {
-        int project = getProject(request);
-        Project project1 = getDatabase().getProject(project);
-        logger.info("doGet : current session found project " + project1);
+        int projid = getProject(request);
+        Project project1 = getDatabase().getProject(projid);
+        logger.info("doGet : current session found projid " + project1);
         String language = project1.getLanguage();
 
         String requestURI = request.getRequestURI();
@@ -119,17 +118,17 @@ public class DownloadServlet extends DatabaseServlet {
 
           if (queryString == null) {
             setHeader(response, "allAudio.zip");
-            writeAllAudio(response, project);
+            writeAllAudio(response, projid);
           } else if (queryString.startsWith(LIST)) {
             String[] split = queryString.split("list=");
             if (split.length == 2) {
               String listid = split[1];
               if (!listid.isEmpty()) {
-                writeUserList(response, db, listid, project);
+                writeUserList(response, db, listid, projid);
               }
             }
           } else if (queryString.startsWith(FILE)) {
-            returnAudioFile(response, db, queryString, language);
+            returnAudioFile(response, db, queryString, language, projid);
           } else if (queryString.startsWith("request")) {
             String[] split1 = queryString.split("&");
             String requestCommand = split1[0];
@@ -139,18 +138,18 @@ public class DownloadServlet extends DatabaseServlet {
             logger.debug("request " + requestCommand + " query " + queryString);
             if (requestCommand.contains(CONTEXT)) {
               Map<String, Collection<String>> typeToSection = getTypeToSelectionFromRequest(queryString);
-              setHeader(response, getZipFileName(db, typeToSection, project, language));
-              writeContextZip(response, typeToSection, project);
+              setHeader(response, getZipFileName(db, typeToSection, projid, language));
+              writeContextZip(response, typeToSection, projid);
             } else {
               Map<String, Collection<String>> typeToSection = getTypeToSelectionFromRequest(queryString);
-              setHeader(response, getZipFileName(db, typeToSection, project, language));
-              writeZip(response, typeToSection, project);
+              setHeader(response, getZipFileName(db, typeToSection, projid, language));
+              writeZip(response, typeToSection, projid);
             }
           }
         } else {
           logger.warn("file download request " + requestURI);
 
-          returnSpreadsheet(response, db, requestURI, project);
+          returnSpreadsheet(response, db, requestURI, projid);
         }
       } catch (Exception e) {
         logger.error("Got " + e, e);
@@ -203,10 +202,12 @@ public class DownloadServlet extends DatabaseServlet {
    * @param response
    * @param db
    * @param queryString
+   * @param projid
    * @throws IOException
    * @see #doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
-  private void returnAudioFile(HttpServletResponse response, DatabaseImpl db, String queryString, String language) throws IOException {
+  private void returnAudioFile(HttpServletResponse response, DatabaseImpl db, String queryString, String language,
+                               int projid) throws IOException {
     String[] split = queryString.split("&");
 
     String file = split[0].split("=")[1];
@@ -215,12 +216,12 @@ public class DownloadServlet extends DatabaseServlet {
 
     if (file.endsWith(".wav")) file = file.replaceAll(".wav", ".mp3");
 
-    String exercise = split[1].split("=")[1];
+    String exercise     = split[1].split("=")[1];
     String useridString = split[2].split("=")[1];
 
     logger.debug("returnAudioFile download exercise " + exercise + " for " + useridString);
 
-    String underscores = getFilenameForDownload(db, Integer.parseInt(exercise), useridString, language);
+    String underscores = getFilenameForDownload(db, Integer.parseInt(exercise), useridString, language, projid);
 
     logger.debug("returnAudioFile query is " + queryString + " file " + file + " exercise " + exercise + " user " + useridString + " so name is " + underscores);
 
@@ -251,14 +252,15 @@ public class DownloadServlet extends DatabaseServlet {
    * @return name without spaces
    * @throws UnsupportedEncodingException
    */
-  private String getFilenameForDownload(DatabaseImpl db, int exercise, String useridString, String language) throws UnsupportedEncodingException {
-    CommonExercise exercise1 = db.getExercise(exercise);
+  private String getFilenameForDownload(DatabaseImpl db, int exercise, String useridString, String language,
+                                        int projid)
+      throws UnsupportedEncodingException {
+    CommonExercise exercise1 = db.getExercise(projid, exercise);
 
     if (exercise1 == null) {
-      logger.error("couldn't find exercise " +exercise + " for " + useridString + " and " + language);
+      logger.error("couldn't find exercise " + exercise + " for '" + useridString + "' and " + language);
       return "Unknown_Exercise";
-    }
-    else {
+    } else {
       boolean english = language.equalsIgnoreCase("english");
 
       // foreign part
