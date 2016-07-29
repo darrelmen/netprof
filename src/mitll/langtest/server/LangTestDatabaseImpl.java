@@ -1207,14 +1207,28 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       int exerciseID = result.getExerciseID();
 
       boolean isAMAS = serverProps.isAMAS();
-      CommonShell exercise = isAMAS ? db.getAMASExercise(exerciseID) :
-          db.getExercise(exerciseID);
+      CommonShell exercise;
+      String sentence = "";
+      if (isAMAS) {
+        exercise = db.getAMASExercise(exerciseID);
+        sentence = exercise.getForeignLanguage();
+      } else {
+        CommonExercise exercise1 = db.getExercise(getProjectID(), exerciseID);
+        exercise = exercise1;
+
+        Collection<CommonExercise> directlyRelated = exercise1.getDirectlyRelated();
+        sentence =
+            result.getAudioType().isContext() && !directlyRelated.isEmpty() ?
+                directlyRelated.iterator().next().getForeignLanguage() :
+                exercise.getForeignLanguage();
+      }
+
 
       // maintain backward compatibility - so we can show old recordings of ref audio for the context sentence
-      String sentence = isAMAS ? exercise.getForeignLanguage() :
-          (result.getAudioType().isContext()) ?
-              db.getExercise(exerciseID).getDirectlyRelated().iterator().next().getForeignLanguage() :
-              exercise.getForeignLanguage();
+//      String sentence = isAMAS ? exercise.getForeignLanguage() :
+//          (result.getAudioType().isContext()) ?
+//              db.getExercise(exerciseID).getDirectlyRelated().iterator().next().getForeignLanguage() :
+//              exercise.getForeignLanguage();
 
       if (exercise == null) {
         logger.warn(getLanguage() + " can't find exercise id " + exerciseID);
@@ -1228,7 +1242,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
             width, height,
             true,  // make transcript images with colored segments
             false, // false = do alignment
-            serverProps.useScoreCache(), "" + exerciseID, result, serverProps.usePhoneToDisplay(), false);
+            serverProps.useScoreCache(),
+            "" + exerciseID, result, serverProps.usePhoneToDisplay(), false);
       }
     } catch (Exception e) {
       logger.error("Got " + e, e);
@@ -1282,7 +1297,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String wavEndingAudio = answer.replaceAll(".mp3", ".wav").replaceAll(".ogg", ".wav");
     Result cachedResult = db.getRefResultDAO().getResult(exerciseID, wavEndingAudio);
     if (cachedResult != null) {
-      if (DEBUG) logger.debug("getPretestScore Cache HIT  : align exercise id = " + exerciseID + " file " + answer + " found previous " + cachedResult.getUniqueID());
+      if (DEBUG)
+        logger.debug("getPretestScore Cache HIT  : align exercise id = " + exerciseID + " file " + answer + " found previous " + cachedResult.getUniqueID());
     } else {
       logger.debug("getPretestScore Cache MISS : align exercise id = " + exerciseID + " file " + answer);
     }
@@ -1432,7 +1448,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    * @see mitll.langtest.client.instrumentation.EventTable#show
    */
-  public List<Event> getEvents() { return db.getEventDAO().getAll(getProjectID());  }
+  public List<Event> getEvents() {
+    return db.getEventDAO().getAll(getProjectID());
+  }
 
   /**
    * @param audioAttribute
@@ -1887,7 +1905,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     int exerciseID = audioContext.getExid();
 
 
-    logger.info("writeAudioFile got request " + audioContext + " payload "+ base64EncodedString.length());
+    logger.info("writeAudioFile got request " + audioContext + " payload " + base64EncodedString.length());
 
     boolean amas = serverProps.isAMAS();
 
@@ -2139,8 +2157,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
           "\nserver: " + serverName;
 
       return msgStr;
-    }
-    else {
+    } else {
       return "";
     }
   }
