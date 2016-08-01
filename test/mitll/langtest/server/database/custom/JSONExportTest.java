@@ -67,7 +67,7 @@ public class JSONExportTest extends JsonExport {
   public void testRead() {
     database.getSectionHelper();
 
-    CommonExercise exercise = database.getExercise(724);
+    CommonExercise exercise = database.getExercise(1,724);
     logger.warn("\n\ntestRead got " + exercise);
   }
 

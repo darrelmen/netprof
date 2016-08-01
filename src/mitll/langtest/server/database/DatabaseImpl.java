@@ -556,12 +556,11 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getResultASRInfo
    * @see mitll.langtest.server.DownloadServlet#getFilenameForDownload
    * @see #deleteItem(int, int)
-   * @see #getCustomOrPredefExercise(int)
+   * @see #getCustomOrPredefExercise(int, int)
    */
-  public CommonExercise getExercise(int id) {
+/*  @Deprecated  public CommonExercise getExercise(int id) {
     return getFirstExerciseDAO().getExercise(id);
-  }
-
+  }*/
   public CommonExercise getExercise(int projectid, int id) {
     Project project = getProjectOrFirst(projectid);
     return project.getExercise(id);
@@ -597,10 +596,9 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     return rawExercises;
   }
 
-  Project getProjectOrFirst(int projectid) {
+  private Project getProjectOrFirst(int projectid) {
     return projectid == -1 ? getFirstProject() : getProject(projectid);
   }
-
 
   public ExerciseDAO<CommonExercise> getExerciseDAO(int projectid) {
     Project project = getProject(projectid);
@@ -1486,7 +1484,8 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#deleteItem
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#deleteItem
    */
-  @Deprecated public boolean deleteItem(int exid, int projectid) {
+  @Deprecated
+  public boolean deleteItem(int exid, int projectid) {
     AddRemoveDAO addRemoveDAO = getAddRemoveDAO();
     if (addRemoveDAO != null) {
       // addRemoveDAO.add(exid, AddRemoveDAO.REMOVE);
@@ -1494,24 +1493,25 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
       logger.warn("add remove not implemented yet!");
     }
     getUserListManager().removeReviewed(exid);
-    getSectionHelper(projectid).removeExercise(getExercise(exid));
+    getSectionHelper(projectid).removeExercise(getExercise(projectid, exid));
     return getExerciseDAO(projectid).remove(exid);
   }
 
   /**
    * TODO : Fix this to get the right project first!
-   *
+   * <p>
    * allow custom items to mask out non-custom items
    * Special code to mask out unit/chapter from database in userexercise table.
    * <p>
    * Must check update times to make sure we don't mask out a newer entry.
    *
+   * @param projid
    * @param id
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExercise
    */
-  @Deprecated public CommonExercise getCustomOrPredefExercise(int id) {
-    CommonExercise userEx = getUserExerciseByExID(id);  // allow custom items to mask out non-custom items
+  public CommonExercise getCustomOrPredefExercise(int projid, int id) {
+/*    CommonExercise userEx = getUserExerciseByExID(id);  // allow custom items to mask out non-custom items
 
     CommonExercise toRet;
 
@@ -1529,15 +1529,24 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
         // DON'T use the unit/chapter from database, at least for now
         userEx.getCombinedMutableUserExercise().setUnitToValue(predef.getUnitToValue());
       }
+    }*/
+
+    CommonExercise toRet = getExercise(projid, id);
+    if (toRet == null) {
+      logger.info("couldn't find exercise " + id + " in " + projid + " looking in user exercise table");
+      toRet = getUserExerciseByExID(id);
     }
+
     return toRet;
   }
 
   /**
+   * Ask the database for the user exercise.
+   *
    * @param id
    * @return
    * @see #editItem
-   * @see #getCustomOrPredefExercise(int)
+   * @see #getCustomOrPredefExercise(int, int)
    */
   private CommonExercise getUserExerciseByExID(int id) {
     return userExerciseDAO.getByExID(id);
@@ -1626,7 +1635,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
       List<CommonExercise> copyAsExercises = new ArrayList<>();
 
       for (CommonShell ex : userListByID.getExercises()) {
-        copyAsExercises.add(getCustomOrPredefExercise(ex.getID()));
+        copyAsExercises.add(getCustomOrPredefExercise(projectid, ex.getID()));
       }
       for (CommonExercise ex : copyAsExercises) {
         userListManager.addAnnotations(ex);

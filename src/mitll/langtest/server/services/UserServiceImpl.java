@@ -203,7 +203,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
 
     if (newUser != null && !newUser.isEnabled()) { // newUser = null means existing newUser.
       logger.debug("newUser " + userID + "/" + newUser + " wishes to be a content developer. Asking for approval.");
-      getEmailHelper().addContentDeveloper(url, email, newUser, mailSupport);
+      getEmailHelper().addContentDeveloper(url, email, newUser, mailSupport, getProject().getLanguage());
       getEmailHelper().sendConfirmationEmail(email, userID, mailSupport);
     } else if (newUser == null) {
       logger.debug("no newUser found for id " + userID);
@@ -271,7 +271,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    */
   public String enableCDUser(String token, String emailR, String url) {
     logger.info("enabling token " + token + " for email " + emailR + " and url " + url);
-    return getEmailHelper().enableCDUser(token, emailR, url);
+    return getEmailHelper().enableCDUser(token, emailR, url, getProject().getLanguage());
   }
 
   /**

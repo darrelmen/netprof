@@ -899,6 +899,7 @@ public class UserListManager implements IUserListManager {
     CommonExercise predefExercise = userExerciseDAO.getPredefExercise(exid);
 
     if (predefExercise == null) {
+      logger.debug("markState " + exid + " = " + state + " by " +creatorID);
       predefExercise = userExerciseDAO.getByExID(exid);
     }
     if (predefExercise != null) {

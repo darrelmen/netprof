@@ -70,15 +70,17 @@ public class EmailHelper {
   /**
    * TODO: Content developer is in context of a project
    */
-  @Deprecated private final String language;
+  //@Deprecated private final String language;
   private final IUserDAO userDAO;
   private final MailSupport mailSupport;
   private ServerProperties serverProperties;
   private PathHelper pathHelper;
 
-  public EmailHelper(ServerProperties serverProperties, IUserDAO userDAO,
-                     MailSupport mailSupport, PathHelper pathHelper) {
-    this.language = serverProperties.getLanguage();
+  public EmailHelper(ServerProperties serverProperties,
+                     IUserDAO userDAO,
+                     MailSupport mailSupport,
+                     PathHelper pathHelper) {
+   // this.language = serverProperties.getLanguage();
     this.serverProperties = serverProperties;
     this.userDAO = userDAO;
     this.mailSupport = mailSupport;
@@ -93,7 +95,7 @@ public class EmailHelper {
    * @param email
    * @param url
    * @param userID
-   * @see mitll.langtest.server.LangTestDatabaseImpl#forgotUsername(String, String, String)
+   * @see mitll.langtest.server.services.UserServiceImpl#forgotUsername
    */
   public void getUserNameEmail(String email, String url, String userID) {
     url = trimURL(url);
@@ -138,7 +140,7 @@ public class EmailHelper {
    * @see mitll.langtest.server.ScoreServlet#resetPassword
    */
   public boolean resetPassword(String user, String email, String url) {
-    logger.debug(serverProperties.getLanguage() + " resetPassword for " + user + " url " + url);
+    logger.debug(" resetPassword for " + user + " url " + url);
 
     String hash1 = getHash(email);
     Integer validUserAndEmail = userDAO.getIDForUserAndEmail(user, hash1);
@@ -172,11 +174,12 @@ public class EmailHelper {
 
       return true;
     } else {
-      logger.error(serverProperties.getLanguage() + " couldn't find user " + user + " and email " + email + " " + hash1);
+      logger.error(" couldn't find user " + user + " and email " + email + " " + hash1);
       String message = "User " + user + " with email " + email + " tried to reset password - but they're not valid.";
       String prefixedMessage = "for " + pathHelper.getInstallPath() + " got " + message;
       logger.debug(prefixedMessage);
-      mailSupport.email(serverProperties.getEmailAddress(), "Invalid password reset for " + serverProperties.getLanguage(), prefixedMessage);
+      mailSupport.email(serverProperties.getEmailAddress(),
+          "Invalid password reset", prefixedMessage);
       return false;
     }
   }
@@ -187,9 +190,9 @@ public class EmailHelper {
    * @param subject
    * @param message
    * @param linkText
-   * @see #sendUserApproval(String, String, String)
+   * @see #sendUserApproval(String, String, String, String)
    * @see #resetPassword(String, String, String)
-   * @see #getUserNameEmail(String, String, User)
+   * @see #getUserNameEmail
    */
   private void sendEmail(String link, String to, String subject, String message, String linkText) {
     List<String> ccEmails = Collections.emptyList();
@@ -205,11 +208,12 @@ public class EmailHelper {
 
   /**
    * @param token
+   * @param language
    * @return
-   * @see mitll.langtest.client.LangTest#handleCDToken
-   * @see mitll.langtest.server.LangTestDatabaseImpl#enableCDUser(String, String, String)
+   * @seex mitll.langtest.client.LangTest#handleCDToken
+   * @see mitll.langtest.server.services.UserServiceImpl#enableCDUser(String, String, String)
    */
-  public String enableCDUser(String token, String emailR, String url) {
+  public String enableCDUser(String token, String emailR, String url, String language) {
     User userWhereEnabledReq = userDAO.getUserWithEnabledKey(token);
     Integer userID;
     if (userWhereEnabledReq == null) {
@@ -234,10 +238,10 @@ public class EmailHelper {
 
         logger.debug("Sending enable CD User email for " + userID + " and " + userWhere);
         userID1 = userWhere.getUserID();
-        sendUserApproval(url, email, userID1);
+        sendUserApproval(url, email, userID1, language);
 
         // send ack to everyone, so they don't ahve to
-        String subject = "Content Developer approved for " + userID1 + " for " + language;
+        String subject = "Content Developer approved for " + userID1;
 
         List<String> approvers = serverProperties.getApprovers();
         List<String> emails = serverProperties.getApproverEmails();
@@ -246,7 +250,7 @@ public class EmailHelper {
           String tamas = approvers.get(i);
           String approvalEmailAddress = emails.get(i);
 
-          String message = getApprovalAck(userID1, tamas);
+          String message = getApprovalAck(userID1, tamas, language);
           mailSupport.sendEmail(NP_SERVER,
               approvalEmailAddress,
               MY_EMAIL,
@@ -258,7 +262,7 @@ public class EmailHelper {
             MY_EMAIL,
             MY_EMAIL,
             subject,
-            getApprovalAck(userID1, GORDON)
+            getApprovalAck(userID1, GORDON, language)
         );
       } else {
         logger.debug("NOT sending enable CD User email for " + userID);
@@ -267,7 +271,7 @@ public class EmailHelper {
     }
   }
 
-  private String getApprovalAck(String userID1, String tamas) {
+  private String getApprovalAck(String userID1, String tamas, String language) {
     return "Hi " +
         tamas + ",<br/><br/>" +
         "User '" + userID1 +
@@ -280,10 +284,11 @@ public class EmailHelper {
    * @param url
    * @param email
    * @param userID1
+   * @param language
    * @seex #enableCDEmail(String, String, mitll.langtest.shared.user.User)
-   * @see #enableCDUser(String, String, String)
+   * @see #enableCDUser(String, String, String, String)
    */
-  private void sendUserApproval(String url, String email, String userID1) {
+  private void sendUserApproval(String url, String email, String userID1, String language) {
     String message = "Hi " + userID1 + ",<br/>" +
         "You have been approved to be a content developer for " + language + "." +
         "<br/>Click on the link below to log in." +
@@ -305,10 +310,11 @@ public class EmailHelper {
    * @param email
    * @param user
    * @param mailSupport
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addUser
+   * @param language
+   * @see mitll.langtest.server.services.UserServiceImpl#addUser
    * @see mitll.langtest.client.user.UserPassLogin#gotSignUp(String, String, String, User.Kind)
    */
-  public void addContentDeveloper(String url, String email, User user, MailSupport mailSupport) {
+  public void addContentDeveloper(String url, String email, User user, MailSupport mailSupport, String language) {
     url = trimURL(url);
     String userID1 = user.getUserID();
     String toHash = userID1 + "_" + System.currentTimeMillis();
@@ -321,13 +327,13 @@ public class EmailHelper {
     for (int i = 0; i < approvers.size(); i++) {
       String tamas = approvers.get(i);
       String approvalEmailAddress = emails.get(i);
-      String message = getEmailApproval(userID1, tamas, email);
-      sendApprovalEmail(url, email, userID1, hash, message, approvalEmailAddress, mailSupport);
+      String message = getEmailApproval(userID1, tamas, email, language);
+      sendApprovalEmail(url, email, userID1, hash, message, approvalEmailAddress, mailSupport, language);
     }
   }
 
   private void sendApprovalEmail(String url, String email, String userID1, String hash, String message,
-                                 String approvalEmailAddress, MailSupport mailSupport) {
+                                 String approvalEmailAddress, MailSupport mailSupport, String language) {
     mailSupport.sendEmail(NP_SERVER,
         url + "?" +
             CD +
@@ -342,7 +348,7 @@ public class EmailHelper {
         Collections.singleton(EmailList.RAY_BUDD));
   }
 
-  private String getEmailApproval(String userID1, String tamas, String email) {
+  private String getEmailApproval(String userID1, String tamas, String email, String language) {
     return "Hi " +
         tamas + ",<br/><br/>" +
         "User <b>" + userID1 +
