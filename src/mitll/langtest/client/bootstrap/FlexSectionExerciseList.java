@@ -54,6 +54,7 @@ import mitll.langtest.client.list.SectionWidgetContainer;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.SectionNode;
+import mitll.langtest.shared.project.ProjectStartupInfo;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -170,8 +171,10 @@ public class FlexSectionExerciseList extends NPExerciseList {
   }
 
   private void getTypeOrder(final FluidContainer container) {
-   // typeOrder = ;
-    addButtonRow(controller.getStartupInfo().getSectionNodes(), container, controller.getTypeOrder());
+    ProjectStartupInfo startupInfo = controller.getStartupInfo();
+    if (startupInfo != null) {
+      addButtonRow(startupInfo.getSectionNodes(), container, controller.getTypeOrder());
+    }
   }
 
   /**
