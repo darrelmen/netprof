@@ -375,10 +375,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     if (exercises.isEmpty()) { // allow lookup by id
       int exid = 0;
-      try {
-        exid = Integer.parseInt(prefix);
-      } catch (NumberFormatException e) {
-        logger.info("can't parse search " + prefix);
+      if (!prefix.isEmpty()) {
+        try {
+          exid = Integer.parseInt(prefix);
+        } catch (NumberFormatException e) {
+          logger.info("can't parse search number '" + prefix + "'");
+        }
       }
       T exercise = getExercise(exid, userID, false);
       if (exercise != null) exercises = Collections.singletonList(exercise);

@@ -52,7 +52,7 @@ public interface IUserExerciseDAO extends IDAO {
    */
   CommonExercise getByExID(int exid);
 
-  Collection<CommonExercise> getAll();
+  Collection<CommonExercise> getAllUserExercises(int projid);
 
   Collection<CommonExercise> getOverrides();
 

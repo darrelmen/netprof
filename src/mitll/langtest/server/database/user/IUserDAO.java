@@ -88,7 +88,7 @@ public interface IUserDAO extends IDAO {
   Map<Integer, User> getUserMap();
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#forgotUsername(String, String, String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#forgotUsername
    * @param emailH
    * @return
    */

@@ -79,13 +79,15 @@ public interface ExerciseDAO<T extends CommonShell> extends SimpleExerciseDAO<T>
 
   /**
    * @param userExerciseDAO
+   * @param projid
    * @see mitll.langtest.server.database.DatabaseImpl#makeDAO(String, String, String)
    */
   void setDependencies(String mediaDir,
                        String installPath,
                        IUserExerciseDAO userExerciseDAO,
                        AddRemoveDAO addRemoveDAO,
-                       IAudioDAO audioDAO);
+                       IAudioDAO audioDAO,
+                       int projid);
 
   /**
    * @param all

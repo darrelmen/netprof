@@ -164,7 +164,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
    * @param idToRef
    * @return
    * @see mitll.langtest.server.database.DatabaseImpl#getJsonPhoneReport
-   * @see JsonSupport#getJsonPhoneReport(long, Map)
+   * @see JsonSupport#getJsonPhoneReport(long, int, Map)
    */
   public JSONObject getWorstPhonesJson(long userid, Collection<Integer> exids, Map<Integer, String> idToRef) {
     PhoneReport phoneReport = getPhoneReport(userid, exids, idToRef);
