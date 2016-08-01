@@ -111,6 +111,8 @@ public class ScoreServlet extends DatabaseServlet {
   public static final String EXPORT = "export";
   public static final String REMOVE_REF_RESULT = "removeRefResult";
   public static final String RESULT_ID = "resultID";
+  public static final String USE_PHONE_TO_DISPLAY = "USE_PHONE_TO_DISPLAY";
+  public static final String ALLOW_ALTERNATES = "ALLOW_ALTERNATES";
   private boolean removeExercisesWithMissingAudioDefault = true;
 
   private RestUserManagement userManagement;
@@ -665,29 +667,36 @@ public class ScoreServlet extends DatabaseServlet {
    */
   private JSONObject getJsonForAudio(HttpServletRequest request, String requestType,
                                      String deviceType, String device) throws IOException {
-    String user = request.getHeader(USER);
+    String user       = request.getHeader(USER);
     String exerciseID = request.getHeader("exercise");
-    int i1 = Integer.parseInt(exerciseID);
-    int reqid = getReqID(request);
+    int i1            = Integer.parseInt(exerciseID);
+    int reqid         = getReqID(request);
 
     logger.debug("getJsonForAudio got request " + requestType + " for user " + user + " exercise " + exerciseID +
         " req " + reqid + " device " + deviceType + "/" + device);
 
-    int i = userManagement.getUserFromParam(user);
-    String wavPath = pathHelper.getLocalPathToAnswer("plan", i1, 0, i);
-    File saveFile = pathHelper.getAbsoluteFile(wavPath);
+    int userid = userManagement.getUserFromParam(user);
+    String wavPath = pathHelper.getLocalPathToAnswer("plan", i1, 0, userid);
+    File saveFile  = pathHelper.getAbsoluteFile(wavPath);
     new File(saveFile.getParent()).mkdirs();
 
-    String allow_alternates = request.getHeader("ALLOW_ALTERNATES");
-    boolean allowAlternates = allow_alternates != null && !allow_alternates.equals("false");
-
-    String use_phone_to_display = request.getHeader("USE_PHONE_TO_DISPLAY");
-    boolean usePhoneToDisplay = use_phone_to_display != null && !use_phone_to_display.equals("false");
+    boolean allowAlternates   = getAllowAlternates(request);
+    boolean usePhoneToDisplay = getUsePhoneToDisplay(request);
 
     writeToFile(request.getInputStream(), saveFile);
 //    new AudioConversion(null).trimSilence(saveFile);
-    return getJsonForAudioForUser(reqid, i1, i, Request.valueOf(requestType.toUpperCase()), wavPath, saveFile,
+    return getJsonForAudioForUser(reqid, i1, userid, Request.valueOf(requestType.toUpperCase()), wavPath, saveFile,
         deviceType, device, allowAlternates, usePhoneToDisplay);
+  }
+
+  private boolean getUsePhoneToDisplay(HttpServletRequest request) {
+    String use_phone_to_display = request.getHeader(USE_PHONE_TO_DISPLAY);
+    return use_phone_to_display != null && !use_phone_to_display.equals("false");
+  }
+
+  private boolean getAllowAlternates(HttpServletRequest request) {
+    String allow_alternates = request.getHeader(ALLOW_ALTERNATES);
+    return allow_alternates != null && !allow_alternates.equals("false");
   }
 
   /**
@@ -722,12 +731,19 @@ public class ScoreServlet extends DatabaseServlet {
    * @return score json
    * @see #getJsonForAudio(javax.servlet.http.HttpServletRequest, String, String, String)
    */
-  private JSONObject getJsonForAudioForUser(int reqid, int exerciseID, int user, Request request, String wavPath,
+  private JSONObject getJsonForAudioForUser(int reqid,
+                                            int exerciseID,
+                                            int user,
+                                            Request request,
+                                            String wavPath,
                                             File saveFile,
-                                            String deviceType, String device, boolean allowAlternates,
+                                            String deviceType,
+                                            String device,
+                                            boolean allowAlternates,
                                             boolean usePhoneToDisplay) {
     long then = System.currentTimeMillis();
-    CommonExercise exercise1 = db.getCustomOrPredefExercise(exerciseID);  // allow custom items to mask out non-custom items
+    int mostRecentProjectByUser = getMostRecentProjectByUser(user);
+    CommonExercise exercise1 = db.getCustomOrPredefExercise(mostRecentProjectByUser, exerciseID);  // allow custom items to mask out non-custom items
 
     JSONObject jsonForScore = new JSONObject();
     if (exercise1 == null) {
@@ -869,10 +885,17 @@ public class ScoreServlet extends DatabaseServlet {
    * @return
    * @see #getJsonForAudioForUser
    */
-  private AudioAnswer getAnswer(int reqid, int exerciseID, int user, boolean doFlashcard, String wavPath, File file,
+  private AudioAnswer getAnswer(int reqid,
+                                int exerciseID,
+                                int user,
+                                boolean doFlashcard,
+                                String wavPath,
+                                File file,
                                 float score,
-                                String deviceType, String device, boolean allowAlternates) {
-    CommonExercise exercise1 = db.getCustomOrPredefExercise(exerciseID);  // allow custom items to mask out non-custom items
+                                String deviceType,
+                                String device,
+                                boolean allowAlternates) {
+    CommonExercise exercise1 = db.getCustomOrPredefExercise(getMostRecentProjectByUser(user), exerciseID);  // allow custom items to mask out non-custom items
 
     AudioContext audioContext =
         new AudioContext(reqid, user, exercise1.getProjectID(), exerciseID, 0,

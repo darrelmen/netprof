@@ -27,7 +27,7 @@ public class DecodeTest extends BaseTest {
   @Test
   public void testRussianContext() {
     DatabaseImpl russian = getDatabase("russian");
-    CommonExercise exercise = russian.getExercise(2600);
+    CommonExercise exercise = russian.getExercise(1,2600);
     String context = exercise.getContext();
 
 
@@ -139,7 +139,7 @@ public class DecodeTest extends BaseTest {
   public void testRussian() {
     DatabaseImpl russian = getDatabase("russian");
     AudioFileHelper audioFileHelper = getAudioFileHelper(russian);
-    CommonExercise exercise = russian.getExercise(8);
+    CommonExercise exercise = russian.getExercise(1,8);
     Collection<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
     for (AudioAttribute audioAttribute : audioAttributes)
       audioFileHelper.decodeOneAttribute(exercise, audioAttribute, false);
@@ -154,7 +154,7 @@ public class DecodeTest extends BaseTest {
   public void testEnglish() {
     DatabaseImpl russian = getDatabase("english");
     AudioFileHelper audioFileHelper = getAudioFileHelper(russian);
-    CommonExercise exercise = russian.getExercise(2253);
+    CommonExercise exercise = russian.getExercise(1,2253);
     logger.info("got " + exercise);
 
     Collection<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
@@ -167,7 +167,7 @@ public class DecodeTest extends BaseTest {
     DatabaseImpl db = getDatabase("spanish");
     AudioFileHelper audioFileHelper = getAudioFileHelper(db);
 
-    CommonExercise exercise = db.getExercise(50264);
+    CommonExercise exercise = db.getExercise(1,50264);
     logger.info("got " +exercise);
 
     Collection<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
