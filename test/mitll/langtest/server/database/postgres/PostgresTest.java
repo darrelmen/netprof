@@ -145,7 +145,7 @@ public class PostgresTest extends BaseTest {
   }
 
   @Test
-  public void testGetFirst() {
+  public void testGetFirstSpanish() {
     DatabaseImpl spanish = getDatabaseLight("spanish", false);
     SlickProject next = spanish.getProjectDAO().getAll().iterator().next();
     ExerciseDAO<CommonExercise> exerciseDAO = spanish.getExerciseDAO(next.id());
@@ -173,7 +173,9 @@ public class PostgresTest extends BaseTest {
         ExerciseDAO<CommonExercise> exerciseDAO = database.getExerciseDAO(project.id());
         List<CommonExercise> rawExercises = exerciseDAO.getRawExercises();
         for (CommonExercise ex : rawExercises.subList(0, toIndex)) {
-          logger.info("ex " + ex.getID() + " '" + ex.getEnglish() + "' '" + ex.getForeignLanguage() + "' : " + ex.getDirectlyRelated().size() + " context sentences.");
+          logger.info("ex " + ex.getID() + " '" + ex.getEnglish() + "' '" + ex.getForeignLanguage() + "'" +
+              " meaning '" + ex.getMeaning()+
+              "' : " + ex.getDirectlyRelated().size() + " context sentences.");
           for (CommonExercise cex : ex.getDirectlyRelated()) {
             logger.info("\t context " + cex.getID() + " '" + cex.getEnglish() + "' '" + cex.getForeignLanguage() + "'");
           }
@@ -184,10 +186,31 @@ public class PostgresTest extends BaseTest {
     }
   }
 
+  @Test
+  public void testGetContextAll() {
+    DatabaseImpl database = getDatabaseLight("netProf", false);
+    Collection<SlickProject> all = database.getProjectDAO().getAll();
+    int toIndex = 10;
+    for (SlickProject project : all) {
+      String language = project.language();
+      logger.info("lang " + language);
+      ExerciseDAO<CommonExercise> exerciseDAO = database.getExerciseDAO(project.id());
+      List<CommonExercise> rawExercises = exerciseDAO.getRawExercises();
+      for (CommonExercise ex : rawExercises.subList(0, toIndex)) {
+        logger.info("ex " + ex.getID() + " '" + ex.getEnglish() + "' '" + ex.getForeignLanguage() + "'" +
+            " meaning '" + ex.getMeaning()+
+            "' : " + ex.getDirectlyRelated().size() + " context sentences.");
+        for (CommonExercise cex : ex.getDirectlyRelated()) {
+          logger.info("\t context " + cex.getID() + " '" + cex.getEnglish() + "' '" + cex.getForeignLanguage() + "'");
+        }
+      }
+      logger.info("Got " + rawExercises.iterator().next());
+    }
+  }
+
 
   @Test
   public void testAnalysisWordsForUser() {
-
     DatabaseImpl database = getDatabaseLight("netProf", false);
     Collection<SlickProject> all = database.getProjectDAO().getAll();
     int toIndex = 10;
@@ -199,9 +222,7 @@ public class PostgresTest extends BaseTest {
       for (WordScore ws : wordScoresForUser) {
         logger.info("testWords got " + ws);
       }
-
     }
-
   }
 
   @Test
@@ -215,8 +236,6 @@ public class PostgresTest extends BaseTest {
     for (SlickUserProject up : spanish.getUserProjectDAO().getAll()) {
       logger.info("got " + up);
     }
-    ;
-
   }
 
   @Test

@@ -441,7 +441,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   /**
    * @param resetKey
    * @return
-   * @see mitll.langtest.server.mail.EmailHelper#enableCDUser(String, String, String)
+   * @see mitll.langtest.server.mail.EmailHelper#enableCDUser(String, String, String, String)
    */
   @Override
   public User getUserWithEnabledKey(String resetKey) {
@@ -713,7 +713,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   /**
    * @param id
    * @return
-   * @see mitll.langtest.server.mail.EmailHelper#enableCDUser(String, String, String)
+   * @see mitll.langtest.server.mail.EmailHelper#enableCDUser(String, String, String, String)
    */
   @Override
   public boolean enableUser(int id) {  return changeEnabled(id,true);  }

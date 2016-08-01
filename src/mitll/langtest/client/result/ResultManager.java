@@ -79,9 +79,10 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class ResultManager extends PagerTable {
+  private final Logger logger = Logger.getLogger("ResultManager");
+
   private static final String YES = "Yes";
   private static final String NO = "No";
-  private final Logger logger = Logger.getLogger("ResultManager");
 
   private static final int PAGE_SIZE = 9;
   private static final String TIMESTAMP = "timestamp";
@@ -118,6 +119,9 @@ public class ResultManager extends PagerTable {
   private CellTable<MonitorResult> cellTable;
   private Panel reviewContainer;
 
+  private Map<String, Typeahead> typeToSuggest = new HashMap<String, Typeahead>();
+  private Typeahead userIDSuggest, textSuggest;
+
   /**
    * @param s
    * @param nameForAnswer
@@ -134,14 +138,11 @@ public class ResultManager extends PagerTable {
 //    PlayAudioWidget.addPlayer();
   }
 
-  private Map<String, Typeahead> typeToSuggest = new HashMap<String, Typeahead>();
-  private Typeahead userIDSuggest, textSuggest;
-
   /**
-   * @see mitll.langtest.client.LangTest.ResultsClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)
+   * @see mitll.langtest.client.InitialUI.ResultsClickHandler#onClick
    */
   public void showResults() {
-    typeToSuggest = new HashMap<String, Typeahead>();
+    typeToSuggest = new HashMap<>();
     userIDSuggest = null;
     textSuggest = null;
     req = 0;
@@ -153,11 +154,12 @@ public class ResultManager extends PagerTable {
     // Enable glass background.
     dialogBox.setGlassEnabled(true);
 
-    final Panel dialogVPanel = new VerticalPanel();
 
-    int left = (Window.getClientWidth()) / 200;
-    int top = (Window.getClientHeight()) / 200;
+    int left = (Window.getClientWidth())  / 200;
+    int top  = (Window.getClientHeight()) / 200;
     dialogBox.setPopupPosition(left, top);
+
+    final Panel dialogVPanel = new VerticalPanel();
     dialogVPanel.setWidth("100%");
 
     service.getNumResults(new AsyncCallback<Integer>() {
@@ -512,17 +514,14 @@ public class ResultManager extends PagerTable {
         final int start = display.getVisibleRange().getStart();
         int end = start + display.getVisibleRange().getLength();
         end = end >= numResults ? numResults : end;
-        //logger.info("asking for " + start +"->" + end);
+        //logger.info("createProvider asking for " + start +"->" + end);
 
         StringBuilder builder = getColumnSortedState(table);
         final Map<String, String> unitToValue = getUnitToValue();
 
-        //final int userID = ;
-       // final String text = getText();
-
         int val = req++;
         // logger.info("getResults req " + unitToValue + " user " + userID + " text " + text + " val " + val);
-        logger.info("got " + builder.toString());
+        logger.info("createProvider got " + builder.toString());
 
         service.getResults(start, end, builder.toString(), unitToValue, getUserID(), getText(), val,
             new AsyncCallback<ResultAndTotal>() {
