@@ -148,6 +148,15 @@ public class UserPassLogin extends UserDialog {
   private boolean signInHasFocus = true;
   private final EventRegistration eventRegistration;
   private Button signIn;
+
+  private DecoratedPopupPanel resetEmailPopup;
+  private Button sendEmail;
+
+
+  private SlimProject currentProject = null;
+  private SlimProject currentSignUpProject = null;
+
+  private Collection<SlimProject> projects;
   private UserServiceAsync userService;
 
   /**
@@ -192,13 +201,13 @@ public class UserPassLogin extends UserDialog {
     };
   }
 
-  private boolean checkWelcome() {
+/*  private boolean checkWelcome() {
     if (!hasShownWelcome() && props.shouldShowWelcome()) {
       keyStorage.storeValue(SHOWN_HELLO, "yes");
       showWelcome();
       return true;
     } else return false;
-  }
+  }*/
 
   private boolean hasShownWelcome() {
     return keyStorage.hasValue(SHOWN_HELLO);
@@ -387,10 +396,6 @@ public class UserPassLogin extends UserDialog {
     return listBox;
   }
 
-  private SlimProject currentProject = null;
-  private SlimProject currentSignUpProject = null;
-
-  private Collection<SlimProject> projects;
 
   /**
    * <p>
@@ -413,7 +418,6 @@ public class UserPassLogin extends UserDialog {
 
         for (final SlimProject project : result) {
           projectChoices.addItem(project.getName());
-
           projectChoices.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
@@ -530,6 +534,7 @@ public class UserPassLogin extends UserDialog {
                 for (SlimProject project1 : projects) {
                   if (project1.getProjectid() == projectid) {
                     projectChoice.setSelectedValue(project1.getLanguage());   // TODO : do something better for pashto
+                    currentProject = project1;
                     break;
                   }
                 }
@@ -541,8 +546,6 @@ public class UserPassLogin extends UserDialog {
     });
   }
 
-  private DecoratedPopupPanel resetEmailPopup;
-  private Button sendEmail;
 
   private Anchor getForgotPassword() {
     final Anchor forgotPassword = new Anchor(FORGOT_PASSWORD);
