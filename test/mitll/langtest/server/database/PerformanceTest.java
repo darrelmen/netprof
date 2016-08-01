@@ -256,7 +256,7 @@ public class PerformanceTest extends BaseTest {
 //    }
   }
 
-  @Test
+/*  @Test
   public void testSudanese() {
     String path = "../dbs/" + "sudaneseToday";//.replaceAll(".h2.db", "");
 
@@ -268,7 +268,7 @@ public class PerformanceTest extends BaseTest {
     HashMap<String, Collection<String>> stringCollectionHashMap = new HashMap<>();
     stringCollectionHashMap.put("Chapter", Collections.singletonList("7"));
     stringCollectionHashMap.put("Lesson", Collections.singletonList("1"));
-    JSONObject jsonPhoneReport = database.getJsonPhoneReport(1, stringCollectionHashMap);
+    JSONObject jsonPhoneReport = database.getJsonPhoneReport(1, projid, stringCollectionHashMap);
 
     logger.info("jsonPhoneReport " + jsonPhoneReport);
   }
@@ -285,10 +285,10 @@ public class PerformanceTest extends BaseTest {
     Map<String, Collection<String>> stringCollectionHashMap = new HashMap<>();
     stringCollectionHashMap.put("Unit", Collections.singletonList("1"));
     stringCollectionHashMap.put("Chapter", Collections.singletonList("6"));
-    JSONObject jsonPhoneReport = database.getJsonPhoneReport(1, stringCollectionHashMap);
+    JSONObject jsonPhoneReport = database.getJsonPhoneReport(1, projid, stringCollectionHashMap);
 
     logger.info("jsonPhoneReport " + jsonPhoneReport);
-  }
+  }*/
 /*
   @Test
   public void testJennifer() {

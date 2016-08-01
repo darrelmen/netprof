@@ -61,7 +61,6 @@ public class UserManagement {
   /**
    * @see DatabaseImpl#makeDAO(String, String, String)
    * @param userDAO
-   * @paramz numExercises
    * @param resultDAO
    * @param userListManager
    */
@@ -71,66 +70,6 @@ public class UserManagement {
     this.userListManager = userListManager;
   }
 
-  /**
-   * Check other sites to see if the user exists somewhere else, and if so go ahead and use that person
-   * here.
-   *
-   * TODO : read the list of sites from a file
-   * TODO : don't do this.
-   *
-   * @Deprecated - not needed in composite webapp
-   * @param login
-   * @param passwordH
-   * @return
-   * @see mitll.langtest.client.user.UserPassLogin#gotLogin
-   * @see mitll.langtest.client.user.UserPassLogin#makeSignInUserName(com.github.gwtbootstrap.client.ui.Fieldset)
-   * @see mitll.langtest.server.LangTestDatabaseImpl#userExists
-   */
-/*  @Deprecated public User userExists(HttpServletRequest request, String login, String passwordH, ServerProperties props) {
-    User user = userDAO.getUser(login, passwordH);
-
-    if (user == null && !passwordH.isEmpty()) {
-      logger.debug("getIdForUserID : checking '" + login + "'");
-
-      for (String site : props.getSites()) {
-        String url = NPF_CLASSROOM_PREFIX + site.replaceAll("Mandarin", "CM") + "/scoreServlet";
-        String json = new HTTPClient().readFromGET(url + "?hasUser=" + login + "&passwordH=" + passwordH);
-
-        if (!json.isEmpty()) {
-          try {
-            JSONObject jsonObject = JSONObject.fromObject(json);
-            Object userid = jsonObject.get(RestUserManagement.USERID);
-            Object pc = jsonObject.get(RestUserManagement.PASSWORD_CORRECT);
-
-            if (userid == null) {
-              logger.warn("huh? got back " + json + " for req " + login + " pass " +passwordH);
-            }
-            else {
-              if (!userid.toString().equals(NO_USER)) {
-                logger.info(site + " : found user " + userid);
-
-                if (pc.toString().equals("true")) {
-                  logger.info("\tmatching password for " + site);
-
-                  String ip = getIPInfo(request);
-                  Object emailH = jsonObject.get(RestUserManagement.EMAIL_H);
-                  Object kind = jsonObject.get(RestUserManagement.KIND);
-                  User.Kind realKind = kind == null ? User.Kind.STUDENT : User.Kind.valueOf(kind.toString());
-
-                  user = addUser(login, passwordH, emailH.toString(), "browser", ip, realKind, true);
-                  break;
-                }
-              }
-            }
-          } catch (Exception e) {
-            logger.error("Got " + e, e);
-          }
-        }
-      }
-    }
-
-    return user;
-  }*/
 
   /**
    *
