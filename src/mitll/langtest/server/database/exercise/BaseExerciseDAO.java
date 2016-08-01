@@ -393,6 +393,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 
 	/**
 	 * Worries about colliding with add and remove on the idToExercise map.
+	 * NO database interaction - just map lookup by id.
 	 * @param id
 	 * @return
 	 * @see BaseUserExerciseDAO#getPredefExercise
@@ -400,7 +401,11 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 	 */
 	public CommonExercise getExercise(int id) {
 		synchronized (this) {
-			return idToExercise.get(id);
+      CommonExercise commonExercise = idToExercise.get(id);
+      if (commonExercise == null) {
+        logger.warn("couldn't find exercise " +id + " in " + idToExercise.size());
+      }
+      return commonExercise;
 		}
 	}
 

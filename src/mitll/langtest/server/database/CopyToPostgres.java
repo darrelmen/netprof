@@ -291,7 +291,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * ??? Also, going forward, we must store emails, since we need to be able to send the sign up message?
    *
    * @param db
-   * @param slickUserDAO
+   * @param projid
    * @see #copyToPostgres(DatabaseImpl)
    */
   private Map<Integer, Integer> copyUsers(DatabaseImpl db, int projid) {
@@ -523,8 +523,10 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param db
    * @param oldToNewUserList
    */
-  private void copyUserExerciseListJoin(DatabaseImpl db, Map<Integer, Integer> oldToNewUserList,
-                                        Map<String, Integer> exToInt, int projectid) {
+  private void copyUserExerciseListJoin(DatabaseImpl db,
+                                        Map<Integer, Integer> oldToNewUserList,
+                                        Map<String, Integer> exToInt,
+                                        int projectid) {
     //if (true) {
     IUserListManager userListManager = db.getUserListManager();
     IUserListExerciseJoinDAO dao = userListManager.getUserListExerciseJoinDAO();
@@ -543,7 +545,7 @@ public class CopyToPostgres<T extends CommonShell> {
         Integer id = exToInt.get(exerciseID);
         CommonExercise customOrPredefExercise = null;
         if (id == null) logger.error("Can't find " + exerciseID);
-        else customOrPredefExercise = db.getCustomOrPredefExercise(id);
+        else customOrPredefExercise = db.getCustomOrPredefExercise(projectid, id);
 //          logger.info("Adding user exercise join : " +join.userlistid + " adding " + exerciseID + " : " +customOrPredefExercise);
         if (customOrPredefExercise == null) {
           logger.error("can't find " + exerciseID + " in " + db.getExercises(projectid).size() + " exercises");
