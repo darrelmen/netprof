@@ -209,21 +209,21 @@ public class JSONExportTest extends JsonExport {
     Collection<CommonExercise> exercises = database.getExercises(-1);
     logger.info("Got " + exercises.size());
   }
-
-  @Test
-  public void testImport() {
-    String file = "spanish.json";
-    JSONExerciseDAO exerciseDAO = new JSONExerciseDAO(file, database.getServerProps(), database.getUserListManager(), true);
-
-    database.setDependencies("bestAudio", ".", exerciseDAO);
-
-    List<CommonExercise> rawExercises = exerciseDAO.getRawExercises();
-
-    logger.info("Got " + rawExercises.size());
-    for (SectionNode node : exerciseDAO.getSectionHelper().getSectionNodes()) {
-      Collection<CommonExercise> exercisesForSelectionState = exerciseDAO.getSectionHelper().getExercisesForSelectionState(node.getType(), node.getName());
-      logger.info("for " + node + " got " + exercisesForSelectionState.size());
-    }
-    //for (CommonExercise exercise : rawExercises) logger.debug(exercise);
-  }
+//
+//  @Test
+//  public void testImport() {
+//    String file = "spanish.json";
+//    JSONExerciseDAO exerciseDAO = new JSONExerciseDAO(file, database.getServerProps(), database.getUserListManager(), true);
+//
+//    database.setDependencies("bestAudio", ".", exerciseDAO, projid);
+//
+//    List<CommonExercise> rawExercises = exerciseDAO.getRawExercises();
+//
+//    logger.info("Got " + rawExercises.size());
+//    for (SectionNode node : exerciseDAO.getSectionHelper().getSectionNodes()) {
+//      Collection<CommonExercise> exercisesForSelectionState = exerciseDAO.getSectionHelper().getExercisesForSelectionState(node.getType(), node.getName());
+//      logger.info("for " + node + " got " + exercisesForSelectionState.size());
+//    }
+//    //for (CommonExercise exercise : rawExercises) logger.debug(exercise);
+//  }
 }

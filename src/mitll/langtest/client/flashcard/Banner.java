@@ -246,7 +246,7 @@ public class Banner implements RequiresResize {
           ProjectStartupInfo startupInfo = controller.getStartupInfo();
 
         //  logger.info("startup " + startupInfo);
-          if (project.getProjectid() == startupInfo.getProjectid()) {
+          if (startupInfo != null && project.getProjectid() == startupInfo.getProjectid()) {
             projectChoices.setSelectedValue(name);
           }
           projectChoices.addChangeHandler(new ChangeHandler() {

@@ -454,7 +454,8 @@ public class AudioExport {
    * @throws Exception
    * @see #writeZip
    */
-  private void writeToStream(Collection<CommonExercise> toWrite, IAudioDAO audioDAO, String installPath,
+  private void writeToStream(Collection<CommonExercise> toWrite,
+                             IAudioDAO audioDAO, String installPath,
                              String relativeConfigDir1, String name, Collection<String> typeOrder,
                              String language1, OutputStream out, boolean skipAudio, boolean isDefectList) throws Exception {
     ZipOutputStream zOut = new ZipOutputStream(out);
@@ -462,9 +463,10 @@ public class AudioExport {
     String overallName = language1 + "_" + name;
     overallName = overallName.replaceAll("\\,", "_");
     if (!skipAudio) {
+      int projectID = toWrite.iterator().next().getProjectID();
       writeFolderContents(zOut, toWrite, audioDAO, installPath, relativeConfigDir1,
           overallName,
-          isEnglish(language1));
+          isEnglish(language1), projectID);
     }
 
     addSpreadsheetToZip(toWrite, typeOrder, language1, zOut, overallName, isDefectList);
@@ -509,6 +511,7 @@ public class AudioExport {
    * @param relativeConfigDir1
    * @param overallName
    * @param isEnglish
+   * @param projid
    * @throws Exception
    * @see #writeToStream
    */
@@ -518,7 +521,7 @@ public class AudioExport {
                                    String installPath,
                                    String relativeConfigDir1,
                                    String overallName,
-                                   boolean isEnglish) throws Exception {
+                                   boolean isEnglish, int projid) throws Exception {
     //int c = 0;
     long then = System.currentTimeMillis();
 
@@ -531,7 +534,7 @@ public class AudioExport {
 
     // attach audio
     int numAttach = 0;
-    Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
+    Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio(projid);
     for (CommonExercise ex : toWrite) {
       Collection<AudioAttribute> audioAttributes = exToAudio.get(ex.getID());
       if (audioAttributes != null) {
@@ -606,7 +609,8 @@ public class AudioExport {
 
     // attach audio
     int numAttach = 0;
-    Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
+    int projectID = toWrite.iterator().next().getProjectID();
+    Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio(projectID);
     for (CommonExercise ex : toWrite) {
       Collection<AudioAttribute> audioAttributes = exToAudio.get(ex.getID());
       if (audioAttributes != null) {

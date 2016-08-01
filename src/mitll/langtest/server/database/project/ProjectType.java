@@ -37,5 +37,6 @@ public enum ProjectType {
   AMAS,
   DIALOG,
   EXPERIMENTAL,
+  TESTING,
   OTHER
 }
