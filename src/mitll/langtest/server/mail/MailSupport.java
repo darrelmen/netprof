@@ -73,7 +73,7 @@ public class MailSupport {
   }
 
   /**
-   * @see EmailHelper#enableCDUser(String, String, String)
+   * @see EmailHelper#enableCDUser(String, String, String, String)
    * @see Report#sendEmails
    * @param serverName
    * @param to

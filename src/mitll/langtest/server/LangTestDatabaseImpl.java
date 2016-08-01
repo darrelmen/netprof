@@ -837,23 +837,27 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     long then2 = System.currentTimeMillis();
 
-    CommonExercise byID = db.getCustomOrPredefExercise(exid);  // allow custom items to mask out non-custom items
+    CommonExercise byID = db.getCustomOrPredefExercise(getProjectID(), exid);
 
     long now = System.currentTimeMillis();
     String language = getLanguage();
     if (now - then2 > WARN_DUR) {
-      logger.debug("getExercise : (" + language + ") took " + (now - then2) + " millis to find exercise " + exid + " for " + userID);
+      logger.debug("getExercise : (" + language + ") took " + (now - then2) + " millis to find exercise " +
+          exid + " for " + userID);
     }
 
     if (byID == null) {
-      logger.error("getExercise : huh? couldn't find exercise with id '" + exid + "' when examining " + exercises.size() + " items");
+      logger.error("getExercise : huh? couldn't find exercise with id '" + exid + "' when examining " +
+          exercises.size() + " items");
     } else {
-      logger.debug("getExercise : find exercise " + exid + " for " + userID + " : " + byID + "\n\tcontext" + byID.getDirectlyRelated());
+      logger.debug("getExercise : find exercise " + exid + " for " + userID + " : " + byID +
+          "\n\tcontext" + byID.getDirectlyRelated());
       then2 = System.currentTimeMillis();
       addAnnotationsAndAudio(userID, byID, isFlashcardReq);
       now = System.currentTimeMillis();
       if (now - then2 > WARN_DUR) {
-        logger.debug("getExercise : (" + language + ") took " + (now - then2) + " millis to add annotations to exercise " + exid + " for " + userID);
+        logger.debug("getExercise : (" + language + ") took " + (now - then2) + " millis to add annotations to " +
+            "exercise " + exid + " for " + userID);
       }
       then2 = System.currentTimeMillis();
 
@@ -884,6 +888,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     // return byID;
     // TODO : why doesn't this work?
     return (T) byID;
+  }
+
+  protected int getMostRecentProjectByUser(int id) {
+    return db.getUserProjectDAO().mostRecentByUser(id);
   }
 
   /**
@@ -1298,9 +1306,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     Result cachedResult = db.getRefResultDAO().getResult(exerciseID, wavEndingAudio);
     if (cachedResult != null) {
       if (DEBUG)
-        logger.debug("getPretestScore Cache HIT  : align exercise id = " + exerciseID + " file " + answer + " found previous " + cachedResult.getUniqueID());
+        logger.debug("getPretestScore Cache HIT  : align exercise id = " + exerciseID + " file " + answer +
+            " found previous " + cachedResult.getUniqueID());
     } else {
-      logger.debug("getPretestScore Cache MISS : align exercise id = " + exerciseID + " file " + answer);
+        logger.debug("getPretestScore Cache MISS : align exercise id = " + exerciseID + " file " + answer);
     }
 
     boolean usePhoneToDisplay1 = usePhoneToDisplay || serverProps.usePhoneToDisplay();
@@ -1464,7 +1473,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     //int beforeNumAudio = before.getAudioAttributes().size();
     db.markAudioDefect(audioAttribute);
 
-    CommonExercise byID = db.getCustomOrPredefExercise(exid.getID());  // allow custom items to mask out non-custom items
+    CommonExercise byID = db.getCustomOrPredefExercise(getProjectID(), exid.getID());  // allow custom items to mask out non-custom items
 
     if (!byID.getMutableAudio().removeAudio(audioAttribute)) {
       String key = audioAttribute.getKey();
@@ -1485,18 +1494,17 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public void markGender(AudioAttribute attr, boolean isMale) {
-    CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(attr.getExid());
+    CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(getProjectID(), attr.getExid());
     int projid = -1;
     if (customOrPredefExercise == null) {
       logger.error("markGender can't find exercise id " + attr.getExid() + "?");
-
     } else {
       projid = customOrPredefExercise.getProjectID();
     }
     db.getAudioDAO().addOrUpdateUser(isMale ? BaseUserDAO.DEFAULT_MALE_ID : BaseUserDAO.DEFAULT_FEMALE_ID, projid, attr);
 
     int exid = attr.getExid();
-    CommonExercise byID = db.getCustomOrPredefExercise(exid);
+    CommonExercise byID = db.getCustomOrPredefExercise(projid, exid);
     if (byID == null) {
       logger.error(getLanguage() + " : couldn't find exercise " + exid);
       logAndNotifyServerException(new Exception("couldn't find exercise " + exid));
@@ -1571,8 +1579,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
     List<MonitorResult> resultList = results.subList(start, min);
     logger.info("getResults ensure compressed audio for " + resultList.size() + " items.");
+    int projectID = getProjectID();
     for (MonitorResult result : resultList) {
-      ensureCompressedAudio(result.getUserid(), db.getCustomOrPredefExercise(result.getExID()), result.getAnswer());
+      ensureCompressedAudio(result.getUserid(), db.getCustomOrPredefExercise(projectID, result.getExID()), result.getAnswer());
     }
     return new ResultAndTotal(new ArrayList<>(resultList), n, req);
   }
@@ -1904,12 +1913,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
                                     boolean allowAlternates) {
     int exerciseID = audioContext.getExid();
 
-
     logger.info("writeAudioFile got request " + audioContext + " payload " + base64EncodedString.length());
 
     boolean amas = serverProps.isAMAS();
 
-    CommonExercise commonExercise = amas ? null : db.getCustomOrPredefExercise(exerciseID);
+    CommonExercise commonExercise = amas ? null : db.getCustomOrPredefExercise(getProjectID(), exerciseID);
     CommonShell exercise1 = amas ? db.getAMASExercise(exerciseID) : commonExercise;
 
     if (exercise1 == null) {

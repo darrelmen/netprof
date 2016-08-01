@@ -55,7 +55,6 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
 
   @Override
   public void init() {
- //   logger.info("init called for MonitoringServiceImpl");
     findSharedDatabase();
     readProperties(getServletContext());
   }
@@ -68,8 +67,10 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
   @Override
   public List<CommonShell> getShells(List<Integer> ids) {
     List<CommonShell> shells = new ArrayList<>();
+    int projectID = getProjectID();
+
     for (Integer id : ids) {
-      CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(id);
+      CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(projectID, id);
       if (customOrPredefExercise == null) {
         logger.warn("Couldn't find exercise for " + id);
       } else {
