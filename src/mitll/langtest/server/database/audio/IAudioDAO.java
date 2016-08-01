@@ -50,9 +50,9 @@ public interface IAudioDAO extends IDAO {
                              AudioType audioType, String audioRef, long timestamp,
                              long durationInMillis, String transcript);
 
-  Map<Integer, List<AudioAttribute>> getExToAudio();
+  Map<Integer, List<AudioAttribute>> getExToAudio(int projectid);
 
-  Collection<AudioAttribute> getAudioAttributes();
+  Collection<AudioAttribute> getAudioAttributesByProject(int projid);
 
   int attachAudio(CommonExercise firstExercise, String installPath, String relativeConfigDir);
 
