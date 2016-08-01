@@ -42,7 +42,6 @@ import java.util.List;
 import java.util.Map;
 
 public interface IUserDAO extends IDAO {
-
   void findOrMakeDefectDetector();
 
   int getDefectDetector();
