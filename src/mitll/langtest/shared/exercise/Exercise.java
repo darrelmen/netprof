@@ -314,9 +314,11 @@ public class Exercise extends AudioExercise implements CommonExercise,
         " unit->lesson " + getUnitToValue();
   }
 
+/*
   public void addMentionedContext(CommonExercise exercise) {
     mentions.add(exercise);
   }
+*/
 
   public boolean hasContext() {
     return !getDirectlyRelated().isEmpty();
