@@ -136,7 +136,7 @@ public class EmailList {
   /**
    * @return
    * @see mitll.langtest.server.mail.EmailHelper#addContentDeveloper
-   * @see mitll.langtest.server.mail.EmailHelper#enableCDUser(String, String, String)
+   * @see EmailHelper#enableCDUser(String, String, String, String)
    */
   public List<String> getApprovers() {
     return approvers;

@@ -50,9 +50,9 @@ import java.util.logging.Logger;
 public class PropertyHandler {
   private final Logger logger = Logger.getLogger("PropertyHandler");
 
-  public static final String TALKS_TO_DOMINO = "talksToDomino";
-  public static final String PRACTICE_CONTEXT = "practiceContext";
-  public static final String FONT_FAMILY = "fontFamily";
+  private static final String TALKS_TO_DOMINO = "talksToDomino";
+  private static final String PRACTICE_CONTEXT = "practiceContext";
+  private static final String FONT_FAMILY = "fontFamily";
 
   private static final String RTL = "rtl";
   private static final String IS_AMAS = "isAMAS";
@@ -187,7 +187,7 @@ public class PropertyHandler {
   }
 
   public boolean isBeta() {
-    return false;
+    return true;
   }
 
   boolean talksToDomino() {
@@ -349,7 +349,7 @@ public class PropertyHandler {
 */
 
   private String getAppTitleSuffix() {
-    return isAMAS() ? AMAS_PRONUNCIATION_FEEDBACK : " Pronunciation Feedback";
+    return isAMAS() ? AMAS_PRONUNCIATION_FEEDBACK : " Pronunciation Feedback";// Alpha";
   }
 
   public String getInitialPrompt() {
@@ -364,6 +364,7 @@ public class PropertyHandler {
     return isAMAS() ? AMAS_WELCOME : "Welcome to " + "NetProF" + "!";
   }
 
+/*
   public Collection<String> getSites() {
     return isAMAS() ? AMAS_SITES : SITE_LIST;
   }
@@ -371,6 +372,7 @@ public class PropertyHandler {
   public String getSitePrefix() {
     return isAMAS() ? "https://np.ll.mit.edu/amas" : "https://np.ll.mit.edu/npfClassroom";
   }
+*/
 
   private void getPreferredVoices(String value) {
     for (String userid : value.split(",")) {
@@ -663,9 +665,11 @@ public class PropertyHandler {
     return showContext;
   }
 
+/*
   public boolean shouldShowWelcome() {
     return showWelcome;
   }
+*/
 
   private static boolean knownChoice(String choice) {
     return TEXT.equals(choice) || AUDIO.equals(choice) || SPEECH.equals(choice);
@@ -759,7 +763,7 @@ public class PropertyHandler {
         "You will not be able to access NetProF until approval is granted.";
   }
 
-  public String getAMASHelpMessage() {
+/*  public String getAMASHelpMessage() {
     return
         "Welcome to the Automatic Multi-Skilled Assessment System (AMAS)<br/>" +
             "<br/>" +
@@ -772,5 +776,5 @@ public class PropertyHandler {
             "<br/>" +
             "The site will remember your login information on this computer for up to one year. You will need to login " +
             "with your username and password again if you access AMAS from a different machine.";
-  }
+  }*/
 }
