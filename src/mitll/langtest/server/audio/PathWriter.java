@@ -66,8 +66,14 @@ public class PathWriter {
    * @see mitll.langtest.server.database.custom.UserListManager#getRefAudioPath
    * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable
    */
-  public String getPermanentAudioPath(PathHelper pathHelper, File fileRef, String destFileName, boolean overwrite,
-                                      int id, String title, String artist, ServerProperties serverProperties) {
+  public String getPermanentAudioPath(PathHelper pathHelper,
+                                      File fileRef,
+                                      String destFileName,
+                                      boolean overwrite,
+                                      int id,
+                                      String title,
+                                      String artist,
+                                      ServerProperties serverProperties) {
     final File bestDir = pathHelper.getAbsoluteFile(BEST_AUDIO);
     if (!bestDir.exists() && !bestDir.mkdir()) {
       if (!bestDir.exists()) logger.warn("huh? couldn't make " + bestDir.getAbsolutePath());

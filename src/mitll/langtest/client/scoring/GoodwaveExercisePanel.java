@@ -108,6 +108,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
    * @see ASRScorePanel#addTooltip
    */
   private static final String DOWNLOAD_YOUR_RECORDING = "Download your recording.";
+  public static final String MEANING = "Meaning";
 
   private final ListInterface listContainer;
   private boolean isBusy = false;
@@ -398,7 +399,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     if (label.contains(CONTEXT)) {
       InlineHTML englishPhrase = new InlineHTML(value, WordCountDirectionEstimator.get().estimateDirection(value));
       englishPhrase.addStyleName("Instruction-data-with-wrap");
-      if (label.contains("Meaning")) {
+      if (label.contains(MEANING)) {
         englishPhrase.addStyleName("englishFont");
       }
       nameValueRow.add(englishPhrase);
@@ -491,7 +492,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     }
 
     w.addStyleName("Instruction-data-with-wrap-keep-word");
-    if (label.contains("Meaning")) {
+    if (label.contains(MEANING)) {
       w.addStyleName("englishFont");
     }
     if (!chineseCharacter) w.addStyleName("rightFiveMargin");

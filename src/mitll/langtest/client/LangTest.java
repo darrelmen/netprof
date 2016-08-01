@@ -587,7 +587,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public void gotUser(User user) {
     setProjectStartupInfo(user);
-    logger.info("\ngotUser Got startup info " + projectStartupInfo);
+  //  logger.info("\ngotUser Got startup info " + projectStartupInfo);
     initialUI.gotUser(user);
   }
 
@@ -605,7 +605,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     } else {
       logger.info("checkInitFlash : initFlash - no permission yet");
       flashRecordPanel.tryWebAudio();
-
 /*      if (flashRecordPanel.initFlash()) {
         checkLogin();
       }*/
