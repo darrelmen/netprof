@@ -174,9 +174,10 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 	 * @param audioDAO
 	 * @param mediaDir
 	 * @param installPath
-	 * @see DatabaseImpl#makeDAO
+	 * @param projectID
+   * @see DatabaseImpl#makeDAO
 	 */
-	private void setAudioDAO(IAudioDAO audioDAO, String mediaDir, String installPath) {
+	private void setAudioDAO(IAudioDAO audioDAO, String mediaDir, String installPath, int projectID) {
 		this.audioDAO = audioDAO;
 
 		File fileInstallPath = new File(installPath);
@@ -187,7 +188,8 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 		this.attachAudio = new AttachAudio(
 				mediaDir,
 				mediaDir.replaceAll("bestAudio", ""), fileInstallPath,
-				serverProps.getAudioOffset(), audioDAO.getExToAudio());
+				serverProps.getAudioOffset(),
+				audioDAO.getExToAudio(projectID));
 	}
 
 	/**
@@ -220,7 +222,8 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 	 * @see DatabaseImpl#getExerciseIDToRefAudio(int)
 	 */
 	public void attachAudio(Collection<CommonExercise> all) {
-		attachAudio.setExToAudio(audioDAO.getExToAudio());
+    int projectid = all.isEmpty() ? -1: all.iterator().next().getProjectID();
+    attachAudio.setExToAudio(audioDAO.getExToAudio(projectid));
 		int user = 0;
 		int examined = 0;
 
@@ -239,7 +242,8 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 		}
 
 		if (!transcriptChanged.isEmpty()) {
-			logger.info("attachAudio : found " + transcriptChanged.size() + " changed transcripts in set of " + exercises.size() + " items");
+			logger.info("attachAudio : found " + transcriptChanged.size() + " changed transcripts in set of " +
+          exercises.size() + " items");
 		}
 	}
 
@@ -247,7 +251,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 	 * TODO : better to use a filter
 	 * Don't add overlays for exercises that have been removed.
 	 *
-	 * @see #setDependencies(String, String, IUserExerciseDAO, AddRemoveDAO, IAudioDAO)
+	 * @see #setDependencies(String, String, IUserExerciseDAO, AddRemoveDAO, IAudioDAO, int)
 	 * @param removes
 	 */
 	protected void addOverlays(Collection<Integer> removes) {
@@ -377,18 +381,22 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 	/**
 	 * This DAO needs to talk to other DAOs.
 	 *
-	 * @see DatabaseImpl#setDependencies(String, String, ExerciseDAO)
-	 * @param mediaDir
-	 * @param installPath
-	 * @param userExerciseDAO
-	 * @param addRemoveDAO
-	 * @param audioDAO
-	 */
-	public void setDependencies(String mediaDir, String installPath,
-															IUserExerciseDAO userExerciseDAO, AddRemoveDAO addRemoveDAO, IAudioDAO audioDAO) {
+	 * @see DatabaseImpl#setDependencies(String, String, ExerciseDAO, int)
+   * @param mediaDir
+   * @param installPath
+   * @param userExerciseDAO
+   * @param addRemoveDAO
+   * @param audioDAO
+   * @param projid
+   */
+	public void setDependencies(String mediaDir,
+                              String installPath,
+                              IUserExerciseDAO userExerciseDAO,
+                              AddRemoveDAO addRemoveDAO,
+                              IAudioDAO audioDAO, int projid) {
 		this.userExerciseDAO = userExerciseDAO;
 		this.addRemoveDAO = addRemoveDAO;
-		setAudioDAO(audioDAO, mediaDir, installPath);
+		setAudioDAO(audioDAO, mediaDir, installPath, projid);
 	}
 
 	/**

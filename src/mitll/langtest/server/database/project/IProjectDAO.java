@@ -40,9 +40,13 @@ import java.util.Collection;
 public interface IProjectDAO extends IDAO {
   int add(int userid, String name, String language, String firstType, String secondType);
 
-  int add(int userid, long modified, String name, String language, String course, ProjectType type, ProjectStatus status, String firstType, String secondType);
+  int add(int userid, long modified, String name, String language, String course,
+          ProjectType type, ProjectStatus status, String firstType, String secondType);
 
   void delete(int id);
+
+  int addTest(int userid, String name, String language,
+              String firstType, String secondType);
 
   Collection<SlickProject> getAll();
 
@@ -53,4 +57,6 @@ public interface IProjectDAO extends IDAO {
   SlickProject mostRecentByUser(int user);
 
   SlickProject getFirst();
+
+  void dropProject(String name);
 }
