@@ -87,12 +87,13 @@ public abstract class BaseAudioDAO extends DAO {
    * @see AudioExport#writeFolderContents
    * @see AudioExport#writeFolderContentsContextOnly
    * @see DatabaseImpl#attachAllAudio
+   * @param projid
    */
-  public Map<Integer, List<AudioAttribute>> getExToAudio() {
+  public Map<Integer, List<AudioAttribute>> getExToAudio(int projid) {
     long then = System.currentTimeMillis();
     Map<Integer, List<AudioAttribute>> exToAudio = new HashMap<>();
     Map<Integer, Set<String>> idToPaths = new HashMap<>();
-    Collection<AudioAttribute> audioAttributes1 = getAudioAttributes();
+    Collection<AudioAttribute> audioAttributes1 = getAudioAttributesByProject(projid);
     for (AudioAttribute audio : audioAttributes1) {
       Integer exid = audio.getExid();
       List<AudioAttribute> audioAttributes = exToAudio.get(exid);
@@ -117,7 +118,7 @@ public abstract class BaseAudioDAO extends DAO {
     return exToAudio;
   }
 
-  abstract Collection<AudioAttribute> getAudioAttributes();
+  abstract Collection<AudioAttribute> getAudioAttributesByProject(int projid);
 
   /**
    * @param firstExercise
@@ -128,7 +129,7 @@ public abstract class BaseAudioDAO extends DAO {
    * @see DatabaseImpl#writeZip(OutputStream, long, PathHelper, int)
    */
   public int attachAudio(CommonExercise firstExercise, String installPath, String relativeConfigDir) {
-    Collection<AudioAttribute> audioAttributes = getAudioAttributes(firstExercise.getID());
+    Collection<AudioAttribute> audioAttributes = getAudioAttributesForExercise(firstExercise.getID());
 
 /*    if (DEBUG) {
       logger.debug("\attachAudio : found " + audioAttributes.size() + " for " + firstExercise.getOldID());
@@ -286,7 +287,7 @@ public abstract class BaseAudioDAO extends DAO {
     }
   }
 
-  abstract Collection<AudioAttribute> getAudioAttributes(int exid);
+  abstract Collection<AudioAttribute> getAudioAttributesForExercise(int exid);
 
   /**
    * Get back the ids of exercises recorded by people who are the same gender as the userid.
@@ -428,7 +429,7 @@ public abstract class BaseAudioDAO extends DAO {
    */
   protected AudioAttribute getAudioAttribute(int userid, int exerciseID, AudioType audioType) {
     AudioAttribute audioAttr = null;
-    Collection<AudioAttribute> audioAttributes = getAudioAttributes(exerciseID);
+    Collection<AudioAttribute> audioAttributes = getAudioAttributesForExercise(exerciseID);
     //logger.debug("for  " +exerciseID + " found " + audioAttributes);
 
     for (AudioAttribute audioAttribute : audioAttributes) {

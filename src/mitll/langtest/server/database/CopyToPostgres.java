@@ -379,7 +379,7 @@ public class CopyToPostgres<T extends CommonShell> {
     SlickAudioDAO slickAudioDAO = (SlickAudioDAO) db.getAudioDAO();
 
     List<SlickAudio> bulk = new ArrayList<>();
-    Collection<AudioAttribute> audioAttributes = db.getH2AudioDAO().getAudioAttributes();
+    Collection<AudioAttribute> audioAttributes = db.getH2AudioDAO().getAudioAttributesByProject(projid);
     logger.info("h2 audio  " + audioAttributes.size());
     int missing = 0;
     int skippedMissingUser = 0;
@@ -414,7 +414,7 @@ public class CopyToPostgres<T extends CommonShell> {
     }
 
     logger.info("took " + (now - then) +
-        " , postgres audio " + slickAudioDAO.getAudioAttributes().size());
+        " , postgres audio " + slickAudioDAO.getAudioAttributesByProject(projid).size());
   }
 
   /**

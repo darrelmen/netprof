@@ -74,16 +74,16 @@ public class UserListManagerTest {
     database.doReport(new PathHelper("war"),"",2016);
   }
 
-  @Test
+/*  @Test
   public void testPhoneReport() {
     Map<String, Collection<String>> typeToValues = new HashMap<String, Collection<String>>();
    // typeToValues.put("Lesson", Arrays.asList("1-1"));
     typeToValues.put("Unit", Arrays.asList("1"));
     typeToValues.put("Chapter", Arrays.asList("1A"));
     int userid = 113;
-    database.getJsonPhoneReport(userid, typeToValues);
+    database.getJsonPhoneReport(userid, projid, typeToValues);
    // database.getJsonScoreHistory(userid, typeToValues);
-  }
+  }*/
 //
 //  @Test
 //  public void testQuery() {

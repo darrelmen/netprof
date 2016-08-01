@@ -65,8 +65,8 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   @Override
-  public Collection<AudioAttribute> getAudioAttributes() {
-    return toAudioAttribute(dao.getAll(), userDAO.getMiniUsers());
+  public Collection<AudioAttribute> getAudioAttributesByProject(int projid) {
+    return toAudioAttribute(dao.getAll(projid), userDAO.getMiniUsers());
   }
 
   @Override
@@ -103,7 +103,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   @Override
-  Collection<AudioAttribute> getAudioAttributes(int exid) {
+  Collection<AudioAttribute> getAudioAttributesForExercise(int exid) {
     return toAudioAttributes(dao.getByExerciseID(exid));
   }
 

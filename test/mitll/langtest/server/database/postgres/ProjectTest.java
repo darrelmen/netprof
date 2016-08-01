@@ -34,11 +34,15 @@ package mitll.langtest.server.database.postgres;
 
 import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.project.ProjectStatus;
 import mitll.langtest.server.database.project.ProjectType;
+import mitll.langtest.server.database.user.IUserDAO;
+import mitll.langtest.server.database.user.UserManagement;
+import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.user.User;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.npdata.dao.SlickProject;
 import mitll.npdata.dao.SlickProjectProperty;
 import org.apache.log4j.Logger;
@@ -53,7 +57,6 @@ public class ProjectTest extends BaseTest {
   @Test
   public void testProject() {
     DatabaseImpl spanish = getDatabase("spanish");
-
 
     IProjectDAO projectDAO = spanish.getProjectDAO();
 
@@ -71,6 +74,35 @@ public class ProjectTest extends BaseTest {
   }
 
   @Test
+  public void testTestProject() {
+    DatabaseImpl database = getDatabase("netProf");
+
+    IProjectDAO projectDAO = database.getProjectDAO();
+
+    IUserDAO userDAO = database.getUserDAO();
+    User gvidaver = userDAO.getUserByID("gvidaver");
+
+    int i = projectDAO.addTest(
+        gvidaver.getId(),
+        "my Spanish",
+        "Spanish",
+        "Unit", "Chapter");
+
+    IUserListManager userListManager = database.getUserListManager();
+
+    UserManagement userManagement = database.getUserManagement();
+    String test345 = "test345";
+    User user = userManagement.addUser(test345, "test123", "1234", "", "", i);
+    if (user == null) {
+      user = userDAO.getUserByID(test345);
+    }
+    if (user != null) {
+      Collection<UserList<CommonShell>> myLists = userListManager.getMyLists(user.getId(), i);
+      logger.info("lists for " + user + " " + myLists);
+    }
+  }
+
+  @Test
   public void testListProjects() {
     DatabaseImpl spanish = getDatabase("spanish");
 
@@ -78,7 +110,7 @@ public class ProjectTest extends BaseTest {
     Collection<SlickProject> all = projectDAO.getAll();
     for (SlickProject project : all) {
       logger.info("Got " + project);
-      for (SlickProjectProperty prop:project.getProps()) {
+      for (SlickProjectProperty prop : project.getProps()) {
         logger.info("\t prop " + prop);
       }
     }
@@ -91,7 +123,7 @@ public class ProjectTest extends BaseTest {
     IProjectDAO projectDAO = spanish.getProjectDAO();
     SlickProject next = projectDAO.getAll().iterator().next();
 
-    projectDAO.addProperty(next.id(),"key","value");
+    projectDAO.addProperty(next.id(), "key", "value");
 
     testListProjects();
 
