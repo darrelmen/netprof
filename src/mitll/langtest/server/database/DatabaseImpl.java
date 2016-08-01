@@ -429,9 +429,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     return refresultDAO;
   }
 
-  public IUserDAO getUserDAO() {
-    return userDAO;
-  }
+  public IUserDAO getUserDAO() { return userDAO; }
 
   @Override
   public Connection getConnection(String who) {
@@ -733,10 +731,11 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
    * @see #makeDAO(String, String, String)
    */
   private void configureProject(String mediaDir, String installPath, Project project) {
-    logger.info("configureProject " + project);
+    logger.info("configureProject " + project + " mediaDir " + mediaDir + " install path " + installPath);
 
     ExerciseDAO<?> exerciseDAO1 = project.getExerciseDAO();
-    setDependencies(mediaDir, installPath, exerciseDAO1);
+    SlickProject project1 = project.getProject();
+    setDependencies(mediaDir, installPath, exerciseDAO1, project1.id());
     List<CommonExercise> rawExercises = project.getRawExercises();
     if (!rawExercises.isEmpty()) {
       logger.debug("first exercise is " + rawExercises.iterator().next());
@@ -744,14 +743,13 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     project.setJsonSupport(new JsonSupport(project.getSectionHelper(), getResultDAO(), getRefResultDAO(), getAudioDAO(),
         getPhoneDAO(), configDir, installPath));
 
-    SlickProject project1 = project.getProject();
-    if (project1 != null) {
+    //if (project1 != null) {
       Map<Integer, String> exerciseIDToRefAudio = getExerciseIDToRefAudio(project1.id());
       project.setAnalysis(
           new SlickAnalysis(this, phoneDAO,
               exerciseIDToRefAudio, (SlickResultDAO) resultDAO)
       );
-    }
+    //}
   }
 
   /**
@@ -842,9 +840,11 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
    * @param mediaDir
    * @param installPath
    * @param exerciseDAO
+   * @param projid
+   * @see #configureProject(String, String, Project)
    */
-  public void setDependencies(String mediaDir, String installPath, ExerciseDAO exerciseDAO) {
-    exerciseDAO.setDependencies(mediaDir, installPath, userExerciseDAO, null /*addRemoveDAO*/, audioDAO);
+  public void setDependencies(String mediaDir, String installPath, ExerciseDAO exerciseDAO, int projid) {
+    exerciseDAO.setDependencies(mediaDir, installPath, userExerciseDAO, null /*addRemoveDAO*/, audioDAO, projid);
   }
 
   private void makeContextPractice(String contextPracticeFile, String installPath) {
@@ -977,8 +977,8 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
    * @return
    * @see mitll.langtest.server.ScoreServlet#getPhoneReport
    */
-  public JSONObject getJsonPhoneReport(long userid, Map<String, Collection<String>> typeToValues) {
-    return getJsonSupport((int) userid).getJsonPhoneReport(userid, typeToValues);
+  public JSONObject getJsonPhoneReport(long userid, int projid, Map<String, Collection<String>> typeToValues) {
+    return getJsonSupport((int) userid).getJsonPhoneReport(userid, projid, typeToValues);
   }
 
   /**
@@ -1342,7 +1342,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
 
     // TODO : why would we want to do this?
     if (userExerciseDAO != null && getExerciseDAO(projectid) != null) {
-      for (CommonExercise exercise : userExerciseDAO.getAll()) {
+      for (CommonExercise exercise : userExerciseDAO.getAllUserExercises(projectid)) {
         join.put(exercise.getID(), exercise);
       }
     }
@@ -1354,14 +1354,14 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
    * @param projectid
    * @return
    * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceForUser
-   * @see DatabaseImpl#makeDAO(String, String, String)
+   * @see DatabaseImpl#configureProject(String, String, Project)
    */
   public Map<Integer, String> getExerciseIDToRefAudio(int projectid) {
     Map<Integer, String> join = new HashMap<>();
     populateIDToRefAudio(join, getExercises(projectid));
 
 
-    Collection<CommonExercise> all = userExerciseDAO.getAll();
+    Collection<CommonExercise> all = userExerciseDAO.getAllUserExercises(projectid);
     getExerciseDAO(projectid).attachAudio(all);
     populateIDToRefAudio(join, all);
     return join;
@@ -1669,7 +1669,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   public void attachAllAudio(int projectid) {
     IAudioDAO audioDAO = getAudioDAO();
 
-    Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
+    Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio(projectid);
 
     long then = System.currentTimeMillis();
     Collection<CommonExercise> exercises = getExercises(projectid);

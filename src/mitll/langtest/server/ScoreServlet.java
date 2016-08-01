@@ -364,7 +364,9 @@ public class ScoreServlet extends DatabaseServlet {
     logger.debug("getPhoneReport (" + getLanguage() + ") : user " + user + " selection " + selection);
     try {
       long then = System.currentTimeMillis();
-      toReturn = db.getJsonPhoneReport(Long.parseLong(user), selection);
+      long userid = Long.parseLong(user);
+
+      toReturn = db.getJsonPhoneReport(userid, getMostRecentProjectByUser((int)userid), selection);
       long now = System.currentTimeMillis();
       if (now - then > 250) {
         logger.debug("getPhoneReport (" + getLanguage() + ") : user " + user + " selection " + selection +
@@ -604,7 +606,7 @@ public class ScoreServlet extends DatabaseServlet {
     if (now - then > 1000) {
       logger.warn("getJsonNestedChapters " + getLanguage() + " getContentAsJson took " + (now - then) + " millis");
     }
-    addVersion(jsonObject);
+    addVersion(jsonObject, projectid);
 
     return jsonObject;
   }
@@ -619,7 +621,7 @@ public class ScoreServlet extends DatabaseServlet {
 
   private JSONObject getJSONExerciseExport(JsonExport jsonExport, int projectid) {
     JSONObject jsonObject = new JSONObject();
-    addVersion(jsonObject);
+    addVersion(jsonObject, projectid);
     jsonExport.addJSONExerciseExport(jsonObject, db.getExercises(projectid));
     return jsonObject;
   }
@@ -1063,9 +1065,12 @@ public class ScoreServlet extends DatabaseServlet {
         false, false, "" + exerciseID, null, usePhoneToDisplay, false);
   }
 
-  private void addVersion(JSONObject jsonObject) {
+  private void addVersion(JSONObject jsonObject, int projid) {
     jsonObject.put(VERSION, VERSION_NOW);
-    jsonObject.put(HAS_MODEL, !db.getServerProps().isNoModel());
+    boolean value = !db.getServerProps().isNoModel();
+
+    ;
+    jsonObject.put(HAS_MODEL, db.getProject(projid).hasModel());
     jsonObject.put("Date", new Date().toString());
   }
 

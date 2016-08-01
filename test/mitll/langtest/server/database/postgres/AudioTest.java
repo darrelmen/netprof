@@ -39,7 +39,6 @@ import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.CommonExercise;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
@@ -154,37 +153,37 @@ public class AudioTest extends BaseTest {
     }
   }
 
-  @Test
+/*  @Test
   public void testDefect() {
     DatabaseImpl spanish = getDatabase("spanish");
 
     IAudioDAO dao = spanish.getAudioDAO();
-    List<AudioAttribute> audioAttributes = dao.getExToAudio().get("2");
+    List<AudioAttribute> audioAttributes = dao.getExToAudio(projectid).get("2");
     for (AudioAttribute audioAttribute : audioAttributes) {
       logger.info("found " + audioAttribute);
     }
     for (AudioAttribute audioAttribute : audioAttributes) {
       logger.info("defects " + dao.markDefect(audioAttribute));
     }
-    audioAttributes = dao.getExToAudio().get("2");
+    audioAttributes = dao.getExToAudio(projectid).get("2");
     if (audioAttributes != null) {
       for (AudioAttribute audioAttribute : audioAttributes) {
         logger.info("found " + audioAttribute);
       }
     }
-  }
+  }*/
 
-  @Test
+  /*@Test
   public void testUpdate() {
     DatabaseImpl spanish = getDatabase("spanish");
 
     UserDAO h2UserDAO = new UserDAO(spanish);
     AudioDAO audioDAO = new AudioDAO(spanish, h2UserDAO);
 
-    audioDAO.getExToAudio();
+    audioDAO.getExToAudio(projectid);
 
     IAudioDAO dao = spanish.getAudioDAO();
-    List<AudioAttribute> audioAttributes = dao.getExToAudio().get(3);
+    List<AudioAttribute> audioAttributes = dao.getExToAudio(projectid).get(3);
     if (audioAttributes != null) {
       for (AudioAttribute audioAttribute : audioAttributes) {
         logger.info("found " + audioAttribute);
@@ -195,11 +194,11 @@ public class AudioTest extends BaseTest {
     } else logger.info("no exercises under 3");
 
 
-    audioAttributes = dao.getExToAudio().get(2222222);
+    audioAttributes = dao.getExToAudio(projectid).get(2222222);
     if (audioAttributes != null) {
       for (AudioAttribute audioAttribute : audioAttributes) {
         logger.info("found " + audioAttribute);
       }
     }
-  }
+  }*/
 }

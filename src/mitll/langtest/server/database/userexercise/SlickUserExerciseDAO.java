@@ -48,8 +48,6 @@ import mitll.npdata.dao.SlickRelatedExercise;
 import mitll.npdata.dao.userexercise.ExerciseDAOWrapper;
 import mitll.npdata.dao.userexercise.RelatedExerciseDAOWrapper;
 import org.apache.log4j.Logger;
-import org.apache.log4j.net.SyslogAppender;
-import org.apache.xmlbeans.impl.common.SystemCache;
 import scala.collection.Seq;
 
 import java.sql.Timestamp;
@@ -342,8 +340,8 @@ public class SlickUserExerciseDAO
     return byExid.isEmpty() ? null : fromSlick(byExid.iterator().next());
   }
 
-  public List<CommonExercise> getAll() {
-    return getUserExercises(dao.getAllUserEx());
+  public List<CommonExercise> getAllUserExercises(int projid) {
+    return getUserExercises(dao.getAllUserEx(projid));
   }
 
   /**
