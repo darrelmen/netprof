@@ -14,7 +14,7 @@ public interface IPhoneDAO<T>  extends IDAO {
   boolean addPhone(T phone);
 
   /**
-   * @see mitll.langtest.server.database.JsonSupport#getJsonPhoneReport(long, Map)
+   * @see mitll.langtest.server.database.JsonSupport#getJsonPhoneReport(long, int, Map)
    * @param userid
    * @param exids
    * @param idToRef

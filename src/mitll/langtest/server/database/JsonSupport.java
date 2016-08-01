@@ -80,7 +80,9 @@ public class JsonSupport {
               IResultDAO resultDAO,
               IRefResultDAO refResultDAO,
               IAudioDAO audioDAO,
-              IPhoneDAO phoneDAO, String configDir, String installPath) {
+              IPhoneDAO phoneDAO,
+              String configDir,
+              String installPath) {
     this.sectionHelper = sectionHelper;
     this.resultDAO = resultDAO;
     this.refResultDAO = refResultDAO;
@@ -304,13 +306,13 @@ public class JsonSupport {
    *
    * @return
    * @see mitll.langtest.server.ScoreServlet#getPhoneReport
-   * @see DatabaseImpl#getJsonPhoneReport(long, Map)
+   * @see DatabaseImpl#getJsonPhoneReport(long, int, Map)
    */
-  public JSONObject getJsonPhoneReport(long userid, Map<String, Collection<String>> typeToValues) {
+  public JSONObject getJsonPhoneReport(long userid, int projid, Map<String, Collection<String>> typeToValues) {
     Collection<CommonExercise> exercisesForState = sectionHelper.getExercisesForSelectionState(typeToValues);
 
     long then = System.currentTimeMillis();
-    Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
+    Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio(projid);
     long now = System.currentTimeMillis();
 
     if (now - then > 500) logger.warn("took " + (now - then) + " millis to get ex->audio map");

@@ -70,18 +70,18 @@ public class UserExTest extends BaseTest {
         logger.info("\t" + list + " has " + ex);
       }
     }
-
-    Collection<CommonExercise> all = dao.getAll();
-    logger.info("all " + all.size() + " first " + all.iterator().next());
-
-    Collection<CommonExercise> overrides = dao.getOverrides();
-    logger.info("overrides " + overrides.size() + " first " + overrides.iterator().next());
-
-    CommonExercise predefExercise = dao.getPredefExercise(1);
-
-    logger.info("predef " + predefExercise);
-
-    logger.info("got " + dao.getByExID(Arrays.asList(1959, 1962)));
+//
+//    Collection<CommonExercise> all = dao.getAllUserExercises(projid);
+//    logger.info("all " + all.size() + " first " + all.iterator().next());
+//
+//    Collection<CommonExercise> overrides = dao.getOverrides();
+//    logger.info("overrides " + overrides.size() + " first " + overrides.iterator().next());
+//
+//    CommonExercise predefExercise = dao.getPredefExercise(1);
+//
+//    logger.info("predef " + predefExercise);
+//
+//    logger.info("got " + dao.getByExID(Arrays.asList(1959, 1962)));
   }
 
   @Test
