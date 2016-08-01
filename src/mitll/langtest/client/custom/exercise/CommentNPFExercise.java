@@ -138,6 +138,10 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
     boolean meaningValid = isMeaningValid(e);
     boolean useMeaningInsteadOfEnglish = isEnglish && meaningValid;
     String english = useMeaningInsteadOfEnglish ? e.getMeaning() : e.getEnglish();
+
+    logger.info("getItemContent meaningValid " + meaningValid + " is english " + isEnglish + " use it " +useMeaningInsteadOfEnglish + "" +
+        " english " + english);
+
     if (!english.isEmpty() && !english.equals("N/A")) {
       String englishPrompt = useMeaningInsteadOfEnglish ? ExerciseFormatter.MEANING_PROMPT : ExerciseFormatter.ENGLISH_PROMPT;
       column.add(getEntry(e, QCNPFExercise.ENGLISH, englishPrompt, english));

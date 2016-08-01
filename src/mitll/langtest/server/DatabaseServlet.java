@@ -34,16 +34,13 @@ package mitll.langtest.server;
 
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.security.DominoSessionException;
 import mitll.langtest.server.database.security.UserSecurityManager;
 import mitll.langtest.shared.user.User;
-import mitll.npdata.dao.SlickProject;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 
 /**
@@ -163,7 +160,8 @@ public class DatabaseServlet extends HttpServlet {
     try {
       User loggedInUser = securityManager.getLoggedInUser(request);
       if (loggedInUser == null) return -1;
-      int i = getDatabase().getUserProjectDAO().mostRecentByUser(loggedInUser.getId());
+      int id = loggedInUser.getId();
+      int i = getMostRecentProjectByUser(id);
       return i;
     } catch (DominoSessionException e) {
       logger.error("Got " + e, e);
@@ -171,6 +169,16 @@ public class DatabaseServlet extends HttpServlet {
     }
   }
 
+  /**
+   * @see #getProject(HttpServletRequest)
+   * @param id
+   * @return
+   */
+  protected int getMostRecentProjectByUser(int id) {
+    return getDatabase().getUserProjectDAO().mostRecentByUser(id);
+  }
+
+/*
   String getProjectLanguage(HttpServletRequest request) {
     try {
       int project = getProject(request);
@@ -181,6 +189,7 @@ public class DatabaseServlet extends HttpServlet {
       return "";
     }
   }
+*/
 
   private DatabaseImpl db = null;
 

@@ -282,10 +282,13 @@ public class SlickUserExerciseDAO
    * @see IUserExerciseDAO#getOnList(int)
    */
   private List<CommonExercise> getUserExercises(Collection<SlickExercise> all) {
-    logger.info("getUserExercises for " + all.size());
+    logger.info("getUserExercises for " + all.size()+ " exercises");
 
     List<CommonExercise> copy = new ArrayList<>();
     for (SlickExercise userExercise : all) copy.add(fromSlick(userExercise));
+
+    logger.info("getUserExercises returned " + copy.size()+ " user exercises");
+
     return copy;
   }
 
@@ -332,9 +335,9 @@ public class SlickUserExerciseDAO
 //    return userExercises2;
   }
 
+
   @Override
   public CommonExercise getByExID(int exid) {
-    //exid = exid.replaceAll("\'", "");
     Seq<SlickExercise> byExid = dao.byID(exid);
     return byExid.isEmpty() ? null : fromSlick(byExid.iterator().next());
   }

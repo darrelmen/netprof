@@ -581,8 +581,8 @@ public class ServerProperties {
 
   /**
    * @return
-   * @see mitll.langtest.server.mail.EmailHelper#addContentDeveloper(String, String, User, MailSupport)
-   * @see mitll.langtest.server.mail.EmailHelper#enableCDUser(String, String, String)
+   * @see mitll.langtest.server.mail.EmailHelper#addContentDeveloper(String, String, User, MailSupport, String)
+   * @see mitll.langtest.server.mail.EmailHelper#enableCDUser(String, String, String, String)
    */
   public List<String> getApprovers() {
     return emailList.getApprovers();
