@@ -37,16 +37,14 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.user.UserProjectDAO;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickProject;
-import mitll.npdata.dao.SlickUserProject;
 import mitll.npdata.dao.project.ProjectDAOWrapper;
 import org.apache.log4j.Logger;
 
 import java.sql.Timestamp;
 import java.util.Collection;
-import java.util.List;
 
 public class ProjectDAO extends DAO implements IProjectDAO {
- // private static final Logger logger = Logger.getLogger(ProjectDAO.class);
+  private static final Logger logger = Logger.getLogger(ProjectDAO.class);
 
   private final ProjectDAOWrapper dao;
   private final ProjectPropertyDAO propertyDAO;
@@ -63,7 +61,9 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     return propertyDAO;
   }
 
-  public void createTable() {  dao.createTable(); }
+  public void createTable() {
+    dao.createTable();
+  }
 
   @Override
   public String getName() {
@@ -75,13 +75,29 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   }
 
   private SlickProject first;
+
   public SlickProject getFirst() {
     if (first == null) first = dao.getAll().iterator().next();
     return first;
   }
 
-  public void delete(int id) { dao.delete(id); }
+  public void delete(int id) {
+    dao.delete(id);
+  }
 
+  public void dropProject(String name) {
+    Collection<SlickProject> all = getAll();
+    for (SlickProject project : all) {
+      logger.info("found " + project);
+      if (project.language().equalsIgnoreCase("english")) {
+        logger.info("deleting " + project);
+        delete(project.id());
+        break;
+      } else {
+        logger.debug("not deleting " + project);
+      }
+    }
+  }
   @Override
   public int add(int userid, long modified, String name, String language, String course,
                  ProjectType type, ProjectStatus status, String firstType, String secondType) {
@@ -99,7 +115,25 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   }
 
   @Override
-  public Collection<SlickProject> getAll() {  return dao.getAll();  }
+  public int addTest(int userid, String name, String language,
+                     String firstType, String secondType) {
+    return dao.insert(new SlickProject(
+        -1,
+        userid,
+        new Timestamp(System.currentTimeMillis()),
+        name,
+        language,
+        "",
+        ProjectType.TESTING.toString(),
+        ProjectStatus.DEVELOPMENT.name(),
+        firstType,
+        secondType));
+  }
+
+  @Override
+  public Collection<SlickProject> getAll() {
+    return dao.getAll();
+  }
 
   public void addProperty(int project, String key, String value) {
     propertyDAO.add(project, System.currentTimeMillis(), key, value);
@@ -112,6 +146,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
 
   /**
    * TODO : don't do two round trips to database.
+   *
    * @param user
    * @return
    */

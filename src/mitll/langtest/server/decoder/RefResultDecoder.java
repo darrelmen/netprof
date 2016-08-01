@@ -100,11 +100,19 @@ public class RefResultDecoder {
       public void run() {
         if (serverProps.shouldTrimAudio()) {
           sleep(5000);
-          trimRef(exercises, relativeConfigDir);
+          if (!exercises.isEmpty()) {
+            CommonExercise next = exercises.iterator().next();
+            trimRef(next.getProjectID(), exercises, relativeConfigDir);
+          }
         }
         if (serverProps.shouldDoDecode()) {
           sleep(5000);
-          if (hasModel) writeRefDecode(exercises, relativeConfigDir);
+          if (hasModel) {
+            if (!exercises.isEmpty()) {
+              CommonExercise next = exercises.iterator().next();
+              writeRefDecode(exercises, relativeConfigDir, next.getProjectID());
+            }
+          }
         } else {
           logger.debug(" not doing decode ref decode");
         }
@@ -112,11 +120,9 @@ public class RefResultDecoder {
     }).start();
   }
 
-/*  private String getLanguage() {
-    return serverProps.getLanguage();
-  }*/
-
   /**
+   *
+   * @param projid
    * @param exercises
    * @seex #runMissingInfo
    */
@@ -162,9 +168,15 @@ public class RefResultDecoder {
   }
 */
 
-  private void trimRef(Collection<CommonExercise> exercises, String relativeConfigDir) {
+  /**
+   *
+   * @param projid
+   * @param exercises
+   * @param relativeConfigDir
+   */
+  private void trimRef(int projid, Collection<CommonExercise> exercises, String relativeConfigDir) {
     if (DO_TRIM) {
-      Map<Integer, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio();
+      Map<Integer, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio(projid);
       String installPath = pathHelper.getInstallPath();
 
       int numResults = db.getRefResultDAO().getNumResults();
@@ -247,9 +259,9 @@ public class RefResultDecoder {
    *
    * @see #doRefDecode
    */
-  private void writeRefDecode(Collection<CommonExercise> exercises, String relativeConfigDir) {
+  private void writeRefDecode(Collection<CommonExercise> exercises, String relativeConfigDir, int projid) {
     if (DO_REF_DECODE) {
-      Map<Integer, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio();
+      Map<Integer, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio(projid);
       String installPath = pathHelper.getInstallPath();
 
       int numResults = db.getRefResultDAO().getNumResults();
