@@ -315,8 +315,8 @@ public class Report {
   private void getReportForProject(String language, JSONObject jsonObject, int year, StringBuilder builder, int projid) {
     List<SlickSlimEvent> allSlim = eventDAO.getAllSlim(projid);
     List<SlickSlimEvent> allDevicesSlim = eventDAO.getAllDevicesSlim(projid);
-    Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
-    Collection<AudioAttribute> audioAttributes = audioDAO.getAudioAttributes();
+    Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio(projid);
+    Collection<AudioAttribute> audioAttributes   = audioDAO.getAudioAttributesByProject(projid);
     List<Result> results = resultDAO.getResults();
     Collection<Result> resultsDevices = resultDAO.getResultsDevices();
 
