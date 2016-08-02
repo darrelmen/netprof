@@ -104,7 +104,6 @@
       <excludeFolder url="file://$MODULE_DIR$/war/config/pages" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/pashto" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/pilot" />
-      <excludeFolder url="file://$MODULE_DIR$/war/config/russian" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/tagalog" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/unitFlashcard" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/urdu" />
