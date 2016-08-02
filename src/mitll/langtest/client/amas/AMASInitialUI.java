@@ -79,8 +79,8 @@ public class AMASInitialUI extends InitialUI {
      * {@link #makeFlashContainer}
      */
     firstRow.add(langTest.getFlashRecordPanel());
-    langTest.modeSelect();
-    learnHelper = new AutoCRTChapterNPFHelper(service, langTest, null, langTest);
+    langTest.recordingModeSelect();
+    learnHelper = new AutoCRTChapterNPFHelper(service, userFeedback, null, controller);
     learnHelper.addNPFToContent(firstRow, "");
   }
 
@@ -120,7 +120,7 @@ public class AMASInitialUI extends InitialUI {
    * @see #showLogin
    * @see #populateRootPanelIfLogin()
    */
-  private void populateRootPanel() {
+  public void populateRootPanel() {
     Container verticalContainer = getRootContainer();
     // header/title line
     // first row ---------------
