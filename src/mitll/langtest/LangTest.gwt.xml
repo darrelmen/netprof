@@ -43,6 +43,13 @@
   <inherits name='com.google.gwt.user.theme.clean.Clean'/>
   <inherits name='com.google.gwt.visualization.Visualization'/>
   <inherits name="com.github.gwtbootstrap.Bootstrap"/>
+
+
+
+  <inherits name="org.gwtbootstrap3.GwtBootstrap3"/>
+
+  <inherits name="org.gwtbootstrap3.extras.respond.Respond"/>
+
   <inherits name="org.moxieapps.gwt.highcharts.Highcharts"/>
 <!--  <inherits name="com.google.common.collect.Collect"/>
   <inherits name="com.google.common.cache.Cache"/>-->
@@ -87,6 +94,8 @@
   <public path='public'/>
 
   <!-- These 3 scripts are necessary so that Flash Recording can work -->
+
+
 
 
 </module>

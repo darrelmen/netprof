@@ -37,11 +37,10 @@ import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.user.User;
-import mitll.langtest.shared.exercise.CommonExercise;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.List;
 
 public class UserTest extends BaseTest {
   private static final Logger logger = Logger.getLogger(UserTest.class);
@@ -71,15 +70,16 @@ public class UserTest extends BaseTest {
     logger.info("got " + users);
 
     String userid = "userid";
-    String hash = Md5Hash.getHash("g@gmail.com");
+    String toHash = "g@gmail.com";
+    String hash = Md5Hash.getHash(toHash);
     String password = Md5Hash.getHash("password");
     String bueller = Md5Hash.getHash("bueller");
-    User user = dao.addUser(userid, password, hash, User.Kind.STUDENT, "128.0.0.1", true, 89, "midest", "browser");
-    User user2 = dao.addUser(userid, password, hash, User.Kind.STUDENT, "128.0.0.1", true, 89, "midest", "iPad");
+    User user = dao.addUser(userid, password, hash, toHash, User.Kind.STUDENT, "128.0.0.1", true, 89, "midest", "browser");
+    User user2 = dao.addUser(userid, password, hash, toHash, User.Kind.STUDENT, "128.0.0.1", true, 89, "midest", "iPad");
 
     logger.info("made " + user);
     logger.info("made " + user2);
-    User user3 = dao.addUser(userid + "ipad", password, hash, User.Kind.STUDENT, "128.0.0.1", true, 89, "midest", "iPad");
+    User user3 = dao.addUser(userid + "ipad", password, hash, toHash, User.Kind.STUDENT, "128.0.0.1", true, 89, "midest", "iPad");
 
     if (user == null) {
       user = dao.getUserByID(userid);
