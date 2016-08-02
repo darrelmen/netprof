@@ -30,38 +30,23 @@
  *
  */
 
-package mitll.langtest.client.instrumentation;
+package mitll.langtest.client;
 
-import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.Tab;
-import com.google.gwt.event.dom.client.HasClickHandlers;
-import com.google.gwt.user.client.ui.UIObject;
-import mitll.langtest.shared.exercise.Shell;
+import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.instrumentation.EventRegistration;
+import mitll.langtest.shared.project.ProjectStartupInfo;
+import mitll.langtest.shared.user.User;
 
-/**
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 7/25/14.
- */
-public interface EventRegistration {
-  EventLogger getButtonFactory();
+import java.util.Collection;
 
-  void register(Button button, int exid);
-  void register(Button button, String exid);
-  void register(Button button);
+public interface LifecycleSupport extends EventRegistration {
+  String getInfoLine();
 
-  void register(Button button, int exid, String context);
-  void register(Button button, String exid, String context);
+  void recordingModeSelect();
 
-  void logEvent(Tab button, String widgetType, String exid, String context);
+  ProjectStartupInfo getStartupInfo();
 
-  void registerWidget(HasClickHandlers clickable, UIObject uiObject, String exid, String context);
+  Collection<User.Permission> getPermissions();
 
-  void logEvent(UIObject button, String widgetType, Shell ex, String context);
-
-  void logEvent(UIObject button, String widgetType, String exid, String context);
-  void logEvent(UIObject button, String widgetType, int exid, String context);
-
-  void logEvent(String widgetID, String widgetType, String exid, String context);
+  Widget getFlashRecordPanel();
 }

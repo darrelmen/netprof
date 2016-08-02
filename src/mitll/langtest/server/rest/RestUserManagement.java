@@ -77,6 +77,7 @@ public class RestUserManagement {
    * @see mitll.langtest.server.database.user.UserManagement#userExists
    */
   private static final String EMAIL_H = "emailH";
+  private static final String EMAIL = "email";
   /**
    * @see mitll.langtest.server.database.user.UserManagement#userExists
    */
@@ -380,6 +381,8 @@ public class RestUserManagement {
         String gender  = request.getHeader(GENDER);
         String dialect = request.getHeader(DIALECT);
         String emailH  = request.getHeader(EMAIL_H);
+        String email  = request.getHeader(EMAIL);
+        if (email == null) email = "";
 
         logger.debug("addUser : Request " + requestType + " for " + deviceType + " user " + user +
             " adding " + gender +
@@ -389,14 +392,15 @@ public class RestUserManagement {
         if (age != null && gender != null && dialect != null) {
           try {
             int age1 = Integer.parseInt(age);
-            user1 = getUserManagement().addUser(user, passwordH, emailH, deviceType, device, User.Kind.CONTENT_DEVELOPER, gender.equalsIgnoreCase("male"), age1, dialect, projid);
+            user1 = getUserManagement().addUser(user, passwordH, emailH, email, deviceType, device,
+                User.Kind.CONTENT_DEVELOPER, gender.equalsIgnoreCase("male"), age1, dialect, projid);
 
           } catch (NumberFormatException e) {
             logger.warn("couldn't parse age " + age);
             jsonObject.put(ERROR, "bad age");
           }
         } else {
-          user1 = getUserManagement().addUser(user, passwordH, emailH, deviceType, device, projid);
+          user1 = getUserManagement().addUser(user, passwordH, emailH, email, deviceType, device, projid);
         }
 
         if (user1 == null) { // how could this happen?
