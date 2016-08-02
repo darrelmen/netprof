@@ -54,7 +54,8 @@ import java.sql.Timestamp;
 import java.util.*;
 
 public class SlickUserExerciseDAO
-    extends BaseUserExerciseDAO implements IUserExerciseDAO/*, ISchema<UserExercise, SlickExercise>*/ {
+    extends BaseUserExerciseDAO
+    implements IUserExerciseDAO {
   private static final Logger logger = Logger.getLogger(SlickUserExerciseDAO.class);
 
   private final ExerciseDAOWrapper dao;
@@ -95,6 +96,7 @@ public class SlickUserExerciseDAO
         unitToValue.getOrDefault(first, ""),
         unitToValue.getOrDefault(second, ""),
         projectID,  // project id fk
+        false,
         false,
         false,
         shared.getID());
@@ -158,6 +160,7 @@ public class SlickUserExerciseDAO
         projectID,  // project id fk
         isPredef,
         isContext,
+        false,
         -1);
   }
 
