@@ -140,8 +140,7 @@ public class SimplePagingContainer<T> implements RequiresResize {
   protected void addSelectionModel() {
   }
 
-  protected void addColumnsToTable()
-  {
+  protected void addColumnsToTable() {
   }
 
   private CellTable<T> makeCellTable(CellTable.Resources o) {
@@ -166,12 +165,22 @@ public class SimplePagingContainer<T> implements RequiresResize {
     table.addColumn(id2, header);
   }
 
-
   protected void clear() {
     List<T> list = getList();
-    list.clear();
-
-    table.setRowCount(list.size());
+    if (list == null) {
+      if (table == null) {
+        controller.logMessageOnServer("no table for " + this.getClass() + " for " + " user " + controller.getUser(),
+            controller.getLanguage());
+      }
+      else {
+        table.setRowCount(0);
+        controller.logMessageOnServer("no list for " + this.getClass() + " for " + " user " + controller.getUser(),
+            controller.getLanguage());
+      }
+    } else {
+      list.clear();
+      table.setRowCount(list.size());
+    }
   }
 
   protected List<T> getList() {
