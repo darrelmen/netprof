@@ -92,7 +92,7 @@ public class ProjectTest extends BaseTest {
 
     UserManagement userManagement = database.getUserManagement();
     String test345 = "test345";
-    User user = userManagement.addUser(test345, "test123", "1234", "", "", i);
+    User user = userManagement.addUser(test345, "test123", "1234", "", "", "", i);
     if (user == null) {
       user = userDAO.getUserByID(test345);
     }
