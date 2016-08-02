@@ -55,6 +55,7 @@ public interface UserService extends RemoteService {
   // User Management --
 
   Collection<SlimProject> getProjects();
+
   User setProject(int projectid);
   /**
    * @see mitll.langtest.client.user.UserPassLogin#gotSignUp(String, String, String, User.Kind)
@@ -82,7 +83,7 @@ public interface UserService extends RemoteService {
   List<User> getUsers();
 
   /**
-   * @see mitll.langtest.client.user.UserPassLogin#gotLogin(String, String, boolean)
+   * @see mitll.langtest.client.user.UserPassLogin#gotLogin
    * @param login
    * @param passwordH
    * @param projectid
@@ -92,13 +93,6 @@ public interface UserService extends RemoteService {
 
   LoginResult loginUser(String userId, String attemptedPassword);
   void logout(String login);
-
-  /**
-   * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser(int)
-   * @param id
-   * @return
-   */
- // User getUserBy(int id);
 
   /**
    * @see mitll.langtest.client.user.ResetPassword#getChangePasswordButton(String, Fieldset, BasicDialog.FormField, BasicDialog.FormField)

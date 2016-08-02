@@ -76,22 +76,23 @@ public class UserManagement {
    * @param userID
    * @param passwordH
    * @param emailH
-   * @param deviceType
+   * @param email
+   *@param deviceType
    * @param device
-   * @param projid
-   * @return
+   * @param projid    @return
    * @see mitll.langtest.server.ScoreServlet#doPost
    */
-  public User addUser(String userID, String passwordH, String emailH, String deviceType, String device, int projid) {
-    return addUser(userID, passwordH, emailH, deviceType, device, User.Kind.STUDENT, true, projid);
+  public User addUser(String userID, String passwordH, String emailH, String email, String deviceType, String device,
+                      int projid) {
+    return addUser(userID, passwordH, emailH, email, deviceType, device, User.Kind.STUDENT, true, projid);
   }
 
-  private User addUser(String userID, String passwordH, String emailH, String deviceType, String device,
+  private User addUser(String userID, String passwordH, String emailH, String email, String deviceType, String device,
                        User.Kind kind,
                        boolean isMale, int projid) {
     int age = 89;
     String dialect = "unk";
-    return addUser(userID, passwordH, emailH, deviceType, device, kind, isMale, age, dialect, projid);
+    return addUser(userID, passwordH, emailH, email, deviceType, device, kind, isMale, age, dialect, projid);
   }
 
   /**
@@ -99,6 +100,7 @@ public class UserManagement {
    * @param userID
    * @param passwordH
    * @param emailH
+   * @param email
    * @param deviceType
    * @param device
    * @param kind
@@ -108,9 +110,10 @@ public class UserManagement {
    * @param projid
    * @return
    */
-  public User addUser(String userID, String passwordH, String emailH, String deviceType, String device, User.Kind kind,
+  public User addUser(String userID, String passwordH, String emailH, String email,
+                      String deviceType, String device, User.Kind kind,
                       boolean isMale, int age, String dialect, int projid) {
-    return addAndGetUser(userID, passwordH, emailH, kind, isMale, age, dialect, deviceType, device, projid);
+    return addAndGetUser(userID, passwordH, emailH, email, kind, isMale, age, dialect, deviceType, device, projid);
   }
 
   /**
@@ -118,6 +121,7 @@ public class UserManagement {
    * @param userID
    * @param passwordH
    * @param emailH
+   * @param email
    * @param kind
    * @param isMale
    * @param age
@@ -126,15 +130,16 @@ public class UserManagement {
    * @return
    * @seex mitll.langtest.server.LangTestDatabaseImpl#addUser
    */
-  public User addUser(HttpServletRequest request, String userID, String passwordH, String emailH, User.Kind kind,
+  public User addUser(HttpServletRequest request, String userID, String passwordH,
+                      String emailH, String email, User.Kind kind,
                       boolean isMale, int age, String dialect, String device, int projid) {
     String ip = getIPInfo(request);
-    return addUser(userID, passwordH, emailH, device, ip, kind, isMale, age, dialect, projid);
+    return addUser(userID, passwordH, emailH, email, device, ip, kind, isMale, age, dialect, projid);
   }
 
-  private User addAndGetUser(String userID, String passwordH, String emailH, User.Kind kind, boolean isMale, int age,
+  private User addAndGetUser(String userID, String passwordH, String emailH, String email, User.Kind kind, boolean isMale, int age,
                              String dialect, String device, String ip, int projid) {
-    User user = userDAO.addUser(userID, passwordH, emailH, kind, ip, isMale, age, dialect, device);
+    User user = userDAO.addUser(userID, passwordH, emailH, email, kind, ip, isMale, age, dialect, device);
     if (user != null) {
       userListManager.createFavorites(user.getId(), projid);
     }
@@ -142,11 +147,11 @@ public class UserManagement {
   }
 
   /**
-   * @param user
+   * @paramx user
    * @return
    * @see DatabaseImpl#addUser
    */
-  public int addUser(User user) {
+/*  public int addUser(User user) {
     int l;
     if ((l = userDAO.getIdForUserID(user.getUserID())) == -1) {
       logger.debug("addUser " + user);
@@ -155,7 +160,7 @@ public class UserManagement {
           user.getPermissions(), User.Kind.STUDENT, "", "", "");
     }
     return l;
-  }
+  }*/
 
   private String getIPInfo(HttpServletRequest request) {
     String header = request.getHeader("User-Agent");
