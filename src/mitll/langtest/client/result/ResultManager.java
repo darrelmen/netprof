@@ -646,7 +646,7 @@ public class ResultManager extends PagerTable {
     TextColumn<MonitorResult> exercise = new TextColumn<MonitorResult>() {
       @Override
       public String getValue(MonitorResult answer) {
-        return answer.getExID();
+        return answer == null ? "Unk" : answer.getExID();
       }
     };
     exercise.setSortable(true);
