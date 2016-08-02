@@ -30,38 +30,18 @@
  *
  */
 
-package mitll.langtest.client.instrumentation;
+package mitll.langtest.client;
 
-import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.Tab;
-import com.google.gwt.event.dom.client.HasClickHandlers;
-import com.google.gwt.user.client.ui.UIObject;
-import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.user.User;
 
-/**
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 7/25/14.
- */
-public interface EventRegistration {
-  EventLogger getButtonFactory();
+public interface UILifecycle {
+  void populateRootPanel();
 
-  void register(Button button, int exid);
-  void register(Button button, String exid);
-  void register(Button button);
+  boolean isRTL();
 
-  void register(Button button, int exid, String context);
-  void register(Button button, String exid, String context);
+  int getHeightOfTopRows();
 
-  void logEvent(Tab button, String widgetType, String exid, String context);
+  void gotUser(User user);
 
-  void registerWidget(HasClickHandlers clickable, UIObject uiObject, String exid, String context);
-
-  void logEvent(UIObject button, String widgetType, Shell ex, String context);
-
-  void logEvent(UIObject button, String widgetType, String exid, String context);
-  void logEvent(UIObject button, String widgetType, int exid, String context);
-
-  void logEvent(String widgetID, String widgetType, String exid, String context);
+  void setSplash();
 }

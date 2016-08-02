@@ -49,6 +49,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.Navigation;
+import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.Banner;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.instrumentation.EventTable;
@@ -56,14 +57,9 @@ import mitll.langtest.client.monitoring.MonitoringManager;
 import mitll.langtest.client.result.ResultManager;
 import mitll.langtest.client.services.UserService;
 import mitll.langtest.client.services.UserServiceAsync;
-import mitll.langtest.client.user.ResetPassword;
-import mitll.langtest.client.user.UserManager;
-import mitll.langtest.client.user.UserPassLogin;
-import mitll.langtest.client.user.UserTable;
-import mitll.langtest.shared.user.SlimProject;
+import mitll.langtest.client.user.*;
 import mitll.langtest.shared.user.User;
 
-import java.util.Collection;
 import java.util.logging.Logger;
 
 /**
@@ -73,17 +69,10 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 2/23/16
  */
-public class InitialUI {
+public class InitialUI implements UILifecycle {
   private final Logger logger = Logger.getLogger("InitialUI");
 
   protected static final String LOGIN = "Login";
-
-  /**
-   * How far to the right to shift the list of sites...
-   *
-   * @seex #getLinksToSites()
-   */
- // private static final int LEFT_LIST_WIDTH = 267;
 
   private static final String LANGTEST_IMAGES = "langtest/images/";
   private static final int NO_USER_INITIAL = -2;
@@ -92,7 +81,9 @@ public class InitialUI {
 
   protected long lastUser = NO_USER_INITIAL;
 
-  protected final LangTest langTest;
+  protected final LifecycleSupport langTest;
+  protected final ExerciseController controller;
+  protected final UserFeedback userFeedback;
   protected final PropertyHandler props;
 
   protected final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
@@ -104,21 +95,28 @@ public class InitialUI {
   protected Panel firstRow;
   private Navigation navigation;
   private final BrowserCheck browserCheck = new BrowserCheck();
+  private Container verticalContainer;
 
+  /**
+   * @see LangTest#onModuleLoad2()
+   * @param langTest
+   * @param userManager
+   */
   public InitialUI(LangTest langTest, UserManager userManager) {
     this.langTest = langTest;
     this.props = langTest.getProps();
     this.userManager = userManager;
+    this.controller = langTest;
+    userFeedback = langTest;
     banner = new Banner(props, userService, langTest, langTest);
   }
-
-  private Container verticalContainer;
 
   /**
    * @see LangTest#showLogin()
    * @see LangTest#populateRootPanel()
    */
-  void populateRootPanel() {
+  @Override
+  public void populateRootPanel() {
     Container verticalContainer = getRootContainer();
     this.verticalContainer = verticalContainer;
     // header/title line
@@ -126,9 +124,7 @@ public class InitialUI {
     Panel firstRow = makeFirstTwoRows(verticalContainer);
 
     if (!showLogin()) {
-      // logger.info("not show login -");
       populateBelowHeader(verticalContainer, firstRow);
-      // userManager.getCurrent();
     }
   }
 
@@ -172,7 +168,7 @@ public class InitialUI {
     };
     // logger.info("talks to domino " + props.talksToDomino());
     reload = (props.talksToDomino()) ? reload : null;
-    Widget title = banner.makeNPFHeaderRow(props.getSplash(), props.isBeta(), getGreeting(),
+    Widget bannerRow = banner.makeNPFHeaderRow(props.getSplash(), props.isBeta(), getGreeting(),
         getReleaseStatus(),
         new LogoutClickHandler(),
         new UsersClickHandler(),
@@ -183,7 +179,7 @@ public class InitialUI {
     );
 
     headerRow = new FluidRow();
-    headerRow.add(new Column(12, title));
+    headerRow.add(new Column(12, bannerRow));
     return headerRow;
   }
 
@@ -206,6 +202,7 @@ public class InitialUI {
     return new HTML(langTest.getInfoLine());
   }
 
+  @Override
   public boolean isRTL() {
     return navigation != null && navigation.isRTL();
   }
@@ -235,7 +232,7 @@ public class InitialUI {
     History.newItem(""); // clear history!
     userManager.clearUser();
     lastUser = NO_USER_INITIAL;
-    langTest.modeSelect();
+    langTest.recordingModeSelect();
   }
 
   private class UsersClickHandler implements ClickHandler {
@@ -276,7 +273,7 @@ public class InitialUI {
 
         public void onSuccess() {
           ResultManager resultManager = new ResultManager(service, props.getNameForAnswer(),
-              langTest.getStartupInfo().getTypeOrder(), outer, langTest);
+              langTest.getStartupInfo().getTypeOrder(), outer, controller);
           resultManager.showResults();
         }
       });
@@ -305,14 +302,13 @@ public class InitialUI {
    * @return
    */
   protected Container getRootContainer() {
-    // logger.info("getRootContainer");
     RootPanel.get().clear();   // necessary?
-
     Container verticalContainer = new FluidContainer();
     verticalContainer.getElement().setId("root_vertical_container");
     return verticalContainer;
   }
 
+  @Override
   public int getHeightOfTopRows() {
     return headerRow.getOffsetHeight();
   }
@@ -341,14 +337,12 @@ public class InitialUI {
        */
       firstRow.add(langTest.getFlashRecordPanel());
     }
-    langTest.modeSelect();
+    langTest.recordingModeSelect();
 
-    navigation = new Navigation(service, userManager, langTest, langTest);
-
+    navigation = new Navigation(service, userManager, controller, userFeedback);
     banner.setNavigation(navigation);
 
     firstRow.add(navigation.getTabPanel());
-    //verticalContainer.add(getLinksToSites());
     addResizeHandler();
   }
 
@@ -378,60 +372,6 @@ public class InitialUI {
     verticalContainer2.add(currentExerciseVPanel);
     return verticalContainer2;
   }
-
-/*  private Panel getLinksToSites() {
-    Panel hp = new HorizontalPanel();
-    Style style = hp.getElement().getStyle();
-    style.setMarginLeft(LEFT_LIST_WIDTH, Style.Unit.PX);
-    style.setMarginTop(10, Style.Unit.PX);
-
-    hp.getElement().setId("linksToSites");
-    //hp.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
-
-    String sitePrefix = "https://np.ll.mit.edu/netProf";
-//    for (String site : props.getSites()) {
-//      Anchor w = new Anchor(site, sitePrefix);
-//      w.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
-//      hp.add(w);
-//    }
-
-
-    userService.getProjects(new AsyncCallback<Collection<SlimProject>>() {
-      @Override
-      public void onFailure(Throwable caught) {
-      }
-
-      @Override
-      public void onSuccess(Collection<SlimProject> result) {
-        boolean anyAdded = false;
-
-        for (final SlimProject project : result) {
-          Anchor w = new Anchor(project.getLanguage(), "");
-          w.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent clickEvent) {
-              userService.setProject(project.getProjectid(), new AsyncCallback<Void>() {
-                @Override
-                public void onFailure(Throwable throwable) {
-
-                }
-
-                @Override
-                public void onSuccess(Void aVoid) {
-                  Window.Location.reload();
-                }
-              });
-            }
-          });
-          w.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
-          hp.add(w);
-        }
-      }
-    });
-
-
-    return hp;
-  }*/
 
   private void addResizeHandler() {
     final InitialUI outer = this;
@@ -473,7 +413,6 @@ public class InitialUI {
     final String cdToken = props.getCdEnableToken();
     if (!cdToken.isEmpty()) {
       logger.info("showLogin token '" + resetPassToken + "' for enabling cd user");
-
       handleCDToken(verticalContainer, firstRow, cdToken, props.getEmailRToken());
       return true;
     }
@@ -482,17 +421,20 @@ public class InitialUI {
     boolean show = userManager.isUserExpired() || userManager.getUserID() == null;
     if (show) {
       logger.info("user is not valid : user expired " + userManager.isUserExpired() + " / " + userManager.getUserID());
-
-      firstRow.add(new UserPassLogin(service, userService, props, userManager, eventRegistration).getContent());
-      clearPadding(verticalContainer);
-      RootPanel.get().add(verticalContainer);
-      banner.setCogVisible(false);
+      showLogin(eventRegistration);
       return true;
     }
     //   logger.info("user is valid...");
 
     banner.setCogVisible(true);
     return false;
+  }
+
+  private void showLogin(EventRegistration eventRegistration) {
+    firstRow.add(new UserPassLogin(service, userService, props, userManager, eventRegistration).getContent());
+    clearPadding(verticalContainer);
+    RootPanel.get().add(verticalContainer);
+    banner.setCogVisible(false);
   }
 
   private void handleResetPass(final Container verticalContainer, final Panel firstRow,
@@ -592,6 +534,7 @@ public class InitialUI {
    * @see UserManager#gotNewUser(User)
    * @see UserManager#storeUser
    */
+  @Override
   public void gotUser(User user) {
     populateRootPanelIfLogin();
     long userID = -1;
@@ -649,13 +592,21 @@ public class InitialUI {
     }
   }
 
+  /**
+   * @see #configureUIGivenUser(long)
+   * @param userID
+   */
   protected void showUserPermissions(long userID) {
     lastUser = userID;
     banner.setBrowserInfo(langTest.getInfoLine());
     banner.reflectPermissions(langTest.getPermissions());
   }
 
-  void setSplash() {
+  /**
+   * @see LangTest#makeFlashContainer()
+   */
+  @Override
+  public void setSplash() {
     banner.setSubtitle();
   }
 }
