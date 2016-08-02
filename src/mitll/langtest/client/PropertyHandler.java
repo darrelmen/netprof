@@ -519,7 +519,7 @@ public class PropertyHandler {
 
   /**
    * @return
-   * @see mitll.langtest.client.LangTest#modeSelect()
+   * @see mitll.langtest.client.LangTest#recordingModeSelect()
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
    */
   private boolean isGrading() {

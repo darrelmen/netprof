@@ -84,15 +84,16 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @param kind
    * @param passwordH
    * @param emailH
+   * @param email
    * @param device
-   * @return
+   *  @return
    */
   @Override
   public int addUser(int age, String gender, int experience, String userAgent, String trueIP,
                      String nativeLang,
                      String dialect, String userID, boolean enabled,
                      Collection<User.Permission> permissions, User.Kind kind,
-                     String passwordH, String emailH, String device) {
+                     String passwordH, String emailH, String email, String device) {
     StringBuilder builder = new StringBuilder();
     for (User.Permission permission : permissions) builder.append(permission).append(",");
     return dao.add(new SlickUser(-1, userID,
@@ -102,7 +103,9 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
         dialect,
         new Timestamp(System.currentTimeMillis()),
         enabled, "", "", builder.toString(),
-        kind.toString(), passwordH, emailH, device, -1));
+        kind.toString(), passwordH, emailH,
+        email,
+        device, -1));
   }
 
   protected void updateUser(int id, User.Kind kind, String passwordH, String emailH) {
@@ -179,6 +182,7 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
         user.getUserKind().name(),
         user.getPasswordHash() == null ? "" : user.getPasswordHash(),
         user.getEmailHash() == null ? "" : user.getEmailHash(),
+        "",
         user.getDevice() == null ? "" : user.getDevice(),
         user.getId()
     );

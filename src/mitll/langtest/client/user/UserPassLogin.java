@@ -1003,13 +1003,13 @@ public class UserPassLogin extends UserDialog {
    * @see #getSignUpButton(com.github.gwtbootstrap.client.ui.base.TextBoxBase, com.github.gwtbootstrap.client.ui.base.TextBoxBase)
    */
   private void gotSignUp(final String user, String password, String email, User.Kind kind) {
-    String passH = Md5Hash.getHash(password);
+    String passH  = Md5Hash.getHash(password);
     String emailH = Md5Hash.getHash(email);
 
-    boolean isCD = kind == User.Kind.CONTENT_DEVELOPER;
-    String gender = isCD ? registrationInfo.isMale() ? MALE : "female" : MALE;
-    String age = isCD ? registrationInfo.getAgeEntryGroup().getText() : "";
-    int age1 = isCD ? (age.isEmpty() ? 99 : Integer.parseInt(age)) : 0;
+    boolean isCD   = kind == User.Kind.CONTENT_DEVELOPER;
+    String gender  = isCD ? registrationInfo.isMale() ? MALE : "female" : MALE;
+    String age     = isCD ? registrationInfo.getAgeEntryGroup().getText() : "";
+    int age1       = isCD ? (age.isEmpty() ? 99 : Integer.parseInt(age)) : 0;
     String dialect = isCD ? registrationInfo.getDialectGroup().getText() : "unk";
 
     signUp.setEnabled(false);
@@ -1108,9 +1108,8 @@ public class UserPassLogin extends UserDialog {
     w3.getElement().getStyle().setLineHeight(1, Style.Unit.EM);
   }
 
-
   /**
-   * TODO : get list of projects
+   * TODOx : get list of projects
    *
    * @param user
    * @param pass
