@@ -1116,10 +1116,10 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
    * @return
    * @see mitll.langtest.server.services.UserServiceImpl#addUser
    */
-  public User addUser(HttpServletRequest request, String userID, String passwordH, String emailH, User.Kind kind,
+/*  public User addUser(HttpServletRequest request, String userID, String passwordH, String emailH, User.Kind kind,
                       boolean isMale, int age, String dialect, String device, int projid) {
-    return userManagement.addUser(request, userID, passwordH, emailH, kind, isMale, age, dialect, device, projid);
-  }
+    return userManagement.addUser(request, userID, passwordH, emailH, email, kind, isMale, age, dialect, device, projid);
+  }*/
 
   /**
    * @param user
