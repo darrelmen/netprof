@@ -48,13 +48,13 @@ public interface IUserDAO extends IDAO {
 
   Database getDatabase();
 
-  User addUser(String userID, String passwordH, String emailH, User.Kind kind, String ipAddr,
+  User addUser(String userID, String passwordH, String emailH, String email, User.Kind kind, String ipAddr,
                boolean isMale, int age, String dialect, String device);
 
   int addUser(int age, String gender, int experience, String ipAddr,
-               String trueIP, String nativeLang, String dialect, String userID, boolean enabled,
-               Collection<User.Permission> permissions,
-               User.Kind kind, String passwordH, String emailH, String device);
+              String trueIP, String nativeLang, String dialect, String userID, boolean enabled,
+              Collection<User.Permission> permissions,
+              User.Kind kind, String passwordH, String emailH, String email, String device);
 
   boolean enableUser(int id);
 
@@ -83,14 +83,15 @@ public interface IUserDAO extends IDAO {
   MiniUser getMiniUser(int userid);
 
   Map<Integer, User> getUserMap(boolean getMale);
+
   Collection<Integer> getUserIDs(boolean getMale);
 
   Map<Integer, User> getUserMap();
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#forgotUsername
    * @param emailH
    * @return
+   * @see mitll.langtest.server.LangTestDatabaseImpl#forgotUsername
    */
   String isValidEmail(String emailH);
 

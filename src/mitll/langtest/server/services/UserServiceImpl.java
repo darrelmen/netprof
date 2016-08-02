@@ -37,6 +37,7 @@ import mitll.langtest.client.services.UserService;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.security.DominoSessionException;
 import mitll.langtest.server.database.security.UserSecurityManager;
+import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.project.ProjectStartupInfo;
@@ -198,7 +199,9 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   public User addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, String email,
                       boolean isMale, int age, String dialect, boolean isCD, String device, int projid) {
     findSharedDatabase();
-    User newUser = db.addUser(getThreadLocalRequest(), userID, passwordH, emailH, kind, isMale, age, dialect, "browser", projid);
+    UserManagement userManagement = db.getUserManagement();
+    User newUser = userManagement.addUser(getThreadLocalRequest(), userID, passwordH, emailH, email,
+        kind, isMale, age, dialect, "browser", projid);
     MailSupport mailSupport = getMailSupport();
 
     if (newUser != null && !newUser.isEnabled()) { // newUser = null means existing newUser.
