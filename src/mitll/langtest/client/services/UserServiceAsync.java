@@ -47,7 +47,8 @@ public interface UserServiceAsync {
 
   void logout(String login, AsyncCallback<Void> async);
 
-  void addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, String email, boolean isMale,
+  void addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, String email,
+               boolean isMale,
                int age, String dialect, boolean isCD, String device, int projid, AsyncCallback<User> async);
 
   void resetPassword(String userid, String text, String url, AsyncCallback<Boolean> asyncCallback);
