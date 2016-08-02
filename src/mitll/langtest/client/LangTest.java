@@ -154,7 +154,7 @@ import java.util.logging.Logger;
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
-public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
+public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification,LifecycleSupport {
   private final Logger logger = Logger.getLogger("LangTest");
 
   public static final String VERSION_INFO = "2.0.0";
@@ -182,7 +182,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private EventLogger buttonFactory;
   private final KeyPressHelper keyPressHelper = new KeyPressHelper(false, true);
   private boolean isMicConnected = true;
-  private InitialUI initialUI;
+  private UILifecycle initialUI;
 
   /**
    * This gets called first.
@@ -413,7 +413,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   /**
-   * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser(int)
+   * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser
    * @see mitll.langtest.client.user.UserManager#login()
    */
   @Override
@@ -447,9 +447,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return browserCheck.getBrowserAndVersion();
   }
 
-  String getInfoLine() {
-    String releaseDate = VERSION +
-        (props.getReleaseDate() != null ? " " + props.getReleaseDate() : "");
+  @Override
+  public String getInfoLine() {
+    String releaseDate1 = props.getReleaseDate();
+    String releaseDate = VERSION + (releaseDate1 != null ? " " + releaseDate1 : "");
     return "<span><font size=-2>" +
         browserCheck.ver + "&nbsp;" +
         releaseDate + (usingWebRTC() ? " Flashless recording" : "") +
@@ -485,7 +486,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @seex #resetState()
    * @see #onModuleLoad2()
    */
-  public void modeSelect() {
+  @Override
+  public void recordingModeSelect() {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
         checkInitFlash();
@@ -596,7 +598,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   /**
-   * @see #modeSelect()
+   * @see #recordingModeSelect()
    */
   private void checkInitFlash() {
     if (flashRecordPanel.gotPermission()) {
@@ -674,7 +676,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @param exid
    * @param context
    */
-  void logEvent(String widgetID, String widgetType, String exid, String context) {
+  @Override
+  public void logEvent(String widgetID, String widgetType, String exid, String context) {
     buttonFactory.logEvent(widgetID, widgetType, new EventContext(exid, context, getUser()));
   }
 
@@ -700,25 +703,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     }
   }
 
-/*  @Override
-  public void rememberAudioType(AudioType audioType) {
-    this.audioType = audioType;
-  }*/
-
   public boolean showCompleted() {
     return isReviewMode() || permissions.contains(User.Permission.RECORD_AUDIO);
   }
 
-  /**
-   * TODO : Hack - don't use audio type like this
-   *
-   * @return
-   */
-/*  @Override
-  public AudioType getAudioType() {
-    if (permissions.contains(User.Permission.RECORD_AUDIO)) return AudioType.RECORDER;
-    else return audioType;
-  }*/
   private boolean isReviewMode() {
     return permissions.contains(User.Permission.QUALITY_CONTROL);
   }
@@ -730,13 +718,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    *
    * @param permission
    * @param on
-   * @see mitll.langtest.client.user.UserManager#login()
+   * @see mitll.langtest.client.user.UserManager#gotNewUser
    */
   public void setPermission(User.Permission permission, boolean on) {
     if (on) permissions.add(permission);
     else permissions.remove(permission);
   }
 
+  @Override
   public Collection<User.Permission> getPermissions() {
     return permissions;
   }
@@ -787,11 +776,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   // recording methods...
 
+  @Override
   public Widget getFlashRecordPanel() {
     return flashRecordPanel;
   }
 
-  long then = 0;
+  private long then = 0;
 
   /**
    * Recording interface

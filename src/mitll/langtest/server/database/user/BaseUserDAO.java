@@ -120,17 +120,18 @@ public abstract class BaseUserDAO extends DAO {
    * @param userID
    * @param passwordH
    * @param emailH
-   * @param kind
+   * @param email
+   *@param kind
    * @param ipAddr
    * @param isMale
    * @param age
    * @param dialect
-   * @param device
-   * @return null if existing, valid user (email and password)
+   * @param device       @return null if existing, valid user (email and password)
    * @see mitll.langtest.server.database.DatabaseImpl#addUser
    * @see UserManagement#addAndGetUser
    */
-  public User addUser(String userID, String passwordH, String emailH, User.Kind kind, String ipAddr,
+  public User addUser(String userID, String passwordH, String emailH, String email,
+                      User.Kind kind, String ipAddr,
                       boolean isMale, int age, String dialect, String device) {
     User userByID = getUserByID(userID);
     if (userByID != null && kind != User.Kind.ANONYMOUS) {
@@ -149,7 +150,8 @@ public abstract class BaseUserDAO extends DAO {
       Collection<User.Permission> perms = (kind == User.Kind.CONTENT_DEVELOPER) ? CD_PERMISSIONS : EMPTY_PERM;
       boolean enabled = (kind != User.Kind.CONTENT_DEVELOPER) || isAdmin(userID) || enableAllUsers;
 
-      int l = addUser(age, isMale ? MALE : FEMALE, 0, ipAddr, "", "", dialect, userID, enabled, perms, kind, passwordH, emailH, device);
+      int l = addUser(age, isMale ? MALE : FEMALE, 0, ipAddr, "", "", dialect, userID, enabled, perms, kind, passwordH,
+          emailH, email, device);
       User userWhere = getUserWhere(l);
       logger.debug(" : addUser : added new user " + userWhere);
 
@@ -188,12 +190,12 @@ public abstract class BaseUserDAO extends DAO {
 
   private int addShellUser(String defectDetector) {
     return addUser(89, MALE, 0, "", "", UNKNOWN, UNKNOWN, defectDetector, false, EMPTY_PERMISSIONS,
-        User.Kind.STUDENT, "", "", "");
+        User.Kind.STUDENT, "", "", "", "");
   }
 
   abstract int getIdForUserID(String id);
 
   abstract int addUser(int age, String gender, int experience, String userAgent,
                        String trueIP, String nativeLang, String dialect, String userID, boolean enabled, Collection<User.Permission> permissions,
-                       User.Kind kind, String passwordH, String emailH, String device);
+                       User.Kind kind, String passwordH, String emailH, String email, String device);
 }

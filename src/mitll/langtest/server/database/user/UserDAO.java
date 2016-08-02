@@ -95,14 +95,14 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    * @param kind
    * @param passwordH
    * @param emailH
-   * @param device          @return newly inserted user id, or 0 if something goes horribly wrong
-   * @see UserManagement#addUser(User)
+   * @param email
+   *@param device          @return newly inserted user id, or 0 if something goes horribly wrong  @see UserManagement#addUser(User)
    */
   @Override
   public int addUser(int age, String gender, int experience, String userAgent,
                      String trueIP, String nativeLang, String dialect, String userID, boolean enabled,
                      Collection<User.Permission> permissions,
-                     User.Kind kind, String passwordH, String emailH, String device) {
+                     User.Kind kind, String passwordH, String emailH, String email, String device) {
     if (passwordH == null) new Exception().printStackTrace();
     try {
       // there are much better ways of doing this...
@@ -166,7 +166,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    * @param kind
    * @param passwordH
    * @param emailH
-   * @see #addUser(String, String, String, User.Kind, String, boolean, int, String, String)
+   * @see BaseUserDAO#addUser(String, String, String, String, User.Kind, String, boolean, int, String, String)
    */
   protected void updateUser(int id, User.Kind kind, String passwordH, String emailH) {
     try {
