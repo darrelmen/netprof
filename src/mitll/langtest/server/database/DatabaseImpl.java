@@ -237,7 +237,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
 
   /**
    * @param reload
-   * @see CopyToPostgres#createProjectIfNotExists(DatabaseImpl)
+   * @see CopyToPostgres#createProjectIfNotExists(DatabaseImpl, String)
    */
   void populateProjects(boolean reload) {
     populateProjects(pathHelper, serverProps, logAndNotify, configDir, reload);
@@ -429,7 +429,9 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     return refresultDAO;
   }
 
-  public IUserDAO getUserDAO() { return userDAO; }
+  public IUserDAO getUserDAO() {
+    return userDAO;
+  }
 
   @Override
   public Connection getConnection(String who) {
@@ -618,23 +620,25 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   /**
    * @param loggedInUser
    * @param projectid
-   * @see mitll.langtest.server.services.UserServiceImpl#userExists(String, String, int)
+   * @see mitll.langtest.server.services.UserServiceImpl#userExists
    */
-  public void rememberUserSelectedProject(User loggedInUser, int projectid) {
+ /* public void rememberUserSelectedProject(User loggedInUser, int projectid) {
     Project project = getProject(projectid);
     logger.info("rememberUserSelectedProject user " + loggedInUser + " -> " + projectid + " : " + project);
-    int id = loggedInUser.getId();
-    rememberProject(id, projectid);
+    rememberProject(loggedInUser.getId(), projectid);
     setStartupInfo(loggedInUser);
-  }
+  }*/
 
   /**
    * Make sure there's a favorites list per user per project
    *
    * @param userid
    * @param projectid
+   * @see mitll.langtest.server.services.UserServiceImpl#setProject
    */
   public void rememberProject(int userid, int projectid) {
+    logger.info("rememberProject user " + userid + " -> " + projectid);
+
     getUserProjectDAO().add(userid, projectid);
     getUserListManager().createFavorites(userid, projectid);
   }
@@ -645,12 +649,18 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   }
 
   public void setStartupInfo(User userWhere, int projid) {
-    Project project = getProject(projid);
-    SlickProject project1 = project.getProject();
-    ProjectStartupInfo startupInfo = new ProjectStartupInfo(getServerProps().getProperties(),
-        project.getTypeOrder(), project.getSectionHelper().getSectionNodes(), project1.id(), project1.language());
-    logger.info("For " + userWhere + " Set startup info " + startupInfo);
-    userWhere.setStartupInfo(startupInfo);
+    logger.info("setStartupInfo : For " + userWhere + " projid " + projid);
+
+    if (projid == -1) {
+      logger.info("For " + userWhere + " no current project.");
+    } else {
+      Project project = getProject(projid);
+      SlickProject project1 = project.getProject();
+      ProjectStartupInfo startupInfo = new ProjectStartupInfo(getServerProps().getProperties(),
+          project.getTypeOrder(), project.getSectionHelper().getSectionNodes(), project1.id(), project1.language());
+      logger.info("setStartupInfo : For " + userWhere + " Set startup info " + startupInfo);
+      userWhere.setStartupInfo(startupInfo);
+    }
   }
 
   /**
@@ -735,7 +745,9 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
 
     ExerciseDAO<?> exerciseDAO1 = project.getExerciseDAO();
     SlickProject project1 = project.getProject();
-    setDependencies(mediaDir, installPath, exerciseDAO1, project1.id());
+    if (project1 == null) logger.info("note : no project for " + project);
+    int id = project1 == null ? -1 : project1.id();
+    setDependencies(mediaDir, installPath, exerciseDAO1, id);
     List<CommonExercise> rawExercises = project.getRawExercises();
     if (!rawExercises.isEmpty()) {
       logger.debug("first exercise is " + rawExercises.iterator().next());
@@ -743,13 +755,13 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     project.setJsonSupport(new JsonSupport(project.getSectionHelper(), getResultDAO(), getRefResultDAO(), getAudioDAO(),
         getPhoneDAO(), configDir, installPath));
 
-    //if (project1 != null) {
-      Map<Integer, String> exerciseIDToRefAudio = getExerciseIDToRefAudio(project1.id());
+    if (project1 != null) {
+      Map<Integer, String> exerciseIDToRefAudio = getExerciseIDToRefAudio(id);
       project.setAnalysis(
           new SlickAnalysis(this, phoneDAO,
               exerciseIDToRefAudio, (SlickResultDAO) resultDAO)
       );
-    //}
+    }
   }
 
   /**
@@ -1255,13 +1267,8 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     }
   }
 
-//  public void dropTables() {
-//    dbConnection.dropAll();
-//  }
-
-  public void copyToPostgres() {
-    CopyToPostgres copyToPostgres = new CopyToPostgres();
-    copyToPostgres.copyToPostgres(this);
+  public void copyToPostgres(String cc) {
+    new CopyToPostgres().copyToPostgres(this, cc);
   }
 
   /**
