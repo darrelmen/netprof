@@ -34,6 +34,7 @@ package mitll.langtest.server;
 
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.server.rest.RestUserManagement;
 import mitll.langtest.server.sorter.ExerciseSorter;
@@ -129,7 +130,7 @@ public class ScoreServlet extends DatabaseServlet {
   private long whenCachedEverything = -1;
 
   private DatabaseImpl db;
-  private AudioFileHelper audioFileHelper;
+ // private AudioFileHelper audioFileHelper;
 
   private static final String ADD_USER = "addUser";
   private static final double ALIGNMENT_SCORE_CORRECT = 0.5;
@@ -146,9 +147,11 @@ public class ScoreServlet extends DatabaseServlet {
   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     String queryString = request.getQueryString();
     if (queryString == null) queryString = ""; // how could this happen???
+    int projectid = getProject(request);
+    String language = getLanguage(projectid);
     if (!queryString.contains(NESTED_CHAPTERS)) { // quiet output for polling from status webapp
       String pathInfo = request.getPathInfo();
-      logger.debug("ScoreServlet.doGet (" + getLanguage() +
+      logger.debug("ScoreServlet.doGet (" + language +
           "): Request '" + queryString + "' path " + pathInfo +
           " uri " + request.getRequestURI() + "  " + request.getRequestURL() + "  " + request.getServletPath());
     }
@@ -156,13 +159,13 @@ public class ScoreServlet extends DatabaseServlet {
     long then = System.currentTimeMillis();
     configureResponse(response);
 
-    getAudioFileHelper();
+   // getAudioFileHelper();
+    makeAudioFileHelper();
     JSONObject toReturn = new JSONObject();
     //toReturn.put(ERROR, "expecting request");
 
     try {
       queryString = URLDecoder.decode(queryString, "UTF-8");
-      int projectid = getProject(request);
       if (matchesRequest(queryString, NESTED_CHAPTERS)) {
         String[] split1 = queryString.split("&");
         if (split1.length == 2) {
@@ -190,7 +193,7 @@ public class ScoreServlet extends DatabaseServlet {
           toReturn = nestedChapters;
         }
       } else if (userManagement.doGet(request, response, queryString, toReturn)) {
-        logger.info("doGet " + getLanguage() + " handled user command for " + queryString);
+        logger.info("doGet " + language + " handled user command for " + queryString);
       } else if (matchesRequest(queryString, CHAPTER_HISTORY)) {
         queryString = removePrefix(queryString, CHAPTER_HISTORY);
         toReturn = getChapterHistory(queryString, toReturn, projectid);
@@ -229,14 +232,14 @@ public class ScoreServlet extends DatabaseServlet {
     long now = System.currentTimeMillis();
     long l = now - then;
     if (l > 10) {
-      logger.info("doGet : (" + getLanguage() + ") took " + l + " millis to do " + request.getQueryString());
+      logger.info("doGet : (" +language + ") took " + l + " millis to do " + request.getQueryString());
     }
     then = now;
     String x = toReturn.toString();
     now = System.currentTimeMillis();
     l = now - then;
     if (l > 50) {
-      logger.info("doGet : (" + getLanguage() + ") took " + l + " millis to do " + request.getQueryString() +
+      logger.info("doGet : (" + language + ") took " + l + " millis to do " + request.getQueryString() +
           " and to do toString on json");
     }
 
@@ -361,7 +364,7 @@ public class ScoreServlet extends DatabaseServlet {
     String user = userAndSelection.getUser();
     Map<String, Collection<String>> selection = userAndSelection.getSelection();
 
-    logger.debug("getPhoneReport (" + getLanguage() + ") : user " + user + " selection " + selection);
+    logger.debug("getPhoneReport : user " + user + " selection " + selection);
     try {
       long then = System.currentTimeMillis();
       long userid = Long.parseLong(user);
@@ -369,7 +372,7 @@ public class ScoreServlet extends DatabaseServlet {
       toReturn = db.getJsonPhoneReport(userid, getMostRecentProjectByUser((int)userid), selection);
       long now = System.currentTimeMillis();
       if (now - then > 250) {
-        logger.debug("getPhoneReport (" + getLanguage() + ") : user " + user + " selection " + selection +
+        logger.debug("getPhoneReport : user " + user + " selection " + selection +
             " took " + (now - then) + " millis");
       }
     } catch (NumberFormatException e) {
@@ -378,11 +381,11 @@ public class ScoreServlet extends DatabaseServlet {
     return toReturn;
   }
 
-  private String getLanguage() {
-    getAudioFileHelper();
-
-    return serverProps.getLanguage();
-  }
+//  private String getLanguage() {
+//   // getAudioFileHelper();
+//
+//    return serverProps.getLanguage();
+//  }
 
   /**
    * @param queryString
@@ -441,8 +444,13 @@ public class ScoreServlet extends DatabaseServlet {
    */
   private ExerciseSorter getExerciseSorter(int projectid) {
     Map<String, Integer> stringIntegerHashMap = new HashMap<>();
+    AudioFileHelper audioFileHelper = getAudioFileHelper(projectid);
     Map<String, Integer> phoneToCount = audioFileHelper == null ? stringIntegerHashMap : audioFileHelper.getPhoneToCount();
     return new ExerciseSorter(db.getSectionHelper(projectid).getTypeOrder(), phoneToCount);
+  }
+
+  private AudioFileHelper getAudioFileHelper(int projectid) {
+    return getProject(projectid).getAudioFileHelper();
   }
 
   /**
@@ -477,14 +485,14 @@ public class ScoreServlet extends DatabaseServlet {
     //   String pathInfo = request.getPathInfo();
 //    logger.debug("ScoreServlet.doPost : Request " + request.getQueryString() + " path " + pathInfo +
 //        " uri " + request.getRequestURI() + "  " + request.getRequestURL() + "  " + request.getServletPath());
-    getAudioFileHelper();
+    makeAudioFileHelper();
 
     configureResponse(response);
 
     String requestType = request.getHeader(REQUEST);
-    String deviceType = request.getHeader(DEVICE_TYPE);
+    String deviceType  = request.getHeader(DEVICE_TYPE);
     if (deviceType == null) deviceType = "unk";
-    String device = request.getHeader(DEVICE);
+    String device      = request.getHeader(DEVICE);
     if (device == null) device = "unk";
 
     JSONObject jsonObject = new JSONObject();
@@ -512,9 +520,7 @@ public class ScoreServlet extends DatabaseServlet {
         }
       } else {
         jsonObject.put(ERROR, "unknown req " + requestType);
-
         logger.warn("doPost unknown request " + requestType + " device " + deviceType + "/" + device);
-
       }
     } else {
       logger.info("request type is null?");
@@ -572,11 +578,17 @@ public class ScoreServlet extends DatabaseServlet {
     response.setCharacterEncoding("UTF-8");
   }
 
+  /**
+   * @see #doGet(HttpServletRequest, HttpServletResponse)
+   * @param response
+   * @param year
+   */
   private void configureResponseHTML(HttpServletResponse response, int year) {
     response.setContentType("text/html; charset=UTF-8");
     response.setCharacterEncoding("UTF-8");
 
-    String fileName = year == -1 ? "reportFor" + getLanguage() : ("reportFor" + getLanguage() + "_forYear" + year);
+    String language = "";
+    String fileName = year == -1 ? "reportFor" + language : ("reportFor" + language + "_forYear" + year);
 
     response.setHeader("Content-disposition", "attachment; filename=" +
         fileName + ".html");
@@ -595,20 +607,25 @@ public class ScoreServlet extends DatabaseServlet {
 
     long then = System.currentTimeMillis();
     JsonExport jsonExport = getJSONExport(projectid);
+    String language = getLanguage(projectid);
     long now = System.currentTimeMillis();
     if (now - then > 1000) {
-      logger.warn("getJsonNestedChapters " + getLanguage() + " getJSONExport took " + (now - then) + " millis");
+      logger.warn("getJsonNestedChapters " + language + " getJSONExport took " + (now - then) + " millis");
     }
     then = now;
 
     jsonObject.put(CONTENT, jsonExport.getContentAsJson(removeExercisesWithMissingAudio));
     now = System.currentTimeMillis();
     if (now - then > 1000) {
-      logger.warn("getJsonNestedChapters " + getLanguage() + " getContentAsJson took " + (now - then) + " millis");
+      logger.warn("getJsonNestedChapters " + language + " getContentAsJson took " + (now - then) + " millis");
     }
     addVersion(jsonObject, projectid);
 
     return jsonObject;
+  }
+
+  private String getLanguage(int projectid) {
+    return getProject(projectid).getLanguage();
   }
 
   /**
@@ -627,22 +644,22 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
-   * TODO : need to pass in the project id.
    * Install path, etc. should have been done by now
    *
    * @param projectid
    * @return
    */
   private JsonExport getJSONExport(int projectid) {
-    //setInstallPath(db);
     db.getExercises(projectid);
 
     Map<String, Integer> stringIntegerMap = Collections.emptyMap();
+    AudioFileHelper audioFileHelper = getAudioFileHelper(projectid);
+
     JsonExport jsonExport = new JsonExport(
         audioFileHelper == null ? stringIntegerMap : audioFileHelper.getPhoneToCount(),
         db.getSectionHelper(projectid),
         serverProps.getPreferredVoices(),
-        getLanguage().equalsIgnoreCase("english")
+        getLanguage(projectid).equalsIgnoreCase("english")
     );
 
     db.attachAllAudio(projectid);
@@ -667,18 +684,26 @@ public class ScoreServlet extends DatabaseServlet {
    * @throws IOException
    * @see #doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
-  private JSONObject getJsonForAudio(HttpServletRequest request, String requestType,
-                                     String deviceType, String device) throws IOException {
+  private JSONObject getJsonForAudio(HttpServletRequest request,
+                                     String requestType,
+                                     String deviceType,
+                                     String device) throws IOException {
     String user       = request.getHeader(USER);
     String exerciseID = request.getHeader("exercise");
     int i1            = Integer.parseInt(exerciseID);
     int reqid         = getReqID(request);
+    int project       = getProject(request);
 
-    logger.debug("getJsonForAudio got request " + requestType + " for user " + user + " exercise " + exerciseID +
-        " req " + reqid + " device " + deviceType + "/" + device);
+    logger.debug("getJsonForAudio got" +
+        " request "  + requestType +
+        " for user " + user +
+        " project "  + project+
+        " exercise " + exerciseID +
+        " req "      + reqid +
+        " device "   + deviceType + "/" + device);
 
     int userid = userManagement.getUserFromParam(user);
-    String wavPath = pathHelper.getLocalPathToAnswer("plan", i1, 0, userid);
+    String wavPath = pathHelper.getLocalPathToAnswer(project, i1, 0, userid);
     File saveFile  = pathHelper.getAbsoluteFile(wavPath);
     new File(saveFile.getParent()).mkdirs();
 
@@ -830,16 +855,18 @@ public class ScoreServlet extends DatabaseServlet {
                                      int user,
                                      boolean doFlashcard,
                                      String wavPath, File saveFile,
-                                     String deviceType, String device, CommonExercise exercise1,
-                                     boolean allowAlternates, boolean usePhoneToDisplay) {
+                                     String deviceType, String device,
+                                     CommonExercise exercise1,
+                                     boolean allowAlternates,
+                                     boolean usePhoneToDisplay) {
     AudioAnswer answer;
 
     if (doFlashcard) {
-      answer = getAnswer(reqid, exerciseID, user, doFlashcard, wavPath, saveFile, -1, deviceType, device, allowAlternates);
+      answer = getAnswer(reqid, exerciseID, user, true, wavPath, saveFile, -1, deviceType, device, allowAlternates);
     } else {
       PretestScore asrScoreForAudio = getASRScoreForAudio(reqid, wavPath, exercise1.getForeignLanguage(), exerciseID,
-          usePhoneToDisplay);
-      answer = getAnswer(reqid, exerciseID, user, doFlashcard, wavPath, saveFile, asrScoreForAudio.getHydecScore(),
+          usePhoneToDisplay, exercise1.getProjectID());
+      answer = getAnswer(reqid, exerciseID, user, false, wavPath, saveFile, asrScoreForAudio.getHydecScore(),
           deviceType, device, allowAlternates);
       answer.setPretestScore(asrScoreForAudio);
     }
@@ -865,7 +892,7 @@ public class ScoreServlet extends DatabaseServlet {
                                           String deviceType, String device, CommonExercise exercise1,
                                           boolean usePhoneToDisplay) {
     PretestScore asrScoreForAudio = getASRScoreForAudioNoCache(reqid, saveFile.getAbsolutePath(),
-        exercise1.getForeignLanguage(), exerciseID, usePhoneToDisplay);
+        exercise1.getForeignLanguage(), exerciseID, usePhoneToDisplay, exercise1.getProjectID());
     AudioAnswer answer = getAnswer(reqid, exerciseID, user, doFlashcard, wavPath, saveFile, asrScoreForAudio.getHydecScore(),
         deviceType, device, false);
     answer.setPretestScore(asrScoreForAudio);
@@ -899,10 +926,12 @@ public class ScoreServlet extends DatabaseServlet {
                                 boolean allowAlternates) {
     CommonExercise exercise1 = db.getCustomOrPredefExercise(getMostRecentProjectByUser(user), exerciseID);  // allow custom items to mask out non-custom items
 
+    int projectID = exercise1.getProjectID();
     AudioContext audioContext =
-        new AudioContext(reqid, user, exercise1.getProjectID(), exerciseID, 0,
+        new AudioContext(reqid, user, projectID, exerciseID, 0,
             doFlashcard ? AudioType.PRACTICE : AudioType.LEARN);
 
+    AudioFileHelper audioFileHelper = getAudioFileHelper(projectID);
     AudioAnswer answer = audioFileHelper.getAnswer(exercise1,
         audioContext,
         wavPath, file, deviceType, device, score, doFlashcard,
@@ -973,14 +1002,12 @@ public class ScoreServlet extends DatabaseServlet {
    * @return
    * @see #doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
-  @Deprecated  private void getAudioFileHelper() {
-    if (audioFileHelper == null) {
-      setPaths();
-
+  private void makeAudioFileHelper() {
+    if (userManagement == null) {
       db = getDatabase();
       if (db != null) {
+        setPaths();
         serverProps = db.getServerProps();
-        audioFileHelper = getAudioFileHelperRef();
         this.userManagement = new RestUserManagement(db, serverProps, pathHelper);
         removeExercisesWithMissingAudioDefault = serverProps.removeExercisesWithMissingAudio();
       }
@@ -1004,11 +1031,11 @@ public class ScoreServlet extends DatabaseServlet {
 //  }
 
   /**
-   * TODO : audio file helper is project specific now. ????
+   * TODOx : audio file helper is project specific now. ????
    * @return
    * @see #getAudioFileHelper()
    */
-  @Deprecated  private AudioFileHelper getAudioFileHelperRef() {
+/*  @Deprecated  private AudioFileHelper getAudioFileHelperRef() {
     AudioFileHelper fileHelper = null;
     Object databaseReference = getServletContext().getAttribute(LangTestDatabaseImpl.AUDIO_FILE_HELPER_REFERENCE);
     if (databaseReference != null) {
@@ -1018,7 +1045,7 @@ public class ScoreServlet extends DatabaseServlet {
       logger.error("huh? for " + db.getServerProps().getLanguage() + " no existing audio file reference?");
     }
     return fileHelper;
-  }
+  }*/
 
 /*  private LoadTesting getLoadTesting() {
     LoadTesting ref = null;
@@ -1040,11 +1067,17 @@ public class ScoreServlet extends DatabaseServlet {
    * @param sentence
    * @param exerciseID
    * @param usePhoneToDisplay
+   * @param projid
    * @return
-   * @see #getAudioAnswer(int, String, int, boolean, String, File, String, String, CommonExercise, boolean, boolean)
+   * @see #getAudioAnswer
    */
-  private PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
-                                           int exerciseID, boolean usePhoneToDisplay) {
+  private PretestScore getASRScoreForAudio(int reqid,
+                                           String testAudioFile,
+                                           String sentence,
+                                           int exerciseID,
+                                           boolean usePhoneToDisplay, int projid) {
+    AudioFileHelper audioFileHelper = getAudioFileHelper(projid);
+
     return audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, 128, 128, false,
         false, serverProps.useScoreCache(), "" + exerciseID, null, usePhoneToDisplay, false);
   }
@@ -1055,23 +1088,30 @@ public class ScoreServlet extends DatabaseServlet {
    * @param sentence
    * @param exerciseID
    * @param usePhoneToDisplay
+   * @param projid
    * @return
    * @see #getAudioAnswerAlign(int, int, int, boolean, String, File, String, String, CommonExercise, boolean)
    */
-  private PretestScore getASRScoreForAudioNoCache(int reqid, String testAudioFile, String sentence,
-                                                  int exerciseID, boolean usePhoneToDisplay) {
+  private PretestScore getASRScoreForAudioNoCache(int reqid,
+                                                  String testAudioFile,
+                                                  String sentence,
+                                                  int exerciseID,
+                                                  boolean usePhoneToDisplay,
+                                                  int projid) {
     //  logger.debug("getASRScoreForAudioNoCache for " + testAudioFile + " under " + sentence);
+    AudioFileHelper audioFileHelper = getAudioFileHelper(projid);
     return audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, 128, 128, false,
         false, false, "" + exerciseID, null, usePhoneToDisplay, false);
   }
 
   private void addVersion(JSONObject jsonObject, int projid) {
     jsonObject.put(VERSION, VERSION_NOW);
-    boolean value = !db.getServerProps().isNoModel();
-
-    ;
-    jsonObject.put(HAS_MODEL, db.getProject(projid).hasModel());
+    jsonObject.put(HAS_MODEL, getProject(projid).hasModel());
     jsonObject.put("Date", new Date().toString());
+  }
+
+  private Project getProject(int projid) {
+    return db.getProject(projid);
   }
 
   /**
@@ -1098,7 +1138,7 @@ public class ScoreServlet extends DatabaseServlet {
     private String user;
     private Map<String, Collection<String>> selection;
 
-    public UserAndSelection(String... split1) {
+    UserAndSelection(String... split1) {
       this.split1 = split1;
     }
 
@@ -1110,7 +1150,7 @@ public class ScoreServlet extends DatabaseServlet {
       return selection;
     }
 
-    public UserAndSelection invoke() {
+    UserAndSelection invoke() {
       user = "";
       selection = new TreeMap<>();
       for (String param : split1) {

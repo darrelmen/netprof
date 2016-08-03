@@ -37,7 +37,6 @@ import java.util.Date;
 
 
 /**
- * 
  * LoginResult
  *
  * @author Raymond Budd <a href="mailto:raymond.budd@ll.mit.edu">raymond.budd@ll.mit.edu</a>
@@ -45,51 +44,57 @@ import java.util.Date;
  */
 
 public class LoginResult implements Serializable {
-	public static enum ResultType { 
-		Success,
-		Failed,
-		AcctExpired,
-		PassExpired,
-		BadPassword,
-		SessionNotRestored
-	};
-	
-	private static final long serialVersionUID = -8359612864581208214L;
-	private User loggedInUser;
-	private ResultType resultType;
-	private Date serverTime;
-	public LoginResult() {}
-	
-	public LoginResult(User loggedInUser, ResultType resultType) {
+  public static enum ResultType {
+    Success,
+    Failed,
+    AcctExpired,
+    PassExpired,
+    BadPassword,
+    SessionNotRestored
+  }
+
+  private static final long serialVersionUID = -8359612864581208214L;
+  private User loggedInUser;
+  private ResultType resultType;
+
+  //private Date serverTime;
+  public LoginResult() {
+  }
+
+  public LoginResult(User loggedInUser, ResultType resultType) {
+    this.loggedInUser = loggedInUser;
+    this.resultType = resultType;
+  }
+
+  public LoginResult(ResultType resultType) {
+    this(null, resultType);
+  }
+
+  public LoginResult(User loggedInUser, Date serverTime) {
+    this(loggedInUser, ResultType.Success);
+    //this.serverTime = serverTime;
+  }
+
+  public User getLoggedInUser() {
+    return loggedInUser;
+  }
+
+/*
+  public void setLoggedInUser(User loggedInUser) {
 		this.loggedInUser = loggedInUser;
-		this.resultType = resultType;
 	}
-	
-	public LoginResult(ResultType resultType) {
-		this(null, resultType);
-	}
+*/
 
-	public LoginResult(User loggedInUser, Date serverTime) {
-		this(loggedInUser, ResultType.Success);
-		this.serverTime = serverTime;
-	}
+  public ResultType getResultType() {
+    return resultType;
+  }
 
-	public User getLoggedInUser() {
-		return loggedInUser;
-	}
-
-	public void setLoggedInUser(User loggedInUser) {
-		this.loggedInUser = loggedInUser;
-	}
-
-	public ResultType getResultType() {
-		return resultType;
-	}
-
+/*
 	public void setResultType(ResultType resultType) {
 		this.resultType = resultType;
 	}
-
+*/
+/*
 	public Date getServerTime() {
 		return serverTime;
 	}
@@ -97,5 +102,9 @@ public class LoginResult implements Serializable {
 	public void setServerTime(Date serverTime) {
 		this.serverTime = serverTime;
 	}
-	
+	*/
+
+  public String toString() {
+    return "Login result " + resultType + " : " + loggedInUser;
+  }
 }

@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.audio;
 
+import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -80,21 +81,18 @@ public class AudioConversion {
   private static final int MIN_WARN_DUR = 30;
 
   private final String soxPath;
-  //@Deprecated
-  //private final String language;
   private final long trimMillisBefore;
   private final long trimMillisAfter;
-  // private final ServerProperties props;
 
   /**
+   * @see mitll.langtest.server.DatabaseServlet#ensureMP3(String, PathHelper, String, String, String)
    * @param props
    */
   public AudioConversion(ServerProperties props) {
     trimMillisBefore = props.getTrimBefore();
-    trimMillisAfter = props.getTrimAfter();
+    trimMillisAfter  = props.getTrimAfter();
     soxPath = getSox();
     audioCheck = new AudioCheck(props);
-    // this.props = props;
     setLame();
   }
 
@@ -106,7 +104,7 @@ public class AudioConversion {
    * @param file                     where we want to write the wav file to
    * @param useSensitiveTooLoudCheck
    * @return true if audio is valid (not too short, not silence)
-   * @see AudioFileHelper#writeAudioFile(String, int, CommonExercise, int, String, int, String, boolean, String, String, boolean, boolean, boolean, boolean)
+   * @see AudioFileHelper#writeAudioFile
    * @see mitll.langtest.server.audio.AudioFileHelper#getAlignment
    */
   AudioCheck.ValidityAndDur convertBase64ToAudioFiles(String base64EncodedString, File file,

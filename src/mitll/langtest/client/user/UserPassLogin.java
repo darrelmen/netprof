@@ -138,7 +138,7 @@ public class UserPassLogin extends UserDialog {
 
   private final UserManager userManager;
   private final KeyPressHelper enterKeyButtonHelper;
-  private final KeyStorage keyStorage;
+ // private final KeyStorage keyStorage;
   private FormField user;
   private FormField signUpUser;
   private FormField signUpEmail;
@@ -152,11 +152,12 @@ public class UserPassLogin extends UserDialog {
   private DecoratedPopupPanel resetEmailPopup;
   private Button sendEmail;
 
-
+/*
   private SlimProject currentProject = null;
   private SlimProject currentSignUpProject = null;
 
   private Collection<SlimProject> projects;
+*/
   private UserServiceAsync userService;
 
   /**
@@ -174,7 +175,7 @@ public class UserPassLogin extends UserDialog {
     super(service, props);
     this.userService = userService;
 
-    keyStorage = new KeyStorage(props.getLanguage(), 1000000);
+//    keyStorage = new KeyStorage(props.getLanguage(), 1000000);
 
     boolean willShow = false;// checkWelcome();
     if (!willShow) {
@@ -209,6 +210,7 @@ public class UserPassLogin extends UserDialog {
     } else return false;
   }*/
 
+/*
   private boolean hasShownWelcome() {
     return keyStorage.hasValue(SHOWN_HELLO);
   }
@@ -228,6 +230,7 @@ public class UserPassLogin extends UserDialog {
     modal.setMaxHeigth((600) + "px");
     modal.show();
   }
+*/
 
   /**
    * Don't redirect them to download site just yet.
@@ -311,10 +314,10 @@ public class UserPassLogin extends UserDialog {
 
     addPasswordField(fieldset, hp);
 
-    //hp.add(getSignInButton());
+    hp.add(getSignInButton());
 
     fieldset.add(hp);
-    fieldset.add(getProjectChoiceRow());
+    //fieldset.add(getProjectChoiceRow());
     fieldset.add(getForgotRow());
     setFocusOnUserID();
 
@@ -372,15 +375,13 @@ public class UserPassLogin extends UserDialog {
    * @return
    * @see #populateSignInForm(Form)
    */
-  private Panel getProjectChoiceRow() {
+/*  private Panel getProjectChoiceRow() {
     Panel hp = new HorizontalPanel();
     hp.addStyleName("topFiveMargin");
-
-    hp.add(projectChoice = getProjectChoices(false));
+  //  hp.add(projectChoice = getProjectChoices(false));
     hp.add(getSignInButton());
-
     return hp;
-  }
+  }*/
 
   /**
    * @param inSignUp
@@ -388,6 +389,7 @@ public class UserPassLogin extends UserDialog {
    * @see #getProjectChoiceRow()
    * @see #getSignUpForm()
    */
+/*
   private ListBox getProjectChoices(boolean inSignUp) {
     ListBox listBox = new ListBox();
     new TooltipHelper().createAddTooltip(listBox, "Choose a language", Placement.LEFT);
@@ -395,16 +397,17 @@ public class UserPassLogin extends UserDialog {
     listBox.addStyleName("leftTenMargin");
     return listBox;
   }
+*/
 
 
   /**
    * <p>
    *
-   * @param projectChoices
+   * @paramx projectChoices
    * @paramx controller
-   * @see #getProjectChoiceRow
+   * @seex #getProjectChoiceRow
    */
-  private void populateListChoices(final ListBox projectChoices, boolean inSignUp) {
+/*  private void populateListChoices(final ListBox projectChoices, boolean inSignUp) {
     userService.getProjects(new AsyncCallback<Collection<SlimProject>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -436,7 +439,7 @@ public class UserPassLogin extends UserDialog {
         }
       }
     });
-  }
+  }*/
 
   private Form getSignInForm() {
     Form signInForm = new Form();
@@ -466,11 +469,13 @@ public class UserPassLogin extends UserDialog {
           if (!value.isEmpty() && value.length() < MIN_PASSWORD) {
             markErrorBlur(password, BAD_PASSWORD);
           } else {
-            if (currentProject == null) {
+         /*   if (currentProject == null) {
               markErrorBlur(projectChoice, "Please choose a language", Placement.TOP);
             } else {
               gotLogin(userID, value, value.isEmpty(), currentProject.getProjectid());
-            }
+            }*/
+            gotLogin(userID, value, value.isEmpty());//, currentProject.getProjectid());
+
           }
         }
 
@@ -513,7 +518,7 @@ public class UserPassLogin extends UserDialog {
           eventRegistration.logEvent(user.box, "UserNameBox", "N/A", "left username field '" + user.getText() + "'");
 
           //    logger.info("checking makeSignInUserName " + user.getText());
-          service.userExists(user.getText(), "", 1, new AsyncCallback<User>() {
+          service.userExists(user.getText(), "", new AsyncCallback<User>() {
             @Override
             public void onFailure(Throwable caught) {
 
@@ -527,17 +532,16 @@ public class UserPassLogin extends UserDialog {
                 String passwordHash = result.getPasswordHash();
                 if (emailHash == null || passwordHash == null || emailHash.isEmpty() || passwordHash.isEmpty()) {
                   eventRegistration.logEvent(user.box, "UserNameBox", "N/A", "existing legacy user " + result.toStringShort());
-
                   copyInfoToSignUp(result);
                 }
-                int projectid = result.getStartupInfo().getProjectid();
+    /*            int projectid = result.getStartupInfo().getProjectid();
                 for (SlimProject project1 : projects) {
                   if (project1.getProjectid() == projectid) {
                     projectChoice.setSelectedValue(project1.getLanguage());   // TODO : do something better for pashto
                     currentProject = project1;
                     break;
                   }
-                }
+                }*/
               }
             }
           });
@@ -744,7 +748,7 @@ public class UserPassLogin extends UserDialog {
 
     makeSignUpPassword(fieldset, emailBox);
 
-    fieldset.add(signUpProjectChoice = getProjectChoices(true));
+   // fieldset.add(signUpProjectChoice = getProjectChoices(true));
 
     fieldset.add(getRolesHeader());
     fieldset.add(getRolesChoices());
@@ -977,8 +981,8 @@ public class UserPassLogin extends UserDialog {
         } else if (selectedRole == User.Kind.CONTENT_DEVELOPER && registrationInfo.getDialectGroup().getText().isEmpty()) {
           eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "didn't fill in dialect ");
           markErrorBlur(registrationInfo.getDialectGroup(), "Enter a language dialect.");
-        } else if (currentSignUpProject == null) {
-          markErrorBlur(signUpProjectChoice, "Please choose a language", Placement.TOP);
+      //  } else if (currentSignUpProject == null) {
+      //    markErrorBlur(signUpProjectChoice, "Please choose a language", Placement.TOP);
         } else {
           gotSignUp(userBox.getValue(), signUpPassword.box.getValue(), emailBox.getValue(), selectedRole);
         }
@@ -987,7 +991,6 @@ public class UserPassLogin extends UserDialog {
     signUp.addStyleName("floatRight");
     signUp.addStyleName("rightFiveMargin");
     signUp.addStyleName("leftFiveMargin");
-
     signUp.setType(ButtonType.SUCCESS);
 
     return signUp;
@@ -1015,7 +1018,8 @@ public class UserPassLogin extends UserDialog {
     signUp.setEnabled(false);
 
     service.addUser(user, passH, emailH, kind, Window.Location.getHref(), email,
-        gender.equalsIgnoreCase(MALE), age1, dialect, isCD, "browser", currentSignUpProject.getProjectid(),
+        gender.equalsIgnoreCase(MALE), age1, dialect, isCD, "browser",
+        //currentSignUpProject.getProjectid(),
         new AsyncCallback<User>() {
           @Override
           public void onFailure(Throwable caught) {
@@ -1115,12 +1119,12 @@ public class UserPassLogin extends UserDialog {
    * @param pass
    * @see #getRightLogin(com.google.gwt.user.client.ui.Panel)
    */
-  private void gotLogin(final String user, final String pass, final boolean emptyPassword, int projectid) {
+  private void gotLogin(final String user, final String pass, final boolean emptyPassword) {
     final String hashedPass = Md5Hash.getHash(pass);
     logger.info("gotLogin : user is '" + user + "' pass '" + pass + "' or '" + hashedPass + "'");
 
     signIn.setEnabled(false);
-    service.userExists(user, hashedPass, projectid, new AsyncCallback<User>() {
+    service.userExists(user, hashedPass, new AsyncCallback<User>() {
       @Override
       public void onFailure(Throwable caught) {
         signIn.setEnabled(true);

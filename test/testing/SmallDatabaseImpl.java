@@ -36,7 +36,7 @@ public class SmallDatabaseImpl implements Database {
   private static final boolean TESTING = false;
 
   //private static final boolean DROP_USER = false;
-  private static final String H2_DB_NAME = TESTING ? "vlr-parle" : "/services/apache-tomcat-7.0.27/webapps/langTest/vlr-parle";
+  private static final String H2_DB_NAME = TESTING ? "vlr-parle" : "/services/apache-tomcat-7.0.27/webapps/lifecycleSupport/vlr-parle";
   // h2 config info
   private String url = "jdbc:h2:" + H2_DB_NAME + ";IFEXISTS=TRUE;QUERY_CACHE_SIZE=0;";
   private final String dbOptions = "";//"?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull",
