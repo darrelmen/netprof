@@ -56,7 +56,7 @@ public class UserManagement {
   private static final Logger logger = Logger.getLogger(UserManagement.class);
   private final IUserDAO userDAO;
   private final IResultDAO resultDAO;
-  private final IUserListManager userListManager;
+//  private final IUserListManager userListManager;
 
   /**
    * @see DatabaseImpl#makeDAO(String, String, String)
@@ -67,32 +67,28 @@ public class UserManagement {
   public UserManagement(IUserDAO userDAO, IResultDAO resultDAO, IUserListManager userListManager) {
     this.userDAO = userDAO;
     this.resultDAO = resultDAO;
-    this.userListManager = userListManager;
+  //  this.userListManager = userListManager;
   }
 
-
   /**
-   *
-   * @param userID
+   *  @param userID
    * @param passwordH
    * @param emailH
    * @param email
-   *@param deviceType
+   * @param deviceType
    * @param device
-   * @param projid    @return
    * @see mitll.langtest.server.ScoreServlet#doPost
    */
-  public User addUser(String userID, String passwordH, String emailH, String email, String deviceType, String device,
-                      int projid) {
-    return addUser(userID, passwordH, emailH, email, deviceType, device, User.Kind.STUDENT, true, projid);
+  public User addUser(String userID, String passwordH, String emailH, String email, String deviceType, String device) {
+    return addUser(userID, passwordH, emailH, email, deviceType, device, User.Kind.STUDENT, true);
   }
 
   private User addUser(String userID, String passwordH, String emailH, String email, String deviceType, String device,
                        User.Kind kind,
-                       boolean isMale, int projid) {
+                       boolean isMale) {
     int age = 89;
     String dialect = "unk";
-    return addUser(userID, passwordH, emailH, email, deviceType, device, kind, isMale, age, dialect, projid);
+    return addUser(userID, passwordH, emailH, email, deviceType, device, kind, isMale, age, dialect/*, projid*/);
   }
 
   /**
@@ -107,13 +103,12 @@ public class UserManagement {
    * @param isMale
    * @param age
    * @param dialect
-   * @param projid
    * @return
    */
   public User addUser(String userID, String passwordH, String emailH, String email,
                       String deviceType, String device, User.Kind kind,
-                      boolean isMale, int age, String dialect, int projid) {
-    return addAndGetUser(userID, passwordH, emailH, email, kind, isMale, age, dialect, deviceType, device, projid);
+                      boolean isMale, int age, String dialect) {
+    return addAndGetUser(userID, passwordH, emailH, email, kind, isMale, age, dialect, deviceType, device/*, projid*/);
   }
 
   /**
@@ -132,24 +127,24 @@ public class UserManagement {
    */
   public User addUser(HttpServletRequest request, String userID, String passwordH,
                       String emailH, String email, User.Kind kind,
-                      boolean isMale, int age, String dialect, String device, int projid) {
+                      boolean isMale, int age, String dialect, String device) {
     String ip = getIPInfo(request);
-    return addUser(userID, passwordH, emailH, email, device, ip, kind, isMale, age, dialect, projid);
+    return addUser(userID, passwordH, emailH, email, device, ip, kind, isMale, age, dialect);
   }
 
   private User addAndGetUser(String userID, String passwordH, String emailH, String email, User.Kind kind, boolean isMale, int age,
-                             String dialect, String device, String ip, int projid) {
+                             String dialect, String device, String ip) {
     User user = userDAO.addUser(userID, passwordH, emailH, email, kind, ip, isMale, age, dialect, device);
-    if (user != null) {
-      userListManager.createFavorites(user.getId(), projid);
-    }
+//    if (user != null) {
+//      userListManager.createFavorites(user.getId(), projid);
+//    }
     return user;
   }
 
   /**
    * @paramx user
    * @return
-   * @see DatabaseImpl#addUser
+   * @seex DatabaseImpl#addUser
    */
 /*  public int addUser(User user) {
     int l;

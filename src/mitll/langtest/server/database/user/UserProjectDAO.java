@@ -58,7 +58,7 @@ public class UserProjectDAO implements IUserProjectDAO {
   }
 
   /**
-   * @see mitll.langtest.server.services.UserServiceImpl#userExists(String, String, int)
+   * @see mitll.langtest.server.services.UserServiceImpl#userExists
    * @param userid
    * @param projid
    * @return
@@ -77,7 +77,7 @@ public class UserProjectDAO implements IUserProjectDAO {
   @Override
   public int mostRecentByUser(int user) {
     List<SlickUserProject> slickUserProjects = dao.mostRecentByUser(user);
-//    logger.info("most recent project for " +user + " is " + next);
+    logger.info("mostRecentByUser most recent project for " +user + " are " + slickUserProjects);
     return slickUserProjects.isEmpty() ? -1 : slickUserProjects.iterator().next().projid();
   }
 
