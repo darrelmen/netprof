@@ -727,15 +727,18 @@ public class UserListManager implements IUserListManager {
       return;
     }
     long now = System.currentTimeMillis();
-
     //logger.debug("fixAudioPaths : checking regular '" + regularSpeed.getAudioRef() + "' against '" +mediaDir + "'");
+
+    String foreignLanguage = userExercise.getForeignLanguage();
+    int id = userExercise.getID();
+    int projectID = userExercise.getProjectID();
 
     if (!regularSpeed.getAudioRef().contains(mediaDir)) {
       File fileRef = pathHelper.getAbsoluteFile(regularSpeed.getAudioRef());
 
       String fast = FAST + "_" + now + "_by_" + userExercise.getCombinedMutableUserExercise().getCreator() + ".wav";
       String artist = regularSpeed.getUser().getUserID();
-      String refAudio = getRefAudioPath(userExercise.getID(), fileRef, fast, overwrite, userExercise.getForeignLanguage(), artist);
+      String refAudio = getRefAudioPath(projectID, id, fileRef, fast, overwrite, foreignLanguage, artist);
       regularSpeed.setAudioRef(refAudio);
       //  logger.debug("fixAudioPaths : for " + userExercise.getOldID() + " fast is " + fast + " size " + FileUtils.size(refAudio));
     }
@@ -747,7 +750,7 @@ public class UserListManager implements IUserListManager {
       String slow = SLOW + "_" + now + "_by_" + userExercise.getCombinedMutableUserExercise().getCreator() + ".wav";
 
       String artist = slowSpeed.getUser().getUserID();
-      String refAudio = getRefAudioPath(userExercise.getID(), fileRef, slow, overwrite, userExercise.getForeignLanguage(), artist);
+      String refAudio = getRefAudioPath(projectID, id, fileRef, slow, overwrite, foreignLanguage, artist );
       //logger.debug("fixAudioPaths : for exid " + userExercise.getOldID()+ " slow is " + refAudio + " size " + FileUtils.size(refAudio));
       slowSpeed.setAudioRef(refAudio);
     }
@@ -758,6 +761,7 @@ public class UserListManager implements IUserListManager {
    * <p>
    * Also normalizes the audio level.
    *
+   * @param projid
    * @param id
    * @param fileRef
    * @param destFileName
@@ -767,9 +771,9 @@ public class UserListManager implements IUserListManager {
    * @return new, permanent audio path
    * @see #fixAudioPaths
    */
-  private String getRefAudioPath(int id, File fileRef, String destFileName, boolean overwrite, String title,
+  private String getRefAudioPath(int projid, int id, File fileRef, String destFileName, boolean overwrite, String title,
                                  String artist) {
-    return new PathWriter().getPermanentAudioPath(pathHelper, fileRef, destFileName, overwrite, id, title, artist,
+    return new PathWriter().getPermanentAudioPath(pathHelper, fileRef, destFileName, overwrite, projid, id, title, artist,
         userDAO.getDatabase().getServerProps());
   }
 

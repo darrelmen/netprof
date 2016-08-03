@@ -39,14 +39,16 @@ public class SlimProject implements IsSerializable {
   private String language;
   private String course;
   private int projectid;
+  private String countryCode;
 
   public SlimProject() {
   }
 
-  public SlimProject(String name, String language, int projectid) {
+  public SlimProject(String name, String language, int projectid, String countryCode) {
     this.name = name;
     this.language = language;
     this.projectid = projectid;
+    this.countryCode = countryCode;
   }
 
   public String toString() {
@@ -67,5 +69,9 @@ public class SlimProject implements IsSerializable {
 
   public int getProjectid() {
     return projectid;
+  }
+
+  public String getCountryCode() {
+    return countryCode;
   }
 }

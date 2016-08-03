@@ -57,7 +57,9 @@ public class AudioContext implements IsSerializable {
    */
   private int userid;
 
-
+  /**
+   * which project this exercise is in
+   */
   private int projid;
 
   /**
@@ -72,6 +74,9 @@ public class AudioContext implements IsSerializable {
    * regular or fast then slow audio recording
    */
   private AudioType audioType;
+
+  public AudioContext() {
+  }
 
   /**
    * @param userid
@@ -95,9 +100,6 @@ public class AudioContext implements IsSerializable {
     this.audioType = audioType;
   }
 
-  public AudioContext() {
-  }
-
   public int getUserid() {
     return userid;
   }
@@ -118,6 +120,13 @@ public class AudioContext implements IsSerializable {
     return audioType;
   }
 
+  /**
+   * project id
+   */
+  public int getProjid() {
+    return projid;
+  }
+
   public String toString() {
     return
         "user " + userid +
@@ -126,12 +135,5 @@ public class AudioContext implements IsSerializable {
             //" q " + questionID +
             " req " + reqid +
             " type " + audioType;
-  }
-
-  /**
-   * project id
-   */
-  public int getProjid() {
-    return projid;
   }
 }

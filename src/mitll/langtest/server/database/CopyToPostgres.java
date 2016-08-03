@@ -78,19 +78,59 @@ import java.util.*;
 
 public class CopyToPostgres<T extends CommonShell> {
   private static final Logger logger = Logger.getLogger(CopyToPostgres.class);
-  //  private static final boolean COPY_ANNO = true;
-//  private static final boolean USERS = true;
-//  private static final boolean AUDIO = true;
-//  private static final boolean EVENT = true;
-  private static final boolean RESULT = true;
-  public static final int WARN_RID_MISSING_THRESHOLD = 50;
-
-//  private static final boolean USER_EXERCISE = true;
-//  private static final boolean COPY_PHONE = true;
-//  private static final boolean WORD = true;
+  private static final int WARN_RID_MISSING_THRESHOLD = 50;
 
   private void copyToPostgres(String config, boolean inTest) {
-    getDatabaseLight(config, inTest).copyToPostgres();
+    getDatabaseLight(config, inTest).copyToPostgres(getCC(config));
+  }
+
+  /**
+   * Add brazilian, serbo croatian, french, etc.
+   * @param config
+   * @return
+   */
+  public String getCC(String config) {
+    String cc = "";
+    List<String> languages =Arrays.asList(
+        "dari",
+        "egyptian",
+        "english",
+        "farsi",
+        "german",
+        "korean",
+        "iraqi",
+        "japanese",
+        "levantine",
+        "mandarin",
+        "msa",
+        "pashto",
+        "spanish",
+        "russian",
+        "sudanese",
+        "tagalog",
+        "urdu");
+    List<String> flags = Arrays.asList(
+        "af",
+        "eg",
+        "us",
+        "ir",
+        "de",
+        "kr",
+        "iq",
+        "jp",
+        "sy",
+        "cn",
+        "al",
+        "af",
+        "es",
+        "ru",
+        "ss",
+        "ph",
+        "pk");
+
+    int i = languages.indexOf(config.toLowerCase());
+    cc = flags.get(i);
+    return cc;
   }
 
   private void testDrop(String config, boolean inTest) {
@@ -142,8 +182,8 @@ public class CopyToPostgres<T extends CommonShell> {
         new PathHelper(getInstallPath(inTest)), false, null, true);
   }
 
-  public void copyToPostgres(DatabaseImpl db) {
-    int projectID = createProjectIfNotExists(db);
+  public void copyToPostgres(DatabaseImpl db, String cc) {
+    int projectID = createProjectIfNotExists(db, cc);
 
     logger.info("copyToPostgres project is " + projectID);
 
@@ -235,15 +275,16 @@ public class CopyToPostgres<T extends CommonShell> {
    * TODO : what to do about pashto 1,2,3?
    *
    * @param db
+   * @param countryCode
    * @return
    */
-  public int createProjectIfNotExists(DatabaseImpl db) {
+  public int createProjectIfNotExists(DatabaseImpl db, String countryCode) {
     IProjectDAO projectDAO = db.getProjectDAO();
     String oldLanguage = getOldLanguage(db);
     int byName = projectDAO.getByName(oldLanguage);
 
     if (byName == -1) {
-      byName = createProject(db, projectDAO);
+      byName = createProject(db, projectDAO, countryCode);
       db.populateProjects(true);
     } else {
       logger.info("found project " + byName + " for language '" + oldLanguage + "'");
@@ -262,14 +303,14 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param projectDAO
    * @see
    */
-  private int createProject(DatabaseImpl db, IProjectDAO projectDAO) {
+  private int createProject(DatabaseImpl db, IProjectDAO projectDAO, String countryCode) {
     Iterator<String> iterator = db.getTypeOrder(-1).iterator();
-    String firstType = iterator.hasNext() ? iterator.next() : "";
+    String firstType  = iterator.hasNext() ? iterator.next() : "";
     String secondType = iterator.hasNext() ? iterator.next() : "";
-    String language = getOldLanguage(db);
+    String language   = getOldLanguage(db);
 
     SlickUserDAOImpl slickUserDAO = (SlickUserDAOImpl) db.getUserDAO();
-    int byName = projectDAO.add(slickUserDAO.getBeforeLoginUser(), language, language, firstType, secondType);
+    int byName = projectDAO.add(slickUserDAO.getBeforeLoginUser(), language, language, firstType, secondType, countryCode);
 
     Properties props = db.getServerProps().getProps();
     for (String prop : ServerProperties.CORE_PROPERTIES) {
