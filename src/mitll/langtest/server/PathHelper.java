@@ -52,9 +52,9 @@ import java.util.List;
  */
 public class PathHelper {
   private static final Logger logger = Logger.getLogger(PathHelper.class);
+
   public static final String ANSWERS = "answers";
   private static final String IMAGE_WRITER_IMAGES = "audioimages";
-  private static final String PLAN = "plan";
   private static final String IMAGE_OUTDIR = "imageOutdir";
   private static final String TOMCAT_WRITE_DIRECTORY_FULL_PATH = "tomcatWriteDirectoryFullPath";
 
@@ -137,15 +137,11 @@ public class PathHelper {
    */
 
   public String getLocalPathToAnswer(AudioContext audioContext) {
-    return getLocalPathToAnswer(audioContext.getExid(), audioContext.getQuestionID(), audioContext.getUserid());
+    return getLocalPathToAnswer(audioContext.getProjid(), audioContext.getExid(), audioContext.getQuestionID(), audioContext.getUserid());
   }
 
-  private String getLocalPathToAnswer(int exercise, int question, int user) {
-    return getLocalPathToAnswer(PLAN, exercise, question, user);
-  }
-
-  String getLocalPathToAnswer(String plan, int exercise, int question, int user) {
-    String planAndTestPath = plan + File.separator + exercise + File.separator + question + File.separator + "subject-" + user;
+  String getLocalPathToAnswer(int projid, int exercise, int question, int user) {
+    String planAndTestPath = projid + File.separator + exercise + File.separator + question + File.separator + "subject-" + user;
     return getWavPath(getTomcatDir(), planAndTestPath);
   }
 
@@ -157,7 +153,6 @@ public class PathHelper {
     String currentTestDir = tomcatWriteDirectory + File.separator + planAndTestPath;
     String wavPath = currentTestDir + File.separator + "answer_" + System.currentTimeMillis() + ".wav";
     //if (mkdirs) logger.debug("getLocalPathToAnswer : making dir at : " + audioFilePath.getAbsolutePath());
-
     return wavPath;
   }
 
@@ -193,7 +188,6 @@ public class PathHelper {
   public void setConfigDir(String configDir) {
     this.configDir = configDir;
   }
-
   public String getConfigDir() {
     return configDir;
   }
