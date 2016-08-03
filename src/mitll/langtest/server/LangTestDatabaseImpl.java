@@ -2025,13 +2025,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
                                          int exerciseID,
                                          AudioAnswer audioAnswer) {
     int idToUse = exercise1 == null ? exerciseID : exercise1.getID();
-    int projid = exercise1 == null ? -1 : exercise1.getProjectID();
+    int projid  = exercise1 == null ? -1 : exercise1.getProjectID();
     String audioTranscript = getAudioTranscript(audioType, exercise1);
 
     String permanentAudioPath = new PathWriter().
         getPermanentAudioPath(pathHelper,
             getAbsoluteFile(audioAnswer.getPath()),
-            getPermanentName(user, audioType), true, idToUse, audioTranscript, getArtist(user), serverProps);
+            getPermanentName(user, audioType), true, projid, idToUse, audioTranscript, getArtist(user), serverProps);
 
     AudioAttribute audioAttribute =
         db.getAudioDAO().addOrUpdate(user, idToUse, projid, audioType, permanentAudioPath, System.currentTimeMillis(),

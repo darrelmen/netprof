@@ -34,14 +34,26 @@ package mitll.langtest.client;
 
 import mitll.langtest.shared.user.User;
 
-public interface UILifecycle {
+interface UILifecycle {
+  /**
+   * @see InitialUI#populateRootPanelIfLogin()
+   * @see LangTest#populateRootPanel()
+   * @see LangTest#showLogin()
+   */
   void populateRootPanel();
 
   boolean isRTL();
 
   int getHeightOfTopRows();
 
+  /**
+   * @see LangTest#gotUser(User)
+   * @param user
+   */
   void gotUser(User user);
 
+  /**
+   * @see LangTest#makeFlashContainer()
+   */
   void setSplash();
 }
