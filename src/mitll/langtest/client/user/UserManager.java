@@ -132,7 +132,7 @@ public class UserManager {
     }
   }
 
-  public void getPermissionsAndSetUser() {
+  private void getPermissionsAndSetUser() {
     getPermissionsAndSetUser(getUserChosenFromStorage(), getPassFromStorage());
   }
 
@@ -190,34 +190,6 @@ public class UserManager {
     });
   }
 
-  /**
-   * Only content developers can do quality control or record audio.
-   * <p>
-   * Legacy people must get approval.
-   *
-   * @param result
-   * @see #storeUser
-   */
-  private void gotNewUser(User result) {
-    logger.info("UserManager.gotNewUser " + result);
-    userNotification.getPermissions().clear();
-    if (result != null) {
-      for (User.Permission permission : result.getPermissions()) {
-        boolean valid = true;
-        if (permission == User.Permission.QUALITY_CONTROL ||
-            permission == User.Permission.RECORD_AUDIO) {
-          valid = result.isCD();
-        }
-        if (valid) {
-          userNotification.setPermission(permission, true);
-        }
-      }
-      this.current = result;
-    //  logger.info("\tgotNewUser current user " + current);
-      userNotification.gotUser(result);
-    }
-    //console("getPermissionsAndSetUser.onSuccess : " + user);
-  }
 
   /**
    * So if there's a current user, ask the server about them.
@@ -245,7 +217,7 @@ public class UserManager {
     logger.info("UserManager.addAnonymousUser : adding anonymous user");
 
     userServiceAsync.addUser("anonymous", "", "", User.Kind.ANONYMOUS, Window.Location.getHref(), "", true, 0,
-        "unknown", false, "browser", -1, new AsyncCallback<User>() {
+        "unknown", false, "browser", new AsyncCallback<User>() {
       @Override
       public void onFailure(Throwable caught) {
 
@@ -447,7 +419,7 @@ public class UserManager {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
       userChosenID = user.getUserID();
       localStorageIfSupported.setItem(getUserIDCookie(), "" + user.getId());
-      localStorageIfSupported.setItem(getPassCookie(), "" + user.getPasswordHash());
+      localStorageIfSupported.setItem(getPassCookie(),   "" + user.getPasswordHash());
       localStorageIfSupported.setItem(getUserChosenID(), "" + userChosenID);
       rememberUserSessionEnd(localStorageIfSupported, futureMoment);
       // localStorageIfSupported.setItem(getLoginType(), "" + userType);
@@ -459,6 +431,35 @@ public class UserManager {
       userNotification.gotUser(user);
     }
   }
+  /**
+   * Only content developers can do quality control or record audio.
+   * <p>
+   * Legacy people must get approval.
+   *
+   * @param result
+   * @see #storeUser
+   */
+  private void gotNewUser(User result) {
+    logger.info("UserManager.gotNewUser " + result);
+    userNotification.getPermissions().clear();
+    if (result != null) {
+      for (User.Permission permission : result.getPermissions()) {
+        boolean valid = true;
+        if (permission == User.Permission.QUALITY_CONTROL ||
+            permission == User.Permission.RECORD_AUDIO) {
+          valid = result.isCD();
+        }
+        if (valid) {
+          userNotification.setPermission(permission, true);
+        }
+      }
+      this.current = result;
+      //  logger.info("\tgotNewUser current user " + current);
+      userNotification.gotUser(result);
+    }
+    //console("getPermissionsAndSetUser.onSuccess : " + user);
+  }
+
 
   /**
    * @param futureMoment

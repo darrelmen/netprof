@@ -84,7 +84,7 @@ public class Project {
                  String relativeConfigDir) {
     this.project = project;
     this.typeOrder = Arrays.asList(project.first(), project.second());
-   // String prop = project.getProp(ServerProperties.MODELS_DIR);
+    // String prop = project.getProp(ServerProperties.MODELS_DIR);
     // logger.info("Project got " + ServerProperties.MODELS_DIR + ": " + prop);
     audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, logAndNotify, this);
     // logger.info("Project got " + audioFileHelper);
@@ -114,7 +114,7 @@ public class Project {
   }
 
   private SmallVocabDecoder getSmallVocabDecoder() {
-    return getAudioFileHelper().getSmallVocabDecoder();
+    return getAudioFileHelper() == null ? null : getAudioFileHelper().getSmallVocabDecoder();
   }
 
 
@@ -164,7 +164,8 @@ public class Project {
 
   public void setAnalysis(SlickAnalysis analysis) {
     this.analysis = analysis;
-    fullTrie = new ExerciseTrie<>(getExercisesForUser(), project.language(), getSmallVocabDecoder());
+    String language = project == null ? "unk" : project.language();
+    fullTrie = new ExerciseTrie<>(getExercisesForUser(), language, getSmallVocabDecoder());
     this.refResultDecoder = new RefResultDecoder(db, serverProps, pathHelper, getAudioFileHelper(), hasModel());
     refResultDecoder.doRefDecode(getExercisesForUser(), relativeConfigDir);
   }
