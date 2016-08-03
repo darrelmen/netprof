@@ -70,7 +70,7 @@ public class ProjectTest extends BaseTest {
         spanish.getLanguage(),
         "ALL",
         ProjectType.NP,
-        ProjectStatus.PRODUCTION, iterator.next(), iterator.next());
+        ProjectStatus.PRODUCTION, iterator.next(), iterator.next(), "es");
   }
 
   @Test
@@ -86,13 +86,13 @@ public class ProjectTest extends BaseTest {
         gvidaver.getId(),
         "my Spanish",
         "Spanish",
-        "Unit", "Chapter");
+        "Unit", "Chapter", "es");
 
     IUserListManager userListManager = database.getUserListManager();
 
     UserManagement userManagement = database.getUserManagement();
     String test345 = "test345";
-    User user = userManagement.addUser(test345, "test123", "1234", "", "", "", i);
+    User user = userManagement.addUser(test345, "test123", "1234", "", "", "");
     if (user == null) {
       user = userDAO.getUserByID(test345);
     }

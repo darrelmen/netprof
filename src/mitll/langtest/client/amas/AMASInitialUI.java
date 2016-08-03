@@ -78,8 +78,8 @@ public class AMASInitialUI extends InitialUI {
     /**
      * {@link #makeFlashContainer}
      */
-    firstRow.add(langTest.getFlashRecordPanel());
-    langTest.recordingModeSelect();
+    firstRow.add(lifecycleSupport.getFlashRecordPanel());
+    lifecycleSupport.recordingModeSelect();
     learnHelper = new AutoCRTChapterNPFHelper(service, userFeedback, null, controller);
     learnHelper.addNPFToContent(firstRow, "");
   }

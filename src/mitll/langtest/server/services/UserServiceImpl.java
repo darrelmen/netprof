@@ -144,12 +144,11 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   /**
    * @param login
    * @param passwordH
-   * @param projectid - chosen by user in login screen or at signup
    * @return
    * @see mitll.langtest.client.user.UserPassLogin#gotLogin
    * @see mitll.langtest.client.user.UserPassLogin#makeSignInUserName(com.github.gwtbootstrap.client.ui.Fieldset)
    */
-  public User userExists(String login, String passwordH, int projectid) {
+  public User userExists(String login, String passwordH) {
     findSharedDatabase();
     if (passwordH.isEmpty()) {
 
@@ -163,12 +162,11 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
 
       return user;
     } else {
-      // return db.getUserManagement().userExists(getThreadLocalRequest(), login, passwordH, serverProps);
       LoginResult loginResult = loginUser(login, passwordH);
       User loggedInUser = loginResult.getLoggedInUser();
-      if (loginResult.getResultType() == LoginResult.ResultType.Success) {
-        db.rememberUserSelectedProject(loggedInUser, projectid);
-      }
+//      if (loginResult.getResultType() == LoginResult.ResultType.Success) {
+//        db.rememberUserSelectedProject(loggedInUser, projectid);
+//      }
       return loggedInUser;
     }
   }
@@ -191,17 +189,17 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @param dialect
    * @param isCD
    * @param device
-   * @param projid
    * @return null if existing user
    * @see mitll.langtest.client.user.UserPassLogin#gotSignUp(String, String, String, User.Kind)
    */
   @Override
   public User addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, String email,
-                      boolean isMale, int age, String dialect, boolean isCD, String device, int projid) {
+                      boolean isMale, int age, String dialect, boolean isCD, String device
+  ) {
     findSharedDatabase();
     UserManagement userManagement = db.getUserManagement();
     User newUser = userManagement.addUser(getThreadLocalRequest(), userID, passwordH, emailH, email,
-        kind, isMale, age, dialect, "browser", projid);
+        kind, isMale, age, dialect, "browser");
     MailSupport mailSupport = getMailSupport();
 
     if (newUser != null && !newUser.isEnabled()) { // newUser = null means existing newUser.
@@ -216,7 +214,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     }
     if (newUser != null) {
       setSessionUser(getThreadLocalRequest().getSession(true), newUser);
-      db.rememberUserSelectedProject(newUser, projid);
+  //    db.rememberUserSelectedProject(newUser, projid);
     }
     return newUser;
   }
@@ -330,10 +328,10 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     return userChosenIDIfValid != null;
   }
 
-  public Collection<SlimProject> getProjects() {
+  public List<SlimProject> getProjects() {
     List<SlimProject> projects = new ArrayList<>();
     for (SlickProject project : db.getProjectDAO().getAll()) {
-      projects.add(new SlimProject(project.name(), project.language(), project.id()));
+      projects.add(new SlimProject(project.name(), project.language(), project.id(), project.countrycode()));
     }
     return projects;
   }
@@ -346,6 +344,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     try {
       User sessionUser = getSessionUser();
       if (sessionUser != null) {
+        logger.info("set project (" +projectid +") for " + sessionUser);
         db.rememberProject(sessionUser.getId(), projectid);
       }
       db.setStartupInfo(sessionUser, projectid);

@@ -393,14 +393,14 @@ public class RestUserManagement {
           try {
             int age1 = Integer.parseInt(age);
             user1 = getUserManagement().addUser(user, passwordH, emailH, email, deviceType, device,
-                User.Kind.CONTENT_DEVELOPER, gender.equalsIgnoreCase("male"), age1, dialect, projid);
+                User.Kind.CONTENT_DEVELOPER, gender.equalsIgnoreCase("male"), age1, dialect);
 
           } catch (NumberFormatException e) {
             logger.warn("couldn't parse age " + age);
             jsonObject.put(ERROR, "bad age");
           }
         } else {
-          user1 = getUserManagement().addUser(user, passwordH, emailH, email, deviceType, device, projid);
+          user1 = getUserManagement().addUser(user, passwordH, emailH, email, deviceType, device);
         }
 
         if (user1 == null) { // how could this happen?

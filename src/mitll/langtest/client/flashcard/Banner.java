@@ -56,7 +56,6 @@ import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
-import mitll.langtest.client.services.UserService;
 import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserNotification;
@@ -73,7 +72,6 @@ import java.util.logging.Logger;
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since
  */
 public class Banner implements RequiresResize {
   private final Logger logger = Logger.getLogger("Banner");
@@ -87,7 +85,7 @@ public class Banner implements RequiresResize {
   private static final double MIN_RATIO = 0.7;
   private static final int min = 720;
   private static final String NETPROF_HELP_LL_MIT_EDU = "netprof-help@dliflc.edu";
-//  private static final String LTEA_DLIFLC_EDU = "ltea@dliflc.edu";
+  //  private static final String LTEA_DLIFLC_EDU = "ltea@dliflc.edu";
   private final String HREF;
   private static final String NEED_HELP_QUESTIONS_CONTACT_US = "Need Help? Questions? Contact us.";
 
@@ -103,8 +101,8 @@ public class Banner implements RequiresResize {
   private Dropdown cogMenu;
   private final PropertyHandler props;
   private final UserServiceAsync userServiceAsync;
-  private ExerciseController controller;
-  private ListBox projectChoices;
+ // private ExerciseController controller;
+//  private ListBox projectChoices;
   private Navigation navigation;
   private UserNotification userNotification;
 
@@ -118,10 +116,10 @@ public class Banner implements RequiresResize {
     isAnonymous = props.getLoginType().equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS);
     HREF = "mailto:" +
         NETPROF_HELP_LL_MIT_EDU + "?" +
-     //   "cc=" + LTEA_DLIFLC_EDU + "&" +
+        //   "cc=" + LTEA_DLIFLC_EDU + "&" +
         "Subject=Question%20about%20" + props.getLanguage() + "%20NetProF";
     this.userServiceAsync = userServiceAsync;
-    this.controller = controller;
+   // this.controller = controller;
     this.userNotification = userNotification;
   }
 
@@ -157,9 +155,9 @@ public class Banner implements RequiresResize {
     appName.addStyleName("bigFont");
 
     flashcard.add(appName);
-    flashcard.add(projectChoices = getProjectChoices());
+  //  flashcard.add(projectChoices = getProjectChoices());
 
-    projectChoices.setVisible(false);
+//    projectChoices.setVisible(false);
 
     flashcardImage = new Image(LangTest.LANGTEST_IMAGES + Banner.NEW_PRO_F1_PNG);
     flashcardImage.addStyleName("floatLeft");
@@ -210,12 +208,12 @@ public class Banner implements RequiresResize {
     return headerRow;
   }
 
-  private ListBox getProjectChoices() {
+/*  private ListBox getProjectChoices() {
     ListBox listBox = new ListBox();
     new TooltipHelper().createAddTooltip(listBox, "Choose a language", Placement.LEFT);
     listBox.addStyleName("leftTenMargin");
     return listBox;
-  }
+  }*/
 
   /**
    * <p>
@@ -224,7 +222,7 @@ public class Banner implements RequiresResize {
    * @paramx controller
    * @see #getProjectChoices
    */
-  private void populateListChoices(final ListBox projectChoices) {
+/*  private void populateListChoices(final ListBox projectChoices) {
     userServiceAsync.getProjects(new AsyncCallback<Collection<SlimProject>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -233,8 +231,8 @@ public class Banner implements RequiresResize {
       @Override
       public void onSuccess(Collection<SlimProject> projects) {
         projectChoices.clear();
-     //   logger.info("got " + projects.size() + " projects");
-     //   boolean anyAdded = false;
+        //   logger.info("got " + projects.size() + " projects");
+        //   boolean anyAdded = false;
         //    logger.info("\tpopulateListChoices : found list " + result.size() + " choices");
         //projectChoices.addItem("Choose a Language");
 
@@ -245,7 +243,7 @@ public class Banner implements RequiresResize {
           projectChoices.addItem(name);
           ProjectStartupInfo startupInfo = controller.getStartupInfo();
 
-        //  logger.info("startup " + startupInfo);
+          //  logger.info("startup " + startupInfo);
           if (startupInfo != null && project.getProjectid() == startupInfo.getProjectid()) {
             projectChoices.setSelectedValue(name);
           }
@@ -263,9 +261,10 @@ public class Banner implements RequiresResize {
         }
       }
     });
-  }
+  }*/
 
   private void setProjectForUser(SlimProject project1) {
+    logger.info("setProjectForUser set project to " + project1);
     userServiceAsync.setProject(project1.getProjectid(), new AsyncCallback<User>() {
       @Override
       public void onFailure(Throwable throwable) {
@@ -275,7 +274,7 @@ public class Banner implements RequiresResize {
       @Override
       public void onSuccess(User aUser) {
         userNotification.setProjectStartupInfo(aUser);
-      //  logger.info("set project for " +aUser + " show initial state");
+        logger.info("set project for " + aUser + " show initial state");
         navigation.showInitialState();
       }
     });
@@ -459,7 +458,7 @@ public class Banner implements RequiresResize {
 
             int rowCount = flexTable.getRowCount();
             flexTable.setHTML(rowCount + 1, 0, "Need Help?");
-            flexTable.setHTML(rowCount + 1, 1, " <a href='" + HREF +            "'>Help Email</a>");
+            flexTable.setHTML(rowCount + 1, 1, " <a href='" + HREF + "'>Help Email</a>");
             return flexTable;
           }
         };
@@ -482,7 +481,7 @@ public class Banner implements RequiresResize {
    */
   public void setUserName(String name) {
     this.userNameWidget.setText(name);
-    populateListChoices(projectChoices);
+   // populateListChoices(projectChoices);
   }
 
   @Override
