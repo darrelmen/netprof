@@ -105,7 +105,6 @@ class DownloadHelper {
   /**
    * @param widget
    * @return
-   * @see #addButtonRow(java.util.List, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection)
    * @see #getDownloadLink
    */
   private void addTooltip(Widget widget) {
@@ -125,13 +124,6 @@ class DownloadHelper {
     return downloadLink;
   }
 
-/*
-  public void updateDownloadLinks(SelectionState selectionState) {
-    if (downloadLink != null)        downloadLink.setHTML(downloadHelper.getURLForDownload(selectionState));
-    if (contextDownloadLink != null) contextDownloadLink.setHTML(downloadHelper.getURLForContextDownload(selectionState));
-  }
-*/
-
   /**
    * @see #getDownloadLink()
    * @return
@@ -139,7 +131,6 @@ class DownloadHelper {
   private SafeHtml getDownloadURL() {
     return getURLForDownload(exerciseList.getSelectionState());
   }
-
   private SafeHtml getDownloadContextURL() {
     return getURLForContextDownload(exerciseList.getSelectionState());
   }
@@ -147,7 +138,7 @@ class DownloadHelper {
   /**
    * @param selectionState
    * @return
-   * @see #showSelectionState(mitll.langtest.client.list.SelectionState)
+   * @see #getDownloadURL
    */
   private SafeHtml getURLForDownload(SelectionState selectionState) {
     return getUrlDownloadLink(selectionState, DOWNLOAD_AUDIO, "download", "Download");
