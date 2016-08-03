@@ -54,7 +54,7 @@ import java.util.List;
 public interface UserService extends RemoteService {
   // User Management --
 
-  Collection<SlimProject> getProjects();
+  List<SlimProject> getProjects();
 
   User setProject(int projectid);
   /**
@@ -70,11 +70,10 @@ public interface UserService extends RemoteService {
    * @param dialect
    * @param isCD
    * @param device
-   * @param projid
    * @return
    */
   User addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, String email, boolean isMale,
-               int age, String dialect, boolean isCD, String device, int projid);
+               int age, String dialect, boolean isCD, String device);
 
   /**
    * @see mitll.langtest.client.user.UserTable#showDialog(LangTestDatabaseAsync)
@@ -86,10 +85,9 @@ public interface UserService extends RemoteService {
    * @see mitll.langtest.client.user.UserPassLogin#gotLogin
    * @param login
    * @param passwordH
-   * @param projectid
    * @return
    */
-  User userExists(String login, String passwordH, int projectid);
+  User userExists(String login, String passwordH);
 
   LoginResult loginUser(String userId, String attemptedPassword);
   void logout(String login);

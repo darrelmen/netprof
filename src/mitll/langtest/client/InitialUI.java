@@ -48,6 +48,7 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Image;
 import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.Banner;
@@ -58,8 +59,10 @@ import mitll.langtest.client.result.ResultManager;
 import mitll.langtest.client.services.UserService;
 import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.client.user.*;
+import mitll.langtest.shared.user.SlimProject;
 import mitll.langtest.shared.user.User;
 
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -74,14 +77,14 @@ public class InitialUI implements UILifecycle {
 
   protected static final String LOGIN = "Login";
 
-  private static final String LANGTEST_IMAGES = "langtest/images/";
+  private static final String LANGTEST_IMAGES = LangTest.LANGTEST_IMAGES;
   private static final int NO_USER_INITIAL = -2;
 
   private final UserManager userManager;
 
   protected long lastUser = NO_USER_INITIAL;
 
-  protected final LifecycleSupport langTest;
+  protected final LifecycleSupport lifecycleSupport;
   protected final ExerciseController controller;
   protected final UserFeedback userFeedback;
   protected final PropertyHandler props;
@@ -98,12 +101,12 @@ public class InitialUI implements UILifecycle {
   private Container verticalContainer;
 
   /**
-   * @see LangTest#onModuleLoad2()
    * @param langTest
    * @param userManager
+   * @see LangTest#onModuleLoad2()
    */
   public InitialUI(LangTest langTest, UserManager userManager) {
-    this.langTest = langTest;
+    this.lifecycleSupport = langTest;
     this.props = langTest.getProps();
     this.userManager = userManager;
     this.controller = langTest;
@@ -117,6 +120,7 @@ public class InitialUI implements UILifecycle {
    */
   @Override
   public void populateRootPanel() {
+    logger.info("----> populateRootPanel BEGIN ------>");
     Container verticalContainer = getRootContainer();
     this.verticalContainer = verticalContainer;
     // header/title line
@@ -126,6 +130,7 @@ public class InitialUI implements UILifecycle {
     if (!showLogin()) {
       populateBelowHeader(verticalContainer, firstRow);
     }
+    logger.info("----> populateRootPanel END   ------>");
   }
 
   /**
@@ -156,7 +161,6 @@ public class InitialUI implements UILifecycle {
         service.reloadExercises(new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
-
           }
 
           @Override
@@ -199,7 +203,7 @@ public class InitialUI implements UILifecycle {
    */
   private HTML getReleaseStatus() {
     browserCheck.getBrowserAndVersion();
-    return new HTML(langTest.getInfoLine());
+    return new HTML(lifecycleSupport.getInfoLine());
   }
 
   @Override
@@ -209,7 +213,7 @@ public class InitialUI implements UILifecycle {
 
   private class LogoutClickHandler implements ClickHandler {
     public void onClick(ClickEvent event) {
-      langTest.logEvent("No widget", "UserLoging", "N/A", "User Logout by " + lastUser);
+      lifecycleSupport.logEvent("No widget", "UserLoging", "N/A", "User Logout by " + lastUser);
       userService.logout(userManager.getUserID(), new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable throwable) {
@@ -232,7 +236,8 @@ public class InitialUI implements UILifecycle {
     History.newItem(""); // clear history!
     userManager.clearUser();
     lastUser = NO_USER_INITIAL;
-    langTest.recordingModeSelect();
+    lifecycleSupport.recordingModeSelect();
+    lifecycleSupport.clearStartupInfo();
   }
 
   private class UsersClickHandler implements ClickHandler {
@@ -255,6 +260,7 @@ public class InitialUI implements UILifecycle {
         public void onFailure(Throwable caught) {
           downloadFailedAlert();
         }
+
         public void onSuccess() {
           new EventTable().show(service);
         }
@@ -263,7 +269,7 @@ public class InitialUI implements UILifecycle {
   }
 
   private class ResultsClickHandler implements ClickHandler {
-    final EventRegistration outer = langTest;
+    final EventRegistration outer = lifecycleSupport;
 
     public void onClick(ClickEvent event) {
       GWT.runAsync(new RunAsyncCallback() {
@@ -273,7 +279,7 @@ public class InitialUI implements UILifecycle {
 
         public void onSuccess() {
           ResultManager resultManager = new ResultManager(service, props.getNameForAnswer(),
-              langTest.getStartupInfo().getTypeOrder(), outer, controller);
+              lifecycleSupport.getStartupInfo().getTypeOrder(), outer, controller);
           resultManager.showResults();
         }
       });
@@ -335,15 +341,32 @@ public class InitialUI implements UILifecycle {
       /**
        * {@link #makeFlashContainer}
        */
-      firstRow.add(langTest.getFlashRecordPanel());
+      firstRow.add(lifecycleSupport.getFlashRecordPanel());
     }
-    langTest.recordingModeSelect();
+    lifecycleSupport.recordingModeSelect();
 
+    //  addNavigationToMainContent();
+    makeNavigation();
+    addResizeHandler();
+  }
+
+  private void addNavigationToMainContent() {
+    makeNavigation();
+
+    //showNavigation(firstRow);
+  }
+
+  private void showNavigation() {
+    if (firstRow.getElement().getChildCount() == 1) {
+      firstRow.add(navigation.getTabPanel());
+    } else {
+      logger.info("first row has " + firstRow.getElement().getChildCount() + " child(ren)");
+    }
+  }
+
+  private void makeNavigation() {
     navigation = new Navigation(service, userManager, controller, userFeedback);
     banner.setNavigation(navigation);
-
-    firstRow.add(navigation.getTabPanel());
-    addResizeHandler();
   }
 
   /**
@@ -368,7 +391,7 @@ public class InitialUI implements UILifecycle {
 
     Container verticalContainer2 = new FluidContainer();
     verticalContainer2.getElement().setId("root_vertical_container");
-    verticalContainer2.add(langTest.getFlashRecordPanel());
+    verticalContainer2.add(lifecycleSupport.getFlashRecordPanel());
     verticalContainer2.add(currentExerciseVPanel);
     return verticalContainer2;
   }
@@ -400,7 +423,7 @@ public class InitialUI implements UILifecycle {
    * @see #populateRootPanel()
    */
   protected boolean showLogin() {
-    final EventRegistration eventRegistration = langTest;
+    final EventRegistration eventRegistration = lifecycleSupport;
 
     // check if we're here as a result of resetting a password
     final String resetPassToken = props.getResetPassToken();
@@ -547,10 +570,15 @@ public class InitialUI implements UILifecycle {
     banner.setUserName(getGreeting());
     if (userID != lastUser) {
       configureUIGivenUser(userID);
-      langTest.logEvent("No widget", "UserLogin", "N/A", "User Login by " + userID);
+      lifecycleSupport.logEvent("No widget", "UserLogin", "N/A", "User Login by " + userID);
     } else {
       logger.info("ignoring got user for current user " + userID);
-      if (navigation != null) navigation.showPreviouslySelectedTab();
+      if (navigation != null) {
+        showNavigation();
+        navigation.showPreviouslySelectedTab();
+      } else {
+        logger.warning("how can navigation be null????");
+      }
     }
     if (userID > -1) {
       banner.setCogVisible(true);
@@ -559,6 +587,8 @@ public class InitialUI implements UILifecycle {
   }
 
   /**
+   * So we know who the user is... now decide what to show them next
+   *
    * @param userID
    * @return
    * @see #gotUser
@@ -566,13 +596,155 @@ public class InitialUI implements UILifecycle {
   protected void configureUIGivenUser(long userID) {
 //    logger.info("configureUIGivenUser : user changed - new " + userID + " vs last " + lastUser +
 //        " audio type " + getAudioType() + " perms " + getPermissions());
-    populateRootPanelIfLogin();
-    logger.info("\tconfigureUIGivenUser : " + userID + " get exercises...");
-    navigation.showInitialState();
-    showUserPermissions(userID);
+    // populateRootPanelIfLogin();
+    if (lifecycleSupport.getStartupInfo() == null) {
+      addProjectChoices();
+    } else {
+      logger.info("\tconfigureUIGivenUser : " + userID + " get exercises...");
+      showNavigation();
+      navigation.showInitialState();
+      showUserPermissions(userID);
+    }
   }
 
+  private void addProjectChoices() {
+
+    userService.getProjects(new AsyncCallback<List<SlimProject>>() {
+      @Override
+      public void onFailure(Throwable caught) {
+      }
+
+      @Override
+      public void onSuccess(List<SlimProject> result) {
+//        projects = result;
+//        projectChoices.clear();
+//        projectChoices.addItem("Choose a Language");
+
+        final Container flags = new Container();
+        final Section section = new Section("section");
+        section.add(flags);
+        firstRow.add(section);
+
+        //   Row current = new Row();
+        Panel current = new Thumbnails();
+        flags.add(current);
+        int numInRow = 4;
+        logger.info("got " + result.size() + "-------- ");
+        for (int i = 0; i < result.size(); i += numInRow) {
+
+          int max = i + numInRow;
+          if (max > result.size()) max = result.size();
+          for (int j = i; j < max; j++) {
+            //Column child = new Column(1);
+            //current.add(child);
+            Panel langIcon = getLangIcon(result, j);
+            //child.add(langIcon);
+            current.add(langIcon);
+          }
+
+          current = new Row();
+          flags.add(current);
+        }
+
+      }
+    });
+  }
+
+
+  private Panel getLangIcon(List<SlimProject> result, int j) {
+    SlimProject choice = result.get(j);
+    Panel imageAnchor = getImageAnchor(choice.getName(), choice.getCountryCode());
+    //  addClickHandler(samples, choice, imageAnchor);
+    return imageAnchor;
+  }
+
+/*  private void addClickHandler(final Container samples, final LIDResp choice, ImageAnchor imageAnchor) {
+    imageAnchor.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        String code = choice.getCode();
+        //    logger.info("got click on " + code);
+        LLClassDemoService.App.getInstance().getSamplesFor(code, new AsyncCallback<List<LIDSample>>() {
+          @Override
+          public void onFailure(Throwable caught) {
+          }
+
+          @Override
+          public void onSuccess(List<LIDSample> result) {
+            samples.clear();
+            ScrollPanel scrollPanel = new ScrollPanel();
+            samples.add(scrollPanel);
+            Container inside = new Container();
+            scrollPanel.add(inside);
+
+            //      logger.info("Adding " + result.size() + " items");
+            for (LIDSample sample : result) {
+              Row current = new Row();
+
+              inside.add(current);
+
+              Column truthCol = new Column(ColumnSize.MD_1);
+              current.add(truthCol);
+
+              MediaList truthMediaList = new MediaList();
+              getImageAnchor(sample.getTruth(), truthMediaList, false, true);
+              truthCol.add(truthMediaList);
+
+              Column tweet = new Column(ColumnSize.MD_8);
+              current.add(tweet);
+
+              Heading tweetHeading = new Heading(HeadingSize.H4, sample.getTweet());
+              tweet.add(tweetHeading);
+
+              Column scoreCol = new Column(ColumnSize.MD_1);
+              current.add(scoreCol);
+
+              MediaList mediaList = new MediaList();
+              getImageAnchor(sample.getScore(), mediaList, false, false);
+              scoreCol.add(mediaList);
+            }
+          }
+        });
+      }
+    });
+  }*/
+
+  private Panel getImageAnchor(String name, String cc) {
+    // ListItem listItem = new ListItem();
+    //    listItem.getElement().setId("listItemFor_" + choice.getCode());
+//    listItem.setMarginLeft(5);
+
+    // MediaBody mediaBody = new MediaBody();
+    Heading child1 = new Heading(5, name);//choice.getLabel());
+    Thumbnail widgets = new Thumbnail();
+    widgets.setSize(2);
+    //FocusPanel widgets= new FocusPanel();
+//    child1.setMarginTop(5);
+    // mediaBody.add(child1);
+
+    Image imageAnchor = new Image("langtest/cc/" + cc + ".png");
+    PushButton button = new PushButton(imageAnchor);
+    //button.getUpFace().setText(name);
+
+    widgets.add(button);
+    widgets.add(child1);
+
+
+    return widgets;
+  }
+
+//  private ImageAnchor getImageAnchor(/*LIDResp choice*/) {
+//    ImageAnchor imageAnchor = new ImageAnchor();
+//    imageAnchor.setAsMediaObject(true);
+//    imageAnchor.setPull(Pull.LEFT);
+////      imageAnchor.setAlt(choice.getCode());
+//    //     imageAnchor.setUrl("images/" + choice.getImageURL());
+//    return imageAnchor;
+//  }
+
   /**
+   * So, if we're currently showing the login, let's switch to the tab panel...
+   *
    * @see #gotUser
    * @see #configureUIGivenUser(long) (long)
    */
@@ -583,23 +755,25 @@ public class InitialUI implements UILifecycle {
     if (childCount > 0) {
       Node child = firstRow.getElement().getChild(0);
       Element as = Element.as(child);
-      // logger.info("populateRootPanelIfLogin found : '" + as.getId() +"'");
+      logger.info("populateRootPanelIfLogin found : '" + as.getId() + "'");
 
       if (as.getId().contains(LOGIN)) {
         logger.info("populateRootPanelIfLogin found login...");
         populateRootPanel();
+      } else {
+        logger.info("populateRootPanelIfLogin no login...");
       }
     }
   }
 
   /**
-   * @see #configureUIGivenUser(long)
    * @param userID
+   * @see #configureUIGivenUser(long)
    */
   protected void showUserPermissions(long userID) {
     lastUser = userID;
-    banner.setBrowserInfo(langTest.getInfoLine());
-    banner.reflectPermissions(langTest.getPermissions());
+    banner.setBrowserInfo(lifecycleSupport.getInfoLine());
+    banner.reflectPermissions(lifecycleSupport.getPermissions());
   }
 
   /**
