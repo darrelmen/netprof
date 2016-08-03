@@ -34,6 +34,7 @@ package mitll.langtest.server.database.project;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.user.UserProjectDAO;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickProject;
@@ -70,8 +71,19 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     return dao.dao().name();
   }
 
-  public int add(int userid, String name, String language, String firstType, String secondType) {
-    return add(userid, System.currentTimeMillis(), name, language, "", ProjectType.NP, ProjectStatus.PRODUCTION, firstType, secondType);
+  /**
+   * @see mitll.langtest.server.database.CopyToPostgres#createProject(DatabaseImpl, IProjectDAO)
+   * @param userid
+   * @param name
+   * @param language
+   * @param firstType
+   * @param secondType
+   * @param countryCode
+   * @return
+   */
+  public int add(int userid, String name, String language, String firstType, String secondType, String countryCode) {
+    return add(userid, System.currentTimeMillis(), name, language, "", ProjectType.NP, ProjectStatus.PRODUCTION,
+        firstType, secondType, countryCode);
   }
 
   private SlickProject first;
@@ -98,9 +110,24 @@ public class ProjectDAO extends DAO implements IProjectDAO {
       }
     }
   }
+
+  /**
+   *
+   * @param userid
+   * @param modified
+   * @param name
+   * @param language
+   * @param course
+   * @param type
+   * @param status
+   * @param firstType
+   * @param secondType
+   * @param countryCode
+   * @return
+   */
   @Override
   public int add(int userid, long modified, String name, String language, String course,
-                 ProjectType type, ProjectStatus status, String firstType, String secondType) {
+                 ProjectType type, ProjectStatus status, String firstType, String secondType, String countryCode) {
     return dao.insert(new SlickProject(
         -1,
         userid,
@@ -111,12 +138,13 @@ public class ProjectDAO extends DAO implements IProjectDAO {
         type.toString(),
         status.toString(),
         firstType,
-        secondType));
+        secondType,
+        countryCode));
   }
 
   @Override
   public int addTest(int userid, String name, String language,
-                     String firstType, String secondType) {
+                     String firstType, String secondType, String countryCode) {
     return dao.insert(new SlickProject(
         -1,
         userid,
@@ -127,7 +155,8 @@ public class ProjectDAO extends DAO implements IProjectDAO {
         ProjectType.TESTING.toString(),
         ProjectStatus.DEVELOPMENT.name(),
         firstType,
-        secondType));
+        secondType,
+        countryCode));
   }
 
   @Override

@@ -59,6 +59,7 @@ import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.flashcard.Banner;
 import mitll.langtest.client.instrumentation.ButtonFactory;
 import mitll.langtest.client.instrumentation.EventContext;
 import mitll.langtest.client.instrumentation.EventLogger;
@@ -73,11 +74,11 @@ import mitll.langtest.client.sound.SoundManagerStatic;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserNotification;
-import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.StartupInfo;
+import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.user.User;
-import mitll.langtest.shared.exercise.Shell;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -154,7 +155,7 @@ import java.util.logging.Logger;
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
-public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification,LifecycleSupport {
+public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification, LifecycleSupport {
   private final Logger logger = Logger.getLogger("LangTest");
 
   public static final String VERSION_INFO = "2.0.0";
@@ -171,7 +172,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private FlashRecordPanelHeadless flashRecordPanel;
 
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
-  private final UserServiceAsync userService  = GWT.create(UserService.class);
+  private final UserServiceAsync userService = GWT.create(UserService.class);
   private final BrowserCheck browserCheck = new BrowserCheck();
   private SoundManagerStatic soundManager;
   private PropertyHandler props;
@@ -396,7 +397,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       browserCheck.checkForCompatibleBrowser();
 
       if (!startupInfo.getMessage().isEmpty()) {
-        showErrorMessage("Configuration Error",  startupInfo.getMessage());
+        showErrorMessage("Configuration Error", startupInfo.getMessage());
       }
 
       loadVisualizationPackages();  // Note : this was formerly done in LangTest.html, since it seemed to be intermittently not loaded properly
@@ -570,7 +571,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   @Override
   public ProjectStartupInfo getStartupInfo() {
+    logger.info("\ngetStartupInfo Got startup info " + projectStartupInfo);
     return projectStartupInfo;
+  }
+
+  public void clearStartupInfo() {
+
+    this.projectStartupInfo = null;
+    logger.info("\nclearStartupInfo Got startup info " + projectStartupInfo);
   }
 
   public Collection<String> getTypeOrder() {
@@ -589,10 +597,14 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   public void gotUser(User user) {
     setProjectStartupInfo(user);
-  //  logger.info("\ngotUser Got startup info " + projectStartupInfo);
+    logger.info("\ngotUser Got startup info " + projectStartupInfo);
     initialUI.gotUser(user);
   }
 
+  /**
+   * @param user
+   * @see Banner#setProjectForUser
+   */
   public void setProjectStartupInfo(User user) {
     projectStartupInfo = user.getStartupInfo();
   }

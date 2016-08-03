@@ -80,17 +80,20 @@ public class PostgresTest extends BaseTest {
 
   @Test
   public void testCopySpanish() {
-    getDatabaseLight("spanish", true).copyToPostgres();
+    String[] strings = {"spanish"};
+    testCopy(strings);
   }
 
   @Test
   public void testCopyRussian() {
-    getDatabaseLight("russian", true).copyToPostgres();
+    String[] strings = {"russian"};
+    testCopy(strings);
   }
 
   @Test
   public void testCopyEnglish() {
-    getDatabaseLight("english", true).copyToPostgres();
+    String[] strings = {"english"};
+    testCopy(strings);
   }
 
   /**
@@ -100,11 +103,64 @@ public class PostgresTest extends BaseTest {
    */
   @Test
   public void testCopyAll() {
-    for (String config : Arrays.asList("spanish", "russian", "english")) {
-      logger.info("-------- copy " + config);
-      getDatabaseLight(config, true, "hydra-dev", "netprof", "npadmin").copyToPostgres();
+    String[] strings = {"spanish", "russian", "english", "msa"};
+    testCopy(strings);
+  }
+
+  void testCopy(String[] strings) {
+    CopyToPostgres cp = new CopyToPostgres();
+    for (String config : Arrays.asList(strings)) {
+      //logger.info("-------- copy " + config);
+      String cc = cp.getCC(config);
+      logger.info("-------- copy " + config + " " + cc);
+
+      getDatabaseLight(config, true, "hydra-dev", "netprof", "npadmin").copyToPostgres(cc);
     }
   }
+
+/*  String getCC(String config) {
+    String cc = "";
+    List<String> languages =Arrays.asList(
+        "dari",
+        "egyptian",
+        "english",
+        "farsi",
+        "german",
+        "korean",
+        "iraqi",
+        "japanese",
+        "levantine",
+        "mandarin",
+        "msa",
+        "pashto",
+        "spanish",
+        "russian",
+        "sudanese",
+        "tagalog",
+        "urdu");
+    List<String> flags = Arrays.asList(
+        "af",
+        "eg",
+        "us",
+        "ir",
+        "de",
+        "kr",
+        "iq",
+        "jp",
+        "sy",
+        "cn",
+        "al",
+        "af",
+        "es",
+        "ru",
+        "ss",
+        "ph",
+        "pk");
+
+    int i = languages.indexOf(config.toLowerCase());
+    cc = flags.get(i);
+    return cc;
+  }*/
 
   @Test
   public void testDeleteEnglish() {
@@ -127,7 +183,8 @@ public class PostgresTest extends BaseTest {
   public void testCopyProject() {
     testCreate();
     DatabaseImpl spanish = getDatabaseLight("spanish", true);
-    new CopyToPostgres().createProjectIfNotExists(spanish);
+    CopyToPostgres copyToPostgres = new CopyToPostgres();
+    copyToPostgres.createProjectIfNotExists(spanish, copyToPostgres.getCC("spanish"));
   }
 
   @Test
@@ -151,7 +208,8 @@ public class PostgresTest extends BaseTest {
     ExerciseDAO<CommonExercise> exerciseDAO = spanish.getExerciseDAO(next.id());
     List<CommonExercise> rawExercises = exerciseDAO.getRawExercises();
     for (CommonExercise ex : rawExercises.subList(0, 100)) {
-      logger.info("ex " + ex.getID() + " '" + ex.getEnglish() + "' '" + ex.getForeignLanguage() + "' : " + ex.getDirectlyRelated().size() + " context sentences.");
+      logger.info("ex " + ex.getID() + " '" + ex.getEnglish() + "' '" + ex.getForeignLanguage() + "' : " +
+          ex.getDirectlyRelated().size() + " context sentences.");
       for (CommonExercise cex : ex.getDirectlyRelated()) {
         logger.info("\t context " + cex.getID() + " '" + cex.getEnglish() + "' '" + cex.getForeignLanguage() + "'");
       }
@@ -174,7 +232,7 @@ public class PostgresTest extends BaseTest {
         List<CommonExercise> rawExercises = exerciseDAO.getRawExercises();
         for (CommonExercise ex : rawExercises.subList(0, toIndex)) {
           logger.info("ex " + ex.getID() + " '" + ex.getEnglish() + "' '" + ex.getForeignLanguage() + "'" +
-              " meaning '" + ex.getMeaning()+
+              " meaning '" + ex.getMeaning() +
               "' : " + ex.getDirectlyRelated().size() + " context sentences.");
           for (CommonExercise cex : ex.getDirectlyRelated()) {
             logger.info("\t context " + cex.getID() + " '" + cex.getEnglish() + "' '" + cex.getForeignLanguage() + "'");
@@ -198,7 +256,7 @@ public class PostgresTest extends BaseTest {
       List<CommonExercise> rawExercises = exerciseDAO.getRawExercises();
       for (CommonExercise ex : rawExercises.subList(0, toIndex)) {
         logger.info("ex " + ex.getID() + " '" + ex.getEnglish() + "' '" + ex.getForeignLanguage() + "'" +
-            " meaning '" + ex.getMeaning()+
+            " meaning '" + ex.getMeaning() +
             "' : " + ex.getDirectlyRelated().size() + " context sentences.");
         for (CommonExercise cex : ex.getDirectlyRelated()) {
           logger.info("\t context " + cex.getID() + " '" + cex.getEnglish() + "' '" + cex.getForeignLanguage() + "'");
@@ -232,7 +290,7 @@ public class PostgresTest extends BaseTest {
     int id = next.id();
     User byID = spanish.getUserDAO().getUserByID("gvidaver");
     logger.info("user is " + byID + " project " + next);
-    spanish.rememberUserSelectedProject(byID, id);
+   // spanish.rememberUserSelectedProject(byID, id);
     for (SlickUserProject up : spanish.getUserProjectDAO().getAll()) {
       logger.info("got " + up);
     }
@@ -240,14 +298,16 @@ public class PostgresTest extends BaseTest {
 
   @Test
   public void testMostRecentProject() {
-    DatabaseImpl spanish = getDatabaseLight("spanish", false);
+    DatabaseImpl spanish = getDatabaseLight("netprof", false);
 
-    User byID = spanish.getUserDAO().getUserByID("spanish");
+    User byID = spanish.getUserDAO().getUserByID("gvidaver");
     logger.info("user is " + byID);
     int i = spanish.getUserProjectDAO().mostRecentByUser(byID.getId());
-
     logger.info("most recent is " + i);
-
+     i = spanish.getUserProjectDAO().mostRecentByUser(999999);
+    logger.info("most recent is " + i);
+    i = spanish.getUserProjectDAO().mostRecentByUser(342);
+    logger.info("most recent is " + i);
   }
 
 
