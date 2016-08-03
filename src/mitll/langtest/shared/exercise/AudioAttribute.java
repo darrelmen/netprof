@@ -33,9 +33,10 @@
 package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.user.MiniUser;
-import mitll.langtest.shared.UserAndTime;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -63,11 +64,11 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   public static final String SLOW = AudioType.SLOW.toString();
   public static final String REGULAR = AudioType.REGULAR.toString();
   public static final String REGULAR_AND_SLOW = "regular and slow";
-  private static final String CONTEXT = "context";
+
   /**
    * TODO : if every have slow recordings of context audio we'll need to add another type or an enum
    */
-  public static final AudioType CONTEXT_AUDIO_TYPE = AudioType.CONTEXT_REGULAR;//"context=" + AudioType.REGULAR.toString();
+  public static final AudioType CONTEXT_AUDIO_TYPE = AudioType.CONTEXT_REGULAR;
 
   private MiniUser user;
 
@@ -101,8 +102,8 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
    * @param type
    * @param user
    * @param transcript       what the speaker read at the time of recording
-   * @see mitll.langtest.server.database.audio.BaseAudioDAO#getAudioAttribute
    * @seex mitll.langtest.server.database.audio.BaseAudioDAO#getResultsForQuery
+   * @see mitll.langtest.server.database.audio.BaseAudioDAO#getAudioAttribute
    */
   public AudioAttribute(int uniqueID, int userid,
                         int exid,
@@ -121,14 +122,9 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
 
     if (type.equals(AudioType.REGULAR)) {
       markRegular();
-    }
-    else if (type.equals(AudioType.SLOW)) {
+    } else if (type.equals(AudioType.SLOW)) {
       markSlow();
-    }
-    //else if (type.equals(AudioType.FAST_AND_SLOW)) {
-    //  addAttribute(SPEED, REGULAR_AND_SLOW);
-    //}
-    else {
+    } else {
       addAttribute(type.getType(), type.getSpeed());
     }
   }
@@ -149,6 +145,12 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     this.userid = miniUser.getId();
   }
 
+  public String getAudioRef() {
+    return audioRef;
+  }
+  public void setAudioRef(String audioRef) {
+    this.audioRef = audioRef;
+  }
   public boolean isValid() {
     return audioRef != null && !audioRef.contains(FILE_MISSING);
   }
@@ -163,12 +165,9 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
 
   @Override
   public String getID() {
-    return exid +"/1";
+    return exid + "/1";
   }
 
-  public void setAudioRef(String audioRef) {
-    this.audioRef = audioRef;
-  }
 
   public AudioAttribute markSlow() {
     addAttribute(SPEED, SLOW);
@@ -183,16 +182,6 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   public boolean isSlow() {
     return matches(SPEED, SLOW);
   }
-
-/*  public String getAudioType() {
-    String speed = getSpeed();
-    if (speed == null && !attributes.isEmpty()) {
-      String s = attributes.toString();
-      return s.substring(1, s.length() - 1);
-    } else {
-      return speed;
-    }
-  }*/
 
   public AudioType getAudioType() {
     return audioType;
@@ -225,23 +214,14 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
 
   /**
    * Or potentially we'd want to look at an attribute - context = true?
+   *
    * @return
    */
   public boolean isContextAudio() {
     return audioType.isContext();
   }
 
-  /**
-   * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#filterByUnrecorded
-   */
-/*
-  public boolean isExampleSentence() {
-    return attributes.containsKey(CONTEXT);
-  }
-*/
-
-  public void addAttribute(String name, String value) {
+  private void addAttribute(String name, String value) {
     if (attributes.containsKey(name)) {
       String s = attributes.get(name);
       if (!s.equals(REGULAR)) System.out.println("replacing value at " + name + " was " + s + " now " + value);
@@ -249,15 +229,12 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     attributes.put(name, value);
   }
 
-  public String getAudioRef() {
-    return audioRef;
-  }
 
   public Map<String, String> getAttributes() {
     return attributes;
   }
 
-  public Set<String> getAttributeKeys() {
+  Set<String> getAttributeKeys() {
     return attributes.keySet();
   }
 
@@ -286,7 +263,9 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     }
   }
 
-  public MiniUser getUser() { return user;  }
+  public MiniUser getUser() {
+    return user;
+  }
 
   /**
    * @param user
@@ -329,7 +308,6 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     return uniqueID;
   }
 
-
   /**
    * Check to see if the audio transcript matches the vocabulary item.
    * Don't worry about punctuation or case.
@@ -350,17 +328,6 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     return t.replaceAll("\\p{P}", "").replaceAll("\\s++", "");
   }
 
-  @Override
-  public String toString() {
-    return "Audio id " + uniqueID +
-        " for ex " + getOldexid()+
-        " : " + audioRef +
-        " attrs " + attributes +
-        " by " + userid + "/" + user +
-        " transcript '" + transcript +
-        "' ";
-  }
-
   public String getTranscript() {
     return transcript == null ? "" : transcript;
   }
@@ -369,15 +336,30 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     this.transcript = transcript;
   }
 
+  /**
+   * @see mitll.langtest.server.database.CopyToPostgres#copyAudio(DatabaseImpl, Map, Map, int)
+   * @return
+   */
   public String getOldexid() {
     return oldexid;
   }
 
   /**
-   * @see mitll.langtest.server.database.audio.AudioDAO#getResultsForQuery(Connection, PreparedStatement)
    * @param oldexid
+   * @see mitll.langtest.server.database.audio.AudioDAO#getResultsForQuery(Connection, PreparedStatement)
    */
   public void setOldexid(String oldexid) {
     this.oldexid = oldexid;
+  }
+
+  @Override
+  public String toString() {
+    return "Audio id " + uniqueID +
+        " for ex " + getOldexid() +
+        " : " + audioRef +
+        " attrs " + attributes +
+        " by " + userid + "/" + user +
+        " transcript '" + transcript +
+        "' ";
   }
 }

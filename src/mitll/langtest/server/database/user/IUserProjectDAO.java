@@ -38,11 +38,12 @@ import mitll.npdata.dao.SlickUserProject;
 import java.util.Collection;
 
 public interface IUserProjectDAO extends IDAO {
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#rememberProject(int, int)
+   * @param userid
+   * @param projid
+   */
   void add(int userid, int projid);
-
   Collection<SlickUserProject> getAll();
-
   int mostRecentByUser(int user);
-
-  //SlickUserProject mostRecentProjectByUser(int user);
 }
