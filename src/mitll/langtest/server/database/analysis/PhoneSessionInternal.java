@@ -46,7 +46,7 @@ import java.util.Map;
  * @since 12/4/15.
  */
 public class PhoneSessionInternal {
-  final SummaryStatistics summaryStatistics = new SummaryStatistics();
+  final SummaryStatistics summaryStatistics  = new SummaryStatistics();
   final SummaryStatistics summaryStatistics2 = new SummaryStatistics();
 
   private double mean;

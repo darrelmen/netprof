@@ -58,11 +58,11 @@ public class PathWriter {
    * @param fileRef
    * @param destFileName
    * @param overwrite
-   * @param id
+   * @param projid
+   *@param exid
    * @param title            mark the mp3 meta data with this title
    * @param artist mark the mp3 meta data with this artist
-   * @param serverProperties
-   * @return path of file under bestAudio directory
+   * @param serverProperties     @return path of file under bestAudio directory
    * @see mitll.langtest.server.database.custom.UserListManager#getRefAudioPath
    * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable
    */
@@ -70,7 +70,8 @@ public class PathWriter {
                                       File fileRef,
                                       String destFileName,
                                       boolean overwrite,
-                                      int id,
+                                      int projid,
+                                      int exid,
                                       String title,
                                       String artist,
                                       ServerProperties serverProperties) {
@@ -78,14 +79,20 @@ public class PathWriter {
     if (!bestDir.exists() && !bestDir.mkdir()) {
       if (!bestDir.exists()) logger.warn("huh? couldn't make " + bestDir.getAbsolutePath());
     }
-    File bestDirForExercise = new File(bestDir, ""+id);
+    File bestDirForExercise = new File(bestDir, ""+exid);
     if (!bestDirForExercise.exists() && !bestDirForExercise.mkdir()) {
       if (!bestDirForExercise.exists()) logger.warn("huh? couldn't make " + bestDirForExercise.getAbsolutePath());
     }
     File destination = new File(bestDirForExercise, destFileName);
     //logger.debug("getPermanentAudioPath : copying from " + fileRef +  " to " + destination.getAbsolutePath());
-    String bestAudioPath = BEST_AUDIO + File.separator + id + File.separator + destFileName;
+
+    String bestAudioPath = BEST_AUDIO +
+        File.separator + projid +
+        File.separator + exid +
+        File.separator + destFileName;
+
     //logger.debug("getPermanentAudioPath : dest path    " + bestDirForExercise.getPath() + " vs " +bestAudioPath);
+
     if (!fileRef.equals(destination) && !destFileName.equals(AudioConversion.FILE_MISSING)) {
       try {
         FileUtils.copyFile(fileRef, destination);

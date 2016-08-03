@@ -44,6 +44,8 @@ public interface LifecycleSupport extends EventRegistration {
 
   void recordingModeSelect();
 
+  void clearStartupInfo();
+
   ProjectStartupInfo getStartupInfo();
 
   Collection<User.Permission> getPermissions();
