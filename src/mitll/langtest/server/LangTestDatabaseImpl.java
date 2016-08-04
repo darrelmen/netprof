@@ -2196,9 +2196,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
       String strongName = getPermutationStrongName();
       String serverName = getThreadLocalRequest().getServerName();
-      String msgStr = message + "\n" + "remoteAddr=" + remoteAddr + "\nuser agent: " + userAgent +
-          "\ngwt: " + strongName +
-          "\nserver: " + serverName;
+      String msgStr = message +
+          "\nremoteAddr : " + remoteAddr +
+          "\nuser agent : " + userAgent +
+          "\ngwt        : " + strongName +
+          "\nserver     : " + serverName;
 
       return msgStr;
     } else {
@@ -2361,7 +2363,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       logger.error("couldn't find lesson plan file " + lessonPlanFile);
     }
 
-    String mediaDir = relativeConfigDir + File.separator + serverProps.getMediaDir();
+    String mediaDir = "";//relativeConfigDir + File.separator + serverProps.getMediaDir();
     String installPath = pathHelper.getInstallPath();
     logger.debug("setInstallPath " + installPath + " " + lessonPlanFile + " media " + serverProps.getMediaDir() + " rel media " + mediaDir);
     db.setInstallPath(installPath,
