@@ -39,7 +39,7 @@ public class DominoReaderTest {
         serverProps.getMediaDir());
   }
 
-//  public StartupInfo getStartupInfo() {
+//  public StartupInfo getProjectStartupInfo() {
 //    return new StartupInfo(database.getServerProps().getProperties(), database.getTypeOrder(projectid), database.getSectionNodes());
 //  }
 
@@ -56,7 +56,7 @@ public class DominoReaderTest {
 //    logger.info("e.g. " + iterator.next());
 //    logger.info("e.g. " + iterator.next());
 
-//    StartupInfo startupInfo = getStartupInfo();
+//    StartupInfo startupInfo = getProjectStartupInfo();
   //  logger.info("Got " + startupInfo);
    // SectionNode next = startupInfo.getSectionNodes().iterator().next();
   //  Map<String, Collection<String>> typeToSection = new HashMap<>();

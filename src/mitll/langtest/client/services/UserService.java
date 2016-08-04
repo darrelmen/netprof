@@ -54,7 +54,7 @@ import java.util.List;
 public interface UserService extends RemoteService {
   // User Management --
 
-  List<SlimProject> getProjects();
+//  List<SlimProject> getProjects();
 
   User setProject(int projectid);
   /**

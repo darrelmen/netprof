@@ -51,7 +51,6 @@ import java.util.*;
  */
 public class UserExercise extends AudioExercise implements CombinedMutableUserExercise, CommonAnnotatable {
   public static final String CUSTOM_PREFIX = "Custom_";
-  //private long uniqueID = -1; //set by database
 
   private int creator;
   private boolean isPredef;

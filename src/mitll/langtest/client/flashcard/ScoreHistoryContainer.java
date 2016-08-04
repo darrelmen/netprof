@@ -80,7 +80,7 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
     super(controller);
     english = controller.getLanguage().equals(ENGLISH);
 
-    sorter = new ExerciseComparator();//controller.getStartupInfo().getTypeOrder());
+    sorter = new ExerciseComparator();//controller.getProjectStartupInfo().getTypeOrder());
 
     for (CommonShell commonShell : allExercises) {
       idToExercise.put(commonShell.getID(), commonShell);

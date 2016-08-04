@@ -241,7 +241,7 @@ public class Banner implements RequiresResize {
         for (final SlimProject project : projects) {
           String name = project.getName();
           projectChoices.addItem(name);
-          ProjectStartupInfo startupInfo = controller.getStartupInfo();
+          ProjectStartupInfo startupInfo = controller.getProjectStartupInfo();
 
           //  logger.info("startup " + startupInfo);
           if (startupInfo != null && project.getProjectid() == startupInfo.getProjectid()) {
