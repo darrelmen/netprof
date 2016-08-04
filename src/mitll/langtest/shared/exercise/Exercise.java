@@ -71,31 +71,35 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   /**
    * @param id
-   * @param projectid
-   * @param updateTime
-   * @paramx content
+   * @param altcontext
+   *@param projectid
+   * @param updateTime   @paramx content
    * @see mitll.langtest.server.database.exercise.ExcelImport#getExercise
    */
-  public Exercise(String id, String context, String contextTranslation, String meaning, String refAudioIndex,
+  public Exercise(String id,
+                  String context, String altcontext, String contextTranslation,
+                  String meaning, String refAudioIndex,
                   int projectid, long updateTime) {
     super(id, -1, projectid);
     this.meaning = meaning;
     this.refAudioIndex = refAudioIndex;
     this.updateTime = updateTime;
-    addContext(context, contextTranslation);
+    addContext(context, altcontext, contextTranslation);
   }
 
   /**
    * @Deprecated - use related exercise join table
    * @param id
    * @param context
+   * @param altcontext
    * @param contextTranslation
    * @param projectid
    */
-  public Exercise(String id, String context, String contextTranslation, int projectid) {
+  @Deprecated public Exercise(String id, String context, String altcontext, String contextTranslation, int projectid) {
     super(id, -1, projectid);
     this.foreignLanguage = context;
-    this.english = contextTranslation;
+    this.altfl           = altcontext;
+    this.english         = contextTranslation;
   }
 
   /**
@@ -201,11 +205,12 @@ public class Exercise extends AudioExercise implements CommonExercise,
   /**
    * @see mitll.langtest.server.database.exercise.JSONURLExerciseDAO#addContextSentences(JSONObject, Exercise)
    * @param context
+   * @param altcontext
    * @param contextTranslation
    */
-  public void addContext(String context, String contextTranslation) {
+  public void addContext(String context, String altcontext, String contextTranslation) {
     if (!context.isEmpty()) {
-      Exercise contextExercise = new Exercise("c" + getID(), context, contextTranslation, getProjectID());
+      Exercise contextExercise = new Exercise("c" + getID(), context, altcontext, contextTranslation, getProjectID());
       contextExercise.setUpdateTime(getUpdateTime());
       contextExercise.setUnitToValue(getUnitToValue());
       addContextExercise(contextExercise);
@@ -281,7 +286,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
   }
 
   /**
-   * @see #addContext(String, String)
+   * @see #addContext(String, String, String)
    * @param contextExercise
    */
   public void addContextExercise(CommonExercise contextExercise) {
@@ -306,6 +311,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
         " old '" + getOldID() +
         "' english '" + getEnglish() +
         "'/'" + getForeignLanguage() + "' " +
+        (getAltFL().isEmpty() ? "" : getAltFL())+
         "meaning '" + getMeaning() +
         "' transliteration '" + getTransliteration() +
         "' context " + getDirectlyRelated() +

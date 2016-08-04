@@ -73,10 +73,10 @@ import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.flashcard.QuizCorrectAndScore;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.instrumentation.Event;
-import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.result.MonitorResult;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.PretestScore;
+import mitll.langtest.shared.user.SlimProject;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickProject;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -1190,15 +1190,49 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public StartupInfo getStartupInfo() {
-    List<ProjectInfo> projectInfos = new ArrayList<>();
+    List<SlimProject> projectInfos = new ArrayList<>();
     if (db == null) {
       logger.info("no db yet...");
     } else {
-      for (SlickProject project : db.getProjectDAO().getAll())
-        projectInfos.add(new ProjectInfo(project.language(), project.id()));
+      projectInfos = getNestedProjectInfo();
     }
 
     return new StartupInfo(serverProps.getProperties(), projectInfos, startupMessage);
+  }
+
+  /**
+   * TODO : consider moving this into user service?
+   * what if later an admin changes it while someone else is looking at it...
+   * @return
+   */
+  List<SlimProject> getNestedProjectInfo() {
+    List<SlimProject> projectInfos = new ArrayList<>();
+
+    Map<String, List<SlickProject>> langToProject = new TreeMap<>();
+    for (SlickProject project : db.getProjectDAO().getAll()) {
+      List<SlickProject> slimProjects = langToProject.get(project.language());
+      if (slimProjects == null) langToProject.put(project.language(), slimProjects = new ArrayList<>());
+      slimProjects.add(project);
+    }
+
+    for (String lang : langToProject.keySet()) {
+      List<SlickProject> slickProjects = langToProject.get(lang);
+      SlickProject project = slickProjects.get(0);
+      SlimProject e = getProjectInfo(project);
+      projectInfos.add(e);
+
+      if (slickProjects.size() > 1) {
+        for (SlickProject slickProject : slickProjects) {
+          e.addChild(getProjectInfo(slickProject));
+        }
+      }
+    }
+
+    return projectInfos;
+  }
+
+  private SlimProject getProjectInfo(SlickProject project) {
+    return new SlimProject(project.id(), project.name(), project.language(), project.countrycode(), project.course());
   }
 
   /**
@@ -1311,7 +1345,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         logger.debug("getPretestScore Cache HIT  : align exercise id = " + exerciseID + " file " + answer +
             " found previous " + cachedResult.getUniqueID());
     } else {
-        logger.debug("getPretestScore Cache MISS : align exercise id = " + exerciseID + " file " + answer);
+      logger.debug("getPretestScore Cache MISS : align exercise id = " + exerciseID + " file " + answer);
     }
 
     boolean usePhoneToDisplay1 = usePhoneToDisplay || serverProps.usePhoneToDisplay();
@@ -2025,7 +2059,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
                                          int exerciseID,
                                          AudioAnswer audioAnswer) {
     int idToUse = exercise1 == null ? exerciseID : exercise1.getID();
-    int projid  = exercise1 == null ? -1 : exercise1.getProjectID();
+    int projid = exercise1 == null ? -1 : exercise1.getProjectID();
     String audioTranscript = getAudioTranscript(audioType, exercise1);
 
     String permanentAudioPath = new PathWriter().
