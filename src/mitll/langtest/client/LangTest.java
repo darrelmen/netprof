@@ -583,7 +583,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   public Collection<String> getTypeOrder() {
-    return projectStartupInfo.getTypeOrder();
+    return projectStartupInfo == null ? Collections.emptyList() : projectStartupInfo.getTypeOrder();
   }
 
   /**
