@@ -1504,6 +1504,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     return getExerciseDAO(projectid).remove(exid);
   }
 
+  int warns = 0;
   /**
    * TODO : Fix this to get the right project first!
    * <p>
@@ -1540,7 +1541,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
 
     CommonExercise toRet = getExercise(projid, id);
     if (toRet == null) {
-      logger.info("couldn't find exercise " + id + " in " + projid + " looking in user exercise table");
+      if (warns++<50) logger.info("couldn't find exercise " + id + " in " + projid + " looking in user exercise table");
       toRet = getUserExerciseByExID(id);
     }
 

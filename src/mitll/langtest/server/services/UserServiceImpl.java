@@ -328,13 +328,14 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     return userChosenIDIfValid != null;
   }
 
-  public List<SlimProject> getProjects() {
+/*  public List<SlimProject> getProjects() {
     List<SlimProject> projects = new ArrayList<>();
     for (SlickProject project : db.getProjectDAO().getAll()) {
-      projects.add(new SlimProject(project.name(), project.language(), project.id(), project.countrycode()));
+      projects.add(new SlimProject(project.id(), project.name(), project.language(), project.countrycode(),
+          project.course()));
     }
     return projects;
-  }
+  }*/
 
   /**
    * @param projectid
