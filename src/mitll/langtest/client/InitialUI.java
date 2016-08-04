@@ -63,6 +63,7 @@ import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.user.SlimProject;
 import mitll.langtest.shared.user.User;
+import org.moxieapps.gwt.highcharts.client.Pane;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -150,8 +151,6 @@ public class InitialUI implements UILifecycle {
     // add header row
     verticalContainer.add(headerRow = makeHeaderRow());
     headerRow.getElement().setId("headerRow");
-
-    //addBreadcrumbs(verticalContainer);
 
     Panel contentRow = new DivWidget();
     contentRow.getElement().setId("contentRow");
@@ -277,7 +276,6 @@ public class InitialUI implements UILifecycle {
         public void onFailure(Throwable caught) {
           downloadFailedAlert();
         }
-
         public void onSuccess() {
           new UserTable(props, userManager.isAdmin()).showUsers(userService);
         }
@@ -291,7 +289,6 @@ public class InitialUI implements UILifecycle {
         public void onFailure(Throwable caught) {
           downloadFailedAlert();
         }
-
         public void onSuccess() {
           new EventTable().show(service);
         }
@@ -307,7 +304,6 @@ public class InitialUI implements UILifecycle {
         public void onFailure(Throwable caught) {
           downloadFailedAlert();
         }
-
         public void onSuccess() {
           ResultManager resultManager = new ResultManager(service, props.getNameForAnswer(),
               lifecycleSupport.getProjectStartupInfo().getTypeOrder(), outer, controller);
@@ -323,7 +319,6 @@ public class InitialUI implements UILifecycle {
         public void onFailure(Throwable caught) {
           downloadFailedAlert();
         }
-
         public void onSuccess() {
           new MonitoringManager(/*service,*/ props).showResults();
         }
@@ -381,8 +376,6 @@ public class InitialUI implements UILifecycle {
     addResizeHandler();
   }
 
-
-
   /**
    * Breadcrumb shows sequence of choices - who - languge - course (FL100 or FL200 or FL300) Elementary FL/Intermediate FL/Advanced FL - what do you want to do
    */
@@ -390,7 +383,7 @@ public class InitialUI implements UILifecycle {
     if (contentRow.getElement().getChildCount() == 1) {
       contentRow.add(navigation.getTabPanel());
     } else {
-      logger.info("first row has " + contentRow.getElement().getChildCount() + " child(ren)");
+      logger.info("showNavigation : first row has " + contentRow.getElement().getChildCount() + " child(ren) - not adding tab panel???");
     }
   }
 
@@ -398,6 +391,7 @@ public class InitialUI implements UILifecycle {
     logger.info("getBreadcrumbs --->");
 
     Breadcrumbs crumbs = new Breadcrumbs(">");
+    crumbs.getElement().setId("breadcrumb");
     crumbs.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
     addCrumbs(crumbs);
 
@@ -424,17 +418,11 @@ public class InitialUI implements UILifecycle {
       me.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent clickEvent) {
-          clearStartupInfo();
-
-          breadcrumbs.clear();
-          addCrumbs(breadcrumbs);
-
-          clearContent();
-          addProjectChoices();
+          clickOnUserCrumb();
         }
       });
       crumbs.add(me);
-      logger.info("getBreadcrumbs adding step for " + current);
+//      logger.info("getBreadcrumbs adding step for " + current);
 
       ProjectStartupInfo startupInfo = lifecycleSupport.getProjectStartupInfo();
       if (startupInfo != null) {
@@ -458,6 +446,29 @@ public class InitialUI implements UILifecycle {
     } else {
       logger.info("getBreadcrumbs no current user --- ????");
     }
+  }
+
+  private void clickOnUserCrumb() {
+    userService.forgetProject(new AsyncCallback<Void>() {
+      @Override
+      public void onFailure(Throwable throwable) {
+
+      }
+
+      @Override
+      public void onSuccess(Void aVoid) {
+
+      }
+    });
+
+    History.newItem("");
+    clearStartupInfo();
+
+    breadcrumbs.clear();
+    addCrumbs(breadcrumbs);
+
+    clearContent();
+    addProjectChoices();
   }
 
   private void makeNavigation() {
@@ -690,9 +701,9 @@ public class InitialUI implements UILifecycle {
    * @see #gotUser
    */
   protected void configureUIGivenUser(long userID) {
-//    logger.info("configureUIGivenUser : user changed - new " + userID + " vs last " + lastUser +
-//        " audio type " + getAudioType() + " perms " + getPermissions());
+    logger.info("configureUIGivenUser : user changed - new " + userID + " vs last " + lastUser);
     // populateRootPanelIfLogin();
+
     if (lifecycleSupport.getProjectStartupInfo() == null) {
       addProjectChoices();
     } else {
@@ -704,7 +715,14 @@ public class InitialUI implements UILifecycle {
     }
   }
 
+  /**
+   * @see #configureUIGivenUser(long)
+   */
   private void addProjectChoices() {
+    clearContent();
+    addBreadcrumbs();
+
+
     showProjectChoices(lifecycleSupport.getStartupInfo().getProjects(), 0);
   }
 
@@ -712,7 +730,26 @@ public class InitialUI implements UILifecycle {
    *
    */
   private void addBreadcrumbs() {
-    verticalContainer.insert(breadcrumbs = getBreadcrumbs(), 1);
+
+    int childCount = verticalContainer.getElement().getChildCount();
+
+    boolean found = false;
+   // logger.info("populateRootPanelIfLogin root " + contentRow.getElement().getNodeName() + " childCount " + childCount);
+    if (childCount > 0) {
+      for (int i = 0; i < childCount; i++) {
+        Node child = verticalContainer.getElement().getChild(i);
+        Element as = Element.as(child);
+        String id = as.getId();
+
+        if (id.equals("breadcrumb")) {
+          found =true;
+          logger.info("found " + id);
+        }
+      }
+    }
+    if (!found) {
+      verticalContainer.insert(breadcrumbs = getBreadcrumbs(), 1);
+    }
   }
 
   private void showProjectChoices(List<SlimProject> result, int nest) {
@@ -723,8 +760,19 @@ public class InitialUI implements UILifecycle {
 
     final Container flags = new Container();
     final Section section = new Section("section");
-    section.add(flags);
     contentRow.add(section);
+
+//    Panel header = new Thumbnails();
+   // Panel header = new FluidRow();
+ //   Panel header = getStatusRow();
+    DivWidget header = new DivWidget();
+    header.addStyleName("container");
+    Heading child = new Heading(3, "Please select a language");
+     header.add(child);
+    child.getElement().getStyle().setMarginLeft(10, Style.Unit.PX  );
+
+    section.add(header);
+    section.add(flags);
 
     //   Row current = new Row();
     Panel current = new Thumbnails();
@@ -749,6 +797,18 @@ public class InitialUI implements UILifecycle {
       current = new Row();
       flags.add(current);
     }
+  }
+
+  private Panel getStatusRow() {
+    Panel status = new DivWidget();
+    status.getElement().setId("statusRow");
+    status.addStyleName("alignCenter");
+    status.addStyleName("inlineBlockStyle");
+  //  status.add(statusHeader);
+  //  statusHeader.getElement().setId("statusHeader");
+  //  statusHeader.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
+   // statusHeader.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
+    return status;
   }
 
   private Panel getLangIcon(String lang, SlimProject projectForLang, int nest) {
@@ -787,7 +847,7 @@ public class InitialUI implements UILifecycle {
 
        // logger.info("project " + projid + " has " + children);
         if (children.size() <2) {
-          logger.info("onClick select leaf project " + projid);
+          logger.info("onClick select leaf project " + projid + " current user " +userManager.getUser() + " : " +userManager.getUserID());
           setProjectForUser(projid);
         } else {
           logger.info("onClick select parent project " + projid);
@@ -795,10 +855,7 @@ public class InitialUI implements UILifecycle {
           w.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent clickEvent) {
-              breadcrumbs.remove(crumbs.get(crumbs.size() - 1));
-              logger.info("breadcrumb click - undo project selection");
-              clearContent();
-              addProjectChoices();
+              clickOnParentCrumb();
             }
           });
           clearContent();
@@ -812,9 +869,19 @@ public class InitialUI implements UILifecycle {
     return widgets;
   }
 
+  void clickOnParentCrumb() {
+    breadcrumbs.remove(crumbs.get(crumbs.size() - 1));
+//    logger.info("breadcrumb click - undo project selection");
+    addProjectChoices();
+  }
+
+  /**
+   * @see #getImageAnchor(String, SlimProject)
+   * @param projectid
+   */
   private void setProjectForUser(int projectid) {
-    // int projectid = project1.getProjectid();
     logger.info("setProjectForUser set project for " + projectid);
+    clearContent();
     userService.setProject(projectid, new AsyncCallback<User>() {
       @Override
       public void onFailure(Throwable throwable) {
@@ -823,23 +890,18 @@ public class InitialUI implements UILifecycle {
 
       @Override
       public void onSuccess(User aUser) {
-        clearContent();
-        userNotification.setProjectStartupInfo(aUser);
-        logger.info("setProjectForUser set project for " + aUser + " show initial state " + lifecycleSupport.getProjectStartupInfo());
-        showNavigation();
-        navigation.showInitialState();
+        if (aUser == null) {
+          logger.warning("huh? no current user? ");
+        }
+        else {
+          userNotification.setProjectStartupInfo(aUser);
+          logger.info("setProjectForUser set project for " + aUser + " show initial state " + lifecycleSupport.getProjectStartupInfo());
+          showNavigation();
+          navigation.showInitialState();
+        }
       }
     });
   }
-
-//  private ImageAnchor getImageAnchor(/*LIDResp choice*/) {
-//    ImageAnchor imageAnchor = new ImageAnchor();
-//    imageAnchor.setAsMediaObject(true);
-//    imageAnchor.setPull(Pull.LEFT);
-////      imageAnchor.setAlt(choice.getCode());
-//    //     imageAnchor.setUrl("images/" + choice.getImageURL());
-//    return imageAnchor;
-//  }
 
   /**
    * So, if we're currently showing the login, let's switch to the tab panel...
