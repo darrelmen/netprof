@@ -48,8 +48,6 @@ import mitll.langtest.shared.exercise.STATE;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.sorter.ExerciseComparator;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Logger;
@@ -79,7 +77,7 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
    */
   public PagingContainer(ExerciseController controller, int verticalUnaccountedFor, boolean isRecorder) {
     super(controller);
-    ProjectStartupInfo startupInfo = controller.getStartupInfo();
+    ProjectStartupInfo startupInfo = controller.getProjectStartupInfo();
     if (startupInfo == null) {
       logger.warning("huh? no startup info?");
 //      sorter = new ExerciseComparator(Collections.emptyList());

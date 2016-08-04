@@ -156,6 +156,7 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification, LifecycleSupport {
+  public static final String INTRO = "Learn pronunciation and practice vocabulary.";
   private final Logger logger = Logger.getLogger("LangTest");
 
   public static final String VERSION_INFO = "2.0.0";
@@ -436,7 +437,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * Set the page title and favicon.
    */
   private void setPageTitle() {
-    Window.setTitle(props.getAppTitle() + " : " + "Learn pronunciation and practice vocabulary.");
+    Window.setTitle(props.getAppTitle() + " : " + INTRO);
 
     Element element = DOM.getElementById("favicon");   // set the page title to be consistent
     if (element != null) {
@@ -510,7 +511,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
        * @see mitll.langtest.client.recorder.WebAudioRecorder
        */
       public void gotPermission() {
-        logger.info("makeFlashContainer - got permission!");
+       // logger.info("makeFlashContainer - got permission!");
         hideFlash();
         checkLogin();
       }
@@ -570,13 +571,12 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   @Override
-  public ProjectStartupInfo getStartupInfo() {
-    logger.info("\ngetStartupInfo Got startup info " + projectStartupInfo);
+  public ProjectStartupInfo getProjectStartupInfo() {
+    //logger.info("\ngetStartupInfo Got startup info " + projectStartupInfo);
     return projectStartupInfo;
   }
 
   public void clearStartupInfo() {
-
     this.projectStartupInfo = null;
     logger.info("\nclearStartupInfo Got startup info " + projectStartupInfo);
   }
@@ -859,5 +859,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   public boolean isMicAvailable() {
     return isMicConnected;
+  }
+
+  public StartupInfo getStartupInfo() {
+    return startupInfo;
   }
 }

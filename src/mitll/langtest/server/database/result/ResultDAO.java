@@ -525,11 +525,12 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
   }
 
   private String normalizeAudioType(String type, boolean withFlash) {
+    String practice = AudioType.PRACTICE.toString();
     if (type.equals("avp")) {
-      type = AudioType.PRACTICE.toString();
+      type = practice;
     }
     else if (type.equals("flashcard")) {
-      type = AudioType.PRACTICE.toString();
+      type = practice;
     }
     else if (type.equals("regular_by_WebRTC")) {
       if (withFlash) logger.error("huh? says with flash but also " + type);
@@ -541,7 +542,10 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
     }
     else if (type.equals("practice_by_WebRTC")) {
       if (withFlash) logger.error("huh? says with flash but also " + type);
-      type = AudioType.PRACTICE.toString();
+      type = practice;
+    }
+    else if (type.startsWith("avp")) {
+      type = practice;
     }
     else {
       type = type.replaceAll("=", "_");

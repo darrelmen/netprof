@@ -96,6 +96,7 @@ public class CopyToPostgres<T extends CommonShell> {
         "egyptian",
         "english",
         "farsi",
+        "french",
         "german",
         "korean",
         "iraqi",
@@ -104,16 +105,20 @@ public class CopyToPostgres<T extends CommonShell> {
         "mandarin",
         "msa",
         "pashto",
-        "spanish",
+        "portuguese",
         "russian",
+        "spanish",
         "sudanese",
         "tagalog",
+        "turkish",
         "urdu");
+
     List<String> flags = Arrays.asList(
         "af",
         "eg",
         "us",
         "ir",
+        "fr",
         "de",
         "kr",
         "iq",
@@ -122,10 +127,12 @@ public class CopyToPostgres<T extends CommonShell> {
         "cn",
         "al",
         "af",
-        "es",
+        "pt",
         "ru",
+        "es",
         "ss",
         "ph",
+        "tr",
         "pk");
 
     int i = languages.indexOf(config.toLowerCase());
