@@ -224,6 +224,10 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 	 */
 	public void attachAudio(Collection<CommonExercise> all) {
     int projectid = all.isEmpty() ? -1: all.iterator().next().getProjectID();
+    logger.info("attachAudio (" + projectid +
+        ")" +
+        " attach audio to " + all.size() + " exercises");
+
     attachAudio.setExToAudio(audioDAO.getExToAudio(projectid));
 		int user = 0;
 		int examined = 0;

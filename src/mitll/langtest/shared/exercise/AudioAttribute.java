@@ -148,6 +148,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   public String getAudioRef() {
     return audioRef;
   }
+
   public void setAudioRef(String audioRef) {
     this.audioRef = audioRef;
   }
