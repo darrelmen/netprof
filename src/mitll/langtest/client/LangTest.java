@@ -168,6 +168,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private static final String DIVIDER = "|";
   private static final int MAX_EXCEPTION_STRING = 300;
   private static final int MAX_CACHE_SIZE = 100;
+  private static final boolean DEBUG = false;
 
   private UserManager userManager;
   private FlashRecordPanelHeadless flashRecordPanel;
@@ -511,7 +512,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
        * @see mitll.langtest.client.recorder.WebAudioRecorder
        */
       public void gotPermission() {
-       // logger.info("makeFlashContainer - got permission!");
+        // logger.info("makeFlashContainer - got permission!");
         hideFlash();
         checkLogin();
       }
@@ -614,7 +615,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    */
   private void checkInitFlash() {
     if (flashRecordPanel.gotPermission()) {
-      logger.info("checkInitFlash : initFlash - has permission");
+      if (DEBUG) logger.info("checkInitFlash : initFlash - has permission");
       checkLogin();
     } else {
       logger.info("checkInitFlash : initFlash - no permission yet");

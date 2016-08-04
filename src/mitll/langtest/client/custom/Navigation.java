@@ -515,7 +515,7 @@ public class Navigation implements RequiresResize, ShowTab {
   public void showInitialState() {
     addTabs();
     if (noPrevClickedTab()) {   // no previous tab
-      logger.info("showInitialState show initial state for " + getUser() + " no previous tab selection");
+     if (false) logger.info("showInitialState show initial state for " + getUser() + " no previous tab selection");
 //      reallyShowInitialState();
       showDefaultInitialTab(true);
 
