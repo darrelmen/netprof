@@ -63,6 +63,7 @@ public class UserManager {
   private final Logger logger = Logger.getLogger("UserManager");
 
   private static final long HOUR_IN_MILLIS = 1000 * 60 * 60;
+  private static final boolean DEBUG = false;
 
   private static final int DAY_HOURS = 24;
   private static final long WEEK_HOURS = DAY_HOURS * 7;
@@ -124,7 +125,7 @@ public class UserManager {
   private void login() {
     final int user = getUser();
     if (user != NO_USER_SET) {
-      logger.info("UserManager.login : current user : " + user);
+      //logger.info("UserManager.login : current user : " + user);
       //console("UserManager.login : current user : " + user);
       getPermissionsAndSetUser();
     } else {
@@ -162,7 +163,7 @@ public class UserManager {
    */
   private void getPermissionsAndSetUser(final String user, String passwordHash) {
     //console("getPermissionsAndSetUser : " + user);
-    logger.info("UserManager.getPermissionsAndSetUser " + user + " asking server for info...");
+    if (DEBUG) logger.info("UserManager.getPermissionsAndSetUser " + user + " asking server for info...");
     if (passwordHash == null) passwordHash = "";
     userServiceAsync.loginUser(user, passwordHash, new AsyncCallback<LoginResult>() {
       @Override
@@ -171,7 +172,7 @@ public class UserManager {
 
       @Override
       public void onSuccess(LoginResult result) {
-        logger.info("UserManager.getPermissionsAndSetUser : onSuccess " + user + " : " + result);
+        if (DEBUG) logger.info("UserManager.getPermissionsAndSetUser : onSuccess " + user + " : " + result);
 //        if (loginType == PropertyHandler.LOGIN_TYPE.ANONYMOUS && result.getUserKind() != User.Kind.ANONYMOUS) {
 //          clearUser();
 //          addAnonymousUser();
@@ -218,17 +219,17 @@ public class UserManager {
 
     userServiceAsync.addUser("anonymous", "", "", User.Kind.ANONYMOUS, Window.Location.getHref(), "", true, 0,
         "unknown", false, "browser", new AsyncCallback<User>() {
-      @Override
-      public void onFailure(Throwable caught) {
+          @Override
+          public void onFailure(Throwable caught) {
 
-      }
+          }
 
-      @Override
-      public void onSuccess(User result) {
-        setDefaultControlValues(result.getId());
-        storeUser(result);
-      }
-    });
+          @Override
+          public void onSuccess(User result) {
+            setDefaultControlValues(result.getId());
+            storeUser(result);
+          }
+        });
   }
 
   private void setDefaultControlValues(int user) {
@@ -419,7 +420,7 @@ public class UserManager {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
       userChosenID = user.getUserID();
       localStorageIfSupported.setItem(getUserIDCookie(), "" + user.getId());
-      localStorageIfSupported.setItem(getPassCookie(),   "" + user.getPasswordHash());
+      localStorageIfSupported.setItem(getPassCookie(), "" + user.getPasswordHash());
       localStorageIfSupported.setItem(getUserChosenID(), "" + userChosenID);
       rememberUserSessionEnd(localStorageIfSupported, futureMoment);
       // localStorageIfSupported.setItem(getLoginType(), "" + userType);
@@ -431,6 +432,7 @@ public class UserManager {
       userNotification.gotUser(user);
     }
   }
+
   /**
    * Only content developers can do quality control or record audio.
    * <p>

@@ -327,7 +327,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
    */
   protected void restoreListBoxState(SelectionState selectionState) {
 //    logger.info("restoreListBoxState restore " + selectionState);
-    ProjectStartupInfo startupInfo = controller.getStartupInfo();
+    ProjectStartupInfo startupInfo = controller.getProjectStartupInfo();
     Collection<String> typeOrder = startupInfo.getTypeOrder();
     sectionWidgetContainer.restoreListBoxState(selectionState, typeOrder);
   }

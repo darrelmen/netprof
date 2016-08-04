@@ -59,10 +59,15 @@ import mitll.langtest.client.result.ResultManager;
 import mitll.langtest.client.services.UserService;
 import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.client.user.*;
+import mitll.langtest.shared.StartupInfo;
+import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.user.SlimProject;
 import mitll.langtest.shared.user.User;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Logger;
 
 /**
@@ -87,6 +92,7 @@ public class InitialUI implements UILifecycle {
   protected final LifecycleSupport lifecycleSupport;
   protected final ExerciseController controller;
   protected final UserFeedback userFeedback;
+  protected final UserNotification userNotification;
   protected final PropertyHandler props;
 
   protected final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
@@ -95,7 +101,8 @@ public class InitialUI implements UILifecycle {
   private final Banner banner;
 
   protected Panel headerRow;
-  protected Panel firstRow;
+  protected Breadcrumbs breadcrumbs;
+  protected Panel contentRow;
   private Navigation navigation;
   private final BrowserCheck browserCheck = new BrowserCheck();
   private Container verticalContainer;
@@ -111,6 +118,7 @@ public class InitialUI implements UILifecycle {
     this.userManager = userManager;
     this.controller = langTest;
     userFeedback = langTest;
+    this.userNotification = langTest;
     banner = new Banner(props, userService, langTest, langTest);
   }
 
@@ -125,10 +133,10 @@ public class InitialUI implements UILifecycle {
     this.verticalContainer = verticalContainer;
     // header/title line
     // first row ---------------
-    Panel firstRow = makeFirstTwoRows(verticalContainer);
+    makeFirstTwoRows(verticalContainer);
 
     if (!showLogin()) {
-      populateBelowHeader(verticalContainer, firstRow);
+      populateBelowHeader(verticalContainer);
     }
     logger.info("----> populateRootPanel END   ------>");
   }
@@ -139,16 +147,20 @@ public class InitialUI implements UILifecycle {
    * @see #populateRootPanel()
    */
   protected Panel makeFirstTwoRows(Container verticalContainer) {
+    // add header row
     verticalContainer.add(headerRow = makeHeaderRow());
     headerRow.getElement().setId("headerRow");
 
-    Panel firstRow = new DivWidget();
-    firstRow.getElement().setId("firstRow");
+    //addBreadcrumbs(verticalContainer);
 
-    verticalContainer.add(firstRow);
-    this.firstRow = firstRow;
-    return firstRow;
+    Panel contentRow = new DivWidget();
+    contentRow.getElement().setId("contentRow");
+
+    verticalContainer.add(contentRow);
+    this.contentRow = contentRow;
+    return contentRow;
   }
+
 
   /**
    * @return
@@ -213,19 +225,25 @@ public class InitialUI implements UILifecycle {
 
   private class LogoutClickHandler implements ClickHandler {
     public void onClick(ClickEvent event) {
-      lifecycleSupport.logEvent("No widget", "UserLoging", "N/A", "User Logout by " + lastUser);
-      userService.logout(userManager.getUserID(), new AsyncCallback<Void>() {
-        @Override
-        public void onFailure(Throwable throwable) {
-
-        }
-
-        @Override
-        public void onSuccess(Void aVoid) {
-          resetState();
-        }
-      });
+      logout();
     }
+  }
+
+  private void logout() {
+    lifecycleSupport.logEvent("No widget", "UserLoging", "N/A", "User Logout by " + lastUser);
+
+    verticalContainer.remove(breadcrumbs);
+
+    userService.logout(userManager.getUserID(), new AsyncCallback<Void>() {
+      @Override
+      public void onFailure(Throwable throwable) {
+      }
+
+      @Override
+      public void onSuccess(Void aVoid) {
+        resetState();
+      }
+    });
   }
 
   /**
@@ -237,6 +255,16 @@ public class InitialUI implements UILifecycle {
     userManager.clearUser();
     lastUser = NO_USER_INITIAL;
     lifecycleSupport.recordingModeSelect();
+    clearContent();
+  }
+
+  private void clearContent() {
+    clearStartupInfo();
+    contentRow.clear();
+    contentRow.add(lifecycleSupport.getFlashRecordPanel()); // put back record panel
+  }
+
+  private void clearStartupInfo() {
     lifecycleSupport.clearStartupInfo();
   }
 
@@ -279,7 +307,7 @@ public class InitialUI implements UILifecycle {
 
         public void onSuccess() {
           ResultManager resultManager = new ResultManager(service, props.getNameForAnswer(),
-              lifecycleSupport.getStartupInfo().getTypeOrder(), outer, controller);
+              lifecycleSupport.getProjectStartupInfo().getTypeOrder(), outer, controller);
           resultManager.showResults();
         }
       });
@@ -323,12 +351,12 @@ public class InitialUI implements UILifecycle {
    * * TODO : FIX ME for headstart
    *
    * @param verticalContainer
-   * @param firstRow          where we put the flash permission window if it gets shown
+   * @paramx contentRow        where we put the flash permission window if it gets shown
    * @seex #handleCDToken(com.github.gwtbootstrap.client.ui.Container, com.google.gwt.user.client.ui.Panel, String, String)
    * @see #populateRootPanel()
    * @see #showLogin()
    */
-  protected void populateBelowHeader(Container verticalContainer, Panel firstRow) {
+  protected void populateBelowHeader(Container verticalContainer) {
     if (showOnlyOneExercise()) {
       Panel currentExerciseVPanel = new FlowPanel();
       currentExerciseVPanel.getElement().setId("currentExercisePanel");
@@ -341,27 +369,65 @@ public class InitialUI implements UILifecycle {
       /**
        * {@link #makeFlashContainer}
        */
-      firstRow.add(lifecycleSupport.getFlashRecordPanel());
+      contentRow.add(lifecycleSupport.getFlashRecordPanel());
     }
     lifecycleSupport.recordingModeSelect();
-
+    //  addBreadcrumbs();
     //  addNavigationToMainContent();
     makeNavigation();
     addResizeHandler();
   }
 
-  private void addNavigationToMainContent() {
-    makeNavigation();
-
-    //showNavigation(firstRow);
+  private void addBreadcrumbs() {
+    verticalContainer.insert(breadcrumbs = getBreadcrumbs(), 1);
   }
 
+  /**
+   * Breadcrumb shows sequence of choices - who - languge - course (FL100 or FL200 or FL300) Elementary FL/Intermediate FL/Advanced FL - what do you want to do
+   */
   private void showNavigation() {
-    if (firstRow.getElement().getChildCount() == 1) {
-      firstRow.add(navigation.getTabPanel());
+    if (contentRow.getElement().getChildCount() == 1) {
+      contentRow.add(navigation.getTabPanel());
     } else {
-      logger.info("first row has " + firstRow.getElement().getChildCount() + " child(ren)");
+      logger.info("first row has " + contentRow.getElement().getChildCount() + " child(ren)");
     }
+  }
+
+  private Breadcrumbs getBreadcrumbs() {
+    logger.info("getBreadcrumbs --->");
+
+    Breadcrumbs crumbs = new Breadcrumbs(">");
+    crumbs.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
+    NavLink home = new NavLink("Home");
+
+    home.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent clickEvent) {
+        logout();
+      }
+    });
+    crumbs.add(home);
+
+    User current = controller.getCurrent();
+    if (current != null) {
+      NavLink me = new NavLink(current.getUserID());
+      me.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent clickEvent) {
+          breadcrumbs = getBreadcrumbs();
+          crumbs.clear();
+          clearStartupInfo();
+        }
+      });
+      crumbs.add(me);
+      logger.info("getBreadcrumbs adding step for " + current);
+
+      ProjectStartupInfo startupInfo = lifecycleSupport.getProjectStartupInfo();
+    } else {
+      logger.info("getBreadcrumbs no current user --- ????");
+    }
+
+    return crumbs;
   }
 
   private void makeNavigation() {
@@ -428,7 +494,7 @@ public class InitialUI implements UILifecycle {
     // check if we're here as a result of resetting a password
     final String resetPassToken = props.getResetPassToken();
     if (!resetPassToken.isEmpty()) {
-      handleResetPass(verticalContainer, firstRow, eventRegistration, resetPassToken);
+      handleResetPass(verticalContainer, contentRow, eventRegistration, resetPassToken);
       return true;
     }
 
@@ -436,7 +502,7 @@ public class InitialUI implements UILifecycle {
     final String cdToken = props.getCdEnableToken();
     if (!cdToken.isEmpty()) {
       logger.info("showLogin token '" + resetPassToken + "' for enabling cd user");
-      handleCDToken(verticalContainer, firstRow, cdToken, props.getEmailRToken());
+      handleCDToken(verticalContainer, contentRow, cdToken, props.getEmailRToken());
       return true;
     }
 
@@ -454,7 +520,7 @@ public class InitialUI implements UILifecycle {
   }
 
   private void showLogin(EventRegistration eventRegistration) {
-    firstRow.add(new UserPassLogin(service, userService, props, userManager, eventRegistration).getContent());
+    contentRow.add(new UserPassLogin(service, userService, props, userManager, eventRegistration).getContent());
     clearPadding(verticalContainer);
     RootPanel.get().add(verticalContainer);
     banner.setCogVisible(false);
@@ -473,7 +539,7 @@ public class InitialUI implements UILifecycle {
         if (result == null || result < 0) {
           logger.info("token '" + resetPassToken + "' is stale. Showing normal view");
           trimURL();
-          populateBelowHeader(verticalContainer, firstRow);
+          populateBelowHeader(verticalContainer);
         } else {
           firstRow.add(new ResetPassword(service, props, eventRegistration).getResetPassword(resetPassToken));
           clearPadding(verticalContainer);
@@ -507,7 +573,7 @@ public class InitialUI implements UILifecycle {
         if (result == null) {
           logger.info("handleCDToken enable - token " + cdToken + " is stale. Showing normal view");
           trimURL();
-          populateBelowHeader(verticalContainer, firstRow);
+          populateBelowHeader(verticalContainer);
         } else {
           firstRow.add(new Heading(2, "OK, content developer <u>" + result + "</u> has been approved."));
           firstRow.addStyleName("leftFiveMargin");
@@ -597,10 +663,11 @@ public class InitialUI implements UILifecycle {
 //    logger.info("configureUIGivenUser : user changed - new " + userID + " vs last " + lastUser +
 //        " audio type " + getAudioType() + " perms " + getPermissions());
     // populateRootPanelIfLogin();
-    if (lifecycleSupport.getStartupInfo() == null) {
+    if (lifecycleSupport.getProjectStartupInfo() == null) {
       addProjectChoices();
     } else {
       logger.info("\tconfigureUIGivenUser : " + userID + " get exercises...");
+      addBreadcrumbs();
       showNavigation();
       navigation.showInitialState();
       showUserPermissions(userID);
@@ -608,7 +675,10 @@ public class InitialUI implements UILifecycle {
   }
 
   private void addProjectChoices() {
+    StartupInfo startupInfo = lifecycleSupport.getStartupInfo();
 
+    showProjectChoices(startupInfo.getProjects(),0);
+/*
     userService.getProjects(new AsyncCallback<List<SlimProject>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -616,121 +686,121 @@ public class InitialUI implements UILifecycle {
 
       @Override
       public void onSuccess(List<SlimProject> result) {
-//        projects = result;
-//        projectChoices.clear();
-//        projectChoices.addItem("Choose a Language");
-
-        final Container flags = new Container();
-        final Section section = new Section("section");
-        section.add(flags);
-        firstRow.add(section);
-
-        //   Row current = new Row();
-        Panel current = new Thumbnails();
-        flags.add(current);
-        int numInRow = 4;
-        logger.info("got " + result.size() + "-------- ");
-        for (int i = 0; i < result.size(); i += numInRow) {
-
-          int max = i + numInRow;
-          if (max > result.size()) max = result.size();
-          for (int j = i; j < max; j++) {
-            //Column child = new Column(1);
-            //current.add(child);
-            Panel langIcon = getLangIcon(result, j);
-            //child.add(langIcon);
-            current.add(langIcon);
-          }
-
-          current = new Row();
-          flags.add(current);
-        }
-
+        showProjectChoices(result, 0);
       }
     });
+*/
   }
 
+  private void showProjectChoices(List<SlimProject> result, int nest) {
+    Map<String, SlimProject> langToProject = new TreeMap<>();
+    for (SlimProject project : result) {
+//      List<SlimProject> slimProjects = langToProject.get(project.getLanguage());
+//      if (slimProjects == null) langToProject.put(project.getLanguage(), slimProjects = new ArrayList<>());
+//      slimProjects.add(project);
+      langToProject.put(project.getLanguage(), project);
+    }
 
-  private Panel getLangIcon(List<SlimProject> result, int j) {
-    SlimProject choice = result.get(j);
-    Panel imageAnchor = getImageAnchor(choice.getName(), choice.getCountryCode());
-    //  addClickHandler(samples, choice, imageAnchor);
+    final Container flags = new Container();
+    final Section section = new Section("section");
+    section.add(flags);
+    contentRow.add(section);
+
+    //   Row current = new Row();
+    Panel current = new Thumbnails();
+    flags.add(current);
+    int numInRow = 4;
+    List<String> languages = new ArrayList<String>(langToProject.keySet());
+//    for (SlimProject project : result) {
+//      languages.add(project.getLanguage());
+//    }
+//    Collections.sort(languages);
+    int size = languages.size();
+    logger.info("addProjectChoices " + size + "-------- ");
+    for (int i = 0; i < size; i += numInRow) {
+      int max = i + numInRow;
+      if (max > size) max = size;
+      for (int j = i; j < max; j++) {
+        String lang = languages.get(j);
+        Panel langIcon = getLangIcon(lang, langToProject.get(lang), nest);
+        current.add(langIcon);
+      }
+
+      current = new Row();
+      flags.add(current);
+    }
+  }
+
+  private Panel getLangIcon(String lang, SlimProject projectForLang, int nest) {
+    String lang1 = nest == 0 ? lang : projectForLang.getName();
+    Panel imageAnchor = getImageAnchor(lang1, projectForLang);
     return imageAnchor;
   }
 
-/*  private void addClickHandler(final Container samples, final LIDResp choice, ImageAnchor imageAnchor) {
-    imageAnchor.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        String code = choice.getCode();
-        //    logger.info("got click on " + code);
-        LLClassDemoService.App.getInstance().getSamplesFor(code, new AsyncCallback<List<LIDSample>>() {
-          @Override
-          public void onFailure(Throwable caught) {
-          }
+  private List<NavLink> crumbs = new ArrayList<>();
 
-          @Override
-          public void onSuccess(List<LIDSample> result) {
-            samples.clear();
-            ScrollPanel scrollPanel = new ScrollPanel();
-            samples.add(scrollPanel);
-            Container inside = new Container();
-            scrollPanel.add(inside);
+  /**
+   * TODO : Consider arbitrarily deep nesting...
+   * @param name
+   * @param projectForLang
+   * @return
+   */
+  private Panel getImageAnchor(String name, SlimProject projectForLang) {
+    int nest = 1;
 
-            //      logger.info("Adding " + result.size() + " items");
-            for (LIDSample sample : result) {
-              Row current = new Row();
-
-              inside.add(current);
-
-              Column truthCol = new Column(ColumnSize.MD_1);
-              current.add(truthCol);
-
-              MediaList truthMediaList = new MediaList();
-              getImageAnchor(sample.getTruth(), truthMediaList, false, true);
-              truthCol.add(truthMediaList);
-
-              Column tweet = new Column(ColumnSize.MD_8);
-              current.add(tweet);
-
-              Heading tweetHeading = new Heading(HeadingSize.H4, sample.getTweet());
-              tweet.add(tweetHeading);
-
-              Column scoreCol = new Column(ColumnSize.MD_1);
-              current.add(scoreCol);
-
-              MediaList mediaList = new MediaList();
-              getImageAnchor(sample.getScore(), mediaList, false, false);
-              scoreCol.add(mediaList);
-            }
-          }
-        });
-      }
-    });
-  }*/
-
-  private Panel getImageAnchor(String name, String cc) {
-    // ListItem listItem = new ListItem();
-    //    listItem.getElement().setId("listItemFor_" + choice.getCode());
-//    listItem.setMarginLeft(5);
-
-    // MediaBody mediaBody = new MediaBody();
-    Heading child1 = new Heading(5, name);//choice.getLabel());
+    Heading child1 = new Heading(5, name);
     Thumbnail widgets = new Thumbnail();
     widgets.setSize(2);
-    //FocusPanel widgets= new FocusPanel();
-//    child1.setMarginTop(5);
-    // mediaBody.add(child1);
+    int projid = projectForLang.getProjectid();
+    String cc = projectForLang.getCountryCode();
 
     Image imageAnchor = new Image("langtest/cc/" + cc + ".png");
     PushButton button = new PushButton(imageAnchor);
-    //button.getUpFace().setText(name);
-
+    button.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent clickEvent) {
+        NavLink w = new NavLink(name);
+        breadcrumbs.add(w);
+        crumbs.add(w);
+        List<SlimProject> children = projectForLang.getChildren();
+        if (children.size() == 1) {
+          setProjectForUser(projid);
+        } else {
+          w.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent clickEvent) {
+              breadcrumbs.remove(crumbs.get(crumbs.size() - 1));
+              clearContent();
+              addProjectChoices();
+            }
+          });
+          clearContent();
+          showProjectChoices(children, nest);
+        }
+      }
+    });
     widgets.add(button);
     widgets.add(child1);
 
-
     return widgets;
+  }
+
+  private void setProjectForUser(int projectid) {
+    // int projectid = project1.getProjectid();
+    logger.info("setProjectForUser set project to " + projectid);
+    userService.setProject(projectid, new AsyncCallback<User>() {
+      @Override
+      public void onFailure(Throwable throwable) {
+
+      }
+
+      @Override
+      public void onSuccess(User aUser) {
+        userNotification.setProjectStartupInfo(aUser);
+        logger.info("set project for " + aUser + " show initial state");
+        navigation.showInitialState();
+      }
+    });
   }
 
 //  private ImageAnchor getImageAnchor(/*LIDResp choice*/) {
@@ -749,13 +819,13 @@ public class InitialUI implements UILifecycle {
    * @see #configureUIGivenUser(long) (long)
    */
   protected void populateRootPanelIfLogin() {
-    int childCount = firstRow.getElement().getChildCount();
+    int childCount = contentRow.getElement().getChildCount();
 
-    logger.info("populateRootPanelIfLogin root " + firstRow.getElement().getNodeName() + " childCount " + childCount);
+    logger.info("populateRootPanelIfLogin root " + contentRow.getElement().getNodeName() + " childCount " + childCount);
     if (childCount > 0) {
-      Node child = firstRow.getElement().getChild(0);
+      Node child = contentRow.getElement().getChild(0);
       Element as = Element.as(child);
-      logger.info("populateRootPanelIfLogin found : '" + as.getId() + "'");
+      if (false) logger.info("populateRootPanelIfLogin found : '" + as.getId() + "'");
 
       if (as.getId().contains(LOGIN)) {
         logger.info("populateRootPanelIfLogin found login...");

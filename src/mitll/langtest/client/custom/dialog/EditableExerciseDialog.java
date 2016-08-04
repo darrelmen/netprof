@@ -122,7 +122,7 @@ class EditableExerciseDialog extends NewUserExercise {
       flow.getElement().setId("addItemsAtTop_unitLesson");
       flow.addStyleName("leftFiveMargin");
 
-      for (String type : controller.getStartupInfo().getTypeOrder()) {
+      for (String type : controller.getProjectStartupInfo().getTypeOrder()) {
         Heading child = new Heading(4, type, newUserExercise.getUnitToValue().get(type));
         child.addStyleName("rightFiveMargin");
         flow.add(child);
