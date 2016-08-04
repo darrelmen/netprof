@@ -65,6 +65,7 @@ public class AudioExercise extends ExerciseShell {
 
   public AudioExercise(@Deprecated String oldID, int id, int projectid) {
     super(oldID, id);
+    this.projectid = projectid;
   }
 
   public String getRefAudio() {
@@ -498,12 +499,13 @@ public class AudioExercise extends ExerciseShell {
     return audioAttributes.remove(audioAttribute.getKey()) != null;
   }
 
-  public String toString() {
-    return super.toString() + " audio attr (" + getAudioAttributes().size() +
-        ") :" + getAudioAttributes() + " and " + fieldToAnnotation + " annotations, unit/lesson " + getUnitToValue();
-  }
-
   public int getProjectID() {
     return projectid;
+  }
+
+  public String toString() {
+    return super.toString() +
+        " audio attr (" + getAudioAttributes().size() +
+        ") :" + getAudioAttributes() + " and " + fieldToAnnotation + " annotations, unit/lesson " + getUnitToValue();
   }
 }
