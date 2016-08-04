@@ -33,9 +33,8 @@
 package mitll.langtest.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.shared.project.ProjectInfo;
+import mitll.langtest.shared.user.SlimProject;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -50,20 +49,21 @@ import java.util.Map;
  */
 public class StartupInfo implements IsSerializable {
   private Map<String, String> properties;
-  private List<ProjectInfo> projects;
+  private List<SlimProject> projects;
   private String message = "";
 
-  public StartupInfo() {} // for serialization
+  public StartupInfo() {
+  } // for serialization
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getStartupInfo()
    * @param properties
    * @paramx typeOrder
    * @paramx sectionNodes
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getStartupInfo()
    */
   public StartupInfo(Map<String, String> properties,
-                     List<ProjectInfo> projects,
-                     String message/*, Collection<String> typeOrder, Collection<SectionNode> sectionNodes*/) {
+                     List<SlimProject> projects,
+                     String message) {
     this.properties = properties;
     this.projects = projects;
     this.message = message;
@@ -74,21 +74,11 @@ public class StartupInfo implements IsSerializable {
     return properties;
   }
 
-  public List<ProjectInfo> getProjects() {
+  public List<SlimProject> getProjects() {
     return projects;
   }
 
   public String getMessage() {
     return message;
   }
-
-/*  public Collection<String> getTypeOrder() {
-    return typeOrder;
-  }
-
-  public Collection<SectionNode> getSectionNodes() {
-    return sectionNodes;
-  }
-
-  public String toString() { return "Order " + getTypeOrder() + " nodes " + getSectionNodes(); }*/
 }

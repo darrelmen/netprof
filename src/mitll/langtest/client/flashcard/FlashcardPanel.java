@@ -140,7 +140,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
 
     Panel contentMiddle = getCardContent();
     DivWidget firstRow = getFirstRow(controller);
-    //  contentMiddle.add(firstRow);
+    //  contentMiddle.add(contentRow);
     DivWidget cardPrompt = getCardPrompt(e);
     cardPrompt.insert(firstRow, 0);
     getMiddlePrompt(cardPrompt, contentMiddle, inner2);
@@ -299,7 +299,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
     int rows = lowestRow != null ? basicNumRows + 1 : basicNumRows;
     Grid grid = new Grid(rows, 1);
     int row = 0;
-    //grid.setWidget(row++, 0, firstRow);
+    //grid.setWidget(row++, 0, contentRow);
     grid.setWidget(row++, 0, contentMiddle);
     grid.setWidget(row++, 0, belowDiv);
     if (lowestRow != null) grid.setWidget(row++, 0, lowestRow);

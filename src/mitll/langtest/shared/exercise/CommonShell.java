@@ -44,6 +44,7 @@ public interface CommonShell extends Shell {
   String getEnglish();
   String getMeaning();
   String getForeignLanguage();
+  String getAltFL();
   String getTransliteration();
 
   int getDominoID();
