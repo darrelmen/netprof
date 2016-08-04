@@ -77,6 +77,9 @@ public class AttachAudio {
     this.mediaDir = mediaDir;
     // this.mediaDir1 = mediaDir1;
      this.mediaDir1 = "";
+
+    logger.info("media dir " + mediaDir + " " + mediaDir1);
+
     this.installPath = installPath;
     this.setExToAudio(exToAudio);
     this.audioOffset = audioOffset;
