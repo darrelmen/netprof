@@ -34,19 +34,23 @@ package mitll.langtest.shared.project;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class ProjectInfo implements IsSerializable {
-private String language;
-  private int projectid;
+import java.util.ArrayList;
+import java.util.List;
 
-  public ProjectInfo() {} // for serialization
+public class ProjectInfo implements IsSerializable {
+  private String name;
+  private String language;
+  private String course;
+  private int projectid;
+  private List<ProjectInfo> children = new ArrayList<>();
+
+  public ProjectInfo() {
+  } // for serialization
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getStartupInfo()
-   * @param properties
-   * @param typeOrder
-   * @param sectionNodes
    */
-  public ProjectInfo(String language, int projectid) {
+  public ProjectInfo(int projectid, String language, String name, String course) {
     this.language = language;
     this.projectid = projectid;
   }
@@ -57,5 +61,13 @@ private String language;
 
   public int getProjectid() {
     return projectid;
+  }
+
+  public void addChild(ProjectInfo projectInfo) {
+    children.add(projectInfo);
+  }
+
+  public List<ProjectInfo> getChildren() {
+    return children;
   }
 }

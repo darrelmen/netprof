@@ -98,7 +98,7 @@ public interface ExerciseController extends EventRegistration {
   String logException(Throwable throwable);
   void logMessageOnServer(String message, String prefix);
 
-  ProjectStartupInfo getStartupInfo();
+  ProjectStartupInfo getProjectStartupInfo();
   Collection<String> getTypeOrder();
 
   void addKeyListener(KeyPressHelper.KeyListener listener);

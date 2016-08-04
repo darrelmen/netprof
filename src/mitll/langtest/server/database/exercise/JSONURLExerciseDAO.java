@@ -167,7 +167,6 @@ public class JSONURLExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<C
 
     exercise.setUpdateTime(getUpdateTimestamp(updateTime, npDID));
     //if (!isLegacy) logger.info("NOT LEGACY " + exercise);
-
     addUnitAndChapterInfo(metadata, exercise);
 
     return exercise;
@@ -199,13 +198,18 @@ public class JSONURLExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<C
     }
   }
 
+  /**
+   * TODO : include alt fl field - e.g mandarin simpified/traditional, serbo-croatian
+   * @param content
+   * @param exercise
+   */
   private void addContextSentences(JSONObject content, Exercise exercise) {
     JSONObject contextSentences = content.getJSONObject("q-lst");
     for (Object key : contextSentences.keySet()) {
       JSONObject pair = contextSentences.getJSONObject(key.toString());
       String stem = pair.getString("stem");
       String trans = pair.getString("trans");
-      exercise.addContext(stem, trans);
+      exercise.addContext(stem, "", trans);
     }
   }
 
