@@ -155,9 +155,9 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
   }
 
   private void getTypeOrder(final FluidContainer container) {
-    typeOrder = controller.getStartupInfo().getTypeOrder();
+    typeOrder = controller.getProjectStartupInfo().getTypeOrder();
     // logger.info("type order is " +typeOrder);
-    addButtonRow(controller.getStartupInfo().getSectionNodes(), container, typeOrder);
+    addButtonRow(controller.getProjectStartupInfo().getSectionNodes(), container, typeOrder);
   }
 
 /*  @Override

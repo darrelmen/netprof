@@ -100,7 +100,7 @@ class WordContainer extends SimplePagingContainer<WordScore> implements Analysis
   WordContainer(ExerciseController controller, AnalysisPlot plot, ShowTab learnTab, Heading w) {
     super(controller);
     spanish = controller.getLanguage().equalsIgnoreCase("Spanish");
-    sorter = new ExerciseComparator();//controller.getStartupInfo().getTypeOrder());
+    sorter = new ExerciseComparator();//controller.getProjectStartupInfo().getTypeOrder());
     this.plot = plot;
     plot.addListener(this);
     this.learnTab = learnTab;

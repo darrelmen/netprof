@@ -236,7 +236,7 @@ public class EditItem {
    * @return
    */
   private CommonExercise getNewItem() {
-    return new UserExercise(NEW_EXERCISE_ID, userManager.getUser(), NEW_ITEM, controller.getStartupInfo().getProjectid());
+    return new UserExercise(NEW_EXERCISE_ID, userManager.getUser(), NEW_ITEM, controller.getProjectStartupInfo().getProjectid());
   }
 
   private void setFactory(final PagingExerciseList<CommonShell, CommonExercise> exerciseList,
@@ -313,7 +313,7 @@ public class EditItem {
   private UserExercise createNewItem(int userid, String listName) {
     long now = System.currentTimeMillis();
     return new UserExercise(-1, UserExercise.CUSTOM_PREFIX + "_" + listName + "_" + userid + "_" + now, userid, "", "", "",
-        controller.getStartupInfo().getProjectid());
+        controller.getProjectStartupInfo().getProjectid());
   }
 
   /**

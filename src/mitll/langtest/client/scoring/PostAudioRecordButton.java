@@ -122,7 +122,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     AudioContext audioContext = new AudioContext(
         reqid,
         controller.getUser(),
-        controller.getStartupInfo().getProjectid(),
+        controller.getProjectStartupInfo().getProjectid(),
         getExerciseID(),
         index,
         getAudioType());
