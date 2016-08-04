@@ -542,15 +542,6 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   }
 
   /**
-   * @param projectid
-   * @return
-   */
-/*  public Collection<SectionNode> getSectionNodes(int projectid) {
-    SectionHelper<?> sectionHelper = (isAmas()) ? getAMASSectionHelper() : getSectionHelper(projectid);
-    return sectionHelper.getSectionNodes();
-  }*/
-
-  /**
    * @param id
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getResultASRInfo
@@ -558,9 +549,6 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
    * @see #deleteItem(int, int)
    * @see #getCustomOrPredefExercise(int, int)
    */
-/*  @Deprecated  public CommonExercise getExercise(int id) {
-    return getFirstExerciseDAO().getExercise(id);
-  }*/
   public CommonExercise getExercise(int projectid, int id) {
     Project project = getProjectOrFirst(projectid);
     return project.getExercise(id);
@@ -618,18 +606,6 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   }
 
   /**
-   * @param loggedInUser
-   * @param projectid
-   * @see mitll.langtest.server.services.UserServiceImpl#userExists
-   */
- /* public void rememberUserSelectedProject(User loggedInUser, int projectid) {
-    Project project = getProject(projectid);
-    logger.info("rememberUserSelectedProject user " + loggedInUser + " -> " + projectid + " : " + project);
-    rememberProject(loggedInUser.getId(), projectid);
-    setStartupInfo(loggedInUser);
-  }*/
-
-  /**
    * Make sure there's a favorites list per user per project
    *
    * @param userid
@@ -670,15 +646,6 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
       logger.info("setStartupInfo : For " + userWhere + " Set startup info " + startupInfo);
       userWhere.setStartupInfo(startupInfo);
     }
-  }
-
-  /**
-   * Sometimes any exercise dao will do.
-   *
-   * @return
-   */
-  private ExerciseDAO<CommonExercise> getFirstExerciseDAO() {
-    return getFirstProject().getExerciseDAO();
   }
 
   private Project getFirstProject() {
