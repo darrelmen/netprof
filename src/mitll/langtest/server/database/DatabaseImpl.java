@@ -637,8 +637,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
    * @see mitll.langtest.server.services.UserServiceImpl#setProject
    */
   public void rememberProject(int userid, int projectid) {
-    logger.info("rememberProject user " + userid + " -> " + projectid);
-
+  //  logger.info("rememberProject user " + userid + " -> " + projectid);
     getUserProjectDAO().add(userid, projectid);
     getUserListManager().createFavorites(userid, projectid);
   }
@@ -648,8 +647,18 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     setStartupInfo(userWhere, i);
   }
 
+  public void forgetProject(int userid) {
+    getUserProjectDAO().forget(userid);
+  }
+
+  /**
+   * @see #setStartupInfo(User)
+   * @see mitll.langtest.server.services.UserServiceImpl#setProject(int)
+   * @param userWhere
+   * @param projid
+   */
   public void setStartupInfo(User userWhere, int projid) {
-    logger.info("setStartupInfo : For " + userWhere + " projid " + projid);
+    logger.info("setStartupInfo : For user " + userWhere + " projid " + projid);
 
     if (projid == -1) {
       logger.info("For " + userWhere + " no current project.");
@@ -1364,6 +1373,8 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
    * @see DatabaseImpl#configureProject(String, String, Project)
    */
   public Map<Integer, String> getExerciseIDToRefAudio(int projectid) {
+    logger.info("getExerciseIDToRefAudio for " +projectid);
+
     Map<Integer, String> join = new HashMap<>();
     populateIDToRefAudio(join, getExercises(projectid));
 

@@ -140,4 +140,6 @@ public interface UserService extends RemoteService {
    * @return
    */
   String enableCDUser(String cdToken, String emailR, String url);
+
+  void forgetProject();
 }

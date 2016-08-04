@@ -70,6 +70,12 @@ public class UserProjectDAO implements IUserProjectDAO {
   }
 
   @Override
+  public void forget(int userid) {
+    dao.forget(userid);
+  }
+
+
+  @Override
   public Collection<SlickUserProject> getAll() {
     return dao.getAll();
   }
@@ -77,7 +83,7 @@ public class UserProjectDAO implements IUserProjectDAO {
   @Override
   public int mostRecentByUser(int user) {
     List<SlickUserProject> slickUserProjects = dao.mostRecentByUser(user);
-    logger.info("mostRecentByUser most recent project for " +user + " are " + slickUserProjects);
+ //   logger.info("mostRecentByUser most recent project for " +user + " are " + slickUserProjects);
     return slickUserProjects.isEmpty() ? -1 : slickUserProjects.iterator().next().projid();
   }
 
