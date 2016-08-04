@@ -534,7 +534,7 @@ public class UserPassLogin extends UserDialog {
                   eventRegistration.logEvent(user.box, "UserNameBox", "N/A", "existing legacy user " + result.toStringShort());
                   copyInfoToSignUp(result);
                 }
-    /*            int projectid = result.getStartupInfo().getProjectid();
+    /*            int projectid = result.getProjectStartupInfo().getProjectid();
                 for (SlimProject project1 : projects) {
                   if (project1.getProjectid() == projectid) {
                     projectChoice.setSelectedValue(project1.getLanguage());   // TODO : do something better for pashto

@@ -400,6 +400,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 		setAudioDAO(audioDAO, mediaDir, installPath, projid);
 	}
 
+	int warns = 0;
 	/**
 	 * Worries about colliding with add and remove on the idToExercise map.
 	 * NO database interaction - just map lookup by id.
@@ -412,7 +413,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 		synchronized (this) {
       CommonExercise commonExercise = idToExercise.get(id);
       if (commonExercise == null) {
-        logger.warn("couldn't find exercise " +id + " in " + idToExercise.size());
+        if (warns++ < 50) logger.warn("couldn't find exercise " +id + " in " + idToExercise.size());
       }
       return commonExercise;
 		}
