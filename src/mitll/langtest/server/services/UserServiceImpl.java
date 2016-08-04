@@ -339,7 +339,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
 
   /**
    * @param projectid
-   * @see Banner#populateListChoices
+   * @see mitll.langtest.client.InitialUI#setProjectForUser(int)
    */
   public User setProject(int projectid) {
     try {
@@ -353,6 +353,18 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     } catch (DominoSessionException e) {
       logger.error("got " + e, e);
       return null;
+    }
+  }
+
+  @Override
+  public void forgetProject() {
+    try {
+      User sessionUser = getSessionUser();
+      if (sessionUser != null) {
+        db.forgetProject(sessionUser.getId());
+      }
+    } catch (DominoSessionException e) {
+      logger.error("got  " +e,e);
     }
   }
 }

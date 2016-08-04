@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.exercise;
 
+import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.AudioExercise;
@@ -49,202 +50,219 @@ import java.util.*;
  * @since 11/10/15.
  */
 public class AttachAudio {
-	private static final Logger logger = Logger.getLogger(AttachAudio.class);
-	private static final String FAST_WAV = "Fast" + ".wav";
-	private static final String SLOW_WAV = "Slow" + ".wav";
+  private static final Logger logger = Logger.getLogger(AttachAudio.class);
+  private static final String FAST_WAV = "Fast" + ".wav";
+  private static final String SLOW_WAV = "Slow" + ".wav";
 
-	private int missingExerciseCount = 0;
-	private int c = 0;
-	private final int audioOffset;
-	private final String mediaDir, mediaDir1;
-	private final File installPath;
-	private Map<Integer, List<AudioAttribute>> exToAudio;
+  private int missingExerciseCount = 0;
+  private int c = 0;
+  private final int audioOffset;
+  private final String mediaDir, mediaDir1;
+  private final File installPath;
+  private Map<Integer, List<AudioAttribute>> exToAudio;
 
-	/**
-	 * @param mediaDir
-	 * @param mediaDir1
-	 * @param installPath
-	 * @param audioOffset
-	 * @param exToAudio
-	 * @see BaseExerciseDAO#setAudioDAO
-	 */
-	public AttachAudio(String mediaDir,
-										 String mediaDir1,
-										 File installPath,
-										 int audioOffset,
-										 Map<Integer, List<AudioAttribute>> exToAudio) {
-		this.mediaDir = mediaDir;
-		this.mediaDir1 = mediaDir1;
-		this.installPath = installPath;
-		this.setExToAudio(exToAudio);
-		this.audioOffset = audioOffset;
-	}
+  /**
+   * @param mediaDir
+   * @param mediaDir1
+   * @param installPath
+   * @param audioOffset
+   * @param exToAudio
+   * @see BaseExerciseDAO#setAudioDAO
+   */
+  public AttachAudio(String mediaDir,
+                     String mediaDir1,
+                     File installPath,
+                     int audioOffset,
+                     Map<Integer, List<AudioAttribute>> exToAudio) {
+    this.mediaDir = mediaDir;
+    this.mediaDir1 = mediaDir1;
+    this.installPath = installPath;
+    this.setExToAudio(exToAudio);
+    this.audioOffset = audioOffset;
+  }
 
-	/**
-	 * Go looking for audio in the media directory ("bestAudio") and if there's a file there
-	 * under a matching exercise id, attach Fast and/or slow versions to this exercise.
-	 * <p>
-	 * Can override audio file directory with a non-empty refAudioIndex.
-	 * <p>
-	 * Also uses audioOffset - audio index is an integer.
-	 *
-	 * @param refAudioIndex override place to look for audio
-	 * @param imported      to attach audio to
-	 * @see ExcelImport#getExercise
-	 */
-	public <T extends AudioExercise> void addOldSchoolAudio(String refAudioIndex, T imported) {
-		int id = imported.getID();
-		String audioDir = refAudioIndex.length() > 0 ? findBest(refAudioIndex) : ""+id;
-		if (audioOffset != 0) {
-			audioDir = "" + (Integer.parseInt(audioDir.trim()) + audioOffset);
-		}
+  /**
+   * Go looking for audio in the media directory ("bestAudio") and if there's a file there
+   * under a matching exercise id, attach Fast and/or slow versions to this exercise.
+   * <p>
+   * Can override audio file directory with a non-empty refAudioIndex.
+   * <p>
+   * Also uses audioOffset - audio index is an integer.
+   *
+   * @param refAudioIndex override place to look for audio
+   * @param imported      to attach audio to
+   * @see ExcelImport#getExercise
+   */
+  public <T extends AudioExercise> void addOldSchoolAudio(String refAudioIndex, T imported) {
+    int id = imported.getID();
+    String audioDir = refAudioIndex.length() > 0 ? findBest(refAudioIndex) : "" + id;
+    if (audioOffset != 0) {
+      audioDir = "" + (Integer.parseInt(audioDir.trim()) + audioOffset);
+    }
 
-		String parentPath = mediaDir + File.separator + audioDir + File.separator;
-		String fastAudioRef = parentPath + FAST_WAV;
-		String slowAudioRef = parentPath + SLOW_WAV;
+    String parentPath = mediaDir + File.separator + audioDir + File.separator;
+    String fastAudioRef = parentPath + FAST_WAV;
+    String slowAudioRef = parentPath + SLOW_WAV;
 
-		File test = new File(fastAudioRef);
-		boolean exists = test.exists();
-		if (!exists) {
-			test = new File(installPath, fastAudioRef);
-			exists = test.exists();
-		}
-		if (exists) {
-			imported.addAudioForUser(ensureForwardSlashes(fastAudioRef), BaseUserDAO.DEFAULT_USER);
-		}
+    File test = new File(fastAudioRef);
+    boolean exists = test.exists();
+    if (!exists) {
+      test = new File(installPath, fastAudioRef);
+      exists = test.exists();
+    }
+    if (exists) {
+      imported.addAudioForUser(ensureForwardSlashes(fastAudioRef), BaseUserDAO.DEFAULT_USER);
+    }
 
-		test = new File(slowAudioRef);
-		exists = test.exists();
-		if (!exists) {
-			test = new File(installPath, slowAudioRef);
-			exists = test.exists();
-		}
-		if (exists) {
-			imported.addAudio(new AudioAttribute(ensureForwardSlashes(slowAudioRef), BaseUserDAO.DEFAULT_USER).markSlow());
-		}
-	}
+    test = new File(slowAudioRef);
+    exists = test.exists();
+    if (!exists) {
+      test = new File(installPath, slowAudioRef);
+      exists = test.exists();
+    }
+    if (exists) {
+      imported.addAudio(new AudioAttribute(ensureForwardSlashes(slowAudioRef), BaseUserDAO.DEFAULT_USER).markSlow());
+    }
+  }
 
-	/**
-	 * Make sure every audio file we attach is a valid audio file -- it's really where it says it's supposed to be.
-	 * <p>
-	 * TODOx : rationalize media path -- don't force hack on bestAudio replacement
-	 * Why does it sometimes have the config dir on the front?
-	 *
-	 * @param imported
-	 * @paramx id
-	 * @see ExcelImport#attachAudio
-	 * @see ExcelImport#getRawExercises()
-	 */
-	public <T extends CommonExercise> int attachAudio(T imported, Collection<Integer> transcriptChanged) {
-		int id = imported.getID();
-		int missing = 0;
-		if (exToAudio.containsKey(id) /*|| exToAudio.containsKey(id + "/1") || exToAudio.containsKey(id + "/2")*/) {
-			List<AudioAttribute> audioAttributes = exToAudio.get(id);
-			//   if (audioAttributes.isEmpty()) logger.info("huh? audio attr empty for " + id);
-			missing = attachAudio(imported, missing, audioAttributes, transcriptChanged);
-		}
-		return missing;
-	}
+  /**
+   * Make sure every audio file we attach is a valid audio file -- it's really where it says it's supposed to be.
+   * <p>
+   * TODOx : rationalize media path -- don't force hack on bestAudio replacement
+   * Why does it sometimes have the config dir on the front?
+   *
+   * @param imported
+   * @paramx id
+   * @see ExcelImport#attachAudio
+   * @see ExcelImport#getRawExercises()
+   */
+  public <T extends CommonExercise> int attachAudio(T imported, Collection<Integer> transcriptChanged) {
+    int id = imported.getID();
+    int missing = 0;
+    if (exToAudio.containsKey(id) /*|| exToAudio.containsKey(id + "/1") || exToAudio.containsKey(id + "/2")*/) {
+      List<AudioAttribute> audioAttributes = exToAudio.get(id);
+      //   if (audioAttributes.isEmpty()) logger.info("huh? audio attr empty for " + id);
+      missing = attachAudio(imported, missing, audioAttributes, transcriptChanged);
+    }
+    return missing;
+  }
 
-	/**
-	 * @param imported
-	 * @param missing
-	 * @param audioAttributes
-	 * @param <T>
-	 * @return
-	 * @see #attachAudio(CommonExercise, Collection)
-	 */
-	private <T extends CommonExercise> int attachAudio(T imported, int missing,
-																										 Collection<AudioAttribute> audioAttributes,
-																										 Collection<Integer> transcriptChangedIDs) {
-		MutableAudioExercise mutableAudio = imported.getMutableAudio();
+  /**
+   * try to fix the audio path
+   * @param imported
+   * @param missing
+   * @param audioAttributes
+   * @param <T>
+   * @return
+   * @see #attachAudio(CommonExercise, Collection)
+   */
+  private <T extends CommonExercise> int attachAudio(T imported,
+                                                     int missing,
+                                                     Collection<AudioAttribute> audioAttributes,
+                                                     Collection<Integer> transcriptChangedIDs) {
+    MutableAudioExercise mutableAudio = imported.getMutableAudio();
 
-		if (audioAttributes == null) {
-			missingExerciseCount++;
-			if (missingExerciseCount < 10) {
-				logger.error("attachAudio can't find " + imported.getID());
-			}
-		} else if (!audioAttributes.isEmpty()) {
-			Set<String> previouslyAttachedAudio = new HashSet<>();
-			for (AudioAttribute audioAttribute : imported.getAudioAttributes()) {
-				previouslyAttachedAudio.add(audioAttribute.getAudioRef());
-			}
+    boolean debug = imported.getID() == 23125;
 
-			int m = 0;
-			for (AudioAttribute audio : audioAttributes) {
-				String child = mediaDir1 + File.separator + audio.getAudioRef();
-				File test = new File(installPath, child);
+    if (audioAttributes == null) {
+      missingExerciseCount++;
+      if (missingExerciseCount < 10 || debug) {
+        logger.error("attachAudio can't find " + imported.getID());
+      }
+    } else if (!audioAttributes.isEmpty()) {
+      Set<String> previouslyAttachedAudio = new HashSet<>();
+      for (AudioAttribute audioAttribute : imported.getAudioAttributes()) {
+        previouslyAttachedAudio.add(audioAttribute.getAudioRef());
+      }
 
-				boolean exists = test.exists();
-				if (!exists) {
-					test = new File(installPath, audio.getAudioRef());
-					exists = test.exists();
-					child = audio.getAudioRef();
-				}
+      int m = 0;
+      if (debug) {
+        logger.info("attachAudio found " + audioAttributes.size() + " media '" + mediaDir1 + "' attr for " + imported);
+      }
 
-				if (exists) {
-					if (!previouslyAttachedAudio.contains(child)) {
-						if (audio.isContextAudio()) {
-							Collection<CommonExercise> directlyRelated = imported.getDirectlyRelated();
-							if (directlyRelated.isEmpty()) {
-							  if (m++ <50) {
-								logger.warn("huh? no context exercise on " +imported);
-							  }
-							}
-							else {
-								if (directlyRelated.size() == 1) {
-									audio.setAudioRef(child);   // remember to prefix the path
-									directlyRelated.iterator().next().getMutableAudio().addAudio(audio);
-								}
-							}
-						}
-						else if (audio.hasMatchingTranscript(imported.getForeignLanguage())) {
-							audio.setAudioRef(child);   // remember to prefix the path
+      for (AudioAttribute audio : audioAttributes) {
+        String audioRef = audio.getAudioRef();
+        if (audioRef.startsWith("bestAudio")) {
+          audioRef = audioRef.replace("bestAudio","bestAudio"+File.separator+imported.getProjectID());
+        }
 
-							mutableAudio.addAudio(audio);
-						} else {
-							transcriptChangedIDs.add(audio.getExid());
+        String child =
+            mediaDir1 + File.separator +
+ //               imported.getProjectID() + File.separator +
+                audioRef;
+
+
+        File test = new File(installPath, child);
+        if (debug) logger.info("test " + test.getAbsolutePath());
+
+        boolean exists = test.exists();
+        if (!exists) {
+          test = new File(installPath, audioRef);
+          exists = test.exists();
+          child = audioRef;
+        }
+
+        if (exists) {
+          if (!previouslyAttachedAudio.contains(child)) {
+            if (audio.isContextAudio()) {
+              Collection<CommonExercise> directlyRelated = imported.getDirectlyRelated();
+              if (directlyRelated.isEmpty()) {
+                if (m++ < 50) {
+                  logger.warn("huh? no context exercise on " + imported);
+                }
+              } else {
+                if (directlyRelated.size() == 1) {
+                  audio.setAudioRef(child);   // remember to prefix the path
+                  directlyRelated.iterator().next().getMutableAudio().addAudio(audio);
+                }
+              }
+            } else if (audio.hasMatchingTranscript(imported.getForeignLanguage())) {
+              audio.setAudioRef(child);   // remember to prefix the path
+
+              mutableAudio.addAudio(audio);
+            } else {
+              transcriptChangedIDs.add(audio.getExid());
 /*							if (m++ < 10) {
-								logger.warn("for " + imported + " audio transcript " + audio.getTranscript() +
+                logger.warn("for " + imported + " audio transcript " + audio.getTranscript() +
 										" doesn't match : '" + removePunct(audio.getTranscript()) + "' vs '" + removePunct(imported.getForeignLanguage()) + "'");
 							}*/
-						}
-						previouslyAttachedAudio.add(child);
+            }
+            previouslyAttachedAudio.add(child);
 //            logger.debug("imported " +imported.getOldID()+ " now " + imported.getAudioAttributes());
-					} else {
-						logger.debug("skipping " + child);
-					}
-				} else {
-					missing++;
-					c++;
-					if (c < 5) {
-						logger.warn("attachAudio file " + test.getAbsolutePath() + " does not exist - \t" + audio.getAudioRef());
+          } else {
+            logger.debug("skipping " + child);
+          }
+        } else {
+          missing++;
+          c++;
+          if (c < 4) {
+            logger.warn("attachAudio file " + test.getAbsolutePath() + " does not exist - \t" + audioRef);
 //            if (c < 2) {
 //              logger.warn("installPath " + installPath + "mediaDir " + mediaDir + " mediaDir1 " + mediaDir1);
 //            }
-					}
-				}
-			}
-		}
-		return missing;
-	}
+          }
+        }
+      }
+    }
+    return missing;
+  }
 
-	/**
-	 * Assumes audio index field looks like : 11109 8723 8722 8721
-	 *
-	 * @param refAudioIndex
-	 * @return
-	 */
-	private String findBest(String refAudioIndex) {
-		String[] split = refAudioIndex.split("\\s+");
-		return (split.length == 0) ? "" : split[0];
-	}
+  /**
+   * Assumes audio index field looks like : 11109 8723 8722 8721
+   *
+   * @param refAudioIndex
+   * @return
+   */
+  private String findBest(String refAudioIndex) {
+    String[] split = refAudioIndex.split("\\s+");
+    return (split.length == 0) ? "" : split[0];
+  }
 
-	private String ensureForwardSlashes(String wavPath) {
-		return wavPath.replaceAll("\\\\", "/");
-	}
+  private String ensureForwardSlashes(String wavPath) {
+    return wavPath.replaceAll("\\\\", "/");
+  }
 
-	public void setExToAudio(Map<Integer, List<AudioAttribute>> exToAudio) {
-		this.exToAudio = exToAudio;
-	}
+  public void setExToAudio(Map<Integer, List<AudioAttribute>> exToAudio) {
+    this.exToAudio = exToAudio;
+  }
 }
