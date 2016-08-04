@@ -33,26 +33,37 @@
 package mitll.langtest.shared.user;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.server.services.UserServiceImpl;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class SlimProject implements IsSerializable {
+  private int projectid;
   private String name;
   private String language;
   private String course;
-  private int projectid;
   private String countryCode;
+  private List<SlimProject> children = new ArrayList<>();
 
+  //  List<>
   public SlimProject() {
   }
 
-  public SlimProject(String name, String language, int projectid, String countryCode) {
+  /**
+   * @see UserServiceImpl#getProjects
+   * @param projectid
+   * @param name
+   * @param language
+   * @param countryCode
+   */
+  public SlimProject(int projectid, String name, String language, String countryCode,
+                     String course) {
     this.name = name;
     this.language = language;
     this.projectid = projectid;
     this.countryCode = countryCode;
-  }
-
-  public String toString() {
-    return "Project #" + projectid + " " + name + " " + language;
+    this.course = course;
   }
 
   public String getName() {
@@ -73,5 +84,18 @@ public class SlimProject implements IsSerializable {
 
   public String getCountryCode() {
     return countryCode;
+  }
+
+  public void addChild(SlimProject projectInfo) {
+    children.add(projectInfo);
+  }
+
+  public List<SlimProject> getChildren() {
+    return children;
+  }
+
+  public String toString() {
+
+    return "Project #" + projectid + " " + name + " " + language +" num children " + children.size();
   }
 }

@@ -49,6 +49,7 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
   protected String english;
   protected String meaning;
   protected String foreignLanguage;
+  protected String altfl = "";
   protected String transliteration;
   int dominoID;
 
@@ -114,6 +115,11 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
   }
 
   @Override
+  public String getAltFL() {
+    return altfl;
+  }
+
+  @Override
   public boolean equals(Object other) {
     return other instanceof ExerciseShell &&
         (getOldID().equals(((ExerciseShell) other).getOldID()) ||
@@ -142,12 +148,19 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
     this.foreignLanguage = foreignLanguage;
   }
 
+  public void setAltFL(String foreignLanguage) {
+    this.altfl = foreignLanguage;
+  }
+
   @Override
   public void setEnglish(String english) {
     this.english = english;
   }
 
   public String toString() {
-    return "Exercise id = " + getOldID() + "/" + getID() + " : " + getEnglish() + " states " + getState() + "/" + getSecondState();
+    return "Exercise " +
+        "id = " + getOldID() + "/" + getID() +
+        " : " + getEnglish() +
+        " states " + getState() + "/" + getSecondState();
   }
 }
