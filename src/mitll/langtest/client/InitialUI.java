@@ -258,6 +258,9 @@ public class InitialUI implements UILifecycle {
     clearContent();
   }
 
+  /**
+   * @see #getBreadcrumbs()
+   */
   private void clearContent() {
     clearStartupInfo();
     contentRow.clear();
@@ -378,9 +381,7 @@ public class InitialUI implements UILifecycle {
     addResizeHandler();
   }
 
-  private void addBreadcrumbs() {
-    verticalContainer.insert(breadcrumbs = getBreadcrumbs(), 1);
-  }
+
 
   /**
    * Breadcrumb shows sequence of choices - who - languge - course (FL100 or FL200 or FL300) Elementary FL/Intermediate FL/Advanced FL - what do you want to do
@@ -398,6 +399,14 @@ public class InitialUI implements UILifecycle {
 
     Breadcrumbs crumbs = new Breadcrumbs(">");
     crumbs.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
+    addCrumbs(crumbs);
+
+    logger.info("getBreadcrumbs now " + crumbs);
+
+    return crumbs;
+  }
+
+  private void addCrumbs(Breadcrumbs crumbs) {
     NavLink home = new NavLink("Home");
 
     home.addClickHandler(new ClickHandler() {
@@ -407,6 +416,7 @@ public class InitialUI implements UILifecycle {
       }
     });
     crumbs.add(home);
+    logger.info("\tgetBreadcrumbs add home");
 
     User current = controller.getCurrent();
     if (current != null) {
@@ -414,20 +424,40 @@ public class InitialUI implements UILifecycle {
       me.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent clickEvent) {
-          breadcrumbs = getBreadcrumbs();
-          crumbs.clear();
           clearStartupInfo();
+
+          breadcrumbs.clear();
+          addCrumbs(breadcrumbs);
+
+          clearContent();
+          addProjectChoices();
         }
       });
       crumbs.add(me);
       logger.info("getBreadcrumbs adding step for " + current);
 
       ProjectStartupInfo startupInfo = lifecycleSupport.getProjectStartupInfo();
+      if (startupInfo != null) {
+        for (SlimProject project : lifecycleSupport.getStartupInfo().getProjects()) {
+          if (project.getProjectid() == startupInfo.getProjectid()) {
+            NavLink lang = new NavLink(project.getLanguage());
+            lang.addClickHandler(new ClickHandler() {
+              @Override
+              public void onClick(ClickEvent clickEvent) {
+ //               breadcrumbs = getBreadcrumbs();
+  //              crumbs.clear();
+    //            clearStartupInfo();
+              }
+            });
+            crumbs.add(lang);
+            logger.info("getBreadcrumbs adding step for " + lang);
+            break;
+          }
+        }
+      }
     } else {
       logger.info("getBreadcrumbs no current user --- ????");
     }
-
-    return crumbs;
   }
 
   private void makeNavigation() {
@@ -675,29 +705,19 @@ public class InitialUI implements UILifecycle {
   }
 
   private void addProjectChoices() {
-    StartupInfo startupInfo = lifecycleSupport.getStartupInfo();
+    showProjectChoices(lifecycleSupport.getStartupInfo().getProjects(), 0);
+  }
 
-    showProjectChoices(startupInfo.getProjects(),0);
-/*
-    userService.getProjects(new AsyncCallback<List<SlimProject>>() {
-      @Override
-      public void onFailure(Throwable caught) {
-      }
-
-      @Override
-      public void onSuccess(List<SlimProject> result) {
-        showProjectChoices(result, 0);
-      }
-    });
-*/
+  /**
+   *
+   */
+  private void addBreadcrumbs() {
+    verticalContainer.insert(breadcrumbs = getBreadcrumbs(), 1);
   }
 
   private void showProjectChoices(List<SlimProject> result, int nest) {
     Map<String, SlimProject> langToProject = new TreeMap<>();
     for (SlimProject project : result) {
-//      List<SlimProject> slimProjects = langToProject.get(project.getLanguage());
-//      if (slimProjects == null) langToProject.put(project.getLanguage(), slimProjects = new ArrayList<>());
-//      slimProjects.add(project);
       langToProject.put(project.getLanguage(), project);
     }
 
@@ -741,6 +761,7 @@ public class InitialUI implements UILifecycle {
 
   /**
    * TODO : Consider arbitrarily deep nesting...
+   *
    * @param name
    * @param projectForLang
    * @return
@@ -751,7 +772,7 @@ public class InitialUI implements UILifecycle {
     Heading child1 = new Heading(5, name);
     Thumbnail widgets = new Thumbnail();
     widgets.setSize(2);
-    int projid = projectForLang.getProjectid();
+    final int projid = projectForLang.getProjectid();
     String cc = projectForLang.getCountryCode();
 
     Image imageAnchor = new Image("langtest/cc/" + cc + ".png");
@@ -763,13 +784,19 @@ public class InitialUI implements UILifecycle {
         breadcrumbs.add(w);
         crumbs.add(w);
         List<SlimProject> children = projectForLang.getChildren();
-        if (children.size() == 1) {
+
+       // logger.info("project " + projid + " has " + children);
+        if (children.size() <2) {
+          logger.info("onClick select leaf project " + projid);
           setProjectForUser(projid);
         } else {
+          logger.info("onClick select parent project " + projid);
+
           w.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent clickEvent) {
               breadcrumbs.remove(crumbs.get(crumbs.size() - 1));
+              logger.info("breadcrumb click - undo project selection");
               clearContent();
               addProjectChoices();
             }
@@ -787,7 +814,7 @@ public class InitialUI implements UILifecycle {
 
   private void setProjectForUser(int projectid) {
     // int projectid = project1.getProjectid();
-    logger.info("setProjectForUser set project to " + projectid);
+    logger.info("setProjectForUser set project for " + projectid);
     userService.setProject(projectid, new AsyncCallback<User>() {
       @Override
       public void onFailure(Throwable throwable) {
@@ -796,8 +823,10 @@ public class InitialUI implements UILifecycle {
 
       @Override
       public void onSuccess(User aUser) {
+        clearContent();
         userNotification.setProjectStartupInfo(aUser);
-        logger.info("set project for " + aUser + " show initial state");
+        logger.info("setProjectForUser set project for " + aUser + " show initial state " + lifecycleSupport.getProjectStartupInfo());
+        showNavigation();
         navigation.showInitialState();
       }
     });
