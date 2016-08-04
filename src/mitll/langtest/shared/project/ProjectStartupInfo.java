@@ -91,6 +91,6 @@ public class ProjectStartupInfo implements IsSerializable {
   public String toString() {
     return "Project  " + projectid +
         " Order " + getTypeOrder() +
-        " nodes " + getSectionNodes();
+        " num nodes " + getSectionNodes().size();
   }
 }
