@@ -317,6 +317,9 @@ public class CopyToPostgres<T extends CommonShell> {
     String language   = getOldLanguage(db);
 
     SlickUserDAOImpl slickUserDAO = (SlickUserDAOImpl) db.getUserDAO();
+
+    if (language.equals("msa")) language = "MSA";
+
     int byName = projectDAO.add(slickUserDAO.getBeforeLoginUser(), language, language, firstType, secondType, countryCode);
 
     Properties props = db.getServerProps().getProps();
