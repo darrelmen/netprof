@@ -75,7 +75,8 @@ public class AttachAudio {
                      int audioOffset,
                      Map<Integer, List<AudioAttribute>> exToAudio) {
     this.mediaDir = mediaDir;
-    this.mediaDir1 = mediaDir1;
+    // this.mediaDir1 = mediaDir1;
+     this.mediaDir1 = "";
     this.installPath = installPath;
     this.setExToAudio(exToAudio);
     this.audioOffset = audioOffset;
@@ -182,15 +183,17 @@ public class AttachAudio {
 
       for (AudioAttribute audio : audioAttributes) {
         String audioRef = audio.getAudioRef();
-        if (audioRef.startsWith("bestAudio")) {
+
+        // we're now placing the best audio for each language under a project id directory
+        if (audioRef.contains("bestAudio")) {
+          if (debug) logger.info("was " + audioRef);
           audioRef = audioRef.replace("bestAudio","bestAudio"+File.separator+imported.getProjectID());
+          if (debug) logger.info("now " + audioRef);
         }
 
         String child =
             mediaDir1 + File.separator +
- //               imported.getProjectID() + File.separator +
                 audioRef;
-
 
         File test = new File(installPath, child);
         if (debug) logger.info("test " + test.getAbsolutePath());
@@ -235,7 +238,7 @@ public class AttachAudio {
         } else {
           missing++;
           c++;
-          if (c < 4) {
+          if (c < 5) {
             logger.warn("attachAudio file " + test.getAbsolutePath() + " does not exist - \t" + audioRef);
 //            if (c < 2) {
 //              logger.warn("installPath " + installPath + "mediaDir " + mediaDir + " mediaDir1 " + mediaDir1);
