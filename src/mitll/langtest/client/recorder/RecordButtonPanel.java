@@ -179,7 +179,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
     String device = controller.getBrowserInfo();
     final int len = base64EncodedWavFile.length();
 
-    AudioContext audioContext = new AudioContext(reqid, controller.getUser(), controller.getStartupInfo().getProjectid(),
+    AudioContext audioContext = new AudioContext(reqid, controller.getUser(), controller.getProjectStartupInfo().getProjectid(),
         exerciseID, index, audioType);
 
     service.writeAudioFile(base64EncodedWavFile,

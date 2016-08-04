@@ -66,22 +66,22 @@ public class AMASInitialUI extends InitialUI {
    * * TODO : FIX ME
    *
    * @param verticalContainer
-   * @param firstRow          where we put the flash permission window if it gets shown
+   * @paramx contentRow          where we put the flash permission window if it gets shown
    * @seex #handleCDToken(com.github.gwtbootstrap.client.ui.Container, com.google.gwt.user.client.ui.Panel, String, String)
    * @see #populateRootPanel()
    * @see #showLogin()
    */
   @Override
-  protected void populateBelowHeader(Container verticalContainer, Panel firstRow) {
+  protected void populateBelowHeader(Container verticalContainer/*, Panel contentRow*/) {
     RootPanel.get().clear();
     RootPanel.get().add(verticalContainer);
     /**
      * {@link #makeFlashContainer}
      */
-    firstRow.add(lifecycleSupport.getFlashRecordPanel());
+    contentRow.add(lifecycleSupport.getFlashRecordPanel());
     lifecycleSupport.recordingModeSelect();
     learnHelper = new AutoCRTChapterNPFHelper(service, userFeedback, null, controller);
-    learnHelper.addNPFToContent(firstRow, "");
+    learnHelper.addNPFToContent(contentRow, "");
   }
 
   @Override
@@ -97,10 +97,10 @@ public class AMASInitialUI extends InitialUI {
   public void populateRootPanelIfLogin() {
 //    logger.info("populateRootPanelIfLogin");
     if (!props.isOdaMode()) {
-      int childCount = firstRow.getElement().getChildCount();
-      // logger.info("populateRootAfterLogin root " + firstRow.getElement().getNodeName() + " childCount " + childCount);
+      int childCount = contentRow.getElement().getChildCount();
+      // logger.info("populateRootAfterLogin root " + contentRow.getElement().getNodeName() + " childCount " + childCount);
       if (childCount > 0) {
-        Node child = firstRow.getElement().getChild(0);
+        Node child = contentRow.getElement().getChild(0);
         Element as = Element.as(child);
         if (as.getId().contains(LOGIN)) {
           //   logger.info("populateRootAfterLogin found login...");
@@ -128,9 +128,9 @@ public class AMASInitialUI extends InitialUI {
 
     if (props.isOdaMode()) {
       headerRow.setVisible(false);
-      populateBelowHeader(verticalContainer, firstRow);
+      populateBelowHeader(verticalContainer);
     } else if (!showLogin()) {
-      populateBelowHeader(verticalContainer, firstRow);
+      populateBelowHeader(verticalContainer);
     }
   }
 
