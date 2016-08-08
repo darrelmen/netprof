@@ -104,7 +104,7 @@ public class AttachAudio {
       audioDir = "" + (Integer.parseInt(audioDir.trim()) + audioOffset);
     }
 
-    String parentPath = mediaDir + File.separator + audioDir + File.separator;
+    String parentPath   = mediaDir + File.separator + audioDir + File.separator;
     String fastAudioRef = parentPath + FAST_WAV;
     String slowAudioRef = parentPath + SLOW_WAV;
 
