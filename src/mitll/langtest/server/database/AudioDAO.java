@@ -33,15 +33,13 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
-import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.MutableAudioExercise;
+import mitll.langtest.shared.exercise.*;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -52,10 +50,9 @@ import java.util.Date;
 
 /**
  * Create, drop, alter, read from the audio table.
- *  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
+ * * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since
  */
 public class AudioDAO extends DAO {
   private static final Logger logger = Logger.getLogger(AudioDAO.class);
@@ -75,6 +72,10 @@ public class AudioDAO extends DAO {
   private static final String SLOW = "slow";
   private static final String CONTEXT_REGULAR = AUDIO_TYPE1;
   private static final String TRANSCRIPT = "transcript";
+  private static final String FAST_WAV = "Fast" + ".wav";
+  private static final String SLOW_WAV = "Slow" + ".wav";
+
+
   public static final String UNKNOWN = "unknown";
   public static final String TOTAL = "total";
   public static final String TOTAL_CONTEXT = "totalContext";
@@ -125,7 +126,10 @@ public class AudioDAO extends DAO {
       }
     }
     database.closeConnection(connection);
+    audioCheck = new AudioCheck(database.getServerProps());
   }
+
+  private AudioCheck audioCheck;
 
   @Override
   protected void addBoolean(Connection connection, String table, String col) throws SQLException {
@@ -134,6 +138,100 @@ public class AudioDAO extends DAO {
         " ADD " + col + " BOOLEAN DEFAULT FALSE");
     statement.execute();
     statement.close();
+  }
+
+
+  private void sleep(int millis) {
+    try {
+      Thread.sleep(millis); // ???
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public <T extends AudioExercise> int addOldSchoolAudio(String refAudioIndex, T imported, int audioOffset, String mediaDir, String installPath) {
+    String audioDir = refAudioIndex.length() > 0 ? findBest(refAudioIndex) : imported.getID();
+    if (audioOffset != 0) {
+      audioDir = "" + (Integer.parseInt(audioDir.trim()) + audioOffset);
+    }
+
+    String parentPath = mediaDir + File.separator + audioDir + File.separator;
+
+    int total = 0;
+    MiniUser defaultUser = UserDAO.DEFAULT_USER;
+    {
+      String fastAudioRef = parentPath + FAST_WAV;
+      File test = new File(fastAudioRef);
+      boolean exists = test.exists();
+      if (!exists) {
+       // logger.info("1 no audio at " + test.getAbsolutePath());
+        test = new File(installPath, fastAudioRef);
+        exists = test.exists();
+      }
+      if (exists) {
+//        imported.addAudioForUser(ensureForwardSlashes(fastAudioRef), defaultUser);
+        long duration = (long) (audioCheck.getDurationInSeconds(test) * 1000d);
+        sleep(50);
+        try {
+          fastAudioRef = "bestAudio" + fastAudioRef.split("bestAudio")[1];
+         //  logger.info("audio at " + fastAudioRef);
+
+          addAudio(connection, (int) defaultUser.getId(), ensureForwardSlashes(fastAudioRef), imported.getID(),
+              test.lastModified(), REGULAR, duration, imported.getForeignLanguage());
+          total++;
+        } catch (Exception e) {
+          logger.error("got " + e, e);
+        }
+      }
+      else {
+       // logger.info("2 no audio at " + test.getAbsolutePath());
+      }
+    }
+
+    {
+      String slowAudioRef = parentPath + SLOW_WAV;
+      File test = new File(slowAudioRef);
+      boolean exists = test.exists();
+      if (!exists) {
+       // logger.info("3 no audio at " + test.getAbsolutePath());
+
+        test = new File(installPath, slowAudioRef);
+        exists = test.exists();
+      }
+      if (exists) {
+        //       imported.addAudio(new AudioAttribute(ensureForwardSlashes(slowAudioRef), defaultUser).markSlow());
+        long duration = (long) (audioCheck.getDurationInSeconds(test) * 1000d);
+        try {
+
+          slowAudioRef = "bestAudio" + slowAudioRef.split("bestAudio")[1];
+
+          addAudio(connection, (int) defaultUser.getId(), ensureForwardSlashes(slowAudioRef), imported.getID(), test.lastModified(), SLOW, duration, imported.getForeignLanguage());
+          total++;
+        } catch (Exception e) {
+          logger.error("got " + e, e);
+        }
+      }
+      else {
+//        logger.info("4 no audio at " + test.getAbsolutePath());
+
+      }
+    }
+    return total;
+  }
+
+  private String ensureForwardSlashes(String wavPath) {
+    return wavPath.replaceAll("\\\\", "/");
+  }
+
+  /**
+   * Assumes audio index field looks like : 11109 8723 8722 8721
+   *
+   * @param refAudioIndex
+   * @return
+   */
+  private String findBest(String refAudioIndex) {
+    String[] split = refAudioIndex.split("\\s+");
+    return (split.length == 0) ? "" : split[0];
   }
 
   /**
@@ -176,6 +274,7 @@ public class AudioDAO extends DAO {
 
   /**
    * Go back and mark transcripts on audio cuts that were not marked properly initially.
+   *
    * @see DatabaseImpl#makeDAO(String, String, String)
    */
   void markTranscripts() {
@@ -198,10 +297,9 @@ public class AudioDAO extends DAO {
               ) {
             audio.setTranscript(context);
             toUpdate.add(audio);
-          //  logger.info("context update " + exercise.getID() + "/" +audio.getUniqueID()+" to " + context);
+            //  logger.info("context update " + exercise.getID() + "/" +audio.getUniqueID()+" to " + context);
           }
-        }
-        else {
+        } else {
           if ((transcript == null ||
               transcript.isEmpty() ||
               transcript.equals(english)) &&
@@ -219,9 +317,9 @@ public class AudioDAO extends DAO {
   }
 
   /**
-   * @see #markTranscripts()
    * @param audio
    * @return
+   * @see #markTranscripts()
    */
   private int updateTranscript(Collection<AudioAttribute> audio) {
     int c = 0;
@@ -258,13 +356,14 @@ public class AudioDAO extends DAO {
   }
 
   /**
-   * @see DatabaseImpl#makeDAO(String, String, String)
    * @param exerciseDAO
+   * @see DatabaseImpl#makeDAO(String, String, String)
    */
   void setExerciseDAO(ExerciseDAO<?> exerciseDAO) {
     this.exerciseDAO = exerciseDAO;
   }
 
+  public int numRows() { return getCount(AUDIO); }
   /**
    * Pulls the list of audio recordings out of the database.
    *
@@ -414,13 +513,13 @@ public class AudioDAO extends DAO {
   }
 
   /**
-   * @see #attachAudio(CommonExercise, String, String)
    * @param firstExercise
    * @param installPath
    * @param relativeConfigDir
    * @param audioConversion
    * @param attr
    * @return
+   * @see #attachAudio(CommonExercise, String, String)
    */
   private boolean attachAudioAndFixPath(CommonExercise firstExercise,
                                         String installPath,
@@ -893,6 +992,7 @@ public class AudioDAO extends DAO {
 
   /**
    * Go back and mark gender on really old audio that had no user info on it.
+   *
    * @param userid
    * @param attr
    * @return
