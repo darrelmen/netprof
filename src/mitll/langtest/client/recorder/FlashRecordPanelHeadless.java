@@ -87,18 +87,6 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     FlashRecordPanelHeadless.micPermission = micPermission;
   }
 
-
-  /**
-   * @param micPermission
-   * @see mitll.langtest.client.LangTest#makeFlashContainer
-   */
-/*
-  public static void setMicPermission(MicPermission micPermission) {
-    FlashRecordPanelHeadless.micPermission = micPermission;
-  }
-*/
-
-
   /**
    * Show this widget (make it big enough to accommodate the permission dialog) and install the flash player.
    *
@@ -169,8 +157,8 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   }
 
   // web audio calls
-  public void tryWebAudio() {
-    webAudio.tryWebAudio();
+  public boolean tryWebAudio() {
+    return webAudio.tryWebAudio();
   }
 
   /**
