@@ -112,6 +112,20 @@ public class PostgresTest extends BaseTest {
     testCopy(toCopy);
   }
 
+  @Test
+  public void testCopyPashto3() {
+    List<Info> toCopy = new ArrayList<>();
+    toCopy.add(getPashto3());
+    testCopy(toCopy);
+  }
+
+  @Test
+  public void testDari() {
+    List<Info> toCopy = new ArrayList<>();
+    toCopy.add(new Info("Dari"));
+    testCopy(toCopy);
+  }
+
   /**
    * databaseHost=hydra-dev
    * databaseUser=netprof
@@ -120,9 +134,12 @@ public class PostgresTest extends BaseTest {
   @Test
   public void testCopyAll() {
     List<Info> toCopy = new ArrayList<>();
+    toCopy.add(new Info("Dari"));
     toCopy.add(getEnglish());
     toCopy.add(new Info("msa"));
     toCopy.add(getPashto());
+    toCopy.add(getPashto2());
+    toCopy.add(getPashto3());
     // toCopy.add(new Info("pashto","Pashto Intermediate Foreign Language","pashtoQuizlet2.properties"));
     // toCopy.add(new Info("pashto","Pashto Advanced Foreign Language","pashtoQuizlet3.properties"));
     toCopy.add(getRussian());

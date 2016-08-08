@@ -446,7 +446,7 @@ public class InitialUI implements UILifecycle {
                 clearStartupInfo();
                 clearContent();
 //                boolean remove = crumbs.remove(projectCrumb);
-                removeLastCrumb();
+                removeUntilCrumb(2);
                // if (!remove) {
                //   logger.warning("didn't remove " + projectCrumb);
                // }
@@ -736,8 +736,6 @@ public class InitialUI implements UILifecycle {
    */
   protected void configureUIGivenUser(long userID) {
     logger.info("configureUIGivenUser : user changed - new " + userID + " vs last " + lastUser);
-    // populateRootPanelIfLogin();
-
     if (lifecycleSupport.getProjectStartupInfo() == null) {
       addProjectChoices();
     } else {
@@ -756,7 +754,7 @@ public class InitialUI implements UILifecycle {
     clearContent();
     addBreadcrumbs();
     List<SlimProject> projects = lifecycleSupport.getStartupInfo().getProjects();
-    logger.info("found " + projects.size() + " initial projects");
+    logger.info("addProjectChoices found " + projects.size() + " initial projects");
     showProjectChoices(projects, 0);
   }
 
@@ -785,8 +783,7 @@ public class InitialUI implements UILifecycle {
   }
 
   private void showProjectChoices(List<SlimProject> result, int nest) {
-    logger.info("showProjectChoices " + result.size() + " : " + nest);
-
+ //   logger.info("showProjectChoices " + result.size() + " : " + nest);
     Map<String, SlimProject> langToProject = new TreeMap<>();
     for (SlimProject project : result) {
       String key = nest == 0 ? project.getLanguage() : project.getName();
@@ -797,14 +794,15 @@ public class InitialUI implements UILifecycle {
     final Section section = new Section("section");
     contentRow.add(section);
 
-//    Panel header = new Thumbnails();
-    // Panel header = new FluidRow();
-    //   Panel header = getStatusRow();
     DivWidget header = new DivWidget();
     header.addStyleName("container");
     String text = "Please select a language";
     if (nest == 1) {
       text = "Please select a course";
+    }
+
+    if (result.isEmpty()) {
+      text = "No languages loaded yet. Please wait.";
     }
     Heading child = new Heading(3, text);
     header.add(child);
@@ -813,15 +811,11 @@ public class InitialUI implements UILifecycle {
     section.add(header);
     section.add(flags);
 
-    //   Row current = new Row();
     Panel current = new Thumbnails();
     flags.add(current);
     int numInRow = 4;
     List<String> languages = new ArrayList<String>(langToProject.keySet());
-//    for (SlimProject project : result) {
-//      languages.add(project.getLanguage());
-//    }
-//    Collections.sort(languages);
+
     int size = languages.size();
     logger.info("addProjectChoices " + size + "-------- nest " + nest);
     for (int i = 0; i < size; i += numInRow) {
@@ -838,25 +832,11 @@ public class InitialUI implements UILifecycle {
     }
   }
 
-/*  private Panel getStatusRow() {
-    Panel status = new DivWidget();
-    status.getElement().setId("statusRow");
-    status.addStyleName("alignCenter");
-    status.addStyleName("inlineBlockStyle");
-    //  status.add(statusHeader);
-    //  statusHeader.getElement().setId("statusHeader");
-    //  statusHeader.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
-    // statusHeader.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
-    return status;
-  }*/
-
   private Panel getLangIcon(String lang, SlimProject projectForLang, int nest) {
     String lang1 = nest == 0 ? lang : projectForLang.getName();
     Panel imageAnchor = getImageAnchor(lang1, projectForLang);
     return imageAnchor;
   }
-
- // private List<NavLink> crumbs = new ArrayList<>();
 
   /**
    * TODO : Consider arbitrarily deep nesting...
@@ -881,9 +861,7 @@ public class InitialUI implements UILifecycle {
       public void onClick(ClickEvent clickEvent) {
         NavLink projectCrumb = new NavLink(name);
         breadcrumbs.add(projectCrumb);
-       // crumbs.add(projectCrumb);
         List<SlimProject> children = projectForLang.getChildren();
-
         // logger.info("project " + projid + " has " + children);
         if (children.size() < 2) {
           logger.info("onClick select leaf project " + projid + " current user " + userManager.getUser() + " : " + userManager.getUserID());
@@ -915,6 +893,14 @@ public class InitialUI implements UILifecycle {
   private void removeLastCrumb() {
     int widgetCount = breadcrumbs.getWidgetCount();
     breadcrumbs.remove(widgetCount-1);
+  }
+
+  private void removeUntilCrumb(int count) {
+    int widgetCount = breadcrumbs.getWidgetCount();
+    for (int i = widgetCount-1;i > count; i--) {
+      boolean remove = breadcrumbs.remove(i);
+      logger.info("remove at " + i + "  " + remove);
+    }
   }
 
   /**
