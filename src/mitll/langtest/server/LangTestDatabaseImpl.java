@@ -1205,25 +1205,31 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * what if later an admin changes it while someone else is looking at it...
    * @return
    */
-  List<SlimProject> getNestedProjectInfo() {
+  private List<SlimProject> getNestedProjectInfo() {
     List<SlimProject> projectInfos = new ArrayList<>();
 
     Map<String, List<SlickProject>> langToProject = new TreeMap<>();
-    for (SlickProject project : db.getProjectDAO().getAll()) {
+    Collection<SlickProject> all = db.getProjectDAO().getAll();
+    logger.info("found " + all.size() + " projects");
+    for (SlickProject project : all) {
       List<SlickProject> slimProjects = langToProject.get(project.language());
       if (slimProjects == null) langToProject.put(project.language(), slimProjects = new ArrayList<>());
       slimProjects.add(project);
     }
 
+    logger.info("lang->project is " + langToProject);
+
     for (String lang : langToProject.keySet()) {
       List<SlickProject> slickProjects = langToProject.get(lang);
       SlickProject project = slickProjects.get(0);
-      SlimProject e = getProjectInfo(project);
-      projectInfos.add(e);
+      SlimProject parent = getProjectInfo(project);
+      projectInfos.add(parent);
 
       if (slickProjects.size() > 1) {
         for (SlickProject slickProject : slickProjects) {
-          e.addChild(getProjectInfo(slickProject));
+          parent.addChild(getProjectInfo(slickProject));
+          logger.info("\t add child to " + parent);
+
         }
       }
     }
