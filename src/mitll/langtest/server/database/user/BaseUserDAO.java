@@ -64,8 +64,9 @@ public abstract class BaseUserDAO extends DAO {
   static final String ENABLED_REQ_KEY = "enabledReqKey";
   static final String NATIVE_LANG = "nativeLang";
   static final String UNKNOWN = "unknown";
-  @Deprecated final String language;
-  private int defectDetector,beforeLoginUser, importUser;
+  @Deprecated
+  final String language;
+  private int defectDetector, beforeLoginUser, importUser, defaultUser, defaultMale, defaultFemale;
   private final boolean enableAllUsers;
 
   static final String ID = "id";
@@ -87,8 +88,8 @@ public abstract class BaseUserDAO extends DAO {
    */
   public static final int DEFAULT_FEMALE_ID = -3;
   public static final int UNDEFINED_USER = -5;
-  public static MiniUser DEFAULT_USER   = new MiniUser(DEFAULT_USER_ID,   99, true, "default", false);
-  public static MiniUser DEFAULT_MALE   = new MiniUser(DEFAULT_MALE_ID,   99, true, "Male", false);
+  public static MiniUser DEFAULT_USER = new MiniUser(DEFAULT_USER_ID, 99, true, "default", false);
+  public static MiniUser DEFAULT_MALE = new MiniUser(DEFAULT_MALE_ID, 99, true, "Male", false);
   public static MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 99, false, "Female", false);
 
   private final Collection<String> admins;
@@ -109,9 +110,25 @@ public abstract class BaseUserDAO extends DAO {
     return defectDetector;
   }
 
-  public int getBeforeLoginUser() { return beforeLoginUser; }
+  public int getBeforeLoginUser() {
+    return beforeLoginUser;
+  }
 
-  public int getImportUser() { return importUser; }
+  public int getImportUser() {
+    return importUser;
+  }
+
+  public int getDefaultUser() {
+    return defaultUser;
+  }
+
+  public int getDefaultMale() {
+    return defaultMale;
+  }
+
+  public int getDefaultFemale() {
+    return defaultFemale;
+  }
 
   /**
    * Check if the user exists already, and return null if so.
@@ -121,12 +138,12 @@ public abstract class BaseUserDAO extends DAO {
    * @param passwordH
    * @param emailH
    * @param email
-   *@param kind
+   * @param kind
    * @param ipAddr
    * @param isMale
    * @param age
    * @param dialect
-   * @param device       @return null if existing, valid user (email and password)
+   * @param device    @return null if existing, valid user (email and password)
    * @see mitll.langtest.server.database.DatabaseImpl#addUser
    * @see UserManagement#addAndGetUser
    */
@@ -174,10 +191,14 @@ public abstract class BaseUserDAO extends DAO {
   /**
    * public for test access... for now
    */
+
   public void findOrMakeDefectDetector() {
     this.defectDetector = getOrAdd(DEFECT_DETECTOR);
     this.beforeLoginUser = getOrAdd(BEFORE_LOGIN_USER);
     this.importUser = getOrAdd(IMPORT_USER);
+    this.defaultUser = getOrAdd("defaultUser");
+    this.defaultMale = getOrAdd("defaultMaleUser");
+    this.defaultFemale = getOrAdd("defaultFemaleUser");
   }
 
   private int getOrAdd(String beforeLoginUser) {

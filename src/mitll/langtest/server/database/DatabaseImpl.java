@@ -1244,8 +1244,8 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     }
   }
 
-//  public void copyToPostgres(String cc, String optName) {
-//    new CopyToPostgres().copyToPostgres(this, cc, optName);
+//  public void copyOneConfig(String cc, String optName) {
+//    new CopyToPostgres().copyOneConfig(this, cc, optName);
 //  }
 
   /**
