@@ -80,18 +80,26 @@ public class CopyToPostgres<T extends CommonShell> {
   private static final Logger logger = Logger.getLogger(CopyToPostgres.class);
   private static final int WARN_RID_MISSING_THRESHOLD = 50;
 
+  /**
+   * @param config
+   * @param inTest
+   * @see #main(String[])
+   */
   private void copyToPostgres(String config, boolean inTest) {
-    getDatabaseLight(config, inTest).copyToPostgres(getCC(config));
+    DatabaseImpl databaseLight = getDatabaseLight(config, inTest);
+    new CopyToPostgres().copyToPostgres(databaseLight, getCC(config), null);
+    //databaseLight.copyToPostgres(getCC(config), null);
   }
 
   /**
    * Add brazilian, serbo croatian, french, etc.
+   *
    * @param config
    * @return
    */
   public String getCC(String config) {
     String cc = "";
-    List<String> languages =Arrays.asList(
+    List<String> languages = Arrays.asList(
         "dari",
         "egyptian",
         "english",
@@ -146,7 +154,7 @@ public class CopyToPostgres<T extends CommonShell> {
   }
 
   private static DBConnection getConnection(String config, boolean inTest) {
-    File file = getConfigFile(config, inTest);
+    File file = getConfigFile(config, null, inTest);
     String parent = file.getParentFile().getAbsolutePath();
     ServerProperties serverProps = new ServerProperties(parent, file.getName());
     return new DBConnection(serverProps.getDatabaseType(),
@@ -158,7 +166,7 @@ public class CopyToPostgres<T extends CommonShell> {
   }
 
   private static DatabaseImpl getDatabaseLight(String config, boolean inTest) {
-    File file = getConfigFile(config, inTest);
+    File file = getConfigFile(config, null, inTest);
     String parent = file.getParentFile().getAbsolutePath();
     ServerProperties serverProps = new ServerProperties(parent, file.getName());
     serverProps.setH2(true);
@@ -169,8 +177,9 @@ public class CopyToPostgres<T extends CommonShell> {
     return database;
   }
 
-  private static File getConfigFile(String config, boolean inTest) {
-    return new File((inTest ? "war" + File.separator : "") + "config" + File.separator + config + File.separator + "quizlet.properties");
+  private static File getConfigFile(String config, String optPropsFile, boolean inTest) {
+    String propsFile = "quizlet.properties";
+    return new File((inTest ? "war" + File.separator : "") + "config" + File.separator + config + File.separator + propsFile);
   }
 
   private static String getInstallPath(boolean inTest) {
@@ -178,7 +187,7 @@ public class CopyToPostgres<T extends CommonShell> {
   }
 
   private static DatabaseImpl getDatabaseVeryLight(String config, boolean inTest) {
-    File file = getConfigFile(config, inTest);
+    File file = getConfigFile(config, null, inTest);
     String name = file.getName();
     String parent = file.getParentFile().getAbsolutePath();
 
@@ -189,8 +198,14 @@ public class CopyToPostgres<T extends CommonShell> {
         new PathHelper(getInstallPath(inTest)), false, null, true);
   }
 
-  public void copyToPostgres(DatabaseImpl db, String cc) {
-    int projectID = createProjectIfNotExists(db, cc);
+  /**
+   * @see DatabaseImpl#copyToPostgres
+   * @param db
+   * @param cc
+   * @param optName null OK
+   */
+  public void copyToPostgres(DatabaseImpl db, String cc, String optName) {
+    int projectID = createProjectIfNotExists(db, cc, optName);
 
     logger.info("copyToPostgres project is " + projectID);
 
@@ -284,14 +299,21 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param db
    * @param countryCode
    * @return
+   * @see #copyToPostgres(DatabaseImpl, String, String)
    */
-  public int createProjectIfNotExists(DatabaseImpl db, String countryCode) {
+  public int createProjectIfNotExists(DatabaseImpl db, String countryCode, String optName) {
     IProjectDAO projectDAO = db.getProjectDAO();
     String oldLanguage = getOldLanguage(db);
-    int byName = projectDAO.getByName(oldLanguage);
+    String name = optName != null ? optName : oldLanguage;
+
+    int byName = projectDAO.getByName(name);
 
     if (byName == -1) {
+      logger.info("checking for project with name '" + name + "' opt '" + optName + "' language '" + oldLanguage +
+          "' - non found");
+
       byName = createProject(db, projectDAO, countryCode);
+
       db.populateProjects(true);
     } else {
       logger.info("found project " + byName + " for language '" + oldLanguage + "'");
@@ -354,7 +376,7 @@ public class CopyToPostgres<T extends CommonShell> {
 
     UserDAO userDAO = new UserDAO(db);
     List<User> importUsers = userDAO.getUsers();
-    logger.info("h2 importUsers  " + importUsers.size());
+    logger.info("copyUsers h2 importUsers  " + importUsers.size());
     int numAdded = 0;
     int unresolved = 0;
     int collisions = 0;
@@ -422,7 +444,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param oldToNewUser
    * @param exToID
    * @param projid
-   * @see #copyToPostgres(DatabaseImpl)
+   * @see #copyToPostgres
    */
   private void copyAudio(DatabaseImpl db,
                          Map<Integer, Integer> oldToNewUser,
@@ -540,7 +562,7 @@ public class CopyToPostgres<T extends CommonShell> {
     logger.info("copyPhone added  " + slickPhoneAO.getNumRows());
   }
 
-  Set<Long> missingRIDs = new HashSet<>();
+  private final Set<Long> missingRIDs = new HashSet<>();
 
   /**
    * @param db
