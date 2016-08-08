@@ -12,6 +12,6 @@ usePredefinedTypeOrder=false
 lessonPlanFile=10000-pashto-course-examples_10_11_2013_Semester2-v2.xlsx
 webserviceHostPort=31190
 #dotrim=false
-dodecode=true
+#dodecode=true
 #dropRefResultTable=true
 #oldSchoolService=false

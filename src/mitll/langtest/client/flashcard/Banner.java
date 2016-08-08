@@ -150,14 +150,12 @@ public class Banner implements RequiresResize {
     flashcard.addStyleName("inlineBlockStyle");
     flashcard.addStyleName("headerBackground");
     flashcard.addStyleName("leftAlign");
-    String betaMark = isBeta ? ("<span><font color='yellow'>" + "&nbsp;BETA" + "</font></span>") : "";
+    String betaMark = isBeta ? ("<span><font color='yellow'>" + "&nbsp;BETA 2.0" + "</font></span>") : "";
     appName = new Paragraph("<span>" + props.getAppTitle() + "</span>" + betaMark);
     appName.addStyleName("bigFont");
 
     flashcard.add(appName);
-  //  flashcard.add(projectChoices = getProjectChoices());
-
-//    projectChoices.setVisible(false);
+    flashcard.add(getSubtitle(splashText));
 
     flashcardImage = new Image(LangTest.LANGTEST_IMAGES + Banner.NEW_PRO_F1_PNG);
     flashcardImage.addStyleName("floatLeft");
