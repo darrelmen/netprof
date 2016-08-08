@@ -51,16 +51,16 @@ public class BaseTest {
 
   protected static DatabaseImpl getDatabaseLight(String config, boolean useH2) {
     String installPath = "war";
-    File file = new File(installPath + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
-    ServerProperties serverProps = getServerProperties(config);
-    DatabaseImpl database = getDatabaseVeryLight(config, useH2);
+    String s = "quizlet.properties";
+    File file = new File(installPath + File.separator + "config" + File.separator + config + File.separator + s);
+    ServerProperties serverProps = getServerProperties(config, s);
+    DatabaseImpl database = getDatabaseVeryLight(config, s, useH2);
     database.setInstallPath(installPath,
         file.getParentFile().getAbsolutePath() + File.separator + database.getServerProps().getLessonPlan(), serverProps.getMediaDir());
     return database;
   }
 
   /**
-   * @see mitll.langtest.server.database.postgres.PostgresTest#testCopy(String[], String[])
    * @param config
    * @param useH2
    * @param host
@@ -68,6 +68,7 @@ public class BaseTest {
    * @param pass
    * @param optPropsFile
    * @return
+   * @see mitll.langtest.server.database.postgres.PostgresTest#testCopy
    */
   protected static DatabaseImpl getDatabaseLight(String config,
                                                  boolean useH2,
@@ -75,10 +76,16 @@ public class BaseTest {
                                                  String user,
                                                  String pass,
                                                  String optPropsFile) {
+
+    logger.info("db " + config + " props " + optPropsFile);
+
     String installPath = "war";
     String propsFile = optPropsFile != null ? optPropsFile : "quizlet.properties";
+
+    logger.info("db " + config + " props " + propsFile);
+
     File file = new File(installPath + File.separator + "config" + File.separator + config + File.separator + propsFile);
-    ServerProperties serverProps = getServerProperties(config);
+    ServerProperties serverProps = getServerProperties(config, propsFile);
 
     serverProps.getProps().setProperty("databaseHost", host);
     serverProps.getProps().setProperty("databaseUser", user);
@@ -99,13 +106,14 @@ public class BaseTest {
     return database;
   }
 
-  protected static ServerProperties getServerProperties(String config) {
-    File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
+  protected static ServerProperties getServerProperties(String config, String propsFile) {
+    // String s = "quizlet.properties";
+    File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + propsFile);
     return new ServerProperties(file.getParentFile().getAbsolutePath(), file.getName());
   }
 
-  protected static DatabaseImpl getDatabaseVeryLight(String config, boolean useH2) {
-    File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
+  protected static DatabaseImpl getDatabaseVeryLight(String config, String propsFile, boolean useH2) {
+    File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + propsFile);
     String name = file.getName();
     String parent = file.getParentFile().getAbsolutePath();
     ServerProperties serverProps = new ServerProperties(parent, name);

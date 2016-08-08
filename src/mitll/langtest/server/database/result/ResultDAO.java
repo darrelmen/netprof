@@ -465,6 +465,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
     ResultSet rs = statement.executeQuery();
     List<Result> results = new ArrayList<>();
     long then = System.currentTimeMillis();
+    int missingScoreCol = 0;
     while (rs.next()) {
       int uniqueID = rs.getInt(ID);
       int userID = rs.getInt(USERID);
@@ -479,7 +480,12 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
 
       boolean correct = rs.getBoolean(CORRECT);
       float pronScore = rs.getFloat(PRON_SCORE);
-      String json = rs.getString(SCORE_JSON);
+      String json = null;
+      try {
+        json = rs.getString(SCORE_JSON);
+      } catch (SQLException e) {
+        if (missingScoreCol++ < 2) logger.info("Got " + e);
+      }
       String device = rs.getString(DEVICE);
       AudioType realAudioType = AudioType.UNSET;
       boolean withFlash = rs.getBoolean(WITH_FLASH);

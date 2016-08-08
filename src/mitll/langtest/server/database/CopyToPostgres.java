@@ -54,6 +54,7 @@ import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.server.database.reviewed.ReviewedDAO;
 import mitll.langtest.server.database.reviewed.SlickReviewedDAO;
 import mitll.langtest.server.database.reviewed.StateCreator;
+import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.database.user.IUserProjectDAO;
 import mitll.langtest.server.database.user.SlickUserDAOImpl;
 import mitll.langtest.server.database.user.UserDAO;
@@ -85,10 +86,9 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param inTest
    * @see #main(String[])
    */
-  private void copyToPostgres(String config, boolean inTest) {
+  private void copyOneConfig(String config, boolean inTest) {
     DatabaseImpl databaseLight = getDatabaseLight(config, inTest);
-    new CopyToPostgres().copyToPostgres(databaseLight, getCC(config), null);
-    //databaseLight.copyToPostgres(getCC(config), null);
+    new CopyToPostgres().copyOneConfig(databaseLight, getCC(config), null);
   }
 
   /**
@@ -204,10 +204,10 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param cc
    * @param optName null OK
    */
-  public void copyToPostgres(DatabaseImpl db, String cc, String optName) {
-    int projectID = createProjectIfNotExists(db, cc, optName);
+  public void copyOneConfig(DatabaseImpl db, String cc, String optName) {
+    int projectID = createProjectIfNotExists(db, cc, optName, "");  // TODO : course?
 
-    logger.info("copyToPostgres project is " + projectID);
+    logger.info("copyOneConfig project is " + projectID);
 
     // first add the user table
     SlickUserDAOImpl slickUserDAO = (SlickUserDAOImpl) db.getUserDAO();
@@ -298,10 +298,11 @@ public class CopyToPostgres<T extends CommonShell> {
    *
    * @param db
    * @param countryCode
+   * @param course
    * @return
-   * @see #copyToPostgres(DatabaseImpl, String, String)
+   * @see #copyOneConfig(DatabaseImpl, String, String)
    */
-  public int createProjectIfNotExists(DatabaseImpl db, String countryCode, String optName) {
+  public int createProjectIfNotExists(DatabaseImpl db, String countryCode, String optName, String course) {
     IProjectDAO projectDAO = db.getProjectDAO();
     String oldLanguage = getOldLanguage(db);
     String name = optName != null ? optName : oldLanguage;
@@ -312,7 +313,7 @@ public class CopyToPostgres<T extends CommonShell> {
       logger.info("checking for project with name '" + name + "' opt '" + optName + "' language '" + oldLanguage +
           "' - non found");
 
-      byName = createProject(db, projectDAO, countryCode);
+      byName = createProject(db, projectDAO, countryCode, name, course);
 
       db.populateProjects(true);
     } else {
@@ -330,9 +331,11 @@ public class CopyToPostgres<T extends CommonShell> {
    *
    * @param db
    * @param projectDAO
+   * @param name
+   * @param course
    * @see
    */
-  private int createProject(DatabaseImpl db, IProjectDAO projectDAO, String countryCode) {
+  private int createProject(DatabaseImpl db, IProjectDAO projectDAO, String countryCode, String name, String course) {
     Iterator<String> iterator = db.getTypeOrder(-1).iterator();
     String firstType  = iterator.hasNext() ? iterator.next() : "";
     String secondType = iterator.hasNext() ? iterator.next() : "";
@@ -342,7 +345,7 @@ public class CopyToPostgres<T extends CommonShell> {
 
     if (language.equals("msa")) language = "MSA";
 
-    int byName = projectDAO.add(slickUserDAO.getBeforeLoginUser(), language, language, firstType, secondType, countryCode);
+    int byName = projectDAO.add(slickUserDAO.getBeforeLoginUser(), name, language, course, firstType, secondType, countryCode);
 
     Properties props = db.getServerProps().getProps();
     for (String prop : ServerProperties.CORE_PROPERTIES) {
@@ -369,9 +372,15 @@ public class CopyToPostgres<T extends CommonShell> {
    */
   private Map<Integer, Integer> copyUsers(DatabaseImpl db, int projid) {
     Map<Integer, Integer> oldToNew = new HashMap<>();
-//  if (USERS) {
-    //    if (slickUserDAO.isEmpty()) {
+
     SlickUserDAOImpl slickUserDAO = (SlickUserDAOImpl) db.getUserDAO();
+
+    oldToNew.put(BaseUserDAO.DEFAULT_USER_ID,slickUserDAO.getDefaultUser());
+
+    oldToNew.put(BaseUserDAO.DEFAULT_MALE_ID,slickUserDAO.getDefaultMale());
+
+    oldToNew.put(BaseUserDAO.DEFAULT_FEMALE_ID,slickUserDAO.getDefaultFemale());
+
     IUserProjectDAO slickUserProjectDAO = db.getUserProjectDAO();
 
     UserDAO userDAO = new UserDAO(db);
@@ -382,7 +391,6 @@ public class CopyToPostgres<T extends CommonShell> {
     int collisions = 0;
     for (User toImport : importUsers) {
       if (toImport.getId() != userDAO.getDefectDetector()) {
-        //   int idForUserID = slickUserDAO.getIdForUserID(toImport.getUserID());
         String toImportUserID = toImport.getUserID();
         User userByID = slickUserDAO.getUserByID(toImportUserID);
 
@@ -444,7 +452,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param oldToNewUser
    * @param exToID
    * @param projid
-   * @see #copyToPostgres
+   * @see #copyOneConfig
    */
   private void copyAudio(DatabaseImpl db,
                          Map<Integer, Integer> oldToNewUser,
@@ -912,10 +920,13 @@ public class CopyToPostgres<T extends CommonShell> {
     Collection<Result> all = originalDAO.getResults();
     logger.info("copyRefResult found " + all.size());
     int missing = 0;
+    Set<Integer> missingUsers = new HashSet<>();
     for (Result result : all) {
-      Integer userID = oldToNewUser.get((int) result.getUserid());
+      int userid = result.getUserid();
+      Integer userID = oldToNewUser.get((int) userid);
       if (userID == null) {
-        logger.error("copyReviewed no user " + result.getUserid());
+        boolean add = missingUsers.add(userid);
+        if (add) logger.warn("copyReviewed no user " + userid);
       } else {
         result.setUserID(userID);
         Integer exid = exToID.get(result.getOldExID());
@@ -951,7 +962,7 @@ public class CopyToPostgres<T extends CommonShell> {
       copyToPostgres.testDrop(config, inTest);
     } else if (action.equals("copy")) {
       logger.info("copying " + config);
-      copyToPostgres.copyToPostgres(config, inTest);
+      copyToPostgres.copyOneConfig(config, inTest);
     }
   }
 }
