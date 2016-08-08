@@ -118,7 +118,7 @@ public class ProjectTest extends BaseTest {
 
   @Test
   public void testAddProperty() {
-    DatabaseImpl spanish = getDatabaseVeryLight("spanish", false);
+    DatabaseImpl spanish = getDatabaseVeryLight("spanish", "quizlet.properties", false);
 
     IProjectDAO projectDAO = spanish.getProjectDAO();
     SlickProject next = projectDAO.getAll().iterator().next();
@@ -132,7 +132,7 @@ public class ProjectTest extends BaseTest {
 
   @Test
   public void testByName() {
-    DatabaseImpl spanish = getDatabaseVeryLight("netProf", false);
+    DatabaseImpl spanish = getDatabaseVeryLight("netProf", "config.properties", false);
     IProjectDAO projectDAO = spanish.getProjectDAO();
 
     String english1 = "english";
@@ -143,10 +143,11 @@ public class ProjectTest extends BaseTest {
 
   @Test
   public void testDrop() {
-    DatabaseImpl spanish = getDatabaseVeryLight("netProf", false);
+    DatabaseImpl spanish = getDatabaseVeryLight("netProf", "config.properties", false);
     IProjectDAO projectDAO = spanish.getProjectDAO();
+    projectDAO.delete(4);
 
-    projectDAO.delete(5);
-    projectDAO.delete(6);
+    testListProjects();
+//    projectDAO.delete(6);
   }
 }
