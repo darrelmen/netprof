@@ -265,6 +265,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
 
   /**
    * Fill in id->project map
+   *
    * @see #DatabaseImpl(DatabaseConnection, String, String, String, ServerProperties, PathHelper, LogAndNotify)
    */
   private void populateProjects(PathHelper pathHelper,
@@ -277,11 +278,8 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
 
     for (SlickProject slickProject : all) {
       if (!idToProject.containsKey(slickProject.id())) {
-        Project project = new Project(slickProject, pathHelper, serverProps, this, logAndNotify, relativeConfigDir);
-        idToProject.put(project.getProject().id(), project);
-        logger.info("populateProjects (reload = " + reload + ") : " + project + " : " + project.getAudioFileHelper());
+        rememberProject(pathHelper, serverProps, logAndNotify, relativeConfigDir, reload, slickProject);
       }
-
     }
 
     if (reload) {
@@ -299,6 +297,12 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     }
     logger.info("populateProjects (reload = " + reload +
         ") now project ids " + idToProject.keySet());
+  }
+
+  private void rememberProject(PathHelper pathHelper, ServerProperties serverProps, LogAndNotify logAndNotify, String relativeConfigDir, boolean reload, SlickProject slickProject) {
+    Project project = new Project(slickProject, pathHelper, serverProps, this, logAndNotify, relativeConfigDir);
+    idToProject.put(project.getProject().id(), project);
+    logger.info("populateProjects (reload = " + reload + ") : " + project + " : " + project.getAudioFileHelper());
   }
 
   private void addSingleProject(ExerciseDAO<CommonExercise> jsonExerciseDAO) {
@@ -614,7 +618,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
    * @see mitll.langtest.server.services.UserServiceImpl#setProject
    */
   public void rememberProject(int userid, int projectid) {
-  //  logger.info("rememberProject user " + userid + " -> " + projectid);
+    //  logger.info("rememberProject user " + userid + " -> " + projectid);
     getUserProjectDAO().add(userid, projectid);
     getUserListManager().createFavorites(userid, projectid);
   }
@@ -629,10 +633,10 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   }
 
   /**
-   * @see #setStartupInfo(User)
-   * @see mitll.langtest.server.services.UserServiceImpl#setProject(int)
    * @param userWhere
    * @param projid
+   * @see #setStartupInfo(User)
+   * @see mitll.langtest.server.services.UserServiceImpl#setProject(int)
    */
   public void setStartupInfo(User userWhere, int projid) {
     logger.info("setStartupInfo : For user " + userWhere + " projid " + projid);
@@ -640,7 +644,12 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     if (projid == -1) {
       logger.info("For " + userWhere + " no current project.");
     } else {
+      if (!idToProject.containsKey(projid)) {
+        populateProjects(false);
+      }
+
       Project project = getProject(projid);
+
       SlickProject project1 = project.getProject();
       ProjectStartupInfo startupInfo = new ProjectStartupInfo(getServerProps().getProperties(),
           project.getTypeOrder(), project.getSectionHelper().getSectionNodes(), project1.id(), project1.language());
@@ -1341,7 +1350,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
    * @see DatabaseImpl#configureProject(String, String, Project)
    */
   public Map<Integer, String> getExerciseIDToRefAudio(int projectid) {
-    logger.info("getExerciseIDToRefAudio for " +projectid);
+    logger.info("getExerciseIDToRefAudio for " + projectid);
 
     Map<Integer, String> join = new HashMap<>();
     populateIDToRefAudio(join, getExercises(projectid));
@@ -1484,6 +1493,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   }
 
   int warns = 0;
+
   /**
    * TODO : Fix this to get the right project first!
    * <p>
@@ -1520,7 +1530,8 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
 
     CommonExercise toRet = getExercise(projid, id);
     if (toRet == null) {
-      if (warns++<50) logger.info("couldn't find exercise " + id + " in " + projid + " looking in user exercise table");
+      if (warns++ < 50)
+        logger.info("couldn't find exercise " + id + " in " + projid + " looking in user exercise table");
       toRet = getUserExerciseByExID(id);
     }
 
