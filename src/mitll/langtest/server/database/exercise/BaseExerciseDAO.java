@@ -122,11 +122,22 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
     Set<String> transcriptChanged = new HashSet<>();
 
     if (DEBUG) logger.info("afterReadingExercises trying to attach audio to " + exercises.size());
+    int i = audioDAO.numRows();
+    if (i < 25) {
+      logger.warn(language + " will now add old school audio... " + i);
+    }
+    else {
+      logger.debug(language + " not adding old school audio since audio table has " + i);
+    }
     for (CommonExercise ex : exercises) {
       attachAudio.attachAudio(ex, transcriptChanged);
-      String refAudioIndex = ex.getRefAudioIndex();
-      if (refAudioIndex != null && !refAudioIndex.isEmpty()) {
-        attachAudio.addOldSchoolAudio(refAudioIndex, (AudioExercise) ex);
+
+      if (i < 25) {
+        logger.warn("-----------> adding old school audio for " + ex.getID());
+        String refAudioIndex = ex.getRefAudioIndex();
+        if (refAudioIndex != null && !refAudioIndex.isEmpty()) {
+          attachAudio.addOldSchoolAudio(refAudioIndex, (AudioExercise) ex);
+        }
       }
     }
     consistencyCheck();
