@@ -62,7 +62,6 @@
       <excludeFolder url="file://$MODULE_DIR$/war/config/levantine" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/mandarinClassroom" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/mandarinL1" />
-      <excludeFolder url="file://$MODULE_DIR$/war/config/pashto" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/pilot" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/russian" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/tagalog" />
