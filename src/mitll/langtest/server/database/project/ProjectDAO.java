@@ -93,6 +93,10 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     return first;
   }
 
+  /**
+   * @see PostgresTest#testDeleteEnglish
+   * @param id
+   */
   public void delete(int id) {
     dao.delete(id);
   }
