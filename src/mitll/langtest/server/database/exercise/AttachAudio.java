@@ -76,9 +76,8 @@ public class AttachAudio {
                      Map<Integer, List<AudioAttribute>> exToAudio) {
     this.mediaDir = mediaDir;
     // this.mediaDir1 = mediaDir1;
-     this.mediaDir1 = "";
-
-    logger.info("media dir " + mediaDir + " " + mediaDir1);
+    this.mediaDir1 = "";
+    logger.info("media dir '" + mediaDir + "' '" + mediaDir1 +"'");
 
     this.installPath = installPath;
     this.setExToAudio(exToAudio);
