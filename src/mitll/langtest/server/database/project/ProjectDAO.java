@@ -34,7 +34,6 @@ package mitll.langtest.server.database.project;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.user.UserProjectDAO;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickProject;
@@ -43,6 +42,7 @@ import org.apache.log4j.Logger;
 
 import java.sql.Timestamp;
 import java.util.Collection;
+import java.util.List;
 
 public class ProjectDAO extends DAO implements IProjectDAO {
   private static final Logger logger = Logger.getLogger(ProjectDAO.class);
@@ -72,14 +72,14 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   }
 
   /**
-   * @see mitll.langtest.server.database.CopyToPostgres#createProject
    * @param userid
    * @param name
    * @param language
    * @param course
-   *@param firstType
+   * @param firstType
    * @param secondType
-   * @param countryCode    @return
+   * @param countryCode @return
+   * @see mitll.langtest.server.database.CopyToPostgres#createProject
    */
   public int add(int userid, String name, String language, String course, String firstType, String secondType, String countryCode) {
     return add(userid, System.currentTimeMillis(), name, language, course, ProjectType.NP, ProjectStatus.PRODUCTION,
@@ -89,13 +89,16 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   private SlickProject first;
 
   public SlickProject getFirst() {
-    if (first == null) first = dao.getAll().iterator().next();
+    if (first == null) {
+      List<SlickProject> all = dao.getAll();
+      first = all.isEmpty() ? null : all.iterator().next();
+    }
     return first;
   }
 
   /**
-   * @see PostgresTest#testDeleteEnglish
    * @param id
+   * @see PostgresTest#testDeleteEnglish
    */
   public void delete(int id) {
     dao.delete(id);
@@ -116,7 +119,6 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   }
 
   /**
-   *
    * @param userid
    * @param modified
    * @param name
