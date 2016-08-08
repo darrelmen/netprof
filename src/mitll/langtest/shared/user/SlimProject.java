@@ -113,7 +113,6 @@ public class SlimProject implements IsSerializable {
   }
 
   public String toString() {
-
     return "Project #" + projectid + " " + name + " " + language + " num children " + children.size();
   }
 }
