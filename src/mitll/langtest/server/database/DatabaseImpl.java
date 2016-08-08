@@ -237,7 +237,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
 
   /**
    * @param reload
-   * @see CopyToPostgres#createProjectIfNotExists(DatabaseImpl, String)
+   * @see CopyToPostgres#createProjectIfNotExists
    */
   void populateProjects(boolean reload) {
     populateProjects(pathHelper, serverProps, logAndNotify, configDir, reload);
@@ -264,6 +264,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   }
 
   /**
+   * Fill in id->project map
    * @see #DatabaseImpl(DatabaseConnection, String, String, String, ServerProperties, PathHelper, LogAndNotify)
    */
   private void populateProjects(PathHelper pathHelper,
@@ -1243,9 +1244,9 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     }
   }
 
-  public void copyToPostgres(String cc) {
-    new CopyToPostgres().copyToPostgres(this, cc);
-  }
+//  public void copyToPostgres(String cc, String optName) {
+//    new CopyToPostgres().copyToPostgres(this, cc, optName);
+//  }
 
   /**
    * @param projid

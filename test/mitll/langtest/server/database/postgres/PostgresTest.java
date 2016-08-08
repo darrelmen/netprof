@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.database.postgres;
 
-import com.google.gwt.media.client.Audio;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.CopyToPostgres;
@@ -50,7 +49,7 @@ import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import java.io.File;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -82,20 +81,21 @@ public class PostgresTest extends BaseTest {
 
   @Test
   public void testCopySpanish() {
-    String[] strings = {"spanish"};
-    testCopy(strings);
+    List<Info> toCopy = new ArrayList<>();
+    toCopy.add(getSpanish());
   }
 
   @Test
   public void testCopyRussian() {
-    String[] strings = {"russian"};
-    testCopy(strings);
+    List<Info> toCopy = new ArrayList<>();
+    toCopy.add(getRussian());
   }
 
   @Test
   public void testCopyEnglish() {
-    String[] strings = {"english"};
-    testCopy(strings);
+    List<Info> toCopy = new ArrayList<>();
+    toCopy.add(getEnglish());
+    testCopy(toCopy);
   }
 
   /**
@@ -105,18 +105,60 @@ public class PostgresTest extends BaseTest {
    */
   @Test
   public void testCopyAll() {
-    String[] strings = {"english", "msa", "russian", "spanish"};
-    testCopy(strings);
+    List<Info> toCopy = new ArrayList<>();
+    toCopy.add(getEnglish());
+    toCopy.add(new Info("msa"));
+    toCopy.add(new Info("pashto", "Pashto Elementary Foreign Language", "pashtoQuizlet1.properties"));
+    // toCopy.add(new Info("pashto","Pashto Intermediate Foreign Language","pashtoQuizlet2.properties"));
+    // toCopy.add(new Info("pashto","Pashto Advanced Foreign Language","pashtoQuizlet3.properties"));
+    toCopy.add(getRussian());
+    toCopy.add(getSpanish());
+    testCopy(toCopy);
   }
 
-  void testCopy(String[] strings) {
+  Info getSpanish() {
+    return new Info("spanish");
+  }
+
+  Info getRussian() {
+    return new Info("russian");
+  }
+
+  Info getEnglish() {
+    return new Info("english");
+  }
+
+  void testCopy(List<Info> infos) {
     CopyToPostgres cp = new CopyToPostgres();
-    for (String config : Arrays.asList(strings)) {
+    for (Info config : infos) {
       //logger.info("-------- copy " + config);
-      String cc = cp.getCC(config);
+      String cc = cp.getCC(config.language);
       logger.info("-------- copy " + config + " " + cc);
 
-      getDatabaseLight(config, true, "hydra-dev", "netprof", "npadmin").copyToPostgres(cc);
+      DatabaseImpl databaseLight = getDatabaseLight(config.language, true, "hydra-dev", "netprof", "npadmin", config.props);
+      new CopyToPostgres().copyToPostgres(databaseLight, cc, config.name);
+
+      //((DatabaseImpl) databaseLight).copyToPostgres(cc, optName);
+    }
+  }
+
+  private class Info {
+    String name;
+    String language;
+    String props;
+
+    public Info(String language) {
+      this(language, language, null);
+    }
+
+    public Info(String language, String name, String props) {
+      this.language = language;
+      this.name = name;
+      this.props = props;
+    }
+
+    public String toString() {
+      return language + " : " + name + " : " + props;
     }
   }
 
@@ -142,7 +184,7 @@ public class PostgresTest extends BaseTest {
     testCreate();
     DatabaseImpl spanish = getDatabaseLight("spanish", true);
     CopyToPostgres copyToPostgres = new CopyToPostgres();
-    copyToPostgres.createProjectIfNotExists(spanish, copyToPostgres.getCC("spanish"));
+    copyToPostgres.createProjectIfNotExists(spanish, copyToPostgres.getCC("spanish"), null);
   }
 
   @Test
