@@ -129,11 +129,16 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
     else {
       logger.debug(language + " not adding old school audio since audio table has " + i);
     }
+
+    int c = 0;
     for (CommonExercise ex : exercises) {
       attachAudio.attachAudio(ex, transcriptChanged);
 
       if (i < 25) {
-        logger.warn("-----------> adding old school audio for " + ex.getID());
+        if (c++ < 25) {
+          logger.warn(language + " (" + exercises.size() +
+              ") -----------> adding old school audio for " + ex.getID() + " : " + serverProps.getLessonPlan());
+        }
         String refAudioIndex = ex.getRefAudioIndex();
         if (refAudioIndex != null && !refAudioIndex.isEmpty()) {
           attachAudio.addOldSchoolAudio(refAudioIndex, (AudioExercise) ex);
