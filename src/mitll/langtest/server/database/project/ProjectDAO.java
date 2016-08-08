@@ -72,17 +72,17 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   }
 
   /**
-   * @see mitll.langtest.server.database.CopyToPostgres#createProject(DatabaseImpl, IProjectDAO)
+   * @see mitll.langtest.server.database.CopyToPostgres#createProject
    * @param userid
    * @param name
    * @param language
-   * @param firstType
+   * @param course
+   *@param firstType
    * @param secondType
-   * @param countryCode
-   * @return
+   * @param countryCode    @return
    */
-  public int add(int userid, String name, String language, String firstType, String secondType, String countryCode) {
-    return add(userid, System.currentTimeMillis(), name, language, "", ProjectType.NP, ProjectStatus.PRODUCTION,
+  public int add(int userid, String name, String language, String course, String firstType, String secondType, String countryCode) {
+    return add(userid, System.currentTimeMillis(), name, language, course, ProjectType.NP, ProjectStatus.PRODUCTION,
         firstType, secondType, countryCode);
   }
 

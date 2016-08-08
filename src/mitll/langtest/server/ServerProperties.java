@@ -220,17 +220,6 @@ public class ServerProperties {
     }
   }
 
-/*  public String getWebserviceIP() {
-    return props.getProperty(WEBSERVICE_HOST_IP1, WEBSERVICE_HOST_IP);
-  }
-
-  public int getWebservicePort() {
-    int ip = Integer.parseInt(props.getProperty(WEBSERVICE_HOST_PORT, "-1"));
-    if (ip == 1)
-      logger.error("No webservice host port found.");
-    return ip;
-  }*/
-
   /**
    * @return
    * @see LangTestDatabaseImpl#readProperties(javax.servlet.ServletContext)

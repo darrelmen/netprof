@@ -58,7 +58,7 @@ public class PostgresTest extends BaseTest {
 
   @Test
   public void testCreate() {
-    getDatabaseVeryLight("spanish", false).createTables();
+    getDatabaseVeryLight("spanish", "quizlet.properties", false).createTables();
   }
 
   @Test
@@ -98,6 +98,20 @@ public class PostgresTest extends BaseTest {
     testCopy(toCopy);
   }
 
+  @Test
+  public void testCopyPashto1() {
+    List<Info> toCopy = new ArrayList<>();
+    toCopy.add(getPashto());
+    testCopy(toCopy);
+  }
+
+  @Test
+  public void testCopyPashto2() {
+    List<Info> toCopy = new ArrayList<>();
+    toCopy.add(getPashto2());
+    testCopy(toCopy);
+  }
+
   /**
    * databaseHost=hydra-dev
    * databaseUser=netprof
@@ -108,12 +122,24 @@ public class PostgresTest extends BaseTest {
     List<Info> toCopy = new ArrayList<>();
     toCopy.add(getEnglish());
     toCopy.add(new Info("msa"));
-    toCopy.add(new Info("pashto", "Pashto Elementary Foreign Language", "pashtoQuizlet1.properties"));
+    toCopy.add(getPashto());
     // toCopy.add(new Info("pashto","Pashto Intermediate Foreign Language","pashtoQuizlet2.properties"));
     // toCopy.add(new Info("pashto","Pashto Advanced Foreign Language","pashtoQuizlet3.properties"));
     toCopy.add(getRussian());
     toCopy.add(getSpanish());
     testCopy(toCopy);
+  }
+
+  Info getPashto() {
+    return new Info("pashto", "Pashto Elementary", "pashtoQuizlet1.properties");
+  }
+
+  Info getPashto2() {
+    return new Info("pashto", "Pashto Intermediate", "pashtoQuizlet2.properties");
+  }
+
+  Info getPashto3() {
+    return new Info("pashto", "Pashto Advanced", "pashtoQuizlet3.properties");
   }
 
   Info getSpanish() {
@@ -136,9 +162,9 @@ public class PostgresTest extends BaseTest {
       logger.info("-------- copy " + config + " " + cc);
 
       DatabaseImpl databaseLight = getDatabaseLight(config.language, true, "hydra-dev", "netprof", "npadmin", config.props);
-      new CopyToPostgres().copyToPostgres(databaseLight, cc, config.name);
+      new CopyToPostgres().copyOneConfig(databaseLight, cc, config.name);
 
-      //((DatabaseImpl) databaseLight).copyToPostgres(cc, optName);
+      //((DatabaseImpl) databaseLight).copyOneConfig(cc, optName);
     }
   }
 
@@ -164,12 +190,13 @@ public class PostgresTest extends BaseTest {
 
   @Test
   public void testDeleteEnglish() {
-    DatabaseImpl english = getDatabaseLight("english", true);
+    String english1 = "english";
+    DatabaseImpl english = getDatabaseLight(english1, true);
     IProjectDAO projectDAO = english.getProjectDAO();
     Collection<SlickProject> all = projectDAO.getAll();
     for (SlickProject project : all) {
       logger.info("found " + project);
-      if (project.language().equalsIgnoreCase("english")) {
+      if (project.language().equalsIgnoreCase(english1)) {
         logger.info("deleting " + project);
         projectDAO.delete(project.id());
         break;
@@ -184,7 +211,7 @@ public class PostgresTest extends BaseTest {
     testCreate();
     DatabaseImpl spanish = getDatabaseLight("spanish", true);
     CopyToPostgres copyToPostgres = new CopyToPostgres();
-    copyToPostgres.createProjectIfNotExists(spanish, copyToPostgres.getCC("spanish"), null);
+    copyToPostgres.createProjectIfNotExists(spanish, copyToPostgres.getCC("spanish"), null, "");
   }
 
   @Test
