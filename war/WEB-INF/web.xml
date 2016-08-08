@@ -77,11 +77,11 @@
 
     <context-param>
         <param-name>config</param-name>
-        <param-value>mandarin</param-value>
+        <param-value>pashto</param-value>
     </context-param>
 
     <context-param>
         <param-name>configFile</param-name>
-        <param-value>quizlet.properties</param-value>
+        <param-value>pashtoQuizlet1.properties</param-value>
     </context-param>
 </web-app>
