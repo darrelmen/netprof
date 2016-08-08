@@ -2494,7 +2494,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     } catch (Exception e) {
       logger.error("couldn't load database " + e, e);
     }
-    this.refResultDecoder = new RefResultDecoder(db, serverProps, pathHelper, audioFileHelper);
+
+    String mediaDir = relativeConfigDir + File.separator + serverProps.getMediaDir();
+    this.refResultDecoder = new RefResultDecoder(db, serverProps, pathHelper, audioFileHelper, mediaDir, pathHelper.getInstallPath());
     refResultDecoder.doRefDecode(getExercises(), relativeConfigDir);
     if (serverProps.isAMAS()) audioFileHelper.makeAutoCRT(relativeConfigDir);
 
