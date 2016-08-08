@@ -56,7 +56,6 @@ public class UserManagement {
   private static final Logger logger = Logger.getLogger(UserManagement.class);
   private final IUserDAO userDAO;
   private final IResultDAO resultDAO;
-//  private final IUserListManager userListManager;
 
   /**
    * @see DatabaseImpl#makeDAO(String, String, String)

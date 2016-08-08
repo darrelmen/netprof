@@ -51,11 +51,11 @@ public class SlimProject implements IsSerializable {
   }
 
   /**
-   * @see UserServiceImpl#getProjects
    * @param projectid
    * @param name
    * @param language
    * @param countryCode
+   * @see UserServiceImpl#getProjects
    */
   public SlimProject(int projectid, String name, String language, String countryCode,
                      String course) {
@@ -90,12 +90,30 @@ public class SlimProject implements IsSerializable {
     children.add(projectInfo);
   }
 
+  public boolean hasChildren() {
+    return !children.isEmpty();
+  }
+
+  public boolean hasChild(int projectid) {
+    for (SlimProject child : children) {
+      if (child.getProjectid() == projectid) return true;
+    }
+    return false;
+  }
+
+  public SlimProject getChild(int projectid) {
+    for (SlimProject child : children) {
+      if (child.getProjectid() == projectid) return child;
+    }
+    return null;
+  }
+
   public List<SlimProject> getChildren() {
     return children;
   }
 
   public String toString() {
 
-    return "Project #" + projectid + " " + name + " " + language +" num children " + children.size();
+    return "Project #" + projectid + " " + name + " " + language + " num children " + children.size();
   }
 }
