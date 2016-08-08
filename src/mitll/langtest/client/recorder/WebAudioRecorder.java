@@ -62,7 +62,7 @@ class WebAudioRecorder {
    *
    * The user can easily ignore the dialog by clicking away.
    */
-  void tryWebAudio() {
+  boolean tryWebAudio() {
     if (!tried) {
       tried = true;
       //logger.info("webAudioMicAvailable -- tryWebAudio!");
@@ -80,6 +80,10 @@ class WebAudioRecorder {
         }
       };
       theTimer.schedule(DELAY_MILLIS);
+      return true;
+    }
+    else {
+      return false;
     }
   }
 
