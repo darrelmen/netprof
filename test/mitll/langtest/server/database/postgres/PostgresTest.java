@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.postgres;
 
+import com.google.gwt.media.client.Audio;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.CopyToPostgres;
@@ -39,6 +40,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.shared.analysis.WordScore;
+import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.DBConnection;
@@ -211,6 +213,7 @@ public class PostgresTest extends BaseTest {
       if (language.equalsIgnoreCase("msa")) {
         CommonExercise exercise = database.getExercise(project.id(), 23125);
         logger.info("Got " + exercise);
+        for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) logger.info("got " + audioAttribute);
       }
     }
   }
