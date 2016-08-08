@@ -607,8 +607,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       checkLogin();
     } else {
       logger.info("checkInitFlash : initFlash - no permission yet");
-      flashRecordPanel.tryWebAudio();
-
+      if (!flashRecordPanel.tryWebAudio()) {
+        checkLogin();
+      }
 /*      if (flashRecordPanel.initFlash()) {
         checkLogin();
       }*/
