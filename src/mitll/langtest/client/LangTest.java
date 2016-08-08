@@ -159,6 +159,8 @@ import java.util.logging.Logger;
  * - Added Japanese, allows you to click on characters in transliteration (hiragana)
  * 1.4.4
  * - Added some minor fixes for exceptions seen in analysis plot
+ * 1.4.5
+ * - Adds audio table references for really old audio like in Pashto 1,2,3
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since
@@ -166,7 +168,7 @@ import java.util.logging.Logger;
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private final Logger logger = Logger.getLogger("LangTest");
 
-  public static final String VERSION_INFO = "1.4.4";
+  public static final String VERSION_INFO = "1.4.5";
 
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
