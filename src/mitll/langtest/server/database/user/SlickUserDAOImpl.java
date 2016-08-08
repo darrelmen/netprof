@@ -171,7 +171,7 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return new SlickUser(user.getId(),
         user.getUserID(),
         user.isMale(),
-        user.getIpaddr(),
+        user.getIpaddr() == null ? "" : user.getIpaddr(),
         "",
         user.getDialect(),
         new Timestamp(user.getTimestampMillis()),

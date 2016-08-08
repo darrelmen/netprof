@@ -58,7 +58,7 @@ public class AudioTest extends BaseTest {
     IAudioDAO dao = spanish.getAudioDAO();
 
     //if (dao.getAudioAttributes().size() == 0) {
-//     spanish.copyToPostgres();
+//     spanish.copyOneConfig();
     // }
 
     Collection<AudioAttribute> audio = dao.getAudioAttributes();
