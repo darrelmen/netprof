@@ -38,10 +38,11 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.Result;
+import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.AudioExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -61,7 +62,7 @@ public class RefResultDecoder {
 
   private static final boolean DO_REF_DECODE = true;
   private static final boolean DO_TRIM = true;
-  private static final int SLEEP_BETWEEN_DECODES = 2000;
+  //private static final int SLEEP_BETWEEN_DECODES = 2000;
 
   private final DatabaseImpl db;
   private final ServerProperties serverProps;
@@ -70,6 +71,8 @@ public class RefResultDecoder {
   private boolean stopDecode = false;
   private final PathHelper pathHelper;
   private final AudioConversion audioConversion;
+  String mediaDir;
+  String installPath;
 
   /**
    * @param db
@@ -78,13 +81,19 @@ public class RefResultDecoder {
    * @param audioFileHelper
    * @see LangTestDatabaseImpl#init()
    */
-  public RefResultDecoder(DatabaseImpl db, ServerProperties serverProperties, PathHelper pathHelper,
-                          AudioFileHelper audioFileHelper) {
+  public RefResultDecoder(DatabaseImpl db,
+                          ServerProperties serverProperties,
+                          PathHelper pathHelper,
+                          AudioFileHelper audioFileHelper,
+                          String mediaDir,
+                          String installPath) {
     this.db = db;
     this.serverProps = serverProperties;
     this.pathHelper = pathHelper;
     this.audioFileHelper = audioFileHelper;
     this.audioConversion = new AudioConversion(serverProperties);
+    this.mediaDir = mediaDir;
+    this.installPath = installPath;
   }
 
   /**
@@ -106,12 +115,26 @@ public class RefResultDecoder {
         } else {
           logger.debug(getLanguage() + " not doing decode ref decode");
         }
+        if (db.getAudioDAO().numRows() < 25) {
+          populateAudioTable(exercises);
+        }
       }
     }).start();
   }
 
   private String getLanguage() {
     return serverProps.getLanguage();
+  }
+
+  private void populateAudioTable(final Collection<CommonExercise> exercises) {
+    int total = 0;
+    for (CommonExercise ex : exercises) {
+      String refAudioIndex = ex.getRefAudioIndex();
+      if (refAudioIndex != null && !refAudioIndex.isEmpty()) {
+        total += db.getAudioDAO().addOldSchoolAudio(refAudioIndex, (AudioExercise) ex, serverProps.getAudioOffset(), mediaDir, installPath);
+      }
+    }
+    logger.info(getLanguage() + " : populateAudioTable added " +total);
   }
 
   /**
@@ -314,6 +337,7 @@ public class RefResultDecoder {
       }
     }).start();
   }
+
 
   private void sleep(int millis) {
     try {
