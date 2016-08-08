@@ -1005,7 +1005,7 @@ public class UserPassLogin extends UserDialog {
    */
   private void gotLogin(final String user, final String pass, final boolean emptyPassword) {
     final String hashedPass = Md5Hash.getHash(pass);
-    logger.info("gotLogin : user is '" + user + "' pass '" + pass + "' or '" + hashedPass + "'");
+    logger.info("gotLogin : user is '" + user + "' pass " + pass.length() + " characters or '" + hashedPass + "'");
 
     signIn.setEnabled(false);
     service.userExists(user, hashedPass, new AsyncCallback<User>() {
@@ -1020,7 +1020,7 @@ public class UserPassLogin extends UserDialog {
         if (result == null) {
           eventRegistration.logEvent(signIn, "sign in", "N/A", "unknown user " + user);
 
-          logger.info("No user with that name '" + user + "' pass '" + pass + "'" + emptyPassword);
+          logger.info("No user with that name '" + user + "' pass " + pass.length() + " characters - " + emptyPassword);
           markErrorBlur(password, emptyPassword ? PLEASE_ENTER_YOUR_PASSWORD : BAD_PASSWORD);
           signIn.setEnabled(true);
         } else {
