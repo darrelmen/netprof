@@ -99,6 +99,7 @@ public class RefResultDecoder {
       @Override
       public void run() {
         if (serverProps.shouldTrimAudio()) {
+          logger.warn("trimming audio!");
           sleep(5000);
           if (!exercises.isEmpty()) {
             CommonExercise next = exercises.iterator().next();
@@ -106,6 +107,8 @@ public class RefResultDecoder {
           }
         }
         if (serverProps.shouldDoDecode()) {
+          logger.warn("shouldDoDecode true");
+
           sleep(5000);
           if (hasModel) {
             if (!exercises.isEmpty()) {
@@ -261,7 +264,7 @@ public class RefResultDecoder {
    */
   private void writeRefDecode(Collection<CommonExercise> exercises, String relativeConfigDir, int projid) {
     boolean b = db.getServerProps().shouldDoDecode();
-    logger.warn("got " +b + " for should do decode");
+    logger.warn("writeRefDecode got " +b + " for should do decode");
     if (false) {
       Map<Integer, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio(projid);
       String installPath = pathHelper.getInstallPath();
