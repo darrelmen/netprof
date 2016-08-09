@@ -30,57 +30,27 @@
  *
  */
 
-package mitll.langtest.shared.answer;
+package mitll.langtest.server.database.result;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import java.util.Map;
+import java.util.Set;
 
-public enum AudioType implements IsSerializable {
-  UNSET("unset"),
+public class UserToCount {
+  private final Map<Integer, Integer> idToCount;
+//  private final Map<Integer, Set<Integer>> idToUniqueCount;
 
-  REGULAR("regular"),
-  SLOW("slow"),
-    FAST_AND_SLOW("fastAndSlow"),  // really old legacy thing
-  PRACTICE("practice"),  // or avp or flashcard
-  // FLASHCARD("flashcard"),
-  LEARN("learn"),
-  TEXT("text"),
-
-  REVIEW("review"),      // TODO: gah - try to remove this
-  RECORDER("recorder"),  // TODO : somehow user role gets expressed with this
-
-  CONTEXT_REGULAR("context=regular", "context", "regular"),
-  CONTEXT_SLOW("context=slow", "context", "slow");
-
-  private final String text;
-  private final String type;
-  private final String speed;
-
-  AudioType(final String text) {
-    this.text = text;
-    type = "";
-    speed = "";
+  UserToCount(Map<Integer, Integer> idToCount
+  //    , Map<Integer, Set<Integer>> idToUniqueCount
+  ) {
+    this.idToCount = idToCount;
+//    this.idToUniqueCount = idToUniqueCount;
   }
 
-  AudioType(final String text, String type, String speed) {
-    this.text = text;
-    this.type = type;
-    this.speed = speed;
+  public Map<Integer, Integer> getIdToCount() {
+    return idToCount;
   }
-
-  @Override
-  public String toString() {
-    return text;
-  }
-
-  public String getType() {
-    return type;
-  }
-
-  public String getSpeed() {
-    return speed;
-  }
-
-  public boolean isContext() {
-    return this == CONTEXT_REGULAR || this == CONTEXT_SLOW;
-  }
+//
+//  public Map<Integer, Set<Integer>> getIdToUniqueCount() {
+//    return idToUniqueCount;
+//  }
 }

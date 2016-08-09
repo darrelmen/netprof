@@ -237,22 +237,6 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   }
 
   /**
-   * @param id
-   * @return
-   * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser(int)
-   */
-/*
-  @Override
-  public User getUserBy(int id) {
-    findSharedDatabase();
-    User userWhere = db.getUserDAO().getUserWhere(id);
-    db.setStartupInfo(userWhere);
-
-    return userWhere;
-  }
-*/
-
-  /**
    * @param user
    * @param email
    * @param url
