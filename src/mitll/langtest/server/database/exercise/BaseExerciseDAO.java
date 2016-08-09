@@ -60,6 +60,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 	private static final String ENGLISH = "english";
 	private static final String MISSING_ENGLISH = "missing english";
 	public static final String BEST_AUDIO = "bestAudio";
+	public static final boolean DEBUG = false;
 
 	private final Map<Integer, CommonExercise> idToExercise = new HashMap<>();
 	protected final SectionHelper<CommonExercise> sectionHelper = new SectionHelper<>();
@@ -443,7 +444,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 				logger.info("Automatically added " + exTofieldToDefect.size() + "/" + count + " defects");
 			}
 		} else {
-			logger.info("NOT Automatically adding " + exTofieldToDefect.size() + " defects");
+			if (DEBUG) logger.info("NOT Automatically adding " + exTofieldToDefect.size() + " defects");
 		}
 	}
 

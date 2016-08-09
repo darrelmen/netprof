@@ -47,7 +47,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-public class UserListDAO extends DAO implements IUserListDAO {
+@Deprecated public class UserListDAO extends DAO implements IUserListDAO {
   private static final String CREATORID = "creatorid";
   private static final Logger logger = Logger.getLogger(UserListDAO.class);
 
