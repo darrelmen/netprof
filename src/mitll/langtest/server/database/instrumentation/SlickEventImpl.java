@@ -43,7 +43,7 @@ public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
    * @param other
    * @param projid
    * @param exToInt
-   * @see mitll.langtest.server.database.CopyToPostgres#copyToPostgres(DatabaseImpl)
+   * @see mitll.langtest.server.database.CopyToPostgres#copyOneConfig(DatabaseImpl, String, String)
    */
   public void copyTableOnlyOnce(IEventDAO other, int projid, Map<Integer, Integer> oldToNew, Map<String, Integer> exToInt) {
     if (getNumRows(projid).intValue() == 0) {
@@ -52,6 +52,7 @@ public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
       logger.info("copyTableOnlyOnce " + all.size() + " events, ex->int size " + exToInt.size());
       Set<String> missingEx = new TreeSet<>();
       Set<String> ex = new TreeSet<>();
+      Set<Integer> userids = new TreeSet<>();
       int missing = 0;
       for (Event event : all) {
         SlickEvent slickEvent = getSlickEvent(event, projid, oldToNew, exToInt);
@@ -65,11 +66,15 @@ public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
           if (add && missing < 100 && !exerciseID.isEmpty()) {
             logger.warn("missing '" + exerciseID + "'");
           }
+          boolean missingUser = userids.add(event.getUserID());
+          if (missingUser) logger.info("missing user " + event.getUserID());
         }
       }
 
+      logMemory();
       if (missing > 0) {
-        logger.warn("skipped " + missing + " out of " + all.size() + " : " + missingEx.size() + " missing " + missingEx);
+        logger.warn("skipped " + missing + " out of " + all.size() + " : " + missingEx.size());// + " missing " + missingEx);
+        logger.warn("missing users " + userids);
         logger.warn("found   " + ex.size() + " exercises");// + " events ex " + ex);
       }
 
@@ -78,6 +83,19 @@ public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
       logger.info("added  " + copy.size() + " events");
 
     }
+  }
+
+
+  private void logMemory() {
+    int MB = (1024 * 1024);
+    Runtime rt = Runtime.getRuntime();
+    long free = rt.freeMemory();
+    long used = rt.totalMemory() - free;
+    long max = rt.maxMemory();
+
+    ThreadGroup threadGroup = Thread.currentThread().getThreadGroup();
+    logger.debug(" current thread group " + threadGroup.getName() + " = " + threadGroup.activeCount() +
+        " : # cores = " + Runtime.getRuntime().availableProcessors() + " heap info free " + free / MB + "M used " + used / MB + "M max " + max / MB + "M");
   }
 
   /**
@@ -108,14 +126,14 @@ public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
     }
   }
 
-  SlickEvent getSlickEvent(Event event, int projid, Integer exid) {
+  private SlickEvent getSlickEvent(Event event, int projid, Integer exid) {
     long timestamp = event.getTimestamp();
     if (timestamp < 1) timestamp = System.currentTimeMillis();
     Timestamp modified = new Timestamp(timestamp);
     return new SlickEvent(-1,
         event.getUserID(),
         exid,
-        modified,
+        timestamp,
         event.getContext() == null ? "" : event.getContext(),
         event.getWidgetID(),
         event.getWidgetType(),
@@ -131,20 +149,20 @@ public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
         "" + event.exid(),
         event.context(),
         event.userid(),
-        event.modified().getTime(),
+        event.modified(),//.getTime(),
         event.device(), event.exid());
   }
 
   /**
    * @param event
    * @param projid
-   * @param oldToNew
+   * @param oldToNewUser
    * @param exToID
    * @return
    * @see #copyTableOnlyOnce(IEventDAO, int, Map, Map)
    */
-  private SlickEvent getSlickEvent(Event event, int projid, Map<Integer, Integer> oldToNew, Map<String, Integer> exToID) {
-    return (oldToNew.containsKey(event.getUserID())) ? toSlick(event, projid, exToID) : null;
+  private SlickEvent getSlickEvent(Event event, int projid, Map<Integer, Integer> oldToNewUser, Map<String, Integer> exToID) {
+    return (oldToNewUser.containsKey(event.getUserID())) ? toSlick(event, projid, exToID) : null;
   }
 
   @Override

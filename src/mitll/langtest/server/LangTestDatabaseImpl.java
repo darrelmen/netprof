@@ -852,8 +852,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       logger.error("getExercise : huh? couldn't find exercise with id '" + exid + "' when examining " +
           exercises.size() + " items");
     } else {
-      logger.debug("getExercise : find exercise " + exid + " for " + userID + " : " + byID +
-          "\n\tcontext" + byID.getDirectlyRelated());
+      logger.debug("getExercise : find exercise " + exid + " for " + userID + " : " + byID
+          //+"\n\tcontext" + byID.getDirectlyRelated()
+      );
       then2 = System.currentTimeMillis();
       addAnnotationsAndAudio(userID, byID, isFlashcardReq);
       now = System.currentTimeMillis();
