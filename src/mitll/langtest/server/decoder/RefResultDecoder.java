@@ -260,7 +260,9 @@ public class RefResultDecoder {
    * @see #doRefDecode
    */
   private void writeRefDecode(Collection<CommonExercise> exercises, String relativeConfigDir, int projid) {
-    if (db.getServerProps().shouldDoDecode()) {
+    boolean b = db.getServerProps().shouldDoDecode();
+    logger.warn("got " +b + " for should do decode");
+    if (false) {
       Map<Integer, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio(projid);
       String installPath = pathHelper.getInstallPath();
 
