@@ -419,7 +419,10 @@ public class SlickUserExerciseDAO
     return oldToNew;
   }
 
-  public Map<Integer, String> getIDToFL(int projid) {
-    return dao.getIDToFL(projid);
-  }
+  /**
+   * @see DBExerciseDAO#getIDToFL(int)
+   * @param projid
+   * @return
+   */
+  public Map<Integer, String> getIDToFL(int projid) {  return dao.getIDToFL(projid);  }
 }
