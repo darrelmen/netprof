@@ -201,9 +201,9 @@ public class PostgresTest extends BaseTest {
     toCopy.add(getEnglish());
     toCopy.add(new Info("Farsi"));
     toCopy.add(new Info("German"));
-    toCopy.add(new Info("Korean"));
     toCopy.add(new Info("Iraqi"));
     toCopy.add(new Info("Japanese"));
+    toCopy.add(new Info("Korean"));
     toCopy.add(new Info("Levantine"));
     toCopy.add(new Info("Mandarin"));
     toCopy.add(new Info("msa"));
@@ -259,11 +259,16 @@ public class PostgresTest extends BaseTest {
     for (Info config : infos) {
       //logger.info("-------- copy " + config);
       String cc = cp.getCC(config.language);
+      long then =System.currentTimeMillis();
       logger.info("\n\n\n-------- STARTED  copy " + config + " " + cc);
 
-      DatabaseImpl databaseLight = getDatabaseLight(config.language, true, "hydra-dev", "netprof", "npadmin", config.props);
+    //  DatabaseImpl databaseLight = getDatabaseLight(config.language, true, "hydra-dev", "netprof", "npadmin", config.props);
+      DatabaseImpl databaseLight = getDatabaseLight(config.language, true, "localhost", "postgres", "pgadmin", config.props);
       new CopyToPostgres().copyOneConfig(databaseLight, cc, config.name);
-      logger.info("\n\n\n-------- FINISHED copy " + config + " " + cc);
+      databaseLight.destroy();
+      long now =System.currentTimeMillis();
+
+      logger.info("\n\n\n-------- FINISHED copy " + config + " " + cc + " in " + ((now-then)/1000) + " seconds");
       log();
 
       //((DatabaseImpl) databaseLight).copyOneConfig(cc, optName);

@@ -696,9 +696,7 @@ public class ServerProperties {
     return props.getProperty("databaseHost", "localhost");
   }
 
-  public int getDatabasePort() {
-    return getIntPropertyDef("databasePort", "5432");
-  }
+  public int getDatabasePort()    { return getIntPropertyDef("databasePort", "5432"); }
 
   public String getDatabaseName() {
     return props.getProperty("databaseName", "netprof");

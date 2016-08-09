@@ -143,8 +143,7 @@ public class ProjectTest extends BaseTest {
 
   @Test
   public void testDrop() {
-    DatabaseImpl spanish = getDatabaseVeryLight("netProf", "config.properties", false);
-    IProjectDAO projectDAO = spanish.getProjectDAO();
-    projectDAO.delete(2);
+    IProjectDAO projectDAO = getDatabaseVeryLight("netProf", "config.properties", false).getProjectDAO();
+    projectDAO.delete(7);
   }
 }
