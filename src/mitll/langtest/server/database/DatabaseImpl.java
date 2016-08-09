@@ -173,6 +173,16 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
 
   private final Map<Integer, Project> idToProject = new HashMap<>();
 
+  /**
+   * JUST FOR TESTING
+   * @param configDir
+   * @param relativeConfigDir
+   * @param dbName
+   * @param serverProps
+   * @param pathHelper
+   * @param mustAlreadyExist
+   * @param logAndNotify
+   */
   public DatabaseImpl(String configDir, String relativeConfigDir, String dbName, ServerProperties serverProps,
                       PathHelper pathHelper, boolean mustAlreadyExist, LogAndNotify logAndNotify) {
     this(configDir, relativeConfigDir, dbName, serverProps, pathHelper, mustAlreadyExist, logAndNotify, false);
@@ -233,6 +243,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     if (!serverProps.useH2()) {
       populateProjects(false);
     }
+    logger.info("made DatabaseImpl : " + this);
   }
 
   private String getOldLanguage(ServerProperties serverProps) {
@@ -597,7 +608,12 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   }
 
   public ExerciseDAO<CommonExercise> getExerciseDAO(int projectid) {
-    return getProject(projectid).getExerciseDAO();
+    Project project = getProject(projectid);
+    logger.debug("getExerciseDAO " + projectid + " found project " +project);
+    ExerciseDAO<CommonExercise> exerciseDAO = project.getExerciseDAO();
+    logger.debug("getExerciseDAO " + projectid + " found exercise dao " +exerciseDAO);
+
+    return exerciseDAO;
   }
 
   public Project getProjectForUser(int userid) {
@@ -821,7 +837,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
       Project firstProject = getFirstProject();
       logger.error("no project with id " + projectid + " in known projects (" + idToProject.keySet() +
           ")" +
-          " returning " + firstProject);
+          " returning first " + firstProject);
       return firstProject;
     }
     return project;
@@ -1934,9 +1950,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     return logAndNotify;
   }
 
-  public IUserExerciseDAO getUserExerciseDAO() {
-    return userExerciseDAO;
-  }
+  public IUserExerciseDAO getUserExerciseDAO() {  return userExerciseDAO;  }
 
   public IAnnotationDAO getAnnotationDAO() {
     return userListManager.getAnnotationDAO();

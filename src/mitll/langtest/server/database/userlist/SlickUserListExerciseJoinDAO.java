@@ -66,10 +66,7 @@ public class SlickUserListExerciseJoinDAO
    * @see mitll.langtest.server.database.custom.UserListManager#addItemToList
    */
   @Override
-  public void add(UserList userList, String uniqueID, int exid) {
-    addPair(userList.getID(), /*uniqueID,*/ exid);
-    //   dao.insert((int) userList.getUniqueID(), uniqueID,exid);
-  }
+  public void add(UserList userList, String uniqueID, int exid) { addPair(userList.getID(), /*uniqueID,*/ exid);  }
 
   /**
    * Just for copying from h2 initially
@@ -77,20 +74,12 @@ public class SlickUserListExerciseJoinDAO
    * @param userlistid
    * @paramz exerciseID
    */
-  public void addPair(int userlistid, /*String exerciseID,*/ int exid) {
-    dao.insert(userlistid, /*exerciseID,*/ exid);
-  }
+  public void addPair(int userlistid, int exid) {  dao.insert(userlistid, exid);  }
 
   @Override
   public void removeListRefs(long listid) {
 
   }
-
-/*
-  public Collection<String> getExidsFor(int listid) {
-    return dao.exids(listid);
-  }
-*/
 
   @Override
   public boolean remove(long listid, int exid) {
