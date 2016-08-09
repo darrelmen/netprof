@@ -74,7 +74,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   public AudioDAO(Database database, IUserDAO userDAO) {
     super(database, userDAO);
 
-    logger.info("making audio dao -------\n\n\n");
+ //   logger.info("making audio dao -------\n\n\n");
 
     connection = database.getConnection(this.getClass().toString());
 

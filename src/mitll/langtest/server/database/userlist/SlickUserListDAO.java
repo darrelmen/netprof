@@ -103,10 +103,11 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
 */
   }
 
-  private SlickUserExerciseList toSlick2(UserList<CommonShell> shared, int userid, int projid) {
+  public SlickUserExerciseList toSlick2(UserList<CommonShell> shared, int userid, int projid) {
     return new SlickUserExerciseList(-1,
         userid,
-        new Timestamp(shared.getModified()), shared.getName(),
+        new Timestamp(shared.getModified()),
+        shared.getName(),
         shared.getDescription(),
         shared.getClassMarker(),
         shared.isPrivate(),
@@ -131,9 +132,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
     dao.insert(UserExercise);
   }
 
-  public void addBulk(List<SlickUserExerciseList> bulk)  {
-    dao.addBulk(bulk);
-  }
+  public void addBulk(List<SlickUserExerciseList> bulk)  {  dao.addBulk(bulk);  }
 
   private List<UserList<CommonShell>> fromSlick(Collection<SlickUserExerciseList> all) {
     List<UserList<CommonShell>> copy = new ArrayList<>();
@@ -310,7 +309,9 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
 
   public Map<Integer, Integer> getOldToNew(int projid) {
     Map<Integer, Integer> oldToNew = new HashMap<>();
-    for (SlickUserExerciseList word : dao.getAll(projid)) oldToNew.put(word.legacyid(), word.id());
+    for (SlickUserExerciseList userExerciseList : dao.getAll(projid)) {
+      oldToNew.put(userExerciseList.legacyid(), userExerciseList.id());
+    }
     return oldToNew;
   }
 
