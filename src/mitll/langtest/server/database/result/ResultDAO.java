@@ -38,11 +38,11 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.Report;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.UserManagement;
+import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.answer.AudioType;
+import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.result.MonitorResult;
 import mitll.langtest.shared.user.User;
-import mitll.langtest.shared.UserAndTime;
-import mitll.langtest.shared.flashcard.CorrectAndScore;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
@@ -144,20 +144,6 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
     return new ArrayList<>();
   }
 
-/*
-  @Override
-  public List<Result> getResultsForPractice() {
-    try {
-      String sql = "SELECT * FROM " + RESULTS + " where " + AUDIO_TYPE + " is not null";
-      List<Result> resultsForQuery = getResultsSQL(sql);
-      return resultsForQuery;
-    } catch (Exception ee) {
-      logException(ee);
-    }
-    return new ArrayList<>();
-  }
-*/
-
   @Override
   public Collection<Result> getResultsDevices() {
     try {
@@ -180,9 +166,9 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
   }
 
   /**
+   * @param projid
    * @return
    * @see DatabaseImpl#getMonitorResults(int)
-   * @param projid
    */
   @Override
   public List<MonitorResult> getMonitorResults(int projid) {
@@ -394,7 +380,6 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
   }
 
   /**
-   *
    * @param matchAVP
    * @return
    */
@@ -491,6 +476,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
       boolean withFlash = rs.getBoolean(WITH_FLASH);
 
       if (type != null) {
+        if (type.contains("WebRTC")) withFlash = false;
         type = normalizeAudioType(type, withFlash);
       }
       try {
@@ -499,7 +485,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
         }
         realAudioType = type == null ? AudioType.UNSET : AudioType.valueOf(type.toUpperCase());
       } catch (IllegalArgumentException e) {
-        logger.warn("unknown audio type " + type + " at " + uniqueID);
+        logger.warn("unknown audio type '" + type + "' at " + uniqueID);
       }
 
       // NOTE : exercise id is not set - no backwards compatibility
@@ -532,28 +518,28 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
 
   private String normalizeAudioType(String type, boolean withFlash) {
     String practice = AudioType.PRACTICE.toString();
-    if (type.equals("avp")) {
+    if (type.isEmpty()) {
+      type = AudioType.LEARN.toString();
+    } else if (type.equals("avp")) {
       type = practice;
-    }
-    else if (type.equals("flashcard")) {
+    } else if (type.equals("_by_WebRTC")) {
+      type = AudioType.LEARN.toString();
+//    } else if (type.equals("fastAndSlow")) {
+//      type = AudioType.LEARN.toString();
+    } else if (type.equals("flashcard")) {
       type = practice;
-    }
-    else if (type.equals("regular_by_WebRTC")) {
+    } else if (type.equals("regular_by_WebRTC")) {
       if (withFlash) logger.error("huh? says with flash but also " + type);
       type = AudioType.REGULAR.toString();
-    }
-    else if (type.equals("slow_by_WebRTC")) {
+    } else if (type.equals("slow_by_WebRTC")) {
       if (withFlash) logger.error("huh? says with flash but also " + type);
       type = AudioType.SLOW.toString();
-    }
-    else if (type.equals("practice_by_WebRTC")) {
+    } else if (type.equals("practice_by_WebRTC")) {
       if (withFlash) logger.error("huh? says with flash but also " + type);
       type = practice;
-    }
-    else if (type.startsWith("avp")) {
+    } else if (type.startsWith("avp")) {
       type = practice;
-    }
-    else {
+    } else {
       type = type.replaceAll("=", "_");
     }
     return type;
@@ -616,7 +602,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
           valid, // valid
           timestamp.getTime(),
           audioType, dur, correct, pronScore, device, processDur, roundTripDur, rs.getBoolean(WITH_FLASH),
-          snr, validity,dtype,simpleDevice,json,"", -1);
+          snr, validity, dtype, simpleDevice, json, "", -1);
 
 /*      result.setDeviceType(dtype);
       result.setSimpleDevice(simpleDevice);
@@ -958,7 +944,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
           int exerciseID = r.getExerciseID();
           Result result = results1.get(exerciseID);
           if (result == null || (r.getTimestamp() > result.getTimestamp())) {
-            results1.put(""+exerciseID, r);
+            results1.put("" + exerciseID, r);
           }
         }
       }
