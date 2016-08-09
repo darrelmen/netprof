@@ -2,7 +2,6 @@ package mitll.langtest.server.database.instrumentation;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.ISchema;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.Event;
@@ -12,13 +11,12 @@ import mitll.npdata.dao.SlickSlimEvent;
 import mitll.npdata.dao.event.EventDAOWrapper;
 import org.apache.log4j.Logger;
 
-import java.sql.Timestamp;
 import java.util.*;
 
 /**
  * Created by go22670 on 5/13/16.
  */
-public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
+public class SlickEventImpl implements IEventDAO/*, ISchema<Event, SlickEvent>*/ {
   private static final Logger logger = Logger.getLogger(SlickEventImpl.class);
   private static final int MAX_EVENTS_TO_SHOW = 20000;
   private EventDAOWrapper eventDAOWrapper;
@@ -45,17 +43,24 @@ public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
    * @param exToInt
    * @see mitll.langtest.server.database.CopyToPostgres#copyOneConfig(DatabaseImpl, String, String)
    */
-  public void copyTableOnlyOnce(IEventDAO other, int projid, Map<Integer, Integer> oldToNew, Map<String, Integer> exToInt) {
-    if (getNumRows(projid).intValue() == 0) {
+  public void copyTableOnlyOnce(IEventDAO other,
+                                int projid,
+                                Map<Integer, Integer> oldToNewUserID,
+                                Map<String, Integer> exToInt) {
+    if (getNumRows(projid).intValue() == 0) {  // Needed?
       List<SlickEvent> copy = new ArrayList<>();
       List<Event> all = other.getAll(projid);
-      logger.info("copyTableOnlyOnce " + all.size() + " events, ex->int size " + exToInt.size());
+      logger.info("copyTableOnlyOnce " + all.size() + " events, ex->int size " + exToInt.size() + " old->new user " + oldToNewUserID.size());
+
       Set<String> missingEx = new TreeSet<>();
       Set<String> ex = new TreeSet<>();
       Set<Integer> userids = new TreeSet<>();
+
       int missing = 0;
       for (Event event : all) {
-        SlickEvent slickEvent = getSlickEvent(event, projid, oldToNew, exToInt);
+        Integer newUserID = oldToNewUserID.get(event.getUserID());
+
+        SlickEvent slickEvent = getSlickEvent(event, projid, oldToNewUserID, exToInt);
         String exerciseID = event.getExerciseID();
         if (slickEvent != null) {
           ex.add(exerciseID);
@@ -67,7 +72,9 @@ public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
             logger.warn("missing '" + exerciseID + "'");
           }
           boolean missingUser = userids.add(event.getUserID());
-          if (missingUser) logger.info("missing user " + event.getUserID());
+          if (missingUser) {
+            logger.info("missing user " + event.getUserID() + " : " + newUserID);
+          }
         }
       }
 
@@ -105,33 +112,33 @@ public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
    */
   @Override
   public boolean add(Event event, int projid) {
-    eventDAOWrapper.add(getSlickEvent(event, projid, event.getExid()));
+    eventDAOWrapper.add(getSlickEvent(event, projid, event.getExid(), event.getUserID()));
     return true;
   }
 
-  Set<String> missing = new TreeSet<>();
+  private Set<String> missing = new TreeSet<>();
 
-  @Override
-  public SlickEvent toSlick(Event event, int projid, Map<String, Integer> exToInt) {
+
+  public SlickEvent toSlick(Event event, int projid, Map<String, Integer> exToInt, int userid) {
     String trim = event.getExerciseID().trim();
     Integer exid = exToInt.get(trim);
     if (exid == null) {
       if (missing.add(trim) && missing.size() < 100) {
-        logger.warn("toSlick missing ex " + event.getExerciseID() + " : " + event);
+        logger.warn("toSlick missing ex " + trim + " : " + event);
       }
       return null;
     } else {
-      SlickEvent slickEvent = getSlickEvent(event, projid, exid);
-      return slickEvent;
+      return getSlickEvent(event, projid, exid, userid);
     }
   }
 
-  private SlickEvent getSlickEvent(Event event, int projid, Integer exid) {
+  private SlickEvent getSlickEvent(Event event, int projid, Integer exid, int userID) {
     long timestamp = event.getTimestamp();
     if (timestamp < 1) timestamp = System.currentTimeMillis();
-    Timestamp modified = new Timestamp(timestamp);
+    //Timestamp modified = new Timestamp(timestamp);
+    //int userID = event.getUserID();
     return new SlickEvent(-1,
-        event.getUserID(),
+        userID,
         exid,
         timestamp,
         event.getContext() == null ? "" : event.getContext(),
@@ -141,8 +148,8 @@ public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
         projid);
   }
 
-  @Override
-  public Event fromSlick(SlickEvent event) {
+  // @Override
+  private Event fromSlick(SlickEvent event) {
     return new Event(
         event.widgetid(),
         event.widgettype(),
@@ -161,8 +168,12 @@ public class SlickEventImpl implements IEventDAO, ISchema<Event, SlickEvent> {
    * @return
    * @see #copyTableOnlyOnce(IEventDAO, int, Map, Map)
    */
-  private SlickEvent getSlickEvent(Event event, int projid, Map<Integer, Integer> oldToNewUser, Map<String, Integer> exToID) {
-    return (oldToNewUser.containsKey(event.getUserID())) ? toSlick(event, projid, exToID) : null;
+  private SlickEvent getSlickEvent(Event event,
+                                   int projid,
+                                   Map<Integer, Integer> oldToNewUser,
+                                   Map<String, Integer> exToID) {
+    Integer newUserID = oldToNewUser.get(event.getUserID());
+    return newUserID == null ? null : toSlick(event, projid, exToID, newUserID);
   }
 
   @Override
