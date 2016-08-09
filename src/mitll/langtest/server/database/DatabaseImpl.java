@@ -259,7 +259,9 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
    * @param reload
    * @see CopyToPostgres#createProjectIfNotExists
    */
-  void populateProjects(boolean reload) { populateProjects(pathHelper, serverProps, logAndNotify, configDir, reload); }
+  void populateProjects(boolean reload) {
+    populateProjects(pathHelper, serverProps, logAndNotify, configDir, reload);
+  }
 
   /**
    * Fill in id->project map
@@ -281,18 +283,22 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     }
 
     if (reload) {
-      for (Project project : getProjects()) {
-        if (project.getExerciseDAO() == null) {
-          setExerciseDAO(project);
-          configureProject(mediaDir, installPath, project);
-          logger.info("\tpopulateProjects (reload = " + reload + ") : " + project + " : " + project.getAudioFileHelper());
-        }
-      }
+      doReload(reload);
     }
 
     logger.info("populateProjects (reload = " + reload + ") now project ids " + idToProject.keySet());
     for (Project project : getProjects()) {
       logger.info("\tproject " + project);
+    }
+  }
+
+  private void doReload(boolean reload) {
+    for (Project project : getProjects()) {
+      if (project.getExerciseDAO() == null) {
+        setExerciseDAO(project);
+        configureProject(mediaDir, installPath, project);
+        logger.info("\tpopulateProjects (reload = " + reload + ") : " + project + " : " + project.getAudioFileHelper());
+      }
     }
   }
 
@@ -590,7 +596,9 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     return projectid == -1 ? getFirstProject() : getProject(projectid);
   }
 
-  public ExerciseDAO<CommonExercise> getExerciseDAO(int projectid) { return getProject(projectid).getExerciseDAO();  }
+  public ExerciseDAO<CommonExercise> getExerciseDAO(int projectid) {
+    return getProject(projectid).getExerciseDAO();
+  }
 
   public Project getProjectForUser(int userid) {
     return getProject(getUserProjectDAO().mostRecentByUser(userid));
@@ -639,14 +647,20 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
       logger.info("For " + userWhere + " no current project.");
     } else {
       if (!idToProject.containsKey(projid)) {
+        logger.info("\tsetStartupInfo : populateProjects...");
+
         populateProjects(false);
       }
 
       Project project = getProject(projid);
 
       SlickProject project1 = project.getProject();
-      ProjectStartupInfo startupInfo = new ProjectStartupInfo(getServerProps().getProperties(),
-          project.getTypeOrder(), project.getSectionHelper().getSectionNodes(), project1.id(), project1.language());
+      ProjectStartupInfo startupInfo = new ProjectStartupInfo(
+          getServerProps().getProperties(),
+          project.getTypeOrder(),
+          project.getSectionHelper().getSectionNodes(),
+          project1.id(),
+          project1.language());
       logger.info("setStartupInfo : For " + userWhere + " Set startup info " + startupInfo);
       userWhere.setStartupInfo(startupInfo);
     }
@@ -742,6 +756,19 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
               exerciseIDToRefAudio, (SlickResultDAO) resultDAO)
       );
     }
+    logMemory();
+  }
+
+  private void logMemory() {
+    int MB = (1024 * 1024);
+    Runtime rt = Runtime.getRuntime();
+    long free = rt.freeMemory();
+    long used = rt.totalMemory() - free;
+    long max = rt.maxMemory();
+
+    ThreadGroup threadGroup = Thread.currentThread().getThreadGroup();
+    logger.debug(" current thread group " + threadGroup.getName() + " = " + threadGroup.activeCount() +
+        " : # cores = " + Runtime.getRuntime().availableProcessors() + " heap info free " + free / MB + "M used " + used / MB + "M max " + max / MB + "M");
   }
 
   /**
@@ -762,9 +789,11 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
       logger.info("makeExerciseDAO reading from excel sheet " + lessonPlanFile);
       addSingleProject(new ExcelImport(lessonPlanFile, getServerProps(), userListManager, ADD_DEFECTS));
     }
-//    setExerciseDAOs();
   }
 
+  /**
+   * @see #makeExerciseDAO(String, boolean)
+   */
   private void setExerciseDAOs() {
     for (Project project : getProjects()) {
       logger.info("makeExerciseDAO project     " + project);
@@ -773,6 +802,10 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     }
   }
 
+  /**
+   * @see #populateProjects(boolean)
+   * @param project
+   */
   private void setExerciseDAO(Project project) {
     logger.info("setExerciseDAO on " + project);
     SlickProject project1 = project.getProject();
