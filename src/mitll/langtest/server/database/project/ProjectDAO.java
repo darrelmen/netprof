@@ -119,6 +119,9 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   }
 
   /**
+   * TODO : consider adding lts class
+   * TODO : consider adding domino project id
+   *
    * @param userid
    * @param modified
    * @param name
@@ -145,7 +148,8 @@ public class ProjectDAO extends DAO implements IProjectDAO {
         status.toString(),
         firstType,
         secondType,
-        countryCode));
+        countryCode,
+        "", -1));
   }
 
   @Override
@@ -162,7 +166,8 @@ public class ProjectDAO extends DAO implements IProjectDAO {
         ProjectStatus.DEVELOPMENT.name(),
         firstType,
         secondType,
-        countryCode));
+        countryCode,
+        "", -1));
   }
 
   @Override
