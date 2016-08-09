@@ -235,14 +235,6 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     }
   }
 
-  /**
-   * @param reload
-   * @see CopyToPostgres#createProjectIfNotExists
-   */
-  void populateProjects(boolean reload) {
-    populateProjects(pathHelper, serverProps, logAndNotify, configDir, reload);
-  }
-
   private String getOldLanguage(ServerProperties serverProps) {
     return serverProps.getLanguage();
   }
@@ -264,9 +256,15 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   }
 
   /**
+   * @param reload
+   * @see CopyToPostgres#createProjectIfNotExists
+   */
+  void populateProjects(boolean reload) { populateProjects(pathHelper, serverProps, logAndNotify, configDir, reload); }
+
+  /**
    * Fill in id->project map
    *
-   * @see #DatabaseImpl(DatabaseConnection, String, String, String, ServerProperties, PathHelper, LogAndNotify)
+   * @see #populateProjects(boolean)
    */
   private void populateProjects(PathHelper pathHelper,
                                 ServerProperties serverProps,
@@ -292,11 +290,10 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
       }
     }
 
+    logger.info("populateProjects (reload = " + reload + ") now project ids " + idToProject.keySet());
     for (Project project : getProjects()) {
-      logger.info("now " + project);
+      logger.info("\tproject " + project);
     }
-    logger.info("populateProjects (reload = " + reload +
-        ") now project ids " + idToProject.keySet());
   }
 
   private void rememberProject(PathHelper pathHelper, ServerProperties serverProps, LogAndNotify logAndNotify, String relativeConfigDir, boolean reload, SlickProject slickProject) {
@@ -593,10 +590,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     return projectid == -1 ? getFirstProject() : getProject(projectid);
   }
 
-  public ExerciseDAO<CommonExercise> getExerciseDAO(int projectid) {
-    Project project = getProject(projectid);
-    return project.getExerciseDAO();
-  }
+  public ExerciseDAO<CommonExercise> getExerciseDAO(int projectid) { return getProject(projectid).getExerciseDAO();  }
 
   public Project getProjectForUser(int userid) {
     return getProject(getUserProjectDAO().mostRecentByUser(userid));
@@ -798,6 +792,14 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
       return firstProject;
     }
     return project;
+  }
+
+  public Project getProjectForgiving(int projectid) {
+    Project project = idToProject.get(projectid);
+    if (project == null) {
+      populateProjects(false);
+    }
+    return idToProject.get(projectid);
   }
 
   private Collection<Project> getProjects() {
@@ -1782,9 +1784,9 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   public void recordWordAndPhoneInfo(AudioAnswer answer, long answerID) {
     PretestScore pretestScore = answer.getPretestScore();
     if (pretestScore == null) {
-      logger.debug(getLanguage() + " : recordWordAndPhoneInfo pretest score is null for " + answer + " and result id " + answerID);
+      logger.debug(" : recordWordAndPhoneInfo pretest score is null for " + answer + " and result id " + answerID);
     } else {
-      logger.debug(getLanguage() + " : recordWordAndPhoneInfo pretest score is " + pretestScore + " for " + answer + " and result id " + answerID);
+      logger.debug(" : recordWordAndPhoneInfo pretest score is " + pretestScore + " for " + answer + " and result id " + answerID);
     }
     recordWordAndPhoneInfo(answerID, pretestScore);
   }
