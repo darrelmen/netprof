@@ -60,6 +60,8 @@ public interface IResultDAO extends IDAO {
 
   Collection<UserAndTime> getUserAndTimes();
 
+  UserToCount getUserToNumAnswers();
+
   SessionsAndScores getSessionsForUserIn2(Collection<Integer> ids,
                                           int latestResultID, int userid,
                                           Collection<Integer> allIds,
