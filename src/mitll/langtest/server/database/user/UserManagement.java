@@ -36,6 +36,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.excel.UserDAOToExcel;
 import mitll.langtest.server.database.result.IResultDAO;
+import mitll.langtest.server.database.result.UserToCount;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.user.User;
 import net.sf.json.JSON;
@@ -176,6 +177,8 @@ public class UserManagement {
    * TODO : come back and re-examine percent complete in context of a project
    * Adds some sugar -- sets the answers and rate per user, and joins with dli experience data
    *
+   * TODO : percent complete should be done from audio table, not result table
+   *
    * @return
    * @see mitll.langtest.server.database.DatabaseImpl#getUsers
    * @see #usersToXLSX(OutputStream, String)
@@ -184,11 +187,11 @@ public class UserManagement {
     Map<Integer, Float> userToRate = resultDAO.getSessions().getUserToRate();
     List<User> users = null;
     try {
-      Pair idToCount = populateUserToNumAnswers();
+      UserToCount idToCount = resultDAO.getUserToNumAnswers();
       users = userDAO.getUsers();
       //int total = exerciseDAO.getRawExercises().size();
       for (User u : users) {
-        Integer numResults = idToCount.idToCount.get(u.getId());
+        Integer numResults = idToCount.getIdToCount().get(u.getId());
         if (numResults != null) {
           u.setNumResults(numResults);
 
@@ -197,6 +200,7 @@ public class UserManagement {
           }
         //  int size = idToCount.idToUniqueCount.get(u.getId()).size();
 
+          // TODO : put this back
           if (false) {
    /*         boolean complete = size >= numExercises;
             u.setComplete(complete);
@@ -218,7 +222,7 @@ public class UserManagement {
    * @return
    * @see #getUsers
    */
-  private Pair populateUserToNumAnswers() {
+/*  public Pair populateUserToNumAnswers() {
     Map<Integer, Integer> idToCount = new HashMap<>();
     Map<Integer, Set<Integer>> idToUniqueCount = new HashMap<>();
     for (UserAndTime result : resultDAO.getUserAndTimes()) {
@@ -244,5 +248,5 @@ public class UserManagement {
       this.idToCount = idToCount;
       this.idToUniqueCount = idToUniqueCount;
     }
-  }
+  }*/
 }

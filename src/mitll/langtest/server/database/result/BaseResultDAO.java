@@ -35,6 +35,7 @@ package mitll.langtest.server.database.result;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.sorter.ExerciseSorter;
+import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.result.MonitorResult;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -350,6 +351,30 @@ public abstract class BaseResultDAO extends DAO {
     return new ArrayList<>();
   }
 
+  /**
+   * So multiple recordings for the same item are counted as 1.
+   * @return
+   * @seex #getUsers
+   */
+  public UserToCount getUserToNumAnswers() {
+    Map<Integer, Integer> idToCount = new HashMap<>();
+   // Map<Integer, Set<Integer>> idToUniqueCount = new HashMap<>();
+    for (UserAndTime result : getUserAndTimes()) {
+      int userid = result.getUserid();
+  //    int exerciseID = result.getExid();
+
+      Integer count = idToCount.get(userid);
+      if (count == null) idToCount.put(userid, 1);
+      else idToCount.put(userid, count + 1);
+
+     // Set<Integer> uniqueForUser = idToUniqueCount.get(userid);
+    //  if (uniqueForUser == null) idToUniqueCount.put(userid, uniqueForUser = new HashSet<>());
+    //  uniqueForUser.add(exerciseID);
+    }
+    return new UserToCount(idToCount);//, idToUniqueCount);
+  }
+
+  abstract Collection<UserAndTime> getUserAndTimes();
   abstract List<CorrectAndScore> getCorrectAndScoresForReal();
 
   /**

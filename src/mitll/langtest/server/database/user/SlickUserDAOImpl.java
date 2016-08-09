@@ -34,11 +34,12 @@ package mitll.langtest.server.database.user;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
+import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickMiniUser;
 import mitll.npdata.dao.SlickUser;
-import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.user.UserDAOWrapper;
 import org.apache.log4j.Logger;
 import scala.collection.Seq;
@@ -51,26 +52,48 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
   private final UserDAOWrapper dao;
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(PathHelper)
    * @param database
    * @param dbConnection
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(PathHelper)
    */
   public SlickUserDAOImpl(Database database, DBConnection dbConnection) {
     super(database);
     dao = new UserDAOWrapper(dbConnection);
   }
 
-  public void createTable() { dao.createTable(); }
+  public void createTable() {
+    dao.createTable();
+  }
 
   @Override
   public String getName() {
     return dao.dao().name();
   }
 
-  public int add(SlickUser user) { return dao.add(user);  }
+  /**
+   * @param user
+   * @return
+   * @see mitll.langtest.server.database.CopyToPostgres#addUser(SlickUserDAOImpl, Map, User)
+   */
+  public int add(SlickUser user) {
+    return dao.add(user);
+  }
 
   /**
-   * @see UserManagement#addUser(User)
+   * Returns SlickUser from database, not necessarily same as passed in?
+   *
+   * @param user
+   * @return
+   */
+  public SlickUser addAndGet(SlickUser user) {
+//    logger.info("in  " + user);
+    SlickUser slickUser = dao.addAndGet(user);
+//    logger.info("out " + slickUser);
+
+    return slickUser;
+  }
+
+  /**
    * @param age
    * @param gender
    * @param experience
@@ -86,7 +109,8 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @param emailH
    * @param email
    * @param device
-   *  @return
+   * @return
+   * @see UserManagement#addUser
    */
   @Override
   public int addUser(int age, String gender, int experience, String userAgent, String trueIP,
@@ -142,15 +166,25 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return convertOrNull(userByIDAndPass);
   }
 
+  /**
+   * @param id
+   * @return
+   * @see mitll.langtest.server.database.CopyToPostgres#copyUsers(DatabaseImpl, int)
+   */
   @Override
-  public User getUserByID(String id) {
-    return convertOrNull(dao.getByUserID(id));
+  public User getUserByID(String id) {  return convertOrNull(dao.getByUserID(id));  }
+
+  public Collection<User> getAllUsersByID(String id) {
+    Seq<SlickUser> byUserID = dao.getByUserID(id);
+    scala.collection.Iterator<SlickUser> iterator = byUserID.iterator();
+    List<User> copy = new ArrayList<>();
+    while (iterator.hasNext()) copy.add(toUser(iterator.next()));
+    return copy;
   }
 
-  public User getByID(int id) {
-    return convertOrNull(dao.byID(id));
+//  public boolean userExists(String id, String passwordHash) { return dao.userExists()}
 
-  }
+  public User getByID(int id) {  return convertOrNull(dao.byID(id));  }
 
   private User convertOrNull(Seq<SlickUser> userByIDAndPass) {
     return userByIDAndPass.isEmpty() ? null : toUser(userByIDAndPass.head());
@@ -168,7 +202,7 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }
 
   public SlickUser toSlick(User user) {
-    return new SlickUser(user.getId(),
+    return new SlickUser(-1,
         user.getUserID(),
         user.isMale(),
         user.getIpaddr() == null ? "" : user.getIpaddr(),
