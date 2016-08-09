@@ -74,13 +74,19 @@ public class Project {
   private DatabaseImpl db;
   private ServerProperties serverProps;
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#addSingleProject(ExerciseDAO)
+   * @param exerciseDAO
+   */
   public Project(ExerciseDAO<CommonExercise> exerciseDAO) {
     this.exerciseDAO = exerciseDAO;
   }
 
   public Project(SlickProject project,
-                 PathHelper pathHelper, ServerProperties serverProps,
-                 DatabaseImpl db, LogAndNotify logAndNotify,
+                 PathHelper pathHelper,
+                 ServerProperties serverProps,
+                 DatabaseImpl db,
+                 LogAndNotify logAndNotify,
                  String relativeConfigDir) {
     this.project = project;
     this.typeOrder = Arrays.asList(project.first(), project.second());
@@ -136,7 +142,7 @@ public class Project {
 
   /**
    * @param exerciseDAO
-   * @see DatabaseImpl#makeExerciseDAO(String, boolean)
+   * @see DatabaseImpl#setExerciseDAO(Project) (String, boolean)
    */
   public void setExerciseDAO(ExerciseDAO<CommonExercise> exerciseDAO) {
     this.exerciseDAO = exerciseDAO;
