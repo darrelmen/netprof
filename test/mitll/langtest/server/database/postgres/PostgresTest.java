@@ -126,6 +126,68 @@ public class PostgresTest extends BaseTest {
     testCopy(toCopy);
   }
 
+  @Test
+  public void testEgyptian() {
+    List<Info> toCopy = new ArrayList<>();
+    toCopy.add(new Info("Egyptian"));
+    testCopy(toCopy);
+  }
+
+  @Test
+  public void testFarsi() {
+    List<Info> toCopy = new ArrayList<>();
+    toCopy.add(new Info("Farsi"));
+    testCopy(toCopy);
+  }
+
+  @Test
+  public void testGerman() {
+    List<Info> toCopy = new ArrayList<>();
+    toCopy.add(new Info("German"));
+    testCopy(toCopy);
+  }
+
+  @Test
+  public void testKorean() {
+    List<Info> toCopy = new ArrayList<>();
+    toCopy.add(new Info("Korean"));
+    testCopy(toCopy);
+  }
+
+  @Test
+  public void testMandarin() {
+    List<Info> toCopy = new ArrayList<>();
+    toCopy.add(new Info("Mandarin"));
+    testCopy(toCopy);
+  }
+
+  @Test
+  public void testIraqi() {
+    List<Info> toCopy = new ArrayList<>();
+    toCopy.add(new Info("Iraqi"));
+    testCopy(toCopy);
+  }
+
+  /**
+   * Broken?
+   */
+  @Test
+  public void testJapanese() {
+    List<Info> toCopy = new ArrayList<>();
+    toCopy.add(new Info("Japanese"));
+    testCopy(toCopy);
+  }
+
+  /**
+   *
+   */
+  @Test
+  public void testLevantine() {
+    List<Info> toCopy = new ArrayList<>();
+    toCopy.add(new Info("Levantine"));
+    testCopy(toCopy);
+  }
+
   /**
    * databaseHost=hydra-dev
    * databaseUser=netprof
@@ -135,7 +197,15 @@ public class PostgresTest extends BaseTest {
   public void testCopyAll() {
     List<Info> toCopy = new ArrayList<>();
     toCopy.add(new Info("Dari"));
+    toCopy.add(new Info("Egyptian"));
     toCopy.add(getEnglish());
+    toCopy.add(new Info("Farsi"));
+    toCopy.add(new Info("German"));
+    toCopy.add(new Info("Korean"));
+    toCopy.add(new Info("Iraqi"));
+    toCopy.add(new Info("Japanese"));
+    toCopy.add(new Info("Levantine"));
+    toCopy.add(new Info("Mandarin"));
     toCopy.add(new Info("msa"));
     toCopy.add(getPashto());
     toCopy.add(getPashto2());
@@ -144,6 +214,19 @@ public class PostgresTest extends BaseTest {
     // toCopy.add(new Info("pashto","Pashto Advanced Foreign Language","pashtoQuizlet3.properties"));
     toCopy.add(getRussian());
     toCopy.add(getSpanish());
+    toCopy.add(new Info("Sudanese"));
+    toCopy.add(new Info("Tagalog"));
+    toCopy.add(new Info("Urdu"));
+
+    testCopy(toCopy);
+  }
+
+  @Test
+  public void testCopyPashtos() {
+    List<Info> toCopy = new ArrayList<>();
+    toCopy.add(getPashto());
+    toCopy.add(getPashto2());
+    toCopy.add(getPashto3());
     testCopy(toCopy);
   }
 
@@ -176,13 +259,27 @@ public class PostgresTest extends BaseTest {
     for (Info config : infos) {
       //logger.info("-------- copy " + config);
       String cc = cp.getCC(config.language);
-      logger.info("-------- copy " + config + " " + cc);
+      logger.info("\n\n\n-------- STARTED  copy " + config + " " + cc);
 
       DatabaseImpl databaseLight = getDatabaseLight(config.language, true, "hydra-dev", "netprof", "npadmin", config.props);
       new CopyToPostgres().copyOneConfig(databaseLight, cc, config.name);
+      logger.info("\n\n\n-------- FINISHED copy " + config + " " + cc);
+      log();
 
       //((DatabaseImpl) databaseLight).copyOneConfig(cc, optName);
     }
+  }
+
+  private void log() {
+    int MB = (1024 * 1024);
+    Runtime rt = Runtime.getRuntime();
+    long free = rt.freeMemory();
+    long used = rt.totalMemory() - free;
+    long max = rt.maxMemory();
+
+    ThreadGroup threadGroup = Thread.currentThread().getThreadGroup();
+    logger.debug(" current thread group " + threadGroup.getName() + " = " + threadGroup.activeCount() +
+        " : # cores = " + Runtime.getRuntime().availableProcessors() + " heap info free " + free / MB + "M used " + used / MB + "M max " + max / MB + "M");
   }
 
   private class Info {

@@ -193,7 +193,7 @@ public abstract class BaseUserDAO extends DAO {
    */
 
   public void findOrMakeDefectDetector() {
-    this.defectDetector = getOrAdd(DEFECT_DETECTOR);
+    this.defectDetector  = getOrAdd(DEFECT_DETECTOR);
     this.beforeLoginUser = getOrAdd(BEFORE_LOGIN_USER);
     this.importUser = getOrAdd(IMPORT_USER);
     this.defaultUser = getOrAdd("defaultUser");
