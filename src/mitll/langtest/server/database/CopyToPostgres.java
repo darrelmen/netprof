@@ -349,7 +349,10 @@ public class CopyToPostgres<T extends CommonShell> {
 
     Properties props = db.getServerProps().getProps();
     for (String prop : ServerProperties.CORE_PROPERTIES) {
-      projectDAO.addProperty(byName, prop, props.getProperty(prop));
+      String property = props.getProperty(prop);
+      if (property != null) {
+        projectDAO.addProperty(byName, prop, property);
+      }
     }
 
     logger.info("created project " + byName);
@@ -418,9 +421,9 @@ public class CopyToPostgres<T extends CommonShell> {
             SlickUser slickUser = addUser(slickUserDAO, slickUserProjectDAO, oldToNew, toImport, projid);
 
             if (userByID1 != null) {
-              logger.info("found existing user " + importUserID + " : " + userByID1);
+//              logger.info("found existing user " + importUserID + " : " + userByID1);
               collisions++;
-              logger.info("collision to project " + projid + " map " + importID + "->" + slickUser.id() + " : " + slickUser);
+              logger.info("user collision to project " + projid + " map " + importID + "->" + slickUser.id() + " : " + slickUser);
             } else {
               numAdded++;
             }
