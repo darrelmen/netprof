@@ -70,7 +70,7 @@ public class ProjectTest extends BaseTest {
         spanish.getLanguage(),
         "ALL",
         ProjectType.NP,
-        ProjectStatus.PRODUCTION, iterator.next(), iterator.next(), "es");
+        ProjectStatus.PRODUCTION, iterator.next(), iterator.next(), "es",0);
   }
 
   @Test
@@ -144,6 +144,7 @@ public class ProjectTest extends BaseTest {
   @Test
   public void testDrop() {
     IProjectDAO projectDAO = getDatabaseVeryLight("netProf", "config.properties", false).getProjectDAO();
-    projectDAO.delete(7);
+    projectDAO.delete(11);
+    projectDAO.delete(12);
   }
 }
