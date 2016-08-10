@@ -102,9 +102,7 @@ public class Project {
     this.pathHelper = pathHelper;
   }
 
-  public String getLanguage() {
-    return project.language();
-  }
+  public String getLanguage() { return project.language();  }
 
   /**
    * Only public to support deletes...
