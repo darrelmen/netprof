@@ -63,8 +63,8 @@ public class UserSecurityManager {
    * The key to get/set the request attribute that holds the
    * user looked up by the security filter.
    */
-  public static final String USER_REQUEST_ATT = "d-user";
-  private static final Marker TIMING = MarkerManager.getMarker("TIMING");
+  //public static final String USER_REQUEST_ATT = "d-user";
+  //private static final Marker TIMING = MarkerManager.getMarker("TIMING");
   private final IUserDAO userDAO;
 
   public UserSecurityManager(IUserDAO userDAO) {
@@ -72,9 +72,11 @@ public class UserSecurityManager {
   }
 
   /**
+   * TODO : remove userId param?
+   *
    * @param request
-   * @param userId
-   * @param killAllSessions
+   * @param userId not really needed
+   * @param killAllSessions remove???
    */
   public void logoutUser(HttpServletRequest request, String userId, boolean killAllSessions) {
     long startMS = System.currentTimeMillis();
@@ -195,11 +197,7 @@ public class UserSecurityManager {
 	}*/
 
   private Map<Integer, User> idToSession = new HashMap<>();
-
-  private synchronized void rememberIDToUser(int id, User user) {
-    idToSession.put(id, user);
-  }
-
+  private synchronized void rememberIDToUser(int id, User user) {  idToSession.put(id, user);  }
   private synchronized User getUserForID(int id) {
     return idToSession.get(id);
   }
