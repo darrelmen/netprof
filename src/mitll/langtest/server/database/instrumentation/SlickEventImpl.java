@@ -60,8 +60,13 @@ public class SlickEventImpl implements IEventDAO/*, ISchema<Event, SlickEvent>*/
       for (Event event : all) {
         Integer newUserID = oldToNewUserID.get(event.getUserID());
 
-        SlickEvent slickEvent = getSlickEvent(event, projid, oldToNewUserID, exToInt);
-        String exerciseID = event.getExerciseID();
+        SlickEvent slickEvent = null;
+        String exerciseID = "";
+        boolean foundUser = newUserID != null;
+        if (foundUser) {
+          slickEvent = getSlickEvent(event, projid, newUserID, exToInt);
+          exerciseID = event.getExerciseID();
+        }
         if (slickEvent != null) {
           ex.add(exerciseID);
           copy.add(slickEvent);
@@ -71,9 +76,12 @@ public class SlickEventImpl implements IEventDAO/*, ISchema<Event, SlickEvent>*/
           if (add && missing < 100 && !exerciseID.isEmpty()) {
             logger.warn("missing '" + exerciseID + "'");
           }
-          boolean missingUser = userids.add(event.getUserID());
-          if (missingUser) {
-            logger.info("missing user " + event.getUserID() + " : " + newUserID);
+
+          if (!foundUser) {
+            boolean missingUser = userids.add(event.getUserID());
+            if (missingUser) {
+              logger.info("missing user " + event.getUserID() + " : " + newUserID);
+            }
           }
         }
       }
@@ -170,10 +178,10 @@ public class SlickEventImpl implements IEventDAO/*, ISchema<Event, SlickEvent>*/
    */
   private SlickEvent getSlickEvent(Event event,
                                    int projid,
-                                   Map<Integer, Integer> oldToNewUser,
+                                   Integer newUserID,
                                    Map<String, Integer> exToID) {
-    Integer newUserID = oldToNewUser.get(event.getUserID());
-    return newUserID == null ? null : toSlick(event, projid, exToID, newUserID);
+ //   Integer newUserID = oldToNewUser.get(event.getUserID());
+    return /*newUserID == null ? null :*/ toSlick(event, projid, exToID, newUserID);
   }
 
   @Override

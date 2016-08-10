@@ -880,7 +880,7 @@ public class InitialUI implements UILifecycle {
         List<SlimProject> children = projectForLang.getChildren();
         // logger.info("project " + projid + " has " + children);
         if (children.size() < 2) {
-          logger.info("onClick select leaf project " + projid + " current user " + userManager.getUser() + " : " + userManager.getUserID());
+          //logger.info("onClick select leaf project " + projid + " current user " + userManager.getUser() + " : " + userManager.getUserID());
           setProjectForUser(projid);
         } else {
           logger.info("onClick select parent project " + projid + " and " + children.size() + " children ");

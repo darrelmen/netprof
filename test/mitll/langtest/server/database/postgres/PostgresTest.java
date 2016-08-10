@@ -34,8 +34,8 @@ package mitll.langtest.server.database.postgres;
 
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.BaseTest;
-import mitll.langtest.server.database.CopyToPostgres;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.copy.CopyToPostgres;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.shared.analysis.WordScore;
@@ -231,15 +231,15 @@ public class PostgresTest extends BaseTest {
   }
 
   Info getPashto() {
-    return new Info("pashto", "Pashto Elementary", "pashtoQuizlet1.properties");
+    return new Info("pashto", "Pashto Elementary", "pashtoQuizlet1.properties", 0);
   }
 
   Info getPashto2() {
-    return new Info("pashto", "Pashto Intermediate", "pashtoQuizlet2.properties");
+    return new Info("pashto", "Pashto Intermediate", "pashtoQuizlet2.properties", 1);
   }
 
   Info getPashto3() {
-    return new Info("pashto", "Pashto Advanced", "pashtoQuizlet3.properties");
+    return new Info("pashto", "Pashto Advanced", "pashtoQuizlet3.properties", 2);
   }
 
   Info getSpanish() {
@@ -256,19 +256,24 @@ public class PostgresTest extends BaseTest {
 
   void testCopy(List<Info> infos) {
     CopyToPostgres cp = new CopyToPostgres();
+    boolean doLocal = false;
     for (Info config : infos) {
       //logger.info("-------- copy " + config);
       String cc = cp.getCC(config.language);
-      long then =System.currentTimeMillis();
+      long then = System.currentTimeMillis();
       logger.info("\n\n\n-------- STARTED  copy " + config + " " + cc);
 
-    //  DatabaseImpl databaseLight = getDatabaseLight(config.language, true, "hydra-dev", "netprof", "npadmin", config.props);
-      DatabaseImpl databaseLight = getDatabaseLight(config.language, true, "localhost", "postgres", "pgadmin", config.props);
-      new CopyToPostgres().copyOneConfig(databaseLight, cc, config.name);
-      databaseLight.destroy();
-      long now =System.currentTimeMillis();
 
-      logger.info("\n\n\n-------- FINISHED copy " + config + " " + cc + " in " + ((now-then)/1000) + " seconds");
+      //  DatabaseImpl databaseLight = getDatabaseLight(config.language, true, "hydra-dev", "netprof", "npadmin", config.props);
+      DatabaseImpl databaseLight = doLocal ?
+          getDatabaseLight(config.language, true, "localhost", "postgres", "pgadmin", config.props) :
+          getDatabaseLight(config.language, true, "hydra-dev", "netprof", "npadmin", config.props);
+
+      new CopyToPostgres().copyOneConfig(databaseLight, cc, config.name, config.displayOrder);
+      databaseLight.destroy();
+      long now = System.currentTimeMillis();
+
+      logger.info("\n\n\n-------- FINISHED copy " + config + " " + cc + " in " + ((now - then) / 1000) + " seconds");
       log();
 
       //((DatabaseImpl) databaseLight).copyOneConfig(cc, optName);
@@ -291,15 +296,17 @@ public class PostgresTest extends BaseTest {
     String name;
     String language;
     String props;
+    int displayOrder = 0;
 
     public Info(String language) {
-      this(language, language, null);
+      this(language, language, null, 0);
     }
 
-    public Info(String language, String name, String props) {
+    public Info(String language, String name, String props, int displayOrder) {
       this.language = language;
       this.name = name;
       this.props = props;
+      this.displayOrder = displayOrder;
     }
 
     public String toString() {
@@ -330,7 +337,7 @@ public class PostgresTest extends BaseTest {
     testCreate();
     DatabaseImpl spanish = getDatabaseLight("spanish", true);
     CopyToPostgres copyToPostgres = new CopyToPostgres();
-    copyToPostgres.createProjectIfNotExists(spanish, copyToPostgres.getCC("spanish"), null, "");
+    copyToPostgres.createProjectIfNotExists(spanish, copyToPostgres.getCC("spanish"), null, "", 0);
   }
 
   @Test
@@ -485,7 +492,15 @@ public class PostgresTest extends BaseTest {
     String parent = file.getParentFile().getAbsolutePath();
     logger.info("path is " + parent);
     ServerProperties serverProps = new ServerProperties(parent, file.getName());
-    return new DBConnection(serverProps.getDatabaseType(),
-        serverProps.getDatabaseHost(), serverProps.getDatabasePort(), serverProps.getDatabaseName(), serverProps.getDatabaseUser(), serverProps.getDatabasePassword());
+    // logger.info("connect to " + serverProps.getDatabaseHost() + " : " + serverProps.getDatabaseName());
+    logger.info("connect to " + serverProps.getDBConfig());
+/*    return new DBConnection(
+        serverProps.getDatabaseType(),
+        serverProps.getDatabaseHost(),
+        serverProps.getDatabasePort(),
+        serverProps.getDatabaseName(),
+        serverProps.getDatabaseUser(),
+        serverProps.getDatabasePassword());*/
+    return new DBConnection(serverProps.getDBConfig());
   }
 }
