@@ -131,4 +131,6 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     }
     return idToEx;
   }
+
+  public String toString() { return "DBExerciseDAO for " + project; }
 }

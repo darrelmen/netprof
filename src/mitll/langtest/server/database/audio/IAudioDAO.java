@@ -54,10 +54,10 @@ public interface IAudioDAO extends IDAO {
 
   Collection<AudioAttribute> getAudioAttributesByProject(int projid);
 
-  int attachAudio(CommonExercise firstExercise, String installPath, String relativeConfigDir);
+  int attachAudio(CommonExercise firstExercise, String installPath, String relativeConfigDir, String language);
 
   boolean attachAudio(CommonExercise firstExercise, String installPath, String relativeConfigDir,
-                      Collection<AudioAttribute> audioAttributes);
+                      Collection<AudioAttribute> audioAttributes, String language);
 
   Collection<Integer> getRecordedBy(int userid);
 
