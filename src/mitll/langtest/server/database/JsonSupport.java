@@ -308,7 +308,7 @@ public class JsonSupport {
    * @see mitll.langtest.server.ScoreServlet#getPhoneReport
    * @see DatabaseImpl#getJsonPhoneReport(long, int, Map)
    */
-  public JSONObject getJsonPhoneReport(long userid, int projid, Map<String, Collection<String>> typeToValues) {
+  JSONObject getJsonPhoneReport(long userid, int projid, Map<String, Collection<String>> typeToValues, String language) {
     Collection<CommonExercise> exercisesForState = sectionHelper.getExercisesForSelectionState(typeToValues);
 
     long then = System.currentTimeMillis();
@@ -317,12 +317,13 @@ public class JsonSupport {
 
     if (now - then > 500) logger.warn("took " + (now - then) + " millis to get ex->audio map");
 
+
     List<Integer> ids = new ArrayList<>();
     Map<Integer, String> exidToRefAudio = new HashMap<>();
     for (CommonExercise exercise : exercisesForState) {
       List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
       if (audioAttributes != null) {
-        audioDAO.attachAudio(exercise, installPath, configDir, audioAttributes);
+        audioDAO.attachAudio(exercise, installPath, configDir, audioAttributes, language);
       }
       int id = exercise.getID();
       ids.add(id);

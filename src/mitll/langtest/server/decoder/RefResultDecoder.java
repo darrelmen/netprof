@@ -180,6 +180,7 @@ public class RefResultDecoder {
   private void trimRef(int projid, Collection<CommonExercise> exercises, String relativeConfigDir) {
     if (DO_TRIM) {
       Map<Integer, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio(projid);
+      String language = db.getLanguage(projid);
       String installPath = pathHelper.getInstallPath();
 
       int numResults = db.getRefResultDAO().getNumResults();
@@ -203,7 +204,7 @@ public class RefResultDecoder {
         List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
         if (audioAttributes != null) {
 //					logger.warn("hmm - audio recorded for " + )
-          boolean didAll = db.getAudioDAO().attachAudio(exercise, installPath, relativeConfigDir, audioAttributes);
+          boolean didAll = db.getAudioDAO().attachAudio(exercise, installPath, relativeConfigDir, audioAttributes,language);
           attrc += audioAttributes.size();
           if (!didAll) {
             failed.add(exercise.getID());
@@ -270,7 +271,7 @@ public class RefResultDecoder {
       String installPath = pathHelper.getInstallPath();
 
       int numResults = db.getRefResultDAO().getNumResults();
-      //String language = getLanguage();
+      String language = db.getLanguage(projid);
       logger.debug(" writeRefDecode : found " +
           numResults + " in ref results table vs " + exToAudio.size() + " exercises with audio");
 
@@ -291,7 +292,7 @@ public class RefResultDecoder {
 
         List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
         if (audioAttributes != null) {
-          db.getAudioDAO().attachAudio(exercise, installPath, relativeConfigDir, audioAttributes);
+          db.getAudioDAO().attachAudio(exercise, installPath, relativeConfigDir, audioAttributes,language);
           attrc += audioAttributes.size();
         }
 

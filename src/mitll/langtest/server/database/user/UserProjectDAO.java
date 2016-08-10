@@ -84,11 +84,17 @@ public class UserProjectDAO implements IUserProjectDAO {
     return dao.getAll();
   }
 
+  /**
+   * TODO - we seem to hit this too often
+   * @param user
+   * @return
+   */
   @Override
   public int mostRecentByUser(int user) {
     List<SlickUserProject> slickUserProjects = dao.mostRecentByUser(user);
- //   logger.info("mostRecentByUser most recent project for " +user + " are " + slickUserProjects);
-    return slickUserProjects.isEmpty() ? -1 : slickUserProjects.iterator().next().projid();
+    int i = slickUserProjects.isEmpty() ? -1 : slickUserProjects.iterator().next().projid();
+ //   logger.info("mostRecentByUser most recent project for " +user + " is project #" + i);
+    return i;
   }
 
 //  @Override
