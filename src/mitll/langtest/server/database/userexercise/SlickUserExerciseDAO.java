@@ -285,12 +285,10 @@ public class SlickUserExerciseDAO
    * @see IUserExerciseDAO#getOnList(int)
    */
   private List<CommonExercise> getUserExercises(Collection<SlickExercise> all) {
-    logger.info("getUserExercises for " + all.size()+ " exercises");
-
+//    logger.info("getUserExercises for " + all.size()+ " exercises");
     List<CommonExercise> copy = new ArrayList<>();
     for (SlickExercise userExercise : all) copy.add(fromSlick(userExercise));
-
-    logger.info("getUserExercises returned " + copy.size()+ " user exercises");
+  //  logger.info("getUserExercises returned " + copy.size()+ " user exercises");
 
     return copy;
   }
