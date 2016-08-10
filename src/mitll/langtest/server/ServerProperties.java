@@ -157,10 +157,9 @@ public class ServerProperties {
   private final Set<Long> preferredVoices = new HashSet<Long>();
   private EmailList emailList;
   private final int userInitialScores = 20;
-  //  private boolean RTL;
   private String fontFamily;
   private String fontFaceURL;
-  //private boolean RTL;
+  private final Map<String, String> phoneToDisplay = new HashMap<>();
 /*
   private int sleepBetweenDecodes;
   private long trimBeforeAndAfter;
@@ -307,7 +306,11 @@ public class ServerProperties {
     return getDefaultFalse(ENABLE_ALL_USERS);
   }
 
-  public boolean shouldDoDecode() {
+  /**
+   * Need per project triggering of repopulate ref result table
+   * @return
+   */
+  @Deprecated public boolean shouldDoDecode() {
     return getDefaultFalse(DO_DECODE);
   }
 
@@ -467,11 +470,14 @@ public class ServerProperties {
     return preferredVoices;
   }
 
-  public boolean shouldDropRefResult() {
+  /**
+   * Should be a per-project option.
+   * @return
+   */
+  @Deprecated public boolean shouldDropRefResult() {
     return getDefaultFalse("dropRefResultTable");
   }
 
-  private final Map<String, String> phoneToDisplay = new HashMap<>();
 
   public Map<String, String> getPhoneToDisplay() {
     return phoneToDisplay;
@@ -683,12 +689,11 @@ public class ServerProperties {
   public long getTrimBefore() {
     return getIntPropertyDef("trimBeforeMillis", "" + TRIM_SILENCE_BEFORE);
   }
-
   public long getTrimAfter()  {
     return getIntPropertyDef("trimAfterMillis", "" + TRIM_SILENCE_AFTER);
   }
 
-  public String getDatabaseType() {
+/*  public String getDatabaseType() {
     return props.getProperty("databaseType", "postgresql");
   }
 
@@ -708,7 +713,9 @@ public class ServerProperties {
 
   public String getDatabasePassword() {
     return props.getProperty("databasePassword", "pgadmin");
-  }
+  }*/
+
+  public String getDBConfig() { return props.getProperty("dbConfig","postgresHydra"); }
 
   public Properties getProps() {
     return props;
