@@ -153,7 +153,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     if (scoreHistory != null && scoreHistory instanceof RequiresResize) {
       ((RequiresResize) scoreHistory).onResize();
     } else {
-      System.err.println("huh? score history doesn't implement requires resize????\\n\n");
+      logger.warning("huh? score history doesn't implement requires resize????\\n\n");
     }
   }
 
@@ -321,7 +321,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
      * @see mitll.langtest.client.recorder.RecordButtonPanel#receivedAudioAnswer(AudioAnswer, com.google.gwt.user.client.ui.Panel)
      */
     public void receivedAudioAnswer(final AudioAnswer result) {
-      logger.info("StatsPracticePanel.receivedAudioAnswer: result " + result);
+      if (false) logger.info("StatsPracticePanel.receivedAudioAnswer: result " + result);
 
       if (result.getValidity() == AudioAnswer.Validity.OK) {
         //resultIDs.add(result.getResultID());
@@ -374,7 +374,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
       sticky.resetStorage();
       if (exercise == null) {
-        System.err.println("StatsPracticePanel.onSetComplete. : err : no exercise?");
+        logger.warning("StatsPracticePanel.onSetComplete. : err : no exercise?");
       } else {
         sticky.storeCurrent(exercise);
       }
