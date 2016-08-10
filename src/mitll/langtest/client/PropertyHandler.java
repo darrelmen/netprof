@@ -364,16 +364,6 @@ public class PropertyHandler {
     return isAMAS() ? AMAS_WELCOME : "Welcome to " + "NetProF" + "!";
   }
 
-/*
-  public Collection<String> getSites() {
-    return isAMAS() ? AMAS_SITES : SITE_LIST;
-  }
-
-  public String getSitePrefix() {
-    return isAMAS() ? "https://np.ll.mit.edu/amas" : "https://np.ll.mit.edu/npfClassroom";
-  }
-*/
-
   private void getPreferredVoices(String value) {
     for (String userid : value.split(",")) {
       try {
