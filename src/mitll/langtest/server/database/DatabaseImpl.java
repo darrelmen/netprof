@@ -125,7 +125,7 @@ import java.util.*;
  * Time: 11:44 PM
  * To change this template use File | Settings | File Templates.
  */
-public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
+public class DatabaseImpl implements Database {
   private static final Logger logger = Logger.getLogger(DatabaseImpl.class);
   private static final int LOG_THRESHOLD = 10;
   private static final String UNKNOWN = "unknown";
@@ -175,6 +175,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
 
   /**
    * JUST FOR TESTING
+   *
    * @param configDir
    * @param relativeConfigDir
    * @param dbName
@@ -270,7 +271,7 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
    * @param reload
    * @see CopyToPostgres#createProjectIfNotExists
    */
-  void populateProjects(boolean reload) {
+  public void populateProjects(boolean reload) {
     populateProjects(pathHelper, serverProps, logAndNotify, configDir, reload);
   }
 
@@ -412,23 +413,27 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
    * @see #initializeDAOs
    */
   private DBConnection getDbConnection() {
-    logger.info("getDbConnection : connecting to " + serverProps.getDatabaseType() +
+/*    logger.info("getDbConnection : " +
+        "connecting to " + serverProps.getDatabaseType() +
         "\n\thost " + serverProps.getDatabaseHost() +
         "\n\tport " + serverProps.getDatabasePort() +
         "\n\tname " + serverProps.getDatabaseName() +
         "\n\tuser " + serverProps.getDatabaseUser() +
         "\n\tpass " + serverProps.getDatabasePassword().length() + " chars"
-    );
+    );*/
 
-    return new DBConnection(serverProps.getDatabaseType(),
+    logger.info("using " + serverProps.getDBConfig());
+
+/*    return new DBConnection(serverProps.getDatabaseType(),
         serverProps.getDatabaseHost(),
         serverProps.getDatabasePort(),
         serverProps.getDatabaseName(),
         serverProps.getDatabaseUser(),
-        serverProps.getDatabasePassword());
+        serverProps.getDatabasePassword());*/
+    return new DBConnection(serverProps.getDBConfig());
   }
 
-  IAudioDAO getH2AudioDAO() {
+  public IAudioDAO getH2AudioDAO() {
     return new AudioDAO(this, this.userDAO);
   }
 
@@ -609,9 +614,9 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
 
   public ExerciseDAO<CommonExercise> getExerciseDAO(int projectid) {
     Project project = getProject(projectid);
-    logger.debug("getExerciseDAO " + projectid + " found project " +project);
+    logger.debug("getExerciseDAO " + projectid + " found project " + project);
     ExerciseDAO<CommonExercise> exerciseDAO = project.getExerciseDAO();
-    logger.debug("getExerciseDAO " + projectid + " found exercise dao " +exerciseDAO);
+    logger.debug("getExerciseDAO " + projectid + " found exercise dao " + exerciseDAO);
 
     return exerciseDAO;
   }
@@ -819,8 +824,8 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
   }
 
   /**
-   * @see #populateProjects(boolean)
    * @param project
+   * @see #populateProjects(boolean)
    */
   private void setExerciseDAO(Project project) {
     logger.info("setExerciseDAO on " + project);
@@ -1950,7 +1955,9 @@ public class DatabaseImpl/*<T extends CommonExercise>*/ implements Database {
     return logAndNotify;
   }
 
-  public IUserExerciseDAO getUserExerciseDAO() {  return userExerciseDAO;  }
+  public IUserExerciseDAO getUserExerciseDAO() {
+    return userExerciseDAO;
+  }
 
   public IAnnotationDAO getAnnotationDAO() {
     return userListManager.getAnnotationDAO();
