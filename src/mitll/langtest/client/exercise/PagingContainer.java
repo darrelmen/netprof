@@ -63,11 +63,15 @@ import java.util.logging.Logger;
  */
 public class PagingContainer<T extends CommonShell> extends ClickablePagingContainer<T> {
   private final Logger logger = Logger.getLogger("PagingContainer");
-  private static final int MAX_LENGTH_ID = 17;
+  private static final int MAX_LENGTH_ID = 18;
+  private static final int JAPANESE_LENGTH = 9;
+  private static final String TRUNCATED = "...";
+
   private final boolean isRecorder;
   private final ExerciseComparator sorter;
   private static final String ENGLISH = "English";
   private final boolean english;
+  private int FLLength = MAX_LENGTH_ID;
 
   /**
    * @param controller
@@ -87,6 +91,9 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
     //  sorter = new ExerciseComparator(typeOrder);
     }
     sorter = new ExerciseComparator();
+
+    boolean japanese = controller.getLanguage().equalsIgnoreCase("Japanese");
+    if (japanese) FLLength = JAPANESE_LENGTH;
 
     this.verticalUnaccountedFor = verticalUnaccountedFor;
     this.isRecorder = isRecorder;
@@ -242,7 +249,13 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
   }
 
   private String truncate(String columnText) {
-    if (columnText.length() > MAX_LENGTH_ID) columnText = columnText.substring(0, MAX_LENGTH_ID - 3) + "...";
+    int lengthToUse = MAX_LENGTH_ID;
+    if (columnText.length() > lengthToUse) columnText = columnText.substring(0, lengthToUse - 3) + TRUNCATED;
+    return columnText;
+  }
+
+  private String truncateFL(String columnText) {
+    if (columnText.length() > FLLength) columnText = columnText.substring(0, FLLength - 3) + TRUNCATED;
     return columnText;
   }
 
@@ -262,7 +275,7 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
 
       @Override
       public SafeHtml getValue(T shell) {
-        String columnText = truncate(getFLText(shell));
+        String columnText = truncateFL(getFLText(shell));
         return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
       }
     };
@@ -271,6 +284,7 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
 
   /**
    * Confusing for english - english col should be foreign language for english,
+   *
    * @param shell
    * @return
    */

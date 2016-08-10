@@ -771,9 +771,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return props.isLogClientMessages();
   }
 
-  public String getLanguage() {
-    return projectStartupInfo != null ? projectStartupInfo.getLanguage() : "";
-  }
+  public String getLanguage() {  return projectStartupInfo != null ? projectStartupInfo.getLanguage() : "";  }
 
   public boolean isRightAlignContent() {
     return props.isRightAlignContent() || initialUI.isRTL();

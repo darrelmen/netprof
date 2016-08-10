@@ -88,6 +88,7 @@ public class PathWriter {
 
     String bestAudioPath = BEST_AUDIO +
         File.separator + projid +
+        File.separator + BEST_AUDIO +
         File.separator + exid +
         File.separator + destFileName;
 
