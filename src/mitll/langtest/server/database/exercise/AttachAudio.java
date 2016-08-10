@@ -212,11 +212,11 @@ public class AttachAudio {
         }
 
         if (!exists) {
-          String candidate = "bestAudio" + File.separator +
-              language + File.separator +
+          String candidate =
+              "bestAudio" + File.separator +
+              language.toLowerCase() + File.separator +
               audioRef;
-          test = new File(installPath,
-              candidate);
+          test = new File(installPath, candidate);
           exists = test.exists();
           if (debug) {
             logger.info("test2 " + test.getAbsolutePath() + " exists " + exists);
