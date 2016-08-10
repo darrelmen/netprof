@@ -39,9 +39,9 @@ import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.scoring.LTSFactory;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.ExerciseAnnotation;
-import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.user.MiniUser;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Row;
@@ -60,7 +60,6 @@ import java.util.zip.ZipOutputStream;
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since
  */
 public class AudioExport {
   private static final Logger logger = Logger.getLogger(AudioExport.class);
@@ -78,9 +77,7 @@ public class AudioExport {
   private Collection<String> typeOrder;
   private final ServerProperties props;
 
-  AudioExport(ServerProperties props) {
-    this.props = props;
-  }
+  AudioExport(ServerProperties props) {  this.props = props;  }
 
   /**
    * @param out
@@ -96,14 +93,14 @@ public class AudioExport {
    * @see DatabaseImpl#writeZip
    */
   void writeZip(OutputStream out,
-                       Map<String, Collection<String>> typeToSection,
-                       SectionHelper<?> sectionHelper,
-                       Collection<CommonExercise> exercisesForSelectionState,
-                       String language1,
-                       IAudioDAO audioDAO,
-                       String installPath,
-                       String relPath,
-                       boolean isDefectList) throws Exception {
+                Map<String, Collection<String>> typeToSection,
+                SectionHelper<?> sectionHelper,
+                Collection<CommonExercise> exercisesForSelectionState,
+                String language1,
+                IAudioDAO audioDAO,
+                String installPath,
+                String relPath,
+                boolean isDefectList) throws Exception {
     List<CommonExercise> copy = getSortedExercises(sectionHelper, exercisesForSelectionState);
     writeToStream(copy, audioDAO, installPath, relPath, getPrefix(typeToSection, typeOrder), typeOrder, language1, out,
         typeToSection.isEmpty(), isDefectList);
@@ -128,13 +125,13 @@ public class AudioExport {
    * @see mitll.langtest.server.database.DatabaseImpl#writeContextZip
    */
   void writeContextZip(OutputStream out,
-                              Map<String, Collection<String>> typeToSection,
-                              SectionHelper<?> sectionHelper,
-                              Collection<CommonExercise> exercisesForSelectionState,
-                              String language1,
-                              IAudioDAO audioDAO,
-                              String installPath,
-                              String relPath) throws Exception {
+                       Map<String, Collection<String>> typeToSection,
+                       SectionHelper<?> sectionHelper,
+                       Collection<CommonExercise> exercisesForSelectionState,
+                       String language1,
+                       IAudioDAO audioDAO,
+                       String installPath,
+                       String relPath) throws Exception {
     List<CommonExercise> copy = getSortedExercises(sectionHelper, exercisesForSelectionState);
     writeContextToStream(copy, audioDAO, installPath, relPath, getPrefix(typeToSection, typeOrder), typeOrder, language1, out);
   }
@@ -158,13 +155,13 @@ public class AudioExport {
    * @see mitll.langtest.server.database.DatabaseImpl#writeZip
    */
   void writeZip(OutputStream out,
-                       String prefix,
-                       SectionHelper<?> sectionHelper,
-                       Collection<? extends CommonExercise> exercisesForSelectionState,
-                       String language1,
-                       IAudioDAO audioDAO,
-                       String installPath,
-                       String relPath, boolean isDefectList) throws Exception {
+                String prefix,
+                SectionHelper<?> sectionHelper,
+                Collection<? extends CommonExercise> exercisesForSelectionState,
+                String language1,
+                IAudioDAO audioDAO,
+                String installPath,
+                String relPath, boolean isDefectList) throws Exception {
     List<CommonExercise> copy = getSortableExercises(sectionHelper, exercisesForSelectionState);
     new ExerciseSorter(typeOrder).sortByTooltip(copy);
     writeToStream(copy, audioDAO, installPath, relPath, prefix, typeOrder, language1, out, false, isDefectList);
@@ -301,8 +298,7 @@ public class AudioExport {
         CommonExercise next = exercise.getDirectlyRelated().iterator().next();
         row.createCell(j++).setCellValue(next.getForeignLanguage());
         row.createCell(j++).setCellValue(next.getEnglish());
-      }
-      else {
+      } else {
         row.createCell(j++).setCellValue("");
         row.createCell(j++).setCellValue("");
       }
@@ -466,7 +462,7 @@ public class AudioExport {
       int projectID = toWrite.iterator().next().getProjectID();
       writeFolderContents(zOut, toWrite, audioDAO, installPath, relativeConfigDir1,
           overallName,
-          isEnglish(language1), projectID);
+          isEnglish(language1), projectID, language1);
     }
 
     addSpreadsheetToZip(toWrite, typeOrder, language1, zOut, overallName, isDefectList);
@@ -482,7 +478,7 @@ public class AudioExport {
     String twoChar = LTSFactory.getID(LTSFactory.Language.valueOf(language1.toUpperCase()));
     writeFolderContentsContextOnly(zOut, toWrite, audioDAO, installPath, relativeConfigDir1,
         overallName,
-        isEnglish(language1), twoChar);
+        isEnglish(language1), twoChar, language1);
 
     addSpreadsheetToZip(toWrite, typeOrder, language1, zOut, overallName, false);
   }
@@ -512,6 +508,7 @@ public class AudioExport {
    * @param overallName
    * @param isEnglish
    * @param projid
+   * @param language
    * @throws Exception
    * @see #writeToStream
    */
@@ -521,7 +518,7 @@ public class AudioExport {
                                    String installPath,
                                    String relativeConfigDir1,
                                    String overallName,
-                                   boolean isEnglish, int projid) throws Exception {
+                                   boolean isEnglish, int projid, String language) throws Exception {
     //int c = 0;
     long then = System.currentTimeMillis();
 
@@ -538,7 +535,7 @@ public class AudioExport {
     for (CommonExercise ex : toWrite) {
       Collection<AudioAttribute> audioAttributes = exToAudio.get(ex.getID());
       if (audioAttributes != null) {
-        audioDAO.attachAudio(ex, installPath, relativeConfigDir1, audioAttributes);
+        audioDAO.attachAudio(ex, installPath, relativeConfigDir1, audioAttributes, language);
         numAttach++;
       }
     }
@@ -597,6 +594,19 @@ public class AudioExport {
     }
   }
 
+  /**
+   *
+   * @param zOut
+   * @param toWrite
+   * @param audioDAO
+   * @param installPath
+   * @param relativeConfigDir1
+   * @param overallName
+   * @param isEnglish
+   * @param twoChar
+   * @param language
+   * @throws Exception
+   */
   private void writeFolderContentsContextOnly(ZipOutputStream zOut,
                                               Collection<CommonExercise> toWrite,
                                               IAudioDAO audioDAO,
@@ -604,7 +614,8 @@ public class AudioExport {
                                               String relativeConfigDir1,
                                               String overallName,
                                               boolean isEnglish,
-                                              String twoChar) throws Exception {
+                                              String twoChar,
+                                              String language) throws Exception {
     long then = System.currentTimeMillis();
 
     // attach audio
@@ -614,7 +625,7 @@ public class AudioExport {
     for (CommonExercise ex : toWrite) {
       Collection<AudioAttribute> audioAttributes = exToAudio.get(ex.getID());
       if (audioAttributes != null) {
-        audioDAO.attachAudio(ex, installPath, relativeConfigDir1, audioAttributes);
+        audioDAO.attachAudio(ex, installPath, relativeConfigDir1, audioAttributes,language);
         numAttach++;
       }
     }
