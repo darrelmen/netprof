@@ -120,8 +120,11 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
    */
   private List<CommonExercise> readExercises(File file) {
     try {
-      return readExercises(new FileInputStream(file));
-    } catch (FileNotFoundException e) {
+      FileInputStream inp = new FileInputStream(file);
+      List<CommonExercise> commonExercises = readExercises(inp);
+      inp.close();
+      return commonExercises;
+    } catch (Exception e) {
       logger.error(language + " : looking for " + file.getAbsolutePath() + " got " + e, e);
     }
     return new ArrayList<>();

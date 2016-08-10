@@ -132,6 +132,13 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
         device, -1));
   }
 
+  /**
+   * @see BaseUserDAO#addUser(String, String, String, String, User.Kind, String, boolean, int, String, String)
+   * @param id
+   * @param kind
+   * @param passwordH
+   * @param emailH
+   */
   protected void updateUser(int id, User.Kind kind, String passwordH, String emailH) {
     dao.updateUser(id, kind.name(), passwordH, emailH,
         kind == User.Kind.CONTENT_DEVELOPER ? CD_PERMISSIONS.toString() : EMPTY_PERM.toString());
@@ -339,10 +346,14 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return idToUser;
   }
 
+  /**
+   * @see mitll.langtest.server.services.UserServiceImpl#changePFor(String, String)
+   * @param user
+   * @param passwordH
+   * @return
+   */
   @Override
-  public boolean changePassword(int user, String passwordH) {
-    return dao.setPassword(user, passwordH);
-  }
+  public boolean changePassword(int user, String passwordH) { return dao.setPassword(user, passwordH);  }
 
   @Override
   public boolean updateKey(int userid, boolean resetKey, String key) {
