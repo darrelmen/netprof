@@ -87,7 +87,7 @@ public class CopyToPostgres<T extends CommonShell> {
    */
   private void copyOneConfig(String config, boolean inTest) {
     DatabaseImpl databaseLight = getDatabaseLight(config, inTest);
-    new CopyToPostgres().copyOneConfig(databaseLight, getCC(config), null);
+    new CopyToPostgres().copyOneConfig(databaseLight, getCC(config), null,0);
     databaseLight.destroy();
   }
 
@@ -204,8 +204,8 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param optName null OK
    * @see #copyOneConfig(String, boolean)
    */
-  public void copyOneConfig(DatabaseImpl db, String cc, String optName) {
-    int projectID = createProjectIfNotExists(db, cc, optName, "");  // TODO : course?
+  public void copyOneConfig(DatabaseImpl db, String cc, String optName, int displayOrder) {
+    int projectID = createProjectIfNotExists(db, cc, optName, "", displayOrder);  // TODO : course?
 
     logger.info("copyOneConfig project is " + projectID);
 
@@ -222,9 +222,9 @@ public class CopyToPostgres<T extends CommonShell> {
       Map<Integer, Integer> oldToNewUser = copyUsers(db, projectID, resultDAO);
 
       Map<Integer, String> idToFL = new HashMap<>();
-      Map<String, Integer> exToID = copyUserAndPredefExercisesAndLists(db, projectID, oldToNewUser,idToFL);
+      Map<String, Integer> exToID = copyUserAndPredefExercisesAndLists(db, projectID, oldToNewUser, idToFL);
 
-      copyResult(db, slickResultDAO, oldToNewUser, projectID, exToID, resultDAO,idToFL);
+      copyResult(db, slickResultDAO, oldToNewUser, projectID, exToID, resultDAO, idToFL);
 
       logger.info("oldToNewUser " + oldToNewUser.size() + " exToID " + exToID.size());
 
@@ -271,7 +271,6 @@ public class CopyToPostgres<T extends CommonShell> {
   }
 
   /**
-   *
    * @param db
    * @param projectID
    * @param oldToNewUser
@@ -307,9 +306,9 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param countryCode
    * @param course
    * @return
-   * @see #copyOneConfig(DatabaseImpl, String, String)
+   * @see #copyOneConfig
    */
-  public int createProjectIfNotExists(DatabaseImpl db, String countryCode, String optName, String course) {
+  public int createProjectIfNotExists(DatabaseImpl db, String countryCode, String optName, String course, int displayOrder) {
     IProjectDAO projectDAO = db.getProjectDAO();
     String oldLanguage = getOldLanguage(db);
     String name = optName != null ? optName : oldLanguage;
@@ -320,7 +319,7 @@ public class CopyToPostgres<T extends CommonShell> {
       logger.info("checking for project with name '" + name + "' opt '" + optName + "' language '" + oldLanguage +
           "' - non found");
 
-      byName = createProject(db, projectDAO, countryCode, name, course);
+      byName = createProject(db, projectDAO, countryCode, name, course, displayOrder);
 
       db.populateProjects(true);
     } else {
@@ -340,9 +339,10 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param projectDAO
    * @param name
    * @param course
-   * @see
+   * @param displayOrder
+   * @see #createProjectIfNotExists(DatabaseImpl, String, String, String)
    */
-  private int createProject(DatabaseImpl db, IProjectDAO projectDAO, String countryCode, String name, String course) {
+  private int createProject(DatabaseImpl db, IProjectDAO projectDAO, String countryCode, String name, String course, int displayOrder) {
     Iterator<String> iterator = db.getTypeOrder(-1).iterator();
     String firstType = iterator.hasNext() ? iterator.next() : "";
     String secondType = iterator.hasNext() ? iterator.next() : "";
@@ -352,7 +352,8 @@ public class CopyToPostgres<T extends CommonShell> {
 
     if (language.equals("msa")) language = "MSA";
 
-    int byName = projectDAO.add(slickUserDAO.getBeforeLoginUser(), name, language, course, firstType, secondType, countryCode);
+    int byName = projectDAO.add(slickUserDAO.getBeforeLoginUser(), name, language, course, firstType, secondType,
+        countryCode, displayOrder);
 
     Properties props = db.getServerProps().getProps();
     for (String prop : ServerProperties.CORE_PROPERTIES) {
