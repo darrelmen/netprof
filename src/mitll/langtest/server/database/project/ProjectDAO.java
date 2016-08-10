@@ -78,12 +78,14 @@ public class ProjectDAO extends DAO implements IProjectDAO {
    * @param course
    * @param firstType
    * @param secondType
-   * @param countryCode @return
+   * @param countryCode
+   * @param displayOrder
+   * @return
    * @see mitll.langtest.server.database.CopyToPostgres#createProject
    */
-  public int add(int userid, String name, String language, String course, String firstType, String secondType, String countryCode) {
+  public int add(int userid, String name, String language, String course, String firstType, String secondType, String countryCode, int displayOrder) {
     return add(userid, System.currentTimeMillis(), name, language, course, ProjectType.NP, ProjectStatus.PRODUCTION,
-        firstType, secondType, countryCode);
+        firstType, secondType, countryCode, displayOrder);
   }
 
   private SlickProject first;
@@ -136,7 +138,8 @@ public class ProjectDAO extends DAO implements IProjectDAO {
    */
   @Override
   public int add(int userid, long modified, String name, String language, String course,
-                 ProjectType type, ProjectStatus status, String firstType, String secondType, String countryCode) {
+                 ProjectType type, ProjectStatus status, String firstType, String secondType, String countryCode,
+                 int displayOrder) {
     return dao.insert(new SlickProject(
         -1,
         userid,
@@ -149,7 +152,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
         firstType,
         secondType,
         countryCode,
-        "", -1));
+        "", -1, displayOrder));
   }
 
   @Override
@@ -167,7 +170,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
         firstType,
         secondType,
         countryCode,
-        "", -1));
+        "", -1, 0));
   }
 
   @Override
