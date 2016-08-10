@@ -63,10 +63,7 @@ import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.user.SlimProject;
 import mitll.langtest.shared.user.User;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -228,7 +225,6 @@ public class InitialUI implements UILifecycle {
 
   private void logout() {
     lifecycleSupport.logEvent("No widget", "UserLoging", "N/A", "User Logout by " + lastUser);
-
     verticalContainer.remove(breadcrumbs);
 
     userService.logout(userManager.getUserID(), new AsyncCallback<Void>() {
@@ -372,8 +368,6 @@ public class InitialUI implements UILifecycle {
       contentRow.add(lifecycleSupport.getFlashRecordPanel());
     }
     lifecycleSupport.recordingModeSelect();
-    //  addBreadcrumbs();
-    //  addNavigationToMainContent();
     makeNavigation();
     addResizeHandler();
   }
@@ -397,11 +391,16 @@ public class InitialUI implements UILifecycle {
     crumbs.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
     addCrumbs(crumbs);
 
-    logger.info("getBreadcrumbs now " + crumbs);
+    logger.info("getBreadcrumbs now has " + crumbs.getElement().getChildCount() + " links");
 
     return crumbs;
   }
 
+  /**
+   * @param crumbs
+   * @see #clickOnUserCrumb()
+   * @see #getBreadcrumbs()
+   */
   private void addCrumbs(Breadcrumbs crumbs) {
     NavLink home = new NavLink("Home");
 
@@ -447,9 +446,9 @@ public class InitialUI implements UILifecycle {
                 clearContent();
 //                boolean remove = crumbs.remove(projectCrumb);
                 removeUntilCrumb(2);
-               // if (!remove) {
-               //   logger.warning("didn't remove " + projectCrumb);
-               // }
+                // if (!remove) {
+                //   logger.warning("didn't remove " + projectCrumb);
+                // }
                 showProjectChoices(project.getChildren(), 1);
               }
             });
@@ -457,7 +456,7 @@ public class InitialUI implements UILifecycle {
             addProjectCrumb(crumbs, project);
             break;
           } else {
-            logger.warning("getBreadcrumbs skipping project " + project);
+            //logger.fine("getBreadcrumbs skipping project " + project);
           }
         }
       }
@@ -466,6 +465,12 @@ public class InitialUI implements UILifecycle {
     }
   }
 
+  /**
+   * @param crumbs
+   * @param project
+   * @return
+   * @see #addCrumbs(Breadcrumbs)
+   */
   private NavLink addProjectCrumb(Breadcrumbs crumbs, SlimProject project) {
     String crumbName = project.getName();
     NavLink lang = new NavLink(crumbName);
@@ -482,6 +487,9 @@ public class InitialUI implements UILifecycle {
     return lang;
   }
 
+  /**
+   * @see #addCrumbs(Breadcrumbs)
+   */
   private void clickOnUserCrumb() {
     userService.forgetProject(new AsyncCallback<Void>() {
       @Override
@@ -502,7 +510,7 @@ public class InitialUI implements UILifecycle {
     addCrumbs(breadcrumbs);
 
     clearContent();
-    addProjectChoices();
+    addProjectChoices(0, null);
   }
 
   private void makeNavigation() {
@@ -677,15 +685,15 @@ public class InitialUI implements UILifecycle {
     Window.Location.replace(trimURL(Window.Location.getHref()));
   }
 
-  private void clearPadding(Container verticalContainer) {
-    verticalContainer.getElement().getStyle().setPaddingLeft(0, Style.Unit.PX);
-    verticalContainer.getElement().getStyle().setPaddingRight(0, Style.Unit.PX);
-  }
-
   private String trimURL(String url) {
     if (url.contains("127.0.0.1")) {
       return "http://127.0.0.1:8888/LangTest.html?gwt.codesvr=127.0.0.1:9997";
     } else return url.split("\\?")[0].split("\\#")[0];
+  }
+
+  private void clearPadding(Container verticalContainer) {
+    verticalContainer.getElement().getStyle().setPaddingLeft(0, Style.Unit.PX);
+    verticalContainer.getElement().getStyle().setPaddingRight(0, Style.Unit.PX);
   }
 
   /**
@@ -737,7 +745,7 @@ public class InitialUI implements UILifecycle {
   protected void configureUIGivenUser(long userID) {
     logger.info("configureUIGivenUser : user changed - new " + userID + " vs last " + lastUser);
     if (lifecycleSupport.getProjectStartupInfo() == null) {
-      addProjectChoices();
+      addProjectChoices(0, null);
     } else {
       logger.info("\tconfigureUIGivenUser : " + userID + " get exercises...");
       addBreadcrumbs();
@@ -749,13 +757,15 @@ public class InitialUI implements UILifecycle {
 
   /**
    * @see #configureUIGivenUser(long)
+   * @see #clickOnUserCrumb()
+   * @see #clickOnParentCrumb
    */
-  private void addProjectChoices() {
+  private void addProjectChoices(int level, SlimProject parent) {
     clearContent();
     addBreadcrumbs();
-    List<SlimProject> projects = lifecycleSupport.getStartupInfo().getProjects();
-    logger.info("addProjectChoices found " + projects.size() + " initial projects");
-    showProjectChoices(projects, 0);
+    List<SlimProject> projects = parent == null ? lifecycleSupport.getStartupInfo().getProjects() : parent.getChildren();
+    logger.info("addProjectChoices found " + projects.size() + " initial projects, nest " + level);
+    showProjectChoices(projects, level);
   }
 
   /**
@@ -783,7 +793,7 @@ public class InitialUI implements UILifecycle {
   }
 
   private void showProjectChoices(List<SlimProject> result, int nest) {
- //   logger.info("showProjectChoices " + result.size() + " : " + nest);
+    //   logger.info("showProjectChoices " + result.size() + " : " + nest);
     Map<String, SlimProject> langToProject = new TreeMap<>();
     for (SlimProject project : result) {
       String key = nest == 0 ? project.getLanguage() : project.getName();
@@ -815,6 +825,12 @@ public class InitialUI implements UILifecycle {
     flags.add(current);
     int numInRow = 4;
     List<String> languages = new ArrayList<String>(langToProject.keySet());
+    Collections.sort(languages, new Comparator<String>() {
+      @Override
+      public int compare(String o1, String o2) {
+        return o1.toLowerCase().compareTo(o2.toLowerCase());
+      }
+    });
 
     int size = languages.size();
     logger.info("addProjectChoices " + size + "-------- nest " + nest);
@@ -827,7 +843,7 @@ public class InitialUI implements UILifecycle {
         current.add(langIcon);
       }
 
-      current = new Row();
+      current = new Thumbnails();
       flags.add(current);
     }
   }
@@ -871,7 +887,7 @@ public class InitialUI implements UILifecycle {
           projectCrumb.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent clickEvent) {
-              clickOnParentCrumb();
+              clickOnParentCrumb(projectForLang);
             }
           });
           clearContent();
@@ -885,19 +901,19 @@ public class InitialUI implements UILifecycle {
     return widgets;
   }
 
-  private void clickOnParentCrumb() {
+  private void clickOnParentCrumb(SlimProject parent) {
     removeLastCrumb();
-    addProjectChoices();
+    addProjectChoices(1, parent);
   }
 
   private void removeLastCrumb() {
     int widgetCount = breadcrumbs.getWidgetCount();
-    breadcrumbs.remove(widgetCount-1);
+    breadcrumbs.remove(widgetCount - 1);
   }
 
   private void removeUntilCrumb(int count) {
     int widgetCount = breadcrumbs.getWidgetCount();
-    for (int i = widgetCount-1;i > count; i--) {
+    for (int i = widgetCount - 1; i > count; i--) {
       boolean remove = breadcrumbs.remove(i);
       logger.info("remove at " + i + "  " + remove);
     }
