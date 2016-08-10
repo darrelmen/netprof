@@ -77,6 +77,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @param userId
    * @param attemptedPassword
    * @return
+   * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser(String, String)
    */
   public LoginResult loginUser(String userId, String attemptedPassword) {
     HttpServletRequest request = getThreadLocalRequest();
@@ -93,10 +94,13 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     );
     User loggedInUser = db.getUserDAO().getStrictUserWithPass(userId, attemptedPassword);//, remoteAddr, userAgent, session.getId());
 
-    String resultStr = (loggedInUser != null) ? " was successful" : " failed";
+    boolean success = loggedInUser != null;
+    String resultStr = success ? " was successful" : " failed";
     logger.info(">Session Activity> User login for id " + userId + resultStr +
-        ". IP: " + remoteAddr + ", UA: " + userAgent);
-    if (loggedInUser != null) {
+        ". IP: " + remoteAddr +
+        ", UA: " + userAgent +
+        (success ? ", user: " +loggedInUser.getId() : ""));
+    if (success) {
       setSessionUser(session, loggedInUser);
       return new LoginResult(loggedInUser, new Date(System.currentTimeMillis()));
     } else {
@@ -109,8 +113,8 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     }
   }
 
-  void setSessionUser(HttpSession session, User loggedInUser) {
-    setUserOnSession(session, loggedInUser);
+  private void setSessionUser(HttpSession session, User loggedInUser) {
+    session.setAttribute(USER_SESSION_ATT, loggedInUser.getId());
     StringBuilder atts = new StringBuilder("Atts: [ ");
     Enumeration<String> attEnum = session.getAttributeNames();
     while (attEnum.hasMoreElements()) {
@@ -127,19 +131,9 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     db.setStartupInfo(loggedInUser);
   }
 
-  private void setUserOnSession(HttpSession session, User loggedInUser) {
-    session.setAttribute(USER_SESSION_ATT, loggedInUser.getId());
-  }
-
-  /*public User getLoggedInUser() {
-    try {
-      return securityManager.getLoggedInUser(getThreadLocalRequest());
-    } catch (DominoSessionException e) {
-      logger.error("got " + e, e);
-    }
-    return null;
-  }
-*/
+//  private void setUserOnSession(HttpSession session, User loggedInUser) {
+//    session.setAttribute(USER_SESSION_ATT, loggedInUser.getId());
+//  }
 
   /**
    * @param login

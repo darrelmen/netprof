@@ -160,6 +160,7 @@ public class UserManager {
    * @param passwordHash
    * @see #login()
    * @see #storeUser
+   * @see #getPermissionsAndSetUser()
    */
   private void getPermissionsAndSetUser(final String user, String passwordHash) {
     //console("getPermissionsAndSetUser : " + user);
@@ -293,14 +294,14 @@ public class UserManager {
 
   private String getPassFromStorage() {
     Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-    String userIDCookie = getPassCookie();
-    return localStorageIfSupported != null ? localStorageIfSupported.getItem(userIDCookie) : NO_USER_SET_STRING;
+    String passCookie = getPassCookie();
+    return localStorageIfSupported != null ? localStorageIfSupported.getItem(passCookie) : NO_USER_SET_STRING;
   }
 
   private String getUserChosenFromStorage() {
     Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-    String userIDCookie = getUserChosenID();
-    return localStorageIfSupported != null ? localStorageIfSupported.getItem(userIDCookie) : NO_USER_SET_STRING;
+    String userChosenID = getUserChosenID();
+    return localStorageIfSupported != null ? localStorageIfSupported.getItem(userChosenID) : NO_USER_SET_STRING;
   }
 
   /**
@@ -326,17 +327,17 @@ public class UserManager {
     return appTitle + ":" + USER_ID;
   }
 
-  private String getPassCookie() {
-    return appTitle + ":" + "pwd";
-  }
+  private String getPassCookie() { return appTitle + ":" + "pwd";  }
 
   private String getUserChosenID() {
     return appTitle + ":" + USER_CHOSEN_ID;
   }
 
+/*
   private String getAudioType() {
     return appTitle + ":" + AUDIO_TYPE;
   }
+*/
 
   private String getExpires() {
     return appTitle + ":" + "expires";

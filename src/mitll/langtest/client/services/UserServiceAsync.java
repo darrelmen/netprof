@@ -33,6 +33,7 @@
 package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.user.LoginResult;
 import mitll.langtest.shared.user.SlimProject;
 import mitll.langtest.shared.user.User;
@@ -45,6 +46,11 @@ public interface UserServiceAsync {
 
   void userExists(String login, String passwordH, AsyncCallback<User> async);
 
+  /**
+   * No real need to pass this in
+   * @param login
+   * @param async
+   */
   void logout(String login, AsyncCallback<Void> async);
 
   void addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, String email,
@@ -63,9 +69,13 @@ public interface UserServiceAsync {
 
   void enableCDUser(String cdToken, String emailR, String url, AsyncCallback<String> asyncCallback);
 
+  /**
+   * @see UserManager#getPermissionsAndSetUser
+   * @param userId
+   * @param attemptedPassword
+   * @param async
+   */
   void loginUser(String userId, String attemptedPassword, AsyncCallback<LoginResult> async);
-
- // void getProjects(AsyncCallback<List<SlimProject>> async);
 
   void setProject(int projectid,AsyncCallback<User> async);
 
