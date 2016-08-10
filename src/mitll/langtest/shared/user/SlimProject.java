@@ -36,6 +36,8 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.server.services.UserServiceImpl;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class SlimProject implements IsSerializable {
@@ -44,6 +46,7 @@ public class SlimProject implements IsSerializable {
   private String language;
   private String course;
   private String countryCode;
+  int displayOrder;
   private List<SlimProject> children = new ArrayList<>();
 
   //  List<>
@@ -55,15 +58,17 @@ public class SlimProject implements IsSerializable {
    * @param name
    * @param language
    * @param countryCode
+   * @param displayOrder
    * @see UserServiceImpl#getProjects
    */
   public SlimProject(int projectid, String name, String language, String countryCode,
-                     String course) {
+                     String course, int displayOrder) {
     this.name = name;
     this.language = language;
     this.projectid = projectid;
     this.countryCode = countryCode;
     this.course = course;
+    this.displayOrder = displayOrder;
   }
 
   public String getName() {
@@ -109,6 +114,13 @@ public class SlimProject implements IsSerializable {
   }
 
   public List<SlimProject> getChildren() {
+    Collections.sort(children, new Comparator<SlimProject>() {
+      @Override
+      public int compare(SlimProject o1, SlimProject o2) {
+        int i = Integer.valueOf(o1.displayOrder).compareTo(o2.displayOrder);
+        return i == 0 ? o1.getName().compareTo(o2.getName()) : i;
+      }
+    });
     return children;
   }
 
