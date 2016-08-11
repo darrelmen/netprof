@@ -63,18 +63,19 @@ public class BaseTest {
   /**
    * @param config
    * @param useH2
-   * @param host
-   * @param user
-   * @param pass
+   * @paramx host
+   * @paramx user
+   * @paramx pass
    * @param optPropsFile
    * @return
    * @see mitll.langtest.server.database.postgres.PostgresTest#testCopy
    */
   protected static DatabaseImpl getDatabaseLight(String config,
                                                  boolean useH2,
-                                                 String host,
-                                                 String user,
-                                                 String pass,
+                                                 boolean useLocal,
+//                                                 String host,
+//                                                 String user,
+//                                                 String pass,
                                                  String optPropsFile) {
 
     logger.info("db " + config + " props " + optPropsFile);
@@ -87,9 +88,15 @@ public class BaseTest {
     File file = new File(installPath + File.separator + "config" + File.separator + config + File.separator + propsFile);
     ServerProperties serverProps = getServerProperties(config, propsFile);
 
-    serverProps.getProps().setProperty("databaseHost", host);
-    serverProps.getProps().setProperty("databaseUser", user);
-    serverProps.getProps().setProperty("databasePassword", pass);
+    if (useLocal) {
+      serverProps.setLocalPostgres();
+    }
+    else {
+      serverProps.setHydraPostgres();
+    }
+//    serverProps.getProps().setProperty("databaseHost", host);
+//    serverProps.getProps().setProperty("databaseUser", user);
+//    serverProps.getProps().setProperty("databasePassword", pass);
 
     serverProps.setH2(useH2);
 
