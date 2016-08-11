@@ -153,6 +153,7 @@ public class AttachAudio {
 
 
   int spew = 0;
+int totalMissingContext = 0;
 
   /**
    * try to fix the audio path
@@ -230,7 +231,10 @@ public class AttachAudio {
               Collection<CommonExercise> directlyRelated = imported.getDirectlyRelated();
               if (directlyRelated.isEmpty()) {
                 if (m++ < 50) {
-                  logger.warn("huh? no context exercise on " + imported);
+                  logger.warn(language + " : no context exercise on " + imported);
+                }
+                if (totalMissingContext++ % 100 == 0) {
+                  logger.warn(language + " (total = " + totalMissingContext+ ") no context exercise on " + imported);
                 }
               } else {
                 if (directlyRelated.size() == 1) {

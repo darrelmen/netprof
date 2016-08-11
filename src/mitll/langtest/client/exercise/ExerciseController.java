@@ -99,6 +99,7 @@ public interface ExerciseController extends EventRegistration {
   void logMessageOnServer(String message, String prefix);
 
   ProjectStartupInfo getProjectStartupInfo();
+  boolean hasModel();
   Collection<String> getTypeOrder();
 
   void addKeyListener(KeyPressHelper.KeyListener listener);
