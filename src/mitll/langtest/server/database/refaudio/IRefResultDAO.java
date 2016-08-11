@@ -59,6 +59,14 @@ public interface IRefResultDAO  extends IDAO {
 
   boolean removeForAudioFile(String audioFile);
 
+  // TODO : add  a simple ex, json pair here
+  // get it, parse it, make reverse map of phone->ex
+  // add this to pairs when read in exercise
+  // add sound to type order...
+  // add fancy table widget?
+  // have widgets cascade values...?
+  // have sort order of items be smarter
+
   List<Result> getResults();
 
   Result getResult(int exid, String answer);
