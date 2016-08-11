@@ -1343,7 +1343,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     boolean usePhoneToDisplay1 = usePhoneToDisplay || serverProps.usePhoneToDisplay();
 
-    PretestScore asrScoreForAudio = getAudioFileHelper().getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg,
+    PretestScore asrScoreForAudio =
+        getAudioFileHelper().getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg,
         false, serverProps.useScoreCache(), "" + exerciseID, cachedResult, usePhoneToDisplay1, false);
 
     long timeToRunHydec = System.currentTimeMillis() - then;

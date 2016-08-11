@@ -196,12 +196,10 @@ public class AudioFileHelper implements AlignDecode {
    * @see mitll.langtest.server.LangTestDatabaseImpl#isValidForeignPhrase(String)
    */
   public boolean checkLTSOnForeignPhrase(String foreignLanguagePhrase) {
-    //  makeASRScoring();
     return asrScoring.validLTS(foreignLanguagePhrase);
   }
 
   public SmallVocabDecoder getSmallVocabDecoder() {
-    //  makeASRScoring();
     return asrScoring.getSmallVocabDecoder();
   }
 
@@ -234,7 +232,7 @@ public class AudioFileHelper implements AlignDecode {
     String wavPath = pathHelper.getLocalPathToAnswer(audioContext);
     File file = pathHelper.getAbsoluteFile(wavPath);
 
-    logger.debug("writeAudioFile got req " + exercise1 + " for " + audioContext + " " + recordingInfoInitial + " to " +wavPath + " and " + file.getAbsolutePath());
+    logger.debug("writeAudioFile got req " + exercise1 + " for " + audioContext + " " + recordingInfoInitial + " to " + wavPath + " and " + file.getAbsolutePath());
     //long then = System.currentTimeMillis();
     AudioCheck.ValidityAndDur validity =
         audioConversion.convertBase64ToAudioFiles(base64EncodedString, file, isRefRecording, isQuietAudioOK());
@@ -926,16 +924,18 @@ public class AudioFileHelper implements AlignDecode {
   private String getSentenceToUse(String sentence) {
     boolean english = getLanguage().equalsIgnoreCase("English") && sentence.equals("%") || sentence.equals("％");
     //if (english) {
-      //logger.info("convert " +sentence + " to percent");
+    //logger.info("convert " +sentence + " to percent");
     //} else {
-      //boolean english1 = getLanguage().equalsIgnoreCase("English");
-      // boolean equals = sentence.equals("%") || sentence.equals("％");
-      //logger.info("NOT convert '" +sentence + "' to percent : " +english1 + " equals " + equals);
-   // }
+    //boolean english1 = getLanguage().equalsIgnoreCase("English");
+    // boolean equals = sentence.equals("%") || sentence.equals("％");
+    //logger.info("NOT convert '" +sentence + "' to percent : " +english1 + " equals " + equals);
+    // }
     return english ? "percent" : sentence;
   }
 
-  private String getLanguage() { return language;  }
+  private String getLanguage() {
+    return language;
+  }
 
   private boolean isEnglishSite() {
     return getLanguage().equalsIgnoreCase("English");
@@ -1033,7 +1033,7 @@ public class AudioFileHelper implements AlignDecode {
       } catch (Exception e) {
         logger.error("for now got " + e, e);
       }
-      webserviceScoring = new ASRWebserviceScoring(installPath, serverProps, logAndNotify, htkDictionary,  project);
+      webserviceScoring = new ASRWebserviceScoring(installPath, serverProps, logAndNotify, htkDictionary, project);
       oldschoolScoring = new ASRScoring(installPath, serverProps, logAndNotify, htkDictionary, project);
     }
     asrScoring = oldschoolScoring;

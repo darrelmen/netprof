@@ -43,9 +43,10 @@ import java.util.List;
 import java.util.Map;
 
 public class BaseRefResultDAO extends DAO {
+  private static final String SCORE_JSON = "scoreJSON";
   protected final boolean dropTable;
 
-  protected BaseRefResultDAO(Database database, boolean dropTable) {
+  BaseRefResultDAO(Database database, boolean dropTable) {
     super(database);
     this.dropTable = dropTable;
   }
@@ -80,7 +81,7 @@ public class BaseRefResultDAO extends DAO {
       for (int i = 0; i < answers.size(); i++) {
         JSONObject jsonObject1 = new JSONObject();
         jsonObject1.put("file", answers.get(i));
-        jsonObject1.put("scoreJSON", jsons.get(i));
+        jsonObject1.put(SCORE_JSON, jsons.get(i));
         array.add(jsonObject1);
       }
       jsonObject.put(exid, array);
