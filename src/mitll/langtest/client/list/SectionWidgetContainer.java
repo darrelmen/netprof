@@ -80,15 +80,15 @@ public class SectionWidgetContainer<T extends SectionWidget> {
     boolean hasNonClearSelection = false;
     List<String> typesWithSelections = new ArrayList<>();
     if (typeOrder == null) {
-      if (DEBUG) logger.warning("huh? type order is null for " + selectionState2);
+      if (DEBUG) logger.warning("restoreListBoxState huh? type order is null for " + selectionState2);
       typeOrder = Collections.emptyList();
     }
     for (String type : typeOrder) {
       Collection<String> selections = selectionState2.get(type);
       if (selections == null) {
-        if (DEBUG)  logger.warning("huh? no selection in selection state " + selectionState2.keySet() + " for " + type);
+        if (DEBUG)  logger.warning("restoreListBoxState huh? no selection in selection state " + selectionState2.keySet() + " for " + type);
       }
-      if (selections != null && selections.iterator().next().equals(HistoryExerciseList.ANY)) {
+      if (selections != null && selections.iterator().next().equals(getAnySelectionValue())) {
         if (hasNonClearSelection) {
           if (DEBUG) logger.info("restoreListBoxState : skipping type since below a selection = " + type);
         } else {
@@ -147,7 +147,7 @@ public class SectionWidgetContainer<T extends SectionWidget> {
 
     // make sure we all types have selections, even if it's the default Clear (ANY) selection
     for (String type : getTypes()) {
-      selectionState2.put(type, Collections.singletonList(HistoryExerciseList.ANY));
+      selectionState2.put(type, Collections.singletonList(getAnySelectionValue()));
     }
     selectionState2.putAll(selectionState.getTypeToSection());
     return selectionState2;
@@ -189,7 +189,7 @@ public class SectionWidgetContainer<T extends SectionWidget> {
         String section = getCurrentSelection(type);
         //   logger.info("getHistoryTokenFromUIState type " + type + " section " + section);
 
-        if (!section.equals(HistoryExerciseList.ANY)) {
+        if (!section.equals(getAnySelectionValue())) {
           unitAndChapterSelection.append(type + "=" + section + ";");
         }
       }
@@ -197,6 +197,10 @@ public class SectionWidgetContainer<T extends SectionWidget> {
 
       return unitAndChapterSelection.toString();
     }
+  }
+
+  protected String getAnySelectionValue() {
+    return HistoryExerciseList.ANY;
   }
 
   /**
@@ -244,7 +248,7 @@ public class SectionWidgetContainer<T extends SectionWidget> {
   /**
    * @param type
    * @param sections
-   * @see #restoreListBoxState(SelectionState)
+   * @see #restoreListBoxState
    */
   protected void selectItem(String type, Collection<String> sections) {
     logger.warning("doing NO OP");
