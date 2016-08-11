@@ -577,6 +577,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return projectStartupInfo;
   }
 
+  public boolean hasModel() {
+    return projectStartupInfo != null && getProjectStartupInfo().isHasModel();
+  }
+
   public void clearStartupInfo() {
     this.projectStartupInfo = null;
     logger.info("\nclearStartupInfo Got startup info " + projectStartupInfo);
