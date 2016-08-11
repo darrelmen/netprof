@@ -245,7 +245,7 @@ public class DatabaseImpl implements Database {
     if (!serverProps.useH2()) {
       populateProjects(false);
     }
-    logger.info("made DatabaseImpl : " + this);
+//    logger.info("made DatabaseImpl : " + this);
   }
 
   private String getOldLanguage(ServerProperties serverProps) {
@@ -689,10 +689,14 @@ public class DatabaseImpl implements Database {
           project.getTypeOrder(),
           project.getSectionHelper().getSectionNodes(),
           project1.id(),
-          project1.language());
+          project1.language(), hasModel(project1));
       logger.info("setStartupInfo : For " + userWhere + " Set startup info " + startupInfo);
       userWhere.setStartupInfo(startupInfo);
     }
+  }
+
+  boolean hasModel(SlickProject project1) {
+    return project1.getProp(ServerProperties.MODELS_DIR) != null;
   }
 
   private Project getFirstProject() {
@@ -837,7 +841,7 @@ public class DatabaseImpl implements Database {
    * @see #populateProjects(boolean)
    */
   private void setExerciseDAO(Project project) {
-    logger.info("setExerciseDAO on " + project);
+//    logger.info("setExerciseDAO on " + project);
     SlickProject project1 = project.getProject();
     DBExerciseDAO dbExerciseDAO = new DBExerciseDAO(getServerProps(), userListManager, ADD_DEFECTS,
         (SlickUserExerciseDAO) getUserExerciseDAO(), project1);
