@@ -295,8 +295,7 @@ public class DatabaseImpl implements Database {
           if (slickProject.language().equalsIgnoreCase("english")) {
             rememberProject(pathHelper, serverProps, logAndNotify, relativeConfigDir, reload, slickProject);
           }
-        }
-        else {
+        } else {
           rememberProject(pathHelper, serverProps, logAndNotify, relativeConfigDir, reload, slickProject);
         }
       }
@@ -745,8 +744,7 @@ public class DatabaseImpl implements Database {
           //       logger.info("set exercise dao " + exerciseDAO + " on " + userExerciseDAO);
           if (getProjects().isEmpty()) {
             logger.warn("no projects loaded yet...?");
-          }
-          else {
+          } else {
             ExerciseDAO<CommonExercise> exerciseDAO = getProjects().iterator().next().getExerciseDAO();
             userExerciseDAO.setExerciseDAO(exerciseDAO);
           }
@@ -833,10 +831,10 @@ public class DatabaseImpl implements Database {
    */
   private void setExerciseDAOs() {
     for (Project project : getProjects()) {
-     // if (project.getProject().id() == 3)
+      // if (project.getProject().id() == 3)
 //      logger.info("makeExerciseDAO project     " + project);
       setExerciseDAO(project);
-  //    logger.info("makeExerciseDAO project now " + project);
+      //    logger.info("makeExerciseDAO project now " + project);
     }
   }
 
@@ -1019,11 +1017,10 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * TODO : pass in projectid...
-   *
    * @param typeToSection
    * @param projectid
    * @return
+   * @see ScoreServlet#getRefInfo(String, JSONObject)
    */
   public JSONObject getJsonRefResult(Map<String, Collection<String>> typeToSection, int projectid) {
     return getJsonSupportForProject(projectid).getJsonRefResults(typeToSection);
@@ -1605,7 +1602,7 @@ public class DatabaseImpl implements Database {
     if (toRet == null) {
       if (warns++ < 50)
         logger.info("couldn't find exercise " + id + " in project #" + projid + " looking in user exercise table");
-  //    toRet = getUserExerciseByExID(id);
+      //    toRet = getUserExerciseByExID(id);
     }
 
     return toRet;
@@ -1710,7 +1707,7 @@ public class DatabaseImpl implements Database {
       }
       for (CommonExercise ex : copyAsExercises) {
         userListManager.addAnnotations(ex);
-        getAudioDAO().attachAudio(ex, pathHelper.getInstallPath(), configDir,language);
+        getAudioDAO().attachAudio(ex, pathHelper.getInstallPath(), configDir, language);
       }
       long now = System.currentTimeMillis();
       logger.debug("\nTook " + (now - then) + " millis to annotate and attach.");
