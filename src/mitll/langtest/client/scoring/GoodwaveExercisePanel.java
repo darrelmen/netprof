@@ -176,7 +176,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     add(center);
 
     // score panel with gauge is on the right
-    if (widgets != null && !controller.getProps().isNoModel() && controller.isRecordingEnabled()) {
+    if (widgets != null && controller.hasModel() && controller.isRecordingEnabled()) {
       add(widgets);
     }
     if (controller.isRecordingEnabled()) {
