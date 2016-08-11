@@ -170,14 +170,10 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     if (!recordingEnabled) {
       logger.warning("Recording is *not* enabled!");
     }
-    boolean noModel = controller.getProps().isNoModel();
-//    if (noModel) {
-//      logger.warning("No model?");
-//    }
+    boolean hasModel = controller.getProjectStartupInfo().isHasModel();
+    boolean showRecordingFlashcard = !hasModel || !recordingEnabled;
 
-    boolean b = noModel || !recordingEnabled;
-
-    return b ?
+    return showRecordingFlashcard ?
         getNoRecordFlashcardPanel(e.getCommonAnnotatable()) :
         new StatsPracticePanel(e.getCommonAnnotatable(), exerciseList);
   }

@@ -430,6 +430,18 @@
         </jar>
     </target>
 
+    <target depends="build" name="lightPatch">
+        <jar destfile="npPatch.war"
+             basedir="war"
+             excludes="bestAudio/**,bestAudioCM/**,bestAudioRussian/**,META-INF,WEB-INF/web.xml,WEB-INF/lib/*.jar,WEB-INF/lib/servlet*.jar,config/**,config/*/vlr-parle.*,answers/**,audioimages/**,scoring/**,config/first/**,config/autocrt/**,config/msa/**,config/msa/**,config/levantine/**,config/pilot/**,config/dari/**,config/pashto/**,scoring/models.dli-levantine/**,scoring/models.wsj01-16/**,,scoring/models.dli-dari/**,scoring/models.dli-ara/**">
+
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
+        </jar>
+    </target>
+
+
     <!-- Makes a jar of just the .class files and the javascript, so you can overlay it on an active webapp -->
     <target depends="" name="easyPatch">
         <jar destfile="npPatch.war"
@@ -506,7 +518,7 @@
                 <path refid="LangTest.classpath"/>
             </classpath>
             <!-- add jvmarg -Xss16M or similar if you see a StackOverflowError -->
-            <jvmarg value="-Xmx768M"/>
+            <jvmarg value="-Xmx3G"/>
             <arg line="-war"/>
             <arg value="war"/>
             <arg line="-style"/>
@@ -514,7 +526,7 @@
             <!-- Additional arguments like -style PRETTY or -logLevel DEBUG -->
             <arg value="OBF"/>
             <arg line="-localWorkers"/>
-            <arg value="6"/>
+            <arg value="5"/>
             <!--
                         <arg value="-compileReport"/>
             -->
