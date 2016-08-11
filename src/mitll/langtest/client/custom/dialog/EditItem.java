@@ -44,6 +44,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.bootstrap.ButtonGroupSectionWidget;
 import mitll.langtest.client.custom.ReloadableContainer;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -174,7 +175,7 @@ public class EditItem {
     }
 
     final PagingExerciseList<CommonShell, CommonExercise> exerciseList =
-        new NPExerciseList(right, service, feedback, controller,
+        new NPExerciseList<ButtonGroupSectionWidget>(right, service, feedback, controller,
             true, instanceName, false) {
           @Override
           protected void onLastItem() {
