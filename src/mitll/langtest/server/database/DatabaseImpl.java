@@ -743,9 +743,13 @@ public class DatabaseImpl implements Database {
           makeExerciseDAO(lessonPlanFile, isURL);
 
           //       logger.info("set exercise dao " + exerciseDAO + " on " + userExerciseDAO);
-          ExerciseDAO<CommonExercise> exerciseDAO = getProjects().iterator().next().getExerciseDAO();
-          userExerciseDAO.setExerciseDAO(exerciseDAO);
-
+          if (getProjects().isEmpty()) {
+            logger.warn("no projects loaded yet...?");
+          }
+          else {
+            ExerciseDAO<CommonExercise> exerciseDAO = getProjects().iterator().next().getExerciseDAO();
+            userExerciseDAO.setExerciseDAO(exerciseDAO);
+          }
           // if (!serverProps.useH2()) {
           configureProjects(mediaDir, installPath);
           //}

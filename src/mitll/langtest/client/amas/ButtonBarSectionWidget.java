@@ -56,7 +56,7 @@ import java.util.logging.Logger;
  * Time: 11:19 AM
  * To change this template use File | Settings | File Templates.
  */
-class ButtonBarSectionWidget implements SectionWidget {
+public class ButtonBarSectionWidget implements SectionWidget {
   private final Logger logger = Logger.getLogger("ButtonBarSectionWidget");
   //private final boolean debug = false;
 
@@ -186,6 +186,11 @@ class ButtonBarSectionWidget implements SectionWidget {
       }
     }
     return strings;
+  }
+
+  @Override
+  public void selectFirst() {
+
   }
 
 
