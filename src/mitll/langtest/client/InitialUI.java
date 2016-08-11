@@ -794,11 +794,11 @@ public class InitialUI implements UILifecycle {
 
   private void showProjectChoices(List<SlimProject> result, int nest) {
     //   logger.info("showProjectChoices " + result.size() + " : " + nest);
-    Map<String, SlimProject> langToProject = new TreeMap<>();
+/*    Map<String, SlimProject> langToProject = new TreeMap<>();
     for (SlimProject project : result) {
       String key = nest == 0 ? project.getLanguage() : project.getName();
       langToProject.put(key, project);
-    }
+    }*/
 
     final Container flags = new Container();
     final Section section = new Section("section");
@@ -824,11 +824,18 @@ public class InitialUI implements UILifecycle {
     Panel current = new Thumbnails();
     flags.add(current);
     int numInRow = 4;
-    List<String> languages = new ArrayList<String>(langToProject.keySet());
-    Collections.sort(languages, new Comparator<String>() {
+    List<SlimProject> languages = new ArrayList<SlimProject>(result);
+    Collections.sort(languages, new Comparator<SlimProject>() {
       @Override
-      public int compare(String o1, String o2) {
-        return o1.toLowerCase().compareTo(o2.toLowerCase());
+      public int compare(SlimProject o1, SlimProject o2) {
+        if (nest == 0) {
+
+          return o1.getLanguage().toLowerCase().compareTo(o2.getLanguage().toLowerCase());
+        }
+        else {
+          int i = Integer.valueOf(o1.getDisplayOrder()).compareTo(o2.getDisplayOrder());
+          return i == 0 ? o1.getName().compareTo(o2.getName()) : i;
+        }
       }
     });
 
@@ -838,8 +845,8 @@ public class InitialUI implements UILifecycle {
       int max = i + numInRow;
       if (max > size) max = size;
       for (int j = i; j < max; j++) {
-        String lang = languages.get(j);
-        Panel langIcon = getLangIcon(lang, langToProject.get(lang), nest);
+        SlimProject project = languages.get(j);
+        Panel langIcon = getLangIcon(project.getLanguage(), project, nest);
         current.add(langIcon);
       }
 

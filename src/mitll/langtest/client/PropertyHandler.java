@@ -112,8 +112,8 @@ public class PropertyHandler {
   private static final String CLICK_AND_HOLD = "clickAndHold";
   private static final String SHOW_CONTEXT = "showContext";
   private static final String QUIET_AUDIO_OK = "quietAudioOK";
-  private static final String SHOW_WELCOME = "showWelcome";
-  private static final String NO_MODEL = "noModel";
+//  private static final String SHOW_WELCOME = "showWelcome";
+//  private static final String NO_MODEL = "noModel";
   private static final String PREFERRED_VOICES = "preferredVoices";
 
   private boolean adminView, analysis = false;
@@ -290,7 +290,7 @@ public class PropertyHandler {
       else if (key.equals(BKG_COLOR_FOR_REF1)) bkgColorForRef = getBoolean(value);
       else if (key.equals(DEMO_MODE)) demoMode = getBoolean(value);
       else if (key.equals(RECORD_TIMEOUT)) recordTimeout = getInt(value, DEFAULT_TIMEOUT, RECORD_TIMEOUT);
-      else if (key.equals(SHOW_WELCOME)) showWelcome = getBoolean(value);
+  //    else if (key.equals(SHOW_WELCOME)) showWelcome = getBoolean(value);
       else if (key.equals(NAME_FOR_ITEM)) nameForItem = value;
       else if (key.equals(NAME_FOR_ANSWER)) nameForAnswer = value;
       else if (key.equals(NAME_FOR_RECORDER)) nameForRecorder = value;
@@ -304,7 +304,7 @@ public class PropertyHandler {
       else if (key.equals(ALLOW_PLUS_IN_URL)) allowPlusInURL = getBoolean(value);
       else if (key.equals(SHOW_SPECTROGRAM)) spectrogram = getBoolean(value);
 
-      else if (key.equals(NO_MODEL)) noModel = getBoolean(value);
+  //    else if (key.equals(NO_MODEL)) noModel = getBoolean(value);
       else if (key.equals(DIALOG)) dialog = value;
       else if (key.equals(QUIET_AUDIO_OK)) quietAudioOK = getBoolean(value);
       else if (key.equals(SHOW_CONTEXT)) showContext = getBoolean(value);
@@ -360,9 +360,11 @@ public class PropertyHandler {
     return isAMAS() ? "Receive feedback on strengths and weaknesses." : "Practice vocabulary with audio flashcards.";
   }
 
+/*
   public String getWelcomeMessage() {
     return isAMAS() ? AMAS_WELCOME : "Welcome to " + "NetProF" + "!";
   }
+*/
 
   private void getPreferredVoices(String value) {
     for (String userid : value.split(",")) {
@@ -623,9 +625,13 @@ public class PropertyHandler {
     return spectrogram;
   }
 
-  public boolean isNoModel() {
+/*  public boolean isNoModel() {
     return noModel;
   }
+
+  public boolean hasModel() {
+    return
+  }*/
 
   /**
    * @return

@@ -1195,14 +1195,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     Map<String, List<SlickProject>> langToProject = new TreeMap<>();
     Collection<SlickProject> all = db.getProjectDAO().getAll();
-    logger.info("found " + all.size() + " projects");
+//    logger.info("found " + all.size() + " projects");
     for (SlickProject project : all) {
       List<SlickProject> slimProjects = langToProject.get(project.language());
       if (slimProjects == null) langToProject.put(project.language(), slimProjects = new ArrayList<>());
       slimProjects.add(project);
     }
 
-    logger.info("lang->project is " + langToProject);
+//    logger.info("lang->project is " + langToProject);
 
     for (String lang : langToProject.keySet()) {
       List<SlickProject> slickProjects = langToProject.get(lang);
@@ -1211,11 +1211,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       projectInfos.add(parent);
 
       if (slickProjects.size() > 1) {
-
         for (SlickProject slickProject : slickProjects) {
           parent.addChild(getProjectInfo(slickProject));
-          logger.info("\t add child to " + parent);
-
+          //  logger.info("\t add child to " + parent);
         }
       }
     }
@@ -1224,8 +1222,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   private SlimProject getProjectInfo(SlickProject project) {
+    boolean hasModel = project.getProp(ServerProperties.MODELS_DIR) != null;
+
     return new SlimProject(project.id(), project.name(), project.language(),
-        project.countrycode(), project.course(), project.displayorder());
+        project.countrycode(), project.course(), project.displayorder(),
+        hasModel
+    );
   }
 
   /**
@@ -2298,7 +2300,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     db = makeDatabaseImpl(serverProps.getH2Database());
     shareDB(servletContext);
     securityManager = new UserSecurityManager(db.getUserDAO());
-    logger.info("made " + securityManager);
 //    shareLoadTesting(servletContext);
   }
 
