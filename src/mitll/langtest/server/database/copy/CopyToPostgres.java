@@ -269,7 +269,7 @@ public class CopyToPostgres<T extends CommonShell> {
       copyReviewed(db, oldToNewUser, exToID, false);
       copyRefResult(db, oldToNewUser, exToID);
     } else {
-      logger.info("Project " + projectID + " already has exercises in it.");
+      logger.info("\n\nProject " + projectID + " already has exercises in it.  Not loading again...");
     }
   }
 

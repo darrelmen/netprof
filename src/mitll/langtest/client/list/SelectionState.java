@@ -140,6 +140,8 @@ public class SelectionState {
     //  logger.info(getInfo());
   }
 
+  public Map<String, Collection<String>> getTypeToSection() {  return typeToSection;  }
+
   private void add(String type, Collection<String> section) {
     List<String> copy = new ArrayList<String>();
     for (String s : section) copy.add(s.trim());
@@ -152,10 +154,6 @@ public class SelectionState {
 
   private void setItem(int item) {
     this.item = item;
-  }
-
-  public Map<String, Collection<String>> getTypeToSection() {
-    return typeToSection;
   }
 
   public String getInstance() {

@@ -39,6 +39,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.list.SimpleSelectExerciseList;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 
@@ -48,7 +49,9 @@ import mitll.langtest.client.user.UserManager;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 1/26/16.
  */
-public class NPFlexSectionExerciseList extends FlexSectionExerciseList {
+public class NPFlexSectionExerciseList
+    //extends FlexSectionExerciseList {
+    extends SimpleSelectExerciseList {
   private static final String COMPLETE = "Complete";
   private static final String LIST_COMPLETE = "List complete!";
 
