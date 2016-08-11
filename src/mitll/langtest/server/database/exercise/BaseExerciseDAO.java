@@ -166,6 +166,8 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   /**
    * @return
    * @see DatabaseImpl#getSectionHelper(int)
+   * @see #addNewExercises()
+   * @see #populateSections(Collection)
    */
   public SectionHelper<CommonExercise> getSectionHelper() {
     return sectionHelper;
