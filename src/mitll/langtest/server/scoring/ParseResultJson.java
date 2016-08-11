@@ -126,15 +126,14 @@ public class ParseResultJson {
   }
 
   /**
-   * TODOx : actually use the parsed json to get transcript info
+   * uses the parsed json to get transcript info
    *
    * @param jsonObject
    * @param words1
    * @param w1
-   * @paramx eventScores
    * @see #parseJsonString(String, boolean)
-   * @see ASRScoring#getCachedScores
-   * @see #writeTranscripts(String, int, int, String, boolean, String, String, boolean, boolean, boolean)
+   * @see PrecalcScores#getCachedScores
+   * @see Scoring#getTypeToTranscriptEvents(JSONObject, boolean)
    */
   Map<ImageType, Map<Float, TranscriptEvent>> parseJson(JSONObject jsonObject, String words1, String w1, boolean usePhones) {
     Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = new HashMap<ImageType, Map<Float, TranscriptEvent>>();
