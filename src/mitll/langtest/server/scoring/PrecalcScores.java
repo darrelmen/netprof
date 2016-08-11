@@ -74,9 +74,7 @@ class PrecalcScores {
     if (valid) {
       jsonObject = JSONObject.fromObject(precalcResult.getJsonScore());
       float pronScore = precalcResult.getPronScore();
-
       scores = getCachedScores(pronScore, jsonObject, usePhoneToDisplay);
-
       isValid = isPrecalcValidCheck();
 //      logger.debug("for cached result " + precalcResult + " is valid " + isValid + " : " + precalcResult.getJsonScore());
     } else {

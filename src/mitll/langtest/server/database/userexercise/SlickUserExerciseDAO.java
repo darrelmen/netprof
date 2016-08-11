@@ -32,10 +32,13 @@
 
 package mitll.langtest.server.database.userexercise;
 
+import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.exercise.DBExerciseDAO;
 import mitll.langtest.server.database.exercise.SectionHelper;
+import mitll.langtest.server.database.refaudio.IRefResultDAO;
 import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
@@ -58,13 +61,22 @@ public class SlickUserExerciseDAO
     implements IUserExerciseDAO {
   private static final Logger logger = Logger.getLogger(SlickUserExerciseDAO.class);
 
+  private long lastModified = System.currentTimeMillis();
+  //long now = System.currentTimeMillis();
+
   private final ExerciseDAOWrapper dao;
   private final RelatedExerciseDAOWrapper relatedExerciseDAOWrapper;
 
-  public SlickUserExerciseDAO(Database database, DBConnection dbConnection) {
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(PathHelper)
+   * @param database
+   * @param dbConnection
+   */
+  public SlickUserExerciseDAO(DatabaseImpl database, DBConnection dbConnection) {
     super(database);
     dao = new ExerciseDAOWrapper(dbConnection);
     relatedExerciseDAOWrapper = new RelatedExerciseDAOWrapper(dbConnection);
+    IRefResultDAO refResultDAO = database.getRefResultDAO();
   }
 
   public void createTable() {
@@ -123,8 +135,6 @@ public class SlickUserExerciseDAO
     return toSlick(shared, isOverride, -1, false, BaseUserDAO.DEFAULT_USER_ID, false);
   }
 
-  long now = System.currentTimeMillis();
-
   /**
    * @param shared
    * @param isOverride
@@ -134,7 +144,8 @@ public class SlickUserExerciseDAO
    * @see SlickUserExerciseDAO#add(CommonExercise, boolean)
    */
   public SlickExercise toSlick(CommonExercise shared,
-                               @Deprecated boolean isOverride, int projectID, boolean isPredef,
+                               @Deprecated boolean isOverride,
+                               int projectID, boolean isPredef,
                                int importUser,
                                boolean isContext) {
     Map<String, String> unitToValue = shared.getUnitToValue();
@@ -146,7 +157,7 @@ public class SlickUserExerciseDAO
     if (creator == BaseUserDAO.UNDEFINED_USER) creator = importUser;
 
     long updateTime = shared.getUpdateTime();
-    if (updateTime == 0) updateTime = now;
+    if (updateTime == 0) updateTime = lastModified;
     return new SlickExercise(-1,
         creator,
         shared.getOldID(),
@@ -195,12 +206,8 @@ public class SlickUserExerciseDAO
     return userExercise;
   }
 
-  private long lastModified = System.currentTimeMillis();
-
   /**
    * So we need to not put the context sentences, at least initially, under the unit-chapter hierarchy.
-   * TODO : add context sentences
-   * TODO : connect context sentences
    *
    * @param slick
    * @return
@@ -209,6 +216,35 @@ public class SlickUserExerciseDAO
   private Exercise fromSlickToExercise(SlickExercise slick,
                                        Collection<String> typeOrder,
                                        SectionHelper<CommonExercise> sectionHelper) {
+    Exercise exercise = new Exercise(
+        slick.id(),
+        slick.exid(),
+        slick.english(),
+        slick.foreignlanguage(),
+        slick.meaning(),
+        slick.transliteration(),
+        slick.projid());
+
+    List<String> translations = new ArrayList<String>();
+    if (slick.foreignlanguage().length() > 0) {
+      translations.add(slick.foreignlanguage());
+    }
+    exercise.setRefSentences(translations);
+    exercise.setUpdateTime(lastModified);
+
+    Map<String, String> unitToValue = getUnitToValue(slick, typeOrder);
+
+
+    if (slick.ispredef() && !slick.iscontext()) {
+      addExerciseToSectionHelper(sectionHelper, unitToValue, exercise);
+    } else {
+      exercise.setUnitToValue(unitToValue);
+    }
+
+    return exercise;
+  }
+
+  private Map<String, String> getUnitToValue(SlickExercise slick, Collection<String> typeOrder) {
     Map<String, String> unitToValue = new HashMap<>();
     Iterator<String> iterator = typeOrder.iterator();
     String first = iterator.next();
@@ -228,38 +264,17 @@ public class SlickUserExerciseDAO
         if (empty) logger.warn("got empty " + second + " for " + slick);
       }
     }
+    return unitToValue;
+  }
 
-    Exercise exercise = new Exercise(
-        slick.id(),
-        slick.exid(),
-        slick.english(),
-        slick.foreignlanguage(),
-        slick.meaning(),
-        slick.transliteration(),
-        slick.projid());
-
-    List<String> translations = new ArrayList<String>();
-    if (slick.foreignlanguage().length() > 0) {
-      translations.add(slick.foreignlanguage());
+  private void addExerciseToSectionHelper(SectionHelper<CommonExercise> sectionHelper,
+                                          Map<String, String> unitToValue,
+                                          Exercise exercise) {
+    List<SectionHelper.Pair> pairs = new ArrayList<>();
+    for (Map.Entry<String, String> pair : unitToValue.entrySet()) {
+      pairs.add(sectionHelper.addExerciseToLesson(exercise, pair.getKey(), pair.getValue()));
     }
-    exercise.setRefSentences(translations);
-
-//    if (!context.isEmpty()) {
-//      imported.addContext(context,contextTranslation);
-//    }
-    exercise.setUpdateTime(lastModified);
-
-    if (slick.ispredef() && !slick.iscontext()) {
-      List<SectionHelper.Pair> pairs = new ArrayList<SectionHelper.Pair>();
-      for (Map.Entry<String, String> pair : unitToValue.entrySet()) {
-        pairs.add(sectionHelper.addExerciseToLesson(exercise, pair.getKey(), pair.getValue()));
-      }
-      sectionHelper.addAssociations(pairs);
-    } else {
-      exercise.setUnitToValue(unitToValue);
-    }
-
-    return exercise;
+    sectionHelper.addAssociations(pairs);
   }
 
   public int insert(SlickExercise UserExercise) {
@@ -305,7 +320,9 @@ public class SlickUserExerciseDAO
                                             Collection<String> typeOrder,
                                             SectionHelper<CommonExercise> sectionHelper) {
     List<CommonExercise> copy = new ArrayList<>();
-    for (SlickExercise userExercise : all) copy.add(fromSlickToExercise(userExercise, typeOrder, sectionHelper));
+    for (SlickExercise userExercise : all) {
+      copy.add(fromSlickToExercise(userExercise, typeOrder, sectionHelper));
+    }
     return copy;
   }
 
@@ -347,17 +364,8 @@ public class SlickUserExerciseDAO
     return getUserExercises(dao.getAllUserEx(projid));
   }
 
-  /**
-   * @param typeOrder
-   * @param sectionHelper
-   * @return
-   * @see DBExerciseDAO#readExercises()
-   */
-//  public List<CommonExercise> getAllExercises(List<String> typeOrder, SectionHelper<CommonExercise> sectionHelper) {
-//    return getExercises(dao.getAllPredefEx(), typeOrder, sectionHelper);
-//  }
-
-  public List<CommonExercise> getByProject(int projectid, List<String> typeOrder, SectionHelper<CommonExercise> sectionHelper) {
+  public List<CommonExercise> getByProject(int projectid, List<String> typeOrder,
+                                           SectionHelper<CommonExercise> sectionHelper) {
     return getExercises(dao.getAllPredefByProject(projectid), typeOrder, sectionHelper);
   }
 
