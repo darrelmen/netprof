@@ -86,10 +86,7 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @return
    */
   public SlickUser addAndGet(SlickUser user) {
-//    logger.info("in  " + user);
     SlickUser slickUser = dao.addAndGet(user);
-//    logger.info("out " + slickUser);
-
     return slickUser;
   }
 
