@@ -86,6 +86,11 @@ public class ExerciseListRequest implements Serializable {
     return typeToSelection;
   }
 
+  /**
+   * @see mitll.langtest.client.list.HistoryExerciseList#loadExercisesUsingPrefix(Map, String, boolean, int)
+   * @param typeToSelection
+   * @return
+   */
   public ExerciseListRequest setTypeToSelection(Map<String, Collection<String>> typeToSelection) {
     this.typeToSelection = typeToSelection;
     return this;

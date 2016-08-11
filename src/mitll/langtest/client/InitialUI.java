@@ -384,14 +384,14 @@ public class InitialUI implements UILifecycle {
   }
 
   private Breadcrumbs getBreadcrumbs() {
-    logger.info("getBreadcrumbs --->");
+ //   logger.info("getBreadcrumbs --->");
 
     Breadcrumbs crumbs = new Breadcrumbs(">");
     crumbs.getElement().setId("breadcrumb");
     crumbs.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
     addCrumbs(crumbs);
 
-    logger.info("getBreadcrumbs now has " + crumbs.getElement().getChildCount() + " links");
+   // logger.info("getBreadcrumbs now has " + crumbs.getElement().getChildCount() + " links");
 
     return crumbs;
   }
@@ -411,7 +411,7 @@ public class InitialUI implements UILifecycle {
       }
     });
     crumbs.add(home);
-    logger.info("\tgetBreadcrumbs add home");
+   // logger.info("\tgetBreadcrumbs add home");
 
     User current = controller.getCurrent();
     if (current != null) {
@@ -423,7 +423,7 @@ public class InitialUI implements UILifecycle {
         }
       });
       crumbs.add(me);
-      logger.info("getBreadcrumbs adding step for current user " + current);
+     // logger.info("getBreadcrumbs adding step for current user " + current);
 
       ProjectStartupInfo startupInfo = lifecycleSupport.getProjectStartupInfo();
       if (startupInfo != null) {
