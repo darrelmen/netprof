@@ -144,7 +144,7 @@ public class UserPassLogin extends UserDialog {
   private FormField signUpEmail;
   private FormField signUpPassword;
   private FormField password;
-  private ListBox projectChoice, signUpProjectChoice;
+ // private ListBox projectChoice, signUpProjectChoice;
   private boolean signInHasFocus = true;
   private final EventRegistration eventRegistration;
   private Button signIn;
@@ -158,7 +158,7 @@ public class UserPassLogin extends UserDialog {
 
   private Collection<SlimProject> projects;
 */
-  private UserServiceAsync userService;
+//  private UserServiceAsync userService;
 
   /**
    * @param service
@@ -173,7 +173,7 @@ public class UserPassLogin extends UserDialog {
                        UserManager userManager,
                        EventRegistration eventRegistration) {
     super(service, props);
-    this.userService = userService;
+    //this.userService = userService;
 
 //    keyStorage = new KeyStorage(props.getLanguage(), 1000000);
 
