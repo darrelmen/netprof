@@ -201,7 +201,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
 
     if (!instance.contains(Navigation.REVIEW) && !instance.contains(Navigation.COMMENT)) {
       approvedButton = addApprovedButton(listContainer, navHelper);
-      if (!controller.getProps().isNoModel()) {
+      if (controller.hasModel()) {
         addAttnLLButton(listContainer, navHelper);
       }
     }
