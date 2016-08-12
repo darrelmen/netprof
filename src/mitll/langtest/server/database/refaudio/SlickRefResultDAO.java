@@ -39,6 +39,7 @@ import mitll.langtest.server.decoder.RefResultDecoder;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickRefResult;
+import mitll.npdata.dao.SlickRefResultJson;
 import mitll.npdata.dao.refaudio.RefResultDAOWrapper;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
@@ -136,6 +137,10 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
     List<Result> results = new ArrayList<>();
     for (SlickRefResult refResult : dao.getAll()) results.add(fromSlick(refResult));
     return results;
+  }
+
+  public List<SlickRefResultJson> getJsonResults() {
+    return dao.getAllSlim();
   }
 
   @Override
