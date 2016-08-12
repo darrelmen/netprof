@@ -41,7 +41,6 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.bootstrap.ButtonGroupSectionWidget;
 import mitll.langtest.client.bootstrap.DownloadHelper;
 import mitll.langtest.client.bootstrap.ItemSorter;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -140,7 +139,7 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<MenuSectio
 
   private void getTypeOrder(final FluidContainer container) {
     typeOrder = controller.getProjectStartupInfo().getTypeOrder();
-    logger.info("getTypeOrder type order is " +typeOrder);
+    logger.info("getTypeOrder type order is " + typeOrder);
     addChoiceRow(controller.getProjectStartupInfo().getSectionNodes(), container, typeOrder);
   }
 
@@ -167,14 +166,19 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<MenuSectio
     firstTypeRow.addStyleName("alignTop");
 
     //int index = 0;
+    MenuSectionWidget parent = null;
     for (String type : types) {
       List<String> sectionsInType = new ItemSorter().getSortedItems(getLabels(rootNodes));
 
-      MenuSectionWidget value = new MenuSectionWidget(type);
+      MenuSectionWidget value = new MenuSectionWidget(type, rootNodes, this);
+      if (parent != null) {
+        parent.addChild(value);
+      }
+      parent = value;
       sectionWidgetContainer.setWidget(type, value);
 
-      logger.info("for " + type + " : " + sectionsInType);
-      value.addChoices(firstTypeRow, type, sectionsInType, this);
+      //   logger.info("for " + type + " : " + sectionsInType);
+      value.addChoices(firstTypeRow, type, sectionsInType);
 
       List<SectionNode> newNodes = getChildSectionNodes(rootNodes);
       rootNodes = newNodes;
@@ -203,6 +207,7 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<MenuSectio
   public void gotSelection() {
     logger.info("gotSelection --- >");
     pushNewSectionHistoryToken();
+
   }
 
   /**
@@ -234,7 +239,7 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<MenuSectio
 
   private List<String> getLabels(Collection<SectionNode> nodes) {
     List<String> items = new ArrayList<>();
-    Set<String> added= new HashSet<>();
+    Set<String> added = new HashSet<>();
     for (SectionNode n : nodes) {
       if (added.add(n.getName())) {
         items.add(n.getName());

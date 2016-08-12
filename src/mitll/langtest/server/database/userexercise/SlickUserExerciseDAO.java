@@ -142,8 +142,6 @@ public class SlickUserExerciseDAO
   }
 
   /**
-   * TODO : type order depends on project
-   *
    * @return
    */
   List<String> getTypeOrder() {

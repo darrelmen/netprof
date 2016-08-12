@@ -1141,3 +1141,63 @@ body .btn-toolbar > .btn-group > .btn.active {
 .boxShadow {
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.15) inset, 0px 1px 2px rgba(0, 0, 0, 0.05);
 }
+
+.stats-toolbar .stats-settings-area {
+    margin: 1px 0px;
+    padding: 0px;
+    border: solid 1px #ddd;
+    border-radius: 4px;
+    position: relative;
+    top: 0px;
+    bottom: 0px;
+    left: 5px;
+    overflow: hidden;
+    display: inline-block;
+}
+.stats-toolbar .stats-settings-area>* {
+    margin-top: 1px;
+    margin-bottom: 1px;
+}
+.stats-toolbar .stats-settings-area>a.btn-link:LINK {
+    color: black;
+    text-decoration: none;
+    margin-right: 6px;
+}
+
+.rte-picker-button {
+    vertical-align: middle;
+    text-align: center;
+}
+
+.rte-picker-button > ul {
+    padding: 5px;
+}
+
+.rte-color-picker-grid {
+    margin: auto;
+}
+
+.rte-color-picker-grid TD {
+    border: solid 2px white;
+    padding: 0px;
+    cursor: pointer;
+    width: 15px;
+    height: 15px;
+}
+
+.rte-color-picker-container {
+    width: 300px;
+    margin: auto;
+    font-weight: bold;
+}
+
+.rte-symbol-picker-container {
+    width: 160px;
+    height: 120px;
+    cursor: pointer;
+}
+
+.rte-symbol-picker-container TD {
+    border: solid 1px #ddd;
+   font-size: 18pt;
+}
