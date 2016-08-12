@@ -33,29 +33,38 @@
 package mitll.langtest.client.list;
 
 import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.ButtonToolbar;
+import com.github.gwtbootstrap.client.ui.DropdownButton;
 import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.ListBox;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.SectionWidget;
+import mitll.langtest.client.table.TableSelect;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.logging.Logger;
 
 public class MenuSectionWidget implements SectionWidget {
+  private final Logger logger = Logger.getLogger("MenuSectionWidget");
+
   private final String type;
-  private ListBox child1 = new ListBox();
+  // private ListBox child1 = new ListBox();
+  DropdownButton child2;
 
   public MenuSectionWidget(String type) {
     this.type = type;
   }
 
+  int num = 0;
+
   public void addChoices(Panel container,
                          String label,
-                         Collection<String> values,
+                         List<String> values,
                          SimpleSelectExerciseList singleSelectExerciseList) {
     Panel horizontalPanel = new HorizontalPanel();
     horizontalPanel.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
@@ -65,35 +74,51 @@ public class MenuSectionWidget implements SectionWidget {
     child.getElement().getStyle().setMarginTop(15, Style.Unit.PX);
     horizontalPanel.add(child);
 
-    child1.addChangeHandler(new ChangeHandler() {
-      @Override
-      public void onChange(ChangeEvent event) {
-        singleSelectExerciseList.gotSelection();
-      }
-    });
+//    child1.addChangeHandler(new ChangeHandler() {
+//      @Override
+//      public void onChange(ChangeEvent event) {
+//        singleSelectExerciseList.gotSelection();
+//      }
+//    });
+//
+//    horizontalPanel.add(child1);
 
-    horizontalPanel.add(child1);
+    ButtonToolbar toolbar = new ButtonToolbar();
 
-    Set<String> unique = new TreeSet<String>(values);
+    this.child2 = new TableSelect().makeSymbolButton(values, 4, singleSelectExerciseList);
+    this.num = values.size();
+    toolbar.add(child2);
+    horizontalPanel.add(toolbar);
 
+    Style style = child2.getElement().getStyle();
+    style.setMarginLeft(5, Style.Unit.PX);
+
+ //   Set<String> unique = new TreeSet<String>(values);
+
+/*
     child1.addItem("All");
-    Style style = child1.getElement().getStyle();
     style.setMarginTop(10, Style.Unit.PX);
     style.setMarginLeft(5, Style.Unit.PX);
     for (String value : unique) {
       child1.addItem(value);
     }
+*/
     container.add(horizontalPanel);
   }
 
   @Override
   public String getCurrentSelection() {
-    return child1.getSelectedValue();
+
+//    return child1.getSelectedValue();
+    String trim = child2.getText().trim();
+    logger.info("current " + type + " : '" +trim+ "'");
+    return trim;
   }
 
   @Override
   public void clearSelectionState() {
-    child1.setSelectedValue("All");
+    //child1.setSelectedValue("All");
+    child2.setText("All");
   }
 
   @Override
@@ -128,7 +153,7 @@ public class MenuSectionWidget implements SectionWidget {
 
   @Override
   public boolean hasOnlyOne() {
-    return child1.getItemCount() == 1;
+    return num == 1;
   }
 
   @Override
@@ -142,6 +167,7 @@ public class MenuSectionWidget implements SectionWidget {
   }
 
   public void selectItem(String item) {
-    child1.setSelectedValue(item);
+//    child1.setSelectedValue(item);
+    child2.setText(item);
   }
 }
