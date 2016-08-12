@@ -36,8 +36,6 @@ package mitll.langtest.client.table;
 import com.github.gwtbootstrap.client.ui.DropdownButton;
 import com.github.gwtbootstrap.client.ui.NavLink;
 import com.github.gwtbootstrap.client.ui.constants.IconSize;
-import com.github.gwtbootstrap.client.ui.constants.IconType;
-import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Element;
@@ -51,6 +49,7 @@ import com.google.gwt.user.client.ui.HTMLTable.Cell;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RichTextArea;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.list.MenuSectionWidget;
 import mitll.langtest.client.list.SimpleSelectExerciseList;
 
 import java.util.List;
@@ -128,23 +127,37 @@ public class TableSelect {
   DropdownButton sButton;
 
   SimpleSelectExerciseList singleSelectExerciseList;
-  public DropdownButton makeSymbolButton(List<String> symbol_values2, int width,
-                                         SimpleSelectExerciseList singleSelectExerciseList) {
-    //  char[][] symbol_values = SYMBOL_VALUES;
-    sButton = new DropdownButton("All");
-    sButton.setIconSize(IconSize.DEFAULT);
-  //  sButton.setSize(ButtonSize.MINI);
-//    sButton.setIcon(IconType.KEYBOARD);
-  //  sButton.setRightDropdown(true);
+  MenuSectionWidget menuSectionWidget;
 
-    this.values = symbol_values2;
-    values.add(0,"All");
+  /**
+   * @param values
+   * @param width
+   * @param singleSelectExerciseList
+   * @param menuSectionWidget
+   * @param initialSelection
+   * @return
+   */
+  public DropdownButton makeSymbolButton(List<String> values,
+                                         int width,
+                                         SimpleSelectExerciseList singleSelectExerciseList,
+                                         MenuSectionWidget menuSectionWidget, String initialSelection) {
+    //  char[][] symbol_values = SYMBOL_VALUES;
+  //  String initialSelection = "All";
+    sButton = new DropdownButton(initialSelection);
+    sButton.setIconSize(IconSize.DEFAULT);
+    //  sButton.setSize(ButtonSize.MINI);
+//    sButton.setIcon(IconType.KEYBOARD);
+    //  sButton.setRightDropdown(true);
+
+    this.values = values;
+    this.values.add(0, "All");
     this.width = width;
     this.singleSelectExerciseList = singleSelectExerciseList;
+    this.menuSectionWidget = menuSectionWidget;
     //  int numRows = symbol_values.length;
     //   int numcols = symbol_values[0].length;
 
-    int n = symbol_values2.size();
+    int n = values.size();
     int size = n;
     int numRows = (int) Math.ceil((double) size / (double) width);
     int numcols = width;
@@ -163,39 +176,40 @@ public class TableSelect {
           symbolGrid.getColumnFormatter().setWidth(c, colWidth);
         }
         //String text = Character.toString(symbol_values[r][c]);
-        String text = symbol_values2.get(n - size);
+        String text = values.get(n - size);
         // logger.info("at " + r + "," + c + " : "+ text);
 
-        symbolGrid.setWidget(r, c, new Label(text));
+        Label widget = new Label(text);
+        symbolGrid.setWidget(r, c, widget);
         size--;
       }
     }
-    symbolGrid.addStyleName("rte-symbol-picker-container");
+  symbolGrid.addStyleName("rte-symbol-picker-container");
     symbolGrid.addClickHandler(handler);
     sButton.add(symbolGrid);
     sButton.addStyleName("rte-picker-button");
     return sButton;
   }
 
-  private Grid createColorGrid(boolean bkgrnd) {
-
-    String[] bwCodes = (bkgrnd) ? ColorFactory.BG_BW_COLOR_CODES : ColorFactory.FG_BW_COLOR_CODES;
-
-    int bwRows = (int) Math.ceil(((float) bwCodes.length) / COLOR_GRID_COL_SIZE);
-    int primaryRows = (int) Math.ceil(((float) ColorFactory.PRIMARY_COLOR_CODES.length) / COLOR_GRID_COL_SIZE);
-    int gradientRows = (int) Math.ceil(((float) ColorFactory.GRADED_COLOR_CODES.length) / COLOR_GRID_COL_SIZE);
-    int totalRows = bwRows + primaryRows + gradientRows;
-    Grid colorGrid = new Grid(totalRows, COLOR_GRID_COL_SIZE);
-    colorGrid.setStyleName("rte-color-picker-grid");
-    int updateRow = -1;
-
-    updateRow = setBackgrounds(colorGrid, updateRow, bwCodes);
-    updateRow = setBackgrounds(colorGrid, updateRow, ColorFactory.PRIMARY_COLOR_CODES);
-    updateRow = setBackgrounds(colorGrid, updateRow, ColorFactory.GRADED_COLOR_CODES);
-
-    colorGrid.addClickHandler(handler);
-    return colorGrid;
-  }
+//  private Grid createColorGrid(boolean bkgrnd) {
+//
+//    String[] bwCodes = (bkgrnd) ? ColorFactory.BG_BW_COLOR_CODES : ColorFactory.FG_BW_COLOR_CODES;
+//
+//    int bwRows = (int) Math.ceil(((float) bwCodes.length) / COLOR_GRID_COL_SIZE);
+//    int primaryRows = (int) Math.ceil(((float) ColorFactory.PRIMARY_COLOR_CODES.length) / COLOR_GRID_COL_SIZE);
+//    int gradientRows = (int) Math.ceil(((float) ColorFactory.GRADED_COLOR_CODES.length) / COLOR_GRID_COL_SIZE);
+//    int totalRows = bwRows + primaryRows + gradientRows;
+//    Grid colorGrid = new Grid(totalRows, COLOR_GRID_COL_SIZE);
+//    colorGrid.setStyleName("rte-color-picker-grid");
+//    int updateRow = -1;
+//
+//    updateRow = setBackgrounds(colorGrid, updateRow, bwCodes);
+//    updateRow = setBackgrounds(colorGrid, updateRow, ColorFactory.PRIMARY_COLOR_CODES);
+//    updateRow = setBackgrounds(colorGrid, updateRow, ColorFactory.GRADED_COLOR_CODES);
+//
+//    colorGrid.addClickHandler(handler);
+//    return colorGrid;
+//  }
 
   /**
    * Change the backgrounds for each color in the grid.
@@ -364,19 +378,9 @@ public class TableSelect {
     String s = values.get((rowIndex * width) + cellIndex);
     logger.info("click on " + s);
 
-//    char insSymbol = SYMBOL_VALUES[rowIndex][cellIndex];
-    // rta.addText(Character.toString(insSymbol));
-
     sButton.setText(s);
-
+    menuSectionWidget.gotSelection(s);
     singleSelectExerciseList.gotSelection();
-
-    // Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-    //   public void execute() {
-    //     rta.setFocus(true);
-    //   }
-    // });
-
   }
 
   private String getClickedColor(Grid clickedGrid, ClickEvent event) {
@@ -391,6 +395,8 @@ public class TableSelect {
     }
   }
 
-  public String getSelection() { return sButton.getText(); }
+  public String getSelection() {
+    return sButton.getText();
+  }
 }
 
