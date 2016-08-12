@@ -37,6 +37,8 @@ import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.copy.CopyToPostgres;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
+import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.exercise.AudioAttribute;
@@ -49,9 +51,7 @@ import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 public class PostgresTest extends BaseTest {
   private static final Logger logger = Logger.getLogger(PostgresTest.class);
@@ -266,7 +266,7 @@ public class PostgresTest extends BaseTest {
       logger.info("\n\n\n-------- STARTED  copy " + config + " " + cc);
 
       //  DatabaseImpl databaseLight = getDatabaseLight(config.language, true, "hydra-dev", "netprof", "npadmin", config.props);
-      DatabaseImpl databaseLight = getDatabaseLight(config.language, true, doLocal,  config.props);
+      DatabaseImpl databaseLight = getDatabaseLight(config.language, true, doLocal, config.props);
 
       cp.copyOneConfig(databaseLight, cc, config.name, config.displayOrder);
       databaseLight.destroy();
@@ -409,6 +409,42 @@ public class PostgresTest extends BaseTest {
       }
     }
   }
+
+  @Test
+  public void testNest() {
+    DatabaseImpl database = getDatabaseLight("netProf", false);
+    Collection<SlickProject> all = database.getProjectDAO().getAll();
+    int toIndex = 10;
+    for (SlickProject project : all) {
+      String language = project.language();
+      logger.info("lang " + language);
+      if (language.equalsIgnoreCase("spanish")) {
+        Project project1 = database.getProject(project.id());
+
+        SectionHelper<CommonExercise> sectionHelper = project1.getSectionHelper();
+        logger.info("type order " + sectionHelper.getTypeOrder());
+        sectionHelper.report();
+
+        Map<String, String> choice = new HashMap<>();
+        choice.put("Unit",  "1");
+        choice.put("Chapter", "1");
+        choice.put("Sound", "rf");
+        Collection<CommonExercise> exercisesForSelectionState = sectionHelper.getExercisesForSimpleSelectionState(choice);
+
+        for (CommonExercise ex : exercisesForSelectionState) {
+          logger.info("found " + ex.getID() + " : " + ex.getForeignLanguage());
+        }
+
+        choice.put("Sound", "jj");
+          exercisesForSelectionState = sectionHelper.getExercisesForSimpleSelectionState(choice);
+
+        for (CommonExercise ex : exercisesForSelectionState) {
+          logger.info("found " + ex.getID() + " :\t" + ex.getForeignLanguage());
+        }
+      }
+    }
+  }
+
 
   @Test
   public void testGetContextAll() {
