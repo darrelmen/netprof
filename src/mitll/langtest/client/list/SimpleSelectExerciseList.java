@@ -55,12 +55,9 @@ import java.util.logging.Logger;
 
 public abstract class SimpleSelectExerciseList extends NPExerciseList<MenuSectionWidget> {
   private final Logger logger = Logger.getLogger("SimpleSelectExerciseList");
-  //private static final int NUM_CHOICES = 3;
-
   private static final int CLASSROOM_VERTICAL_EXTRA = 270;
   private static final String SHOWING_ALL_ENTRIES = "Showing all entries";
 
-  //  private final List<ButtonType> buttonTypes = new ArrayList<>();
   private final Heading statusHeader = new Heading(4);
   private Collection<String> typeOrder;
   private final Panel sectionPanel;
@@ -123,9 +120,6 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<MenuSectio
   public void addWidgets() {
     sectionPanel.clear();
     sectionPanel.add(getWidgetsForTypes());
-//    DivWidget bottomRow = getBottomRow();
-//    addBottomText(bottomRow);
-//    sectionPanel.add(bottomRow);
   }
 
   /**
@@ -146,7 +140,7 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<MenuSectio
 
   private void getTypeOrder(final FluidContainer container) {
     typeOrder = controller.getProjectStartupInfo().getTypeOrder();
-    // logger.info("type order is " +typeOrder);
+    logger.info("getTypeOrder type order is " +typeOrder);
     addChoiceRow(controller.getProjectStartupInfo().getSectionNodes(), container, typeOrder);
   }
 
@@ -172,19 +166,17 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<MenuSectio
     container.add(firstTypeRow);
     firstTypeRow.addStyleName("alignTop");
 
-    int index = 0;
+    //int index = 0;
     for (String type : types) {
-      Collection<String> sectionsInType = new ItemSorter().getSortedItems(getLabels(rootNodes));
+      List<String> sectionsInType = new ItemSorter().getSortedItems(getLabels(rootNodes));
 
       MenuSectionWidget value = new MenuSectionWidget(type);
       sectionWidgetContainer.setWidget(type, value);
+
+      logger.info("for " + type + " : " + sectionsInType);
       value.addChoices(firstTypeRow, type, sectionsInType, this);
 
-      List<SectionNode> newNodes = new ArrayList<>();
-
-      for (SectionNode node : rootNodes) {
-        newNodes.addAll(node.getChildren());
-      }
+      List<SectionNode> newNodes = getChildSectionNodes(rootNodes);
       rootNodes = newNodes;
     }
     makeDefaultSelections();
@@ -195,6 +187,14 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<MenuSectio
 
 
     pushFirstListBoxSelection();
+  }
+
+  private List<SectionNode> getChildSectionNodes(Collection<SectionNode> rootNodes) {
+    List<SectionNode> newNodes = new ArrayList<>();
+    for (SectionNode node : rootNodes) {
+      newNodes.addAll(node.getChildren());
+    }
+    return newNodes;
   }
 
   /**
@@ -234,7 +234,12 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<MenuSectio
 
   private List<String> getLabels(Collection<SectionNode> nodes) {
     List<String> items = new ArrayList<>();
-    for (SectionNode n : nodes) items.add(n.getName());
+    Set<String> added= new HashSet<>();
+    for (SectionNode n : nodes) {
+      if (added.add(n.getName())) {
+        items.add(n.getName());
+      }
+    }
     return items;
   }
 
