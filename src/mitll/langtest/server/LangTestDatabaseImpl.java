@@ -801,7 +801,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     try {
       exid1 = Integer.parseInt(exid);
     } catch (NumberFormatException e) {
-      logger.warn("can't parse " + exid);
+      logger.warn("can't parse '" + exid +"'");
     }
     return getExercise(exid1, userID, isFlashcardReq);
   }
