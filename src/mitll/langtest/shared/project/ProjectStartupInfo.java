@@ -34,6 +34,7 @@ package mitll.langtest.shared.project;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.shared.SectionNode;
+import mitll.langtest.shared.user.User;
 
 import java.util.Collection;
 import java.util.Map;
@@ -55,7 +56,7 @@ public class ProjectStartupInfo implements IsSerializable {
    * @param sectionNodes
    * @param projectid
    * @param hasModel
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getStartupInfo()
+   * @see mitll.langtest.server.database.DatabaseImpl#setStartupInfo(User, int)
    */
   public ProjectStartupInfo(Map<String, String> properties,
                             Collection<String> typeOrder,
