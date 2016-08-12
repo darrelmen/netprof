@@ -60,10 +60,10 @@ public abstract class Analysis extends DAO {
 
   private static final int FIVE_MINUTES = 5 * 60 * 1000;
   private static final float MIN_SCORE_TO_SHOW = 0.20f;
-  protected static final String EMPTY_JSON = "{}";
+  static final String EMPTY_JSON = "{}";
   private final ParseResultJson parseResultJson;
   private final IPhoneDAO phoneDAO;
-  protected Map<Integer, String> exToRef;
+  Map<Integer, String> exToRef;
 
   /**
    * @param database
@@ -389,7 +389,7 @@ public abstract class Analysis extends DAO {
     return userToUserInfo;
   }
 
-  protected String trimPathForWebPage(String path) {
+  String trimPathForWebPage(String path) {
     int answer = path.indexOf(PathHelper.ANSWERS);
     return (answer == -1) ? path : path.substring(answer);
   }

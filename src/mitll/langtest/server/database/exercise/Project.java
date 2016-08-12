@@ -49,6 +49,7 @@ import org.apache.log4j.Logger;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -62,7 +63,7 @@ public class Project {
   private static final String WEBSERVICE_HOST_IP = "127.0.0.1";
 
   private SlickProject project;
-  private List<String> typeOrder;
+  //private List<String> typeOrder;
   private ExerciseDAO<CommonExercise> exerciseDAO;
   private JsonSupport jsonSupport;
   private SlickAnalysis analysis;
@@ -82,6 +83,15 @@ public class Project {
     this.exerciseDAO = exerciseDAO;
   }
 
+  /**
+   * @see DatabaseImpl#rememberProject(int, int)
+   * @param project
+   * @param pathHelper
+   * @param serverProps
+   * @param db
+   * @param logAndNotify
+   * @param relativeConfigDir
+   */
   public Project(SlickProject project,
                  PathHelper pathHelper,
                  ServerProperties serverProps,
@@ -89,7 +99,7 @@ public class Project {
                  LogAndNotify logAndNotify,
                  String relativeConfigDir) {
     this.project = project;
-    this.typeOrder = Arrays.asList(project.first(), project.second());
+ //   this.typeOrder = Arrays.asList(project.first(), project.second());
     // String prop = project.getProp(ServerProperties.MODELS_DIR);
     // logger.info("Project got " + ServerProperties.MODELS_DIR + ": " + prop);
     audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, logAndNotify, this);
@@ -135,7 +145,8 @@ public class Project {
   }
 
   public List<String> getTypeOrder() {
-    return typeOrder;
+    SectionHelper<CommonExercise> sectionHelper = getSectionHelper();
+    return sectionHelper == null ? Collections.EMPTY_LIST : sectionHelper.getTypeOrder();
   }
 
   /**
@@ -155,7 +166,7 @@ public class Project {
   }
 
   public SectionHelper<CommonExercise> getSectionHelper() {
-    return exerciseDAO.getSectionHelper();
+    return exerciseDAO == null ? null : exerciseDAO.getSectionHelper();
   }
 
   public void setJsonSupport(JsonSupport jsonSupport) {
@@ -218,6 +229,6 @@ public class Project {
   }
 
   public String toString() {
-    return "Project project = " + project + " types " + typeOrder + " exercise dao " + exerciseDAO;
+    return "Project project = " + project + " types " + getTypeOrder() + " exercise dao " + exerciseDAO;
   }
 }
