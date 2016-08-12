@@ -40,13 +40,12 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.bootstrap.ItemSorter;
 import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.table.TableSelect;
+import mitll.langtest.shared.SectionNode;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.logging.Logger;
 
 public class MenuSectionWidget implements SectionWidget {
@@ -55,17 +54,21 @@ public class MenuSectionWidget implements SectionWidget {
   private final String type;
   // private ListBox child1 = new ListBox();
   DropdownButton child2;
+  Collection<SectionNode> nodes;
+  SimpleSelectExerciseList singleSelectExerciseList;
 
-  public MenuSectionWidget(String type) {
+  public MenuSectionWidget(String type, Collection<SectionNode> nodes, SimpleSelectExerciseList singleSelectExerciseList) {
     this.type = type;
+    this.nodes = nodes;
+    this.singleSelectExerciseList = singleSelectExerciseList;
   }
 
   int num = 0;
+  ButtonToolbar toolbar = new ButtonToolbar();
 
   public void addChoices(Panel container,
                          String label,
-                         List<String> values,
-                         SimpleSelectExerciseList singleSelectExerciseList) {
+                         List<String> values) {
     Panel horizontalPanel = new HorizontalPanel();
     horizontalPanel.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
 
@@ -82,18 +85,12 @@ public class MenuSectionWidget implements SectionWidget {
 //    });
 //
 //    horizontalPanel.add(child1);
-
-    ButtonToolbar toolbar = new ButtonToolbar();
-
-    this.child2 = new TableSelect().makeSymbolButton(values, 4, singleSelectExerciseList);
-    this.num = values.size();
-    toolbar.add(child2);
     horizontalPanel.add(toolbar);
+    this.num = values.size();
 
-    Style style = child2.getElement().getStyle();
-    style.setMarginLeft(5, Style.Unit.PX);
+    addGridChoices(values, "All");
 
- //   Set<String> unique = new TreeSet<String>(values);
+    //   Set<String> unique = new TreeSet<String>(values);
 
 /*
     child1.addItem("All");
@@ -106,12 +103,20 @@ public class MenuSectionWidget implements SectionWidget {
     container.add(horizontalPanel);
   }
 
+  private void addGridChoices(List<String> values, String initialChoice) {
+    logger.info("addGridChoices " + this + " : " + initialChoice);
+    this.child2 = new TableSelect().makeSymbolButton(values, 4, singleSelectExerciseList, this, initialChoice);
+    toolbar.clear();
+    toolbar.add(child2);
+    Style style = child2.getElement().getStyle();
+    style.setMarginLeft(5, Style.Unit.PX);
+  }
+
   @Override
   public String getCurrentSelection() {
-
 //    return child1.getSelectedValue();
     String trim = child2.getText().trim();
-    logger.info("current " + type + " : '" +trim+ "'");
+    logger.info("current " + type + " : '" + trim + "'");
     return trim;
   }
 
@@ -169,5 +174,56 @@ public class MenuSectionWidget implements SectionWidget {
   public void selectItem(String item) {
 //    child1.setSelectedValue(item);
     child2.setText(item);
+  }
+
+  MenuSectionWidget childWidget;
+
+  public void addChild(MenuSectionWidget value) {
+    childWidget = value;
+  }
+
+  public void gotSelection(String s) {
+    Collection<String> possibleValues = Collections.singleton(s);
+    gotSelection(possibleValues);
+  }
+
+  public void gotSelection(Collection<String> possibleValues) {
+    logger.info("gotSelection " + type + " : " + possibleValues);
+
+    Set<String> possible = new HashSet<>();
+    for (SectionNode node : nodes) {
+      if (possibleValues.contains(node.getName())) {
+        List<String> sectionsInType = new ItemSorter().getSortedItems(getLabels(node.getChildren()));
+        possible.addAll(sectionsInType);
+      }
+    }
+    if (childWidget != null) {
+      String currentSelection = childWidget.getCurrentSelection();
+
+      boolean stillValid = possible.contains(currentSelection);
+      childWidget.addGridChoices(new ArrayList<>(possible), stillValid ? currentSelection : "All");
+      if (!stillValid) {
+        logger.info("\tgotSelection reset choice on " + childWidget + " since it's current is " + currentSelection + " is not in " + possible);
+
+//        childWidget.selectFirst();
+      }
+      logger.info("\tgotSelection recurse on " + childWidget);
+      childWidget.gotSelection(possible);
+    }
+  }
+
+  private List<String> getLabels(Collection<SectionNode> nodes) {
+    List<String> items = new ArrayList<>();
+    Set<String> added = new HashSet<>();
+    for (SectionNode n : nodes) {
+      if (added.add(n.getName())) {
+        items.add(n.getName());
+      }
+    }
+    return items;
+  }
+
+  public String toString() {
+    return "sectionWidget " + type;
   }
 }
