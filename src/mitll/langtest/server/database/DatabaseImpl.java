@@ -722,7 +722,7 @@ public class DatabaseImpl implements Database {
       ProjectStartupInfo startupInfo = new ProjectStartupInfo(
           getServerProps().getProperties(),
           typeOrder,
-          project.getSectionHelper().getSectionNodes(),
+          project.getSectionHelper().getSectionNodes(typeOrder),
           project1.id(),
           project1.language(), hasModel(project1));
       logger.info("setStartupInfo : For " + userWhere +
