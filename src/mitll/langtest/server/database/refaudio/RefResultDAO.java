@@ -40,6 +40,7 @@ import mitll.langtest.server.database.JsonSupport;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.decoder.RefResultDecoder;
 import mitll.langtest.shared.answer.AudioType;
+import mitll.npdata.dao.SlickRefResultJson;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
@@ -288,6 +289,11 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
       logException(ee);
     }
     return new ArrayList<>();
+  }
+
+  @Override
+  public List<SlickRefResultJson> getJsonResults() {
+    return null;
   }
 
   /**

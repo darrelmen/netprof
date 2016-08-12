@@ -35,12 +35,13 @@ package mitll.langtest.server.database.refaudio;
 import mitll.langtest.server.audio.DecodeAlignOutput;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.result.Result;
+import mitll.npdata.dao.SlickRefResultJson;
 import net.sf.json.JSONObject;
 
 import java.util.Collection;
 import java.util.List;
 
-public interface IRefResultDAO  extends IDAO {
+public interface IRefResultDAO extends IDAO {
   boolean removeForExercise(int exid);
 
   long addAnswer(int userID,
@@ -68,6 +69,8 @@ public interface IRefResultDAO  extends IDAO {
   // have sort order of items be smarter
 
   List<Result> getResults();
+
+  List<SlickRefResultJson> getJsonResults();
 
   Result getResult(int exid, String answer);
 
