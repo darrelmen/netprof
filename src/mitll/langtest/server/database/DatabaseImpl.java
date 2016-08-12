@@ -76,6 +76,7 @@ import mitll.langtest.server.database.word.IWordDAO;
 import mitll.langtest.server.database.word.SlickWordDAO;
 import mitll.langtest.server.database.word.Word;
 import mitll.langtest.server.mail.MailSupport;
+import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.ContextPractice;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
@@ -95,6 +96,7 @@ import mitll.langtest.shared.scoring.PretestScore;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickProject;
+import mitll.npdata.dao.SlickRefResultJson;
 import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
@@ -374,9 +376,9 @@ public class DatabaseImpl implements Database {
 
 //    addRemoveDAO = new AddRemoveDAO(this);
 
-    userExerciseDAO = new SlickUserExerciseDAO(this, dbConnection);
-
     refresultDAO = new SlickRefResultDAO(this, dbConnection, serverProps.shouldDropRefResult());
+    userExerciseDAO = new SlickUserExerciseDAO(this, dbConnection, getPhoneToExercises(refresultDAO));
+
     wordDAO = new SlickWordDAO(this, dbConnection);
     phoneDAO = new SlickPhoneDAO(this, dbConnection);
 
@@ -413,6 +415,34 @@ public class DatabaseImpl implements Database {
 //
 //    long now = System.currentTimeMillis();
 //    if (now - then > 1000) logger.info("took " + (now - then) + " millis to put back word and phone");
+  }
+
+  //Map<String,Collection<Integer>> getPhoneToExercises(IRefResultDAO refResultDAO) {
+  Map<Integer, Collection<String>> getPhoneToExercises(IRefResultDAO refResultDAO) {
+    long then = System.currentTimeMillis();
+    List<SlickRefResultJson> jsonResults = refResultDAO.getJsonResults();
+    long now = System.currentTimeMillis();
+    logger.info("took " +(now-then) + " millis to get ref results");
+    Map<Integer, Collection<String>> exToPhones = new HashMap<>();
+
+    ParseResultJson parseResultJson = new ParseResultJson(null);
+
+    for (SlickRefResultJson exjson : jsonResults) {
+      Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.parseJson(exjson.scorejson());
+      List<TranscriptSegment> transcriptSegments = netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
+      Set<String> phones = new HashSet<>();
+      for (TranscriptSegment segment : transcriptSegments) phones.add(segment.getEvent());
+
+      int exid = exjson.exid();
+      for (String phone : phones) {
+        Collection<String> phonesForEx = exToPhones.get(exid);
+        if (phonesForEx == null) exToPhones.put(exid, phonesForEx = new HashSet<>());
+        phonesForEx.add(phone);
+      }
+    }
+    logger.info("took " +(System.currentTimeMillis()-then) + " millis to populate ex->phone map");
+
+    return exToPhones;
   }
 
   /**
@@ -683,13 +713,21 @@ public class DatabaseImpl implements Database {
       Project project = getProject(projid);
 
       SlickProject project1 = project.getProject();
+      List<String> typeOrder = project.getTypeOrder();
+      boolean sound = typeOrder.remove("Sound");
+      if (!sound) logger.warn("sound missing???");
+      else {
+        typeOrder.add("Sound");
+      }
       ProjectStartupInfo startupInfo = new ProjectStartupInfo(
           getServerProps().getProperties(),
-          project.getTypeOrder(),
+          typeOrder,
           project.getSectionHelper().getSectionNodes(),
           project1.id(),
           project1.language(), hasModel(project1));
-      logger.info("setStartupInfo : For " + userWhere + " Set startup info " + startupInfo);
+      logger.info("setStartupInfo : For " + userWhere +
+          "\n\t " + typeOrder +
+          "\n\tSet startup info " + startupInfo);
       userWhere.setStartupInfo(startupInfo);
     }
   }
