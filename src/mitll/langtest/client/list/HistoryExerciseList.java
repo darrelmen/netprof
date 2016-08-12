@@ -72,8 +72,8 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
   protected long userID;
   protected final SectionWidgetContainer<V> sectionWidgetContainer;
 
-  protected static final boolean DEBUG_ON_VALUE_CHANGE = true;
-  private static final boolean DEBUG = true;
+  protected static final boolean DEBUG_ON_VALUE_CHANGE = false;
+  private static final boolean DEBUG = false;
 
   /**
    * @param currentExerciseVPanel
