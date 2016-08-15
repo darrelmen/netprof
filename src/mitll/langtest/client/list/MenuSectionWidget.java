@@ -116,7 +116,7 @@ public class MenuSectionWidget implements SectionWidget {
   public String getCurrentSelection() {
 //    return child1.getSelectedValue();
     String trim = child2.getText().trim();
-    logger.info("current " + type + " : '" + trim + "'");
+  //  logger.info("current " + type + " : '" + trim + "'");
     return trim;
   }
 
