@@ -260,12 +260,12 @@ public class SlickUserExerciseDAO
     Map<String, String> unitToValue = getUnitToValue(slick, typeOrder);
 
     Collection<String> phones = exToPhones.get(id);
+    //if (phones == null || phones.isEmpty()) logger.warn("no phones for " + id);
     if (slick.ispredef() && !slick.iscontext()) {
       //    addExerciseToSectionHelper(sectionHelper, unitToValue, exercise);
-
       List<SectionHelper.Pair> pairs = getPairs(sectionHelper, unitToValue, exercise);
       if (phones == null) {
-        logger.warn("no phones for " + id);
+//        logger.warn("no phones for " + id);
       }
       else {
         for (String phone : phones) {
@@ -279,13 +279,13 @@ public class SlickUserExerciseDAO
 
     return exercise;
   }
-
+/*
   private void addExerciseToSectionHelper(SectionHelper<CommonExercise> sectionHelper,
                                           Map<String, String> unitToValue,
                                           Exercise exercise) {
     List<SectionHelper.Pair> pairs = getPairs(sectionHelper, unitToValue, exercise);
     sectionHelper.addAssociations(pairs);
-  }
+  }*/
 
   private List<SectionHelper.Pair> getPairs(SectionHelper<CommonExercise> sectionHelper,
                                             Map<String, String> unitToValue,
