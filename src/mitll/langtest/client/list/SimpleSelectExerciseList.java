@@ -35,6 +35,7 @@ package mitll.langtest.client.list;
 import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.Section;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -43,6 +44,7 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.bootstrap.DownloadHelper;
 import mitll.langtest.client.bootstrap.ItemSorter;
+import mitll.langtest.client.bootstrap.SectionNodeItemSorter;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.user.UserFeedback;
@@ -58,7 +60,7 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<MenuSectio
   private static final String SHOWING_ALL_ENTRIES = "Showing all entries";
 
   private final Heading statusHeader = new Heading(4);
-  private Collection<String> typeOrder;
+  private List<String> typeOrder;
   private final Panel sectionPanel;
   private final DownloadHelper downloadHelper;
 
@@ -139,7 +141,7 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<MenuSectio
 
   private void getTypeOrder(final FluidContainer container) {
     typeOrder = controller.getProjectStartupInfo().getTypeOrder();
-    logger.info("getTypeOrder type order is " + typeOrder);
+  //  logger.info("getTypeOrder type order is " + typeOrder);
     addChoiceRow(controller.getProjectStartupInfo().getSectionNodes(), container, typeOrder);
   }
 
@@ -151,7 +153,7 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<MenuSectio
    * @param types
    * @see #getTypeOrder(FluidContainer)
    */
-  private void addChoiceRow(Collection<SectionNode> rootNodes, final FluidContainer container, Collection<String> types) {
+  private void addChoiceRow(Collection<SectionNode> rootNodes, final FluidContainer container, List<String> types) {
 /*    logger.info("addChoiceRow for user = " + controller.getUser() + " got types " +
         types + " num root nodes " + rootNodes.size());*/
     if (types.isEmpty()) {
@@ -165,10 +167,26 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<MenuSectio
     container.add(firstTypeRow);
     firstTypeRow.addStyleName("alignTop");
 
+//    logger.info("iter order ");
+    rootNodes = new SectionNodeItemSorter().getSortedItems(rootNodes);
+   // for (SectionNode node:rootNodes) logger.info("\t" + node.getType() + " " +node.getName());
+
     //int index = 0;
+
     MenuSectionWidget parent = null;
+    int i =0;
+
     for (String type : types) {
-      List<String> sectionsInType = new ItemSorter().getSortedItems(getLabels(rootNodes));
+//      List<String> sectionsInType = new ArrayList<>();
+//      for (SectionNode node:rootNodes) {
+//        sectionsInType.add(node.getName());
+//      }
+     // if (!type.equals("Sound")) {
+     //   for (SectionNode node : rootNodes) logger.info("#" + (i++) + "\t" + node.getName());
+     // }
+      //List<String> sectionsInType = new ItemSorter().getSortedItems(getLabels(rootNodes));
+      List<String> sectionsInType = getLabels(rootNodes);
+
 
       MenuSectionWidget value = new MenuSectionWidget(type, rootNodes, this);
       if (parent != null) {
@@ -180,8 +198,11 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<MenuSectio
       //   logger.info("for " + type + " : " + sectionsInType);
       value.addChoices(firstTypeRow, type, sectionsInType);
 
-      List<SectionNode> newNodes = getChildSectionNodes(rootNodes);
-      rootNodes = newNodes;
+      if (types.indexOf(type) < types.size()-1) {
+        rootNodes = getChildSectionNodes(rootNodes);
+        rootNodes = new SectionNodeItemSorter().getSortedItems(rootNodes);
+      }
+      i = 0;
     }
     makeDefaultSelections();
 
@@ -196,7 +217,17 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<MenuSectio
   private List<SectionNode> getChildSectionNodes(Collection<SectionNode> rootNodes) {
     List<SectionNode> newNodes = new ArrayList<>();
     for (SectionNode node : rootNodes) {
-      newNodes.addAll(node.getChildren());
+    //  logger.info("getChildSectionNodes " + node.getType() + " "+ node.getName());
+
+      Collection<SectionNode> children = node.getChildren();
+
+      if (!children.isEmpty() && !children.iterator().next().getType().equals("Sound")) {
+    //    for (SectionNode child : children) {
+    //      logger.info("\tAdding " + child.getType() + " "+ child.getName());
+     //   }
+      }
+      newNodes.addAll(children);
+
     }
     return newNodes;
   }
@@ -205,23 +236,10 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<MenuSectio
    * @seex ButtonBarSectionWidget#getChoice(ButtonGroup, String)
    */
   public void gotSelection() {
-    logger.info("gotSelection --- >");
+ //   logger.info("gotSelection --- >");
     pushNewSectionHistoryToken();
-
   }
 
-  /**
-   * @return
-   * @see #addChoiceRow
-   */
-//  private DivWidget getBottomRow() {
-//    DivWidget bottomRow = new DivWidget();
-//    bottomRow.getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
-//    DivWidget left = new DivWidget();
-//    left.addStyleName("floatLeftList");
-//    bottomRow.add(left);
-//    return bottomRow;
-//  }
   private DivWidget getBottomRow() {
     FlexTable links = downloadHelper.getDownloadLinks();
     // else {
@@ -270,7 +288,7 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<MenuSectio
     // keep the download link info in sync with the selection
     Map<String, Collection<String>> typeToSection = selectionState.getTypeToSection();
 
-    logger.info("showSelectionState : typeOrder " + typeOrder + " selection state " + typeToSection);
+  //  logger.info("showSelectionState : typeOrder " + typeOrder + " selection state " + typeToSection);
 
     downloadHelper.updateDownloadLinks(selectionState);
 
@@ -340,11 +358,6 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<MenuSectio
     showEmptySelection();
   }
 
-/*
-  private int getNumChoices() {
-    return getSectionWidget("Quiz") == null ? NUM_CHOICES - 1 : NUM_CHOICES;
-  }
-*/
 
   /**
    * @param toShow
@@ -367,7 +380,7 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<MenuSectio
    */
   @Override
   protected void loadFirstExercise() {
-    logger.info("loadFirstExercise : ---");
+   // logger.info("loadFirstExercise : ---");
 
     if (isEmpty()) { // this can only happen if the database doesn't load properly, e.g. it's in use
       logger.info("loadFirstExercise : current exercises is empty?");
@@ -385,18 +398,6 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<MenuSectio
       v.selectFirst();
     }
   }
-/*
-
-  private void setSizesAndPushFirst() {
-    pushFirstListBoxSelection();
-//    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-//      public void execute() {
-//        setScrollPanelWidth();
-//      }
-//    });
-  }
-*/
-
 
   protected SectionWidgetContainer<MenuSectionWidget> getSectionWidgetContainer() {
     return new SectionWidgetContainer<MenuSectionWidget>() {
