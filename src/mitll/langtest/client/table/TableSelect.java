@@ -65,7 +65,7 @@ public class TableSelect {
    * in Color factory which should ideally be the same to ensure
    * layout in a single row.
    */
- // public static final int COLOR_GRID_COL_SIZE = 8;
+  // public static final int COLOR_GRID_COL_SIZE = 8;
 
   private ToolbarEventHandler handler = new ToolbarEventHandler();
 
@@ -153,28 +153,32 @@ public class TableSelect {
 
     this.values = values;
     this.values.add(0, ALL);
-    this.width = width;
     this.singleSelectExerciseList = singleSelectExerciseList;
     this.menuSectionWidget = menuSectionWidget;
 
     int n = values.size();
     int size = n;
+
     int numRows = (int) Math.ceil((double) size / (double) width);
+    if (numRows > 20) {
+      numRows = 20;
+      width   = (int) Math.ceil((double) n / (double) 20);
+    }
+
+    this.width = width;
     int numcols = width;
 
     symbolGrid = new Grid(numRows, numcols);
 
 //    String colWidth = (100 / numcols) + "%";
-
-   // logger.info("rows " + numRows + " num cols " + numcols);
-
+    // logger.info("rows " + numRows + " num cols " + numcols);
     int widthSoFar = 0;
 
     for (int r = 0; r < numRows; r++) {
       int numItemsInRow = size >= width ? width : size % width;
       for (int c = 0; c < numItemsInRow; c++) {
         String text = values.get(n - size);
-        int width1 = getWidth(text.replaceAll(" ","_"), "bold 24px Arial");
+        int width1 = getWidth(text.replaceAll(" ", "_").replaceAll("-", "_"), "bold 24px Arial");
         if (width1 > widthSoFar) {
           logger.info("new highest - for " + text + " got " + width1);
           widthSoFar = width1;
@@ -404,19 +408,13 @@ public class TableSelect {
       }
     }*/
 
-//String selection = ;
-
   private void handleSymbolClick(ClickEvent event) {
-//      final CommentableRichTextArea rta = getLastFocused();
-    //    if (rta == null) {
-    //      return;
-    //   }
     Cell clickedCell = symbolGrid.getCellForEvent(event);
     int rowIndex = clickedCell.getRowIndex();
     int cellIndex = clickedCell.getCellIndex();
 
     String s = values.get((rowIndex * width) + cellIndex);
-    logger.info("click on " + s);
+    //   logger.info("click on " + s);
 
     sButton.setText(s);
     menuSectionWidget.gotSelection(s);
