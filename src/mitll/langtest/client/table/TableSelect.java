@@ -38,9 +38,7 @@ import com.github.gwtbootstrap.client.ui.NavLink;
 import com.github.gwtbootstrap.client.ui.constants.IconSize;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.Style.BorderStyle;
-import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -54,6 +52,8 @@ import mitll.langtest.client.list.SimpleSelectExerciseList;
 
 import java.util.List;
 import java.util.logging.Logger;
+
+//import com.google.gwt.user.client.ui.Label;
 
 
 public class TableSelect {
@@ -129,6 +129,10 @@ public class TableSelect {
   SimpleSelectExerciseList singleSelectExerciseList;
   MenuSectionWidget menuSectionWidget;
 
+  static {
+    new TableSelect().register();
+  }
+
   /**
    * @param values
    * @param width
@@ -141,8 +145,6 @@ public class TableSelect {
                                          int width,
                                          SimpleSelectExerciseList singleSelectExerciseList,
                                          MenuSectionWidget menuSectionWidget, String initialSelection) {
-    //  char[][] symbol_values = SYMBOL_VALUES;
-  //  String initialSelection = "All";
     sButton = new DropdownButton(initialSelection);
     sButton.setIconSize(IconSize.DEFAULT);
     //  sButton.setSize(ButtonSize.MINI);
@@ -154,8 +156,6 @@ public class TableSelect {
     this.width = width;
     this.singleSelectExerciseList = singleSelectExerciseList;
     this.menuSectionWidget = menuSectionWidget;
-    //  int numRows = symbol_values.length;
-    //   int numcols = symbol_values[0].length;
 
     int n = values.size();
     int size = n;
@@ -164,33 +164,73 @@ public class TableSelect {
 
     symbolGrid = new Grid(numRows, numcols);
 
-    String colWidth = (100 / numcols) + "%";
+//    String colWidth = (100 / numcols) + "%";
 
-    logger.info("rows " + numRows + " num cols " + numcols);
+   // logger.info("rows " + numRows + " num cols " + numcols);
 
+    int widthSoFar = 0;
+
+    for (int r = 0; r < numRows; r++) {
+      int numItemsInRow = size >= width ? width : size % width;
+      for (int c = 0; c < numItemsInRow; c++) {
+        String text = values.get(n - size);
+        int width1 = getWidth(text.replaceAll(" ","_"), "bold 24px Arial");
+        if (width1 > widthSoFar) {
+          logger.info("new highest - for " + text + " got " + width1);
+          widthSoFar = width1;
+        }
+        size--;
+      }
+    }
+    size = n;
     for (int r = 0; r < numRows; r++) {
       //int numItemsInRow = symbol_values[r].length;
       int numItemsInRow = size >= width ? width : size % width;
       for (int c = 0; c < numItemsInRow; c++) {
-        if (r == 0) {
-          symbolGrid.getColumnFormatter().setWidth(c, colWidth);
-        }
-        //String text = Character.toString(symbol_values[r][c]);
+        // if (r == 0) {
+        //  symbolGrid.getColumnFormatter().setWidth(c, colWidth);
+        // }
         String text = values.get(n - size);
-        // logger.info("at " + r + "," + c + " : "+ text);
 
         Label widget = new Label(text);
+        widget.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
+        widget.setWidth(widthSoFar + "px");
         symbolGrid.setWidget(r, c, widget);
         size--;
       }
     }
-  symbolGrid.addStyleName("rte-symbol-picker-container");
+    symbolGrid.addStyleName("rte-symbol-picker-container");
     symbolGrid.addClickHandler(handler);
     sButton.add(symbolGrid);
     sButton.addStyleName("rte-picker-button");
     return sButton;
   }
 
+  /**
+   * @return
+   * @see
+   */
+  public native int getWidth(String text, String font) /*-{
+      return $wnd.jQuery.fn.textWidth(text, font)
+  }-*/;
+
+  public native void register() /*-{
+      $wnd.jQuery.fn.textWidth = function (text, font) {
+          if (!$wnd.jQuery.fn.textWidth.fakeEl) {
+              $wnd.jQuery.fn.textWidth.fakeEl = $wnd.jQuery('<span>').hide().appendTo(document.body);
+          }
+          $wnd.jQuery.fn.textWidth.fakeEl.text(text || this.val() || this.text()).css('font', font || this.css('font'));
+          return $wnd.jQuery.fn.textWidth.fakeEl.width();
+      };
+  }-*/;
+
+/**
+ *     if (!$.fn.textWidth.fakeEl) $.fn.textWidth.fakeEl = $('<span>').hide().appendTo(document.body);
+ $.fn.textWidth.fakeEl.text(text || this.val() || this.text()).css('font', font || this.css('font'));
+ return $.fn.textWidth.fakeEl.width();
+
+
+ */
 //  private Grid createColorGrid(boolean bkgrnd) {
 //
 //    String[] bwCodes = (bkgrnd) ? ColorFactory.BG_BW_COLOR_CODES : ColorFactory.FG_BW_COLOR_CODES;
@@ -219,27 +259,27 @@ public class TableSelect {
    * @param colors    The set of colors to update.
    * @return Return the index of the last row created.
    */
-  private int setBackgrounds(Grid colorGrid, int updateRow, String[] colors) {
-    for (int i = 0; i < colors.length; i++) {
-      int currCol = i % COLOR_GRID_COL_SIZE;
-      if (currCol == 0) {
-        updateRow++;
-      }
-      Element cellElt = colorGrid.getCellFormatter().getElement(updateRow, currCol);
-      if (colors[i] != null) {
-        cellElt.getStyle().setBackgroundColor(colors[i]);
-        cellElt.getStyle().setColor(colors[i]);
-      } else {
-        Label xLbl = new Label("X");
-        xLbl.getElement().getStyle().setBorderColor("#000000");
-        xLbl.getElement().getStyle().setBorderStyle(BorderStyle.DASHED);
-        xLbl.getElement().getStyle().setBorderWidth(1.0, Unit.PX);
-        colorGrid.setWidget(updateRow, currCol, xLbl);
-      }
-    }
-    colorGrid.getRowFormatter().addStyleName(updateRow, "rte-color-picker-offset-row");
-    return updateRow;
-  }
+//  private int setBackgrounds(Grid colorGrid, int updateRow, String[] colors) {
+//    for (int i = 0; i < colors.length; i++) {
+//      int currCol = i % COLOR_GRID_COL_SIZE;
+//      if (currCol == 0) {
+//        updateRow++;
+//      }
+//      Element cellElt = colorGrid.getCellFormatter().getElement(updateRow, currCol);
+//      if (colors[i] != null) {
+//        cellElt.getStyle().setBackgroundColor(colors[i]);
+//        cellElt.getStyle().setColor(colors[i]);
+//      } else {
+//        Label xLbl = new Label("X");
+//        xLbl.getElement().getStyle().setBorderColor("#000000");
+//        xLbl.getElement().getStyle().setBorderStyle(BorderStyle.DASHED);
+//        xLbl.getElement().getStyle().setBorderWidth(1.0, Unit.PX);
+//        colorGrid.setWidget(updateRow, currCol, xLbl);
+//      }
+//    }
+//    colorGrid.getRowFormatter().addStyleName(updateRow, "rte-color-picker-offset-row");
+//    return updateRow;
+//  }
 
   /**
    * We use an inner ToolbarEventHandler class to avoid exposing event methods on the
