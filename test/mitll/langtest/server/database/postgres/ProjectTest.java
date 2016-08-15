@@ -126,12 +126,22 @@ public class ProjectTest extends BaseTest {
     projectDAO.addProperty(next.id(), "key", "value");
 
     testListProjects();
-
 //    next.addProp(new SlickProjectProperty(-1, new Timestamp(System.currentTimeMillis()), next.id(), "test", "test"));
   }
 
   @Test
   public void testByName() {
+    DatabaseImpl spanish = getDatabaseVeryLight("netProf", "config.properties", false);
+    IProjectDAO projectDAO = spanish.getProjectDAO();
+
+    String english1 = "english";
+    int english = projectDAO.getByName(english1);
+
+    logger.info("found " + english + " for "+ english1);
+  }
+
+  @Test
+  public void testPhones() {
     DatabaseImpl spanish = getDatabaseVeryLight("netProf", "config.properties", false);
     IProjectDAO projectDAO = spanish.getProjectDAO();
 
