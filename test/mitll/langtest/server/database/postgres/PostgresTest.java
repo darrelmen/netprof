@@ -190,6 +190,20 @@ public class PostgresTest extends BaseTest {
     testCopy(toCopy);
   }
 
+  @Test
+  public void testMSA() {
+    List<Info> toCopy = new ArrayList<>();
+    toCopy.add(new Info("msa"));
+    testCopy(toCopy);
+  }
+
+  @Test
+  public void testTagalog() {
+    List<Info> toCopy = new ArrayList<>();
+    toCopy.add(new Info("Tagalog"));
+    testCopy(toCopy);
+  }
+
   /**
    * databaseHost=hydra-dev
    * databaseUser=netprof
@@ -418,28 +432,37 @@ public class PostgresTest extends BaseTest {
     for (SlickProject project : all) {
       String language = project.language();
       logger.info("lang " + language);
-      if (language.equalsIgnoreCase("spanish")) {
+      //  String spanish = "spanish";
+      String spanish = "msa";
+      if (language.equalsIgnoreCase(spanish)) {
         Project project1 = database.getProject(project.id());
 
         SectionHelper<CommonExercise> sectionHelper = project1.getSectionHelper();
         logger.info("type order " + sectionHelper.getTypeOrder());
         sectionHelper.report();
 
-        Map<String, String> choice = new HashMap<>();
-        choice.put("Unit",  "1");
-        choice.put("Chapter", "1");
-        choice.put("Sound", "rf");
-        Collection<CommonExercise> exercisesForSelectionState = sectionHelper.getExercisesForSimpleSelectionState(choice);
+        if (false) {
+          Map<String, String> choice = new HashMap<>();
+          // choice.put("Unit",  "1");
+          choice.put("Chapter", "1");
+//        choice.put("Sound", "rf");
+          Collection<CommonExercise> exercisesForSelectionState = sectionHelper.getExercisesForSimpleSelectionState(choice);
 
-        for (CommonExercise ex : exercisesForSelectionState) {
-          logger.info("found " + ex.getID() + " : " + ex.getForeignLanguage());
-        }
+          int b = 0;
 
-        choice.put("Sound", "jj");
+          for (CommonExercise ex : exercisesForSelectionState) {
+            if (b++ < 10)
+              logger.info("1 found " + ex.getID() + " : " + ex.getForeignLanguage());
+          }
+
+          choice.put("Sound", "jj");
           exercisesForSelectionState = sectionHelper.getExercisesForSimpleSelectionState(choice);
 
-        for (CommonExercise ex : exercisesForSelectionState) {
-          logger.info("found " + ex.getID() + " :\t" + ex.getForeignLanguage());
+          int c = 0;
+          for (CommonExercise ex : exercisesForSelectionState) {
+            if (c++ < 10)
+              logger.info("2 found " + ex.getID() + " :\t" + ex.getForeignLanguage());
+          }
         }
       }
     }
