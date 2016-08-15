@@ -116,7 +116,7 @@ public class MenuSectionWidget implements SectionWidget {
   public String getCurrentSelection() {
 //    return child1.getSelectedValue();
     String trim = child2.getText().trim();
-  //  logger.info("current " + type + " : '" + trim + "'");
+    //  logger.info("current " + type + " : '" + trim + "'");
     return trim;
   }
 
@@ -187,12 +187,13 @@ public class MenuSectionWidget implements SectionWidget {
     gotSelection(possibleValues);
   }
 
-  public void gotSelection(Collection<String> possibleValues) {
+  private void gotSelection(Collection<String> possibleValues) {
     logger.info("gotSelection " + type + " : " + possibleValues);
 
     Set<String> possible = new HashSet<>();
     for (SectionNode node : nodes) {
-      if (possibleValues.contains(node.getName())) {
+      if ((!possibleValues.isEmpty() && possibleValues.iterator().next().equals(TableSelect.ALL)) ||
+          possibleValues.contains(node.getName())) {
         List<String> sectionsInType = new ItemSorter().getSortedItems(getLabels(node.getChildren()));
         possible.addAll(sectionsInType);
       }
@@ -201,13 +202,12 @@ public class MenuSectionWidget implements SectionWidget {
       String currentSelection = childWidget.getCurrentSelection();
 
       boolean stillValid = possible.contains(currentSelection);
-      childWidget.addGridChoices(new ArrayList<>(possible), stillValid ? currentSelection : "All");
-      if (!stillValid) {
-        logger.info("\tgotSelection reset choice on " + childWidget + " since it's current is " + currentSelection + " is not in " + possible);
-
-//        childWidget.selectFirst();
-      }
-      logger.info("\tgotSelection recurse on " + childWidget);
+      childWidget.addGridChoices(new ArrayList<>(possible), stillValid ? currentSelection : TableSelect.ALL);
+//      if (!stillValid) {
+//        logger.info("\tgotSelection reset choice on " + childWidget + " since it's current is " + currentSelection +
+//            " is not in " + possible);
+//      }
+//      logger.info("\tgotSelection recurse on " + childWidget);
       childWidget.gotSelection(possible);
     }
   }
