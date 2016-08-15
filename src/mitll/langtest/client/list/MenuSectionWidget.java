@@ -91,7 +91,6 @@ public class MenuSectionWidget implements SectionWidget {
     addGridChoices(values, "All");
 
     //   Set<String> unique = new TreeSet<String>(values);
-
 /*
     child1.addItem("All");
     style.setMarginTop(10, Style.Unit.PX);
