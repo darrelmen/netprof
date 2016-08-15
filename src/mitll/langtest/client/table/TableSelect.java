@@ -41,11 +41,9 @@ import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTMLTable.Cell;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.RichTextArea;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.list.MenuSectionWidget;
 import mitll.langtest.client.list.SimpleSelectExerciseList;
@@ -59,13 +57,15 @@ import java.util.logging.Logger;
 public class TableSelect {
   private final Logger logger = Logger.getLogger("TableSelect");
 
+  public static final String ALL = "All";
+
   /**
    * The size of the color grid. This should ideally
    * match the number of B/W and/or Primary colors defined
    * in Color factory which should ideally be the same to ensure
    * layout in a single row.
    */
-  public static final int COLOR_GRID_COL_SIZE = 8;
+ // public static final int COLOR_GRID_COL_SIZE = 8;
 
   private ToolbarEventHandler handler = new ToolbarEventHandler();
 
@@ -152,7 +152,7 @@ public class TableSelect {
     //  sButton.setRightDropdown(true);
 
     this.values = values;
-    this.values.add(0, "All");
+    this.values.add(0, ALL);
     this.width = width;
     this.singleSelectExerciseList = singleSelectExerciseList;
     this.menuSectionWidget = menuSectionWidget;
@@ -428,12 +428,12 @@ public class TableSelect {
     return clickedCell.getElement().getStyle().getBackgroundColor();
   }
 
-  // @Override
-  public void onKeyUp(KeyUpEvent event) {
-    if (event.getSource() instanceof RichTextArea) {
-      // updateStatus((RichTextArea) event.getSource());
-    }
-  }
+//  // @Override
+//  public void onKeyUp(KeyUpEvent event) {
+//    if (event.getSource() instanceof RichTextArea) {
+//      // updateStatus((RichTextArea) event.getSource());
+//    }
+//  }
 
   public String getSelection() {
     return sButton.getText();
