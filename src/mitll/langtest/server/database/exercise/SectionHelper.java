@@ -71,7 +71,7 @@ public class SectionHelper<T extends Shell> {
     if (predefinedTypeOrder.isEmpty()) {
       List<String> types = new ArrayList<String>();
       types.addAll(typeToSectionToTypeToSections.keySet());
- //     logger.info("getTypeOrder " + predefinedTypeOrder + " : " + types);
+  //    logger.info("getTypeOrder " + predefinedTypeOrder + " : " + types);
 
       if (types.isEmpty()) {
         types.addAll(typeToUnitToLesson.keySet());
@@ -89,7 +89,7 @@ public class SectionHelper<T extends Shell> {
     } else {
       Set<String> validTypes = typeToUnitToLesson.keySet();
 
-//      logger.info("getTypeOrder validTypes " + validTypes);
+   //   logger.info("getTypeOrder validTypes " + validTypes);
 
       List<String> valid = new ArrayList<String>(predefinedTypeOrder);
       valid.retainAll(validTypes);
