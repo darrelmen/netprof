@@ -54,6 +54,8 @@ public class User extends MiniUser {
   private String nativeLang;
   private String dialect;
   private String device;
+  private String first = "";
+  private String last  = "";
   private String resetKey;
   private String cdKey;
   private long timestamp;
@@ -62,9 +64,12 @@ public class User extends MiniUser {
 
   public boolean isStudent() { return getUserKind().equals(Kind.STUDENT);  }
   public boolean isTeacher() { return getUserKind().equals(Kind.TEACHER);  }
-  public boolean isCD() {
-    return getUserKind().equals(Kind.CONTENT_DEVELOPER);
-  }
+
+  /**
+   * @see mitll.langtest.client.user.UserManager#gotNewUser(User)
+   * @return
+   */
+  public boolean isCD() {  return getUserKind().equals(Kind.CONTENT_DEVELOPER); }
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#setStartupInfo
@@ -76,6 +81,22 @@ public class User extends MiniUser {
 
   public ProjectStartupInfo getStartupInfo() {
     return startupInfo;
+  }
+
+  public String getFirst() {
+    return first;
+  }
+
+  public void setFirst(String first) {
+    this.first = first;
+  }
+
+  public String getLast() {
+    return last;
+  }
+
+  public void setLast(String last) {
+    this.last = last;
   }
 
   public enum Kind implements IsSerializable {UNSET, STUDENT, TEACHER, CONTENT_DEVELOPER, ANONYMOUS}
@@ -263,7 +284,9 @@ public class User extends MiniUser {
 
   public String toString() {
     return "user " + getId() + "/" + getUserID() +
-        " is a " + getGender() + " age " + getAge() +
+        " '" + first +
+        "' '" + last +
+        "' is a " + getGender() + " age " + getAge() +
         " admin " + isAdmin() +
         " dialect " + getDialect() +
         " emailH " + getEmailHash() +
