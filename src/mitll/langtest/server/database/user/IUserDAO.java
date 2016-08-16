@@ -35,6 +35,7 @@ package mitll.langtest.server.database.user;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.shared.user.MiniUser;
+import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
 
 import java.util.Collection;
@@ -47,14 +48,20 @@ public interface IUserDAO extends IDAO {
   int getDefectDetector();
 
   Database getDatabase();
+//
+//  User addUser(String userID, String passwordH, String emailH, String email, User.Kind kind, String ipAddr,
+//               boolean isMale, int age, String dialect, String device, String first, String last);
 
-  User addUser(String userID, String passwordH, String emailH, String email, User.Kind kind, String ipAddr,
-               boolean isMale, int age, String dialect, String device);
+  User addUser(SignUpUser user);
 
   int addUser(int age, String gender, int experience, String ipAddr,
-              String trueIP, String nativeLang, String dialect, String userID, boolean enabled,
+              String trueIP, String nativeLang,
+              String dialect, String userID,
+              boolean enabled,
               Collection<User.Permission> permissions,
-              User.Kind kind, String passwordH, String emailH, String email, String device);
+              User.Kind kind,
+              String passwordH,
+              String emailH, String email, String device, String first, String last);
 
   boolean enableUser(int id);
 

@@ -44,7 +44,10 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 /**
@@ -78,7 +81,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   private int chapterIndex;
   private int weekIndex;
 
-  private final boolean DEBUG = false;
+  private final boolean DEBUG = true;
   private long lastModified;
 
   /**
@@ -299,14 +302,16 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
             getSectionHelper().setPredefinedTypeOrder(predefinedTypeOrder);
           }
 
-          if (DEBUG) logger.debug("columns" +
+          if (DEBUG) logger.debug("readFromSheet columns" +
               " word index " + colIndexOffset +
+              " altfl " + altIndex +
               " week " + weekIndex +
               " unit " + unitIndex +
               " chapter " + chapterIndex +
               " meaning " + meaningIndex +
               " transliterationIndex " + transliterationIndex +
               " contextIndex " + contextIndex +
+              " altcontext " + altcontextIndex +
               " id " + idIndex +
               " audio " + audioIndex
           );
@@ -635,7 +640,9 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   private CommonExercise getExercise(String id,
                                      String english,
                                      String foreignLanguagePhrase,
-                                     String altfl, String translit, String meaning,
+                                     String altfl,
+                                     String translit,
+                                     String meaning,
                                      String context,
                                      String altcontext,
                                      String contextTranslation,
@@ -655,6 +662,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     imported.setForeignLanguage(foreignLanguagePhrase);
     imported.setAltFL(altfl);
 
+    if (DEBUG) logger.info("got " + imported);
     return imported;
   }
 
