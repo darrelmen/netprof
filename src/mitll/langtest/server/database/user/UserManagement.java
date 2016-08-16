@@ -33,11 +33,10 @@
 package mitll.langtest.server.database.user;
 
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.excel.UserDAOToExcel;
 import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.database.result.UserToCount;
-import mitll.langtest.shared.UserAndTime;
+import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
 import net.sf.json.JSON;
 import org.apache.log4j.Logger;
@@ -45,7 +44,9 @@ import org.apache.log4j.Logger;
 import javax.servlet.http.HttpServletRequest;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -62,84 +63,92 @@ public class UserManagement {
    * @see DatabaseImpl#makeDAO(String, String, String)
    * @param userDAO
    * @param resultDAO
-   * @param userListManager
    */
-  public UserManagement(IUserDAO userDAO, IResultDAO resultDAO, IUserListManager userListManager) {
+  public UserManagement(IUserDAO userDAO, IResultDAO resultDAO) {
     this.userDAO = userDAO;
     this.resultDAO = resultDAO;
-  //  this.userListManager = userListManager;
   }
 
   /**
-   *  @param userID
-   * @param passwordH
-   * @param emailH
-   * @param email
-   * @param deviceType
-   * @param device
+   *  @paramx userID
+   * @paramx passwordH
+   * @paramx emailH
+   * @paramx email
+   * @paramx deviceType
+   * @paramx device
    * @see mitll.langtest.server.ScoreServlet#doPost
    */
-  public User addUser(String userID, String passwordH, String emailH, String email, String deviceType, String device) {
-    return addUser(userID, passwordH, emailH, email, deviceType, device, User.Kind.STUDENT, true);
-  }
+//  public User addUser(SignUpUser user) {//String userID, String passwordH, String emailH, String email, String deviceType, String device) {
+//    return addUser(user.setKind(User.Kind.STUDENT).setMale(true));
+//  }
 
-  private User addUser(String userID, String passwordH, String emailH, String email, String deviceType, String device,
+/*  private User addUser(String userID, String passwordH, String emailH, String email, String deviceType, String device,
                        User.Kind kind,
                        boolean isMale) {
-    int age = 89;
-    String dialect = "unk";
-    return addUser(userID, passwordH, emailH, email, deviceType, device, kind, isMale, age, dialect/*, projid*/);
-  }
+    return addUser(userID, passwordH, emailH, email, deviceType, device, kind, isMale, 89, "unk");
+  }*/
 
   /**
-   * @see DatabaseImpl#addUser
-   * @param userID
-   * @param passwordH
-   * @param emailH
-   * @param email
-   * @param deviceType
-   * @param device
-   * @param kind
-   * @param isMale
-   * @param age
-   * @param dialect
+   * @seex DatabaseImpl#addUser
+   * @paramx xuserID
+   * @paramx passwordH
+   * @paramx emailH
+   * @paramx email
+   * @paramx deviceType
+   * @paramx device
+   * @paramx kind
+   * @paramx isMale
+   * @paramx age
+   * @paramx dialect
    * @return
    */
-  public User addUser(String userID, String passwordH, String emailH, String email,
+/*  public User addUser(String userID, String passwordH, String emailH, String email,
                       String deviceType, String device, User.Kind kind,
                       boolean isMale, int age, String dialect) {
-    return addAndGetUser(userID, passwordH, emailH, email, kind, isMale, age, dialect, deviceType, device/*, projid*/);
-  }
+    return addAndGetUser(userID, passwordH, emailH, email, kind, isMale, age, dialect, deviceType, device*//*, projid*//*);
+  }*/
 
+  public User addUser(SignUpUser user) {
+   return userDAO.addUser(user);
+  }
   /**
    * @param request
-   * @param userID
-   * @param passwordH
-   * @param emailH
-   * @param email
-   * @param kind
-   * @param isMale
-   * @param age
-   * @param dialect
-   * @param device
+   * @paramx userID
+   * @paramx passwordH
+   * @paramx emailH
+   * @paramx email
+   * @paramx kind
+   * @paramx isMale
+   * @paramx age
+   * @paramx dialect
+   * @paramx xdevice
    * @return
    * @seex mitll.langtest.server.LangTestDatabaseImpl#addUser
    */
-  public User addUser(HttpServletRequest request, String userID, String passwordH,
+/*  public User addUser(HttpServletRequest request,
+                      String userID, String passwordH,
                       String emailH, String email, User.Kind kind,
                       boolean isMale, int age, String dialect, String device) {
     String ip = getIPInfo(request);
     return addUser(userID, passwordH, emailH, email, device, ip, kind, isMale, age, dialect);
+  }*/
+
+  public User addUser(HttpServletRequest request, SignUpUser user) {
+    return addUser(user.setIp(getIPInfo(request)));
   }
 
-  private User addAndGetUser(String userID, String passwordH, String emailH, String email, User.Kind kind, boolean isMale, int age,
-                             String dialect, String device, String ip) {
-    User user = userDAO.addUser(userID, passwordH, emailH, email, kind, ip, isMale, age, dialect, device);
-//    if (user != null) {
-//      userListManager.createFavorites(user.getId(), projid);
-//    }
-    return user;
-  }
+//  private User addAndGetUser(String userID, String passwordH, String emailH, String email, User.Kind kind, boolean isMale, int age,
+//                             String dialect, String device, String ip) {
+//    User user = userDAO.addUser(userID, passwordH, emailH, email, kind, ip, isMale, age, dialect, device, first, last);
+////    if (user != null) {
+////      userListManager.createFavorites(user.getId(), projid);
+////    }
+//    return user;
+//  }
+
+//  private User addAndGetUser(SignUpUser user) {
+//    return userDAO.addUser(user);
+//  }
 
   /**
    * @paramx user

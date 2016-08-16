@@ -39,6 +39,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
+import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
@@ -167,7 +168,7 @@ public class RestUserManagement {
 
         String rep = (getUserIDForToken(token) == -1) ?
             getHTML("Note : your password has already been reset. Please go back to NetProF.", "Password has already been reset") :
-            getHTML("OK, your password has been reset. Please go back to NetProF and login.",  "Password has been reset");
+            getHTML("OK, your password has been reset. Please go back to NetProF and login.", "Password has been reset");
         reply(response, rep);
       }
       return true;
@@ -185,7 +186,7 @@ public class RestUserManagement {
       }
       return true;
     } else if (queryString.equals("users")) {
-      toReturn.put("users",db.usersToJSON());
+      toReturn.put("users", db.usersToJSON());
       return true;
     }
     return false;
@@ -230,11 +231,11 @@ public class RestUserManagement {
       toReturn.put(TOKEN, "");
       toReturn.put(PASSWORD_CORRECT, FALSE);
     } else {
-      toReturn.put(USERID,    userFound.getId());
-      toReturn.put(EMAIL_H,   userFound.getEmailHash());
-      toReturn.put(KIND,      userFound.getUserKind().toString());
+      toReturn.put(USERID, userFound.getId());
+      toReturn.put(EMAIL_H, userFound.getEmailHash());
+      toReturn.put(KIND, userFound.getUserKind().toString());
       toReturn.put(HAS_RESET, userFound.hasResetKey());
-      toReturn.put(TOKEN,     userFound.getResetKey());
+      toReturn.put(TOKEN, userFound.getResetKey());
       toReturn.put(PASSWORD_CORRECT,
           userFound.getPasswordHash() == null ? FALSE :
               userFound.getPasswordHash().equalsIgnoreCase(passwordH));
@@ -350,7 +351,7 @@ public class RestUserManagement {
 
   /**
    * TODO : pass in the project id from the iOS app.
-   *
+   * <p>
    * So - what can happen - either we have a user and password match, in which case adding a user is equivalent
    * to logging in OR we have an existing user with a different password, in which case either it's a different
    * person with the same userid attempt, or the same person making a password mistake...
@@ -369,7 +370,7 @@ public class RestUserManagement {
     // first check if user exists already with this password -- if so go ahead and log them in.
     User exactMatch = db.getUserDAO().getStrictUserWithPass(user, passwordH);
 
-    logger.info("addUser user " + user + " pass "+ passwordH + " match " + exactMatch);
+    logger.info("addUser user " + user + " pass " + passwordH + " match " + exactMatch);
 
     int projid = -1; // TODO : figure out which project a user is in right now
 
@@ -377,11 +378,11 @@ public class RestUserManagement {
       User checkExisting = db.getUserDAO().getUserByID(user);
 
       if (checkExisting == null) { // OK, nobody with matching user and password
-        String age     = request.getHeader(AGE);
-        String gender  = request.getHeader(GENDER);
+        String age = request.getHeader(AGE);
+        String gender = request.getHeader(GENDER);
         String dialect = request.getHeader(DIALECT);
-        String emailH  = request.getHeader(EMAIL_H);
-        String email  = request.getHeader(EMAIL);
+        String emailH = request.getHeader(EMAIL_H);
+        String email = request.getHeader(EMAIL);
         if (email == null) email = "";
 
         logger.debug("addUser : Request " + requestType + " for " + deviceType + " user " + user +
@@ -392,15 +393,19 @@ public class RestUserManagement {
         if (age != null && gender != null && dialect != null) {
           try {
             int age1 = Integer.parseInt(age);
-            user1 = getUserManagement().addUser(user, passwordH, emailH, email, deviceType, device,
-                User.Kind.CONTENT_DEVELOPER, gender.equalsIgnoreCase("male"), age1, dialect);
+            boolean male = gender.equalsIgnoreCase("male");
+            SignUpUser user2 = new SignUpUser(user, passwordH, emailH, email, User.Kind.CONTENT_DEVELOPER, male, age1, dialect, deviceType, device, "", "");
+//            user1 = getUserManagement().addUser(user, passwordH, emailH, email, deviceType, device,
+//                User.Kind.CONTENT_DEVELOPER, male, age1, dialect);
+            user1 = getUserManagement().addUser(user2);
 
           } catch (NumberFormatException e) {
             logger.warn("couldn't parse age " + age);
             jsonObject.put(ERROR, "bad age");
           }
         } else {
-          user1 = getUserManagement().addUser(user, passwordH, emailH, email, deviceType, device);
+          SignUpUser user2 = new SignUpUser(user, passwordH, emailH, email, User.Kind.CONTENT_DEVELOPER, true, 89, dialect, deviceType, device, "", "");
+          user1 = getUserManagement().addUser(user2);
         }
 
         if (user1 == null) { // how could this happen?
