@@ -82,7 +82,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    * Somehow on subsequent runs, the ids skip by 30 or so?
    * <p>
    * Uses return generated keys to get the user id
-   *  @param age
+   * @param age
    * @param gender
    * @param experience
    * @param userAgent
@@ -96,13 +96,15 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    * @param passwordH
    * @param emailH
    * @param email
-   *@param device          @return newly inserted user id, or 0 if something goes horribly wrong  @see UserManagement#addUser(User)
+   * @param device          @return newly inserted user id, or 0 if something goes horribly wrong  @see UserManagement#addUser(User)
+   * @param first
+   * @param last
    */
   @Override
   public int addUser(int age, String gender, int experience, String userAgent,
                      String trueIP, String nativeLang, String dialect, String userID, boolean enabled,
                      Collection<User.Permission> permissions,
-                     User.Kind kind, String passwordH, String emailH, String email, String device) {
+                     User.Kind kind, String passwordH, String emailH, String email, String device, String first, String last) {
     if (passwordH == null) new Exception().printStackTrace();
     try {
       // there are much better ways of doing this...
@@ -166,7 +168,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    * @param kind
    * @param passwordH
    * @param emailH
-   * @see BaseUserDAO#addUser(String, String, String, String, User.Kind, String, boolean, int, String, String)
+   * @see BaseUserDAO#addUser(String, String, String, String, User.Kind, String, boolean, int, String, String, String, String)
    */
   protected void updateUser(int id, User.Kind kind, String passwordH, String emailH) {
     try {

@@ -45,7 +45,6 @@ public class MiniUser implements IsSerializable, Comparable<MiniUser> {
   public MiniUser() {
   } // for serialization
 
-
   /**
    * @param id
    * @param age

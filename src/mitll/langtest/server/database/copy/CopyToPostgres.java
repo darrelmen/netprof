@@ -80,6 +80,7 @@ public class CopyToPostgres<T extends CommonShell> {
   private static final Logger logger = Logger.getLogger(CopyToPostgres.class);
   private static final int WARN_RID_MISSING_THRESHOLD = 50;
   private static final boolean COPY_EVENTS = true;
+  private static final boolean DEBUG = false;
 
   /**
    * @param config
@@ -399,14 +400,14 @@ public class CopyToPostgres<T extends CommonShell> {
     IUserProjectDAO slickUserProjectDAO = db.getUserProjectDAO();
 
     UserDAO userDAO = new UserDAO(db);
-    int defectDetector = userDAO.getDefectDetector();
-    oldToNew.put(defectDetector, slickUserDAO.getDefectDetector());
+    int defectDetector = userDAO.getDefectDetector(value);
+    oldToNew.put(defectDetector, slickUserDAO.getDefectDetector(value));
 
     List<User> importUsers = userDAO.getUsers();
     logger.info("copyUsers h2 importUsers  " + importUsers.size());
     UserToCount userToNumAnswers = oldResultDAO.getUserToNumAnswers();
     Map<Integer, Integer> idToCount = userToNumAnswers.getIdToCount();
-    logger.info("id->count " + idToCount.size() + " values " + idToCount.values().size());
+    if (DEBUG) logger.info("id->count " + idToCount.size() + " values " + idToCount.values().size());
 
     int collisions = 0;
     int lurker = 0;
@@ -418,6 +419,7 @@ public class CopyToPostgres<T extends CommonShell> {
         String passwordHash = toImport.getPasswordHash();
         if (passwordHash == null) passwordHash = "";
 
+        if (DEBUG) logger.info("import " + toImport);
         User strictUserWithPass = slickUserDAO.getStrictUserWithPass(importUserID, passwordHash);
 
         if (strictUserWithPass != null) {
@@ -431,9 +433,8 @@ public class CopyToPostgres<T extends CommonShell> {
           } else {
             User userByID1 = slickUserDAO.getUserByID(importUserID);
 
-
             if (userByID1 != null) {
-//              logger.info("found existing user " + importUserID + " : " + userByID1);
+              if (DEBUG) logger.info("found existing user " + importUserID + " : " + userByID1);
               // User "adam" already exists with a different password - what to do?
               // void current password! Force them to set it again when they log in again
               int existingID = userByID1.getId();
