@@ -44,6 +44,7 @@ import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.UserPassLogin;
 import mitll.langtest.shared.user.LoginResult;
+import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.SlimProject;
 import mitll.langtest.shared.user.User;
 
@@ -54,29 +55,36 @@ import java.util.List;
 public interface UserService extends RemoteService {
   // User Management --
 
-//  List<SlimProject> getProjects();
-
   User setProject(int projectid);
   /**
    * @see mitll.langtest.client.user.UserPassLogin#gotSignUp(String, String, String, User.Kind)
-   * @param userID
-   * @param passwordH
-   * @param emailH
-   * @param kind
+   * @paramx userID
+   * @paramx passwordH
+   * @paramx emailH
+   * @paramx kind
    * @param url
-   * @param email
-   * @param isMale
-   * @param age
-   * @param dialect
+   * @paramx email
+   * @paramx isMale
+   * @paramx age
+   * @paramx dialect
    * @param isCD
-   * @param device
+   * @paramx device
    * @return
    */
-  User addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, String email, boolean isMale,
-               int age, String dialect, boolean isCD, String device);
+//  User addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, String email, boolean isMale,
+//               int age, String dialect, boolean isCD, String device);
+
+  User addUser(//String userID, String passwordH, String emailH, User.Kind kind,
+               SignUpUser user,
+               String url,
+               //String email,
+               //boolean isMale,
+               //int age, String dialect,
+               boolean isCD);
+               //String device,)
 
   /**
-   * @see mitll.langtest.client.user.UserTable#showDialog(LangTestDatabaseAsync)
+   * @see mitll.langtest.client.user.UserTable#showDialog
    * @return
    */
   List<User> getUsers();

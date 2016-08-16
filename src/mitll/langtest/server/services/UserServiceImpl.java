@@ -42,6 +42,7 @@ import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.user.LoginResult;
+import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.SlimProject;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickProject;
@@ -172,30 +173,40 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   /**
    * Send confirmation to your email too.
    *
-   * @param userID
-   * @param passwordH
-   * @param emailH
-   * @param kind
+   * @paramx userID
+   * @paramx passwordH
+   * @paramx emailH
+   * @paramx kind
    * @param url
-   * @param email
-   * @param isMale
-   * @param age
-   * @param dialect
+   * @paramx email
+   * @paramx isMale
+   * @paramx age
+   * @paramx dialect
    * @param isCD
-   * @param device
+   * @paramx device
    * @return null if existing user
    * @see mitll.langtest.client.user.UserPassLogin#gotSignUp(String, String, String, User.Kind)
    */
   @Override
-  public User addUser(String userID, String passwordH, String emailH, User.Kind kind, String url, String email,
-                      boolean isMale, int age, String dialect, boolean isCD, String device
+  public User addUser(//String userID, String passwordH, String emailH, User.Kind kind,
+                      SignUpUser user,
+                      String url,
+        //              String email,
+          //            boolean isMale, int age, String dialect,
+                      boolean isCD
+      //, String device
   ) {
     findSharedDatabase();
     UserManagement userManagement = db.getUserManagement();
-    User newUser = userManagement.addUser(getThreadLocalRequest(), userID, passwordH, emailH, email,
-        kind, isMale, age, dialect, "browser");
+    User newUser = userManagement.addUser(getThreadLocalRequest(),
+        user
+    //    userID, passwordH, emailH, email,
+    //    kind, isMale, age, dialect, "browser"
+    );
     MailSupport mailSupport = getMailSupport();
 
+    String userID = user.getUserID();
+    String email = user.getEmail();
     if (newUser != null && !newUser.isEnabled()) { // newUser = null means existing newUser.
       logger.debug("newUser " + userID + "/" + newUser + " wishes to be a content developer. Asking for approval.");
       getEmailHelper().addContentDeveloper(url, email, newUser, mailSupport, getProject().getLanguage());
@@ -208,7 +219,6 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     }
     if (newUser != null) {
       setSessionUser(getThreadLocalRequest().getSession(true), newUser);
-  //    db.rememberUserSelectedProject(newUser, projid);
     }
     return newUser;
   }

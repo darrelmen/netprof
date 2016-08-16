@@ -402,6 +402,8 @@ public class DatabaseImpl implements Database {
 
     createTables();
 
+
+
     userDAO.findOrMakeDefectDetector();
 
     try {
@@ -750,7 +752,7 @@ public class DatabaseImpl implements Database {
           configureProjects(mediaDir, installPath);
           //}
         }
-        userManagement = new UserManagement(userDAO, resultDAO, userListManager);
+        userManagement = new UserManagement(userDAO, resultDAO);
       }
     }
   }
@@ -1309,6 +1311,8 @@ public class DatabaseImpl implements Database {
       logger.info("createTables created slick tables : " + created);
       logger.info("createTables after create slick tables - has " + dbConnection.getTables());
     }
+
+    dbConnection.addColumn();
   }
 
   private void createIfNotThere(IDAO slickUserDAO, List<String> created) {
