@@ -83,12 +83,14 @@ public class PostgresTest extends BaseTest {
   public void testCopySpanish() {
     List<Info> toCopy = new ArrayList<>();
     toCopy.add(getSpanish());
+    testCopy(toCopy);
   }
 
   @Test
   public void testCopyRussian() {
     List<Info> toCopy = new ArrayList<>();
     toCopy.add(getRussian());
+    testCopy(toCopy);
   }
 
   @Test
@@ -188,6 +190,13 @@ public class PostgresTest extends BaseTest {
     testCopy(toCopy);
   }
 
+  @Test
+  public void testTagalog() {
+    List<Info> toCopy = new ArrayList<>();
+    toCopy.add(new Info("Tagalog"));
+    testCopy(toCopy);
+  }
+
   /**
    * databaseHost=hydra-dev
    * databaseUser=netprof
@@ -230,41 +239,38 @@ public class PostgresTest extends BaseTest {
     testCopy(toCopy);
   }
 
-  Info getPashto() {
+  private Info getPashto() {
     return new Info("pashto", "Pashto Elementary", "pashtoQuizlet1.properties", 0);
   }
 
-  Info getPashto2() {
+  private Info getPashto2() {
     return new Info("pashto", "Pashto Intermediate", "pashtoQuizlet2.properties", 1);
   }
 
-  Info getPashto3() {
+  private Info getPashto3() {
     return new Info("pashto", "Pashto Advanced", "pashtoQuizlet3.properties", 2);
   }
 
-  Info getSpanish() {
+  private Info getSpanish() {
     return new Info("spanish");
   }
 
-  Info getRussian() {
+  private Info getRussian() {
     return new Info("russian");
   }
 
-  Info getEnglish() {
+  private Info getEnglish() {
     return new Info("english");
   }
 
-  void testCopy(List<Info> infos) {
+  private void testCopy(List<Info> infos) {
     CopyToPostgres cp = new CopyToPostgres();
     boolean doLocal = false;
     for (Info config : infos) {
-      //logger.info("-------- copy " + config);
       String cc = cp.getCC(config.language);
       long then = System.currentTimeMillis();
       logger.info("\n\n\n-------- STARTED  copy " + config + " " + cc);
 
-
-      //  DatabaseImpl databaseLight = getDatabaseLight(config.language, true, "hydra-dev", "netprof", "npadmin", config.props);
       DatabaseImpl databaseLight = doLocal ?
           getDatabaseLight(config.language, true, "localhost", "postgres", "pgadmin", config.props) :
           getDatabaseLight(config.language, true, "hydra-dev", "netprof", "npadmin", config.props);
@@ -272,11 +278,8 @@ public class PostgresTest extends BaseTest {
       new CopyToPostgres().copyOneConfig(databaseLight, cc, config.name, config.displayOrder);
       databaseLight.destroy();
       long now = System.currentTimeMillis();
-
       logger.info("\n\n\n-------- FINISHED copy " + config + " " + cc + " in " + ((now - then) / 1000) + " seconds");
       log();
-
-      //((DatabaseImpl) databaseLight).copyOneConfig(cc, optName);
     }
   }
 
@@ -293,9 +296,9 @@ public class PostgresTest extends BaseTest {
   }
 
   private class Info {
-    String name;
-    String language;
-    String props;
+    final String name;
+    final String language;
+    final String props;
     int displayOrder = 0;
 
     public Info(String language) {
