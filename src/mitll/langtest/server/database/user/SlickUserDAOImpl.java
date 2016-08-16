@@ -73,7 +73,7 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
   /**
    * @param user
    * @return
-   * @see mitll.langtest.server.database.CopyToPostgres#addUser(SlickUserDAOImpl, Map, User)
+   * @see mitll.langtest.server.database.CopyToPostgres#addUser
    */
   public int add(SlickUser user) {
     return dao.add(user);
@@ -86,10 +86,7 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @return
    */
   public SlickUser addAndGet(SlickUser user) {
-//    logger.info("in  " + user);
     SlickUser slickUser = dao.addAndGet(user);
-//    logger.info("out " + slickUser);
-
     return slickUser;
   }
 
@@ -109,15 +106,22 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @param emailH
    * @param email
    * @param device
+   * @param first
+   * @param last
    * @return
    * @see UserManagement#addUser
    */
   @Override
-  public int addUser(int age, String gender, int experience, String userAgent, String trueIP,
+  public int addUser(int age,
+                     String gender,
+                     int experience,
+                     String userAgent,
+                     String trueIP,
                      String nativeLang,
                      String dialect, String userID, boolean enabled,
                      Collection<User.Permission> permissions, User.Kind kind,
-                     String passwordH, String emailH, String email, String device) {
+                     String passwordH, String emailH, String email, String device,
+                     String first, String last) {
     StringBuilder builder = new StringBuilder();
     for (User.Permission permission : permissions) builder.append(permission).append(",");
     return dao.add(new SlickUser(-1, userID,
@@ -129,15 +133,15 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
         enabled, "", "", builder.toString(),
         kind.toString(), passwordH, emailH,
         email,
-        device, -1));
+        device, first, last, -1));
   }
 
   /**
-   * @see BaseUserDAO#addUser(String, String, String, String, User.Kind, String, boolean, int, String, String)
    * @param id
    * @param kind
    * @param passwordH
    * @param emailH
+   * @see BaseUserDAO#addUser(String, String, String, String, User.Kind, String, boolean, int, String, String, String, String)
    */
   protected void updateUser(int id, User.Kind kind, String passwordH, String emailH) {
     dao.updateUser(id, kind.name(), passwordH, emailH,
@@ -179,7 +183,9 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @see mitll.langtest.server.database.CopyToPostgres#copyUsers(DatabaseImpl, int)
    */
   @Override
-  public User getUserByID(String id) {  return convertOrNull(dao.getByUserID(id));  }
+  public User getUserByID(String id) {
+    return convertOrNull(dao.getByUserID(id));
+  }
 
   public Collection<User> getAllUsersByID(String id) {
     Seq<SlickUser> byUserID = dao.getByUserID(id);
@@ -191,7 +197,9 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
 //  public boolean userExists(String id, String passwordHash) { return dao.userExists()}
 
-  public User getByID(int id) {  return convertOrNull(dao.byID(id));  }
+  public User getByID(int id) {
+    return convertOrNull(dao.byID(id));
+  }
 
   private User convertOrNull(Seq<SlickUser> userByIDAndPass) {
     return userByIDAndPass.isEmpty() ? null : toUser(userByIDAndPass.head());
@@ -209,7 +217,7 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }
 
   public SlickUser toSlick(User user) {
-    return new SlickUser(-1,
+    SlickUser user1 = new SlickUser(-1,
         user.getUserID(),
         user.isMale(),
         user.getIpaddr() == null ? "" : user.getIpaddr(),
@@ -225,8 +233,14 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
         user.getEmailHash() == null ? "" : user.getEmailHash(),
         "",
         user.getDevice() == null ? "" : user.getDevice(),
+        user.getFirst(),
+        user.getLast(),
         user.getId()
     );
+
+   // logger.info("made " + user1);
+
+    return user1;
   }
 
   private User toUser(SlickUser s) {
@@ -347,13 +361,15 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }
 
   /**
-   * @see mitll.langtest.server.services.UserServiceImpl#changePFor(String, String)
    * @param user
    * @param passwordH
    * @return
+   * @see mitll.langtest.server.services.UserServiceImpl#changePFor(String, String)
    */
   @Override
-  public boolean changePassword(int user, String passwordH) { return dao.setPassword(user, passwordH);  }
+  public boolean changePassword(int user, String passwordH) {
+    return dao.setPassword(user, passwordH);
+  }
 
   @Override
   public boolean updateKey(int userid, boolean resetKey, String key) {

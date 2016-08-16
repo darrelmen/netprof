@@ -92,14 +92,14 @@ public class ProjectTest extends BaseTest {
 
     UserManagement userManagement = database.getUserManagement();
     String test345 = "test345";
-    User user = userManagement.addUser(test345, "test123", "1234", "", "", "");
-    if (user == null) {
-      user = userDAO.getUserByID(test345);
-    }
-    if (user != null) {
-      Collection<UserList<CommonShell>> myLists = userListManager.getMyLists(user.getId(), i);
-      logger.info("lists for " + user + " " + myLists);
-    }
+//    User user = userManagement.addUser(test345, "test123", "1234", "", "", "");
+//    if (user == null) {
+//      user = userDAO.getUserByID(test345);
+//    }
+//    if (user != null) {
+//      Collection<UserList<CommonShell>> myLists = userListManager.getMyLists(user.getId(), i);
+//      logger.info("lists for " + user + " " + myLists);
+//    }
   }
 
   @Test
@@ -144,7 +144,7 @@ public class ProjectTest extends BaseTest {
   @Test
   public void testDrop() {
     IProjectDAO projectDAO = getDatabaseVeryLight("netProf", "config.properties", false).getProjectDAO();
-    projectDAO.delete(11);
-    projectDAO.delete(12);
+    projectDAO.delete(25);
+  //  projectDAO.delete(14);
   }
 }

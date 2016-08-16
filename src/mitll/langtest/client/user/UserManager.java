@@ -110,11 +110,11 @@ public class UserManager {
    */
   public void checkLogin() {
     //logger.info("loginType " + loginType);
-    if (loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS)) { // explicit setting of login type
-      anonymousLogin();
-    } else {
+  //  if (loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS)) { // explicit setting of login type
+ //     anonymousLogin();
+  //  } else {
       login();
-    }
+    //}
   }
 
   /**
@@ -201,21 +201,21 @@ public class UserManager {
    * @see mitll.langtest.client.LangTest#checkLogin
    */
 
-  private void anonymousLogin() {
+/*  private void anonymousLogin() {
     int user = getUser();
     if (user != NO_USER_SET) {
       //logger.info("UserManager.anonymousLogin : current user : " + user);
       getPermissionsAndSetUser();
     } else {
       logger.info("UserManager.anonymousLogin : make new user, since user = " + user);
-      addAnonymousUser();
+   //   addAnonymousUser();
     }
-  }
+  }*/
 
   /**
    * This is useful in headstart context.
    */
-  private void addAnonymousUser() {
+/*  private void addAnonymousUser() {
     logger.info("UserManager.addAnonymousUser : adding anonymous user");
 
     userServiceAsync.addUser("anonymous", "", "", User.Kind.ANONYMOUS, Window.Location.getHref(), "", true, 0,
@@ -231,14 +231,14 @@ public class UserManager {
             storeUser(result);
           }
         });
-  }
+  }*/
 
-  private void setDefaultControlValues(int user) {
+/*  private void setDefaultControlValues(int user) {
     ControlState controlState = new ControlState();
     controlState.setStorage(new KeyStorage(props.getLanguage(), user));
     controlState.setAudioOn(true);
     controlState.setAudioFeedbackOn(true);
-  }
+  }*/
 
   /**
    * For display purposes

@@ -37,6 +37,7 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.annotation.AnnotationDAO;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.shared.user.MiniUser;
+import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
 import org.apache.log4j.Logger;
 
@@ -105,8 +106,9 @@ public abstract class BaseUserDAO extends DAO {
    * @return
    * @see IUserListManager#addDefect(int, String, String)
    * @see AnnotationDAO#AnnotationDAO
+   * @param value
    */
-  public int getDefectDetector() {
+  public int getDefectDetector(String value) {
     return defectDetector;
   }
 
@@ -143,23 +145,27 @@ public abstract class BaseUserDAO extends DAO {
    * @param isMale
    * @param age
    * @param dialect
-   * @param device    @return null if existing, valid user (email and password)
-   * @see mitll.langtest.server.database.DatabaseImpl#addUser
+   * @param device
+   * @param first
+   * @param last      @return null if existing, valid user (email and password)
    * @see UserManagement#addAndGetUser
    */
-  public User addUser(String userID, String passwordH, String emailH, String email,
+/*  public User addUser(String userID, String passwordH, String emailH, String email,
                       User.Kind kind, String ipAddr,
-                      boolean isMale, int age, String dialect, String device) {
+                      boolean isMale, int age, String dialect, String device, String first, String last) {
     User userByID = getUserByID(userID);
     if (userByID != null && kind != User.Kind.ANONYMOUS) {
       // user exists!
-      if (userByID.getEmailHash() != null && userByID.getPasswordHash() != null &&
-          !userByID.getEmailHash().isEmpty() && !userByID.getPasswordHash().isEmpty()) {
+      String emailHash = userByID.getEmailHash();
+      String passwordHash = userByID.getPasswordHash();
+      if (emailHash != null && passwordHash != null &&
+          !emailHash.isEmpty() && !passwordHash.isEmpty()) {
         logger.debug(" : addUser : user " + userID + " is an existing user.");
         return null; // existing user!
       } else {
-        updateUser(userByID.getId(), kind, passwordH, emailH);
-        User userWhere = getUserWhere(userByID.getId());
+        int id = userByID.getId();
+        updateUser(id, kind, passwordH, emailH);
+        User userWhere = getUserWhere(id);
         logger.debug(" : addUser : returning updated user " + userWhere);
         return userWhere;
       }
@@ -168,12 +174,52 @@ public abstract class BaseUserDAO extends DAO {
       boolean enabled = (kind != User.Kind.CONTENT_DEVELOPER) || isAdmin(userID) || enableAllUsers;
 
       int l = addUser(age, isMale ? MALE : FEMALE, 0, ipAddr, "", "", dialect, userID, enabled, perms, kind, passwordH,
-          emailH, email, device);
+          emailH, email, device, first, last);
       User userWhere = getUserWhere(l);
       logger.debug(" : addUser : added new user " + userWhere);
 
       return userWhere;
     }
+  }*/
+
+  public User addUser(SignUpUser user) {
+    String userID = user.getUserID();
+    User userByID = getUserByID(userID);
+    User.Kind kind = user.getKind();
+    if (userByID != null && kind != User.Kind.ANONYMOUS) {
+      // user exists!
+      String emailHash = userByID.getEmailHash();
+      String passwordHash = userByID.getPasswordHash();
+      if (emailHash != null && passwordHash != null &&
+          !emailHash.isEmpty() && !passwordHash.isEmpty()) {
+        logger.debug(" : addUser : user " + userID + " is an existing user.");
+        return null; // existing user!
+      } else {
+        int id = userByID.getId();
+        updateUser(id, kind, user.getPasswordH(), user.getEmailH());
+        User userWhere = getUserWhere(id);
+        logger.debug(" : addUser : returning updated user " + userWhere);
+        return userWhere;
+      }
+    } else {
+      Collection<User.Permission> perms = (kind == User.Kind.CONTENT_DEVELOPER) ? CD_PERMISSIONS : EMPTY_PERM;
+      boolean enabled = (kind != User.Kind.CONTENT_DEVELOPER) || isAdmin(userID) || enableAllUsers;
+
+      int l = addUserAndGetID(user, perms, enabled);
+      User userWhere = getUserWhere(l);
+      logger.debug(" : addUser : added new user " + userWhere);
+      return userWhere;
+    }
+  }
+
+  private int addUserAndGetID(SignUpUser user, Collection<User.Permission> perms, boolean enabled) {
+    return addUser(user.getAge(),
+        user.isMale() ? MALE : FEMALE,
+        0,
+        user.getIp(), "", "",
+        user.getDialect(),
+        user.getUserID(), enabled, perms, user.getKind(), user.getPasswordH(),
+        user.getEmailH(), user.getEmail(), user.getDevice(), user.getFirst(), user.getLast());
   }
 
   abstract User getUserByID(String id);
@@ -191,9 +237,8 @@ public abstract class BaseUserDAO extends DAO {
   /**
    * public for test access... for now
    */
-
   public void findOrMakeDefectDetector() {
-    this.defectDetector  = getOrAdd(DEFECT_DETECTOR);
+    this.defectDetector = getOrAdd(DEFECT_DETECTOR);
     this.beforeLoginUser = getOrAdd(BEFORE_LOGIN_USER);
     this.importUser = getOrAdd(IMPORT_USER);
     this.defaultUser = getOrAdd("defaultUser");
@@ -211,12 +256,18 @@ public abstract class BaseUserDAO extends DAO {
 
   private int addShellUser(String defectDetector) {
     return addUser(89, MALE, 0, "", "", UNKNOWN, UNKNOWN, defectDetector, false, EMPTY_PERMISSIONS,
-        User.Kind.STUDENT, "", "", "", "");
+        User.Kind.STUDENT, "", "", "", "", "", "");
   }
 
   abstract int getIdForUserID(String id);
 
   abstract int addUser(int age, String gender, int experience, String userAgent,
-                       String trueIP, String nativeLang, String dialect, String userID, boolean enabled, Collection<User.Permission> permissions,
-                       User.Kind kind, String passwordH, String emailH, String email, String device);
+                       String trueIP,
+                       String nativeLang,
+                       String dialect,
+                       String userID,
+                       boolean enabled,
+                       Collection<User.Permission> permissions,
+                       User.Kind kind,
+                       String passwordH, String emailH, String email, String device, String first, String last);
 }
