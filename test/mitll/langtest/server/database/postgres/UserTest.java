@@ -74,29 +74,29 @@ public class UserTest extends BaseTest {
     String hash = Md5Hash.getHash(toHash);
     String password = Md5Hash.getHash("password");
     String bueller = Md5Hash.getHash("bueller");
-    User user = dao.addUser(userid, password, hash, toHash, User.Kind.STUDENT, "128.0.0.1", true, 89, "midest", "browser");
-    User user2 = dao.addUser(userid, password, hash, toHash, User.Kind.STUDENT, "128.0.0.1", true, 89, "midest", "iPad");
+//    User user = dao.addUser(userid, password, hash, toHash, User.Kind.STUDENT, "128.0.0.1", true, 89, "midest", "browser", first, last);
+//    User user2 = dao.addUser(userid, password, hash, toHash, User.Kind.STUDENT, "128.0.0.1", true, 89, "midest", "iPad", first, last);
+//
+//    logger.info("made " + user);
+//    logger.info("made " + user2);
+//    User user3 = dao.addUser(userid + "ipad", password, hash, toHash, User.Kind.STUDENT, "128.0.0.1", true, 89, "midest", "iPad", first, last);
 
-    logger.info("made " + user);
-    logger.info("made " + user2);
-    User user3 = dao.addUser(userid + "ipad", password, hash, toHash, User.Kind.STUDENT, "128.0.0.1", true, 89, "midest", "iPad");
+//    if (user == null) {
+//      user = dao.getUserByID(userid);
+//      logger.info("found " + user);
+//    }
+//
+//    logger.info("before " + user.isEnabled());
+//
+//    int id = user.getId();
+//    boolean b = dao.enableUser(id);
 
-    if (user == null) {
-      user = dao.getUserByID(userid);
-      logger.info("found " + user);
-    }
-
-    logger.info("before " + user.isEnabled());
-
-    int id = user.getId();
-    boolean b = dao.enableUser(id);
-
-    logger.info("enable user " + b);
-
-    logger.info("change enabled " + dao.changeEnabled(id, true) + " : " + dao.getUserWhere(id).isEnabled());
-    logger.info("change enabled " + dao.changeEnabled(id, false) + " : " + dao.getUserWhere(id).isEnabled());
-    int bogusID = 123456789;
-    logger.info("change enabled " + dao.changeEnabled(bogusID, false) + " : " + dao.getUserWhere(id).isEnabled());
+//    logger.info("enable user " + b);
+//
+//    logger.info("change enabled " + dao.changeEnabled(id, true) + " : " + dao.getUserWhere(id).isEnabled());
+//    logger.info("change enabled " + dao.changeEnabled(id, false) + " : " + dao.getUserWhere(id).isEnabled());
+//    int bogusID = 123456789;
+//    logger.info("change enabled " + dao.changeEnabled(bogusID, false) + " : " + dao.getUserWhere(id).isEnabled());
 
 
     logger.info("user " + dao.getIDForUserAndEmail(userid, hash));
@@ -115,28 +115,28 @@ public class UserTest extends BaseTest {
 
     logger.info("valid email " + dao.isValidEmail(hash));
     logger.info("valid email " + dao.isValidEmail(password));
-    logger.info("change password\n" +
-        dao.getStrictUserWithPass(userid, password) + " :\n" +
-        dao.changePassword(id, bueller) + "\n" +
-        dao.getStrictUserWithPass(userid, password) + " :\n" +
-        dao.getStrictUserWithPass(userid, bueller));
-
-    logger.info("reset key " +
-        dao.getUserWithResetKey("reset") +
-        ":\n" + dao.updateKey(id, true, "reset") +
-        " :\n" + dao.getUserWithResetKey("reset") +
-        ":\n" + dao.clearKey(id, true) +
-        " :\n" + dao.getUserWithResetKey("reset")
-    );
-
-    logger.info("enabled key " +
-        dao.getUserWithResetKey("enabled") +
-        ":\n" + dao.updateKey(id, false, "enabled") +
-        " :\n" + dao.getUserWithEnabledKey("enabled") +
-        ":\n" + dao.clearKey(id, false) +
-        ":\n" + dao.clearKey(bogusID, false) +
-        " :\n" + dao.getUserWithEnabledKey("enabled")
-    );
+//    logger.info("change password\n" +
+//        dao.getStrictUserWithPass(userid, password) + " :\n" +
+//        dao.changePassword(id, bueller) + "\n" +
+//        dao.getStrictUserWithPass(userid, password) + " :\n" +
+//        dao.getStrictUserWithPass(userid, bueller));
+//
+//    logger.info("reset key " +
+//        dao.getUserWithResetKey("reset") +
+//        ":\n" + dao.updateKey(id, true, "reset") +
+//        " :\n" + dao.getUserWithResetKey("reset") +
+//        ":\n" + dao.clearKey(id, true) +
+//        " :\n" + dao.getUserWithResetKey("reset")
+//    );
+//
+//    logger.info("enabled key " +
+//        dao.getUserWithResetKey("enabled") +
+//        ":\n" + dao.updateKey(id, false, "enabled") +
+//        " :\n" + dao.getUserWithEnabledKey("enabled") +
+//        ":\n" + dao.clearKey(id, false) +
+//        ":\n" + dao.clearKey(bogusID, false) +
+//        " :\n" + dao.getUserWithEnabledKey("enabled")
+//    );
     //  spanish.doReport(new PathHelper("war"));
   }
 
