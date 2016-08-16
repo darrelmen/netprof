@@ -160,7 +160,7 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
   public String toString() {
     return "Exercise " +
         "id = " + getOldID() + "/" + getID() +
-        " : " + getEnglish() +
+        " : " + getEnglish() + " alt "+ getAltFL()+
         " states " + getState() + "/" + getSecondState();
   }
 }

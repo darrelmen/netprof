@@ -130,7 +130,6 @@ public class ScoreServlet extends DatabaseServlet {
   private long whenCachedEverything = -1;
 
   private DatabaseImpl db;
- // private AudioFileHelper audioFileHelper;
 
   private static final String ADD_USER = "addUser";
   private static final double ALIGNMENT_SCORE_CORRECT = 0.5;

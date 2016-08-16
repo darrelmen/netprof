@@ -65,6 +65,7 @@ import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.services.UserServiceAsync;
+import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.SlimProject;
 import mitll.langtest.shared.user.User;
 
@@ -134,17 +135,15 @@ public class UserPassLogin extends UserDialog {
   private static final String HELP = "Help";
   private static final String AGE_ERR_MSG = "Enter age between " + MIN_AGE + " and " + MAX_AGE + ".";
 
-  private static final String SHOWN_HELLO = "shownHello";
+//  private static final String SHOWN_HELLO = "shownHello";
 
   private final UserManager userManager;
   private final KeyPressHelper enterKeyButtonHelper;
- // private final KeyStorage keyStorage;
   private FormField user;
   private FormField signUpUser;
   private FormField signUpEmail;
   private FormField signUpPassword;
   private FormField password;
-  private ListBox projectChoice, signUpProjectChoice;
   private boolean signInHasFocus = true;
   private final EventRegistration eventRegistration;
   private Button signIn;
@@ -152,31 +151,18 @@ public class UserPassLogin extends UserDialog {
   private DecoratedPopupPanel resetEmailPopup;
   private Button sendEmail;
 
-/*
-  private SlimProject currentProject = null;
-  private SlimProject currentSignUpProject = null;
-
-  private Collection<SlimProject> projects;
-*/
-  private UserServiceAsync userService;
-
   /**
    * @param service
    * @param props
    * @param userManager
    * @param eventRegistration
-   * @see mitll.langtest.client.LangTest#showLogin
+   * @see mitll.langtest.client.InitialUI#showLogin
    */
   public UserPassLogin(LangTestDatabaseAsync service,
-                       UserServiceAsync userService,
                        PropertyHandler props,
                        UserManager userManager,
                        EventRegistration eventRegistration) {
     super(service, props);
-    this.userService = userService;
-
-//    keyStorage = new KeyStorage(props.getLanguage(), 1000000);
-
     boolean willShow = false;// checkWelcome();
     if (!willShow) {
       if (BrowserCheck.isIPad()) {
@@ -317,7 +303,6 @@ public class UserPassLogin extends UserDialog {
     hp.add(getSignInButton());
 
     fieldset.add(hp);
-    //fieldset.add(getProjectChoiceRow());
     fieldset.add(getForgotRow());
     setFocusOnUserID();
 
@@ -370,76 +355,6 @@ public class UserPassLogin extends UserDialog {
 
     return hp2;
   }
-
-  /**
-   * @return
-   * @see #populateSignInForm(Form)
-   */
-/*  private Panel getProjectChoiceRow() {
-    Panel hp = new HorizontalPanel();
-    hp.addStyleName("topFiveMargin");
-  //  hp.add(projectChoice = getProjectChoices(false));
-    hp.add(getSignInButton());
-    return hp;
-  }*/
-
-  /**
-   * @param inSignUp
-   * @return
-   * @see #getProjectChoiceRow()
-   * @see #getSignUpForm()
-   */
-/*
-  private ListBox getProjectChoices(boolean inSignUp) {
-    ListBox listBox = new ListBox();
-    new TooltipHelper().createAddTooltip(listBox, "Choose a language", Placement.LEFT);
-    populateListChoices(listBox, inSignUp);
-    listBox.addStyleName("leftTenMargin");
-    return listBox;
-  }
-*/
-
-
-  /**
-   * <p>
-   *
-   * @paramx projectChoices
-   * @paramx controller
-   * @seex #getProjectChoiceRow
-   */
-/*  private void populateListChoices(final ListBox projectChoices, boolean inSignUp) {
-    userService.getProjects(new AsyncCallback<Collection<SlimProject>>() {
-      @Override
-      public void onFailure(Throwable caught) {
-      }
-
-      @Override
-      public void onSuccess(Collection<SlimProject> result) {
-        projects = result;
-        projectChoices.clear();
-        projectChoices.addItem("Choose a Language");
-
-        for (final SlimProject project : result) {
-          projectChoices.addItem(project.getName());
-          projectChoices.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-              for (SlimProject project1 : projects) {
-                if (project1.getName().equals(projectChoices.getValue())) {
-                  if (inSignUp) {
-                    currentSignUpProject = project1;
-                  } else {
-                    currentProject = project1;
-                  }
-                  break;
-                }
-              }
-            }
-          });
-        }
-      }
-    });
-  }*/
 
   private Form getSignInForm() {
     Form signInForm = new Form();
@@ -915,7 +830,6 @@ public class UserPassLogin extends UserDialog {
       }
     });
 
-    //if (!CHECK_AGE)
     registrationInfo.hideAge();
     registrationInfo.getDialectGroup().box.addFocusHandler(new FocusHandler() {
       @Override
@@ -997,6 +911,8 @@ public class UserPassLogin extends UserDialog {
   }
 
   /**
+   * TODO : add first and last name so students can find their teacher
+   * 
    * When the form is valid, make a new user or update an existing one.
    *
    * @param user
@@ -1017,9 +933,15 @@ public class UserPassLogin extends UserDialog {
 
     signUp.setEnabled(false);
 
-    service.addUser(user, passH, emailH, kind, Window.Location.getHref(), email,
-        gender.equalsIgnoreCase(MALE), age1, dialect, isCD, "browser",
-        //currentSignUpProject.getProjectid(),
+    SignUpUser newUser = new SignUpUser(user,passH,emailH,email,kind,gender.equalsIgnoreCase(MALE),age1,dialect,"browser","","","");
+
+    service.addUser(//user, passH, emailH, kind,
+        newUser,
+        Window.Location.getHref(),
+        //email,
+        //gender.equalsIgnoreCase(MALE), age1, dialect,
+        isCD,
+        //"browser",
         new AsyncCallback<User>() {
           @Override
           public void onFailure(Throwable caught) {
@@ -1074,7 +996,7 @@ public class UserPassLogin extends UserDialog {
     left.setWidth(LEFT_SIDE_WIDTH + "px");
     leftAndRight.add(left);
     int size = 1;
-    //   int subSize = size + 2;
+
     Heading w2 = new Heading(size, props.getInitialPrompt());
     left.add(w2);
     w2.getElement().getStyle().setPaddingBottom(24, Style.Unit.PX);
@@ -1083,7 +1005,7 @@ public class UserPassLogin extends UserDialog {
     addBullett(left, props.getFirstBullet(), "NewProF2_48x48.png");
     if (!props.isAMAS()) {
       addBullett(left, SECOND_BULLET, "NewProF1_48x48.png");
-      addBullett(left, THIRD_BULLET, "listIcon_48x48_transparent.png");
+      addBullett(left, THIRD_BULLET,  "listIcon_48x48_transparent.png");
 //    w3.getElement().getStyle().setMarginTop(-1, Style.Unit.PX);
 //    configure(w3);
     }
