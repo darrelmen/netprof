@@ -134,7 +134,9 @@ public class SlickUserExerciseDAO
    * @see SlickUserExerciseDAO#add(CommonExercise, boolean)
    */
   public SlickExercise toSlick(CommonExercise shared,
-                               @Deprecated boolean isOverride, int projectID, boolean isPredef,
+                               @Deprecated boolean isOverride,
+                               int projectID,
+                               boolean isPredef,
                                int importUser,
                                boolean isContext) {
     Map<String, String> unitToValue = shared.getUnitToValue();
@@ -154,7 +156,7 @@ public class SlickUserExerciseDAO
         shared.getEnglish(),
         shared.getMeaning(),
         shared.getForeignLanguage(),
-        "",
+        shared.getAltFL(),
         shared.getTransliteration(),
         isOverride,
         unitToValue.getOrDefault(first, ""),
