@@ -81,7 +81,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   private int chapterIndex;
   private int weekIndex;
 
-  private final boolean DEBUG = true;
+  private final boolean DEBUG = false;
   private long lastModified;
 
   /**
