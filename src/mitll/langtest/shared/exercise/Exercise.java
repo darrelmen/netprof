@@ -72,8 +72,9 @@ public class Exercise extends AudioExercise implements CommonExercise,
   /**
    * @param id
    * @param altcontext
-   *@param projectid
-   * @param updateTime   @paramx content
+   * @param projectid
+   * @param updateTime
+   * @paramx content
    * @see mitll.langtest.server.database.exercise.ExcelImport#getExercise
    */
   public Exercise(String id,
