@@ -872,12 +872,12 @@ public class UserListManager {
 
   void markAllFieldsFixed(CommonExercise userExercise, long userID) {
     Collection<String> fields = userExercise.getFields();
-    logger.debug("setExerciseState " + userExercise + "  has " + fields + " user " + userID);
+    logger.debug("markAllFieldsFixed " + userExercise + "  has " + fields + " user " + userID);
     addAnnotations(userExercise);
     for (String field : fields) {
       ExerciseAnnotation annotation1 = userExercise.getAnnotation(field);
       if (!annotation1.isCorrect()) {
-        logger.debug("\tsetExerciseState " + userExercise.getID() + "  has " + annotation1);
+        logger.debug("\tmarkAllFieldsFixed " + userExercise.getID() + "  has " + annotation1);
 
         addAnnotation(userExercise.getID(), field, CORRECT, FIXED, userID);
       }
