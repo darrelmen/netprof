@@ -113,6 +113,16 @@ public class Exercise extends AudioExercise implements CommonExercise,
   }
 
   @Override
+  public void setContext(String context) {
+    this.context = context;
+  }
+
+  @Override
+  public void setContextTranslation(String context) {
+    this.contextTranslation = context;
+  }
+
+  @Override
   public String getRefAudioIndex() {
     return refAudioIndex;
   }
