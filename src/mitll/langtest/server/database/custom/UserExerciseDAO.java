@@ -67,7 +67,7 @@ public class UserExerciseDAO extends DAO {
   private static final String STATE = "state";
   private static final String CONTEXT = "context";
   private static final String CONTEXT_TRANSLATION = "contextTranslation";
-  public static final String CREATORID = "creatorid";
+  private static final String CREATORID = "creatorid";
 
   private ExerciseDAO<CommonExercise> exerciseDAO;
   private static final boolean DEBUG = false;
@@ -135,8 +135,10 @@ public class UserExerciseDAO extends DAO {
               "foreignLanguage" + "," +
               TRANSLITERATION + "," +
               CREATORID + "," +
-              CONTEXT + "," + CONTEXT_TRANSLATION +
-              ",override," + UNIT +
+              CONTEXT + "," +
+              CONTEXT_TRANSLATION + "," +
+              "override," +
+              UNIT +
               "," + LESSON +
               "," + MODIFIED +
               ") " +
@@ -204,8 +206,10 @@ public class UserExerciseDAO extends DAO {
 
       finish(connection, statement);
 
-      logger.debug("now " + getCount(USEREXERCISE) + " user exercises and user exercise is " + userExercise);
-      logger.debug("new " + (predefined ? " PREDEF " : " USER ") + " user exercise is " + userExercise);
+    //  logger.debug("now " + getCount(USEREXERCISE) + " user exercises and user exercise is " + userExercise);
+      if (DEBUG) {
+        logger.debug("new " + (predefined ? " PREDEF " : " USER ") + " user exercise is " + userExercise);
+      }
     } catch (Exception ee) {
       logException(ee);
     }
