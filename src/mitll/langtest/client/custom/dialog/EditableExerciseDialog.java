@@ -156,10 +156,10 @@ class EditableExerciseDialog extends NewUserExercise {
                                   ListInterface<CommonShell> pagingContainer,
                                   Panel toAddTo,
                                   ControlGroup normalSpeedRecording) {
-
-    if (logger != null) {
-      logger.info(this.getClass() + " adding create button - editable.");
-    }
+//
+//    if (logger != null) {
+//      logger.info(this.getClass() + " adding create button - editable.");
+//    }
 
     Panel row = new DivWidget();
     row.addStyleName("marginBottomTen");
@@ -187,13 +187,21 @@ class EditableExerciseDialog extends NewUserExercise {
     return new PrevNextList<>(shell, exerciseList, shouldDisableNext(), controller);
   }
 
+  /**
+   * @see #getCreateButton(UserList, ListInterface, Panel, ControlGroup)
+   * @param uniqueID
+   * @return
+   */
   private Button makeDeleteButton(final long uniqueID) {
     Button delete = makeDeleteButton(ul);
 
     delete.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        deleteItem(newUserExercise.getID(), uniqueID, ul, exerciseList, predefinedContentList);
+        delete.setEnabled(false);
+        String id = newUserExercise.getID();
+        logger.info("makeDeleteButton got click to delete " +id);
+        deleteItem(id, uniqueID, ul, exerciseList, predefinedContentList);
       }
     });
 
@@ -211,7 +219,6 @@ class EditableExerciseDialog extends NewUserExercise {
     container.add(row);
     String subtext = "";
     english = makeBoxAndAnno(row, getEnglishLabel(), subtext, englishAnno);
-    //return row;
   }
 
   /**
