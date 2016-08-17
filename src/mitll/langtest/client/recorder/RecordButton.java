@@ -67,7 +67,7 @@ public class RecordButton extends Button {
 
   private static final int PERIOD_MILLIS = 500;
   public static final String RECORD1 = "Record      ";
-  public static final String STOP1 = "Recording";
+  public static final String STOP1 = "Recording...";
   private static final String WINDOWS = "Win32";
   private final String RECORD;
   private final String STOP;
