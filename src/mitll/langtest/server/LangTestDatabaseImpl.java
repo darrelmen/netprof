@@ -1508,18 +1508,19 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         String fl      = parts[0];
         String english = parts[1];
         if (onFirst && english.equalsIgnoreCase(getLanguage())) {
-          logger.info("skipping header line");
+          logger.info("reallyCreateNewItems skipping header line");
           firstColIsEnglish = true;
         }
         else {
-          if (firstColIsEnglish || isValidForeignPhrase(english)) {
+          if (firstColIsEnglish || (isValidForeignPhrase(english) && !isValidForeignPhrase(fl))) {
             String temp = english;
             english = fl;
             fl      = temp;
+            //logger.info("flip english '" +english+ "' to fl '" +fl+ "'");
           }
           UserExercise newItem = new UserExercise(-1, UserExercise.CUSTOM_PREFIX + "_" + (n++), creator, english, fl, "");
           newItems.add(newItem);
-          logger.info("new " + newItem);
+          logger.info("reallyCreateNewItems new " + newItem);
         }
       }
       onFirst = false;
@@ -1545,7 +1546,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   UserListManager getUserListManager() {
     return db.getUserListManager();
   }
-
 
   /**
    * @param exercise
