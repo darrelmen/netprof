@@ -171,8 +171,7 @@ public class SimplePagingContainer<T> implements RequiresResize {
       if (table == null) {
         controller.logMessageOnServer("no table for " + this.getClass() + " for " + " user " + controller.getUser(),
             controller.getLanguage());
-      }
-      else {
+      } else {
         table.setRowCount(0);
         controller.logMessageOnServer("no list for " + this.getClass() + " for " + " user " + controller.getUser(),
             controller.getLanguage());
@@ -184,7 +183,7 @@ public class SimplePagingContainer<T> implements RequiresResize {
   }
 
   protected List<T> getList() {
-    return dataProvider.getList();
+    return dataProvider == null ? null : dataProvider.getList();
   }
 
   /**
