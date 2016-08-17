@@ -307,7 +307,6 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
   private void markReviewed(final HasID completedExercise) {
     boolean allCorrect = incorrectFields.isEmpty();
     //System.out.println("markReviewed : exercise " + completedExercise.getID() + " instance " + instance + " allCorrect " + allCorrect);
-
     service.markReviewed(completedExercise.getID(), allCorrect, controller.getUser(),
         new AsyncCallback<Void>() {
           @Override
@@ -362,6 +361,8 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
     column.add(getEntry(e, FOREIGN_LANGUAGE, ExerciseFormatter.FOREIGN_LANGUAGE_PROMPT, e.getForeignLanguage()));
     column.add(getEntry(e, TRANSLITERATION, ExerciseFormatter.TRANSLITERATION, e.getTransliteration()));
     column.add(getEntry(e, ENGLISH, ExerciseFormatter.ENGLISH_PROMPT, e.getEnglish()));
+    column.add(getEntry(e, CONTEXT, ExerciseFormatter.CONTEXT, e.getContext()));
+    column.add(getEntry(e, CONTEXT_TRANSLATION, ExerciseFormatter.CONTEXT_TRANSLATION, e.getContextTranslation()));
 
     return column;
   }

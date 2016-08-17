@@ -68,9 +68,11 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioPanel<Shell> {
-  private static final int MIN_VALID_DYNAMIC_RANGE = 32;
-  private static final int MIN_GOOD_DYNAMIC_RANGE = 40;
+  public static final int HEIGHT_OF_RECORD_ROW = 58;
   private final Logger logger = Logger.getLogger("RecordAudioPanel");
+
+  private static final int MIN_VALID_DYNAMIC_RANGE = 32;
+  private static final int MIN_GOOD_DYNAMIC_RANGE  = 40;
 
   private final int index;
 
@@ -132,8 +134,11 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
 
     afterPlayWidget.setVisible(false);
     progressBar.setWidth("300px");
-    progressBar.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
+    Style style = progressBar.getElement().getStyle();
+    style.setMarginLeft(5, Style.Unit.PX);
     progressBar.addStyleName("topBarMargin");
+  //  style.setMarginTop(5, Style.Unit.PX);
+  //  style.setMarginBottom(5, Style.Unit.PX);
     return afterPlayWidget;
   }
 
@@ -237,7 +242,8 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
    */
   private class MyPlayAudioPanel extends PlayAudioPanel {
     public MyPlayAudioPanel(Image recordImage1, Image recordImage2, final Panel panel, String suffix, Widget toTheRightWidget) {
-      super(RecordAudioPanel.this.soundManager, new PlayListener() {
+      super(RecordAudioPanel.this.soundManager,
+          new PlayListener() {
         public void playStarted() {
           if (panel instanceof BusyPanel) {
             ((BusyPanel) panel).setBusy(true);
@@ -258,6 +264,7 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
       add(recordImage2);
       recordImage2.setVisible(false);
       getElement().setId("MyPlayAudioPanel");
+      setHeight(HEIGHT_OF_RECORD_ROW + "px");
     }
 
     /**
@@ -274,7 +281,6 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
 
   protected class MyWaveformPostAudioRecordButton extends WaveformPostAudioRecordButton {
     // private long then,now;
-
     /**
      * @param audioType
      * @param recordButtonTitle
@@ -296,6 +302,7 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
       /// then = System.currentTimeMillis();
       super.startRecording();
       showStart();
+      afterPlayWidget.setVisible(false);
     }
 
     @Override
@@ -339,6 +346,7 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
      * Set the value on the progress bar to reflect the dynamic range we measure on the audio.
      *
      * @param result
+     * @see #useResult(AudioAnswer)
      */
     private void showDynamicRange(AudioAnswer result) {
       double dynamicRange = result.getDynamicRange();
