@@ -52,11 +52,12 @@ public class PropertyHandler {
 
   private static final String RTL = "rtl";
   private static final String IS_AMAS = "isAMAS";
+
   /**
    * Possibly we need to add a delay after button is released to actually tell flash to stop recording.
    * @see RecordButton#startOrStopRecording()
    */
-  private static final int DEFAULT_AFTER_STOP_DELAY_MILLIS = 75;
+  private static final int DEFAULT_AFTER_STOP_DELAY_MILLIS = 85;
 
   // property file property names
   private static final String ENABLE_ALL_USERS = "enableAllUsers";
@@ -294,7 +295,9 @@ public class PropertyHandler {
       else if (key.equals(IS_AMAS)) isAMAS = getBoolean(value);
       else if (key.equals("talksToDomino")) talksToDomino = getBoolean(value);
       else if (key.equals("scoringModel")) modelDir = value;
-      else if (key.equals("afterStopDelayMillis")) afterStopDelayMillis = getInt(value, DEFAULT_AFTER_STOP_DELAY_MILLIS, "afterStopDelayMillis");
+      else if (key.equals("afterStopDelayMillis")) {
+        afterStopDelayMillis = getInt(value, DEFAULT_AFTER_STOP_DELAY_MILLIS, "afterStopDelayMillis");
+      }
         //else if (key.equals(IS_AMAS)) isAMAS = getBoolean(value);
       else if (key.equals(USE_PHONE_TO_DISPLAY)) {
         // logger.info("found " + USE_PHONE_TO_DISPLAY + " = " + value);
