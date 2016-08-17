@@ -117,7 +117,7 @@ class CheckLTS {
 
     String language = isMandarin ? " MANDARIN " : "";
 
-    //logger.debug("checkLTS '" + language + "' tokens : '" + tokens + "' lts " + lts + " dict size " + htkDictionary.size());
+    if (DEBUG) logger.debug("checkLTS '" + language + "' tokens : '" + tokens + "' lts " + lts + " dict size " + htkDictionary.size());
 
     Set<String> oov = new HashSet<>();
     Set<String> inlts = new HashSet<>();
@@ -171,6 +171,8 @@ class CheckLTS {
     } else {
       if (DEBUG) logger.info("for " + foreignLanguagePhrase + " : inlts " + inlts + " indict " + indict);
     }
+    if (DEBUG)  logger.debug("checkLTS '" + language + "' tokens : '" + tokens + "' oov " + oov + " for " + foreignLanguagePhrase + " : inlts " + inlts + " indict " + indict);
+
     return oov;
   }
 
