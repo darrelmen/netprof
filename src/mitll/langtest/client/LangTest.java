@@ -161,14 +161,15 @@ import java.util.logging.Logger;
  * - Added some minor fixes for exceptions seen in analysis plot
  * 1.4.5
  * - Adds audio table references for really old audio like in Pashto 1,2,3
- *
+ * 1.4.6
+ * - Fixes for bugs #649,#650
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since
  * */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private final Logger logger = Logger.getLogger("LangTest");
 
-  public static final String VERSION_INFO = "1.4.5";
+  public static final String VERSION_INFO = "1.4.6";
 
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
