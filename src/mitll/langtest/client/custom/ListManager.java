@@ -54,6 +54,7 @@ import mitll.langtest.client.custom.content.ReviewItemHelper;
 import mitll.langtest.client.custom.dialog.CreateListDialog;
 import mitll.langtest.client.custom.dialog.EditItem;
 import mitll.langtest.client.custom.tabs.TabAndContent;
+import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
@@ -73,9 +74,9 @@ import java.util.logging.Logger;
  * @since 10/20/15.
  */
 public class ListManager implements RequiresResize {
-  public static final String IMPORT_ITEM = "importItem";
-  public static final boolean SHOW_IMPORT = false;
   private final Logger logger = Logger.getLogger("ListManager");
+  private static final String IMPORT_ITEM = "importItem";
+  private static final boolean SHOW_IMPORT = true;
 
   private final KeyStorage storage;
   private ScrollPanel listScrollPanel;
@@ -586,7 +587,6 @@ public class ListManager implements RequiresResize {
     TabAndContent practice = null;
     if (isNormalList) {
       //logger.info("getListOperations : isNormalList ");
-
       practice = makeTab(tabPanel, IconType.CHECK, PRACTICE);
       final TabAndContent fpractice = practice;
       practice.getContent().addStyleName("centerPractice");
@@ -606,7 +606,7 @@ public class ListManager implements RequiresResize {
     TabAndContent editItemTab = null;
 
     // see bug #650 - teachers should be able to record items for a student
-    logger.info("edit tab created " + created);
+    //  logger.info("edit tab created " + created);
     if ((created || userManager.isTeacher()) && (!ul.isPrivate() || isMyList)) {
       editItemTab = getEditTab(ul, toSelect, tabPanel, isReview, isComment);
     }
@@ -904,9 +904,13 @@ public class ListManager implements RequiresResize {
   }
 
   private void reallyShowLearnTab(TabPanel tabPanel, TabAndContent learnTab, UserList ul, String instanceName1) {
-    tabPanel.selectTab(SUBTAB_LEARN_INDEX);
-    learnTab.clickOnTab();
-    showLearnTab(learnTab, ul, instanceName1, ul.getLast());
+    if (!ul.isEmpty()) {
+      tabPanel.selectTab(SUBTAB_LEARN_INDEX);
+      learnTab.clickOnTab();
+      showLearnTab(learnTab, ul, instanceName1, ul.getLast());
+    } else {
+      new DialogHelper(false).showErrorMessage("No items imported", "No items had valid " + controller.getLanguage() + " text.");
+    }
   }
 
   private String getInstanceName(boolean isReview) {
