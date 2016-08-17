@@ -85,12 +85,13 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
   private static final int HIDE_DELAY = 2500;
 
   private static final boolean NEXT_ON_BAD_AUDIO = false;
+  /**
+   * @see #getFeedbackGroup(ControlState)
+   */
   private static final String FEEDBACK = "PLAY ON MISTAKE";
   private static final String AVP_RECORD_BUTTON = "AVP_RecordButton";
 
   /**
-   *
-   *
    * @param e
    * @param service
    * @param controller
@@ -99,7 +100,6 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
    * @param instance
    * @param exerciseList
    * @see StatsFlashcardFactory.StatsPracticePanel#StatsPracticePanel
-   *
    */
   public BootstrapExercisePanel(final T e,
                                 final LangTestDatabaseAsync service,
@@ -113,9 +113,9 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
   }
 
   /**
-   * @see #getRightColumn(mitll.langtest.client.flashcard.ControlState)
    * @param controlState
    * @return
+   * @see #getRightColumn(mitll.langtest.client.flashcard.ControlState)
    */
   @Override
   protected ControlGroup getFeedbackGroup(final ControlState controlState) {
@@ -151,9 +151,9 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
     return group;
   }
 
-  private Button makeGroupButton(ButtonGroup buttonGroup,String title) {
+  private Button makeGroupButton(ButtonGroup buttonGroup, String title) {
     Button onButton = new Button(title);
-    onButton.getElement().setId(FEEDBACK+"_"+title);
+    onButton.getElement().setId(FEEDBACK + "_" + title);
     controller.register(onButton, exercise.getID());
     buttonGroup.add(onButton);
     return onButton;
@@ -180,9 +180,9 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
     if (logger == null) {
       logger = Logger.getLogger("BootstrapExercisePanel");
     }
-  //  logger.info("called  addRecordingAndFeedbackWidgets ");
+    //  logger.info("called  addRecordingAndFeedbackWidgets ");
     // add answer widget to do the recording
-  //  String exerciseID = exerciseID.getID();
+    //  String exerciseID = exerciseID.getID();
     Widget answerAndRecordButtonRow = getAnswerAndRecordButtonRow(exerciseID, service, controller);
     toAddTo.add(answerAndRecordButtonRow);
 
@@ -200,7 +200,6 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
   private RecordButton realRecordButton;
 
   /**
-   *
    * @param exerciseID
    * @param service
    * @param controller
@@ -208,7 +207,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
    * @see FlashcardPanel#addRecordingAndFeedbackWidgets(String, LangTestDatabaseAsync, ExerciseController, Panel)
    */
   private Widget getAnswerAndRecordButtonRow(String exerciseID, LangTestDatabaseAsync service, ExerciseController controller) {
-   // logger.info("BootstrapExercisePanel.getAnswerAndRecordButtonRow = " + instance);
+    // logger.info("BootstrapExercisePanel.getAnswerAndRecordButtonRow = " + instance);
     RecordButtonPanel answerWidget = getAnswerWidget(exerciseID, service, controller, addKeyBinding, instance);
     this.answerWidget = answerWidget;
     button = answerWidget.getRecordButton();
@@ -218,7 +217,9 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
   }
 
   @Override
-  protected void setClickToFlipHeight(DivWidget clickToFlipContainer) { clickToFlipContainer.setHeight("12px");  }
+  protected void setClickToFlipHeight(DivWidget clickToFlipContainer) {
+    clickToFlipContainer.setHeight("12px");
+  }
 
   @Override
   protected void setMarginTop(HTML clickToFlip, Widget icon) {
@@ -292,9 +293,10 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
     AudioAnswerListener exercisePanel = this;
     return new FlashcardRecordButtonPanel(exercisePanel, service, controller, exerciseID, 1, instance, typeToSelection) {
       final FlashcardRecordButtonPanel outer = this;
+
       @Override
       protected RecordButton makeRecordButton(final ExerciseController controller, String buttonTitle) {
-       // logger.info("makeRecordButton : using " + instance);
+        // logger.info("makeRecordButton : using " + instance);
         final FlashcardRecordButton widgets = new FlashcardRecordButton(controller.getRecordTimeout(), this, true,
             addKeyBinding, controller,
             BootstrapExercisePanel.this.instance) {
@@ -313,12 +315,26 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
           }
 
           @Override
-          protected void gotLeftArrow() { exerciseList.loadPrev();   }
+          protected void gotLeftArrow() {
+            exerciseList.loadPrev();
+          }
 
           @Override
           protected void gotRightArrow() {
             if (!exerciseList.isPendingReq()) {
               gotClickOnNext();
+            }
+          }
+
+          @Override
+          protected void gotUpArrow() {
+            gotDownArrow();
+          }
+
+          @Override
+          protected void gotDownArrow() {
+            if (!selectShowFL()) {
+              flipCard();
             }
           }
 
@@ -339,7 +355,8 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
     };
   }
 
-  void recordingStarted() {}
+  void recordingStarted() {
+  }
 
   /**
    * Show progress bar with score percentage, colored by score.
@@ -348,7 +365,9 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
    * @param score
    * @see
    */
-  private void showPronScoreFeedback(double score) {  scoreFeedbackRow.add(showScoreFeedback(score));  }
+  private void showPronScoreFeedback(double score) {
+    scoreFeedbackRow.add(showScoreFeedback(score));
+  }
 
 
   /**
@@ -376,12 +395,17 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
     return scoreFeedback;
   }
 
-  private void clearFeedback() {  scoreFeedbackRow.clear(); }
-  private Heading getRecoOutput() { return recoOutput;  }
+  private void clearFeedback() {
+    scoreFeedbackRow.clear();
+  }
+
+  private Heading getRecoOutput() {
+    return recoOutput;
+  }
 
   /**
-   * @see mitll.langtest.client.recorder.RecordButtonPanel#receivedAudioAnswer
    * @param result
+   * @see mitll.langtest.client.recorder.RecordButtonPanel#receivedAudioAnswer
    */
   public void receivedAudioAnswer(final AudioAnswer result) {
     String path = exercise.getRefAudio() != null ? exercise.getRefAudio() : exercise.getSlowAudioRef();
@@ -425,10 +449,11 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
    * @param html
    * @see #receivedAudioAnswer
    */
-  private void showPopup(String html, Widget button) { new PopupHelper().showPopup(html, button, HIDE_DELAY);  }
+  private void showPopup(String html, Widget button) {
+    new PopupHelper().showPopup(html, button, HIDE_DELAY);
+  }
 
   /**
-   *
    * @param score
    * @see #receivedAudioAnswer(mitll.langtest.shared.AudioAnswer)
    */
@@ -437,24 +462,24 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
     showOtherText();
     getSoundFeedback().queueSong(SoundFeedback.CORRECT);
 
-   // if (showOnlyEnglish) {
-      showHeard(heard);
+    // if (showOnlyEnglish) {
+    showHeard(heard);
     //}
   }
 
   /**
+   * @param heard
    * @see #showCorrectFeedback(double, String)
    * @see #showIncorrectFeedback(AudioAnswer, double, boolean, String)
-   * @param heard
    */
   private void showHeard(String heard) {
     String removedTruth = removePunct(exercise.getForeignLanguage());
     String removedHeard = removePunct(heard);
     if (!removedHeard.equalsIgnoreCase(removedTruth)) {
-      logger.info("heard '" + heard + "' '" +removedHeard +
+      logger.info("heard '" + heard + "' '" + removedHeard +
           "'" +
-          " vs '" + exercise.getForeignLanguage() + " '" + removedTruth+
-          "'"+
+          " vs '" + exercise.getForeignLanguage() + " '" + removedTruth +
+          "'" +
           "'");
       Heading recoOutput = getRecoOutput();
       if (recoOutput != null) {
@@ -477,7 +502,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
    * @param hasRefAudio
    * @see #receivedAudioAnswer
    */
-  private String showIncorrectFeedback(AudioAnswer result, double score, boolean hasRefAudio,String heard) {
+  private String showIncorrectFeedback(AudioAnswer result, double score, boolean hasRefAudio, String heard) {
     if (result.isSaidAnswer()) { // if they said the right answer, but poorly, show pron score
       showPronScoreFeedback(score);
       showHeard(heard);
@@ -531,9 +556,9 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
   }
 
   /**
-   * @see #showIncorrectFeedback
-   * @paramx correctPrompt
    * @param path
+   * @paramx correctPrompt
+   * @see #showIncorrectFeedback
    */
   private void playRefAndGoToNext(String path) {
     getSoundFeedback().queueSong(getPath(path), new SoundFeedback.EndListener() {
@@ -547,7 +572,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
       @Override
       public void songEnded() {
         endListener.songEnded();
-       // removePlayingHighlight(textWidget);
+        // removePlayingHighlight(textWidget);
         loadNext();
       }
     });
@@ -598,6 +623,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
   /**
    * TODO : whole thing is bogus - we shouldn't just flash the answer up and then move on
    * advance to next should be separate action.
+   *
    * @param correct
    * @param feedback make delay dependent on how long the text is
    * @see #receivedAudioAnswer(mitll.langtest.shared.AudioAnswer)
@@ -637,7 +663,6 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
   }
 
   /**
-   *
    * @param delay
    * @see #goToNextAfter(int)
    * @see #nextAfterDelay(boolean, String)
@@ -649,7 +674,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
     if (!preventFutureTimerUse) {
       //if (delay > 100) {
       //  logger.info("loadNextOnTimer ----> load next on " + delay);
-     // }
+      // }
       Timer t = new Timer() {
         @Override
         public void run() {
@@ -660,28 +685,33 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
       currentTimer = t;
       t.schedule(delay);
     } //else {
-      //logger.info("\n\n\n----> ignoring next ");
+    //logger.info("\n\n\n----> ignoring next ");
     //}
   }
 
   private boolean preventFutureTimerUse = false;
+
   void cancelTimer() {
     removePlayingHighlight();
 
     preventFutureTimerUse = true;
     if (currentTimer != null) currentTimer.cancel();
   }
-  private void initRecordButton() {  answerWidget.initRecordButton();  }
+
+  private void initRecordButton() {
+    answerWidget.initRecordButton();
+  }
 
   /**
    * @see #nextAfterDelay(boolean, String)
    */
-  void loadNext() {}
+  void loadNext() {
+  }
 
   /**
-   * @see FlashcardPanel#FlashcardPanel
    * @param controller
    * @return
+   * @see FlashcardPanel#FlashcardPanel
    */
   @Override
   DivWidget getFirstRow(ExerciseController controller) {
