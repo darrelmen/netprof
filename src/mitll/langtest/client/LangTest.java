@@ -162,7 +162,7 @@ import java.util.logging.Logger;
  * 1.4.5
  * - Adds audio table references for really old audio like in Pashto 1,2,3
  * 1.4.6
- * - Fixes for bugs #649,#650
+ * - Fixes for bugs #649,#650,#651, partial fix to #652, flip card in avp with arrow keys
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since
  * */
