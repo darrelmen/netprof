@@ -345,7 +345,7 @@ public class ListManager implements RequiresResize {
               userManager, onlyMine, optionalExercise));
     } else {
       //     logger.info("viewLessons for user #" + userManager.getUser());
-      service.getListsForUser(userManager.getUser(), onlyMine,
+      service.getListsForUser(getUser(), onlyMine,
           onlyVisited,
           new UserListCallback(this, contentPanel, insideContentPanel, listScrollPanel,
               LESSONS + (onlyMine ? "_Mine" : "_Others"),
@@ -469,12 +469,19 @@ public class ListManager implements RequiresResize {
     container.getElement().getStyle().setPaddingLeft(2, Style.Unit.PX);
     container.getElement().getStyle().setPaddingRight(2, Style.Unit.PX);
 
-    Panel firstRow = new FluidRow();    // TODO : this is wacky -- clean up...
-    firstRow.getElement().setId("container_first_row");
-
+    Panel firstRow = getFirstInfoRow(ul);
     container.add(firstRow);
-    firstRow.add(getListInfo(ul));
-    firstRow.addStyleName("userListDarkerBlueColor");
+
+    Panel secondRow = new FluidRow();    // TODO : this is wacky -- clean up...
+    Heading child1 = new Heading(5, "created by " + ul.getCreator().getUserID());
+    secondRow.add(child1);
+    child1.addStyleName("leftFiveMargin");
+    Style style = child1.getElement().getStyle();
+    style.setMarginTop(3, Style.Unit.PX);
+    style.setMarginBottom(3, Style.Unit.PX);
+    secondRow.addStyleName("userListDarkerBlueColor");
+
+    container.add(secondRow);
 
     Panel r1 = new FluidRow();
     r1.addStyleName("userListDarkerBlueColor");
@@ -491,9 +498,17 @@ public class ListManager implements RequiresResize {
     return container;
   }
 
+  private Panel getFirstInfoRow(UserList ul) {
+    Panel firstRow = new FluidRow();    // TODO : this is wacky -- clean up...
+    firstRow.getElement().setId("container_first_row");
+    firstRow.add(getListInfo(ul));
+    firstRow.addStyleName("userListDarkerBlueColor");
+    return firstRow;
+  }
+
 
   private Panel getListInfo(UserList ul) {
-    String subtext = ul.getDescription() + " " + ul.getClassMarker();
+    String subtext = ul.getDescription() + " " + ul.getClassMarker();// + " created by " +ul.getCreator().getUserID();
     Heading widgets = new Heading(1, ul.getName(), subtext);    // TODO : better color for subtext h1->small
 
     widgets.addStyleName("floatLeft");
@@ -589,7 +604,10 @@ public class ListManager implements RequiresResize {
 
     // add add item and edit tabs (conditionally)
     TabAndContent editItemTab = null;
-    if (created && (!ul.isPrivate() || isMyList)) {
+
+    // see bug #650 - teachers should be able to record items for a student
+    logger.info("edit tab created " + created);
+    if ((created || userManager.isTeacher()) && (!ul.isPrivate() || isMyList)) {
       editItemTab = getEditTab(ul, toSelect, tabPanel, isReview, isComment);
     }
     if (SHOW_IMPORT) {
@@ -607,8 +625,20 @@ public class ListManager implements RequiresResize {
     return tabPanel;
   }
 
-  private TabAndContent getEditTab(final UserList<CommonShell> ul, final HasID toSelect, TabPanel tabPanel,
-                                   final boolean isReview, final boolean isComment) {
+  /**
+   * @param ul
+   * @param toSelect
+   * @param tabPanel
+   * @param isReview
+   * @param isComment
+   * @return
+   * @see #getListOperations(UserList, String, HasID)
+   */
+  private TabAndContent getEditTab(final UserList<CommonShell> ul,
+                                   final HasID toSelect,
+                                   TabPanel tabPanel,
+                                   final boolean isReview,
+                                   final boolean isComment) {
     final TabAndContent editTab = makeTab(tabPanel, IconType.EDIT, isReview ? ADD_DELETE_EDIT_ITEM : ADD_OR_EDIT_ITEM);
     //  logger.info("getListOperations : making editTab");
 
@@ -657,7 +687,11 @@ public class ListManager implements RequiresResize {
   }
 
   private boolean createdByYou(UserList<?> ul) {
-    return ul.getCreator().getId() == userManager.getUser();
+    return ul.getCreator().getId() == getUser();
+  }
+
+  private int getUser() {
+    return userManager.getUser();
   }
 
   void deleteList(Button delete, final UserList ul, final boolean onlyMyLists) {
@@ -717,12 +751,12 @@ public class ListManager implements RequiresResize {
   }
 
   /**
-   * @see #getImportTab(UserList, TabPanel, TabAndContent, String)
    * @param ul
    * @param container
    * @param learnTab
    * @param instanceName
    * @param tabPanel
+   * @see #getImportTab(UserList, TabPanel, TabAndContent, String)
    */
   private void showImportItem(final UserList ul, final TabAndContent container, final TabAndContent learnTab, final String instanceName,
                               final TabPanel tabPanel) {
@@ -738,13 +772,13 @@ public class ListManager implements RequiresResize {
     w.setVisibleLines(20);
     w.setCharacterWidth(150);
 
-    inner.add(new Heading(4, "Copy and paste tab separated lines with pairs of " +controller.getLanguage() + " item and its translation."));
+    inner.add(new Heading(4, "Copy and paste tab separated lines with pairs of " + controller.getLanguage() + " item and its translation."));
     inner.add(new Heading(4, "(Quizlet export format.)"));
     Button anImport = new Button("Import");
     anImport.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        service.reallyCreateNewItems(userManager.getUser(), ul.getUniqueID(), w.getText(), new AsyncCallback<Collection<CommonExercise>>() {
+        service.reallyCreateNewItems(getUser(), ul.getUniqueID(), w.getText(), new AsyncCallback<Collection<CommonExercise>>() {
           @Override
           public void onFailure(Throwable caught) {
           }
