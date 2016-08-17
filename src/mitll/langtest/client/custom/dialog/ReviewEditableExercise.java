@@ -145,7 +145,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     box.setText(originalContext = newUserExercise.getContext());
 
     useAnnotation(newUserExercise, "context", contextAnno);
-    useAnnotation(newUserExercise, "contextTrans", contextTransAnno);
+    useAnnotation(newUserExercise, "context translation", contextTransAnno);
 
     box.addBlurHandler(new BlurHandler() {
       @Override
