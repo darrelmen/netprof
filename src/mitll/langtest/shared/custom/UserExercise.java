@@ -172,11 +172,11 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
     this.transliteration = transliteration;
   }
 
-  private void setContext(String context) {
+  public void setContext(String context) {
     this.context = context;
   }
 
-  private void setContextTranslation(String contextTranslation) {
+  public void setContextTranslation(String contextTranslation) {
     this.contextTranslation = contextTranslation;
   }
 
