@@ -172,7 +172,6 @@ class NewUserExercise extends BasicDialog {
     final String id1 = ul.getID();
 
     foreignLang.box.getElement().setId("NewUserExercise_ForeignLang_entry_for_list_" + id1);
-
     // focusOn(formField); // Bad idea since steals the focus after search
     makeTranslitRow(upper);
     translit.box.getElement().setId("NewUserExercise_Transliteration_entry_for_list_" + id1);
@@ -180,6 +179,7 @@ class NewUserExercise extends BasicDialog {
     makeEnglishRow(upper);
     english.box.getElement().setId("NewUserExercise_English_entry_for_list_" + id1);
 
+    makeOptionalRows(upper);
     // make audio row
     upper.add(makeAudioRow());
 
@@ -217,6 +217,10 @@ class NewUserExercise extends BasicDialog {
     return container;
   }
 
+  protected void makeOptionalRows(DivWidget upper) {
+
+  }
+
   /**
    * @return
    * @see #addNew(mitll.langtest.shared.custom.UserList, mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel)
@@ -239,7 +243,7 @@ class NewUserExercise extends BasicDialog {
   void addItemsAtTop(Panel container) {
   }
 
-  private void gotBlur() {
+  protected void gotBlur() {
     gotBlur(foreignLang, rap, normalSpeedRecording, ul, listInterface, toAddTo);
   }
 
@@ -531,6 +535,10 @@ class NewUserExercise extends BasicDialog {
     });
   }
 
+  /**
+   * @see EditableExerciseDialog#postEditItem
+   * @param mutableExercise
+   */
   void grabInfoFromFormAndStuffInfoExercise(MutableExercise mutableExercise) {
     mutableExercise.setEnglish(english.getText());
     mutableExercise.setForeignLanguage(foreignLang.getText());
