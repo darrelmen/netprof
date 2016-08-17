@@ -201,7 +201,7 @@ public class UserExerciseDAO extends DAO {
         preparedStatement.close();
         userExercise.getCombinedMutableUserExercise().setID(customID);
 
-        logger.debug("\tuserExercise= " + userExercise);
+        if (DEBUG) logger.debug("\tuserExercise= " + userExercise);
       }
 
       finish(connection, statement);
