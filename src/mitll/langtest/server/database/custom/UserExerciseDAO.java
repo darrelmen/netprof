@@ -574,14 +574,14 @@ public class UserExerciseDAO extends DAO {
   public void update(CommonExercise userExercise, boolean createIfDoesntExist) {
     try {
       Connection connection = database.getConnection(this.getClass().toString());
-      String sql = "UPDATE " + USEREXERCISE +
-          " " +
+      String sql = "UPDATE " + USEREXERCISE +" " +
           "SET " +
           "english=?," +
           "foreignLanguage=?," +
           TRANSLITERATION + "=?," +
-          MODIFIED +
-          "=? " +
+          CONTEXT + "=?," +
+          CONTEXT_TRANSLATION + "=?," +
+          MODIFIED + "=? " +
           "WHERE " +
           EXERCISEID +
           "=?";
@@ -592,6 +592,8 @@ public class UserExerciseDAO extends DAO {
       statement.setString(ii++, userExercise.getEnglish());
       statement.setString(ii++, userExercise.getForeignLanguage());
       statement.setString(ii++, userExercise.getTransliteration());
+      statement.setString(ii++, userExercise.getContext());
+      statement.setString(ii++, userExercise.getContextTranslation());
       statement.setTimestamp(ii++, new Timestamp(System.currentTimeMillis()));
       statement.setString(ii++, userExercise.getID());
 
