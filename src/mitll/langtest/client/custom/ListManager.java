@@ -157,9 +157,9 @@ public class ListManager implements RequiresResize {
     });
 
     npfHelper  = new NPFHelper(service, feedback, controller, false);
-    reviewItem = new ReviewItemHelper(service, feedback, controller, exerciseList);//, npfHelper);
+    reviewItem = new ReviewItemHelper(service, feedback, controller, exerciseList);
     avpHelper  = new AVPHelper(service, feedback, controller);
-    editItem   = new EditItem(service, userManager, controller, exerciseList, feedback);//, npfHelper);
+    editItem   = new EditItem(service, userManager, controller, exerciseList, feedback);
   }
 
   void addStudyLists(final TabAndContent studyLists) {
@@ -568,7 +568,6 @@ public class ListManager implements RequiresResize {
    */
   private TabPanel getListOperations(final UserList<CommonShell> ul, final String instanceName, final HasID toSelect) {
     // logger.info("getListOperations : '" + instanceName + " for list " + ul);
-
     boolean isMyList = createdByYou(ul);
     boolean created = isMyList || instanceName.equals(REVIEW) || instanceName.equals(COMMENT);
 
@@ -579,8 +578,11 @@ public class ListManager implements RequiresResize {
     final String instanceName1 = isReview ? REVIEW : isComment ? COMMENT : isAttention ? ATTENTION : LEARN;
 
     // add learn tab
-    String learnTitle = isReview ? POSSIBLE_DEFECTS :
-        isComment ? ITEMS_WITH_COMMENTS : isAttention ? "Items for LL" : LEARN_PRONUNCIATION;
+    String learnTitle =
+        isReview ? POSSIBLE_DEFECTS :
+            isComment ? ITEMS_WITH_COMMENTS :
+                isAttention ? "Items for LL" : LEARN_PRONUNCIATION;
+
     final TabAndContent learn = makeTab(tabPanel, isReview ? IconType.EDIT_SIGN : IconType.LIGHTBULB, learnTitle);
     final boolean isNormalList = !isReview && !isComment && !isAttention;
     learn.getTab().addClickHandler(new ClickHandler() {
@@ -746,7 +748,6 @@ public class ListManager implements RequiresResize {
     return new TabAndContent(tabPanel, iconType, label);
   }
 
-
   /**
    * @param ul
    * @param container
@@ -850,7 +851,6 @@ public class ListManager implements RequiresResize {
 //      logger.info("selectTabGivenHistory choose prev ");
     }
   }
-
 
   /**
    * @param tabPanel
