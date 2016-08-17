@@ -47,7 +47,7 @@ import java.util.Collection;
  * To change this template use File | Settings | File Templates.
  */
 public class User extends MiniUser {
-  private static final String NOT_SET = "NOT_SET";
+  public static final String NOT_SET = "NOT_SET";
   private int experience;
   private String ipaddr;
   private String  passwordHash;
