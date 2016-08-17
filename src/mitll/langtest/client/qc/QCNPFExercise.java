@@ -101,7 +101,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
 
   private static final String COMMENT_TOOLTIP = "Comments are optional.";
   private static final String CHECKBOX_TOOLTIP = "Check to indicate this field has a defect.";
-  private static final String APPROVED_BUTTON_TOOLTIP = "Indicate item has no defects.";
+  private static final String APPROVED_BUTTON_TOOLTIP  = "Indicate item has no defects.";
   private static final String APPROVED_BUTTON_TOOLTIP2 = "Item has been marked with a defect";
   private static final String ATTENTION_LL = "Attention LL";
   private static final String MARK_FOR_LL_REVIEW = "Mark for review by Lincoln Laboratory.";
