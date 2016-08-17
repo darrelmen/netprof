@@ -190,8 +190,7 @@ public class EditItem {
             if (itemID.equals(NEW_EXERCISE_ID)) {
               useExercise(getNewItem());
             } else {
-              logger.info("EditItem.makeExerciseList - askServerForExercise = " + itemID);
-
+           //   logger.info("EditItem.makeExerciseList - askServerForExercise = " + itemID);
               super.askServerForExercise(itemID);
             }
           }
@@ -417,6 +416,9 @@ public class EditItem {
         @Override
         public void onClick(ClickEvent event) {
 //          logger.info(getClass() + " : makeDeleteButton npfHelperList (2) " + npfHelper);
+         // delete.setEnabled(false);
+          String id = newUserExercise.getID();
+          logger.info("RemoveFromListOnlyExercise.makeDeleteButton got click to delete " +id);
           deleteItem(newUserExercise.getID(), uniqueID, ul, exerciseList, predefinedContentList);
         }
       });
