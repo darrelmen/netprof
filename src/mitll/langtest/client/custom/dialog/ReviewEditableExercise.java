@@ -34,19 +34,17 @@ package mitll.langtest.client.custom.dialog;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
+import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.TabPanel;
-import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.base.*;
+import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.MouseOverEvent;
-import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
-import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.ReloadableContainer;
 import mitll.langtest.client.custom.tabs.RememberTabAndContent;
@@ -62,6 +60,7 @@ import mitll.langtest.client.scoring.EmptyScoreListener;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayListener;
+import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.ExerciseAnnotation;
@@ -100,6 +99,13 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
 
   private final PagingExerciseList<CommonShell, CommonExercise> exerciseList;
 
+  BasicDialog.FormField context;
+  BasicDialog.FormField contextTrans;
+  private final HTML contextAnno = new HTML();
+  private final HTML contextTransAnno = new HTML();
+  private String originalContext = "";
+  private String originalContextTrans = "";
+
   /**
    * @param itemMarker
    * @param changedUserExercise
@@ -123,6 +129,74 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
         predefinedContent,
         instanceName);
     this.exerciseList = exerciseList;
+  }
+
+  /**
+   * TODO should move this stuff into a class that handles these basic operations
+   *
+   * @param newUserExercise
+   * @param <S>
+   */
+  @Override
+  public <S extends CommonShell & AudioRefExercise & AnnotationExercise> void setFields(S newUserExercise) {
+    super.setFields(newUserExercise);
+    final com.github.gwtbootstrap.client.ui.base.TextBoxBase box = context.box;
+
+    box.setText(originalContext = newUserExercise.getContext());
+
+    useAnnotation(newUserExercise, "context", contextAnno);
+    useAnnotation(newUserExercise, "contextTrans", contextTransAnno);
+
+    box.addBlurHandler(new BlurHandler() {
+      @Override
+      public void onBlur(BlurEvent event) {
+        gotBlur();
+        try {
+          long uniqueID = originalList.getUniqueID();
+          controller.logEvent(box, "TextBox", "UserList_" + uniqueID, "ContextBox = " + box.getValue());
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+    });
+
+    TextBoxBase box1 = contextTrans.box;
+    box1.setText(originalContextTrans = newUserExercise.getContextTranslation());
+    box1.addBlurHandler(new BlurHandler() {
+      @Override
+      public void onBlur(BlurEvent event) {
+        gotBlur();
+        try {
+          long uniqueID = originalList.getUniqueID();
+          controller.logEvent(box1, "TextBox", "UserList_" + uniqueID, "ContextTransBox = " + box1.getValue());
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+    });
+  }
+
+  void grabInfoFromFormAndStuffInfoExercise(MutableExercise mutableExercise) {
+    super.grabInfoFromFormAndStuffInfoExercise(mutableExercise);
+    mutableExercise.setContext(context.getText());
+    mutableExercise.setContextTranslation(contextTrans.getText());
+  }
+
+  protected void makeOptionalRows(DivWidget upper) {
+    makeContextRow(upper);
+    makeContextTransRow(upper);
+  }
+
+  protected void makeContextRow(Panel container) {
+    Panel row = new FluidRow();
+    container.add(row);
+    context = makeBoxAndAnno(row, "Context", "", contextAnno);
+  }
+
+  protected void makeContextTransRow(Panel container) {
+    Panel row = new FluidRow();
+    container.add(row);
+    contextTrans = makeBoxAndAnno(row, "Context Translation", "", contextTransAnno);
   }
 
   private List<RememberTabAndContent> tabs;
@@ -245,8 +319,8 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
 
   private String getUserTitle(int me, MiniUser user) {
     long id = user.getId();
-    if (id == UserDAO.DEFAULT_USER_ID)        return GoodwaveExercisePanel.DEFAULT_SPEAKER;
-    else if (id == UserDAO.DEFAULT_MALE_ID)   return "Default Male";
+    if (id == UserDAO.DEFAULT_USER_ID) return GoodwaveExercisePanel.DEFAULT_SPEAKER;
+    else if (id == UserDAO.DEFAULT_MALE_ID) return "Default Male";
     else if (id == UserDAO.DEFAULT_FEMALE_ID) return "Default Female";
     else return
           (user.getId() == me) ? "by You (" + user.getUserID() + ")" : getUserTitle(user);
@@ -281,7 +355,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   }
 
   private final Set<Widget> audioWasPlayed = new HashSet<>();
- // private final Set<Widget> toResize = new HashSet<>();
+  // private final Set<Widget> toResize = new HashSet<>();
 
 /*
   private String getPath(String path) {
@@ -315,7 +389,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     audioPanel.getElement().setId("ASRScoringAudioPanel");
     noteAudioHasBeenPlayed(exercise.getID(), audio, audioPanel);
     tabAndContent.addWidget(audioPanel);
-  //  toResize.add(audioPanel);
+    //  toResize.add(audioPanel);
 
     Panel vert = new VerticalPanel();
     vert.add(audioPanel);
@@ -441,7 +515,6 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     row.add(prevNext);
 
 
-
     if (newUserExercise.getCombinedMutableUserExercise().checkPredef()) {   // for now, only the owner of the list can remove or add to their list
       row.add(getRemove());
       row.add(getDuplicate());
@@ -510,7 +583,6 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   }
 
   /**
-   *
    * @return
    */
   private Button getDuplicate() {
