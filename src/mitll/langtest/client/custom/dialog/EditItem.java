@@ -357,7 +357,7 @@ public class EditItem {
     if (doNewExercise) { // whole new exercise
       editableExercise = new NewUserExercise(service, controller, itemMarker, this, exercise, getInstance(), originalList);
     } else {
-      boolean iCreatedThisItem = didICreateThisItem(exercise);
+      boolean iCreatedThisItem = didICreateThisItem(exercise) || userManager.isTeacher();  // asked that teachers be able to record audio for other's items
       if (iCreatedThisItem) {  // it's mine!
         editableExercise = new EditableExerciseDialog(service, controller, this, itemMarker, exercise,
             originalList,
@@ -385,7 +385,7 @@ public class EditItem {
    */
   private boolean didICreateThisItem(CommonExercise exercise) {
     boolean isMine = exercise.getCreator() == controller.getUser();
-    logger.info("for " + exercise + " vs " + controller.getUser() + " is Mine " + isMine);
+   // logger.info("for " + exercise + " vs " + controller.getUser() + " is Mine " + isMine);
     return isMine;
   }
 
@@ -406,12 +406,11 @@ public class EditItem {
       this.listInterface = listInterface;
 
       Button delete = makeDeleteButton(ul, originalList.getUniqueID());
-
       container.add(delete);
       return container;
     }
 
-    public Button makeDeleteButton(final UserList<CommonShell> ul, final long uniqueID) {
+    Button makeDeleteButton(final UserList<CommonShell> ul, final long uniqueID) {
       Button delete = makeDeleteButton(ul);
 
       delete.addClickHandler(new ClickHandler() {
