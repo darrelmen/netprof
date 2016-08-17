@@ -61,7 +61,6 @@ import java.util.logging.Logger;
  * @since 3/26/2014.
  */
 public class ReviewItemHelper extends NPFHelper {
-//  public static final String ONLY_WITH_AUDIO_DEFECTS1 = "onlyWithAudioDefects";
   private final Logger logger = Logger.getLogger("ReviewItemHelper");
 
   private static final String ONLY_WITH_AUDIO_DEFECTS = "Only with audio defects";
@@ -69,7 +68,6 @@ public class ReviewItemHelper extends NPFHelper {
   private FlexListLayout<CommonShell, CommonExercise> flexListLayout;
   private final HasText itemMarker;
   private final ReloadableContainer predefinedContent;
-//  private final NPFHelper npfHelper;
 
   /**
    * @param service
@@ -183,7 +181,7 @@ public class ReviewItemHelper extends NPFHelper {
           checkBox.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-              Boolean value = checkBox.getValue();
+//              Boolean value = checkBox.getValue();
           //    logger.info("START : got click on only audio defects - " +value);
              // loadExercises(getHistoryToken(""), getTypeAheadText(), value);
               pushNewSectionHistoryToken();
