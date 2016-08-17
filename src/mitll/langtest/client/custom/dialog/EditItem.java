@@ -99,8 +99,7 @@ public class EditItem {
    * @param service
    * @param userManager
    * @param controller
-   * @paramx npfHelper
-   * @see mitll.langtest.client.custom.Navigation#Navigation
+   * @see mitll.langtest.client.custom.ListManager#ListManager
    */
   public EditItem(final LangTestDatabaseAsync service, final UserManager userManager, ExerciseController controller,
                   ReloadableContainer predefinedContentList, UserFeedback feedback
@@ -332,7 +331,7 @@ public class EditItem {
     if (setFields) editableExercise.setFields(newExercise);
   }
 
-  public void clearNewExercise() {
+  void clearNewExercise() {
     this.newExercise = null;
   }
 
@@ -356,14 +355,13 @@ public class EditItem {
     if (doNewExercise) { // whole new exercise
       editableExercise = new NewUserExercise(service, controller, itemMarker, this, exercise, getInstance(), originalList);
     } else {
-      boolean iCreatedThisItem = didICreateThisItem(exercise) || userManager.isTeacher();  // asked that teachers be able to record audio for other's items
+      boolean iCreatedThisItem = didICreateThisItem(exercise) || (userManager.isTeacher() && !exercise.isPredefined());  // asked that teachers be able to record audio for other's items
       if (iCreatedThisItem) {  // it's mine!
         editableExercise = new EditableExerciseDialog(service, controller, this, itemMarker, exercise,
             originalList,
             exerciseList,
             predefinedContentList,
             getInstance()
-            //    npfHelper
         );
       } else {
         editableExercise = new RemoveFromListOnlyExercise(itemMarker, exercise, originalList);
@@ -371,9 +369,8 @@ public class EditItem {
     }
     return editableExercise;
   }
-
   private String getInstance() {
-    return instanceName;//npfHelper.getInstanceName();
+    return instanceName;
   }
 
   /**
@@ -388,8 +385,11 @@ public class EditItem {
     return isMine;
   }
 
+  /**
+   * @see #getAddOrEditPanel(CommonExercise, HasText, UserList, boolean)
+   */
   private class RemoveFromListOnlyExercise extends NewUserExercise {
-    public RemoveFromListOnlyExercise(HasText itemMarker, CommonExercise exercise, UserList<CommonShell> originalList) {
+    RemoveFromListOnlyExercise(HasText itemMarker, CommonExercise exercise, UserList<CommonShell> originalList) {
       super(EditItem.this.service, EditItem.this.controller, itemMarker, EditItem.this, exercise, EditItem.this.getInstance(), originalList);
     }
 
