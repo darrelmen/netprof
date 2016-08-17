@@ -112,10 +112,10 @@ public class AnnotationDAO extends DAO {
     index(database);
   }
 
-  void index(Database database) throws SQLException {
+  private void index(Database database) throws SQLException {
     createIndex(database, EXERCISEID, ANNOTATION);
-    createIndex(database, FIELD1, ANNOTATION);
-    createIndex(database, MODIFIED, ANNOTATION);
+    createIndex(database, FIELD1,     ANNOTATION);
+    createIndex(database, MODIFIED,   ANNOTATION);
   }
 
   /**
@@ -138,13 +138,14 @@ public class AnnotationDAO extends DAO {
           "VALUES(?,?,?,?,?,?);");
       int i = 1;
 
-      statement.setLong(i++, annotation.getCreatorID());
+      statement.setLong(i++,   annotation.getCreatorID());
       statement.setString(i++, annotation.getExerciseID());
       statement.setString(i++, annotation.getField());
       statement.setString(i++, annotation.getStatus());
       statement.setTimestamp(i++, new Timestamp(System.currentTimeMillis()));
       statement.setString(i++, annotation.getComment());
 
+      logger.info("adding annotation " + annotation);
       int j = statement.executeUpdate();
 
       if (j != 1) {
