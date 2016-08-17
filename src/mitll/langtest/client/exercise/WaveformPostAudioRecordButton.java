@@ -53,7 +53,6 @@ import java.util.logging.Logger;
 */
 public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
 //  private final Logger logger = Logger.getLogger("WaveformPostAudioRecordButton");
-
   private static final String RECORD_BUTTON = "RecordButton";
   private final RecordAudioPanel recordAudioPanel;
   private PlayAudioPanel playAudioPanel;
