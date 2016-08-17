@@ -58,6 +58,7 @@ import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
+import mitll.langtest.shared.User;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -155,13 +156,13 @@ public class ListManager implements RequiresResize {
       }
     });
 
-    npfHelper = new NPFHelper(service, feedback, controller, false);
+    npfHelper  = new NPFHelper(service, feedback, controller, false);
     reviewItem = new ReviewItemHelper(service, feedback, controller, exerciseList);//, npfHelper);
-    avpHelper = new AVPHelper(service, feedback, controller);
-    editItem = new EditItem(service, userManager, controller, exerciseList, feedback);//, npfHelper);
+    avpHelper  = new AVPHelper(service, feedback, controller);
+    editItem   = new EditItem(service, userManager, controller, exerciseList, feedback);//, npfHelper);
   }
 
-  public void addStudyLists(final TabAndContent studyLists) {
+  void addStudyLists(final TabAndContent studyLists) {
     subListTabPanel = new TabPanel();
     studyLists.getContent().add(subListTabPanel);
 
@@ -474,15 +475,11 @@ public class ListManager implements RequiresResize {
     container.add(firstRow);
 
     Panel secondRow = new FluidRow();    // TODO : this is wacky -- clean up...
-    Heading child1 = new Heading(5, "created by " + ul.getCreator().getUserID());
-    secondRow.add(child1);
-    child1.addStyleName("leftFiveMargin");
-    Style style = child1.getElement().getStyle();
-    style.setMarginTop(3, Style.Unit.PX);
-    style.setMarginBottom(3, Style.Unit.PX);
-    secondRow.addStyleName("userListDarkerBlueColor");
 
-    container.add(secondRow);
+    String userID = ul.getCreator().getUserID();
+    if (!userID.equals(User.NOT_SET)) {
+      addCreatedBy(container, secondRow, userID);
+    }
 
     Panel r1 = new FluidRow();
     r1.addStyleName("userListDarkerBlueColor");
@@ -499,6 +496,18 @@ public class ListManager implements RequiresResize {
     return container;
   }
 
+  private void addCreatedBy(FluidContainer container, Panel secondRow, String userID) {
+    Heading child1 = new Heading(5, "created by " + userID);
+    secondRow.add(child1);
+    child1.addStyleName("leftFiveMargin");
+    Style style = child1.getElement().getStyle();
+    style.setMarginTop(3, Style.Unit.PX);
+    style.setMarginBottom(3, Style.Unit.PX);
+    secondRow.addStyleName("userListDarkerBlueColor");
+
+    container.add(secondRow);
+  }
+
   private Panel getFirstInfoRow(UserList ul) {
     Panel firstRow = new FluidRow();    // TODO : this is wacky -- clean up...
     firstRow.getElement().setId("container_first_row");
@@ -509,7 +518,7 @@ public class ListManager implements RequiresResize {
 
 
   private Panel getListInfo(UserList ul) {
-    String subtext = ul.getDescription() + " " + ul.getClassMarker();// + " created by " +ul.getCreator().getUserID();
+    String subtext = ul.getDescription() + " " + ul.getClassMarker();
     Heading widgets = new Heading(1, ul.getName(), subtext);    // TODO : better color for subtext h1->small
 
     widgets.addStyleName("floatLeft");
