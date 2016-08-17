@@ -587,11 +587,11 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     protected void gotClickOnNext() {
       abortPlayback();
 
-      logger.info("on last " + exerciseList.onLast());
+      //logger.info("on last " + exerciseList.onLast());
       if (exerciseList.onLast()) {
         onSetComplete();
       } else {
-        logger.info("load next " + exerciseList.getCurrentExerciseID());
+        //logger.info("load next " + exerciseList.getCurrentExerciseID());
         exerciseList.loadNext();
       }
     }
