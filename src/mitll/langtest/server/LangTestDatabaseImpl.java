@@ -284,7 +284,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         " config " + relativeConfigDir + " request " + request);
 
     try {
-      UserList userListByID = request.getUserListID() != -1 ? db.getUserListByID(request.getUserListID()) : null;
+      boolean isUserListReq = request.getUserListID() != -1;
+      UserList userListByID = isUserListReq ? db.getUserListByID(request.getUserListID()) : null;
 
       if (request.getTypeToSelection().isEmpty()) {   // no unit-chapter filtering
         // get initial exercise set, either from a user list or predefined
@@ -300,7 +301,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         exercises = filterExercises(request, exercises);
 
         String role = request.getRole();
-        int i = markRecordedState(userID, role, exercises, request.isOnlyExamples());
+
+        if (!isUserListReq) {
+          int i = markRecordedState(userID, role, exercises, request.isOnlyExamples());
+        }
 
         // now sort : everything gets sorted the same way
         List<CommonExercise> commonExercises;
