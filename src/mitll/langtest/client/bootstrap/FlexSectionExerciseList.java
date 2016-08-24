@@ -118,7 +118,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
     buttonTypes.add(ButtonType.INFO);
     buttonTypes.add(ButtonType.WARNING);
     setUnaccountedForVertical(CLASSROOM_VERTICAL_EXTRA);
-    downloadHelper = new DownloadHelper(controller, instance, this, controller.isTeacher());
+    downloadHelper = new DownloadHelper(controller, this);
   }
 
   protected SectionWidgetContainer<ButtonGroupSectionWidget> getSectionWidgetContainer() {
@@ -272,7 +272,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
     //   logger.info("user is not a teacher.");
     // }
     DivWidget bottomRow = new DivWidget();
-    bottomRow.getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
+    bottomRow.getElement().getStyle().setMarginBottom(18, Style.Unit.PX);
     DivWidget left = new DivWidget();
     left.addStyleName("floatLeftList");
     left.add(links);
