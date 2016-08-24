@@ -46,6 +46,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.content.NPFlexSectionExerciseList;
+import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.list.HistoryExerciseList;
@@ -266,7 +267,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
   }
 
   private DivWidget getBottomRow() {
-    FlexTable links = downloadHelper.getDownloadLinks();
+    Panel links = downloadHelper.getDownloadLinks();
     // else {
     //   logger.info("user is not a teacher.");
     // }
@@ -279,7 +280,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
     return bottomRow;
   }
 
-  SelectionState getSelectionState() {
+  public SelectionState getSelectionState() {
     return getSelectionState(getHistoryTokenFromUIState("", ""));
   }
 
