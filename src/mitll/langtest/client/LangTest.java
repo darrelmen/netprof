@@ -163,13 +163,15 @@ import java.util.logging.Logger;
  * - Adds audio table references for really old audio like in Pashto 1,2,3
  * 1.4.6
  * - Fixes for bugs #649,#650,#651, partial fix to #652, flip card in avp with arrow keys
+ * 1.4.7
+ * - Fixes for bugs #646 - download link replaced with dialog
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since
  * */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private final Logger logger = Logger.getLogger("LangTest");
 
-  public static final String VERSION_INFO = "1.4.6";
+  public static final String VERSION_INFO = "1.4.7";
 
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
