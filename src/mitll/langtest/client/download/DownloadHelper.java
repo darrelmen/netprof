@@ -42,8 +42,6 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Panel;
@@ -62,15 +60,14 @@ import java.util.logging.Logger;
 public class DownloadHelper {
   private final Logger logger = Logger.getLogger("DownloadHelper");
 
-  private static final String DOWNLOAD_SPREADSHEET = "Download spreadsheet and audio for selected sections.";
+  //  private static final String DOWNLOAD_SPREADSHEET = "Download spreadsheet and audio for selected sections.";
   private static final String DOWNLOAD_AUDIO = "downloadAudio";
-
   private final EventRegistration eventRegistration;
 
   private final FlexSectionExerciseList exerciseList;
 
-  public DownloadHelper(EventRegistration eventRegistration, String instance,
-                        FlexSectionExerciseList exerciseList, boolean isTeacher) {
+  public DownloadHelper(EventRegistration eventRegistration,
+                        FlexSectionExerciseList exerciseList) {
     this.eventRegistration = eventRegistration;
 //    this.instance = instance;
     this.exerciseList = exerciseList;
@@ -83,7 +80,7 @@ public class DownloadHelper {
   public Panel getDownloadLinks() {
     FlexTable links = new FlexTable();
     Button download = new Button("Download", IconType.DOWNLOAD);
-
+    download.setType(ButtonType.SUCCESS);
     selectionState = exerciseList.getSelectionState();
     download.addClickHandler(new ClickHandler() {
       @Override
@@ -93,14 +90,11 @@ public class DownloadHelper {
     });
     links.setWidget(0, 0, download
 
-    );//downloadLink = getDownloadLink());
-//    if (isTeacher) {
-//      links.setWidget(0, 1, contextDownloadLink = getContextDownloadLink());
-//    }
+    );
     return links;
   }
 
-  SelectionState selectionState;
+  private SelectionState selectionState;
 
   /**
    * @param selectionState
@@ -116,28 +110,37 @@ public class DownloadHelper {
     isRegular = true;
 
     DivWidget container = new DivWidget();
-    //container.add(new Heading(4, "Select Audio"));
-    DivWidget showGroup = getShowGroup(false);
-    showGroup.addStyleName("topFiveMargin");
-    showGroup.addStyleName("bottomFiveMargin");
+    if (selectionState.isEmpty()) {
+      container.add(new Heading(3, "Download spreadsheet for whole course."));
+      container.add(new Heading(4, "Select a unit or chapter to download audio."));
+    } else {
 
-    FluidRow row = new FluidRow();
-    row.add(new Heading(4, "Gender"));
-    row.add(showGroup);
-    container.add(row);
+      DivWidget showGroup = getShowGroup(false);
+      showGroup.addStyleName("topFiveMargin");
+      showGroup.addStyleName("bottomFiveMargin");
+      // showGroup.addStyleName("leftFiveMargin");
 
-    row = new FluidRow();
-    row.add(new Heading(4, "Content"));
-    Widget buttonBarChoices = getButtonBarChoices(Arrays.asList("Vocabulary", "Context Sentences"), "vocab", ButtonType.SUCCESS);
-    row.add(buttonBarChoices);
+      FluidRow row = new FluidRow();
+      row.add(new Heading(4, "Gender"));
+      row.add(showGroup);
+      container.add(row);
 
-    container.add(row);
+      row = new FluidRow();
+      row.add(new Heading(4, "Content"));
+      Widget buttonBarChoices = getButtonBarChoices(Arrays.asList("Vocabulary", "Context Sentences"), "vocab", ButtonType.SUCCESS);
+      row.add(buttonBarChoices);
 
-    row = new FluidRow();
-    row.add(new Heading(4, "Speed"));
-    row.add(getShowGroup2());
+      container.add(row);
 
-    container.add(row);
+      row = new FluidRow();
+      row.add(new Heading(4, "Speed"));
+      Widget showGroup2 = getShowGroup2();
+      row.add(showGroup2);
+      // showGroup2.addStyleName("leftFiveMargin");
+
+
+      container.add(row);
+    }
 
     new DialogHelper(true).show(
         "Download Content",
@@ -168,6 +171,7 @@ public class DownloadHelper {
     buttonGroup.setToggle(ToggleType.RADIO);
     toolbar.add(buttonGroup);
 
+
     Set<String> seen = new HashSet<String>();
     boolean isFirst = true;
     for (String v : values) {
@@ -192,7 +196,6 @@ public class DownloadHelper {
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
           public void execute() {
             isContext = !(text.equals("Vocabulary"));
-//            singleSelectExerciseList.gotSelection();//type,text);
           }
         });
       }
@@ -208,7 +211,7 @@ public class DownloadHelper {
     int topToUse = 10;
     style.setMarginTop(topToUse, Style.Unit.PX);
     style.setMarginBottom(topToUse, Style.Unit.PX);
-    style.setMarginLeft(5, Style.Unit.PX);
+    //   style.setMarginLeft(5, Style.Unit.PX);
   }
 
   private Button configure(String title, ClickHandler handler, Button onButton) {
@@ -220,16 +223,15 @@ public class DownloadHelper {
     return onButton;
   }
 
-
   private static final String M = "M";
   private static final String F = "F";
 
-  boolean isMale = false;
-  boolean isContext = false;
-  boolean isRegular = true;
+  private boolean isMale = false;
+  private boolean isContext = false;
+  private boolean isRegular = true;
 
-  Image turtle = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "turtle_32.png"));
-  Image turtleSelected = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "turtle_32_selected.png"));
+  private final Image turtle = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "turtle_32.png"));
+  private final Image turtleSelected = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "turtle_32_selected.png"));
 
   private DivWidget getShowGroup(boolean selectFirst) {
     Collection<String> choices = new ArrayList<>();
@@ -274,7 +276,7 @@ public class DownloadHelper {
     row.add(pushButton);
     addTooltip(pushButton);
     row.setWidth("65px");
-    row.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
+    row.getElement().getStyle().setMarginBottom(25, Style.Unit.PX);
 
 
     return row;
@@ -300,7 +302,7 @@ public class DownloadHelper {
   }
 
 
-  public String toDominoUrl(String relativeLoc) {
+  private String toDominoUrl(String relativeLoc) {
     String baseUrl = GWT.getHostPageBaseURL();
     StringBuilder dominoUrl = new StringBuilder();
 
