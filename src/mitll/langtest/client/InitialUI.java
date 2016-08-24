@@ -49,6 +49,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.Navigation;
+import mitll.langtest.client.download.DownloadIFrame;
 import mitll.langtest.client.flashcard.Banner;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.instrumentation.EventTable;
@@ -139,6 +140,9 @@ public class InitialUI {
     verticalContainer.add(firstRow);
     this.firstRow = firstRow;
     firstRow.getElement().setId("firstRow");
+    DivWidget w = new DivWidget();
+    w.getElement().setId(DownloadIFrame.DOWNLOAD_AREA_ID);
+    RootPanel.get().add(w);
     return firstRow;
   }
 
