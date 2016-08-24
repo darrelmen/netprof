@@ -55,6 +55,7 @@ import mitll.langtest.client.custom.dialog.CreateListDialog;
 import mitll.langtest.client.custom.dialog.EditItem;
 import mitll.langtest.client.custom.tabs.TabAndContent;
 import mitll.langtest.client.dialog.DialogHelper;
+import mitll.langtest.client.download.DownloadLink;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
@@ -481,19 +482,26 @@ public class ListManager implements RequiresResize {
       addCreatedBy(container, secondRow, userID);
     }
 
+    container.add(gwtDownloadLinkRow(ul, instanceName));
+    container.add(getListOperations (ul, instanceName, toSelect));
+
+    return container;
+  }
+
+  private Panel gwtDownloadLinkRow(UserList ul, String instanceName) {
     Panel r1 = new FluidRow();
     r1.addStyleName("userListDarkerBlueColor");
+    r1.add(getDownloadLink(ul, instanceName));
+    return r1;
+  }
 
-    Anchor downloadLink = new DownloadLink(controller).getDownloadLink(ul.getUniqueID(), instanceName + "_" + ul.getUniqueID(), ul.getName());
+  private Anchor getDownloadLink(UserList ul, String instanceName) {
+    long listID = ul.getUniqueID();
+    String linkid = instanceName + "_" + listID;
+    Anchor downloadLink = new DownloadLink(controller).getDownloadLink(listID, linkid, ul.getName());
     Node child = downloadLink.getElement().getChild(0);
     AnchorElement.as(child).getStyle().setColor("#333333");
-
-    r1.add(downloadLink);
-
-    container.add(r1);
-
-    container.add(getListOperations(ul, instanceName, toSelect));
-    return container;
+    return downloadLink;
   }
 
   private void addCreatedBy(FluidContainer container, Panel secondRow, String userID) {
