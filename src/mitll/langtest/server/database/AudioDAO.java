@@ -387,7 +387,7 @@ public class AudioDAO extends DAO {
    * @param relativeConfigDir
    * @see mitll.langtest.server.LangTestDatabaseImpl#attachAudio(mitll.langtest.shared.exercise.CommonExercise)
    * @see DatabaseImpl#attachAudio(CommonExercise)
-   * @see DatabaseImpl#writeZip(OutputStream, long, PathHelper)
+   * @see DatabaseImpl#writeZip(OutputStream, long, PathHelper, AudioExport.AudioExportOptions)
    */
   public int attachAudio(CommonExercise firstExercise, String installPath, String relativeConfigDir) {
     Collection<AudioAttribute> audioAttributes = getAudioAttributes(firstExercise.getID());
