@@ -268,9 +268,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.list.PagingExerciseList#loadExercises
    */
   @Override
-  public <T extends CommonShell> ExerciseListWrapper<T> getExerciseIds(
-      ExerciseListRequest request
-  ) {
+  public <T extends CommonShell> ExerciseListWrapper<T> getExerciseIds( ExerciseListRequest request  ) {
     if (serverProps.isAMAS()) {
       ExerciseListWrapper<AmasExerciseImpl> amasExerciseIds = getAMASExerciseIds(request);
       return (ExerciseListWrapper<T>) amasExerciseIds; // TODO : how to do this without forcing it.
@@ -803,7 +801,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     try {
       exid1 = Integer.parseInt(exid);
     } catch (NumberFormatException e) {
-      logger.warn("can't parse " + exid);
+      logger.warn("can't parse '" + exid +"'");
     }
     return getExercise(exid1, userID, isFlashcardReq);
   }
@@ -1345,7 +1343,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     boolean usePhoneToDisplay1 = usePhoneToDisplay || serverProps.usePhoneToDisplay();
 
-    PretestScore asrScoreForAudio = getAudioFileHelper().getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg,
+    PretestScore asrScoreForAudio =
+        getAudioFileHelper().getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg,
         false, serverProps.useScoreCache(), "" + exerciseID, cachedResult, usePhoneToDisplay1, false);
 
     long timeToRunHydec = System.currentTimeMillis() - then;

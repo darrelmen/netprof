@@ -93,6 +93,8 @@ public class CopyToPostgres<T extends CommonShell> {
     databaseLight.destroy();
   }
 
+
+
   /**
    * Add brazilian, serbo croatian, french, etc.
    *
@@ -270,7 +272,7 @@ public class CopyToPostgres<T extends CommonShell> {
       copyReviewed(db, oldToNewUser, exToID, false);
       copyRefResult(db, oldToNewUser, exToID);
     } else {
-      logger.info("Project " + projectID + " already has exercises in it.");
+      logger.info("\n\nProject " + projectID + " already has exercises in it.  Not loading again...");
     }
   }
 
@@ -400,8 +402,8 @@ public class CopyToPostgres<T extends CommonShell> {
     IUserProjectDAO slickUserProjectDAO = db.getUserProjectDAO();
 
     UserDAO userDAO = new UserDAO(db);
-    int defectDetector = userDAO.getDefectDetector(value);
-    oldToNew.put(defectDetector, slickUserDAO.getDefectDetector(value));
+    int defectDetector = userDAO.getDefectDetector();
+    oldToNew.put(defectDetector, slickUserDAO.getDefectDetector());
 
     List<User> importUsers = userDAO.getUsers();
     logger.info("copyUsers h2 importUsers  " + importUsers.size());
@@ -1047,7 +1049,6 @@ public class CopyToPostgres<T extends CommonShell> {
     String config = arg[1];
     boolean inTest = arg.length > 2;
     CopyToPostgres copyToPostgres = new CopyToPostgres();
-
 
     if (action.equals("drop")) {
       logger.info("drop " + config);
