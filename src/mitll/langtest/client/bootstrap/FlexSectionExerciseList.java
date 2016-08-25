@@ -68,7 +68,7 @@ import java.util.logging.Logger;
  * Time: 5:32 PM
  * To change this template use File | Settings | File Templates.
  */
-public class FlexSectionExerciseList extends NPExerciseList {
+public class FlexSectionExerciseList extends NPExerciseList<ButtonGroupSectionWidget> {
   private final Logger logger = Logger.getLogger("FlexSectionExerciseList");
   private static final int LABEL_MARGIN_BOTTOM = 10;
 
@@ -85,7 +85,6 @@ public class FlexSectionExerciseList extends NPExerciseList {
   private Panel clearColumnContainer;
   private Panel labelColumn;
   private final Heading statusHeader = new Heading(4);
- // private Collection<String> typeOrder;
   private final Panel sectionPanel;
   private final DownloadHelper downloadHelper;
   private int rememberedID = -1;
@@ -141,7 +140,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
    * @see mitll.langtest.client.InitialUI#configureUIGivenUser
    */
   public boolean getExercises(final long userID) {
-    //System.out.println("FlexSectionExerciseList.getExercises : Get exercises for user=" + userID + " instance " + getInstance());
+    //logger.info("FlexSectionExerciseList.getExercises : Get exercises for user=" + userID + " instance " + getInstance());
     this.userID = userID;
     addWidgets();
     return false;
@@ -280,10 +279,10 @@ public class FlexSectionExerciseList extends NPExerciseList {
     bottomRow.add(left);
     return bottomRow;
   }
-
+/*
   SelectionState getSelectionState() {
     return getSelectionState(getHistoryTokenFromUIState("", -1));
-  }
+  }*/
 
   /**
    * Label is in column 0
