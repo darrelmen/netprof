@@ -31,6 +31,16 @@ public class DecodeTest extends BaseTest {
     logger.info("got\n" + exercise);
   }
 
+  @Test
+  public void testSpanishContext() {
+    DatabaseImpl<CommonExercise> russian = getDatabase("spanish");
+    CommonExercise exercise = russian.getExercise("50264");
+    //String context = exercise.getContext();
+
+    logger.info("got\n" + exercise);
+  }
+
+
   //public static final boolean DO_ONE = false;
 
   @Test
