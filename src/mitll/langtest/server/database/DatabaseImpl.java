@@ -1322,7 +1322,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @throws Exception
    * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
-  public void writeZip(OutputStream out, Map<String, Collection<String>> typeToSection,
+  public void writeZip(OutputStream out,
+                       Map<String, Collection<String>> typeToSection,
                        AudioExport.AudioExportOptions options) throws Exception {
     Collection<CommonExercise> exercisesForSelectionState = typeToSection.isEmpty() ?
         getExercises() :
@@ -1340,21 +1341,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         );
   }
 
-  /**
-   * @seex DownloadServlet#writeContextZip(HttpServletResponse, Map)
-   * @paramx out
-   * @paramx typeToSection
-   * @throws Exception
-   */
-/*  public void writeContextZip(OutputStream out, Map<String, Collection<String>> typeToSection) throws Exception {
-    Collection<CommonExercise> exercisesForSelectionState = typeToSection.isEmpty() ?
-        getExercises() :
-        getSectionHelper().getExercisesForSelectionState(typeToSection);
-    new AudioExport(getServerProps()).writeContextZip(out, typeToSection, getSectionHelper(), exercisesForSelectionState,
-        getLanguage(),
-        getAudioDAO(), installPath, configDir);
-  }*/
-
   @Override
   public String getLanguage() {
     return getServerProps().getLanguage();
@@ -1365,7 +1351,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @param out
    * @throws Exception
    */
-  public void writeZip(OutputStream out) throws Exception {
+  public void writeUserListAudio(OutputStream out) throws Exception {
     new AudioExport(getServerProps()).writeZipJustOneAudio(out, getSectionHelper(), getExercises(), installPath);
   }
 
@@ -1379,7 +1365,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @throws Exception
    * @see mitll.langtest.server.DownloadServlet#writeUserList
    */
-  public String writeZip(OutputStream out, long listid, PathHelper pathHelper, AudioExport.AudioExportOptions options) throws Exception {
+  public String writeUserListAudio(OutputStream out, long listid, PathHelper pathHelper,
+                                   AudioExport.AudioExportOptions options) throws Exception {
     String language = getLanguage();
     if (listid == -1) return language + "_Unknown";
 
@@ -1403,7 +1390,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       }
       long now = System.currentTimeMillis();
       logger.debug("\nTook " + (now - then) + " millis to annotate and attach.");
-      new AudioExport(getServerProps()).writeZip(out, userListByID.getName(), getSectionHelper(), copyAsExercises, language,
+      new AudioExport(getServerProps()).writeUserListAudio(out, userListByID.getName(), getSectionHelper(), copyAsExercises, language,
           audioDAO, installPath, configDir, listid == UserListManager.REVIEW_MAGIC_ID, options);
     }
     return language + "_" + userListByID.getName();
