@@ -110,7 +110,7 @@ public class BaseExercise implements IsSerializable, Shell {
    */
   public void addUnitToValue(String unit, String value) {
     if (value == null) return;
-    this.getUnitToValue().put(unit, value);
+    unitToValue.put(unit, value);
   }
 
   /**

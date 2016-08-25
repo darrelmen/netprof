@@ -102,6 +102,7 @@ public class InitialUI implements UILifecycle {
   private Navigation navigation;
   private final BrowserCheck browserCheck = new BrowserCheck();
   private Container verticalContainer;
+  private static final boolean DEBUG =false;
 
   /**
    * @param langTest
@@ -384,14 +385,14 @@ public class InitialUI implements UILifecycle {
   }
 
   private Breadcrumbs getBreadcrumbs() {
-    logger.info("getBreadcrumbs --->");
+ //   logger.info("getBreadcrumbs --->");
 
     Breadcrumbs crumbs = new Breadcrumbs(">");
     crumbs.getElement().setId("breadcrumb");
     crumbs.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
     addCrumbs(crumbs);
 
-    logger.info("getBreadcrumbs now has " + crumbs.getElement().getChildCount() + " links");
+   // logger.info("getBreadcrumbs now has " + crumbs.getElement().getChildCount() + " links");
 
     return crumbs;
   }
@@ -411,7 +412,7 @@ public class InitialUI implements UILifecycle {
       }
     });
     crumbs.add(home);
-    logger.info("\tgetBreadcrumbs add home");
+   // logger.info("\tgetBreadcrumbs add home");
 
     User current = controller.getCurrent();
     if (current != null) {
@@ -423,7 +424,7 @@ public class InitialUI implements UILifecycle {
         }
       });
       crumbs.add(me);
-      logger.info("getBreadcrumbs adding step for current user " + current);
+     // logger.info("getBreadcrumbs adding step for current user " + current);
 
       ProjectStartupInfo startupInfo = lifecycleSupport.getProjectStartupInfo();
       if (startupInfo != null) {
@@ -434,10 +435,10 @@ public class InitialUI implements UILifecycle {
             NavLink lang = new NavLink(crumbName);
 
             crumbs.add(lang);
-            logger.info("getBreadcrumbs adding step for " + lang);
+         //   logger.info("getBreadcrumbs adding step for " + lang);
 
             SlimProject child = project.getChild(currentProject);
-            final NavLink projectCrumb = addProjectCrumb(crumbs, child);
+            /*final NavLink projectCrumb =*/ addProjectCrumb(crumbs, child);
 
             lang.addClickHandler(new ClickHandler() {
               @Override
@@ -714,7 +715,7 @@ public class InitialUI implements UILifecycle {
       userID = user.getId();
     }
 
-    logger.info("gotUser : userID " + userID);
+    if (DEBUG)  logger.info("gotUser : userID " + userID);
 
     banner.setUserName(getGreeting());
     if (userID != lastUser) {
@@ -962,17 +963,17 @@ public class InitialUI implements UILifecycle {
   protected void populateRootPanelIfLogin() {
     int childCount = contentRow.getElement().getChildCount();
 
-    logger.info("populateRootPanelIfLogin root " + contentRow.getElement().getNodeName() + " childCount " + childCount);
+    if (DEBUG)  logger.info("populateRootPanelIfLogin root " + contentRow.getElement().getNodeName() + " childCount " + childCount);
     if (childCount > 0) {
       Node child = contentRow.getElement().getChild(0);
       Element as = Element.as(child);
-      if (false) logger.info("populateRootPanelIfLogin found : '" + as.getId() + "'");
+      if (DEBUG) logger.info("populateRootPanelIfLogin found : '" + as.getId() + "'");
 
       if (as.getId().contains(LOGIN)) {
         logger.info("populateRootPanelIfLogin found login...");
         populateRootPanel();
       } else {
-        logger.info("populateRootPanelIfLogin no login...");
+        if (DEBUG) logger.info("populateRootPanelIfLogin no login...");
       }
     }
   }

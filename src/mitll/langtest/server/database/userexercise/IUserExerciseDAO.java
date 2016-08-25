@@ -39,7 +39,11 @@ import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * @see
+ */
 public interface IUserExerciseDAO extends IDAO {
   void add(CommonExercise userExercise, boolean isOverride);
 
@@ -63,4 +67,7 @@ public interface IUserExerciseDAO extends IDAO {
   void setExerciseDAO(ExerciseDAO<CommonExercise> exerciseDAO);
 
   CommonExercise getPredefExercise(int exid);
+
+  void setExToPhones(Map<Integer, Collection<String>> exToPhones);
+
 }

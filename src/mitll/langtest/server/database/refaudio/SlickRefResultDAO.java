@@ -39,6 +39,7 @@ import mitll.langtest.server.decoder.RefResultDecoder;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickRefResult;
+import mitll.npdata.dao.SlickRefResultJson;
 import mitll.npdata.dao.refaudio.RefResultDAOWrapper;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
@@ -133,18 +134,33 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
    */
   @Override
   public List<Result> getResults() {
+    logger.info("getResults --- ");
     List<Result> results = new ArrayList<>();
     for (SlickRefResult refResult : dao.getAll()) results.add(fromSlick(refResult));
     return results;
   }
 
+  public List<SlickRefResultJson> getJsonResults() {
+    logger.info("getJsonResults --- ");
+
+    return dao.getAllSlim();
+  }
+
   @Override
   public Result getResult(int exid, String answer) {
+    long then = System.currentTimeMillis();
     Collection<SlickRefResult> slickRefResults = dao.byExAndAnswer(exid, answer);
+    long now = System.currentTimeMillis();
+    if (now - then > 20) logger.info("took " + (now - then) + " to lookup " + exid);
     if (slickRefResults.isEmpty()) return null;
     else return fromSlick(slickRefResults.iterator().next());
   }
 
+  /**
+   * @param ids
+   * @return
+   * @see mitll.langtest.server.database.JsonSupport#getJsonRefResults(Map)
+   */
   @Override
   public JSONObject getJSONScores(Collection<Integer> ids) {
     Collection<Tuple3<Integer, String, String>> tuple3s = dao.jsonByExIDs(ids);
@@ -197,6 +213,7 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
 
   @Override
   public int getNumResults() {
+    logger.info("getNumResults ---");
     return dao.getNumRows();
   }
 }
