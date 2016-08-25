@@ -176,7 +176,7 @@ public class DownloadServlet extends DatabaseServlet {
     audioExportOptions.setSkip(typeToSection.isEmpty());
     String zipFileName = getZipFileName(db, typeToSection, audioExportOptions);
 
-    logger.info("writeAudioZip zip file name " + zipFileName);
+    //logger.info("writeAudioZip zip file name " + zipFileName);
     setHeader(response, zipFileName);
     writeZip(response, typeToSection, audioExportOptions);
   }
