@@ -462,7 +462,7 @@ public abstract class BaseAudioDAO extends DAO {
    * @param durationInMillis
    * @param transcript
    * @return
-   * @see #addOrUpdate
+   * @see AudioDAO#addOrUpdate
    */
   protected AudioAttribute getAudioAttribute(int i,
                                              int userid, String audioRef, int exerciseID, long timestamp,
@@ -474,7 +474,7 @@ public abstract class BaseAudioDAO extends DAO {
         audioRef, // answer
         timestamp,
         durationInMillis, audioType,
-        miniUser, transcript);
+        miniUser, transcript, audioRef);
   }
 
   public Set<AudioAttribute> getAndMarkDefects(AudioAttributeExercise userExercise,

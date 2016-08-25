@@ -103,7 +103,8 @@ public class UnitChapterItemHelper<T extends CommonShell> {
     //logger.info("getUnitLessonForExercise " + exercise + " unit value " +exercise.getUnitToValue());
 
     for (String type : typeOrder) {
-      Heading child = new Heading(HEADING_FOR_UNIT_LESSON, type, exercise.getUnitToValue().get(type));
+      String subtext = exercise.getUnitToValue().get(type);
+      Heading child = new Heading(HEADING_FOR_UNIT_LESSON, type, subtext);
       child.addStyleName("rightFiveMargin");
       flow.add(child);
     }

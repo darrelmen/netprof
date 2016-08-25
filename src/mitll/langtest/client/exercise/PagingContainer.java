@@ -63,7 +63,7 @@ import java.util.logging.Logger;
  */
 public class PagingContainer<T extends CommonShell> extends ClickablePagingContainer<T> {
   private final Logger logger = Logger.getLogger("PagingContainer");
-  private static final int MAX_LENGTH_ID = 18;
+  private static final int MAX_LENGTH_ID = 17;
   private static final int JAPANESE_LENGTH = 9;
   private static final String TRUNCATED = "...";
 

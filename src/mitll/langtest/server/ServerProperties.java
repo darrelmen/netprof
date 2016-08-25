@@ -62,42 +62,20 @@ public class ServerProperties {
   private static final Logger logger = Logger.getLogger(ServerProperties.class);
 
   private static final String FALSE = "false";
-  private static final String TRUE = "true";
+  private static final String TRUE  = "true";
 
-  /**
-   * TODO : read this from a config file, or maybe from the sites.json file on np
-   */
-  private static final List<String> SITE_LIST = Arrays.asList(
-      "Dari",
-      "Egyptian",
-      "English",
-      "Farsi",
-      "German",
-      "Korean",
-      "Iraqi",
-      "Levantine",
-      "Mandarin",
-      "MSA",
-      "Pashto1",
-      "Pashto2",
-      "Pashto3",
-      "Russian",
-      "Spanish",
-      "Sudanese",
-      "Tagalog",
-      "Urdu");
-
+/*
   private static final List<String> AMAS_SITES =
       Arrays.asList("Dari", "Farsi", "Korean", "Mandarin", "MSA", "Pashto", "Russian", "Spanish", "Urdu");
-
+*/
 
   public static final String MIRA_DEVEL_HOST = "mira-devel.llan.ll.mit.edu/scorer/item"; //"mira-devel.llan.ll.mit.edu/msa/item";
-  private static final String MIRA_DEVEL = "https://" + MIRA_DEVEL_HOST;
-  private static final String MIRA_LEN = "https://mira.ll.mit.edu/scorer/item";
-  private static final String MIRA_DEFAULT = MIRA_LEN;
+  private static final String MIRA_DEVEL     = "https://" + MIRA_DEVEL_HOST;
+  private static final String MIRA_LEN       = "https://mira.ll.mit.edu/scorer/item";
+  private static final String MIRA_DEFAULT   = MIRA_LEN;
   private static final String MIRA_CLASSIFIER_URL = "miraClassifierURL";
 
-//  private static final String WEBSERVICE_HOST_IP1 = "webserviceHostIP";
+  //  private static final String WEBSERVICE_HOST_IP1 = "webserviceHostIP";
 //  private static final String WEBSERVICE_HOST_PORT = "webserviceHostPort";
   private static final String LESSON_PLAN_FILE = "lessonPlanFile";
   private static final String USE_MYSQL = "useMYSQL";
@@ -108,6 +86,9 @@ public class ServerProperties {
   private static final String FONT_FAMILY = "fontFamily";
   private static final String SLEEP_BETWEEN_DECODES_MILLIS = "sleepBetweenDecodesMillis";
   public static final String MODELS_DIR = "MODELS_DIR";
+  public static final String DB_CONFIG = "dbConfig";
+  public static final String POSTGRES_HYDRA = "postgresHydra";
+  public static final String POSTGRES = "postgres";
   private String miraClassifierURL = MIRA_DEVEL;// MIRA_LEN; //MIRA_DEVEL;
 
   /**
@@ -239,7 +220,8 @@ public class ServerProperties {
     return getDefaultTrue(USE_SCORE_CACHE);
   }
 
-  @Deprecated  public String getLanguage() {
+  @Deprecated
+  public String getLanguage() {
     return props.getProperty(LANGUAGE, "");
   }
 
@@ -308,9 +290,11 @@ public class ServerProperties {
 
   /**
    * Need per project triggering of repopulate ref result table
+   *
    * @return
    */
-  @Deprecated public boolean shouldDoDecode() {
+  @Deprecated
+  public boolean shouldDoDecode() {
     return getDefaultFalse(DO_DECODE);
   }
 
@@ -472,9 +456,11 @@ public class ServerProperties {
 
   /**
    * Should be a per-project option.
+   *
    * @return
    */
-  @Deprecated public boolean shouldDropRefResult() {
+  @Deprecated
+  public boolean shouldDropRefResult() {
     return getDefaultFalse("dropRefResultTable");
   }
 
@@ -625,10 +611,6 @@ public class ServerProperties {
     return props.getProperty("miraFlavor", getLanguage().toLowerCase() + "-amas3");
   }
 
-  public Collection<String> getSites() {
-    return isAMAS() ? AMAS_SITES : SITE_LIST;
-  }
-
   public boolean useMYSQL() {
     return getDefaultFalse(USE_MYSQL);
   }
@@ -689,7 +671,8 @@ public class ServerProperties {
   public long getTrimBefore() {
     return getIntPropertyDef("trimBeforeMillis", "" + TRIM_SILENCE_BEFORE);
   }
-  public long getTrimAfter()  {
+
+  public long getTrimAfter() {
     return getIntPropertyDef("trimAfterMillis", "" + TRIM_SILENCE_AFTER);
   }
 
@@ -715,7 +698,20 @@ public class ServerProperties {
     return props.getProperty("databasePassword", "pgadmin");
   }*/
 
-  public String getDBConfig() { return props.getProperty("dbConfig","postgresHydra"); }
+  public String getDBConfig() {
+    return props.getProperty(DB_CONFIG, POSTGRES_HYDRA);
+  }
+
+  /**
+   * These point to config entries in application.conf in the resources directory in npdata.
+   */
+  public void setLocalPostgres() {
+    props.setProperty(DB_CONFIG, POSTGRES);
+  }
+
+  public void setHydraPostgres() {
+    props.setProperty(DB_CONFIG, POSTGRES_HYDRA);
+  }
 
   public Properties getProps() {
     return props;
