@@ -32,6 +32,7 @@
 
 package mitll.langtest.shared.exercise;
 
+import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.client.list.PagingExerciseList;
 
 import java.io.Serializable;
@@ -45,7 +46,7 @@ import java.util.Map;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 3/30/16.
  */
-public class ExerciseListRequest implements Serializable {
+public class ExerciseListRequest implements IsSerializable {
   private int reqID = 1;
   private Map<String, Collection<String>> typeToSelection = new HashMap<>();
   private String prefix = "";
@@ -86,6 +87,11 @@ public class ExerciseListRequest implements Serializable {
     return typeToSelection;
   }
 
+  /**
+   * @see mitll.langtest.client.list.HistoryExerciseList#loadExercisesUsingPrefix(Map, String, boolean, int)
+   * @param typeToSelection
+   * @return
+   */
   public ExerciseListRequest setTypeToSelection(Map<String, Collection<String>> typeToSelection) {
     this.typeToSelection = typeToSelection;
     return this;

@@ -68,4 +68,6 @@ public interface SectionWidget {
   boolean hasOnlyOne();
 
   List<String> getCurrentSelections();
+
+  void selectFirst();
 }

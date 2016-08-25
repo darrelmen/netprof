@@ -41,6 +41,7 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.instrumentation.EventRegistration;
+import mitll.langtest.client.list.HistoryExerciseList;
 import mitll.langtest.client.list.SelectionState;
 
 import java.util.Collection;
@@ -52,26 +53,28 @@ import java.util.Map;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 11/16/15.
  */
-class DownloadHelper {
+public class DownloadHelper {
   private static final String DOWNLOAD_SPREADSHEET = "Download spreadsheet and audio for selected sections.";
   private static final String DOWNLOAD_AUDIO = "downloadAudio";
 
   private final EventRegistration eventRegistration;
   private final String instance;
-  private final FlexSectionExerciseList exerciseList;
+  private final HistoryExerciseList exerciseList;
   private Anchor downloadLink;
   private Anchor contextDownloadLink;
   private final boolean isTeacher;
 
-  DownloadHelper(EventRegistration eventRegistration, String instance,
-                        FlexSectionExerciseList exerciseList, boolean isTeacher) {
+  public DownloadHelper(EventRegistration eventRegistration,
+                        String instance,
+                        HistoryExerciseList exerciseList,
+                        boolean isTeacher) {
     this.eventRegistration = eventRegistration;
     this.instance = instance;
     this.exerciseList = exerciseList;
     this.isTeacher = isTeacher;
   }
 
-  FlexTable getDownloadLinks() {
+  public FlexTable getDownloadLinks() {
     FlexTable links = new FlexTable();
     links.setWidget(0, 0,downloadLink = getDownloadLink());
     if (isTeacher) {
@@ -80,7 +83,7 @@ class DownloadHelper {
     return links;
   }
 
-  void updateDownloadLinks(SelectionState selectionState) {
+  public void updateDownloadLinks(SelectionState selectionState) {
     if (downloadLink != null)        downloadLink.setHTML(getURLForDownload(selectionState));
     if (contextDownloadLink != null) contextDownloadLink.setHTML(getURLForContextDownload(selectionState));
   }

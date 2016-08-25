@@ -206,15 +206,14 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
    * @see ExerciseList#pushFirstSelection(int, String)
    * @see ExerciseList#pushNewItem(String, int)
    */
-
   private void checkAndAskOrFirst(int exerciseID) {
     int toUse = getValidExerciseID(exerciseID);
     if (hasExercise(toUse)) {
       checkAndAskServer(toUse);
     }
-    else {
-
-    }
+//    else {
+//
+//    }
   }
 
   private int getValidExerciseID(int exerciseID) {
@@ -326,7 +325,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */
   protected void restoreListBoxState(SelectionState selectionState) {
-//    logger.info("restoreListBoxState restore " + selectionState);
+    logger.info("restoreListBoxState restore " + selectionState);
     ProjectStartupInfo startupInfo = controller.getProjectStartupInfo();
     Collection<String> typeOrder = startupInfo.getTypeOrder();
     sectionWidgetContainer.restoreListBoxState(selectionState, typeOrder);
@@ -445,7 +444,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
       if (exerciseID != -1) {
         checkAndAskOrFirst(exerciseID);
       } else {
-        logger.warning("Not doing anything as response to " + request);
+        logger.warning("Not doing anything as response to " + request+ " : " + exerciseID);
       }
     }
   }
@@ -455,13 +454,17 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
     loadExercisesUsingPrefix(typeToSection, getTypeAheadText(), false, -1);
   }
 
+  public SelectionState getSelectionState() {
+    return getSelectionState(getHistoryTokenFromUIState("", -1));
+  }
+
   /**
    * @param token
    * @return object representing type=value pairs from history token
    * @see PagingExerciseList#loadExercises(String, String, boolean, boolean)
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */
-  protected SelectionState getSelectionState(String token) {
+  public SelectionState getSelectionState(String token) {
     return new SelectionState(token, !allowPlusInURL);
   }
 

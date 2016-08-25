@@ -359,6 +359,7 @@ public class RefResultDecoder {
    * @see #writeRefDecode
    */
   private Set<String> getDecodedFiles() {
+    logger.info("getDecodedFiles ----");
     List<Result> results = db.getRefResultDAO().getResults();
     Set<String> decodedFiles = new HashSet<>();
     for (Result res : results) {
