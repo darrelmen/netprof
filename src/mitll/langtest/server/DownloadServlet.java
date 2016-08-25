@@ -126,16 +126,10 @@ public class DownloadServlet extends DatabaseServlet {
           } else if (queryString.startsWith(FILE)) {
             returnAudioFile(response, db, queryString);
           } else if (queryString.startsWith(REQUEST)) {
-            //  String[] split1 = queryString.split("&");
-            //  String requestCommand = split1[0];
-
-            //queryString = split1.length == 1 ? split1[0] : split1[1];
-
-            writeAudioZip(response, db, queryString/*, requestCommand*/);
+            writeAudioZip(response, db, queryString);
           }
         } else {
-          logger.warn("file download request " + requestURI);
-
+//          logger.debug("file download request " + requestURI);
           returnSpreadsheet(response, db, requestURI);
         }
       } catch (Exception e) {
@@ -162,10 +156,14 @@ public class DownloadServlet extends DatabaseServlet {
     return options;
   }
 
-  private void writeAudioZip(HttpServletResponse response, DatabaseImpl db, String queryString/*, String requestCommand*/) {
-    logger.debug("request " +
-        " query " + queryString);
-
+  /**
+   * @see #doGet(HttpServletRequest, HttpServletResponse)
+   * @param response
+   * @param db
+   * @param queryString
+   */
+  private void writeAudioZip(HttpServletResponse response, DatabaseImpl db, String queryString) {
+   // logger.debug("request " +  " query " + queryString);
     String[] split1 = queryString.split("&");
 
     String unitChapter = "";
@@ -174,13 +172,9 @@ public class DownloadServlet extends DatabaseServlet {
     }
 
     Map<String, Collection<String>> typeToSection = getTypeToSelectionFromRequest(unitChapter);
-    setHeader(response, getZipFileName(db, typeToSection));
-
-//    if (requestCommand.contains(CONTEXT)) {
-//      writeContextZip(response, typeToSection);
-//    } else {
-    writeZip(response, typeToSection, getAudioExportOptions(split1));
-//    }
+    AudioExport.AudioExportOptions audioExportOptions = getAudioExportOptions(split1);
+    setHeader(response, getZipFileName(db, typeToSection, audioExportOptions));
+    writeZip(response, typeToSection, audioExportOptions);
   }
 
   /**
@@ -197,17 +191,12 @@ public class DownloadServlet extends DatabaseServlet {
     }
   }
 
-/*  private void writeContextZip(HttpServletResponse response, Map<String, Collection<String>> typeToSection) {
-    try {
-      getDatabase().writeContextZip(response.getOutputStream(), typeToSection);
-    } catch (Exception e) {
-      logger.error("couldn't write zip?", e);
-    }
-  }*/
-
-  private String getZipFileName(DatabaseImpl db, Map<String, Collection<String>> typeToSection) {
+  private String getZipFileName(DatabaseImpl db, Map<String, Collection<String>> typeToSection,
+                                AudioExport.AudioExportOptions audioExportOptions) {
     String name = typeToSection.isEmpty() ? AUDIO : db.getPrefix(typeToSection);
     name = name.replaceAll("\\,", "_");
+
+    name += audioExportOptions.getInfo();
     name += ".zip";
     return getLanguage() + "_" + name;
   }
@@ -345,7 +334,8 @@ public class DownloadServlet extends DatabaseServlet {
    * @param listid
    * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
-  private void writeUserList(HttpServletResponse response, DatabaseImpl db,
+  private void writeUserList(HttpServletResponse response,
+                             DatabaseImpl db,
                              String listid,
                              AudioExport.AudioExportOptions options) {
     Integer id = null;
@@ -361,12 +351,18 @@ public class DownloadServlet extends DatabaseServlet {
       name += ".zip";
       setHeader(response, name);
 
+      options.setUserList(true);
       db.writeZip(response.getOutputStream(), id == null ? -1 : id, new PathHelper(getServletContext()), options);
     } catch (Exception e) {
       logger.error("couldn't write zip?", e);
     }
   }
 
+  /**
+   * @see #writeAudioZip(HttpServletResponse, DatabaseImpl, String)
+   * @param response
+   * @param fileName
+   */
   private void setHeader(HttpServletResponse response, String fileName) {
     response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
     response.setContentType("application/zip");
