@@ -298,11 +298,11 @@ public class AudioExport {
     }
 
     public String getInfo() {
-      return skip ?
+      return skip || isUserList ?
           "" :
           "_" + (justMale ? "male" : "female") + "_" +
-          (justRegularSpeed ? "regular" : "slow") + "_" +
-          (justContext ? "context" : "vocab");
+              (justRegularSpeed ? "regular" : "slow") + "_" +
+              (justContext ? "context" : "vocab");
     }
   }
 
@@ -367,7 +367,7 @@ public class AudioExport {
       populateGenderToCount(toWrite, maleToCount, femaleToCount);
     }
     // find the male and female with most recordings for this exercise
-    MiniUser male = options.justContext ? null : getMaxUser(maleToCount);
+    MiniUser male   = options.justContext ? null : getMaxUser(maleToCount);
     MiniUser female = options.justContext ? null : getMaxUser(femaleToCount);
 
     AudioConversion audioConversion = new AudioConversion(props);
@@ -387,17 +387,25 @@ public class AudioExport {
         String speed = options.justRegularSpeed ? AudioAttribute.REGULAR : AudioAttribute.SLOW;
 
         if (options.isUserList()) {
-          for (AudioAttribute audioAttribute : ex.getAudioAttributes()) {
-            String name = overallName + File.separator + getUniqueName(ex, !isEnglish);
-            copyAudio(zOut, names, name, speed, installPath, audioConversion, audioAttribute, ex.getID(), ex.getForeignLanguage());
+          AudioAttribute audioAttribute = getLatest(ex, true);
+          if (audioAttribute != null) {
+            copyAudio(zOut, installPath, overallName, isEnglish, audioConversion, names, ex, speed, audioAttribute);
             someAudio = true;
+          } else {
+            logger.info("no   male audio for " + ex.getID());
+          }
+          audioAttribute = getLatest(ex, false);
+          if (audioAttribute != null) {
+            copyAudio(zOut, installPath, overallName, isEnglish, audioConversion, names, ex, speed, audioAttribute);
+            someAudio = true;
+          } else {
+            logger.info("no female audio for " + ex.getID());
           }
         } else {
           AudioAttribute recording = getAudioAttribute(majorityUser, ex, options.justMale, speed);
           if (recording != null) {
             // logger.debug("found " + recording + " by " + recording.getUser());
-            String name = overallName + File.separator + getUniqueName(ex, !isEnglish);
-            copyAudio(zOut, names, name, speed, installPath, audioConversion, recording, ex.getID(), ex.getForeignLanguage());
+            copyAudio(zOut, installPath, overallName, isEnglish, audioConversion, names, ex, speed, recording);
             someAudio = true;
           }
         }
@@ -419,6 +427,35 @@ public class AudioExport {
           "num attached " + numAttach +
           " missing audio " + numMissing);
     }
+  }
+
+  private AudioAttribute getLatest(CommonExercise ex, boolean isMale) {
+    long latestTime = 0;
+    AudioAttribute latest = null;
+    for (AudioAttribute audioAttribute : ex.getAudioAttributes()) {
+      if (audioAttribute.isValid() &&
+          (isMale && audioAttribute.isMale()) ||
+              (!isMale && !audioAttribute.isMale())
+          ) {
+
+        if (audioAttribute.getTimestamp() >= latestTime) {
+          latest = audioAttribute;
+          latestTime = audioAttribute.getTimestamp();
+/*          logger.info("getLatest for " + ex.getID() + " male = " + isMale +
+              " found new latest " + audioAttribute.getUniqueID() + " : " + audioAttribute);*/
+        }
+      }
+    }
+
+    return latest;
+  }
+
+  private void copyAudio(ZipOutputStream zOut, String installPath, String overallName,
+                         boolean isEnglish,
+                         AudioConversion audioConversion,
+                         Set<String> names, CommonExercise ex, String speed, AudioAttribute audioAttribute) throws IOException {
+    String name = overallName + File.separator + getUniqueName(ex, !isEnglish);
+    copyAudio(zOut, names, name, speed, installPath, audioConversion, audioAttribute, ex.getID(), ex.getForeignLanguage());
   }
 
   private boolean copyContextAudioBothGenders(ZipOutputStream zOut,
@@ -626,6 +663,7 @@ public class AudioExport {
     String name = trim.equals("N/A") ? foreignLanguage : trim + (includeFL ? "_" + foreignLanguage : "");
     name = name.trim();
     name = name.replaceAll("\"", "\\'").replaceAll("\\?", "").replaceAll("\\:", "").replaceAll("/", " or ").replaceAll("\\\\", " or ");
+    name = name.replaceAll("\\,", "_");
     return name;
   }
 
@@ -658,12 +696,17 @@ public class AudioExport {
       if (names.contains(name)) {
         name += "_" + exid;
       }
-      names.add(name);
+
+      boolean add = names.add(name);
       name = name.replaceAll(" ", "_");
       name += ".mp3";
 
       //logger.debug("copyContextAudio : mp3 name is " + name);
-      addZipEntry(zOut, mp3, name);
+      if (add) {
+        addZipEntry(zOut, mp3, name);
+      } else {
+        logger.info("skip duplicate " + name);
+      }
     } else {
 
       String absolutePath = mp3.getAbsolutePath();
@@ -693,7 +736,11 @@ public class AudioExport {
     if (mp3.exists()) {
       String name = audioRef.replaceAll(".wav", ".mp3");
       //logger.debug("copyAudioSimple : mp3 name is " + name);
-      addZipEntry(zOut, mp3, name);
+      try {
+        addZipEntry(zOut, mp3, name);
+      } catch (Exception e) {
+        logger.debug("skip entry for audio " + name);
+      }
     } else {
       logger.warn("\tDidn't write " + mp3.getAbsolutePath());
     }
