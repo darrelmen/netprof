@@ -157,13 +157,13 @@ public class DownloadServlet extends DatabaseServlet {
   }
 
   /**
-   * @see #doGet(HttpServletRequest, HttpServletResponse)
    * @param response
    * @param db
    * @param queryString
+   * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
   private void writeAudioZip(HttpServletResponse response, DatabaseImpl db, String queryString) {
-   // logger.debug("request " +  " query " + queryString);
+    // logger.debug("request " +  " query " + queryString);
     String[] split1 = queryString.split("&");
 
     String unitChapter = "";
@@ -173,7 +173,11 @@ public class DownloadServlet extends DatabaseServlet {
 
     Map<String, Collection<String>> typeToSection = getTypeToSelectionFromRequest(unitChapter);
     AudioExport.AudioExportOptions audioExportOptions = getAudioExportOptions(split1);
-    setHeader(response, getZipFileName(db, typeToSection, audioExportOptions));
+    audioExportOptions.setSkip(typeToSection.isEmpty());
+    String zipFileName = getZipFileName(db, typeToSection, audioExportOptions);
+
+    logger.info("writeAudioZip zip file name " + zipFileName);
+    setHeader(response, zipFileName);
     writeZip(response, typeToSection, audioExportOptions);
   }
 
@@ -182,7 +186,8 @@ public class DownloadServlet extends DatabaseServlet {
    * @param typeToSection
    * @see #doGet
    */
-  private void writeZip(HttpServletResponse response, Map<String, Collection<String>> typeToSection,
+  private void writeZip(HttpServletResponse response,
+                        Map<String, Collection<String>> typeToSection,
                         AudioExport.AudioExportOptions options) {
     try {
       getDatabase().writeZip(response.getOutputStream(), typeToSection, options);
@@ -191,14 +196,22 @@ public class DownloadServlet extends DatabaseServlet {
     }
   }
 
-  private String getZipFileName(DatabaseImpl db, Map<String, Collection<String>> typeToSection,
+  private String getZipFileName(DatabaseImpl db,
+                                Map<String, Collection<String>> typeToSection,
                                 AudioExport.AudioExportOptions audioExportOptions) {
+    String name = getBaseName(db, typeToSection, audioExportOptions);
+    name += ".zip";
+    return name;
+  }
+
+  private String getBaseName(DatabaseImpl db, Map<String, Collection<String>> typeToSection,
+                             AudioExport.AudioExportOptions audioExportOptions) {
     String name = typeToSection.isEmpty() ? AUDIO : db.getPrefix(typeToSection);
     name = name.replaceAll("\\,", "_");
 
     name += audioExportOptions.getInfo();
-    name += ".zip";
-    return getLanguage() + "_" + name;
+    name = getLanguage() + "_" + name;
+    return name;
   }
 
   /**
@@ -322,7 +335,7 @@ public class DownloadServlet extends DatabaseServlet {
    */
   private void writeAllAudio(HttpServletResponse response) {
     try {
-      getDatabase().writeZip(response.getOutputStream());
+      getDatabase().writeUserListAudio(response.getOutputStream());
     } catch (Exception e) {
       logger.error("Got " + e, e);
     }
@@ -352,16 +365,16 @@ public class DownloadServlet extends DatabaseServlet {
       setHeader(response, name);
 
       options.setUserList(true);
-      db.writeZip(response.getOutputStream(), id == null ? -1 : id, new PathHelper(getServletContext()), options);
+      db.writeUserListAudio(response.getOutputStream(), id == null ? -1 : id, new PathHelper(getServletContext()), options);
     } catch (Exception e) {
       logger.error("couldn't write zip?", e);
     }
   }
 
   /**
-   * @see #writeAudioZip(HttpServletResponse, DatabaseImpl, String)
    * @param response
    * @param fileName
+   * @see #writeAudioZip(HttpServletResponse, DatabaseImpl, String)
    */
   private void setHeader(HttpServletResponse response, String fileName) {
     response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
