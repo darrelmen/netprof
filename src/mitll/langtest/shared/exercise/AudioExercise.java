@@ -71,12 +71,12 @@ public class AudioExercise extends ExerciseShell {
   }
 
   /**
-   * @param prefs
+   * @param preferredVoices
    * @return
    * @see mitll.langtest.server.DatabaseServlet#getJsonForExercise
    */
-  public String getRefAudioWithPrefs(Collection<Long> prefs) {
-    AudioAttribute audio = getRegularSpeedWithPrefs(prefs);
+  public String getRefAudioWithPrefs(Collection<Long> preferredVoices) {
+    AudioAttribute audio = getRegularSpeedWithPrefs(preferredVoices);
     return audio != null ? audio.getAudioRef() : null;
   }
 
@@ -154,7 +154,7 @@ public class AudioExercise extends ExerciseShell {
     return null;
   }
 
-  AudioAttribute getAudioPreferUsers(String name, String value, Collection<Long> prefs) {
+  private AudioAttribute getAudioPreferUsers(String name, String value, Collection<Long> prefs) {
     AudioAttribute candidate = null;
     // long latest = 0;
     for (AudioAttribute audio : getAudioAttributes()) {
@@ -190,6 +190,25 @@ public class AudioExercise extends ExerciseShell {
           (
               (isMale && audioAttribute.isMale()) ||
                   (!isMale && !audioAttribute.isMale()))
+          ) {
+
+        if (audioAttribute.getTimestamp() >= latestTime) {
+          latest = audioAttribute;
+          latestTime = audioAttribute.getTimestamp();
+        }
+      }
+    }
+
+    return latest;
+  }
+
+  public AudioAttribute getLatest(boolean isMale) {
+    long latestTime = 0;
+    AudioAttribute latest = null;
+    for (AudioAttribute audioAttribute : getAudioAttributes()) {
+      if (
+          (isMale && audioAttribute.isMale()) ||
+              (!isMale && !audioAttribute.isMale())
           ) {
 
         if (audioAttribute.getTimestamp() >= latestTime) {
