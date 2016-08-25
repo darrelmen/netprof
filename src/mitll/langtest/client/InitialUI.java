@@ -143,6 +143,9 @@ public class InitialUI {
     DivWidget w = new DivWidget();
     w.getElement().setId(DownloadIFrame.DOWNLOAD_AREA_ID);
     RootPanel.get().add(w);
+    w.setVisible(false);
+//    w.setWidth("0px");
+//    w.setHeight("0px");
     return firstRow;
   }
 
