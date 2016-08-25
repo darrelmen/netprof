@@ -486,7 +486,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
           audioRef, // answer
           timestamp.getTime(),
           dur, realType,
-          user, transcript);
+          user, transcript, audioRef);
       audioAttr.setOldexid(exid);
 
       if (user == null) {
@@ -726,6 +726,11 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
+  }
+
+  @Override
+  public void validateFileExists(int projid, String installPath, String language) {
+
   }
 
   /**

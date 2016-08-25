@@ -177,7 +177,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                                            int imageHeight,
                                            boolean useScoreForBkgColor,
                                            boolean decode,
-                                           boolean useCache, String prefix,
+                                           boolean useCache,
+                                           String prefix,
                                            Result precalcResult,
                                            boolean usePhoneToDisplay) {
     String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;

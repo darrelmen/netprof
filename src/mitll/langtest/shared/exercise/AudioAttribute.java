@@ -74,11 +74,13 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
 
   private int uniqueID;
   private String audioRef;
+  private String actualPath; // where we found it on the hydra server - might be different from audioRef if it's been moved
   private int exid;
   private String oldexid;
   private int userid;
   private long timestamp;
   private long durationInMillis;
+
   /**
    * Don't send to client - just server side
    */
@@ -88,6 +90,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   private Map<String, String> attributes = new HashMap<String, String>();
   private boolean hasBeenPlayed;
   private AudioType audioType;
+ // boolean exists;
 
   public AudioAttribute() {
   }
@@ -102,13 +105,14 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
    * @param type
    * @param user
    * @param transcript       what the speaker read at the time of recording
+   * @param actualPath
    * @seex mitll.langtest.server.database.audio.BaseAudioDAO#getResultsForQuery
    * @see mitll.langtest.server.database.audio.BaseAudioDAO#getAudioAttribute
    */
   public AudioAttribute(int uniqueID, int userid,
                         int exid,
                         String audioRef,
-                        long timestamp, long durationInMillis, AudioType type, MiniUser user, String transcript) {
+                        long timestamp, long durationInMillis, AudioType type, MiniUser user, String transcript, String actualPath) {
     this.uniqueID = uniqueID;
     this.userid = userid;
     this.exid = exid;
@@ -119,6 +123,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
 
     this.setUser(user);
     this.audioType = type;
+    this.actualPath =actualPath;
 
     if (type.equals(AudioType.REGULAR)) {
       markRegular();
@@ -357,10 +362,14 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   public String toString() {
     return "Audio id " + uniqueID +
         " for ex " + getOldexid() +
-        " : " + audioRef +
+        " : " + audioRef + "/" + actualPath+
         " attrs " + attributes +
         " by " + userid + "/" + user +
         " transcript '" + transcript +
         "' ";
+  }
+
+  public String getActualPath() {
+    return actualPath;
   }
 }

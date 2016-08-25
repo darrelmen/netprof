@@ -34,6 +34,7 @@ package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.database.Database;
 import mitll.langtest.shared.SectionNode;
+import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.Shell;
 import org.apache.log4j.Logger;
 
@@ -62,21 +63,23 @@ public class SectionHelper<T extends Shell> {
   }
 
   /**
+   * Try to put least numerous types at the top of the hierarchy
    * @return
    * @see Database#getTypeOrder
    */
   public List<String> getTypeOrder() {
-    //logger.info("getTypeOrder " + predefinedTypeOrder);
     if (predefinedTypeOrder.isEmpty()) {
       List<String> types = new ArrayList<String>();
       types.addAll(typeToSectionToTypeToSections.keySet());
+  //    logger.info("getTypeOrder " + predefinedTypeOrder + " : " + types);
+
       if (types.isEmpty()) {
         types.addAll(typeToUnitToLesson.keySet());
       } else {
         Collections.sort(types, new Comparator<String>() {
           @Override
           public int compare(String o1, String o2) {
-            int first = typeToSectionToTypeToSections.get(o1).size();
+            int first  = typeToSectionToTypeToSections.get(o1).size();
             int second = typeToSectionToTypeToSections.get(o2).size();
             return first > second ? +1 : first < second ? -1 : 0;
           }
@@ -85,7 +88,9 @@ public class SectionHelper<T extends Shell> {
       return types;
     } else {
       Set<String> validTypes = typeToUnitToLesson.keySet();
-      //logger.info("getTypeOrder validTypes " + validTypes);
+
+   //   logger.info("getTypeOrder validTypes " + validTypes);
+
       List<String> valid = new ArrayList<String>(predefinedTypeOrder);
       valid.retainAll(validTypes);
       return valid;
@@ -109,6 +114,10 @@ public class SectionHelper<T extends Shell> {
    */
   public Collection<SectionNode> getSectionNodes() {
     return getChildren(getTypeOrder());
+  }
+
+  public Collection<SectionNode> getSectionNodes(List<String> typeOrder) {
+    return getChildren(typeOrder);
   }
 
   private List<SectionNode> getChildren(List<String> typeOrder) {
@@ -252,41 +261,46 @@ public class SectionHelper<T extends Shell> {
   }
 
   /**
-   * @param where
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesFromFiltered(java.util.Map, mitll.langtest.shared.custom.UserList)
+   * @param exercise
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesFromUserListFiltered(Map, UserList)
    * @see mitll.langtest.server.database.exercise.ExcelImport#getRawExercises()
    */
-  public void addExercise(T where) {
+  public void addExercise(T exercise) {
     List<SectionHelper.Pair> pairs = new ArrayList<SectionHelper.Pair>();
-    for (Map.Entry<String, String> pair : where.getUnitToValue().entrySet()) {
-      Pair pair1 = addExerciseToLesson(where, pair.getKey(), pair.getValue());
-      pairs.add(pair1);
+    for (Map.Entry<String, String> pair : exercise.getUnitToValue().entrySet()) {
+      pairs.add(addExerciseToLesson(exercise, pair.getKey(), pair.getValue()));
     }
     addAssociations(pairs);
   }
 
   /**
    * @param exercise
-   * @param type
-   * @param unitName
+   * @param type for this type - e.g. unit, chapter
+   * @param unitName for this unit or chapter
    * @return
    * @see mitll.langtest.server.database.exercise.ExcelImport#recordUnitChapterWeek
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesFromFiltered(java.util.Map, mitll.langtest.shared.custom.UserList)
    */
   public Pair addExerciseToLesson(T exercise, String type, String unitName) {
-    Map<String, Lesson<T>> unit = getSectionToLesson(type);
+    Map<String, Lesson<T>> sectionToLesson = getSectionToLesson(type);
 
-    addUnitNameEntry(exercise, unitName, unit);
+    addUnitNameEntry(exercise, unitName, sectionToLesson);
 
     exercise.addUnitToValue(type, unitName);
 
     return new Pair(type, unitName);
   }
 
-  private void addUnitNameEntry(T exercise, String unitName, Map<String, Lesson<T>> unit) {
-    Lesson<T> unitForName = unit.get(unitName);
+  /**
+   *
+   * @param exercise
+   * @param unitName
+   * @param sectionToLesson within a type, what groups are there - e.g. chapters
+   */
+  private void addUnitNameEntry(T exercise, String unitName, Map<String, Lesson<T>> sectionToLesson) {
+    Lesson<T> unitForName = sectionToLesson.get(unitName);
     if (unitForName == null) {
-      unit.put(unitName, unitForName = new Lesson<T>(unitName));
+      sectionToLesson.put(unitName, unitForName = new Lesson<T>(unitName));
     }
     unitForName.addExercise(exercise);
   }

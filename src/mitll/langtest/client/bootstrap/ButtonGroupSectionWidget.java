@@ -81,6 +81,11 @@ public class ButtonGroupSectionWidget implements SectionWidget {
     return null;
   }
 
+  @Override
+  public void selectFirst() {
+
+  }
+
   /**
    * @param row
    * @see FlexSectionExerciseList#addButtonGroup(com.google.gwt.user.client.ui.HorizontalPanel, java.util.List, String, java.util.List, ButtonGroupSectionWidget)
