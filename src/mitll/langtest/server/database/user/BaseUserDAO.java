@@ -106,9 +106,8 @@ public abstract class BaseUserDAO extends DAO {
    * @return
    * @see IUserListManager#addDefect(int, String, String)
    * @see AnnotationDAO#AnnotationDAO
-   * @param value
    */
-  public int getDefectDetector(String value) {
+  public int getDefectDetector() {
     return defectDetector;
   }
 
