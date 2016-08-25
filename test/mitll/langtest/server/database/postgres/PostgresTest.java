@@ -37,6 +37,8 @@ import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.copy.CopyToPostgres;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
+import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.exercise.AudioAttribute;
@@ -49,9 +51,7 @@ import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 public class PostgresTest extends BaseTest {
   private static final Logger logger = Logger.getLogger(PostgresTest.class);
@@ -191,6 +191,13 @@ public class PostgresTest extends BaseTest {
   }
 
   @Test
+  public void testMSA() {
+    List<Info> toCopy = new ArrayList<>();
+    toCopy.add(new Info("msa"));
+    testCopy(toCopy);
+  }
+
+  @Test
   public void testTagalog() {
     List<Info> toCopy = new ArrayList<>();
     toCopy.add(new Info("Tagalog"));
@@ -265,17 +272,15 @@ public class PostgresTest extends BaseTest {
 
   private void testCopy(List<Info> infos) {
     CopyToPostgres cp = new CopyToPostgres();
-    boolean doLocal = false;
+    boolean doLocal = true;
     for (Info config : infos) {
       String cc = cp.getCC(config.language);
       long then = System.currentTimeMillis();
       logger.info("\n\n\n-------- STARTED  copy " + config + " " + cc);
 
-      DatabaseImpl databaseLight = doLocal ?
-          getDatabaseLight(config.language, true, "localhost", "postgres", "pgadmin", config.props) :
-          getDatabaseLight(config.language, true, "hydra-dev", "netprof", "npadmin", config.props);
-
-      new CopyToPostgres().copyOneConfig(databaseLight, cc, config.name, config.displayOrder);
+      //  DatabaseImpl databaseLight = getDatabaseLight(config.language, true, "hydra-dev", "netprof", "npadmin", config.props);
+      DatabaseImpl databaseLight = getDatabaseLight(config.language, true, doLocal, config.props);
+      cp.copyOneConfig(databaseLight, cc, config.name, config.displayOrder);
       databaseLight.destroy();
       long now = System.currentTimeMillis();
       logger.info("\n\n\n-------- FINISHED copy " + config + " " + cc + " in " + ((now - then) / 1000) + " seconds");
@@ -415,6 +420,51 @@ public class PostgresTest extends BaseTest {
       }
     }
   }
+
+  @Test
+  public void testNest() {
+    DatabaseImpl database = getDatabaseLight("netProf", false);
+    Collection<SlickProject> all = database.getProjectDAO().getAll();
+    int toIndex = 10;
+    for (SlickProject project : all) {
+      String language = project.language();
+      logger.info("lang " + language);
+      //  String spanish = "spanish";
+      String spanish = "msa";
+      if (language.equalsIgnoreCase(spanish)) {
+        Project project1 = database.getProject(project.id());
+
+        SectionHelper<CommonExercise> sectionHelper = project1.getSectionHelper();
+        logger.info("type order " + sectionHelper.getTypeOrder());
+        sectionHelper.report();
+
+        if (false) {
+          Map<String, String> choice = new HashMap<>();
+          // choice.put("Unit",  "1");
+          choice.put("Chapter", "1");
+//        choice.put("Sound", "rf");
+          Collection<CommonExercise> exercisesForSelectionState = sectionHelper.getExercisesForSimpleSelectionState(choice);
+
+          int b = 0;
+
+          for (CommonExercise ex : exercisesForSelectionState) {
+            if (b++ < 10)
+              logger.info("1 found " + ex.getID() + " : " + ex.getForeignLanguage());
+          }
+
+          choice.put("Sound", "jj");
+          exercisesForSelectionState = sectionHelper.getExercisesForSimpleSelectionState(choice);
+
+          int c = 0;
+          for (CommonExercise ex : exercisesForSelectionState) {
+            if (c++ < 10)
+              logger.info("2 found " + ex.getID() + " :\t" + ex.getForeignLanguage());
+          }
+        }
+      }
+    }
+  }
+
 
   @Test
   public void testGetContextAll() {

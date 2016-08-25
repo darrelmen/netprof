@@ -34,6 +34,7 @@ package mitll.langtest.server.scoring;
 
 import audio.image.ImageType;
 import audio.image.TranscriptEvent;
+import audio.imagewriter.EventAndFileInfo;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
@@ -69,6 +70,11 @@ public class ParseResultJson {
     this.props = properties;
   }
 
+  /**
+   * @param typeToEvent
+   * @return
+   * @see ASRScoring#getTypeToEndTimes(EventAndFileInfo)
+   */
   public Map<NetPronImageType, List<TranscriptSegment>> getNetPronImageTypeToEndTimes(Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent) {
     Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = new HashMap<NetPronImageType, List<TranscriptSegment>>();
     for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : typeToEvent.entrySet()) {
@@ -86,24 +92,26 @@ public class ParseResultJson {
     return typeToEndTimes;
   }
 
+  int warn = 0;
+
   /**
-   * @see #parseJson(String)
    * @param json
    * @param usePhones
    * @return
+   * @see #parseJson(String)
    */
   private Map<ImageType, Map<Float, TranscriptEvent>> parseJsonString(String json, boolean usePhones) {
     if (json.isEmpty()) throw new IllegalArgumentException("json is empty");
- //   else {
+    //   else {
 //      logger.warn("json = " + json);
-   // }
+    // }
     Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap =
         parseJson(JSONObject.fromObject(json), "words", "w", usePhones);
 
     if (imageTypeMapMap.isEmpty()) logger.warn("json " + json + " produced empty events map");
     else if (imageTypeMapMap.get(ImageType.WORD_TRANSCRIPT).isEmpty()) {
-      logger.warn("no words for " +json);
-     // throw new Exception();
+      if (warn++ < 10) logger.warn("no words for " + json);
+      // throw new Exception();
     }
     return imageTypeMapMap;
   }
@@ -120,53 +128,51 @@ public class ParseResultJson {
       logger.warn("json is empty?");
     }
     if (json.equals("{}")) {
-      logger.warn("json is " +json);
+      logger.warn("json is " + json);
     }
     return getNetPronImageTypeToEndTimes(parseJsonString(json, false));
   }
 
   /**
-   * TODOx : actually use the parsed json to get transcript info
+   * uses the parsed json to get transcript info
    *
    * @param jsonObject
    * @param words1
    * @param w1
-   * @paramx eventScores
    * @see #parseJsonString(String, boolean)
-   * @see ASRScoring#getCachedScores
-   * @see #writeTranscripts(String, int, int, String, boolean, String, String, boolean, boolean, boolean)
+   * @see PrecalcScores#getCachedScores
+   * @see Scoring#getTypeToTranscriptEvents(JSONObject, boolean)
    */
   Map<ImageType, Map<Float, TranscriptEvent>> parseJson(JSONObject jsonObject, String words1, String w1, boolean usePhones) {
     Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = new HashMap<ImageType, Map<Float, TranscriptEvent>>();
     SortedMap<Float, TranscriptEvent> wordEvents = new TreeMap<Float, TranscriptEvent>();
     SortedMap<Float, TranscriptEvent> phoneEvents = new TreeMap<Float, TranscriptEvent>();
 
-    typeToEvent.put(ImageType.WORD_TRANSCRIPT,  wordEvents);
+    typeToEvent.put(ImageType.WORD_TRANSCRIPT, wordEvents);
     typeToEvent.put(ImageType.PHONE_TRANSCRIPT, phoneEvents);
 
-   // boolean valid = true;
+    // boolean valid = true;
     if (jsonObject.containsKey(words1)) {
       try {
         JSONArray words = jsonObject.getJSONArray(words1);
         for (int i = 0; i < words.size() /*&& valid*/; i++) {
           JSONObject word = words.getJSONObject(i);
           //if (word.containsKey(STR)) {
-            objectToEvent(wordEvents, w1, word, false);
-            JSONArray phones = word.getJSONArray(PHONES);
-            getPhones(phoneEvents, phones, usePhones);
-         // } else {
-         //   valid = false;
-         // }
+          objectToEvent(wordEvents, w1, word, false);
+          JSONArray phones = word.getJSONArray(PHONES);
+          getPhones(phoneEvents, phones, usePhones);
+          // } else {
+          //   valid = false;
+          // }
         }
       } catch (Exception e) {
         logger.debug("no json array at " + words1 + " in " + jsonObject, e);
       }
-    }
-    else {
-      logger.warn("skipping " + words1 + " " + w1 + " has " +jsonObject.keySet());
+    } else {
+      logger.warn("skipping " + words1 + " " + w1 + " has " + jsonObject.keySet());
     }
 
-   // return valid ? typeToEvent : new HashMap<>();
+    // return valid ? typeToEvent : new HashMap<>();
     return typeToEvent;
   }
 
@@ -183,10 +189,10 @@ public class ParseResultJson {
 
   private void objectToEvent(SortedMap<Float, TranscriptEvent> phoneEvents, String tokenKey, JSONObject phone,
                              boolean usePhone) {
-    String token  = phone.getString(tokenKey);
+    String token = phone.getString(tokenKey);
     double pscore = phone.getDouble(S);
     double pstart = phone.containsKey(STR) ? phone.getDouble(STR) : 0d;
-    double pend   = phone.containsKey(END) ? phone.getDouble(END) : 0d;
+    double pend = phone.containsKey(END) ? phone.getDouble(END) : 0d;
     if (usePhone) {
       token = props.getDisplayPhoneme(token);
     }
