@@ -82,6 +82,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
   /**
    * Update the user if the audio is already there.
+   *
    * @param userid
    * @param exerciseID
    * @param projid
@@ -100,6 +101,12 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   @Override
   public void updateExerciseID(int uniqueID, int exerciseID) {
     dao.updateExerciseID(uniqueID, exerciseID);
+  }
+
+  @Override
+  public void validateFileExists(int projid, String installPath, String language) {
+    dao.validateFileExists(projid, System.currentTimeMillis() - (24 * 60 * 60 * 1000), installPath, language.toLowerCase());
+
   }
 
   @Override
@@ -156,13 +163,20 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   private List<AudioAttribute> toAudioAttributes(Collection<SlickAudio> all) {
     List<AudioAttribute> copy = new ArrayList<>();
     Map<Integer, MiniUser> idToMini = userDAO.getMiniUsers();
-    for (SlickAudio s : all)
+    for (SlickAudio s : all) {
       copy.add(toAudioAttribute(s, idToMini));
+    }
     return copy;
   }
 
   int spew = 0;
 
+  /**
+   * Actual audio path is where we find it on the server... potentially different from where it was originally recorded...
+   * @param s
+   * @param idToMini
+   * @return
+   */
   private AudioAttribute toAudioAttribute(SlickAudio s, Map<Integer, MiniUser> idToMini) {
     MiniUser miniUser = idToMini.get(s.userid());
 
@@ -185,16 +199,16 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
         s.duration(),
         AudioType.valueOf(audiotype.toUpperCase()),
         miniUser,
-        s.transcript());
+        s.transcript(),
+        s.actualpath());
   }
-
 
   /**
    * @param orig
    * @param oldToNewUser
    * @param projid
    * @return
-   * @see mitll.langtest.server.database.CopyToPostgres#copyAudio
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyAudio
    */
   public SlickAudio getSlickAudio(AudioAttribute orig, Map<Integer, Integer> oldToNewUser, int projid) {
     AudioType audioType = orig.getAudioType();
@@ -219,7 +233,10 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
           orig.getDurationInMillis(),
           false,
           orig.getTranscript(),
-          projid);
+          projid,
+          false,
+          0,
+          "");
     }
   }
 

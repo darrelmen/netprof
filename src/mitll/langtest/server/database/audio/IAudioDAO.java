@@ -86,4 +86,6 @@ public interface IAudioDAO extends IDAO {
                                         Map<String, ExerciseAnnotation> fieldToAnnotation);
 
   void updateExerciseID(int uniqueID, int exerciseID);
+
+  void validateFileExists(int projid, String installPath, String language);
 }

@@ -58,7 +58,6 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       SlickProject project
   ) {
     super(serverProps, userListManager, addDefects, project.language());
-   // logger.info("reading from database--------- ");
     this.userExerciseDAO = userExerciseDAO;
     this.project = project;
   }
@@ -90,7 +89,6 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       Collection<SlickRelatedExercise> related = userExerciseDAO.getAllRelated(projid);
 
 //      logger.info(prefix + " readExercises got " + related.size() + " related exercises;");
-
       Map<Integer, CommonExercise> idToEx = getIDToExercise(allNonContextExercises);
       Map<Integer, CommonExercise> idToContext =
           getIDToExercise(userExerciseDAO.getContextByProject(projid, typeOrder, getSectionHelper()));
@@ -107,8 +105,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
             root.getMutable().addContextExercise(context);
             attached++;
           } else if (c++ < 10) {
-            logger.warn("1 " +prefix + " didn't attach " + relatedExercise + "" +
-                " for\n" + root + "\n and " + context);
+            logger.warn("1 " +prefix + " didn't attach " + relatedExercise + "" +" for\n" + root);
           }
         } else if (c++ < 10) {
           logger.warn("2 " + prefix + " didn't attach " + relatedExercise + "" +
