@@ -34,18 +34,15 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioConversion;
+import mitll.langtest.server.database.excel.ExcelExport;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.scoring.LTSFactory;
 import mitll.langtest.server.sorter.ExerciseSorter;
-import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 import java.io.File;
 import java.io.IOException;
@@ -63,14 +60,9 @@ import java.util.zip.ZipOutputStream;
 public class AudioExport {
   private static final Logger logger = Logger.getLogger(AudioExport.class);
 
-  private static final String ID = "ID";
-  private static final String WORD_EXPRESSION = "Word/Expression";
-  private static final String TRANSLITERATION = "Transliteration";
-  private static final String MEANING = "Meaning";
   private static final String MALE = "Male";
   private static final String FEMALE = "Female";
-  private static final String CONTEXT_SENTENCE = "Context Sentence";
-  private static final String CONTEXT_TRANSLATION = "Context Translation";
+
   private Collection<String> typeOrder;
   private final ServerProperties props;
 
@@ -89,7 +81,7 @@ public class AudioExport {
    * @param relPath
    * @param isDefectList
    * @throws Exception
-   * @see DatabaseImpl#writeZip
+   * @see DatabaseImpl#writeUserListAudio
    */
   void writeZip(OutputStream out,
                 Map<String, Collection<String>> typeToSection,
@@ -117,18 +109,18 @@ public class AudioExport {
    * @param relPath
    * @param isDefectList
    * @throws Exception
-   * @see mitll.langtest.server.database.DatabaseImpl#writeZip
+   * @see mitll.langtest.server.database.DatabaseImpl#writeUserListAudio
    */
-  public void writeZip(OutputStream out,
-                       String prefix,
-                       SectionHelper<?> sectionHelper,
-                       Collection<? extends CommonExercise> exercisesForSelectionState,
-                       String language1,
-                       AudioDAO audioDAO,
-                       String installPath,
-                       String relPath,
-                       boolean isDefectList,
-                       AudioExportOptions options) throws Exception {
+  void writeUserListAudio(OutputStream out,
+                          String prefix,
+                          SectionHelper<?> sectionHelper,
+                          Collection<? extends CommonExercise> exercisesForSelectionState,
+                          String language1,
+                          AudioDAO audioDAO,
+                          String installPath,
+                          String relPath,
+                          boolean isDefectList,
+                          AudioExportOptions options) throws Exception {
     List<CommonExercise> copy = getSortableExercises(sectionHelper, exercisesForSelectionState);
     new ExerciseSorter(typeOrder).sortByTooltip(copy);
     writeToStream(copy, audioDAO, installPath, relPath, prefix, typeOrder, language1, out, false, isDefectList, options);
@@ -151,7 +143,7 @@ public class AudioExport {
    * @param exercisesForSelectionState
    * @param installPath
    * @throws Exception
-   * @see mitll.langtest.server.database.DatabaseImpl#writeZip(java.io.OutputStream)
+   * @see mitll.langtest.server.database.DatabaseImpl#writeUserListAudio(java.io.OutputStream)
    */
   public void writeZipJustOneAudio(OutputStream out,
                                    SectionHelper<?> sectionHelper,
@@ -168,10 +160,17 @@ public class AudioExport {
    * @return
    * @see mitll.langtest.server.database.DatabaseImpl#getPrefix(java.util.Map)
    */
-  public String getPrefix(SectionHelper<?> sectionHelper, Map<String, Collection<String>> typeToSection) {
+  String getPrefix(SectionHelper<?> sectionHelper, Map<String, Collection<String>> typeToSection) {
     return getPrefix(typeToSection, sectionHelper.getTypeOrder());
   }
 
+  /**
+   * @param typeToSection
+   * @param typeOrder
+   * @return
+   * @see #getPrefix(SectionHelper, Map)
+   * @see #writeZip(OutputStream, Map, SectionHelper, Collection, String, AudioDAO, String, String, boolean, AudioExportOptions)
+   */
   private String getPrefix(Map<String, Collection<String>> typeToSection, Collection<String> typeOrder) {
     String prefix = "";
     for (String type : typeOrder) {
@@ -194,227 +193,6 @@ public class AudioExport {
   }
 
   /**
-   * @param exercises
-   * @param out
-   * @param typeOrder
-   * @param language
-   * @param isDefectList
-   * @see #writeToStream
-   * @see #addSpreadsheetToZip
-   */
-  private void writeExcelToStream(Collection<CommonExercise> exercises, OutputStream out, Collection<String> typeOrder,
-                                  String language, boolean isDefectList) {
-    SXSSFWorkbook wb = writeExcel(exercises, language, typeOrder, isDefectList);
-    long then = System.currentTimeMillis();
-    try {
-      wb.write(out);
-      long now2 = System.currentTimeMillis();
-      if (now2 - then > 500) {
-        logger.warn("toXLSX : took " + (now2 - then) + " millis to write excel to output stream ");
-      }
-      wb.dispose();
-    } catch (IOException e) {
-      logger.error("got " + e, e);
-    }
-  }
-
-  /**
-   * TODO : come back to this to make sure meaning, english, and foreign language make sense for English
-   * Exercises and UserExercises.
-   *
-   * @param copy
-   * @param language
-   * @param typeOrder
-   * @param isDefectList
-   * @return
-   * @see #writeExcelToStream
-   */
-  private SXSSFWorkbook writeExcel(Collection<CommonExercise> copy,
-                                   String language,
-                                   Collection<String> typeOrder,
-                                   boolean isDefectList) {
-    long now;
-    long then = System.currentTimeMillis();
-
-    SXSSFWorkbook wb = new SXSSFWorkbook(1000); // keep 100 rows in memory, exceeding rows will be flushed to disk
-    Sheet sheet = wb.createSheet("Exercises");
-    int rownum = 0;
-    Row headerRow = sheet.createRow(rownum++);
-
-    boolean english = addHeaderRow(language, typeOrder, headerRow, isDefectList);
-    Set<Long> preferredVoices = props.getPreferredVoices();
-
-    for (CommonExercise exercise : copy) {
-      Row row = sheet.createRow(rownum++);
-
-      int j = 0;
-
-      row.createCell(j++).setCellValue(exercise.getID());
-
-      // logger.warn("English " + exercise.getEnglish() + " getMeaning " + exercise.getMeaning() + " getForeignLanguage " + exercise.getForeignLanguage() + " ref " + exercise.getRefSentence());
-
-      // TODO : some horrible hacks to deal with UserExercise vs Exercise confusion about fields.
-      // WORD_EXPRESSION
-      String english1 = english ? exercise.getForeignLanguage() : exercise.getEnglish();
-      row.createCell(j++).setCellValue(english1);
-
-      if (!english) {
-        row.createCell(j++).setCellValue(exercise.getForeignLanguage());
-      }
-
-      String meaning = english ?
-          (exercise.getMeaning().isEmpty() ? exercise.getEnglish() : exercise.getMeaning()) :
-          exercise.getTransliteration();
-
-      // english ? MEANING : TRANSLITERATION
-      // evil thing where the meaning is empty for UserExercise overrides, but on the spreadsheet
-      row.createCell(j++).setCellValue(meaning);
-
-      for (String type : typeOrder) {
-        row.createCell(j++).setCellValue(exercise.getUnitToValue().get(type));
-      }
-      row.createCell(j++).setCellValue(exercise.getContext());
-      row.createCell(j++).setCellValue(exercise.getContextTranslation());
-
-      if (isDefectList) {
-        addDefects(english, preferredVoices, exercise, row, j);
-
-      }
-    }
-    now = System.currentTimeMillis();
-    if (now - then > 100) {
-      logger.warn("toXLSX : took " + (now - then) + " millis to add " + rownum + " rows to sheet, or " + (now - then) / rownum + " millis/row");
-    }
-    return wb;
-  }
-
-  private void addDefects(boolean english, Set<Long> preferredVoices, CommonExercise exercise, Row row, int j) {
-    //        logger.debug("annos for " + exercise.getID() + "\tfields : " + exercise.getFieldToAnnotation());
-    ExerciseAnnotation annotation = exercise.getAnnotation("english");
-    row.createCell(j++).setCellValue(annotation == null || annotation.isCorrect() ? "" : annotation.getComment());
-
-    if (!english) {
-      annotation = exercise.getAnnotation("foreignLanguage");
-      row.createCell(j++).setCellValue(annotation == null || annotation.isCorrect() ? "" : annotation.getComment());
-    }
-
-    annotation = exercise.getAnnotation(CONTEXT_SENTENCE);
-    row.createCell(j++).setCellValue(annotation == null || annotation.isCorrect() ? "" : annotation.getComment());
-
-    annotation = exercise.getAnnotation(CONTEXT_TRANSLATION);
-    row.createCell(j++).setCellValue(annotation == null || annotation.isCorrect() ? "" : annotation.getComment());
-
-    Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(true, preferredVoices);
-//        logger.debug("for ex " + exercise.getID() + " males " + malesMap);
-//        if (malesMap.isEmpty()) {
-//          logger.debug("ex " + exercise.getID() + " males   " + exercise.getUserMap(true));
-//        }
-    Collection<AudioAttribute> defaultUserAudio = exercise.getDefaultUserAudio();
-
-    addColsForGender(exercise, row, j, malesMap, exercise.getSortedUsers(malesMap), defaultUserAudio);
-
-    Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false, preferredVoices);
-//        logger.debug("for ex " + exercise.getID() + " females " + femalesMap);
-//        if (femalesMap.isEmpty()) {
-//          logger.debug("ex " + exercise.getID() + " females " + exercise.getUserMap(false));
-//        }
-
-    addColsForGender(exercise, row, j, femalesMap, exercise.getSortedUsers(femalesMap), defaultUserAudio);
-  }
-
-  private void addColsForGender(CommonExercise exercise, Row row, int j,
-                                Map<MiniUser, List<AudioAttribute>> malesMap,
-                                Collection<MiniUser> maleUsers,
-                                Collection<AudioAttribute> defaultUserAudio) {
-    if (maleUsers.isEmpty() && defaultUserAudio.isEmpty()) {
-      row.createCell(j++).setCellValue("");
-      row.createCell(j++).setCellValue("");//sCorrect() ? "":annotation.getComment());
-    } else {
-      Collection<AudioAttribute> audioAttributes = maleUsers.isEmpty() ? defaultUserAudio : malesMap.get(maleUsers.iterator().next());
-//      logger.debug("for ex " + exercise.getID() + " first male " + maleUsers.get(0) +  " = " + audioAttributes);
-      if (audioAttributes == null || audioAttributes.isEmpty()) audioAttributes = defaultUserAudio;
-      addColsForAudio(exercise, row, j, audioAttributes);
-    }
-  }
-
-  private void addColsForAudio(CommonExercise exercise, Row row, int j,
-                               Collection<AudioAttribute> audioAttributes) {
-    AudioAttribute regAttr = null;
-    AudioAttribute slowAttr = null;
-    if (audioAttributes.isEmpty()) logger.debug("huh? no audio for " + exercise.getID());
-    for (final AudioAttribute audioAttribute : audioAttributes) {
-      if (audioAttribute.isRegularSpeed()) {
-        regAttr = audioAttribute;
-      } else if (audioAttribute.isSlow()) {  // careful not to get context sentence audio ...
-        slowAttr = audioAttribute;
-      }
-    }
-    if (regAttr == null) {
-      row.createCell(j++).setCellValue("");
-    } else {
-      //    logger.debug("match " + regAttr);
-      for (Map.Entry<String, ExerciseAnnotation> pair : exercise.getFieldToAnnotation().entrySet()) {
-        if (regAttr.getAudioRef().endsWith(pair.getKey())) {
-          ExerciseAnnotation value = pair.getValue();
-          row.createCell(j++).setCellValue(value.isCorrect() ? "" : value.getComment());
-          //      logger.debug("\t look for " + regAttr.getAudioRef() + " found " + value);
-          break;
-        } else {
-          //    logger.debug("\t no match " + regAttr.getAudioRef());
-        }
-      }
-    }
-
-    if (slowAttr == null) {
-      row.createCell(j++).setCellValue("");
-    } else {
-      for (Map.Entry<String, ExerciseAnnotation> pair : exercise.getFieldToAnnotation().entrySet()) {
-        if (slowAttr.getAudioRef().endsWith(pair.getKey())) {
-          ExerciseAnnotation value = pair.getValue();
-          row.createCell(j++).setCellValue(value.isCorrect() ? "" : value.getComment());
-          //  logger.debug("\t look for " + slowAttr.getAudioRef() + " found " + value);
-          break;
-        }
-      }
-
-      //logger.debug("\t look for " + slowAttr.getAudioRef() + " found " + annotation);
-    }
-  }
-
-  private boolean addHeaderRow(String language, Collection<String> typeOrder, Row headerRow, boolean isDefectList) {
-    List<String> columns = new ArrayList<>();
-    columns.add(ID);
-    columns.add(WORD_EXPRESSION);
-    boolean english = isEnglish(language);
-    if (!english) {
-      columns.add(language);
-    }
-    columns.add(english ? MEANING : TRANSLITERATION);
-    columns.addAll(typeOrder);
-    columns.add(CONTEXT_SENTENCE);
-    columns.add(CONTEXT_TRANSLATION);
-
-    if (isDefectList) {
-      //  logger.debug("adding defect columns");
-      columns.add(WORD_EXPRESSION + "_comment");
-      if (!english) columns.add(language + "_comment");
-      columns.add(CONTEXT_SENTENCE + "_comment");
-      columns.add(CONTEXT_TRANSLATION + "_comment");
-      columns.add("male_reg");
-      columns.add("male_slow");
-
-      columns.add("female_reg");
-      columns.add("female_slow");
-    }
-
-    for (int i = 0; i < columns.size(); i++) {
-      headerRow.createCell(i).setCellValue(columns.get(i));
-    }
-
-    return english;
-  }
-
-  /**
    * @param toWrite
    * @param audioDAO
    * @param installPath
@@ -426,7 +204,7 @@ public class AudioExport {
    * @param skipAudio
    * @param isDefectList
    * @throws Exception
-   * @see #writeZip
+   * @see #writeUserListAudio
    */
   private void writeToStream(Collection<CommonExercise> toWrite, AudioDAO audioDAO, String installPath,
                              String relativeConfigDir1, String name, Collection<String> typeOrder,
@@ -434,15 +212,22 @@ public class AudioExport {
                              AudioExportOptions options) throws Exception {
     ZipOutputStream zOut = new ZipOutputStream(out);
 
-    String overallName = language1 + "_" + name;
-    overallName = overallName.replaceAll("\\,", "_");
+    String baseName = baseName(name, language1).replaceAll("\\,", "_");
+    String overallName = baseName + options.getInfo();
+    //overallName = overallName.replaceAll("\\,", "_");
+
+    logger.info("writeToStream overall name " + overallName);
     if (!skipAudio) {
       writeFolderContents(zOut, toWrite, audioDAO, installPath, relativeConfigDir1,
           overallName,
           isEnglish(language1), getCountryCode(language1), options);
     }
 
-    addSpreadsheetToZip(toWrite, typeOrder, language1, zOut, overallName, isDefectList);
+    addSpreadsheetToZip(toWrite, typeOrder, language1, zOut, baseName, isDefectList);
+  }
+
+  private String baseName(String name, String language1) {
+    return language1 + "_" + name;
   }
 
   public static class AudioExportOptions {
@@ -450,42 +235,55 @@ public class AudioExport {
     private boolean justRegularSpeed = true;
     private boolean justContext = false;
     private boolean isUserList = false;
+    boolean skip = false;
 
     public AudioExportOptions() {
     }
 
+/*
     public AudioExportOptions(boolean justMale, boolean justRegularSpeed, boolean justContext, boolean isUserList) {
       this.justContext = justContext;
       this.justRegularSpeed = justRegularSpeed;
       this.justMale = justMale;
       this.isUserList = isUserList;
     }
+*/
 
+/*
     public boolean isJustMale() {
       return justMale;
     }
+*/
 
     public void setJustMale(boolean justMale) {
       this.justMale = justMale;
     }
 
+/*
     public boolean isJustRegularSpeed() {
       return justRegularSpeed;
     }
+*/
 
     public void setJustRegularSpeed(boolean justRegularSpeed) {
       this.justRegularSpeed = justRegularSpeed;
     }
 
+/*
     public boolean isJustContext() {
       return justContext;
+    }
+*/
+
+    public void setSkip(boolean skip) {
+      this.skip = skip;
     }
 
     public void setJustContext(boolean justContext) {
       this.justContext = justContext;
     }
 
-    public boolean isUserList() {
+    boolean isUserList() {
       return isUserList;
     }
 
@@ -496,12 +294,13 @@ public class AudioExport {
     public String toString() {
       return "options " +
           getInfo() + " " +
-          (isUserList ? "user list" : "predef")
-          ;
+          (isUserList ? "user list" : "predef");
     }
 
     public String getInfo() {
-      return (justMale ? "male" : "female") + "_" +
+      return skip ?
+          "" :
+          "_" + (justMale ? "male" : "female") + "_" +
           (justRegularSpeed ? "regular" : "slow") + "_" +
           (justContext ? "context" : "vocab");
     }
@@ -515,7 +314,7 @@ public class AudioExport {
                                    String language1, ZipOutputStream zOut, String overallName,
                                    boolean isDefectList) throws IOException {
     zOut.putNextEntry(new ZipEntry(overallName + File.separator + overallName + ".xlsx"));
-    writeExcelToStream(toWrite, zOut, typeOrder, language1, isDefectList);
+    new ExcelExport(props).writeExcelToStream(toWrite, zOut, typeOrder, language1, isDefectList);
   }
 
   private void writeToStreamJustOneAudio(Collection<CommonExercise> toWrite, String installPath,
@@ -553,6 +352,7 @@ public class AudioExport {
     //int c = 0;
     long then = System.currentTimeMillis();
 
+    logger.info("overall name " + overallName);
     //logger.debug("found audio for " + exToAudio.size() + " items and writing " + toWrite.size() + " items ");
     // logger.debug("realContextPath " + realContextPath + " installPath " + installPath + " relativeConfigDir1 " +relativeConfigDir1);
 
