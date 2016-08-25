@@ -567,6 +567,11 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
     }
   }
 
+  @Override
+  public void setExToPhones(Map<Integer, Collection<String>> exToPhones) {
+
+  }
+
   private void addColumnToTable(Connection connection) throws SQLException {
     addVarchar(connection, USEREXERCISE, TRANSLITERATION);
   }

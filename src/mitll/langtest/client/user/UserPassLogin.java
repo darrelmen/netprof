@@ -144,6 +144,7 @@ public class UserPassLogin extends UserDialog {
   private FormField signUpEmail;
   private FormField signUpPassword;
   private FormField password;
+
   private boolean signInHasFocus = true;
   private final EventRegistration eventRegistration;
   private Button signIn;
@@ -415,7 +416,7 @@ public class UserPassLogin extends UserDialog {
     user = addControlFormFieldWithPlaceholder(fieldset, false, MIN_LENGTH_USER_ID, USER_ID_MAX_LENGTH, USERNAME);
     user.box.addStyleName("topMargin");
     user.box.addStyleName("rightFiveMargin");
-    user.box.getElement().setId("Username_Box_SignIn");
+    user.box.getElement().setId("Use`rname_Box_SignIn");
     user.box.setWidth(SIGN_UP_WIDTH);
 
     user.box.addFocusHandler(new FocusHandler() {

@@ -38,6 +38,7 @@ import mitll.langtest.client.bootstrap.ButtonGroupSectionWidget;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
+import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -49,7 +50,7 @@ import mitll.langtest.shared.exercise.CommonShell;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 1/5/16.
  */
-public class NPExerciseList extends HistoryExerciseList<CommonShell, CommonExercise, ButtonGroupSectionWidget> {
+public class NPExerciseList<V extends SectionWidget> extends HistoryExerciseList<CommonShell, CommonExercise, V> {
   protected NPExerciseList(Panel currentExerciseVPanel,
                            LangTestDatabaseAsync service,
                            UserFeedback feedback,

@@ -40,9 +40,10 @@ import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.userexercise.BaseUserExerciseDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
-import mitll.langtest.shared.exercise.AudioExercise;
+import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.npdata.dao.SlickProject;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -80,6 +81,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    * @param userListManager
    * @param addDefects
    * @param language
+   * @see DBExerciseDAO#DBExerciseDAO(ServerProperties, IUserListManager, boolean, SlickUserExerciseDAO, SlickProject)
    */
   BaseExerciseDAO(ServerProperties serverProps, IUserListManager userListManager, boolean addDefects, String language) {
     this.serverProps = serverProps;
@@ -149,11 +151,11 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     int n = 0;
     for (CommonExercise ex : exercises) {
       attachAudio.attachAudio(ex, transcriptChanged);
-      String refAudioIndex = ex.getRefAudioIndex();
+/*      String refAudioIndex = ex.getRefAudioIndex();
       if (refAudioIndex != null && !refAudioIndex.isEmpty()) {
         attachAudio.addOldSchoolAudio(refAudioIndex, (AudioExercise) ex);
         n++;
-      }
+      }*/
     }
     logger.info("attachAudio afterReadingExercises finished attaching audio to " + n);
 
@@ -166,6 +168,8 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   /**
    * @return
    * @see DatabaseImpl#getSectionHelper(int)
+   * @see #addNewExercises()
+   * @see #populateSections(Collection)
    */
   public SectionHelper<CommonExercise> getSectionHelper() {
     return sectionHelper;
@@ -178,7 +182,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    * @param mediaDir
    * @param installPath
    * @param projectID
-   * @see DatabaseImpl#makeDAO
+   * @see #setDependencies(String, String, IUserExerciseDAO, AddRemoveDAO, IAudioDAO, int)
    */
   private void setAudioDAO(IAudioDAO audioDAO, String mediaDir, String installPath, int projectID) {
     this.audioDAO = audioDAO;
@@ -187,6 +191,8 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     if (!fileInstallPath.exists()) {
       logger.warn("\n\n\nhuh? install path " + fileInstallPath.getAbsolutePath() + " doesn't exist???");
     }
+
+    audioDAO.validateFileExists(projectID, installPath, language);
 
     this.attachAudio = new AttachAudio(
         mediaDir,
