@@ -76,6 +76,7 @@ import mitll.langtest.server.database.word.IWordDAO;
 import mitll.langtest.server.database.word.SlickWordDAO;
 import mitll.langtest.server.database.word.Word;
 import mitll.langtest.server.mail.MailSupport;
+import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.ContextPractice;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
@@ -95,6 +96,7 @@ import mitll.langtest.shared.scoring.PretestScore;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickProject;
+import mitll.npdata.dao.SlickRefResultJson;
 import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
@@ -295,8 +297,7 @@ public class DatabaseImpl implements Database {
           if (slickProject.language().equalsIgnoreCase("english")) {
             rememberProject(pathHelper, serverProps, logAndNotify, relativeConfigDir, reload, slickProject);
           }
-        }
-        else {
+        } else {
           rememberProject(pathHelper, serverProps, logAndNotify, relativeConfigDir, reload, slickProject);
         }
       }
@@ -375,9 +376,9 @@ public class DatabaseImpl implements Database {
 
 //    addRemoveDAO = new AddRemoveDAO(this);
 
-    userExerciseDAO = new SlickUserExerciseDAO(this, dbConnection);
-
     refresultDAO = new SlickRefResultDAO(this, dbConnection, serverProps.shouldDropRefResult());
+    userExerciseDAO = new SlickUserExerciseDAO(this, dbConnection);//, getExerciseToPhone(refresultDAO));
+
     wordDAO = new SlickWordDAO(this, dbConnection);
     phoneDAO = new SlickPhoneDAO(this, dbConnection);
 
@@ -419,27 +420,43 @@ public class DatabaseImpl implements Database {
   }
 
   /**
+   * @see #initializeDAOs(PathHelper)
+   * @param refResultDAO
+   * @return
+   */
+  Map<Integer, Collection<String>> getExerciseToPhone(IRefResultDAO refResultDAO) {
+    long then = System.currentTimeMillis();
+    List<SlickRefResultJson> jsonResults = refResultDAO.getJsonResults();
+    long now = System.currentTimeMillis();
+    logger.info("took " +(now-then) + " millis to get ref results");
+    Map<Integer, Collection<String>> exToPhones = new HashMap<>();
+
+    ParseResultJson parseResultJson = new ParseResultJson(null);
+
+    for (SlickRefResultJson exjson : jsonResults) {
+      Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.parseJson(exjson.scorejson());
+      List<TranscriptSegment> transcriptSegments = netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
+      Set<String> phones = new HashSet<>();
+      for (TranscriptSegment segment : transcriptSegments) phones.add(segment.getEvent());
+
+      int exid = exjson.exid();
+      for (String phone : phones) {
+        Collection<String> phonesForEx = exToPhones.get(exid);
+        if (phonesForEx == null) exToPhones.put(exid, phonesForEx = new HashSet<>());
+        phonesForEx.add(phone);
+      }
+    }
+    logger.info("took " +(System.currentTimeMillis()-then) + " millis to populate ex->phone map");
+
+    return exToPhones;
+  }
+
+  /**
    * @return
    * @see #initializeDAOs
    */
   private DBConnection getDbConnection() {
-/*    logger.info("getDbConnection : " +
-        "connecting to " + serverProps.getDatabaseType() +
-        "\n\thost " + serverProps.getDatabaseHost() +
-        "\n\tport " + serverProps.getDatabasePort() +
-        "\n\tname " + serverProps.getDatabaseName() +
-        "\n\tuser " + serverProps.getDatabaseUser() +
-        "\n\tpass " + serverProps.getDatabasePassword().length() + " chars"
-    );*/
-
-    logger.info("using " + serverProps.getDBConfig());
-
-/*    return new DBConnection(serverProps.getDatabaseType(),
-        serverProps.getDatabaseHost(),
-        serverProps.getDatabasePort(),
-        serverProps.getDatabaseName(),
-        serverProps.getDatabaseUser(),
-        serverProps.getDatabasePassword());*/
+    logger.info("getDbConnection using " + serverProps.getDBConfig());
     return new DBConnection(serverProps.getDBConfig());
   }
 
@@ -611,6 +628,9 @@ public class DatabaseImpl implements Database {
       return Collections.emptyList();
     }
     Project project = getProjectOrFirst(projectid);
+
+
+
     List<CommonExercise> rawExercises = project.getRawExercises();
     if (rawExercises.isEmpty()) {
       logger.warn("getExercises no exercises in " + getServerProps().getLessonPlan() + " at " + installPath);
@@ -686,13 +706,21 @@ public class DatabaseImpl implements Database {
       Project project = getProject(projid);
 
       SlickProject project1 = project.getProject();
+      List<String> typeOrder = project.getTypeOrder();
+      boolean sound = typeOrder.remove("Sound");
+      if (!sound) logger.warn("sound missing???");
+      else {
+        typeOrder.add("Sound");
+      }
       ProjectStartupInfo startupInfo = new ProjectStartupInfo(
           getServerProps().getProperties(),
-          project.getTypeOrder(),
-          project.getSectionHelper().getSectionNodes(),
+          typeOrder,
+          project.getSectionHelper().getSectionNodes(typeOrder),
           project1.id(),
           project1.language(), hasModel(project1));
-      logger.info("setStartupInfo : For " + userWhere + " Set startup info " + startupInfo);
+      logger.info("setStartupInfo : For " + userWhere +
+          "\n\t " + typeOrder +
+          "\n\tSet startup info " + startupInfo);
       userWhere.setStartupInfo(startupInfo);
     }
   }
@@ -745,9 +773,12 @@ public class DatabaseImpl implements Database {
           makeExerciseDAO(lessonPlanFile, isURL);
 
           //       logger.info("set exercise dao " + exerciseDAO + " on " + userExerciseDAO);
-          ExerciseDAO<CommonExercise> exerciseDAO = getProjects().iterator().next().getExerciseDAO();
-          userExerciseDAO.setExerciseDAO(exerciseDAO);
-
+          if (getProjects().isEmpty()) {
+            logger.warn("no projects loaded yet...?");
+          } else {
+            ExerciseDAO<CommonExercise> exerciseDAO = getProjects().iterator().next().getExerciseDAO();
+            userExerciseDAO.setExerciseDAO(exerciseDAO);
+          }
           // if (!serverProps.useH2()) {
           configureProjects(mediaDir, installPath);
           //}
@@ -758,6 +789,9 @@ public class DatabaseImpl implements Database {
   }
 
   private void configureProjects(String mediaDir, String installPath) {
+    // TODO : this seems like a bad idea --
+    userExerciseDAO.setExToPhones(getExerciseToPhone(refresultDAO));
+
     for (Project project : getProjects()) {
       configureProject(mediaDir, installPath, project);
     }
@@ -777,6 +811,7 @@ public class DatabaseImpl implements Database {
     if (project1 == null) logger.info("note : no project for " + project);
     int id = project1 == null ? -1 : project1.id();
     setDependencies(mediaDir, installPath, exerciseDAO1, id);
+
     List<CommonExercise> rawExercises = project.getRawExercises();
     if (!rawExercises.isEmpty()) {
       logger.debug("first exercise is " + rawExercises.iterator().next());
@@ -831,10 +866,10 @@ public class DatabaseImpl implements Database {
    */
   private void setExerciseDAOs() {
     for (Project project : getProjects()) {
-     // if (project.getProject().id() == 3)
+      // if (project.getProject().id() == 3)
 //      logger.info("makeExerciseDAO project     " + project);
       setExerciseDAO(project);
-  //    logger.info("makeExerciseDAO project now " + project);
+      //    logger.info("makeExerciseDAO project now " + project);
     }
   }
 
@@ -1017,11 +1052,10 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * TODO : pass in projectid...
-   *
    * @param typeToSection
    * @param projectid
    * @return
+   * @see ScoreServlet#getRefInfo(String, JSONObject)
    */
   public JSONObject getJsonRefResult(Map<String, Collection<String>> typeToSection, int projectid) {
     return getJsonSupportForProject(projectid).getJsonRefResults(typeToSection);
@@ -1279,10 +1313,10 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * TODO : add get tablename method to slick DAOs.
+   * @see #initializeDAOs(PathHelper)
    */
   public void createTables() {
-    // logger.info("createTables create slick tables - has " + dbConnection.getTables());
+    logger.info("createTables create slick tables - has " + dbConnection.getTables());
     List<String> created = new ArrayList<>();
 
     List<IDAO> idaos = Arrays.asList(
@@ -1427,7 +1461,6 @@ public class DatabaseImpl implements Database {
 
     Map<Integer, String> join = new HashMap<>();
     populateIDToRefAudio(join, getExercises(projectid));
-
 
     Collection<CommonExercise> all = userExerciseDAO.getAllUserExercises(projectid);
     getExerciseDAO(projectid).attachAudio(all);
@@ -1605,7 +1638,7 @@ public class DatabaseImpl implements Database {
     if (toRet == null) {
       if (warns++ < 50)
         logger.info("couldn't find exercise " + id + " in project #" + projid + " looking in user exercise table");
-  //    toRet = getUserExerciseByExID(id);
+      //    toRet = getUserExerciseByExID(id);
     }
 
     return toRet;
@@ -1710,7 +1743,7 @@ public class DatabaseImpl implements Database {
       }
       for (CommonExercise ex : copyAsExercises) {
         userListManager.addAnnotations(ex);
-        getAudioDAO().attachAudio(ex, pathHelper.getInstallPath(), configDir,language);
+        getAudioDAO().attachAudio(ex, pathHelper.getInstallPath(), configDir, language);
       }
       long now = System.currentTimeMillis();
       logger.debug("\nTook " + (now - then) + " millis to annotate and attach.");

@@ -35,12 +35,14 @@ package mitll.langtest.server.database.refaudio;
 import mitll.langtest.server.audio.DecodeAlignOutput;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.result.Result;
+import mitll.langtest.server.decoder.RefResultDecoder;
+import mitll.npdata.dao.SlickRefResultJson;
 import net.sf.json.JSONObject;
 
 import java.util.Collection;
 import java.util.List;
 
-public interface IRefResultDAO  extends IDAO {
+public interface IRefResultDAO extends IDAO {
   boolean removeForExercise(int exid);
 
   long addAnswer(int userID,
@@ -59,11 +61,35 @@ public interface IRefResultDAO  extends IDAO {
 
   boolean removeForAudioFile(String audioFile);
 
+  // TODO : add  a simple ex, json pair here
+  // get it, parse it, make reverse map of phone->ex
+  // add this to pairs when read in exercise
+  // add sound to type order...
+  // add fancy table widget?
+  // have widgets cascade values...?
+  // have sort order of items be smarter
+
+  /**
+   * @see RefResultDecoder#getDecodedFiles()
+   * @return
+   */
   List<Result> getResults();
 
+  List<SlickRefResultJson> getJsonResults();
+
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getPretestScore(int, int, String, String, int, int, boolean, int, boolean)
+   * @param exid
+   * @param answer
+   * @return
+   */
   Result getResult(int exid, String answer);
 
   JSONObject getJSONScores(Collection<Integer> ids);
 
+  /**
+   * @see mitll.langtest.server.decoder.RefResultDecoder#trimRef(int, Collection, String)
+   * @return
+   */
   int getNumResults();
 }

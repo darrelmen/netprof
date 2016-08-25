@@ -34,10 +34,7 @@ package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.shared.exercise.Shell;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -52,7 +49,11 @@ public class Lesson<T extends Shell> {
   private final List<T> exerciseList = new ArrayList<>();
   private String unit;
 
-  public Lesson(String unit) { this.unit = unit; }
+  /**
+   * @see SectionHelper#addUnitNameEntry(Shell, String, Map)
+   * @param unit
+   */
+  Lesson(String unit) { this.unit = unit; }
   public void addExercise(T e) { exerciseList.add(e); }
   public boolean remove(T exercise) {
     return exerciseList.remove(exercise);
