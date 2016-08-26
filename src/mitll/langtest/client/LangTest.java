@@ -165,6 +165,8 @@ import java.util.logging.Logger;
  * - Fixes for bugs #649,#650,#651, partial fix to #652, flip card in avp with arrow keys
  * 1.4.7
  * - Fixes for bugs #646 - download link replaced with dialog
+ * 1.4.8
+ * - Fixed bug with detecting RTL text and showing it in the exercise list
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since
  * */
