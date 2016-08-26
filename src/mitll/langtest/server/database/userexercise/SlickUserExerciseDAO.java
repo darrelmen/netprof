@@ -273,7 +273,7 @@ public class SlickUserExerciseDAO
       }
       else {
         for (String phone : phones) {
-          pairs.add(sectionHelper.addExerciseToLesson(exercise, "Sound", phone));
+          pairs.add(sectionHelper.getPairForExerciseAndLesson(exercise, "Sound", phone));
         }
       }
       sectionHelper.addAssociations(pairs);
