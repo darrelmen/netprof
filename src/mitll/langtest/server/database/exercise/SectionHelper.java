@@ -282,12 +282,17 @@ public class SectionHelper<T extends Shell> {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesFromFiltered(java.util.Map, mitll.langtest.shared.custom.UserList)
    */
   public Pair addExerciseToLesson(T exercise, String type, String unitName) {
-    Map<String, Lesson<T>> sectionToLesson = getSectionToLesson(type);
-
-    addUnitNameEntry(exercise, unitName, sectionToLesson);
+    Pair pair = getPairForExerciseAndLesson(exercise, type, unitName);
 
     exercise.addUnitToValue(type, unitName);
 
+    return pair;
+  }
+
+  public Pair getPairForExerciseAndLesson(T exercise, String type, String unitName) {
+    Map<String, Lesson<T>> sectionToLesson = getSectionToLesson(type);
+
+    addUnitNameEntry(exercise, unitName, sectionToLesson);
     return new Pair(type, unitName);
   }
 

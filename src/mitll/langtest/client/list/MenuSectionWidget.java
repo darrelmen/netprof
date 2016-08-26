@@ -53,9 +53,9 @@ public class MenuSectionWidget implements SectionWidget {
 
   private final String type;
   // private ListBox child1 = new ListBox();
-  DropdownButton child2;
-  Collection<SectionNode> nodes;
-  SimpleSelectExerciseList singleSelectExerciseList;
+  private DropdownButton child2;
+  private final Collection<SectionNode> nodes;
+  private final SimpleSelectExerciseList singleSelectExerciseList;
 
   public MenuSectionWidget(String type, Collection<SectionNode> nodes, SimpleSelectExerciseList singleSelectExerciseList) {
     this.type = type;
@@ -63,8 +63,8 @@ public class MenuSectionWidget implements SectionWidget {
     this.singleSelectExerciseList = singleSelectExerciseList;
   }
 
-  int num = 0;
-  ButtonToolbar toolbar = new ButtonToolbar();
+  private int num = 0;
+  private final ButtonToolbar toolbar = new ButtonToolbar();
 
   public void addChoices(Panel container,
                          String label,
@@ -175,7 +175,7 @@ public class MenuSectionWidget implements SectionWidget {
     child2.setText(item);
   }
 
-  MenuSectionWidget childWidget;
+  private MenuSectionWidget childWidget;
 
   public void addChild(MenuSectionWidget value) {
     childWidget = value;
