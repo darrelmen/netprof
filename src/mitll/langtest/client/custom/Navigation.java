@@ -190,7 +190,7 @@ public class Navigation implements RequiresResize, ShowTab {
   }
 
   public boolean isRTL() {
-    return controller.getProps().isRightAlignContent() || (learnHelper.getExerciseList() != null && learnHelper.getExerciseList().isRTL());
+    return controller.getProps().isRightAlignContent();// || (learnHelper.getExerciseList() != null && learnHelper.getExerciseList().isRTL());
   }
 
   private void makeDialogWindow(final LangTestDatabaseAsync service, final ExerciseController controller) {
