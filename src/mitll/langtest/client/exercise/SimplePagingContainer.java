@@ -106,20 +106,25 @@ public class SimplePagingContainer<T> implements RequiresResize {
   }
 
   private void makeCellTable() {
-    CellTable.Resources o = chooseResources();
-
-    this.table = makeCellTable(o);
-
+    this.table = makeCellTable(chooseResources());
     configureTable();
   }
+
+  private CellTable<T> makeCellTable(CellTable.Resources o) {
+    return new CellTable<T>(getPageSize(), o);
+  }
+
+  protected int getPageSize() { return PAGE_SIZE;  }
 
   protected CellTable.Resources chooseResources() {
     CellTable.Resources o;
 
     if (controller.isRightAlignContent()) {   // so when we truncate long entries, the ... appears on the correct end
-      // logger.info("simplePaging : chooseResources RTL - content");
+      logger.info("simplePaging : chooseResources RTL - content");
       o = GWT.create(RTLTableResources.class);
     } else {
+      logger.info("simplePaging : chooseResources LTR - content");
+
       o = GWT.create(TableResources.class);
     }
     return o;
@@ -143,13 +148,6 @@ public class SimplePagingContainer<T> implements RequiresResize {
   protected void addColumnsToTable() {
   }
 
-  private CellTable<T> makeCellTable(CellTable.Resources o) {
-    return new CellTable<T>(getPageSize(), o);
-  }
-
-  protected int getPageSize() {
-    return PAGE_SIZE;
-  }
 
   public void flush() {
     dataProvider.flush();
