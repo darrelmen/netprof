@@ -841,9 +841,14 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     return onFirst(getCurrentExercise());
   }
 
-  public boolean isRTL() {
-    return !isEmpty() && WordCountDirectionEstimator.get().estimateDirection(getAt(0).getForeignLanguage()) == HasDirection.Direction.RTL;
-  }
+/*  public boolean isRTL() {
+    if (!isEmpty()) {
+      HasDirection.Direction direction = WordCountDirectionEstimator.get().estimateDirection(getAt(0).getForeignLanguage());
+      logger.info("isRTL not empty : rtl " + direction);
+    }
+    boolean b = !isEmpty() && WordCountDirectionEstimator.get().estimateDirection(getAt(0).getForeignLanguage()) == HasDirection.Direction.RTL;
+    return b;
+  }*/
 
   /**
    * @param current
