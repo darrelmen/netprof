@@ -207,8 +207,14 @@ public class InitialUI {
     return new HTML(langTest.getInfoLine());
   }
 
+  /**
+   *
+   * @return
+   */
   public boolean isRTL() {
-    return navigation != null && navigation.isRTL();
+    boolean b = navigation != null && navigation.isRTL();
+    if (b) logger.info("content is RTL!");
+    return b;
   }
 
   private class LogoutClickHandler implements ClickHandler {
@@ -222,7 +228,6 @@ public class InitialUI {
    * @seex mitll.langtest.client.LangTest.LogoutClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)
    */
   private void resetState() {
-    //logger.info("clearing current history token");
     History.newItem(""); // clear history!
     userManager.clearUser();
     lastUser = NO_USER_INITIAL;
