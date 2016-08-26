@@ -36,6 +36,8 @@ import audio.image.ImageType;
 import audio.imagewriter.SimpleImageWriter;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.TextBox;
+import com.google.gwt.i18n.client.HasDirection;
+import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabase;
@@ -1161,7 +1163,19 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public StartupInfo getStartupInfo() {
-    return new StartupInfo(serverProps.getProperties(), db.getTypeOrder(), db.getSectionNodes());
+    Collection<CommonExercise> exercises = db.getExercises();
+    Map<String, String> properties = serverProps.getProperties();
+    if (!exercises.isEmpty()) {
+      CommonExercise next = exercises.iterator().next();
+      HasDirection.Direction direction = WordCountDirectionEstimator.get().estimateDirection(next.getForeignLanguage());
+      String rtl = properties.get("rtl");
+      if (rtl == null) {
+        boolean isRTL = direction == HasDirection.Direction.RTL;
+       // logger.info("examined text and found it to be " + direction);
+        properties.put("rtl", ""+isRTL);
+      }
+    }
+    return new StartupInfo(properties, db.getTypeOrder(), db.getSectionNodes());
   }
 
   /**
