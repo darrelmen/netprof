@@ -282,7 +282,9 @@ public class PropertyHandler {
       else if (key.equals(LOG_CLIENT_MESSAGES)) logClientMessages = getBoolean(value);
       else if (key.equals(LANGUAGE)) language = value;
       else if (key.equals(SPLASH_TITLE)) splashTitle = value;
-      else if (key.equals(RIGHT_ALIGN_CONTENT) || key.equals(RTL)) rightAlignContent = getBoolean(value);
+      else if (key.equals(RIGHT_ALIGN_CONTENT) || key.equals(RTL)) {
+        rightAlignContent = getBoolean(value);
+      }
       else if (key.equals(SHOW_FLASHCARD_ANSWER)) showFlashcardAnswer = getBoolean(value);
       else if (key.equals(ALLOW_PLUS_IN_URL)) allowPlusInURL = getBoolean(value);
       else if (key.equals(SHOW_SPECTROGRAM)) spectrogram = getBoolean(value);
@@ -567,12 +569,6 @@ public class PropertyHandler {
     return !dialog.isEmpty();
   }
 
-/*
-  public String dialogFile() {
-    return dialog;
-  }
-*/
-
   public String getLanguage() {
     return language;
   }
@@ -613,15 +609,15 @@ public class PropertyHandler {
    * @return
    * @see LangTest#showLogin()
    */
-  public String getResetPassToken() {
+  String getResetPassToken() {
     return resetPassToken;
   }
 
-  public String getCdEnableToken() {
+ String getCdEnableToken() {
     return cdEnableToken;
   }
 
-  public String getEmailRToken() {
+ String getEmailRToken() {
     return emailRToken;
   }
 
@@ -733,7 +729,7 @@ public class PropertyHandler {
         "You will not be able to access NetProF until approval is granted.";
   }
 
-  public String getAMASHelpMessage() {
+/*  public String getAMASHelpMessage() {
     return
         "Welcome to the Automatic Multi-Skilled Assessment System (AMAS)<br/>" +
             "<br/>" +
@@ -746,5 +742,5 @@ public class PropertyHandler {
             "<br/>" +
             "The site will remember your login information on this computer for up to one year. You will need to login " +
             "with your username and password again if you access AMAS from a different machine.";
-  }
+  }*/
 }
