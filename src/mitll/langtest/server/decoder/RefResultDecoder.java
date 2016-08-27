@@ -35,14 +35,17 @@ package mitll.langtest.server.decoder;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
+import mitll.langtest.server.audio.PathWriter;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.AudioExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -105,6 +108,8 @@ public class RefResultDecoder {
     new Thread(new Runnable() {
       @Override
       public void run() {
+
+
         if (serverProps.shouldTrimAudio()) {
           sleep(5000);
           trimRef(exercises, relativeConfigDir);
@@ -120,6 +125,64 @@ public class RefResultDecoder {
         }
       }
     }).start();
+  }
+
+  /**
+   * This was for a one time fix for weird sudanese thing where audio files were truncated on Aug 11 and 12
+   * Very weird.
+   * @param pathHelper
+   * @param path
+   * @return
+   */
+ /* public void fixTruncated(PathHelper war) {
+    Collection<AudioAttribute> audioAttributes = db.getAudioDAO().getAudioAttributes();
+    int fixed = 0;
+    for (AudioAttribute attribute : audioAttributes) {
+      String audioRef = attribute.getAudioRef();
+      File audioFile = getAbsoluteFile(war, audioRef);
+      String exid = attribute.getExid();
+      if (audioFile.exists()) {
+        long length = audioFile.length();
+        if (length == 16428) {
+          List<CorrectAndScore> resultsForExIDInForUser = db.getResultDAO().getResultsForExIDInForUser(attribute.getUserid(), false, exid);
+          logger.info("fixTruncated found suspect file " + audioRef + " and " + resultsForExIDInForUser.size());
+
+          for (CorrectAndScore correctAndScore : resultsForExIDInForUser) {
+            long diff = attribute.getTimestamp() - correctAndScore.getTimestamp();
+            if (diff > 0 && diff < 200) {
+              String orig = correctAndScore.getPath();
+              logger.info("\tin db, found original (" + diff + ") " + orig);
+              File origFile = getAbsoluteFile(war, orig);
+              if (origFile.exists()) {
+                double durationInSeconds = new AudioCheck(null).getDurationInSeconds(origFile)*1000;
+                long durationInMillis = attribute.getDurationInMillis();
+
+                if (durationInMillis == (long)durationInSeconds) {
+                  logger.info("\t\tDur " + durationInSeconds + " vs " + durationInMillis + " got match - fixing...");
+                  new PathWriter().copyAndNormalize(origFile, db.getServerProps(), audioFile);
+                  logger.info("\t\tgot match - after length = " +audioFile.length());
+                  fixed++;
+                }
+                else {
+                  logger.warn("\t\tNO MATCH Dur " + durationInSeconds + " vs " + durationInMillis);
+                }
+              } else {
+                logger.warn("\t\tcan't find " + origFile.getAbsolutePath());
+              }
+            }
+          }
+        }
+      } else {
+        if (exid.startsWith("3007")) {
+          logger.info("no file at " + audioFile.getAbsolutePath());
+        }
+      }
+    }
+    logger.info("Fixed " +fixed + " files");
+  }*/
+
+  private File getAbsoluteFile(PathHelper pathHelper, String path) {
+    return pathHelper.getAbsoluteFile(path);
   }
 
   private String getLanguage() {
