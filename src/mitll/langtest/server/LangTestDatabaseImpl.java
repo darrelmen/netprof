@@ -2288,7 +2288,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String permanentAudioPath = new PathWriter().
         getPermanentAudioPath(pathHelper,
             getAbsoluteFile(audioAnswer.getPath()),
-            getPermanentName(user, audioType), true, idToUse, audioTranscript, getArtist(user), serverProps);
+            getPermanentName(user, audioType),
+            true,
+            idToUse,
+            audioTranscript,
+            getArtist(user),
+            serverProps);
 
     AudioAttribute audioAttribute =
         db.getAudioDAO().addOrUpdate(user, idToUse, audioType, permanentAudioPath, System.currentTimeMillis(),
@@ -2537,6 +2542,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     refResultDecoder.doRefDecode(getExercises(), relativeConfigDir);
     if (serverProps.isAMAS()) audioFileHelper.makeAutoCRT(relativeConfigDir);
 
+//    refResultDecoder.fixTruncated(pathHelper);
     //checkForOgg(getExercises());
   }
 
