@@ -666,7 +666,7 @@ public class ResultDAO extends DAO {
     jsonObject.put("history", jsonArray);
     return jsonObject;
   }*/
-  private List<CorrectAndScore> getResultsForExIDInForUser(long userID, boolean isFlashcardRequest, String id) {
+  public List<CorrectAndScore> getResultsForExIDInForUser(long userID, boolean isFlashcardRequest, String id) {
     return getResultsForExIDInForUser(Collections.singleton(id), isFlashcardRequest, userID);
   }
 
