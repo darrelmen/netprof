@@ -99,6 +99,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
   ImageAndCheck phones;
 
   private int lastWidth = 0;
+  private int lastWidthOuter = 0;
   private AudioPositionPopup audioPositionPopup;
   protected final LangTestDatabaseAsync service;
   protected final SoundManagerAPI soundManager;
@@ -136,6 +137,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     if (playAudio != null) {
       controller.register(getPlayButton(), exerciseID);
     }
+
   }
 
   public Button getPlayButton() {
@@ -163,19 +165,31 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     this.logMessages = controller.isLogClientMessages();
     this.controller = controller;
     this.gaugePanel = gaugePanel;
-    if (DEBUG) logger.info("AudioPanel : gauge panel " + gaugePanel);
+   // if (DEBUG || true) logger.info(getElement().getId()  +" AudioPanel : gauge panel " + gaugePanel);
     this.showSpectrogram = showSpectrogram;
     this.rightMargin = rightMargin;
     this.exerciseID = exerciseID;
     this.exercise = exercise;
     this.instance = instance;
     getElement().setId("AudioPanel_exercise_" + exerciseID);
+
+    int width = getImageWidth();
+    setWidth((width+10)+"px");
+   // logger.info(getElement().getId() + " - AudioPanel set width to " + width);
   }
 
   public void onResize() {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
-        getImages();
+        int images = getImages();
+        logger.info(getElement().getId() + " gotResize " + images);
+        if (images != 0) {
+          int diff = Math.abs(Window.getClientWidth() - lastWidthOuter);
+          if (lastWidthOuter == 0 || diff > WINDOW_SIZE_CHANGE_THRESHOLD) {
+            lastWidthOuter = Window.getClientWidth();
+            setWidth((images+10)+"px");
+          }
+        }
       }
     });
   }
@@ -436,7 +450,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
    * @see #getImagesForPath(String)
    * @see #onResize()
    */
-  private void getImages() {
+  private int getImages() {
     //int leftColumnWidth1 = controller.getLeftColumnWidth();
     int width = getImageWidth();
 
@@ -449,9 +463,11 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
             " request width " + width + " path " + audioPath);
       }
       getEachImage(width);
+      return width;
     } else {
       if (DEBUG_GET_IMAGES) logger.info("\tAudioPanel.getImages : not updating, offset width " +
           getOffsetWidth() + " width " + width + " path " + audioPath + " diff " + diff + " last " + lastWidth);
+      return 0;
     }
   }
 
@@ -459,7 +475,11 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     int leftColumnWidth = LEFT_COLUMN_WIDTH + IMAGE_WIDTH_SLOP;
     int rightSide = gaugePanel != null ? gaugePanel.getOffsetWidth() : rightMargin;
     if (gaugePanel != null && rightSide == 0 /*&& !controller.getProps().isNoModel()*/) {
+      //logger.info("adding right side offset ");
       rightSide = 180; // TODO : hack!!!
+    }
+    else {
+      rightSide = 20;
     }
     return getWidthForWaveform(LEFT_COLUMN_WIDTH, leftColumnWidth, rightSide);
   }
@@ -471,8 +491,10 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     width -= 4;
     if (DEBUG_GET_IMAGES) {
       logger.info("AudioPanel.getImages : leftColumnWidth " + leftColumnWidth + "(" + leftColumnWidth1 +
-          ") width " + width + " (screen portion = " + screenPortion +
-          ") vs window width " + Window.getClientWidth() + " right side " + rightSide);
+          ") width " + width +
+          " (screen portion = " + screenPortion +
+          ") vs window width " + Window.getClientWidth() +
+          " right side " + rightSide);
     }
     return width;
   }

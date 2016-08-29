@@ -44,6 +44,8 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.RequiresResize;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.ReloadableContainer;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -153,7 +155,7 @@ class NewUserExercise extends BasicDialog {
                       final Panel toAddTo) {
     this.ul = ul;
 
-    final FluidContainer container = new FluidContainer();
+    final FluidContainer container = new ResizableFluid();
     DivWidget upper = new DivWidget();
 
     Element element = container.getElement();
@@ -216,6 +218,31 @@ class NewUserExercise extends BasicDialog {
 
     return container;
   }
+
+/*  private class ResizableDiv extends DivWidget implements RequiresResize {
+
+    @Override
+    public void onResize() {
+      for (int i = 0; i < getWidgetCount(); i++) {
+        Widget widget = getWidget(i);
+        if (widget instanceof RequiresResize) {
+          ((RequiresResize) widget).onResize();
+//          logger.info("ResizableDiv : resizing " + widget.getElement().getId() );
+        } else {
+//          logger.info("ResizableDiv : skipping " + widget.getElement().getId() + "  : " + widget.getClass());
+        }
+      }
+    }
+  }*/
+
+  private class ResizableFluid extends FluidContainer implements RequiresResize {
+    @Override
+    public void onResize() {
+      rap.onResize();
+      rapSlow.onResize();
+    }
+  }
+
 
   protected void makeOptionalRows(DivWidget upper) {
 
@@ -536,8 +563,8 @@ class NewUserExercise extends BasicDialog {
   }
 
   /**
-   * @see EditableExerciseDialog#postEditItem
    * @param mutableExercise
+   * @see EditableExerciseDialog#postEditItem
    */
   void grabInfoFromFormAndStuffInfoExercise(MutableExercise mutableExercise) {
     mutableExercise.setEnglish(english.getText());
@@ -678,11 +705,11 @@ class NewUserExercise extends BasicDialog {
       controller.register(getPlayButton(), newExercise.getID());
     }
 
-    @Override
+/*    @Override
     protected void getEachImage(int width) {
       float newWidth = Window.getClientWidth() * 0.65f;
       super.getEachImage((int) newWidth);
-    }
+    }*/
 
     /**
      * Note that we want to post the audio the server, but not record in the results table (since it's not an answer
