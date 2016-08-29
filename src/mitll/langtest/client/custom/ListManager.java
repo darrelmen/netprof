@@ -411,6 +411,7 @@ public class ListManager implements RequiresResize {
 
   @Override
   public void onResize() {
+   // logger.info("got onResize " + getClass().toString());
     setScrollPanelWidth(listScrollPanel);
 
     npfHelper.onResize();
