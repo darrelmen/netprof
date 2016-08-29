@@ -237,7 +237,7 @@ class EditableExerciseDialog extends NewUserExercise {
 
     foreignAnno.getElement().setId("foreignLanguageAnnotation");
 
-    if (DEBUG) logger.info("makeForeignLangRow make fl row " + foreignAnno);
+//    if (DEBUG) logger.info("makeForeignLangRow make fl row " + foreignAnno);
 
     foreignLang = makeBoxAndAnno(row, controller.getLanguage(), "", foreignAnno);
     foreignLang.box.setDirectionEstimator(true);   // automatically detect whether text is RTL
@@ -275,7 +275,6 @@ class EditableExerciseDialog extends NewUserExercise {
   protected ControlGroup makeSlowAudioPanel(Panel row) {
     rapSlow = makeRecordAudioPanel(row, false, instance);
     slowAnno.addStyleName("topFiveMargin");
-
     return addControlGroupEntrySimple(row, SLOW_SPEED_REFERENCE_RECORDING_OPTIONAL, rapSlow, slowAnno);
   }
 
@@ -287,7 +286,7 @@ class EditableExerciseDialog extends NewUserExercise {
    * @return
    * @see #makeEnglishRow(com.google.gwt.user.client.ui.Panel)
    */
-  protected FormField makeBoxAndAnno(Panel row, String label, String subtext, HTML annoBox) {
+  FormField makeBoxAndAnno(Panel row, String label, String subtext, HTML annoBox) {
     FormField formField = addControlFormFieldHorizontal(row, label, subtext, false, 1, annoBox, LABEL_WIDTH);
     annoBox.addStyleName("leftFiveMargin");
     annoBox.addStyleName("editComment");
@@ -497,9 +496,7 @@ class EditableExerciseDialog extends NewUserExercise {
       MutableShell mutableShell = byID.getMutableShell();
       mutableShell.setEnglish(newUserExercise.getEnglish());
       mutableShell.setForeignLanguage(newUserExercise.getForeignLanguage());
-
-      if (DEBUG || true) logger.info("\tchangeTooltip : for " + newUserExercise.getID() + " now " + newUserExercise);
-
+//      if (DEBUG || true) logger.info("\tchangeTooltip : for " + newUserExercise.getID() + " now " + newUserExercise);
       pagingContainer.redraw();   // show change to tooltip!
     }
   }
@@ -571,7 +568,7 @@ class EditableExerciseDialog extends NewUserExercise {
    * @param annoField
    * @see #setFields(CommonShell)
    */
-  protected void useAnnotation(AnnotationExercise userExercise, String field, HTML annoField) {
+  void useAnnotation(AnnotationExercise userExercise, String field, HTML annoField) {
    // ExerciseAnnotation annotation = ;
     // if (DEBUG) logger.info("useAnnotation anno for " + field + " = " + annotation);
     useAnnotation(userExercise.getAnnotation(field), annoField);
@@ -579,7 +576,6 @@ class EditableExerciseDialog extends NewUserExercise {
 
   private void useAnnotation(ExerciseAnnotation anno, final HTML annoField) {
     final boolean isIncorrect = anno != null && !anno.isCorrect();
-
     // if (DEBUG) logger.info("useAnnotation anno for " + anno + " = " + isIncorrect + " : " + annoField);
 
     if (isIncorrect) {
