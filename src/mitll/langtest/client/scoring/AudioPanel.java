@@ -90,7 +90,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
   private final ScoreListener gaugePanel;
   protected final String exerciseID;
   protected String audioPath;
-  private final Map<String, Integer> reqs = new HashMap<String, Integer>();
+  private final Map<String, Integer> reqs = new HashMap<>();
   private int reqid;
 
   private ImageAndCheck waveform;
@@ -128,8 +128,8 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
    * @see ScoringAudioPanel#ScoringAudioPanel
    */
   public AudioPanel(String path, LangTestDatabaseAsync service,
-             ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin,
-             String playButtonSuffix, String audioType, String exerciseID, T exercise, String instance) {
+                    ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin,
+                    String playButtonSuffix, String audioType, String exerciseID, T exercise, String instance) {
     this(service, controller, showSpectrogram, gaugePanel, 1.0f, rightMargin, exerciseID, exercise, instance);
     this.audioPath = path;
 
@@ -137,7 +137,6 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     if (playAudio != null) {
       controller.register(getPlayButton(), exerciseID);
     }
-
   }
 
   public Button getPlayButton() {
@@ -165,7 +164,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     this.logMessages = controller.isLogClientMessages();
     this.controller = controller;
     this.gaugePanel = gaugePanel;
-   // if (DEBUG || true) logger.info(getElement().getId()  +" AudioPanel : gauge panel " + gaugePanel);
+    // if (DEBUG || true) logger.info(getElement().getId()  +" AudioPanel : gauge panel " + gaugePanel);
     this.showSpectrogram = showSpectrogram;
     this.rightMargin = rightMargin;
     this.exerciseID = exerciseID;
@@ -174,20 +173,20 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     getElement().setId("AudioPanel_exercise_" + exerciseID);
 
     int width = getImageWidth();
-    setWidth((width+10)+"px");
-   // logger.info(getElement().getId() + " - AudioPanel set width to " + width);
+//    logger.info(getElement().getId() + " width " + width);
+    setWidth((width) + "px");
   }
 
   public void onResize() {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
         int images = getImages();
-        logger.info(getElement().getId() + " gotResize " + images);
+//        logger.info(getElement().getId() + " gotResize " + images);
         if (images != 0) {
           int diff = Math.abs(Window.getClientWidth() - lastWidthOuter);
           if (lastWidthOuter == 0 || diff > WINDOW_SIZE_CHANGE_THRESHOLD) {
             lastWidthOuter = Window.getClientWidth();
-            setWidth((images+10)+"px");
+            setWidth((images) + "px");
           }
         }
       }
@@ -213,8 +212,8 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     divWithRelativePosition.add(imageContainer);
     imageContainer.getElement().setId("AudioPanel_imageContainer");
     float totalHeight = getWaveformHeight() + (2 * 20);
-    imageContainer.setHeight(totalHeight +"px");
-  //  imageContainer.setWidth(getImageWidth()+"px");
+    imageContainer.setHeight(totalHeight + "px");
+    //  imageContainer.setWidth(getImageWidth()+"px");
 
     HorizontalPanel hp = new HorizontalPanel();
     hp.setVerticalAlignment(ALIGN_MIDDLE);
@@ -246,15 +245,15 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     Image wordsImage = words.getImage();
     imageContainer.add(wordsImage);
     wordsImage.getElement().setId("Transcript_Words");
-    wordsImage.setHeight(20+"px");
+    wordsImage.setHeight(20 + "px");
 
     phones = new ImageAndCheck();
     Image phonesImage = phones.getImage();
     imageContainer.add(phonesImage);
-    phonesImage.setHeight(20+"px");
+    phonesImage.setHeight(20 + "px");
     phonesImage.getElement().setId("Transcript_Phones");
 
-   // hp.setWidth("100%");
+    // hp.setWidth("100%");
 
     add(hp);
     hp.addStyleName("bottomFiveMargin");
@@ -341,8 +340,8 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     }
 
     /**
-     * @see WaveformPostAudioRecordButton#stopRecording()
      * @param visible
+     * @see WaveformPostAudioRecordButton#stopRecording()
      */
     public void setVisible(boolean visible) {
       getImage().setVisible(visible);
@@ -353,8 +352,8 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     }
 
     /**
-     * @see WaveformPostAudioRecordButton#stopRecording()
      * @param url
+     * @see WaveformPostAudioRecordButton#stopRecording()
      */
     public void setUrl(String url) {
       getImage().setUrl(url);
@@ -362,8 +361,8 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     }
 
     /**
-     * @see ASRScoringAudioPanel#scoreAudio(String, long, String, ImageAndCheck, ImageAndCheck, int, int, int)
      * @return
+     * @see ASRScoringAudioPanel#scoreAudio(String, long, String, ImageAndCheck, ImageAndCheck, int, int, int)
      */
     public Image getImage() {
       return image;
@@ -400,9 +399,9 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     return path;
   }
 
-  //private CompressedAudio compressedAudio = new CompressedAudio();
-
-  private String getPath(String path) { return CompressedAudio.getPath(path);  }
+  private String getPath(String path) {
+    return CompressedAudio.getPath(path);
+  }
 
   /**
    * Note this is currently not very accurate with soundmanager2.
@@ -474,12 +473,11 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
   private int getImageWidth() {
     int leftColumnWidth = LEFT_COLUMN_WIDTH + IMAGE_WIDTH_SLOP;
     int rightSide = gaugePanel != null ? gaugePanel.getOffsetWidth() : rightMargin;
-    if (gaugePanel != null && rightSide == 0 /*&& !controller.getProps().isNoModel()*/) {
+    if (gaugePanel != null && rightSide == 0) {
       //logger.info("adding right side offset ");
       rightSide = 180; // TODO : hack!!!
-    }
-    else {
-      rightSide = 20;
+    } else {
+      rightSide = 180;
     }
     return getWidthForWaveform(LEFT_COLUMN_WIDTH, leftColumnWidth, rightSide);
   }
@@ -506,7 +504,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
    * @see #getImages()
    */
   protected void getEachImage(int width) {
-   // logger.info("AudioPanel.getEachImage : " + getElement().getId()+ " path " + audioPath);
+    // logger.info("AudioPanel.getEachImage : " + getElement().getId()+ " path " + audioPath);
     getImageURLForAudio(audioPath, WAVEFORM, width, getWaveform());
     if (showSpectrogram) {
       getImageURLForAudio(audioPath, SPECTROGRAM, width, getSpectrogram());
@@ -548,7 +546,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
           long roundtrip = now - then;
 
           if (!result.successful) {
-            logger.warning("getImageURLForAudio : got error for request for type " + type + " and " +path + " and exid " + exerciseID);
+            logger.warning("getImageURLForAudio : got error for request for type " + type + " and " + path + " and exid " + exerciseID);
             if (WARN_ABOUT_MISSING_AUDIO) Window.alert("missing audio file on server " + path);
           } else if (result.req == -1 || isMostRecentRequest(type, result.req)) { // could be cached
             showResult(result, imageAndCheck);
