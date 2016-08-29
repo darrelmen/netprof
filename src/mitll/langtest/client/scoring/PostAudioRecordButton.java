@@ -57,7 +57,7 @@ import java.util.logging.Logger;
  */
 public abstract class PostAudioRecordButton extends RecordButton implements RecordButton.RecordingListener {
   private final Logger logger = Logger.getLogger("PostAudioRecordButton");
-  private static final int BUTTON_WIDTH = 82; // was 68
+  private static final int BUTTON_WIDTH = 93; // was 68
 
   private boolean validAudio = false;
   private static final int LOG_ROUNDTRIP_THRESHOLD = 3000;
