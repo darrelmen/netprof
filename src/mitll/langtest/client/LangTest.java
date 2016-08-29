@@ -167,13 +167,15 @@ import java.util.logging.Logger;
  * - Fixes for bugs #646 - download link replaced with dialog
  * 1.4.8
  * - Fixed bug with detecting RTL text and showing it in the exercise list
+ * 1.4.9
+ * - Fixed bug with downloading audio for custom item.
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since
  * */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private final Logger logger = Logger.getLogger("LangTest");
 
-  public static final String VERSION_INFO = "1.4.7";
+  public static final String VERSION_INFO = "1.4.9";
 
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
