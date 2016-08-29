@@ -269,7 +269,7 @@ public class DownloadServlet extends DatabaseServlet {
    * @throws UnsupportedEncodingException
    */
   private String getFilenameForDownload(DatabaseImpl db, String exercise, String useridString) throws UnsupportedEncodingException {
-    CommonExercise exercise1 = db.getExercise(exercise);
+    CommonExercise exercise1 = db.getCustomOrPredefExercise(exercise);
     boolean english = getLanguage().equalsIgnoreCase("english");
 
     // foreign part
