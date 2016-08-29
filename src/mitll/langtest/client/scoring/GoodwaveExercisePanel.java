@@ -242,6 +242,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
   protected void addUserRecorder(LangTestDatabaseAsync service, ExerciseController controller, Panel toAddTo,
                                  float screenPortion, T exercise) {
     DivWidget div = new DivWidget();
+    div.getElement().setId("GoodwaveExercisePanel_UserRecorder");
     ScoringAudioPanel answerWidget = getAnswerWidget(service, controller, screenPortion);
     String refAudio = exercise.getRefAudio();
     if (refAudio == null) {
@@ -538,7 +539,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
    * An ASR scoring panel with a record button.
    */
   private class ASRRecordAudioPanel extends ASRScoringAudioPanel<T> {
-    public static final String DOWNLOAD_AUDIO = "downloadAudio";
+     static final String DOWNLOAD_AUDIO = "downloadAudio";
     private final int index;
     private PostAudioRecordButton postAudioRecordButton;
     private PlayAudioPanel playAudioPanel;
