@@ -703,6 +703,8 @@ public class Navigation implements RequiresResize, ShowTab {
 
   @Override
   public void onResize() {
+   // logger.info("got onResize " + getClass().toString());
+
     learnHelper.onResize();
     recorderHelper.onResize();
     recordExampleHelper.onResize();
