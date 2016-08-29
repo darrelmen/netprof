@@ -39,10 +39,7 @@ import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.HasText;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.ReloadableContainer;
 import mitll.langtest.client.dialog.ModalInfoDialog;
@@ -77,7 +74,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class EditItem {
-  private final Logger logger = Logger.getLogger("EditItem");
+  final Logger logger = Logger.getLogger("EditItem");
 
   public static final String NEW_ITEM = "*New Item*";
   public static final String NEW_EXERCISE_ID = "NewExerciseID";
@@ -142,7 +139,14 @@ public class EditItem {
   }
 
   public void onResize() {
-    if (exerciseList != null) exerciseList.onResize();
+    if (exerciseList != null) {
+    //  logger.info("EditItem onResize");
+      exerciseList.onResize();
+    }
+    else {
+      logger.info("EditItem onResize - no exercise list");
+
+    }
   }
 
   private UserList<CommonShell> makeListOfOnlyYourItems(UserList<CommonShell> toCopy) {
@@ -244,7 +248,7 @@ public class EditItem {
     exerciseList.setFactory(new ExercisePanelFactory<CommonShell, CommonExercise>(service, feedback, controller, exerciseList) {
       @Override
       public Panel getExercisePanel(CommonExercise e) {
-        Panel panel = new SimplePanel();
+        Panel panel = new ResizableSimple();
         panel.getElement().setId("EditItemPanel");
         // TODO : do something better here than toCommonUserExercise
         UserExercise userExercise = new UserExercise(e, e.getCreator());
@@ -252,6 +256,20 @@ public class EditItem {
         return panel;
       }
     });
+  }
+
+  private class ResizableSimple extends SimplePanel implements RequiresResize {
+
+    @Override
+    public void onResize() {
+      Widget widget = getWidget();
+      if (widget instanceof RequiresResize) {
+        ((RequiresResize)widget).onResize();
+      }
+      else {
+        logger.info("skipping " + widget.getElement().getId());
+      }
+    }
   }
 
   /**
