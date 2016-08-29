@@ -34,8 +34,6 @@ package mitll.langtest.client.list;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.i18n.client.HasDirection;
-import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -226,12 +224,11 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     Widget current = innerContainer.getWidget();
     if (current != null) {
       if (current instanceof RequiresResize) {
-        //if (DEBUG) logger.info("resizing right side for " + instance + " "+ current.getClass());
+       // if (DEBUG || true) logger.info("resizing right side for " + instance + " " + current.getClass());
         ((RequiresResize) current).onResize();
+      } else {
+        logger.warning("huh?  right side is not resizable " + instance + " " + current.getClass());
       }
-//      else {
-      //logger.warning("huh?  right side is not resizable " + instance + " "+ current.getClass());
-      //    }
     }
     //   else {
 //      logger.warning("huh? no right side of exercise list");
@@ -473,6 +470,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   @Override
   public void hide() {
+    logger.info(getElement().getId() + " got hide");
     getParent().setVisible(false);
   }
 
@@ -532,7 +530,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 //          createdPanel == null ||
 //          (
 //              createdPanel.getElement().getExID().equals(EMPTY_PANEL))) {
-        askServerForExercise(id);
+      askServerForExercise(id);
 //      } else {
 //        logger.info("got " + hasExercise(id) + " current " + getCurrentExerciseID() + " vs " + id);
 //      }
