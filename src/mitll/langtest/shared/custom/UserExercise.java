@@ -297,11 +297,13 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
   @Override
   public void setSafeToDecode(boolean isSafeToDecode) {
   }
+/*
 
   @Override
   public String getRefAudioIndex() {
     return "";
   }
+*/
 
   public void setAvgScore(float avgScore) {
     this.avgScore = avgScore;

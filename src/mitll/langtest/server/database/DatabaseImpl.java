@@ -66,6 +66,7 @@ import mitll.langtest.server.database.result.*;
 import mitll.langtest.server.database.reviewed.IReviewedDAO;
 import mitll.langtest.server.database.reviewed.SlickReviewedDAO;
 import mitll.langtest.server.database.user.*;
+import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.server.database.userlist.IUserListDAO;
@@ -404,7 +405,6 @@ public class DatabaseImpl implements Database {
     createTables();
 
 
-
     userDAO.findOrMakeDefectDetector();
 
     try {
@@ -420,33 +420,35 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * @see #initializeDAOs(PathHelper)
    * @param refResultDAO
    * @return
+   * @see #initializeDAOs(PathHelper)
    */
-  Map<Integer, Collection<String>> getExerciseToPhone(IRefResultDAO refResultDAO) {
+  Map<Integer, ExercisePhoneInfo> getExerciseToPhone(IRefResultDAO refResultDAO) {
     long then = System.currentTimeMillis();
     List<SlickRefResultJson> jsonResults = refResultDAO.getJsonResults();
     long now = System.currentTimeMillis();
-    logger.info("took " +(now-then) + " millis to get ref results");
-    Map<Integer, Collection<String>> exToPhones = new HashMap<>();
+    logger.info("took " + (now - then) + " millis to get ref results");
+    Map<Integer, ExercisePhoneInfo> exToPhones = new HashMap<>();
 
     ParseResultJson parseResultJson = new ParseResultJson(null);
 
     for (SlickRefResultJson exjson : jsonResults) {
       Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.parseJson(exjson.scorejson());
       List<TranscriptSegment> transcriptSegments = netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
-      Set<String> phones = new HashSet<>();
-      for (TranscriptSegment segment : transcriptSegments) phones.add(segment.getEvent());
 
       int exid = exjson.exid();
-      for (String phone : phones) {
-        Collection<String> phonesForEx = exToPhones.get(exid);
-        if (phonesForEx == null) exToPhones.put(exid, phonesForEx = new HashSet<>());
-        phonesForEx.add(phone);
+      ExercisePhoneInfo phonesForEx = exToPhones.get(exid);
+      if (phonesForEx == null) exToPhones.put(exid, phonesForEx = new ExercisePhoneInfo());
+
+      {
+        Set<String> phones = new HashSet<>();
+        for (TranscriptSegment segment : transcriptSegments) phones.add(segment.getEvent());
+        phonesForEx.addPhones(phones);
       }
+      phonesForEx.setNumPhones(exjson.numalignphones());
     }
-    logger.info("took " +(System.currentTimeMillis()-then) + " millis to populate ex->phone map");
+    logger.info("took " + (System.currentTimeMillis() - then) + " millis to populate ex->phone map");
 
     return exToPhones;
   }
@@ -630,7 +632,6 @@ public class DatabaseImpl implements Database {
     Project project = getProjectOrFirst(projectid);
 
 
-
     List<CommonExercise> rawExercises = project.getRawExercises();
     if (rawExercises.isEmpty()) {
       logger.warn("getExercises no exercises in " + getServerProps().getLessonPlan() + " at " + installPath);
@@ -707,11 +708,19 @@ public class DatabaseImpl implements Database {
 
       SlickProject project1 = project.getProject();
       List<String> typeOrder = project.getTypeOrder();
-      boolean sound = typeOrder.remove("Sound");
+      boolean sound = typeOrder.remove(SlickUserExerciseDAO.SOUND);
+      boolean diff  = typeOrder.remove(SlickUserExerciseDAO.DIFFICULTY);
       if (!sound) logger.warn("sound missing???");
       else {
-        typeOrder.add("Sound");
+        typeOrder.add(SlickUserExerciseDAO.SOUND);
       }
+
+      if (!diff) {
+
+      } else {
+        //typeOrder.add(SlickUserExerciseDAO.DIFFICULTY);
+      }
+
       ProjectStartupInfo startupInfo = new ProjectStartupInfo(
           getServerProps().getProperties(),
           typeOrder,
@@ -790,7 +799,8 @@ public class DatabaseImpl implements Database {
 
   private void configureProjects(String mediaDir, String installPath) {
     // TODO : this seems like a bad idea --
-    userExerciseDAO.setExToPhones(getExerciseToPhone(refresultDAO));
+    Map<Integer, ExercisePhoneInfo> exerciseToPhone = getExerciseToPhone(refresultDAO);
+    userExerciseDAO.setExToPhones(exerciseToPhone);
 
     for (Project project : getProjects()) {
       configureProject(mediaDir, installPath, project);

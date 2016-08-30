@@ -134,15 +134,14 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
    */
   @Override
   public List<Result> getResults() {
-    logger.info("getResults --- ");
+//    logger.info("getResults --- ");
     List<Result> results = new ArrayList<>();
     for (SlickRefResult refResult : dao.getAll()) results.add(fromSlick(refResult));
     return results;
   }
 
   public List<SlickRefResultJson> getJsonResults() {
-    logger.info("getJsonResults --- ");
-
+  //  logger.info("getJsonResults --- ");
     return dao.getAllSlim();
   }
 

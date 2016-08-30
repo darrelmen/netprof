@@ -64,11 +64,15 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 
   /**
    * I don't think we're doing user exercise mask out overrides anymore...
+   *
    * @param removes
    */
-  protected void addOverlays(Collection<Integer> removes) {}
+  protected void addOverlays(Collection<Integer> removes) {
+  }
 
-  public Map<Integer,String> getIDToFL(int projid) {  return userExerciseDAO.getIDToFL(projid);  }
+  public Map<Integer, String> getIDToFL(int projid) {
+    return userExerciseDAO.getIDToFL(projid);
+  }
 
   /**
    * Does join with related exercise table - maybe better way to do this in scala side?
@@ -80,11 +84,10 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   List<CommonExercise> readExercises() {
     try {
       List<String> typeOrder = Arrays.asList(project.first(), project.second());
-      String prefix = "Project " + project.name();
 
       int projid = project.id();
       List<CommonExercise> allNonContextExercises = userExerciseDAO.getByProject(projid, typeOrder, getSectionHelper());
-      logger.info("project " + project +" readExercises got " + allNonContextExercises.size() + " predef exercises;");
+      logger.info("project " + project + " readExercises got " + allNonContextExercises.size() + " predef exercises;");
 
       Collection<SlickRelatedExercise> related = userExerciseDAO.getAllRelated(projid);
 
@@ -93,10 +96,12 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       Map<Integer, CommonExercise> idToContext =
           getIDToExercise(userExerciseDAO.getContextByProject(projid, typeOrder, getSectionHelper()));
 
-      logger.info(prefix + " idToContext " + idToContext.size());
+      // logger.info(prefix + " idToContext " + idToContext.size());
 
       int attached = 0;
       int c = 0;
+
+      String prefix = "Project " + project.name();
       for (SlickRelatedExercise relatedExercise : related) {
         CommonExercise root = idToEx.get(relatedExercise.exid());
         if (root != null) {
@@ -105,15 +110,14 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
             root.getMutable().addContextExercise(context);
             attached++;
           } else if (c++ < 10) {
-            logger.warn("1 " +prefix + " didn't attach " + relatedExercise + "" +" for\n" + root);
+            logger.warn("1 " + prefix + " didn't attach " + relatedExercise + "" + " for\n" + root);
           }
         } else if (c++ < 10) {
           logger.warn("2 " + prefix + " didn't attach " + relatedExercise + "" +
               " for, e.g. " + allNonContextExercises.iterator().next());
         }
       }
-      logger.info(prefix +
-          " Read " + allNonContextExercises.size() + " exercises from database, attached " + attached);
+      logger.info(prefix + " Read " + allNonContextExercises.size() + " exercises from database, attached " + attached);
       return allNonContextExercises;
     } catch (Exception e) {
       logger.error("got " + e, e);
@@ -129,5 +133,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     return idToEx;
   }
 
-  public String toString() { return "DBExerciseDAO for " + project; }
+  public String toString() {
+    return "DBExerciseDAO for " + project;
+  }
 }

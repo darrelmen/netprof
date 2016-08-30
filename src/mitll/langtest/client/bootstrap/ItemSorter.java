@@ -54,6 +54,7 @@ public class ItemSorter {
     boolean isInt = true;
     for (String item : items) {
       try {
+        item = dropGreater(item);
         Integer.parseInt(item);
       } catch (NumberFormatException e) {
         isInt = false;
@@ -63,8 +64,8 @@ public class ItemSorter {
       Collections.sort(items, new Comparator<String>() {
         @Override
         public int compare(String o1, String o2) {
-          int first = Integer.parseInt(o1);
-          int second = Integer.parseInt(o2);
+          int first  = Integer.parseInt(dropGreater(o1));
+          int second = Integer.parseInt(dropGreater(o2));
           return first < second ? -1 : first > second ? +1 : 0;
         }
       });
@@ -73,6 +74,11 @@ public class ItemSorter {
       sortWithCompoundKeys(items);
     }
     return items;
+  }
+
+  public String dropGreater(String item) {
+    if (item.startsWith(">")) item = item.substring(1,item.length());
+    return item;
   }
 
   /**
