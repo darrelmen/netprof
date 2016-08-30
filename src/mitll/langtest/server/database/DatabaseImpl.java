@@ -102,7 +102,6 @@ import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
@@ -170,7 +169,7 @@ public class DatabaseImpl implements Database {
   private final LogAndNotify logAndNotify;
 
   private static final boolean ADD_DEFECTS = false;
-  private UserManagement userManagement = null;
+  private mitll.langtest.server.database.user.UserManagement userManagement = null;
   private final String absConfigDir;
   private SimpleExerciseDAO<AmasExerciseImpl> fileExerciseDAO;
   private PathHelper pathHelper;
@@ -273,7 +272,7 @@ public class DatabaseImpl implements Database {
 
   /**
    * @param reload
-   * @see CopyToPostgres#createProjectIfNotExists
+   * @seex CopyToPostgres#createProjectIfNotExists
    */
   public void populateProjects(boolean reload) {
     populateProjects(pathHelper, serverProps, logAndNotify, configDir, reload);
@@ -792,7 +791,7 @@ public class DatabaseImpl implements Database {
           configureProjects(mediaDir, installPath);
           //}
         }
-        userManagement = new UserManagement(userDAO, resultDAO);
+        userManagement = new mitll.langtest.server.database.user.UserManagement(userDAO, resultDAO);
       }
     }
   }
@@ -983,7 +982,7 @@ public class DatabaseImpl implements Database {
     Set<AudioAttribute> original = new HashSet<>(userExercise.getAudioAttributes());
     Set<AudioAttribute> defects = audioDAO.getAndMarkDefects(userExercise, userExercise.getFieldToAnnotation());
 
-    logger.debug("originally had " + original.size() + " attribute, and " + defects.size() + " defects");
+    logger.debug("editItem originally had " + original.size() + " attribute, and " + defects.size() + " defects");
 
     int projectID = userExercise.getProjectID();
     CommonExercise exercise = getExerciseDAO(projectID).addOverlay(userExercise);
@@ -1034,7 +1033,7 @@ public class DatabaseImpl implements Database {
    */
   public void markAudioDefect(AudioAttribute audioAttribute) {
     if (audioDAO.markDefect(audioAttribute) < 1) {
-      logger.error("huh? couldn't mark error on " + audioAttribute);
+      logger.error("markAudioDefect huh? couldn't mark error on " + audioAttribute);
     }
   }
 
@@ -1248,7 +1247,7 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.DownloadServlet#returnSpreadsheet
    */
   public void usersToXLSX(OutputStream out) {
-    userManagement.usersToXLSX(out, getLanguage());
+    userManagement.usersToXLSX(out);
   }
 
   public JSON usersToJSON() {
@@ -1682,14 +1681,14 @@ public class DatabaseImpl implements Database {
    * @throws Exception
    * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
-  public void writeZip(OutputStream out, Map<String, Collection<String>> typeToSection, int projectid) throws Exception {
+  public void writeZip(OutputStream out, Map<String, Collection<String>> typeToSection, int projectid,AudioExport.AudioExportOptions options) throws Exception {
     Collection<CommonExercise> exercisesForSelectionState = typeToSection.isEmpty() ?
         getExercises(projectid) :
         getSectionHelper(projectid).getExercisesForSelectionState(typeToSection);
     String language = getLanguage(projectid);
     new AudioExport(getServerProps()).writeZip(out, typeToSection, getSectionHelper(projectid), exercisesForSelectionState,
         language,
-        getAudioDAO(), installPath, configDir, false);
+        getAudioDAO(), installPath, configDir, false,options);
   }
 
   public String getLanguage(int projectid) {
@@ -1702,26 +1701,13 @@ public class DatabaseImpl implements Database {
     return getOldLanguage(getServerProps());
   }
 
-  public void writeContextZip(OutputStream out, Map<String, Collection<String>> typeToSection, int projectid)
-      throws Exception {
-    SectionHelper<CommonExercise> sectionHelper = getSectionHelper(projectid);
-    Collection<CommonExercise> exercisesForSelectionState = typeToSection.isEmpty() ?
-        getExercises(projectid) :
-        sectionHelper.getExercisesForSelectionState(typeToSection);
-    new AudioExport(getServerProps()).writeContextZip(out, typeToSection, sectionHelper, exercisesForSelectionState,
-        getLanguage(projectid),
-        getAudioDAO(), installPath, configDir);
-  }
-
   /**
+   * @see DownloadServlet#writeAllAudio(HttpServletResponse)
    * @param out
-   * @param projectid
    * @throws Exception
-   * @see DownloadServlet#doGet(HttpServletRequest, HttpServletResponse)
    */
-  public void writeZip(OutputStream out, int projectid) throws Exception {
-    new AudioExport(getServerProps()).writeZipJustOneAudio(out, getSectionHelper(projectid), getExercises(projectid),
-        installPath);
+  public void writeUserListAudio(OutputStream out, int projectid) throws Exception {
+    new AudioExport(getServerProps()).writeZipJustOneAudio(out, getSectionHelper(projectid), getExercises(projectid), installPath);
   }
 
   /**
@@ -1730,12 +1716,14 @@ public class DatabaseImpl implements Database {
    * @param out
    * @param listid
    * @param projectid
+   * @param options
    * @return
    * @throws Exception
    * @see mitll.langtest.server.DownloadServlet#writeUserList
    */
-  public String writeZip(OutputStream out, long listid, PathHelper pathHelper, int projectid) throws Exception {
-    String language = getLanguage(projectid);
+  public String writeUserListAudio(OutputStream out, long listid, PathHelper pathHelper, int projectid,
+                                   AudioExport.AudioExportOptions options) throws Exception {
+      String language = getLanguage(projectid);
     if (listid == -1) return language + "_Unknown";
 
     UserList<CommonShell> userListByID = getUserListByID(listid, projectid);
@@ -1757,15 +1745,15 @@ public class DatabaseImpl implements Database {
       }
       long now = System.currentTimeMillis();
       logger.debug("\nTook " + (now - then) + " millis to annotate and attach.");
-      new AudioExport(getServerProps()).writeZip(out, userListByID.getName(), getSectionHelper(projectid),
+      new AudioExport(getServerProps()).writeUserListAudio(out, userListByID.getName(), getSectionHelper(projectid),
           copyAsExercises, language,
-          getAudioDAO(), installPath, configDir, listid == IUserListManager.REVIEW_MAGIC_ID);
+          getAudioDAO(), installPath, configDir, listid == IUserListManager.REVIEW_MAGIC_ID, options);
     }
     return language + "_" + userListByID.getName();
   }
 
   /**
-   * JUST FOR TESTING?
+   * JUST FOR TESTING
    *
    * @param ex
    * @return
@@ -2043,7 +2031,7 @@ public class DatabaseImpl implements Database {
     return userProjectDAO;
   }
 
-  public UserManagement getUserManagement() {
+  public mitll.langtest.server.database.user.UserManagement getUserManagement() {
     return userManagement;
   }
 }

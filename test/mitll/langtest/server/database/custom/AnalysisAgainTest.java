@@ -51,7 +51,7 @@ public class AnalysisAgainTest {
 
     List<WordScore> wordScoresForUser = database.getAnalysis(-1).getWordScoresForUser(1, 1);
     for (WordScore ws : wordScoresForUser) {
-      //if (ws.getId().equals("50246"))
+      //if (ws.getExID().equals("50246"))
       logger.info("ws " +ws.getId() + " " + ws.getNativeAudio() + " " + ws.getFileRef());
     }
 
