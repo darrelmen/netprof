@@ -35,6 +35,7 @@ package mitll.langtest.server.database.postgres;
 import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.custom.IUserListManager;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.project.ProjectStatus;
 import mitll.langtest.server.database.project.ProjectType;
@@ -48,6 +49,7 @@ import mitll.npdata.dao.SlickProjectProperty;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -149,6 +151,27 @@ public class ProjectTest extends BaseTest {
     int english = projectDAO.getByName(english1);
 
     logger.info("found " + english + " for "+ english1);
+  }
+
+  @Test
+  public void testAgain() {
+    DatabaseImpl spanish = getDatabaseVeryLight("netProf", "config.properties", false);
+    IProjectDAO projectDAO = spanish.getProjectDAO();
+
+    String english1 = "mandarin";
+    int english = projectDAO.getByName(english1);
+
+    logger.info("found " + english + " for "+ english1);
+
+    spanish.populateProjects(false);
+
+    spanish.setInstallPath("", "","");
+
+    Project project = spanish.getProject(english);
+
+    logger.info("project " + project );
+
+    project.getSectionHelper().report();
   }
 
   @Test
