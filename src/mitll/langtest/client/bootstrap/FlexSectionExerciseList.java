@@ -46,6 +46,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.content.NPFlexSectionExerciseList;
+import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.list.HistoryExerciseList;
@@ -117,7 +118,7 @@ public class FlexSectionExerciseList extends NPExerciseList<ButtonGroupSectionWi
     buttonTypes.add(ButtonType.INFO);
     buttonTypes.add(ButtonType.WARNING);
     setUnaccountedForVertical(CLASSROOM_VERTICAL_EXTRA);
-    downloadHelper = new DownloadHelper(controller, instance, this, controller.getCurrent().isTeacher());
+    downloadHelper = new DownloadHelper(controller, this);
   }
 
   protected SectionWidgetContainer<ButtonGroupSectionWidget> getSectionWidgetContainer() {
@@ -267,22 +268,22 @@ public class FlexSectionExerciseList extends NPExerciseList<ButtonGroupSectionWi
   }
 
   private DivWidget getBottomRow() {
-    FlexTable links = downloadHelper.getDownloadLinks();
+    Panel links = downloadHelper.getDownloadLinks();
     // else {
     //   logger.info("user is not a teacher.");
     // }
     DivWidget bottomRow = new DivWidget();
-    bottomRow.getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
+    bottomRow.getElement().getStyle().setMarginBottom(18, Style.Unit.PX);
     DivWidget left = new DivWidget();
     left.addStyleName("floatLeftList");
     left.add(links);
     bottomRow.add(left);
     return bottomRow;
   }
-/*
-  SelectionState getSelectionState() {
-    return getSelectionState(getHistoryTokenFromUIState("", -1));
-  }*/
+//
+//  public SelectionState getSelectionState() {
+//    return getSelectionState(getHistoryTokenFromUIState("", ""));
+//  }
 
   /**
    * Label is in column 0

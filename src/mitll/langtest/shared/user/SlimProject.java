@@ -33,7 +33,6 @@
 package mitll.langtest.shared.user;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.server.services.UserServiceImpl;
 import mitll.npdata.dao.SlickProject;
 
 import java.util.ArrayList;
@@ -49,6 +48,7 @@ public class SlimProject implements IsSerializable {
   private String countryCode;
   private int displayOrder;
   private boolean hasModel;
+  private boolean isRTL;
   private List<SlimProject> children = new ArrayList<>();
 
   //  List<>
@@ -62,10 +62,11 @@ public class SlimProject implements IsSerializable {
    * @param countryCode
    * @param displayOrder
    * @param hasModel
+   * @param isRTL
    * @see mitll.langtest.server.LangTestDatabaseImpl#getProjectInfo(SlickProject)
    */
   public SlimProject(int projectid, String name, String language, String countryCode,
-                     String course, int displayOrder, boolean hasModel) {
+                     String course, int displayOrder, boolean hasModel, boolean isRTL) {
     this.name = name;
     this.language = language;
     this.projectid = projectid;
@@ -73,6 +74,7 @@ public class SlimProject implements IsSerializable {
     this.course = course;
     this.displayOrder = displayOrder;
     this.hasModel = hasModel;
+    this.isRTL = isRTL;
   }
 
   public String getName() {
@@ -138,5 +140,9 @@ public class SlimProject implements IsSerializable {
 
   public boolean isHasModel() {
     return hasModel;
+  }
+
+  public boolean isRTL() {
+    return isRTL;
   }
 }

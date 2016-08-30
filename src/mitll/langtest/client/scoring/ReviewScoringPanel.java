@@ -231,7 +231,7 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
           String html = "Score : <b>" + getScore(Math.min(100.0f, zeroToHundred)) + "%</b>";
           scoreInfo.setHTML(html);
 
-          // logger.info("Setting " + scoreInfo.getElement().getId() + " to " + html);
+          // logger.info("Setting " + scoreInfo.getElement().getExID() + " to " + html);
           tablesContainer.clear();
           belowContainer.clear();
 

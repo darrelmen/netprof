@@ -34,7 +34,12 @@ package mitll.langtest.client.exercise;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Image;
+import com.github.gwtbootstrap.client.ui.ProgressBar;
+import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.safehtml.shared.UriUtils;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
@@ -46,12 +51,14 @@ import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
+
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.AudioRefExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Shell;
 
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * A waveform record button and a play audio button.
@@ -62,6 +69,12 @@ import java.util.Map;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioPanel<Shell> {
+  private final Logger logger = Logger.getLogger("RecordAudioPanel");
+  private static final int HEIGHT_OF_RECORD_ROW = 58;
+
+  private static final int MIN_VALID_DYNAMIC_RANGE = 32;
+  private static final int MIN_GOOD_DYNAMIC_RANGE  = 40;
+
   private final int index;
 
   private PostAudioRecordButton postAudioRecordButton;
@@ -111,11 +124,37 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
     getElement().setId("RecordAudioPanel_" + exercise.getID() + "_" + index + "_" + audioType);
   }
 
+  private final ProgressBar progressBar = new ProgressBar(ProgressBarBase.Style.DEFAULT);
+  private final HorizontalPanel afterPlayWidget = new HorizontalPanel();
+
+  /**
+   * Add dynamic range feedback to the right of the play button.
+   *
+   * @return
+   * @see mitll.langtest.client.scoring.AudioPanel#addWidgets
+   */
+  @Override
+  protected Widget getAfterPlayWidget() {
+    HTML w = new HTML("Dynamic Range");
+    w.addStyleName("leftTenMargin");
+    w.addStyleName("topBarMargin");
+    afterPlayWidget.add(w);
+    afterPlayWidget.add(progressBar);
+
+    afterPlayWidget.setVisible(false);
+    progressBar.setWidth("300px");
+    Style style = progressBar.getElement().getStyle();
+    style.setMarginLeft(5, Style.Unit.PX);
+    progressBar.addStyleName("topBarMargin");
+  //  style.setMarginTop(5, Style.Unit.PX);
+  //  style.setMarginBottom(5, Style.Unit.PX);
+    return afterPlayWidget;
+  }
+
   /**
    * Worries about context type audio too.
    *
    * @return
-   * @see #RecordAudioPanel(Shell, ExerciseController, Panel, LangTestDatabaseAsync, int, boolean, String, String)
    */
   public AudioAttribute getAudioAttribute() {
     AudioAttribute audioAttribute = audioType.equals(AudioType.REGULAR) ? exercise.getRecordingsBy(controller.getUser(), true) :
@@ -197,7 +236,7 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
   }
 
   public void setEnabled(boolean val) {
-    //System.out.println("RecordAudioPanel.setEnabled " + val);
+    //logger.info("RecordAudioPanel.setEnabled " + val);
     postAudioRecordButton.setEnabled(val);
     if (postAudioRecordButton.hasValidAudio()) playAudioPanel.setEnabled(val);
   }
@@ -212,7 +251,8 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
    */
   private class MyPlayAudioPanel extends PlayAudioPanel {
     public MyPlayAudioPanel(Image recordImage1, Image recordImage2, final Panel panel, String suffix, Widget toTheRightWidget) {
-      super(RecordAudioPanel.this.soundManager, new PlayListener() {
+      super(RecordAudioPanel.this.soundManager,
+          new PlayListener() {
         public void playStarted() {
           if (panel instanceof BusyPanel) {
             ((BusyPanel) panel).setBusy(true);
@@ -226,12 +266,14 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
           }
           postAudioRecordButton.setEnabled(true);
         }
+
       }, suffix, toTheRightWidget);
       add(recordImage1);
       recordImage1.setVisible(false);
       add(recordImage2);
       recordImage2.setVisible(false);
       getElement().setId("MyPlayAudioPanel");
+      setHeight(HEIGHT_OF_RECORD_ROW + "px");
     }
 
     /**
@@ -240,7 +282,7 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
      */
     @Override
     protected void addButtons(Widget optionalToTheRight) {
-      if (postAudioRecordButton == null) System.err.println("huh? postAudioRecordButton is null???");
+      if (postAudioRecordButton == null) logger.warning("huh? postAudioRecordButton is null???");
       else add(postAudioRecordButton);
       super.addButtons(optionalToTheRight);
     }
@@ -271,6 +313,7 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
       /// then = System.currentTimeMillis();
       super.startRecording();
       showStart();
+      afterPlayWidget.setVisible(false);
     }
 
     @Override
@@ -286,12 +329,53 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
       flipRecordImages(first);
     }
 
+    /**
+     * From Paul Gatewood:
+     * 
+     * Reasonable upper limit outside of an acoustic isolation room is 70dB Dynamic Range
+     * <p>
+     * I would put
+     * 40-70dB in the Green
+     * From (29for iOS and 32 for lptp) to 40 in the Yellow
+     * Below the threshold is in the red.
+     *
+     * @param result
+     */
     @Override
     public void useResult(AudioAnswer result) {
       super.useResult(result);
       if (result.isValid()) {
         // System.out.println("tell other tabs that audio has arrived!");
       }
+      showDynamicRange(result);
+    }
+
+    @Override
+    protected void useInvalidResult(AudioAnswer result) {
+      super.useInvalidResult(result);
+      showDynamicRange(result);
+    }
+
+    /**
+     * Set the value on the progress bar to reflect the dynamic range we measure on the audio.
+     *
+     * @param result
+     * @see #useResult(AudioAnswer)
+     */
+    private void showDynamicRange(AudioAnswer result) {
+      double dynamicRange = result.getDynamicRange();
+      double percent = dynamicRange / 70;
+      progressBar.setPercent(100 * percent);
+      progressBar.setText("" + roundToHundredth(dynamicRange));
+      progressBar.setColor(dynamicRange > MIN_GOOD_DYNAMIC_RANGE ?
+          ProgressBarBase.Color.SUCCESS : dynamicRange > MIN_VALID_DYNAMIC_RANGE ?
+          ProgressBarBase.Color.WARNING :
+          ProgressBarBase.Color.DANGER);
+      afterPlayWidget.setVisible(true);
+    }
+
+    private float roundToHundredth(double totalHours) {
+      return ((float) ((Math.round(totalHours * 100d)))) / 100f;
     }
   }
 }
