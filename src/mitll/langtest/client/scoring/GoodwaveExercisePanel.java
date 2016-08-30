@@ -77,6 +77,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -89,7 +90,7 @@ import java.util.List;
 public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & ScoredExercise>
     extends    HorizontalPanel
     implements BusyPanel, RequiresResize, ProvidesResize, CommentAnnotator {
-  //  private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
+  private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
 
   public static final String CONTEXT = "Context";
 
@@ -387,6 +388,9 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     Panel nameValueRow = new FlowPanel();
     nameValueRow.getElement().setId("nameValueRow_" + label);
     nameValueRow.addStyleName("Instruction");
+
+//    logger.info("got content widget " + label + "'" +value+
+//        "'");
 
     if (includeLabel) {
       InlineHTML labelWidget = new InlineHTML(label);
