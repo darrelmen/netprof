@@ -95,14 +95,7 @@ public class PathWriter {
     //logger.debug("getPermanentAudioPath : dest path    " + bestDirForExercise.getPath() + " vs " +bestAudioPath);
 
     if (!fileRef.equals(destination) && !destFileName.equals(AudioConversion.FILE_MISSING)) {
-      try {
-        FileUtils.copyFile(fileRef, destination);
-      } catch (IOException e) {
-        logger.error("couldn't copy " +fileRef.getAbsolutePath() + " to " + destination.getAbsolutePath());
-      }
-
-      //logger.debug("getPermanentAudioPath : normalizing levels for " + destination.getAbsolutePath());
-      new AudioConversion(serverProperties).normalizeLevels(destination);
+      copyAndNormalize(fileRef, serverProperties, destination);
     } else {
       if (FileUtils.sizeOf(destination) == 0) {
         logger.error("\ngetRefAudioPath : huh? " + destination + " is empty???");
@@ -111,6 +104,17 @@ public class PathWriter {
     }
     ensureMP3(pathHelper, bestAudioPath, overwrite, title, artist, serverProperties);
     return bestAudioPath;
+  }
+
+  public void copyAndNormalize(File fileRef, ServerProperties serverProperties, File destination) {
+    try {
+      FileUtils.copyFile(fileRef, destination);
+    } catch (IOException e) {
+      logger.error("couldn't copy " +fileRef.getAbsolutePath() + " to " + destination.getAbsolutePath());
+    }
+
+    // logger.debug("getPermanentAudioPath : normalizing levels for " + destination.getAbsolutePath());
+    new AudioConversion(serverProperties).normalizeLevels(destination);
   }
 
   private void ensureMP3(PathHelper pathHelper, String wavFile, boolean overwrite, String title, String artist,

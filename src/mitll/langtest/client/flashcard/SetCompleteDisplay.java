@@ -83,6 +83,7 @@ public class SetCompleteDisplay {
    */
   void addLeftAndRightCharts(List<AVPHistoryForList> result,
                              Collection<Double> scores,
+//  void addLeftAndRightCharts(List<AVPHistoryForList> result, Map<String, Double> exToScore,
                              int numCorrect, int numIncorrect, int numExercises, Panel container) {
     // add left chart and table
     AVPHistoryForList sessionAVPHistoryForList = result.get(0);
@@ -179,6 +180,7 @@ public class SetCompleteDisplay {
    * @param sessionAVPHistoryForList
    * @param scoreColHeader
    * @return
+   * @see #addLeftAndRightCharts(List, Map, int, int, int, Panel)
    * @see #showFeedbackCharts(java.util.List, java.util.Map, int, int, int)
    */
   private Table makeTable(AVPHistoryForList sessionAVPHistoryForList, String scoreColHeader) {

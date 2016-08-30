@@ -123,7 +123,7 @@ public class ServerProperties {
 
   private static final String USE_PHONE_TO_DISPLAY = "usePhoneToDisplay";
   private static final String ADD_MISSING_INFO = "addMissingInfo";
-  private static final int MIN_DYNAMIC_RANGE_DEFAULT = 20; // Paul Gatewood 11/24/15 : The bottom line is we should set the minimum Dynamic Range threshold to 20dB for NetProf users
+  private static final int MIN_DYNAMIC_RANGE_DEFAULT = 24; // Paul Gatewood 11/24/15 : The bottom line is we should set the minimum Dynamic Range threshold to 20dB for NetProf users
   private static final int SLEEP_BETWEEN_DECODES_DEFAULT = 100; // Paul Gatewood 11/24/15 : The bottom line is we should set the minimum Dynamic Range threshold to 20dB for NetProf users
   private static final String MIN_DYNAMIC_RANGE = "minDynamicRange";
   private static final String RUN_REF_DECODE_WITH_HYDEC = "runRefDecodeWithHydec";
@@ -393,7 +393,7 @@ public class ServerProperties {
       for (String userid : property.split(",")) {
         try {
           preferredVoices.add(Long.parseLong(userid));
-          logger.info("pref users " + preferredVoices);
+          logger.info("preferredVoices pref users " + preferredVoices);
         } catch (NumberFormatException e) {
           logger.error("couldn't parse userid " + userid);
         }

@@ -34,16 +34,15 @@ package mitll.langtest.client.custom.dialog;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
+import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.MouseOverEvent;
-import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -61,12 +60,13 @@ import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.scoring.EmptyScoreListener;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayListener;
+import mitll.langtest.client.user.BasicDialog;
+import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
-import mitll.langtest.shared.ExerciseAnnotation;
-import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.user.MiniUser;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -78,6 +78,7 @@ import java.util.logging.Logger;
  * @since 3/28/2014.
  */
 public class ReviewEditableExercise extends EditableExerciseDialog {
+  public static final String MARK_FIXED_TOOLTIP = "Mark item as fixed, removed defective audio, and remove item from the review list.";
   private final Logger logger = Logger.getLogger("ReviewEditableExercise");
 
   private static final String FIXED = "Mark Fixed";
@@ -95,6 +96,13 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
 
   private final Set<Widget> audioWasPlayed = new HashSet<>();
   private final PagingExerciseList<CommonShell, CommonExercise> exerciseList;
+
+  BasicDialog.FormField context;
+  BasicDialog.FormField contextTrans;
+  private final HTML contextAnno = new HTML();
+  private final HTML contextTransAnno = new HTML();
+  private String originalContext = "";
+  private String originalContextTrans = "";
 
   /**
    * @param itemMarker
@@ -119,6 +127,79 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
         predefinedContent,
         instanceName);
     this.exerciseList = exerciseList;
+  }
+
+  /**
+   * TODO should move this stuff into a class that handles these basic operations
+   *
+   * @param newUserExercise
+   * @param <S>
+   */
+  @Override
+  public <S extends CommonShell & AudioRefExercise & AnnotationExercise> void setFields(S newUserExercise) {
+    super.setFields(newUserExercise);
+    final com.github.gwtbootstrap.client.ui.base.TextBoxBase box = context.box;
+
+    // TODO : put this back!!!
+
+
+/*    box.setText(originalContext = newUserExercise.getContext());
+
+    useAnnotation(newUserExercise, "context", contextAnno);
+    useAnnotation(newUserExercise, "context translation", contextTransAnno);
+
+    box.addBlurHandler(new BlurHandler() {
+      @Override
+      public void onBlur(BlurEvent event) {
+        gotBlur();
+        try {
+          long uniqueID = originalList.getID();
+          controller.logEvent(box, "TextBox", "UserList_" + uniqueID, "ContextBox = " + box.getValue());
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+    });
+
+    TextBoxBase box1 = contextTrans.box;
+    box1.setText(originalContextTrans = newUserExercise.getContextTranslation());
+    box1.addBlurHandler(new BlurHandler() {
+      @Override
+      public void onBlur(BlurEvent event) {
+        gotBlur();
+        try {
+          long uniqueID = originalList.getID();
+          controller.logEvent(box1, "TextBox", "UserList_" + uniqueID, "ContextTransBox = " + box1.getValue());
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+    });*/
+  }
+
+  void grabInfoFromFormAndStuffInfoExercise(MutableExercise mutableExercise) {
+    super.grabInfoFromFormAndStuffInfoExercise(mutableExercise);
+
+    // TODO : put this back!
+    /*    mutableExercise.setContext(context.getText());
+    mutableExercise.setContextTranslation(contextTrans.getText());*/
+  }
+
+  protected void makeOptionalRows(DivWidget upper) {
+    makeContextRow(upper);
+    makeContextTransRow(upper);
+  }
+
+  protected void makeContextRow(Panel container) {
+    Panel row = new FluidRow();
+    container.add(row);
+    context = makeBoxAndAnno(row, "Context", "", contextAnno);
+  }
+
+  protected void makeContextTransRow(Panel container) {
+    Panel row = new FluidRow();
+    container.add(row);
+    contextTrans = makeBoxAndAnno(row, "Context Translation", "", contextTransAnno);
   }
 
   private List<RememberTabAndContent> tabs;
@@ -234,6 +315,32 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     if (addRightMargin) tabAndContent.getContent().getElement().getStyle().setMarginRight(70, Style.Unit.PX);
     return tabAndContent;
   }
+
+/*  private String getUserTitle(int me, MiniUser user) {
+    return (user.isDefault()) ? GoodwaveExercisePanel.DEFAULT_SPEAKER : (user.getExID() == me) ? "by You (" + user.getUserID() + ")" : getUserTitle(user);
+  }*/
+
+/*
+  private String getUserTitle(int me, MiniUser user) {
+    long id = user.getId();
+    if (id == UserDAO.DEFAULT_USER_ID) return GoodwaveExercisePanel.DEFAULT_SPEAKER;
+    else if (id == UserDAO.DEFAULT_MALE_ID) return "Default Male";
+    else if (id == UserDAO.DEFAULT_FEMALE_ID) return "Default Female";
+    else return
+          (user.getId() == me) ? "by You (" + user.getUserID() + ")" : getUserTitle(user);
+  }
+*/
+
+/*
+  private String getUserTitle(MiniUser user) {
+    return (user.isMale() ? MALE : FEMALE) +
+        (
+            user.isAdmin()
+                ? " (" + user.getUserID() + ")" : "") +
+        " age " + user.getAge();
+  }
+*/
+
   /**
    * Don't warn user to check if audio is consistent if there isn't any.
    *
@@ -254,6 +361,14 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     return didChange;
   }
 
+//  private final Set<Widget> audioWasPlayed = new HashSet<>();
+  // private final Set<Widget> toResize = new HashSet<>();
+
+/*
+  private String getPath(String path) {
+    return CompressedAudio.getPath(path);
+  }
+*/
 
   private <X extends CommonShell & AnnotationExercise> Widget getPanelForAudio(final X exercise,
                                                                                final AudioAttribute audio,
@@ -280,7 +395,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     audioPanel.getElement().setId("ASRScoringAudioPanel");
     noteAudioHasBeenPlayed(exercise, audio, audioPanel);
     tabAndContent.addWidget(audioPanel);
-  //  toResize.add(audioPanel);
+    //  toResize.add(audioPanel);
 
     Panel vert = new VerticalPanel();
     vert.add(audioPanel);
@@ -405,29 +520,32 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     prevNext.addStyleName("floatLeft");
     row.add(prevNext);
 
-    final Button fixed = makeFixedButton();
-
-//    if (logger != null) {
-//      logger.info(this.getClass() + " adding create button - review editable.");
-//    }
-
-    fixed.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        validateThenPost(foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo, true, true);
-      }
-    });
 
     if (newUserExercise.getCombinedMutableUserExercise().checkPredef()) {   // for now, only the owner of the list can remove or add to their list
       row.add(getRemove());
       row.add(getDuplicate());
     }
 
+    final Button fixed = getFixedButton(ul, pagingContainer, toAddTo, normalSpeedRecording);
     row.add(fixed);
 
     configureButtonRow(row);
 
     return row;
+  }
+
+  private Button getFixedButton(final UserList<CommonShell> ul, final ListInterface<CommonShell> pagingContainer, final Panel toAddTo, final ControlGroup normalSpeedRecording) {
+    final Button fixed = makeFixedButton();
+//    if (logger != null) {
+//      logger.info(this.getClass() + " adding create button - review editable.");
+//    }
+    fixed.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        validateThenPost(foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo, true, true);
+      }
+    });
+    return fixed;
   }
 
   private Button getRemove() {
@@ -470,6 +588,9 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     });
   }
 
+  /**
+   * @return
+   */
   private Button getDuplicate() {
     final Button duplicate = new Button(DUPLICATE);
     duplicate.setType(ButtonType.SUCCESS);
@@ -534,7 +655,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
         checkForForeignChange();
       }
     });
-    addTooltip(fixed, "Mark item as fixed, removed defective audio, and remove item from the review list.");
+    addTooltip(fixed, MARK_FIXED_TOOLTIP);
     return fixed;
   }
 

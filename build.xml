@@ -321,6 +321,16 @@
         </jar>
     </target>
 
+    <target depends="build" name="classroomFrench">
+        <jar destfile="npfClassroomFrenchEval.war" basedir="war"
+             includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/french/**,scoring/bin.linux64/**,scoring/configurations/**"
+        >
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
+        </jar>
+    </target>
+
     <target depends="build" name="classroomGerman">
         <jar destfile="npfClassroomGerman.war" basedir="war"
              includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/german/**,scoring/bin.linux64/**,scoring/configurations/**"
@@ -526,8 +536,8 @@
             <!-- Additional arguments like -style PRETTY or -logLevel DEBUG -->
             <arg value="OBF"/>
             <arg line="-localWorkers"/>
-            <arg value="5"/>
-            <!--
+            <arg value="4"/>
+           <!--
                         <arg value="-compileReport"/>
             -->
 
