@@ -175,7 +175,7 @@ public class ButtonGroupSectionWidget implements SectionWidget {
    * @see FlexSectionExerciseList#addClickHandlerToButton(mitll.langtest.client.bootstrap.FlexSectionExerciseList.ButtonWithChildren, String, ButtonGroupSectionWidget) (String, java.util.Collection)
    */
   void simpleSelectItem(Collection<String> sections) {
-    logger.info("ButtonGroupSectionWidget: simpleSelectItem " + this + " : " + type + "=" + sections);
+  //  logger.info("ButtonGroupSectionWidget: simpleSelectItem " + this + " : " + type + "=" + sections);
     clearSelectionState();
     if (isClearSelection(sections)) {
       clearSelection();

@@ -34,6 +34,8 @@ package mitll.langtest.server;
 
 import audio.image.ImageType;
 import audio.imagewriter.SimpleImageWriter;
+import com.google.gwt.i18n.client.HasDirection;
+import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabase;
@@ -67,6 +69,7 @@ import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.answer.Answer;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
+import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
@@ -268,7 +271,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.list.PagingExerciseList#loadExercises
    */
   @Override
-  public <T extends CommonShell> ExerciseListWrapper<T> getExerciseIds( ExerciseListRequest request  ) {
+  public <T extends CommonShell> ExerciseListWrapper<T> getExerciseIds(ExerciseListRequest request) {
     if (serverProps.isAMAS()) {
       ExerciseListWrapper<AmasExerciseImpl> amasExerciseIds = getAMASExerciseIds(request);
       return (ExerciseListWrapper<T>) amasExerciseIds; // TODO : how to do this without forcing it.
@@ -281,7 +284,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         " config " + relativeConfigDir + " request " + request);
 
     try {
-      UserList userListByID = request.getUserListID() != -1 ? db.getUserListByID(request.getUserListID(), getProjectID()) : null;
+      boolean isUserListReq = request.getUserListID() != -1;
+      UserList userListByID = isUserListReq ? db.getUserListByID(request.getUserListID(), getProjectID()) : null;
+
 
       if (request.getTypeToSelection().isEmpty()) {   // no unit-chapter filtering
         // get initial exercise set, either from a user list or predefined
@@ -297,7 +302,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         exercises = filterExercises(request, exercises);
 
         String role = request.getRole();
-        int i = markRecordedState(userID, role, exercises, request.isOnlyExamples());
+
+        if (!isUserListReq) {
+          int i = markRecordedState(userID, role, exercises, request.isOnlyExamples());
+        }
 
         // now sort : everything gets sorted the same way
         List<CommonExercise> commonExercises;
@@ -325,8 +333,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
   }
 
-  Collection<CommonExercise> filterExercises(ExerciseListRequest request,
-                                             Collection<CommonExercise> exercises) {
+  /**
+   * @param request
+   * @param exercises
+   * @return
+   */
+  private Collection<CommonExercise> filterExercises(ExerciseListRequest request,
+                                                     Collection<CommonExercise> exercises) {
     exercises = filterByUnrecorded(request, exercises);
     exercises = filterByOnlyAudioAnno(request.isOnlyWithAudioAnno(), exercises);
     exercises = filterByOnlyDefaultAudio(request.isOnlyDefaultAudio(), exercises);
@@ -801,7 +814,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     try {
       exid1 = Integer.parseInt(exid);
     } catch (NumberFormatException e) {
-      logger.warn("can't parse '" + exid +"'");
+      logger.warn("can't parse '" + exid + "'");
     }
     return getExercise(exid1, userID, isFlashcardReq);
   }
@@ -1219,13 +1232,32 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return projectInfos;
   }
 
+  /**
+   * TODO FIX ME
+   *
+   * @param project
+   * @return
+   */
   private SlimProject getProjectInfo(SlickProject project) {
     boolean hasModel = project.getProp(ServerProperties.MODELS_DIR) != null;
 
+    Collection<CommonExercise> exercises = db.getExercises(project.id());
+    //  Map<String, String> properties = serverProps.getProperties();
+
+    boolean isRTL = false;
+    if (!exercises.isEmpty()) {
+      CommonExercise next = exercises.iterator().next();
+      HasDirection.Direction direction = WordCountDirectionEstimator.get().estimateDirection(next.getForeignLanguage());
+      // String rtl = properties.get("rtl");
+      isRTL = direction == HasDirection.Direction.RTL;
+      // logger.info("examined text and found it to be " + direction);
+
+    }
+
     return new SlimProject(project.id(), project.name(), project.language(),
         project.countrycode(), project.course(), project.displayorder(),
-        hasModel
-    );
+        hasModel,
+        isRTL);
   }
 
   /**
@@ -1345,7 +1377,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     PretestScore asrScoreForAudio =
         getAudioFileHelper().getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg,
-        false, serverProps.useScoreCache(), "" + exerciseID, cachedResult, usePhoneToDisplay1, false);
+            false, serverProps.useScoreCache(), "" + exerciseID, cachedResult, usePhoneToDisplay1, false);
 
     long timeToRunHydec = System.currentTimeMillis() - then;
 
@@ -1451,6 +1483,93 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
+   * Put the new item in the database,
+   * copy the audio under bestAudio
+   * assign the item to a user list
+   *
+   * @param userListID
+   * @param userExercise
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
+   */
+/*
+  public CommonExercise reallyCreateNewItem(long userListID, CommonExercise userExercise) {
+    //logger.debug("reallyCreateNewItem : made user exercise " + userExercise + " on list " + userListID);
+    getUserListManager().reallyCreateNewItem(userListID, userExercise, serverProps.getMediaDir());
+
+    for (AudioAttribute audioAttribute : userExercise.getAudioAttributes()) {
+//      logger.debug("\treallyCreateNewItem : update " + audioAttribute + " to " + userExercise.getID());
+      db.getAudioDAO().updateExerciseID(audioAttribute.getUniqueID(), userExercise.getID());
+    }
+    //  logger.debug("\treallyCreateNewItem : made user exercise " + userExercise + " on list " + userListID);
+
+    return userExercise;
+  }
+*/
+
+/*
+  @Override
+  public Collection<CommonExercise> reallyCreateNewItems(long creator, long userListID, String userExerciseText) {
+    String[] lines = userExerciseText.split("\n");
+    logger.info("got " + lines.length + " lines");
+    List<CommonExercise> newItems = new ArrayList<>();
+    UserList<CommonShell> userListByID = db.getUserListManager().getUserListByID(userListID, Collections.emptyList());
+    int n = userListByID.getExercises().size();
+    Set<String> currentKnownFL = new HashSet<>();
+    for (CommonShell shell : userListByID.getExercises()) currentKnownFL.add(shell.getForeignLanguage());
+    boolean onFirst = true;
+    boolean firstColIsEnglish = false;
+    for (String line : lines) {
+      String[] parts = line.split("\\t");
+//      logger.info("\tgot " + parts.length + " parts");
+      if (parts.length > 1) {
+        String fl = parts[0];
+        String english = parts[1];
+        if (onFirst && english.equalsIgnoreCase(getLanguage())) {
+          logger.info("reallyCreateNewItems skipping header line");
+          firstColIsEnglish = true;
+        } else {
+          if (firstColIsEnglish || (isValidForeignPhrase(english) && !isValidForeignPhrase(fl))) {
+            String temp = english;
+            english = fl;
+            fl = temp;
+            //logger.info("flip english '" +english+ "' to fl '" +fl+ "'");
+          }
+          UserExercise newItem = new UserExercise(-1, UserExercise.CUSTOM_PREFIX + "_" + (n++), (int) creator, english, fl, "", getProjectID());
+          newItems.add(newItem);
+          logger.info("reallyCreateNewItems new " + newItem);
+        }
+      }
+      onFirst = false;
+    }
+
+    List<CommonExercise> actualItems = new ArrayList<>();
+    for (CommonExercise candidate : newItems) {
+      String foreignLanguage = candidate.getForeignLanguage();
+      if (!currentKnownFL.contains(foreignLanguage)) {
+        if (isValidForeignPhrase(foreignLanguage)) {
+          getUserListManager().reallyCreateNewItem(userListID, candidate, serverProps.getMediaDir());
+          actualItems.add(candidate);
+        } else {
+          logger.info("item #" + candidate.getID() + " '" + candidate.getForeignLanguage() + "' is invalid");
+        }
+      }
+    }
+    logger.info("Returning " + actualItems.size() + "/" + lines.length);
+    return actualItems;
+  }
+*/
+
+  /**
+   * @param exercise
+   * @return
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#duplicateExercise
+   */
+  //@Override
+  public CommonExercise duplicateExercise(CommonExercise exercise) {
+    return db.duplicateExercise(exercise);
+  }
+
+  /**
    * @param id
    * @return
    * @seex ReviewEditableExercise#confirmThenDeleteItem
@@ -1507,9 +1626,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     if (!byID.getMutableAudio().removeAudio(audioAttribute)) {
       String key = audioAttribute.getKey();
-      logger.warn("huh? couldn't remove key '" + key +
-          "' : " + audioAttribute + " from " + exid +
-          " keys were " + byID.getAudioRefToAttr().keySet() + " contains " + byID.getAudioRefToAttr().containsKey(key));
+      logger.warn("markAudioDefect huh? couldn't remove key '" + key +
+          "' : " + audioAttribute + " from ex #" + exid +
+          "\n\tkeys were " + byID.getAudioRefToAttr().keySet() + " contains " + byID.getAudioRefToAttr().containsKey(key));
     }
     /*   int afterNumAudio = byID.getAudioAttributes().size();
     if (afterNumAudio != beforeNumAudio - 1) {
@@ -1540,11 +1659,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       logAndNotifyServerException(new Exception("couldn't find exercise " + exid));
     } else {
       byID.getAudioAttributes().clear();
-
 //      logger.debug("re-attach " + attr + " given isMale " + isMale);
-
       attachAudio(byID);
-
 /*
       String addr = Integer.toHexString(byID.hashCode());
       for (AudioAttribute audioAttribute : byID.getAudioAttributes()) {
@@ -1939,7 +2055,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
                                     boolean recordedWithFlash, String deviceType, String device,
 
                                     boolean doFlashcard,
-                                    boolean recordInResults, boolean addToAudioTable,
+                                    boolean recordInResults,
+                                    boolean addToAudioTable,
                                     boolean allowAlternates) {
     int exerciseID = audioContext.getExid();
 
@@ -2038,6 +2155,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * Remember this audio as reference audio for this exercise, and possibly clear the APRROVED (inspected) state
    * on the exercise indicating it needs to be inspected again (we've added new audio).
+   * <p>
+   * Don't return a path to the normalized audio, since this doesn't let the recorder have feedback about how soft
+   * or loud they are : https://gh.ll.mit.edu/DLI-LTEA/Development/issues/601
    *
    * @param user        who recorded audio
    * @param audioType   regular or slow
@@ -2056,10 +2176,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     int projid = exercise1 == null ? -1 : exercise1.getProjectID();
     String audioTranscript = getAudioTranscript(audioType, exercise1);
 
+    //  logger.debug("addToAudioTable user " + user + " ex " + exerciseID + " for " + audioType + " path before " + audioAnswer.getPath());
+
     String permanentAudioPath = new PathWriter().
         getPermanentAudioPath(pathHelper,
             getAbsoluteFile(audioAnswer.getPath()),
-            getPermanentName(user, audioType), true, projid, idToUse, audioTranscript, getArtist(user), serverProps);
+            getPermanentName(user, audioType),
+            true,
+            projid,
+            idToUse,
+            audioTranscript,
+            getArtist(user),
+            serverProps);
 
     AudioAttribute audioAttribute =
         db.getAudioDAO().addOrUpdate(user, idToUse, projid, audioType, permanentAudioPath, System.currentTimeMillis(),
