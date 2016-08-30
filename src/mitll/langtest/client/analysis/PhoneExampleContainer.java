@@ -148,7 +148,7 @@ public class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
     return new Column<WordAndScore, SafeHtml>(new SafeHtmlCell()) {
       @Override
       public SafeHtml getValue(WordAndScore shell) {
-        // CommonShell exercise = null;//getShell(shell.getId());
+        // CommonShell exercise = null;//getShell(shell.getExID());
         // logger.info("Got " + shell + "  : " + exercise);
         // String title = exercise == null ? "play" : exercise.getForeignLanguage() + "/" + exercise.getEnglish();
         return PlayAudioWidget.getAudioTagHTML(shell.getAnswerAudio(), "play");
@@ -160,8 +160,8 @@ public class PhoneExampleContainer extends SimplePagingContainer<WordAndScore> {
     return new Column<WordAndScore, SafeHtml>(new SafeHtmlCell()) {
       @Override
       public SafeHtml getValue(WordAndScore shell) {
-        //  CommonShell exercise = getShell(shell.getId());
-        // logger.info("getPlayAudio : Got " + shell.getId() + "  : " + exercise);
+        //  CommonShell exercise = getShell(shell.getExID());
+        // logger.info("getPlayAudio : Got " + shell.getExID() + "  : " + exercise);
         //String title = exercise == null ? "play" : exercise.getForeignLanguage() + "/" + exercise.getEnglish();
         if (shell.getRefAudio() != null) {
           return PlayAudioWidget.getAudioTagHTML(shell.getRefAudio(), "play");
