@@ -274,8 +274,14 @@ public class AmasExerciseImpl implements CommonShell {
 
   @Override
   public String getAltFL() {
+    return null;
+  }
+
+/*
+  public String getAltFL() {
     return "";
   }
+*/
 
   @Override
   public String getTransliteration() {

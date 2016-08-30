@@ -57,8 +57,8 @@ public class ContextCommentNPFExercise<T extends CommonExercise> extends NPFExer
   private static final String NO_REFERENCE_AUDIO = "No reference audio";
   private static final String M = "M";
   private static final String F = "F";
-  public static final String PUNCT_REGEX = "[\\?\\.,-\\/#!$%\\^&\\*;:{}=\\-_`~()]";
-  public static final String SPACE_REGEX = " ";
+  private static final String PUNCT_REGEX = "[\\?\\.,-\\/#!$%\\^&\\*;:{}=\\-_`~()]";
+  private static final String SPACE_REGEX = " ";
   private static final String REF_AUDIO = "refAudio";
 
   private AudioAttribute defaultAudio, maleAudio, femaleAudio;
@@ -137,7 +137,7 @@ public class ContextCommentNPFExercise<T extends CommonExercise> extends NPFExer
     return e.getMeaning() != null && !e.getMeaning().trim().isEmpty();
   }
 
-  private void addContextButton(final T e, DivWidget row) {
+/*  private void addContextButton(final T e, DivWidget row) {
     //String originalContext = e.getContext();
     //String context = originalContext != null && !originalContext.trim().isEmpty() ? originalContext : "";
 
@@ -163,7 +163,7 @@ public class ContextCommentNPFExercise<T extends CommonExercise> extends NPFExer
 
       row.add(show);
     }
-  }
+  }*/
 
   /**
    * @param e
