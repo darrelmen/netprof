@@ -55,6 +55,7 @@ public class AudioExercise extends ExerciseShell {
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
   private static final String CONTEXT = "context";
+  protected String altfl = "";
 
   private Map<String, AudioAttribute> audioAttributes = new HashMap<String, AudioAttribute>();
   private Map<String, ExerciseAnnotation> fieldToAnnotation = new HashMap<String, ExerciseAnnotation>();
@@ -503,9 +504,19 @@ public class AudioExercise extends ExerciseShell {
     return projectid;
   }
 
+  //  @Override
+  public String getAltFL() {
+    return altfl;
+  }
+
+  public void setAltFL(String foreignLanguage) {
+    this.altfl = foreignLanguage;
+  }
+
   public String toString() {
     return super.toString() +
         " audio attr (" + getAudioAttributes().size() +
-        ") :" + getAudioAttributes() + " and " + fieldToAnnotation + " annotations, unit/lesson " + getUnitToValue();
+        ") :" + getAudioAttributes() + " and " +
+        fieldToAnnotation + " annotations, unit/lesson " + getUnitToValue();
   }
 }
