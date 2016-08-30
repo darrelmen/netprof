@@ -103,7 +103,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
 
   private static final String COMMENT_TOOLTIP = "Comments are optional.";
   private static final String CHECKBOX_TOOLTIP = "Check to indicate this field has a defect.";
-  private static final String APPROVED_BUTTON_TOOLTIP = "Indicate item has no defects.";
+  private static final String APPROVED_BUTTON_TOOLTIP  = "Indicate item has no defects.";
   private static final String APPROVED_BUTTON_TOOLTIP2 = "Item has been marked with a defect";
   private static final String ATTENTION_LL = "Attention LL";
   private static final String MARK_FOR_LL_REVIEW = "Mark for review by Lincoln Laboratory.";
@@ -363,6 +363,13 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
     column.add(getEntry(e, FOREIGN_LANGUAGE, ExerciseFormatter.FOREIGN_LANGUAGE_PROMPT, e.getForeignLanguage()));
     column.add(getEntry(e, TRANSLITERATION, ExerciseFormatter.TRANSLITERATION, e.getTransliteration()));
     column.add(getEntry(e, ENGLISH, ExerciseFormatter.ENGLISH_PROMPT, e.getEnglish()));
+
+    // TODO:  put this back!!!
+
+/*
+    column.add(getEntry(e, CONTEXT, ExerciseFormatter.CONTEXT, e.getContext()));
+    column.add(getEntry(e, CONTEXT_TRANSLATION, ExerciseFormatter.CONTEXT_TRANSLATION, e.getContextTranslation()));
+*/
 
     return column;
   }

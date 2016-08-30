@@ -142,6 +142,9 @@ public class EmailHelper {
   public boolean resetPassword(String user, String email, String url) {
     logger.debug(" resetPassword for " + user + " url " + url);
 
+    user  = user.trim();
+    email = email.trim();
+
     String hash1 = getHash(email);
     Integer validUserAndEmail = userDAO.getIDForUserAndEmail(user, hash1);
 
