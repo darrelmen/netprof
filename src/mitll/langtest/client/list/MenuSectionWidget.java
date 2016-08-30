@@ -52,23 +52,30 @@ public class MenuSectionWidget implements SectionWidget {
   private final Logger logger = Logger.getLogger("MenuSectionWidget");
 
   private final String type;
-  // private ListBox child1 = new ListBox();
   private DropdownButton child2;
   private final Collection<SectionNode> nodes;
   private final SimpleSelectExerciseList singleSelectExerciseList;
 
-  public MenuSectionWidget(String type, Collection<SectionNode> nodes, SimpleSelectExerciseList singleSelectExerciseList) {
+  /**
+   * @param type
+   * @param nodes
+   * @param singleSelectExerciseList
+   */
+  MenuSectionWidget(String type,
+                    Collection<SectionNode> nodes,
+                    SimpleSelectExerciseList singleSelectExerciseList) {
     this.type = type;
     this.nodes = nodes;
     this.singleSelectExerciseList = singleSelectExerciseList;
+    logger.info("made menu " + type + " with " + nodes.size());
   }
 
   private int num = 0;
   private final ButtonToolbar toolbar = new ButtonToolbar();
 
-  public void addChoices(Panel container,
-                         String label,
-                         List<String> values) {
+  void addChoices(Panel container,
+                  String label,
+                  List<String> values) {
     Panel horizontalPanel = new HorizontalPanel();
     horizontalPanel.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
 
@@ -76,34 +83,15 @@ public class MenuSectionWidget implements SectionWidget {
     Heading child = new Heading(5, label);
     child.getElement().getStyle().setMarginTop(15, Style.Unit.PX);
     horizontalPanel.add(child);
-
-//    child1.addChangeHandler(new ChangeHandler() {
-//      @Override
-//      public void onChange(ChangeEvent event) {
-//        singleSelectExerciseList.gotSelection();
-//      }
-//    });
-//
-//    horizontalPanel.add(child1);
     horizontalPanel.add(toolbar);
     this.num = values.size();
 
     addGridChoices(values, "All");
-
-    //   Set<String> unique = new TreeSet<String>(values);
-/*
-    child1.addItem("All");
-    style.setMarginTop(10, Style.Unit.PX);
-    style.setMarginLeft(5, Style.Unit.PX);
-    for (String value : unique) {
-      child1.addItem(value);
-    }
-*/
     container.add(horizontalPanel);
   }
 
   private void addGridChoices(List<String> values, String initialChoice) {
-    logger.info("addGridChoices " + this + " : " + initialChoice);
+//    logger.info("addGridChoices " + this + " : " + initialChoice);
     this.child2 = new TableSelect().makeSymbolButton(values, 4, singleSelectExerciseList, this, initialChoice);
     toolbar.clear();
     toolbar.add(child2);
@@ -188,20 +176,35 @@ public class MenuSectionWidget implements SectionWidget {
 
   private void gotSelection(Collection<String> possibleValues) {
     logger.info("gotSelection " + type + " : " + possibleValues);
+    boolean isAll = !possibleValues.isEmpty() && possibleValues.iterator().next().equals(TableSelect.ALL);
 
+    logger.info("examine " + nodes.size() + " nodes");
     Set<String> possible = new HashSet<>();
+
+    List<String> sorted = new ArrayList<>();
+    ItemSorter itemSorter = new ItemSorter();
+
     for (SectionNode node : nodes) {
-      if ((!possibleValues.isEmpty() && possibleValues.iterator().next().equals(TableSelect.ALL)) ||
-          possibleValues.contains(node.getName())) {
-        List<String> sectionsInType = new ItemSorter().getSortedItems(getLabels(node.getChildren()));
-        possible.addAll(sectionsInType);
+      if (isAll || possibleValues.contains(node.getName())) {
+        List<String> temp = new ArrayList<>();
+        for (SectionNode n : node.getChildren()) {
+          if (possible.add(n.getName())) {
+            temp.add(n.getName());
+          }
+        }
+
+        List<String> sectionsInType = itemSorter.getSortedItems(temp);
+//        List<String> sectionsInType = new ItemSorter().getSortedItems(getLabels(node.getChildren()));
+//        possible.addAll(sectionsInType);
+        sorted.addAll(sectionsInType);
       }
     }
     if (childWidget != null) {
       String currentSelection = childWidget.getCurrentSelection();
 
       boolean stillValid = possible.contains(currentSelection);
-      childWidget.addGridChoices(new ArrayList<>(possible), stillValid ? currentSelection : TableSelect.ALL);
+      // ArrayList<String> values = new ArrayList<>(possible);
+      childWidget.addGridChoices(sorted, stillValid ? currentSelection : TableSelect.ALL);
 //      if (!stillValid) {
 //        logger.info("\tgotSelection reset choice on " + childWidget + " since it's current is " + currentSelection +
 //            " is not in " + possible);

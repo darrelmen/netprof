@@ -79,9 +79,10 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T> {
+  private Logger logger = Logger.getLogger("CommentNPFExercise");
+
   private static final String HIGHLIGHT_START = "<span style='background-color:#5bb75b;color:black'>"; //#5bb75b
   private static final String HIGHLIGHT_END = "</span>";
-  private Logger logger = Logger.getLogger("CommentNPFExercise");
 
   private static final String CONTEXT_SENTENCE = "Context Sentence";
   private static final String DEFAULT = "Default";
@@ -132,6 +133,7 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
 
     column.add(row);
 
+    addAltFL(e, column);
     addTransliteration(e, column);
 
     boolean isEnglish = controller.getLanguage().equalsIgnoreCase("english");
@@ -139,7 +141,7 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
     boolean useMeaningInsteadOfEnglish = isEnglish && meaningValid;
     String english = useMeaningInsteadOfEnglish ? e.getMeaning() : e.getEnglish();
 
-    logger.info("getItemContent meaningValid " + meaningValid + " is english " + isEnglish + " use it " +useMeaningInsteadOfEnglish + "" +
+    logger.info("getItemContent meaningValid " + meaningValid + " is english " + isEnglish + " use it " + useMeaningInsteadOfEnglish + "" +
         " english " + english);
 
     if (!english.isEmpty() && !english.equals("N/A")) {
@@ -161,33 +163,44 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
     }
   }
 
+  private void addAltFL(T e, Panel column) {
+    String translitSentence = e.getAltFL();
+    if (!translitSentence.isEmpty() && !translitSentence.equals("N/A")) {
+      column.add(getEntry(e, QCNPFExercise.ALTFL, ExerciseFormatter.ALTFL, translitSentence));
+    }
+  }
+
   private boolean isMeaningValid(T e) {
     return e.getMeaning() != null && !e.getMeaning().trim().isEmpty();
   }
 
   private void addContextButton(final T e, DivWidget row) {
-    //String originalContext = e.getContext();
-    //String context = originalContext != null && !originalContext.trim().isEmpty() ? originalContext : "";
+    final Collection<CommonExercise> directlyRelated = e.getDirectlyRelated();
 
-    if (!e.getDirectlyRelated().isEmpty() && controller.getProps().showContextButton()) {
+    if (!directlyRelated.isEmpty() && controller.getProps().showContextButton()) {
       Button show = new Button(CONTEXT_SENTENCE);
       show.setIcon(IconType.QUOTE_RIGHT);
       show.setType(ButtonType.SUCCESS);
+
       show.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
           DivWidget container = new DivWidget();
-          for (CommonExercise contextEx : e.getDirectlyRelated()) {
-            container.add(getContext(contextEx, e.getForeignLanguage()));
+          String foreignLanguage = e.getForeignLanguage();
+          String altFL = e.getAltFL();
+
+          for (CommonExercise contextEx : directlyRelated) {
+            container.add(getContext(contextEx, foreignLanguage, altFL));
           }
-          new ModalInfoDialog(CONTEXT_SENTENCE, container);//getContext(e, e.getForeignLanguage()));
+          new ModalInfoDialog(CONTEXT_SENTENCE, container);
         }
       });
 
       show.addStyleName("floatRight");
-      show.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
-      show.getElement().getStyle().setMarginTop(-10, Style.Unit.PX);
-      show.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
+      Style style = show.getElement().getStyle();
+      style.setMarginBottom(5, Style.Unit.PX);
+      style.setMarginTop(-10, Style.Unit.PX);
+      style.setMarginRight(5, Style.Unit.PX);
 
       row.add(show);
     }
@@ -195,23 +208,28 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
 
   /**
    * @param e
+   * @param altText
    * @return
    * @see #addContextButton
    */
-  private <U extends CommonAudioExercise> Panel getContext(U e, String itemText) {
-    String context = e.getForeignLanguage();//e.getContext() != null && !e.getContext().trim().isEmpty() ? e.getContext() : "";
-    String contextTranslation = e.getEnglish();//e.getContextTranslation() != null && !e.getContextTranslation().trim().isEmpty() ? e.getContextTranslation() : "";
+  private <U extends CommonAudioExercise> Panel getContext(U e, String itemText, String altText) {
+    String context = e.getForeignLanguage();
+    String contextTranslation = e.getEnglish();
     boolean same = context.equals(contextTranslation);
 
     if (!context.isEmpty()) {
       Panel hp = new HorizontalPanel();
       addGenderChoices(e, hp);
-      String highlightedVocabItemInContext = getHighlightedItemInContext(context,itemText);
-      Widget entry = getEntry(e, QCNPFExercise.CONTEXT, ExerciseFormatter.CONTEXT, highlightedVocabItemInContext);
 
       Panel vp = new VerticalPanel();
+
+      Widget entry = getEntry(e, QCNPFExercise.CONTEXT, ExerciseFormatter.CONTEXT, getHighlightedItemInContext(context, itemText));
       vp.add(entry);
+      Widget entry2 = getEntry(e, QCNPFExercise.ALTCONTEXT, ExerciseFormatter.ALTCONTEXT, getHighlightedItemInContext(e.getAltFL(), altText));
+      vp.add(entry2);
+
       addContextTranslation(e, contextTranslation, same, vp);
+
       hp.add(vp);
       return hp;
     } else {
@@ -227,24 +245,7 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
     }
   }
 
-  /**
-   * Add underlines of item tokens in context sentence.
-   * <p>
-   * TODO : don't do this - make spans with different colors
-   * <p>
-   * Worries about lower case/upper case mismatch.
-   *
-   * @param e
-   * @param context
-   * @return
-   * @see #getContext
-   */
-/*
-  private String highlightVocabItemInContext(CommonShell e, String context) {
-    return getHighlightedItemInContext(context, e.getForeignLanguage());
-  }
-*/
-
+  //private static final boolean debug = false;
   /**
    * @param context
    * @param foreignLanguage
@@ -255,21 +256,25 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
     String trim = foreignLanguage.trim();
     String toFind = removePunct(trim);
 
+
     // split on spaces, find matching words if no contigious overlap
     int i = context.indexOf(toFind);
     if (i == -1) { // maybe mixed case - 'where' in Where is the desk?
       String str = toFind.toLowerCase();
       i = context.toLowerCase().indexOf(str);
-      logger.info("Got "+i + " for " + str + " in " + context);
+      logger.info("Got " + i + " for " + str + " in " + context);
     }
     int end = i + toFind.length();
     if (i > -1) {
-      //log("marking underline from " + i + " to " + end + " for '" + toFind +  "' in '" + trim + "'");
+    //  if (debug) logger.info("marking underline from " + i + " to " + end + " for '" + toFind + "' in '" + trim + "'");
       context = context.substring(0, i) + HIGHLIGHT_START + context.substring(i, end) + HIGHLIGHT_END + context.substring(end);
+
+    //  if (debug) logger.info("context " + context);
+
     } else {
-      //log("NOT marking underline from " + i + " to " + end);
-      //log("trim   " + trim + " len " + trim.length());
-      //log("toFind " + toFind + " len " + trim.length());
+      //if (debug) logger.info("NOT marking underline from " + i + " to " + end);
+      //if (debug) logger.info("trim   " + trim + " len " + trim.length());
+      //if (debug) logger.info("toFind " + toFind + " len " + trim.length());
 
       Collection<String> tokens = getTokens(trim);
       int startToken;
@@ -282,7 +287,7 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
       }
       String lowerContext = context.toLowerCase();
       for (String token : tokens) {
-//        logger.info("getHighlightedItemInContext Check token '" + token + "'");
+        //if (debug) logger.info("getHighlightedItemInContext Check token '" + token + "'");
         startToken = lowerContext.indexOf(token, endToken);
         if (startToken != -1) {
           builder.append(context.substring(endToken, startToken));
@@ -290,11 +295,12 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
           builder.append(context.substring(startToken, endToken = startToken + token.length()));
           builder.append(HIGHLIGHT_END);
         } else {
-  //        logger.info("getHighlightedItemInContext from " + endToken + " couldn't find token '" + token + "' len " + token.length() + " in '" + context + "'");
+//          if (debug)
+//            logger.info("getHighlightedItemInContext from " + endToken + " couldn't find token '" + token + "' len " + token.length() + " in '" + context + "'");
         }
       }
       builder.append(context.substring(endToken));
-      // System.out.println("before " + context + " after " + builder.toString());
+//      if (debug) logger.info("before " + context + " after " + builder.toString());
       context = builder.toString();
     }
     return context;
@@ -311,10 +317,9 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
       if (scoreForChoice > score) {
         highest = choice;
         score = scoreForChoice;
-    //    logger.info("findLongest Got " + score + " for " + new HashSet<>(choice));
-      }
-      else {
-      //  logger.info("findLongest Got " + score + " vs " + highest);
+        //    logger.info("findLongest Got " + score + " for " + new HashSet<>(choice));
+      } else {
+        //  logger.info("findLongest Got " + score + " vs " + highest);
       }
     }
     return highest == null ? tList : highest;
@@ -326,10 +331,10 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
     context = context.toLowerCase();
 
     for (String token : tokens) {
-     // logger.info("getHighlightedItemInContext Check token '" + token + "'");
+      // logger.info("getHighlightedItemInContext Check token '" + token + "'");
       startToken = context.indexOf(token, endToken);
       if (startToken == -1) {
-       // logger.info("getHighlightedItemInContext Check token '" + token + "' not after end " +endToken);
+        // logger.info("getHighlightedItemInContext Check token '" + token + "' not after end " +endToken);
         return false;
       } else {
         endToken = startToken + token.length();
@@ -401,13 +406,13 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
           defaultAudio = audioAttribute;
         } else if (audioAttribute.getUser().isMale()) {
           if (audioAttribute.getTimestamp() > maleTime) {
-            if (maleAudio == null || !preferredUsers.contains(maleAudio.getUser().getId())) {
+            if (maleAudio == null || !preferredUsers.contains((long) maleAudio.getUser().getId())) {
               maleAudio = audioAttribute;
               maleTime = audioAttribute.getTimestamp();
             }
           }
         } else if (audioAttribute.getTimestamp() > femaleTime) {
-          if (femaleAudio == null || !preferredUsers.contains(femaleAudio.getUser().getId())) {
+          if (femaleAudio == null || !preferredUsers.contains((long) femaleAudio.getUser().getId())) {
             femaleAudio = audioAttribute;
             femaleTime = audioAttribute.getTimestamp();
           }
