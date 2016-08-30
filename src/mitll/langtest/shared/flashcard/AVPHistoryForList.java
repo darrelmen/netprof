@@ -60,7 +60,7 @@ public class AVPHistoryForList implements IsSerializable {
   public AVPHistoryForList() {}
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#getUserHistoryForList(long, java.util.Collection, long)
+   * @see mitll.langtest.server.database.DatabaseImpl#getUserHistoryForList
    * @param scores
    * @param userID
    * @param useCorrect when false get score percentages true for percentage correct

@@ -76,6 +76,10 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
   private final Map<Integer, CommonShell> idToExercise = new HashMap<>();
   private final ExerciseComparator sorter;
 
+  /**
+   * @param controller
+   * @param allExercises
+   */
   ScoreHistoryContainer(ExerciseController controller, Collection<? extends CommonShell> allExercises) {
     super(controller);
     english = controller.getLanguage().equals(ENGLISH);
@@ -88,15 +92,15 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
   }
 
   /**
-   * @see SetCompleteDisplay#getScoreHistory
    * @param sortedHistory
    * @return
+   * @see SetCompleteDisplay#getScoreHistory
    */
   public Panel getTableWithPager(List<ExerciseCorrectAndScore> sortedHistory) {
     Panel tableWithPager = getTableWithPager();
     tableWithPager.getElement().setId("TableScoreHistory");
-  //  tableWithPager.setWidth(TABLE_HISTORY_WIDTH + "px");
-   // tableWithPager.addStyleName("floatLeft");
+    //  tableWithPager.setWidth(TABLE_HISTORY_WIDTH + "px");
+    // tableWithPager.addStyleName("floatLeft");
 
     for (ExerciseCorrectAndScore exerciseCorrectAndScore : sortedHistory) {
       addItem(exerciseCorrectAndScore);
@@ -123,11 +127,11 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
 
     Column<ExerciseCorrectAndScore, SafeHtml> flColumn = getFLColumn();
     flColumn.setSortable(true);
-    table.setColumnWidth(flColumn,COL_WIDTH + "px");
+    table.setColumnWidth(flColumn, COL_WIDTH + "px");
 
     String language = controller.getLanguage();
     String headerForFL = language.equals("English") ? "Meaning" : language;
-    addColumn(flColumn,   new TextHeader(headerForFL));
+    addColumn(flColumn, new TextHeader(headerForFL));
     addColumn(englishCol, new TextHeader("English"));
 
     List<ExerciseCorrectAndScore> dataList = getList();
@@ -204,9 +208,8 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
   }
 
 
-
   private ColumnSortEvent.ListHandler<ExerciseCorrectAndScore> getScoreSorter(Column<ExerciseCorrectAndScore, SafeHtml> scoreCol,
-                                                                                List<ExerciseCorrectAndScore> dataList) {
+                                                                              List<ExerciseCorrectAndScore> dataList) {
     ColumnSortEvent.ListHandler<ExerciseCorrectAndScore> columnSortHandler = new ColumnSortEvent.ListHandler<ExerciseCorrectAndScore>(dataList);
     columnSortHandler.setComparator(scoreCol,
         new Comparator<ExerciseCorrectAndScore>() {
@@ -219,24 +222,21 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
               if (o2 == null) {
                 logger.warning("------- o2 is null?");
                 return -1;
-              }
-              else {
+              } else {
                 int a1 = o1.getAvgScorePercent();
                 int a2 = o2.getAvgScorePercent();
                 int i = Integer.valueOf(a1).compareTo(a2);
-               // logger.info("a1 " + a1 + " vs " + a2 + " i " + i);
+                // logger.info("a1 " + a1 + " vs " + a2 + " i " + i);
                 if (i == 0) {
                   CommonShell shell1 = idToExercise.get(o1.getId());
                   CommonShell shell2 = idToExercise.get(o2.getId());
                   if (o1.getId() == o2.getId()) logger.warning("same id " + o1.getId());
                   return shell1.getEnglish().compareTo(shell2.getEnglish());
-                }
-                else {
+                } else {
                   return i;
                 }
               }
-            }
-            else {
+            } else {
               logger.warning("------- o1 is null?");
 
               return -1;
@@ -262,7 +262,7 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
     table.setColumnWidth(scoreColumn, 70 + "px");
     table.setWidth("100%", true);
 
-    ColumnSortEvent.ListHandler<ExerciseCorrectAndScore> columnSortHandler2 = getScoreSorter(scoreColumn,  getList());
+    ColumnSortEvent.ListHandler<ExerciseCorrectAndScore> columnSortHandler2 = getScoreSorter(scoreColumn, getList());
     table.addColumnSortHandler(columnSortHandler2);
 
     new TooltipHelper().addTooltip(table, CORRECT_INCORRECT_HISTORY_AND_AVERAGE_PRONUNCIATION_SCORE);
@@ -279,12 +279,17 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
     };
   }
 
+  /**
+   * TODO : what if we can't find the exercise id here?
+   *
+   * @return
+   */
   private Column<ExerciseCorrectAndScore, SafeHtml> getFLColumn() {
     return new Column<ExerciseCorrectAndScore, SafeHtml>(new SafeHtmlCell()) {
       @Override
       public SafeHtml getValue(ExerciseCorrectAndScore shell) {
         CommonShell shell1 = idToExercise.get(shell.getId());
-        String toShow = getFLText(shell1);
+        String toShow = shell1 == null ? "" : getFLText(shell1);
         String columnText = truncate(toShow);
         return getSafeHtml(shell, columnText);
       }
@@ -336,6 +341,7 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
 
   /**
    * Confusing for english - english col should be foreign language for english,
+   *
    * @param shell
    * @return
    */
@@ -346,6 +352,7 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
 
   /**
    * Confusing for english - fl text should be english or meaning if there is meaning
+   *
    * @param shell
    * @return
    */

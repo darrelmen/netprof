@@ -39,7 +39,7 @@ import mitll.langtest.shared.project.ProjectStartupInfo;
 import java.util.Collection;
 
 public class User extends MiniUser {
-  private static final String NOT_SET = "NOT_SET";
+  public static final String NOT_SET = "NOT_SET";
   private int experience;
   private String ipaddr;
   private String passwordHash;
@@ -171,6 +171,10 @@ public class User extends MiniUser {
     return timestamp;
   }
 
+  /**
+   *
+   * @param timestampMillis
+   */
   public void setTimestampMillis(long timestampMillis) {
     this.timestamp = timestampMillis;
   }

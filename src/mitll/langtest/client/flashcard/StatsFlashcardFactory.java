@@ -390,7 +390,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       service.getUserHistoryForList(user, copies, latestResultID, selection, ul == null ? -1 : ul.getID(), new AsyncCallback<AVPScoreReport>() {
         @Override
         public void onFailure(Throwable caught) {
-          //System.err.println("StatsPracticePanel.onSetComplete. : got failure " + caught);
+          //logger.warning("StatsPracticePanel.onSetComplete. : got failure " + caught);
         }
 
         @Override
@@ -594,11 +594,11 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     protected void gotClickOnNext() {
       abortPlayback();
 
-      logger.info("on last " + exerciseList.onLast());
+      //logger.info("on last " + exerciseList.onLast());
       if (exerciseList.onLast()) {
         onSetComplete();
       } else {
-        logger.info("load next " + exerciseList.getCurrentExerciseID());
+        //logger.info("load next " + exerciseList.getCurrentExerciseID());
         exerciseList.loadNext();
       }
     }

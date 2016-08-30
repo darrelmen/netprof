@@ -121,6 +121,10 @@ public class AnalysisPlot extends TimeSeriesPlot {
   private final List<Long> weeks = new ArrayList<>();
   private final List<Long> months = new ArrayList<>();
 
+  private int index = 0;
+
+  private TimeWidgets timeWidgets;
+
   /**
    * @param service
    * @param userid
@@ -601,10 +605,8 @@ public class AnalysisPlot extends TimeSeriesPlot {
   private void addDeviceData(Collection<TimeAndScore> iPadData, Chart chart, boolean isVisible) {
     if (!iPadData.isEmpty()) {
       Number[][] data = getDataForTimeAndScore(iPadData);
-
-      String iPadName = I_PAD_I_PHONE;
       Series series = chart.createSeries()
-          .setName(iPadName)
+          .setName(I_PAD_I_PHONE)
           .setPoints(data)
           .setOption("color", "#00B800")
           .setType(Series.Type.SCATTER);
@@ -742,9 +744,9 @@ public class AnalysisPlot extends TimeSeriesPlot {
           for (CommonShell shell : commonShells) idToEx.put(shell.getID(), shell);
         }
       });
-    } else {
+    } //else {
       //logger.info("rawBest is empty?");
-    }
+    //}
   }
 
   /**
@@ -764,12 +766,8 @@ public class AnalysisPlot extends TimeSeriesPlot {
     this.timeHorizon = timeHorizon;
     Long x = goToLast(timeHorizon);
     if (x != null) return x;
-    return 0;
+    else return 0;
   }
-
-  private int index = 0;
-
-  private TimeWidgets timeWidgets;
 
   /**
    * @param timeHorizon
@@ -833,7 +831,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
     timeChanged(firstTime, lastTime);
   }
 
-  public void gotPrevClick() {
+  void gotPrevClick() {
     long offset = timeHorizon == AnalysisTab.TIME_HORIZON.WEEK ? WEEK : MONTH;
     List<Long> periods = timeHorizon == AnalysisTab.TIME_HORIZON.WEEK ? weeks : months;
 
@@ -845,7 +843,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
     showTimePeriod(offset, periods);
   }
 
-  public void gotNextClick() {
+  void gotNextClick() {
     long offset = timeHorizon == AnalysisTab.TIME_HORIZON.WEEK ? WEEK : MONTH;
     List<Long> periods = timeHorizon == AnalysisTab.TIME_HORIZON.WEEK ? weeks : months;
 
