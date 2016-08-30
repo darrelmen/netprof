@@ -102,7 +102,7 @@ public class UserPassLogin extends UserDialog {
   private static final int LEFT_SIDE_WIDTH = 483;
   private static final String SIGN_UP_SUBTEXT = "Sign up";
   private static final String PLEASE_ENTER_YOUR_PASSWORD = "Please enter your password.";
-  private static final String BAD_PASSWORD = "Wrong password - have you signed up?";
+  private static final String BAD_PASSWORD = "Wrong password, please try again.";// - have you signed up?";
   private static final String PASSWORD = "Password";
   private static final String USERNAME = "Username";
   private static final String SIGN_IN = "Log In";
@@ -383,7 +383,7 @@ public class UserPassLogin extends UserDialog {
         } else {
           String value = password.box.getValue();
           if (!value.isEmpty() && value.length() < MIN_PASSWORD) {
-            markErrorBlur(password, BAD_PASSWORD);
+            markErrorBlur(password, "Please enter a password longer than " + MIN_PASSWORD + " characters.");
           } else {
          /*   if (currentProject == null) {
               markErrorBlur(projectChoice, "Please choose a language", Placement.TOP);
@@ -1044,7 +1044,7 @@ public class UserPassLogin extends UserDialog {
    */
   private void gotLogin(final String user, final String pass, final boolean emptyPassword) {
     final String hashedPass = Md5Hash.getHash(pass);
-    logger.info("gotLogin : user is '" + user + "' pass '" + pass + "' or '" + hashedPass + "'");
+    logger.info("gotLogin : user is '" + user + "' pass " + pass.length() + " characters or '" + hashedPass + "'");
 
     signIn.setEnabled(false);
     service.userExists(user, hashedPass, new AsyncCallback<User>() {
@@ -1059,11 +1059,10 @@ public class UserPassLogin extends UserDialog {
         if (result == null) {
           eventRegistration.logEvent(signIn, "sign in", "N/A", "unknown user " + user);
 
-          logger.info("No user with that name '" + user + "' pass '" + pass + "'" + emptyPassword);
-          markErrorBlur(password, emptyPassword ? PLEASE_ENTER_YOUR_PASSWORD : BAD_PASSWORD);
+          logger.info("No user with that name '" + user + "' pass " + pass.length() + " characters - " + emptyPassword);
+          markErrorBlur(password, emptyPassword ? PLEASE_ENTER_YOUR_PASSWORD : "No user found - have you signed up?");
           signIn.setEnabled(true);
         } else {
-          // logger.info("Found user " + result);
           foundExistingUser(result, emptyPassword, hashedPass);
         }
       }

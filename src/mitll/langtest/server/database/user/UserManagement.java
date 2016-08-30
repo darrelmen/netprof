@@ -177,9 +177,8 @@ public class UserManagement {
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#usersToXLSX(OutputStream)
    * @param out
-   * @param language
    */
-  public void usersToXLSX(OutputStream out, String language) { new UserDAOToExcel().toXLSX(out, getUsers(), language); }
+  public void usersToXLSX(OutputStream out) { new UserDAOToExcel().toXLSX(out, getUsers()); }
   public JSON usersToJSON() { return new UserDAOToExcel().toJSON(getUsers());  }
 
   /**
@@ -190,7 +189,7 @@ public class UserManagement {
    *
    * @return
    * @see mitll.langtest.server.database.DatabaseImpl#getUsers
-   * @see #usersToXLSX(OutputStream, String)
+   * @see #usersToXLSX
    */
   public List<User> getUsers() {
     Map<Integer, Float> userToRate = resultDAO.getSessions().getUserToRate();
