@@ -60,7 +60,7 @@ class WebAudioRecorder {
    *
    * The user can easily ignore the dialog by clicking away.
    */
-  void tryWebAudio() {
+  boolean tryWebAudio() {
     if (!tried) {
       tried = true;
       //logger.info("webAudioMicAvailable -- tryWebAudio!");
@@ -78,6 +78,10 @@ class WebAudioRecorder {
         }
       };
       theTimer.schedule(DELAY_MILLIS);
+      return true;
+    }
+    else {
+      return false;
     }
   }
 
@@ -107,9 +111,13 @@ class WebAudioRecorder {
   }-*/;
 
   private static void console(String message) {
-    int ieVersion = BrowserCheck.getIEVersion();
-    if (ieVersion == -1 || ieVersion > 9) {
-      consoleLog(message);
+    try {
+      int ieVersion = BrowserCheck.getIEVersion();
+      if (ieVersion == -1 || ieVersion > 9) {
+        consoleLog(message);
+      }
+    } catch (Exception e) {
+      //e.printStackTrace();
     }
   }
 
