@@ -47,6 +47,7 @@ import mitll.langtest.shared.exercise.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.logging.Logger;
 
 /**
  * Does fancy flashing record bulb while recording.
@@ -58,10 +59,10 @@ import java.util.Collection;
  * To change this template use File | Settings | File Templates.
  */
 public class WaveformExercisePanel<L extends CommonShell, T extends CommonExercise> extends ExercisePanel<L,T> {
-//  private final Logger logger = Logger.getLogger("WaveformExercisePanel");
+  private final Logger logger = Logger.getLogger("WaveformExercisePanel");
   public static final String CONTEXT = "context=";
 
-  private static final String RECORD_PROMPT  = "Record the word or phrase, first at normal speed, then again at slow speed.";
+  private static final String RECORD_PROMPT = "Record the word or phrase, first at normal speed, then again at slow speed.";
   private static final String RECORD_PROMPT2 = "Record the in-context sentence.";
   private static final String EXAMPLE_RECORD = "EXAMPLE_RECORD";
   private boolean isBusy = false;
@@ -99,7 +100,6 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
 
   /**
    * @see ExercisePanel#ExercisePanel
-   *
    */
   protected void addInstructions() {
     Panel flow = new UnitChapterItemHelper<T>(controller.getTypeOrder()).addUnitChapterItem(exercise, this);
@@ -109,7 +109,10 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
     add(new Heading(4, isExampleRecord() ? RECORD_PROMPT2 : RECORD_PROMPT));
   }
 
-  private boolean isNormalRecord()  { return !isExampleRecord(); }
+  private boolean isNormalRecord() {
+    return !isExampleRecord();
+  }
+
   private boolean isExampleRecord() {
     return message.equals(EXAMPLE_RECORD);
   }
@@ -185,7 +188,12 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
 
   @Override
   public void onResize() {
-    for (RecordAudioPanel ap : audioPanels) {  ap.onResize();  }
+    logger.info(getElement().getId() + " gotResize " + (audioPanels
+        != null ? audioPanels.size() : ""));
+
+    for (RecordAudioPanel ap : audioPanels) {
+      ap.onResize();
+    }
   }
 
   /**
@@ -199,7 +207,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
    */
   @Override
   public void postAnswers(ExerciseController controller, HasID completedExercise) {
-  //  completedExercise.setState(STATE.RECORDED);
+    //  completedExercise.setState(STATE.RECORDED);
     // TODO : gah = do we really need to do this???
    // logger.info("Not setting state on " +completedExercise.getOldID());
     exerciseList.setState(completedExercise.getID(), STATE.RECORDED);

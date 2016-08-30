@@ -148,11 +148,31 @@ import java.util.logging.Logger;
  * - fixes for generated keys bug on result table
  * 1.3.4
  * - student analysis tab visible, html5 audio preferred
- * 2.0.0
- * - uses postgres for database
- * <p>
+ * 1.3.5
+ * - bug fix for issue where prev next buttons on empty list would throw exception, event dialog wouldn't come up on big tables
+ * 1.3.6
+ * - admin test on userid was case sensitive
+ * 1.4.0
+ * - fix for user password reset issue where people have trouble resetting their password - allow user@host.edu as login for user
+ * 1.4.1
+ * - fixes for AVP - doesn't return scores at end of practice, english doesn't show meaning, english doesn't show hide options, english doesn't highlight right text box when click to play audio
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
+ * 1.4.2
+ * - fix for bug where column header for "context" got skipped for egyptian
+ * 1.4.3
+ * - Added Japanese, allows you to click on characters in transliteration (hiragana)
+ * 1.4.4
+ * - Added some minor fixes for exceptions seen in analysis plot
+ * 1.4.5
+ * - Adds audio table references for really old audio like in Pashto 1,2,3
+ * 1.4.6
+ * - Fixes for bugs #649,#650,#651, partial fix to #652, flip card in avp with arrow keys
+ * 1.4.7
+ * - Fixes for bugs #646 - download link replaced with dialog
+ * 1.4.8
+ * - Fixed bug with detecting RTL text and showing it in the exercise list
+ * 1.4.9
+ * - Fixed bug with downloading audio for custom item.
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification, LifecycleSupport {
@@ -757,6 +777,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   public User getCurrent() {
     return userManager.getCurrent();
+  }
+  public boolean isAdmin() {
+    return userManager.isAdmin();
   }
 
   public PropertyHandler getProps() {
