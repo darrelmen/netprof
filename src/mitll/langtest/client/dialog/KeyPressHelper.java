@@ -161,10 +161,10 @@ public class KeyPressHelper {
     }
   }
 
-  public boolean removeKeyHandler(String name) {
+/*  public boolean removeKeyHandler(String name) {
     KeyListener remove = listeners.remove(name);
     return remove != null;
-  }
+  }*/
 
   public void userHitEnterKey(Button button) {
     //System.out.println("\tEnterKeyButtonHelper.userHitEnterKey " + keyHandler);

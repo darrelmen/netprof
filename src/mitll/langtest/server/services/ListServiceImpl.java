@@ -204,30 +204,49 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     List<CommonExercise> newItems = new ArrayList<>();
     UserList<CommonShell> userListByID = db.getUserListManager().getUserListByID(userListID, Collections.emptyList());
     int n = userListByID.getExercises().size();
-    Set<String> unique = new HashSet<>();
-    for (CommonShell shell : userListByID.getExercises()) unique.add(shell.getForeignLanguage());
+    Set<String> currentKnownFL = new HashSet<>();
+    for (CommonShell shell : userListByID.getExercises()) currentKnownFL.add(shell.getForeignLanguage());
+    boolean onFirst = true;
+    boolean firstColIsEnglish = false;
     for (String line : lines) {
       String[] parts = line.split("\\t");
-      if (DEBUG) logger.info("\tgot " + parts.length + " parts");
+//      logger.info("\tgot " + parts.length + " parts");
       if (parts.length > 1) {
-        String exerciseID = UserExercise.CUSTOM_PREFIX + "_" + creator + "_" + userListByID + "_" + (n++);
-        UserExercise newItem = new UserExercise(-1, exerciseID, creator, parts[1], parts[0], "", getProjectID());
-        newItems.add(newItem);
-        if (DEBUG) logger.info("new " + newItem);
+        String fl = parts[0];
+        String english = parts[1];
+        if (onFirst && english.equalsIgnoreCase(getProject().getLanguage())) {
+          logger.info("reallyCreateNewItems skipping header line");
+          firstColIsEnglish = true;
+        } else {
+          if (firstColIsEnglish || (isValidForeignPhrase(english) && !isValidForeignPhrase(fl))) {
+            String temp = english;
+            english = fl;
+            fl = temp;
+            //logger.info("flip english '" +english+ "' to fl '" +fl+ "'");
+          }
+          UserExercise newItem =
+              new UserExercise(-1,
+                  UserExercise.CUSTOM_PREFIX + "_" + (n++), (int) creator, english, fl, "", getProjectID());
+          newItems.add(newItem);
+          logger.info("reallyCreateNewItems new " + newItem);
+        }
       }
+      onFirst = false;
     }
 
     List<CommonExercise> actualItems = new ArrayList<>();
     for (CommonExercise candidate : newItems) {
       String foreignLanguage = candidate.getForeignLanguage();
-      if (!unique.contains(foreignLanguage)) {
+      if (!currentKnownFL.contains(foreignLanguage)) {
         if (isValidForeignPhrase(foreignLanguage)) {
-          getUserListManager().reallyCreateNewItem(userListID, candidate, getMediaDir());
+          getUserListManager().reallyCreateNewItem(userListID, candidate, serverProps.getMediaDir());
           actualItems.add(candidate);
+        } else {
+          logger.info("item #" + candidate.getID() + " '" + candidate.getForeignLanguage() + "' is invalid");
         }
       }
     }
-    logger.info("Returning " + actualItems.size());
+    logger.info("Returning " + actualItems.size() + "/" + lines.length);
     return actualItems;
   }
 

@@ -162,8 +162,8 @@ public class UserDAOToExcel {
     return json;
   }
 
-  public void toXLSX(OutputStream out, Collection<User> users, String language) {
-    writeToStream(out, getSpreadsheet(users), language);
+  public void toXLSX(OutputStream out, Collection<User> users) {
+    writeToStream(out, getSpreadsheet(users));
   }
 
   private SXSSFWorkbook getSpreadsheet(Collection<User> users) {
@@ -229,14 +229,14 @@ public class UserDAOToExcel {
     return wb;
   }
 
-  private void writeToStream(OutputStream out, SXSSFWorkbook wb, String language) {
+  private void writeToStream(OutputStream out, SXSSFWorkbook wb) {
     long now;
     try {
       long then = System.currentTimeMillis();
       wb.write(out);
       now = System.currentTimeMillis();
       if (now - then > 100) {
-        logger.warn(language + " : toXLSX : took " + (now - then) + " millis to write excel to output stream ");
+        logger.warn(" : toXLSX : took " + (now - then) + " millis to write excel to output stream ");
       }
       out.close();
       wb.dispose();

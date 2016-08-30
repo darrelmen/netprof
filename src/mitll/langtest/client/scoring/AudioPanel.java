@@ -91,7 +91,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
   private final ScoreListener gaugePanel;
  // protected final int exerciseID;
   protected String audioPath;
-  private final Map<String, Integer> reqs = new HashMap<String, Integer>();
+  private final Map<String, Integer> reqs = new HashMap<>();
   private int reqid;
 
   private ImageAndCheck waveform;
@@ -100,6 +100,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
   ImageAndCheck phones;
 
   private int lastWidth = 0;
+  private int lastWidthOuter = 0;
   private AudioPositionPopup audioPositionPopup;
   protected final LangTestDatabaseAsync service;
   protected final SoundManagerAPI soundManager;
@@ -180,12 +181,24 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     this.instance = instance;
     int id = exercise != null ? exercise.getID() : 0;
     getElement().setId("AudioPanel_exercise_" + id);
+
+    int width = getImageWidth();
+//    logger.info(getElement().getId() + " width " + width);
+    setWidth((width) + "px");
   }
 
   public void onResize() {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
-        getImages();
+        int images = getImages();
+//        logger.info(getElement().getId() + " gotResize " + images);
+        if (images != 0) {
+          int diff = Math.abs(Window.getClientWidth() - lastWidthOuter);
+          if (lastWidthOuter == 0 || diff > WINDOW_SIZE_CHANGE_THRESHOLD) {
+            lastWidthOuter = Window.getClientWidth();
+            setWidth((images) + "px");
+          }
+        }
       }
     });
   }
@@ -250,7 +263,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     phonesImage.setHeight(TRANSCRIPT_IMAGE_HEIGHT +"px");
     phonesImage.getElement().setId("Transcript_Phones");
 
-   // hp.setWidth("100%");
+    // hp.setWidth("100%");
 
     add(hp);
     hp.addStyleName("bottomFiveMargin");
@@ -337,8 +350,8 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     }
 
     /**
-     * @see WaveformPostAudioRecordButton#stopRecording()
      * @param visible
+     * @see WaveformPostAudioRecordButton#stopRecording()
      */
     public void setVisible(boolean visible) {
       getImage().setVisible(visible);
@@ -349,8 +362,8 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     }
 
     /**
-     * @see WaveformPostAudioRecordButton#stopRecording()
      * @param url
+     * @see WaveformPostAudioRecordButton#stopRecording()
      */
     public void setUrl(String url) {
       getImage().setUrl(url);
@@ -360,6 +373,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     /**
      * @see ScoringAudioPanel#scoreAudio(String, int, String, ImageAndCheck, ImageAndCheck, int, int, int)
      * @return
+     * @see ASRScoringAudioPanel#scoreAudio(String, long, String, ImageAndCheck, ImageAndCheck, int, int, int)
      */
     public Image getImage() {
       return image;
@@ -396,9 +410,9 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     return path;
   }
 
-  //private CompressedAudio compressedAudio = new CompressedAudio();
-
-  private String getPath(String path) { return CompressedAudio.getPath(path);  }
+  private String getPath(String path) {
+    return CompressedAudio.getPath(path);
+  }
 
   /**
    * Note this is currently not very accurate with soundmanager2.
@@ -446,7 +460,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
    * @see #getImagesForPath(String)
    * @see #onResize()
    */
-  private void getImages() {
+  private int getImages() {
     //int leftColumnWidth1 = controller.getLeftColumnWidth();
     int width = getImageWidth();
 
@@ -459,17 +473,22 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
             " request width " + width + " path " + audioPath);
       }
       getEachImage(width);
+      return width;
     } else {
       if (DEBUG_GET_IMAGES) logger.info("\tAudioPanel.getImages : not updating, offset width " +
           getOffsetWidth() + " width " + width + " path " + audioPath + " diff " + diff + " last " + lastWidth);
+      return 0;
     }
   }
 
   private int getImageWidth() {
     int leftColumnWidth = LEFT_COLUMN_WIDTH + IMAGE_WIDTH_SLOP;
     int rightSide = gaugePanel != null ? gaugePanel.getOffsetWidth() : rightMargin;
-    if (gaugePanel != null && rightSide == 0 /*&& !controller.getProps().isNoModel()*/) {
+    if (gaugePanel != null && rightSide == 0) {
+      //logger.info("adding right side offset ");
       rightSide = 180; // TODO : hack!!!
+    } else {
+      rightSide = 180;
     }
     return getWidthForWaveform(LEFT_COLUMN_WIDTH, leftColumnWidth, rightSide);
   }
@@ -481,8 +500,10 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     width -= 4;
     if (DEBUG_GET_IMAGES) {
       logger.info("AudioPanel.getImages : leftColumnWidth " + leftColumnWidth + "(" + leftColumnWidth1 +
-          ") width " + width + " (screen portion = " + screenPortion +
-          ") vs window width " + Window.getClientWidth() + " right side " + rightSide);
+          ") width " + width +
+          " (screen portion = " + screenPortion +
+          ") vs window width " + Window.getClientWidth() +
+          " right side " + rightSide);
     }
     return width;
   }
@@ -494,7 +515,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
    * @see #getImages()
    */
   protected void getEachImage(int width) {
-    //logger.info("AudioPanel.getEachImage : " + getElement().getId()+ " path " + audioPath);
+    // logger.info("AudioPanel.getEachImage : " + getElement().getId()+ " path " + audioPath);
     getImageURLForAudio(audioPath, WAVEFORM, width, getWaveform());
     if (showSpectrogram) {
       getImageURLForAudio(audioPath, SPECTROGRAM, width, getSpectrogram());
