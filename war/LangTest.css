@@ -881,6 +881,7 @@ fieldset > legend {
     box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1), 1px 1px 4px rgba(0, 0, 0, 0.12);
     padding: 5px;
     margin-bottom:5px;
+    margin-top:5px;
 }
 
 .buttonGroupInset6 {
@@ -1199,5 +1200,11 @@ body .btn-toolbar > .btn-group > .btn.active {
 
 .rte-symbol-picker-container TD {
     border: solid 1px #ddd;
-   font-size: 18pt;
+    font-size: 18pt;
+}
+
+body .hidden-download-frame {
+    display: none;
+    width: 0;
+    height: 0;
 }

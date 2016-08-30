@@ -188,7 +188,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
     return WordCountDirectionEstimator.get().estimateDirection(content);
   }
 
-  protected boolean isRTLContent(String content) {
+  private boolean isRTLContent(String content) {
     return controller.isRightAlignContent() || getDirection(content) == HasDirection.Direction.RTL;
   }
 
@@ -201,6 +201,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
   }
 
   public void onResize() {
+    logger.info("Got onResize");
   }
 
   public boolean isBusy() {
