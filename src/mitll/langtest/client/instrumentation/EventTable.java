@@ -50,6 +50,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.table.PagerTable;
 import mitll.langtest.shared.instrumentation.Event;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -83,14 +84,14 @@ public class EventTable extends PagerTable {
     int top = (Window.getClientHeight()) / 20;
     dialogBox.setPopupPosition(left, top);
 
-    service.getEvents(new AsyncCallback<List<Event>>() {
+    service.getEvents(new AsyncCallback<Collection<Event>>() {
       public void onFailure(Throwable caught) {
         if (!caught.getMessage().trim().equals("0")) {
           Window.alert("getEvents couldn't contact server");
         }
       }
 
-      public void onSuccess(List<Event> result) {
+      public void onSuccess(Collection<Event> result) {
         if (lastTable != null) {
           dialogVPanel.remove(lastTable);
           dialogVPanel.remove(closeButton);
@@ -120,7 +121,7 @@ public class EventTable extends PagerTable {
     return getAnchorHTML("downloadEvents", "Download Excel");
   }
 
-  private Widget getTable(List<Event> result, Widget rightOfPager) {
+  private Widget getTable(Collection<Event> result, Widget rightOfPager) {
     final CellTable<Event> table = new CellTable<Event>();
     table.setPageSize(PAGE_SIZE);
     int width = (int) (Window.getClientWidth() * 0.9);

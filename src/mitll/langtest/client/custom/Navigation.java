@@ -206,7 +206,7 @@ public class Navigation implements RequiresResize, ShowTab {
   }
 
   public boolean isRTL() {
-    return controller.getProps().isRightAlignContent() || (learnHelper.getExerciseList() != null && learnHelper.getExerciseList().isRTL());
+    return controller.getProps().isRightAlignContent();// || (learnHelper.getExerciseList() != null && learnHelper.getExerciseList().isRTL());
   }
 
   private void makeDialogWindow(final LangTestDatabaseAsync service, final ExerciseController controller) {
@@ -328,10 +328,6 @@ public class Navigation implements RequiresResize, ShowTab {
         }
       });
     }
-  }
-
-  private boolean permittedToRecord() {
-    return controller.getPermissions().contains(User.Permission.RECORD_AUDIO);
   }
 
   /**
@@ -491,7 +487,11 @@ public class Navigation implements RequiresResize, ShowTab {
   }
 
   private boolean isQC() {
-    return controller.getPermissions().contains(User.Permission.QUALITY_CONTROL);
+    return controller.getPermissions().contains(User.Permission.QUALITY_CONTROL) || controller.isAdmin();
+  }
+
+  private boolean permittedToRecord() {
+    return controller.getPermissions().contains(User.Permission.RECORD_AUDIO)    || controller.isAdmin();
   }
 
   private void logEvent(TabAndContent yourStuff, String context) {
@@ -730,6 +730,8 @@ public class Navigation implements RequiresResize, ShowTab {
 
   @Override
   public void onResize() {
+   // logger.info("got onResize " + getClass().toString());
+
     learnHelper.onResize();
     recorderHelper.onResize();
     recordExampleHelper.onResize();
