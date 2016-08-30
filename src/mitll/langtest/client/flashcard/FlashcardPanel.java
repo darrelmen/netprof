@@ -78,11 +78,16 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
   static final String PLAYING_AUDIO_HIGHLIGHT = "playingAudioHighlight";
   private static final String WARN_NO_FLASH = "<font color='red'>Flash is not activated. " +
       "Do you have a flashblocker? Please add this site to its whitelist.</font>";
+  private static final String ARROW_KEY_TIP = "<i>Use arrow keys to advance or flip.</i>";
 
   static final int DELAY_MILLIS = 1000;
 
-  static final String ON = "On";
+  static final String ON  = "On";
   static final String OFF = "Off";
+
+  /**
+   * @see #getShowGroup(ControlState)
+   */
   private static final String SHOW = "START WITH";
   private static final String ENGLISH = "English";
   private static final String PLAY = "AUDIO";
@@ -159,14 +164,14 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
 
     inner.add(threePartContent);
 
-    //  logger.info("Adding recording widgets to " + inner2.getElement().getId());
+    //  logger.info("Adding recording widgets to " + inner2.getElement().getExID());
     Scheduler.get().scheduleDeferred(new Command() {
       public void execute() {
         addRecordingAndFeedbackWidgets(getID(), service, controller, inner2);
       }
     });
 
-    //  logger.info("After adding recording widgets to " + inner2.getElement().getId());
+    //  logger.info("After adding recording widgets to " + inner2.getElement().getExID());
 
     inner2.add(getFinalWidgets());
 
@@ -342,23 +347,26 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
     contentMiddle.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        //System.out.println("---> click on card to flip...");
+        boolean englishHidden = isHidden(english);
 
-        if (clickToFlip.isVisible()) {
-          boolean showEnglish = controlState.showEnglish();
-          if (!showEnglish || !controlState.showForeign()) {
-            toggleVisibility(english);
-            toggleVisibility(foreign);
-            boolean englishHidden = isHidden(english);
-            controller.logEvent(contentMiddle, "flashcard_itself", exercise, "flip card to show " + (englishHidden ? " english" : controller.getLanguage()));
-            if (!isHidden(foreign) && controlState.isAudioOn()) {
-              playRef();
-            }
-          }
-        }
+        controller.logEvent(contentMiddle, "flashcard_itself", exercise, "flip card to show " + (englishHidden ? " english" : getLanguage()));
+        flipCard();
       }
     });
     return contentMiddle;
+  }
+
+  void flipCard() {
+    if (clickToFlip.isVisible()) {
+      boolean showEnglish = controlState.showEnglish();
+      if (!showEnglish || !controlState.showForeign()) {
+        toggleVisibility(english);
+        toggleVisibility(foreign);
+        if (!isHidden(foreign) && controlState.isAudioOn()) {
+          playRef();
+        }
+      }
+    }
   }
 
   private void toggleVisibility(Widget english) {
@@ -380,13 +388,17 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
     rightColumn.setVisible(vis);
   }
 
+  /**
+   * @param controlState
+   * @return
+   * @see #getThreePartContent(ControlState, Panel, DivWidget, DivWidget)
+   */
   private Panel getRightColumn(final ControlState controlState) {
     Panel rightColumn = new VerticalPanel();
 
     rightColumn.add(getAudioGroup(controlState));
-    if (!isSiteEnglish()) {
-      rightColumn.add(getShowGroup(controlState));
-    }
+    rightColumn.add(getShowGroup(controlState));
+
     Widget feedbackGroup = getFeedbackGroup(controlState);
     if (feedbackGroup != null) rightColumn.add(feedbackGroup);
     final Button shuffle = new Button(SHUFFLE);
@@ -396,8 +408,6 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
       @Override
       public void onClick(ClickEvent event) {
         boolean shuffleOn = !shuffle.isToggled();
-
-        //System.out.println("shuffle onClick " + shuffleOn);
         controlState.setSuffleOn(shuffleOn);
         gotShuffleClick(shuffleOn);
       }
@@ -406,6 +416,10 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
 
     rightColumn.add(shuffle);
 
+    // Heading child = new Heading(6, "<i>Use arrow keys to advance or flip.</i>");
+    Widget child = new HTML(ARROW_KEY_TIP);
+    child.getElement().getStyle().setMarginTop(25, Style.Unit.PX);
+    rightColumn.add(child);
     rightColumn.addStyleName("leftTenMargin");
     return rightColumn;
   }
@@ -434,7 +448,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
     toAddTo.add(getNextButton());
   }
 
-  public void setPrevNextVisible(boolean val) {
+  void setPrevNextVisible(boolean val) {
     prevNextRow.setVisible(val);
   }
 
@@ -571,7 +585,11 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
     return offButton;
   }
 
-
+  /**
+   * @param controlState
+   * @return
+   * @see #getRightColumn(ControlState)
+   */
   private ControlGroup getShowGroup(final ControlState controlState) {
     ControlGroup group = new ControlGroup(SHOW);
     ButtonToolbar w = new ButtonToolbar();
@@ -581,11 +599,30 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
     buttonGroup.setToggle(ToggleType.RADIO);
     w.add(buttonGroup);
 
-    buttonGroup.add(getOn(controlState));
-    buttonGroup.add(getBoth(controlState));
-    buttonGroup.add(getOff(controlState));
+    showOnlyFL = getOn(controlState);
+    buttonGroup.add(showOnlyFL);
+    both = getBoth(controlState);
+    buttonGroup.add(both);
+    showEnglish = getOff(controlState);
+    buttonGroup.add(showEnglish);
 
     return group;
+  }
+
+  private Button showOnlyFL, both, showEnglish;
+
+  protected boolean selectShowFL() {
+    if (both.isActive()) {
+      showOnlyFL.click();
+      showOnlyFL.setActive(true);
+      both.setActive(false);
+      showEnglish.setActive(false);
+      return true;
+    }
+    else {
+      return false;
+    }
+    //showForeign(controlState);
   }
 
   private Button getOn(final ControlState controlState) {
@@ -596,19 +633,27 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
     onButton.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        if (!controlState.isForeign()) {
-          controlState.setShowState(ControlState.FOREIGN);
-          //System.out.println("getOn : now on " + controlState);
-          showEnglishOrForeign();
-        }
+        showForeign(controlState);
       }
     });
     onButton.setActive(controlState.showForeign() && !controlState.showBoth());
     return onButton;
   }
 
+  protected void showForeign(ControlState controlState) {
+    if (!controlState.isForeign()) {
+      controlState.setShowState(ControlState.FOREIGN);
+      showEnglishOrForeign();
+    }
+  }
+
+  private String getLanguage() {
+    return controller.getLanguage();
+  }
+
   private Button getOff(final ControlState controlState) {
-    Button showEnglish = new Button(ENGLISH);
+    String english = isSiteEnglish() ? "Meaning" : ENGLISH;
+    Button showEnglish = new Button(english);
     showEnglish.getElement().setId("Show_English");
     controller.register(showEnglish, getID());
 
@@ -617,7 +662,6 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
       public void onClick(ClickEvent event) {
         if (!controlState.isEnglish()) {
           controlState.setShowState(ControlState.ENGLISH);
-          //System.out.println("getOff : now  " + controlState);
           showEnglishOrForeign();
         }
       }
@@ -670,31 +714,28 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
   private DivWidget getQuestionContent(T e) {
     String foreignSentence = e.getForeignLanguage();
 
-    String englishSentence = e.getEnglish();
+    String englishTranslations = e.getEnglish();
+    if (isSiteEnglish() && !e.getMeaning().isEmpty()) {
+      englishTranslations = e.getMeaning();
+    }
     boolean usedForeign = false;
-    if (englishSentence.isEmpty()) {
-      englishSentence = foreignSentence;
+    if (englishTranslations.isEmpty()) {
+      englishTranslations = foreignSentence;
       usedForeign = true;
     }
-    FocusPanel widgets = makeEnglishPhrase(englishSentence);
-    widgets.getElement().getStyle().setMarginLeft(-20, Style.Unit.PX);
-    widgets.setWidth("100%");
+    FocusPanel englishPhrase = makeEnglishPhrase(englishTranslations);
+    englishPhrase.getElement().getStyle().setMarginLeft(-20, Style.Unit.PX);
+    englishPhrase.setWidth("100%");
     DivWidget div = new DivWidget();
     div.getElement().setId("QuestionContentFieldContainer");
     div.addStyleName("blockStyle");
-    div.add(widgets);
+    div.add(englishPhrase);
 
     foreign = getForeignLanguageContent(foreignSentence, e.hasRefAudio());
 
     if (!usedForeign) {
       div.add(foreign);
     }
-    if (isSiteEnglish()) {
-      if (getRefAudioToPlay() != null) {
-        addAudioBindings(widgets);
-      }
-    }
-
     showEnglishOrForeign();
 
     return div;
@@ -712,7 +753,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
   }
 
   boolean isSiteEnglish() {
-    return controller.getLanguage().equals("English");
+    return getLanguage().equals("English");
   }
 
   /**
@@ -726,8 +767,8 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
     foreignLanguageContent.getElement().setId("ForeignLanguageContent");
     foreignLanguageContent.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
 
-    FocusPanel container = new FocusPanel();   // TODO : remove???
-    container.getElement().setId("FLPhrase_container");
+    FocusPanel flPhraseContainer = new FocusPanel();   // TODO : remove???
+    flPhraseContainer.getElement().setId("FLPhrase_container");
 
     Panel hp = new HorizontalPanel();
     hp.add(foreignLanguageContent);
@@ -746,15 +787,11 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
     hp.add(simple);
     DivWidget centeringRow = getCenteringRow();
     centeringRow.add(hp);
-    container.add(centeringRow);
+    flPhraseContainer.add(centeringRow);
 
-    addAudioBindings(container);
-    return container;
+    addAudioBindings(flPhraseContainer);
+    return flPhraseContainer;
   }
-
-/*
-  private void setForeignLanguageContentText(String text) { this.foreignLanguageContent.setText(text); }
-*/
 
   private DivWidget getCenteringRow() {
     DivWidget status = new DivWidget();
@@ -882,7 +919,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
   private void playRef(String path) {
     //  System.out.println("playRef... ---------- " + exercise.getOldID() + " path " + path );
     path = getPath(path);
-    final Widget textWidget = isSiteEnglish() ? english : foreign;
+    final Widget textWidget = foreign;//() ? english : foreign;
     getSoundFeedback().queueSong(path, new SoundFeedback.EndListener() {
       @Override
       public void songStarted() {
@@ -901,8 +938,6 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
   void removePlayingHighlight(Widget textWidget) {
     textWidget.removeStyleName(PLAYING_AUDIO_HIGHLIGHT);
   }
-
- // private CompressedAudio compressedAudio = new CompressedAudio();
 
   protected String getPath(String path) {
     return CompressedAudio.getPath(path);

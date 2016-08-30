@@ -50,6 +50,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.ui.Image;
 import mitll.langtest.client.custom.Navigation;
+import mitll.langtest.client.download.DownloadIFrame;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.Banner;
 import mitll.langtest.client.instrumentation.EventRegistration;
@@ -63,8 +64,12 @@ import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.user.SlimProject;
 import mitll.langtest.shared.user.User;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.logging.Logger;
+
 
 /**
  * <br/>
@@ -153,6 +158,12 @@ public class InitialUI implements UILifecycle {
 
     verticalContainer.add(contentRow);
     this.contentRow = contentRow;
+
+    DivWidget w = new DivWidget();
+    w.getElement().setId(DownloadIFrame.DOWNLOAD_AREA_ID);
+    RootPanel.get().add(w);
+    w.setVisible(false);
+
     return contentRow;
   }
 
@@ -215,7 +226,9 @@ public class InitialUI implements UILifecycle {
 
   @Override
   public boolean isRTL() {
-    return navigation != null && navigation.isRTL();
+    boolean b = navigation != null && navigation.isRTL();
+    if (b) logger.info("content is RTL!");
+    return b;
   }
 
   private class LogoutClickHandler implements ClickHandler {
@@ -244,7 +257,6 @@ public class InitialUI implements UILifecycle {
    * @seex mitll.langtest.client.LangTest.LogoutClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)
    */
   private void resetState() {
-    //logger.info("clearing current history token");
     History.newItem(""); // clear history!
     userManager.clearUser();
     lastUser = NO_USER_INITIAL;
