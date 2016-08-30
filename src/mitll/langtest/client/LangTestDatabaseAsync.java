@@ -118,7 +118,7 @@ public interface LangTestDatabaseAsync {
   void logEvent(String id, String widgetType, String exid, String context, int userid, String hitID, String device,
                 AsyncCallback<Void> async);
 
-  void getEvents(AsyncCallback<List<Event>> async);
+  void getEvents(AsyncCallback<Collection<Event>> async);
 
   void markState(int exid, STATE state, int creatorID, AsyncCallback<Void> async);
 

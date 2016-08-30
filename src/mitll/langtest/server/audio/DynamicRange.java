@@ -111,7 +111,7 @@ public class DynamicRange {
     try {
       ais = AudioSystem.getAudioInputStream(file);
       AudioFormat format = ais.getFormat();
-  //    logger.info("file " + file.getName() + " sample rate " + format.getSampleRate());
+      //    logger.info("file " + file.getName() + " sample rate " + format.getSampleRate());
 
       boolean bigEndian = format.isBigEndian();
       if (bigEndian) {
@@ -127,7 +127,7 @@ public class DynamicRange {
 
 //      logger.info(" frameRate" + frameRate);
 //      logger.info(" secPerFrame" + secPerFrame);
-   //   logger.info(" fsize" + fsize);
+      //   logger.info(" fsize" + fsize);
 
       double floor = Math.floor(.05f / secPerFrame);
       double actualFloor = Math.ceil(floor / 10) * 10;
@@ -169,7 +169,7 @@ public class DynamicRange {
         for (int i = 0; i < charsRead; i += fsize)
           for (int s = 0; s < fsize; s += 2) {
             // short tmp = (short) ((buf[i + s] << 8) | buf[i + s + 1]); // BIG ENDIAN
-            byte firstByte  = buf[i + s];
+            byte firstByte = buf[i + s];
             byte secondByte = buf[i + s + 1];
             short tmp = (short) ((firstByte & 0xFF) | (secondByte << 8)); // LITTLE ENDIAN
 
@@ -239,8 +239,8 @@ public class DynamicRange {
           }
       }
 
-     // logger.info("did " + c);
-   //   DecimalFormat decimalFormat = new DecimalFormat("##.##");
+      // logger.info("did " + c);
+      //   DecimalFormat decimalFormat = new DecimalFormat("##.##");
 
 //      logger.info("maxrms:\t" + maxrms);
 //      logger.info("minrms:\t" + minrms);

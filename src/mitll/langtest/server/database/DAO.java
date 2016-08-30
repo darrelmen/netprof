@@ -318,9 +318,9 @@ public class DAO {
 
   /**
    * Does not seem to work with h2
-   * @param connection
-   * @param table
-   * @param column
+   * @paramx connection
+   * @paramx table
+   * @paramx column
    * @return
    * @throws SQLException
    */
@@ -335,4 +335,8 @@ public class DAO {
 
     return numColumns == 1;
   }*/
+
+  public String toString() {
+    return super.toString() + " : " + database.getServerProps().getH2Database();
+  }
 }
