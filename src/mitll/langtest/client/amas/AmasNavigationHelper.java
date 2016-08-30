@@ -51,7 +51,7 @@ import mitll.langtest.shared.exercise.Shell;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 8/6/13
  */
-public class AmasNavigationHelper extends HorizontalPanel {
+class AmasNavigationHelper extends HorizontalPanel {
   private static final String CONTINUE = "Continue";
 
   private Button next;

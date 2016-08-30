@@ -130,8 +130,8 @@ class AudioPositionPopup extends SimplePanel implements AudioControl  {
     int offsetHeight = parent.getOffsetHeight();
     int width = parent.getOffsetWidth();
 
- /*   if (!parent.getElement().getId().equals(imageContainer.getElement().getId())) {
-      System.err.println("parent " + parent.getElement().getId() + " but container " + imageContainer.getElement().getId());
+ /*   if (!parent.getElement().getExID().equals(imageContainer.getElement().getExID())) {
+      System.err.println("parent " + parent.getElement().getExID() + " but container " + imageContainer.getElement().getExID());
     }*/
     //positionInMillis -= (double)ScoringAudioPanel.MP3_HEADER_OFFSET;
     float positionInMillisF = (float)positionInMillis;// - ScoringAudioPanel.MP3_HEADER_OFFSET*1000;
@@ -145,7 +145,7 @@ class AudioPositionPopup extends SimplePanel implements AudioControl  {
 
 /*    if (debug) {
       System.out.println(this + " showAt " + positionInMillis + " millis " + "/" +pixelProgress
-        +" parent " + parent.getElement().getId()+ " width " + width+
+        +" parent " + parent.getElement().getExID()+ " width " + width+
         " millis " +
         " dim x " +
         getOffsetWidth() +

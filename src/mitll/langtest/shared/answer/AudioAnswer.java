@@ -51,7 +51,15 @@ public class AudioAnswer implements IsSerializable {
   private int resultID;
   private AudioAttribute audioAttribute;
   private PretestScore pretestScore;
+  private double dynamicRange;
 
+  public double getDynamicRange() {
+    return dynamicRange;
+  }
+
+  public void setDynamicRange(double dynamicRange) {
+    this.dynamicRange = dynamicRange;
+  }
 
   /**
    * @see mitll.langtest.server.audio.AudioCheck.ValidityAndDur

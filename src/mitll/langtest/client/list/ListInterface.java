@@ -80,7 +80,7 @@ public interface ListInterface<T extends Shell> extends RequiresResize, Reloadab
      */
   boolean getExercises(long userID);
 
-  boolean isRTL();
+ // boolean isRTL();
 
   /**
    * @see mitll.langtest.client.custom.content.NPFHelper#doInternalLayout(UserList, String)

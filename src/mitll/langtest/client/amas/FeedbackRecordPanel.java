@@ -231,7 +231,7 @@ public class FeedbackRecordPanel extends AmasExercisePanel {
     for (CorrectAndScore cs : correctAndScores.getCorrectAndScoreCollection()) {
       if (cs.isMatch(exercise)) {
         int qid = cs.getQid();
-    //    logger.info("makeTabStateReflectHistory found " + cs.getId() + " :  " + qid + " : " + cs);
+    //    logger.info("makeTabStateReflectHistory found " + cs.getExID() + " :  " + qid + " : " + cs);
         markTabComplete(qid);
       }
     }

@@ -390,6 +390,7 @@ public class AudioFileHelper implements AlignDecode {
       logger.debug("getAudioAnswerDecoding recordInResults answer " + answer);
 
       recordInResults(context, recordingInfo, validity, answer);
+      answer.setDynamicRange(validity.getMaxMinRange());
     }
     logger.debug("getAudioAnswerDecoding answer " + answer);
     return answer;
