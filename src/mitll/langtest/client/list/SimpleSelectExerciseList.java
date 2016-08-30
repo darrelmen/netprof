@@ -82,17 +82,12 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<MenuSectio
     sectionPanel = new FluidContainer();
     sectionPanel.getElement().setId("sectionPanel_" + instance);
 
-    sectionPanel.getElement().getStyle().setPaddingLeft(0, Style.Unit.PX);
-    sectionPanel.getElement().getStyle().setPaddingRight(0, Style.Unit.PX);
+    Style style = sectionPanel.getElement().getStyle();
+    style.setPaddingLeft(0, Style.Unit.PX);
+    style.setPaddingRight(0, Style.Unit.PX);
     secondRow.add(new Column(12, sectionPanel));
-
-//    buttonTypes.add(ButtonType.PRIMARY);
-//    buttonTypes.add(ButtonType.SUCCESS);
-//    buttonTypes.add(ButtonType.INFO);
-//    buttonTypes.add(ButtonType.WARNING);
     setUnaccountedForVertical(CLASSROOM_VERTICAL_EXTRA);
     downloadHelper = new DownloadHelper(controller, instance, this, controller.getCurrent().isTeacher());
-
   }
 
   /**
@@ -187,6 +182,7 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<MenuSectio
       //List<String> sectionsInType = new ItemSorter().getSortedItems(getLabels(rootNodes));
       List<String> sectionsInType = getLabels(rootNodes);
 
+      logger.info("got " + type + " num sections " + sectionsInType.size());
 
       MenuSectionWidget value = new MenuSectionWidget(type, rootNodes, this);
       if (parent != null) {

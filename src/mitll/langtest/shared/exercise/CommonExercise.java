@@ -46,7 +46,8 @@ public interface CommonExercise extends CommonAudioExercise, ScoredExercise {
 
   List<String> getFirstPron();
 
-  String getRefAudioIndex();
+//  String getRefAudioIndex();
+  String getAltFL();
 
   boolean isPredefined();
 
