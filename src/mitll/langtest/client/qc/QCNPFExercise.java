@@ -89,9 +89,11 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
 
   public static final String FOREIGN_LANGUAGE = "foreignLanguage";
   public static final String TRANSLITERATION = "transliteration";
+  public static final String ALTFL = "alternate";
   public static final String ENGLISH = "english";
   public static final String MEANING = "meaning";
   public static final String CONTEXT = "context";
+  public static final String ALTCONTEXT = "altcontext";
   public static final String CONTEXT_TRANSLATION = "context translation";
 
   private static final String REF_AUDIO = "refAudio";
