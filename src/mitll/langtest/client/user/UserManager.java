@@ -402,7 +402,7 @@ public class UserManager {
       localStorageIfSupported.removeItem(getUserIDCookie());
       localStorageIfSupported.removeItem(getPassCookie());
       localStorageIfSupported.removeItem(getUserChosenID());
-      logger.info("clearUser : removed item " + getUserID() + " user now " + getUser());
+     // logger.info("clearUser : removed item " + getUserID() + " user now " + getUser());
     } else {
       userID = NO_USER_SET;
     }
