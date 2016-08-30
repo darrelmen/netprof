@@ -34,8 +34,6 @@ package mitll.langtest.client.list;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.i18n.client.HasDirection;
-import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -69,7 +67,7 @@ import java.util.logging.Logger;
 public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     extends VerticalPanel
     implements ListInterface<T>, ProvidesResize {
-  public static final String EMPTY_PANEL = "placeHolderWhenNoExercises";
+  private static final String EMPTY_PANEL = "placeHolderWhenNoExercises";
   private final Logger logger = Logger.getLogger("ExerciseList");
 
   private static final int MAX_MSG_LEN = 200;
@@ -82,7 +80,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   private final ExerciseController controller;
 
   protected Panel createdPanel;
-  protected int lastReqID = 0;
+  private int lastReqID = 0;
   final boolean allowPlusInURL;
   private final String instance;
   private final List<ListChangeListener<T>> listeners = new ArrayList<>();
@@ -90,7 +88,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   private U cachedNext = null;
   private boolean pendingReq = false;
-  protected ExerciseListRequest lastSuccessfulRequest = null;
+  ExerciseListRequest lastSuccessfulRequest = null;
 
   private static final boolean DEBUG = false;
 
@@ -124,7 +122,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @see #ExerciseList
    */
   private void addWidgets(final Panel currentExerciseVPanel) {
-//    if (DEBUG) logger.info("ExerciseList.addWidgets for currentExerciseVPanel " + currentExerciseVPanel.getElement().getId() + " instance " + getInstance());
+//    if (DEBUG) logger.info("ExerciseList.addWidgets for currentExerciseVPanel " + currentExerciseVPanel.getElement().getExID() + " instance " + getInstance());
     this.innerContainer = new SimplePanel();
     innerContainer.getElement().setId("ExerciseList_innerContainer");
     currentExerciseVPanel.add(innerContainer);
@@ -223,12 +221,11 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     Widget current = innerContainer.getWidget();
     if (current != null) {
       if (current instanceof RequiresResize) {
-        //if (DEBUG) logger.info("resizing right side for " + instance + " "+ current.getClass());
+       // if (DEBUG || true) logger.info("resizing right side for " + instance + " " + current.getClass());
         ((RequiresResize) current).onResize();
+      } else {
+        logger.warning("huh?  right side is not resizable " + instance + " " + current.getClass());
       }
-//      else {
-      //logger.warning("huh?  right side is not resizable " + instance + " "+ current.getClass());
-      //    }
     }
     //   else {
 //      logger.warning("huh? no right side of exercise list");
@@ -470,6 +467,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   @Override
   public void hide() {
+    logger.info(getElement().getId() + " got hide");
     getParent().setVisible(false);
   }
 
@@ -528,8 +526,8 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 //      if (//!getCurrentExerciseID().equals(id) ||
 //          createdPanel == null ||
 //          (
-//              createdPanel.getElement().getId().equals(EMPTY_PANEL))) {
-        askServerForExercise(id);
+//              createdPanel.getElement().getExID().equals(EMPTY_PANEL))) {
+      askServerForExercise(id);
 //      } else {
 //        logger.info("got " + hasExercise(id) + " current " + getCurrentExerciseID() + " vs " + id);
 //      }
@@ -838,9 +836,14 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     return onFirst(getCurrentExercise());
   }
 
-  public boolean isRTL() {
-    return !isEmpty() && WordCountDirectionEstimator.get().estimateDirection(getAt(0).getForeignLanguage()) == HasDirection.Direction.RTL;
-  }
+/*  public boolean isRTL() {
+    if (!isEmpty()) {
+      HasDirection.Direction direction = WordCountDirectionEstimator.get().estimateDirection(getAt(0).getForeignLanguage());
+      logger.info("isRTL not empty : rtl " + direction);
+    }
+    boolean b = !isEmpty() && WordCountDirectionEstimator.get().estimateDirection(getAt(0).getForeignLanguage()) == HasDirection.Direction.RTL;
+    return b;
+  }*/
 
   /**
    * @param current

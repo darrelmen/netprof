@@ -128,7 +128,7 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
 
     // Set the width of each column.
     table.setColumnWidth(englishCol, 50.0, Style.Unit.PCT);
-    table.setColumnWidth(flColumn,   50.0, Style.Unit.PCT);
+    table.setColumnWidth(flColumn, 50.0, Style.Unit.PCT);
   }
 
   private ColumnSortEvent.ListHandler<T> getFLSorter(Column<T, SafeHtml> flColumn, List<T> dataList) {
@@ -297,6 +297,7 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
 
   /**
    * Confusing for english - fl text should be english or meaning if there is meaning
+   *
    * @param shell
    * @return
    */
