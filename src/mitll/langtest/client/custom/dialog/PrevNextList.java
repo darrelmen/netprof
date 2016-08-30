@@ -73,15 +73,14 @@ public class PrevNextList<T extends Shell> extends HorizontalPanel {
   private void makePrevButton(final T exercise) {
     this.prev = new Button("Previous");
     prev.getElement().setId("PrevNextList_Previous");
-
-    controller.register(prev, exercise.getID());
+   // controller.register(prev, exercise == null ? "" :exercise.getID());
+    prev.setType(ButtonType.SUCCESS);
+    prev.setEnabled(!container.onFirst(exercise));
     prev.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         clickPrev();
       }
     });
-    prev.setEnabled(!container.onFirst(exercise));
-    prev.setType(ButtonType.SUCCESS);
 
     add(prev);
   }

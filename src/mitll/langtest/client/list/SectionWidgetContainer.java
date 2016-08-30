@@ -102,7 +102,7 @@ public class SectionWidgetContainer<T extends SectionWidget> {
         hasNonClearSelection = true;
 
         if (!hasType(type)) {
-          if (!type.equals("item")) {
+          if (hasTypes() && !type.equals("item")) {
             logger.warning("restoreListBoxState for " + selectionState + " : huh? bad type '" + type +
                 "', expecting something in " + getTypes());
           }
@@ -223,6 +223,8 @@ public class SectionWidgetContainer<T extends SectionWidget> {
   private boolean hasType(String type) {
     return typeToBox.containsKey(type);
   }
+
+  private boolean hasTypes() { return !typeToBox.isEmpty(); }
 
   /**
    * Make sure all sections have a selection - quiz, test type, ilr level
