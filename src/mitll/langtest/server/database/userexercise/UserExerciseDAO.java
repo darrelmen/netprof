@@ -568,7 +568,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   }
 
   @Override
-  public void setExToPhones(Map<Integer, Collection<String>> exToPhones) {
+  public void setExToPhones(Map<Integer, ExercisePhoneInfo> exToPhones) {
 
   }
 

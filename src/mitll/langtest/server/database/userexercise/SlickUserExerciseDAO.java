@@ -58,13 +58,18 @@ public class SlickUserExerciseDAO
     extends BaseUserExerciseDAO
     implements IUserExerciseDAO {
   private static final Logger logger = Logger.getLogger(SlickUserExerciseDAO.class);
+  public static final String SOUND = "Sound";
+  public static final String DIFFICULTY = "Difficulty";
 
-  private long lastModified = System.currentTimeMillis();
-  //long now = System.currentTimeMillis();
+  /**
+   * TODO : need to do something to allow this to scale well - maybe ajax style nested types, etc.
+   */
+  public static final boolean ADD_PHONE_LENGTH = false;
 
+  private final long lastModified = System.currentTimeMillis();
   private final ExerciseDAOWrapper dao;
   private final RelatedExerciseDAOWrapper relatedExerciseDAOWrapper;
-  private Map<Integer, Collection<String>> exToPhones;
+  private Map<Integer, ExercisePhoneInfo> exToPhones;
 
   /**
    * @param database
@@ -72,39 +77,11 @@ public class SlickUserExerciseDAO
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(PathHelper)
    */
   public SlickUserExerciseDAO(DatabaseImpl database, DBConnection dbConnection
-      //,
-       //                       Map<Integer, Collection<String>> exToPhones
   ) {
     super(database);
     dao = new ExerciseDAOWrapper(dbConnection);
     relatedExerciseDAOWrapper = new RelatedExerciseDAOWrapper(dbConnection);
-  //  this.exToPhones = exToPhones;
-    // IRefResultDAO refResultDAO = database.getRefResultDAO();
-
-    //  getPhoneToExercises(refResultDAO);
   }
-
-/*  Map<String,Collection<Integer>> getPhoneToExercises(IRefResultDAO refResultDAO) {
-    List<SlickRefResultJson> jsonResults = refResultDAO.getJsonResults();
-
-    Map<String,Collection<Integer>> phoneToExercises = new HashMap<>();
-
-    for (SlickRefResultJson exjson : jsonResults) {
-      String scorejson = exjson.scorejson();
-      ParseResultJson parseResultJson = new ParseResultJson(null);
-      Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.parseJson(scorejson);
-      List<TranscriptSegment> transcriptSegments = netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
-      Set<String> phones = new HashSet<>();
-      for (TranscriptSegment segment: transcriptSegments) phones.add(segment.getEvent());
-      for (String phone : phones) {
-        Collection<Integer> integers = phoneToExercises.get(phone);
-        if (integers == null) phoneToExercises.put(phone, integers = new HashSet<>());
-        integers.add(exjson.exid());
-      }
-    }
-
-    return phoneToExercises;
-  }*/
 
   public void createTable() {
     dao.createTable();
@@ -234,11 +211,12 @@ public class SlickUserExerciseDAO
 
   /**
    * So we need to not put the context sentences, at least initially, under the unit-chapter hierarchy.
-   *
+   * <p>
    * Use exercise -> phone map to determine phones per exercise...
-   * @see #setExToPhones(Map)
+   *
    * @param slick
    * @return
+   * @see IUserExerciseDAO#setExToPhones(Map)
    * @see #getExercises(Collection, Collection, SectionHelper)
    */
   private Exercise fromSlickToExercise(SlickExercise slick,
@@ -260,36 +238,57 @@ public class SlickUserExerciseDAO
     }
     exercise.setRefSentences(translations);
     exercise.setUpdateTime(lastModified);
+    exercise.setAltFL(slick.altfl());
+    addPhoneInfo(slick, typeOrder, sectionHelper, id, exercise);
 
+    return exercise;
+  }
+
+  private void addPhoneInfo(SlickExercise slick, Collection<String> typeOrder,
+                            SectionHelper<CommonExercise> sectionHelper,
+                            int id,
+                            Exercise exercise) {
     Map<String, String> unitToValue = getUnitToValue(slick, typeOrder);
 
-    Collection<String> phones = exToPhones.get(id);
+    ExercisePhoneInfo exercisePhoneInfo = exToPhones.get(id);
+    Collection<String> phones = exercisePhoneInfo == null ? null : exercisePhoneInfo.getPhones();
     //if (phones == null || phones.isEmpty()) logger.warn("no phones for " + id);
+    int max = 15;
+    int i = 0;
     if (slick.ispredef() && !slick.iscontext()) {
       //    addExerciseToSectionHelper(sectionHelper, unitToValue, exercise);
       List<SectionHelper.Pair> pairs = getPairs(sectionHelper, unitToValue, exercise);
       if (phones == null) {
 //        logger.warn("no phones for " + id);
-      }
-      else {
+      } else {
         for (String phone : phones) {
-          pairs.add(sectionHelper.getPairForExerciseAndLesson(exercise, "Sound", phone));
+          pairs.add(sectionHelper.getPairForExerciseAndLesson(exercise, SOUND, phone));
+        }
+
+        if (ADD_PHONE_LENGTH) {
+          int numPhones = exercisePhoneInfo.getNumPhones();
+
+          int choice = range.get(0);
+          for (int r : range) {
+            i++;
+            if (numPhones <= r) {
+              choice = i;
+              break;
+            }
+          }
+          String label = "" + choice;
+//        if (numPhones >= max) {
+//          label = ">" + (max - 1);
+//        }
+          pairs.add(sectionHelper.getPairForExerciseAndLesson(exercise, DIFFICULTY, label));
         }
       }
+
       sectionHelper.addAssociations(pairs);
     } else {
       exercise.setUnitToValue(unitToValue);
     }
-
-    return exercise;
   }
-/*
-  private void addExerciseToSectionHelper(SectionHelper<CommonExercise> sectionHelper,
-                                          Map<String, String> unitToValue,
-                                          Exercise exercise) {
-    List<SectionHelper.Pair> pairs = getPairs(sectionHelper, unitToValue, exercise);
-    sectionHelper.addAssociations(pairs);
-  }*/
 
   private List<SectionHelper.Pair> getPairs(SectionHelper<CommonExercise> sectionHelper,
                                             Map<String, String> unitToValue,
@@ -357,7 +356,6 @@ public class SlickUserExerciseDAO
     List<CommonExercise> copy = new ArrayList<>();
     for (SlickExercise userExercise : all) copy.add(fromSlick(userExercise));
     //  logger.info("getUserExercises returned " + copy.size()+ " user exercises");
-
     return copy;
   }
 
@@ -418,11 +416,11 @@ public class SlickUserExerciseDAO
   }
 
   /**
-   * @see DBExerciseDAO#readExercises
    * @param projectid
    * @param typeOrder
    * @param sectionHelper
    * @return
+   * @see DBExerciseDAO#readExercises
    */
   public List<CommonExercise> getByProject(int projectid, List<String> typeOrder,
                                            SectionHelper<CommonExercise> sectionHelper) {
@@ -496,8 +494,39 @@ public class SlickUserExerciseDAO
     return dao.getIDToFL(projid);
   }
 
+  List<Integer> range = new ArrayList<>();
+
+  /**
+   * @param exToPhones
+   * @see DatabaseImpl#configureProjects
+   */
   @Override
-  public void setExToPhones(Map<Integer, Collection<String>> exToPhones) {
+  public void setExToPhones(Map<Integer, ExercisePhoneInfo> exToPhones) {
     this.exToPhones = exToPhones;
+
+    int total = 0;
+
+    Map<Integer, Integer> binToCount = new TreeMap<>();
+    for (ExercisePhoneInfo exercisePhoneInfo : exToPhones.values()) {
+      int numPhones = exercisePhoneInfo.getNumPhones();
+      binToCount.put(numPhones, binToCount.getOrDefault(numPhones, 0) + 1);
+      total++;
+    }
+    int ranges = 6;
+    int desired = total / ranges;
+    int window = desired;
+    int prev = 0;
+    for (Integer bin : binToCount.keySet()) {
+      Integer count = binToCount.get(bin);
+      window -= count;
+      logger.info(bin + "\t" + count + "\tleft " + window);
+      if (window <= 0) {
+        range.add(prev);
+        window += desired;
+      }
+      prev = bin;
+    }
+    if (!range.isEmpty()) range = range.subList(0, range.size() - 1);
+    logger.info("got range " + range);
   }
 }
