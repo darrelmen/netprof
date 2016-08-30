@@ -317,7 +317,7 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
     status.addStyleName("inlineBlockStyle");
     status.add(statusHeader);
     statusHeader.getElement().setId("statusHeader");
-    statusHeader.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
+    statusHeader.getElement().getStyle().setMarginTop(5, Style.Unit.PX);
     statusHeader.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
     return status;
   }

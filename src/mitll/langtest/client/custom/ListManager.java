@@ -55,6 +55,8 @@ import mitll.langtest.client.custom.content.ReviewItemHelper;
 import mitll.langtest.client.custom.dialog.CreateListDialog;
 import mitll.langtest.client.custom.dialog.EditItem;
 import mitll.langtest.client.custom.tabs.TabAndContent;
+import mitll.langtest.client.dialog.DialogHelper;
+import mitll.langtest.client.download.DownloadLink;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.ListService;
 import mitll.langtest.client.services.ListServiceAsync;
@@ -64,6 +66,7 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
+import mitll.langtest.shared.user.User;
 
 import java.util.Collection;
 import java.util.List;
@@ -76,9 +79,9 @@ import java.util.logging.Logger;
  * @since 10/20/15.
  */
 public class ListManager implements RequiresResize {
-  public static final String IMPORT_ITEM = "importItem";
-  public static final boolean SHOW_IMPORT = false;
   private final Logger logger = Logger.getLogger("ListManager");
+  private static final String IMPORT_ITEM = "importItem";
+  private static final boolean SHOW_IMPORT = true;
 
   private final KeyStorage storage;
   private ScrollPanel listScrollPanel;
@@ -159,13 +162,13 @@ public class ListManager implements RequiresResize {
       }
     });
 
-    npfHelper  = new NPFHelper(service, feedback, controller, false);
-    reviewItem = new ReviewItemHelper(service, feedback, controller, exerciseList);//, npfHelper);
-    avpHelper  = new AVPHelper(service, feedback, controller);
-    editItem   = new EditItem(service, userManager, controller, exerciseList, feedback);//, npfHelper);
+    npfHelper = new NPFHelper(service, feedback, controller, false);
+    reviewItem = new ReviewItemHelper(service, feedback, controller, exerciseList);
+    avpHelper = new AVPHelper(service, feedback, controller);
+    editItem = new EditItem(service, userManager, controller, exerciseList, feedback);
   }
 
-  public void addStudyLists(final TabAndContent studyLists) {
+  void addStudyLists(final TabAndContent studyLists) {
     subListTabPanel = new TabPanel();
     studyLists.getContent().add(subListTabPanel);
 
@@ -427,6 +430,7 @@ public class ListManager implements RequiresResize {
 
   @Override
   public void onResize() {
+    // logger.info("got onResize " + getClass().toString());
     setScrollPanelWidth(listScrollPanel);
 
     npfHelper.onResize();
@@ -488,27 +492,58 @@ public class ListManager implements RequiresResize {
     container.getElement().getStyle().setPaddingLeft(2, Style.Unit.PX);
     container.getElement().getStyle().setPaddingRight(2, Style.Unit.PX);
 
-    Panel firstRow = new FluidRow();    // TODO : this is wacky -- clean up...
-    firstRow.getElement().setId("container_first_row");
-
+    Panel firstRow = getFirstInfoRow(ul);
     container.add(firstRow);
-    firstRow.add(getListInfo(ul));
-    firstRow.addStyleName("userListDarkerBlueColor");
 
+    Panel secondRow = new FluidRow();    // TODO : this is wacky -- clean up...
+
+    String userID = ul.getCreator().getUserID();
+    if (!userID.equals(User.NOT_SET)) {
+      addCreatedBy(container, secondRow, userID);
+    }
+
+    container.add(gwtDownloadLinkRow(ul, instanceName));
+    container.add(getListOperations(ul, instanceName, toSelect));
+
+    return container;
+  }
+
+  private Panel gwtDownloadLinkRow(UserList ul, String instanceName) {
     Panel r1 = new FluidRow();
     r1.addStyleName("userListDarkerBlueColor");
+    r1.add(getDownloadLink(ul, instanceName));
+    return r1;
+  }
 
-    int realID = ul.getID();
-    Anchor downloadLink = new DownloadLink(controller).getDownloadLink(realID, instanceName + "_" + realID, ul.getName());
+  //    int realID = ul.getID();
+//    Anchor downloadLink = new DownloadLink(controller).getDownloadLink(realID, instanceName + "_" + realID, ul.getName());
+  private Anchor getDownloadLink(UserList ul, String instanceName) {
+    long listID = ul.getID();
+    String linkid = instanceName + "_" + listID;
+    Anchor downloadLink = new DownloadLink(controller).getDownloadLink(listID, linkid, ul.getName());
     Node child = downloadLink.getElement().getChild(0);
     AnchorElement.as(child).getStyle().setColor("#333333");
+    return downloadLink;
+  }
 
-    r1.add(downloadLink);
+  private void addCreatedBy(FluidContainer container, Panel secondRow, String userID) {
+    Heading child1 = new Heading(5, "created by " + userID);
+    secondRow.add(child1);
+    child1.addStyleName("leftFiveMargin");
+    Style style = child1.getElement().getStyle();
+    style.setMarginTop(3, Style.Unit.PX);
+    style.setMarginBottom(3, Style.Unit.PX);
+    secondRow.addStyleName("userListDarkerBlueColor");
 
-    container.add(r1);
+    container.add(secondRow);
+  }
 
-    container.add(getListOperations(ul, instanceName, toSelect));
-    return container;
+  private Panel getFirstInfoRow(UserList ul) {
+    Panel firstRow = new FluidRow();    // TODO : this is wacky -- clean up...
+    firstRow.getElement().setId("container_first_row");
+    firstRow.add(getListInfo(ul));
+    firstRow.addStyleName("userListDarkerBlueColor");
+    return firstRow;
   }
 
 
@@ -561,7 +596,6 @@ public class ListManager implements RequiresResize {
    */
   private TabPanel getListOperations(final UserList<CommonShell> ul, final String instanceName, final HasID toSelect) {
     // logger.info("getListOperations : '" + instanceName + " for list " + ul);
-
     boolean isMyList = createdByYou(ul);
     boolean created = isMyList || instanceName.equals(REVIEW) || instanceName.equals(COMMENT);
 
@@ -572,8 +606,11 @@ public class ListManager implements RequiresResize {
     final String instanceName1 = isReview ? REVIEW : isComment ? COMMENT : isAttention ? ATTENTION : LEARN;
 
     // add learn tab
-    String learnTitle = isReview ? POSSIBLE_DEFECTS :
-        isComment ? ITEMS_WITH_COMMENTS : isAttention ? "Items for LL" : LEARN_PRONUNCIATION;
+    String learnTitle =
+        isReview ? POSSIBLE_DEFECTS :
+            isComment ? ITEMS_WITH_COMMENTS :
+                isAttention ? "Items for LL" : LEARN_PRONUNCIATION;
+
     final TabAndContent learn = makeTab(tabPanel, isReview ? IconType.EDIT_SIGN : IconType.LIGHTBULB, learnTitle);
     final boolean isNormalList = !isReview && !isComment && !isAttention;
     learn.getTab().addClickHandler(new ClickHandler() {
@@ -589,7 +626,6 @@ public class ListManager implements RequiresResize {
     TabAndContent practice = null;
     if (isNormalList) {
       //logger.info("getListOperations : isNormalList ");
-
       practice = makeTab(tabPanel, IconType.CHECK, PRACTICE);
       final TabAndContent fpractice = practice;
       practice.getContent().addStyleName("centerPractice");
@@ -597,7 +633,7 @@ public class ListManager implements RequiresResize {
         @Override
         public void onClick(ClickEvent event) {
           storage.storeValue(SUB_TAB, PRACTICE1);
-          //       logger.info("getListOperations : got click on practice " + fpractice.getContent().getElement().getId());
+          //       logger.info("getListOperations : got click on practice " + fpractice.getContent().getElement().getExID());
           avpHelper.setContentPanel(fpractice.getContent());
           avpHelper.showNPF(ul, fpractice, PRACTICE1, true, toSelect);
           controller.logEvent(fpractice.getTab(), "Tab", getListID(ul), PRACTICE1);
@@ -607,7 +643,10 @@ public class ListManager implements RequiresResize {
 
     // add add item and edit tabs (conditionally)
     TabAndContent editItemTab = null;
-    if (created && (!ul.isPrivate() || isMyList)) {
+
+    // see bug #650 - teachers should be able to record items for a student
+    //  logger.info("edit tab created " + created);
+    if ((created || userManager.isTeacher()) && (!ul.isPrivate() || isMyList)) {
       editItemTab = getEditTab(ul, toSelect, tabPanel, isReview, isComment);
     }
     if (SHOW_IMPORT) {
@@ -625,8 +664,20 @@ public class ListManager implements RequiresResize {
     return tabPanel;
   }
 
-  private TabAndContent getEditTab(final UserList<CommonShell> ul, final HasID toSelect, TabPanel tabPanel,
-                                   final boolean isReview, final boolean isComment) {
+  /**
+   * @param ul
+   * @param toSelect
+   * @param tabPanel
+   * @param isReview
+   * @param isComment
+   * @return
+   * @see #getListOperations(UserList, String, HasID)
+   */
+  private TabAndContent getEditTab(final UserList<CommonShell> ul,
+                                   final HasID toSelect,
+                                   TabPanel tabPanel,
+                                   final boolean isReview,
+                                   final boolean isComment) {
     final TabAndContent editTab = makeTab(tabPanel, IconType.EDIT, isReview ? ADD_DELETE_EDIT_ITEM : ADD_OR_EDIT_ITEM);
     //  logger.info("getListOperations : making editTab");
 
@@ -679,7 +730,11 @@ public class ListManager implements RequiresResize {
   }
 
   private boolean createdByYou(UserList<?> ul) {
-    return ul.getCreator().getId() == userManager.getUser();
+    return ul.getCreator().getId() == getUser();
+  }
+
+  private int getUser() {
+    return userManager.getUser();
   }
 
   void deleteList(Button delete, final UserList ul, final boolean onlyMyLists) {
@@ -724,7 +779,6 @@ public class ListManager implements RequiresResize {
   private TabAndContent makeTab(TabPanel tabPanel, IconType iconType, String label) {
     return new TabAndContent(tabPanel, iconType, label);
   }
-
 
   /**
    * @param ul
@@ -831,7 +885,6 @@ public class ListManager implements RequiresResize {
     }
   }
 
-
   /**
    * @param tabPanel
    * @param learnTab
@@ -893,9 +946,13 @@ public class ListManager implements RequiresResize {
   }
 
   private void reallyShowLearnTab(TabPanel tabPanel, TabAndContent learnTab, UserList ul, String instanceName1) {
-    tabPanel.selectTab(SUBTAB_LEARN_INDEX);
-    learnTab.clickOnTab();
-    showLearnTab(learnTab, ul, instanceName1, ul.getLast());
+    if (!ul.isEmpty()) {
+      tabPanel.selectTab(SUBTAB_LEARN_INDEX);
+      learnTab.clickOnTab();
+      showLearnTab(learnTab, ul, instanceName1, ul.getLast());
+    } else {
+      new DialogHelper(false).showErrorMessage("No items imported", "No items had valid " + controller.getLanguage() + " text.");
+    }
   }
 
   private String getInstanceName(boolean isReview) {
