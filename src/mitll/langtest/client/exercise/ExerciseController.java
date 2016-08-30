@@ -70,6 +70,8 @@ public interface ExerciseController extends EventRegistration {
 
   User getCurrent();
 
+  boolean isAdmin();
+
   void startRecording();
   void stopRecording(WavCallback wavCallback);
 

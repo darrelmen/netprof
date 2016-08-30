@@ -331,7 +331,7 @@ public interface LangTestDatabase extends RemoteService {
    * @see mitll.langtest.client.instrumentation.EventTable#showDialog(LangTestDatabaseAsync)
    * @return
    */
-  List<Event> getEvents();
+  Collection<Event> getEvents();
 
   /**
    * Dialog support...

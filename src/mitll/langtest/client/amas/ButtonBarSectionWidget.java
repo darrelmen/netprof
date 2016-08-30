@@ -180,7 +180,7 @@ public class ButtonBarSectionWidget implements SectionWidget {
   public List<String> getCurrentSelections() {
     List<String> strings = new ArrayList<String>();
     for (Button button : buttons) {
-      //  logger.info("getCurrentSelection for  " + getType() + " button "  + button.getElement().getId() + " active " + button.isActive());
+      //  logger.info("getCurrentSelection for  " + getType() + " button "  + button.getElement().getExID() + " active " + button.isActive());
       if (button.isActive()) {
         strings.add(button.getText().trim());
       }
