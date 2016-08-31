@@ -35,18 +35,16 @@ package mitll.langtest.client.list;
 import com.github.gwtbootstrap.client.ui.Column;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.Section;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.bootstrap.DownloadHelper;
-import mitll.langtest.client.bootstrap.ItemSorter;
 import mitll.langtest.client.bootstrap.SectionNodeItemSorter;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SectionWidget;
+import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.custom.UserList;
@@ -73,10 +71,13 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<MenuSectio
    * @param instance
    * @param incorrectFirst
    */
-  public SimpleSelectExerciseList(Panel secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
+  public SimpleSelectExerciseList(Panel secondRow,
+                                  Panel currentExerciseVPanel,
+                                  ExerciseServiceAsync service,
                                   UserFeedback feedback,
                                   ExerciseController controller,
-                                  String instance, boolean incorrectFirst) {
+                                  String instance,
+                                  boolean incorrectFirst) {
     super(currentExerciseVPanel, service, feedback, controller, true, instance, incorrectFirst);
 
     sectionPanel = new FluidContainer();

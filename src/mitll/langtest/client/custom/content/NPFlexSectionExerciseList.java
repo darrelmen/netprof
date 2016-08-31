@@ -49,9 +49,7 @@ import mitll.langtest.client.user.UserManager;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 1/26/16.
  */
-public class NPFlexSectionExerciseList
-    //extends FlexSectionExerciseList {
-    extends SimpleSelectExerciseList {
+public class NPFlexSectionExerciseList extends SimpleSelectExerciseList {
   private static final String COMPLETE = "Complete";
   private static final String LIST_COMPLETE = "List complete!";
 
@@ -60,13 +58,15 @@ public class NPFlexSectionExerciseList
    * @param currentExercisePanel
    * @param instanceName
    * @param incorrectFirst
-   * @see mitll.langtest.client.custom.Navigation#makePracticeHelper(LangTestDatabaseAsync, UserManager, ExerciseController, UserFeedback)
+   * @see mitll.langtest.client.custom.Navigation#makePracticeHelper
    * @see FlexListLayout#makeExerciseList(Panel, Panel, String, boolean)
    */
-  public NPFlexSectionExerciseList(FlexListLayout flexListLayout, Panel topRow, Panel currentExercisePanel,
+  public NPFlexSectionExerciseList(FlexListLayout flexListLayout,
+                                   Panel topRow,
+                                   Panel currentExercisePanel,
                                    String instanceName,
                                    boolean incorrectFirst) {
-    super(topRow, currentExercisePanel, flexListLayout.service, flexListLayout.feedback,
+    super(topRow, currentExercisePanel, flexListLayout.exerciseServiceAsync, flexListLayout.feedback,
         flexListLayout.controller, instanceName, incorrectFirst);
   }
 

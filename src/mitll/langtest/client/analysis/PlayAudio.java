@@ -36,6 +36,7 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.client.sound.SoundPlayer;
@@ -53,7 +54,7 @@ import java.util.logging.Logger;
  */
 class PlayAudio {
   private final Logger logger = Logger.getLogger("PlayAudio");
-  private final LangTestDatabaseAsync service;
+  private final ExerciseServiceAsync service;
   private final SoundPlayer soundFeedback;
   private final Widget playFeedback;
   private Timer t;
@@ -64,7 +65,7 @@ class PlayAudio {
    * @param playFeedback
    * @see AnalysisPlot#AnalysisPlot
    */
-  PlayAudio(LangTestDatabaseAsync service, SoundPlayer soundFeedback, Widget playFeedback) {
+  PlayAudio(ExerciseServiceAsync service, SoundPlayer soundFeedback, Widget playFeedback) {
     this.service = service;
     this.soundFeedback = soundFeedback;
     this.playFeedback = playFeedback;
@@ -93,7 +94,8 @@ class PlayAudio {
           if (scores.isEmpty()) {
             String msg = "playLast no Correct and scores for exercise : " + id + " and user " + userid;
             logger.warning(msg);
-            service.logMessage(msg, new AsyncCallback<Void>() {
+            // TODO : consider putting this back
+            /*            service.logMessage(msg, new AsyncCallback<Void>() {
               @Override
               public void onFailure(Throwable throwable) {
               }
@@ -101,7 +103,7 @@ class PlayAudio {
               @Override
               public void onSuccess(Void aVoid) {
               }
-            });
+            });*/
           }
           else {
             CorrectAndScore correctAndScore = scores.get(scores.size() - 1);

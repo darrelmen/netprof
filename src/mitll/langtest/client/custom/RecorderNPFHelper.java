@@ -49,6 +49,7 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.WaveformExercisePanel;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -80,12 +81,16 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
    * @param userManager
    * @param controller
    * @param doNormalRecording
+   * @param exerciseServiceAsync
    * @see Navigation#Navigation
    */
-  public RecorderNPFHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager,
-                           ExerciseController controller, boolean doNormalRecording,
-                           ReloadableContainer exerciseList) {
-    super(service, feedback, userManager, controller, exerciseList);
+  public RecorderNPFHelper(LangTestDatabaseAsync service,
+                           UserFeedback feedback,
+                           UserManager userManager,
+                           ExerciseController controller,
+                           boolean doNormalRecording,
+                           ReloadableContainer exerciseList, ExerciseServiceAsync exerciseServiceAsync) {
+    super(service, feedback, userManager, controller, exerciseList, exerciseServiceAsync);
     this.doNormalRecording = doNormalRecording;
   }
 
@@ -101,10 +106,9 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
   }
 
   @Override
-  protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
-                                                                        final UserManager userManager, ExerciseController controller,
+  protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(final UserManager userManager,
                                                                         SimpleChapterNPFHelper<CommonShell, CommonExercise> outer) {
-    return new MyFlexListLayout<CommonShell, CommonExercise>(service, feedback, controller, outer) {
+    return new MyFlexListLayout<CommonShell, CommonExercise>(service, feedback, controller, outer, exerciseServiceAsync) {
 
       final FlexListLayout outerLayout = this;
 
