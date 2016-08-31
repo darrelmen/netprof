@@ -45,6 +45,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.qc.QCNPFExercise;
+import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -58,22 +59,22 @@ import mitll.langtest.shared.exercise.CommonShell;
  */
 class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
   private static final String SHOW_ONLY_UNRECORDED = "Show Only Audio by Unknown Gender";
-
   private static final String MARK_DEFECTS1 = "markDefects";
 
-  MarkDefectsChapterNPFHelper( LangTestDatabaseAsync service,
-                                     UserFeedback feedback, UserManager userManager, ExerciseController controller,
-                                     SimpleChapterNPFHelper learnHelper) {
-    super(service, feedback, userManager, controller, learnHelper);
+  MarkDefectsChapterNPFHelper(LangTestDatabaseAsync service,
+                              UserFeedback feedback,
+                              UserManager userManager,
+                              ExerciseController controller,
+                              SimpleChapterNPFHelper learnHelper,
+                              ExerciseServiceAsync exerciseServiceAsync
+  ) {
+    super(service, feedback, userManager, controller, learnHelper, exerciseServiceAsync);
   }
 
   @Override
-  protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(LangTestDatabaseAsync service,
-                                                                        UserFeedback feedback,
-                                                                        UserManager userManager,
-                                                                        ExerciseController controller,
+  protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(UserManager userManager,
                                                                         SimpleChapterNPFHelper<CommonShell, CommonExercise> outer) {
-    return new MyFlexListLayout<CommonShell, CommonExercise>(service, feedback, controller, outer) {
+    return new MyFlexListLayout<CommonShell, CommonExercise>(service, feedback, controller, outer, exerciseServiceAsync) {
       @Override
       protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow,
                                                                                  Panel currentExercisePanel,
@@ -105,7 +106,6 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
             add(pagingContainer.getTableWithPager());
             //setOnlyExamples(!doNormalRecording);
           }
-
     /*      private String setCheckboxTitle(UserManager userManager) {
             return SHOW_ONLY_UNRECORDED;// + (userManager.isMale() ? " by Males" : " by Females");
           }*/

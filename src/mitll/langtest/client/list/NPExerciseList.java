@@ -39,7 +39,9 @@ import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SectionWidget;
+import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
+import mitll.langtest.server.database.excel.ExcelExport;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -52,7 +54,7 @@ import mitll.langtest.shared.exercise.CommonShell;
  */
 public class NPExerciseList<V extends SectionWidget> extends HistoryExerciseList<CommonShell, CommonExercise, V> {
   protected NPExerciseList(Panel currentExerciseVPanel,
-                           LangTestDatabaseAsync service,
+                           ExerciseServiceAsync service,
                            UserFeedback feedback,
                            ExerciseController controller,
                            boolean showTypeAhead,
