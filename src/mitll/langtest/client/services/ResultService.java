@@ -34,6 +34,7 @@ package mitll.langtest.client.services;
 
 import com.github.gwtbootstrap.client.ui.Container;
 import com.github.gwtbootstrap.client.ui.Fieldset;
+import com.github.gwtbootstrap.client.ui.TextBox;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
@@ -41,88 +42,62 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.InitialUI;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.instrumentation.EventRegistration;
+import mitll.langtest.client.result.ResultManager;
+import mitll.langtest.client.scoring.AudioPanel;
+import mitll.langtest.client.scoring.ScoringAudioPanel;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.UserPassLogin;
+import mitll.langtest.shared.ResultAndTotal;
+import mitll.langtest.shared.scoring.PretestScore;
 import mitll.langtest.shared.user.LoginResult;
 import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
-@RemoteServiceRelativePath("user-manager")
-public interface UserService extends RemoteService {
-  // User Management --
-
-  User setProject(int projectid);
-
-  User addUser(SignUpUser user, String url, boolean isCD);
-
+@RemoteServiceRelativePath("result-manager")
+public interface ResultService extends RemoteService {
   /**
-   * @return
-   * @see mitll.langtest.client.user.UserTable#showDialog
-   */
-  List<User> getUsers();
-
-  /**
-   * @param login
-   * @param passwordH
-   * @return
-   * @see mitll.langtest.client.user.UserPassLogin#gotLogin
-   */
-  User userExists(String login, String passwordH);
-
-  LoginResult loginUser(String userId, String attemptedPassword);
-
-  void logout(String login);
-
-  /**
-   * @param token
-   * @param first
-   * @return
-   * @see mitll.langtest.client.user.ResetPassword#getChangePasswordButton(String, Fieldset, BasicDialog.FormField, BasicDialog.FormField)
-   */
-  boolean changePFor(String token, String first);
-
-  /**
-   * @param token
-   * @return
-   * @see InitialUI#handleResetPass(Container, Panel, EventRegistration, String)
-   */
-  long getUserIDForToken(String token);
-
-  /**
+   * @see mitll.langtest.client.result.ResultManager#getTypeaheadUsing(String, TextBox)
+   * @param unitToValue
    * @param userid
-   * @param enabled
-   * @see mitll.langtest.client.user.UserTable#addAdminCol(LangTestDatabaseAsync, CellTable)
-   */
-  void changeEnabledFor(int userid, boolean enabled);
-
-  /**
-   * @param emailH
-   * @param email
-   * @param url
+   * @param flText
+   * @param which
    * @return
-   * @see UserPassLogin#getForgotUser()
    */
-  boolean forgotUsername(String emailH, String email, String url);
+  Collection<String> getResultAlternatives(Map<String, String> unitToValue, int userid, String flText, String which);
+
 
   /**
+   * @see ResultManager#showResults
+   * @return
+   */
+  int getNumResults();
+
+  /**
+   * @see ResultManager#createProvider(int, CellTable)
+   * @param start
+   * @param end
+   * @param sortInfo
+   * @param unitToValue
    * @param userid
-   * @param text
-   * @param url
+   * @param flText
+   * @param req
    * @return
-   * @see UserPassLogin#getForgotPassword()
    */
-  boolean resetPassword(String userid, String text, String url);
+  ResultAndTotal getResults(int start, int end, String sortInfo, Map<String, String> unitToValue, int userid,
+                            String flText, int req);
+
 
   /**
-   * @param cdToken
-   * @param emailR
-   * @param url
+   * @see ScoringAudioPanel#scoreAudio(String, int, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
+   * @param resultID
+   * @param width
+   * @param height
    * @return
-   * @see InitialUI#handleCDToken(Container, Panel, String, String)
    */
-  String enableCDUser(String cdToken, String emailR, String url);
+ // PretestScore getResultASRInfo(int resultID, int width, int height);
 
-  void forgetProject();
 }
