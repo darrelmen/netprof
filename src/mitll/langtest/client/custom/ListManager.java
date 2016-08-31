@@ -58,6 +58,7 @@ import mitll.langtest.client.custom.tabs.TabAndContent;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.download.DownloadLink;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.services.ListService;
 import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
@@ -136,6 +137,7 @@ public class ListManager implements RequiresResize {
    * @param controller
    * @param feedback
    * @param tabPanel
+   * @param exerciseServiceAsync
    * @see Navigation#getTabPanel()
    */
   public ListManager(final LangTestDatabaseAsync service,
@@ -143,7 +145,7 @@ public class ListManager implements RequiresResize {
                      final ExerciseController controller,
                      UserFeedback feedback,
                      TabPanel tabPanel,
-                     ReloadableContainer exerciseList) {
+                     ReloadableContainer exerciseList, ExerciseServiceAsync exerciseServiceAsync) {
     if (exerciseList == null) logger.warning("huh? exerciselist is null?\n\n\n");
 
     this.service = service;
@@ -162,9 +164,9 @@ public class ListManager implements RequiresResize {
       }
     });
 
-    npfHelper = new NPFHelper(service, feedback, controller, false);
-    reviewItem = new ReviewItemHelper(service, feedback, controller, exerciseList);
-    avpHelper = new AVPHelper(service, feedback, controller);
+    npfHelper = new NPFHelper(service, feedback, controller, false, exerciseServiceAsync);
+    reviewItem = new ReviewItemHelper(service, feedback, controller, exerciseList, exerciseServiceAsync);
+    avpHelper = new AVPHelper(service, feedback, controller, exerciseServiceAsync);
     editItem = new EditItem(service, userManager, controller, exerciseList, feedback);
   }
 
