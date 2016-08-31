@@ -37,11 +37,10 @@ import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.bootstrap.DownloadHelper;
 import mitll.langtest.client.bootstrap.SectionNodeItemSorter;
+import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.services.ExerciseServiceAsync;
@@ -88,7 +87,7 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<MenuSectio
     style.setPaddingRight(0, Style.Unit.PX);
     secondRow.add(new Column(12, sectionPanel));
     setUnaccountedForVertical(CLASSROOM_VERTICAL_EXTRA);
-    downloadHelper = new DownloadHelper(controller, instance, this, controller.getCurrent().isTeacher());
+    downloadHelper = new DownloadHelper(controller, this);
   }
 
   /**
@@ -237,13 +236,27 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<MenuSectio
     pushNewSectionHistoryToken();
   }
 
+//  private DivWidget getBottomRow() {
+//    FlexTable links = downloadHelper.getDownloadLinks();
+//    // else {
+//    //   logger.info("user is not a teacher.");
+//    // }
+//    DivWidget bottomRow = new DivWidget();
+//    bottomRow.getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
+//    DivWidget left = new DivWidget();
+//    left.addStyleName("floatLeftList");
+//    left.add(links);
+//    bottomRow.add(left);
+//    return bottomRow;
+//  }
+
   private DivWidget getBottomRow() {
-    FlexTable links = downloadHelper.getDownloadLinks();
+    Panel links = downloadHelper.getDownloadLinks();
     // else {
     //   logger.info("user is not a teacher.");
     // }
     DivWidget bottomRow = new DivWidget();
-    bottomRow.getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
+    bottomRow.getElement().getStyle().setMarginBottom(18, Style.Unit.PX);
     DivWidget left = new DivWidget();
     left.addStyleName("floatLeftList");
     left.add(links);

@@ -52,6 +52,7 @@ import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.instrumentation.EventRegistration;
+import mitll.langtest.client.list.HistoryExerciseList;
 import mitll.langtest.client.list.SelectionState;
 
 import java.util.*;
@@ -63,10 +64,10 @@ public class DownloadHelper {
   private static final String DOWNLOAD_AUDIO = "downloadAudio";
 //  private final EventRegistration eventRegistration;
 
-  private final FlexSectionExerciseList exerciseList;
+  private final HistoryExerciseList exerciseList;
 
   public DownloadHelper(EventRegistration eventRegistration,
-                        FlexSectionExerciseList exerciseList) {
+                        HistoryExerciseList exerciseList) {
   //  this.eventRegistration = eventRegistration;
     this.exerciseList = exerciseList;
   }
