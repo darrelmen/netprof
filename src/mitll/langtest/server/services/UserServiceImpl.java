@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.services;
 
-import mitll.langtest.client.flashcard.Banner;
 import mitll.langtest.client.services.UserService;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.security.DominoSessionException;
@@ -43,14 +42,14 @@ import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.user.LoginResult;
 import mitll.langtest.shared.user.SignUpUser;
-import mitll.langtest.shared.user.SlimProject;
 import mitll.langtest.shared.user.User;
-import mitll.npdata.dao.SlickProject;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.util.*;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public class UserServiceImpl extends MyRemoteServiceServlet implements UserService {
