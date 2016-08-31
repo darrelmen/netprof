@@ -43,6 +43,7 @@ import com.google.gwt.user.client.ui.HTML;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
+import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.sound.SoundPlayer;
 import mitll.langtest.shared.exercise.ExerciseListWrapper;
@@ -132,7 +133,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
    * @param minRecordings
    * @see AnalysisTab#AnalysisTab
    */
-  public AnalysisPlot(LangTestDatabaseAsync service, int userid, final String userChosenID, final int minRecordings,
+  public AnalysisPlot(ExerciseServiceAsync service, int userid, final String userChosenID, final int minRecordings,
                       SoundManagerAPI soundManagerAPI, Icon playFeedback) {
     getElement().setId("AnalysisPlot");
     int minHeight = isShort() ? CHART_HEIGHT_SHORT : CHART_HEIGHT;
@@ -276,7 +277,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
     });
   }
 
-  private void populateExerciseMap(LangTestDatabaseAsync service, int userid) {
+  private void populateExerciseMap(ExerciseServiceAsync service, int userid) {
     service.getExerciseIds(
         new ExerciseListRequest(1, userid),
         new AsyncCallback<ExerciseListWrapper<CommonShell>>() {
