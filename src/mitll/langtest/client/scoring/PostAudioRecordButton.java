@@ -80,8 +80,12 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
    * @see GoodwaveExercisePanel.ASRRecordAudioPanel.MyPostAudioRecordButton
    */
   public PostAudioRecordButton(int exerciseID,
-                               final ExerciseController controller, LangTestDatabaseAsync service,
-                               int index, boolean recordInResults, String recordButtonTitle, String stopButtonTitle) {
+                               final ExerciseController controller,
+                               LangTestDatabaseAsync service,
+                               int index,
+                               boolean recordInResults,
+                               String recordButtonTitle,
+                               String stopButtonTitle) {
     super(controller.getRecordTimeout(), controller.getProps().doClickAndHold(), recordButtonTitle, stopButtonTitle,
         controller.getProps());
     setRecordingListener(this);
@@ -95,13 +99,13 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     Style style = getElement().getStyle();
     style.setMarginTop(1, Style.Unit.PX);
     style.setMarginBottom(1, Style.Unit.PX);
-    setWidth(BUTTON_WIDTH +
-        "px");
+    setWidth(BUTTON_WIDTH + "px");
   }
 
   public void setExercise(int exercise) {
     this.exerciseID = exercise;
   }
+
   protected int getExerciseID() {
     return exerciseID;
   }
@@ -130,7 +134,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
         index,
         getAudioType());
 
-    logger.info("PostAudioRecordButton.postAudioFile : " +  getAudioType() + " : " + audioContext);
+    logger.info("PostAudioRecordButton.postAudioFile : " + getAudioType() + " : " + audioContext);
 
     service.writeAudioFile(
         base64EncodedWavFile,
@@ -197,8 +201,8 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   }
 
   /**
-   * @see #postAudioFile(String)
    * @return
+   * @see #postAudioFile(String)
    */
   abstract protected AudioType getAudioType();
 
@@ -231,7 +235,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   }
 
   protected void useInvalidResult(AudioAnswer result) {
-    controller.logEvent(this, "recordButton", ""+ exerciseID, "invalid recording " + result.getValidity());
+    controller.logEvent(this, "recordButton", "" + exerciseID, "invalid recording " + result.getValidity());
     //  logger.info("useInvalidResult platform is " + getPlatform());
     if (!checkAndShowTooLoud(result.getValidity())) {
       showPopup(result.getValidity().getPrompt());
@@ -248,6 +252,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   }
 
   public abstract void useResult(AudioAnswer result);
+
   public boolean hasValidAudio() {
     return validAudio;
   }
