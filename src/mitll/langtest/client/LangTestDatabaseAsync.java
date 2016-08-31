@@ -56,10 +56,6 @@ import java.util.Map;
  * @since
  */
 public interface LangTestDatabaseAsync {
-  <T extends CommonShell> void getExerciseIds(
-                                              ExerciseListRequest request,
-                                              AsyncCallback<ExerciseListWrapper<T>> async);
-
   void writeAudioFile(String base64EncodedString,
                       AudioContext audioContext,
 
@@ -91,7 +87,6 @@ public interface LangTestDatabaseAsync {
   void getScoresForUser(Map<String, Collection<String>> typeToSection, int userID, Collection<Integer> exids,
                         AsyncCallback<QuizCorrectAndScore> async);
 
-  <T extends Shell> void getExercise(int exid, int userID, boolean isFlashcardReq, AsyncCallback<T> async);
 
 
 

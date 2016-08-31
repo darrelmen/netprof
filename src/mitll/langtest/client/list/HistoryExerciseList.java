@@ -42,6 +42,7 @@ import mitll.langtest.client.amas.SingleSelectExerciseList;
 import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SectionWidget;
+import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -85,9 +86,13 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
    * @param incorrectFirst
    * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#FlexSectionExerciseList(Panel, Panel, LangTestDatabaseAsync, UserFeedback, ExerciseController, String, boolean)
    */
-  protected HistoryExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
+  protected HistoryExerciseList(Panel currentExerciseVPanel,
+                                ExerciseServiceAsync service,
+                                UserFeedback feedback,
                                 ExerciseController controller,
-                                boolean showTypeAhead, String instance, boolean incorrectFirst) {
+                                boolean showTypeAhead,
+                                String instance,
+                                boolean incorrectFirst) {
     super(currentExerciseVPanel, service, feedback, null, controller, showTypeAhead, instance, incorrectFirst);
     sectionWidgetContainer = getSectionWidgetContainer();
     addHistoryListener();

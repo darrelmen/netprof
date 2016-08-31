@@ -45,6 +45,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.KeyStorage;
+import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -209,7 +210,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   /**
    * Pull state out of cache and re-populate correct, incorrect, and score history.
    *
-   * @see mitll.langtest.client.custom.PracticeHelper#getMyListLayout
+   * @see SimpleChapterNPFHelper#getMyListLayout
    */
   public void populateCorrectMap() {
     String value = sticky.getCorrect();

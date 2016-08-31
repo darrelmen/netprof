@@ -47,6 +47,7 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.NPExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.qc.QCNPFExercise;
+import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -81,20 +82,27 @@ public class NPFHelper implements RequiresResize {
   PagingExerciseList<CommonShell, CommonExercise> npfExerciseList = null;
   private final boolean showQC;
   DivWidget contentPanel;
+  ExerciseServiceAsync exerciseServiceAsync;
 
   /**
    * @param service
    * @param feedback
    * @param controller
    * @param showQC
+   * @param exerciseServiceAsync
    * @see mitll.langtest.client.custom.Navigation#Navigation
    * @see mitll.langtest.client.custom.ListManager#ListManager
    */
-  public NPFHelper(LangTestDatabaseAsync service, UserFeedback feedback, ExerciseController controller, boolean showQC) {
+  public NPFHelper(LangTestDatabaseAsync service,
+                   UserFeedback feedback,
+                   ExerciseController controller,
+                   boolean showQC,
+                   ExerciseServiceAsync exerciseServiceAsync) {
     this.service = service;
     this.feedback = feedback;
     this.controller = controller;
     this.showQC = showQC;
+    this.exerciseServiceAsync = exerciseServiceAsync;
   }
 
   /**
@@ -120,16 +128,16 @@ public class NPFHelper implements RequiresResize {
    */
   public void showNPF(UserList<CommonShell> ul, TabAndContent tabAndContent, String instanceName, boolean loadExercises,
                       HasID toSelect) {
-   // logger.info(getClass() + " : adding npf content instanceName = " + instanceName + " for list " + ul + " with " +ul.getExercises().size());
+    // logger.info(getClass() + " : adding npf content instanceName = " + instanceName + " for list " + ul + " with " +ul.getExercises().size());
 
     DivWidget content = tabAndContent.getContent();
     int widgetCount = content.getWidgetCount();
     if (!madeNPFContent || widgetCount == 0) {
       madeNPFContent = true;
-     // logger.info("\t: adding npf content instanceName = " + instanceName + " for list " + ul);
+      // logger.info("\t: adding npf content instanceName = " + instanceName + " for list " + ul);
       addNPFToContent(ul, content, instanceName, loadExercises, toSelect);
     } else {
-     // logger.info("\t: rememberAndLoadFirst instanceName = " + instanceName + " for list " + ul);
+      // logger.info("\t: rememberAndLoadFirst instanceName = " + instanceName + " for list " + ul);
       rememberAndLoadFirst(ul, toSelect);
     }
   }
@@ -241,8 +249,8 @@ public class NPFHelper implements RequiresResize {
     for (CommonShell ex : ul.getExercises()) {
       copy.add(ex);
     }
-    int id = toSelect == null ? -1: toSelect.getID();
-    npfExerciseList.rememberAndLoadFirst(copy,"", "", id);
+    int id = toSelect == null ? -1 : toSelect.getID();
+    npfExerciseList.rememberAndLoadFirst(copy, "", "", id);
     npfExerciseList.setWidth("270px");
     npfExerciseList.getElement().getStyle().setProperty("minWidth", "270px");
   }
@@ -254,7 +262,7 @@ public class NPFHelper implements RequiresResize {
    * @see #makeNPFExerciseList
    */
   PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(final Panel right, final String instanceName) {
-    return new NPExerciseList(right, service, feedback, controller,
+    return new NPExerciseList(right, exerciseServiceAsync, feedback, controller,
         true, instanceName, false) {
       @Override
       protected void onLastItem() {

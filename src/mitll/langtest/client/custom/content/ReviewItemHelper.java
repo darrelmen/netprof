@@ -46,6 +46,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.list.SelectionState;
+import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
@@ -74,14 +75,15 @@ public class ReviewItemHelper extends NPFHelper {
    * @param feedback
    * @param controller
    * @param predefinedContent
+   * @param exerciseServiceAsync
    * @see mitll.langtest.client.custom.Navigation#Navigation
    * @see mitll.langtest.client.custom.ListManager#ListManager
    */
   public ReviewItemHelper(final LangTestDatabaseAsync service, final UserFeedback feedback,
                           final ExerciseController controller,
-                          final ReloadableContainer predefinedContent
-  ) {
-    super(service, feedback, controller, true);
+                          final ReloadableContainer predefinedContent,
+                          ExerciseServiceAsync exerciseServiceAsync) {
+    super(service, feedback, controller, true, exerciseServiceAsync);
     this.itemMarker = null;
     this.predefinedContent = predefinedContent;
     if (predefinedContent == null) logger.warning("huh? predefinedContent is null");
@@ -119,8 +121,8 @@ public class ReviewItemHelper extends NPFHelper {
   private class ReviewFlexListLayout extends FlexListLayout<CommonShell, CommonExercise> {
     private final UserList<CommonShell> ul;
 
-    public ReviewFlexListLayout(UserList<CommonShell> ul) {
-      super(ReviewItemHelper.this.service, ReviewItemHelper.this.feedback, ReviewItemHelper.this.controller);
+    ReviewFlexListLayout(UserList<CommonShell> ul) {
+      super(ReviewItemHelper.this.service, ReviewItemHelper.this.feedback, ReviewItemHelper.this.controller, ReviewItemHelper.this.exerciseServiceAsync);
       this.ul = ul;
     }
 

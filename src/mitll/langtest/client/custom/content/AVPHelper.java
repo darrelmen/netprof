@@ -36,12 +36,14 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.bootstrap.ButtonGroupSectionWidget;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.flashcard.StatsFlashcardFactory;
 import mitll.langtest.client.list.NPExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -64,9 +66,10 @@ public class AVPHelper extends NPFHelper {
    * @param service
    * @param feedback
    * @param controller
+   * @param exerciseServiceAsync
    */
-  public AVPHelper(LangTestDatabaseAsync service, UserFeedback feedback, ExerciseController controller) {
-    super(service, feedback, controller, false);
+  public AVPHelper(LangTestDatabaseAsync service, UserFeedback feedback, ExerciseController controller, ExerciseServiceAsync exerciseServiceAsync) {
+    super(service, feedback, controller, false, exerciseServiceAsync);
   }
 
   /**
@@ -85,6 +88,7 @@ public class AVPHelper extends NPFHelper {
   }
 
   /**
+   * TODO : parameterize exercise list by different SectionWidget
    * @see mitll.langtest.client.custom.content.NPFHelper#makeNPFExerciseList(com.google.gwt.user.client.ui.Panel, String)
    * @param right
    * @param instanceName
@@ -92,7 +96,7 @@ public class AVPHelper extends NPFHelper {
    */
   @Override
   PagingExerciseList<CommonShell,CommonExercise> makeExerciseList(final Panel right, final String instanceName) {
-    PagingExerciseList<CommonShell,CommonExercise> widgets = new NPExerciseList(right, service, feedback, controller,
+    PagingExerciseList<CommonShell,CommonExercise> widgets = new NPExerciseList<ButtonGroupSectionWidget>(right, exerciseServiceAsync, feedback, controller,
         true, instanceName, true) {
       @Override
       protected void onLastItem() {

@@ -33,12 +33,15 @@
 package mitll.langtest.client.amas;
 
 import com.github.gwtbootstrap.client.ui.Container;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootPanel;
 import mitll.langtest.client.InitialUI;
 import mitll.langtest.client.LangTest;
+import mitll.langtest.client.services.ExerciseService;
+import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserManager;
 
 import java.util.logging.Logger;
@@ -51,8 +54,9 @@ import java.util.logging.Logger;
  * @since 12/21/15.
  */
 public class AMASInitialUI extends InitialUI {
-  private final Logger logger = Logger.getLogger("AMASInitialUI");
+//  private final Logger logger = Logger.getLogger("AMASInitialUI");
   protected AutoCRTChapterNPFHelper learnHelper;
+  private final ExerciseServiceAsync exerciseServiceAsync = GWT.create(ExerciseService.class);
 
   public AMASInitialUI(LangTest langTest, UserManager userManager) {
     super(langTest, userManager);
@@ -80,7 +84,7 @@ public class AMASInitialUI extends InitialUI {
      */
     contentRow.add(lifecycleSupport.getFlashRecordPanel());
     lifecycleSupport.recordingModeSelect();
-    learnHelper = new AutoCRTChapterNPFHelper(service, userFeedback, null, controller);
+    learnHelper = new AutoCRTChapterNPFHelper(service, userFeedback, null, controller, exerciseServiceAsync);
     learnHelper.addNPFToContent(contentRow, "");
   }
 

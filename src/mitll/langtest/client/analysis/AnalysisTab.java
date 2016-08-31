@@ -50,6 +50,7 @@ import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
+import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.WordScore;
 
@@ -70,7 +71,7 @@ public class AnalysisTab extends DivWidget {
   private static final String SOUNDS = "Sounds";
   private static final String SUBTITLE = "scores > 20";
   private boolean isNarrow = false;
-  final AnalysisServiceAsync service = GWT.create(AnalysisService.class);
+  private final AnalysisServiceAsync analysisServiceAsync = GWT.create(AnalysisService.class);
 
   enum TIME_HORIZON {WEEK, MONTH, ALL}
 
@@ -87,7 +88,9 @@ public class AnalysisTab extends DivWidget {
    * @see Navigation#showAnalysis()
    * @see UserContainer#gotClickOnItem
    */
-  public AnalysisTab(final LangTestDatabaseAsync service, final ExerciseController controller, final int userid,
+  public AnalysisTab(final ExerciseServiceAsync service,
+                     final ExerciseController controller,
+                     final int userid,
                      final ShowTab showTab, String userChosenID, int minRecordings, DivWidget overallBottom) {
     this.controller = controller;
     getElement().setId("AnalysisTab");
@@ -117,7 +120,7 @@ public class AnalysisTab extends DivWidget {
       add(bottom); // student
     }
 
-    getWordScores(this.service, controller, userid, showTab, analysisPlot, bottom, minRecordings);
+    getWordScores(this.analysisServiceAsync, controller, userid, showTab, analysisPlot, bottom, minRecordings);
   }
 
   /**
