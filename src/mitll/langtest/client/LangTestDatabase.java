@@ -82,25 +82,6 @@ public interface LangTestDatabase extends RemoteService {
 
   // answer DAO
 
-  /**
-   * @see mitll.langtest.client.scoring.PostAudioRecordButton#postAudioFile(String)
-   * @param base64EncodedString encoded audio bytes
-   * @param audioContext
-   * @param recordedWithFlash
-   * @param deviceType
-   * @param device
-   * @param doFlashcard
-   * @param recordInResults
-   * @param addToAudioTable
-   * @param allowAlternates
-   * @return
-   */
-  AudioAnswer writeAudioFile(String base64EncodedString,
-                             AudioContext audioContext,
-                             boolean recordedWithFlash, String deviceType, String device,
-                             boolean doFlashcard, boolean recordInResults,
-                             boolean addToAudioTable,
-                             boolean allowAlternates);
 
 
   /**
