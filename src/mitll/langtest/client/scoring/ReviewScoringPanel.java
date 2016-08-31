@@ -61,8 +61,9 @@ import java.util.logging.Logger;
  * @since 7/17/15.
  */
 public class ReviewScoringPanel extends ScoringAudioPanel {
-  private static final int WIDTH_MARGIN = 230;
   private final Logger logger = Logger.getLogger("ReviewScoringPanel");
+
+  private static final int WIDTH_MARGIN = 230;
   private HTML scoreInfo;
   private final Panel tablesContainer;
   private final Panel belowContainer;
@@ -112,7 +113,7 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
     if (scores == null) {
       logger.warning("scores is null?");
     } else {
-      List<String> keys = new ArrayList<String>(scores.keySet());
+      List<String> keys = new ArrayList<>(scores.keySet());
       Collections.sort(keys);
       for (String key : keys) {
         HTMLPanel row = new HTMLPanel("tr", "");
@@ -142,7 +143,7 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
     if (scores == null) {
       logger.warning("scores is null?");
     } else {
-      List<String> keys = new ArrayList<String>(scores.keySet());
+      List<String> keys = new ArrayList<>(scores.keySet());
       Collections.sort(keys);
 
       HTMLPanel row = new HTMLPanel("tr", "");
@@ -237,36 +238,47 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
 
           if (result.getWordScores() != null) {
             if (!result.getWordScores().isEmpty()) {
-              Table wordTable = makeTable("Word", "Score", result.getWordScores());
-
-              ScrollPanel child = new ScrollPanel(wordTable);
-              child.getElement().setId("TableScroller_Word");
-              child.setWidth("170px");
-              child.setHeight("200px");
-              tablesContainer.add(child);
+              addWordScoreTable(result);
             }
 
             if (!result.getPhoneScores().isEmpty()) {
-              Table phoneTable = makeTableHoriz("Phone", "Avg. Score", result.getPhoneScores());
-              phoneTable.getElement().getStyle().setMarginBottom(3, Style.Unit.PX);
-              phoneTable.addStyleName("topFiveMargin");
-
               DivWidget left = new DivWidget();
               left.addStyleName("floatLeft");
-              left.add(phoneTable);
+              left.add(getPhoneScoreTable(result));
 
               belowContainer.add(left);
-              Widget table2 = getWordTable(result);
-              table2.addStyleName("topFiveMargin");
-              table2.addStyleName("leftFiveMargin");
-              table2.addStyleName("floatLeft");
-              belowContainer.add(table2);
+              belowContainer.add(getStyledWordTable(result));
               belowContainer.add(new DivWidget());
             }
           }
         }
       }
     });
+  }
+
+  private Widget getStyledWordTable(PretestScore result) {
+    Widget table2 = getWordTable(result);
+    table2.addStyleName("topFiveMargin");
+    table2.addStyleName("leftFiveMargin");
+    table2.addStyleName("floatLeft");
+    return table2;
+  }
+
+  private Table getPhoneScoreTable(PretestScore result) {
+    Table phoneTable = makeTableHoriz("Phone", "Avg. Score", result.getPhoneScores());
+    phoneTable.getElement().getStyle().setMarginBottom(3, Style.Unit.PX);
+    phoneTable.addStyleName("topFiveMargin");
+    return phoneTable;
+  }
+
+  private void addWordScoreTable(PretestScore result) {
+    Table wordTable = makeTable("Word", "Score", result.getWordScores());
+
+    ScrollPanel child = new ScrollPanel(wordTable);
+    child.getElement().setId("TableScroller_Word");
+    child.setWidth("170px");
+    child.setHeight("200px");
+    tablesContainer.add(child);
   }
 
   /**
