@@ -120,15 +120,6 @@ public interface LangTestDatabase extends RemoteService {
                              boolean addToAudioTable,
                              boolean allowAlternates);
 
-  /**
-   * @see mitll.langtest.client.result.ResultManager#getTypeaheadUsing(String, TextBox)
-   * @param unitToValue
-   * @param userid
-   * @param flText
-   * @param which
-   * @return
-   */
-  Collection<String> getResultAlternatives(Map<String, String> unitToValue, int userid, String flText, String which);
 
   /**
    * @see LangTest#getImage(int, String, String, String, int, int, String, AsyncCallback)
@@ -206,26 +197,6 @@ public interface LangTestDatabase extends RemoteService {
 
   // Admin dialogs ---
 
-  /**
-   * @see ResultManager#showResults
-   * @return
-   */
-  int getNumResults();
-
-  /**
-   * @see ResultManager#createProvider(int, CellTable)
-   * @param start
-   * @param end
-   * @param sortInfo
-   * @param unitToValue
-   * @param userid
-   * @param flText
-   * @param req
-   * @return
-   */
-  ResultAndTotal getResults(int start, int end, String sortInfo,Map<String, String> unitToValue, int userid,
-                            String flText, int req);
-
 
   /**
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete
@@ -289,16 +260,6 @@ public interface LangTestDatabase extends RemoteService {
    * @param creatorID
    */
   void markState(int exid, STATE state, int creatorID);
-
-  /**
-   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#doAfterEditComplete(ListInterface, boolean)
-   * @param id
-   * @param state
-   * @param userID
-   */
-/*
-  void setExerciseState(String id, STATE state, int userID);
-*/
 
   /**
    * @see ReviewEditableExercise#confirmThenDeleteItem()
