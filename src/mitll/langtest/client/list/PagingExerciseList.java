@@ -44,11 +44,12 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PopupHelper;
+import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.*;
@@ -69,7 +70,7 @@ import java.util.*;
 public abstract class PagingExerciseList<T extends CommonShell, U extends Shell> extends ExerciseList<T, U> {
   //private final Logger logger = Logger.getLogger("PagingExerciseList");
 
-  public static final String SEARCH = "Search";
+  static final String SEARCH = "Search";
   private static final int TEN_SECONDS = 10 * 60 * 1000;
 
   protected final ExerciseController controller;
@@ -99,9 +100,14 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * @see mitll.langtest.client.custom.content.AVPHelper#makeExerciseList(Panel, String)
    * @see mitll.langtest.client.custom.content.NPFHelper#makeExerciseList(Panel, String)
    */
-  PagingExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
-                     ExercisePanelFactory<T, U> factory, ExerciseController controller,
-                     boolean showTypeAhead, String instance, boolean incorrectFirst) {
+  PagingExerciseList(Panel currentExerciseVPanel,
+                     ExerciseServiceAsync service,
+                     UserFeedback feedback,
+                     ExercisePanelFactory<T, U> factory,
+                     ExerciseController controller,
+                     boolean showTypeAhead,
+                     String instance,
+                     boolean incorrectFirst) {
     super(currentExerciseVPanel, service, feedback, factory, controller, instance, incorrectFirst);
     this.controller = controller;
     this.showTypeAhead = showTypeAhead;
@@ -537,7 +543,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
 
   /**
    * @param unrecorded
-   * @see mitll.langtest.client.custom.RecorderNPFHelper#getMyListLayout
+   * @see SimpleChapterNPFHelper#getMyListLayout
    */
   public void setUnrecorded(boolean unrecorded) {
     this.unrecorded = unrecorded;

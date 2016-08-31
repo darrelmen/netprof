@@ -36,6 +36,7 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -49,6 +50,8 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.NPExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.client.services.ExerciseService;
+import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.custom.UserExercise;
@@ -83,6 +86,8 @@ public class EditItem {
   private static final String EDIT_ITEM = "editItem";
 
   private final ExerciseController controller;
+  private final ExerciseServiceAsync exerciseServiceAsync = GWT.create(ExerciseService.class);
+
   private final LangTestDatabaseAsync service;
   private final UserManager userManager;
 
@@ -100,7 +105,8 @@ public class EditItem {
    * @param controller
    * @see mitll.langtest.client.custom.ListManager#ListManager
    */
-  public EditItem(final LangTestDatabaseAsync service, final UserManager userManager, ExerciseController controller,
+  public EditItem(final LangTestDatabaseAsync service,
+                  final UserManager userManager, ExerciseController controller,
                   ReloadableContainer predefinedContentList, UserFeedback feedback
   ) {
     this.controller = controller;
@@ -178,7 +184,7 @@ public class EditItem {
     }
 
     final PagingExerciseList<CommonShell, CommonExercise> exerciseList =
-        new NPExerciseList<ButtonGroupSectionWidget>(right, service, feedback, controller,
+        new NPExerciseList<ButtonGroupSectionWidget>(right, exerciseServiceAsync, feedback, controller,
             true, instanceName, false) {
           @Override
           protected void onLastItem() {

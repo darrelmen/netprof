@@ -46,6 +46,7 @@ import mitll.langtest.client.custom.dialog.EditItem;
 import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.ExerciseListWrapper;
@@ -74,7 +75,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   boolean incorrectFirstOrder = false;
 
   protected SimplePanel innerContainer;
-  protected final LangTestDatabaseAsync service;
+  protected final ExerciseServiceAsync service;
   private final UserFeedback feedback;
   private ExercisePanelFactory<T, U> factory;
   private final ExerciseController controller;
@@ -101,7 +102,9 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @param instance
    * @seex mitll.langtest.client.LangTest#makeExerciseList
    */
-  ExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
+  ExerciseList(Panel currentExerciseVPanel,
+               ExerciseServiceAsync service,
+               UserFeedback feedback,
                ExercisePanelFactory<T, U> factory,
                ExerciseController controller,
                String instance, boolean incorrectFirst) {
