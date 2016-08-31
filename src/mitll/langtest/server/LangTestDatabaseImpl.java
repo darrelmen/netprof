@@ -36,7 +36,6 @@ import audio.image.ImageType;
 import audio.imagewriter.SimpleImageWriter;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.client.scoring.AudioPanel;
@@ -45,26 +44,20 @@ import mitll.langtest.server.amas.QuizCorrect;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
-import mitll.langtest.server.audio.PathWriter;
 import mitll.langtest.server.autocrt.AutoCRT;
-import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.result.Result;
-import mitll.langtest.server.database.security.DominoSessionException;
 import mitll.langtest.server.database.security.UserSecurityManager;
 import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.services.MyRemoteServiceServlet;
-import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.shared.ContextPractice;
 import mitll.langtest.shared.StartupInfo;
-import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.answer.Answer;
 import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
@@ -74,9 +67,7 @@ import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.PretestScore;
 import mitll.langtest.shared.user.SlimProject;
-import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickProject;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletContext;
@@ -100,27 +91,58 @@ import java.util.*;
 @SuppressWarnings("serial")
 public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements LangTestDatabase {
   private static final Logger logger = Logger.getLogger(LangTestDatabaseImpl.class);
+
   public static final String DATABASE_REFERENCE = "databaseReference";
 
+  private static final String WAV1 = "wav";
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
   private static final int MP3_LENGTH = MP3.length();
-
-  private static final String WAV1 = "wav";
-
-//  private DatabaseImpl db;
 
   /**
    */
   @Deprecated private AudioFileHelper audioFileHelper;
   private String relativeConfigDir;
   private String configDir;
-//  private ServerProperties serverProps;
-  private AudioConversion audioConversion;
-//  private PathHelper pathHelper;
- // private ExerciseTrie<AmasExerciseImpl> amasFullTrie = null;
+  //private AudioConversion audioConversion;
   private static final boolean DEBUG = false;
-//  private UserSecurityManager securityManager;
+
+
+  private String startupMessage = "";
+
+  /**
+   * Reco test option lets you run through and score all the reference audio -- if you want to see model performance
+   */
+  @Override
+  public void init() {
+    try {
+      this.pathHelper = new PathHelper(getServletContext());
+      readProperties(getServletContext());
+      setInstallPath(db);
+      if (serverProps.isAMAS()) {
+        audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, this, null);
+      }
+    } catch (Exception e) {
+      startupMessage = e.getMessage();
+      logger.error("Got " + e, e);
+    }
+
+    try {
+      db.preloadContextPractice();
+      getUserListManager().setStateOnExercises();
+      db.doReport(serverProps, getServletContext().getRealPath(""), getMailSupport(), pathHelper);
+    } catch (Exception e) {
+      logger.error("couldn't load database " + e, e);
+    }
+
+    try {
+//      this.refResultDecoder = new RefResultDecoder(db, serverProps, pathHelper, getAudioFileHelper());
+//      refResultDecoder.doRefDecode(getExercises(), relativeConfigDir);
+      if (serverProps.isAMAS()) getAudioFileHelper().makeAutoCRT(relativeConfigDir);
+    } catch (Exception e) {
+      logger.error("Got " + e, e);
+    }
+  }
 
   /**
    * @param request
@@ -141,29 +163,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       throw new ServletException("rethrow exception", eee);
     }
   }
-
-/*  @Override
-  public void logAndNotifyServerException(Exception e) {
-    logAndNotifyServerException(e, "");
-  }
-
-  @Override
-  public void logAndNotifyServerException(Exception e, String additionalMessage) {
-    String message1 = e == null ? "null_ex" : e.getMessage() == null ? "null_msg" : e.getMessage();
-    if (!message1.contains("Broken Pipe")) {
-      String prefix = additionalMessage.isEmpty() ? "" : additionalMessage + "\n";
-      String prefixedMessage = prefix + "for " + pathHelper.getInstallPath() +
-          (e != null ? " got " + "Server Exception : " + ExceptionUtils.getStackTrace(e) : "");
-      String subject = "Server Exception on " + pathHelper.getInstallPath();
-      sendEmail(subject, getInfo(prefixedMessage));
-
-      logger.debug(getInfo(prefixedMessage));
-    }
-  }*/
-
-/*  private void sendEmail(String subject, String prefixedMessage) {
-    getMailSupport().email(serverProps.getEmailAddress(), subject, prefixedMessage);
-  }*/
 
   /**
    * JUST FOR AMAS
@@ -244,42 +243,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
 //    }
   }*/
 
-  boolean didCheckLTS = false;
-
-  /**
-   * Called from the client:
-   *
-   * @return
-   * @see mitll.langtest.client.list.ListInterface#getExercises
-   */
-  private Collection<CommonExercise> getExercises() {
-    long then = System.currentTimeMillis();
-    Collection<CommonExercise> exercises = getExercisesForUser();
-    long now = System.currentTimeMillis();
-    if (now - then > 200) {
-      logger.info("getExercises took " + (now - then) + " millis to get the raw exercise list for " + getLanguage());
-    }
-    if (!didCheckLTS) {
-//      buildExerciseTrie();
-      AudioFileHelper audioFileHelper = getAudioFileHelper();
-
-      if (audioFileHelper == null) logger.error("no audio file helper for " + getProject());
-      else {
-        audioFileHelper.checkLTSAndCountPhones(exercises);
-        didCheckLTS = true;
-      }
-    }
-
-    now = System.currentTimeMillis();
-    if (now - then > 200) {
-      logger.info("took " + (now - then) + " millis to get the predef exercise list for " + getLanguage());
-    }
-    return exercises;
-  }
-
-  private Collection<CommonExercise> getExercisesForUser() {
-    return db.getExercises(getProjectID());
-  }
+  private Collection<CommonExercise> getExercisesForUser() {  return db.getExercises(getProjectID());  }
 
   public ContextPractice getContextPractice() {
     return db.getContextPractice();
@@ -299,11 +263,12 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
    * @seex #ensureMP3s(CommonExercise, String)
    * @see #writeAudioFile
    */
-  private boolean ensureMP3(String wavFile, String title, String artist) {
+/*  private boolean ensureMP3(String wavFile, String title, String artist) {
     return ensureMP3(wavFile, title, artist, pathHelper.getInstallPath());
-  }
+  }*/
   // int spew = 0;
 
+/*
   private boolean ensureMP3(String wavFile, String title, String artist, String parent) {
     if (wavFile != null) {
       if (!audioConversion.exists(wavFile, parent)) {
@@ -312,21 +277,26 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
         // }
         parent = configDir;
       }
+*/
 /*      if (!audioConversion.exists(wavFile, parent)) {// && wavFile.contains("1310")) {
         if (WARN_MISSING_FILE && spew++ < 10) {
           logger.error("ensureMP3 : can't find " + wavFile + " under " + parent + " for " + title + " " + artist);
         }
-      }*/
+      }*//*
+
 
       String s = audioConversion.ensureWriteMP3(wavFile, parent, false, title, artist);
       boolean isMissing = s.equals(AudioConversion.FILE_MISSING);
+*/
 /*      if (isMissing && wavFile.contains("1310")) {
         logger.error("ensureMP3 : can't find " + wavFile + " under " + parent + " for " + title + " " + artist);
-      }*/
+      }*//*
+
       return !isMissing;
     }
     return false;
   }
+*/
 
   /**
    * Get an image of desired dimensions for the audio file - only for Waveform and spectrogram.
@@ -493,7 +463,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     boolean hasModel = project.getProp(ServerProperties.MODELS_DIR) != null;
 
     Collection<CommonExercise> exercises = db.getExercises(project.id());
-    //  Map<String, String> properties = serverProps.getProperties();
 
     boolean isRTL = false;
     if (!exercises.isEmpty()) {
@@ -502,7 +471,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       // String rtl = properties.get("rtl");
       isRTL = direction == HasDirection.Direction.RTL;
       // logger.info("examined text and found it to be " + direction);
-
     }
 
     return new SlimProject(project.id(), project.name(), project.language(),
@@ -555,7 +523,9 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
         return new PretestScore();
       } else {
         String audioFilePath = result.getAnswer();
-        ensureMP3(audioFilePath, sentence, "" + result.getUserid());
+
+        // NOTE : actively avoid doing this -
+        //ensureMP3(audioFilePath, sentence, "" + result.getUserid());
         //logger.info("resultID " +resultID+ " temp dir " + tempDir.getAbsolutePath());
         asrScoreForAudio = getAudioFileHelper().getASRScoreForAudio(1,
             audioFilePath, sentence,
@@ -670,9 +640,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     db.getAnswerDAO().addRoundTrip(resultID, roundTrip);
   }
 
-  // Users ---------------------
-
-
   /**
    * @param exerciseID
    * @param field
@@ -705,17 +672,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   public void markState(int exid, STATE state, int creatorID) {
     getUserListManager().markState(exid, state, creatorID);
   }
-
-  /**
-   * @param id
-   * @param state
-   * @param userID
-   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#doAfterEditComplete(mitll.langtest.client.list.ListInterface, boolean)
-   */
-/*  @Override
-  public void setExerciseState(String id, STATE state, int userID) {
-    getUserListManager().markState(id, state, userID);
-  }*/
 
   /**
    * Can't check if it's valid if we don't have a model.
@@ -870,112 +826,14 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
    * @return
    * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser
    */
+/*
   private User getUserBy(int id) {
     return db.getUserDAO().getUserWhere(id);
   }
+*/
   // Results ---------------------
 
-  /**
-   * Record an answer entry in the database.<br></br>
-   * Write the posted data to a wav and an mp3 file (since all the browser audio works with mp3).
-   * <p>
-   * A side effect is to set the first state to UNSET if it was APPROVED
-   * and to set the second state (not really used right now) to RECORDED
-   * <p>
-   * <p>
-   * Wade has observed that audio normalization really messes up the ASR -- silence doesn't appear as silence after you multiply
-   * the signal.  Also, the user doesn't get feedback that their mic gain is too high/too low or that they
-   * are speaking too softly or too loudly
-   * <p>
-   * Client references below:
-   *
-   * @param base64EncodedString generated by flash on the client
-   * @param recordedWithFlash   mark if we recorded it using flash recorder or webrtc
-   * @param deviceType
-   * @param device
-   * @param doFlashcard         true if called from practice (flashcard) and we want to do decode and not align
-   * @param recordInResults     if true, record in results table -- only when recording in a learn or practice tab
-   * @param addToAudioTable     if true, add to audio table -- only when recording reference audio for an item.
-   * @param allowAlternates
-   * @return AudioAnswer object with information about the audio on the server, including if audio is valid (not too short, etc.)
-   * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording()
-   * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
-   */
-  @Override
-  public AudioAnswer writeAudioFile(String base64EncodedString,
-                                    AudioContext audioContext,
 
-                                    boolean recordedWithFlash, String deviceType, String device,
-
-                                    boolean doFlashcard,
-                                    boolean recordInResults,
-                                    boolean addToAudioTable,
-                                    boolean allowAlternates) {
-    int exerciseID = audioContext.getExid();
-
-    logger.info("writeAudioFile got request " + audioContext + " payload " + base64EncodedString.length());
-
-    boolean amas = serverProps.isAMAS();
-
-    CommonExercise commonExercise = amas ? null : db.getCustomOrPredefExercise(getProjectID(), exerciseID);
-    CommonShell exercise1 = amas ? db.getAMASExercise(exerciseID) : commonExercise;
-
-    if (exercise1 == null) {
-      logger.warn(getLanguage() + " : couldn't find exerciseID with id '" + exerciseID + "'");
-    }
-//		else {
-//			logger.info("allow alternates " + allowAlternates + " " +exerciseID +
-//					" exercise1 " + exercise1.getForeignLanguage() + " refs " + exercise1.getRefSentences());
-//		}
-
-    AnswerInfo.RecordingInfo recordingInfo = new AnswerInfo.RecordingInfo("", "", deviceType, device, recordedWithFlash);
-
-    AudioAnswer audioAnswer = amas ?
-        getAudioFileHelper().writeAMASAudioFile(base64EncodedString, db.getAMASExercise(exerciseID), audioContext, recordingInfo) :
-        getAudioFileHelper().writeAudioFile(base64EncodedString,
-            exercise1,
-            audioContext, recordingInfo,
-            recordInResults, doFlashcard, allowAlternates, addToAudioTable);
-
-    int user = audioContext.getUserid();
-    if (addToAudioTable && audioAnswer.isValid()) {
-      audioAnswer.setAudioAttribute(addToAudioTable(user, audioContext.getAudioType(), commonExercise, exerciseID, audioAnswer));
-    } //else {
-    // So Wade has observed that this really messes up the ASR -- silence doesn't appear as silence after you multiply
-    // the signal.  Also, the user doesn't get feedback that their mic gain is too high/too low or that they
-    // are speaking too softly or too loudly.
-
-    // normalizeLevel(audioAnswer);
-    // }
-
-    if (!audioAnswer.isValid() && audioAnswer.getDurationInMillis() == 0) {
-      logger.warn("huh? got zero length recording " + user + " " + exerciseID);
-      logEvent("audioRecording", "writeAudioFile", "" + exerciseID, "Writing audio - got zero duration!", user, "unknown", device);
-    } else {
-      ensureCompressedEquivalent(user, exercise1, audioAnswer);
-    }
-
-    return audioAnswer;
-  }
-
-  private void ensureCompressedEquivalent(int user, CommonShell exercise1, AudioAnswer audioAnswer) {
-    ensureCompressedAudio(user, exercise1, audioAnswer.getPath());
-  }
-
-  private void ensureCompressedAudio(int user, CommonShell exercise1, String path) {
-    String foreignLanguage = exercise1 == null ? "unknown" : exercise1.getForeignLanguage();
-    String userID = getUserID(user);
-    if (userID == null) {
-      logger.warn("ensureCompressedEquivalent huh? no user for " + user);
-    }
-
-    ensureMP3(path, foreignLanguage, userID);
-  }
-
-  private String getUserID(int user) {
-    User userBy = getUserBy(user);
-    return userBy == null ? "" + user : userBy.getUserID();
-  }
 
   /**
    * A low overhead way of doing alignment.
@@ -1005,90 +863,12 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     return audioAnswer;
   }
 
-  /**
-   * Remember this audio as reference audio for this exercise, and possibly clear the APRROVED (inspected) state
-   * on the exercise indicating it needs to be inspected again (we've added new audio).
-   * <p>
-   * Don't return a path to the normalized audio, since this doesn't let the recorder have feedback about how soft
-   * or loud they are : https://gh.ll.mit.edu/DLI-LTEA/Development/issues/601
-   *
-   * @param user        who recorded audio
-   * @param audioType   regular or slow
-   * @param exercise1   for which exercise - how could this be null?
-   * @param exerciseID  perhaps sometimes we want to override the exercise id?
-   * @param audioAnswer holds the path of the temporary recorded file
-   * @return AudioAttribute that represents the audio that has been added to the exercise
-   * @see #writeAudioFile
-   */
-  private AudioAttribute addToAudioTable(int user,
-                                         AudioType audioType,
-                                         CommonExercise exercise1,
-                                         int exerciseID,
-                                         AudioAnswer audioAnswer) {
-    int idToUse = exercise1 == null ? exerciseID : exercise1.getID();
-    int projid = exercise1 == null ? -1 : exercise1.getProjectID();
-    String audioTranscript = getAudioTranscript(audioType, exercise1);
 
-    //  logger.debug("addToAudioTable user " + user + " ex " + exerciseID + " for " + audioType + " path before " + audioAnswer.getPath());
-
-    String permanentAudioPath = new PathWriter().
-        getPermanentAudioPath(pathHelper,
-            getAbsoluteFile(audioAnswer.getPath()),
-            getPermanentName(user, audioType),
-            true,
-            projid,
-            idToUse,
-            audioTranscript,
-            getArtist(user),
-            serverProps);
-
-    AudioAttribute audioAttribute =
-        db.getAudioDAO().addOrUpdate(user, idToUse, projid, audioType, permanentAudioPath, System.currentTimeMillis(),
-            audioAnswer.getDurationInMillis(), audioTranscript);
-    audioAnswer.setPath(audioAttribute.getAudioRef());
-    logger.debug("addToAudioTable user " + user + " ex " + exerciseID + " for " + audioType + " audio answer has " +
-        audioAttribute);
-
-    // what state should we mark recorded audio?
-    setExerciseState(idToUse, user, exercise1);
-    return audioAttribute;
-  }
 
   private File getAbsoluteFile(String path) {
     return pathHelper.getAbsoluteFile(path);
   }
 
-  private String getAudioTranscript(AudioType audioType, CommonExercise exercise1) {
-    return exercise1 == null ? "" :
-        audioType.equals(AudioAttribute.CONTEXT_AUDIO_TYPE) ? exercise1.getContext() : exercise1.getForeignLanguage();
-  }
-
-  private String getPermanentName(int user, AudioType audioType) {
-    return audioType.toString() + "_" + System.currentTimeMillis() + "_by_" + user + ".wav";
-  }
-
-  private String getArtist(int user) {
-    User userWhere = db.getUserDAO().getUserWhere(user);
-    return userWhere == null ? "" + user : userWhere.getUserID();
-  }
-
-  /**
-   * Only change APPROVED to UNSET.
-   *
-   * @param exercise
-   * @param user
-   * @param exercise1
-   */
-  private void setExerciseState(int exercise, int user, Shell exercise1) {
-    if (exercise1 != null) {
-      IUserListManager userListManager = getUserListManager();
-      STATE currentState = userListManager.getCurrentState(exercise);
-      if (currentState == STATE.APPROVED) { // clear approved on new audio -- we need to review it again
-        userListManager.setState(exercise1, STATE.UNSET, user);
-      }
-      userListManager.setSecondState(exercise1, STATE.RECORDED, user);
-    }
-  }
 
   /**
    * Filter out the default audio recordings...
@@ -1126,7 +906,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
         populateCollatorMap(allIDs, idToKey, collator, exercise);
       }
     } else {
-      Collection<CommonExercise> exercisesForState = (typeToSection == null || typeToSection.isEmpty()) ? getExercises() :
+      Collection<CommonExercise> exercisesForState = (typeToSection == null || typeToSection.isEmpty()) ? getExercisesForUser() :
           getSectionHelper().getExercisesForSelectionState(typeToSection);
 
       for (CommonExercise exercise : exercisesForState) {
@@ -1148,7 +928,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     idToKey.put(exercise.getID(), collationKey);
   }
 
-
   public void logMessage(String message) {
     if (message.length() > 10000) message = message.substring(0, 10000);
     String prefixedMessage = "for " + pathHelper.getInstallPath() + " from client " + message;
@@ -1158,29 +937,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       sendEmail("Javascript Exception", getInfo(prefixedMessage));
     }
   }
-/*
-  private String getInfo(String message) {
-    HttpServletRequest request = getThreadLocalRequest();
-    if (request != null) {
-      String remoteAddr = request.getHeader("X-FORWARDED-FOR");
-      if (remoteAddr == null || remoteAddr.isEmpty()) {
-        remoteAddr = request.getRemoteAddr();
-      }
-      String userAgent = request.getHeader("User-Agent");
-
-      String strongName = getPermutationStrongName();
-      String serverName = getThreadLocalRequest().getServerName();
-      String msgStr = message +
-          "\nremoteAddr : " + remoteAddr +
-          "\nuser agent : " + userAgent +
-          "\ngwt        : " + strongName +
-          "\nserver     : " + serverName;
-
-      return msgStr;
-    } else {
-      return "";
-    }
-  }*/
 
   private MailSupport getMailSupport() {
     return new MailSupport(serverProps.isDebugEMail(), serverProps.isTestEmail());
@@ -1199,41 +955,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     }
   }
 
-  private String startupMessage = "";
-
-  /**
-   * Reco test option lets you run through and score all the reference audio -- if you want to see model performance
-   */
-  @Override
-  public void init() {
-    try {
-      this.pathHelper = new PathHelper(getServletContext());
-      readProperties(getServletContext());
-      setInstallPath(db);
-      if (serverProps.isAMAS()) {
-        audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, this, null);
-      }
-    } catch (Exception e) {
-      startupMessage = e.getMessage();
-      logger.error("Got " + e, e);
-    }
-
-    try {
-      db.preloadContextPractice();
-      getUserListManager().setStateOnExercises();
-      db.doReport(serverProps, getServletContext().getRealPath(""), getMailSupport(), pathHelper);
-    } catch (Exception e) {
-      logger.error("couldn't load database " + e, e);
-    }
-
-    try {
-//      this.refResultDecoder = new RefResultDecoder(db, serverProps, pathHelper, getAudioFileHelper());
-//      refResultDecoder.doRefDecode(getExercises(), relativeConfigDir);
-      if (serverProps.isAMAS()) getAudioFileHelper().makeAutoCRT(relativeConfigDir);
-    } catch (Exception e) {
-      logger.error("Got " + e, e);
-    }
-  }
 
   private AudioFileHelper getAudioFileHelper() {
     if (serverProps.isAMAS()) {
@@ -1247,17 +968,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       return project.getAudioFileHelper();
     }
   }
-
-/*  private String getLanguage() {
-    Project project = getProject();
-    if (project == null) {
-      logger.error("no current project ");
-      return "";
-    } else {
-      SlickProject project1 = project.getProject();
-      return project1.language();
-    }
-  }*/
 
   /**
    * The config web.xml file.
@@ -1275,7 +985,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     pathHelper.setConfigDir(configDir);
 
     serverProps = new ServerProperties(servletContext, configDir);
-    audioConversion = new AudioConversion(serverProps);
+ //   audioConversion = new AudioConversion(serverProps);
     db = makeDatabaseImpl(serverProps.getH2Database());
     shareDB(servletContext);
     securityManager = new UserSecurityManager(db.getUserDAO());
@@ -1305,18 +1015,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     servletContext.setAttribute(DATABASE_REFERENCE, db);
   }
 
-  /**
-   * @paramx servletContext
-   * @see #getExercises
-   */
-/*  private void shareAudioFileHelper(ServletContext servletContext) {
-    Object databaseReference = servletContext.getAttribute(AUDIO_FILE_HELPER_REFERENCE);
-    if (databaseReference != null) {
-      logger.debug("hmm... found existing reference " + databaseReference);
-    }
-
-    servletContext.setAttribute(AUDIO_FILE_HELPER_REFERENCE, getAudioFileHelper());
-  }*/
   private DatabaseImpl makeDatabaseImpl(String h2DatabaseFile) {
     //logger.debug("word pairs " +  serverProps.isWordPairs() + " language " + serverProps.getLanguage() + " config dir " + relativeConfigDir);
     return new DatabaseImpl(configDir, relativeConfigDir, h2DatabaseFile, serverProps, pathHelper, true, this, false);
@@ -1342,45 +1040,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
         lessonPlanFile,
         mediaDir);
   }
-
-  /**
-   * Find user from session, then find the current project for the user.
-   *
-   * @return
-   */
-/*  private int getProjectID() {
-    try {
-      User loggedInUser = getSessionUser();
-      if (loggedInUser == null) {
-        logger.warn("getProjectID : no logged in user?");
-        return -1;
-      }
-      int i = db.getProjectIDForUser(loggedInUser);
-      return i;
-    } catch (DominoSessionException e) {
-      logger.error("Got " + e, e);
-      return -1;
-    }
-  }*/
-
-/*
-  private User getSessionUser() throws DominoSessionException {
-    HttpServletRequest threadLocalRequest = getThreadLocalRequest();
-    //   logger.info("getProjectID got request " + threadLocalRequest);
-    return securityManager.getLoggedInUser(threadLocalRequest);
-  }
-*/
-
-/*  private Project getProject() {
-    try {
-      User loggedInUser = getSessionUser();
-      if (loggedInUser == null) return null;
-      else return db.getProjectForUser(loggedInUser.getId());
-    } catch (DominoSessionException e) {
-      logger.error("got " + e, e);
-      return null;
-    }
-  }*/
 
   private String getLessonPlan() {
     return serverProps.getLessonPlan() == null ? null : configDir + File.separator + serverProps.getLessonPlan();
