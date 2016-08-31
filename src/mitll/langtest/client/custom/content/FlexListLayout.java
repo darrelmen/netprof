@@ -39,6 +39,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -59,6 +60,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
 
   final ExerciseController controller;
   final LangTestDatabaseAsync service;
+  final ExerciseServiceAsync exerciseServiceAsync;
   final UserFeedback feedback;
   private final boolean incorrectFirst;
 
@@ -66,15 +68,18 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
    * @param service
    * @param feedback
    * @param controller
+   * @param exerciseServiceAsync
    * @see ReviewItemHelper#doInternalLayout(mitll.langtest.shared.custom.UserList, String)
    */
-  public FlexListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
-                        ExerciseController controller) {
+  public FlexListLayout(LangTestDatabaseAsync service,
+                        UserFeedback feedback,
+                        ExerciseController controller,
+                        ExerciseServiceAsync exerciseServiceAsync) {
     this.controller = controller;
     this.service = service;
     this.feedback = feedback;
-    //  this.userManager = userManager;
     this.incorrectFirst = false;
+    this.exerciseServiceAsync = exerciseServiceAsync;
   }
 
   /**

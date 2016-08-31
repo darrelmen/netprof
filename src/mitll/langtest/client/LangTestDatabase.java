@@ -80,24 +80,6 @@ public interface LangTestDatabase extends RemoteService {
    */
   StartupInfo getStartupInfo();
 
-  /**
-   * @see mitll.langtest.client.list.PagingExerciseList#loadExercises(String, String, boolean)
-   * @param request
-   * @param <T>
-   * @return
-   */
-  <T extends CommonShell> ExerciseListWrapper<T> getExerciseIds(ExerciseListRequest request);
-
-  /**
-   * @see mitll.langtest.client.list.ExerciseList#askServerForExercise(int)
-   * @param <T>
-   * @param exid
-   * @param userID
-   * @param isFlashcardReq
-   * @return
-   */
-  <T extends Shell> T getExercise(int exid, int userID, boolean isFlashcardReq);
-
   // answer DAO
 
   /**

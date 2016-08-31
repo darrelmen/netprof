@@ -32,7 +32,6 @@
 
 package mitll.langtest.client.custom;
 
-import com.github.gwtbootstrap.client.ui.Container;
 import com.github.gwtbootstrap.client.ui.TabLink;
 import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
@@ -63,20 +62,23 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
-import mitll.langtest.client.services.ListService;
-import mitll.langtest.client.services.ListServiceAsync;
+import mitll.langtest.client.services.ExerciseService;
+import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.ContextPractice;
-import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.analysis.WordAndScore;
 import mitll.langtest.shared.analysis.WordScore;
+import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.user.User;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -90,7 +92,7 @@ import java.util.logging.Logger;
  */
 public class Navigation implements RequiresResize, ShowTab {
   private static final String STUDENT_ANALYSIS = "Student Analysis";
-  private static final String CUSTOM = "Custom";
+  //private static final String CUSTOM = "Custom";
   public static final String CLASSROOM = "classroom";
   private final Logger logger = Logger.getLogger("Navigation");
 
@@ -121,7 +123,9 @@ public class Navigation implements RequiresResize, ShowTab {
 
   private final ExerciseController controller;
   private final LangTestDatabaseAsync service;
-  private final ListServiceAsync listService = GWT.create(ListService.class);
+  // private final ListServiceAsync listService = GWT.create(ListService.class);
+  private final ExerciseServiceAsync exerciseServiceAsync = GWT.create(ExerciseService.class);
+
   private final UserManager userManager;
   private final SimpleChapterNPFHelper practiceHelper;
 
@@ -153,7 +157,7 @@ public class Navigation implements RequiresResize, ShowTab {
    * @param controller
    * @param feedback
    * @paramx predefinedContentList
-   * @see mitll.langtest.client.InitialUI#populateBelowHeader(Container, Panel)
+   * @see mitll.langtest.client.InitialUI#populateBelowHeader
    */
   public Navigation(final LangTestDatabaseAsync service, final UserManager userManager,
                     final ExerciseController controller, UserFeedback feedback) {
@@ -163,15 +167,12 @@ public class Navigation implements RequiresResize, ShowTab {
     this.feedback = feedback;
     storage = new KeyStorage(controller);
 
-    learnHelper = new SimpleChapterNPFHelper<CommonShell, CommonExercise>(service, feedback, userManager, controller, null
-    ) {
+    learnHelper = new SimpleChapterNPFHelper<CommonShell, CommonExercise>(service, feedback, userManager, controller, null,
+        exerciseServiceAsync) {
       @Override
-      protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(LangTestDatabaseAsync service,
-                                                                            UserFeedback feedback,
-                                                                            UserManager userManager,
-                                                                            ExerciseController controller,
+      protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(UserManager userManager,
                                                                             SimpleChapterNPFHelper<CommonShell, CommonExercise> outer) {
-        return new MyFlexListLayout<CommonShell, CommonExercise>(service, feedback, controller, outer) {
+        return new MyFlexListLayout<CommonShell, CommonExercise>(service, feedback, controller, outer, exerciseServiceAsync) {
           @Override
           protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow,
                                                                                      Panel currentExercisePanel,
@@ -199,10 +200,10 @@ public class Navigation implements RequiresResize, ShowTab {
       makeDialogWindow(service, controller);
     }
 
-    markDefectsHelper = new MarkDefectsChapterNPFHelper(service, feedback, userManager, controller, learnHelper);
-    practiceHelper = new PracticeHelper(service, feedback, userManager, controller);
-    recorderHelper = new RecorderNPFHelper(service, feedback, userManager, controller, true, learnHelper);
-    recordExampleHelper = new RecorderNPFHelper(service, feedback, userManager, controller, false, learnHelper);
+    markDefectsHelper = new MarkDefectsChapterNPFHelper(service, feedback, userManager, controller, learnHelper, exerciseServiceAsync);
+    practiceHelper = new PracticeHelper(service, feedback, userManager, controller, exerciseServiceAsync);
+    recorderHelper = new RecorderNPFHelper(service, feedback, userManager, controller, true, learnHelper, exerciseServiceAsync);
+    recordExampleHelper = new RecorderNPFHelper(service, feedback, userManager, controller, false, learnHelper, exerciseServiceAsync);
   }
 
   public boolean isRTL() {
@@ -236,13 +237,13 @@ public class Navigation implements RequiresResize, ShowTab {
    *
    * @return
    * @see #getTabPanel
-   * @see mitll.langtest.client.InitialUI#populateBelowHeader(Container, Panel)
+   * @see mitll.langtest.client.InitialUI#populateBelowHeader
    */
   public Widget getTabPanel() {
     tabPanel = new TabPanel();
     tabPanel.getElement().getStyle().setMarginTop(-8, Style.Unit.PX);
     tabPanel.getElement().setId("tabPanel");
-    this.listManager = new ListManager(service, userManager, controller, feedback, tabPanel, learnHelper);
+    this.listManager = new ListManager(service, userManager, controller, feedback, tabPanel, learnHelper, exerciseServiceAsync);
 
     // so we can know when chapters is revealed and tell it to update it's lists
     tabPanel.addShowHandler(new TabPanel.ShowEvent.Handler() {
@@ -395,7 +396,7 @@ public class Navigation implements RequiresResize, ShowTab {
 
     analysis.getContent().clear();
     ShowTab showTab = this;
-    AnalysisTab w = new AnalysisTab(service, controller, getUser(), showTab, userManager.getUserID(), 1, null);
+    AnalysisTab w = new AnalysisTab(exerciseServiceAsync, controller, getUser(), showTab, userManager.getUserID(), 1, null);
     analysis.getContent().add(w);
   }
 
@@ -406,7 +407,7 @@ public class Navigation implements RequiresResize, ShowTab {
     learnHelper.showNPF(chapters, LEARN);
 
     studentAnalysis.getContent().clear();
-    studentAnalysis.getContent().add(new StudentAnalysis(service, controller, (ShowTab) this));
+    studentAnalysis.getContent().add(new StudentAnalysis(exerciseServiceAsync, controller, (ShowTab) this));
   }
 
   private void addStudyLists() {
@@ -491,7 +492,7 @@ public class Navigation implements RequiresResize, ShowTab {
   }
 
   private boolean permittedToRecord() {
-    return controller.getPermissions().contains(User.Permission.RECORD_AUDIO)    || controller.isAdmin();
+    return controller.getPermissions().contains(User.Permission.RECORD_AUDIO) || controller.isAdmin();
   }
 
   private void logEvent(TabAndContent yourStuff, String context) {
@@ -515,7 +516,7 @@ public class Navigation implements RequiresResize, ShowTab {
   public void showInitialState() {
     addTabs();
     if (noPrevClickedTab()) {   // no previous tab
-     if (false) logger.info("showInitialState show initial state for " + getUser() + " no previous tab selection");
+      if (false) logger.info("showInitialState show initial state for " + getUser() + " no previous tab selection");
 //      reallyShowInitialState();
       showDefaultInitialTab(true);
 
@@ -730,7 +731,7 @@ public class Navigation implements RequiresResize, ShowTab {
 
   @Override
   public void onResize() {
-   // logger.info("got onResize " + getClass().toString());
+    // logger.info("got onResize " + getClass().toString());
 
     learnHelper.onResize();
     recorderHelper.onResize();

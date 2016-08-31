@@ -50,6 +50,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.list.HistoryExerciseList;
 import mitll.langtest.client.list.SelectionState;
+import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
@@ -90,10 +91,13 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
    * @param instance
    * @param incorrectFirst
    */
-  SingleSelectExerciseList(Panel secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
+  SingleSelectExerciseList(Panel secondRow,
+                           Panel currentExerciseVPanel,
+                           ExerciseServiceAsync service,
                            UserFeedback feedback,
                            ExerciseController controller,
-                           String instance, boolean incorrectFirst) {
+                           String instance,
+                           boolean incorrectFirst) {
     super(currentExerciseVPanel, service, feedback, controller, true, instance, incorrectFirst);
 
     sectionPanel = new FluidContainer();
@@ -344,7 +348,6 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
   /**
    * @param toShow
    * @see SingleSelectExerciseList#gotEmptyExerciseList()
-   * @see ResponseExerciseList#quizCompleteDisplay
    */
   void showMessage(String toShow, boolean addStartOver) {
     createdPanel = new SimplePanel();
