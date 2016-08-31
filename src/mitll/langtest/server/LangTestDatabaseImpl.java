@@ -109,8 +109,6 @@ import java.util.*;
 public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTestDatabase, LogAndNotify {
   private static final Logger logger = Logger.getLogger(LangTestDatabaseImpl.class);
   public static final String DATABASE_REFERENCE = "databaseReference";
-//  @Deprecated
-//  public static final String AUDIO_FILE_HELPER_REFERENCE = "audioFileHelperReference";
 
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
@@ -127,10 +125,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private DatabaseImpl db;
 
   /**
-   * Put inside a Project
    */
-  @Deprecated
-  AudioFileHelper audioFileHelper;
+  @Deprecated private AudioFileHelper audioFileHelper;
   private String relativeConfigDir;
   private String configDir;
   private ServerProperties serverProps;
@@ -897,9 +893,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return (T) byID;
   }
 
+/*
   protected int getMostRecentProjectByUser(int id) {
     return db.getUserProjectDAO().mostRecentByUser(id);
   }
+*/
 
   /**
    * @param id
@@ -1013,7 +1011,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       if (audioFileHelper == null) logger.error("no audio file helper for " + getProject());
       else {
         audioFileHelper.checkLTSAndCountPhones(exercises);
-        //shareAudioFileHelper(getServletContext());
         didCheckLTS = true;
       }
     }
@@ -1035,7 +1032,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   @Override
   public void reloadExercises() {
-    logger.info("reloadExercises");
+    logger.info("reloadExercises --- !");
     db.reloadExercises(getProjectID());
   }
 
@@ -1050,7 +1047,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private boolean ensureMP3(String wavFile, String title, String artist) {
     return ensureMP3(wavFile, title, artist, pathHelper.getInstallPath());
   }
-
   // int spew = 0;
 
   private boolean ensureMP3(String wavFile, String title, String artist, String parent) {
@@ -1233,7 +1229,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * TODO FIX ME
+   * TODOx FIX ME
    *
    * @param project
    * @return
@@ -1483,93 +1479,19 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * Put the new item in the database,
-   * copy the audio under bestAudio
-   * assign the item to a user list
-   *
-   * @param userListID
-   * @param userExercise
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
-   */
-/*
-  public CommonExercise reallyCreateNewItem(long userListID, CommonExercise userExercise) {
-    //logger.debug("reallyCreateNewItem : made user exercise " + userExercise + " on list " + userListID);
-    getUserListManager().reallyCreateNewItem(userListID, userExercise, serverProps.getMediaDir());
-
-    for (AudioAttribute audioAttribute : userExercise.getAudioAttributes()) {
-//      logger.debug("\treallyCreateNewItem : update " + audioAttribute + " to " + userExercise.getID());
-      db.getAudioDAO().updateExerciseID(audioAttribute.getUniqueID(), userExercise.getID());
-    }
-    //  logger.debug("\treallyCreateNewItem : made user exercise " + userExercise + " on list " + userListID);
-
-    return userExercise;
-  }
-*/
-
-/*
-  @Override
-  public Collection<CommonExercise> reallyCreateNewItems(long creator, long userListID, String userExerciseText) {
-    String[] lines = userExerciseText.split("\n");
-    logger.info("got " + lines.length + " lines");
-    List<CommonExercise> newItems = new ArrayList<>();
-    UserList<CommonShell> userListByID = db.getUserListManager().getUserListByID(userListID, Collections.emptyList());
-    int n = userListByID.getExercises().size();
-    Set<String> currentKnownFL = new HashSet<>();
-    for (CommonShell shell : userListByID.getExercises()) currentKnownFL.add(shell.getForeignLanguage());
-    boolean onFirst = true;
-    boolean firstColIsEnglish = false;
-    for (String line : lines) {
-      String[] parts = line.split("\\t");
-//      logger.info("\tgot " + parts.length + " parts");
-      if (parts.length > 1) {
-        String fl = parts[0];
-        String english = parts[1];
-        if (onFirst && english.equalsIgnoreCase(getLanguage())) {
-          logger.info("reallyCreateNewItems skipping header line");
-          firstColIsEnglish = true;
-        } else {
-          if (firstColIsEnglish || (isValidForeignPhrase(english) && !isValidForeignPhrase(fl))) {
-            String temp = english;
-            english = fl;
-            fl = temp;
-            //logger.info("flip english '" +english+ "' to fl '" +fl+ "'");
-          }
-          UserExercise newItem = new UserExercise(-1, UserExercise.CUSTOM_PREFIX + "_" + (n++), (int) creator, english, fl, "", getProjectID());
-          newItems.add(newItem);
-          logger.info("reallyCreateNewItems new " + newItem);
-        }
-      }
-      onFirst = false;
-    }
-
-    List<CommonExercise> actualItems = new ArrayList<>();
-    for (CommonExercise candidate : newItems) {
-      String foreignLanguage = candidate.getForeignLanguage();
-      if (!currentKnownFL.contains(foreignLanguage)) {
-        if (isValidForeignPhrase(foreignLanguage)) {
-          getUserListManager().reallyCreateNewItem(userListID, candidate, serverProps.getMediaDir());
-          actualItems.add(candidate);
-        } else {
-          logger.info("item #" + candidate.getID() + " '" + candidate.getForeignLanguage() + "' is invalid");
-        }
-      }
-    }
-    logger.info("Returning " + actualItems.size() + "/" + lines.length);
-    return actualItems;
-  }
-*/
-
-  /**
    * @param exercise
    * @return
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#duplicateExercise
    */
   //@Override
+/*
   public CommonExercise duplicateExercise(CommonExercise exercise) {
     return db.duplicateExercise(exercise);
   }
+*/
 
   /**
+   * TODO : maybe fully support this
    * @param id
    * @return
    * @seex ReviewEditableExercise#confirmThenDeleteItem
@@ -1690,337 +1612,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return db.getUserDAO().getUserWhere(id);
   }
   // Results ---------------------
-
-  /**
-   * TODO : consider doing offset/limit on database query.
-   * TODO : super expensive on long lists
-   * <p>
-   * Sometimes we type faster than we can respond, so we can throw away stale requests.
-   * <p>
-   * Filter results by search criteria -- unit->value map (e.g. chapter=5), userid, and foreign language text
-   *
-   * @param req      - to echo back -- so that if we get an old request we can discard it
-   * @param sortInfo - encoding which fields we want to sort, and ASC/DESC choice
-   * @return
-   * @see mitll.langtest.client.result.ResultManager#createProvider(int, com.google.gwt.user.cellview.client.CellTable)
-   */
-  @Override
-  public ResultAndTotal getResults(int start, int end, String sortInfo, Map<String, String> unitToValue, int userid,
-                                   String flText, int req) {
-    List<MonitorResult> results = getResults(unitToValue, userid, flText);
-    if (!results.isEmpty()) {
-      Comparator<MonitorResult> comparator = results.get(0).getComparator(Arrays.asList(sortInfo.split(",")));
-      try {
-        Collections.sort(results, comparator);
-      } catch (Exception e) {
-        logger.error("Doing " + sortInfo + " " + unitToValue + " " + userid + " " + flText + " " + start + "-" + end +
-            " Got " + e, e);
-      }
-    }
-    int n = results.size();
-    int min = Math.min(end, n);
-    if (start > min) {
-      logger.debug("original req from " + start + " to " + end);
-      start = 0;
-    }
-    List<MonitorResult> resultList = results.subList(start, min);
-    logger.info("getResults ensure compressed audio for " + resultList.size() + " items.");
-    int projectID = getProjectID();
-    for (MonitorResult result : resultList) {
-      ensureCompressedAudio(result.getUserid(), db.getCustomOrPredefExercise(projectID, result.getExID()), result.getAnswer());
-    }
-    return new ResultAndTotal(new ArrayList<>(resultList), n, req);
-  }
-
-  @Override
-  public int getNumResults() {
-    return db.getResultDAO().getNumResults(getProjectID());
-  }
-
-  /**
-   * TODO : don't fetch everything from the database if you don't have to.
-   * Use offset and limit to restrict?
-   *
-   * @param unitToValue
-   * @param userid
-   * @param flText
-   * @return
-   * @see #getResults(int, int, String, java.util.Map, int, String, int)
-   */
-  private List<MonitorResult> getResults(Map<String, String> unitToValue, int userid, String flText) {
-    logger.debug("getResults : request " + unitToValue + " " + userid + " " + flText);
-    int projectID = getProjectID();
-
-    boolean isNumber = false;
-    try {
-      int i = Integer.parseInt(flText);
-      isNumber = true;
-    } catch (NumberFormatException e) {
-    }
-    if (isNumber) {
-      int i = Integer.parseInt(flText);
-
-      List<MonitorResult> monitorResultsByID = db.getMonitorResultsWithText(db.getResultDAO().getMonitorResultsByID(i));
-      logger.debug("getResults : request " + unitToValue + " " + userid + " " + flText + " returning " + monitorResultsByID.size() + " results...");
-      return monitorResultsByID;
-    }
-
-    boolean filterByUser = userid > -1;
-
-    Collection<MonitorResult> results = getMonitorResults();
-
-    Trie<MonitorResult> trie;
-
-    for (String type : db.getTypeOrder(projectID)) {
-      if (unitToValue.containsKey(type)) {
-
-        // logger.debug("getResults making trie for " + type);
-        // make trie from results
-        trie = new Trie<MonitorResult>();
-
-        trie.startMakingNodes();
-        for (MonitorResult result : results) {
-          String s = result.getUnitToValue().get(type);
-          if (s != null) {
-            trie.addEntryToTrie(new ResultWrapper(s, result));
-          }
-        }
-        trie.endMakingNodes();
-
-        results = trie.getMatchesLC(unitToValue.get(type));
-      }
-    }
-
-    if (filterByUser) { // asking for userid
-      // make trie from results
-      //      logger.debug("making trie for userid " + userid);
-
-      trie = new Trie<MonitorResult>();
-      trie.startMakingNodes();
-      for (MonitorResult result : results) {
-        trie.addEntryToTrie(new ResultWrapper(Long.toString(result.getUserid()), result));
-      }
-      trie.endMakingNodes();
-
-      results = trie.getMatchesLC(Long.toString(userid));
-    }
-
-    // must be asking for text
-    boolean filterByText = flText != null && !flText.isEmpty();
-    if (filterByText) { // asking for text
-      trie = new Trie<MonitorResult>();
-      trie.startMakingNodes();
-      //     logger.debug("searching over " + results.size());
-      for (MonitorResult result : results) {
-        String foreignText = result.getForeignText();
-        if (foreignText != null) {
-          trie.addEntryToTrie(new ResultWrapper(foreignText.trim(), result));
-        }
-      }
-      trie.endMakingNodes();
-
-      results = trie.getMatchesLC(flText);
-    }
-    logger.debug("getResults : request " + unitToValue + " " + userid + " " + flText + " returning " + results.size() + " results...");
-    return new ArrayList<>(results);
-  }
-
-  private Collection<MonitorResult> getMonitorResults() {
-    return db.getMonitorResults(getProjectID());
-  }
-
-  /**
-   * Respond to type ahead.
-   *
-   * @param unitToValue
-   * @param userid
-   * @param flText
-   * @param which
-   * @return
-   * @see mitll.langtest.client.result.ResultManager#getTypeaheadUsing
-   */
-  @Override
-  public Collection<String> getResultAlternatives(Map<String, String> unitToValue,
-                                                  int userid,
-                                                  String flText,
-                                                  String which) {
-    Collection<MonitorResult> results = getMonitorResults();
-
-    logger.debug("getResultAlternatives request " + unitToValue + " userid=" + userid + " fl '" + flText + "' :'" + which + "'");
-
-    Collection<String> matches = new TreeSet<>();
-    Trie<MonitorResult> trie;
-
-    for (String type : db.getTypeOrder(getProjectID())) {
-      if (unitToValue.containsKey(type)) {
-
-        //    logger.debug("getResultAlternatives making trie for " + type);
-        // make trie from results
-        trie = new Trie<MonitorResult>();
-
-        trie.startMakingNodes();
-        for (MonitorResult result : results) {
-          String s = result.getUnitToValue().get(type);
-          if (s != null) {
-            trie.addEntryToTrie(new ResultWrapper(s, result));
-          }
-        }
-        trie.endMakingNodes();
-
-        String s = unitToValue.get(type);
-        Collection<MonitorResult> matchesLC = trie.getMatchesLC(s);
-
-        // stop!
-        if (which.equals(type)) {
-          //        logger.debug("\tmatch for " + type);
-
-          boolean allInt = true;
-          for (MonitorResult result : matchesLC) {
-            String e = result.getUnitToValue().get(type);
-            if (allInt) {
-              try {
-                Integer.parseInt(e);
-              } catch (NumberFormatException e1) {
-                allInt = false;
-              }
-            }
-            matches.add(e);
-          }
-
-          if (allInt) {
-            List<String> sorted = new ArrayList<String>(matches);
-            Collections.sort(sorted, new Comparator<String>() {
-              @Override
-              public int compare(String o1, String o2) {
-                return compareTwoMaybeInts(o1, o2);
-              }
-            });
-            return sorted;
-          }
-
-          //          logger.debug("returning " + matches);
-
-          return matches;
-        } else {
-          results = matchesLC;
-        }
-      }
-    }
-
-    if (userid > -1) { // asking for userid
-      // make trie from results
-
-      logger.debug("making trie for userid " + userid);
-
-      trie = new Trie<MonitorResult>();
-      trie.startMakingNodes();
-      for (MonitorResult result : results) {
-        trie.addEntryToTrie(new ResultWrapper(Long.toString(result.getUserid()), result));
-      }
-      trie.endMakingNodes();
-
-      Set<Integer> imatches = new TreeSet<>();
-      Collection<MonitorResult> matchesLC = trie.getMatchesLC(Long.toString(userid));
-
-      // stop!
-      if (which.equals(MonitorResult.USERID)) {
-        for (MonitorResult result : matchesLC) {
-          imatches.add(result.getUserid());
-        }
-        //logger.debug("returning " + imatches);
-
-        for (Integer m : imatches) matches.add(Long.toString(m));
-        matches = getLimitedSizeList(matches);
-        return matches;
-      } else {
-        results = matchesLC;
-      }
-    }
-
-    // must be asking for text
-    trie = new Trie<MonitorResult>();
-    trie.startMakingNodes();
-    //logger.debug("text searching over " + results.size());
-    for (MonitorResult result : results) {
-      trie.addEntryToTrie(new ResultWrapper(result.getForeignText(), result));
-      trie.addEntryToTrie(new ResultWrapper("" + result.getExID(), result));
-    }
-    trie.endMakingNodes();
-
-    Collection<MonitorResult> matchesLC = trie.getMatchesLC(flText);
-    //logger.debug("matchesLC for '" +flText+  "' " + matchesLC);
-
-    boolean isNumber = false;
-    try {
-      Integer.parseInt(flText);
-      isNumber = true;
-    } catch (NumberFormatException e) {
-    }
-
-    if (isNumber) {
-      for (MonitorResult result : matchesLC) {
-        matches.add("" + result.getExID());
-      }
-    } else {
-      for (MonitorResult result : matchesLC) {
-        matches.add(result.getForeignText().trim());
-      }
-    }
-    //logger.debug("returning text " + matches);
-
-    return getLimitedSizeList(matches);
-  }
-
-  private Collection<String> getLimitedSizeList(Collection<String> matches) {
-    if (matches.size() > MAX) {
-      List<String> matches2 = new ArrayList<String>();
-      int nn = 0;
-      for (String match : matches) {
-        if (nn++ < MAX) {
-          matches2.add(match);
-        }
-      }
-      matches = matches2;
-    }
-    return matches;
-  }
-
-  private int compareTwoMaybeInts(String id1, String id2) {
-    int comp;
-    try {   // this could be slow
-      int i = Integer.parseInt(id1);
-      int j = Integer.parseInt(id2);
-      comp = i - j;
-    } catch (NumberFormatException e) {
-      comp = id1.compareTo(id2);
-    }
-    return comp;
-  }
-
-  private static class ResultWrapper implements TextEntityValue<MonitorResult> {
-    private final String value;
-    private final MonitorResult e;
-
-    ResultWrapper(String value, MonitorResult e) {
-      this.value = value;
-      this.e = e;
-    }
-
-    @Override
-    public MonitorResult getValue() {
-      return e;
-    }
-
-    @Override
-    public String getNormalizedValue() {
-      return value;
-    }
-
-    public String toString() {
-      return "result " + e.getExID() + " : " + value;
-    }
-  }
-
 
   /**
    * Record an answer entry in the database.<br></br>
