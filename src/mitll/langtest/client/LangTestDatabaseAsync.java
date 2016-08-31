@@ -93,8 +93,6 @@ public interface LangTestDatabaseAsync {
 
   <T extends Shell> void getExercise(int exid, int userID, boolean isFlashcardReq, AsyncCallback<T> async);
 
-  void getResults(int start, int end, String sortInfo, Map<String, String> unitToValue, int userid, String flText,
-                  int req, AsyncCallback<ResultAndTotal> async);
 
 
   void logMessage(String message, AsyncCallback<Void> async);
@@ -142,18 +140,11 @@ public interface LangTestDatabaseAsync {
                     String identifier,
                     int reqid, String device, AsyncCallback<AudioAnswer> async);
 
-  void getNumResults(AsyncCallback<Integer> async);
 
-  void getResultAlternatives(Map<String, String> unitToValue,
-                             int userid,
-                             String flText,
-                             String which,
-                             AsyncCallback<Collection<String>> async);
 
   void addRoundTrip(int resultid, int roundTrip, AsyncCallback<Void> async);
 
   void getResultASRInfo(int resultID, int width, int height, AsyncCallback<PretestScore> async);
-
 
   void getASRScoreForAudioPhonemes(int reqid, long resultID, String testAudioFile, String sentence,
                                    int width, int height, boolean useScoreToColorBkg,
