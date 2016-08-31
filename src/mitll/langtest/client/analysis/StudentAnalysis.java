@@ -38,10 +38,10 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
+import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.analysis.UserInfo;
 
@@ -63,14 +63,14 @@ public class StudentAnalysis extends DivWidget {
   private static final String STUDENTS = "Students";
   private static final String OR_MORE_RECORDINGS = "5 or more recordings";
   private static final int STUDENT_WIDTH = 300;
-  private final AnalysisServiceAsync service = GWT.create(AnalysisService.class);
+  private final AnalysisServiceAsync analysisServiceAsync = GWT.create(AnalysisService.class);
 
-  public StudentAnalysis(final LangTestDatabaseAsync vanillaService, final ExerciseController controller,
+  public StudentAnalysis(final ExerciseServiceAsync vanillaService, final ExerciseController controller,
                          final ShowTab showTab) {
     String appTitle = controller.getProps().getAppTitle();
     final String selectedUserKey = getSelectedUserKey(controller, appTitle);
 
-    service.getUsersWithRecordings(new AsyncCallback<Collection<UserInfo>>() {
+    analysisServiceAsync.getUsersWithRecordings(new AsyncCallback<Collection<UserInfo>>() {
       @Override
       public void onFailure(Throwable throwable) {
         logger.warning("Got " + throwable);

@@ -53,6 +53,7 @@ import mitll.langtest.client.list.HistoryExerciseList;
 import mitll.langtest.client.list.NPExerciseList;
 import mitll.langtest.client.list.SectionWidgetContainer;
 import mitll.langtest.client.list.SelectionState;
+import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.project.ProjectStartupInfo;
@@ -100,10 +101,13 @@ public class FlexSectionExerciseList extends NPExerciseList<ButtonGroupSectionWi
    * @param incorrectFirst
    * @see NPFlexSectionExerciseList#NPFlexSectionExerciseList
    */
-  protected FlexSectionExerciseList(Panel secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
+  protected FlexSectionExerciseList(Panel secondRow,
+                                    Panel currentExerciseVPanel,
+                                    ExerciseServiceAsync service,
                                     UserFeedback feedback,
                                     ExerciseController controller,
-                                    String instance, boolean incorrectFirst) {
+                                    String instance,
+                                    boolean incorrectFirst) {
     super(currentExerciseVPanel, service, feedback, controller, true, instance, incorrectFirst);
 
     sectionPanel = new FluidContainer();

@@ -41,6 +41,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.flashcard.StatsFlashcardFactory;
 import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -59,14 +60,16 @@ import java.util.logging.Logger;
 class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
   private final Logger logger = Logger.getLogger("PracticeHelper");
 
-  //  private Navigation navigation;
   private StatsFlashcardFactory<CommonShell, CommonExercise> statsFlashcardFactory;
   private Widget outerBottomRow;
 
-  public PracticeHelper(//Navigation navigation,
-                        LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager, ExerciseController controller) {
-    super(service, feedback, userManager, controller, null);
-    // this.navigation = navigation;
+  public PracticeHelper(
+      LangTestDatabaseAsync service,
+      UserFeedback feedback,
+      UserManager userManager,
+      ExerciseController controller,
+      ExerciseServiceAsync exerciseServiceAsync) {
+    super(service, feedback, userManager, controller, null, exerciseServiceAsync);
   }
 
   @Override
@@ -85,10 +88,9 @@ class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise>
   }
 
   @Override
-  protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(LangTestDatabaseAsync service, UserFeedback feedback,
-                                                                        UserManager userManager, ExerciseController controller,
+  protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(UserManager userManager,
                                                                         SimpleChapterNPFHelper<CommonShell, CommonExercise> outer) {
-    return new MyFlexListLayout<CommonShell, CommonExercise>(service, feedback, controller, outer) {
+    return new MyFlexListLayout<CommonShell, CommonExercise>(service, feedback, controller, outer, exerciseServiceAsync) {
       final FlexListLayout outer = this;
 
       @Override

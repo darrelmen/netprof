@@ -92,6 +92,17 @@
         <url-pattern>/langtest/result-manager</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>exerciseService</servlet-name>
+        <servlet-class>mitll.langtest.server.services.ExerciseServiceImpl</servlet-class>
+        <load-on-startup>3</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>exerciseService</servlet-name>
+        <url-pattern>/langtest/exercise-manager</url-pattern>
+    </servlet-mapping>
+
     <!-- ==================================================================== -->
     <!-- End RPC mappings                                                     -->
     <!-- ==================================================================== -->

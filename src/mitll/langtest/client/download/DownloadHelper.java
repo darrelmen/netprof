@@ -59,17 +59,15 @@ import java.util.logging.Logger;
 
 public class DownloadHelper {
   private final Logger logger = Logger.getLogger("DownloadHelper");
-
   //  private static final String DOWNLOAD_SPREADSHEET = "Download spreadsheet and audio for selected sections.";
   private static final String DOWNLOAD_AUDIO = "downloadAudio";
-  private final EventRegistration eventRegistration;
+//  private final EventRegistration eventRegistration;
 
   private final FlexSectionExerciseList exerciseList;
 
   public DownloadHelper(EventRegistration eventRegistration,
                         FlexSectionExerciseList exerciseList) {
-    this.eventRegistration = eventRegistration;
-//    this.instance = instance;
+  //  this.eventRegistration = eventRegistration;
     this.exerciseList = exerciseList;
   }
 
