@@ -112,7 +112,6 @@ public class ResultManager extends PagerTable {
 
   private final EventRegistration eventRegistration;
   private final LangTestDatabaseAsync service;
-//  private final ResultServiceAsync resultServiceAsync;
   private final ResultServiceAsync resultServiceAsync = GWT.create(ResultService.class);
 
   private final AudioTag audioTag = new AudioTag();

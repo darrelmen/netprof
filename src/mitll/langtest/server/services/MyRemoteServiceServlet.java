@@ -34,13 +34,17 @@ package mitll.langtest.server.services;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import mitll.langtest.server.LangTestDatabaseImpl;
+import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.security.DominoSessionException;
 import mitll.langtest.server.database.security.UserSecurityManager;
+import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.user.User;
+import mitll.npdata.dao.SlickProject;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletContext;
@@ -48,12 +52,13 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 
 @SuppressWarnings("serial")
-public class MyRemoteServiceServlet extends RemoteServiceServlet {
+public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogAndNotify {
   private static final Logger logger = Logger.getLogger(MyRemoteServiceServlet.class);
 
   protected DatabaseImpl db;
   protected ServerProperties serverProps;
-  UserSecurityManager securityManager;
+  protected UserSecurityManager securityManager;
+  protected PathHelper pathHelper;
 
   private DatabaseImpl getDatabase() {
     DatabaseImpl db = null;
@@ -61,6 +66,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet {
     Object databaseReference = getServletContext().getAttribute(LangTestDatabaseImpl.DATABASE_REFERENCE);
     if (databaseReference != null) {
       db = (DatabaseImpl) databaseReference;
+      this.pathHelper = new PathHelper(getServletContext());
       // logger.debug("found existing database reference " + db + " under " +getServletContext());
     } else {
       logger.info("getDatabase : no existing db reference yet...");
@@ -97,7 +103,6 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet {
     serverProps = new ServerProperties(servletContext, configDir);
   }
 
-
   protected int getProjectID() {
     try {
       User loggedInUser = getSessionUser();
@@ -131,4 +136,66 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet {
    * @throws DominoSessionException
    */
   User getSessionUser() throws DominoSessionException { return securityManager.getLoggedInUser(getThreadLocalRequest()); }
+
+  protected String getLanguage() {
+    Project project = getProject();
+    if (project == null) {
+      logger.error("no current project ");
+      return "";
+    } else {
+      SlickProject project1 = project.getProject();
+      return project1.language();
+    }
+  }
+
+  @Override
+  public void logAndNotifyServerException(Exception e) {
+    logAndNotifyServerException(e, "");
+  }
+
+  @Override
+  public void logAndNotifyServerException(Exception e, String additionalMessage) {
+    String message1 = e == null ? "null_ex" : e.getMessage() == null ? "null_msg" : e.getMessage();
+    if (!message1.contains("Broken Pipe")) {
+      String prefix = additionalMessage.isEmpty() ? "" : additionalMessage + "\n";
+      String prefixedMessage = prefix + "for " + pathHelper.getInstallPath() +
+          (e != null ? " got " + "Server Exception : " + ExceptionUtils.getStackTrace(e) : "");
+      String subject = "Server Exception on " + pathHelper.getInstallPath();
+      sendEmail(subject, getInfo(prefixedMessage));
+
+      logger.debug(getInfo(prefixedMessage));
+    }
+  }
+
+  protected void sendEmail(String subject, String prefixedMessage) {
+    getMailSupport().email(serverProps.getEmailAddress(), subject, prefixedMessage);
+  }
+
+  private MailSupport getMailSupport() {
+    return new MailSupport(serverProps.isDebugEMail(), serverProps.isTestEmail());
+  }
+
+  protected String getInfo(String message) {
+    HttpServletRequest request = getThreadLocalRequest();
+    if (request != null) {
+      String remoteAddr = request.getHeader("X-FORWARDED-FOR");
+      if (remoteAddr == null || remoteAddr.isEmpty()) {
+        remoteAddr = request.getRemoteAddr();
+      }
+      String userAgent = request.getHeader("User-Agent");
+
+      String strongName = getPermutationStrongName();
+      String serverName = getThreadLocalRequest().getServerName();
+      String msgStr = message +
+          "\nremoteAddr : " + remoteAddr +
+          "\nuser agent : " + userAgent +
+          "\ngwt        : " + strongName +
+          "\nserver     : " + serverName;
+
+      return msgStr;
+    } else {
+      return "";
+    }
+  }
+
 }

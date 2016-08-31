@@ -30,7 +30,7 @@
  *
  */
 
-package mitll.langtest.server;
+package mitll.langtest.server.services;
 
 import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.database.exercise.SectionHelper;
@@ -43,14 +43,7 @@ import org.apache.log4j.Logger;
 
 import java.util.*;
 
-/**
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 11/13/13
- * Time: 1:19 AM 2/22/16.
- */
-class AmasSupport {
+public class AmasSupport {
   private static final Logger logger = Logger.getLogger(AmasSupport.class);
   //  private static final String WAV = ".wav";
 //  private static final String MP3 = ".mp3";
