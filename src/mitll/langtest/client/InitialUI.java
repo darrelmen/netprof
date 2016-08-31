@@ -83,6 +83,11 @@ import java.util.logging.Logger;
 public class InitialUI implements UILifecycle {
   private final Logger logger = Logger.getLogger("InitialUI");
 
+  /**
+   * Tamas doesn't like scrolling -- try to prevent it on laptops
+   */
+  private static final int ITEMS_IN_ROW = 5;
+
   protected static final String LOGIN = "Login";
 
   private static final String LANGTEST_IMAGES = LangTest.LANGTEST_IMAGES;
@@ -839,7 +844,7 @@ public class InitialUI implements UILifecycle {
 
     Panel current = new Thumbnails();
     flags.add(current);
-    int numInRow = 4;
+    int numInRow = ITEMS_IN_ROW;
     List<SlimProject> languages = new ArrayList<SlimProject>(result);
     Collections.sort(languages, new Comparator<SlimProject>() {
       @Override
