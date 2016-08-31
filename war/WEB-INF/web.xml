@@ -81,6 +81,17 @@
         <url-pattern>/langtest/list-manager</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>resultService</servlet-name>
+        <servlet-class>mitll.langtest.server.services.ResultServiceImpl</servlet-class>
+        <load-on-startup>3</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>resultService</servlet-name>
+        <url-pattern>/langtest/result-manager</url-pattern>
+    </servlet-mapping>
+
     <!-- ==================================================================== -->
     <!-- End RPC mappings                                                     -->
     <!-- ==================================================================== -->

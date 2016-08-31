@@ -57,6 +57,8 @@ import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.instrumentation.EventTable;
 import mitll.langtest.client.monitoring.MonitoringManager;
 import mitll.langtest.client.result.ResultManager;
+import mitll.langtest.client.services.ResultService;
+import mitll.langtest.client.services.ResultServiceAsync;
 import mitll.langtest.client.services.UserService;
 import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.client.user.*;
@@ -93,7 +95,7 @@ public class InitialUI implements UILifecycle {
   protected final LifecycleSupport lifecycleSupport;
   protected final ExerciseController controller;
   protected final UserFeedback userFeedback;
-  protected final UserNotification userNotification;
+  private final UserNotification userNotification;
   protected final PropertyHandler props;
 
   protected final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
@@ -102,7 +104,7 @@ public class InitialUI implements UILifecycle {
   private final Banner banner;
 
   protected Panel headerRow;
-  protected Breadcrumbs breadcrumbs;
+  private Breadcrumbs breadcrumbs;
   protected Panel contentRow;
   private Navigation navigation;
   private final BrowserCheck browserCheck = new BrowserCheck();
@@ -205,7 +207,6 @@ public class InitialUI implements UILifecycle {
     return headerRow;
   }
 
-
   /**
    * @return
    * @see #gotUser
@@ -283,7 +284,6 @@ public class InitialUI implements UILifecycle {
         public void onFailure(Throwable caught) {
           downloadFailedAlert();
         }
-
         public void onSuccess() {
           new UserTable(props, userManager.isAdmin()).showUsers(userService);
         }
@@ -297,7 +297,6 @@ public class InitialUI implements UILifecycle {
         public void onFailure(Throwable caught) {
           downloadFailedAlert();
         }
-
         public void onSuccess() {
           new EventTable().show(service);
         }
@@ -315,8 +314,13 @@ public class InitialUI implements UILifecycle {
         }
 
         public void onSuccess() {
-          ResultManager resultManager = new ResultManager(service, props.getNameForAnswer(),
-              lifecycleSupport.getProjectStartupInfo().getTypeOrder(), outer, controller);
+          ResultManager resultManager = new ResultManager(
+              service,
+             // resultService,
+              props.getNameForAnswer(),
+              lifecycleSupport.getProjectStartupInfo().getTypeOrder(),
+              outer,
+              controller);
           resultManager.showResults();
         }
       });
@@ -329,9 +333,8 @@ public class InitialUI implements UILifecycle {
         public void onFailure(Throwable caught) {
           downloadFailedAlert();
         }
-
         public void onSuccess() {
-          new MonitoringManager(/*service,*/ props).showResults();
+          new MonitoringManager(props).showResults();
         }
       });
     }
