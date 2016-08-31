@@ -30,52 +30,43 @@
  *
  */
 
-package mitll.langtest.client.exercise;
+package mitll.langtest.client.services;
 
-import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.client.user.UserFeedback;
+import com.github.gwtbootstrap.client.ui.TextBox;
+import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.client.rpc.RemoteService;
+import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import mitll.langtest.client.result.ResultManager;
+import mitll.langtest.client.scoring.AudioPanel;
+import mitll.langtest.client.scoring.ScoringAudioPanel;
+import mitll.langtest.shared.ResultAndTotal;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ExerciseListRequest;
+import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.Shell;
 
-/**
- * Created with IntelliJ IDEA.
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 7/9/12
- * Time: 6:18 PM
- * To change this template use File | Settings | File Templates.
- */
-public abstract class ExercisePanelFactory <T extends Shell, U extends Shell> {
-  protected final LangTestDatabaseAsync service;
-  protected final ExerciseController controller;
-  protected ListInterface<T> exerciseList;
+import java.util.Collection;
+import java.util.Map;
+
+@RemoteServiceRelativePath("exercise-manager")
+public interface ExerciseService extends RemoteService {
 
   /**
-   * @see mitll.langtest.client.custom.dialog.EditItem#setFactory
-   * @param service
-   * @param userFeedback
-   * @param controller
-   * @param exerciseList
-   */
-  public ExercisePanelFactory(final LangTestDatabaseAsync service,
-                              final UserFeedback userFeedback,
-                              final ExerciseController controller,
-                              ListInterface<T> exerciseList) {
-    this.service = service;
-    this.controller = controller;
-    this.exerciseList = exerciseList;
-  }
-
-  public void setExerciseList(ListInterface<T> exerciseList) {
-     this.exerciseList = exerciseList;
-  }
-
-  /**
-   * @see mitll.langtest.client.list.ExerciseList#makeExercisePanel
-   * @param e
+   * @see mitll.langtest.client.list.PagingExerciseList#loadExercises(String, String, boolean)
+   * @param request
+   * @param <T>
    * @return
    */
-  public abstract Panel getExercisePanel(U e);
+  <T extends CommonShell> ExerciseListWrapper<T> getExerciseIds(ExerciseListRequest request);
+
+  /**
+   * @see mitll.langtest.client.list.ExerciseList#askServerForExercise(int)
+   * @param <T>
+   * @param exid
+   * @param userID
+   * @param isFlashcardReq
+   * @return
+   */
+  <T extends Shell> T getExercise(int exid, int userID, boolean isFlashcardReq);
+
 }

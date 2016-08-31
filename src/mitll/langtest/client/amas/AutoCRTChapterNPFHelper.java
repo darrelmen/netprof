@@ -41,6 +41,7 @@ import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
@@ -61,11 +62,12 @@ public class AutoCRTChapterNPFHelper extends SimpleChapterNPFHelper {
    * @param feedback
    * @param userManager
    * @param controller
+   * @param exerciseServiceAsync
    * @see LangTest#populateBelowHeader
    */
   public AutoCRTChapterNPFHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager,
-                                 ExerciseController controller) {
-    super(service, feedback, userManager, controller, null);
+                                 ExerciseController controller, ExerciseServiceAsync exerciseServiceAsync) {
+    super(service, feedback, userManager, controller, null, exerciseServiceAsync);
   }
 
   /**
@@ -94,23 +96,21 @@ public class AutoCRTChapterNPFHelper extends SimpleChapterNPFHelper {
   }
 
   /**
-   * @param service
-   * @param feedback
+   * TODO : parameterize this
+   *
    * @param userManager
-   * @param controller
    * @param outer
    * @return
    * @see mitll.langtest.client.custom.SimpleChapterNPFHelper#SimpleChapterNPFHelper
    */
   @Override
-  protected FlexListLayout getMyListLayout(final LangTestDatabaseAsync service, final UserFeedback feedback,
-                                           UserManager userManager, final ExerciseController controller,
+  protected FlexListLayout getMyListLayout(UserManager userManager,
                                            SimpleChapterNPFHelper outer) {
-    return new MyFlexListLayout(service, feedback, controller, outer) {
+    return new MyFlexListLayout(service, feedback, controller, outer, exerciseServiceAsync) {
       @Override
       protected PagingExerciseList makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName,
                                                     boolean incorrectFirst) {
-        exerciseList = new ResponseExerciseList(topRow, currentExercisePanel, service, feedback, controller, instanceName);
+        exerciseList = new ResponseExerciseList(topRow, currentExercisePanel, exerciseServiceAsync, feedback, controller, instanceName);
         return exerciseList;
       }
 

@@ -53,19 +53,18 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.exercise.STATE;
-import mitll.langtest.shared.flashcard.QuizCorrectAndScore;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -91,8 +90,8 @@ public class ResponseExerciseList extends SingleSelectExerciseList {
 
   private static final String RESPONSE_TYPE = "responseType";
   private static final String RESPONSE_TYPE_DIVIDER = "###";
-  private QuizScorePanel quizPanel;
-  private static final String CONGRATULATIONS = "Congratulations!";
+//  private QuizScorePanel quizPanel;
+//  private static final String CONGRATULATIONS = "Congratulations!";
 
   /**
    * @param secondRow
@@ -100,9 +99,11 @@ public class ResponseExerciseList extends SingleSelectExerciseList {
    * @param service
    * @param feedback
    * @param controller
-   * @see mitll.langtest.client.amas.AutoCRTChapterNPFHelper#getMyListLayout
+   * @see SimpleChapterNPFHelper#getMyListLayout
    */
-  public ResponseExerciseList(Panel secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
+  public ResponseExerciseList(Panel secondRow,
+                              Panel currentExerciseVPanel,
+                              ExerciseServiceAsync service,
                               UserFeedback feedback,
                               final ExerciseController controller, String instance) {
     super(secondRow, currentExerciseVPanel, service, feedback, controller, instance, false);
@@ -117,7 +118,7 @@ public class ResponseExerciseList extends SingleSelectExerciseList {
    * @param responseType
    * @see #getChoice(ButtonGroup, String, IconType)
    * @see #getResponseWidget()
-   * @see #ResponseExerciseList(Panel, Panel, LangTestDatabaseAsync, UserFeedback, ExerciseController, String)
+   * @see #ResponseExerciseList
    */
   private void responseTypeChanged(String responseType) {
     setResponseType(responseType);
@@ -336,12 +337,15 @@ public class ResponseExerciseList extends SingleSelectExerciseList {
   }
 */
 
+/*
   private String getQuizStatus() {
     String quiz = "Quiz #" + getQuiz();
     String level = "ILR Level " + getILRLevel();
     return getTestType() + " " + quiz + " at " + level + " is complete.";
   }
+*/
 
+/*
   private String getQuiz() {
     Collection<String> quiz1 = getTypeToSelection().get("Quiz");
     return quiz1 == null ? "" : quiz1.iterator().next();
@@ -356,6 +360,7 @@ public class ResponseExerciseList extends SingleSelectExerciseList {
     Collection<String> strings = getTypeToSelection().get("ILR Level");
     return strings == null ? "" : strings.iterator().next();
   }
+*/
 
 /*  private void quizCompleteDisplay() {
     showMessage(getQuizStatus(), true);
@@ -392,10 +397,11 @@ public class ResponseExerciseList extends SingleSelectExerciseList {
 */
 
   public void setQuizPanel(QuizScorePanel quizPanel) {
-    this.quizPanel = quizPanel;
+
+    //this.quizPanel = quizPanel;
   }
 
-  private void getScores() {
+/*  private void getScores() {
     service.getScoresForUser(getTypeToSelection(), controller.getUser(), getIDs(), new AsyncCallback<QuizCorrectAndScore>() {
       @Override
       public void onFailure(Throwable throwable) {
@@ -408,7 +414,7 @@ public class ResponseExerciseList extends SingleSelectExerciseList {
         quizPanel.setVisible(true);
       }
     });
-  }
+  }*/
 
   private static class MySafeHtmlCell extends SafeHtmlCell {
     private final boolean consumeClicks;
