@@ -67,6 +67,8 @@ import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.client.recorder.MicPermission;
 import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
+import mitll.langtest.client.services.ResultService;
+import mitll.langtest.client.services.ResultServiceAsync;
 import mitll.langtest.client.services.UserService;
 import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.client.sound.SoundManagerAPI;
@@ -195,6 +197,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
   private final UserServiceAsync userService = GWT.create(UserService.class);
+
   private final BrowserCheck browserCheck = new BrowserCheck();
   private SoundManagerStatic soundManager;
   private PropertyHandler props;
