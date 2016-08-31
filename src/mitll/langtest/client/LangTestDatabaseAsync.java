@@ -56,18 +56,7 @@ import java.util.Map;
  * @since
  */
 public interface LangTestDatabaseAsync {
-  void writeAudioFile(String base64EncodedString,
-                      AudioContext audioContext,
 
-                      boolean recordedWithFlash,
-                      String deviceType,
-                      String device,
-                      boolean doFlashcard,
-                      boolean recordInResults,
-                      boolean addToAudioTable,
-                      boolean allowAlternates,
-
-                      AsyncCallback<AudioAnswer> async);
 
 
   void getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence, int width, int height,
