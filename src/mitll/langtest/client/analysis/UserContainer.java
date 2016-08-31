@@ -50,11 +50,11 @@ import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.view.client.SingleSelectionModel;
-import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
+import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.analysis.UserInfo;
 
@@ -92,16 +92,17 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
   private final ShowTab learnTab;
   private final DivWidget rightSide;
   private final DivWidget overallBottom;
-  private final LangTestDatabaseAsync service;
+  private final ExerciseServiceAsync exerciseServiceAsync;
   private final Long selectedUser;
   private final String selectedUserKey;
 
   /**
    * @param controller
    * @param rightSide
-   * @see StudentAnalysis#StudentAnalysis(ExerciseController, ShowTab)
+   * @see StudentAnalysis#StudentAnalysis
    */
-  UserContainer(LangTestDatabaseAsync service, ExerciseController controller,
+  UserContainer(ExerciseServiceAsync service,
+                ExerciseController controller,
                        DivWidget rightSide,
                        DivWidget overallBottom,
                        ShowTab learnTab,
@@ -110,7 +111,7 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
     super(controller);
     this.rightSide = rightSide;
     this.learnTab = learnTab;
-    this.service = service;
+    this.exerciseServiceAsync = service;
     this.overallBottom = overallBottom;
     this.selectedUserKey = selectedUserKey;
     this.selectedUser = getSelectedUser(selectedUserKey);
@@ -536,7 +537,7 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
     User user1 = user.getUser();
     int id = (int) user1.getId();
     overallBottom.clear();
-    AnalysisTab widgets = new AnalysisTab(service, controller, id, learnTab, user1.getUserID(), MIN_RECORDINGS, overallBottom);
+    AnalysisTab widgets = new AnalysisTab(exerciseServiceAsync, controller, id, learnTab, user1.getUserID(), MIN_RECORDINGS, overallBottom);
     rightSide.clear();
     rightSide.add(widgets);
     storeSelectedUser(user.getUser().getId());
