@@ -38,6 +38,7 @@ import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.Typeahead;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -58,6 +59,8 @@ import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.list.TypeAhead;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.ReviewScoringPanel;
+import mitll.langtest.client.services.ResultService;
+import mitll.langtest.client.services.ResultServiceAsync;
 import mitll.langtest.client.table.PagerTable;
 import mitll.langtest.shared.result.MonitorResult;
 import mitll.langtest.shared.ResultAndTotal;
@@ -109,6 +112,9 @@ public class ResultManager extends PagerTable {
 
   private final EventRegistration eventRegistration;
   private final LangTestDatabaseAsync service;
+//  private final ResultServiceAsync resultServiceAsync;
+  private final ResultServiceAsync resultServiceAsync = GWT.create(ResultService.class);
+
   private final AudioTag audioTag = new AudioTag();
   private final String nameForAnswer;
   private final Map<Column<?, ?>, String> colToField = new HashMap<Column<?, ?>, String>();
@@ -126,16 +132,20 @@ public class ResultManager extends PagerTable {
    * @param s
    * @param nameForAnswer
    * @param eventRegistration
-   * @see mitll.langtest.client.LangTest#onModuleLoad2
+   * @see mitll.langtest.client.InitialUI.ResultsClickHandler#onClick
    */
-  public ResultManager(LangTestDatabaseAsync s, String nameForAnswer,
-                       Collection<String> typeOrder, EventRegistration eventRegistration, ExerciseController controller) {
-    this.service = s;
+  public ResultManager(LangTestDatabaseAsync service,
+                //       ResultServiceAsync s,
+                       String nameForAnswer,
+                       Collection<String> typeOrder,
+                       EventRegistration eventRegistration,
+                       ExerciseController controller) {
+    this.service = service;
+   // this.resultServiceAsync = s;
     this.nameForAnswer = nameForAnswer;
     this.typeOrder = typeOrder;
     this.eventRegistration = eventRegistration;
     this.controller = controller;
-//    PlayAudioWidget.addPlayer();
   }
 
   /**
@@ -162,7 +172,7 @@ public class ResultManager extends PagerTable {
     final Panel dialogVPanel = new VerticalPanel();
     dialogVPanel.setWidth("100%");
 
-    service.getNumResults(new AsyncCallback<Integer>() {
+    resultServiceAsync.getNumResults(new AsyncCallback<Integer>() {
       @Override
       public void onFailure(Throwable caught) {
       }
@@ -246,7 +256,7 @@ public class ResultManager extends PagerTable {
       @Override
       public void requestSuggestions(final Request request, final Callback callback) {
         //logger.info(" requestSuggestions got request for " + type + " : " + unitToValue);
-        service.getResultAlternatives(getUnitToValue(), getUserID(), getText(), whichField, new AsyncCallback<Collection<String>>() {
+        resultServiceAsync.getResultAlternatives(getUnitToValue(), getUserID(), getText(), whichField, new AsyncCallback<Collection<String>>() {
           @Override
           public void onFailure(Throwable caught) {
           }
@@ -272,7 +282,7 @@ public class ResultManager extends PagerTable {
       public void requestSuggestions(final Request request, final Callback callback) {
         //logger.info(" requestSuggestions got request for userid " + getUnitToValue() + " " + getText() + " " + getUserID());
 
-        service.getResultAlternatives(getUnitToValue(), getUserID(), getText(), MonitorResult.USERID, new AsyncCallback<Collection<String>>() {
+        resultServiceAsync.getResultAlternatives(getUnitToValue(), getUserID(), getText(), MonitorResult.USERID, new AsyncCallback<Collection<String>>() {
           @Override
           public void onFailure(Throwable caught) {
           }
@@ -303,7 +313,7 @@ public class ResultManager extends PagerTable {
       public void requestSuggestions(final Request request, final Callback callback) {
         //logger.info(" requestSuggestions got request for txt " + getUnitToValue() + " " + getText() + " " + getUserID());
 
-        service.getResultAlternatives(getUnitToValue(), getUserID(), getText(), MonitorResult.TEXT, new AsyncCallback<Collection<String>>() {
+        resultServiceAsync.getResultAlternatives(getUnitToValue(), getUserID(), getText(), MonitorResult.TEXT, new AsyncCallback<Collection<String>>() {
           @Override
           public void onFailure(Throwable caught) {
           }
@@ -523,7 +533,7 @@ public class ResultManager extends PagerTable {
         // logger.info("getResults req " + unitToValue + " user " + userID + " text " + text + " val " + val);
         logger.info("createProvider got " + builder.toString());
 
-        service.getResults(start, end, builder.toString(), unitToValue, getUserID(), getText(), val,
+        resultServiceAsync.getResults(start, end, builder.toString(), unitToValue, getUserID(), getText(), val,
             new AsyncCallback<ResultAndTotal>() {
           @Override
           public void onFailure(Throwable caught) {
