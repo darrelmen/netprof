@@ -41,6 +41,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.WavCallback;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.services.AudioServiceAsync;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.scoring.AudioContext;
@@ -78,7 +79,8 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
    *
    * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#FlashcardRecordButtonPanel
    */
-  protected RecordButtonPanel(final LangTestDatabaseAsync service, final ExerciseController controller,
+  protected RecordButtonPanel(final LangTestDatabaseAsync service,
+                              final ExerciseController controller,
                               final int exerciseID,
                               final int index,
                               boolean doFlashcardAudio, AudioType audioType, String recordButtonTitle) {
