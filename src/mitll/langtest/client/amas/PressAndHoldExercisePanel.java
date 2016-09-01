@@ -236,7 +236,7 @@ public class PressAndHoldExercisePanel extends VerticalPanel implements AudioAns
                                             int qid,
                                             Map<String, Collection<String>> typeToSelection) {
     PressAndHoldExercisePanel widgets = this;
-    return new FlashcardRecordButtonPanel(widgets, service, controller, exercise, qid) {
+    return new FlashcardRecordButtonPanel(widgets, controller, exercise, qid) {
       @Override
       public Widget getRecordButton() {
         return super.getRealRecordButton();
