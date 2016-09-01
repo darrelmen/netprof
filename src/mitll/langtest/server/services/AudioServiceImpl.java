@@ -32,8 +32,12 @@
 
 package mitll.langtest.server.services;
 
+import audio.image.ImageType;
+import audio.imagewriter.SimpleImageWriter;
+import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.services.AudioService;
 import mitll.langtest.client.services.ExerciseService;
+import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.audio.PathWriter;
@@ -50,6 +54,7 @@ import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.user.User;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -66,15 +71,20 @@ import java.util.*;
 public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioService {
   private static final Logger logger = Logger.getLogger(AudioServiceImpl.class);
 
+  private static final String WAV1 = "wav";
+  private static final String WAV = ".wav";
+  private static final String MP3 = ".mp3";
+  private static final int MP3_LENGTH = MP3.length();
+
+  private static final boolean DEBUG = false;
+
   @Deprecated private AudioFileHelper audioFileHelper;
   private AudioConversion audioConversion;
   private String configDir;
 
   @Override
   public void init() {
-    findSharedDatabase();
-    ServletContext servletContext = getServletContext();
-    readProperties(servletContext);
+    super.init();
     audioConversion = new AudioConversion(serverProps);
     String relativeConfigDir = "config" + File.separator + getServletContext().getInitParameter("config");
     this.configDir = pathHelper.getInstallPath() + File.separator + relativeConfigDir;
@@ -361,4 +371,103 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 //    }
   }*/
 
+
+  /**
+   * Get an image of desired dimensions for the audio file - only for Waveform and spectrogram.
+   * Also returns the audio file duration -- so we can deal with the difference in length between mp3 and wav
+   * versions of the same audio file.  (The browser soundmanager plays mp3 and reports audio offsets into
+   * the mp3 file, but all the images are generated from the shorter wav file.)
+   * <p>
+   * TODO : Worrying about absolute vs relative path is maddening.  Must be a better way!
+   *
+   * @param reqid
+   * @param audioFile
+   * @param imageType
+   * @param width
+   * @param height
+   * @param exerciseID
+   * @return path to an image file
+   * @see mitll.langtest.client.scoring.AudioPanel#getImageURLForAudio
+   */
+  public ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height,
+                                            String exerciseID) {
+    if (audioFile.isEmpty()) logger.error("huh? audio file is empty for req id " + reqid + " exid " + exerciseID);
+
+    SimpleImageWriter imageWriter = new SimpleImageWriter();
+
+    String wavAudioFile = getWavAudioFile(audioFile);
+    File testFile = new File(wavAudioFile);
+    if (!testFile.exists() || testFile.length() == 0) {
+      if (testFile.length() == 0) logger.error("getImageForAudioFile : huh? " + wavAudioFile + " is empty???");
+      return new ImageResponse();
+    }
+    ImageType imageType1 =
+        imageType.equalsIgnoreCase(ImageType.WAVEFORM.toString()) ? ImageType.WAVEFORM :
+            imageType.equalsIgnoreCase(ImageType.SPECTROGRAM.toString()) ? ImageType.SPECTROGRAM : null;
+    if (imageType1 == null) {
+      logger.error("getImageForAudioFile '" + imageType + "' is unknown?");
+      return new ImageResponse(); // success = false!
+    }
+    String imageOutDir = pathHelper.getImageOutDir();
+
+    if (DEBUG) {
+      logger.debug("getImageForAudioFile : getting images (" + width + " x " + height + ") (" + reqid + ") type " + imageType +
+          " for " + wavAudioFile + "");
+    }
+
+    long then = System.currentTimeMillis();
+
+    String absolutePathToImage = imageWriter.writeImage(wavAudioFile, getAbsoluteFile(imageOutDir).getAbsolutePath(),
+        width, height, imageType1, exerciseID);
+    long now = System.currentTimeMillis();
+    long diff = now - then;
+    if (diff > 100) {
+      logger.debug("getImageForAudioFile : got images (" + width + " x " + height + ") (" + reqid + ") type " + imageType +
+          " for " + wavAudioFile + " took " + diff + " millis");
+    }
+    String installPath = pathHelper.getInstallPath();
+
+    String relativeImagePath = absolutePathToImage;
+    if (absolutePathToImage.startsWith(installPath)) {
+      relativeImagePath = absolutePathToImage.substring(installPath.length());
+    } else {
+      logger.error("getImageForAudioFile huh? file path " + absolutePathToImage + " doesn't start with " + installPath + "?");
+    }
+
+    relativeImagePath = pathHelper.ensureForwardSlashes(relativeImagePath);
+    if (relativeImagePath.startsWith("/")) {
+      relativeImagePath = relativeImagePath.substring(1);
+    }
+    String imageURL = relativeImagePath;
+    double duration = new AudioCheck(serverProps).getDurationInSeconds(wavAudioFile);
+    if (duration == 0) {
+      logger.error("huh? " + wavAudioFile + " has zero duration???");
+    }
+    /*    logger.debug("for " + wavAudioFile + " type " + imageType + " rel path is " + relativeImagePath +
+        " url " + imageURL + " duration " + duration);*/
+
+    return new ImageResponse(reqid, imageURL, duration);
+  }
+
+  private String getWavAudioFile(String audioFile) {
+    if (audioFile.endsWith("." + AudioTag.COMPRESSED_TYPE) || audioFile.endsWith(MP3)) {
+      String wavFile = removeSuffix(audioFile) + WAV;
+      File test = getAbsoluteFile(wavFile);
+      audioFile = test.exists() ? test.getAbsolutePath() : getAudioFileHelper().getWavForMP3(audioFile);
+    }
+
+    return ensureWAV(audioFile);
+  }
+
+  private String removeSuffix(String audioFile) {
+    return audioFile.substring(0, audioFile.length() - MP3_LENGTH);
+  }
+
+  private String ensureWAV(String audioFile) {
+    if (!audioFile.endsWith(WAV1)) {
+      return audioFile.substring(0, audioFile.length() - MP3_LENGTH) + WAV;
+    } else {
+      return audioFile;
+    }
+  }
 }
