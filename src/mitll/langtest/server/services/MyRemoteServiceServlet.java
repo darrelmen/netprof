@@ -38,6 +38,7 @@ import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioConversion;
+import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.exercise.SectionHelper;
@@ -63,10 +64,19 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
   protected UserSecurityManager securityManager;
   protected PathHelper pathHelper;
 
+  /**
+   * JUST FOR AMAS and interop with old h2 database...
+   */
+  @Deprecated protected AudioFileHelper audioFileHelper;
+
   @Override
   public void init() {
     findSharedDatabase();
     readProperties(getServletContext());
+
+    if (serverProps.isAMAS()) {
+      audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, this, null);
+    }
   }
 
   private DatabaseImpl getDatabase() {
@@ -209,5 +219,18 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
 
   protected SectionHelper<CommonExercise> getSectionHelper() {
     return db.getSectionHelper(getProjectID());
+  }
+
+  protected AudioFileHelper getAudioFileHelper() {
+    if (serverProps.isAMAS()) {
+      return audioFileHelper;
+    } else {
+      Project project = getProject();
+      if (project == null) {
+        logger.warn("getAudioFileHelper no current project???");
+        return null;
+      }
+      return project.getAudioFileHelper();
+    }
   }
 }
