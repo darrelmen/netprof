@@ -47,12 +47,6 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
 
   private static final int MAX = 30;
 
-  @Override
-  public void init() {
-    findSharedDatabase();
-    readProperties(getServletContext());
-  }
-
   /**
    * NOTE NOTE NOTE - we skip doing ensure ogg/mp3 on files for now - since this service will likely not be
    * on the server that has the audio.  And ideally this will already have been done.
