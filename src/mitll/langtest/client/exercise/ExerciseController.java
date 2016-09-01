@@ -38,6 +38,7 @@ import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.WavCallback;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.instrumentation.EventRegistration;
+import mitll.langtest.client.services.AudioServiceAsync;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.image.ImageResponse;
@@ -62,6 +63,7 @@ import java.util.Collection;
  */
 public interface ExerciseController extends EventRegistration {
   LangTestDatabaseAsync getService();
+  AudioServiceAsync getAudioService();
   UserFeedback getFeedback();
 
   String getBrowserInfo();

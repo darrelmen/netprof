@@ -34,13 +34,10 @@ package mitll.langtest.client.exercise;
 
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
-
-import java.util.logging.Logger;
 
 /**
 * Tells playAudioPanel to be enabled/disabled in response to recording states
@@ -66,7 +63,6 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
    * @param controller
    * @param widgets
    * @param recordAudioPanel
-   * @param service
    * @param index
    * @param recordInResults
    * @param playButtonSuffix
@@ -76,10 +72,13 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
   protected WaveformPostAudioRecordButton(int exerciseID,
                                           ExerciseController controller,
                                           Panel widgets,
-                                          RecordAudioPanel recordAudioPanel, LangTestDatabaseAsync service, int index,
-                                          boolean recordInResults, String playButtonSuffix, String stopButtonText,
+                                          RecordAudioPanel recordAudioPanel,
+                                          int index,
+                                          boolean recordInResults,
+                                          String playButtonSuffix,
+                                          String stopButtonText,
                                           AudioType audioType) {
-    super(exerciseID, controller, service, index, recordInResults, playButtonSuffix, stopButtonText);
+    super(exerciseID, controller, index, recordInResults, playButtonSuffix, stopButtonText);
     this.recordAudioPanel = recordAudioPanel;
     this.parentPanel = widgets;
     getElement().setId("WaveformPostAudioRecordButton_" + index);

@@ -289,7 +289,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
                                             String instance) {
    // Map<String, Collection<String>> typeToSelection = Collections.emptyMap();
     AudioAnswerListener exercisePanel = this;
-    return new FlashcardRecordButtonPanel(exercisePanel, service, controller, exerciseID, 1) {
+    return new FlashcardRecordButtonPanel(exercisePanel, controller, exerciseID, 1) {
       final FlashcardRecordButtonPanel outer = this;
 
       @Override

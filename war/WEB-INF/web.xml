@@ -103,6 +103,17 @@
         <url-pattern>/langtest/exercise-manager</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>audioService</servlet-name>
+        <servlet-class>mitll.langtest.server.services.AudioServiceImpl</servlet-class>
+        <load-on-startup>3</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>audioService</servlet-name>
+        <url-pattern>/langtest/audio-manager</url-pattern>
+    </servlet-mapping>
+
     <!-- ==================================================================== -->
     <!-- End RPC mappings                                                     -->
     <!-- ==================================================================== -->
