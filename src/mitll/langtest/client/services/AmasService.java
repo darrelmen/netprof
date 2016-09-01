@@ -32,52 +32,57 @@
 
 package mitll.langtest.client.services;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.github.gwtbootstrap.client.ui.Container;
+import com.github.gwtbootstrap.client.ui.Fieldset;
+import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import mitll.langtest.client.LangTest;
-import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.ExerciseListRequest;
-import mitll.langtest.shared.exercise.ExerciseListWrapper;
-import mitll.langtest.shared.exercise.Shell;
-import mitll.langtest.shared.image.ImageResponse;
+import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.InitialUI;
+import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.instrumentation.EventRegistration;
+import mitll.langtest.client.user.BasicDialog;
+import mitll.langtest.client.user.UserPassLogin;
+import mitll.langtest.shared.answer.Answer;
+import mitll.langtest.shared.flashcard.QuizCorrectAndScore;
 import mitll.langtest.shared.scoring.AudioContext;
+import mitll.langtest.shared.user.LoginResult;
+import mitll.langtest.shared.user.SignUpUser;
+import mitll.langtest.shared.user.User;
 
-@RemoteServiceRelativePath("audio-manager")
-public interface AudioService extends RemoteService {
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+@RemoteServiceRelativePath("amas-manager")
+public interface AmasService extends RemoteService {
 
   /**
-   * @see mitll.langtest.client.scoring.PostAudioRecordButton#postAudioFile(String)
-   * @param base64EncodedString encoded audio bytes
+   * AMAS ONLY
+   * @see mitll.langtest.client.amas.TextResponse#getScoreForGuess
    * @param audioContext
-   * @param recordedWithFlash
-   * @param deviceType
-   * @param device
-   * @param doFlashcard
-   * @param recordInResults
-   * @param addToAudioTable
-   * @param allowAlternates
+   * @param answer
+   * @param timeSpent
+   * @param typeToSection
    * @return
    */
-  AudioAnswer writeAudioFile(String base64EncodedString,
-                             AudioContext audioContext,
-                             boolean recordedWithFlash, String deviceType, String device,
-                             boolean doFlashcard, boolean recordInResults,
-                             boolean addToAudioTable,
-                             boolean allowAlternates);
-
+  Answer getScoreForAnswer(AudioContext audioContext, String answer, long timeSpent, Map<String, Collection<String>> typeToSection);
 
   /**
-   * @see LangTest#getImage(int, String, String, String, int, int, String, AsyncCallback)
-   * @param reqid
-   * @param audioFile
-   * @param imageType
-   * @param width
-   * @param height
-   * @param exerciseID
+   * AMAS ONLY
+   * @see mitll.langtest.client.amas.FeedbackRecordPanel.AnswerPanel#getChoice
+   * @param resultID
+   * @param correct
+   */
+  void addStudentAnswer(long resultID, boolean correct);
+
+  /**
+   * AMAS
+   * @see mitll.langtest.client.amas.FeedbackRecordPanel#getScores(boolean)
+   * @param typeToSection
+   * @param userID
+   * @param exids
    * @return
    */
-  ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, String exerciseID);
-
+  QuizCorrectAndScore getScoresForUser(Map<String, Collection<String>> typeToSection, int userID, Collection<Integer> exids);
 }

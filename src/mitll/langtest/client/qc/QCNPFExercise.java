@@ -280,7 +280,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
    */
   private void markAttentionLL(ListInterface listContainer, HasID completedExercise) {
     if (isCourseContent()) {
-      controller.getService().markState(completedExercise.getID(), STATE.ATTN_LL, controller.getUser(),
+      controller.getQCService().markState(completedExercise.getID(), STATE.ATTN_LL, controller.getUser(),
           new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -309,7 +309,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
     boolean allCorrect = incorrectFields.isEmpty();
     //System.out.println("markReviewed : exercise " + completedExercise.getOldID() + " instance " + instance + " allCorrect " + allCorrect);
 
-    controller.getService().markReviewed(completedExercise.getID(), allCorrect, controller.getUser(),
+    controller.getQCService().markReviewed(completedExercise.getID(), allCorrect, controller.getUser(),
         new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
@@ -561,7 +561,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
                           boolean isMale) {
     offButton.setEnabled(false);
 
-    controller.getService().markGender(audio, isMale, new AsyncCallback<Void>() {
+    controller.getQCService().markGender(audio, isMale, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
         offButton.setEnabled(true);
