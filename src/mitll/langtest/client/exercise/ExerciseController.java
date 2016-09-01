@@ -40,6 +40,7 @@ import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.services.AudioServiceAsync;
 import mitll.langtest.client.services.QCServiceAsync;
+import mitll.langtest.client.services.ScoringServiceAsync;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.image.ImageResponse;
@@ -64,8 +65,17 @@ import java.util.Collection;
  */
 public interface ExerciseController extends EventRegistration {
   LangTestDatabaseAsync getService();
+
   AudioServiceAsync getAudioService();
+
   QCServiceAsync getQCService();
+
+  /**
+   * TODO : do we really need to do this?
+   * @return
+   */
+  ScoringServiceAsync getScoringService();
+
   UserFeedback getFeedback();
 
   String getBrowserInfo();
