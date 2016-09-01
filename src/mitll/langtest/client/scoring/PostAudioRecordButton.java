@@ -35,7 +35,6 @@ package mitll.langtest.client.scoring;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PopupHelper;
 import mitll.langtest.client.WavCallback;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -66,13 +65,14 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   private int reqid = 0;
   private int exerciseID;
   protected final ExerciseController controller;
-  private final LangTestDatabaseAsync service;
+//  private final LangTestDatabaseAsync service;
+//  private final AudioServiceAsync audioServiceAsync;
+
   private final boolean recordInResults;
 
   /**
    * @param exerciseID
    * @param controller
-   * @param service
    * @param index
    * @param recordInResults
    * @param recordButtonTitle
@@ -81,7 +81,6 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
    */
   public PostAudioRecordButton(int exerciseID,
                                final ExerciseController controller,
-                               LangTestDatabaseAsync service,
                                int index,
                                boolean recordInResults,
                                String recordButtonTitle,
@@ -92,7 +91,8 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     this.index = index;
     this.exerciseID = exerciseID;
     this.controller = controller;
-    this.service = service;
+//    this.service = service;
+//    this.audioServiceAsync = audioService;
     this.recordInResults = recordInResults;
     getElement().setId("PostAudioRecordButton");
     controller.register(this, exerciseID);
@@ -136,7 +136,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
 
     logger.info("PostAudioRecordButton.postAudioFile : " + getAudioType() + " : " + audioContext);
 
-    service.writeAudioFile(
+    controller.getAudioService().writeAudioFile(
         base64EncodedWavFile,
         audioContext,
 
@@ -185,7 +185,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
 
 
   private void addRT(AudioAnswer result, int roundtrip) {
-    service.addRoundTrip(result.getResultID(), roundtrip, new AsyncCallback<Void>() {
+    controller.getService().addRoundTrip(result.getResultID(), roundtrip, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
       }
@@ -219,7 +219,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   }
 
   private void logMessage(String message) {
-    service.logMessage(message, new AsyncCallback<Void>() {
+    controller.getService().logMessage(message, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
       }
