@@ -43,7 +43,7 @@ import org.apache.log4j.Logger;
 
 import java.util.*;
 
-public class AmasSupport {
+class AmasSupport {
   private static final Logger logger = Logger.getLogger(AmasSupport.class);
   //  private static final String WAV = ".wav";
 //  private static final String MP3 = ".mp3";

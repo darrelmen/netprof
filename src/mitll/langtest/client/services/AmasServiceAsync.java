@@ -33,30 +33,25 @@
 package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.ExerciseListRequest;
-import mitll.langtest.shared.exercise.ExerciseListWrapper;
-import mitll.langtest.shared.exercise.Shell;
-import mitll.langtest.shared.image.ImageResponse;
+import mitll.langtest.client.user.UserManager;
+import mitll.langtest.shared.answer.Answer;
+import mitll.langtest.shared.flashcard.QuizCorrectAndScore;
 import mitll.langtest.shared.scoring.AudioContext;
+import mitll.langtest.shared.user.LoginResult;
+import mitll.langtest.shared.user.SignUpUser;
+import mitll.langtest.shared.user.User;
 
-public interface AudioServiceAsync {
-  void writeAudioFile(String base64EncodedString,
-                      AudioContext audioContext,
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
-                      boolean recordedWithFlash,
-                      String deviceType,
-                      String device,
-                      boolean doFlashcard,
-                      boolean recordInResults,
-                      boolean addToAudioTable,
-                      boolean allowAlternates,
+public interface AmasServiceAsync {
+  void getScoreForAnswer(AudioContext audioContext, String answer,
+                         long timeSpent, Map<String, Collection<String>> typeToSection, AsyncCallback<Answer> async);
 
-                      AsyncCallback<AudioAnswer> async);
+  void addStudentAnswer(long resultID, boolean correct, AsyncCallback<Void> async);
 
-  void getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height,
-                            String exerciseID,
-                            AsyncCallback<ImageResponse> async);
+  void getScoresForUser(Map<String, Collection<String>> typeToSection, int userID, Collection<Integer> exids,
+                        AsyncCallback<QuizCorrectAndScore> async);
 
 }

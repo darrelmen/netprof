@@ -33,19 +33,14 @@
 package mitll.langtest.client;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.shared.*;
-import mitll.langtest.shared.answer.Answer;
+import mitll.langtest.shared.ContextPractice;
+import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
-import mitll.langtest.shared.flashcard.QuizCorrectAndScore;
-import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.instrumentation.Event;
-import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -56,37 +51,22 @@ import java.util.Map;
  * @since
  */
 public interface LangTestDatabaseAsync {
+  void getStartupInfo( AsyncCallback<StartupInfo> async);
+
   void getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence, int width, int height,
                            boolean useScoreToColorBkg,
                            int exerciseID,
                            AsyncCallback<PretestScore> async);
 
-  void getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height,
-                            String exerciseID,
-                            AsyncCallback<ImageResponse> async);
-
-  void getScoreForAnswer(AudioContext audioContext, String answer,
-                         long timeSpent, Map<String, Collection<String>> typeToSection, AsyncCallback<Answer> async);
-
-  void addStudentAnswer(long resultID, boolean correct, AsyncCallback<Void> async);
-
-  void getScoresForUser(Map<String, Collection<String>> typeToSection, int userID, Collection<Integer> exids,
-                        AsyncCallback<QuizCorrectAndScore> async);
-
-
-
 
   void logMessage(String message, AsyncCallback<Void> async);
 
-  void getStartupInfo( AsyncCallback<StartupInfo> async);
+  void logEvent(String id, String widgetType, String exid, String context, int userid, String hitID, String device,
+                AsyncCallback<Void> async);
 
-  void addAnnotation(int exerciseID, String field, String status, String comment, int userID, AsyncCallback<Void> async);
-
-  void markReviewed(int id, boolean isCorrect, int creatorID, AsyncCallback<Void> asyncCallback);
+  void getEvents(AsyncCallback<Collection<Event>> async);
 
   void isValidForeignPhrase(String foreign, AsyncCallback<Boolean> async);
-
-  void deleteItem(int exid, AsyncCallback<Boolean> async);
 
   void getUserHistoryForList(int userid,
                              Collection<Integer> ids,
@@ -94,16 +74,6 @@ public interface LangTestDatabaseAsync {
                              Map<String, Collection<String>> typeToSection,
                              long userListID, AsyncCallback<AVPScoreReport> async);
 
-  void logEvent(String id, String widgetType, String exid, String context, int userid, String hitID, String device,
-                AsyncCallback<Void> async);
-
-  void getEvents(AsyncCallback<Collection<Event>> async);
-
-  void markState(int exid, STATE state, int creatorID, AsyncCallback<Void> async);
-
-  void markAudioDefect(AudioAttribute audioAttribute, HasID exid, AsyncCallback<Void> async);
-
-  void markGender(AudioAttribute attr, boolean isMale, AsyncCallback<Void> async);
 
   void getMaleFemaleProgress(AsyncCallback<Map<String, Float>> async);
 

@@ -67,10 +67,7 @@ import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.client.recorder.MicPermission;
 import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
-import mitll.langtest.client.services.AudioService;
-import mitll.langtest.client.services.AudioServiceAsync;
-import mitll.langtest.client.services.UserService;
-import mitll.langtest.client.services.UserServiceAsync;
+import mitll.langtest.client.services.*;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.sound.SoundManagerStatic;
 import mitll.langtest.client.user.UserFeedback;
@@ -199,6 +196,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
   private final AudioServiceAsync audioService = GWT.create(AudioService.class);
   private final UserServiceAsync userService = GWT.create(UserService.class);
+  private final QCServiceAsync qcServiceAsync = GWT.create(QCService.class);
 
   private final BrowserCheck browserCheck = new BrowserCheck();
   private SoundManagerStatic soundManager;
@@ -353,7 +351,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       ifPresent.req = -1;
       client.onSuccess(ifPresent);
     } else {
-      service.getImageForAudioFile(reqid, path, type, toUse, height, exerciseID, new AsyncCallback<ImageResponse>() {
+      audioService.getImageForAudioFile(reqid, path, type, toUse, height, exerciseID, new AsyncCallback<ImageResponse>() {
         public void onFailure(Throwable caught) {
        /*   if (!caught.getMessage().trim().equals("0")) {
             Window.alert("getImageForAudioFile Couldn't contact server. Please check network connection.");
@@ -818,6 +816,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   public AudioServiceAsync getAudioService() {
     return audioService;
+  }
+
+  public QCServiceAsync getQCService() {
+    return qcServiceAsync;
   }
 
   public UserFeedback getFeedback() {

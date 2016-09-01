@@ -48,12 +48,7 @@ import java.util.Map;
 public class MonitoringServiceImpl extends MyRemoteServiceServlet implements MonitoringService {
   private static final Logger logger = Logger.getLogger(MonitoringServiceImpl.class);
 
-  @Override
-  public void init() {
-    //logger.info("init called for MonitoringServiceImpl");
-    findSharedDatabase();
-    readProperties(getServletContext());
-  }
+
 
   @Override
   public Map<User, Integer> getUserToResultCount() {
