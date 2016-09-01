@@ -280,7 +280,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
    */
   private void markAttentionLL(ListInterface listContainer, HasID completedExercise) {
     if (isCourseContent()) {
-      service.markState(completedExercise.getID(), STATE.ATTN_LL, controller.getUser(),
+      controller.getService().markState(completedExercise.getID(), STATE.ATTN_LL, controller.getUser(),
           new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -309,7 +309,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
     boolean allCorrect = incorrectFields.isEmpty();
     //System.out.println("markReviewed : exercise " + completedExercise.getOldID() + " instance " + instance + " allCorrect " + allCorrect);
 
-    service.markReviewed(completedExercise.getID(), allCorrect, controller.getUser(),
+    controller.getService().markReviewed(completedExercise.getID(), allCorrect, controller.getUser(),
         new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
@@ -561,7 +561,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
                           boolean isMale) {
     offButton.setEnabled(false);
 
-    service.markGender(audio, isMale, new AsyncCallback<Void>() {
+    controller.getService().markGender(audio, isMale, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
         offButton.setEnabled(true);
@@ -653,7 +653,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
       // logger.info("getPanelForAudio path after  " + audioRef);
     }
     String speed = audio.isRegularSpeed() ? " Regular speed" : " Slow speed";
-    final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<T>(audioRef, e.getForeignLanguage(), service, controller,
+    final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<T>(audioRef, e.getForeignLanguage(), controller,
         controller.getProps().showSpectrogram(), scorePanel, 70, speed, e, instance);
     audioPanel.setShowColor(true);
     audioPanel.getElement().setId("ASRScoringAudioPanel");
