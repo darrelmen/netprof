@@ -97,9 +97,15 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
    * @see mitll.langtest.client.custom.dialog.NewUserExercise.CreateFirstRecordAudioPanel#CreateFirstRecordAudioPanel(CommonExercise, Panel, boolean, String)
    * @see mitll.langtest.client.exercise.WaveformExercisePanel#getAnswerWidget(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
    */
-  public RecordAudioPanel(T exercise, ExerciseController controller, Panel widgets,
-                          LangTestDatabaseAsync service, int index, boolean showSpectrogram, AudioType audioType, String instance) {
-    super(service,
+  public RecordAudioPanel(T exercise,
+                          ExerciseController controller,
+                          Panel widgets,
+                          LangTestDatabaseAsync service,
+                          int index,
+                          boolean showSpectrogram,
+                          AudioType audioType,
+                          String instance) {
+    super(
         // use full screen width
         // use keyboard
         controller, showSpectrogram,
@@ -107,7 +113,8 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
         , 1.0f, 23,
       //  exercise.getID(), // TODO : why both here??
         exercise,
-        instance);
+        instance
+    );
     this.exercisePanel = widgets;
     this.index = index;
     this.exercise = exercise;
@@ -289,18 +296,17 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
   }
 
   protected class MyWaveformPostAudioRecordButton extends WaveformPostAudioRecordButton {
-    // private long then,now;
-
     /**
      * @param audioType
      * @param recordButtonTitle
      * @see #makePostAudioRecordButton(AudioType, String)
      */
-    public MyWaveformPostAudioRecordButton(AudioType audioType, String recordButtonTitle) {
+    protected MyWaveformPostAudioRecordButton(AudioType audioType, String recordButtonTitle) {
       super(RecordAudioPanel.this.exercise.getID(),
           RecordAudioPanel.this.controller,
           RecordAudioPanel.this.exercisePanel,
-          RecordAudioPanel.this, RecordAudioPanel.this.service, RecordAudioPanel.this.index, true,
+          RecordAudioPanel.this,
+          RecordAudioPanel.this.index, true,
           recordButtonTitle, RecordButton.STOP1, audioType);
       setWidth("110px");
     }

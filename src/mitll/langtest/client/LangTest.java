@@ -67,8 +67,8 @@ import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.client.recorder.MicPermission;
 import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
-import mitll.langtest.client.services.ResultService;
-import mitll.langtest.client.services.ResultServiceAsync;
+import mitll.langtest.client.services.AudioService;
+import mitll.langtest.client.services.AudioServiceAsync;
 import mitll.langtest.client.services.UserService;
 import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.client.sound.SoundManagerAPI;
@@ -175,6 +175,7 @@ import java.util.logging.Logger;
  * - Fixed bug with detecting RTL text and showing it in the exercise list
  * 1.4.9
  * - Fixed bug with downloading audio for custom item.
+ *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification, LifecycleSupport {
@@ -196,6 +197,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private FlashRecordPanelHeadless flashRecordPanel;
 
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
+  private final AudioServiceAsync audioService = GWT.create(AudioService.class);
   private final UserServiceAsync userService = GWT.create(UserService.class);
 
   private final BrowserCheck browserCheck = new BrowserCheck();
@@ -781,6 +783,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public User getCurrent() {
     return userManager.getCurrent();
   }
+
   public boolean isAdmin() {
     return userManager.isAdmin();
   }
@@ -801,7 +804,9 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return props.isLogClientMessages();
   }
 
-  public String getLanguage() {  return projectStartupInfo != null ? projectStartupInfo.getLanguage() : "";  }
+  public String getLanguage() {
+    return projectStartupInfo != null ? projectStartupInfo.getLanguage() : "";
+  }
 
   public boolean isRightAlignContent() {
     return props.isRightAlignContent() || initialUI.isRTL();
@@ -809,6 +814,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   public LangTestDatabaseAsync getService() {
     return service;
+  }
+
+  public AudioServiceAsync getAudioService() {
+    return audioService;
   }
 
   public UserFeedback getFeedback() {
