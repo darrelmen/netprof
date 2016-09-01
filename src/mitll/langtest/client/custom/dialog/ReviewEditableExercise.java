@@ -411,7 +411,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
       @Override
       public void onClick(ClickEvent event) {
         logger.info("marking audio defect for " + audio + " on " + exercise.getID());
-        service.markAudioDefect(audio, exercise, new AsyncCallback<Void>() {    // delete comment too?
+        controller.getQCService().markAudioDefect(audio, exercise, new AsyncCallback<Void>() {    // delete comment too?
           @Override
           public void onFailure(Throwable caught) {
           }
@@ -568,7 +568,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     dialogHelper.show(ARE_YOU_SURE, MSGS, new DialogHelper.CloseListener() {
       @Override
       public void gotYes() {
-        service.deleteItem(newUserExercise.getID(), new AsyncCallback<Boolean>() {
+        controller.getQCService().deleteItem(newUserExercise.getID(), new AsyncCallback<Boolean>() {
           @Override
           public void onFailure(Throwable caught) {
           }
@@ -693,7 +693,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
         logger.warning("\ndoAfterEditComplete : error - didn't remove " + id + " from original " + originalList);
       }
 
-      service.markState(id, STATE.FIXED, user, new AsyncCallback<Void>() {
+      controller.getQCService().markState(id, STATE.FIXED, user, new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
         }
@@ -758,7 +758,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
           deleteButton.setEnabled(false);
           int id = exercise.getID();
           logger.info("marking audio defect for " + getAudioAttribute() + " on " + id);
-          service.markAudioDefect(getAudioAttribute(), exercise, new AsyncCallback<Void>() {    // delete comment too?
+          controller.getQCService().markAudioDefect(getAudioAttribute(), exercise, new AsyncCallback<Void>() {    // delete comment too?
             @Override
             public void onFailure(Throwable caught) {
             }
