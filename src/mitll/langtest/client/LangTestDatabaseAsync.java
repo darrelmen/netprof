@@ -56,9 +56,6 @@ import java.util.Map;
  * @since
  */
 public interface LangTestDatabaseAsync {
-
-
-
   void getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence, int width, int height,
                            boolean useScoreToColorBkg,
                            int exerciseID,

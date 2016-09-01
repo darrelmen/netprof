@@ -453,7 +453,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
       if (exerciseID != -1) {
         checkAndAskOrFirst(exerciseID);
       } else {
-        logger.warning("Not doing anything as response to " + request+ " : " + exerciseID);
+        logger.warning("Not doing anything as response to request " + request+ "\n\tfor exercise " + exerciseID);
       }
     }
   }

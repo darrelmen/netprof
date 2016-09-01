@@ -62,7 +62,6 @@ import mitll.langtest.shared.scoring.AudioContext;
  */
 public class RecordButtonPanel implements RecordButton.RecordingListener {
   protected final RecordButton recordButton;
-  private final LangTestDatabaseAsync service;
   private final ExerciseController controller;
   private final int exerciseID;
   private final int index;
@@ -79,12 +78,12 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
    *
    * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#FlashcardRecordButtonPanel
    */
-  protected RecordButtonPanel(final LangTestDatabaseAsync service,
-                              final ExerciseController controller,
+  protected RecordButtonPanel(final ExerciseController controller,
                               final int exerciseID,
                               final int index,
-                              boolean doFlashcardAudio, AudioType audioType, String recordButtonTitle) {
-    this.service = service;
+                              boolean doFlashcardAudio,
+                              AudioType audioType,
+                              String recordButtonTitle) {
     this.controller = controller;
     this.exerciseID = exerciseID;
     this.index = index;
@@ -184,7 +183,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
     AudioContext audioContext = new AudioContext(reqid, controller.getUser(), controller.getProjectStartupInfo().getProjectid(),
         exerciseID, index, audioType);
 
-    service.writeAudioFile(base64EncodedWavFile,
+    controller.getAudioService().writeAudioFile(base64EncodedWavFile,
         audioContext,
         controller.usingFlashRecorder(), "browser", device,
         doFlashcardAudio,
@@ -212,7 +211,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
             long now = System.currentTimeMillis();
             long diff = now - then;
 
-            service.addRoundTrip(result.getResultID(), (int) diff, new AsyncCallback<Void>() {
+            controller.getService().addRoundTrip(result.getResultID(), (int) diff, new AsyncCallback<Void>() {
               @Override
               public void onFailure(Throwable caught) {
               }
@@ -239,7 +238,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
   }
 
   private void logMessage(String message) {
-    service.logMessage(message, new AsyncCallback<Void>() {
+    controller.getService().logMessage(message, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
       }
