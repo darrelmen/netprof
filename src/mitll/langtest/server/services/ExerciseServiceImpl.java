@@ -76,16 +76,6 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
 
   private static final boolean WARN_MISSING_FILE = true;
   private static final boolean DEBUG = false;
-  @Deprecated private AudioFileHelper audioFileHelper;
-
-  @Override
-  public void init() {
-    super.init();
-
-    if (serverProps.isAMAS()) {
-      audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, this, null);
-    }
-  }
 
   /**
    * Complicated.
@@ -194,7 +184,9 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
 //      buildExerciseTrie();
       AudioFileHelper audioFileHelper = getAudioFileHelper();
 
-      if (audioFileHelper == null) logger.error("no audio file helper for " + getProject());
+      if (audioFileHelper == null) {
+        logger.error("no audio file helper for " + getProject());
+      }
       else {
         audioFileHelper.checkLTSAndCountPhones(exercises);
         didCheckLTS = true;
@@ -935,6 +927,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
    * TODO : remove duplicate
    * @return
    */
+/*
   private AudioFileHelper getAudioFileHelper() {
     if (serverProps.isAMAS()) {
       return audioFileHelper;
@@ -947,6 +940,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
       return project.getAudioFileHelper();
     }
   }
+*/
 
 /*
   private void sendEmail(String subject, String prefixedMessage) {
