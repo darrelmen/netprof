@@ -123,7 +123,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
    * @param exerciseList
    * @see ExercisePanelFactory#getExercisePanel(mitll.langtest.shared.exercise.Shell)
    */
-  public FlashcardPanel(final T e, final LangTestDatabaseAsync service,
+  FlashcardPanel(final T e, final LangTestDatabaseAsync service,
                         final ExerciseController controller, boolean addKeyBinding,
                         final ControlState controlState,
                         MySoundFeedback soundFeedback,
@@ -226,7 +226,8 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
   }
 
   private void addAnnotation(final String field, final String status, final String commentToPost) {
-    service.addAnnotation(exercise.getID(), field, status, commentToPost, controller.getUser(), new AsyncCallback<Void>() {
+    controller.getQCService().addAnnotation(exercise.getID(), field, status, commentToPost, controller.getUser(),
+        new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
       }

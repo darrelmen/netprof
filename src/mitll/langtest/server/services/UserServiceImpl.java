@@ -64,12 +64,6 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * user looked up by the security filter.
    */
 //  private static final String USER_REQUEST_ATT = UserSecurityManager.USER_REQUEST_ATT;
-  @Override
-  public void init() {
-    //  logger.info("init called for UserServiceImpl");
-    findSharedDatabase();
-    readProperties(getServletContext());
-  }
 
   /**
    * TODO record additional session info in database.
