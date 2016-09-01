@@ -716,7 +716,7 @@ class NewUserExercise extends BasicDialog {
     @Override
     protected WaveformPostAudioRecordButton makePostAudioRecordButton(AudioType audioType, String recordButtonTitle) {
       postAudioButton =
-          new WaveformPostAudioRecordButton(exercise.getID(), controller, exercisePanel, this, service,
+          new WaveformPostAudioRecordButton(exercise.getID(), controller, exercisePanel, this,
               recordRegularSpeed ? 0 : 1,
               false // don't record in results table
               ,

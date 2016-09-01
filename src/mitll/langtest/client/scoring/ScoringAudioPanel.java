@@ -38,7 +38,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.UIObject;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.instrumentation.EventContext;
 import mitll.langtest.shared.exercise.Shell;
@@ -75,35 +74,33 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
 
   /**
    * @param refSentence
-   * @param service
    * @param gaugePanel
    * @param playButtonSuffix
    * @param exercise
    * @param instance
-   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, LangTestDatabaseAsync, ExerciseController, ScoreListener, String, Shell, String)
+   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, ExerciseController, ScoreListener, String, Shell, String)
    */
-  ScoringAudioPanel(String refSentence, LangTestDatabaseAsync service, ExerciseController controller,
+  ScoringAudioPanel(String refSentence, ExerciseController controller,
                     ScoreListener gaugePanel, String playButtonSuffix, T exercise, String instance) {
-    this(null, refSentence, service, controller, SHOW_SPECTROGRAM, gaugePanel, 23, playButtonSuffix, exercise, instance);
+    this(null, refSentence, controller, SHOW_SPECTROGRAM, gaugePanel, 23, playButtonSuffix, exercise, instance);
   }
 
   /**
    * @param path
    * @param refSentence
-   * @param service
    * @param showSpectrogram
    * @param gaugePanel
    * @param rightMargin
    * @param playButtonSuffix
    * @param exercise
    * @param instance
-   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, String, LangTestDatabaseAsync, ExerciseController, boolean, ScoreListener, int, String, Shell, String)
+   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, String, ExerciseController, boolean, ScoreListener, int, String, Shell, String)
    */
-  ScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service,
+  ScoringAudioPanel(String path, String refSentence,
                     ExerciseController controller,
                     boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin, String playButtonSuffix,
                     T exercise, String instance) {
-    super(path, service, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix,
+    super(path, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix,
         exercise, instance);
     this.refSentence = refSentence;
     showOnlyOneExercise = controller.showOnlyOneExercise();
@@ -258,14 +255,14 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
 
   /**
    * @param score
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, float, mitll.langtest.shared.exercise.T)
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder
    */
   public void addScore(CorrectAndScore score) {
     scoreListener.addScore(score);
   }
 
   /**
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, float, mitll.langtest.shared.exercise.T)
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder
    */
   public void showChart() {
     scoreListener.showChart(showOnlyOneExercise);
@@ -273,7 +270,7 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
 
   /**
    * @param avgScore
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, float, mitll.langtest.shared.exercise.T)
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder
    */
   public void setClassAvg(float avgScore) {
     scoreListener.setClassAvg(avgScore);
