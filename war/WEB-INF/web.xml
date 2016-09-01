@@ -114,6 +114,28 @@
         <url-pattern>/langtest/audio-manager</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>amasService</servlet-name>
+        <servlet-class>mitll.langtest.server.services.AmasServiceImpl</servlet-class>
+        <load-on-startup>3</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>amasService</servlet-name>
+        <url-pattern>/langtest/amas-manager</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>qcService</servlet-name>
+        <servlet-class>mitll.langtest.server.services.QCServiceImpl</servlet-class>
+        <load-on-startup>3</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>qcService</servlet-name>
+        <url-pattern>/langtest/qc-manager</url-pattern>
+    </servlet-mapping>
+
     <!-- ==================================================================== -->
     <!-- End RPC mappings                                                     -->
     <!-- ==================================================================== -->
@@ -156,14 +178,14 @@
         <url-pattern>/scoreServlet/*</url-pattern>
     </servlet-mapping>
 
-<!--    <servlet>
-        <servlet-name>loadTestServlet</servlet-name>
-        <servlet-class>mitll.langtest.server.load.LoadTestServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>loadTestServlet</servlet-name>
-        <url-pattern>/loadTest/*</url-pattern>
-    </servlet-mapping>-->
+    <!--    <servlet>
+            <servlet-name>loadTestServlet</servlet-name>
+            <servlet-class>mitll.langtest.server.load.LoadTestServlet</servlet-class>
+        </servlet>
+        <servlet-mapping>
+            <servlet-name>loadTestServlet</servlet-name>
+            <url-pattern>/loadTest/*</url-pattern>
+        </servlet-mapping>-->
 
     <context-param>
         <param-name>config</param-name>

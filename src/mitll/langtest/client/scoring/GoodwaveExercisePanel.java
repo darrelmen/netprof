@@ -88,7 +88,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & ScoredExercise>
-    extends    HorizontalPanel
+    extends HorizontalPanel
     implements BusyPanel, RequiresResize, ProvidesResize, CommentAnnotator {
   private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
 
@@ -373,17 +373,18 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
   }
 
   private void addAnnotation(final String field, final String status, final String commentToPost) {
-    controller.getService().addAnnotation(getLocalExercise().getID(), field, status, commentToPost, controller.getUser(), new AsyncCallback<Void>() {
-      @Override
-      public void onFailure(Throwable caught) {
-      }
+    controller.getQCService().addAnnotation(getLocalExercise().getID(), field, status, commentToPost, controller.getUser(),
+        new AsyncCallback<Void>() {
+          @Override
+          public void onFailure(Throwable caught) {
+          }
 
-      @Override
-      public void onSuccess(Void result) {
+          @Override
+          public void onSuccess(Void result) {
 //        System.out.println("\t" + new Date() + " : onSuccess : posted to server " + getExercise().getOldID() +
 //            " field '" + field + "' commentLabel '" + commentToPost + "' is " + status);//, took " + (now - then) + " millis");
-      }
-    });
+          }
+        });
   }
 
   /**
@@ -579,9 +580,10 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
      * So here we're trying to make the record and play buttons know about each other
      * to the extent that when we're recording, we can't play audio, and when we're playing
      * audio, we can't record. We also mark the widget as busy so we can't move on to a different exercise.
-     *  @param toTheRightWidget
+     *
+     * @param toTheRightWidget
      * @param buttonTitle
-     * @param recordButtonTitle  @return
+     * @param recordButtonTitle @return
      * @see AudioPanel#getPlayButtons
      */
     @Override

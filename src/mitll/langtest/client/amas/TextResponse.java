@@ -34,6 +34,7 @@ package mitll.langtest.client.amas;
 
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -49,6 +50,8 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PopupHelper;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.services.AmasService;
+import mitll.langtest.client.services.AmasServiceAsync;
 import mitll.langtest.shared.answer.Answer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.scoring.AudioContext;
@@ -79,6 +82,7 @@ class TextResponse {
 
   private long timeShown = System.currentTimeMillis();
   private final Map<String, Collection<String>> typeToSelection;
+  private final AmasServiceAsync amasService = GWT.create(AmasService.class);
 
   /**
    * @param user
@@ -312,7 +316,7 @@ class TextResponse {
           new AudioContext(0, user, -1, exerciseID, questionID, answerType);
 
       logger.info("contexxt " + audioContext);
-      service.getScoreForAnswer(
+      amasService.getScoreForAnswer(
           audioContext, guess, timeSpent, typeToSelection,
           new AsyncCallback<Answer>() {
             @Override
