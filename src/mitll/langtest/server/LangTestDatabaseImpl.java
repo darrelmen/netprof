@@ -32,19 +32,13 @@
 
 package mitll.langtest.server;
 
-import audio.image.ImageType;
-import audio.imagewriter.SimpleImageWriter;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
-import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTestDatabase;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.ScoringAudioPanel;
-import mitll.langtest.server.amas.QuizCorrect;
-import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
-import mitll.langtest.server.autocrt.AutoCRT;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.Project;
@@ -56,15 +50,11 @@ import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.services.MyRemoteServiceServlet;
 import mitll.langtest.shared.ContextPractice;
 import mitll.langtest.shared.StartupInfo;
-import mitll.langtest.shared.answer.Answer;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
-import mitll.langtest.shared.flashcard.QuizCorrectAndScore;
-import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.instrumentation.Event;
-import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.PretestScore;
 import mitll.langtest.shared.user.SlimProject;
 import mitll.npdata.dao.SlickProject;
@@ -94,19 +84,14 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
 
   public static final String DATABASE_REFERENCE = "databaseReference";
 
-  private static final String WAV1 = "wav";
-  private static final String WAV = ".wav";
-  private static final String MP3 = ".mp3";
-  private static final int MP3_LENGTH = MP3.length();
-
   /**
    */
-  @Deprecated private AudioFileHelper audioFileHelper;
+  @Deprecated
+  private AudioFileHelper audioFileHelper;
   private String relativeConfigDir;
   private String configDir;
   //private AudioConversion audioConversion;
   private static final boolean DEBUG = false;
-
 
   private String startupMessage = "";
 
@@ -164,66 +149,13 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     }
   }
 
-  /**
-   * JUST FOR AMAS
-   * @param typeToSection
-   * @param userID
-   * @param exids
-   * @return
-   */
-  public QuizCorrectAndScore getScoresForUser(Map<String, Collection<String>> typeToSection,
-                                              int userID,
-                                              Collection<Integer> exids) {
-    return new QuizCorrect(db).getScoresForUser(typeToSection, userID, exids, getProjectID());
+  protected SectionHelper<CommonExercise> getSectionHelper() {
+    return super.getSectionHelper();
   }
 
   /**
-   * JUST FOR AMAS
-   * @param resultID
-   * @param correct
-   */
-  @Override
-  public void addStudentAnswer(long resultID, boolean correct) {
-    db.getAnswerDAO().addUserScore((int) resultID, correct ? 1.0f : 0.0f);
-  }
-
-  /**
-   * JUST FOR AMAS
-   * TODO : put this back
-   *
-   * @param audioContext
-   * @param answer
-   * @param timeSpent
-   * @param typeToSection
-   * @return
-   * @see mitll.langtest.client.amas.TextResponse#getScoreForGuess
-   */
-  public Answer getScoreForAnswer(AudioContext audioContext, String answer,
-                                  long timeSpent,
-                                  Map<String, Collection<String>> typeToSection) {
-    // AutoCRT.CRTScores scoreForAnswer1 = audioFileHelper.getScoreForAnswer(exercise, questionID, answer);
-    AutoCRT.CRTScores scoreForAnswer1 = new AutoCRT.CRTScores();
-    double scoreForAnswer = serverProps.useMiraClassifier() ? scoreForAnswer1.getNewScore() : scoreForAnswer1.getOldScore();
-
-    String session = "";// getLatestSession(typeToSection, userID);
-    //  logger.warn("getScoreForAnswer user " + userID + " ex " + exercise.getOldID() + " qid " +questionID + " type " +typeToSection + " session " + session);
-    boolean correct = scoreForAnswer > 0.5;
-    long resultID = db.getAnswerDAO().addTextAnswer(audioContext,
-        answer,
-        correct,
-        (float) scoreForAnswer, (float) scoreForAnswer, session, timeSpent);
-
-    Answer answer1 = new Answer(scoreForAnswer, correct, resultID);
-    return answer1;
-  }
-
-  private SectionHelper<CommonExercise> getSectionHelper() {
-    return db.getSectionHelper(getProjectID());
-  }
-
-  /**
-   * @param byID
-   * @param parentDir
+   * @paramx byID
+   * @paramx parentDir
    * @seex LoadTesting#getExercise
    * @seex #makeExerciseListWrapper
    */
@@ -242,8 +174,9 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
 //      logger.warn("ensureMP3s : (" + getLanguage() + ") no ref audio for " + byID);
 //    }
   }*/
-
-  private Collection<CommonExercise> getExercisesForUser() {  return db.getExercises(getProjectID());  }
+  private Collection<CommonExercise> getExercisesForUser() {
+    return db.getExercises(getProjectID());
+  }
 
   public ContextPractice getContextPractice() {
     return db.getContextPractice();
@@ -255,149 +188,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     db.reloadExercises(getProjectID());
   }
 
-  /**
-   * @param wavFile
-   * @param title
-   * @param artist
-   * @return true if mp3 file exists
-   * @seex #ensureMP3s(CommonExercise, String)
-   * @see #writeAudioFile
-   */
-/*  private boolean ensureMP3(String wavFile, String title, String artist) {
-    return ensureMP3(wavFile, title, artist, pathHelper.getInstallPath());
-  }*/
-  // int spew = 0;
-
-/*
-  private boolean ensureMP3(String wavFile, String title, String artist, String parent) {
-    if (wavFile != null) {
-      if (!audioConversion.exists(wavFile, parent)) {
-        //if (WARN_MISSING_FILE) {
-        //   logger.warn("ensureMP3 : can't find " + wavFile + " under " + parent + " trying config... ");
-        // }
-        parent = configDir;
-      }
-*/
-/*      if (!audioConversion.exists(wavFile, parent)) {// && wavFile.contains("1310")) {
-        if (WARN_MISSING_FILE && spew++ < 10) {
-          logger.error("ensureMP3 : can't find " + wavFile + " under " + parent + " for " + title + " " + artist);
-        }
-      }*//*
-
-
-      String s = audioConversion.ensureWriteMP3(wavFile, parent, false, title, artist);
-      boolean isMissing = s.equals(AudioConversion.FILE_MISSING);
-*/
-/*      if (isMissing && wavFile.contains("1310")) {
-        logger.error("ensureMP3 : can't find " + wavFile + " under " + parent + " for " + title + " " + artist);
-      }*//*
-
-      return !isMissing;
-    }
-    return false;
-  }
-*/
-
-  /**
-   * Get an image of desired dimensions for the audio file - only for Waveform and spectrogram.
-   * Also returns the audio file duration -- so we can deal with the difference in length between mp3 and wav
-   * versions of the same audio file.  (The browser soundmanager plays mp3 and reports audio offsets into
-   * the mp3 file, but all the images are generated from the shorter wav file.)
-   * <p>
-   * TODO : Worrying about absolute vs relative path is maddening.  Must be a better way!
-   *
-   * @param reqid
-   * @param audioFile
-   * @param imageType
-   * @param width
-   * @param height
-   * @param exerciseID
-   * @return path to an image file
-   * @see mitll.langtest.client.scoring.AudioPanel#getImageURLForAudio
-   */
-  public ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height,
-                                            String exerciseID) {
-    if (audioFile.isEmpty()) logger.error("huh? audio file is empty for req id " + reqid + " exid " + exerciseID);
-
-    SimpleImageWriter imageWriter = new SimpleImageWriter();
-
-    String wavAudioFile = getWavAudioFile(audioFile);
-    File testFile = new File(wavAudioFile);
-    if (!testFile.exists() || testFile.length() == 0) {
-      if (testFile.length() == 0) logger.error("getImageForAudioFile : huh? " + wavAudioFile + " is empty???");
-      return new ImageResponse();
-    }
-    ImageType imageType1 =
-        imageType.equalsIgnoreCase(ImageType.WAVEFORM.toString()) ? ImageType.WAVEFORM :
-            imageType.equalsIgnoreCase(ImageType.SPECTROGRAM.toString()) ? ImageType.SPECTROGRAM : null;
-    if (imageType1 == null) {
-      logger.error("getImageForAudioFile '" + imageType + "' is unknown?");
-      return new ImageResponse(); // success = false!
-    }
-    String imageOutDir = pathHelper.getImageOutDir();
-
-    if (DEBUG) {
-      logger.debug("getImageForAudioFile : getting images (" + width + " x " + height + ") (" + reqid + ") type " + imageType +
-          " for " + wavAudioFile + "");
-    }
-
-    long then = System.currentTimeMillis();
-
-    String absolutePathToImage = imageWriter.writeImage(wavAudioFile, getAbsoluteFile(imageOutDir).getAbsolutePath(),
-        width, height, imageType1, exerciseID);
-    long now = System.currentTimeMillis();
-    long diff = now - then;
-    if (diff > 100) {
-      logger.debug("getImageForAudioFile : got images (" + width + " x " + height + ") (" + reqid + ") type " + imageType +
-          " for " + wavAudioFile + " took " + diff + " millis");
-    }
-    String installPath = pathHelper.getInstallPath();
-
-    String relativeImagePath = absolutePathToImage;
-    if (absolutePathToImage.startsWith(installPath)) {
-      relativeImagePath = absolutePathToImage.substring(installPath.length());
-    } else {
-      logger.error("getImageForAudioFile huh? file path " + absolutePathToImage + " doesn't start with " + installPath + "?");
-    }
-
-    relativeImagePath = pathHelper.ensureForwardSlashes(relativeImagePath);
-    if (relativeImagePath.startsWith("/")) {
-      relativeImagePath = relativeImagePath.substring(1);
-    }
-    String imageURL = relativeImagePath;
-    double duration = new AudioCheck(serverProps).getDurationInSeconds(wavAudioFile);
-    if (duration == 0) {
-      logger.error("huh? " + wavAudioFile + " has zero duration???");
-    }
-    /*    logger.debug("for " + wavAudioFile + " type " + imageType + " rel path is " + relativeImagePath +
-        " url " + imageURL + " duration " + duration);*/
-
-    return new ImageResponse(reqid, imageURL, duration);
-  }
-
-  private String getWavAudioFile(String audioFile) {
-    if (audioFile.endsWith("." + AudioTag.COMPRESSED_TYPE) || audioFile.endsWith(MP3)) {
-      String wavFile = removeSuffix(audioFile) + WAV;
-      File test = getAbsoluteFile(wavFile);
-      audioFile = test.exists() ? test.getAbsolutePath() : getAudioFileHelper().getWavForMP3(audioFile);
-    }
-
-    return ensureWAV(audioFile);
-  }
-
-  private String removeSuffix(String audioFile) {
-    return audioFile.substring(0, audioFile.length() - MP3_LENGTH);
-  }
-
-  private String ensureWAV(String audioFile) {
-    if (!audioFile.endsWith(WAV1)) {
-      return audioFile.substring(0, audioFile.length() - MP3_LENGTH) + WAV;
-    } else {
-      return audioFile;
-    }
-  }
-
-  /**
+   /**
    * Get properties (first time called read properties file -- e.g. see war/config/levantine/config.properties).
    *
    * @return
@@ -640,38 +431,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     db.getAnswerDAO().addRoundTrip(resultID, roundTrip);
   }
 
-  /**
-   * @param exerciseID
-   * @param field
-   * @param status
-   * @param comment
-   * @param userID
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addAnnotation(String, String, String)
-   */
-  @Override
-  public void addAnnotation(int exerciseID, String field, String status, String comment, int userID) {
-    getUserListManager().addAnnotation(exerciseID, field, status, comment, userID);
-  }
-
-  /**
-   * @param id
-   * @param isCorrect
-   * @param creatorID
-   * @see mitll.langtest.client.qc.QCNPFExercise#markReviewed
-   */
-  public void markReviewed(int id, boolean isCorrect, int creatorID) {
-    getUserListManager().markCorrectness(id, isCorrect, creatorID);
-  }
-
-  /**
-   * @param exid
-   * @param state
-   * @param creatorID
-   * @see mitll.langtest.client.qc.QCNPFExercise#markAttentionLL
-   */
-  public void markState(int exid, STATE state, int creatorID) {
-    getUserListManager().markState(exid, state, creatorID);
-  }
 
   /**
    * Can't check if it's valid if we don't have a model.
@@ -701,20 +460,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   }
 */
 
-  /**
-   * TODO : maybe fully support this
-   * @param id
-   * @return
-   * @seex ReviewEditableExercise#confirmThenDeleteItem
-   */
-  public boolean deleteItem(int id) {
-    boolean b = db.deleteItem(id, getProjectID());
-    if (b) {
-      // force rebuild of full trie
-      getProject().buildExerciseTrie(db);
-    }
-    return b;
-  }
 
   /**
    * @param id
@@ -742,97 +487,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   public List<Event> getEvents() {
     return db.getEventDAO().getAll(getProjectID());
   }
-
-  /**
-   * @param audioAttribute
-   * @param exid
-   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getPanelForAudio
-   */
-  @Override
-  public void markAudioDefect(AudioAttribute audioAttribute, HasID exid) {
-    logger.debug("markAudioDefect mark audio defect for " + exid + " on " + audioAttribute);
-    //CommonExercise before = db.getCustomOrPredefExercise(exid);  // allow custom items to mask out non-custom items
-    //int beforeNumAudio = before.getAudioAttributes().size();
-    db.markAudioDefect(audioAttribute);
-
-    CommonExercise byID = db.getCustomOrPredefExercise(getProjectID(), exid.getID());  // allow custom items to mask out non-custom items
-
-    if (!byID.getMutableAudio().removeAudio(audioAttribute)) {
-      String key = audioAttribute.getKey();
-      logger.warn("markAudioDefect huh? couldn't remove key '" + key +
-          "' : " + audioAttribute + " from ex #" + exid +
-          "\n\tkeys were " + byID.getAudioRefToAttr().keySet() + " contains " + byID.getAudioRefToAttr().containsKey(key));
-    }
-    /*   int afterNumAudio = byID.getAudioAttributes().size();
-    if (afterNumAudio != beforeNumAudio - 1) {
-      logger.error("\thuh? before there were " + beforeNumAudio + " but after there were " + afterNumAudio);
-    }*/
-  }
-
-  /**
-   * This supports labeling really old audio for gender.
-   *
-   * TODO : why think about attach audio???
-   * @param attr
-   * @param isMale
-   * @see mitll.langtest.client.qc.QCNPFExercise#getGenderGroup
-   */
-  @Override
-  public void markGender(AudioAttribute attr, boolean isMale) {
-    CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(getProjectID(), attr.getExid());
-    int projid = -1;
-    if (customOrPredefExercise == null) {
-      logger.error("markGender can't find exercise id " + attr.getExid() + "?");
-    } else {
-      projid = customOrPredefExercise.getProjectID();
-    }
-    db.getAudioDAO().addOrUpdateUser(isMale ? BaseUserDAO.DEFAULT_MALE_ID : BaseUserDAO.DEFAULT_FEMALE_ID, projid, attr);
-
-    int exid = attr.getExid();
-    CommonExercise byID = db.getCustomOrPredefExercise(projid, exid);
-    if (byID == null) {
-      logger.error(getLanguage() + " : couldn't find exercise " + exid);
-      logAndNotifyServerException(new Exception("couldn't find exercise " + exid));
-    } else {
-
-      // TODO : consider putting this back???
-      //   byID.getAudioAttributes().clear();
-//      logger.debug("re-attach " + attr + " given isMale " + isMale);
-
-      // TODO : consider putting this back???
-      //   attachAudio(byID);
-/*
-      String addr = Integer.toHexString(byID.hashCode());
-      for (AudioAttribute audioAttribute : byID.getAudioAttributes()) {
-        logger.debug("markGender 1 after gender change, now " + audioAttribute + " : " +audioAttribute.getUserid() + " on " + addr);
-      }
-*/
-
-      db.getExerciseDAO(getProjectID()).addOverlay(byID);
-
-/*      CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(exid);
-      String adrr3 = Integer.toHexString(customOrPredefExercise.hashCode());
-      logger.info("markGender getting " + adrr3 + " : " + customOrPredefExercise);
-      for (AudioAttribute audioAttribute : customOrPredefExercise.getAudioAttributes()) {
-        logger.debug("markGender 2 after gender change, now " + audioAttribute + " : " +audioAttribute.getUserid() + " on "+ adrr3);
-      }*/
-
-    }
-    getSectionHelper().refreshExercise(byID);
-  }
-
-  /**
-   * @param id
-   * @return
-   * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser
-   */
-/*
-  private User getUserBy(int id) {
-    return db.getUserDAO().getUserWhere(id);
-  }
-*/
-  // Results ---------------------
-
 
 
   /**
@@ -862,13 +516,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     }
     return audioAnswer;
   }
-
-
-
-  private File getAbsoluteFile(String path) {
-    return pathHelper.getAbsoluteFile(path);
-  }
-
 
   /**
    * Filter out the default audio recordings...
@@ -955,7 +602,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     }
   }
 
-
   private AudioFileHelper getAudioFileHelper() {
     if (serverProps.isAMAS()) {
       return audioFileHelper;
@@ -985,7 +631,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     pathHelper.setConfigDir(configDir);
 
     serverProps = new ServerProperties(servletContext, configDir);
- //   audioConversion = new AudioConversion(serverProps);
+    //   audioConversion = new AudioConversion(serverProps);
     db = makeDatabaseImpl(serverProps.getH2Database());
     shareDB(servletContext);
     securityManager = new UserSecurityManager(db.getUserDAO());
