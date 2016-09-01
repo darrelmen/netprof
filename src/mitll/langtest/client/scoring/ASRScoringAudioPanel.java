@@ -37,6 +37,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.services.ScoringServiceAsync;
+import mitll.langtest.server.scoring.Scoring;
 import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.scoring.PretestScore;
 
@@ -155,7 +157,7 @@ public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> 
     };
 
     int id = exercise.getID();
-    LangTestDatabaseAsync service = controller.getService();
+    ScoringServiceAsync service = controller.getScoringService();
     if (controller.getProps().shouldUsePhoneToDisplay()) {
       service.getASRScoreForAudioPhonemes(
           reqid, resultID, path, refSentence, toUse, height, useScoreToColorBkg, id, async);

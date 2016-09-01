@@ -30,48 +30,40 @@
  *
  */
 
-package mitll.langtest.client;
+package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.shared.ContextPractice;
-import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.flashcard.AVPScoreReport;
-import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.scoring.PretestScore;
 
-import java.util.Collection;
-import java.util.Map;
+public interface ScoringServiceAsync {
 
-/**
- * The async counterpart of <code>LangTestDatabase</code>.
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since
- */
-public interface LangTestDatabaseAsync {
-  void getStartupInfo( AsyncCallback<StartupInfo> async);
+  void getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence, int width, int height,
+                           boolean useScoreToColorBkg,
+                           int exerciseID,
+                           AsyncCallback<PretestScore> async);
 
-  void logMessage(String message, AsyncCallback<Void> async);
-
-  void logEvent(String id, String widgetType, String exid, String context, int userid, String hitID, String device,
-                AsyncCallback<Void> async);
-
-  void getEvents(AsyncCallback<Collection<Event>> async);
-
-  void isValidForeignPhrase(String foreign, AsyncCallback<Boolean> async);
-
-  void getUserHistoryForList(int userid,
-                             Collection<Integer> ids,
-                             long latestResultID,
-                             Map<String, Collection<String>> typeToSection,
-                             long userListID, AsyncCallback<AVPScoreReport> async);
+  /**
+   * @param base64EncodedString
+   * @param textToAlign
+   * @param identifier
+   * @param reqid
+   * @param device
+   * @param async
+   * @see mitll.langtest.client.scoring.SimplePostAudioRecordButton#postAudioFile(String)
+   */
+  void getAlignment(String base64EncodedString,
+                    String textToAlign,
+                    String identifier,
+                    int reqid, String device, AsyncCallback<AudioAnswer> async);
 
 
-  void getMaleFemaleProgress(AsyncCallback<Map<String, Float>> async);
+  void addRoundTrip(int resultid, int roundTrip, AsyncCallback<Void> async);
 
-  void getContextPractice(AsyncCallback<ContextPractice> async);
+  void getResultASRInfo(int resultID, int width, int height, AsyncCallback<PretestScore> async);
 
-  void reloadExercises(AsyncCallback<Void> async);
+  void getASRScoreForAudioPhonemes(int reqid, long resultID, String testAudioFile, String sentence,
+                                   int width, int height, boolean useScoreToColorBkg,
+                                   int exerciseID,
+                                   AsyncCallback<PretestScore> async);
 }

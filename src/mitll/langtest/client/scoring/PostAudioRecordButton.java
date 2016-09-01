@@ -183,9 +183,8 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
         });
   }
 
-
   private void addRT(AudioAnswer result, int roundtrip) {
-    controller.getService().addRoundTrip(result.getResultID(), roundtrip, new AsyncCallback<Void>() {
+    controller.getScoringService().addRoundTrip(result.getResultID(), roundtrip, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
       }
