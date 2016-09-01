@@ -197,6 +197,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private final AudioServiceAsync audioService = GWT.create(AudioService.class);
   private final UserServiceAsync userService = GWT.create(UserService.class);
   private final QCServiceAsync qcServiceAsync = GWT.create(QCService.class);
+  private final ScoringServiceAsync scoringServiceAsync = GWT.create(ScoringService.class);
 
   private final BrowserCheck browserCheck = new BrowserCheck();
   private SoundManagerStatic soundManager;
@@ -822,18 +823,20 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     return qcServiceAsync;
   }
 
+  public ScoringServiceAsync getScoringService() {
+    return scoringServiceAsync;
+  }
+
   public UserFeedback getFeedback() {
     return this;
   }
-
   // recording methods...
 
   @Override
   public Widget getFlashRecordPanel() {
     return flashRecordPanel;
   }
-
-  private long then = 0;
+//  private long then = 0;
 
   /**
    * Recording interface
@@ -842,7 +845,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see PostAudioRecordButton#startRecording()
    */
   public void startRecording() {
-    then = System.currentTimeMillis();
+//    then = System.currentTimeMillis();
     flashRecordPanel.recordOnClick();
   }
 
