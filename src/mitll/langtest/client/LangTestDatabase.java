@@ -33,8 +33,6 @@
 package mitll.langtest.client;
 
 import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.TextBox;
-import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
@@ -43,14 +41,16 @@ import mitll.langtest.client.custom.dialog.ReviewEditableExercise;
 import mitll.langtest.client.custom.tabs.RememberTabAndContent;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.client.result.ResultManager;
+import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.scoring.AudioPanel;
-import mitll.langtest.client.scoring.ScoringAudioPanel;
-import mitll.langtest.shared.*;
+import mitll.langtest.shared.ContextPractice;
+import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.answer.Answer;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.HasID;
+import mitll.langtest.shared.exercise.STATE;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.flashcard.QuizCorrectAndScore;
 import mitll.langtest.shared.image.ImageResponse;
@@ -80,10 +80,6 @@ public interface LangTestDatabase extends RemoteService {
    */
   StartupInfo getStartupInfo();
 
-  // answer DAO
-
-
-
   /**
    * @see LangTest#getImage(int, String, String, String, int, int, String, AsyncCallback)
    * @param reqid
@@ -97,7 +93,7 @@ public interface LangTestDatabase extends RemoteService {
   ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, String exerciseID);
 
   /**
-   * @see ScoringAudioPanel#scoreAudio(String, int, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
+   * @see mitll.langtest.client.scoring.ReviewScoringPanel#scoreAudio(String, int, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
    * @param resultID
    * @param width
    * @param height
@@ -106,7 +102,7 @@ public interface LangTestDatabase extends RemoteService {
   PretestScore getResultASRInfo(int resultID, int width, int height);
 
   /**
-   * @see ScoringAudioPanel#scoreAudio(String, int, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
+   * @see ASRScoringAudioPanel#scoreAudio(String, int, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
    * @param reqid
    * @param resultID
    * @param testAudioFile
@@ -121,7 +117,7 @@ public interface LangTestDatabase extends RemoteService {
                                    int width, int height, boolean useScoreToColorBkg, int exerciseID);
 
   /**
-   * @see ScoringAudioPanel#scoreAudio(String, int, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
+   * @see ASRScoringAudioPanel#scoreAudio(String, int, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
    * @param reqid
    * @param resultID
    * @param testAudioFile
@@ -137,6 +133,7 @@ public interface LangTestDatabase extends RemoteService {
 
   /**
    * @see mitll.langtest.client.scoring.PostAudioRecordButton#addRT(AudioAnswer, int)
+   * @see mitll.langtest.client.recorder.RecordButtonPanel#postAudioFile(Panel, int, String)
    * @param resultid
    * @param roundTrip
    */
@@ -154,12 +151,14 @@ public interface LangTestDatabase extends RemoteService {
   AudioAnswer getAlignment(String base64EncodedString,
                            String textToAlign,
                            String identifier,
-                           int reqid, String device);
+                           int reqid,
+                           String device);
 
+  /**
+   * @see RecorderNPFHelper#getProgressInfo
+   * @return
+   */
   Map<String, Float> getMaleFemaleProgress();
-
-  // Admin dialogs ---
-
 
   /**
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete
@@ -184,6 +183,7 @@ public interface LangTestDatabase extends RemoteService {
 
   /**
    * @see mitll.langtest.client.flashcard.FlashcardPanel#addAnnotation(String, String, String)
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addAnnotation(String, String, String)
    * @param exerciseID
    * @param field
    * @param status
@@ -195,7 +195,7 @@ public interface LangTestDatabase extends RemoteService {
   // QC State changes
 
   /**
-   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getDeleteButton(Panel, AudioAttribute, String, String)
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getDeleteButton
    * @param audioAttribute
    * @param exid
    */
@@ -240,7 +240,7 @@ public interface LangTestDatabase extends RemoteService {
   void logMessage(String message);
 
   /**
-   * @see mitll.langtest.client.instrumentation.ButtonFactory#logEvent(String, String, String, String, long)
+   * @see mitll.langtest.client.instrumentation.ButtonFactory#logEvent
    * @param id
    * @param widgetType
    * @param exid
@@ -252,7 +252,7 @@ public interface LangTestDatabase extends RemoteService {
   void logEvent(String id, String widgetType, String exid, String context, int userid, String hitID, String device);
 
   /**
-   * @see mitll.langtest.client.instrumentation.EventTable#showDialog(LangTestDatabaseAsync)
+   * @see mitll.langtest.client.instrumentation.EventTable#show
    * @return
    */
   Collection<Event> getEvents();
