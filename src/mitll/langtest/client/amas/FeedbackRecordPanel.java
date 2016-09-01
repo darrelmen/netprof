@@ -37,6 +37,7 @@ import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.ToggleType;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -45,10 +46,12 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.shared.answer.Answer;
-import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.client.services.AmasService;
+import mitll.langtest.client.services.AmasServiceAsync;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.amas.QAPair;
+import mitll.langtest.shared.answer.Answer;
+import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.STATE;
 import mitll.langtest.shared.exercise.Shell;
@@ -86,6 +89,7 @@ public class FeedbackRecordPanel extends AmasExercisePanel {
   private List<TextResponse> textResponses;
   private final QuizScorePanel quizScorePanel;
   private final Set<Integer> selfScoreQuestions = new HashSet<Integer>();
+  private final AmasServiceAsync amasService = GWT.create(AmasService.class);
 
   /**
    * @param e
@@ -211,27 +215,28 @@ public class FeedbackRecordPanel extends AmasExercisePanel {
    * @see mitll.langtest.client.amas.FeedbackRecordPanel.AnswerPanel#getStudentAnswer(LangTestDatabaseAsync, int)
    */
   private void getScores(final boolean firstTime) {
-    service.getScoresForUser(exerciseList.getTypeToSelection(), controller.getUser(), exerciseList.getIDs(), new AsyncCallback<QuizCorrectAndScore>() {
-      @Override
-      public void onFailure(Throwable throwable) {
-        logger.warning("didn't do scores?");
-      }
+    amasService.getScoresForUser(exerciseList.getTypeToSelection(), controller.getUser(), exerciseList.getIDs(),
+        new AsyncCallback<QuizCorrectAndScore>() {
+          @Override
+          public void onFailure(Throwable throwable) {
+            logger.warning("didn't do scores?");
+          }
 
-      @Override
-      public void onSuccess(QuizCorrectAndScore correctAndScores) {
-        quizScorePanel.setScores(correctAndScores.getCorrectAndScoreCollection());
-        if (firstTime) {
-          makeTabStateReflectHistory(correctAndScores);
-        }
-      }
-    });
+          @Override
+          public void onSuccess(QuizCorrectAndScore correctAndScores) {
+            quizScorePanel.setScores(correctAndScores.getCorrectAndScoreCollection());
+            if (firstTime) {
+              makeTabStateReflectHistory(correctAndScores);
+            }
+          }
+        });
   }
 
   private void makeTabStateReflectHistory(QuizCorrectAndScore correctAndScores) {
     for (CorrectAndScore cs : correctAndScores.getCorrectAndScoreCollection()) {
       if (cs.isMatch(exercise)) {
         int qid = cs.getQid();
-    //    logger.info("makeTabStateReflectHistory found " + cs.getExID() + " :  " + qid + " : " + cs);
+        //    logger.info("makeTabStateReflectHistory found " + cs.getExID() + " :  " + qid + " : " + cs);
         markTabComplete(qid);
       }
     }
@@ -384,16 +389,15 @@ public class FeedbackRecordPanel extends AmasExercisePanel {
 
     private Button getChoice(final LangTestDatabaseAsync service, final int questionIndex, final Panel userAnswer,
                              final AsyncCallback<Void> async, final boolean correct, String label) {
-      Button choice1 = getChoice(label, new ClickHandler() {
+      return getChoice(label, new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          service.addStudentAnswer(currentResultID, correct, async);
+          amasService.addStudentAnswer(currentResultID, correct, async);
           selfScoreQuestions.add(questionIndex);
           recordCompleted(userAnswer);
           enableNext();
         }
       });
-      return choice1;
     }
 
     private void styleToolbar(ButtonToolbar toolbar) {
@@ -452,7 +456,7 @@ public class FeedbackRecordPanel extends AmasExercisePanel {
       Panel outerContainer = new DivWidget();
       outerContainer.getElement().setId("textAnswerColumn");
 
-      outerContainer.addStyleName(controller.isRightAlignContent() ? "floatRight": "floatLeft");
+      outerContainer.addStyleName(controller.isRightAlignContent() ? "floatRight" : "floatLeft");
       outerContainer.addStyleName("rightTenMargin");
 
       Panel row1 = new VerticalPanel();
