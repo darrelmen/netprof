@@ -136,6 +136,18 @@
         <url-pattern>/langtest/qc-manager</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>scoringService</servlet-name>
+        <servlet-class>mitll.langtest.server.services.ScoringServiceImpl</servlet-class>
+        <load-on-startup>3</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>scoringService</servlet-name>
+        <url-pattern>/langtest/scoring-manager</url-pattern>
+    </servlet-mapping>
+
+
     <!-- ==================================================================== -->
     <!-- End RPC mappings                                                     -->
     <!-- ==================================================================== -->
