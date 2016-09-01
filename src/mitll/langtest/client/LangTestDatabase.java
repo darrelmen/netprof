@@ -32,35 +32,22 @@
 
 package mitll.langtest.client;
 
-import com.github.gwtbootstrap.client.ui.Button;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.custom.dialog.ReviewEditableExercise;
-import mitll.langtest.client.custom.tabs.RememberTabAndContent;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.shared.ContextPractice;
 import mitll.langtest.shared.StartupInfo;
-import mitll.langtest.shared.answer.Answer;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.HasID;
-import mitll.langtest.shared.exercise.STATE;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
-import mitll.langtest.shared.flashcard.QuizCorrectAndScore;
-import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.instrumentation.Event;
-import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.PretestScore;
-import mitll.langtest.shared.user.MiniUser;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -79,18 +66,6 @@ public interface LangTestDatabase extends RemoteService {
    * @return
    */
   StartupInfo getStartupInfo();
-
-  /**
-   * @see LangTest#getImage(int, String, String, String, int, int, String, AsyncCallback)
-   * @param reqid
-   * @param audioFile
-   * @param imageType
-   * @param width
-   * @param height
-   * @param exerciseID
-   * @return
-   */
-  ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, String exerciseID);
 
   /**
    * @see mitll.langtest.client.scoring.ReviewScoringPanel#scoreAudio(String, int, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
@@ -172,64 +147,12 @@ public interface LangTestDatabase extends RemoteService {
   AVPScoreReport getUserHistoryForList(int userid, Collection<Integer> ids, long latestResultID,
                                        Map<String, Collection<String>> typeToSection, long userListID);
 
-  // User Exercise Lists -
-
   /**
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase(UserList, ListInterface, Panel, boolean)
    * @param foreign
    * @return
    */
   boolean isValidForeignPhrase(String foreign);
-
-  /**
-   * @see mitll.langtest.client.flashcard.FlashcardPanel#addAnnotation(String, String, String)
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addAnnotation(String, String, String)
-   * @param exerciseID
-   * @param field
-   * @param status
-   * @param comment
-   * @param userID
-   */
-  void addAnnotation(int exerciseID, String field, String status, String comment, int userID);
-
-  // QC State changes
-
-  /**
-   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getDeleteButton
-   * @param audioAttribute
-   * @param exid
-   */
-  void markAudioDefect(AudioAttribute audioAttribute, HasID exid);
-
-  /**
-   * @see mitll.langtest.client.qc.QCNPFExercise#markGender(MiniUser, Button, AudioAttribute, RememberTabAndContent, List, Button, boolean)
-   * @param attr
-   * @param isMale
-   */
-  void markGender(AudioAttribute attr, boolean isMale);
-
-  /**
-   * @see mitll.langtest.client.qc.QCNPFExercise#markReviewed(HasID)
-   * @param exid
-   * @param isCorrect
-   * @param creatorID
-   */
-  void markReviewed(int exid, boolean isCorrect, int creatorID);
-
-  /**
-   * @see mitll.langtest.client.qc.QCNPFExercise#markAttentionLL(ListInterface, HasID)
-   * @param exid
-   * @param state
-   * @param creatorID
-   */
-  void markState(int exid, STATE state, int creatorID);
-
-  /**
-   * @see ReviewEditableExercise#confirmThenDeleteItem()
-   * @param exid
-   * @return
-   */
-  boolean deleteItem(int exid);
 
   // Telemetry ---
 
@@ -265,33 +188,4 @@ public interface LangTestDatabase extends RemoteService {
   ContextPractice getContextPractice();
 
   void reloadExercises();
-
-  /**
-   * AMAS ONLY
-   * @see mitll.langtest.client.amas.TextResponse#getScoreForGuess
-   * @param audioContext
-   * @param answer
-   * @param timeSpent
-   * @param typeToSection
-   * @return
-   */
-  Answer getScoreForAnswer(AudioContext audioContext, String answer, long timeSpent, Map<String, Collection<String>> typeToSection);
-
-  /**
-   * AMAS ONLY
-   * @see mitll.langtest.client.amas.FeedbackRecordPanel.AnswerPanel#getChoice
-   * @param resultID
-   * @param correct
-   */
-  void addStudentAnswer(long resultID, boolean correct);
-
-  /**
-   * AMAS
-   * @see mitll.langtest.client.amas.FeedbackRecordPanel#getScores(boolean)
-   * @param typeToSection
-   * @param userID
-   * @param exids
-   * @return
-   */
-  QuizCorrectAndScore getScoresForUser(Map<String, Collection<String>> typeToSection, int userID, Collection<Integer> exids);
 }

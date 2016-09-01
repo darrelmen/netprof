@@ -37,11 +37,14 @@ import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.security.DominoSessionException;
 import mitll.langtest.server.database.security.UserSecurityManager;
 import mitll.langtest.server.mail.MailSupport;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickProject;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -59,6 +62,12 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
   protected ServerProperties serverProps;
   protected UserSecurityManager securityManager;
   protected PathHelper pathHelper;
+
+  @Override
+  public void init() {
+    findSharedDatabase();
+    readProperties(getServletContext());
+  }
 
   private DatabaseImpl getDatabase() {
     DatabaseImpl db = null;
@@ -198,4 +207,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
     }
   }
 
+  protected SectionHelper<CommonExercise> getSectionHelper() {
+    return db.getSectionHelper(getProjectID());
+  }
 }

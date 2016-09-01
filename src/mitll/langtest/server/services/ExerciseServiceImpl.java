@@ -80,9 +80,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
 
   @Override
   public void init() {
-    findSharedDatabase();
-    ServletContext servletContext = getServletContext();
-    readProperties(servletContext);
+    super.init();
 
     if (serverProps.isAMAS()) {
       audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, this, null);
@@ -514,11 +512,6 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
    */
   private void addPlayedMarkings(int userID, CommonExercise firstExercise) {
     db.getEventDAO().addPlayedMarkings(userID, firstExercise);
-  }
-
-
-  private SectionHelper<CommonExercise> getSectionHelper() {
-    return db.getSectionHelper(getProjectID());
   }
 
   /**
