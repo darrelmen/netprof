@@ -78,7 +78,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
   private static final boolean DEBUG = false;
 
-  @Deprecated private AudioFileHelper audioFileHelper;
   private AudioConversion audioConversion;
   private String configDir;
 
@@ -335,6 +334,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     return db.getUserListManager();
   }
 
+/*
   private AudioFileHelper getAudioFileHelper() {
     if (serverProps.isAMAS()) {
       return audioFileHelper;
@@ -347,7 +347,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       return project.getAudioFileHelper();
     }
   }
-
+*/
 
   /**
    * @param byID

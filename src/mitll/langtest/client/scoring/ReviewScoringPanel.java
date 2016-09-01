@@ -212,7 +212,7 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
     // Schedule the timer to run once in 1 seconds.
     t.schedule(wasVisible ? 1000 : 1);
 
-    controller.getService().getResultASRInfo(resultID, width, height, new AsyncCallback<PretestScore>() {
+    controller.getScoringService().getResultASRInfo(resultID, width, height, new AsyncCallback<PretestScore>() {
       public void onFailure(Throwable caught) {
         wordTranscript.getImage().setVisible(false);
         phoneTranscript.getImage().setVisible(false);
