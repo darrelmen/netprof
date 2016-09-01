@@ -61,9 +61,9 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 2/23/16
  */
-public abstract class AmasExercisePanel extends VerticalPanel implements
+abstract class AmasExercisePanel extends VerticalPanel implements
     PostAnswerProvider, ProvidesResize, RequiresResize, ExerciseQuestionState {
-  public static final String LISTEN_TO_THIS = "Listen to this audio and answer the question below";
+  private static final String LISTEN_TO_THIS = "Listen to this audio and answer the question below";
   private final Logger logger = Logger.getLogger("AmasExercisePanel");
 
   private static final int QUESTION_WIDTH = 700;
@@ -73,34 +73,29 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
   private static final String PROMPT = PROMPT_PREFIX + " question below.";
   private static final String PROMPT2 = PROMPT_PREFIX + " questions below.";
 
-  private final List<Widget> answers = new ArrayList<Widget>();
-
+  private final List<Widget> answers = new ArrayList<>();
   private final Set<Tab> completedTabs = new HashSet<>();
 
   AmasExerciseImpl exercise = null;
   final ExerciseController controller;
-
-  final LangTestDatabaseAsync service;
   final AmasNavigationHelper amasNavigationHelper;
   final ResponseExerciseList exerciseList;
-  private final Map<Integer, Widget> indexToWidget = new HashMap<Integer, Widget>();
+  private final Map<Integer, Widget> indexToWidget = new HashMap<>();
 
-  private final Map<Integer, Tab> indexToTab = new TreeMap<Integer, Tab>();
+  private final Map<Integer, Tab> indexToTab = new TreeMap<>();
   private TabPanel tabPanel;
   Integer currentTab = 1;
 
   /**
    * @param e
-   * @param service
    * @param controller
    * @param exerciseList
    * @see FeedbackRecordPanel#FeedbackRecordPanel
    */
-  AmasExercisePanel(final AmasExerciseImpl e, final LangTestDatabaseAsync service,
+  AmasExercisePanel(final AmasExerciseImpl e,
                     final ExerciseController controller, ResponseExerciseList exerciseList) {
     this.exercise = e;
     this.controller = controller;
-    this.service = service;
     this.exerciseList = exerciseList;
     this.amasNavigationHelper = getNavigationHelper(controller);
 
@@ -126,7 +121,7 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
     }
     add(hp);
 
-    addQuestions(e, service, controller);
+    addQuestions(e, controller.getService(), controller);
 
     // add next and prev buttons
     add(amasNavigationHelper);
@@ -155,7 +150,7 @@ public abstract class AmasExercisePanel extends VerticalPanel implements
 
   /**
    * @param numQuestions
-   * @see #AmasExercisePanel(AmasExerciseImpl, LangTestDatabaseAsync, ExerciseController, ResponseExerciseList)
+   * @see #AmasExercisePanel(AmasExerciseImpl, ExerciseController, ResponseExerciseList)
    */
   private void addInstructions(int numQuestions) {
     addInstructions(numQuestions == 1 ? PROMPT : PROMPT2, false);
