@@ -72,7 +72,6 @@ public class RecordButton extends Button {
   private final String RECORD;
   private final String STOP;
 
-
   private boolean recording = false;
   private Timer recordTimer;
   private final int autoStopDelay;
