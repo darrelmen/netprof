@@ -49,13 +49,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   private static final Logger logger = Logger.getLogger(ListServiceImpl.class);
   private static final boolean DEBUG = false;
 
-  @Override
-  public void init() {
-    findSharedDatabase();
-    readProperties(getServletContext());
-  }
-
-  /**
+   /**
    * @param userid
    * @param name
    * @param description
