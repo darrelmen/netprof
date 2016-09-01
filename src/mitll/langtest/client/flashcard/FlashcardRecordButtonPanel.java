@@ -36,7 +36,6 @@ import com.github.gwtbootstrap.client.ui.base.IconAnchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.recorder.RecordButtonPanel;
@@ -62,18 +61,16 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
 
   /**
    * @param exercisePanel
-   * @param service
    * @param controller
    * @param exerciseID
    * @param index
    * @see BootstrapExercisePanel#getAnswerWidget(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, String)
    */
   public FlashcardRecordButtonPanel(AudioAnswerListener exercisePanel,
-                                    LangTestDatabaseAsync service,
                                     ExerciseController controller,
                                     int exerciseID,
                                     int index) {
-    super(service, controller, exerciseID, index, true, AudioType.PRACTICE, "Record");
+    super(controller, exerciseID, index, true, AudioType.PRACTICE, "Record");
    // this.instance = instance;
     this.exercisePanel = exercisePanel;
   }
@@ -99,7 +96,7 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
 
   /**
    * @return
-   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#getAnswerAndRecordButtonRow(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
+   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#getAnswerAndRecordButtonRow
    */
   @Override
   public Widget getRecordButton() {

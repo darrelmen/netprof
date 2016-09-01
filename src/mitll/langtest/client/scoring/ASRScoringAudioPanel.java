@@ -62,22 +62,24 @@ public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> 
   /**
    * @see mitll.langtest.client.scoring.FastAndSlowASRScoringAudioPanel#FastAndSlowASRScoringAudioPanel
    * @param refSentence
-   * @param service
    * @param gaugePanel
    * @param playButtonSuffix
    * @param exercise
    * @param instance
    */
-  public ASRScoringAudioPanel(String refSentence, LangTestDatabaseAsync service, ExerciseController controller, ScoreListener gaugePanel,
-                              String playButtonSuffix, T exercise, String instance) {
-    super(refSentence, service, controller, gaugePanel, playButtonSuffix, exercise, instance);
+  ASRScoringAudioPanel(String refSentence,
+                              ExerciseController controller,
+                              ScoreListener gaugePanel,
+                              String playButtonSuffix,
+                              T exercise,
+                              String instance) {
+    super(refSentence, controller, gaugePanel, playButtonSuffix, exercise, instance);
   }
 
   /**
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.FastAndSlowASRScoringAudioPanel#FastAndSlowASRScoringAudioPanel
+   * @see mitll.langtest.client.scoring.FastAndSlowASRScoringAudioPanel#FastAndSlowASRScoringAudioPanel
    * @param path
    * @param refSentence
-   * @param service
    * @param controller
    * @param showSpectrogram
    * @param gaugePanel
@@ -86,10 +88,10 @@ public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> 
    * @param exercise
    * @param instance
    */
-  public ASRScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service,
+  public ASRScoringAudioPanel(String path, String refSentence,
                               ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel,
                               int rightMargin, String playButtonSuffix, T exercise, String instance) {
-    super(path, refSentence, service, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix, exercise, instance);
+    super(path, refSentence, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix, exercise, instance);
     this.useScoreToColorBkg = controller.useBkgColorForRef();
   }
 
@@ -153,10 +155,13 @@ public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> 
     };
 
     int id = exercise.getID();
+    LangTestDatabaseAsync service = controller.getService();
     if (controller.getProps().shouldUsePhoneToDisplay()) {
-      service.getASRScoreForAudioPhonemes(reqid, resultID, path, refSentence, toUse, height, useScoreToColorBkg, id, async);
+      service.getASRScoreForAudioPhonemes(
+          reqid, resultID, path, refSentence, toUse, height, useScoreToColorBkg, id, async);
     } else {
-      service.getASRScoreForAudio(reqid, resultID, path, refSentence, toUse, height, useScoreToColorBkg, id, async);
+      service.getASRScoreForAudio(
+          reqid, resultID, path, refSentence, toUse, height, useScoreToColorBkg, id, async);
     }
   }
 }
