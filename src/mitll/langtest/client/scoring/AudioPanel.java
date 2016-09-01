@@ -39,7 +39,6 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
-import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.WaveformPostAudioRecordButton;
@@ -102,7 +101,9 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
   private int lastWidth = 0;
   private int lastWidthOuter = 0;
   private AudioPositionPopup audioPositionPopup;
-  protected final LangTestDatabaseAsync service;
+ // protected final LangTestDatabaseAsync service;
+//  protected final AudioServiceAsync audioServiceAsync;
+
   protected final SoundManagerAPI soundManager;
   private PlayAudioPanel playAudio;
   private float screenPortion = 1.0f;
@@ -118,7 +119,6 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
   private static final boolean DEBUG_GET_IMAGES = false;
 
   /**
-   * @param service
    * @param showSpectrogram
    * @param gaugePanel
    * @param rightMargin
@@ -127,11 +127,16 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
    * @param instance
    * @see ScoringAudioPanel#ScoringAudioPanel
    */
-  public AudioPanel(String path, LangTestDatabaseAsync service,
-                    ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin,
+  public AudioPanel(String path,
+                    ExerciseController controller,
+                    boolean showSpectrogram,
+                    ScoreListener gaugePanel,
+                    int rightMargin,
                     String playButtonSuffix,
-                    T exercise, String instance) {
-    this(service, controller, showSpectrogram, gaugePanel, 1.0f, rightMargin, /*exercise.getID(), */exercise, instance);
+                    T exercise,
+                    String instance) {
+    this(controller, showSpectrogram, gaugePanel, 1.0f, rightMargin, /*exercise.getID(), */exercise, instance
+    );
     this.audioPath = path;
 
     addWidgets(playButtonSuffix, "Record");
@@ -150,26 +155,28 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
   }
 
   /**
-   * @param service
    * @param controller
    * @param showSpectrogram
    * @param gaugePanel
    * @param screenPortion
    * @param rightMargin
-   * @paramx exerciseID
    * @param exercise
    * @param instance
+   * @paramx exerciseID
    * @see mitll.langtest.client.exercise.RecordAudioPanel#RecordAudioPanel
    */
-  protected AudioPanel(LangTestDatabaseAsync service,
-                       ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel,
-                       float screenPortion, int rightMargin,
+  protected AudioPanel(ExerciseController controller,
+                       boolean showSpectrogram,
+                       ScoreListener gaugePanel,
+                       float screenPortion,
+                       int rightMargin,
                        //int exerciseID,
                        T exercise,
                        String instance) {
     this.screenPortion = screenPortion;
     this.soundManager = controller.getSoundManager();
-    this.service = service;
+  //  this.service = service;
+//    this.audioServiceAsync =audioServiceAsync;
     this.logMessages = controller.isLogClientMessages();
     this.controller = controller;
     this.gaugePanel = gaugePanel;
@@ -373,7 +380,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     /**
      * @see ScoringAudioPanel#scoreAudio(String, int, String, ImageAndCheck, ImageAndCheck, int, int, int)
      * @return
-     * @see ASRScoringAudioPanel#scoreAudio(String, long, String, ImageAndCheck, ImageAndCheck, int, int, int)
+     * @see ASRScoringAudioPanel#scoreAudio
      */
     public Image getImage() {
       return image;
@@ -588,7 +595,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     String message = "getImageURLForAudio : (success) " + result + " took " + roundtrip + " millis, audio dur " +
         (result.durationInSeconds * 1000f) + " millis, " +
         " " + ((float) roundtrip / (float) (result.durationInSeconds * 1000f)) + " roundtrip/audio duration ratio.";
-    service.logMessage(message, new AsyncCallback<Void>() {
+    controller.getService().logMessage(message, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
       }
