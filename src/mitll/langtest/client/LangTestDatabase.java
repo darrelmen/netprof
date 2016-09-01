@@ -67,69 +67,7 @@ public interface LangTestDatabase extends RemoteService {
    */
   StartupInfo getStartupInfo();
 
-  /**
-   * @see mitll.langtest.client.scoring.ReviewScoringPanel#scoreAudio(String, int, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
-   * @param resultID
-   * @param width
-   * @param height
-   * @return
-   */
-  PretestScore getResultASRInfo(int resultID, int width, int height);
-
-  /**
-   * @see ASRScoringAudioPanel#scoreAudio(String, int, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
-   * @param reqid
-   * @param resultID
-   * @param testAudioFile
-   * @param sentence
-   * @param width
-   * @param height
-   * @param useScoreToColorBkg
-   * @param exerciseID
-   * @return
-   */
-  PretestScore getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence,
-                                   int width, int height, boolean useScoreToColorBkg, int exerciseID);
-
-  /**
-   * @see ASRScoringAudioPanel#scoreAudio(String, int, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
-   * @param reqid
-   * @param resultID
-   * @param testAudioFile
-   * @param sentence
-   * @param width
-   * @param height
-   * @param useScoreToColorBkg
-   * @param exerciseID
-   * @return
-   */
-  PretestScore getASRScoreForAudioPhonemes(int reqid, long resultID, String testAudioFile, String sentence,
-                                           int width, int height, boolean useScoreToColorBkg, int exerciseID);
-
-  /**
-   * @see mitll.langtest.client.scoring.PostAudioRecordButton#addRT(AudioAnswer, int)
-   * @see mitll.langtest.client.recorder.RecordButtonPanel#postAudioFile(Panel, int, String)
-   * @param resultid
-   * @param roundTrip
-   */
-  void addRoundTrip(int resultid, int roundTrip);
-
-  /**
-   * @see mitll.langtest.client.scoring.SimplePostAudioRecordButton#postAudioFile(String)
-   * @param base64EncodedString
-   * @param textToAlign
-   * @param identifier
-   * @param reqid
-   * @param device
-   * @return
-   */
-  AudioAnswer getAlignment(String base64EncodedString,
-                           String textToAlign,
-                           String identifier,
-                           int reqid,
-                           String device);
-
-  /**
+    /**
    * @see RecorderNPFHelper#getProgressInfo
    * @return
    */
