@@ -481,7 +481,7 @@ public class ResultManager extends PagerTable {
       // logger.info("audio type " + audioType);
       String foreignText = selectedObject.getForeignText();
 
-      ReviewScoringPanel w = new ReviewScoringPanel(selectedObject.getAnswer(), foreignText, service, controller,
+      ReviewScoringPanel w = new ReviewScoringPanel(selectedObject.getAnswer(), foreignText, controller,
           null, "instance");
 
       w.setResultID(selectedObject.getUniqueID());
@@ -493,7 +493,7 @@ public class ResultManager extends PagerTable {
       reviewContainer.add(vert);
       reviewContainer.add(w.getTables());
     } else {
-      AudioPanel w = new AudioPanel<>(selectedObject.getAnswer(), service, controller, false, null, 10, "",
+      AudioPanel w = new AudioPanel<>(selectedObject.getAnswer(), controller, false, null, 10, "",
           null, "instance");
       reviewContainer.add(w);
     }

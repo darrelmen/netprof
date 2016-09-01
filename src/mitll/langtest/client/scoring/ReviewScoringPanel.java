@@ -41,7 +41,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
@@ -70,17 +69,16 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
 
   /**
    * @param refSentence
-   * @param service
    * @param controller
    * @param exercise
    * @param instance
    * @see mitll.langtest.client.result.ResultManager#getAsyncTable(int, Widget)
    */
-  public ReviewScoringPanel(String path, String refSentence, LangTestDatabaseAsync service,
+  public ReviewScoringPanel(String path, String refSentence,
                             ExerciseController controller,
                             CommonExercise exercise,
                             String instance) {
-    super(path, refSentence, service, controller, false, new EmptyScoreListener(), 23, "", exercise, instance);
+    super(path, refSentence, controller, false, new EmptyScoreListener(), 23, "", exercise, instance);
     tablesContainer = new HorizontalPanel();
     tablesContainer.getElement().setId("TablesContainer");
     belowContainer = new DivWidget();
@@ -214,7 +212,7 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
     // Schedule the timer to run once in 1 seconds.
     t.schedule(wasVisible ? 1000 : 1);
 
-    service.getResultASRInfo(resultID, width, height, new AsyncCallback<PretestScore>() {
+    controller.getService().getResultASRInfo(resultID, width, height, new AsyncCallback<PretestScore>() {
       public void onFailure(Throwable caught) {
         wordTranscript.getImage().setVisible(false);
         phoneTranscript.getImage().setVisible(false);
@@ -293,7 +291,7 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
 
   /**
    * @return
-   * @see mitll.langtest.client.result.ResultManager#getAsyncTable(int)
+   * @see mitll.langtest.client.result.ResultManager#getAsyncTable
    */
   public Widget getTables() {
     return tablesContainer;

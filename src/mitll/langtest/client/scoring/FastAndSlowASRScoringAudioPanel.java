@@ -43,7 +43,6 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.exercise.AudioAttribute;
@@ -77,17 +76,16 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
   /**
    * @param exercise
    * @param path
-   * @param service
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#getAudioPanel
    */
   protected FastAndSlowASRScoringAudioPanel(T exercise,
-                                            String path, LangTestDatabaseAsync service, ExerciseController controller1,
+                                            String path,
+                                            ExerciseController controller1,
                                             ScoreListener scoreListener,
                                             String instance
   ) {
     super(path,
         exercise.getForeignLanguage(),
-        service,
         controller1,
         controller1.getProps().showSpectrogram(), scoreListener, RIGHT_MARGIN, REFERENCE, exercise, instance);
   }

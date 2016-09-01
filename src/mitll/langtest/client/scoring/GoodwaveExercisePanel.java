@@ -111,7 +111,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
    * @see ASRScorePanel#addTooltip
    */
   private static final String DOWNLOAD_YOUR_RECORDING = "Download your recording.";
-  public static final String MEANING = "Meaning";
+  private static final String MEANING = "Meaning";
 
   private final ListInterface listContainer;
   private boolean isBusy = false;
@@ -122,7 +122,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
   protected final T exercise;
   protected final ExerciseController controller;
 
-  protected final LangTestDatabaseAsync service;
+  //protected final LangTestDatabaseAsync service;
   protected final ListServiceAsync listService = GWT.create(ListService.class);
 
   protected ScoreListener scorePanel;
@@ -144,12 +144,15 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
    * @param instance
    * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel
    */
-  protected GoodwaveExercisePanel(final T commonExercise, final ExerciseController controller,
+  protected GoodwaveExercisePanel(final T commonExercise,
+                                  final ExerciseController controller,
                                   final ListInterface<CommonShell> listContainer,
-                                  float screenPortion, boolean addKeyHandler, String instance) {
+                                  float screenPortion,
+                                  boolean addKeyHandler,
+                                  String instance) {
     this.exercise = commonExercise;
     this.controller = controller;
-    this.service = controller.getService();
+//    this.service = controller.getService();
     this.screenPortion = screenPortion;
     this.instance = instance;
     String language = controller.getLanguage();
@@ -189,7 +192,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
       add(widgets);
     }
     if (controller.isRecordingEnabled()) {
-      addUserRecorder(service, controller, center, screenPortion, exercise); // todo : revisit screen portion...
+      addUserRecorder(controller.getService(), controller, center, screenPortion, exercise); // todo : revisit screen portion...
     }
 
     if (!controller.showOnlyOneExercise()) { // headstart doesn't need navigation, lists, etc.
@@ -351,7 +354,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
   }
 
   protected ASRScoringAudioPanel makeFastAndSlowAudio(String path) {
-    return new FastAndSlowASRScoringAudioPanel(getLocalExercise(), path, service, controller, scorePanel, instance);
+    return new FastAndSlowASRScoringAudioPanel(getLocalExercise(), path, controller, scorePanel, instance);
   }
 
   /**
@@ -370,7 +373,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
   }
 
   private void addAnnotation(final String field, final String status, final String commentToPost) {
-    service.addAnnotation(getLocalExercise().getID(), field, status, commentToPost, controller.getUser(), new AsyncCallback<Void>() {
+    controller.getService().addAnnotation(getLocalExercise().getID(), field, status, commentToPost, controller.getUser(), new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
       }
@@ -567,7 +570,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
      * @see GoodwaveExercisePanel#getAnswerWidget
      */
     ASRRecordAudioPanel(LangTestDatabaseAsync service, ExerciseController controller, T exercise, String instance) {
-      super(exercise.getForeignLanguage(), service, controller, scorePanel, REFERENCE, exercise, instance);
+      super(exercise.getForeignLanguage(), controller, scorePanel, REFERENCE, exercise, instance);
       this.index = 1;
       getElement().setId("ASRRecordAudioPanel");
     }
@@ -707,9 +710,13 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
      */
     private class MyPostAudioRecordButton extends PostAudioRecordButton {
       MyPostAudioRecordButton(ExerciseController controller) {
-        super(getLocalExercise().getID(), controller, ASRRecordAudioPanel.this.service, ASRRecordAudioPanel.this.index,
+        super(getLocalExercise().getID(),
+            controller,
+            ASRRecordAudioPanel.this.index,
             true,
-            RECORD_YOURSELF, controller.getProps().doClickAndHold() ? RELEASE_TO_STOP : "Stop");
+            RECORD_YOURSELF,
+            controller.getProps().doClickAndHold() ? RELEASE_TO_STOP : "Stop"
+        );
       }
 
       @Override
