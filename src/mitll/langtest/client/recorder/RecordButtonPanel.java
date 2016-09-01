@@ -211,7 +211,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
             long now = System.currentTimeMillis();
             long diff = now - then;
 
-            controller.getService().addRoundTrip(result.getResultID(), (int) diff, new AsyncCallback<Void>() {
+            controller.getScoringService().addRoundTrip(result.getResultID(), (int) diff, new AsyncCallback<Void>() {
               @Override
               public void onFailure(Throwable caught) {
               }

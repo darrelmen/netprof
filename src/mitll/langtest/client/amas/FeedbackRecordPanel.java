@@ -100,7 +100,7 @@ public class FeedbackRecordPanel extends AmasExercisePanel {
   public FeedbackRecordPanel(AmasExerciseImpl e, LangTestDatabaseAsync service, ExerciseController controller,
                              ResponseExerciseList exerciseList,
                              QuizScorePanel quizScorePanel) {
-    super(e, service, controller, exerciseList);
+    super(e, controller, exerciseList);
     getElement().setId("FeedbackRecordPanel");
     this.quizScorePanel = quizScorePanel;
     getScores(true);

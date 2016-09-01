@@ -138,7 +138,7 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
   private void postAudioFile(String base64EncodedWavFile) {
     reqid++;
 
-    service.getAlignment(base64EncodedWavFile,
+    controller.getScoringService().getAlignment(base64EncodedWavFile,
         textToAlign,
         identifier,
         reqid,
