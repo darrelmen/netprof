@@ -33,30 +33,27 @@
 package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.ExerciseListRequest;
-import mitll.langtest.shared.exercise.ExerciseListWrapper;
-import mitll.langtest.shared.exercise.Shell;
-import mitll.langtest.shared.image.ImageResponse;
+import mitll.langtest.shared.answer.Answer;
+import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.HasID;
+import mitll.langtest.shared.exercise.STATE;
+import mitll.langtest.shared.flashcard.QuizCorrectAndScore;
 import mitll.langtest.shared.scoring.AudioContext;
 
-public interface AudioServiceAsync {
-  void writeAudioFile(String base64EncodedString,
-                      AudioContext audioContext,
+import java.util.Collection;
+import java.util.Map;
 
-                      boolean recordedWithFlash,
-                      String deviceType,
-                      String device,
-                      boolean doFlashcard,
-                      boolean recordInResults,
-                      boolean addToAudioTable,
-                      boolean allowAlternates,
+public interface QCServiceAsync {
+  void addAnnotation(int exerciseID, String field, String status, String comment, int userID, AsyncCallback<Void> async);
 
-                      AsyncCallback<AudioAnswer> async);
+  void markReviewed(int id, boolean isCorrect, int creatorID, AsyncCallback<Void> asyncCallback);
 
-  void getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height,
-                            String exerciseID,
-                            AsyncCallback<ImageResponse> async);
+  void markState(int exid, STATE state, int creatorID, AsyncCallback<Void> async);
+
+  void markAudioDefect(AudioAttribute audioAttribute, HasID exid, AsyncCallback<Void> async);
+
+  void markGender(AudioAttribute attr, boolean isMale, AsyncCallback<Void> async);
+
+  void deleteItem(int exid, AsyncCallback<Boolean> async);
 
 }
