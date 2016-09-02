@@ -30,56 +30,26 @@
  *
  */
 
-package mitll.langtest.client.services;
+package mitll.langtest.server.database.user;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.user.LoginResult;
+import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.IDAO;
+import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
+import mitll.npdata.dao.SlickUserSession;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
-public interface UserServiceAsync {
-  void getUsers(AsyncCallback<List<User>> async);
+public interface IUserSessionDAO extends IDAO {
 
-  void userExists(String login, String passwordH, AsyncCallback<User> async);
+  void add(SlickUserSession user);
 
-  /**
-   * No real need to pass this in
-   *
-   * @param login
-   * @param async
-   */
-  void logout(String login, AsyncCallback<Void> async);
+  Collection<String> getByUser(int userid);
 
-  void addUser(
-      SignUpUser user,
-      String url,
-      boolean isCD,
-      AsyncCallback<User> async);
+  int getUserForSession(String sesssion);
 
-  void resetPassword(String userid, String text, String url, AsyncCallback<Boolean> asyncCallback);
-
-  void forgotUsername(String emailH, String email, String url, AsyncCallback<Boolean> async);
-
-  void getUserIDForToken(String token, AsyncCallback<Long> async);
-
-  void changePFor(String token, String first, AsyncCallback<Boolean> asyncCallback);
-
-  void changeEnabledFor(int userid, boolean enabled, AsyncCallback<Void> async);
-
-  void enableCDUser(String cdToken, String emailR, String url, AsyncCallback<String> asyncCallback);
-
-  /**
-   * @param userId
-   * @param attemptedPassword
-   * @param async
-   * @see UserManager#getPermissionsAndSetUser
-   */
-  void loginUser(String userId, String attemptedPassword, AsyncCallback<LoginResult> async);
-
-  void setProject(int projectid, AsyncCallback<User> async);
-
-  void forgetProject(AsyncCallback<Void> async);
+  void removeSession(String session);
 }
