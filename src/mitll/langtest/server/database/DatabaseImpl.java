@@ -138,6 +138,7 @@ public class DatabaseImpl implements Database {
   private String installPath;
 
   private IUserDAO userDAO;
+  private IUserSessionDAO userSessionDAO;
   private IResultDAO resultDAO;
 
   private IRefResultDAO refresultDAO;
@@ -359,26 +360,16 @@ public class DatabaseImpl implements Database {
 
     dbConnection = getDbConnection();
 
-    SlickEventImpl slickEventDAO = new SlickEventImpl(dbConnection);
-    eventDAO = slickEventDAO;
-
-    SlickUserDAOImpl slickUserDAO = new SlickUserDAOImpl(this, dbConnection);
-    this.userDAO = slickUserDAO;
-
-    SlickAudioDAO slickAudioDAO = new SlickAudioDAO(this, dbConnection, this.userDAO);
-    audioDAO = slickAudioDAO;
-
-    SlickResultDAO slickResultDAO = new SlickResultDAO(this, dbConnection);
-    resultDAO = slickResultDAO;
-
-    SlickAnswerDAO slickAnswerDAO = new SlickAnswerDAO(this, dbConnection);
-    answerDAO = slickAnswerDAO;
-
+    eventDAO = new SlickEventImpl(dbConnection);
+    this.userDAO = new SlickUserDAOImpl(this, dbConnection);
+    this.userSessionDAO = new SlickUserSessionDAOImpl(this,dbConnection);
+    audioDAO = new SlickAudioDAO(this, dbConnection, this.userDAO);
+    resultDAO = new SlickResultDAO(this, dbConnection);
+    answerDAO = new SlickAnswerDAO(this, dbConnection);
 //    addRemoveDAO = new AddRemoveDAO(this);
 
     refresultDAO = new SlickRefResultDAO(this, dbConnection, serverProps.shouldDropRefResult());
     userExerciseDAO = new SlickUserExerciseDAO(this, dbConnection);//, getExerciseToPhone(refresultDAO));
-
     wordDAO = new SlickWordDAO(this, dbConnection);
     phoneDAO = new SlickPhoneDAO(this, dbConnection);
 
@@ -1343,7 +1334,8 @@ public class DatabaseImpl implements Database {
         getReviewedDAO(),
         getSecondStateDAO(),
         ((ProjectDAO) getProjectDAO()).getProjectPropertyDAO(),
-        getUserProjectDAO()
+        getUserProjectDAO(),
+        userSessionDAO
     );
     for (IDAO dao : idaos) {
       createIfNotThere(dao, created);
@@ -2033,5 +2025,9 @@ public class DatabaseImpl implements Database {
 
   public mitll.langtest.server.database.user.UserManagement getUserManagement() {
     return userManagement;
+  }
+
+  public IUserSessionDAO getUserSessionDAO() {
+    return userSessionDAO;
   }
 }
