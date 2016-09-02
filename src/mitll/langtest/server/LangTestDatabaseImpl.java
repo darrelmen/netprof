@@ -432,7 +432,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     //   audioConversion = new AudioConversion(serverProps);
     db = makeDatabaseImpl(serverProps.getH2Database());
     shareDB(servletContext);
-    securityManager = new UserSecurityManager(db.getUserDAO());
+    securityManager = new UserSecurityManager(db.getUserDAO(), db.getUserSessionDAO());
 //    shareLoadTesting(servletContext);
   }
 

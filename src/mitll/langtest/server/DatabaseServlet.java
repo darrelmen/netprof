@@ -44,6 +44,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 
 /**
+ * TODO : consider how to partition audio services...
+ *
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
@@ -52,11 +54,10 @@ import java.io.*;
 public class DatabaseServlet extends HttpServlet {
   private static final Logger logger = Logger.getLogger(DatabaseServlet.class);
   private static final int BUFFER_SIZE = 4096;
- // private static final String NO = "NO";
+  // private static final String NO = "NO";
   // not clear this is a big win currently - this enables us to rewrite the mp3s and possibly mark
   // them with a title
 //  private static final Boolean CHECK_FOR_MP3 = false;
-
   protected ServerProperties serverProps;
   //private String relativeConfigDir;
   private String configDir;
@@ -78,9 +79,9 @@ public class DatabaseServlet extends HttpServlet {
    * @param wavFile
    * @param title
    * @param author
-   * @see mitll.langtest.server.ScoreServlet#getAnswer
+   * @see mitll.langtest.server.ScoreServlet#ensureMP3Later(int, String, String)
    */
-  protected void ensureMP3(String wavFile, String title, String author) {
+  void ensureMP3(String wavFile, String title, String author) {
     ensureMP3(wavFile, pathHelper, configDir, title, author);
   }
 
@@ -98,7 +99,7 @@ public class DatabaseServlet extends HttpServlet {
         logger.error("huh? can't find " + wavFile + " under " + parent);
       }
       String filePath = audioConversion.ensureWriteMP3(wavFile, parent, false, title, author);
-     // return new File(filePath).exists();
+      // return new File(filePath).exists();
     } else {
       //return;
     }
@@ -152,9 +153,9 @@ public class DatabaseServlet extends HttpServlet {
   }
 
   /**
-   * @see #doGet
    * @param request
    * @return
+   * @see #doGet
    */
   int getProject(HttpServletRequest request) {
     try {
@@ -170,26 +171,13 @@ public class DatabaseServlet extends HttpServlet {
   }
 
   /**
-   * @see #getProject(HttpServletRequest)
    * @param id
    * @return
+   * @see #getProject(HttpServletRequest)
    */
   int getMostRecentProjectByUser(int id) {
     return getDatabase().getUserProjectDAO().mostRecentByUser(id);
   }
-
-/*
-  String getProjectLanguage(HttpServletRequest request) {
-    try {
-      int project = getProject(request);
-      Project project1 = getDatabase().getProject(project);
-      return project1.getLanguage();
-    } catch (Exception e) {
-      logger.error("got " +e,e);
-      return "";
-    }
-  }
-*/
 
   private DatabaseImpl db = null;
 
@@ -198,7 +186,7 @@ public class DatabaseServlet extends HttpServlet {
       Object databaseReference = getServletContext().getAttribute(LangTestDatabaseImpl.DATABASE_REFERENCE);
       if (databaseReference != null) {
         db = (DatabaseImpl) databaseReference;
-        securityManager = new UserSecurityManager(db.getUserDAO());
+        securityManager = new UserSecurityManager(db.getUserDAO(), db.getUserSessionDAO());
         // logger.debug("found existing database reference " + db + " under " +getServletContext());
       } else {
         logger.error("huh? no existing db reference?");
