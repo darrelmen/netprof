@@ -36,37 +36,25 @@ import audio.image.ImageType;
 import audio.imagewriter.SimpleImageWriter;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.services.AudioService;
-import mitll.langtest.client.services.ExerciseService;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
-import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.audio.PathWriter;
 import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.custom.IUserListManager;
-import mitll.langtest.server.database.exercise.Project;
-import mitll.langtest.server.database.exercise.SectionHelper;
-import mitll.langtest.server.database.user.BaseUserDAO;
-import mitll.langtest.server.scoring.SmallVocabDecoder;
-import mitll.langtest.server.sorter.ExerciseSorter;
-import mitll.langtest.server.trie.ExerciseTrie;
-import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
-import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.user.User;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 
-import javax.servlet.ServletContext;
 import java.io.File;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.text.Collator;
-import java.util.*;
 
+
+/**
+ * TODO : add image generation here too - since it's done from a file.
+ */
 @SuppressWarnings("serial")
 public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioService {
   private static final Logger logger = Logger.getLogger(AudioServiceImpl.class);
@@ -80,6 +68,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
   private AudioConversion audioConversion;
   private String configDir;
+  private PathWriter pathWriter;
 
   @Override
   public void init() {
@@ -87,6 +76,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     audioConversion = new AudioConversion(serverProps);
     String relativeConfigDir = "config" + File.separator + getServletContext().getInitParameter("config");
     this.configDir = pathHelper.getInstallPath() + File.separator + relativeConfigDir;
+    pathWriter = new PathWriter(serverProps);
   }
 
   /**
@@ -171,7 +161,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
     return audioAnswer;
   }
-
 
 
   private void ensureCompressedEquivalent(int user, CommonShell exercise1, AudioAnswer audioAnswer) {
@@ -269,7 +258,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
     //  logger.debug("addToAudioTable user " + user + " ex " + exerciseID + " for " + audioType + " path before " + audioAnswer.getPath());
 
-    String permanentAudioPath = new PathWriter().
+    String permanentAudioPath = pathWriter.
         getPermanentAudioPath(pathHelper,
             getAbsoluteFile(audioAnswer.getPath()),
             getPermanentName(user, audioType),

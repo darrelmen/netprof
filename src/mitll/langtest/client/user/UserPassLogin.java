@@ -36,7 +36,6 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.Image;
-import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
@@ -59,18 +58,13 @@ import mitll.langtest.client.BrowserCheck;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
-import mitll.langtest.client.custom.KeyStorage;
-import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.instrumentation.EventRegistration;
-import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.shared.user.SignUpUser;
-import mitll.langtest.shared.user.SlimProject;
 import mitll.langtest.shared.user.User;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
@@ -664,7 +658,7 @@ public class UserPassLogin extends UserDialog {
 
     makeSignUpPassword(fieldset, emailBox);
 
-   // fieldset.add(signUpProjectChoice = getProjectChoices(true));
+    // fieldset.add(signUpProjectChoice = getProjectChoices(true));
 
     fieldset.add(getRolesHeader());
     fieldset.add(getRolesChoices());
@@ -896,8 +890,8 @@ public class UserPassLogin extends UserDialog {
         } else if (selectedRole == User.Kind.CONTENT_DEVELOPER && registrationInfo.getDialectGroup().getText().isEmpty()) {
           eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "didn't fill in dialect ");
           markErrorBlur(registrationInfo.getDialectGroup(), "Enter a language dialect.");
-      //  } else if (currentSignUpProject == null) {
-      //    markErrorBlur(signUpProjectChoice, "Please choose a language", Placement.TOP);
+          //  } else if (currentSignUpProject == null) {
+          //    markErrorBlur(signUpProjectChoice, "Please choose a language", Placement.TOP);
         } else {
           gotSignUp(userBox.getValue(), signUpPassword.box.getValue(), emailBox.getValue(), selectedRole);
         }
@@ -913,7 +907,7 @@ public class UserPassLogin extends UserDialog {
 
   /**
    * TODO : add first and last name so students can find their teacher
-   * 
+   * <p>
    * When the form is valid, make a new user or update an existing one.
    *
    * @param user
@@ -923,26 +917,23 @@ public class UserPassLogin extends UserDialog {
    * @see #getSignUpButton(com.github.gwtbootstrap.client.ui.base.TextBoxBase, com.github.gwtbootstrap.client.ui.base.TextBoxBase)
    */
   private void gotSignUp(final String user, String password, String email, User.Kind kind) {
-    String passH  = Md5Hash.getHash(password);
+    String passH = Md5Hash.getHash(password);
     String emailH = Md5Hash.getHash(email);
 
-    boolean isCD   = kind == User.Kind.CONTENT_DEVELOPER;
-    String gender  = isCD ? registrationInfo.isMale() ? MALE : "female" : MALE;
-    String age     = isCD ? registrationInfo.getAgeEntryGroup().getText() : "";
-    int age1       = isCD ? (age.isEmpty() ? 99 : Integer.parseInt(age)) : 0;
+    boolean isCD = kind == User.Kind.CONTENT_DEVELOPER;
+    String gender = isCD ? registrationInfo.isMale() ? MALE : "female" : MALE;
+    String age = isCD ? registrationInfo.getAgeEntryGroup().getText() : "";
+    int age1 = isCD ? (age.isEmpty() ? 99 : Integer.parseInt(age)) : 0;
     String dialect = isCD ? registrationInfo.getDialectGroup().getText() : "unk";
 
     signUp.setEnabled(false);
 
-    SignUpUser newUser = new SignUpUser(user,passH,emailH,email,kind,gender.equalsIgnoreCase(MALE),age1,dialect,"browser","","","");
+    SignUpUser newUser = new SignUpUser(user, passH, emailH, email, kind, gender.equalsIgnoreCase(MALE), age1, dialect, "browser", "", "", "");
 
-    service.addUser(//user, passH, emailH, kind,
+    service.addUser(
         newUser,
         Window.Location.getHref(),
-        //email,
-        //gender.equalsIgnoreCase(MALE), age1, dialect,
         isCD,
-        //"browser",
         new AsyncCallback<User>() {
           @Override
           public void onFailure(Throwable caught) {
@@ -1006,7 +997,7 @@ public class UserPassLogin extends UserDialog {
     addBullett(left, props.getFirstBullet(), "NewProF2_48x48.png");
     if (!props.isAMAS()) {
       addBullett(left, SECOND_BULLET, "NewProF1_48x48.png");
-      addBullett(left, THIRD_BULLET,  "listIcon_48x48_transparent.png");
+      addBullett(left, THIRD_BULLET, "listIcon_48x48_transparent.png");
 //    w3.getElement().getStyle().setMarginTop(-1, Style.Unit.PX);
 //    configure(w3);
     }

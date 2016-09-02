@@ -133,6 +133,12 @@ public class UserManagement {
     return addUser(userID, passwordH, emailH, email, device, ip, kind, isMale, age, dialect);
   }*/
 
+  /**
+   * @see mitll.langtest.server.services.UserServiceImpl#addUser(SignUpUser, String, boolean)
+   * @param request
+   * @param user
+   * @return
+   */
   public User addUser(HttpServletRequest request, SignUpUser user) {
     return addUser(user.setIp(getIPInfo(request)));
   }
@@ -166,6 +172,11 @@ public class UserManagement {
     return l;
   }*/
 
+  /**
+   * @see #addUser(HttpServletRequest, SignUpUser)
+   * @param request
+   * @return
+   */
   private String getIPInfo(HttpServletRequest request) {
     String header = request.getHeader("User-Agent");
     SimpleDateFormat sdf = new SimpleDateFormat();
