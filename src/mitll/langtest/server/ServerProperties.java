@@ -144,6 +144,7 @@ public class ServerProperties {
   private static final String MIN_DYNAMIC_RANGE = "minDynamicRange";
   private static final String RUN_REF_DECODE_WITH_HYDEC = "runRefDecodeWithHydec";
   private static final String BEST_AUDIO = "bestAudio";
+  private static final String CHECK_AUDIO_TRANSCRIPT = "checkAudioTranscript";
 
   private Properties props = new Properties();
 
@@ -305,9 +306,13 @@ public class ServerProperties {
     return getDefaultFalse("isAMAS");
   }
 
+  public boolean shouldCheckAudioTranscript() {
+    return getDefaultTrue(CHECK_AUDIO_TRANSCRIPT);
+  }
+
   /**
-   * @see mitll.langtest.server.decoder.RefResultDecoder#doRefDecode(Collection, String)
    * @return
+   * @see mitll.langtest.server.decoder.RefResultDecoder#doRefDecode(Collection, String)
    */
   public boolean shouldTrimAudio() {
     return getDefaultTrue(DO_TRIM);
@@ -404,7 +409,7 @@ public class ServerProperties {
     }
     miraClassifierURL = props.getProperty(MIRA_CLASSIFIER_URL, MIRA_DEFAULT);
 
-    props.put("scoringModel",props.getProperty("MODELS_DIR",""));
+    props.put("scoringModel", props.getProperty("MODELS_DIR", ""));
 
     if (getLessonPlan().startsWith("http")) props.setProperty("talksToDomino", TRUE);
   }
@@ -627,7 +632,7 @@ public class ServerProperties {
   }
 
   private static final long TRIM_SILENCE_BEFORE = 300;
-  private static final long TRIM_SILENCE_AFTER  = 300;
+  private static final long TRIM_SILENCE_AFTER = 300;
 
   public long getTrimBefore() {
     return getIntPropertyDef("trimBeforeMillis", "" + TRIM_SILENCE_BEFORE);
