@@ -59,6 +59,7 @@ public class AttachAudio {
   private final String mediaDir, mediaDir1;
   private final File installPath;
   private Map<String, List<AudioAttribute>> exToAudio;
+  private boolean checkAudioTranscript = true;
 
   /**
    * @param mediaDir
@@ -66,18 +67,21 @@ public class AttachAudio {
    * @param installPath
    * @param audioOffset
    * @param exToAudio
+   * @param checkAudioTranscript
    * @see BaseExerciseDAO#setAudioDAO
    */
   public AttachAudio(String mediaDir,
                      String mediaDir1,
                      File installPath,
                      int audioOffset,
-                     Map<String, List<AudioAttribute>> exToAudio) {
+                     Map<String, List<AudioAttribute>> exToAudio,
+                     boolean checkAudioTranscript) {
     this.mediaDir = mediaDir;
     this.mediaDir1 = mediaDir1;
     this.installPath = installPath;
     this.setExToAudio(exToAudio);
     this.audioOffset = audioOffset;
+    this.checkAudioTranscript = checkAudioTranscript;
   }
 
   /**
@@ -134,7 +138,7 @@ public class AttachAudio {
    * Why does it sometimes have the config dir on the front?
    *
    * @param imported
-   * @paramx id
+   * @param transcriptChanged
    * @see ExcelImport#attachAudio
    * @see ExcelImport#getRawExercises()
    */
@@ -189,7 +193,7 @@ public class AttachAudio {
 
         if (exists) {
           if (!audioPaths.contains(child)) {
-            if (audio.hasMatchingTranscript(imported.getForeignLanguage())) {
+            if (audio.hasMatchingTranscript(imported.getForeignLanguage()) || !checkAudioTranscript) {
               audio.setAudioRef(child);   // remember to prefix the path
               mutableAudio.addAudio(audio);
             } else {
@@ -234,7 +238,7 @@ public class AttachAudio {
     return wavPath.replaceAll("\\\\", "/");
   }
 
-  public void setExToAudio(Map<String, List<AudioAttribute>> exToAudio) {
+  void setExToAudio(Map<String, List<AudioAttribute>> exToAudio) {
     this.exToAudio = exToAudio;
   }
 }
