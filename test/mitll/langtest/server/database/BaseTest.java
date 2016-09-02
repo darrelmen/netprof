@@ -73,9 +73,6 @@ public class BaseTest {
   protected static DatabaseImpl getDatabaseLight(String config,
                                                  boolean useH2,
                                                  boolean useLocal,
-//                                                 String host,
-//                                                 String user,
-//                                                 String pass,
                                                  String optPropsFile) {
 
     logger.info("db " + config + " props " + optPropsFile);
@@ -86,6 +83,9 @@ public class BaseTest {
     logger.info("db " + config + " props " + propsFile);
 
     File file = new File(installPath + File.separator + "config" + File.separator + config + File.separator + propsFile);
+
+    logger.info("path " + file.getAbsolutePath());
+
     ServerProperties serverProps = getServerProperties(config, propsFile);
 
     if (useLocal) {

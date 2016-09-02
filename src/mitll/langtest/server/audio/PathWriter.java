@@ -59,12 +59,12 @@ public class PathWriter {
    * @param destFileName
    * @param overwrite
    * @param projid
-   *@param exid
+   * @param exid
    * @param title            mark the mp3 meta data with this title
-   * @param artist mark the mp3 meta data with this artist
-   * @param serverProperties     @return path of file under bestAudio directory
+   * @param artist           mark the mp3 meta data with this artist
+   * @param serverProperties @return path of file under bestAudio directory
    * @see mitll.langtest.server.database.custom.UserListManager#getRefAudioPath
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable
+   * @see mitll.langtest.server.services.AudioServiceImpl#addToAudioTable
    */
   public String getPermanentAudioPath(PathHelper pathHelper,
                                       File fileRef,
@@ -79,7 +79,7 @@ public class PathWriter {
     if (!bestDir.exists() && !bestDir.mkdir()) {
       if (!bestDir.exists()) logger.warn("huh? couldn't make " + bestDir.getAbsolutePath());
     }
-    File bestDirForExercise = new File(bestDir, ""+exid);
+    File bestDirForExercise = new File(bestDir, "" + exid);
     if (!bestDirForExercise.exists() && !bestDirForExercise.mkdir()) {
       if (!bestDirForExercise.exists()) logger.warn("huh? couldn't make " + bestDirForExercise.getAbsolutePath());
     }
@@ -110,7 +110,7 @@ public class PathWriter {
     try {
       FileUtils.copyFile(fileRef, destination);
     } catch (IOException e) {
-      logger.error("couldn't copy " +fileRef.getAbsolutePath() + " to " + destination.getAbsolutePath());
+      logger.error("couldn't copy " + fileRef.getAbsolutePath() + " to " + destination.getAbsolutePath());
     }
 
     // logger.debug("getPermanentAudioPath : normalizing levels for " + destination.getAbsolutePath());
