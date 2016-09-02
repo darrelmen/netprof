@@ -30,56 +30,64 @@
  *
  */
 
-package mitll.langtest.client.services;
+package mitll.langtest.server.database.user;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.user.LoginResult;
-import mitll.langtest.shared.user.SignUpUser;
-import mitll.langtest.shared.user.User;
+import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.database.DAO;
+import mitll.langtest.server.database.Database;
+import mitll.npdata.dao.DBConnection;
+import mitll.npdata.dao.SlickUserSession;
+import mitll.npdata.dao.user.UserSessionDAOWrapper;
+import org.apache.log4j.Logger;
 
-import java.util.List;
+import java.util.Collection;
 
-public interface UserServiceAsync {
-  void getUsers(AsyncCallback<List<User>> async);
-
-  void userExists(String login, String passwordH, AsyncCallback<User> async);
-
-  /**
-   * No real need to pass this in
-   *
-   * @param login
-   * @param async
-   */
-  void logout(String login, AsyncCallback<Void> async);
-
-  void addUser(
-      SignUpUser user,
-      String url,
-      boolean isCD,
-      AsyncCallback<User> async);
-
-  void resetPassword(String userid, String text, String url, AsyncCallback<Boolean> asyncCallback);
-
-  void forgotUsername(String emailH, String email, String url, AsyncCallback<Boolean> async);
-
-  void getUserIDForToken(String token, AsyncCallback<Long> async);
-
-  void changePFor(String token, String first, AsyncCallback<Boolean> asyncCallback);
-
-  void changeEnabledFor(int userid, boolean enabled, AsyncCallback<Void> async);
-
-  void enableCDUser(String cdToken, String emailR, String url, AsyncCallback<String> asyncCallback);
+public class SlickUserSessionDAOImpl extends DAO implements IUserSessionDAO {
+  private static final Logger logger = Logger.getLogger(SlickUserSessionDAOImpl.class);
+  private final UserSessionDAOWrapper dao;
 
   /**
-   * @param userId
-   * @param attemptedPassword
-   * @param async
-   * @see UserManager#getPermissionsAndSetUser
+   * @param database
+   * @param dbConnection
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(PathHelper)
    */
-  void loginUser(String userId, String attemptedPassword, AsyncCallback<LoginResult> async);
+  public SlickUserSessionDAOImpl(Database database, DBConnection dbConnection) {
+    super(database);
+    dao = new UserSessionDAOWrapper(dbConnection);
+  }
 
-  void setProject(int projectid, AsyncCallback<User> async);
+  public void createTable() {
+    dao.createTable();
+  }
 
-  void forgetProject(AsyncCallback<Void> async);
+  @Override
+  public String getName() {
+    return dao.dao().name();
+  }
+
+  /**
+   * @param user
+   * @return
+   */
+  @Override
+  public void add(SlickUserSession user) {
+    dao.add(user);
+  }
+
+  @Override
+  public Collection<String> getByUser(int userid) {
+    return dao.getByUserID(userid);
+  }
+
+  @Override
+  public int getUserForSession(String sesssion) {
+    Collection<Integer> userForSession = dao.getUserForSession(sesssion);
+
+    return userForSession.isEmpty() ? -1 : userForSession.iterator().next();
+  }
+
+  @Override
+  public void removeSession(String session) {
+    dao.removeSession(session);
+  }
 }

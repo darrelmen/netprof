@@ -51,6 +51,16 @@ public class PathWriter {
 
   private static final String BEST_AUDIO = "bestAudio";
 
+  private final File bestDir;
+
+  public PathWriter(ServerProperties properties) {
+    //  bestDir = pathHelper.getAbsoluteFile(BEST_AUDIO);
+    bestDir = new File(properties.getMediaDir());
+    if (!bestDir.exists() && !bestDir.mkdir()) {
+      if (!bestDir.exists()) logger.warn("huh? couldn't make " + bestDir.getAbsolutePath());
+    }
+  }
+
   /**
    * Skips copying files called FILE_MISSING {@link mitll.langtest.server.audio.AudioConversion#FILE_MISSING}
    *
@@ -75,10 +85,10 @@ public class PathWriter {
                                       String title,
                                       String artist,
                                       ServerProperties serverProperties) {
-    final File bestDir = pathHelper.getAbsoluteFile(BEST_AUDIO);
-    if (!bestDir.exists() && !bestDir.mkdir()) {
-      if (!bestDir.exists()) logger.warn("huh? couldn't make " + bestDir.getAbsolutePath());
-    }
+//    final File bestDir = pathHelper.getAbsoluteFile(BEST_AUDIO);
+//    if (!bestDir.exists() && !bestDir.mkdir()) {
+//      if (!bestDir.exists()) logger.warn("huh? couldn't make " + bestDir.getAbsolutePath());
+//    }
     File bestDirForExercise = new File(bestDir, "" + exid);
     if (!bestDirForExercise.exists() && !bestDirForExercise.mkdir()) {
       if (!bestDirForExercise.exists()) logger.warn("huh? couldn't make " + bestDirForExercise.getAbsolutePath());
@@ -106,7 +116,7 @@ public class PathWriter {
     return bestAudioPath;
   }
 
-  public void copyAndNormalize(File fileRef, ServerProperties serverProperties, File destination) {
+  private void copyAndNormalize(File fileRef, ServerProperties serverProperties, File destination) {
     try {
       FileUtils.copyFile(fileRef, destination);
     } catch (IOException e) {
@@ -117,7 +127,11 @@ public class PathWriter {
     new AudioConversion(serverProperties).normalizeLevels(destination);
   }
 
-  private void ensureMP3(PathHelper pathHelper, String wavFile, boolean overwrite, String title, String artist,
+  private void ensureMP3(PathHelper pathHelper,
+                         String wavFile,
+                         boolean overwrite,
+                         String title,
+                         String artist,
                          ServerProperties serverProperties) {
     if (wavFile != null) {
       String parent = pathHelper.getInstallPath();

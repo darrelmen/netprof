@@ -127,7 +127,7 @@ public class ServerProperties {
   private static final int SLEEP_BETWEEN_DECODES_DEFAULT = 100; // Paul Gatewood 11/24/15 : The bottom line is we should set the minimum Dynamic Range threshold to 20dB for NetProf users
   private static final String MIN_DYNAMIC_RANGE = "minDynamicRange";
   private static final String RUN_REF_DECODE_WITH_HYDEC = "runRefDecodeWithHydec";
-  private static final String BEST_AUDIO = "bestAudio";
+  private static final String DEFAULT_BEST_AUDIO = "/opt/netProf/bestAudio";
 
   private Properties props = new Properties();
 
@@ -260,7 +260,7 @@ public class ServerProperties {
    * @see LangTestDatabaseImpl#setInstallPath
    */
   public String getMediaDir() {
-    return props.getProperty(MEDIA_DIR, BEST_AUDIO);
+    return props.getProperty(MEDIA_DIR, DEFAULT_BEST_AUDIO);
   }
 
   public double getMinPronScore() {
