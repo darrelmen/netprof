@@ -100,7 +100,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
         logger.error("no database?");
       }
       else {
-        securityManager = new UserSecurityManager(db.getUserDAO());
+        securityManager = new UserSecurityManager(db.getUserDAO(), db.getUserSessionDAO());
       }
     }
   }

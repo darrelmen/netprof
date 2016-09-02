@@ -133,7 +133,7 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
         enabled, "", "", builder.toString(),
         kind.toString(), passwordH, emailH,
         email,
-        device, first, last, -1));
+        device, first, last, -1, true));
   }
 
   /**
@@ -235,10 +235,10 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
         user.getDevice() == null ? "" : user.getDevice(),
         user.getFirst(),
         user.getLast(),
-        user.getId()
+        user.getId(), true
     );
 
-   // logger.info("made " + user1);
+    // logger.info("made " + user1);
 
     return user1;
   }
