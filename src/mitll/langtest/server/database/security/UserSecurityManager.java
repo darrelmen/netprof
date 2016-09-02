@@ -34,11 +34,10 @@ package mitll.langtest.server.database.security;
 
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.database.user.IUserDAO;
+import mitll.langtest.server.database.user.IUserSessionDAO;
 import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.Marker;
-import org.apache.logging.log4j.MarkerManager;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -65,38 +64,51 @@ public class UserSecurityManager {
    */
   //public static final String USER_REQUEST_ATT = "d-user";
   //private static final Marker TIMING = MarkerManager.getMarker("TIMING");
-  private final IUserDAO userDAO;
 
-  public UserSecurityManager(IUserDAO userDAO) {
+  private Map<Integer, User> idToSession = new HashMap<>();
+
+  private final IUserDAO userDAO;
+  private final IUserSessionDAO userSessionDAO;
+
+  public UserSecurityManager(IUserDAO userDAO, IUserSessionDAO userSessionDAO) {
     this.userDAO = userDAO;
+    this.userSessionDAO = userSessionDAO;
   }
 
   /**
+   * Creates a new session at the end???? why?
    * TODO : remove userId param?
+   * <p>
+   * When would we want to kill all sessions?
    *
    * @param request
-   * @param userId not really needed
+   * @param userId          not really needed
    * @param killAllSessions remove???
    */
   public void logoutUser(HttpServletRequest request, String userId, boolean killAllSessions) {
     long startMS = System.currentTimeMillis();
-    HttpSession session = request.getSession(false);
+    HttpSession session = getCurrentSession(request);
     if (session != null) {
       log.info("Invalidating session {}", session.getId());
-//			if (userId != null) {
-//				getUserService().logoutUser(userId, session.getId(), killAllSessions);
-//			}
+      if (userId != null) {
+        userSessionDAO.removeSession(session.getId());
+      }
       // not strictly necessary, but ...
       session.removeAttribute(USER_SESSION_ATT);
       session.invalidate();
     } else {
       log.error(">Session Activity> No session found on logout for id " + userId);
     }
-    request.getSession(true);
+
+//    request.getSession(true);
     log.warn(">Session Activity> User logout complete for id {} on primary host in {} ms",
         () -> userId,
         //	"primary",
         () -> elapsedMS(startMS));
+  }
+
+  private HttpSession getCurrentSession(HttpServletRequest request) {
+    return request.getSession(false);
   }
 
   private static long elapsedMS(long startMS) {
@@ -153,6 +165,8 @@ public class UserSecurityManager {
 
   /**
    * Get the current user out of the HTTP session or DB.
+   * <p>
+   * If we can't find it in the session, we're probably the pNetProf instance.
    *
    * @param request The incoming request.
    * @return The user from the data store. Should not be null.
@@ -164,42 +178,22 @@ public class UserSecurityManager {
     //long startMS = System.currentTimeMillis();
 
     User sessUser = lookupUserFromHttpSession(request);
-    if (false && sessUser == null) {
-      //sessUser = lookupUserFromDBSession(request);
+    if (sessUser == null) {
+      sessUser = lookupUserFromDBSession(request);
     } else {
-//      log.info("User found in HTTP session. User: {}. SID: {}", sessUser, request.getRequestedSessionId());
+      log.info("User found in HTTP session. User: {}. SID: {}", sessUser, request.getRequestedSessionId());
     }
 //		if (sessUser != null && (!sessUser.isActive())) {
 //			sessUser = null;
 //		}
 
-  //  log.info(TIMING, "Lookup User for {} complete in {}", request.getRequestURL(), elapsedMS(startMS));
+    //  log.info(TIMING, "Lookup User for {} complete in {}", request.getRequestURL(), elapsedMS(startMS));
     if (sessUser == null && throwOnFail) {
       log.error("About to fail due to missing user in session! SID: {}",
           request.getRequestedSessionId(), new Throwable());
       throw new DominoSessionException("Could not look up user!");
     }
     return sessUser;
-  }
-
-  /**
-   * TODO : consider how to do this.
-   *
-   * @param request
-   * @return
-   * @throws DominoSessionException
-   */
-/*	protected User lookupUserFromDBSession(HttpServletRequest request)
-      throws DominoSessionException {
-		String sid = request.getRequestedSessionId();
-		log.info("Lookup user from DB session. SID: {}", sid);
-		return userDAO.lookupUser(sid);
-	}*/
-
-  private Map<Integer, User> idToSession = new HashMap<>();
-  private synchronized void rememberIDToUser(int id, User user) {  idToSession.put(id, user);  }
-  private synchronized User getUserForID(int id) {
-    return idToSession.get(id);
   }
 
   /**
@@ -210,7 +204,7 @@ public class UserSecurityManager {
    */
   private User lookupUserFromHttpSession(HttpServletRequest request) {
     User sessUser = null;
-    HttpSession session = request != null ? request.getSession(false) : null;
+    HttpSession session = request != null ? getCurrentSession(request) : null;
     if (session != null) {
       Integer uidI = (Integer) session.getAttribute(USER_SESSION_ATT);
 /*      log.info("Lookup user from HTTP session. SID={} Request SID={}, Session Created={}, isNew={}, result={}",
@@ -222,12 +216,18 @@ public class UserSecurityManager {
         if (sessUser == null) {
           log.info("lookupUserFromHttpSession got cache miss for " + uidI);
 
-          log.info("Lookup user from HTTP session. SID={} Request SID={}, Session Created={}, isNew={}, result={}",
-              session.getId(), request.getRequestedSessionId(),
+          log.info("Lookup user from HTTP session. " +
+                  "SID={} " +
+                  "Request SID={}, " +
+                  "Session Created={}, " +
+                  "isNew={}, " +
+                  "result={}",
+              session.getId(),
+              request.getRequestedSessionId(),
               request.getSession().getCreationTime(), request.getSession().isNew(), uidI);
 
-          sessUser = userDAO.getByID(uidI);
-          rememberIDToUser(uidI, sessUser);
+          //  sessUser = userDAO.getByID(uidI);
+          sessUser = rememberUser(uidI);
         }
 //        else {
 //          return userForID;
@@ -238,6 +238,41 @@ public class UserSecurityManager {
           request.getRequestedSessionId());
     }
     return sessUser;
+  }
+
+  /**
+   * TODO : consider how to do this.
+   *
+   * @param request
+   * @return
+   * @throws DominoSessionException
+   */
+  private User lookupUserFromDBSession(HttpServletRequest request)
+      throws DominoSessionException {
+    String sid = request.getRequestedSessionId();
+    log.info("Lookup user from DB session. SID: {}", sid);
+    int userForSession = userSessionDAO.getUserForSession(sid);
+    return rememberUser(userForSession);
+  }
+
+  private User rememberUser(int uidI) {
+    User sessUser = userDAO.getByID(uidI);
+
+    if (sessUser == null) {
+      log.warn("huh? no user with id " + uidI);
+      return null;
+    } else {
+      rememberIDToUser(uidI, sessUser);
+      return sessUser;
+    }
+  }
+
+  private synchronized void rememberIDToUser(int id, User user) {
+    idToSession.put(id, user);
+  }
+
+  private synchronized User getUserForID(int id) {
+    return idToSession.get(id);
   }
 
   private void throwException(String opName, User cUser, String checkDesc)
