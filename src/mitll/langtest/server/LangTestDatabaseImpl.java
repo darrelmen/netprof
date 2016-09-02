@@ -2633,7 +2633,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     serverProps = new ServerProperties(servletContext, configDir);
     audioConversion = new AudioConversion(serverProps);
-    db = makeDatabaseImpl(serverProps.getH2Database());
+    String h2Database = serverProps.getH2Database();
+    if (h2Database == null) {
+      logger.error("huh? no h2 database file specified in properties???");
+    }
+    db = makeDatabaseImpl(h2Database);
     shareDB(servletContext);
 //    shareLoadTesting(servletContext);
   }

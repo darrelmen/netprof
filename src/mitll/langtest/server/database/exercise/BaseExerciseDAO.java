@@ -39,7 +39,6 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.custom.UserExerciseDAO;
 import mitll.langtest.server.database.custom.UserListManager;
-import mitll.langtest.shared.exercise.AudioExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.apache.log4j.Logger;
@@ -181,7 +180,9 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
     this.attachAudio = new AttachAudio(
         mediaDir,
         mediaDir.replaceAll("bestAudio", ""), fileInstallPath,
-        serverProps.getAudioOffset(), audioDAO.getExToAudio());
+        serverProps.getAudioOffset(),
+        audioDAO.getExToAudio(),
+        serverProps.shouldCheckAudioTranscript());
   }
 
   /**
