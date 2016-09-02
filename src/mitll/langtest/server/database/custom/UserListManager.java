@@ -33,6 +33,7 @@
 package mitll.langtest.server.database.custom;
 
 import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.PathWriter;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.annotation.IAnnotationDAO;
@@ -771,10 +772,16 @@ public class UserListManager implements IUserListManager {
    * @return new, permanent audio path
    * @see #fixAudioPaths
    */
-  private String getRefAudioPath(int projid, int id, File fileRef, String destFileName, boolean overwrite, String title,
+  private String getRefAudioPath(int projid,
+                                 int id,
+                                 File fileRef,
+                                 String destFileName,
+                                 boolean overwrite,
+                                 String title,
                                  String artist) {
-    return new PathWriter().getPermanentAudioPath(pathHelper, fileRef, destFileName, overwrite, projid, id, title, artist,
-        userDAO.getDatabase().getServerProps());
+    ServerProperties serverProps = userDAO.getDatabase().getServerProps();
+    return new PathWriter(serverProps).getPermanentAudioPath(pathHelper, fileRef, destFileName, overwrite, projid, id, title, artist,
+        serverProps);
   }
 
   /**
