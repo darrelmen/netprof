@@ -56,9 +56,11 @@ import java.util.*;
 public class PostgresTest extends BaseTest {
   private static final Logger logger = Logger.getLogger(PostgresTest.class);
 
+  private static final boolean doLocal = false;
+
   @Test
   public void testCreate() {
-    getDatabaseVeryLight("spanish", "quizlet.properties", false).createTables();
+    getDatabaseVeryLight("spanish", "config.properties", false).createTables();
   }
 
   @Test
@@ -75,7 +77,6 @@ public class PostgresTest extends BaseTest {
     DBConnection spanish = getConnection("netProf");
     spanish.dropAll();
     scala.collection.immutable.List<String> listOfTables = spanish.getListOfTables();
-
     logger.info("after drop " + listOfTables);
   }
 
@@ -272,7 +273,6 @@ public class PostgresTest extends BaseTest {
 
   private void testCopy(List<Info> infos) {
     CopyToPostgres cp = new CopyToPostgres();
-    boolean doLocal = true;
     for (Info config : infos) {
       String cc = cp.getCC(config.language);
       long then = System.currentTimeMillis();
@@ -541,7 +541,7 @@ public class PostgresTest extends BaseTest {
   }
 
   private static DBConnection getConnection(String config) {
-    File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
+    File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + "config.properties");
     String parent = file.getParentFile().getAbsolutePath();
     logger.info("path is " + parent);
     ServerProperties serverProps = new ServerProperties(parent, file.getName());
