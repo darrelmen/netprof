@@ -187,6 +187,10 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     return userExercise;
   }
 
+  /**
+   * @see #reallyCreateNewItem(long, CommonExercise)
+   * @return
+   */
   String getMediaDir() {
     return serverProps.getMediaDir();
   }
