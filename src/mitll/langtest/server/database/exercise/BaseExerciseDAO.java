@@ -178,23 +178,34 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    * TODO : what if they add a user exercise and add audio to it, or record new audio for other exercises???
    *
    * @param audioDAO
-   * @param mediaDir
-   * @param installPath
    * @param projectID
-   * @see #setDependencies(String, String, IUserExerciseDAO, AddRemoveDAO, IAudioDAO, int)
+   * @see #setDependencies
    */
-  private void setAudioDAO(IAudioDAO audioDAO, String mediaDir, String installPath, int projectID) {
+  private void setAudioDAO(IAudioDAO audioDAO, int projectID) {
     this.audioDAO = audioDAO;
+//    File fileInstallPath = new File(installPath);
+//    if (!fileInstallPath.exists()) {
+//      logger.warn("\n\n\nhuh? install path " + fileInstallPath.getAbsolutePath() + " doesn't exist???");
+//    }
 
-    File fileInstallPath = new File(installPath);
-    if (!fileInstallPath.exists()) {
-      logger.warn("\n\n\nhuh? install path " + fileInstallPath.getAbsolutePath() + " doesn't exist???");
-    }
+    String mediaDir = serverProps.getMediaDir();
+    File file = new File(mediaDir);
+    if (file.exists()) {
+      if (file.isDirectory()) {
+        String[] list = file.list();
+        if (list == null) {
+          logger.error("configuration error - can't get files from media directory " + mediaDir);
+        } else if (list.length > 0) { // only on pnetprof (behind firewall), znetprof has no audio, might have a directory.
+          logger.debug("validating files under " + file.getAbsolutePath());
+          audioDAO.validateFileExists(projectID, mediaDir, language);
+        }
+      } else {
+        logger.error("configuration error - expecting media directory " + mediaDir + " to be directory.");
 
-    audioDAO.validateFileExists(projectID, installPath, language);
+      }
+    } else logger.warn("configuration error - expecting a media directory " + mediaDir);
 
-    this.attachAudio = new AttachAudio(
-        audioDAO.getExToAudio(projectID), language);
+    this.attachAudio = new AttachAudio(audioDAO.getExToAudio(projectID), language);
   }
 
   /**
@@ -391,22 +402,18 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   /**
    * This DAO needs to talk to other DAOs.
    *
-   * @param mediaDir
-   * @param installPath
    * @param userExerciseDAO
    * @param addRemoveDAO
    * @param audioDAO
    * @param projid
-   * @see DatabaseImpl#setDependencies(String, String, ExerciseDAO, int)
+   * @see DatabaseImpl#setDependencies
    */
-  public void setDependencies(String mediaDir,
-                              String installPath,
-                              IUserExerciseDAO userExerciseDAO,
+  public void setDependencies(IUserExerciseDAO userExerciseDAO,
                               AddRemoveDAO addRemoveDAO,
                               IAudioDAO audioDAO, int projid) {
     this.userExerciseDAO = userExerciseDAO;
     this.addRemoveDAO = addRemoveDAO;
-    setAudioDAO(audioDAO, mediaDir, installPath, projid);
+    setAudioDAO(audioDAO, projid);
   }
 
   private int warns = 0;
