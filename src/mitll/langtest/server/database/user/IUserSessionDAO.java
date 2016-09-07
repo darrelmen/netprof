@@ -32,19 +32,12 @@
 
 package mitll.langtest.server.database.user;
 
-import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.IDAO;
-import mitll.langtest.shared.user.MiniUser;
-import mitll.langtest.shared.user.SignUpUser;
-import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickUserSession;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 
 public interface IUserSessionDAO extends IDAO {
-
   void add(SlickUserSession user);
 
   Collection<String> getByUser(int userid);
@@ -52,4 +45,6 @@ public interface IUserSessionDAO extends IDAO {
   int getUserForSession(String sesssion);
 
   void removeSession(String session);
+
+  int getNumRows();
 }
