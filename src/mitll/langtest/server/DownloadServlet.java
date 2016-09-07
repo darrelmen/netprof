@@ -71,7 +71,7 @@ public class DownloadServlet extends DatabaseServlet {
   private static final String AUDIO = "audio";
   private static final String LIST = "list";
   private static final String FILE = "file";
-  private static final String CONTEXT = "context";
+//  private static final String CONTEXT = "context";
   private static final String COMPRESSED_SUFFIX = "mp3";
   public static final String UTF_8 = "UTF-8";
   //UserSecurityManager securityManager;
@@ -421,8 +421,9 @@ public class DownloadServlet extends DatabaseServlet {
 
 //      db.writeZip(response.getOutputStream(), id == null ? -1 : id, new PathHelper(getServletContext()), projectid);
       options.setUserList(true);
+      ServerProperties serverProps = db.getServerProps();
       db.writeUserListAudio(response.getOutputStream(), id == null ? -1 : id,
-          new PathHelper(getServletContext(), db.getServerProps()),
+          new PathHelper(getServletContext(), serverProps),
           projectid, options);
     } catch (Exception e) {
       logger.error("couldn't write zip?", e);

@@ -61,7 +61,6 @@ import java.util.Map;
  */
 public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
   // private Logger logger = Logger.getLogger("ScoringAudioPanel");
-
   private static final int ANNOTATION_HEIGHT = 20;
   private static final boolean SHOW_SPECTROGRAM = false;
 
@@ -81,8 +80,9 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
    * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, ExerciseController, ScoreListener, String, Shell, String)
    */
   ScoringAudioPanel(String refSentence, ExerciseController controller,
-                    ScoreListener gaugePanel, String playButtonSuffix, T exercise, String instance) {
-    this(null, refSentence, controller, SHOW_SPECTROGRAM, gaugePanel, 23, playButtonSuffix, exercise, instance);
+                    ScoreListener gaugePanel, String playButtonSuffix, T exercise,
+                    String instance) {
+    this(null, refSentence, controller, SHOW_SPECTROGRAM, gaugePanel, 23, playButtonSuffix, exercise, exercise.getID(), instance);
   }
 
   /**
@@ -93,15 +93,21 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
    * @param rightMargin
    * @param playButtonSuffix
    * @param exercise
+   * @param exerciseID
    * @param instance
    * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, String, ExerciseController, boolean, ScoreListener, int, String, Shell, String)
    */
   ScoringAudioPanel(String path, String refSentence,
                     ExerciseController controller,
-                    boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin, String playButtonSuffix,
-                    T exercise, String instance) {
+                    boolean showSpectrogram,
+                    ScoreListener gaugePanel,
+                    int rightMargin,
+                    String playButtonSuffix,
+                    T exercise,
+                    int exerciseID,
+                    String instance) {
     super(path, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix,
-        exercise, instance);
+        exercise, exerciseID, instance);
     this.refSentence = refSentence;
     showOnlyOneExercise = controller.showOnlyOneExercise();
     addClickHandlers();
