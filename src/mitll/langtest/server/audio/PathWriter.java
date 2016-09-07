@@ -68,11 +68,12 @@ public class PathWriter {
    * @param fileRef
    * @param destFileName
    * @param overwrite
-   * @param projid
+   * @param language
    * @param exid
    * @param title            mark the mp3 meta data with this title
    * @param artist           mark the mp3 meta data with this artist
-   * @param serverProperties @return path of file under bestAudio directory
+   * @param serverProperties
+   * @return path of file under bestAudio directory
    * @see mitll.langtest.server.database.custom.UserListManager#getRefAudioPath
    * @see mitll.langtest.server.services.AudioServiceImpl#addToAudioTable
    */
@@ -80,7 +81,7 @@ public class PathWriter {
                                       File fileRef,
                                       String destFileName,
                                       boolean overwrite,
-                                      int projid,
+                                      String language,
                                       int exid,
                                       String title,
                                       String artist,
@@ -96,8 +97,8 @@ public class PathWriter {
     File destination = new File(bestDirForExercise, destFileName);
     //logger.debug("getPermanentAudioPath : copying from " + fileRef +  " to " + destination.getAbsolutePath());
 
-    String bestAudioPath = BEST_AUDIO +
-        File.separator + projid +
+    String bestAudioPath = //BEST_AUDIO +
+        File.separator + language + //projid +
         File.separator + BEST_AUDIO +
         File.separator + exid +
         File.separator + destFileName;
@@ -122,7 +123,6 @@ public class PathWriter {
     } catch (IOException e) {
       logger.error("couldn't copy " + fileRef.getAbsolutePath() + " to " + destination.getAbsolutePath());
     }
-
     // logger.debug("getPermanentAudioPath : normalizing levels for " + destination.getAbsolutePath());
     new AudioConversion(serverProperties).normalizeLevels(destination);
   }
@@ -134,7 +134,8 @@ public class PathWriter {
                          String artist,
                          ServerProperties serverProperties) {
     if (wavFile != null) {
-      String parent = pathHelper.getInstallPath();
+      // String parent = pathHelper.getInstallPath();
+       String parent = serverProperties.getMediaDir();
 
       AudioConversion audioConversion = new AudioConversion(serverProperties);
       if (!audioConversion.exists(wavFile, parent)) {
@@ -143,9 +144,29 @@ public class PathWriter {
       if (!audioConversion.exists(wavFile, parent)) {
         logger.error("can't find " + wavFile + " under " + parent);
       }
-      audioConversion.ensureWriteMP3(wavFile, parent, overwrite, title, artist);
+      String s = audioConversion.ensureWriteMP3(wavFile, parent, overwrite, title, artist);
+      logger.info("ensureMP3 wrote " + wavFile + " to " + s);
     } else {
       logger.warn("not converting wav to mp3???\n\n\n");
     }
   }
+
+/*  private void ensureMP3Easy(PathHelper pathHelper,
+                         String wavFile,
+                         boolean overwrite,
+                         String title,
+                         String artist,
+                         ServerProperties serverProperties) {
+    if (wavFile != null) {
+      if (new File(wavFile).exists()) {
+        AudioConversion audioConversion = new AudioConversion(serverProperties);
+        audioConversion.ensureWriteMP3(wavFile, parent, overwrite, title, artist);
+      }
+      else {
+        logger.error("can't find " + wavFile);
+      }
+    } else {
+      logger.warn("not converting wav to mp3???\n\n\n");
+    }
+  }*/
 }

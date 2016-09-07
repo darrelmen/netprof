@@ -255,7 +255,7 @@ public class JsonSupport {
     for (CommonExercise exercise : exercisesForState) {
       List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
       if (audioAttributes != null) {
-        audioDAO.attachAudio(exercise, installPath, configDir, audioAttributes, language);
+        audioDAO.attachAudio(exercise, /*installPath, configDir, */audioAttributes, language);
       }
       int id = exercise.getID();
       ids.add(id);

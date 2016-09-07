@@ -61,7 +61,7 @@ public class AudioContext implements IsSerializable {
    * which project this exercise is in
    */
   private int projid;
-
+  private String language;
   /**
    * exercise id
    */
@@ -81,20 +81,22 @@ public class AudioContext implements IsSerializable {
   /**
    * @param userid
    * @param projid
+   * @param language
    * @param exid
    * @param questionID
-   * @param audioType
-   * @see
+   * @param audioType  @see
    */
   public AudioContext(int reqid,
                       int userid,
                       int projid,
+                      String language,
                       int exid,
                       int questionID,
                       AudioType audioType) {
     this.reqid = reqid;
     this.userid = userid;
     this.projid = projid;
+    this.language = language;
     this.exid = exid;
     this.questionID = questionID;
     this.audioType = audioType;
@@ -135,5 +137,9 @@ public class AudioContext implements IsSerializable {
             //" q " + questionID +
             " req " + reqid +
             " type " + audioType;
+  }
+
+  public String getLanguage() {
+    return language;
   }
 }
