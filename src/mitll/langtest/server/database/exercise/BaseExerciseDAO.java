@@ -175,6 +175,8 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   }
 
   /**
+   * Only validate audio when there is audio to validate.
+   *
    * TODO : what if they add a user exercise and add audio to it, or record new audio for other exercises???
    *
    * @param audioDAO
