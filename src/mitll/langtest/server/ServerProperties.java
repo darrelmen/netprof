@@ -131,8 +131,10 @@ public class ServerProperties {
   private static final String CHECK_AUDIO_ON_STARTUP = "checkAudioOnStartup";
 
   private static final String DEFAULT_NETPROF_AUDIO_DIR = "/opt/netProf/";
-  private static final String DEFAULT_BEST_AUDIO = DEFAULT_NETPROF_AUDIO_DIR +"bestAudio";
-  private static final String DEFAULT_ANSWERS = DEFAULT_NETPROF_AUDIO_DIR + "answers";
+  public static final String BEST_AUDIO = "bestAudio";
+  private static final String DEFAULT_BEST_AUDIO = DEFAULT_NETPROF_AUDIO_DIR + BEST_AUDIO;
+  public static final String ANSWERS = "answers";
+  private static final String DEFAULT_ANSWERS = DEFAULT_NETPROF_AUDIO_DIR + ANSWERS;
 
   private Properties props = new Properties();
 
