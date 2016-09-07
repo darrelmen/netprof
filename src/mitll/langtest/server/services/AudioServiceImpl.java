@@ -213,8 +213,12 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         if (WARN_MISSING_FILE) {
            logger.warn("ensureMP3 : can't find " + wavFile);// + " under " + parent + " trying config... ");
          }
-       // parent = serverProps.getAnswerDir() + File.separator + language;
+        parent = serverProps.getAudioBaseDir();// + File.separator + language;
+
+        logger.warn("ensureMP3 : trying " + wavFile + " under " + parent);// + " under " + parent + " trying config... ");
+
       }
+
 /*      if (!audioConversion.exists(wavFile, parent)) {// && wavFile.contains("1310")) {
         if (WARN_MISSING_FILE && spew++ < 10) {
           logger.error("ensureMP3 : can't find " + wavFile + " under " + parent + " for " + title + " " + artist);
