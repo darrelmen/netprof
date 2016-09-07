@@ -153,22 +153,34 @@ public class PathHelper {
    *
    * @param audioContext
    * @return a path relative to the install dir
-   * @see LangTestDatabaseImpl#writeAudioFile
+   * @see mitll.langtest.server.audio.AudioFileHelper#writeAudioFile
    */
   public String getAbsoluteToAnswer(AudioContext audioContext) {
-    String language = audioContext.getLanguage().toLowerCase();
-    return getAbsoluteToAnswer(language, audioContext.getExid(), audioContext.getQuestionID(), audioContext.getUserid());
+    return getAbsoluteToAnswer(
+        audioContext.getLanguage().toLowerCase(),
+        audioContext.getExid(),
+        audioContext.getQuestionID(),
+        audioContext.getUserid());
   }
 
   /**
-   * TODO : fix this -
-   *
-   * @param language
-   * @param exercise
-   * @param question
-   * @param user
+   * CHEESY - assumes audio base dir is related to answers.
+   * @param audioContext
    * @return
    */
+  public String getRelToAnswer(AudioContext audioContext) {
+    return getAbsoluteToAnswer(audioContext).substring(properties.getAudioBaseDir().length());
+  }
+
+    /**
+     * TODO : fix this -
+     *
+     * @param language
+     * @param exercise
+     * @param question
+     * @param user
+     * @return
+     */
   String getAbsoluteToAnswer(String language, int exercise, int question, int user) {
     String planAndTestPath =
         language.toLowerCase() + File.separator +
@@ -182,7 +194,11 @@ public class PathHelper {
     return getWavPath(getAnswerDir(), planAndTestPath);
   }
 
-  public String getAnswerDir() {
+  public String getRelPathUnder(String planAndTestPath) {
+    return getWavPath(getAnswerDir().substring(properties.getAudioBaseDir().length()), planAndTestPath);
+  }
+
+  private String getAnswerDir() {
     return properties.getAnswerDir();
   }
 
@@ -201,19 +217,6 @@ public class PathHelper {
     //if (mkdirs) logger.debug("getAbsoluteToAnswer : making dir at : " + audioFilePath.getAbsolutePath());
     return wavPath;
   }
-
-/*  private String getAnswersDir() {
-
-    String tomcatWriteDirectory = context.getInitParameter(TOMCAT_WRITE_DIRECTORY_FULL_PATH);
-    if (tomcatWriteDirectory == null) tomcatWriteDirectory = ANSWERS;
-
-    File test = new File(tomcatWriteDirectory);
-    if (!test.exists()) test.mkdirs();
-    if (!test.exists()) {
-      tomcatWriteDirectory = ANSWERS;
-    }
-    return tomcatWriteDirectory;
-  }*/
 
   /**
    * @return path to image output dir
