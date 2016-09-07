@@ -37,7 +37,7 @@ public class AMASReaderTest {
     logger.debug("config     " + file.getName());
     ServerProperties serverProps = new ServerProperties(parent, file.getName());
     String dbName = serverProps.getH2Database();
-    database = new DatabaseImpl(parent, file.getName(), dbName, serverProps, new PathHelper("war"), false, null, true);
+    database = new DatabaseImpl(parent, file.getName(), dbName, serverProps, new PathHelper("war", serverProps), false, null, true);
     logger.debug("made " + database);
     database.setInstallPath("war", parent + File.separator + database.getServerProps().getLessonPlan(),
         serverProps.getMediaDir());
@@ -46,7 +46,7 @@ public class AMASReaderTest {
 
   @Test
   public void testReport() {
-    database.doReport(new PathHelper("war"), "", 2016);
+    database.doReport(new PathHelper("war", null), "", 2016);
   }
 
   @Test
@@ -65,7 +65,7 @@ public class AMASReaderTest {
     logger.info("\n\ngot " + exercises.size());
 
     ServerProperties serverProps = database.getServerProps();
-    AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), serverProps, database, null, null);
+    AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war", serverProps), serverProps, database, null, null);
 
     audioFileHelper.makeAutoCRT(".");
 
