@@ -477,12 +477,15 @@ public class ResultManager extends PagerTable {
    */
   private void respondToClick(MonitorResult selectedObject) {
     reviewContainer.clear();
+    int exID = selectedObject.getExID();
+
     if (selectedObject.getDurationInMillis() > 100 && selectedObject.isValid()) {
       // logger.info("audio type " + audioType);
       String foreignText = selectedObject.getForeignText();
 
       ReviewScoringPanel w = new ReviewScoringPanel(selectedObject.getAnswer(), foreignText, controller,
-          null, "instance");
+          exID, // no exercise!
+          "instance");
 
       w.setResultID(selectedObject.getUniqueID());
 
@@ -494,7 +497,7 @@ public class ResultManager extends PagerTable {
       reviewContainer.add(w.getTables());
     } else {
       AudioPanel w = new AudioPanel<>(selectedObject.getAnswer(), controller, false, null, 10, "",
-          null, "instance");
+          null, exID, "instance");
       reviewContainer.add(w);
     }
   }
