@@ -240,6 +240,9 @@ public class AttachAudio {
                   audio.setAudioRef(actualPath);   // remember to prefix the path
                   directlyRelated.iterator().next().getMutableAudio().addAudio(audio);
                 }
+                else if (!directlyRelated.isEmpty()){
+                  logger.info("got more than 1 directly related ? " + directlyRelated.size());
+                }
               }
             } else if (audio.hasMatchingTranscript(exercise.getForeignLanguage())) {
               audio.setAudioRef(actualPath);   // remember to prefix the path

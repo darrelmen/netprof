@@ -35,10 +35,8 @@ package mitll.langtest.client.scoring;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.ScoringServiceAsync;
-import mitll.langtest.server.scoring.Scoring;
 import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.scoring.PretestScore;
 
@@ -92,8 +90,10 @@ public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> 
    */
   public ASRScoringAudioPanel(String path, String refSentence,
                               ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel,
-                              int rightMargin, String playButtonSuffix, T exercise, String instance) {
-    super(path, refSentence, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix, exercise, instance);
+                              int rightMargin, String playButtonSuffix,
+                              T exercise,
+                              String instance) {
+    super(path, refSentence, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix, exercise, exercise.getID(), instance);
     this.useScoreToColorBkg = controller.useBkgColorForRef();
   }
 

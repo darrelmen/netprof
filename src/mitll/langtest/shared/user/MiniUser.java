@@ -122,9 +122,6 @@ public class MiniUser implements IsSerializable, Comparable<MiniUser> {
   public String toString() {
     return "mini-user " + id + " : " + age + " yr old " +
         (isMale() ? "male" : "female") +
-        (isAdmin() ? "ADMIN" : "")
-        ;
+        (isAdmin() ? "ADMIN" : "");
   }
-
-
 }
