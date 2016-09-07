@@ -318,7 +318,7 @@ public class DatabaseImpl implements Database {
     for (Project project : getProjects()) {
       if (project.getExerciseDAO() == null) {
         setExerciseDAO(project);
-        configureProject(mediaDir, installPath, project);
+        configureProject(installPath, project);
         logger.info("\tpopulateProjects (reload = " + reload + ") : " + project + " : " + project.getAudioFileHelper());
       }
     }
@@ -349,15 +349,6 @@ public class DatabaseImpl implements Database {
    * @see #DatabaseImpl(DatabaseConnection, String, String, String, ServerProperties, PathHelper, LogAndNotify)
    */
   private void initializeDAOs(PathHelper pathHelper) {
-    if (serverProps.useORM()) {
-      try {
-        String dbName = serverProps.getH2Database();
-        logger.info("dbname " + dbName);
-      } catch (Exception e) {
-        logger.error("Making session management, got " + e, e);
-      }
-    }
-
     dbConnection = getDbConnection();
 
     eventDAO = new SlickEventImpl(dbConnection);
@@ -779,7 +770,7 @@ public class DatabaseImpl implements Database {
             userExerciseDAO.setExerciseDAO(exerciseDAO);
           }
           // if (!serverProps.useH2()) {
-          configureProjects(mediaDir, installPath);
+          configureProjects(installPath);
           //}
         }
         userManagement = new mitll.langtest.server.database.user.UserManagement(userDAO, resultDAO);
@@ -787,37 +778,36 @@ public class DatabaseImpl implements Database {
     }
   }
 
-  private void configureProjects(String mediaDir, String installPath) {
+  private void configureProjects(String installPath) {
     // TODO : this seems like a bad idea --
     Map<Integer, ExercisePhoneInfo> exerciseToPhone = getExerciseToPhone(refresultDAO);
     userExerciseDAO.setExToPhones(exerciseToPhone);
 
     for (Project project : getProjects()) {
-      configureProject(mediaDir, installPath, project);
+      configureProject(installPath, project);
     }
   }
 
   /**
-   * @param mediaDir
    * @param installPath
    * @param project
    * @see #makeDAO(String, String, String)
    */
-  private void configureProject(String mediaDir, String installPath, Project project) {
-    logger.info("configureProject " + project + " mediaDir " + mediaDir + " install path " + installPath);
+  private void configureProject(String installPath, Project project) {
+    logger.info("configureProject " + project +  " install path " + installPath);
 
     ExerciseDAO<?> exerciseDAO1 = project.getExerciseDAO();
     SlickProject project1 = project.getProject();
     if (project1 == null) logger.info("note : no project for " + project);
     int id = project1 == null ? -1 : project1.id();
-    setDependencies(mediaDir, installPath, exerciseDAO1, id);
+    setDependencies(exerciseDAO1, id);
 
     List<CommonExercise> rawExercises = project.getRawExercises();
     if (!rawExercises.isEmpty()) {
       logger.debug("first exercise is " + rawExercises.iterator().next());
     }
     project.setJsonSupport(new JsonSupport(project.getSectionHelper(), getResultDAO(), getRefResultDAO(), getAudioDAO(),
-        getPhoneDAO(), configDir, installPath));
+        getPhoneDAO()));
 
     if (project1 != null) {
       Map<Integer, String> exerciseIDToRefAudio = getExerciseIDToRefAudio(id);
@@ -916,7 +906,8 @@ public class DatabaseImpl implements Database {
       this.fileExerciseDAO = new AMASJSONURLExerciseDAO(getServerProps());
       numExercises = fileExerciseDAO.getNumExercises();
     } else {
-      fileExerciseDAO = new FileExerciseDAO<>(mediaDir, getOldLanguage(serverProps), absConfigDir, lessonPlanFile, installPath);
+      fileExerciseDAO = new FileExerciseDAO<>(mediaDir, getOldLanguage(serverProps), absConfigDir,
+          lessonPlanFile, installPath);
       numExercises = fileExerciseDAO.getNumExercises();
     }
     return numExercises;
@@ -941,14 +932,12 @@ public class DatabaseImpl implements Database {
   /**
    * Public for testing only...
    *
-   * @param mediaDir
-   * @param installPath
    * @param exerciseDAO
    * @param projid
-   * @see #configureProject(String, String, Project)
+   * @see #configureProject(String, Project)
    */
-  public void setDependencies(String mediaDir, String installPath, ExerciseDAO exerciseDAO, int projid) {
-    exerciseDAO.setDependencies(mediaDir, installPath, userExerciseDAO, null /*addRemoveDAO*/, audioDAO, projid);
+  public void setDependencies(ExerciseDAO exerciseDAO, int projid) {
+    exerciseDAO.setDependencies(userExerciseDAO, null /*addRemoveDAO*/, audioDAO, projid);
   }
 
   private void makeContextPractice(String contextPracticeFile, String installPath) {
@@ -1455,7 +1444,7 @@ public class DatabaseImpl implements Database {
    * @param projectid
    * @return
    * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceForUser
-   * @see DatabaseImpl#configureProject(String, String, Project)
+   * @see DatabaseImpl#configureProject(String, Project)
    */
   public Map<Integer, String> getExerciseIDToRefAudio(int projectid) {
     logger.info("getExerciseIDToRefAudio for " + projectid);
