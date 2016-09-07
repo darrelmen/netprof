@@ -35,7 +35,6 @@ package mitll.langtest.server.audio;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.exercise.CommonExercise;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -516,6 +515,10 @@ public class AudioConversion {
     return writeMP3(pathToWav, realContextPath, overwrite, title, author);
   }
 
+  public String ensureWriteMP3Easy(String pathToWav, boolean overwrite, String title, String author) {
+    if (pathToWav == null || pathToWav.equals("null")) throw new IllegalArgumentException("huh? path is null");
+    return writeMP3Easy(pathToWav, new File(pathToWav), overwrite, title, author);
+  }
   private int spew2 = 0;
 
   /**
@@ -528,12 +531,15 @@ public class AudioConversion {
    */
   private String writeMP3(String pathToWav, String realContextPath, boolean overwrite, String title, String author) {
     File absolutePathToWav = getAbsoluteFile(pathToWav, realContextPath);
+    return writeMP3Easy(pathToWav, absolutePathToWav, overwrite, title, author);
+  }
 
+  private String writeMP3Easy(String pathToWav, File absolutePathToWav, boolean overwrite, String title, String author) {
     String mp3File = absolutePathToWav.getAbsolutePath().replace(".wav", MP3);
     File mp3 = new File(mp3File);
     if (!mp3.exists() || overwrite) {
       if (DEBUG)
-        logger.debug("writeMP3 : doing mp3 conversion for " + absolutePathToWav + " path " + pathToWav + " context " + realContextPath);
+        logger.debug("writeMP3 : doing mp3 conversion for " + absolutePathToWav + " path " + pathToWav );
 
       if (DEBUG) logger.debug("run lame on " + absolutePathToWav + " making " + mp3File);
 
@@ -547,7 +553,7 @@ public class AudioConversion {
     File ogg = new File(oggFile);
     if (!ogg.exists() || overwrite) {
       if (DEBUG)
-        logger.debug("writeMP3 : doing ogg conversion for " + absolutePathToWav + " path " + pathToWav + " context " + realContextPath);
+        logger.debug("writeMP3 : doing ogg conversion for " + absolutePathToWav + " path " + pathToWav );
 
       if (DEBUG) logger.debug("run ogg on " + absolutePathToWav + " making " + oggFile);
 
@@ -670,12 +676,19 @@ public class AudioConversion {
    * @return
    * @see MP3Support#getWavForMP3(String, String)
    */
-  File convertMP3ToWav(String pathToWav) {
+  @Deprecated File convertMP3ToWav(String pathToWav) {
     assert (pathToWav.endsWith(MP3));
     String mp3File = pathToWav.replace(MP3, ".wav");
     return writeWavFromMP3(getLame(), pathToWav, mp3File);
   }
 
+  /**
+   * @deprecated  when would this be a good idea???
+   * @param lamePath
+   * @param pathToAudioFile
+   * @param mp3File
+   * @return
+   */
   private File writeWavFromMP3(String lamePath, String pathToAudioFile, String mp3File) {
     ProcessBuilder lameProc = new ProcessBuilder(lamePath, "--decode", pathToAudioFile, mp3File);
     try {

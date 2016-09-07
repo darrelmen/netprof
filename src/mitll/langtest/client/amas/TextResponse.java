@@ -312,8 +312,9 @@ class TextResponse {
       long timeSpent = System.currentTimeMillis() - timeShown;
       timeShown = System.currentTimeMillis();
 
+      String language = "unknown"; // TODO : fix this later
       AudioContext audioContext =
-          new AudioContext(0, user, -1, exerciseID, questionID, answerType);
+          new AudioContext(0, user, -1, language,exerciseID, questionID, answerType);
 
       logger.info("contexxt " + audioContext);
       amasService.getScoreForAnswer(

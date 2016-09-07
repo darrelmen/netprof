@@ -490,7 +490,9 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
   private void attachAudio(CommonExercise firstExercise) {
     String language = db.getLanguage(firstExercise);
     String relativeConfigDir = "config" + File.separator + getServletContext().getInitParameter("config");
-    db.getAudioDAO().attachAudio(firstExercise, pathHelper.getInstallPath(), relativeConfigDir, language);
+    db.getAudioDAO().attachAudioToExercise(firstExercise,
+        //pathHelper.getInstallPath(), relativeConfigDir,
+        language);
   }
 
   /**

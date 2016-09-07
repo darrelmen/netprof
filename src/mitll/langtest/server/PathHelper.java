@@ -56,18 +56,24 @@ public class PathHelper {
   public static final String ANSWERS = "answers";
   private static final String IMAGE_WRITER_IMAGES = "audioimages";
   private static final String IMAGE_OUTDIR = "imageOutdir";
-  private static final String TOMCAT_WRITE_DIRECTORY_FULL_PATH = "tomcatWriteDirectoryFullPath";
+//  private static final String TOMCAT_WRITE_DIRECTORY_FULL_PATH = "tomcatWriteDirectoryFullPath";
 
   private String realContextPathTest;
   private final ServletContext context;
   private String configDir;
+  private ServerProperties properties;
 
   public PathHelper(ServletContext context) {
     this.context = context;
   }
 
-  public PathHelper(String realContextPathTest) {
-    this((ServletContext) null);
+  public PathHelper(ServletContext context, ServerProperties properties) {
+    this.context = context;
+    this.properties = properties;
+  }
+
+  public PathHelper(String realContextPathTest, ServerProperties properties) {
+    this((ServletContext) null, properties);
     this.realContextPathTest = realContextPathTest;
   }
 
@@ -85,7 +91,19 @@ public class PathHelper {
     return getAbsolute(getInstallPath(), filePath);
   }
 
-  public File getAbsolute(String realContextPath, String filePath) {
+  public File getAbsoluteAnswerAudioFile(String filePath, String language) {
+    return getAbsolute(getAnswerDir() + File.separator + language.toLowerCase(), filePath);
+  }
+
+  public File getAbsoluteBestAudioFile(String filePath, String language) {
+    return getAbsolute(properties.getMediaDir() + File.separator + language.toLowerCase(), filePath);
+  }
+
+  public File getAbsoluteAudioFile(String filePath) {
+    return getAbsolute(properties.getAudioBaseDir(), filePath);
+  }
+
+  private File getAbsolute(String realContextPath, String filePath) {
     return new File(realContextPath, filePath);
   }
 
@@ -95,6 +113,7 @@ public class PathHelper {
    * relative and absolute paths to audio and image files.
    *
    * @return path to webapp install location
+   * @deprecated we don't store the audio underneath the install path anymore, if that's why you want the install path
    */
   public String getInstallPath() {
     if (context == null && realContextPathTest == null) {
@@ -136,27 +155,56 @@ public class PathHelper {
    * @see LangTestDatabaseImpl#writeAudioFile
    */
 
-  public String getLocalPathToAnswer(AudioContext audioContext) {
-    return getLocalPathToAnswer(audioContext.getProjid(), audioContext.getExid(), audioContext.getQuestionID(), audioContext.getUserid());
+  public String getAbsoluteToAnswer(AudioContext audioContext) {
+    // int projid = audioContext.getProjid();
+    String language = audioContext.getLanguage();
+    return getAbsoluteToAnswer(language, audioContext.getExid(), audioContext.getQuestionID(), audioContext.getUserid());
   }
 
-  String getLocalPathToAnswer(int projid, int exercise, int question, int user) {
-    String planAndTestPath = projid + File.separator + exercise + File.separator + question + File.separator + "subject-" + user;
-    return getWavPath(getTomcatDir(), planAndTestPath);
+  /**
+   * TODO : fix this -
+   *
+   * @param language
+   * @param exercise
+   * @param question
+   * @param user
+   * @return
+   */
+  String getAbsoluteToAnswer(String language, int exercise, int question, int user) {
+    String planAndTestPath =
+        language + File.separator +
+            exercise + File.separator +
+            question + File.separator +
+            "subject-" + user;
+    return getAbsoluteWavPathUnder(planAndTestPath);
   }
 
-  public String getWavPathUnder(String planAndTestPath) {
-    return getWavPath(getTomcatDir(), planAndTestPath);
+  public String getAbsoluteWavPathUnder(String planAndTestPath) {
+    return getWavPath(getAnswerDir(), planAndTestPath);
   }
 
+  public String getAnswerDir() {
+    return properties.getAnswerDir();
+  }
+
+  /**
+   * TODO : make wave file name more helpful - include exercise, user, etc.
+   *
+   * @param tomcatWriteDirectory
+   * @param planAndTestPath
+   * @return
+   */
   private String getWavPath(String tomcatWriteDirectory, String planAndTestPath) {
-    String currentTestDir = tomcatWriteDirectory + File.separator + planAndTestPath;
-    String wavPath = currentTestDir + File.separator + "answer_" + System.currentTimeMillis() + ".wav";
-    //if (mkdirs) logger.debug("getLocalPathToAnswer : making dir at : " + audioFilePath.getAbsolutePath());
+    String wavPath =
+        tomcatWriteDirectory + File.separator +
+            planAndTestPath + File.separator +
+            "answer_" + System.currentTimeMillis() + ".wav";
+    //if (mkdirs) logger.debug("getAbsoluteToAnswer : making dir at : " + audioFilePath.getAbsolutePath());
     return wavPath;
   }
 
-  private String getTomcatDir() {
+/*  private String getAnswersDir() {
+
     String tomcatWriteDirectory = context.getInitParameter(TOMCAT_WRITE_DIRECTORY_FULL_PATH);
     if (tomcatWriteDirectory == null) tomcatWriteDirectory = ANSWERS;
 
@@ -166,7 +214,7 @@ public class PathHelper {
       tomcatWriteDirectory = ANSWERS;
     }
     return tomcatWriteDirectory;
-  }
+  }*/
 
   /**
    * @return path to image output dir
@@ -188,7 +236,12 @@ public class PathHelper {
   public void setConfigDir(String configDir) {
     this.configDir = configDir;
   }
+
   public String getConfigDir() {
     return configDir;
+  }
+
+  public void setProperties(ServerProperties properties) {
+    this.properties = properties;
   }
 }

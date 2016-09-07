@@ -55,9 +55,9 @@ class MP3Support {
   private ServerProperties serverProperties;
 
   /**
-   * @see AudioFileHelper#AudioFileHelper(PathHelper, ServerProperties, DatabaseImpl, LogAndNotify)
    * @param pathHelper
    * @param serverProperties
+   * @see AudioFileHelper#AudioFileHelper(PathHelper, ServerProperties, DatabaseImpl, LogAndNotify)
    */
   MP3Support(PathHelper pathHelper, ServerProperties serverProperties) {
     this.pathHelper = pathHelper;
@@ -65,18 +65,20 @@ class MP3Support {
   }
 
   /**
+   * TODO : remove language??? will this is always work???
    * @param testAudioFile
+   * @param language
    * @return
    * @see AudioFileHelper#getASRScoreForAudio
    */
-  String dealWithMP3Audio(String testAudioFile) {
+  String dealWithMP3Audio(String testAudioFile, String language) {
     if (!testAudioFile.endsWith(WAV)) {
       String wavFile = removeSuffix(testAudioFile) + WAV;
-      File test = pathHelper.getAbsoluteFile(wavFile);
+      File test = pathHelper.getAbsoluteAudioFile(wavFile);
       if (!test.exists()) {
-        logger.warn("expecting audio file with wav extension, but didn't find " + test.getAbsolutePath());
+        logger.warn("\n\n\ndealWithMP3Audio : expecting audio file with wav extension, but didn't find " + test.getAbsolutePath());
       }
-      return test.exists() ? test.getAbsolutePath() : getWavForMP3(testAudioFile);
+      return test.exists() ? test.getAbsolutePath() : getWavForMP3(testAudioFile, language);
     } else {
       return testAudioFile;
     }
@@ -87,12 +89,17 @@ class MP3Support {
   }
 
   /**
+   * Looks under the answer dir -- should it?
    * @param audioFile
+   * @param language
    * @return
-   * @see #dealWithMP3Audio(String)
+   * @see #dealWithMP3Audio(String, String)
    * @see mitll.langtest.server.LangTestDatabaseImpl#getImageForAudioFile
    */
-  String getWavForMP3(String audioFile) {  return getWavForMP3(audioFile, pathHelper.getInstallPath());  }
+//  String getWavForMP3(String audioFile, String language) {
+// //   String installPath = ;//pathHelper.getInstallPath();
+//    return getWavForMP3(audioFile, language);
+//  }
 
   /**
    * Ultimately does lame --decode from.mp3 to.wav
@@ -102,13 +109,13 @@ class MP3Support {
    * <p>
    * Gotta be a better way...
    *
-   * @param audioFile        to convert
+   * @param audioFile to convert
    * @return
-   * @see #getWavForMP3(String)
+   * @see #getWavForMP3(String, String)
    */
-  private String getWavForMP3(String audioFile, String installPath) {
+  String getWavForMP3(String audioFile, String language) {
     assert (audioFile.endsWith(".mp3"));
-    String absolutePath = pathHelper.getAbsolute(installPath, audioFile).getAbsolutePath();
+    String absolutePath = pathHelper.getAbsoluteAnswerAudioFile(audioFile, language).getAbsolutePath();
 
     if (!new File(absolutePath).exists())
       logger.error("getWavForMP3 : expecting file at " + absolutePath);
