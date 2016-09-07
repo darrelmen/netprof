@@ -60,7 +60,6 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   private static final String CONTAINS_SEMI = "contains semicolon - should this item be split?";
   private static final String ENGLISH = "english";
   private static final String MISSING_ENGLISH = "missing english";
-  public static final String BEST_AUDIO = "bestAudio";
   public static final boolean DEBUG = false;
 
   private final Map<Integer, CommonExercise> idToExercise = new HashMap<>();
@@ -195,9 +194,6 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     audioDAO.validateFileExists(projectID, installPath, language);
 
     this.attachAudio = new AttachAudio(
-        mediaDir,
-        mediaDir.replaceAll(BEST_AUDIO, ""), fileInstallPath,
-        serverProps.getAudioOffset(),
         audioDAO.getExToAudio(projectID), language);
   }
 

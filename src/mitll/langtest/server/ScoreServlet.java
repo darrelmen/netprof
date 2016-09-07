@@ -702,8 +702,8 @@ public class ScoreServlet extends DatabaseServlet {
         " device "   + deviceType + "/" + device);
 
     int userid = userManagement.getUserFromParam(user);
-    String wavPath = pathHelper.getLocalPathToAnswer(project, i1, 0, userid);
-    File saveFile  = pathHelper.getAbsoluteFile(wavPath);
+    String wavPath = pathHelper.getAbsoluteToAnswer(db.getProject(project).getLanguage(), i1, 0, userid);
+    File saveFile  = new File(wavPath);// pathHelper.getAbsoluteFile(wavPath);
     new File(saveFile.getParent()).mkdirs();
 
     boolean allowAlternates   = getAllowAlternates(request);
@@ -927,8 +927,8 @@ public class ScoreServlet extends DatabaseServlet {
 
     int projectID = exercise1.getProjectID();
     AudioContext audioContext =
-        new AudioContext(reqid, user, projectID, exerciseID, 0,
-            doFlashcard ? AudioType.PRACTICE : AudioType.LEARN);
+        new AudioContext(reqid, user, projectID, getLanguage(projectID), exerciseID,
+            0, doFlashcard ? AudioType.PRACTICE : AudioType.LEARN);
 
     AudioFileHelper audioFileHelper = getAudioFileHelper(projectID);
     AudioAnswer answer = audioFileHelper.getAnswer(exercise1,

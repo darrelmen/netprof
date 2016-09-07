@@ -4,6 +4,7 @@ import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.user.UserDAO;
 import org.apache.log4j.Logger;
 
@@ -45,7 +46,7 @@ public class SmallDatabaseImpl implements Database {
   private HttpServlet servlet;
   private String h2DbName = H2_DB_NAME;
 
-  public SmallDatabaseImpl(String dburl) {
+/*  public SmallDatabaseImpl(String dburl) {
     this.h2DbName = dburl;
     this.url = "jdbc:h2:" + h2DbName + ";IFEXISTS=TRUE;QUERY_CACHE_SIZE=0;";
     try {
@@ -53,8 +54,7 @@ public class SmallDatabaseImpl implements Database {
     } catch (Exception e) {
       logger.error("got " + e, e);  //To change body of catch statement use File | Settings | File Templates.
     }
-  }
-
+  }*/
 
   @Override
   public void logEvent(String exid, String context, int userid, String device) {
@@ -69,6 +69,11 @@ public class SmallDatabaseImpl implements Database {
   @Override
   public String getLanguage() {
     return "";
+  }
+
+  @Override
+  public Project getProject(int projectid) {
+    return null;
   }
 
   @Override

@@ -89,6 +89,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     try {
       this.pathHelper = new PathHelper(getServletContext());
       readProperties(getServletContext());
+      pathHelper.setProperties(serverProps);
       setInstallPath(db);
       if (serverProps.isAMAS()) {
         audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, this, null);

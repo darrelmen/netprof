@@ -33,12 +33,12 @@
 package mitll.langtest.server.database.audio;
 
 import mitll.langtest.server.database.IDAO;
-import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.ExerciseAnnotation;
-import mitll.langtest.shared.user.User;
+import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.AudioAttributeExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.user.User;
 
 import java.util.Collection;
 import java.util.List;
@@ -54,10 +54,13 @@ public interface IAudioDAO extends IDAO {
 
   Collection<AudioAttribute> getAudioAttributesByProject(int projid);
 
-  int attachAudio(CommonExercise firstExercise, String installPath, String relativeConfigDir, String language);
+  int attachAudioToExercise(CommonExercise firstExercise, /*String installPath, String relativeConfigDir,*/ String language);
 
-  boolean attachAudio(CommonExercise firstExercise, String installPath, String relativeConfigDir,
-                      Collection<AudioAttribute> audioAttributes, String language);
+  boolean attachAudio(CommonExercise firstExercise,
+                      // String installPath,
+                      // String relativeConfigDir,
+                      Collection<AudioAttribute> audioAttributes,
+                      String language);
 
   Collection<Integer> getRecordedBy(int userid);
 
@@ -70,9 +73,9 @@ public interface IAudioDAO extends IDAO {
                                        float totalContext);
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#markRecordedState(int, String, Collection, boolean)
    * @param userid
    * @return
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#markRecordedState
    */
   Collection<Integer> getRecordedExForUser(int userid);
 

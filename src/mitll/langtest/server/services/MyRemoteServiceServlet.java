@@ -37,7 +37,6 @@ import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.Project;
@@ -85,7 +84,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
     Object databaseReference = getServletContext().getAttribute(LangTestDatabaseImpl.DATABASE_REFERENCE);
     if (databaseReference != null) {
       db = (DatabaseImpl) databaseReference;
-      this.pathHelper = new PathHelper(getServletContext());
+      this.pathHelper = new PathHelper(getServletContext(), db.getServerProps());
       // logger.debug("found existing database reference " + db + " under " +getServletContext());
     } else {
       logger.info("getDatabase : no existing db reference yet...");
@@ -117,9 +116,9 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
    */
   void readProperties(ServletContext servletContext) {
     String relativeConfigDir = "config" + File.separator + servletContext.getInitParameter("config");
-    PathHelper pathHelper = new PathHelper(getServletContext());
     String configDir = pathHelper.getInstallPath() + File.separator + relativeConfigDir;
     serverProps = new ServerProperties(servletContext, configDir);
+   // PathHelper pathHelper = new PathHelper(getServletContext(), serverProps);
   }
 
   protected int getProjectID() {
