@@ -236,7 +236,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   }
 
   private EmailHelper getEmailHelper() {
-    return new EmailHelper(serverProps, db.getUserDAO(), getMailSupport(), new PathHelper(getServletContext()));
+    return new EmailHelper(serverProps, db.getUserDAO(), getMailSupport(), new PathHelper(getServletContext(), serverProps));
   }
 
   private MailSupport getMailSupport() {

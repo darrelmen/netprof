@@ -68,7 +68,7 @@ public class InvalidateAudioTest {
 
   private SmallVocabDecoder getSmallVocabDecoder(DatabaseImpl newDB) {
     ServerProperties serverProps = newDB.getServerProps();
-    AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), serverProps, newDB, null, null);
+    AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war", serverProps), serverProps, newDB, null, null);
     return audioFileHelper.getSmallVocabDecoder();
   }
 
@@ -254,7 +254,9 @@ public class InvalidateAudioTest {
     File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + props);
     String parent = file.getParent();
     logger.debug("config dir " + parent + " config     " + file.getName());
-    DatabaseImpl war = new DatabaseImpl(parent, file.getName(), dbName, new ServerProperties(parent, file.getName()), new PathHelper("war"), false, null);
+    ServerProperties serverProps = new ServerProperties(parent, file.getName());
+    DatabaseImpl war = new DatabaseImpl(parent, file.getName(), dbName, serverProps,
+        new PathHelper("war", serverProps), false, null);
     String media = parent + File.separator + "media";
     logger.debug("made " + war + " media " + media);
 

@@ -181,9 +181,9 @@ public class ASRScoring extends Scoring implements ASR {
     }
     File wavFile = new File(pathname);
     boolean mustPrepend = false;
-    if (!wavFile.exists() && deployPath != null) {
+    if (!wavFile.exists()) {
       //logger.debug("trying new path for " + pathname + " under " + deployPath);
-      wavFile = new File(deployPath + File.separator + pathname);
+      wavFile = new File(props.getAudioBaseDir() + File.separator + pathname);
       mustPrepend = true;
     }
     if (!wavFile.exists()) {
@@ -196,7 +196,7 @@ public class ASRScoring extends Scoring implements ASR {
     try {
       String audioDir = testAudioDir;
       if (mustPrepend) {
-        audioDir = deployPath + File.separator + audioDir;
+        audioDir = props.getAudioBaseDir() + File.separator + audioDir;
         if (!new File(audioDir).exists()) logger.error("Couldn't find " + audioDir);
         else testAudioDir = audioDir;
       }
