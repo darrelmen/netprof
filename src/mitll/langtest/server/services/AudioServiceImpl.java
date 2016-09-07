@@ -223,9 +223,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
       String s = audioConversion.ensureWriteMP3(wavFile, parent, false, title, artist);
       boolean isMissing = s.equals(AudioConversion.FILE_MISSING);
-/*      if (isMissing && wavFile.contains("1310")) {
+      if (isMissing){// && wavFile.contains("1310")) {
         logger.error("ensureMP3 : can't find " + wavFile + " under " + parent + " for " + title + " " + artist);
-      }*/
+      }
       return !isMissing;
     }
     return false;
@@ -464,8 +464,16 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   private String getWavAudioFile(String audioFile) {
     if (audioFile.endsWith("." + AudioTag.COMPRESSED_TYPE) || audioFile.endsWith(MP3)) {
       String wavFile = removeSuffix(audioFile) + WAV;
-      File test = pathHelper.getAbsoluteAudioFile(wavFile);
-      audioFile = test.exists() ? test.getAbsolutePath() : "FILE_MISSING.wav";//getAudioFileHelper().getWavForMP3(audioFile, );
+      logger.info("getWavAudioFile " + audioFile);
+      if (new File(wavFile).exists()) {
+        return wavFile;
+      }
+      else {
+        File test = pathHelper.getAbsoluteAudioFile(wavFile);
+        logger.info("getWavAudioFile test " + test.getAbsolutePath());
+
+        audioFile = test.exists() ? test.getAbsolutePath() : "FILE_MISSING.wav";//getAudioFileHelper().getWavForMP3(audioFile, );
+      }
     }
 
     return ensureWAV(audioFile);
