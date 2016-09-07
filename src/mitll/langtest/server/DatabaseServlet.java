@@ -82,12 +82,14 @@ public class DatabaseServlet extends HttpServlet {
    * @see mitll.langtest.server.ScoreServlet#ensureMP3Later(int, String, String)
    */
   void ensureMP3(String wavFile, String title, String author) {
-    ensureMP3(wavFile, pathHelper, configDir, title, author);
+    ensureMP3(wavFile, configDir, title, author);
   }
 
-  private void ensureMP3(String wavFile, PathHelper pathHelper, String configDir, String title, String author) {
+  private void ensureMP3(String wavFile, String configDir, String title, String author) {
     if (wavFile != null) {
-      String parent = pathHelper.getInstallPath();
+    //  String parent = pathHelper.getInstallPath();
+      String parent = serverProps.getMediaDir();
+
       //logger.debug("ensureMP3 : wav " + wavFile + " under " + parent);
 
       AudioConversion audioConversion = new AudioConversion(serverProps);
@@ -99,22 +101,23 @@ public class DatabaseServlet extends HttpServlet {
         logger.error("huh? can't find " + wavFile + " under " + parent);
       }
       String filePath = audioConversion.ensureWriteMP3(wavFile, parent, false, title, author);
+      logger.info("wrote " +wavFile + " to " + filePath);
       // return new File(filePath).exists();
     } else {
       //return;
     }
   }
 
-  protected void setPaths() {
+  void setPaths() {
     pathHelper = getPathHelper();
-    String config = getServletContext().getInitParameter("config");
+   // String config = getServletContext().getInitParameter("config");
     //this.relativeConfigDir = "config" + File.separator + config;
     // logger.debug("setPaths rel " + relativeConfigDir  + " pathHelper " + pathHelper);
     this.configDir = getConfigDir();
   }
 
   private PathHelper getPathHelper() {
-    return new PathHelper(getServletContext());
+    return new PathHelper(getServletContext(), serverProps);
   }
 
   private String getConfigDir() {

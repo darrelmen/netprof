@@ -73,6 +73,8 @@ public abstract class Scoring {
   private static final float SCORE_SCALAR = 1.0f;
   private static final String SCORING = "scoring";
   public static final String MANDARIN = "mandarin";
+  public static final String PHONES_LAB = ".phones.lab";
+  public static final String WORDS_LAB = ".words.lab";
 
   final String scoringDir;
   final String deployPath;
@@ -198,7 +200,7 @@ public abstract class Scoring {
     // logger.debug("writeTranscripts - " + audioFileNoSuffix + " prefix " + prefix);
     boolean foundATranscript = false;
     // These may not all exist. The speech file is created only by multisv right now.
-    String phoneLabFile = prependDeploy(audioFileNoSuffix + ".phones.lab");
+    String phoneLabFile = prependDeploy(audioFileNoSuffix + PHONES_LAB);
     Map<ImageType, String> typeToFile = new HashMap<>();
 
     if (phoneLab != null) {
@@ -259,7 +261,7 @@ public abstract class Scoring {
 
     boolean foundATranscript = false;
     // These may not all exist. The speech file is created only by multisv right now.
-    String phoneLabFile = prependDeploy(audioFileNoSuffix + ".phones.lab");
+    String phoneLabFile = prependDeploy(audioFileNoSuffix + PHONES_LAB);
     Map<ImageType, String> typeToFile = new HashMap<>();
     if (new File(phoneLabFile).exists()) {
 //      logger.info("using " + phoneLabFile);
@@ -269,7 +271,7 @@ public abstract class Scoring {
       logger.warn("no phones " + phoneLabFile);
     }
 
-    String wordLabFile = prependDeploy(audioFileNoSuffix + ".words.lab");
+    String wordLabFile = prependDeploy(audioFileNoSuffix + WORDS_LAB);
     if (new File(wordLabFile).exists()) {
 //      logger.info("using " + wordLabFile);
       typeToFile.put(ImageType.WORD_TRANSCRIPT, wordLabFile);
@@ -326,12 +328,12 @@ public abstract class Scoring {
     // logger.debug("writeTranscriptsCached " + object);
     if (decode || imageWidth < 0) {  // hack to skip image generation
       // These may not all exist. The speech file is created only by multisv right now.
-      String phoneLabFile = prependDeploy(audioFileNoSuffix + ".phones.lab");
+      String phoneLabFile = prependDeploy(audioFileNoSuffix + PHONES_LAB);
       Map<ImageType, String> typeToFile = new HashMap<>();
       if (new File(phoneLabFile).exists()) {
         typeToFile.put(ImageType.PHONE_TRANSCRIPT, phoneLabFile);
       }
-      String wordLabFile = prependDeploy(audioFileNoSuffix + ".words.lab");
+      String wordLabFile = prependDeploy(audioFileNoSuffix + WORDS_LAB);
       if (new File(wordLabFile).exists()) {
         typeToFile.put(ImageType.WORD_TRANSCRIPT, wordLabFile);
       }
@@ -413,7 +415,7 @@ public abstract class Scoring {
 
   private String prependDeploy(String pathname) {
     if (!new File(pathname).exists()) {
-      pathname = deployPath + File.separator + pathname;
+      pathname = props.getAudioBaseDir() + File.separator + pathname;
     }
     return pathname;
   }

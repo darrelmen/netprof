@@ -38,6 +38,7 @@ import mitll.langtest.server.audio.PathWriter;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.annotation.IAnnotationDAO;
 import mitll.langtest.server.database.annotation.UserAnnotation;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.reviewed.IReviewedDAO;
 import mitll.langtest.server.database.reviewed.StateCreator;
 import mitll.langtest.server.database.user.IUserDAO;
@@ -735,26 +736,33 @@ public class UserListManager implements IUserListManager {
     int projectID = userExercise.getProjectID();
 
     if (!regularSpeed.getAudioRef().contains(mediaDir)) {
-      File fileRef = pathHelper.getAbsoluteFile(regularSpeed.getAudioRef());
-
-      String fast = FAST + "_" + now + "_by_" + userExercise.getCombinedMutableUserExercise().getCreator() + ".wav";
-      String artist = regularSpeed.getUser().getUserID();
-      String refAudio = getRefAudioPath(projectID, id, fileRef, fast, overwrite, foreignLanguage, artist);
-      regularSpeed.setAudioRef(refAudio);
+      String fast1 = FAST;
+      fixAudioPathOfAttribute(userExercise, overwrite, regularSpeed, now, foreignLanguage, id, projectID, fast1);
       //  logger.debug("fixAudioPaths : for " + userExercise.getOldID() + " fast is " + fast + " size " + FileUtils.size(refAudio));
     }
 
     AudioAttribute slowSpeed = userExercise.getSlowSpeed();
 
-    if (slowSpeed != null && !slowSpeed.getAudioRef().isEmpty() && !slowSpeed.getAudioRef().contains(mediaDir)) {
-      File fileRef = pathHelper.getAbsoluteFile(slowSpeed.getAudioRef());
-      String slow = SLOW + "_" + now + "_by_" + userExercise.getCombinedMutableUserExercise().getCreator() + ".wav";
-
-      String artist = slowSpeed.getUser().getUserID();
-      String refAudio = getRefAudioPath(projectID, id, fileRef, slow, overwrite, foreignLanguage, artist );
-      //logger.debug("fixAudioPaths : for exid " + userExercise.getOldID()+ " slow is " + refAudio + " size " + FileUtils.size(refAudio));
-      slowSpeed.setAudioRef(refAudio);
+    if (slowSpeed != null && !slowSpeed.getAudioRef().isEmpty() &&
+        !slowSpeed.getAudioRef().contains(mediaDir)) {
+      fixAudioPathOfAttribute(userExercise, overwrite, slowSpeed, now, foreignLanguage, id, projectID, SLOW);
     }
+  }
+
+  private void fixAudioPathOfAttribute(CommonExercise userExercise,
+                                       boolean overwrite,
+                                       AudioAttribute regularSpeed,
+                                       long now,
+                                       String foreignLanguage,
+                                       int id,
+                                       int projectID,
+                                       String prefix) {
+    File fileRef = pathHelper.getAbsoluteAudioFile(regularSpeed.getAudioRef());
+
+    String fast = prefix + "_" + now + "_by_" + userExercise.getCombinedMutableUserExercise().getCreator() + ".wav";
+    String artist = regularSpeed.getUser().getUserID();
+    String refAudio = getRefAudioPath(projectID, id, fileRef, fast, overwrite, foreignLanguage, artist);
+    regularSpeed.setAudioRef(refAudio);
   }
 
   /**
@@ -780,7 +788,16 @@ public class UserListManager implements IUserListManager {
                                  String title,
                                  String artist) {
     ServerProperties serverProps = userDAO.getDatabase().getServerProps();
-    return new PathWriter(serverProps).getPermanentAudioPath(pathHelper, fileRef, destFileName, overwrite, projid, id, title, artist,
+    Project project = userDAO.getDatabase().getProject(projid);
+    return new PathWriter(serverProps).getPermanentAudioPath(
+        pathHelper,
+        fileRef,
+        destFileName,
+        overwrite,
+        project.getLanguage(),
+        id,
+        title,
+        artist,
         serverProps);
   }
 

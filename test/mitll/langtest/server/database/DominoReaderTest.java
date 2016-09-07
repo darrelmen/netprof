@@ -2,14 +2,11 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.shared.SectionNode;
-import mitll.langtest.shared.StartupInfo;
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
-import java.util.*;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -33,7 +30,7 @@ public class DominoReaderTest {
 
     logger.debug("config dir " + parent + " config     " + name);
     ServerProperties serverProps = new ServerProperties(parent, name);
-    database = new DatabaseImpl(parent, name, serverProps.getH2Database(), serverProps, new PathHelper("war"), false, null, false);
+    database = new DatabaseImpl(parent, name, serverProps.getH2Database(), serverProps, new PathHelper("war", serverProps), false, null, false);
     // logger.debug("made " + database);
     database.setInstallPath("war", parent + File.separator + database.getServerProps().getLessonPlan(),
         serverProps.getMediaDir());
