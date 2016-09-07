@@ -49,10 +49,14 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   private static final Logger logger = Logger.getLogger(SlickAudioDAO.class);
 
   private final AudioDAOWrapper dao;
+  private final long now = System.currentTimeMillis();
+  private final long before = now - (24 * 60 * 60 * 1000);
+  private final boolean doCheckOnStartup;
 
   public SlickAudioDAO(Database database, DBConnection dbConnection, IUserDAO userDAO) {
     super(database, userDAO);
     dao = new AudioDAOWrapper(dbConnection);
+    doCheckOnStartup = database.getServerProps().doAudioCheckOnStartup();
   }
 
   public void createTable() {
@@ -103,10 +107,16 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     dao.updateExerciseID(uniqueID, exerciseID);
   }
 
+  /**
+   * @see mitll.langtest.server.database.exercise.BaseExerciseDAO#setAudioDAO
+   * @param projid
+   * @param installPath
+   * @param language
+   */
   @Override
   public void validateFileExists(int projid, String installPath, String language) {
-    dao.validateFileExists(projid, System.currentTimeMillis() - (24 * 60 * 60 * 1000), installPath, language.toLowerCase());
-
+    long pastTime = doCheckOnStartup ? now : before;
+    dao.validateFileExists(projid, pastTime, installPath, language.toLowerCase());
   }
 
   @Override
@@ -169,13 +179,15 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     return copy;
   }
 
-  int spew = 0;
+  private int spew = 0;
 
   /**
    * Actual audio path is where we find it on the server... potentially different from where it was originally recorded...
+   *
    * @param s
    * @param idToMini
    * @return
+   * @see #toAudioAttribute(List, Map)
    */
   private AudioAttribute toAudioAttribute(SlickAudio s, Map<Integer, MiniUser> idToMini) {
     MiniUser miniUser = idToMini.get(s.userid());
@@ -240,6 +252,12 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     }
   }
 
+  /**
+   * @see #getAudioAttributesByProject(int)
+   * @param all
+   * @param idToMini
+   * @return
+   */
   private List<AudioAttribute> toAudioAttribute(List<SlickAudio> all, Map<Integer, MiniUser> idToMini) {
     List<AudioAttribute> copy = new ArrayList<>();
 //    logger.info("table has " + dao.getNumRows());
