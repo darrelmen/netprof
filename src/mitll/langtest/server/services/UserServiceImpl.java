@@ -37,6 +37,7 @@ import mitll.langtest.client.services.UserService;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.security.DominoSessionException;
 import mitll.langtest.server.database.security.UserSecurityManager;
+import mitll.langtest.server.database.user.IUserSessionDAO;
 import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
@@ -44,10 +45,12 @@ import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.user.LoginResult;
 import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
+import mitll.npdata.dao.SlickUserSession;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
@@ -114,12 +117,14 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
 
 
   /**
-   * @see #loginUser(String, String)
    * @param session
    * @param loggedInUser
+   * @see #loginUser(String, String)
+   * @see #addUser(SignUpUser, String, boolean)
    */
   private void setSessionUser(HttpSession session, User loggedInUser) {
-    session.setAttribute(USER_SESSION_ATT, loggedInUser.getId());
+    int id1 = loggedInUser.getId();
+    session.setAttribute(USER_SESSION_ATT, id1);
     StringBuilder atts = new StringBuilder("Atts: [ ");
     Enumeration<String> attEnum = session.getAttributeNames();
     while (attEnum.hasMoreElements()) {
@@ -128,7 +133,16 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     atts.append("]");
 //      logger.info("acct detail {}", loggedInUser.getAcctDetail());
     HttpSession session1 = getCurrentSession();
-    logger.info("Adding user to " + session.getId() +
+    String id = session.getId();
+
+    IUserSessionDAO userSessionDAO = db.getUserSessionDAO();
+   // logger.info("num user sessions before " + userSessionDAO.getNumRows());
+
+    userSessionDAO.add(new SlickUserSession(-1, id1, id, new Timestamp(System.currentTimeMillis())));
+
+   // logger.info("num user sessions now " + userSessionDAO.getNumRows() + " : session = " + userSessionDAO.getByUser(id1));
+
+    logger.info("Adding user to " + id +
         " lookup is " + session1.getAttribute(USER_SESSION_ATT) +
         ", session.isNew=" + session1.isNew() +
         ", created=" + session1.getCreationTime() +
@@ -136,18 +150,23 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     db.setStartupInfo(loggedInUser);
   }
 
-
   /**
    * true = create a new session
+   *
    * @return
    */
-  private HttpSession createSession() { return getThreadLocalRequest().getSession(true);  }
+  private HttpSession createSession() {
+    return getThreadLocalRequest().getSession(true);
+  }
 
   /**
    * false = don't create the session
+   *
    * @return
    */
-  private HttpSession getCurrentSession() { return getThreadLocalRequest().getSession(false);  }
+  private HttpSession getCurrentSession() {
+    return getThreadLocalRequest().getSession(false);
+  }
 
   /**
    * @param login
@@ -180,8 +199,8 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   }
 
   /**
-   * @see InitialUI#logout
    * @param login
+   * @see InitialUI#logout
    */
   public void logout(String login) {
     securityManager.logoutUser(getThreadLocalRequest(), login, true);
@@ -212,9 +231,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   ) {
     findSharedDatabase();
     UserManagement userManagement = db.getUserManagement();
-    User newUser = userManagement.addUser(getThreadLocalRequest(),
-        user
-    );
+    User newUser = userManagement.addUser(getThreadLocalRequest(), user);
     MailSupport mailSupport = getMailSupport();
 
     String userID = user.getUserID();
