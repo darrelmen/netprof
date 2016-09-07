@@ -226,10 +226,16 @@ public class AudioFileHelper implements AlignDecode {
                                     boolean allowAlternates,
                                     boolean isRefRecording) {
     String wavPath = pathHelper.getAbsoluteToAnswer(audioContext);
+    String relPath = pathHelper.getRelToAnswer(audioContext);
+
     File file = new File(wavPath);
    // File file = pathHelper.getAbsoluteFile(wavPath);
 
-    logger.debug("writeAudioFile got req " + exercise1 + " for " + audioContext + " " + recordingInfoInitial + " to " + wavPath + " and " + file.getAbsolutePath());
+    logger.debug("writeAudioFile got req " + exercise1 +
+        " for " + audioContext + " " + recordingInfoInitial +
+        " to " + wavPath +
+        " and " + file.getAbsolutePath());
+
     //long then = System.currentTimeMillis();
     AudioCheck.ValidityAndDur validity =
         audioConversion.convertBase64ToAudioFiles(base64EncodedString, file, isRefRecording, isQuietAudioOK());
@@ -246,7 +252,8 @@ public class AudioFileHelper implements AlignDecode {
         audioContext,
         new AnswerInfo.RecordingInfo(recordingInfoInitial, file.getPath()),
 
-        wavPath, file,
+        relPath,
+        file,
 
         validity,
 

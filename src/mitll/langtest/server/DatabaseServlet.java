@@ -59,7 +59,6 @@ public class DatabaseServlet extends HttpServlet {
   // them with a title
 //  private static final Boolean CHECK_FOR_MP3 = false;
   protected ServerProperties serverProps;
-  //private String relativeConfigDir;
   private String configDir;
   protected PathHelper pathHelper;
   private UserSecurityManager securityManager;
@@ -117,6 +116,7 @@ public class DatabaseServlet extends HttpServlet {
   }
 
   private PathHelper getPathHelper() {
+    serverProps = getDatabase().getServerProps();
     if (serverProps == null) throw new IllegalArgumentException("huh? props is null?");
     return new PathHelper(getServletContext(), serverProps);
   }
