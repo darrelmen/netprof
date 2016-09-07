@@ -58,12 +58,16 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class AudioAttribute implements IsSerializable, UserAndTime {
+  /**
+   * @Deprecated - this shouldn't ever be used, since we only return audio that has been recently confirmed to be
+   * on disk.
+   */
   private static final String FILE_MISSING = "FILE_MISSING";
 
   private static final String SPEED = "speed";
   public static final String SLOW = AudioType.SLOW.toString();
   public static final String REGULAR = AudioType.REGULAR.toString();
-  public static final String REGULAR_AND_SLOW = "regular and slow";
+ // public static final String REGULAR_AND_SLOW = "regular and slow";
 
   /**
    * TODO : if every have slow recordings of context audio we'll need to add another type or an enum
