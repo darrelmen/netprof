@@ -41,7 +41,8 @@ public class DecodeTest extends BaseTest {
 
   @Test
   public void testSpanishReport() {
-    JSONObject jsonObject = getDatabase("spanish").doReport(new PathHelper("war"), "", 2016);
+    DatabaseImpl spanish = getDatabase("spanish");
+    JSONObject jsonObject = spanish.doReport(new PathHelper("war", spanish.getServerProps()), "", 2016);
     logger.info("got\n" + jsonObject);
   }
 
@@ -109,7 +110,7 @@ public class DecodeTest extends BaseTest {
   @Test
   public void testMandarin() {
     DatabaseImpl russian = getDatabase("mandarin");
-    JSONObject war = russian.doReport(new PathHelper("war"));
+    JSONObject war = russian.doReport(new PathHelper("war", null));
     logger.info("json:\n" + war);
   }
 
@@ -117,11 +118,11 @@ public class DecodeTest extends BaseTest {
   public void testMSAReports() {
     DatabaseImpl russian = getDatabase("msa");
     long then = System.currentTimeMillis();
-    JSONObject war = russian.doReport(new PathHelper("war"));
+    JSONObject war = russian.doReport(new PathHelper("war", null));
     long now = System.currentTimeMillis();
     logger.debug("report 1 : took " + (now - then) + " millis");
     now = then;
-    JSONObject war2 = russian.doReport(new PathHelper("war"));
+    JSONObject war2 = russian.doReport(new PathHelper("war", null));
     now = System.currentTimeMillis();
 
     logger.debug("report 2 took " + (now - then) + " millis");
@@ -131,7 +132,7 @@ public class DecodeTest extends BaseTest {
 
   @Test
   public void testFullMandarin() {
-    JSONObject war = getDatabase("mandarin").doReport(new PathHelper("war"));
+    JSONObject war = getDatabase("mandarin").doReport(new PathHelper("war", null));
     logger.info("json:\n" + war);
   }
 
@@ -147,7 +148,7 @@ public class DecodeTest extends BaseTest {
 
   AudioFileHelper getAudioFileHelper(DatabaseImpl russian) {
     ServerProperties serverProps = russian.getServerProps();
-    return new AudioFileHelper(new PathHelper("war"), serverProps, russian, null, null);
+    return new AudioFileHelper(new PathHelper("war", null), serverProps, russian, null, null);
   }
 
   @Test

@@ -41,6 +41,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
+import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.AudioContext;
 
 import java.util.logging.Logger;
@@ -126,13 +127,14 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     reqid++;
     final long then = System.currentTimeMillis();
 
+    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
     AudioContext audioContext = new AudioContext(
         reqid,
         controller.getUser(),
-        controller.getProjectStartupInfo().getProjectid(),
+        projectStartupInfo.getProjectid(),
+        projectStartupInfo.getLanguage(),
         getExerciseID(),
-        index,
-        getAudioType());
+        index, getAudioType());
 
     logger.info("PostAudioRecordButton.postAudioFile : " + getAudioType() + " : " + audioContext);
 

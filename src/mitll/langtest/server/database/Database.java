@@ -34,6 +34,7 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.database.exercise.Project;
 
 import java.sql.Connection;
 import java.util.Collection;
@@ -60,6 +61,8 @@ public interface Database {
   ServerProperties getServerProps();
 
   String getLanguage();
+
+  Project getProject(int projectid);
 
   LogAndNotify getLogAndNotify();
 
