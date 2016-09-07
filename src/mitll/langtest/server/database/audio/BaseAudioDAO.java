@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.database.audio;
 
-import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.database.AudioExport;
 import mitll.langtest.server.database.DAO;
@@ -48,7 +47,6 @@ import mitll.langtest.shared.user.User;
 import org.apache.log4j.Logger;
 
 import java.io.File;
-import java.io.OutputStream;
 import java.util.*;
 
 public abstract class BaseAudioDAO extends DAO {
@@ -74,10 +72,12 @@ public abstract class BaseAudioDAO extends DAO {
  // public static final String BEST_AUDIO = "bestAudio";
 
   protected final IUserDAO userDAO;
+  private final int netProfDurLength;
 
   BaseAudioDAO(Database database, IUserDAO userDAO) {
     super(database);
     this.userDAO = userDAO;
+    netProfDurLength = database.getServerProps().getAudioBaseDir().length();
   }
 
   /**
@@ -244,6 +244,7 @@ public abstract class BaseAudioDAO extends DAO {
   }
 
   /**
+   * Don't do this checking of file path stuff -
    * @see #attachAudioToExercise
    * @param firstExercise
    * @param installPath
@@ -271,19 +272,19 @@ public abstract class BaseAudioDAO extends DAO {
      //   String langPrefix = BEST_AUDIO + File.separator + language.toLowerCase();
         String langPrefix = language.toLowerCase();
         String prefix = installPath + File.separator + langPrefix;
-        File file = new File(prefix, attr.getAudioRef());
+       /* File file = new File(prefix, attr.getAudioRef());
         if (!file.exists()) {
           if (DEBUG_ATTACH) logger.debug("\tattachAudioAndFixPath couldn't find '" + file.getAbsolutePath() + "'");
 
-        }
-        if (audioConversion.exists(attr.getAudioRef(), prefix)) {
-          if (DEBUG_ATTACH) logger.debug("\tattachAudioAndFixPath was '" + attr.getAudioRef() + "'");
-          String relPrefix = prefix.substring(database.getServerProps().getAudioBaseDir().length());
+        }*/
+        //if (audioConversion.exists(attr.getAudioRef(), prefix)) {
+        //  if (DEBUG_ATTACH) logger.debug("\tattachAudioAndFixPath was '" + attr.getAudioRef() + "'");
+        String relPrefix = prefix.substring(netProfDurLength);
           attr.setAudioRef(relPrefix + File.separator + attr.getAudioRef());
           if (DEBUG_ATTACH) logger.debug("\tattachAudioAndFixPath now '" + attr.getAudioRef() + "'");
-        } else {
-          if (DEBUG_ATTACH) logger.debug("\tattachAudio couldn't find audio file at '" + attr.getAudioRef() + "' under " + langPrefix);
-        }
+       // } else {
+       //   if (DEBUG_ATTACH) logger.debug("\tattachAudio couldn't find audio file at '" + attr.getAudioRef() + "' under " + langPrefix);
+       // }
 
 /*
         if (audioConversion.exists(attr.getAudioRef(), relativeConfigDir)) {
