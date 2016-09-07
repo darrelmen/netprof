@@ -63,8 +63,8 @@ public class JsonSupport {
   private final IRefResultDAO refResultDAO;
   private final IAudioDAO audioDAO;
   private final IPhoneDAO phoneDAO;
-  private final String configDir;
-  private final String installPath;
+//  private final String configDir;
+//  private final String installPath;
 
   /**
    * @param sectionHelper
@@ -72,24 +72,20 @@ public class JsonSupport {
    * @param refResultDAO
    * @param audioDAO
    * @param phoneDAO
-   * @param configDir
-   * @param installPath
    * @see mitll.langtest.server.database.DatabaseImpl#setInstallPath(String, String, String)
    */
   JsonSupport(SectionHelper<CommonExercise> sectionHelper,
               IResultDAO resultDAO,
               IRefResultDAO refResultDAO,
               IAudioDAO audioDAO,
-              IPhoneDAO phoneDAO,
-              String configDir,
-              String installPath) {
+              IPhoneDAO phoneDAO) {
     this.sectionHelper = sectionHelper;
     this.resultDAO = resultDAO;
     this.refResultDAO = refResultDAO;
     this.audioDAO = audioDAO;
     this.phoneDAO = phoneDAO;
-    this.configDir = configDir;
-    this.installPath = installPath;
+//    this.configDir = configDir;
+//    this.installPath = installPath;
   }
 
   /**
@@ -135,7 +131,6 @@ public class JsonSupport {
   JSONObject getJsonRefResults(Map<String, Collection<String>> typeToSection) {
     Collection<CommonExercise> exercisesForState = sectionHelper.getExercisesForSelectionState(typeToSection);
     List<Integer> allIDs = new ArrayList<>();
-
     // Map<String, CommonExercise> idToEx = new HashMap<String, CommonExercise>();
     for (CommonExercise exercise : exercisesForState) {
       // String id = exercise.getOldID();
@@ -201,7 +196,6 @@ public class JsonSupport {
 
   private JSONArray getScoresAsJson(Collection<CorrectAndScore> correctAndScoresLimited) {
     JSONArray history = new JSONArray();
-
     for (CorrectAndScore cs : correctAndScoresLimited) {
       history.add(round(cs.getScore()));
     }
@@ -249,7 +243,6 @@ public class JsonSupport {
 
     if (now - then > 500) logger.warn("took " + (now - then) + " millis to get ex->audio map");
 
-
     List<Integer> ids = new ArrayList<>();
     Map<Integer, String> exidToRefAudio = new HashMap<>();
     for (CommonExercise exercise : exercisesForState) {
@@ -263,7 +256,6 @@ public class JsonSupport {
     }
 
     now = System.currentTimeMillis();
-
     if (now - then > 300) logger.warn("getJsonPhoneReport : took " + (now - then) + " millis to attach audio again!");
 
     return phoneDAO.getWorstPhonesJson(userid, ids, exidToRefAudio);
