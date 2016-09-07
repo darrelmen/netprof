@@ -646,9 +646,9 @@ public class DatabaseImpl implements Database {
     return getProject(getUserProjectDAO().mostRecentByUser(userid));
   }
 
-  public int getProjectIDForUser(User loggedInUser) {
+/*  public int getProjectIDForUser(User loggedInUser) {
     return getUserProjectDAO().mostRecentByUser(loggedInUser.getId());
-  }
+  }*/
 
   public void stopDecode() {
     for (Project project : getProjects()) project.stopDecode();
@@ -1683,6 +1683,10 @@ public class DatabaseImpl implements Database {
         getAudioDAO(), installPath, configDir, false,options);
   }
 
+  public String getLanguage(CommonExercise ex) {
+    return getLanguage(ex.getProjectID());
+  }
+
   public String getLanguage(int projectid) {
     return getProject(projectid).getLanguage();
   }
@@ -1713,7 +1717,10 @@ public class DatabaseImpl implements Database {
    * @throws Exception
    * @see mitll.langtest.server.DownloadServlet#writeUserList
    */
-  public String writeUserListAudio(OutputStream out, long listid, PathHelper pathHelper, int projectid,
+  public String writeUserListAudio(OutputStream out,
+                                   long listid,
+                                   PathHelper pathHelper,
+                                   int projectid,
                                    AudioExport.AudioExportOptions options) throws Exception {
       String language = getLanguage(projectid);
     if (listid == -1) return language + "_Unknown";
@@ -1733,7 +1740,7 @@ public class DatabaseImpl implements Database {
       }
       for (CommonExercise ex : copyAsExercises) {
         userListManager.addAnnotations(ex);
-        getAudioDAO().attachAudio(ex, pathHelper.getInstallPath(), configDir, language);
+        getAudioDAO().attachAudioToExercise(ex,/* pathHelper.getInstallPath(), configDir,*/ language);
       }
       long now = System.currentTimeMillis();
       logger.debug("\nTook " + (now - then) + " millis to annotate and attach.");
@@ -1751,12 +1758,10 @@ public class DatabaseImpl implements Database {
    * @return
    */
   public int attachAudio(CommonExercise ex) {
-    return getAudioDAO().attachAudio(ex, installPath, configDir, getLanguage(ex));
+    return getAudioDAO().attachAudioToExercise(ex, /*installPath, configDir,*/ getLanguage(ex));
   }
 
-  public String getLanguage(CommonExercise ex) {
-    return getLanguage(ex.getProjectID());
-  }
+
 
   /**
    * Expensive ?
@@ -1774,7 +1779,7 @@ public class DatabaseImpl implements Database {
     for (CommonExercise exercise : exercises) {
       List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
       if (audioAttributes != null) {
-        audioDAO.attachAudio(exercise, installPath, configDir, audioAttributes, project.getLanguage());
+        audioDAO.attachAudio(exercise, /*installPath, configDir,*/ audioAttributes, project.getLanguage());
       }
       //if (!debug) ensureMP3s(exercise);
       // exercises.add(getJsonForExercise(exercise));

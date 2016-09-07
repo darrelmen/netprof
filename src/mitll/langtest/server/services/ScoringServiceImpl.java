@@ -63,7 +63,7 @@ import java.util.Collection;
 public class ScoringServiceImpl extends MyRemoteServiceServlet implements ScoringService {
   private static final Logger logger = Logger.getLogger(ScoringServiceImpl.class);
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
   /**
    * NOTE NOTE NOTE : doesn't make sure we have mp3 or ogg file equivalents...

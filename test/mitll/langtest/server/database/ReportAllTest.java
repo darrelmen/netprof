@@ -93,7 +93,7 @@ public class ReportAllTest extends BaseTest {
 
     List<String> configs = Arrays.asList();
     int i = 0;
-    PathHelper war = new PathHelper("war");
+    PathHelper war = new PathHelper("war", null);
 
     configs = Collections.singletonList("english");
     for (String db : Arrays.asList("npfEnglish")) {
@@ -139,7 +139,7 @@ public class ReportAllTest extends BaseTest {
         , "spanish", "sudanese", "tagalog", "urdu"
     );
     int i = 0;
-    PathHelper war = new PathHelper("war");
+    PathHelper war = new PathHelper("war", null);
 
     if (DO_ONE) {
       configs = Collections.singletonList("spanish");

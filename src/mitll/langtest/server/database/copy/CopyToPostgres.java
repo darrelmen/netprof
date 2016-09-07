@@ -201,7 +201,7 @@ public class CopyToPostgres<T extends CommonShell> {
     ServerProperties serverProps = new ServerProperties(parent, name);
     serverProps.setH2(true);
     return new DatabaseImpl(parent, name, serverProps.getH2Database(), serverProps,
-        new PathHelper(getInstallPath(inTest)), false, null, true);
+        new PathHelper(getInstallPath(inTest), serverProps), false, null, true);
   }
 
   /**

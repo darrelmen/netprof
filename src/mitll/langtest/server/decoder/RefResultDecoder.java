@@ -39,10 +39,10 @@ import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.Project;
-import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.user.MiniUser;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
@@ -61,7 +61,7 @@ public class RefResultDecoder {
 
   private static final boolean DO_REF_DECODE = true;
   private static final boolean DO_TRIM = false;
- // private static final int SLEEP_BETWEEN_DECODES = 2000;
+  // private static final int SLEEP_BETWEEN_DECODES = 2000;
 
   private final DatabaseImpl db;
   private final ServerProperties serverProps;
@@ -172,7 +172,6 @@ public class RefResultDecoder {
 */
 
   /**
-   *
    * @param projid
    * @param exercises
    * @param relativeConfigDir
@@ -204,7 +203,7 @@ public class RefResultDecoder {
         List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
         if (audioAttributes != null) {
 //					logger.warn("hmm - audio recorded for " + )
-          boolean didAll = db.getAudioDAO().attachAudio(exercise, installPath, relativeConfigDir, audioAttributes,language);
+          boolean didAll = db.getAudioDAO().attachAudio(exercise, /*installPath, relativeConfigDir,*/ audioAttributes, language);
           attrc += audioAttributes.size();
           if (!didAll) {
             failed.add(exercise.getID());
@@ -265,7 +264,7 @@ public class RefResultDecoder {
    */
   private void writeRefDecode(Collection<CommonExercise> exercises, String relativeConfigDir, int projid) {
     boolean b = db.getServerProps().shouldDoDecode();
-    logger.warn("writeRefDecode got " +b + " for should do decode");
+    logger.warn("writeRefDecode got " + b + " for should do decode");
     if (false) {
       Map<Integer, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio(projid);
       String installPath = pathHelper.getInstallPath();
@@ -292,7 +291,7 @@ public class RefResultDecoder {
 
         List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
         if (audioAttributes != null) {
-          db.getAudioDAO().attachAudio(exercise, installPath, relativeConfigDir, audioAttributes,language);
+          db.getAudioDAO().attachAudio(exercise, /*installPath, relativeConfigDir,*/ audioAttributes, language);
           attrc += audioAttributes.size();
         }
 
@@ -402,7 +401,7 @@ public class RefResultDecoder {
         if (!audioRef.contains("context=")) {
           //logger.debug("doing alignment -- ");
           // Do alignment...
-          File absoluteFile = pathHelper.getAbsoluteFile(audioRef);
+          File absoluteFile = pathHelper.getAbsoluteAudioFile(audioRef);
           fileExists = absoluteFile.exists();
         }
 
@@ -434,7 +433,7 @@ public class RefResultDecoder {
     for (AudioAttribute attribute : audioAttributes) {
       String bestAudio = getFile(attribute);
       String audioRef = attribute.getAudioRef();
-      File absoluteFile = pathHelper.getAbsoluteFile(audioRef);
+      File absoluteFile = pathHelper.getAbsoluteAudioFile(audioRef);
 
       if (absoluteFile.exists()) {
         File replacement = new File(absoluteFile.getParent(), "orig_" + absoluteFile.getName());
