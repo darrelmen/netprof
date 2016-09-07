@@ -70,6 +70,7 @@ public class PathHelper {
   public PathHelper(ServletContext context, ServerProperties properties) {
     this.context = context;
     this.properties = properties;
+    if (properties == null) throw new IllegalArgumentException("properties is null??");
   }
 
   public PathHelper(String realContextPathTest, ServerProperties properties) {
@@ -154,10 +155,8 @@ public class PathHelper {
    * @return a path relative to the install dir
    * @see LangTestDatabaseImpl#writeAudioFile
    */
-
   public String getAbsoluteToAnswer(AudioContext audioContext) {
-    // int projid = audioContext.getProjid();
-    String language = audioContext.getLanguage();
+    String language = audioContext.getLanguage().toLowerCase();
     return getAbsoluteToAnswer(language, audioContext.getExid(), audioContext.getQuestionID(), audioContext.getUserid());
   }
 
@@ -172,7 +171,7 @@ public class PathHelper {
    */
   String getAbsoluteToAnswer(String language, int exercise, int question, int user) {
     String planAndTestPath =
-        language + File.separator +
+        language.toLowerCase() + File.separator +
             exercise + File.separator +
             question + File.separator +
             "subject-" + user;
