@@ -37,13 +37,12 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.WavCallback;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.services.AudioServiceAsync;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
+import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.AudioContext;
 
 /**
@@ -180,8 +179,12 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
     String device = controller.getBrowserInfo();
     final int len = base64EncodedWavFile.length();
 
-    AudioContext audioContext = new AudioContext(reqid, controller.getUser(), controller.getProjectStartupInfo().getProjectid(),
-        exerciseID, index, audioType);
+    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+    AudioContext audioContext = new AudioContext(reqid,
+        controller.getUser(),
+        projectStartupInfo.getProjectid(), projectStartupInfo.getLanguage(),
+        exerciseID,
+        index, audioType);
 
     controller.getAudioService().writeAudioFile(base64EncodedWavFile,
         audioContext,
@@ -257,7 +260,8 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
     return recordButton;
   }
 
-  protected void receivedAudioAnswer(AudioAnswer result, final Panel outer) {}
+  protected void receivedAudioAnswer(AudioAnswer result, final Panel outer) {
+  }
 
   public void setAllowAlternates(boolean allowAlternates) {
     this.allowAlternates = allowAlternates;

@@ -5,11 +5,11 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.result.Result;
-import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.Event;
+import mitll.langtest.shared.user.User;
 import org.apache.log4j.Logger;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -23,7 +23,7 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -48,7 +48,8 @@ public class UserListManagerTest {
     logger.debug("config dir " + parent);
     logger.debug("config     " + file.getName());
     dbName = "npfSpanish";//"mandarin";// "mandarin";
-    database = new DatabaseImpl(parent, file.getName(), dbName, new ServerProperties(parent, file.getName()), new PathHelper("war"), false, null);
+    ServerProperties serverProps = new ServerProperties(parent, file.getName());
+    database = new DatabaseImpl(parent, file.getName(), dbName, serverProps, new PathHelper("war", serverProps), false, null);
     logger.debug("made " + database);
     String media = parent + File.separator + "media";
     logger.debug("media " + media);
@@ -67,12 +68,12 @@ public class UserListManagerTest {
   }
 */
 
-  @Test
+/*  @Test
   public void testReport() {
-   // Map<String, Collection<String>> typeToValues = new HashMap<String, Collection<String>>();
-  //  typeToValues.put("Lesson", Arrays.asList("1-1"));
-    database.doReport(new PathHelper("war"),"",2016);
-  }
+    // Map<String, Collection<String>> typeToValues = new HashMap<String, Collection<String>>();
+    //  typeToValues.put("Lesson", Arrays.asList("1-1"));
+    database.doReport(new PathHelper("war", ), "", 2016);
+  }*/
 
 /*  @Test
   public void testPhoneReport() {
@@ -135,28 +136,28 @@ public class UserListManagerTest {
     Map<Integer, Integer> weekToCount = new TreeMap<Integer, Integer>();
     for (User user : users) {
       //try {
-       // if (user.getTimestamp().isEmpty()) continue;
-       // Date parse = simpleDateFormat2.parse(user.getTimestamp());
+      // if (user.getTimestamp().isEmpty()) continue;
+      // Date parse = simpleDateFormat2.parse(user.getTimestamp());
       long created = user.getTimestampMillis();
-        if (created > january1st.getTime()) {
-          ytd++;
+      if (created > january1st.getTime()) {
+        ytd++;
 
-          calendar.setTimeInMillis(created);
-          int i = calendar.get(Calendar.MONTH);
-          String month1 = getMonth(i);
-          Integer integer = monthToCount.get(month1);
-          monthToCount.put(month1, (integer == null) ? 1 : integer + 1);
+        calendar.setTimeInMillis(created);
+        int i = calendar.get(Calendar.MONTH);
+        String month1 = getMonth(i);
+        Integer integer = monthToCount.get(month1);
+        monthToCount.put(month1, (integer == null) ? 1 : integer + 1);
 
-          int w = calendar.get(Calendar.WEEK_OF_YEAR);
-          Integer integer2 = weekToCount.get(w);
+        int w = calendar.get(Calendar.WEEK_OF_YEAR);
+        Integer integer2 = weekToCount.get(w);
 
-          weekToCount.put(w, (integer2 == null) ? 1 : integer2 + 1);
-        } else {
-         // logger.debug("NO time " + user.getTimestamp() + " " + parse);
-        }
-     /// } catch (ParseException e) {
-     //   e.printStackTrace();
-     // }
+        weekToCount.put(w, (integer2 == null) ? 1 : integer2 + 1);
+      } else {
+        // logger.debug("NO time " + user.getTimestamp() + " " + parse);
+      }
+      /// } catch (ParseException e) {
+      //   e.printStackTrace();
+      // }
     }
     logger.debug("ytd " + ytd);
     logger.debug("month " + monthToCount);
@@ -170,11 +171,11 @@ public class UserListManagerTest {
   private void getResults() {
     Calendar calendar = new GregorianCalendar();
     int year = calendar.get(Calendar.YEAR);
-   // logger.debug("year " + year);
+    // logger.debug("year " + year);
     calendar.set(Calendar.YEAR, year);
     calendar.set(Calendar.DAY_OF_YEAR, 1);
     Date january1st = calendar.getTime();
-  //  logger.debug("jan first " + january1st);
+    //  logger.debug("jan first " + january1st);
 
     int ytd = 0;
 

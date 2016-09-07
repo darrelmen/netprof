@@ -62,7 +62,7 @@ public class ServerProperties {
   private static final Logger logger = Logger.getLogger(ServerProperties.class);
 
   private static final String FALSE = "false";
-  private static final String TRUE  = "true";
+  private static final String TRUE = "true";
 
 /*
   private static final List<String> AMAS_SITES =
@@ -70,9 +70,9 @@ public class ServerProperties {
 */
 
   public static final String MIRA_DEVEL_HOST = "mira-devel.llan.ll.mit.edu/scorer/item"; //"mira-devel.llan.ll.mit.edu/msa/item";
-  private static final String MIRA_DEVEL     = "https://" + MIRA_DEVEL_HOST;
-  private static final String MIRA_LEN       = "https://mira.ll.mit.edu/scorer/item";
-  private static final String MIRA_DEFAULT   = MIRA_LEN;
+  private static final String MIRA_DEVEL = "https://" + MIRA_DEVEL_HOST;
+  private static final String MIRA_LEN = "https://mira.ll.mit.edu/scorer/item";
+  private static final String MIRA_DEFAULT = MIRA_LEN;
   private static final String MIRA_CLASSIFIER_URL = "miraClassifierURL";
 
   //  private static final String WEBSERVICE_HOST_IP1 = "webserviceHostIP";
@@ -102,6 +102,8 @@ public class ServerProperties {
   private static final String LANGUAGE = "language";
 
   private static final String MEDIA_DIR = "mediaDir";
+  private static final String ANSWER_DIR = "answerDir";
+  private static final String NETPROF_AUDIO_DIR = "audioDir";
   //  private static final String RECO_TEST = "recoTest";
 //  private static final String RECO_TEST2 = "recoTest2";
   private static final String MIN_PRON_SCORE = "minPronScore";
@@ -127,7 +129,10 @@ public class ServerProperties {
   private static final int SLEEP_BETWEEN_DECODES_DEFAULT = 100; // Paul Gatewood 11/24/15 : The bottom line is we should set the minimum Dynamic Range threshold to 20dB for NetProf users
   private static final String MIN_DYNAMIC_RANGE = "minDynamicRange";
   private static final String RUN_REF_DECODE_WITH_HYDEC = "runRefDecodeWithHydec";
-  private static final String DEFAULT_BEST_AUDIO = "/opt/netProf/bestAudio";
+
+  private static final String DEFAULT_NETPROF_AUDIO_DIR = "/opt/netProf/";
+  private static final String DEFAULT_BEST_AUDIO = DEFAULT_NETPROF_AUDIO_DIR +"bestAudio";
+  private static final String DEFAULT_ANSWERS = DEFAULT_NETPROF_AUDIO_DIR + "answers";
 
   private Properties props = new Properties();
 
@@ -261,6 +266,14 @@ public class ServerProperties {
    */
   public String getMediaDir() {
     return props.getProperty(MEDIA_DIR, DEFAULT_BEST_AUDIO);
+  }
+
+  public String getAnswerDir() {
+    return props.getProperty(ANSWER_DIR, DEFAULT_ANSWERS);
+  }
+
+  public String getAudioBaseDir() {
+    return props.getProperty(NETPROF_AUDIO_DIR, DEFAULT_NETPROF_AUDIO_DIR);
   }
 
   public double getMinPronScore() {

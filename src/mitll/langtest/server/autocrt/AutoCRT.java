@@ -35,6 +35,7 @@ package mitll.langtest.server.autocrt;
 import ag.experiment.AutoGradeExperiment;
 import mira.classifier.Classifier;
 import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.database.export.Export;
 import mitll.langtest.server.export.ExerciseExport;
@@ -42,9 +43,9 @@ import mitll.langtest.server.export.ResponseAndGrade;
 import mitll.langtest.server.scoring.AlignDecode;
 import mitll.langtest.server.scoring.InDictFilter;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
-import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.amas.QAPair;
+import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.log4j.Logger;
@@ -90,6 +91,7 @@ public class AutoCRT {
   private final boolean doEighty = false;
   private final boolean usePreDefOnly = false;
   boolean comparisonTesting = false;
+  protected ServerProperties serverProperties;
 
   /**
    * @param db
@@ -99,7 +101,8 @@ public class AutoCRT {
    */
   public AutoCRT(Export exporter, AlignDecode db, InDictFilter inDictFilter,
                  String installPath, String relativeConfigDir, double minPronScore,
-                 String miraFlavor, String miraURL, boolean useMiraClassifier) {
+                 String miraFlavor, String miraURL, boolean useMiraClassifier,
+                 ServerProperties serverProperties) {
     this.installPath = installPath;
     this.mediaDir = relativeConfigDir;
     this.exporter = exporter;
@@ -109,7 +112,7 @@ public class AutoCRT {
     this.miraFlavor = miraFlavor;
     this.miraURL = miraURL;
     this.useMiraClassifier = useMiraClassifier;
-
+    this.serverProperties = serverProperties;
     if (comparisonTesting) {
       File file = getReportFile(miraFlavor);
       logger.debug("wrote to " + file.getAbsolutePath());
@@ -148,7 +151,7 @@ public class AutoCRT {
 
   public static File getReportFile(String prefix, String suffix) {
     String today = getTodayMillis();
-    return getReportFile(new PathHelper("war"), today, prefix, suffix);
+    return getReportFile(new PathHelper("war", null), today, prefix, suffix);
   }
 
   private static String getTodayMillis() {
@@ -277,7 +280,7 @@ public class AutoCRT {
    * @see #getExportedAnswers(String, int)
    */
   private PretestScore getScoreForAudio(AmasExerciseImpl exercise, String exerciseID, int questionID, File audioFile, boolean useCache) {
-    Collection<String> exportedAnswersOrig = getPredefAnswers(exercise, questionID-1);
+    Collection<String> exportedAnswersOrig = getPredefAnswers(exercise, questionID - 1);
     if (exportedAnswersOrig == null) logger.warn("getScoreForAudio : can't find " + exerciseID + "/" + questionID);
     Collection<String> exportedAnswers = inDictFilter.getValidPhrases(exportedAnswersOrig);   // remove phrases that break hydec
     if (exportedAnswers == null)
@@ -299,10 +302,10 @@ public class AutoCRT {
   }
 
   /**
-   * @see #getScoreForAudio(AmasExerciseImpl, String, int, File, boolean)
    * @param exercise
    * @param questionID
    * @return
+   * @see #getScoreForAudio(AmasExerciseImpl, String, int, File, boolean)
    */
   private Collection<String> getPredefAnswers(AmasExerciseImpl exercise, int questionID) {
     QAPair q = exercise.getQuestions().get(questionID);
