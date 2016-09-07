@@ -117,6 +117,7 @@ public class DatabaseServlet extends HttpServlet {
   }
 
   private PathHelper getPathHelper() {
+    if (serverProps == null) throw new IllegalArgumentException("huh? props is null?");
     return new PathHelper(getServletContext(), serverProps);
   }
 

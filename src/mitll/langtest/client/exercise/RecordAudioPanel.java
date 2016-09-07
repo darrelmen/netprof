@@ -43,7 +43,6 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
@@ -89,7 +88,6 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
   /**
    * @param exercise
    * @param controller
-   * @param service
    * @param index
    * @param showSpectrogram
    * @param audioType
@@ -100,7 +98,6 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
   public RecordAudioPanel(T exercise,
                           ExerciseController controller,
                           Panel widgets,
-                          LangTestDatabaseAsync service,
                           int index,
                           boolean showSpectrogram,
                           AudioType audioType,
@@ -113,7 +110,7 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
         , 1.0f, 23,
       //  exercise.getID(), // TODO : why both here??
         exercise,
-        instance
+        exercise.getID(), instance
     );
     this.exercisePanel = widgets;
     this.index = index;
