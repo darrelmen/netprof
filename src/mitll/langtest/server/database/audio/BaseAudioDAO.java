@@ -69,7 +69,7 @@ public abstract class BaseAudioDAO extends DAO {
   private static final String CONTEXT_REGULAR = AUDIO_TYPE1;
   private static final String TRANSLITERATION = "transliteration";
   private static final boolean DEBUG_ATTACH = true;
- // public static final String BEST_AUDIO = "bestAudio";
+  // public static final String BEST_AUDIO = "bestAudio";
 
   protected final IUserDAO userDAO;
   private final int netProfDurLength;
@@ -156,7 +156,7 @@ public abstract class BaseAudioDAO extends DAO {
 
   /**
    * TODO : deal with possibility of audio being in either bestAudio or in answers...
-   *
+   * <p>
    * TODO : rewrite this so it's not insane -adding and removing attributes??
    * <p>
    * Complicated, but separates old school "Default Speaker" audio into a second pile.
@@ -189,7 +189,7 @@ public abstract class BaseAudioDAO extends DAO {
         defaultAudio.add(attr);
       } else {
         audioPaths.add(attr.getAudioRef());
-        boolean didIt = attachAudioAndFixPath(firstExercise, installPath, audioConversion, attr, language);
+        boolean didIt = attachAudioAndFixPath(firstExercise, installPath, attr, language);
         if (!didIt) {
           if (DEBUG_ATTACH && allSucceeded) {
             String foreignLanguage = attr.isContextAudio() ? firstExercise.getContext() : firstExercise.getForeignLanguage();
@@ -208,7 +208,7 @@ public abstract class BaseAudioDAO extends DAO {
 
     for (AudioAttribute attr : defaultAudio) {
       if (!audioPaths.contains(attr.getAudioRef())) {
-        boolean didIt = attachAudioAndFixPath(firstExercise, installPath, audioConversion, attr, language);
+        boolean didIt = attachAudioAndFixPath(firstExercise, installPath, attr, language);
         if (!didIt) {
           if (DEBUG_ATTACH && allSucceeded) {
             logger.info("not attaching audio\t" + attr.getUniqueID() + " to\t" + firstExercise.getID() +
@@ -245,17 +245,16 @@ public abstract class BaseAudioDAO extends DAO {
 
   /**
    * Don't do this checking of file path stuff -
-   * @see #attachAudioToExercise
+   *
    * @param firstExercise
    * @param installPath
-   * @param audioConversion
    * @param attr
    * @param language
    * @return
+   * @see #attachAudioToExercise
    */
   private boolean attachAudioAndFixPath(CommonExercise firstExercise,
                                         String installPath,
-                                        AudioConversion audioConversion,
                                         AudioAttribute attr,
                                         String language) {
     Collection<CommonExercise> directlyRelated = firstExercise.getDirectlyRelated();
@@ -266,10 +265,10 @@ public abstract class BaseAudioDAO extends DAO {
 
       if (attr.getAudioRef() == null)
         logger.error("attachAudioAndFixPath huh? no audio ref for " + attr + " under " + firstExercise);
-      else if (!audioConversion.exists(attr.getAudioRef(), installPath)) { // seems like this will always fail???
+      else {//if (!audioConversion.exists(attr.getAudioRef(), installPath)) { // seems like this will always fail???
         // so a path to the file on disk will now look like /opt/netProf/bestAudio/spanish/bestAudio/123/regular_XXX.wav
         // in the database we store just bestAudio/123/regular_XXX.wav
-     //   String langPrefix = BEST_AUDIO + File.separator + language.toLowerCase();
+        //   String langPrefix = BEST_AUDIO + File.separator + language.toLowerCase();
         String langPrefix = language.toLowerCase();
         String prefix = installPath + File.separator + langPrefix;
        /* File file = new File(prefix, attr.getAudioRef());
@@ -280,11 +279,11 @@ public abstract class BaseAudioDAO extends DAO {
         //if (audioConversion.exists(attr.getAudioRef(), prefix)) {
         //  if (DEBUG_ATTACH) logger.debug("\tattachAudioAndFixPath was '" + attr.getAudioRef() + "'");
         String relPrefix = prefix.substring(netProfDurLength);
-          attr.setAudioRef(relPrefix + File.separator + attr.getAudioRef());
-          if (DEBUG_ATTACH) logger.debug("\tattachAudioAndFixPath now '" + attr.getAudioRef() + "'");
-       // } else {
-       //   if (DEBUG_ATTACH) logger.debug("\tattachAudio couldn't find audio file at '" + attr.getAudioRef() + "' under " + langPrefix);
-       // }
+        attr.setAudioRef(relPrefix + File.separator + attr.getAudioRef());
+        if (DEBUG_ATTACH) logger.debug("\tattachAudioAndFixPath now '" + attr.getAudioRef() + "'");
+        // } else {
+        //   if (DEBUG_ATTACH) logger.debug("\tattachAudio couldn't find audio file at '" + attr.getAudioRef() + "' under " + langPrefix);
+        // }
 
 /*
         if (audioConversion.exists(attr.getAudioRef(), relativeConfigDir)) {

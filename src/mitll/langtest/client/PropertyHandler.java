@@ -34,6 +34,7 @@ package mitll.langtest.client;
 
 import com.google.gwt.user.client.Window;
 import mitll.langtest.client.recorder.RecordButton;
+import mitll.langtest.client.user.UserPassLogin;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -87,7 +88,7 @@ public class PropertyHandler {
   private static final String GRADING = GRADING_PROP;
   private static final String BKG_COLOR_FOR_REF = "bkgColorForRef";
   private static final String EXERCISE_TITLE = "exercise_title";
-  private static final String ADMIN_PARAM = "admin";
+ // private static final String ADMIN_PARAM = "admin";
   private static final String ANALYSIS = "analysis";
   private static final String TURK_PARAM = "turk";
   private static final String NUM_GRADES_TO_COLLECT_PARAM = NUM_GRADES_TO_COLLECT;
@@ -447,10 +448,11 @@ public class PropertyHandler {
       demoMode = !demoParam.equals("false");
     }
 
-    String adminParam = Window.Location.getParameter(ADMIN_PARAM);
-    if (adminParam != null) {
-      adminView = !adminParam.equals("false");
-    }
+    // 9/7/16 Ray says no admin mode
+//    String adminParam = Window.Location.getParameter(ADMIN_PARAM);
+//    if (adminParam != null) {
+//      adminView = !adminParam.equals("false");
+//    }
     String p = Window.Location.getParameter(ANALYSIS);
     if (p != null) {
       analysis = !p.equals("false");
@@ -692,11 +694,9 @@ public class PropertyHandler {
   public String getResponseType() {
     return responseType;
   }
-
   public void setResponseType(String responseType) {
     this.responseType = responseType;
   }
-
   public boolean isOdaMode() {
     return false;
   }
@@ -704,6 +704,7 @@ public class PropertyHandler {
   /**
    * TODO : Consider rewording for other customers...
    *
+   * @see UserPassLogin#getLoginInfo
    * @return
    */
   public String getHelpMessage() {
@@ -751,6 +752,7 @@ public class PropertyHandler {
    * TODO : Consider rewording for other customers...
    *
    * @return
+   * @see UserPassLogin#getRecordAudioPopover
    */
   public String getRecordAudioPopoverText() {
     return "Click here if you have been assigned to record reference audio or do quality control.<br/>" +

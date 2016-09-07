@@ -854,23 +854,27 @@ public class AudioFileHelper implements AlignDecode {
                                            Result precalcResult,
                                            boolean usePhoneToDisplay,
                                            boolean useOldSchool) {
-    String language = getLanguage();
+    String language = getLanguage().toLowerCase();
     logger.debug("getASRScoreForAudio (" + language + ")" + (decode ? " Decoding " : " Aligning ") +
         "" + testAudioFile + " with sentence '" + sentence + "' req# " + reqid +
         (useCache ? " check cache" : " NO CACHE") + " prefix " + prefix);
 
-    //   makeASRScoring();
     if (testAudioFile == null) {
       logger.error("getASRScoreForAudio huh? no test audio file for " + sentence);
       return new PretestScore(); // very defensive
     }
     testAudioFile = mp3Support.dealWithMP3Audio(testAudioFile, language);
     if (!new File(testAudioFile).exists()) {
-      String absolutePath = pathHelper.getAbsoluteAnswerAudioFile(testAudioFile, language).getAbsolutePath();
-      logger.info("looking for " + testAudioFile + " at " + absolutePath);
+    //  String absolutePath = pathHelper.getAbsoluteAnswerAudioFile(testAudioFile, language).getAbsolutePath();
+      String absolutePath = pathHelper.getAbsoluteAudioFile(testAudioFile).getAbsolutePath();
       if (!new File(absolutePath).exists()) {
-        logger.error("getASRScoreForAudio huh? no testAudioFile for " + sentence + " at " + new File(testAudioFile).getAbsolutePath() + " or " + absolutePath);
+        logger.error("getASRScoreForAudio huh? no testAudioFile for " + sentence +
+            "\n\tat " + new File(testAudioFile).getAbsolutePath() +
+            "\n\tnor " + absolutePath);
         return new PretestScore();
+      }
+      else {
+        logger.info("found " + testAudioFile + " at " + absolutePath);
       }
     }
 
@@ -980,9 +984,9 @@ public class AudioFileHelper implements AlignDecode {
     return audioFile.substring(0, audioFile.length() - SUFFIX_LENGTH);
   }
 
-  public String getWavForMP3(String audioFile, String language) {
+/*  public String getWavForMP3(String audioFile, String language) {
     return mp3Support.getWavForMP3(audioFile, language);
-  }
+  }*/
 
   /**
    * Does decoding if doFlashcard is true.
