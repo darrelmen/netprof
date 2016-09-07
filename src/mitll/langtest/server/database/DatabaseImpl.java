@@ -103,6 +103,7 @@ import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -658,13 +659,17 @@ public class DatabaseImpl implements Database {
     getUserListManager().createFavorites(userid, projectid);
   }
 
+  public void forgetProject(int userid) {
+    getUserProjectDAO().forget(userid);
+  }
+
+  /**
+   * @see mitll.langtest.server.services.UserServiceImpl#setSessionUser(HttpSession, User)
+   * @param userWhere
+   */
   public void setStartupInfo(User userWhere) {
     int i = getUserProjectDAO().mostRecentByUser(userWhere.getId());
     setStartupInfo(userWhere, i);
-  }
-
-  public void forgetProject(int userid) {
-    getUserProjectDAO().forget(userid);
   }
 
   /**
@@ -681,7 +686,6 @@ public class DatabaseImpl implements Database {
     } else {
       if (!idToProject.containsKey(projid)) {
         logger.info("\tsetStartupInfo : populateProjects...");
-
         populateProjects(false);
       }
 
@@ -707,7 +711,8 @@ public class DatabaseImpl implements Database {
           typeOrder,
           project.getSectionHelper().getSectionNodes(typeOrder),
           project1.id(),
-          project1.language(), hasModel(project1));
+          project1.language(),
+          hasModel(project1));
       logger.info("setStartupInfo : For " + userWhere +
           "\n\t " + typeOrder +
           "\n\tSet startup info " + startupInfo);
@@ -715,7 +720,7 @@ public class DatabaseImpl implements Database {
     }
   }
 
-  boolean hasModel(SlickProject project1) {
+  private boolean hasModel(SlickProject project1) {
     return project1.getProp(ServerProperties.MODELS_DIR) != null;
   }
 
