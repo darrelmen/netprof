@@ -33,10 +33,8 @@
 package mitll.langtest.server.audio;
 
 import mitll.langtest.client.AudioTag;
-import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.database.DatabaseImpl;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -52,33 +50,43 @@ class MP3Support {
   private static final int SUFFIX_LENGTH = ("." + AudioTag.COMPRESSED_TYPE).length();
   private static final String WAV = ".wav";
   private final PathHelper pathHelper;
-  private ServerProperties serverProperties;
+  // private ServerProperties serverProperties;
 
   /**
    * @param pathHelper
    * @param serverProperties
-   * @see AudioFileHelper#AudioFileHelper(PathHelper, ServerProperties, DatabaseImpl, LogAndNotify)
+   * @see AudioFileHelper#AudioFileHelper
    */
   MP3Support(PathHelper pathHelper, ServerProperties serverProperties) {
     this.pathHelper = pathHelper;
-    this.serverProperties = serverProperties;
+    // this.serverProperties = serverProperties;
   }
 
   /**
    * TODO : remove language??? will this is always work???
+   *
    * @param testAudioFile
    * @param language
    * @return
    * @see AudioFileHelper#getASRScoreForAudio
    */
   String dealWithMP3Audio(String testAudioFile, String language) {
+    logger.debug("dealWithMP3Audio " + language + " testAudio " + testAudioFile);
     if (!testAudioFile.endsWith(WAV)) {
       String wavFile = removeSuffix(testAudioFile) + WAV;
-      File test = pathHelper.getAbsoluteAudioFile(wavFile);
-      if (!test.exists()) {
-        logger.warn("\n\n\ndealWithMP3Audio : expecting audio file with wav extension, but didn't find " + test.getAbsolutePath());
+      File test1 = new File(wavFile);
+      if (test1.exists()) {
+        return wavFile;
+      } else {
+        File test = pathHelper.getAbsoluteAudioFile(wavFile);
+        if (test.exists()) {
+          logger.info("dealWithMP3Audio found file at " + test.getAbsolutePath());
+        }
+        else {
+          logger.warn("\n\n\ndealWithMP3Audio : expecting audio file with wav extension, but didn't find " + test.getAbsolutePath());
+        }
+        return test.exists() ? test.getAbsolutePath() : testAudioFile;//getWavForMP3(testAudioFile, language);
       }
-      return test.exists() ? test.getAbsolutePath() : getWavForMP3(testAudioFile, language);
     } else {
       return testAudioFile;
     }
@@ -113,7 +121,7 @@ class MP3Support {
    * @return
    * @see #getWavForMP3(String, String)
    */
-  String getWavForMP3(String audioFile, String language) {
+/*  String getWavForMP3(String audioFile, String language) {
     assert (audioFile.endsWith(".mp3"));
     String absolutePath = pathHelper.getAbsoluteAnswerAudioFile(audioFile, language).getAbsolutePath();
 
@@ -132,5 +140,5 @@ class MP3Support {
     }
     assert (audioFile.endsWith(WAV));
     return audioFile;
-  }
+  }*/
 }

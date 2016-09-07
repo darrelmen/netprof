@@ -115,7 +115,6 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     }
   }
 
-
   /**
    * @param session
    * @param loggedInUser

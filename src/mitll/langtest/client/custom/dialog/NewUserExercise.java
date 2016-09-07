@@ -675,7 +675,7 @@ class NewUserExercise extends BasicDialog {
 
     public CreateFirstRecordAudioPanel(CommonExercise newExercise, Panel row,
                                        boolean recordRegularSpeed, String instance) {
-      super(newExercise, NewUserExercise.this.controller, row, NewUserExercise.this.service, 0, false,
+      super(newExercise, NewUserExercise.this.controller, row, 0, false,
           recordRegularSpeed ? AudioType.REGULAR : AudioType.SLOW, instance);
       this.recordRegularSpeed = recordRegularSpeed;
       setExercise(newExercise);
