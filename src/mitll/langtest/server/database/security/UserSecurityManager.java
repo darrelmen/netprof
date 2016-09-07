@@ -84,6 +84,7 @@ public class UserSecurityManager {
    * @param request
    * @param userId          not really needed
    * @param killAllSessions remove???
+   * @see mitll.langtest.server.services.UserServiceImpl#logout(String)
    */
   public void logoutUser(HttpServletRequest request, String userId, boolean killAllSessions) {
     long startMS = System.currentTimeMillis();
@@ -252,14 +253,22 @@ public class UserSecurityManager {
     String sid = request.getRequestedSessionId();
     log.info("Lookup user from DB session. SID: {}", sid);
     int userForSession = userSessionDAO.getUserForSession(sid);
+    if (userForSession == -1) {
+      log.error("no user for session " +sid + " in database?");
+    }
     return rememberUser(userForSession);
   }
 
+  /**
+   * @param uidI
+   * @return
+   * @see #lookupUserFromHttpSession(HttpServletRequest)
+   */
   private User rememberUser(int uidI) {
     User sessUser = userDAO.getByID(uidI);
 
     if (sessUser == null) {
-      log.warn("huh? no user with id " + uidI);
+      log.error("rememberUser huh? no user with id " + uidI);
       return null;
     } else {
       rememberIDToUser(uidI, sessUser);
