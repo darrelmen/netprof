@@ -40,6 +40,7 @@ import mitll.langtest.shared.user.MiniUser;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -67,7 +68,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   private static final String SPEED = "speed";
   public static final String SLOW = AudioType.SLOW.toString();
   public static final String REGULAR = AudioType.REGULAR.toString();
- // public static final String REGULAR_AND_SLOW = "regular and slow";
+  // public static final String REGULAR_AND_SLOW = "regular and slow";
 
   /**
    * TODO : if every have slow recordings of context audio we'll need to add another type or an enum
@@ -94,7 +95,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   private Map<String, String> attributes = new HashMap<String, String>();
   private boolean hasBeenPlayed;
   private AudioType audioType;
- // boolean exists;
+  // boolean exists;
 
   public AudioAttribute() {
   }
@@ -116,7 +117,12 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   public AudioAttribute(int uniqueID, int userid,
                         int exid,
                         String audioRef,
-                        long timestamp, long durationInMillis, AudioType type, MiniUser user, String transcript, String actualPath) {
+                        long timestamp,
+                        long durationInMillis,
+                        AudioType type,
+                        MiniUser user,
+                        String transcript,
+                        String actualPath) {
     this.uniqueID = uniqueID;
     this.userid = userid;
     this.exid = exid;
@@ -127,7 +133,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
 
     this.setUser(user);
     this.audioType = type;
-    this.actualPath =actualPath;
+    this.actualPath = actualPath;
 
     if (type.equals(AudioType.REGULAR)) {
       markRegular();
@@ -161,6 +167,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   public void setAudioRef(String audioRef) {
     this.audioRef = audioRef;
   }
+
   public boolean isValid() {
     return audioRef != null && !audioRef.contains(FILE_MISSING);
   }
@@ -347,8 +354,8 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   }
 
   /**
-   * @see mitll.langtest.server.database.CopyToPostgres#copyAudio(DatabaseImpl, Map, Map, int)
    * @return
+   * @see mitll.langtest.server.database.CopyToPostgres#copyAudio(DatabaseImpl, Map, Map, int)
    */
   public String getOldexid() {
     return oldexid;
@@ -362,18 +369,22 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     this.oldexid = oldexid;
   }
 
+  /**
+   * @see mitll.langtest.server.database.exercise.AttachAudio#attachAudio(CommonExercise, int, Collection, Collection, String)
+   * @return
+   */
+  public String getActualPath() {
+    return actualPath;
+  }
+
   @Override
   public String toString() {
     return "Audio id " + uniqueID +
         " for ex " + getOldexid() +
-        " : " + audioRef + "/" + actualPath+
+        " : " + audioRef + "/" + actualPath +
         " attrs " + attributes +
         " by " + userid + "/" + user +
         " transcript '" + transcript +
         "' ";
-  }
-
-  public String getActualPath() {
-    return actualPath;
   }
 }

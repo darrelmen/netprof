@@ -207,10 +207,11 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    */
   private boolean ensureMP3(String wavFile, String title, String artist, String parent, String language) {
     if (wavFile != null) {
-      File test = new File(parent + File.separator + language, wavFile);
+     // File test = new File(parent + File.separator + language, wavFile);
+      File test = new File(wavFile);
       if (!test.exists()) {
         if (WARN_MISSING_FILE) {
-           logger.warn("ensureMP3 : can't find " + wavFile + " under " + parent + " trying config... ");
+           logger.warn("ensureMP3 : can't find " + wavFile);// + " under " + parent + " trying config... ");
          }
        // parent = serverProps.getAnswerDir() + File.separator + language;
       }

@@ -90,11 +90,11 @@ import java.util.logging.Logger;
 public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & ScoredExercise>
     extends HorizontalPanel
     implements BusyPanel, RequiresResize, ProvidesResize, CommentAnnotator {
-  private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
+  //private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
 
   public static final String CONTEXT = "Context";
-  public static final String SAY = "Say";
-  public static final String TRANSLITERATION = "Transliteration";
+  private static final String SAY = "Say";
+  private static final String TRANSLITERATION = "Transliteration";
 
   private static final String MANDARIN = "Mandarin";
   private static final String KOREAN = "Korean";
@@ -122,7 +122,6 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
   protected final T exercise;
   protected final ExerciseController controller;
 
-  //protected final LangTestDatabaseAsync service;
   protected final ListServiceAsync listService = GWT.create(ListService.class);
 
   protected ScoreListener scorePanel;
