@@ -63,7 +63,6 @@ public class ServerProperties {
 
   private static final String FALSE = "false";
   private static final String TRUE = "true";
-
 /*
   private static final List<String> AMAS_SITES =
       Arrays.asList("Dari", "Farsi", "Korean", "Mandarin", "MSA", "Pashto", "Russian", "Spanish", "Urdu");
@@ -112,7 +111,7 @@ public class ServerProperties {
   private static final String SKIP_SEMICOLONS = "skipSemicolons";
   private static final String AUDIO_OFFSET = "audioOffset";
   private static final String MAX_NUM_EXERCISES = "maxNumExercises";
-  private static final String NO_MODEL = "noModel";
+//  private static final String NO_MODEL = "noModel";
   private static final String TIER_INDEX = "tierIndex";
   private static final String QUIET_AUDIO_OK = "quietAudioOK";
   private static final String CONFIG_FILE = "configFile";
@@ -129,6 +128,7 @@ public class ServerProperties {
   private static final int SLEEP_BETWEEN_DECODES_DEFAULT = 100; // Paul Gatewood 11/24/15 : The bottom line is we should set the minimum Dynamic Range threshold to 20dB for NetProf users
   private static final String MIN_DYNAMIC_RANGE = "minDynamicRange";
   private static final String RUN_REF_DECODE_WITH_HYDEC = "runRefDecodeWithHydec";
+  private static final String CHECK_AUDIO_ON_STARTUP = "checkAudioOnStartup";
 
   private static final String DEFAULT_NETPROF_AUDIO_DIR = "/opt/netProf/";
   private static final String DEFAULT_BEST_AUDIO = DEFAULT_NETPROF_AUDIO_DIR +"bestAudio";
@@ -288,10 +288,10 @@ public class ServerProperties {
     return getDefaultTrue(SKIP_SEMICOLONS);
   }
 
-  @Deprecated
+/*  @Deprecated
   public boolean isNoModel() {
     return getDefaultFalse(NO_MODEL);
-  }
+  }*/
 
   boolean removeExercisesWithMissingAudio() {
     return getDefaultTrue(REMOVE_EXERCISES_WITH_MISSING_AUDIO);
@@ -640,8 +640,8 @@ public class ServerProperties {
     return getDefaultFalse(USE_POSTGRE_SQL);
   }
 
-  public boolean useORM() {
-    return getDefaultTrue(USE_ORM);
+  public boolean doAudioCheckOnStartup() {
+    return getDefaultTrue(CHECK_AUDIO_ON_STARTUP);
   }
 
   public void setRTL(boolean isRTL) {
