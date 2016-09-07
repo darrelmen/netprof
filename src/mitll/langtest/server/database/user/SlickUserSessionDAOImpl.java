@@ -70,9 +70,7 @@ public class SlickUserSessionDAOImpl extends DAO implements IUserSessionDAO {
    * @return
    */
   @Override
-  public void add(SlickUserSession user) {
-    dao.add(user);
-  }
+  public void add(SlickUserSession user) {  dao.add(user);  }
 
   @Override
   public Collection<String> getByUser(int userid) {
@@ -90,4 +88,6 @@ public class SlickUserSessionDAOImpl extends DAO implements IUserSessionDAO {
   public void removeSession(String session) {
     dao.removeSession(session);
   }
+
+  public int getNumRows() { return dao.numRows(); }
 }
