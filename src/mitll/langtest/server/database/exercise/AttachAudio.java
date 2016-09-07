@@ -37,7 +37,6 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.MutableAudioExercise;
 import org.apache.log4j.Logger;
 
-import java.io.File;
 import java.util.*;
 
 /**
@@ -56,31 +55,23 @@ public class AttachAudio {
   //  private final int audioOffset;
 //private final String mediaDir;
   private final String mediaDir1;
-  private final File installPath;
+//  private final File installPath;
   private Map<Integer, List<AudioAttribute>> exToAudio;
   private String language;
 
   /**
-   * @param mediaDir
-   * @param mediaDir1
-   * @param installPath
-   * @param audioOffset
    * @param exToAudio
    * @param language
    * @see BaseExerciseDAO#setAudioDAO
    */
-  public AttachAudio(String mediaDir,
-                     String mediaDir1,
-                     File installPath,
-                     int audioOffset,
-                     Map<Integer, List<AudioAttribute>> exToAudio,
+  public AttachAudio(Map<Integer, List<AudioAttribute>> exToAudio,
                      String language) {
     //  this.mediaDir = mediaDir;
     // this.mediaDir1 = mediaDir1;
     this.mediaDir1 = "";
     //  logger.info("media dir '" + mediaDir + "' '" + mediaDir1 + "'");
     this.language = language;
-    this.installPath = installPath;
+//    this.installPath = installPath;
     this.setExToAudio(exToAudio);
     //this.audioOffset = audioOffset;
   }
