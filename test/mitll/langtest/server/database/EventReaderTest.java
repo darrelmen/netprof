@@ -3,7 +3,6 @@ package mitll.langtest.server.database;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.instrumentation.IEventDAO;
-import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.instrumentation.Event;
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
@@ -30,7 +29,7 @@ public class EventReaderTest {
 
     logger.debug("config dir " + parent + " config     " + name);
     ServerProperties serverProps = new ServerProperties(parent, name);
-    database = new DatabaseImpl(parent, name, serverProps.getH2Database(), serverProps, new PathHelper("war"), false, null, false);
+    database = new DatabaseImpl(parent, name, serverProps.getH2Database(), serverProps, new PathHelper("war", serverProps), false, null, false);
     // logger.debug("made " + database);
     database.setInstallPath("war", parent + File.separator + database.getServerProps().getLessonPlan(),
         serverProps.getMediaDir());
@@ -43,7 +42,7 @@ public class EventReaderTest {
   @Test
   public void testReadOne() {
     IEventDAO eventDAO = database.getEventDAO();
-   // boolean empty = ((HEventDAO) eventDAO).isEmpty();
+    // boolean empty = ((HEventDAO) eventDAO).isEmpty();
 
     //logger.info("is empty " +empty);
 

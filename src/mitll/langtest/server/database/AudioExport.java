@@ -487,7 +487,7 @@ public class AudioExport {
     for (CommonExercise ex : toWrite) {
       Collection<AudioAttribute> audioAttributes = exToAudio.get(ex.getID());
       if (audioAttributes != null) {
-        audioDAO.attachAudio(ex, installPath, relativeConfigDir1, audioAttributes,language);
+        audioDAO.attachAudio(ex, /*installPath, relativeConfigDir1,*/ audioAttributes,language);
         numAttach++;
       }
     }

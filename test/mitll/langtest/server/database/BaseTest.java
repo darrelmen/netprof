@@ -41,7 +41,7 @@ public class BaseTest {
     ServerProperties serverProps = new ServerProperties(parent, name);
     serverProps.setH2(useH2);
     DatabaseImpl database = new DatabaseImpl(parent, name, serverProps.getH2Database(),
-        serverProps, new PathHelper(installPath), false, null, false);
+        serverProps, new PathHelper(installPath, serverProps), false, null, false);
 
     database.setInstallPath(installPath, parent + File.separator + database.getServerProps().getLessonPlan(),
         serverProps.getMediaDir());
@@ -63,11 +63,11 @@ public class BaseTest {
   /**
    * @param config
    * @param useH2
+   * @param optPropsFile
+   * @return
    * @paramx host
    * @paramx user
    * @paramx pass
-   * @param optPropsFile
-   * @return
    * @see mitll.langtest.server.database.postgres.PostgresTest#testCopy
    */
   protected static DatabaseImpl getDatabaseLight(String config,
@@ -90,8 +90,7 @@ public class BaseTest {
 
     if (useLocal) {
       serverProps.setLocalPostgres();
-    }
-    else {
+    } else {
       serverProps.setHydraPostgres();
     }
 //    serverProps.getProps().setProperty("databaseHost", host);
@@ -104,7 +103,7 @@ public class BaseTest {
     String name = file.getName();
 
     DatabaseImpl database = new DatabaseImpl(parent, name, serverProps.getH2Database(), serverProps,
-        new PathHelper("war"), false, null, false);
+        new PathHelper("war", serverProps), false, null, false);
 
     database.setInstallPath(installPath,
         file.getParentFile().getAbsolutePath() + File.separator + database.getServerProps().getLessonPlan(),
@@ -126,7 +125,7 @@ public class BaseTest {
     ServerProperties serverProps = new ServerProperties(parent, name);
     serverProps.setH2(useH2);
     DatabaseImpl database = new DatabaseImpl(parent, name, serverProps.getH2Database(), serverProps,
-        new PathHelper("war"), false, null, false);
+        new PathHelper("war", serverProps), false, null, false);
     return database;
   }
 
@@ -138,7 +137,7 @@ public class BaseTest {
   protected BufferedWriter getWriter(String prefix) throws IOException {
     SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("MM_dd_yy_HH_mm_ss");
     String today = simpleDateFormat2.format(new Date());
-    File file = getReportFile(new PathHelper("war"), today, prefix);
+    File file = getReportFile(new PathHelper("war", null), today, prefix);
     logger.info("writing to " + file.getAbsolutePath());
     return new BufferedWriter(new FileWriter(file));
   }
@@ -166,8 +165,9 @@ public class BaseTest {
   protected DatabaseImpl getDatabase(DatabaseConnection connection, String config, String dbName) {
     File file = getPropertiesFile(config);
     String parent = file.getParent();
+    ServerProperties serverProps = new ServerProperties(parent, file.getName());
     DatabaseImpl database =
-        new DatabaseImpl(connection, parent, file.getName(), dbName, new ServerProperties(parent, file.getName()), new PathHelper("war"), null);
+        new DatabaseImpl(connection, parent, file.getName(), dbName, serverProps, new PathHelper("war", serverProps), null);
     // logger.debug("made " + database);
 
     database.setInstallPath(".", parent + File.separator + database.getServerProps().getLessonPlan(), "media");
