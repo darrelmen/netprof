@@ -48,7 +48,8 @@ public class ReportTest {
     logger.debug("config dir " + parent);
     logger.debug("config     " + file.getName());
     //  dbName = "npfEnglish";//"mandarin";// "mandarin";
-    database = new DatabaseImpl(parent, file.getName(), dbName, new ServerProperties(parent, file.getName()), new PathHelper("war"), false, null);
+    ServerProperties serverProps = new ServerProperties(parent, file.getName());
+    database = new DatabaseImpl(parent, file.getName(), dbName, serverProps, new PathHelper("war", serverProps), false, null);
     logger.debug("made " + database);
     String media = parent + File.separator + "media";
     logger.debug("media " + media);

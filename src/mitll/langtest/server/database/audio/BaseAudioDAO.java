@@ -68,9 +68,10 @@ public abstract class BaseAudioDAO extends DAO {
   protected static final String REGULAR = "regular";
   protected static final String SLOW = "slow";
   private static final String AUDIO_TYPE1 = "context=" + REGULAR;
-  protected static final String CONTEXT_REGULAR = AUDIO_TYPE1;
+  private static final String CONTEXT_REGULAR = AUDIO_TYPE1;
   private static final String TRANSLITERATION = "transliteration";
-  private static final boolean DEBUG_ATTACH = false;
+  private static final boolean DEBUG_ATTACH = true;
+ // public static final String BEST_AUDIO = "bestAudio";
 
   protected final IUserDAO userDAO;
 
@@ -86,7 +87,6 @@ public abstract class BaseAudioDAO extends DAO {
    * @return
    * @seex ExerciseDAO#setAudioDAO
    * @see AudioExport#writeFolderContents
-   * @see AudioExport#writeFolderContentsContextOnly
    * @see DatabaseImpl#attachAllAudio
    */
   public Map<Integer, List<AudioAttribute>> getExToAudio(int projid) {
@@ -122,14 +122,12 @@ public abstract class BaseAudioDAO extends DAO {
 
   /**
    * @param firstExercise
-   * @param installPath
-   * @param relativeConfigDir
    * @param language
-   * @see mitll.langtest.server.LangTestDatabaseImpl#attachAudio(mitll.langtest.shared.exercise.CommonExercise)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#attachAudio
    * @see DatabaseImpl#attachAudio(CommonExercise)
-   * @see DatabaseImpl#writeZip(OutputStream, long, PathHelper, int)
+   * @see DatabaseImpl#writeZip
    */
-  public int attachAudio(CommonExercise firstExercise, String installPath, String relativeConfigDir, String language) {
+  public int attachAudioToExercise(CommonExercise firstExercise, String language) {
     Collection<AudioAttribute> audioAttributes = getAudioAttributesForExercise(firstExercise.getID());
 
 /*    if (DEBUG) {
@@ -143,7 +141,7 @@ public abstract class BaseAudioDAO extends DAO {
       }
     }*/
 
-    boolean attachedAll = attachAudio(firstExercise, installPath, relativeConfigDir, audioAttributes, language);
+    boolean attachedAll = attachAudio(firstExercise, audioAttributes, language);
 
     if (!attachedAll)
       logger.info("didn't attach all audio to " + firstExercise.getID() + " " + firstExercise.getForeignLanguage());
@@ -157,6 +155,8 @@ public abstract class BaseAudioDAO extends DAO {
   }
 
   /**
+   * TODO : deal with possibility of audio being in either bestAudio or in answers...
+   *
    * TODO : rewrite this so it's not insane -adding and removing attributes??
    * <p>
    * Complicated, but separates old school "Default Speaker" audio into a second pile.
@@ -165,21 +165,19 @@ public abstract class BaseAudioDAO extends DAO {
    * TODO : why would we want to skip adding audio from the initial path set?
    *
    * @param firstExercise
-   * @param installPath
-   * @param relativeConfigDir
    * @param audioAttributes
    * @param language
    * @see AudioExport#writeFolderContents
-   * @see #attachAudio
+   * @see #attachAudioToExercise
    * @see mitll.langtest.server.json.JsonExport#getJsonArray
    * @see
    */
   public boolean attachAudio(CommonExercise firstExercise,
-                             String installPath,
-                             String relativeConfigDir,
                              Collection<AudioAttribute> audioAttributes,
                              String language) {
     AudioConversion audioConversion = new AudioConversion(database.getServerProps());
+
+    String installPath = database.getServerProps().getMediaDir();
 
     List<AudioAttribute> defaultAudio = new ArrayList<>();
     Set<String> audioPaths = new HashSet<>();
@@ -191,7 +189,7 @@ public abstract class BaseAudioDAO extends DAO {
         defaultAudio.add(attr);
       } else {
         audioPaths.add(attr.getAudioRef());
-        boolean didIt = attachAudioAndFixPath(firstExercise, installPath, relativeConfigDir, audioConversion, attr, language);
+        boolean didIt = attachAudioAndFixPath(firstExercise, installPath, audioConversion, attr, language);
         if (!didIt) {
           if (DEBUG_ATTACH && allSucceeded) {
             String foreignLanguage = attr.isContextAudio() ? firstExercise.getContext() : firstExercise.getForeignLanguage();
@@ -210,7 +208,7 @@ public abstract class BaseAudioDAO extends DAO {
 
     for (AudioAttribute attr : defaultAudio) {
       if (!audioPaths.contains(attr.getAudioRef())) {
-        boolean didIt = attachAudioAndFixPath(firstExercise, installPath, relativeConfigDir, audioConversion, attr, language);
+        boolean didIt = attachAudioAndFixPath(firstExercise, installPath, audioConversion, attr, language);
         if (!didIt) {
           if (DEBUG_ATTACH && allSucceeded) {
             logger.info("not attaching audio\t" + attr.getUniqueID() + " to\t" + firstExercise.getID() +
@@ -245,12 +243,20 @@ public abstract class BaseAudioDAO extends DAO {
     return allSucceeded;
   }
 
-
+  /**
+   * @see #attachAudioToExercise
+   * @param firstExercise
+   * @param installPath
+   * @param audioConversion
+   * @param attr
+   * @param language
+   * @return
+   */
   private boolean attachAudioAndFixPath(CommonExercise firstExercise,
                                         String installPath,
-                                        String relativeConfigDir,
                                         AudioConversion audioConversion,
-                                        AudioAttribute attr, String language) {
+                                        AudioAttribute attr,
+                                        String language) {
     Collection<CommonExercise> directlyRelated = firstExercise.getDirectlyRelated();
     String against = attr.isContextAudio() && !directlyRelated.isEmpty() ?
         directlyRelated.iterator().next().getForeignLanguage() : firstExercise.getForeignLanguage();
@@ -259,18 +265,25 @@ public abstract class BaseAudioDAO extends DAO {
 
       if (attr.getAudioRef() == null)
         logger.error("attachAudioAndFixPath huh? no audio ref for " + attr + " under " + firstExercise);
-      else if (!audioConversion.exists(attr.getAudioRef(), installPath)) {
-        String langPrefix = "bestAudio" + File.separator + language.toLowerCase();
-        String prefix = installPath + File.separator +
-            langPrefix;
+      else if (!audioConversion.exists(attr.getAudioRef(), installPath)) { // seems like this will always fail???
+        // so a path to the file on disk will now look like /opt/netProf/bestAudio/spanish/bestAudio/123/regular_XXX.wav
+        // in the database we store just bestAudio/123/regular_XXX.wav
+     //   String langPrefix = BEST_AUDIO + File.separator + language.toLowerCase();
+        String langPrefix = language.toLowerCase();
+        String prefix = installPath + File.separator + langPrefix;
+        File file = new File(prefix, attr.getAudioRef());
+        if (!file.exists()) {
+          if (DEBUG_ATTACH) logger.debug("\tattachAudioAndFixPath couldn't find '" + file.getAbsolutePath() + "'");
+
+        }
         if (audioConversion.exists(attr.getAudioRef(), prefix)) {
           if (DEBUG_ATTACH) logger.debug("\tattachAudioAndFixPath was '" + attr.getAudioRef() + "'");
-          attr.setAudioRef(langPrefix + File.separator + attr.getAudioRef());
+          String relPrefix = prefix.substring(database.getServerProps().getAudioBaseDir().length());
+          attr.setAudioRef(relPrefix + File.separator + attr.getAudioRef());
           if (DEBUG_ATTACH) logger.debug("\tattachAudioAndFixPath now '" + attr.getAudioRef() + "'");
         } else {
           if (DEBUG_ATTACH) logger.debug("\tattachAudio couldn't find audio file at '" + attr.getAudioRef() + "' under " + langPrefix);
         }
-
 
 /*
         if (audioConversion.exists(attr.getAudioRef(), relativeConfigDir)) {

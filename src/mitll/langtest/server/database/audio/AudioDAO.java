@@ -232,7 +232,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
    *
    * @param exid
    * @return
-   * @see #attachAudio
+   * @see #attachAudioToExercise
    */
   protected Collection<AudioAttribute> getAudioAttributesForExercise(int exid) {
     try {

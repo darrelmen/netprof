@@ -241,7 +241,10 @@ public class DownloadServlet extends DatabaseServlet {
    * @throws IOException
    * @see #doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
-  private void returnAudioFile(HttpServletResponse response, DatabaseImpl db, String queryString, String language,
+  private void returnAudioFile(HttpServletResponse response,
+                               DatabaseImpl db,
+                               String queryString,
+                               String language,
                                int projid) throws IOException {
     String[] split = queryString.split("&");
 
@@ -264,9 +267,9 @@ public class DownloadServlet extends DatabaseServlet {
     response.setCharacterEncoding(UTF_8);
     response.setHeader("Content-Disposition", "attachment; filename*=UTF-8''" + underscores);
 
-    File fileRef = pathHelper.getAbsoluteFile(file);
+    File fileRef = pathHelper.getAbsoluteAnswerAudioFile(file, language);
     if (!fileRef.exists()) {
-      logger.warn("huh? can't find " + file);
+      logger.warn("huh? can't find " + file + " at " + fileRef.getAbsolutePath());
     } else {
       FileInputStream input = new FileInputStream(fileRef);
       int size = (int) input.getChannel().size();
@@ -418,7 +421,9 @@ public class DownloadServlet extends DatabaseServlet {
 
 //      db.writeZip(response.getOutputStream(), id == null ? -1 : id, new PathHelper(getServletContext()), projectid);
       options.setUserList(true);
-      db.writeUserListAudio(response.getOutputStream(), id == null ? -1 : id, new PathHelper(getServletContext()), projectid, options);
+      db.writeUserListAudio(response.getOutputStream(), id == null ? -1 : id,
+          new PathHelper(getServletContext(), db.getServerProps()),
+          projectid, options);
     } catch (Exception e) {
       logger.error("couldn't write zip?", e);
     }

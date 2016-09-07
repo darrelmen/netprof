@@ -161,7 +161,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @param useCache              cache scores so subsequent requests for the same audio file will get the cached score
    * @param prefix                on the names of the image files, if they are written
    * @param precalcResult
-   * @param usePhoneToDisplay     @return score info coming back from alignment/reco
+   * @param usePhoneToDisplay
+   * @return score info coming back from alignment/reco
    * @paramx tmpDir                where to run hydec
    * @paramx scoringDir            where the hydec subset is (models, bin.linux64, etc.)
    * @see ASR#scoreRepeat
@@ -188,8 +189,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     // audio conversion stuff
     File wavFile = new File(pathname);
     boolean mustPrepend = false;
-    if (!wavFile.exists() && deployPath != null) {
-      wavFile = new File(deployPath + File.separator + pathname);
+    if (!wavFile.exists()) {
+      wavFile = new File(props.getAudioBaseDir() + File.separator + pathname);
       mustPrepend = true;
     }
     if (!wavFile.exists()) {
@@ -199,7 +200,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     try {
       String audioDir = testAudioDir;
       if (mustPrepend) {
-        audioDir = deployPath + File.separator + audioDir;
+        audioDir = props.getAudioBaseDir() + File.separator + audioDir;
         if (!new File(audioDir).exists()) logger.error("Couldn't find " + audioDir);
         else testAudioDir = audioDir;
       }
