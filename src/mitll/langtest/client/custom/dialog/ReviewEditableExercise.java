@@ -520,7 +520,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     row.add(prevNext);
 
 
-    if (newUserExercise.getCombinedMutableUserExercise().checkPredef()) {   // for now, only the owner of the list can remove or add to their list
+    if (newUserExercise.isPredefined()) {//getCombinedMutableUserExercise().checkPredef()) {   // for now, only the owner of the list can remove or add to their list
       row.add(getRemove());
       row.add(getDuplicate());
     }
@@ -612,7 +612,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    */
   private void duplicateExercise(final Button duplicate) {
     duplicate.setEnabled(false);
-    newUserExercise.getCombinedMutableUserExercise().setCreator(controller.getUser());
+    newUserExercise.getMutable().setCreator(controller.getUser());
     CommonShell commonShell = exerciseList.byHasID(newUserExercise);
     if (commonShell != null) {
       newUserExercise.setState(commonShell.getState());
