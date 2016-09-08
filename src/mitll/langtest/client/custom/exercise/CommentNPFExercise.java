@@ -302,7 +302,7 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
    */
   private void addPlayAndVoiceChoices(Panel hp) {
     AudioAttribute toUse = maleAudio != null ? maleAudio : femaleAudio != null ? femaleAudio : defaultAudio;
-    String path = toUse == null ? null : toUse.getActualPath();
+    String path = toUse == null ? null : toUse.getAudioRef();
     logger.info("addPlayAndVoiceChoices choosing to play " + toUse);
     logger.info("addPlayAndVoiceChoices path             " + path);
     if (path != null) {
@@ -363,13 +363,13 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
     String audioRef;
     switch (choice) {
       case M:
-        audioRef = maleAudio.getActualPath();
+        audioRef = maleAudio.getAudioRef();
         break;
       case F:
-        audioRef = femaleAudio.getActualPath();
+        audioRef = femaleAudio.getAudioRef();
         break;
       default:
-        audioRef = defaultAudio.getActualPath();
+        audioRef = defaultAudio.getAudioRef();
         break;
     }
     return audioRef;

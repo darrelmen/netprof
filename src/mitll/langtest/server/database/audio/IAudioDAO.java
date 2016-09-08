@@ -54,11 +54,9 @@ public interface IAudioDAO extends IDAO {
 
   Collection<AudioAttribute> getAudioAttributesByProject(int projid);
 
-  int attachAudioToExercise(CommonExercise firstExercise, /*String installPath, String relativeConfigDir,*/ String language);
+  int attachAudioToExercise(CommonExercise firstExercise, String language);
 
   boolean attachAudio(CommonExercise firstExercise,
-                      // String installPath,
-                      // String relativeConfigDir,
                       Collection<AudioAttribute> audioAttributes,
                       String language);
 
