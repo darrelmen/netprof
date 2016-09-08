@@ -52,7 +52,9 @@ interface MutableUserExercise {
    * @see mitll.langtest.server.database.custom.UserListManager#duplicate(CommonExercise)
    * @param id
    */
+/*
   void setOldID(String id);
+*/
 
   /**
    * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#reallyChange(ListInterface, boolean)
@@ -76,7 +78,7 @@ interface MutableUserExercise {
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getCreateButton(UserList, ListInterface, Panel, ControlGroup)
    * @return
    */
-  boolean checkPredef();
+//  boolean checkPredef();
 
   void setUnitToValue(Map<String, String> unitToValue);
 }
