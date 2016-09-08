@@ -73,12 +73,12 @@ public class DownloadServlet extends DatabaseServlet {
   private static final String FILE = "file";
 //  private static final String CONTEXT = "context";
   private static final String COMPRESSED_SUFFIX = "mp3";
-  public static final String UTF_8 = "UTF-8";
+  private static final String UTF_8 = "UTF-8";
   //UserSecurityManager securityManager;
-  public static final String USERS = "users";
-  public static final String RESULTS = "results";
-  public static final String EVENTS = "events";
-  public static final String REQUEST = "request";
+  private static final String USERS = "users";
+  private static final String RESULTS = "results";
+  private static final String EVENTS = "events";
+  private static final String REQUEST = "request";
 
   /**
    * This is getting complicated.
@@ -257,17 +257,16 @@ public class DownloadServlet extends DatabaseServlet {
     String exercise = split[1].split("=")[1];
     String useridString = split[2].split("=")[1];
 
-    logger.debug("returnAudioFile download exercise " + exercise + " for " + useridString);
+    logger.debug("returnAudioFile download exercise #" + exercise + " for user id=" + useridString + " file " + file);
 
     String underscores = getFilenameForDownload(db, Integer.parseInt(exercise), useridString, language, projid);
 
-    logger.debug("returnAudioFile query is " + queryString + " file " + file + " exercise " + exercise + " user " + useridString + " so name is " + underscores);
+    logger.debug("returnAudioFile query is " + queryString + " exercise " + exercise +
+        " user " + useridString + " so name is " + underscores);
 
-    response.setContentType("audio/mpeg");
-    response.setCharacterEncoding(UTF_8);
-    response.setHeader("Content-Disposition", "attachment; filename*=UTF-8''" + underscores);
+    setResponse(response, underscores);
 
-    File fileRef = pathHelper.getAbsoluteAnswerAudioFile(file, language);
+    File fileRef = pathHelper.getAbsoluteAudioFile(file);
     if (!fileRef.exists()) {
       logger.warn("huh? can't find " + file + " at " + fileRef.getAbsolutePath());
     } else {
@@ -279,6 +278,13 @@ public class DownloadServlet extends DatabaseServlet {
       IOUtils.copy(input, response.getOutputStream());
       response.getOutputStream().flush();
     }
+  }
+
+  private void setResponse(HttpServletResponse response, String underscores) {
+    response.setContentType("audio/mpeg");
+   // response.setCharacterEncoding(UTF_8);
+    response.setHeader("Content-Disposition", "attachment; filename*=UTF-8''" + underscores);
+//    response.setHeader("Content-Disposition", "filename='" + underscores +"'");
   }
 
   /**
@@ -323,10 +329,6 @@ public class DownloadServlet extends DatabaseServlet {
     }
   }
 
-//  private String getLanguage(DatabaseImpl db, int userid) {
-//    return db.getProjectForUser(userid).getLanguage();
-//  }
-
   private String getUserPart(DatabaseImpl db, int userid) {
     User userWhere = db.getUserDAO().getUserWhere(userid);
     return userWhere != null ? (userWhere.getUserID().isEmpty() ? "" : "_by_" + userWhere.getUserID()) : "";
@@ -346,20 +348,6 @@ public class DownloadServlet extends DatabaseServlet {
                                  int projectid, String language) throws IOException {
     response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     ServletOutputStream outputStream = response.getOutputStream();
-
-/*
-    if (encodedFileName.toLowerCase().contains("users")) {
-      setResponseHeader(response, "users.xlsx");
-      db.usersToXLSX(outputStream);
-    } else if (encodedFileName.toLowerCase().contains("results")) {
-      setResponseHeader(response, "results.xlsx");
-      new ResultDAOToExcel().writeExcelToStream(db.getMonitorResults(projectid), db.getTypeOrder(projectid), outputStream);
-    } else if (encodedFileName.toLowerCase().contains("events")) {
-      setResponseHeader(response, "events.xlsx");
-      new EventDAOToExcel(db).toXLSX(db.getEventDAO().getAll(), outputStream);
-*/
-
-
     String prefix = language + "_";
     if (encodedFileName.toLowerCase().contains(USERS)) {
       String filename = prefix + "users.xlsx";

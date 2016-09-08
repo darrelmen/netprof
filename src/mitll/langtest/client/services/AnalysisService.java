@@ -50,7 +50,6 @@ import java.util.List;
 
 @RemoteServiceRelativePath("analysis-manager")
 public interface AnalysisService extends RemoteService {
-
   // Analysis support
   Collection<UserInfo> getUsersWithRecordings();
 

@@ -182,7 +182,7 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<MenuSectio
       //List<String> sectionsInType = new ItemSorter().getSortedItems(getLabels(rootNodes));
       List<String> sectionsInType = getLabels(rootNodes);
 
-      logger.info("got " + type + " num sections " + sectionsInType.size());
+   //   logger.info("got " + type + " num sections " + sectionsInType.size());
 
       MenuSectionWidget value = new MenuSectionWidget(type, rootNodes, this);
       if (parent != null) {
