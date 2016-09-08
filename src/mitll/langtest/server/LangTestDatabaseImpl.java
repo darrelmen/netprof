@@ -285,8 +285,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     return db.duplicateExercise(exercise);
   }
 */
-
-
   /**
    * @param id
    * @param widgetType
@@ -299,6 +297,8 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
    */
   @Override
   public void logEvent(String id, String widgetType, String exid, String context, int userid, String hitID, String device) {
+    logger.debug("log event " + id + " " + widgetType + " exid "  +exid + " context " +context + " by user " + userid);
+
     try {
       db.logEvent(id, widgetType, exid, context, userid, device);
     } catch (Exception e) {

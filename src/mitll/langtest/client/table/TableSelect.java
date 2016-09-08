@@ -32,31 +32,22 @@
 
 package mitll.langtest.client.table;
 
-
 import com.github.gwtbootstrap.client.ui.DropdownButton;
-import com.github.gwtbootstrap.client.ui.NavLink;
 import com.github.gwtbootstrap.client.ui.constants.IconSize;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTMLTable.Cell;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.list.MenuSectionWidget;
 import mitll.langtest.client.list.SimpleSelectExerciseList;
 
 import java.util.List;
 import java.util.logging.Logger;
 
-//import com.google.gwt.user.client.ui.Label;
-
-
 public class TableSelect {
   private final Logger logger = Logger.getLogger("TableSelect");
-
   public static final String ALL = "All";
 
   /**
@@ -67,67 +58,16 @@ public class TableSelect {
    */
   // public static final int COLOR_GRID_COL_SIZE = 8;
 
-  private ToolbarEventHandler handler = new ToolbarEventHandler();
+  private final ToolbarEventHandler handler = new ToolbarEventHandler();
 
-//  private Map<NavLink, RichTextArea.FontSize> fontSizeMap;
-//
-//  private ToolbarEventHandler handler = new ToolbarEventHandler();
-//  private EditSourceEventHandler editSrcHandler = new EditSourceEventHandler();
-//
-//  private Button boldBtn;
-//  private Button italicBtn;
-//  private Button underlineBtn;
-//  private Button subscriptBtn;
-//  private Button superscriptBtn;
-//  private Button strikeBtn;
-//  private Button indentBtn;
-//  private Button outdentBtn;
-//  private Button justLeftBtn;
-//  private Button justCenterBtn;
-//  private Button justRightBtn;
-//
-//  private Button hrBtn;
-//  private Button olBtn;
-//  private Button ulBtn;
-//  private Button insertImgBtn;
-//  private Button createLinkBtn;
-//  private Button removeLinkBtn;
-//  private Button editSourceBtn;
-
-  private DropdownButton colorDBtn;
-  private DropdownButton symbolDBtn;
-  private DropdownButton fontDBtn;
-  private DropdownButton fontSizeDBtn;
-
-  private DropdownButton advFormattingDBtn;
-  private DropdownButton removeDBtn;
-
-  private Grid fgColorGrid;
-  private Grid bgColorGrid;
   private Grid symbolGrid;
 
-  private static final String NO_WRAP_LINK = "No Wrap";
-  private static final String WRAP_LINK = "Normal Wrap";
-  private static final String LTR_LINK = "LTR";
-  private static final String RTL_LINK = "RTL";
+  private List<String> values;
+  private int width;
+  private DropdownButton sButton;
 
-  private static final String RM_SEL_KEEPCMT_LINK = "Keep comments";
-  private static final String RM_SEL_KEEPCMTBR_LINK = "Keep comments, breaks";
-  private static final String RM_SEL_LINK = "All Selection";
-  private static final String RM_ALL_LINK = "All Area";
-
-  private char[][] SYMBOL_VALUES = {
-      {'‘', '’', '“', '”'},
-      {'§', '¶', '…', '©'},
-      {'—', '–', '™', '®'}
-  };
-  //private Language targetLanguage;
-  List<String> values;
-  int width;
-  DropdownButton sButton;
-
-  SimpleSelectExerciseList singleSelectExerciseList;
-  MenuSectionWidget menuSectionWidget;
+  private SimpleSelectExerciseList singleSelectExerciseList;
+  private MenuSectionWidget menuSectionWidget;
 
   static {
     new TableSelect().register();
@@ -162,7 +102,7 @@ public class TableSelect {
     int numRows = (int) Math.ceil((double) size / (double) width);
     if (numRows > 20) {
       numRows = 20;
-      width   = (int) Math.ceil((double) n / (double) 20);
+      width = (int) Math.ceil((double) n / (double) 20);
     }
 
     this.width = width;
@@ -180,7 +120,7 @@ public class TableSelect {
         String text = values.get(n - size);
         int width1 = getWidth(text.replaceAll(" ", "_").replaceAll("-", "_"), "bold 24px Arial");
         if (width1 > widthSoFar) {
-          logger.info("new highest - for " + text + " got " + width1);
+       //   logger.info("new highest - for " + text + " got " + width1);
           widthSoFar = width1;
         }
         size--;
@@ -291,81 +231,7 @@ public class TableSelect {
    */
   private class ToolbarEventHandler implements ClickHandler/*, KeyUpHandler*/ {
     public void onClick(final ClickEvent event) {
-      final Widget sender = (Widget) event.getSource();
-
-   /*   final CommentableRichTextArea lastFocused = getLastFocused();
-      if (lastFocused != null && lastFocused.getFormatter() != null &&
-          lastFocused.isAttached()) {
-        lastFocused.setFocus(true);
-        Formatter formatter = lastFocused.getFormatter();
-        if (sender == boldBtn) {
-          formatter.toggleBold();
-        } else if (sender == italicBtn) {
-          formatter.toggleItalic();
-        } else if (sender == underlineBtn) {
-          formatter.toggleUnderline();
-        } else if (sender == subscriptBtn) {
-          formatter.toggleSubscript();
-        } else if (sender == superscriptBtn) {
-          formatter.toggleSuperscript();
-        } else if (sender == strikeBtn) {
-          formatter.toggleStrikethrough();
-        } else if (sender == indentBtn) {
-          formatter.rightIndent();
-        } else if (sender == outdentBtn) {
-          formatter.leftIndent();
-        } else if (sender == justLeftBtn) {
-          formatter.setJustification(RichTextArea.Justification.LEFT);
-        } else if (sender == justCenterBtn) {
-          formatter.setJustification(RichTextArea.Justification.CENTER);
-        } else if (sender == justRightBtn) {
-          formatter.setJustification(RichTextArea.Justification.RIGHT);
-        } else if (sender == insertImgBtn) {
-          String url = Window.prompt("Enter an image URL:", "http://");
-          if (url != null) {
-            formatter.insertImage(url);
-          }
-        } else if (sender == createLinkBtn) {
-          String url = Window.prompt("Enter a URL to create a link on the selected text:", "http://");
-          if (url != null) {
-            formatter.createLink(url);
-          }
-        } else if (sender == removeLinkBtn) {
-          formatter.removeLink();
-        } else if (sender == hrBtn) {
-          formatter.insertHorizontalRule();
-        } else if (sender == olBtn) {
-          formatter.insertOrderedList();
-        } else if (sender == ulBtn) {
-          formatter.insertUnorderedList();
-        } else if (sender == editSourceBtn) {
-          editSource();
-        } else if (event.getSource() instanceof RichTextArea) {
-          updateStatus((RichTextArea) event.getSource());
-        } else*/
-      if (sender == fgColorGrid) {
-        String color = getClickedColor(fgColorGrid, event);
-        //    color = getState().getColorFactory().rgbToHex(color);
-        //formatter.setForeColor(color);
-      } else if (sender == bgColorGrid) {
-        String color = getClickedColor(bgColorGrid, event);
-        if (color.isEmpty()) {
-          //formatter.setBackColor(null);
-        } else {
-          // formatter.setBackColor(color);
-        }
-      } else if (sender == symbolGrid) {
-        handleSymbolClick(event);
-      } else if (sender instanceof NavLink || sender.getParent() instanceof NavLink) {
-        // With nav links the event must be handled outside of the event
-        // thread to ensure the area is focused after complete. This typically
-        // makes a second deferred during the handler to reclaim the focus.
-        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-          public void execute() {
-            //handleNavLinkClick(event, sender, lastFocused);
-          }
-        });
-      }
+      handleSymbolClick(event);
     }
   }
 
@@ -421,20 +287,17 @@ public class TableSelect {
     singleSelectExerciseList.gotSelection();
   }
 
+/*
   private String getClickedColor(Grid clickedGrid, ClickEvent event) {
     Cell clickedCell = clickedGrid.getCellForEvent(event);
     return clickedCell.getElement().getStyle().getBackgroundColor();
   }
+*/
 
-//  // @Override
-//  public void onKeyUp(KeyUpEvent event) {
-//    if (event.getSource() instanceof RichTextArea) {
-//      // updateStatus((RichTextArea) event.getSource());
-//    }
-//  }
-
+/*
   public String getSelection() {
     return sButton.getText();
   }
+*/
 }
 

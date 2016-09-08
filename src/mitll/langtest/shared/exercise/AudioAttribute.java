@@ -68,7 +68,6 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   private static final String SPEED = "speed";
   public static final String SLOW = AudioType.SLOW.toString();
   public static final String REGULAR = AudioType.REGULAR.toString();
-  // public static final String REGULAR_AND_SLOW = "regular and slow";
 
   /**
    * TODO : if every have slow recordings of context audio we'll need to add another type or an enum
@@ -95,7 +94,6 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   private Map<String, String> attributes = new HashMap<String, String>();
   private boolean hasBeenPlayed;
   private AudioType audioType;
-  // boolean exists;
 
   public AudioAttribute() {
   }
@@ -114,7 +112,8 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
    * @seex mitll.langtest.server.database.audio.BaseAudioDAO#getResultsForQuery
    * @see mitll.langtest.server.database.audio.BaseAudioDAO#getAudioAttribute
    */
-  public AudioAttribute(int uniqueID, int userid,
+  public AudioAttribute(int uniqueID,
+                        int userid,
                         int exid,
                         String audioRef,
                         long timestamp,
@@ -184,7 +183,6 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   public String getID() {
     return exid + "/1";
   }
-
 
   public AudioAttribute markSlow() {
     addAttribute(SPEED, SLOW);
@@ -264,7 +262,6 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
       String speed = attributes.values().iterator().next();
       return speed.substring(0, 1).toUpperCase() + speed.substring(1);
     } else {
-
       StringBuilder stringBuilder = new StringBuilder();
       for (Map.Entry<String, String> pair : attributes.entrySet()) {
         String key = pair.getKey();
@@ -355,7 +352,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
 
   /**
    * @return
-   * @see mitll.langtest.server.database.CopyToPostgres#copyAudio(DatabaseImpl, Map, Map, int)
+   * @see mitll.langtest.server.database.CopyToPostgres#copyAudio
    */
   public String getOldexid() {
     return oldexid;
@@ -380,11 +377,13 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   @Override
   public String toString() {
     return "Audio id " + uniqueID +
-        " for ex " + getOldexid() +
-        " : " + audioRef + "/" + actualPath +
-        " attrs " + attributes +
-        " by " + userid + "/" + user +
-        " transcript '" + transcript +
+        " for ex    " + getID()+
+        " (old ex " + getOldexid() + ") :" +
+        "\n\tpath   " + audioRef +
+        "\n\tactual " + actualPath +
+        "\n\tattrs  " + attributes +
+        "\n\tby     " + userid + "/" + user +
+        "\n\ttranscript '" + transcript +
         "' ";
   }
 }
