@@ -67,7 +67,7 @@ public class MenuSectionWidget implements SectionWidget {
     this.type = type;
     this.nodes = nodes;
     this.singleSelectExerciseList = singleSelectExerciseList;
-    logger.info("made menu " + type + " with " + nodes.size());
+  //  logger.info("made menu " + type + " with " + nodes.size());
   }
 
   private int num = 0;

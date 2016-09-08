@@ -39,11 +39,13 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.phone.IPhoneDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.scoring.ParseResultJson;
+import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import org.apache.log4j.Logger;
+import org.apache.poi.xssf.model.MapInfo;
 
 import java.util.*;
 
@@ -96,10 +98,11 @@ public abstract class Analysis extends DAO {
       "rbtrbt"));
 
   List<UserInfo> getUserInfos(IUserDAO userDAO, Map<Integer, UserInfo> best) {
-    Map<Integer, User> userMap = userDAO.getUserMap();
+ //   Map<Integer, User> userMap = userDAO.getUserMap();
+    Map<Integer, MiniUser> userMap = userDAO.getMiniUsers();
     List<UserInfo> userInfos = new ArrayList<>();
     for (Map.Entry<Integer, UserInfo> pair : best.entrySet()) {
-      User user = userMap.get(pair.getKey());
+      MiniUser user = userMap.get(pair.getKey());
 
       if (user == null) {
         logger.warn("huh? no user for " + pair.getKey());

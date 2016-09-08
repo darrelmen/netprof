@@ -32,12 +32,15 @@
 
 package mitll.langtest.shared.analysis;
 
+import mitll.langtest.server.database.user.IUserDAO;
+import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -46,7 +49,7 @@ import java.util.List;
  * @since 10/29/15.
  */
 public class UserInfo implements Serializable {
-  private User user;
+  private MiniUser user;
   private int start;
   private int current;
   private int num;
@@ -98,16 +101,21 @@ public class UserInfo implements Serializable {
     return getUser() == null ? "UNK" : getUser().getUserID();
   }
 
-  public long getTimestampMillis() {
-    return startTime;
-//    return getUser().getTimestampMillis();
-  }
+  public long getTimestampMillis() { return startTime;  }
 
-  public User getUser() {
+  /**
+   *
+   * @return
+   */
+  public MiniUser getUser() {
     return user;
   }
 
-  public void setUser(User user) {
+  /**
+   * @see mitll.langtest.server.database.analysis.Analysis#getUserInfos(IUserDAO, Map)
+   * @param user
+   */
+  public void setUser(MiniUser user) {
     this.user = user;
   }
 
@@ -140,7 +148,7 @@ public class UserInfo implements Serializable {
   }
 
   public String toString() {
-    User user = getUser();
+    MiniUser user = getUser();
     String id = user == null ? "UNK" : "" + user.getId();
     return id + "/" + getUserID() + " : " + getNum() + " : " + getStart() + " " + getCurrent() + " " + getDiff();
   }

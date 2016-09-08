@@ -42,6 +42,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
 import mitll.langtest.client.services.ExerciseServiceAsync;
+import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.analysis.UserInfo;
 
@@ -130,7 +131,7 @@ public class StudentAnalysis extends DivWidget {
   private List<UserInfo> getUserInfos(Collection<UserInfo> users) {
     List<UserInfo> filtered = new ArrayList<UserInfo>();
     for (UserInfo userInfo : users) {
-      User user = userInfo.getUser();
+      MiniUser user = userInfo.getUser();
       if (user != null && user.getUserID() != null && !user.getUserID().equals("defectDetector")) {
         filtered.add(userInfo);
       } else {

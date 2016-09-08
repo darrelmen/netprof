@@ -176,7 +176,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       logger.warn("ensureCompressedEquivalent huh? no user for " + user);
     }
 
-    ensureMP3(path, foreignLanguage, userID, language);
+    ensureMP3(path, foreignLanguage, userID);
   }
 
   /**
@@ -185,29 +185,15 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * @param wavFile
    * @param title
    * @param artist
-   * @param language
    * @return true if mp3 file exists
    * @seex #ensureMP3s(CommonExercise, String)
    * @see #writeAudioFile
    */
-  private boolean ensureMP3(String wavFile, String title, String artist, String language) {
-    return ensureMP3(wavFile, title, artist, serverProps.getAnswerDir(), language);
-  }
-  // int spew = 0;
-
-  /**
-   * Should we make it so we can call it on both answers and bestAudio audio?
-   *
-   * @param wavFile
-   * @param title
-   * @param artist
-   * @param parent
-   * @param language
-   * @return
-   */
-  private boolean ensureMP3(String wavFile, String title, String artist, String parent, String language) {
+  private boolean ensureMP3(String wavFile, String title, String artist) {
+    String parent =  serverProps.getAnswerDir();
     if (wavFile != null) {
-     // File test = new File(parent + File.separator + language, wavFile);
+      logger.debug("ensureMP3 : trying " + wavFile + " under " + parent);
+      // File test = new File(parent + File.separator + language, wavFile);
       File test = new File(wavFile);
       if (!test.exists()) {
         if (WARN_MISSING_FILE) {
