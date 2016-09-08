@@ -78,7 +78,9 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
 
   private int uniqueID;
   private String audioRef;
-  private String actualPath; // where we found it on the hydra server - might be different from audioRef if it's been moved
+
+  // DON'T send this to client
+  private transient String actualPath; // where we found it on the hydra server - might be different from audioRef if it's been moved
   private int exid;
   private String oldexid;
   private int userid;

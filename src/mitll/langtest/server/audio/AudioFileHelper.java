@@ -133,16 +133,15 @@ public class AudioFileHelper implements AlignDecode {
    * NOTE : has side effect of setting the number of phones!
    *
    * @param exercises
-   * @see LangTestDatabaseImpl#getExercises()
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#getExercises
    */
   public void checkLTSAndCountPhones(Collection<CommonExercise> exercises) {
     synchronized (this) {
       if (!checkedLTS) {
         checkedLTS = true;
         int count = 0;
-        //   makeASRScoring();
 
-        phoneToCount = new HashMap<String, Integer>();
+        phoneToCount = new HashMap<>();
         for (CommonExercise exercise : exercises) {
           boolean validForeignPhrase = isInDictOrLTS(exercise);
           if (!validForeignPhrase) {

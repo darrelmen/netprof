@@ -102,7 +102,6 @@ import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
@@ -354,7 +353,7 @@ public class DatabaseImpl implements Database {
 
     eventDAO = new SlickEventImpl(dbConnection);
     this.userDAO = new SlickUserDAOImpl(this, dbConnection);
-    this.userSessionDAO = new SlickUserSessionDAOImpl(this,dbConnection);
+    this.userSessionDAO = new SlickUserSessionDAOImpl(this, dbConnection);
     audioDAO = new SlickAudioDAO(this, dbConnection, this.userDAO);
     resultDAO = new SlickResultDAO(this, dbConnection);
     answerDAO = new SlickAnswerDAO(this, dbConnection);
@@ -523,6 +522,7 @@ public class DatabaseImpl implements Database {
   }
 
   //private String mediaDir;
+
   /**
    * @param installPath
    * @param lessonPlanFile
@@ -662,8 +662,8 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * @see mitll.langtest.server.services.UserServiceImpl#setSessionUser(HttpSession, User)
    * @param userWhere
+   * @see mitll.langtest.server.services.UserServiceImpl#setSessionUser(HttpSession, User)
    */
   public void setStartupInfo(User userWhere) {
     int i = getUserProjectDAO().mostRecentByUser(userWhere.getId());
@@ -692,7 +692,7 @@ public class DatabaseImpl implements Database {
       SlickProject project1 = project.getProject();
       List<String> typeOrder = project.getTypeOrder();
       boolean sound = typeOrder.remove(SlickUserExerciseDAO.SOUND);
-      boolean diff  = typeOrder.remove(SlickUserExerciseDAO.DIFFICULTY);
+      boolean diff = typeOrder.remove(SlickUserExerciseDAO.DIFFICULTY);
       if (!sound) logger.warn("sound missing???");
       else {
         typeOrder.add(SlickUserExerciseDAO.SOUND);
@@ -797,7 +797,7 @@ public class DatabaseImpl implements Database {
    * @see #makeDAO(String, String, String)
    */
   private void configureProject(String installPath, Project project) {
-    logger.info("configureProject " + project +  " install path " + installPath);
+    logger.info("configureProject " + project + " install path " + installPath);
 
     ExerciseDAO<?> exerciseDAO1 = project.getExerciseDAO();
     SlickProject project1 = project.getProject();
@@ -1308,7 +1308,7 @@ public class DatabaseImpl implements Database {
    * @see #initializeDAOs(PathHelper)
    */
   public void createTables() {
-  //  logger.info("createTables create slick tables - has " + dbConnection.getTables());
+    //  logger.info("createTables create slick tables - has " + dbConnection.getTables());
 
     List<IDAO> idaos = Arrays.asList(
         getUserDAO(),
@@ -1666,7 +1666,7 @@ public class DatabaseImpl implements Database {
    * @throws Exception
    * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
-  public void writeZip(OutputStream out, Map<String, Collection<String>> typeToSection, int projectid,AudioExport.AudioExportOptions options) throws Exception {
+  public void writeZip(OutputStream out, Map<String, Collection<String>> typeToSection, int projectid, AudioExport.AudioExportOptions options) throws Exception {
     Collection<CommonExercise> exercisesForSelectionState = typeToSection.isEmpty() ?
         getExercises(projectid) :
         getSectionHelper(projectid).getExercisesForSelectionState(typeToSection);
@@ -1676,7 +1676,7 @@ public class DatabaseImpl implements Database {
         getSectionHelper(projectid),
         exercisesForSelectionState,
         language,
-        getAudioDAO(), installPath, configDir, false,options);
+        getAudioDAO(), installPath, configDir, false, options);
   }
 
   public String getLanguage(CommonExercise ex) {
@@ -1694,9 +1694,9 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * @see DownloadServlet#writeAllAudio(HttpServletResponse)
    * @param out
    * @throws Exception
+   * @see DownloadServlet#writeAllAudio
    */
   public void writeUserListAudio(OutputStream out, int projectid) throws Exception {
     new AudioExport(getServerProps()).writeZipJustOneAudio(out, getSectionHelper(projectid), getExercises(projectid), installPath);
@@ -1715,10 +1715,9 @@ public class DatabaseImpl implements Database {
    */
   public String writeUserListAudio(OutputStream out,
                                    long listid,
-                                   PathHelper pathHelper,
                                    int projectid,
                                    AudioExport.AudioExportOptions options) throws Exception {
-      String language = getLanguage(projectid);
+    String language = getLanguage(projectid);
     if (listid == -1) return language + "_Unknown";
 
     UserList<CommonShell> userListByID = getUserListByID(listid, projectid);
@@ -1736,7 +1735,7 @@ public class DatabaseImpl implements Database {
       }
       for (CommonExercise ex : copyAsExercises) {
         userListManager.addAnnotations(ex);
-        getAudioDAO().attachAudioToExercise(ex,/* pathHelper.getInstallPath(), configDir,*/ language);
+        getAudioDAO().attachAudioToExercise(ex, language);
       }
       long now = System.currentTimeMillis();
       logger.debug("\nTook " + (now - then) + " millis to annotate and attach.");
@@ -1756,7 +1755,6 @@ public class DatabaseImpl implements Database {
   public int attachAudio(CommonExercise ex) {
     return getAudioDAO().attachAudioToExercise(ex, /*installPath, configDir,*/ getLanguage(ex));
   }
-
 
 
   /**
