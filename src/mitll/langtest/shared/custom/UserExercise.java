@@ -89,7 +89,6 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
                       String transliteration, int projectid) {
     super(exerciseID, uniqueID, projectid);
     this.creator = creator;
-    //  this.uniqueID = uniqueID;
     this.english = english;
     this.foreignLanguage = foreignLanguage;
     this.transliteration = transliteration;
@@ -174,12 +173,6 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
   public void setID(int uniqueID) {
     this.id = uniqueID;
   }
-
-/*
-  public long getUniqueID() {
-    return uniqueID;
-  }
-*/
 
   public void setTransliteration(String transliteration) {
     this.transliteration = transliteration;
@@ -296,13 +289,6 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
   @Override
   public void setSafeToDecode(boolean isSafeToDecode) {
   }
-/*
-
-  @Override
-  public String getRefAudioIndex() {
-    return "";
-  }
-*/
 
   public void setAvgScore(float avgScore) {
     this.avgScore = avgScore;
