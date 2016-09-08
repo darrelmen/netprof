@@ -586,7 +586,7 @@ public class UserListManager implements IUserListManager {
         CommonExercise byID = userExerciseDAO.getPredefExercise(id);
         if (byID != null) {
           //logger.debug("getReviewedUserExercises : found " + byID + " tooltip " + byID.getTooltip());
-          UserExercise e = new UserExercise(byID, byID.getCreator());
+          Exercise e = new Exercise(byID);
           onList.add(e); // all predefined references
           //e.setTooltip(byID.getCombinedTooltip());
           //logger.debug("getReviewedUserExercises : found " + e.getOldID() + " tooltip " + e.getTooltip());
@@ -759,7 +759,7 @@ public class UserListManager implements IUserListManager {
                                        String prefix) {
     File fileRef = pathHelper.getAbsoluteAudioFile(regularSpeed.getAudioRef());
 
-    String fast = prefix + "_" + now + "_by_" + userExercise.getCombinedMutableUserExercise().getCreator() + ".wav";
+    String fast = prefix + "_" + now + "_by_" + userExercise.getCreator() + ".wav";
     String artist = regularSpeed.getUser().getUserID();
     String refAudio = getRefAudioPath(projectID, id, fileRef, fast, overwrite, foreignLanguage, artist);
     regularSpeed.setAudioRef(refAudio);

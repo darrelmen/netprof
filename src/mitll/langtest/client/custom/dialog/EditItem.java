@@ -56,10 +56,7 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.AnnotationExercise;
-import mitll.langtest.shared.exercise.AudioRefExercise;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -98,6 +95,7 @@ public class EditItem {
 
   private PagingExerciseList<CommonShell, CommonExercise> exerciseList;
   private final String instanceName;
+  private Exercise newExercise;
 
   /**
    * @param service
@@ -148,10 +146,9 @@ public class EditItem {
 
   public void onResize() {
     if (exerciseList != null) {
-    //  logger.info("EditItem onResize");
+      //  logger.info("EditItem onResize");
       exerciseList.onResize();
-    }
-    else {
+    } else {
       logger.info("EditItem onResize - no exercise list");
 
     }
@@ -201,7 +198,7 @@ public class EditItem {
             if (itemID == NEW_EXERCISE_ID) {
               useExercise(getNewItem());
             } else {
-           //   logger.info("EditItem.makeExerciseList - askServerForExercise = " + itemID);
+              //   logger.info("EditItem.makeExerciseList - askServerForExercise = " + itemID);
               super.askServerForExercise(itemID);
             }
           }
@@ -245,7 +242,12 @@ public class EditItem {
    * @return
    */
   private CommonExercise getNewItem() {
-    return new UserExercise(NEW_EXERCISE_ID, userManager.getUser(), NEW_ITEM, controller.getProjectStartupInfo().getProjectid());
+    //  return new UserExercise(NEW_EXERCISE_ID, userManager.getUser(), NEW_ITEM, controller.getProjectStartupInfo().getProjectid());
+    return new Exercise(NEW_EXERCISE_ID,
+        userManager.getUser(),
+        NEW_ITEM,
+        controller.getProjectStartupInfo().getProjectid(),
+        false);
   }
 
   private void setFactory(final PagingExerciseList<CommonShell, CommonExercise> exerciseList,
@@ -253,13 +255,13 @@ public class EditItem {
                           final UserList<CommonShell> originalList) {
     final PagingExerciseList<CommonShell, CommonExercise> outer = exerciseList;
 
-    exerciseList.setFactory(new ExercisePanelFactory<CommonShell, CommonExercise>(service, feedback, controller, exerciseList) {
+    exerciseList.setFactory(new ExercisePanelFactory<CommonShell, CommonExercise>(service,
+        feedback, controller, exerciseList) {
       @Override
       public Panel getExercisePanel(CommonExercise e) {
         Panel panel = new ResizableSimple();
         panel.getElement().setId("EditItemPanel");
-        // TODO : do something better here than toCommonUserExercise
-        UserExercise userExercise = new UserExercise(e, e.getCreator());
+        Exercise userExercise = new Exercise(e);
         populatePanel(userExercise, panel, ul, originalList, itemMarker, outer);
         return panel;
       }
@@ -272,9 +274,8 @@ public class EditItem {
     public void onResize() {
       Widget widget = getWidget();
       if (widget instanceof RequiresResize) {
-        ((RequiresResize)widget).onResize();
-      }
-      else {
+        ((RequiresResize) widget).onResize();
+      } else {
         logger.info("skipping " + widget.getElement().getId());
       }
     }
@@ -296,7 +297,6 @@ public class EditItem {
     npfExerciseList.rememberAndLoadFirst(userExercises);
   }
 
-  private UserExercise newExercise;
 
   /**
    * @param exercise
@@ -333,10 +333,17 @@ public class EditItem {
    * @return
    * @see #populatePanel(CommonExercise, Panel, UserList, UserList, HasText, ListInterface)
    */
-  private UserExercise createNewItem(int userid, String listName) {
+  private Exercise createNewItem(int userid, String listName) {
     long now = System.currentTimeMillis();
-    return new UserExercise(-1, UserExercise.CUSTOM_PREFIX + "_" + listName + "_" + userid + "_" + now, userid, "", "", "",
-        controller.getProjectStartupInfo().getProjectid());
+//    return new UserExercise(-1,
+//        UserExercise.CUSTOM_PREFIX + "_" + listName + "_" + userid + "_" + now,
+//        userid, "", "", "",
+//        controller.getProjectStartupInfo().getProjectid());
+
+    return new Exercise(-1,
+        userid, "",
+        controller.getProjectStartupInfo().getProjectid(),
+        false);
   }
 
   /**
@@ -385,7 +392,8 @@ public class EditItem {
     if (doNewExercise) { // whole new exercise
       editableExercise = new NewUserExercise(service, controller, itemMarker, this, exercise, getInstance(), originalList);
     } else {
-      boolean iCreatedThisItem = didICreateThisItem(exercise) || (userManager.isTeacher() && !exercise.isPredefined());  // asked that teachers be able to record audio for other's items
+      boolean iCreatedThisItem = didICreateThisItem(exercise) ||
+          (userManager.isTeacher() && !exercise.isPredefined());  // asked that teachers be able to record audio for other's items
       if (iCreatedThisItem) {  // it's mine!
         editableExercise = new EditableExerciseDialog(service, controller, this, itemMarker, exercise,
             originalList,
@@ -399,6 +407,7 @@ public class EditItem {
     }
     return editableExercise;
   }
+
   private String getInstance() {
     return instanceName;
   }
