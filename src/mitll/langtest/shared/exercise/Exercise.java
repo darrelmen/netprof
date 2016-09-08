@@ -32,12 +32,21 @@
 
 package mitll.langtest.shared.exercise;
 
+import mitll.langtest.client.custom.content.FlexListLayout;
+import mitll.langtest.client.custom.dialog.EditItem;
+import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.server.database.user.UserDAO;
+import mitll.langtest.server.database.userexercise.UserExerciseDAO;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
+import mitll.npdata.dao.SlickExercise;
 import net.sf.json.JSONObject;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 import static mitll.langtest.server.database.user.BaseUserDAO.UNDEFINED_USER;
 
@@ -64,6 +73,10 @@ public class Exercise extends AudioExercise implements CommonExercise,
   private Collection<CommonExercise> mentions = new ArrayList<>();
   private boolean safeToDecode;
 
+  private int creator = UNDEFINED_USER;
+  private boolean isPredef;
+  private boolean isOverride;
+
   // for serialization
   public Exercise() {
   }
@@ -77,29 +90,48 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @see mitll.langtest.server.database.exercise.ExcelImport#getExercise
    */
   public Exercise(String id,
-                  String context, String altcontext, String contextTranslation,
-                  String meaning, String refAudioIndex,
-                  int projectid, long updateTime) {
+                  String context,
+                  String altcontext,
+                  String contextTranslation,
+                  String meaning,
+                  int projectid,
+                  long updateTime) {
     super(id, -1, projectid);
     this.meaning = meaning;
-    //this.refAudioIndex = refAudioIndex;
     this.updateTime = updateTime;
     addContext(context, altcontext, contextTranslation);
   }
 
+
   /**
-   * @Deprecated - use related exercise join table
+   * @param exid
+   * @param creator
+   * @param english
+   * @param projectid
+   * @see EditItem#getNewItem
+   */
+  public Exercise(int exid, int creator, String english, int projectid, boolean isPredef) {
+    this.id = exid;
+    this.creator = creator;
+    this.english = english;
+    this.projectid = projectid;
+    this.isPredef = isPredef;
+  }
+
+  /**
    * @param id
    * @param context
    * @param altcontext
    * @param contextTranslation
    * @param projectid
+   * @Deprecated - use related exercise join table
    */
-  @Deprecated public Exercise(String id, String context, String altcontext, String contextTranslation, int projectid) {
+  @Deprecated
+  private Exercise(String id, String context, String altcontext, String contextTranslation, int projectid) {
     super(id, -1, projectid);
     this.foreignLanguage = context;
-    this.altfl           = altcontext;
-    this.english         = contextTranslation;
+    this.altfl = altcontext;
+    this.english = contextTranslation;
   }
 
   /**
@@ -118,7 +150,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
                   String foreignLanguage,
                   String meaning,
                   String transliteration,
-                  int dominoID, int projectid) {
+                  int dominoID,
+                  int projectid) {
     super(id, -1, projectid);
     setEnglishSentence(englishSentence);
     this.meaning = meaning;
@@ -127,17 +160,92 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.dominoID = dominoID;
   }
 
+  /**
+   * @param exid
+   * @param oldid
+   * @param creator
+   * @param englishSentence
+   * @param foreignLanguage
+   * @param meaning
+   * @param transliteration
+   * @param projectid
+   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#fromSlickToExercise(SlickExercise, Collection, SectionHelper)
+   */
   public Exercise(int exid,
                   String oldid,
+                  int creator,
                   String englishSentence,
                   String foreignLanguage,
                   String meaning,
-                  String transliteration, int projectid) {
+                  String transliteration,
+                  int projectid) {
     super(oldid, exid, projectid);
+    this.creator = creator;
     setEnglishSentence(englishSentence);
     this.meaning = meaning;
     setForeignLanguage(foreignLanguage);
     setTransliteration(transliteration);
+  }
+
+  /**
+   * @param uniqueID
+   * @param exerciseID
+   * @param creator
+   * @param english
+   * @param foreignLanguage
+   * @param transliteration
+   * @param isOverride
+   * @param modifiedTimestamp
+   * @param projectid
+   * @see UserExerciseDAO#getUserExercise
+   */
+  public Exercise(int uniqueID,
+                  String exerciseID,
+                  int creator,
+                  String english,
+                  String foreignLanguage,
+                  String transliteration,
+                  boolean isOverride,
+                  Map<String, String> unitToValue,
+                  long modifiedTimestamp,
+                  int projectid) {
+    this(uniqueID, exerciseID, creator, english, foreignLanguage, "", transliteration, projectid);
+    setUnitToValue(unitToValue);
+    this.isOverride = isOverride;
+    this.updateTime = modifiedTimestamp;
+  }
+
+  /**
+   * @param exercise
+   * @see FlexListLayout#getFactory(PagingExerciseList)
+   */
+  public <T extends CommonExercise> Exercise(T exercise) {
+    super(exercise.getOldID(), exercise.getID(), exercise.getProjectID());
+    this.isPredef = true;
+    this.english = exercise.getEnglish();
+    this.foreignLanguage = exercise.getForeignLanguage();
+    this.transliteration = exercise.getTransliteration();
+    this.meaning = exercise.getMeaning();
+
+    setFieldToAnnotation(exercise.getFieldToAnnotation());
+    setUnitToValue(exercise.getUnitToValue());
+    setState(exercise.getState());
+    setSecondState(exercise.getSecondState());
+
+    for (CommonExercise contextEx : exercise.getDirectlyRelated()) {
+      addContextExercise(contextEx);
+    }
+//    for (CommonExercise contextEx : exercise.getMentions()) {
+//      addMentionedContext(contextEx);
+//    }
+    copyAudio(exercise);
+    this.creator = exercise.getCreator();
+  }
+
+  private void copyAudio(AudioRefExercise exercise) {
+    for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) {
+      addAudio(audioAttribute);
+    }
   }
 
   @Override
@@ -156,7 +264,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   @Override
   public boolean isPredefined() {
-    return true;
+    return isPredef;
   }
 
   /**
@@ -165,7 +273,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
    */
   @Override
   public int getCreator() {
-    return UNDEFINED_USER;
+    return creator;
   }
 
   @Override
@@ -183,21 +291,20 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return this;
   }
 
-  @Override
-  public CombinedMutableUserExercise getCombinedMutableUserExercise() {
-    new Exception("shouldn't call this method.");
-    return null;
-  }
+//  @Override
+//  public CombinedMutableUserExercise getCombinedMutableUserExercise() {
+//    return this;
+//  }
 
   public CommonAnnotatable getCommonAnnotatable() {
     return this;
   }
 
   /**
-   * @see mitll.langtest.server.database.exercise.JSONURLExerciseDAO#addContextSentences(JSONObject, Exercise)
    * @param context
    * @param altcontext
    * @param contextTranslation
+   * @see mitll.langtest.server.database.exercise.JSONURLExerciseDAO#addContextSentences(JSONObject, Exercise)
    */
   public void addContext(String context, String altcontext, String contextTranslation) {
     if (!context.isEmpty()) {
@@ -226,8 +333,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
   }
 
   /**
-   * @see mitll.langtest.server.database.result.BaseResultDAO#attachScoreHistory(int, CommonExercise, boolean)
    * @param scores
+   * @see mitll.langtest.server.database.result.BaseResultDAO#attachScoreHistory(int, CommonExercise, boolean)
    */
   @Override
   public void setScores(List<CorrectAndScore> scores) {
@@ -247,13 +354,12 @@ public class Exercise extends AudioExercise implements CommonExercise,
   }
 
   /**
-   * @param bagOfPhones
+   * @paramx bagOfPhones
    * @see mitll.langtest.server.audio.AudioFileHelper#countPhones
    */
-  @Override
-  public void setBagOfPhones(Set<String> bagOfPhones) {
-  }
-
+//  @Override
+//  public void setBagOfPhones(Set<String> bagOfPhones) {
+//  }
   @Override
   public List<String> getFirstPron() {
     return firstPron;
@@ -265,8 +371,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
   }
 
   /**
-   * @see mitll.langtest.server.database.exercise.JSONURLExerciseDAO#toExercise
    * @param updateTime
+   * @see mitll.langtest.server.database.exercise.JSONURLExerciseDAO#toExercise
    */
   public void setUpdateTime(long updateTime) {
     this.updateTime = updateTime;
@@ -277,8 +383,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
   }
 
   /**
-   * @see #addContext(String, String, String)
    * @param contextExercise
+   * @see #addContext(String, String, String)
    */
   public void addContextExercise(CommonExercise contextExercise) {
     directlyRelated.add(contextExercise);
@@ -302,7 +408,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
         " old '" + getOldID() +
         "' english '" + getEnglish() +
         "'/'" + getForeignLanguage() + "' " +
-        (getAltFL().isEmpty() ? "" : getAltFL())+
+        (getAltFL().isEmpty() ? "" : getAltFL()) +
         "meaning '" + getMeaning() +
         "' transliteration '" + getTransliteration() +
         "' context " + getDirectlyRelated() +
@@ -321,7 +427,9 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return !getDirectlyRelated().isEmpty();
   }
 
-  public String getContext() { return getDirectlyRelated().iterator().next().getForeignLanguage(); }
+  public String getContext() {
+    return getDirectlyRelated().iterator().next().getForeignLanguage();
+  }
 
   public Collection<CommonExercise> getDirectlyRelated() {
     return directlyRelated;
@@ -337,5 +445,22 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   public void setSafeToDecode(boolean safeToDecode) {
     this.safeToDecode = safeToDecode;
+  }
+
+//  public boolean isPredef() {
+//    return isPredef;
+//  }
+
+  public boolean isOverride() {
+    return isOverride;
+  }
+
+  public void setCreator(int creator) {
+    this.creator = creator;
+  }
+
+
+  public void setID(int uniqueID) {
+    this.id = uniqueID;
   }
 }

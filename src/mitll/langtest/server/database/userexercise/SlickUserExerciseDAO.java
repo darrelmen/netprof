@@ -93,7 +93,7 @@ public class SlickUserExerciseDAO
   }
 
   //  @Override
-  public SlickExercise toSlick(UserExercise shared, int projectID) {
+  public SlickExercise toSlick(Exercise shared, int projectID) {
     Map<String, String> unitToValue = shared.getUnitToValue();
     List<String> typeOrder = getTypeOrder();
     Iterator<String> iterator = typeOrder.iterator();
@@ -185,7 +185,7 @@ public class SlickUserExerciseDAO
    * @return
    * @see #getUserExercises(Collection)
    */
-  private UserExercise fromSlick(SlickExercise slick) {
+  private Exercise fromSlick(SlickExercise slick) {
     Map<String, String> unitToValue = new HashMap<>();
     Iterator<String> iterator = getTypeOrder().iterator();
     String first = iterator.next();
@@ -194,7 +194,7 @@ public class SlickUserExerciseDAO
     if (!second.isEmpty())
       unitToValue.put(second, slick.lesson());
 
-    UserExercise userExercise = new UserExercise(
+    Exercise userExercise = new Exercise(
         slick.id(),
         slick.exid(),
         slick.userid(),
@@ -226,6 +226,7 @@ public class SlickUserExerciseDAO
     Exercise exercise = new Exercise(
         id,
         slick.exid(),
+        BaseUserDAO.UNDEFINED_USER,
         slick.english(),
         slick.foreignlanguage(),
         slick.meaning(),

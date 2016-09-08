@@ -39,6 +39,7 @@ import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.Exercise;
 import mitll.langtest.shared.exercise.HasID;
 import org.apache.log4j.Logger;
 
@@ -67,7 +68,7 @@ public class BaseUserExerciseDAO extends DAO {
         CommonExercise byID = getExercise(ue);
 
         if (byID != null) {
-          userExercises2.add(new UserExercise(byID, byID.getCreator())); // all predefined references
+          userExercises2.add(new Exercise(byID)); // all predefined references
 
           /// TODO : put this back???
           // if (isEnglish) {
