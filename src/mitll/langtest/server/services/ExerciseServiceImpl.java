@@ -826,7 +826,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
         logger.debug("getExercise : (" + language + ") took " + (now - then2) + " millis to add annotations to " +
             "exercise " + exid + " for " + userID);
       }
-      then2 = System.currentTimeMillis();
+//      then2 = System.currentTimeMillis();
 
       //logger.debug("getExercise : returning " + byID);
       // NOTE : not ensuring MP3s or OGG versions of WAV file.
@@ -838,13 +838,13 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
         logger.debug("getExercise : returning " + byID);
       }
 
-      now = System.currentTimeMillis();
-      if (now - then2 > WARN_DUR) {
-        if (WARN_MISSING_FILE) {
-          logger.debug("getExercise : (" + language + ") took " + (now - then2) + " millis " +
-              "to ensure there are mp3s for exercise " + exid + " for " + userID);
-        }
-      }
+//      now = System.currentTimeMillis();
+//      if (now - then2 > WARN_DUR) {
+//        if (WARN_MISSING_FILE) {
+//          logger.debug("getExercise : (" + language + ") took " + (now - then2) + " millis " +
+//              "to ensure there are mp3s for exercise " + exid + " for " + userID);
+//        }
+//      }
     }
     checkPerformance(exid, then);
 
@@ -870,6 +870,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
 
 
   /**
+   * @see #getExercise(String, int, boolean)
    * @param id
    * @param then
    */
