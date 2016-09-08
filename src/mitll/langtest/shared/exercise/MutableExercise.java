@@ -46,7 +46,7 @@ import java.util.Set;
  * @since 2/1/16.
  */
 public interface MutableExercise extends CommonShell, MutableShell {
-  void setBagOfPhones(Set<String> bagOfPhones);
+ // void setBagOfPhones(Set<String> bagOfPhones);
 
   void setFirstPron(List<String> phones);
 
@@ -71,4 +71,7 @@ public interface MutableExercise extends CommonShell, MutableShell {
   void addContextExercise(CommonExercise contextExercise);
 
   void setOldID(String id);
+
+  void setCreator(int id);
+
 }

@@ -176,7 +176,7 @@ public class AudioFileHelper implements AlignDecode {
    */
   private <T extends CommonShell & MutableExercise> void countPhones(T exercise) {
     ASR.PhoneInfo bagOfPhones = asrScoring.getBagOfPhones(exercise.getForeignLanguage());
-    exercise.setBagOfPhones(bagOfPhones.getPhoneSet());
+   // exercise.setBagOfPhones(bagOfPhones.getPhoneSet());
     exercise.setFirstPron(bagOfPhones.getFirstPron());
 
     for (String phone : bagOfPhones.getFirstPron()) {

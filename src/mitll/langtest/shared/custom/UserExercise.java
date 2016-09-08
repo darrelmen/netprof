@@ -33,6 +33,7 @@
 package mitll.langtest.shared.custom;
 
 import mitll.langtest.client.custom.content.FlexListLayout;
+import mitll.langtest.client.custom.dialog.EditItem;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.server.database.userexercise.UserExerciseDAO;
 import mitll.langtest.shared.exercise.*;
@@ -48,6 +49,7 @@ import java.util.*;
  * @since 9/27/13
  * Time: 8:37 PM
  * To change this template use File | Settings | File Templates.
+ * @deprecated use Exercise instead!
  */
 public class UserExercise extends AudioExercise implements CombinedMutableUserExercise, CommonAnnotatable {
   public static final String CUSTOM_PREFIX = "Custom_";
@@ -68,6 +70,13 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
   }  // just for serialization
 
 
+  /**
+   * @see EditItem#getNewItem
+   * @param exid
+   * @param creator
+   * @param english
+   * @param projectid
+   */
   public UserExercise(int exid, int creator, String english, int projectid) {
     this(exid, ""+exid, creator, english, "", "", projectid);
   }
@@ -85,8 +94,13 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
    * @see mitll.langtest.client.custom.dialog.EditItem#createNewItem
    * @see mitll.langtest.client.custom.dialog.EditItem#getNewItem
    */
-  public UserExercise(int uniqueID, String exerciseID, int creator, String english, String foreignLanguage,
-                      String transliteration, int projectid) {
+  public UserExercise(int uniqueID,
+                      String exerciseID,
+                      int creator,
+                      String english,
+                      String foreignLanguage,
+                      String transliteration,
+                      int projectid) {
     super(exerciseID, uniqueID, projectid);
     this.creator = creator;
     this.english = english;
@@ -107,10 +121,15 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
    * @param projectid
    * @see UserExerciseDAO#getUserExercise
    */
-  public UserExercise(int uniqueID, String exerciseID, int creator, String english, String foreignLanguage,
+  public UserExercise(int uniqueID,
+                      String exerciseID,
+                      int creator,
+                      String english,
+                      String foreignLanguage,
                       String transliteration,
                       boolean isOverride,
-                      Map<String, String> unitToValue, long modifiedTimestamp,
+                      Map<String, String> unitToValue,
+                      long modifiedTimestamp,
                       int projectid) {
     this(uniqueID, exerciseID, creator, english, foreignLanguage, transliteration, projectid);
     setUnitToValue(unitToValue);
@@ -235,10 +254,10 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
     return this;
   }
 
-  @Override
-  public CombinedMutableUserExercise getCombinedMutableUserExercise() {
-    return this;
-  }
+//  @Override
+//  public CombinedMutableUserExercise getCombinedMutableUserExercise() {
+//    return this;
+//  }
 
   @Override
   public CommonAnnotatable getCommonAnnotatable() {
@@ -272,9 +291,9 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
     return firstPron;
   }
 
-  @Override
-  public void setBagOfPhones(Set<String> bagOfPhones) {
-  }
+//  @Override
+//  public void setBagOfPhones(Set<String> bagOfPhones) {
+//  }
 
   @Override
   public void setFirstPron(List<String> phones) {
