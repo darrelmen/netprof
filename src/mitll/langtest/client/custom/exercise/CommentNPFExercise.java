@@ -270,7 +270,7 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
     Set<Long> preferredUsers = controller.getProps().getPreferredVoices();
     for (AudioAttribute audioAttribute : e.getAudioAttributes()) {
       if (audioAttribute.isContextAudio()) {
-        logger.info("adding context audio " + audioAttribute);
+        logger.info("addGenderChoices : adding context audio " + audioAttribute);
         long user = audioAttribute.getUser().getId();
         if (user == -1) {
           defaultAudio = audioAttribute;
@@ -303,6 +303,8 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
   private void addPlayAndVoiceChoices(Panel hp) {
     AudioAttribute toUse = maleAudio != null ? maleAudio : femaleAudio != null ? femaleAudio : defaultAudio;
     String path = toUse == null ? null : toUse.getActualPath();
+    logger.info("addPlayAndVoiceChoices choosing to play " + toUse);
+    logger.info("addPlayAndVoiceChoices path             " + path);
     if (path != null) {
       contextPlay = new PlayAudioPanel(controller, path)
           .setPlayLabel("")
