@@ -36,9 +36,9 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.userlist.UserListDAO;
 import mitll.langtest.server.database.userlist.UserListExerciseJoinDAO;
-import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.Exercise;
 import org.apache.log4j.Logger;
 
 import java.sql.*;
@@ -60,6 +60,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   private static final String STATE = "state";
   private static final String CONTEXT = "context";
   private static final String CONTEXT_TRANSLATION = "contextTranslation";
+  public static final String CUSTOM_PREFIX = "Custom_";
 
   private static final boolean DEBUG = false;
 
@@ -140,7 +141,8 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
       statement.setString(i++, fixSingleQuote(userExercise.getEnglish()));
       statement.setString(i++, fixSingleQuote(userExercise.getForeignLanguage()));
       statement.setString(i++, fixSingleQuote(userExercise.getTransliteration()));
-      statement.setLong(i++, userExercise.getCombinedMutableUserExercise().getCreator());
+      //     statement.setLong(i++, userExercise.getCombinedMutableUserExercise().getCreator());
+      statement.setLong(i++, userExercise.getCreator());
 
       if (userExercise.hasContext()) {
         CommonExercise next = userExercise.getDirectlyRelated().iterator().next();
@@ -182,22 +184,26 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
       }
       //logger.debug("unique id = " + id);
 
-      userExercise.getCombinedMutableUserExercise().setID(id);
+      //   userExercise.getCombinedMutableUserExercise().setID(id);
+      ((Exercise) userExercise).setID(id);
 
       // TODO : consider making this an actual prepared statement?
       boolean predefined = userExercise.isPredefined();
       if (!predefined) {     // cheesy!
-        String customID = UserExercise.CUSTOM_PREFIX + id;
+        String customID = CUSTOM_PREFIX + id;
         String sql = "UPDATE " + USEREXERCISE +
             " " +
             "SET " +
             EXERCISEID +
             "='" + customID + "' " +
-            "WHERE uniqueid=" + userExercise.getCombinedMutableUserExercise().getID();
+            "WHERE uniqueid=" +
+            //  userExercise.getCombinedMutableUserExercise().getID();
+            userExercise.getID();
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.executeUpdate();
         preparedStatement.close();
-        userExercise.getCombinedMutableUserExercise().setOldID(customID);
+       // userExercise.getCombinedMutableUserExercise().setOldID(customID);
+        ((Exercise)userExercise).setOldID(customID);
 
         logger.debug("\tuserExercise= " + userExercise);
       }
@@ -287,7 +293,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
         }
         CommonExercise exercise = getPredefExercise(exid1);
         if (exercise != null) {
-          UserExercise e = new UserExercise(exercise, exercise.getCreator());
+          Exercise e = new Exercise(exercise);
           userExercises2.add(e);
           if (isEnglish) {
             e.setEnglish(exercise.getMeaning());
@@ -349,7 +355,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
    *
    * @param exid
    * @return
-   * @see mitll.langtest.server.database.DatabaseImpl#getUserExerciseWhere(String)
+   * @see mitll.langtest.server.database.DatabaseImpl#getUserExerciseWhere
    */
   @Override
   public CommonExercise getByExID(int exid) {
@@ -383,9 +389,9 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
     return Collections.emptyList();
   }
 
-  public Collection<UserExercise> getAllUserExercises() throws SQLException {
+  public Collection<Exercise> getAllUserExercises() throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
-    List<UserExercise> exercises = new ArrayList<>();
+    List<Exercise> exercises = new ArrayList<>();
     try {
       PreparedStatement statement = connection.prepareStatement(GET_ALL_SQL);
       //logger.debug("getUserExercises sql = " + sql);
@@ -441,7 +447,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
 
       List<String> typeOrder = exerciseDAO.getSectionHelper().getTypeOrder();
       while (rs.next()) {
-        UserExercise e = getUserExercise(rs, typeOrder);
+        Exercise e = getUserExercise(rs, typeOrder);
 
 //        logger.info("getUserExercises " + e);
 
@@ -460,14 +466,14 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
     return exercises;
   }
 
-  private UserExercise getUserExercise(ResultSet rs, List<String> typeOrder) throws SQLException {
+  private Exercise getUserExercise(ResultSet rs, List<String> typeOrder) throws SQLException {
     Map<String, String> unitToValue = getUnitToValue(rs, typeOrder);
 
     Timestamp timestamp = rs.getTimestamp(MODIFIED);
 
     Date date = (timestamp != null) ? new Date(timestamp.getTime()) : new Date(0);
 
-    return new UserExercise(
+    return new Exercise(
         rs.getInt("uniqueid"),
         rs.getString(EXERCISEID),
         rs.getInt("creatorid"),

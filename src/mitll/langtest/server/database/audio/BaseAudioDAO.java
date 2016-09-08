@@ -68,7 +68,7 @@ public abstract class BaseAudioDAO extends DAO {
   private static final String AUDIO_TYPE1 = "context=" + REGULAR;
   private static final String CONTEXT_REGULAR = AUDIO_TYPE1;
   private static final String TRANSLITERATION = "transliteration";
-  private static final boolean DEBUG_ATTACH = true;
+  private static final boolean DEBUG_ATTACH = false;
   // public static final String BEST_AUDIO = "bestAudio";
 
   protected final IUserDAO userDAO;
@@ -191,7 +191,7 @@ public abstract class BaseAudioDAO extends DAO {
         boolean didIt = attachAudioAndFixPath(firstExercise, installPath, attr, language);
         if (!didIt) {
           if (DEBUG_ATTACH && allSucceeded) {
-            String foreignLanguage = attr.isContextAudio() ? firstExercise.getContext() : firstExercise.getForeignLanguage();
+            String foreignLanguage = attr.isContextAudio() && firstExercise.hasContext() ? firstExercise.getContext() : firstExercise.getForeignLanguage();
             logger.info("not attaching audio\t" + attr.getUniqueID() + " to\t" + firstExercise.getID() +
                 "\tsince transcript has changed : old '" +
                 attr.getTranscript() +
