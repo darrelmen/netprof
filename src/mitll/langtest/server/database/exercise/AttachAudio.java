@@ -32,11 +32,13 @@
 
 package mitll.langtest.server.database.exercise;
 
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.MutableAudioExercise;
 import org.apache.log4j.Logger;
 
+import java.io.File;
 import java.util.*;
 
 /**
@@ -55,7 +57,7 @@ public class AttachAudio {
   //  private final int audioOffset;
 //private final String mediaDir;
   private final String mediaDir1;
-//  private final File installPath;
+  //  private final File installPath;
   private Map<Integer, List<AudioAttribute>> exToAudio;
   private String language;
 
@@ -135,6 +137,7 @@ public class AttachAudio {
   public <T extends CommonExercise> int attachAudio(T imported, Collection<Integer> transcriptChanged) {
     int id = imported.getID();
     int missing = 0;
+//    logger.info("Attach audio to " + imported);
     if (exToAudio.containsKey(id) /*|| exToAudio.containsKey(id + "/1") || exToAudio.containsKey(id + "/2")*/) {
       List<AudioAttribute> audioAttributes = exToAudio.get(id);
       //   if (audioAttributes.isEmpty()) logger.info("huh? audio attr empty for " + id);
@@ -143,13 +146,12 @@ public class AttachAudio {
     return missing;
   }
 
-
-  int spew = 0;
-  int totalMissingContext = 0;
+  //int spew = 0;
+  private int totalMissingContext = 0;
 
   /**
    * try to fix the audio path
-   *
+   * <p>
    * We get the actual path from what's set in the database.
    * Only the hydra server can see the actual file to see if it's there.
    * We communicate that via the actual path field in the database.
@@ -183,82 +185,52 @@ public class AttachAudio {
       }
 
       int m = 0;
-      if (debug) {
-        logger.info("attachAudio found " + audioAttributes.size() + " media '" + mediaDir1 + "' attr for " + exercise);
-      }
+//      if (debug) {
+//        logger.info("attachAudio found " + audioAttributes.size() + " media '" + mediaDir1 + "' attr for " + exercise);
+//      }
 
       for (AudioAttribute audio : audioAttributes) {
-  //      String audioRef = audio.getAudioRef();
-
-        // we're now placing the best audio for each language under a project language directory
-//        if (audioRef.contains("bestAudio")) {
-//          if (debug) logger.info("was " + audioRef);
-//          audioRef = audioRef.replace("bestAudio","bestAudio"+File.separator+exercise.getProjectID());
-//          if (debug) logger.info("now " + audioRef);
-//        }
-//
-//        String actualPath =
-//            mediaDir1 + File.separator +
-//                audioRef;
-
-/*        String actualPath = audioRef;
-        File test = new File(installPath, audioRef);
-        boolean exists = test.exists();
-        if (debug && !exists) {
-          logger.info("test " + test.getAbsolutePath() + " exists " + exists);
-        }
-
-        if (!exists) {
-          String candidate =
-              "bestAudio" + File.separator +
-                  language.toLowerCase() + File.separator +
-                  audioRef;
-          test = new File(installPath, candidate);
-          exists = test.exists();
-          if (debug) {
-            logger.info("test2 " + test.getAbsolutePath() + " exists " + exists);
-          }
-          actualPath = candidate;
-        }*/
-
+// so this is something like bestAudio/spanish/bestAudio/3742/regular_xxx.ogg
         String actualPath = audio.getActualPath();
-        //if (exists) {
-          if (!previouslyAttachedAudio.contains(actualPath)) {
-            if (audio.isContextAudio()) {
-              Collection<CommonExercise> directlyRelated = exercise.getDirectlyRelated();
-              if (directlyRelated.isEmpty()) {
-                if (m++ < 50) {
-                  logger.warn(language + " : no context exercise on " + exercise);
-                }
-                if (totalMissingContext++ % 100 == 0) {
-                  logger.warn(language + " (total = " + totalMissingContext + ") no context exercise on " + exercise);
-                }
-              } else {
-                // TODO : not sure why this is needed - wouldn't we do this on context exercises?
-                // TODO : why only if there's one context exercise???
-                if (directlyRelated.size() == 1) {
-                  audio.setAudioRef(actualPath);   // remember to prefix the path
-                  directlyRelated.iterator().next().getMutableAudio().addAudio(audio);
-                }
-                else if (!directlyRelated.isEmpty()){
-                  logger.info("got more than 1 directly related ? " + directlyRelated.size());
-                }
+        if (!actualPath.startsWith(ServerProperties.BEST_AUDIO)) {
+          actualPath = ServerProperties.BEST_AUDIO + File.separator +actualPath;
+        }
+        if (!previouslyAttachedAudio.contains(actualPath)) {
+          if (audio.isContextAudio()) {
+            //logger.info("attachAudio for " + exercise.getID() + " found " + audio);
+            Collection<CommonExercise> directlyRelated = exercise.getDirectlyRelated();
+            if (directlyRelated.isEmpty()) {
+              if (m++ < 50) {
+                logger.warn(language + " : no context exercise on " + exercise);
               }
-            } else if (audio.hasMatchingTranscript(exercise.getForeignLanguage())) {
-              audio.setAudioRef(actualPath);   // remember to prefix the path
-              mutableAudio.addAudio(audio);
+              if (totalMissingContext++ % 100 == 0) {
+                logger.warn(language + " (total = " + totalMissingContext + ") no context exercise on " + exercise);
+              }
             } else {
-              transcriptChangedIDs.add(audio.getExid());
+              // TODO : not sure why this is needed - wouldn't we do this on context exercises?
+              // TODO : why only if there's one context exercise???
+              if (directlyRelated.size() == 1) {
+                audio.setAudioRef(actualPath);   // remember to prefix the path
+                directlyRelated.iterator().next().getMutableAudio().addAudio(audio);
+              } else if (!directlyRelated.isEmpty()) {
+                logger.info("got more than 1 directly related ? " + directlyRelated.size());
+              }
+            }
+          } else if (audio.hasMatchingTranscript(exercise.getForeignLanguage())) {
+            audio.setAudioRef(actualPath);   // remember to prefix the path
+            mutableAudio.addAudio(audio);
+          } else {
+            transcriptChangedIDs.add(audio.getExid());
 /*							if (m++ < 10) {
                 logger.warn("for " + exercise + " audio transcript " + audio.getTranscript() +
 										" doesn't match : '" + removePunct(audio.getTranscript()) + "' vs '" + removePunct(exercise.getForeignLanguage()) + "'");
 							}*/
-            }
-            previouslyAttachedAudio.add(actualPath);
-//            logger.debug("exercise " +exercise.getOldID()+ " now " + exercise.getAudioAttributes());
-          } else {
-            logger.debug("skipping " + actualPath);
           }
+          previouslyAttachedAudio.add(actualPath);
+//            logger.debug("exercise " +exercise.getOldID()+ " now " + exercise.getAudioAttributes());
+        } else {
+          logger.debug("skipping " + actualPath);
+        }
 /*        } else {
           missing++;
           c++;
@@ -277,8 +249,8 @@ public class AttachAudio {
   /**
    * Assumes audio index field looks like : 11109 8723 8722 8721
    *
-   * @paramx refAudioIndex
    * @return
+   * @paramx refAudioIndex
    */
 /*  private String findBest(String refAudioIndex) {
     String[] split = refAudioIndex.split("\\s+");
@@ -288,7 +260,6 @@ public class AttachAudio {
   private String ensureForwardSlashes(String wavPath) {
     return wavPath.replaceAll("\\\\", "/");
   }*/
-
   public void setExToAudio(Map<Integer, List<AudioAttribute>> exToAudio) {
     this.exToAudio = exToAudio;
   }

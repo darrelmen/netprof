@@ -77,7 +77,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -534,7 +533,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
    * @see #addUserRecorder
    */
   private ScoringAudioPanel getAnswerWidget(LangTestDatabaseAsync service, final ExerciseController controller, float screenPortion) {
-    ScoringAudioPanel widgets = new ASRRecordAudioPanel(service, controller, getLocalExercise(), instance);
+    ScoringAudioPanel widgets = new ASRRecordAudioPanel(controller, getLocalExercise(), instance);
     widgets.addScoreListener(scorePanel);
     answerAudio = widgets;
     answerAudio.setScreenPortion(screenPortion);
@@ -563,13 +562,12 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     private Panel downloadContainer;
 
     /**
-     * @param service
      * @param controller
      * @param exercise
      * @param instance
      * @see GoodwaveExercisePanel#getAnswerWidget
      */
-    ASRRecordAudioPanel(LangTestDatabaseAsync service, ExerciseController controller, T exercise, String instance) {
+    ASRRecordAudioPanel(ExerciseController controller, T exercise, String instance) {
       super(exercise.getForeignLanguage(), controller, scorePanel, REFERENCE, exercise, instance);
       this.index = 1;
       getElement().setId("ASRRecordAudioPanel");
@@ -657,8 +655,10 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
       downloadAnchor.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          controller.logEvent(downloadAnchor, "DownloadUserAudio_Anchor",
-              exercise, "downloading audio file " + audioPath);
+          controller.logEvent(downloadAnchor,
+              "DownloadUserAudio_Anchor",
+              exercise,
+              "downloading audio file " + audioPath);
         }
       });
       return downloadAnchor;

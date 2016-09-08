@@ -134,7 +134,6 @@ public class PathWriter {
                          String artist,
                          ServerProperties serverProperties) {
     if (wavFile != null) {
-      // String parent = pathHelper.getInstallPath();
        String parent = serverProperties.getMediaDir();
 
       AudioConversion audioConversion = new AudioConversion(serverProperties);
