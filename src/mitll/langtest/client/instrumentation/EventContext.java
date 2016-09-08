@@ -42,4 +42,8 @@ public class EventContext {
     this.context = context;
     this.userid = userid;
   }
+
+  public String toString() {
+    return "exid " + exid + " in " + context + " by " + userid;
+  }
 }

@@ -98,6 +98,7 @@
   <!-- These 3 scripts are necessary so that Flash Recording can work -->
 
 
-
+  <!-- speed up compilation during development -->
+  <collapse-all-properties />
 
 </module>

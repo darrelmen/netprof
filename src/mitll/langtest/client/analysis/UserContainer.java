@@ -55,6 +55,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.services.ExerciseServiceAsync;
+import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.analysis.UserInfo;
 
@@ -534,7 +535,7 @@ class UserContainer extends SimplePagingContainer<UserInfo> {
   }
 
   private void gotClickOnItem(final UserInfo user) {
-    User user1 = user.getUser();
+    MiniUser user1 = user.getUser();
     int id = (int) user1.getId();
     overallBottom.clear();
     AnalysisTab widgets = new AnalysisTab(exerciseServiceAsync, controller, id, learnTab, user1.getUserID(), MIN_RECORDINGS, overallBottom);

@@ -486,7 +486,8 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
           audioRef, // answer
           timestamp.getTime(),
           dur, realType,
-          user, transcript, audioRef);
+          user, transcript,
+          audioRef);
       audioAttr.setOldexid(exid);
 
       if (user == null) {
