@@ -244,7 +244,11 @@ public abstract class BaseAudioDAO extends DAO {
   }
 
   /**
-   * Don't do this checking of file path stuff -
+   * So this happens on the znetProf side where we don't have access to the actual file
+   * We have confidence the file is there b/c we check it's existence every 24 hours, or on every startup of the
+   * pnetProf instance.
+   *
+   * TODO : not sure what to do if we have multiple context sentences...
    *
    * @param firstExercise
    * @param installPath
@@ -259,41 +263,20 @@ public abstract class BaseAudioDAO extends DAO {
                                         String language) {
     Collection<CommonExercise> directlyRelated = firstExercise.getDirectlyRelated();
     String against = attr.isContextAudio() && !directlyRelated.isEmpty() ?
-        directlyRelated.iterator().next().getForeignLanguage() : firstExercise.getForeignLanguage();
+        directlyRelated.iterator().next().getForeignLanguage() :
+        firstExercise.getForeignLanguage();
     if (attr.hasMatchingTranscript(against)) {
       firstExercise.getMutableAudio().addAudio(attr);
-
       if (attr.getAudioRef() == null)
         logger.error("attachAudioAndFixPath huh? no audio ref for " + attr + " under " + firstExercise);
-      else {//if (!audioConversion.exists(attr.getAudioRef(), installPath)) { // seems like this will always fail???
+      else {
         // so a path to the file on disk will now look like /opt/netProf/bestAudio/spanish/bestAudio/123/regular_XXX.wav
         // in the database we store just bestAudio/123/regular_XXX.wav
-        //   String langPrefix = BEST_AUDIO + File.separator + language.toLowerCase();
         String langPrefix = language.toLowerCase();
         String prefix = installPath + File.separator + langPrefix;
-       /* File file = new File(prefix, attr.getAudioRef());
-        if (!file.exists()) {
-          if (DEBUG_ATTACH) logger.debug("\tattachAudioAndFixPath couldn't find '" + file.getAbsolutePath() + "'");
-
-        }*/
-        //if (audioConversion.exists(attr.getAudioRef(), prefix)) {
-        //  if (DEBUG_ATTACH) logger.debug("\tattachAudioAndFixPath was '" + attr.getAudioRef() + "'");
         String relPrefix = prefix.substring(netProfDurLength);
         attr.setAudioRef(relPrefix + File.separator + attr.getAudioRef());
-        if (DEBUG_ATTACH) logger.debug("\tattachAudioAndFixPath now '" + attr.getAudioRef() + "'");
-        // } else {
-        //   if (DEBUG_ATTACH) logger.debug("\tattachAudio couldn't find audio file at '" + attr.getAudioRef() + "' under " + langPrefix);
-        // }
-
-/*
-        if (audioConversion.exists(attr.getAudioRef(), relativeConfigDir)) {
-          logger.debug("\tattachAudioAndFixPath was '" + attr.getAudioRef() + "'");
-          attr.setAudioRef(relativeConfigDir + File.separator + attr.getAudioRef());
-          logger.debug("\tattachAudioAndFixPath now '" + attr.getAudioRef() + "'");
-        } else {
-          logger.debug("\tattachAudio couldn't find audio file at '" + attr.getAudioRef() + "'");
-        }
-*/
+       // if (DEBUG_ATTACH) logger.debug("\tattachAudioAndFixPath now '" + attr.getAudioRef() + "'");
       }
       return true;
     } else {
@@ -303,7 +286,6 @@ public abstract class BaseAudioDAO extends DAO {
           "' vs exercise '" +foreignLanguage+
           "'");
 */
-
       return false;
     }
   }
@@ -324,10 +306,8 @@ public abstract class BaseAudioDAO extends DAO {
     // find set of users of same gender
     Set<Integer> validAudioAtReg = getAudioExercisesForGender(userIDs, REGULAR);
     //logger.debug(" regular speed for " + userMap.keySet() + " " + validAudioAtReg.size());
-
     Set<Integer> validAudioAtSlow = getAudioExercisesForGender(userIDs, SLOW);
 //    logger.debug(" slow speed for " + userMap.keySet() + " " + validAudioAtSlow.size());
-
     boolean b = validAudioAtReg.retainAll(validAudioAtSlow);
     //  logger.debug("retain all " + b + " " + validAudioAtReg.size());
     return validAudioAtReg;
@@ -476,6 +456,7 @@ public abstract class BaseAudioDAO extends DAO {
    * @param transcript
    * @return
    * @see AudioDAO#addOrUpdate
+   * @deprecated
    */
   protected AudioAttribute getAudioAttribute(int i,
                                              int userid, String audioRef, int exerciseID, long timestamp,
@@ -487,7 +468,8 @@ public abstract class BaseAudioDAO extends DAO {
         audioRef, // answer
         timestamp,
         durationInMillis, audioType,
-        miniUser, transcript, audioRef);
+        miniUser, transcript,
+        audioRef);
   }
 
   public Set<AudioAttribute> getAndMarkDefects(AudioAttributeExercise userExercise,
