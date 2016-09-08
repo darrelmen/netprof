@@ -67,6 +67,7 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.Exercise;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.*;
 import org.apache.log4j.Logger;
@@ -817,10 +818,10 @@ public class CopyToPostgres<T extends CommonShell> {
       int c = 0;
       UserExerciseDAO ueDAO = new UserExerciseDAO(db);
       ueDAO.setExerciseDAO(db.getExerciseDAO(projectid));
-      Collection<UserExercise> allUserExercises = ueDAO.getAllUserExercises();
+      Collection<Exercise> allUserExercises = ueDAO.getAllUserExercises();
       logger.info("copying  " + allUserExercises.size() + " user exercises");
 
-      for (UserExercise userExercise : allUserExercises) {
+      for (Exercise userExercise : allUserExercises) {
         Integer userID = oldToNewUser.get(userExercise.getCreator());
         if (userID == null) {
           if (c++ < 50) logger.error("user exercise : no user " + userExercise.getCreator());
