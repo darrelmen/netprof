@@ -117,7 +117,6 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
     setUnitToValue(unitToValue);
     this.isOverride = isOverride;
     this.modifiedTimestamp = modifiedTimestamp;
-  //  addContext(context, contextTranslation);
   }
 
   /**
