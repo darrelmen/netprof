@@ -53,7 +53,6 @@ import static mitll.langtest.server.database.user.BaseUserDAO.UNDEFINED_USER;
  */
 public class Exercise extends AudioExercise implements CommonExercise,
     MutableExercise, MutableAudioExercise, MutableAnnotationExercise, CommonAnnotatable {
-//  private transient String refAudioIndex;
   private transient Collection<String> refSentences = new ArrayList<String>();
   private List<CorrectAndScore> scores;
   private float avgScore;
@@ -154,15 +153,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
   public void setRefSentences(Collection<String> sentenceRefs) {
     this.refSentences = sentenceRefs;
   }
-
-  /**
-   * @return
-   * @deprecated we should convert these into audio table entries
-   */
-/*  @Override
-  public String getRefAudioIndex() {
-    return refAudioIndex;
-  }*/
 
   @Override
   public boolean isPredefined() {
