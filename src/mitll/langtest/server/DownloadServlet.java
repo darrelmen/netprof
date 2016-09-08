@@ -36,7 +36,6 @@ import mitll.langtest.server.database.AudioExport;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.excel.EventDAOToExcel;
 import mitll.langtest.server.database.excel.ResultDAOToExcel;
-import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.User;
 import org.apache.commons.io.IOUtils;
@@ -71,10 +70,8 @@ public class DownloadServlet extends DatabaseServlet {
   private static final String AUDIO = "audio";
   private static final String LIST = "list";
   private static final String FILE = "file";
-//  private static final String CONTEXT = "context";
   private static final String COMPRESSED_SUFFIX = "mp3";
   private static final String UTF_8 = "UTF-8";
-  //UserSecurityManager securityManager;
   private static final String USERS = "users";
   private static final String RESULTS = "results";
   private static final String EVENTS = "events";
@@ -110,9 +107,8 @@ public class DownloadServlet extends DatabaseServlet {
     if (db != null) {
       try {
         int projid = getProject(request);
-        Project project1 = getDatabase().getProject(projid);
-        logger.info("doGet : current session found projid " + project1);
-        String language = project1.getLanguage();
+        //       logger.info("doGet : current session found projid " + project1);
+        String language = getDatabase().getProject(projid).getLanguage();
 
         String requestURI = request.getRequestURI();
         if (requestURI.toLowerCase().contains(AUDIO)) {
@@ -282,7 +278,7 @@ public class DownloadServlet extends DatabaseServlet {
 
   private void setResponse(HttpServletResponse response, String underscores) {
     response.setContentType("audio/mpeg");
-   // response.setCharacterEncoding(UTF_8);
+    // response.setCharacterEncoding(UTF_8);
     response.setHeader("Content-Disposition", "attachment; filename*=UTF-8''" + underscores);
 //    response.setHeader("Content-Disposition", "filename='" + underscores +"'");
   }
@@ -373,6 +369,7 @@ public class DownloadServlet extends DatabaseServlet {
   /**
    * @param response
    * @see #doGet
+   * @deprecated not sure how this can be called
    */
   private void writeAllAudio(HttpServletResponse response, int projectid) {
     try {
@@ -407,12 +404,11 @@ public class DownloadServlet extends DatabaseServlet {
       name += ".zip";
       setHeader(response, name);
 
-//      db.writeZip(response.getOutputStream(), id == null ? -1 : id, new PathHelper(getServletContext()), projectid);
       options.setUserList(true);
-      ServerProperties serverProps = db.getServerProps();
-      db.writeUserListAudio(response.getOutputStream(), id == null ? -1 : id,
-          new PathHelper(getServletContext(), serverProps),
-          projectid, options);
+      db.writeUserListAudio(response.getOutputStream(),
+          id == null ? -1 : id,
+          projectid,
+          options);
     } catch (Exception e) {
       logger.error("couldn't write zip?", e);
     }
