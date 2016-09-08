@@ -40,6 +40,7 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.Exercise;
 import org.apache.log4j.Logger;
 
 import java.util.*;
@@ -222,9 +223,16 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
             fl = temp;
             //logger.info("flip english '" +english+ "' to fl '" +fl+ "'");
           }
-          UserExercise newItem =
-              new UserExercise(-1,
-                  UserExercise.CUSTOM_PREFIX + "_" + (n++), (int) creator, english, fl, "", getProjectID());
+//          UserExercise newItem =
+//              new UserExercise(-1,
+//                  UserExercise.CUSTOM_PREFIX + "_" + (n++), (int) creator, english, fl, "", getProjectID());
+
+          Exercise newItem =
+              new Exercise(-1,
+                  (int) creator,
+                  english, getProjectID(),false);
+          newItem.setForeignLanguage(fl);
+
           newItems.add(newItem);
           logger.info("reallyCreateNewItems new " + newItem);
         }
