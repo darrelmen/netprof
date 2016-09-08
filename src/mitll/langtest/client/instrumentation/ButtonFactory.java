@@ -44,6 +44,8 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.exercise.ExerciseController;
 
+import java.util.logging.Logger;
+
 /**
  * Does event logging for widgets -- calls service to log event.
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -52,7 +54,7 @@ import mitll.langtest.client.exercise.ExerciseController;
  * @since 3/24/2014.
  */
 public class ButtonFactory implements EventLogger {
-  //private Logger logger = Logger.getLogger("ButtonFactory");
+  private Logger logger = Logger.getLogger("ButtonFactory");
   private final LangTestDatabaseAsync service;
   private final PropertyHandler props;
   private final ExerciseController controller;
@@ -75,7 +77,7 @@ public class ButtonFactory implements EventLogger {
   }
 
   private void registerButton(final Button button, final String exid, final int userid) {
-    registerButton(button, new EventContext(exid,button.getText(),userid));
+    registerButton(button, new EventContext(exid, button.getText(), userid));
   }
 
   @Override
@@ -117,13 +119,13 @@ public class ButtonFactory implements EventLogger {
    *
    * @param widgetID
    * @param widgetType
-   * @param exid
+   * @paramx exid
    * @param context
-   * @param userid
+   * @paramx userid
    */
   @Override
   public void logEvent(final String widgetID, final String widgetType, EventContext context) {
-    // System.out.println("logEvent event for " + widgetID + " " + widgetType + " exid " + exid + " context " + context + " user " + userid);
+    logger.info("logEvent event for " + widgetID + " " + widgetType + " context " + context);
     final ButtonFactory outer = this;
 
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
@@ -133,25 +135,28 @@ public class ButtonFactory implements EventLogger {
               props != null &&
               controller != null &&
               service != null) {
-            String turkID = props.getTurkID();
+            //          String turkID = props.getTurkID();
             String browserInfo = controller.getBrowserInfo();
 
-            if (turkID != null && browserInfo != null) {
-              service.logEvent(widgetID, widgetType, context.exid, context.context, context.userid, turkID, browserInfo,
+            if (//turkID != null &&
+                browserInfo != null) {
+              logger.info("\tlogEvent event for " + widgetID + " " + widgetType + " context " + context + " browser " +browserInfo);
+
+              service.logEvent(widgetID, widgetType, context.exid, context.context, context.userid, "", browserInfo,
                   new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
                       if (caught != null &&
                           caught.getMessage() != null &&
                           !caught.getMessage().trim().equals("0")) {
-                        // System.err.println("FAILED to send event for " + widgetID + " message '" + caught.getMessage() +"'");
+                        logger.warning("logEvent FAILED to send event for " + widgetID + " message '" + caught.getMessage() +"'");
                         caught.printStackTrace();
                       }
                     }
 
                     @Override
                     public void onSuccess(Void result) {
-                      //System.out.println("sent event for " + widgetID);
+                      logger.info("logEvent sent event for " + widgetID);
                     }
                   });
             }

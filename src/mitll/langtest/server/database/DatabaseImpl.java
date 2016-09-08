@@ -386,7 +386,6 @@ public class DatabaseImpl implements Database {
 
     createTables();
 
-
     userDAO.findOrMakeDefectDetector();
 
     try {
@@ -523,8 +522,7 @@ public class DatabaseImpl implements Database {
     return monitoringSupport;
   }
 
-  String mediaDir;
-
+  //private String mediaDir;
   /**
    * @param installPath
    * @param lessonPlanFile
@@ -534,7 +532,7 @@ public class DatabaseImpl implements Database {
   public void setInstallPath(String installPath, String lessonPlanFile, String mediaDir) {
     logger.debug("got install path " + installPath + " media " + mediaDir);
     this.installPath = installPath;
-    this.mediaDir = mediaDir;
+    //this.mediaDir = mediaDir;
     makeDAO(lessonPlanFile, mediaDir, installPath);
   }
 
@@ -1310,8 +1308,7 @@ public class DatabaseImpl implements Database {
    * @see #initializeDAOs(PathHelper)
    */
   public void createTables() {
-    logger.info("createTables create slick tables - has " + dbConnection.getTables());
-    List<String> created = new ArrayList<>();
+  //  logger.info("createTables create slick tables - has " + dbConnection.getTables());
 
     List<IDAO> idaos = Arrays.asList(
         getUserDAO(),
@@ -1331,6 +1328,8 @@ public class DatabaseImpl implements Database {
         getUserProjectDAO(),
         userSessionDAO
     );
+
+    List<String> created = new ArrayList<>();
     for (IDAO dao : idaos) {
       createIfNotThere(dao, created);
     }
@@ -1672,7 +1671,10 @@ public class DatabaseImpl implements Database {
         getExercises(projectid) :
         getSectionHelper(projectid).getExercisesForSelectionState(typeToSection);
     String language = getLanguage(projectid);
-    new AudioExport(getServerProps()).writeZip(out, typeToSection, getSectionHelper(projectid), exercisesForSelectionState,
+    new AudioExport(getServerProps()).writeZip(out,
+        typeToSection,
+        getSectionHelper(projectid),
+        exercisesForSelectionState,
         language,
         getAudioDAO(), installPath, configDir, false,options);
   }
