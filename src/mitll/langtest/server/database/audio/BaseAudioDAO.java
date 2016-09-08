@@ -175,8 +175,7 @@ public abstract class BaseAudioDAO extends DAO {
   public boolean attachAudio(CommonExercise firstExercise,
                              Collection<AudioAttribute> audioAttributes,
                              String language) {
-    AudioConversion audioConversion = new AudioConversion(database.getServerProps());
-
+   // AudioConversion audioConversion = new AudioConversion(database.getServerProps());
     String installPath = database.getServerProps().getMediaDir();
 
     List<AudioAttribute> defaultAudio = new ArrayList<>();
