@@ -33,8 +33,8 @@
 package mitll.langtest.server.database.result;
 
 import mitll.langtest.server.audio.DecodeAlignOutput;
-import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.UserAndTime;
+import mitll.langtest.shared.answer.AudioType;
 
 import java.beans.Transient;
 import java.util.Date;

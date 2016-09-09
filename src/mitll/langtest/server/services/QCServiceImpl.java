@@ -35,7 +35,6 @@ package mitll.langtest.server.services;
 import mitll.langtest.client.services.QCService;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.database.custom.IUserListManager;
-import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;

@@ -111,7 +111,7 @@ public class ServerProperties {
   private static final String SKIP_SEMICOLONS = "skipSemicolons";
   private static final String AUDIO_OFFSET = "audioOffset";
   private static final String MAX_NUM_EXERCISES = "maxNumExercises";
-//  private static final String NO_MODEL = "noModel";
+  //  private static final String NO_MODEL = "noModel";
   private static final String TIER_INDEX = "tierIndex";
   private static final String QUIET_AUDIO_OK = "quietAudioOK";
   private static final String CONFIG_FILE = "configFile";
@@ -129,6 +129,7 @@ public class ServerProperties {
   private static final String MIN_DYNAMIC_RANGE = "minDynamicRange";
   private static final String RUN_REF_DECODE_WITH_HYDEC = "runRefDecodeWithHydec";
   private static final String CHECK_AUDIO_ON_STARTUP = "checkAudioOnStartup";
+  private static final String CHECK_AUDIO_FILE_EXISTS = "checkAudioFileExists";
 
   private static final String DEFAULT_NETPROF_AUDIO_DIR = "/opt/netProf/";
   public static final String BEST_AUDIO = "bestAudio";
@@ -319,15 +320,17 @@ public class ServerProperties {
 
   /**
    * @return
-   * @see mitll.langtest.server.decoder.RefResultDecoder#doRefDecode(Collection, String)
+   * @see mitll.langtest.server.decoder.RefResultDecoder#doRefDecode(Collection)
    */
   public boolean shouldTrimAudio() {
     return getDefaultTrue(DO_TRIM);
   }
 
+/*
   public int getAudioOffset() {
     return getIntProperty(AUDIO_OFFSET);
   }
+*/
 
   private int getIntProperty(String audioOffset) {
     try {
@@ -644,6 +647,10 @@ public class ServerProperties {
 
   public boolean doAudioCheckOnStartup() {
     return getDefaultTrue(CHECK_AUDIO_ON_STARTUP);
+  }
+
+  public boolean doAudioFileExistsCheck() {
+    return getDefaultTrue(CHECK_AUDIO_FILE_EXISTS);
   }
 
   public void setRTL(boolean isRTL) {

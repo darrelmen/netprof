@@ -44,9 +44,9 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
+import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 
@@ -325,7 +325,6 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
 
   protected void ignoreStaleRequest(ExerciseListWrapper<T> result) { popRequest(); }
 
-
   /**
    * Given a selectionState state, make sure the list boxes are consistent with it.
    *
@@ -333,7 +332,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */
   protected void restoreListBoxState(SelectionState selectionState) {
-    logger.info("restoreListBoxState restore " + selectionState);
+ //   logger.info("restoreListBoxState restore " + selectionState);
     ProjectStartupInfo startupInfo = controller.getProjectStartupInfo();
     Collection<String> typeOrder = startupInfo.getTypeOrder();
     sectionWidgetContainer.restoreListBoxState(selectionState, typeOrder);

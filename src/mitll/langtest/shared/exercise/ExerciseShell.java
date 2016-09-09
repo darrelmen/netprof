@@ -46,11 +46,11 @@ import java.util.Collections;
  * <p>
  */
 class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
-  protected String english;
-  protected String meaning;
-  protected String foreignLanguage;
-  protected String transliteration;
-  int dominoID;
+  protected String english = "";
+  protected String meaning = "";
+  protected String foreignLanguage = "";
+  protected String transliteration = "";
+  protected int dominoID = -1;
 
   public ExerciseShell() {
   }
@@ -159,8 +159,7 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
   public String toString() {
     return "Exercise " +
         "id = " + getOldID() + "/" + getID() +
-        " : " + getEnglish() +
-        //" alt "+ getAltFL()+
+        " : '" + getEnglish() + "'"+
         " states " + getState() + "/" + getSecondState();
   }
 }

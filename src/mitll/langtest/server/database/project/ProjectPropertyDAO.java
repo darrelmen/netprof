@@ -36,9 +36,7 @@ import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.IDAO;
 import mitll.npdata.dao.DBConnection;
-import mitll.npdata.dao.SlickProject;
 import mitll.npdata.dao.SlickProjectProperty;
-import mitll.npdata.dao.project.ProjectDAOWrapper;
 import mitll.npdata.dao.project.ProjectPropertyDAOWrapper;
 import org.apache.log4j.Logger;
 

@@ -32,28 +32,15 @@
 
 package mitll.langtest.server.services;
 
-import audio.image.ImageType;
-import audio.imagewriter.SimpleImageWriter;
-import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.ScoringAudioPanel;
-import mitll.langtest.client.services.AudioService;
 import mitll.langtest.client.services.ScoringService;
-import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
-import mitll.langtest.server.audio.AudioFileHelper;
-import mitll.langtest.server.audio.PathWriter;
-import mitll.langtest.server.database.AnswerInfo;
-import mitll.langtest.server.database.custom.IUserListManager;
-import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.answer.AudioType;
-import mitll.langtest.shared.exercise.*;
-import mitll.langtest.shared.image.ImageResponse;
-import mitll.langtest.shared.scoring.AudioContext;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.scoring.PretestScore;
-import mitll.langtest.shared.user.User;
 import org.apache.log4j.Logger;
 
 import java.io.File;

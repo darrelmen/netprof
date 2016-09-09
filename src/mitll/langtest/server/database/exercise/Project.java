@@ -47,7 +47,6 @@ import mitll.langtest.shared.exercise.CommonShell;
 import mitll.npdata.dao.SlickProject;
 import org.apache.log4j.Logger;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -182,7 +181,7 @@ public class Project {
     String language = project == null ? "unk" : project.language();
     fullTrie = new ExerciseTrie<>(getExercisesForUser(), language, getSmallVocabDecoder());
     this.refResultDecoder = new RefResultDecoder(db, serverProps, pathHelper, getAudioFileHelper(), hasModel());
-    refResultDecoder.doRefDecode(getExercisesForUser(), relativeConfigDir);
+    refResultDecoder.doRefDecode(getExercisesForUser());
   }
 
   public SlickAnalysis getAnalysis() {
