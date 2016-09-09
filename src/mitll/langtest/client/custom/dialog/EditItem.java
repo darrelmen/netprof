@@ -241,7 +241,6 @@ public class EditItem {
    * @return
    */
   private CommonExercise getNewItem() {
-    //  return new UserExercise(NEW_EXERCISE_ID, userManager.getUser(), NEW_ITEM, controller.getProjectStartupInfo().getProjectid());
     return new Exercise(
         NEW_EXERCISE_ID,
         userManager.getUser(),
@@ -334,15 +333,8 @@ public class EditItem {
    * @see #populatePanel(CommonExercise, Panel, UserList, UserList, HasText, ListInterface)
    */
   private Exercise createNewItem(int userid, String listName) {
-  //  long now = System.currentTimeMillis();
-//    return new UserExercise(-1,
-//        UserExercise.CUSTOM_PREFIX + "_" + listName + "_" + userid + "_" + now,
-//        userid, "", "", "",
-//        controller.getProjectStartupInfo().getProjectid());
-
     int projectid = controller.getProjectStartupInfo().getProjectid();
-
-    logger.info("project id is " + projectid);
+//    logger.info("project id is " + projectid);
     return new Exercise(-1,
         userid,
         "",
