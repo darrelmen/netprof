@@ -38,7 +38,6 @@ import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.exercise.DBExerciseDAO;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.user.BaseUserDAO;
-import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -64,7 +63,7 @@ public class SlickUserExerciseDAO
   /**
    * TODO : need to do something to allow this to scale well - maybe ajax style nested types, etc.
    */
-  public static final boolean ADD_PHONE_LENGTH = false;
+  private static final boolean ADD_PHONE_LENGTH = false;
 
   private final long lastModified = System.currentTimeMillis();
   private final ExerciseDAOWrapper dao;
@@ -127,14 +126,14 @@ public class SlickUserExerciseDAO
   }
 
   /**
-   * TODO : we won't do override items soon, since they will just be domino edits...
+   * TODO : we won't do override items soon, since they will just be domino edits...?
    *
    * @param shared
    * @param isOverride
    * @return
    */
   public SlickExercise toSlick(CommonExercise shared, @Deprecated boolean isOverride) {
-    return toSlick(shared, isOverride, -1, false, BaseUserDAO.DEFAULT_USER_ID, false);
+    return toSlick(shared, isOverride, shared.getProjectID(), false, BaseUserDAO.DEFAULT_USER_ID, false);
   }
 
   /**
@@ -385,7 +384,7 @@ public class SlickUserExerciseDAO
    */
   @Override
   public void add(CommonExercise userExercise, boolean isOverride) {
-    //  logger.info("adding " + userExercise);
+    logger.info("adding " + userExercise);
     insert(toSlick(userExercise, isOverride));
   }
 
@@ -400,9 +399,6 @@ public class SlickUserExerciseDAO
     List<CommonShell> userExercises2 = new ArrayList<>();
     userExercises2.addAll(userExercises);
     return userExercises2;
-//    List<CommonShell> userExercises2 = new ArrayList<>();
-//    enrichWithPredefInfo(userExercises2, userExercises);
-//    return userExercises2;
   }
 
 

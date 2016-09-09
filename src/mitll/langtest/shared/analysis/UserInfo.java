@@ -34,7 +34,6 @@ package mitll.langtest.shared.analysis;
 
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.user.MiniUser;
-import mitll.langtest.shared.user.User;
 
 import java.io.Serializable;
 import java.util.Collections;

@@ -33,8 +33,8 @@
 package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.monitoring.Session;
+import mitll.langtest.shared.user.User;
 
 import java.util.List;
 import java.util.Map;

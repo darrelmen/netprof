@@ -77,6 +77,8 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
   private final boolean showIsPublic;
   private final int optionalExercise;
 
+  private static final boolean DEBUG = false;
+
   /**
    * @param contentPanel
    * @param insideContentPanel
@@ -118,16 +120,16 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
 
   @Override
   public void onSuccess(final Collection<UserList<CommonShell>> result) {
-    logger.info("\tUserListCallback.onSuccess : Displaying " + result.size() + " user lists for " + instanceName);
+    //logger.info("\tUserListCallback.onSuccess : Displaying " + result.size() + " user lists for " + instanceName);
     if (result.isEmpty()) {
-      logger.info("\t\tUserListCallback.onSuccess : Displaying empty set");
+      //logger.info("\t\tUserListCallback.onSuccess : Displaying empty set");
 
       insideContentPanel.clear();
       listScrollPanel.clear();
       insideContentPanel.add(getNoListsCreated());
     } else {
-
-      logger.info("\t\tUserListCallback.onSuccess : Displaying " + result.size() + " user lists for " + instanceName);
+      if (DEBUG)
+        logger.info("\t\tUserListCallback.onSuccess : Displaying " + result.size() + " user lists for " + instanceName);
 
       listScrollPanel.getElement().setId("scrollPanel");
 
@@ -147,11 +149,11 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
       insideContentPanel.add(listScrollPanel);
 
       if (optionalExercise != -1) {
-        logger.info("onSuccess find list for " + optionalExercise);
+        if (DEBUG) logger.info("onSuccess find list for " + optionalExercise);
         for (UserList<? extends HasID> ul : result) {
           for (HasID ex : ul.getExercises()) {
             if (ex.getID() == optionalExercise) {
-              logger.info("onSuccess ex " + optionalExercise + " is on " + ul);
+              if (DEBUG) logger.info("onSuccess ex " + optionalExercise + " is on " + ul);
               listManager.showList(ul, contentPanel, instanceName, ex);
               break;
             }
@@ -358,7 +360,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
       @Override
       public void onClick(ClickEvent event) {
         event.stopPropagation();
-        logger.info("For " + uniqueID + " value " + isPublic.getValue());
+        if (DEBUG) logger.info("For " + uniqueID + " value " + isPublic.getValue());
         listManager.setPublic(uniqueID, isPublic.getValue());
       }
     });

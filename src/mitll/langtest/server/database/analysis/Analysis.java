@@ -39,13 +39,11 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.phone.IPhoneDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.scoring.ParseResultJson;
-import mitll.langtest.shared.user.MiniUser;
-import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
+import mitll.langtest.shared.user.MiniUser;
 import org.apache.log4j.Logger;
-import org.apache.poi.xssf.model.MapInfo;
 
 import java.util.*;
 
