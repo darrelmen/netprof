@@ -37,6 +37,7 @@ package mitll.langtest.shared.exercise;
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 2/1/16.
+ * @deprecated
  */
 public interface CombinedMutableUserExercise extends CommonExercise,
     MutableExercise, MutableAudioExercise, MutableUserExercise, MutableAnnotationExercise {

@@ -38,8 +38,8 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.scoring.AudioContext;
-import mitll.npdata.dao.SlickResult;
 import mitll.npdata.dao.DBConnection;
+import mitll.npdata.dao.SlickResult;
 import mitll.npdata.dao.result.ResultDAOWrapper;
 import org.apache.log4j.Logger;
 

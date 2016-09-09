@@ -62,8 +62,8 @@ import mitll.langtest.client.scoring.ReviewScoringPanel;
 import mitll.langtest.client.services.ResultService;
 import mitll.langtest.client.services.ResultServiceAsync;
 import mitll.langtest.client.table.PagerTable;
-import mitll.langtest.shared.result.MonitorResult;
 import mitll.langtest.shared.ResultAndTotal;
+import mitll.langtest.shared.result.MonitorResult;
 
 import java.util.ArrayList;
 import java.util.Collection;

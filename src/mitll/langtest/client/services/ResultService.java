@@ -32,29 +32,16 @@
 
 package mitll.langtest.client.services;
 
-import com.github.gwtbootstrap.client.ui.Container;
-import com.github.gwtbootstrap.client.ui.Fieldset;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.InitialUI;
-import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.result.ResultManager;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.ScoringAudioPanel;
-import mitll.langtest.client.user.BasicDialog;
-import mitll.langtest.client.user.UserPassLogin;
 import mitll.langtest.shared.ResultAndTotal;
-import mitll.langtest.shared.scoring.PretestScore;
-import mitll.langtest.shared.user.LoginResult;
-import mitll.langtest.shared.user.SignUpUser;
-import mitll.langtest.shared.user.User;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 @RemoteServiceRelativePath("result-manager")
