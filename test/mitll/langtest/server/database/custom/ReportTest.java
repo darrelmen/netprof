@@ -4,8 +4,8 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.result.Result;
+import mitll.langtest.shared.exercise.Exercise;
 import mitll.langtest.shared.user.User;
-import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.Event;
@@ -456,7 +456,7 @@ public class ReportTest {
     assertTrue(!listsForUser3.contains(test));
   }*/
 
-  @Test
+ // @Test
 /*  public void testAddVisitor2() {
     List<User> users = database.getUsers();
     logger.debug("1 users size " + users.size());
@@ -556,8 +556,8 @@ public class ReportTest {
   }
 */
 
-  private UserExercise addExercise(User owner, UserListManager userListManager, long listid, UserList testList) {
-    UserExercise english = createNewItem(owner.getId());
+/*  private Exercise addExercise(User owner, UserListManager userListManager, long listid, UserList testList) {
+    Exercise english = createNewItem(owner.getId());
     userListManager.reallyCreateNewItem(listid, english, "");
 
     // have to go back to database to get user list
@@ -569,14 +569,14 @@ public class ReportTest {
     assertTrue(exercises.contains(english));
     // tooltip should never be empty
     return english;
-  }
+  }*/
 
   private int userExerciseCount = 0;
 
-  private UserExercise createNewItem(int userid) {
+/*  private Exercise createNewItem(int userid) {
     int uniqueID = userExerciseCount++;
-    return new UserExercise(uniqueID, UserExercise.CUSTOM_PREFIX + uniqueID, userid, " ", "", "", -1);
-  }
+    return new Exercise(uniqueID, "", userid, " ", "", "", -1);
+  }*/
 
   /**
    * TODO exercise other methods
