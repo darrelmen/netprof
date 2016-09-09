@@ -96,7 +96,7 @@ class NewUserExercise extends BasicDialog {
   final CommonExercise newUserExercise;
 
   final ExerciseController controller;
-  final LangTestDatabaseAsync service;
+  private final LangTestDatabaseAsync service;
 
   final ListServiceAsync listService = GWT.create(ListService.class);
   private final HasText itemMarker;
@@ -141,6 +141,8 @@ class NewUserExercise extends BasicDialog {
     this.newUserExercise = newExercise;
     this.instance = instance;
     this.originalList = originalList;
+
+    logger.info("new exercise is " + newUserExercise);
   }
 
   /**
@@ -173,7 +175,7 @@ class NewUserExercise extends BasicDialog {
     container.add(upper);
 
     makeForeignLangRow(upper);
-    final String id1 = ""+ul.getID();
+    final String id1 = "" + ul.getID();
 
     foreignLang.box.getElement().setId("NewUserExercise_ForeignLang_entry_for_list_" + id1);
     // focusOn(formField); // Bad idea since steals the focus after search
@@ -354,7 +356,7 @@ class NewUserExercise extends BasicDialog {
 
     delete.setType(ButtonType.WARNING);
     delete.addStyleName("floatRight");
-    controller.register(delete, ""+ newUserExercise.getID(), "Remove from list " + ul.getID() + "/" + ul.getName());
+    controller.register(delete, "" + newUserExercise.getID(), "Remove from list " + ul.getID() + "/" + ul.getName());
     return delete;
   }
 
@@ -594,7 +596,7 @@ class NewUserExercise extends BasicDialog {
                                final ListInterface<CommonShell> exerciseList,
                                final Panel toAddTo,
                                boolean onClick) {
-    //   logger.info("user list is " + ul);
+    logger.info("afterValidForeignPhrase newUserExercise is " + newUserExercise);
     listService.reallyCreateNewItem(ul.getID(), newUserExercise, new AsyncCallback<CommonExercise>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -621,7 +623,6 @@ class NewUserExercise extends BasicDialog {
   private void afterItemCreated(CommonExercise newExercise, UserList<CommonShell> ul,
                                 ListInterface<CommonShell> exerciseList, Panel toAddTo) {
     logger.info("afterItemCreated " + newExercise + " creator " + newExercise.getCreator());
-
     editItem.clearNewExercise(); // success -- don't remember it
 
     CommonShell newUserExercisePlaceholder = ul.remove(EditItem.NEW_EXERCISE_ID);
@@ -753,7 +754,7 @@ class NewUserExercise extends BasicDialog {
             public void useResult(AudioAnswer result) {
               super.useResult(result);
 
-              logger.info("useResult got back " + result.getAudioAttribute() + " for " + newUserExercise);
+              // logger.info("useResult got back " + result.getAudioAttribute() + " for " + newUserExercise);
               if (result.getAudioAttribute() != null) {
                 if (recordRegularSpeed) {
                   result.getAudioAttribute().markRegular();
@@ -761,7 +762,8 @@ class NewUserExercise extends BasicDialog {
                   result.getAudioAttribute().markSlow();
                 }
 
-                newUserExercise.getCombinedMutableUserExercise().addAudio(result.getAudioAttribute());
+                // newUserExercise.getCombinedMutableUserExercise().addAudio(result.getAudioAttribute());
+                newUserExercise.getMutableAudio().addAudio(result.getAudioAttribute());
 
               } else {
                 logger.warning("no valid audio on " + result);
@@ -773,10 +775,11 @@ class NewUserExercise extends BasicDialog {
             protected void useInvalidResult(AudioAnswer result) {
               super.useInvalidResult(result);
 
+              MutableAudioExercise mutableAudio = newUserExercise.getMutableAudio();
               if (recordRegularSpeed) {
-                newUserExercise.getCombinedMutableUserExercise().clearRefAudio();
+                mutableAudio.clearRefAudio();
               } else {
-                newUserExercise.getCombinedMutableUserExercise().clearSlowRefAudio();
+                mutableAudio.clearSlowRefAudio();
               }
 
               audioPosted();

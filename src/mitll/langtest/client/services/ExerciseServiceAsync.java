@@ -33,14 +33,10 @@
 package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.shared.ResultAndTotal;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
 import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.Shell;
-
-import java.util.Collection;
-import java.util.Map;
 
 public interface ExerciseServiceAsync {
   <T extends CommonShell> void getExerciseIds(

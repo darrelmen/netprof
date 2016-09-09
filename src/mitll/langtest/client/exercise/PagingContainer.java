@@ -302,12 +302,15 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
    * @return
    */
   private String getFLText(CommonShell shell) {
+//    logger.info("getFLText on " +shell);
     String toShow = shell.getForeignLanguage();
     if (english && !shell.getEnglish().equals(EditItem.NEW_ITEM)) {
       String meaning = shell.getMeaning();
       toShow = meaning.isEmpty() ? shell.getEnglish() : meaning;
     }
-    if (toShow.isEmpty()) toShow = ""+shell.getID();
+    if (toShow.isEmpty()) {
+      toShow = "*Nothing Yet*";//""+shell.getID();
+    }
     return toShow;
   }
 }

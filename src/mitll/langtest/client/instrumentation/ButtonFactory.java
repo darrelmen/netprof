@@ -125,7 +125,7 @@ public class ButtonFactory implements EventLogger {
    */
   @Override
   public void logEvent(final String widgetID, final String widgetType, EventContext context) {
-    logger.info("logEvent event for " + widgetID + " " + widgetType + " context " + context);
+//    logger.info("logEvent event for " + widgetID + " " + widgetType + " context " + context);
     final ButtonFactory outer = this;
 
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
@@ -140,7 +140,7 @@ public class ButtonFactory implements EventLogger {
 
             if (//turkID != null &&
                 browserInfo != null) {
-              logger.info("\tlogEvent event for " + widgetID + " " + widgetType + " context " + context + " browser " +browserInfo);
+              //logger.info("\tlogEvent event for " + widgetID + " " + widgetType + " context " + context + " browser " +browserInfo);
 
               service.logEvent(widgetID, widgetType, context.exid, context.context, context.userid, "", browserInfo,
                   new AsyncCallback<Void>() {

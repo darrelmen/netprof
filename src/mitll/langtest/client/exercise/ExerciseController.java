@@ -44,7 +44,6 @@ import mitll.langtest.client.services.ScoringServiceAsync;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.image.ImageResponse;
-import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.user.User;
 
