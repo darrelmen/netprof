@@ -46,8 +46,6 @@ public interface CommonExercise extends CommonAudioExercise, ScoredExercise {
 
   List<String> getFirstPron();
 
- // String getAltFL();
-
   boolean isPredefined();
 
   boolean hasContext();
@@ -77,6 +75,5 @@ public interface CommonExercise extends CommonAudioExercise, ScoredExercise {
   MutableExercise getMutable();
   MutableAudioExercise getMutableAudio();
   MutableAnnotationExercise getMutableAnnotation();
- // CombinedMutableUserExercise getCombinedMutableUserExercise();
   CommonAnnotatable getCommonAnnotatable();
 }
