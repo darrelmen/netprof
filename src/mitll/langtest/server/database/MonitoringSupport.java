@@ -33,14 +33,14 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.database.result.IResultDAO;
+import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.server.database.result.SessionInfo;
 import mitll.langtest.server.database.user.IUserDAO;
-import mitll.langtest.server.database.result.Result;
-import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.monitoring.Session;
+import mitll.langtest.shared.user.User;
 import org.apache.log4j.Logger;
 
 import java.text.SimpleDateFormat;

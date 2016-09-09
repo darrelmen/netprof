@@ -32,7 +32,6 @@
 
 package mitll.langtest.client.custom.exercise;
 
-import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.exercise.CommonExercise;
 
 import java.util.ArrayList;

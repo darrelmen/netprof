@@ -32,16 +32,12 @@
 
 package mitll.langtest.client.services;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.LangTest;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.image.ImageResponse;
-import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.PretestScore;
 
 @RemoteServiceRelativePath("scoring-manager")

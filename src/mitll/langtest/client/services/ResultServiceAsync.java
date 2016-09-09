@@ -34,7 +34,6 @@ package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.ResultAndTotal;
-import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.Collection;
 import java.util.Map;
