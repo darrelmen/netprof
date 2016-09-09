@@ -54,7 +54,6 @@ import mitll.langtest.client.services.ExerciseService;
 import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 
@@ -243,7 +242,8 @@ public class EditItem {
    */
   private CommonExercise getNewItem() {
     //  return new UserExercise(NEW_EXERCISE_ID, userManager.getUser(), NEW_ITEM, controller.getProjectStartupInfo().getProjectid());
-    return new Exercise(NEW_EXERCISE_ID,
+    return new Exercise(
+        NEW_EXERCISE_ID,
         userManager.getUser(),
         NEW_ITEM,
         controller.getProjectStartupInfo().getProjectid(),
@@ -334,15 +334,19 @@ public class EditItem {
    * @see #populatePanel(CommonExercise, Panel, UserList, UserList, HasText, ListInterface)
    */
   private Exercise createNewItem(int userid, String listName) {
-    long now = System.currentTimeMillis();
+  //  long now = System.currentTimeMillis();
 //    return new UserExercise(-1,
 //        UserExercise.CUSTOM_PREFIX + "_" + listName + "_" + userid + "_" + now,
 //        userid, "", "", "",
 //        controller.getProjectStartupInfo().getProjectid());
 
+    int projectid = controller.getProjectStartupInfo().getProjectid();
+
+    logger.info("project id is " + projectid);
     return new Exercise(-1,
-        userid, "",
-        controller.getProjectStartupInfo().getProjectid(),
+        userid,
+        "",
+        projectid,
         false);
   }
 
@@ -357,7 +361,8 @@ public class EditItem {
    * @param setFields
    * @see #populatePanel
    */
-  private void addEditOrAddPanel(CommonExercise newExercise, HasText itemMarker,
+  private void addEditOrAddPanel(CommonExercise newExercise,
+                                 HasText itemMarker,
                                  UserList<CommonShell> originalList,
                                  Panel right,
                                  UserList<CommonShell> ul,
@@ -384,10 +389,12 @@ public class EditItem {
    * @param originalList
    * @param doNewExercise
    * @return
-   * @see #populatePanel
+   * @see #addEditOrAddPanel(CommonExercise, HasText, UserList, Panel, UserList, ListInterface, boolean, boolean)
    */
-  private NewUserExercise getAddOrEditPanel(CommonExercise exercise, HasText itemMarker,
-                                            UserList<CommonShell> originalList, boolean doNewExercise) {
+  private NewUserExercise getAddOrEditPanel(CommonExercise exercise,
+                                            HasText itemMarker,
+                                            UserList<CommonShell> originalList,
+                                            boolean doNewExercise) {
     NewUserExercise editableExercise;
     if (doNewExercise) { // whole new exercise
       editableExercise = new NewUserExercise(service, controller, itemMarker, this, exercise, getInstance(), originalList);

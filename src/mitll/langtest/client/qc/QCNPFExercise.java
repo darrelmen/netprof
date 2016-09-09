@@ -66,8 +66,8 @@ import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.ExerciseFormatter;
-import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.user.MiniUser;
 
 import java.util.*;
 import java.util.logging.Logger;

@@ -1565,7 +1565,7 @@ public class DatabaseImpl implements Database {
 
     logger.debug("exercise state " + exercise.getState());
 
-    userListManager.setState(duplicate, exercise.getState(), exercise.getCombinedMutableUserExercise().getCreator());
+    userListManager.setState(duplicate, exercise.getState(), exercise.getCreator());
 
     logger.debug("duplicate after " + duplicate);
 
