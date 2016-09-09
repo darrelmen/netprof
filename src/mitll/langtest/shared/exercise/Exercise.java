@@ -291,11 +291,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return this;
   }
 
-//  @Override
-//  public CombinedMutableUserExercise getCombinedMutableUserExercise() {
-//    return this;
-//  }
-
   public CommonAnnotatable getCommonAnnotatable() {
     return this;
   }
