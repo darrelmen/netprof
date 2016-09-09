@@ -55,9 +55,8 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.services.ExerciseServiceAsync;
-import mitll.langtest.shared.user.MiniUser;
-import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.analysis.UserInfo;
+import mitll.langtest.shared.user.MiniUser;
 
 import java.util.Collection;
 import java.util.Comparator;

@@ -38,17 +38,12 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.client.custom.dialog.ReviewEditableExercise;
 import mitll.langtest.client.custom.tabs.RememberTabAndContent;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.shared.answer.Answer;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.STATE;
-import mitll.langtest.shared.flashcard.QuizCorrectAndScore;
-import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.user.MiniUser;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 @RemoteServiceRelativePath("qc-manager")
 public interface QCService extends RemoteService {

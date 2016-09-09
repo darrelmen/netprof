@@ -44,10 +44,10 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.AudioAttributeExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.user.MiniUser;
 
 import java.util.*;
 import java.util.logging.Logger;

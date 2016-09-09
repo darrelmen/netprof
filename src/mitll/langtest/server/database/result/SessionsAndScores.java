@@ -35,7 +35,6 @@ package mitll.langtest.server.database.result;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import mitll.langtest.shared.monitoring.Session;
 
-import java.util.Collection;
 import java.util.List;
 
 public class SessionsAndScores {

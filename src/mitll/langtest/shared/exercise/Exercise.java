@@ -390,33 +390,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
     directlyRelated.add(contextExercise);
   }
 
-  public String toString() {
-    Collection<AudioAttribute> audioAttributes1 = getAudioAttributes();
-
-    // warn about attr that have no user
-    StringBuilder builder = new StringBuilder();
-    for (AudioAttribute attr : audioAttributes1) {
-      if (attr.getUser() == null) {
-        builder.append("\t").append(attr.toString()).append("\n");
-      }
-    }
-
-    return "Exercise " +
-        //Integer.toHexString(hashCode()) +
-        " " + getID() +
-        "/" + getDominoID() +
-        " old '" + getOldID() +
-        "' english '" + getEnglish() +
-        "'/'" + getForeignLanguage() + "' " +
-        (getAltFL().isEmpty() ? "" : getAltFL()) +
-        "meaning '" + getMeaning() +
-        "' transliteration '" + getTransliteration() +
-        "' context " + getDirectlyRelated() +
-        " audio count = " + audioAttributes1.size() +
-        (builder.toString().isEmpty() ? "" : " \n\tmissing user audio " + builder.toString()) +
-        " unit->lesson " + getUnitToValue();
-  }
-
 /*
   public void addMentionedContext(CommonExercise exercise) {
     mentions.add(exercise);
@@ -447,10 +420,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.safeToDecode = safeToDecode;
   }
 
-//  public boolean isPredef() {
-//    return isPredef;
-//  }
-
   public boolean isOverride() {
     return isOverride;
   }
@@ -459,8 +428,37 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.creator = creator;
   }
 
-
   public void setID(int uniqueID) {
     this.id = uniqueID;
+  }
+
+  public String toString() {
+    Collection<AudioAttribute> audioAttributes1 = getAudioAttributes();
+
+    // warn about attr that have no user
+    StringBuilder builder = new StringBuilder();
+    for (AudioAttribute attr : audioAttributes1) {
+      if (attr.getUser() == null) {
+        builder.append("\t").append(attr.toString()).append("\n");
+      }
+    }
+
+    return "Exercise " +
+        //Integer.toHexString(hashCode()) +
+        //" " +
+        getID() +
+        "/" + getDominoID() +
+        " old '" + getOldID() +
+        "'" +
+        " project " + projectid +
+        " english '" + getEnglish() +
+        "'/'" + getForeignLanguage() + "' " +
+        (getAltFL().isEmpty() ? "" : getAltFL()) +
+        "meaning '" + getMeaning() +
+        "' transliteration '" + getTransliteration() +
+        "' context " + getDirectlyRelated() +
+        " audio count = " + audioAttributes1.size() +
+        (builder.toString().isEmpty() ? "" : " \n\tmissing user audio " + builder.toString()) +
+        " unit->lesson " + getUnitToValue();
   }
 }

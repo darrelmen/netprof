@@ -32,21 +32,12 @@
 
 package mitll.langtest.client.services;
 
-import com.github.gwtbootstrap.client.ui.TextBox;
-import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import mitll.langtest.client.result.ResultManager;
-import mitll.langtest.client.scoring.AudioPanel;
-import mitll.langtest.client.scoring.ScoringAudioPanel;
-import mitll.langtest.shared.ResultAndTotal;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
 import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.Shell;
-
-import java.util.Collection;
-import java.util.Map;
 
 @RemoteServiceRelativePath("exercise-manager")
 public interface ExerciseService extends RemoteService {

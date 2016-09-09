@@ -35,13 +35,8 @@ package mitll.langtest.client.custom.content;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
 import mitll.langtest.client.dialog.ModalInfoDialog;
-import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.SimpleSelectExerciseList;
-import mitll.langtest.client.user.UserFeedback;
-import mitll.langtest.client.user.UserManager;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory

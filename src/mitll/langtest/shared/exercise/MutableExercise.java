@@ -37,7 +37,6 @@ import mitll.langtest.shared.flashcard.CorrectAndScore;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory

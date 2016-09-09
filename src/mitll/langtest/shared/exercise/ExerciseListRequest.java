@@ -35,7 +35,6 @@ package mitll.langtest.shared.exercise;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.client.list.PagingExerciseList;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
