@@ -44,8 +44,8 @@ import java.util.Map;
  * @since 1/5/16.
  */
 public class BaseExercise implements IsSerializable, Shell {
-  @Deprecated protected String oldid;
-  protected int id;
+  @Deprecated protected String oldid = "";
+  protected int id = -1;
 
   /**
    * TODO : why do we need to carry this around?

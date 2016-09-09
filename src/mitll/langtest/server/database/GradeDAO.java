@@ -34,8 +34,8 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.database.user.IUserDAO;
-import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.grade.Grade;
+import mitll.langtest.shared.user.User;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;

@@ -36,7 +36,6 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.flashcard.QuizCorrectAndScore;
-import org.apache.log4j.Logger;
 
 import java.util.*;
 
