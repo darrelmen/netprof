@@ -37,7 +37,6 @@ import mitll.langtest.server.database.userexercise.BaseUserExerciseDAO;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickWord;
 import mitll.npdata.dao.word.WordDAOWrapper;
-import org.apache.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.List;

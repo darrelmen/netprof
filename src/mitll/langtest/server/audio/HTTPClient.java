@@ -36,7 +36,6 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.shared.amas.QAPair;
 import org.apache.log4j.Logger;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;

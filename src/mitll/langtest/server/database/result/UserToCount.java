@@ -33,7 +33,6 @@
 package mitll.langtest.server.database.result;
 
 import java.util.Map;
-import java.util.Set;
 
 public class UserToCount {
   private final Map<Integer, Integer> idToCount;

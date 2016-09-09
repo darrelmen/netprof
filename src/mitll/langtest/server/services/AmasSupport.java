@@ -32,8 +32,8 @@
 
 package mitll.langtest.server.services;
 
-import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.database.exercise.SectionHelper;
+import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.STATE;

@@ -43,6 +43,7 @@ import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.Exercise;
 import mitll.npdata.dao.SlickProject;
 import org.apache.log4j.Logger;
 
@@ -199,7 +200,9 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
           logger.error("configuration error - can't get files from media directory " + mediaDir);
         } else if (list.length > 0) { // only on pnetprof (behind firewall), znetprof has no audio, might have a directory.
           logger.debug("validating files under " + file.getAbsolutePath());
-          audioDAO.validateFileExists(projectID, mediaDir, language);
+          if (serverProps.doAudioFileExistsCheck()) {
+            audioDAO.validateFileExists(projectID, mediaDir, language);
+          }
         }
       } else {
         logger.error("configuration error - expecting media directory " + mediaDir + " to be directory.");
@@ -275,7 +278,8 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    * Don't add overlays for exercises that have been removed.
    *
    * @param removes
-   * @see #setDependencies(String, String, IUserExerciseDAO, AddRemoveDAO, IAudioDAO, int)
+   * @see #setDependencies
+   * @deprecated only for old h2 world with immutable exercises from spreadsheet
    */
   protected void addOverlays(Collection<Integer> removes) {
     Collection<CommonExercise> overrides = userExerciseDAO.getOverrides();
@@ -307,7 +311,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 
           if (userExUpdateTime > predefUpdateTime) {
             Map<String, String> unitToValue = originalExercise.getUnitToValue();
-            userExercise.getCombinedMutableUserExercise().setUnitToValue(unitToValue);
+            ((Exercise)userExercise).setUnitToValue(unitToValue);
 
             logger.debug("addOverlays refresh originalExercise for " + userExercise.getID() + " '" + userExercise.getForeignLanguage() +
                 "' vs '" + originalExercise.getForeignLanguage() +

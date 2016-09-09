@@ -34,12 +34,12 @@ package mitll.langtest.server.database.result;
 
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.sorter.ExerciseSorter;
-import mitll.langtest.shared.result.MonitorResult;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
+import mitll.langtest.shared.result.MonitorResult;
 
 import java.text.CollationKey;
 import java.text.Collator;

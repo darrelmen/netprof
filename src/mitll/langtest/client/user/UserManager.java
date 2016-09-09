@@ -33,11 +33,8 @@
 package mitll.langtest.client.user;
 
 import com.google.gwt.storage.client.Storage;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.PropertyHandler;
-import mitll.langtest.client.custom.KeyStorage;
-import mitll.langtest.client.flashcard.ControlState;
 import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.shared.user.LoginResult;
 import mitll.langtest.shared.user.User;
