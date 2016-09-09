@@ -63,7 +63,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   }
 
   /**
-   * I don't think we're doing user exercise mask out overrides anymore...
+   * I don't think we're doing user exercise mask-out overrides anymore...
    *
    * @param removes
    */

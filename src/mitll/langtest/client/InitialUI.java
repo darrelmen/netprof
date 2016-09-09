@@ -57,8 +57,6 @@ import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.instrumentation.EventTable;
 import mitll.langtest.client.monitoring.MonitoringManager;
 import mitll.langtest.client.result.ResultManager;
-import mitll.langtest.client.services.ResultService;
-import mitll.langtest.client.services.ResultServiceAsync;
 import mitll.langtest.client.services.UserService;
 import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.client.user.*;
