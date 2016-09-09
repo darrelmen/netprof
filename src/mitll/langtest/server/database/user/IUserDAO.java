@@ -34,7 +34,6 @@ package mitll.langtest.server.database.user;
 
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.IDAO;
-import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;

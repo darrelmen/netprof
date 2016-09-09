@@ -33,11 +33,8 @@
 package mitll.langtest.shared.sorter;
 
 import mitll.langtest.client.custom.exercise.CommentNPFExercise;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.STATE;
-
-import java.util.Collection;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory

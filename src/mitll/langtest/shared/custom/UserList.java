@@ -37,9 +37,9 @@ import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.server.database.userlist.IUserListDAO;
 import mitll.langtest.server.database.userlist.SlickUserListDAO;
 import mitll.langtest.server.database.userlist.UserListDAO;
-import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.exercise.BaseExercise;
 import mitll.langtest.shared.exercise.HasID;
+import mitll.langtest.shared.user.User;
 
 import java.util.ArrayList;
 import java.util.Collection;

@@ -91,29 +91,27 @@ public class RefResultDecoder {
 
   /**
    * @param exercises
-   * @param relativeConfigDir
    * @see LangTestDatabaseImpl#init()
    */
-  public void doRefDecode(final Collection<CommonExercise> exercises, final String relativeConfigDir) {
+  public void doRefDecode(final Collection<CommonExercise> exercises) {
     new Thread(new Runnable() {
       @Override
       public void run() {
         if (serverProps.shouldTrimAudio()) {
-          logger.warn("trimming audio!");
+          logger.warn("doRefDecode trimming audio!");
           sleep(5000);
           if (!exercises.isEmpty()) {
             CommonExercise next = exercises.iterator().next();
-            trimRef(next.getProjectID(), exercises, relativeConfigDir);
+            trimRef(next.getProjectID(), exercises);
           }
         }
         if (serverProps.shouldDoDecode()) {
-          logger.warn("shouldDoDecode true");
-
+          logger.warn("doRefDecode shouldDoDecode true");
           sleep(5000);
           if (hasModel) {
             if (!exercises.isEmpty()) {
               CommonExercise next = exercises.iterator().next();
-              writeRefDecode(exercises, relativeConfigDir, next.getProjectID());
+              writeRefDecode(exercises, next.getProjectID());
             }
           }
         } else {
@@ -174,9 +172,8 @@ public class RefResultDecoder {
   /**
    * @param projid
    * @param exercises
-   * @param relativeConfigDir
    */
-  private void trimRef(int projid, Collection<CommonExercise> exercises, String relativeConfigDir) {
+  private void trimRef(int projid, Collection<CommonExercise> exercises) {
     if (DO_TRIM) {
       Map<Integer, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio(projid);
       String language = db.getLanguage(projid);
@@ -258,16 +255,17 @@ public class RefResultDecoder {
   }
 
   /**
+   * TODO : put this back so we can run it per project
    * Do alignment and decoding on all the reference audio and store the results in the RefResult table.
    *
    * @see #doRefDecode
    */
-  private void writeRefDecode(Collection<CommonExercise> exercises, String relativeConfigDir, int projid) {
+  private void writeRefDecode(Collection<CommonExercise> exercises, int projid) {
     boolean b = db.getServerProps().shouldDoDecode();
     logger.warn("writeRefDecode got " + b + " for should do decode");
     if (false) {
       Map<Integer, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio(projid);
-      String installPath = pathHelper.getInstallPath();
+     // String installPath = pathHelper.getInstallPath();
 
       int numResults = db.getRefResultDAO().getNumResults();
       String language = db.getLanguage(projid);

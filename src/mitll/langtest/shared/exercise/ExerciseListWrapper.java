@@ -33,10 +33,7 @@
 package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.Shell;
 
-import java.util.Collection;
 import java.util.List;
 
 public class ExerciseListWrapper<T extends Shell> implements IsSerializable {

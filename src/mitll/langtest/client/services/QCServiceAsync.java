@@ -33,15 +33,9 @@
 package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.shared.answer.Answer;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.STATE;
-import mitll.langtest.shared.flashcard.QuizCorrectAndScore;
-import mitll.langtest.shared.scoring.AudioContext;
-
-import java.util.Collection;
-import java.util.Map;
 
 public interface QCServiceAsync {
   void addAnnotation(int exerciseID, String field, String status, String comment, int userID, AsyncCallback<Void> async);
