@@ -33,16 +33,11 @@
 package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.answer.Answer;
 import mitll.langtest.shared.flashcard.QuizCorrectAndScore;
 import mitll.langtest.shared.scoring.AudioContext;
-import mitll.langtest.shared.user.LoginResult;
-import mitll.langtest.shared.user.SignUpUser;
-import mitll.langtest.shared.user.User;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 public interface AmasServiceAsync {

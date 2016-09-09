@@ -33,17 +33,10 @@
 package mitll.langtest.server.services;
 
 import mitll.langtest.client.services.ExerciseService;
-import mitll.langtest.server.PathHelper;
-import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
-import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.custom.IUserListManager;
-import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.exercise.SectionHelper;
-import mitll.langtest.server.database.security.UserSecurityManager;
 import mitll.langtest.server.database.user.BaseUserDAO;
-import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.server.trie.ExerciseTrie;
@@ -52,12 +45,9 @@ import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.user.User;
-import mitll.npdata.dao.SlickProject;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;

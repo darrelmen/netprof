@@ -420,7 +420,7 @@ class EditableExerciseDialog extends NewUserExercise {
    * @see #audioPosted()
    */
   void reallyChange(final ListInterface<CommonShell> pagingContainer, final boolean buttonClicked) {
-    newUserExercise.getCombinedMutableUserExercise().setCreator(controller.getUser());
+    newUserExercise.getMutable().setCreator(controller.getUser());
     postEditItem(pagingContainer, buttonClicked);
   }
 
@@ -449,7 +449,6 @@ class EditableExerciseDialog extends NewUserExercise {
         originalRefAudio     = newUserExercise.getRefAudio();
         originalSlowRefAudio = newUserExercise.getSlowAudioRef();
         // if (DEBUG) logger.info("postEditItem : onSuccess " + newUserExercise.getTooltip());
-
         doAfterEditComplete(pagingContainer, buttonClicked);
       }
     });
@@ -500,7 +499,6 @@ class EditableExerciseDialog extends NewUserExercise {
     }
   }
 
-
   /**
    * @param newUserExercise
    * @see EditItem#addEditOrAddPanel
@@ -508,7 +506,6 @@ class EditableExerciseDialog extends NewUserExercise {
   @Override
   public <S extends CommonShell & AudioRefExercise & AnnotationExercise> void setFields(S newUserExercise) {
     //if (DEBUG) logger.info("grabInfoFromFormAndStuffInfoExercise : setting fields with " + newUserExercise);
-
     // english
     {
       english.box.setText(originalEnglish = newUserExercise.getEnglish());

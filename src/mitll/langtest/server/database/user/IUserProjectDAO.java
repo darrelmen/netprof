@@ -33,7 +33,6 @@
 package mitll.langtest.server.database.user;
 
 import mitll.langtest.server.database.IDAO;
-import mitll.npdata.dao.SlickUser;
 import mitll.npdata.dao.SlickUserProject;
 
 import java.util.Collection;

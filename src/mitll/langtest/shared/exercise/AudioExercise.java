@@ -33,7 +33,6 @@
 package mitll.langtest.shared.exercise;
 
 import mitll.langtest.shared.ExerciseAnnotation;
-import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.user.MiniUser;
 import net.sf.json.JSONObject;
 
@@ -482,9 +481,9 @@ public class AudioExercise extends ExerciseShell {
 
   /**
    * @param fieldToAnnotation
-   * @see UserExercise#UserExercise(CommonShell, long)
+   * @see Exercise#Exercise
    */
-  public void setFieldToAnnotation(Map<String, ExerciseAnnotation> fieldToAnnotation) {
+  protected void setFieldToAnnotation(Map<String, ExerciseAnnotation> fieldToAnnotation) {
     this.fieldToAnnotation = fieldToAnnotation;
   }
 
@@ -534,6 +533,7 @@ public class AudioExercise extends ExerciseShell {
 
   public String toString() {
     return super.toString() +
+        " project " + projectid +
         " audio attr (" + getAudioAttributes().size() +
         ") :" + getAudioAttributes() + " and " +
         fieldToAnnotation + " annotations, unit/lesson " + getUnitToValue();
