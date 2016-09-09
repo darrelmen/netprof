@@ -222,10 +222,6 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
             fl = temp;
             //logger.info("flip english '" +english+ "' to fl '" +fl+ "'");
           }
-//          UserExercise newItem =
-//              new UserExercise(-1,
-//                  UserExercise.CUSTOM_PREFIX + "_" + (n++), (int) creator, english, fl, "", getProjectID());
-
           Exercise newItem =
               new Exercise(-1,
                   (int) creator,
