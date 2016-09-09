@@ -5,7 +5,6 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.result.Result;
-import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.Event;
@@ -570,7 +569,7 @@ public class UserListManagerTest {
   }
 */
 
-  private UserExercise addExercise(User owner, UserListManager userListManager, long listid, UserList testList) {
+/*  private UserExercise addExercise(User owner, UserListManager userListManager, long listid, UserList testList) {
     UserExercise english = createNewItem(owner.getId());
     userListManager.reallyCreateNewItem(listid, english, "");
 
@@ -583,14 +582,16 @@ public class UserListManagerTest {
     assertTrue(exercises.contains(english));
 
     return english;
-  }
+  }*/
 
   private int userExerciseCount = 0;
 
+/*
   private UserExercise createNewItem(int userid) {
     int uniqueID = userExerciseCount++;
     return new UserExercise(uniqueID, UserExercise.CUSTOM_PREFIX + uniqueID, userid, " ", "", "", -1);
   }
+*/
 
   /**
    * TODO exercise other methods
