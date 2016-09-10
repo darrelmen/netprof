@@ -164,7 +164,7 @@ public class AudioDAO extends DAO {
       File test = new File(fastAudioRef);
       boolean exists = test.exists();
       if (!exists) {
-       // logger.info("1 no audio at " + test.getAbsolutePath());
+        // logger.info("1 no audio at " + test.getAbsolutePath());
         test = new File(installPath, fastAudioRef);
         exists = test.exists();
       }
@@ -174,7 +174,7 @@ public class AudioDAO extends DAO {
         sleep(50);
         try {
           fastAudioRef = "bestAudio" + fastAudioRef.split("bestAudio")[1];
-         //  logger.info("audio at " + fastAudioRef);
+          //  logger.info("audio at " + fastAudioRef);
 
           addAudio(connection, (int) defaultUser.getId(), ensureForwardSlashes(fastAudioRef), imported.getID(),
               test.lastModified(), REGULAR, duration, imported.getForeignLanguage());
@@ -182,9 +182,8 @@ public class AudioDAO extends DAO {
         } catch (Exception e) {
           logger.error("got " + e, e);
         }
-      }
-      else {
-       // logger.info("2 no audio at " + test.getAbsolutePath());
+      } else {
+        // logger.info("2 no audio at " + test.getAbsolutePath());
       }
     }
 
@@ -193,7 +192,7 @@ public class AudioDAO extends DAO {
       File test = new File(slowAudioRef);
       boolean exists = test.exists();
       if (!exists) {
-       // logger.info("3 no audio at " + test.getAbsolutePath());
+        // logger.info("3 no audio at " + test.getAbsolutePath());
 
         test = new File(installPath, slowAudioRef);
         exists = test.exists();
@@ -210,8 +209,7 @@ public class AudioDAO extends DAO {
         } catch (Exception e) {
           logger.error("got " + e, e);
         }
-      }
-      else {
+      } else {
 //        logger.info("4 no audio at " + test.getAbsolutePath());
 
       }
@@ -363,7 +361,10 @@ public class AudioDAO extends DAO {
     this.exerciseDAO = exerciseDAO;
   }
 
-  public int numRows() { return getCount(AUDIO); }
+  public int numRows() {
+    return getCount(AUDIO);
+  }
+
   /**
    * Pulls the list of audio recordings out of the database.
    *
@@ -555,7 +556,7 @@ public class AudioDAO extends DAO {
    * @return
    * @see #attachAudio
    */
-  private Collection<AudioAttribute> getAudioAttributes(String exid) {
+  public Collection<AudioAttribute> getAudioAttributes(String exid) {
     try {
       String sql = SELECT_ALL + " WHERE " + Database.EXID + "='" + exid + "' AND " + DEFECT + "=false";
       Collection<AudioAttribute> resultsSQL = getResultsSQL(sql);
@@ -583,9 +584,9 @@ public class AudioDAO extends DAO {
     return new ArrayList<>();
   }
 
-  public Set<String> getRecordedRegularForUser(long userid) {
+/*  public Set<String> getRecordedRegularForUser(long userid) {
     return getAudioForGender(Collections.singleton(userid), REGULAR);
-  }
+  }*/
 
   /**
    * Get back the ids of exercises recorded by people who are the same gender as the userid.
@@ -1061,6 +1062,23 @@ public class AudioDAO extends DAO {
     return addAudio(connection, userid, audioRef, exerciseID, timestamp, audioType, durationInMillis, transcript);
   }
 
+  /**
+   * @see DatabaseImpl#editItem(CommonExercise, boolean)
+   * @param existing
+   * @param newTranscript
+   */
+  public void copyWithNewTranscript(AudioAttribute existing, String newTranscript) {
+    String exerciseID = existing.getExid();
+    long timestamp = existing.getTimestamp();
+    String audioType = existing.getAudioType();
+    long durationInMillis = existing.getDurationInMillis();
+    logger.debug("copyWithNewTranscript existing - " + existing);
+    try {
+      addAudio(connection, (int) existing.getUserid(), existing.getAudioRef(), exerciseID, timestamp, audioType, durationInMillis, newTranscript);
+    } catch (SQLException e) {
+      logger.error("Got " + e, e);
+    }
+  }
 
   /**
    * Why does this have to be so schizo? add or update -- should just choose
@@ -1332,8 +1350,14 @@ public class AudioDAO extends DAO {
    * @throws SQLException
    * @see #add(Connection, Result, int, String, String)
    */
-  private long addAudio(Connection connection, int userid, String audioRef, String exerciseID, long timestamp,
-                        String audioType, long durationInMillis, String transcript) throws SQLException {
+  private long addAudio(Connection connection,
+                        int userid,
+                        String audioRef,
+                        String exerciseID,
+                        long timestamp,
+                        String audioType,
+                        long durationInMillis,
+                        String transcript) throws SQLException {
     if (isBadUser(userid)) {
       logger.error("huh? userid is " + userid);
       new Exception().printStackTrace();
