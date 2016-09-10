@@ -93,7 +93,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   private boolean pendingReq = false;
   ExerciseListRequest lastSuccessfulRequest = null;
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
   /**
    * @param currentExerciseVPanel
