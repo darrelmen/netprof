@@ -535,15 +535,22 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   }
 
   /**
+   * TODO : why is this so confusing???
+   *
    * @param userExercise
+   * @param keepAudio
    * @see mitll.langtest.server.LangTestDatabaseImpl#editItem
    * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#postEditItem
    */
-  public void editItem(CommonExercise userExercise) {
-    logger.debug("editItem ex #" + userExercise.getID() + " mediaDir : " + getServerProps().getMediaDir() +
+  public void editItem(CommonExercise userExercise, boolean keepAudio) {
+    String id = userExercise.getID();
+    logger.debug("editItem exercise #" + id +
+        " mediaDir : " + getServerProps().getMediaDir() +
         " initially audio was\n\t " + userExercise.getAudioAttributes());
 
-    getUserListManager().editItem(userExercise, true, getServerProps().getMediaDir());
+    getUserListManager().editItem(userExercise,
+        true, // create if doesn't exist
+        getServerProps().getMediaDir());
 
     Set<AudioAttribute> original = new HashSet<>(userExercise.getAudioAttributes());
     Set<AudioAttribute> defects = getAndMarkDefects(userExercise, userExercise.getFieldToAnnotation());
@@ -554,38 +561,42 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     boolean notOverlay = exercise == null;
     if (notOverlay) {
       // not an overlay! it's a new user exercise
-      exercise = getUserExerciseWhere(userExercise.getID());
-      logger.debug("not an overlay " + exercise);
+      exercise = getUserExerciseWhere(id);
+      logger.debug("\teditItem not an overlay " + exercise);
     } else {
       exercise = userExercise;
-      logger.debug("made overlay " + exercise);
+      logger.debug("\teditItem made overlay " + exercise);
     }
 
     if (notOverlay) {
       logger.error("huh? couldn't make overlay or find user exercise for " + userExercise);
     } else {
       boolean b = original.removeAll(defects);  // TODO - does this work really without a compareTo?
-      logger.debug(b ? "removed defects " + original.size() + " now" : " didn't remove any defects - " + defects.size());
+      logger.debug(b ? "editItem removed defects " + original.size() + " now" : "editItem didn't remove any defects - " + defects.size());
 
       MutableAudioExercise mutableAudio = exercise.getMutableAudio();
       for (AudioAttribute attribute : defects) {
         if (!mutableAudio.removeAudio(attribute)) {
-          logger.warn("huh? couldn't remove " + attribute.getKey() + " from " + exercise.getID());
+          logger.warn("editItem : huh? couldn't remove " + attribute.getKey() + " from " + exercise.getID());
         }
       }
 
       // why would this make sense to do???
-/*      String overlayID = exercise.getID();
+      if (keepAudio) {
+        Collection<AudioAttribute> audioAttributes = audioDAO.getAudioAttributes(id);
 
-      logger.debug("editItem copying " + original.size() + " audio attrs under exercise overlay id " + overlayID);
-
-      for (AudioAttribute toCopy : original) {
-        if (toCopy.getUserid() < UserDAO.DEFAULT_FEMALE_ID) {
-          logger.error("bad user id for " + toCopy);
+        for (AudioAttribute audioAttribute : audioAttributes) logger.debug("before " + audioAttribute);
+        logger.debug("editItem copying " + original.size() + " audio attrs under exercise overlay id " + exercise.getID());
+        for (AudioAttribute toCopy : original) {
+          if (toCopy.getUserid() < UserDAO.DEFAULT_FEMALE_ID) {
+            logger.error("bad user id for " + toCopy);
+          }
+          logger.debug("\teditItem copying " + toCopy + " with new fl " + userExercise.getForeignLanguage());
+          audioDAO.copyWithNewTranscript(toCopy, userExercise.getForeignLanguage());
         }
-        logger.debug("\t copying " + toCopy);
-        audioDAO.add((int) toCopy.getUserid(), toCopy.getAudioRef(), overlayID, toCopy.getTimestamp(), toCopy.getAudioType(), toCopy.getDurationInMillis());
-      }*/
+
+        for (AudioAttribute audioAttribute : audioDAO.getAudioAttributes(id)) logger.debug("after  " + audioAttribute);
+      }
     }
 
     getSectionHelper().refreshExercise(exercise);
@@ -604,7 +615,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     Set<AudioAttribute> defects = new HashSet<AudioAttribute>();
 
     for (Map.Entry<String, ExerciseAnnotation> fieldAnno : fieldToAnnotation.entrySet()) {
-      if (!fieldAnno.getValue().isCorrect()) {  // i.e. defect
+      if (fieldAnno.getValue().isDefect()) {  // i.e. defect
         AudioAttribute audioAttribute = userExercise.getAudioRefToAttr().get(fieldAnno.getKey());
         if (audioAttribute != null) {
           logger.debug("getAndMarkDefects : found defect " + audioAttribute +
@@ -1338,7 +1349,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         configDir,
         false,
         options
-        );
+    );
   }
 
   @Override
@@ -1347,9 +1358,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   }
 
   /**
-   * @see DownloadServlet#writeAllAudio(HttpServletResponse)
    * @param out
    * @throws Exception
+   * @see DownloadServlet#writeAllAudio(HttpServletResponse)
    */
   public void writeUserListAudio(OutputStream out) throws Exception {
     new AudioExport(getServerProps()).writeZipJustOneAudio(out, getSectionHelper(), getExercises(), installPath);
