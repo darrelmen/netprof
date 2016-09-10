@@ -490,7 +490,7 @@ public class UserListManager {
     userList.setExercises(onList);
 
     markState(onList);
-    logger.debug("returning " + userList + (userList.getExercises().isEmpty() ? "" : " first " + userList.getExercises().iterator().next()));
+    logger.debug("getReviewList returning " + userList + (userList.getExercises().isEmpty() ? "" : " first " + userList.getExercises().iterator().next()));
     return userList;
   }
 
@@ -658,7 +658,7 @@ public class UserListManager {
   private void fixAudioPaths(CommonExercise userExercise, boolean overwrite, String mediaDir) {
     AudioAttribute regularSpeed = userExercise.getRegularSpeed();
     if (regularSpeed == null) {
-      logger.warn("huh? no ref audio for " + userExercise);
+      logger.warn("fixAudioPaths huh? no ref audio for " + userExercise);
       return;
     }
     long now = System.currentTimeMillis();
@@ -666,26 +666,25 @@ public class UserListManager {
     //logger.debug("fixAudioPaths : checking regular '" + regularSpeed.getAudioRef() + "' against '" +mediaDir + "'");
 
     if (!regularSpeed.getAudioRef().contains(mediaDir)) {
-      File fileRef = pathHelper.getAbsoluteFile(regularSpeed.getAudioRef());
-
-      String fast = FAST + "_" + now + "_by_" + userExercise.getCombinedMutableUserExercise().getCreator() + ".wav";
-      String artist = regularSpeed.getUser().getUserID();
-      String refAudio = getRefAudioPath(userExercise.getID(), fileRef, fast, overwrite, userExercise.getForeignLanguage(), artist);
-      regularSpeed.setAudioRef(refAudio);
-      //  logger.debug("fixAudioPaths : for " + userExercise.getID() + " fast is " + fast + " size " + FileUtils.size(refAudio));
+      fixAudioPath(userExercise, overwrite, regularSpeed, now, FAST);
     }
 
     AudioAttribute slowSpeed = userExercise.getSlowSpeed();
 
-    if (slowSpeed != null && !slowSpeed.getAudioRef().isEmpty() && !slowSpeed.getAudioRef().contains(mediaDir)) {
-      File fileRef = pathHelper.getAbsoluteFile(slowSpeed.getAudioRef());
-      String slow = SLOW + "_" + now + "_by_" + userExercise.getCombinedMutableUserExercise().getCreator() + ".wav";
-
-      String artist = slowSpeed.getUser().getUserID();
-      String refAudio = getRefAudioPath(userExercise.getID(), fileRef, slow, overwrite, userExercise.getForeignLanguage(), artist);
-      //logger.debug("fixAudioPaths : for exid " + userExercise.getID()+ " slow is " + refAudio + " size " + FileUtils.size(refAudio));
-      slowSpeed.setAudioRef(refAudio);
+    if (slowSpeed != null && !slowSpeed.getAudioRef().isEmpty() &&
+        !slowSpeed.getAudioRef().contains(mediaDir)) {
+      fixAudioPath(userExercise, overwrite, slowSpeed, now, SLOW);
     }
+  }
+
+  private void fixAudioPath(CommonExercise userExercise, boolean overwrite, AudioAttribute regularSpeed, long now, String prefix) {
+    File fileRef = pathHelper.getAbsoluteFile(regularSpeed.getAudioRef());
+
+    String fast = prefix + "_" + now + "_by_" + userExercise.getCombinedMutableUserExercise().getCreator() + ".wav";
+    String artist   = regularSpeed.getUser().getUserID();
+    String refAudio = getRefAudioPath(userExercise.getID(), fileRef, fast, overwrite, userExercise.getForeignLanguage(), artist);
+    regularSpeed.setAudioRef(refAudio);
+    //  logger.debug("fixAudioPaths : for " + userExercise.getID() + " fast is " + fast + " size " + FileUtils.size(refAudio));
   }
 
   /**
@@ -870,7 +869,12 @@ public class UserListManager {
     reviewedDAO.remove(exerciseid);
   }
 
-  void markAllFieldsFixed(CommonExercise userExercise, long userID) {
+  /**
+   * @see #markState(String, STATE, long)
+   * @param userExercise
+   * @param userID
+   */
+  private void markAllFieldsFixed(CommonExercise userExercise, long userID) {
     Collection<String> fields = userExercise.getFields();
     logger.debug("markAllFieldsFixed " + userExercise + "  has " + fields + " user " + userID);
     addAnnotations(userExercise);
