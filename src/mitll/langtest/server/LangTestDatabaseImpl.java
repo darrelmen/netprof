@@ -889,7 +889,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     checkPerformance(id, then);
 
     if (byID != null) {
-      //logger.debug("returning (" + language + ") exercise " + byID.getID() + " : " + byID);
+      logger.debug("returning (" + language + ") exercise " + byID.getID() + " : " + byID);
     } else {
       logger.warn(getLanguage() + " : couldn't find exercise with id '" + id + "'");
     }
@@ -1441,14 +1441,31 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public List<UserList<CommonShell>> getReviewLists() {
-    List<UserList<CommonShell>> lists = new ArrayList<>();
     UserListManager userListManager = getUserListManager();
-    UserList<CommonShell> defectList = userListManager.getDefectList(db.getTypeOrder());
-    lists.add(defectList);
 
-    lists.add(userListManager.getCommentedList(db.getTypeOrder()));
+    long then = System.currentTimeMillis();
+    UserList<CommonShell> defectList = userListManager.getDefectList(db.getTypeOrder());
+    long now = System.currentTimeMillis();
+    logger.info("took " + (now-then) + " to get defect list size = "+ defectList.getExercises().size());
+
+    List<UserList<CommonShell>> lists = new ArrayList<>();
+    lists.add(defectList);
+    then = System.currentTimeMillis();
+    UserList<CommonShell> commentedList = userListManager.getCommentedList(db.getTypeOrder());
+    lists.add(commentedList);
+    now = System.currentTimeMillis();
+
+    logger.info("took " + (now-then) + " to get comment list size = "+ commentedList.getExercises().size());
+
     if (!serverProps.isNoModel()) {
-      lists.add(userListManager.getAttentionList(db.getTypeOrder()));
+      then = System.currentTimeMillis();
+      UserList<CommonShell> attentionList = userListManager.getAttentionList(db.getTypeOrder());
+      now = System.currentTimeMillis();
+
+      lists.add(attentionList);
+
+      logger.info("took " + (now-then) + " to get attention list size = "+ attentionList.getExercises().size());
+
     }
     return lists;
   }
@@ -1614,11 +1631,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * @param userExercise
+   * @param keepAudio
    * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#postEditItem
    */
   @Override
-  public void editItem(CommonExercise userExercise) {
-    db.editItem(userExercise);
+  public void editItem(CommonExercise userExercise, boolean keepAudio) {
+    db.editItem(userExercise, keepAudio);
     logger.debug("editItem : now user exercise " + userExercise);
   }
 
