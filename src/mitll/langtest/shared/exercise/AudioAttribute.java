@@ -331,18 +331,21 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     return t.replaceAll("\\p{P}", "").replaceAll("\\s++", "");
   }
 
-  @Override
-  public String toString() {
-    return "Audio id " + uniqueID + " : " + audioRef + " attrs " + attributes + " by " + userid + "/" + user +
-        " transcript '" + transcript +
-        "' ";
-  }
-
   public String getTranscript() {
     return transcript == null ? "" : transcript;
   }
 
   public void setTranscript(String transcript) {
     this.transcript = transcript;
+  }
+
+  @Override
+  public String toString() {
+    return "Audio id " + uniqueID +
+        " : " + audioRef +
+        " attrs " + attributes +
+        " by " + userid + "/" + user +
+        " transcript '" + transcript +
+        "' ";
   }
 }
