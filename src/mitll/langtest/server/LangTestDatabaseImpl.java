@@ -1636,6 +1636,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public void editItem(CommonExercise userExercise, boolean keepAudio) {
+    logger.debug("editItem : user exercise " + userExercise.getID() + " keep " + keepAudio);
+
     db.editItem(userExercise, keepAudio);
     logger.debug("editItem : now user exercise " + userExercise);
   }
