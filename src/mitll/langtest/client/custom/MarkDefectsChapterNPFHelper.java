@@ -61,6 +61,14 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
 
   private static final String MARK_DEFECTS1 = "markDefects";
 
+  /**
+   * @see Navigation#Navigation(LangTestDatabaseAsync, UserManager, ExerciseController, UserFeedback)
+   * @param service
+   * @param feedback
+   * @param userManager
+   * @param controller
+   * @param learnHelper
+   */
   MarkDefectsChapterNPFHelper( LangTestDatabaseAsync service,
                                      UserFeedback feedback, UserManager userManager, ExerciseController controller,
                                      SimpleChapterNPFHelper learnHelper) {
@@ -89,6 +97,15 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
             addTypeAhead(column);
 
             // row 2
+            getFilterCheckbox();
+            add(filterOnly);
+
+            // row 3
+            add(pagingContainer.getTableWithPager());
+            //setOnlyExamples(!doNormalRecording);
+          }
+
+          private void getFilterCheckbox() {
             filterOnly = new CheckBox(SHOW_ONLY_UNRECORDED);
             filterOnly.addClickHandler(new ClickHandler() {
               @Override
@@ -99,16 +116,10 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
               }
             });
             filterOnly.addStyleName("leftFiveMargin");
-            add(filterOnly);
-
-            // row 3
-            add(pagingContainer.getTableWithPager());
-            //setOnlyExamples(!doNormalRecording);
           }
-
-          private String setCheckboxTitle(UserManager userManager) {
-            return SHOW_ONLY_UNRECORDED;// + (userManager.isMale() ? " by Males" : " by Females");
-          }
+//          private String setCheckboxTitle(UserManager userManager) {
+//            return SHOW_ONLY_UNRECORDED;// + (userManager.isMale() ? " by Males" : " by Females");
+//          }
         };
       }
     };
@@ -118,7 +129,7 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
     return new ExercisePanelFactory<CommonShell, CommonExercise>(service, feedback, controller, exerciseList) {
       @Override
       public Panel getExercisePanel(CommonExercise e) {
-        return new QCNPFExercise<CommonExercise>(e, controller, exerciseList, MARK_DEFECTS1);
+        return new QCNPFExercise<>(e, controller, exerciseList, MARK_DEFECTS1);
       }
     };
   }
