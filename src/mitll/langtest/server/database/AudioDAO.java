@@ -90,7 +90,7 @@ public class AudioDAO extends DAO {
   public static final String FEMALE_CONTEXT = "femaleContext";
 
   private final boolean DEBUG = false;
-  private static final boolean DEBUG_ATTACH = true;
+  private static final boolean DEBUG_ATTACH = false;
 
   private final Connection connection;
   private final UserDAO userDAO;
@@ -594,9 +594,10 @@ public class AudioDAO extends DAO {
 
       for (AudioAttribute audioAttribute : resultsSQL) {
         String audioRef = audioAttribute.getAudioRef();
-        if (!paths.contains(audioRef)) {
+        String key = audioRef + "_" + audioAttribute.getTranscript();
+        if (!paths.contains(key)) {
           ret.add(audioAttribute);
-          paths.add(audioRef);
+          paths.add(key);
         }
         //  else {
         //logger.info("skipping duplicate audio attr " + audioAttribute + " for " + exid);
@@ -1091,7 +1092,7 @@ public class AudioDAO extends DAO {
    * @param newTranscript
    * @see DatabaseImpl#editItem(CommonExercise, boolean)
    */
-  public void copyWithNewTranscript(AudioAttribute existing, String newTranscript) {
+   void copyWithNewTranscript(AudioAttribute existing, String newTranscript) {
     String exerciseID = existing.getExid();
     long timestamp = existing.getTimestamp();
     String audioType = existing.getAudioType();
