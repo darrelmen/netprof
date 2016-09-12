@@ -234,8 +234,7 @@ class EditableExerciseDialog extends NewUserExercise {
    */
   @Override
   protected void makeForeignLangRow(Panel container) {
-    if (DEBUG) logger.info("EditableExerciseDialog.makeForeignLangRow --->");
-
+    //if (DEBUG) logger.info("EditableExerciseDialog.makeForeignLangRow --->");
     Panel row = new FluidRow();
     container.add(row);
 

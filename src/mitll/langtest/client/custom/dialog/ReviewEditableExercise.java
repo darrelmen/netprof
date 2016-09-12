@@ -114,7 +114,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   private String originalContext = "";
   private String originalContextTrans = "";
   private List<RememberTabAndContent> tabs;
-  CheckBox keepAudio = new CheckBox("Keep Audio");
+  CheckBox keepAudio = new CheckBox("Keep Audio even if text changes");
 
   /**
    * @param itemMarker
@@ -359,7 +359,6 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
             setupPopover(tab.getContent(), getWarningHeader(), getWarningForFL(), Placement.TOP, DELAY_MILLIS, false);
           }
         }*/
-
         setupPopover(keepAudio, getWarningHeader(), getWarningForFL(), Placement.TOP, DELAY_MILLIS, false);
       }
     }
@@ -457,7 +456,6 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     delete.setType(ButtonType.WARNING);
     delete.setIcon(IconType.REMOVE);
     delete.addClickHandler(handler);
-
     return delete;
   }
 
@@ -493,12 +491,20 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    */
   private <E extends AnnotationExercise> Widget getCommentLine(E e, AudioAttribute audio) {
     ExerciseAnnotation audioAnnotation = e.getAnnotation(audio.getAudioRef());
+
+//    logger.info("annotation for " + audio.getAudioRef() + " is " + audioAnnotation);
+
     if (audioAnnotation != null && !audioAnnotation.isCorrect()) {
       HTML child = new HTML(audioAnnotation.getComment().isEmpty() ? "EMPTY COMMENT" : audioAnnotation.getComment());
       child.getElement().getStyle().setFontSize(14, Style.Unit.PX);
       child.getElement().getStyle().setFontWeight(Style.FontWeight.BOLD);
       return child;
     } else {
+      Map<String, ExerciseAnnotation> fieldToAnnotation = e.getFieldToAnnotation();
+
+//      for (Map.Entry<String, ExerciseAnnotation> pair : fieldToAnnotation.entrySet()) {
+//        logger.info("found " + pair.getKey() + " : " + pair.getValue());
+//      }
       return null;
     }
   }
@@ -694,7 +700,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    */
   @Override
   protected void doAfterEditComplete(ListInterface<CommonShell> pagingContainer, boolean buttonClicked) {
-  //  super.doAfterEditComplete(pagingContainer, buttonClicked);
+    //  super.doAfterEditComplete(pagingContainer, buttonClicked);
     changeTooltip(pagingContainer);
 
     if (buttonClicked) {
