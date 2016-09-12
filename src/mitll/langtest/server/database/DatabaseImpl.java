@@ -72,6 +72,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.Annotation;
 import java.text.CollationKey;
 import java.util.*;
 
@@ -635,6 +636,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   }
 
   /**
+   * After marking an audio defective, we want to make an annotation that indicates it's no longer something that
+   * needs to be fixed.
+   *
    * @param audioAttribute
    * @see mitll.langtest.server.LangTestDatabaseImpl#markAudioDefect(mitll.langtest.shared.exercise.AudioAttribute, String)
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getPanelForAudio
@@ -642,6 +646,14 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   public void markAudioDefect(AudioAttribute audioAttribute) {
     if (audioDAO.markDefect(audioAttribute) < 1) {
       logger.error("markAudioDefect huh? couldn't mark error on " + audioAttribute);
+    }
+    else {
+      userListManager.addAnnotation(
+          audioAttribute.getExid(),
+          audioAttribute.getAudioRef(),
+          UserListManager.CORRECT,
+          "audio marked with defect",
+          audioAttribute.getUserid());
     }
   }
 
