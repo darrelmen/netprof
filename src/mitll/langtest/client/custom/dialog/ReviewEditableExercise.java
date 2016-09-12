@@ -43,6 +43,7 @@ import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
+import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -544,7 +545,16 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     }
 
     row.add(getFixedButton(ul, pagingContainer, toAddTo, normalSpeedRecording));
-    keepAudio.setValue(true);
+    boolean keepAudioSelection = getKeepAudioSelection();
+
+    logger.info("value is  " + keepAudioSelection);
+    keepAudio.setValue(keepAudioSelection);
+    keepAudio.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent clickEvent) {
+        storeKeepAudio(keepAudio.getValue());
+      }
+    });
     keepAudio.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
     row.add(keepAudio);
     configureButtonRow(row);
@@ -682,11 +692,59 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    */
   @Override
   protected void audioPosted() {
-    reallyChange(listInterface, false, keepAudio.getValue());
+    Boolean value = getKeepAudio();
+    logger.info("did audioPosted keep audio = " + value);
+    reallyChange(listInterface, false, value);
   }
 
+  protected boolean getKeepAudio() {
+    Boolean value = keepAudio.getValue();
+    logger.info(this.getClass() + " : did getKeepAudio keep audio = " + value);
+    return value;
+  }
+
+  /**
+   * @see #isValidForeignPhrase(UserList, ListInterface, Panel, boolean)
+   */
   @Override
   protected void checkIfNeedsRefAudio() {
+  }
+
+  private boolean getKeepAudioSelection() {
+    return getKeepAudioSelection(getSelectedUserKey(controller, ""));
+  }
+
+  private boolean getKeepAudioSelection(String selectedUserKey) {
+    if (Storage.isLocalStorageSupported()) {
+      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
+      String item = localStorageIfSupported.getItem(selectedUserKey);
+     // logger.info("value for " + selectedUserKey + "='" + item+ "'");
+      if (item != null) {
+        return item.toLowerCase().equals("true");
+      }
+      else {
+        storeKeepAudio(true);
+        return true;
+      }
+    }
+    // else {
+    return false;
+    // }
+  }
+
+  private String getSelectedUserKey(ExerciseController controller, String appTitle) {
+    return getStoragePrefix(controller, appTitle) + "keepAudio";
+  }
+
+  private String getStoragePrefix(ExerciseController controller, String appTitle) {
+    return appTitle + ":" + controller.getUser() + ":";
+  }
+
+  private void storeKeepAudio(boolean shouldKeepAudio) {
+    if (Storage.isLocalStorageSupported()) {
+      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
+      localStorageIfSupported.setItem(getSelectedUserKey(controller, ""), "" + shouldKeepAudio);
+    }
   }
 
   /**
@@ -702,12 +760,9 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   protected void doAfterEditComplete(ListInterface<CommonShell> pagingContainer, boolean buttonClicked) {
     //  super.doAfterEditComplete(pagingContainer, buttonClicked);
     changeTooltip(pagingContainer);
-
     if (buttonClicked) {
       userSaidExerciseIsFixed();
-    } //else {
-    //logger.info("----> doAfterEditComplete : button not clicked ");
-    // }
+    }
   }
 
   private void userSaidExerciseIsFixed() {
