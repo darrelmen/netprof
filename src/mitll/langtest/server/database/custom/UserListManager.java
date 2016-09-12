@@ -58,9 +58,9 @@ import java.util.*;
 public class UserListManager {
   private static final Logger logger = Logger.getLogger(UserListManager.class);
 
-  private static final String CORRECT = "correct";
-  private static final String FIXED = "fixed";
+  public static final String CORRECT = "correct";
   private static final String INCORRECT = "incorrect";
+  private static final String FIXED = "fixed";
 
   private static final String FAST = "Fast";
   private static final String SLOW = "Slow";
@@ -746,7 +746,7 @@ public class UserListManager {
     }
   }
 
-  public boolean listExists(long id) {
+  private boolean listExists(long id) {
     return userListDAO.getWhere(id, false) != null;
   }
 
