@@ -51,6 +51,11 @@ public class TabAndContent {
   private final DivWidget content;
   private final String label;
 
+  public TabAndContent(TabPanel tabPanel, IconType iconType, String label) {
+    this(iconType,label);
+    tabPanel.add(getTab().asTabLink());
+  }
+
   /**
    * @param iconType
    * @param label
@@ -71,11 +76,6 @@ public class TabAndContent {
     this.tab = tab;
     this.content = content;
     this.label = label;
-  }
-
-  public TabAndContent(TabPanel tabPanel, IconType iconType, String label) {
-    this(iconType,label);
-    tabPanel.add(getTab().asTabLink());
   }
 
   private void zeroPadding(Panel createContent) {
