@@ -32,6 +32,7 @@
 
 package mitll.langtest.client.custom.tabs;
 
+import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -53,6 +54,7 @@ public class RememberTabAndContent extends TabAndContent {
    * @param label
    * @param isCheckable
    * @see mitll.langtest.client.qc.QCNPFExercise#addTabsForUsers
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getRememberTabAndContent(TabPanel, String, boolean, boolean)
    */
   public RememberTabAndContent(IconType iconType, String label, boolean isCheckable) {
     super(iconType, label);
