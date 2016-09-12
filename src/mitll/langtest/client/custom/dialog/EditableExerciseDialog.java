@@ -322,8 +322,14 @@ class EditableExerciseDialog extends NewUserExercise {
     if (foreignChanged() || translitChanged() || englishChanged() || refAudioChanged() || slowRefAudioChanged() || onClick) {
       if (DEBUG)
         logger.info("postChangeIfDirty:  change " + foreignChanged() + translitChanged() + englishChanged() + refAudioChanged() + slowRefAudioChanged());
-      reallyChange(exerciseList, onClick, false);
+
+      logger.info("postChangeIfDirty keep audio = " + getKeepAudio());
+      reallyChange(exerciseList, onClick, getKeepAudio());
     }
+  }
+
+  protected boolean getKeepAudio() {
+    return false;
   }
 
   /**
@@ -439,7 +445,7 @@ class EditableExerciseDialog extends NewUserExercise {
    * @see #reallyChange(ListInterface, boolean, boolean)
    */
   private void postEditItem(final ListInterface<CommonShell> pagingContainer, final boolean buttonClicked, boolean keepAudio) {
-    if (DEBUG) logger.info("postEditItem : edit item " + buttonClicked);
+    if (DEBUG) logger.info("postEditItem : edit item " + buttonClicked + " keep audio " +keepAudio);
 
     grabInfoFromFormAndStuffInfoExercise(newUserExercise.getMutable());
 
