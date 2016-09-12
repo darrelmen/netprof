@@ -167,7 +167,6 @@ public class SelectionState {
     return search;
   }
 
-
   boolean isOnlyWithAudioDefects() {
     return onlyWithAudioDefects;
   }
@@ -181,11 +180,11 @@ public class SelectionState {
     return s.substring(0, Math.max(0, s.length() - 2));
   }
 
-  public String getInfo() {
+/*  public String getInfo() {
     return "parseToken : instance " + instance + " : " +
         "search " + search + ", " +
         "item " + item + ", " +
         "unit->chapter " + getTypeToSection() +
         " onlyWithAudioDefects="+isOnlyWithAudioDefects();
-  }
+  }*/
 }
