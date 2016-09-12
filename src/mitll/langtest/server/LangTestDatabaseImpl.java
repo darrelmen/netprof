@@ -1641,6 +1641,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
+   * Remember to clear any incorrect annotations.
+   *
    * @param audioAttribute
    * @param exid
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getPanelForAudio
@@ -1661,6 +1663,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
           "' : " + audioAttribute + " from ex #" + exid +
           "\n\tkeys were " + byID.getAudioRefToAttr().keySet() + " contains " + byID.getAudioRefToAttr().containsKey(key));
     }
+
     /*   int afterNumAudio = byID.getAudioAttributes().size();
     if (afterNumAudio != beforeNumAudio - 1) {
       logger.error("\thuh? before there were " + beforeNumAudio + " but after there were " + afterNumAudio);

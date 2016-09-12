@@ -63,6 +63,9 @@ import java.util.logging.Logger;
 public class ReviewItemHelper extends NPFHelper {
   private final Logger logger = Logger.getLogger("ReviewItemHelper");
 
+  /**
+   *
+   */
   private static final String ONLY_WITH_AUDIO_DEFECTS = "Only with audio defects";
 
   private FlexListLayout<CommonShell, CommonExercise> flexListLayout;
