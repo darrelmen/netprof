@@ -546,6 +546,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   public void editItem(CommonExercise userExercise, boolean keepAudio) {
     String id = userExercise.getID();
     logger.debug("editItem exercise #" + id +
+        " keep audio " + keepAudio +
         " mediaDir : " + getServerProps().getMediaDir() +
         " initially audio was\n\t " + userExercise.getAudioAttributes());
 
@@ -596,7 +597,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
           audioDAO.copyWithNewTranscript(toCopy, userExercise.getForeignLanguage());
         }
 
-        for (AudioAttribute audioAttribute : audioDAO.getAudioAttributes(id)) logger.debug("after  " + audioAttribute);
+        for (AudioAttribute audioAttribute : audioDAO.getAudioAttributes(id)) logger.debug("editItem after  " + audioAttribute);
       }
     }
 

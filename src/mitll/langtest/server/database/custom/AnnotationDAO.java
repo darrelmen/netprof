@@ -85,7 +85,7 @@ public class AnnotationDAO extends DAO {
    *
    * @throws SQLException
    */
-  public void markCorrectForDefectAudio() throws SQLException {
+  private void markCorrectForDefectAudio() throws SQLException {
     String sql = "select annotation.uniqueid from annotation, audio where status='incorrect' and annotation.field = audio.audioref and audio.defect=true";
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
