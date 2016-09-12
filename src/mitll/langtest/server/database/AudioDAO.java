@@ -40,6 +40,7 @@ import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.exercise.*;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -89,11 +90,12 @@ public class AudioDAO extends DAO {
   public static final String FEMALE_CONTEXT = "femaleContext";
 
   private final boolean DEBUG = false;
+  private static final boolean DEBUG_ATTACH = true;
+
   private final Connection connection;
   private final UserDAO userDAO;
   private ExerciseDAO<?> exerciseDAO;
 
-  private static final boolean DEBUG_ATTACH = false;
 
   /**
    * @param database
@@ -382,6 +384,7 @@ public class AudioDAO extends DAO {
     return new ArrayList<>();
   }
 
+
   /**
    * @param firstExercise
    * @param installPath
@@ -528,7 +531,32 @@ public class AudioDAO extends DAO {
                                         AudioConversion audioConversion,
                                         AudioAttribute attr) {
     String against = attr.isContextAudio() ? firstExercise.getContext() : firstExercise.getForeignLanguage();
-    if (attr.hasMatchingTranscript(against)) {
+//    String noAccents = Normalizer.normalize(against, Normalizer.Form.NFD);
+//
+//    logger.info("attachAudioAndFixPath before '" +against+
+//        "' after '" + noAccents+
+//        "'");
+
+    String noAccents = StringUtils.stripAccents(against);
+    String transcript = attr.getTranscript();
+    String noAccentsTranscript = transcript == null ? null : StringUtils.stripAccents(transcript);
+//    boolean foundAlt = false;
+//    if (!before.equals(noAccents)) {
+//      if (firstExercise.getID().equals("3277")) {
+//        logger.info("attachAudio before '" + before +
+//            "' after '" + noAccents +
+//            "'");
+//      }
+//      foundAlt = true;
+//    } else {
+//      if (firstExercise.getID().equals("3277")) {
+//        logger.info("attachAudio before '" + before +
+//            "' after '" + noAccents +
+//            "'");
+//      }
+//    }
+
+    if (attr.matchTranscript(against, transcript) || attr.matchTranscript(noAccents, noAccentsTranscript)) {
       firstExercise.getMutableAudio().addAudio(attr);
 
       if (attr.getAudioRef() == null)
@@ -583,10 +611,6 @@ public class AudioDAO extends DAO {
     }
     return new ArrayList<>();
   }
-
-/*  public Set<String> getRecordedRegularForUser(long userid) {
-    return getAudioForGender(Collections.singleton(userid), REGULAR);
-  }*/
 
   /**
    * Get back the ids of exercises recorded by people who are the same gender as the userid.
@@ -1063,9 +1087,9 @@ public class AudioDAO extends DAO {
   }
 
   /**
-   * @see DatabaseImpl#editItem(CommonExercise, boolean)
    * @param existing
    * @param newTranscript
+   * @see DatabaseImpl#editItem(CommonExercise, boolean)
    */
   public void copyWithNewTranscript(AudioAttribute existing, String newTranscript) {
     String exerciseID = existing.getExid();
