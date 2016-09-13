@@ -32,15 +32,13 @@
 
 package mitll.langtest.client.user;
 
-import com.github.gwtbootstrap.client.ui.ControlGroup;
-import com.github.gwtbootstrap.client.ui.Form;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.PasswordTextBox;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.user.client.ui.FocusWidget;
-import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.services.UserService;
@@ -57,6 +55,7 @@ import mitll.langtest.shared.user.User;
  * To change this template use File | Settings | File Templates.
  */
 abstract class UserDialog extends BasicDialog {
+  protected static final String VALID_EMAIL = "Please enter a valid email address.";
   static final int USER_ID_MAX_LENGTH = 35;
 
   static final int MIN_AGE = 12;
@@ -113,9 +112,9 @@ abstract class UserDialog extends BasicDialog {
     userManager.storeUser(result);
   }
 
-  public KeyPressHelper getEnterKeyButtonHelper() {
+/*  public KeyPressHelper getEnterKeyButtonHelper() {
     return enterKeyButtonHelper;
-  }
+  }*/
 
   public void setEnterKeyButtonHelper(KeyPressHelper enterKeyButtonHelper) {
     this.enterKeyButtonHelper = enterKeyButtonHelper;
@@ -135,5 +134,25 @@ abstract class UserDialog extends BasicDialog {
         widget.setFocus(true);
       }
     });
+  }
+
+  /**
+   * @param commentPopup
+   * @param commentEntryText
+   * @param okButton
+   * @param prompt
+   * @see #getForgotPassword()
+   * @see #getForgotUser()
+   */
+  protected void makePopup(Panel commentPopup, Widget commentEntryText, Widget okButton, String prompt) {
+    Panel vp = new VerticalPanel();
+    Panel w = new Heading(6, prompt);
+    vp.add(w);
+    w.addStyleName("bottomFiveMargin");
+    Panel hp = new HorizontalPanel();
+    hp.add(commentEntryText);
+    hp.add(okButton);
+    vp.add(hp);
+    commentPopup.add(vp);
   }
 }

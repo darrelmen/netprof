@@ -60,7 +60,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   private static final String STATE = "state";
   private static final String CONTEXT = "context";
   private static final String CONTEXT_TRANSLATION = "contextTranslation";
-  public static final String CUSTOM_PREFIX = "Custom_";
+  private static final String CUSTOM_PREFIX = "Custom_";
 
   private static final boolean DEBUG = false;
 
@@ -212,16 +212,19 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
 
       logger.debug("now " + getCount(USEREXERCISE) + " user exercises and user exercise is " + userExercise);
       logger.debug("new " + (predefined ? " PREDEF " : " USER ") + " user exercise is " + userExercise);
+
+      return id;
     } catch (Exception ee) {
       logException(ee);
     }
+    return -1;
   }
 
   private String fixSingleQuote(String s) {
     return s == null ? "" : s.replaceAll("'", "''");
   }
 
-  void createUserTable(Database database) throws SQLException {
+  private void createUserTable(Database database) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement("CREATE TABLE if not exists " +
         USEREXERCISE +
