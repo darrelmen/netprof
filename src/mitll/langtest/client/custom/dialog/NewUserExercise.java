@@ -563,9 +563,8 @@ class NewUserExercise extends BasicDialog {
   void grabInfoFromFormAndStuffInfoExercise(MutableExercise mutableExercise) {
     String text = english.getText();
 
-    logger.info("so english  field is " + text);
-    logger.info("so fl       field is " + foreignLang.getText());
-    logger.info("so translit field is " + translit.getText());
+    logger.info("so english  field is " + text + " fl " + foreignLang.getText());
+ //   logger.info("so translit field is " + translit.getText());
     if (isEnglish()) {
       mutableExercise.setMeaning(text);
     }
@@ -626,9 +625,12 @@ class NewUserExercise extends BasicDialog {
    * @param ul
    * @param exerciseList
    * @param toAddTo
+   * @see #afterValidForeignPhrase(UserList, ListInterface, Panel, boolean)
    */
-  private void afterItemCreated(CommonExercise newExercise, UserList<CommonShell> ul,
-                                ListInterface<CommonShell> exerciseList, Panel toAddTo) {
+  private void afterItemCreated(CommonExercise newExercise,
+                                UserList<CommonShell> ul,
+                                ListInterface<CommonShell> exerciseList,
+                                Panel toAddTo) {
     logger.info("afterItemCreated " + newExercise + " creator " + newExercise.getCreator());
 
     editItem.clearNewExercise(); // success -- don't remember it
