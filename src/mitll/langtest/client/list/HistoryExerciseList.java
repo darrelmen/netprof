@@ -42,6 +42,7 @@ import mitll.langtest.client.amas.SingleSelectExerciseList;
 import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SectionWidget;
+import mitll.langtest.client.flashcard.StatsFlashcardFactory;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -165,7 +166,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
         "' vs new exercise " + exerciseID + " instance " + getInstance());*/
 
     if (idFromToken.equals(exerciseID)) {
-      if (DEBUG)
+      if (DEBUG || true)
         logger.info("pushFirstSelection : (" + getInstance() + ") current token " + token + " same as new " + exerciseID);
       checkAndAskOrFirst(exerciseID);
     } else {
@@ -200,15 +201,13 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
    * @see #pushFirstSelection(String, String)
    * @see #pushNewItem(String, String)
    */
-
   private void checkAndAskOrFirst(String exerciseID) {
+   // logger.info("checkAndAskOrFirst "+ exerciseID);
     String toUse = getValidExerciseID(exerciseID);
     if (hasExercise(toUse)) {
+      logger.info("\tcheckAndAskOrFirst "+ exerciseID);
       checkAndAskServer(toUse);
     }
-//    else {
-//
-//    }
   }
 
   private String getValidExerciseID(String exerciseID) {
@@ -236,7 +235,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
 //    if (DEBUG)
 //      logger.info("HistoryExerciseList.pushNewItem : current currentToken '" + currentToken + "' vs new id '" + exerciseID + "'");
     if (currentToken != null && (historyToken.equals(currentToken) || trimmedToken.equals(currentToken))) {
-      if (DEBUG)
+      if (DEBUG || true)
         logger.info("HistoryExerciseList.pushNewItem : current currentToken '" + currentToken + "' same as new " + historyToken);
       checkAndAskOrFirst(exerciseID);
     } else {
@@ -287,7 +286,6 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
     } else {
       if (DEBUG)
         logger.info("pushNewSectionHistoryToken : currentToken " + currentToken + " instance " + getInstance());
-    //  SelectionState newState = getSelectionState(sectionWidgetContainer.getHistoryToken());
       SelectionState newState = getSelectionState(historyToken);
       loadExercisesUsingPrefix(newState.getTypeToSection(), selectionState.getSearch(), newState.isOnlyWithAudioDefects(), selectionState.getItem());
     }
@@ -396,10 +394,6 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
     loadExercisesUsingPrefix(typeToSection, prefix, onlyWithAudioAnno, "");
   }
 
-/*  protected void loadExercisesUsingPrefix(SelectionState selectionState) {
-    loadExercisesUsingPrefix(newState.getTypeToSection(), selectionState.getSearch(), selectionState.isOnlyWithAudioDefects(), selectionState.getItem());
-  }*/
-
   /**
    * @param typeToSection
    * @param prefix
@@ -433,8 +427,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
       }
     } else {
       if (DEBUG) {
-        logger.info("skipping request for current list" +
-            "\n" + request + " vs\n" +lastSuccessfulRequest);
+        logger.info(getClass() + " skipping request for current list" + "\n" + request + " vs\n" +lastSuccessfulRequest);
       }
       if (exerciseID != null) {
         checkAndAskOrFirst(exerciseID);
@@ -444,6 +437,10 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
     }
   }
 
+  /**
+   * @see StatsFlashcardFactory.StatsPracticePanel#doIncorrectFirst
+   * @param typeToSection
+   */
   @Override
   public void reload(Map<String, Collection<String>> typeToSection) {
     loadExercisesUsingPrefix(typeToSection, getTypeAheadText(), false, "");
@@ -452,7 +449,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
   /**
    * @param token
    * @return object representing type=value pairs from history token
-   * @see PagingExerciseList#loadExercises(String, String, boolean, boolean)
+   * @see PagingExerciseList#loadExercises
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */
   protected SelectionState getSelectionState(String token) {
