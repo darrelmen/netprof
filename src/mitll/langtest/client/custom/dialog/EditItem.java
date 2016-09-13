@@ -320,7 +320,6 @@ public class EditItem {
       if (newExercise == null) {
         newExercise = createNewItem(userManager.getUser(), ul.getName().replaceAll("\\s+", "_"));
         addEditOrAddPanel(newExercise, itemMarker, originalList, right, ul, pagingContainer, true, false);
-
       } else {
         addEditOrAddPanel(newExercise, itemMarker, originalList, right, ul, pagingContainer, true, true);
       }
