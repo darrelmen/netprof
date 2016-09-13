@@ -93,5 +93,6 @@
     <orderEntry type="library" name="slf4j-log4j12-1.7.21" level="project" />
     <orderEntry type="library" name="commons-math3-3.5 (2)" level="project" />
     <orderEntry type="library" name="pronz" level="project" />
+    <orderEntry type="library" name="commons-lang3-3.4 (2)" level="project" />
   </component>
 </module>
