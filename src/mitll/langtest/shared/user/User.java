@@ -44,6 +44,7 @@ public class User extends MiniUser {
   private String ipaddr;
   private String passwordHash;
   private String emailHash;
+  private String email;
   private boolean enabled;
   private boolean admin;
   private int numResults;
@@ -55,52 +56,14 @@ public class User extends MiniUser {
   private String dialect;
   private String device;
   private String first = "";
-  private String last  = "";
+  private String last = "";
   private String resetKey;
   private String cdKey;
   private long timestamp;
   private Collection<Permission> permissions;
   private ProjectStartupInfo startupInfo;
 
-  public boolean isStudent() { return getUserKind().equals(Kind.STUDENT);  }
-  public boolean isTeacher() { return getUserKind().equals(Kind.TEACHER);  }
-
-  /**
-   * @see mitll.langtest.client.user.UserManager#gotNewUser(User)
-   * @return
-   */
-  public boolean isCD() {  return getUserKind().equals(Kind.CONTENT_DEVELOPER); }
-
-  /**
-   * @see mitll.langtest.server.database.DatabaseImpl#setStartupInfo
-   * @param startupInfo
-   */
-  public void setStartupInfo(ProjectStartupInfo startupInfo) {
-    this.startupInfo = startupInfo;
-  }
-
-  public ProjectStartupInfo getStartupInfo() {
-    return startupInfo;
-  }
-
-  public String getFirst() {
-    return first;
-  }
-
-  public void setFirst(String first) {
-    this.first = first;
-  }
-
-  public String getLast() {
-    return last;
-  }
-
-  public void setLast(String last) {
-    this.last = last;
-  }
-
-  public enum Kind implements IsSerializable {UNSET, STUDENT, TEACHER, CONTENT_DEVELOPER, ANONYMOUS}
-
+  public enum Kind       implements IsSerializable {UNSET, STUDENT, TEACHER, CONTENT_DEVELOPER, ANONYMOUS}
   public enum Permission implements IsSerializable {QUALITY_CONTROL, RECORD_AUDIO, ENABLE_DEVELOPER}
 
   public User() {
@@ -144,7 +107,9 @@ public class User extends MiniUser {
    */
   public User(int id, int age, int gender, int experience, String ipaddr, String passwordH,
               String nativeLang, String dialect, String userID, boolean enabled, boolean isAdmin,
-              Collection<Permission> permissions, Kind userKind, String emailHash, String device, String resetPassKey,
+              Collection<Permission> permissions, Kind userKind,
+              String emailHash,
+              String device, String resetPassKey,
               String cdEnableKey, long timestamp) {
     super(id, age, gender == 0, userID, isAdmin);
     this.experience = experience;
@@ -163,6 +128,50 @@ public class User extends MiniUser {
     this.timestamp = timestamp;
   }
 
+  public boolean isStudent() {
+    return getUserKind().equals(Kind.STUDENT);
+  }
+
+  public boolean isTeacher() {
+    return getUserKind().equals(Kind.TEACHER);
+  }
+
+  /**
+   * @return
+   * @see mitll.langtest.client.user.UserManager#gotNewUser(User)
+   */
+  public boolean isCD() {
+    return getUserKind().equals(Kind.CONTENT_DEVELOPER);
+  }
+
+  /**
+   * @param startupInfo
+   * @see mitll.langtest.server.database.DatabaseImpl#setStartupInfo
+   */
+  public void setStartupInfo(ProjectStartupInfo startupInfo) {
+    this.startupInfo = startupInfo;
+  }
+
+  public ProjectStartupInfo getStartupInfo() {
+    return startupInfo;
+  }
+
+  public String getFirst() {
+    return first;
+  }
+
+  public void setFirst(String first) {
+    this.first = first;
+  }
+
+  public String getLast() {
+    return last;
+  }
+
+  public void setLast(String last) {
+    this.last = last;
+  }
+
   public Collection<Permission> getPermissions() {
     return permissions;
   }
@@ -172,7 +181,6 @@ public class User extends MiniUser {
   }
 
   /**
-   *
    * @param timestampMillis
    */
   public void setTimestampMillis(long timestampMillis) {
@@ -196,8 +204,8 @@ public class User extends MiniUser {
   }
 
   /**
-   * @see mitll.langtest.client.InitialUI#gotUser(User)
    * @return
+   * @see mitll.langtest.client.InitialUI#gotUser(User)
    */
   public boolean isAdmin() {
     return admin;

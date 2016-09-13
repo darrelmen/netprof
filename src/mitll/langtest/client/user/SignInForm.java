@@ -52,8 +52,11 @@ import mitll.langtest.shared.user.User;
 
 import java.util.logging.Logger;
 
-public class SignInForm extends UserDialog {
+class SignInForm extends UserDialog implements SignIn {
   private final Logger logger = Logger.getLogger("SignUpForm");
+
+  private static final String TROUBLE_CONNECTING_TO_SERVER = "Trouble connecting to server.";
+  private static final String NO_USER_FOUND = "No user found - have you signed up?";
 
   private static final String MAGIC_PASS = Md5Hash.getHash("adm!n");
 
@@ -72,7 +75,8 @@ public class SignInForm extends UserDialog {
   private static final String CHECK_EMAIL = "Check Email";
   private static final String PLEASE_CHECK_YOUR_EMAIL = "Please check your email";
   private static final String ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD = "Enter your email to reset your password.";
-  private static final String SEND = "Send";
+  private static final String ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD_GOT_IT = "Click here and then check your email to reset your password.";
+  private static final String SEND = "Send Reset Email";
   private static final String SIGN_UP_WIDTH = "266px";
   private static final String PLEASE_CHECK = "Please check";
   private static final int EMAIL_POPUP_DELAY = 4000;
@@ -85,14 +89,14 @@ public class SignInForm extends UserDialog {
   private DecoratedPopupPanel resetEmailPopup;
   private Button sendEmail;
   private final EventRegistration eventRegistration;
-  private UserPassLogin userPassLogin;
-  private SignUpForm signUpForm;
+  private UserPassDialog userPassLogin;
+  private SignUp signUpForm;
 
-  public SignInForm(PropertyHandler props,
-                    UserManager userManager,
-                    EventRegistration eventRegistration,
-                    UserPassLogin userPassLogin,
-                    SignUpForm signUpForm) {
+  SignInForm(PropertyHandler props,
+             UserManager userManager,
+             EventRegistration eventRegistration,
+             UserPassDialog userPassLogin,
+             SignUp signUpForm) {
     super(props, userManager);
     this.eventRegistration = eventRegistration;
     this.userPassLogin = userPassLogin;
@@ -102,9 +106,10 @@ public class SignInForm extends UserDialog {
   /**
    * @param signInForm
    * @return
-   * @see #getRightLogin(com.google.gwt.user.client.ui.Panel)
+   * @see UserPassLogin#getRightLogin
    */
-  public Form populateSignInForm(Form signInForm, Panel forgotRow, KeyPressHelper enterKeyButtonHelper) {
+  @Override
+  public Panel populateSignInForm(Form signInForm, Panel forgotRow, KeyPressHelper enterKeyButtonHelper) {
     Fieldset fieldset = new Fieldset();
     signInForm.add(fieldset);
 
@@ -165,22 +170,15 @@ public class SignInForm extends UserDialog {
 
             @Override
             public void onSuccess(User result) {
-              //       System.out.println("makeSignInUserName : for " + user.getText() + " got back " + result);
+              // logger.info("makeSignInUserName : for " + user.getText() + " got back " + result);
               if (result != null) {
                 String emailHash = result.getEmailHash();
                 String passwordHash = result.getPasswordHash();
+              //  this.email = result.getEmail();
                 if (emailHash == null || passwordHash == null || emailHash.isEmpty() || passwordHash.isEmpty()) {
                   eventRegistration.logEvent(user.box, "UserNameBox", "N/A", "existing legacy user " + result.toStringShort());
                   copyInfoToSignUp(result);
                 }
-    /*            int projectid = result.getProjectStartupInfo().getProjectid();
-                for (SlimProject project1 : projects) {
-                  if (project1.getProjectid() == projectid) {
-                    projectChoice.setSelectedValue(project1.getLanguage());   // TODO : do something better for pashto
-                    currentProject = project1;
-                    break;
-                  }
-                }*/
               }
             }
           });
@@ -222,20 +220,11 @@ public class SignInForm extends UserDialog {
           if (!value.isEmpty() && value.length() < MIN_PASSWORD) {
             markErrorBlur(password, "Please enter a password longer than " + MIN_PASSWORD + " characters.");
           } else {
-         /*   if (currentProject == null) {
-              markErrorBlur(projectChoice, "Please choose a language", Placement.TOP);
-            } else {
-              gotLogin(userID, value, value.isEmpty(), currentProject.getProjectid());
-            }*/
-            gotLogin(userID, value, value.isEmpty());//, currentProject.getProjectid());
-
+            gotLogin(userID, value, value.isEmpty());
           }
         }
-
       }
     });
-    //   enterKeyButtonHelper.addKeyHandler(signIn);
-
     signIn.addStyleName("rightFiveMargin");
     signIn.addStyleName("leftFiveMargin");
 
@@ -259,7 +248,7 @@ public class SignInForm extends UserDialog {
       @Override
       public void onFailure(Throwable caught) {
         signIn.setEnabled(true);
-        markErrorBlur(signIn, "Trouble connecting to server.");
+        markErrorBlur(signIn, TROUBLE_CONNECTING_TO_SERVER);
       }
 
       @Override
@@ -268,7 +257,7 @@ public class SignInForm extends UserDialog {
           eventRegistration.logEvent(signIn, "sign in", "N/A", "unknown user " + user);
 
           logger.info("No user with that name '" + user + "' pass " + pass.length() + " characters - " + emptyPassword);
-          markErrorBlur(password, emptyPassword ? PLEASE_ENTER_YOUR_PASSWORD : "No user found - have you signed up?");
+          markErrorBlur(password, emptyPassword ? PLEASE_ENTER_YOUR_PASSWORD : NO_USER_FOUND);
           signIn.setEnabled(true);
         } else {
           foundExistingUser(result, emptyPassword, hashedPass);
@@ -298,14 +287,14 @@ public class SignInForm extends UserDialog {
         markErrorBlur(password, PLEASE_ENTER_YOUR_PASSWORD);
         signIn.setEnabled(true);
       } else if (result.getPasswordHash().equalsIgnoreCase(hashedPass)) {
-        if (result.isEnabled() || result.getUserKind() != User.Kind.CONTENT_DEVELOPER || props.enableAllUsers()) {
+        if (result.isEnabled() ||
+            result.getUserKind() != User.Kind.CONTENT_DEVELOPER ||
+            props.enableAllUsers()) {
           eventRegistration.logEvent(signIn, "sign in", "N/A", "successful sign in for " + user);
           //    logger.info("Got valid user " + user + " and matching password, so we're letting them in.");
-
           storeUser(result);
         } else {
           eventRegistration.logEvent(signIn, "sign in", "N/A", "successful sign in for " + user + " but wait for approval.");
-
           markErrorBlur(signIn, PLEASE_WAIT, "Please wait until you've been approved. Check your email.", Placement.LEFT);
           signIn.setEnabled(true);
         }
@@ -315,7 +304,7 @@ public class SignInForm extends UserDialog {
           eventRegistration.logEvent(signIn, "sign in", "N/A", "sign in as user '" + user + "'");
           storeUser(result);
         } else {
-          logger.info("bad pass  " + passwordHash);
+          logger.info("foundExistingUser bad pass  " + passwordHash);
           //  logger.info("admin " + Md5Hash.getHash("adm!n"));
           eventRegistration.logEvent(signIn, "sign in", "N/A", "bad password");
 
@@ -340,42 +329,18 @@ public class SignInForm extends UserDialog {
   }
 
   /**
-   * @return
-   * @see #populateSignInForm(Form)
+   * @see UserPassLogin#showSuggestApp
    */
-/*  private Panel getForgotRow() {
-    Panel hp2 = new HorizontalPanel();
-
-    Anchor forgotUser = getForgotUser();
-    forgotUser.addStyleName("topFiveMargin");
-    hp2.add(forgotUser);
-    forgotUser.addStyleName("leftTenMargin");
-
-    Anchor forgotPassword = getForgotPassword();
-    hp2.add(forgotPassword);
-    forgotPassword.addStyleName("topFiveMargin");
-    forgotPassword.addStyleName("leftFiveMargin");
-
-    Button help = new Button(HELP);
-    help.addStyleName("leftTenMargin");
-    help.getElement().getStyle().setMarginTop(-5, Style.Unit.PX);
-    help.setType(ButtonType.PRIMARY);
-    help.setIcon(IconType.QUESTION_SIGN);
-
-    help.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        showWelcome2();
-      }
-    });
-    hp2.add(help);
-
-    return hp2;
-  }*/
+  @Override
   public void setFocusOnUserID() {
     setFocusOn(user.box);
   }
 
+  /**
+   * @return
+   * @see UserPassLogin#getForgotRow
+   */
+  @Override
   public Anchor getForgotPassword() {
     final Anchor forgotPassword = new Anchor(FORGOT_PASSWORD);
     forgotPassword.addClickHandler(new ClickHandler() {
@@ -386,6 +351,7 @@ public class SignInForm extends UserDialog {
           return;
         }
         final TextBox emailEntry = new TextBox();
+
         resetEmailPopup = new DecoratedPopupPanel(true);
         sendEmail = new Button(SEND);
         sendEmail.setType(ButtonType.PRIMARY);
@@ -440,6 +406,11 @@ public class SignInForm extends UserDialog {
     return forgotPassword;
   }
 
+  /**
+   * @return
+   * @see UserPassLogin#UserPassLogin(PropertyHandler, UserManager, EventRegistration)
+   */
+  @Override
   public boolean clickSendEmail() {
     if (resetEmailPopup != null && resetEmailPopup.isShowing()) {
       sendEmail.fireEvent(new KeyPressHelper.ButtonClickEvent());
