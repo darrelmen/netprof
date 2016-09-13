@@ -105,11 +105,11 @@ public class UserPassLogin extends UserDialog {
                        UserManager userManager,
                        EventRegistration eventRegistration) {
     super(props, userManager);
-    boolean willShow = false;// checkWelcome();
 
     signUpForm = new SignUpForm(props, userManager, eventRegistration, this);
     signInForm = new SignInForm(props, userManager, eventRegistration, this, signUpForm);
 
+    boolean willShow = false;// checkWelcome();
     if (!willShow) {
       if (BrowserCheck.isIPad()) {
         showSuggestApp();
@@ -272,72 +272,6 @@ public class UserPassLogin extends UserDialog {
 
     return hp2;
   }
-
-/*
-  private Anchor getForgotPassword() {
-    final Anchor forgotPassword = new Anchor(FORGOT_PASSWORD);
-    forgotPassword.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        if (user.getText().isEmpty()) {
-          markErrorBlur(user, ENTER_A_USER_NAME);
-          return;
-        }
-        final TextBox emailEntry = new TextBox();
-        resetEmailPopup = new DecoratedPopupPanel(true);
-        sendEmail = new Button(SEND);
-        sendEmail.setType(ButtonType.PRIMARY);
-        sendEmail.addStyleName("leftTenMargin");
-        sendEmail.addClickHandler(new ClickHandler() {
-          @Override
-          public void onClick(ClickEvent event) {
-            String text = emailEntry.getText();
-            if (!isValidEmail(text)) {
-       *//*       System.out.println("email is '" + text+ "' ");*//*
-              markErrorBlur(emailEntry, PLEASE_CHECK, VALID_EMAIL, Placement.TOP);
-              return;
-            }
-
-            sendEmail.setEnabled(false);
-            service.resetPassword(user.box.getText(), text, Window.Location.getHref(), new AsyncCallback<Boolean>() {
-              @Override
-              public void onFailure(Throwable caught) {
-                sendEmail.setEnabled(true);
-              }
-
-              @Override
-              public void onSuccess(Boolean result) {
-                String heading = result ? CHECK_EMAIL : "Unknown email";
-                String message = result ? PLEASE_CHECK_YOUR_EMAIL : user.box.getText() + " doesn't have that email. Check for a typo?";
-                setupPopover(sendEmail, heading, message, Placement.LEFT, EMAIL_POPUP_DELAY, new MyPopover(false) {
-                  boolean isFirst = true;
-
-                  @Override
-                  public void hide() {
-                    super.hide();
-                    if (isFirst) {
-                      isFirst = false;
-                    } else {
-                      resetEmailPopup.hide(); // TODO : ugly - somehow hide is called twice
-                    }
-                    //System.out.println("got hide !" + new Date()
-                    //);
-                  }
-                }, false);
-              }
-            });
-          }
-        });
-        eventRegistration.register(sendEmail, "N/A", "reset password");
-
-        makePopup(resetEmailPopup, emailEntry, sendEmail, ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD);
-        resetEmailPopup.showRelativeTo(forgotPassword);
-        setFocusOn(emailEntry);
-      }
-    });
-    return forgotPassword;
-  }*/
-
 
   private DecoratedPopupPanel sendUsernamePopup;
   private Button sendUsernameEmail;
