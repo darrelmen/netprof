@@ -88,8 +88,8 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
   private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
 
   public static final String CONTEXT = "Context";
-  public static final String SAY = "Say";
-  public static final String TRANSLITERATION = "Transliteration";
+  private static final String SAY = "Say";
+  private static final String TRANSLITERATION = "Transliteration";
 
   private static final String MANDARIN = "Mandarin";
   private static final String KOREAN = "Korean";
@@ -105,7 +105,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
   /**
    * @see ASRScorePanel#addTooltip
    */
-  public static final String DOWNLOAD_YOUR_RECORDING = "Download your recording.";
+  private static final String DOWNLOAD_YOUR_RECORDING = "Download your recording.";
 
   private final ListInterface listContainer;
   private boolean isBusy = false;

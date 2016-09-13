@@ -547,7 +547,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     row.add(getFixedButton(ul, pagingContainer, toAddTo, normalSpeedRecording));
     boolean keepAudioSelection = getKeepAudioSelection();
 
-    logger.info("value is  " + keepAudioSelection);
+ //   logger.info("value is  " + keepAudioSelection);
     keepAudio.setValue(keepAudioSelection);
     keepAudio.addClickHandler(new ClickHandler() {
       @Override
@@ -693,13 +693,13 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   @Override
   protected void audioPosted() {
     Boolean value = getKeepAudio();
-    logger.info("did audioPosted keep audio = " + value);
+  //  logger.info("did audioPosted keep audio = " + value);
     reallyChange(listInterface, false, value);
   }
 
   protected boolean getKeepAudio() {
     Boolean value = keepAudio.getValue();
-    logger.info(this.getClass() + " : did getKeepAudio keep audio = " + value);
+  //  logger.info(this.getClass() + " : did getKeepAudio keep audio = " + value);
     return value;
   }
 
@@ -769,7 +769,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     final String id = newUserExercise.getID();
     int user = controller.getUser();
 
-    logger.info("doAfterEditComplete : forgetting exercise " + id + " current user " + user);
+//    logger.info("doAfterEditComplete : forgetting exercise " + id + " current user " + user + " before list had " + ul.getExercises().size());
 
     if (!ul.remove(newUserExercise)) {
       logger.warning("\ndoAfterEditComplete : error - didn't remove " + id + " from ul " + ul);
@@ -785,9 +785,10 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
 
       @Override
       public void onSuccess(Void result) {
-        reloadLearnList();
-
+        logger.info("doAfterEditComplete : forgetting exercise " + id);
         exerciseList.forgetExercise(id);
+
+        reloadLearnList();
       }
     });
   }
