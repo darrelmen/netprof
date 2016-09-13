@@ -46,7 +46,6 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.instrumentation.EventRegistration;
@@ -72,8 +71,8 @@ public class ResetPassword extends UserDialog {
   private final EventRegistration eventRegistration;
   private final KeyPressHelper enterKeyButtonHelper;
 
-  public ResetPassword(LangTestDatabaseAsync service, PropertyHandler props, EventRegistration eventRegistration) {
-    super(service, props);
+  public ResetPassword(PropertyHandler props, EventRegistration eventRegistration) {
+    super(props, null);
     this.eventRegistration = eventRegistration;
     enterKeyButtonHelper = new KeyPressHelper(false);
   }
@@ -111,25 +110,21 @@ public class ResetPassword extends UserDialog {
     Heading w = new Heading(3, CHOOSE_A_NEW_PASSWORD);
     fieldset.add(w);
     w.addStyleName("leftFiveMargin");
-    final BasicDialog.FormField firstPassword  = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, PASSWORD);
+    final BasicDialog.FormField firstPassword = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, PASSWORD);
     final BasicDialog.FormField secondPassword = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, "Confirm " + PASSWORD);
 
-  //  firstPassword.getWidget().setTabIndex(0);
-   // secondPassword.getWidget().setTabIndex(1);
+    //  firstPassword.getWidget().setTabIndex(0);
+    // secondPassword.getWidget().setTabIndex(1);
 
     getChangePasswordButton(token, fieldset, firstPassword, secondPassword);
     right.add(rightDiv);
-    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-      public void execute() {
-        firstPassword.getWidget().setFocus(true);
-      }
-    });
+    setFocusOn(firstPassword.getWidget());
     return container;
   }
 
   private void getChangePasswordButton(final String token, Fieldset fieldset, final BasicDialog.FormField firstPassword, final BasicDialog.FormField secondPassword) {
     final Button changePassword = new Button(CHANGE_PASSWORD);
-   // changePassword.setTabIndex(3);
+    // changePassword.setTabIndex(3);
     changePassword.getElement().setId("changePassword");
     eventRegistration.register(changePassword);
     changePassword.addStyleName("floatRight");
@@ -188,8 +183,6 @@ public class ResetPassword extends UserDialog {
 
     changePassword.addStyleName("rightFiveMargin");
     changePassword.addStyleName("leftFiveMargin");
-
     changePassword.setType(ButtonType.PRIMARY);
   }
-
 }
