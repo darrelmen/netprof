@@ -622,7 +622,7 @@ public class InitialUI implements UILifecycle {
   }
 
   private void showLogin(EventRegistration eventRegistration) {
-    contentRow.add(new UserPassLogin(service, props, userManager, eventRegistration).getContent());
+    contentRow.add(new UserPassLogin(props, userManager, eventRegistration).getContent());
     clearPadding(verticalContainer);
     RootPanel.get().add(verticalContainer);
     banner.setCogVisible(false);
@@ -643,7 +643,7 @@ public class InitialUI implements UILifecycle {
           trimURL();
           populateBelowHeader(verticalContainer);
         } else {
-          firstRow.add(new ResetPassword(service, props, eventRegistration).getResetPassword(resetPassToken));
+          firstRow.add(new ResetPassword(props, eventRegistration).getResetPassword(resetPassToken));
           clearPadding(verticalContainer);
         }
       }
