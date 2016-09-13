@@ -142,7 +142,7 @@ class NewUserExercise extends BasicDialog {
     this.instance = instance;
     this.originalList = originalList;
 
-    logger.info("new exercise is " + newUserExercise);
+ //   logger.info("new exercise is " + newUserExercise);
   }
 
   /**
@@ -242,11 +242,12 @@ class NewUserExercise extends BasicDialog {
   private class ResizableFluid extends FluidContainer implements RequiresResize {
     @Override
     public void onResize() {
+      if (rap != null) {
       rap.onResize();
       rapSlow.onResize();
     }
   }
-
+  }
 
   protected void makeOptionalRows(DivWidget upper) {
 
@@ -387,15 +388,6 @@ class NewUserExercise extends BasicDialog {
     container.add(row);
     translit = addControlFormField(row, TRANSLITERATION_OPTIONAL, false, 0, 150, "");
   }
-/*
-  private void focusOn(final FormField form) {
-    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-      public void execute() {
-        form.box.setFocus(true);
-      }
-    });
-  }
-*/
 
   public <S extends CommonShell & AudioRefExercise & AnnotationExercise> void setFields(S newUserExercise) {
     //  logger.info("setFields : setting fields with " + newUserExercise);
@@ -699,12 +691,6 @@ class NewUserExercise extends BasicDialog {
       getPlayButton().getElement().setId(id + "Play_" + speed);
       controller.register(getPlayButton(), newExercise.getID());
     }
-
-/*    @Override
-    protected void getEachImage(int width) {
-      float newWidth = Window.getClientWidth() * 0.65f;
-      super.getEachImage((int) newWidth);
-    }*/
 
     /**
      * Note that we want to post the audio the server, but not record in the results table (since it's not an answer
