@@ -276,7 +276,7 @@ public class DatabaseImpl implements Database {
    * @seex CopyToPostgres#createProjectIfNotExists
    */
   public void populateProjects(boolean reload) {
-    populateProjects(pathHelper, serverProps, logAndNotify, configDir, reload);
+    populateProjects(pathHelper, serverProps, logAndNotify, reload);
   }
 
   /**
@@ -287,7 +287,6 @@ public class DatabaseImpl implements Database {
   private void populateProjects(PathHelper pathHelper,
                                 ServerProperties serverProps,
                                 LogAndNotify logAndNotify,
-                                String relativeConfigDir,
                                 boolean reload) {
     Collection<SlickProject> all = projectDAO.getAll();
     logger.info("populateProjects : found " + all.size() + " projects");
@@ -296,10 +295,10 @@ public class DatabaseImpl implements Database {
       if (!idToProject.containsKey(slickProject.id())) {
         if (DEBUG_ONE_PROJECT) {
           if (slickProject.language().equalsIgnoreCase("english")) {
-            rememberProject(pathHelper, serverProps, logAndNotify, relativeConfigDir, reload, slickProject);
+            rememberProject(pathHelper, serverProps, logAndNotify, reload, slickProject);
           }
         } else {
-          rememberProject(pathHelper, serverProps, logAndNotify, relativeConfigDir, reload, slickProject);
+          rememberProject(pathHelper, serverProps, logAndNotify, reload, slickProject);
         }
       }
     }
@@ -319,13 +318,22 @@ public class DatabaseImpl implements Database {
       if (project.getExerciseDAO() == null) {
         setExerciseDAO(project);
         configureProject(installPath, project);
-        logger.info("\tpopulateProjects (reload = " + reload + ") : " + project + " : " + project.getAudioFileHelper());
+        logger.info("\tpopulateProjects : " + project + " : " + project.getAudioFileHelper());
       }
     }
   }
 
-  private void rememberProject(PathHelper pathHelper, ServerProperties serverProps, LogAndNotify logAndNotify, String relativeConfigDir, boolean reload, SlickProject slickProject) {
-    Project project = new Project(slickProject, pathHelper, serverProps, this, logAndNotify, relativeConfigDir);
+  /**
+   *  @param pathHelper
+   * @param serverProps
+   * @param logAndNotify
+   * @param reload
+   * @param slickProject
+   * @see #populateProjects(PathHelper, ServerProperties, LogAndNotify, boolean)
+   */
+  private void rememberProject(PathHelper pathHelper, ServerProperties serverProps, LogAndNotify logAndNotify,
+                               boolean reload, SlickProject slickProject) {
+    Project project = new Project(slickProject, pathHelper, serverProps, this, logAndNotify);
     idToProject.put(project.getProject().id(), project);
     logger.info("populateProjects (reload = " + reload + ") : " + project + " : " + project.getAudioFileHelper());
   }
@@ -636,10 +644,6 @@ public class DatabaseImpl implements Database {
     return getProject(getUserProjectDAO().mostRecentByUser(userid));
   }
 
-/*  public int getProjectIDForUser(User loggedInUser) {
-    return getUserProjectDAO().mostRecentByUser(loggedInUser.getId());
-  }*/
-
   public void stopDecode() {
     for (Project project : getProjects()) project.stopDecode();
   }
@@ -815,9 +819,12 @@ public class DatabaseImpl implements Database {
     if (project1 != null) {
       Map<Integer, String> exerciseIDToRefAudio = getExerciseIDToRefAudio(id);
       project.setAnalysis(
-          new SlickAnalysis(this, phoneDAO,
-              exerciseIDToRefAudio, (SlickResultDAO) resultDAO)
+          new SlickAnalysis(this,
+              phoneDAO,
+              exerciseIDToRefAudio,
+              (SlickResultDAO) resultDAO)
       );
+      userExerciseDAO.getTemplateExercise(id);
     }
     logMemory();
   }
@@ -891,13 +898,13 @@ public class DatabaseImpl implements Database {
     return project;
   }
 
-  public Project getProjectForgiving(int projectid) {
+/*  public Project getProjectForgiving(int projectid) {
     Project project = idToProject.get(projectid);
     if (project == null) {
       populateProjects(false);
     }
     return idToProject.get(projectid);
-  }
+  }*/
 
   private Collection<Project> getProjects() {
     return idToProject.values();

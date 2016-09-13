@@ -38,5 +38,6 @@ public enum ProjectType {
   DIALOG,
   EXPERIMENTAL,
   TESTING,
-  OTHER
+  OTHER,
+  DEFAULT
 }
