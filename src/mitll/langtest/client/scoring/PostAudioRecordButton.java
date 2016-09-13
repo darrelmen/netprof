@@ -145,10 +145,10 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
         controller.usingFlashRecorder(),
         "browser",
         controller.getBrowserInfo(),
-        false,
+        false, // do flashcard
         recordInResults,
         shouldAddToAudioTable(),
-        false,
+        false, // allow alternates
 
         new AsyncCallback<AudioAnswer>() {
           public void onFailure(Throwable caught) {
@@ -163,7 +163,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
             long now = System.currentTimeMillis();
             long roundtrip = now - then;
 
-            logger.info("PostAudioRecordButton : Got audio answer " + result + " platform is " + getPlatform());
+            logger.info("PostAudioRecordButton : Got audio answer " + result);// + " platform is " + getPlatform());
 
             if (result.getReqid() != reqid) {
               logger.info("ignoring old response " + result);
