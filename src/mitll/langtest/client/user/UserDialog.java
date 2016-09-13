@@ -55,7 +55,7 @@ import mitll.langtest.shared.user.User;
  * To change this template use File | Settings | File Templates.
  */
 abstract class UserDialog extends BasicDialog {
-  protected static final String VALID_EMAIL = "Please enter a valid email address.";
+  static final String VALID_EMAIL = "Please enter a valid email address.";
   static final int USER_ID_MAX_LENGTH = 35;
 
   static final int MIN_AGE = 12;
@@ -65,12 +65,11 @@ abstract class UserDialog extends BasicDialog {
   private final UserManager userManager;
   private KeyPressHelper enterKeyButtonHelper;
 
-  protected final UserServiceAsync service = GWT.create(UserService.class);;
+  protected final UserServiceAsync service = GWT.create(UserService.class);
 
   UserDialog(PropertyHandler props, UserManager userManager/*, KeyPressHelper enterKeyButtonHelper*/) {
     this.props = props;
     this.userManager = userManager;
-//    this.enterKeyButtonHelper = enterKeyButtonHelper;
   }
 
   protected FormField addControlFormField(Panel dialogBox, String label, boolean isPassword, int minLength, int maxLength, String hint) {
@@ -106,21 +105,19 @@ abstract class UserDialog extends BasicDialog {
    * @see #foundExistingUser(User, boolean, String)
    * @see #gotSignUp(String, String, String, User.Kind)
    */
-  protected void storeUser(User result) {
+  void storeUser(User result) {
     //logger.info("UserPassLogin.storeUser - " + result);
     enterKeyButtonHelper.removeKeyHandler();
     userManager.storeUser(result);
   }
 
-/*  public KeyPressHelper getEnterKeyButtonHelper() {
-    return enterKeyButtonHelper;
-  }*/
+
 
   public void setEnterKeyButtonHelper(KeyPressHelper enterKeyButtonHelper) {
     this.enterKeyButtonHelper = enterKeyButtonHelper;
   }
 
-  protected Form getSignInForm() {
+   Form getSignInForm() {
     Form signInForm = new Form();
     signInForm.addStyleName("topMargin");
     signInForm.addStyleName("formRounded");
@@ -128,7 +125,7 @@ abstract class UserDialog extends BasicDialog {
     return signInForm;
   }
 
-  protected void setFocusOn(final FocusWidget widget) {
+   void setFocusOn(final FocusWidget widget) {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
         widget.setFocus(true);
@@ -141,10 +138,10 @@ abstract class UserDialog extends BasicDialog {
    * @param commentEntryText
    * @param okButton
    * @param prompt
-   * @see #getForgotPassword()
-   * @see #getForgotUser()
+   * @see #getForgotPassword
+   * @see #getForgotUser
    */
-  protected void makePopup(Panel commentPopup, Widget commentEntryText, Widget okButton, String prompt) {
+   void makePopup(Panel commentPopup, Widget commentEntryText, Widget okButton, String prompt) {
     Panel vp = new VerticalPanel();
     Panel w = new Heading(6, prompt);
     vp.add(w);

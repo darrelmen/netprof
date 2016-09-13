@@ -80,7 +80,7 @@ public class EmailHelper {
                      IUserDAO userDAO,
                      MailSupport mailSupport,
                      PathHelper pathHelper) {
-   // this.language = serverProperties.getLanguage();
+    // this.language = serverProperties.getLanguage();
     this.serverProperties = serverProperties;
     this.userDAO = userDAO;
     this.mailSupport = mailSupport;
@@ -142,7 +142,7 @@ public class EmailHelper {
   public boolean resetPassword(String user, String email, String url) {
     logger.debug(" resetPassword for " + user + " url " + url);
 
-    user  = user.trim();
+    user = user.trim();
     email = email.trim();
 
     String hash1 = getHash(email);
@@ -364,14 +364,27 @@ public class EmailHelper {
         CLOSING;
   }
 
-  public void sendConfirmationEmail(String email, String userID1, MailSupport mailSupport) {
-    mailSupport.sendEmail(NP_SERVER, email, NETPROF_HELP_DLIFLC_EDU, "Welcome to NetProF", getUserConfirmationEmail(userID1));
+  /**
+   *
+   * @param email
+   * @param userID1
+   * @param firstName
+   * @param mailSupport
+   */
+  public void sendConfirmationEmail(String email, String userID1, String firstName, MailSupport mailSupport) {
+    mailSupport.sendEmail(NP_SERVER, email, NETPROF_HELP_DLIFLC_EDU, "Welcome to NetProF", getUserConfirmationEmail(userID1, firstName));
   }
 
-  private String getUserConfirmationEmail(String userID1) {
+  private String getUserConfirmationEmail(String userID1, String firstName) {
     return "Hi " +
-        userID1 + ",<br/><br/>" +
-        "You are now a user of NetProF.<br/>";
+        firstName + ",<br/><br/>" +
+        "Your user id is " + userID1 +
+        ".<br/>" +
+        "You are now a user of NetProF.<br/>" +
+        "If you have any questions, see the user manual or email <a href='mailto:" +
+        NETPROF_HELP_DLIFLC_EDU +
+        "'>NetProF Help</a>."
+        ;
   }
 
   private String trimURL(String url) {
