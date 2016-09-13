@@ -33,15 +33,19 @@
 package mitll.langtest.client.user;
 
 import com.github.gwtbootstrap.client.ui.ControlGroup;
+import com.github.gwtbootstrap.client.ui.Form;
 import com.github.gwtbootstrap.client.ui.PasswordTextBox;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
+import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.services.UserService;
 import mitll.langtest.client.services.UserServiceAsync;
+import mitll.langtest.shared.user.User;
 
 /**
  * Created with IntelliJ IDEA.
@@ -59,12 +63,15 @@ abstract class UserDialog extends BasicDialog {
   static final int MAX_AGE = 90;
 
   final PropertyHandler props;
-  //final LangTestDatabaseAsync service;
+  private final UserManager userManager;
+  private KeyPressHelper enterKeyButtonHelper;
+
   protected final UserServiceAsync service = GWT.create(UserService.class);;
 
-  UserDialog(LangTestDatabaseAsync service, PropertyHandler props) {
-    //this.service = service;
+  UserDialog(PropertyHandler props, UserManager userManager/*, KeyPressHelper enterKeyButtonHelper*/) {
     this.props = props;
+    this.userManager = userManager;
+//    this.enterKeyButtonHelper = enterKeyButtonHelper;
   }
 
   protected FormField addControlFormField(Panel dialogBox, String label, boolean isPassword, int minLength, int maxLength, String hint) {
@@ -89,5 +96,44 @@ abstract class UserDialog extends BasicDialog {
   String trimURL(String url) {
     if (url.contains("127.0.0.1")) return url.split("#")[0];
     else return url.split("\\?")[0].split("#")[0];
+  }
+
+  protected boolean isValidEmail(String text) {
+    return text.trim().toUpperCase().matches("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$");
+  }
+
+  /**
+   * @param result
+   * @see #foundExistingUser(User, boolean, String)
+   * @see #gotSignUp(String, String, String, User.Kind)
+   */
+  protected void storeUser(User result) {
+    //logger.info("UserPassLogin.storeUser - " + result);
+    enterKeyButtonHelper.removeKeyHandler();
+    userManager.storeUser(result);
+  }
+
+  public KeyPressHelper getEnterKeyButtonHelper() {
+    return enterKeyButtonHelper;
+  }
+
+  public void setEnterKeyButtonHelper(KeyPressHelper enterKeyButtonHelper) {
+    this.enterKeyButtonHelper = enterKeyButtonHelper;
+  }
+
+  protected Form getSignInForm() {
+    Form signInForm = new Form();
+    signInForm.addStyleName("topMargin");
+    signInForm.addStyleName("formRounded");
+    signInForm.getElement().getStyle().setBackgroundColor("white");
+    return signInForm;
+  }
+
+  protected void setFocusOn(final FocusWidget widget) {
+    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+      public void execute() {
+        widget.setFocus(true);
+      }
+    });
   }
 }

@@ -383,9 +383,10 @@ public class SlickUserExerciseDAO
    * @see mitll.langtest.server.database.custom.UserListManager#reallyCreateNewItem(long, CommonExercise, String)
    */
   @Override
-  public void add(CommonExercise userExercise, boolean isOverride) {
+  public int add(CommonExercise userExercise, boolean isOverride) {
     logger.info("adding " + userExercise);
-    insert(toSlick(userExercise, isOverride));
+    return insert(toSlick(userExercise, isOverride));
+   // userExercise.setI
   }
 
   /**
