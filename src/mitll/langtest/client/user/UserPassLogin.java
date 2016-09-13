@@ -56,7 +56,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.BrowserCheck;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
@@ -76,17 +75,12 @@ import java.util.logging.Logger;
  * @since 8/11/14.
  */
 public class UserPassLogin extends UserDialog {
-  public static final String NEW_USER = "New User?";
   private final Logger logger = Logger.getLogger("UserPassLogin");
 
   private static final String IPAD_LINE_1 = "Also consider installing the NetProF app, which is available on the DLI App Store.";// or";
   // private static final String IPAD_LINE_2 = "Or click this link to install <a href='https://np.ll.mit.edu/iOSNetProF/'>iOS NetProF" + "</a>.";
   private static final String IPAD_LINE_3 = "Otherwise, you will not be able to record yourself practicing vocabulary.";
 
-  private static final String WAIT_FOR_APPROVAL = "Wait for approval";
-  private static final String YOU_WILL_GET_AN_APPROVAL_MESSAGE_BY_EMAIL = "You will get an approval message by email.";
-
-  private static final String MALE = "male";
   private static final String MAGIC_PASS = Md5Hash.getHash("adm!n");
   private static final String CURRENT_USERS = "Current users should add an email and password.";
 
@@ -94,7 +88,6 @@ public class UserPassLogin extends UserDialog {
 
   private static final int MIN_PASSWORD = 4;
   private static final int LEFT_SIDE_WIDTH = 483;
-  private static final String SIGN_UP_SUBTEXT = "Sign up";
   private static final String PLEASE_ENTER_YOUR_PASSWORD = "Please enter your password.";
   private static final String BAD_PASSWORD = "Wrong password, please try again.";// - have you signed up?";
   private static final String PASSWORD = "Password";
@@ -113,30 +106,17 @@ public class UserPassLogin extends UserDialog {
   private static final String ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD = "Enter your email to reset your password.";
   private static final String FORGOT_USERNAME = "Forgot username?";
   private static final String SEND = "Send";
-  private static final String SIGN_UP = "Sign Up";
-  private static final String ARE_YOU_A = "Please choose : Are you a";
   private static final String STUDENT = "Student or ";
   private static final String TEACHER = "Teacher?";
   private static final String SIGN_UP_WIDTH = "266px";
   private static final int BULLET_MARGIN = 25;
-  private static final String RECORD_AUDIO_HEADING = "Recording audio/Quality Control";
-  private static final int WAIT_FOR_READING_APPROVAL = 3000;
   private static final String PLEASE_CHECK = "Please check";
-  private static final String RECORD_REFERENCE_AUDIO = "Are you an assigned reference audio recorder?";
   private static final String ENTER_YOUR_EMAIL = "Enter your email to get your username.";
   private static final int EMAIL_POPUP_DELAY = 4000;
-  private static final String USER_EXISTS = "User exists already, please sign in or choose a different name.";
   private static final String HELP = "Help";
-  private static final String AGE_ERR_MSG = "Enter age between " + MIN_AGE + " and " + MAX_AGE + ".";
 
-//  private static final String SHOWN_HELLO = "shownHello";
-
-  private final UserManager userManager;
   private final KeyPressHelper enterKeyButtonHelper;
   private FormField user;
-  private FormField signUpUser;
-  private FormField signUpEmail;
-  private FormField signUpPassword;
   private FormField password;
 
   private boolean signInHasFocus = true;
@@ -145,27 +125,29 @@ public class UserPassLogin extends UserDialog {
 
   private DecoratedPopupPanel resetEmailPopup;
   private Button sendEmail;
+  private SignUpForm signUpForm;
 
   /**
-   * @param service
    * @param props
    * @param userManager
    * @param eventRegistration
    * @see mitll.langtest.client.InitialUI#showLogin
    */
-  public UserPassLogin(LangTestDatabaseAsync service,
-                       PropertyHandler props,
+  public UserPassLogin(PropertyHandler props,
                        UserManager userManager,
                        EventRegistration eventRegistration) {
-    super(service, props);
+    super(props, userManager);
     boolean willShow = false;// checkWelcome();
+
+    signUpForm = new SignUpForm(props, userManager, eventRegistration, this);
+
     if (!willShow) {
       if (BrowserCheck.isIPad()) {
         showSuggestApp();
       }
     }
 
-    this.userManager = userManager;
+    // this.userManager = userManager;
     this.eventRegistration = eventRegistration;
     enterKeyButtonHelper = new KeyPressHelper(true) {
       @Override
@@ -177,12 +159,17 @@ public class UserPassLogin extends UserDialog {
         } else if (signInHasFocus) {
           button.fireEvent(new ButtonClickEvent());
         } else {
-          signUp.fireEvent(new KeyPressHelper.ButtonClickEvent());
+         // signUp.fireEvent(new KeyPressHelper.ButtonClickEvent());
+          signUpForm.clickSignUp();
         }
       }
     };
+    setEnterKeyButtonHelper(enterKeyButtonHelper);
   }
 
+  public void clearSignInHasFocus() {
+    signInHasFocus = false;
+  }
 /*  private boolean checkWelcome() {
     if (!hasShownWelcome() && props.shouldShowWelcome()) {
       keyStorage.storeValue(SHOWN_HELLO, "yes");
@@ -275,7 +262,7 @@ public class UserPassLogin extends UserDialog {
     right.add(rightDiv);
 
     rightDiv.add(populateSignInForm(getSignInForm()));
-    rightDiv.add(getSignUpForm());
+    rightDiv.add(signUpForm.getSignUpForm());
   }
 
   /**
@@ -349,14 +336,6 @@ public class UserPassLogin extends UserDialog {
     hp2.add(help);
 
     return hp2;
-  }
-
-  private Form getSignInForm() {
-    Form signInForm = new Form();
-    signInForm.addStyleName("topMargin");
-    signInForm.addStyleName("formRounded");
-    signInForm.getElement().getStyle().setBackgroundColor("white");
-    return signInForm;
   }
 
   /**
@@ -519,11 +498,7 @@ public class UserPassLogin extends UserDialog {
 
         makePopup(resetEmailPopup, emailEntry, sendEmail, ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD);
         resetEmailPopup.showRelativeTo(forgotPassword);
-        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-          public void execute() {
-            emailEntry.setFocus(true);
-          }
-        });
+        setFocusOn(emailEntry);
       }
     });
     return forgotPassword;
@@ -595,19 +570,15 @@ public class UserPassLogin extends UserDialog {
 
         makePopup(sendUsernamePopup, emailEntry, sendUsernameEmail, ENTER_YOUR_EMAIL);
         sendUsernamePopup.showRelativeTo(forgotUsername);
-        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-          public void execute() {
-            emailEntry.setFocus(true);
-          }
-        });
+        setFocusOn(emailEntry);
       }
     });
     return forgotUsername;
   }
-
-  private boolean isValidEmail(String text) {
-    return text.trim().toUpperCase().matches("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$");
-  }
+//
+//  private boolean isValidEmail(String text) {
+//    return text.trim().toUpperCase().matches("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$");
+//  }
 
   /**
    * @param commentPopup
@@ -633,220 +604,6 @@ public class UserPassLogin extends UserDialog {
     setFocusOn(user.box);
   }
 
-  private void setFocusOn(final FocusWidget widget) {
-    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-      public void execute() {
-        widget.setFocus(true);
-      }
-    });
-  }
-
-  private Button signUp;
-  private CheckBox contentDevCheckbox;
-
-  private Form getSignUpForm() {
-    Form form = getSignInForm();
-
-    Fieldset fieldset = new Fieldset();
-    Heading w = new Heading(3, NEW_USER, SIGN_UP_SUBTEXT);
-    w.addStyleName("signUp");
-    form.add(w);
-    form.add(fieldset);
-
-    TextBoxBase userBox = makeSignUpUsername(fieldset);
-    TextBoxBase emailBox = makeSignUpEmail(fieldset);
-
-    makeSignUpPassword(fieldset, emailBox);
-
-    // fieldset.add(signUpProjectChoice = getProjectChoices(true));
-
-    fieldset.add(getRolesHeader());
-    fieldset.add(getRolesChoices());
-
-    getContentDevCheckbox();
-
-    if (!props.isAMAS()) fieldset.add(contentDevCheckbox);
-
-    makeRegistrationInfo(fieldset);
-    fieldset.add(getSignUpButton(userBox, emailBox));
-
-    return form;
-  }
-
-  private Heading getRolesHeader() {
-    Heading w1 = new Heading(5, ARE_YOU_A);
-    w1.addStyleName("leftTenMargin");
-    int value = 5;
-    w1.getElement().getStyle().setMarginTop(value, Style.Unit.PX);
-    w1.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
-    return w1;
-  }
-
-  private void getContentDevCheckbox() {
-    SafeHtmlBuilder builder = new SafeHtmlBuilder();
-    builder.appendHtmlConstant(RECORD_REFERENCE_AUDIO);
-    contentDevCheckbox = new CheckBox(builder.toSafeHtml());
-
-    contentDevCheckbox.setVisible(false);
-    contentDevCheckbox.addStyleName("leftTenMargin");
-    contentDevCheckbox.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        selectedRole = contentDevCheckbox.getValue() ? User.Kind.CONTENT_DEVELOPER : User.Kind.TEACHER;
-        registrationInfo.setVisible(contentDevCheckbox.getValue());
-      }
-    });
-    contentDevCheckbox.addFocusHandler(new FocusHandler() {
-      @Override
-      public void onFocus(FocusEvent event) {
-        if (studentOrTeacherPopover != null) {
-          logger.info("hiding student/teacher popover!");
-          studentOrTeacherPopover.hide();
-        }
-      }
-    });
-
-    contentDevCheckbox.getElement().getStyle().setPaddingBottom(10, Style.Unit.PX);
-    if (!props.enableAllUsers()) {
-      getRecordAudioPopover();
-    }
-  }
-
-  private void getRecordAudioPopover() {
-    String html = props.getRecordAudioPopoverText();
-    addPopover(contentDevCheckbox, RECORD_AUDIO_HEADING, html);
-  }
-
-  private Panel getRolesChoices() {
-    Panel roles = new HorizontalPanel();
-    roles.addStyleName("leftTenMargin");
-
-    roles.add(studentChoice);
-    roles.add(teacherChoice);
-    teacherChoice.addStyleName("leftFiveMargin");
-
-    studentChoice.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        selectedRole = User.Kind.STUDENT;
-        registrationInfo.setVisible(false);
-        contentDevCheckbox.setVisible(false);
-        contentDevCheckbox.setValue(false);
-      }
-    });
-
-    // Tamas wanted student by default...?
-    studentChoice.setValue(true);
-
-    teacherChoice.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        selectedRole = User.Kind.TEACHER;
-        registrationInfo.setVisible(false);
-        contentDevCheckbox.setVisible(true);
-      }
-    });
-
-    return roles;
-  }
-
-  private TextBoxBase makeSignUpUsername(Fieldset fieldset) {
-    signUpUser = addControlFormFieldWithPlaceholder(fieldset, false, MIN_LENGTH_USER_ID, BULLET_MARGIN, USERNAME);
-    final TextBoxBase userBox = signUpUser.box;
-    userBox.addStyleName("topMargin");
-    userBox.addStyleName("rightFiveMargin");
-    userBox.setWidth(SIGN_UP_WIDTH);
-    userBox.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
-    userBox.addFocusHandler(new FocusHandler() {
-      @Override
-      public void onFocus(FocusEvent event) {
-        signInHasFocus = false;
-        eventRegistration.logEvent(userBox, "SignUp_UserNameBox", "N/A", "focus in username field in sign up form");
-
-      }
-    });
-    return userBox;
-  }
-
-  private TextBoxBase makeSignUpEmail(Fieldset fieldset) {
-    signUpEmail = addControlFormFieldWithPlaceholder(fieldset, false, MIN_LENGTH_USER_ID, USER_ID_MAX_LENGTH, "Email");
-    final TextBoxBase emailBox = signUpEmail.box;
-    emailBox.addStyleName("topMargin");
-    emailBox.addStyleName("rightFiveMargin");
-    emailBox.setWidth(SIGN_UP_WIDTH);
-    emailBox.addFocusHandler(new FocusHandler() {
-      @Override
-      public void onFocus(FocusEvent event) {
-        signInHasFocus = false;
-        eventRegistration.logEvent(emailBox, "SignUp_EmailBox", "N/A", "focus in email field in sign up form");
-      }
-    });
-
-    // TODO : this competes with the warning for existing users - don't add a tooltip
-
-    return emailBox;
-  }
-
-  /**
-   * @param fieldset
-   * @param emailBox
-   * @see #getSignUpForm
-   */
-  private void makeSignUpPassword(Fieldset fieldset, final UIObject emailBox) {
-    signUpPassword = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, PASSWORD);
-    signUpPassword.box.addFocusHandler(new FocusHandler() {
-      @Override
-      public void onFocus(FocusEvent event) {
-        signInHasFocus = false;
-        eventRegistration.logEvent(emailBox, "SignUp_PasswordBox", "N/A", "focus in password field in sign up form");
-      }
-    });
-    signUpPassword.box.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
-    signUpPassword.box.setWidth(SIGN_UP_WIDTH);
-  }
-
-  private void makeRegistrationInfo(Fieldset fieldset) {
-    registrationInfo = new RegistrationInfo(fieldset);
-
-    final TextBoxBase ageBox = registrationInfo.getAgeEntryGroup().box;
-    ageBox.addFocusHandler(new FocusHandler() {
-      @Override
-      public void onFocus(FocusEvent event) {
-        signInHasFocus = false;
-      }
-    });
-    ageBox.addBlurHandler(new BlurHandler() {
-      @Override
-      public void onBlur(BlurEvent event) {
-        if (!isValidAge(registrationInfo.getAgeEntryGroup())) {
-          //  registrationInfo.getAgeEntryGroup().markError(AGE_ERR_MSG);
-          markErrorBlur(registrationInfo.getAgeEntryGroup().box, AGE_ERR_MSG, Placement.TOP);
-        }
-      }
-    });
-
-    registrationInfo.hideAge();
-    registrationInfo.getDialectGroup().box.addFocusHandler(new FocusHandler() {
-      @Override
-      public void onFocus(FocusEvent event) {
-        signInHasFocus = false;
-      }
-    });
-    registrationInfo.getMale().addFocusHandler(new FocusHandler() {
-      @Override
-      public void onFocus(FocusEvent event) {
-        signInHasFocus = false;
-      }
-    });
-    registrationInfo.getFemale().addFocusHandler(new FocusHandler() {
-      @Override
-      public void onFocus(FocusEvent event) {
-        signInHasFocus = false;
-      }
-    });
-    registrationInfo.setVisible(false);
-  }
-
   private RegistrationInfo registrationInfo;
   private User.Kind selectedRole = User.Kind.STUDENT;
 
@@ -854,130 +611,8 @@ public class UserPassLogin extends UserDialog {
   private final RadioButton teacherChoice = new RadioButton("ROLE_CHOICE", TEACHER);
   private Popover studentOrTeacherPopover;
 
-  private Button getSignUpButton(final TextBoxBase userBox, final TextBoxBase emailBox) {
-    signUp = new Button(SIGN_UP);
-    signUp.getElement().setId("SignUp");
-    eventRegistration.register(signUp);
 
-    signUp.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        if (userBox.getValue().length() < MIN_LENGTH_USER_ID) {
-          eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "short user id '" + userBox.getValue() + "'");
-          markErrorBlur(signUpUser, PLEASE_ENTER_A_LONGER_USER_ID);
-        } else if (signUpEmail.box.getValue().isEmpty()) {
-          eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "short email");
-          markErrorBlur(signUpEmail, "Please enter your email.");
-          //  } else if (signUpEmail.box.getValue().length() < MIN_EMAIL) {
-          //     eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "short email");
-          //     markErrorBlur(signUpEmail, "Please enter your email.");
-        } else if (!isValidEmail(signUpEmail.box.getValue())) {
-          eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "invalid email");
-          markErrorBlur(signUpEmail, VALID_EMAIL);
-        } else if (signUpPassword.box.getValue().length() < MIN_PASSWORD) {
-          eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "short password");
-          markErrorBlur(signUpPassword, signUpPassword.box.getValue().isEmpty() ? PLEASE_ENTER_A_PASSWORD :
-              "Please enter a password at least " + MIN_PASSWORD + " characters long.");
-        } else if (selectedRole == User.Kind.UNSET) {
-          studentOrTeacherPopover = markErrorBlur(studentChoice, "Please choose", "Please select either student or teacher.", Placement.LEFT);
-          eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "didn't check role");
-        } else if (selectedRole == User.Kind.CONTENT_DEVELOPER && !registrationInfo.checkValidGender()) {
-          eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "didn't check gender");
-//        } else if (CHECK_AGE && selectedRole == User.Kind.CONTENT_DEVELOPER && !isValidAge(registrationInfo.getAgeEntryGroup())) {
-          //         eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "didn't fill in age ");
-          //         markErrorBlur(registrationInfo.getAgeEntryGroup().box, AGE_ERR_MSG,Placement.TOP);
-          //   registrationInfo.getAgeEntryGroup().markError(AGE_ERR_MSG);
-        } else if (selectedRole == User.Kind.CONTENT_DEVELOPER && registrationInfo.getDialectGroup().getText().isEmpty()) {
-          eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "didn't fill in dialect ");
-          markErrorBlur(registrationInfo.getDialectGroup(), "Enter a language dialect.");
-          //  } else if (currentSignUpProject == null) {
-          //    markErrorBlur(signUpProjectChoice, "Please choose a language", Placement.TOP);
-        } else {
-          gotSignUp(userBox.getValue(), signUpPassword.box.getValue(), emailBox.getValue(), selectedRole);
-        }
-      }
-    });
-    signUp.addStyleName("floatRight");
-    signUp.addStyleName("rightFiveMargin");
-    signUp.addStyleName("leftFiveMargin");
-    signUp.setType(ButtonType.SUCCESS);
-
-    return signUp;
-  }
-
-  /**
-   * TODO : add first and last name so students can find their teacher
-   * <p>
-   * When the form is valid, make a new user or update an existing one.
-   *
-   * @param user
-   * @param password
-   * @param email
-   * @param kind
-   * @see #getSignUpButton(com.github.gwtbootstrap.client.ui.base.TextBoxBase, com.github.gwtbootstrap.client.ui.base.TextBoxBase)
-   */
-  private void gotSignUp(final String user, String password, String email, User.Kind kind) {
-    String passH = Md5Hash.getHash(password);
-    String emailH = Md5Hash.getHash(email);
-
-    boolean isCD = kind == User.Kind.CONTENT_DEVELOPER;
-    String gender = isCD ? registrationInfo.isMale() ? MALE : "female" : MALE;
-    String age = isCD ? registrationInfo.getAgeEntryGroup().getText() : "";
-    int age1 = isCD ? (age.isEmpty() ? 99 : Integer.parseInt(age)) : 0;
-    String dialect = isCD ? registrationInfo.getDialectGroup().getText() : "unk";
-
-    signUp.setEnabled(false);
-
-    SignUpUser newUser = new SignUpUser(user, passH, emailH, email, kind, gender.equalsIgnoreCase(MALE), age1, dialect, "browser", "", "", "");
-
-    service.addUser(
-        newUser,
-        Window.Location.getHref(),
-        isCD,
-        new AsyncCallback<User>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            eventRegistration.logEvent(signUp, "signing up", "N/A", "Couldn't contact server...?");
-
-            signUp.setEnabled(true);
-            markErrorBlur(signUp, "Trouble connecting to server.");
-          }
-
-          @Override
-          public void onSuccess(User result) {
-            if (result == null) {
-              eventRegistration.logEvent(signUp, "signing up", "N/A", "Tried to sign up, but existing user (" + user + ").");
-              signUp.setEnabled(true);
-              markErrorBlur(signUpUser, USER_EXISTS);
-            } else {
-              if (result.isEnabled()) {
-                eventRegistration.logEvent(signUp, "signing up", "N/A", getSignUpEvent(result));
-                // logger.info("Got valid, enabled new user " + user + " and so we're letting them in.");
-
-                storeUser(result);
-              } else {
-                eventRegistration.logEvent(signUp, "signing up", "N/A", getSignUpEvent(result) +
-                    " but waiting for approval from Tamas.");
-                markErrorBlur(signUp, WAIT_FOR_APPROVAL, YOU_WILL_GET_AN_APPROVAL_MESSAGE_BY_EMAIL, Placement.TOP);
-                Timer t = new Timer() {
-                  @Override
-                  public void run() {
-                    Window.Location.reload();
-
-                  }
-                };
-                t.schedule(WAIT_FOR_READING_APPROVAL);
-              }
-            }
-          }
-        });
-  }
-
-  private String getSignUpEvent(User result) {
-    return "successful sign up as " + result.getUserID() + "/" + result.getId() + " as " + result.getUserKind();
-  }
-
-  /**
+   /**
    * TODO : somehow on chrome the images get smooshed.
    *
    * @param leftAndRight
@@ -1118,29 +753,7 @@ public class UserPassLogin extends UserDialog {
    * @see #makeSignInUserName(com.github.gwtbootstrap.client.ui.Fieldset)
    */
   private void copyInfoToSignUp(User result) {
-    signUpUser.box.setText(result.getUserID());
-    signUpPassword.box.setText(password.getText());
-    setFocusOn(signUpEmail.getWidget());
+    signUpForm.copyInfoToSignUp(result,password.getText());
     eventRegistration.logEvent(signIn, "sign in", "N/A", "copied info to sign up form");
-
-    markErrorBlur(signUpEmail, "Add info", CURRENT_USERS, Placement.TOP);
-    signUpPassword.getGroup().setType(ControlGroupType.ERROR);
-    signUpEmail.box.addBlurHandler(new BlurHandler() {
-      @Override
-      public void onBlur(BlurEvent event) {
-        signUpPassword.getGroup().setType(ControlGroupType.NONE);
-      }
-    });
-  }
-
-  /**
-   * @param result
-   * @see #foundExistingUser(User, boolean, String)
-   * @see #gotSignUp(String, String, String, User.Kind)
-   */
-  private void storeUser(User result) {
-    //logger.info("UserPassLogin.storeUser - " + result);
-    enterKeyButtonHelper.removeKeyHandler();
-    userManager.storeUser(result);
   }
 }
