@@ -61,6 +61,7 @@ public class AudioContext implements IsSerializable {
    * which project this exercise is in
    */
   private int projid;
+
   private String language;
   /**
    * exercise id
@@ -131,12 +132,13 @@ public class AudioContext implements IsSerializable {
 
   public String toString() {
     return
-        "user " + userid +
-            " projid " + projid +
-            " id " + exid +
+        "AudioContext" +
+            "\n\tuser   " + userid +
+            "\n\tprojid " + projid +
+            "\n\texid   " + exid +
             //" q " + questionID +
-            " req " + reqid +
-            " type " + audioType;
+            "\n\treq    " + reqid +
+            "\n\ttype   " + audioType;
   }
 
   public String getLanguage() {
