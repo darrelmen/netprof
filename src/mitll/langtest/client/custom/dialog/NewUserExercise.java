@@ -130,7 +130,8 @@ class NewUserExercise extends BasicDialog {
    */
   public NewUserExercise(final LangTestDatabaseAsync service,
                          ExerciseController controller,
-                         HasText itemMarker, EditItem editItem,
+                         HasText itemMarker,
+                         EditItem editItem,
                          CommonExercise newExercise,
                          String instance,
                          UserList<CommonShell> originalList) {
@@ -222,22 +223,6 @@ class NewUserExercise extends BasicDialog {
 
     return container;
   }
-
-/*  private class ResizableDiv extends DivWidget implements RequiresResize {
-
-    @Override
-    public void onResize() {
-      for (int i = 0; i < getWidgetCount(); i++) {
-        Widget widget = getWidget(i);
-        if (widget instanceof RequiresResize) {
-          ((RequiresResize) widget).onResize();
-//          logger.info("ResizableDiv : resizing " + widget.getElement().getId() );
-        } else {
-//          logger.info("ResizableDiv : skipping " + widget.getElement().getId() + "  : " + widget.getClass());
-        }
-      }
-    }
-  }*/
 
   private class ResizableFluid extends FluidContainer implements RequiresResize {
     @Override

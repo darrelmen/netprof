@@ -161,9 +161,7 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }
 
   @Override
-  public int getIdForUserID(String id) {
-    return dao.idForUser(id);
-  }
+  public int getIdForUserID(String id) { return dao.idForUser(id); }
 
   @Override
   public User getUser(String id, String passwordHash) {
@@ -391,12 +389,4 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return dao.changeEnabled(userid, enabled);
   }
 
-/*  public Map<Integer, Integer> getOldToNew() {
-    Map<Integer, Integer> oldToNew = new HashMap<>();
-    for (SlickUser user : dao.getAllPredef()) oldToNew.put(user.legacyid(), user.id());
-    return oldToNew;
-  }*/
-/*
-  public boolean isEmpty() { return dao.getNumRows() < 2; }
-*/
 }
