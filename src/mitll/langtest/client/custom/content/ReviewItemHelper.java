@@ -137,7 +137,8 @@ public class ReviewItemHelper extends NPFHelper {
           ReviewEditableExercise reviewEditableExercise =
               new ReviewEditableExercise(service, controller, itemMarker,
                   userExercise, ul,
-                  pagingExerciseList, predefinedContent,
+                  pagingExerciseList,
+                  predefinedContent,
                   "ReviewEditableExercise"
               );
 
