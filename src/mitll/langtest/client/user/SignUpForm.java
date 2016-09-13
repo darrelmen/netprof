@@ -59,7 +59,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 class SignUpForm extends UserDialog {
-  private final Logger logger = Logger.getLogger("UserPassLogin");
+  private final Logger logger = Logger.getLogger("SignUpForm");
   private static final String NEW_USER = "New User?";
 
   private static final String WAIT_FOR_APPROVAL = "Wait for approval";
