@@ -33,24 +33,17 @@
 package mitll.langtest.client.user;
 
 import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.Image;
-import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
-import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
@@ -60,7 +53,6 @@ import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.instrumentation.EventRegistration;
-import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
 
 import java.util.Arrays;
@@ -81,34 +73,14 @@ public class UserPassLogin extends UserDialog {
   // private static final String IPAD_LINE_2 = "Or click this link to install <a href='https://np.ll.mit.edu/iOSNetProF/'>iOS NetProF" + "</a>.";
   private static final String IPAD_LINE_3 = "Otherwise, you will not be able to record yourself practicing vocabulary.";
 
-  private static final String MAGIC_PASS = Md5Hash.getHash("adm!n");
-  private static final String CURRENT_USERS = "Current users should add an email and password.";
-
-  private static final int MIN_LENGTH_USER_ID = 4;
-
-  private static final int MIN_PASSWORD = 4;
   private static final int LEFT_SIDE_WIDTH = 483;
-  private static final String PLEASE_ENTER_YOUR_PASSWORD = "Please enter your password.";
-  private static final String BAD_PASSWORD = "Wrong password, please try again.";// - have you signed up?";
-  private static final String PASSWORD = "Password";
-  private static final String USERNAME = "Username";
-  private static final String SIGN_IN = "Log In";
-  private static final String PLEASE_ENTER_A_LONGER_USER_ID = "Please enter a longer user id.";
-  private static final String VALID_EMAIL = "Please enter a valid email address.";
-  private static final String PLEASE_WAIT = "Please wait";
+  //private static final String VALID_EMAIL = "Please enter a valid email address.";
   private static final String SECOND_BULLET = "Record your voice and get feedback on your pronunciation.";//"Get feedback on your pronunciation";
   private static final String THIRD_BULLET = "Create and share vocab lists for study and review.";//"Make your own lists of words to study later or to share.";
-  private static final String PLEASE_ENTER_A_PASSWORD = "Please enter a password";
-  private static final String FORGOT_PASSWORD = "Forgot password?";
-  private static final String ENTER_A_USER_NAME = "Enter a user name.";
   private static final String CHECK_EMAIL = "Check Email";
   private static final String PLEASE_CHECK_YOUR_EMAIL = "Please check your email";
-  private static final String ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD = "Enter your email to reset your password.";
   private static final String FORGOT_USERNAME = "Forgot username?";
   private static final String SEND = "Send";
-  private static final String STUDENT = "Student or ";
-  private static final String TEACHER = "Teacher?";
-  private static final String SIGN_UP_WIDTH = "266px";
   private static final int BULLET_MARGIN = 25;
   private static final String PLEASE_CHECK = "Please check";
   private static final String ENTER_YOUR_EMAIL = "Enter your email to get your username.";
@@ -116,16 +88,12 @@ public class UserPassLogin extends UserDialog {
   private static final String HELP = "Help";
 
   private final KeyPressHelper enterKeyButtonHelper;
-  private FormField user;
-  private FormField password;
 
   private boolean signInHasFocus = true;
   private final EventRegistration eventRegistration;
-  private Button signIn;
 
-  private DecoratedPopupPanel resetEmailPopup;
-  private Button sendEmail;
   private SignUpForm signUpForm;
+  private SignInForm signInForm;
 
   /**
    * @param props
@@ -140,6 +108,7 @@ public class UserPassLogin extends UserDialog {
     boolean willShow = false;// checkWelcome();
 
     signUpForm = new SignUpForm(props, userManager, eventRegistration, this);
+    signInForm = new SignInForm(props, userManager, eventRegistration, this, signUpForm);
 
     if (!willShow) {
       if (BrowserCheck.isIPad()) {
@@ -147,28 +116,33 @@ public class UserPassLogin extends UserDialog {
       }
     }
 
-    // this.userManager = userManager;
     this.eventRegistration = eventRegistration;
     enterKeyButtonHelper = new KeyPressHelper(true) {
       @Override
       public void userHitEnterKey(Button button) {
         if (sendUsernamePopup != null && sendUsernamePopup.isShowing()) {
           sendUsernameEmail.fireEvent(new ButtonClickEvent());
-        } else if (resetEmailPopup != null && resetEmailPopup.isShowing()) {
-          sendEmail.fireEvent(new ButtonClickEvent());
+        } else if (signInForm.clickSendEmail()) {
+      //    sendEmail.fireEvent(new ButtonClickEvent());
         } else if (signInHasFocus) {
           button.fireEvent(new ButtonClickEvent());
         } else {
-         // signUp.fireEvent(new KeyPressHelper.ButtonClickEvent());
+          // signUp.fireEvent(new KeyPressHelper.ButtonClickEvent());
           signUpForm.clickSignUp();
         }
       }
     };
     setEnterKeyButtonHelper(enterKeyButtonHelper);
+    signInForm.setEnterKeyButtonHelper(enterKeyButtonHelper);
+    signUpForm.setEnterKeyButtonHelper(enterKeyButtonHelper);
   }
 
   public void clearSignInHasFocus() {
     signInHasFocus = false;
+  }
+
+  public void setSignInHasFocus() {
+    signInHasFocus = true;
   }
 /*  private boolean checkWelcome() {
     if (!hasShownWelcome() && props.shouldShowWelcome()) {
@@ -214,7 +188,7 @@ public class UserPassLogin extends UserDialog {
         null, new HiddenHandler() {
           @Override
           public void onHidden(HiddenEvent hiddenEvent) {
-            setFocusOnUserID();
+            signInForm.setFocusOnUserID();
           }
         },
         true);
@@ -261,52 +235,13 @@ public class UserPassLogin extends UserDialog {
     DivWidget rightDiv = new DivWidget();
     right.add(rightDiv);
 
-    rightDiv.add(populateSignInForm(getSignInForm()));
+    rightDiv.add(signInForm.populateSignInForm(getSignInForm(), getForgotRow(), enterKeyButtonHelper));
     rightDiv.add(signUpForm.getSignUpForm());
   }
 
   /**
-   * @param signInForm
    * @return
-   * @see #getRightLogin(com.google.gwt.user.client.ui.Panel)
-   */
-  private Form populateSignInForm(Form signInForm) {
-    Fieldset fieldset = new Fieldset();
-    signInForm.add(fieldset);
-
-    makeSignInUserName(fieldset);
-
-    Panel hp = new HorizontalPanel();
-    hp.getElement().setId("password_login_box");
-    hp.addStyleName("leftFiveMargin");
-
-    addPasswordField(fieldset, hp);
-
-    hp.add(getSignInButton());
-
-    fieldset.add(hp);
-    fieldset.add(getForgotRow());
-    setFocusOnUserID();
-
-    return signInForm;
-  }
-
-  private void addPasswordField(Fieldset fieldset, Panel hp) {
-    password = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, PASSWORD);
-    password.box.addFocusHandler(new FocusHandler() {
-      @Override
-      public void onFocus(FocusEvent event) {
-        signInHasFocus = true;
-        eventRegistration.logEvent(user.box, "PasswordBox", "N/A", "focus in password field");
-      }
-    });
-
-    hp.add(password.box);
-  }
-
-  /**
-   * @return
-   * @see #populateSignInForm(Form)
+   * @see SignInForm#populateSignInForm
    */
   private Panel getForgotRow() {
     Panel hp2 = new HorizontalPanel();
@@ -316,7 +251,7 @@ public class UserPassLogin extends UserDialog {
     hp2.add(forgotUser);
     forgotUser.addStyleName("leftTenMargin");
 
-    Anchor forgotPassword = getForgotPassword();
+    Anchor forgotPassword = signInForm.getForgotPassword();
     hp2.add(forgotPassword);
     forgotPassword.addStyleName("topFiveMargin");
     forgotPassword.addStyleName("leftFiveMargin");
@@ -338,108 +273,7 @@ public class UserPassLogin extends UserDialog {
     return hp2;
   }
 
-  /**
-   * @return
-   * @see #populateSignInForm(Form)
-   */
-  private Button getSignInButton() {
-    signIn = new Button(SIGN_IN);
-    signIn.setWidth("45px");
-    signIn.getElement().setId("SignIn");
-    eventRegistration.register(signIn);
-    signIn.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        String userID = user.box.getValue();
-        if (userID.length() < MIN_LENGTH_USER_ID) {
-          markErrorBlur(user, PLEASE_ENTER_A_LONGER_USER_ID);
-        } else {
-          String value = password.box.getValue();
-          if (!value.isEmpty() && value.length() < MIN_PASSWORD) {
-            markErrorBlur(password, "Please enter a password longer than " + MIN_PASSWORD + " characters.");
-          } else {
-         /*   if (currentProject == null) {
-              markErrorBlur(projectChoice, "Please choose a language", Placement.TOP);
-            } else {
-              gotLogin(userID, value, value.isEmpty(), currentProject.getProjectid());
-            }*/
-            gotLogin(userID, value, value.isEmpty());//, currentProject.getProjectid());
-
-          }
-        }
-
-      }
-    });
-    enterKeyButtonHelper.addKeyHandler(signIn);
-
-    signIn.addStyleName("rightFiveMargin");
-    signIn.addStyleName("leftFiveMargin");
-
-    signIn.setType(ButtonType.PRIMARY);
-    return signIn;
-  }
-
-  /**
-   * If there's an existing user without a password, copy their info to the sign up box.
-   *
-   * @param fieldset
-   * @see #populateSignInForm(Form)
-   */
-  private void makeSignInUserName(Fieldset fieldset) {
-    user = addControlFormFieldWithPlaceholder(fieldset, false, MIN_LENGTH_USER_ID, USER_ID_MAX_LENGTH, USERNAME);
-    user.box.addStyleName("topMargin");
-    user.box.addStyleName("rightFiveMargin");
-    user.box.getElement().setId("Use`rname_Box_SignIn");
-    user.box.setWidth(SIGN_UP_WIDTH);
-
-    user.box.addFocusHandler(new FocusHandler() {
-      @Override
-      public void onFocus(FocusEvent event) {
-        signInHasFocus = true;
-        eventRegistration.logEvent(user.box, "UserNameBox", "N/A", "focus in username field");
-      }
-    });
-
-    user.box.addBlurHandler(new BlurHandler() {
-      @Override
-      public void onBlur(BlurEvent event) {
-        if (!user.getText().isEmpty()) {
-          eventRegistration.logEvent(user.box, "UserNameBox", "N/A", "left username field '" + user.getText() + "'");
-
-          //    logger.info("checking makeSignInUserName " + user.getText());
-          service.userExists(user.getText(), "", new AsyncCallback<User>() {
-            @Override
-            public void onFailure(Throwable caught) {
-
-            }
-
-            @Override
-            public void onSuccess(User result) {
-              //       System.out.println("makeSignInUserName : for " + user.getText() + " got back " + result);
-              if (result != null) {
-                String emailHash = result.getEmailHash();
-                String passwordHash = result.getPasswordHash();
-                if (emailHash == null || passwordHash == null || emailHash.isEmpty() || passwordHash.isEmpty()) {
-                  eventRegistration.logEvent(user.box, "UserNameBox", "N/A", "existing legacy user " + result.toStringShort());
-                  copyInfoToSignUp(result);
-                }
-    /*            int projectid = result.getProjectStartupInfo().getProjectid();
-                for (SlimProject project1 : projects) {
-                  if (project1.getProjectid() == projectid) {
-                    projectChoice.setSelectedValue(project1.getLanguage());   // TODO : do something better for pashto
-                    currentProject = project1;
-                    break;
-                  }
-                }*/
-              }
-            }
-          });
-        }
-      }
-    });
-  }
-
-
+/*
   private Anchor getForgotPassword() {
     final Anchor forgotPassword = new Anchor(FORGOT_PASSWORD);
     forgotPassword.addClickHandler(new ClickHandler() {
@@ -459,7 +293,7 @@ public class UserPassLogin extends UserDialog {
           public void onClick(ClickEvent event) {
             String text = emailEntry.getText();
             if (!isValidEmail(text)) {
-       /*       System.out.println("email is '" + text+ "' ");*/
+       *//*       System.out.println("email is '" + text+ "' ");*//*
               markErrorBlur(emailEntry, PLEASE_CHECK, VALID_EMAIL, Placement.TOP);
               return;
             }
@@ -502,14 +336,15 @@ public class UserPassLogin extends UserDialog {
       }
     });
     return forgotPassword;
-  }
+  }*/
+
 
   private DecoratedPopupPanel sendUsernamePopup;
   private Button sendUsernameEmail;
 
   /**
    * @return
-   * @see #populateSignInForm(com.github.gwtbootstrap.client.ui.Form)
+   * @see SignInForm#populateSignInForm
    */
   private Anchor getForgotUser() {
     final Anchor forgotUsername = new Anchor(FORGOT_USERNAME);
@@ -575,44 +410,8 @@ public class UserPassLogin extends UserDialog {
     });
     return forgotUsername;
   }
-//
-//  private boolean isValidEmail(String text) {
-//    return text.trim().toUpperCase().matches("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$");
-//  }
 
   /**
-   * @param commentPopup
-   * @param commentEntryText
-   * @param okButton
-   * @param prompt
-   * @see #getForgotPassword()
-   * @see #getForgotUser()
-   */
-  private void makePopup(Panel commentPopup, Widget commentEntryText, Widget okButton, String prompt) {
-    Panel vp = new VerticalPanel();
-    Panel w = new Heading(6, prompt);
-    vp.add(w);
-    w.addStyleName("bottomFiveMargin");
-    Panel hp = new HorizontalPanel();
-    hp.add(commentEntryText);
-    hp.add(okButton);
-    vp.add(hp);
-    commentPopup.add(vp);
-  }
-
-  private void setFocusOnUserID() {
-    setFocusOn(user.box);
-  }
-
-  private RegistrationInfo registrationInfo;
-  private User.Kind selectedRole = User.Kind.STUDENT;
-
-  private final RadioButton studentChoice = new RadioButton("ROLE_CHOICE", STUDENT);
-  private final RadioButton teacherChoice = new RadioButton("ROLE_CHOICE", TEACHER);
-  private Popover studentOrTeacherPopover;
-
-
-   /**
    * TODO : somehow on chrome the images get smooshed.
    *
    * @param leftAndRight
@@ -659,101 +458,5 @@ public class UserPassLogin extends UserDialog {
     w3.getElement().getStyle().setMarginLeft(10, Style.Unit.PX);
     w3.getElement().getStyle().setFontSize(16, Style.Unit.PT);
     w3.getElement().getStyle().setLineHeight(1, Style.Unit.EM);
-  }
-
-  /**
-   * TODOx : get list of projects
-   *
-   * @param user
-   * @param pass
-   * @see #getRightLogin(com.google.gwt.user.client.ui.Panel)
-   */
-  private void gotLogin(final String user, final String pass, final boolean emptyPassword) {
-    final String hashedPass = Md5Hash.getHash(pass);
-    logger.info("gotLogin : user is '" + user + "' pass " + pass.length() + " characters or '" + hashedPass + "'");
-
-    signIn.setEnabled(false);
-    service.userExists(user, hashedPass, new AsyncCallback<User>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        signIn.setEnabled(true);
-        markErrorBlur(signIn, "Trouble connecting to server.");
-      }
-
-      @Override
-      public void onSuccess(User result) {
-        if (result == null) {
-          eventRegistration.logEvent(signIn, "sign in", "N/A", "unknown user " + user);
-
-          logger.info("No user with that name '" + user + "' pass " + pass.length() + " characters - " + emptyPassword);
-          markErrorBlur(password, emptyPassword ? PLEASE_ENTER_YOUR_PASSWORD : "No user found - have you signed up?");
-          signIn.setEnabled(true);
-        } else {
-          foundExistingUser(result, emptyPassword, hashedPass);
-        }
-      }
-    });
-  }
-
-  /**
-   * @param result
-   * @param emptyPassword
-   * @param hashedPass
-   * @see #gotLogin
-   */
-  private void foundExistingUser(User result, boolean emptyPassword, String hashedPass) {
-    String user = result.getUserID();
-    String emailHash = result.getEmailHash();
-    String passwordHash = result.getPasswordHash();
-    if (emailHash == null || passwordHash == null || emailHash.isEmpty() || passwordHash.isEmpty()) {
-      copyInfoToSignUp(result);
-      signIn.setEnabled(true);
-    } else {
-      // logger.info("Got valid user " + result);
-      if (emptyPassword) {
-        eventRegistration.logEvent(signIn, "sign in", "N/A", "empty password");
-
-        markErrorBlur(password, PLEASE_ENTER_YOUR_PASSWORD);
-        signIn.setEnabled(true);
-      } else if (result.getPasswordHash().equalsIgnoreCase(hashedPass)) {
-        if (result.isEnabled() || result.getUserKind() != User.Kind.CONTENT_DEVELOPER || props.enableAllUsers()) {
-          eventRegistration.logEvent(signIn, "sign in", "N/A", "successful sign in for " + user);
-          //    logger.info("Got valid user " + user + " and matching password, so we're letting them in.");
-
-          storeUser(result);
-        } else {
-          eventRegistration.logEvent(signIn, "sign in", "N/A", "successful sign in for " + user + " but wait for approval.");
-
-          markErrorBlur(signIn, PLEASE_WAIT, "Please wait until you've been approved. Check your email.", Placement.LEFT);
-          signIn.setEnabled(true);
-        }
-      } else { // special pathway...
-        String enteredPass = Md5Hash.getHash(password.getText());
-        if (enteredPass.equals(MAGIC_PASS)) {
-          eventRegistration.logEvent(signIn, "sign in", "N/A", "sign in as user '" + user + "'");
-          storeUser(result);
-        } else {
-          logger.info("bad pass  " + passwordHash);
-          //  logger.info("admin " + Md5Hash.getHash("adm!n"));
-          eventRegistration.logEvent(signIn, "sign in", "N/A", "bad password");
-
-          markErrorBlur(password, BAD_PASSWORD);
-          signIn.setEnabled(true);
-        }
-      }
-    }
-  }
-
-  /**
-   * Don't enable the teacher choice for legacy users, b/c it lets them skip over the
-   * recorder/not a recorder choice.
-   *
-   * @param result
-   * @see #foundExistingUser(User, boolean, String)
-   * @see #makeSignInUserName(com.github.gwtbootstrap.client.ui.Fieldset)
-   */
-  private void copyInfoToSignUp(User result) {
-    signUpForm.copyInfoToSignUp(result,password.getText());
-    eventRegistration.logEvent(signIn, "sign in", "N/A", "copied info to sign up form");
   }
 }
