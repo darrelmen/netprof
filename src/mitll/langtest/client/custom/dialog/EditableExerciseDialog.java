@@ -82,7 +82,7 @@ class EditableExerciseDialog extends NewUserExercise {
   private String originalSlowRefAudio;
   private String originalTransliteration;
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   /**
    * @param itemMarker
@@ -308,7 +308,7 @@ class EditableExerciseDialog extends NewUserExercise {
                                final ListInterface<CommonShell> exerciseList,
                                final Panel toAddTo,
                                boolean onClick) {
-//    if (DEBUG) logger.info("EditItem.afterValidForeignPhrase : exercise id " + newUserExercise.getID());
+    if (DEBUG) logger.info("EditableExerciseDialog.afterValidForeignPhrase : exercise id " + newUserExercise.getID());
     checkForForeignChange();
     postChangeIfDirty(exerciseList, onClick);
   }
@@ -432,6 +432,7 @@ class EditableExerciseDialog extends NewUserExercise {
    * @see #audioPosted()
    */
   void reallyChange(final ListInterface<CommonShell> pagingContainer, final boolean markFixedClicked, boolean keepAudio) {
+    logger.info("reallyChange " + markFixedClicked + " " + keepAudio);
     newUserExercise.getCombinedMutableUserExercise().setCreator(controller.getUser());
     postEditItem(pagingContainer, markFixedClicked, keepAudio);
   }
@@ -530,7 +531,7 @@ class EditableExerciseDialog extends NewUserExercise {
           getMeaning(newUserExercise) :
           newUserExercise.getEnglish();
 
-      logger.info("using english " + english);
+  //    logger.info("using english " + english);
       this.english.box.setText(originalEnglish = english);
       ((TextBox) this.english.box).setVisibleLength(english.length() + 4);
       if (english.length() > 20) {
