@@ -43,7 +43,8 @@ import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
 import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
@@ -53,7 +54,6 @@ import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.instrumentation.EventRegistration;
-import mitll.langtest.shared.user.User;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -66,9 +66,8 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 8/11/14.
  */
-public class UserPassLogin extends UserDialog {
-  private final Logger logger = Logger.getLogger("UserPassLogin");
-
+public class UserPassLogin extends UserDialog implements UserPassDialog {
+//  private final Logger logger = Logger.getLogger("UserPassLogin");
   private static final String IPAD_LINE_1 = "Also consider installing the NetProF app, which is available on the DLI App Store.";// or";
   // private static final String IPAD_LINE_2 = "Or click this link to install <a href='https://np.ll.mit.edu/iOSNetProF/'>iOS NetProF" + "</a>.";
   private static final String IPAD_LINE_3 = "Otherwise, you will not be able to record yourself practicing vocabulary.";
@@ -84,6 +83,7 @@ public class UserPassLogin extends UserDialog {
   private static final int BULLET_MARGIN = 25;
   private static final String PLEASE_CHECK = "Please check";
   private static final String ENTER_YOUR_EMAIL = "Enter your email to get your username.";
+ // private static final String ENTER_YOUR_EMAIL = "Please check your email to get your username.";
   private static final int EMAIL_POPUP_DELAY = 4000;
   private static final String HELP = "Help";
 
@@ -92,8 +92,8 @@ public class UserPassLogin extends UserDialog {
   private boolean signInHasFocus = true;
   private final EventRegistration eventRegistration;
 
-  private SignUpForm signUpForm;
-  private SignInForm signInForm;
+  private SignUp signUpForm;
+  private SignIn signInForm;
 
   /**
    * @param props
@@ -117,13 +117,20 @@ public class UserPassLogin extends UserDialog {
     }
 
     this.eventRegistration = eventRegistration;
-    enterKeyButtonHelper = new KeyPressHelper(true) {
+    enterKeyButtonHelper = getKeyPressHelper();
+    setEnterKeyButtonHelper(enterKeyButtonHelper);
+    signInForm.setEnterKeyButtonHelper(enterKeyButtonHelper);
+    signUpForm.setEnterKeyButtonHelper(enterKeyButtonHelper);
+  }
+
+  private KeyPressHelper getKeyPressHelper() {
+    return new KeyPressHelper(true) {
       @Override
       public void userHitEnterKey(Button button) {
         if (sendUsernamePopup != null && sendUsernamePopup.isShowing()) {
           sendUsernameEmail.fireEvent(new ButtonClickEvent());
         } else if (signInForm.clickSendEmail()) {
-      //    sendEmail.fireEvent(new ButtonClickEvent());
+          //    sendEmail.fireEvent(new ButtonClickEvent());
         } else if (signInHasFocus) {
           button.fireEvent(new ButtonClickEvent());
         } else {
@@ -132,15 +139,14 @@ public class UserPassLogin extends UserDialog {
         }
       }
     };
-    setEnterKeyButtonHelper(enterKeyButtonHelper);
-    signInForm.setEnterKeyButtonHelper(enterKeyButtonHelper);
-    signUpForm.setEnterKeyButtonHelper(enterKeyButtonHelper);
   }
 
+  @Override
   public void clearSignInHasFocus() {
     signInHasFocus = false;
   }
 
+  @Override
   public void setSignInHasFocus() {
     signInHasFocus = true;
   }
