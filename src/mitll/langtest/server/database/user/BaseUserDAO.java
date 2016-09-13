@@ -237,12 +237,12 @@ public abstract class BaseUserDAO extends DAO {
    * public for test access... for now
    */
   public void findOrMakeDefectDetector() {
-    this.defectDetector = getOrAdd(DEFECT_DETECTOR);
+    this.defectDetector  = getOrAdd(DEFECT_DETECTOR);
     this.beforeLoginUser = getOrAdd(BEFORE_LOGIN_USER);
-    this.importUser = getOrAdd(IMPORT_USER);
-    this.defaultUser = getOrAdd("defaultUser");
-    this.defaultMale = getOrAdd("defaultMaleUser");
-    this.defaultFemale = getOrAdd("defaultFemaleUser");
+    this.importUser      = getOrAdd(IMPORT_USER);
+    this.defaultUser     = getOrAdd("defaultUser");
+    this.defaultMale     = getOrAdd("defaultMaleUser");
+    this.defaultFemale   = getOrAdd("defaultFemaleUser");
   }
 
   private int getOrAdd(String beforeLoginUser) {
