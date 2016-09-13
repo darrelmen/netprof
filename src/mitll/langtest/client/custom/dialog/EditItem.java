@@ -56,6 +56,7 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.project.ProjectStartupInfo;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -241,11 +242,14 @@ public class EditItem {
    * @return
    */
   private CommonExercise getNewItem() {
+    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+
+    int projectid = projectStartupInfo == null ? -1 : projectStartupInfo.getProjectid();
     return new Exercise(
         NEW_EXERCISE_ID,
         userManager.getUser(),
         NEW_ITEM,
-        controller.getProjectStartupInfo().getProjectid(),
+        projectid,
         false);
   }
 
