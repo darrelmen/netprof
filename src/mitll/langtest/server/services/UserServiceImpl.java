@@ -171,13 +171,12 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @param login
    * @param passwordH
    * @return
-   * @see mitll.langtest.client.user.UserPassLogin#gotLogin
-   * @see mitll.langtest.client.user.UserPassLogin#makeSignInUserName(com.github.gwtbootstrap.client.ui.Fieldset)
+   * @see mitll.langtest.client.user.SignInForm#gotLogin
+   * @see mitll.langtest.client.user.SignInForm#makeSignInUserName
    */
   public User userExists(String login, String passwordH) {
     findSharedDatabase();
     if (passwordH.isEmpty()) {
-
       User user = db.getUserDAO().getUser(login, passwordH);
       if (user != null) {
         int i = db.getUserProjectDAO().mostRecentByUser(user.getId());
@@ -211,16 +210,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @param url
    * @param isCD
    * @return null if existing user
-   * @paramx userID
-   * @paramx passwordH
-   * @paramx emailH
-   * @paramx kind
-   * @paramx email
-   * @paramx isMale
-   * @paramx age
-   * @paramx dialect
-   * @paramx device
-   * @see mitll.langtest.client.user.UserPassLogin#gotSignUp(String, String, String, User.Kind)
+   * @see mitll.langtest.client.user.SignUpForm#gotSignUp
    */
   @Override
   public User addUser(
@@ -235,15 +225,16 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
 
     String userID = user.getUserID();
     String email = user.getEmail();
+    String first = user.getFirst();
     if (newUser != null && !newUser.isEnabled()) { // newUser = null means existing newUser.
       logger.debug("newUser " + userID + "/" + newUser + " wishes to be a content developer. Asking for approval.");
       getEmailHelper().addContentDeveloper(url, email, newUser, mailSupport, getProject().getLanguage());
-      getEmailHelper().sendConfirmationEmail(email, userID, mailSupport);
+      getEmailHelper().sendConfirmationEmail(email, userID, first, mailSupport);
     } else if (newUser == null) {
       logger.debug("no newUser found for id " + userID);
     } else {
       logger.debug("newUser " + userID + "/" + newUser + " is enabled.");
-      getEmailHelper().sendConfirmationEmail(email, userID, mailSupport);
+      getEmailHelper().sendConfirmationEmail(email, userID, first, mailSupport);
     }
     if (newUser != null) {
       setSessionUser(createSession(), newUser);
@@ -273,7 +264,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @param email
    * @param url
    * @return true if there's a user with this email
-   * @see mitll.langtest.client.user.UserPassLogin#getForgotPassword()
+   * @see mitll.langtest.client.user.SignInForm#getForgotPassword
    */
   public boolean resetPassword(String user, String email, String url) {
     logger.debug("resetPassword for " + user);
@@ -343,15 +334,6 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     getEmailHelper().getUserNameEmail(email, url, userChosenIDIfValid);
     return userChosenIDIfValid != null;
   }
-
-/*  public List<SlimProject> getProjects() {
-    List<SlimProject> projects = new ArrayList<>();
-    for (SlickProject project : db.getProjectDAO().getAll()) {
-      projects.add(new SlimProject(project.id(), project.name(), project.language(), project.countrycode(),
-          project.course()));
-    }
-    return projects;
-  }*/
 
   /**
    * @param projectid
