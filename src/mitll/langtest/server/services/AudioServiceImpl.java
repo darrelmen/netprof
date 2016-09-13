@@ -51,7 +51,6 @@ import org.apache.log4j.Logger;
 
 import java.io.File;
 
-
 /**
  * TODO : add image generation here too - since it's done from a file.
  */
@@ -75,7 +74,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   public void init() {
     super.init();
     audioConversion = new AudioConversion(serverProps);
-    String relativeConfigDir = "config" + File.separator + getServletContext().getInitParameter("config");
+ //   String relativeConfigDir = "config" + File.separator + getServletContext().getInitParameter("config");
 //    this.configDir = pathHelper.getInstallPath() + File.separator + relativeConfigDir;
     pathWriter = new PathWriter(serverProps);
   }
@@ -119,22 +118,23 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
                                     boolean addToAudioTable,
                                     boolean allowAlternates) {
     int exerciseID = audioContext.getExid();
+    boolean isExistingExercise = exerciseID > 0;
 
-    logger.info("writeAudioFile got request " + audioContext + " payload " + base64EncodedString.length());
+    logger.info("writeAudioFile got request " + audioContext +
+        " do flashcard " +doFlashcard +
+        " recordInResults " +recordInResults +
+        " addToAudioTable " +addToAudioTable +
+        " allowAlternates " +allowAlternates +
+        "payload " + base64EncodedString.length());
 
     boolean amas = serverProps.isAMAS();
 
-    CommonExercise commonExercise = amas ? null : db.getCustomOrPredefExercise(getProjectID(), exerciseID);
+    CommonExercise commonExercise = amas || !isExistingExercise ? null : db.getCustomOrPredefExercise(getProjectID(), exerciseID);
     CommonShell exercise1 = amas ? db.getAMASExercise(exerciseID) : commonExercise;
 
-    if (exercise1 == null) {
+    if (exercise1 == null && isExistingExercise) {
       logger.warn(getLanguage() + " : couldn't find exerciseID with id '" + exerciseID + "'");
     }
-//		else {
-//			logger.info("allow alternates " + allowAlternates + " " +exerciseID +
-//					" exercise1 " + exercise1.getForeignLanguage() + " refs " + exercise1.getRefSentences());
-//		}
-
     AnswerInfo.RecordingInfo recordingInfo = new AnswerInfo.RecordingInfo("", "", deviceType, device, recordedWithFlash);
 
     AudioAnswer audioAnswer = amas ?

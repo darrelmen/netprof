@@ -396,13 +396,14 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
 
   @Override
   public String toString() {
-    return "Audio id " + uniqueID +
-        " for ex    " + getID()+
+    return "Audio" +
+        "\n\tid         " + uniqueID +
+        "\n\tfor ex     " + getID()+
         " (old ex " + getOldexid() + ") :" +
-        "\n\tpath   " + audioRef +
-        "\n\tactual " + actualPath +
-        "\n\tattrs  " + attributes +
-        "\n\tby     " + userid + "/" + user +
+        "\n\tpath       " + audioRef +
+        "\n\tactual     " + actualPath +
+        "\n\tattrs      " + attributes +
+        "\n\tby         " + userid + "/" + user +
         "\n\ttranscript '" + transcript +
         "' ";
   }
