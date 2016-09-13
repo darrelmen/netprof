@@ -630,8 +630,8 @@ public class UserListManager implements IUserListManager {
    */
   @Override
   public void reallyCreateNewItem(long userListID, CommonExercise userExercise, String mediaDir) {
-    userExerciseDAO.add(userExercise, false);
-    addItemToList(userListID, userExercise.getOldID(), userExercise.getID());
+    int add = userExerciseDAO.add(userExercise, false);
+    addItemToList(userListID, userExercise.getOldID(), add);
     editItem(userExercise, false, mediaDir);
   }
 

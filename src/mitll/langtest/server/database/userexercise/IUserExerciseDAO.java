@@ -45,7 +45,7 @@ import java.util.Map;
  * @see
  */
 public interface IUserExerciseDAO extends IDAO {
-  void add(CommonExercise userExercise, boolean isOverride);
+  int add(CommonExercise userExercise, boolean isOverride);
 
   List<CommonShell> getOnList(int listID);
 

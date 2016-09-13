@@ -332,11 +332,30 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
    */
   public boolean hasMatchingTranscript(String foreignLanguage) {
     try {
-      return transcript == null || foreignLanguage.isEmpty() || transcript.isEmpty() ||
-          removePunct(transcript).toLowerCase().equals(removePunct(foreignLanguage).toLowerCase());
+
+//      String before = foreignLanguage;
+//      String fixedAgainst = StringUtils.stripAccents(before);
+
+//      if (!before.equals(fixedAgainst)) {
+//        logger.info("attachAudio before '" + before +
+//            "' after '" + fixedAgainst +
+//            "'");
+//      }
+
+      return matchTranscript(foreignLanguage);
     } catch (Exception e) {
       return true;
     }
+  }
+
+  private boolean matchTranscript(String foreignLanguage) {
+    String transcript = this.transcript;
+    return matchTranscript(foreignLanguage, transcript);
+  }
+
+  public boolean matchTranscript(String foreignLanguage, String transcript) {
+      return transcript == null || foreignLanguage.isEmpty() || transcript.isEmpty() ||
+          removePunct(transcript).toLowerCase().equals(removePunct(foreignLanguage).toLowerCase());
   }
 
   private String removePunct(String t) {
