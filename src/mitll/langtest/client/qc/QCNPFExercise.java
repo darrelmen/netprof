@@ -97,6 +97,9 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
   public static final String CONTEXT_TRANSLATION = "context translation";
 
   private static final String REF_AUDIO = "refAudio";
+  /**
+   * @see #addApprovedButton(ListInterface, NavigationHelper)
+   */
   private static final String APPROVED = "Approve Item";
   private static final String NO_AUDIO_RECORDED = "No Audio Recorded.";
   private static final String COMMENT = "Comment";
@@ -789,7 +792,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
     final TextBox commentEntry = new TextBox();
     commentEntry.getElement().setId("QCNPFExercise_Comment_TextBox_" + field);
     commentEntry.addStyleName("topFiveMargin");
-    if (annotation != null) {
+    if (annotation != null && annotation.isDefect()) {
       commentEntry.setText(annotation.getComment());
     }
     commentEntry.setVisibleLength(100);
