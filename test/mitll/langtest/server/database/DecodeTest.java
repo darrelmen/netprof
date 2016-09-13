@@ -37,6 +37,20 @@ public class DecodeTest extends BaseTest {
   }
 
   @Test
+  public void testSpanishAudio() {
+    DatabaseImpl<CommonExercise> russian = getDatabase("spanish");
+    CommonExercise exercise = russian.getExercise("3277");
+    russian.attachAudio(exercise);
+    //String context = exercise.getContext();
+
+    for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) {
+      logger.info("Found " + audioAttribute);
+    }
+//    russian.getSectionHelper().report();
+    logger.info("got\n" + exercise);
+  }
+
+  @Test
   public void testFixSudanese() {
     DatabaseImpl<CommonExercise> russian = getDatabase("sudanese");
 
