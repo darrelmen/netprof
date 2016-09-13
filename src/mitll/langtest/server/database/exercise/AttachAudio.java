@@ -36,6 +36,7 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.MutableAudioExercise;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -56,7 +57,7 @@ public class AttachAudio {
   private int c = 0;
   //  private final int audioOffset;
 //private final String mediaDir;
-  private final String mediaDir1;
+ // private final String mediaDir1;
   //  private final File installPath;
   private Map<Integer, List<AudioAttribute>> exToAudio;
   private String language;
@@ -66,11 +67,11 @@ public class AttachAudio {
    * @param language
    * @see BaseExerciseDAO#setAudioDAO
    */
-  public AttachAudio(Map<Integer, List<AudioAttribute>> exToAudio,
+  AttachAudio(Map<Integer, List<AudioAttribute>> exToAudio,
                      String language) {
     //  this.mediaDir = mediaDir;
     // this.mediaDir1 = mediaDir1;
-    this.mediaDir1 = "";
+   // this.mediaDir1 = "";
     //  logger.info("media dir '" + mediaDir + "' '" + mediaDir1 + "'");
     this.language = language;
 //    this.installPath = installPath;
@@ -195,6 +196,11 @@ public class AttachAudio {
         if (!actualPath.startsWith(ServerProperties.BEST_AUDIO)) {
           actualPath = ServerProperties.BEST_AUDIO + File.separator +actualPath;
         }
+        String before = exercise.getForeignLanguage();
+        String noAccents = StringUtils.stripAccents(before);
+        String transcript = audio.getTranscript();
+        String noAccentsTranscript = transcript == null ? null : StringUtils.stripAccents(transcript);
+
         if (!previouslyAttachedAudio.contains(actualPath)) {
           if (audio.isContextAudio()) {
             //logger.info("attachAudio for " + exercise.getID() + " found " + audio);
@@ -216,7 +222,8 @@ public class AttachAudio {
                 logger.info("got more than 1 directly related ? " + directlyRelated.size());
               }
             }
-          } else if (audio.hasMatchingTranscript(exercise.getForeignLanguage())) {
+          } else if ((audio.matchTranscript(before, transcript) ||
+              audio.matchTranscript(noAccents, noAccentsTranscript))) {
             audio.setAudioRef(actualPath);   // remember to prefix the path
             mutableAudio.addAudio(audio);
           } else {

@@ -39,6 +39,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -255,9 +256,8 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
       }
     }
 
+    boolean choseRegularSpeed = isRegularSpeed();
     if (regular != null) {
-      //System.out.println("addRegularAndSlow regular " + regular);
-
       addAudioRadioButton(vp, regular);
       final AudioAttribute innerRegAttr = regAttr;
       final RadioButton innerRegular = regular;
@@ -265,13 +265,13 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
         @Override
         public void onClick(ClickEvent event) {
           showAudio(innerRegAttr);
+          storeIsRegular(true);
           controller.logEvent(innerRegular, RADIO_BUTTON, exercise.getID(), SELECTED_AUDIO + innerRegAttr.getAudioRef());
         }
       });
-      regular.setValue(true);
+      regular.setValue(choseRegularSpeed);
     }
     if (slow != null) {
-      //System.out.println("addRegularAndSlow slow " + slow);
       addAudioRadioButton(vp, slow);
       final AudioAttribute innerSlowAttr = slowAttr;
       final RadioButton innerSlow = slow;
@@ -279,13 +279,14 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
         @Override
         public void onClick(ClickEvent event) {
           showAudio(innerSlowAttr);
+          storeIsRegular(false);
           controller.logEvent(innerSlow, RADIO_BUTTON, exercise.getID(), SELECTED_AUDIO + innerSlowAttr.getAudioRef());
         }
       });
-      if (regular == null)
+      if (regular == null || !choseRegularSpeed)
         slow.setValue(true);
     }
-    AudioAttribute firstAttr = (regular != null) ? regAttr : slowAttr;
+    AudioAttribute firstAttr = ((regular != null && choseRegularSpeed) || slowAttr == null) ? regAttr : slowAttr;
 
     if ((regular == null) && (slow == null)) {
       // logger.warning("no radio choice got selected??? ");
@@ -301,6 +302,46 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
     }
 //    if (firstAttr == null)
 //      logger.warning("huh? no attribute ");
+  }
+
+  private boolean isRegularSpeed() {
+    return isRegularSpeed(getStorageKey());
+  }
+
+  private boolean isRegularSpeed(String selectedUserKey) {
+    if (Storage.isLocalStorageSupported()) {
+      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
+      String item = localStorageIfSupported.getItem(selectedUserKey);
+      //    logger.info("isRegularSpeed value for " + selectedUserKey + "='" + item+ "'");
+      if (item != null) {
+        return item.toLowerCase().equals("true");
+      } else {
+        storeIsRegular(true);
+        return true;
+      }
+    }
+    // else {
+    return false;
+    // }
+  }
+
+  private String getStorageKey(ExerciseController controller, String appTitle) {
+    return getStoragePrefix(controller, appTitle) + "audioSpeed";
+  }
+
+  private String getStoragePrefix(ExerciseController controller, String appTitle) {
+    return appTitle + ":" + controller.getUser() + ":" + instance + ":";
+  }
+
+  private void storeIsRegular(boolean shouldKeepAudio) {
+    if (Storage.isLocalStorageSupported()) {
+      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
+      localStorageIfSupported.setItem(getStorageKey(), "" + shouldKeepAudio);
+    }
+  }
+
+  private String getStorageKey() {
+    return getStorageKey(controller, controller.getLanguage());
   }
 
   /**
