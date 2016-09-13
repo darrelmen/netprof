@@ -140,10 +140,9 @@ public class EditItem {
 
   public void onResize() {
     if (exerciseList != null) {
-    //  logger.info("EditItem onResize");
+      //  logger.info("EditItem onResize");
       exerciseList.onResize();
-    }
-    else {
+    } else {
       logger.info("EditItem onResize - no exercise list");
 
     }
@@ -193,7 +192,7 @@ public class EditItem {
             if (itemID.equals(NEW_EXERCISE_ID)) {
               useExercise(getNewItem());
             } else {
-           //   logger.info("EditItem.makeExerciseList - askServerForExercise = " + itemID);
+              //     logger.info("EditItem.makeExerciseList - askServerForExercise = " + itemID);
               super.askServerForExercise(itemID);
             }
           }
@@ -264,9 +263,8 @@ public class EditItem {
     public void onResize() {
       Widget widget = getWidget();
       if (widget instanceof RequiresResize) {
-        ((RequiresResize)widget).onResize();
-      }
-      else {
+        ((RequiresResize) widget).onResize();
+      } else {
         logger.info("skipping " + widget.getElement().getId());
       }
     }
@@ -387,6 +385,7 @@ public class EditItem {
     }
     return editableExercise;
   }
+
   private String getInstance() {
     return instanceName;
   }
@@ -399,7 +398,7 @@ public class EditItem {
    */
   private boolean didICreateThisItem(CommonExercise exercise) {
     boolean isMine = exercise.getCreator() == controller.getUser();
-   // logger.info("for " + exercise + " vs " + controller.getUser() + " is Mine " + isMine);
+    // logger.info("for " + exercise + " vs " + controller.getUser() + " is Mine " + isMine);
     return isMine;
   }
 
@@ -434,9 +433,9 @@ public class EditItem {
         @Override
         public void onClick(ClickEvent event) {
 //          logger.info(getClass() + " : makeDeleteButton npfHelperList (2) " + npfHelper);
-         // delete.setEnabled(false);
+          // delete.setEnabled(false);
           String id = newUserExercise.getID();
-          logger.info("RemoveFromListOnlyExercise.makeDeleteButton got click to delete " +id);
+          logger.info("RemoveFromListOnlyExercise.makeDeleteButton got click to delete " + id);
           deleteItem(newUserExercise.getID(), uniqueID, ul, exerciseList, predefinedContentList);
         }
       });
