@@ -64,11 +64,13 @@ public class SlickUserExerciseDAO
    * TODO : need to do something to allow this to scale well - maybe ajax style nested types, etc.
    */
   private static final boolean ADD_PHONE_LENGTH = false;
+  public static final String NEW_USER_EXERCISE = "NEW_USER_EXERCISE";
 
   private final long lastModified = System.currentTimeMillis();
   private final ExerciseDAOWrapper dao;
   private final RelatedExerciseDAOWrapper relatedExerciseDAOWrapper;
   private Map<Integer, ExercisePhoneInfo> exToPhones;
+  int beforeLoginUser;
 
   /**
    * @param database
@@ -80,6 +82,7 @@ public class SlickUserExerciseDAO
     super(database);
     dao = new ExerciseDAOWrapper(dbConnection);
     relatedExerciseDAOWrapper = new RelatedExerciseDAOWrapper(dbConnection);
+    beforeLoginUser = database.getUserDAO().getBeforeLoginUser();
   }
 
   public void createTable() {
@@ -91,7 +94,12 @@ public class SlickUserExerciseDAO
     return dao.dao().name();
   }
 
-  //  @Override
+  /**
+   * @param shared
+   * @param projectID
+   * @return
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#addUserExercises(DatabaseImpl, Map, int, SlickUserExerciseDAO)
+   */
   public SlickExercise toSlick(Exercise shared, int projectID) {
     Map<String, String> unitToValue = shared.getUnitToValue();
     List<String> typeOrder = getTypeOrder();
@@ -384,9 +392,8 @@ public class SlickUserExerciseDAO
    */
   @Override
   public int add(CommonExercise userExercise, boolean isOverride) {
-    logger.info("adding " + userExercise);
+//    logger.info("adding " + userExercise);
     return insert(toSlick(userExercise, isOverride));
-   // userExercise.setI
   }
 
   /**
@@ -402,11 +409,22 @@ public class SlickUserExerciseDAO
     return userExercises2;
   }
 
-
   @Override
   public CommonExercise getByExID(int exid) {
     Seq<SlickExercise> byExid = dao.byID(exid);
     return byExid.isEmpty() ? null : fromSlick(byExid.iterator().next());
+  }
+
+  @Override
+  public CommonExercise getTemplateExercise(int projID) {
+    Seq<SlickExercise> byExid = dao.getByExid(NEW_USER_EXERCISE, projID);
+    CommonExercise commonExercise = byExid.isEmpty() ? null : fromSlick(byExid.iterator().next());
+    if (commonExercise == null) {
+      add(new Exercise(-1, NEW_USER_EXERCISE, beforeLoginUser, "", "", "", "", projID), false);
+      byExid = dao.getByExid(NEW_USER_EXERCISE, projID);
+      commonExercise = byExid.isEmpty() ? null : fromSlick(byExid.iterator().next());
+    }
+    return commonExercise;
   }
 
   public List<CommonExercise> getAllUserExercises(int projid) {
@@ -453,6 +471,11 @@ public class SlickUserExerciseDAO
     }
   }
 
+  /**
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyOneConfig(DatabaseImpl, String, String, int)
+   * @param projectid
+   * @return
+   */
   public boolean isProjectEmpty(int projectid) {
     return dao.isProjectEmpty(projectid);
   }

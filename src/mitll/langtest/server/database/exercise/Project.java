@@ -69,7 +69,7 @@ public class Project {
   private AudioFileHelper audioFileHelper;
   private ExerciseTrie<CommonExercise> fullTrie = null;
   private RefResultDecoder refResultDecoder;
-  private String relativeConfigDir;
+  //private String relativeConfigDir;
   private PathHelper pathHelper;
   private DatabaseImpl db;
   private ServerProperties serverProps;
@@ -89,14 +89,12 @@ public class Project {
    * @param serverProps
    * @param db
    * @param logAndNotify
-   * @param relativeConfigDir
    */
   public Project(SlickProject project,
                  PathHelper pathHelper,
                  ServerProperties serverProps,
                  DatabaseImpl db,
-                 LogAndNotify logAndNotify,
-                 String relativeConfigDir) {
+                 LogAndNotify logAndNotify) {
     this.project = project;
  //   this.typeOrder = Arrays.asList(project.first(), project.second());
     // String prop = project.getProp(ServerProperties.MODELS_DIR);
@@ -104,8 +102,7 @@ public class Project {
     audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, logAndNotify, this);
     // logger.info("Project got " + audioFileHelper);
     // logger.info("Project got " + audioFileHelper.getCollator());
-
-    this.relativeConfigDir = relativeConfigDir;
+   // this.relativeConfigDir = relativeConfigDir;
     this.db = db;
     this.serverProps = serverProps;
     this.pathHelper = pathHelper;

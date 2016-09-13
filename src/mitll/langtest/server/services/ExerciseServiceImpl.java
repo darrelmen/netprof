@@ -255,35 +255,6 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
       logger.debug(getInfo(prefixedMessage));
     }
   }
-
-  /**
-   * TODOx remove duplicate
-   * @param message
-   * @return
-   */
-/*  private String getInfo(String message) {
-    HttpServletRequest request = getThreadLocalRequest();
-    if (request != null) {
-      String remoteAddr = request.getHeader("X-FORWARDED-FOR");
-      if (remoteAddr == null || remoteAddr.isEmpty()) {
-        remoteAddr = request.getRemoteAddr();
-      }
-      String userAgent = request.getHeader("User-Agent");
-
-      String strongName = getPermutationStrongName();
-      String serverName = getThreadLocalRequest().getServerName();
-      String msgStr = message +
-          "\nremoteAddr : " + remoteAddr +
-          "\nuser agent : " + userAgent +
-          "\ngwt        : " + strongName +
-          "\nserver     : " + serverName;
-
-      return msgStr;
-    } else {
-      return "";
-    }
-  }*/
-
   /**
    * Copies the exercises....?
    *

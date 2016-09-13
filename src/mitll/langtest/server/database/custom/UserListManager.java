@@ -622,7 +622,7 @@ public class UserListManager implements IUserListManager {
 
   /**
    * @param userListID
-   * @param userExercise
+   * @param userExercise notional until now!
    * @param mediaDir
    * @seezz #addItemToUserList
    * @see mitll.langtest.server.services.ListServiceImpl#reallyCreateNewItem
