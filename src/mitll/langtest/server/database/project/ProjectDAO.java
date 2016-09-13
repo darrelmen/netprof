@@ -39,6 +39,7 @@ import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickProject;
 import mitll.npdata.dao.project.ProjectDAOWrapper;
 import org.apache.log4j.Logger;
+import scala.collection.Seq;
 
 import java.sql.Timestamp;
 import java.util.Collection;
@@ -46,16 +47,35 @@ import java.util.List;
 
 public class ProjectDAO extends DAO implements IProjectDAO {
   private static final Logger logger = Logger.getLogger(ProjectDAO.class);
+  private static final String DEFAULT_PROJECT = "DEFAULT_PROJECT";
 
   private final ProjectDAOWrapper dao;
   private final ProjectPropertyDAO propertyDAO;
   private final UserProjectDAO userProjectDAO;
+  private SlickProject defaultProject;
 
   public ProjectDAO(Database database, DBConnection dbConnection) {
     super(database);
     propertyDAO = new ProjectPropertyDAO(database, dbConnection);
     dao = new ProjectDAOWrapper(dbConnection);
     userProjectDAO = new UserProjectDAO(dbConnection);
+
+    defaultProject = getDefaultProject();
+    if (defaultProject == null) {
+      add(-1, System.currentTimeMillis(),
+          DEFAULT_PROJECT,
+          "",
+          "",
+          ProjectType.DEFAULT,
+          ProjectStatus.RETIRED,
+          "", "", "", 0);
+      defaultProject = getDefaultProject();
+    }
+  }
+
+  private SlickProject getDefaultProject() {
+    Seq<SlickProject> aDefault = dao.getDefault();
+    return aDefault.isEmpty() ? null : aDefault.iterator().next();
   }
 
   public ProjectPropertyDAO getProjectPropertyDAO() {
