@@ -113,7 +113,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
    * @see UserListManager#reallyCreateNewItem
    * @see #update
    */
-  public void add(CommonExercise userExercise, boolean isOverride) {
+  public int add(CommonExercise userExercise, boolean isOverride) {
     List<String> typeOrder = exerciseDAO.getSectionHelper().getTypeOrder();
 
     try {
