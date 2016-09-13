@@ -106,8 +106,10 @@ public class AudioConversion {
    * @see AudioFileHelper#writeAudioFile
    * @see mitll.langtest.server.audio.AudioFileHelper#getAlignment
    */
-  AudioCheck.ValidityAndDur convertBase64ToAudioFiles(String base64EncodedString, File file,
-                                                      boolean useSensitiveTooLoudCheck, boolean quietAudioOK) {
+  AudioCheck.ValidityAndDur convertBase64ToAudioFiles(String base64EncodedString,
+                                                      File file,
+                                                      boolean useSensitiveTooLoudCheck,
+                                                      boolean quietAudioOK) {
     long then = System.currentTimeMillis();
     file.getParentFile().mkdirs();
 

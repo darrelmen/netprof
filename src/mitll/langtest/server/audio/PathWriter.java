@@ -50,7 +50,6 @@ public class PathWriter {
   private static final Logger logger = Logger.getLogger(PathWriter.class);
 
   private static final String BEST_AUDIO = "bestAudio";
-
   private final File bestDir;
 
   public PathWriter(ServerProperties properties) {
@@ -134,14 +133,17 @@ public class PathWriter {
                          String artist,
                          ServerProperties serverProperties) {
     if (wavFile != null) {
-       String parent = serverProperties.getMediaDir();
+      String parent = serverProperties.getMediaDir();
 
       AudioConversion audioConversion = new AudioConversion(serverProperties);
       if (!audioConversion.exists(wavFile, parent)) {
-        parent = pathHelper.getConfigDir();
+        logger.warn("ensureMP3 can't find " + wavFile + " under " + parent);
+
+    //    parent = pathHelper.getConfigDir();
+        parent = serverProperties.getAudioBaseDir();
       }
       if (!audioConversion.exists(wavFile, parent)) {
-        logger.error("can't find " + wavFile + " under " + parent);
+        logger.error("ensureMP3 can't find " + wavFile + " under " + parent);
       }
       String s = audioConversion.ensureWriteMP3(wavFile, parent, overwrite, title, artist);
       logger.info("ensureMP3 wrote " + wavFile + " to " + s);
