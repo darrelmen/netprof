@@ -96,23 +96,21 @@ class SignUpForm extends UserDialog {
   private Button signUp;
   private CheckBox contentDevCheckbox;
   private final Map<Widget, Popover> widgetToPopover = new HashMap<Widget, Popover>();
-  UserPassLogin userPassLogin;
+  private UserPassLogin userPassLogin;
   private static final String CURRENT_USERS = "Current users should add an email and password.";
 
 
-  public SignUpForm(PropertyHandler props,
-                    UserManager userManager,
-                    EventRegistration eventRegistration, UserPassLogin userPassLogin) {
+  SignUpForm(PropertyHandler props,
+             UserManager userManager,
+             EventRegistration eventRegistration, UserPassLogin userPassLogin) {
     super(props, userManager);
-//    this.userManager = userManager;
     this.eventRegistration = eventRegistration;
     this.userPassLogin = userPassLogin;
   }
 
-  public void clickSignUp() {
+  void clickSignUp() {
     signUp.fireEvent(new KeyPressHelper.ButtonClickEvent());
   }
-
 
   /**
    * Don't enable the teacher choice for legacy users, b/c it lets them skip over the
@@ -122,11 +120,11 @@ class SignUpForm extends UserDialog {
    * @see #foundExistingUser(User, boolean, String)
    * @see #makeSignInUserName(com.github.gwtbootstrap.client.ui.Fieldset)
    */
-  public void copyInfoToSignUp(User result, String passwordText) {
+  void copyInfoToSignUp(User result, String passwordText) {
     signUpUser.box.setText(result.getUserID());
     signUpPassword.box.setText(passwordText);
     setFocusOn(signUpEmail.getWidget());
- //   eventRegistration.logEvent(signIn, "sign in", "N/A", "copied info to sign up form");
+    //   eventRegistration.logEvent(signIn, "sign in", "N/A", "copied info to sign up form");
 
     markErrorBlur(signUpEmail, "Add info", CURRENT_USERS, Placement.TOP);
     signUpPassword.getGroup().setType(ControlGroupType.ERROR);
@@ -277,29 +275,6 @@ class SignUpForm extends UserDialog {
     });
     return userBox;
   }
-
-/*  BasicDialog.FormField addControlFormFieldWithPlaceholder(Panel dialogBox, boolean isPassword, int minLength, int maxLength, String hint) {
-    final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
-    user.setMaxLength(maxLength);
-    user.setPlaceholder(hint);
-    return getFormField(dialogBox, user, minLength);
-  }*/
-
-/*  private BasicDialog.FormField getFormField(Panel dialogBox, TextBox user, int minLength) {
-    final ControlGroup userGroup = addControlGroupEntryNoLabel(dialogBox, user);
-    return new BasicDialog.FormField(user, userGroup, minLength);
-  }*/
-
-
-/*  private ControlGroup addControlGroupEntryNoLabel(Panel dialogBox, Widget widget) {
-    final ControlGroup userGroup = new ControlGroup();
-    userGroup.addStyleName("leftFiveMargin");
-    widget.addStyleName("leftFiveMargin");
-
-    userGroup.add(widget);
-    dialogBox.add(userGroup);
-    return userGroup;
-  }*/
 
   private TextBoxBase makeSignUpEmail(Fieldset fieldset) {
     signUpEmail = addControlFormFieldWithPlaceholder(fieldset, false, MIN_LENGTH_USER_ID, USER_ID_MAX_LENGTH, "Email");
@@ -509,45 +484,4 @@ class SignUpForm extends UserDialog {
   private String getSignUpEvent(User result) {
     return "successful sign up as " + result.getUserID() + "/" + result.getId() + " as " + result.getUserKind();
   }
-
-  /**
-   * @return
-   * @paramx xsignInForm
-   * @seex #getRightLogin(com.google.gwt.user.client.ui.Panel)
-   */
-//  private Form populateSignInForm(Form signInForm) {
-//    Fieldset fieldset = new Fieldset();
-//    signInForm.add(fieldset);
-//
-//    makeSignInUserName(fieldset);
-//
-//    Panel hp = new HorizontalPanel();
-//    hp.getElement().setId("password_login_box");
-//    hp.addStyleName("leftFiveMargin");
-//
-//    addPasswordField(fieldset, hp);
-//
-//    hp.add(getSignInButton());
-//
-//    fieldset.add(hp);
-//    fieldset.add(getForgotRow());
-//    setFocusOnUserID();
-//
-//    return signInForm;
-//  }
-/*
-  private void addPasswordField(Fieldset fieldset, Panel hp) {
-    password = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, PASSWORD);
-    password.box.addFocusHandler(new FocusHandler() {
-      @Override
-      public void onFocus(FocusEvent event) {
-        signInHasFocus = true;
-        eventRegistration.logEvent(user.box, "PasswordBox", "N/A", "focus in password field");
-      }
-    });
-
-    hp.add(password.box);
-  }
-*/
-
 }
