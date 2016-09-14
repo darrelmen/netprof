@@ -34,6 +34,7 @@ package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.scoring.AudioContext;
 
@@ -55,4 +56,5 @@ public interface AudioServiceAsync {
                             String exerciseID,
                             AsyncCallback<ImageResponse> async);
 
+  void reallyCreateNewItem(long userListID, CommonExercise userExercise, String language, AsyncCallback<CommonExercise> async);
 }
