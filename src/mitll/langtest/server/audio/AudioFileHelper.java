@@ -177,9 +177,9 @@ public class AudioFileHelper implements AlignDecode {
   private <T extends CommonShell & MutableExercise> void countPhones(T exercise) {
     ASR.PhoneInfo bagOfPhones = asrScoring.getBagOfPhones(exercise.getForeignLanguage());
    // exercise.setBagOfPhones(bagOfPhones.getPhoneSet());
-    exercise.setFirstPron(bagOfPhones.getFirstPron());
-
-    for (String phone : bagOfPhones.getFirstPron()) {
+    List<String> firstPron = bagOfPhones.getFirstPron();
+    exercise.setFirstPron(firstPron);
+    for (String phone : firstPron) {
       Integer integer = getPhoneToCount().get(phone);
       getPhoneToCount().put(phone, integer == null ? 1 : integer + 1);
     }
@@ -228,8 +228,6 @@ public class AudioFileHelper implements AlignDecode {
     String relPath = pathHelper.getRelToAnswer(audioContext);
 
     File file = new File(wavPath);
-   // File file = pathHelper.getAbsoluteFile(wavPath);
-
     logger.debug("writeAudioFile got req ex " + exercise1 +
         " for " + audioContext + " " + recordingInfoInitial +
         " to " + wavPath +
@@ -265,8 +263,7 @@ public class AudioFileHelper implements AlignDecode {
                                         AudioContext audioContext,
                                         AnswerInfo.RecordingInfo recordingInfoInitial) {
     String wavPath = pathHelper.getAbsoluteToAnswer(audioContext);
-    File file = new File(wavPath);//pathHelper.getAbsoluteFile(wavPath);
-
+    File file = new File(wavPath);
     //long then = System.currentTimeMillis();
     AudioCheck.ValidityAndDur validity =
         audioConversion.convertBase64ToAudioFiles(base64EncodedString, file, false, isQuietAudioOK());
