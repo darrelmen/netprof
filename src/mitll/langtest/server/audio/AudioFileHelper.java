@@ -117,7 +117,7 @@ public class AudioFileHelper implements AlignDecode {
     this.language = project.getLanguage();
     this.useOldSchoolServiceOnly = serverProperties.getOldSchoolService();
     isNoModel = project.isNoModel();
-    this.mp3Support = new MP3Support(pathHelper, serverProperties);
+    this.mp3Support = new MP3Support(pathHelper);
     audioConversion = new AudioConversion(serverProps);
     makeASRScoring(project);
     makeDecodeCorrectnessChecker();
@@ -874,7 +874,7 @@ public class AudioFileHelper implements AlignDecode {
       logger.error("getASRScoreForAudio huh? no test audio file for " + sentence);
       return new PretestScore(); // very defensive
     }
-    testAudioFile = mp3Support.dealWithMP3Audio(testAudioFile, language);
+    testAudioFile = mp3Support.dealWithMP3Audio(testAudioFile);
     if (!new File(testAudioFile).exists()) {
     //  String absolutePath = pathHelper.getAbsoluteAnswerAudioFile(testAudioFile, language).getAbsolutePath();
       String absolutePath = pathHelper.getAbsoluteAudioFile(testAudioFile).getAbsolutePath();
