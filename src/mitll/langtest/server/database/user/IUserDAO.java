@@ -43,14 +43,12 @@ import java.util.List;
 import java.util.Map;
 
 public interface IUserDAO extends IDAO {
-  void findOrMakeDefectDetector();
+  void ensureDefaultUsers();
 
   int getDefectDetector();
 
   Database getDatabase();
-//
-//  User addUser(String userID, String passwordH, String emailH, String email, User.Kind kind, String ipAddr,
-//               boolean isMale, int age, String dialect, String device, String first, String last);
+
 
   User addUser(SignUpUser user);
 

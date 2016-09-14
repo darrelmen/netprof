@@ -521,7 +521,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   @Override
   public void checkAndAskServer(int id) {
-    if (DEBUG)
+    if (DEBUG || true)
       logger.info(getClass() + " : (" + instance + ") ExerciseList.checkAndAskServer - askServerForExercise = " + id);
     if (hasExercise(id)) {
 //      if (//!getCurrentExerciseID().equals(id) ||
@@ -534,6 +534,9 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 //      }
     } else if (id != EditItem.NEW_EXERCISE_ID) {
       logger.warning("checkAndAskServer : can't load " + id);
+    }
+    else {
+      logger.warning("checkAndAskServer : skipping request for " + id);
     }
   }
 
@@ -564,7 +567,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
       useExercise(cachedNext);
     } else {
       pendingReq = true;
-      if (DEBUG) logger.info("ExerciseList.askServerForExercise id = " + itemID + " instance " + instance);
+      if (DEBUG || true) logger.info("ExerciseList.askServerForExercise id = " + itemID + " instance " + instance);
       service.getExercise(itemID, controller.getUser(), incorrectFirstOrder, new ExerciseAsyncCallback());
     }
 
@@ -576,17 +579,20 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     int i = getIndex(itemID);
     if (!isOnLastItem(i)) {
       T next = getAt(i + 1);
-      service.getExercise(next.getID(), controller.getUser(), incorrectFirstOrder, new AsyncCallback<U>() {
-        @Override
-        public void onFailure(Throwable caught) {
-        }
+      if (next.getID() != EditItem.NEW_EXERCISE_ID) {
+      //  logger.info("ask for next " + next);
+        service.getExercise(next.getID(), controller.getUser(), incorrectFirstOrder, new AsyncCallback<U>() {
+          @Override
+          public void onFailure(Throwable caught) {
+          }
 
-        @Override
-        public void onSuccess(U result) {
-          cachedNext = result;
-          //if (DEBUG) logger.info("\tExerciseList.askServerForExercise got cached id = " + cachedNext.getOldID() + " instance " + instance);
-        }
-      });
+          @Override
+          public void onSuccess(U result) {
+            cachedNext = result;
+            //if (DEBUG) logger.info("\tExerciseList.askServerForExercise got cached id = " + cachedNext.getOldID() + " instance " + instance);
+          }
+        });
+      }
     }
   }
 
@@ -719,11 +725,11 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
         logger.warning("\tdidn't remove current widget");
       } else innerContainer.getParent().removeStyleName("shadowBorder");
     } else {
-      logger.warning("\tremoveCurrentExercise : no inner current widget for " + report());
+      logger.warning("\tremoveCurrentExercise : no inner current widget for " + reportLocal());
     }
   }
 
-  private String report() {
+  public String reportLocal() {
     return "list " + getInstance() + " id " + getElement().getId();
   }
 

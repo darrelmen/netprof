@@ -54,6 +54,7 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.exercise.*;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Show exercises with a cell table that can handle thousands of rows.
@@ -67,7 +68,7 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class PagingExerciseList<T extends CommonShell, U extends Shell> extends ExerciseList<T, U> {
-  //private final Logger logger = Logger.getLogger("PagingExerciseList");
+  private final Logger logger = Logger.getLogger("PagingExerciseList");
 
   static final String SEARCH = "Search";
   private static final int TEN_SECONDS = 10 * 60 * 1000;
@@ -207,6 +208,12 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
       }
     }
     return super.findFirstExercise();
+  }
+
+  public void report() {
+    for (T es : pagingContainer.getExercises()) {
+      logger.info(userListID + " has " + es);
+    }
   }
 
   /**
@@ -436,7 +443,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   protected T getFirst() {
     return pagingContainer.getFirst();
   }
-
 
   @Override
   public T byHasID(HasID hasID) {

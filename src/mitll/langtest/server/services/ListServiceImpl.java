@@ -42,6 +42,7 @@ import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Exercise;
 import org.apache.log4j.Logger;
 
+import java.io.File;
 import java.util.*;
 
 @SuppressWarnings("serial")
@@ -49,7 +50,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   private static final Logger logger = Logger.getLogger(ListServiceImpl.class);
   private static final boolean DEBUG = true;
 
-   /**
+  /**
    * @param userid
    * @param name
    * @param description
@@ -130,6 +131,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
 
   /**
    * TODO : maybe remove second arg
+   *
    * @param userListID
    * @param exID
    * @return
@@ -137,7 +139,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    */
   public void addItemToUserList(long userListID, int exID) {
     CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(getProjectID(), exID);
-    getUserListManager().addItemToList(userListID, ""+exID, customOrPredefExercise.getID());
+    getUserListManager().addItemToList(userListID, "" + exID, customOrPredefExercise.getID());
   }
 
   /**
@@ -170,17 +172,18 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    *
    * @param userListID
    * @param userExercise
+   * @param language
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
    */
   @Override
-  public CommonExercise reallyCreateNewItem(long userListID, CommonExercise userExercise) {
+  public CommonExercise reallyCreateNewItem(long userListID, CommonExercise userExercise, String language) {
     if (DEBUG) logger.debug("reallyCreateNewItem : made user exercise " + userExercise + " on list " + userListID);
     getUserListManager().reallyCreateNewItem(userListID, userExercise, getMediaDir());
     int id = userExercise.getID();
 
     for (AudioAttribute audioAttribute : userExercise.getAudioAttributes()) {
       if (DEBUG) logger.debug("\treallyCreateNewItem : update " + audioAttribute + " to " + id);
-      db.getAudioDAO().updateExerciseID(audioAttribute.getUniqueID(), id);
+      db.getAudioDAO().updateExerciseID(audioAttribute.getUniqueID(), id, /*language.toLowerCase() + File.separator + */audioAttribute.getAudioRef());
     }
     if (DEBUG) logger.debug("\treallyCreateNewItem : made user exercise " + userExercise + " on list " + userListID);
 
@@ -188,8 +191,8 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   }
 
   /**
-   * @see #reallyCreateNewItem(long, CommonExercise)
    * @return
+   * @see #reallyCreateNewItem(long, CommonExercise)
    */
   String getMediaDir() {
     return serverProps.getMediaDir();
@@ -281,7 +284,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   @Override
   public void editItem(CommonExercise userExercise) {
     db.editItem(userExercise);
-    if (DEBUG)  logger.debug("editItem : now user exercise " + userExercise);
+    if (DEBUG) logger.debug("editItem : now user exercise " + userExercise);
   }
 
   IUserListManager getUserListManager() {

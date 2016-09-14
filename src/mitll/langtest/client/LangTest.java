@@ -352,6 +352,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       ifPresent.req = -1;
       client.onSuccess(ifPresent);
     } else {
+      logger.info("get image for " + path);
       audioService.getImageForAudioFile(reqid, path, type, toUse, height, exerciseID, new AsyncCallback<ImageResponse>() {
         public void onFailure(Throwable caught) {
        /*   if (!caught.getMessage().trim().equals("0")) {
