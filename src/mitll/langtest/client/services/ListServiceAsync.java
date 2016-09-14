@@ -62,7 +62,6 @@ public interface ListServiceAsync {
 
   void setPublicOnList(long userListID, boolean isPublic, AsyncCallback<Void> async);
 
-  void reallyCreateNewItem(long userListID, CommonExercise userExercise, String language, AsyncCallback<CommonExercise> async);
 
   void reallyCreateNewItems(int creator, long userListID, String userExerciseText, AsyncCallback<Collection<CommonExercise>> async);
 
