@@ -86,7 +86,12 @@ public interface IAudioDAO extends IDAO {
   Set<AudioAttribute> getAndMarkDefects(AudioAttributeExercise userExercise,
                                         Map<String, ExerciseAnnotation> fieldToAnnotation);
 
-  void updateExerciseID(int uniqueID, int exerciseID);
+  /**
+   * @see mitll.langtest.server.services.ListServiceImpl#reallyCreateNewItem
+   * @param uniqueID
+   * @param exerciseID
+   */
+  void updateExerciseID(int uniqueID, int exerciseID, String actualPath);
 
   void validateFileExists(int projid, String installPath, String language);
 }

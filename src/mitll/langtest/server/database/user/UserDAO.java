@@ -59,7 +59,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     super(database);
     try {
       createTable(database);
-      findOrMakeDefectDetector();
+      ensureDefaultUsers();
     } catch (Exception e) {
       logger.error("got " + e, e);
       database.logEvent("unk", "create user table " + e.toString(), 0, UNKNOWN);

@@ -368,7 +368,7 @@ public class ListManager implements RequiresResize {
               false, true,
               userManager, onlyMine, optionalExercise));
     } else {
-      //     logger.info("viewLessons for user #" + userManager.getUser());
+      logger.info("viewLessons for user #" + userManager.getUser());
       listService.getListsForUser(userManager.getUser(), onlyMine,
           onlyVisited,
           new UserListCallback(this, contentPanel, insideContentPanel, listScrollPanel,
@@ -465,6 +465,11 @@ public class ListManager implements RequiresResize {
     String previousList = storage.getValue(CLICKED_USER_LIST);
     String currentValue = storeCurrentClickedList(ul);
 
+    Collection exercises = ul.getExercises();
+    for (Object ex:exercises) {
+      logger.info(ul.getID() + " has " + ex);
+    }
+
     // if select a new list, clear the subtab selection
     if (previousList != null && !previousList.equals(currentValue)) {
       //  logger.info("\tshowList " +previousList + " vs " + currentValue + " remove " + SUB_TAB);
@@ -517,8 +522,6 @@ public class ListManager implements RequiresResize {
     return r1;
   }
 
-  //    int realID = ul.getID();
-//    Anchor downloadLink = new DownloadLink(controller).getDownloadLink(realID, instanceName + "_" + realID, ul.getName());
   private Anchor getDownloadLink(UserList ul, String instanceName) {
     long listID = ul.getID();
     String linkid = instanceName + "_" + listID;
@@ -559,7 +562,7 @@ public class ListManager implements RequiresResize {
     return widgets;
   }
 
-  private String storeCurrentClickedList(UserList ul) {
+  private String storeCurrentClickedList(HasID ul) {
     return storeCurrentClickedList(ul.getID());
   }
 
@@ -613,34 +616,14 @@ public class ListManager implements RequiresResize {
             isComment ? ITEMS_WITH_COMMENTS :
                 isAttention ? "Items for LL" : LEARN_PRONUNCIATION;
 
-    final TabAndContent learn = makeTab(tabPanel, isReview ? IconType.EDIT_SIGN : IconType.LIGHTBULB, learnTitle);
     final boolean isNormalList = !isReview && !isComment && !isAttention;
-    learn.getTab().addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        controller.logEvent(learn.getTab(), "Tab", getListID(ul), LEARN);
-        storage.storeValue(SUB_TAB, LEARN);
-        showLearnTab(learn, ul, instanceName1, null);
-      }
-    });
+    final TabAndContent learn = isNormalList ? getLearnTab(ul, tabPanel, isReview, instanceName1, learnTitle) : null;
 
     // add practice tab
     TabAndContent practice = null;
     if (isNormalList) {
       //logger.info("getListOperations : isNormalList ");
-      practice = makeTab(tabPanel, IconType.CHECK, PRACTICE);
-      final TabAndContent fpractice = practice;
-      practice.getContent().addStyleName("centerPractice");
-      practice.getTab().addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-          storage.storeValue(SUB_TAB, PRACTICE1);
-          //       logger.info("getListOperations : got click on practice " + fpractice.getContent().getElement().getExID());
-          avpHelper.setContentPanel(fpractice.getContent());
-          avpHelper.showNPF(ul, fpractice, PRACTICE1, true, toSelect);
-          controller.logEvent(fpractice.getTab(), "Tab", getListID(ul), PRACTICE1);
-        }
-      });
+      practice = getPracticeTab(ul, toSelect, tabPanel);
     }
 
     // add add item and edit tabs (conditionally)
@@ -651,10 +634,8 @@ public class ListManager implements RequiresResize {
     if ((created || userManager.isTeacher()) && (!ul.isPrivate() || isMyList)) {
       editItemTab = getEditTab(ul, toSelect, tabPanel, isReview, isComment);
     }
-    if (SHOW_IMPORT) {
-      if (isMyList && !isReview && !isComment && !ul.isFavorite()) {
-        getImportTab(ul, tabPanel, learn, instanceName1);
-      }
+    if (isMyList && !isReview && !isComment && !ul.isFavorite()) {
+      getImportTab(ul, tabPanel, learn, instanceName1);
     }
 
     // select the initial tab -- either add if an empty
@@ -664,6 +645,37 @@ public class ListManager implements RequiresResize {
         toSelect);
 
     return tabPanel;
+  }
+
+  private TabAndContent getLearnTab(final UserList<CommonShell> ul, TabPanel tabPanel, boolean isReview, final String instanceName1, String learnTitle) {
+    final TabAndContent learn = makeTab(tabPanel, isReview ? IconType.EDIT_SIGN : IconType.LIGHTBULB, learnTitle);
+    learn.getTab().addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        controller.logEvent(learn.getTab(), "Tab", getListID(ul), LEARN);
+        storage.storeValue(SUB_TAB, LEARN);
+        showLearnTab(learn, ul, instanceName1, null);
+      }
+    });
+    return learn;
+  }
+
+  private TabAndContent getPracticeTab(final UserList<CommonShell> ul, final HasID toSelect, TabPanel tabPanel) {
+    TabAndContent practice;
+    practice = makeTab(tabPanel, IconType.CHECK, PRACTICE);
+    final TabAndContent fpractice = practice;
+    practice.getContent().addStyleName("centerPractice");
+    practice.getTab().addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        storage.storeValue(SUB_TAB, PRACTICE1);
+        //       logger.info("getListOperations : got click on practice " + fpractice.getContent().getElement().getExID());
+        avpHelper.setContentPanel(fpractice.getContent());
+        avpHelper.showNPF(ul, fpractice, PRACTICE1, true, toSelect);
+        controller.logEvent(fpractice.getTab(), "Tab", getListID(ul), PRACTICE1);
+      }
+    });
+    return practice;
   }
 
   /**
@@ -701,7 +713,7 @@ public class ListManager implements RequiresResize {
     return editTab;
   }
 
-  String getListID(UserList<CommonShell> ul) {
+  private String getListID(HasID ul) {
     return "UserList_" + ul.getID();
   }
 
@@ -879,8 +891,16 @@ public class ListManager implements RequiresResize {
       } else {
         logger.info("selectTabGivenHistory doing sublearn " + instanceName1);
 
+        if (learn == null) {
+          tabPanel.selectTab(0); // first tab
+       //   reviewItem.showNPF(ul, edit, getInstanceName(isReview), false, toSelect);
+          showEditReviewOrComment(ul, isNormalList, edit, isReview, isComment);
+
+        }
+        else {
         tabPanel.selectTab(SUBTAB_LEARN_INDEX);
         showLearnTab(learn, ul, instanceName1, toSelect);
+      }
       }
     } else {
 //      logger.info("selectTabGivenHistory choose prev ");
