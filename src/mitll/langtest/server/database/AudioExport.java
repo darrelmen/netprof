@@ -319,7 +319,6 @@ public class AudioExport {
   }
 
   /**
-   *
    * @param toWrite
    * @param installPath
    * @param out
@@ -379,7 +378,7 @@ public class AudioExport {
       populateGenderToCount(toWrite, maleToCount, femaleToCount);
     }
     // find the male and female with most recordings for this exercise
-    MiniUser male   = justContext ? null : getMaxUser(maleToCount);
+    MiniUser male = justContext ? null : getMaxUser(maleToCount);
     MiniUser female = justContext ? null : getMaxUser(femaleToCount);
 
     AudioConversion audioConversion = new AudioConversion(props);
@@ -402,14 +401,14 @@ public class AudioExport {
         if (options.isUserList()) {
           AudioAttribute audioAttribute = getLatest(ex, true);
           if (audioAttribute != null) {
-            copyAudio(zOut, installPath, overallName, isEnglish, audioConversion, names, ex, speed, audioAttribute);
+            copyAudio(zOut, overallName, isEnglish, audioConversion, names, ex, speed, audioAttribute);
             someAudio = true;
           } else {
             logger.info("no   male audio for " + ex.getID());
           }
           audioAttribute = getLatest(ex, false);
           if (audioAttribute != null) {
-            copyAudio(zOut, installPath, overallName, isEnglish, audioConversion, names, ex, speed, audioAttribute);
+            copyAudio(zOut, overallName, isEnglish, audioConversion, names, ex, speed, audioAttribute);
             someAudio = true;
           } else {
             logger.info("no female audio for " + ex.getID());
@@ -418,7 +417,7 @@ public class AudioExport {
           AudioAttribute recording = getAudioAttribute(majorityUser, ex, options.justMale, speed);
           if (recording != null) {
             // logger.debug("found " + recording + " by " + recording.getUser());
-            copyAudio(zOut, installPath, overallName, isEnglish, audioConversion, names, ex, speed, recording);
+            copyAudio(zOut, overallName, isEnglish, audioConversion, names, ex, speed, recording);
             someAudio = true;
           }
         }
@@ -464,9 +463,7 @@ public class AudioExport {
   }
 
   /**
-   * @see #writeFolderContents(ZipOutputStream, Collection, IAudioDAO, String, String, String, boolean, String, AudioExportOptions, String)
    * @param zOut
-   * @param installPath
    * @param overallName
    * @param isEnglish
    * @param audioConversion
@@ -475,9 +472,9 @@ public class AudioExport {
    * @param speed
    * @param audioAttribute
    * @throws IOException
+   * @see #writeFolderContents(ZipOutputStream, Collection, IAudioDAO, String, String, String, boolean, String, AudioExportOptions, String)
    */
   private void copyAudio(ZipOutputStream zOut,
-                         String installPath,
                          String overallName,
                          boolean isEnglish,
                          AudioConversion audioConversion,
@@ -727,7 +724,7 @@ public class AudioExport {
                          int exid,
                          String title) throws IOException {
     String audioRef = attribute.getActualPath();
-    String baseAudioDir = props.getMediaDir();
+    String baseAudioDir = audioRef.startsWith(ServerProperties.BEST_AUDIO) ? props.getAudioBaseDir() : props.getMediaDir();
 //    logger.debug("\tcopyAudio for ex id " +exid + " writing audio under context path " + baseAudioDir + " at " + audioRef);
     String author = attribute.getUser().getUserID();
     String s = audioConversion.ensureWriteMP3(audioRef, baseAudioDir, false, title, author);

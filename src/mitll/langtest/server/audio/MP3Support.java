@@ -34,7 +34,6 @@ package mitll.langtest.server.audio;
 
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.server.PathHelper;
-import mitll.langtest.server.ServerProperties;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -50,28 +49,25 @@ class MP3Support {
   private static final int SUFFIX_LENGTH = ("." + AudioTag.COMPRESSED_TYPE).length();
   private static final String WAV = ".wav";
   private final PathHelper pathHelper;
-  // private ServerProperties serverProperties;
 
   /**
    * @param pathHelper
    * @param serverProperties
    * @see AudioFileHelper#AudioFileHelper
    */
-  MP3Support(PathHelper pathHelper, ServerProperties serverProperties) {
+  MP3Support(PathHelper pathHelper) {
     this.pathHelper = pathHelper;
-    // this.serverProperties = serverProperties;
   }
 
   /**
    * TODO : remove language??? will this is always work???
    *
    * @param testAudioFile
-   * @param language
    * @return
    * @see AudioFileHelper#getASRScoreForAudio
    */
-  String dealWithMP3Audio(String testAudioFile, String language) {
-    logger.debug("dealWithMP3Audio " + language + " testAudio " + testAudioFile);
+  String dealWithMP3Audio(String testAudioFile) {
+   // logger.debug("dealWithMP3Audio " + language + " testAudio " + testAudioFile);
     if (!testAudioFile.endsWith(WAV)) {
       String wavFile = removeSuffix(testAudioFile) + WAV;
       File test1 = new File(wavFile);
@@ -80,12 +76,12 @@ class MP3Support {
       } else {
         File test = pathHelper.getAbsoluteAudioFile(wavFile);
         if (test.exists()) {
-          logger.info("dealWithMP3Audio found file at " + test.getAbsolutePath());
+//          logger.info("dealWithMP3Audio found file at " + test.getAbsolutePath());
         }
         else {
           logger.warn("\n\n\ndealWithMP3Audio : expecting audio file with wav extension, but didn't find " + test.getAbsolutePath());
         }
-        return test.exists() ? test.getAbsolutePath() : testAudioFile;//getWavForMP3(testAudioFile, language);
+        return test.exists() ? test.getAbsolutePath() : testAudioFile;
       }
     } else {
       return testAudioFile;
@@ -95,19 +91,6 @@ class MP3Support {
   private String removeSuffix(String audioFile) {
     return audioFile.substring(0, audioFile.length() - SUFFIX_LENGTH);
   }
-
-  /**
-   * Looks under the answer dir -- should it?
-   * @param audioFile
-   * @param language
-   * @return
-   * @see #dealWithMP3Audio(String, String)
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getImageForAudioFile
-   */
-//  String getWavForMP3(String audioFile, String language) {
-// //   String installPath = ;//pathHelper.getInstallPath();
-//    return getWavForMP3(audioFile, language);
-//  }
 
   /**
    * Ultimately does lame --decode from.mp3 to.wav
