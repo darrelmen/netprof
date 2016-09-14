@@ -102,16 +102,22 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     dao.addOrUpdateUser(userid, exerciseID, projid, audioType.toString(), audioRef, timestamp, durationInMillis, transcript);
   }
 
+  /**
+   *
+   * @param uniqueID
+   * @param exerciseID
+   * @param actualPath
+   */
   @Override
-  public void updateExerciseID(int uniqueID, int exerciseID) {
-    dao.updateExerciseID(uniqueID, exerciseID);
+  public void updateExerciseID(int uniqueID, int exerciseID, String actualPath) {
+    dao.updateExerciseID(uniqueID, exerciseID, actualPath);
   }
 
   /**
-   * @see mitll.langtest.server.database.exercise.BaseExerciseDAO#setAudioDAO
    * @param projid
    * @param installPath
    * @param language
+   * @see mitll.langtest.server.database.exercise.BaseExerciseDAO#setAudioDAO
    */
   @Override
   public void validateFileExists(int projid, String installPath, String language) {
@@ -253,10 +259,10 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   /**
-   * @see #getAudioAttributesByProject(int)
    * @param all
    * @param idToMini
    * @return
+   * @see #getAudioAttributesByProject(int)
    */
   private List<AudioAttribute> toAudioAttribute(List<SlickAudio> all, Map<Integer, MiniUser> idToMini) {
     List<AudioAttribute> copy = new ArrayList<>();

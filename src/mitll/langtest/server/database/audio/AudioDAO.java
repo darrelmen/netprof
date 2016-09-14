@@ -701,7 +701,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   @Override
-  public void updateExerciseID(int uniqueID, int exerciseID) {
+  public void updateExerciseID(int uniqueID, int exerciseID, String path) {
     try {
       Connection connection = database.getConnection(this.getClass().toString());
       String sql = "UPDATE " + AUDIO +
