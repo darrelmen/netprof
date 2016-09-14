@@ -805,10 +805,12 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
     checkPerformance(exid, then);
 
     if (byID != null) {
+/*
       logger.debug("returning (" + language + ") exercise " + byID.getOldID() + " : " + byID);
       for (AudioAttribute audioAttribute : byID.getAudioAttributes()) {
         logger.info("\thas " + audioAttribute);
       }
+*/
     } else {
       logger.warn(getLanguage() + " : couldn't find exercise with id '" + exid + "'");
     }
