@@ -52,25 +52,44 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   private final ProjectDAOWrapper dao;
   private final ProjectPropertyDAO propertyDAO;
   private final UserProjectDAO userProjectDAO;
-  private SlickProject defaultProject;
+//  private SlickProject defaultProject;
 
+  /**
+   * @param database
+   * @param dbConnection
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
+   */
   public ProjectDAO(Database database, DBConnection dbConnection) {
     super(database);
     propertyDAO = new ProjectPropertyDAO(database, dbConnection);
     dao = new ProjectDAOWrapper(dbConnection);
     userProjectDAO = new UserProjectDAO(dbConnection);
 
-    defaultProject = getDefaultProject();
+    //  ensureDefaultProject(defaultUser);
+  }
+
+  public int ensureDefaultProject(int defaultUser) {
+    SlickProject defaultProject = getDefaultProject();
     if (defaultProject == null) {
-      add(-1, System.currentTimeMillis(),
+      add(defaultUser,
+          System.currentTimeMillis(),
           DEFAULT_PROJECT,
           "",
           "",
           ProjectType.DEFAULT,
           ProjectStatus.RETIRED,
-          "", "", "", 0);
+          "", "", "",
+          0);
       defaultProject = getDefaultProject();
+      return defaultProject == null ? -1 : defaultProject.id();
+    } else {
+      return defaultProject.id();
     }
+  }
+
+  public int getDefault() {
+    SlickProject defaultProject = getDefaultProject();
+    return defaultProject == null ? -1 : defaultProject.id();
   }
 
   private SlickProject getDefaultProject() {

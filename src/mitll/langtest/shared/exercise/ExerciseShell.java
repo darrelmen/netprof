@@ -124,8 +124,9 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
 
   @Override
   public boolean equals(Object other) {
+    boolean checkOld = !getOldID().isEmpty();
     return other instanceof ExerciseShell &&
-        (getOldID().equals(((ExerciseShell) other).getOldID()) ||
+        (checkOld && getOldID().equals(((ExerciseShell) other).getOldID()) ||
             (getID() == ((ExerciseShell) other).getID())
         );
   }
@@ -157,7 +158,7 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
   }
 
   public String toString() {
-    return "Exercise " +
+    return "ExerciseShell " +
         "id = " + getOldID() + "/" + getID() +
         " : '" + getEnglish() + "'"+
         " states " + getState() + "/" + getSecondState();

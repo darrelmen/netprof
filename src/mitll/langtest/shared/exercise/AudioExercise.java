@@ -522,6 +522,10 @@ public class AudioExercise extends ExerciseShell {
     return projectid;
   }
 
+  public void setProjectID(int projectid) {
+    this.projectid = projectid;
+  }
+
   //  @Override
   public String getAltFL() {
     return altfl;
