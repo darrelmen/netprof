@@ -37,6 +37,7 @@ import audio.image.TranscriptEvent;
 import audio.image.TranscriptReader;
 import audio.imagewriter.EventAndFileInfo;
 import audio.imagewriter.TranscriptWriter;
+import com.google.gson.JsonObject;
 import corpus.EmptyLTS;
 import corpus.HTKDictionary;
 import corpus.LTS;
@@ -45,7 +46,6 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.scoring.NetPronImageType;
-import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -323,7 +323,7 @@ public abstract class Scoring {
   EventAndFileInfo writeTranscriptsCached(String imageOutDir, int imageWidth, int imageHeight,
                                           String audioFileNoSuffix, boolean useScoreToColorBkg,
                                           String prefix, String suffix, boolean decode, boolean useWebservice,
-                                          JSONObject object,
+                                          JsonObject object,
                                           boolean usePhoneToDisplay) {
     // logger.debug("writeTranscriptsCached " + object);
     if (decode || imageWidth < 0) {  // hack to skip image generation
@@ -355,7 +355,7 @@ public abstract class Scoring {
     }
   }
 
-  private Map<ImageType, Map<Float, TranscriptEvent>> getTypeToTranscriptEvents(JSONObject object, boolean usePhoneToDisplay) {
+  private Map<ImageType, Map<Float, TranscriptEvent>> getTypeToTranscriptEvents(JsonObject object, boolean usePhoneToDisplay) {
     return new ParseResultJson(props).parseJson(object, "words", "w", usePhoneToDisplay);
   }
 

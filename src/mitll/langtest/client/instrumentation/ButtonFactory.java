@@ -119,8 +119,8 @@ public class ButtonFactory implements EventLogger {
    *
    * @param widgetID
    * @param widgetType
-   * @paramx exid
    * @param context
+   * @paramx exid
    * @paramx userid
    */
   @Override
@@ -149,14 +149,14 @@ public class ButtonFactory implements EventLogger {
                       if (caught != null &&
                           caught.getMessage() != null &&
                           !caught.getMessage().trim().equals("0")) {
-                        logger.warning("logEvent FAILED to send event for " + widgetID + " message '" + caught.getMessage() +"'");
+                        logger.warning("logEvent FAILED to send event for " + widgetID + " message '" + caught.getMessage() + "'");
                         caught.printStackTrace();
                       }
                     }
 
                     @Override
                     public void onSuccess(Void result) {
-                      logger.info("logEvent sent event for " + widgetID);
+                      //logger.info("logEvent sent event for " + widgetID);
                     }
                   });
             }
