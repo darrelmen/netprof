@@ -74,8 +74,8 @@ public class UserListManager implements IUserListManager {
   private static final String FIXED = "fixed";
   private static final String INCORRECT = "incorrect";
 
-  private static final String FAST = "Fast";
-  private static final String SLOW = "Slow";
+  private static final String FAST = "regular";
+  private static final String SLOW = "slow";
   private static final String MY_FAVORITES = "My Favorites";
   private static final String COMMENTS = "Comments";
   private static final String ALL_ITEMS_WITH_COMMENTS = "All items with comments";
@@ -633,7 +633,6 @@ public class UserListManager implements IUserListManager {
     int add = userExerciseDAO.add(userExercise, false);
     addItemToList(userListID, userExercise.getOldID(), add);
     fixAudioPaths(userExercise, true, mediaDir);
-
 //    editItem(userExercise, false, mediaDir);
   }
 
@@ -724,6 +723,7 @@ public class UserListManager implements IUserListManager {
    * @param overwrite
    * @param mediaDir
    * @see #editItem
+   * @see #reallyCreateNewItem(long, CommonExercise, String)
    */
   private void fixAudioPaths(CommonExercise userExercise, boolean overwrite, String mediaDir) {
     AudioAttribute regularSpeed = userExercise.getRegularSpeed();
