@@ -236,7 +236,7 @@ public abstract class BaseUserDAO extends DAO {
   /**
    * public for test access... for now
    */
-  public void findOrMakeDefectDetector() {
+  public void ensureDefaultUsers() {
     this.defectDetector  = getOrAdd(DEFECT_DETECTOR);
     this.beforeLoginUser = getOrAdd(BEFORE_LOGIN_USER);
     this.importUser      = getOrAdd(IMPORT_USER);

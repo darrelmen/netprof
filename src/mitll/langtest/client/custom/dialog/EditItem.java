@@ -78,7 +78,6 @@ public class EditItem {
   final Logger logger = Logger.getLogger("EditItem");
 
   public static final String NEW_ITEM = "*New Item*";
-  //public static final String NEW_EXERCISE_ID = "NewExerciseID";
   public static final int NEW_EXERCISE_ID = -100;
   private static final String EDIT_ITEM = "editItem";
 
@@ -209,6 +208,7 @@ public class EditItem {
             boolean addNewItem = includeAddItem;
 
             for (final CommonShell es : result) {
+              logger.info("Adding " +es.getID() + " : " + es.getClass());
               addExercise(es);
               if (includeAddItem && es.getID() == NEW_EXERCISE_ID) {
                 addNewItem = false;
@@ -216,7 +216,11 @@ public class EditItem {
             }
 
             if (addNewItem) {
-              addExercise(getNewItem());  // TODO : fix this
+              CommonExercise newItem = getNewItem();
+
+              logger.info("Adding " +newItem.getID()+ " : " + newItem.getClass());
+
+              addExercise(newItem);  // TODO : fix this
             }
             flush();
             return result;
