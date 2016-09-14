@@ -55,7 +55,6 @@ import java.util.List;
 
 @RemoteServiceRelativePath("list-manager")
 public interface ListService extends RemoteService {
-
   /**
    * @see mitll.langtest.client.custom.dialog.CreateListDialog#addUserList(BasicDialog.FormField, TextArea, BasicDialog.FormField, boolean)
    * @param userid
@@ -90,7 +89,6 @@ public interface ListService extends RemoteService {
    * @return
    */
   boolean deleteItemFromList(long listid, int exid);
-
   /**
    * @see ReviewEditableExercise#confirmThenDeleteItem()
    * @param exid
@@ -143,7 +141,7 @@ public interface ListService extends RemoteService {
    * @param language
    * @return
    */
-  CommonExercise reallyCreateNewItem(long userListID, CommonExercise userExercise, String language);
+//  CommonExercise reallyCreateNewItem(long userListID, CommonExercise userExercise, String language);
 
   /**
    * @see mitll.langtest.client.custom.ListManager#showImportItem(UserList, TabAndContent, TabAndContent, String, TabPanel)
@@ -166,7 +164,4 @@ public interface ListService extends RemoteService {
    * @param userExercise
    */
   void editItem(CommonExercise userExercise);
-
-
-
 }
