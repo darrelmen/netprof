@@ -48,7 +48,6 @@ import mitll.langtest.shared.user.User;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 
-import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.Collator;
@@ -159,7 +158,6 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
    * TODO : remove duplicate
    * Called from the client:
    *
-   *
    * @return
    * @see mitll.langtest.client.list.ListInterface#getExercises
    */
@@ -176,8 +174,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
 
       if (audioFileHelper == null) {
         logger.error("no audio file helper for " + getProject());
-      }
-      else {
+      } else {
         audioFileHelper.checkLTSAndCountPhones(exercises);
         didCheckLTS = true;
       }
@@ -232,13 +229,14 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
     return c;
   }
 
-//  @Override
+  //  @Override
   public void logAndNotifyServerException(Exception e) {
     logAndNotifyServerException(e, "");
   }
 
   /**
    * TODO remove duplicate
+   *
    * @param e
    * @param additionalMessage
    */
@@ -255,6 +253,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
       logger.debug(getInfo(prefixedMessage));
     }
   }
+
   /**
    * Copies the exercises....?
    *
@@ -330,7 +329,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
   /**
    * NOTE NOTE NOTE : not doing ensureMP3 - since we likely don't have access to file system for here.
    * ALSO - ideally this is done at the moment the wav is made.
-   *
+   * <p>
    * Send the first exercise along so we don't have to ask for it after we get the initial list
    *
    * @param exercises
@@ -449,11 +448,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
    * @see #addAnnotationsAndAudio(int, mitll.langtest.shared.exercise.CommonExercise, boolean)
    */
   private void attachAudio(CommonExercise firstExercise) {
-    String language = db.getLanguage(firstExercise);
-  //  String relativeConfigDir = "config" + File.separator + getServletContext().getInitParameter("config");
-    db.getAudioDAO().attachAudioToExercise(firstExercise,
-        //pathHelper.getInstallPath(), relativeConfigDir,
-        language);
+    db.getAudioDAO().attachAudioToExercise(firstExercise, db.getLanguage(firstExercise));
   }
 
   /**
@@ -810,7 +805,10 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
     checkPerformance(exid, then);
 
     if (byID != null) {
-      //logger.debug("returning (" + language + ") exercise " + byID.getOldID() + " : " + byID);
+      logger.debug("returning (" + language + ") exercise " + byID.getOldID() + " : " + byID);
+      for (AudioAttribute audioAttribute : byID.getAudioAttributes()) {
+        logger.info("\thas " + audioAttribute);
+      }
     } else {
       logger.warn(getLanguage() + " : couldn't find exercise with id '" + exid + "'");
     }
@@ -831,9 +829,9 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
 
 
   /**
-   * @see #getExercise(String, int, boolean)
    * @param id
    * @param then
+   * @see #getExercise(String, int, boolean)
    */
   private void checkPerformance(int id, long then) {
     long now;
@@ -889,6 +887,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
 
   /**
    * TODO : remove duplicate
+   *
    * @return
    */
 /*
@@ -915,7 +914,6 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
     return new MailSupport(serverProps.isDebugEMail(), serverProps.isTestEmail());
   }
 */
-
   private String getOldLanguage() {
     return serverProps.getLanguage();
   }
