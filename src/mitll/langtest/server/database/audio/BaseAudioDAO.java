@@ -174,7 +174,6 @@ public abstract class BaseAudioDAO extends DAO {
   public boolean attachAudio(CommonExercise firstExercise,
                              Collection<AudioAttribute> audioAttributes,
                              String language) {
-   // AudioConversion audioConversion = new AudioConversion(database.getServerProps());
     String installPath = database.getServerProps().getMediaDir();
 
     List<AudioAttribute> defaultAudio = new ArrayList<>();
@@ -245,7 +244,7 @@ public abstract class BaseAudioDAO extends DAO {
    * So this happens on the znetProf side where we don't have access to the actual file
    * We have confidence the file is there b/c we check it's existence every 24 hours, or on every startup of the
    * pnetProf instance.
-   *
+   * <p>
    * TODO : not sure what to do if we have multiple context sentences...
    *
    * @param firstExercise
@@ -265,16 +264,25 @@ public abstract class BaseAudioDAO extends DAO {
         firstExercise.getForeignLanguage();
     if (attr.hasMatchingTranscript(against)) {
       firstExercise.getMutableAudio().addAudio(attr);
-      if (attr.getAudioRef() == null)
+      String audioRef = attr.getAudioRef();
+      if (audioRef == null)
         logger.error("attachAudioAndFixPath huh? no audio ref for " + attr + " under " + firstExercise);
       else {
         // so a path to the file on disk will now look like /opt/netProf/bestAudio/spanish/bestAudio/123/regular_XXX.wav
         // in the database we store just bestAudio/123/regular_XXX.wav
-        String langPrefix = language.toLowerCase();
-        String prefix = installPath + File.separator + langPrefix;
+
+        // or if we store bestAudio/spanish/123/regular_YYY.wav ...? e.g. for newly recorded audio
+
+        String s = language.toLowerCase();
+        String prefix = installPath + File.separator + s;
         String relPrefix = prefix.substring(netProfDurLength);
-        attr.setAudioRef(relPrefix + File.separator + attr.getAudioRef());
-       // if (DEBUG_ATTACH) logger.debug("\tattachAudioAndFixPath now '" + attr.getAudioRef() + "'");
+        if (!audioRef.contains(s)) {
+          logger.info("audioref " +audioRef + " does not contain '" +prefix+
+              "' before " + attr.getAudioRef());
+          attr.setAudioRef(relPrefix + File.separator + audioRef);
+          logger.info("after " + attr.getAudioRef());
+        }
+        if (DEBUG_ATTACH || true) logger.debug("\tattachAudioAndFixPath now '" + attr.getAudioRef() + "'");
       }
       return true;
     } else {

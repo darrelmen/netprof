@@ -183,7 +183,10 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
 
     for (AudioAttribute audioAttribute : userExercise.getAudioAttributes()) {
       if (DEBUG) logger.debug("\treallyCreateNewItem : update " + audioAttribute + " to " + id);
-      db.getAudioDAO().updateExerciseID(audioAttribute.getUniqueID(), id, /*language.toLowerCase() + File.separator + */audioAttribute.getAudioRef());
+      db.getAudioDAO().updateExerciseID(
+          audioAttribute.getUniqueID(),
+          id,
+          audioAttribute.getAudioRef());
     }
     if (DEBUG) logger.debug("\treallyCreateNewItem : made user exercise " + userExercise + " on list " + userListID);
 
