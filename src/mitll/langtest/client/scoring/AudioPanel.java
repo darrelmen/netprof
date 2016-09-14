@@ -88,8 +88,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
   private static final int IMAGE_WIDTH_SLOP = 70 + WINDOW_SIZE_CHANGE_THRESHOLD / 2;
 
   private final ScoreListener gaugePanel;
-  // protected final int exerciseID;
-  protected String audioPath;
+   protected String audioPath;
   private final Map<String, Integer> reqs = new HashMap<>();
   private int reqid;
 
@@ -519,7 +518,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
    * @see #getImages()
    */
   protected void getEachImage(int width) {
-    // logger.info("AudioPanel.getEachImage : " + getElement().getId()+ " path " + audioPath);
+    logger.info("AudioPanel.getEachImage : " + getElement().getId()+ " path " + audioPath);
     getImageURLForAudio(audioPath, WAVEFORM, width, getWaveform());
     if (showSpectrogram) {
       getImageURLForAudio(audioPath, SPECTROGRAM, width, getSpectrogram());

@@ -36,6 +36,7 @@ import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Shell;
 
 import java.util.*;
@@ -156,6 +157,7 @@ public class ClickablePagingContainer<T extends Shell> extends SimplePagingConta
   /**
    * @param exercise
    * @see ListInterface#addExercise(Shell)
+   * @see mitll.langtest.client.list.PagingExerciseList#addExercise(CommonShell)
    */
   public void addExercise(T exercise) {
     idToExercise.put(exercise.getID(), exercise);
@@ -189,18 +191,6 @@ public class ClickablePagingContainer<T extends Shell> extends SimplePagingConta
       markCurrentExercise(currentExercise.getID());
     }
   }
-
-/*  protected float adjustVerticalRatio(float ratio) {
-    if (dataProvider != null && getList() != null && !getList().isEmpty()) {
-      T toLoad = getList().get(0);
-
-      if (toLoad.getOldID().length() > ID_LINE_WRAP_LENGTH) {
-        ratio /= 2; // hack for long ids
-      }
-    }
-
-    return ratio;
-  }*/
 
   public void markCurrentExercise(int itemID) {
     if (getList() == null || getList().isEmpty()) return;
