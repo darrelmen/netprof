@@ -175,7 +175,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @param language
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
    */
-  @Override
+ /* @Override
   public CommonExercise reallyCreateNewItem(long userListID, CommonExercise userExercise, String language) {
     if (DEBUG) logger.debug("reallyCreateNewItem : made user exercise " + userExercise + " on list " + userListID);
     getUserListManager().reallyCreateNewItem(userListID, userExercise, getMediaDir());
@@ -191,11 +191,11 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     if (DEBUG) logger.debug("\treallyCreateNewItem : made user exercise " + userExercise + " on list " + userListID);
 
     return userExercise;
-  }
+  }*/
 
   /**
    * @return
-   * @see #reallyCreateNewItem(long, CommonExercise)
+   * @see #reallyCreateNewItem
    */
   String getMediaDir() {
     return serverProps.getMediaDir();

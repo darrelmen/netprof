@@ -53,6 +53,8 @@ import mitll.langtest.client.exercise.WaveformPostAudioRecordButton;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.recorder.RecordButton;
+import mitll.langtest.client.services.AudioService;
+import mitll.langtest.client.services.AudioServiceAsync;
 import mitll.langtest.client.services.ListService;
 import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.client.sound.PlayListener;
@@ -99,6 +101,7 @@ class NewUserExercise extends BasicDialog {
   private final LangTestDatabaseAsync service;
 
   final ListServiceAsync listService = GWT.create(ListService.class);
+  final AudioServiceAsync audioServiceAsync = GWT.create(AudioService.class);
   private final HasText itemMarker;
   BasicDialog.FormField english;
   BasicDialog.FormField foreignLang;
@@ -143,7 +146,7 @@ class NewUserExercise extends BasicDialog {
     this.instance = instance;
     this.originalList = originalList;
 
- //   logger.info("new exercise is " + newUserExercise);
+    //   logger.info("new exercise is " + newUserExercise);
   }
 
   /**
@@ -228,10 +231,10 @@ class NewUserExercise extends BasicDialog {
     @Override
     public void onResize() {
       if (rap != null) {
-      rap.onResize();
-      rapSlow.onResize();
+        rap.onResize();
+        rapSlow.onResize();
+      }
     }
-  }
   }
 
   protected void makeOptionalRows(DivWidget upper) {
@@ -574,16 +577,19 @@ class NewUserExercise extends BasicDialog {
                                final Panel toAddTo,
                                boolean onClick) {
     logger.info("afterValidForeignPhrase newUserExercise is " + newUserExercise);
-    listService.reallyCreateNewItem(ul.getID(), newUserExercise, getLanguage(), new AsyncCallback<CommonExercise>() {
-      @Override
-      public void onFailure(Throwable caught) {
-      }
+    audioServiceAsync.reallyCreateNewItem(ul.getID(),
+        newUserExercise,
+        getLanguage(),
+        new AsyncCallback<CommonExercise>() {
+          @Override
+          public void onFailure(Throwable caught) {
+          }
 
-      @Override
-      public void onSuccess(CommonExercise newExercise) {
-        afterItemCreated(newExercise, ul, exerciseList, toAddTo);
-      }
-    });
+          @Override
+          public void onSuccess(CommonExercise newExercise) {
+            afterItemCreated(newExercise, ul, exerciseList, toAddTo);
+          }
+        });
   }
 
   /**
@@ -610,16 +616,16 @@ class NewUserExercise extends BasicDialog {
 
     ul.addExercise(newExercise);
 
-    for (CommonShell exercise:ul.getExercises()) {
+    for (CommonShell exercise : ul.getExercises()) {
       logger.info("user list " + ul.getID() + " " + ul.getName() + " has " + exercise);
     }
     originalList.addExercise(newExercise);
-    for (CommonShell exercise:originalList.getExercises()) {
+    for (CommonShell exercise : originalList.getExercises()) {
       logger.info("originalList " + ul.getID() + " " + ul.getName() + " has " + exercise);
     }
     ul.addExercise(newUserExercisePlaceholder); // make sure the placeholder is always at the end
 
-    for (CommonShell exercise:ul.getExercises()) {
+    for (CommonShell exercise : ul.getExercises()) {
       logger.info("after user list " + ul.getID() + " " + ul.getName() + " has " + exercise);
     }
 

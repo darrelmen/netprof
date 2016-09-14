@@ -95,7 +95,6 @@ public class PathWriter {
 //        File.separator + BEST_AUDIO +
 //        File.separator + exid +
 //        File.separator + destFileName;
-
     //logger.debug("getPermanentAudioPath : dest path    " + bestDirForExercise.getPath() + " vs " +bestAudioPath);
 
     if (!wavFileRef.equals(destination) && !destFileName.equals(AudioConversion.FILE_MISSING)) {
@@ -119,6 +118,8 @@ public class PathWriter {
   }
 
   /**
+   * MUST HAVE ACCESS TO AUDIO FILES  - only on pNetProf
+   *
    * @see #getPermanentAudioPath(File, String, boolean, String, int, String, String, ServerProperties)
    * @param fileRef
    * @param serverProperties

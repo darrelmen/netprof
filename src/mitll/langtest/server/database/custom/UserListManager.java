@@ -633,7 +633,6 @@ public class UserListManager implements IUserListManager {
     int add = userExerciseDAO.add(userExercise, false);
     addItemToList(userListID, userExercise.getOldID(), add);
     fixAudioPaths(userExercise, true, mediaDir);
-//    editItem(userExercise, false, mediaDir);
   }
 
   /**
@@ -750,6 +749,17 @@ public class UserListManager implements IUserListManager {
     }
   }
 
+  /**
+   *
+   * @param userExercise
+   * @param overwrite
+   * @param regularSpeed
+   * @param now
+   * @param foreignLanguage
+   * @param id
+   * @param projectID
+   * @param prefix
+   */
   private void fixAudioPathOfAttribute(CommonExercise userExercise,
                                        boolean overwrite,
                                        AudioAttribute regularSpeed,
