@@ -197,9 +197,9 @@ public class PathHelper {
     return getWavPath(getAnswerDir(), planAndTestPath);
   }
 
-  public String getRelPathUnder(String planAndTestPath) {
+/*  public String getRelPathUnder(String planAndTestPath) {
     return getWavPath(getAnswerDir().substring(properties.getAudioBaseDir().length()), planAndTestPath);
-  }
+  }*/
 
   private String getAnswerDir() {
     return properties.getAnswerDir();
