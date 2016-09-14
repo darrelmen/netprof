@@ -38,6 +38,7 @@ import audio.image.TranscriptEvent;
 import audio.imagewriter.EventAndFileInfo;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.gson.JsonObject;
 import corpus.HTKDictionary;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
@@ -49,7 +50,6 @@ import mitll.langtest.server.database.result.Result;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
-import net.sf.json.JSONObject;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import pronz.dirs.Dirs;
@@ -210,7 +210,7 @@ public class ASRScoring extends Scoring implements ASR {
     }
 
     Scores scores;
-    JSONObject jsonObject = null;
+    JsonObject jsonObject = null;
 
     PrecalcScores precalcScores = new PrecalcScores(props, precalcResult, usePhoneToDisplay);
 
@@ -258,7 +258,7 @@ public class ASRScoring extends Scoring implements ASR {
                                        boolean decode, String prefix, String noSuffix,
                                        File wavFile,
                                        Scores scores,
-                                       JSONObject jsonObject,
+                                       JsonObject jsonObject,
                                        boolean usePhoneToDisplay) {
     //  logger.debug("getPretestScore jsonObject " + jsonObject);
 //    logger.debug("getPretestScore scores     " + scores);
@@ -273,7 +273,7 @@ public class ASRScoring extends Scoring implements ASR {
 
     if (!scores.isValid()) {
       // skip image generation!
-      jsonObject = new JSONObject();
+      jsonObject = new JsonObject();
     }
 
     EventAndFileInfo eventAndFileInfo = jsonObject == null ?

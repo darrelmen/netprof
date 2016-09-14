@@ -174,4 +174,6 @@ public interface ListInterface<T extends Shell> extends RequiresResize, Reloadab
   void searchBoxEntry(String text);
 
   int getIndex(int currentID);
+
+  void report();
 }
