@@ -215,8 +215,7 @@ public class UserSecurityManager {
       if (uidI != null) {
         sessUser = getUserForID(uidI);
         if (sessUser == null) {
-          log.info("lookupUserFromHttpSession got cache miss for " + uidI);
-
+         // log.info("lookupUserFromHttpSession got cache miss for " + uidI);
           log.info("Lookup user from HTTP session. " +
                   "SID={} " +
                   "Request SID={}, " +
