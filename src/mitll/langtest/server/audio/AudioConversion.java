@@ -75,6 +75,8 @@ public class AudioConversion {
   private static final double DIFF_THRESHOLD = 0.2;
   private static final boolean SPEW = true;
   private static final String MP3 = ".mp3";
+  public static final String WAV = ".wav";
+  public static final String OGG = ".ogg";
   private final AudioCheck audioCheck;
   private static final boolean DEBUG = false;
   private static final int MIN_WARN_DUR = 30;
@@ -200,7 +202,7 @@ public class AudioConversion {
    * @see mitll.langtest.server.scoring.ASRScoring#scoreRepeatExercise
    */
   public String convertTo16Khz(String testAudioDir, String testAudioFileNoSuffix) throws UnsupportedAudioFileException {
-    String pathname = testAudioDir + File.separator + testAudioFileNoSuffix + ".wav";
+    String pathname = testAudioDir + File.separator + testAudioFileNoSuffix + WAV;
     File wavFile = convertTo16Khz(new File(pathname));
     return removeSuffix(wavFile.getName());
   }
@@ -325,7 +327,7 @@ public class AudioConversion {
   private File copyFileAndDeleteOriginal(final File wavFile, final String sourceFile, final String suffix) throws IOException {
 //    logger.info("orig " + wavFile.getName() + " source " + sourceFile + " suffix " + suffix);
     String name1 = wavFile.getName();
-    String dest = wavFile.getParent() + File.separator + removeSuffix(name1) + suffix + ".wav";
+    String dest = wavFile.getParent() + File.separator + removeSuffix(name1) + suffix + WAV;
 
     File replacement = new File(dest);
     File srcFile = new File(sourceFile);
@@ -422,7 +424,7 @@ public class AudioConversion {
   }
 
   private String makeTempFile(String prefix) throws IOException {
-    return makeTempDir(prefix) + File.separator + "temp" + prefix + ".wav";
+    return makeTempDir(prefix) + File.separator + "temp" + prefix + WAV;
   }
 
   /**
@@ -540,34 +542,34 @@ public class AudioConversion {
     if (!absolutePathToWav.exists()) {
       absolutePathToWav = getAbsoluteFile(pathToWav, realContextPath);
     }
-    return writeMP3Easy(pathToWav, absolutePathToWav, overwrite, title, author);
+    return writeMP3Easy(absolutePathToWav, overwrite, title, author);
   }
 
-  private String writeMP3Easy(String pathToWav, File absolutePathToWav, boolean overwrite, String title, String author) {
-    String mp3File = absolutePathToWav.getAbsolutePath().replace(".wav", MP3);
+  public String writeMP3Easy(File absolutePathToWav, boolean overwrite, String title, String author) {
+    String mp3File = absolutePathToWav.getAbsolutePath().replace(WAV, MP3);
     File mp3 = new File(mp3File);
     if (!mp3.exists() || overwrite) {
       if (DEBUG)
-        logger.debug("writeMP3 : doing mp3 conversion for " + absolutePathToWav + " path " + pathToWav);
+        logger.debug("writeMP3 : doing mp3 conversion for " + absolutePathToWav);
 
       if (DEBUG) logger.debug("run lame on " + absolutePathToWav + " making " + mp3File);
 
       if (!convertToMP3FileAndCheck(getLame(), title, absolutePathToWav.getAbsolutePath(), mp3File, author)) {
-        if (spew2++ < 10) logger.error("File missing for " + pathToWav + " for " + author);
+        if (spew2++ < 10) logger.error("File missing for " + absolutePathToWav + " for " + author);
         return FILE_MISSING;
       }
     }
 
-    String oggFile = absolutePathToWav.getAbsolutePath().replace(".wav", ".ogg");
+    String oggFile = absolutePathToWav.getAbsolutePath().replace(WAV, OGG);
     File ogg = new File(oggFile);
     if (!ogg.exists() || overwrite) {
       if (DEBUG)
-        logger.debug("writeMP3 : doing ogg conversion for " + absolutePathToWav + " path " + pathToWav);
+        logger.debug("writeMP3 : doing ogg conversion for " + absolutePathToWav);
 
       if (DEBUG) logger.debug("run ogg on " + absolutePathToWav + " making " + oggFile);
 
       if (!convertToOGGFileAndCheck(getOggenc(), title, absolutePathToWav.getAbsolutePath(), oggFile, author)) {
-        logger.error("ogg File missing for " + pathToWav);
+        logger.error("ogg File missing for " + absolutePathToWav);
         return FILE_MISSING;
       }
     }

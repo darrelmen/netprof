@@ -91,7 +91,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
    * @param optionalExercise
    * @see ListManager#viewLessons
    */
-  public UserListCallback(ListManager listManager,
+  UserListCallback(ListManager listManager,
                           Panel contentPanel,
                           Panel insideContentPanel,
                           ScrollPanel listScrollPanel,
@@ -204,16 +204,17 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
   }
 
   /**
-   * @param result
+   * @param userLists
    * @param insideScroll
    * @param nameToLists
    * @return
    * @see #onSuccess(java.util.Collection)
    */
-  private boolean addUserListsToDisplay(Collection<UserList<CommonShell>> result, Panel insideScroll,
+  private boolean addUserListsToDisplay(Collection<UserList<CommonShell>> userLists,
+                                        Panel insideScroll,
                                         Map<String, List<UserList<CommonShell>>> nameToLists) {
     boolean anyAdded = false;
-    for (final UserList<CommonShell> ul : result) {
+    for (final UserList<CommonShell> ul : userLists) {
       List<UserList<CommonShell>> collisions = nameToLists.get(ul.getName());
       boolean showMore = false;
       if (collisions.size() > 1) {
@@ -305,9 +306,10 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
     h4.addStyleName("floatLeft");
     r1.add(h4);
 
-    boolean empty = ul.getDescription().trim().isEmpty();
+    String description = ul.getDescription();
+    boolean empty = description.trim().isEmpty();
     boolean cmempty = ul.getClassMarker().trim().isEmpty();
-    String subtext = empty ? "" : ul.getDescription() + (cmempty ? "" : ",");
+    String subtext = empty ? "" : description + (cmempty ? "" : ",");
 
     if (!empty) {
       h4 = getDescription(subtext);
@@ -343,10 +345,10 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
 
     container.add(r1);
 
-    if (showMore && !ul.getDescription().isEmpty()) {
+    if (showMore && !description.isEmpty()) {
       Panel r2 = new FluidRow();
       container.add(r2);
-      r2.add(getUserListText2(ul.getDescription()));
+      r2.add(getUserListText2(description));
     }
   }
 
