@@ -566,6 +566,7 @@ public class AudioConversion {
         if (spew2++ < 10) logger.error("File missing for " + absolutePathToWav + " for " + author);
         return FILE_MISSING;
       }
+      logger.info("writeMP3Easy path is " + mp3.getAbsolutePath() + " : " + mp3.exists());
     }
 
     String oggFile = absolutePathToWav.getAbsolutePath().replace(WAV, OGG);
