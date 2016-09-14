@@ -37,6 +37,7 @@ import audio.image.TranscriptEvent;
 import audio.imagewriter.EventAndFileInfo;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.gson.JsonObject;
 import corpus.HTKDictionary;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
@@ -95,11 +96,12 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @param deployPath
    * @param properties
    * @param project
-   * @paramx langTestDatabase
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio
+   * @see mitll.langtest.server.services.ScoringServiceImpl#getASRScoreForAudio
    * @see mitll.langtest.server.audio.AudioFileHelper#makeASRScoring
    */
-  public ASRWebserviceScoring(String deployPath, ServerProperties properties, LogAndNotify langTestDatabase,
+  public ASRWebserviceScoring(String deployPath,
+                              ServerProperties properties,
+                              LogAndNotify langTestDatabase,
                               HTKDictionary htkDictionary,
                               Project project) {
     super(deployPath, properties, langTestDatabase, htkDictionary, project);
@@ -232,7 +234,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     // TODO remove the 16k hardcoding?
     double duration = new AudioCheck(props).getDurationInSeconds(wavFile);
 
-    JSONObject jsonObject = null;
+    JsonObject jsonObject = null;
 
     PrecalcScores precalcScores = new PrecalcScores(props, precalcResult, usePhoneToDisplay);
 
@@ -317,7 +319,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                                        double duration,
                                        int processDur,
                                        boolean usePhoneToDisplay,
-                                       JSONObject jsonObject
+                                       JsonObject jsonObject
   ) {
     String prefix1 = prefix + (useScoreForBkgColor ? "bkgColorForRef" : "") + (usePhoneToDisplay ? "_phoneToDisplay" : "");
     boolean reallyUsePhone = usePhoneToDisplay || props.usePhoneToDisplay();
@@ -631,13 +633,4 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       return phoneToScore;
     }
   }
-
-/*  public static void main(String[] arg) {
-    String transcript = "~ 쯤";
-    String cleaned = new SLFFile().cleanToken(transcript).trim();
-    System.out.println("cleaned " + cleaned);
-
-    String cleanedTranscript = ASRWebserviceScoring.getCleanedTranscript(cleaned, ";");
-    System.out.println("After " + cleanedTranscript);
-  }*/
 }

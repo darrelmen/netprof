@@ -245,6 +245,7 @@ public class DatabaseImpl implements Database {
     monitoringSupport = new MonitoringSupport(userDAO, resultDAO);
     this.pathHelper = pathHelper;
 
+
     if (!serverProps.useH2()) {
       populateProjects(false);
     }
@@ -288,6 +289,7 @@ public class DatabaseImpl implements Database {
                                 ServerProperties serverProps,
                                 LogAndNotify logAndNotify,
                                 boolean reload) {
+
     Collection<SlickProject> all = projectDAO.getAll();
     logger.info("populateProjects : found " + all.size() + " projects");
 
@@ -304,7 +306,7 @@ public class DatabaseImpl implements Database {
     }
 
     if (reload) {
-      doReload(reload);
+      doReload();
     }
 
     logger.info("populateProjects (reload = " + reload + ") now project ids " + idToProject.keySet());
@@ -313,7 +315,7 @@ public class DatabaseImpl implements Database {
     }
   }
 
-  private void doReload(boolean reload) {
+  private void doReload() {
     for (Project project : getProjects()) {
       if (project.getExerciseDAO() == null) {
         setExerciseDAO(project);
@@ -324,7 +326,7 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   *  @param pathHelper
+   * @param pathHelper
    * @param serverProps
    * @param logAndNotify
    * @param reload
@@ -393,7 +395,10 @@ public class DatabaseImpl implements Database {
 
     createTables();
 
-    userDAO.findOrMakeDefectDetector();
+    userDAO.ensureDefaultUsers();
+    int defaultProject = projectDAO.ensureDefaultProject(userDAO.getBeforeLoginUser());
+    // make sure we have a template exercise
+    userExerciseDAO.ensureTemplateExercise(defaultProject);
 
     try {
       ((UserListManager) userListManager).setUserExerciseDAO(userExerciseDAO);
@@ -824,7 +829,7 @@ public class DatabaseImpl implements Database {
               exerciseIDToRefAudio,
               (SlickResultDAO) resultDAO)
       );
-      userExerciseDAO.getTemplateExercise(id);
+//      userExerciseDAO.getTemplateExercise();
     }
     logMemory();
   }
@@ -891,8 +896,8 @@ public class DatabaseImpl implements Database {
     if (project == null) {
       Project firstProject = getFirstProject();
       logger.error("no project with id " + projectid + " in known projects (" + idToProject.keySet() +
-          ")" +
-          " returning first " + firstProject);
+          ") returning first " + firstProject,
+          new IllegalArgumentException());
       return firstProject;
     }
     return project;
@@ -1639,7 +1644,10 @@ public class DatabaseImpl implements Database {
     if (toRet == null) {
       if (warns++ < 50)
         logger.info("couldn't find exercise " + id + " in project #" + projid + " looking in user exercise table");
-      //    toRet = getUserExerciseByExID(id);
+      toRet = getUserExerciseByExID(id);
+      if (toRet != null) {
+        attachAudio(toRet);
+      }
     }
 
     return toRet;
@@ -1760,7 +1768,7 @@ public class DatabaseImpl implements Database {
    * @return
    */
   public int attachAudio(CommonExercise ex) {
-    return getAudioDAO().attachAudioToExercise(ex, /*installPath, configDir,*/ getLanguage(ex));
+    return getAudioDAO().attachAudioToExercise(ex, getLanguage(ex));
   }
 
 

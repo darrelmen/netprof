@@ -34,11 +34,12 @@ package mitll.langtest.server.scoring;
 
 import audio.image.ImageType;
 import audio.image.TranscriptEvent;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.shared.answer.AudioType;
-import net.sf.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -54,7 +55,7 @@ class PrecalcScores {
 
   private final Result precalcResult;
   private Scores scores;
-  private JSONObject jsonObject;
+  private JsonObject jsonObject;
   private final boolean isValid;
   private final ParseResultJson parseResultJson;
 
@@ -65,14 +66,15 @@ class PrecalcScores {
    * @param precalcResult
    * @param usePhoneToDisplay
    */
-  public PrecalcScores(ServerProperties serverProperties, Result precalcResult, boolean usePhoneToDisplay) {
+  PrecalcScores(ServerProperties serverProperties, Result precalcResult, boolean usePhoneToDisplay) {
     this.parseResultJson = new ParseResultJson(serverProperties);
     this.precalcResult = precalcResult;
 
     boolean valid = isValidPrecalc();
 
     if (valid) {
-      jsonObject = JSONObject.fromObject(precalcResult.getJsonScore());
+      JsonParser parser = new JsonParser();
+      jsonObject = parser.parse(precalcResult.getJsonScore()).getAsJsonObject();
       float pronScore = precalcResult.getPronScore();
       scores = getCachedScores(pronScore, jsonObject, usePhoneToDisplay);
       isValid = isPrecalcValidCheck();
@@ -103,7 +105,7 @@ class PrecalcScores {
    * @return
    * @see #PrecalcScores(ServerProperties, Result, boolean)
    */
-  private Scores getCachedScores(float pronScore, JSONObject jsonObject, boolean usePhones) {
+  private Scores getCachedScores(float pronScore, JsonObject jsonObject, boolean usePhones) {
     Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap = parseResultJson.parseJson(jsonObject, "words", "w", usePhones);
     Map<String, Map<String, Float>> eventScores = getEventAverages(imageTypeMapMap);
     return new Scores(pronScore, eventScores, 0);
@@ -172,7 +174,7 @@ class PrecalcScores {
     return scores;
   }
 
-  public JSONObject getJsonObject() {
+  public JsonObject getJsonObject() {
     return jsonObject;
   }
 

@@ -403,9 +403,11 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return directlyRelated;
   }
 
+/*
   public Collection<CommonExercise> getMentions() {
     return mentions;
   }
+*/
 
   public boolean isSafeToDecode() {
     return safeToDecode;
