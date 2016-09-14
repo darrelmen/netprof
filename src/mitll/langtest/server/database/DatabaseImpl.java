@@ -1617,7 +1617,7 @@ public class DatabaseImpl implements Database {
    * @param projid
    * @param id
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercise
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#getExercise
    */
   public CommonExercise getCustomOrPredefExercise(int projid, int id) {
 /*    CommonExercise userEx = getUserExerciseByExID(id);  // allow custom items to mask out non-custom items
@@ -1645,9 +1645,9 @@ public class DatabaseImpl implements Database {
       if (warns++ < 50)
         logger.info("couldn't find exercise " + id + " in project #" + projid + " looking in user exercise table");
       toRet = getUserExerciseByExID(id);
-      if (toRet != null) {
-        attachAudio(toRet);
-      }
+//      if (toRet != null) {
+//        attachAudio(toRet);
+//      }
     }
 
     return toRet;
