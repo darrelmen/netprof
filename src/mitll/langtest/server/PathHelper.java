@@ -83,18 +83,21 @@ public class PathHelper {
   }
 
   /**
+   * NOT FOR AUDIO.
+   *
    * @param filePath
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable
    * @see mitll.langtest.server.LangTestDatabaseImpl#getImageForAudioFile(int, String, String, int, int, String)
+   *
    */
   public File getAbsoluteFile(String filePath) {
     return getAbsolute(getInstallPath(), filePath);
   }
 
-  public File getAbsoluteAnswerAudioFile(String filePath, String language) {
-    return getAbsolute(getAnswerDir() + File.separator + language.toLowerCase(), filePath);
-  }
+//  public File getAbsoluteAnswerAudioFile(String filePath, String language) {
+//    return getAbsolute(getAnswerDir() + File.separator + language.toLowerCase(), filePath);
+//  }
 
   public File getAbsoluteBestAudioFile(String filePath, String language) {
     return getAbsolute(properties.getMediaDir() + File.separator + language.toLowerCase(), filePath);

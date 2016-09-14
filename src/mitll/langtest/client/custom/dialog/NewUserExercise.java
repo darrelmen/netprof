@@ -574,7 +574,7 @@ class NewUserExercise extends BasicDialog {
                                final Panel toAddTo,
                                boolean onClick) {
     logger.info("afterValidForeignPhrase newUserExercise is " + newUserExercise);
-    listService.reallyCreateNewItem(ul.getID(), newUserExercise, new AsyncCallback<CommonExercise>() {
+    listService.reallyCreateNewItem(ul.getID(), newUserExercise, getLanguage(), new AsyncCallback<CommonExercise>() {
       @Override
       public void onFailure(Throwable caught) {
       }
@@ -597,8 +597,10 @@ class NewUserExercise extends BasicDialog {
    * @param toAddTo
    * @see #afterValidForeignPhrase(UserList, ListInterface, Panel, boolean)
    */
-  private void afterItemCreated(CommonExercise newExercise, UserList<CommonShell> ul,
-                                ListInterface<CommonShell> exerciseList, Panel toAddTo) {
+  private void afterItemCreated(CommonExercise newExercise,
+                                UserList<CommonShell> ul,
+                                ListInterface<CommonShell> exerciseList,
+                                Panel toAddTo) {
     logger.info("afterItemCreated " + newExercise + " creator " + newExercise.getCreator());
     editItem.clearNewExercise(); // success -- don't remember it
 
@@ -607,9 +609,20 @@ class NewUserExercise extends BasicDialog {
     logger.info("afterItemCreated removed " + newUserExercisePlaceholder);
 
     ul.addExercise(newExercise);
-    originalList.addExercise(newExercise);
 
+    for (CommonShell exercise:ul.getExercises()) {
+      logger.info("user list " + ul.getID() + " " + ul.getName() + " has " + exercise);
+    }
+    originalList.addExercise(newExercise);
+    for (CommonShell exercise:originalList.getExercises()) {
+      logger.info("originalList " + ul.getID() + " " + ul.getName() + " has " + exercise);
+    }
     ul.addExercise(newUserExercisePlaceholder); // make sure the placeholder is always at the end
+
+    for (CommonShell exercise:ul.getExercises()) {
+      logger.info("after user list " + ul.getID() + " " + ul.getName() + " has " + exercise);
+    }
+
     itemMarker.setText(ul.getExercises().size() + " items");
 
     Shell toMoveToEnd = moveNewExerciseToEndOfList(newExercise, exerciseList);
@@ -621,14 +634,27 @@ class NewUserExercise extends BasicDialog {
 
     exerciseList.checkAndAskServer(id);
 
+    exerciseList.report();
+
     toAddTo.clear();
     toAddTo.add(addNew(ul, originalList, exerciseList, toAddTo));
   }
 
   private Shell moveNewExerciseToEndOfList(CommonExercise newExercise, ListInterface<CommonShell> exerciseList) {
     CommonShell toMoveToEnd = exerciseList.simpleRemove(EditItem.NEW_EXERCISE_ID);
+
+    logger.info("moveNewExerciseToEndOfList removed " + toMoveToEnd);
+    exerciseList.report();
+
+    logger.info("moveNewExerciseToEndOfList add " + newExercise);
+
     exerciseList.addExercise(newExercise);
+    exerciseList.report();
+    logger.info("moveNewExerciseToEndOfList add " + toMoveToEnd);
+
     exerciseList.addExercise(toMoveToEnd);
+    exerciseList.report();
+
     exerciseList.redraw();
     return toMoveToEnd;
   }

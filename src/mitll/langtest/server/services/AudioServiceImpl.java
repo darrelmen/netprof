@@ -67,14 +67,14 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   private static final boolean WARN_MISSING_FILE = true;
 
   private AudioConversion audioConversion;
-//  private String configDir;
+  //  private String configDir;
   private PathWriter pathWriter;
 
   @Override
   public void init() {
     super.init();
     audioConversion = new AudioConversion(serverProps);
- //   String relativeConfigDir = "config" + File.separator + getServletContext().getInitParameter("config");
+    //   String relativeConfigDir = "config" + File.separator + getServletContext().getInitParameter("config");
 //    this.configDir = pathHelper.getInstallPath() + File.separator + relativeConfigDir;
     pathWriter = new PathWriter(serverProps);
   }
@@ -120,16 +120,25 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     int exerciseID = audioContext.getExid();
     boolean isExistingExercise = exerciseID > 0;
 
-    logger.info("writeAudioFile got request " + audioContext +
-        " do flashcard " +doFlashcard +
-        " recordInResults " +recordInResults +
-        " addToAudioTable " +addToAudioTable +
-        " allowAlternates " +allowAlternates +
-        "payload " + base64EncodedString.length());
+    logger.info("writeAudioFile got " +
+        "\n\trequest         " + audioContext +
+        "\n\tdo flashcard    " + doFlashcard +
+        "\n\trecordInResults " + recordInResults +
+        "\n\taddToAudioTable " + addToAudioTable +
+        "\n\tallowAlternates " + allowAlternates +
+        "\n\tpayload bytes   " + base64EncodedString.length());
 
     boolean amas = serverProps.isAMAS();
 
-    CommonExercise commonExercise = amas || !isExistingExercise ? null : db.getCustomOrPredefExercise(getProjectID(), exerciseID);
+    CommonExercise commonExercise = amas || isExistingExercise ?
+        db.getCustomOrPredefExercise(getProjectID(), exerciseID) :
+        db.getUserExerciseDAO().getTemplateExercise(db.getProjectDAO().getDefault());
+
+    if (!isExistingExercise) {
+      ((Exercise) commonExercise).setProjectID(audioContext.getProjid());
+      audioContext.setExid(commonExercise.getID());
+    }
+
     CommonShell exercise1 = amas ? db.getAMASExercise(exerciseID) : commonExercise;
 
     if (exercise1 == null && isExistingExercise) {
@@ -180,7 +189,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   }
 
   /**
-   * Only for bestAudio ---
+   * Only for bestAudio?
    *
    * @param wavFile
    * @param title
@@ -190,19 +199,17 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * @see #writeAudioFile
    */
   private boolean ensureMP3(String wavFile, String title, String artist) {
-    String parent =  serverProps.getAnswerDir();
+    String parent = serverProps.getAnswerDir();
     if (wavFile != null) {
       logger.debug("ensureMP3 : trying " + wavFile + " under " + parent);
       // File test = new File(parent + File.separator + language, wavFile);
       File test = new File(wavFile);
       if (!test.exists()) {
         if (WARN_MISSING_FILE) {
-           logger.warn("ensureMP3 : can't find " + wavFile);// + " under " + parent + " trying config... ");
-         }
+          logger.warn("ensureMP3 : can't find " + test.getAbsolutePath());// + " under " + parent + " trying config... ");
+        }
         parent = serverProps.getAudioBaseDir();// + File.separator + language;
-
         logger.warn("ensureMP3 : trying " + wavFile + " under " + parent);// + " under " + parent + " trying config... ");
-
       }
 
 /*      if (!audioConversion.exists(wavFile, parent)) {// && wavFile.contains("1310")) {
@@ -213,7 +220,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
       String s = audioConversion.ensureWriteMP3(wavFile, parent, false, title, artist);
       boolean isMissing = s.equals(AudioConversion.FILE_MISSING);
-      if (isMissing){// && wavFile.contains("1310")) {
+      if (isMissing) {
         logger.error("ensureMP3 : can't find " + wavFile + " under " + parent + " for " + title + " " + artist);
       }
       return !isMissing;
@@ -262,11 +269,13 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     int projid = exercise1 == null ? -1 : exercise1.getProjectID();
     String audioTranscript = getAudioTranscript(audioType, exercise1);
     String language = db.getProject(projid).getLanguage();
-    //  logger.debug("addToAudioTable user " + user + " ex " + exerciseID + " for " + audioType + " path before " + audioAnswer.getPath());
+    logger.debug("addToAudioTable user " + user + " ex " + exerciseID + " for " + audioType + " path before " + audioAnswer.getPath());
 
+    File absoluteFile = pathHelper.getAbsoluteAudioFile(audioAnswer.getPath());
+    if (!absoluteFile.exists()) logger.error("addToAudioTable huh? no file at " + absoluteFile.getAbsolutePath());
     String permanentAudioPath = pathWriter.
-        getPermanentAudioPath(pathHelper,
-            pathHelper.getAbsoluteAudioFile(audioAnswer.getPath()),
+        getPermanentAudioPath(
+            absoluteFile,
             getPermanentName(user, audioType),
             true,
             language,
@@ -279,8 +288,11 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         db.getAudioDAO().addOrUpdate(user, idToUse, projid, audioType, permanentAudioPath, System.currentTimeMillis(),
             audioAnswer.getDurationInMillis(), audioTranscript);
     audioAnswer.setPath(audioAttribute.getAudioRef());
-    logger.debug("addToAudioTable user " + user + " ex " + exerciseID + " for " + audioType + " audio answer has " +
-        audioAttribute);
+    logger.debug("addToAudioTable" +
+        "\n\tuser " + user +
+        "\n\tex " + exerciseID + "/" + idToUse +
+        "\n\tfor " + audioType +
+        "\n\taudio answer has " + audioAttribute);
 
     // what state should we mark recorded audio?
     setExerciseState(idToUse, user, exercise1);
@@ -382,7 +394,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * @return path to an image file
    * @see mitll.langtest.client.scoring.AudioPanel#getImageURLForAudio
    */
-  public ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height,
+  public ImageResponse getImageForAudioFile(int reqid,
+                                            String audioFile, String imageType, int width, int height,
                                             String exerciseID) {
     if (audioFile.isEmpty()) logger.error("huh? audio file is empty for req id " + reqid + " exid " + exerciseID);
 
@@ -444,8 +457,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
   /**
    * Here we assume the audioFile path is like
-   *
-   *    bestAudio/spanish/bestAudio/123/regular_xxx.mp3
+   * <p>
+   * bestAudio/spanish/bestAudio/123/regular_xxx.mp3
    * OR answers/spanish/answers/123/regular_xxx.mp3
    *
    * @param audioFile
@@ -457,8 +470,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       logger.info("getWavAudioFile " + audioFile);
       if (new File(wavFile).exists()) {
         return wavFile;
-      }
-      else {
+      } else {
         File test = pathHelper.getAbsoluteAudioFile(wavFile);
         logger.info("getWavAudioFile test " + test.getAbsolutePath());
 

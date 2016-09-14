@@ -58,5 +58,9 @@ public interface IProjectDAO extends IDAO {
 
   SlickProject getFirst();
 
+  int ensureDefaultProject(int defaultUser);
+
+  int getDefault();
+
   void dropProject(String name);
 }

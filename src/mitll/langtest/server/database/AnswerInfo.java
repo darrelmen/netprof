@@ -75,7 +75,7 @@ public class AnswerInfo {
     String device;
     boolean withFlash;
 
-    public RecordingInfo(RecordingInfo other,String audioFile) {
+    public RecordingInfo(RecordingInfo other, String audioFile) {
       this.answer = other.answer;
       this.audioFile = audioFile;
       this.deviceType = other.deviceType;
@@ -92,6 +92,10 @@ public class AnswerInfo {
       this.deviceType = deviceType;
       this.device = device;
       this.withFlash = withFlash;
+    }
+
+    public String toString() {
+      return "answer " + answer + " audioFile " + audioFile + " device " + deviceType + "/" + device + " with flash " + withFlash;
     }
   }
 
@@ -166,10 +170,10 @@ public class AnswerInfo {
 
   private AnswerInfo(AnswerInfo other,
 
-                    boolean correct,
-                    float pronScore,
-                    String scoreJson,
-                    int processDur) {
+                     boolean correct,
+                     float pronScore,
+                     String scoreJson,
+                     int processDur) {
     this(other.getUserid(),
         other.getProjid(),
         other.getId(),
@@ -299,10 +303,14 @@ public class AnswerInfo {
     return snr;
   }
 
-  public String getTranscript() { return transcript; }
+  public String getTranscript() {
+    return transcript;
+  }
+
   public void setTranscript(String transcript) {
     this.transcript = transcript;
   }
+
   public String toString() {
     return "answer for exid #" + id +
         " correct " + correct +

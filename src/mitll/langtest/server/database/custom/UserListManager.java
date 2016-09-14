@@ -632,7 +632,9 @@ public class UserListManager implements IUserListManager {
   public void reallyCreateNewItem(long userListID, CommonExercise userExercise, String mediaDir) {
     int add = userExerciseDAO.add(userExercise, false);
     addItemToList(userListID, userExercise.getOldID(), add);
-    editItem(userExercise, false, mediaDir);
+    fixAudioPaths(userExercise, true, mediaDir);
+
+//    editItem(userExercise, false, mediaDir);
   }
 
   /**
@@ -712,6 +714,8 @@ public class UserListManager implements IUserListManager {
   }*/
 
   /**
+   * TODO : Why is this needed?
+   *
    * Remember to copy the audio from the posted location to a more permanent location.
    * <p>
    * If it's already under a media directory -- don't change it.
@@ -724,24 +728,22 @@ public class UserListManager implements IUserListManager {
   private void fixAudioPaths(CommonExercise userExercise, boolean overwrite, String mediaDir) {
     AudioAttribute regularSpeed = userExercise.getRegularSpeed();
     if (regularSpeed == null) {
-      logger.warn("huh? no ref audio for " + userExercise);
+      logger.warn("fixAudioPaths huh? no ref audio for " + userExercise);
       return;
     }
     long now = System.currentTimeMillis();
-    //logger.debug("fixAudioPaths : checking regular '" + regularSpeed.getAudioRef() + "' against '" +mediaDir + "'");
+    logger.debug("fixAudioPaths : checking regular '" + regularSpeed.getAudioRef() + "' against '" +mediaDir + "'");
 
     String foreignLanguage = userExercise.getForeignLanguage();
     int id = userExercise.getID();
     int projectID = userExercise.getProjectID();
 
     if (!regularSpeed.getAudioRef().contains(mediaDir)) {
-      String fast1 = FAST;
-      fixAudioPathOfAttribute(userExercise, overwrite, regularSpeed, now, foreignLanguage, id, projectID, fast1);
-      //  logger.debug("fixAudioPaths : for " + userExercise.getOldID() + " fast is " + fast + " size " + FileUtils.size(refAudio));
+      fixAudioPathOfAttribute(userExercise, overwrite, regularSpeed, now, foreignLanguage, id, projectID, FAST);
+      logger.debug("fixAudioPaths : for " + userExercise.getOldID() + " fast is " + regularSpeed.getAudioRef());
     }
 
     AudioAttribute slowSpeed = userExercise.getSlowSpeed();
-
     if (slowSpeed != null && !slowSpeed.getAudioRef().isEmpty() &&
         !slowSpeed.getAudioRef().contains(mediaDir)) {
       fixAudioPathOfAttribute(userExercise, overwrite, slowSpeed, now, foreignLanguage, id, projectID, SLOW);
@@ -789,7 +791,6 @@ public class UserListManager implements IUserListManager {
     ServerProperties serverProps = userDAO.getDatabase().getServerProps();
     Project project = userDAO.getDatabase().getProject(projid);
     return new PathWriter(serverProps).getPermanentAudioPath(
-        pathHelper,
         fileRef,
         destFileName,
         overwrite,
