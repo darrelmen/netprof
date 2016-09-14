@@ -52,7 +52,7 @@ import org.apache.log4j.Logger;
 import java.io.File;
 
 /**
- * TODO : add image generation here too - since it's done from a file.
+ * does image generation here too - since it's done from a file.
  */
 @SuppressWarnings("serial")
 public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioService {
@@ -67,15 +67,12 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   private static final boolean WARN_MISSING_FILE = true;
 
   private AudioConversion audioConversion;
-  //  private String configDir;
   private PathWriter pathWriter;
 
   @Override
   public void init() {
     super.init();
     audioConversion = new AudioConversion(serverProps);
-    //   String relativeConfigDir = "config" + File.separator + getServletContext().getInitParameter("config");
-//    this.configDir = pathHelper.getInstallPath() + File.separator + relativeConfigDir;
     pathWriter = new PathWriter(serverProps);
   }
 
@@ -169,17 +166,13 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       logger.warn("huh? got zero length recording " + user + " " + exerciseID);
       logEvent("audioRecording", "writeAudioFile", "" + exerciseID, "Writing audio - got zero duration!", user, "unknown", device);
     } else {
-      ensureCompressedEquivalent(user, exercise1, audioAnswer, audioContext.getLanguage());
+      ensureCompressedAudio(user, exercise1, audioAnswer.getPath());
     }
 
     return audioAnswer;
   }
 
-  private void ensureCompressedEquivalent(int user, CommonShell exercise1, AudioAnswer audioAnswer, String language) {
-    ensureCompressedAudio(user, exercise1, audioAnswer.getPath(), language);
-  }
-
-  private void ensureCompressedAudio(int user, CommonShell exercise1, String path, String language) {
+  private void ensureCompressedAudio(int user, CommonShell exercise1, String path) {
     String foreignLanguage = exercise1 == null ? "unknown" : exercise1.getForeignLanguage();
     String userID = getUserID(user);
     if (userID == null) {
@@ -190,7 +183,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   }
 
   /**
-   * Only for bestAudio?
+   * for both audio in answers and best audio -- could be more efficient...
    *
    * @param wavFile
    * @param title
@@ -200,9 +193,10 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * @see #writeAudioFile
    */
   private boolean ensureMP3(String wavFile, String title, String artist) {
+   // if (!wavFile.startsWith(serverProps.getAudioBaseDir()))
     String parent = serverProps.getAnswerDir();
     if (wavFile != null) {
-      logger.debug("ensureMP3 : trying " + wavFile + " under " + parent);
+      logger.debug("ensureMP3 : trying " + wavFile);
       // File test = new File(parent + File.separator + language, wavFile);
       File test = new File(wavFile);
       if (!test.exists()) {
@@ -270,7 +264,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     int projid = exercise1 == null ? -1 : exercise1.getProjectID();
     String audioTranscript = getAudioTranscript(audioType, exercise1);
     String language = db.getProject(projid).getLanguage();
-    logger.debug("addToAudioTable user " + user + " ex " + exerciseID + " for " + audioType + " path before " + audioAnswer.getPath());
+ //   logger.debug("addToAudioTable user " + user + " ex " + exerciseID + " for " + audioType + " path before " + audioAnswer.getPath());
 
     File absoluteFile = pathHelper.getAbsoluteAudioFile(audioAnswer.getPath());
     if (!absoluteFile.exists()) logger.error("addToAudioTable huh? no file at " + absoluteFile.getAbsolutePath());
@@ -354,29 +348,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
   }
 */
-
-  /**
-   * @param byID
-   * @param parentDir
-   * @seex LoadTesting#getExercise
-   * @seex #makeExerciseListWrapper
-   */
-/*  private void ensureMP3s(CommonExercise byID, String parentDir) {
-    Collection<AudioAttribute> audioAttributes = byID.getAudioAttributes();
-    for (AudioAttribute audioAttribute : audioAttributes) {
-      if (!ensureMP3(audioAttribute.getAudioRef(), byID.getForeignLanguage(), audioAttribute.getUser().getUserID(), parentDir)) {
-//        if (byID.getOldID().equals("1310")) {
-//          logger.warn("ensureMP3 : can't find " + audioAttribute + " under " + parentDir + " for " + byID);
-//        }
-        audioAttribute.setAudioRef(AudioConversion.FILE_MISSING);
-      }
-    }
-
-//    if (audioAttributes.isEmpty() && byID.getOldID().equals("1310")) {
-//      logger.warn("ensureMP3s : (" + getLanguage() + ") no ref audio for " + byID);
-//    }
-  }*/
-
 
   /**
    * Get an image of desired dimensions for the audio file - only for Waveform and spectrogram.
@@ -493,7 +464,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       return audioFile;
     }
   }
-
 
   /**
    * Put the new item in the database,
