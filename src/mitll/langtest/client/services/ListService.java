@@ -140,9 +140,10 @@ public interface ListService extends RemoteService {
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase(UserList, ListInterface, Panel, boolean)
    * @param userListID
    * @param userExercise
+   * @param language
    * @return
    */
-  CommonExercise reallyCreateNewItem(long userListID, CommonExercise userExercise);
+  CommonExercise reallyCreateNewItem(long userListID, CommonExercise userExercise, String language);
 
   /**
    * @see mitll.langtest.client.custom.ListManager#showImportItem(UserList, TabAndContent, TabAndContent, String, TabPanel)

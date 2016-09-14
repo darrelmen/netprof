@@ -202,8 +202,8 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.executeUpdate();
         preparedStatement.close();
-       // userExercise.getCombinedMutableUserExercise().setOldID(customID);
-        ((Exercise)userExercise).setOldID(customID);
+        // userExercise.getCombinedMutableUserExercise().setOldID(customID);
+        ((Exercise) userExercise).setOldID(customID);
 
         logger.debug("\tuserExercise= " + userExercise);
       }
@@ -362,7 +362,6 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
    */
   @Override
   public CommonExercise getByExID(int exid) {
-    //exid = exid.replaceAll("\'", "");
     String sql = "SELECT * from " + USEREXERCISE + " where " + EXERCISEID + "='" + exid + "'";
     Collection<CommonExercise> commonExercises = getCommonExercises(sql);
     return commonExercises.isEmpty() ? null : commonExercises.iterator().next();
@@ -371,6 +370,11 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   @Override
   public CommonExercise getTemplateExercise(int projID) {
     return null;
+  }
+
+
+  @Override
+  public void ensureTemplateExercise(int projID) {
   }
 
   @Override
@@ -456,9 +460,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
       List<String> typeOrder = exerciseDAO.getSectionHelper().getTypeOrder();
       while (rs.next()) {
         Exercise e = getUserExercise(rs, typeOrder);
-
 //        logger.info("getUserExercises " + e);
-
 /*        if (addMissingAudio) {
           String ref = rs.getString(REF_AUDIO);
           String sref = rs.getString(SLOW_AUDIO_REF);

@@ -63,9 +63,6 @@ public class AudioContext implements IsSerializable {
   private int projid;
 
   private String language;
-  /**
-   * exercise id
-   */
   private int exid;
   /**
    * question within the exercise
@@ -85,7 +82,8 @@ public class AudioContext implements IsSerializable {
    * @param language
    * @param exid
    * @param questionID
-   * @param audioType  @see
+   * @param audioType
+   * @see mitll.langtest.client.scoring.PostAudioRecordButton#postAudioFile(String)
    */
   public AudioContext(int reqid,
                       int userid,
@@ -130,6 +128,14 @@ public class AudioContext implements IsSerializable {
     return projid;
   }
 
+  public String getLanguage() {
+    return language;
+  }
+
+  public void setExid(int exid) {
+    this.exid = exid;
+  }
+
   public String toString() {
     return
         "AudioContext" +
@@ -139,9 +145,5 @@ public class AudioContext implements IsSerializable {
             //" q " + questionID +
             "\n\treq    " + reqid +
             "\n\ttype   " + audioType;
-  }
-
-  public String getLanguage() {
-    return language;
   }
 }
