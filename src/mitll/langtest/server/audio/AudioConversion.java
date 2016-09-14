@@ -537,15 +537,23 @@ public class AudioConversion {
    * @see #ensureWriteMP3
    */
   private String writeMP3(String pathToWav, String realContextPath, boolean overwrite, String title, String author) {
-    //File absolutePathToWav = getAbsoluteFile(pathToWav, realContextPath);
     File absolutePathToWav = new File(pathToWav); // LAZY - what should it be?
     if (!absolutePathToWav.exists()) {
+      logger.info("can't find " +absolutePathToWav.getAbsolutePath());
       absolutePathToWav = getAbsoluteFile(pathToWav, realContextPath);
     }
     return writeMP3Easy(absolutePathToWav, overwrite, title, author);
   }
 
-  public String writeMP3Easy(File absolutePathToWav, boolean overwrite, String title, String author) {
+  /**
+   * @see PathWriter#getPermanentAudioPath(File, String, boolean, String, int, String, String, ServerProperties)
+   * @param absolutePathToWav
+   * @param overwrite
+   * @param title
+   * @param author
+   * @return
+   */
+  String writeMP3Easy(File absolutePathToWav, boolean overwrite, String title, String author) {
     String mp3File = absolutePathToWav.getAbsolutePath().replace(WAV, MP3);
     File mp3 = new File(mp3File);
     if (!mp3.exists() || overwrite) {
@@ -700,7 +708,7 @@ public class AudioConversion {
    * @return
    * @deprecated when would this be a good idea???
    */
-  private File writeWavFromMP3(String lamePath, String pathToAudioFile, String mp3File) {
+/*  private File writeWavFromMP3(String lamePath, String pathToAudioFile, String mp3File) {
     ProcessBuilder lameProc = new ProcessBuilder(lamePath, "--decode", pathToAudioFile, mp3File);
     try {
       //    System.out.println("convertFileAndCheck running lame" + lameProc.command());
@@ -712,9 +720,9 @@ public class AudioConversion {
     }
 
     return new File(mp3File);
-  }
+  }*/
 
-  int spew = 0;
+  private int spew = 0;
 
   /**
    * @param lamePath
@@ -744,7 +752,8 @@ public class AudioConversion {
     File testMP3 = new File(mp3File);
     if (!testMP3.exists()) {
       if (!new File(pathToAudioFile).exists()) {
-        if (SPEW && spew++ < 10) logger.error("huh? source file " + pathToAudioFile + " doesn't exist?");
+        if (SPEW && spew++ < 10) logger.error("huh? source file " + pathToAudioFile + " doesn't exist?",
+             new Exception("can't find " + pathToAudioFile));
       } else {
         logger.error("didn't write MP3 : " + testMP3.getAbsolutePath() +
             " exe path " + lamePath +
