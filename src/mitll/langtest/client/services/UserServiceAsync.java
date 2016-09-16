@@ -82,4 +82,6 @@ public interface UserServiceAsync {
   void setProject(int projectid, AsyncCallback<User> async);
 
   void forgetProject(AsyncCallback<Void> async);
+
+  void changePassword(int userid, String currentPasswordH, String newPasswordH, AsyncCallback<Boolean> async);
 }

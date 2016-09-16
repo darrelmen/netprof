@@ -128,9 +128,10 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     final long then = System.currentTimeMillis();
 
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+    final int user = getUser();
     AudioContext audioContext = new AudioContext(
         reqid,
-        controller.getUser(),
+        user,
         projectStartupInfo.getProjectid(),
         projectStartupInfo.getLanguage(),
         getExerciseID(),
@@ -155,7 +156,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
             long now = System.currentTimeMillis();
             logger.info("PostAudioRecordButton : (failure) posting audio took " + (now - then) + " millis");
 
-            logMessage("failed to post audio for " + controller.getUser() + " exercise " + getExerciseID());
+            logMessage("failed to post audio for " + user + " exercise " + getExerciseID());
             showPopup(AudioAnswer.Validity.INVALID.getPrompt());
           }
 
@@ -185,6 +186,10 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
         });
   }
 
+  private int getUser() {
+    return controller.getUserState().getUser();
+  }
+
   private void addRT(AudioAnswer result, int roundtrip) {
     controller.getScoringService().addRoundTrip(result.getResultID(), roundtrip, new AsyncCallback<Void>() {
       @Override
@@ -212,7 +217,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   }
 
   private void logRoundtripTime(AudioAnswer result, long roundtrip) {
-    String message = "PostAudioRecordButton : (success) User #" + controller.getUser() +
+    String message = "PostAudioRecordButton : (success) User #" + getUser() +
         " post audio took " + roundtrip + " millis, audio dur " +
         result.getDurationInMillis() + " millis, " +
         " " + ((float) roundtrip / (float) result.getDurationInMillis()) + " roundtrip/audio duration ratio.";

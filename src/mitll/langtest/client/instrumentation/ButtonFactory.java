@@ -73,7 +73,7 @@ public class ButtonFactory implements EventLogger {
 
   @Override
   public void register(ExerciseController controller, final Button button, final String exid) {
-    registerButton(button, exid, controller.getUser());
+    registerButton(button, exid, controller.getUserState().getUser());
   }
 
   private void registerButton(final Button button, final String exid, final int userid) {
@@ -127,6 +127,7 @@ public class ButtonFactory implements EventLogger {
   public void logEvent(final String widgetID, final String widgetType, EventContext context) {
 //    logger.info("logEvent event for " + widgetID + " " + widgetType + " context " + context);
     final ButtonFactory outer = this;
+    if (context.getUserid() == -1) context.setUserid(controller.getUserState().getUser());
 
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
@@ -142,7 +143,7 @@ public class ButtonFactory implements EventLogger {
                 browserInfo != null) {
               //logger.info("\tlogEvent event for " + widgetID + " " + widgetType + " context " + context + " browser " +browserInfo);
 
-              service.logEvent(widgetID, widgetType, context.exid, context.context, context.userid, "", browserInfo,
+              service.logEvent(widgetID, widgetType, context.exid, context.context, context.getUserid(), "", browserInfo,
                   new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {

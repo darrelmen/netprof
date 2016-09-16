@@ -73,6 +73,7 @@ import mitll.langtest.client.sound.SoundManagerStatic;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserNotification;
+import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.image.ImageResponse;
@@ -175,7 +176,8 @@ import java.util.logging.Logger;
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
-public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification, LifecycleSupport {
+public class LangTest implements
+    EntryPoint, UserFeedback, ExerciseController, UserNotification, LifecycleSupport, UserState {
   public static final String INTRO = "Learn pronunciation and practice vocabulary.";
   private final Logger logger = Logger.getLogger("LangTest");
 
@@ -474,6 +476,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public String getBrowserInfo() {
     return browserCheck.getBrowserAndVersion();
   }
+
+  public UserState getUserState() { return this; }
 
   @Override
   public String getInfoLine() {
@@ -911,4 +915,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public StartupInfo getStartupInfo() {
     return startupInfo;
   }
+
+  public void logout() { initialUI.logout(); }
 }

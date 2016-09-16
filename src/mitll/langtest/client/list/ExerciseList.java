@@ -47,6 +47,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
+import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.*;
 
@@ -90,6 +91,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   ExerciseListRequest lastSuccessfulRequest = null;
 
   private static final boolean DEBUG = false;
+UserState userState;
 
   /**
    * @param currentExerciseVPanel
@@ -105,12 +107,14 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
                UserFeedback feedback,
                ExercisePanelFactory<T, U> factory,
                ExerciseController controller,
-               String instance, boolean incorrectFirst) {
+               String instance,
+               boolean incorrectFirst) {
     this.instance = instance;
     this.service = service;
     this.feedback = feedback;
     this.factory = factory;
     this.allowPlusInURL = controller.getProps().shouldAllowPlusInURL();
+    this.userState = controller.getUserState();
     this.controller = controller;
     this.incorrectFirstOrder = incorrectFirst;
     addWidgets(currentExerciseVPanel);
@@ -157,7 +161,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   }
 
   private ExerciseListRequest getRequest() {
-    return new ExerciseListRequest(incrRequest(), controller.getUser())
+    return new ExerciseListRequest(incrRequest(), getUser())
         .setRole(getRole())
         .setIncorrectFirstOrder(incorrectFirstOrder);
   }
@@ -172,7 +176,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    */
   public void reload() {
     //logger.info("reload -");
-    getExercises(controller.getUser());
+    getExercises(getUser());
   }
 
   @Override
@@ -188,7 +192,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    */
   private void reloadWith(int id) {
     if (DEBUG)
-      logger.info("ExerciseList.reloadWith id = " + id + " for user " + controller.getUser() + " instance " + getInstance());
+      logger.info("ExerciseList.reloadWith id = " + id + " for user " + getUser() + " instance " + getInstance());
     service.getExerciseIds(getRequest(), new SetExercisesCallbackWithID(id));
   }
 
@@ -560,7 +564,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @see ListInterface#checkAndAskServer(int)
    */
   protected void askServerForExercise(int itemID) {
-    controller.checkUser();
+    userState.checkUser();
     if (cachedNext != null && cachedNext.getID() == itemID) {
       if (DEBUG)
         logger.info("\tExerciseList.askServerForExercise using cached id = " + itemID + " instance " + instance);
@@ -568,7 +572,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     } else {
       pendingReq = true;
       if (DEBUG || true) logger.info("ExerciseList.askServerForExercise id = " + itemID + " instance " + instance);
-      service.getExercise(itemID, controller.getUser(), incorrectFirstOrder, new ExerciseAsyncCallback());
+      service.getExercise(itemID, getUser(), incorrectFirstOrder, new ExerciseAsyncCallback());
     }
 
     // go get next and cache it
@@ -581,7 +585,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
       T next = getAt(i + 1);
       if (next.getID() != EditItem.NEW_EXERCISE_ID) {
       //  logger.info("ask for next " + next);
-        service.getExercise(next.getID(), controller.getUser(), incorrectFirstOrder, new AsyncCallback<U>() {
+        service.getExercise(next.getID(), getUser(), incorrectFirstOrder, new AsyncCallback<U>() {
           @Override
           public void onFailure(Throwable caught) {
           }
@@ -594,6 +598,10 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
         });
       }
     }
+  }
+
+  private int getUser() {
+    return userState.getUser();
   }
 
   public void clearCachedExercise() {
