@@ -60,15 +60,20 @@ public class MiniUser implements IsSerializable, Comparable<MiniUser> {
     this.isAdmin = isAdmin;
   }
 
-  public boolean isDefault() { return id < 0; }
-  public boolean isUnknownDefault() { return id == -1; }
+  public boolean isDefault() {
+    return id < 0;
+  }
+
+  public boolean isUnknownDefault() {
+    return id == -1;
+  }
 
   /**
    * It seems strange to copy the string here, but I think it will help the RPC code not try to serialize
    * the User this object is made from.
    *
-   * @see UserDAO#getMiniUsers()
    * @param user
+   * @see UserDAO#getMiniUsers()
    */
   public MiniUser(User user) {
     this(user.getId(), user.getAge(), user.isMale(), new String(user.getUserID()), user.isAdmin());
@@ -85,7 +90,7 @@ public class MiniUser implements IsSerializable, Comparable<MiniUser> {
 
   @Override
   public boolean equals(Object obj) {
-    return (obj instanceof MiniUser) && compareTo((MiniUser)obj) == 0;
+    return (obj instanceof MiniUser) && compareTo((MiniUser) obj) == 0;
   }
 
   @Override
@@ -93,7 +98,9 @@ public class MiniUser implements IsSerializable, Comparable<MiniUser> {
     return new Long(id).hashCode();
   }
 
-  public int getGender() { return isMale?0:1;  }
+  public int getGender() {
+    return isMale ? 0 : 1;
+  }
 
   public int getId() {
     return id;
@@ -108,8 +115,8 @@ public class MiniUser implements IsSerializable, Comparable<MiniUser> {
   }
 
   /**
-   * @see UserDAO#getUsers
    * @param userID
+   * @see UserDAO#getUsers
    */
   public void setUserID(String userID) {
     this.userID = userID;
