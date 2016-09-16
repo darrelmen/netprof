@@ -72,7 +72,7 @@ public class UserManager {
 
   private static final String USER_ID = "userID";
   private static final String USER_CHOSEN_ID = "userChosenID";
-  private static final String AUDIO_TYPE = "audioType";
+ // private static final String AUDIO_TYPE = "audioType";
 
   private final UserServiceAsync userServiceAsync;
   private final UserNotification userNotification;
@@ -81,7 +81,7 @@ public class UserManager {
 
   private final PropertyHandler.LOGIN_TYPE loginType;
   private final String appTitle;
-  private final PropertyHandler props;
+ // private final PropertyHandler props;
   private User current;
 
   /**
@@ -93,7 +93,7 @@ public class UserManager {
   public UserManager(UserNotification lt, UserServiceAsync userServiceAsync, PropertyHandler props) {
     this.userNotification = lt;
     this.userServiceAsync = userServiceAsync;
-    this.props = props;
+   // this.props = props;
     this.loginType = props.getLoginType();
     this.appTitle = props.getAppTitle();
   }
@@ -264,6 +264,7 @@ public class UserManager {
     }
   }
 
+/*
   public int getUserPasswordHash() {
     if (Storage.isLocalStorageSupported()) {
       String sid = getPassFromStorage();
@@ -272,6 +273,7 @@ public class UserManager {
       return (int) userID;
     }
   }
+*/
 
   /**
    * @return

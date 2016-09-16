@@ -488,11 +488,11 @@ public class Navigation implements RequiresResize, ShowTab {
   }
 
   private boolean isQC() {
-    return controller.getPermissions().contains(User.Permission.QUALITY_CONTROL) || controller.isAdmin();
+    return controller.getUserState().getPermissions().contains(User.Permission.QUALITY_CONTROL) || controller.getUserState().isAdmin();
   }
 
   private boolean permittedToRecord() {
-    return controller.getPermissions().contains(User.Permission.RECORD_AUDIO) || controller.isAdmin();
+    return controller.getUserState().getPermissions().contains(User.Permission.RECORD_AUDIO) || controller.getUserState().isAdmin();
   }
 
   private void logEvent(TabAndContent yourStuff, String context) {

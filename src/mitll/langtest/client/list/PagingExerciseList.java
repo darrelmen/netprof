@@ -161,7 +161,8 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
   ExerciseListRequest getRequest(String prefix) {
-    return new ExerciseListRequest(incrRequest(), controller.getUser())
+    return new ExerciseListRequest(incrRequest(),
+        controller.getUserState().getUser())
         .setPrefix(prefix)
         .setUserListID(userListID)
         .setRole(getRole())

@@ -363,11 +363,12 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
     public void onSegmentClick(TranscriptSegment segment) {
       //   playSegment(MP3_HEADER_OFFSET+segment.getStart(), MP3_HEADER_OFFSET+segment.getEnd());
       playSegment(segment.getStart(), segment.getEnd());
-      controller.getButtonFactory().logEvent(widget, type.toString(), new EventContext("" + exercise.getID(), "Clicked on " + segment.getEvent(), controller.getUser()));
+      controller.getButtonFactory().logEvent(widget, type.toString(),
+          new EventContext("" + exercise.getID(), "Clicked on " + segment.getEvent()));
     }
   }
 
-  private static interface EventSegment {
+  private interface EventSegment {
     void onSegmentClick(TranscriptSegment segment);
   }
 }
