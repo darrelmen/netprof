@@ -419,7 +419,7 @@ class EditableExerciseDialog extends NewUserExercise {
    * @see #audioPosted()
    */
   void reallyChange(final ListInterface<CommonShell> pagingContainer, final boolean buttonClicked) {
-    newUserExercise.getMutable().setCreator(controller.getUser());
+    newUserExercise.getMutable().setCreator(controller.getUserState().getUser());
     postEditItem(pagingContainer, buttonClicked);
   }
 
