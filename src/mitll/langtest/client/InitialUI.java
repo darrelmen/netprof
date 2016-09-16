@@ -50,6 +50,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.ui.Image;
 import mitll.langtest.client.custom.Navigation;
+import mitll.langtest.client.domino.user.ChangePasswordView;
 import mitll.langtest.client.download.DownloadIFrame;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.Banner;
@@ -98,6 +99,7 @@ public class InitialUI implements UILifecycle {
   protected final LifecycleSupport lifecycleSupport;
   protected final ExerciseController controller;
   protected final UserFeedback userFeedback;
+  protected final UserState userState;
   private final UserNotification userNotification;
   protected final PropertyHandler props;
 
@@ -112,7 +114,7 @@ public class InitialUI implements UILifecycle {
   private Navigation navigation;
   private final BrowserCheck browserCheck = new BrowserCheck();
   private Container verticalContainer;
-  private static final boolean DEBUG =false;
+  private static final boolean DEBUG = false;
 
   /**
    * @param langTest
@@ -121,6 +123,7 @@ public class InitialUI implements UILifecycle {
    */
   public InitialUI(LangTest langTest, UserManager userManager) {
     this.lifecycleSupport = langTest;
+    this.userState = langTest;
     this.props = langTest.getProps();
     this.userManager = userManager;
     this.controller = langTest;
@@ -172,6 +175,7 @@ public class InitialUI implements UILifecycle {
     return contentRow;
   }
 
+  private static final String LOG_OUT = "Log Out";
 
   /**
    * @return
@@ -195,14 +199,26 @@ public class InitialUI implements UILifecycle {
     };
     // logger.info("talks to domino " + props.talksToDomino());
     reload = (props.talksToDomino()) ? reload : null;
+
+    List<Banner.LinkAndTitle> choices = new ArrayList<>();
+    choices.add(new Banner.LinkAndTitle("Users", new UsersClickHandler(), true));
+    String nameForAnswer = props.getNameForAnswer() + "s";
+    choices.add(new Banner.LinkAndTitle(
+        nameForAnswer.substring(0, 1).toUpperCase() + nameForAnswer.substring(1), new ResultsClickHandler(), true));
+    choices.add(new Banner.LinkAndTitle("Monitoring", new MonitoringClickHandler(), true));
+    choices.add(new Banner.LinkAndTitle("Events", new EventsClickHandler(), true));
+    choices.add(new Banner.LinkAndTitle("Change Password", new ChangePasswordClickHandler(), false));
+    choices.add(new Banner.LinkAndTitle(LOG_OUT, new LogoutClickHandler(), false));
+
     Widget bannerRow = banner.makeNPFHeaderRow(props.getSplash(), props.isBeta(), getGreeting(),
         getReleaseStatus(),
-        new LogoutClickHandler(),
+        //    new LogoutClickHandler(),
+        choices/*
         new UsersClickHandler(),
         new ResultsClickHandler(),
         new MonitoringClickHandler(),
         new EventsClickHandler(),
-        reload
+        reload*/
     );
 
     headerRow = new FluidRow();
@@ -241,7 +257,7 @@ public class InitialUI implements UILifecycle {
     }
   }
 
-  private void logout() {
+  public void logout() {
     lifecycleSupport.logEvent("No widget", "UserLoging", "N/A", "User Logout by " + lastUser);
     verticalContainer.remove(breadcrumbs);
 
@@ -287,6 +303,7 @@ public class InitialUI implements UILifecycle {
         public void onFailure(Throwable caught) {
           downloadFailedAlert();
         }
+
         public void onSuccess() {
           new UserTable(props, userManager.isAdmin()).showUsers(userService);
         }
@@ -300,8 +317,24 @@ public class InitialUI implements UILifecycle {
         public void onFailure(Throwable caught) {
           downloadFailedAlert();
         }
+
         public void onSuccess() {
           new EventTable().show(service);
+        }
+      });
+    }
+  }
+
+  private class ChangePasswordClickHandler implements ClickHandler {
+    //UserState outer = LangTest.this;
+    public void onClick(ClickEvent event) {
+      GWT.runAsync(new RunAsyncCallback() {
+        public void onFailure(Throwable caught) {
+          downloadFailedAlert();
+        }
+
+        public void onSuccess() {
+          new ChangePasswordView(userManager.getCurrent(), false, userState, userService).showModal();
         }
       });
     }
@@ -319,7 +352,7 @@ public class InitialUI implements UILifecycle {
         public void onSuccess() {
           ResultManager resultManager = new ResultManager(
               service,
-             // resultService,
+              // resultService,
               props.getNameForAnswer(),
               lifecycleSupport.getProjectStartupInfo().getTypeOrder(),
               outer,
@@ -336,6 +369,7 @@ public class InitialUI implements UILifecycle {
         public void onFailure(Throwable caught) {
           downloadFailedAlert();
         }
+
         public void onSuccess() {
           new MonitoringManager(props).showResults();
         }
@@ -403,14 +437,14 @@ public class InitialUI implements UILifecycle {
   }
 
   private Breadcrumbs getBreadcrumbs() {
- //   logger.info("getBreadcrumbs --->");
+    //   logger.info("getBreadcrumbs --->");
 
     Breadcrumbs crumbs = new Breadcrumbs(">");
     crumbs.getElement().setId("breadcrumb");
     crumbs.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
     addCrumbs(crumbs);
 
-   // logger.info("getBreadcrumbs now has " + crumbs.getElement().getChildCount() + " links");
+    // logger.info("getBreadcrumbs now has " + crumbs.getElement().getChildCount() + " links");
 
     return crumbs;
   }
@@ -430,9 +464,9 @@ public class InitialUI implements UILifecycle {
       }
     });
     crumbs.add(home);
-   // logger.info("\tgetBreadcrumbs add home");
+    // logger.info("\tgetBreadcrumbs add home");
 
-    User current = controller.getCurrent();
+    User current = userManager.getCurrent();
     if (current != null) {
       NavLink me = new NavLink(current.getUserID());
       me.addClickHandler(new ClickHandler() {
@@ -442,7 +476,7 @@ public class InitialUI implements UILifecycle {
         }
       });
       crumbs.add(me);
-     // logger.info("getBreadcrumbs adding step for current user " + current);
+      // logger.info("getBreadcrumbs adding step for current user " + current);
 
       ProjectStartupInfo startupInfo = lifecycleSupport.getProjectStartupInfo();
       if (startupInfo != null) {
@@ -453,10 +487,11 @@ public class InitialUI implements UILifecycle {
             NavLink lang = new NavLink(crumbName);
 
             crumbs.add(lang);
-         //   logger.info("getBreadcrumbs adding step for " + lang);
+            //   logger.info("getBreadcrumbs adding step for " + lang);
 
             SlimProject child = project.getChild(currentProject);
-            /*final NavLink projectCrumb =*/ addProjectCrumb(crumbs, child);
+            /*final NavLink projectCrumb =*/
+            addProjectCrumb(crumbs, child);
 
             lang.addClickHandler(new ClickHandler() {
               @Override
@@ -733,7 +768,7 @@ public class InitialUI implements UILifecycle {
       userID = user.getId();
     }
 
-    if (DEBUG)  logger.info("gotUser : userID " + userID);
+    if (DEBUG) logger.info("gotUser : userID " + userID);
 
     banner.setUserName(getGreeting());
     if (userID != lastUser) {
@@ -850,8 +885,7 @@ public class InitialUI implements UILifecycle {
         if (nest == 0) {
 
           return o1.getLanguage().toLowerCase().compareTo(o2.getLanguage().toLowerCase());
-        }
-        else {
+        } else {
           int i = Integer.valueOf(o1.getDisplayOrder()).compareTo(o2.getDisplayOrder());
           return i == 0 ? o1.getName().compareTo(o2.getName()) : i;
         }
@@ -981,7 +1015,8 @@ public class InitialUI implements UILifecycle {
   protected void populateRootPanelIfLogin() {
     int childCount = contentRow.getElement().getChildCount();
 
-    if (DEBUG)  logger.info("populateRootPanelIfLogin root " + contentRow.getElement().getNodeName() + " childCount " + childCount);
+    if (DEBUG)
+      logger.info("populateRootPanelIfLogin root " + contentRow.getElement().getNodeName() + " childCount " + childCount);
     if (childCount > 0) {
       Node child = contentRow.getElement().getChild(0);
       Element as = Element.as(child);

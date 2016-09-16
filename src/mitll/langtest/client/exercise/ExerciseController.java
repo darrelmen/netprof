@@ -43,6 +43,7 @@ import mitll.langtest.client.services.QCServiceAsync;
 import mitll.langtest.client.services.ScoringServiceAsync;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.user.UserFeedback;
+import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.user.User;
@@ -79,18 +80,20 @@ public interface ExerciseController extends EventRegistration {
 
   String getBrowserInfo();
 
+  UserState getUserState();
+
   int getUser();
 
-  User getCurrent();
+//  User getCurrent();
 
-  boolean isAdmin();
+//  boolean isAdmin();
 
   void startRecording();
   void stopRecording(WavCallback wavCallback);
 
   SoundManagerAPI getSoundManager();
 
-  boolean showOnlyOneExercise();
+@Deprecated boolean showOnlyOneExercise();
 
   boolean useBkgColorForRef();
 
@@ -98,7 +101,7 @@ public interface ExerciseController extends EventRegistration {
 
   boolean isLogClientMessages();
 
-  Collection<User.Permission> getPermissions();
+  //Collection<User.Permission> getPermissions();
 
   boolean showCompleted();
 
@@ -123,7 +126,7 @@ public interface ExerciseController extends EventRegistration {
 
   boolean usingFlashRecorder();
 
-  void checkUser();
+ // void checkUser();
 
   boolean isMicAvailable();
 }

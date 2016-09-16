@@ -371,7 +371,8 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
   }
 
   private void addAnnotation(final String field, final String status, final String commentToPost) {
-    controller.getQCService().addAnnotation(getLocalExercise().getID(), field, status, commentToPost, controller.getUser(),
+    controller.getQCService().addAnnotation(getLocalExercise().getID(), field, status, commentToPost,
+        getUser(),
         new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
@@ -383,6 +384,10 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
 //            " field '" + field + "' commentLabel '" + commentToPost + "' is " + status);//, took " + (now - then) + " millis");
           }
         });
+  }
+
+  protected int getUser() {
+    return controller.getUserState().getUser();
   }
 
   /**
@@ -701,7 +706,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
           exercise.getID() +
           "&" +
           "userID=" +
-          controller.getUser();
+          getUser();
       download.setHref(href);
       downloadAnchor.setHref(href);
     }

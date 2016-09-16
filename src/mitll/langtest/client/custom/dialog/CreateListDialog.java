@@ -152,7 +152,7 @@ public class CreateListDialog extends BasicDialog {
     RadioButton radioButton = new RadioButton("Public_Private_Group", "Public");
     RadioButton radioButton2 = new RadioButton("Public_Private_Group", "Private");
 
-    boolean isStudent = controller.getCurrent().isStudent();
+    boolean isStudent = controller.getUserState().getCurrent().isStudent();
 
     radioButton.setValue(!isStudent);
     radioButton2.setValue(isStudent);
