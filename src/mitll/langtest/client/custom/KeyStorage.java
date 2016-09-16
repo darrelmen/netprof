@@ -48,19 +48,19 @@ public class KeyStorage {
   private String language;
   private int user;
 
+  public KeyStorage(ExerciseController controller) {
+    this(controller.getLanguage(), controller.getUserState().getUser());
+    this.controller = controller;
+  }
+
   /**
    * @see mitll.langtest.client.user.UserPassLogin#UserPassLogin
    * @param language
    * @param user
    */
-  public KeyStorage(String language, int user) {
+  private KeyStorage(String language, int user) {
     this.language = language;
     this.user = user;
-  }
-
-  public KeyStorage(ExerciseController controller) {
-    this(controller.getLanguage(), controller.getUser());
-    this.controller = controller;
   }
 
   private final boolean showedAlert = false;
