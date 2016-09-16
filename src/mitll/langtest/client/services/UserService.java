@@ -77,11 +77,12 @@ public interface UserService extends RemoteService {
 
   /**
    * @param token
-   * @param first
+   * @param passwordH
    * @return
    * @see mitll.langtest.client.user.ResetPassword#getChangePasswordButton(String, Fieldset, BasicDialog.FormField, BasicDialog.FormField)
    */
-  boolean changePFor(String token, String first);
+  boolean changePFor(String token, String passwordH);
+  boolean changePassword(int userid,String currentPasswordH, String passwordH);
 
   /**
    * @param token

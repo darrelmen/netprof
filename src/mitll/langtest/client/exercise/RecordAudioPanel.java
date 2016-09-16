@@ -160,13 +160,14 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
    * @return
    */
   public AudioAttribute getAudioAttribute() {
-    AudioAttribute audioAttribute = audioType.equals(AudioType.REGULAR) ? exercise.getRecordingsBy(controller.getUser(), true) :
-        audioType.equals(AudioType.SLOW) ? exercise.getRecordingsBy(controller.getUser(), false) : null;
+    long user = controller.getUserState().getUser();
+    AudioAttribute audioAttribute = audioType.equals(AudioType.REGULAR) ? exercise.getRecordingsBy(user, true) :
+        audioType.equals(AudioType.SLOW) ? exercise.getRecordingsBy(user, false) : null;
 
     if (audioType.isContext()) {
       for (AudioAttribute audioAttribute1 : exercise.getAudioAttributes()) {
         Map<String, String> attributes = audioAttribute1.getAttributes();
-        if (attributes.containsKey("context") && audioAttribute1.getUserid() == controller.getUser()) {
+        if (attributes.containsKey("context") && audioAttribute1.getUserid() == user) {
           return audioAttribute1;
         }
       }

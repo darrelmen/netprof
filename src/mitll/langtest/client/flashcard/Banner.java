@@ -57,6 +57,7 @@ import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.shared.user.SlimProject;
 import mitll.langtest.shared.user.User;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
@@ -89,51 +90,55 @@ public class Banner implements RequiresResize {
   private Image flashcardImage;
   private Image collab;
   private HTML userNameWidget;
-  private final String nameForAnswer;
+//  private final String nameForAnswer;
   private Paragraph subtitle;
   private HTML browserInfo;
   private Panel qc, recordAudio;
   private Dropdown cogMenu;
   private final PropertyHandler props;
   private final UserServiceAsync userServiceAsync;
- // private ExerciseController controller;
-//  private ListBox projectChoices;
+  // private ExerciseController controller;
   private Navigation navigation;
   private UserNotification userNotification;
-  private NavLink userC, resultsC, monitoringC, eventsC, reloadLink;
+ // private NavLink userC, resultsC, monitoringC, eventsC, reloadLink;
+ private List<NavLink> adminLinks = new ArrayList<>();
 
   /**
    * @see mitll.langtest.client.InitialUI#InitialUI(LangTest, UserManager)
    */
-  public Banner(PropertyHandler props, UserServiceAsync userServiceAsync, ExerciseController controller,
+  public Banner(PropertyHandler props,
+                UserServiceAsync userServiceAsync,
+                ExerciseController controller,
                 UserNotification userNotification) {
     this.props = props;
-    this.nameForAnswer = props.getNameForAnswer() + "s";
+   // this.nameForAnswer = props.getNameForAnswer() + "s";
     isAnonymous = props.getLoginType().equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS);
     HREF = "mailto:" +
         NETPROF_HELP_LL_MIT_EDU + "?" +
         //   "cc=" + LTEA_DLIFLC_EDU + "&" +
         "Subject=Question%20about%20" + props.getLanguage() + "%20NetProF";
     this.userServiceAsync = userServiceAsync;
-   // this.controller = controller;
+    // this.controller = controller;
     this.userNotification = userNotification;
   }
 
   /**
    * @param splashText
    * @param userName
-   * @param reload
+   * @paramx reload
    * @return
    * @see InitialUI#makeHeaderRow()
    */
   public Panel makeNPFHeaderRow(String splashText,
                                 boolean isBeta, String userName, HTML browserInfo,
-                                ClickHandler logoutClickHandler,
-                                ClickHandler users,
+                             //   ClickHandler logoutClickHandler,
+                                List<Banner.LinkAndTitle> choices
+     /*                           ClickHandler users,
                                 ClickHandler results,
                                 ClickHandler monitoring,
                                 ClickHandler events,
-                                ClickHandler reload) {
+                                ClickHandler reload*/
+  ) {
     HorizontalPanel headerRow = new HorizontalPanel();
     headerRow.setWidth("100%");
     headerRow.addStyleName("headerBackground");
@@ -177,7 +182,7 @@ public class Banner implements RequiresResize {
     hp.add(recordAudio = new SimplePanel());
 
     // add log out/admin options cogMenu
-    makeCogMenu(logoutClickHandler, users, results, monitoring, events, reload);
+    makeCogMenu(choices);//logoutClickHandler, users, results, monitoring, events, reload);
 
     if (!isAnonymous) {
       hp.add(cogMenu);
@@ -201,78 +206,6 @@ public class Banner implements RequiresResize {
     return headerRow;
   }
 
-/*  private ListBox getProjectChoices() {
-    ListBox listBox = new ListBox();
-    new TooltipHelper().createAddTooltip(listBox, "Choose a language", Placement.LEFT);
-    listBox.addStyleName("leftTenMargin");
-    return listBox;
-  }*/
-
-  /**
-   * <p>
-   *
-   * @paramx projectChoices
-   * @paramx controller
-   * @seex #getProjectChoices
-   */
-/*  private void populateListChoices(final ListBox projectChoices) {
-    userServiceAsync.getProjects(new AsyncCallback<Collection<SlimProject>>() {
-      @Override
-      public void onFailure(Throwable caught) {
-      }
-
-      @Override
-      public void onSuccess(Collection<SlimProject> projects) {
-        projectChoices.clear();
-        //   logger.info("got " + projects.size() + " projects");
-        //   boolean anyAdded = false;
-        //    logger.info("\tpopulateListChoices : found list " + result.size() + " choices");
-        //projectChoices.addItem("Choose a Language");
-
-        projectChoices.setVisible(!projects.isEmpty());
-
-        for (final SlimProject project : projects) {
-          String name = project.getName();
-          projectChoices.addItem(name);
-          ProjectStartupInfo startupInfo = controller.getProjectStartupInfo();
-
-          //  logger.info("startup " + startupInfo);
-          if (startupInfo != null && project.getProjectid() == startupInfo.getProjectid()) {
-            projectChoices.setSelectedValue(name);
-          }
-          projectChoices.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-              for (SlimProject project1 : projects) {
-                if (project1.getName().equals(projectChoices.getValue())) {
-                  setProjectForUser(project1);
-                  break;
-                }
-              }
-            }
-          });
-        }
-      }
-    });
-  }*/
-
-  private void setProjectForUser(SlimProject project1) {
-    logger.info("setProjectForUser set project to " + project1);
-    userServiceAsync.setProject(project1.getProjectid(), new AsyncCallback<User>() {
-      @Override
-      public void onFailure(Throwable throwable) {
-
-      }
-
-      @Override
-      public void onSuccess(User aUser) {
-        userNotification.setProjectStartupInfo(aUser);
-        logger.info("set project for " + aUser + " show initial state");
-        navigation.showInitialState();
-      }
-    });
-  }
-
   /**
    * @param splashText
    * @return
@@ -292,20 +225,28 @@ public class Banner implements RequiresResize {
   }
 
   /**
-   * @param logoutClickHandler
-   * @param users
-   * @param results
-   * @param monitoring
-   * @param events
+   * @paramx logoutClickHandler
+   * @paramx users
+   * @paramx results
+   * @paramx monitoring
+   * @paramx events
    * @see #makeNPFHeaderRow
    */
-  private void makeCogMenu(ClickHandler logoutClickHandler, ClickHandler users, ClickHandler results,
-                           ClickHandler monitoring, ClickHandler events, ClickHandler reload) {
-    cogMenu = makeMenu(users, results, monitoring, events, reload);
+  private void makeCogMenu( List<LinkAndTitle> choices
+  //                          ClickHandler logoutClickHandler, ClickHandler users, ClickHandler results,
+    //                       ClickHandler monitoring, ClickHandler events, ClickHandler reload
+  ) {
+//    List<LinkAndTitle> choices = new ArrayList<>();
+//    choices.add(new LinkAndTitle("Users", users));
+//    choices.add(new LinkAndTitle(nameForAnswer.substring(0, 1).toUpperCase() + nameForAnswer.substring(1), results));
+//    choices.add(new LinkAndTitle("Monitoring", monitoring));
+//    choices.add(new LinkAndTitle("Events", events));
+
+    cogMenu = makeMenu(choices);
     cogMenu.addStyleName("cogStyle");
-    NavLink widget1 = new NavLink(LOG_OUT);
-    widget1.addClickHandler(logoutClickHandler);
-    cogMenu.add(widget1);
+//    NavLink widget1 = new NavLink(LOG_OUT);
+//    widget1.addClickHandler(logoutClickHandler);
+//    cogMenu.add(widget1);
   }
 
   public void reflectPermissions(Collection<User.Permission> permissions) {
@@ -379,26 +320,31 @@ public class Banner implements RequiresResize {
     emailAnchor.getElement().setId("emailAnchor");
     emailAnchor.addStyleName("bold");
     emailAnchor.addStyleName("rightTwentyMargin");
-    emailAnchor.getElement().setAttribute("download","");
+    emailAnchor.getElement().setAttribute("download", "");
     emailAnchor.getElement().getStyle().setColor("#90B3CF");
     return emailAnchor;
   }
 
+  private Dropdown makeMenu(Collection<LinkAndTitle> choicesToAdd) {
+    Dropdown w = getDropdown();
+
+    adminLinks.clear();
+    for (LinkAndTitle linkAndTitle : choicesToAdd) {
+      NavLink add = linkAndTitle.add(w);
+      if (linkAndTitle.isAdminChoice) adminLinks.add(add);
+    }
+    return w;
+  }
 
   /**
-   * @param users
-   * @param results
-   * @param monitoring
    * @return
+   * @paramx users
+   * @paramx results
+   * @paramx monitoring
    * @see #makeCogMenu
    */
-  private Dropdown makeMenu(ClickHandler users, ClickHandler results, ClickHandler monitoring, ClickHandler events, ClickHandler reload) {
-    Dropdown w = new Dropdown();
-    w.setRightDropdown(true);
-    w.setIcon(IconType.COG);
-    w.setIconSize(IconSize.LARGE);
-
-    w.add(getAbout());
+/*  private Dropdown makeMenu(ClickHandler users, ClickHandler results, ClickHandler monitoring, ClickHandler events, ClickHandler reload) {
+    Dropdown w = getDropdown();
 
     userC = new NavLink("Users");
     userC.addClickHandler(users);
@@ -416,14 +362,44 @@ public class Banner implements RequiresResize {
     eventsC.addClickHandler(events);
     w.add(eventsC);
 
-
+*//*
     reloadLink = new NavLink("Reload from Domino");
     if (reload != null) {
       reloadLink.addClickHandler(reload);
       w.add(reloadLink);
     }
+*//*
 
     return w;
+  }*/
+  private Dropdown getDropdown() {
+    Dropdown w = new Dropdown();
+    w.setRightDropdown(true);
+    w.setIcon(IconType.COG);
+    w.setIconSize(IconSize.LARGE);
+    w.add(getAbout());
+    return w;
+  }
+
+
+  public static class LinkAndTitle {
+    ClickHandler clickHandler;
+    String title;
+    boolean isAdminChoice;
+
+    public LinkAndTitle(String title, ClickHandler click, boolean isAdminChoice) {
+      this.title = title;
+      this.clickHandler = click;
+      this.isAdminChoice = isAdminChoice;
+    }
+
+    public NavLink add(Dropdown dropdown) {
+      NavLink monitoringC = new NavLink(title);
+      monitoringC.addClickHandler(clickHandler);
+
+      dropdown.add(monitoringC);
+      return monitoringC;
+    }
   }
 
   private NavLink getAbout() {
@@ -472,11 +448,12 @@ public class Banner implements RequiresResize {
   }
 
   public void setVisibleAdmin(boolean visibleAdmin) {
-    userC.setVisible(visibleAdmin);
-    resultsC.setVisible(visibleAdmin);
-    monitoringC.setVisible(visibleAdmin);
-    eventsC.setVisible(visibleAdmin);
-    reloadLink.setVisible(visibleAdmin);
+    for (NavLink choice :adminLinks) choice.setVisible(visibleAdmin);
+//    userC.setVisible(visibleAdmin);
+//    resultsC.setVisible(visibleAdmin);
+//    monitoringC.setVisible(visibleAdmin);
+//    eventsC.setVisible(visibleAdmin);
+//    reloadLink.setVisible(visibleAdmin);
   }
 
   /**
@@ -485,7 +462,6 @@ public class Banner implements RequiresResize {
    */
   public void setUserName(String name) {
     this.userNameWidget.setText(name);
-   // populateListChoices(projectChoices);
   }
 
   @Override
