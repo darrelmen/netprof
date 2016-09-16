@@ -341,7 +341,7 @@ public class ASRScorePanel extends FlowPanel implements ScoreListener {
     String href = "downloadAudio?" +
         "file=" + audioPath + "&" +
         "exerciseID=" + exerciseID + "&" +
-        "userID=" + controller.getUser();
+        "userID=" + controller.getUserState().getUser();
     download.setHref(href);
   }
 

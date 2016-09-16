@@ -29,33 +29,69 @@
  *
  *
  */
+package mitll.langtest.client.domino.common;
 
-package mitll.langtest.client;
+import com.github.gwtbootstrap.client.ui.ControlGroup;
+import com.github.gwtbootstrap.client.ui.ControlLabel;
+import com.github.gwtbootstrap.client.ui.Controls;
 
-import mitll.langtest.shared.user.User;
+import java.util.logging.Logger;
 
-interface UILifecycle {
-  /**
-   * @see InitialUI#populateRootPanelIfLogin()
-   * @see LangTest#populateRootPanel()
-   * @see LangTest#showLogin()
-   */
-  void populateRootPanel();
+/**
+ * DecoratedFormValue: A simple Read-only value with a label to be shown on a form.  
+ *
+ * @author Raymond Budd <a href=mailto:raymond.budd@ll.mit.edu>raymond.budd@ll.mit.edu</a>
+ * @since May 16, 2013 3:43:26 PM
+ */
+public class DecoratedFormValue {
 
-  boolean isRTL();
+	protected static final Logger log = Logger.getLogger("DecoratedFormValue");
+	
+	private ControlGroup ctrlGroup;
+	private ControlLabel label;
+	private String formValue;
+	private ControlLabel valueLabel;
+	
+	public DecoratedFormValue() {}
+	
+	public DecoratedFormValue(String mainLabel, String formValue) {
+		init(mainLabel, formValue);
+	}
+	
+	protected void init(String mainLabel, String formValue) {
+		this.formValue = formValue;
+		ctrlGroup = new ControlGroup();
+		Controls ctrls = new Controls();
+		ctrls.setControlsRow(true);
 
-  int getHeightOfTopRows();
+		if (mainLabel != null) {
+			label = new ControlLabel(mainLabel);
+			ctrlGroup.add(label);
+		}
 
-  /**
-   * @see LangTest#gotUser(User)
-   * @param user
-   */
-  void gotUser(User user);
+		valueLabel = new ControlLabel(formValue);
+		ctrls.add(valueLabel);
+		
+		ctrlGroup.add(ctrls);//valueLabel);
+	}
+	
+	public ControlGroup getCtrlGroup() {
+		return ctrlGroup;
+	}
+	
+	public boolean hasLabel() {
+		return label != null;
+	}
 
-  /**
-   * @see LangTest#makeFlashContainer()
-   */
-  void setSplash();
+	public ControlLabel getLabel() {
+		return label;
+	}
+	
+	public ControlLabel getValueLabel() {
+		return valueLabel;
+	}
 
-  void logout();
+	public String getValue() {
+		return formValue;
+	}
 }

@@ -30,32 +30,22 @@
  *
  */
 
-package mitll.langtest.client;
+package mitll.langtest.client.user;
 
 import mitll.langtest.shared.user.User;
 
-interface UILifecycle {
-  /**
-   * @see InitialUI#populateRootPanelIfLogin()
-   * @see LangTest#populateRootPanel()
-   * @see LangTest#showLogin()
-   */
-  void populateRootPanel();
+import java.util.Collection;
 
-  boolean isRTL();
+public interface UserState {
+  int getUser();
 
-  int getHeightOfTopRows();
+  User getCurrent();
 
-  /**
-   * @see LangTest#gotUser(User)
-   * @param user
-   */
-  void gotUser(User user);
+  boolean isAdmin();
 
-  /**
-   * @see LangTest#makeFlashContainer()
-   */
-  void setSplash();
+  Collection<User.Permission> getPermissions();
+
+  void checkUser();
 
   void logout();
 }
