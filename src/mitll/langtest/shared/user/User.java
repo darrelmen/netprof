@@ -63,8 +63,8 @@ public class User extends MiniUser {
   private Collection<Permission> permissions;
   private ProjectStartupInfo startupInfo;
 
-  public enum Kind       implements IsSerializable {UNSET, STUDENT, TEACHER, CONTENT_DEVELOPER, ANONYMOUS}
-  public enum Permission implements IsSerializable {QUALITY_CONTROL, RECORD_AUDIO, ENABLE_DEVELOPER}
+  public enum Kind       implements IsSerializable {UNSET, STUDENT, TEACHER, CONTENT_DEVELOPER, ADMIN, ANONYMOUS}
+  public enum Permission implements IsSerializable {QUALITY_CONTROL, RECORD_AUDIO, ENABLE_DEVELOPER, TEACHER_PERM}
 
   public User() {
   } // for serialization

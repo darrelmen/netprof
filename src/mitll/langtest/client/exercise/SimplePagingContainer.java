@@ -58,7 +58,7 @@ public class SimplePagingContainer<T> implements RequiresResize {
   public static final int MAX_WIDTH = 320;
   private static final int PAGE_SIZE = 10;   // TODO : make this sensitive to vertical real estate?
   private static final int VERTICAL_SLOP = 35;
- // static final int ID_LINE_WRAP_LENGTH = 20;
+  // static final int ID_LINE_WRAP_LENGTH = 20;
   private static final int HEIGHT_OF_CELL_TABLE_WITH_15_ROWS = 395;
   private static final float MAX_PAGES = 2f;
   private static final int MIN_PAGE_SIZE = 3;
@@ -114,7 +114,9 @@ public class SimplePagingContainer<T> implements RequiresResize {
     return new CellTable<T>(getPageSize(), o);
   }
 
-  protected int getPageSize() { return PAGE_SIZE;  }
+  protected int getPageSize() {
+    return PAGE_SIZE;
+  }
 
   protected CellTable.Resources chooseResources() {
     CellTable.Resources o;
@@ -123,7 +125,7 @@ public class SimplePagingContainer<T> implements RequiresResize {
       //logger.info("simplePaging : chooseResources RTL - content");
       o = GWT.create(RTLTableResources.class);
     } else {
-     // logger.info("simplePaging : chooseResources LTR - content");
+      // logger.info("simplePaging : chooseResources LTR - content");
       o = GWT.create(TableResources.class);
     }
     return o;
@@ -165,13 +167,14 @@ public class SimplePagingContainer<T> implements RequiresResize {
   protected void clear() {
     List<T> list = getList();
     if (list == null) {
+      int user = controller.getUserState().getUser();
+      String suffix = this.getClass() + " for " + " user " +
+          user;
       if (table == null) {
-        controller.logMessageOnServer("no table for " + this.getClass() + " for " + " user " + controller.getUser(),
-            controller.getLanguage());
+        controller.logMessageOnServer("no table for " + suffix, controller.getLanguage());
       } else {
         table.setRowCount(0);
-        controller.logMessageOnServer("no list for " + this.getClass() + " for " + " user " + controller.getUser(),
-            controller.getLanguage());
+        controller.logMessageOnServer("no list for " + suffix,  controller.getLanguage());
       }
     } else {
       list.clear();
