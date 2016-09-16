@@ -365,9 +365,7 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @see mitll.langtest.server.services.UserServiceImpl#changePFor(String, String)
    */
   @Override
-  public boolean changePassword(int user, String passwordH) {
-    return dao.setPassword(user, passwordH);
-  }
+  public boolean changePassword(int user, String passwordH) { return dao.setPassword(user, passwordH);  }
 
   @Override
   public boolean updateKey(int userid, boolean resetKey, String key) {
