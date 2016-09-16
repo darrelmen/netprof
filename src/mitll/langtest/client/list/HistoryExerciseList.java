@@ -357,7 +357,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
       }
       if (getCreatedPanel() == null) {
         popRequest();
-        noSectionsGetExercises(controller.getUser());
+        noSectionsGetExercises(controller.getUserState().getUser());
       }
       return;
     }
@@ -433,7 +433,9 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
         if (DEBUG) {
           logger.info("HistoryExerciseList.loadExercisesUsingPrefix looking for '" + prefix +
               "' (" + prefix.length() + " chars) in context of " + typeToSection + " list " + userListID +
-              " instance " + getInstance() + " user " + controller.getUser() + " unrecorded " + getUnrecorded() +
+              " instance " + getInstance() +
+              //" user " + controller.getUser() +
+              " unrecorded " + getUnrecorded() +
               " only examples " + isOnlyExamples());
         }
         scheduleWaitTimer();

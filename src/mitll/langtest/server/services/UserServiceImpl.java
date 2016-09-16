@@ -135,11 +135,11 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     String id = session.getId();
 
     IUserSessionDAO userSessionDAO = db.getUserSessionDAO();
-   // logger.info("num user sessions before " + userSessionDAO.getNumRows());
+    // logger.info("num user sessions before " + userSessionDAO.getNumRows());
 
     userSessionDAO.add(new SlickUserSession(-1, id1, id, new Timestamp(System.currentTimeMillis())));
 
-   // logger.info("num user sessions now " + userSessionDAO.getNumRows() + " : session = " + userSessionDAO.getByUser(id1));
+    // logger.info("num user sessions now " + userSessionDAO.getNumRows() + " : session = " + userSessionDAO.getByUser(id1));
 
     logger.info("Adding user to " + id +
         " lookup is " + session1.getAttribute(USER_SESSION_ATT) +
@@ -175,7 +175,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @see mitll.langtest.client.user.SignInForm#makeSignInUserName
    */
   public User userExists(String login, String passwordH) {
-    findSharedDatabase();
+    // findSharedDatabase();
     if (passwordH.isEmpty()) {
       User user = db.getUserDAO().getUser(login, passwordH);
       if (user != null) {
@@ -218,7 +218,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
       String url,
       boolean isCD
   ) {
-    findSharedDatabase();
+    //  findSharedDatabase();
     UserManagement userManagement = db.getUserManagement();
     User newUser = userManagement.addUser(getThreadLocalRequest(), user);
     MailSupport mailSupport = getMailSupport();
@@ -255,7 +255,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @see mitll.langtest.client.user.UserTable#showDialog
    */
   public List<User> getUsers() {
-    findSharedDatabase();
+    //  findSharedDatabase();
     return db.getUsers();
   }
 
@@ -289,7 +289,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    */
   @Override
   public long getUserIDForToken(String token) {
-    findSharedDatabase();
+    //  findSharedDatabase();
     User user = db.getUserDAO().getUserWithResetKey(token);
     long l = (user == null) ? -1 : user.getId();
     // logger.info("for token " + token + " got user id " + l);
@@ -298,21 +298,46 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
 
   @Override
   public boolean changePFor(String token, String passwordH) {
-    findSharedDatabase();
+    //  findSharedDatabase();
     User userWhereResetKey = db.getUserDAO().getUserWithResetKey(token);
     if (userWhereResetKey != null) {
       db.getUserDAO().clearKey(userWhereResetKey.getId(), true);
 
-      if (!db.getUserDAO().changePassword(userWhereResetKey.getId(), passwordH)) {
+      if (db.getUserDAO().changePassword(userWhereResetKey.getId(), passwordH)) {
+        return true;
+      } else {
         logger.error("couldn't update user password for user " + userWhereResetKey);
+        return false;
       }
-      return true;
     } else return false;
+  }
+
+  /**
+   * TODO: consider stronger password like in domino.
+   * @param userid
+   * @param currentPasswordH
+   * @param passwordH
+   * @return
+   */
+  public boolean changePassword(int userid, String currentPasswordH, String passwordH) {
+    User userWhereResetKey = db.getUserDAO().getByID(userid);
+    if (userWhereResetKey == null) {
+      return false;
+    } else if (userWhereResetKey.getPasswordHash().equals(currentPasswordH)) {
+      if (db.getUserDAO().changePassword(userid, passwordH)) {
+        return true;
+      } else {
+        logger.error("couldn't update user password for user " + userid);
+        return false;
+      }
+    } else {
+      return false;
+    }
   }
 
   @Override
   public void changeEnabledFor(int userid, boolean enabled) {
-    findSharedDatabase();
+    //findSharedDatabase();
     User userWhere = db.getUserDAO().getUserWhere(userid);
     if (userWhere == null) logger.error("couldn't find " + userid);
     else {
@@ -329,7 +354,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    */
   @Override
   public boolean forgotUsername(String emailH, String email, String url) {
-    findSharedDatabase();
+    //findSharedDatabase();
     String userChosenIDIfValid = db.getUserDAO().isValidEmail(emailH);
     getEmailHelper().getUserNameEmail(email, url, userChosenIDIfValid);
     return userChosenIDIfValid != null;
