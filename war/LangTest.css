@@ -1208,3 +1208,65 @@ body .hidden-download-frame {
     width: 0;
     height: 0;
 }
+
+/*
+* Increased height for new project dialog.
+*/
+body .domino-modal.modal.in {
+    position: absolute;
+    left: 20%;
+    right: 20%;
+    bottom: 8%;
+    top: 8%;
+    margin-left: 0px;
+    overflow: hidden;
+    width: auto;
+    max-width: 560px;
+    max-height: 650px;
+}
+
+body .small-modal.modal.in {
+    top: 5%;
+    max-height: 240px;
+}
+
+body .login-modal.modal.in .modal-body {
+    bottom: 0px;
+}
+
+body .login-modal.modal.in {
+    max-height: 360px;
+}
+
+body .login-modal.modal.in .login-processing {
+    float: right;
+}
+
+body .login-modal.modal.in .login-processing * {
+    display: inline;
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+
+body .ch-password-modal.modal.in {
+    top: 5%;
+    max-height: 380px;
+}
+
+body .ch-password-modal .force-pw-label {
+    width: 100%;
+    text-align: center;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    font-weight: bold;
+}
+
+
+body .big-modal.modal.in {
+    left: 7%;
+    right: 7%;
+    bottom: 5%;
+    top: 5%;
+    max-width: none;
+}
