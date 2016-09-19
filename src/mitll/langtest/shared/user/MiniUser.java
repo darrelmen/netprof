@@ -36,11 +36,14 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.server.database.user.UserDAO;
 
 public class MiniUser implements IsSerializable, Comparable<MiniUser> {
+  protected String first = "";
+  protected String last = "";
   private int id;
   private int age;
   private boolean isMale;
   private String userID;
   private boolean isAdmin;
+  protected long timestamp;
 
   public MiniUser() {
   } // for serialization
@@ -53,6 +56,10 @@ public class MiniUser implements IsSerializable, Comparable<MiniUser> {
    * @param isAdmin
    */
   public MiniUser(int id, int age, boolean isMale, String userID, boolean isAdmin) {
+    setFields(id, age, isMale, userID, isAdmin);
+  }
+
+  protected void setFields(int id, int age, boolean isMale, String userID, boolean isAdmin) {
     this.id = id;
     this.age = age;
     this.isMale = isMale;
@@ -114,6 +121,14 @@ public class MiniUser implements IsSerializable, Comparable<MiniUser> {
     return userID;
   }
 
+  public long getTimestampMillis() {
+    return timestamp;
+  }
+
+  public void setTimestampMillis(long startTime) {
+    this.timestamp = startTime;
+  }
+
   /**
    * @param userID
    * @see UserDAO#getUsers
@@ -130,5 +145,21 @@ public class MiniUser implements IsSerializable, Comparable<MiniUser> {
     return "mini-user " + id + " : " + age + " yr old " +
         (isMale() ? "male" : "female") +
         (isAdmin() ? "ADMIN" : "");
+  }
+
+  public String getFirst() {
+    return first;
+  }
+
+  public String getLast() {
+    return last;
+  }
+
+  public void setFirst(String first) {
+    this.first = first;
+  }
+
+  public void setLast(String last) {
+    this.last = last;
   }
 }
