@@ -138,6 +138,7 @@ public class DatabaseImpl implements Database {
   private String installPath;
 
   private IUserDAO userDAO;
+  private IUserPermissionDAO userPermissionDAO;
   private IUserSessionDAO userSessionDAO;
   private IResultDAO resultDAO;
 
@@ -362,7 +363,11 @@ public class DatabaseImpl implements Database {
     dbConnection = getDbConnection();
 
     eventDAO = new SlickEventImpl(dbConnection);
-    this.userDAO = new SlickUserDAOImpl(this, dbConnection);
+    SlickUserDAOImpl slickUserDAO = new SlickUserDAOImpl(this, dbConnection);
+    this.userDAO = slickUserDAO;
+    userPermissionDAO = new SlickUserPermissionDAOImpl(this, dbConnection);
+    slickUserDAO.setPermissionDAO(userPermissionDAO);
+
     this.userSessionDAO = new SlickUserSessionDAOImpl(this, dbConnection);
     audioDAO = new SlickAudioDAO(this, dbConnection, this.userDAO);
     resultDAO = new SlickResultDAO(this, dbConnection);
@@ -370,7 +375,7 @@ public class DatabaseImpl implements Database {
 //    addRemoveDAO = new AddRemoveDAO(this);
 
     refresultDAO = new SlickRefResultDAO(this, dbConnection, serverProps.shouldDropRefResult());
-    userExerciseDAO = new SlickUserExerciseDAO(this, dbConnection);//, getExerciseToPhone(refresultDAO));
+    userExerciseDAO = new SlickUserExerciseDAO(this, dbConnection);
     wordDAO = new SlickWordDAO(this, dbConnection);
     phoneDAO = new SlickPhoneDAO(this, dbConnection);
 
@@ -785,7 +790,7 @@ public class DatabaseImpl implements Database {
           configureProjects(installPath);
           //}
         }
-        userManagement = new mitll.langtest.server.database.user.UserManagement(userDAO, resultDAO);
+        userManagement = new mitll.langtest.server.database.user.UserManagement(userDAO, resultDAO, userPermissionDAO);
       }
     }
   }
@@ -896,7 +901,7 @@ public class DatabaseImpl implements Database {
     if (project == null) {
       Project firstProject = getFirstProject();
       logger.error("no project with id " + projectid + " in known projects (" + idToProject.keySet() +
-          ") returning first " + firstProject,
+              ") returning first " + firstProject,
           new IllegalArgumentException());
       return firstProject;
     }
@@ -1324,6 +1329,7 @@ public class DatabaseImpl implements Database {
 
     List<IDAO> idaos = Arrays.asList(
         getUserDAO(),
+        userPermissionDAO,
         getProjectDAO(),
         userExerciseDAO,
         ((SlickUserExerciseDAO) userExerciseDAO).getRelatedExercise(),
