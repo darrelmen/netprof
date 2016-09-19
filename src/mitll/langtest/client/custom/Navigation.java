@@ -91,10 +91,11 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class Navigation implements RequiresResize, ShowTab {
+  private final Logger logger = Logger.getLogger("Navigation");
+
   private static final String STUDENT_ANALYSIS = "Student Analysis";
   //private static final String CUSTOM = "Custom";
   public static final String CLASSROOM = "classroom";
-  private final Logger logger = Logger.getLogger("Navigation");
 
   private static final String CHAPTERS = "Learn Pronunciation";
   private static final String YOUR_LISTS = "Study Your Lists";
@@ -123,7 +124,6 @@ public class Navigation implements RequiresResize, ShowTab {
 
   private final ExerciseController controller;
   private final LangTestDatabaseAsync service;
-  // private final ListServiceAsync listService = GWT.create(ListService.class);
   private final ExerciseServiceAsync exerciseServiceAsync = GWT.create(ExerciseService.class);
 
   private final UserManager userManager;
@@ -307,28 +307,32 @@ public class Navigation implements RequiresResize, ShowTab {
     }
 
     if (permittedToRecord()) {
-      recorderTab = makeFirstLevelTab(tabPanel, IconType.MICROPHONE, RECORD_AUDIO);
-      recorderTab.getContent().getElement().setId("recorder_contentPanel");
-      recorderTab.getTab().addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-          checkAndMaybeClearTab(RECORD_AUDIO);
-          recorderHelper.showNPF(recorderTab, "record_Audio");
-          logEvent(recorderTab, RECORD_AUDIO);
-        }
-      });
-
-      recordExampleTab = makeFirstLevelTab(tabPanel, IconType.MICROPHONE, RECORD_EXAMPLE);
-      recordExampleTab.getContent().getElement().setId("record_example_contentPanel");
-      recordExampleTab.getTab().addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-          checkAndMaybeClearTab(RECORD_EXAMPLE);
-          recordExampleHelper.showNPF(recordExampleTab, "record_Example_Audio");
-          logEvent(recordExampleTab, RECORD_EXAMPLE);
-        }
-      });
+      addRecordTabs();
     }
+  }
+
+  private void addRecordTabs() {
+    recorderTab = makeFirstLevelTab(tabPanel, IconType.MICROPHONE, RECORD_AUDIO);
+    recorderTab.getContent().getElement().setId("recorder_contentPanel");
+    recorderTab.getTab().addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        checkAndMaybeClearTab(RECORD_AUDIO);
+        recorderHelper.showNPF(recorderTab, "record_Audio");
+        logEvent(recorderTab, RECORD_AUDIO);
+      }
+    });
+
+    recordExampleTab = makeFirstLevelTab(tabPanel, IconType.MICROPHONE, RECORD_EXAMPLE);
+    recordExampleTab.getContent().getElement().setId("record_example_contentPanel");
+    recordExampleTab.getTab().addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        checkAndMaybeClearTab(RECORD_EXAMPLE);
+        recordExampleHelper.showNPF(recordExampleTab, "record_Example_Audio");
+        logEvent(recordExampleTab, RECORD_EXAMPLE);
+      }
+    });
   }
 
   /**
@@ -407,9 +411,12 @@ public class Navigation implements RequiresResize, ShowTab {
     learnHelper.showNPF(chapters, LEARN);
 
     studentAnalysis.getContent().clear();
-    studentAnalysis.getContent().add(new StudentAnalysis(exerciseServiceAsync, controller, (ShowTab) this));
+    studentAnalysis.getContent().add(new StudentAnalysis(exerciseServiceAsync, controller, this));
   }
 
+  /**
+   * @see #addTabs
+   */
   private void addStudyLists() {
     studyLists = makeFirstLevelTab(tabPanel, IconType.FOLDER_CLOSE, STUDY_LISTS);
     listManager.addStudyLists(studyLists);
@@ -516,40 +523,11 @@ public class Navigation implements RequiresResize, ShowTab {
   public void showInitialState() {
     addTabs();
     if (noPrevClickedTab()) {   // no previous tab
-      if (false) logger.info("showInitialState show initial state for " + getUser() + " no previous tab selection");
-//      reallyShowInitialState();
       showDefaultInitialTab(true);
-
     } else {
       selectPreviousTab();
     }
   }
-
-  /*private void reallyShowInitialState() {
-    listService.getListsForUser(getUser(), true, true, new AsyncCallback<Collection<UserList<CommonShell>>>() {
-      @Override
-      public void onFailure(Throwable caught) {
-      }
-
-      @Override
-      public void onSuccess(Collection<UserList<CommonShell>> result) {
-        if (result.size() == 1 && // if only one empty list - one you've created
-            result.iterator().next().isEmpty()) {
-          // choose default tab to show
-          showDefaultInitialTab(true);
-        } else {
-          boolean foundCreated = false;
-          for (UserList<?> ul : result) {
-            if (createdByYou(ul)) {
-              foundCreated = true;
-              break;
-            }
-          }
-          listManager.showMyLists(foundCreated, !foundCreated);
-        }
-      }
-    });
-  }*/
 
   private int getUser() {
     return userManager.getUser();
@@ -575,7 +553,7 @@ public class Navigation implements RequiresResize, ShowTab {
 
   private boolean noPrevClickedTab() {
     String value = getClickedTab();
-    logger.info("noPrevClickedTab selected tab = " + value);
+//    logger.info("noPrevClickedTab selected tab = " + value);
     return value.isEmpty();
   }
 
@@ -746,7 +724,8 @@ public class Navigation implements RequiresResize, ShowTab {
    * @return
    * @see #showInitialState()
    */
-  private boolean createdByYou(UserList ul) {
+  /*private boolean createdByYou(UserList ul) {
     return ul.getCreator().getId() == getUser();
   }
+*/
 }

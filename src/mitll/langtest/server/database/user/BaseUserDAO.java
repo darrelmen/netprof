@@ -67,7 +67,7 @@ public abstract class BaseUserDAO extends DAO {
   static final String UNKNOWN = "unknown";
   @Deprecated
   final String language;
-  private int defectDetector, beforeLoginUser, importUser, defaultUser, defaultMale, defaultFemale;
+  protected int defectDetector, beforeLoginUser, importUser, defaultUser, defaultMale, defaultFemale;
   private final boolean enableAllUsers;
 
   static final String ID = "id";
@@ -135,19 +135,19 @@ public abstract class BaseUserDAO extends DAO {
    * Check if the user exists already, and return null if so.
    * If it exists but is a legacy user, update its fields.
    *
-   * @param userID
-   * @param passwordH
-   * @param emailH
-   * @param email
-   * @param kind
-   * @param ipAddr
-   * @param isMale
-   * @param age
-   * @param dialect
-   * @param device
-   * @param first
-   * @param last      @return null if existing, valid user (email and password)
-   * @see UserManagement#addAndGetUser
+   * @paramx userID
+   * @paramx passwordH
+   * @paramx emailH
+   * @paramx email
+   * @paramx kind
+   * @paramx ipAddr
+   * @paramx isMale
+   * @paramx age
+   * @paramx dialect
+   * @paramx device
+   * @paramx first
+   * @paramx last      @return null if existing, valid user (email and password)
+   * @seex UserManagement#addAndGetUser
    */
 /*  public User addUser(String userID, String passwordH, String emailH, String email,
                       User.Kind kind, String ipAddr,
@@ -181,11 +181,38 @@ public abstract class BaseUserDAO extends DAO {
     }
   }*/
 
+  /**
+   * @param user
+   * @return
+   * @see UserManagement#addUser(SignUpUser)
+   */
   public User addUser(SignUpUser user) {
     String userID = user.getUserID();
     User userByID = getUserByID(userID);
     User.Kind kind = user.getKind();
-    if (userByID != null && kind != User.Kind.ANONYMOUS) {
+    if (userByID == null/* && kind != User.Kind.ANONYMOUS*/) {
+      // Collection<User.Permission> perms = (kind == User.Kind.CONTENT_DEVELOPER) ? CD_PERMISSIONS : EMPTY_PERM;
+      // boolean enabled = (kind != User.Kind.CONTENT_DEVELOPER) || isAdmin(userID) || enableAllUsers;
+      // List<SlickUserPermission> requested = new ArrayList<>();
+      List<User.Permission> requested = new ArrayList<>();
+      if (kind.equals(User.Kind.TEACHER)) {
+        requested.add(User.Permission.TEACHER_PERM);
+//        Timestamp now = new Timestamp(System.currentTimeMillis());
+//        requested.add(new SlickUserPermission(-1,
+//            beforeLoginUser,
+//            beforeLoginUser,
+//            User.Permission.TEACHER_PERM.toString(),
+//            now,
+//            User.PermissionStatus.PENDING.toString(),
+//            now,
+//            beforeLoginUser));
+      }
+      int l = addUserAndGetID(user, requested);
+      User userWhere = getUserWhere(l);
+      logger.debug(" : addUser : added new user " + userWhere);
+      return userWhere;
+
+    } else {
       // user exists!
       String emailHash = userByID.getEmailHash();
       String passwordHash = userByID.getPasswordHash();
@@ -200,24 +227,23 @@ public abstract class BaseUserDAO extends DAO {
         logger.debug(" : addUser : returning updated user " + userWhere);
         return userWhere;
       }
-    } else {
-      Collection<User.Permission> perms = (kind == User.Kind.CONTENT_DEVELOPER) ? CD_PERMISSIONS : EMPTY_PERM;
-      boolean enabled = (kind != User.Kind.CONTENT_DEVELOPER) || isAdmin(userID) || enableAllUsers;
-
-      int l = addUserAndGetID(user, perms, enabled);
-      User userWhere = getUserWhere(l);
-      logger.debug(" : addUser : added new user " + userWhere);
-      return userWhere;
     }
   }
 
-  private int addUserAndGetID(SignUpUser user, Collection<User.Permission> perms, boolean enabled) {
+  private int addUserAndGetID(SignUpUser user,
+                              //  Collection<SlickUserPermission> perms,
+                              Collection<User.Permission> perms//,
+                              //                            boolean enabled
+  ) {
     return addUser(user.getAge(),
         user.isMale() ? MALE : FEMALE,
         0,
         user.getIp(), "", "",
         user.getDialect(),
-        user.getUserID(), enabled, perms, user.getKind(), user.getPasswordH(),
+        user.getUserID(),
+        true,
+        perms,
+        user.getKind(), user.getPasswordH(),
         user.getEmailH(), user.getEmail(), user.getDevice(), user.getFirst(), user.getLast());
   }
 
@@ -237,12 +263,12 @@ public abstract class BaseUserDAO extends DAO {
    * public for test access... for now
    */
   public void ensureDefaultUsers() {
-    this.defectDetector  = getOrAdd(DEFECT_DETECTOR);
+    this.defectDetector = getOrAdd(DEFECT_DETECTOR);
     this.beforeLoginUser = getOrAdd(BEFORE_LOGIN_USER);
-    this.importUser      = getOrAdd(IMPORT_USER);
-    this.defaultUser     = getOrAdd("defaultUser");
-    this.defaultMale     = getOrAdd("defaultMaleUser");
-    this.defaultFemale   = getOrAdd("defaultFemaleUser");
+    this.importUser = getOrAdd(IMPORT_USER);
+    this.defaultUser = getOrAdd("defaultUser");
+    this.defaultMale = getOrAdd("defaultMaleUser");
+    this.defaultFemale = getOrAdd("defaultFemaleUser");
   }
 
   private int getOrAdd(String beforeLoginUser) {
@@ -267,6 +293,9 @@ public abstract class BaseUserDAO extends DAO {
                        String userID,
                        boolean enabled,
                        Collection<User.Permission> permissions,
+                       //     Collection<SlickUserPermission> permissions,
+
+
                        User.Kind kind,
                        String passwordH, String emailH, String email, String device, String first, String last);
 }
