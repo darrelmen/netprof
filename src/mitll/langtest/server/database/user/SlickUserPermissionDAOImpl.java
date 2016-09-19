@@ -32,82 +32,71 @@
 
 package mitll.langtest.server.database.user;
 
+import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.IDAO;
-import mitll.langtest.shared.user.MiniUser;
-import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
+import mitll.npdata.dao.DBConnection;
+import mitll.npdata.dao.SlickUserPermission;
+import mitll.npdata.dao.permission.UserPermissionDAOWrapper;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public interface IUserDAO extends IDAO {
-  void ensureDefaultUsers();
+public class SlickUserPermissionDAOImpl extends DAO implements IUserPermissionDAO {
+  private final UserPermissionDAOWrapper dao;
 
-  int getDefectDetector();
+  public SlickUserPermissionDAOImpl(Database database, DBConnection dbConnection) {
+    super(database);
+    this.dao = new UserPermissionDAOWrapper(dbConnection);
+  }
 
-  Database getDatabase();
+  @Override
+  public String getName() {
+    return dao.dao().name();
+  }
 
-  User addUser(SignUpUser user);
+  @Override
+  public void createTable() {
+    dao.createTable();
+  }
 
-  int addUser(int age, String gender, int experience, String ipAddr,
-              String trueIP, String nativeLang,
-              String dialect, String userID,
-              boolean enabled,
-              Collection<User.Permission> permissions,
-              User.Kind kind,
-              String passwordH,
-              String emailH, String email, String device, String first, String last);
+  @Override
+  public Collection<SlickUserPermission> getUserPermissions() {
+    return dao.all();
+  }
 
-  boolean enableUser(int id);
+  @Override
+  public Collection<SlickUserPermission> getPendingPermissions() {
+    return dao.pending();
+  }
 
-  boolean changeEnabled(int userid, boolean enabled);
+  @Override
+  public void grant(int id, int changedby) {
+    dao.grant(id, changedby);
+  }
 
-  Integer getIDForUserAndEmail(String user, String emailH);
+  @Override
+  public void deny(int id, int changedby) {
+    dao.deny(id, changedby);
+  }
 
-  int getIdForUserID(String id);
+  @Override
+  public void insert(SlickUserPermission e) {
+    dao.insert(e);
+  }
 
-  User getUser(String id, String passwordHash);
+  public Map<Integer, Collection<String>> granted() {
+    return dao.granted();
+  }
 
-  User getStrictUserWithPass(String id, String passwordHash);
-
-  User getUserByID(String id);
-
-  User getByID(int id);
-
-  User getUserWhere(int userid);
-
-  List<User> getUsers();
-
-  List<User> getUsersDevices();
-
-  Map<Integer, MiniUser> getMiniUsers();
-
-  MiniUser getMiniUser(int userid);
-
-  Map<Integer, User> getUserMap(boolean getMale);
-
-  Collection<Integer> getUserIDs(boolean getMale);
-
-  Map<Integer, User> getUserMap();
-
-  /**
-   * @param emailH
-   * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#forgotUsername
-   */
-  String isValidEmail(String emailH);
-
-  boolean changePassword(int user, String passwordH);
-
-  User getUserWithResetKey(String key);
-
-  User getUserWithEnabledKey(String key);
-
-  boolean updateKey(int userid, boolean resetKey, String key);
-
-  boolean clearKey(int userid, boolean resetKey);
-
-  int getBeforeLoginUser();
+  public Collection<User.Permission> getGrantedForUser(int id) {
+    Collection<String> strings = dao.grantedForUser(id);
+    List<User.Permission> perms = new ArrayList<>();
+    for (String perm : strings) {
+      perms.add(User.Permission.valueOf(perm));
+    }
+    return perms;
+  }
 }
