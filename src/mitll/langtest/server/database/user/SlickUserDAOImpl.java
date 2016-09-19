@@ -93,24 +93,27 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
    */
   public SlickUser addAndGet(SlickUser user, Collection<User.Permission> permissions) {
     SlickUser user1 = dao.addAndGet(user);
-    addPermissions(permissions);
+    int i = addPermissions(permissions, user1.id());
+   // if (i > 0) logger.info("inserted " + i + " permissions for " + user1.id());
     return user1;
   }
 
-  private void addPermissions(Collection<User.Permission> permissions) {
+  private int addPermissions(Collection<User.Permission> permissions, int foruserid) {
     Timestamp now = new Timestamp(System.currentTimeMillis());
-    int beforeLoginUser = getBeforeLoginUser();
+    int c = 0;
     for (User.Permission permission : permissions) {
       SlickUserPermission e = new SlickUserPermission(-1,
-          beforeLoginUser,
-          beforeLoginUser,
+          foruserid,
+          foruserid,
           permission.toString(),
           now,
-          User.PermissionStatus.PENDING.toString(),
+          User.PermissionStatus.GRANTED.toString(),
           now,
-          beforeLoginUser);
+          importUser);
       permissionDAO.insert(e);
+      c++;
     }
+    return c;
   }
 
   /**
@@ -264,10 +267,8 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
     List<User> copy = new ArrayList<>();
 
     Map<Integer, Collection<String>> granted = permissionDAO.granted();
-//    Collection<SlickUserPermission> permissions = (Collection<SlickUserPermission>) granted;
-    //   permissions.groupBy
     for (SlickUser s : all) {
-      logger.info("to user " + s);
+//      logger.info("to user " + s);
       copy.add(toUser(s, toUserPerms(granted.get(s.id()))));
     }
     return copy;
@@ -277,7 +278,7 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
     List<User.Permission> perms = new ArrayList<>();
     if (strings != null) {
       for (String p : strings) {
-        logger.info("value of '" + p + "'");
+//        logger.info("value of '" + p + "'");
         perms.add(User.Permission.valueOf(p));
       }
     }

@@ -62,14 +62,12 @@ public class Project {
   private static final String WEBSERVICE_HOST_IP = "127.0.0.1";
 
   private SlickProject project;
-  //private List<String> typeOrder;
   private ExerciseDAO<CommonExercise> exerciseDAO;
   private JsonSupport jsonSupport;
   private SlickAnalysis analysis;
   private AudioFileHelper audioFileHelper;
   private ExerciseTrie<CommonExercise> fullTrie = null;
   private RefResultDecoder refResultDecoder;
-  //private String relativeConfigDir;
   private PathHelper pathHelper;
   private DatabaseImpl db;
   private ServerProperties serverProps;
