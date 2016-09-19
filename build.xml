@@ -266,13 +266,10 @@
             <arg line="-localWorkers"/>
             <arg value="6"/>
 
-<!--
             <arg line="-draftCompile"/>
--->
 <!--
             <arg value="true"/>
 -->
-
 <!--
             <arg value="-compileReport"/>
 -->
