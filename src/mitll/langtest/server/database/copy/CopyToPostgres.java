@@ -94,7 +94,6 @@ public class CopyToPostgres<T extends CommonShell> {
   }
 
 
-
   /**
    * Add brazilian, serbo croatian, french, etc.
    *
@@ -488,8 +487,8 @@ public class CopyToPostgres<T extends CommonShell> {
                             Map<Integer, Integer> oldToNew,
                             User toImport) {
     //logger.info("addUser " + toImport);
-    SlickUser user = slickUserDAO.toSlick(toImport);// TODO fix this
-    SlickUser slickUser = slickUserDAO.addAndGet(user);
+    SlickUser user = slickUserDAO.toSlick(toImport);
+    SlickUser slickUser = slickUserDAO.addAndGet(user, toImport.getPermissions());
 
     int add = slickUser.id();
 //    logger.info("addUser id  " + add + " for " + user.id() + " equal " + (user == slickUser));

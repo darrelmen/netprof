@@ -63,8 +63,28 @@ public class User extends MiniUser {
   private Collection<Permission> permissions;
   private ProjectStartupInfo startupInfo;
 
-  public enum Kind       implements IsSerializable {UNSET, STUDENT, TEACHER, CONTENT_DEVELOPER, ADMIN, ANONYMOUS}
-  public enum Permission implements IsSerializable {QUALITY_CONTROL, RECORD_AUDIO, ENABLE_DEVELOPER, TEACHER_PERM}
+//  private boolean isActive;
+//  public boolean isActive() {
+//    return isActive;
+//  }
+
+  public enum Kind implements IsSerializable {UNSET, STUDENT, TEACHER, CONTENT_DEVELOPER, PROJECT_ADMIN, ADMIN}
+
+  public enum Permission implements IsSerializable {
+    QUALITY_CONTROL,
+    RECORD_AUDIO,
+    DEVELOP_CONTENT, //? make new projects? edit via domino?
+    TEACHER_PERM, // gets to see teacher things, invite
+    CREATE_USER,
+    EDIT_USER
+  }
+
+  public enum PermissionStatus implements IsSerializable {
+    PENDING,
+    GRANTED,
+    DENIED,
+    REVOKED  // needed? maybe after granted
+  }
 
   public User() {
   } // for serialization
@@ -110,7 +130,8 @@ public class User extends MiniUser {
               Collection<Permission> permissions, Kind userKind,
               String emailHash,
               String device, String resetPassKey,
-              String cdEnableKey, long timestamp) {
+              String cdEnableKey, long timestamp//, boolean isActive
+  ) {
     super(id, age, gender == 0, userID, isAdmin);
     this.experience = experience;
     this.ipaddr = ipaddr;
@@ -126,6 +147,7 @@ public class User extends MiniUser {
     this.resetKey = resetPassKey;
     this.cdKey = cdEnableKey;
     this.timestamp = timestamp;
+    //   this.isActive = isActive;
   }
 
   public boolean isStudent() {
