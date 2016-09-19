@@ -271,4 +271,16 @@ public class DecodeTest extends BaseTest {
     for (AudioAttribute audioAttribute : audioAttributes)
       audioFileHelper.decodeOneAttribute(exercise, audioAttribute, false);
   }
+
+  @Test
+  public void testMandarinUnk() {
+    DatabaseImpl database = getDatabase("mandarin");
+    AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), database.getServerProps(), database, null);
+    CommonExercise exercise = database.getExercise("5474");
+    logger.info("got " + exercise);
+
+    Collection<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
+    for (AudioAttribute audioAttribute : audioAttributes)
+      audioFileHelper.decodeOneAttribute(exercise, audioAttribute, false);
+  }
 }
