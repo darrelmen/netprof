@@ -63,7 +63,9 @@ public class DAO {
 
   public String getName() { throw new IllegalArgumentException("not to be called"); }
 
-  public void createTable() {}
+  public void createTable() {
+    throw new IllegalArgumentException("no code for creating the table " + getClass());
+  }
 
   protected DAO(Database database) {
     this.database = database;
