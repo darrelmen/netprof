@@ -55,7 +55,9 @@ public interface UserService extends RemoteService {
 
   User setProject(int projectid);
 
-  User addUser(SignUpUser user, String url, boolean isCD);
+  User addUser(SignUpUser user, String url
+  //    , boolean isCD
+  );
 
   /**
    * @return
