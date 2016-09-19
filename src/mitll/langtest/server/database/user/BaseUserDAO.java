@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.user;
 
+import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.annotation.AnnotationDAO;
@@ -52,7 +53,7 @@ public abstract class BaseUserDAO extends DAO {
   public static final String USERS = "users";
   public static final String MALE = "male";
   public static final String FEMALE = "female";
-  static final String PERMISSIONS = "EMPTY_PERMISSIONS";
+  static final String PERMISSIONS = "permissions";
   static final String KIND = "kind";
   static final String PASS = "passwordH";
   static final String EMAIL = "emailH";
@@ -68,7 +69,7 @@ public abstract class BaseUserDAO extends DAO {
   @Deprecated
   final String language;
   protected int defectDetector, beforeLoginUser, importUser, defaultUser, defaultMale, defaultFemale;
-  private final boolean enableAllUsers;
+ // private final boolean enableAllUsers;
 
   static final String ID = "id";
   static final String AGE = "age";
@@ -99,7 +100,7 @@ public abstract class BaseUserDAO extends DAO {
     super(database);
     admins = database.getServerProps().getAdmins();
     language = database.getServerProps().getLanguage();
-    enableAllUsers = database.getServerProps().enableAllUsers();
+    //enableAllUsers = database.getServerProps().enableAllUsers();
   }
 
   /**
@@ -130,56 +131,6 @@ public abstract class BaseUserDAO extends DAO {
   public int getDefaultFemale() {
     return defaultFemale;
   }
-
-  /**
-   * Check if the user exists already, and return null if so.
-   * If it exists but is a legacy user, update its fields.
-   *
-   * @paramx userID
-   * @paramx passwordH
-   * @paramx emailH
-   * @paramx email
-   * @paramx kind
-   * @paramx ipAddr
-   * @paramx isMale
-   * @paramx age
-   * @paramx dialect
-   * @paramx device
-   * @paramx first
-   * @paramx last      @return null if existing, valid user (email and password)
-   * @seex UserManagement#addAndGetUser
-   */
-/*  public User addUser(String userID, String passwordH, String emailH, String email,
-                      User.Kind kind, String ipAddr,
-                      boolean isMale, int age, String dialect, String device, String first, String last) {
-    User userByID = getUserByID(userID);
-    if (userByID != null && kind != User.Kind.ANONYMOUS) {
-      // user exists!
-      String emailHash = userByID.getEmailHash();
-      String passwordHash = userByID.getPasswordHash();
-      if (emailHash != null && passwordHash != null &&
-          !emailHash.isEmpty() && !passwordHash.isEmpty()) {
-        logger.debug(" : addUser : user " + userID + " is an existing user.");
-        return null; // existing user!
-      } else {
-        int id = userByID.getId();
-        updateUser(id, kind, passwordH, emailH);
-        User userWhere = getUserWhere(id);
-        logger.debug(" : addUser : returning updated user " + userWhere);
-        return userWhere;
-      }
-    } else {
-      Collection<User.Permission> perms = (kind == User.Kind.CONTENT_DEVELOPER) ? CD_PERMISSIONS : EMPTY_PERM;
-      boolean enabled = (kind != User.Kind.CONTENT_DEVELOPER) || isAdmin(userID) || enableAllUsers;
-
-      int l = addUser(age, isMale ? MALE : FEMALE, 0, ipAddr, "", "", dialect, userID, enabled, perms, kind, passwordH,
-          emailH, email, device, first, last);
-      User userWhere = getUserWhere(l);
-      logger.debug(" : addUser : added new user " + userWhere);
-
-      return userWhere;
-    }
-  }*/
 
   /**
    * @param user
@@ -261,6 +212,7 @@ public abstract class BaseUserDAO extends DAO {
 
   /**
    * public for test access... for now
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
   public void ensureDefaultUsers() {
     this.defectDetector = getOrAdd(DEFECT_DETECTOR);
@@ -294,8 +246,6 @@ public abstract class BaseUserDAO extends DAO {
                        boolean enabled,
                        Collection<User.Permission> permissions,
                        //     Collection<SlickUserPermission> permissions,
-
-
                        User.Kind kind,
                        String passwordH, String emailH, String email, String device, String first, String last);
 }
