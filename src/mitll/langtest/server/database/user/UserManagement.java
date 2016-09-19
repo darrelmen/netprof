@@ -38,12 +38,15 @@ import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.database.result.UserToCount;
 import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
+import mitll.npdata.dao.SlickUserPermission;
 import net.sf.json.JSON;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.OutputStream;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -57,16 +60,18 @@ import java.util.Map;
 public class UserManagement {
   private static final Logger logger = Logger.getLogger(UserManagement.class);
   private final IUserDAO userDAO;
+  private final IUserPermissionDAO permissionDAO;
   private final IResultDAO resultDAO;
 
   /**
-   * @see DatabaseImpl#makeDAO(String, String, String)
    * @param userDAO
    * @param resultDAO
+   * @see DatabaseImpl#makeDAO(String, String, String)
    */
-  public UserManagement(IUserDAO userDAO, IResultDAO resultDAO) {
+  public UserManagement(IUserDAO userDAO, IResultDAO resultDAO, IUserPermissionDAO permissionDAO) {
     this.userDAO = userDAO;
     this.resultDAO = resultDAO;
+    this.permissionDAO = permissionDAO;
   }
 
   /**
@@ -89,6 +94,7 @@ public class UserManagement {
   }*/
 
   /**
+   * @return
    * @seex DatabaseImpl#addUser
    * @paramx xuserID
    * @paramx passwordH
@@ -100,16 +106,50 @@ public class UserManagement {
    * @paramx isMale
    * @paramx age
    * @paramx dialect
-   * @return
    */
 /*  public User addUser(String userID, String passwordH, String emailH, String email,
                       String deviceType, String device, User.Kind kind,
                       boolean isMale, int age, String dialect) {
     return addAndGetUser(userID, passwordH, emailH, email, kind, isMale, age, dialect, deviceType, device*//*, projid*//*);
   }*/
-
   public User addUser(SignUpUser user) {
-   return userDAO.addUser(user);
+    User user1 = userDAO.addUser(user);
+
+//    List<SlickUserPermission> requested = new ArrayList<>();
+
+    List<User.Permission> permissions = new ArrayList<>();
+    if (user1.getUserKind().equals(User.Kind.TEACHER)) {
+      permissions.add(User.Permission.TEACHER_PERM);
+//        Timestamp now = new Timestamp(System.currentTimeMillis());
+//        requested.add(new SlickUserPermission(-1,
+//            beforeLoginUser,
+//            beforeLoginUser,
+//            User.Permission.TEACHER_PERM.toString(),
+//            now,
+//            User.PermissionStatus.PENDING.toString(),
+//            now,
+//            beforeLoginUser));
+    }
+
+
+    addPermissions(permissions);
+    return user1;
+  }
+
+  private void addPermissions(List<User.Permission> permissions) {
+    Timestamp now = new Timestamp(System.currentTimeMillis());
+    int beforeLoginUser = userDAO.getBeforeLoginUser();
+    for (User.Permission permission : permissions) {
+      SlickUserPermission e = new SlickUserPermission(-1,
+          beforeLoginUser,
+          beforeLoginUser,
+          permission.toString(),
+          now,
+          User.PermissionStatus.PENDING.toString(),
+          now,
+          beforeLoginUser);
+      permissionDAO.insert(e);
+    }
   }
   /**
    * @param request
@@ -134,10 +174,10 @@ public class UserManagement {
   }*/
 
   /**
-   * @see mitll.langtest.server.services.UserServiceImpl#addUser(SignUpUser, String, boolean)
    * @param request
    * @param user
    * @return
+   * @see mitll.langtest.server.services.UserServiceImpl#addUser(SignUpUser, String, boolean)
    */
   public User addUser(HttpServletRequest request, SignUpUser user) {
     return addUser(user.setIp(getIPInfo(request)));
@@ -173,9 +213,9 @@ public class UserManagement {
   }*/
 
   /**
-   * @see #addUser(HttpServletRequest, SignUpUser)
    * @param request
    * @return
+   * @see #addUser(HttpServletRequest, SignUpUser)
    */
   private String getIPInfo(HttpServletRequest request) {
     String header = request.getHeader("User-Agent");
@@ -186,16 +226,21 @@ public class UserManagement {
   }
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#usersToXLSX(OutputStream)
    * @param out
+   * @see mitll.langtest.server.database.DatabaseImpl#usersToXLSX(OutputStream)
    */
-  public void usersToXLSX(OutputStream out) { new UserDAOToExcel().toXLSX(out, getUsers()); }
-  public JSON usersToJSON() { return new UserDAOToExcel().toJSON(getUsers());  }
+  public void usersToXLSX(OutputStream out) {
+    new UserDAOToExcel().toXLSX(out, getUsers());
+  }
+
+  public JSON usersToJSON() {
+    return new UserDAOToExcel().toJSON(getUsers());
+  }
 
   /**
    * TODO : come back and re-examine percent complete in context of a project
    * Adds some sugar -- sets the answers and rate per user, and joins with dli experience data
-   *
+   * <p>
    * TODO : percent complete should be done from audio table, not result table
    *
    * @return
@@ -217,7 +262,7 @@ public class UserManagement {
           if (userToRate.containsKey(u.getId())) {
             u.setRate(userToRate.get(u.getId()));
           }
-        //  int size = idToCount.idToUniqueCount.get(u.getId()).size();
+          //  int size = idToCount.idToUniqueCount.get(u.getId()).size();
 
           // TODO : put this back
           if (false) {

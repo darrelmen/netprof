@@ -96,7 +96,9 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    * @param passwordH
    * @param emailH
    * @param email
-   * @param device          @return newly inserted user id, or 0 if something goes horribly wrong  @see UserManagement#addUser(User)
+   * @param device
+   * @return newly inserted user id, or 0 if something goes horribly wrong
+   * @see UserManagement#addUser(User)
    * @param first
    * @param last
    */
