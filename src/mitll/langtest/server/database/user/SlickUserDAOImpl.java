@@ -34,12 +34,12 @@ package mitll.langtest.server.database.user;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickMiniUser;
 import mitll.npdata.dao.SlickUser;
+import mitll.npdata.dao.SlickUserPermission;
 import mitll.npdata.dao.user.UserDAOWrapper;
 import org.apache.log4j.Logger;
 import scala.collection.Seq;
@@ -50,6 +50,7 @@ import java.util.*;
 public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
   private static final Logger logger = Logger.getLogger(SlickUserDAOImpl.class);
   private final UserDAOWrapper dao;
+  private IUserPermissionDAO permissionDAO;
 
   /**
    * @param database
@@ -59,6 +60,10 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
   public SlickUserDAOImpl(Database database, DBConnection dbConnection) {
     super(database);
     dao = new UserDAOWrapper(dbConnection);
+  }
+
+  public void setPermissionDAO(IUserPermissionDAO permissionDAO) {
+    this.permissionDAO = permissionDAO;
   }
 
   public void createTable() {
@@ -73,7 +78,7 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
   /**
    * @param user
    * @return
-   * @see mitll.langtest.server.database.CopyToPostgres#addUser
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#addUser
    */
   public int add(SlickUser user) {
     return dao.add(user);
@@ -84,10 +89,28 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
    *
    * @param user
    * @return
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#addUser(SlickUserDAOImpl, Map, User)
    */
-  public SlickUser addAndGet(SlickUser user) {
-    SlickUser slickUser = dao.addAndGet(user);
-    return slickUser;
+  public SlickUser addAndGet(SlickUser user, Collection<User.Permission> permissions) {
+    SlickUser user1 = dao.addAndGet(user);
+    addPermissions(permissions);
+    return user1;
+  }
+
+  private void addPermissions(Collection<User.Permission> permissions) {
+    Timestamp now = new Timestamp(System.currentTimeMillis());
+    int beforeLoginUser = getBeforeLoginUser();
+    for (User.Permission permission : permissions) {
+      SlickUserPermission e = new SlickUserPermission(-1,
+          beforeLoginUser,
+          beforeLoginUser,
+          permission.toString(),
+          now,
+          User.PermissionStatus.PENDING.toString(),
+          now,
+          beforeLoginUser);
+      permissionDAO.insert(e);
+    }
   }
 
   /**
@@ -119,21 +142,44 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
                      String trueIP,
                      String nativeLang,
                      String dialect, String userID, boolean enabled,
-                     Collection<User.Permission> permissions, User.Kind kind,
+                     Collection<User.Permission> permissions,
+                     User.Kind kind,
                      String passwordH, String emailH, String email, String device,
                      String first, String last) {
-    StringBuilder builder = new StringBuilder();
-    for (User.Permission permission : permissions) builder.append(permission).append(",");
+//    StringBuilder builder = new StringBuilder();
+//    for (User.Permission permission : permissions) builder.append(permission).append(",");
+    List<SlickUserPermission> requested = new ArrayList<>();
+
+    Timestamp now = new Timestamp(System.currentTimeMillis());
+    for (User.Permission permission : permissions) {
+      requested.add(new SlickUserPermission(-1,
+          beforeLoginUser,
+          beforeLoginUser,
+          permission.toString(),
+          now,
+          User.PermissionStatus.PENDING.toString(),
+          now,
+          beforeLoginUser));
+    }
+
     return dao.add(new SlickUser(-1, userID,
         gender.equalsIgnoreCase("male"),
         userAgent,
         trueIP,
         dialect,
         new Timestamp(System.currentTimeMillis()),
-        enabled, "", "", builder.toString(),
-        kind.toString(), passwordH, emailH,
+        enabled,
+        "",
+        "",
+//        builder.toString(),
+        kind.toString(),
+        passwordH,
+        emailH,
         email,
-        device, first, last, -1, true));
+        device,
+        first,
+        last,
+        -1));
   }
 
   /**
@@ -141,11 +187,11 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @param kind
    * @param passwordH
    * @param emailH
-   * @see BaseUserDAO#addUser(String, String, String, String, User.Kind, String, boolean, int, String, String, String, String)
+   * @see BaseUserDAO#addUser
    */
   protected void updateUser(int id, User.Kind kind, String passwordH, String emailH) {
-    dao.updateUser(id, kind.name(), passwordH, emailH,
-        kind == User.Kind.CONTENT_DEVELOPER ? CD_PERMISSIONS.toString() : EMPTY_PERM.toString());
+    dao.updateUser(id, kind.name(), passwordH, emailH);//,
+//        kind == User.Kind.CONTENT_DEVELOPER ? CD_PERMISSIONS.toString() : EMPTY_PERM.toString());
   }
 
   @Override
@@ -161,7 +207,9 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }
 
   @Override
-  public int getIdForUserID(String id) { return dao.idForUser(id); }
+  public int getIdForUserID(String id) {
+    return dao.idForUser(id);
+  }
 
   @Override
   public User getUser(String id, String passwordHash) {
@@ -178,29 +226,33 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
   /**
    * @param id
    * @return
-   * @see mitll.langtest.server.database.CopyToPostgres#copyUsers(DatabaseImpl, int)
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyUsers
    */
   @Override
   public User getUserByID(String id) {
     return convertOrNull(dao.getByUserID(id));
   }
 
-  public Collection<User> getAllUsersByID(String id) {
+/*  public Collection<User> getAllUsersByID(String id) {
     Seq<SlickUser> byUserID = dao.getByUserID(id);
     scala.collection.Iterator<SlickUser> iterator = byUserID.iterator();
     List<User> copy = new ArrayList<>();
     while (iterator.hasNext()) copy.add(toUser(iterator.next()));
     return copy;
-  }
-
-//  public boolean userExists(String id, String passwordHash) { return dao.userExists()}
+  }*/
 
   public User getByID(int id) {
     return convertOrNull(dao.byID(id));
   }
 
   private User convertOrNull(Seq<SlickUser> userByIDAndPass) {
-    return userByIDAndPass.isEmpty() ? null : toUser(userByIDAndPass.head());
+    if (userByIDAndPass.isEmpty()) return null;
+    else {
+      SlickUser head = userByIDAndPass.head();
+      Collection<User.Permission> grantedForUser = permissionDAO.getGrantedForUser(head.id());
+      return toUser(head, grantedForUser);
+    }
+//    return userByIDAndPass.isEmpty() ? null : toUser(userByIDAndPass.head());
   }
 
   @Override
@@ -210,8 +262,26 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
   private List<User> toUsers(List<SlickUser> all) {
     List<User> copy = new ArrayList<>();
-    for (SlickUser s : all) copy.add(toUser(s));
+
+    Map<Integer, Collection<String>> granted = permissionDAO.granted();
+//    Collection<SlickUserPermission> permissions = (Collection<SlickUserPermission>) granted;
+    //   permissions.groupBy
+    for (SlickUser s : all) {
+      logger.info("to user " + s);
+      copy.add(toUser(s, toUserPerms(granted.get(s.id()))));
+    }
     return copy;
+  }
+
+  private Collection<User.Permission> toUserPerms(Collection<String> strings) {
+    List<User.Permission> perms = new ArrayList<>();
+    if (strings != null) {
+      for (String p : strings) {
+        logger.info("value of '" + p + "'");
+        perms.add(User.Permission.valueOf(p));
+      }
+    }
+    return perms;
   }
 
   public SlickUser toSlick(User user) {
@@ -225,7 +295,7 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
         user.isEnabled(),
         user.getResetKey() == null ? "" : user.getResetKey(),
         "",
-        user.getPermissions().toString(),
+        //  user.getPermissions().toString(),
         user.getUserKind().name(),
         user.getPasswordHash() == null ? "" : user.getPasswordHash(),
         user.getEmailHash() == null ? "" : user.getEmailHash(),
@@ -233,7 +303,7 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
         user.getDevice() == null ? "" : user.getDevice(),
         user.getFirst(),
         user.getLast(),
-        user.getId(), true
+        user.getId()
     );
 
     // logger.info("made " + user1);
@@ -241,7 +311,7 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return user1;
   }
 
-  private User toUser(SlickUser s) {
+  private User toUser(SlickUser s, Collection<User.Permission> perms) {
     boolean admin = isAdmin(s.userid());
 
     User user = new User(
@@ -256,7 +326,7 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
         s.userid(),
         s.enabled(),
         admin,
-        getPerm(s.permissions()),
+        perms,
         User.Kind.valueOf(s.kind()),
         s.emailhash(),
         s.device(),
@@ -271,10 +341,10 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
   /**
    * OK this is kind of a hack, should be a separate table.
    *
-   * @param perms
    * @return
+   * @paramx perms
    */
-  private Collection<User.Permission> getPerm(String perms) {
+/*  private Collection<User.Permission> getPerm(String perms) {
     Collection<User.Permission> permissions = new ArrayList<>();
 
     if (perms != null) {
@@ -293,8 +363,7 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
       }
     }
     return permissions;
-  }
-
+  }*/
   @Override
   public List<User> getUsersDevices() {
     return toUsers(dao.getUsersFromDevices());
@@ -342,7 +411,10 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
   public Map<Integer, User> getUserMap(boolean getMale) {
     Map<Integer, SlickUser> byMale = dao.getByMaleMap(getMale);
     Map<Integer, User> idToUser = new HashMap<>();
-    byMale.forEach((k, v) -> idToUser.put(k, toUser(v)));
+
+    Map<Integer, Collection<String>> granted = permissionDAO.granted();
+
+    byMale.forEach((k, v) -> idToUser.put(k, toUser(v, toUserPerms(granted.get(k)))));
     return idToUser;
   }
 
@@ -354,7 +426,9 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
   @Override
   public Map<Integer, User> getUserMap() {
     Map<Integer, User> idToUser = new HashMap<>();
-    dao.getIdToUser().forEach((k, v) -> idToUser.put(k, toUser(v)));
+    Map<Integer, Collection<String>> granted = permissionDAO.granted();
+
+    dao.getIdToUser().forEach((k, v) -> idToUser.put(k, toUser(v, toUserPerms(granted.get(k)))));
     return idToUser;
   }
 
@@ -365,7 +439,9 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @see mitll.langtest.server.services.UserServiceImpl#changePFor(String, String)
    */
   @Override
-  public boolean changePassword(int user, String passwordH) { return dao.setPassword(user, passwordH);  }
+  public boolean changePassword(int user, String passwordH) {
+    return dao.setPassword(user, passwordH);
+  }
 
   @Override
   public boolean updateKey(int userid, boolean resetKey, String key) {

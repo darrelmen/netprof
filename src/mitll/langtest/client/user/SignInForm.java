@@ -287,15 +287,16 @@ class SignInForm extends UserDialog implements SignIn {
         markErrorBlur(password, PLEASE_ENTER_YOUR_PASSWORD);
         signIn.setEnabled(true);
       } else if (result.getPasswordHash().equalsIgnoreCase(hashedPass)) {
-        if (result.isEnabled() ||
-            result.getUserKind() != User.Kind.CONTENT_DEVELOPER ||
-            props.enableAllUsers()) {
+        if (result.isEnabled() //||
+         //   result.getUserKind() != User.Kind.CONTENT_DEVELOPER ||
+        //    props.enableAllUsers()
+        ) {
           eventRegistration.logEvent(signIn, "sign in", "N/A", "successful sign in for " + user);
           //    logger.info("Got valid user " + user + " and matching password, so we're letting them in.");
           storeUser(result);
         } else {
           eventRegistration.logEvent(signIn, "sign in", "N/A", "successful sign in for " + user + " but wait for approval.");
-          markErrorBlur(signIn, PLEASE_WAIT, "Please wait until you've been approved. Check your email.", Placement.LEFT);
+          markErrorBlur(signIn, PLEASE_WAIT, "Please wait until you've been approved to use NetProF. Check your email.", Placement.LEFT);
           signIn.setEnabled(true);
         }
       } else { // special pathway...
@@ -307,7 +308,6 @@ class SignInForm extends UserDialog implements SignIn {
           logger.info("foundExistingUser bad pass  " + passwordHash);
           //  logger.info("admin " + Md5Hash.getHash("adm!n"));
           eventRegistration.logEvent(signIn, "sign in", "N/A", "bad password");
-
           markErrorBlur(password, BAD_PASSWORD);
           signIn.setEnabled(true);
         }
