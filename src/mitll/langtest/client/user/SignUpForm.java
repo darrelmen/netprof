@@ -93,7 +93,7 @@ class SignUpForm extends UserDialog implements SignUp {
   private final EventRegistration eventRegistration;
 
   private Button signUp;
-  private CheckBox contentDevCheckbox;
+//  private CheckBox contentDevCheckbox;
   private UserPassDialog userPassLogin;
   private static final String CURRENT_USERS = "Current users should add an email and password.";
 
@@ -160,8 +160,7 @@ class SignUpForm extends UserDialog implements SignUp {
     fieldset.add(getRolesChoices());
 
     //getContentDevCheckbox();
-
-    if (!props.isAMAS()) fieldset.add(contentDevCheckbox);
+//    if (!props.isAMAS()) fieldset.add(contentDevCheckbox);
 
     makeRegistrationInfo(fieldset);
     fieldset.add(getSignUpButton(userBox, emailBox));
@@ -208,10 +207,10 @@ class SignUpForm extends UserDialog implements SignUp {
     }
   }*/
 
-  private void getRecordAudioPopover() {
+/*  private void getRecordAudioPopover() {
     String html = props.getRecordAudioPopoverText();
     addPopover(contentDevCheckbox, RECORD_AUDIO_HEADING, html);
-  }
+  }*/
 
   private Panel getRolesChoices() {
     Panel roles = new HorizontalPanel();
@@ -226,8 +225,8 @@ class SignUpForm extends UserDialog implements SignUp {
       public void onClick(ClickEvent event) {
         selectedRole = User.Kind.STUDENT;
         registrationInfo.setVisible(false);
-        contentDevCheckbox.setVisible(false);
-        contentDevCheckbox.setValue(false);
+  //      contentDevCheckbox.setVisible(false);
+   //     contentDevCheckbox.setValue(false);
       }
     });
 
@@ -239,7 +238,7 @@ class SignUpForm extends UserDialog implements SignUp {
       public void onClick(ClickEvent event) {
         selectedRole = User.Kind.TEACHER;
         registrationInfo.setVisible(false);
-        contentDevCheckbox.setVisible(true);
+     //   contentDevCheckbox.setVisible(true);
       }
     });
 

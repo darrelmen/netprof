@@ -53,9 +53,7 @@ public class SlickUserPermissionDAOImpl extends DAO implements IUserPermissionDA
   }
 
   @Override
-  public String getName() {
-    return dao.dao().name();
-  }
+  public String getName() { return dao.dao().name();  }
 
   @Override
   public void createTable() {
