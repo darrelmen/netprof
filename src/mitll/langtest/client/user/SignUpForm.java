@@ -55,6 +55,7 @@ import mitll.langtest.shared.user.User;
 import java.util.logging.Logger;
 
 class SignUpForm extends UserDialog implements SignUp {
+  public static final int BOGUS_AGE = 99;
   private final Logger logger = Logger.getLogger("SignUpForm");
   private static final String NEW_USER = "New User?";
 
@@ -158,7 +159,7 @@ class SignUpForm extends UserDialog implements SignUp {
     fieldset.add(getRolesHeader());
     fieldset.add(getRolesChoices());
 
-    getContentDevCheckbox();
+    //getContentDevCheckbox();
 
     if (!props.isAMAS()) fieldset.add(contentDevCheckbox);
 
@@ -177,7 +178,7 @@ class SignUpForm extends UserDialog implements SignUp {
     return w1;
   }
 
-  private void getContentDevCheckbox() {
+/*  private void getContentDevCheckbox() {
     SafeHtmlBuilder builder = new SafeHtmlBuilder();
     builder.appendHtmlConstant(RECORD_REFERENCE_AUDIO);
     contentDevCheckbox = new CheckBox(builder.toSafeHtml());
@@ -205,7 +206,7 @@ class SignUpForm extends UserDialog implements SignUp {
     if (!props.enableAllUsers()) {
       getRecordAudioPopover();
     }
-  }
+  }*/
 
   private void getRecordAudioPopover() {
     String html = props.getRecordAudioPopoverText();
@@ -402,7 +403,12 @@ class SignUpForm extends UserDialog implements SignUp {
             } else if (selectedRole == User.Kind.UNSET) {
               studentOrTeacherPopover = markErrorBlur(studentChoice, "Please choose", "Please select either student or teacher.", Placement.LEFT);
               eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "didn't check role");
-            } else if (selectedRole == User.Kind.CONTENT_DEVELOPER && !registrationInfo.checkValidGender()) {
+            }
+
+            // TODO : ask content developers for info when they first sign up
+
+/*            else if (selectedRole == User.Kind.CONTENT_DEVELOPER &&
+                !registrationInfo.checkValidGender()) {
               eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "didn't check gender");
               //        } else if (CHECK_AGE && selectedRole == User.Kind.CONTENT_DEVELOPER && !isValidAge(registrationInfo.getAgeEntryGroup())) {
               //         eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "didn't fill in age ");
@@ -413,7 +419,9 @@ class SignUpForm extends UserDialog implements SignUp {
               markErrorBlur(registrationInfo.getDialectGroup(), "Enter a language dialect.");
               //  } else if (currentSignUpProject == null) {
               //    markErrorBlur(signUpProjectChoice, "Please choose a language", Placement.TOP);
-            } else {
+            } */
+
+            else {
               gotSignUp(userID, passwordText, emailBox.getValue(), selectedRole);
             }
           }
@@ -443,21 +451,25 @@ class SignUpForm extends UserDialog implements SignUp {
     String passH  = Md5Hash.getHash(password);
     String emailH = Md5Hash.getHash(email);
 
-    boolean isCD = kind == User.Kind.CONTENT_DEVELOPER;
+/*    boolean isCD = kind == User.Kind.CONTENT_DEVELOPER;
     String gender = isCD ? registrationInfo.isMale() ? MALE : "female" : MALE;
     String age = isCD ? registrationInfo.getAgeEntryGroup().getText() : "";
     int age1 = isCD ? (age.isEmpty() ? 99 : Integer.parseInt(age)) : 0;
-    String dialect = isCD ? registrationInfo.getDialectGroup().getText() : "unk";
+    String dialect = isCD ? registrationInfo.getDialectGroup().getText() : "unk";*/
 
+    int age1 = BOGUS_AGE;
+    String dialect = "unk";
     signUp.setEnabled(false);
 
-    SignUpUser newUser = new SignUpUser(user, passH, emailH, email, kind, gender.equalsIgnoreCase(MALE), age1, dialect,
+    SignUpUser newUser = new SignUpUser(user, passH, emailH, email, kind,
+        true,  // don't really know the gender, so guess male...?
+        age1, dialect,
         "browser", "", firstName.getText(), lastName.getText());
 
     service.addUser(
         newUser,
         Window.Location.getHref(),
-        isCD,
+  //      isCD,
         new AsyncCallback<User>() {
           @Override
           public void onFailure(Throwable caught) {

@@ -215,8 +215,8 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   @Override
   public User addUser(
       SignUpUser user,
-      String url,
-      boolean isCD
+      String url//,
+      //boolean isCD
   ) {
     //  findSharedDatabase();
     UserManagement userManagement = db.getUserManagement();
