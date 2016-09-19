@@ -56,7 +56,7 @@ public interface UserServiceAsync {
   void addUser(
       SignUpUser user,
       String url,
-      boolean isCD,
+   //   boolean isCD,
       AsyncCallback<User> async);
 
   void resetPassword(String userid, String text, String url, AsyncCallback<Boolean> asyncCallback);
