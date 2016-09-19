@@ -32,10 +32,10 @@
 
 package mitll.langtest.shared.analysis;
 
+import mitll.langtest.client.analysis.UserContainer;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.user.MiniUser;
 
-import java.io.Serializable;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -47,8 +47,8 @@ import java.util.Map;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 10/29/15.
  */
-public class UserInfo implements Serializable {
-  private MiniUser user;
+public class UserInfo extends MiniUser {
+  //private MiniUser user;
   private int start;
   private int current;
   private int num;
@@ -107,17 +107,24 @@ public class UserInfo implements Serializable {
    * @return
    */
   public MiniUser getUser() {
-    return user;
+    return this;
   }
 
   /**
    * @see mitll.langtest.server.database.analysis.Analysis#getUserInfos(IUserDAO, Map)
    * @param user
    */
-  public void setUser(MiniUser user) {
-    this.user = user;
+ public void setUser(MiniUser user) {
+   setFields(user.getId(),user.getAge(),user.isMale(),user.getUserID(),user.isAdmin());
+   setTimestampMillis(user.getTimestampMillis());
+   user.setFirst(user.getFirst());
+   user.setLast(user.getLast());
   }
 
+  /**
+   * @see UserContainer#getStart
+   * @return
+   */
   public int getStart() {
     return start;
   }
