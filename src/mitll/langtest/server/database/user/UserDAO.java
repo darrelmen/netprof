@@ -511,29 +511,13 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     List<User> users = new ArrayList<>();
 
     while (rs.next()) {
-      String userid;
+      String userid = rs.getString("userid"); // userid
 
-      String perms = rs.getString(PERMISSIONS);
-      Collection<User.Permission> permissions = new ArrayList<>();
-      userid = rs.getString("userid"); // userid
+      Collection<User.Permission> permissions = getPermissions(rs, userid);
 
-      if (perms != null) {
-        perms = perms.replaceAll("\\[", "").replaceAll("\\]", "");
-        for (String perm : perms.split(",")) {
-          perm = perm.trim();
-          try {
-            if (!perm.isEmpty()) {
-              permissions.add(User.Permission.valueOf(perm));
-            }
-          } catch (IllegalArgumentException e) {
-            logger.warn(language + " : huh, for user " + userid +
-                " perm '" + perm +
-                "' is not a permission?");
-          }
-        }
-      }
-
-
+//      if (!permissions.isEmpty()) {
+//        logger.info("For " + userid + " : " + permissions);
+//      }
       boolean isAdmin = isAdmin(userid);
       String userKind = rs.getString(KIND);
 
@@ -574,6 +558,33 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
       }
     }
     return users;
+  }
+
+  private Collection<User.Permission> getPermissions(ResultSet rs, String userid) throws SQLException {
+    String perms = rs.getString(PERMISSIONS);
+    Collection<User.Permission> permissions = new ArrayList<>();
+
+    if (perms != null) {
+//      logger.info("For " + userid + " " + perms);
+
+      perms = perms.replaceAll("\\[", "").replaceAll("\\]", "");
+      for (String perm : perms.split(",")) {
+        perm = perm.trim();
+        try {
+          if (!perm.isEmpty()) {
+            permissions.add(User.Permission.valueOf(perm));
+          }
+        } catch (IllegalArgumentException e) {
+          logger.warn(language + " : huh, for user " + userid +
+              " perm '" + perm +
+              "' is not a permission?");
+        }
+      }
+    }
+    else {
+      logger.info("no perms column???");
+    }
+    return permissions;
   }
 
   @Override
