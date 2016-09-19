@@ -55,11 +55,9 @@ public class User extends MiniUser {
   private String nativeLang;
   private String dialect;
   private String device;
-  private String first = "";
-  private String last = "";
   private String resetKey;
   private String cdKey;
-  private long timestamp;
+//  private long timestamp;
   private Collection<Permission> permissions;
   private ProjectStartupInfo startupInfo;
 
@@ -67,8 +65,7 @@ public class User extends MiniUser {
 //  public boolean isActive() {
 //    return isActive;
 //  }
-
-  public enum Kind implements IsSerializable {UNSET, STUDENT, TEACHER, CONTENT_DEVELOPER, PROJECT_ADMIN, ADMIN}
+  public enum Kind implements IsSerializable {UNSET, STUDENT, TEACHER, CONTENT_DEVELOPER, PROJECT_ADMIN, ADMIN, TEST}
 
   public enum Permission implements IsSerializable {
     QUALITY_CONTROL,
@@ -198,17 +195,17 @@ public class User extends MiniUser {
     return permissions;
   }
 
-  public long getTimestampMillis() {
+ /* public long getTimestampMillis() {
     return timestamp;
   }
 
-  /**
+  *//**
    * @param timestampMillis
-   */
+   *//*
   public void setTimestampMillis(long timestampMillis) {
     this.timestamp = timestampMillis;
   }
-
+*/
   /**
    * @return
    * @see mitll.langtest.client.user.UserTable#getTable
