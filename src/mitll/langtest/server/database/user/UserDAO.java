@@ -426,6 +426,11 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     return mini;
   }
 
+  @Override
+  public Map<User.Kind, Collection<MiniUser>> getMiniByKind() {
+    return null;
+  }
+
   /**
    * @param userid
    * @return null if can't find by id
@@ -528,6 +533,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
       String email = rs.getString(EMAIL);
       String device = rs.getString(DEVICE);
       User.Kind userKind1 = userKind == null ? User.Kind.UNSET : User.Kind.valueOf(userKind);
+      if (admins.contains(userID)) userKind1 = User.Kind.ADMIN;
       String resetKey = rs.getString(RESET_PASSWORD_KEY);
       User newUser = new User(id, //id
           rs.getInt(AGE), // age
@@ -692,11 +698,16 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    * @param user
    * @param resetKey
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#changePFor(String, String)
+   * @see mitll.langtest.server.services.UserServiceImpl#changePFor
    */
   @Override
   public boolean clearKey(int user, boolean resetKey) {
     return updateKey(user, resetKey, "");
+  }
+
+  @Override
+  public Map<User.Kind, Integer> getCounts() {
+    return null;
   }
 
   @Override

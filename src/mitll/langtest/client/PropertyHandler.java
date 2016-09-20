@@ -206,9 +206,11 @@ public class PropertyHandler {
     return afterStopDelayMillis;
   }
 
+/*
   public void setAfterStopDelayMillis(int afterStopDelayMillis) {
     this.afterStopDelayMillis = afterStopDelayMillis;
   }
+*/
 
   public String getFontFamily() {
     return fontFamily;
@@ -221,7 +223,7 @@ public class PropertyHandler {
     return modelDir;
   }
 
-  public enum LOGIN_TYPE {ANONYMOUS, STUDENT}
+  @Deprecated  public enum LOGIN_TYPE {ANONYMOUS, STUDENT}
 
   private boolean spectrogram = false;
   private boolean clickAndHold = true;
