@@ -37,6 +37,7 @@ import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 
 import java.util.Collection;
+import java.util.List;
 
 public class User extends MiniUser {
   public static final String NOT_SET = "NOT_SET";
@@ -131,7 +132,7 @@ public class User extends MiniUser {
   public User(int id, int age, int gender, int experience, String ipaddr, String password,
               boolean enabled, Collection<Permission> permissions) {
     this(id, age, gender, experience, ipaddr, password, NOT_SET, NOT_SET, NOT_SET, enabled, false, permissions,
-        Kind.STUDENT, "", "", "", "", System.currentTimeMillis());
+        Kind.STUDENT, "", "", "", "", "", System.currentTimeMillis());
   }
 
   /**
@@ -146,17 +147,20 @@ public class User extends MiniUser {
    * @param isAdmin
    * @param permissions
    * @param userKind
+   * @param email
    * @param emailHash
    * @param device
    * @param resetPassKey
    * @param cdEnableKey
    * @param timestamp
-   * @see UserDAO#getUsers()
+   * @see mitll.langtest.server.database.user.SlickUserDAOImpl#toUsers(List)
+   * @see UserDAO#getUsers
    */
   public User(int id, int age, int gender, int experience, String ipaddr, String passwordH,
               String nativeLang, String dialect, String userID, boolean enabled, boolean isAdmin,
               Collection<Permission> permissions, Kind userKind,
-              String emailHash,
+              String email, String emailHash,
+
               String device, String resetPassKey,
               String cdEnableKey, long timestamp//, boolean isActive
   ) {
@@ -164,6 +168,7 @@ public class User extends MiniUser {
     this.experience = experience;
     this.ipaddr = ipaddr;
     this.passwordHash = passwordH;
+    this.email = email;
     this.emailHash = emailHash;
     this.userKind = userKind;
     this.setEnabled(enabled);
@@ -175,7 +180,6 @@ public class User extends MiniUser {
     this.resetKey = resetPassKey;
     this.cdKey = cdEnableKey;
     this.timestamp = timestamp;
-    //   this.isActive = isActive;
   }
 
   public boolean isStudent() {

@@ -32,30 +32,22 @@
 
 package mitll.langtest.client.userops;
 
-import com.github.gwtbootstrap.client.ui.CheckBox;
-import com.github.gwtbootstrap.client.ui.ControlGroup;
-import com.github.gwtbootstrap.client.ui.ControlLabel;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.analysis.BasicUserContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.services.UserServiceAsync;
+import mitll.langtest.client.user.UserPassDialog;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 
@@ -68,6 +60,7 @@ public class OpsUserContainer extends BasicUserContainer<MiniUser> {
   public OpsUserContainer(ExerciseController controller, String header, DivWidget rightSide) {
     super(controller, header);
     this.rightSide = rightSide;
+    rightSide.clear();
   }
 
   protected int getPageSize() {
@@ -147,58 +140,83 @@ public class OpsUserContainer extends BasicUserContainer<MiniUser> {
 
     rightSide.clear();
 
-    UserServiceAsync userService = controller.getUserService();
-    userService.getUser(user.getId(), new AsyncCallback<User>() {
-      @Override
-      public void onFailure(Throwable throwable) {
+    if (!user.isAdmin()) {
+      UserServiceAsync userService = controller.getUserService();
+      userService.getUser(user.getId(), new AsyncCallback<User>() {
+        @Override
+        public void onFailure(Throwable throwable) {
+        }
 
-      }
-
-      @Override
-      public void onSuccess(User user) {
-//        if (user.isEnabled()) {
-        CheckBox enabled = new CheckBox("Enabled");
-        enabled.setValue(user.isEnabled());
-//        enabled.setVisible(false);
-        enabled.addStyleName("leftTenMargin");
-        enabled.addClickHandler(new ClickHandler() {
-          @Override
-          public void onClick(ClickEvent event) {
-            if (!enabled.getValue()) {
-              userService.deactivate(user.getId(), new AsyncCallback<Boolean>() {
-                @Override
-                public void onFailure(Throwable throwable) {
-                  // enabled.setValue(false);
-                }
-
-                @Override
-                public void onSuccess(Boolean aBoolean) {
-                }
-              });
-            } else {
-              userService.activate(user.getId(), new AsyncCallback<Boolean>() {
-                @Override
-                public void onFailure(Throwable throwable) {
-                  // enabled.setValue(true);
-                }
-
-                @Override
-                public void onSuccess(Boolean aBoolean) {
-                }
-              });
-            }
-          }
-        });
-
-        //rightSide.add(enabled);
-
-        addControlGroupEntry(rightSide, "Enabled?", enabled, "Lock or unlock user");
-      }
-      //  }
-    });
+        @Override
+        public void onSuccess(User user) {
+          populateUserEdit(rightSide, user);
+        }
+      });
+    }
   }
 
-  protected ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget widget, String hint) {
+  private void populateUserEdit(DivWidget userDetail,
+                                User user
+  ) {
+
+    EditUserForm signUpForm = new EditUserForm(
+        controller.getProps(),
+        null,
+        controller,
+        new UserPassDialog() {
+          @Override
+          public void clearSignInHasFocus() {
+          }
+
+          @Override
+          public void setSignInHasFocus() {
+          }
+        });
+    signUpForm.setSignUpButtonTitle("Edit User");
+    Panel signUpForm1 = signUpForm.getSignUpForm(user);
+    signUpForm1.addStyleName("leftFiveMargin");
+    userDetail.add(signUpForm1);
+ //   getEnabledCheckBox(user, controller.getUserService(), rightSide);
+  }
+
+/*  private void getEnabledCheckBox(final User user, final UserServiceAsync userService,
+                                  DivWidget toAddTo) {
+    CheckBox enabled = new CheckBox("Enabled");
+    enabled.setValue(user.isEnabled());
+    enabled.addStyleName("leftTenMargin");
+    enabled.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        if (!enabled.getValue()) {
+          userService.deactivate(user.getId(), new AsyncCallback<Boolean>() {
+            @Override
+            public void onFailure(Throwable throwable) {
+              // enabled.setValue(false);
+            }
+
+            @Override
+            public void onSuccess(Boolean aBoolean) {
+            }
+          });
+        } else {
+          userService.activate(user.getId(), new AsyncCallback<Boolean>() {
+            @Override
+            public void onFailure(Throwable throwable) {
+              // enabled.setValue(true);
+            }
+
+            @Override
+            public void onSuccess(Boolean aBoolean) {
+            }
+          });
+        }
+      }
+    });
+
+    addControlGroupEntry(toAddTo, "Enabled?", enabled, "Lock or unlock user");
+  }*/
+
+/*  protected ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget widget, String hint) {
     final ControlGroup userGroup = new ControlGroup();
     userGroup.addStyleName("leftFiveMargin");
     ControlLabel labelWidget = new ControlLabel(label);
@@ -222,5 +240,5 @@ public class OpsUserContainer extends BasicUserContainer<MiniUser> {
     }
     dialogBox.add(userGroup);
     return userGroup;
-  }
+  }*/
 }
