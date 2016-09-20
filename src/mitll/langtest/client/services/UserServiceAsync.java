@@ -45,6 +45,8 @@ import java.util.Map;
 
 public interface UserServiceAsync {
   void getUsers(AsyncCallback<List<User>> async);
+  void getUser(int id,AsyncCallback<User> async);
+  void deactivate(int id,AsyncCallback<Boolean> async);
 
   void userExists(String login, String passwordH, AsyncCallback<User> async);
 
@@ -91,4 +93,6 @@ public interface UserServiceAsync {
   void getCounts(AsyncCallback<Map<User.Kind, Integer>> async);
 
   void getKindToUser(AsyncCallback<Map<User.Kind, Collection<MiniUser>>> async);
+
+  void activate(int id, AsyncCallback<Boolean> async);
 }

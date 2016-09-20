@@ -49,6 +49,7 @@ import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -63,22 +64,6 @@ public class UserOps {
 
   Map<User.Kind, Label> kindToLabel = new HashMap<>();
   Map<User.Kind, IconType> kindToIcon = new HashMap<>();
-
-/*  private void addUserMaintenance(TabAndContent users) {
-   // users = makeFirstLevelTab(tabPanel, IconType.GROUP, USERS);
-
-    users.getTab().addClickHandler(new ClickHandler() {
-       @Override
-      public void onClick(ClickEvent event) {
-        checkAndMaybeClearTab(USERS);
-        // learnHelper.showNPF(chapters, LEARN);
-        showUsers();
-
-
-        logEvent(users, USERS);
-      }
-    });
-  }*/
 
   public UserOps(ExerciseController controller, UserManager userManager) {
     setKindToIcon();
@@ -100,32 +85,36 @@ public class UserOps {
 
     DivWidget left = addDiv(content);
     DivWidget right = addDiv(content);
-    NavLink first = getKinds(left, right);
+    DivWidget detail = addDiv(content);
+
+    NavLink first = getKinds(left, right,detail);
+
     userManager.getCounts(kindToLabel);
 
     right.getElement().setId("userContent");
     right.getElement().getStyle().setMarginLeft(10, Style.Unit.PX);
-
 //    logger.info("Loaded everything...");
 
+    showInitialState(right, detail, first);
+  }
+
+  private void showInitialState(final DivWidget right, final DivWidget detail, NavLink first) {
     final NavLink toClick = first;
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       @Override
       public void execute() {
         if (toClick != null) {
-          //showUsers(users);
-          showUsers(User.Kind.STUDENT, right);
+          showUsers(User.Kind.STUDENT, right, detail);
           toClick.setActive(true);
           lastClicked = toClick;
-          //toClick.fireEvent(new Navigation.ButtonClickEvent());
-          logger.info("Fire click event on " + toClick.getElement().getId());
         }
       }
     });
   }
 
-  NavLink lastClicked = null;
-  private NavLink getKinds(DivWidget left, DivWidget right) {
+  private NavLink lastClicked = null;
+
+  private NavLink getKinds(DivWidget left, DivWidget right, DivWidget detail) {
     NavList kindsLinks = new NavList();
     kindsLinks.setWidth("180px");
     left.add(kindsLinks);
@@ -135,7 +124,7 @@ public class UserOps {
     NavLink first = null;
     for (User.Kind kind : User.Kind.values()) {
       if (kind.shouldShow()) {
-        NavLink userLink = getUserLink(kind, right);
+        NavLink userLink = getUserLink(kind, right, detail);
         kindsLinks.add(userLink);
         if (first == null) first = userLink;
       }
@@ -151,10 +140,7 @@ public class UserOps {
     return left;
   }
 
-  private class ButtonClickEvent extends ClickEvent {
-  }
-
-  private NavLink getUserLink(User.Kind kind, DivWidget content) {
+  private NavLink getUserLink(User.Kind kind, DivWidget content, DivWidget userForm) {
     NavLink students = new NavLink(kind.getName() + "s");
     students.setIcon(kindToIcon.get(kind));
     students.getElement().setId("link_" + kind);
@@ -166,14 +152,15 @@ public class UserOps {
       @Override
       public void onClick(ClickEvent clickEvent) {
         lastClicked.setActive(false);
-        showUsers(kind, content);
+        showUsers(kind, content, userForm);
         students.setActive(true);
+        lastClicked = students;
       }
     });
     return students;
   }
 
-  private void showUsers(final User.Kind kind, final DivWidget content) {
+  private void showUsers(final User.Kind kind, final DivWidget content, DivWidget userForm) {
     userManager.getUserService().getKindToUser(new AsyncCallback<Map<User.Kind, Collection<MiniUser>>>() {
       @Override
       public void onFailure(Throwable throwable) {
@@ -182,20 +169,29 @@ public class UserOps {
 
       @Override
       public void onSuccess(Map<User.Kind, Collection<MiniUser>> kindCollectionMap) {
-        showUserList(kind, content, kindCollectionMap);
+        showUserList(kind, content, kindCollectionMap, userForm);
       }
     });
   }
 
   private void showUserList(User.Kind kind,
                             DivWidget content,
-                            Map<User.Kind, Collection<MiniUser>> kindCollectionMap) {
+                            Map<User.Kind, Collection<MiniUser>> kindCollectionMap
+      , DivWidget userForm) {
     content.clear();
     Collection<MiniUser> miniUsers = kindCollectionMap.get(kind);
-    content.add(getUsers(kind, miniUsers));
+    if (miniUsers == null) miniUsers = new ArrayList<>();
+    content.add(getUsers(kind, miniUsers, userForm));
   }
 
-  private DivWidget getUsers(User.Kind kind, Collection<MiniUser> miniUsers) {
-    return new OpsUserContainer(controller, kind.getName()).getTable(miniUsers, "", "");
+  private DivWidget getUsers(User.Kind kind, Collection<MiniUser> miniUsers, DivWidget userForm) {
+    return getOpsUserContainer(kind, userForm).getTable(miniUsers, "", "");
+  }
+
+  private OpsUserContainer getOpsUserContainer(User.Kind kind, DivWidget rightSide) {
+    return new OpsUserContainer(controller,
+        kind.getName(),
+        rightSide
+    );
   }
 }
