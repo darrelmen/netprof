@@ -52,7 +52,7 @@ import java.util.List;
 public class EmailHelper {
   private static final Logger logger = Logger.getLogger(EmailHelper.class);
 
-  private static final String NP_SERVER = "np.ll.mit.edu";
+  //private static final String NP_SERVER = "np.ll.mit.edu";
   private static final String MY_EMAIL = "gordon.vidaver@ll.mit.edu";
   private static final String CLOSING = "Regards, Administrator";
   private static final String GORDON = "Gordon";
@@ -63,28 +63,27 @@ public class EmailHelper {
 
   private static final String PASSWORD_RESET = "Password Reset";
   private static final String RESET_PASSWORD = "Reset Password";
-  private static final String REPLY_TO = "admin@" + NP_SERVER;
+  // private static final String REPLY_TO = "admin@" + NP_SERVER;
   private static final String YOUR_USER_NAME = "Your user name";
   public static final String NETPROF_HELP_DLIFLC_EDU = "netprof-help@dliflc.edu";
 
-  /**
-   * TODO: Content developer is in context of a project
-   */
-  //@Deprecated private final String language;
   private final IUserDAO userDAO;
   private final MailSupport mailSupport;
   private ServerProperties serverProperties;
   private PathHelper pathHelper;
+  String REPLY_TO, NP_SERVER;
 
   public EmailHelper(ServerProperties serverProperties,
                      IUserDAO userDAO,
                      MailSupport mailSupport,
                      PathHelper pathHelper) {
-    // this.language = serverProperties.getLanguage();
     this.serverProperties = serverProperties;
+
     this.userDAO = userDAO;
     this.mailSupport = mailSupport;
     this.pathHelper = pathHelper;
+    NP_SERVER = serverProperties.getNPServer();
+    REPLY_TO = "admin@" + NP_SERVER;
   }
 
   private String getHash(String toHash) {
@@ -136,8 +135,8 @@ public class EmailHelper {
    * @param email
    * @param url
    * @return true if there's a user with this email
-   * @see mitll.langtest.client.user.UserPassLogin#getForgotPassword()
-   * @see mitll.langtest.server.ScoreServlet#resetPassword
+   * @see mitll.langtest.server.rest.RestUserManagement#resetPassword
+   * @see mitll.langtest.server.services.UserServiceImpl#resetPassword
    */
   public boolean resetPassword(String user, String email, String url) {
     logger.debug(" resetPassword for " + user + " url " + url);
@@ -365,7 +364,6 @@ public class EmailHelper {
   }
 
   /**
-   *
    * @param email
    * @param userID1
    * @param firstName
@@ -381,10 +379,16 @@ public class EmailHelper {
         "Your user id is " + userID1 +
         ".<br/>" +
         "You are now a user of NetProF.<br/>" +
-        "If you have any questions, see the user manual or email <a href='mailto:" +
-        NETPROF_HELP_DLIFLC_EDU +
-        "'>NetProF Help</a>."
+        "If you have any questions, see the user manual or email " +
+        getHelpEmail() +
+        "."
         ;
+  }
+
+  private String getHelpEmail() {
+    return "<a href='mailto:" +
+        NETPROF_HELP_DLIFLC_EDU +
+        "'>NetProF Help</a>";
   }
 
   private String trimURL(String url) {
@@ -407,4 +411,30 @@ public class EmailHelper {
     return builder.toString();
   }
 
+  /**
+   * @see mitll.langtest.server.services.UserServiceImpl#changePassword(int, String, String)
+   * @param userWhereResetKey
+   */
+  public void sendChangedPassword(User userWhereResetKey) {
+    String email = userWhereResetKey.getEmail();
+    if (email != null && !email.isEmpty()) {
+      String first = userWhereResetKey.getFirst();
+      String userID = userWhereResetKey.getUserID();
+      String greeting = first.isEmpty() ? userID :
+          first;
+      String message = "Hi " + greeting + ",<br/>" +
+          "Your password for your NetProF account" + (first.isEmpty() ? "" : " " + userID) +
+          " has changed. If this is in error, please contact the help email at " + getHelpEmail() + "." +
+          "<br/>Click on the link below to log in." +
+          "<br/><br/>" +
+          CLOSING;
+
+      sendEmail(NP_SERVER, // baseURL
+          email, // destination email
+          "Password Changed for " + userID, // subject
+          message,
+          "Click here to return to the site." // link text
+      );
+    }
+  }
 }

@@ -41,20 +41,20 @@ import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.services.AudioServiceAsync;
 import mitll.langtest.client.services.QCServiceAsync;
 import mitll.langtest.client.services.ScoringServiceAsync;
+import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.ProjectStartupInfo;
-import mitll.langtest.shared.user.User;
 
 import java.util.Collection;
 
 /**
  * Common services for UI components.
- *
+ * <p>
  * TODO :  This could be made less of a grab bag of stuff - break into interfaces, etc.
- *
+ * <p>
  * Created with IntelliJ IDEA.
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -70,8 +70,11 @@ public interface ExerciseController extends EventRegistration {
 
   QCServiceAsync getQCService();
 
+  UserServiceAsync getUserService();
+
   /**
    * TODO : do we really need to do this?
+   *
    * @return
    */
   ScoringServiceAsync getScoringService();
@@ -84,16 +87,14 @@ public interface ExerciseController extends EventRegistration {
 
   int getUser();
 
-//  User getCurrent();
-
-//  boolean isAdmin();
-
   void startRecording();
+
   void stopRecording(WavCallback wavCallback);
 
   SoundManagerAPI getSoundManager();
 
-@Deprecated boolean showOnlyOneExercise();
+  @Deprecated
+  boolean showOnlyOneExercise();
 
   boolean useBkgColorForRef();
 
@@ -101,23 +102,26 @@ public interface ExerciseController extends EventRegistration {
 
   boolean isLogClientMessages();
 
-  //Collection<User.Permission> getPermissions();
-
   boolean showCompleted();
 
   void getImage(int reqid, String path, String type, int toUse, int height, int exerciseID, AsyncCallback<ImageResponse> client);
 
   String getLanguage();
+
   boolean isRightAlignContent();
+
   int getHeightOfTopRows();
 
   PropertyHandler getProps();
 
   String logException(Throwable throwable);
+
   void logMessageOnServer(String message, String prefix);
 
   ProjectStartupInfo getProjectStartupInfo();
+
   boolean hasModel();
+
   Collection<String> getTypeOrder();
 
   void addKeyListener(KeyPressHelper.KeyListener listener);
@@ -125,8 +129,6 @@ public interface ExerciseController extends EventRegistration {
   boolean isRecordingEnabled();
 
   boolean usingFlashRecorder();
-
- // void checkUser();
 
   boolean isMicAvailable();
 }
