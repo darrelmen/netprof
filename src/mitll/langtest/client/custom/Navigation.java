@@ -33,7 +33,6 @@
 package mitll.langtest.client.custom;
 
 import com.github.gwtbootstrap.client.ui.*;
-import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.GWT;
@@ -43,8 +42,9 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.*;
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.RequiresResize;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.analysis.AnalysisTab;
 import mitll.langtest.client.analysis.ShowTab;
@@ -65,6 +65,7 @@ import mitll.langtest.client.services.ExerciseService;
 import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
+import mitll.langtest.client.userops.UserOps;
 import mitll.langtest.shared.ContextPractice;
 import mitll.langtest.shared.analysis.WordAndScore;
 import mitll.langtest.shared.analysis.WordScore;
@@ -73,10 +74,7 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.user.User;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -204,6 +202,8 @@ public class Navigation implements RequiresResize, ShowTab {
     practiceHelper = new PracticeHelper(service, feedback, userManager, controller, exerciseServiceAsync);
     recorderHelper = new RecorderNPFHelper(service, feedback, userManager, controller, true, learnHelper, exerciseServiceAsync);
     recordExampleHelper = new RecorderNPFHelper(service, feedback, userManager, controller, false, learnHelper, exerciseServiceAsync);
+
+  //  setKindToIcon();
   }
 
   public boolean isRTL() {
@@ -432,48 +432,100 @@ public class Navigation implements RequiresResize, ShowTab {
       public void onClick(ClickEvent event) {
         checkAndMaybeClearTab(USERS);
         // learnHelper.showNPF(chapters, LEARN);
+        new UserOps(controller,userManager).showUsers(users);
 
-        showUsers();
 
         logEvent(users, USERS);
       }
     });
   }
 
-  private void showUsers() {
+/*
+  Map<User.Kind, Label> kindToLabel = new HashMap<>();
+  Map<User.Kind, IconType> kindToIcon = new HashMap<>();
+
+  private void setKindToIcon() {
+    kindToIcon.put(User.Kind.STUDENT, IconType.USER);
+    kindToIcon.put(User.Kind.TEACHER, IconType.GROUP);
+    kindToIcon.put(User.Kind.CONTENT_DEVELOPER, IconType.PENCIL);
+    kindToIcon.put(User.Kind.PROJECT_ADMIN, IconType.BOLT);
+    kindToIcon.put(User.Kind.ADMIN, IconType.ANDROID);
+  }
+*/
+
+ /* private void showUsers() {
     DivWidget content = users.getContent();
     content.clear();
 
     NavList w = new NavList();
     w.setWidth("180px");
     content.add(w);
-    w.add(new NavHeader("Users"));
-    NavLink students = new NavLink("Students");
-    students.setIcon(IconType.USER);
-    Label w5 = new Label("5");
-    w5.getElement().getStyle().setFloat(Style.Float.RIGHT);
-    students.add(w5);
-    w.add(students);
-    NavLink teachers = new NavLink("Teachers");
-    teachers.setIcon(IconType.GROUP);
-    w.add(teachers);
-    NavLink w2 = new NavLink("Content Developers");
-    w2.setIcon(IconType.PENCIL);
-    w.add(w2);
-    NavLink w3 = new NavLink("Program Admins");
-    w3.setIcon(IconType.BOLT);
-    w.add(w3);
-    NavLink w4 = new NavLink("System Admins");
-    w4.setIcon(IconType.ANDROID);
-    w.add(w4);
 
+    w.add(new NavHeader("Users"));
+    NavLink first = null;
     DivWidget w1 = new DivWidget();
+    for (User.Kind kind : User.Kind.values()) {
+      if (kind.shouldShow()) {
+        NavLink userLink = getUserLink(kind, w1);
+        w.add(userLink);
+        if (first == null) first = userLink;
+      }
+    }
+    userManager.getCounts(kindToLabel);
+
     content.add(w1);
     w1.getElement().setId("userContent");
-    w1.getElement().getStyle().setMarginLeft(181, Style.Unit.PX);
+    w1.getElement().getStyle().setMarginLeft(220, Style.Unit.PX);
 
+    logger.info("Loaded everything...");
 
+    final NavLink toClick = first;
+    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+      @Override
+      public void execute() {
+        if (toClick != null) {
+          toClick.fireEvent(new ButtonClickEvent());
+          logger.info("Fire click event on " + toClick.getElement().getId());
+        }
+      }
+    });
+  }*/
+
+  /*private class ButtonClickEvent extends ClickEvent {
   }
+
+  private NavLink getUserLink(User.Kind kind, DivWidget content) {
+    NavLink students = new NavLink(kind.getName() + "s");
+    students.setIcon(kindToIcon.get(kind));
+    students.getElement().setId("link_" + kind);
+    Label w5 = new Label("");
+    kindToLabel.put(kind, w5);
+    w5.getElement().getStyle().setFloat(Style.Float.RIGHT);
+    students.add(w5);
+    students.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent clickEvent) {
+        userManager.getUserService().getKindToUser(new AsyncCallback<Map<User.Kind, Collection<MiniUser>>>() {
+          @Override
+          public void onFailure(Throwable throwable) {
+
+          }
+
+          @Override
+          public void onSuccess(Map<User.Kind, Collection<MiniUser>> kindCollectionMap) {
+            content.clear();
+            Collection<MiniUser> miniUsers = kindCollectionMap.get(kind);
+            content.add(getUsers(miniUsers));
+          }
+        });
+      }
+
+      private DivWidget getUsers(Collection<MiniUser> miniUsers) {
+        return new OpsUserContainer(controller, kind.getName()).getTable(miniUsers, kind.getName(), "");
+      }
+    });
+    return students;
+  }*/
 
   private void addLearnTab() {
     chapters = makeFirstLevelTab(tabPanel, IconType.LIGHTBULB, CHAPTERS);
@@ -667,7 +719,7 @@ public class Navigation implements RequiresResize, ShowTab {
       } else if (clickedTab.equals(CHAPTERS)) {
         learnHelper.showNPF(chapters, LEARN);
       } else if (clickedTab.equals(USERS)) {
-       showUsers();
+        new UserOps(controller,userManager).showUsers(users);
       } else if (clickedTab.equals(RECORD_AUDIO)) {
         recorderHelper.showNPF(recorderTab, AudioType.RECORDER.toString());
       } else if (clickedTab.equals(RECORD_EXAMPLE)) {

@@ -34,12 +34,14 @@ package mitll.langtest.client.user;
 
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Label;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.shared.user.LoginResult;
 import mitll.langtest.shared.user.User;
 
 import java.util.Date;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -72,16 +74,15 @@ public class UserManager {
 
   private static final String USER_ID = "userID";
   private static final String USER_CHOSEN_ID = "userChosenID";
- // private static final String AUDIO_TYPE = "audioType";
+  // private static final String AUDIO_TYPE = "audioType";
 
   private final UserServiceAsync userServiceAsync;
   private final UserNotification userNotification;
   private long userID = NO_USER_SET;
   private String userChosenID = "";
 
-  private final PropertyHandler.LOGIN_TYPE loginType;
+  //  private final PropertyHandler.LOGIN_TYPE loginType;
   private final String appTitle;
- // private final PropertyHandler props;
   private User current;
 
   /**
@@ -93,11 +94,12 @@ public class UserManager {
   public UserManager(UserNotification lt, UserServiceAsync userServiceAsync, PropertyHandler props) {
     this.userNotification = lt;
     this.userServiceAsync = userServiceAsync;
-   // this.props = props;
-    this.loginType = props.getLoginType();
+    // this.props = props;
+    //  this.loginType = props.getLoginType();
     this.appTitle = props.getAppTitle();
   }
 
+  public UserServiceAsync getUserService() { return userServiceAsync; }
   /**
    * Keeping option to do an anonymous login...
    * for egyptian class and headstart?
@@ -107,10 +109,10 @@ public class UserManager {
    */
   public void checkLogin() {
     //logger.info("loginType " + loginType);
-  //  if (loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS)) { // explicit setting of login type
- //     anonymousLogin();
-  //  } else {
-      login();
+    //  if (loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS)) { // explicit setting of login type
+    //     anonymousLogin();
+    //  } else {
+    login();
     //}
   }
 
@@ -326,7 +328,9 @@ public class UserManager {
     return appTitle + ":" + USER_ID;
   }
 
-  private String getPassCookie() { return appTitle + ":" + "pwd";  }
+  private String getPassCookie() {
+    return appTitle + ":" + "pwd";
+  }
 
   private String getUserChosenID() {
     return appTitle + ":" + USER_CHOSEN_ID;
@@ -401,7 +405,7 @@ public class UserManager {
       localStorageIfSupported.removeItem(getUserIDCookie());
       localStorageIfSupported.removeItem(getPassCookie());
       localStorageIfSupported.removeItem(getUserChosenID());
-     // logger.info("clearUser : removed item " + getUserID() + " user now " + getUser());
+      // logger.info("clearUser : removed item " + getUserID() + " user now " + getUser());
     } else {
       userID = NO_USER_SET;
     }
@@ -500,7 +504,7 @@ public class UserManager {
    * @return one year for anonymous
    */
   private long getUserSessionDuration() {
-    long mult = loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS) ? 52 : 4;
+    long mult =/* loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS) ? 52 :*/ 4;
     return EXPIRATION_HOURS * mult;
   }
 
@@ -518,5 +522,27 @@ public class UserManager {
 
   public User getCurrent() {
     return current;
+  }
+
+  public void getCounts(Map<User.Kind, Label> kindToLabel) {
+    userServiceAsync.getCounts(new AsyncCallback<Map<User.Kind, Integer>>() {
+      @Override
+      public void onFailure(Throwable throwable) {
+
+      }
+
+      @Override
+      public void onSuccess(Map<User.Kind, Integer> kindIntegerMap) {
+        for (Map.Entry<User.Kind, Label> pair : kindToLabel.entrySet()) {
+          Integer count = kindIntegerMap.get(pair.getKey());
+          if (count != null) {
+            pair.getValue().setText("" + count);
+          } else {
+            pair.getValue().setText("0");
+
+          }
+        }
+      }
+    });
   }
 }
