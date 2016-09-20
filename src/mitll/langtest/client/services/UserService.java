@@ -44,10 +44,13 @@ import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.UserPassLogin;
 import mitll.langtest.shared.user.LoginResult;
+import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 @RemoteServiceRelativePath("user-manager")
 public interface UserService extends RemoteService {
@@ -64,6 +67,10 @@ public interface UserService extends RemoteService {
    * @see mitll.langtest.client.user.UserTable#showDialog
    */
   List<User> getUsers();
+
+  Map<User.Kind,Integer> getCounts();
+
+  Map<User.Kind,Collection<MiniUser>> getKindToUser();
 
   /**
    * @param login

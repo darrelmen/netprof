@@ -57,15 +57,42 @@ public class User extends MiniUser {
   private String device;
   private String resetKey;
   private String cdKey;
-//  private long timestamp;
+  //  private long timestamp;
   private Collection<Permission> permissions;
   private ProjectStartupInfo startupInfo;
 
-//  private boolean isActive;
+  //  private boolean isActive;
 //  public boolean isActive() {
 //    return isActive;
 //  }
-  public enum Kind implements IsSerializable {UNSET, STUDENT, TEACHER, CONTENT_DEVELOPER, PROJECT_ADMIN, ADMIN, TEST}
+  public enum Kind implements IsSerializable {
+    UNSET("Unset", false),
+    STUDENT("Student", true),
+    TEACHER("Teacher", true),
+    CONTENT_DEVELOPER("Content Developer", true),
+    PROJECT_ADMIN("Project Admin", true), ADMIN("System Admin", true),
+    TEST("Test Account", false),
+    INTERNAL("INTERNAL", false);
+
+    String name;
+    boolean show;
+
+    Kind() {
+    }
+
+    Kind(String name, boolean show) {
+      this.name = name;
+      this.show = show;
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public boolean shouldShow() {
+      return show;
+    }
+  }
 
   public enum Permission implements IsSerializable {
     QUALITY_CONTROL,
@@ -206,6 +233,7 @@ public class User extends MiniUser {
     this.timestamp = timestampMillis;
   }
 */
+
   /**
    * @return
    * @see mitll.langtest.client.user.UserTable#getTable
