@@ -826,6 +826,9 @@ public class LangTest implements
   public AudioServiceAsync getAudioService() {
     return audioService;
   }
+  public UserServiceAsync getUserService() {
+    return userService;
+  }
 
   public QCServiceAsync getQCService() {
     return qcServiceAsync;

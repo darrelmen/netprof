@@ -118,7 +118,6 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
     String relativeConfigDir = "config" + File.separator + servletContext.getInitParameter("config");
     String configDir = pathHelper.getInstallPath() + File.separator + relativeConfigDir;
     serverProps = new ServerProperties(servletContext, configDir);
-   // PathHelper pathHelper = new PathHelper(getServletContext(), serverProps);
   }
 
   protected int getProjectID() {
