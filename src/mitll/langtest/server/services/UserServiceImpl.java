@@ -253,9 +253,11 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @return
    * @see mitll.langtest.client.user.UserTable#showDialog
    */
-  public List<User> getUsers() {  return db.getUsers();  }
+  public List<User> getUsers() {
+    return db.getUsers();
+  }
 
-  public Map<User.Kind,Integer> getCounts() {
+  public Map<User.Kind, Integer> getCounts() {
     return db.getUserDAO().getCounts();
   }
 
@@ -318,7 +320,8 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   }
 
   /**
-   * TODO: consider stronger password like in domino.
+   * TODO: consider stronger passwords like in domino.
+   *
    * @param userid
    * @param currentPasswordH
    * @param passwordH
@@ -330,6 +333,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
       return false;
     } else if (userWhereResetKey.getPasswordHash().equals(currentPasswordH)) {
       if (db.getUserDAO().changePassword(userid, passwordH)) {
+        getEmailHelper().sendChangedPassword(userWhereResetKey);
         return true;
       } else {
         logger.error("couldn't update user password for user " + userid);
@@ -342,7 +346,6 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
 
   @Override
   public void changeEnabledFor(int userid, boolean enabled) {
-    //findSharedDatabase();
     User userWhere = db.getUserDAO().getUserWhere(userid);
     if (userWhere == null) logger.error("couldn't find " + userid);
     else {
@@ -359,7 +362,6 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    */
   @Override
   public boolean forgotUsername(String emailH, String email, String url) {
-    //findSharedDatabase();
     String userChosenIDIfValid = db.getUserDAO().isValidEmail(emailH);
     getEmailHelper().getUserNameEmail(email, url, userChosenIDIfValid);
     return userChosenIDIfValid != null;
@@ -394,5 +396,18 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     } catch (DominoSessionException e) {
       logger.error("got  " + e, e);
     }
+  }
+
+  @Override
+  public User getUser(int id) {
+    return db.getUserDAO().getByID(id);
+  }
+
+  public boolean deactivate(int id) {
+    return db.getUserDAO().changeEnabled(id, false);
+  }
+
+  public boolean activate(int id) {
+    return db.getUserDAO().changeEnabled(id, true);
   }
 }

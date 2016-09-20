@@ -39,8 +39,6 @@ import mitll.langtest.shared.user.User;
 public interface SignUp {
   void setEnterKeyButtonHelper(KeyPressHelper enterKeyButtonHelper);
   void clickSignUp();
-
   void copyInfoToSignUp(User result, String passwordText);
-
   Panel getSignUpForm();
 }
