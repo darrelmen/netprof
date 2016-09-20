@@ -53,10 +53,11 @@ import mitll.langtest.shared.user.User;
 import java.util.logging.Logger;
 
 class SignInForm extends UserDialog implements SignIn {
+  public static final String DEACTIVATED = "I'm sorry, this account has been deactivated.";
   private final Logger logger = Logger.getLogger("SignUpForm");
 
   private static final String TROUBLE_CONNECTING_TO_SERVER = "Trouble connecting to server.";
-  private static final String NO_USER_FOUND = "No user found - have you signed up?";
+  private static final String NO_USER_FOUND = "No userField found - have you signed up?";
 
   private static final String MAGIC_PASS = Md5Hash.getHash("adm!n");
 
@@ -68,10 +69,10 @@ class SignInForm extends UserDialog implements SignIn {
   private static final String PASSWORD = "Password";
   private static final String USERNAME = "Username";
   private static final String SIGN_IN = "Log In";
-  private static final String PLEASE_ENTER_A_LONGER_USER_ID = "Please enter a longer user id.";
+  private static final String PLEASE_ENTER_A_LONGER_USER_ID = "Please enter a longer userField id.";
   private static final String PLEASE_WAIT = "Please wait";
   private static final String FORGOT_PASSWORD = "Forgot password?";
-  private static final String ENTER_A_USER_NAME = "Enter a user name.";
+  private static final String ENTER_A_USER_NAME = "Enter a userField name.";
   private static final String CHECK_EMAIL = "Check Email";
   private static final String PLEASE_CHECK_YOUR_EMAIL = "Please check your email";
   private static final String ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD = "Enter your email to reset your password.";
@@ -81,7 +82,7 @@ class SignInForm extends UserDialog implements SignIn {
   private static final String PLEASE_CHECK = "Please check";
   private static final int EMAIL_POPUP_DELAY = 4000;
 
-  private FormField user;
+  private FormField userField;
   private FormField password;
 
   private Button signIn;
@@ -134,35 +135,35 @@ class SignInForm extends UserDialog implements SignIn {
   }
 
   /**
-   * If there's an existing user without a password, copy their info to the sign up box.
+   * If there's an existing userField without a password, copy their info to the sign up box.
    *
    * @param fieldset
    * @see #populateSignInForm
    */
   private void makeSignInUserName(Fieldset fieldset) {
-    user = addControlFormFieldWithPlaceholder(fieldset, false, MIN_LENGTH_USER_ID, USER_ID_MAX_LENGTH, USERNAME);
-    user.box.addStyleName("topMargin");
-    user.box.addStyleName("rightFiveMargin");
-    user.box.getElement().setId("Use`rname_Box_SignIn");
-    user.box.setWidth(SIGN_UP_WIDTH);
+    userField = addControlFormFieldWithPlaceholder(fieldset, false, MIN_LENGTH_USER_ID, USER_ID_MAX_LENGTH, USERNAME);
+    userField.box.addStyleName("topMargin");
+    userField.box.addStyleName("rightFiveMargin");
+    userField.box.getElement().setId("Use`rname_Box_SignIn");
+    userField.box.setWidth(SIGN_UP_WIDTH);
 
-    user.box.addFocusHandler(new FocusHandler() {
+    userField.box.addFocusHandler(new FocusHandler() {
       @Override
       public void onFocus(FocusEvent event) {
         // signInHasFocus = true;
         userPassLogin.setSignInHasFocus();
-        eventRegistration.logEvent(user.box, "UserNameBox", "N/A", "focus in username field");
+        eventRegistration.logEvent(userField.box, "UserNameBox", "N/A", "focus in username field");
       }
     });
 
-    user.box.addBlurHandler(new BlurHandler() {
+    userField.box.addBlurHandler(new BlurHandler() {
       @Override
       public void onBlur(BlurEvent event) {
-        if (!user.getText().isEmpty()) {
-          eventRegistration.logEvent(user.box, "UserNameBox", "N/A", "left username field '" + user.getText() + "'");
+        if (!userField.getText().isEmpty()) {
+          eventRegistration.logEvent(userField.box, "UserNameBox", "N/A", "left username field '" + userField.getText() + "'");
 
-          //    logger.info("checking makeSignInUserName " + user.getText());
-          service.userExists(user.getText(), "", new AsyncCallback<User>() {
+          //    logger.info("checking makeSignInUserName " + userField.getText());
+          service.userExists(userField.getText(), "", new AsyncCallback<User>() {
             @Override
             public void onFailure(Throwable caught) {
 
@@ -170,13 +171,13 @@ class SignInForm extends UserDialog implements SignIn {
 
             @Override
             public void onSuccess(User result) {
-              // logger.info("makeSignInUserName : for " + user.getText() + " got back " + result);
+              // logger.info("makeSignInUserName : for " + userField.getText() + " got back " + result);
               if (result != null) {
                 String emailHash = result.getEmailHash();
                 String passwordHash = result.getPasswordHash();
               //  this.email = result.getEmail();
                 if (emailHash == null || passwordHash == null || emailHash.isEmpty() || passwordHash.isEmpty()) {
-                  eventRegistration.logEvent(user.box, "UserNameBox", "N/A", "existing legacy user " + result.toStringShort());
+                  eventRegistration.logEvent(userField.box, "UserNameBox", "N/A", "existing legacy userField " + result.toStringShort());
                   copyInfoToSignUp(result);
                 }
               }
@@ -193,7 +194,7 @@ class SignInForm extends UserDialog implements SignIn {
       @Override
       public void onFocus(FocusEvent event) {
         userPassLogin.setSignInHasFocus();
-        eventRegistration.logEvent(user.box, "PasswordBox", "N/A", "focus in password field");
+        eventRegistration.logEvent(userField.box, "PasswordBox", "N/A", "focus in password field");
       }
     });
 
@@ -212,9 +213,9 @@ class SignInForm extends UserDialog implements SignIn {
     signIn.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        String userID = user.box.getValue();
+        String userID = userField.box.getValue();
         if (userID.length() < MIN_LENGTH_USER_ID) {
-          markErrorBlur(user, PLEASE_ENTER_A_LONGER_USER_ID);
+          markErrorBlur(userField, PLEASE_ENTER_A_LONGER_USER_ID);
         } else {
           String value = password.box.getValue();
           if (!value.isEmpty() && value.length() < MIN_PASSWORD) {
@@ -241,7 +242,7 @@ class SignInForm extends UserDialog implements SignIn {
    */
   private void gotLogin(final String user, final String pass, final boolean emptyPassword) {
     final String hashedPass = Md5Hash.getHash(pass);
-    logger.info("gotLogin : user is '" + user + "' pass " + pass.length() + " characters or '" + hashedPass + "'");
+    logger.info("gotLogin : userField is '" + user + "' pass " + pass.length() + " characters or '" + hashedPass + "'");
 
     signIn.setEnabled(false);
     service.userExists(user, hashedPass, new AsyncCallback<User>() {
@@ -254,13 +255,19 @@ class SignInForm extends UserDialog implements SignIn {
       @Override
       public void onSuccess(User result) {
         if (result == null) {
-          eventRegistration.logEvent(signIn, "sign in", "N/A", "unknown user " + user);
+          eventRegistration.logEvent(signIn, "sign in", "N/A", "unknown userField " + user);
 
-          logger.info("No user with that name '" + user + "' pass " + pass.length() + " characters - " + emptyPassword);
+          logger.info("No userField with that name '" + user + "' pass " + pass.length() + " characters - " + emptyPassword);
           markErrorBlur(password, emptyPassword ? PLEASE_ENTER_YOUR_PASSWORD : NO_USER_FOUND);
           signIn.setEnabled(true);
         } else {
-          foundExistingUser(result, emptyPassword, hashedPass);
+          if (!result.isEnabled()) {
+            markErrorBlur(userField, DEACTIVATED);
+            signIn.setEnabled(true);
+          }
+          else {
+            foundExistingUser(result, emptyPassword, hashedPass);
+          }
         }
       }
     });
@@ -280,7 +287,7 @@ class SignInForm extends UserDialog implements SignIn {
       copyInfoToSignUp(result);
       signIn.setEnabled(true);
     } else {
-      // logger.info("Got valid user " + result);
+      // logger.info("Got valid userField " + result);
       if (emptyPassword) {
         eventRegistration.logEvent(signIn, "sign in", "N/A", "empty password");
 
@@ -292,17 +299,17 @@ class SignInForm extends UserDialog implements SignIn {
         //    props.enableAllUsers()
         ) {
           eventRegistration.logEvent(signIn, "sign in", "N/A", "successful sign in for " + user);
-          //    logger.info("Got valid user " + user + " and matching password, so we're letting them in.");
+          //    logger.info("Got valid userField " + userField + " and matching password, so we're letting them in.");
           storeUser(result);
         } else {
           eventRegistration.logEvent(signIn, "sign in", "N/A", "successful sign in for " + user + " but wait for approval.");
-          markErrorBlur(signIn, PLEASE_WAIT, "Please wait until you've been approved to use NetProF. Check your email.", Placement.LEFT);
+          markErrorBlur(signIn, "I'm sorry", DEACTIVATED, Placement.LEFT);
           signIn.setEnabled(true);
         }
       } else { // special pathway...
         String enteredPass = Md5Hash.getHash(password.getText());
         if (enteredPass.equals(MAGIC_PASS)) {
-          eventRegistration.logEvent(signIn, "sign in", "N/A", "sign in as user '" + user + "'");
+          eventRegistration.logEvent(signIn, "sign in", "N/A", "sign in as userField '" + user + "'");
           storeUser(result);
         } else {
           logger.info("foundExistingUser bad pass  " + passwordHash);
@@ -333,7 +340,7 @@ class SignInForm extends UserDialog implements SignIn {
    */
   @Override
   public void setFocusOnUserID() {
-    setFocusOn(user.box);
+    setFocusOn(userField.box);
   }
 
   /**
@@ -346,8 +353,8 @@ class SignInForm extends UserDialog implements SignIn {
     forgotPassword.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        if (user.getText().isEmpty()) {
-          markErrorBlur(user, ENTER_A_USER_NAME);
+        if (userField.getText().isEmpty()) {
+          markErrorBlur(userField, ENTER_A_USER_NAME);
           return;
         }
         final TextBox emailEntry = new TextBox();
@@ -367,7 +374,7 @@ class SignInForm extends UserDialog implements SignIn {
             }
 
             sendEmail.setEnabled(false);
-            service.resetPassword(user.box.getText(), text, Window.Location.getHref(), new AsyncCallback<Boolean>() {
+            service.resetPassword(userField.box.getText(), text, Window.Location.getHref(), new AsyncCallback<Boolean>() {
               @Override
               public void onFailure(Throwable caught) {
                 sendEmail.setEnabled(true);
@@ -376,7 +383,7 @@ class SignInForm extends UserDialog implements SignIn {
               @Override
               public void onSuccess(Boolean result) {
                 String heading = result ? CHECK_EMAIL : "Unknown email";
-                String message = result ? PLEASE_CHECK_YOUR_EMAIL : user.box.getText() + " doesn't have that email. Check for a typo?";
+                String message = result ? PLEASE_CHECK_YOUR_EMAIL : userField.box.getText() + " doesn't have that email. Check for a typo?";
                 setupPopover(sendEmail, heading, message, Placement.LEFT, EMAIL_POPUP_DELAY, new MyPopover(false) {
                   boolean isFirst = true;
 
