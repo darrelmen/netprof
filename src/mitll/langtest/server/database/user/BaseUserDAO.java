@@ -178,15 +178,14 @@ public abstract class BaseUserDAO extends DAO {
     }
   }
 
-  private int addUserAndGetID(SignUpUser user,
-                              //  Collection<SlickUserPermission> perms,
-                              Collection<User.Permission> perms//,
-                              //                            boolean enabled
+  private int addUserAndGetID(SignUpUser user, Collection<User.Permission> perms
   ) {
     return addUser(user.getAge(),
         user.isMale() ? MALE : FEMALE,
         0,
-        user.getIp(), "", "",
+        user.getIp(),
+        "",
+        "",
         user.getDialect(),
         user.getUserID(),
         true,

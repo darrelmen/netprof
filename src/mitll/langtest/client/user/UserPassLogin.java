@@ -58,7 +58,6 @@ import mitll.langtest.client.instrumentation.EventRegistration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -241,7 +240,7 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
     DivWidget rightDiv = new DivWidget();
     right.add(rightDiv);
 
-    rightDiv.add(signInForm.populateSignInForm(getSignInForm(), getForgotRow(), enterKeyButtonHelper));
+    rightDiv.add(signInForm.populateSignInForm(getUserForm(), getForgotRow(), enterKeyButtonHelper));
     rightDiv.add(signUpForm.getSignUpForm());
   }
 
@@ -250,33 +249,39 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
    * @see SignInForm#populateSignInForm
    */
   private Panel getForgotRow() {
-    Panel hp2 = new HorizontalPanel();
-
     Anchor forgotUser = getForgotUser();
-    forgotUser.addStyleName("topFiveMargin");
-    hp2.add(forgotUser);
-    forgotUser.addStyleName("leftTenMargin");
+    styleLink(forgotUser);
 
     Anchor forgotPassword = signInForm.getForgotPassword();
-    hp2.add(forgotPassword);
-    forgotPassword.addStyleName("topFiveMargin");
-    forgotPassword.addStyleName("leftFiveMargin");
+    styleLink(forgotPassword);
 
+    Panel hp2 = new HorizontalPanel();
+
+    hp2.add(forgotUser);
+    hp2.add(forgotPassword);
+    hp2.add(getHelpButton());
+
+    return hp2;
+  }
+
+  private void styleLink(Anchor forgotUser) {
+    forgotUser.addStyleName("topFiveMargin");
+    forgotUser.addStyleName("leftTenMargin");
+  }
+
+  private Button getHelpButton() {
     Button help = new Button(HELP);
     help.addStyleName("leftTenMargin");
     help.getElement().getStyle().setMarginTop(-5, Style.Unit.PX);
     help.setType(ButtonType.PRIMARY);
     help.setIcon(IconType.QUESTION_SIGN);
-
     help.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
         showWelcome2();
       }
     });
-    hp2.add(help);
-
-    return hp2;
+    return help;
   }
 
   private DecoratedPopupPanel sendUsernamePopup;

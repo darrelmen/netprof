@@ -147,7 +147,8 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
                      String dialect, String userID, boolean enabled,
                      Collection<User.Permission> permissions,
                      User.Kind kind,
-                     String passwordH, String emailH, String email, String device,
+                     String passwordH,
+                     String emailH, String email, String device,
                      String first, String last) {
 //    StringBuilder builder = new StringBuilder();
 //    for (User.Permission permission : permissions) builder.append(permission).append(",");
@@ -285,6 +286,11 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return perms;
   }
 
+  /**
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#addUser(SlickUserDAOImpl, Map, User)
+   * @param user
+   * @return
+   */
   public SlickUser toSlick(User user) {
     SlickUser user1 = new SlickUser(-1,
         user.getUserID(),
@@ -329,6 +335,7 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
         admin,
         perms,
         User.Kind.valueOf(s.kind()),
+        s.email(),
         s.emailhash(),
         s.device(),
         s.resetpasswordkey(),
@@ -336,35 +343,12 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
         s.modified().getTime()
     );
 
+    user.setFirst(s.first());
+    user.setLast(s.last());
+
     return user;
   }
 
-  /**
-   * OK this is kind of a hack, should be a separate table.
-   *
-   * @return
-   * @paramx perms
-   */
-/*  private Collection<User.Permission> getPerm(String perms) {
-    Collection<User.Permission> permissions = new ArrayList<>();
-
-    if (perms != null) {
-      perms = perms.replaceAll("\\[", "").replaceAll("\\]", "");
-      for (String perm : perms.split(",")) {
-        perm = perm.trim();
-        try {
-          if (!perm.isEmpty()) {
-            permissions.add(User.Permission.valueOf(perm));
-          }
-        } catch (IllegalArgumentException e) {
-          logger.warn(" : huh, for user " +// userid +
-              " perm '" + perm +
-              "' is not a permission?");
-        }
-      }
-    }
-    return permissions;
-  }*/
   @Override
   public List<User> getUsersDevices() {
     return toUsers(dao.getUsersFromDevices());
