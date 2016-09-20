@@ -124,7 +124,7 @@ public class CreateListDialog extends BasicDialog {
     row = new FluidRow();
     child.add(row);
     final TextArea area = new TextArea();
-    final BasicDialog.FormField description = getFormField(row, DESCRIPTION_OPTIONAL, area, 1);
+    final BasicDialog.FormField description = getSimpleFormField(row, DESCRIPTION_OPTIONAL, area, 1);
     description.box.getElement().setId("CreateListDialog_Description");
     description.box.addBlurHandler(new BlurHandler() {
       @Override
