@@ -35,10 +35,13 @@ package mitll.langtest.client.services;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.user.LoginResult;
+import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public interface UserServiceAsync {
   void getUsers(AsyncCallback<List<User>> async);
@@ -84,4 +87,8 @@ public interface UserServiceAsync {
   void forgetProject(AsyncCallback<Void> async);
 
   void changePassword(int userid, String currentPasswordH, String newPasswordH, AsyncCallback<Boolean> async);
+
+  void getCounts(AsyncCallback<Map<User.Kind, Integer>> async);
+
+  void getKindToUser(AsyncCallback<Map<User.Kind, Collection<MiniUser>>> async);
 }

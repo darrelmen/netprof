@@ -43,6 +43,7 @@ import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.user.LoginResult;
+import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickUserSession;
@@ -51,9 +52,7 @@ import org.apache.log4j.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.sql.Timestamp;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.List;
+import java.util.*;
 
 @SuppressWarnings("serial")
 public class UserServiceImpl extends MyRemoteServiceServlet implements UserService {
@@ -254,9 +253,15 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @return
    * @see mitll.langtest.client.user.UserTable#showDialog
    */
-  public List<User> getUsers() {
-    //  findSharedDatabase();
-    return db.getUsers();
+  public List<User> getUsers() {  return db.getUsers();  }
+
+  public Map<User.Kind,Integer> getCounts() {
+    return db.getUserDAO().getCounts();
+  }
+
+  @Override
+  public Map<User.Kind, Collection<MiniUser>> getKindToUser() {
+    return db.getUserDAO().getMiniByKind();
   }
 
   /**

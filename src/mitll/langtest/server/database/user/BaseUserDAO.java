@@ -94,7 +94,7 @@ public abstract class BaseUserDAO extends DAO {
   public static MiniUser DEFAULT_MALE = new MiniUser(DEFAULT_MALE_ID, 99, true, "Male", false);
   public static MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 99, false, "Female", false);
 
-  private final Collection<String> admins;
+  protected final Collection<String> admins;
 
   BaseUserDAO(Database database) {
     super(database);
@@ -119,15 +119,12 @@ public abstract class BaseUserDAO extends DAO {
   public int getImportUser() {
     return importUser;
   }
-
   public int getDefaultUser() {
     return defaultUser;
   }
-
   public int getDefaultMale() {
     return defaultMale;
   }
-
   public int getDefaultFemale() {
     return defaultFemale;
   }
@@ -232,8 +229,11 @@ public abstract class BaseUserDAO extends DAO {
   }
 
   private int addShellUser(String defectDetector) {
-    return addUser(89, MALE, 0, "", "", UNKNOWN, UNKNOWN, defectDetector, false, EMPTY_PERMISSIONS,
-        User.Kind.STUDENT, "", "", "", "", "", "");
+    return addUser(89,
+        MALE,
+        0, "", "", UNKNOWN, UNKNOWN, defectDetector, false, EMPTY_PERMISSIONS,
+        User.Kind.INTERNAL,
+        "", "", "", "", "", "");
   }
 
   abstract int getIdForUserID(String id);
@@ -248,4 +248,5 @@ public abstract class BaseUserDAO extends DAO {
                        //     Collection<SlickUserPermission> permissions,
                        User.Kind kind,
                        String passwordH, String emailH, String email, String device, String first, String last);
+
 }
