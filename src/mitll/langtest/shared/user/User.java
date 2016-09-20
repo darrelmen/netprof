@@ -61,6 +61,10 @@ public class User extends MiniUser {
   private Collection<Permission> permissions;
   private ProjectStartupInfo startupInfo;
 
+  public String getEmail() {
+    return email;
+  }
+
   //  private boolean isActive;
 //  public boolean isActive() {
 //    return isActive;

@@ -385,6 +385,16 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
       if (miniUsers == null) kindToUsers.put(key, miniUsers = new ArrayList<>());
       miniUsers.add(getMini(s));
     }
+
+    for (Collection<MiniUser> perKind:kindToUsers.values()) {
+      Collections.sort((ArrayList<MiniUser>) perKind, new Comparator<MiniUser>() {
+        @Override
+        public int compare(MiniUser o1, MiniUser o2) {
+          return -1*Long.valueOf(o1.getTimestampMillis()).compareTo(o2.getTimestampMillis());
+        }
+      });
+    }
+
     return kindToUsers;
   }
 

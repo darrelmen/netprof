@@ -42,7 +42,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.InitialUI;
 import mitll.langtest.client.LangTest;
@@ -54,7 +53,6 @@ import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserNotification;
-import mitll.langtest.shared.user.SlimProject;
 import mitll.langtest.shared.user.User;
 
 import java.util.ArrayList;
@@ -90,18 +88,18 @@ public class Banner implements RequiresResize {
   private Image flashcardImage;
   private Image collab;
   private HTML userNameWidget;
-//  private final String nameForAnswer;
+  //  private final String nameForAnswer;
   private Paragraph subtitle;
   private HTML browserInfo;
   private Panel qc, recordAudio;
   private Dropdown cogMenu;
   private final PropertyHandler props;
-  private final UserServiceAsync userServiceAsync;
-  // private ExerciseController controller;
-  private Navigation navigation;
-  private UserNotification userNotification;
- // private NavLink userC, resultsC, monitoringC, eventsC, reloadLink;
- private List<NavLink> adminLinks = new ArrayList<>();
+//  private final UserServiceAsync userServiceAsync;
+//  // private ExerciseController controller;
+//  private Navigation navigation;
+//  private UserNotification userNotification;
+  // private NavLink userC, resultsC, monitoringC, eventsC, reloadLink;
+  private List<NavLink> adminLinks = new ArrayList<>();
 
   /**
    * @see mitll.langtest.client.InitialUI#InitialUI(LangTest, UserManager)
@@ -111,27 +109,27 @@ public class Banner implements RequiresResize {
                 ExerciseController controller,
                 UserNotification userNotification) {
     this.props = props;
-   // this.nameForAnswer = props.getNameForAnswer() + "s";
+    // this.nameForAnswer = props.getNameForAnswer() + "s";
     isAnonymous = props.getLoginType().equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS);
     HREF = "mailto:" +
         NETPROF_HELP_LL_MIT_EDU + "?" +
         //   "cc=" + LTEA_DLIFLC_EDU + "&" +
         "Subject=Question%20about%20" + props.getLanguage() + "%20NetProF";
-    this.userServiceAsync = userServiceAsync;
+//    this.userServiceAsync = userServiceAsync;
     // this.controller = controller;
-    this.userNotification = userNotification;
+  //  this.userNotification = userNotification;
   }
 
   /**
    * @param splashText
    * @param userName
-   * @paramx reload
    * @return
+   * @paramx reload
    * @see InitialUI#makeHeaderRow()
    */
   public Panel makeNPFHeaderRow(String splashText,
                                 boolean isBeta, String userName, HTML browserInfo,
-                             //   ClickHandler logoutClickHandler,
+                                //   ClickHandler logoutClickHandler,
                                 List<Banner.LinkAndTitle> choices
      /*                           ClickHandler users,
                                 ClickHandler results,
@@ -232,9 +230,9 @@ public class Banner implements RequiresResize {
    * @paramx events
    * @see #makeNPFHeaderRow
    */
-  private void makeCogMenu( List<LinkAndTitle> choices
-  //                          ClickHandler logoutClickHandler, ClickHandler users, ClickHandler results,
-    //                       ClickHandler monitoring, ClickHandler events, ClickHandler reload
+  private void makeCogMenu(List<LinkAndTitle> choices
+                           //                          ClickHandler logoutClickHandler, ClickHandler users, ClickHandler results,
+                           //                       ClickHandler monitoring, ClickHandler events, ClickHandler reload
   ) {
 //    List<LinkAndTitle> choices = new ArrayList<>();
 //    choices.add(new LinkAndTitle("Users", users));
@@ -448,12 +446,7 @@ public class Banner implements RequiresResize {
   }
 
   public void setVisibleAdmin(boolean visibleAdmin) {
-    for (NavLink choice :adminLinks) choice.setVisible(visibleAdmin);
-//    userC.setVisible(visibleAdmin);
-//    resultsC.setVisible(visibleAdmin);
-//    monitoringC.setVisible(visibleAdmin);
-//    eventsC.setVisible(visibleAdmin);
-//    reloadLink.setVisible(visibleAdmin);
+    for (NavLink choice : adminLinks) choice.setVisible(visibleAdmin);
   }
 
   /**
@@ -491,7 +484,8 @@ public class Banner implements RequiresResize {
     appName.getElement().getStyle().setFontSize(ratio, Style.Unit.EM);
   }
 
-  public void setNavigation(Navigation navigation) {
-    this.navigation = navigation;
+  @Deprecated  public void setNavigation(Navigation navigation) {
+
+//    this.navigation = navigation;
   }
 }

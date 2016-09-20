@@ -32,46 +32,70 @@
 
 package mitll.langtest.client.userops;
 
+import com.github.gwtbootstrap.client.ui.CheckBox;
+import com.github.gwtbootstrap.client.ui.ControlGroup;
+import com.github.gwtbootstrap.client.ui.ControlLabel;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
-import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.cellview.client.TextHeader;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.analysis.BasicUserContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
+import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.shared.user.MiniUser;
+import mitll.langtest.shared.user.User;
 
 import java.util.Comparator;
 import java.util.List;
 
 public class OpsUserContainer extends BasicUserContainer<MiniUser> {
-  public OpsUserContainer(ExerciseController controller, String header) {
+  DivWidget rightSide;
+
+  public OpsUserContainer(ExerciseController controller, String header, DivWidget rightSide) {
     super(controller, header);
+    this.rightSide = rightSide;
+  }
+
+  protected int getPageSize() {
+    return 30;
   }
 
   @Override
   protected void addColumnsToTable() {
     super.addColumnsToTable();
 
-    Column<MiniUser, SafeHtml> firstNameCol = getFirstCol();
-    firstNameCol.setSortable(true);
-    table.setColumnWidth(firstNameCol, ID_WIDTH + "px");
-    addColumn(firstNameCol, new TextHeader("First"));
-    ColumnSortEvent.ListHandler<MiniUser> columnSortHandler = getNameSorter(firstNameCol, getList());
-    table.addColumnSortHandler(columnSortHandler);
-
-    table.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(dateCol, true));
+    getNameCol("First", true);
+    getNameCol("Last", false);
+    table.getColumnSortList().push(dateCol);
     table.setWidth("100%", true);
 
     addTooltip();
   }
 
-  private Column<MiniUser, SafeHtml> getFirstCol() {
+  private void getNameCol(String colHeader, boolean isFirst) {
+    Column<MiniUser, SafeHtml> firstNameCol = getFirstCol(isFirst);
+    firstNameCol.setSortable(true);
+    table.setColumnWidth(firstNameCol, ID_WIDTH + "px");
+    addColumn(firstNameCol, new TextHeader(colHeader));
+    ColumnSortEvent.ListHandler<MiniUser> columnSortHandler = getNameSorter(firstNameCol, getList(), isFirst);
+    table.addColumnSortHandler(columnSortHandler);
+  }
+
+  private Column<MiniUser, SafeHtml> getFirstCol(boolean useFirst) {
     return new Column<MiniUser, SafeHtml>(new PagingContainer.ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, MiniUser object, NativeEvent event) {
@@ -83,13 +107,16 @@ public class OpsUserContainer extends BasicUserContainer<MiniUser> {
 
       @Override
       public SafeHtml getValue(MiniUser shell) {
-        return getSafeHtml(truncate(shell.getFirst()));
+        return getSafeHtml(truncate(useFirst ?
+            shell.getFirst() :
+            shell.getLast()));
       }
     };
   }
 
   private ColumnSortEvent.ListHandler<MiniUser> getNameSorter(Column<MiniUser, SafeHtml> englishCol,
-                                                              List<MiniUser> dataList) {
+                                                              List<MiniUser> dataList,
+                                                              boolean useFirst) {
     ColumnSortEvent.ListHandler<MiniUser> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol,
         new Comparator<MiniUser>() {
@@ -102,12 +129,98 @@ public class OpsUserContainer extends BasicUserContainer<MiniUser> {
             if (o1 != null) {
               if (o2 == null) return 1;
               else {
-                return o1.getFirst().compareTo(o2.getFirst());
+                return useFirst ?
+                    o1.getFirst().compareTo(o2.getFirst()) :
+                    o1.getLast().compareTo(o2.getLast())
+                    ;
               }
             }
             return -1;
           }
         });
     return columnSortHandler;
+  }
+
+  @Override
+  protected void gotClickOnItem(final MiniUser user) {
+    super.gotClickOnItem(user);
+
+    rightSide.clear();
+
+    UserServiceAsync userService = controller.getUserService();
+    userService.getUser(user.getId(), new AsyncCallback<User>() {
+      @Override
+      public void onFailure(Throwable throwable) {
+
+      }
+
+      @Override
+      public void onSuccess(User user) {
+//        if (user.isEnabled()) {
+        CheckBox enabled = new CheckBox("Enabled");
+        enabled.setValue(user.isEnabled());
+//        enabled.setVisible(false);
+        enabled.addStyleName("leftTenMargin");
+        enabled.addClickHandler(new ClickHandler() {
+          @Override
+          public void onClick(ClickEvent event) {
+            if (!enabled.getValue()) {
+              userService.deactivate(user.getId(), new AsyncCallback<Boolean>() {
+                @Override
+                public void onFailure(Throwable throwable) {
+                  // enabled.setValue(false);
+                }
+
+                @Override
+                public void onSuccess(Boolean aBoolean) {
+                }
+              });
+            } else {
+              userService.activate(user.getId(), new AsyncCallback<Boolean>() {
+                @Override
+                public void onFailure(Throwable throwable) {
+                  // enabled.setValue(true);
+                }
+
+                @Override
+                public void onSuccess(Boolean aBoolean) {
+                }
+              });
+            }
+          }
+        });
+
+        //rightSide.add(enabled);
+
+        addControlGroupEntry(rightSide, "Enabled?", enabled, "Lock or unlock user");
+      }
+      //  }
+    });
+  }
+
+  protected ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget widget, String hint) {
+    final ControlGroup userGroup = new ControlGroup();
+    userGroup.addStyleName("leftFiveMargin");
+    ControlLabel labelWidget = new ControlLabel(label);
+    labelWidget.getElement().setId("Label_" + label);
+    userGroup.add(labelWidget);
+    widget.addStyleName("leftFiveMargin");
+
+    if (hint.isEmpty()) {
+      userGroup.add(widget);
+    } else {
+      Panel vert = new VerticalPanel();
+
+      HTML hint1 = new HTML(hint);
+      hint1.getElement().getStyle().setProperty("fontSize", "smaller");
+      hint1.getElement().getStyle().setFontStyle(Style.FontStyle.ITALIC);
+
+      vert.add(widget);
+      vert.add(hint1);
+
+      userGroup.add(vert);
+    }
+    dialogBox.add(userGroup);
+    return userGroup;
   }
 }
