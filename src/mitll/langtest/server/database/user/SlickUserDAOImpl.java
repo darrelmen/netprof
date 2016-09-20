@@ -94,7 +94,7 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
   public SlickUser addAndGet(SlickUser user, Collection<User.Permission> permissions) {
     SlickUser user1 = dao.addAndGet(user);
     int i = addPermissions(permissions, user1.id());
-   // if (i > 0) logger.info("inserted " + i + " permissions for " + user1.id());
+    // if (i > 0) logger.info("inserted " + i + " permissions for " + user1.id());
     return user1;
   }
 
@@ -377,8 +377,25 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return idToUser;
   }
 
+  public Map<User.Kind, Collection<MiniUser>> getMiniByKind() {
+    Map<User.Kind, Collection<MiniUser>> kindToUsers = new HashMap<>();
+    for (SlickMiniUser s : dao.getAllSlim()) {
+      User.Kind key = User.Kind.valueOf(s.kind());
+      Collection<MiniUser> miniUsers = kindToUsers.get(key);
+      if (miniUsers == null) kindToUsers.put(key, miniUsers = new ArrayList<>());
+      miniUsers.add(getMini(s));
+    }
+    return kindToUsers;
+  }
+
   private MiniUser getMini(SlickMiniUser s) {
-    return new MiniUser(s.id(), 0, s.ismale(), s.userid(), isAdmin(s.userid()));
+    MiniUser miniUser = new MiniUser(s.id(), 0, s.ismale(), s.userid(), isAdmin(s.userid()));
+
+    miniUser.setTimestampMillis(s.modified().getTime());
+    miniUser.setFirst(s.first());
+    miniUser.setLast(s.last());
+
+    return miniUser;
   }
 
   @Override
@@ -464,4 +481,12 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return dao.changeEnabled(userid, enabled);
   }
 
+  public Map<User.Kind, Integer> getCounts() {
+    Map<String, Integer> counts = dao.getCounts();
+    Map<User.Kind, Integer> ret = new HashMap<>();
+    for (Map.Entry<String, Integer> pair : counts.entrySet()) {
+      ret.put(User.Kind.valueOf(pair.getKey()), pair.getValue());
+    }
+    return ret;
+  }
 }
