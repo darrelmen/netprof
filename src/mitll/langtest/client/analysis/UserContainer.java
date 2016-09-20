@@ -57,9 +57,9 @@ import java.util.List;
  * @since 10/20/15.
  */
 public class UserContainer extends BasicUserContainer<UserInfo> {
-  private static final String SIGNED_UP1 = "Started";
-  private static final int ID_WIDTH = 130;
-  private static final int SIGNED_UP = 95;
+//  private static final String SIGNED_UP1 = "Started";
+//  private static final int ID_WIDTH = 130;
+//  private static final int SIGNED_UP = 95;
 
   private static final String CURRENT = "Curr.";
   private static final int CURRENT_WIDTH = 60;

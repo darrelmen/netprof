@@ -52,9 +52,9 @@ import mitll.langtest.shared.user.User;
 
 import java.util.logging.Logger;
 
-class SignInForm extends UserDialog implements SignIn {
-  public static final String DEACTIVATED = "I'm sorry, this account has been deactivated.";
+public class SignInForm extends UserDialog implements SignIn {
   private final Logger logger = Logger.getLogger("SignUpForm");
+  private static final String DEACTIVATED = "I'm sorry, this account has been deactivated.";
 
   private static final String TROUBLE_CONNECTING_TO_SERVER = "Trouble connecting to server.";
   private static final String NO_USER_FOUND = "No userField found - have you signed up?";
@@ -70,13 +70,13 @@ class SignInForm extends UserDialog implements SignIn {
   private static final String USERNAME = "Username";
   private static final String SIGN_IN = "Log In";
   private static final String PLEASE_ENTER_A_LONGER_USER_ID = "Please enter a longer userField id.";
-  private static final String PLEASE_WAIT = "Please wait";
+ // private static final String PLEASE_WAIT = "Please wait";
   private static final String FORGOT_PASSWORD = "Forgot password?";
   private static final String ENTER_A_USER_NAME = "Enter a userField name.";
   private static final String CHECK_EMAIL = "Check Email";
   private static final String PLEASE_CHECK_YOUR_EMAIL = "Please check your email";
   private static final String ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD = "Enter your email to reset your password.";
-  private static final String ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD_GOT_IT = "Click here and then check your email to reset your password.";
+ // private static final String ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD_GOT_IT = "Click here and then check your email to reset your password.";
   private static final String SEND = "Send Reset Email";
   private static final String SIGN_UP_WIDTH = "266px";
   private static final String PLEASE_CHECK = "Please check";
@@ -93,6 +93,14 @@ class SignInForm extends UserDialog implements SignIn {
   private UserPassDialog userPassLogin;
   private SignUp signUpForm;
 
+  /**
+   * @see UserPassLogin#UserPassLogin
+   * @param props
+   * @param userManager
+   * @param eventRegistration
+   * @param userPassLogin
+   * @param signUpForm
+   */
   SignInForm(PropertyHandler props,
              UserManager userManager,
              EventRegistration eventRegistration,
