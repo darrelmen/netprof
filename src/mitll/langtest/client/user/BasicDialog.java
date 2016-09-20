@@ -78,7 +78,7 @@ public class BasicDialog {
   protected FormField addControlFormField(Panel dialogBox, String label, boolean isPassword, int minLength, int maxLength, String hint) {
     final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
     user.setMaxLength(maxLength);
-    return getFormField(dialogBox, label, user, minLength);
+    return getSimpleFormField(dialogBox, label, user, minLength);
   }
 
   protected FormField addControlFormFieldHorizontal(Panel dialogBox, String label, String subtext, boolean isPassword, int minLength,
@@ -96,11 +96,20 @@ public class BasicDialog {
     return formField;
   }
 
-  protected FormField getFormField(Panel dialogBox, String label, TextBoxBase user, int minLength) {
+  protected FormField getSimpleFormField(Panel dialogBox,
+                                         String label,
+                                         TextBoxBase user,
+                                         int minLength) {
     final ControlGroup userGroup = addControlGroupEntry(dialogBox, label, user, "");
     return new FormField(user, userGroup, minLength);
   }
 
+  /**
+   * @see #getSimpleFormField(Panel, TextBox, int)
+   * @param dialogBox
+   * @param widget
+   * @return
+   */
   private ControlGroup addControlGroupEntryNoLabel(Panel dialogBox, Widget widget) {
     final ControlGroup userGroup = new ControlGroup();
     userGroup.addStyleName("leftFiveMargin");
@@ -119,7 +128,7 @@ public class BasicDialog {
    * @param widget
    * @param hint      if empty, skips adding it.
    * @return
-   * @see mitll.langtest.client.user.UserDialog#getFormField(com.google.gwt.user.client.ui.Panel, String, com.github.gwtbootstrap.client.ui.base.TextBoxBase, int)
+   * @see mitll.langtest.client.user.UserDialog#getSimpleFormField(com.google.gwt.user.client.ui.Panel, String, com.github.gwtbootstrap.client.ui.base.TextBoxBase, int)
    */
   protected ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget widget, String hint) {
     final ControlGroup userGroup = new ControlGroup();
@@ -134,10 +143,7 @@ public class BasicDialog {
     } else {
       Panel vert = new VerticalPanel();
 
-      HTML hint1 = new HTML(hint);
-      hint1.getElement().getStyle().setProperty("fontSize", "smaller");
-      hint1.getElement().getStyle().setFontStyle(Style.FontStyle.ITALIC);
-
+      HTML hint1 = getHint(hint);
       vert.add(widget);
       vert.add(hint1);
 
@@ -145,6 +151,13 @@ public class BasicDialog {
     }
     dialogBox.add(userGroup);
     return userGroup;
+  }
+
+  private HTML getHint(String hint) {
+    HTML hint1 = new HTML(hint);
+    hint1.getElement().getStyle().setProperty("fontSize", "smaller");
+    hint1.getElement().getStyle().setFontStyle(Style.FontStyle.ITALIC);
+    return hint1;
   }
 
   private ControlGroup addControlGroupEntryHorizontal(Panel dialogBox, String label, Widget widget, int labelWidth, String subtext) {
@@ -461,9 +474,7 @@ public class BasicDialog {
     popover.setHtml(isHTML);
     popover.setText(message);
     if (heading != null) {
-
       if (DEBUG) logger.info("simplePopover : set heading " + heading);
-
       popover.setHeading(heading);
     }
     popover.setPlacement(placement);
@@ -474,14 +485,13 @@ public class BasicDialog {
     if (heading == null) {
       popover.getWidget().getElement().removeAttribute("data-original-title");
     }
-
   }
 
   FormField addControlFormFieldWithPlaceholder(Panel dialogBox, boolean isPassword, int minLength, int maxLength, String hint) {
     final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
     user.setMaxLength(maxLength);
     user.setPlaceholder(hint);
-    return getFormField(dialogBox, user, minLength);
+    return getSimpleFormField(dialogBox, user, minLength);
   }
 
   private final Map<Widget, Popover> widgetToPopover = new HashMap<Widget, Popover>();
@@ -502,7 +512,7 @@ public class BasicDialog {
     popover.reconfigure();
   }
 
-  private FormField getFormField(Panel dialogBox, TextBox user, int minLength) {
+  private FormField getSimpleFormField(Panel dialogBox, TextBox user, int minLength) {
     final ControlGroup userGroup = addControlGroupEntryNoLabel(dialogBox, user);
     return new FormField(user, userGroup, minLength);
   }
