@@ -32,12 +32,15 @@
 
 package mitll.langtest.client.analysis;
 
+import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -65,23 +68,62 @@ public class BasicUserContainer<T extends MiniUser> extends SimplePagingContaine
   static final int TABLE_WIDTH = 420;
   private static final int MAX_LENGTH_ID = 13;
   private static final int PAGE_SIZE = 11;
-  protected final Long selectedUser;
-  protected final String selectedUserKey;
-  protected final DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yy");
-  protected final Date now = new Date();
+  private final Long selectedUser;
+  private final String selectedUserKey;
+  private final DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yy");
+  private final Date now = new Date();
   private final Logger logger = Logger.getLogger("UserContainer");
-  String header;
+  private final String header;
 
-  private static final int ID_WIDTH = 130;
+  protected static final int ID_WIDTH = 130;
   private static final int SIGNED_UP = 95;
   private static final String SIGNED_UP1 = "Started";
+  private static final int STUDENT_WIDTH = 300;
 
-  protected BasicUserContainer(ExerciseController controller,
-                               String selectedUserKey) {
+  public BasicUserContainer(ExerciseController controller,
+                            String selectedUserKey,
+                            String header) {
     super(controller);
     this.selectedUserKey = selectedUserKey;
     this.selectedUser = getSelectedUser(selectedUserKey);
-    header = "Student";
+    this.header = header;
+  }
+
+  public BasicUserContainer(ExerciseController controller, String header) {
+    super(controller);
+    this.selectedUserKey = getSelectedUserKey(controller, header);
+    this.selectedUser = getSelectedUser(selectedUserKey);
+    this.header = header;
+  }
+
+  public DivWidget getTable(Collection<T> users, String title, String subtitle) {
+    return getStudentContainer(getTableWithPager(users), title, subtitle);
+  }
+
+  private DivWidget getStudentContainer(Panel tableWithPager, String title, String subtitle) {
+    Heading students = subtitle.isEmpty() ?
+        new Heading(3, title) :
+        new Heading(3, title, subtitle);
+
+    students.setWidth(STUDENT_WIDTH + "px");
+    students.getElement().getStyle().setMarginBottom(2, Style.Unit.PX);
+
+    DivWidget leftSide = new DivWidget();
+    leftSide.getElement().setId("studentDiv");
+    leftSide.addStyleName("floatLeftList");
+    if (!title.isEmpty()) {
+      leftSide.add(students);
+    }
+    leftSide.add(tableWithPager);
+    return leftSide;
+  }
+
+  private String getSelectedUserKey(ExerciseController controller, String appTitle) {
+    return getStoragePrefix(controller, appTitle) + "selectedUser";
+  }
+
+  private String getStoragePrefix(ExerciseController controller, String appTitle) {
+    return appTitle + ":" + controller.getUser() + ":";
   }
 
   protected String truncate(String columnText) {
@@ -90,16 +132,18 @@ public class BasicUserContainer<T extends MiniUser> extends SimplePagingContaine
   }
 
   /**
-   * @see SimplePagingContainer#makeCellTable()
    * @return
+   * @see SimplePagingContainer#makeCellTable()
    */
   protected int getPageSize() {
-    return isShort() ? 8:PAGE_SIZE;
+    return isShort() ? 8 : PAGE_SIZE;
   }
 
   private boolean isShort() {
     return Window.getClientHeight() < 822;
   }
+
+  protected Column<T, SafeHtml> dateCol;
 
   @Override
   protected void addColumnsToTable() {
@@ -110,7 +154,7 @@ public class BasicUserContainer<T extends MiniUser> extends SimplePagingContaine
     ColumnSortEvent.ListHandler<T> columnSortHandler = getUserSorter(userCol, getList());
     table.addColumnSortHandler(columnSortHandler);
 
-    Column<T, SafeHtml> dateCol = getDateColumn();
+    dateCol = getDateColumn();
     dateCol.setSortable(true);
     addColumn(dateCol, new TextHeader(SIGNED_UP1));
     table.setColumnWidth(dateCol, SIGNED_UP + "px");
@@ -143,7 +187,7 @@ public class BasicUserContainer<T extends MiniUser> extends SimplePagingContaine
             int i = 0;
             for (T userInfo : users) {
               if (userInfo.getId() == selectedUser) {
-            //    logger.info("found previous selection - " + userInfo + " : " + i);
+                //    logger.info("found previous selection - " + userInfo + " : " + i);
                 table.getSelectionModel().setSelected(userInfo, true);
                 gotClickOnItem(userInfo);
 
@@ -209,8 +253,8 @@ public class BasicUserContainer<T extends MiniUser> extends SimplePagingContaine
     return o;
   }
 
-  protected ColumnSortEvent.ListHandler<T> getUserSorter(Column<T, SafeHtml> englishCol,
-                                                                List<T> dataList) {
+  private ColumnSortEvent.ListHandler<T> getUserSorter(Column<T, SafeHtml> englishCol,
+                                                       List<T> dataList) {
     ColumnSortEvent.ListHandler<T> columnSortHandler = new ColumnSortEvent.ListHandler<T>(dataList);
     columnSortHandler.setComparator(englishCol,
         new Comparator<T>() {
@@ -232,8 +276,8 @@ public class BasicUserContainer<T extends MiniUser> extends SimplePagingContaine
     return columnSortHandler;
   }
 
-  protected ColumnSortEvent.ListHandler<T> getDateSorter(Column<T, SafeHtml> englishCol,
-                                                                List<T> dataList) {
+  private ColumnSortEvent.ListHandler<T> getDateSorter(Column<T, SafeHtml> englishCol,
+                                                       List<T> dataList) {
     ColumnSortEvent.ListHandler<T> columnSortHandler = new ColumnSortEvent.ListHandler<T>(dataList);
     columnSortHandler.setComparator(englishCol,
         new Comparator<T>() {
@@ -259,7 +303,12 @@ public class BasicUserContainer<T extends MiniUser> extends SimplePagingContaine
     return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
   }
 
-  protected Long getSelectedUser(String selectedUserKey) {
+  /**
+   * @param selectedUserKey
+   * @return
+   * @see #BasicUserContainer(ExerciseController, String)
+   */
+  private Long getSelectedUser(String selectedUserKey) {
     if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
       String item = localStorageIfSupported.getItem(selectedUserKey);
@@ -278,11 +327,10 @@ public class BasicUserContainer<T extends MiniUser> extends SimplePagingContaine
     // }
   }
 
-  protected void storeSelectedUser(long selectedUser) {
+  private void storeSelectedUser(long selectedUser) {
     if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
       localStorageIfSupported.setItem(selectedUserKey, "" + selectedUser);
-
     }
   }
 
@@ -292,7 +340,7 @@ public class BasicUserContainer<T extends MiniUser> extends SimplePagingContaine
         ".");
   }
 
-  protected Column<T, SafeHtml> getUserColumn() {
+  private Column<T, SafeHtml> getUserColumn() {
     return new Column<T, SafeHtml>(new PagingContainer.ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
@@ -309,7 +357,7 @@ public class BasicUserContainer<T extends MiniUser> extends SimplePagingContaine
     };
   }
 
-  protected Column<T, SafeHtml> getDateColumn() {
+  private Column<T, SafeHtml> getDateColumn() {
     return new Column<T, SafeHtml>(new PagingContainer.ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
@@ -343,11 +391,23 @@ public class BasicUserContainer<T extends MiniUser> extends SimplePagingContaine
 
   protected void gotClickOnItem(final T user) {
     MiniUser user1 = user;//user.getUser();
-    int id =  user1.getId();
+    int id = user1.getId();
 //    overallBottom.clear();
 //    AnalysisTab widgets = new AnalysisTab(exerciseServiceAsync, controller, id, learnTab, user1.getUserID(), MIN_RECORDINGS, overallBottom);
 //    rightSide.clear();
 //    rightSide.add(widgets);
     storeSelectedUser(id);
+  }
+
+  /**
+   * MUST BE PUBLIC
+   */
+  public interface LocalTableResources extends CellTable.Resources {
+    /**
+     * The styles applied to the table.
+     */
+    @Override
+    @Source({CellTable.Style.DEFAULT_CSS, "ScoresCellTableStyleSheet.css"})
+    TableResources.TableStyle cellTableStyle();
   }
 }

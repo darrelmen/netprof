@@ -42,7 +42,6 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
-import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.services.ExerciseServiceAsync;
@@ -50,7 +49,6 @@ import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.user.MiniUser;
 
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -89,13 +87,12 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
                        ShowTab learnTab,
                        String selectedUserKey
   ) {
-    super(controller, selectedUserKey);
+    super(controller, selectedUserKey, "Student");
     this.rightSide = rightSide;
     this.learnTab = learnTab;
     this.exerciseServiceAsync = service;
     this.overallBottom = overallBottom;
   }
-
 
   private ColumnSortEvent.ListHandler<UserInfo> getNumSorter(Column<UserInfo, SafeHtml> englishCol,
                                                              List<UserInfo> dataList) {
@@ -193,6 +190,8 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
 
   @Override
   protected void addColumnsToTable() {
+    super.addColumnsToTable();
+/*
     Column<UserInfo, SafeHtml> userCol = getUserColumn();
     userCol.setSortable(true);
     table.setColumnWidth(userCol, ID_WIDTH + "px");
@@ -205,6 +204,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
     addColumn(dateCol, new TextHeader(SIGNED_UP1));
     table.setColumnWidth(dateCol, SIGNED_UP + "px");
     table.addColumnSortHandler(getDateSorter(dateCol, getList()));
+*/
 
     Column<UserInfo, SafeHtml> num = getNum();
     num.setSortable(true);
@@ -307,24 +307,12 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
   }
 
   protected void gotClickOnItem(final UserInfo user) {
+    super.gotClickOnItem(user);
     MiniUser user1 = user.getUser();
-    int id = (int) user1.getId();
+    int id = user1.getId();
     overallBottom.clear();
     AnalysisTab widgets = new AnalysisTab(exerciseServiceAsync, controller, id, learnTab, user1.getUserID(), MIN_RECORDINGS, overallBottom);
     rightSide.clear();
     rightSide.add(widgets);
-    storeSelectedUser(user.getUser().getId());
-  }
-
-  /**
-   * MUST BE PUBLIC
-   */
-  public interface LocalTableResources extends CellTable.Resources {
-    /**
-     * The styles applied to the table.
-     */
-    @Override
-    @Source({CellTable.Style.DEFAULT_CSS, "ScoresCellTableStyleSheet.css"})
-    TableResources.TableStyle cellTableStyle();
   }
 }
