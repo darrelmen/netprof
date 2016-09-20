@@ -86,9 +86,9 @@ public class ModalInfoDialog {
     modal.show();
   }
 
-  public Modal getModal(String title, String message, Widget widget, HiddenHandler handler, boolean bigger) {
+/*  public Modal getModal(String title, String message, Widget widget, HiddenHandler handler, boolean bigger) {
     return getModal(title, Collections.singleton(message), Collections.emptyList(), widget, handler, bigger);
-  }
+  }*/
 
   public Modal getModal(String title, Collection<String> messages, Collection<String> values, Widget widget, HiddenHandler handler, boolean bigger) {
     final Modal modal = new Modal(true);

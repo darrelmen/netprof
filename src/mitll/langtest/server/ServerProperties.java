@@ -89,6 +89,7 @@ public class ServerProperties {
   public static final String POSTGRES_HYDRA = "postgresHydra";
   public static final String POSTGRES = "postgres";
   private String miraClassifierURL = MIRA_DEVEL;// MIRA_LEN; //MIRA_DEVEL;
+  private static final String NP_SERVER = "np.ll.mit.edu";
 
   /**
    * I.e. the hydra web service for ASR
@@ -737,5 +738,9 @@ public class ServerProperties {
 
   public Properties getProps() {
     return props;
+  }
+
+  public String getNPServer() {
+    return props.getProperty("SERVER_NAME", NP_SERVER);
   }
 }
