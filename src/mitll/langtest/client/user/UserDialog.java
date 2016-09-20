@@ -67,11 +67,21 @@ abstract class UserDialog extends BasicDialog {
 
   protected final UserServiceAsync service = GWT.create(UserService.class);
 
-  UserDialog(PropertyHandler props, UserManager userManager/*, KeyPressHelper enterKeyButtonHelper*/) {
+  UserDialog(PropertyHandler props, UserManager userManager) {
     this.props = props;
     this.userManager = userManager;
   }
 
+  /**
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#makeEnglishRow
+   * @param dialogBox
+   * @param label
+   * @param isPassword
+   * @param minLength
+   * @param maxLength
+   * @param hint
+   * @return
+   */
   protected FormField addControlFormField(Panel dialogBox, String label, boolean isPassword, int minLength, int maxLength, String hint) {
     final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
     user.setMaxLength(maxLength);
@@ -102,8 +112,8 @@ abstract class UserDialog extends BasicDialog {
 
   /**
    * @param result
-   * @see #foundExistingUser(User, boolean, String)
-   * @see #gotSignUp(String, String, String, User.Kind)
+   * @see SignInForm#foundExistingUser(User, boolean, String)
+   * @see SignUpForm#gotSignUp(String, String, String, User.Kind)
    */
   void storeUser(User result) {
     //logger.info("UserPassLogin.storeUser - " + result);
@@ -111,13 +121,11 @@ abstract class UserDialog extends BasicDialog {
     userManager.storeUser(result);
   }
 
-
-
   public void setEnterKeyButtonHelper(KeyPressHelper enterKeyButtonHelper) {
     this.enterKeyButtonHelper = enterKeyButtonHelper;
   }
 
-   Form getSignInForm() {
+   Form getUserForm() {
     Form signInForm = new Form();
     signInForm.addStyleName("topMargin");
     signInForm.addStyleName("formRounded");
