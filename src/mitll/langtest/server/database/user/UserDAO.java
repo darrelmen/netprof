@@ -551,7 +551,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
           isAdmin,
           permissions,
           userKind1,
-          email,
+          email, email,
           device,
           resetKey,
           "",
