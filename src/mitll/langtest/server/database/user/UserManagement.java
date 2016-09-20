@@ -232,7 +232,6 @@ public class UserManagement {
   public void usersToXLSX(OutputStream out) {
     new UserDAOToExcel().toXLSX(out, getUsers());
   }
-
   public JSON usersToJSON() {
     return new UserDAOToExcel().toJSON(getUsers());
   }

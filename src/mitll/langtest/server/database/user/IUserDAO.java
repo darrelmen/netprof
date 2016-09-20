@@ -84,6 +84,8 @@ public interface IUserDAO extends IDAO {
 
   Map<Integer, MiniUser> getMiniUsers();
 
+  Map<User.Kind,Collection<MiniUser>> getMiniByKind();
+
   MiniUser getMiniUser(int userid);
 
   Map<Integer, User> getUserMap(boolean getMale);
@@ -95,7 +97,7 @@ public interface IUserDAO extends IDAO {
   /**
    * @param emailH
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#forgotUsername
+   * @see mitll.langtest.server.services.UserServiceImpl#forgotUsername
    */
   String isValidEmail(String emailH);
 
@@ -110,4 +112,6 @@ public interface IUserDAO extends IDAO {
   boolean clearKey(int userid, boolean resetKey);
 
   int getBeforeLoginUser();
+
+  Map<User.Kind,Integer> getCounts();
 }
