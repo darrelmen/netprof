@@ -185,7 +185,7 @@ public class MailSupport {
    * @see mitll.langtest.server.LangTestDatabaseImpl#sendEmail(String, String)
    */
   public void email(String receiver, String subject, String message) {
-    normalEmail(RECIPIENT_NAME, receiver, new ArrayList<String>(), subject, message, LOCALHOST);
+    normalEmail(RECIPIENT_NAME, receiver, new ArrayList<>(), subject, message, LOCALHOST);
   }
 
   /**
