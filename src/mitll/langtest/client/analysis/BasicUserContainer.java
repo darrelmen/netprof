@@ -389,15 +389,7 @@ public class BasicUserContainer<T extends MiniUser> extends SimplePagingContaine
     };
   }
 
-  protected void gotClickOnItem(final T user) {
-    MiniUser user1 = user;//user.getUser();
-    int id = user1.getId();
-//    overallBottom.clear();
-//    AnalysisTab widgets = new AnalysisTab(exerciseServiceAsync, controller, id, learnTab, user1.getUserID(), MIN_RECORDINGS, overallBottom);
-//    rightSide.clear();
-//    rightSide.add(widgets);
-    storeSelectedUser(id);
-  }
+  protected void gotClickOnItem(final T user) {  storeSelectedUser(user.getId());  }
 
   /**
    * MUST BE PUBLIC

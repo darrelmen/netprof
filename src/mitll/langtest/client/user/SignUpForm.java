@@ -55,12 +55,13 @@ import mitll.langtest.shared.user.User;
 import java.util.logging.Logger;
 
 class SignUpForm extends UserDialog implements SignUp {
-  public static final int BOGUS_AGE = 99;
   private final Logger logger = Logger.getLogger("SignUpForm");
+
+  public static final int BOGUS_AGE = 99;
   private static final String NEW_USER = "New User?";
 
-  private static final String WAIT_FOR_APPROVAL = "Wait for approval";
-  private static final String YOU_WILL_GET_AN_APPROVAL_MESSAGE_BY_EMAIL = "You will get an approval message by email.";
+//  private static final String WAIT_FOR_APPROVAL = "Wait for approval";
+//  private static final String YOU_WILL_GET_AN_APPROVAL_MESSAGE_BY_EMAIL = "You will get an approval message by email.";
 
   private static final String MALE = "male";
   private static final int MIN_LENGTH_USER_ID = 4;
@@ -232,7 +233,6 @@ class SignUpForm extends UserDialog implements SignUp {
 
     // Tamas wanted student by default...?
     studentChoice.setValue(true);
-
     teacherChoice.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
@@ -362,7 +362,7 @@ class SignUpForm extends UserDialog implements SignUp {
 
   private final RadioButton studentChoice = new RadioButton("ROLE_CHOICE", STUDENT);
   private final RadioButton teacherChoice = new RadioButton("ROLE_CHOICE", TEACHER);
-  private Popover studentOrTeacherPopover;
+ // private Popover studentOrTeacherPopover;
 
   private Button getSignUpButton(final TextBoxBase userBox, final TextBoxBase emailBox) {
     signUp = new Button(SIGN_UP);
@@ -400,7 +400,8 @@ class SignUpForm extends UserDialog implements SignUp {
               markErrorBlur(signUpPassword, passwordText.isEmpty() ? PLEASE_ENTER_A_PASSWORD :
                   "Please enter a password at least " + MIN_PASSWORD + " characters long.");
             } else if (selectedRole == User.Kind.UNSET) {
-              studentOrTeacherPopover = markErrorBlur(studentChoice, "Please choose", "Please select either student or teacher.", Placement.LEFT);
+              //studentOrTeacherPopover =
+                  markErrorBlur(studentChoice, "Please choose", "Please select either student or teacher.", Placement.LEFT);
               eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "didn't check role");
             }
 
@@ -493,7 +494,9 @@ class SignUpForm extends UserDialog implements SignUp {
               } else {
                 eventRegistration.logEvent(signUp, "signing up", "N/A", getSignUpEvent(result) +
                     " but waiting for approval from Tamas.");
-                markErrorBlur(signUp, WAIT_FOR_APPROVAL, YOU_WILL_GET_AN_APPROVAL_MESSAGE_BY_EMAIL, Placement.TOP);
+              //  markErrorBlur(signUp, WAIT_FOR_APPROVAL, YOU_WILL_GET_AN_APPROVAL_MESSAGE_BY_EMAIL, Placement.TOP);
+                markErrorBlur(signUp, "I'm sorry",
+                    "Your account has been deactivated. Please contact help email if needed.", Placement.TOP);
                 Timer t = new Timer() {
                   @Override
                   public void run() {
