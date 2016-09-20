@@ -149,7 +149,6 @@ public class SimplePagingContainer<T> implements RequiresResize {
   protected void addColumnsToTable() {
   }
 
-
   public void flush() {
     dataProvider.flush();
     table.setRowCount(getList().size());
