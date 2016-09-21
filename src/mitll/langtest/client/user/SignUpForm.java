@@ -157,12 +157,15 @@ public class SignUpForm extends UserDialog implements SignUp {
   public void copyInfoToSignUp(User result, String passwordText) {
     signUpUser.box.setText(result.getUserID());
     signUpPassword.box.setText(passwordText);
-    setFocusOn(signUpEmail.getWidget());
+    signUpPassword.getGroup().setType(ControlGroupType.ERROR);
+
+    FormField firstFocus = this.firstName;
+    setFocusOn(firstFocus.getWidget());
     //   eventRegistration.logEvent(signIn, "sign in", "N/A", "copied info to sign up form");
 
-    markErrorBlur(signUpEmail, "Add info", CURRENT_USERS, Placement.TOP);
-    signUpPassword.getGroup().setType(ControlGroupType.ERROR);
-    signUpEmail.box.addBlurHandler(new BlurHandler() {
+    markErrorBlur(firstFocus, "Add info", CURRENT_USERS, Placement.TOP);
+
+    firstFocus.box.addBlurHandler(new BlurHandler() {
       @Override
       public void onBlur(BlurEvent event) {
         signUpPassword.getGroup().setType(ControlGroupType.NONE);
@@ -265,7 +268,7 @@ public class SignUpForm extends UserDialog implements SignUp {
     contentDevCheckbox.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-      //  selectedRole = contentDevCheckbox.getValue() ? User.Kind.CONTENT_DEVELOPER : User.Kind.TEACHER;
+        //  selectedRole = contentDevCheckbox.getValue() ? User.Kind.CONTENT_DEVELOPER : User.Kind.TEACHER;
         registrationInfo.setVisible(contentDevCheckbox.getValue());
       }
     });
@@ -294,27 +297,33 @@ public class SignUpForm extends UserDialog implements SignUp {
 
   private Panel getRolesChoices(User.Kind currentRole) {
     Panel vert = new VerticalPanel();
-    Panel roles = new HorizontalPanel();
-    roles.addStyleName("leftTenMargin");
-
-    vert.add(roles);
 
     Collection<User.Kind> roles1 = getRoles();
-    int c = 0;
-    for (User.Kind role : roles1) {
-      RadioButton roleChoice = addRoleChoice(roles, role);
-      roleToChoice.put(role, roleChoice);
-      roleChoice.addStyleName("leftFiveMargin");
 
-      if (role == currentRole) {
-        roleChoice.setValue(true);
-        selectedRole = role;
-      }
+    if (roles1.size() == 1) {
+      selectedRole = roles1.iterator().next();
+    } else {
+      Panel roles = new HorizontalPanel();
+      roles.addStyleName("leftTenMargin");
 
-      if (c++ < roles1.size() && c % 2 == 0) {
-        roles = new HorizontalPanel();
-        roles.addStyleName("leftTenMargin");
-        vert.add(roles);
+      vert.add(roles);
+
+      int c = 0;
+      for (User.Kind role : roles1) {
+        RadioButton roleChoice = addRoleChoice(roles, role);
+        roleToChoice.put(role, roleChoice);
+        roleChoice.addStyleName("leftFiveMargin");
+
+        if (role == currentRole) {
+          roleChoice.setValue(true);
+          selectedRole = role;
+        }
+
+        if (c++ < roles1.size() && c % 2 == 0) {
+          roles = new HorizontalPanel();
+          roles.addStyleName("leftTenMargin");
+          vert.add(roles);
+        }
       }
     }
     return vert;
@@ -470,6 +479,8 @@ public class SignUpForm extends UserDialog implements SignUp {
         //logger.info("sign up click for " + userID);
         if (isFormValid(userID)) {
           gotSignUp(userID, getPasswordText(), emailBox.getValue(), selectedRole);
+        } else {
+          logger.warning("form is not valid!!");
         }
       }
     });
@@ -516,8 +527,10 @@ public class SignUpForm extends UserDialog implements SignUp {
           eventRegistration.logEvent(SignUpForm.this.signUp, "SignUp_Button", "N/A", "short password");
           markErrorBlur(signUpPassword, passwordText.isEmpty() ? PLEASE_ENTER_A_PASSWORD :
               "Please enter a password at least " + MIN_PASSWORD + " characters long.");
+          return false;
+        } else {
+          return true;
         }
-        return false;
       } else {
         return true;
       }
