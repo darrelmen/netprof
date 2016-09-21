@@ -533,7 +533,9 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
       String email = rs.getString(EMAIL);
       String device = rs.getString(DEVICE);
 
-      logger.warn("user kind for " +id + " " + userID + " is null?");
+      if (userKind == null) {
+        logger.warn("user kind for " + id + " " + userID + " is null?");
+      }
 
       // if the user kind is unmarked, we'll make them a student, we can always change it later.
 
@@ -552,7 +554,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
           rs.getString(DIALECT), // dialect
           userID,
 
-          rs.getBoolean(ENABLED) || (userKind1 != User.Kind.CONTENT_DEVELOPER),
+          rs.getBoolean(ENABLED),// || (userKind1 != User.Kind.CONTENT_DEVELOPER),
           isAdmin,
           permissions,
           userKind1,

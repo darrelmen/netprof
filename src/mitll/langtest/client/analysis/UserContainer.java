@@ -57,10 +57,6 @@ import java.util.List;
  * @since 10/20/15.
  */
 public class UserContainer extends BasicUserContainer<UserInfo> {
-//  private static final String SIGNED_UP1 = "Started";
-//  private static final int ID_WIDTH = 130;
-//  private static final int SIGNED_UP = 95;
-
   private static final String CURRENT = "Curr.";
   private static final int CURRENT_WIDTH = 60;
   private static final int DIFF_WIDTH = 55;
@@ -189,21 +185,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
   @Override
   protected void addColumnsToTable() {
     super.addColumnsToTable();
-/*
-    Column<UserInfo, SafeHtml> userCol = getUserColumn();
-    userCol.setSortable(true);
-    table.setColumnWidth(userCol, ID_WIDTH + "px");
-    addColumn(userCol, new TextHeader(header));
-    ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = getUserSorter(userCol, getList());
-    table.addColumnSortHandler(columnSortHandler);
-
-    Column<UserInfo, SafeHtml> dateCol = getDateColumn();
-    dateCol.setSortable(true);
-    addColumn(dateCol, new TextHeader(SIGNED_UP1));
-    table.setColumnWidth(dateCol, SIGNED_UP + "px");
-    table.addColumnSortHandler(getDateSorter(dateCol, getList()));
-*/
-
     Column<UserInfo, SafeHtml> num = getNum();
     num.setSortable(true);
     addColumn(num, new TextHeader("#"));
