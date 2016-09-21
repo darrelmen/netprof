@@ -64,7 +64,7 @@ public class SimplePagingContainer<T> implements RequiresResize {
   private static final int MIN_PAGE_SIZE = 3;
   private static final float DEFAULT_PAGE_SIZE = 15f;
   protected final ExerciseController controller;
-  ListDataProvider<T> dataProvider;
+  private ListDataProvider<T> dataProvider;
   protected CellTable<T> table;
   protected SingleSelectionModel<T> selectionModel;
   int verticalUnaccountedFor = 100;
@@ -114,9 +114,7 @@ public class SimplePagingContainer<T> implements RequiresResize {
     return new CellTable<T>(getPageSize(), o);
   }
 
-  protected int getPageSize() {
-    return PAGE_SIZE;
-  }
+  protected int getPageSize() {  return PAGE_SIZE;  }
 
   protected CellTable.Resources chooseResources() {
     CellTable.Resources o;
@@ -190,6 +188,7 @@ public class SimplePagingContainer<T> implements RequiresResize {
    * @see mitll.langtest.client.list.PagingExerciseList#onResize()
    */
   public void onResize() {
+    logger.info("on resize called!");
     int numRows = getNumTableRowsGivenScreenHeight();
     if (table.getPageSize() != numRows) {
       table.setPageSize(numRows);
@@ -204,12 +203,13 @@ public class SimplePagingContainer<T> implements RequiresResize {
       pixelsAbove = table.getElement().getAbsoluteTop() + VERTICAL_SLOP;
     }
     int leftOver = Window.getClientHeight() - pixelsAbove;
-    if (DEBUG) {
+/*    if (DEBUG) {
       logger.info("getNumTableRowsGivenScreenHeight Got on resize window height " + Window.getClientHeight() +
           " header " + header + " result = " + leftOver + "( vert unaccount " +
-          verticalUnaccountedFor + " vs absolute top " + table.getElement().getAbsoluteTop() + " pix above " + pixelsAbove +
+          verticalUnaccountedFor + " vs absolute top " + table.getElement().getAbsoluteTop() +
+          " pix above " + pixelsAbove +
           ")");
-    }
+    }*/
 
     float rawRatio = ((float) leftOver) / (float) heightOfCellTableWith15Rows();
     float tableRatio = Math.min(MAX_PAGES, rawRatio);

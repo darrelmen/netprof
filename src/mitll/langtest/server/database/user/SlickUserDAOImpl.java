@@ -170,6 +170,7 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
         gender.equalsIgnoreCase("male"),
         userAgent,
         trueIP,
+        age,
         dialect,
         new Timestamp(System.currentTimeMillis()),
         enabled,
@@ -297,6 +298,7 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
         user.isMale(),
         user.getIpaddr() == null ? "" : user.getIpaddr(),
         "",
+        user.getAge(),
         user.getDialect(),
         new Timestamp(user.getTimestampMillis()),
         user.isEnabled(),
@@ -310,10 +312,10 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
         user.getDevice() == null ? "" : user.getDevice(),
         user.getFirst(),
         user.getLast(),
-        user.getId()
+        user.getID()
     );
 
-    // logger.info("made " + user1);
+     logger.info("toSlick made " + user1);
 
     return user1;
   }
@@ -323,7 +325,7 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
     User user = new User(
         s.id(),
-        89,
+        s.age(),
         s.ismale() ? 0 : 1,
         0,
         s.ipaddr(),
@@ -339,7 +341,7 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
         s.emailhash(),
         s.device(),
         s.resetpasswordkey(),
-        s.enabledreqkey(),
+        //s.enabledreqkey(),
         s.modified().getTime()
     );
 
@@ -482,5 +484,14 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
       ret.put(User.Kind.valueOf(pair.getKey()), pair.getValue());
     }
     return ret;
+  }
+
+  @Override
+  public void update(User toUpdate) {
+    logger.info("update " + toUpdate);
+    SlickUser toUpdate1 = toSlick(toUpdate);
+    logger.info("update " + toUpdate1);
+
+    dao.update(toUpdate1);
   }
 }

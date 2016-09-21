@@ -41,19 +41,19 @@ public class UserTitle {
   private static final String FEMALE = "Female";
 
   public String getUserTitle(int me, MiniUser user) {
-    long id = user.getId();
+    long id = user.getID();
     if (id == BaseUserDAO.DEFAULT_USER_ID)        return GoodwaveExercisePanel.DEFAULT_SPEAKER;
     else if (id == BaseUserDAO.DEFAULT_MALE_ID)   return "Default Male";
     else if (id == BaseUserDAO.DEFAULT_FEMALE_ID) return "Default Female";
     else return
-          (user.getId() == me) ? "by You (" + user.getUserID() + ")" : getUserTitle(user);
+          (user.getID() == me) ? "by You (" + user.getUserID() + ")" : getUserTitle(user);
   }
 
   private String getUserTitle(MiniUser user) {
     return (user.isMale() ? MALE : FEMALE) +
         (user.isAdmin()
             ? " (" + user.getUserID() + ")" : "")
-        + " #" + user.getId()
+        + " #" + user.getID()
         ;
     //+  " age " + user.getAge();
   }

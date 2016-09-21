@@ -307,7 +307,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> {
   protected void gotClickOnItem(final UserInfo user) {
     super.gotClickOnItem(user);
     MiniUser user1 = user.getUser();
-    int id = user1.getId();
+    int id = user1.getID();
     overallBottom.clear();
     AnalysisTab widgets = new AnalysisTab(exerciseServiceAsync, controller, id, learnTab, user1.getUserID(), MIN_RECORDINGS, overallBottom);
     rightSide.clear();

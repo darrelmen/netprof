@@ -88,7 +88,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
   }
 
   public SlickUserExerciseList toSlick(UserList<CommonShell> shared, int projid) {
-    return toSlick2(shared, shared.getCreator().getId(), projid);
+    return toSlick2(shared, shared.getCreator().getID(), projid);
   }
 
   public SlickUserExerciseList toSlick2(UserList<CommonShell> shared, int userid, int projid) {
@@ -233,7 +233,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
    */
   private void populateLists(Collection<UserList<CommonShell>> lists, long userid) {
     for (UserList<CommonShell> ul : lists) {
-      if (userid == -1 || ul.getCreator().getId() == userid || !ul.isFavorite()) {   // skip other's favorites
+      if (userid == -1 || ul.getCreator().getID() == userid || !ul.isFavorite()) {   // skip other's favorites
         populateList(ul);
       }
     }

@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.database.user;
 
-import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.annotation.AnnotationDAO;
@@ -69,7 +68,7 @@ public abstract class BaseUserDAO extends DAO {
   @Deprecated
   final String language;
   protected int defectDetector, beforeLoginUser, importUser, defaultUser, defaultMale, defaultFemale;
- // private final boolean enableAllUsers;
+  // private final boolean enableAllUsers;
 
   static final String ID = "id";
   static final String AGE = "age";
@@ -90,8 +89,12 @@ public abstract class BaseUserDAO extends DAO {
    */
   public static final int DEFAULT_FEMALE_ID = -3;
   public static final int UNDEFINED_USER = -5;
+
+  @Deprecated
   public static MiniUser DEFAULT_USER = new MiniUser(DEFAULT_USER_ID, 99, true, "default", false);
+  @Deprecated
   public static MiniUser DEFAULT_MALE = new MiniUser(DEFAULT_MALE_ID, 99, true, "Male", false);
+  @Deprecated
   public static MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 99, false, "Female", false);
 
   protected final Collection<String> admins;
@@ -119,12 +122,15 @@ public abstract class BaseUserDAO extends DAO {
   public int getImportUser() {
     return importUser;
   }
+
   public int getDefaultUser() {
     return defaultUser;
   }
+
   public int getDefaultMale() {
     return defaultMale;
   }
+
   public int getDefaultFemale() {
     return defaultFemale;
   }
@@ -169,7 +175,7 @@ public abstract class BaseUserDAO extends DAO {
         logger.debug(" : addUser : user " + userID + " is an existing user.");
         return null; // existing user!
       } else {
-        int id = userByID.getId();
+        int id = userByID.getID();
         updateUser(id, kind, user.getPasswordH(), user.getEmailH());
         User userWhere = getUserWhere(id);
         logger.debug(" : addUser : returning updated user " + userWhere);
@@ -208,6 +214,7 @@ public abstract class BaseUserDAO extends DAO {
 
   /**
    * public for test access... for now
+   *
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
   public void ensureDefaultUsers() {
