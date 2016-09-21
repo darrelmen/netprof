@@ -765,7 +765,7 @@ public class InitialUI implements UILifecycle {
     populateRootPanelIfLogin();
     long userID = -1;
     if (user != null) {
-      userID = user.getId();
+      userID = user.getID();
     }
 
     if (DEBUG) logger.info("gotUser : userID " + userID);

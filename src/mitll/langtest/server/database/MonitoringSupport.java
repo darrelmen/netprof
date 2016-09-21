@@ -86,7 +86,7 @@ public class MonitoringSupport {
     Map<User, Integer> idToCount = new HashMap<User, Integer>();
     Map<Integer, User> idToUser = new HashMap<>();
     for (User u : users) {
-      idToUser.put(u.getId(), u);
+      idToUser.put(u.getID(), u);
       idToCount.put(u, 0);
     }
     for (UserAndTime r : resultDAO.getUserAndTimes()) {
@@ -104,7 +104,7 @@ public class MonitoringSupport {
     Map<User, Integer> idToCount = new HashMap<User, Integer>();
     Map<Long, User> idToUser = new HashMap<Long, User>();
     for (User u : users) {
-      idToUser.put(u.getId(), u);
+      idToUser.put(u.getID(), u);
       idToCount.put(u, 0);
     }
     for (UserAndTime r : resultDAO.getUserAndTimes()) {
@@ -248,7 +248,7 @@ public class MonitoringSupport {
 
     int total = 0;
     for (Result r : results) {
-      String key = r.getOldID();//.getId() + "/" + r.getQid();
+      String key = r.getOldID();//.getID() + "/" + r.getQid();
 
       List<Grade> grades = idToGrade.get(r.getUniqueID());
       if (grades == null) {
@@ -676,7 +676,7 @@ public class MonitoringSupport {
 
     Map<Long, User> idToUser = new HashMap<Long, User>();
     for (User u : users) {
-      idToUser.put(u.getId(), u);
+      idToUser.put(u.getID(), u);
     }*/
 
 /*

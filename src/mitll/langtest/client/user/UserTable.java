@@ -176,7 +176,7 @@ public class UserTable extends PagerTable {
     TextColumn<User> id = new TextColumn<User>() {
       @Override
       public String getValue(User contact) {
-        return "" + contact.getId();
+        return "" + contact.getID();
       }
     };
     id.setSortable(true);
@@ -344,7 +344,7 @@ public class UserTable extends PagerTable {
               return 0;
             }
             if (o1 != null) {
-              return (o2 != null) ? (int) (o1.getId() - o2.getId()) : 0;
+              return (o2 != null) ? (int) (o1.getID() - o2.getID()) : 0;
             }
             return -1;
           }
@@ -427,7 +427,7 @@ public class UserTable extends PagerTable {
         //   UserServiceAsync service = GWT.create(UserService.class);;
 
 //          logger.info("update " + object.getUserID() + " " + value);
-        service.changeEnabledFor((int) object.getId(), value, new AsyncCallback<Void>() {
+        service.changeEnabledFor((int) object.getID(), value, new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
 
@@ -800,7 +800,7 @@ public class UserTable extends PagerTable {
   }
 
   int compareUserID(User o1, User o2) {
-    return Integer.valueOf(o1.getId()).compareTo(o2.getId());
+    return Integer.valueOf(o1.getID()).compareTo(o2.getID());
   }
 
   int compareTimestamp(User o1, User o2) {

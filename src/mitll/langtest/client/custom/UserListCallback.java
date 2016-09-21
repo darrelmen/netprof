@@ -435,7 +435,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
   }
 
   private boolean createdByYou(UserList ul) {
-    return ul.getCreator().getId() == userManager.getUser();
+    return ul.getCreator().getID() == userManager.getUser();
   }
 
   private Widget getUserListText2(String content) {
