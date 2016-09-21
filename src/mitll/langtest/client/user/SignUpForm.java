@@ -101,7 +101,7 @@ public class SignUpForm extends UserDialog implements SignUp {
   private BasicDialog.FormField signUpPassword;
 
   private RegistrationInfo registrationInfo;
-  private User.Kind selectedRole = User.Kind.STUDENT;
+  protected User.Kind selectedRole = User.Kind.STUDENT;
 
   private final EventRegistration eventRegistration;
 
@@ -265,7 +265,7 @@ public class SignUpForm extends UserDialog implements SignUp {
     contentDevCheckbox.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        selectedRole = contentDevCheckbox.getValue() ? User.Kind.CONTENT_DEVELOPER : User.Kind.TEACHER;
+      //  selectedRole = contentDevCheckbox.getValue() ? User.Kind.CONTENT_DEVELOPER : User.Kind.TEACHER;
         registrationInfo.setVisible(contentDevCheckbox.getValue());
       }
     });
@@ -292,29 +292,24 @@ public class SignUpForm extends UserDialog implements SignUp {
     addPopover(contentDevCheckbox, RECORD_AUDIO_HEADING, html);
   }
 
-  private Panel getRolesChoices(User.Kind selectedRole) {
+  private Panel getRolesChoices(User.Kind currentRole) {
     Panel vert = new VerticalPanel();
     Panel roles = new HorizontalPanel();
     roles.addStyleName("leftTenMargin");
 
     vert.add(roles);
 
-    boolean isFirst = true;
-
     Collection<User.Kind> roles1 = getRoles();
     int c = 0;
     for (User.Kind role : roles1) {
       RadioButton roleChoice = addRoleChoice(roles, role);
       roleToChoice.put(role, roleChoice);
-//      if (!isFirst) {
-//        roleChoice.addStyleName("leftFiveMargin");
-//      }
-//      if (isFirst) {
-//        isFirst = false;
-//      }
-          roleChoice.addStyleName("leftFiveMargin");
+      roleChoice.addStyleName("leftFiveMargin");
 
-      if (role == selectedRole) roleChoice.setValue(true);
+      if (role == currentRole) {
+        roleChoice.setValue(true);
+        selectedRole = role;
+      }
 
       if (c++ < roles1.size() && c % 2 == 0) {
         roles = new HorizontalPanel();
@@ -335,6 +330,7 @@ public class SignUpForm extends UserDialog implements SignUp {
       @Override
       public void onClick(ClickEvent event) {
         selectedRole = student;
+//        logger.info("selected role is now "+ selectedRole);
         registrationInfo.setVisible(false);
         //      contentDevCheckbox.setVisible(false);
         //     contentDevCheckbox.setValue(false);
@@ -462,10 +458,6 @@ public class SignUpForm extends UserDialog implements SignUp {
     registrationInfo.setVisible(false);
   }
 
-
-//  private final RadioButton studentChoice = new RadioButton("ROLE_CHOICE", STUDENT);
-//  private final RadioButton teacherChoice = new RadioButton("ROLE_CHOICE", TEACHER);
-  // private Popover studentOrTeacherPopover;
   private Button getSignUpButton(final TextBoxBase userBox, final TextBoxBase emailBox) {
     this.signUp = new Button(signUpTitle);
     this.signUp.getElement().setId("SignUp");

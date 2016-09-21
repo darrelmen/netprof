@@ -245,7 +245,6 @@ public class BasicDialog {
   protected void markError(ControlGroup dialectGroup, Widget dialect, Focusable focusable, String header, String message, Placement right) {
     dialectGroup.setType(ControlGroupType.ERROR);
     focusable.setFocus(true);
-
     setupPopoverThatHidesItself(dialect, header, message, right);
   }
 

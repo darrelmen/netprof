@@ -172,7 +172,7 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
         trueIP,
         age,
         dialect,
-        new Timestamp(System.currentTimeMillis()),
+        now,
         enabled,
         "",
         "",
@@ -184,7 +184,9 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
         device,
         first,
         last,
-        -1));
+        -1,
+        now
+        ));
   }
 
   /**
@@ -288,19 +290,21 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }
 
   /**
-   * @see mitll.langtest.server.database.copy.CopyToPostgres#addUser(SlickUserDAOImpl, Map, User)
    * @param user
+   * @param useid
    * @return
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#addUser(SlickUserDAOImpl, Map, User)
    */
-  public SlickUser toSlick(User user) {
-    SlickUser user1 = new SlickUser(-1,
+  public SlickUser toSlick(User user, boolean useid) {
+    Timestamp now = new Timestamp(user.getTimestampMillis());
+    SlickUser user1 = new SlickUser(useid ? user.getID() : -1,
         user.getUserID(),
         user.isMale(),
         user.getIpaddr() == null ? "" : user.getIpaddr(),
         "",
         user.getAge(),
         user.getDialect(),
-        new Timestamp(user.getTimestampMillis()),
+        now,
         user.isEnabled(),
         user.getResetKey() == null ? "" : user.getResetKey(),
         "",
@@ -312,10 +316,11 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
         user.getDevice() == null ? "" : user.getDevice(),
         user.getFirst(),
         user.getLast(),
-        user.getID()
+        user.getID(),
+        now
     );
 
-     logger.info("toSlick made " + user1);
+    logger.info("toSlick made " + user1);
 
     return user1;
   }
@@ -372,11 +377,11 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
       miniUsers.add(getMini(s));
     }
 
-    for (Collection<MiniUser> perKind:kindToUsers.values()) {
+    for (Collection<MiniUser> perKind : kindToUsers.values()) {
       Collections.sort((ArrayList<MiniUser>) perKind, new Comparator<MiniUser>() {
         @Override
         public int compare(MiniUser o1, MiniUser o2) {
-          return -1*Long.valueOf(o1.getTimestampMillis()).compareTo(o2.getTimestampMillis());
+          return -1 * Long.valueOf(o1.getTimestampMillis()).compareTo(o2.getTimestampMillis());
         }
       });
     }
@@ -488,10 +493,14 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
   @Override
   public void update(User toUpdate) {
-    logger.info("update " + toUpdate);
-    SlickUser toUpdate1 = toSlick(toUpdate);
-    logger.info("update " + toUpdate1);
+  //  logger.info("update " + toUpdate);
+    SlickUser toUpdate1 = toSlick(toUpdate, true);
+  //  logger.info("update " + toUpdate1);
 
-    dao.update(toUpdate1);
+    int update = dao.update(toUpdate1);
+    if (update == 0) {
+      logger.warn("didn't update table with " + toUpdate1);
+    }
+    logger.info("user now " + getByID(toUpdate.getID()));
   }
 }
