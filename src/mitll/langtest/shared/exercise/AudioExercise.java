@@ -162,7 +162,7 @@ public class AudioExercise extends ExerciseShell {
     // long latest = 0;
     for (AudioAttribute audio : getAudioAttributes()) {
       if (audio.matches(name, value)) {
-        if (prefs.contains(audio.getUser().getId())) {
+        if (prefs.contains(audio.getUser().getID())) {
           return audio;
         } else {
 
@@ -298,7 +298,7 @@ public class AudioExercise extends ExerciseShell {
     List<AudioAttribute> mine = new ArrayList<AudioAttribute>();
     for (AudioAttribute attr : getAudioAttributes()) {
       if (attr.getUser() != null) {
-        if (attr.getUser().getId() == userID) mine.add(attr);
+        if (attr.getUser().getID() == userID) mine.add(attr);
       }
 //      else {
 //        System.err.println("getRecordingsBy : Can't find user for " + attr);
@@ -403,21 +403,21 @@ public class AudioExercise extends ExerciseShell {
         MiniUser user = pair.getKey();
         //System.out.println("\t\tgetMostRecentAudio user " + user + "" + (user.isDefault() ? " DEFAULT " : ""));
 
-        if (user.getId() != -1) {
+        if (user.getID() != -1) {
           if (audioAttribute.isRegularSpeed()) reg = true;
           if (audioAttribute.isSlow()) slow = true;
 
           long timestamp1 = audioAttribute.getTimestamp();
           if (reg && slow && bothTimestamp < timestamp1) {
             //  System.out.println("\t\tlatest is " + new Date(timestamp1));
-            if (bothLatest == null || !preferredUsers.contains(bothLatest.getId())) {
+            if (bothLatest == null || !preferredUsers.contains(bothLatest.getID())) {
               bothTimestamp = timestamp1;
               //  System.out.println("\t\t\tlatest is " + new Date(bothTimestamp));
               bothLatest = user;
             }
           }
           if (timestamp <= timestamp1) {
-            if (latest == null || !preferredUsers.contains(latest.getId())) {
+            if (latest == null || !preferredUsers.contains(latest.getID())) {
               timestamp = timestamp1;
               latest = user;
             }

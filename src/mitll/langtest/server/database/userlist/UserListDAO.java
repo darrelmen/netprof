@@ -137,7 +137,7 @@ import java.util.List;
               "VALUES(?,?,?,?,?,?);");
       int i = 1;
       //     statement.setLong(i++, userList.getUserID());
-      statement.setLong(i++, userList.getCreator().getId());
+      statement.setLong(i++, userList.getCreator().getID());
       statement.setString(i++, userList.getName());
       statement.setString(i++, userList.getDescription());
       statement.setString(i++, userList.getClassMarker());
@@ -386,7 +386,7 @@ import java.util.List;
   private List<UserList<CommonShell>> getUserLists(String sql, long userid) throws SQLException {
     List<UserList<CommonShell>> lists = getWhere(sql);
     for (UserList<CommonShell> ul : lists) {
-      if (userid == -1 || ul.getCreator().getId() == userid || !ul.isFavorite()) {   // skip other's favorites
+      if (userid == -1 || ul.getCreator().getID() == userid || !ul.isFavorite()) {   // skip other's favorites
         populateList(ul);
       }
     }

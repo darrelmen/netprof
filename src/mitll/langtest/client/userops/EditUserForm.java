@@ -34,6 +34,8 @@ package mitll.langtest.client.userops;
 
 import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.Fieldset;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.user.SignUpForm;
@@ -41,24 +43,40 @@ import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserPassDialog;
 import mitll.langtest.shared.user.User;
 
+import java.util.Collection;
+import java.util.logging.Logger;
+
 public class EditUserForm extends SignUpForm {
+  private final Logger logger = Logger.getLogger("SignUpForm");
+  private final User toEdit;
+  private final UserOps userOps;
+
   /**
    * @param props
    * @param userManager
    * @param eventRegistration
    * @param userPassLogin
-   * @see UserPassLogin#UserPassLogin
+   * @see OpsUserContainer#populateUserEdit(DivWidget, User)
    */
-  public EditUserForm(PropertyHandler props, UserManager userManager, EventRegistration eventRegistration, UserPassDialog userPassLogin) {
+  public EditUserForm(PropertyHandler props,
+                      UserManager userManager,
+                      EventRegistration eventRegistration,
+                      UserPassDialog userPassLogin,
+                      User toEdit,
+                      UserOps userOps) {
     super(props, userManager, eventRegistration, userPassLogin);
     setMarkFieldsWithLabels(true);
+    setRolesHeader("Current user role");
+    this.toEdit = toEdit;
+    this.userOps = userOps;
   }
 
-  CheckBox enabled;
+  private CheckBox enabled;
+
   /**
-   * @see SignUpForm#getSignUpForm(User)
    * @param user
    * @return
+   * @see SignUpForm#getSignUpForm(User)
    */
   protected Fieldset getFields(User user) {
     Fieldset fields = super.getFields(user);
@@ -67,9 +85,50 @@ public class EditUserForm extends SignUpForm {
     enabled.setValue(user.isEnabled());
     enabled.addStyleName("leftTenMargin");
 
-    addControlGroupEntry(fields, "Enabled?", enabled, "Lock or unlock user");
+    addControlGroupEntry(fields,
+        //"Enabled?"
+        ""
+        , enabled, "Lock or unlock user");
 
-  //  fields.add(enabled);
     return fields;
+  }
+
+  protected boolean isFormValid(String userID) {
+    String emailText = signUpEmail.box.getValue();
+
+    if (!emailText.isEmpty() && !isValidEmail(emailText)) {
+      markInvalidEmail();
+      return false;
+    } else return true;
+  }
+
+  protected void gotSignUp(final String user, String password, String email, User.Kind kind) {
+    User updated = new User(toEdit);
+
+    updated.setUserID(user);
+    updated.setEmail(email);
+    updated.setUserKind(kind);
+    updated.setFirst(firstName.getText());
+    updated.setLast(lastName.getText());
+
+    logger.info("updating with " + updated);
+
+    userManager.getUserService().update(updated, new AsyncCallback<Void>() {
+      @Override
+      public void onFailure(Throwable throwable) {
+
+
+      }
+
+      @Override
+      public void onSuccess(Void aVoid) {
+        logger.info("Consider updating the user list");
+        userOps.reload();
+      }
+    });
+  }
+
+  protected Collection<User.Kind> getRoles() {
+    return User.getVisibleRoles();
   }
 }

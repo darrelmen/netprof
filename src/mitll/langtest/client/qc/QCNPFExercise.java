@@ -458,7 +458,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
         tabAndContent.addWidget(panelForAudio1.audioPanel);
         toResize.add(panelForAudio1.audioPanel);
 
-        if (user.getId() == BaseUserDAO.DEFAULT_USER_ID) {    // add widgets to mark gender on default audio
+        if (user.getID() == BaseUserDAO.DEFAULT_USER_ID) {    // add widgets to mark gender on default audio
           addGenderAssignmentButtons(tabAndContent, audioAttributes, audio, panelForAudio);
         } else {
           tabAndContent.getContent().add(panelForAudio);
@@ -624,7 +624,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
   }
 
   private boolean isDefaultNoGenderUser(MiniUser user) {
-    return user.getId() == BaseUserDAO.DEFAULT_USER_ID;
+    return user.getID() == BaseUserDAO.DEFAULT_USER_ID;
   }
 
   private Button makeGroupButton(ButtonGroup buttonGroup, String title) {
@@ -634,6 +634,24 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
     buttonGroup.add(onButton);
     return onButton;
   }
+
+/*  private String getUserTitle(int me, MiniUser user) {
+    long id = user.getID();
+    if (id == UserDAO.DEFAULT_USER_ID)        return GoodwaveExercisePanel.DEFAULT_SPEAKER;
+    else if (id == UserDAO.DEFAULT_MALE_ID)   return "Default Male";
+    else if (id == UserDAO.DEFAULT_FEMALE_ID) return "Default Female";
+    else return
+          (user.getID() == me) ? "by You (" + user.getUserID() + ")" : getUserTitle(user);
+  }*/
+
+/*
+  private String getUserTitle(MiniUser user) {
+    return (user.isMale() ? MALE : FEMALE) +
+        (user.isAdmin()
+            ? " (" + user.getUserID() + ")" : "") +
+        " age " + user.getAge();
+  }
+*/
 
   /**
    * Keep track of all audio elements -- have they all been played? If so, we can enable the approve & next buttons

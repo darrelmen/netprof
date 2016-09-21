@@ -226,7 +226,7 @@ public class UserManager {
 
           @Override
           public void onSuccess(User result) {
-            setDefaultControlValues(result.getId());
+            setDefaultControlValues(result.getID());
             storeUser(result);
           }
         });
@@ -413,7 +413,7 @@ public class UserManager {
 
   /**
    * @param user
-   * @see mitll.langtest.client.user.UserPassLogin#storeUser(User)
+   * @see UserDialog#storeUser(User, UserManager)
    */
   void storeUser(User user) {
     logger.info("storeUser : user now " + user);
@@ -423,16 +423,16 @@ public class UserManager {
     if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
       userChosenID = user.getUserID();
-      localStorageIfSupported.setItem(getUserIDCookie(), "" + user.getId());
+      localStorageIfSupported.setItem(getUserIDCookie(), "" + user.getID());
       localStorageIfSupported.setItem(getPassCookie(), "" + user.getPasswordHash());
       localStorageIfSupported.setItem(getUserChosenID(), "" + userChosenID);
       rememberUserSessionEnd(localStorageIfSupported, futureMoment);
       // localStorageIfSupported.setItem(getLoginType(), "" + userType);
-      logger.info("storeUser : user now " + user.getId() + " / " + getUser() + "' expires in " + (DURATION / 1000) + " seconds");
+      logger.info("storeUser : user now " + user.getID() + " / " + getUser() + "' expires in " + (DURATION / 1000) + " seconds");
 
       gotNewUser(user);
     } else {  // not sure what we could possibly do here...
-      userID = user.getId();
+      userID = user.getID();
       userNotification.gotUser(user);
     }
   }
