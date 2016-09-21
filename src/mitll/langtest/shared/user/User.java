@@ -407,7 +407,7 @@ public class User extends MiniUser {
     return enabled;
   }
 
-  private void setEnabled(boolean enabled) {
+  public void setEnabled(boolean enabled) {
     this.enabled = enabled;
   }
 
@@ -448,6 +448,7 @@ public class User extends MiniUser {
         "\n\tis a    " + getGender() +
         "\n\tage     " + getAge() +
         "\n\tadmin   " + isAdmin() +
+        "\n\tenabled   " + isEnabled() +
         "\n\tdialect " + getDialect() +
         "\n\temailH  " + getEmailHash() +
         "\n\tpassH   " + getPasswordHash() +
