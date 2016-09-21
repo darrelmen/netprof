@@ -33,6 +33,7 @@
 package mitll.langtest.client.user;
 
 import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
@@ -45,6 +46,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.dialog.KeyPressHelper;
@@ -52,6 +54,9 @@ import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 public class SignUpForm extends UserDialog implements SignUp {
@@ -63,7 +68,7 @@ public class SignUpForm extends UserDialog implements SignUp {
 //  private static final String WAIT_FOR_APPROVAL = "Wait for approval";
 //  private static final String YOU_WILL_GET_AN_APPROVAL_MESSAGE_BY_EMAIL = "You will get an approval message by email.";
 
-  private static final String MALE = "male";
+  //  private static final String MALE = "male";
   private static final int MIN_LENGTH_USER_ID = 4;
 
   private static final int MIN_PASSWORD = 4;
@@ -90,10 +95,13 @@ public class SignUpForm extends UserDialog implements SignUp {
   private static final String AGE_ERR_MSG = "Enter age between " + MIN_AGE + " and " + MAX_AGE + ".";
 
   private BasicDialog.FormField signUpUser;
-  private BasicDialog.FormField firstName;
-  private BasicDialog.FormField lastName;
-  private BasicDialog.FormField signUpEmail;
+  protected BasicDialog.FormField firstName;
+  protected BasicDialog.FormField lastName;
+  protected BasicDialog.FormField signUpEmail;
   private BasicDialog.FormField signUpPassword;
+
+  private RegistrationInfo registrationInfo;
+  private User.Kind selectedRole = User.Kind.STUDENT;
 
   private final EventRegistration eventRegistration;
 
@@ -101,8 +109,11 @@ public class SignUpForm extends UserDialog implements SignUp {
   private CheckBox contentDevCheckbox;
   private UserPassDialog userPassLogin;
   private static final String CURRENT_USERS = "Current users should add an email and password.";
-  String signUpTitle = SIGN_UP;
+  private String signUpTitle = SIGN_UP;
+  private String rolesHeader = ARE_YOU_A;
   boolean markFieldsWithLabels = false;
+  protected UserManager userManager;
+  private Map<User.Kind, RadioButton> roleToChoice = new HashMap<>();
 
   /**
    * @param props
@@ -115,7 +126,8 @@ public class SignUpForm extends UserDialog implements SignUp {
                     UserManager userManager,
                     EventRegistration eventRegistration,
                     UserPassDialog userPassLogin) {
-    super(props, userManager);
+    super(props);
+    this.userManager = userManager;
     this.eventRegistration = eventRegistration;
     this.userPassLogin = userPassLogin;
   }
@@ -171,6 +183,11 @@ public class SignUpForm extends UserDialog implements SignUp {
     return getTwoPartForm(heading, fields);
   }
 
+  /**
+   * @param user
+   * @return
+   * @see mitll.langtest.client.userops.OpsUserContainer#populateUserEdit(DivWidget, User)
+   */
   public Panel getSignUpForm(User user) {
     Fieldset fields = getFields(user);
     fields.add(getSignUpButton(userBox, emailBox));
@@ -219,7 +236,7 @@ public class SignUpForm extends UserDialog implements SignUp {
     }
 
     fieldset.add(getRolesHeader());
-    fieldset.add(getRolesChoices());
+    fieldset.add(getRolesChoices(user == null ? User.Kind.STUDENT : user.getUserKind()));
 
     if (!props.isAMAS() && contentDevCheckbox != null) {
       fieldset.add(contentDevCheckbox);
@@ -230,7 +247,7 @@ public class SignUpForm extends UserDialog implements SignUp {
   }
 
   private Heading getRolesHeader() {
-    Heading w1 = new Heading(5, ARE_YOU_A);
+    Heading w1 = new Heading(5, rolesHeader);
     w1.addStyleName("leftTenMargin");
     int value = 5;
     w1.getElement().getStyle().setMarginTop(value, Style.Unit.PX);
@@ -263,7 +280,6 @@ public class SignUpForm extends UserDialog implements SignUp {
       }
     });
 */
-
     contentDevCheckbox.getElement().getStyle().setPaddingBottom(10, Style.Unit.PX);
     if (!props.enableAllUsers()) {
       getRecordAudioPopover();
@@ -276,36 +292,56 @@ public class SignUpForm extends UserDialog implements SignUp {
     addPopover(contentDevCheckbox, RECORD_AUDIO_HEADING, html);
   }
 
-  private Panel getRolesChoices() {
+  private Panel getRolesChoices(User.Kind selectedRole) {
+    Panel vert = new VerticalPanel();
     Panel roles = new HorizontalPanel();
     roles.addStyleName("leftTenMargin");
 
-    roles.add(studentChoice);
-    roles.add(teacherChoice);
-    teacherChoice.addStyleName("leftFiveMargin");
+    vert.add(roles);
 
+    boolean isFirst = true;
+
+    Collection<User.Kind> roles1 = getRoles();
+    int c = 0;
+    for (User.Kind role : roles1) {
+      RadioButton roleChoice = addRoleChoice(roles, role);
+      roleToChoice.put(role, roleChoice);
+//      if (!isFirst) {
+//        roleChoice.addStyleName("leftFiveMargin");
+//      }
+//      if (isFirst) {
+//        isFirst = false;
+//      }
+          roleChoice.addStyleName("leftFiveMargin");
+
+      if (role == selectedRole) roleChoice.setValue(true);
+
+      if (c++ < roles1.size() && c % 2 == 0) {
+        roles = new HorizontalPanel();
+        roles.addStyleName("leftTenMargin");
+        vert.add(roles);
+      }
+    }
+    return vert;
+  }
+
+  protected Collection<User.Kind> getRoles() {
+    return User.getSelfChoiceRoles();
+  }
+
+  private RadioButton addRoleChoice(Panel roles, final User.Kind student) {
+    RadioButton studentChoice = new RadioButton("ROLE_CHOICE", student.getName());
     studentChoice.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        selectedRole = User.Kind.STUDENT;
+        selectedRole = student;
         registrationInfo.setVisible(false);
         //      contentDevCheckbox.setVisible(false);
         //     contentDevCheckbox.setValue(false);
       }
     });
-
-    // Tamas wanted student by default...?
-    studentChoice.setValue(true);
-    teacherChoice.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        selectedRole = User.Kind.TEACHER;
-        registrationInfo.setVisible(false);
-        //   contentDevCheckbox.setVisible(true);
-      }
-    });
-
-    return roles;
+    roles.add(studentChoice);
+    return studentChoice;
   }
 
   private TextBoxBase makeSignUpUsername(Fieldset fieldset) {
@@ -426,13 +462,10 @@ public class SignUpForm extends UserDialog implements SignUp {
     registrationInfo.setVisible(false);
   }
 
-  private RegistrationInfo registrationInfo;
-  private User.Kind selectedRole = User.Kind.STUDENT;
 
-  private final RadioButton studentChoice = new RadioButton("ROLE_CHOICE", STUDENT);
-  private final RadioButton teacherChoice = new RadioButton("ROLE_CHOICE", TEACHER);
+//  private final RadioButton studentChoice = new RadioButton("ROLE_CHOICE", STUDENT);
+//  private final RadioButton teacherChoice = new RadioButton("ROLE_CHOICE", TEACHER);
   // private Popover studentOrTeacherPopover;
-
   private Button getSignUpButton(final TextBoxBase userBox, final TextBoxBase emailBox) {
     this.signUp = new Button(signUpTitle);
     this.signUp.getElement().setId("SignUp");
@@ -442,58 +475,9 @@ public class SignUpForm extends UserDialog implements SignUp {
       @Override
       public void onClick(ClickEvent event) {
         String userID = userBox.getValue();
-        if (userID.length() < MIN_LENGTH_USER_ID) {
-          eventRegistration.logEvent(SignUpForm.this.signUp, "SignUp_Button", "N/A", "short user id '" + userID + "'");
-          markErrorBlur(signUpUser, PLEASE_ENTER_A_LONGER_USER_ID);
-        } else if (firstName.getText().isEmpty()) {
-          eventRegistration.logEvent(firstName.getWidget(), "SignUp_Button", "N/A", "short user first name '" + firstName.getText() + "'");
-          markErrorBlur(firstName, "Please enter a first name.");
-        } else if (lastName.getText().isEmpty()) {
-          eventRegistration.logEvent(lastName.getWidget(), "SignUp_Button", "N/A", "short user last name '" + lastName.getText() + "'");
-          markErrorBlur(lastName, "Please enter a last name.");
-        } else {
-          String emailText = signUpEmail.box.getValue();
-          if (emailText.isEmpty()) {
-            eventRegistration.logEvent(SignUpForm.this.signUp, "SignUp_Button", "N/A", "short email");
-            markErrorBlur(signUpEmail, "Please enter your email.");
-            //  } else if (signUpEmail.box.getValue().length() < MIN_EMAIL) {
-            //     eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "short email");
-            //     markErrorBlur(signUpEmail, "Please enter your email.");
-          } else if (!isValidEmail(emailText)) {
-            eventRegistration.logEvent(SignUpForm.this.signUp, "SignUp_Button", "N/A", "invalid email");
-            markErrorBlur(signUpEmail, VALID_EMAIL);
-          } else {
-            String passwordText = signUpPassword.box.getValue();
-            if (passwordText.length() < MIN_PASSWORD) {
-              eventRegistration.logEvent(SignUpForm.this.signUp, "SignUp_Button", "N/A", "short password");
-              markErrorBlur(signUpPassword, passwordText.isEmpty() ? PLEASE_ENTER_A_PASSWORD :
-                  "Please enter a password at least " + MIN_PASSWORD + " characters long.");
-            } else if (selectedRole == User.Kind.UNSET) {
-              //studentOrTeacherPopover =
-              markErrorBlur(studentChoice, "Please choose", "Please select either student or teacher.", Placement.LEFT);
-              eventRegistration.logEvent(SignUpForm.this.signUp, "SignUp_Button", "N/A", "didn't check role");
-            }
-
-            // TODO : ask content developers for info when they first sign up
-
-/*            else if (selectedRole == User.Kind.CONTENT_DEVELOPER &&
-                !registrationInfo.checkValidGender()) {
-              eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "didn't check gender");
-              //        } else if (CHECK_AGE && selectedRole == User.Kind.CONTENT_DEVELOPER && !isValidAge(registrationInfo.getAgeEntryGroup())) {
-              //         eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "didn't fill in age ");
-              //         markErrorBlur(registrationInfo.getAgeEntryGroup().box, AGE_ERR_MSG,Placement.TOP);
-              //   registrationInfo.getAgeEntryGroup().markError(AGE_ERR_MSG);
-            } else if (selectedRole == User.Kind.CONTENT_DEVELOPER && registrationInfo.getDialectGroup().getText().isEmpty()) {
-              eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "didn't fill in dialect ");
-              markErrorBlur(registrationInfo.getDialectGroup(), "Enter a language dialect.");
-              //  } else if (currentSignUpProject == null) {
-              //    markErrorBlur(signUpProjectChoice, "Please choose a language", Placement.TOP);
-            } */
-
-            else {
-              gotSignUp(userID, passwordText, emailBox.getValue(), selectedRole);
-            }
-          }
+        //logger.info("sign up click for " + userID);
+        if (isFormValid(userID)) {
+          gotSignUp(userID, getPasswordText(), emailBox.getValue(), selectedRole);
         }
       }
     });
@@ -503,6 +487,54 @@ public class SignUpForm extends UserDialog implements SignUp {
     this.signUp.setType(ButtonType.SUCCESS);
 
     return this.signUp;
+  }
+
+  private String getPasswordText() {
+    return signUpPassword == null ? "" : signUpPassword.box.getValue();
+  }
+
+  protected boolean isFormValid(String userID) {
+    if (userID.length() < MIN_LENGTH_USER_ID) {
+      eventRegistration.logEvent(SignUpForm.this.signUp, "SignUp_Button", "N/A", "short user id '" + userID + "'");
+      markErrorBlur(signUpUser, PLEASE_ENTER_A_LONGER_USER_ID);
+      return false;
+    } else if (firstName.getText().isEmpty()) {
+      eventRegistration.logEvent(firstName.getWidget(), "SignUp_Button", "N/A", "short user first name '" + firstName.getText() + "'");
+      markErrorBlur(firstName, "Please enter a first name.");
+      return false;
+    } else if (lastName.getText().isEmpty()) {
+      eventRegistration.logEvent(lastName.getWidget(), "SignUp_Button", "N/A", "short user last name '" + lastName.getText() + "'");
+      markErrorBlur(lastName, "Please enter a last name.");
+      return false;
+    } else {
+      String emailText = signUpEmail.box.getValue();
+      if (emailText.isEmpty()) {
+        eventRegistration.logEvent(SignUpForm.this.signUp, "SignUp_Button", "N/A", "short email");
+        markErrorBlur(signUpEmail, "Please enter your email.");
+        return false;
+        //  } else if (signUpEmail.box.getValue().length() < MIN_EMAIL) {
+        //     eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "short email");
+        //     markErrorBlur(signUpEmail, "Please enter your email.");
+      } else if (!isValidEmail(emailText)) {
+        markInvalidEmail();
+        return false;
+      } else if (signUpPassword != null) {
+        String passwordText = getPasswordText();
+        if (passwordText.length() < MIN_PASSWORD) {
+          eventRegistration.logEvent(SignUpForm.this.signUp, "SignUp_Button", "N/A", "short password");
+          markErrorBlur(signUpPassword, passwordText.isEmpty() ? PLEASE_ENTER_A_PASSWORD :
+              "Please enter a password at least " + MIN_PASSWORD + " characters long.");
+        }
+        return false;
+      } else {
+        return true;
+      }
+    }
+  }
+
+  protected void markInvalidEmail() {
+    eventRegistration.logEvent(SignUpForm.this.signUp, "SignUp_Button", "N/A", "invalid email");
+    markErrorBlur(signUpEmail, VALID_EMAIL);
   }
 
   /**
@@ -559,7 +591,7 @@ public class SignUpForm extends UserDialog implements SignUp {
                 eventRegistration.logEvent(signUp, "signing up", "N/A", getSignUpEvent(result));
                 // logger.info("Got valid, enabled new user " + user + " and so we're letting them in.");
 
-                storeUser(result);
+                storeUser(result, userManager);
               } else {
                 eventRegistration.logEvent(signUp, "signing up", "N/A", getSignUpEvent(result) +
                     " but waiting for approval from Tamas.");
@@ -581,6 +613,10 @@ public class SignUpForm extends UserDialog implements SignUp {
   }
 
   private String getSignUpEvent(User result) {
-    return "successful sign up as " + result.getUserID() + "/" + result.getId() + " as " + result.getUserKind();
+    return "successful sign up as " + result.getUserID() + "/" + result.getID() + " as " + result.getUserKind();
+  }
+
+  public void setRolesHeader(String rolesHeader) {
+    this.rolesHeader = rolesHeader;
   }
 }

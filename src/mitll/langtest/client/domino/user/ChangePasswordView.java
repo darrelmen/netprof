@@ -114,7 +114,7 @@ public class ChangePasswordView extends Composite {
     /**
      * When would we want them not to re-enter the password - I guess if it's a reset for someone else???
      */
-/*    if (cUser.getId() == editUser.getId() ||
+/*    if (cUser.getID() == editUser.getID() ||
         //((!(cUser.hasRole(Role.UM)))&&(!cUser.hasRole(Role.GrAM)))
         !cUser.isAdmin()
         ) { // Role should always be UM or Group AM.
@@ -229,7 +229,7 @@ public class ChangePasswordView extends Composite {
     final DecoratedFields df = getFirstDecoratedField();
 
 //    String hash = Md5Hash.getHash(newPass);
-    userServiceAsync.changePassword(editUser.getId(),
+    userServiceAsync.changePassword(editUser.getID(),
         currPass == null ? "" : Md5Hash.getHash(currPass),
         Md5Hash.getHash(newPass),
         //sendEmail,

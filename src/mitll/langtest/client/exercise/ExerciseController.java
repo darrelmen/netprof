@@ -44,6 +44,7 @@ import mitll.langtest.client.services.ScoringServiceAsync;
 import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.user.UserFeedback;
+import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.ProjectStartupInfo;
@@ -71,6 +72,8 @@ public interface ExerciseController extends EventRegistration {
   QCServiceAsync getQCService();
 
   UserServiceAsync getUserService();
+
+  UserManager getUserManager();
 
   /**
    * TODO : do we really need to do this?

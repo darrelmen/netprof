@@ -37,6 +37,7 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.Report;
 import mitll.langtest.server.database.result.Result;
+import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.AudioAttribute;
@@ -880,5 +881,16 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
 
   private void index(Database database) throws SQLException {
     createIndex(database, Database.EXID, AUDIO);
+  }
+
+  MiniUser checkDefaultUser(long userID, MiniUser user) {
+    if (userID == BaseUserDAO.DEFAULT_USER_ID) {
+      user = BaseUserDAO.DEFAULT_USER;
+    } else if (userID == BaseUserDAO.DEFAULT_MALE_ID) {
+      user = BaseUserDAO.DEFAULT_MALE;
+    } else if (userID == BaseUserDAO.DEFAULT_FEMALE_ID) {
+      user = BaseUserDAO.DEFAULT_FEMALE;
+    }
+    return user;
   }
 }

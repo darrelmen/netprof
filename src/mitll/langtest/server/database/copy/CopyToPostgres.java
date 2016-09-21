@@ -81,6 +81,7 @@ public class CopyToPostgres<T extends CommonShell> {
   private static final int WARN_RID_MISSING_THRESHOLD = 50;
   private static final boolean COPY_EVENTS = true;
   private static final boolean DEBUG = false;
+  private static final int WARN_MISSING_THRESHOLD = 10;
 
   /**
    * @param config
@@ -414,7 +415,7 @@ public class CopyToPostgres<T extends CommonShell> {
     int lurker = 0;
     List<SlickUser> added = new ArrayList<>();
     for (User toImport : importUsers) {
-      int importID = toImport.getId();
+      int importID = toImport.getID();
       if (importID != defectDetector) {
         String importUserID = toImport.getUserID();
         String passwordHash = toImport.getPasswordHash();
@@ -425,7 +426,7 @@ public class CopyToPostgres<T extends CommonShell> {
 
         if (strictUserWithPass != null) {
           // do nothing, but remember id mapping
-          oldToNew.put(importID, strictUserWithPass.getId());
+          oldToNew.put(importID, strictUserWithPass.getID());
         } else {
 
           if (importUserID.isEmpty() && idToCount.get(importID) != null && idToCount.get(importID) == 0) {
@@ -438,7 +439,7 @@ public class CopyToPostgres<T extends CommonShell> {
               if (DEBUG) logger.info("found existing user " + importUserID + " : " + userByID1);
               // User "adam" already exists with a different password - what to do?
               // void current password! Force them to set it again when they log in again
-              int existingID = userByID1.getId();
+              int existingID = userByID1.getID();
               if (!userByID1.getPasswordHash().isEmpty()) {
                 slickUserDAO.changePassword(existingID, "");
               }
@@ -491,8 +492,8 @@ public class CopyToPostgres<T extends CommonShell> {
     SlickUser slickUser = slickUserDAO.addAndGet(user, toImport.getPermissions());
     int add = slickUser.id();
 //    logger.info("addUser id  " + add + " for " + user.id() + " equal " + (user == slickUser));
-    //   logger.info("addUser map " + toImport.getId() + " -> " + add);
-    oldToNew.put(toImport.getId(), add);
+    //   logger.info("addUser map " + toImport.getID() + " -> " + add);
+    oldToNew.put(toImport.getID(), add);
     return slickUser;
   }
 
@@ -526,7 +527,7 @@ public class CopyToPostgres<T extends CommonShell> {
         } else skippedMissingUser++;
       } else {
         missingExIDs.add(oldexid);
-        if (missing < 50) logger.warn("missing ex for " + att + " : " + oldexid);
+        if (missing < WARN_MISSING_THRESHOLD) logger.warn("missing ex for " + att + " : " + oldexid);
         missing++;
       }
     }
@@ -721,7 +722,7 @@ public class CopyToPostgres<T extends CommonShell> {
     List<SlickUserExerciseList> bulk = new ArrayList<>();
 
     for (UserList<CommonShell> list : oldUserLists) {
-      int oldID = list.getCreator().getId();
+      int oldID = list.getCreator().getID();
       Integer newUserID = oldToNewUser.get(oldID);
       if (newUserID == null) {
         logger.error("UserListManager can't find user " + oldID + " in " + oldToNewUser.size());

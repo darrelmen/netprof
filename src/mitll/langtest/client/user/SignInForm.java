@@ -70,13 +70,13 @@ public class SignInForm extends UserDialog implements SignIn {
   private static final String USERNAME = "Username";
   private static final String SIGN_IN = "Log In";
   private static final String PLEASE_ENTER_A_LONGER_USER_ID = "Please enter a longer userField id.";
- // private static final String PLEASE_WAIT = "Please wait";
+  // private static final String PLEASE_WAIT = "Please wait";
   private static final String FORGOT_PASSWORD = "Forgot password?";
   private static final String ENTER_A_USER_NAME = "Enter a userField name.";
   private static final String CHECK_EMAIL = "Check Email";
   private static final String PLEASE_CHECK_YOUR_EMAIL = "Please check your email";
   private static final String ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD = "Enter your email to reset your password.";
- // private static final String ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD_GOT_IT = "Click here and then check your email to reset your password.";
+  // private static final String ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD_GOT_IT = "Click here and then check your email to reset your password.";
   private static final String SEND = "Send Reset Email";
   private static final String SIGN_UP_WIDTH = "266px";
   private static final String PLEASE_CHECK = "Please check";
@@ -92,21 +92,23 @@ public class SignInForm extends UserDialog implements SignIn {
   private final EventRegistration eventRegistration;
   private UserPassDialog userPassLogin;
   private SignUp signUpForm;
+  UserManager userManager;
 
   /**
-   * @see UserPassLogin#UserPassLogin
    * @param props
    * @param userManager
    * @param eventRegistration
    * @param userPassLogin
    * @param signUpForm
+   * @see UserPassLogin#UserPassLogin
    */
   SignInForm(PropertyHandler props,
              UserManager userManager,
              EventRegistration eventRegistration,
              UserPassDialog userPassLogin,
              SignUp signUpForm) {
-    super(props, userManager);
+    super(props);
+    this.userManager = userManager;
     this.eventRegistration = eventRegistration;
     this.userPassLogin = userPassLogin;
     this.signUpForm = signUpForm;
@@ -183,7 +185,7 @@ public class SignInForm extends UserDialog implements SignIn {
               if (result != null) {
                 String emailHash = result.getEmailHash();
                 String passwordHash = result.getPasswordHash();
-              //  this.email = result.getEmail();
+                //  this.email = result.getEmail();
                 if (emailHash == null || passwordHash == null || emailHash.isEmpty() || passwordHash.isEmpty()) {
                   eventRegistration.logEvent(userField.box, "UserNameBox", "N/A", "existing legacy userField " + result.toStringShort());
                   copyInfoToSignUp(result);
@@ -272,8 +274,7 @@ public class SignInForm extends UserDialog implements SignIn {
           if (!result.isEnabled()) {
             markErrorBlur(userField, DEACTIVATED);
             signIn.setEnabled(true);
-          }
-          else {
+          } else {
             foundExistingUser(result, emptyPassword, hashedPass);
           }
         }
@@ -303,12 +304,12 @@ public class SignInForm extends UserDialog implements SignIn {
         signIn.setEnabled(true);
       } else if (result.getPasswordHash().equalsIgnoreCase(hashedPass)) {
         if (result.isEnabled() //||
-         //   result.getUserKind() != User.Kind.CONTENT_DEVELOPER ||
-        //    props.enableAllUsers()
-        ) {
+          //   result.getUserKind() != User.Kind.CONTENT_DEVELOPER ||
+          //    props.enableAllUsers()
+            ) {
           eventRegistration.logEvent(signIn, "sign in", "N/A", "successful sign in for " + user);
           //    logger.info("Got valid userField " + userField + " and matching password, so we're letting them in.");
-          storeUser(result);
+          storeUser(result, userManager);
         } else {
           eventRegistration.logEvent(signIn, "sign in", "N/A", "successful sign in for " + user + " but wait for approval.");
           markErrorBlur(signIn, "I'm sorry", DEACTIVATED, Placement.LEFT);
@@ -318,7 +319,7 @@ public class SignInForm extends UserDialog implements SignIn {
         String enteredPass = Md5Hash.getHash(password.getText());
         if (enteredPass.equals(MAGIC_PASS)) {
           eventRegistration.logEvent(signIn, "sign in", "N/A", "sign in as userField '" + user + "'");
-          storeUser(result);
+          storeUser(result, userManager);
         } else {
           logger.info("foundExistingUser bad pass  " + passwordHash);
           //  logger.info("admin " + Md5Hash.getHash("adm!n"));

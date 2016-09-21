@@ -209,7 +209,7 @@ public class UserSecurityManager {
     if (session != null) {
       Integer uidI = (Integer) session.getAttribute(USER_SESSION_ATT);
 /*      log.info("Lookup user from HTTP session. SID={} Request SID={}, Session Created={}, isNew={}, result={}",
-          session.getId(), request.getRequestedSessionId(),
+          session.getID(), request.getRequestedSessionId(),
           request.getSession().getCreationTime(), request.getSession().isNew(), uidI);*/
 
       if (uidI != null) {

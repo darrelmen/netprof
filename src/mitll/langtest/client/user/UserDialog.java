@@ -41,6 +41,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.dialog.KeyPressHelper;
+import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.services.UserService;
 import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.shared.user.User;
@@ -62,14 +63,18 @@ abstract class UserDialog extends BasicDialog {
   static final int MAX_AGE = 90;
 
   final PropertyHandler props;
-  private final UserManager userManager;
+//  private final UserManager userManager;
   private KeyPressHelper enterKeyButtonHelper;
 
   protected final UserServiceAsync service = GWT.create(UserService.class);
 
-  UserDialog(PropertyHandler props, UserManager userManager) {
+  /**
+   * @see SignUpForm#SignUpForm(PropertyHandler, UserManager, EventRegistration, UserPassDialog)
+   * @param props
+   */
+  UserDialog(PropertyHandler props) {
     this.props = props;
-    this.userManager = userManager;
+  //  this.userManager = userManager;
   }
 
   /**
@@ -112,10 +117,11 @@ abstract class UserDialog extends BasicDialog {
 
   /**
    * @param result
+   * @param userManager
    * @see SignInForm#foundExistingUser(User, boolean, String)
    * @see SignUpForm#gotSignUp(String, String, String, User.Kind)
    */
-  void storeUser(User result) {
+  void storeUser(User result, UserManager userManager) {
     //logger.info("UserPassLogin.storeUser - " + result);
     enterKeyButtonHelper.removeKeyHandler();
     userManager.storeUser(result);

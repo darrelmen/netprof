@@ -36,8 +36,12 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+
+import static mitll.langtest.shared.user.User.Permission.*;
 
 public class User extends MiniUser {
   public static final String NOT_SET = "NOT_SET";
@@ -57,7 +61,7 @@ public class User extends MiniUser {
   private String dialect;
   private String device;
   private String resetKey;
-  private String cdKey;
+//  private String cdKey;
   //  private long timestamp;
   private Collection<Permission> permissions;
   private ProjectStartupInfo startupInfo;
@@ -66,18 +70,43 @@ public class User extends MiniUser {
     return email;
   }
 
-  //  private boolean isActive;
-//  public boolean isActive() {
-//    return isActive;
-//  }
+  public void setEmailHash(String emailHash) {
+    this.emailHash = emailHash;
+  }
+
+  public void setEmail(String email) {
+    this.email = email;
+  }
+
+  public void setUserKind(Kind userKind) {
+    this.userKind = userKind;
+  }
+
+  public void setDialect(String dialect) {
+    this.dialect = dialect;
+  }
+
+  public void setPermissions(Collection<Permission> permissions) {
+    this.permissions = permissions;
+  }
+
   public enum Kind implements IsSerializable {
     UNSET("Unset", false),
+    INTERNAL("INTERNAL", false),
+
     STUDENT("Student", true),
+
     TEACHER("Teacher", true),
+
     CONTENT_DEVELOPER("Content Developer", true),
-    PROJECT_ADMIN("Project Admin", true), ADMIN("System Admin", true),
-    TEST("Test Account", false),
-    INTERNAL("INTERNAL", false);
+
+    AUDIO_RECORDER("Audio Recorder", true),
+
+    PROJECT_ADMIN("Project Admin", true),
+
+    ADMIN("System Admin", true),
+
+    TEST("Test Account", true);
 
     String name;
     boolean show;
@@ -99,12 +128,46 @@ public class User extends MiniUser {
     }
   }
 
+  public static Collection<User.Kind> getVisibleRoles() {
+    return Arrays.asList(Kind.STUDENT, Kind.TEACHER, Kind.AUDIO_RECORDER, Kind.CONTENT_DEVELOPER, Kind.PROJECT_ADMIN, Kind.TEST);
+  }
+
+  public static Collection<User.Kind> getSelfChoiceRoles() {
+    return Arrays.asList(Kind.STUDENT, Kind.TEACHER);
+  }
+
+  public static Collection<Permission> getPermsForRole(Kind role) {
+    switch (role) {
+      case STUDENT:
+        return Collections.emptyList();
+      case TEACHER:
+        return Arrays.asList(
+            TEACHER_PERM,
+            EDIT_STUDENT);  // students
+      case AUDIO_RECORDER:
+        return Collections.singleton(
+            Permission.RECORD_AUDIO);
+      case CONTENT_DEVELOPER:
+        return Arrays.asList(
+            Permission.RECORD_AUDIO,
+            Permission.QUALITY_CONTROL);
+      case PROJECT_ADMIN:
+        return Arrays.asList(
+            TEACHER_PERM,
+            INVITE,
+            EDIT_USER);
+      default:
+        return Collections.emptyList();
+    }
+  }
+
   public enum Permission implements IsSerializable {
     QUALITY_CONTROL,
     RECORD_AUDIO,
     DEVELOP_CONTENT, //? make new projects? edit via domino?
     TEACHER_PERM, // gets to see teacher things, invite
-    CREATE_USER,
+    INVITE,
+    EDIT_STUDENT,
     EDIT_USER
   }
 
@@ -132,7 +195,32 @@ public class User extends MiniUser {
   public User(int id, int age, int gender, int experience, String ipaddr, String password,
               boolean enabled, Collection<Permission> permissions) {
     this(id, age, gender, experience, ipaddr, password, NOT_SET, NOT_SET, NOT_SET, enabled, false, permissions,
-        Kind.STUDENT, "", "", "", "", "", System.currentTimeMillis());
+        Kind.STUDENT,
+        "",
+        "", "", "", //"",
+        System.currentTimeMillis());
+  }
+
+  public User(User copy) {
+    this(copy.getID(),
+        copy.getAge(),
+        copy.getGender(),
+        copy.getExperience(),
+        copy.getIpaddr(),
+        copy.getPasswordHash(),
+        copy.getNativeLang(),
+        copy.getDialect(),
+        copy.getUserID(),
+        copy.isEnabled(),
+        copy.isAdmin(),
+        copy.getPermissions(),
+        copy.getUserKind(),
+        copy.getEmail(),
+        copy.getEmailHash(),
+        copy.getDevice(),
+        copy.getResetKey(),
+        //copy.cdKey,
+        copy.getTimestampMillis());
   }
 
   /**
@@ -151,7 +239,7 @@ public class User extends MiniUser {
    * @param emailHash
    * @param device
    * @param resetPassKey
-   * @param cdEnableKey
+   * @paramx cdEnableKey
    * @param timestamp
    * @see mitll.langtest.server.database.user.SlickUserDAOImpl#toUsers(List)
    * @see UserDAO#getUsers
@@ -162,7 +250,8 @@ public class User extends MiniUser {
               String email, String emailHash,
 
               String device, String resetPassKey,
-              String cdEnableKey, long timestamp//, boolean isActive
+              //String cdEnableKey,
+              long timestamp//, boolean isActive
   ) {
     super(id, age, gender == 0, userID, isAdmin);
     this.experience = experience;
@@ -178,7 +267,7 @@ public class User extends MiniUser {
     this.dialect = dialect;
     this.device = device;
     this.resetKey = resetPassKey;
-    this.cdKey = cdEnableKey;
+  //  this.cdKey = cdEnableKey;
     this.timestamp = timestamp;
   }
 
@@ -343,26 +432,31 @@ public class User extends MiniUser {
   }
 
   public String toStringShort() {
-    return "user " + getId() + "/" + getUserID() +
-        " is a " + getGender() + " age " + getAge() +
-        " kind " + getUserKind() +
-        " perms " + getPermissions();
+    return "user " + getID() + "/" + getUserID() +
+        "\n\tis a " + getGender() +
+        "\n\tage " + getAge() +
+        "\n\tkind " + getUserKind() +
+        "\n\tperms " + getPermissions();
   }
 
   public String toString() {
-    return "user " + getId() + "/" + getUserID() +
-        " '" + first +
-        "' '" + last +
-        "' is a " + getGender() + " age " + getAge() +
-        " admin " + isAdmin() +
-        " dialect " + getDialect() +
-        " emailH " + getEmailHash() +
-        " passH " + getPasswordHash() +
-        " kind " + getUserKind() +
-        " perms " + getPermissions() +
-        " device " + getDevice() +
-        " reset '" + resetKey + "'" +
-        " cdenable '" + cdKey + "' " + startupInfo
+    return "user " + getID() + "/" + getUserID() +
+        "\n\t first '" + first +
+        "'" +
+        "\n\t last  '" + last +
+        "'" +
+        "\n\tis a    " + getGender() +
+        "\n\tage     " + getAge() +
+        "\n\tadmin   " + isAdmin() +
+        "\n\tdialect " + getDialect() +
+        "\n\temailH  " + getEmailHash() +
+        "\n\tpassH   " + getPasswordHash() +
+        "\n\tkind    " + getUserKind() +
+        "\n\tperms   " + getPermissions() +
+        "\n\tdevice  " + getDevice() +
+        "\n\treset  '" + resetKey + "'" +
+        //" cdenable '" + cdKey + "'" +
+        "\n\t         " + startupInfo
         ;
   }
 }

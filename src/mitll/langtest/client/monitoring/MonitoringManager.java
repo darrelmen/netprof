@@ -1412,7 +1412,7 @@ public class MonitoringManager {
       User user = pair.getKey();
       String name = user.getUserID();
       if (name == null || name.length() == 0) {
-        name = "" + user.getId();
+        name = "" + user.getID();
       }
       name = name.trim();
       Integer count = nameToCount.get(name);
