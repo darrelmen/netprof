@@ -56,6 +56,8 @@ import java.util.Comparator;
 import java.util.List;
 
 public class OpsUserContainer extends BasicUserContainer<MiniUser> implements RequiresResize {
+  public static final String FIRST = "First";
+  public static final String LAST = "Last";
   private final DivWidget rightSide;
   private final UserOps userOps;
 
@@ -81,8 +83,8 @@ public class OpsUserContainer extends BasicUserContainer<MiniUser> implements Re
   protected void addColumnsToTable() {
     super.addColumnsToTable();
 
-    getNameCol("First", true);
-    getNameCol("Last", false);
+    getNameCol(FIRST, true);
+    getNameCol(LAST,  false);
     table.getColumnSortList().push(dateCol);
     table.setWidth("100%", true);
 
@@ -165,9 +167,7 @@ public class OpsUserContainer extends BasicUserContainer<MiniUser> implements Re
     }
   }
 
-  private void populateUserEdit(DivWidget userDetail,
-                                User user
-  ) {
+  private void populateUserEdit(DivWidget userDetail, User user) {
 
     EditUserForm signUpForm = new EditUserForm(
         controller.getProps(),
