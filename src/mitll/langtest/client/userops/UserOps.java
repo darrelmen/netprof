@@ -58,14 +58,14 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 public class UserOps implements RequiresResize {
-  private final Logger logger = Logger.getLogger("UserOps");
+ // private final Logger logger = Logger.getLogger("UserOps");
 
   //private static final String USERS = "Users";
   private final UserManager userManager;
   private final ExerciseController controller;
 
-  private Map<User.Kind, Label> kindToLabel = new HashMap<>();
-  private Map<User.Kind, IconType> kindToIcon = new HashMap<>();
+  private final Map<User.Kind, Label> kindToLabel = new HashMap<>();
+  private final Map<User.Kind, IconType> kindToIcon = new HashMap<>();
 
   /**
    * @param controller
@@ -88,6 +88,11 @@ public class UserOps implements RequiresResize {
     kindToIcon.put(User.Kind.TEST, IconType.COGS);
   }
 
+  /**
+   * @param users
+   * @see Navigation#addUserMaintenance()
+   * @see Navigation#selectPreviousTab
+   */
   public void showUsers(TabAndContent users) {
     DivWidget content = users.getContent();
     content.clear();
@@ -98,7 +103,6 @@ public class UserOps implements RequiresResize {
 
     NavLink first = getKinds(left, right, detail);
 
-    userManager.getCounts(kindToLabel);
 
     right.getElement().setId("userContent");
     right.getElement().getStyle().setMarginLeft(10, Style.Unit.PX);
@@ -150,7 +154,6 @@ public class UserOps implements RequiresResize {
   }
 
   /**
-   *
    * @param kind
    * @param content
    * @param userForm
@@ -176,13 +179,12 @@ public class UserOps implements RequiresResize {
     return students;
   }
 
-  User.Kind currentKind;
-  DivWidget currentContent;
-  DivWidget currentUserForm;
+  private User.Kind currentKind;
+  private DivWidget currentContent;
+  private DivWidget currentUserForm;
 
   public void reload() {
     MiniUser currentSelection = opsUserContainer.getNext();
-
     if (currentSelection != null) {
       opsUserContainer.storeSelectedUser(currentSelection.getID());
     }
@@ -203,6 +205,8 @@ public class UserOps implements RequiresResize {
         currentContent = content;
         currentUserForm = userForm;
 
+        userManager.getCounts(kindToLabel);
+
         requiresResize = showUserList(kind, content, kindCollectionMap, userForm);
 
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
@@ -216,7 +220,7 @@ public class UserOps implements RequiresResize {
   }
 
   private RequiresResize requiresResize = null;
-  OpsUserContainer opsUserContainer;
+  private OpsUserContainer opsUserContainer;
 
   /**
    * Show users of this kind.
@@ -235,7 +239,7 @@ public class UserOps implements RequiresResize {
     Collection<MiniUser> miniUsers = kindCollectionMap.get(kind);
     if (miniUsers == null) miniUsers = new ArrayList<>();
 
-     opsUserContainer = getOpsUserContainer(kind, userForm);
+    opsUserContainer = getOpsUserContainer(kind, userForm);
     DivWidget table = opsUserContainer.getTable(miniUsers, "", "");
     content.add(table);
     return opsUserContainer;
