@@ -271,18 +271,18 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
     for (AudioAttribute audioAttribute : e.getAudioAttributes()) {
       if (audioAttribute.isContextAudio()) {
         logger.info("addGenderChoices : adding context audio " + audioAttribute);
-        long user = audioAttribute.getUser().getId();
+        long user = audioAttribute.getUser().getID();
         if (user == -1) {
           defaultAudio = audioAttribute;
         } else if (audioAttribute.getUser().isMale()) {
           if (audioAttribute.getTimestamp() > maleTime) {
-            if (maleAudio == null || !preferredUsers.contains((long) maleAudio.getUser().getId())) {
+            if (maleAudio == null || !preferredUsers.contains((long) maleAudio.getUser().getID())) {
               maleAudio = audioAttribute;
               maleTime = audioAttribute.getTimestamp();
             }
           }
         } else if (audioAttribute.getTimestamp() > femaleTime) {
-          if (femaleAudio == null || !preferredUsers.contains((long) femaleAudio.getUser().getId())) {
+          if (femaleAudio == null || !preferredUsers.contains((long) femaleAudio.getUser().getID())) {
             femaleAudio = audioAttribute;
             femaleTime = audioAttribute.getTimestamp();
           }

@@ -39,7 +39,6 @@ import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;
@@ -72,7 +71,7 @@ public class ResetPassword extends UserDialog {
   private final KeyPressHelper enterKeyButtonHelper;
 
   public ResetPassword(PropertyHandler props, EventRegistration eventRegistration) {
-    super(props, null);
+    super(props);
     this.eventRegistration = eventRegistration;
     enterKeyButtonHelper = new KeyPressHelper(false);
   }
@@ -110,8 +109,10 @@ public class ResetPassword extends UserDialog {
     Heading w = new Heading(3, CHOOSE_A_NEW_PASSWORD);
     fieldset.add(w);
     w.addStyleName("leftFiveMargin");
-    final BasicDialog.FormField firstPassword = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, PASSWORD);
-    final BasicDialog.FormField secondPassword = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, "Confirm " + PASSWORD);
+    final BasicDialog.FormField firstPassword =
+        addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, PASSWORD);
+    final BasicDialog.FormField secondPassword =
+        addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, "Confirm " + PASSWORD);
 
     //  firstPassword.getWidget().setTabIndex(0);
     // secondPassword.getWidget().setTabIndex(1);

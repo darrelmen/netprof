@@ -53,6 +53,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.custom.TooltipHelper;
+import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
@@ -64,7 +65,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 
-public class BasicUserContainer<T extends MiniUser> extends SimplePagingContainer<T> {
+public class BasicUserContainer<T extends MiniUser>
+  //  extends SimplePagingContainer<T>
+    extends ClickablePagingContainer<T>
+{
   static final int TABLE_WIDTH = 420;
   private static final int MAX_LENGTH_ID = 13;
   private static final int PAGE_SIZE = 11;
@@ -186,7 +190,7 @@ public class BasicUserContainer<T extends MiniUser> extends SimplePagingContaine
           } else {
             int i = 0;
             for (T userInfo : users) {
-              if (userInfo.getId() == selectedUser) {
+              if (userInfo.getID() == selectedUser) {
                 //    logger.info("found previous selection - " + userInfo + " : " + i);
                 table.getSelectionModel().setSelected(userInfo, true);
                 gotClickOnItem(userInfo);
@@ -327,7 +331,11 @@ public class BasicUserContainer<T extends MiniUser> extends SimplePagingContaine
     // }
   }
 
-  private void storeSelectedUser(long selectedUser) {
+  /**
+   * @see #gotClickOnItem(MiniUser)
+   * @param selectedUser
+   */
+  public void storeSelectedUser(long selectedUser) {
     if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
       localStorageIfSupported.setItem(selectedUserKey, "" + selectedUser);
@@ -389,7 +397,7 @@ public class BasicUserContainer<T extends MiniUser> extends SimplePagingContaine
     };
   }
 
-  protected void gotClickOnItem(final T user) {  storeSelectedUser(user.getId());  }
+  protected void gotClickOnItem(final T user) {  storeSelectedUser(user.getID());  }
 
   /**
    * MUST BE PUBLIC

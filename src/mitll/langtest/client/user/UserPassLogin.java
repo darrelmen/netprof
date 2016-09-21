@@ -103,7 +103,7 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
   public UserPassLogin(PropertyHandler props,
                        UserManager userManager,
                        EventRegistration eventRegistration) {
-    super(props, userManager);
+    super(props);
 
     signUpForm = new SignUpForm(props, userManager, eventRegistration, this);
     signInForm = new SignInForm(props, userManager, eventRegistration, this, signUpForm);
