@@ -488,7 +488,7 @@ public class CopyToPostgres<T extends CommonShell> {
                             Map<Integer, Integer> oldToNew,
                             User toImport) {
 //    logger.info("addUser " + toImport + " with " + toImport.getPermissions());
-    SlickUser user = slickUserDAO.toSlick(toImport);
+    SlickUser user = slickUserDAO.toSlick(toImport, false);
     SlickUser slickUser = slickUserDAO.addAndGet(user, toImport.getPermissions());
     int add = slickUser.id();
 //    logger.info("addUser id  " + add + " for " + user.id() + " equal " + (user == slickUser));

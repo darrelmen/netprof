@@ -533,13 +533,14 @@ public class UserManager {
 
       @Override
       public void onSuccess(Map<User.Kind, Integer> kindIntegerMap) {
+        logger.info("got back " +kindIntegerMap);
+
         for (Map.Entry<User.Kind, Label> pair : kindToLabel.entrySet()) {
           Integer count = kindIntegerMap.get(pair.getKey());
           if (count != null) {
             pair.getValue().setText("" + count);
           } else {
             pair.getValue().setText("0");
-
           }
         }
       }
