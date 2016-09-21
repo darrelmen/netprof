@@ -300,18 +300,18 @@ public class ContextCommentNPFExercise<T extends CommonExercise> extends NPFExer
     Set<Long> preferredUsers = controller.getProps().getPreferredVoices();
     for (AudioAttribute audioAttribute : e.getAudioAttributes()) {
       if (audioAttribute.isContextAudio()) {
-        long user = audioAttribute.getUser().getId();
+        long user = audioAttribute.getUser().getID();
         if (user == -1) {
           defaultAudio = audioAttribute;
         } else if (audioAttribute.getUser().isMale()) {
           if (audioAttribute.getTimestamp() > maleTime) {
-            if (maleAudio == null || !preferredUsers.contains(maleAudio.getUser().getId())) {
+            if (maleAudio == null || !preferredUsers.contains(maleAudio.getUser().getID())) {
               maleAudio = audioAttribute;
               maleTime = audioAttribute.getTimestamp();
             }
           }
         } else if (audioAttribute.getTimestamp() > femaleTime) {
-          if (femaleAudio == null || !preferredUsers.contains(femaleAudio.getUser().getId())) {
+          if (femaleAudio == null || !preferredUsers.contains(femaleAudio.getUser().getID())) {
             femaleAudio = audioAttribute;
             femaleTime = audioAttribute.getTimestamp();
           }

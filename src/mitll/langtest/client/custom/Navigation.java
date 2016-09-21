@@ -32,7 +32,8 @@
 
 package mitll.langtest.client.custom;
 
-import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.TabLink;
+import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.GWT;
@@ -74,7 +75,10 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.user.User;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -91,7 +95,7 @@ public class Navigation implements RequiresResize, ShowTab {
 
   private static final String STUDENT_ANALYSIS = "Student Analysis";
   //private static final String CUSTOM = "Custom";
-  public static final String CLASSROOM = "classroom";
+  private static final String CLASSROOM = "classroom";
 
   private static final String CHAPTERS = "Learn Pronunciation";
   private static final String USERS = "Users";
@@ -203,7 +207,7 @@ public class Navigation implements RequiresResize, ShowTab {
     recorderHelper = new RecorderNPFHelper(service, feedback, userManager, controller, true, learnHelper, exerciseServiceAsync);
     recordExampleHelper = new RecorderNPFHelper(service, feedback, userManager, controller, false, learnHelper, exerciseServiceAsync);
 
-  //  setKindToIcon();
+    //  setKindToIcon();
   }
 
   public boolean isRTL() {
@@ -431,101 +435,13 @@ public class Navigation implements RequiresResize, ShowTab {
       @Override
       public void onClick(ClickEvent event) {
         checkAndMaybeClearTab(USERS);
-        // learnHelper.showNPF(chapters, LEARN);
-        new UserOps(controller,userManager).showUsers(users);
-
-
+        UserOps userOps = new UserOps(controller, userManager);
+        userOps.showUsers(users);
+        users.setResizeable(userOps);
         logEvent(users, USERS);
       }
     });
   }
-
-/*
-  Map<User.Kind, Label> kindToLabel = new HashMap<>();
-  Map<User.Kind, IconType> kindToIcon = new HashMap<>();
-
-  private void setKindToIcon() {
-    kindToIcon.put(User.Kind.STUDENT, IconType.USER);
-    kindToIcon.put(User.Kind.TEACHER, IconType.GROUP);
-    kindToIcon.put(User.Kind.CONTENT_DEVELOPER, IconType.PENCIL);
-    kindToIcon.put(User.Kind.PROJECT_ADMIN, IconType.BOLT);
-    kindToIcon.put(User.Kind.ADMIN, IconType.ANDROID);
-  }
-*/
-
- /* private void showUsers() {
-    DivWidget content = users.getContent();
-    content.clear();
-
-    NavList w = new NavList();
-    w.setWidth("180px");
-    content.add(w);
-
-    w.add(new NavHeader("Users"));
-    NavLink first = null;
-    DivWidget w1 = new DivWidget();
-    for (User.Kind kind : User.Kind.values()) {
-      if (kind.shouldShow()) {
-        NavLink userLink = getUserLink(kind, w1);
-        w.add(userLink);
-        if (first == null) first = userLink;
-      }
-    }
-    userManager.getCounts(kindToLabel);
-
-    content.add(w1);
-    w1.getElement().setId("userContent");
-    w1.getElement().getStyle().setMarginLeft(220, Style.Unit.PX);
-
-    logger.info("Loaded everything...");
-
-    final NavLink toClick = first;
-    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-      @Override
-      public void execute() {
-        if (toClick != null) {
-          toClick.fireEvent(new ButtonClickEvent());
-          logger.info("Fire click event on " + toClick.getElement().getId());
-        }
-      }
-    });
-  }*/
-
-  /*private class ButtonClickEvent extends ClickEvent {
-  }
-
-  private NavLink getUserLink(User.Kind kind, DivWidget content) {
-    NavLink students = new NavLink(kind.getName() + "s");
-    students.setIcon(kindToIcon.get(kind));
-    students.getElement().setId("link_" + kind);
-    Label w5 = new Label("");
-    kindToLabel.put(kind, w5);
-    w5.getElement().getStyle().setFloat(Style.Float.RIGHT);
-    students.add(w5);
-    students.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent clickEvent) {
-        userManager.getUserService().getKindToUser(new AsyncCallback<Map<User.Kind, Collection<MiniUser>>>() {
-          @Override
-          public void onFailure(Throwable throwable) {
-
-          }
-
-          @Override
-          public void onSuccess(Map<User.Kind, Collection<MiniUser>> kindCollectionMap) {
-            content.clear();
-            Collection<MiniUser> miniUsers = kindCollectionMap.get(kind);
-            content.add(getUsers(miniUsers));
-          }
-        });
-      }
-
-      private DivWidget getUsers(Collection<MiniUser> miniUsers) {
-        return new OpsUserContainer(controller, kind.getName()).getTable(miniUsers, kind.getName(), "");
-      }
-    });
-    return students;
-  }*/
 
   private void addLearnTab() {
     chapters = makeFirstLevelTab(tabPanel, IconType.LIGHTBULB, CHAPTERS);
@@ -719,7 +635,9 @@ public class Navigation implements RequiresResize, ShowTab {
       } else if (clickedTab.equals(CHAPTERS)) {
         learnHelper.showNPF(chapters, LEARN);
       } else if (clickedTab.equals(USERS)) {
-        new UserOps(controller,userManager).showUsers(users);
+        UserOps userOps = new UserOps(controller, userManager);
+        userOps.showUsers(users);
+        users.setResizeable(userOps);
       } else if (clickedTab.equals(RECORD_AUDIO)) {
         recorderHelper.showNPF(recorderTab, AudioType.RECORDER.toString());
       } else if (clickedTab.equals(RECORD_EXAMPLE)) {
@@ -814,13 +732,14 @@ public class Navigation implements RequiresResize, ShowTab {
 
   @Override
   public void onResize() {
-    // logger.info("got onResize " + getClass().toString());
+    logger.info("got onResize " + getClass().toString());
 
     learnHelper.onResize();
     recorderHelper.onResize();
     recordExampleHelper.onResize();
     markDefectsHelper.onResize();
     practiceHelper.onResize();
+    users.onResize();
     if (listManager != null) listManager.onResize();
   }
 
@@ -830,7 +749,7 @@ public class Navigation implements RequiresResize, ShowTab {
    * @see #showInitialState()
    */
   /*private boolean createdByYou(UserList ul) {
-    return ul.getCreator().getId() == getUser();
+    return ul.getCreator().getID() == getUser();
   }
 */
 }

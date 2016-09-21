@@ -127,7 +127,7 @@ public class UserDAOToExcel {
     for (User user : users) {
       int j = 0;
       JSONObject jsonObject = new JSONObject();
-      jsonObject.put(COLUMNSJSON.get(j++), user.getId());
+      jsonObject.put(COLUMNSJSON.get(j++), user.getID());
       jsonObject.put(COLUMNSJSON.get(j++), user.getUserID());
       jsonObject.put(COLUMNSJSON.get(j++), user.getDialect());
       jsonObject.put(COLUMNSJSON.get(j++), user.getAge());
@@ -187,7 +187,7 @@ public class UserDAOToExcel {
     for (User user : users) {
       Row row = sheet.createRow(rownum++);
       int j = 0;
-      row.createCell(j++).setCellValue(user.getId());
+      row.createCell(j++).setCellValue(user.getID());
       row.createCell(j++).setCellValue(user.getUserID());
       row.createCell(j++).setCellValue(user.getDialect());
       row.createCell(j++).setCellValue(user.getAge());
