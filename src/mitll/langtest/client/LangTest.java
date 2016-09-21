@@ -830,6 +830,8 @@ public class LangTest implements
     return userService;
   }
 
+  public UserManager getUserManager() { return userManager; }
+
   public QCServiceAsync getQCService() {
     return qcServiceAsync;
   }

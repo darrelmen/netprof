@@ -222,8 +222,8 @@ public class EmailHelper {
       logger.debug("enableCDUser user id null for token " + token + " email " + emailR + " url " + url);
       userID = null;
     } else {
-      userID = userWhereEnabledReq.getId();
-      logger.debug("enableCDUser user id '" + userID + "' for " + token + " vs " + userWhereEnabledReq.getId());
+      userID = userWhereEnabledReq.getID();
+      logger.debug("enableCDUser user id '" + userID + "' for " + token + " vs " + userWhereEnabledReq.getID());
     }
     String email = rot13(emailR);
 
@@ -321,7 +321,7 @@ public class EmailHelper {
     String userID1 = user.getUserID();
     String toHash = userID1 + "_" + System.currentTimeMillis();
     String hash = getHash(toHash);
-    if (!userDAO.updateKey(user.getId(), false, hash)) {
+    if (!userDAO.updateKey(user.getID(), false, hash)) {
       logger.error("huh? couldn't add the CD update key to " + user);
     }
     List<String> approvers = serverProperties.getApprovers();

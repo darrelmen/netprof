@@ -596,7 +596,7 @@ public class Report {
   private List<User> fixUserStarts() {
     List<User> users = userDAO.getUsers();
     for (User user : users) {
-      Long aLong = userToStart.get(user.getId());
+      Long aLong = userToStart.get(user.getID());
       if (aLong != null) user.setTimestampMillis(aLong);
       //else {
       //  logger.error("no events for " + user.getExID());
@@ -649,7 +649,7 @@ public class Report {
         continue;
       }
       if (isStudent) {
-        students.add(user.getId());
+        students.add(user.getID());
         long userCreated = user.getTimestampMillis();
         if (yearTimeRange.inYear(userCreated)) {
           ytd++;
@@ -742,7 +742,7 @@ public class Report {
   }
 
   private boolean shouldSkipUser(User user) {
-    return user.getId() == 3 || user.getId() == 1 ||
+    return user.getID() == 3 || user.getID() == 1 ||
         lincoln.contains(user.getUserID()) || user.getUserID().startsWith(SKIP_USER);
   }
 
@@ -1246,7 +1246,7 @@ public class Report {
       for (AudioAttribute audioAttribute : audioAttributes) {
         if (getFile(audioAttribute).equals(getFile(result))) {
           long userid = result.getUserid();
-          if (audioAttribute.getUser().getId() == userid) {
+          if (audioAttribute.getUser().getID() == userid) {
             skip = true;
             break;
           }
