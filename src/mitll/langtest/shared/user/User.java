@@ -94,6 +94,7 @@ public class User extends MiniUser {
     UNSET("Unset", false),
     INTERNAL("INTERNAL", false),
 
+
     STUDENT("Student", true),
 
     TEACHER("Teacher", true),
@@ -102,11 +103,11 @@ public class User extends MiniUser {
 
     AUDIO_RECORDER("Audio Recorder", true),
 
+    TEST("Test Account", true),
+
     PROJECT_ADMIN("Project Admin", true),
 
-    ADMIN("System Admin", true),
-
-    TEST("Test Account", true);
+    ADMIN("System Admin", true);
 
     String name;
     boolean show;
