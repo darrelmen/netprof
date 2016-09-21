@@ -32,10 +32,10 @@
 
 package mitll.langtest.shared.user;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.server.database.user.UserDAO;
+import mitll.langtest.shared.exercise.HasID;
 
-public class MiniUser implements IsSerializable, Comparable<MiniUser> {
+public class MiniUser implements HasID, Comparable<HasID> {
   protected String first = "";
   protected String last = "";
   private int id;
@@ -83,7 +83,7 @@ public class MiniUser implements IsSerializable, Comparable<MiniUser> {
    * @see UserDAO#getMiniUsers()
    */
   public MiniUser(User user) {
-    this(user.getId(), user.getAge(), user.isMale(), new String(user.getUserID()), user.isAdmin());
+    this(user.getID(), user.getAge(), user.isMale(), new String(user.getUserID()), user.isAdmin());
   }
 
   public boolean isMale() {
@@ -91,8 +91,8 @@ public class MiniUser implements IsSerializable, Comparable<MiniUser> {
   }
 
   @Override
-  public int compareTo(MiniUser o) {
-    return id < o.id ? -1 : id > o.id ? +1 : 0;
+  public int compareTo(HasID o) {
+    return id < o.getID() ? -1 : id > o.getID() ? +1 : 0;
   }
 
   @Override
@@ -109,7 +109,7 @@ public class MiniUser implements IsSerializable, Comparable<MiniUser> {
     return isMale ? 0 : 1;
   }
 
-  public int getId() {
+  public int getID() {
     return id;
   }
 
@@ -121,14 +121,6 @@ public class MiniUser implements IsSerializable, Comparable<MiniUser> {
     return userID;
   }
 
-  public long getTimestampMillis() {
-    return timestamp;
-  }
-
-  public void setTimestampMillis(long startTime) {
-    this.timestamp = startTime;
-  }
-
   /**
    * @param userID
    * @see UserDAO#getUsers
@@ -137,14 +129,16 @@ public class MiniUser implements IsSerializable, Comparable<MiniUser> {
     this.userID = userID;
   }
 
-  public boolean isAdmin() {
-    return isAdmin;
+  public long getTimestampMillis() {
+    return timestamp;
   }
 
-  public String toString() {
-    return "mini-user " + id + " : " + age + " yr old " +
-        (isMale() ? "male" : "female") +
-        (isAdmin() ? "ADMIN" : "");
+  public void setTimestampMillis(long startTime) {
+    this.timestamp = startTime;
+  }
+
+  public boolean isAdmin() {
+    return isAdmin;
   }
 
   public String getFirst() {
@@ -161,5 +155,12 @@ public class MiniUser implements IsSerializable, Comparable<MiniUser> {
 
   public void setLast(String last) {
     this.last = last;
+  }
+
+  public String getOldID() {return "";}
+  public String toString() {
+    return "mini-user " + id + " : " + age + " yr old " +
+        (isMale() ? "male" : "female") +
+        (isAdmin() ? "ADMIN" : "");
   }
 }

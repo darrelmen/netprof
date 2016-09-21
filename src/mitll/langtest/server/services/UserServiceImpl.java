@@ -89,19 +89,19 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     logger.info("Login session " + session.getId() + " isNew=" + session.isNew()
         //    + " host is secondary " + properties.isSecondaryHost()
     );
-    User loggedInUser = db.getUserDAO().getStrictUserWithPass(userId, attemptedPassword);//, remoteAddr, userAgent, session.getId());
+    User loggedInUser = db.getUserDAO().getStrictUserWithPass(userId, attemptedPassword);//, remoteAddr, userAgent, session.getID());
 
     boolean success = loggedInUser != null;
     String resultStr = success ? " was successful" : " failed";
     logger.info(">Session Activity> User login for id " + userId + resultStr +
         ". IP: " + remoteAddr +
         ", UA: " + userAgent +
-        (success ? ", user: " + loggedInUser.getId() : ""));
+        (success ? ", user: " + loggedInUser.getID() : ""));
     if (success) {
       setSessionUser(session, loggedInUser);
       return new LoginResult(loggedInUser, new Date(System.currentTimeMillis()));
     } else {
-      loggedInUser = db.getUserDAO().getUser(userId, attemptedPassword);//, remoteAddr, userAgent, session.getId());
+      loggedInUser = db.getUserDAO().getUser(userId, attemptedPassword);//, remoteAddr, userAgent, session.getID());
       return getLoginResult(loggedInUser);
     }
   }
@@ -121,7 +121,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @see #addUser(SignUpUser, String, boolean)
    */
   private void setSessionUser(HttpSession session, User loggedInUser) {
-    int id1 = loggedInUser.getId();
+    int id1 = loggedInUser.getID();
     session.setAttribute(USER_SESSION_ATT, id1);
     StringBuilder atts = new StringBuilder("Atts: [ ");
     Enumeration<String> attEnum = session.getAttributeNames();
@@ -178,7 +178,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     if (passwordH.isEmpty()) {
       User user = db.getUserDAO().getUser(login, passwordH);
       if (user != null) {
-        int i = db.getUserProjectDAO().mostRecentByUser(user.getId());
+        int i = db.getUserProjectDAO().mostRecentByUser(user.getID());
         ProjectStartupInfo startupInfo = new ProjectStartupInfo();
         user.setStartupInfo(startupInfo);
         startupInfo.setProjectid(i);
@@ -298,7 +298,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   public long getUserIDForToken(String token) {
     //  findSharedDatabase();
     User user = db.getUserDAO().getUserWithResetKey(token);
-    long l = (user == null) ? -1 : user.getId();
+    long l = (user == null) ? -1 : user.getID();
     // logger.info("for token " + token + " got user id " + l);
     return l;
   }
@@ -308,9 +308,9 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     //  findSharedDatabase();
     User userWhereResetKey = db.getUserDAO().getUserWithResetKey(token);
     if (userWhereResetKey != null) {
-      db.getUserDAO().clearKey(userWhereResetKey.getId(), true);
+      db.getUserDAO().clearKey(userWhereResetKey.getID(), true);
 
-      if (db.getUserDAO().changePassword(userWhereResetKey.getId(), passwordH)) {
+      if (db.getUserDAO().changePassword(userWhereResetKey.getID(), passwordH)) {
         return true;
       } else {
         logger.error("couldn't update user password for user " + userWhereResetKey);
@@ -376,7 +376,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
       User sessionUser = getSessionUser();
       if (sessionUser != null) {
         logger.info("set project (" + projectid + ") for " + sessionUser);
-        db.rememberProject(sessionUser.getId(), projectid);
+        db.rememberProject(sessionUser.getID(), projectid);
       }
       db.setStartupInfo(sessionUser, projectid);
       return sessionUser;
@@ -391,7 +391,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     try {
       User sessionUser = getSessionUser();
       if (sessionUser != null) {
-        db.forgetProject(sessionUser.getId());
+        db.forgetProject(sessionUser.getID());
       }
     } catch (DominoSessionException e) {
       logger.error("got  " + e, e);
@@ -403,11 +403,13 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     return db.getUserDAO().getByID(id);
   }
 
-  public boolean deactivate(int id) {
+  public void update(User toUpdate) {
+    db.getUserDAO().update(toUpdate);
+  }
+/*  public boolean deactivate(int id) {
     return db.getUserDAO().changeEnabled(id, false);
   }
-
   public boolean activate(int id) {
     return db.getUserDAO().changeEnabled(id, true);
-  }
+  }*/
 }

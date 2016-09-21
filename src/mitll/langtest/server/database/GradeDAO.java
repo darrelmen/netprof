@@ -286,7 +286,7 @@ public class GradeDAO extends DAO {
         } catch (NumberFormatException e) {
           User user = idToUser.get(grader);
           if (user != null) {
-            graderID = (int) user.getId();
+            graderID = (int) user.getID();
           } else {
             if (count++ < 20 && validIds) {
               logger.warn("couldn't parse grader '" + grader + "' or find user by that id in " + idToUser.keySet());

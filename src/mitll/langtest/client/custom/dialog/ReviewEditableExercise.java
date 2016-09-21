@@ -278,7 +278,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     UserTitle userTitle = new UserTitle();
     for (MiniUser user : users) {
 
-      boolean byMe = (user.getId() == me);
+      boolean byMe = (user.getID() == me);
       if (!byMe) {
         String tabTitle = userTitle.getUserTitle(me, user);
 
@@ -324,12 +324,12 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
 
 /*
   private String getUserTitle(int me, MiniUser user) {
-    long id = user.getId();
+    long id = user.getID();
     if (id == UserDAO.DEFAULT_USER_ID) return GoodwaveExercisePanel.DEFAULT_SPEAKER;
     else if (id == UserDAO.DEFAULT_MALE_ID) return "Default Male";
     else if (id == UserDAO.DEFAULT_FEMALE_ID) return "Default Female";
     else return
-          (user.getId() == me) ? "by You (" + user.getUserID() + ")" : getUserTitle(user);
+          (user.getID() == me) ? "by You (" + user.getUserID() + ")" : getUserTitle(user);
   }
 */
 

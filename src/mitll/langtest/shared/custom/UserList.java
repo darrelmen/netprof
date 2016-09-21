@@ -216,7 +216,7 @@ public class UserList<T extends HasID> extends BaseExercise {
 
   @Override
   public String toString() {
-    long id = creator == null ? -1 : creator.getId();
+    long id = creator == null ? -1 : creator.getID();
     return "UserList #" + getID() + " '" + name + "' by " + id +
         " : with " + getExercises().size() + " exercises.";
   }

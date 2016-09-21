@@ -37,6 +37,7 @@ import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.Shell;
 
 import java.util.*;
@@ -48,7 +49,7 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 1/5/16.
  */
-public class ClickablePagingContainer<T extends Shell> extends SimplePagingContainer<T> {
+public class ClickablePagingContainer<T extends HasID> extends SimplePagingContainer<T> {
   private final Logger logger = Logger.getLogger("ClickablePagingContainer");
 
   private static final boolean DEBUG = false;
@@ -64,7 +65,7 @@ public class ClickablePagingContainer<T extends Shell> extends SimplePagingConta
 
   private T getByID(int id) {
     for (T t : getList()) {
-      if (t.getID() ==id) {
+      if (t.getID() == id) {
         return t;
       }
     }
@@ -133,6 +134,17 @@ public class ClickablePagingContainer<T extends Shell> extends SimplePagingConta
 
   public T getCurrentSelection() {
     return selectionModel.getSelectedObject();
+  }
+
+  public T getNext() {
+    T currentSelection = getCurrentSelection();
+    if (currentSelection != null) {
+      int index = getIndex(currentSelection);
+      return getAt((index == getSize() - 1) ? 0 : index + 1);
+    }
+    else {
+      return null;
+    }
   }
 
   @Override

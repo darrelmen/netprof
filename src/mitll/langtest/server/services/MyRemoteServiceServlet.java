@@ -124,7 +124,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
     try {
       User loggedInUser = getSessionUser();
       if (loggedInUser == null) return -1;
-      int i = db.getUserProjectDAO().mostRecentByUser(loggedInUser.getId());
+      int i = db.getUserProjectDAO().mostRecentByUser(loggedInUser.getID());
       return i;
     } catch (DominoSessionException e) {
       logger.error("Got " + e, e);
@@ -139,7 +139,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
         return null;
       }
       else {
-        return db.getProjectForUser(loggedInUser.getId());
+        return db.getProjectForUser(loggedInUser.getID());
       }
     } catch (DominoSessionException e) {
       logger.error("got " + e, e);

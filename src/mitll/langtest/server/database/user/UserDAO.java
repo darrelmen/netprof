@@ -72,8 +72,8 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    */
 /*  public void checkForFavorites(UserListManager manager) {
     for (User u : getUsers()) {
-      if (manager.getListsForUser(u.getId(), true, false).isEmpty()) {
-        manager.createFavorites(u.getId());
+      if (manager.getListsForUser(u.getID(), true, false).isEmpty()) {
+        manager.createFavorites(u.getID());
       }
     }
   }*/
@@ -111,7 +111,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     try {
       // there are much better ways of doing this...
       int max = 0;
-      for (User u : getUsers()) if (u.getId() > max) max = u.getId();
+      for (User u : getUsers()) if (u.getID() > max) max = u.getID();
 //      logger.info("addUser : max is " + max + " new user '" + userID + "' age " + age + " gender " + gender + " pass " + passwordH);
 
       Connection connection = database.getConnection(this.getClass().toString());
@@ -235,7 +235,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
         USER_ID + ")='" + user.toUpperCase() + "'";
 
     int i = userExistsSQL("N/A", sql);
-    return i == -1 ? null : getUserWhere(i).getId();
+    return i == -1 ? null : getUserWhere(i).getID();
   }
 
   /**
@@ -243,7 +243,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    *
    * @param id
    * @return
-   * @see DatabaseImpl#userExists(String)
+   * @see DatabaseImpl#userExists
    */
   @Override
   public int getIdForUserID(String id) {
@@ -422,7 +422,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   public Map<Integer, MiniUser> getMiniUsers() {
     List<User> users = getUsers();
     Map<Integer, MiniUser> mini = new HashMap<>();
-    for (User user : users) mini.put(user.getId(), new MiniUser(user));
+    for (User user : users) mini.put(user.getID(), new MiniUser(user));
     return mini;
   }
 
@@ -532,7 +532,12 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
       String userID = rs.getString(USER_ID);
       String email = rs.getString(EMAIL);
       String device = rs.getString(DEVICE);
-      User.Kind userKind1 = userKind == null ? User.Kind.UNSET : User.Kind.valueOf(userKind);
+
+      logger.warn("user kind for " +id + " " + userID + " is null?");
+
+      // if the user kind is unmarked, we'll make them a student, we can always change it later.
+
+      User.Kind userKind1 = userKind == null ? User.Kind.STUDENT : User.Kind.valueOf(userKind);
       if (admins.contains(userID)) userKind1 = User.Kind.ADMIN;
       String resetKey = rs.getString(RESET_PASSWORD_KEY);
       User newUser = new User(id, //id
@@ -554,13 +559,13 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
           email, email,
           device,
           resetKey,
-          "",
+        //  "",
           rs.getTimestamp(TIMESTAMP).getTime());
 
       users.add(newUser);
 
       if (newUser.getUserID() == null) {
-        newUser.setUserID("" + newUser.getId());
+        newUser.setUserID("" + newUser.getID());
       }
     }
     return users;
@@ -612,7 +617,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     Map<Integer, User> idToUser = new HashMap<>();
     for (User u : users) {
       if (u.isMale() && getMale || (!u.isMale() && !getMale)) {
-        idToUser.put(u.getId(), u);
+        idToUser.put(u.getID(), u);
       }
     }
     return idToUser;
@@ -625,7 +630,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   private Map<Integer, User> getMap(List<User> users) {
     Map<Integer, User> idToUser = new HashMap<>();
     for (User u : users) {
-      idToUser.put(u.getId(), u);
+      idToUser.put(u.getID(), u);
     }
     return idToUser;
   }
@@ -708,6 +713,11 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   @Override
   public Map<User.Kind, Integer> getCounts() {
     return null;
+  }
+
+  @Override
+  public void update(User toUpdate) {
+
   }
 
   @Override
