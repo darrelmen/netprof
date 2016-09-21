@@ -157,7 +157,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   public AudioAttribute(String audioRef, MiniUser miniUser) {
     this(audioRef);
     this.setUser(miniUser);
-    this.userid = miniUser.getId();
+    this.userid = miniUser.getID();
   }
 
   public String getAudioRef() {

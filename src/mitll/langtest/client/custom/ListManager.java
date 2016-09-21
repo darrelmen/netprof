@@ -579,7 +579,7 @@ public class ListManager implements RequiresResize {
    * @see #showList
    */
   private void addVisitor(UserList ul) {
-    if (ul.getCreator().getId() != controller.getUser()) {
+    if (ul.getCreator().getID() != controller.getUser()) {
       listService.addVisitor(ul.getID(), controller.getUser(), new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
@@ -744,7 +744,7 @@ public class ListManager implements RequiresResize {
   }
 
   private boolean createdByYou(UserList<?> ul) {
-    return ul.getCreator().getId() == getUser();
+    return ul.getCreator().getID() == getUser();
   }
 
   private int getUser() {

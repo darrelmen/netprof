@@ -231,7 +231,7 @@ public class RestUserManagement {
       toReturn.put(TOKEN, "");
       toReturn.put(PASSWORD_CORRECT, FALSE);
     } else {
-      toReturn.put(USERID, userFound.getId());
+      toReturn.put(USERID, userFound.getID());
       toReturn.put(EMAIL_H, userFound.getEmailHash());
       toReturn.put(KIND, userFound.getUserKind().toString());
       toReturn.put(HAS_RESET, userFound.hasResetKey());
@@ -244,7 +244,7 @@ public class RestUserManagement {
 
   private long getUserIDForToken(String token) {
     User user = db.getUserDAO().getUserWithResetKey(token);
-    return (user == null) ? -1 : user.getId();
+    return (user == null) ? -1 : user.getID();
   }
 
   /**
@@ -328,9 +328,9 @@ public class RestUserManagement {
     User userWhereResetKey = db.getUserDAO().getUserWithResetKey(token);
     if (userWhereResetKey != null) {
       logger.debug("clearing key for " + userWhereResetKey);
-      db.getUserDAO().clearKey(userWhereResetKey.getId(), true);
+      db.getUserDAO().clearKey(userWhereResetKey.getID(), true);
 
-      if (!db.getUserDAO().changePassword(userWhereResetKey.getId(), passwordH)) {
+      if (!db.getUserDAO().changePassword(userWhereResetKey.getID(), passwordH)) {
         logger.error("couldn't update user password for user " + userWhereResetKey);
       }
       return true;
@@ -411,7 +411,7 @@ public class RestUserManagement {
         if (user1 == null) { // how could this happen?
           jsonObject.put(EXISTING_USER_NAME, "");
         } else {
-          jsonObject.put(USERID, user1.getId());
+          jsonObject.put(USERID, user1.getID());
         }
 
       } else {
@@ -423,7 +423,7 @@ public class RestUserManagement {
       if (exactMatch.hasResetKey()) {
         jsonObject.put(ERROR, "password was reset");
       } else {
-        jsonObject.put(USERID, exactMatch.getId());
+        jsonObject.put(USERID, exactMatch.getID());
       }
     }
   }

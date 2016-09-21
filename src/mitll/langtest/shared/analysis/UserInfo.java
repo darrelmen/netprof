@@ -115,7 +115,7 @@ public class UserInfo extends MiniUser {
    * @param user
    */
  public void setUser(MiniUser user) {
-   setFields(user.getId(),user.getAge(),user.isMale(),user.getUserID(),user.isAdmin());
+   setFields(user.getID(),user.getAge(),user.isMale(),user.getUserID(),user.isAdmin());
    setTimestampMillis(user.getTimestampMillis());
    user.setFirst(user.getFirst());
    user.setLast(user.getLast());
@@ -155,7 +155,7 @@ public class UserInfo extends MiniUser {
 
   public String toString() {
     MiniUser user = getUser();
-    String id = user == null ? "UNK" : "" + user.getId();
+    String id = user == null ? "UNK" : "" + user.getID();
     return id + "/" + getUserID() + " : " + getNum() + " : " + getStart() + " " + getCurrent() + " " + getDiff();
   }
 }

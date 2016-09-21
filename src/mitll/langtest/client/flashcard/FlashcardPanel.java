@@ -905,7 +905,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
    * @see #playRef()
    */
   String getRefAudioToPlay() {
-    //System.out.println(getElement().getId() + " playing audio for " +exercise.getOldID());
+    //System.out.println(getElement().getID() + " playing audio for " +exercise.getOldID());
     String path = exercise.getRefAudio();
     if (path == null) {
       path = exercise.getSlowAudioRef(); // fall back to slow audio

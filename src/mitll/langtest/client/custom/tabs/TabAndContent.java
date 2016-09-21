@@ -39,6 +39,9 @@ import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.RequiresResize;
+
+import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -46,10 +49,13 @@ import com.google.gwt.user.client.ui.Panel;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 4/14/2014.
  */
-public class TabAndContent {
+public class TabAndContent implements RequiresResize {
+  private final Logger logger = Logger.getLogger("TabAndContent");
+
   private final Tab tab;
   private final DivWidget content;
   private final String label;
+  private RequiresResize resizeable = null;
 
   /**
    * @param iconType
@@ -74,7 +80,7 @@ public class TabAndContent {
   }
 
   public TabAndContent(TabPanel tabPanel, IconType iconType, String label) {
-    this(iconType,label);
+    this(iconType, label);
     tabPanel.add(getTab().asTabLink());
   }
 
@@ -96,9 +102,23 @@ public class TabAndContent {
     getTab().fireEvent(new ButtonClickEvent());
   }
 
+  @Override
+  public void onResize() {
+    if (resizeable != null) {
+      logger.info("on resize");
+      resizeable.onResize();
+    }
+  }
+
+  public void setResizeable(RequiresResize resizeable) {
+    this.resizeable = resizeable;
+  }
+
   /*To call click() function for Programmatic equivalent of the user clicking the button.*/
   private class ButtonClickEvent extends ClickEvent {
   }
 
-  public String toString() { return "TabAndContent " + label; }
+  public String toString() {
+    return "TabAndContent " + label;
+  }
 }

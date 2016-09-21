@@ -186,7 +186,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     getElement().setId("AudioPanel_exercise_" + id);
 
     int width = getImageWidth();
-//    logger.info(getElement().getId() + " width " + width);
+//    logger.info(getElement().getID() + " width " + width);
     setWidth((width) + "px");
   }
 
@@ -194,7 +194,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
         int images = getImages();
-//        logger.info(getElement().getId() + " gotResize " + images);
+//        logger.info(getElement().getID() + " gotResize " + images);
         if (images != 0) {
           int diff = Math.abs(Window.getClientWidth() - lastWidthOuter);
           if (lastWidthOuter == 0 || diff > WINDOW_SIZE_CHANGE_THRESHOLD) {

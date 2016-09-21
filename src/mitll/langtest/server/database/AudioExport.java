@@ -639,7 +639,7 @@ public class AudioExport {
   }
 
 /*  private AudioAttribute getAudioAttribute(MiniUser majorityUser, CommonExercise ex, boolean isMale, boolean regularSpeed) {
-    AudioAttribute recordingAtSpeed = majorityUser != null ? ex.getRecordingsBy(majorityUser.getId(), regularSpeed) : null;
+    AudioAttribute recordingAtSpeed = majorityUser != null ? ex.getRecordingsBy(majorityUser.getID(), regularSpeed) : null;
 
     if (recordingAtSpeed == null) {  // can't find majority user or nothing by this person at that speed
       Collection<AudioAttribute> byGender = ex.getByGender(isMale);
@@ -666,7 +666,7 @@ public class AudioExport {
    * @see #writeFolderContents
    */
   private AudioAttribute getAudioAttribute(MiniUser majorityUser, CommonExercise ex, boolean isMale, String speed) {
-    AudioAttribute recordingAtSpeed = majorityUser != null ? ex.getRecordingsBy(majorityUser.getId(), speed) : null;
+    AudioAttribute recordingAtSpeed = majorityUser != null ? ex.getRecordingsBy(majorityUser.getID(), speed) : null;
 
     if (recordingAtSpeed == null) {  // can't find majority user or nothing by this person at that speed
       Collection<AudioAttribute> byGender = ex.getByGender(isMale);

@@ -138,6 +138,7 @@ public interface UserService extends RemoteService {
 
   User getUser(int id);
 
-  boolean deactivate(int id);
-  boolean activate(int id);
+  void update(User user);
+//  boolean deactivate(int id);
+//  boolean activate(int id);
 }

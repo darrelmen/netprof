@@ -165,7 +165,7 @@ public class DatabaseServlet extends HttpServlet {
     try {
       User loggedInUser = securityManager.getLoggedInUser(request);
       if (loggedInUser == null) return -1;
-      int id = loggedInUser.getId();
+      int id = loggedInUser.getID();
       int i = getMostRecentProjectByUser(id);
       return i;
     } catch (DominoSessionException e) {
