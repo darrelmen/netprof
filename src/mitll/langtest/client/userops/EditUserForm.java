@@ -44,13 +44,16 @@ import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserPassDialog;
 import mitll.langtest.shared.user.User;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.logging.Logger;
 
 public class EditUserForm extends SignUpForm {
   private final Logger logger = Logger.getLogger("SignUpForm");
   private final User toEdit;
   private final UserOps userOps;
+  User.Kind userKind;
 
   /**
    * @param props
@@ -70,6 +73,7 @@ public class EditUserForm extends SignUpForm {
     setRolesHeader("Current user role");
     this.toEdit = toEdit;
     this.userOps = userOps;
+    userKind = userManager.getCurrent().getUserKind();
   }
 
   private CheckBox enabled;
@@ -132,6 +136,11 @@ public class EditUserForm extends SignUpForm {
   }
 
   protected Collection<User.Kind> getRoles() {
-    return User.getVisibleRoles();
+    Collection<User.Kind> visibleRoles = User.getVisibleRoles();
+    List<User.Kind> choices = new ArrayList<>();
+    for (User.Kind role : visibleRoles) {
+      if (role.compareTo(userKind) < 0) choices.add(role);
+    }
+    return choices;
   }
 }
