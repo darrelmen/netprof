@@ -680,7 +680,7 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.services.UserServiceImpl#setSessionUser(HttpSession, User)
    */
   public void setStartupInfo(User userWhere) {
-    int i = getUserProjectDAO().mostRecentByUser(userWhere.getId());
+    int i = getUserProjectDAO().mostRecentByUser(userWhere.getID());
     setStartupInfo(userWhere, i);
   }
 

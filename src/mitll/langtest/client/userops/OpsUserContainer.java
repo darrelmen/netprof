@@ -43,6 +43,7 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.RequiresResize;
 import mitll.langtest.client.analysis.BasicUserContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
@@ -54,17 +55,26 @@ import mitll.langtest.shared.user.User;
 import java.util.Comparator;
 import java.util.List;
 
-public class OpsUserContainer extends BasicUserContainer<MiniUser> {
-  DivWidget rightSide;
+public class OpsUserContainer extends BasicUserContainer<MiniUser> implements RequiresResize {
+  private final DivWidget rightSide;
+  private final UserOps userOps;
 
-  public OpsUserContainer(ExerciseController controller, String header, DivWidget rightSide) {
+  /**
+   * @param controller
+   * @param header
+   * @param rightSide
+   * @see UserOps#getOpsUserContainer(User.Kind, DivWidget)
+   */
+  OpsUserContainer(ExerciseController controller, String header, DivWidget rightSide,
+                   UserOps userOps) {
     super(controller, header);
     this.rightSide = rightSide;
     rightSide.clear();
+    this.userOps = userOps;
   }
 
   protected int getPageSize() {
-    return 30;
+    return 31;
   }
 
   @Override
@@ -142,7 +152,7 @@ public class OpsUserContainer extends BasicUserContainer<MiniUser> {
 
     if (!user.isAdmin()) {
       UserServiceAsync userService = controller.getUserService();
-      userService.getUser(user.getId(), new AsyncCallback<User>() {
+      userService.getUser(user.getID(), new AsyncCallback<User>() {
         @Override
         public void onFailure(Throwable throwable) {
         }
@@ -161,7 +171,7 @@ public class OpsUserContainer extends BasicUserContainer<MiniUser> {
 
     EditUserForm signUpForm = new EditUserForm(
         controller.getProps(),
-        null,
+        controller.getUserManager(),
         controller,
         new UserPassDialog() {
           @Override
@@ -171,74 +181,10 @@ public class OpsUserContainer extends BasicUserContainer<MiniUser> {
           @Override
           public void setSignInHasFocus() {
           }
-        });
+        }, user, userOps);
     signUpForm.setSignUpButtonTitle("Edit User");
     Panel signUpForm1 = signUpForm.getSignUpForm(user);
     signUpForm1.addStyleName("leftFiveMargin");
     userDetail.add(signUpForm1);
- //   getEnabledCheckBox(user, controller.getUserService(), rightSide);
   }
-
-/*  private void getEnabledCheckBox(final User user, final UserServiceAsync userService,
-                                  DivWidget toAddTo) {
-    CheckBox enabled = new CheckBox("Enabled");
-    enabled.setValue(user.isEnabled());
-    enabled.addStyleName("leftTenMargin");
-    enabled.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        if (!enabled.getValue()) {
-          userService.deactivate(user.getId(), new AsyncCallback<Boolean>() {
-            @Override
-            public void onFailure(Throwable throwable) {
-              // enabled.setValue(false);
-            }
-
-            @Override
-            public void onSuccess(Boolean aBoolean) {
-            }
-          });
-        } else {
-          userService.activate(user.getId(), new AsyncCallback<Boolean>() {
-            @Override
-            public void onFailure(Throwable throwable) {
-              // enabled.setValue(true);
-            }
-
-            @Override
-            public void onSuccess(Boolean aBoolean) {
-            }
-          });
-        }
-      }
-    });
-
-    addControlGroupEntry(toAddTo, "Enabled?", enabled, "Lock or unlock user");
-  }*/
-
-/*  protected ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget widget, String hint) {
-    final ControlGroup userGroup = new ControlGroup();
-    userGroup.addStyleName("leftFiveMargin");
-    ControlLabel labelWidget = new ControlLabel(label);
-    labelWidget.getElement().setId("Label_" + label);
-    userGroup.add(labelWidget);
-    widget.addStyleName("leftFiveMargin");
-
-    if (hint.isEmpty()) {
-      userGroup.add(widget);
-    } else {
-      Panel vert = new VerticalPanel();
-
-      HTML hint1 = new HTML(hint);
-      hint1.getElement().getStyle().setProperty("fontSize", "smaller");
-      hint1.getElement().getStyle().setFontStyle(Style.FontStyle.ITALIC);
-
-      vert.add(widget);
-      vert.add(hint1);
-
-      userGroup.add(vert);
-    }
-    dialogBox.add(userGroup);
-    return userGroup;
-  }*/
 }

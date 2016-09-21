@@ -416,17 +416,6 @@ public abstract class BaseAudioDAO extends DAO {
 
   abstract Set<Integer> getValidAudioOfType(int userid, String audioType);
 
-  MiniUser checkDefaultUser(long userID, MiniUser user) {
-    if (userID == BaseUserDAO.DEFAULT_USER_ID) {
-      user = BaseUserDAO.DEFAULT_USER;
-    } else if (userID == BaseUserDAO.DEFAULT_MALE_ID) {
-      user = BaseUserDAO.DEFAULT_MALE;
-    } else if (userID == BaseUserDAO.DEFAULT_FEMALE_ID) {
-      user = BaseUserDAO.DEFAULT_FEMALE;
-    }
-    return user;
-  }
-
   /**
    * @param userid
    * @param exerciseID
