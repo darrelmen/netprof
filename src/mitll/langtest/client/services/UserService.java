@@ -59,7 +59,7 @@ public interface UserService extends RemoteService {
   User setProject(int projectid);
 
   User addUser(SignUpUser user, String url
-  //    , boolean isCD
+               //    , boolean isCD
   );
 
   /**
@@ -68,9 +68,9 @@ public interface UserService extends RemoteService {
    */
   List<User> getUsers();
 
-  Map<User.Kind,Integer> getCounts();
+  Map<User.Kind, Integer> getCounts();
 
-  Map<User.Kind,Collection<MiniUser>> getKindToUser();
+  Map<User.Kind, Collection<MiniUser>> getKindToUser();
 
   /**
    * @param login
@@ -91,7 +91,8 @@ public interface UserService extends RemoteService {
    * @see mitll.langtest.client.user.ResetPassword#getChangePasswordButton(String, Fieldset, BasicDialog.FormField, BasicDialog.FormField)
    */
   boolean changePFor(String token, String passwordH);
-  boolean changePassword(int userid,String currentPasswordH, String passwordH);
+
+  boolean changePassword(int userid, String currentPasswordH, String passwordH);
 
   /**
    * @param token
