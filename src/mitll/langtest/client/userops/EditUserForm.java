@@ -33,6 +33,7 @@
 package mitll.langtest.client.userops;
 
 import com.github.gwtbootstrap.client.ui.CheckBox;
+import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.Fieldset;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -82,14 +83,15 @@ public class EditUserForm extends SignUpForm {
     Fieldset fields = super.getFields(user);
 
     enabled = new CheckBox("Enabled");
+    logger.info("user enabled : " + user.isEnabled());
     enabled.setValue(user.isEnabled());
     enabled.addStyleName("leftTenMargin");
 
-    addControlGroupEntry(fields,
+    ControlGroup group = addControlGroupEntry(fields,
         //"Enabled?"
         ""
-        , enabled, "Lock or unlock user");
-
+        , enabled, "");//"Lock or unlock user");
+    addTooltip(group, "Lock out or unlock user");
     return fields;
   }
 
@@ -104,20 +106,21 @@ public class EditUserForm extends SignUpForm {
 
   protected void gotSignUp(final String user, String password, String email, User.Kind kind) {
     User updated = new User(toEdit);
+    //  logger.info("Role for " +user + " = " +selectedRole);
 
+    updated.setUserKind(selectedRole);
     updated.setUserID(user);
     updated.setEmail(email);
     updated.setUserKind(kind);
     updated.setFirst(firstName.getText());
     updated.setLast(lastName.getText());
+    updated.setEnabled(enabled.getValue());
 
     logger.info("updating with " + updated);
 
     userManager.getUserService().update(updated, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable throwable) {
-
-
       }
 
       @Override

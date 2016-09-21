@@ -66,9 +66,8 @@ import java.util.List;
 import java.util.logging.Logger;
 
 public class BasicUserContainer<T extends MiniUser>
-  //  extends SimplePagingContainer<T>
-    extends ClickablePagingContainer<T>
-{
+    //  extends SimplePagingContainer<T>
+    extends ClickablePagingContainer<T> {
   static final int TABLE_WIDTH = 420;
   private static final int MAX_LENGTH_ID = 13;
   private static final int PAGE_SIZE = 11;
@@ -84,7 +83,7 @@ public class BasicUserContainer<T extends MiniUser>
   private static final String SIGNED_UP1 = "Started";
   private static final int STUDENT_WIDTH = 300;
 
-  public BasicUserContainer(ExerciseController controller,
+  BasicUserContainer(ExerciseController controller,
                             String selectedUserKey,
                             String header) {
     super(controller);
@@ -175,10 +174,27 @@ public class BasicUserContainer<T extends MiniUser>
     tableWithPager.getElement().setId("TableScoreHistory");
     tableWithPager.addStyleName("floatLeft");
 
+    int i = 0;
+    int index = 0;
+    T userToSelect = null;
     for (T user : users) {
       addItem(user);
+
+      if (selectedUser != null && user.getID() == selectedUser) {
+        index = i;
+        userToSelect = user;
+      }
+      i++;
     }
+
     flush();
+
+    if (index > 0) {
+      scrollIntoView(index, false);
+    }
+
+    final T finalUser = userToSelect;
+
 
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
@@ -188,25 +204,31 @@ public class BasicUserContainer<T extends MiniUser>
             table.getSelectionModel().setSelected(next, true);
             gotClickOnItem(next);
           } else {
-            int i = 0;
+            if (finalUser != null) {
+              table.getSelectionModel().setSelected(finalUser, true);
+              gotClickOnItem(finalUser);
+            }
+            /*int i = 0;
             for (T userInfo : users) {
               if (userInfo.getID() == selectedUser) {
                 //    logger.info("found previous selection - " + userInfo + " : " + i);
                 table.getSelectionModel().setSelected(userInfo, true);
                 gotClickOnItem(userInfo);
 
+*//*
                 final int index = i;
                 Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
                   public void execute() {
-                    scrollIntoView(index);
+                    scrollIntoView(index, false);
                   }
                 });
+*//*
 
                 break;
               }
-              i++;
+              i++;*/
             }
-          }
+          //}
         } else {
           logger.warning("huh? users is empty???");
         }
@@ -216,7 +238,12 @@ public class BasicUserContainer<T extends MiniUser>
     return tableWithPager;
   }
 
-  private void scrollIntoView(int i) {
+  /**
+   * @param i
+   * @param doRedraw
+   * @see #getTableWithPager
+   */
+  private void scrollIntoView(int i, boolean doRedraw) {
     int pageSize = table.getPageSize();
     int pageNum = i / pageSize;
     int newIndex = pageNum * pageSize;
@@ -233,7 +260,9 @@ public class BasicUserContainer<T extends MiniUser>
 //        if (DEBUG) logger.info("new start of next newIndex " + newStart + "/" + newIndex + "/page = " + pageNum +
 //            " vs current " + table.getVisibleRange());
         table.setVisibleRange(newStart, pageSize);
-        table.redraw();
+        if (doRedraw) {
+          table.redraw();
+        }
       }
     }
     i++;
@@ -332,8 +361,8 @@ public class BasicUserContainer<T extends MiniUser>
   }
 
   /**
-   * @see #gotClickOnItem(MiniUser)
    * @param selectedUser
+   * @see #gotClickOnItem(MiniUser)
    */
   public void storeSelectedUser(long selectedUser) {
     if (Storage.isLocalStorageSupported()) {
@@ -397,7 +426,9 @@ public class BasicUserContainer<T extends MiniUser>
     };
   }
 
-  protected void gotClickOnItem(final T user) {  storeSelectedUser(user.getID());  }
+  protected void gotClickOnItem(final T user) {
+    storeSelectedUser(user.getID());
+  }
 
   /**
    * MUST BE PUBLIC
