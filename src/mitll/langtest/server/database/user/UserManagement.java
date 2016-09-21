@@ -187,7 +187,7 @@ public class UserManagement {
 //                             String dialect, String device, String ip) {
 //    User user = userDAO.addUser(userID, passwordH, emailH, email, kind, ip, isMale, age, dialect, device, first, last);
 ////    if (user != null) {
-////      userListManager.createFavorites(user.getId(), projid);
+////      userListManager.createFavorites(user.getID(), projid);
 ////    }
 //    return user;
 //  }
@@ -254,14 +254,14 @@ public class UserManagement {
       users = userDAO.getUsers();
       //int total = exerciseDAO.getRawExercises().size();
       for (User u : users) {
-        Integer numResults = idToCount.getIdToCount().get(u.getId());
+        Integer numResults = idToCount.getIdToCount().get(u.getID());
         if (numResults != null) {
           u.setNumResults(numResults);
 
-          if (userToRate.containsKey(u.getId())) {
-            u.setRate(userToRate.get(u.getId()));
+          if (userToRate.containsKey(u.getID())) {
+            u.setRate(userToRate.get(u.getID()));
           }
-          //  int size = idToCount.idToUniqueCount.get(u.getId()).size();
+          //  int size = idToCount.idToUniqueCount.get(u.getID()).size();
 
           // TODO : put this back
           if (false) {

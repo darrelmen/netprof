@@ -43,6 +43,8 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.RequiresResize;
+import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.custom.tabs.TabAndContent;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.user.UserManager;
@@ -55,16 +57,21 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-public class UserOps {
+public class UserOps implements RequiresResize {
   private final Logger logger = Logger.getLogger("UserOps");
 
-  private static final String USERS = "Users";
+  //private static final String USERS = "Users";
   private final UserManager userManager;
   private final ExerciseController controller;
 
-  Map<User.Kind, Label> kindToLabel = new HashMap<>();
-  Map<User.Kind, IconType> kindToIcon = new HashMap<>();
+  private Map<User.Kind, Label> kindToLabel = new HashMap<>();
+  private Map<User.Kind, IconType> kindToIcon = new HashMap<>();
 
+  /**
+   * @param controller
+   * @param userManager
+   * @see Navigation#addUserMaintenance
+   */
   public UserOps(ExerciseController controller, UserManager userManager) {
     setKindToIcon();
     this.controller = controller;
@@ -75,8 +82,10 @@ public class UserOps {
     kindToIcon.put(User.Kind.STUDENT, IconType.USER);
     kindToIcon.put(User.Kind.TEACHER, IconType.GROUP);
     kindToIcon.put(User.Kind.CONTENT_DEVELOPER, IconType.PENCIL);
+    kindToIcon.put(User.Kind.AUDIO_RECORDER, IconType.MICROPHONE);
     kindToIcon.put(User.Kind.PROJECT_ADMIN, IconType.BOLT);
     kindToIcon.put(User.Kind.ADMIN, IconType.ANDROID);
+    kindToIcon.put(User.Kind.TEST, IconType.COGS);
   }
 
   public void showUsers(TabAndContent users) {
@@ -87,7 +96,7 @@ public class UserOps {
     DivWidget right = addDiv(content);
     DivWidget detail = addDiv(content);
 
-    NavLink first = getKinds(left, right,detail);
+    NavLink first = getKinds(left, right, detail);
 
     userManager.getCounts(kindToLabel);
 
@@ -140,6 +149,13 @@ public class UserOps {
     return left;
   }
 
+  /**
+   *
+   * @param kind
+   * @param content
+   * @param userForm
+   * @return
+   */
   private NavLink getUserLink(User.Kind kind, DivWidget content, DivWidget userForm) {
     NavLink students = new NavLink(kind.getName() + "s");
     students.setIcon(kindToIcon.get(kind));
@@ -160,7 +176,21 @@ public class UserOps {
     return students;
   }
 
+  User.Kind currentKind;
+  DivWidget currentContent;
+  DivWidget currentUserForm;
+
+  public void reload() {
+    MiniUser currentSelection = opsUserContainer.getNext();
+
+    if (currentSelection != null) {
+      opsUserContainer.storeSelectedUser(currentSelection.getID());
+    }
+    showUsers(currentKind, currentContent, currentUserForm);
+  }
+
   private void showUsers(final User.Kind kind, final DivWidget content, DivWidget userForm) {
+
     userManager.getUserService().getKindToUser(new AsyncCallback<Map<User.Kind, Collection<MiniUser>>>() {
       @Override
       public void onFailure(Throwable throwable) {
@@ -169,29 +199,60 @@ public class UserOps {
 
       @Override
       public void onSuccess(Map<User.Kind, Collection<MiniUser>> kindCollectionMap) {
-        showUserList(kind, content, kindCollectionMap, userForm);
+        currentKind = kind;
+        currentContent = content;
+        currentUserForm = userForm;
+
+        requiresResize = showUserList(kind, content, kindCollectionMap, userForm);
+
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+          @Override
+          public void execute() {
+            onResize();
+          }
+        });
       }
     });
   }
 
-  private void showUserList(User.Kind kind,
-                            DivWidget content,
-                            Map<User.Kind, Collection<MiniUser>> kindCollectionMap
-      , DivWidget userForm) {
+  private RequiresResize requiresResize = null;
+  OpsUserContainer opsUserContainer;
+
+  /**
+   * Show users of this kind.
+   *
+   * @param kind
+   * @param content
+   * @param kindCollectionMap
+   * @param userForm
+   * @return
+   */
+  private RequiresResize showUserList(User.Kind kind,
+                                      DivWidget content,
+                                      Map<User.Kind, Collection<MiniUser>> kindCollectionMap,
+                                      DivWidget userForm) {
     content.clear();
     Collection<MiniUser> miniUsers = kindCollectionMap.get(kind);
     if (miniUsers == null) miniUsers = new ArrayList<>();
-    content.add(getUsers(kind, miniUsers, userForm));
-  }
 
-  private DivWidget getUsers(User.Kind kind, Collection<MiniUser> miniUsers, DivWidget userForm) {
-    return getOpsUserContainer(kind, userForm).getTable(miniUsers, "", "");
+     opsUserContainer = getOpsUserContainer(kind, userForm);
+    DivWidget table = opsUserContainer.getTable(miniUsers, "", "");
+    content.add(table);
+    return opsUserContainer;
   }
 
   private OpsUserContainer getOpsUserContainer(User.Kind kind, DivWidget rightSide) {
     return new OpsUserContainer(controller,
         kind.getName(),
-        rightSide
+        rightSide,
+        this
     );
+  }
+
+  @Override
+  public void onResize() {
+    if (requiresResize != null) {
+      requiresResize.onResize();
+    }
   }
 }

@@ -284,7 +284,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
           soundFeedback,
           soundFeedback.getEndListener(),
           StatsFlashcardFactory.this.instance, exerciseListToUse);
-      // logger.info("made " + this.getElement().getId() + " for " + e.getOldID());
+      // logger.info("made " + this.getElement().getID() + " for " + e.getOldID());
     }
 
     @Override

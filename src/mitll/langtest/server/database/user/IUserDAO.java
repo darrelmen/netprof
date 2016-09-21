@@ -114,4 +114,6 @@ public interface IUserDAO extends IDAO {
   int getBeforeLoginUser();
 
   Map<User.Kind,Integer> getCounts();
+
+  void update(User toUpdate);
 }
