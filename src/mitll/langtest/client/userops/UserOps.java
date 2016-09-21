@@ -55,12 +55,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 
 public class UserOps implements RequiresResize {
  // private final Logger logger = Logger.getLogger("UserOps");
-
-  //private static final String USERS = "Users";
   private final UserManager userManager;
   private final ExerciseController controller;
 
@@ -135,8 +132,11 @@ public class UserOps implements RequiresResize {
     kindsLinks.add(new NavHeader("Users"));
 
     NavLink first = null;
+    User current = controller.getUserState().getCurrent();
+    User.Kind loggedInUserRole = current.getUserKind();
     for (User.Kind kind : User.Kind.values()) {
-      if (kind.shouldShow()) {
+      if (kind.shouldShow() &&
+          (kind.compareTo(loggedInUserRole) < 0 || current.isAdmin())) {
         NavLink userLink = getUserLink(kind, right, detail);
         kindsLinks.add(userLink);
         if (first == null) first = userLink;
