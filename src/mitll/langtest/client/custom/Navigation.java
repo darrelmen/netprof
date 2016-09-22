@@ -46,6 +46,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.InitialUI;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.analysis.AnalysisTab;
 import mitll.langtest.client.analysis.ShowTab;
@@ -81,6 +82,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import static mitll.langtest.shared.user.User.Kind.TEACHER;
+
 /**
  * Created with IntelliJ IDEA.
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -98,6 +101,9 @@ public class Navigation implements RequiresResize, ShowTab {
   private static final String CLASSROOM = "classroom";
 
   private static final String CHAPTERS = "Learn Pronunciation";
+  /**
+   * @see #addUserMaintenance
+   */
   private static final String USERS = "Users";
   private static final String YOUR_LISTS = "Study Your Lists";
   private static final String STUDY_LISTS = "Study Lists";
@@ -116,6 +122,9 @@ public class Navigation implements RequiresResize, ShowTab {
   private static final String CLICKED_TAB = "clickedTab";
 
   private static final String LEARN = "learn";
+  /**
+   * @see #addRecordTabs
+   */
   private static final String RECORD_AUDIO = "Record Audio";
   private static final String RECORD_EXAMPLE = "Record In-context Audio";
   private static final String CONTENT1 = "content";
@@ -241,7 +250,7 @@ public class Navigation implements RequiresResize, ShowTab {
    *
    * @return
    * @see #getTabPanel
-   * @see mitll.langtest.client.InitialUI#populateBelowHeader
+   * @see InitialUI#showNavigation
    */
   public Widget getTabPanel() {
     tabPanel = new TabPanel();
@@ -282,12 +291,16 @@ public class Navigation implements RequiresResize, ShowTab {
 
   /**
    * Defines order of tabs...
-   * Show student analysis by default.
+   * Show student analysis if the user has teacher permissions
    *
    * @return
    * @see #showInitialState()
    */
   private void addTabs() {
+    if (tabPanel == null) {
+      logger.warning("\n\n\thuh? tab panel is null???");
+      return;
+    }
     tabPanel.clear();
     tabs.clear();
     nameToTab.clear();
@@ -297,15 +310,23 @@ public class Navigation implements RequiresResize, ShowTab {
     addLearnTab();
     addPracticeTab();
     addStudyLists();
-    if (userManager.getCurrent().getUserKind() != User.Kind.STUDENT || userManager.getCurrent().isAdmin()) {
+//    User.Kind userKind = userManager.getCurrent().getUserKind();
+
+    if (userManager.hasPermission(User.Permission.TEACHER_PERM) ||
+        userManager.hasPermission(User.Permission.EDIT_STUDENT) ||
+        userManager.hasPermission(User.Permission.EDIT_USER) ||
+        userManager.hasPermission(User.Permission.INVITE) ||
+
+        userManager.getCurrent().isAdmin()) {
       addUserMaintenance();
     }
     addAnalysis();
 
-    if (controller.getProps().useAnalysis()) {
-      if (userManager.isTeacher()) {
+    if (controller.getProps().useAnalysis() ||
+        userManager.hasPermission(User.Permission.TEACHER_PERM)) {
+     // if (userManager.isTeacher()) {
         addTeacherAnalysis();
-      }
+     // }
     }
 
     if (isQC()) {
@@ -387,6 +408,7 @@ public class Navigation implements RequiresResize, ShowTab {
    * @see #addTabs()
    */
   private void addTeacherAnalysis() {
+    logger.info("addTeacherAnalysis for " + controller.getUser());
     studentAnalysis = makeFirstLevelTab(tabPanel, IconType.TROPHY, STUDENT_ANALYSIS);
     studentAnalysis.getTab().addClickHandler(new ClickHandler() {
       @Override
@@ -414,6 +436,7 @@ public class Navigation implements RequiresResize, ShowTab {
    * @see #addAnalysis()
    */
   private void showStudentAnalysis() {
+    logger.info("show student analysis");
     learnHelper.showNPF(chapters, LEARN);
 
     studentAnalysis.getContent().clear();
@@ -428,6 +451,9 @@ public class Navigation implements RequiresResize, ShowTab {
     listManager.addStudyLists(studyLists);
   }
 
+  /**
+   *
+   */
   private void addUserMaintenance() {
     users = makeFirstLevelTab(tabPanel, IconType.GROUP, USERS);
 
@@ -515,11 +541,11 @@ public class Navigation implements RequiresResize, ShowTab {
   }
 
   private boolean isQC() {
-    return controller.getUserState().getPermissions().contains(User.Permission.QUALITY_CONTROL) || controller.getUserState().isAdmin();
+    return controller.getUserState().hasPermission(User.Permission.QUALITY_CONTROL) || controller.getUserState().isAdmin();
   }
 
   private boolean permittedToRecord() {
-    return controller.getUserState().getPermissions().contains(User.Permission.RECORD_AUDIO) || controller.getUserState().isAdmin();
+    return controller.getUserState().hasPermission(User.Permission.RECORD_AUDIO) || controller.getUserState().isAdmin();
   }
 
   private void logEvent(TabAndContent yourStuff, String context) {

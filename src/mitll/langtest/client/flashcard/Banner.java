@@ -129,13 +129,7 @@ public class Banner implements RequiresResize {
    */
   public Panel makeNPFHeaderRow(String splashText,
                                 boolean isBeta, String userName, HTML browserInfo,
-                                //   ClickHandler logoutClickHandler,
                                 List<Banner.LinkAndTitle> choices
-     /*                           ClickHandler users,
-                                ClickHandler results,
-                                ClickHandler monitoring,
-                                ClickHandler events,
-                                ClickHandler reload*/
   ) {
     HorizontalPanel headerRow = new HorizontalPanel();
     headerRow.setWidth("100%");
@@ -180,7 +174,7 @@ public class Banner implements RequiresResize {
     hp.add(recordAudio = new SimplePanel());
 
     // add log out/admin options cogMenu
-    makeCogMenu(choices);//logoutClickHandler, users, results, monitoring, events, reload);
+    makeCogMenu(choices);
 
     if (!isAnonymous) {
       hp.add(cogMenu);
@@ -231,20 +225,9 @@ public class Banner implements RequiresResize {
    * @see #makeNPFHeaderRow
    */
   private void makeCogMenu(List<LinkAndTitle> choices
-                           //                          ClickHandler logoutClickHandler, ClickHandler users, ClickHandler results,
-                           //                       ClickHandler monitoring, ClickHandler events, ClickHandler reload
   ) {
-//    List<LinkAndTitle> choices = new ArrayList<>();
-//    choices.add(new LinkAndTitle("Users", users));
-//    choices.add(new LinkAndTitle(nameForAnswer.substring(0, 1).toUpperCase() + nameForAnswer.substring(1), results));
-//    choices.add(new LinkAndTitle("Monitoring", monitoring));
-//    choices.add(new LinkAndTitle("Events", events));
-
     cogMenu = makeMenu(choices);
     cogMenu.addStyleName("cogStyle");
-//    NavLink widget1 = new NavLink(LOG_OUT);
-//    widget1.addClickHandler(logoutClickHandler);
-//    cogMenu.add(widget1);
   }
 
   public void reflectPermissions(Collection<User.Permission> permissions) {

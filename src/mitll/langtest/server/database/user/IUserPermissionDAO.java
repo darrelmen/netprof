@@ -50,6 +50,8 @@ public interface IUserPermissionDAO extends IDAO {
 
   void insert(SlickUserPermission e);
 
+  Collection<SlickUserPermission> grantedForUser(int userid);
+
   Collection<User.Permission> getGrantedForUser(int id);
 
   Map<Integer, Collection<String>> granted();

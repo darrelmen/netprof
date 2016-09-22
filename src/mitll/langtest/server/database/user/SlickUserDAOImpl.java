@@ -501,6 +501,6 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
     if (update == 0) {
       logger.warn("didn't update table with " + toUpdate1);
     }
-    logger.info("user now " + getByID(toUpdate.getID()));
+   // logger.info("user now " + getByID(toUpdate.getID()));
   }
 }
