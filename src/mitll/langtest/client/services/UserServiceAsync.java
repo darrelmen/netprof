@@ -94,7 +94,7 @@ public interface UserServiceAsync {
 
   void getKindToUser(AsyncCallback<Map<User.Kind, Collection<MiniUser>>> async);
 
-  void update(User user, AsyncCallback<Void> async);
+  void update(User user, int changingUser, AsyncCallback<Void> async);
 
 //  void activate(int id, AsyncCallback<Boolean> async);
 }
