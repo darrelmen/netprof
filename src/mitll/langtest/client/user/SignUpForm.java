@@ -40,14 +40,12 @@ import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.instrumentation.EventRegistration;
@@ -68,7 +66,7 @@ public class SignUpForm extends UserDialog implements SignUp {
 //  private static final String WAIT_FOR_APPROVAL = "Wait for approval";
 //  private static final String YOU_WILL_GET_AN_APPROVAL_MESSAGE_BY_EMAIL = "You will get an approval message by email.";
 
-  //  private static final String MALE = "male";
+  private static final String MALE = "male";
   private static final int MIN_LENGTH_USER_ID = 4;
 
   private static final int MIN_PASSWORD = 4;
@@ -106,7 +104,7 @@ public class SignUpForm extends UserDialog implements SignUp {
   private final EventRegistration eventRegistration;
 
   private Button signUp;
-  private CheckBox contentDevCheckbox;
+  //  private CheckBox contentDevCheckbox;
   private UserPassDialog userPassLogin;
   private static final String CURRENT_USERS = "Current users should add an email and password.";
   private String signUpTitle = SIGN_UP;
@@ -225,40 +223,55 @@ public class SignUpForm extends UserDialog implements SignUp {
     TextBoxBase lastNameBox = makeSignUpLastName(fieldset);
     emailBox = makeSignUpEmail(fieldset);
 
+    User.Kind userKind = user == null ? User.Kind.UNSET : user.getUserKind();
     if (user != null) {
       userBox.setText(user.getUserID());
       firstNameBox.setText(user.getFirst());
       lastNameBox.setText(user.getLast());
       emailBox.setText(user.getEmail());
-      if (user.getUserKind() == User.Kind.CONTENT_DEVELOPER) {
-        getContentDevCheckbox();
-      }
+//      if (askForDemographic(userKind)) {
+//        getContentDevCheckbox();
+//      }
     }
     if (user == null) {
       makeSignUpPassword(fieldset);
     }
 
     fieldset.add(getRolesHeader());
-    fieldset.add(getRolesChoices(user == null ? User.Kind.STUDENT : user.getUserKind()));
+    fieldset.add(getRolesChoices(user == null ? User.Kind.STUDENT : userKind));
 
-    if (!props.isAMAS() && contentDevCheckbox != null) {
-      fieldset.add(contentDevCheckbox);
+//    if (!props.isAMAS() && contentDevCheckbox != null) {
+//      fieldset.add(contentDevCheckbox);
+//    }
+
+    if (askForDemographic(userKind)) {
+      fieldset.add(getHeader("Demographic Info"));
+      makeRegistrationInfo(fieldset);
     }
 
-    makeRegistrationInfo(fieldset);
     return fieldset;
   }
 
+  protected boolean askForDemographic(User.Kind userKind) {
+    return userKind == User.Kind.CONTENT_DEVELOPER ||
+        userKind == User.Kind.AUDIO_RECORDER;
+  }
+
   private Heading getRolesHeader() {
+    String rolesHeader = this.rolesHeader;
+    return getHeader(rolesHeader);
+  }
+
+  protected Heading getHeader(String rolesHeader) {
     Heading w1 = new Heading(5, rolesHeader);
     w1.addStyleName("leftTenMargin");
     int value = 5;
     w1.getElement().getStyle().setMarginTop(value, Style.Unit.PX);
-    w1.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
+    w1.getElement().getStyle().setMarginBottom(value, Style.Unit.PX);
     return w1;
   }
 
-  private Widget getContentDevCheckbox() {
+/*  private Widget getContentDevCheckbox() {
     SafeHtmlBuilder builder = new SafeHtmlBuilder();
     builder.appendHtmlConstant(RECORD_REFERENCE_AUDIO);
     contentDevCheckbox = new CheckBox(builder.toSafeHtml());
@@ -272,7 +285,7 @@ public class SignUpForm extends UserDialog implements SignUp {
         registrationInfo.setVisible(contentDevCheckbox.getValue());
       }
     });
-/*
+*//*
     contentDevCheckbox.addFocusHandler(new FocusHandler() {
       @Override
       public void onFocus(FocusEvent event) {
@@ -282,18 +295,19 @@ public class SignUpForm extends UserDialog implements SignUp {
         }
       }
     });
-*/
+*//*
     contentDevCheckbox.getElement().getStyle().setPaddingBottom(10, Style.Unit.PX);
     if (!props.enableAllUsers()) {
       getRecordAudioPopover();
     }
     return contentDevCheckbox;
-  }
+  }*/
 
-  private void getRecordAudioPopover() {
+  /*private void getRecordAudioPopover() {
     String html = props.getRecordAudioPopoverText();
     addPopover(contentDevCheckbox, RECORD_AUDIO_HEADING, html);
   }
+*/
 
   private Panel getRolesChoices(User.Kind currentRole) {
     Panel vert = new VerticalPanel();
@@ -425,6 +439,9 @@ public class SignUpForm extends UserDialog implements SignUp {
     signUpPassword.box.setWidth(SIGN_UP_WIDTH);
   }
 
+  /**
+   * @param fieldset
+   */
   private void makeRegistrationInfo(Fieldset fieldset) {
     registrationInfo = new RegistrationInfo(fieldset);
 
@@ -445,7 +462,7 @@ public class SignUpForm extends UserDialog implements SignUp {
       }
     });
 
-    registrationInfo.hideAge();
+//    registrationInfo.hideAge();
     registrationInfo.getDialectGroup().box.addFocusHandler(new FocusHandler() {
       @Override
       public void onFocus(FocusEvent event) {
@@ -464,7 +481,7 @@ public class SignUpForm extends UserDialog implements SignUp {
         userPassLogin.clearSignInHasFocus();
       }
     });
-    registrationInfo.setVisible(false);
+    //  registrationInfo.setVisible(false);
   }
 
   private Button getSignUpButton(final TextBoxBase userBox, final TextBoxBase emailBox) {
@@ -542,6 +559,11 @@ public class SignUpForm extends UserDialog implements SignUp {
     markErrorBlur(signUpEmail, VALID_EMAIL);
   }
 
+  protected int getAge(boolean isCD) {
+    String age = isCD ? registrationInfo.getAgeEntryGroup().getText() : "";
+    int age1 = isCD ? (age.isEmpty() ? 99 : Integer.parseInt(age)) : 0;
+    return age1;
+  }
   /**
    * TODO : add first and last name so students can find their teacher
    * <p>
@@ -557,20 +579,24 @@ public class SignUpForm extends UserDialog implements SignUp {
     String passH = Md5Hash.getHash(password);
     String emailH = Md5Hash.getHash(email);
 
-/*    boolean isCD = kind == User.Kind.CONTENT_DEVELOPER;
-    String gender = isCD ? registrationInfo.isMale() ? MALE : "female" : MALE;
-    String age = isCD ? registrationInfo.getAgeEntryGroup().getText() : "";
-    int age1 = isCD ? (age.isEmpty() ? 99 : Integer.parseInt(age)) : 0;
-    String dialect = isCD ? registrationInfo.getDialectGroup().getText() : "unk";*/
+    boolean isCD = askForDemographic(kind);
+//    boolean gender = isMale(isCD);
+//    String age = isCD ? registrationInfo.getAgeEntryGroup().getText() : "";
+//    int age1 = isCD ? (age.isEmpty() ? 99 : Integer.parseInt(age)) : 0;
+//    String dialect = getDialect(isCD);
 
-    int age1 = BOGUS_AGE;
-    String dialect = "unk";
+//    int age1 = BOGUS_AGE;
+//    String dialect = "unk";
     signUp.setEnabled(false);
 
     SignUpUser newUser = new SignUpUser(user, passH, emailH, email, kind,
-        true,  // don't really know the gender, so guess male...?
-        age1, dialect,
-        "browser", "", firstName.getText(), lastName.getText());
+
+        isMale(isCD),  // don't really know the gender, so guess male...?
+        getAge(isCD),
+        getDialect(isCD),
+
+        "browser", "",
+        firstName.getText(), lastName.getText());
 
     service.addUser(
         newUser,
@@ -615,6 +641,14 @@ public class SignUpForm extends UserDialog implements SignUp {
             }
           }
         });
+  }
+
+  protected String getDialect(boolean isCD) {
+    return isCD ? registrationInfo.getDialectGroup().getText() : "unk";
+  }
+
+  protected boolean isMale(boolean isCD) {
+    return !isCD || registrationInfo.isMale();
   }
 
   private String getSignUpEvent(User result) {

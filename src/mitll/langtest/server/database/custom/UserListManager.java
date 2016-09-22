@@ -538,8 +538,7 @@ public class UserListManager implements IUserListManager {
     List<CommonShell> onList = getReviewedUserExercises(idToEx, ids);
 
     // logger.debug("getReviewList '" +name+ "' ids size = " + allKnown.size() + " yielded " + onList.size());
-    User user = getQCUser();
-    UserList<CommonShell> userList = new UserList<CommonShell>(userListMaginID, user, name, description, "", false,
+    UserList<CommonShell> userList = new UserList<CommonShell>(userListMaginID, getQCUser(), name, description, "", false,
         System.currentTimeMillis());
     //userList.setReview(true);
 
@@ -552,6 +551,10 @@ public class UserListManager implements IUserListManager {
     return userList;
   }
 
+  /**
+   * Need a bogus user for the list.
+   * @return
+   */
   private User getQCUser() {
     List<User.Permission> permissions = new ArrayList<User.Permission>();
     permissions.add(User.Permission.QUALITY_CONTROL);
