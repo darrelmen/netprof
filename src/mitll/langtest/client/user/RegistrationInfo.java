@@ -60,9 +60,9 @@ class RegistrationInfo extends BasicDialog {
   private final RadioButton male = new RadioButton(GENDER_GROUP, "Male");
   private final RadioButton female = new RadioButton(GENDER_GROUP, "Female");
   private final Panel genders;
-  private static final Boolean ADD_AGE = false;
+  private static final Boolean ADD_AGE = true;
 
-  public RegistrationInfo(ComplexWidget toAddTo) {
+  RegistrationInfo(ComplexWidget toAddTo) {
     genders = new HorizontalPanel();
     genders.add(male);
     female.addStyleName("leftFiveMargin");
@@ -73,7 +73,6 @@ class RegistrationInfo extends BasicDialog {
     female.addStyleName("topFiveMargin");
     toAddTo.add(genders);
     //  ageEntryGroup = addDecoratedControlFormFieldWithPlaceholder(toAddTo, false, 2, 2, YOUR_AGE);
-
 
     if (ADD_AGE) {
       ageEntryGroup = addControlFormFieldWithPlaceholder(toAddTo, false, 2, 2, YOUR_AGE);

@@ -54,7 +54,7 @@ public interface UserNotification {
    * @param user
    */
   void gotUser(User user);
-  void setPermission(User.Permission permission, boolean on);
+ // void setPermission(User.Permission permission, boolean on);
   Collection<User.Permission> getPermissions();
   void setProjectStartupInfo(User user);
 }

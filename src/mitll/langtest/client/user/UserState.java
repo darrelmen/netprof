@@ -45,6 +45,8 @@ public interface UserState {
 
   Collection<User.Permission> getPermissions();
 
+  boolean hasPermission(User.Permission permission);
+
   void checkUser();
 
   void logout();
