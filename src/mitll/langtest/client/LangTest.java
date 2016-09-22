@@ -637,7 +637,7 @@ public class LangTest implements
 
   /**
    * @param user
-   * @see Banner#setProjectForUser
+   * @see InitialUI#setProjectForUser
    */
   public void setProjectStartupInfo(User user) {
     projectStartupInfo = user.getStartupInfo();
@@ -753,32 +753,36 @@ public class LangTest implements
   }
 
   public boolean showCompleted() {
-    return isReviewMode() || permissions.contains(User.Permission.RECORD_AUDIO);
+    return isReviewMode() || hasPermission(User.Permission.RECORD_AUDIO);
   }
 
   private boolean isReviewMode() {
-    return permissions.contains(User.Permission.QUALITY_CONTROL);
+    return hasPermission(User.Permission.QUALITY_CONTROL);
   }
 
-  private final Set<User.Permission> permissions = new HashSet<User.Permission>();
+//  private final Set<User.Permission> permissions = new HashSet<User.Permission>();
 
   /**
    * When we login, we ask for permissions for the user from the server.
    *
-   * @param permission
-   * @param on
+   * @paramx permission
+   * @paramx on
    * @see mitll.langtest.client.user.UserManager#gotNewUser
    */
-  public void setPermission(User.Permission permission, boolean on) {
+/*  public void setPermission(User.Permission permission, boolean on) {
     if (on) permissions.add(permission);
     else permissions.remove(permission);
-  }
+  }*/
 
   @Override
   public Collection<User.Permission> getPermissions() {
-    return permissions;
+    return getCurrent().getPermissions();
   }
 
+  public boolean hasPermission(User.Permission permission) {
+    logger.info("user permissions " + getPermissions() + " for " +getCurrent());
+    return getPermissions().contains(permission);
+  }
   /**
    * @return
    * @see mitll.langtest.client.exercise.PostAnswerProvider#postAnswers
