@@ -88,6 +88,10 @@ public class SlickUserPermissionDAOImpl extends DAO implements IUserPermissionDA
   public Map<Integer, Collection<String>> granted() {
     return dao.granted();
   }
+  @Override
+  public Collection<SlickUserPermission> grantedForUser(int userid) {
+    return dao.grantedPermsForUser(userid);
+  }
 
   public Collection<User.Permission> getGrantedForUser(int id) {
     Collection<String> strings = dao.grantedForUser(id);

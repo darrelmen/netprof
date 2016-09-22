@@ -447,9 +447,9 @@ public class UserManager {
    */
   private void gotNewUser(User result) {
     logger.info("UserManager.gotNewUser " + result);
-    userNotification.getPermissions().clear();
+//    userNotification.getPermissions().clear();
     if (result != null) {
-      for (User.Permission permission : result.getPermissions()) {
+/*      for (User.Permission permission : result.getPermissions()) {
         boolean valid = true;
         if (permission == User.Permission.QUALITY_CONTROL ||
             permission == User.Permission.RECORD_AUDIO) {
@@ -458,7 +458,7 @@ public class UserManager {
         if (valid) {
           userNotification.setPermission(permission, true);
         }
-      }
+      }*/
       this.current = result;
       //  logger.info("\tgotNewUser current user " + current);
       userNotification.gotUser(result);
@@ -522,6 +522,10 @@ public class UserManager {
 
   public User getCurrent() {
     return current;
+  }
+
+  public boolean hasPermission(User.Permission permission) {
+    return current.getPermissions().contains(permission);
   }
 
   public void getCounts(Map<User.Kind, Label> kindToLabel) {
