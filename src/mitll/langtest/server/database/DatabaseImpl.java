@@ -2050,4 +2050,8 @@ public class DatabaseImpl implements Database {
   public IUserSessionDAO getUserSessionDAO() {
     return userSessionDAO;
   }
+
+  public IUserPermissionDAO getUserPermissionDAO() {
+    return userPermissionDAO;
+  }
 }

@@ -61,8 +61,7 @@ public class User extends MiniUser {
   private String dialect;
   private String device;
   private String resetKey;
-//  private String cdKey;
-  //  private long timestamp;
+
   private Collection<Permission> permissions;
   private ProjectStartupInfo startupInfo;
 
@@ -70,9 +69,11 @@ public class User extends MiniUser {
     return email;
   }
 
+/*
   public void setEmailHash(String emailHash) {
     this.emailHash = emailHash;
   }
+*/
 
   public void setEmail(String email) {
     this.email = email;
@@ -94,19 +95,12 @@ public class User extends MiniUser {
     UNSET("Unset", false),
     INTERNAL("INTERNAL", false),
 
-
     STUDENT("Student", true),
-
     TEACHER("Teacher", true),
-
     CONTENT_DEVELOPER("Content Developer", true),
-
     AUDIO_RECORDER("Audio Recorder", true),
-
     TEST("Test Account", true),
-
     PROJECT_ADMIN("Project Admin", true),
-
     ADMIN("System Admin", true);
 
     String name;
@@ -137,25 +131,116 @@ public class User extends MiniUser {
     return Arrays.asList(Kind.STUDENT, Kind.TEACHER);
   }
 
-  public static Collection<Permission> getPermsForRole(Kind role) {
+/*
+  public static Collection<Permission> getInitialPermsForRole(Kind role) {
+    switch (role) {
+      case STUDENT:
+        return Collections.emptyList();
+      case TEACHER:
+        return Collections.emptyList();
+      case AUDIO_RECORDER:
+        return Collections.singleton(
+            RECORD_AUDIO);
+      case CONTENT_DEVELOPER:
+        return Arrays.asList(
+            RECORD_AUDIO,
+            Permission.QUALITY_CONTROL);
+      case PROJECT_ADMIN:
+        return Arrays.asList(
+            TEACHER_PERM,
+            INVITE,
+            EDIT_STUDENT,
+            EDIT_USER);
+      default:
+        return Collections.emptyList();
+    }
+  }
+*/
+
+  /**
+   * These are the permissions you get when you are invited by program manager or admin
+   * @param role
+   * @return
+   */
+  public static Collection<Permission> getInvitedPermsForRole(Kind role) {
     switch (role) {
       case STUDENT:
         return Collections.emptyList();
       case TEACHER:
         return Arrays.asList(
             TEACHER_PERM,
-            EDIT_STUDENT);  // students
+            INVITE // other stuedents
+            );
       case AUDIO_RECORDER:
         return Collections.singleton(
-            Permission.RECORD_AUDIO);
+            RECORD_AUDIO);
       case CONTENT_DEVELOPER:
         return Arrays.asList(
-            Permission.RECORD_AUDIO,
+            RECORD_AUDIO,
             Permission.QUALITY_CONTROL);
       case PROJECT_ADMIN:
         return Arrays.asList(
             TEACHER_PERM,
             INVITE,
+            EDIT_STUDENT,
+            EDIT_USER);
+      default:
+        return Collections.emptyList();
+    }
+  }
+
+  /**
+   * When you sign up yourself (not invited, you request these permissions).
+   * The only roles are student and teacher for self-sign up.
+   * @param role
+   * @return
+   */
+  public static Collection<Permission> getRequestedPermsForRole(Kind role) {
+    switch (role) {
+      case STUDENT:
+        return Collections.emptyList();
+
+      case TEACHER:
+        return Arrays.asList(
+            TEACHER_PERM/*,
+            EDIT_STUDENT*/
+        );  // students
+
+      default:
+        return Collections.emptyList();
+    }
+  }
+
+  /**
+   * These are the set of possible permissions you can have when you are one of these users.
+   * @param role
+   * @return
+   */
+  public static Collection<Permission> getPossiblePermsForRole(Kind role) {
+    switch (role) {
+      case STUDENT:
+        return Collections.emptyList();
+      case TEACHER:
+        return Arrays.asList(
+            TEACHER_PERM, // allows them to via the full analysis tab, edit students
+            RECORD_AUDIO,
+            DEVELOP_CONTENT, //? make new projects? edit via domino?
+            INVITE,
+            EDIT_STUDENT,
+            EDIT_USER
+        );  // students
+      case AUDIO_RECORDER:
+        return Collections.singleton(
+            RECORD_AUDIO);
+      case CONTENT_DEVELOPER:
+        return Arrays.asList(
+            RECORD_AUDIO,
+            QUALITY_CONTROL);
+      case PROJECT_ADMIN:
+        return Arrays.asList(
+            TEACHER_PERM,
+            INVITE,
+            EDIT_STUDENT,
             EDIT_USER);
       default:
         return Collections.emptyList();
@@ -163,13 +248,28 @@ public class User extends MiniUser {
   }
 
   public enum Permission implements IsSerializable {
-    QUALITY_CONTROL,
-    RECORD_AUDIO,
-    DEVELOP_CONTENT, //? make new projects? edit via domino?
-    TEACHER_PERM, // gets to see teacher things, invite
-    INVITE,
-    EDIT_STUDENT,
-    EDIT_USER
+    TEACHER_PERM("View Student Data"), // gets to see teacher things, invite
+    EDIT_STUDENT("Edit Student Profile"),
+
+    QUALITY_CONTROL("Quality Control"),
+    RECORD_AUDIO("Record Audio"),
+    DEVELOP_CONTENT("Develop Content"), //? make new projects? edit via domino?
+    INVITE("Invite New Users"),
+    EDIT_USER("Edit All User Profiles");
+
+    String name;
+
+    Permission() {
+    }
+
+    Permission(String name) {
+      this.name = name;
+    }
+
+    public String getName() {
+      return name;
+    }
+
   }
 
   public enum PermissionStatus implements IsSerializable {

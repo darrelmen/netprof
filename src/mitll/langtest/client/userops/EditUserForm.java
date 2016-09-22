@@ -37,6 +37,7 @@ import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.Fieldset;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Grid;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.user.SignUpForm;
@@ -44,16 +45,14 @@ import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserPassDialog;
 import mitll.langtest.shared.user.User;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
-public class EditUserForm extends SignUpForm {
+class EditUserForm extends SignUpForm {
   private final Logger logger = Logger.getLogger("SignUpForm");
   private final User toEdit;
   private final UserOps userOps;
-  User.Kind userKind;
+  private final User.Kind userKind;
 
   /**
    * @param props
@@ -62,12 +61,12 @@ public class EditUserForm extends SignUpForm {
    * @param userPassLogin
    * @see OpsUserContainer#populateUserEdit(DivWidget, User)
    */
-  public EditUserForm(PropertyHandler props,
-                      UserManager userManager,
-                      EventRegistration eventRegistration,
-                      UserPassDialog userPassLogin,
-                      User toEdit,
-                      UserOps userOps) {
+  EditUserForm(PropertyHandler props,
+               UserManager userManager,
+               EventRegistration eventRegistration,
+               UserPassDialog userPassLogin,
+               User toEdit,
+               UserOps userOps) {
     super(props, userManager, eventRegistration, userPassLogin);
     setMarkFieldsWithLabels(true);
     setRolesHeader("Current user role");
@@ -86,8 +85,9 @@ public class EditUserForm extends SignUpForm {
   protected Fieldset getFields(User user) {
     Fieldset fields = super.getFields(user);
 
+    fields.add(getHeader("Lock/Unlock Account"));
     enabled = new CheckBox("Enabled");
-    logger.info("user enabled : " + user.isEnabled());
+//    logger.info("user enabled : " + user.isEnabled());
     enabled.setValue(user.isEnabled());
     enabled.addStyleName("leftTenMargin");
 
@@ -96,7 +96,33 @@ public class EditUserForm extends SignUpForm {
         ""
         , enabled, "");//"Lock or unlock user");
     addTooltip(group, "Lock out or unlock user");
+
+    Collection<User.Permission> possiblePermsForRole = User.getPossiblePermsForRole(user.getUserKind());
+    if (!possiblePermsForRole.isEmpty()) {
+      int size = possiblePermsForRole.size();
+      int numRows = (int) Math.ceil(size / 2) + 1;
+      logger.info("size " + size + " rows " + numRows);
+      Grid grid = new Grid(numRows, 2);
+      int n = 0;
+      for (User.Permission permission : possiblePermsForRole) {
+        grid.setWidget(n / 2, n % 2, getPermChoice(permission, user.getPermissions().contains(permission)));
+        n++;
+      }
+
+      fields.add(getHeader("Permissions"));
+      fields.add(grid);
+    }
+
     return fields;
+  }
+
+  Map<User.Permission, CheckBox> permToCheck = new HashMap<>();
+
+  private CheckBox getPermChoice(User.Permission permission, boolean isCurrent) {
+    CheckBox checkBox = new CheckBox(permission.getName());
+    permToCheck.put(permission, checkBox);
+    checkBox.setValue(isCurrent);
+    return checkBox;
   }
 
   protected boolean isFormValid(String userID) {
@@ -112,6 +138,11 @@ public class EditUserForm extends SignUpForm {
     User updated = new User(toEdit);
     //  logger.info("Role for " +user + " = " +selectedRole);
 
+    if (askForDemographic(kind)) {
+      updated.setAge(getAge(true));
+      updated.setMale(isMale(true));
+      updated.setDialect(getDialect(true));
+    }
     updated.setUserKind(selectedRole);
     updated.setUserID(user);
     updated.setEmail(email);
@@ -120,9 +151,14 @@ public class EditUserForm extends SignUpForm {
     updated.setLast(lastName.getText());
     updated.setEnabled(enabled.getValue());
 
+    List<User.Permission> perms = new ArrayList<>();
+    for (Map.Entry<User.Permission, CheckBox> pair : permToCheck.entrySet()) {
+      if (pair.getValue().getValue()) perms.add(pair.getKey());
+    }
+    updated.setPermissions(perms);
     logger.info("updating with " + updated);
 
-    userManager.getUserService().update(updated, new AsyncCallback<Void>() {
+    userManager.getUserService().update(updated, BOGUS_AGE, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable throwable) {
       }
