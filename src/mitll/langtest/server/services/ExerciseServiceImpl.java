@@ -327,6 +327,8 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
   }
 
   /**
+   * TODO : what to do with request role here?
+   *
    * NOTE NOTE NOTE : not doing ensureMP3 - since we likely don't have access to file system for here.
    * ALSO - ideally this is done at the moment the wav is made.
    * <p>
