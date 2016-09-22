@@ -96,9 +96,9 @@ public class UserInfo extends MiniUser {
     return (int) Math.ceil(100 * total / size);
   }
 
-  public String getUserID() {
+/*  public String getUserID() {
     return getUser() == null ? "UNK" : getUser().getUserID();
-  }
+  }*/
 
   public long getTimestampMillis() { return startTime;  }
 

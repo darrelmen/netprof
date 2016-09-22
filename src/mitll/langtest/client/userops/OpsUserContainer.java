@@ -56,8 +56,8 @@ import java.util.Comparator;
 import java.util.List;
 
 public class OpsUserContainer extends BasicUserContainer<MiniUser> implements RequiresResize {
-  public static final String FIRST = "First";
-  public static final String LAST = "Last";
+  private static final String FIRST = "First";
+  private static final String LAST = "Last";
   private final DivWidget rightSide;
   private final UserOps userOps;
 

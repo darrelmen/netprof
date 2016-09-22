@@ -200,6 +200,19 @@ public class InitialUI implements UILifecycle {
     // logger.info("talks to domino " + props.talksToDomino());
     reload = (props.talksToDomino()) ? reload : null;
 
+    List<Banner.LinkAndTitle> choices = getCogMenuChoices();
+
+    Widget bannerRow = banner.makeNPFHeaderRow(props.getSplash(), props.isBeta(), getGreeting(),
+        getReleaseStatus(),
+        choices
+    );
+
+    headerRow = new FluidRow();
+    headerRow.add(new Column(12, bannerRow));
+    return headerRow;
+  }
+
+  private List<Banner.LinkAndTitle> getCogMenuChoices() {
     List<Banner.LinkAndTitle> choices = new ArrayList<>();
     choices.add(new Banner.LinkAndTitle("Users", new UsersClickHandler(), true));
     String nameForAnswer = props.getNameForAnswer() + "s";
@@ -209,21 +222,7 @@ public class InitialUI implements UILifecycle {
     choices.add(new Banner.LinkAndTitle("Events", new EventsClickHandler(), true));
     choices.add(new Banner.LinkAndTitle("Change Password", new ChangePasswordClickHandler(), false));
     choices.add(new Banner.LinkAndTitle(LOG_OUT, new LogoutClickHandler(), false));
-
-    Widget bannerRow = banner.makeNPFHeaderRow(props.getSplash(), props.isBeta(), getGreeting(),
-        getReleaseStatus(),
-        //    new LogoutClickHandler(),
-        choices/*
-        new UsersClickHandler(),
-        new ResultsClickHandler(),
-        new MonitoringClickHandler(),
-        new EventsClickHandler(),
-        reload*/
-    );
-
-    headerRow = new FluidRow();
-    headerRow.add(new Column(12, bannerRow));
-    return headerRow;
+    return choices;
   }
 
   /**
@@ -427,6 +426,10 @@ public class InitialUI implements UILifecycle {
 
   /**
    * Breadcrumb shows sequence of choices - who - languge - course (FL100 or FL200 or FL300) Elementary FL/Intermediate FL/Advanced FL - what do you want to do
+   *
+   * @see #configureUIGivenUser(long)
+   * @see #gotUser(User)
+   * @see #setProjectForUser(int)
    */
   private void showNavigation() {
     if (contentRow.getElement().getChildCount() == 1) {
@@ -785,7 +788,11 @@ public class InitialUI implements UILifecycle {
     }
     if (userID > -1) {
       banner.setCogVisible(true);
-      banner.setVisibleAdmin(user.isAdmin() || props.isAdminView() || user.isTeacher() || user.isCD());
+      banner.setVisibleAdmin(
+          user.isAdmin() ||
+          props.isAdminView() ||
+          user.getUserKind() == User.Kind.PROJECT_ADMIN ||
+          user.isCD());
     }
   }
 

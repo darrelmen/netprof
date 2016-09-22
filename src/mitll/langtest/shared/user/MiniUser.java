@@ -163,4 +163,12 @@ public class MiniUser implements HasID, Comparable<HasID> {
         (isMale() ? "male" : "female") +
         (isAdmin() ? "ADMIN" : "");
   }
+
+  public void setMale(boolean male) {
+    isMale = male;
+  }
+
+  public void setAge(int age) {
+    this.age = age;
+  }
 }

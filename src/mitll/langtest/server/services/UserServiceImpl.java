@@ -37,6 +37,7 @@ import mitll.langtest.client.services.UserService;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.security.DominoSessionException;
 import mitll.langtest.server.database.security.UserSecurityManager;
+import mitll.langtest.server.database.user.IUserPermissionDAO;
 import mitll.langtest.server.database.user.IUserSessionDAO;
 import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.server.mail.EmailHelper;
@@ -46,6 +47,7 @@ import mitll.langtest.shared.user.LoginResult;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
+import mitll.npdata.dao.SlickUserPermission;
 import mitll.npdata.dao.SlickUserSession;
 import org.apache.log4j.Logger;
 
@@ -403,8 +405,43 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     return db.getUserDAO().getByID(id);
   }
 
-  public void update(User toUpdate) {
+  public void update(User toUpdate, int changingUser) {
     db.getUserDAO().update(toUpdate);
+
+    Collection<User.Permission> included = toUpdate.getPermissions();
+
+    IUserPermissionDAO userPermissionDAO = db.getUserPermissionDAO();
+    int updatedUserID = toUpdate.getID();
+    Collection<SlickUserPermission> currentGranted = userPermissionDAO.grantedForUser(updatedUserID);
+
+    logger.info("current perms for " + updatedUserID + " " + currentGranted);
+    // deny all current permissions not included in update set
+    List<User.Permission> currentPerms = new ArrayList<>();
+    for (SlickUserPermission perm : currentGranted) {
+      User.Permission current = User.Permission.valueOf(perm.name());
+      currentPerms.add(current);
+      if (!included.contains(current)) {
+        logger.info("\t deny " +perm+
+            " for " + updatedUserID + " " + currentGranted);
+        userPermissionDAO.deny(perm.id(), changingUser);
+      }
+    }
+    // all perms in update - current = what we need to insert at granted
+    included.removeAll(currentPerms);
+
+    Timestamp now = new Timestamp(System.currentTimeMillis());
+    for (User.Permission perm : included) {
+      logger.info("\tgrant " +perm+" for " + updatedUserID );
+      userPermissionDAO.insert(new SlickUserPermission(-1,
+          updatedUserID,
+          changingUser,
+          perm.name(),
+          now,
+          User.PermissionStatus.GRANTED.name(),
+          now,
+          changingUser
+          ));
+    }
   }
 /*  public boolean deactivate(int id) {
     return db.getUserDAO().changeEnabled(id, false);
