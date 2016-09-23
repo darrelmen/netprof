@@ -300,7 +300,6 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 
   private String getJoinSQL(long userid, String filterClause) {
     return "select " +
-
         "results.exid," +
         "results.answer," +
         "results." + ResultDAO.SCORE_JSON + "," +
@@ -310,7 +309,6 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
         "word.seq, " +
         "word.word, " +
 //        "word.score wordscore, " +
-
         "phone.* " +
 
         " from " +
@@ -325,6 +323,10 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
         " order by results.exid, results.time desc";
   }
 
+  /**
+   * For old h2 world we don't have phone duration.
+   * @return
+   */
   public Collection<Phone> getAll() {
     Connection connection = getConnection();
 
@@ -339,7 +341,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
         String phone = rs.getString(PHONE);
         int seq = rs.getInt(SEQ);
         float phoneScore = rs.getFloat(SCORE);
-        all.add(new Phone(rid, wid, phone, seq, phoneScore));
+        all.add(new Phone(rid, wid, phone, seq, phoneScore, 0));
       }
       finish(connection, statement, rs);
     } catch (SQLException e) {
