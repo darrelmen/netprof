@@ -43,10 +43,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.UserPassLogin;
-import mitll.langtest.shared.user.LoginResult;
-import mitll.langtest.shared.user.MiniUser;
-import mitll.langtest.shared.user.SignUpUser;
-import mitll.langtest.shared.user.User;
+import mitll.langtest.shared.user.*;
 
 import java.util.Collection;
 import java.util.List;
@@ -140,6 +137,10 @@ public interface UserService extends RemoteService {
   User getUser(int id);
 
   void update(User user, int changingUser);
+
+  Collection<Invitation> getPending(User.Kind requestRole);
+
+  void invite(Invitation invite);
 //  boolean deactivate(int id);
 //  boolean activate(int id);
 }
