@@ -44,7 +44,7 @@ import java.util.List;
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 3/18/14.
-*/
+ */
 public class AVPHistoryForList implements IsSerializable {
   private float pbCorrect;
   private float top;
@@ -57,27 +57,30 @@ public class AVPHistoryForList implements IsSerializable {
   private int numScores;
   private List<UserScore> scores = new ArrayList<UserScore>();
 
-  public AVPHistoryForList() {}
+  public AVPHistoryForList() {
+  }
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#getUserHistoryForList
    * @param scores
    * @param userID
    * @param useCorrect when false get score percentages true for percentage correct
+   * @see mitll.langtest.server.database.DatabaseImpl#getUserHistoryForList
    */
   public AVPHistoryForList(Collection<Session> scores, long userID, boolean useCorrect) {
     this.useCorrect = useCorrect;
     numScores = scores.size();
-    calc(scores,userID);
+    calc(scores, userID);
     if (scores.isEmpty()) System.err.println("huh? scores is empty???");
   }
 
   public float getPbCorrect() {
     return pbCorrect;
   }
+
   public float getTop() {
     return top;
   }
+
   public float getTotalCorrect() {
     return totalCorrect;
   }
@@ -106,7 +109,7 @@ public class AVPHistoryForList implements IsSerializable {
       if (score.getUserid() == userID) {
         if (value > pbCorrect) pbCorrect = value;
         yValuesForUser.add(value);
-      //  System.out.println("showLeaderboardPlot : for user " +userID + " got " + score);
+        //  System.out.println("showLeaderboardPlot : for user " +userID + " got " + score);
       } else {
         //System.out.println("\tshowLeaderboardPlot : for user " +score.getUserid() + " got " + score);
         totalNotMe += value;
@@ -118,10 +121,9 @@ public class AVPHistoryForList implements IsSerializable {
       }
       totalCorrect += value;
     }
-
 //    if (yValuesForUser.isEmpty()) {
-   //   System.err.println("huh? yValuesForUser (" + userID + ") is empty???");
-  //  }
+    //   System.err.println("huh? yValuesForUser (" + userID + ") is empty???");
+    //  }
   }
 
   private float getValue(SetScore score) {
@@ -150,27 +152,28 @@ public class AVPHistoryForList implements IsSerializable {
     private boolean isCurrent;
     private int index;
 
-    public UserScore() {}
-    public UserScore(int index,String user, float score, boolean isCurrent) {
-      this.index = index ;
+    public UserScore() {
+    }
+
+    public UserScore(int index, String user, float score, boolean isCurrent) {
+      this.index = index;
       this.user = user;
       this.score = score;
       this.isCurrent = isCurrent;
     }
 
-
     public String getUser() {
       return user;
     }
-
     public float getScore() {
       return score;
     }
 
     /**
      * Is this the score for the current session?
-     * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#bold(mitll.langtest.shared.flashcard.AVPHistoryForList.UserScore, String)
+     *
      * @return
+     * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#bold(mitll.langtest.shared.flashcard.AVPHistoryForList.UserScore, String)
      */
     public boolean isCurrent() {
       return isCurrent;
@@ -180,11 +183,13 @@ public class AVPHistoryForList implements IsSerializable {
       return index;
     }
 
-    public String toString() { return "id " + index + " by " + user + " " + ((int)getScore()) + (isCurrent() ? " current! " : ""); }
+    public String toString() {
+      return "id " + index + " by " + user + " " + ((int) getScore()) + (isCurrent() ? " current! " : "");
+    }
   }
 
   public String toString() {
     return "History " + numScores + " correct " + getTotalCorrect() + " pb correct " + getPbCorrect() +
-      " class avg " + getClassAvg() + " scores " + scores;
+        " class avg " + getClassAvg() + " scores " + scores;
   }
 }

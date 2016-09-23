@@ -144,9 +144,9 @@ public class Session implements IsSerializable, SetScore {
     return userid;
   }
 
-  public void setUserid(int userid) {
-    this.userid = userid;
-  }
+//  public void setUserid(int userid) {
+//    this.userid = userid;
+//  }
 
   public float getCorrectPercent() {
     return correctPercent;
