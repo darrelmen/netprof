@@ -52,10 +52,9 @@ import java.util.List;
 public class EmailHelper {
   private static final Logger logger = Logger.getLogger(EmailHelper.class);
 
-  //private static final String NP_SERVER = "np.ll.mit.edu";
-  private static final String MY_EMAIL = "gordon.vidaver@ll.mit.edu";
+  @Deprecated  private static final String MY_EMAIL = "gordon.vidaver@ll.mit.edu";
   private static final String CLOSING = "Regards, Administrator";
-  private static final String GORDON = "Gordon";
+  @Deprecated  private static final String GORDON = "Gordon";
 
   private static final String RP = "rp";
   private static final String CD = "cd";
@@ -65,13 +64,13 @@ public class EmailHelper {
   private static final String RESET_PASSWORD = "Reset Password";
   // private static final String REPLY_TO = "admin@" + NP_SERVER;
   private static final String YOUR_USER_NAME = "Your user name";
-  public static final String NETPROF_HELP_DLIFLC_EDU = "netprof-help@dliflc.edu";
+  private static final String NETPROF_HELP_DLIFLC_EDU = "netprof-help@dliflc.edu";
 
   private final IUserDAO userDAO;
   private final MailSupport mailSupport;
   private ServerProperties serverProperties;
   private PathHelper pathHelper;
-  String REPLY_TO, NP_SERVER;
+  private String REPLY_TO, NP_SERVER;
 
   public EmailHelper(ServerProperties serverProperties,
                      IUserDAO userDAO,
@@ -314,9 +313,9 @@ public class EmailHelper {
    * @param mailSupport
    * @param language
    * @see mitll.langtest.server.services.UserServiceImpl#addUser
-   * @see mitll.langtest.client.user.UserPassLogin#gotSignUp(String, String, String, User.Kind)
+   * @seex mitll.langtest.client.user.UserPassLogin#gotSignUp
    */
-  public void addContentDeveloper(String url, String email, User user, MailSupport mailSupport, String language) {
+  @Deprecated public void addContentDeveloper(String url, String email, User user, MailSupport mailSupport, String language) {
     url = trimURL(url);
     String userID1 = user.getUserID();
     String toHash = userID1 + "_" + System.currentTimeMillis();
@@ -327,21 +326,21 @@ public class EmailHelper {
     List<String> approvers = serverProperties.getApprovers();
     List<String> emails = serverProperties.getApproverEmails();
     for (int i = 0; i < approvers.size(); i++) {
-      String tamas = approvers.get(i);
-      String approvalEmailAddress = emails.get(i);
-      String message = getEmailApproval(userID1, tamas, email, language);
-      sendApprovalEmail(url, email, userID1, hash, message, approvalEmailAddress, mailSupport, language);
+      String message = getEmailApproval(userID1, approvers.get(i), email, language);
+      sendApprovalEmail(url, email, userID1, hash, message, emails.get(i), mailSupport, language);
     }
   }
 
   private void sendApprovalEmail(String url, String email, String userID1, String hash, String message,
                                  String approvalEmailAddress, MailSupport mailSupport, String language) {
+    String baseURL = url + "?" +
+        CD +
+        "=" + hash + "&" +  // content developer token
+        ER +
+        "=" + rot13(email);
+
     mailSupport.sendEmail(NP_SERVER,
-        url + "?" +
-            CD +
-            "=" + hash + "&" +  // content developer token
-            ER +
-            "=" + rot13(email), // email encoding
+        baseURL, // email encoding
         approvalEmailAddress,
         serverProperties.getApprovalEmailAddress(),
         "Content Developer approval for " + userID1 + " for " + language,
@@ -359,6 +358,44 @@ public class EmailHelper {
         "." + "<br/>" +
 
         "Click the link to allow them." +
+        "<br/><br/>" +
+        CLOSING;
+  }
+
+  private void sendInviteEmail(String url,
+                               String email,
+                               User inviter,
+                               User.Kind atRole,
+                               int inviteID,
+                               MailSupport mailSupport) {
+    url = trimURL(url);
+    String hash = getHash(atRole.toString());
+
+    String baseURL = url + "?" +
+        "k" +
+        "=" + hash + "&" +  // content developer token
+        "i" +
+        "=" + getHash(email + "_" + inviteID);
+
+    String message = getInvitation(inviter.getFullName());
+
+    mailSupport.sendEmail(NP_SERVER,
+        baseURL, // email encoding
+        email,
+        NETPROF_HELP_DLIFLC_EDU,
+        "Invitation to NetProF from " + inviter.getFullName(),
+        message,
+        "Click to approve", // link text
+        Collections.singleton(EmailList.RAY_BUDD));
+  }
+
+  private String getInvitation(String inviterFullName) {
+    return "Hi," +
+        //tamas + "," +
+        "<br/><br/>" +
+        inviterFullName + " has kindly invited you to use " +"NetProF"+"."+
+        "<br/><br/>" +
+        "Click the link to sign up." +
         "<br/><br/>" +
         CLOSING;
   }

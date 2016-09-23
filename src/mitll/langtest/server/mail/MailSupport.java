@@ -82,8 +82,7 @@ public class MailSupport {
    * @param message
    */
   public void sendEmail(String serverName, String to, String replyTo, String subject, String message) {
-    List<String> ccEmails = Collections.emptyList();
-    sendEmail(serverName, null, to, replyTo, subject, message, null, ccEmails);
+    sendEmail(serverName, null, to, replyTo, subject, message, null, Collections.emptyList());
   }
 
   /**
@@ -98,7 +97,7 @@ public class MailSupport {
    * @see EmailHelper#sendApprovalEmail(String, String, String, String, String, String, MailSupport)
    * @see EmailHelper#sendEmail
    */
-  public void sendEmail(String serverName, String baseURL, String to, String replyTo, String subject, String message,
+  void sendEmail(String serverName, String baseURL, String to, String replyTo, String subject, String message,
                         String linkText, Collection<String> ccEmails) {
     List<String> toAddresses = (to.contains(",")) ? Arrays.asList(to.split(",")) : new ArrayList<String>();
     if (toAddresses.isEmpty()) {
