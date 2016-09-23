@@ -41,15 +41,12 @@ import mitll.langtest.server.database.project.ProjectStatus;
 import mitll.langtest.server.database.project.ProjectType;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.UserManagement;
-import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickProject;
 import mitll.npdata.dao.SlickProjectProperty;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
-import java.io.File;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -66,13 +63,13 @@ public class ProjectTest extends BaseTest {
 
     Iterator<String> iterator = spanish.getTypeOrder(-1).iterator();
     projectDAO.add(
-        gvidaver.getId(),
+        gvidaver.getID(),
         System.currentTimeMillis(),
         "my Spanish",
         spanish.getLanguage(),
         "ALL",
         ProjectType.NP,
-        ProjectStatus.PRODUCTION, iterator.next(), iterator.next(), "es",0);
+        ProjectStatus.PRODUCTION, iterator.next(), iterator.next(), "es", 0);
   }
 
   @Test
@@ -85,7 +82,7 @@ public class ProjectTest extends BaseTest {
     User gvidaver = userDAO.getUserByID("gvidaver");
 
     int i = projectDAO.addTest(
-        gvidaver.getId(),
+        gvidaver.getID(),
         "my Spanish",
         "Spanish",
         "Unit", "Chapter", "es");
@@ -99,7 +96,7 @@ public class ProjectTest extends BaseTest {
 //      user = userDAO.getUserByID(test345);
 //    }
 //    if (user != null) {
-//      Collection<UserList<CommonShell>> myLists = userListManager.getMyLists(user.getId(), i);
+//      Collection<UserList<CommonShell>> myLists = userListManager.getMyLists(user.getID(), i);
 //      logger.info("lists for " + user + " " + myLists);
 //    }
   }
@@ -139,7 +136,7 @@ public class ProjectTest extends BaseTest {
     String english1 = "english";
     int english = projectDAO.getByName(english1);
 
-    logger.info("found " + english + " for "+ english1);
+    logger.info("found " + english + " for " + english1);
   }
 
   @Test
@@ -150,7 +147,15 @@ public class ProjectTest extends BaseTest {
     String english1 = "english";
     int english = projectDAO.getByName(english1);
 
-    logger.info("found " + english + " for "+ english1);
+    logger.info("found " + english + " for " + english1);
+  }
+
+  @Test
+  public void testUserCount() {
+    DatabaseImpl spanish = getDatabaseVeryLight("netProf", "config.properties", false);
+
+
+    logger.info("counts " + spanish.getUserDAO().getCounts());
   }
 
   @Test
@@ -161,15 +166,15 @@ public class ProjectTest extends BaseTest {
     String english1 = "mandarin";
     int english = projectDAO.getByName(english1);
 
-    logger.info("found " + english + " for "+ english1);
+    logger.info("found " + english + " for " + english1);
 
     spanish.populateProjects(false);
 
-    spanish.setInstallPath("", "","");
+    spanish.setInstallPath("", "", "");
 
     Project project = spanish.getProject(english);
 
-    logger.info("project " + project );
+    logger.info("project " + project);
 
     project.getSectionHelper().report();
   }
@@ -178,6 +183,6 @@ public class ProjectTest extends BaseTest {
   public void testDrop() {
     IProjectDAO projectDAO = getDatabaseVeryLight("netProf", "config.properties", false).getProjectDAO();
     projectDAO.delete(2);
-  //  projectDAO.delete(14);
+    //  projectDAO.delete(14);
   }
 }

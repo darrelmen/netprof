@@ -37,6 +37,10 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import java.sql.Time;
 import java.sql.Timestamp;
 
+/**
+ * Not sure if this is being used... yet?
+ */
+@Deprecated
 public class UserPermission implements IsSerializable {
 
   int foruser, byuser, changedby;
