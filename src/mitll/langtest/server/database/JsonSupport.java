@@ -74,7 +74,7 @@ public class JsonSupport {
    * @param phoneDAO
    * @see mitll.langtest.server.database.DatabaseImpl#setInstallPath(String, String, String)
    */
-  JsonSupport(SectionHelper<CommonExercise> sectionHelper,
+  public JsonSupport(SectionHelper<CommonExercise> sectionHelper,
               IResultDAO resultDAO,
               IRefResultDAO refResultDAO,
               IAudioDAO audioDAO,
