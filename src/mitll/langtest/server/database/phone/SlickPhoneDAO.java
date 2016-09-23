@@ -77,7 +77,8 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
         (int) shared.getWid(),
         shared.getPhone(),
         shared.getSeq(),
-        shared.getScore());
+        shared.getScore(),
+        shared.getDuration());
   }
 
   public Phone fromSlick(SlickPhone slick) {
@@ -87,7 +88,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
         slick.wid(),
         slick.phone(),
         slick.seq(),
-        slick.score());
+        slick.score(), slick.duration());
   }
 
   public void insert(SlickPhone word) {
