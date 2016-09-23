@@ -38,7 +38,6 @@ import mitll.langtest.server.database.audio.AudioDAO;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.user.User;
-import mitll.langtest.shared.exercise.AudioAttribute;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
@@ -93,8 +92,8 @@ public class AudioTest extends BaseTest {
 
     Map<Integer, Integer> truth = new HashMap<>();
     for (User user : new UserDAO(spanish).getUsers()) {
-//      Collection<String> recordedBy = dao.getRecordedBy(user.getId());
-      Collection<Integer> recordedBy = h2AudioDAO.getRecordedExForUser(user.getId());
+//      Collection<String> recordedBy = dao.getRecordedBy(user.getID());
+      Collection<Integer> recordedBy = h2AudioDAO.getRecordedExForUser(user.getID());
       if (!recordedBy.isEmpty()) {
         logger.info("h2  for " + user.getUserID() + " recorded\t" + recordedBy.size());
       }
@@ -102,8 +101,8 @@ public class AudioTest extends BaseTest {
 
     IAudioDAO dao = spanish.getAudioDAO();
     for (User user : spanish.getUsers()) {
-//      Collection<String> recordedBy = dao.getRecordedBy(user.getId());
-      Collection<Integer> recordedBy = dao.getRecordedExForUser(user.getId());
+//      Collection<String> recordedBy = dao.getRecordedBy(user.getID());
+      Collection<Integer> recordedBy = dao.getRecordedExForUser(user.getID());
       if (!recordedBy.isEmpty()) {
         logger.info("postgres for " + user.getUserID() + " recorded " + recordedBy.size());
       }
@@ -118,7 +117,7 @@ public class AudioTest extends BaseTest {
     List<User> users = spanish.getUsers();
     long then = System.currentTimeMillis();
     for (User user : users) {
-      Collection<Integer> recordedBy = dao.getWithContext(user.getId());
+      Collection<Integer> recordedBy = dao.getWithContext(user.getID());
       if (!recordedBy.isEmpty()) {
         logger.info("postgres for " + user.getUserID() + " with context " + recordedBy.size());
       }
@@ -131,7 +130,7 @@ public class AudioTest extends BaseTest {
     AudioDAO audioDAO = new AudioDAO(spanish, h2UserDAO);
     then = System.currentTimeMillis();
     for (User user : h2UserDAO.getUsers()) {
-      Collection<Integer> recordedBy = audioDAO.getWithContext(user.getId());
+      Collection<Integer> recordedBy = audioDAO.getWithContext(user.getID());
       if (!recordedBy.isEmpty()) {
         logger.info("h2 for " + user.getUserID() + " with context " + recordedBy.size());
       }
@@ -146,7 +145,7 @@ public class AudioTest extends BaseTest {
     logger.info("got  h2 " + maleFemaleProgressH2);
 
     for (User user : users) {
-      Collection<Integer> recordedBy = dao.getRecordedExampleForUser(user.getId());
+      Collection<Integer> recordedBy = dao.getRecordedExampleForUser(user.getID());
       if (!recordedBy.isEmpty()) {
         logger.info("postgres for " + user.getUserID() + " getRecordedExampleForUser " + recordedBy.size());
       }

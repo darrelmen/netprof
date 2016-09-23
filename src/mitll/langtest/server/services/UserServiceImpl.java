@@ -43,10 +43,8 @@ import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.project.ProjectStartupInfo;
-import mitll.langtest.shared.user.LoginResult;
-import mitll.langtest.shared.user.MiniUser;
-import mitll.langtest.shared.user.SignUpUser;
-import mitll.langtest.shared.user.User;
+import mitll.langtest.shared.user.*;
+import mitll.npdata.dao.SlickInvite;
 import mitll.npdata.dao.SlickUserPermission;
 import mitll.npdata.dao.SlickUserSession;
 import org.apache.log4j.Logger;
@@ -209,17 +207,12 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * Send confirmation to your email too.
    *
    * @param url
-   * @param isCD
    * @return null if existing user
+   * @paramx isCD
    * @see mitll.langtest.client.user.SignUpForm#gotSignUp
    */
   @Override
-  public User addUser(
-      SignUpUser user,
-      String url//,
-      //boolean isCD
-  ) {
-    //  findSharedDatabase();
+  public User addUser(SignUpUser user, String url) {
     UserManagement userManagement = db.getUserManagement();
     User newUser = userManagement.addUser(getThreadLocalRequest(), user);
     MailSupport mailSupport = getMailSupport();
@@ -227,16 +220,19 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     String userID = user.getUserID();
     String email = user.getEmail();
     String first = user.getFirst();
-    if (newUser != null && !newUser.isEnabled()) { // newUser = null means existing newUser.
+
+    if (newUser != null/* && !newUser.isEnabled()*/) { // newUser = null means existing newUser.
       logger.debug("newUser " + userID + "/" + newUser + " wishes to be a content developer. Asking for approval.");
-      getEmailHelper().addContentDeveloper(url, email, newUser, mailSupport, getProject().getLanguage());
+      //getEmailHelper().addContentDeveloper(url, email, newUser, mailSupport, getProject().getLanguage());
       getEmailHelper().sendConfirmationEmail(email, userID, first, mailSupport);
-    } else if (newUser == null) {
+    } else /*if (newUser == null)*/ {
       logger.debug("no newUser found for id " + userID);
-    } else {
+    } /*else {
       logger.debug("newUser " + userID + "/" + newUser + " is enabled.");
       getEmailHelper().sendConfirmationEmail(email, userID, first, mailSupport);
-    }
+    }*/
+
+
     if (newUser != null) {
       setSessionUser(createSession(), newUser);
     }
@@ -298,7 +294,6 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    */
   @Override
   public long getUserIDForToken(String token) {
-    //  findSharedDatabase();
     User user = db.getUserDAO().getUserWithResetKey(token);
     long l = (user == null) ? -1 : user.getID();
     // logger.info("for token " + token + " got user id " + l);
@@ -307,7 +302,6 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
 
   @Override
   public boolean changePFor(String token, String passwordH) {
-    //  findSharedDatabase();
     User userWhereResetKey = db.getUserDAO().getUserWithResetKey(token);
     if (userWhereResetKey != null) {
       db.getUserDAO().clearKey(userWhereResetKey.getID(), true);
@@ -421,7 +415,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
       User.Permission current = User.Permission.valueOf(perm.name());
       currentPerms.add(current);
       if (!included.contains(current)) {
-        logger.info("\t deny " +perm+
+        logger.info("\t deny " + perm +
             " for " + updatedUserID + " " + currentGranted);
         userPermissionDAO.deny(perm.id(), changingUser);
       }
@@ -431,7 +425,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
 
     Timestamp now = new Timestamp(System.currentTimeMillis());
     for (User.Permission perm : included) {
-      logger.info("\tgrant " +perm+" for " + updatedUserID );
+      logger.info("\tgrant " + perm + " for " + updatedUserID);
       userPermissionDAO.insert(new SlickUserPermission(-1,
           updatedUserID,
           changingUser,
@@ -440,13 +434,52 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
           User.PermissionStatus.GRANTED.name(),
           now,
           changingUser
-          ));
+      ));
     }
   }
-/*  public boolean deactivate(int id) {
-    return db.getUserDAO().changeEnabled(id, false);
+
+  @Override
+  public Collection<Invitation> getPending(User.Kind requestRole) {
+    List<Invitation> visible = new ArrayList<>();
+    Collection<SlickInvite> pending = db.getInviteDAO().getPending();
+    for (SlickInvite invite : pending) {
+      String kind = invite.kind();
+      User.Kind kind1 = User.Kind.valueOf(kind);
+      if (kind1.compareTo(requestRole) < 0) {  // e.g. students below teachers
+        visible.add(toInvitation(invite));
+      }
+    }
+    return visible;
   }
-  public boolean activate(int id) {
-    return db.getUserDAO().changeEnabled(id, true);
-  }*/
+
+  private Invitation toInvitation(SlickInvite invite) {
+    return new Invitation(User.Kind.valueOf(invite.kind()),
+        invite.byuserid(),
+        invite.modified().getTime(),
+        invite.email()
+    );
+  }
+
+  /**
+   * Invite you to NetProF as a student, or teacher, or program manager, etc.
+   *
+   * @param invite
+   */
+  @Override
+  public void invite(Invitation invite) {
+    db.getInviteDAO().add(new SlickInvite(-1,
+        invite.getKind().toString(),
+        invite.getByuser(),
+        new Timestamp(System.currentTimeMillis()),
+
+        "PENDING", db.getUserDAO().getBeforeLoginUser(),
+        new Timestamp(0),
+
+        invite.getEmail()));
+
+    // not checking if insert fails -- how could it?
+
+    getEmailHelper().sendConfirmationEmail(email, userID, first, mailSupport);
+
+  }
 }

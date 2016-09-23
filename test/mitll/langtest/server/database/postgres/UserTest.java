@@ -88,7 +88,7 @@ public class UserTest extends BaseTest {
 //
 //    logger.info("before " + user.isEnabled());
 //
-//    int id = user.getId();
+//    int id = user.getID();
 //    boolean b = dao.enableUser(id);
 
 //    logger.info("enable user " + b);
