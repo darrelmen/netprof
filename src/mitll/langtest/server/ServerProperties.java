@@ -33,6 +33,7 @@
 package mitll.langtest.server;
 
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.mail.EmailList;
 import mitll.langtest.server.mail.MailSupport;
@@ -650,6 +651,10 @@ public class ServerProperties {
     return getDefaultTrue(CHECK_AUDIO_ON_STARTUP);
   }
 
+  /**
+   * @see mitll.langtest.server.database.exercise.BaseExerciseDAO#setAudioDAO(IAudioDAO, int)
+   * @return
+   */
   public boolean doAudioFileExistsCheck() {
     return getDefaultTrue(CHECK_AUDIO_FILE_EXISTS);
   }
