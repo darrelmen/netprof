@@ -85,6 +85,7 @@ public class OpsUserContainer extends BasicUserContainer<MiniUser> implements Re
 
     getNameCol(FIRST, true);
     getNameCol(LAST,  false);
+
     table.getColumnSortList().push(dateCol);
     table.setWidth("100%", true);
 
@@ -149,7 +150,6 @@ public class OpsUserContainer extends BasicUserContainer<MiniUser> implements Re
   @Override
   protected void gotClickOnItem(final MiniUser user) {
     super.gotClickOnItem(user);
-
     rightSide.clear();
 
     if (!user.isAdmin()) {
@@ -168,7 +168,6 @@ public class OpsUserContainer extends BasicUserContainer<MiniUser> implements Re
   }
 
   private void populateUserEdit(DivWidget userDetail, User user) {
-
     EditUserForm signUpForm = new EditUserForm(
         controller.getProps(),
         controller.getUserManager(),
