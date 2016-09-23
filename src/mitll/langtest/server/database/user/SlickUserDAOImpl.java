@@ -139,6 +139,7 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @param email
    * @param device
    * @param first
+   * @param first
    * @param last
    * @return
    * @see UserManagement#addUser
