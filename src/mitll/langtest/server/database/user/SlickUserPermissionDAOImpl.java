@@ -53,7 +53,9 @@ public class SlickUserPermissionDAOImpl extends DAO implements IUserPermissionDA
   }
 
   @Override
-  public String getName() { return dao.dao().name();  }
+  public String getName() {
+    return dao.dao().name();
+  }
 
   @Override
   public void createTable() {
@@ -81,17 +83,21 @@ public class SlickUserPermissionDAOImpl extends DAO implements IUserPermissionDA
   }
 
   @Override
-  public void insert(SlickUserPermission e) {
-    dao.insert(e);
-  }
+  public void insert(SlickUserPermission e) {  dao.insert(e);  }
 
   public Map<Integer, Collection<String>> granted() {
     return dao.granted();
   }
+
   @Override
   public Collection<SlickUserPermission> grantedForUser(int userid) {
     return dao.grantedPermsForUser(userid);
   }
+
+//  @Override
+//  public Collection<SlickUserPermission> forUser(int userid) {
+//    return dao.forUser(userid);
+//  }
 
   public Collection<User.Permission> getGrantedForUser(int id) {
     Collection<String> strings = dao.grantedForUser(id);

@@ -524,12 +524,21 @@ public class PostgresTest extends BaseTest {
 
     User byID = spanish.getUserDAO().getUserByID("gvidaver");
     logger.info("user is " + byID);
-    int i = spanish.getUserProjectDAO().mostRecentByUser(byID.getId());
+    int i = spanish.getUserProjectDAO().mostRecentByUser(byID.getID());
     logger.info("most recent is " + i);
     i = spanish.getUserProjectDAO().mostRecentByUser(999999);
     logger.info("most recent is " + i);
     i = spanish.getUserProjectDAO().mostRecentByUser(342);
     logger.info("most recent is " + i);
+  }
+
+  @Test
+  public void testUserCount() {
+    DatabaseImpl spanish = getDatabaseLight("netprof", false);
+
+    Map<User.Kind, Integer> counts = spanish.getUserDAO().getCounts();
+
+    logger.info("got " + counts);
   }
 
 

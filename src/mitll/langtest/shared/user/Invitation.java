@@ -30,64 +30,40 @@
  *
  */
 
-package mitll.langtest.server.database.user;
+package mitll.langtest.shared.user;
 
-import mitll.langtest.server.PathHelper;
-import mitll.langtest.server.database.DAO;
-import mitll.langtest.server.database.Database;
-import mitll.npdata.dao.DBConnection;
-import mitll.npdata.dao.SlickUserSession;
-import mitll.npdata.dao.user.UserSessionDAOWrapper;
-import org.apache.log4j.Logger;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
-import java.util.Collection;
+public class Invitation implements IsSerializable {
+  private User.Kind kind;
+  private int byuser;
+  private long modified;
+  private String email;
 
-public class SlickUserSessionDAOImpl extends DAO implements IUserSessionDAO {
-  private static final Logger logger = Logger.getLogger(SlickUserSessionDAOImpl.class);
-  private final UserSessionDAOWrapper dao;
-
-  /**
-   * @param database
-   * @param dbConnection
-   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(PathHelper)
-   */
-  public SlickUserSessionDAOImpl(Database database, DBConnection dbConnection) {
-    super(database);
-    dao = new UserSessionDAOWrapper(dbConnection);
+  public Invitation(User.Kind kind, int byuser, long modified, String email) {
+    this.kind = kind;
+    this.byuser = byuser;
+    this.modified = modified;
+    this.email = email;
   }
 
-  public void createTable() {
-    dao.createTable();
+  public Invitation() {
+
   }
 
-  @Override
-  public String getName() {
-    return dao.dao().name();
+  public User.Kind getKind() {
+    return kind;
   }
 
-  /**
-   * @param user
-   * @return
-   */
-  @Override
-  public void add(SlickUserSession user) {  dao.add(user);  }
-
-/*  @Override
-  public Collection<String> getByUser(int userid) {
-    return dao.getByUserID(userid);
-  }*/
-
-  @Override
-  public int getUserForSession(String sesssion) {
-    Collection<Integer> userForSession = dao.getUserForSession(sesssion);
-
-    return userForSession.isEmpty() ? -1 : userForSession.iterator().next();
+  public int getByuser() {
+    return byuser;
   }
 
-  @Override
-  public void removeSession(String session) {
-    dao.removeSession(session);
+  public long getModified() {
+    return modified;
   }
 
-  public int getNumRows() { return dao.numRows(); }
+  public String getEmail() {
+    return email;
+  }
 }
