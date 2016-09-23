@@ -91,6 +91,10 @@ public class User extends MiniUser {
     this.permissions = permissions;
   }
 
+  public String getFullName() {
+    return first != null && !first.isEmpty() || last != null && !last.isEmpty() ? first + " " + last : getUserID();
+  }
+
   public enum Kind implements IsSerializable {
     UNSET("Unset", false),
     INTERNAL("INTERNAL", false),
@@ -159,6 +163,7 @@ public class User extends MiniUser {
 
   /**
    * These are the permissions you get when you are invited by program manager or admin
+   *
    * @param role
    * @return
    */
@@ -170,7 +175,7 @@ public class User extends MiniUser {
         return Arrays.asList(
             TEACHER_PERM,
             INVITE // other stuedents
-            );
+        );
       case AUDIO_RECORDER:
         return Collections.singleton(
             RECORD_AUDIO);
@@ -192,6 +197,7 @@ public class User extends MiniUser {
   /**
    * When you sign up yourself (not invited, you request these permissions).
    * The only roles are student and teacher for self-sign up.
+   *
    * @param role
    * @return
    */
@@ -213,6 +219,7 @@ public class User extends MiniUser {
 
   /**
    * These are the set of possible permissions you can have when you are one of these users.
+   *
    * @param role
    * @return
    */
@@ -340,8 +347,8 @@ public class User extends MiniUser {
    * @param emailHash
    * @param device
    * @param resetPassKey
-   * @paramx cdEnableKey
    * @param timestamp
+   * @paramx cdEnableKey
    * @see mitll.langtest.server.database.user.SlickUserDAOImpl#toUsers(List)
    * @see UserDAO#getUsers
    */
@@ -368,7 +375,7 @@ public class User extends MiniUser {
     this.dialect = dialect;
     this.device = device;
     this.resetKey = resetPassKey;
-  //  this.cdKey = cdEnableKey;
+    //  this.cdKey = cdEnableKey;
     this.timestamp = timestamp;
   }
 
