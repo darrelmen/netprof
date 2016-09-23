@@ -169,6 +169,7 @@ public class DatabaseImpl implements Database {
   private PathHelper pathHelper;
   private IProjectManagement projectManagement;
   private RecordWordAndPhone recordWordAndPhone;
+  private IInviteDAO inviteDAO;
 
   /**
    * JUST FOR TESTING
@@ -297,6 +298,7 @@ public class DatabaseImpl implements Database {
     slickUserDAO.setPermissionDAO(userPermissionDAO);
 
     this.userSessionDAO = new SlickUserSessionDAOImpl(this, dbConnection);
+    this.inviteDAO = new SlickInviteDAOImpl(this, dbConnection);
     audioDAO = new SlickAudioDAO(this, dbConnection, this.userDAO);
     resultDAO = new SlickResultDAO(this, dbConnection);
     answerDAO = new SlickAnswerDAO(this, dbConnection);
@@ -1626,6 +1628,8 @@ public class DatabaseImpl implements Database {
   public IUserPermissionDAO getUserPermissionDAO() {
     return userPermissionDAO;
   }
+
+  public IInviteDAO getInviteDAO() { return inviteDAO; }
 
   public String toString() {
     return "Database : " + this.getClass().toString();

@@ -103,13 +103,13 @@ public class SignUpForm extends UserDialog implements SignUp {
 
   private final EventRegistration eventRegistration;
 
-  private Button signUp;
+  protected Button signUp;
   //  private CheckBox contentDevCheckbox;
   private UserPassDialog userPassLogin;
   private static final String CURRENT_USERS = "Current users should add an email and password.";
   private String signUpTitle = SIGN_UP;
   private String rolesHeader = ARE_YOU_A;
-  boolean markFieldsWithLabels = false;
+  private boolean markFieldsWithLabels = false;
   protected UserManager userManager;
   private Map<User.Kind, RadioButton> roleToChoice = new HashMap<>();
 
@@ -160,7 +160,6 @@ public class SignUpForm extends UserDialog implements SignUp {
     FormField firstFocus = this.firstName;
     setFocusOn(firstFocus.getWidget());
     //   eventRegistration.logEvent(signIn, "sign in", "N/A", "copied info to sign up form");
-
     markErrorBlur(firstFocus, "Add info", CURRENT_USERS, Placement.TOP);
 
     firstFocus.box.addBlurHandler(new BlurHandler() {
@@ -564,6 +563,7 @@ public class SignUpForm extends UserDialog implements SignUp {
     int age1 = isCD ? (age.isEmpty() ? 99 : Integer.parseInt(age)) : 0;
     return age1;
   }
+
   /**
    * TODO : add first and last name so students can find their teacher
    * <p>
@@ -576,18 +576,11 @@ public class SignUpForm extends UserDialog implements SignUp {
    * @see #getSignUpButton(com.github.gwtbootstrap.client.ui.base.TextBoxBase, com.github.gwtbootstrap.client.ui.base.TextBoxBase)
    */
   protected void gotSignUp(final String user, String password, String email, User.Kind kind) {
-    String passH = Md5Hash.getHash(password);
-    String emailH = Md5Hash.getHash(email);
-
-    boolean isCD = askForDemographic(kind);
-//    boolean gender = isMale(isCD);
-//    String age = isCD ? registrationInfo.getAgeEntryGroup().getText() : "";
-//    int age1 = isCD ? (age.isEmpty() ? 99 : Integer.parseInt(age)) : 0;
-//    String dialect = getDialect(isCD);
-
-//    int age1 = BOGUS_AGE;
-//    String dialect = "unk";
     signUp.setEnabled(false);
+
+    String passH  = Md5Hash.getHash(password);
+    String emailH = Md5Hash.getHash(email);
+    boolean isCD = askForDemographic(kind);
 
     SignUpUser newUser = new SignUpUser(user, passH, emailH, email, kind,
 
@@ -601,12 +594,10 @@ public class SignUpForm extends UserDialog implements SignUp {
     service.addUser(
         newUser,
         Window.Location.getHref(),
-        //      isCD,
         new AsyncCallback<User>() {
           @Override
           public void onFailure(Throwable caught) {
             eventRegistration.logEvent(signUp, "signing up", "N/A", "Couldn't contact server...?");
-
             signUp.setEnabled(true);
             markErrorBlur(signUp, "Trouble connecting to server.");
           }
@@ -629,14 +620,15 @@ public class SignUpForm extends UserDialog implements SignUp {
                 //  markErrorBlur(signUp, WAIT_FOR_APPROVAL, YOU_WILL_GET_AN_APPROVAL_MESSAGE_BY_EMAIL, Placement.TOP);
                 markErrorBlur(signUp, "I'm sorry",
                     "Your account has been deactivated. Please contact help email if needed.", Placement.TOP);
+/*
                 Timer t = new Timer() {
                   @Override
                   public void run() {
                     Window.Location.reload();
-
                   }
                 };
                 t.schedule(WAIT_FOR_READING_APPROVAL);
+*/
               }
             }
           }
