@@ -36,24 +36,24 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.npdata.dao.DBConnection;
-import mitll.npdata.dao.SlickUserSession;
-import mitll.npdata.dao.user.UserSessionDAOWrapper;
+import mitll.npdata.dao.SlickInvite;
+import mitll.npdata.dao.user.InviteDAOWrapper;
 import org.apache.log4j.Logger;
 
 import java.util.Collection;
 
-public class SlickUserSessionDAOImpl extends DAO implements IUserSessionDAO {
-  private static final Logger logger = Logger.getLogger(SlickUserSessionDAOImpl.class);
-  private final UserSessionDAOWrapper dao;
+public class SlickInviteDAOImpl extends DAO implements IInviteDAO {
+  private static final Logger logger = Logger.getLogger(SlickInviteDAOImpl.class);
+  private final InviteDAOWrapper dao;
 
   /**
    * @param database
    * @param dbConnection
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(PathHelper)
    */
-  public SlickUserSessionDAOImpl(Database database, DBConnection dbConnection) {
+  public SlickInviteDAOImpl(Database database, DBConnection dbConnection) {
     super(database);
-    dao = new UserSessionDAOWrapper(dbConnection);
+    dao = new InviteDAOWrapper(dbConnection);
   }
 
   public void createTable() {
@@ -66,28 +66,20 @@ public class SlickUserSessionDAOImpl extends DAO implements IUserSessionDAO {
   }
 
   /**
-   * @param user
+   * @param invite
    * @return
    */
   @Override
-  public void add(SlickUserSession user) {  dao.add(user);  }
-
-/*  @Override
-  public Collection<String> getByUser(int userid) {
-    return dao.getByUserID(userid);
-  }*/
-
-  @Override
-  public int getUserForSession(String sesssion) {
-    Collection<Integer> userForSession = dao.getUserForSession(sesssion);
-
-    return userForSession.isEmpty() ? -1 : userForSession.iterator().next();
+  public void add(SlickInvite invite) {
+    dao.add(invite);
   }
 
   @Override
-  public void removeSession(String session) {
-    dao.removeSession(session);
+  public Collection<SlickInvite> getPending() {
+    return dao.pending();
   }
 
-  public int getNumRows() { return dao.numRows(); }
+  public int getNumRows() {
+    return dao.numRows();
+  }
 }

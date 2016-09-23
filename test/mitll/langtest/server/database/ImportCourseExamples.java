@@ -101,7 +101,7 @@ public class ImportCourseExamples {
     int i = npfRussian.userExists(user.getUserID());
     if (i > 0) logger.debug("found duplicate " + user);
     int l = i != -1 ? i : npfRussian.addUser(user);
-    oldToNew.put(user.getId(), l);
+    oldToNew.put(user.getID(), l);
   }
 */
 

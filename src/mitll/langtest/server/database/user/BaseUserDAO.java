@@ -136,47 +136,40 @@ public abstract class BaseUserDAO extends DAO {
   }
 
   /**
+   * If the user is somehow missing some info, but exists, add the missing
+   * email,pass info
+   * to their account
+   *
    * @param user
-   * @return
+   * @return user if add or modified, null if no change was done
    * @see UserManagement#addUser(SignUpUser)
    */
   public User addUser(SignUpUser user) {
     String userID = user.getUserID();
-    User userByID = getUserByID(userID);
-    User.Kind kind = user.getKind();
-    if (userByID == null/* && kind != User.Kind.ANONYMOUS*/) {
-      // Collection<User.Permission> perms = (kind == User.Kind.CONTENT_DEVELOPER) ? CD_PERMISSIONS : EMPTY_PERM;
-      // boolean enabled = (kind != User.Kind.CONTENT_DEVELOPER) || isAdmin(userID) || enableAllUsers;
-      // List<SlickUserPermission> requested = new ArrayList<>();
-      List<User.Permission> requested = new ArrayList<>();
-      if (kind.equals(User.Kind.TEACHER)) {
-        requested.add(User.Permission.TEACHER_PERM);
-//        Timestamp now = new Timestamp(System.currentTimeMillis());
-//        requested.add(new SlickUserPermission(-1,
-//            beforeLoginUser,
-//            beforeLoginUser,
-//            User.Permission.TEACHER_PERM.toString(),
-//            now,
-//            User.PermissionStatus.PENDING.toString(),
-//            now,
-//            beforeLoginUser));
-      }
-      int l = addUserAndGetID(user, requested);
-      User userWhere = getUserWhere(l);
+    User currentUser = getUserByID(userID);
+    if (currentUser == null) {
+//      List<User.Permission> requested = new ArrayList<>();
+//      User.Kind kind = user.getKind();
+//      if (kind.equals(User.Kind.TEACHER)) {
+//        requested.add(User.Permission.TEACHER_PERM);
+//      }
+      User userWhere = getUserWhere(addUserAndGetID(user/*,requested*/));
       logger.debug(" : addUser : added new user " + userWhere);
       return userWhere;
-
     } else {
       // user exists!
-      String emailHash = userByID.getEmailHash();
-      String passwordHash = userByID.getPasswordHash();
-      if (emailHash != null && passwordHash != null &&
-          !emailHash.isEmpty() && !passwordHash.isEmpty()) {
+      String emailHash = currentUser.getEmailHash();
+      String passwordHash = currentUser.getPasswordHash();
+
+      if (emailHash != null &&
+          passwordHash != null &&
+          !emailHash.isEmpty() &&
+          !passwordHash.isEmpty()) {
         logger.debug(" : addUser : user " + userID + " is an existing user.");
         return null; // existing user!
       } else {
-        int id = userByID.getID();
-        updateUser(id, kind, user.getPasswordH(), user.getEmailH());
+        int id = currentUser.getID();
+        updateUser(id, user.getKind(), user.getPasswordH(), user.getEmailH());
         User userWhere = getUserWhere(id);
         logger.debug(" : addUser : returning updated user " + userWhere);
         return userWhere;
@@ -184,8 +177,13 @@ public abstract class BaseUserDAO extends DAO {
     }
   }
 
-  private int addUserAndGetID(SignUpUser user, Collection<User.Permission> perms
-  ) {
+  /**
+   * @param user
+   * @paramx perms
+   * @return
+   * @see #addUser(SignUpUser)
+   */
+  private int addUserAndGetID(SignUpUser user/*, Collection<User.Permission> perms*/) {
     return addUser(user.getAge(),
         user.isMale() ? MALE : FEMALE,
         0,
@@ -195,7 +193,7 @@ public abstract class BaseUserDAO extends DAO {
         user.getDialect(),
         user.getUserID(),
         true,
-        perms,
+        Collections.emptyList(),
         user.getKind(), user.getPasswordH(),
         user.getEmailH(), user.getEmail(), user.getDevice(), user.getFirst(), user.getLast());
   }
@@ -251,7 +249,6 @@ public abstract class BaseUserDAO extends DAO {
                        String userID,
                        boolean enabled,
                        Collection<User.Permission> permissions,
-                       //     Collection<SlickUserPermission> permissions,
                        User.Kind kind,
                        String passwordH, String emailH, String email, String device, String first, String last);
 

@@ -40,7 +40,7 @@ import java.util.Collection;
 public interface IUserSessionDAO extends IDAO {
   void add(SlickUserSession user);
 
-  Collection<String> getByUser(int userid);
+  //Collection<String> getByUser(int userid);
 
   int getUserForSession(String sesssion);
 
