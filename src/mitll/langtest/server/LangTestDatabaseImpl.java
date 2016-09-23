@@ -337,7 +337,8 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   public AVPScoreReport getUserHistoryForList(int userid,
                                               Collection<Integer> ids,
                                               long latestResultID,
-                                              Map<String, Collection<String>> typeToSection, long userListID) {
+                                              Map<String, Collection<String>> typeToSection,
+                                              long userListID) {
     //logger.debug("getUserHistoryForList " + userid + " and " + ids + " type to section " + typeToSection);
     UserList<CommonShell> userListByID = userListID != -1 ? db.getUserListByID(userListID, getProjectID()) : null;
     List<Integer> allIDs = new ArrayList<>();
