@@ -37,8 +37,8 @@ public class MergeSites extends BaseTest {
       if (!userID.isEmpty()) {
         if (chosenToUser.containsKey(userID)) {
           User oldUser = chosenToUser.get(userID);
-          if (oldUser.getId() != newUser.getId()) {
-            oldToNew.put(oldUser.getId(), newUser.getId());
+          if (oldUser.getID() != newUser.getID()) {
+            oldToNew.put(oldUser.getID(), newUser.getID());
             logger.info("got existing user new\n\t" + newUser + "old\n\t" + oldUser);
           }
         }
@@ -52,7 +52,7 @@ public class MergeSites extends BaseTest {
         if (l1 < 0) logger.warn("huh - couldn't addExerciseToList " + old);
         else {
           logger.info("Adding " + old);
-          oldToNew.put(old.getId(), l1);
+          oldToNew.put(old.getID(), l1);
           c++;
         }
       }
@@ -163,7 +163,7 @@ public class MergeSites extends BaseTest {
     int i = npfRussian.userExists(user.getUserID());
     if (i > 0) logger.debug("found duplicate " + user);
     int l = i != -1 ? i : npfRussian.addUser(user);
-    oldToNew.put(user.getId(), l);
+    oldToNew.put(user.getID(), l);
   }*/
 
   /*

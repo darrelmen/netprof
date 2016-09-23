@@ -75,142 +75,60 @@ public class UserManagement {
   }
 
   /**
-   *  @paramx userID
-   * @paramx passwordH
-   * @paramx emailH
-   * @paramx email
-   * @paramx deviceType
-   * @paramx device
-   * @see mitll.langtest.server.ScoreServlet#doPost
-   */
-//  public User addUser(SignUpUser user) {//String userID, String passwordH, String emailH, String email, String deviceType, String device) {
-//    return addUser(user.setKind(User.Kind.STUDENT).setMale(true));
-//  }
-
-/*  private User addUser(String userID, String passwordH, String emailH, String email, String deviceType, String device,
-                       User.Kind kind,
-                       boolean isMale) {
-    return addUser(userID, passwordH, emailH, email, deviceType, device, kind, isMale, 89, "unk");
-  }*/
-
-  /**
+   * For now, only teachers get pending requests...
+   * @param user
    * @return
-   * @seex DatabaseImpl#addUser
-   * @paramx xuserID
-   * @paramx passwordH
-   * @paramx emailH
-   * @paramx email
-   * @paramx deviceType
-   * @paramx device
-   * @paramx kind
-   * @paramx isMale
-   * @paramx age
-   * @paramx dialect
    */
-/*  public User addUser(String userID, String passwordH, String emailH, String email,
-                      String deviceType, String device, User.Kind kind,
-                      boolean isMale, int age, String dialect) {
-    return addAndGetUser(userID, passwordH, emailH, email, kind, isMale, age, dialect, deviceType, device*//*, projid*//*);
-  }*/
   public User addUser(SignUpUser user) {
     User user1 = userDAO.addUser(user);
 
-//    List<SlickUserPermission> requested = new ArrayList<>();
+    if (user1 != null) {
 
-    List<User.Permission> permissions = new ArrayList<>();
-    if (user1.getUserKind().equals(User.Kind.TEACHER)) {
-      permissions.add(User.Permission.TEACHER_PERM);
-//        Timestamp now = new Timestamp(System.currentTimeMillis());
-//        requested.add(new SlickUserPermission(-1,
-//            beforeLoginUser,
-//            beforeLoginUser,
-//            User.Permission.TEACHER_PERM.toString(),
-//            now,
-//            User.PermissionStatus.PENDING.toString(),
-//            now,
-//            beforeLoginUser));
+      ifTeacherAddPermissions(user1);
     }
 
-
-    addPermissions(permissions);
     return user1;
+  }
+
+  private void ifTeacherAddPermissions(User user1) {
+    List<User.Permission> permissions = new ArrayList<>();
+    if (user1.getUserKind().equals(User.Kind.TEACHER)) {
+      logger.debug("Adding pending teacher permission...");
+      permissions.add(User.Permission.TEACHER_PERM);
+    }
+    addPermissions(permissions);
   }
 
   private void addPermissions(List<User.Permission> permissions) {
     Timestamp now = new Timestamp(System.currentTimeMillis());
     int beforeLoginUser = userDAO.getBeforeLoginUser();
+
     for (User.Permission permission : permissions) {
-      SlickUserPermission e = new SlickUserPermission(-1,
-          beforeLoginUser,
-          beforeLoginUser,
-          permission.toString(),
-          now,
-          User.PermissionStatus.PENDING.toString(),
-          now,
-          beforeLoginUser);
+      SlickUserPermission e = getPendingRequest(now, beforeLoginUser, permission);
       permissionDAO.insert(e);
     }
   }
-  /**
-   * @param request
-   * @paramx userID
-   * @paramx passwordH
-   * @paramx emailH
-   * @paramx email
-   * @paramx kind
-   * @paramx isMale
-   * @paramx age
-   * @paramx dialect
-   * @paramx xdevice
-   * @return
-   * @seex mitll.langtest.server.LangTestDatabaseImpl#addUser
-   */
-/*  public User addUser(HttpServletRequest request,
-                      String userID, String passwordH,
-                      String emailH, String email, User.Kind kind,
-                      boolean isMale, int age, String dialect, String device) {
-    String ip = getIPInfo(request);
-    return addUser(userID, passwordH, emailH, email, device, ip, kind, isMale, age, dialect);
-  }*/
+
+  private SlickUserPermission getPendingRequest(Timestamp now, int beforeLoginUser, User.Permission permission) {
+    return new SlickUserPermission(-1,
+        beforeLoginUser,
+        beforeLoginUser,
+        permission.toString(),
+        now,
+        User.PermissionStatus.PENDING.toString(),
+        now,
+        beforeLoginUser);
+  }
 
   /**
    * @param request
    * @param user
    * @return
-   * @see mitll.langtest.server.services.UserServiceImpl#addUser(SignUpUser, String, boolean)
+   * @see mitll.langtest.server.services.UserServiceImpl#addUser
    */
   public User addUser(HttpServletRequest request, SignUpUser user) {
     return addUser(user.setIp(getIPInfo(request)));
   }
-
-//  private User addAndGetUser(String userID, String passwordH, String emailH, String email, User.Kind kind, boolean isMale, int age,
-//                             String dialect, String device, String ip) {
-//    User user = userDAO.addUser(userID, passwordH, emailH, email, kind, ip, isMale, age, dialect, device, first, last);
-////    if (user != null) {
-////      userListManager.createFavorites(user.getID(), projid);
-////    }
-//    return user;
-//  }
-
-//  private User addAndGetUser(SignUpUser user) {
-//    return userDAO.addUser(user);
-//  }
-
-  /**
-   * @paramx user
-   * @return
-   * @seex DatabaseImpl#addUser
-   */
-/*  public int addUser(User user) {
-    int l;
-    if ((l = userDAO.getIdForUserID(user.getUserID())) == -1) {
-      logger.debug("addUser " + user);
-      l = userDAO.addUser(user.getAge(), user.getGender() == 0 ? BaseUserDAO.MALE : BaseUserDAO.FEMALE,
-          user.getExperience(), user.getIpaddr(), "", user.getNativeLang(), user.getDialect(), user.getUserID(), false,
-          user.getPermissions(), User.Kind.STUDENT, "", "", "");
-    }
-    return l;
-  }*/
 
   /**
    * @param request

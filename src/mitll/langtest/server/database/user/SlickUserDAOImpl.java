@@ -98,6 +98,12 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return user1;
   }
 
+  /**
+   * Add granted permissions...
+   * @param permissions
+   * @param foruserid
+   * @return
+   */
   private int addPermissions(Collection<User.Permission> permissions, int foruserid) {
     Timestamp now = new Timestamp(System.currentTimeMillis());
     int c = 0;
@@ -150,21 +156,8 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
                      String passwordH,
                      String emailH, String email, String device,
                      String first, String last) {
-//    StringBuilder builder = new StringBuilder();
-//    for (User.Permission permission : permissions) builder.append(permission).append(",");
-    List<SlickUserPermission> requested = new ArrayList<>();
-
     Timestamp now = new Timestamp(System.currentTimeMillis());
-    for (User.Permission permission : permissions) {
-      requested.add(new SlickUserPermission(-1,
-          beforeLoginUser,
-          beforeLoginUser,
-          permission.toString(),
-          now,
-          User.PermissionStatus.PENDING.toString(),
-          now,
-          beforeLoginUser));
-    }
+   // getConvertedPermissions(permissions, now);
 
     return dao.add(new SlickUser(-1, userID,
         gender.equalsIgnoreCase("male"),
@@ -189,7 +182,26 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
         ));
   }
 
+/*  private void getConvertedPermissions(Collection<User.Permission> permissions, Timestamp now) {
+    List<SlickUserPermission> requested = new ArrayList<>();
+    for (User.Permission permission : permissions) {
+      requested.add(getPendingPermission(now, permission));
+    }
+  }*/
+
+/*  private SlickUserPermission getPendingPermission(Timestamp now, User.Permission permission) {
+    return new SlickUserPermission(-1,
+        beforeLoginUser,
+        beforeLoginUser,
+        permission.toString(),
+        now,
+        User.PermissionStatus.PENDING.toString(),
+        now,
+        beforeLoginUser);
+  }*/
+
   /**
+   * For really old users with missing info
    * @param id
    * @param kind
    * @param passwordH
