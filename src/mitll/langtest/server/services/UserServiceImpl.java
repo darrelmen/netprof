@@ -466,8 +466,9 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @param invite
    */
   @Override
-  public void invite(Invitation invite) {
-    db.getInviteDAO().add(new SlickInvite(-1,
+  public void invite(String url,
+                     Invitation invite) {
+    int inviteID = db.getInviteDAO().add(new SlickInvite(-1,
         invite.getKind().toString(),
         invite.getByuser(),
         new Timestamp(System.currentTimeMillis()),
@@ -475,11 +476,18 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
         "PENDING", db.getUserDAO().getBeforeLoginUser(),
         new Timestamp(0),
 
-        invite.getEmail()));
+        invite.getEmail(),
+        ""));
+
+    String inviteKey = getEmailHelper().getHash(invite.getEmail() + "_" + inviteID);
+    db.getInviteDAO().update(inviteID, inviteKey);
+    User inviter = db.getUserDAO().getByID(invite.getByuser());
 
     // not checking if insert fails -- how could it?
-
-    getEmailHelper().sendConfirmationEmail(email, userID, first, mailSupport);
+    getEmailHelper().sendInviteEmail(url,
+        invite.getEmail(),
+        inviter,
+        invite.getKind(),inviteKey,getMailSupport());
 
   }
 }

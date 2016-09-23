@@ -57,11 +57,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class UserOps implements RequiresResize {
- // private final Logger logger = Logger.getLogger("UserOps");
+  public static final String USERS = "Users";
+  // private final Logger logger = Logger.getLogger("UserOps");
   private final UserManager userManager;
   private final ExerciseController controller;
 
   private final Map<User.Kind, Label> kindToLabel = new HashMap<>();
+  private final Map<String, Label> inviteToLabel = new HashMap<>();
   private final Map<User.Kind, IconType> kindToIcon = new HashMap<>();
 
   /**
@@ -100,13 +102,14 @@ public class UserOps implements RequiresResize {
 
     NavLink first = getKinds(left, right, detail);
 
-
     right.getElement().setId("userContent");
     right.getElement().getStyle().setMarginLeft(10, Style.Unit.PX);
 //    logger.info("Loaded everything...");
 
     showInitialState(right, detail, first);
   }
+
+  private NavLink lastClicked = null;
 
   private void showInitialState(final DivWidget right, final DivWidget detail, NavLink first) {
     final NavLink toClick = first;
@@ -122,18 +125,33 @@ public class UserOps implements RequiresResize {
     });
   }
 
-  private NavLink lastClicked = null;
 
+  /**
+   * @param left
+   * @param right
+   * @param detail
+   * @return
+   * @see #showUsers
+   */
   private NavLink getKinds(DivWidget left, DivWidget right, DivWidget detail) {
     NavList kindsLinks = new NavList();
     kindsLinks.setWidth("180px");
     left.add(kindsLinks);
 
-    kindsLinks.add(new NavHeader("Users"));
-
-    NavLink first = null;
+    // add users ----
+    kindsLinks.add(new NavHeader(USERS));
     User current = controller.getUserState().getCurrent();
     User.Kind loggedInUserRole = current.getUserKind();
+    NavLink first = addRoleLinks(right, detail, kindsLinks, current, loggedInUserRole);
+
+    kindsLinks.add(new NavHeader("Invitations"));
+    kindsLinks.add(getInviteLink(right, detail));
+    return first;
+  }
+
+  private NavLink addRoleLinks(DivWidget right, DivWidget detail, NavList kindsLinks, User current, User.Kind loggedInUserRole) {
+    NavLink first = null;
+
     for (User.Kind kind : User.Kind.values()) {
       if (kind.shouldShow() &&
           (kind.compareTo(loggedInUserRole) < 0 || current.isAdmin())) {
@@ -142,7 +160,6 @@ public class UserOps implements RequiresResize {
         if (first == null) first = userLink;
       }
     }
-
     return first;
   }
 
@@ -172,6 +189,27 @@ public class UserOps implements RequiresResize {
       public void onClick(ClickEvent clickEvent) {
         lastClicked.setActive(false);
         showUsers(kind, content, userForm);
+        students.setActive(true);
+        lastClicked = students;
+      }
+    });
+    return students;
+  }
+
+  private NavLink getInviteLink(DivWidget content, DivWidget pendingInvites) {
+    NavLink students = new NavLink("Pending");
+    students.setIcon(IconType.ENVELOPE);
+    students.getElement().setId("link_" + "pending");
+    Label w5 = new Label("");
+    inviteToLabel.put("pending", w5);
+    w5.getElement().getStyle().setFloat(Style.Float.RIGHT);
+    students.add(w5);
+    students.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent clickEvent) {
+        lastClicked.setActive(false);
+        //showUsers(kind, content, userForm);
+        // showInvitations
         students.setActive(true);
         lastClicked = students;
       }

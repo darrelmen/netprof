@@ -34,10 +34,7 @@ package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.user.LoginResult;
-import mitll.langtest.shared.user.MiniUser;
-import mitll.langtest.shared.user.SignUpUser;
-import mitll.langtest.shared.user.User;
+import mitll.langtest.shared.user.*;
 
 import java.util.Collection;
 import java.util.List;
@@ -45,8 +42,8 @@ import java.util.Map;
 
 public interface UserServiceAsync {
   void getUsers(AsyncCallback<List<User>> async);
-  void getUser(int id,AsyncCallback<User> async);
-//  void deactivate(int id,AsyncCallback<Boolean> async);
+
+  void getUser(int id, AsyncCallback<User> async);
 
   void userExists(String login, String passwordH, AsyncCallback<User> async);
 
@@ -61,7 +58,6 @@ public interface UserServiceAsync {
   void addUser(
       SignUpUser user,
       String url,
-   //   boolean isCD,
       AsyncCallback<User> async);
 
   void resetPassword(String userid, String text, String url, AsyncCallback<Boolean> asyncCallback);
@@ -74,6 +70,13 @@ public interface UserServiceAsync {
 
   void changeEnabledFor(int userid, boolean enabled, AsyncCallback<Void> async);
 
+  /**
+   * @Deprecated - not doing this anymore...
+   * @param cdToken
+   * @param emailR
+   * @param url
+   * @param asyncCallback
+   */
   void enableCDUser(String cdToken, String emailR, String url, AsyncCallback<String> asyncCallback);
 
   /**
@@ -96,5 +99,7 @@ public interface UserServiceAsync {
 
   void update(User user, int changingUser, AsyncCallback<Void> async);
 
-//  void activate(int id, AsyncCallback<Boolean> async);
+  void getPending(User.Kind requestRole, AsyncCallback<Collection<Invitation>> async);
+
+  void invite(String url, Invitation invite, AsyncCallback<Void> async);
 }
