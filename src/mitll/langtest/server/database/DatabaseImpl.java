@@ -68,6 +68,7 @@ import mitll.langtest.server.database.reviewed.IReviewedDAO;
 import mitll.langtest.server.database.reviewed.SlickReviewedDAO;
 import mitll.langtest.server.database.user.*;
 import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
+import mitll.langtest.server.database.userexercise.ExerciseToPhone;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.server.database.userlist.IUserListDAO;
@@ -77,26 +78,20 @@ import mitll.langtest.server.database.userlist.SlickUserListExerciseVisitorDAO;
 import mitll.langtest.server.database.word.IWordDAO;
 import mitll.langtest.server.database.word.SlickWordDAO;
 import mitll.langtest.server.mail.MailSupport;
-import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.ContextPractice;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
-import mitll.langtest.shared.flashcard.AVPHistoryForList;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
-import mitll.langtest.shared.instrumentation.TranscriptSegment;
-import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.result.MonitorResult;
 import mitll.langtest.shared.scoring.AudioContext;
-import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickProject;
-import mitll.npdata.dao.SlickRefResultJson;
 import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
@@ -130,7 +125,6 @@ public class DatabaseImpl implements Database {
   private static final Logger logger = Logger.getLogger(DatabaseImpl.class);
   private static final int LOG_THRESHOLD = 10;
   private static final String UNKNOWN = "unknown";
-  private static final String SIL = "sil";
   public static final int IMPORT_PROJECT_ID = -100;
   private static final boolean ADD_DEFECTS = false;
 
@@ -174,7 +168,7 @@ public class DatabaseImpl implements Database {
   private SimpleExerciseDAO<AmasExerciseImpl> fileExerciseDAO;
   private PathHelper pathHelper;
   private IProjectManagement projectManagement;
-  RecordWordAndPhone recordWordAndPhone;
+  private RecordWordAndPhone recordWordAndPhone;
 
   /**
    * JUST FOR TESTING
@@ -346,43 +340,8 @@ public class DatabaseImpl implements Database {
     }
 
     recordWordAndPhone = new RecordWordAndPhone(wordDAO, phoneDAO);
-
 //    long now = System.currentTimeMillis();
 //    if (now - then > 1000) logger.info("took " + (now - then) + " millis to put back word and phone");
-  }
-
-  /**
-   * @param refResultDAO
-   * @return
-   * @see #initializeDAOs(PathHelper)
-   */
-  private Map<Integer, ExercisePhoneInfo> getExerciseToPhone(IRefResultDAO refResultDAO) {
-    long then = System.currentTimeMillis();
-    List<SlickRefResultJson> jsonResults = refResultDAO.getJsonResults();
-    long now = System.currentTimeMillis();
-    logger.info("took " + (now - then) + " millis to get ref results");
-    Map<Integer, ExercisePhoneInfo> exToPhones = new HashMap<>();
-
-    ParseResultJson parseResultJson = new ParseResultJson(null);
-
-    for (SlickRefResultJson exjson : jsonResults) {
-      Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.parseJson(exjson.scorejson());
-      List<TranscriptSegment> transcriptSegments = netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
-
-      int exid = exjson.exid();
-      ExercisePhoneInfo phonesForEx = exToPhones.get(exid);
-      if (phonesForEx == null) exToPhones.put(exid, phonesForEx = new ExercisePhoneInfo());
-
-      {
-        Set<String> phones = new HashSet<>();
-        for (TranscriptSegment segment : transcriptSegments) phones.add(segment.getEvent());
-        phonesForEx.addPhones(phones);
-      }
-      phonesForEx.setNumPhones(exjson.numalignphones());
-    }
-    logger.info("took " + (System.currentTimeMillis() - then) + " millis to populate ex->phone map");
-
-    return exToPhones;
   }
 
   /**
@@ -557,7 +516,6 @@ public class DatabaseImpl implements Database {
     logger.debug("getExerciseDAO " + projectid + " found project " + project);
     ExerciseDAO<CommonExercise> exerciseDAO = project.getExerciseDAO();
     logger.debug("getExerciseDAO " + projectid + " found exercise dao " + exerciseDAO);
-
     return exerciseDAO;
   }
 
@@ -662,7 +620,7 @@ public class DatabaseImpl implements Database {
 
   private void configureProjects() {
     // TODO : this seems like a bad idea --
-    Map<Integer, ExercisePhoneInfo> exerciseToPhone = getExerciseToPhone(refresultDAO);
+    Map<Integer, ExercisePhoneInfo> exerciseToPhone = new ExerciseToPhone().getExerciseToPhone(refresultDAO);
     userExerciseDAO.setExToPhones(exerciseToPhone);
     projectManagement.configureProjects();
   }
@@ -877,94 +835,14 @@ public class DatabaseImpl implements Database {
                                               int latestResultID,
                                               Collection<Integer> allIDs,
                                               Map<Integer, CollationKey> idToKey) {
-    logger.debug("getUserHistoryForList " + userid + " and " + ids.size() + " ids, latest " + latestResultID);
-
-    SessionsAndScores sessionsAndScores = resultDAO.getSessionsForUserIn2(ids, latestResultID, userid, allIDs, idToKey);
-    List<Session> sessionsForUserIn2 = sessionsAndScores.getSessions();
-
-    Map<Integer, User> userMap = userDAO.getUserMap();
-
-    AVPHistoryForList sessionAVPHistoryForList = new AVPHistoryForList(sessionsForUserIn2, userid, true);
-    AVPHistoryForList sessionAVPHistoryForList2 = new AVPHistoryForList(sessionsForUserIn2, userid, false);
-
-    // sort by correct %
-    Collections.sort(sessionsForUserIn2, new Comparator<Session>() {
-      @Override
-      public int compare(Session o1, Session o2) {
-        float correctPercent = o1.getCorrectPercent();
-        float correctPercent1 = o2.getCorrectPercent();
-        return correctPercent < correctPercent1 ? +1 : correctPercent > correctPercent1 ? -1 :
-            compareTimestamps(o1, o2);
-      }
-    });
-
-    int count = 0;
-    List<AVPHistoryForList.UserScore> scores = new ArrayList<>();
-
-    for (Session session : sessionsForUserIn2) {
-      if (count++ < 10 || session.isLatest()) {
-        scores.add(makeScore(count, userMap, session, true));
-      }
-    }
-
-    logger.debug("getUserHistoryForList correct scores " + scores);
-
-    if (scores.size() == 11) {
-      scores.remove(9);
-    }
-    sessionAVPHistoryForList.setScores(scores);
-
-    Collections.sort(sessionsForUserIn2, new Comparator<Session>() {
-      @Override
-      public int compare(Session o1, Session o2) {
-        return o1.getAvgScore() < o2.getAvgScore() ? +1 : o1.getAvgScore() > o2.getAvgScore() ? -1 : compareTimestamps(o1, o2);
-      }
-    });
-
-    count = 0;
-    scores = new ArrayList<>();
-
-    for (Session session : sessionsForUserIn2) {
-      if (count++ < 10 || session.isLatest()) {
-        scores.add(makeScore(count, userMap, session, false));
-      }
-    }
-    logger.debug("getUserHistoryForList pron    scores " + scores);
-
-    if (scores.size() == 11) {
-      scores.remove(9);
-    }
-
-    sessionAVPHistoryForList2.setScores(scores);
-
-    List<AVPHistoryForList> historyForLists = new ArrayList<>();
-    historyForLists.add(sessionAVPHistoryForList);
-    historyForLists.add(sessionAVPHistoryForList2);
-
-//    logger.debug("returning " + historyForLists);
-//    logger.debug("correct/incorrect history " + sessionsAndScores.sortedResults);
-    return new AVPScoreReport(historyForLists, sessionsAndScores.getSortedResults());
-  }
-
-  private int compareTimestamps(Session o1, Session o2) {
-    return o1.getTimestamp() < o2.getTimestamp() ? +1 : o1.getTimestamp() > o2.getTimestamp() ? -1 : 0;
-  }
-
-  private AVPHistoryForList.UserScore makeScore(int count, Map<Integer, User> userMap, Session session, boolean useCorrect) {
-    float value = useCorrect ? session.getCorrectPercent() : 100f * session.getAvgScore();
-    int userid = session.getUserid();
-    User user = userMap.get(userid);
-    String userID;
-    if (user == null) {
-      logger.warn("huh? couldn't find userid " + userid + " in map with keys " + userMap.keySet());
-      userID = "Default User";
-    } else {
-      userID = user.getUserID();
-    }
-    return new AVPHistoryForList.UserScore(count,
-        userID,
-        value,
-        session.isLatest());
+    return new UserSessionHistory().getUserHistoryForList(userid,
+        userDAO.getByID(userid),
+        ids,
+        latestResultID,
+        allIDs,
+        idToKey,
+        resultDAO
+    );
   }
 
   /**
@@ -1422,7 +1300,10 @@ public class DatabaseImpl implements Database {
    * @throws Exception
    * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
-  public void writeZip(OutputStream out, Map<String, Collection<String>> typeToSection, int projectid, AudioExport.AudioExportOptions options) throws Exception {
+  public void writeZip(OutputStream out,
+                       Map<String, Collection<String>> typeToSection,
+                       int projectid,
+                       AudioExport.AudioExportOptions options) throws Exception {
     Collection<CommonExercise> exercisesForSelectionState = typeToSection.isEmpty() ?
         getExercises(projectid) :
         getSectionHelper(projectid).getExercisesForSelectionState(typeToSection);
@@ -1438,7 +1319,6 @@ public class DatabaseImpl implements Database {
   public String getLanguage(CommonExercise ex) {
     return getLanguage(ex.getProjectID());
   }
-
   public String getLanguage(int projectid) {
     return getProject(projectid).getLanguage();
   }
@@ -1512,7 +1392,6 @@ public class DatabaseImpl implements Database {
     return getAudioDAO().attachAudioToExercise(ex, getLanguage(ex));
   }
 
-
   /**
    * Expensive ?
    *
@@ -1553,6 +1432,12 @@ public class DatabaseImpl implements Database {
     return getUserListManager().getUserListByID(listid, getSectionHelper(projectid).getTypeOrder());
   }
 
+  /**
+   * @see DownloadServlet#getBaseName
+   * @param typeToSection
+   * @param projectid
+   * @return
+   */
   public String getPrefix(Map<String, Collection<String>> typeToSection, int projectid) {
     return new AudioExport(getServerProps()).getPrefix(getSectionHelper(projectid), typeToSection);
   }
@@ -1628,14 +1513,15 @@ public class DatabaseImpl implements Database {
     getAnswerDAO().changeAnswer(resultID, asrScoreForAudio.getHydecScore(), asrScoreForAudio.getProcessDur(), asrScoreForAudio.getJson());
     recordWordAndPhone.recordWordAndPhoneInfo(resultID, asrScoreForAudio);
   }
-/**
- * @param answer
- * @param answerID
- * @see mitll.langtest.server.audio.AudioFileHelper#recordInResults(AudioContext, AnswerInfo.RecordingInfo, AudioCheck.ValidityAndDur, AudioAnswer)
- */
+
+  /**
+   * @param answer
+   * @param answerID
+   * @see mitll.langtest.server.audio.AudioFileHelper#recordInResults(AudioContext, AnswerInfo.RecordingInfo, AudioCheck.ValidityAndDur, AudioAnswer)
+   */
 
   public void recordWordAndPhoneInfo(AudioAnswer answer, long answerID) {
-    recordWordAndPhone.recordWordAndPhoneInfo(answer,answerID);
+    recordWordAndPhone.recordWordAndPhoneInfo(answer, answerID);
   }
 
   /**
