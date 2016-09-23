@@ -44,7 +44,7 @@ import java.util.*;
  */
 public class EmailList {
   // MIT LL
-  private static final String GORDON_VIDAVER = "gordon.vidaver@ll.mit.edu";
+  static final String GORDON_VIDAVER = "gordon.vidaver@ll.mit.edu";
   private static final String DOUG_JONES = "daj@ll.mit.edu";
   static final String RAY_BUDD = "Raymond.Budd@ll.mit.edu";
 
