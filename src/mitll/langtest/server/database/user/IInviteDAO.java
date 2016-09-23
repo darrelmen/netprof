@@ -37,7 +37,9 @@ import mitll.npdata.dao.SlickInvite;
 import java.util.Collection;
 
 public interface IInviteDAO {
-  void add(SlickInvite invite);
+  int add(SlickInvite invite);
+
+  void update(int id, String key);
 
   Collection<SlickInvite> getPending();
 }
