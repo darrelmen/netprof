@@ -49,6 +49,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import static mitll.langtest.shared.user.User.Kind;
+
 @RemoteServiceRelativePath("user-manager")
 public interface UserService extends RemoteService {
   // User Management --
@@ -138,9 +140,7 @@ public interface UserService extends RemoteService {
 
   void update(User user, int changingUser);
 
-  Collection<Invitation> getPending(User.Kind requestRole);
+  Collection<Invitation> getPending(Kind requestRole);
 
-  void invite(Invitation invite);
-//  boolean deactivate(int id);
-//  boolean activate(int id);
+  void invite(String url, Invitation invite);
 }
