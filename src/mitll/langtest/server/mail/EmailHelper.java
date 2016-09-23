@@ -85,7 +85,7 @@ public class EmailHelper {
     REPLY_TO = "admin@" + NP_SERVER;
   }
 
-  private String getHash(String toHash) {
+  public String getHash(String toHash) {
     return StringUtils.toHexString(Md5Utils.getMd5Digest(toHash.getBytes()));
   }
 
@@ -362,11 +362,22 @@ public class EmailHelper {
         CLOSING;
   }
 
-  private void sendInviteEmail(String url,
+  /**
+   * So the first part in the url is the desired role, the second is the lookup key for the invitation
+   *
+   * @param url
+   * @param email
+   * @param inviter
+   * @param atRole
+   * @param inviteKey
+   * @param mailSupport
+   */
+  public void sendInviteEmail(String url,
                                String email,
                                User inviter,
                                User.Kind atRole,
-                               int inviteID,
+                              // int inviteID,
+                               String inviteKey,
                                MailSupport mailSupport) {
     url = trimURL(url);
     String hash = getHash(atRole.toString());
@@ -375,7 +386,7 @@ public class EmailHelper {
         "k" +
         "=" + hash + "&" +  // content developer token
         "i" +
-        "=" + getHash(email + "_" + inviteID);
+        "=" + inviteKey;//getHash(email + "_" + inviteID);
 
     String message = getInvitation(inviter.getFullName());
 
@@ -385,8 +396,8 @@ public class EmailHelper {
         NETPROF_HELP_DLIFLC_EDU,
         "Invitation to NetProF from " + inviter.getFullName(),
         message,
-        "Click to approve", // link text
-        Collections.singleton(EmailList.RAY_BUDD));
+        "Click to sign up", // link text
+        Collections.singleton(EmailList.GORDON_VIDAVER));
   }
 
   private String getInvitation(String inviterFullName) {

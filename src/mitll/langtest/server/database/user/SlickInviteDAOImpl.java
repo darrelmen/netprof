@@ -70,9 +70,11 @@ public class SlickInviteDAOImpl extends DAO implements IInviteDAO {
    * @return
    */
   @Override
-  public void add(SlickInvite invite) {
-    dao.add(invite);
+  public int add(SlickInvite invite) {
+    return dao.add(invite);
   }
+
+  public void update(int id, String key) { dao.update(id,key);}
 
   @Override
   public Collection<SlickInvite> getPending() {
