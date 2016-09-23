@@ -46,7 +46,8 @@ public class TranscriptSegment implements IsSerializable {
   private String event;                 /// Text to be displayed per event
   private float score;                  /// posterior score
 
-  public TranscriptSegment() {}
+  public TranscriptSegment() {
+  }
 
   /**
    * Constructor
@@ -72,8 +73,13 @@ public class TranscriptSegment implements IsSerializable {
     return end;
   }
 
+  public int getDuration() {
+    return Math.round(end * 1000 - start * 1000);
+  }
+
   /**
    * Event could be a word or a phone, generally.
+   *
    * @return
    */
   public String getEvent() {
@@ -83,9 +89,11 @@ public class TranscriptSegment implements IsSerializable {
   public float getScore() {
     return score;
   }
+
   private float roundToHundredth(float totalHours) {
     return ((float) ((Math.round(totalHours * 100d)))) / 100f;
   }
+
   public String toString() {
     return "[" + roundToHundredth(start) + "-" + roundToHundredth(end) + "] " + event + " (" + roundToHundredth(score) + ")";
   }
