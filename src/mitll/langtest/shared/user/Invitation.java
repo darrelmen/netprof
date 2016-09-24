@@ -40,15 +40,15 @@ public class Invitation implements IsSerializable {
   private long modified;
   private String email;
 
+  public Invitation() {
+
+  }
+
   public Invitation(User.Kind kind, int byuser, long modified, String email) {
     this.kind = kind;
     this.byuser = byuser;
     this.modified = modified;
     this.email = email;
-  }
-
-  public Invitation() {
-
   }
 
   public User.Kind getKind() {

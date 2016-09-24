@@ -99,7 +99,10 @@ public class UserManager {
     this.appTitle = props.getAppTitle();
   }
 
-  public UserServiceAsync getUserService() { return userServiceAsync; }
+  public UserServiceAsync getUserService() {
+    return userServiceAsync;
+  }
+
   /**
    * Keeping option to do an anonymous login...
    * for egyptian class and headstart?
@@ -537,7 +540,7 @@ public class UserManager {
 
       @Override
       public void onSuccess(Map<User.Kind, Integer> kindIntegerMap) {
-        logger.info("got back " +kindIntegerMap);
+        logger.info("got back " + kindIntegerMap);
 
         for (Map.Entry<User.Kind, Label> pair : kindToLabel.entrySet()) {
           Integer count = kindIntegerMap.get(pair.getKey());
@@ -549,5 +552,29 @@ public class UserManager {
         }
       }
     });
+  }
+
+  public void getInvitationCounts(Map<String, Label> kindToLabel) {
+    userServiceAsync.getInvitationCounts(current.getUserKind(),
+        new AsyncCallback<Map<String, Integer>>() {
+          @Override
+          public void onFailure(Throwable throwable) {
+
+          }
+
+          @Override
+          public void onSuccess(Map<String, Integer> kindIntegerMap) {
+            logger.info("got back " + kindIntegerMap);
+
+            for (Map.Entry<String, Label> pair : kindToLabel.entrySet()) {
+              Integer count = kindIntegerMap.get(pair.getKey());
+              if (count != null) {
+                pair.getValue().setText("" + count);
+              } else {
+                pair.getValue().setText("0");
+              }
+            }
+          }
+        });
   }
 }
