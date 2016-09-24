@@ -140,7 +140,9 @@ public interface UserService extends RemoteService {
 
   void update(User user, int changingUser);
 
-  Collection<Invitation> getPending(Kind requestRole);
+  Collection<Invitation> getPending(User.Kind requestRole);
 
   void invite(String url, Invitation invite);
+
+  Map<String, Integer> getInvitationCounts(User.Kind requestRole);
 }

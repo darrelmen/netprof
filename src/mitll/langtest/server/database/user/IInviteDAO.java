@@ -32,9 +32,11 @@
 
 package mitll.langtest.server.database.user;
 
+import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickInvite;
 
 import java.util.Collection;
+import java.util.Map;
 
 public interface IInviteDAO {
   int add(SlickInvite invite);
@@ -42,4 +44,6 @@ public interface IInviteDAO {
   void update(int id, String key);
 
   Collection<SlickInvite> getPending();
+
+  Map<String,Integer> getInvitationCounts(User.Kind requestRole);
 }
