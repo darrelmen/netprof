@@ -32,6 +32,7 @@
 
 package mitll.langtest.client.userops;
 
+import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.NavHeader;
 import com.github.gwtbootstrap.client.ui.NavLink;
 import com.github.gwtbootstrap.client.ui.NavList;
@@ -41,13 +42,16 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RequiresResize;
 import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.custom.tabs.TabAndContent;
+import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.user.UserManager;
+import mitll.langtest.shared.user.Invitation;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 
@@ -124,7 +128,6 @@ public class UserOps implements RequiresResize {
       }
     });
   }
-
 
   /**
    * @param left
@@ -209,7 +212,7 @@ public class UserOps implements RequiresResize {
       public void onClick(ClickEvent clickEvent) {
         lastClicked.setActive(false);
         //showUsers(kind, content, userForm);
-        // showInvitations
+        showInvitations(true, content);
         students.setActive(true);
         lastClicked = students;
       }
@@ -229,8 +232,15 @@ public class UserOps implements RequiresResize {
     showUsers(currentKind, currentContent, currentUserForm);
   }
 
+  /**
+   * Talk to the service.
+   *
+   * @param kind
+   * @param content
+   * @param userForm
+   * @see
+   */
   private void showUsers(final User.Kind kind, final DivWidget content, DivWidget userForm) {
-
     userManager.getUserService().getKindToUser(new AsyncCallback<Map<User.Kind, Collection<MiniUser>>>() {
       @Override
       public void onFailure(Throwable throwable) {
@@ -255,6 +265,57 @@ public class UserOps implements RequiresResize {
         });
       }
     });
+  }
+
+  /**
+   * Invites are sent to recipient email, then they click on a link taking them to an invite sign up page
+   * when they sign up, the invitation gets marked accepted, and the new user id is marked on the invitation.
+   * <p>
+   * Either pending or accepted
+   *
+   * @param pending
+   */
+  private void showInvitations(boolean pending, final DivWidget content) {
+    userManager.getUserService().getPending(
+        userManager.getCurrent().getUserKind(),
+        new AsyncCallback<Collection<Invitation>>() {
+          @Override
+          public void onFailure(Throwable throwable) {
+
+          }
+
+          @Override
+          public void onSuccess(Collection<Invitation> invitations) {
+            userManager.getInvitationCounts(inviteToLabel);
+            content.clear();
+            Button w = new Button("Invite New User", IconType.ENVELOPE);
+            w.addClickHandler(new ClickHandler() {
+              @Override
+              public void onClick(ClickEvent clickEvent) {
+
+                User.Kind inviteRole = User.Kind.STUDENT;
+
+                String inviteEmail = "gordon.vidaver@ll.mit.edu";
+
+                userManager.getUserService().invite(Window.Location.getHref(),
+                    new Invitation(inviteRole,
+                        userManager.getUser(), System.currentTimeMillis(), inviteEmail),
+                    new AsyncCallback<Void>() {
+                      @Override
+                      public void onFailure(Throwable throwable) {
+
+                      }
+
+                      @Override
+                      public void onSuccess(Void aVoid) {
+                        new ModalInfoDialog("Success!", "User invited!");
+                      }
+                    });
+              }
+            });
+            content.add(w);
+          }
+        });
   }
 
   private RequiresResize requiresResize = null;
