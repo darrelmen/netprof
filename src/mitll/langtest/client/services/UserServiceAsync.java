@@ -95,6 +95,8 @@ public interface UserServiceAsync {
 
   void getCounts(AsyncCallback<Map<User.Kind, Integer>> async);
 
+  void getInvitationCounts(User.Kind requestRole, AsyncCallback<Map<String, Integer>> async);
+
   void getKindToUser(AsyncCallback<Map<User.Kind, Collection<MiniUser>>> async);
 
   void update(User user, int changingUser, AsyncCallback<Void> async);
