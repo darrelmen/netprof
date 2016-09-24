@@ -700,6 +700,7 @@ public class InitialUI implements UILifecycle {
    * @param firstRow
    * @param cdToken
    * @param emailR
+   * @deprecated
    */
   private void handleCDToken(final Container verticalContainer, final Panel firstRow, final String cdToken, String emailR) {
     logger.info("enabling token " + cdToken + " for email " + emailR);
