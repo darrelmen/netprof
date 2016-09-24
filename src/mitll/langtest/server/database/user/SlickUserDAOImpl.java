@@ -509,7 +509,6 @@ public class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
   //  logger.info("update " + toUpdate);
     SlickUser toUpdate1 = toSlick(toUpdate, true);
   //  logger.info("update " + toUpdate1);
-
     int update = dao.update(toUpdate1);
     if (update == 0) {
       logger.warn("didn't update table with " + toUpdate1);

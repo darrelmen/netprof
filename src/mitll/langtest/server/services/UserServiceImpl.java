@@ -259,6 +259,10 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     return db.getUserDAO().getCounts();
   }
 
+  public Map<String, Integer> getInvitationCounts(User.Kind requestRole) {
+    return db.getInviteDAO().getInvitationCounts(requestRole);
+  }
+
   @Override
   public Map<User.Kind, Collection<MiniUser>> getKindToUser() {
     return db.getUserDAO().getMiniByKind();

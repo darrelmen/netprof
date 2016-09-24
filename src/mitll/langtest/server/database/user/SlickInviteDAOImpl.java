@@ -35,12 +35,15 @@ package mitll.langtest.server.database.user;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickInvite;
 import mitll.npdata.dao.user.InviteDAOWrapper;
 import org.apache.log4j.Logger;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SlickInviteDAOImpl extends DAO implements IInviteDAO {
   private static final Logger logger = Logger.getLogger(SlickInviteDAOImpl.class);
@@ -63,6 +66,26 @@ public class SlickInviteDAOImpl extends DAO implements IInviteDAO {
   @Override
   public String getName() {
     return dao.dao().name();
+  }
+
+  public Map<String, Integer> getInvitationCounts(User.Kind requestRole) {
+    Collection<SlickInvite> all = dao.all();
+
+    Map<String,Integer> typeToCount = new HashMap<>();
+    for (SlickInvite invite:all) {
+      User.Kind kind = getKind(invite.kind());
+      if ((kind.compareTo(requestRole)<0)){
+        String state = invite.state();
+        Integer integer = typeToCount.get(state);
+        typeToCount.put(state,integer==null?0:integer+1);
+      }
+    }
+
+    return typeToCount;
+  }
+
+  private User.Kind getKind(String key) {
+    return User.Kind.valueOf(key);
   }
 
   /**
