@@ -39,35 +39,55 @@ import mitll.langtest.client.custom.KeyStorage;
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 2/11/14.
-*/
+ */
 public class ControlState {
   private static final String SHOW_STATE = "showState";
   private static final String AUDIO_ON = "audioOn";
   private static final String AUDIO_FEEDBACK_ON = "audioFeedbackOn";
   private static final String SHUFFLE_ON = "shuffleOn";
   private static final String TRUE_VALUE = Boolean.TRUE.toString();
+  public static final String ENGLISH = "english";
+  public static final String FOREIGN = "foreign";
+  static final String BOTH = "both";
+  public static final String AUTO_PLAY = "autoPlay";
   private static int count = 0;
+
   private boolean audioOn = true;
   private boolean audioFeedbackOn = true;
   private boolean shuffleOn = false;
-  public static final String ENGLISH = "english";
-  public static final String FOREIGN = "foreign";
-  public static final String BOTH = "both";
+  private boolean autoPlay = false;
   private String showState = BOTH; // english/foreign/both - default
 
   private KeyStorage storage = null;
   private final int id;
 
-  public ControlState() { id = count++;}
-  public boolean showEnglish() { return showState.equals(ENGLISH) || showState.equals(BOTH);}
-  public boolean showForeign() { return showState.equals(FOREIGN) || showState.equals(BOTH);}
-  public boolean showBoth() { return  showState.equals(BOTH);}
-  public boolean isEnglish() { return showState.equals(ENGLISH);}
-  public boolean isForeign() { return showState.equals(FOREIGN);}
+  public ControlState() {
+    id = count++;
+  }
+
+  boolean showEnglish() {
+    return showState.equals(ENGLISH) || showState.equals(BOTH);
+  }
+
+  boolean showForeign() {
+    return showState.equals(FOREIGN) || showState.equals(BOTH);
+  }
+
+  boolean showBoth() {
+    return showState.equals(BOTH);
+  }
+
+  public boolean isEnglish() {
+    return showState.equals(ENGLISH);
+  }
+
+  public boolean isForeign() {
+    return showState.equals(FOREIGN);
+  }
 
   /**
-   * @see StatsFlashcardFactory#StatsFlashcardFactory(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, String, mitll.langtest.shared.custom.UserList)
    * @param storage
+   * @see StatsFlashcardFactory#StatsFlashcardFactory(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, String, mitll.langtest.shared.custom.UserList)
    */
   public void setStorage(KeyStorage storage) {
     this.storage = storage;
@@ -77,14 +97,14 @@ public class ControlState {
     else if (showState1.equals(BOTH)) showState = BOTH;
     else if (showState1.equals(ENGLISH)) showState = ENGLISH;
 
-    String audioOnKey = storage.getValue(AUDIO_ON);
-    audioOn = audioOnKey.equalsIgnoreCase(TRUE_VALUE);
+    audioOn = getValue(AUDIO_ON);
+    audioFeedbackOn = getValue(AUDIO_FEEDBACK_ON);
+    shuffleOn = getValue(SHUFFLE_ON);
+    autoPlay = getValue(AUTO_PLAY);
+  }
 
-    String audioFeedbackOnKey = storage.getValue(AUDIO_FEEDBACK_ON);
-    audioFeedbackOn = audioFeedbackOnKey.equalsIgnoreCase(TRUE_VALUE);
-
-    String shuffleOnKey = storage.getValue(SHUFFLE_ON);
-    shuffleOn = shuffleOnKey.equalsIgnoreCase(TRUE_VALUE);
+  private boolean getValue(String audioOn) {
+    return storage.getValue(audioOn).equalsIgnoreCase(TRUE_VALUE);
   }
 
   public void setAudioOn(boolean audioOn) {
@@ -97,14 +117,23 @@ public class ControlState {
     storeValue(AUDIO_FEEDBACK_ON, audioFeedbackOn);
   }
 
-  public void setSuffleOn(boolean shuffleOn) {
+  void setSuffleOn(boolean shuffleOn) {
     this.shuffleOn = shuffleOn;
-    storeValue(SHUFFLE_ON,shuffleOn);
+    storeValue(SHUFFLE_ON, shuffleOn);
   }
 
-  public void setShowState(String showState) {
+  void setShowState(String showState) {
     this.showState = showState;
     if (storage != null) storage.storeValue(SHOW_STATE, showState);
+  }
+
+  /**
+   * @param autoPlay
+   * @see FlashcardPanel#getAutoPlayButton
+   */
+  void setAutoPlayOn(boolean autoPlay) {
+    this.autoPlay = autoPlay;
+    storeValue(AUTO_PLAY, autoPlay);
   }
 
   private void storeValue(String slot, boolean shuffleOn) {
@@ -112,20 +141,33 @@ public class ControlState {
       storage.storeValue(slot, Boolean.toString(shuffleOn));
     }
   }
-/*
 
-  public String getShowState() {
-    return showState;
-  }
-*/
-
-  public boolean isAudioOn() {
+  boolean isAudioOn() {
     return audioOn;
   }
-  public boolean isAudioFeedbackOn() { return audioFeedbackOn;  }
-  public boolean isShuffle() { return shuffleOn;  }
+
+  boolean isAudioFeedbackOn() {
+    return audioFeedbackOn;
+  }
+
+  /**
+   * @return
+   * @see FlashcardPanel#getRightColumn(ControlState)
+   */
+  boolean isShuffle() {
+    return shuffleOn;
+  }
+
+  boolean isAutoPlay() {
+    return autoPlay;
+  }
 
   public String toString() {
-    return "ControlState : id " + id + " audio " + audioOn + " show " + showState + " shuffle " + shuffleOn;
+    return "ControlState :" +
+        " id " + id +
+        " audio " + audioOn +
+        " show " + showState +
+        " shuffle " + shuffleOn +
+        " auto play " + autoPlay;
   }
 }
