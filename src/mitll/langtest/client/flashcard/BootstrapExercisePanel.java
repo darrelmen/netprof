@@ -101,14 +101,14 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
    * @param exerciseList
    * @see StatsFlashcardFactory.StatsPracticePanel#StatsPracticePanel
    */
-  public BootstrapExercisePanel(final T e,
-                                final LangTestDatabaseAsync service,
-                                final ExerciseController controller,
-                                boolean addKeyBinding,
-                                final ControlState controlState,
-                                MySoundFeedback soundFeedback,
-                                SoundFeedback.EndListener endListener,
-                                String instance, ListInterface exerciseList) {
+  BootstrapExercisePanel(final T e,
+                         final LangTestDatabaseAsync service,
+                         final ExerciseController controller,
+                         boolean addKeyBinding,
+                         final ControlState controlState,
+                         MySoundFeedback soundFeedback,
+                         SoundFeedback.EndListener endListener,
+                         String instance, ListInterface exerciseList) {
     super(e, service, controller, addKeyBinding, controlState, soundFeedback, endListener, instance, exerciseList);
   }
 
@@ -132,6 +132,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
       @Override
       public void onClick(ClickEvent event) {
         controlState.setAudioFeedbackOn(true);
+        setAutoPlay(false);
         //logger.info("now on " + controlState);
       }
     });
@@ -143,6 +144,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
       @Override
       public void onClick(ClickEvent event) {
         controlState.setAudioFeedbackOn(false);
+        setAutoPlay(false);
         //logger.info("now off " + controlState);
       }
     });
@@ -180,11 +182,9 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
     if (logger == null) {
       logger = Logger.getLogger("BootstrapExercisePanel");
     }
-    //  logger.info("called  addRecordingAndFeedbackWidgets ");
+    // logger.info("called  addRecordingAndFeedbackWidgets ");
     // add answer widget to do the recording
-    //  String exerciseID = exerciseID.getID();
-    Widget answerAndRecordButtonRow = getAnswerAndRecordButtonRow(exerciseID, service, controller);
-    toAddTo.add(answerAndRecordButtonRow);
+    toAddTo.add(getAnswerAndRecordButtonRow(exerciseID, service, controller));
 
     if (controller.getProps().showFlashcardAnswer()) {
       toAddTo.add(getRecoOutputRow());
@@ -304,6 +304,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
           protected void start() {
             controller.logEvent(this, AVP_RECORD_BUTTON, exerciseID, "Start_Recording");
             super.start();
+            setAutoPlay(false);
             recordingStarted();
           }
 
@@ -517,13 +518,12 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
         String path = getRefAudioToPlay();
         if (path == null) {
           playIncorrect(); // this should never happen
-        } else if (!preventFutureTimerUse) {
-          playRefAndGoToNext(path);
+        } else if (isTimerNotRunning()) {
+          playRefAndGoToNext(path, 0, false);
         }
       } else {
         playIncorrect();
-        int delay = 1000;
-        goToNextAfter(delay);
+        goToNextAfter(1000);
       }
     } else {
       tryAgain();
@@ -541,6 +541,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
     return correctPrompt;
   }
 
+
   private void showOtherText() {
     if (controlState.isEnglish()) showForeign();
     else if (controlState.isForeign()) showEnglish();
@@ -557,25 +558,59 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
 
   /**
    * @param path
+   * @param delayMillis
+   * @param useCheck
    * @paramx correctPrompt
    * @see #showIncorrectFeedback
    */
-  private void playRefAndGoToNext(String path) {
+  protected void playRefAndGoToNext(String path, final int delayMillis, boolean useCheck) {
     getSoundFeedback().queueSong(getPath(path), new SoundFeedback.EndListener() {
       @Override
       public void songStarted() {
         Widget widget = isSiteEnglish() ? english : foreign;
-        widget.addStyleName(PLAYING_AUDIO_HIGHLIGHT);
-        endListener.songStarted();
+        addPlayingHighlight(widget);
+        if (endListener != null) endListener.songStarted();
       }
 
       @Override
       public void songEnded() {
-        endListener.songEnded();
-        // removePlayingHighlight(textWidget);
-        loadNext();
+        if (endListener != null) endListener.songEnded();
+        cancelTimer();
+        if (isTabVisible()) {
+          //logger.info("songEnded : loadNextOnTimer " + delayMillis + " for " + path);
+          if (delayMillis > 0) {
+            if (useCheck) {
+              checkThenLoadNextOnTimer(delayMillis);
+            } else {
+              loadNextOnTimer(delayMillis);
+            }
+          } else {
+            loadNext();
+          }
+        }
+        else {
+         // logger.info("songEnded : tab not visible! ");
+          setAutoPlay(false);
+         // abortPlayback();
+        }
+
       }
     });
+  }
+
+  protected void abortPlayback() {
+
+  }
+
+  protected void checkThenLoadNextOnTimer(int delayMillis) {
+    if (controlState.isAutoPlay()) {
+      logger.info("checkThenLoadNextOnTimer " + delayMillis);
+      boolean b = loadNextOnTimer(delayMillis);
+    }
+    else {
+      logger.info("checkThenLoadNextOnTimer NOT AUTO PLAY " + delayMillis);
+
+    }
   }
 
   /**
@@ -583,6 +618,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#recordingStarted()
    */
   void removePlayingHighlight() {
+    //logger.info("removePlayingHighlight - ");
     removePlayingHighlight(isSiteEnglish() ? english : foreign);
   }
 
@@ -598,10 +634,13 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
         initRecordButton();
       }
     };
-    int incorrectDelay = DELAY_MILLIS_LONG;
-    t.schedule(incorrectDelay);
+    t.schedule(DELAY_MILLIS_LONG);
   }
 
+  /**
+   * @param delay
+   * @see #showIncorrectFeedback(AudioAnswer, double, boolean, String)
+   */
   private void goToNextAfter(int delay) {
     loadNextOnTimer(controller.getProps().isDemoMode() ? LONG_DELAY_MILLIS : delay);
   }
@@ -654,6 +693,8 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
 
       if (correct) {
         // go to next item
+        logger.info("Bootstrap nextAfterDelay " + correct);
+
         loadNextOnTimer(100);//DELAY_MILLIS);
       } else {
         initRecordButton();
@@ -668,34 +709,45 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
    * @see #nextAfterDelay(boolean, String)
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#nextAfterDelay(boolean, String)
    */
-  void loadNextOnTimer(final int delay) {
+  boolean loadNextOnTimer(final int delay) {
     //logger.info("loadNextOnTimer ----> load next on " + delay);
-
-    if (!preventFutureTimerUse) {
+    if (isTimerNotRunning()) {
       //if (delay > 100) {
       //  logger.info("loadNextOnTimer ----> load next on " + delay);
       // }
-      Timer t = new Timer() {
+      logger.info("loadNextOnTimer ----> load next on " + delay);
+      currentTimer = new Timer() {
         @Override
         public void run() {
-          currentTimer = null;
+          //    currentTimer = null;
           loadNext();
         }
       };
-      currentTimer = t;
-      t.schedule(delay);
-    } //else {
-    //logger.info("\n\n\n----> ignoring next ");
-    //}
+      // currentTimer = t;
+      currentTimer.schedule(delay);
+      return true;
+    } else {
+      logger.info("loadNextOnTimer ----> ignoring next current timer is running");
+      return false;
+      //preventFutureTimerUse = false;
+    }
   }
 
-  private boolean preventFutureTimerUse = false;
+  private boolean isTimerNotRunning() {
+    return (currentTimer == null) || !currentTimer.isRunning();
+  }
 
+  /**
+   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#abortPlayback
+   */
   void cancelTimer() {
+    logger.info("cancelTimer ----> ");
     removePlayingHighlight();
 
-    preventFutureTimerUse = true;
-    if (currentTimer != null) currentTimer.cancel();
+    if (currentTimer != null) {
+//      logger.info("\tcancelTimer ----> ");
+      currentTimer.cancel();
+    }
   }
 
   private void initRecordButton() {
