@@ -47,6 +47,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
+import mitll.langtest.client.InitialUI;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.custom.TooltipHelper;
@@ -82,7 +83,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
 
   static final int DELAY_MILLIS = 1000;
 
-  static final String ON  = "On";
+  static final String ON = "On";
   static final String OFF = "Off";
 
   /**
@@ -112,6 +113,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
   private final DivWidget prevNextRow;
   final LangTestDatabaseAsync service;
   boolean showOnlyEnglish = false;
+  private Button autoPlay;
 
   /**
    * @param e
@@ -123,12 +125,15 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
    * @param exerciseList
    * @see ExercisePanelFactory#getExercisePanel(mitll.langtest.shared.exercise.Shell)
    */
-  public FlashcardPanel(final T e, final LangTestDatabaseAsync service,
-                        final ExerciseController controller, boolean addKeyBinding,
-                        final ControlState controlState,
-                        MySoundFeedback soundFeedback,
-                        SoundFeedback.EndListener endListener,
-                        String instance, ListInterface exerciseList) {
+  FlashcardPanel(final T e,
+                 final LangTestDatabaseAsync service,
+                 final ExerciseController controller,
+                 boolean addKeyBinding,
+                 final ControlState controlState,
+                 MySoundFeedback soundFeedback,
+                 SoundFeedback.EndListener endListener,
+                 String instance,
+                 ListInterface exerciseList) {
     this.addKeyBinding = addKeyBinding;
     this.exercise = e;
     this.controller = controller;
@@ -184,9 +189,47 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
     addPrevNextWidgets(prevNextRow);
 
     addRowBelowPrevNext(lowestRow);
-    if (controlState.isAudioOn() && mainContainer.isVisible() && !isHidden(foreign)) {
-      playRef();
+
+    Scheduler.get().scheduleDeferred(new Command() {
+      public void execute() {
+        maybePlayRef(controlState);
+      }
+    });
+  }
+
+  private void maybePlayRef(ControlState controlState) {
+    logger.info("maybePlayRef --- ");
+    if (controlState.isAudioOn() && isTabVisible()) {
+      if (!controlState.isAutoPlay()) {
+        logger.info("audio on, so playing ref");
+        playRef();
+      } else {
+        logger.info("auto advance on, so not playing ref here");
+      }
     }
+    else {
+      logger.info("tab not visible - so no audio.");
+    }
+  }
+
+  boolean isTabVisible() {
+    return mainContainer.isVisible() && !isHidden(foreign) && isVisible(mainContainer);
+  }
+
+  public boolean isVisible(Widget w) {
+    while (w.getElement().hasParentElement()) {
+     // String display = w.getElement().getStyle().getDisplay();
+     // logger.info("isVisible check " + w.getElement().getId() + " vis " +w.isVisible() + " display " + display);
+      if (/*!w.isVisible() || display.equals("none") ||*/ w.getOffsetWidth() == 0) {
+        logger.info("isVisible check " + w.getElement().getId() + " vis " +w.isVisible() + " offset width " + w.getOffsetWidth());
+        return false;
+      } else if (w.getElement().getId().equals(InitialUI.ROOT_VERTICAL_CONTAINER)) {
+        return true;
+      }
+      w = w.getParent();
+    }
+//    logger.info("\tisVisible check " + w.getElement().getId());
+    return w.isVisible();
   }
 
   private CommentBox commentBox;
@@ -344,12 +387,24 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
       @Override
       public void onClick(ClickEvent event) {
         boolean englishHidden = isHidden(english);
-
+        setAutoPlay(false);
         controller.logEvent(contentMiddle, "flashcard_itself", exercise, "flip card to show " + (englishHidden ? " english" : getLanguage()));
         flipCard();
       }
     });
     return contentMiddle;
+  }
+
+  void setAutoPlay(boolean b) {
+    if (!b) {
+      autoPlay.setActive(false);
+      controlState.setAutoPlayOn(false);
+      logger.info("setAutoPlay false");
+      cancelTimer();
+    }
+  }
+
+  void cancelTimer() {
   }
 
   void flipCard() {
@@ -367,15 +422,12 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
 
   private void toggleVisibility(Widget english) {
     Style style = english.getElement().getStyle();
-    String visibility = style.getVisibility();
-    boolean hidden = visibility.equals("hidden");
+    boolean hidden = style.getVisibility().equals("hidden");
     style.setVisibility(hidden ? Style.Visibility.VISIBLE : Style.Visibility.HIDDEN);
   }
 
   private boolean isHidden(Widget english) {
-    Style style = english.getElement().getStyle();
-    String visibility = style.getVisibility();
-    return visibility.equals("hidden");
+    return english.getElement().getStyle().getVisibility().equals("hidden");
   }
 
   void setMainContentVisible(boolean vis) {
@@ -397,6 +449,19 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
 
     Widget feedbackGroup = getFeedbackGroup(controlState);
     if (feedbackGroup != null) rightColumn.add(feedbackGroup);
+
+    rightColumn.add(getShuffleButton(controlState));
+    rightColumn.add(autoPlay = getAutoPlayButton(controlState));
+
+    // Heading child = new Heading(6, "<i>Use arrow keys to advance or flip.</i>");
+    Widget child = new HTML(ARROW_KEY_TIP);
+    child.getElement().getStyle().setMarginTop(25, Style.Unit.PX);
+    rightColumn.add(child);
+    rightColumn.addStyleName("leftTenMargin");
+    return rightColumn;
+  }
+
+  private Button getShuffleButton(final ControlState controlState) {
     final Button shuffle = new Button(SHUFFLE);
     shuffle.setToggle(true);
     shuffle.setIcon(IconType.RANDOM);
@@ -409,15 +474,35 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
       }
     });
     shuffle.setActive(controlState.isShuffle());
+    return shuffle;
+  }
 
-    rightColumn.add(shuffle);
+  /**
+   * @param controlState
+   * @return
+   * @see #getRightColumn
+   */
+  private Button getAutoPlayButton(final ControlState controlState) {
+    final Button autoPlay = new Button("Auto");
+    autoPlay.addStyleName("topFiveMargin");
+    autoPlay.setToggle(true);
+    autoPlay.setIcon(IconType.PLAY);
 
-    // Heading child = new Heading(6, "<i>Use arrow keys to advance or flip.</i>");
-    Widget child = new HTML(ARROW_KEY_TIP);
-    child.getElement().getStyle().setMarginTop(25, Style.Unit.PX);
-    rightColumn.add(child);
-    rightColumn.addStyleName("leftTenMargin");
-    return rightColumn;
+    // logger.info("auto play state " + controlState.isAutoPlay());
+
+    autoPlay.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        boolean shuffleOn = !autoPlay.isToggled();
+        controlState.setAutoPlayOn(shuffleOn);
+        gotAutoPlay(shuffleOn);
+      }
+    });
+    autoPlay.setActive(controlState.isAutoPlay());
+
+    // logger.info("auto play active " + autoPlay.isActive());
+
+    return autoPlay;
   }
 
   Widget getFeedbackGroup(ControlState controlState) {
@@ -426,6 +511,10 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
 
   void gotShuffleClick(boolean b) {
     exerciseList.setShuffle(b);
+  }
+
+  void gotAutoPlay(boolean b) {
+    // exerciseList.setAutoPlay(b);
   }
 
   Panel getLeftState() {
@@ -461,9 +550,9 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
     left.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
+        //setAutoPlay(false);
         left.setEnabled(false);
         exerciseList.loadPrev();
-
       }
     });
     return left;
@@ -497,6 +586,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
     right.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
+        //setAutoPlay(false);
         right.setEnabled(false);
         gotClickOnNext();
       }
@@ -557,6 +647,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
     onButton.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
+        setAutoPlay(false);
         if (!controlState.isAudioOn()) {
           playRefLater();
         }
@@ -573,6 +664,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
     offButton.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
+        setAutoPlay(false);
         controlState.setAudioOn(false);
       }
     });
@@ -614,8 +706,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
       both.setActive(false);
       showEnglish.setActive(false);
       return true;
-    }
-    else {
+    } else {
       return false;
     }
     //showForeign(controlState);
@@ -637,7 +728,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
     return onButton;
   }
 
-  protected void showForeign(ControlState controlState) {
+  private void showForeign(ControlState controlState) {
     if (!controlState.isForeign()) {
       controlState.setShowState(ControlState.FOREIGN);
       showEnglishOrForeign();
@@ -808,6 +899,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
       @Override
       public void onClick(ClickEvent event) {
         // System.out.println("---> click on audio playback panel...");
+        setAutoPlay(false);
         playRefLater();
         event.getNativeEvent().stopPropagation();
       }
@@ -914,25 +1006,38 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
    * @see #playRef()
    */
   private void playRef(String path) {
-    //  System.out.println("playRef... ---------- " + exercise.getID() + " path " + path );
+    logger.info("playRef ---------- " + exercise.getID() + " path " + path);
     path = getPath(path);
+    final String outer = path;
     final Widget textWidget = foreign;//() ? english : foreign;
-    getSoundFeedback().queueSong(path, new SoundFeedback.EndListener() {
-      @Override
-      public void songStarted() {
-        textWidget.addStyleName(PLAYING_AUDIO_HIGHLIGHT);
-        endListener.songStarted();
-      }
+    getSoundFeedback().queueSong(path,
+        new SoundFeedback.EndListener() {
+          @Override
+          public void songStarted() {
+            addPlayingHighlight(textWidget);
+            if (endListener != null) endListener.songStarted();
+          }
 
-      @Override
-      public void songEnded() {
-        removePlayingHighlight(textWidget);
-        endListener.songEnded();
-      }
-    });
+          @Override
+          public void songEnded() {
+      //      logger.info("playRef remove playing highlight on " + outer);
+            removePlayingHighlight(textWidget);
+            if (endListener != null) endListener.songEnded();
+          }
+        });
   }
 
+  void addPlayingHighlight(Widget textWidget) {
+  //  logger.info("addPlayingHighlight add playing highlight");
+    textWidget.addStyleName(PLAYING_AUDIO_HIGHLIGHT);
+  }
+
+  /**
+   * @param textWidget
+   * @see BootstrapExercisePanel#removePlayingHighlight(Widget)
+   */
   void removePlayingHighlight(Widget textWidget) {
+    //logger.info("removePlayingHighlight remove playing highlight");
     textWidget.removeStyleName(PLAYING_AUDIO_HIGHLIGHT);
   }
 
