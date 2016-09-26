@@ -35,6 +35,8 @@ package mitll.langtest.client.flashcard;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.client.sound.SoundManagerAPI;
 
+import java.util.logging.Logger;
+
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -42,10 +44,17 @@ import mitll.langtest.client.sound.SoundManagerAPI;
  * @since 2/2/16.
  */
 class MySoundFeedback extends SoundFeedback {
+  private final Logger logger = Logger.getLogger("MySoundFeedback");
+
   public MySoundFeedback(SoundManagerAPI soundManagerAPI) {
     super(soundManagerAPI);
-  //  this.statsFlashcardFactory = statsFlashcardFactory;
   }
+
+  /**
+   * @param song
+   * @param endListener
+   * @see BootstrapExercisePanel#playRefAndGoToNext
+   */
 
   public synchronized void queueSong(String song, EndListener endListener) {
     //logger.info("\t queueSong song " +song+ " -------  "+ System.currentTimeMillis());
@@ -54,28 +63,41 @@ class MySoundFeedback extends SoundFeedback {
   }
 
   public synchronized void queueSong(String song) {
-    //logger.info("\t queueSong song " +song+ " -------  "+ System.currentTimeMillis());
+    //logger.info("\t queueSong (no callback) song " +song+ " -------  "+ System.currentTimeMillis());
     destroySound(); // if there's something playing, stop it!
     createSound(song, null);
   }
 
+  /**
+   * @see StatsFlashcardFactory.StatsPracticePanel#abortPlayback
+   */
   public synchronized void clear() {
-    //  logger.info("\t stop playing current sound -------  "+ System.currentTimeMillis());
+    logger.info("\t stop playing current sound -------  "+ System.currentTimeMillis());
     destroySound(); // if there's something playing, stop it!
   }
 
   // TODO : remove this empty listener
-  private final EndListener endListener = new EndListener() {
+  private EndListener endListener = new EndListener() {
     @Override
     public void songStarted() {
-      //logger.info("song started --------- "+ System.currentTimeMillis());
+      //logger.info("empty listener - song started --------- "+ System.currentTimeMillis());
     }
 
     @Override
     public void songEnded() {
-      //logger.info("song ended   --------- " + System.currentTimeMillis());
+      //logger.info("empty listener - song ended   --------- " + System.currentTimeMillis());
     }
   };
 
-  public EndListener getEndListener() { return endListener; }
+  /**
+   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#StatsPracticePanel
+   * @return
+   */
+  EndListener getEndListener() {
+    return endListener;
+  }
+
+  void setEndListener(EndListener endListener) {
+    this.endListener = endListener;
+  }
 }
