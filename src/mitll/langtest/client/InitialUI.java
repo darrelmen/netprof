@@ -73,6 +73,8 @@ import java.util.logging.Logger;
 public class InitialUI {
   private final Logger logger = Logger.getLogger("InitialUI");
 
+  public static final String ROOT_VERTICAL_CONTAINER = "root_vertical_container";
+
   protected static final String LOGIN = "Login";
 
   /**
@@ -306,7 +308,7 @@ public class InitialUI {
     RootPanel.get().clear();   // necessary?
 
     Container verticalContainer = new FluidContainer();
-    verticalContainer.getElement().setId("root_vertical_container");
+    verticalContainer.getElement().setId(ROOT_VERTICAL_CONTAINER);
     return verticalContainer;
   }
 
@@ -369,7 +371,7 @@ public class InitialUI {
     currentExerciseVPanel.addStyleName("noMargin");
 
     Container verticalContainer2 = new FluidContainer();
-    verticalContainer2.getElement().setId("root_vertical_container");
+    verticalContainer2.getElement().setId(ROOT_VERTICAL_CONTAINER);
     verticalContainer2.add(langTest.getFlashRecordPanel());
     verticalContainer2.add(currentExerciseVPanel);
     return verticalContainer2;
