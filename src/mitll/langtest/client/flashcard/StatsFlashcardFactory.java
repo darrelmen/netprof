@@ -50,6 +50,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.ListChangeListener;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.custom.UserList;
@@ -75,6 +76,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     extends ExercisePanelFactory<L, T>
     implements RequiresResize {
   private final Logger logger = Logger.getLogger("StatsFlashcardFactory");
+  private static final int DELAY_MILLIS = 100;
 
   private static final String REMAINING = "Remaining";
   private static final String INCORRECT = "Incorrect";
@@ -191,7 +193,9 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         ADD_KEY_BINDING,
         StatsFlashcardFactory.this.controlState,
         soundFeedback,
-        soundFeedback.getEndListener(), StatsFlashcardFactory.this.instance, exerciseList) {
+        soundFeedback.getEndListener(),
+        StatsFlashcardFactory.this.instance,
+        exerciseList) {
       @Override
       protected void gotShuffleClick(boolean b) {
         sticky.resetStorage();
@@ -274,9 +278,25 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
           ADD_KEY_BINDING,
           StatsFlashcardFactory.this.controlState,
           soundFeedback,
-          soundFeedback.getEndListener(),
+          null,
           StatsFlashcardFactory.this.instance, exerciseListToUse);
-      // logger.info("made " + this.getElement().getExID() + " for " + e.getID());
+      soundFeedback.setEndListener(new SoundFeedback.EndListener() {
+        @Override
+        public void songStarted() {
+
+        }
+
+        @Override
+        public void songEnded() {
+          removePlayingHighlight();
+        }
+      });
+
+      if (controlState.isAutoPlay()) {
+       // logger.info("auto play so going to next");
+        playRefAndGoToNext(getRefAudioToPlay(), StatsFlashcardFactory.DELAY_MILLIS, true);
+      }
+      //logger.info("made " + this.getElement().getId() + " for " + e.getID());
     }
 
     @Override
@@ -288,7 +308,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     /**
      * @see #loadNextOnTimer(int)
      * @see #nextAfterDelay(boolean, String)
-     * @see #playRefAndGoToNext(String)
+     * @see BootstrapExercisePanel#playRefAndGoToNext
      */
     @Override
     protected void loadNext() {
@@ -299,10 +319,25 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       }
     }
 
+    /**
+     * @param b
+     * @see FlashcardPanel#getShuffleButton(ControlState)
+     */
     @Override
     protected void gotShuffleClick(boolean b) {
       sticky.resetStorage();
       super.gotShuffleClick(b);
+    }
+
+    protected void gotAutoPlay(boolean b) {
+      if (b) {
+       // logger.info("gotAutoPlay got click...");
+        playRefAndGoToNext(getRefAudioToPlay(), StatsFlashcardFactory.DELAY_MILLIS, true);
+      } else {
+      //  logger.info("gotAutoPlay cancelTimer");
+       // cancelTimer();
+        abortPlayback();
+      }
     }
 
     /**
@@ -310,7 +345,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
      * @see mitll.langtest.client.recorder.RecordButtonPanel#receivedAudioAnswer(mitll.langtest.shared.AudioAnswer, com.google.gwt.user.client.ui.Panel)
      */
     public void receivedAudioAnswer(final AudioAnswer result) {
-      if (false) logger.info("StatsPracticePanel.receivedAudioAnswer: result " + result);
+     // if (false) logger.info("StatsPracticePanel.receivedAudioAnswer: result " + result);
 
       if (result.getValidity() == AudioAnswer.Validity.OK) {
         resultIDs.add(result.getResultID());
@@ -487,9 +522,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       w1.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-
 //          logger.info("getRepeatButton : click on " + GO_BACK);
-
           w1.setVisible(false);
           showFlashcardDisplay();
 
@@ -542,7 +575,6 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     private void makeFlashcardButtonsVisible() {
       contentPanel.removeStyleName("noWidthCenterPractice");
       contentPanel.addStyleName("centerPractice");
-
       //   logger.info("makeFlashcardButtonsVisible ---- \n\n\n");
 
       startOver.setVisible(true);
@@ -561,8 +593,8 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       if (exerciseList.onLast()) {
         onSetComplete();
       } else {
-        int delayMillis = DELAY_MILLIS;
-        loadNextOnTimer(delayMillis);
+       // logger.info("nextAfterDelay " + correct);
+        loadNextOnTimer(DELAY_MILLIS);
       }
     }
 
@@ -619,7 +651,9 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       return startOver;
     }
 
-    void abortPlayback() {
+    @Override
+    protected void abortPlayback() {
+      logger.info("abortPlayback ---");
       cancelTimer();
       soundFeedback.clear();
     }
