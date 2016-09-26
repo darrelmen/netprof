@@ -1111,16 +1111,19 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String installPath = pathHelper.getInstallPath();
 
     String relativeImagePath = absolutePathToImage;
-    if (absolutePathToImage.startsWith(installPath)) {
+    if (absolutePathToImage != null && absolutePathToImage.startsWith(installPath)) {
       relativeImagePath = absolutePathToImage.substring(installPath.length());
     } else {
       logger.error("getImageForAudioFile huh? file path " + absolutePathToImage + " doesn't start with " + installPath + "?");
     }
 
-    relativeImagePath = pathHelper.ensureForwardSlashes(relativeImagePath);
-    if (relativeImagePath.startsWith("/")) {
-      relativeImagePath = relativeImagePath.substring(1);
+    if (relativeImagePath != null) {
+      relativeImagePath = pathHelper.ensureForwardSlashes(relativeImagePath);
+      if (relativeImagePath.startsWith("/")) {
+        relativeImagePath = relativeImagePath.substring(1);
+      }
     }
+
     String imageURL = relativeImagePath;
     double duration = new AudioCheck(serverProps).getDurationInSeconds(wavAudioFile);
     if (duration == 0) {
