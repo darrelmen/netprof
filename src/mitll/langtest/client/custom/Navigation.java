@@ -240,7 +240,7 @@ public class Navigation implements RequiresResize, ShowTab {
         boolean wasChapters = targetName.contains(CHAPTERS);
         Panel createdPanel = learnHelper.getExerciseList() != null ? learnHelper.getExerciseList().getCreatedPanel() : null;
         boolean hasCreated = createdPanel != null;
-        // logger.info("getTabPanel : got shown event : '" +showEvent + "' target '" + targetName + "' hasCreated " + hasCreated);
+        //logger.info("getTabPanel : got shown event : '" +showEvent + "' target '" + targetName + "' hasCreated " + hasCreated);
         if (hasCreated && wasChapters && (createdPanel instanceof GoodwaveExercisePanel)) {
           //   logger.info("\taddShowHandler got chapters! created panel :  has created " + hasCreated + " was revealed  " + createdPanel.getClass());
           ((GoodwaveExercisePanel) createdPanel).wasRevealed();
