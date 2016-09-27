@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.copy;
 
+import mitll.hlt.domino.shared.model.user.ClientUserDetail;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
@@ -52,10 +53,7 @@ import mitll.langtest.server.database.result.*;
 import mitll.langtest.server.database.reviewed.ReviewedDAO;
 import mitll.langtest.server.database.reviewed.SlickReviewedDAO;
 import mitll.langtest.server.database.reviewed.StateCreator;
-import mitll.langtest.server.database.user.BaseUserDAO;
-import mitll.langtest.server.database.user.IUserProjectDAO;
-import mitll.langtest.server.database.user.SlickUserDAOImpl;
-import mitll.langtest.server.database.user.UserDAO;
+import mitll.langtest.server.database.user.*;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.server.database.userexercise.UserExerciseDAO;
 import mitll.langtest.server.database.userlist.*;
@@ -216,7 +214,8 @@ public class CopyToPostgres<T extends CommonShell> {
     logger.info("copyOneConfig project is " + projectID);
 
     // first add the user table
-    SlickUserDAOImpl slickUserDAO = (SlickUserDAOImpl) db.getUserDAO();
+//    SlickUserDAOImpl userDAO = (SlickUserDAOImpl) db.getUserDAO();
+    DominoUserDAOImpl userDAO = (DominoUserDAOImpl) db.getUserDAO();
     SlickResultDAO slickResultDAO = (SlickResultDAO) db.getResultDAO();
     SlickUserExerciseDAO slickUEDAO = (SlickUserExerciseDAO) db.getUserExerciseDAO();
 
@@ -230,7 +229,8 @@ public class CopyToPostgres<T extends CommonShell> {
       Map<Integer, String> idToFL = new HashMap<>();
       Map<String, Integer> exToID = copyUserAndPredefExercisesAndLists(db, projectID, oldToNewUser, idToFL);
 
-      copyResult(db, slickResultDAO, oldToNewUser, projectID, exToID, resultDAO, idToFL);
+      copyResult(//db,
+          slickResultDAO, oldToNewUser, projectID, exToID, resultDAO, idToFL);
 
       logger.info("oldToNewUser " + oldToNewUser.size() + " exToID " + exToID.size());
 
@@ -266,7 +266,7 @@ public class CopyToPostgres<T extends CommonShell> {
 
 
       // anno DAO
-      copyAnno(db, slickUserDAO, oldToNewUser, exToID);
+      copyAnno(db, userDAO, oldToNewUser, exToID);
 
       copyReviewed(db, oldToNewUser, exToID, true);
       copyReviewed(db, oldToNewUser, exToID, false);
@@ -345,7 +345,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param name
    * @param course
    * @param displayOrder
-   * @see #createProjectIfNotExists(DatabaseImpl, String, String, String)
+   * @see #createProjectIfNotExists
    */
   private int createProject(DatabaseImpl db, IProjectDAO projectDAO, String countryCode, String name, String course, int displayOrder) {
     Iterator<String> iterator = db.getTypeOrder(-1).iterator();
@@ -394,16 +394,17 @@ public class CopyToPostgres<T extends CommonShell> {
    * @see #copyOneConfig(DatabaseImpl, String, String)
    */
   private Map<Integer, Integer> copyUsers(DatabaseImpl db, int projid, IResultDAO oldResultDAO) {
-    SlickUserDAOImpl slickUserDAO = (SlickUserDAOImpl) db.getUserDAO();
+//    SlickUserDAOImpl dominoUserDAO = (SlickUserDAOImpl) db.getUserDAO();
+    DominoUserDAOImpl dominoUserDAO = (DominoUserDAOImpl) db.getUserDAO();
 
     Map<Integer, Integer> oldToNew = new HashMap<>();
-    addDefaultUsers(oldToNew, slickUserDAO);
+    addDefaultUsers(oldToNew, dominoUserDAO);
 
     IUserProjectDAO slickUserProjectDAO = db.getUserProjectDAO();
 
     UserDAO userDAO = new UserDAO(db);
     int defectDetector = userDAO.getDefectDetector();
-    oldToNew.put(defectDetector, slickUserDAO.getDefectDetector());
+    oldToNew.put(defectDetector, dominoUserDAO.getDefectDetector());
 
     List<User> importUsers = userDAO.getUsers();
     logger.info("copyUsers h2 importUsers  " + importUsers.size());
@@ -422,7 +423,7 @@ public class CopyToPostgres<T extends CommonShell> {
         if (passwordHash == null) passwordHash = "";
 
         if (DEBUG) logger.info("import " + toImport);
-        User strictUserWithPass = slickUserDAO.getStrictUserWithPass(importUserID, passwordHash);
+        User strictUserWithPass = dominoUserDAO.getStrictUserWithPass(importUserID, passwordHash);
 
         if (strictUserWithPass != null) {
           // do nothing, but remember id mapping
@@ -433,7 +434,7 @@ public class CopyToPostgres<T extends CommonShell> {
             logger.info("skipping old user " + toImport + " since they have an empty user name and no recordings");
             lurker++;
           } else {
-            User userByID1 = slickUserDAO.getUserByID(importUserID);
+            User userByID1 = dominoUserDAO.getUserByID(importUserID);
 
             if (userByID1 != null) {
               if (DEBUG) logger.info("found existing user " + importUserID + " : " + userByID1);
@@ -441,14 +442,14 @@ public class CopyToPostgres<T extends CommonShell> {
               // void current password! Force them to set it again when they log in again
               int existingID = userByID1.getID();
               if (!userByID1.getPasswordHash().isEmpty()) {
-                slickUserDAO.changePassword(existingID, "");
+                dominoUserDAO.changePassword(existingID, "");
               }
               oldToNew.put(importID, existingID);
               collisions++;
               logger.info("user collision to project " + projid + " map " + importID + "->" + existingID +
                   " : " + userByID1);
             } else {
-              added.add(addUser(slickUserDAO, oldToNew, toImport));
+              added.add(addUser(dominoUserDAO, oldToNew, toImport));
             }
           }
         }
@@ -463,7 +464,7 @@ public class CopyToPostgres<T extends CommonShell> {
     }
     slickUserProjectDAO.addBulk(toAdd);
     logger.info("after, postgres importUsers " +
-        "num = " + slickUserDAO.getUsers().size() +
+        "num = " + dominoUserDAO.getUsers().size() +
         " added " + added.size() +
         " collisions " + collisions +
         " lurker " + lurker
@@ -471,7 +472,13 @@ public class CopyToPostgres<T extends CommonShell> {
     return oldToNew;
   }
 
-  private void addDefaultUsers(Map<Integer, Integer> oldToNew, SlickUserDAOImpl slickUserDAO) {
+/*  private void addDefaultUsers(Map<Integer, Integer> oldToNew, SlickUserDAOImpl slickUserDAO) {
+    oldToNew.put(BaseUserDAO.DEFAULT_USER_ID, slickUserDAO.getDefaultUser());
+    oldToNew.put(BaseUserDAO.DEFAULT_MALE_ID, slickUserDAO.getDefaultMale());
+    oldToNew.put(BaseUserDAO.DEFAULT_FEMALE_ID, slickUserDAO.getDefaultFemale());
+  } */
+
+  private void addDefaultUsers(Map<Integer, Integer> oldToNew, DominoUserDAOImpl slickUserDAO) {
     oldToNew.put(BaseUserDAO.DEFAULT_USER_ID, slickUserDAO.getDefaultUser());
     oldToNew.put(BaseUserDAO.DEFAULT_MALE_ID, slickUserDAO.getDefaultMale());
     oldToNew.put(BaseUserDAO.DEFAULT_FEMALE_ID, slickUserDAO.getDefaultFemale());
@@ -484,7 +491,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @return
    * @see #copyUsers
    */
-  private SlickUser addUser(SlickUserDAOImpl slickUserDAO,
+/*  private SlickUser addUser(SlickUserDAOImpl slickUserDAO,
                             Map<Integer, Integer> oldToNew,
                             User toImport) {
 //    logger.info("addUser " + toImport + " with " + toImport.getPermissions());
@@ -495,6 +502,18 @@ public class CopyToPostgres<T extends CommonShell> {
     //   logger.info("addUser map " + toImport.getID() + " -> " + add);
     oldToNew.put(toImport.getID(), add);
     return slickUser;
+  }*/
+  private ClientUserDetail addUser(DominoUserDAOImpl slickUserDAO,
+                                   Map<Integer, Integer> oldToNew,
+                                   User toImport) {
+//    logger.info("addUser " + toImport + " with " + toImport.getPermissions());
+    ClientUserDetail user = slickUserDAO.toClientUserDetail(toImport, false);
+    ClientUserDetail addedUser = slickUserDAO.addAndGet(user, toImport.getPasswordHash(), toImport.getPermissions());
+    int add = addedUser.getDocumentDBID();
+//    logger.info("addUser id  " + add + " for " + user.id() + " equal " + (user == addedUser));
+    //   logger.info("addUser map " + toImport.getID() + " -> " + add);
+    oldToNew.put(toImport.getID(), add);
+    return addedUser;
   }
 
   /**
@@ -549,16 +568,14 @@ public class CopyToPostgres<T extends CommonShell> {
   }
 
   /**
-   * TODO : set the exid int field
-   * TODO : set the exid int field
-   * TODO : set the exid int field
+   * TODOx : set the exid int field
    *
    * @param db
    * @param slickUserDAO
    * @param oldToNewUser
    * @param exToID
    */
-  private void copyAnno(DatabaseImpl db, SlickUserDAOImpl slickUserDAO, Map<Integer, Integer> oldToNewUser,
+  private void copyAnno(DatabaseImpl db, IUserDAO slickUserDAO, Map<Integer, Integer> oldToNewUser,
                         Map<String, Integer> exToID) {
     SlickAnnotationDAO annotationDAO = (SlickAnnotationDAO) db.getAnnotationDAO();
     List<SlickAnnotation> bulk = new ArrayList<>();
@@ -626,7 +643,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param db
    * @param oldToNewResult
    * @param slickWordDAO
-   * @see #copyToPostgres
+   * @see #copyOneConfig(DatabaseImpl, String, String, int)
    */
   private void copyWord(DatabaseImpl db, Map<Integer, Integer> oldToNewResult, SlickWordDAO slickWordDAO) {
     int c = 0;
@@ -879,15 +896,15 @@ public class CopyToPostgres<T extends CommonShell> {
   }
 
   /**
-   * @param db
+   * @paramx db
    * @param slickResultDAO
    * @param oldToNewUser
    * @param projid
    * @param exToID
    * @param resultDAO
-   * @see #copyOneConfig(DatabaseImpl, String, String)
+   * @see #copyOneConfig
    */
-  private void copyResult(DatabaseImpl db,
+  private void copyResult(//DatabaseImpl db,
                           SlickResultDAO slickResultDAO,
                           Map<Integer, Integer> oldToNewUser,
                           int projid,
@@ -1001,7 +1018,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param db
    * @param oldToNewUser
    * @param exToID
-   * @see #copyToPostgres(DatabaseImpl)
+   * @see #copyOneConfig(DatabaseImpl, String, String, int)
    */
   private void copyRefResult(DatabaseImpl db, Map<Integer, Integer> oldToNewUser, Map<String, Integer> exToID) {
     SlickRefResultDAO dao = (SlickRefResultDAO) db.getRefResultDAO();
