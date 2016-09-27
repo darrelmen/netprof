@@ -190,6 +190,17 @@
         <url-pattern>/scoreServlet/*</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>dominoUserService</servlet-name>
+        <servlet-class>mitll.hlt.domino.server.user.UserServiceFacadeImpl</servlet-class>
+        <load-on-startup>3</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>dominoUserService</servlet-name>
+        <url-pattern>/dominoCore/user-manager</url-pattern>
+    </servlet-mapping>
+
     <!--    <servlet>
             <servlet-name>loadTestServlet</servlet-name>
             <servlet-class>mitll.langtest.server.load.LoadTestServlet</servlet-class>
@@ -198,6 +209,11 @@
             <servlet-name>loadTestServlet</servlet-name>
             <url-pattern>/loadTest/*</url-pattern>
         </servlet-mapping>-->
+
+    <!-- initialize core data services - Mongo connection pool, etc -->
+    <listener>
+        <listener-class>mitll.hlt.domino.server.ServerInitializationManager</listener-class>
+    </listener>
 
     <context-param>
         <param-name>config</param-name>
