@@ -135,5 +135,8 @@
     <orderEntry type="module" module-name="root" />
     <orderEntry type="library" name="commons-lang-2.6" level="project" />
     <orderEntry type="library" name="gson-2.7" level="project" />
+    <orderEntry type="module" module-name="domino-core_main" />
+    <orderEntry type="library" name="Gradle: mitll.hlt:domino-shared:1.2.0-topic-v24-domino-core" level="project" />
+    <orderEntry type="library" name="Gradle: mitll.hlt:mongo-core:0.1-SNAPSHOT" level="project" />
   </component>
 </module>
