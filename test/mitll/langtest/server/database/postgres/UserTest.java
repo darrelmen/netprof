@@ -101,7 +101,7 @@ public class UserTest extends BaseTest {
 
     logger.info("user " + dao.getIDForUserAndEmail(userid, hash));
     logger.info("user " + dao.getIDForUserAndEmail(userid, password));
-    logger.info("user id " + dao.getIdForUserID(userid));
+    //logger.info("user id " + dao.getIdForUserID(userid));
     logger.info("user " + dao.getUser(userid, password));
     logger.info("user " + dao.getUser(userid, hash));
     logger.info("user " + dao.getStrictUserWithPass(userid, password));

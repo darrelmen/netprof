@@ -96,6 +96,7 @@ import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
@@ -199,7 +200,8 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#makeDatabaseImpl(String)
    */
   public DatabaseImpl(String configDir, String relativeConfigDir, String dbName, ServerProperties serverProps,
-                      PathHelper pathHelper, boolean mustAlreadyExist, LogAndNotify logAndNotify, boolean readOnly) {
+                      PathHelper pathHelper, boolean mustAlreadyExist, LogAndNotify logAndNotify, boolean readOnly,
+                      ServletContext servletContext) {
     this(serverProps.useH2() ?
             new H2Connection(configDir, dbName, mustAlreadyExist, logAndNotify, readOnly) :
             serverProps.usePostgres() ?
@@ -209,7 +211,7 @@ public class DatabaseImpl implements Database {
                     null,
         configDir, relativeConfigDir, dbName,
         serverProps,
-        pathHelper, logAndNotify);
+        pathHelper, logAndNotify,servletContext);
   }
 
   public DatabaseImpl(DatabaseConnection connection,
@@ -218,7 +220,8 @@ public class DatabaseImpl implements Database {
                       String dbName,
                       ServerProperties serverProps,
                       PathHelper pathHelper,
-                      LogAndNotify logAndNotify) {
+                      LogAndNotify logAndNotify,
+                      ServletContext servletContext) {
     long then;
     long now;
     this.connection = connection;
@@ -230,7 +233,7 @@ public class DatabaseImpl implements Database {
     if (maybeGetH2Connection(relativeConfigDir, dbName, serverProps)) return;
     then = System.currentTimeMillis();
 
-    initializeDAOs(pathHelper);
+    initializeDAOs(pathHelper,servletContext);
     now = System.currentTimeMillis();
     if (now - then > 300) {
       logger.info("took " + (now - then) + " millis to initialize DAOs for " + getOldLanguage(serverProps));
@@ -288,14 +291,15 @@ public class DatabaseImpl implements Database {
    *
    * @see #DatabaseImpl(DatabaseConnection, String, String, String, ServerProperties, PathHelper, LogAndNotify)
    */
-  private void initializeDAOs(PathHelper pathHelper) {
+  private void initializeDAOs(PathHelper pathHelper, ServletContext servletContext) {
     dbConnection = getDbConnection();
 
     eventDAO = new SlickEventImpl(dbConnection);
-    SlickUserDAOImpl slickUserDAO = new SlickUserDAOImpl(this, dbConnection);
-    this.userDAO = slickUserDAO;
+    //   SlickUserDAOImpl slickUserDAO = new SlickUserDAOImpl(this, dbConnection);
+    DominoUserDAOImpl dominoUserDAO = new DominoUserDAOImpl(this, servletContext);
+    this.userDAO = dominoUserDAO;
     userPermissionDAO = new SlickUserPermissionDAOImpl(this, dbConnection);
-    slickUserDAO.setPermissionDAO(userPermissionDAO);
+    //  slickUserDAO.setPermissionDAO(userPermissionDAO);
 
     this.userSessionDAO = new SlickUserSessionDAOImpl(this, dbConnection);
     this.inviteDAO = new SlickInviteDAOImpl(this, dbConnection);
@@ -951,7 +955,7 @@ public class DatabaseImpl implements Database {
     //  logger.info("createTables create slick tables - has " + dbConnection.getTables());
 
     List<IDAO> idaos = Arrays.asList(
-        getUserDAO(),
+        //getUserDAO(),
         userPermissionDAO,
         getProjectDAO(),
         userExerciseDAO,
@@ -1321,6 +1325,7 @@ public class DatabaseImpl implements Database {
   public String getLanguage(CommonExercise ex) {
     return getLanguage(ex.getProjectID());
   }
+
   public String getLanguage(int projectid) {
     return getProject(projectid).getLanguage();
   }
@@ -1435,10 +1440,10 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * @see DownloadServlet#getBaseName
    * @param typeToSection
    * @param projectid
    * @return
+   * @see DownloadServlet#getBaseName
    */
   public String getPrefix(Map<String, Collection<String>> typeToSection, int projectid) {
     return new AudioExport(getServerProps()).getPrefix(getSectionHelper(projectid), typeToSection);
@@ -1629,7 +1634,9 @@ public class DatabaseImpl implements Database {
     return userPermissionDAO;
   }
 
-  public IInviteDAO getInviteDAO() { return inviteDAO; }
+  public IInviteDAO getInviteDAO() {
+    return inviteDAO;
+  }
 
   public String toString() {
     return "Database : " + this.getClass().toString();
