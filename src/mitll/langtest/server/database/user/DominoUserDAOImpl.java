@@ -32,45 +32,99 @@
 
 package mitll.langtest.server.database.user;
 
+import mitll.hlt.domino.server.ServerInitializationManager;
+import mitll.hlt.domino.server.user.IUserServiceDelegate;
+import mitll.hlt.domino.server.user.UserServiceFacadeImpl;
+import mitll.hlt.domino.server.util.Mailer;
+import mitll.hlt.domino.server.util.Mongo;
+import mitll.hlt.domino.server.util.ServerProperties;
+import mitll.hlt.domino.shared.common.SResult;
+import mitll.hlt.domino.shared.model.user.ClientUserDetail;
+import mitll.hlt.domino.shared.model.user.Group;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
-import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickMiniUser;
 import mitll.npdata.dao.SlickUser;
 import mitll.npdata.dao.SlickUserPermission;
-import mitll.npdata.dao.user.UserDAOWrapper;
 import org.apache.log4j.Logger;
 import scala.collection.Seq;
 
+import javax.servlet.ServletContext;
 import java.sql.Timestamp;
 import java.util.*;
 
-public abstract class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
-  SlickUserDAOImpl(Database database) {
-    super(database);
-  }
-  /*private static final Logger logger = Logger.getLogger(SlickUserDAOImpl.class);
-  private final UserDAOWrapper dao;
-  private IUserPermissionDAO permissionDAO;
+import mitll.hlt.domino.server.user.IUserServiceDelegate;
+import mitll.hlt.domino.server.user.UserServiceFacadeImpl;
+import mitll.hlt.domino.server.util.Mailer;
+import mitll.hlt.domino.server.util.Mongo;
+import mitll.hlt.domino.server.util.ServerProperties;
+import mitll.hlt.domino.shared.util.DateFormatter;
+import mitll.hlt.domino.shared.util.GWTDateFormatter;
+import mitll.hlt.json.JSONSerializer;
 
-  *//**
+import org.apache.commons.io.FileUtils;
+import org.apache.ignite.Ignite;
+import org.apache.ignite.Ignition;
+import org.apache.ignite.configuration.DeploymentMode;
+import org.apache.ignite.configuration.IgniteConfiguration;
+import org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi;
+import org.apache.ignite.spi.discovery.tcp.ipfinder.vm.TcpDiscoveryVmIpFinder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+
+public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
+  private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DominoUserDAOImpl.class);
+  private final IUserServiceDelegate delegate;
+//  private final UserDAOWrapper dao;
+//  private IUserPermissionDAO permissionDAO;
+
+  /**
    * @param database
    * @param dbConnection
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(PathHelper)
-   *//*
-  public SlickUserDAOImpl(Database database, DBConnection dbConnection) {
+   */
+  public DominoUserDAOImpl(Database database, ServletContext servletContext) {
     super(database);
-    dao = new UserDAOWrapper(dbConnection);
+  //  dao = new UserDAOWrapper(dbConnection);
+
+    this.delegate = (IUserServiceDelegate)servletContext.
+        getAttribute(ServerInitializationManager.USER_SVC);
+
+
+   // ServerProperties props = getServerProperties(in, newContext);
+
+  //  log.info("Starting Mongo connection initialization");
+    Mongo pool = Mongo.createPool(new DBProperties());
+    //DocumentService docSvc = null;
+    IUserServiceDelegate userDelegate = null;
+
+    Ignite ignite = null;
+//    if (props.isCacheEnabled()) {
+//      ignite = getIgnite();
+//      newContext.setAttribute(IGNITE, ignite);
+//    }
+
+    if (pool != null) {
+     // newContext.setAttribute(MONGO_ATT_NAME, pool);
+      JSONSerializer serializer = Mongo.makeSerializer();
+     // newContext.setAttribute(JSON_SERIALIZER, serializer);
+      Mailer m = new Mailer(props.getMailerProperties());
+      userDelegate = UserServiceFacadeImpl.makeServiceDelegate(props, m, pool, serializer, ignite);
+    }
+   // new MongoUserServiceDelegate(props.getUserServiceProperties(), mailer, mongoCP);
   }
 
+/*
   public void setPermissionDAO(IUserPermissionDAO permissionDAO) {
     this.permissionDAO = permissionDAO;
   }
+*/
 
   public void createTable() {
-    dao.createTable();
+
   }
 
   @Override
@@ -79,37 +133,38 @@ public abstract class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
     //return dao.dao().name();
   }
 
-  *//**
+  /**
    * @param user
    * @return
    * @see mitll.langtest.server.database.copy.CopyToPostgres#addUser
-   *//*
-  public int add(SlickUser user) {
-
+   */
+/*  public int add(SlickUser user) {
+    delegate.addUser(new mitll.hlt.domino.shared.model.user.User())
     return dao.add(user);
-  }
+  }*/
 
-  *//**
+  /**
    * Returns SlickUser from database, not necessarily same as passed in?
    *
    * @param user
    * @return
-   * @see mitll.langtest.server.database.copy.CopyToPostgres#addUser(SlickUserDAOImpl, Map, User)
-   *//*
-  public SlickUser addAndGet(SlickUser user, Collection<User.Permission> permissions) {
-    SlickUser user1 = dao.addAndGet(user);
-    int i = addPermissions(permissions, user1.id());
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#addUser(DominoUserDAOImpl, Map, User)
+   */
+  public ClientUserDetail addAndGet(ClientUserDetail user,String encodedPass, Collection<User.Permission> permissions) {
+    SResult<ClientUserDetail> clientUserDetailSResult = delegate.doAddUser(user, encodedPass);
+//    SlickUser user1 = dao.addAndGet(user);
+  //  int i = addPermissions(permissions, user1.id());
     // if (i > 0) logger.info("inserted " + i + " permissions for " + user1.id());
-    return user1;
+    return clientUserDetailSResult.get();
   }
 
-  *//**
+  /**
    * Add granted permissions...
    * @param permissions
    * @param foruserid
    * @return
-   *//*
-  private int addPermissions(Collection<User.Permission> permissions, int foruserid) {
+   */
+/*  private int addPermissions(Collection<User.Permission> permissions, int foruserid) {
     Timestamp now = new Timestamp(System.currentTimeMillis());
     int c = 0;
     for (User.Permission permission : permissions) {
@@ -125,9 +180,9 @@ public abstract class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
       c++;
     }
     return c;
-  }
+  }*/
 
-  *//**
+  /**
    * @param age
    * @param gender
    * @param experience
@@ -148,7 +203,7 @@ public abstract class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @param last
    * @return
    * @see UserManagement#addUser
-   *//*
+   */
   @Override
   public int addUser(int age,
                      String gender,
@@ -188,14 +243,14 @@ public abstract class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
         ));
   }
 
-*//*  private void getConvertedPermissions(Collection<User.Permission> permissions, Timestamp now) {
+/*  private void getConvertedPermissions(Collection<User.Permission> permissions, Timestamp now) {
     List<SlickUserPermission> requested = new ArrayList<>();
     for (User.Permission permission : permissions) {
       requested.add(getPendingPermission(now, permission));
     }
-  }*//*
+  }*/
 
-*//*  private SlickUserPermission getPendingPermission(Timestamp now, User.Permission permission) {
+/*  private SlickUserPermission getPendingPermission(Timestamp now, User.Permission permission) {
     return new SlickUserPermission(-1,
         beforeLoginUser,
         beforeLoginUser,
@@ -204,16 +259,16 @@ public abstract class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
         User.PermissionStatus.PENDING.toString(),
         now,
         beforeLoginUser);
-  }*//*
+  }*/
 
-  *//**
+  /**
    * For really old users with missing info
    * @param id
    * @param kind
    * @param passwordH
    * @param emailH
    * @see BaseUserDAO#addUser
-   *//*
+   */
   protected void updateUser(int id, User.Kind kind, String passwordH, String emailH) {
     dao.updateUser(id, kind.name(), passwordH, emailH);//,
 //        kind == User.Kind.CONTENT_DEVELOPER ? CD_PERMISSIONS.toString() : EMPTY_PERM.toString());
@@ -248,23 +303,23 @@ public abstract class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return convertOrNull(userByIDAndPass);
   }
 
-  *//**
+  /**
    * @param id
    * @return
    * @see mitll.langtest.server.database.copy.CopyToPostgres#copyUsers
-   *//*
+   */
   @Override
   public User getUserByID(String id) {
     return convertOrNull(dao.getByUserID(id));
   }
 
-*//*  public Collection<User> getAllUsersByID(String id) {
+/*  public Collection<User> getAllUsersByID(String id) {
     Seq<SlickUser> byUserID = dao.getByUserID(id);
     scala.collection.Iterator<SlickUser> iterator = byUserID.iterator();
     List<User> copy = new ArrayList<>();
     while (iterator.hasNext()) copy.add(toUser(iterator.next()));
     return copy;
-  }*//*
+  }*/
 
   public User getByID(int id) {
     return convertOrNull(dao.byID(id));
@@ -307,16 +362,23 @@ public abstract class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return perms;
   }
 
-  *//**
+  /**
    * @param user
    * @param useid
    * @return
-   * @see mitll.langtest.server.database.copy.CopyToPostgres#addUser(SlickUserDAOImpl, Map, User)
-   *//*
-  public SlickUser toSlick(User user, boolean useid) {
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#addUser(DominoUserDAOImpl, Map, User)
+   */
+  public ClientUserDetail toClientUserDetail(User user, boolean useid) {
     Timestamp now = new Timestamp(user.getTimestampMillis());
-    SlickUser user1 = new SlickUser(useid ? user.getID() : -1,
+    ClientUserDetail user1 = new ClientUserDetail(
+        //useid ? user.getID() : -1,
         user.getUserID(),
+        user.getFirst(),
+        user.getLast(),
+        user.getEmail(),
+        Collections.emptyList(),
+        new Group()/*
+
         user.isMale(),
         user.getIpaddr() == null ? "" : user.getIpaddr(),
         "",
@@ -332,10 +394,9 @@ public abstract class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
         user.getEmailHash() == null ? "" : user.getEmailHash(),
         "",
         user.getDevice() == null ? "" : user.getDevice(),
-        user.getFirst(),
-        user.getLast(),
+
         user.getID(),
-        now
+        now*/
     );
 
     logger.info("toSlick made " + user1);
@@ -469,12 +530,12 @@ public abstract class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return idToUser;
   }
 
-  *//**
+  /**
    * @param user
    * @param passwordH
    * @return
    * @see mitll.langtest.server.services.UserServiceImpl#changePFor(String, String)
-   *//*
+   */
   @Override
   public boolean changePassword(int user, String passwordH) {
     return dao.setPassword(user, passwordH);
@@ -519,5 +580,5 @@ public abstract class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
       logger.warn("didn't update table with " + toUpdate1);
     }
    // logger.info("user now " + getByID(toUpdate.getID()));
-  }*/
+  }
 }

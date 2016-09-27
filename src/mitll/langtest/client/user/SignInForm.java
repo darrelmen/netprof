@@ -90,9 +90,9 @@ public class SignInForm extends UserDialog implements SignIn {
   private DecoratedPopupPanel resetEmailPopup;
   private Button sendEmail;
   private final EventRegistration eventRegistration;
-  private UserPassDialog userPassLogin;
-  private SignUp signUpForm;
-  UserManager userManager;
+  private final UserPassDialog userPassLogin;
+  private final SignUp signUpForm;
+  private final UserManager userManager;
 
   /**
    * @param props
