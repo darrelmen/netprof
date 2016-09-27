@@ -454,13 +454,13 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     if (databaseReference != null) {
       logger.debug("hmm... found existing database reference " + databaseReference);
     }
-
     servletContext.setAttribute(DATABASE_REFERENCE, db);
   }
 
   private DatabaseImpl makeDatabaseImpl(String h2DatabaseFile) {
     //logger.debug("word pairs " +  serverProps.isWordPairs() + " language " + serverProps.getLanguage() + " config dir " + relativeConfigDir);
-    return new DatabaseImpl(configDir, relativeConfigDir, h2DatabaseFile, serverProps, pathHelper, true, this, false);
+    return new DatabaseImpl(configDir, relativeConfigDir, h2DatabaseFile, serverProps, pathHelper, true, this, false,
+        getServletContext());
   }
 
   /**
