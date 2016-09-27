@@ -33,65 +33,161 @@
 package mitll.langtest.server.database.user;
 
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.IDAO;
+import mitll.langtest.server.database.Report;
+import mitll.langtest.server.database.result.IResultDAO;
+import mitll.langtest.server.services.UserServiceImpl;
+import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 public interface IUserDAO extends IDAO {
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
+   */
   void ensureDefaultUsers();
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
+   */
   int getDefectDetector();
 
-  Database getDatabase();
+  /**
+   * @see mitll.langtest.server.database.custom.UserListManager#getRefAudioPath(int, int, File, String, boolean, String, String)
+   * @return
+   */
+  @Deprecated Database getDatabase();
 
+  /**
+   * @see UserManagement#addUser(SignUpUser)
+   * @param user
+   * @return
+   */
   User addUser(SignUpUser user);
 
-  int addUser(int age, String gender, int experience, String ipAddr,
+/*  int addUser(int age, String gender, int experience, String ipAddr,
               String trueIP, String nativeLang,
               String dialect, String userID,
               boolean enabled,
               Collection<User.Permission> permissions,
               User.Kind kind,
               String passwordH,
-              String emailH, String email, String device, String first, String last);
+              String emailH, String email, String device, String first, String last);*/
 
-  boolean enableUser(int id);
+  @Deprecated boolean enableUser(int id);
 
+  /**
+   * @see mitll.langtest.server.services.UserServiceImpl#changeEnabledFor
+   * @param userid
+   * @param enabled
+   * @return
+   */
   boolean changeEnabled(int userid, boolean enabled);
 
+  /**
+   * @see mitll.langtest.server.mail.EmailHelper#resetPassword(String, String, String)
+   * @see mitll.langtest.server.rest.RestUserManagement#resetPassword(String, String, String)
+   * @param user
+   * @param emailH
+   * @return
+   */
   Integer getIDForUserAndEmail(String user, String emailH);
 
-  int getIdForUserID(String id);
+//  int getIdForUserID(String id);
 
+  /**
+   * @see mitll.langtest.server.services.UserServiceImpl#loginUser(String, String)
+   * @param id
+   * @param passwordHash
+   * @return
+   */
   User getUser(String id, String passwordHash);
 
+  /**
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyUsers(DatabaseImpl, int, IResultDAO)
+   * @param id
+   * @param passwordHash
+   * @return
+   */
   User getStrictUserWithPass(String id, String passwordHash);
 
+  /**
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyUsers(DatabaseImpl, int, IResultDAO)
+   * @param id
+   * @return
+   */
   User getUserByID(String id);
 
+  /**
+   * @see DatabaseImpl#getUserHistoryForList(int, Collection, int, Collection, Map)
+   * @param id
+   * @return
+   */
   User getByID(int id);
 
+  /**
+   * @see mitll.langtest.server.database.audio.BaseAudioDAO#getUserIDs
+   * @param userid
+   * @return
+   */
   User getUserWhere(int userid);
 
+  /**
+   * @see UserManagement#getUsers
+   * @return
+   */
   List<User> getUsers();
 
+  /**
+   * @see Report#getReport
+   * @return
+   */
   List<User> getUsersDevices();
 
+  /**
+   * @see mitll.langtest.server.database.analysis.Analysis#getUserInfos(IUserDAO, Map)
+   * @return
+   */
   Map<Integer, MiniUser> getMiniUsers();
 
-  Map<User.Kind,Collection<MiniUser>> getMiniByKind();
+  /**
+   * @see UserServiceImpl#getKindToUser
+   * @return
+   */
+  @Deprecated  Map<User.Kind,Collection<MiniUser>> getMiniByKind();
 
+  /**
+   * @see mitll.langtest.server.database.audio.BaseAudioDAO#getAudioAttribute
+   * @param userid
+   * @return
+   */
   MiniUser getMiniUser(int userid);
 
+  /**
+   * @see mitll.langtest.server.database.audio.BaseAudioDAO#getUserIDs(int)
+   * @param getMale
+   * @return
+   */
   Map<Integer, User> getUserMap(boolean getMale);
 
+  /**
+   * @see mitll.langtest.server.database.audio.BaseAudioDAO#getUserIDs(int)
+   * @param getMale
+   * @return
+   */
   Collection<Integer> getUserIDs(boolean getMale);
 
+  /**
+   * @see mitll.langtest.server.database.result.ResultDAO#getUserToResults(AudioType, IUserDAO)
+   * @return
+   */
   Map<Integer, User> getUserMap();
 
   /**
@@ -101,19 +197,55 @@ public interface IUserDAO extends IDAO {
    */
   String isValidEmail(String emailH);
 
+  /**
+   * @see UserServiceImpl#changePassword(int, String, String)
+   * @param user
+   * @param passwordH
+   * @return
+   */
   boolean changePassword(int user, String passwordH);
 
+  /**
+   * @see UserServiceImpl#changePFor(String, String)
+   * @param key
+   * @return
+   */
   User getUserWithResetKey(String key);
 
-  User getUserWithEnabledKey(String key);
+ @Deprecated User getUserWithEnabledKey(String key);
 
+  /**
+   * @see mitll.langtest.server.mail.EmailHelper#resetPassword(String, String, String)
+   * @param userid
+   * @param resetKey
+   * @param key
+   * @return
+   */
   boolean updateKey(int userid, boolean resetKey, String key);
 
+  /**
+   * @see UserServiceImpl#changePFor(String, String)
+   * @param userid
+   * @param resetKey
+   * @return
+   */
   boolean clearKey(int userid, boolean resetKey);
 
+  /**
+   * @see DatabaseImpl#initializeDAOs
+   * @return
+   */
   int getBeforeLoginUser();
 
+  /**
+   * @see UserServiceImpl#getCounts()
+   * @return
+   */
   Map<User.Kind,Integer> getCounts();
 
+  /**
+   * @see UserServiceImpl#update
+   * @param toUpdate
+   */
   void update(User toUpdate);
 }
