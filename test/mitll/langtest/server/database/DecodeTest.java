@@ -283,4 +283,18 @@ public class DecodeTest extends BaseTest {
     for (AudioAttribute audioAttribute : audioAttributes)
       audioFileHelper.decodeOneAttribute(exercise, audioAttribute, false);
   }
+
+  @Test
+  public void testSerbian() {
+    DatabaseImpl database = getDatabase("serbian");
+    AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), database.getServerProps(), database, null);
+    Collection exercises = database.getExercises();
+    logger.info("Got " +exercises.size());
+    if (exercises.isEmpty()) {
+
+    }
+    else {
+      logger.info("Got " + exercises.iterator().next());
+    }
+  }
 }
