@@ -35,89 +35,75 @@ package mitll.langtest.server.database.user;
 import mitll.hlt.domino.server.ServerInitializationManager;
 import mitll.hlt.domino.server.user.IUserServiceDelegate;
 import mitll.hlt.domino.server.user.UserServiceFacadeImpl;
-import mitll.hlt.domino.server.util.Mailer;
-import mitll.hlt.domino.server.util.Mongo;
-import mitll.hlt.domino.server.util.ServerProperties;
+import mitll.hlt.domino.server.util.*;
 import mitll.hlt.domino.shared.common.SResult;
+import mitll.hlt.domino.shared.model.user.AccountDetail;
 import mitll.hlt.domino.shared.model.user.ClientUserDetail;
+import mitll.hlt.domino.shared.model.user.DBUser;
 import mitll.hlt.domino.shared.model.user.Group;
-import mitll.langtest.server.PathHelper;
+import mitll.hlt.json.JSONSerializer;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickMiniUser;
 import mitll.npdata.dao.SlickUser;
-import mitll.npdata.dao.SlickUserPermission;
-import org.apache.log4j.Logger;
 import scala.collection.Seq;
 
 import javax.servlet.ServletContext;
 import java.sql.Timestamp;
 import java.util.*;
 
-import mitll.hlt.domino.server.user.IUserServiceDelegate;
-import mitll.hlt.domino.server.user.UserServiceFacadeImpl;
-import mitll.hlt.domino.server.util.Mailer;
-import mitll.hlt.domino.server.util.Mongo;
-import mitll.hlt.domino.server.util.ServerProperties;
-import mitll.hlt.domino.shared.util.DateFormatter;
-import mitll.hlt.domino.shared.util.GWTDateFormatter;
-import mitll.hlt.json.JSONSerializer;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.ignite.Ignite;
-import org.apache.ignite.Ignition;
-import org.apache.ignite.configuration.DeploymentMode;
-import org.apache.ignite.configuration.IgniteConfiguration;
-import org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi;
-import org.apache.ignite.spi.discovery.tcp.ipfinder.vm.TcpDiscoveryVmIpFinder;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 
 public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DominoUserDAOImpl.class);
   private final IUserServiceDelegate delegate;
+
+  /**
+   * TODO : get the admin user.
+   */
+  User adminUser;
 //  private final UserDAOWrapper dao;
 //  private IUserPermissionDAO permissionDAO;
 
   /**
    * @param database
-   * @param dbConnection
-   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(PathHelper)
+   * @paramx dbConnection
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
   public DominoUserDAOImpl(Database database, ServletContext servletContext) {
     super(database);
-  //  dao = new UserDAOWrapper(dbConnection);
+    //  dao = new UserDAOWrapper(dbConnection);
 
-    this.delegate = (IUserServiceDelegate)servletContext.
+    this.delegate = (IUserServiceDelegate) servletContext.
         getAttribute(ServerInitializationManager.USER_SVC);
 
 
-   // ServerProperties props = getServerProperties(in, newContext);
+    // ServerProperties props = getServerProperties(in, newContext);
 
-  //  log.info("Starting Mongo connection initialization");
-    Mongo pool = Mongo.createPool(new DBProperties());
+    //  log.info("Starting Mongo connection initialization");
+    Properties props = database.getServerProps().getProps();
+    Mongo pool = Mongo.createPool(new DBProperties(props));
     //DocumentService docSvc = null;
     IUserServiceDelegate userDelegate = null;
 
-    Ignite ignite = null;
+//    Ignite ignite = null;
 //    if (props.isCacheEnabled()) {
 //      ignite = getIgnite();
 //      newContext.setAttribute(IGNITE, ignite);
 //    }
 
     if (pool != null) {
-     // newContext.setAttribute(MONGO_ATT_NAME, pool);
+      // newContext.setAttribute(MONGO_ATT_NAME, pool);
       JSONSerializer serializer = Mongo.makeSerializer();
-     // newContext.setAttribute(JSON_SERIALIZER, serializer);
-      Mailer m = new Mailer(props.getMailerProperties());
-      userDelegate = UserServiceFacadeImpl.makeServiceDelegate(props, m, pool, serializer, ignite);
+      // newContext.setAttribute(JSON_SERIALIZER, serializer);
+      Mailer m = new Mailer(new MailerProperties(props));//props.getMailerProperties());
+      mitll.hlt.domino.server.util.ServerProperties dominoProps = new ServerProperties(props, "1.0", "demo", "0", "now");
+      userDelegate = UserServiceFacadeImpl.makeServiceDelegate(dominoProps, m, pool, serializer, null/*ignite*/);
     }
-   // new MongoUserServiceDelegate(props.getUserServiceProperties(), mailer, mongoCP);
+    // new MongoUserServiceDelegate(props.getUserServiceProperties(), mailer, mongoCP);
   }
 
-/*
+  /*
   public void setPermissionDAO(IUserPermissionDAO permissionDAO) {
     this.permissionDAO = permissionDAO;
   }
@@ -150,10 +136,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @return
    * @see mitll.langtest.server.database.copy.CopyToPostgres#addUser(DominoUserDAOImpl, Map, User)
    */
-  public ClientUserDetail addAndGet(ClientUserDetail user,String encodedPass, Collection<User.Permission> permissions) {
+  public ClientUserDetail addAndGet(ClientUserDetail user, String encodedPass, Collection<User.Permission> permissions) {
     SResult<ClientUserDetail> clientUserDetailSResult = delegate.doAddUser(user, encodedPass);
 //    SlickUser user1 = dao.addAndGet(user);
-  //  int i = addPermissions(permissions, user1.id());
+    //  int i = addPermissions(permissions, user1.id());
     // if (i > 0) logger.info("inserted " + i + " permissions for " + user1.id());
     return clientUserDetailSResult.get();
   }
@@ -218,29 +204,21 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
                      String emailH, String email, String device,
                      String first, String last) {
     Timestamp now = new Timestamp(System.currentTimeMillis());
-   // getConvertedPermissions(permissions, now);
+    // getConvertedPermissions(permissions, now);
 
-    return dao.add(new SlickUser(-1, userID,
-        gender.equalsIgnoreCase("male"),
-        userAgent,
-        trueIP,
-        age,
-        dialect,
-        now,
-        enabled,
-        "",
-        "",
-//        builder.toString(),
-        kind.toString(),
-        passwordH,
-        emailH,
-        email,
-        device,
-        first,
-        last,
-        -1,
-        now
-        ));
+    List<mitll.hlt.domino.shared.model.user.User.Role> ts = Collections.emptyList();
+    SResult<ClientUserDetail> clientUserDetailSResult = delegate.doAddUser(new ClientUserDetail(
+            //useid ? user.getID() : -1,
+            userID,
+            first,
+            last,
+            email,
+            ts,
+            new Group()
+        ),
+        passwordH);
+    ClientUserDetail clientUserDetail = clientUserDetailSResult.get();
+    return clientUserDetail.getDocumentDBID();
   }
 
 /*  private void getConvertedPermissions(Collection<User.Permission> permissions, Timestamp now) {
@@ -263,6 +241,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
   /**
    * For really old users with missing info
+   *
    * @param id
    * @param kind
    * @param passwordH
@@ -270,7 +249,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @see BaseUserDAO#addUser
    */
   protected void updateUser(int id, User.Kind kind, String passwordH, String emailH) {
-    dao.updateUser(id, kind.name(), passwordH, emailH);//,
+    DBUser dbUser = delegate.lookupDBUser(id);
+    delegate.doSavePassword()
+    dbUser.set
+    delegate.updateUser(adminUser, new ClientUserDetail(dbUser,new AccountDetail()));
+//    dao.updateUser(id, kind.name(), passwordH, emailH);//,
 //        kind == User.Kind.CONTENT_DEVELOPER ? CD_PERMISSIONS.toString() : EMPTY_PERM.toString());
   }
 
@@ -401,6 +384,38 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
     logger.info("toSlick made " + user1);
 
+    return user1;
+  }
+
+  private ClientUserDetail getClientUser(User user) {
+    ClientUserDetail user1 = new ClientUserDetail(
+        //useid ? user.getID() : -1,
+        user.getUserID(),
+        user.getFirst(),
+        user.getLast(),
+        user.getEmail(),
+        Collections.emptyList(),
+        new Group()/*
+
+        user.isMale(),
+        user.getIpaddr() == null ? "" : user.getIpaddr(),
+        "",
+        user.getAge(),
+        user.getDialect(),
+        now,
+        user.isEnabled(),
+        user.getResetKey() == null ? "" : user.getResetKey(),
+        "",
+        //  user.getPermissions().toString(),
+        user.getUserKind().name(),
+        user.getPasswordHash() == null ? "" : user.getPasswordHash(),
+        user.getEmailHash() == null ? "" : user.getEmailHash(),
+        "",
+        user.getDevice() == null ? "" : user.getDevice(),
+
+        user.getID(),
+        now*/
+    );
     return user1;
   }
 
@@ -572,13 +587,13 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
   @Override
   public void update(User toUpdate) {
-  //  logger.info("update " + toUpdate);
+    //  logger.info("update " + toUpdate);
     SlickUser toUpdate1 = toSlick(toUpdate, true);
-  //  logger.info("update " + toUpdate1);
+    //  logger.info("update " + toUpdate1);
     int update = dao.update(toUpdate1);
     if (update == 0) {
       logger.warn("didn't update table with " + toUpdate1);
     }
-   // logger.info("user now " + getByID(toUpdate.getID()));
+    // logger.info("user now " + getByID(toUpdate.getID()));
   }
 }
