@@ -77,7 +77,7 @@
 
     <context-param>
         <param-name>config</param-name>
-        <param-value>spanish</param-value>
+        <param-value>serbian</param-value>
     </context-param>
 
     <context-param>
