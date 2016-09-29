@@ -38,6 +38,7 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.JsonSupport;
 import mitll.langtest.server.database.analysis.SlickAnalysis;
+import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.exercise.DBExerciseDAO;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.database.exercise.Project;
@@ -52,62 +53,70 @@ import org.apache.log4j.Logger;
 import java.util.*;
 
 public class ProjectManagement implements IProjectManagement {
-  private static final Logger logger = Logger.getLogger(DatabaseImpl.class);
-  public static final int IMPORT_PROJECT_ID = -100;
+  private static final Logger logger = Logger.getLogger(ProjectManagement.class);
+  private static final int IMPORT_PROJECT_ID = -100;
   private static final boolean ADD_DEFECTS = false;
 
   private static final boolean DEBUG_ONE_PROJECT = false;
-  private PathHelper pathHelper;
+  private final PathHelper pathHelper;
   private final ServerProperties serverProps;
   private final LogAndNotify logAndNotify;
 
-  private IProjectDAO projectDAO;
+  private final IProjectDAO projectDAO;
 
-  DatabaseImpl db;
+  private final DatabaseImpl db;
   private final Map<Integer, Project> idToProject = new HashMap<>();
 
+  /**
+   * @param pathHelper
+   * @param properties
+   * @param logAndNotify
+   * @param db
+   * @see
+   */
   public ProjectManagement(PathHelper pathHelper, ServerProperties properties, LogAndNotify logAndNotify,
                            DatabaseImpl db) {
     this.pathHelper = pathHelper;
     this.serverProps = properties;
     this.logAndNotify = logAndNotify;
     this.db = db;
+    this.projectDAO = db.getProjectDAO();
   }
 
+/*
   public IProjectDAO getProjectDAO() {
     return projectDAO;
   }
+*/
 
   /**
-   * @param reload
    * @seex CopyToPostgres#createProjectIfNotExists
+   * @see DatabaseImpl#populateProjects(boolean)
    */
-  @Override
-  public void populateProjects(boolean reload) {
-    populateProjects(pathHelper, serverProps, logAndNotify, reload, db);
+ // @Override
+  public void populateProjects() {
+    populateProjects(pathHelper, serverProps, logAndNotify, db);
+    //setExerciseDAOs();
   }
 
-
-  @Override
-  public String getLanguage(CommonExercise ex) {
+  //@Override
+ /* public String getLanguage(CommonExercise ex) {
     return getLanguage(ex.getProjectID());
-  }
+  }*/
 
-  @Override
-  public String getLanguage(int projectid) {
+  //@Override
+  private String getLanguage(int projectid) {
     return getProject(projectid).getLanguage();
   }
-
 
   /**
    * Fill in id->project map
    *
-   * @see #populateProjects(boolean)
+   * @see IProjectManagement#populateProjects()
    */
   private void populateProjects(PathHelper pathHelper,
                                 ServerProperties serverProps,
                                 LogAndNotify logAndNotify,
-                                boolean reload,
                                 DatabaseImpl db) {
     Collection<SlickProject> all = projectDAO.getAll();
     logger.info("populateProjects : found " + all.size() + " projects");
@@ -116,58 +125,68 @@ public class ProjectManagement implements IProjectManagement {
       if (!idToProject.containsKey(slickProject.id())) {
         if (DEBUG_ONE_PROJECT) {
           if (slickProject.language().equalsIgnoreCase("english")) {
-            rememberProject(pathHelper, serverProps, logAndNotify, reload, slickProject, db);
+            rememberProject(pathHelper, serverProps, logAndNotify, slickProject, db);
           }
         } else {
-          rememberProject(pathHelper, serverProps, logAndNotify, reload, slickProject, db);
+          rememberProject(pathHelper, serverProps, logAndNotify, slickProject, db);
         }
       }
     }
 
-    if (reload) {
+/*    if (reload) {
       doReload();
-    }
+    }*/
 
-    logger.info("populateProjects (reload = " + reload + ") now project ids " + idToProject.keySet());
+    logger.info("populateProjects " +
+        //"(reload = " + reload + ") " +
+        "now project ids " + idToProject.keySet());
     for (Project project : getProjects()) {
       logger.info("\tproject " + project);
     }
   }
 
-  @Override
-  public void doReload() {
+  /**
+   * TODO : add mechanism to trigger reload of exercises for a NetProf project from a domino project
+   *
+   */
+  //@Override
+/*  private void doReload() {
     for (Project project : getProjects()) {
       if (project.getExerciseDAO() == null) {
         setExerciseDAO(project);
-        configureProject(/*installPath,*/ project);
+        configureProject(*//*installPath,*//* project);
         logger.info("\tpopulateProjects : " + project + " : " + project.getAudioFileHelper());
       }
     }
-  }
+  }*/
 
+
+  /**
+   *   // TODO : this seems like a bad idea --
+   */
   @Override
   public void configureProjects() {
-    // TODO : this seems like a bad idea --
-
-    for (Project project : getProjects()) {
+    Collection<Project> projects = getProjects();
+    logger.info("configureProjects got " + projects.size());
+    for (Project project : projects) {
       configureProject(project);
     }
   }
 
   /**
-   * @param installPath
+   * @paramx installPath
    * @param project
-   * @see #makeDAO(String, String, String)
+   * @see #configureProjects
    */
-  @Override
-  public void configureProject(/*String installPath,*/ Project project) {
-    // logger.info("configureProject " + project + " install path " + installPath);
+ // @Override
+  private void configureProject(/*String installPath,*/ Project project) {
+    logger.info("configureProject " + project);
 
-    ExerciseDAO<?> exerciseDAO1 = project.getExerciseDAO();
+   // ExerciseDAO<?> exerciseDAO1 = ;
     SlickProject project1 = project.getProject();
     if (project1 == null) logger.info("note : no project for " + project);
     int id = project1 == null ? -1 : project1.id();
-    setDependencies(exerciseDAO1, id);
+    setDependencies(project.getExerciseDAO(), id);
 
     List<CommonExercise> rawExercises = project.getRawExercises();
     if (!rawExercises.isEmpty()) {
@@ -189,8 +208,22 @@ public class ProjectManagement implements IProjectManagement {
     logMemory();
   }
 
-  public void setDependencies(ExerciseDAO exerciseDAO, int projid) {
-    exerciseDAO.setDependencies(db.getUserExerciseDAO(), null /*addRemoveDAO*/, db.getAudioDAO(), projid);
+  /**
+   * @param exerciseDAO
+   * @param projid
+   * @see #configureProject(Project)
+   */
+  private void setDependencies(ExerciseDAO exerciseDAO, int projid) {
+    logger.info("setDependencies - " + projid);
+    IAudioDAO audioDAO = db.getAudioDAO();
+
+    if (audioDAO == null) logger.error("no audio dao ", new Exception());
+
+    exerciseDAO.setDependencies(
+        db.getUserExerciseDAO(),
+        null /*addRemoveDAO*/,
+        audioDAO,
+        projid);
   }
 
   private void logMemory() {
@@ -198,15 +231,15 @@ public class ProjectManagement implements IProjectManagement {
     Runtime rt = Runtime.getRuntime();
     long free = rt.freeMemory();
     long used = rt.totalMemory() - free;
-    long max = rt.maxMemory();
+    long max  = rt.maxMemory();
 
     ThreadGroup threadGroup = Thread.currentThread().getThreadGroup();
     logger.debug(" current thread group " + threadGroup.getName() + " = " + threadGroup.activeCount() +
         " : # cores = " + Runtime.getRuntime().availableProcessors() + " heap info free " + free / MB + "M used " + used / MB + "M max " + max / MB + "M");
   }
 
-  @Override
-  public Project getProjectOrFirst(int projectid) {
+//  @Override
+private Project getProjectOrFirst(int projectid) {
     return projectid == -1 ? getFirstProject() : getProject(projectid);
   }
 
@@ -224,16 +257,20 @@ public class ProjectManagement implements IProjectManagement {
    * @param pathHelper
    * @param serverProps
    * @param logAndNotify
-   * @param reload
    * @param slickProject
-   * @see #populateProjects(PathHelper, ServerProperties, LogAndNotify, boolean)
+   * @see #populateProjects
    */
-  private void rememberProject(PathHelper pathHelper, ServerProperties serverProps, LogAndNotify logAndNotify,
-                               boolean reload, SlickProject slickProject,
+  private void rememberProject(PathHelper pathHelper,
+                               ServerProperties serverProps,
+                               LogAndNotify logAndNotify,
+                               SlickProject slickProject,
                                DatabaseImpl db) {
     Project project = new Project(slickProject, pathHelper, serverProps, db, logAndNotify);
     idToProject.put(project.getProject().id(), project);
-    logger.info("populateProjects (reload = " + reload + ") : " + project + " : " + project.getAudioFileHelper());
+    logger.info("populateProjects " +
+        //"(reload = " + reload + ")" +
+        " : " + project + " : " + project.getAudioFileHelper());
+    setExerciseDAO(project);
   }
 
   @Override
@@ -241,29 +278,36 @@ public class ProjectManagement implements IProjectManagement {
     idToProject.put(IMPORT_PROJECT_ID, new Project(jsonExerciseDAO));
   }
 
-
   /**
-   * @see #makeExerciseDAO(String, boolean)
+   * @see DatabaseImpl#makeExerciseDAO(String, boolean)
+   * @see IProjectManagement#populateProjects()
    */
-  @Override
+  //@Override
+/*
   public void setExerciseDAOs() {
-    for (Project project : getProjects()) {
+    Collection<Project> projects = getProjects();
+    logger.info("setExerciseDAOs on " + projects.size());
+    for (Project project : projects) {
       // if (project.getProject().id() == 3)
-//      logger.info("makeExerciseDAO project     " + project);
+      logger.info("makeExerciseDAO project     " + project);
       setExerciseDAO(project);
       //    logger.info("makeExerciseDAO project now " + project);
     }
   }
+*/
 
   /**
    * @param project
-   * @see #populateProjects(boolean)
+   * @see #setExerciseDAOs
    */
-  private void setExerciseDAO(Project project/*, DBExerciseDAO dbExerciseDAO*/) {
-//    logger.info("setExerciseDAO on " + project);
-    SlickProject project1 = project.getProject();
-    DBExerciseDAO dbExerciseDAO = new DBExerciseDAO(serverProps, db.getUserListManager(), ADD_DEFECTS,
-        (SlickUserExerciseDAO) db.getUserExerciseDAO(), project1);
+  private void setExerciseDAO(Project project) {
+    logger.info("setExerciseDAO on " + project);
+    DBExerciseDAO dbExerciseDAO = new DBExerciseDAO(
+        serverProps,
+        db.getUserListManager(),
+        ADD_DEFECTS,
+        (SlickUserExerciseDAO) db.getUserExerciseDAO(),
+        project.getProject());
     project.setExerciseDAO(dbExerciseDAO);
   }
 
@@ -338,14 +382,14 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   @Override
-  public Project getFirstProject() {
+public Project getFirstProject() {
     return getProjects().iterator().next();
   }
 
   /**
    * @param userWhere
    * @param projid
-   * @see #setStartupInfo(User)
+   * @see #setStartupInfo
    * @see mitll.langtest.server.services.UserServiceImpl#setProject(int)
    */
   @Override
@@ -357,7 +401,7 @@ public class ProjectManagement implements IProjectManagement {
     } else {
       if (!idToProject.containsKey(projid)) {
         logger.info("\tsetStartupInfo : populateProjects...");
-        populateProjects(false);
+        populateProjects();
       }
 
       Project project = getProject(projid);
