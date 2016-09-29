@@ -304,8 +304,7 @@ public class RestUserManagement {
   }
 
   private boolean forgotUsername(String email) {
-    String emailH = Md5Hash.getHash(email);
-    String valid = db.getUserDAO().isValidEmail(emailH);
+    String valid = db.getUserDAO().isValidEmail(Md5Hash.getHash(email));
     if (valid != null) {
       getEmailHelper().getUserNameEmailDevice(email, valid);
       return true;

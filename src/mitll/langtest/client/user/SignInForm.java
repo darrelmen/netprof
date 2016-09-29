@@ -48,12 +48,13 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.instrumentation.EventRegistration;
+import mitll.langtest.shared.user.LoginResult;
 import mitll.langtest.shared.user.User;
 
 import java.util.logging.Logger;
 
 public class SignInForm extends UserDialog implements SignIn {
-  private final Logger logger = Logger.getLogger("SignUpForm");
+  private final Logger logger = Logger.getLogger("SignInForm");
 
   private static final String DEACTIVATED = "I'm sorry, this account has been deactivated.";
 
@@ -158,7 +159,6 @@ public class SignInForm extends UserDialog implements SignIn {
     userField.box.getElement().setId("Use`rname_Box_SignIn");
     userField.box.setWidth(SIGN_UP_WIDTH);
 
-
     userField.box.addFocusHandler(new FocusHandler() {
       @Override
       public void onFocus(FocusEvent event) {
@@ -172,13 +172,15 @@ public class SignInForm extends UserDialog implements SignIn {
       @Override
       public void onBlur(BlurEvent event) {
         logger.info("makeSignInUserName : got blur ");
-        if (!userField.getText().isEmpty()) {
-          eventRegistration.logEvent(userField.box, "UserNameBox", "N/A", "left username field '" + userField.getText() + "'");
+        final String text = userField.getText();
 
-          //    logger.info("checking makeSignInUserName " + userField.getText());
-          service.userExists(userField.getText(), "", new AsyncCallback<User>() {
+        if (!text.isEmpty()) {
+          eventRegistration.logEvent(userField.box, "UserNameBox", "N/A", "left username field '" + text + "'");
+             logger.info("\tchecking makeSignInUserName " + text);
+          service.userExists(text, "", new AsyncCallback<User>() {
             @Override
             public void onFailure(Throwable caught) {
+              logger.warning("\tgot FAILURE on userExists " + text);
 
             }
 
@@ -295,51 +297,102 @@ public class SignInForm extends UserDialog implements SignIn {
   }
 
   /**
-   * @param result
+   * @param foundUser
    * @param emptyPassword
    * @param hashedPass
    * @see #gotLogin
    */
-  private void foundExistingUser(User result, boolean emptyPassword, String hashedPass) {
-    String user = result.getUserID();
-    String emailHash = result.getEmailHash();
-    String passwordHash = result.getPasswordHash();
+  private void foundExistingUser(User foundUser, boolean emptyPassword, String hashedPass) {
+    String emailHash = foundUser.getEmailHash();
+    String passwordHash = foundUser.getPasswordHash();
     if (emailHash == null || passwordHash == null || emailHash.isEmpty() || passwordHash.isEmpty()) {
-      copyInfoToSignUp(result);
+      copyInfoToSignUp(foundUser);
       signIn.setEnabled(true);
     } else {
-      // logger.info("Got valid userField " + result);
+      // logger.info("Got valid userField " + foundUser);
       if (emptyPassword) {
         eventRegistration.logEvent(signIn, "sign in", "N/A", "empty password");
-
         markErrorBlur(password, PLEASE_ENTER_YOUR_PASSWORD);
         signIn.setEnabled(true);
-      } else if (result.getPasswordHash().equalsIgnoreCase(hashedPass)) {
-        if (result.isEnabled() //||
-          //   result.getUserKind() != User.Kind.CONTENT_DEVELOPER ||
-          //    props.enableAllUsers()
+      } else {
+        getPermissionsAndSetUser(foundUser.getUserID(),hashedPass);
+
+        /*if (foundUser.getPasswordHash().equalsIgnoreCase(hashedPass)) {
+          gotGoodPassword(foundUser);
+        } else {
+          gotBadPassword(foundUser, passwordHash);
+        }*/
+      }
+    }
+  }
+
+  private void getPermissionsAndSetUser(final String user, final String passwordHash) {
+    //console("getPermissionsAndSetUser : " + user);
+   // if (passwordHash == null) passwordHash = "";
+    userManager.getUserService().loginUser(user, passwordHash, new AsyncCallback<LoginResult>() {
+      @Override
+      public void onFailure(Throwable caught) {
+      }
+
+      @Override
+      public void onSuccess(LoginResult result) {
+        //if (DEBUG) logger.info("UserManager.getPermissionsAndSetUser : onSuccess " + user + " : " + result);
+//        if (loginType == PropertyHandler.LOGIN_TYPE.ANONYMOUS && result.getUserKind() != User.Kind.ANONYMOUS) {
+//          clearUser();
+//          addAnonymousUser();
+//        } else
+//
+        if (result == null || //loginType != PropertyHandler.LOGIN_TYPE.ANONYMOUS &&
+            result.getResultType() != LoginResult.ResultType.Success
+          //    result.getUserKind() == User.Kind.ANONYMOUS
             ) {
-          eventRegistration.logEvent(signIn, "sign in", "N/A", "successful sign in for " + user);
-          //    logger.info("Got valid userField " + userField + " and matching password, so we're letting them in.");
-          storeUser(result, userManager);
+     //     clearUser();
+      //    userNotification.showLogin();
+          gotBadPassword(result.getLoggedInUser(), passwordHash);
+
         } else {
-          eventRegistration.logEvent(signIn, "sign in", "N/A", "successful sign in for " + user + " but wait for approval.");
-          markErrorBlur(signIn, "I'm sorry", DEACTIVATED, Placement.LEFT);
-          signIn.setEnabled(true);
-        }
-      } else { // special pathway...
-        String enteredPass = Md5Hash.getHash(password.getText());
-        if (enteredPass.equals(MAGIC_PASS)) {
-          eventRegistration.logEvent(signIn, "sign in", "N/A", "sign in as userField '" + user + "'");
-          storeUser(result, userManager);
-        } else {
-          logger.info("foundExistingUser bad pass  " + passwordHash);
-          //  logger.info("admin " + Md5Hash.getHash("adm!n"));
-          eventRegistration.logEvent(signIn, "sign in", "N/A", "bad password");
-          markErrorBlur(password, BAD_PASSWORD);
-          signIn.setEnabled(true);
+          gotGoodPassword(result.getLoggedInUser(), passwordHash);
+        //  gotNewUser(result.getLoggedInUser());
         }
       }
+    });
+  }
+
+  private void gotGoodPassword(User foundUser,String passwordHash) {
+    String user = foundUser.getUserID();
+    if (foundUser.isEnabled() //||
+      //   foundUser.getUserKind() != User.Kind.CONTENT_DEVELOPER ||
+      //    props.enableAllUsers()
+        ) {
+      //foundUser.setPassword()
+      eventRegistration.logEvent(signIn, "sign in", "N/A", "successful sign in for " + user);
+      //    logger.info("Got valid userField " + userField + " and matching password, so we're letting them in.");
+      storeUser(foundUser, userManager, passwordHash);
+    } else {
+      eventRegistration.logEvent(signIn, "sign in", "N/A", "successful sign in for " + user + " but wait for approval.");
+      markErrorBlur(signIn, "I'm sorry", DEACTIVATED, Placement.LEFT);
+      signIn.setEnabled(true);
+    }
+  }
+
+  /**
+   * TODO : Maybe for now magic pass won't work? think of something better!
+   * @param foundUser
+   * @param passwordHash
+   */
+  private void gotBadPassword(User foundUser, String passwordHash) {
+    String enteredPass = Md5Hash.getHash(password.getText());
+    if (enteredPass.equals(MAGIC_PASS)) {
+      // special pathway...
+      String user = foundUser.getUserID();
+      eventRegistration.logEvent(signIn, "sign in", "N/A", "sign in as userField '" + user + "'");
+      storeUser(foundUser, userManager, passwordHash);
+    } else {
+      logger.info("foundExistingUser bad pass  " + passwordHash);
+      //  logger.info("admin " + Md5Hash.getHash("adm!n"));
+      eventRegistration.logEvent(signIn, "sign in", "N/A", "bad password");
+      markErrorBlur(password, BAD_PASSWORD);
+      signIn.setEnabled(true);
     }
   }
 

@@ -59,7 +59,6 @@ import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.flashcard.Banner;
 import mitll.langtest.client.instrumentation.ButtonFactory;
 import mitll.langtest.client.instrumentation.EventContext;
 import mitll.langtest.client.instrumentation.EventLogger;
@@ -173,13 +172,16 @@ import java.util.logging.Logger;
  * - Fixed bug with detecting RTL text and showing it in the exercise list
  * 1.4.9
  * - Fixed bug with downloading audio for custom item.
+ * 2.0.0
+ * - development to master
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class LangTest implements
     EntryPoint, UserFeedback, ExerciseController, UserNotification, LifecycleSupport, UserState {
-  public static final String INTRO = "Learn pronunciation and practice vocabulary.";
   private final Logger logger = Logger.getLogger("LangTest");
+
+  private static final String INTRO = "Learn pronunciation and practice vocabulary.";
 
   public static final String VERSION_INFO = "2.0.0";
 
@@ -190,7 +192,7 @@ public class LangTest implements
   private static final String DIVIDER = "|";
   private static final int MAX_EXCEPTION_STRING = 300;
   private static final int MAX_CACHE_SIZE = 100;
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
   private UserManager userManager;
   private FlashRecordPanelHeadless flashRecordPanel;
@@ -477,7 +479,9 @@ public class LangTest implements
     return browserCheck.getBrowserAndVersion();
   }
 
-  public UserState getUserState() { return this; }
+  public UserState getUserState() {
+    return this;
+  }
 
   @Override
   public String getInfoLine() {
@@ -522,6 +526,7 @@ public class LangTest implements
   public void recordingModeSelect() {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
+        logger.info("check init flash");
         checkInitFlash();
       }
     });
@@ -536,12 +541,14 @@ public class LangTest implements
    * @see mitll.langtest.client.recorder.FlashRecordPanelHeadless#micConnected()
    */
   private void makeFlashContainer() {
+    logger.info("makeFlashContainer - called");
+
     MicPermission micPermission = new MicPermission() {
       /**
        * @see mitll.langtest.client.recorder.WebAudioRecorder
        */
       public void gotPermission() {
-        // logger.info("makeFlashContainer - got permission!");
+        logger.info("\tmakeFlashContainer - got permission!");
         hideFlash();
         checkLogin();
       }
@@ -573,7 +580,7 @@ public class LangTest implements
        * @see
        */
       public void noRecordingMethodAvailable() {
-        logger.info(" : makeFlashContainer - no way to record");
+        logger.info("\tmakeFlashContainer - no way to record");
         hideFlash();
         new ModalInfoDialog("Can't record audio", "Recording audio is not supported.", new HiddenHandler() {
           @Override
@@ -592,7 +599,6 @@ public class LangTest implements
       }
     };
     flashRecordPanel = new FlashRecordPanelHeadless(micPermission);
-//    FlashRecordPanelHeadless.setMicPermission(micPermission);
   }
 
   private void hideFlash() {
@@ -612,7 +618,7 @@ public class LangTest implements
 
   public void clearStartupInfo() {
     this.projectStartupInfo = null;
-    logger.info("\nclearStartupInfo Got startup info " + projectStartupInfo);
+    //logger.info("clearStartupInfo   ");
   }
 
   public Collection<String> getTypeOrder() {
@@ -773,16 +779,16 @@ public class LangTest implements
     if (on) permissions.add(permission);
     else permissions.remove(permission);
   }*/
-
   @Override
   public Collection<User.Permission> getPermissions() {
     return getCurrent().getPermissions();
   }
 
   public boolean hasPermission(User.Permission permission) {
-    logger.info("user permissions " + getPermissions() + " for " +getCurrent());
+    logger.info("hasPermission user permissions " + getPermissions() + " for " + getUser());
     return getPermissions().contains(permission);
   }
+
   /**
    * @return
    * @see mitll.langtest.client.exercise.PostAnswerProvider#postAnswers
@@ -830,11 +836,14 @@ public class LangTest implements
   public AudioServiceAsync getAudioService() {
     return audioService;
   }
+
   public UserServiceAsync getUserService() {
     return userService;
   }
 
-  public UserManager getUserManager() { return userManager; }
+  public UserManager getUserManager() {
+    return userManager;
+  }
 
   public QCServiceAsync getQCService() {
     return qcServiceAsync;
@@ -925,5 +934,7 @@ public class LangTest implements
     return startupInfo;
   }
 
-  public void logout() { initialUI.logout(); }
+  public void logout() {
+    initialUI.logout();
+  }
 }
