@@ -53,10 +53,7 @@ import static mitll.langtest.shared.user.User.Kind;
 
 @RemoteServiceRelativePath("user-manager")
 public interface UserService extends RemoteService {
-  // User Management --
-
   User setProject(int projectid);
-
   User addUser(SignUpUser user, String url
                //    , boolean isCD
   );
@@ -75,10 +72,16 @@ public interface UserService extends RemoteService {
    * @param login
    * @param passwordH
    * @return
-   * @see mitll.langtest.client.user.UserPassLogin#gotLogin
+   * @see mitll.langtest.client.user.SignInForm#gotLogin
    */
   User userExists(String login, String passwordH);
 
+  /**
+   * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser(String, String)
+   * @param userId
+   * @param attemptedPassword - hashed - don't send clear password
+   * @return
+   */
   LoginResult loginUser(String userId, String attemptedPassword);
 
   void logout(String login);

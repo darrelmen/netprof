@@ -118,13 +118,14 @@ abstract class UserDialog extends BasicDialog {
   /**
    * @param result
    * @param userManager
+   * @param passwordHash
    * @see SignInForm#foundExistingUser(User, boolean, String)
    * @see SignUpForm#gotSignUp(String, String, String, User.Kind)
    */
-  void storeUser(User result, UserManager userManager) {
+  void storeUser(User result, UserManager userManager, String passwordHash) {
     //logger.info("UserPassLogin.storeUser - " + result);
     enterKeyButtonHelper.removeKeyHandler();
-    userManager.storeUser(result);
+    userManager.storeUser(result, passwordHash);
   }
 
   public void setEnterKeyButtonHelper(KeyPressHelper enterKeyButtonHelper) {
