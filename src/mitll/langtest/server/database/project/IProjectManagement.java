@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.project;
 
+import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -40,19 +41,25 @@ import mitll.langtest.shared.user.User;
 import java.util.Collection;
 
 public interface IProjectManagement {
-  void populateProjects(boolean reload);
+  /**
+   * @see DatabaseImpl#populateProjects(boolean)
+   */
+  void populateProjects();
 
-  String getLanguage(CommonExercise ex);
+ // String getLanguage(CommonExercise ex);
 
-  String getLanguage(int projectid);
+ // String getLanguage(int projectid);
 
-  void doReload();
+ // void doReload();
 
+  /**
+   * @see DatabaseImpl#configureProjects
+   */
   void configureProjects();
 
-  void configureProject(/*String installPath,*/ Project project);
+  //void configureProject(/*String installPath,*/ Project project);
 
-  Project getProjectOrFirst(int projectid);
+  //Project getProjectOrFirst(int projectid);
 
   Project getProjectForUser(int userid);
 
@@ -60,7 +67,10 @@ public interface IProjectManagement {
 
   void addSingleProject(ExerciseDAO<CommonExercise> jsonExerciseDAO);
 
-  void setExerciseDAOs();
+  /**
+   * @see DatabaseImpl#makeExerciseDAO(String, boolean)
+   */
+ // void setExerciseDAOs();
 
   CommonExercise getExercise(int projectid, int id);
 

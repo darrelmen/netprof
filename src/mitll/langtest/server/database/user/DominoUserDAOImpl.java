@@ -32,36 +32,36 @@
 
 package mitll.langtest.server.database.user;
 
-import mitll.hlt.domino.server.ServerInitializationManager;
+import mitll.hlt.domino.server.user.INetProfUserDelegate;
 import mitll.hlt.domino.server.user.IUserServiceDelegate;
 import mitll.hlt.domino.server.user.UserServiceFacadeImpl;
 import mitll.hlt.domino.server.util.*;
+import mitll.hlt.domino.shared.common.FilterDetail;
+import mitll.hlt.domino.shared.common.FindOptions;
 import mitll.hlt.domino.shared.common.SResult;
-import mitll.hlt.domino.shared.model.user.AccountDetail;
-import mitll.hlt.domino.shared.model.user.ClientUserDetail;
-import mitll.hlt.domino.shared.model.user.DBUser;
-import mitll.hlt.domino.shared.model.user.Group;
+import mitll.hlt.domino.shared.model.user.*;
 import mitll.hlt.json.JSONSerializer;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
-import mitll.npdata.dao.SlickMiniUser;
-import mitll.npdata.dao.SlickUser;
-import scala.collection.Seq;
 
-import javax.servlet.ServletContext;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DominoUserDAOImpl.class);
-  private final IUserServiceDelegate delegate;
+
+  private IUserServiceDelegate delegate;
+  private INetProfUserDelegate netProfDelegate;
 
   /**
    * TODO : get the admin user.
    */
-  User adminUser;
+  mitll.hlt.domino.shared.model.user.User adminUser;
+  mitll.hlt.domino.shared.model.user.User dominoImportUser;
 //  private final UserDAOWrapper dao;
 //  private IUserPermissionDAO permissionDAO;
 
@@ -70,13 +70,12 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @paramx dbConnection
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
-  public DominoUserDAOImpl(Database database, ServletContext servletContext) {
+  public DominoUserDAOImpl(Database database/*, ServletContext servletContext*/) {
     super(database);
     //  dao = new UserDAOWrapper(dbConnection);
 
-    this.delegate = (IUserServiceDelegate) servletContext.
-        getAttribute(ServerInitializationManager.USER_SVC);
-
+//    this.delegate = (IUserServiceDelegate) servletContext.
+//        getAttribute(ServerInitializationManager.USER_SVC);
 
     // ServerProperties props = getServerProperties(in, newContext);
 
@@ -98,9 +97,23 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       // newContext.setAttribute(JSON_SERIALIZER, serializer);
       Mailer m = new Mailer(new MailerProperties(props));//props.getMailerProperties());
       mitll.hlt.domino.server.util.ServerProperties dominoProps = new ServerProperties(props, "1.0", "demo", "0", "now");
-      userDelegate = UserServiceFacadeImpl.makeServiceDelegate(dominoProps, m, pool, serializer, null/*ignite*/);
+
+      delegate = UserServiceFacadeImpl.makeServiceDelegate(dominoProps, m, pool, serializer, null/*ignite*/);
+      this.netProfDelegate = delegate.getNetProfDeleagate();
+
+    } else {
+      logger.error("couldn't connect to user service");
     }
+
+
     // new MongoUserServiceDelegate(props.getUserServiceProperties(), mailer, mongoCP);
+  }
+
+  @Override
+  public void ensureDefaultUsers() {
+    super.ensureDefaultUsers();
+    adminUser = delegate.getUser(BEFORE_LOGIN_USER);
+    dominoImportUser = delegate.getUser(IMPORT_USER);
   }
 
   /*
@@ -203,19 +216,23 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
                      String passwordH,
                      String emailH, String email, String device,
                      String first, String last) {
-    Timestamp now = new Timestamp(System.currentTimeMillis());
+    // Timestamp now = new Timestamp(System.currentTimeMillis());
     // getConvertedPermissions(permissions, now);
 
     List<mitll.hlt.domino.shared.model.user.User.Role> ts = Collections.emptyList();
-    SResult<ClientUserDetail> clientUserDetailSResult = delegate.doAddUser(new ClientUserDetail(
-            //useid ? user.getID() : -1,
-            userID,
-            first,
-            last,
-            email,
-            ts,
-            new Group()
-        ),
+    ClientUserDetail updateUser = new ClientUserDetail(
+        //useid ? user.getID() : -1,
+        userID,
+        first,
+        last,
+        email,
+        ts,
+        new Group()
+    );
+    AccountDetail acctDetail = new AccountDetail();
+    updateUser.setAcctDetail(acctDetail);
+    acctDetail.setCrTime(new Date());
+    SResult<ClientUserDetail> clientUserDetailSResult = delegate.doAddUser(updateUser,
         passwordH);
     ClientUserDetail clientUserDetail = clientUserDetailSResult.get();
     return clientUserDetail.getDocumentDBID();
@@ -241,49 +258,101 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
   /**
    * For really old users with missing info
+   * <p>
+   * TODO: SKIP ROLE FOR NOW.
    *
    * @param id
    * @param kind
    * @param passwordH
    * @param emailH
+   * @param email
    * @see BaseUserDAO#addUser
    */
-  protected void updateUser(int id, User.Kind kind, String passwordH, String emailH) {
-    DBUser dbUser = delegate.lookupDBUser(id);
-    delegate.doSavePassword()
-    dbUser.set
-    delegate.updateUser(adminUser, new ClientUserDetail(dbUser,new AccountDetail()));
+  protected void updateUser(int id, User.Kind kind, String passwordH, String emailH, String email) {
+    DBUser dbUser = savePasswordAndGetUser(id, passwordH);
+    dbUser.setEmail(email);
+    delegate.updateUser(adminUser, new ClientUserDetail(dbUser, new AccountDetail()));
 //    dao.updateUser(id, kind.name(), passwordH, emailH);//,
 //        kind == User.Kind.CONTENT_DEVELOPER ? CD_PERMISSIONS.toString() : EMPTY_PERM.toString());
   }
 
+  private DBUser savePasswordAndGetUser(int id, String passwordH) {
+    DBUser dbUser = delegate.lookupDBUser(id);
+    if (dbUser != null) {
+      dbUser.setPrimaryGroup(new Group()); // TODO just for now... so it doesn't crash
+      netProfDelegate.doSavePassword(dbUser, passwordH);
+    }
+    return dbUser;
+  }
+
   @Override
   public String isValidEmail(String emailH) {
-    List<String> usersWithEmail = dao.isValidEmail(emailH);
-    return usersWithEmail.isEmpty() ? null : usersWithEmail.get(0);
+    Set<FilterDetail<UserColumn>> filterDetails = getEmailFilter(emailH);
+    List<DBUser> users = getDbUsers(filterDetails);
+
+    return users.isEmpty() ? null : users.get(0).getUserId();
+  }
+
+  private List<DBUser> getDbUsers(Set<FilterDetail<UserColumn>> filterDetails) {
+    return delegate.getUsers(-1, new FindOptions<>(filterDetails));
+  }
+
+  private Set<FilterDetail<UserColumn>> getEmailFilter(String emailH) {
+    Set<FilterDetail<UserColumn>> filterDetails = new HashSet<>();
+    filterDetails.add(new FilterDetail<>(UserColumn.Email, emailH, FilterDetail.Operator.EQ));
+    return filterDetails;
   }
 
   @Override
   public Integer getIDForUserAndEmail(String user, String emailH) {
-    List<Integer> idForUserAndEmail = dao.getIDForUserAndEmail(user, emailH);
-    return idForUserAndEmail.isEmpty() ? null : idForUserAndEmail.get(0);
+    Set<FilterDetail<UserColumn>> emailFilter = getEmailFilter(emailH);
+    addUserID(user, emailFilter);
+
+    List<DBUser> users = getDbUsers(emailFilter);
+    return users.isEmpty() ? null : users.get(0).getDocumentDBID();
+  }
+
+  private void addUserID(String user, Set<FilterDetail<UserColumn>> emailFilter) {
+    emailFilter.add(new FilterDetail<>(UserColumn.UserId, user, FilterDetail.Operator.EQ));
   }
 
   @Override
   public int getIdForUserID(String id) {
-    return dao.idForUser(id);
+    List<DBUser> users = getDbUsersByUserID(id);
+    return users.isEmpty() ? -1 : users.get(0).getDocumentDBID();
   }
 
+  private List<DBUser> getDbUsersByUserID(String id) {
+    Set<FilterDetail<UserColumn>> filterDetails = new HashSet<>();
+    addUserID(id, filterDetails);
+    return getDbUsers(filterDetails);
+  }
+
+  /**
+   * TODO : remove the password arg.
+   *
+   * @param id
+   * @param passwordHash
+   * @return
+   */
   @Override
   public User getUser(String id, String passwordHash) {
-    Seq<SlickUser> userByIDAndPass = dao.getUserByIDAndPassOrFallback(id, passwordHash);
-    return convertOrNull(userByIDAndPass);
+    List<DBUser> users = getDbUsersByUserID(id);
+    return users.isEmpty() ? null : toUser(users.iterator().next());
   }
 
   @Override
   public User getStrictUserWithPass(String id, String passwordHash) {
-    Seq<SlickUser> userByIDAndPass = dao.getUserByIDAndPass(id, passwordHash);
-    return convertOrNull(userByIDAndPass);
+    User user = getUser(id, "");
+    if (user != null) {
+      if (netProfDelegate.isPasswordMatch(user.getID(), passwordHash)) {
+        return user;
+      } else {
+        return null;
+      }
+    } else {
+      return null;
+    }
   }
 
   /**
@@ -293,7 +362,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    */
   @Override
   public User getUserByID(String id) {
-    return convertOrNull(dao.getByUserID(id));
+    return getUser(id, "");
   }
 
 /*  public Collection<User> getAllUsersByID(String id) {
@@ -305,31 +374,52 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }*/
 
   public User getByID(int id) {
-    return convertOrNull(dao.byID(id));
+    DBUser dbUser = delegate.lookupDBUser(id);
+    return dbUser == null ? null : toUser(dbUser);
   }
 
-  private User convertOrNull(Seq<SlickUser> userByIDAndPass) {
+  /**
+   * TODO : lookup permissions for user
+   *
+   * @param userByIDAndPass
+   * @return
+   */
+  private User convertOrNull(Collection<mitll.hlt.domino.shared.model.user.User> userByIDAndPass) {
     if (userByIDAndPass.isEmpty()) return null;
     else {
-      SlickUser head = userByIDAndPass.head();
-      Collection<User.Permission> grantedForUser = permissionDAO.getGrantedForUser(head.id());
-      return toUser(head, grantedForUser);
+      mitll.hlt.domino.shared.model.user.User head = userByIDAndPass.iterator().next();
+//      Collection<User.Permission> grantedForUser = permissionDAO.getGrantedForUser(head.id());
+      return toUser(head);
     }
 //    return userByIDAndPass.isEmpty() ? null : toUser(userByIDAndPass.head());
   }
 
-  @Override
-  public List<User> getUsers() {
-    return toUsers(dao.getAll());
+  private User toUser(mitll.hlt.domino.shared.model.user.User head) {
+    Collection<User.Permission> grantedForUser = Collections.emptyList();
+    return toUser(head, grantedForUser);
   }
 
-  private List<User> toUsers(List<SlickUser> all) {
+  @Override
+  public List<User> getUsers() {
+    return toUsers(getAll());
+  }
+
+  /**
+   * TODO : add permissions
+   *
+   * @param all
+   * @return
+   */
+  private List<User> toUsers(List<DBUser> all) {
     List<User> copy = new ArrayList<>();
 
-    Map<Integer, Collection<String>> granted = permissionDAO.granted();
-    for (SlickUser s : all) {
+//    Map<Integer, Collection<String>> granted = permissionDAO.granted();
+    for (DBUser s : all) {
 //      logger.info("to user " + s);
-      copy.add(toUser(s, toUserPerms(granted.get(s.id()))));
+      copy.add(toUser(s,
+          Collections.emptyList()
+          //    toUserPerms(granted.get(s.id())))
+      ));
     }
     return copy;
   }
@@ -353,7 +443,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    */
   public ClientUserDetail toClientUserDetail(User user, boolean useid) {
     Timestamp now = new Timestamp(user.getTimestampMillis());
-    ClientUserDetail user1 = new ClientUserDetail(
+    ClientUserDetail clientUserDetail = new ClientUserDetail(
         //useid ? user.getID() : -1,
         user.getUserID(),
         user.getFirst(),
@@ -382,9 +472,12 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         now*/
     );
 
-    logger.info("toSlick made " + user1);
+    clientUserDetail.setAcctDetail(new AccountDetail(dominoImportUser, new Date(user.getTimestampMillis())));
 
-    return user1;
+
+    logger.info("toSlick made " + clientUserDetail);
+
+    return clientUserDetail;
   }
 
   private ClientUserDetail getClientUser(User user) {
@@ -419,53 +512,84 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return user1;
   }
 
-  private User toUser(SlickUser s, Collection<User.Permission> perms) {
-    boolean admin = isAdmin(s.userid());
+  /**
+   * TODO: figure out how to add gender -
+   *
+   * @param dominoUser
+   * @param perms
+   * @return
+   */
+  private User toUser(mitll.hlt.domino.shared.model.user.User dominoUser, Collection<User.Permission> perms) {
+    boolean admin = isAdmin(dominoUser);
 
     User user = new User(
-        s.id(),
-        s.age(),
-        s.ismale() ? 0 : 1,
+        dominoUser.getDocumentDBID(),
+        99,//dominoUser.age(),
+        0,//dominoUser.ismale() ? 0 : 1,
         0,
-        s.ipaddr(),
-        s.passhash(),
+        "",//dominoUser.ipaddr(),
+        "",//dominoUser.passhash(),
         "",
-        s.dialect(),
-        s.userid(),
-        s.enabled(),
+        "",//dominoUser.dialect(),
+        dominoUser.getUserId(),
+        dominoUser.isActive(),
         admin,
         perms,
-        User.Kind.valueOf(s.kind()),
-        s.email(),
-        s.emailhash(),
-        s.device(),
-        s.resetpasswordkey(),
-        //s.enabledreqkey(),
-        s.modified().getTime()
+        getUserKind(dominoUser),
+        dominoUser.getEmail(),
+        "",//dominoUser.emailhash(),
+        "",//        dominoUser.device(),
+        "",//dominoUser.resetpasswordkey(),
+        //dominoUser.enabledreqkey(),
+        0//dominoUser.modified().getTime()
     );
 
-    user.setFirst(s.first());
-    user.setLast(s.last());
+    user.setFirst(dominoUser.getFirstName());
+    user.setLast(dominoUser.getLastName());
 
     return user;
   }
 
+  private boolean isAdmin(mitll.hlt.domino.shared.model.user.User dominoUser) {
+    return dominoUser.hasRole(mitll.hlt.domino.shared.model.user.User.Role.GrAM) ||
+        dominoUser.hasRole(mitll.hlt.domino.shared.model.user.User.Role.PrAdmin);
+  }
+
+  /**
+   * TODO : convert domino role to NetProF role.
+   *
+   * @param dominoUser
+   * @return
+   */
+  private User.Kind getUserKind(mitll.hlt.domino.shared.model.user.User dominoUser) {
+    return User.Kind.STUDENT;
+  }
+
+  /**
+   * TOOD : get device info from domino user?
+   *
+   * @return
+   */
   @Override
   public List<User> getUsersDevices() {
-    return toUsers(dao.getUsersFromDevices());
+    return Collections.emptyList();//dao.getUsersFromDevices());
   }
 
   @Override
   public Map<Integer, MiniUser> getMiniUsers() {
     Map<Integer, MiniUser> idToUser = new HashMap<>();
-    for (SlickMiniUser s : dao.getAllSlim()) idToUser.put(s.id(), getMini(s));
+    for (DBUser s : getAll()) idToUser.put(s.getDocumentDBID(), getMini(s));
     return idToUser;
+  }
+
+  private List<DBUser> getAll() {
+    return delegate.getUsers(-1, null);
   }
 
   public Map<User.Kind, Collection<MiniUser>> getMiniByKind() {
     Map<User.Kind, Collection<MiniUser>> kindToUsers = new HashMap<>();
-    for (SlickMiniUser s : dao.getAllSlim()) {
-      User.Kind key = User.Kind.valueOf(s.kind());
+    for (DBUser s : getAll()) {
+      User.Kind key = getRole(s);//User.Kind.valueOf(s.kind());
       Collection<MiniUser> miniUsers = kindToUsers.get(key);
       if (miniUsers == null) kindToUsers.put(key, miniUsers = new ArrayList<>());
       miniUsers.add(getMini(s));
@@ -483,66 +607,138 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return kindToUsers;
   }
 
-  private MiniUser getMini(SlickMiniUser s) {
-    MiniUser miniUser = new MiniUser(s.id(), 0, s.ismale(), s.userid(), isAdmin(s.userid()));
-
-    miniUser.setTimestampMillis(s.modified().getTime());
-    miniUser.setFirst(s.first());
-    miniUser.setLast(s.last());
-
-    return miniUser;
+  /**
+   * TODO : figure out how to get ROLE from DBUser
+   *
+   * @param s
+   * @return
+   */
+  private User.Kind getRole(DBUser s) {
+    return User.Kind.STUDENT;
   }
 
   @Override
   public MiniUser getMiniUser(int userid) {
-    List<SlickMiniUser> match = dao.getSlimFor(userid);
-    return match.isEmpty() ? null : getMini(match.iterator().next());
+    DBUser byID = delegate.lookupDBUser(userid);
+    return byID == null ? null : getMini(byID);
   }
 
+  /**
+   * TODO : figure out how to get gender
+   *
+   * @param dominoUser
+   * @return
+   */
+  private MiniUser getMini(DBUser dominoUser) {
+    boolean admin = isAdmin(dominoUser);
+
+    MiniUser miniUser = new MiniUser(dominoUser.getDocumentDBID(),
+        0,
+        true,//dominoUser.ismale(),
+        dominoUser.getUserId(),
+        admin);
+
+ //   logger.info("getMini for " + dominoUser);
+
+    AccountDetail acctDetail = dominoUser.getAcctDetail();
+    long time = acctDetail == null ?
+        System.currentTimeMillis() :
+        acctDetail.getCrTime() == null ? System.currentTimeMillis() : acctDetail.getCrTime().getTime();
+
+    miniUser.setTimestampMillis(time);
+    miniUser.setFirst(dominoUser.getFirstName());
+    miniUser.setLast(dominoUser.getLastName());
+
+    return miniUser;
+  }
+
+  /**
+   * TODO: Reset password works differently now...?
+   *
+   * @param resetKey
+   * @return
+   * @see mitll.langtest.server.rest.RestUserManagement#changePFor(String, String)
+   * @see mitll.langtest.server.rest.RestUserManagement#getUserIDForToken(String)
+   * @see mitll.langtest.server.services.UserServiceImpl#changePFor(String, String)
+   * @see mitll.langtest.server.services.UserServiceImpl#getUserIDForToken(String)
+   */
   @Override
+  @Deprecated
   public User getUserWithResetKey(String resetKey) {
-    return convertOrNull(dao.getByReset(resetKey));
+    return null;//convertOrNull(dao.getByReset(resetKey));
   }
 
+  /**
+   * TODO : enable content developer will happen in domino user management UI.
+   *
+   * @param resetKey
+   * @return
+   * @see mitll.langtest.server.mail.EmailHelper#enableCDUser(String, String, String, String)
+   */
   @Override
+  @Deprecated
   public User getUserWithEnabledKey(String resetKey) {
-    return convertOrNull(dao.getByEnabledReq(resetKey));
+    //return convertOrNull(dao.getByEnabledReq(resetKey));
+    return null;
   }
 
   @Override
   public User getUserWhere(int userid) {
-//    logger.info("getUserWhere ask for user " + userid);
-    Seq<SlickUser> userByIDAndPass = dao.byID(userid);
-//    logger.info("getUserWhere got " + userByIDAndPass);
-    User user = convertOrNull(userByIDAndPass);
-    //  logger.info("getUserWhere got " + user);
-
-    return user;
+    return getByID(userid);
   }
 
+  /**
+   * TODO:add permissions?
+   * TODO:add gender
+   *
+   * @param getMale
+   * @return
+   */
   @Override
   public Map<Integer, User> getUserMap(boolean getMale) {
-    Map<Integer, SlickUser> byMale = dao.getByMaleMap(getMale);
+    //Map<Integer, SlickUser> byMale = dao.getByMaleMap(getMale);
+
     Map<Integer, User> idToUser = new HashMap<>();
+    getAll().forEach(dbUser -> idToUser.put(dbUser.getDocumentDBID(), toUser(dbUser)));
+//    Map<Integer, Collection<String>> granted = permissionDAO.granted();
 
-    Map<Integer, Collection<String>> granted = permissionDAO.granted();
-
-    byMale.forEach((k, v) -> idToUser.put(k, toUser(v, toUserPerms(granted.get(k)))));
+//    byMale.forEach((k, v) -> idToUser.put(k, toUser(v, toUserPerms(granted.get(k)))));
     return idToUser;
   }
 
+  /**
+   * TODO:add gender
+   *
+   * @param getMale
+   * @return
+   */
   @Override
   public Collection<Integer> getUserIDs(boolean getMale) {
-    return dao.getByMaleIDs(getMale);
+//    return dao.getByMaleIDs(getMale);
+    List<Integer> ids = getAll()
+        .stream()
+        .map(UserDescriptor::getDocumentDBID)
+        .collect(Collectors.toList());
+
+    return ids;
   }
 
+  /**
+   * TODO: add permissions
+   *
+   * @return
+   * @see mitll.langtest.server.database.result.ResultDAO#getUserToResults(AudioType, IUserDAO)
+   */
   @Override
   public Map<Integer, User> getUserMap() {
-    Map<Integer, User> idToUser = new HashMap<>();
-    Map<Integer, Collection<String>> granted = permissionDAO.granted();
+/*    Map<Integer, User> idToUser = new HashMap<>();
+//    Map<Integer, Collection<String>> granted = permissionDAO.granted();
 
     dao.getIdToUser().forEach((k, v) -> idToUser.put(k, toUser(v, toUserPerms(granted.get(k)))));
-    return idToUser;
+
+    return idToUser;*/
+
+    return getUserMap(true);
   }
 
   /**
@@ -553,17 +749,39 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    */
   @Override
   public boolean changePassword(int user, String passwordH) {
-    return dao.setPassword(user, passwordH);
+    return savePasswordAndGetUser(user, passwordH) != null;
+    //return dao.setPassword(user, passwordH);
   }
 
+  /**
+   * TODO : we can't store reset password keys yet
+   *
+   * @param userid
+   * @param resetKey
+   * @param key
+   * @return
+   * @see mitll.langtest.server.mail.EmailHelper#resetPassword(String, String, String)
+   */
   @Override
+  @Deprecated
   public boolean updateKey(int userid, boolean resetKey, String key) {
-    return dao.updateKey(userid, resetKey, key);
+    return false;
+//    return dao.updateKey(userid, resetKey, key);
   }
 
+  /**
+   * TODO : can't store keys for the moment...
+   *
+   * @param user
+   * @param resetKey
+   * @return
+   * @see mitll.langtest.server.rest.RestUserManagement#changePFor
+   */
   @Override
   public boolean clearKey(int user, boolean resetKey) {
-    return dao.updateKey(user, resetKey, "");
+
+//    return dao.updateKey(user, resetKey, "");
+    return false;
   }
 
   @Override
@@ -571,22 +789,44 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return changeEnabled(id, true);
   }
 
+  /**
+   * TODO : this will be done in the Domino user UI.
+   *
+   * @param userid
+   * @param enabled
+   * @return
+   */
   @Override
   public boolean changeEnabled(int userid, boolean enabled) {
-    return dao.changeEnabled(userid, enabled);
+//    return dao.changeEnabled(userid, enabled);
+    return false;
   }
 
+  /**
+   * We don't support this UI anymore.
+   *
+   * @return
+   */
+  @Deprecated
   public Map<User.Kind, Integer> getCounts() {
-    Map<String, Integer> counts = dao.getCounts();
+    // Map<String, Integer> counts = dao.getCounts();
     Map<User.Kind, Integer> ret = new HashMap<>();
-    for (Map.Entry<String, Integer> pair : counts.entrySet()) {
+ /*   for (Map.Entry<String, Integer> pair : counts.entrySet()) {
       ret.put(User.Kind.valueOf(pair.getKey()), pair.getValue());
     }
+ */
     return ret;
   }
 
+  /**
+   * TODO : user updates happen in domino UI...
+   *
+   * @param toUpdate
+   */
   @Override
+  @Deprecated
   public void update(User toUpdate) {
+/*
     //  logger.info("update " + toUpdate);
     SlickUser toUpdate1 = toSlick(toUpdate, true);
     //  logger.info("update " + toUpdate1);
@@ -594,6 +834,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     if (update == 0) {
       logger.warn("didn't update table with " + toUpdate1);
     }
+*/
     // logger.info("user now " + getByID(toUpdate.getID()));
   }
 }

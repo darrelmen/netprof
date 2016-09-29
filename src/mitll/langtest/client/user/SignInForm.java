@@ -54,6 +54,7 @@ import java.util.logging.Logger;
 
 public class SignInForm extends UserDialog implements SignIn {
   private final Logger logger = Logger.getLogger("SignUpForm");
+
   private static final String DEACTIVATED = "I'm sorry, this account has been deactivated.";
 
   private static final String TROUBLE_CONNECTING_TO_SERVER = "Trouble connecting to server.";
@@ -157,6 +158,7 @@ public class SignInForm extends UserDialog implements SignIn {
     userField.box.getElement().setId("Use`rname_Box_SignIn");
     userField.box.setWidth(SIGN_UP_WIDTH);
 
+
     userField.box.addFocusHandler(new FocusHandler() {
       @Override
       public void onFocus(FocusEvent event) {
@@ -169,6 +171,7 @@ public class SignInForm extends UserDialog implements SignIn {
     userField.box.addBlurHandler(new BlurHandler() {
       @Override
       public void onBlur(BlurEvent event) {
+        logger.info("makeSignInUserName : got blur ");
         if (!userField.getText().isEmpty()) {
           eventRegistration.logEvent(userField.box, "UserNameBox", "N/A", "left username field '" + userField.getText() + "'");
 
@@ -181,21 +184,28 @@ public class SignInForm extends UserDialog implements SignIn {
 
             @Override
             public void onSuccess(User result) {
-              // logger.info("makeSignInUserName : for " + userField.getText() + " got back " + result);
-              if (result != null) {
-                String emailHash = result.getEmailHash();
-                String passwordHash = result.getPasswordHash();
-                //  this.email = result.getEmail();
-                if (emailHash == null || passwordHash == null || emailHash.isEmpty() || passwordHash.isEmpty()) {
-                  eventRegistration.logEvent(userField.box, "UserNameBox", "N/A", "existing legacy userField " + result.toStringShort());
-                  copyInfoToSignUp(result);
-                }
-              }
+              gotUserExists(result);
             }
           });
         }
       }
     });
+  }
+
+  private void gotUserExists(User result) {
+    logger.info("makeSignInUserName : for " + userField.getText() + " got back " + result);
+    if (result != null) {
+      String emailHash = result.getEmailHash();
+      String passwordHash = result.getPasswordHash();
+      logger.info("makeSignInUserName : for " + userField.getText() + " got back " + result);
+      logger.info("makeSignInUserName : for " + userField.getText() + " emailHash " + emailHash);
+      logger.info("makeSignInUserName : for " + userField.getText() + " passwordHash " + passwordHash);
+      //  this.email = result.getEmail();
+      if (emailHash == null || passwordHash == null || emailHash.isEmpty() || passwordHash.isEmpty()) {
+        eventRegistration.logEvent(userField.box, "UserNameBox", "N/A", "existing legacy userField " + result.toStringShort());
+        copyInfoToSignUp(result);
+      }
+    }
   }
 
   private void addPasswordField(Fieldset fieldset, Panel hp) {
@@ -248,7 +258,7 @@ public class SignInForm extends UserDialog implements SignIn {
    *
    * @param user
    * @param pass
-   * @see UserPassLogin#getRightLogin
+   * @see #getSignInButton
    */
   private void gotLogin(final String user, final String pass, final boolean emptyPassword) {
     final String hashedPass = Md5Hash.getHash(pass);
@@ -264,6 +274,8 @@ public class SignInForm extends UserDialog implements SignIn {
 
       @Override
       public void onSuccess(User result) {
+        logger.info("gotLogin : userField is '" + user + "' result " + result);
+
         if (result == null) {
           eventRegistration.logEvent(signIn, "sign in", "N/A", "unknown userField " + user);
 

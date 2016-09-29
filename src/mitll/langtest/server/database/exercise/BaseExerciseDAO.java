@@ -416,7 +416,8 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    */
   public void setDependencies(IUserExerciseDAO userExerciseDAO,
                               AddRemoveDAO addRemoveDAO,
-                              IAudioDAO audioDAO, int projid) {
+                              IAudioDAO audioDAO,
+                              int projid) {
     this.userExerciseDAO = userExerciseDAO;
     this.addRemoveDAO = addRemoveDAO;
     setAudioDAO(audioDAO, projid);
