@@ -114,7 +114,7 @@ public class InitialUI implements UILifecycle {
   private Navigation navigation;
   private final BrowserCheck browserCheck = new BrowserCheck();
   private Container verticalContainer;
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
   /**
    * @param langTest
@@ -138,7 +138,7 @@ public class InitialUI implements UILifecycle {
    */
   @Override
   public void populateRootPanel() {
- //   logger.info("----> populateRootPanel BEGIN ------>");
+    logger.info("----> populateRootPanel BEGIN ------>");
     Container verticalContainer = getRootContainer();
     this.verticalContainer = verticalContainer;
     // header/title line
@@ -148,7 +148,7 @@ public class InitialUI implements UILifecycle {
     if (!showLogin()) {
       populateBelowHeader(verticalContainer);
     }
- //   logger.info("----> populateRootPanel END   ------>");
+    logger.info("----> populateRootPanel END   ------>");
   }
 
   /**
@@ -396,7 +396,7 @@ public class InitialUI implements UILifecycle {
   }
 
   /**
-   * * TODO : FIX ME for headstart
+   * * TODO : FIX ME for headstart?
    *
    * @param verticalContainer
    * @paramx contentRow        where we put the flash permission window if it gets shown
@@ -419,6 +419,7 @@ public class InitialUI implements UILifecycle {
        */
       contentRow.add(lifecycleSupport.getFlashRecordPanel());
     }
+    logger.info("populateBelowHeader -- ");
     lifecycleSupport.recordingModeSelect();
     makeNavigation();
     addResizeHandler();
@@ -432,7 +433,9 @@ public class InitialUI implements UILifecycle {
    * @see #setProjectForUser(int)
    */
   private void showNavigation() {
+
     if (contentRow.getElement().getChildCount() == 1) {
+      logger.info("showNavigation : - add to content root");
       contentRow.add(navigation.getTabPanel());
     } else {
       logger.info("showNavigation : first row has " + contentRow.getElement().getChildCount() + " child(ren) - not adding tab panel???");
@@ -540,7 +543,7 @@ public class InitialUI implements UILifecycle {
       }
     });
     crumbs.add(lang);
-    logger.info("getBreadcrumbs adding step for " + lang);
+ //   logger.info("getBreadcrumbs adding step for " + lang);
     return lang;
   }
 
@@ -551,12 +554,10 @@ public class InitialUI implements UILifecycle {
     userService.forgetProject(new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable throwable) {
-
       }
 
       @Override
       public void onSuccess(Void aVoid) {
-
       }
     });
 
@@ -649,7 +650,7 @@ public class InitialUI implements UILifecycle {
     // are we here to show the login screen?
     boolean show = userManager.isUserExpired() || userManager.getUserID() == null;
     if (show) {
-      logger.info("user is not valid : user expired " + userManager.isUserExpired() + " / " + userManager.getUserID());
+      logger.info("showLogin user is not valid : user expired " + userManager.isUserExpired() + " / " + userManager.getUserID());
       showLogin(eventRegistration);
       return true;
     }
