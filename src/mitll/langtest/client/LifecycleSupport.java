@@ -40,6 +40,9 @@ import mitll.langtest.shared.user.User;
 
 import java.util.Collection;
 
+/**
+ * MUST BE PUBLIC - for AMASInitialUI to access.
+ */
 public interface LifecycleSupport extends EventRegistration {
   String getInfoLine();
 

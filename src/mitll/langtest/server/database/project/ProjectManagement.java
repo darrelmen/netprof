@@ -394,7 +394,7 @@ public Project getFirstProject() {
    */
   @Override
   public void setStartupInfo(User userWhere, int projid) {
-    logger.info("setStartupInfo : For user " + userWhere + " projid " + projid);
+    //logger.info("setStartupInfo : For user " + userWhere + " projid " + projid);
 
     if (projid == -1) {
       logger.info("For " + userWhere + " no current project.");
@@ -408,6 +408,8 @@ public Project getFirstProject() {
 
       SlickProject project1 = project.getProject();
       List<String> typeOrder = project.getTypeOrder();
+      //logger.info("project " + projid + " type order " + typeOrder);
+
       boolean sound = typeOrder.remove(SlickUserExerciseDAO.SOUND);
       boolean diff = typeOrder.remove(SlickUserExerciseDAO.DIFFICULTY);
       if (!sound) logger.warn("sound missing???");
