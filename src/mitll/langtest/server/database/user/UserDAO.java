@@ -170,9 +170,10 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    * @param kind
    * @param passwordH
    * @param emailH
+   * @param email
    * @see BaseUserDAO#addUser(String, String, String, String, User.Kind, String, boolean, int, String, String, String, String)
    */
-  protected void updateUser(int id, User.Kind kind, String passwordH, String emailH) {
+  protected void updateUser(int id, User.Kind kind, String passwordH, String emailH, String email) {
     try {
       if (passwordH == null) {
         logger.error("Got null password Hash?", new Exception("empty password hash"));
@@ -258,7 +259,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    * @param id
    * @param passwordHash
    * @return a
-   * @see mitll.langtest.server.LangTestDatabaseImpl#userExists(String, String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#userExists
    * @see mitll.langtest.server.ScoreServlet#doGet
    */
   @Override

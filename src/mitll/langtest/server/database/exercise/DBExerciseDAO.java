@@ -48,7 +48,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   private SlickProject project;
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#makeExerciseDAO(String, boolean)
+   * @see mitll.langtest.server.database.project.ProjectManagement#setExerciseDAO
    */
   public DBExerciseDAO(
       ServerProperties serverProps,

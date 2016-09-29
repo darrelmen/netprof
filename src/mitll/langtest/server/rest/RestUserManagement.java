@@ -39,6 +39,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
+import mitll.langtest.server.services.UserServiceImpl;
 import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
 import net.sf.json.JSONObject;
@@ -242,6 +243,11 @@ public class RestUserManagement {
     }
   }
 
+  /**
+   * @see #doGet(HttpServletRequest, HttpServletResponse, String, JSONObject)
+   * @param token
+   * @return
+   */
   private long getUserIDForToken(String token) {
     User user = db.getUserDAO().getUserWithResetKey(token);
     return (user == null) ? -1 : user.getID();
@@ -324,6 +330,13 @@ public class RestUserManagement {
     }
   }
 
+  /**
+   * TODO : remove duplicate code - here and
+   * @see UserServiceImpl#changePFor
+   * @param token
+   * @param passwordH
+   * @return
+   */
   private boolean changePFor(String token, String passwordH) {
     User userWhereResetKey = db.getUserDAO().getUserWithResetKey(token);
     if (userWhereResetKey != null) {

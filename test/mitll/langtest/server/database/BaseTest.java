@@ -6,10 +6,7 @@ import mitll.langtest.server.database.connection.DatabaseConnection;
 import mitll.langtest.server.database.connection.H2Connection;
 import org.apache.log4j.Logger;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -87,7 +84,13 @@ public class BaseTest {
     logger.info("path " + file.getAbsolutePath());
 
     ServerProperties serverProps = getServerProperties(config, propsFile);
-
+    ServerProperties serverProps2 = getServerProperties("netProf", "domino.properties");
+    String configFileFullPath = serverProps2.getConfigFileFullPath();
+    try {
+      serverProps.getProps().load(new FileInputStream(configFileFullPath));
+    } catch (IOException e) {
+      logger.error("can't find " + configFileFullPath);
+    }
     if (useLocal) {
       serverProps.setLocalPostgres();
     } else {
