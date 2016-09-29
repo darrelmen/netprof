@@ -126,6 +126,7 @@ public interface IUserDAO extends IDAO {
   User getUserByID(String id);
 
   /**
+   * TODO : replace with user where or rename
    * @see DatabaseImpl#getUserHistoryForList(int, Collection, int, Collection, Map)
    * @param id
    * @return

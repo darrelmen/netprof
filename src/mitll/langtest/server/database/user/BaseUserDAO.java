@@ -47,8 +47,8 @@ public abstract class BaseUserDAO extends DAO {
   private static final Logger logger = Logger.getLogger(BaseUserDAO.class);
 
   private static final String DEFECT_DETECTOR = "defectDetector";
-  private static final String BEFORE_LOGIN_USER = "beforeLogin";
-  private static final String IMPORT_USER = "importUser";
+  protected static final String BEFORE_LOGIN_USER = "beforeLogin";
+  protected static final String IMPORT_USER = "importUser";
   public static final String USERS = "users";
   public static final String MALE = "male";
   public static final String FEMALE = "female";
@@ -169,7 +169,7 @@ public abstract class BaseUserDAO extends DAO {
         return null; // existing user!
       } else {
         int id = currentUser.getID();
-        updateUser(id, user.getKind(), user.getPasswordH(), user.getEmailH());
+        updateUser(id, user.getKind(), user.getPasswordH(), user.getEmailH(), user.getEmail());
         User userWhere = getUserWhere(id);
         logger.debug(" : addUser : returning updated user " + userWhere);
         return userWhere;
@@ -200,11 +200,11 @@ public abstract class BaseUserDAO extends DAO {
 
   abstract User getUserByID(String id);
 
-  abstract void updateUser(int id, User.Kind kind, String passwordH, String emailH);
+  abstract void updateUser(int id, User.Kind kind, String passwordH, String emailH, String email);
 
   abstract User getUserWhere(int userid);
 
-  boolean isAdmin(String userid) {
+  @Deprecated  boolean isAdmin(String userid) {
     return userid != null && (admins.contains(userid.toLowerCase()));
   }
 
@@ -242,7 +242,10 @@ public abstract class BaseUserDAO extends DAO {
 
   abstract int getIdForUserID(String id);
 
-  abstract int addUser(int age, String gender, int experience, String userAgent,
+  abstract int addUser(int age,
+                       String gender,
+                       int experience,
+                       String userAgent,
                        String trueIP,
                        String nativeLang,
                        String dialect,
@@ -250,6 +253,11 @@ public abstract class BaseUserDAO extends DAO {
                        boolean enabled,
                        Collection<User.Permission> permissions,
                        User.Kind kind,
-                       String passwordH, String emailH, String email, String device, String first, String last);
+                       String passwordH,
+                       String emailH,
+                       String email,
+                       String device,
+                       String first,
+                       String last);
 
 }

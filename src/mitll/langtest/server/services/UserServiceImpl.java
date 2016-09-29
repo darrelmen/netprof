@@ -32,8 +32,10 @@
 
 package mitll.langtest.server.services;
 
+import com.github.gwtbootstrap.client.ui.Fieldset;
 import mitll.langtest.client.InitialUI;
 import mitll.langtest.client.services.UserService;
+import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.security.DominoSessionException;
 import mitll.langtest.server.database.security.UserSecurityManager;
@@ -304,6 +306,12 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     return l;
   }
 
+  /**
+   * @see mitll.langtest.client.user.ResetPassword#getChangePasswordButton
+   * @param token
+   * @param passwordH
+   * @return
+   */
   @Override
   public boolean changePFor(String token, String passwordH) {
     User userWhereResetKey = db.getUserDAO().getUserWithResetKey(token);
@@ -316,7 +324,10 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
         logger.error("couldn't update user password for user " + userWhereResetKey);
         return false;
       }
-    } else return false;
+    } else {
+
+      return false;
+    }
   }
 
   /**

@@ -96,7 +96,6 @@ import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
@@ -200,8 +199,8 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#makeDatabaseImpl(String)
    */
   public DatabaseImpl(String configDir, String relativeConfigDir, String dbName, ServerProperties serverProps,
-                      PathHelper pathHelper, boolean mustAlreadyExist, LogAndNotify logAndNotify, boolean readOnly,
-                      ServletContext servletContext) {
+                      PathHelper pathHelper, boolean mustAlreadyExist, LogAndNotify logAndNotify, boolean readOnly/*,
+                      ServletContext servletContext*/) {
     this(serverProps.useH2() ?
             new H2Connection(configDir, dbName, mustAlreadyExist, logAndNotify, readOnly) :
             serverProps.usePostgres() ?
@@ -211,7 +210,7 @@ public class DatabaseImpl implements Database {
                     null,
         configDir, relativeConfigDir, dbName,
         serverProps,
-        pathHelper, logAndNotify,servletContext);
+        pathHelper, logAndNotify/*,servletContext*/);
   }
 
   public DatabaseImpl(DatabaseConnection connection,
@@ -220,8 +219,8 @@ public class DatabaseImpl implements Database {
                       String dbName,
                       ServerProperties serverProps,
                       PathHelper pathHelper,
-                      LogAndNotify logAndNotify,
-                      ServletContext servletContext) {
+                      LogAndNotify logAndNotify/*,
+                      ServletContext servletContext*/) {
     long then;
     long now;
     this.connection = connection;
@@ -233,7 +232,7 @@ public class DatabaseImpl implements Database {
     if (maybeGetH2Connection(relativeConfigDir, dbName, serverProps)) return;
     then = System.currentTimeMillis();
 
-    initializeDAOs(pathHelper,servletContext);
+    initializeDAOs(pathHelper/*,servletContext*/);
     now = System.currentTimeMillis();
     if (now - then > 300) {
       logger.info("took " + (now - then) + " millis to initialize DAOs for " + getOldLanguage(serverProps));
@@ -242,10 +241,9 @@ public class DatabaseImpl implements Database {
     monitoringSupport = new MonitoringSupport(userDAO, resultDAO);
     this.pathHelper = pathHelper;
 
-
-    if (!serverProps.useH2()) {
-      populateProjects(false);
-    }
+//    if (!serverProps.useH2()) {
+//      populateProjects(false);
+//    }
 //    logger.info("made DatabaseImpl : " + this);
   }
 
@@ -270,11 +268,21 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * @param reload
+   * @param reload - this won't be used...
    * @seex CopyToPostgres#createProjectIfNotExists
+   * @see DatabaseImpl#DatabaseImpl
+   * @see LangTestDatabaseImpl#init
    */
   public void populateProjects(boolean reload) {
-    projectManagement.populateProjects(reload);
+    logger.info("populateProjects --- ");
+
+    if (projectManagement == null) {
+      logger.info("no project management yet...");
+    }
+    else {
+      projectManagement.populateProjects();
+     // projectManagement.setExerciseDAOs();
+    }
   }
 
   private Connection getConnection() {
@@ -291,12 +299,12 @@ public class DatabaseImpl implements Database {
    *
    * @see #DatabaseImpl(DatabaseConnection, String, String, String, ServerProperties, PathHelper, LogAndNotify)
    */
-  private void initializeDAOs(PathHelper pathHelper, ServletContext servletContext) {
+  private void initializeDAOs(PathHelper pathHelper/*, ServletContext servletContext*/) {
     dbConnection = getDbConnection();
 
     eventDAO = new SlickEventImpl(dbConnection);
     //   SlickUserDAOImpl slickUserDAO = new SlickUserDAOImpl(this, dbConnection);
-    DominoUserDAOImpl dominoUserDAO = new DominoUserDAOImpl(this, servletContext);
+    DominoUserDAOImpl dominoUserDAO = new DominoUserDAOImpl(this/*, servletContext*/);
     this.userDAO = dominoUserDAO;
     userPermissionDAO = new SlickUserPermissionDAOImpl(this, dbConnection);
     //  slickUserDAO.setPermissionDAO(userPermissionDAO);
@@ -439,7 +447,7 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.LangTestDatabaseImpl#setInstallPath
    */
   public void setInstallPath(String installPath, String lessonPlanFile, String mediaDir) {
-    logger.debug("got install path " + installPath + " media " + mediaDir);
+    logger.debug("setInstallPath got install path " + installPath + " media " + mediaDir);
     this.installPath = installPath;
     this.projectManagement = new ProjectManagement(pathHelper, serverProps, getLogAndNotify(), this);
     makeDAO(lessonPlanFile, mediaDir, installPath);
@@ -606,13 +614,16 @@ public class DatabaseImpl implements Database {
 //          logger.info("Got " + lessonPlanFile);
           numExercises = readAMASExercises(lessonPlanFile, mediaDir, installPath, isURL);
         } else {
+          logger.info("makeDAO makeExerciseDAO -- ");
+
           makeExerciseDAO(lessonPlanFile, isURL);
 
-          //       logger.info("set exercise dao " + exerciseDAO + " on " + userExerciseDAO);
+          populateProjects(false);
+      //    logger.info("set exercise dao " + exerciseDAO + " on " + userExerciseDAO);
           if (projectManagement.getProjects().isEmpty()) {
-            logger.warn("no projects loaded yet...?");
+            logger.warn("\n\n\nmakeDAO no projects loaded yet...?");
           } else {
-            ExerciseDAO<CommonExercise> exerciseDAO = projectManagement.getProjects().iterator().next().getExerciseDAO();
+            ExerciseDAO<CommonExercise> exerciseDAO = projectManagement.getFirstProject().getExerciseDAO();
             userExerciseDAO.setExerciseDAO(exerciseDAO);
           }
           // if (!serverProps.useH2()) {
@@ -624,6 +635,10 @@ public class DatabaseImpl implements Database {
     }
   }
 
+  /**
+   * Why a separate, later step???
+   * @see #makeDAO
+   */
   private void configureProjects() {
     // TODO : this seems like a bad idea --
     Map<Integer, ExercisePhoneInfo> exerciseToPhone = new ExerciseToPhone().getExerciseToPhone(refresultDAO);
@@ -632,15 +647,19 @@ public class DatabaseImpl implements Database {
   }
 
   /**
+   * Here to support import from old individual sites for CopyToPostgres
+   *
    * @param lessonPlanFile
    * @param isURL
    * @see #makeDAO(String, String, String)
    */
   private void makeExerciseDAO(String lessonPlanFile, boolean isURL) {
+    logger.info("makeExerciseDAO - " + lessonPlanFile);
+
     if (isURL) {
       projectManagement.addSingleProject(new JSONURLExerciseDAO(getServerProps(), userListManager, ADD_DEFECTS));
     } else if (!serverProps.useH2()) {
-      projectManagement.setExerciseDAOs();
+//      projectManagement.setExerciseDAOs();
     } else if (lessonPlanFile.endsWith(".json")) {
       logger.info("got " + lessonPlanFile);
       JSONExerciseDAO jsonExerciseDAO = new JSONExerciseDAO(lessonPlanFile, getServerProps(), userListManager, ADD_DEFECTS);
@@ -689,7 +708,7 @@ public class DatabaseImpl implements Database {
    *
    * @param exerciseDAO
    * @param projid
-   * @see #configureProject(String, Project)
+   * @see #configureProject
    */
   public void setDependencies(ExerciseDAO exerciseDAO, int projid) {
     exerciseDAO.setDependencies(userExerciseDAO, null /*addRemoveDAO*/, audioDAO, projid);
