@@ -135,10 +135,12 @@ public class UserManager {
     }
   }
 
+  /**
+   * @see #login
+   */
   private void getPermissionsAndSetUser() {
     getPermissionsAndSetUser(getUserChosenFromStorage(), getPassFromStorage());
   }
-
 /*  private void console(String message) {
     int ieVersion = BrowserCheck.getIEVersion();
     if (ieVersion == -1 || ieVersion > 9) {
@@ -147,7 +149,6 @@ public class UserManager {
     }
   }*/
 /*
-
   private native static void consoleLog(String message) */
 /*-{
       console.log("UserManager:" + message);
@@ -166,8 +167,9 @@ public class UserManager {
    */
   private void getPermissionsAndSetUser(final String user, String passwordHash) {
     //console("getPermissionsAndSetUser : " + user);
-    if (DEBUG) logger.info("UserManager.getPermissionsAndSetUser " + user + " asking server for info...");
+    if (DEBUG || true) logger.info("UserManager.getPermissionsAndSetUser " + user + " asking server for info...");
     if (passwordHash == null) passwordHash = "";
+
     userServiceAsync.loginUser(user, passwordHash, new AsyncCallback<LoginResult>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -193,47 +195,6 @@ public class UserManager {
       }
     });
   }
-
-
-  /**
-   * So if there's a current user, ask the server about them.
-   * If not add a new anonymous user.
-   *
-   * @see #checkLogin()
-   * @see mitll.langtest.client.LangTest#checkLogin
-   */
-
-/*  private void anonymousLogin() {
-    int user = getUser();
-    if (user != NO_USER_SET) {
-      //logger.info("UserManager.anonymousLogin : current user : " + user);
-      getPermissionsAndSetUser();
-    } else {
-      logger.info("UserManager.anonymousLogin : make new user, since user = " + user);
-   //   addAnonymousUser();
-    }
-  }*/
-
-  /**
-   * This is useful in headstart context.
-   */
-/*  private void addAnonymousUser() {
-    logger.info("UserManager.addAnonymousUser : adding anonymous user");
-
-    userServiceAsync.addUser("anonymous", "", "", User.Kind.ANONYMOUS, Window.Location.getHref(), "", true, 0,
-        "unknown", false, "browser", new AsyncCallback<User>() {
-          @Override
-          public void onFailure(Throwable caught) {
-
-          }
-
-          @Override
-          public void onSuccess(User result) {
-            setDefaultControlValues(result.getID());
-            storeUser(result);
-          }
-        });
-  }*/
 
 /*  private void setDefaultControlValues(int user) {
     ControlState controlState = new ControlState();
@@ -286,6 +247,7 @@ public class UserManager {
    */
   public boolean isUserExpired() {
     String sid = getUserFromStorage();
+    logger.info("sid from storage "+ sid);
     return (sid == null || sid.equals(NO_USER_SET_STRING)) ||
         checkUserExpired(sid);
   }
@@ -298,8 +260,7 @@ public class UserManager {
 
   private String getPassFromStorage() {
     Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-    String passCookie = getPassCookie();
-    return localStorageIfSupported != null ? localStorageIfSupported.getItem(passCookie) : NO_USER_SET_STRING;
+    return localStorageIfSupported != null ? localStorageIfSupported.getItem(getPassCookie()) : NO_USER_SET_STRING;
   }
 
   private String getUserChosenFromStorage() {
@@ -316,6 +277,7 @@ public class UserManager {
   private boolean checkUserExpired(String sid) {
     boolean expired = false;
     if (userExpired(sid)) {
+      logger.info("user expired " +sid);
       clearUser();
       expired = true;
     }
@@ -408,7 +370,7 @@ public class UserManager {
       localStorageIfSupported.removeItem(getUserIDCookie());
       localStorageIfSupported.removeItem(getPassCookie());
       localStorageIfSupported.removeItem(getUserChosenID());
-      // logger.info("clearUser : removed item " + getUserID() + " user now " + getUser());
+      logger.info("clearUser : removed item " + getUserID() + " user now " + getUser());
     } else {
       userID = NO_USER_SET;
     }
@@ -416,9 +378,12 @@ public class UserManager {
 
   /**
    * @param user
-   * @see UserDialog#storeUser(User, UserManager)
+   * @param passwordHash
+   * @see SignInForm#foundExistingUser(User, boolean, String)
+   * @see SignUpForm#gotSignUp(String, String, String, User.Kind)
+   * @see UserDialog#storeUser(User, UserManager, String)
    */
-  void storeUser(User user) {
+  void storeUser(User user, String passwordHash) {
     logger.info("storeUser : user now " + user);
 
     final long DURATION = getUserSessionDuration();
@@ -427,7 +392,7 @@ public class UserManager {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
       userChosenID = user.getUserID();
       localStorageIfSupported.setItem(getUserIDCookie(), "" + user.getID());
-      localStorageIfSupported.setItem(getPassCookie(), "" + user.getPasswordHash());
+      localStorageIfSupported.setItem(getPassCookie(), passwordHash);
       localStorageIfSupported.setItem(getUserChosenID(), "" + userChosenID);
       rememberUserSessionEnd(localStorageIfSupported, futureMoment);
       // localStorageIfSupported.setItem(getLoginType(), "" + userType);
@@ -463,7 +428,7 @@ public class UserManager {
         }
       }*/
       this.current = result;
-      //  logger.info("\tgotNewUser current user " + current);
+      logger.info("\tgotNewUser current user " + current);
       userNotification.gotUser(result);
     }
     //console("getPermissionsAndSetUser.onSuccess : " + user);

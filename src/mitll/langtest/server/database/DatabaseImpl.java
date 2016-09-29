@@ -304,8 +304,7 @@ public class DatabaseImpl implements Database {
 
     eventDAO = new SlickEventImpl(dbConnection);
     //   SlickUserDAOImpl slickUserDAO = new SlickUserDAOImpl(this, dbConnection);
-    DominoUserDAOImpl dominoUserDAO = new DominoUserDAOImpl(this/*, servletContext*/);
-    this.userDAO = dominoUserDAO;
+    this.userDAO = new DominoUserDAOImpl(this/*, servletContext*/);
     userPermissionDAO = new SlickUserPermissionDAOImpl(this, dbConnection);
     //  slickUserDAO.setPermissionDAO(userPermissionDAO);
 
@@ -574,6 +573,7 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.services.UserServiceImpl#setProject(int)
    */
   public void setStartupInfo(User userWhere, int projid) {
+  //  logger.info("setStartupInfo on " + userWhere + " for project " + projid);
     projectManagement.setStartupInfo(userWhere, projid);
   }
 
