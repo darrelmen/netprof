@@ -97,15 +97,16 @@ public class User extends MiniUser {
 
   public enum Kind implements IsSerializable {
     UNSET("Unset", false),
-    INTERNAL("INTERNAL", false),
+    INTERNAL("INTERNAL", false),  // for users we keep to maintain referencial integrity, for instance an importUser
 
     STUDENT("Student", true),
     TEACHER("Teacher", true),
-    CONTENT_DEVELOPER("Content Developer", true),
-    AUDIO_RECORDER("Audio Recorder", true),
-    TEST("Test Account", true),
-    PROJECT_ADMIN("Project Admin", true),
-    ADMIN("System Admin", true);
+    CONTENT_DEVELOPER("Content Developer", true), // someone who can edit content and record audio
+    AUDIO_RECORDER("Audio Recorder", true),       // someone who is just an audio recorder
+    TEST("Test Account", true),                   // e.g. for developers at Lincoln or DLI, demo accounts
+    SPAM("Spam Account", true),                   // for marking nuisance accounts
+    PROJECT_ADMIN("Project Admin", true),         // invite new users, admin accounts below
+    ADMIN("System Admin", true);                  // invite project admins, closed set determined by server properties
 
     String name;
     boolean show;
@@ -182,7 +183,7 @@ public class User extends MiniUser {
       case CONTENT_DEVELOPER:
         return Arrays.asList(
             RECORD_AUDIO,
-            Permission.QUALITY_CONTROL);
+            QUALITY_CONTROL);
       case PROJECT_ADMIN:
         return Arrays.asList(
             TEACHER_PERM,
@@ -231,14 +232,13 @@ public class User extends MiniUser {
         return Arrays.asList(
             TEACHER_PERM, // allows them to via the full analysis tab, edit students
             RECORD_AUDIO,
-            DEVELOP_CONTENT, //? make new projects? edit via domino?
+            DEVELOP_CONTENT, // make new projects, edit via domino
             INVITE,
             EDIT_STUDENT,
             EDIT_USER
         );  // students
       case AUDIO_RECORDER:
-        return Collections.singleton(
-            RECORD_AUDIO);
+        return Collections.singleton(RECORD_AUDIO);
       case CONTENT_DEVELOPER:
         return Arrays.asList(
             RECORD_AUDIO,
@@ -255,7 +255,7 @@ public class User extends MiniUser {
   }
 
   public enum Permission implements IsSerializable {
-    TEACHER_PERM("View Student Data"), // gets to see teacher things, invite
+    TEACHER_PERM("View Student Data"), // gets to see teacher things like student analysis, invite
     EDIT_STUDENT("Edit Student Profile"),
 
     QUALITY_CONTROL("Quality Control"),
@@ -276,7 +276,6 @@ public class User extends MiniUser {
     public String getName() {
       return name;
     }
-
   }
 
   public enum PermissionStatus implements IsSerializable {
