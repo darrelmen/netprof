@@ -41,6 +41,7 @@ import mitll.hlt.domino.shared.common.FindOptions;
 import mitll.hlt.domino.shared.common.SResult;
 import mitll.hlt.domino.shared.model.user.*;
 import mitll.hlt.json.JSONSerializer;
+import mitll.langtest.client.user.Md5Hash;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.user.MiniUser;
@@ -345,6 +346,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   public User getStrictUserWithPass(String id, String passwordHash) {
     User user = getUser(id, "");
     if (user != null) {
+      logger.info("getStrictUserWithPass " + id + " and " + passwordHash);
       if (netProfDelegate.isPasswordMatch(user.getID(), passwordHash)) {
         return user;
       } else {
@@ -381,10 +383,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   /**
    * TODO : lookup permissions for user
    *
-   * @param userByIDAndPass
+   * @paramx xuserByIDAndPass
    * @return
    */
-  private User convertOrNull(Collection<mitll.hlt.domino.shared.model.user.User> userByIDAndPass) {
+/*  private User convertOrNull(Collection<mitll.hlt.domino.shared.model.user.User> userByIDAndPass) {
     if (userByIDAndPass.isEmpty()) return null;
     else {
       mitll.hlt.domino.shared.model.user.User head = userByIDAndPass.iterator().next();
@@ -392,7 +394,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       return toUser(head);
     }
 //    return userByIDAndPass.isEmpty() ? null : toUser(userByIDAndPass.head());
-  }
+  }*/
 
   private User toUser(mitll.hlt.domino.shared.model.user.User head) {
     Collection<User.Permission> grantedForUser = Collections.emptyList();
@@ -442,7 +444,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @see mitll.langtest.server.database.copy.CopyToPostgres#addUser(DominoUserDAOImpl, Map, User)
    */
   public ClientUserDetail toClientUserDetail(User user, boolean useid) {
-    Timestamp now = new Timestamp(user.getTimestampMillis());
+    //Timestamp now = new Timestamp(user.getTimestampMillis());
     ClientUserDetail clientUserDetail = new ClientUserDetail(
         //useid ? user.getID() : -1,
         user.getUserID(),
@@ -480,7 +482,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return clientUserDetail;
   }
 
-  private ClientUserDetail getClientUser(User user) {
+/*  private ClientUserDetail getClientUser(User user) {
     ClientUserDetail user1 = new ClientUserDetail(
         //useid ? user.getID() : -1,
         user.getUserID(),
@@ -488,7 +490,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         user.getLast(),
         user.getEmail(),
         Collections.emptyList(),
-        new Group()/*
+        new Group()*//*
 
         user.isMale(),
         user.getIpaddr() == null ? "" : user.getIpaddr(),
@@ -507,10 +509,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         user.getDevice() == null ? "" : user.getDevice(),
 
         user.getID(),
-        now*/
+        now*//*
     );
     return user1;
-  }
+  }*/
 
   /**
    * TODO: figure out how to add gender -
@@ -520,15 +522,18 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @return
    */
   private User toUser(mitll.hlt.domino.shared.model.user.User dominoUser, Collection<User.Permission> perms) {
+   // logger.info("toUser " + dominoUser);
     boolean admin = isAdmin(dominoUser);
+   // logger.info("\ttoUser admin " + admin);
 
+    String email = dominoUser.getEmail();
     User user = new User(
         dominoUser.getDocumentDBID(),
         99,//dominoUser.age(),
         0,//dominoUser.ismale() ? 0 : 1,
         0,
         "",//dominoUser.ipaddr(),
-        "",//dominoUser.passhash(),
+        "BOGUS_HASH_PASS",//dominoUser.passhash(),
         "",
         "",//dominoUser.dialect(),
         dominoUser.getUserId(),
@@ -536,8 +541,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         admin,
         perms,
         getUserKind(dominoUser),
-        dominoUser.getEmail(),
-        "",//dominoUser.emailhash(),
+        email,
+        Md5Hash.getHash(email),//dominoUser.emailhash(),
         "",//        dominoUser.device(),
         "",//dominoUser.resetpasswordkey(),
         //dominoUser.enabledreqkey(),
@@ -546,6 +551,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
     user.setFirst(dominoUser.getFirstName());
     user.setLast(dominoUser.getLastName());
+
+//    logger.info("\ttoUser return " + user);
 
     return user;
   }
