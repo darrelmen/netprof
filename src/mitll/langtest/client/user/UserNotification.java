@@ -50,11 +50,10 @@ public interface UserNotification {
 
   /**
    * @see UserManager#gotNewUser(User)
-   * @see UserManager#storeUser(User)
+   * @see UserManager#storeUser(User, String)
    * @param user
    */
   void gotUser(User user);
- // void setPermission(User.Permission permission, boolean on);
   Collection<User.Permission> getPermissions();
   void setProjectStartupInfo(User user);
 }

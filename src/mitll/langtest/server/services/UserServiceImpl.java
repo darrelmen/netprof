@@ -176,14 +176,19 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @see mitll.langtest.client.user.SignInForm#makeSignInUserName
    */
   public User userExists(String login, String passwordH) {
-    // findSharedDatabase();
+    logger.info("userExists " + login + " pass " + passwordH);
+
     if (passwordH.isEmpty()) {
       User user = db.getUserDAO().getUser(login, passwordH);
       if (user != null) {
+        logger.info("\tuserExists " + login + " user " + user);
         int i = db.getUserProjectDAO().mostRecentByUser(user.getID());
         ProjectStartupInfo startupInfo = new ProjectStartupInfo();
         user.setStartupInfo(startupInfo);
         startupInfo.setProjectid(i);
+      }
+      else {
+        logger.info("\tuserExists no user for " + login);
       }
 
       return user;
