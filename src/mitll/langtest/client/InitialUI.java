@@ -138,7 +138,7 @@ public class InitialUI implements UILifecycle {
    */
   @Override
   public void populateRootPanel() {
-    logger.info("----> populateRootPanel BEGIN ------>");
+ //   logger.info("----> populateRootPanel BEGIN ------>");
     Container verticalContainer = getRootContainer();
     this.verticalContainer = verticalContainer;
     // header/title line
@@ -148,7 +148,7 @@ public class InitialUI implements UILifecycle {
     if (!showLogin()) {
       populateBelowHeader(verticalContainer);
     }
-    logger.info("----> populateRootPanel END   ------>");
+ //   logger.info("----> populateRootPanel END   ------>");
   }
 
   /**

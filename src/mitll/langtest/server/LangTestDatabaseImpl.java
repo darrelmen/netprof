@@ -91,6 +91,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       readProperties(getServletContext());
       pathHelper.setProperties(serverProps);
       setInstallPath(db);
+      //db.populateProjects(false);
       if (serverProps.isAMAS()) {
         audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, this, null);
       }
@@ -459,8 +460,9 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
 
   private DatabaseImpl makeDatabaseImpl(String h2DatabaseFile) {
     //logger.debug("word pairs " +  serverProps.isWordPairs() + " language " + serverProps.getLanguage() + " config dir " + relativeConfigDir);
-    return new DatabaseImpl(configDir, relativeConfigDir, h2DatabaseFile, serverProps, pathHelper, true, this, false,
-        getServletContext());
+    return new DatabaseImpl(configDir, relativeConfigDir, h2DatabaseFile, serverProps, pathHelper, true, this, false
+    //    ,        getServletContext()
+    );
   }
 
   /**
