@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.copy;
 
+import mitll.hlt.domino.shared.model.user.AccountDetail;
 import mitll.hlt.domino.shared.model.user.ClientUserDetail;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
@@ -86,7 +87,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param inTest
    * @see #main(String[])
    */
-  private void copyOneConfig(String config, boolean inTest) {
+  private void copyOneConfigCommand(String config, boolean inTest) {
     DatabaseImpl databaseLight = getDatabaseLight(config, inTest);
     new CopyToPostgres().copyOneConfig(databaseLight, getCC(config), null, 0);
     databaseLight.destroy();
@@ -206,7 +207,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param db
    * @param cc
    * @param optName null OK
-   * @see #copyOneConfig(String, boolean)
+   * @see #copyOneConfig
    */
   public void copyOneConfig(DatabaseImpl db, String cc, String optName, int displayOrder) {
     int projectID = createProjectIfNotExists(db, cc, optName, "", displayOrder);  // TODO : course?
@@ -353,11 +354,11 @@ public class CopyToPostgres<T extends CommonShell> {
     String secondType = iterator.hasNext() ? iterator.next() : "";
     String language = getOldLanguage(db);
 
-    SlickUserDAOImpl slickUserDAO = (SlickUserDAOImpl) db.getUserDAO();
+    DominoUserDAOImpl dominoUserDAO = (DominoUserDAOImpl) db.getUserDAO();
 
     if (language.equals("msa")) language = "MSA";
 
-    int byName = projectDAO.add(slickUserDAO.getBeforeLoginUser(), name, language, course, firstType, secondType,
+    int byName = projectDAO.add(dominoUserDAO.getBeforeLoginUser(), name, language, course, firstType, secondType,
         countryCode, displayOrder);
 
     Properties props = db.getServerProps().getProps();
@@ -391,7 +392,7 @@ public class CopyToPostgres<T extends CommonShell> {
    *
    * @param db
    * @param projid
-   * @see #copyOneConfig(DatabaseImpl, String, String)
+   * @see #copyOneConfig
    */
   private Map<Integer, Integer> copyUsers(DatabaseImpl db, int projid, IResultDAO oldResultDAO) {
 //    SlickUserDAOImpl dominoUserDAO = (SlickUserDAOImpl) db.getUserDAO();
@@ -414,7 +415,7 @@ public class CopyToPostgres<T extends CommonShell> {
 
     int collisions = 0;
     int lurker = 0;
-    List<SlickUser> added = new ArrayList<>();
+    List<ClientUserDetail> added = new ArrayList<>();
     for (User toImport : importUsers) {
       int importID = toImport.getID();
       if (importID != defectDetector) {
@@ -456,13 +457,7 @@ public class CopyToPostgres<T extends CommonShell> {
       }
     }
 
-    logger.info("adding user->project for " + projid);
-    List<SlickUserProject> toAdd = new ArrayList<>();
-    Timestamp modified = new Timestamp(System.currentTimeMillis());
-    for (SlickUser user : added) {
-      toAdd.add(new SlickUserProject(-1, user.id(), projid, modified));
-    }
-    slickUserProjectDAO.addBulk(toAdd);
+    addUserProjectBinding(projid, slickUserProjectDAO, added);
     logger.info("after, postgres importUsers " +
         "num = " + dominoUserDAO.getUsers().size() +
         " added " + added.size() +
@@ -472,43 +467,53 @@ public class CopyToPostgres<T extends CommonShell> {
     return oldToNew;
   }
 
+  private void addUserProjectBinding(int projid, IUserProjectDAO slickUserProjectDAO, List<ClientUserDetail> added) {
+    logger.info("adding user->project for " + projid);
+    List<SlickUserProject> toAdd = new ArrayList<>();
+    Timestamp modified = new Timestamp(System.currentTimeMillis());
+    for (ClientUserDetail user : added) {
+      toAdd.add(new SlickUserProject(-1, user.getDocumentDBID(), projid, modified));
+    }
+    slickUserProjectDAO.addBulk(toAdd);
+  }
+
 /*  private void addDefaultUsers(Map<Integer, Integer> oldToNew, SlickUserDAOImpl slickUserDAO) {
     oldToNew.put(BaseUserDAO.DEFAULT_USER_ID, slickUserDAO.getDefaultUser());
     oldToNew.put(BaseUserDAO.DEFAULT_MALE_ID, slickUserDAO.getDefaultMale());
     oldToNew.put(BaseUserDAO.DEFAULT_FEMALE_ID, slickUserDAO.getDefaultFemale());
   } */
 
-  private void addDefaultUsers(Map<Integer, Integer> oldToNew, DominoUserDAOImpl slickUserDAO) {
-    oldToNew.put(BaseUserDAO.DEFAULT_USER_ID, slickUserDAO.getDefaultUser());
-    oldToNew.put(BaseUserDAO.DEFAULT_MALE_ID, slickUserDAO.getDefaultMale());
-    oldToNew.put(BaseUserDAO.DEFAULT_FEMALE_ID, slickUserDAO.getDefaultFemale());
+  private void addDefaultUsers(Map<Integer, Integer> oldToNew, DominoUserDAOImpl dominoUserDAO) {
+    oldToNew.put(BaseUserDAO.DEFAULT_USER_ID, dominoUserDAO.getDefaultUser());
+    oldToNew.put(BaseUserDAO.DEFAULT_MALE_ID, dominoUserDAO.getDefaultMale());
+    oldToNew.put(BaseUserDAO.DEFAULT_FEMALE_ID, dominoUserDAO.getDefaultFemale());
   }
 
   /**
-   * @param slickUserDAO
+   * @param dominoUserDAO
    * @param oldToNew
    * @param toImport
    * @return
    * @see #copyUsers
    */
-/*  private SlickUser addUser(SlickUserDAOImpl slickUserDAO,
+/*  private SlickUser addUser(dominoUserDAOImpl dominoUserDAO,
                             Map<Integer, Integer> oldToNew,
                             User toImport) {
 //    logger.info("addUser " + toImport + " with " + toImport.getPermissions());
-    SlickUser user = slickUserDAO.toSlick(toImport, false);
-    SlickUser slickUser = slickUserDAO.addAndGet(user, toImport.getPermissions());
+    SlickUser user = dominoUserDAO.toSlick(toImport, false);
+    SlickUser slickUser = dominoUserDAO.addAndGet(user, toImport.getPermissions());
     int add = slickUser.id();
 //    logger.info("addUser id  " + add + " for " + user.id() + " equal " + (user == slickUser));
     //   logger.info("addUser map " + toImport.getID() + " -> " + add);
     oldToNew.put(toImport.getID(), add);
     return slickUser;
   }*/
-  private ClientUserDetail addUser(DominoUserDAOImpl slickUserDAO,
+  private ClientUserDetail addUser(DominoUserDAOImpl dominoUserDAO,
                                    Map<Integer, Integer> oldToNew,
                                    User toImport) {
 //    logger.info("addUser " + toImport + " with " + toImport.getPermissions());
-    ClientUserDetail user = slickUserDAO.toClientUserDetail(toImport, false);
-    ClientUserDetail addedUser = slickUserDAO.addAndGet(user, toImport.getPasswordHash(), toImport.getPermissions());
+    ClientUserDetail user = dominoUserDAO.toClientUserDetail(toImport, false);
+    ClientUserDetail addedUser = dominoUserDAO.addAndGet(user, toImport.getPasswordHash(), toImport.getPermissions());
     int add = addedUser.getDocumentDBID();
 //    logger.info("addUser id  " + add + " for " + user.id() + " equal " + (user == addedUser));
     //   logger.info("addUser map " + toImport.getID() + " -> " + add);
@@ -571,17 +576,17 @@ public class CopyToPostgres<T extends CommonShell> {
    * TODOx : set the exid int field
    *
    * @param db
-   * @param slickUserDAO
+   * @param dominoUserDAO
    * @param oldToNewUser
    * @param exToID
    */
-  private void copyAnno(DatabaseImpl db, IUserDAO slickUserDAO, Map<Integer, Integer> oldToNewUser,
+  private void copyAnno(DatabaseImpl db, IUserDAO dominoUserDAO, Map<Integer, Integer> oldToNewUser,
                         Map<String, Integer> exToID) {
     SlickAnnotationDAO annotationDAO = (SlickAnnotationDAO) db.getAnnotationDAO();
     List<SlickAnnotation> bulk = new ArrayList<>();
     int missing = 0;
     Set<Long> missingUsers = new HashSet<>();
-    Collection<UserAnnotation> all = new AnnotationDAO(db, slickUserDAO).getAll();
+    Collection<UserAnnotation> all = new AnnotationDAO(db, dominoUserDAO).getAll();
     for (UserAnnotation annotation : all) {
       long creatorID = annotation.getCreatorID();
       Integer userID = oldToNewUser.get((int) creatorID);
@@ -807,7 +812,8 @@ public class CopyToPostgres<T extends CommonShell> {
       Collection<CommonExercise> exercises = db.getExercises(DatabaseImpl.IMPORT_PROJECT_ID);
       logger.info("copyUserAndPredefExercises found " + exercises.size() + " old exercises.");
 
-      int importUser = ((SlickUserDAOImpl) db.getUserDAO()).getImportUser();
+      // TODO : why not add it to interface?
+      int importUser = ((DominoUserDAOImpl) db.getUserDAO()).getImportUser();
       addPredefExercises(projectid, slickUEDAO, importUser, exercises);
       exToInt = slickUEDAO.getOldToNew(projectid);
 
@@ -1069,7 +1075,7 @@ public class CopyToPostgres<T extends CommonShell> {
       copyToPostgres.testDrop(config, inTest);
     } else if (action.equals("copy")) {
       logger.info("copying " + config);
-      copyToPostgres.copyOneConfig(config, inTest);
+      copyToPostgres.copyOneConfigCommand(config, inTest);
     }
   }
 }
