@@ -145,9 +145,10 @@ public class Project {
 
   /**
    * @param exerciseDAO
-   * @see DatabaseImpl#setExerciseDAO(Project) (String, boolean)
+   * @see mitll.langtest.server.database.project.ProjectManagement#setExerciseDAO
    */
   public void setExerciseDAO(ExerciseDAO<CommonExercise> exerciseDAO) {
+    logger.info("setExerciseDAO - ");
     this.exerciseDAO = exerciseDAO;
   }
 

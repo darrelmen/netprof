@@ -101,8 +101,12 @@ public class ProjectStartupInfo implements IsSerializable {
   }
 
   public String toString() {
+    Collection<SectionNode> sectionNodes = getSectionNodes();
+
+    String sectionInfo = sectionNodes == null ? "missing section nodes???" : " num nodes " + sectionNodes.size();
     return "Project  " + projectid +
         " Order " + getTypeOrder() +
-        " num nodes " + getSectionNodes().size() + " has model " + hasModel;
+        sectionInfo +
+        " has model " + hasModel;
   }
 }
