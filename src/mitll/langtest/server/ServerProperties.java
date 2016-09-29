@@ -164,6 +164,7 @@ public class ServerProperties {
       "N_HIDDEN",
       "webserviceHostPort"
   );
+  private String configFileFullPath;
 
   /**
    * @param servletContext
@@ -194,7 +195,7 @@ public class ServerProperties {
    * @param configFile
    * @param dateFromManifest
    */
-  private void readProps(String configDir, String configFile, String dateFromManifest) {
+  private String readProps(String configDir, String configFile, String dateFromManifest) {
     String configFileFullPath = configDir + File.separator + configFile;
     if (!new File(configFileFullPath).exists()) {
       logger.error("couldn't find config file " + new File(configFileFullPath));
@@ -204,11 +205,16 @@ public class ServerProperties {
         props.load(new FileInputStream(configFileFullPath));
         emailList = new EmailList(props);
         readProperties(dateFromManifest);
+        this.configFileFullPath = configFileFullPath;
+        return configFileFullPath;
       } catch (IOException e) {
         logger.error("got " + e, e);
       }
     }
+    return "";
   }
+
+
 
   /**
    * @return
@@ -747,5 +753,9 @@ public class ServerProperties {
 
   public String getNPServer() {
     return props.getProperty("SERVER_NAME", NP_SERVER);
+  }
+
+  public String getConfigFileFullPath() {
+    return configFileFullPath;
   }
 }
