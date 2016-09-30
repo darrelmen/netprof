@@ -44,8 +44,7 @@ import java.util.logging.Logger;
  * @since 2/2/16.
  */
 class MySoundFeedback extends SoundFeedback {
-  private final Logger logger = Logger.getLogger("MySoundFeedback");
-
+//  private final Logger logger = Logger.getLogger("MySoundFeedback");
   public MySoundFeedback(SoundManagerAPI soundManagerAPI) {
     super(soundManagerAPI);
   }
@@ -72,7 +71,7 @@ class MySoundFeedback extends SoundFeedback {
    * @see StatsFlashcardFactory.StatsPracticePanel#abortPlayback
    */
   public synchronized void clear() {
-    logger.info("\t stop playing current sound -------  "+ System.currentTimeMillis());
+   // logger.info("\t stop playing current sound -------  "+ System.currentTimeMillis());
     destroySound(); // if there's something playing, stop it!
   }
 
