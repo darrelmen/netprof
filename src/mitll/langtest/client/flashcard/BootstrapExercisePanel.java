@@ -441,7 +441,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
       }
     }
     if (!badAudioRecording && (correct || !hasRefAudio)) {
-      logger.info("\treceivedAudioAnswer: correct " + correct + " pron score : " + score + " has ref " + hasRefAudio);
+      //logger.info("\treceivedAudioAnswer: correct " + correct + " pron score : " + score + " has ref " + hasRefAudio);
       nextAfterDelay(correct, feedback);
     }
   }
@@ -455,6 +455,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
   }
 
   /**
+   * TODO : decide when to show what ASR "heard"
    * @param score
    * @see #receivedAudioAnswer(mitll.langtest.shared.AudioAnswer)
    */
@@ -464,7 +465,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
     getSoundFeedback().queueSong(SoundFeedback.CORRECT);
 
     // if (showOnlyEnglish) {
-    showHeard(heard);
+    //showHeard(heard);
     //}
   }
 
@@ -506,7 +507,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
   private String showIncorrectFeedback(AudioAnswer result, double score, boolean hasRefAudio, String heard) {
     if (result.isSaidAnswer()) { // if they said the right answer, but poorly, show pron score
       showPronScoreFeedback(score);
-      showHeard(heard);
+    //  showHeard(heard);
     }
     showOtherText();
 
