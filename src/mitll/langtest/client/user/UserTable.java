@@ -399,8 +399,10 @@ public class UserTable extends PagerTable {
     // Add the data to the data provider, which automatically pushes it to the
     // widget.
     List<User> list = dataProvider.getList();
-    for (User contact : users) {
-      list.add(contact);
+    if (users != null) {
+      for (User contact : users) {
+        list.add(contact);
+      }
     }
     table.setRowCount(list.size());
     return list;
