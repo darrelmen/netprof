@@ -95,6 +95,10 @@ public class User extends MiniUser {
     return first != null && !first.isEmpty() || last != null && !last.isEmpty() ? first + " " + last : getUserID();
   }
 
+  public void setAdmin(boolean admin) {
+    this.admin = admin;
+  }
+
   public enum Kind implements IsSerializable {
     UNSET("Unset", false),
     INTERNAL("INTERNAL", false),  // for users we keep to maintain referencial integrity, for instance an importUser

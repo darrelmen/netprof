@@ -83,30 +83,13 @@ public class ProjectManagement implements IProjectManagement {
     this.projectDAO = db.getProjectDAO();
   }
 
-/*
-  public IProjectDAO getProjectDAO() {
-    return projectDAO;
-  }
-*/
-
   /**
    * @seex CopyToPostgres#createProjectIfNotExists
-   * @see DatabaseImpl#populateProjects(boolean)
+   * @see DatabaseImpl#populateProjects()
    */
- // @Override
+  @Override
   public void populateProjects() {
     populateProjects(pathHelper, serverProps, logAndNotify, db);
-    //setExerciseDAOs();
-  }
-
-  //@Override
- /* public String getLanguage(CommonExercise ex) {
-    return getLanguage(ex.getProjectID());
-  }*/
-
-  //@Override
-  private String getLanguage(int projectid) {
-    return getProject(projectid).getLanguage();
   }
 
   /**
@@ -179,7 +162,7 @@ public class ProjectManagement implements IProjectManagement {
    * @see #configureProjects
    */
  // @Override
-  private void configureProject(/*String installPath,*/ Project project) {
+  private void configureProject(Project project) {
     logger.info("configureProject " + project);
 
    // ExerciseDAO<?> exerciseDAO1 = ;
@@ -204,8 +187,17 @@ public class ProjectManagement implements IProjectManagement {
               (SlickResultDAO) db.getResultDAO())
       );
 //      userExerciseDAO.getTemplateExercise();
+
+      project.getAudioFileHelper().checkLTSAndCountPhones(rawExercises);
+      populatePhoneTrie(rawExercises);
     }
+
+
     logMemory();
+  }
+
+  private void populatePhoneTrie(List<CommonExercise> rawExercises) {
+
   }
 
   /**

