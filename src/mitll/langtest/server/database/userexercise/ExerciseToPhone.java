@@ -33,8 +33,12 @@
 package mitll.langtest.server.database.userexercise;
 
 import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.refaudio.IRefResultDAO;
 import mitll.langtest.server.scoring.ParseResultJson;
+import mitll.langtest.server.trie.ExerciseTrie;
+import mitll.langtest.server.trie.Trie;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.npdata.dao.SlickRefResultJson;
@@ -48,16 +52,17 @@ public class ExerciseToPhone {
   /**
    * @param refResultDAO
    * @return
-   * @see #initializeDAOs(PathHelper)
+   * @see DatabaseImpl#configureProjects
    */
   public Map<Integer, ExercisePhoneInfo> getExerciseToPhone(IRefResultDAO refResultDAO) {
     long then = System.currentTimeMillis();
     List<SlickRefResultJson> jsonResults = refResultDAO.getJsonResults();
     long now = System.currentTimeMillis();
-    logger.info("took " + (now - then) + " millis to get ref results");
+    logger.info("getExerciseToPhone took " + (now - then) + " millis to get ref results");
     Map<Integer, ExercisePhoneInfo> exToPhones = new HashMap<>();
 
     ParseResultJson parseResultJson = new ParseResultJson(null);
+
 
     for (SlickRefResultJson exjson : jsonResults) {
       Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.parseJson(exjson.scorejson());
@@ -67,15 +72,17 @@ public class ExerciseToPhone {
       ExercisePhoneInfo phonesForEx = exToPhones.get(exid);
       if (phonesForEx == null) exToPhones.put(exid, phonesForEx = new ExercisePhoneInfo());
 
-      {
-        Set<String> phones = new HashSet<>();
-        for (TranscriptSegment segment : transcriptSegments) phones.add(segment.getEvent());
-        phonesForEx.addPhones(phones);
-      }
+      addPhones(transcriptSegments, phonesForEx);
       phonesForEx.setNumPhones(exjson.numalignphones());
     }
     logger.info("took " + (System.currentTimeMillis() - then) + " millis to populate ex->phone map");
 
     return exToPhones;
+  }
+
+  private void addPhones(List<TranscriptSegment> transcriptSegments, ExercisePhoneInfo phonesForEx) {
+    Set<String> phones = new HashSet<>();
+    for (TranscriptSegment segment : transcriptSegments) phones.add(segment.getEvent());
+    phonesForEx.addPhones(phones);
   }
 }

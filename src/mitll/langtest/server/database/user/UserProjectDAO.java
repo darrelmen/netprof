@@ -65,7 +65,6 @@ public class UserProjectDAO implements IUserProjectDAO {
    */
   @Override
   public void add(int userid, int projid) {
-    //logger.info("UserProjectDAO adding " + userid + " -> " + projid);
     dao.insert(new SlickUserProject(-1, userid, projid, new Timestamp(System.currentTimeMillis())));
   }
 
@@ -93,13 +92,6 @@ public class UserProjectDAO implements IUserProjectDAO {
   public int mostRecentByUser(int user) {
     List<SlickUserProject> slickUserProjects = dao.mostRecentByUser(user);
     int i = slickUserProjects.isEmpty() ? -1 : slickUserProjects.iterator().next().projid();
- //   logger.info("mostRecentByUser most recent project for " +user + " is project #" + i);
     return i;
   }
-
-//  @Override
-//  public SlickUserProject mostRecentProjectByUser(int user) {
-//    List<SlickUserProject> slickUserProjects = dao.mostRecentByUser(user);
-//    return slickUserProjects.iterator().next();
-//  }
 }

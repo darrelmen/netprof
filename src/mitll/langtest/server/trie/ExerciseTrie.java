@@ -32,6 +32,8 @@
 
 package mitll.langtest.server.trie;
 
+import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.apache.log4j.Logger;
@@ -48,7 +50,7 @@ import java.util.Collection;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 11/13/13
  * Time: 4:42 PM
- * To change this template use File | Settings | File Templates.
+ * @see Project#fullTrie
  */
 public class ExerciseTrie<T extends CommonShell> extends Trie<T> {
   private static final Logger logger = Logger.getLogger(ExerciseTrie.class);
@@ -68,10 +70,12 @@ public class ExerciseTrie<T extends CommonShell> extends Trie<T> {
    *
    * @param exercisesForState
    * @param language
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseIds
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseListWrapperForPrefix
+   * @see Project#buildExerciseTrie
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseIds
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseListWrapperForPrefix
    */
-  public ExerciseTrie(Collection<T> exercisesForState, String language,
+  public ExerciseTrie(Collection<T> exercisesForState,
+                      String language,
                       SmallVocabDecoder smallVocabDecoder) {
     boolean includeForeign = !language.equals(ENGLISH);
     startMakingNodes();
@@ -83,22 +87,29 @@ public class ExerciseTrie<T extends CommonShell> extends Trie<T> {
     boolean hasClickableCharacters = isMandarin || isKorean || isJapanese;
 
     //logger.debug("lang " + language + " looking at " + exercisesForState.size());
-
     for (T exercise : exercisesForState) {
-      addEnglish(smallVocabDecoder, exercise);
-      if (includeForeign) {
-        addForeign(smallVocabDecoder, isMandarin, hasClickableCharacters, exercise);
-      } else {
-        for (String t : smallVocabDecoder.getTokens(exercise.getMeaning())) {
-          addEntry(exercise, t);
-        }
-      }
+      addEntryForExercise(smallVocabDecoder, includeForeign, isMandarin, hasClickableCharacters, exercise);
     }
     endMakingNodes();
     long now = System.currentTimeMillis();
 
     if (now - then > TOOLONG_TO_WAIT) {
       logger.debug("getExercisesForSelectionState : took " + (now - then) + " millis to build ");
+    }
+  }
+
+  protected void addEntryForExercise(SmallVocabDecoder smallVocabDecoder,
+                                   boolean includeForeign,
+                                   boolean isMandarin,
+                                   boolean hasClickableCharacters,
+                                   T exercise) {
+    addEnglish(smallVocabDecoder, exercise);
+    if (includeForeign) {
+      addForeign(smallVocabDecoder, isMandarin, hasClickableCharacters, exercise);
+    } else {
+      for (String t : smallVocabDecoder.getTokens(exercise.getMeaning())) {
+        addEntry(exercise, t);
+      }
     }
   }
 
@@ -188,11 +199,11 @@ public class ExerciseTrie<T extends CommonShell> extends Trie<T> {
      * @param useEnglish
      * @see ExerciseTrie#ExerciseTrie
      */
-    public ExerciseWrapper(T e, boolean useEnglish) {
+    ExerciseWrapper(T e, boolean useEnglish) {
       this((useEnglish ? e.getEnglish().toLowerCase() : e.getForeignLanguage().toLowerCase()), e);
     }
 
-    public ExerciseWrapper(String value, T e) {
+    ExerciseWrapper(String value, T e) {
       this.value = value;
       this.e = e;
     }
