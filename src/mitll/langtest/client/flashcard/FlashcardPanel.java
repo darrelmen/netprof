@@ -198,17 +198,17 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
   }
 
   private void maybePlayRef(ControlState controlState) {
-    logger.info("maybePlayRef --- ");
+    //logger.info("maybePlayRef --- ");
     if (controlState.isAudioOn() && isTabVisible()) {
       if (!controlState.isAutoPlay()) {
-        logger.info("audio on, so playing ref");
+       // logger.info("audio on, so playing ref");
         playRef();
       } else {
-        logger.info("auto advance on, so not playing ref here");
+       // logger.info("auto advance on, so not playing ref here");
       }
     }
     else {
-      logger.info("tab not visible - so no audio.");
+     // logger.info("tab not visible - so no audio.");
     }
   }
 
@@ -221,7 +221,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
      // String display = w.getElement().getStyle().getDisplay();
      // logger.info("isVisible check " + w.getElement().getId() + " vis " +w.isVisible() + " display " + display);
       if (/*!w.isVisible() || display.equals("none") ||*/ w.getOffsetWidth() == 0) {
-        logger.info("isVisible check " + w.getElement().getId() + " vis " +w.isVisible() + " offset width " + w.getOffsetWidth());
+      //  logger.info("isVisible check " + w.getElement().getId() + " vis " +w.isVisible() + " offset width " + w.getOffsetWidth());
         return false;
       } else if (w.getElement().getId().equals(InitialUI.ROOT_VERTICAL_CONTAINER)) {
         return true;
