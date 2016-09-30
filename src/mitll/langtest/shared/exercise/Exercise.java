@@ -360,6 +360,10 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return firstPron;
   }
 
+  /**
+   * @see mitll.langtest.server.audio.AudioFileHelper#countPhones
+   * @param firstPron
+   */
   @Override
   public void setFirstPron(List<String> firstPron) {
     this.firstPron = firstPron;

@@ -268,20 +268,17 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * @param reload - this won't be used...
    * @seex CopyToPostgres#createProjectIfNotExists
+   * @see DatabaseImpl#makeDAO(String, String, String)
    * @see DatabaseImpl#DatabaseImpl
    * @see LangTestDatabaseImpl#init
    */
-  public void populateProjects(boolean reload) {
-    logger.info("populateProjects --- ");
-
+  public void populateProjects() {
     if (projectManagement == null) {
       logger.info("no project management yet...");
-    }
-    else {
+    } else {
+      logger.info("populateProjects --- ");
       projectManagement.populateProjects();
-     // projectManagement.setExerciseDAOs();
     }
   }
 
@@ -573,7 +570,7 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.services.UserServiceImpl#setProject(int)
    */
   public void setStartupInfo(User userWhere, int projid) {
-  //  logger.info("setStartupInfo on " + userWhere + " for project " + projid);
+    //  logger.info("setStartupInfo on " + userWhere + " for project " + projid);
     projectManagement.setStartupInfo(userWhere, projid);
   }
 
@@ -618,14 +615,19 @@ public class DatabaseImpl implements Database {
 
           makeExerciseDAO(lessonPlanFile, isURL);
 
-          populateProjects(false);
-      //    logger.info("set exercise dao " + exerciseDAO + " on " + userExerciseDAO);
+          populateProjects();
+          //    logger.info("set exercise dao " + exerciseDAO + " on " + userExerciseDAO);
           if (projectManagement.getProjects().isEmpty()) {
             logger.warn("\n\n\nmakeDAO no projects loaded yet...?");
           } else {
             ExerciseDAO<CommonExercise> exerciseDAO = projectManagement.getFirstProject().getExerciseDAO();
             userExerciseDAO.setExerciseDAO(exerciseDAO);
           }
+
+          // TODO
+          // TODO : will this break import???
+          // TODO
+
           // if (!serverProps.useH2()) {
           configureProjects();
           //}
@@ -637,6 +639,7 @@ public class DatabaseImpl implements Database {
 
   /**
    * Why a separate, later step???
+   *
    * @see #makeDAO
    */
   private void configureProjects() {

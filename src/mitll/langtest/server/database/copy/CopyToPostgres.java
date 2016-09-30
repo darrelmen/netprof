@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.database.copy;
 
-import mitll.hlt.domino.shared.model.user.AccountDetail;
 import mitll.hlt.domino.shared.model.user.ClientUserDetail;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
@@ -327,7 +326,7 @@ public class CopyToPostgres<T extends CommonShell> {
 
       byName = createProject(db, projectDAO, countryCode, name, course, displayOrder);
 
-      db.populateProjects(true);
+      db.populateProjects();
     } else {
       logger.info("found project " + byName + " for language '" + oldLanguage + "'");
     }
