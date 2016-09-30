@@ -73,7 +73,7 @@ public class Project {
   private ServerProperties serverProps;
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#addSingleProject(ExerciseDAO)
+   * @see mitll.langtest.server.database.project.ProjectManagement#addSingleProject
    * @param exerciseDAO
    */
   public Project(ExerciseDAO<CommonExercise> exerciseDAO) {
