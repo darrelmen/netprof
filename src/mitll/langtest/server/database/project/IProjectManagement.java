@@ -42,35 +42,21 @@ import java.util.Collection;
 
 public interface IProjectManagement {
   /**
-   * @see DatabaseImpl#populateProjects(boolean)
+   * @see DatabaseImpl#populateProjects()
    */
   void populateProjects();
-
- // String getLanguage(CommonExercise ex);
-
- // String getLanguage(int projectid);
-
- // void doReload();
 
   /**
    * @see DatabaseImpl#configureProjects
    */
   void configureProjects();
 
-  //void configureProject(/*String installPath,*/ Project project);
-
-  //Project getProjectOrFirst(int projectid);
 
   Project getProjectForUser(int userid);
 
   void stopDecode();
 
   void addSingleProject(ExerciseDAO<CommonExercise> jsonExerciseDAO);
-
-  /**
-   * @see DatabaseImpl#makeExerciseDAO(String, boolean)
-   */
- // void setExerciseDAOs();
 
   CommonExercise getExercise(int projectid, int id);
 
