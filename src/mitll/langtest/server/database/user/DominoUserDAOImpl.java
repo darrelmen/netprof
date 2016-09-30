@@ -46,6 +46,10 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -57,6 +61,13 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
   private IUserServiceDelegate delegate;
   private INetProfUserDelegate netProfDelegate;
+
+//  static Logger root = (Logger) LoggerFactory
+//      .getLogger(Logger.ROOT_LOGGER_NAME);
+//
+//  static {
+//    root.setLevel(Level.INFO);
+//  }
 
   /**
    * TODO : get the admin user.
@@ -73,6 +84,19 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    */
   public DominoUserDAOImpl(Database database/*, ServletContext servletContext*/) {
     super(database);
+
+    System.setProperty("DEBUG.MONGO", "false");
+
+// Enable DB operation tracing
+    System.setProperty("DB.TRACE", "true");
+
+//    LogManager.getLogger("org.mongodb.driver.connection").setLevel(org.apache.log4j.Level.OFF);
+//    LogManager.getLogger("org.mongodb.driver.management").setLevel(org.apache.log4j.Level.OFF);
+//    LogManager.getLogger("org.mongodb.driver.cluster").setLevel(org.apache.log4j.Level.OFF);
+//    LogManager.getLogger("org.mongodb.driver.protocol.insert").setLevel(org.apache.log4j.Level.OFF);
+//    LogManager.getLogger("org.mongodb.driver.protocol.query").setLevel(org.apache.log4j.Level.OFF);
+//    LogManager.getLogger("org.mongodb.driver.protocol.update").setLevel(org.apache.log4j.Level.OFF);
+
     //  dao = new UserDAOWrapper(dbConnection);
 
 //    this.delegate = (IUserServiceDelegate) servletContext.
