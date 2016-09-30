@@ -106,7 +106,6 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
       boolean isUserListReq = request.getUserListID() != -1;
       UserList userListByID = isUserListReq ? db.getUserListByID(request.getUserListID(), getProjectID()) : null;
 
-
       if (request.getTypeToSelection().isEmpty()) {   // no unit-chapter filtering
         // get initial exercise set, either from a user list or predefined
         boolean predefExercises = userListByID == null;
@@ -152,9 +151,12 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
     }
   }
 
-  boolean didCheckLTS = false;
+//  private boolean didCheckLTS = false;
 
   /**
+   * TODO : this doesn't make sense - we need to do this on all projects, once.
+   * Here it's just doing it on the first project that's asked for.
+   *
    * TODO : remove duplicate
    * Called from the client:
    *
@@ -168,17 +170,17 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
     if (now - then > 200) {
       logger.info("getExercises took " + (now - then) + " millis to get the raw exercise list for " + getLanguage());
     }
-    if (!didCheckLTS) {
+
+/*    if (!didCheckLTS) {
 //      buildExerciseTrie();
       AudioFileHelper audioFileHelper = getAudioFileHelper();
-
       if (audioFileHelper == null) {
         logger.error("no audio file helper for " + getProject());
       } else {
         audioFileHelper.checkLTSAndCountPhones(exercises);
         didCheckLTS = true;
       }
-    }
+    }*/
 
     now = System.currentTimeMillis();
     if (now - then > 200) {
@@ -187,10 +189,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
     return exercises;
   }
 
-  private Collection<CommonExercise> getExercisesForUser() {
-    return db.getExercises(getProjectID());
-  }
-
+  private Collection<CommonExercise> getExercisesForUser() {  return db.getExercises(getProjectID());  }
   Collator getCollator() {
     return getAudioFileHelper().getCollator();
   }
