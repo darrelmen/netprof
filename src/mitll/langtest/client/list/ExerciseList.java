@@ -470,7 +470,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   @Override
   public void hide() {
-    logger.info(getElement().getId() + " got hide");
+    //logger.info(getElement().getId() + " got hide");
     getParent().setVisible(false);
   }
 
@@ -489,6 +489,10 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
       if (DEBUG) logger.info("loadFirstExercise ex id =" + toLoad.getID() + " instance " + instance);
       pushFirstSelection(toLoad.getID(), "");
     }
+  }
+
+  public void loadFirst() {
+    pushFirstSelection(getFirst().getID(), "");
   }
 
   protected abstract boolean isEmpty();
