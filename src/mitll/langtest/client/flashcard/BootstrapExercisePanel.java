@@ -80,6 +80,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
   private static final int LONG_DELAY_MILLIS = 3500;
   private static final int DELAY_CHARACTERS = 40;
   private static final int HIDE_DELAY = 2500;
+  protected static final int DELAY_MILLIS = 100;
 
   private static final boolean NEXT_ON_BAD_AUDIO = false;
   /**
@@ -98,7 +99,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
    * @param exerciseList
    * @see StatsFlashcardFactory.StatsPracticePanel#StatsPracticePanel
    */
-  public BootstrapExercisePanel(final T e,
+  BootstrapExercisePanel(final T e,
                                 final LangTestDatabaseAsync service,
                                 final ExerciseController controller,
                                 boolean addKeyBinding,
@@ -129,6 +130,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
       @Override
       public void onClick(ClickEvent event) {
         controlState.setAudioFeedbackOn(true);
+        setAutoPlay(false);
         //logger.info("now on " + controlState);
       }
     });
@@ -140,6 +142,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
       @Override
       public void onClick(ClickEvent event) {
         controlState.setAudioFeedbackOn(false);
+        setAutoPlay(false);
         //logger.info("now off " + controlState);
       }
     });
@@ -302,6 +305,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
           protected void start() {
             controller.logEvent(this, AVP_RECORD_BUTTON, exerciseID, "Start_Recording");
             super.start();
+            setAutoPlay(false);
             recordingStarted();
           }
 
@@ -462,7 +466,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
     getSoundFeedback().queueSong(SoundFeedback.CORRECT);
 
     // if (showOnlyEnglish) {
-    showHeard(heard);
+    //showHeard(heard);
     //}
   }
 
@@ -471,7 +475,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
    * @see #showCorrectFeedback(double, String)
    * @see #showIncorrectFeedback(AudioAnswer, double, boolean, String)
    */
-  private void showHeard(String heard) {
+/*  private void showHeard(String heard) {
     String removedTruth = removePunct(exercise.getForeignLanguage());
     String removedHeard = removePunct(heard);
     if (!removedHeard.equalsIgnoreCase(removedTruth)) {
@@ -486,7 +490,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
         recoOutput.getElement().getStyle().setColor("#000000");
       }
     }
-  }
+  }*/
 
   private String removePunct(String t) {
     return t.replaceAll("/", " ").replaceAll(CommentNPFExercise.PUNCT_REGEX, "");
@@ -504,7 +508,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
   private String showIncorrectFeedback(AudioAnswer result, double score, boolean hasRefAudio, String heard) {
     if (result.isSaidAnswer()) { // if they said the right answer, but poorly, show pron score
       showPronScoreFeedback(score);
-      showHeard(heard);
+    //  showHeard(heard);
     }
     showOtherText();
 
@@ -516,13 +520,12 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
         String path = getRefAudioToPlay();
         if (path == null) {
           playIncorrect(); // this should never happen
-        } else if (!preventFutureTimerUse) {
-          playRefAndGoToNext(path);
+        } else if (isTimerNotRunning()) {
+          playRefAndGoToNext(path, 0, false);
         }
       } else {
         playIncorrect();
-        int delay = 1000;
-        goToNextAfter(delay);
+        goToNextAfter(1000);
       }
     } else {
       tryAgain();
@@ -554,27 +557,8 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
     getSoundFeedback().queueSong(SoundFeedback.INCORRECT);
   }
 
-  /**
-   * @param path
-   * @paramx correctPrompt
-   * @see #showIncorrectFeedback
-   */
-  private void playRefAndGoToNext(String path) {
-    getSoundFeedback().queueSong(getPath(path), new SoundFeedback.EndListener() {
-      @Override
-      public void songStarted() {
-        Widget widget = isSiteEnglish() ? english : foreign;
-        widget.addStyleName(PLAYING_AUDIO_HIGHLIGHT);
-        endListener.songStarted();
-      }
+  protected void abortPlayback() {
 
-      @Override
-      public void songEnded() {
-        endListener.songEnded();
-        // removePlayingHighlight(textWidget);
-        loadNext();
-      }
-    });
   }
 
   /**
@@ -582,7 +566,11 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#recordingStarted()
    */
   void removePlayingHighlight() {
-    removePlayingHighlight(isSiteEnglish() ? english : foreign);
+    //logger.info("removePlayingHighlight - ");
+    removePlayingHighlight(
+    //    isSiteEnglish() ? english : foreign
+      foreign
+    );
   }
 
   /**
@@ -597,10 +585,13 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
         initRecordButton();
       }
     };
-    int incorrectDelay = DELAY_MILLIS_LONG;
-    t.schedule(incorrectDelay);
+    t.schedule(DELAY_MILLIS_LONG);
   }
 
+  /**
+   * @param delay
+   * @see #showIncorrectFeedback(AudioAnswer, double, boolean, String)
+   */
   private void goToNextAfter(int delay) {
     loadNextOnTimer(controller.getProps().isDemoMode() ? LONG_DELAY_MILLIS : delay);
   }
@@ -616,8 +607,6 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
     String translit = exercise.getTransliteration().length() > 0 ? "<br/>(" + exercise.getTransliteration() + ")" : "";
     return refSentence + translit;
   }
-
-  private Timer currentTimer = null;
 
   /**
    * TODO : whole thing is bogus - we shouldn't just flash the answer up and then move on
@@ -662,49 +651,19 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
   }
 
   /**
-   * @param delay
-   * @see #goToNextAfter(int)
-   * @see #nextAfterDelay(boolean, String)
-   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#nextAfterDelay(boolean, String)
+   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#abortPlayback
    */
-  void loadNextOnTimer(final int delay) {
-    //logger.info("loadNextOnTimer ----> load next on " + delay);
-
-    if (!preventFutureTimerUse) {
-      //if (delay > 100) {
-      //  logger.info("loadNextOnTimer ----> load next on " + delay);
-      // }
-      Timer t = new Timer() {
-        @Override
-        public void run() {
-          currentTimer = null;
-          loadNext();
-        }
-      };
-      currentTimer = t;
-      t.schedule(delay);
-    } //else {
-    //logger.info("\n\n\n----> ignoring next ");
-    //}
-  }
-
-  private boolean preventFutureTimerUse = false;
-
   void cancelTimer() {
+//    logger.info("cancelTimer ----> ");
     removePlayingHighlight();
-
-    preventFutureTimerUse = true;
-    if (currentTimer != null) currentTimer.cancel();
+    if (currentTimer != null) {
+//      logger.info("\tcancelTimer ----> ");
+      currentTimer.cancel();
+    }
   }
 
   private void initRecordButton() {
     answerWidget.initRecordButton();
-  }
-
-  /**
-   * @see #nextAfterDelay(boolean, String)
-   */
-  void loadNext() {
   }
 
   /**

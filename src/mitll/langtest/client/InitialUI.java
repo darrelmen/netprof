@@ -82,6 +82,9 @@ import java.util.logging.Logger;
 public class InitialUI implements UILifecycle {
   private final Logger logger = Logger.getLogger("InitialUI");
 
+  public static final String ROOT_VERTICAL_CONTAINER = "root_vertical_container";
+
+
   /**
    * Tamas doesn't like scrolling -- try to prevent it on laptops
    */
@@ -386,7 +389,7 @@ public class InitialUI implements UILifecycle {
   protected Container getRootContainer() {
     RootPanel.get().clear();   // necessary?
     Container verticalContainer = new FluidContainer();
-    verticalContainer.getElement().setId("root_vertical_container");
+    verticalContainer.getElement().setId(ROOT_VERTICAL_CONTAINER);
     return verticalContainer;
   }
 
