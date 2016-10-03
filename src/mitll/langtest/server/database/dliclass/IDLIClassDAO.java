@@ -30,19 +30,15 @@
  *
  */
 
-package mitll.langtest.server.database.user;
+package mitll.langtest.server.database.dliclass;
 
 import mitll.langtest.server.database.IDAO;
-import mitll.npdata.dao.SlickUserSession;
+import mitll.langtest.shared.user.User;
+import mitll.npdata.dao.SlickUserPermission;
 
 import java.util.Collection;
+import java.util.Map;
 
-public interface IUserSessionDAO extends IDAO {
-  void add(SlickUserSession user);
+public interface IDLIClassDAO extends IDAO {
 
-  int getUserForSession(String sesssion);
-
-  void removeSession(String session);
-
-  int getNumRows();
 }
