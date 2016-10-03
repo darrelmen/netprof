@@ -44,7 +44,6 @@ import mitll.langtest.client.sound.SoundManagerAPI;
 class MySoundFeedback extends SoundFeedback {
   public MySoundFeedback(SoundManagerAPI soundManagerAPI) {
     super(soundManagerAPI);
-  //  this.statsFlashcardFactory = statsFlashcardFactory;
   }
 
   public synchronized void queueSong(String song, EndListener endListener) {
@@ -59,23 +58,36 @@ class MySoundFeedback extends SoundFeedback {
     createSound(song, null);
   }
 
+  /**
+   * @see StatsFlashcardFactory.StatsPracticePanel#abortPlayback
+   */
   public synchronized void clear() {
     //  logger.info("\t stop playing current sound -------  "+ System.currentTimeMillis());
     destroySound(); // if there's something playing, stop it!
   }
 
   // TODO : remove this empty listener
-  private final EndListener endListener = new EndListener() {
+  private EndListener endListener = new EndListener() {
     @Override
     public void songStarted() {
-      //logger.info("song started --------- "+ System.currentTimeMillis());
+      //logger.info("empty listener - song started --------- "+ System.currentTimeMillis());
     }
 
     @Override
     public void songEnded() {
-      //logger.info("song ended   --------- " + System.currentTimeMillis());
+      //logger.info("empty listener - song ended   --------- " + System.currentTimeMillis());
     }
   };
 
-  public EndListener getEndListener() { return endListener; }
+  /**
+   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#StatsPracticePanel
+   * @return
+   */
+  EndListener getEndListener() {
+    return endListener;
+  }
+
+  void setEndListener(EndListener endListener) {
+    this.endListener = endListener;
+  }
 }

@@ -50,9 +50,12 @@ public class ControlState {
   private boolean audioOn = true;
   private boolean audioFeedbackOn = true;
   private boolean shuffleOn = false;
+  private boolean autoPlay = false;
+
   public static final String ENGLISH = "english";
   public static final String FOREIGN = "foreign";
   public static final String BOTH = "both";
+  public static final String AUTO_PLAY = "autoPlay";
   private String showState = BOTH; // english/foreign/both - default
 
   private KeyStorage storage = null;
@@ -77,14 +80,14 @@ public class ControlState {
     else if (showState1.equals(BOTH)) showState = BOTH;
     else if (showState1.equals(ENGLISH)) showState = ENGLISH;
 
-    String audioOnKey = storage.getValue(AUDIO_ON);
-    audioOn = audioOnKey.equalsIgnoreCase(TRUE_VALUE);
+    audioOn = getValue(AUDIO_ON);
+    audioFeedbackOn = getValue(AUDIO_FEEDBACK_ON);
+    shuffleOn = getValue(SHUFFLE_ON);
+    autoPlay = getValue(AUTO_PLAY);
+  }
 
-    String audioFeedbackOnKey = storage.getValue(AUDIO_FEEDBACK_ON);
-    audioFeedbackOn = audioFeedbackOnKey.equalsIgnoreCase(TRUE_VALUE);
-
-    String shuffleOnKey = storage.getValue(SHUFFLE_ON);
-    shuffleOn = shuffleOnKey.equalsIgnoreCase(TRUE_VALUE);
+  private boolean getValue(String audioOn) {
+    return storage.getValue(audioOn).equalsIgnoreCase(TRUE_VALUE);
   }
 
   public void setAudioOn(boolean audioOn) {
@@ -97,14 +100,23 @@ public class ControlState {
     storeValue(AUDIO_FEEDBACK_ON, audioFeedbackOn);
   }
 
-  public void setSuffleOn(boolean shuffleOn) {
+  void setSuffleOn(boolean shuffleOn) {
     this.shuffleOn = shuffleOn;
     storeValue(SHUFFLE_ON,shuffleOn);
   }
 
-  public void setShowState(String showState) {
+  void setShowState(String showState) {
     this.showState = showState;
     if (storage != null) storage.storeValue(SHOW_STATE, showState);
+  }
+
+  /**
+   * @param autoPlay
+   * @see FlashcardPanel#getAutoPlayButton
+   */
+  void setAutoPlayOn(boolean autoPlay) {
+    this.autoPlay = autoPlay;
+    storeValue(AUTO_PLAY, autoPlay);
   }
 
   private void storeValue(String slot, boolean shuffleOn) {
@@ -112,20 +124,38 @@ public class ControlState {
       storage.storeValue(slot, Boolean.toString(shuffleOn));
     }
   }
-/*
 
-  public String getShowState() {
-    return showState;
-  }
-*/
-
-  public boolean isAudioOn() {
+  boolean isAudioOn() {
     return audioOn;
   }
-  public boolean isAudioFeedbackOn() { return audioFeedbackOn;  }
-  public boolean isShuffle() { return shuffleOn;  }
+
+  boolean isAudioFeedbackOn() {
+    return audioFeedbackOn;
+  }
+
+  /**
+   * @return
+   * @see FlashcardPanel#getRightColumn(ControlState)
+   */
+  boolean isShuffle() {
+    return shuffleOn;
+  }
+
+  /**
+   * @see BootstrapExercisePanel#checkThenLoadNextOnTimer
+   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#
+   * @return
+   */
+  boolean isAutoPlay() {
+    return autoPlay;
+  }
 
   public String toString() {
-    return "ControlState : id " + id + " audio " + audioOn + " show " + showState + " shuffle " + shuffleOn;
+    return "ControlState :" +
+        " id " + id +
+        " audio " + audioOn +
+        " show " + showState +
+        " shuffle " + shuffleOn +
+        " auto play " + autoPlay;
   }
 }
