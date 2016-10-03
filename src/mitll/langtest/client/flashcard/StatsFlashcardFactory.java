@@ -76,7 +76,6 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     extends ExercisePanelFactory<L, T>
     implements RequiresResize {
   private final Logger logger = Logger.getLogger("StatsFlashcardFactory");
-  private static final int DELAY_MILLIS = 100;
 
   private static final String REMAINING = "Remaining";
   private static final String INCORRECT = "Incorrect";
@@ -196,6 +195,9 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         soundFeedback.getEndListener(),
         StatsFlashcardFactory.this.instance,
         exerciseList) {
+
+
+
       @Override
       protected void gotShuffleClick(boolean b) {
         sticky.resetStorage();
@@ -219,7 +221,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   /**
    * Pull state out of cache and re-populate correct, incorrect, and score history.
    *
-   * @see mitll.langtest.client.custom.Navigation#makePracticeHelper(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.user.UserFeedback)
+   * @see mitll.langtest.client.custom.Navigation#makePracticeHelper
    */
   public void populateCorrectMap() {
     String value = sticky.getCorrect();
@@ -282,9 +284,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
           StatsFlashcardFactory.this.instance, exerciseListToUse);
       soundFeedback.setEndListener(new SoundFeedback.EndListener() {
         @Override
-        public void songStarted() {
-
-        }
+        public void songStarted() {}
 
         @Override
         public void songEnded() {
@@ -292,10 +292,13 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         }
       });
 
-      if (controlState.isAutoPlay()) {
-       // logger.info("auto play so going to next");
+ /*     if (controlState.isAutoPlay()) {
+        logger.info("StatsPracticePanel auto play so going to next");
         playRefAndGoToNext(getRefAudioToPlay(), StatsFlashcardFactory.DELAY_MILLIS, true);
       }
+      else {
+        logger.info("StatsPracticePanel auto play OFF ");
+      }*/
       //logger.info("made " + this.getElement().getId() + " for " + e.getID());
     }
 
@@ -331,11 +334,10 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
     protected void gotAutoPlay(boolean b) {
       if (b) {
-       // logger.info("gotAutoPlay got click...");
-        playRefAndGoToNext(getRefAudioToPlay(), StatsFlashcardFactory.DELAY_MILLIS, true);
+     //   logger.info("gotAutoPlay got click...");
+        playRefAndGoToNextIfSet();
       } else {
-      //  logger.info("gotAutoPlay cancelTimer");
-       // cancelTimer();
+     //   logger.info("gotAutoPlay abortPlayback");
         abortPlayback();
       }
     }
@@ -653,7 +655,6 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
     @Override
     protected void abortPlayback() {
-      logger.info("abortPlayback ---");
       cancelTimer();
       soundFeedback.clear();
     }
