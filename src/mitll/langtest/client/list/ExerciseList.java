@@ -493,6 +493,10 @@ UserState userState;
     }
   }
 
+  public void loadFirst() {
+    pushFirstSelection(getFirst().getID(), "");
+  }
+
   protected abstract boolean isEmpty();
 
   /**

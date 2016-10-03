@@ -51,6 +51,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.ListChangeListener;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.custom.UserList;
@@ -282,9 +283,17 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
           ADD_KEY_BINDING,
           StatsFlashcardFactory.this.controlState,
           soundFeedback,
-          soundFeedback.getEndListener(),
+          null,
           StatsFlashcardFactory.this.instance, exerciseListToUse);
-      // logger.info("made " + this.getElement().getID() + " for " + e.getOldID());
+      soundFeedback.setEndListener(new SoundFeedback.EndListener() {
+        @Override
+        public void songStarted() {}
+
+        @Override
+        public void songEnded() {
+          removePlayingHighlight();
+        }
+      });
     }
 
     @Override
@@ -296,7 +305,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     /**
      * @see #loadNextOnTimer(int)
      * @see #nextAfterDelay(boolean, String)
-     * @see #playRefAndGoToNext(String)
+     * @see #playRefAndGoToNext
      */
     @Override
     protected void loadNext() {
@@ -307,10 +316,24 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       }
     }
 
+    /**
+     * @param b
+     * @see FlashcardPanel#getShuffleButton(ControlState)
+     */
     @Override
     protected void gotShuffleClick(boolean b) {
       sticky.resetStorage();
       super.gotShuffleClick(b);
+    }
+
+    protected void gotAutoPlay(boolean b) {
+      if (b) {
+     //   logger.info("gotAutoPlay got click...");
+        playRefAndGoToNextIfSet();
+      } else {
+     //   logger.info("gotAutoPlay abortPlayback");
+        abortPlayback();
+      }
     }
 
     /**
@@ -627,7 +650,8 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       return startOver;
     }
 
-    void abortPlayback() {
+    @Override
+    protected void abortPlayback() {
       cancelTimer();
       soundFeedback.clear();
     }
