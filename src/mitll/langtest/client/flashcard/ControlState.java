@@ -158,6 +158,11 @@ public class ControlState {
     return shuffleOn;
   }
 
+  /**
+   * @see BootstrapExercisePanel#checkThenLoadNextOnTimer
+   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#
+   * @return
+   */
   boolean isAutoPlay() {
     return autoPlay;
   }

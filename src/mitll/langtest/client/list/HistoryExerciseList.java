@@ -396,10 +396,6 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
     loadExercisesUsingPrefix(typeToSection, prefix, onlyWithAudioAnno, "");
   }
 
-/*  protected void loadExercisesUsingPrefix(SelectionState selectionState) {
-    loadExercisesUsingPrefix(newState.getTypeToSection(), selectionState.getSearch(), selectionState.isOnlyWithAudioDefects(), selectionState.getItem());
-  }*/
-
   /**
    * @param typeToSection
    * @param prefix
