@@ -997,11 +997,9 @@ public class DatabaseImpl implements Database {
     );
 
     List<String> created = new ArrayList<>();
-    for (IDAO dao : idaos) {
-      createIfNotThere(dao, created);
-    }
-
+    for (IDAO dao : idaos) createIfNotThere(dao, created);
     userListManager.createTables(dbConnection, created);
+
     if (!created.isEmpty()) {
       logger.info("createTables created slick tables : " + created);
       logger.info("createTables after create slick tables - has " + dbConnection.getTables());
