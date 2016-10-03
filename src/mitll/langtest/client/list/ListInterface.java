@@ -78,8 +78,6 @@ public interface ListInterface<T extends Shell> extends RequiresResize, Reloadab
      */
   boolean getExercises(long userID);
 
- // boolean isRTL();
-
   /**
    * @see mitll.langtest.client.custom.content.NPFHelper#doInternalLayout(UserList, String)
    * @param props
@@ -87,6 +85,7 @@ public interface ListInterface<T extends Shell> extends RequiresResize, Reloadab
    */
   Widget getExerciseListOnLeftSide(PropertyHandler props);
 
+  void loadFirst();
 
   boolean loadNext();
 
