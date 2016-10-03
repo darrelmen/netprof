@@ -122,7 +122,7 @@ class PlayAudio {
    * @param refAudio
    */
   private void playLastThenRef(CorrectAndScore correctAndScore, String refAudio) {
-    final String path = getPath(refAudio);
+    final String path  = getPath(refAudio);
     final String path1 = getPath(correctAndScore.getPath());
     soundFeedback.queueSong(path1, new SoundFeedback.EndListener() {
       @Override
@@ -176,8 +176,6 @@ class PlayAudio {
       }
     });
   }
-
-  //private CompressedAudio compressedAudio = new CompressedAudio();
 
   private String getPath(String path) { return CompressedAudio.getPath(path);  }
 }
