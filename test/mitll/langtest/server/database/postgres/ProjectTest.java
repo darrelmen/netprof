@@ -168,7 +168,7 @@ public class ProjectTest extends BaseTest {
 
     logger.info("found " + english + " for " + english1);
 
-    spanish.populateProjects(false);
+    spanish.populateProjects();
 
     spanish.setInstallPath("", "", "");
 
