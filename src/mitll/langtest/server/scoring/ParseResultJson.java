@@ -40,9 +40,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.phone.PhoneDAO;
-import mitll.langtest.server.database.refaudio.IRefResultDAO;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import org.apache.log4j.Logger;
@@ -77,7 +75,8 @@ public class ParseResultJson {
    * @return
    * @see ASRScoring#getTypeToEndTimes(EventAndFileInfo)
    */
-  public Map<NetPronImageType, List<TranscriptSegment>> getNetPronImageTypeToEndTimes(Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent) {
+  public Map<NetPronImageType, List<TranscriptSegment>> getNetPronImageTypeToEndTimes(
+      Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent) {
     Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = new HashMap<NetPronImageType, List<TranscriptSegment>>();
     for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : typeToEvent.entrySet()) {
       NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
@@ -102,17 +101,16 @@ public class ParseResultJson {
    * @return
    * @see #parseJson(String)
    */
-  private Map<ImageType, Map<Float, TranscriptEvent>> parseJsonString(String json, boolean usePhones) {
+  private Map<ImageType, Map<Float, TranscriptEvent>> parseJsonString(String json, boolean usePhones,
+                                                                      Map<String, List<List<String>>> wordToPronunciations) {
     if (json.isEmpty()) throw new IllegalArgumentException("json is empty");
     //   else {
 //      logger.warn("json = " + json);
     // }
-
     JsonParser parser = new JsonParser();
-
     JsonObject parse = parser.parse(json).getAsJsonObject();
     Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap =
-        parseJson(parse, "words", "w", usePhones);
+        parseJson(parse, "words", "w", usePhones, wordToPronunciations);
 
     if (imageTypeMapMap.isEmpty()) logger.warn("json " + json + " produced empty events map");
     else if (imageTypeMapMap.get(ImageType.WORD_TRANSCRIPT).isEmpty()) {
@@ -126,7 +124,7 @@ public class ParseResultJson {
    * @param json
    * @return
    * @see PhoneDAO#getPhoneReport
-   * @see DatabaseImpl#getExerciseToPhone(IRefResultDAO)
+   * @see mitll.langtest.server.database.userexercise.ExerciseToPhone#getExerciseToPhone
    * @see mitll.langtest.server.database.analysis.Analysis#getWordScore(List)
    */
   public Map<NetPronImageType, List<TranscriptSegment>> parseJson(String json) {
@@ -136,7 +134,12 @@ public class ParseResultJson {
     if (json.equals("{}")) {
       logger.warn("json is " + json);
     }
-    return getNetPronImageTypeToEndTimes(parseJsonString(json, false));
+    return getNetPronImageTypeToEndTimes(parseJsonString(json, false, null));
+  }
+
+  public Map<NetPronImageType, List<TranscriptSegment>> parseJsonAndGetProns(String json,
+                                                                             Map<String, List<List<String>>> wordToPronunciations) {
+    return getNetPronImageTypeToEndTimes(parseJsonString(json, false, wordToPronunciations));
   }
 
   /**
@@ -149,7 +152,8 @@ public class ParseResultJson {
    * @see PrecalcScores#getCachedScores
    * @see Scoring#getTypeToTranscriptEvents
    */
-  Map<ImageType, Map<Float, TranscriptEvent>> parseJson(JsonObject jsonObject, String words1, String w1, boolean usePhones) {
+  Map<ImageType, Map<Float, TranscriptEvent>> parseJson(JsonObject jsonObject, String words1, String w1, boolean usePhones,
+                                                        Map<String, List<List<String>>> wordToPronunciations) {
     Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = new HashMap<ImageType, Map<Float, TranscriptEvent>>();
     SortedMap<Float, TranscriptEvent> wordEvents = new TreeMap<Float, TranscriptEvent>();
     SortedMap<Float, TranscriptEvent> phoneEvents = new TreeMap<Float, TranscriptEvent>();
@@ -157,20 +161,24 @@ public class ParseResultJson {
     typeToEvent.put(ImageType.WORD_TRANSCRIPT, wordEvents);
     typeToEvent.put(ImageType.PHONE_TRANSCRIPT, phoneEvents);
 
-    // boolean valid = true;
     if (jsonObject.has(words1)) {
       try {
-      //  JSONArray words = jsonObject.getJSONArray(words1);
         JsonArray words = jsonObject.getAsJsonArray(words1);
-        for (int i = 0; i < words.size() /*&& valid*/; i++) {
+        for (int i = 0; i < words.size(); i++) {
           JsonObject word = words.get(i).getAsJsonObject();
-          //if (word.containsKey(STR)) {
-          objectToEvent(wordEvents, w1, word, false);
-          JsonArray phones = word.getAsJsonArray(PHONES);
-          getPhones(phoneEvents, phones, usePhones);
-          // } else {
-          //   valid = false;
-          // }
+          String wordToken = objectToEvent(wordEvents, w1, word, false);
+          List<String> phones1 = getPhones(phoneEvents, word.getAsJsonArray(PHONES), usePhones);
+
+          if (wordToPronunciations != null) {
+            if (!phones1.isEmpty()) {
+              List<List<String>> lists = wordToPronunciations.get(wordToken);
+              if (lists == null) {
+                wordToPronunciations.put(wordToken, lists = new ArrayList<List<String>>());
+              }
+              lists.add(phones1);
+            //  logger.info("Adding " + wordToken + " -> " + phones1);
+            }
+          }
         }
       } catch (Exception e) {
         logger.debug("no json array at " + words1 + " in " + jsonObject, e);
@@ -179,23 +187,30 @@ public class ParseResultJson {
       logger.warn("skipping " + words1 + " " + w1);// + " has " + jsonObject.());
     }
 
-    // return valid ? typeToEvent : new HashMap<>();
     return typeToEvent;
   }
 
-  private void getPhones(SortedMap<Float, TranscriptEvent> phoneEvents, JsonArray phones, boolean usePhone) {
-    getEventsFromJson(phoneEvents, phones, P, usePhone);
+  private List<String> getPhones(SortedMap<Float, TranscriptEvent> phoneEvents, JsonArray phones, boolean usePhone) {
+    return getEventsFromJson(phoneEvents, phones, P, usePhone);
   }
 
-  private void getEventsFromJson(SortedMap<Float, TranscriptEvent> phoneEvents, JsonArray phones, String tokenKey, boolean usePhone) {
+  private List<String> getEventsFromJson(SortedMap<Float, TranscriptEvent> phoneEvents,
+                                         JsonArray phones,
+                                         String tokenKey,
+                                         boolean usePhone) {
+    List<String> phonesForWord = new ArrayList<>();
     for (int j = 0; j < phones.size(); j++) {
       JsonObject phone = phones.get(j).getAsJsonObject();
-      objectToEvent(phoneEvents, tokenKey, phone, usePhone);
+      String phoneToken = objectToEvent(phoneEvents, tokenKey, phone, usePhone);
+      phonesForWord.add(phoneToken);
     }
+    return phonesForWord;
   }
 
-  private void objectToEvent(SortedMap<Float, TranscriptEvent> phoneEvents, String tokenKey, JsonObject phone,
-                             boolean usePhone) {
+  private String objectToEvent(SortedMap<Float, TranscriptEvent> phoneEvents,
+                               String tokenKey,
+                               JsonObject phone,
+                               boolean usePhone) {
     String token = phone.get(tokenKey).getAsString();
     double pscore = phone.get(S).getAsDouble();
     double pstart = phone.has(STR) ? phone.get(STR).getAsDouble() : 0d;
@@ -205,5 +220,6 @@ public class ParseResultJson {
     }
 
     phoneEvents.put((float) pstart, new TranscriptEvent((float) pstart, (float) pend, token, (float) pscore));
+    return token;
   }
 }
