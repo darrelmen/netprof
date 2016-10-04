@@ -33,18 +33,15 @@
 package mitll.langtest.server.database.userexercise;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.TreeSet;
 
 public class ExercisePhoneInfo {
   private int numPhones = 0;
   private Collection<String> phones = new TreeSet<>();
+  private Map<String, ExerciseToPhone.Info> wordToInfo;
 
-  public ExercisePhoneInfo() {
- //   this.numPhones = numPhones;
-//    this.phones = phones;
-  }
-
-  public int getNumPhones() {
+  int getNumPhones() {
     return numPhones;
   }
 
@@ -52,11 +49,19 @@ public class ExercisePhoneInfo {
     return phones;
   }
 
-  public void addPhones(Collection<String> phone) {
+  void addPhones(Collection<String> phone) {
     this.phones.addAll(phone);
   }
 
-  public void setNumPhones(int num) {
+  void setNumPhones(int num) {
     numPhones = Math.max(numPhones, num);
+  }
+
+  public void setWordToInfo(Map<String, ExerciseToPhone.Info> wordToInfo) {
+    this.wordToInfo = wordToInfo;
+  }
+
+  public Map<String, ExerciseToPhone.Info> getWordToInfo() {
+    return wordToInfo;
   }
 }
