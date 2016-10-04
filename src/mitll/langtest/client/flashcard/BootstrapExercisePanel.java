@@ -78,11 +78,11 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
   private Heading recoOutput;
   private static final int DELAY_MILLIS_LONG = 3000;
   private static final int LONG_DELAY_MILLIS = 3500;
-  private static final int DELAY_CHARACTERS = 40;
+  //private static final int DELAY_CHARACTERS = 40;
   private static final int HIDE_DELAY = 2500;
   protected static final int DELAY_MILLIS = 100;
+  //private static final boolean NEXT_ON_BAD_AUDIO = false;
 
-  private static final boolean NEXT_ON_BAD_AUDIO = false;
   /**
    * @see #getFeedbackGroup(ControlState)
    */
@@ -182,9 +182,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
     }
     //  logger.info("called  addRecordingAndFeedbackWidgets ");
     // add answer widget to do the recording
-  //  String exerciseID = exerciseID.getOldID();
-    Widget answerAndRecordButtonRow = getAnswerAndRecordButtonRow(exerciseID, service, controller);
-    toAddTo.add(answerAndRecordButtonRow);
+    toAddTo.add(getAnswerAndRecordButtonRow(exerciseID, service, controller));
 
     if (controller.getProps().showFlashcardAnswer()) {
       toAddTo.add(getRecoOutputRow());
@@ -443,7 +441,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
       }
     }
     if (!badAudioRecording && (correct || !hasRefAudio)) {
-      logger.info("\treceivedAudioAnswer: correct " + correct + " pron score : " + score + " has ref " + hasRefAudio);
+      //logger.info("\treceivedAudioAnswer: correct " + correct + " pron score : " + score + " has ref " + hasRefAudio);
       nextAfterDelay(correct, feedback);
     }
   }
@@ -457,6 +455,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
   }
 
   /**
+   * TODO : decide when to show what ASR "heard"
    * @param score
    * @see #receivedAudioAnswer(AudioAnswer)
    */
@@ -471,7 +470,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
   }
 
   /**
-   * @param heard
+   * @paramz heard
    * @see #showCorrectFeedback(double, String)
    * @see #showIncorrectFeedback(AudioAnswer, double, boolean, String)
    */
@@ -596,11 +595,11 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
     loadNextOnTimer(controller.getProps().isDemoMode() ? LONG_DELAY_MILLIS : delay);
   }
 
-  private int getFeedbackLengthProportionalDelay(String feedback) {
+ /* private int getFeedbackLengthProportionalDelay(String feedback) {
     int mult1 = feedback.length() / DELAY_CHARACTERS;
     int mult = Math.max(3, mult1);
     return mult * DELAY_MILLIS;
-  }
+  }*/
 
   private String getCorrectDisplay() {
     String refSentence = exercise.getForeignLanguage();
@@ -614,10 +613,10 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
    *
    * @param correct
    * @param feedback make delay dependent on how long the text is
-   * @see #receivedAudioAnswer(AudioAnswer)
+   * @see #receivedAudioAnswer(mitll.langtest.shared.AudioAnswer)
    */
   void nextAfterDelay(boolean correct, String feedback) {
-    if (NEXT_ON_BAD_AUDIO) {
+/*    if (NEXT_ON_BAD_AUDIO) {
       logger.info("doing nextAfterDelay : correct " + correct + " feedback " + feedback);
       // Schedule the timer to run once in 1 seconds.
       Timer t = new Timer() {
@@ -637,29 +636,26 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
         delayMillis *= 2;
       }
       t.schedule(delayMillis);
-    } else {
-      logger.info("doing nextAfterDelay : correct " + correct + " feedback " + feedback);
+    } else {*/
+    //  logger.info("doing nextAfterDelay : correct " + correct + " feedback " + feedback);
 
       if (correct) {
         // go to next item
+//        logger.info("Bootstrap nextAfterDelay " + correct);
         loadNextOnTimer(100);//DELAY_MILLIS);
       } else {
         initRecordButton();
         clearFeedback();
       }
-    }
+  //  }
   }
 
   /**
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#abortPlayback
    */
   void cancelTimer() {
-//    logger.info("cancelTimer ----> ");
+    super.cancelTimer();
     removePlayingHighlight();
-    if (currentTimer != null) {
-//      logger.info("\tcancelTimer ----> ");
-      currentTimer.cancel();
-    }
   }
 
   private void initRecordButton() {
