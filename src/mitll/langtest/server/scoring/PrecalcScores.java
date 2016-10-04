@@ -61,10 +61,11 @@ class PrecalcScores {
 
   /**
    * TODO : use this with webservice scoring too
-   * @see ASRScoring#scoreRepeatExercise(String, String, String, String, String, int, int, boolean, boolean, String, boolean, String, Result, boolean)
+   *
    * @param serverProperties
    * @param precalcResult
    * @param usePhoneToDisplay
+   * @see ASRScoring#scoreRepeatExercise(String, String, String, String, String, int, int, boolean, boolean, String, boolean, String, Result, boolean)
    */
   PrecalcScores(ServerProperties serverProperties, Result precalcResult, boolean usePhoneToDisplay) {
     this.parseResultJson = new ParseResultJson(serverProperties);
@@ -86,6 +87,7 @@ class PrecalcScores {
 
   /**
    * Sometimes we write the unknown model alignment into the ref result table - really shouldn't do that.
+   *
    * @return
    */
   private boolean isPrecalcValidCheck() {
@@ -106,7 +108,7 @@ class PrecalcScores {
    * @see #PrecalcScores(ServerProperties, Result, boolean)
    */
   private Scores getCachedScores(float pronScore, JsonObject jsonObject, boolean usePhones) {
-    Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap = parseResultJson.parseJson(jsonObject, "words", "w", usePhones);
+    Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap = parseResultJson.parseJson(jsonObject, "words", "w", usePhones, null);
     Map<String, Map<String, Float>> eventScores = getEventAverages(imageTypeMapMap);
     return new Scores(pronScore, eventScores, 0);
   }

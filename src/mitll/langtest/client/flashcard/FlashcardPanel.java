@@ -76,15 +76,13 @@ import static mitll.langtest.server.audio.AudioConversion.FILE_MISSING;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 6/26/2014.
  */
-class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExercise & MutableAnnotationExercise> extends HorizontalPanel {
+public class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExercise & MutableAnnotationExercise> extends HorizontalPanel {
   private final Logger logger = Logger.getLogger("FlashcardPanel");
 
-  static final String PLAYING_AUDIO_HIGHLIGHT = "playingAudioHighlight";
+  private static final String PLAYING_AUDIO_HIGHLIGHT = "playingAudioHighlight";
   private static final String WARN_NO_FLASH = "<font color='red'>Flash is not activated. " +
       "Do you have a flashblocker? Please add this site to its whitelist.</font>";
   private static final String ARROW_KEY_TIP = "<i>Use arrow keys to advance or flip.</i>";
-
-//  static final int DELAY_MILLIS = 1000;
 
   static final String ON  = "On";
   static final String OFF = "Off";
@@ -100,8 +98,8 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
   private static final String SHUFFLE = "Shuffle";
 
   final T exercise;
-  protected Timer currentTimer = null;
-  Widget english;
+  Timer currentTimer = null;
+  private Widget english;
   Widget foreign;
 
   private final MySoundFeedback soundFeedback;
@@ -111,7 +109,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
   private final Panel mainContainer;
   private Panel leftState;
   private Panel rightColumn;
-  final SoundFeedback.EndListener endListener;
+  private final SoundFeedback.EndListener endListener;
   final String instance;
   final ListInterface exerciseList;
   private final DivWidget prevNextRow;
@@ -151,7 +149,6 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
 
     Panel contentMiddle = getCardContent();
     DivWidget firstRow = getFirstRow(controller);
-    //  contentMiddle.add(firstRow);
     DivWidget cardPrompt = getCardPrompt(e);
     cardPrompt.insert(firstRow, 0);
     getMiddlePrompt(cardPrompt, contentMiddle, inner2);
@@ -191,6 +188,17 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
 
     addRowBelowPrevNext(lowestRow);
 
+    playRefOrAutoPlay();
+  }
+
+  public void wasRevealed() {
+   // logger.info("wasRevealed");
+    playRefOrAutoPlay();
+  }
+
+  private void playRefOrAutoPlay() {
+   // logger.info("playRefOrAutoPlay");
+
     Scheduler.get().scheduleDeferred(new Command() {
       public void execute() {
         maybePlayRef(controlState);
@@ -199,9 +207,11 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
     });
   }
 
-/*  void doAutoPlay(ControlState controlState) {
-    logger.info("doAutoPlay "+controlState);
-  }*/
+  public void wasHidden() {
+    logger.info("wasHidden");
+    cancelTimer();
+    getSoundFeedback().clear();
+  }
 
   private void maybePlayRef(ControlState controlState) {
     //logger.info("maybePlayRef --- ");
@@ -421,14 +431,25 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
     return contentMiddle;
   }
 
+  /**
+   * @param b
+   * @see #addAudioBindings
+   * @see #getAudioOffButton
+   * @see #getAudioOnButton
+   * @see #getCardContent
+   * @see #playRefAndGoToNext
+   */
   void setAutoPlay(boolean b) {
     if (!b) {
+      logger.info("setAutoPlay false");
+
       autoPlay.setActive(false);
       controlState.setAutoPlayOn(false);
-//      logger.info("setAutoPlay false");
       cancelTimer();
     }
   }
+
+  private boolean isSongPlaying = false;
 
   /**
    * @param path
@@ -440,18 +461,29 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
   protected void playRefAndGoToNext(String path, final int delayMillis, boolean useCheck) {
    // logger.info("playRefAndGoToNext " + path);
     if (!isValid(path)) {
+      if (isTabVisible()) {
       checkThenLoadNextOnTimer(1000);
+      } else {
+       // logger.info("tab is not visible");
+      }
     } else {
       getSoundFeedback().queueSong(getPath(path), new SoundFeedback.EndListener() {
         @Override
         public void songStarted() {
-          Widget widget = isSiteEnglish() ? english : foreign;
-          addPlayingHighlight(widget);
-          if (endListener != null) endListener.songStarted();
+          //Widget widget = isSiteEnglish() ? english : foreign;
+          isSongPlaying = true;
+
+          addPlayingHighlight(isSiteEnglish() ? english : foreign);
+          if (endListener != null) {
+           // logger.info("tell endlistener song started for " + path);
+            endListener.songStarted();
+          }
         }
 
         @Override
         public void songEnded() {
+          isSongPlaying = false;
+
           if (endListener != null) endListener.songEnded();
           cancelTimer();
           if (isTabVisible()) {
@@ -467,8 +499,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
             }
           } else {
             // logger.info("songEnded : tab not visible! ");
-            setAutoPlay(false);
-            // abortPlayback();
+            //setAutoPlay(false);
           }
 
         }
@@ -499,32 +530,27 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
   boolean loadNextOnTimer(final int delay) {
     //logger.info("loadNextOnTimer ----> load next on " + delay);
     if (isTimerNotRunning()) {
-      //if (delay > 100) {
-      //  logger.info("loadNextOnTimer ----> load next on " + delay);
-      // }
-     // logger.info("loadNextOnTimer ----> load next on " + delay);
       currentTimer = new Timer() {
         @Override
         public void run() {
-          //    currentTimer = null;
+//          logger.info("loadNextOnTimer ----> at " + System.currentTimeMillis() + "  firing on " + currentTimer);
           loadNext();
         }
       };
-      // currentTimer = t;
       currentTimer.schedule(delay);
       return true;
     } else {
-      logger.info("loadNextOnTimer ----> ignoring next current timer is running");
+  //    logger.info("loadNextOnTimer ----> ignoring next current timer is running");
       return false;
-      //preventFutureTimerUse = false;
     }
   }
 
-  protected boolean isTimerNotRunning() {
+  boolean isTimerNotRunning() {
     return (currentTimer == null) || !currentTimer.isRunning();
   }
 
   void cancelTimer() {
+    if (currentTimer != null) currentTimer.cancel();
   }
 
   void flipCard() {
@@ -542,15 +568,12 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
 
   private void toggleVisibility(Widget english) {
     Style style = english.getElement().getStyle();
-    String visibility = style.getVisibility();
-    boolean hidden = visibility.equals("hidden");
+    boolean hidden = style.getVisibility().equals("hidden");
     style.setVisibility(hidden ? Style.Visibility.VISIBLE : Style.Visibility.HIDDEN);
   }
 
   private boolean isHidden(Widget english) {
-    Style style = english.getElement().getStyle();
-    String visibility = style.getVisibility();
-    return visibility.equals("hidden");
+    return english.getElement().getStyle().getVisibility().equals("hidden");
   }
 
   void setMainContentVisible(boolean vis) {
@@ -576,7 +599,6 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
     rightColumn.add(getShuffleButton(controlState));
     rightColumn.add(autoPlay = getAutoPlayButton(controlState));
 
-    // Heading child = new Heading(6, "<i>Use arrow keys to advance or flip.</i>");
     Widget child = new HTML(ARROW_KEY_TIP);
     child.getElement().getStyle().setMarginTop(25, Style.Unit.PX);
     rightColumn.add(child);
@@ -645,11 +667,20 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
     return null;
   }
 
+  /**
+   * So if an auto play timer is in progress, stop it first.
+   * @param b
+   */
   void gotShuffleClick(boolean b) {
+    //logger.info("got shuffle click = " + b);
+    wasHidden();
     exerciseList.setShuffle(b);
   }
 
-  void gotAutoPlay(boolean b) {  }
+  void gotAutoPlay(boolean b) {
+    if (b) playRefAndGoToNextIfSet();
+    else cancelTimer();
+  }
 
   Panel getLeftState() {
     return null;
@@ -1157,7 +1188,7 @@ class FlashcardPanel<T extends CommonShell & AudioRefExercise & AnnotationExerci
     });
   }
 
-  void addPlayingHighlight(Widget textWidget) {
+  private void addPlayingHighlight(Widget textWidget) {
     //  logger.info("addPlayingHighlight add playing highlight");
     textWidget.addStyleName(PLAYING_AUDIO_HIGHLIGHT);
   }

@@ -134,6 +134,7 @@ public class AudioFileHelper implements AlignDecode {
    *
    * @param exercises
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getExercises
+   * @see mitll.langtest.server.database.project.ProjectManagement#configureProject
    */
   public void checkLTSAndCountPhones(Collection<CommonExercise> exercises) {
     synchronized (this) {
