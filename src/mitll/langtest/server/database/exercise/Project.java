@@ -39,6 +39,7 @@ import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.JsonSupport;
 import mitll.langtest.server.database.analysis.SlickAnalysis;
+import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.decoder.RefResultDecoder;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.trie.ExerciseTrie;
@@ -50,6 +51,7 @@ import org.apache.log4j.Logger;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Has everything associated with a project
@@ -71,6 +73,8 @@ public class Project {
   private PathHelper pathHelper;
   private DatabaseImpl db;
   private ServerProperties serverProps;
+  private ExerciseTrie<CommonExercise> phoneTrie;
+  private Map<Integer, ExercisePhoneInfo> exToPhone;
 
   /**
    * @see mitll.langtest.server.database.project.ProjectManagement#addSingleProject
@@ -223,7 +227,23 @@ public class Project {
     return exerciseDAO.getExercise(id);
   }
 
+/*  public void setPhoneTrie(ExerciseTrie<CommonExercise> phoneTrie) {
+    this.phoneTrie = phoneTrie;
+  }
+
+  public ExerciseTrie<CommonExercise> getPhoneTrie() {
+    return phoneTrie;
+  }*/
+
   public String toString() {
     return "Project project = " + project + " types " + getTypeOrder() + " exercise dao " + exerciseDAO;
+  }
+
+  public void setExToPhone(Map<Integer, ExercisePhoneInfo> exToPhone) {
+    this.exToPhone = exToPhone;
+  }
+
+  public Map<Integer, ExercisePhoneInfo> getExToPhone() {
+    return exToPhone;
   }
 }

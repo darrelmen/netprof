@@ -171,7 +171,7 @@ public class ExerciseTrie<T extends CommonShell> extends Trie<T> {
     }
   }
 
-  private boolean addEntry(T exercise, String token) {
+  protected boolean addEntry(T exercise, String token) {
     return addEntryToTrie(new ExerciseWrapper<T>(token.toLowerCase(), exercise));
   }
 

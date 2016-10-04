@@ -99,10 +99,6 @@ public interface ListInterface<T extends Shell> extends RequiresResize, Reloadab
    */
   boolean loadNextExercise(HasID current);
 
-//  default boolean loadNextExercise(int id) {
-//    return loadNextExercise(id);
-//  }
-
   boolean loadNextExercise(int id);
 
   boolean loadPrev();
