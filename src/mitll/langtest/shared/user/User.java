@@ -430,18 +430,6 @@ public class User extends MiniUser {
     return permissions;
   }
 
- /* public long getTimestampMillis() {
-    return timestamp;
-  }
-
-  *//**
-   * @param timestampMillis
-   *//*
-  public void setTimestampMillis(long timestampMillis) {
-    this.timestamp = timestampMillis;
-  }
-*/
-
   /**
    * @return
    * @see mitll.langtest.client.user.UserTable#getTable
