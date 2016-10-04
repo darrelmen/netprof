@@ -100,6 +100,10 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
     this.flexListLayout = getMyListLayout(userManager, outer);
   }
 
+  public Panel getCreatedPanel() {
+    return getExerciseList() != null ? getExerciseList().getCreatedPanel() : null;
+  }
+
   protected abstract FlexListLayout<T, U> getMyListLayout(UserManager userManager,
                                                           SimpleChapterNPFHelper<T, U> outer);
 

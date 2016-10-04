@@ -43,11 +43,16 @@ import mitll.langtest.server.database.exercise.DBExerciseDAO;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.result.SlickResultDAO;
+import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
+import mitll.langtest.server.database.userexercise.ExerciseToPhone;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
+import mitll.langtest.server.scoring.SmallVocabDecoder;
+import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickProject;
+import mitll.npdata.dao.SlickRefResultJson;
 import org.apache.log4j.Logger;
 
 import java.util.*;
@@ -145,7 +150,7 @@ public class ProjectManagement implements IProjectManagement {
 
 
   /**
-   *   // TODO : this seems like a bad idea --
+   * // TODO : this seems like a bad idea --
    */
   @Override
   public void configureProjects() {
@@ -157,15 +162,13 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   /**
-   * @paramx installPath
    * @param project
+   * @paramx installPath
    * @see #configureProjects
    */
- // @Override
+  // @Override
   private void configureProject(Project project) {
-    logger.info("configureProject " + project);
-
-   // ExerciseDAO<?> exerciseDAO1 = ;
+//    logger.info("configureProject " + project);
     SlickProject project1 = project.getProject();
     if (project1 == null) logger.info("note : no project for " + project);
     int id = project1 == null ? -1 : project1.id();
@@ -187,18 +190,56 @@ public class ProjectManagement implements IProjectManagement {
               (SlickResultDAO) db.getResultDAO())
       );
 //      userExerciseDAO.getTemplateExercise();
-
       project.getAudioFileHelper().checkLTSAndCountPhones(rawExercises);
-      populatePhoneTrie(rawExercises);
-    }
 
+//      ExerciseTrie<CommonExercise> commonExerciseExerciseTrie = populatePhoneTrie(rawExercises);
+      logMemory();
+
+      Set<Integer> exids = new HashSet<>();
+      for (CommonExercise exercise:rawExercises) exids.add(exercise.getID());
+
+      List<SlickRefResultJson> jsonResults = db.getRefResultDAO().getJsonResults();
+
+      Map<Integer, ExercisePhoneInfo> exToPhonePerProject = new ExerciseToPhone().getExToPhonePerProject(exids, jsonResults);
+      project.setExToPhone(exToPhonePerProject);
+      //    project.setPhoneTrie(commonExerciseExerciseTrie);
+      logMemory();
+    }
 
     logMemory();
   }
 
-  private void populatePhoneTrie(List<CommonExercise> rawExercises) {
+/*  private ExerciseTrie<CommonExercise> populatePhoneTrie(List<CommonExercise> rawExercises) {
 
-  }
+
+    ExerciseTrie<CommonExercise> phoneTrie = new ExerciseTrie<CommonExercise>(rawExercises, "", null
+    ) {
+      @Override
+      protected void addEntryForExercise(SmallVocabDecoder smallVocabDecoder,
+                                         boolean includeForeign,
+                                         boolean isMandarin,
+                                         boolean hasClickableCharacters,
+                                         CommonExercise exercise) {
+
+        List<String> firstPron = exercise.getFirstPron();
+        for (String t : firstPron) {
+          addEntry(exercise, t);
+        }
+
+        int max = 5;
+        if (max > firstPron.size()) max = firstPron.size();
+        for (int i = 2; i < max; i++) {
+          List<String> strings = firstPron.subList(0, i);
+          StringBuilder builder = new StringBuilder();
+          for (String s : strings) builder.append(s);
+          String prefix = builder.toString();
+          addEntry(exercise, prefix);
+     //     logger.info("adding prefix " + prefix);
+        }
+      }
+    };
+    return phoneTrie;
+  }*/
 
   /**
    * @param exerciseDAO
@@ -223,15 +264,15 @@ public class ProjectManagement implements IProjectManagement {
     Runtime rt = Runtime.getRuntime();
     long free = rt.freeMemory();
     long used = rt.totalMemory() - free;
-    long max  = rt.maxMemory();
+    long max = rt.maxMemory();
 
     ThreadGroup threadGroup = Thread.currentThread().getThreadGroup();
     logger.debug(" current thread group " + threadGroup.getName() + " = " + threadGroup.activeCount() +
         " : # cores = " + Runtime.getRuntime().availableProcessors() + " heap info free " + free / MB + "M used " + used / MB + "M max " + max / MB + "M");
   }
 
-//  @Override
-private Project getProjectOrFirst(int projectid) {
+  //  @Override
+  private Project getProjectOrFirst(int projectid) {
     return projectid == -1 ? getFirstProject() : getProject(projectid);
   }
 
@@ -334,7 +375,6 @@ private Project getProjectOrFirst(int projectid) {
     }
     Project project = getProjectOrFirst(projectid);
 
-
     List<CommonExercise> rawExercises = project.getRawExercises();
     if (rawExercises.isEmpty()) {
       logger.warn("getExercises no exercises in " + serverProps.getLessonPlan());// + " at " + installPath);
@@ -374,7 +414,7 @@ private Project getProjectOrFirst(int projectid) {
   }
 
   @Override
-public Project getFirstProject() {
+  public Project getFirstProject() {
     return getProjects().iterator().next();
   }
 
