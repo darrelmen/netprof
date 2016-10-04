@@ -192,7 +192,7 @@ public class LangTest implements
   private static final String DIVIDER = "|";
   private static final int MAX_EXCEPTION_STRING = 300;
   private static final int MAX_CACHE_SIZE = 100;
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   private UserManager userManager;
   private FlashRecordPanelHeadless flashRecordPanel;
@@ -526,7 +526,7 @@ public class LangTest implements
   public void recordingModeSelect() {
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
-        logger.info("check init flash");
+        //logger.info("check init flash");
         checkInitFlash();
       }
     });
