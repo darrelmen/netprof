@@ -356,7 +356,7 @@ public abstract class Scoring {
   }
 
   private Map<ImageType, Map<Float, TranscriptEvent>> getTypeToTranscriptEvents(JsonObject object, boolean usePhoneToDisplay) {
-    return new ParseResultJson(props).parseJson(object, "words", "w", usePhoneToDisplay);
+    return new ParseResultJson(props).parseJson(object, "words", "w", usePhoneToDisplay,null);
   }
 
   // JESS reupdate here
