@@ -316,16 +316,15 @@ public class SignInForm extends UserDialog implements SignIn {
         signIn.setEnabled(true);
       } else {
         getPermissionsAndSetUser(foundUser.getUserID(),hashedPass);
-
-        /*if (foundUser.getPasswordHash().equalsIgnoreCase(hashedPass)) {
-          gotGoodPassword(foundUser);
-        } else {
-          gotBadPassword(foundUser, passwordHash);
-        }*/
       }
     }
   }
 
+  /**
+   *
+   * @param user
+   * @param passwordHash
+   */
   private void getPermissionsAndSetUser(final String user, final String passwordHash) {
     //console("getPermissionsAndSetUser : " + user);
    // if (passwordHash == null) passwordHash = "";
@@ -337,22 +336,13 @@ public class SignInForm extends UserDialog implements SignIn {
       @Override
       public void onSuccess(LoginResult result) {
         //if (DEBUG) logger.info("UserManager.getPermissionsAndSetUser : onSuccess " + user + " : " + result);
-//        if (loginType == PropertyHandler.LOGIN_TYPE.ANONYMOUS && result.getUserKind() != User.Kind.ANONYMOUS) {
-//          clearUser();
-//          addAnonymousUser();
-//        } else
-//
-        if (result == null || //loginType != PropertyHandler.LOGIN_TYPE.ANONYMOUS &&
+        if (result == null ||
             result.getResultType() != LoginResult.ResultType.Success
-          //    result.getUserKind() == User.Kind.ANONYMOUS
             ) {
-     //     clearUser();
-      //    userNotification.showLogin();
           gotBadPassword(result.getLoggedInUser(), passwordHash);
 
         } else {
           gotGoodPassword(result.getLoggedInUser(), passwordHash);
-        //  gotNewUser(result.getLoggedInUser());
         }
       }
     });
