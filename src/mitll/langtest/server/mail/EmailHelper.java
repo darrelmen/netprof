@@ -53,6 +53,9 @@ public class EmailHelper {
   private static final Logger logger = Logger.getLogger(EmailHelper.class);
 
   @Deprecated  private static final String MY_EMAIL = "gordon.vidaver@ll.mit.edu";
+  /**
+   *
+   */
   private static final String CLOSING = "Regards, Administrator";
   @Deprecated  private static final String GORDON = "Gordon";
 
@@ -65,6 +68,11 @@ public class EmailHelper {
   // private static final String REPLY_TO = "admin@" + NP_SERVER;
   private static final String YOUR_USER_NAME = "Your user name";
   private static final String NETPROF_HELP_DLIFLC_EDU = "netprof-help@dliflc.edu";
+
+  private static final String HELP_EMAIL = "<a href='mailto:" + NETPROF_HELP_DLIFLC_EDU + "'>NetProF Help</a>";
+  private static final String USER_CONF_FIRST_LINE = "You are now a user of NetProF.<br/>";
+  private static final String USER_CONF_SECOND_LINE = "If you have any questions, see the user manual or email " +
+      HELP_EMAIL + ".";
 
   private final IUserDAO userDAO;
   private final MailSupport mailSupport;
@@ -208,13 +216,15 @@ public class EmailHelper {
   }
 
   /**
+   * We're going to do user management in domino.
+   *
    * @param token
    * @param language
    * @return
    * @seex mitll.langtest.client.LangTest#handleCDToken
    * @see mitll.langtest.server.services.UserServiceImpl#enableCDUser(String, String, String)
    */
-  public String enableCDUser(String token, String emailR, String url, String language) {
+  @Deprecated  public String enableCDUser(String token, String emailR, String url, String language) {
     User userWhereEnabledReq = userDAO.getUserWithEnabledKey(token);
     Integer userID;
     if (userWhereEnabledReq == null) {
@@ -424,19 +434,15 @@ public class EmailHelper {
   private String getUserConfirmationEmail(String userID1, String firstName) {
     return "Hi " +
         firstName + ",<br/><br/>" +
-        "Your user id is " + userID1 +
-        ".<br/>" +
-        "You are now a user of NetProF.<br/>" +
-        "If you have any questions, see the user manual or email " +
-        getHelpEmail() +
-        "."
-        ;
+        "Your user id is " + userID1 + ".<br/>" +
+        USER_CONF_FIRST_LINE +
+        USER_CONF_SECOND_LINE +
+        "<br/><br/>" +
+        CLOSING;
   }
 
   private String getHelpEmail() {
-    return "<a href='mailto:" +
-        NETPROF_HELP_DLIFLC_EDU +
-        "'>NetProF Help</a>";
+    return HELP_EMAIL;
   }
 
   private String trimURL(String url) {

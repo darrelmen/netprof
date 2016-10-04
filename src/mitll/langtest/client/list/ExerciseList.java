@@ -529,8 +529,10 @@ UserState userState;
 
   @Override
   public void checkAndAskServer(int id) {
-    if (DEBUG || true)
+    if (DEBUG) {
       logger.info(getClass() + " : (" + instance + ") ExerciseList.checkAndAskServer - askServerForExercise = " + id);
+    }
+
     if (hasExercise(id)) {
 //      if (//!getCurrentExerciseID().equals(id) ||
 //          createdPanel == null ||
