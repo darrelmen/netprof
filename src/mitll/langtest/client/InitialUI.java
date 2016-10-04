@@ -97,6 +97,14 @@ public class InitialUI implements UILifecycle {
 
   private final UserManager userManager;
 
+  /**
+   * @see #configureUIGivenUser
+   * @see #gotUser
+   * @see #lastUser
+   * @see #resetState
+   * @see #showUserPermissions
+   *
+   */
   protected long lastUser = NO_USER_INITIAL;
 
   protected final LifecycleSupport lifecycleSupport;
@@ -117,7 +125,7 @@ public class InitialUI implements UILifecycle {
   private Navigation navigation;
   private final BrowserCheck browserCheck = new BrowserCheck();
   private Container verticalContainer;
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   /**
    * @param langTest
@@ -141,7 +149,7 @@ public class InitialUI implements UILifecycle {
    */
   @Override
   public void populateRootPanel() {
-    logger.info("----> populateRootPanel BEGIN ------>");
+  //  logger.info("----> populateRootPanel BEGIN ------>");
     Container verticalContainer = getRootContainer();
     this.verticalContainer = verticalContainer;
     // header/title line
@@ -151,7 +159,7 @@ public class InitialUI implements UILifecycle {
     if (!showLogin()) {
       populateBelowHeader(verticalContainer);
     }
-    logger.info("----> populateRootPanel END   ------>");
+//    logger.info("----> populateRootPanel END   ------>");
   }
 
   /**
@@ -422,7 +430,7 @@ public class InitialUI implements UILifecycle {
        */
       contentRow.add(lifecycleSupport.getFlashRecordPanel());
     }
-    logger.info("populateBelowHeader -- ");
+   // logger.info("populateBelowHeader -- ");
     lifecycleSupport.recordingModeSelect();
     makeNavigation();
     addResizeHandler();
@@ -436,9 +444,8 @@ public class InitialUI implements UILifecycle {
    * @see #setProjectForUser(int)
    */
   private void showNavigation() {
-
     if (contentRow.getElement().getChildCount() == 1) {
-      logger.info("showNavigation : - add to content root");
+     // logger.info("showNavigation : - add to content root");
       contentRow.add(navigation.getTabPanel());
     } else {
       logger.info("showNavigation : first row has " + contentRow.getElement().getChildCount() + " child(ren) - not adding tab panel???");
@@ -817,8 +824,8 @@ public class InitialUI implements UILifecycle {
       addBreadcrumbs();
       showNavigation();
       navigation.showInitialState();
-      showUserPermissions(userID);
     }
+    showUserPermissions(userID);
   }
 
   /**
@@ -830,12 +837,12 @@ public class InitialUI implements UILifecycle {
     clearContent();
     addBreadcrumbs();
     List<SlimProject> projects = parent == null ? lifecycleSupport.getStartupInfo().getProjects() : parent.getChildren();
-    logger.info("addProjectChoices found " + projects.size() + " initial projects, nest " + level);
+  //  logger.info("addProjectChoices found " + projects.size() + " initial projects, nest " + level);
     showProjectChoices(projects, level);
   }
 
   /**
-   *
+   * @see #addProjectChoices(int, SlimProject)
    */
   private void addBreadcrumbs() {
     int childCount = verticalContainer.getElement().getChildCount();
@@ -849,7 +856,7 @@ public class InitialUI implements UILifecycle {
 
         if (id.equals("breadcrumb")) {
           found = true;
-          logger.info("found " + id);
+    //      logger.info("found " + id);
         }
       }
     }
@@ -858,13 +865,13 @@ public class InitialUI implements UILifecycle {
     }
   }
 
+  /**
+   * @see #addProjectChoices(int, SlimProject)
+   * @param result
+   * @param nest
+   */
   private void showProjectChoices(List<SlimProject> result, int nest) {
-    //   logger.info("showProjectChoices " + result.size() + " : " + nest);
-/*    Map<String, SlimProject> langToProject = new TreeMap<>();
-    for (SlimProject project : result) {
-      String key = nest == 0 ? project.getLanguage() : project.getName();
-      langToProject.put(key, project);
-    }*/
+    logger.info("showProjectChoices " + result.size() + " : " + nest);
 
     final Container flags = new Container();
     final Section section = new Section("section");
@@ -905,7 +912,7 @@ public class InitialUI implements UILifecycle {
     });
 
     int size = languages.size();
-    logger.info("addProjectChoices " + size + "-------- nest " + nest);
+  //  logger.info("addProjectChoices " + size + "-------- nest " + nest);
     for (int i = 0; i < size; i += numInRow) {
       int max = i + numInRow;
       if (max > size) max = size;
