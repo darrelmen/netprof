@@ -72,6 +72,7 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
   private static final String ENGLISH = "English";
   private final boolean english;
   private int FLLength = MAX_LENGTH_ID;
+  boolean showCompleted;
 
   /**
    * @param controller
@@ -98,6 +99,8 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
     this.verticalUnaccountedFor = verticalUnaccountedFor;
     this.isRecorder = isRecorder;
     english = controller.getLanguage().equals(ENGLISH);
+
+    showCompleted = controller.showCompleted();
   }
 
   protected void addColumnsToTable() {
@@ -196,7 +199,7 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
       @Override
       public SafeHtml getValue(T shell) {
         String columnText = getEnglishText(shell);
-        if (!controller.showCompleted()) {
+        if (!showCompleted) {
           return getColumnToolTip(columnText);
         } else {
           String html = ""+shell.getID();
