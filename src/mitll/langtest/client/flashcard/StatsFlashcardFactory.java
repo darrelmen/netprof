@@ -291,15 +291,6 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
           removePlayingHighlight();
         }
       });
-
- /*     if (controlState.isAutoPlay()) {
-        logger.info("StatsPracticePanel auto play so going to next");
-        playRefAndGoToNext(getRefAudioToPlay(), StatsFlashcardFactory.DELAY_MILLIS, true);
-      }
-      else {
-        logger.info("StatsPracticePanel auto play OFF ");
-      }*/
-      //logger.info("made " + this.getElement().getId() + " for " + e.getID());
     }
 
     @Override
@@ -332,12 +323,16 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       super.gotShuffleClick(b);
     }
 
+    /**
+     * @see #getAutoPlayButton
+     * @param b
+     */
     protected void gotAutoPlay(boolean b) {
       if (b) {
-     //   logger.info("gotAutoPlay got click...");
+//        logger.info("gotAutoPlay got click...");
         playRefAndGoToNextIfSet();
       } else {
-     //   logger.info("gotAutoPlay abortPlayback");
+//        logger.info("gotAutoPlay abortPlayback");
         abortPlayback();
       }
     }
