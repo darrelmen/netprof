@@ -97,6 +97,10 @@
             <appender-ref ref="LogFile"/>
         </logger>
 
+        <logger name="org.mongodb.driver.cluster" level="info" additivity="true">
+            <appender-ref ref="LogFile"/>
+        </logger>
+
         <root level="debug">
             <appender-ref ref="Mail" level="error"/>
         </root>
