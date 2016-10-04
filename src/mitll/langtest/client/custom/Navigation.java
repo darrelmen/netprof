@@ -60,6 +60,7 @@ import mitll.langtest.client.custom.exercise.ContextCommentNPFExercise;
 import mitll.langtest.client.custom.tabs.TabAndContent;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.flashcard.FlashcardPanel;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
@@ -81,8 +82,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
-
-import static mitll.langtest.shared.user.User.Kind.TEACHER;
 
 /**
  * Created with IntelliJ IDEA.
@@ -269,19 +268,29 @@ public class Navigation implements RequiresResize, ShowTab {
             " ' target name '" + targetName+ "'");*/
 
         boolean wasChapters = targetName.contains(CHAPTERS);
-        Panel createdPanel = learnHelper.getExerciseList() != null ? learnHelper.getExerciseList().getCreatedPanel() : null;
+        Panel createdPanel = learnHelper.getCreatedPanel();
         boolean hasCreated = createdPanel != null;
         // logger.info("getTabPanel : got shown event : '" +showEvent + "' target '" + targetName + "' hasCreated " + hasCreated);
-        if (hasCreated && wasChapters && (createdPanel instanceof GoodwaveExercisePanel)) {
-          //   logger.info("\taddShowHandler got chapters! created panel :  has created " + hasCreated + " was revealed  " + createdPanel.getClass());
+        if (wasChapters) {
+          //  logger.info("\taddShowHandler got chapters! created panel was revealed class " + createdPanel.getClass());
+          if (hasCreated && (createdPanel instanceof GoodwaveExercisePanel)) {
           ((GoodwaveExercisePanel) createdPanel).wasRevealed();
+          }
+
+          Panel createdPanel1 = practiceHelper.getCreatedPanel();
+          if (createdPanel1 != null) {
+            ((FlashcardPanel) createdPanel1).wasHidden();
         } else {
-     /*     logger.info("\taddShowHandler ignoring target " + targetName);
-          logger.info("\taddShowHandler ignoring target " + learnHelper);
-          logger.info("\taddShowHandler ignoring target " + learnHelper.getExerciseList());
-          if (learnHelper.getExerciseList() != null) {
-            logger.info("\taddShowHandler ignoring target " + learnHelper.getExerciseList().getCreatedPanel());
-          }*/
+            //          logger.info("no practice panel");
+          }
+        } else {
+          if (targetName.contains(PRACTICE)) {
+            Panel createdPanel1 = practiceHelper.getCreatedPanel();
+            if (createdPanel1 != null) {
+              //       logger.info("getTabPanel : practice : got shown event : '" + showEvent + "' target '" + targetName + "'");
+              ((FlashcardPanel) createdPanel1).wasRevealed();
+            }
+          }
         }
       }
     });
