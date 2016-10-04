@@ -129,7 +129,12 @@ public class UserManager {
     if (user != NO_USER_SET) {
       //logger.info("UserManager.login : current user : " + user);
       //console("UserManager.login : current user : " + user);
-      getPermissionsAndSetUser();
+      if (current == null) {
+        getPermissionsAndSetUser();
+      }
+      else {
+        logger.info("user "+ user + " and full info " + current);
+      }
     } else {
       userNotification.showLogin();
     }
@@ -178,14 +183,8 @@ public class UserManager {
       @Override
       public void onSuccess(LoginResult result) {
         if (DEBUG) logger.info("UserManager.getPermissionsAndSetUser : onSuccess " + user + " : " + result);
-//        if (loginType == PropertyHandler.LOGIN_TYPE.ANONYMOUS && result.getUserKind() != User.Kind.ANONYMOUS) {
-//          clearUser();
-//          addAnonymousUser();
-//        } else
-//
-        if (result == null || //loginType != PropertyHandler.LOGIN_TYPE.ANONYMOUS &&
+        if (result == null ||
             result.getResultType() != LoginResult.ResultType.Success
-          //    result.getUserKind() == User.Kind.ANONYMOUS
             ) {
           clearUser();
           userNotification.showLogin();
@@ -195,13 +194,6 @@ public class UserManager {
       }
     });
   }
-
-/*  private void setDefaultControlValues(int user) {
-    ControlState controlState = new ControlState();
-    controlState.setStorage(new KeyStorage(props.getLanguage(), user));
-    controlState.setAudioOn(true);
-    controlState.setAudioFeedbackOn(true);
-  }*/
 
   /**
    * For display purposes
@@ -247,8 +239,10 @@ public class UserManager {
    */
   public boolean isUserExpired() {
     String sid = getUserFromStorage();
-    logger.info("sid from storage "+ sid);
-    return (sid == null || sid.equals(NO_USER_SET_STRING)) ||
+ //   logger.info("sid from storage "+ sid);
+    return (
+        sid == null ||
+        sid.equals(NO_USER_SET_STRING)) ||
         checkUserExpired(sid);
   }
 
@@ -301,12 +295,6 @@ public class UserManager {
     return appTitle + ":" + USER_CHOSEN_ID;
   }
 
-/*
-  private String getAudioType() {
-    return appTitle + ":" + AUDIO_TYPE;
-  }
-*/
-
   private String getExpires() {
     return appTitle + ":" + "expires";
   }
@@ -354,11 +342,6 @@ public class UserManager {
    * @see mitll.langtest.client.InitialUI#resetState()
    */
   public void clearUser() {
-    clearCookieState();
-  }
-
-  private void clearCookieState() {
-    // userNotification.rememberAudioType(AudioType.UNSET);
 /*
     if (USE_COOKIE) {
       Cookies.setCookie("sid", "" + NO_USER_SET);
@@ -414,7 +397,7 @@ public class UserManager {
    * @see #storeUser
    */
   private void gotNewUser(User result) {
-    logger.info("UserManager.gotNewUser " + result);
+   // logger.info("UserManager.gotNewUser " + result);
 //    userNotification.getPermissions().clear();
     if (result != null) {
 /*      for (User.Permission permission : result.getPermissions()) {
@@ -428,7 +411,7 @@ public class UserManager {
         }
       }*/
       this.current = result;
-      logger.info("\tgotNewUser current user " + current);
+     // logger.info("\tgotNewUser current user " + current);
       userNotification.gotUser(result);
     }
     //console("getPermissionsAndSetUser.onSuccess : " + user);
