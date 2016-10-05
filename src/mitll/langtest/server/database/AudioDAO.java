@@ -40,6 +40,7 @@ import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.exercise.*;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -89,11 +90,12 @@ public class AudioDAO extends DAO {
   public static final String FEMALE_CONTEXT = "femaleContext";
 
   private final boolean DEBUG = false;
+  private static final boolean DEBUG_ATTACH = false;
+
   private final Connection connection;
   private final UserDAO userDAO;
   private ExerciseDAO<?> exerciseDAO;
 
-  private static final boolean DEBUG_ATTACH = false;
 
   /**
    * @param database
@@ -164,7 +166,7 @@ public class AudioDAO extends DAO {
       File test = new File(fastAudioRef);
       boolean exists = test.exists();
       if (!exists) {
-       // logger.info("1 no audio at " + test.getAbsolutePath());
+        // logger.info("1 no audio at " + test.getAbsolutePath());
         test = new File(installPath, fastAudioRef);
         exists = test.exists();
       }
@@ -174,7 +176,7 @@ public class AudioDAO extends DAO {
         sleep(50);
         try {
           fastAudioRef = "bestAudio" + fastAudioRef.split("bestAudio")[1];
-         //  logger.info("audio at " + fastAudioRef);
+          //  logger.info("audio at " + fastAudioRef);
 
           addAudio(connection, (int) defaultUser.getId(), ensureForwardSlashes(fastAudioRef), imported.getID(),
               test.lastModified(), REGULAR, duration, imported.getForeignLanguage());
@@ -182,9 +184,8 @@ public class AudioDAO extends DAO {
         } catch (Exception e) {
           logger.error("got " + e, e);
         }
-      }
-      else {
-       // logger.info("2 no audio at " + test.getAbsolutePath());
+      } else {
+        // logger.info("2 no audio at " + test.getAbsolutePath());
       }
     }
 
@@ -193,7 +194,7 @@ public class AudioDAO extends DAO {
       File test = new File(slowAudioRef);
       boolean exists = test.exists();
       if (!exists) {
-       // logger.info("3 no audio at " + test.getAbsolutePath());
+        // logger.info("3 no audio at " + test.getAbsolutePath());
 
         test = new File(installPath, slowAudioRef);
         exists = test.exists();
@@ -210,8 +211,7 @@ public class AudioDAO extends DAO {
         } catch (Exception e) {
           logger.error("got " + e, e);
         }
-      }
-      else {
+      } else {
 //        logger.info("4 no audio at " + test.getAbsolutePath());
 
       }
@@ -363,7 +363,10 @@ public class AudioDAO extends DAO {
     this.exerciseDAO = exerciseDAO;
   }
 
-  public int numRows() { return getCount(AUDIO); }
+  public int numRows() {
+    return getCount(AUDIO);
+  }
+
   /**
    * Pulls the list of audio recordings out of the database.
    *
@@ -380,6 +383,7 @@ public class AudioDAO extends DAO {
     }
     return new ArrayList<>();
   }
+
 
   /**
    * @param firstExercise
@@ -527,7 +531,32 @@ public class AudioDAO extends DAO {
                                         AudioConversion audioConversion,
                                         AudioAttribute attr) {
     String against = attr.isContextAudio() ? firstExercise.getContext() : firstExercise.getForeignLanguage();
-    if (attr.hasMatchingTranscript(against)) {
+//    String noAccents = Normalizer.normalize(against, Normalizer.Form.NFD);
+//
+//    logger.info("attachAudioAndFixPath before '" +against+
+//        "' after '" + noAccents+
+//        "'");
+
+    String noAccents = StringUtils.stripAccents(against);
+    String transcript = attr.getTranscript();
+    String noAccentsTranscript = transcript == null ? null : StringUtils.stripAccents(transcript);
+//    boolean foundAlt = false;
+//    if (!before.equals(noAccents)) {
+//      if (firstExercise.getID().equals("3277")) {
+//        logger.info("attachAudio before '" + before +
+//            "' after '" + noAccents +
+//            "'");
+//      }
+//      foundAlt = true;
+//    } else {
+//      if (firstExercise.getID().equals("3277")) {
+//        logger.info("attachAudio before '" + before +
+//            "' after '" + noAccents +
+//            "'");
+//      }
+//    }
+
+    if (attr.matchTranscript(against, transcript) || attr.matchTranscript(noAccents, noAccentsTranscript)) {
       firstExercise.getMutableAudio().addAudio(attr);
 
       if (attr.getAudioRef() == null)
@@ -555,7 +584,7 @@ public class AudioDAO extends DAO {
    * @return
    * @see #attachAudio
    */
-  private Collection<AudioAttribute> getAudioAttributes(String exid) {
+  public Collection<AudioAttribute> getAudioAttributes(String exid) {
     try {
       String sql = SELECT_ALL + " WHERE " + Database.EXID + "='" + exid + "' AND " + DEFECT + "=false";
       Collection<AudioAttribute> resultsSQL = getResultsSQL(sql);
@@ -565,9 +594,10 @@ public class AudioDAO extends DAO {
 
       for (AudioAttribute audioAttribute : resultsSQL) {
         String audioRef = audioAttribute.getAudioRef();
-        if (!paths.contains(audioRef)) {
+        String key = audioRef + "_" + audioAttribute.getTranscript();
+        if (!paths.contains(key)) {
           ret.add(audioAttribute);
-          paths.add(audioRef);
+          paths.add(key);
         }
         //  else {
         //logger.info("skipping duplicate audio attr " + audioAttribute + " for " + exid);
@@ -581,10 +611,6 @@ public class AudioDAO extends DAO {
       logger.error("got " + ee, ee);
     }
     return new ArrayList<>();
-  }
-
-  public Set<String> getRecordedRegularForUser(long userid) {
-    return getAudioForGender(Collections.singleton(userid), REGULAR);
   }
 
   /**
@@ -1061,6 +1087,23 @@ public class AudioDAO extends DAO {
     return addAudio(connection, userid, audioRef, exerciseID, timestamp, audioType, durationInMillis, transcript);
   }
 
+  /**
+   * @param existing
+   * @param newTranscript
+   * @see DatabaseImpl#editItem(CommonExercise, boolean)
+   */
+   void copyWithNewTranscript(AudioAttribute existing, String newTranscript) {
+    String exerciseID = existing.getExid();
+    long timestamp = existing.getTimestamp();
+    String audioType = existing.getAudioType();
+    long durationInMillis = existing.getDurationInMillis();
+    logger.debug("copyWithNewTranscript existing - " + existing);
+    try {
+      addAudio(connection, (int) existing.getUserid(), existing.getAudioRef(), exerciseID, timestamp, audioType, durationInMillis, newTranscript);
+    } catch (SQLException e) {
+      logger.error("Got " + e, e);
+    }
+  }
 
   /**
    * Why does this have to be so schizo? add or update -- should just choose
@@ -1332,8 +1375,14 @@ public class AudioDAO extends DAO {
    * @throws SQLException
    * @see #add(Connection, Result, int, String, String)
    */
-  private long addAudio(Connection connection, int userid, String audioRef, String exerciseID, long timestamp,
-                        String audioType, long durationInMillis, String transcript) throws SQLException {
+  private long addAudio(Connection connection,
+                        int userid,
+                        String audioRef,
+                        String exerciseID,
+                        long timestamp,
+                        String audioType,
+                        long durationInMillis,
+                        String transcript) throws SQLException {
     if (isBadUser(userid)) {
       logger.error("huh? userid is " + userid);
       new Exception().printStackTrace();
