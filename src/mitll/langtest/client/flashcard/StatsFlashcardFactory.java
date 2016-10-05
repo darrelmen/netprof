@@ -196,8 +196,6 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         StatsFlashcardFactory.this.instance,
         exerciseList) {
 
-
-
       @Override
       protected void gotShuffleClick(boolean b) {
         sticky.resetStorage();
