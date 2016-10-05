@@ -198,48 +198,16 @@ public class ProjectManagement implements IProjectManagement {
       Set<Integer> exids = new HashSet<>();
       for (CommonExercise exercise:rawExercises) exids.add(exercise.getID());
 
-      List<SlickRefResultJson> jsonResults = db.getRefResultDAO().getJsonResults();
-
-      Map<Integer, ExercisePhoneInfo> exToPhonePerProject = new ExerciseToPhone().getExToPhonePerProject(exids, jsonResults);
-      project.setExToPhone(exToPhonePerProject);
+//      List<SlickRefResultJson> jsonResults = db.getRefResultDAO().getJsonResults();
+//
+//      Map<Integer, ExercisePhoneInfo> exToPhonePerProject = new ExerciseToPhone().getExToPhonePerProject(exids, jsonResults);
+//      project.setExToPhone(exToPhonePerProject);
       //    project.setPhoneTrie(commonExerciseExerciseTrie);
       logMemory();
     }
 
     logMemory();
   }
-
-/*  private ExerciseTrie<CommonExercise> populatePhoneTrie(List<CommonExercise> rawExercises) {
-
-
-    ExerciseTrie<CommonExercise> phoneTrie = new ExerciseTrie<CommonExercise>(rawExercises, "", null
-    ) {
-      @Override
-      protected void addEntryForExercise(SmallVocabDecoder smallVocabDecoder,
-                                         boolean includeForeign,
-                                         boolean isMandarin,
-                                         boolean hasClickableCharacters,
-                                         CommonExercise exercise) {
-
-        List<String> firstPron = exercise.getFirstPron();
-        for (String t : firstPron) {
-          addEntry(exercise, t);
-        }
-
-        int max = 5;
-        if (max > firstPron.size()) max = firstPron.size();
-        for (int i = 2; i < max; i++) {
-          List<String> strings = firstPron.subList(0, i);
-          StringBuilder builder = new StringBuilder();
-          for (String s : strings) builder.append(s);
-          String prefix = builder.toString();
-          addEntry(exercise, prefix);
-     //     logger.info("adding prefix " + prefix);
-        }
-      }
-    };
-    return phoneTrie;
-  }*/
 
   /**
    * @param exerciseDAO
