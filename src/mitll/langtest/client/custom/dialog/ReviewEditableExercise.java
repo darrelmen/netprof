@@ -33,16 +33,17 @@
 package mitll.langtest.client.custom.dialog;
 
 import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.ControlGroup;
-import com.github.gwtbootstrap.client.ui.FluidRow;
+import com.github.gwtbootstrap.client.ui.CheckBox;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.TabPanel;
-import com.github.gwtbootstrap.client.ui.base.*;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
+import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -79,9 +80,13 @@ import java.util.logging.Logger;
  * @since 3/28/2014.
  */
 public class ReviewEditableExercise extends EditableExerciseDialog {
-  public static final String MARK_FIXED_TOOLTIP = "Mark item as fixed, removed defective audio, and remove item from the review list.";
   private final Logger logger = Logger.getLogger("ReviewEditableExercise");
 
+  private static final String MARK_FIXED_TOOLTIP = "Mark item as fixed, removed defective audio, and remove item from the review list.";
+
+  /**
+   * @see #makeFixedButton
+   */
   private static final String FIXED = "Mark Fixed";
   private static final String DUPLICATE = "Duplicate";
   private static final String DELETE = "Delete";
@@ -93,18 +98,24 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   private static final String REGULAR_SPEED = " Regular speed";
   private static final String SLOW_SPEED = " Slow speed";
   private static final int DELAY_MILLIS = 5000;
+
+  /**
+   * @see #makeAudioRow
+   */
   private static final String ADD_AUDIO = "Add audio";
   private static final String MALE = "Male";
   private static final String FEMALE = "Female";
 
   private final PagingExerciseList<CommonShell, CommonExercise> exerciseList;
 
-  BasicDialog.FormField context;
-  BasicDialog.FormField contextTrans;
+  private BasicDialog.FormField context;
+  private BasicDialog.FormField contextTrans;
   private final HTML contextAnno = new HTML();
   private final HTML contextTransAnno = new HTML();
   private String originalContext = "";
   private String originalContextTrans = "";
+  private List<RememberTabAndContent> tabs;
+  CheckBox keepAudio = new CheckBox("Keep Audio even if text changes");
 
   /**
    * @param itemMarker
@@ -140,12 +151,10 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   @Override
   public <S extends CommonShell & AudioRefExercise & AnnotationExercise> void setFields(S newUserExercise) {
     super.setFields(newUserExercise);
+
     final com.github.gwtbootstrap.client.ui.base.TextBoxBase box = context.box;
 
     box.setText(originalContext = newUserExercise.getContext());
-
-    useAnnotation(newUserExercise, "context", contextAnno);
-    useAnnotation(newUserExercise, "context translation", contextTransAnno);
 
     box.addBlurHandler(new BlurHandler() {
       @Override
@@ -159,6 +168,9 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
         }
       }
     });
+
+    useAnnotation(newUserExercise, "context", contextAnno);
+    useAnnotation(newUserExercise, "context translation", contextTransAnno);
 
     TextBoxBase box1 = contextTrans.box;
     box1.setText(originalContextTrans = newUserExercise.getContextTranslation());
@@ -199,7 +211,6 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     contextTrans = makeBoxAndAnno(row, "Context Translation", "", contextTransAnno);
   }
 
-  private List<RememberTabAndContent> tabs;
 
   /**
    * @return
@@ -221,10 +232,9 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     addTabsForUsers(newUserExercise, tabPanel, malesMap, maleUsers);
     addTabsForUsers(newUserExercise, tabPanel, femalesMap, femaleUsers);
 
-    RememberTabAndContent tabAndContent = getRememberTabAndContent(tabPanel, ADD_AUDIO, false);
-    DivWidget widget = getRecordingWidget();
+    RememberTabAndContent tabAndContent = getRememberTabAndContent(tabPanel, ADD_AUDIO, false, false);
 
-    tabAndContent.getContent().add(widget);
+    tabAndContent.getContent().add(getRecordingWidget());
     tabAndContent.getTab().setIcon(IconType.PLUS);
 
     /*if (!maleUsers.isEmpty() || !femaleUsers.isEmpty())*/
@@ -277,7 +287,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
       if (!byMe) {
         String tabTitle = getUserTitle(me, user);
 
-        RememberTabAndContent tabAndContent = getRememberTabAndContent(tabPanel, tabTitle, true);
+        RememberTabAndContent tabAndContent = getRememberTabAndContent(tabPanel, tabTitle, true, true);
 
         boolean allHaveBeenPlayed = true;
 
@@ -303,8 +313,8 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     }
   }
 
-  private RememberTabAndContent getRememberTabAndContent(TabPanel tabPanel, String tabTitle, boolean addRightMargin) {
-    RememberTabAndContent tabAndContent = new RememberTabAndContent(IconType.QUESTION_SIGN, tabTitle);
+  private RememberTabAndContent getRememberTabAndContent(TabPanel tabPanel, String tabTitle, boolean addRightMargin, boolean isCheckable) {
+    RememberTabAndContent tabAndContent = new RememberTabAndContent(IconType.QUESTION_SIGN, tabTitle, isCheckable);
     tabPanel.add(tabAndContent.getTab().asTabLink());
     tabs.add(tabAndContent);
 
@@ -313,10 +323,9 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     return tabAndContent;
   }
 
-/*  private String getUserTitle(int me, MiniUser user) {
-    return (user.isDefault()) ? GoodwaveExercisePanel.DEFAULT_SPEAKER : (user.getExID() == me) ? "by You (" + user.getUserID() + ")" : getUserTitle(user);
-  }*/
-
+  /*  private String getUserTitle(int me, MiniUser user) {
+      return (user.isDefault()) ? GoodwaveExercisePanel.DEFAULT_SPEAKER : (user.getExID() == me) ? "by You (" + user.getUserID() + ")" : getUserTitle(user);
+    }*/
   private String getUserTitle(int me, MiniUser user) {
     long id = user.getId();
     if (id == UserDAO.DEFAULT_USER_ID) return GoodwaveExercisePanel.DEFAULT_SPEAKER;
@@ -327,11 +336,12 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   }
 
   private String getUserTitle(MiniUser user) {
+    String suffix = user.getAge() < 99 ? " age " + user.getAge() : "";
+    String userid = true//user.isAdmin()
+        ? " (" + user.getUserID() + ")" : "";
     return (user.isMale() ? MALE : FEMALE) +
-        (
-            user.isAdmin()
-                ? " (" + user.getUserID() + ")" : "") +
-        " age " + user.getAge();
+        userid +
+        suffix;
   }
 
   /**
@@ -345,9 +355,12 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
 
     if (didChange) {
       if (hasAudio()) {
-        for (RememberTabAndContent tab : tabs) {
-          setupPopover(tab.getContent(), getWarningHeader(), getWarningForFL(), Placement.TOP, DELAY_MILLIS, false);
-        }
+/*        for (RememberTabAndContent tab : tabs) {
+          if (tab.isCheckable()) {
+            setupPopover(tab.getContent(), getWarningHeader(), getWarningForFL(), Placement.TOP, DELAY_MILLIS, false);
+          }
+        }*/
+        setupPopover(keepAudio, getWarningHeader(), getWarningForFL(), Placement.TOP, DELAY_MILLIS, false);
       }
     }
 
@@ -355,13 +368,6 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   }
 
   private final Set<Widget> audioWasPlayed = new HashSet<>();
-  // private final Set<Widget> toResize = new HashSet<>();
-
-/*
-  private String getPath(String path) {
-    return CompressedAudio.getPath(path);
-  }
-*/
 
   private <X extends CommonShell & AnnotationExercise> Widget getPanelForAudio(final X exercise,
                                                                                final AudioAttribute audio,
@@ -373,9 +379,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<X>(audioRef, exercise.getForeignLanguage(), service, controller,
         controller.getProps().showSpectrogram(), new EmptyScoreListener(), 70, audio.isRegularSpeed() ? REGULAR_SPEED : SLOW_SPEED, exercise.getID(),
         exercise, instance
-        //npfHelper.getInstanceName()
     ) {
-
       /**
        * @see mitll.langtest.client.scoring.AudioPanel#addWidgets(String, String, String)
        * @return
@@ -401,6 +405,14 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     return vert;
   }
 
+  /**
+   * @param widgets
+   * @param audio
+   * @param exerciseID
+   * @param tip
+   * @return
+   * @see #getPanelForAudio
+   */
   private Widget getDeleteButton(final Panel widgets, final AudioAttribute audio, final String exerciseID, String tip) {
     ClickHandler handler = new ClickHandler() {
       @Override
@@ -424,8 +436,11 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     return getDeleteButton(tip, handler);
   }
 
+  /**
+   * @see #doAfterEditComplete(ListInterface, boolean)
+   */
   private void reloadLearnList() {
-    Reloadable exerciseList = predefinedContentList.getReloadable();//npfHelper.getExerciseList();
+    Reloadable exerciseList = predefinedContentList.getReloadable();
     if (exerciseList != null) {
       exerciseList.clearCachedExercise();
       exerciseList.reload();
@@ -442,7 +457,6 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     delete.setType(ButtonType.WARNING);
     delete.setIcon(IconType.REMOVE);
     delete.addClickHandler(handler);
-
     return delete;
   }
 
@@ -457,6 +471,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
       @Override
       public void playStarted() {
         audioWasPlayed.add(audioPanel);
+        logger.info("now audio was played is size " + audioWasPlayed.size());
         for (RememberTabAndContent tabAndContent : tabs) {
           tabAndContent.checkAllPlayed(audioWasPlayed);
         }
@@ -477,12 +492,20 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    */
   private <E extends AnnotationExercise> Widget getCommentLine(E e, AudioAttribute audio) {
     ExerciseAnnotation audioAnnotation = e.getAnnotation(audio.getAudioRef());
+
+//    logger.info("annotation for " + audio.getAudioRef() + " is " + audioAnnotation);
+
     if (audioAnnotation != null && !audioAnnotation.isCorrect()) {
       HTML child = new HTML(audioAnnotation.getComment().isEmpty() ? "EMPTY COMMENT" : audioAnnotation.getComment());
       child.getElement().getStyle().setFontSize(14, Style.Unit.PX);
       child.getElement().getStyle().setFontWeight(Style.FontWeight.BOLD);
       return child;
     } else {
+      Map<String, ExerciseAnnotation> fieldToAnnotation = e.getFieldToAnnotation();
+
+//      for (Map.Entry<String, ExerciseAnnotation> pair : fieldToAnnotation.entrySet()) {
+//        logger.info("found " + pair.getKey() + " : " + pair.getValue());
+//      }
       return null;
     }
   }
@@ -493,6 +516,8 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   }
 
   /**
+   * Three buttons - previous, next, mark fixed.
+   * <p>
    * Add a fixed button, so we know when to clear the comments and remove this item from the reviewed list.
    *
    * @param ul
@@ -514,25 +539,34 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     prevNext.addStyleName("floatLeft");
     row.add(prevNext);
 
-
     if (newUserExercise.getCombinedMutableUserExercise().checkPredef()) {   // for now, only the owner of the list can remove or add to their list
       row.add(getRemove());
       row.add(getDuplicate());
     }
 
-    final Button fixed = getFixedButton(ul, pagingContainer, toAddTo, normalSpeedRecording);
-    row.add(fixed);
+    row.add(getFixedButton(ul, pagingContainer, toAddTo, normalSpeedRecording));
+    boolean keepAudioSelection = getKeepAudioSelection();
 
+ //   logger.info("value is  " + keepAudioSelection);
+    keepAudio.setValue(keepAudioSelection);
+    keepAudio.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent clickEvent) {
+        storeKeepAudio(keepAudio.getValue());
+      }
+    });
+    keepAudio.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
+    row.add(keepAudio);
     configureButtonRow(row);
 
     return row;
   }
 
-  private Button getFixedButton(final UserList<CommonShell> ul, final ListInterface<CommonShell> pagingContainer, final Panel toAddTo, final ControlGroup normalSpeedRecording) {
+  private Button getFixedButton(final UserList<CommonShell> ul,
+                                final ListInterface<CommonShell> pagingContainer,
+                                final Panel toAddTo,
+                                final ControlGroup normalSpeedRecording) {
     final Button fixed = makeFixedButton();
-//    if (logger != null) {
-//      logger.info(this.getClass() + " adding create button - review editable.");
-//    }
     fixed.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
@@ -653,13 +687,64 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     return fixed;
   }
 
+  /**
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise.CreateFirstRecordAudioPanel#makePostAudioRecordButton
+   */
   @Override
   protected void audioPosted() {
-    reallyChange(listInterface, false);
+    Boolean value = getKeepAudio();
+  //  logger.info("did audioPosted keep audio = " + value);
+    reallyChange(listInterface, false, value);
   }
 
+  protected boolean getKeepAudio() {
+    Boolean value = keepAudio.getValue();
+  //  logger.info(this.getClass() + " : did getKeepAudio keep audio = " + value);
+    return value;
+  }
+
+  /**
+   * @see #isValidForeignPhrase(UserList, ListInterface, Panel, boolean)
+   */
   @Override
   protected void checkIfNeedsRefAudio() {
+  }
+
+  private boolean getKeepAudioSelection() {
+    return getKeepAudioSelection(getSelectedUserKey(controller, ""));
+  }
+
+  private boolean getKeepAudioSelection(String selectedUserKey) {
+    if (Storage.isLocalStorageSupported()) {
+      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
+      String item = localStorageIfSupported.getItem(selectedUserKey);
+     // logger.info("value for " + selectedUserKey + "='" + item+ "'");
+      if (item != null) {
+        return item.toLowerCase().equals("true");
+      }
+      else {
+        storeKeepAudio(true);
+        return true;
+      }
+    }
+    // else {
+    return false;
+    // }
+  }
+
+  private String getSelectedUserKey(ExerciseController controller, String appTitle) {
+    return getStoragePrefix(controller, appTitle) + "keepAudio";
+  }
+
+  private String getStoragePrefix(ExerciseController controller, String appTitle) {
+    return appTitle + ":" + controller.getUser() + ":";
+  }
+
+  private void storeKeepAudio(boolean shouldKeepAudio) {
+    if (Storage.isLocalStorageSupported()) {
+      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
+      localStorageIfSupported.setItem(getSelectedUserKey(controller, ""), "" + shouldKeepAudio);
+    }
   }
 
   /**
@@ -669,45 +754,48 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    * @param buttonClicked
    * @seex #doAfterEditComplete(mitll.langtest.client.list.ListInterface, boolean)
    * @see #reallyChange
-   * @see #postEditItem(mitll.langtest.client.list.ListInterface, boolean)
+   * @see #postEditItem
    */
   @Override
   protected void doAfterEditComplete(ListInterface<CommonShell> pagingContainer, boolean buttonClicked) {
-    super.doAfterEditComplete(pagingContainer, buttonClicked);
-
+    //  super.doAfterEditComplete(pagingContainer, buttonClicked);
+    changeTooltip(pagingContainer);
     if (buttonClicked) {
-      final String id = newUserExercise.getID();
-      int user = controller.getUser();
+      userSaidExerciseIsFixed();
+    }
+  }
 
-      logger.info("doAfterEditComplete : forgetting " + id + " user " + user);
+  private void userSaidExerciseIsFixed() {
+    final String id = newUserExercise.getID();
+    int user = controller.getUser();
 
-      if (!ul.remove(newUserExercise)) {
-        logger.warning("\ndoAfterEditComplete : error - didn't remove " + id + " from ul " + ul);
+//    logger.info("doAfterEditComplete : forgetting exercise " + id + " current user " + user + " before list had " + ul.getExercises().size());
+
+    if (!ul.remove(newUserExercise)) {
+      logger.warning("\ndoAfterEditComplete : error - didn't remove " + id + " from ul " + ul);
+    }
+    if (!originalList.remove(newUserExercise)) {
+      logger.warning("\ndoAfterEditComplete : error - didn't remove " + id + " from original " + originalList);
+    }
+
+    service.setExerciseState(id, STATE.FIXED, user, new AsyncCallback<Void>() {
+      @Override
+      public void onFailure(Throwable caught) {
       }
-      if (!originalList.remove(newUserExercise)) {
-        logger.warning("\ndoAfterEditComplete : error - didn't remove " + id + " from original " + originalList);
+
+      @Override
+      public void onSuccess(Void result) {
+        logger.info("doAfterEditComplete : forgetting exercise " + id);
+        exerciseList.forgetExercise(id);
+
+        reloadLearnList();
       }
-
-      service.setExerciseState(id, STATE.FIXED, user, new AsyncCallback<Void>() {
-        @Override
-        public void onFailure(Throwable caught) {
-        }
-
-        @Override
-        public void onSuccess(Void result) {
-          reloadLearnList();
-
-          exerciseList.forgetExercise(id);
-        }
-      });
-    } //else {
-    //logger.info("----> doAfterEditComplete : button not clicked ");
-    // }
+    });
   }
 
   @Override
   protected String getEnglishLabel() {
-    return "English<br/>";
+    return controller.getLanguage().equalsIgnoreCase("english") ? "Meaning<br/>" : "English<br/>";
   }
 
   @Override
