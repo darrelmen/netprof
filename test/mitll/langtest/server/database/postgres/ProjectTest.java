@@ -41,14 +41,19 @@ import mitll.langtest.server.database.project.ProjectStatus;
 import mitll.langtest.server.database.project.ProjectType;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.UserManagement;
+import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
+import mitll.langtest.server.trie.ExerciseTrie;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickProject;
 import mitll.npdata.dao.SlickProjectProperty;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 public class ProjectTest extends BaseTest {
   private static final Logger logger = Logger.getLogger(ProjectTest.class);
@@ -151,11 +156,39 @@ public class ProjectTest extends BaseTest {
   }
 
   @Test
-  public void testUserCount() {
+  public void testOneEditNeighbors() {
     DatabaseImpl spanish = getDatabaseVeryLight("netProf", "config.properties", false);
+    IUserDAO userDAO = spanish.getUserDAO();
+    logger.info("counts " + userDAO + " " + userDAO.getUsers().size());
 
+    spanish.populateProjects();
+    spanish.setInstallPath("", "", "");
 
-    logger.info("counts " + spanish.getUserDAO().getCounts());
+    Project project = spanish.getProject(2);
+
+    List<CommonExercise> rawExercises = project.getRawExercises();
+
+//    ExerciseTrie<CommonExercise> phoneTrie = project.getPhoneTrie();
+    int i = 0;
+
+    for (CommonExercise exercise:rawExercises) {
+      ExercisePhoneInfo exercisePhoneInfo = project.getExToPhone().get(exercise.getID());
+      if (exercisePhoneInfo != null) {
+        logger.info("for " + exercise.getID() + " : " + exercise.getForeignLanguage() +  " " + exercisePhoneInfo.getWordToInfo());
+        if (i++ > 10) break;
+      }
+    }
+
+/*    List<String> tests = Arrays.asList("l", "la", "las", "s", "se", "seg", "ak");
+    for (String test : tests) {
+      Collection<CommonExercise> matches = phoneTrie.getMatches(test);
+      logger.info("for " + test + " got " + matches.size());
+      int i = 0;
+      for (CommonExercise exercise : matches) {
+        logger.info("found " + test + " : " + exercise.getForeignLanguage());
+        if (i++ > 10) break;
+      }
+    }*/
   }
 
   @Test
