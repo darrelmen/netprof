@@ -263,8 +263,7 @@ public class SectionHelper<T extends Shell> {
   public void addExercise(T where) {
     List<SectionHelper.Pair> pairs = new ArrayList<SectionHelper.Pair>();
     for (Map.Entry<String, String> pair : where.getUnitToValue().entrySet()) {
-      Pair pair1 = addExerciseToLesson(where, pair.getKey(), pair.getValue());
-      pairs.add(pair1);
+      pairs.add(addExerciseToLesson(where, pair.getKey(), pair.getValue()));
     }
     addAssociations(pairs);
   }
