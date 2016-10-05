@@ -173,7 +173,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @see NPFHelper#reload
    */
   public void reload() {
-    //logger.info("reload -");
+    logger.info(getClass() + " reload -");
     getExercises(controller.getUser());
   }
 
@@ -224,11 +224,12 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     Widget current = innerContainer.getWidget();
     if (current != null) {
       if (current instanceof RequiresResize) {
-       // if (DEBUG || true) logger.info("resizing right side for " + instance + " " + current.getClass());
+        // if (DEBUG || true) logger.info("resizing right side for " + instance + " " + current.getClass());
         ((RequiresResize) current).onResize();
-      } else {
-        logger.warning("huh?  right side is not resizable " + instance + " " + current.getClass());
       }
+      /*else {
+        logger.warning("huh?  right side is not resizable " + instance + " " + current.getClass());
+      }*/
     }
     //   else {
 //      logger.warning("huh? no right side of exercise list");
@@ -459,8 +460,10 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     T current = getCurrentExercise();
     if (current.getID().equals(id)) {
       if (!onLast(current)) {
+        logger.info(getClass() + " removeExercise - load next after " + id);
         loadNextExercise(current);
       } else if (!onFirst(current)) {
+        logger.info(getClass() + " removeExercise - load prev before " + id);
         loadPreviousExercise(current);
       }
     }
