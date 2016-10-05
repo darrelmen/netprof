@@ -52,7 +52,6 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   private final ProjectDAOWrapper dao;
   private final ProjectPropertyDAO propertyDAO;
   private final UserProjectDAO userProjectDAO;
-//  private SlickProject defaultProject;
 
   /**
    * @param database
