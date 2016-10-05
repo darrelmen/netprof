@@ -169,7 +169,9 @@ import java.util.logging.Logger;
  * - Fixed bug with detecting RTL text and showing it in the exercise list
  * 1.4.9
  * - Fixed bug with downloading audio for custom item.
- * 1.4.10 (9-26-16)
+ * 1.4.10 (9/9/16)
+ * - Fixes for QC -
+ * 1.4.11 (9-26-16)
  * - Added auto advance button to avp
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since
@@ -177,7 +179,7 @@ import java.util.logging.Logger;
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private final Logger logger = Logger.getLogger("LangTest");
 
-  public static final String VERSION_INFO = "1.4.10";
+  public static final String VERSION_INFO = "1.4.11";
 
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
