@@ -111,16 +111,12 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
                          SoundFeedback.EndListener endListener,
                          String instance, ListInterface exerciseList) {
     super(e, service, controller, addKeyBinding, controlState, soundFeedback, endListener, instance, exerciseList);
-
-/*
-    if (logger == null) {
-      logger = Logger.getLogger("BootstrapExercisePanel");
-    }
-    logger.info("got here!");
-
-    doAutoPlay(controlState);
-*/
   }
+
+  /**
+   * Don't add one.
+   */
+  protected void addKeyListener() { }
 
   /**
    * @param controlState
