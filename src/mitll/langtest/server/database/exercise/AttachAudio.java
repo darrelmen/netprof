@@ -37,6 +37,7 @@ import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.AudioExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.MutableAudioExercise;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -48,7 +49,7 @@ import java.util.*;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 11/10/15.
  */
-public class AttachAudio {
+class AttachAudio {
   private static final Logger logger = Logger.getLogger(AttachAudio.class);
   private static final String FAST_WAV = "Fast" + ".wav";
   private static final String SLOW_WAV = "Slow" + ".wav";
@@ -70,12 +71,12 @@ public class AttachAudio {
    * @param checkAudioTranscript
    * @see BaseExerciseDAO#setAudioDAO
    */
-  public AttachAudio(String mediaDir,
-                     String mediaDir1,
-                     File installPath,
-                     int audioOffset,
-                     Map<String, List<AudioAttribute>> exToAudio,
-                     boolean checkAudioTranscript) {
+  AttachAudio(String mediaDir,
+              String mediaDir1,
+              File installPath,
+              int audioOffset,
+              Map<String, List<AudioAttribute>> exToAudio,
+              boolean checkAudioTranscript) {
     this.mediaDir = mediaDir;
     this.mediaDir1 = mediaDir1;
     this.installPath = installPath;
@@ -96,7 +97,8 @@ public class AttachAudio {
    * @param imported      to attach audio to
    * @see BaseExerciseDAO#afterReadingExercises
    */
-  @Deprecated  public <T extends AudioExercise> void addOldSchoolAudio(String refAudioIndex, T imported) {
+  @Deprecated
+  public <T extends AudioExercise> void addOldSchoolAudio(String refAudioIndex, T imported) {
     String audioDir = refAudioIndex.length() > 0 ? findBest(refAudioIndex) : imported.getID();
     if (audioOffset != 0) {
       audioDir = "" + (Integer.parseInt(audioDir.trim()) + audioOffset);
@@ -193,7 +195,39 @@ public class AttachAudio {
 
         if (exists) {
           if (!audioPaths.contains(child)) {
-            if (audio.hasMatchingTranscript(imported.getForeignLanguage()) || !checkAudioTranscript) {
+            String before = imported.getForeignLanguage();
+            String noAccents = StringUtils.stripAccents(before);
+
+//            boolean foundAlt = false;
+//            if (!before.equals(noAccents)) {
+////      logger.info("attachAudio before '" + before +
+////          "' after '" + noAccents +
+////          "'");
+//              foundAlt = true;
+//            }
+
+            //    String noAccents = StringUtils.stripAccents(against);
+            String transcript = audio.getTranscript();
+            String noAccentsTranscript = transcript == null ? null : StringUtils.stripAccents(transcript);
+//    boolean foundAlt = false;
+//    if (!before.equals(noAccents)) {
+//      if (firstExercise.getID().equals("3277")) {
+//        logger.info("attachAudio before '" + before +
+//            "' after '" + noAccents +
+//            "'");
+//      }
+//      foundAlt = true;
+//    } else {
+//      if (firstExercise.getID().equals("3277")) {
+//        logger.info("attachAudio before '" + before +
+//            "' after '" + noAccents +
+//            "'");
+//      }
+//    }
+
+            if (!checkAudioTranscript ||
+                (audio.matchTranscript(before, transcript) || audio.matchTranscript(noAccents, noAccentsTranscript))
+                ) {
               audio.setAudioRef(child);   // remember to prefix the path
               mutableAudio.addAudio(audio);
             } else {
@@ -229,6 +263,7 @@ public class AttachAudio {
    * @param refAudioIndex
    * @return
    */
+
   private String findBest(String refAudioIndex) {
     String[] split = refAudioIndex.split("\\s+");
     return (split.length == 0) ? "" : split[0];

@@ -85,6 +85,8 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
     extends GoodwaveExercisePanel<T> {
   private Logger logger = Logger.getLogger("QCNPFExercise");
 
+  private static final String VOCABULARY = "Vocabulary:";
+
   private static final String DEFECT = "Defect?";
 
   public static final String FOREIGN_LANGUAGE = "foreignLanguage";
@@ -95,6 +97,9 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
   public static final String CONTEXT_TRANSLATION = "context translation";
 
   private static final String REF_AUDIO = "refAudio";
+  /**
+   * @see #addApprovedButton(ListInterface, NavigationHelper)
+   */
   private static final String APPROVED = "Approve Item";
   private static final String NO_AUDIO_RECORDED = "No Audio Recorded.";
   private static final String COMMENT = "Comment";
@@ -120,7 +125,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
   private Button approvedButton;
   private Tooltip approvedTooltip;
   private Tooltip nextTooltip;
-  //private CompressedAudio compressedAudio = new CompressedAudio();
+  private List<RememberTabAndContent> tabs;
 
   /**
    * @param e
@@ -175,7 +180,8 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel
    */
   protected NavigationHelper<CommonShell> getNavigationHelper(ExerciseController controller,
-                                                              final ListInterface<CommonShell> listContainer, boolean addKeyHandler) {
+                                                              final ListInterface<CommonShell> listContainer,
+                                                              boolean addKeyHandler) {
     NavigationHelper<CommonShell> navHelper = new NavigationHelper<CommonShell>(exercise, controller,
         new PostAnswerProvider() {
           @Override
@@ -265,7 +271,6 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
     if (isCourseContent()) {
       markReviewed(completedExercise);
       boolean allCorrect = incorrectFields.isEmpty();
-
       listContainer.setState(completedExercise.getID(), allCorrect ? STATE.APPROVED : STATE.DEFECT);
       listContainer.redraw();
     }
@@ -358,9 +363,15 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
 //      row.add(widgets);
 //    }
 
-    column.add(getEntry(e, FOREIGN_LANGUAGE, ExerciseFormatter.FOREIGN_LANGUAGE_PROMPT, e.getForeignLanguage()));
+    column.add(getEntry(e, FOREIGN_LANGUAGE, VOCABULARY, e.getForeignLanguage()));
     column.add(getEntry(e, TRANSLITERATION, ExerciseFormatter.TRANSLITERATION, e.getTransliteration()));
-    column.add(getEntry(e, ENGLISH, ExerciseFormatter.ENGLISH_PROMPT, e.getEnglish()));
+
+    if (controller.getLanguage().equalsIgnoreCase("English")) {
+      column.add(getEntry(e, MEANING, ExerciseFormatter.MEANING_PROMPT, e.getMeaning()));
+    }
+    else {
+      column.add(getEntry(e, ENGLISH, ExerciseFormatter.ENGLISH_PROMPT, e.getEnglish()));
+    }
     column.add(getEntry(e, CONTEXT, ExerciseFormatter.CONTEXT, e.getContext()));
     column.add(getEntry(e, CONTEXT_TRANSLATION, ExerciseFormatter.CONTEXT_TRANSLATION, e.getContextTranslation()));
 
@@ -381,7 +392,6 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
     for (RequiresResize rr : toResize) rr.onResize();
   }
 
-  private List<RememberTabAndContent> tabs;
 
   protected Widget getScoringAudioPanel(final T e) {
     if (!e.hasRefAudio()) {
@@ -428,10 +438,9 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
     int me = controller.getUser();
     for (MiniUser user : maleUsers) {
       String tabTitle = getUserTitle(me, user);
-
      // logger.info("addTabsForUsers for user " + user + " got " + tabTitle);
 
-      RememberTabAndContent tabAndContent = new RememberTabAndContent(IconType.QUESTION_SIGN, tabTitle);
+      RememberTabAndContent tabAndContent = new RememberTabAndContent(IconType.QUESTION_SIGN, tabTitle, true);
       tabPanel.add(tabAndContent.getTab().asTabLink());
       tabs.add(tabAndContent);
 
@@ -637,10 +646,13 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
   }
 
   private String getUserTitle(MiniUser user) {
+    String suffix = user.getAge() < 99 ? " age " + user.getAge() : "";
+
+    String userid = true//user.isAdmin()
+        ? " (" + user.getUserID() + ")" : "";
     return (user.isMale() ? MALE : FEMALE) +
-        (user.isAdmin()
-            ? " (" + user.getUserID() + ")" : "") +
-        " age " + user.getAge();
+        userid +
+        suffix;
   }
 
   /**
@@ -669,7 +681,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
       @Override
       public void playStarted() {
         audioWasPlayed.add(audioPanel);
-       // logger.info("playing audio " + audio.getAudioRef() + " has " + tabs.size() + " tabs, now " + audioWasPlayed.size() + " played");
+        logger.info("getPanelForAudio playing audio " + audio.getAudioRef() + " has " + tabs.size() + " tabs, now " + audioWasPlayed.size() + " played");
         //if (audioWasPlayed.size() == toResize.size()) {
         // all components played
         setApproveButtonState();
@@ -780,7 +792,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
     final TextBox commentEntry = new TextBox();
     commentEntry.getElement().setId("QCNPFExercise_Comment_TextBox_" + field);
     commentEntry.addStyleName("topFiveMargin");
-    if (annotation != null) {
+    if (annotation != null && annotation.isDefect()) {
       commentEntry.setText(annotation.getComment());
     }
     commentEntry.setVisibleLength(100);
