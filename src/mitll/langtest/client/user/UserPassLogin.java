@@ -77,6 +77,8 @@ import java.util.logging.Logger;
  * @since 8/11/14.
  */
 public class UserPassLogin extends UserDialog {
+  private static final String USERNAME_BOX_SIGN_IN = "Username_Box_SignIn";
+  public static final String USER_NAME_BOX = "UserNameBox";
   private final Logger logger = Logger.getLogger("UserPassLogin");
 
   private static final String IPAD_LINE_1 = "Also consider installing the NetProF app, which is available on the DLI App Store.";// or";
@@ -404,14 +406,14 @@ public class UserPassLogin extends UserDialog {
     user = addControlFormFieldWithPlaceholder(fieldset, false, MIN_LENGTH_USER_ID, USER_ID_MAX_LENGTH, USERNAME);
     user.box.addStyleName("topMargin");
     user.box.addStyleName("rightFiveMargin");
-    user.box.getElement().setId("Username_Box_SignIn");
+    user.box.getElement().setId(USERNAME_BOX_SIGN_IN);
     user.box.setWidth(SIGN_UP_WIDTH);
 
     user.box.addFocusHandler(new FocusHandler() {
       @Override
       public void onFocus(FocusEvent event) {
         signInHasFocus = true;
-        eventRegistration.logEvent(user.box, "UserNameBox", "N/A", "focus in username field");
+        eventRegistration.logEvent(user.box, USER_NAME_BOX, "N/A", "focus in username field");
       }
     });
 
@@ -419,7 +421,7 @@ public class UserPassLogin extends UserDialog {
       @Override
       public void onBlur(BlurEvent event) {
         if (!user.getText().isEmpty()) {
-          eventRegistration.logEvent(user.box, "UserNameBox", "N/A", "left username field '" + user.getText() + "'");
+          eventRegistration.logEvent(user.box, USER_NAME_BOX, "N/A", "left username field '" + user.getText() + "'");
 
           //    logger.info("checking makeSignInUserName " + user.getText());
           service.userExists(user.getText(), "", new AsyncCallback<User>() {
@@ -435,7 +437,7 @@ public class UserPassLogin extends UserDialog {
                 String emailHash = result.getEmailHash();
                 String passwordHash = result.getPasswordHash();
                 if (emailHash == null || passwordHash == null || emailHash.isEmpty() || passwordHash.isEmpty()) {
-                  eventRegistration.logEvent(user.box, "UserNameBox", "N/A", "existing legacy user " + result.toStringShort());
+                  eventRegistration.logEvent(user.box, USER_NAME_BOX, "N/A", "existing legacy user " + result.toStringShort());
                   copyInfoToSignUp(result);
                 }
               }
