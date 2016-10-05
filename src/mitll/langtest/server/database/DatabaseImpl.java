@@ -50,6 +50,10 @@ import mitll.langtest.server.database.contextPractice.ContextPracticeImport;
 import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.custom.UserListManager;
+import mitll.langtest.server.database.dliclass.DLIClassDAO;
+import mitll.langtest.server.database.dliclass.DLIClassJoinDAO;
+import mitll.langtest.server.database.dliclass.IDLIClassDAO;
+import mitll.langtest.server.database.dliclass.IDLIClassJoinDAO;
 import mitll.langtest.server.database.exercise.*;
 import mitll.langtest.server.database.instrumentation.IEventDAO;
 import mitll.langtest.server.database.instrumentation.SlickEventImpl;
@@ -149,6 +153,8 @@ public class DatabaseImpl implements Database {
   private IEventDAO eventDAO;
   private IProjectDAO projectDAO;
   private IUserProjectDAO userProjectDAO;
+  IDLIClassDAO dliClassDAO;
+  IDLIClassJoinDAO dliClassJoinDAO;
 
   private ContextPractice contextPractice;
 
@@ -219,8 +225,7 @@ public class DatabaseImpl implements Database {
                       String dbName,
                       ServerProperties serverProps,
                       PathHelper pathHelper,
-                      LogAndNotify logAndNotify/*,
-                      ServletContext servletContext*/) {
+                      LogAndNotify logAndNotify) {
     long then;
     long now;
     this.connection = connection;
@@ -231,8 +236,7 @@ public class DatabaseImpl implements Database {
 
     if (maybeGetH2Connection(relativeConfigDir, dbName, serverProps)) return;
     then = System.currentTimeMillis();
-
-    initializeDAOs(pathHelper/*,servletContext*/);
+    initializeDAOs(pathHelper);
     now = System.currentTimeMillis();
     if (now - then > 300) {
       logger.info("took " + (now - then) + " millis to initialize DAOs for " + getOldLanguage(serverProps));
@@ -240,7 +244,6 @@ public class DatabaseImpl implements Database {
 
     monitoringSupport = new MonitoringSupport(userDAO, resultDAO);
     this.pathHelper = pathHelper;
-
 //    if (!serverProps.useH2()) {
 //      populateProjects(false);
 //    }
@@ -296,12 +299,12 @@ public class DatabaseImpl implements Database {
    *
    * @see #DatabaseImpl(DatabaseConnection, String, String, String, ServerProperties, PathHelper, LogAndNotify)
    */
-  private void initializeDAOs(PathHelper pathHelper/*, ServletContext servletContext*/) {
+  private void initializeDAOs(PathHelper pathHelper) {
     dbConnection = getDbConnection();
 
     eventDAO = new SlickEventImpl(dbConnection);
     //   SlickUserDAOImpl slickUserDAO = new SlickUserDAOImpl(this, dbConnection);
-    this.userDAO = new DominoUserDAOImpl(this/*, servletContext*/);
+    this.userDAO = new DominoUserDAOImpl(this);
     userPermissionDAO = new SlickUserPermissionDAOImpl(this, dbConnection);
     //  slickUserDAO.setPermissionDAO(userPermissionDAO);
 
@@ -335,6 +338,8 @@ public class DatabaseImpl implements Database {
 
     projectDAO = new ProjectDAO(this, dbConnection);
     userProjectDAO = new UserProjectDAO(dbConnection);
+    dliClassDAO = new DLIClassDAO(dbConnection);
+    dliClassJoinDAO = new DLIClassJoinDAO(dbConnection);
 
     createTables();
 
@@ -523,9 +528,9 @@ public class DatabaseImpl implements Database {
 
   public ExerciseDAO<CommonExercise> getExerciseDAO(int projectid) {
     Project project = getProject(projectid);
-    logger.debug("getExerciseDAO " + projectid + " found project " + project);
+    //logger.debug("getExerciseDAO " + projectid + " found project " + project);
     ExerciseDAO<CommonExercise> exerciseDAO = project.getExerciseDAO();
-    logger.debug("getExerciseDAO " + projectid + " found exercise dao " + exerciseDAO);
+    //logger.debug("getExerciseDAO " + projectid + " found exercise dao " + exerciseDAO);
     return exerciseDAO;
   }
 
@@ -971,11 +976,12 @@ public class DatabaseImpl implements Database {
   }
 
   /**
+   * the User info lives in domino...
+   *
    * @see #initializeDAOs(PathHelper)
    */
   public void createTables() {
     //  logger.info("createTables create slick tables - has " + dbConnection.getTables());
-
     List<IDAO> idaos = Arrays.asList(
         //getUserDAO(),
         userPermissionDAO,
@@ -993,7 +999,9 @@ public class DatabaseImpl implements Database {
         getSecondStateDAO(),
         ((ProjectDAO) getProjectDAO()).getProjectPropertyDAO(),
         getUserProjectDAO(),
-        userSessionDAO
+        userSessionDAO,
+        dliClassDAO,
+        dliClassJoinDAO
     );
 
     List<String> created = new ArrayList<>();

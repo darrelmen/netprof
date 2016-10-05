@@ -42,7 +42,7 @@ import mitll.langtest.server.database.project.ProjectType;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
-import mitll.langtest.server.trie.ExerciseTrie;
+import mitll.langtest.server.database.userexercise.ExerciseToPhone;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickProject;
@@ -50,20 +50,19 @@ import mitll.npdata.dao.SlickProjectProperty;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public class ProjectTest extends BaseTest {
   private static final Logger logger = Logger.getLogger(ProjectTest.class);
+  public static final int MAX = 200;
 
   @Test
   public void testProject() {
     DatabaseImpl spanish = getDatabase("spanish");
-
     IProjectDAO projectDAO = spanish.getProjectDAO();
-
     User gvidaver = spanish.getUserDAO().getUserByID("gvidaver");
 
     Iterator<String> iterator = spanish.getTypeOrder(-1).iterator();
@@ -168,14 +167,25 @@ public class ProjectTest extends BaseTest {
 
     List<CommonExercise> rawExercises = project.getRawExercises();
 
-//    ExerciseTrie<CommonExercise> phoneTrie = project.getPhoneTrie();
     int i = 0;
 
-    for (CommonExercise exercise:rawExercises) {
+    for (CommonExercise exercise : rawExercises) {
       ExercisePhoneInfo exercisePhoneInfo = project.getExToPhone().get(exercise.getID());
       if (exercisePhoneInfo != null) {
-        logger.info("for " + exercise.getID() + " : " + exercise.getForeignLanguage() +  " " + exercisePhoneInfo.getWordToInfo());
-        if (i++ > 10) break;
+        Map<String, ExerciseToPhone.Info> wordToInfo = exercisePhoneInfo.getWordToInfo();
+        logger.info("for " + exercise.getID() + " : " + exercise.getForeignLanguage() + " " + wordToInfo);
+
+        if (wordToInfo != null) {
+          for (Map.Entry<String, ExerciseToPhone.Info> pair : wordToInfo.entrySet()) {
+            String pron = pair.getKey();
+            ExerciseToPhone.Info value = pair.getValue();
+            Map<String, Integer> pronToCount = value.getPronToCount();
+            logger.info("\t" + pron + " = " + value.getPronToInfo());// + " (" +pronToCount.get(pron)+ ")");
+            logger.info("\t" + pron + " = " + pronToCount);
+          }
+        }
+
+        if (i++ > MAX) break;
       }
     }
 
