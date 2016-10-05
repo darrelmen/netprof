@@ -97,24 +97,53 @@ public class ExerciseToPhone {
 
     ParseResultJson parseResultJson = new ParseResultJson(null);
 
-    Map<Integer, Map<String, List<List<String>>>> exToWordToPronunciations = new HashMap<>();
+    //Map<Integer, Map<String, List<List<String>>>> exToWordToPronunciations = new HashMap<>();
 
     // partition into same length sets
     Map<Integer, Set<Info>> lengthToInfos = new HashMap<>();
 
-    logger.info("looking at " +inProject.size() + " exercises and "+ jsonResults.size() + " results");
+    logger.info("looking at " + inProject.size() + " exercises and " + jsonResults.size() + " results");
+
+    Map<Integer, Map<String, Set<String>>> exToWordToPron = new HashMap<>();
 
     for (SlickRefResultJson exjson : jsonResults) {
       int exid = exjson.exid();
       if (inProject.contains(exid)) {
-        Map<String, List<List<String>>> wordToProns = exToWordToPronunciations.get(exid);
-        if (wordToProns == null)
-          exToWordToPronunciations.put(exid, wordToProns = new HashMap<String, List<List<String>>>());
+//        Map<String, List<List<String>>> wordToProns = exToWordToPronunciations.get(exid);
+//        if (wordToProns == null)
+//          exToWordToPronunciations.put(exid, wordToProns = new HashMap<String, List<List<String>>>());
+        Map<String, List<List<String>>> wordToProns = new HashMap<String, List<List<String>>>();
 
         Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.parseJsonAndGetProns(exjson.scorejson(), wordToProns);
+        int numWords = netPronImageTypeListMap.get(NetPronImageType.WORD_TRANSCRIPT).size();
 
         for (Map.Entry<String, List<List<String>>> pair : wordToProns.entrySet()) {
-          Info info = new Info(exid, pair.getKey(), pair.getValue());
+          Map<String, Set<String>> wordToPron = exToWordToPron.get(exid);
+          if (wordToPron == null) exToWordToPron.put(exid, wordToPron = new HashMap<String, Set<String>>());
+
+
+          String word = pair.getKey();
+          Set<String> pForWord = wordToPron.get(word);
+          if (pForWord == null) wordToPron.put(word, pForWord = new HashSet<String>());
+
+          List<List<String>> pronsForWord = pair.getValue();
+          for (List<String> pron : pronsForWord) {
+            String pronKey = getPronKey(pron);
+            if (!pForWord.contains(pronKey)) {
+              pForWord.add(pronKey);
+
+              Info info = new Info(exid, word, pronsForWord, numWords);
+              //for (List<String> pron : info.getPronunciations()) {
+              Set<Info> infos = lengthToInfos.get(pron.size());
+              if (infos == null) {
+                lengthToInfos.put(pron.size(), infos = new HashSet<Info>());
+              }
+              infos.add(info);
+              // }
+            }
+          }
+/*
+          Info info = new Info(exid, word, pronsForWord, numWords);
           for (List<String> pron : info.getPronunciations()) {
             Set<Info> infos = lengthToInfos.get(pron.size());
             if (infos == null) {
@@ -122,6 +151,7 @@ public class ExerciseToPhone {
             }
             infos.add(info);
           }
+*/
         }
 
         ExercisePhoneInfo phonesForEx = exToPhones.get(exid);
@@ -143,7 +173,7 @@ public class ExerciseToPhone {
       if (length < 3) continue;
       Set<Info> value = pair.getValue();
 
-      logger.info("n x n " + value.size());
+      logger.info(length + " : n x n " + value.size());
 
       int j = 0;
       for (Info info : value) {
@@ -156,25 +186,21 @@ public class ExerciseToPhone {
                   if (pron2.size() == length) {
                     int subs = 0;
                     for (int i = 0; i < length; i++) {
-                      String first  = pron.get(i);
+                      String first = pron.get(i);
                       String second = pron2.get(i);
                       if (!first.equals(second)) {
                         subs++;
                         if (subs == 2) break; // only one sub distance away
                       }
                     }
-                    if (subs == 1) {
-                      //logger.info(pron + " one from " +pron2);
-
-                      info.addNeighbor(other);
-                      Map<String, Info> wordToInfo = exToWordToInfo.get(info.exid);
-                      if (wordToInfo == null) {
-                        exToWordToInfo.put(info.exid, wordToInfo = new HashMap<>());
-                      }
-                      Info previous = wordToInfo.put(info.word, info);
-
+                    if (subs == 1) {   // e.g. l-ah-s => l-o-s
+//                      logger.info(pron + " one from " +pron2);
+                      addNeighbor(exToWordToInfo, info, other, true);
                       //if (previous != null) logger.warn("found previous " + info);
                     }
+                    /*else if (subs == 2){
+                      addNeighbor(exToWordToInfo, info, other, false);
+                    }*/
                   }
                 }
               }
@@ -191,34 +217,121 @@ public class ExerciseToPhone {
       }
     }
 
-
     logger.info("took " + (System.currentTimeMillis() - then) + " millis to populate ex->phone map");
-
     return exToPhones;
+  }
+
+  private void addNeighbor(Map<Integer, Map<String, Info>> exToWordToInfo, Info info, Info other, boolean isOne) {
+    info.addNeighbor(other, isOne);
+    Map<String, Info> wordToInfo = exToWordToInfo.get(info.exid);
+    if (wordToInfo == null) {
+      exToWordToInfo.put(info.exid, wordToInfo = new HashMap<>());
+    }
+    Info previous = wordToInfo.put(info.word, info);
+  }
+
+
+  @NotNull
+  private String getPronKey(List<String> pron) {
+    StringBuilder builder = new StringBuilder();
+    for (String phone : pron) builder.append(phone).append("-");
+    return builder.toString();
   }
 
   public static class Info {
     int exid;
     String word;
     private List<List<String>> pronunciations;
-    List<Info> oneSubNeighbors = new ArrayList<>();
 
-    public Info(int exid, String word, List<List<String>> pronunciations) {
+    int numWords;
+
+    private Map<String, Info> pronToInfo = new HashMap<>();
+    private Map<String, Integer> pronToCount = new HashMap<>();
+    private Map<String, Info> pronToInfo2 = new HashMap<>();
+    private Map<String, Integer> pronToCount2 = new HashMap<>();
+
+    /**
+     * @param exid
+     * @param word
+     * @param pronunciations
+     * @see ExerciseToPhone#getExToPhonePerProject(Set, List)
+     */
+    public Info(int exid, String word, List<List<String>> pronunciations, int numWords) {
       this.exid = exid;
       this.word = word;
       this.pronunciations = pronunciations;
+      this.numWords = numWords;
     }
 
-    public void addNeighbor(Info neighbor) {
-      oneSubNeighbors.add(neighbor);
+    /**
+     * @param neighbor
+     */
+    void addNeighbor(Info neighbor, boolean isOne) {
+      //    oneSubNeighbors.add(neighbor);
+      for (List<String> pron : neighbor.getPronunciations()) {
+        String pronKey = getPronKey(pron);
+        Map<String, Info> pronToInfo = isOne ? this.pronToInfo : pronToInfo2;
+        Map<String, Integer> pronToCount = isOne ? this.pronToCount : pronToCount2;
+
+        addNeighbor(neighbor, pronKey, pronToInfo, pronToCount);
+      }
     }
 
-    public List<List<String>> getPronunciations() {
+    private void addNeighbor(Info neighbor, String pronKey, Map<String, Info> pronToInfo, Map<String, Integer> pronToCount) {
+      Info currentInfo = pronToInfo.get(pronKey);
+      if (currentInfo == null || currentInfo.numWords > neighbor.numWords) {
+        pronToInfo.put(pronKey, neighbor);
+        pronToCount.put(pronKey, 1);
+//        logger.info("new neighbor " + neighbor);
+      } else if (currentInfo.numWords == neighbor.numWords) {
+        int value = pronToCount.get(pronKey) + 1;
+        pronToCount.put(pronKey, value);
+
+        if (pronKey.equals("libro")) {
+          logger.info(pronKey + " " + exid + " - " + neighbor.exid + " value " + value);
+        }
+
+        if (value % 100 == 0) {
+//            logger.info(pronKey + " = " + value);
+        }
+      }
+    }
+
+    @NotNull
+    private String getPronKey(List<String> pron) {
+      StringBuilder builder = new StringBuilder();
+      for (String phone : pron) builder.append(phone).append("-");
+      return builder.toString();
+    }
+
+    List<List<String>> getPronunciations() {
       return pronunciations;
     }
 
     public String toString() {
-      return "exid " + exid + " : " + word + " prons " + pronunciations.size() + " neighbors " + oneSubNeighbors.size();
+      StringBuilder builder = getProns(pronToInfo);
+
+      StringBuilder builder2 = new StringBuilder();
+      for (List<String> pron : pronunciations) builder2.append(getPronKey(pron)).append(", ");
+
+      return "exid " + exid + " : " + word + " prons " + pronunciations.size() + " (" + builder2 +
+          ") " +
+          "one sub neighbors " + pronToInfo.size() + " : " + builder;// + "\n\ttwo " + pronToInfo2.size() + " " + getProns(pronToInfo2);
+    }
+
+    @NotNull
+    private StringBuilder getProns(Map<String, Info>pronToInfo ) {
+      StringBuilder builder = new StringBuilder();
+      for (String pron : pronToInfo.keySet()) builder.append(pron).append(",");
+      return builder;
+    }
+
+    public Map<String, Info> getPronToInfo() {
+      return pronToInfo;
+    }
+
+    public Map<String, Integer> getPronToCount() {
+      return pronToCount;
     }
   }
 
