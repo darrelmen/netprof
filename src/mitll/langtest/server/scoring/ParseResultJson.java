@@ -101,7 +101,8 @@ public class ParseResultJson {
    * @return
    * @see #parseJson(String)
    */
-  private Map<ImageType, Map<Float, TranscriptEvent>> parseJsonString(String json, boolean usePhones,
+  private Map<ImageType, Map<Float, TranscriptEvent>> parseJsonString(String json,
+                                                                      boolean usePhones,
                                                                       Map<String, List<List<String>>> wordToPronunciations) {
     if (json.isEmpty()) throw new IllegalArgumentException("json is empty");
     //   else {
