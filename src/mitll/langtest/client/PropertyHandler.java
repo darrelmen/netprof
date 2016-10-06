@@ -60,6 +60,7 @@ public class PropertyHandler {
 
   /**
    * Possibly we need to add a delay after button is released to actually tell flash to stop recording.
+   *
    * @see RecordButton#startOrStopRecording()
    */
   private static final int DEFAULT_AFTER_STOP_DELAY_MILLIS = 90;
@@ -88,7 +89,7 @@ public class PropertyHandler {
   private static final String GRADING = GRADING_PROP;
   private static final String BKG_COLOR_FOR_REF = "bkgColorForRef";
   private static final String EXERCISE_TITLE = "exercise_title";
- // private static final String ADMIN_PARAM = "admin";
+  // private static final String ADMIN_PARAM = "admin";
   private static final String ANALYSIS = "analysis";
   private static final String TURK_PARAM = "turk";
   private static final String NUM_GRADES_TO_COLLECT_PARAM = NUM_GRADES_TO_COLLECT;
@@ -114,11 +115,11 @@ public class PropertyHandler {
   private static final String CLICK_AND_HOLD = "clickAndHold";
   private static final String SHOW_CONTEXT = "showContext";
   private static final String QUIET_AUDIO_OK = "quietAudioOK";
-//  private static final String SHOW_WELCOME = "showWelcome";
+  //  private static final String SHOW_WELCOME = "showWelcome";
 //  private static final String NO_MODEL = "noModel";
   private static final String PREFERRED_VOICES = "preferredVoices";
 
-  private boolean adminView, analysis = false;
+  private boolean analysis = false;
   private boolean canPracticeContext = false;
   private boolean enableAllUsers;
   private boolean isAMAS;
@@ -151,8 +152,8 @@ public class PropertyHandler {
       "Tagalog",
       "Urdu");
 
-//  private static final List<String> AMAS_SITES = Arrays.asList("Dari", "Farsi", "Korean", "Mandarin", "MSA", "Pashto", "Russian", "Spanish", "Urdu");
- // private boolean beta;
+  //  private static final List<String> AMAS_SITES = Arrays.asList("Dari", "Farsi", "Korean", "Mandarin", "MSA", "Pashto", "Russian", "Spanish", "Urdu");
+  // private boolean beta;
   private String fontFamily = "";
   private String modelDir;
   private int afterStopDelayMillis;
@@ -178,9 +179,11 @@ public class PropertyHandler {
     return preferredVoices;
   }
 
+/*
   public boolean enableAllUsers() {
     return enableAllUsers;
   }
+*/
 
   public boolean shouldUsePhoneToDisplay() {
     return usePhoneToDisplay;
@@ -200,6 +203,7 @@ public class PropertyHandler {
 
   /**
    * Typically 50 or 100 milliseconds.
+   *
    * @return
    */
   public int getAfterStopDelayMillis() {
@@ -219,11 +223,12 @@ public class PropertyHandler {
   public void setFontFamily(String fontFamily) {
     this.fontFamily = fontFamily;
   }
+
   public String getModelDir() {
     return modelDir;
   }
 
-  @Deprecated  public enum LOGIN_TYPE {ANONYMOUS, STUDENT}
+//  @Deprecated  public enum LOGIN_TYPE {ANONYMOUS, STUDENT}
 
   private boolean spectrogram = false;
   private boolean clickAndHold = true;
@@ -258,11 +263,11 @@ public class PropertyHandler {
   private String appTitle = null;
 
   private boolean rightAlignContent;
-  private LOGIN_TYPE loginType = LOGIN_TYPE.STUDENT;
+//  private LOGIN_TYPE loginType = LOGIN_TYPE.STUDENT;
 
   private boolean showFlashcardAnswer = true;
   private boolean allowPlusInURL;
-  private boolean noModel = false;
+  // private boolean noModel = false;
 
   private static final String RESPONSE_TYPE = "responseType";
   private static final String SPEECH = "Speech";
@@ -296,7 +301,7 @@ public class PropertyHandler {
       else if (key.equals(BKG_COLOR_FOR_REF1)) bkgColorForRef = getBoolean(value);
       else if (key.equals(DEMO_MODE)) demoMode = getBoolean(value);
       else if (key.equals(RECORD_TIMEOUT)) recordTimeout = getInt(value, DEFAULT_TIMEOUT, RECORD_TIMEOUT);
-  //    else if (key.equals(SHOW_WELCOME)) showWelcome = getBoolean(value);
+        //    else if (key.equals(SHOW_WELCOME)) showWelcome = getBoolean(value);
       else if (key.equals(NAME_FOR_ITEM)) nameForItem = value;
       else if (key.equals(NAME_FOR_ANSWER)) nameForAnswer = value;
       else if (key.equals(NAME_FOR_RECORDER)) nameForRecorder = value;
@@ -307,12 +312,11 @@ public class PropertyHandler {
       else if (key.equals(SPLASH_TITLE)) splashTitle = value;
       else if (key.equals(RIGHT_ALIGN_CONTENT) || key.equals(RTL)) {
         rightAlignContent = getBoolean(value);
-      }
-      else if (key.equals(SHOW_FLASHCARD_ANSWER)) showFlashcardAnswer = getBoolean(value);
+      } else if (key.equals(SHOW_FLASHCARD_ANSWER)) showFlashcardAnswer = getBoolean(value);
       else if (key.equals(ALLOW_PLUS_IN_URL)) allowPlusInURL = getBoolean(value);
       else if (key.equals(SHOW_SPECTROGRAM)) spectrogram = getBoolean(value);
 
-  //    else if (key.equals(NO_MODEL)) noModel = getBoolean(value);
+        //    else if (key.equals(NO_MODEL)) noModel = getBoolean(value);
       else if (key.equals(DIALOG)) dialog = value;
       else if (key.equals(QUIET_AUDIO_OK)) quietAudioOK = getBoolean(value);
       else if (key.equals(SHOW_CONTEXT)) showContext = getBoolean(value);
@@ -325,19 +329,19 @@ public class PropertyHandler {
       else if (key.equals("afterStopDelayMillis")) {
         afterStopDelayMillis = getInt(value, DEFAULT_AFTER_STOP_DELAY_MILLIS, "afterStopDelayMillis");
       }
-        //else if (key.equals(IS_AMAS)) isAMAS = getBoolean(value);
+      //else if (key.equals(IS_AMAS)) isAMAS = getBoolean(value);
       else if (key.equals(USE_PHONE_TO_DISPLAY)) {
         // logger.info("found " + USE_PHONE_TO_DISPLAY + " = " + value);
         usePhoneToDisplay = getBoolean(value);
       } else if (key.equals(PREFERRED_VOICES)) {
         getPreferredVoices(value);
-      } else if (key.equals(LOGIN_TYPE_PARAM)) {
+      } /*else if (key.equals(LOGIN_TYPE_PARAM)) {
         try {
           loginType = LOGIN_TYPE.valueOf(value.toUpperCase());
         } catch (IllegalArgumentException e) {
           logger.warning("unknown value for " + key + " : " + value);
         }
-      }
+      }*/
     }
 
     if (appTitle == null) {
@@ -504,6 +508,7 @@ public class PropertyHandler {
       if (usePhoneToDisplay) logger.info("usePhoneToDisplay is " + usePhoneToDisplay);
     }
 
+/*
     String loginType = Window.Location.getParameter(LOGIN_TYPE_PARAM);
     if (loginType != null) {
       try {
@@ -512,6 +517,7 @@ public class PropertyHandler {
         logger.warning("couldn't parse " + loginType);
       }
     }
+*/
 
     if (Window.Location.getParameter(RESPONSE_TYPE) != null) {
       responseType = Window.Location.getParameter(RESPONSE_TYPE);
@@ -555,7 +561,7 @@ public class PropertyHandler {
   }
 
   public boolean isAdminView() {
-    return adminView;
+    return false;//adminView;
   }
 
   public boolean useAnalysis() {
@@ -614,10 +620,6 @@ public class PropertyHandler {
     return rightAlignContent;
   }
 
-  public LOGIN_TYPE getLoginType() {
-    return getExercise_title() != null ? LOGIN_TYPE.ANONYMOUS : loginType;
-  }
-
   public boolean showFlashcardAnswer() {
     return showFlashcardAnswer;
   }
@@ -630,14 +632,6 @@ public class PropertyHandler {
     return spectrogram;
   }
 
-/*  public boolean isNoModel() {
-    return noModel;
-  }
-
-  public boolean hasModel() {
-    return
-  }*/
-
   /**
    * @return
    * @see LangTest#showLogin()
@@ -646,11 +640,11 @@ public class PropertyHandler {
     return resetPassToken;
   }
 
- String getCdEnableToken() {
+  String getCdEnableToken() {
     return cdEnableToken;
   }
 
- String getEmailRToken() {
+  String getEmailRToken() {
     return emailRToken;
   }
 
@@ -696,9 +690,11 @@ public class PropertyHandler {
   public String getResponseType() {
     return responseType;
   }
+
   public void setResponseType(String responseType) {
     this.responseType = responseType;
   }
+
   public boolean isOdaMode() {
     return false;
   }
@@ -706,8 +702,8 @@ public class PropertyHandler {
   /**
    * TODO : Consider rewording for other customers...
    *
-   * @see UserPassLogin#getLoginInfo
    * @return
+   * @see UserPassLogin#getLoginInfo
    */
   public String getHelpMessage() {
 /*    return
@@ -754,8 +750,9 @@ public class PropertyHandler {
    * TODO : Consider rewording for other customers...
    *
    * @return
-   * @see UserPassLogin#getRecordAudioPopover
+   * @seex UserPassLogin#getRecordAudioPopover
    */
+/*
   public String getRecordAudioPopoverText() {
     return "Click here if you have been assigned to record reference audio or do quality control.<br/>" +
         "After you click sign up, " +
@@ -763,6 +760,7 @@ public class PropertyHandler {
         "You will receive an email once it's approved.<br/>" +
         "You will not be able to access NetProF until approval is granted.";
   }
+*/
 
 /*  public String getAMASHelpMessage() {
     return
