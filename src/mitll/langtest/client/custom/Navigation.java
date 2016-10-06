@@ -96,7 +96,6 @@ public class Navigation implements RequiresResize, ShowTab {
   private final Logger logger = Logger.getLogger("Navigation");
 
   private static final String STUDENT_ANALYSIS = "Student Analysis";
-  //private static final String CUSTOM = "Custom";
   private static final String CLASSROOM = "classroom";
 
   private static final String CHAPTERS = "Learn Pronunciation";
@@ -104,6 +103,7 @@ public class Navigation implements RequiresResize, ShowTab {
    * @see #addUserMaintenance
    */
   private static final String USERS = "Users";
+  private static final String CLASSES = "Classes";
   private static final String YOUR_LISTS = "Study Your Lists";
   private static final String STUDY_LISTS = "Study Lists";
   private static final String OTHERS_LISTS = "Study Visited Lists";
@@ -214,88 +214,18 @@ public class Navigation implements RequiresResize, ShowTab {
     practiceHelper = new PracticeHelper(service, feedback, userManager, controller, exerciseServiceAsync);
     recorderHelper = new RecorderNPFHelper(service, feedback, userManager, controller, true, learnHelper, exerciseServiceAsync);
     recordExampleHelper = new RecorderNPFHelper(service, feedback, userManager, controller, false, learnHelper, exerciseServiceAsync);
-
-    //  setKindToIcon();
-  }
-
-  public boolean isRTL() {
-    return controller.getProps().isRightAlignContent();// || (learnHelper.getExerciseList() != null && learnHelper.getExerciseList().isRTL());
-  }
-
-  private void makeDialogWindow(final LangTestDatabaseAsync service, final ExerciseController controller) {
-    GWT.runAsync(new RunAsyncCallback() {
-      public void onFailure(Throwable caught) {
-        downloadFailedAlert();
-      }
-
-      public void onSuccess() {
-        service.getContextPractice(new AsyncCallback<ContextPractice>() {
-          public void onSuccess(ContextPractice cpw) {
-            logger.info("run async to get dialog ui");
-            dialogWindow = new DialogWindow(service, controller, cpw);
-          }
-
-          public void onFailure(Throwable caught) {
-            logger.info("getContextPractice failed");
-          }
-          //TODO: this is naughty
-        });
-      }
-    });
   }
 
   /**
-   * TODO : clean this up - why a horrible hack for learn tab?
-   *
-   * @return
-   * @see #getTabPanel
-   * @see InitialUI#showNavigation
+   * @see mitll.langtest.client.InitialUI#configureUIGivenUser
    */
-  public Widget getTabPanel() {
-    tabPanel = new TabPanel();
-    tabPanel.getElement().getStyle().setMarginTop(-8, Style.Unit.PX);
-    tabPanel.getElement().setId("tabPanel");
-    this.listManager = new ListManager(service, userManager, controller, feedback, tabPanel, learnHelper, exerciseServiceAsync);
-
-    // so we can know when chapters is revealed and tell it to update it's lists
-    tabPanel.addShowHandler(new TabPanel.ShowEvent.Handler() {
-      @Override
-      public void onShow(TabPanel.ShowEvent showEvent) {
-        TabLink target = showEvent.getTarget();
-        String targetName = target == null ? "" : target.toString();
- /*       logger.info("got shown event : '" +showEvent + "'\n" +
-            "\ntarget " + target +
-            " ' target name '" + targetName+ "'");*/
-
-        boolean wasChapters = targetName.contains(CHAPTERS);
-        Panel createdPanel = learnHelper.getCreatedPanel();
-        boolean hasCreated = createdPanel != null;
-        // logger.info("getTabPanel : got shown event : '" +showEvent + "' target '" + targetName + "' hasCreated " + hasCreated);
-        if (wasChapters) {
-          //  logger.info("\taddShowHandler got chapters! created panel was revealed class " + createdPanel.getClass());
-          if (hasCreated && (createdPanel instanceof GoodwaveExercisePanel)) {
-          ((GoodwaveExercisePanel) createdPanel).wasRevealed();
-          }
-
-          Panel createdPanel1 = practiceHelper.getCreatedPanel();
-          if (createdPanel1 != null) {
-            ((FlashcardPanel) createdPanel1).wasHidden();
-        } else {
-            //          logger.info("no practice panel");
-          }
-        } else {
-          if (targetName.contains(PRACTICE)) {
-            Panel createdPanel1 = practiceHelper.getCreatedPanel();
-            if (createdPanel1 != null) {
-              //       logger.info("getTabPanel : practice : got shown event : '" + showEvent + "' target '" + targetName + "'");
-              ((FlashcardPanel) createdPanel1).wasRevealed();
-            }
-          }
-        }
-      }
-    });
-
-    return tabPanel;    // TODO - consider how to tell panels when they are hidden by tab changes
+  public void showInitialState() {
+    addTabs();
+    if (noPrevClickedTab()) {   // no previous tab
+      showDefaultInitialTab(true);
+    } else {
+      selectPreviousTab();
+    }
   }
 
   /**
@@ -333,9 +263,9 @@ public class Navigation implements RequiresResize, ShowTab {
 
     if (controller.getProps().useAnalysis() ||
         userManager.hasPermission(User.Permission.TEACHER_PERM)) {
-     // if (userManager.isTeacher()) {
-        addTeacherAnalysis();
-     // }
+      // if (userManager.isTeacher()) {
+      addTeacherAnalysis();
+      // }
     }
 
     if (isQC()) {
@@ -347,15 +277,91 @@ public class Navigation implements RequiresResize, ShowTab {
     }
   }
 
+  private void makeDialogWindow(final LangTestDatabaseAsync service, final ExerciseController controller) {
+    GWT.runAsync(new RunAsyncCallback() {
+      public void onFailure(Throwable caught) {
+        downloadFailedAlert();
+      }
+      public void onSuccess() {
+        service.getContextPractice(new AsyncCallback<ContextPractice>() {
+          public void onSuccess(ContextPractice cpw) {
+  //          logger.info("run async to get dialog ui");
+            dialogWindow = new DialogWindow(service, controller, cpw);
+          }
+
+          public void onFailure(Throwable caught) {
+            logger.info("getContextPractice failed");
+          }
+        });
+      }
+    });
+  }
+
+  /**
+   * TODO : clean this up - why a horrible hack for learn tab?
+   *
+   * @return
+   * @see #getTabPanel
+   * @see InitialUI#showNavigation
+   */
+  public Widget getTabPanel() {
+    tabPanel = new TabPanel();
+    tabPanel.getElement().getStyle().setMarginTop(-8, Style.Unit.PX);
+    tabPanel.getElement().setId("tabPanel");
+    this.listManager = new ListManager(service, userManager, controller, feedback, tabPanel, learnHelper, exerciseServiceAsync);
+    // so we can know when chapters is revealed and tell it to update it's lists
+    tabPanel.addShowHandler(new TabPanel.ShowEvent.Handler() {
+      @Override
+      public void onShow(TabPanel.ShowEvent showEvent) {
+        gotShowEvent(showEvent);
+      }
+    });
+
+    return tabPanel;    // TODO - consider how to tell panels when they are hidden by tab changes
+  }
+
+  private void gotShowEvent(TabPanel.ShowEvent showEvent) {
+    TabLink target = showEvent.getTarget();
+    String targetName = target == null ? "" : target.toString();
+ /*       logger.info("got shown event : '" +showEvent + "'\n" +
+            "\ntarget " + target +
+            " ' target name '" + targetName+ "'");*/
+
+    boolean wasChapters = targetName.contains(CHAPTERS);
+    Panel createdPanel = learnHelper.getCreatedPanel();
+    boolean hasCreated = createdPanel != null;
+    // logger.info("getTabPanel : got shown event : '" +showEvent + "' target '" + targetName + "' hasCreated " + hasCreated);
+    if (wasChapters) {
+      //  logger.info("\taddShowHandler got chapters! created panel was revealed class " + createdPanel.getClass());
+      if (hasCreated && (createdPanel instanceof GoodwaveExercisePanel)) {
+      ((GoodwaveExercisePanel) createdPanel).wasRevealed();
+      }
+
+      Panel createdPanel1 = practiceHelper.getCreatedPanel();
+      if (createdPanel1 != null) {
+        ((FlashcardPanel) createdPanel1).wasHidden();
+    } else {
+        //          logger.info("no practice panel");
+      }
+    } else {
+      if (targetName.contains(PRACTICE)) {
+        Panel createdPanel1 = practiceHelper.getCreatedPanel();
+        if (createdPanel1 != null) {
+          //       logger.info("getTabPanel : practice : got shown event : '" + showEvent + "' target '" + targetName + "'");
+          ((FlashcardPanel) createdPanel1).wasRevealed();
+        }
+      }
+    }
+  }
+
   private void addRecordTabs() {
     recorderTab = makeFirstLevelTab(tabPanel, IconType.MICROPHONE, RECORD_AUDIO);
     recorderTab.getContent().getElement().setId("recorder_contentPanel");
     recorderTab.getTab().addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        checkAndMaybeClearTab(RECORD_AUDIO);
+        checkAndMaybeClearTabAndLogEvent(RECORD_AUDIO, recorderTab);
         recorderHelper.showNPF(recorderTab, "record_Audio");
-        logEvent(recorderTab, RECORD_AUDIO);
       }
     });
 
@@ -364,11 +370,15 @@ public class Navigation implements RequiresResize, ShowTab {
     recordExampleTab.getTab().addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        checkAndMaybeClearTab(RECORD_EXAMPLE);
+        checkAndMaybeClearTabAndLogEvent(RECORD_EXAMPLE, recordExampleTab);
         recordExampleHelper.showNPF(recordExampleTab, "record_Example_Audio");
-        logEvent(recordExampleTab, RECORD_EXAMPLE);
       }
     });
+  }
+
+  private void checkAndMaybeClearTabAndLogEvent(String recordAudio, TabAndContent recorderTab) {
+    checkAndMaybeClearTab(recordAudio);
+    logEvent(recorderTab, recordAudio);
   }
 
   /**
@@ -380,9 +390,9 @@ public class Navigation implements RequiresResize, ShowTab {
     markDefectsTab.getTab().addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        checkAndMaybeClearTab(MARK_DEFECTS);
+        checkAndMaybeClearTabAndLogEvent(MARK_DEFECTS, recorderTab);
+
         markDefectsHelper.showNPF(markDefectsTab, MARK_DEFECTS1);
-        logEvent(recorderTab, MARK_DEFECTS);
       }
     });
 
@@ -391,9 +401,8 @@ public class Navigation implements RequiresResize, ShowTab {
     review.getTab().addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        checkAndMaybeClearTab(FIX_DEFECTS);
+        checkAndMaybeClearTabAndLogEvent(FIX_DEFECTS, review);
         listManager.viewReview(review.getContent());
-        logEvent(review, FIX_DEFECTS);
       }
     });
   }
@@ -406,8 +415,7 @@ public class Navigation implements RequiresResize, ShowTab {
     analysis.getTab().addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        checkAndMaybeClearTab(ANALYSIS);
-        logEvent(analysis, ANALYSIS);
+        checkAndMaybeClearTabAndLogEvent(ANALYSIS, analysis);
         showAnalysis();
       }
     });
@@ -417,13 +425,12 @@ public class Navigation implements RequiresResize, ShowTab {
    * @see #addTabs()
    */
   private void addTeacherAnalysis() {
-    logger.info("addTeacherAnalysis for " + controller.getUser());
+//    logger.info("addTeacherAnalysis for " + controller.getUser());
     studentAnalysis = makeFirstLevelTab(tabPanel, IconType.TROPHY, STUDENT_ANALYSIS);
     studentAnalysis.getTab().addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        checkAndMaybeClearTab(STUDENT_ANALYSIS);
-        logEvent(studentAnalysis, STUDENT_ANALYSIS);
+        checkAndMaybeClearTabAndLogEvent(STUDENT_ANALYSIS, studentAnalysis);
         showStudentAnalysis();
       }
     });
@@ -445,9 +452,8 @@ public class Navigation implements RequiresResize, ShowTab {
    * @see #addAnalysis()
    */
   private void showStudentAnalysis() {
-    logger.info("show student analysis");
+  //  logger.info("show student analysis");
     learnHelper.showNPF(chapters, LEARN);
-
     studentAnalysis.getContent().clear();
     studentAnalysis.getContent().add(new StudentAnalysis(exerciseServiceAsync, controller, this));
   }
@@ -461,19 +467,18 @@ public class Navigation implements RequiresResize, ShowTab {
   }
 
   /**
-   *
+   * @see #addTabs
    */
   private void addUserMaintenance() {
     users = makeFirstLevelTab(tabPanel, IconType.GROUP, USERS);
-
     users.getTab().addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        checkAndMaybeClearTab(USERS);
+        checkAndMaybeClearTabAndLogEvent(USERS, users);
+
         UserOps userOps = new UserOps(controller, userManager);
         userOps.showUsers(users);
         users.setResizeable(userOps);
-        logEvent(users, USERS);
       }
     });
   }
@@ -483,9 +488,9 @@ public class Navigation implements RequiresResize, ShowTab {
     chapters.getTab().addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        checkAndMaybeClearTab(CHAPTERS);
+        checkAndMaybeClearTabAndLogEvent(CHAPTERS, chapters);
+
         learnHelper.showNPF(chapters, LEARN);
-        logEvent(chapters, CHAPTERS);
       }
     });
   }
@@ -498,21 +503,13 @@ public class Navigation implements RequiresResize, ShowTab {
   private void addPracticeTab() {
     practiceTab = makeFirstLevelTab(tabPanel, IconType.REPLY, PRACTICE);
     practiceTab.getContent().getElement().setId("practicePanel");
-    practiceTab.getTab().addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        showPracticeTab();
-        logEvent(practiceTab, PRACTICE);
-      }
-    });
+    practiceTab.getTab().addClickHandler(event -> showPracticeTab());
   }
 
   private void showPracticeTab() {
     if (practiceTab != null) {
-      checkAndMaybeClearTab(PRACTICE);
-      //    logger.info(" ------- showPracticeTab make practice tab  - ");
+      checkAndMaybeClearTabAndLogEvent(PRACTICE, practiceTab);
       practiceHelper.showNPF(practiceTab, PRACTICE);
-      //practiceHelper.setContentPanel(practiceTab.getContent());
       practiceHelper.hideList();
     }
   }
@@ -523,7 +520,6 @@ public class Navigation implements RequiresResize, ShowTab {
         public void onFailure(Throwable caught) {
           downloadFailedAlert();
         }
-
         public void onSuccess() {
           reallyAddDialogTab();
           showPreviouslySelectedTab();
@@ -537,8 +533,7 @@ public class Navigation implements RequiresResize, ShowTab {
     dialog.getTab().addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        checkAndMaybeClearTab(PRACTICE_DIALOG);
-        logEvent(dialog, PRACTICE_DIALOG);
+        checkAndMaybeClearTabAndLogEvent(PRACTICE_DIALOG, dialog);
         dialog.getContent().getElement().setId("contentPanel");
         dialogWindow.viewDialog(dialog.getContent());
       }
@@ -570,18 +565,6 @@ public class Navigation implements RequiresResize, ShowTab {
     tabs.add(tabAndContent);
     nameToTab.put(label, tabAndContent);
     return tabAndContent;
-  }
-
-  /**
-   * @see mitll.langtest.client.InitialUI#configureUIGivenUser
-   */
-  public void showInitialState() {
-    addTabs();
-    if (noPrevClickedTab()) {   // no previous tab
-      showDefaultInitialTab(true);
-    } else {
-      selectPreviousTab();
-    }
   }
 
   private int getUser() {
@@ -767,8 +750,7 @@ public class Navigation implements RequiresResize, ShowTab {
 
   @Override
   public void onResize() {
-    logger.info("got onResize " + getClass().toString());
-
+   // logger.info("got onResize " + getClass().toString());
     learnHelper.onResize();
     recorderHelper.onResize();
     recordExampleHelper.onResize();
@@ -777,14 +759,4 @@ public class Navigation implements RequiresResize, ShowTab {
     users.onResize();
     if (listManager != null) listManager.onResize();
   }
-
-  /**
-   * @param ul
-   * @return
-   * @see #showInitialState()
-   */
-  /*private boolean createdByYou(UserList ul) {
-    return ul.getCreator().getID() == getUser();
-  }
-*/
 }
