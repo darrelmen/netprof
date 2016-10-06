@@ -83,22 +83,15 @@ public class Banner implements RequiresResize {
   private static final String NEED_HELP_QUESTIONS_CONTACT_US = "Need Help? Questions? Contact us.";
   private static final String DOCUMENTATION = "User Manual";
 
-  private final boolean isAnonymous;
   private Paragraph appName;
   private Image flashcardImage;
   private Image collab;
   private HTML userNameWidget;
-  //  private final String nameForAnswer;
   private Paragraph subtitle;
   private HTML browserInfo;
   private Panel qc, recordAudio;
   private Dropdown cogMenu;
   private final PropertyHandler props;
-//  private final UserServiceAsync userServiceAsync;
-//  // private ExerciseController controller;
-//  private Navigation navigation;
-//  private UserNotification userNotification;
-  // private NavLink userC, resultsC, monitoringC, eventsC, reloadLink;
   private List<NavLink> adminLinks = new ArrayList<>();
 
   /**
@@ -110,14 +103,10 @@ public class Banner implements RequiresResize {
                 UserNotification userNotification) {
     this.props = props;
     // this.nameForAnswer = props.getNameForAnswer() + "s";
-    isAnonymous = props.getLoginType().equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS);
     HREF = "mailto:" +
         NETPROF_HELP_LL_MIT_EDU + "?" +
         //   "cc=" + LTEA_DLIFLC_EDU + "&" +
         "Subject=Question%20about%20" + props.getLanguage() + "%20NetProF";
-//    this.userServiceAsync = userServiceAsync;
-    // this.controller = controller;
-  //  this.userNotification = userNotification;
   }
 
   /**
@@ -167,18 +156,14 @@ public class Banner implements RequiresResize {
     hp.add(getAnchor());
 
     userNameWidget = getUserNameWidget(userName);
-    if (!isAnonymous) {
-      hp.add(userNameWidget);
-    }
+     hp.add(userNameWidget);
     hp.add(qc = new SimplePanel());
     hp.add(recordAudio = new SimplePanel());
 
     // add log out/admin options cogMenu
     makeCogMenu(choices);
 
-    if (!isAnonymous) {
-      hp.add(cogMenu);
-    }
+    hp.add(cogMenu);
 
     browserInfo.addStyleName("leftFiveMargin");
     browserInfo.addStyleName("darkerBlueColor");
