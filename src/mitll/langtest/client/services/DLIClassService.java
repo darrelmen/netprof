@@ -30,67 +30,26 @@
  *
  */
 
-package mitll.langtest.server.database.dliclass;
+package mitll.langtest.client.services;
 
-import mitll.langtest.shared.dliclass.DLIClass;
-import mitll.npdata.dao.DBConnection;
-import mitll.npdata.dao.SlickDLIClass;
-import mitll.npdata.dao.dliclass.DLIClassWrapper;
-import org.apache.log4j.Logger;
+import com.github.gwtbootstrap.client.ui.Container;
+import com.github.gwtbootstrap.client.ui.Fieldset;
+import com.google.gwt.user.client.rpc.RemoteService;
+import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.InitialUI;
+import mitll.langtest.client.instrumentation.EventRegistration;
+import mitll.langtest.client.user.BasicDialog;
+import mitll.langtest.client.user.UserPassLogin;
+import mitll.langtest.shared.user.*;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
-public class DLIClassDAO implements IDLIClassDAO {
-  private static final Logger logger = Logger.getLogger(DLIClassDAO.class);
-  private static final String DEFAULT_PROJECT = "DEFAULT_PROJECT";
+import static mitll.langtest.shared.user.User.Kind;
 
-  private final DLIClassWrapper dao;
-
-  /**
-   * @param dbConnection
-   * @paramx database
-   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
-   */
-  public DLIClassDAO(DBConnection dbConnection) {
-    dao = new DLIClassWrapper(dbConnection);
-  }
-
-  public List<DLIClass> getAll() {
-    Collection<SlickDLIClass> all = dao.all();
-    List<DLIClass> ret = new ArrayList<>();
-    for (SlickDLIClass dliClass : all) ret.add(fromSlick(dliClass));
-    return ret;
-  }
-
-  public List<DLIClass> getAllBy(int teacherid) {
-    Collection<SlickDLIClass> all = dao.allBy(teacherid);
-    List<DLIClass> ret = new ArrayList<>();
-    for (SlickDLIClass dliClass : all) ret.add(fromSlick(dliClass));
-    return ret;
-  }
-
-  private DLIClass fromSlick(SlickDLIClass dliClass) {
-    return new DLIClass(
-        dliClass.id(),
-        dliClass.projid(),
-        dliClass.ownerid(),
-        dliClass.modified(),
-        dliClass.end(),
-        dliClass.name(),
-        dliClass.room(),
-        dliClass.timeofday());
-  }
-
-  public void createTable() {
-    dao.createTable();
-  }
-
-  @Override
-  public String getName() {
-    return dao.dao().name();
-  }
-
+@RemoteServiceRelativePath("dliclass-manager")
+public interface DLIClassService extends RemoteService {
 
 }

@@ -254,10 +254,11 @@ public class InitialUI implements UILifecycle {
     return new HTML(lifecycleSupport.getInfoLine());
   }
 
+
   @Override
   public boolean isRTL() {
-    boolean b = navigation != null && navigation.isRTL();
-    if (b) logger.info("content is RTL!");
+    boolean b = controller.getProps().isRightAlignContent();//navigation != null && navigation.isRTL();
+  //  if (b) logger.info("content is RTL!");
     return b;
   }
 
@@ -454,12 +455,10 @@ public class InitialUI implements UILifecycle {
 
   private Breadcrumbs getBreadcrumbs() {
     //   logger.info("getBreadcrumbs --->");
-
     Breadcrumbs crumbs = new Breadcrumbs(">");
     crumbs.getElement().setId("breadcrumb");
     crumbs.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
     addCrumbs(crumbs);
-
     // logger.info("getBreadcrumbs now has " + crumbs.getElement().getChildCount() + " links");
 
     return crumbs;
