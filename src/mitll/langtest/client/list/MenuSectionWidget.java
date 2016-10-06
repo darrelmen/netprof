@@ -36,7 +36,10 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ButtonToolbar;
 import com.github.gwtbootstrap.client.ui.DropdownButton;
 import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
@@ -52,7 +55,7 @@ public class MenuSectionWidget implements SectionWidget {
   private final Logger logger = Logger.getLogger("MenuSectionWidget");
 
   private final String type;
-  private DropdownButton child2;
+  private DropdownButton dropdownButton;
   private final Collection<SectionNode> nodes;
   private final SimpleSelectExerciseList singleSelectExerciseList;
 
@@ -73,6 +76,12 @@ public class MenuSectionWidget implements SectionWidget {
   private int num = 0;
   private final ButtonToolbar toolbar = new ButtonToolbar();
 
+  /**
+   * @see SimpleSelectExerciseList#addChoiceRow
+   * @param container
+   * @param label
+   * @param values
+   */
   void addChoices(Panel container,
                   String label,
                   List<String> values) {
@@ -83,6 +92,33 @@ public class MenuSectionWidget implements SectionWidget {
     Heading child = new Heading(5, label);
     child.getElement().getStyle().setMarginTop(15, Style.Unit.PX);
     horizontalPanel.add(child);
+    Button left = new Button("", IconType.CARET_LEFT);
+    left.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        String currentSelection = getCurrentSelection();
+        int i = values.indexOf(currentSelection);
+          if (i > 0){
+            selectItem(values.get(i+1));
+        }
+      }
+    });
+    left.addStyleName("rightFiveMargin");
+    horizontalPanel.add(left);
+    Button right = new Button("", IconType.CARET_RIGHT);
+    left.addStyleName("leftFiveMargin");
+
+    right.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        String currentSelection = getCurrentSelection();
+        int i = values.indexOf(currentSelection);
+        if (i < values.size()-1){
+          selectItem(values.get(i+1));
+        }
+      }
+    });
+    horizontalPanel.add(right);
     horizontalPanel.add(toolbar);
     this.num = values.size();
 
@@ -90,27 +126,26 @@ public class MenuSectionWidget implements SectionWidget {
     container.add(horizontalPanel);
   }
 
+  /**
+   * @see #gotSelection(Collection)
+   * @param values
+   * @param initialChoice
+   */
   private void addGridChoices(List<String> values, String initialChoice) {
-//    logger.info("addGridChoices " + this + " : " + initialChoice);
-    this.child2 = new TableSelect().makeSymbolButton(values, 4, singleSelectExerciseList, this, initialChoice);
+    this.dropdownButton = new TableSelect().makeSymbolButton(values, 4, singleSelectExerciseList, this, initialChoice);
     toolbar.clear();
-    toolbar.add(child2);
-    Style style = child2.getElement().getStyle();
-    style.setMarginLeft(5, Style.Unit.PX);
+    toolbar.add(dropdownButton);
+    dropdownButton.addStyleName("leftFiveMargin");
   }
 
   @Override
   public String getCurrentSelection() {
-//    return child1.getSelectedValue();
-    String trim = child2.getText().trim();
-    //  logger.info("current " + type + " : '" + trim + "'");
-    return trim;
+    return dropdownButton.getText().trim();
   }
 
   @Override
   public void clearSelectionState() {
-    //child1.setSelectedValue("All");
-    child2.setText("All");
+    dropdownButton.setText("All");
   }
 
   @Override
@@ -125,17 +160,14 @@ public class MenuSectionWidget implements SectionWidget {
 
   @Override
   public void enableAll() {
-
   }
 
   @Override
   public void addButton(Button b) {
-
   }
 
   @Override
   public void addLabel(Widget label, String color) {
-
   }
 
   @Override
@@ -159,8 +191,7 @@ public class MenuSectionWidget implements SectionWidget {
   }
 
   public void selectItem(String item) {
-//    child1.setSelectedValue(item);
-    child2.setText(item);
+    dropdownButton.setText(item);
   }
 
   private MenuSectionWidget childWidget;
