@@ -163,7 +163,7 @@ class WebAudioRecorder {
    */
   public static void getBase64(String encoded) {
     if (encoded.length() < 100) {
-      console("bytes = '" + encoded + "'");
+      console("getBase64 (short audio?) bytes = '" + encoded + "'");
     }
 /*    if (getAllZero()) {
       logger.info("Seems like the mic is not plugged in?");

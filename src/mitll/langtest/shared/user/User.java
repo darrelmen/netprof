@@ -69,12 +69,6 @@ public class User extends MiniUser {
     return email;
   }
 
-/*
-  public void setEmailHash(String emailHash) {
-    this.emailHash = emailHash;
-  }
-*/
-
   public void setEmail(String email) {
     this.email = email;
   }
