@@ -54,8 +54,14 @@ import static mitll.langtest.shared.user.User.Kind;
 @RemoteServiceRelativePath("user-manager")
 public interface UserService extends RemoteService {
   User setProject(int projectid);
-  User addUser(SignUpUser user, String url
-               //    , boolean isCD
+
+  /**
+   * @see mitll.langtest.client.user.SignUpForm#gotSignUp
+   * @param user
+   * @param url
+   * @return
+   */
+  User addUser(SignUpUser user, String url  //    , boolean isCD
   );
 
   /**
@@ -64,9 +70,6 @@ public interface UserService extends RemoteService {
    */
   List<User> getUsers();
 
-  Map<User.Kind, Integer> getCounts();
-
-  Map<User.Kind, Collection<MiniUser>> getKindToUser();
 
   /**
    * @param login
@@ -106,7 +109,7 @@ public interface UserService extends RemoteService {
   /**
    * @param userid
    * @param enabled
-   * @see mitll.langtest.client.user.UserTable#addAdminCol(LangTestDatabaseAsync, CellTable)
+   * @see mitll.langtest.client.user.UserTable#addAdminCol
    */
   void changeEnabledFor(int userid, boolean enabled);
 
@@ -124,7 +127,7 @@ public interface UserService extends RemoteService {
    * @param text
    * @param url
    * @return
-   * @see UserPassLogin#getForgotPassword()
+   * @see mitll.langtest.client.user.SignInForm#getForgotPassword
    */
   boolean resetPassword(String userid, String text, String url);
 
@@ -141,11 +144,24 @@ public interface UserService extends RemoteService {
 
   User getUser(int id);
 
+
+
+
+  @Deprecated
   void update(User user, int changingUser);
 
+  @Deprecated
   Collection<Invitation> getPending(User.Kind requestRole);
 
+  @Deprecated
   void invite(String url, Invitation invite);
 
+  @Deprecated
   Map<String, Integer> getInvitationCounts(User.Kind requestRole);
+
+  @Deprecated
+  Map<User.Kind, Integer> getCounts();
+
+  @Deprecated
+  Map<User.Kind, Collection<MiniUser>> getKindToUser();
 }
