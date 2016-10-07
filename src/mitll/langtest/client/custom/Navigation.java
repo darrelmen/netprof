@@ -103,7 +103,11 @@ public class Navigation implements RequiresResize, ShowTab {
    * @see #addUserMaintenance
    */
   private static final String USERS = "Users";
+
   private static final String CLASSES = "Classes";
+
+  private static final String PROJECTS = "Projects";
+
   private static final String YOUR_LISTS = "Study Your Lists";
   private static final String STUDY_LISTS = "Study Lists";
   private static final String OTHERS_LISTS = "Study Visited Lists";
@@ -149,7 +153,8 @@ public class Navigation implements RequiresResize, ShowTab {
 
   private TabPanel tabPanel;
   private TabAndContent studyLists;
-  private TabAndContent users;
+ // private TabAndContent users;
+  private TabAndContent projects;
   private TabAndContent dialog;
   private TabAndContent chapters;
   private TabAndContent analysis, studentAnalysis;
@@ -249,16 +254,17 @@ public class Navigation implements RequiresResize, ShowTab {
     addLearnTab();
     addPracticeTab();
     addStudyLists();
-//    User.Kind userKind = userManager.getCurrent().getUserKind();
 
-    if (userManager.hasPermission(User.Permission.TEACHER_PERM) ||
+//    User.Kind userKind = userManager.getCurrent().getUserKind();
+/*    if (userManager.hasPermission(User.Permission.TEACHER_PERM) ||
         userManager.hasPermission(User.Permission.EDIT_STUDENT) ||
         userManager.hasPermission(User.Permission.EDIT_USER) ||
         userManager.hasPermission(User.Permission.INVITE) ||
 
         userManager.getCurrent().isAdmin()) {
       addUserMaintenance();
-    }
+    }*/
+
     addAnalysis();
 
     if (controller.getProps().useAnalysis() ||
@@ -469,7 +475,7 @@ public class Navigation implements RequiresResize, ShowTab {
   /**
    * @see #addTabs
    */
-  private void addUserMaintenance() {
+/*  private void addUserMaintenance() {
     users = makeFirstLevelTab(tabPanel, IconType.GROUP, USERS);
     users.getTab().addClickHandler(new ClickHandler() {
       @Override
@@ -481,7 +487,48 @@ public class Navigation implements RequiresResize, ShowTab {
         users.setResizeable(userOps);
       }
     });
+  }*/
+
+
+  /**
+   * Add a way to make a new project
+   *  - associate project with domino project... (or just import for now?)
+   *
+   * Or copy?
+   * copy a new project? what about audio? or copy list of exercises? or just have a parent project?
+   * then would need ref audio in context of a project...
+   *
+   * need project service
+   *  query for all projects
+   *  move project type from one to another
+   *  only allow if we're project admin
+   *
+   * need model list table -- port, language, models dir
+   * so we can associate a new model with a project... --- e.g.
+   *
+   * as a language model object...
+   *
+   * N_OUTPUT=29
+   * N_HIDDEN=2000,2500,2500
+   * webserviceHostPort=31196
+   *
+   * way to kick off ref result recalc...?
+   * way to kick off user result recalc
+   */
+  private void addProjectMaintenance() {
+    projects = makeFirstLevelTab(tabPanel, IconType.BOOK, PROJECTS);
+    projects.getTab().addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        checkAndMaybeClearTabAndLogEvent(PROJECTS, projects);
+
+//        UserOps userOps = new UserOps(controller, userManager);
+//        userOps.showUsers(users);
+//        users.setResizeable(userOps);
+      }
+    });
   }
+
 
   private void addLearnTab() {
     chapters = makeFirstLevelTab(tabPanel, IconType.LIGHTBULB, CHAPTERS);
@@ -652,10 +699,16 @@ public class Navigation implements RequiresResize, ShowTab {
         dialogWindow.viewDialog(dialog.getContent());
       } else if (clickedTab.equals(CHAPTERS)) {
         learnHelper.showNPF(chapters, LEARN);
-      } else if (clickedTab.equals(USERS)) {
-        UserOps userOps = new UserOps(controller, userManager);
-        userOps.showUsers(users);
-        users.setResizeable(userOps);
+//      } else if (clickedTab.equals(USERS)) {
+//        UserOps userOps = new UserOps(controller, userManager);
+//        userOps.showUsers(users);
+//        users.setResizeable(userOps);
+      } else if (clickedTab.equals(PROJECTS)) {
+
+//        UserOps userOps = new UserOps(controller, userManager);
+//        userOps.showUsers(users);
+//        users.setResizeable(userOps);
+//
       } else if (clickedTab.equals(RECORD_AUDIO)) {
         recorderHelper.showNPF(recorderTab, AudioType.RECORDER.toString());
       } else if (clickedTab.equals(RECORD_EXAMPLE)) {
@@ -756,7 +809,11 @@ public class Navigation implements RequiresResize, ShowTab {
     recordExampleHelper.onResize();
     markDefectsHelper.onResize();
     practiceHelper.onResize();
-    users.onResize();
+
+
+    //users.onResize();
+    projects.onResize();
+
     if (listManager != null) listManager.onResize();
   }
 }
