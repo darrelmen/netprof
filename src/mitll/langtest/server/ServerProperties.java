@@ -73,11 +73,12 @@ public class ServerProperties {
       "English",
       "Farsi",
       "German",
-      "Korean",
       "Iraqi",
       "Japanese",
+      "Korean",
       "Levantine",
       "Mandarin",
+      "Mandarin (TR)",
       "MSA",
       "Pashto1",
       "Pashto2",
@@ -90,7 +91,6 @@ public class ServerProperties {
 
   private static final List<String> AMAS_SITES =
       Arrays.asList("Dari", "Farsi", "Korean", "Mandarin", "MSA", "Pashto", "Russian", "Spanish", "Urdu");
-
 
   public static final String MIRA_DEVEL_HOST = "mira-devel.llan.ll.mit.edu/scorer/item"; //"mira-devel.llan.ll.mit.edu/msa/item";
   private static final String MIRA_DEVEL = "https://" + MIRA_DEVEL_HOST;
