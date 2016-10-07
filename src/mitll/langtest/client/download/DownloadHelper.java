@@ -48,7 +48,6 @@ import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
-import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.list.SelectionState;
@@ -63,7 +62,10 @@ public class DownloadHelper {
   private static final String DOWNLOAD_AUDIO = "downloadAudio";
 //  private final EventRegistration eventRegistration;
 
+  private SelectionState selectionState;
   private final FlexSectionExerciseList exerciseList;
+  private Collection<String> typeOrder;
+  private Heading selectionStatus;
 
   public DownloadHelper(EventRegistration eventRegistration, FlexSectionExerciseList exerciseList) {
     //  this.eventRegistration = eventRegistration;
@@ -88,14 +90,13 @@ public class DownloadHelper {
     return download;
   }
 
-  private SelectionState selectionState;
-
   /**
    * @param selectionState
    * @see FlexSectionExerciseList#showSelectionState(SelectionState)
    */
-  public void updateDownloadLinks(SelectionState selectionState) {
+  public void updateDownloadLinks(SelectionState selectionState, Collection<String> typeOrder) {
     this.selectionState = selectionState;
+    this.typeOrder = typeOrder;
   }
 
   private Heading status1 = new Heading(4, "");
@@ -112,12 +113,11 @@ public class DownloadHelper {
       container.add(new Heading(3, "Download spreadsheet for whole course."));
       container.add(new Heading(4, "Select a unit or chapter to download audio."));
     } else {
-
       status1.setText("");
       status1.setHeight("20px");
       isRegularSet = false;
       isContextSet = false;
-      isMaleSet    = false;
+      isMaleSet = false;
 
       status2.setText("");
       status2.setHeight("20px");
@@ -125,7 +125,13 @@ public class DownloadHelper {
       status3.setText("");
       status3.setHeight("20px");
 
-      FluidRow row = getContentRow();
+      FluidRow row = new FluidRow();
+      Heading w = new Heading(4, selectionState.getDescription(typeOrder));
+      w.addStyleName("blueColor");
+      row.add(w);
+      container.add(row);
+
+      row = getContentRow();
       container.add(row);
 
       row = getGenderRow();
@@ -134,20 +140,8 @@ public class DownloadHelper {
       row = getSpeedRow();
       container.add(row);
 
-      row = new FluidRow();
+      row = getStatusArea();
       container.add(row);
-
-      Well well = new Well();
-      Panel vert = new VerticalPanel();
-      well.add(vert);
-      vert.add(status1);
-      status1.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
-      status1.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
-      vert.add(status2);
-      status2.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
-      vert.add(status3);
-      status3.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
-      row.add(well);
     }
 
     closeButton = new DialogHelper(true).show(
@@ -170,6 +164,24 @@ public class DownloadHelper {
         }, 550);
     closeButton.setType(ButtonType.SUCCESS);
     closeButton.setEnabled(selectionState.isEmpty());
+  }
+
+  private FluidRow getStatusArea() {
+    FluidRow row;
+    row = new FluidRow();
+
+    Well well = new Well();
+    Panel vert = new VerticalPanel();
+    well.add(vert);
+    vert.add(status1);
+    status1.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
+    status1.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
+    vert.add(status2);
+    status2.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
+    vert.add(status3);
+    status3.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
+    row.add(well);
+    return row;
   }
 
   private FluidRow getSpeedRow() {
@@ -317,8 +329,6 @@ public class DownloadHelper {
 
   private Panel getToolbar2() {
     Panel buttonToolbar = new HorizontalPanel();
-    //  buttonGroup.setToggle(ToggleType.RADIO);
-    //buttonToolbar.add(buttonGroup);
     return buttonToolbar;
   }
 
@@ -347,19 +357,12 @@ public class DownloadHelper {
         showSpeeds();
       }
     });
-    //slow.getElement().getStyle().setMarginLeft(64, Style.Unit.PX);
     buttonToolbar.add(slow);
-
-//    return buttonToolbar;
-    // addTooltip(pushButton);
-    //row.setWidth("65px");
     buttonToolbar.getElement().getStyle().setMarginBottom(25, Style.Unit.PX);
-
-//    return row;
     return buttonToolbar;
   }
 
-  ToggleButton regular, slow;
+  private ToggleButton regular, slow;
 
   private void showSpeeds() {
     regular.setDown(isRegular);
@@ -378,13 +381,9 @@ public class DownloadHelper {
   }
 
   private ToggleButton getChoice2(String title, Image upImage, Image downImage, ClickHandler handler) {
-    //com.github.gwtbootstrap.client.ui.Button onButton = new com.github.gwtbootstrap.client.ui.Button(title.equals(M) ? "" : title.equals(F) ? "" : title);
-
     ToggleButton onButton = new ToggleButton(upImage, downImage);
     onButton.getElement().setId("Choice_" + title);
-    //   controller.register(onButton, exercise.getID());
     onButton.addClickHandler(handler);
-    //  onButton.setActive(isActive);
     onButton.getElement().getStyle().setZIndex(0);
     onButton.setWidth("50" +
         "px");
@@ -398,11 +397,9 @@ public class DownloadHelper {
    * @return
    * @see #getSpeedChoices
    */
-  private void addTooltip(Widget widget) {
-    new TooltipHelper().addTooltip(widget, "Click for slow speed audio.");
-  }
-
-
+//  private void addTooltip(Widget widget) {
+//    new TooltipHelper().addTooltip(widget, "Click for slow speed audio.");
+//  }
   private String toDominoUrl(String relativeLoc) {
     String baseUrl = GWT.getHostPageBaseURL();
     StringBuilder dominoUrl = new StringBuilder();
