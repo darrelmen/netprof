@@ -37,6 +37,7 @@ import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.download.DownloadHelper;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -60,10 +61,12 @@ public class DialogHelper {
     this.doYesAndNo = doYesAndNo;
   }
 
+/*
   public DialogHelper(String title, Collection<String> msgs, CloseListener listener) {
     this.doYesAndNo = true;
-    show(title, msgs, null, "Yes", "No",listener);
+    show(title, msgs, null, "Yes", "No", listener);
   }
+*/
 
   public void showErrorMessage(String title, String msg) {
     List<String> msgs = new ArrayList<String>();
@@ -72,14 +75,14 @@ public class DialogHelper {
   }
 
   private void showErrorMessage(String title, Collection<String> msgs) {
-    show(title, msgs, null, "Close","No", null);
+    show(title, msgs, null, "Close", "No", null, -1);
   }
 /*  public void show(String title, String msg, String buttonName, final CloseListener listener) {
     show(title, Collections.singletonList(msg), buttonName, listener);
   }*/
 
   public void show(String title, Collection<String> msgs, final CloseListener listener) {
-    show(title, msgs, null, "Yes","No", listener);
+    show(title, msgs, null, "Yes", "No", listener, -1);
   }
 
   /**
@@ -87,20 +90,17 @@ public class DialogHelper {
    *
    * @param title
    * @param msgs
+   * @param maxHeight
+   * @see DownloadHelper#showDialog
    */
-  public void show(String title, Collection<String> msgs, Widget other, String buttonName, String cancelButtonName,final CloseListener listener) {
-   // String no = "No";
-    //final DialogBox dialogBox = new DialogBox();
+  public Button show(String title, Collection<String> msgs, Widget other, String buttonName, String cancelButtonName,
+                     final CloseListener listener, int maxHeight) {
     final Modal dialogBox = new Modal();
-    Button closeButton;
-
-    // dialogBox.setGlassEnabled(true);
     dialogBox.setTitle("<b>" + title + "</b>");
-
+    if (maxHeight > 0) dialogBox.setMaxHeigth(maxHeight + "px");
+    Button closeButton;
     closeButton = new Button(buttonName);
     closeButton.setType(ButtonType.PRIMARY);
-
-    // closeButton.getElement().setId("closeButton");
     closeButton.setFocus(true);
 
     FluidContainer container = new FluidContainer();
@@ -148,9 +148,9 @@ public class DialogHelper {
       }
     });
 
-   /* dialogBox.setWidget(container);
-    dialogBox.center();*/
     dialogBox.add(container);
     dialogBox.show();
+
+    return closeButton;
   }
 }
