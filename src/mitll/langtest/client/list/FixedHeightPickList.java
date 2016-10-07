@@ -34,80 +34,63 @@ package mitll.langtest.client.list;
 
 import com.github.gwtbootstrap.client.ui.NavLink;
 import com.github.gwtbootstrap.client.ui.NavList;
-import com.github.gwtbootstrap.client.ui.Tooltip;
 import com.github.gwtbootstrap.client.ui.constants.IconSize;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
-import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.HasWidgets;
-import mitll.hlt.domino.shared.model.project.ClientPMProject;
-import mitll.hlt.domino.shared.model.project.ClientProject;
-import mitll.hlt.domino.shared.model.project.Contributor;
+import mitll.langtest.client.domino.common.DecoratedFields;
+import mitll.langtest.client.table.ListSelect;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class FixedHeightPickList {
-  NavList contributorNL;
+  private NavList contributorNL;
 
-  private void addContributorDF(HasWidgets fields) {
+  public void addContributorDF(HasWidgets fields, List<String> choices, ListSelect.Selection handler) {
     contributorNL = new NavList();
     contributorNL.addStyleName("domino-picklist");
     contributorNL.addStyleName("domino-visible-picklist");
-    updateContributorFields(false);
-    //contributorDF = new DecoratedFields("Apply to", contributorNL);
-    //fields.add(contributorDF.getCtrlGroup());
+    updateContributorFields(false, choices, handler);
+
+    DecoratedFields contributorDF = new DecoratedFields("Apply to", contributorNL);
+    fields.add(contributorDF.getCtrlGroup());
+   // fields.add(contributorNL);
   }
 
-  private void updateContributorFields(boolean activeOnly) {
+  private void updateContributorFields(boolean activeOnly, List<String> choices,  ListSelect.Selection handler) {
     if (contributorNL != null) {
       contributorNL.clear();
-//      Set<Contributor> newAC = new HashSet<>();
-//      ClientProject selProj = getSelectedProject();
-//      ClientPMProject currProj = getState().getPMProject();
-//      if (selProj != null && currProj != null && selProj instanceof ClientPMProject) {
-//        ClientPMProject selPMProj = (ClientPMProject)selProj;
-//        addContributorFields(selPMProj.getProjectContributors(activeOnly), newAC, "");
-//        if (currProj.getId() != selPMProj.getId()) {
-//          addContributorFields(currProj.getProjectContributors(activeOnly), newAC, currProj.getName() + " - ");
-//        }
-//        this.activeTeam = newAC;
-//      }
-
-
-  //    if (currProj.getId() != selPMProj.getId()) {
-
-      }
+      addContributorFields(choices, handler);
+    }
   }
-/*
-  private void addContributorFields(List<Contributor> contribs, Set<Contributor> newAC, String prefix) {
-    for (Contributor contrib : contribs) {
-      NavLink link = createNavLink(prefix + contrib.getContribUser().getFullName(),
+
+  private void addContributorFields(List<String> choices,  ListSelect.Selection handler
+                                    /*, String prefix*/) {
+    for (String contrib : choices) {
+      NavLink link = createNavLink(//prefix +
+          contrib,
           IconType.CHECK_EMPTY, IconSize.DEFAULT, new ClickHandler() {
             @Override
             public void onClick(ClickEvent clickEvent) {
-
+              handler.gotSelection(contrib);
             }
           });
-      Tooltip tip = new Tooltip(contrib.getContribUser().getUserId());
+
+/*      Tooltip tip = new Tooltip(contrib);//contrib.getContribUser().getUserId());
       tip.setWidget(link);
       tip.setShowDelay(500);
       tip.setAnimation(true);
       tip.setPlacement(Placement.LEFT);
       tip.reconfigure();
       //contributorMap.put(link, contrib);
-      link.addStyleName("pick-item");
-      contributorNL.add(link);
-*//*      if (activeTeam.contains(contrib)) {
-        updateLink(link, contributorMap, newAC);
-      }*//*
-    }
-  }*/
+      link.addStyleName("pick-item");*/
 
-  private <CType> void updateLink(NavLink nl, Map<NavLink, CType> nlMap, Set<CType> activeSet) {
+      contributorNL.add(link);
+    }
+  }
+
+/*  private <CType> void updateLink(NavLink nl, Map<NavLink, CType> nlMap, Set<CType> activeSet) {
     boolean newChecked = !nl.isActive();
     IconType icon = newChecked ? IconType.OK : IconType.CHECK_EMPTY;
     nl.setActive(newChecked);
@@ -118,23 +101,28 @@ public class FixedHeightPickList {
     } else {
       activeSet.remove(active);
     }
-  }
+  }*/
 
-  public NavLink createNavLink(String linkText, IconType linkIcon,
-                               IconSize iconSize, ClickHandler handler) {
+  public NavLink createNavLink(String linkText,
+                               IconType linkIcon,
+                               IconSize iconSize,
+                               ClickHandler handler) {
     return createNavLink(linkText, linkIcon, iconSize, handler, false);
   }
 
-  public NavLink createNavLink(String linkText, IconType linkIcon,
-                               IconSize iconSize, ClickHandler handler, boolean active) {
+  public NavLink createNavLink(String linkText,
+                               IconType linkIcon,
+                               IconSize iconSize,
+                               ClickHandler handler,
+                               boolean active) {
     NavLink theLink = new NavLink();
     if (linkText != null) {
       theLink.setText(linkText);
     }
-    if (linkIcon != null) {
+/*    if (linkIcon != null) {
       theLink.setIcon(linkIcon);
       theLink.setIconSize(iconSize);
-    }
+    }*/
     // force right dropdowns to align left.
     theLink.addStyleName("left-align");
     theLink.addClickHandler(handler);

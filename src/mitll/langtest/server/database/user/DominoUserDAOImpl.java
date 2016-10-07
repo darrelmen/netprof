@@ -43,6 +43,7 @@ import mitll.hlt.domino.shared.model.user.*;
 import mitll.hlt.json.JSONSerializer;
 import mitll.langtest.client.user.Md5Hash;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
@@ -65,8 +66,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    */
   mitll.hlt.domino.shared.model.user.User adminUser;
   mitll.hlt.domino.shared.model.user.User dominoImportUser;
-//  private final UserDAOWrapper dao;
-//  private IUserPermissionDAO permissionDAO;
+
 
   /**
    * @param database
@@ -124,7 +124,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 */
 
   public void createTable() {
-
   }
 
   @Override
@@ -140,6 +139,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @see mitll.langtest.server.database.copy.CopyToPostgres#addUser(DominoUserDAOImpl, Map, User)
    */
   public ClientUserDetail addAndGet(ClientUserDetail user, String encodedPass, Collection<User.Permission> permissions) {
+    invalidateCache();
     SResult<ClientUserDetail> clientUserDetailSResult = delegate.doAddUser(user, encodedPass);
 //    SlickUser user1 = dao.addAndGet(user);
     //  int i = addPermissions(permissions, user1.id());
@@ -225,6 +225,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     SResult<ClientUserDetail> clientUserDetailSResult = delegate.doAddUser(updateUser,
         passwordH);
     ClientUserDetail clientUserDetail = clientUserDetailSResult.get();
+
+    invalidateCache();
     return clientUserDetail.getDocumentDBID();
   }
 
@@ -399,7 +401,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return copy;
   }
 
-  private Collection<User.Permission> toUserPerms(Collection<String> strings) {
+/*  private Collection<User.Permission> toUserPerms(Collection<String> strings) {
     List<User.Permission> perms = new ArrayList<>();
     if (strings != null) {
       for (String p : strings) {
@@ -408,7 +410,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       }
     }
     return perms;
-  }
+  }*/
 
   /**
    * @param user
@@ -542,15 +544,38 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return Collections.emptyList();//dao.getUsersFromDevices());
   }
 
+  private Map<Integer, MiniUser> miniUserCache = null;
+
+  /**
+   * It seems like it's slow to get users out of domino users table, without ignite...
+   * Maybe we should add ignite, but maybe we can avoid it for the time being?
+   * @return
+   * @see Analysis#getUserInfos
+   * @see mitll.langtest.server.database.audio.SlickAudioDAO#getAudioAttributesByProject(int)
+   */
   @Override
-  public Map<Integer, MiniUser> getMiniUsers() {
-    Map<Integer, MiniUser> idToUser = new HashMap<>();
-    for (DBUser s : getAll()) idToUser.put(s.getDocumentDBID(), getMini(s));
-    return idToUser;
+  public synchronized Map<Integer, MiniUser> getMiniUsers() {
+    if (miniUserCache == null) {
+      Map<Integer, MiniUser> idToUser = new HashMap<>();
+      for (DBUser s : getAll()) idToUser.put(s.getDocumentDBID(), getMini(s));
+      miniUserCache = idToUser;
+      return idToUser;
+    }
+    else {
+      return miniUserCache;
+    }
+  }
+
+  private synchronized void invalidateCache() {
+    miniUserCache = null;
   }
 
   private List<DBUser> getAll() {
-    return delegate.getUsers(-1, null);
+    long then = System.currentTimeMillis();
+    List<DBUser> users = delegate.getUsers(-1, null);
+    long now  = System.currentTimeMillis();
+    if (now-then > 20) logger.warn("took " + (now-then) + " to get " + users.size() + " users");
+    return users;
   }
 
   public Map<User.Kind, Collection<MiniUser>> getMiniByKind() {
@@ -599,8 +624,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   private MiniUser getMini(DBUser dominoUser) {
     boolean admin = isAdmin(dominoUser);
 
-    MiniUser miniUser = new MiniUser(dominoUser.getDocumentDBID(),
-        0,
+    MiniUser miniUser = new MiniUser(
+        dominoUser.getDocumentDBID(),
+        0,  // age
         true,//dominoUser.ismale(),
         dominoUser.getUserId(),
         admin);
@@ -746,7 +772,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    */
   @Override
   public boolean clearKey(int user, boolean resetKey) {
-
 //    return dao.updateKey(user, resetKey, "");
     return false;
   }
@@ -763,6 +788,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @param enabled
    * @return
    */
+  @Deprecated
   @Override
   public boolean changeEnabled(int userid, boolean enabled) {
 //    return dao.changeEnabled(userid, enabled);
