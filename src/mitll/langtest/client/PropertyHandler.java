@@ -48,6 +48,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class PropertyHandler {
+  public static final String NPF_CLASSROOM_URL = "https://np.ll.mit.edu/npfClassroom";
   private final Logger logger = Logger.getLogger("PropertyHandler");
 
   private static final String RTL = "rtl";
@@ -124,6 +125,9 @@ public class PropertyHandler {
   private static final String INITIAL_PROMPT = "Practice pronunciation and learn vocabulary.";//"Learn how to pronounce words and practice vocabulary.";
   private static final String AMAS_INITIAL_PROMPT = "Test your Listening and Reading Skills.";
 
+  /**
+   * TODO : don't do this in two places!
+   */
   private static final List<String> SITE_LIST = Arrays.asList(
       "Dari",
       "Egyptian",
@@ -135,7 +139,7 @@ public class PropertyHandler {
       "Korean",
       "Levantine",
       "Mandarin",
-      "Mandarin (TR)",
+      "MandarinTraditional",
       "MSA",
       "Pashto1",
       "Pashto2",
@@ -355,7 +359,7 @@ public class PropertyHandler {
   }
 
   public String getSitePrefix() {
-    return isAMAS() ? "https://np.ll.mit.edu/amas" : "https://np.ll.mit.edu/npfClassroom";
+    return isAMAS() ? "https://np.ll.mit.edu/amas" : NPF_CLASSROOM_URL;
   }
 
   private void getPreferredVoices(String value) {
