@@ -146,9 +146,14 @@ public class ListSectionWidget implements SectionWidget {
         int i = values.indexOf(currentSelection);
         if (i < values.size() - 1) {
           String item = values.get(i + 1);
+          logger.info("Selecting " + (i+1) + " " + item);
           selectItem(item);
           gotSelection(item);
           singleSelectExerciseList.gotSelection();
+        }
+        else {
+          logger.info("not selecting next " + i + " " + currentSelection);
+
         }
       }
     });
