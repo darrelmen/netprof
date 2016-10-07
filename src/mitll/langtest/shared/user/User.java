@@ -69,6 +69,10 @@ public class User extends MiniUser {
     return email;
   }
 
+  /**
+   * @see mitll.langtest.client.userops.EditUserForm#gotSignUp
+   * @param email
+   */
   public void setEmail(String email) {
     this.email = email;
   }
@@ -349,12 +353,16 @@ public class User extends MiniUser {
    * @see mitll.langtest.server.database.user.SlickUserDAOImpl#toUsers(List)
    * @see UserDAO#getUsers
    */
-  public User(int id, int age, int gender, int experience, String ipaddr, String passwordH,
+  public User(int id,
+              int age,
+              int gender, int experience, String ipaddr, String passwordH,
               String nativeLang, String dialect, String userID, boolean enabled, boolean isAdmin,
               Collection<Permission> permissions, Kind userKind,
+
               String email, String emailHash,
 
-              String device, String resetPassKey,
+              String device,
+              String resetPassKey,
               //String cdEnableKey,
               long timestamp//, boolean isActive
   ) {
