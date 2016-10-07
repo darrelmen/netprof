@@ -147,6 +147,17 @@
         <url-pattern>/langtest/scoring-manager</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>dliClassService</servlet-name>
+        <servlet-class>mitll.langtest.server.services.DLIClassServiceImpl</servlet-class>
+        <load-on-startup>3</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>dliClassService</servlet-name>
+        <url-pattern>/langtest/dliclass-manager</url-pattern>
+    </servlet-mapping>
+
 
     <!-- ==================================================================== -->
     <!-- End RPC mappings                                                     -->
