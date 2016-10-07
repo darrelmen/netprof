@@ -173,14 +173,16 @@ import java.util.logging.Logger;
  * - Fixes for QC -
  * 1.4.11 (9-26-16)
  * - Added auto advance button to avp
+ * 1.5.0 (10-07-16)
+ * - Clean up download dialog as per Michael Grimmer request
+ *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since
  * */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private final Logger logger = Logger.getLogger("LangTest");
 
-  public static final String VERSION_INFO = "1.4.11";
-
+  public static final String VERSION_INFO = "1.5.0";
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
   private static final String UNKNOWN = "unknown";
