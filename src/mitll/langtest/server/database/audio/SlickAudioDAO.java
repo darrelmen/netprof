@@ -33,7 +33,6 @@
 package mitll.langtest.server.database.audio;
 
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.AudioAttribute;
@@ -104,7 +103,6 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   /**
-   *
    * @param uniqueID
    * @param exerciseID
    * @param actualPath
@@ -128,7 +126,12 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
   @Override
   Collection<AudioAttribute> getAudioAttributesForExercise(int exid) {
-    return toAudioAttributes(dao.getByExerciseID(exid));
+    long then = System.currentTimeMillis();
+    List<SlickAudio> byExerciseID = dao.getByExerciseID(exid);
+    long now = System.currentTimeMillis();
+    if (now - then > 20)
+      logger.warn("getAudioAttributesForExercise took " + (now - then) + " to get " + byExerciseID.size() + " attr for " + exid);
+    return toAudioAttributes(byExerciseID);
   }
 
   @Override

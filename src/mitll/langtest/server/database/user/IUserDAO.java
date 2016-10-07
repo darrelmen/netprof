@@ -72,15 +72,6 @@ public interface IUserDAO extends IDAO {
    */
   User addUser(SignUpUser user);
 
-/*  int addUser(int age, String gender, int experience, String ipAddr,
-              String trueIP, String nativeLang,
-              String dialect, String userID,
-              boolean enabled,
-              Collection<User.Permission> permissions,
-              User.Kind kind,
-              String passwordH,
-              String emailH, String email, String device, String first, String last);*/
-
   @Deprecated boolean enableUser(int id);
 
   /**
@@ -99,8 +90,6 @@ public interface IUserDAO extends IDAO {
    * @return
    */
   Integer getIDForUserAndEmail(String user, String emailH);
-
-//  int getIdForUserID(String id);
 
   /**
    * @see mitll.langtest.server.services.UserServiceImpl#loginUser(String, String)
