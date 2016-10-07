@@ -531,7 +531,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
 
       String password = rs.getString(PASS);
       String userID = rs.getString(USER_ID);
-      String email = rs.getString(EMAIL);
+      String emailH = rs.getString(EMAIL);
       String device = rs.getString(DEVICE);
 
       if (userKind == null) {
@@ -559,7 +559,8 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
           isAdmin,
           permissions,
           userKind1,
-          email, email,
+          "",
+          emailH,
           device,
           resetKey,
         //  "",
