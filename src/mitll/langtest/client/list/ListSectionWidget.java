@@ -32,10 +32,8 @@
 
 package mitll.langtest.client.list;
 
-import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.ButtonToolbar;
-import com.github.gwtbootstrap.client.ui.DropdownButton;
-import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -46,7 +44,6 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.bootstrap.ItemSorter;
 import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.table.ListBoxSelect;
-import mitll.langtest.client.table.ListSelect;
 import mitll.langtest.client.table.TableSelect;
 import mitll.langtest.shared.SectionNode;
 import org.jetbrains.annotations.NotNull;
@@ -54,11 +51,11 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.logging.Logger;
 
-public class MenuSectionWidget implements SectionWidget {
+public class ListSectionWidget implements SectionWidget {
   private final Logger logger = Logger.getLogger("MenuSectionWidget");
 
   private final String type;
-  private DropdownButton dropdownButton;
+  private ListBox listBox;
   private final Collection<SectionNode> nodes;
   private final SimpleSelectExerciseList singleSelectExerciseList;
 
@@ -67,7 +64,7 @@ public class MenuSectionWidget implements SectionWidget {
    * @param nodes
    * @param singleSelectExerciseList
    */
-  MenuSectionWidget(String type,
+  ListSectionWidget(String type,
                     Collection<SectionNode> nodes,
                     SimpleSelectExerciseList singleSelectExerciseList) {
     this.type = type;
@@ -77,7 +74,8 @@ public class MenuSectionWidget implements SectionWidget {
   }
 
   private int num = 0;
-  private final ButtonToolbar toolbar = new ButtonToolbar();
+ // private final ButtonToolbar toolbar = new ButtonToolbar();
+  private final DivWidget toolbar = new DivWidget();
 
   /**
    * @param container
@@ -157,42 +155,22 @@ public class MenuSectionWidget implements SectionWidget {
     return right;
   }
 
-  /**
-   * @param values
-   * @param initialChoice
-   * @see #gotSelection(Collection)
-   */
-  private void addGridChoices(List<String> values, String initialChoice) {
-    this.dropdownButton = new TableSelect().makeSymbolButton(values, 4, singleSelectExerciseList, this, initialChoice);
-    toolbar.clear();
-    toolbar.add(dropdownButton);
-    dropdownButton.addStyleName("leftFiveMargin");
-  }
-
   private void addChoices(List<String> values, String initialChoice) {
-    this.dropdownButton = new ListSelect().makeSymbolButton(values, 4, singleSelectExerciseList, this, initialChoice);
+    this.listBox = new ListBoxSelect().makeSymbolButton(values, 4, singleSelectExerciseList, this, initialChoice);
     toolbar.clear();
-    toolbar.add(dropdownButton);
-    dropdownButton.addStyleName("leftFiveMargin");
+    toolbar.add(listBox);
+    listBox.addStyleName("leftFiveMargin");
   }
-/*
-  private void addChoices2(List<String> values, String initialChoice) {
-    this.dropdownButton = new ListBoxSelect().makeSymbolButton(values, 4, singleSelectExerciseList, this, initialChoice);
-    toolbar.clear();
-    toolbar.add(dropdownButton);
-    dropdownButton.addStyleName("leftFiveMargin");
-  }
-*/
 
 
   @Override
   public String getCurrentSelection() {
-    return dropdownButton.getText().trim();
+    return listBox.getSelectedValue().trim();
   }
 
   @Override
   public void clearSelectionState() {
-    dropdownButton.setText("All");
+    listBox.setSelectedValue("All");
   }
 
   @Override
@@ -238,13 +216,13 @@ public class MenuSectionWidget implements SectionWidget {
   }
 
   public boolean selectItem(String item) {
-    dropdownButton.setText(item);
+    listBox.setSelectedValue(item);
     return true;
   }
 
-  private MenuSectionWidget childWidget;
+  private ListSectionWidget childWidget;
 
-  public void addChild(MenuSectionWidget value) {
+  public void addChild(ListSectionWidget value) {
     childWidget = value;
   }
 
@@ -299,18 +277,6 @@ public class MenuSectionWidget implements SectionWidget {
     }
   }
 
-/*
-  private List<String> getLabels(Collection<SectionNode> nodes) {
-    List<String> items = new ArrayList<>();
-    Set<String> added = new HashSet<>();
-    for (SectionNode n : nodes) {
-      if (added.add(n.getName())) {
-        items.add(n.getName());
-      }
-    }
-    return items;
-  }
-*/
 
   public String toString() {
     return "sectionWidget " + type;
