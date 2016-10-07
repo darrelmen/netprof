@@ -228,7 +228,7 @@ public class UserPassLogin extends UserDialog {
           }
         },
         true);
-    modal.setMaxHeigth((600) + "px");
+    modal.setMaxHeigth(600 + "px");
     modal.show();
   }
 
