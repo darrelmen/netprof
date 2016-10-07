@@ -51,7 +51,7 @@ import mitll.langtest.shared.custom.UserList;
 import java.util.*;
 import java.util.logging.Logger;
 
-public abstract class SimpleSelectExerciseList extends NPExerciseList<MenuSectionWidget> {
+public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectionWidget> {
   private final Logger logger = Logger.getLogger("SimpleSelectExerciseList");
   private static final int CLASSROOM_VERTICAL_EXTRA = 270;
   private static final String SHOWING_ALL_ENTRIES = "Showing all entries";
@@ -168,7 +168,7 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<MenuSectio
 
     //int index = 0;
 
-    MenuSectionWidget parent = null;
+    ListSectionWidget parent = null;
     int i =0;
 
     for (String type : types) {
@@ -184,7 +184,8 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<MenuSectio
 
    //   logger.info("got " + type + " num sections " + sectionsInType.size());
 
-      MenuSectionWidget value = new MenuSectionWidget(type, rootNodes, this);
+   //   MenuSectionWidget value = new MenuSectionWidget(type, rootNodes, this);
+      ListSectionWidget value = new ListSectionWidget(type, rootNodes, this);
       if (parent != null) {
         parent.addChild(value);
       }
@@ -409,8 +410,8 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<MenuSectio
     }
   }
 
-  protected SectionWidgetContainer<MenuSectionWidget> getSectionWidgetContainer() {
-    return new SectionWidgetContainer<MenuSectionWidget>() {
+  protected SectionWidgetContainer<ListSectionWidget> getSectionWidgetContainer() {
+    return new SectionWidgetContainer<ListSectionWidget>() {
       protected String getAnySelectionValue() {
         return "All";
       }
@@ -421,7 +422,7 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<MenuSectio
        * @param sections
        */
       protected void selectItem(String type, Collection<String> sections) {
-        MenuSectionWidget widget = sectionWidgetContainer.getWidget(type);
+        SectionWidget widget = sectionWidgetContainer.getWidget(type);
         widget.selectItem(sections.iterator().next());
       }
     };

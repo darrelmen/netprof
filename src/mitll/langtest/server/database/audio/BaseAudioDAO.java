@@ -127,8 +127,12 @@ public abstract class BaseAudioDAO extends DAO {
    * @see DatabaseImpl#writeZip
    */
   public int attachAudioToExercise(CommonExercise firstExercise, String language) {
+    long then = System.currentTimeMillis();
     Collection<AudioAttribute> audioAttributes = getAudioAttributesForExercise(firstExercise.getID());
+    long now = System.currentTimeMillis();
 
+    if (now - then > 20)
+      logger.warn("attachAudioToExercise took " + (now - then) + " to get " + audioAttributes.size() + " attributes");
 /*    if (DEBUG) {
       logger.debug("\attachAudio : found " + audioAttributes.size() + " for " + firstExercise.getOldID());
       for (AudioAttribute attribute : audioAttributes) {
@@ -140,7 +144,12 @@ public abstract class BaseAudioDAO extends DAO {
       }
     }*/
 
+    then = now;
     boolean attachedAll = attachAudio(firstExercise, audioAttributes, language);
+    now = System.currentTimeMillis();
+
+    if (now - then > 20)
+      logger.warn("attachAudioToExercise took " + (now - then) + " to attach audio to " + firstExercise.getID());
 
     if (!attachedAll)
       logger.info("didn't attach all audio to " + firstExercise.getID() + " " + firstExercise.getForeignLanguage());
@@ -277,12 +286,12 @@ public abstract class BaseAudioDAO extends DAO {
         String prefix = installPath + File.separator + s;
         String relPrefix = prefix.substring(netProfDurLength);
         if (!audioRef.contains(s)) {
-          logger.info("audioref " +audioRef + " does not contain '" +prefix+
+          if (DEBUG_ATTACH) logger.info("audioref " + audioRef + " does not contain '" + prefix +
               "' before " + attr.getAudioRef());
           attr.setAudioRef(relPrefix + File.separator + audioRef);
-          logger.info("after " + attr.getAudioRef());
+          if (DEBUG_ATTACH) logger.info("after " + attr.getAudioRef());
         }
-        if (DEBUG_ATTACH || true) logger.debug("\tattachAudioAndFixPath now '" + attr.getAudioRef() + "'");
+        if (DEBUG_ATTACH) logger.debug("\tattachAudioAndFixPath now '" + attr.getAudioRef() + "'");
       }
       return true;
     } else {
