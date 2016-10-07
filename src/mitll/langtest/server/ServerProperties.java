@@ -78,7 +78,7 @@ public class ServerProperties {
       "Korean",
       "Levantine",
       "Mandarin",
-      "Mandarin (TR)",
+      "MandarinTraditional",
       "MSA",
       "Pashto1",
       "Pashto2",
