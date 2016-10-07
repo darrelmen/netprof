@@ -70,4 +70,6 @@ public interface SectionWidget {
   List<String> getCurrentSelections();
 
   void selectFirst();
+
+  boolean selectItem(String item);
 }
