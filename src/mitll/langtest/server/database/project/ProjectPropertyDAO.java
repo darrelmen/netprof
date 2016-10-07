@@ -43,12 +43,12 @@ import org.apache.log4j.Logger;
 import java.sql.Timestamp;
 import java.util.Collection;
 
-public class ProjectPropertyDAO extends DAO implements IDAO {
+class ProjectPropertyDAO extends DAO implements IDAO {
   private static final Logger logger = Logger.getLogger(ProjectPropertyDAO.class);
 
   private ProjectPropertyDAOWrapper dao;
 
-  public ProjectPropertyDAO(Database database, DBConnection dbConnection) {
+  ProjectPropertyDAO(Database database, DBConnection dbConnection) {
     super(database);
     dao = new ProjectPropertyDAOWrapper(dbConnection);
   }

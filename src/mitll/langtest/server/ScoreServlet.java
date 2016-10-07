@@ -1109,28 +1109,7 @@ public class ScoreServlet extends DatabaseServlet {
     jsonObject.put("Date", new Date().toString());
   }
 
-  private Project getProject(int projid) {
-    return db.getProject(projid);
-  }
-
-  /**
-   * @paramz db
-   * @return
-   * @see #getJsonNestedChapters(boolean, int)
-   */
-/*  private void setInstallPath(DatabaseImpl db) {
-    String lessonPlanFile = getLessonPlan();
-    if (!new File(lessonPlanFile).exists()) logger.error("couldn't find lesson plan file " + lessonPlanFile);
-
-    db.setInstallPath(pathHelper.getInstallPath(), lessonPlanFile,
-        relativeConfigDir + File.separator + serverProps.getMediaDir());
-  }*/
-
-/*
-  private String getLessonPlan() {
-    return configDir + File.separator + serverProps.getLessonPlan();
-  }
-*/
+  private Project getProject(int projid) {    return db.getProject(projid);  }
 
   private class UserAndSelection {
     private final String[] split1;
