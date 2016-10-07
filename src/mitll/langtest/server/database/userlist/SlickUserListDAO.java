@@ -103,12 +103,13 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
         shared.isFavorite(),
         shared.getID(),
         projid,
-        false // not homework list
+        false, // not homework list
+        ""
     );
   }
 
   private UserList<CommonShell> fromSlick(SlickUserExerciseList slick) {
-    return new UserList<CommonShell>(
+    return new UserList<>(
         slick.id(),
         userDAO.getUserWhere(slick.userid()),
         slick.name(),
