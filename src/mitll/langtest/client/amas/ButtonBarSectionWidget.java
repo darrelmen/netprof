@@ -268,7 +268,7 @@ public class ButtonBarSectionWidget implements SectionWidget {
    * @see #selectItems(Collection)
    * @see SingleSelectExerciseList#selectItem
    */
-  private boolean selectItem(String toSelect) {
+  public boolean selectItem(String toSelect) {
     // logger.info("ButtonGroupSectionWidget: selectItem " + getType() + "=" + toSelect);
     String currentSelection = getCurrentSelection();
     boolean alreadySelected = toSelect.equals(currentSelection.trim());
