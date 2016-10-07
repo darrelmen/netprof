@@ -35,11 +35,7 @@ package mitll.langtest.client.table;
 import com.github.gwtbootstrap.client.ui.ListBox;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.list.ListSectionWidget;
-import mitll.langtest.client.list.MenuSectionWidget;
 import mitll.langtest.client.list.SimpleSelectExerciseList;
 
 import java.util.List;
@@ -47,17 +43,14 @@ import java.util.List;
 public class ListBoxSelect {
   //  private final Logger logger = Logger.getLogger("TableSelect");
   public static final String ALL = "All";
- // public static final String FONT_TO_USE = "bold 24px Arial";
-  public static final String FONT_TO_USE = "bold 24px Arial";
-  private List<String> values;
-  // private DropdownButton sButton;
+//  public static final String FONT_TO_USE = "bold 24px Arial";
   private SimpleSelectExerciseList singleSelectExerciseList;
   private ListSectionWidget menuSectionWidget;
-
 
   static {
     new ListBoxSelect().register();
   }
+
   /**
    * @param values
    * @param width
@@ -67,46 +60,29 @@ public class ListBoxSelect {
    * @return
    */
   public ListBox makeSymbolButton(List<String> values,
-                                 int width,
-                                 SimpleSelectExerciseList singleSelectExerciseList,
-                                 ListSectionWidget menuSectionWidget,
-                                 String initialSelection) {
-//    sButton = new DropdownButton(initialSelection);
-//    sButton.setIconSize(IconSize.DEFAULT);
-
-    this.values = values;
-    this.values.add(0, ALL);
+                                  int width,
+                                  SimpleSelectExerciseList singleSelectExerciseList,
+                                  ListSectionWidget menuSectionWidget,
+                                  String initialSelection) {
+    List<String> values1 = values;
+    values1.add(0, ALL);
     this.singleSelectExerciseList = singleSelectExerciseList;
     this.menuSectionWidget = menuSectionWidget;
 
     box = new ListBox();
+    box.setHeight("35px");
+    box.getElement().getStyle().setProperty("fontSize", "large");
+
     box.addStyleName("topMargin");
 
     int widthSoFar = 150;
 
     for (String value : values) {
       box.addItem(value);
-
-  /*    int width1 = getWidth(value.replaceAll(" ", "_").replaceAll("-", "_"), FONT_TO_USE);
-      if (width1 > widthSoFar) {
-        //   logger.info("new highest - for " + text + " got " + width1);
-        widthSoFar = width1;
-      }*/
     }
 
-    box.setWidth(widthSoFar+"px");
-/*
-    box.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent clickEvent) {
-        String selectedValue = box.getSelectedValue();
-        reallyGotSelection(selectedValue);
-      }
-    });
-*/
-
+    box.setWidth(widthSoFar + "px");
     box.addChangeHandler(new ChangeHandler() {
-
       @Override
       public void onChange(ChangeEvent event) {
         String selectedValue = box.getSelectedValue();
@@ -114,8 +90,6 @@ public class ListBoxSelect {
       }
     });
     box.setSelectedValue(initialSelection);
-    // sButton.add(box);
-    //  sButton.addStyleName("rte-picker-button");
     return box;
   }
 
@@ -138,11 +112,7 @@ public class ListBoxSelect {
       };
   }-*/;
 
-  ListBox box;
-
-  public interface Selection {
-    void gotSelection(String s);
-  }
+  private ListBox box;
 
   private void reallyGotSelection(String s) {
     box.setSelectedValue(s);
