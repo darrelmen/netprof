@@ -1327,6 +1327,7 @@ public class ResultDAO extends DAO {
     if (!columns.contains(MODEL.toLowerCase())) {
       addVarchar(connection, RESULTS, MODEL);
     }
+
     if (!columns.contains(MODELUPDATE.toLowerCase())) {
       addTimestamp(connection, RESULTS, MODELUPDATE);
     }
