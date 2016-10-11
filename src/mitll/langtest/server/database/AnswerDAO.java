@@ -342,22 +342,28 @@ public class AnswerDAO extends DAO {
   /**
    * @param id
    * @param processDur
+   * @param isCorrect
    * @see mitll.langtest.server.LangTestDatabaseImpl#getPretestScore(int, long, String, String, int, int, boolean, String, boolean)
-   * @see mitll.langtest.server.database.DatabaseImpl#rememberScore(long, PretestScore)
+   * @see DatabaseImpl#rememberScore(long, PretestScore, boolean)
    */
-  public void changeAnswer(long id, float score, int processDur, String json) {
+  public void changeAnswer(long id, float score, int processDur, String json, boolean isCorrect) {
     //logger.info("Setting id " + id + " score " + score + " process dur " + processDur + " json " + json);
     Connection connection = getConnection();
     try {
       String sql = "UPDATE " +
           "results " +
           "SET " +
-          ResultDAO.PRON_SCORE + "='" + score + "', " +
+          ResultDAO.PRON_SCORE  + "='" + score + "', " +
           ResultDAO.PROCESS_DUR + "='" + processDur + "', " +
-          ResultDAO.SCORE_JSON + "='" + json + "' " +
+          ResultDAO.CORRECT     + "="  + isCorrect + ", " +
+          ResultDAO.MODELUPDATE     + "='"  + new Timestamp(System.currentTimeMillis()) + "', " +
+          ResultDAO.MODEL     + "='"  + database.getServerProps().getProperty("MODELS_DIR").replaceAll("models.", "") + "', " +
+          ResultDAO.SCORE_JSON  + "='" + json + "' " +
+
           "WHERE id=" + id;
 
       PreparedStatement statement = connection.prepareStatement(sql);
+
       if (statement.executeUpdate() == 0) {
         logger.error("huh? didn't change the answer for " + id + " sql " + sql);
       }
