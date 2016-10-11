@@ -331,7 +331,7 @@ public class RefResultDecoder {
     int staleExercise = 0;
     int currentAlready = 0;
 
-    String currentModel =  db.getServerProps().getProperty("MODELS_DIR").replaceAll("models.", "");
+    String currentModel =  db.getServerProps().getCurrentModel();
 
     for (Result result : results) {
       if (result.isValid()) {
