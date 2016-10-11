@@ -633,7 +633,7 @@ public class ServerProperties {
   }
 
   private static final long TRIM_SILENCE_BEFORE = 300;
-  private static final long TRIM_SILENCE_AFTER = 300;
+  private static final long TRIM_SILENCE_AFTER  = 300;
 
   public long getTrimBefore() {
     return getIntPropertyDef("trimBeforeMillis", "" + TRIM_SILENCE_BEFORE);
@@ -644,6 +644,10 @@ public class ServerProperties {
   }
 
   public boolean shouldRecalcStudentAudio() {
-    return getDefaultFalse("shouldRecalcStudentAudio");
+    return getDefaultTrue("shouldRecalcStudentAudio");
+  }
+
+  public String getCurrentModel() {
+    return getProperty("MODELS_DIR").replaceAll("models.", "");
   }
 }
