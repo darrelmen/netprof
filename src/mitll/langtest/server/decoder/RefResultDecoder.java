@@ -35,17 +35,15 @@ package mitll.langtest.server.decoder;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
-import mitll.langtest.server.audio.PathWriter;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.ResultDAO;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.AudioExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -67,7 +65,7 @@ public class RefResultDecoder {
   private static final boolean DO_TRIM = true;
   //private static final int SLEEP_BETWEEN_DECODES = 2000;
 
-  private final DatabaseImpl db;
+  private final DatabaseImpl<CommonExercise> db;
   private final ServerProperties serverProps;
 
   private final AudioFileHelper audioFileHelper;
@@ -84,7 +82,7 @@ public class RefResultDecoder {
    * @param audioFileHelper
    * @see LangTestDatabaseImpl#init()
    */
-  public RefResultDecoder(DatabaseImpl db,
+  public RefResultDecoder(DatabaseImpl<CommonExercise> db,
                           ServerProperties serverProperties,
                           PathHelper pathHelper,
                           AudioFileHelper audioFileHelper,
@@ -108,8 +106,6 @@ public class RefResultDecoder {
     new Thread(new Runnable() {
       @Override
       public void run() {
-
-
         if (serverProps.shouldTrimAudio()) {
           sleep(5000);
           trimRef(exercises, relativeConfigDir);
@@ -123,6 +119,9 @@ public class RefResultDecoder {
         if (db.getAudioDAO().numRows() < 25) {
           populateAudioTable(exercises);
         }
+        if (db.getServerProps().shouldRecalcStudentAudio()) {
+          recalcStudentAudio();
+        }
       }
     }).start();
   }
@@ -130,6 +129,7 @@ public class RefResultDecoder {
   /**
    * This was for a one time fix for weird sudanese thing where audio files were truncated on Aug 11 and 12
    * Very weird.
+   *
    * @param pathHelper
    * @param path
    * @return
@@ -180,7 +180,6 @@ public class RefResultDecoder {
     }
     logger.info("Fixed " +fixed + " files");
   }*/
-
   private File getAbsoluteFile(PathHelper pathHelper, String path) {
     return pathHelper.getAbsoluteFile(path);
   }
@@ -197,7 +196,7 @@ public class RefResultDecoder {
         total += db.getAudioDAO().addOldSchoolAudio(refAudioIndex, (AudioExercise) ex, serverProps.getAudioOffset(), mediaDir, installPath);
       }
     }
-    logger.info(getLanguage() + " : populateAudioTable added " +total);
+    logger.info(getLanguage() + " : populateAudioTable added " + total);
   }
 
   /**
@@ -228,7 +227,7 @@ public class RefResultDecoder {
       if (exercise != null) {
         logger.info("doMissingInfo #" + count + " of " + size + " align " + exercise.getID() + " and result " + res.getUniqueID());
         PretestScore alignmentScore = audioFileHelper.getAlignmentScore(exercise, res.getAnswer(), serverProps.usePhoneToDisplay(), false);
-        db.rememberScore(res.getUniqueID(), alignmentScore);
+        db.rememberScore(res.getUniqueID(), alignmentScore, false);
       } else {
         logger.warn("no exercise for " + res.getExerciseID() + " from result?");
       }
@@ -315,6 +314,73 @@ public class RefResultDecoder {
         logger.warn("failed to attach audio to " + failed.size() + " exercises : " + failed);
       }
     }
+  }
+
+  private void recalcStudentAudio() {
+    ResultDAO resultDAO = db.getResultDAO();
+
+    Map<String, CommonExercise> idToEx = new HashMap<>();
+    List<CommonExercise> rawExercises = db.getExerciseDAO().getRawExercises();
+    for (CommonExercise ex : rawExercises) idToEx.put(ex.getID(), ex);
+
+    int count = 0;
+    Set<String> skip = new HashSet<>(Arrays.asList("slow","regular","slow_by_WebRTC","regular_by_WebRTC"));
+    List<Result> results = resultDAO.getResults();
+    int skipped = 0;
+    int notThere = 0;
+    int staleExercise = 0;
+    int currentAlready = 0;
+
+    String currentModel =  db.getServerProps().getProperty("MODELS_DIR").replaceAll("models.", "");
+
+    for (Result result : results) {
+      if (result.isValid()) {
+        if (skip.contains(result.getAudioType())) {skipped++;}
+        else {
+          String audioRef = result.getAnswer();
+
+          boolean fileExists = false;
+          if (!audioRef.contains("context=")) {
+            //logger.debug("doing alignment -- ");
+            // Do alignment...
+            File absoluteFile = pathHelper.getAbsoluteFile(audioRef);
+            fileExists = absoluteFile.exists();
+          }
+
+          String exid = result.getExid();
+
+          if (fileExists) {
+            CommonExercise exercise = idToEx.get(exid);
+            if (exercise != null) {
+              if (result.getModel() == null || !result.getModel().equals(currentModel)) {
+                audioFileHelper.recalcOne(result, exercise);
+                sleep(serverProps.getSleepBetweenDecodes());
+                count++;
+                if (count % 100 == 0) logger.info("recalc " + count + "/" + results.size());
+              }
+              else {
+                currentAlready++;
+              }
+            }
+            else {
+              if (staleExercise < 1000) {
+                logger.info("can't find ex '" + exid + "' in " + idToEx.size());
+              }
+              staleExercise++;
+            }
+          }
+          else {
+            if (notThere < 1000 || exid.startsWith("1")) logger.info("Can't find " + pathHelper.getAbsoluteFile(audioRef).getAbsolutePath());
+            notThere++;
+          }
+        }
+      }
+    }
+
+    logger.info("recalcStudentAudio did recalc on " + count + "/" + results.size() +
+        " skipped " + skipped +
+        " not there " + notThere + " stale exercises " + staleExercise + " currentAlready " + currentAlready);
+
   }
 
   /**
