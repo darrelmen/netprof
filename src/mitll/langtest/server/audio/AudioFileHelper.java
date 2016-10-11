@@ -42,6 +42,7 @@ import mitll.langtest.server.autocrt.AutoCRT;
 import mitll.langtest.server.autocrt.DecodeCorrectnessChecker;
 import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.decoder.RefResultDecoder;
 import mitll.langtest.server.scoring.*;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Result;
@@ -434,7 +435,7 @@ public class AudioFileHelper implements AlignDecode {
 
         // Do decoding, and record alignment info we just got in the database ...
         long durationInMillis = attribute.getDurationInMillis();
-        AudioAnswer decodeAnswer = getRefDecodeAnswer(exercise, audioRef, absoluteFile, durationInMillis, false);
+        AudioAnswer decodeAnswer = getDecodeAnswer(exercise, audioRef, absoluteFile, durationInMillis, false);
         DecodeAlignOutput decodeOutput = new DecodeAlignOutput(decodeAnswer, true);
 
         PretestScore alignmentScoreOld = doHydec ? getAlignmentScore(exercise, absolutePath,
@@ -442,7 +443,7 @@ public class AudioFileHelper implements AlignDecode {
         DecodeAlignOutput alignOutputOld = new DecodeAlignOutput(alignmentScoreOld, false);
 
         // Do decoding, and record alignment info we just got in the database ...
-        AudioAnswer decodeAnswerOld = doHydec ? getRefDecodeAnswer(exercise, audioRef, absoluteFile, durationInMillis, true) : new AudioAnswer();
+        AudioAnswer decodeAnswerOld = doHydec ? getDecodeAnswer(exercise, audioRef, absoluteFile, durationInMillis, true) : new AudioAnswer();
         DecodeAlignOutput decodeOutputOld = new DecodeAlignOutput(decodeAnswerOld, true);
 
         //logger.debug("attr dur " + attribute.getDurationInMillis());
@@ -463,6 +464,31 @@ public class AudioFileHelper implements AlignDecode {
     } else {
       logger.warn("skipping " + exercise.getID() + " since can't do decode/align b/c of LTS errors ");
     }
+  }
+
+  /**
+   * @see RefResultDecoder#recalcStudentAudio
+   * @param result
+   * @param exercise
+   * @return
+   */
+  public boolean recalcOne(Result result, CommonExercise exercise) {
+    String audioRef = result.getAnswer();
+
+    File absoluteFile = pathHelper.getAbsoluteFile(audioRef);
+    String absolutePath = absoluteFile.getAbsolutePath();
+
+    if (result.getAudioType().equals("flashcard") || result.getAudioType().equals("avp")) {
+      long durationInMillis = result.getDurationInMillis();
+      AudioAnswer decodeAnswer = getDecodeAnswer(exercise, audioRef, absoluteFile, durationInMillis, false);
+      //DecodeAlignOutput decodeOutput = new DecodeAlignOutput(decodeAnswer, true);
+      db.rememberScore(result.getUniqueID(), decodeAnswer.getPretestScore(), decodeAnswer.isCorrect());
+    } else {
+      PretestScore alignmentScore = getAlignmentScore(exercise, absolutePath, serverProps.usePhoneToDisplay(), false);
+//      DecodeAlignOutput alignOutput = new DecodeAlignOutput(alignmentScore, false);
+      db.rememberScore(result.getUniqueID(), alignmentScore, alignmentScore.getHydecScore() > 0.25);
+    }
+    return true;
   }
 
   /**
@@ -512,11 +538,21 @@ public class AudioFileHelper implements AlignDecode {
     //   logger.debug("getRefAudioAnswerDecoding decodeAnswer " + decodeAnswer);
   }
 
-  private AudioAnswer getRefDecodeAnswer(CommonExercise exercise1, String wavPath, File file, long duration,
-                                         boolean useOldSchool) {
-    return getAudioAnswer(1, exercise1, true, wavPath, file,
+  private AudioAnswer getDecodeAnswer(CommonExercise exercise1,
+                                      String wavPath,
+                                      File file,
+                                      long duration,
+                                      boolean useOldSchool) {
+    return getAudioAnswer(1,
+        exercise1,
+        true,  // decode!
+        wavPath,
+        file,
         new AudioCheck.ValidityAndDur(duration),
-        false, false, useOldSchool);
+        false, // don't use cache
+        false, // don't allow alternates
+        useOldSchool // if should use hydec instead of hydra NPWS service
+    );
   }
 
   private void logValidity(AudioContext context, File file, AudioCheck.ValidityAndDur validity) {
