@@ -109,6 +109,11 @@ public class WordDAO extends DAO {
    */
   private void createTable(Database database) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
+
+    if (database.getServerProps().shouldRecalcStudentAudio()) {
+      drop(WORD, connection);
+    }
+
     PreparedStatement statement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS " +
         WORD +
         " (" +
