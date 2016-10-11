@@ -119,6 +119,11 @@ public class PhoneDAO extends DAO {
    */
   private void createTable(Database database) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
+
+    if (database.getServerProps().shouldRecalcStudentAudio()) {
+      drop(PHONE, connection);
+    }
+
     PreparedStatement statement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS " +
         PHONE +
         " (" +
