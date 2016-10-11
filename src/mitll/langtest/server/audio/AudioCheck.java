@@ -312,6 +312,7 @@ public class AudioCheck {
     /**
      * @param validity
      * @param dur
+     * @parma quietAudioOK - only useful for automated load testing where we aren't really making recordings
      */
     public ValidityAndDur(AudioAnswer.Validity validity, double dur, boolean quietAudioOK) {
       this.validity = validity;
