@@ -979,7 +979,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return audioDAO;
   }
 
-  private WordDAO getWordDAO() {
+  public WordDAO getWordDAO() {
     return wordDAO;
   }
 
@@ -1336,6 +1336,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return serverProps;
   }
 
+
+
   private AddRemoveDAO getAddRemoveDAO() {
     return addRemoveDAO;
   }
@@ -1593,7 +1595,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
             if (pseg.getStart() >= segment.getStart() && pseg.getEnd() <= segment.getEnd()) {
               String pevent = pseg.getEvent();
               if (!pevent.equals(SLFFile.UNKNOWN_MODEL) && !pevent.equals(SIL)) {
-                getPhoneDAO().addPhone(new PhoneDAO.Phone(answerID, wid, pevent, pindex++, pseg.getScore()));
+                getPhoneDAO().addPhone(new PhoneDAO.Phone(answerID, wid, pevent, pindex++, pseg.getScore(), pseg.getDuration()));
               }
             }
           }
