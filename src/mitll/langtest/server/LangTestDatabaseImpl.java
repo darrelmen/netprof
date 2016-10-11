@@ -1284,7 +1284,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         " took " + timeToRunHydec + " millis " + " usePhoneToDisplay " + usePhoneToDisplay1);
 
     if (resultID > -1 && cachedResult == null) { // alignment has two steps : 1) post the audio, then 2) do alignment
-      db.rememberScore(resultID, asrScoreForAudio);
+      db.rememberScore(resultID, asrScoreForAudio, false);
     }
     return asrScoreForAudio;
   }
