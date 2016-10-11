@@ -532,7 +532,6 @@ public class ASRScoring extends Scoring implements ASR {
 
       Map<String, Map<String, Float>> stringMapMap = jscoreOut._2;
       //logger.debug("hydec output " + stringMapMap);
-
       return new Scores(hydec_score, stringMapMap, (int) timeToRunHydec);
     } catch (AssertionError e) {
       logger.error("Got assertion error " + e, e);
