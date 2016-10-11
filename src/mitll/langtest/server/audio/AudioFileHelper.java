@@ -481,11 +481,13 @@ public class AudioFileHelper implements AlignDecode {
     if (result.getAudioType().equals("flashcard") || result.getAudioType().equals("avp")) {
       long durationInMillis = result.getDurationInMillis();
       AudioAnswer decodeAnswer = getDecodeAnswer(exercise, audioRef, absoluteFile, durationInMillis, false);
-      //DecodeAlignOutput decodeOutput = new DecodeAlignOutput(decodeAnswer, true);
+      db.getPhoneDAO().removePhones(result.getUniqueID());
+      db.getWordDAO().removeWords(result.getUniqueID());
       db.rememberScore(result.getUniqueID(), decodeAnswer.getPretestScore(), decodeAnswer.isCorrect());
     } else {
       PretestScore alignmentScore = getAlignmentScore(exercise, absolutePath, serverProps.usePhoneToDisplay(), false);
-//      DecodeAlignOutput alignOutput = new DecodeAlignOutput(alignmentScore, false);
+      db.getPhoneDAO().removePhones(result.getUniqueID());
+      db.getWordDAO().removeWords(result.getUniqueID());
       db.rememberScore(result.getUniqueID(), alignmentScore, alignmentScore.getHydecScore() > 0.25);
     }
     return true;
@@ -1030,7 +1032,7 @@ public class AudioFileHelper implements AlignDecode {
 
   /**
    * @return
-   * @see #readDictionary
+   * @see #makeASRScoring
    */
   private HTKDictionary makeDict(String installPath) {
     String dictFile = new ConfigFileCreator(serverProps.getProperties(), null, Scoring.getScoringDir(installPath)).getDictFile();
