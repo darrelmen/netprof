@@ -105,6 +105,8 @@ public class ResultDAO extends DAO {
 
   static final String USER_SCORE = "userscore";
   static final String TRANSCRIPT = "transcript";
+  public static final String MODEL = "model";
+  public static final String MODELUPDATE = "modelupdate";
 
   private final boolean DEBUG = false;
 
@@ -892,6 +894,7 @@ public class ResultDAO extends DAO {
       float pronScore = rs.getFloat(PRON_SCORE);
       String json = rs.getString(SCORE_JSON);
       String device = rs.getString(DEVICE);
+      String model = rs.getString(MODEL);
 
       Result result = new Result(uniqueID, userID, //id
           plan, // plan
@@ -901,7 +904,8 @@ public class ResultDAO extends DAO {
           valid, // valid
           timestamp.getTime(),
 
-          type, dur, correct, pronScore, device);
+          type, dur, correct, pronScore, device,
+          model);
       result.setJsonScore(json);
       results.add(result);
     }
@@ -1320,6 +1324,13 @@ public class ResultDAO extends DAO {
       addVarchar(connection, RESULTS, TRANSCRIPT);
     }
 
+    if (!columns.contains(MODEL.toLowerCase())) {
+      addVarchar(connection, RESULTS, MODEL);
+    }
+    if (!columns.contains(MODELUPDATE.toLowerCase())) {
+      addTimestamp(connection, RESULTS, MODELUPDATE);
+    }
+
     database.closeConnection(connection);
 
     createIndex(database, EXID, RESULTS);
@@ -1488,6 +1499,7 @@ public class ResultDAO extends DAO {
   public void writeExcelToStream(Collection<MonitorResult> results, Collection<String> typeOrder, OutputStream out) {
     new ResultDAOToExcel().writeExcelToStream(results, typeOrder, out);
   }
+
 
   private static class MyUserAndTime implements UserAndTime {
     private final long userID;
