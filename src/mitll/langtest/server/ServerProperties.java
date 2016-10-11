@@ -422,6 +422,7 @@ public class ServerProperties {
     return props.getProperty(param, TRUE).equals(TRUE);
   }
 
+  public String getProperty(String prop) { return props.getProperty(prop); }
   /**
    * if true, use old school (hydec)
    * OR if there is no webservice port specified
@@ -640,5 +641,9 @@ public class ServerProperties {
 
   public long getTrimAfter() {
     return getIntPropertyDef("trimAfterMillis", "" + TRIM_SILENCE_AFTER);
+  }
+
+  public boolean shouldRecalcStudentAudio() {
+    return getDefaultFalse("shouldRecalcStudentAudio");
   }
 }
