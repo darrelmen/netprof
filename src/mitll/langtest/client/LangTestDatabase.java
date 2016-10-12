@@ -121,5 +121,6 @@ public interface LangTestDatabase extends RemoteService {
    */
   ContextPractice getContextPractice();
 
-  void reloadExercises();
+
+  @Deprecated void reloadExercises();
 }
