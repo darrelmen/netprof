@@ -217,8 +217,8 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
 
     for (String lang : langToProject.keySet()) {
       List<SlickProject> slickProjects = langToProject.get(lang);
-      SlickProject project = slickProjects.get(0);
-      SlimProject parent = getProjectInfo(project);
+      SlickProject firstProject = slickProjects.get(0);
+      SlimProject parent = getProjectInfo(firstProject);
       projectInfos.add(parent);
 
       if (slickProjects.size() > 1) {
