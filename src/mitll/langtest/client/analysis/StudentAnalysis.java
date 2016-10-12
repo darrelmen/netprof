@@ -32,12 +32,10 @@
 
 package mitll.langtest.client.analysis;
 
-import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
@@ -59,7 +57,7 @@ import java.util.logging.Logger;
 public class StudentAnalysis extends DivWidget {
   private final Logger logger = Logger.getLogger("StudentAnalysis");
 
-  private static final int LEFT_MARGIN = BasicUserContainer.TABLE_WIDTH + 53;
+  private static final int LEFT_MARGIN = MemoryItemContainer.TABLE_WIDTH + 53;
   private static final String STUDENTS = "Students";
   private static final String OR_MORE_RECORDINGS = "5 or more recordings";
 //  private static final int STUDENT_WIDTH = 300;

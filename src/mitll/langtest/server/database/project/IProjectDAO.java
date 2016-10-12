@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.project;
 
+import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.database.IDAO;
 import mitll.npdata.dao.SlickProject;
 
@@ -48,6 +49,11 @@ public interface IProjectDAO extends IDAO {
   int addTest(int userid, String name, String language,
               String firstType, String secondType, String countryCode);
 
+  /**
+   * @return
+   * @see ProjectManagement#populateProjects
+   * @see LangTestDatabaseImpl#getNestedProjectInfo
+   */
   Collection<SlickProject> getAll();
 
   void addProperty(int projid, String key, String value);
@@ -62,5 +68,5 @@ public interface IProjectDAO extends IDAO {
 
   int getDefault();
 
-  void dropProject(String name);
+  // void dropProject(String name);
 }
