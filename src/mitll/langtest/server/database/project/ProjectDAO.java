@@ -144,7 +144,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     dao.delete(id);
   }
 
-  public void dropProject(String name) {
+/*  public void dropProject(String name) {
     Collection<SlickProject> all = getAll();
     for (SlickProject project : all) {
       logger.info("found " + project);
@@ -156,7 +156,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
         logger.debug("not deleting " + project);
       }
     }
-  }
+  }*/
 
   /**
    * TODO : consider adding lts class
