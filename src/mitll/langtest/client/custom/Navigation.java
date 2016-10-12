@@ -63,6 +63,7 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.flashcard.FlashcardPanel;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.client.project.ProjectOps;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.services.ExerciseService;
 import mitll.langtest.client.services.ExerciseServiceAsync;
@@ -257,6 +258,8 @@ public class Navigation implements RequiresResize, ShowTab {
     addLearnTab();
     addPracticeTab();
     addStudyLists();
+
+    addProjectMaintenance();
 
 //    User.Kind userKind = userManager.getCurrent().getUserKind();
 /*    if (userManager.hasPermission(User.Permission.TEACHER_PERM) ||
@@ -524,9 +527,11 @@ public class Navigation implements RequiresResize, ShowTab {
       public void onClick(ClickEvent event) {
         checkAndMaybeClearTabAndLogEvent(PROJECTS, projects);
 
+        ProjectOps projectOps = new ProjectOps(controller);
+        projectOps.show(projects);
 //        UserOps userOps = new UserOps(controller, userManager);
 //        userOps.showUsers(users);
-//        users.setResizeable(userOps);
+        //projectOps.setResizeable(userOps);
       }
     });
   }
