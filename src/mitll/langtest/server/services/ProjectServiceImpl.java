@@ -30,71 +30,31 @@
  *
  */
 
-package mitll.langtest.shared.project;
+package mitll.langtest.server.services;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.shared.exercise.HasID;
-import org.jetbrains.annotations.NotNull;
+import mitll.langtest.client.services.ProjectService;
+import mitll.langtest.server.database.security.UserSecurityManager;
+import mitll.langtest.shared.project.ProjectInfo;
+import org.apache.logging.log4j.LogManager;
 
-public class ProjectInfo implements HasID, IsSerializable {
-  private String name;
-  private String language;
-  private String course;
-  private int id;
-  //private List<ProjectInfo> children = new ArrayList<>();
-  private long created;
+import java.util.List;
+import java.util.stream.Collectors;
 
-  public ProjectInfo() {
-  } // for serialization
-
-  /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getStartupInfo()
-   */
-  public ProjectInfo(int projectid, String language, String name, String course, long created) {
-    this.language = language;
-    this.id = projectid;
-    this.name = name;
-    this.course = course;
-    this.created = created;
-  }
-
-  public String getLanguage() {
-    return language;
-  }
+@SuppressWarnings("serial")
+public class ProjectServiceImpl extends MyRemoteServiceServlet implements ProjectService {
+  //private static final Logger logger = Logger.getLogger(ProjectServiceImpl.class);
+  // try to use a more modern logger...?
+  private static final org.apache.logging.log4j.Logger log = LogManager.getLogger(ProjectServiceImpl.class);
 
   @Override
-  public String getOldID() {
-    return null;
-  }
-
-  public int getID() {
-    return id;
-  }
-
-/*  public void addChild(ProjectInfo projectInfo) {
-    children.add(projectInfo);
-  }
-
-  public List<ProjectInfo> getChildren() {
-    return children;
-  }*/
-
-  @Override
-  public int compareTo(@NotNull HasID o) {
-    if (o instanceof ProjectInfo) {
-      ProjectInfo otherProject = (ProjectInfo) o;
-      ProjectInfo thisProject = this;
-      return thisProject.name.compareTo(otherProject.name);
-    } else {
-      return 1;
-    }
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public long getCreated() {
-    return created;
+  public List<ProjectInfo> getAll() {
+    return db.getProjectDAO().getAll()
+        .stream()
+        .map(project -> new ProjectInfo(project.id(),
+            project.language(),
+            project.name(),
+            project.course(),
+            project.modified().getTime()))
+        .collect(Collectors.toList());
   }
 }

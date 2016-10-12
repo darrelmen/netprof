@@ -66,6 +66,8 @@ import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.services.ExerciseService;
 import mitll.langtest.client.services.ExerciseServiceAsync;
+import mitll.langtest.client.services.ProjectService;
+import mitll.langtest.client.services.ProjectServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.userops.UserOps;
@@ -138,6 +140,7 @@ public class Navigation implements RequiresResize, ShowTab {
   private final ExerciseController controller;
   private final LangTestDatabaseAsync service;
   private final ExerciseServiceAsync exerciseServiceAsync = GWT.create(ExerciseService.class);
+  private final ProjectServiceAsync projectServiceAsync   = GWT.create(ProjectService.class);
 
   private final UserManager userManager;
   private final SimpleChapterNPFHelper practiceHelper;
@@ -488,7 +491,6 @@ public class Navigation implements RequiresResize, ShowTab {
       }
     });
   }*/
-
 
   /**
    * Add a way to make a new project
