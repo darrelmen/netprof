@@ -158,6 +158,17 @@
         <url-pattern>/langtest/dliclass-manager</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>projectService</servlet-name>
+        <servlet-class>mitll.langtest.server.services.ProjectServiceImpl</servlet-class>
+        <load-on-startup>3</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>projectService</servlet-name>
+        <url-pattern>/langtest/project-manager</url-pattern>
+    </servlet-mapping>
+
 
     <!-- ==================================================================== -->
     <!-- End RPC mappings                                                     -->
