@@ -61,8 +61,7 @@ public interface UserService extends RemoteService {
    * @param url
    * @return
    */
-  User addUser(SignUpUser user, String url  //    , boolean isCD
-  );
+  User addUser(SignUpUser user, String url);
 
   /**
    * @return
