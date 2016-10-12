@@ -32,413 +32,56 @@
 
 package mitll.langtest.client.analysis;
 
-import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.google.gwt.cell.client.Cell;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.dom.client.BrowserEvents;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.storage.client.Storage;
-import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.ColumnSortEvent;
-import com.google.gwt.user.cellview.client.TextHeader;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.view.client.SingleSelectionModel;
-import mitll.langtest.client.custom.TooltipHelper;
-import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.PagingContainer;
-import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.shared.user.MiniUser;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.logging.Logger;
-
-public class BasicUserContainer<T extends MiniUser>
-    //  extends SimplePagingContainer<T>
-    extends ClickablePagingContainer<T> {
-  static final int TABLE_WIDTH = 420;
-  private static final int MAX_LENGTH_ID = 13;
-  private static final int PAGE_SIZE = 11;
-  private final Long selectedUser;
-  private final String selectedUserKey;
-  private final DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yy");
-  private final Date now = new Date();
-  private final Logger logger = Logger.getLogger("UserContainer");
-  private final String header;
-
-  protected static final int ID_WIDTH = 130;
-  private static final int SIGNED_UP = 95;
-  private static final String SIGNED_UP1 = "Started";
-  private static final int STUDENT_WIDTH = 300;
-
+public class BasicUserContainer<T extends MiniUser> extends MemoryItemContainer<T> {
   BasicUserContainer(ExerciseController controller,
-                            String selectedUserKey,
-                            String header) {
-    super(controller);
-    this.selectedUserKey = selectedUserKey;
-    this.selectedUser = getSelectedUser(selectedUserKey);
-    this.header = header;
+                     String selectedUserKey,
+                     String header) {
+    super(controller,selectedUserKey,header);
   }
 
   public BasicUserContainer(ExerciseController controller, String header) {
-    super(controller);
-    this.selectedUserKey = getSelectedUserKey(controller, header);
-    this.selectedUser = getSelectedUser(selectedUserKey);
-    this.header = header;
+    super(controller,header);
   }
 
-  public DivWidget getTable(Collection<T> users, String title, String subtitle) {
-    return getStudentContainer(getTableWithPager(users), title, subtitle);
-  }
-
-  private DivWidget getStudentContainer(Panel tableWithPager, String title, String subtitle) {
-    Heading students = subtitle.isEmpty() ?
-        new Heading(3, title) :
-        new Heading(3, title, subtitle);
-
-    students.setWidth(STUDENT_WIDTH + "px");
-    students.getElement().getStyle().setMarginBottom(2, Style.Unit.PX);
-
-    DivWidget leftSide = new DivWidget();
-    leftSide.getElement().setId("studentDiv");
-    leftSide.addStyleName("floatLeftList");
-    if (!title.isEmpty()) {
-      leftSide.add(students);
-    }
-    leftSide.add(tableWithPager);
-    return leftSide;
-  }
-
-  private String getSelectedUserKey(ExerciseController controller, String appTitle) {
-    return getStoragePrefix(controller, appTitle) + "selectedUser";
-  }
-
-  private String getStoragePrefix(ExerciseController controller, String appTitle) {
-    return appTitle + ":" + controller.getUser() + ":";
-  }
-
-  protected String truncate(String columnText) {
-    if (columnText.length() > MAX_LENGTH_ID) columnText = columnText.substring(0, MAX_LENGTH_ID - 3) + "...";
-    return columnText;
-  }
-
-  /**
-   * @return
-   * @see SimplePagingContainer#makeCellTable()
-   */
-  protected int getPageSize() {
-    return isShort() ? 8 : PAGE_SIZE;
-  }
-
-  private boolean isShort() {
-    return Window.getClientHeight() < 822;
-  }
-
-  protected Column<T, SafeHtml> dateCol;
-
-  @Override
-  protected void addColumnsToTable() {
-    Column<T, SafeHtml> userCol = getUserColumn();
-    userCol.setSortable(true);
-    table.setColumnWidth(userCol, ID_WIDTH + "px");
-    addColumn(userCol, new TextHeader(header));
-    ColumnSortEvent.ListHandler<T> columnSortHandler = getUserSorter(userCol, getList());
-    table.addColumnSortHandler(columnSortHandler);
-
-    dateCol = getDateColumn();
-    dateCol.setSortable(true);
-    addColumn(dateCol, new TextHeader(SIGNED_UP1));
-    table.setColumnWidth(dateCol, SIGNED_UP + "px");
-    table.addColumnSortHandler(getDateSorter(dateCol, getList()));
-  }
-
-  /**
-   * @param users
-   * @return
-   * @see StudentAnalysis#StudentAnalysis
-   */
-  public Panel getTableWithPager(final Collection<T> users) {
-    Panel tableWithPager = getTableWithPager();
-    tableWithPager.getElement().setId("TableScoreHistory");
-    tableWithPager.addStyleName("floatLeft");
-
-    int i = 0;
-    int index = 0;
-    T userToSelect = null;
-    for (T user : users) {
-      addItem(user);
-
-      if (selectedUser != null && user.getID() == selectedUser) {
-        index = i;
-        userToSelect = user;
-      }
-      i++;
+  protected int getNameCompare(T o1, T o2) {
+    if (o1 == o2) {
+      return 0;
     }
 
-    flush();
-
-    if (index > 0) {
-      scrollIntoView(index, false);
-    }
-
-    final T finalUser = userToSelect;
-
-
-    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-      public void execute() {
-        if (!users.isEmpty()) {
-          if (selectedUser == null) {
-            T next = users.iterator().next();
-            table.getSelectionModel().setSelected(next, true);
-            gotClickOnItem(next);
-          } else {
-            if (finalUser != null) {
-              table.getSelectionModel().setSelected(finalUser, true);
-              gotClickOnItem(finalUser);
-            }
-            /*int i = 0;
-            for (T userInfo : users) {
-              if (userInfo.getID() == selectedUser) {
-                //    logger.info("found previous selection - " + userInfo + " : " + i);
-                table.getSelectionModel().setSelected(userInfo, true);
-                gotClickOnItem(userInfo);
-
-*//*
-                final int index = i;
-                Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-                  public void execute() {
-                    scrollIntoView(index, false);
-                  }
-                });
-*//*
-
-                break;
-              }
-              i++;*/
-            }
-          //}
-        } else {
-          logger.warning("huh? users is empty???");
-        }
-      }
-    });
-
-    return tableWithPager;
-  }
-
-  /**
-   * @param i
-   * @param doRedraw
-   * @see #getTableWithPager
-   */
-  private void scrollIntoView(int i, boolean doRedraw) {
-    int pageSize = table.getPageSize();
-    int pageNum = i / pageSize;
-    int newIndex = pageNum * pageSize;
-
-    if (i < table.getPageStart()) {
-      int newStart = Math.max(0, newIndex);//table.getPageStart() - table.getPageSize());
-//                  if (DEBUG) logger.info("new start of " + i+ " " + pageNum + " size " + pageSize +
-//                      " prev page " + newStart + " vs current " + table.getVisibleRange());
-      table.setVisibleRange(newStart, pageSize);
-    } else {
-      int pageEnd = table.getPageStart() + pageSize;
-      if (i >= pageEnd) {
-        int newStart = Math.max(0, Math.min(table.getRowCount() - pageSize, newIndex));   // not sure how this happens, but need Math.max(0,...)
-//        if (DEBUG) logger.info("new start of next newIndex " + newStart + "/" + newIndex + "/page = " + pageNum +
-//            " vs current " + table.getVisibleRange());
-        table.setVisibleRange(newStart, pageSize);
-        if (doRedraw) {
-          table.redraw();
-        }
+    // Compare the name columns.
+    if (o1 != null) {
+      if (o2 == null) return 1;
+      else {
+        return o1.getUserID().compareTo(o2.getUserID());
       }
     }
-    i++;
+    return -1;
   }
 
-  @Override
-  protected void setMaxWidth() {
-    table.getElement().getStyle().setProperty("maxWidth", TABLE_WIDTH + "px");
+  protected String getItemLabel(T shell) {
+    return shell.getUserID();
   }
 
-  @Override
-  protected void addSelectionModel() {
-    selectionModel = new SingleSelectionModel<T>();
-    table.setSelectionModel(selectionModel);
-  }
+  protected int getDateCompare(T o1, T o2) {
+    if (o1 == o2) {
+      return 0;
+    }
 
-  @Override
-  protected CellTable.Resources chooseResources() {
-    CellTable.Resources o;
-    o = GWT.create(UserContainer.LocalTableResources.class);
-    return o;
-  }
-
-  private ColumnSortEvent.ListHandler<T> getUserSorter(Column<T, SafeHtml> englishCol,
-                                                       List<T> dataList) {
-    ColumnSortEvent.ListHandler<T> columnSortHandler = new ColumnSortEvent.ListHandler<T>(dataList);
-    columnSortHandler.setComparator(englishCol,
-        new Comparator<T>() {
-          public int compare(T o1, T o2) {
-            if (o1 == o2) {
-              return 0;
-            }
-
-            // Compare the name columns.
-            if (o1 != null) {
-              if (o2 == null) return 1;
-              else {
-                return o1.getUserID().compareTo(o2.getUserID());
-              }
-            }
-            return -1;
-          }
-        });
-    return columnSortHandler;
-  }
-
-  private ColumnSortEvent.ListHandler<T> getDateSorter(Column<T, SafeHtml> englishCol,
-                                                       List<T> dataList) {
-    ColumnSortEvent.ListHandler<T> columnSortHandler = new ColumnSortEvent.ListHandler<T>(dataList);
-    columnSortHandler.setComparator(englishCol,
-        new Comparator<T>() {
-          public int compare(T o1, T o2) {
-            if (o1 == o2) {
-              return 0;
-            }
-
-            // Compare the name columns.
-            if (o1 != null) {
-              if (o2 == null) return 1;
-              else {
-                return Long.valueOf(o1.getTimestampMillis()).compareTo(o2.getTimestampMillis());
-              }
-            }
-            return -1;
-          }
-        });
-    return columnSortHandler;
-  }
-
-  protected SafeHtml getSafeHtml(String columnText) {
-    return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
-  }
-
-  /**
-   * @param selectedUserKey
-   * @return
-   * @see #BasicUserContainer(ExerciseController, String)
-   */
-  private Long getSelectedUser(String selectedUserKey) {
-    if (Storage.isLocalStorageSupported()) {
-      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-      String item = localStorageIfSupported.getItem(selectedUserKey);
-      if (item != null) {
-        try {
-          return Long.parseLong(item);
-        } catch (NumberFormatException e) {
-          logger.warning("got " + e);
-          return null;
-
-        }
+    // Compare the name columns.
+    if (o1 != null) {
+      if (o2 == null) return 1;
+      else {
+        return Long.valueOf(o1.getTimestampMillis()).compareTo(o2.getTimestampMillis());
       }
     }
-    // else {
-    return null;
-    // }
+    return -1;
   }
 
-  /**
-   * @param selectedUser
-   * @see #gotClickOnItem(MiniUser)
-   */
-  public void storeSelectedUser(long selectedUser) {
-    if (Storage.isLocalStorageSupported()) {
-      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-      localStorageIfSupported.setItem(selectedUserKey, "" + selectedUser);
-    }
+  public Long getItemDate(T shell) {
+    return shell.getTimestampMillis();
   }
 
-  protected void addTooltip() {
-    new TooltipHelper().addTooltip(table, "Click on a " +
-        header +
-        ".");
-  }
-
-  private Column<T, SafeHtml> getUserColumn() {
-    return new Column<T, SafeHtml>(new PagingContainer.ClickableCell()) {
-      @Override
-      public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
-        super.onBrowserEvent(context, elem, object, event);
-        if (BrowserEvents.CLICK.equals(event.getType())) {
-          gotClickOnItem(object);
-        }
-      }
-
-      @Override
-      public SafeHtml getValue(T shell) {
-        return getSafeHtml(truncate(shell.getUserID()));
-      }
-    };
-  }
-
-  private Column<T, SafeHtml> getDateColumn() {
-    return new Column<T, SafeHtml>(new PagingContainer.ClickableCell()) {
-      @Override
-      public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
-        super.onBrowserEvent(context, elem, object, event);
-        if (BrowserEvents.CLICK.equals(event.getType())) {
-          gotClickOnItem(object);
-        }
-      }
-
-      @Override
-      public boolean isDefaultSortAscending() {
-        return false;
-      }
-
-      @Override
-      public SafeHtml getValue(T shell) {
-        String signedUp = format.format(
-            //     new Date(shell.getUser().getTimestampMillis())
-            new Date(shell.getTimestampMillis())
-        );
-
-        String format = BasicUserContainer.this.format.format(now);
-        if (format.substring(format.length() - 2).equals(signedUp.substring(signedUp.length() - 2))) {
-          signedUp = signedUp.substring(0, signedUp.length() - 4);
-        }
-
-        return getSafeHtml(signedUp);
-      }
-    };
-  }
-
-  protected void gotClickOnItem(final T user) {
-    storeSelectedUser(user.getID());
-  }
-
-  /**
-   * MUST BE PUBLIC
-   */
-  public interface LocalTableResources extends CellTable.Resources {
-    /**
-     * The styles applied to the table.
-     */
-    @Override
-    @Source({CellTable.Style.DEFAULT_CSS, "ScoresCellTableStyleSheet.css"})
-    TableResources.TableStyle cellTableStyle();
-  }
 }
