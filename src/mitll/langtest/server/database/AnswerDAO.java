@@ -46,7 +46,6 @@ import java.sql.*;
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since
  */
 public class AnswerDAO extends DAO {
   private static final Logger logger = Logger.getLogger(AnswerDAO.class);
@@ -125,6 +124,7 @@ public class AnswerDAO extends DAO {
   /**
    * JUST for MergeSites.
    * TODO : remove
+   *
    * @param info
    * @return
    * @throws SQLException
@@ -163,7 +163,7 @@ public class AnswerDAO extends DAO {
 
     int i = 1;
 
-    statement.setInt(i++, (int)info.getUserid());
+    statement.setInt(i++, (int) info.getUserid());
     statement.setString(i++, PLAN); // obsolete
     statement.setString(i++, copyStringChar(info.getExID()));
     statement.setInt(i++, 1);
@@ -198,7 +198,7 @@ public class AnswerDAO extends DAO {
 
   /**
    * Need to protect call to get generated keys.
-   *
+   * <p>
    * Add a row to the table.
    * Each insert is marked with a timestamp.
    * This allows us to determine user completion rate.
@@ -276,7 +276,7 @@ public class AnswerDAO extends DAO {
       statement.close();
       long now = System.currentTimeMillis();
 
-      logger.debug(getLanguage() + " : END   : addAnswerToTable : adding answer for (" + (now-then)+
+      logger.debug(getLanguage() + " : END   : addAnswerToTable : adding answer for (" + (now - then) +
           ") millis : " + info + " result id " + newID);
     }
 
@@ -350,15 +350,16 @@ public class AnswerDAO extends DAO {
     //logger.info("Setting id " + id + " score " + score + " process dur " + processDur + " json " + json);
     Connection connection = getConnection();
     try {
+      String currentModel = database.getServerProps().getCurrentModel();
       String sql = "UPDATE " +
           "results " +
           "SET " +
-          ResultDAO.PRON_SCORE  + "='" + score + "', " +
+          ResultDAO.PRON_SCORE + "='" + score + "', " +
           ResultDAO.PROCESS_DUR + "='" + processDur + "', " +
-          ResultDAO.CORRECT     + "="  + isCorrect + ", " +
-          ResultDAO.MODELUPDATE     + "='"  + new Timestamp(System.currentTimeMillis()) + "', " +
-          ResultDAO.MODEL     + "='"  + database.getServerProps().getProperty("MODELS_DIR").replaceAll("models.", "") + "', " +
-          ResultDAO.SCORE_JSON  + "='" + json + "' " +
+          ResultDAO.CORRECT + "=" + isCorrect + ", " +
+          ResultDAO.MODELUPDATE + "='" + new Timestamp(System.currentTimeMillis()) + "', " +
+          ResultDAO.MODEL + "='" + currentModel + "', " +
+          ResultDAO.SCORE_JSON + "='" + json + "' " +
 
           "WHERE id=" + id;
 
@@ -370,7 +371,7 @@ public class AnswerDAO extends DAO {
 
       statement.close();
     } catch (Exception e) {
-      logger.error("got " + e, e);
+      logger.error("changeAnswer got " + e, e);
     } finally {
       database.closeConnection(connection);
     }
