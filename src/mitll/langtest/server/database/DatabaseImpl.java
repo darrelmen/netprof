@@ -1539,9 +1539,10 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   /**
    * @param resultID
    * @param asrScoreForAudio
-   * @param isDecode
+   * @param isCorrect
    * @see LangTestDatabaseImpl#getPretestScore(int, long, String, String, int, int, boolean, String, boolean)
    * @see ScoreServlet#getJsonForAudioForUser(int, String, int, ScoreServlet.Request, String, File, String, String, boolean, boolean)
+   * @see mitll.langtest.server.audio.AudioFileHelper#recalcOne
    */
   public void rememberScore(long resultID, PretestScore asrScoreForAudio, boolean isCorrect) {
     getAnswerDAO().changeAnswer(resultID, asrScoreForAudio.getHydecScore(), asrScoreForAudio.getProcessDur(), asrScoreForAudio.getJson(), isCorrect);
@@ -1571,6 +1572,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   private void recordWordAndPhoneInfo(long answerID, PretestScore pretestScore) {
     if (pretestScore != null) {
       recordWordAndPhoneInfo(answerID, pretestScore.getsTypeToEndTimes());
+    }
+    else {
+      logger.warn("recordWordAndPhoneInfo no score for " + answerID);
     }
   }
 
