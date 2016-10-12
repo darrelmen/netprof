@@ -50,6 +50,7 @@ import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -98,6 +99,9 @@ public class RefResultDecoder {
   }
 
   /**
+   * Used to have cheesy check for trying to convert old audio held outside of audio table into audio table
+   * entries.
+   *
    * @param exercises
    * @param relativeConfigDir
    * @see LangTestDatabaseImpl#init()
@@ -116,9 +120,11 @@ public class RefResultDecoder {
         } else {
           logger.debug(getLanguage() + " not doing decode ref decode");
         }
+/*
         if (db.getAudioDAO().numRows() < 25) {
           populateAudioTable(exercises);
         }
+*/
         if (db.getServerProps().shouldRecalcStudentAudio()) {
           recalcStudentAudio();
         }
@@ -130,8 +136,8 @@ public class RefResultDecoder {
    * This was for a one time fix for weird sudanese thing where audio files were truncated on Aug 11 and 12
    * Very weird.
    *
-   * @param pathHelper
-   * @param path
+   * @paramz pathHelper
+   * @paramz path
    * @return
    */
  /* public void fixTruncated(PathHelper war) {
@@ -180,9 +186,11 @@ public class RefResultDecoder {
     }
     logger.info("Fixed " +fixed + " files");
   }*/
+/*
   private File getAbsoluteFile(PathHelper pathHelper, String path) {
     return pathHelper.getAbsoluteFile(path);
   }
+*/
 
   private String getLanguage() {
     return serverProps.getLanguage();
@@ -191,9 +199,18 @@ public class RefResultDecoder {
   private void populateAudioTable(final Collection<CommonExercise> exercises) {
     int total = 0;
     for (CommonExercise ex : exercises) {
+      if (stopDecode) return;
+
       String refAudioIndex = ex.getRefAudioIndex();
       if (refAudioIndex != null && !refAudioIndex.isEmpty()) {
-        total += db.getAudioDAO().addOldSchoolAudio(refAudioIndex, (AudioExercise) ex, serverProps.getAudioOffset(), mediaDir, installPath);
+        try {
+          total += db.getAudioDAO().addOldSchoolAudio(refAudioIndex,
+              (AudioExercise) ex,
+              serverProps.getAudioOffset(),
+              mediaDir, installPath);
+        } catch (SQLException e) {
+          return;
+        }
       }
     }
     logger.info(getLanguage() + " : populateAudioTable added " + total);

@@ -151,7 +151,7 @@ public class AudioDAO extends DAO {
     }
   }
 
-  public <T extends AudioExercise> int addOldSchoolAudio(String refAudioIndex, T imported, int audioOffset, String mediaDir, String installPath) {
+  public <T extends AudioExercise> int addOldSchoolAudio(String refAudioIndex, T imported, int audioOffset, String mediaDir, String installPath) throws SQLException {
     String audioDir = refAudioIndex.length() > 0 ? findBest(refAudioIndex) : imported.getID();
     if (audioOffset != 0) {
       audioDir = "" + (Integer.parseInt(audioDir.trim()) + audioOffset);
@@ -183,6 +183,7 @@ public class AudioDAO extends DAO {
           total++;
         } catch (Exception e) {
           logger.error("got " + e, e);
+          throw e;
         }
       } else {
         // logger.info("2 no audio at " + test.getAbsolutePath());
@@ -1387,9 +1388,8 @@ public class AudioDAO extends DAO {
       logger.error("huh? userid is " + userid);
       new Exception().printStackTrace();
     }
-
     // logger.debug("addAudio : by " + userid + " for ex " + exerciseID + " type " + audioType + " ref " + audioRef);
-    int before = DEBUG ? getCount(AUDIO) : 0;
+    int before = 0;//DEBUG ? getCount(AUDIO) : 0;
 
     PreparedStatement statement = connection.prepareStatement("INSERT INTO " + AUDIO +
         "(" +

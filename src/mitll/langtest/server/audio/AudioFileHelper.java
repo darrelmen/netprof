@@ -467,6 +467,9 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   /**
+   * Re-write info in result table, mark it with model and model update date
+   * rewrite word and phone info for result.
+   *
    * @see RefResultDecoder#recalcStudentAudio
    * @param result
    * @param exercise
@@ -474,21 +477,24 @@ public class AudioFileHelper implements AlignDecode {
    */
   public boolean recalcOne(Result result, CommonExercise exercise) {
     String audioRef = result.getAnswer();
-
     File absoluteFile = pathHelper.getAbsoluteFile(audioRef);
-    String absolutePath = absoluteFile.getAbsolutePath();
+
+    int uniqueID = result.getUniqueID();
 
     if (result.getAudioType().equals("flashcard") || result.getAudioType().equals("avp")) {
       long durationInMillis = result.getDurationInMillis();
       AudioAnswer decodeAnswer = getDecodeAnswer(exercise, audioRef, absoluteFile, durationInMillis, false);
-      db.getPhoneDAO().removePhones(result.getUniqueID());
-      db.getWordDAO().removeWords(result.getUniqueID());
-      db.rememberScore(result.getUniqueID(), decodeAnswer.getPretestScore(), decodeAnswer.isCorrect());
+      db.getPhoneDAO().removePhones(uniqueID);
+      db.getWordDAO().removeWords(uniqueID);
+      db.rememberScore(uniqueID, decodeAnswer.getPretestScore(), decodeAnswer.isCorrect());
+      logger.info("rememberScore for result " + uniqueID + " : decode " /* +decodeAnswer.getPretestScore()*/);
     } else {
+      String absolutePath = absoluteFile.getAbsolutePath();
       PretestScore alignmentScore = getAlignmentScore(exercise, absolutePath, serverProps.usePhoneToDisplay(), false);
-      db.getPhoneDAO().removePhones(result.getUniqueID());
-      db.getWordDAO().removeWords(result.getUniqueID());
-      db.rememberScore(result.getUniqueID(), alignmentScore, alignmentScore.getHydecScore() > 0.25);
+      db.getPhoneDAO().removePhones(uniqueID);
+      db.getWordDAO().removeWords(uniqueID);
+      db.rememberScore(uniqueID, alignmentScore, alignmentScore.getHydecScore() > 0.25);
+      logger.info("rememberScore for result " + uniqueID + " : alignment "  +alignmentScore);
     }
     return true;
   }
