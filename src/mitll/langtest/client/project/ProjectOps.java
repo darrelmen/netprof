@@ -73,12 +73,12 @@ public class ProjectOps implements RequiresResize {
 
 
   /**
-   * @param users
-   * @see Navigation#addUserMaintenance()
+   * @param tabAndContent
+   * @see Navigation#addProjectMaintenance
    * @see Navigation#selectPreviousTab
    */
-  public void show(TabAndContent users) {
-    DivWidget content = users.getContent();
+  public void show(TabAndContent tabAndContent) {
+    DivWidget content = tabAndContent.getContent();
     content.clear();
 
     DivWidget left = addDiv(content);
