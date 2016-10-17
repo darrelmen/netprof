@@ -77,6 +77,8 @@ import java.util.logging.Logger;
  * @since 8/11/14.
  */
 public class UserPassLogin extends UserDialog {
+  private static final String USERNAME_BOX_SIGN_IN = "Username_Box_SignIn";
+  public static final String USER_NAME_BOX = "UserNameBox";
   private final Logger logger = Logger.getLogger("UserPassLogin");
 
   private static final String IPAD_LINE_1 = "Also consider installing the NetProF app, which is available on the DLI App Store.";// or";
@@ -96,7 +98,7 @@ public class UserPassLogin extends UserDialog {
   private static final int LEFT_SIDE_WIDTH = 483;
   private static final String SIGN_UP_SUBTEXT = "Sign up";
   private static final String PLEASE_ENTER_YOUR_PASSWORD = "Please enter your password.";
-  private static final String BAD_PASSWORD = "Wrong password - have you signed up?";
+  private static final String BAD_PASSWORD = "Wrong password, please try again.";// - have you signed up?";
   private static final String PASSWORD = "Password";
   private static final String USERNAME = "Username";
   private static final String SIGN_IN = "Log In";
@@ -226,7 +228,7 @@ public class UserPassLogin extends UserDialog {
           }
         },
         true);
-    modal.setMaxHeigth((600) + "px");
+    modal.setMaxHeigth(600 + "px");
     modal.show();
   }
 
@@ -377,7 +379,7 @@ public class UserPassLogin extends UserDialog {
         } else {
           String value = password.box.getValue();
           if (!value.isEmpty() && value.length() < MIN_PASSWORD) {
-            markErrorBlur(password, BAD_PASSWORD);
+            markErrorBlur(password, "Please enter a password longer than " + MIN_PASSWORD + " characters.");
           } else {
             gotLogin(userID, value, value.isEmpty());
           }
@@ -404,14 +406,14 @@ public class UserPassLogin extends UserDialog {
     user = addControlFormFieldWithPlaceholder(fieldset, false, MIN_LENGTH_USER_ID, USER_ID_MAX_LENGTH, USERNAME);
     user.box.addStyleName("topMargin");
     user.box.addStyleName("rightFiveMargin");
-    user.box.getElement().setId("Username_Box_SignIn");
+    user.box.getElement().setId(USERNAME_BOX_SIGN_IN);
     user.box.setWidth(SIGN_UP_WIDTH);
 
     user.box.addFocusHandler(new FocusHandler() {
       @Override
       public void onFocus(FocusEvent event) {
         signInHasFocus = true;
-        eventRegistration.logEvent(user.box, "UserNameBox", "N/A", "focus in username field");
+        eventRegistration.logEvent(user.box, USER_NAME_BOX, "N/A", "focus in username field");
       }
     });
 
@@ -419,7 +421,7 @@ public class UserPassLogin extends UserDialog {
       @Override
       public void onBlur(BlurEvent event) {
         if (!user.getText().isEmpty()) {
-          eventRegistration.logEvent(user.box, "UserNameBox", "N/A", "left username field '" + user.getText() + "'");
+          eventRegistration.logEvent(user.box, USER_NAME_BOX, "N/A", "left username field '" + user.getText() + "'");
 
           //    logger.info("checking makeSignInUserName " + user.getText());
           service.userExists(user.getText(), "", new AsyncCallback<User>() {
@@ -435,8 +437,7 @@ public class UserPassLogin extends UserDialog {
                 String emailHash = result.getEmailHash();
                 String passwordHash = result.getPasswordHash();
                 if (emailHash == null || passwordHash == null || emailHash.isEmpty() || passwordHash.isEmpty()) {
-                  eventRegistration.logEvent(user.box, "UserNameBox", "N/A", "existing legacy user " + result.toStringShort());
-
+                  eventRegistration.logEvent(user.box, USER_NAME_BOX, "N/A", "existing legacy user " + result.toStringShort());
                   copyInfoToSignUp(result);
                 }
               }
@@ -595,7 +596,7 @@ public class UserPassLogin extends UserDialog {
   }
 
   private boolean isValidEmail(String text) {
-    return text.toUpperCase().matches("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$");
+    return text.trim().toUpperCase().matches("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$");
   }
 
   /**
@@ -924,7 +925,7 @@ public class UserPassLogin extends UserDialog {
             } else {
               if (result.isEnabled()) {
                 eventRegistration.logEvent(signUp, "signing up", "N/A", getSignUpEvent(result));
-                logger.info("Got valid, enabled new user " + user + " and so we're letting them in.");
+               // logger.info("Got valid, enabled new user " + user + " and so we're letting them in.");
 
                 storeUser(result);
               } else {
@@ -1006,7 +1007,7 @@ public class UserPassLogin extends UserDialog {
    */
   private void gotLogin(final String user, final String pass, final boolean emptyPassword) {
     final String hashedPass = Md5Hash.getHash(pass);
-    logger.info("gotLogin : user is '" + user + "' pass '" + pass + "' or '" + hashedPass + "'");
+    logger.info("gotLogin : user is '" + user + "' pass " + pass.length() + " characters or '" + hashedPass + "'");
 
     signIn.setEnabled(false);
     service.userExists(user, hashedPass, new AsyncCallback<User>() {
@@ -1021,11 +1022,10 @@ public class UserPassLogin extends UserDialog {
         if (result == null) {
           eventRegistration.logEvent(signIn, "sign in", "N/A", "unknown user " + user);
 
-          logger.info("No user with that name '" + user + "' pass '" + pass + "'" + emptyPassword);
-          markErrorBlur(password, emptyPassword ? PLEASE_ENTER_YOUR_PASSWORD : BAD_PASSWORD);
+          logger.info("No user with that name '" + user + "' pass " + pass.length() + " characters - " + emptyPassword);
+          markErrorBlur(password, emptyPassword ? PLEASE_ENTER_YOUR_PASSWORD : "No user found - have you signed up?");
           signIn.setEnabled(true);
         } else {
-          logger.info("Found user " + result);
           foundExistingUser(result, emptyPassword, hashedPass);
         }
       }
@@ -1046,7 +1046,7 @@ public class UserPassLogin extends UserDialog {
       copyInfoToSignUp(result);
       signIn.setEnabled(true);
     } else {
-      logger.info("Got valid user " + result);
+     // logger.info("Got valid user " + result);
       if (emptyPassword) {
         eventRegistration.logEvent(signIn, "sign in", "N/A", "empty password");
 
@@ -1055,7 +1055,7 @@ public class UserPassLogin extends UserDialog {
       } else if (result.getPasswordHash().equalsIgnoreCase(hashedPass)) {
         if (result.isEnabled() || result.getUserKind() != User.Kind.CONTENT_DEVELOPER || props.enableAllUsers()) {
           eventRegistration.logEvent(signIn, "sign in", "N/A", "successful sign in for " + user);
-          logger.info("Got valid user " + user + " and matching password, so we're letting them in.");
+      //    logger.info("Got valid user " + user + " and matching password, so we're letting them in.");
 
           storeUser(result);
         } else {
