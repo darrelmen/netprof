@@ -34,10 +34,12 @@ package mitll.langtest.client.exercise;
 
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.scoring.UnitChapterItemHelper;
 import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.Result;
@@ -56,10 +58,10 @@ import java.util.logging.Logger;
  * Time: 6:17 PM
  * To change this template use File | Settings | File Templates.
  */
-public class WaveformExercisePanel<L extends CommonShell, T extends CommonShell & AudioRefExercise> extends ExercisePanel<L,T> {
+public class WaveformExercisePanel<L extends CommonShell, T extends CommonShell & AudioRefExercise> extends ExercisePanel<L, T> {
   private final Logger logger = Logger.getLogger("WaveformExercisePanel");
 
-  private static final String RECORD_PROMPT  = "Record the word or phrase, first at normal speed, then again at slow speed.";
+  private static final String RECORD_PROMPT = "Record the word or phrase, first at normal speed, then again at slow speed.";
   private static final String RECORD_PROMPT2 = "Record the in-context sentence.";
   private static final String EXAMPLE_RECORD = "EXAMPLE_RECORD";
   private boolean isBusy = false;
@@ -97,7 +99,6 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonShell 
 
   /**
    * @see ExercisePanel#ExercisePanel
-   *
    */
   protected void addInstructions() {
     Panel flow = new UnitChapterItemHelper<T>(controller.getTypeOrder()).addUnitChapterItem(exercise, this);
@@ -107,7 +108,10 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonShell 
     add(new Heading(4, isExampleRecord() ? RECORD_PROMPT2 : RECORD_PROMPT));
   }
 
-  private boolean isNormalRecord()  { return !isExampleRecord(); }
+  private boolean isNormalRecord() {
+    return !isExampleRecord();
+  }
+
   private boolean isExampleRecord() {
     return message.equals(EXAMPLE_RECORD);
   }
@@ -162,7 +166,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonShell 
   }
 
   private VerticalPanel addRecordAudioPanelNoCaption(T exercise, LangTestDatabaseAsync service,
-                                            ExerciseController controller, int index, Panel vp, String audioType) {
+                                                     ExerciseController controller, int index, Panel vp, String audioType) {
     RecordAudioPanel fast = new RecordAudioPanel<T>(exercise, controller, this, service, index, false, audioType, instance);
     audioPanels.add(fast);
     vp.add(fast);
@@ -178,7 +182,11 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonShell 
 
   @Override
   public void onResize() {
-    for (RecordAudioPanel ap : audioPanels) {  ap.onResize();  }
+/*    logger.info(getElement().getId() + " gotResize " + (audioPanels
+        != null ? audioPanels.size() : ""));*/
+    for (RecordAudioPanel ap : audioPanels) {
+      ap.onResize();
+    }
   }
 
   /**
@@ -192,10 +200,10 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonShell 
    */
   @Override
   public void postAnswers(ExerciseController controller, HasID completedExercise) {
-  //  completedExercise.setState(STATE.RECORDED);
+    //  completedExercise.setState(STATE.RECORDED);
     // TODO : gah = do we really need to do this???
 
-    logger.info("Not setting state on " +completedExercise.getID());
+    logger.info("Not setting state on " + completedExercise.getID());
 
     exerciseList.setState(completedExercise.getID(), STATE.RECORDED);
     exerciseList.redraw();
