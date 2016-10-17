@@ -47,7 +47,7 @@ import java.util.logging.Logger;
  * @since 5/27/2014.
  */
 class WebAudioRecorder {
-  private final Logger logger = Logger.getLogger("WebAudioRecorder");
+//  private final Logger logger = Logger.getLogger("WebAudioRecorder");
   private static final int DELAY_MILLIS = 5000;
 
   private static boolean webAudioMicAvailable;
@@ -62,10 +62,10 @@ class WebAudioRecorder {
    *
    * The user can easily ignore the dialog by clicking away.
    */
-  public void tryWebAudio() {
+  boolean tryWebAudio() {
     if (!tried) {
       tried = true;
-      logger.info("webAudioMicAvailable -- tryWebAudio!");
+      //logger.info("webAudioMicAvailable -- tryWebAudio!");
       initWebaudio();
 
       if (theTimer != null) theTimer.cancel();
@@ -80,6 +80,10 @@ class WebAudioRecorder {
         }
       };
       theTimer.schedule(DELAY_MILLIS);
+      return true;
+    }
+    else {
+      return false;
     }
   }
 
@@ -109,9 +113,13 @@ class WebAudioRecorder {
   }-*/;
 
   private static void console(String message) {
-    int ieVersion = BrowserCheck.getIEVersion();
-    if (ieVersion == -1 || ieVersion > 9) {
-      consoleLog(message);
+    try {
+      int ieVersion = BrowserCheck.getIEVersion();
+      if (ieVersion == -1 || ieVersion > 9) {
+        consoleLog(message);
+      }
+    } catch (Exception e) {
+      //e.printStackTrace();
     }
   }
 
@@ -119,16 +127,13 @@ class WebAudioRecorder {
       console.log( "WebAudioRecorder:" + message );
   }-*/;
 
-  //public boolean isMicConnected() { return micConnected; }
   public boolean isWebAudioMicAvailable() { return webAudioMicAvailable; }
 
   public static void webAudioMicAvailable() {
     gotResponse = true;
 
     console("webAudioMicAvailable -- connected!");
-
     webAudioMicAvailable = true;
-//    logger.info("webAudioMicAvailable -- connected!");
     FlashRecordPanelHeadless.micPermission.gotPermission();
   }
 
@@ -137,8 +142,13 @@ class WebAudioRecorder {
 
     console("webAudioMicNotAvailable!");
 
+    noWebRTC();
+  }
+
+  static void noWebRTC() {
     webAudioMicAvailable = false;
-    FlashRecordPanelHeadless.micPermission.noRecordingMethodAvailable();
+//    FlashRecordPanelHeadless.micPermission.noRecordingMethodAvailable();
+    FlashRecordPanelHeadless.micPermission.noWebRTCAvailable();
   }
 
   public static void webAudioPermissionDenied() {
@@ -146,8 +156,7 @@ class WebAudioRecorder {
 
     console("webAudioPermissionDenied!");
 
-    webAudioMicAvailable = false;
-   // FlashRecordPanelHeadless.micPermission.noRecordingMethodAvailable();
+    noWebRTC();
   }
 
   /**
@@ -155,7 +164,6 @@ class WebAudioRecorder {
    * @param encoded
    */
   public static void getBase64(String encoded) {
-    //logger.info("WebAudioRecorder.getBase64 " + encoded.length());
     if (encoded.length() < 100) {
       console("bytes = '" + encoded + "'");
     }
