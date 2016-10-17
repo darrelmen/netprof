@@ -63,6 +63,7 @@ public class AudioCheck {
   private static final float PowerThreshold = -79.50f;//-55.0f;
   private static final float VarianceThreshold = 20.0f;
   private static final double CLIPPED_RATIO = 0.005; // 1/2 %
+  private static final double CLIPPED_RATIO_TIGHTER = 0.0025; // 1/2 %
   private static final double LOG_OF_TEN = Math.log(10.0);
 
   private static final short clippedThreshold = 32704; // 32768-64
@@ -72,6 +73,7 @@ public class AudioCheck {
   // private static final short clippedThreshold2Minus = -32752; // 32768-16
   private static final float MAX_VALUE = 32768.0f;
   public static final ValidityAndDur INVALID_AUDIO = new ValidityAndDur();
+  public static final int CLIPPED_FRAME_COUNT = 1;
   private final int MIN_DYNAMIC_RANGE;
   private final ServerProperties props;
 
@@ -179,6 +181,8 @@ public class AudioCheck {
    * @param file audio byte array with header
    * @return true if well formed
    * @see AudioConversion#isValid(File, boolean, boolean)
+   * @see #checkWavFile(File, boolean)
+   * @see #checkWavFileRejectAnyTooLoud(File, boolean)
    */
   private ValidityAndDur checkWavFileWithClipThreshold(File file, boolean usePercent, boolean quietAudioOK) {
     AudioInputStream ais = null;
@@ -241,8 +245,8 @@ public class AudioCheck {
 
       float clippedRatio = ((float) countClipped) / (float) frameLength;
       float clippedRatio2 = ((float) cc) / (float) frameLength;
-      boolean wasClipped = usePercent ? clippedRatio > CLIPPED_RATIO : countClipped > 1;
-      boolean wasClipped2 = usePercent ? clippedRatio2 > CLIPPED_RATIO : cc > 1;
+      boolean wasClipped  = usePercent ? clippedRatio > CLIPPED_RATIO : clippedRatio > CLIPPED_RATIO_TIGHTER;// > CLIPPED_FRAME_COUNT;
+    //  boolean wasClipped2 = usePercent ? clippedRatio2 > CLIPPED_RATIO : cc > 1;
 /*      logger.info("of " + total +" got " +countClipped + " out of " + n +"  or " + clippedRatio  + "/" +clippedRatio2+
         " not " + notClippedRatio +" wasClipped = " + wasClipped);*/
 
@@ -252,12 +256,12 @@ public class AudioCheck {
       final boolean validAudio = mean > PowerThreshold || std > VarianceThreshold;
 
       if (wasClipped || !validAudio) {
-        logger.info("checkWavFile: audio recording (Length: " + frameLength + ") " +
+        logger.info("checkWavFile: audio recording (Length: " + frameLength + " frames) " +
             "mean power = " + mean + " (dB) vs " + PowerThreshold +
             ", std = " + std + " vs " + VarianceThreshold +
             " valid = " + validAudio +
-            " was clipped " + wasClipped + " (" + (clippedRatio * 100f) + "% samples clipped, # clipped = " + countClipped + ") " +
-            " was clipped " + wasClipped2 + " (" + (clippedRatio2 * 100f) + "% samples clipped, # clipped = " + cc + ")" +
+            " was clipped (1) " + wasClipped +  " (" + (clippedRatio * 100f) +  "% samples clipped, # clipped = " + countClipped + ") " +
+           // " was clipped (2) " + wasClipped2 + " (" + (clippedRatio2 * 100f) + "% samples clipped, # clipped = " + cc + ")" +
             " max = " + max + "/" + nmax
         );
       }
@@ -308,6 +312,7 @@ public class AudioCheck {
     /**
      * @param validity
      * @param dur
+     * @parma quietAudioOK - only useful for automated load testing where we aren't really making recordings
      */
     public ValidityAndDur(AudioAnswer.Validity validity, double dur, boolean quietAudioOK) {
       this.validity = validity;
