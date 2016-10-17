@@ -36,6 +36,8 @@ import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.download.DownloadHelper;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,7 +47,6 @@ import java.util.List;
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since
  */
 public class DialogHelper {
   private final boolean doYesAndNo;
@@ -60,11 +61,12 @@ public class DialogHelper {
     this.doYesAndNo = doYesAndNo;
   }
 
+/*
   public DialogHelper(String title, Collection<String> msgs, CloseListener listener) {
     this.doYesAndNo = true;
-    show(title, msgs, "Yes", listener);
+    show(title, msgs, null, "Yes", "No", listener);
   }
-
+*/
 
   public void showErrorMessage(String title, String msg) {
     List<String> msgs = new ArrayList<String>();
@@ -73,15 +75,14 @@ public class DialogHelper {
   }
 
   private void showErrorMessage(String title, Collection<String> msgs) {
-    show(title, msgs, "Close", null);
+    show(title, msgs, null, "Close", "No", null, -1);
   }
-
 /*  public void show(String title, String msg, String buttonName, final CloseListener listener) {
     show(title, Collections.singletonList(msg), buttonName, listener);
   }*/
 
   public void show(String title, Collection<String> msgs, final CloseListener listener) {
-    show(title, msgs, "Yes", listener);
+    show(title, msgs, null, "Yes", "No", listener, -1);
   }
 
   /**
@@ -89,19 +90,17 @@ public class DialogHelper {
    *
    * @param title
    * @param msgs
+   * @param maxHeight
+   * @see DownloadHelper#showDialog
    */
-  private void show(String title, Collection<String> msgs, String buttonName, final CloseListener listener) {
-    //final DialogBox dialogBox = new DialogBox();
+  public Button show(String title, Collection<String> msgs, Widget other, String buttonName, String cancelButtonName,
+                     final CloseListener listener, int maxHeight) {
     final Modal dialogBox = new Modal();
-    Button closeButton;
-
-    // dialogBox.setGlassEnabled(true);
     dialogBox.setTitle("<b>" + title + "</b>");
-
+    if (maxHeight > 0) dialogBox.setMaxHeigth(maxHeight + "px");
+    Button closeButton;
     closeButton = new Button(buttonName);
     closeButton.setType(ButtonType.PRIMARY);
-
-    // closeButton.getElement().setId("closeButton");
     closeButton.setFocus(true);
 
     FluidContainer container = new FluidContainer();
@@ -117,12 +116,14 @@ public class DialogHelper {
       container.add(row);
     }
 
+    if (other != null) container.add(other);
+
     // add buttons
     FluidRow row = new FluidRow();
     if (doYesAndNo) {
       row.add(new Column(4, closeButton));
       row.add(new Column(4, new Heading(4)));
-      Button noButton = new Button("No");
+      Button noButton = new Button(cancelButtonName);
       noButton.setType(ButtonType.INVERSE);
 
       row.add(new Column(4, noButton));
@@ -147,9 +148,9 @@ public class DialogHelper {
       }
     });
 
-   /* dialogBox.setWidget(container);
-    dialogBox.center();*/
     dialogBox.add(container);
     dialogBox.show();
+
+    return closeButton;
   }
 }
