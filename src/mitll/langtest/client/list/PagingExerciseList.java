@@ -42,7 +42,6 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -58,7 +57,6 @@ import mitll.langtest.shared.exercise.STATE;
 import mitll.langtest.shared.exercise.Shell;
 
 import java.util.*;
-import java.util.logging.Logger;
 
 /**
  * Show exercises with a cell table that can handle thousands of rows.
@@ -72,9 +70,9 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class PagingExerciseList<T extends CommonShell, U extends Shell> extends ExerciseList<T, U> {
-  private static final String SEARCH = "Search";
+  //  private final Logger logger = Logger.getLogger("PagingExerciseList");
+  public static final String SEARCH = "Search";
   private static final int TEN_SECONDS = 10 * 60 * 1000;
-  private final Logger logger = Logger.getLogger("PagingExerciseList");
 
   protected final ExerciseController controller;
   protected ClickablePagingContainer<T> pagingContainer;
@@ -224,7 +222,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   public void setUnaccountedForVertical(int v) {
     unaccountedForVertical = v;
     pagingContainer.setUnaccountedForVertical(v);
-    //logger.info("setUnaccountedForVertical : vert " + v + " for " +getElement().getId());
+    //logger.info("setUnaccountedForVertical : vert " + v + " for " +getElement().getExID());
   }
 
   /**
@@ -241,6 +239,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     // row 2
     add(pagingContainer.getTableWithPager());
   }
+
   /**
    * Called on keypress
    * Show wait cursor if the type ahead takes too long.
@@ -266,16 +265,16 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    */
   public void searchBoxEntry(String text) {
     if (showTypeAhead) {
-   //   logger.info("searchBoxEntry type ahead '" + text + "'");
+      //   logger.info("searchBoxEntry type ahead '" + text + "'");
       gotTypeAheadEvent(text, true);
     }
   }
 
   private Stack<Long> pendingRequests = new Stack<>();
- // private int typeRequestID = 0;
+  // private int typeRequestID = 0;
 
   private void gotTypeAheadEvent(String text, boolean setTypeAheadText) {
-  //  logger.info("got type ahead '" + text + "' at " + new Date(keypressTimestamp));
+    //  logger.info("got type ahead '" + text + "' at " + new Date(keypressTimestamp));
     if (!setTypeAheadText) {
       pendingRequests.add(System.currentTimeMillis());
     }
@@ -300,19 +299,18 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
   /**
-   * @see HistoryExerciseList#restoreUIState(SelectionState)
    * @param t
+   * @see HistoryExerciseList#restoreUIState(SelectionState)
    */
   void setTypeAheadText(String t) {
     if (pendingRequests.isEmpty()) {
       if (typeAhead != null) {
-     //   logger.info("Set type ahead to '" + t + "'");
+        //   logger.info("Set type ahead to '" + t + "'");
         typeAhead.setText(t);
       }
-    }
-    else {
+    } else {
       popRequest();
-     // logger.info("setTypeAheadText pendingRequests now" + pendingRequests);
+      // logger.info("setTypeAheadText pendingRequests now" + pendingRequests);
     }
   }
 
@@ -344,7 +342,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   protected void showEmptySelection() {
 /*
     logger.info("for " + getInstance() +
-        " showing no items match relative to " + typeAhead.getWidget().getElement().getId() + " parent " + typeAhead.getWidget().getParent().getElement().getId());
+        " showing no items match relative to " + typeAhead.getWidget().getElement().getExID() + " parent " + typeAhead.getWidget().getParent().getElement().getExID());
 */
 
     Scheduler.get().scheduleDeferred(new Command() {
@@ -402,8 +400,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   public Collection<T> rememberExercises(Collection<T> result) {
     inOrderResult = result;
     if (doShuffle) {
-     // logger.info(getInstance() + " : rememberExercises - shuffling " + result.size() + " items");
-
+      // logger.info(getInstance() + " : rememberExercises - shuffling " + result.size() + " items");
       ArrayList<T> ts = new ArrayList<>(result);
       result = ts;
       Shuffler.shuffle(ts);
