@@ -34,6 +34,7 @@ package mitll.langtest.client;
 
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.cellview.client.CellTable;
 
 /**
  * Use an mp3 audio reference and either WAV or WEBM.
@@ -50,6 +51,11 @@ public class AudioTag {
   private static final String PRELOAD_HINT = "auto";
   public static final String COMPRESSED_TYPE = "ogg";
 
+  /**
+   * @see mitll.langtest.client.result.ResultManager#addColumnsToTable(CellTable)
+   * @param result
+   * @return
+   */
   public SafeHtml getAudioTag(String result) {
     return getAudioTag(result, true);
   }
