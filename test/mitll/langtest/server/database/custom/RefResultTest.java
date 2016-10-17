@@ -134,7 +134,7 @@ public class RefResultTest {
     Map<String,CorrectAndScore> idToCorrect = new HashMap<String, CorrectAndScore>();
 
     for (CorrectAndScore correctAndScore : resultsForUser) {
-      String key = correctAndScore.getId() + "/" + correctAndScore.getQid();
+      String key = correctAndScore.getExID() + "/" + correctAndScore.getQid();
       //  CorrectAndScore prev = idToCorrect.get(key);
       // if previous entry had no self grade but this one does take it
       // if (prev == null && correctAndScore.hasUserScore()) {// *//*|| !prev.hasUserScore()*//*) {
