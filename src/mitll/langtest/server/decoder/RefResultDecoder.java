@@ -387,7 +387,7 @@ public class RefResultDecoder {
             }
           }
           else {
-            if (notThere < 1000 || exid.startsWith("1")) logger.info("Can't find " + pathHelper.getAbsoluteFile(audioRef).getAbsolutePath());
+            if (notThere < 10) logger.info("Can't find " + pathHelper.getAbsoluteFile(audioRef).getAbsolutePath());
             notThere++;
           }
         }
