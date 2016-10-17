@@ -34,7 +34,8 @@ package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.custom.UserListManager;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.Exercise;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -79,6 +80,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
 
   private final boolean DEBUG = false;
   private long lastModified;
+  private boolean first = false;
 
   /**
    * JUST FOR TESTING
@@ -103,15 +105,16 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     super(serverProps, userListManager, addDefects);
     this.file = file;
 
-  //  logger.info("Reading from " + file);
+    //  logger.info("Reading from " + file);
     maxExercises = serverProps.getMaxNumExercises();
     // turn off missing fast/slow for classroom
     shouldHaveRefAudio = false;
     this.usePredefinedTypeOrder = serverProps.usePredefinedTypeOrder();
     this.skipSemicolons = serverProps.shouldSkipSemicolonEntries();
-    this.unitIndex    = serverProps.getUnitChapterWeek()[0];
+    // from the tier index property
+    this.unitIndex = serverProps.getUnitChapterWeek()[0];
     this.chapterIndex = serverProps.getUnitChapterWeek()[1];
-    this.weekIndex    = serverProps.getUnitChapterWeek()[2];
+    this.weekIndex = serverProps.getUnitChapterWeek()[2];
     if (DEBUG) logger.debug("unit " + unitIndex + " chapter " + chapterIndex + " week " + weekIndex);
   }
 
@@ -213,6 +216,8 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
    * @see #readExercises(java.io.InputStream)
    */
   private Collection<CommonExercise> readFromSheet(Sheet sheet) {
+    if (DEBUG) logger.info("read from sheet " + sheet.getSheetName());
+
     List<CommonExercise> exercises = new ArrayList<CommonExercise>();
     int id = 0;
     boolean gotHeader = false;
@@ -254,6 +259,8 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
           List<String> predefinedTypeOrder = new ArrayList<String>();
           for (String col : columns) {
             String colNormalized = col.toLowerCase();
+            //if (DEBUG) logger.info("col " + colNormalized + "/" + col);
+
             if (colNormalized.startsWith(WORD)) {
               gotHeader = true;
               colIndexOffset = columns.indexOf(col);
@@ -271,28 +278,39 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
               audioIndex = columns.indexOf(col);
               hasAudioIndex = true;
             } else if (gotUCW) {
-//              logger.debug("using predef unit/chapter/week ");
+              if (DEBUG) logger.debug("using predef unit/chapter/week ");
               if (columns.indexOf(col) == unitIndex) {
                 predefinedTypeOrder.add(col);
+                if (DEBUG) logger.debug("predefinedTypeOrder unit " + predefinedTypeOrder);
+
                 unitName = col;
               } else if (columns.indexOf(col) == chapterIndex) {
                 predefinedTypeOrder.add(col);
+                if (DEBUG) logger.debug("predefinedTypeOrder chapter " + predefinedTypeOrder);
+
                 chapterName = col;
               } else if (columns.indexOf(col) == weekIndex) {
                 predefinedTypeOrder.add(col);
+                if (DEBUG) logger.debug("predefinedTypeOrder week " + predefinedTypeOrder);
+
                 weekName = col;
               }
             } else if (colNormalized.contains("unit") || colNormalized.contains("book")) {
               unitIndex = columns.indexOf(col);
+              if (DEBUG) logger.debug("predefinedTypeOrder unit " + predefinedTypeOrder);
+
               predefinedTypeOrder.add(col);
               unitName = col;
             } else if (colNormalized.contains("chapter") || colNormalized.contains("lesson")) {
               chapterIndex = columns.indexOf(col);
               predefinedTypeOrder.add(col);
+              if (DEBUG) logger.debug("predefinedTypeOrder chapter " + predefinedTypeOrder);
+
               chapterName = col;
             } else if (colNormalized.contains("week")) {
               weekIndex = columns.indexOf(col);
               predefinedTypeOrder.add(col);
+              if (DEBUG) logger.debug("predefinedTypeOrder week " + predefinedTypeOrder);
               weekName = col;
             }
           }
@@ -305,7 +323,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
               " meaning " + meaningIndex +
               " transliterationIndex " + transliterationIndex +
               " contextIndex " + contextIndex +
-              " id " + idIndex + " audio " + audioIndex
+              " id " + idIndex + " audio " + audioIndex + " predef " + predefinedTypeOrder
           );
         } else {
           int colIndex = colIndexOffset;
@@ -403,14 +421,29 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     return exercises;
   }
 
-  private List<String> getHeader( Row next) {
+  private String doTrim(String s) {
+    String trim = s.trim();
+    String s1 = trim.replaceAll("\\p{Z}+", " ");
+    String trim1 = s1.trim();
+/*    if (!trim1.equals(s)) {
+      logger.info("trim  '" + trim +
+          "'");
+      logger.info("s1    '" + s1 +
+          "'");
+      logger.info("trim1 '" + trim1 +
+          "'");
+    }*/
+    return trim1;
+  }
+
+  private List<String> getHeader(Row next) {
     List<String> columns = new ArrayList<String>();
 
-      Iterator<Cell> cellIterator = next.cellIterator();
-      while (cellIterator.hasNext()) {
-        Cell next1 = cellIterator.next();
-        columns.add(next1.toString().trim());
-      }
+    Iterator<Cell> cellIterator = next.cellIterator();
+    while (cellIterator.hasNext()) {
+      Cell next1 = cellIterator.next();
+      columns.add(next1.toString().trim());
+    }
 
     return columns;
   }
@@ -486,14 +519,18 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
             }
           }
 
-          if (DEBUG) logger.debug("columns word index " + colIndexOffset +
-              " week " + weekIndex + " unit " + unitIndex + " chapter " + chapterIndex +
-              " meaning " + meaningIndex +
-              " transliterationIndex " + transliterationIndex +
-              " contextIndex " + contextIndex +
-              " contextTranslationIndex " + contextTranslationIndex +
-              " id " + idIndex + " audio " + audioIndex
-          );
+          if (DEBUG && !first) {
+            logger.debug("columns word index " + colIndexOffset +
+                " week " + weekIndex + " unit " + unitIndex + " chapter " + chapterIndex +
+                " meaning " + meaningIndex +
+                " transliterationIndex " + transliterationIndex +
+                " contextIndex " + contextIndex +
+                " contextTranslationIndex " + contextTranslationIndex +
+                " id " + idIndex + " audio " + audioIndex
+
+            );
+            first = true;
+          }
         } else {
           int colIndex = colIndexOffset;
           boolean isDelete = isDeletedRow(sheet, next, colIndex);
@@ -533,7 +570,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   }
 
   private boolean contextColMatch(String colNormalized) {
-    return colNormalized.contains(CONTEXT) && colNormalized.contains("sentence");
+    return colNormalized.contains(CONTEXT) && (colNormalized.contains("sentence") || !colNormalized.contains("translation"));
   }
 
   private boolean isDeletedRow(Sheet sheet, Row next, int colIndex) {
@@ -585,9 +622,9 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   }
 
   /**
-   * @see #readFromSheet(Sheet)
    * @param exercises
    * @param imported
+   * @see #readFromSheet(Sheet)
    */
   private void rememberExercise(Collection<CommonExercise> exercises,
                                 CommonExercise imported) {
@@ -600,11 +637,12 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     }
     if (foreignLanguagePhrase.endsWith("\'"))
       foreignLanguagePhrase = foreignLanguagePhrase.substring(0, foreignLanguagePhrase.length() - 1);
-    return foreignLanguagePhrase;
+    return doTrim(foreignLanguagePhrase);
   }
 
   /**
    * Don't do an overlay if it's older than the file creation date.
+   *
    * @param id
    * @param english
    * @param foreignLanguagePhrase
