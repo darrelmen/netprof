@@ -118,18 +118,21 @@ public class NPFHelper implements RequiresResize {
    * @param toSelect
    * @see mitll.langtest.client.custom.ListManager#getListOperations
    */
-  public void showNPF(UserList<CommonShell> ul, TabAndContent tabAndContent, String instanceName, boolean loadExercises,
+  public void showNPF(UserList<CommonShell> ul,
+                      TabAndContent tabAndContent,
+                      String instanceName,
+                      boolean loadExercises,
                       HasID toSelect) {
-    logger.info(getClass() + " : adding npf content instanceName = " + instanceName + " for list " + ul + " with " +ul.getExercises().size());
+//    logger.info(getClass() + " : adding npf content instanceName = " + instanceName + " for list " + ul + " with " +ul.getExercises().size());
 
     DivWidget content = tabAndContent.getContent();
     int widgetCount = content.getWidgetCount();
     if (!madeNPFContent || widgetCount == 0) {
       madeNPFContent = true;
-      logger.info("\t: adding npf content instanceName = " + instanceName + " for list " + ul);
+     // logger.info("\t: adding npf content instanceName = " + instanceName + " for list " + ul);
       addNPFToContent(ul, content, instanceName, loadExercises, toSelect);
     } else {
-      logger.info("\t: rememberAndLoadFirst instanceName = " + instanceName + " for list " + ul);
+     // logger.info("\t: rememberAndLoadFirst instanceName = " + instanceName + " for list " + ul);
       rememberAndLoadFirst(ul, toSelect);
     }
   }
