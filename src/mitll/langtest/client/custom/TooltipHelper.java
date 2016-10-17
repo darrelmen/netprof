@@ -59,7 +59,7 @@ public class TooltipHelper {
    * @return
    */
   public Tooltip createAddTooltip(Widget widget, String tip, Placement placement) {
-   // System.out.println("Add tooltip " + tip + " to " + widget.getElement().getId() + " place " + placement);
+   // System.out.println("Add tooltip " + tip + " to " + widget.getElement().getExID() + " place " + placement);
     Tooltip tooltip = new Tooltip();
     tooltip.setWidget(widget);
     tooltip.setText(tip);
