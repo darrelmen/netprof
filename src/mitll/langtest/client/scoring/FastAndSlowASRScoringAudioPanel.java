@@ -39,14 +39,17 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.MiniUser;
+import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.AudioAttributeExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -58,7 +61,7 @@ import java.util.logging.Logger;
  * @since 10/16/15.
  */
 public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttributeExercise> extends ASRScoringAudioPanel<T> {
-  private Logger logger = null;
+  private Logger logger = Logger.getLogger("FastAndSlowASRScoringAudioPanel");
 
   private static final String DEFAULT = "Default";
 
@@ -81,7 +84,7 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
                                          String path, LangTestDatabaseAsync service, ExerciseController controller1,
                                          ScoreListener scoreListener,
                                          String instance
-                                         ) {
+  ) {
     super(path,
         exercise.getForeignLanguage(),
         service,
@@ -114,9 +117,9 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
       // add gender choices
       Set<Long> preferredVoices = controller.getProps().getPreferredVoices();
 
-      Map<MiniUser, List<AudioAttribute>> malesMap   = exercise.getMostRecentAudio(true, preferredVoices);
+      Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(true, preferredVoices);
       Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false, preferredVoices);
-      Collection<AudioAttribute> defaultUserAudio    = exercise.getDefaultUserAudio();
+      Collection<AudioAttribute> defaultUserAudio = exercise.getDefaultUserAudio();
 
       List<MiniUser> maleUsers = exercise.getSortedUsers(malesMap);
       boolean maleEmpty = maleUsers.isEmpty();
@@ -232,7 +235,6 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
   private void addRegularAndSlow(Panel vp, Collection<AudioAttribute> audioAttributes, String instance) {
 /*      System.out.println("getAfterPlayWidget : for exercise " +exercise.getID() +
         " path "+ audioPath + " attributes were " + audioAttributes);*/
-
     RadioButton regular = null;
     AudioAttribute regAttr = null;
     RadioButton slow = null;
@@ -254,9 +256,8 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
       }
     }
 
+    boolean choseRegularSpeed = isRegularSpeed();
     if (regular != null) {
-      //System.out.println("addRegularAndSlow regular " + regular);
-
       addAudioRadioButton(vp, regular);
       final AudioAttribute innerRegAttr = regAttr;
       final RadioButton innerRegular = regular;
@@ -264,13 +265,14 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
         @Override
         public void onClick(ClickEvent event) {
           showAudio(innerRegAttr);
+          storeIsRegular(true);
           controller.logEvent(innerRegular, RADIO_BUTTON, exerciseID, SELECTED_AUDIO + innerRegAttr.getAudioRef());
         }
       });
-      regular.setValue(true);
+      regular.setValue(choseRegularSpeed);
     }
+
     if (slow != null) {
-      //System.out.println("addRegularAndSlow slow " + slow);
       addAudioRadioButton(vp, slow);
       final AudioAttribute innerSlowAttr = slowAttr;
       final RadioButton innerSlow = slow;
@@ -278,18 +280,18 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
         @Override
         public void onClick(ClickEvent event) {
           showAudio(innerSlowAttr);
+          storeIsRegular(false);
           controller.logEvent(innerSlow, RADIO_BUTTON, exerciseID, SELECTED_AUDIO + innerSlowAttr.getAudioRef());
         }
       });
-      if (regular == null)
+      if (regular == null || !choseRegularSpeed)
         slow.setValue(true);
     }
-    AudioAttribute firstAttr = (regular != null) ? regAttr : slowAttr;
+    AudioAttribute firstAttr = ((regular != null && choseRegularSpeed) || slowAttr == null) ? regAttr : slowAttr;
 
     if ((regular == null) && (slow == null)) {
-     // logger.warning("no radio choice got selected??? ");
-    }
-    else {
+      // logger.warning("no radio choice got selected??? ");
+    } else {
       //System.out.println("GoodwaveExercisePanel.addRegularAndSlow showing " +firstAttr);
       final AudioAttribute ffirstAttr = firstAttr;
       Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
@@ -301,6 +303,46 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
     }
 //    if (firstAttr == null)
 //      logger.warning("huh? no attribute ");
+  }
+
+  private boolean isRegularSpeed() {
+    return isRegularSpeed(getStorageKey());
+  }
+
+  private boolean isRegularSpeed(String selectedUserKey) {
+    if (Storage.isLocalStorageSupported()) {
+      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
+      String item = localStorageIfSupported.getItem(selectedUserKey);
+      //    logger.info("isRegularSpeed value for " + selectedUserKey + "='" + item+ "'");
+      if (item != null) {
+        return item.toLowerCase().equals("true");
+      } else {
+        storeIsRegular(true);
+        return true;
+      }
+    }
+    // else {
+    return false;
+    // }
+  }
+
+  private String getStorageKey(ExerciseController controller, String appTitle) {
+    return getStoragePrefix(controller, appTitle) + "audioSpeed";
+  }
+
+  private String getStoragePrefix(ExerciseController controller, String appTitle) {
+    return appTitle + ":" + controller.getUser() + ":" + instance + ":";
+  }
+
+  private void storeIsRegular(boolean shouldKeepAudio) {
+    if (Storage.isLocalStorageSupported()) {
+      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
+      localStorageIfSupported.setItem(getStorageKey(), "" + shouldKeepAudio);
+    }
+  }
+
+  private String getStorageKey() {
+    return getStorageKey(controller, controller.getLanguage());
   }
 
   /**
