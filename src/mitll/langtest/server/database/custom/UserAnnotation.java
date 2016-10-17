@@ -52,7 +52,6 @@ class UserAnnotation {
   private long timestamp;
 
   /**
-   * @paramx uniqueID
    * @param exerciseID
    * @param field
    * @param status

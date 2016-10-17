@@ -59,6 +59,7 @@ import mitll.langtest.client.custom.exercise.CommentNPFExercise;
 import mitll.langtest.client.custom.tabs.TabAndContent;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.flashcard.FlashcardPanel;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.user.UserFeedback;
@@ -102,7 +103,7 @@ public class Navigation implements RequiresResize, ShowTab {
   private static final String FIX_DEFECTS = "Fix Defects";
   private static final String CREATE = "Create a New List";
   private static final String BROWSE = "Browse Lists";
-  public static final String CLICKED_USER_LIST = "clickedUserList";
+  static final String CLICKED_USER_LIST = "clickedUserList";
   private static final String CLICKED_TAB = "clickedTab";
 
   private static final String LEARN = "learn";
@@ -190,7 +191,7 @@ public class Navigation implements RequiresResize, ShowTab {
   }
 
   public boolean isRTL() {
-    return controller.getProps().isRightAlignContent() || (learnHelper.getExerciseList() != null && learnHelper.getExerciseList().isRTL());
+    return controller.getProps().isRightAlignContent();// || (learnHelper.getExerciseList() != null && learnHelper.getExerciseList().isRTL());
   }
 
   private void makeDialogWindow(final LangTestDatabaseAsync service, final ExerciseController controller) {
@@ -217,6 +218,7 @@ public class Navigation implements RequiresResize, ShowTab {
 
   /**
    * TODO : clean this up - why a horrible hack for learn tab?
+   *
    * @return
    * @see #getTabPanel
    * @see mitll.langtest.client.LangTest#populateRootPanel()
@@ -238,19 +240,29 @@ public class Navigation implements RequiresResize, ShowTab {
             " ' target name '" + targetName+ "'");*/
 
         boolean wasChapters = targetName.contains(CHAPTERS);
-        Panel createdPanel = learnHelper.getExerciseList() != null ? learnHelper.getExerciseList().getCreatedPanel() : null;
+        Panel createdPanel = learnHelper.getCreatedPanel();
         boolean hasCreated = createdPanel != null;
-        // logger.info("getTabPanel : got shown event : '" +showEvent + "' target '" + targetName + "' hasCreated " + hasCreated);
-        if (hasCreated && wasChapters && (createdPanel instanceof GoodwaveExercisePanel)) {
-          //   logger.info("\taddShowHandler got chapters! created panel :  has created " + hasCreated + " was revealed  " + createdPanel.getClass());
-          ((GoodwaveExercisePanel) createdPanel).wasRevealed();
+//        logger.info("getTabPanel : got shown event : '" + showEvent + "' target '" + targetName + "' hasCreated " + hasCreated);
+        if (wasChapters) {
+          //  logger.info("\taddShowHandler got chapters! created panel was revealed class " + createdPanel.getClass());
+          if (hasCreated && (createdPanel instanceof GoodwaveExercisePanel)) {
+            ((GoodwaveExercisePanel) createdPanel).wasRevealed();
+          }
+
+          Panel createdPanel1 = practiceHelper.getCreatedPanel();
+          if (createdPanel1 != null) {
+            ((FlashcardPanel) createdPanel1).wasHidden();
+          } else {
+            //          logger.info("no practice panel");
+          }
         } else {
-     /*     logger.info("\taddShowHandler ignoring target " + targetName);
-          logger.info("\taddShowHandler ignoring target " + learnHelper);
-          logger.info("\taddShowHandler ignoring target " + learnHelper.getExerciseList());
-          if (learnHelper.getExerciseList() != null) {
-            logger.info("\taddShowHandler ignoring target " + learnHelper.getExerciseList().getCreatedPanel());
-          }*/
+          if (targetName.contains(PRACTICE)) {
+            Panel createdPanel1 = practiceHelper.getCreatedPanel();
+            if (createdPanel1 != null) {
+              //       logger.info("getTabPanel : practice : got shown event : '" + showEvent + "' target '" + targetName + "'");
+              ((FlashcardPanel) createdPanel1).wasRevealed();
+            }
+          }
         }
       }
     });
@@ -260,6 +272,7 @@ public class Navigation implements RequiresResize, ShowTab {
 
   /**
    * Defines order of tabs...
+   * Show student analysis by default.
    *
    * @return
    * @see #showInitialState()
@@ -275,8 +288,9 @@ public class Navigation implements RequiresResize, ShowTab {
     addPracticeTab();
     addStudyLists();
 
+    addAnalysis();
+
     if (controller.getProps().useAnalysis()) {
-      addAnalysis();
       if (userManager.isTeacher()) {
         addTeacherAnalysis();
       }
@@ -309,10 +323,6 @@ public class Navigation implements RequiresResize, ShowTab {
         }
       });
     }
-  }
-
-  private boolean permittedToRecord() {
-    return controller.getPermissions().contains(User.Permission.RECORD_AUDIO);
   }
 
   /**
@@ -434,9 +444,7 @@ public class Navigation implements RequiresResize, ShowTab {
   private void showPracticeTab() {
     if (practiceTab != null) {
       checkAndMaybeClearTab(PRACTICE);
-      //    logger.info(" ------- showPracticeTab make practice tab  - ");
       practiceHelper.showNPF(practiceTab, PRACTICE);
-      //practiceHelper.setContentPanel(practiceTab.getContent());
       practiceHelper.hideList();
     }
   }
@@ -474,7 +482,11 @@ public class Navigation implements RequiresResize, ShowTab {
   }
 
   private boolean isQC() {
-    return controller.getPermissions().contains(User.Permission.QUALITY_CONTROL);
+    return controller.getPermissions().contains(User.Permission.QUALITY_CONTROL) || controller.isAdmin();
+  }
+
+  private boolean permittedToRecord() {
+    return controller.getPermissions().contains(User.Permission.RECORD_AUDIO) || controller.isAdmin();
   }
 
   private void logEvent(TabAndContent yourStuff, String context) {
@@ -552,7 +564,7 @@ public class Navigation implements RequiresResize, ShowTab {
 
   private boolean noPrevClickedTab() {
     String value = getClickedTab();
-  //  logger.info("selected tab = " + value);
+    //  logger.info("selected tab = " + value);
     return value.isEmpty();
   }
 
@@ -591,7 +603,7 @@ public class Navigation implements RequiresResize, ShowTab {
         Widget widget = content.getWidget(0);
 
         int tab = orig.equals(YOUR_LISTS) ? 0 : orig.equals(OTHERS_LISTS) ? 1 : orig.equals(CREATE) ? 2 : orig.equals(BROWSE) ? 3 : 0;
-        logger.info("selectPreviousTab Select tab " + tab + " orig " + orig);
+        //  logger.info("selectPreviousTab Select tab " + tab + " orig " + orig);
         listManager.showFirstUserListTab((TabPanel) widget, tab);
         if (tab == 0) {
           listManager.showMyLists(true, false);
@@ -636,6 +648,7 @@ public class Navigation implements RequiresResize, ShowTab {
   /**
    * What to do when we don't know which tab to select
    * Right now show the learn pronunciation tab.
+   *
    * @param setClickedStorage
    */
   private void showDefaultInitialTab(boolean setClickedStorage) {
@@ -650,9 +663,9 @@ public class Navigation implements RequiresResize, ShowTab {
   }
 
   /**
+   * @param id
    * @see mitll.langtest.client.analysis.PhoneExampleContainer#gotClickOnItem(WordAndScore)
    * @see mitll.langtest.client.analysis.WordContainer#gotClickOnItem(WordScore)
-   * @param id
    */
   @Override
   public void showLearnAndItem(String id) {
@@ -683,7 +696,7 @@ public class Navigation implements RequiresResize, ShowTab {
     } else if (toUse.getTab() == null) {
       logger.warning("huh? toUse has a null tab? " + toUse);
     } else {
-     // logger.info("click on tab " + toUse);
+      // logger.info("click on tab " + toUse);
       toUse.clickOnTab();
     }
   }
@@ -701,6 +714,8 @@ public class Navigation implements RequiresResize, ShowTab {
 
   @Override
   public void onResize() {
+    // logger.info("got onResize " + getClass().toString());
+
     learnHelper.onResize();
     recorderHelper.onResize();
     recordExampleHelper.onResize();
