@@ -45,6 +45,7 @@ import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.custom.UserExercise;
 import mitll.langtest.shared.custom.UserList;
@@ -62,12 +63,14 @@ import java.util.logging.Logger;
 public class ReviewItemHelper extends NPFHelper {
   private final Logger logger = Logger.getLogger("ReviewItemHelper");
 
+  /**
+   *
+   */
   private static final String ONLY_WITH_AUDIO_DEFECTS = "Only with audio defects";
 
   private FlexListLayout<CommonShell, CommonExercise> flexListLayout;
   private final HasText itemMarker;
   private final ReloadableContainer predefinedContent;
-//  private final NPFHelper npfHelper;
 
   /**
    * @param service
@@ -134,7 +137,8 @@ public class ReviewItemHelper extends NPFHelper {
           ReviewEditableExercise reviewEditableExercise =
               new ReviewEditableExercise(service, controller, itemMarker,
                   userExercise, ul,
-                  pagingExerciseList, predefinedContent,
+                  pagingExerciseList,
+                  predefinedContent,
                   "ReviewEditableExercise"
               );
 
@@ -157,7 +161,16 @@ public class ReviewItemHelper extends NPFHelper {
                                                                                String instanceName, boolean incorrectFirst) {
       FlexListLayout outer = this;
       return new NPFlexSectionExerciseList(outer, topRow, currentExercisePanel, instanceName, incorrectFirst) {
-        //com.github.gwtbootstrap.client.ui.CheckBox onlyAudio;
+        com.github.gwtbootstrap.client.ui.CheckBox checkBox;
+
+        protected String getHistoryTokenFromUIState(String search, String id) {
+          String s = super.getHistoryTokenFromUIState(search, id) +
+              ";" +
+              SelectionState.ONLY_WITH_AUDIO_DEFECTS +
+              "=" + checkBox.getValue();
+        //  logger.info("history token now  " + s);
+          return s;
+        }
 
         @Override
         protected void addTableWithPager(ClickablePagingContainer pagingContainer) {
@@ -167,16 +180,20 @@ public class ReviewItemHelper extends NPFHelper {
           addTypeAhead(column);
 
           // row 2
-          final com.github.gwtbootstrap.client.ui.CheckBox w = new com.github.gwtbootstrap.client.ui.CheckBox(ONLY_WITH_AUDIO_DEFECTS);
+          this.checkBox = new com.github.gwtbootstrap.client.ui.CheckBox(ONLY_WITH_AUDIO_DEFECTS);
           //onlyAudio = w;
-          w.addClickHandler(new ClickHandler() {
+          checkBox.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-              loadExercises(getHistoryToken(""), getTypeAheadText(), w.getValue());
+//              Boolean value = checkBox.getValue();
+          //    logger.info("START : got click on only audio defects - " +value);
+             // loadExercises(getHistoryToken(""), getTypeAheadText(), value);
+              pushNewSectionHistoryToken();
+            //  logger.info("END   : got click on only audio defects - " +value);
             }
           });
-          w.addStyleName("leftFiveMargin");
-          add(w);
+          checkBox.addStyleName("leftFiveMargin");
+          add(checkBox);
 
           // row 3
           add(pagingContainer.getTableWithPager());

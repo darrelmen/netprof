@@ -630,8 +630,8 @@ public class AudioConversion {
     File file = new File(oggEncPath);
     if (!file.exists()) {
       logger.error("can't find oggenc at " + file.getAbsolutePath());
+      oggEncPath = "oggenc";
     }
-//    oggEncPath = "oggenc";
     return oggEncPath;
   }
 
