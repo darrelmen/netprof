@@ -40,6 +40,8 @@ import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.exercise.Shell;
 
+import java.util.logging.Logger;
+
 /**
 * Tells playAudioPanel to be enabled/disabled in response to recording states
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -50,6 +52,7 @@ import mitll.langtest.shared.exercise.Shell;
 * To change this template use File | Settings | File Templates.
 */
 public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
+//  private final Logger logger = Logger.getLogger("WaveformPostAudioRecordButton");
   private static final String RECORD_BUTTON = "RecordButton";
   private final RecordAudioPanel recordAudioPanel;
   private PlayAudioPanel playAudioPanel;
@@ -149,20 +152,18 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
   @Override
   protected void useInvalidResult(AudioAnswer result) {
     super.useInvalidResult(result);
-
-    System.out.println("WaveformPostAudioRecordButton : " + getElement().getId() + " : got invalid result " +result);
+//    logger.info("WaveformPostAudioRecordButton : " + getElement().getExID() + " : got invalid result " +result);
     recordAudioPanel.getWaveform().setVisible(false);
     recordAudioPanel.getSpectrogram().setVisible(false);
     if (parentPanel instanceof ExercisePanel) {
       ((ExercisePanel) parentPanel).recordIncomplete(recordAudioPanel);
     }
   //  controller.logEvent(recordAudioPanel.getButton(), "recordButton", getExercise().getID(), "invalid recording " + result.getValidity());
-
     setPlayEnabled(false);
   }
 
   private void setPlayEnabled(boolean val) {
-    //System.out.println("setPlayEnabled -- " + getElement().getId() + " : valid audio ? " + hasValidAudio() + " enable " + val);
+    //logger.info("setPlayEnabled -- " + getElement().getExID() + " : valid audio ? " + hasValidAudio() + " enable " + val);
     playAudioPanel.setEnabled(val && hasValidAudio());
   }
 
@@ -170,7 +171,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
    * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel(com.google.gwt.user.client.ui.Widget, String)
    * @param playAudioPanel
    */
-  public void setPlayAudioPanel(PlayAudioPanel playAudioPanel) {
+  void setPlayAudioPanel(PlayAudioPanel playAudioPanel) {
     this.playAudioPanel = playAudioPanel;
   }
 }
