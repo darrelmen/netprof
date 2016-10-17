@@ -130,7 +130,7 @@ public interface LangTestDatabaseAsync {
 
   void addVisitor(long userListID, long user, AsyncCallback<Void> asyncCallback);
 
-  void editItem(CommonExercise userExercise, AsyncCallback<Void> async);
+  void editItem(CommonExercise userExercise, boolean keepAudio, AsyncCallback<Void> async);
 
   void addAnnotation(String exerciseID, String field, String status, String comment, long userID, AsyncCallback<Void> async);
 
@@ -154,7 +154,7 @@ public interface LangTestDatabaseAsync {
   void logEvent(String id, String widgetType, String exid, String context, long userid, String hitID, String device,
                 AsyncCallback<Void> async);
 
-  void getEvents(AsyncCallback<List<Event>> async);
+  void getEvents(AsyncCallback<Collection<Event>> async);
 
   void markState(String id, STATE state, long creatorID, AsyncCallback<Void> async);
 

@@ -47,12 +47,15 @@ import java.util.logging.Logger;
 public class SelectionState {
   private final Logger logger = Logger.getLogger("SelectionState");
 
+  public static final String ONLY_WITH_AUDIO_DEFECTS = "onlyWithAudioDefects";
+
   static final String INSTANCE = "instance";
   private String item = "";
   private final Map<String, Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
   private String instance = "";
   private String search = "";
   private static final boolean DEBUG = false;
+  private boolean onlyWithAudioDefects;
 
   /**
    * @param token
@@ -105,6 +108,8 @@ public class SelectionState {
             setItem(section);
           } else if (type.equals("#search") || type.equals("search")) {
             search = section;
+          } else if (type.equals("#" +ONLY_WITH_AUDIO_DEFECTS) || type.equals(ONLY_WITH_AUDIO_DEFECTS)) {
+            onlyWithAudioDefects = section.equals("true");
           } else {
             String[] split = section.split(",");
             List<String> sections = Arrays.asList(split);
@@ -154,12 +159,48 @@ public class SelectionState {
     return typeToSection;
   }
 
+  public static final String SHOWING_ALL_ENTRIES = "Showing all entries";
+
+  public String getDescription(Collection<String> typeOrder) {
+    if (typeToSection.isEmpty()) {
+      return SHOWING_ALL_ENTRIES;
+    } else {
+      StringBuilder status = new StringBuilder();
+      //System.out.println("showSelectionState : typeOrder " + typeOrder + " selection state " + typeToSection);
+      for (String type : typeOrder) {
+        Collection<String> selectedItems = typeToSection.get(type);
+        if (selectedItems != null) {
+          List<String> sorted = new ArrayList<String>();
+          for (String selectedItem : selectedItems) {
+            sorted.add(selectedItem);
+          }
+          Collections.sort(sorted);
+          StringBuilder status2 = new StringBuilder();
+          String sep = sorted.size() == 2 ? " and ":", ";
+          for (String item : sorted) {
+            status2.append(item).append(sep);
+          }
+          String s = status2.toString();
+          if (!s.isEmpty()) s = s.substring(0, s.length() - sep.length());
+          String statusForType = type + " " + s;
+          status.append(statusForType).append(" and ");
+        }
+      }
+      String text = status.toString();
+      if (text.length() > 0) text = text.substring(0, text.length() - " and ".length());
+      return text;
+    }
+  }
   public String getInstance() {
     return instance;
   }
 
   public String getSearch() {
     return search;
+  }
+
+  boolean isOnlyWithAudioDefects() {
+    return onlyWithAudioDefects;
   }
 
   public String toString() {
@@ -171,7 +212,11 @@ public class SelectionState {
     return s.substring(0, Math.max(0, s.length() - 2));
   }
 
-  public String getInfo() {
-    return "parseToken : instance " + instance + " : search " + search + " : item " + item + " : unit->chapter " + getTypeToSection();
-  }
+/*  public String getInfo() {
+    return "parseToken : instance " + instance + " : " +
+        "search " + search + ", " +
+        "item " + item + ", " +
+        "unit->chapter " + getTypeToSection() +
+        " onlyWithAudioDefects="+isOnlyWithAudioDefects();
+  }*/
 }
