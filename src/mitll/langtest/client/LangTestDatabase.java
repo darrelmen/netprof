@@ -489,8 +489,9 @@ public interface LangTestDatabase extends RemoteService {
   /**
    * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#postEditItem(ListInterface, boolean)
    * @param userExercise
+   * @param keepAudio
    */
-  void editItem(CommonExercise userExercise);
+  void editItem(CommonExercise userExercise, boolean keepAudio);
 
   /**
    * @see mitll.langtest.client.flashcard.FlashcardPanel#addAnnotation(String, String, String)
@@ -590,7 +591,7 @@ public interface LangTestDatabase extends RemoteService {
    * @see mitll.langtest.client.instrumentation.EventTable#showDialog(LangTestDatabaseAsync)
    * @return
    */
-  List<Event> getEvents();
+  Collection<Event> getEvents();
 
   /**
    * Dialog support...
