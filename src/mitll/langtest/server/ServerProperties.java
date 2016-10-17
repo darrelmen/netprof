@@ -73,10 +73,12 @@ public class ServerProperties {
       "English",
       "Farsi",
       "German",
-      "Korean",
       "Iraqi",
+      "Japanese",
+      "Korean",
       "Levantine",
       "Mandarin",
+      "MandarinTraditional",
       "MSA",
       "Pashto1",
       "Pashto2",
@@ -89,7 +91,6 @@ public class ServerProperties {
 
   private static final List<String> AMAS_SITES =
       Arrays.asList("Dari", "Farsi", "Korean", "Mandarin", "MSA", "Pashto", "Russian", "Spanish", "Urdu");
-
 
   public static final String MIRA_DEVEL_HOST = "mira-devel.llan.ll.mit.edu/scorer/item"; //"mira-devel.llan.ll.mit.edu/msa/item";
   private static final String MIRA_DEVEL = "https://" + MIRA_DEVEL_HOST;
@@ -138,11 +139,12 @@ public class ServerProperties {
 
   private static final String USE_PHONE_TO_DISPLAY = "usePhoneToDisplay";
   private static final String ADD_MISSING_INFO = "addMissingInfo";
-  private static final int MIN_DYNAMIC_RANGE_DEFAULT = 20; // Paul Gatewood 11/24/15 : The bottom line is we should set the minimum Dynamic Range threshold to 20dB for NetProf users
+  private static final int MIN_DYNAMIC_RANGE_DEFAULT = 24; // Paul Gatewood 11/24/15 : The bottom line is we should set the minimum Dynamic Range threshold to 20dB for NetProf users
   private static final int SLEEP_BETWEEN_DECODES_DEFAULT = 100; // Paul Gatewood 11/24/15 : The bottom line is we should set the minimum Dynamic Range threshold to 20dB for NetProf users
   private static final String MIN_DYNAMIC_RANGE = "minDynamicRange";
   private static final String RUN_REF_DECODE_WITH_HYDEC = "runRefDecodeWithHydec";
   private static final String BEST_AUDIO = "bestAudio";
+  private static final String CHECK_AUDIO_TRANSCRIPT = "checkAudioTranscript";
 
   private Properties props = new Properties();
 
@@ -153,7 +155,6 @@ public class ServerProperties {
   private final Set<Long> preferredVoices = new HashSet<Long>();
   private EmailList emailList;
   private final int userInitialScores = 20;
-  //private boolean RTL;
 /*  private int sleepBetweenDecodes;
   private long trimBeforeAndAfter;
   private long trimBefore;
@@ -305,9 +306,13 @@ public class ServerProperties {
     return getDefaultFalse("isAMAS");
   }
 
+  public boolean shouldCheckAudioTranscript() {
+    return getDefaultTrue(CHECK_AUDIO_TRANSCRIPT);
+  }
+
   /**
-   * @see mitll.langtest.server.decoder.RefResultDecoder#doRefDecode(Collection, String)
    * @return
+   * @see mitll.langtest.server.decoder.RefResultDecoder#doRefDecode(Collection, String)
    */
   public boolean shouldTrimAudio() {
     return getDefaultTrue(DO_TRIM);
@@ -396,7 +401,7 @@ public class ServerProperties {
       for (String userid : property.split(",")) {
         try {
           preferredVoices.add(Long.parseLong(userid));
-          logger.info("pref users " + preferredVoices);
+          logger.info("preferredVoices pref users " + preferredVoices);
         } catch (NumberFormatException e) {
           logger.error("couldn't parse userid " + userid);
         }
@@ -404,7 +409,7 @@ public class ServerProperties {
     }
     miraClassifierURL = props.getProperty(MIRA_CLASSIFIER_URL, MIRA_DEFAULT);
 
-    props.put("scoringModel",props.getProperty("MODELS_DIR",""));
+    props.put("scoringModel", props.getProperty("MODELS_DIR", ""));
 
     if (getLessonPlan().startsWith("http")) props.setProperty("talksToDomino", TRUE);
   }
@@ -417,6 +422,7 @@ public class ServerProperties {
     return props.getProperty(param, TRUE).equals(TRUE);
   }
 
+  public String getProperty(String prop) { return props.getProperty(prop); }
   /**
    * if true, use old school (hydec)
    * OR if there is no webservice port specified
@@ -635,5 +641,13 @@ public class ServerProperties {
 
   public long getTrimAfter() {
     return getIntPropertyDef("trimAfterMillis", "" + TRIM_SILENCE_AFTER);
+  }
+
+  public boolean shouldRecalcStudentAudio() {
+    return getDefaultTrue("shouldRecalcStudentAudio");
+  }
+
+  public String getCurrentModel() {
+    return getProperty("MODELS_DIR").replaceAll("models.", "");
   }
 }
