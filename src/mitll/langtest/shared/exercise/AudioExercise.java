@@ -58,7 +58,9 @@ public class AudioExercise extends ExerciseShell {
   private Map<String, AudioAttribute> audioAttributes = new HashMap<String, AudioAttribute>();
   private Map<String, ExerciseAnnotation> fieldToAnnotation = new HashMap<String, ExerciseAnnotation>();
 
-  public AudioExercise() {}
+  public AudioExercise() {
+  }
+
   public AudioExercise(String id) {
     super(id);
   }
@@ -69,20 +71,22 @@ public class AudioExercise extends ExerciseShell {
   }
 
   /**
-   * @see mitll.langtest.server.DatabaseServlet#getJsonForExercise
-   * @param prefs
+   * @param preferredVoices
    * @return
+   * @see mitll.langtest.server.DatabaseServlet#getJsonForExercise
    */
-  public String getRefAudioWithPrefs(Collection<Long> prefs) {
-    AudioAttribute audio = getRegularSpeedWithPrefs(prefs);
+  public String getRefAudioWithPrefs(Collection<Long> preferredVoices) {
+    AudioAttribute audio = getRegularSpeedWithPrefs(preferredVoices);
     return audio != null ? audio.getAudioRef() : null;
   }
 
   /**
-   * @see mitll.langtest.server.database.custom.UserListManager#fixAudioPaths
    * @return
+   * @see mitll.langtest.server.database.custom.UserListManager#fixAudioPaths
    */
-  public AudioAttribute getRegularSpeed() {  return getAudio(SPEED, REGULAR); }
+  public AudioAttribute getRegularSpeed() {
+    return getAudio(SPEED, REGULAR);
+  }
 
   public AudioAttribute getRegularSpeedWithPrefs(Collection<Long> prefs) {
     return getAudioPreferUsers(SPEED, REGULAR, prefs);
@@ -98,8 +102,8 @@ public class AudioExercise extends ExerciseShell {
   }
 
   /**
-   * @see mitll.langtest.server.database.exercise.ExcelImport#getExercise
    * @param s
+   * @see mitll.langtest.server.database.exercise.ExcelImport#getExercise
    * @deprecated - try to avoid this
    */
   public void setRefAudio(String s) {
@@ -117,9 +121,9 @@ public class AudioExercise extends ExerciseShell {
   }
 
   /**
-   * @see mitll.langtest.server.database.exercise.ExcelImport#addOldSchoolAudio
    * @param ref
    * @param user
+   * @see mitll.langtest.server.database.exercise.ExcelImport#addOldSchoolAudio
    */
   public void addAudioForUser(String ref, MiniUser user) {
     addAudio(new AudioAttribute(ref, user));
@@ -138,6 +142,7 @@ public class AudioExercise extends ExerciseShell {
   /**
    * Get the first matching audio cut.
    * Doesn't worry about getting the latest one, or respecting gender.
+   *
    * @param name
    * @param value
    * @return
@@ -149,15 +154,14 @@ public class AudioExercise extends ExerciseShell {
     return null;
   }
 
-  AudioAttribute getAudioPreferUsers(String name, String value, Collection<Long> prefs) {
+  private AudioAttribute getAudioPreferUsers(String name, String value, Collection<Long> prefs) {
     AudioAttribute candidate = null;
-   // long latest = 0;
+    // long latest = 0;
     for (AudioAttribute audio : getAudioAttributes()) {
       if (audio.matches(name, value)) {
         if (prefs.contains(audio.getUser().getId())) {
           return audio;
-        }
-        else {
+        } else {
 
           candidate = audio;
         }
@@ -183,8 +187,30 @@ public class AudioExercise extends ExerciseShell {
     AudioAttribute latest = null;
     for (AudioAttribute audioAttribute : getAudioAttributes()) {
       if (audioAttribute.getAudioType().startsWith(CONTEXT) &&
-          ((isMale && audioAttribute.isMale()) || (!isMale && !audioAttribute.isMale()))
+          (
+              (isMale && audioAttribute.isMale()) ||
+                  (!isMale && !audioAttribute.isMale()))
           ) {
+
+        if (audioAttribute.getTimestamp() >= latestTime) {
+          latest = audioAttribute;
+          latestTime = audioAttribute.getTimestamp();
+        }
+      }
+    }
+
+    return latest;
+  }
+
+  public AudioAttribute getLatest(boolean isMale) {
+    long latestTime = 0;
+    AudioAttribute latest = null;
+    for (AudioAttribute audioAttribute : getAudioAttributes()) {
+      if (
+          (isMale && audioAttribute.isMale()) ||
+              (!isMale && !audioAttribute.isMale())
+          ) {
+
         if (audioAttribute.getTimestamp() >= latestTime) {
           latest = audioAttribute;
           latestTime = audioAttribute.getTimestamp();
@@ -202,9 +228,9 @@ public class AudioExercise extends ExerciseShell {
   }
 
   /**
-   * @see #getUserMap(boolean)
    * @param isMale
    * @return
+   * @see #getUserMap(boolean)
    */
   public Collection<AudioAttribute> getByGender(boolean isMale) {
     List<AudioAttribute> males = new ArrayList<AudioAttribute>();
@@ -212,8 +238,7 @@ public class AudioExercise extends ExerciseShell {
       MiniUser user = audioAttribute.getUser();
       if (user == null) {
         //logger.error ("getByGender : huh? there's no user attached to " + audioAttribute);
-      }
-      else if (isMale && user.isMale() || (!isMale && !user.isMale())) {
+      } else if (isMale && user.isMale() || (!isMale && !user.isMale())) {
         males.add(audioAttribute);
       }
     }
@@ -232,10 +257,10 @@ public class AudioExercise extends ExerciseShell {
   }
 
   /**
-   * @see mitll.langtest.client.exercise.RecordAudioPanel#RecordAudioPanel
    * @param userID
    * @param regularSpeed map fast and slow to regular
    * @return
+   * @see mitll.langtest.client.exercise.RecordAudioPanel#RecordAudioPanel
    * @see mitll.langtest.server.database.AudioExport#getAudioAttribute
    */
   public AudioAttribute getRecordingsBy(long userID, boolean regularSpeed) {
@@ -251,10 +276,10 @@ public class AudioExercise extends ExerciseShell {
   }
 
   /**
-   * @see mitll.langtest.server.database.AudioExport#getAudioAttribute(MiniUser, CommonExercise, boolean, String)
    * @param userID
    * @param speed
    * @return
+   * @see mitll.langtest.server.database.AudioExport#getAudioAttribute(MiniUser, CommonExercise, boolean, String)
    */
   public AudioAttribute getRecordingsBy(long userID, String speed) {
     List<AudioAttribute> recordingsBy = getRecordingsBy(userID);
@@ -282,11 +307,10 @@ public class AudioExercise extends ExerciseShell {
   }
 
   /**
-   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#makeAudioRow()
-   * List of audio is sorted to show regular before slow.
-   *
    * @param isMale
    * @return
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#makeAudioRow()
+   * List of audio is sorted to show regular before slow.
    */
   public Map<MiniUser, List<AudioAttribute>> getUserMap(boolean isMale) {
     Map<MiniUser, List<AudioAttribute>> userToAudio = getUserToAudio(isMale);
@@ -308,6 +332,7 @@ public class AudioExercise extends ExerciseShell {
 
   /**
    * Skip context audio
+   *
    * @param isMale
    * @return
    * @see #getMostRecentAudio(boolean, java.util.Set)
@@ -324,18 +349,18 @@ public class AudioExercise extends ExerciseShell {
           userToAudio.put(attribute.getUser(), audioAttributes1 = new ArrayList<AudioAttribute>());
         audioAttributes1.add(attribute);
       }
-    //  else {
-    //    System.out.println("getUserToAudio : skipping context " + attribute);
-    //  }
+      //  else {
+      //    System.out.println("getUserToAudio : skipping context " + attribute);
+      //  }
     }
-  //  System.out.println("getUserToAudio : ret " +isMale+ " for " + userToAudio);
+    //  System.out.println("getUserToAudio : ret " +isMale+ " for " + userToAudio);
 
     return userToAudio;
   }
 
   /**
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.FastAndSlowASRScoringAudioPanel#getAfterPlayWidget()
    * @return
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.FastAndSlowASRScoringAudioPanel#getAfterPlayWidget()
    */
   public List<AudioAttribute> getDefaultUserAudio() {
     List<AudioAttribute> males = new ArrayList<AudioAttribute>();
@@ -383,10 +408,10 @@ public class AudioExercise extends ExerciseShell {
 
           long timestamp1 = audioAttribute.getTimestamp();
           if (reg && slow && bothTimestamp < timestamp1) {
-          //  System.out.println("\t\tlatest is " + new Date(timestamp1));
+            //  System.out.println("\t\tlatest is " + new Date(timestamp1));
             if (bothLatest == null || !preferredUsers.contains(bothLatest.getId())) {
               bothTimestamp = timestamp1;
-            //  System.out.println("\t\t\tlatest is " + new Date(bothTimestamp));
+              //  System.out.println("\t\t\tlatest is " + new Date(bothTimestamp));
               bothLatest = user;
             }
           }
@@ -413,8 +438,7 @@ public class AudioExercise extends ExerciseShell {
             " was " + userToAudio + " but couldn't find latest user?");
       }
 */
-    }
-    else {
+    } else {
       List<AudioAttribute> value = userToAudio.get(toUse);
       if (value != null) {
         userToAudioSingle.put(toUse, value);
@@ -426,9 +450,9 @@ public class AudioExercise extends ExerciseShell {
   }
 
   /**
-   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#makeAudioRow()
    * @param malesMap
    * @return
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#makeAudioRow()
    */
   public List<MiniUser> getSortedUsers(Map<MiniUser, List<AudioAttribute>> malesMap) {
     List<MiniUser> maleUsers = new ArrayList<MiniUser>(malesMap.keySet());
@@ -441,20 +465,22 @@ public class AudioExercise extends ExerciseShell {
   }
 
   /**
-   * @see mitll.langtest.server.database.custom.UserListManager#addAnnotations
    * @param field
    * @param status
    * @param comment
+   * @see mitll.langtest.server.database.custom.UserListManager#addAnnotations
    */
   public void addAnnotation(String field, String status, String comment) {
-    fieldToAnnotation.put(field, new ExerciseAnnotation(status,comment));
+    fieldToAnnotation.put(field, new ExerciseAnnotation(status, comment));
   }
 
-  public Map<String, ExerciseAnnotation> getFieldToAnnotation() {  return fieldToAnnotation;  }
+  public Map<String, ExerciseAnnotation> getFieldToAnnotation() {
+    return fieldToAnnotation;
+  }
 
   /**
-   * @see UserExercise#UserExercise(CommonExercise)
    * @param fieldToAnnotation
+   * @see UserExercise#UserExercise(CommonExercise)
    */
   public void setFieldToAnnotation(Map<String, ExerciseAnnotation> fieldToAnnotation) {
     this.fieldToAnnotation = fieldToAnnotation;
@@ -470,13 +496,12 @@ public class AudioExercise extends ExerciseShell {
         //}
 
         return exerciseAnnotation;
-      }
-      else if (field.endsWith(MP3)) {
+      } else if (field.endsWith(MP3)) {
         String key = field.replaceAll(MP3, WAV);
         ExerciseAnnotation exerciseAnnotation = fieldToAnnotation.get(key);
-   //     if (exerciseAnnotation == null && !fieldToAnnotation.isEmpty()) {
+        //     if (exerciseAnnotation == null && !fieldToAnnotation.isEmpty()) {
 //          System.out.println("getAnnotation : Can't find " + field + " in "+ fieldToAnnotation.keySet());
-     //   }
+        //   }
 
         return exerciseAnnotation;
       }
@@ -484,14 +509,16 @@ public class AudioExercise extends ExerciseShell {
     return fieldToAnnotation.get(field);
   }
 
-  public Collection<String> getFields() { return fieldToAnnotation.keySet(); }
+  public Collection<String> getFields() {
+    return fieldToAnnotation.keySet();
+  }
 
   public boolean removeAudio(AudioAttribute audioAttribute) {
     return audioAttributes.remove(audioAttribute.getKey()) != null;
   }
 
   public String toString() {
-    return super.toString() +" audio attr (" +getAudioAttributes().size()+
-      ") :" + getAudioAttributes() + " and " +fieldToAnnotation + " annotations, unit/lesson " + getUnitToValue();
+    return super.toString() + " audio attr (" + getAudioAttributes().size() +
+        ") :" + getAudioAttributes() + " and " + fieldToAnnotation + " annotations, unit/lesson " + getUnitToValue();
   }
 }
