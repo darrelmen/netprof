@@ -376,7 +376,7 @@ public class ResponseExerciseList extends SingleSelectExerciseList {
 
   /**
    * @see FeedbackRecordPanel#postAnswers
-   * @param current
+   * @paramx current
    * @return
    */
 /*

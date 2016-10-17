@@ -58,9 +58,9 @@ import java.util.*;
 public class UserListManager {
   private static final Logger logger = Logger.getLogger(UserListManager.class);
 
-  private static final String CORRECT = "correct";
-  private static final String FIXED = "fixed";
+  public static final String CORRECT = "correct";
   private static final String INCORRECT = "incorrect";
+  private static final String FIXED = "fixed";
 
   private static final String FAST = "Fast";
   private static final String SLOW = "Slow";
@@ -302,9 +302,8 @@ public class UserListManager {
         return null;
       } else {
         UserList e = new UserList(i++, userWhere, name, description, dliClass, isPrivate);
-
         userListDAO.add(e);
-        logger.debug("createUserList : now there are " + userListDAO.getCount() + " lists total, for " + userid);
+//        logger.debug("createUserList : now there are " + userListDAO.getCount() + " lists total, for " + userid);
         return e;
       }
     }
@@ -359,7 +358,9 @@ public class UserListManager {
     }
 
     if (listsForUser.isEmpty()) {
-      logger.warn("getListsForUser - list is empty for " + userid + " only created " + listsICreated + " visited " + visitedLists);
+      if (DEBUG) {
+        logger.warn("getListsForUser - list is empty for " + userid + " only created " + listsICreated + " visited " + visitedLists);
+      }
     } else if (favorite != null) {
       listsForUser.remove(favorite);
       listsForUser.add(0, favorite);// put at front
@@ -489,7 +490,7 @@ public class UserListManager {
     userList.setExercises(onList);
 
     markState(onList);
-    logger.debug("returning " + userList + (userList.getExercises().isEmpty() ? "" : " first " + userList.getExercises().iterator().next()));
+    logger.debug("getReviewList returning " + userList + (userList.getExercises().isEmpty() ? "" : " first " + userList.getExercises().iterator().next()));
     return userList;
   }
 
@@ -508,6 +509,7 @@ public class UserListManager {
   private List<CommonShell> getReviewedUserExercises(Map<String, CommonExercise> idToUserExercise, Collection<String> ids) {
     List<CommonShell> onList = new ArrayList<>();
 
+    int c = 0;
     for (String id : ids) {
       if (id.startsWith(UserExercise.CUSTOM_PREFIX)) {   // add user defined exercises
         if (idToUserExercise.containsKey(id)) {
@@ -525,10 +527,14 @@ public class UserListManager {
           //e.setTooltip(byID.getCombinedTooltip());
           //logger.debug("getReviewedUserExercises : found " + e.getID() + " tooltip " + e.getTooltip());
         } else {
-          logger.warn("getReviewedUserExercises : huh? can't find predef exercise " + id);
+          if (c++ < 10) {
+            logger.warn("getReviewedUserExercises : huh? can't find predef exercise " + id);
+          }
         }
       }
     }
+    logger.warn("getReviewedUserExercises : huh? couldn't find " + c + " predef exercises.");
+
     Collections.sort(onList, new Comparator<HasID>() {
       @Override
       public int compare(HasID o1, HasID o2) {
@@ -652,7 +658,7 @@ public class UserListManager {
   private void fixAudioPaths(CommonExercise userExercise, boolean overwrite, String mediaDir) {
     AudioAttribute regularSpeed = userExercise.getRegularSpeed();
     if (regularSpeed == null) {
-      logger.warn("huh? no ref audio for " + userExercise);
+      logger.warn("fixAudioPaths huh? no ref audio for " + userExercise);
       return;
     }
     long now = System.currentTimeMillis();
@@ -660,26 +666,25 @@ public class UserListManager {
     //logger.debug("fixAudioPaths : checking regular '" + regularSpeed.getAudioRef() + "' against '" +mediaDir + "'");
 
     if (!regularSpeed.getAudioRef().contains(mediaDir)) {
-      File fileRef = pathHelper.getAbsoluteFile(regularSpeed.getAudioRef());
-
-      String fast = FAST + "_" + now + "_by_" + userExercise.getCombinedMutableUserExercise().getCreator() + ".wav";
-      String artist = regularSpeed.getUser().getUserID();
-      String refAudio = getRefAudioPath(userExercise.getID(), fileRef, fast, overwrite, userExercise.getForeignLanguage(), artist);
-      regularSpeed.setAudioRef(refAudio);
-      //  logger.debug("fixAudioPaths : for " + userExercise.getID() + " fast is " + fast + " size " + FileUtils.size(refAudio));
+      fixAudioPath(userExercise, overwrite, regularSpeed, now, FAST);
     }
 
     AudioAttribute slowSpeed = userExercise.getSlowSpeed();
 
-    if (slowSpeed != null && !slowSpeed.getAudioRef().isEmpty() && !slowSpeed.getAudioRef().contains(mediaDir)) {
-      File fileRef = pathHelper.getAbsoluteFile(slowSpeed.getAudioRef());
-      String slow = SLOW + "_" + now + "_by_" + userExercise.getCombinedMutableUserExercise().getCreator() + ".wav";
-
-      String artist = slowSpeed.getUser().getUserID();
-      String refAudio = getRefAudioPath(userExercise.getID(), fileRef, slow, overwrite, userExercise.getForeignLanguage(), artist);
-      //logger.debug("fixAudioPaths : for exid " + userExercise.getID()+ " slow is " + refAudio + " size " + FileUtils.size(refAudio));
-      slowSpeed.setAudioRef(refAudio);
+    if (slowSpeed != null && !slowSpeed.getAudioRef().isEmpty() &&
+        !slowSpeed.getAudioRef().contains(mediaDir)) {
+      fixAudioPath(userExercise, overwrite, slowSpeed, now, SLOW);
     }
+  }
+
+  private void fixAudioPath(CommonExercise userExercise, boolean overwrite, AudioAttribute regularSpeed, long now, String prefix) {
+    File fileRef = pathHelper.getAbsoluteFile(regularSpeed.getAudioRef());
+
+    String fast = prefix + "_" + now + "_by_" + userExercise.getCombinedMutableUserExercise().getCreator() + ".wav";
+    String artist   = regularSpeed.getUser().getUserID();
+    String refAudio = getRefAudioPath(userExercise.getID(), fileRef, fast, overwrite, userExercise.getForeignLanguage(), artist);
+    regularSpeed.setAudioRef(refAudio);
+    //  logger.debug("fixAudioPaths : for " + userExercise.getID() + " fast is " + fast + " size " + FileUtils.size(refAudio));
   }
 
   /**
@@ -741,7 +746,7 @@ public class UserListManager {
     }
   }
 
-  public boolean listExists(long id) {
+  private boolean listExists(long id) {
     return userListDAO.getWhere(id, false) != null;
   }
 
@@ -864,14 +869,19 @@ public class UserListManager {
     reviewedDAO.remove(exerciseid);
   }
 
-  void markAllFieldsFixed(CommonExercise userExercise, long userID) {
+  /**
+   * @see #markState(String, STATE, long)
+   * @param userExercise
+   * @param userID
+   */
+  private void markAllFieldsFixed(CommonExercise userExercise, long userID) {
     Collection<String> fields = userExercise.getFields();
-    logger.debug("setExerciseState " + userExercise + "  has " + fields + " user " + userID);
+    logger.debug("markAllFieldsFixed " + userExercise + "  has " + fields + " user " + userID);
     addAnnotations(userExercise);
     for (String field : fields) {
       ExerciseAnnotation annotation1 = userExercise.getAnnotation(field);
       if (!annotation1.isCorrect()) {
-        logger.debug("\tsetExerciseState " + userExercise.getID() + "  has " + annotation1);
+        logger.debug("\tmarkAllFieldsFixed " + userExercise.getID() + "  has " + annotation1);
 
         addAnnotation(userExercise.getID(), field, CORRECT, FIXED, userID);
       }
@@ -933,5 +943,9 @@ public class UserListManager {
    */
   public Set<String> getAudioAnnos() {
     return annotationDAO.getAudioAnnos();
+  }
+
+  public UserExerciseDAO getUserExerciseDAO() {
+    return userExerciseDAO;
   }
 }
