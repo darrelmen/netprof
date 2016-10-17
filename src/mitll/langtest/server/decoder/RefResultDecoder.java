@@ -38,16 +38,19 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.server.database.ResultDAO;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.Result;
+import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.AudioExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -61,15 +64,17 @@ public class RefResultDecoder {
 
   private static final boolean DO_REF_DECODE = true;
   private static final boolean DO_TRIM = true;
-  private static final int SLEEP_BETWEEN_DECODES = 2000;
+  //private static final int SLEEP_BETWEEN_DECODES = 2000;
 
-  private final DatabaseImpl db;
+  private final DatabaseImpl<CommonExercise> db;
   private final ServerProperties serverProps;
 
   private final AudioFileHelper audioFileHelper;
   private boolean stopDecode = false;
   private final PathHelper pathHelper;
   private final AudioConversion audioConversion;
+  String mediaDir;
+  String installPath;
 
   /**
    * @param db
@@ -78,16 +83,25 @@ public class RefResultDecoder {
    * @param audioFileHelper
    * @see LangTestDatabaseImpl#init()
    */
-  public RefResultDecoder(DatabaseImpl db, ServerProperties serverProperties, PathHelper pathHelper,
-                          AudioFileHelper audioFileHelper) {
+  public RefResultDecoder(DatabaseImpl<CommonExercise> db,
+                          ServerProperties serverProperties,
+                          PathHelper pathHelper,
+                          AudioFileHelper audioFileHelper,
+                          String mediaDir,
+                          String installPath) {
     this.db = db;
     this.serverProps = serverProperties;
     this.pathHelper = pathHelper;
     this.audioFileHelper = audioFileHelper;
     this.audioConversion = new AudioConversion(serverProperties);
+    this.mediaDir = mediaDir;
+    this.installPath = installPath;
   }
 
   /**
+   * Used to have cheesy check for trying to convert old audio held outside of audio table into audio table
+   * entries.
+   *
    * @param exercises
    * @param relativeConfigDir
    * @see LangTestDatabaseImpl#init()
@@ -106,12 +120,100 @@ public class RefResultDecoder {
         } else {
           logger.debug(getLanguage() + " not doing decode ref decode");
         }
+/*
+        if (db.getAudioDAO().numRows() < 25) {
+          populateAudioTable(exercises);
+        }
+*/
+        if (db.getServerProps().shouldRecalcStudentAudio()) {
+          recalcStudentAudio();
+        }
       }
     }).start();
   }
 
+  /**
+   * This was for a one time fix for weird sudanese thing where audio files were truncated on Aug 11 and 12
+   * Very weird.
+   *
+   * @paramz pathHelper
+   * @paramz path
+   * @return
+   */
+ /* public void fixTruncated(PathHelper war) {
+    Collection<AudioAttribute> audioAttributes = db.getAudioDAO().getAudioAttributes();
+    int fixed = 0;
+    for (AudioAttribute attribute : audioAttributes) {
+      String audioRef = attribute.getAudioRef();
+      File audioFile = getAbsoluteFile(war, audioRef);
+      String exid = attribute.getExid();
+      if (audioFile.exists()) {
+        long length = audioFile.length();
+        if (length == 16428) {
+          List<CorrectAndScore> resultsForExIDInForUser = db.getResultDAO().getResultsForExIDInForUser(attribute.getUserid(), false, exid);
+          logger.info("fixTruncated found suspect file " + audioRef + " and " + resultsForExIDInForUser.size());
+
+          for (CorrectAndScore correctAndScore : resultsForExIDInForUser) {
+            long diff = attribute.getTimestamp() - correctAndScore.getTimestamp();
+            if (diff > 0 && diff < 200) {
+              String orig = correctAndScore.getPath();
+              logger.info("\tin db, found original (" + diff + ") " + orig);
+              File origFile = getAbsoluteFile(war, orig);
+              if (origFile.exists()) {
+                double durationInSeconds = new AudioCheck(null).getDurationInSeconds(origFile)*1000;
+                long durationInMillis = attribute.getDurationInMillis();
+
+                if (durationInMillis == (long)durationInSeconds) {
+                  logger.info("\t\tDur " + durationInSeconds + " vs " + durationInMillis + " got match - fixing...");
+                  new PathWriter().copyAndNormalize(origFile, db.getServerProps(), audioFile);
+                  logger.info("\t\tgot match - after length = " +audioFile.length());
+                  fixed++;
+                }
+                else {
+                  logger.warn("\t\tNO MATCH Dur " + durationInSeconds + " vs " + durationInMillis);
+                }
+              } else {
+                logger.warn("\t\tcan't find " + origFile.getAbsolutePath());
+              }
+            }
+          }
+        }
+      } else {
+        if (exid.startsWith("3007")) {
+          logger.info("no file at " + audioFile.getAbsolutePath());
+        }
+      }
+    }
+    logger.info("Fixed " +fixed + " files");
+  }*/
+/*
+  private File getAbsoluteFile(PathHelper pathHelper, String path) {
+    return pathHelper.getAbsoluteFile(path);
+  }
+*/
+
   private String getLanguage() {
     return serverProps.getLanguage();
+  }
+
+  private void populateAudioTable(final Collection<CommonExercise> exercises) {
+    int total = 0;
+    for (CommonExercise ex : exercises) {
+      if (stopDecode) return;
+
+      String refAudioIndex = ex.getRefAudioIndex();
+      if (refAudioIndex != null && !refAudioIndex.isEmpty()) {
+        try {
+          total += db.getAudioDAO().addOldSchoolAudio(refAudioIndex,
+              (AudioExercise) ex,
+              serverProps.getAudioOffset(),
+              mediaDir, installPath);
+        } catch (SQLException e) {
+          return;
+        }
+      }
+    }
+    logger.info(getLanguage() + " : populateAudioTable added " + total);
   }
 
   /**
@@ -142,7 +244,7 @@ public class RefResultDecoder {
       if (exercise != null) {
         logger.info("doMissingInfo #" + count + " of " + size + " align " + exercise.getID() + " and result " + res.getUniqueID());
         PretestScore alignmentScore = audioFileHelper.getAlignmentScore(exercise, res.getAnswer(), serverProps.usePhoneToDisplay(), false);
-        db.rememberScore(res.getUniqueID(), alignmentScore);
+        db.rememberScore(res.getUniqueID(), alignmentScore, false);
       } else {
         logger.warn("no exercise for " + res.getExerciseID() + " from result?");
       }
@@ -231,6 +333,73 @@ public class RefResultDecoder {
     }
   }
 
+  private void recalcStudentAudio() {
+    ResultDAO resultDAO = db.getResultDAO();
+
+    Map<String, CommonExercise> idToEx = new HashMap<>();
+    List<CommonExercise> rawExercises = db.getExerciseDAO().getRawExercises();
+    for (CommonExercise ex : rawExercises) idToEx.put(ex.getID(), ex);
+
+    int count = 0;
+    Set<String> skip = new HashSet<>(Arrays.asList("slow","regular","slow_by_WebRTC","regular_by_WebRTC"));
+    List<Result> results = resultDAO.getResults();
+    int skipped = 0;
+    int notThere = 0;
+    int staleExercise = 0;
+    int currentAlready = 0;
+
+    String currentModel =  db.getServerProps().getCurrentModel();
+
+    for (Result result : results) {
+      if (result.isValid()) {
+        if (skip.contains(result.getAudioType())) {skipped++;}
+        else {
+          String audioRef = result.getAnswer();
+
+          boolean fileExists = false;
+          if (!audioRef.contains("context=")) {
+            //logger.debug("doing alignment -- ");
+            // Do alignment...
+            File absoluteFile = pathHelper.getAbsoluteFile(audioRef);
+            fileExists = absoluteFile.exists();
+          }
+
+          String exid = result.getExid();
+
+          if (fileExists) {
+            CommonExercise exercise = idToEx.get(exid);
+            if (exercise != null) {
+              if (result.getModel() == null || !result.getModel().equals(currentModel)) {
+                audioFileHelper.recalcOne(result, exercise);
+                sleep(serverProps.getSleepBetweenDecodes());
+                count++;
+                if (count % 100 == 0) logger.info("recalc " + count + "/" + results.size());
+              }
+              else {
+                currentAlready++;
+              }
+            }
+            else {
+              if (staleExercise < 1000) {
+                logger.info("can't find ex '" + exid + "' in " + idToEx.size());
+              }
+              staleExercise++;
+            }
+          }
+          else {
+            if (notThere < 1000 || exid.startsWith("1")) logger.info("Can't find " + pathHelper.getAbsoluteFile(audioRef).getAbsolutePath());
+            notThere++;
+          }
+        }
+      }
+    }
+
+    logger.info("recalcStudentAudio did recalc on " + count + "/" + results.size() +
+        " skipped " + skipped +
+        " not there " + notThere + " stale exercises " + staleExercise + " currentAlready " + currentAlready);
+
+  }
+
   /**
    * Do alignment and decoding on all the reference audio and store the results in the RefResult table.
    *
@@ -314,6 +483,7 @@ public class RefResultDecoder {
       }
     }).start();
   }
+
 
   private void sleep(int millis) {
     try {
