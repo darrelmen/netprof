@@ -49,6 +49,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.Navigation;
+import mitll.langtest.client.download.DownloadIFrame;
 import mitll.langtest.client.flashcard.Banner;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.instrumentation.EventTable;
@@ -72,6 +73,9 @@ import java.util.logging.Logger;
 public class InitialUI {
   private final Logger logger = Logger.getLogger("InitialUI");
 
+  private static final String NPF_CLASSROOM_URL = "https://np.ll.mit.edu/npfClassroom";
+
+  public static final String ROOT_VERTICAL_CONTAINER = "root_vertical_container";
   protected static final String LOGIN = "Login";
 
   /**
@@ -121,7 +125,7 @@ public class InitialUI {
     Panel firstRow = makeFirstTwoRows(verticalContainer);
 
     if (!showLogin()) {
-     // logger.info("not show login -");
+      // logger.info("not show login -");
       populateBelowHeader(verticalContainer, firstRow);
     }
   }
@@ -139,6 +143,12 @@ public class InitialUI {
     verticalContainer.add(firstRow);
     this.firstRow = firstRow;
     firstRow.getElement().setId("firstRow");
+    DivWidget w = new DivWidget();
+    w.getElement().setId(DownloadIFrame.DOWNLOAD_AREA_ID);
+    RootPanel.get().add(w);
+    w.setVisible(false);
+//    w.setWidth("0px");
+//    w.setHeight("0px");
     return firstRow;
   }
 
@@ -163,8 +173,8 @@ public class InitialUI {
         });
       }
     };
-   // logger.info("talks to domino " + props.talksToDomino());
-    reload = (props.talksToDomino()) ?reload:null;
+    // logger.info("talks to domino " + props.talksToDomino());
+    reload = (props.talksToDomino()) ? reload : null;
     Widget title = banner.makeNPFHeaderRow(props.getSplash(), props.isBeta(), getGreeting(),
         getReleaseStatus(),
         new LogoutClickHandler(),
@@ -200,8 +210,13 @@ public class InitialUI {
     return new HTML(langTest.getInfoLine());
   }
 
+  /**
+   * @return
+   */
   public boolean isRTL() {
-    return navigation != null && navigation.isRTL();
+    boolean b = navigation != null && navigation.isRTL();
+    if (b) logger.info("content is RTL!");
+    return b;
   }
 
   private class LogoutClickHandler implements ClickHandler {
@@ -215,7 +230,6 @@ public class InitialUI {
    * @seex mitll.langtest.client.LangTest.LogoutClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)
    */
   private void resetState() {
-    //logger.info("clearing current history token");
     History.newItem(""); // clear history!
     userManager.clearUser();
     lastUser = NO_USER_INITIAL;
@@ -290,11 +304,11 @@ public class InitialUI {
    * @return
    */
   protected Container getRootContainer() {
-   // logger.info("getRootContainer");
+    // logger.info("getRootContainer");
     RootPanel.get().clear();   // necessary?
 
     Container verticalContainer = new FluidContainer();
-    verticalContainer.getElement().setId("root_vertical_container");
+    verticalContainer.getElement().setId(ROOT_VERTICAL_CONTAINER);
     return verticalContainer;
   }
 
@@ -357,7 +371,7 @@ public class InitialUI {
     currentExerciseVPanel.addStyleName("noMargin");
 
     Container verticalContainer2 = new FluidContainer();
-    verticalContainer2.getElement().setId("root_vertical_container");
+    verticalContainer2.getElement().setId(ROOT_VERTICAL_CONTAINER);
     verticalContainer2.add(langTest.getFlashRecordPanel());
     verticalContainer2.add(currentExerciseVPanel);
     return verticalContainer2;
@@ -370,7 +384,8 @@ public class InitialUI {
     style.setMarginTop(10, Style.Unit.PX);
 
     for (String site : props.getSites()) {
-      Anchor w = new Anchor(site, "https://np.ll.mit.edu/npfClassroom" + site.replaceAll("Mandarin", "CM"));
+      String siteChanged = site.endsWith("Mandarin") ? site.replaceAll("Mandarin", "CM") : site;
+      Anchor w = new Anchor(site, NPF_CLASSROOM_URL + siteChanged);
       w.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
       hp.add(w);
     }
@@ -584,7 +599,7 @@ public class InitialUI {
     if (childCount > 0) {
       Node child = firstRow.getElement().getChild(0);
       Element as = Element.as(child);
-     // logger.info("populateRootPanelIfLogin found : '" + as.getId() +"'");
+      // logger.info("populateRootPanelIfLogin found : '" + as.getExID() +"'");
 
       if (as.getId().contains(LOGIN)) {
         logger.info("populateRootPanelIfLogin found login...");
@@ -599,7 +614,7 @@ public class InitialUI {
     banner.reflectPermissions(langTest.getPermissions());
   }
 
-  public void setSplash() {
+  void setSplash() {
     banner.setSubtitle();
   }
 }

@@ -394,7 +394,7 @@ public class ResultManager extends PagerTable {
 
     else {
       TextBox widget = (TextBox) textSuggest.getWidget();
-      //    logger.info("checking " + widget.getElement().getId() + " " + widget.getText() +" " + widget.getValue());
+      //    logger.info("checking " + widget.getElement().getExID() + " " + widget.getText() +" " + widget.getValue());
       return widget.getValue();
     }
   }
@@ -470,7 +470,7 @@ public class ResultManager extends PagerTable {
       // logger.info("audio type " + audioType);
       String foreignText = selectedObject.getForeignText();
 
-      ReviewScoringPanel w = new ReviewScoringPanel(selectedObject.getAnswer(), foreignText, service, controller, selectedObject.getId(), null, "instance");
+      ReviewScoringPanel w = new ReviewScoringPanel(selectedObject.getAnswer(), foreignText, service, controller, selectedObject.getExID(), null, "instance");
 
       w.setResultID(selectedObject.getUniqueID());
 
@@ -481,7 +481,7 @@ public class ResultManager extends PagerTable {
       reviewContainer.add(vert);
       reviewContainer.add(w.getTables());
     } else {
-      AudioPanel w = new AudioPanel(selectedObject.getAnswer(), service, controller, false, null, 10, "", controller.getAudioType(), selectedObject.getId(), null, "instance");
+      AudioPanel w = new AudioPanel(selectedObject.getAnswer(), service, controller, false, null, 10, "", controller.getAudioType(), selectedObject.getExID(), null, "instance");
       reviewContainer.add(w);
     }
   }
@@ -542,9 +542,11 @@ public class ResultManager extends PagerTable {
               updateRowData(start, result.results);
               if (numTotal > 0) {
                 MonitorResult object = result.results.get(0);
-//                    logger.info("--->getResults req " + result.req +
-//                            " " + unitToValue + " user " + userID + " text '" + text + "' : " +
-//                            "got back " + result.results.size() + " of total " + result.numTotal + " selecting "+ object);
+/*
+                    logger.info("--->getResults req " + result.req +
+                            " " + unitToValue + " user " + userID + " text '" + text + "' : " +
+                            "got back " + result.results.size() + " of total " + result.numTotal + " selecting "+ object);
+*/
                 cellTable.getSelectionModel().setSelected(object, true);
               }
             }
@@ -605,7 +607,7 @@ public class ResultManager extends PagerTable {
         String answer1 = answer.getAnswer();
         if (answer1.endsWith(".wav")) {
           return audioTag.getAudioTag(answer1);
-          //  return PlayAudioWidget.getAudioTagHTML(answer1,"answer_to_"+answer.getId() + "_by_"+answer.getUserid()+"_"+answer.getUniqueID());
+          //  return PlayAudioWidget.getAudioTagHTML(answer1,"answer_to_"+answer.getExID() + "_by_"+answer.getUserid()+"_"+answer.getUniqueID());
         } else {
           SafeHtmlBuilder sb = new SafeHtmlBuilder();
           sb.appendHtmlConstant(answer1);
@@ -644,7 +646,7 @@ public class ResultManager extends PagerTable {
     TextColumn<MonitorResult> exercise = new TextColumn<MonitorResult>() {
       @Override
       public String getValue(MonitorResult answer) {
-        return answer.getId();
+        return answer == null ? "Unk" : answer.getExID();
       }
     };
     exercise.setSortable(true);
