@@ -44,6 +44,7 @@ import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.OutputStream;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -73,7 +74,7 @@ public class UserManagement {
   /**
    * Check other sites to see if the user exists somewhere else, and if so go ahead and use that person
    * here.
-   *
+   * <p>
    * TODO : read the list of sites from a file
    *
    * @param login
@@ -90,7 +91,9 @@ public class UserManagement {
       logger.debug("userExists : checking '" + login + "'");
 
       for (String site : props.getSites()) {
-        String url = NPF_CLASSROOM_PREFIX + site.replaceAll("Mandarin", "CM") + "/scoreServlet";
+        String siteForMandarin = site.endsWith("Mandarin") ? site.replaceAll("Mandarin", "CM") : site;
+
+        String url = NPF_CLASSROOM_PREFIX + siteForMandarin + "/scoreServlet";
         String json = new HTTPClient().readFromGET(url + "?hasUser=" + login + "&passwordH=" + passwordH);
 
         if (!json.isEmpty()) {
@@ -100,9 +103,8 @@ public class UserManagement {
             Object pc = jsonObject.get(RestUserManagement.PASSWORD_CORRECT);
 
             if (userid == null) {
-              logger.warn("huh? got back " + json + " for req " + login + " pass " +passwordH);
-            }
-            else {
+              logger.warn("huh? got back " + json + " for req " + login + " pass " + passwordH);
+            } else {
               if (!userid.toString().equals(NO_USER)) {
                 logger.info(site + " : found user " + userid);
 
@@ -130,7 +132,6 @@ public class UserManagement {
   }
 
   /**
-   *
    * @param userID
    * @param passwordH
    * @param emailH
@@ -186,16 +187,33 @@ public class UserManagement {
 
   /**
    * @param user
+   * @param doThrow
    * @return
-   * @seex mitll.langtest.server.database.ImportCourseExamples#copyUser
+   * @see DatabaseImpl#addUser(User)
    */
-  public long addUser(User user) {
+  public long addUser(User user, boolean doThrow) {
     long l;
-    if ((l = userDAO.userExists(user.getUserID())) == -1) {
-      logger.debug("addUser " + user);
-      l = userDAO.addUser(user.getAge(), user.getGender() == 0 ? UserDAO.MALE : UserDAO.FEMALE,
-          user.getExperience(), user.getIpaddr(), user.getNativeLang(), user.getDialect(), user.getUserID(), false,
-          user.getPermissions(), User.Kind.STUDENT, "", "", "");
+    String userID = user.getUserID();
+    if ((l = userDAO.userExists(userID)) == -1) {
+      logger.debug("addUser " + userID + " : " + new Date(user.getTimestampMillis()));
+      try {
+        l = userDAO.addUser(user.getAge(),
+            user.getGender() == 0 ? UserDAO.MALE : UserDAO.FEMALE,
+            user.getExperience(),
+            user.getIpaddr(),
+            user.getNativeLang(),
+            user.getDialect(),
+            userID,
+            user.isEnabled(),
+            user.getPermissions(),
+            user.getUserKind(),
+            user.getPasswordHash(),
+            user.getEmailHash(),
+            user.getDevice(),
+            user.getTimestampMillis(), doThrow);
+      } catch (SQLException e) {
+        logger.error("Got " + e, e);
+      }
     }
     return l;
   }
@@ -204,7 +222,7 @@ public class UserManagement {
    * Somehow on subsequent runs, the ids skip by 30 or so?
    * <p/>
    * Uses return generated keys to get the user id
-   *
+   * <p>
    * JUST FOR TESTING
    *
    * @param age
@@ -220,8 +238,13 @@ public class UserManagement {
                       String nativeLang, String dialect, String userID, Collection<User.Permission> permissions,
                       String device) {
     logger.debug("addUser " + userID);
-    long l = userDAO.addUser(age, gender, experience, ipAddr, nativeLang, dialect, userID, false, permissions,
-        User.Kind.STUDENT, "", "", device);
+    long l = 0;
+    try {
+      l = userDAO.addUser(age, gender, experience, ipAddr, nativeLang, dialect, userID, false, permissions,
+          User.Kind.STUDENT, "", "", device, System.currentTimeMillis(), false);
+    } catch (SQLException e) {
+      logger.error("got " + e, e);
+    }
     userListManager.createFavorites(l);
     return l;
   }
@@ -235,11 +258,16 @@ public class UserManagement {
   }
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#usersToXLSX(OutputStream)
    * @param out
+   * @see mitll.langtest.server.database.DatabaseImpl#usersToXLSX(OutputStream)
    */
-  void usersToXLSX(OutputStream out) {  userDAO.toXLSX(out, getUsers());  }
-  JSON usersToJSON() { return userDAO.toJSON(getUsers());  }
+  void usersToXLSX(OutputStream out) {
+    userDAO.toXLSX(out, getUsers());
+  }
+
+  JSON usersToJSON() {
+    return userDAO.toJSON(getUsers());
+  }
 
   /**
    * Adds some sugar -- sets the answers and rate per user, and joins with dli experience data
@@ -280,6 +308,7 @@ public class UserManagement {
 
   /**
    * So multiple recordings for the same item are counted as 1.
+   *
    * @return
    * @see #getUsers
    */
