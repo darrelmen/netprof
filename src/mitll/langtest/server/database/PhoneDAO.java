@@ -46,7 +46,6 @@ import org.apache.log4j.Logger;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.util.*;
-import java.util.Date;
 
 /**
  * Created with IntelliJ IDEA.
@@ -66,6 +65,7 @@ public class PhoneDAO extends DAO {
   private static final String WID = "wid";
   private static final String SEQ = "seq";
   private static final String SCORE = "score";
+  private static final String DURATION = "duration";
 
   private static final boolean DEBUG = false;
   private static final String RID1 = "RID";
@@ -89,19 +89,21 @@ public class PhoneDAO extends DAO {
     }
   }
 
-  public static class Phone {
+  static class Phone {
     final long wid;
     final long rid;
     final String phone;
     final int seq;
     final float score;
+    float duration;
 
-    public Phone(long rid, long wid, String phone, int seq, float score) {
+    Phone(long rid, long wid, String phone, int seq, float score, float duration) {
       this.rid = rid;
       this.wid = wid;
       this.phone = phone;
       this.seq = seq;
       this.score = score;
+      this.duration = duration;
     }
 
     public String toString() {
@@ -119,6 +121,11 @@ public class PhoneDAO extends DAO {
    */
   private void createTable(Database database) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
+
+//    if (database.getServerProps().shouldRecalcStudentAudio()) {
+//      drop(PHONE, connection);
+//    }
+
     PreparedStatement statement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS " +
         PHONE +
         " (" +
@@ -128,6 +135,7 @@ public class PhoneDAO extends DAO {
         PHONE + " VARCHAR, " +
         SEQ + " INT, " +
         SCORE + " FLOAT, " +
+        DURATION + " FLOAT, " +
 
         "FOREIGN KEY(" +
         RID +
@@ -144,7 +152,44 @@ public class PhoneDAO extends DAO {
         ")");
 
     finish(database, connection, statement);
+
+    Collection<String> columns = getColumns(PHONE);
+
+    if (!columns.contains(DURATION.toLowerCase())) {
+      addFloat(connection, PHONE, DURATION);
+    }
   }
+
+  public boolean removePhones(long resultid) {
+    Connection connection = getConnection();
+    boolean val = true;
+    try {
+      // there are much better ways of doing this...
+      PreparedStatement statement = connection.prepareStatement(
+          "DELETE FROM " + PHONE +
+              " WHERE " +
+              RID + "=" +resultid);
+      int i = 1;
+
+//      statement.setLong(i++, resultid);
+      int j = statement.executeUpdate();
+
+      if (j == 0) {
+        logger.error("huh? didn't remove rows for " + resultid + " got ");// + grade + " grade for " + resultID + " and " + grader + " and " + gradeID + " and " + gradeType);
+        val = false;
+      }
+      statement.close();
+
+    } catch (SQLException ee) {
+      logger.error("trying to drop phones " + resultid + " got " + ee, ee);
+      logAndNotify.logAndNotifyServerException(ee);
+      val = false;
+    } finally {
+      database.closeConnection(connection);
+    }
+    return val;
+  }
+
 
   /**
    * <p>
@@ -163,10 +208,10 @@ public class PhoneDAO extends DAO {
               WID + "," +
               PHONE + "," +
               SEQ + "," +
-              SCORE +
-              //"," +
+              SCORE + ","+
+              DURATION +
               ") " +
-              "VALUES(?,?,?,?,?)");
+              "VALUES(?,?,?,?,?,?)");
       int i = 1;
 
       statement.setLong(i++, phone.rid);
@@ -174,6 +219,7 @@ public class PhoneDAO extends DAO {
       statement.setString(i++, phone.phone);
       statement.setInt(i++, phone.seq);
       statement.setFloat(i++, phone.score);
+      statement.setFloat(i++, phone.duration);
 
       int j = statement.executeUpdate();
 
@@ -339,7 +385,7 @@ public class PhoneDAO extends DAO {
   /**
    * @param userid
    * @param exids
-   * @param sortByLatestExample
+   * @paramx sortByLatestExample
    * @return
    * @throws SQLException
    * @see #getPhoneReport(long, List, Map)
@@ -357,7 +403,7 @@ public class PhoneDAO extends DAO {
    * @return
    * @throws SQLException
    * @see #getWorstPhonesForResults(long, List, Map)
-   * @see #getWorstPhones(long, List, Map, boolean)
+   * @see #getWorstPhones
    */
   private PhoneReport getPhoneReport(String sql, Map<String, String> idToRef, boolean addTranscript, boolean sortByLatestExample) throws SQLException {
     // logger.debug("getPhoneReport query is " + sql);
@@ -564,6 +610,7 @@ public class PhoneDAO extends DAO {
    * For the iPad, we don't want to return every single example, just the latest one, and the summary score
    * for the phone is just for the latest ones, or else they can seem inconsistent, since the iPad only shows
    * distinct words.
+   *
    * @param phoneToAvg
    * @param sorted
    * @return
@@ -580,7 +627,7 @@ public class PhoneDAO extends DAO {
       phoneToMinimal.put(pair.getKey(), new ArrayList<>(wordToExample.values()));
     }
 
-   final Map<String, Float> phoneToScore = new HashMap<>();
+    final Map<String, Float> phoneToScore = new HashMap<>();
     for (Map.Entry<String, List<WordAndScore>> pair : phoneToMinimal.entrySet()) {
       float total = 0;
       for (WordAndScore example : pair.getValue()) total += example.getScore();
@@ -591,7 +638,7 @@ public class PhoneDAO extends DAO {
     Collections.sort(sorted, new Comparator<String>() {
       @Override
       public int compare(String o1, String o2) {
-        Float current  = phoneToScore.get(o1);
+        Float current = phoneToScore.get(o1);
         Float current1 = phoneToScore.get(o2);
         int i = current.compareTo(current1);
         return i == 0 ? o1.compareTo(o2) : i;
