@@ -386,7 +386,7 @@ public class ReportTest {
     //if (users.isEmpty()) {
     users = addAndGetUsers("test22");
     //}
-    user = users.get(users.size() - 1).getId();
+    user = users.get(users.size() - 1).getExID();
     logger.debug("Got user " + user);
     UserListManager userListManager = database.getUserListManager();
 
@@ -421,14 +421,14 @@ public class ReportTest {
     User user = users.iterator().next();
     UserListManager userListManager = database.getUserListManager();
 
-    long listid = addListCheck(user.getId(), userListManager, "test");
+    long listid = addListCheck(user.getExID(), userListManager, "test");
     if (listid == -1) {
-      UserList test1 = userListManager.getByName(user.getId(), "test");
+      UserList test1 = userListManager.getByName(user.getExID(), "test");
       listid = test1.getUniqueID();
     }
     assertTrue(userListManager.getUserListsForText("", -1).contains(userListManager.getUserListByID(listid, new ArrayList<String>())));
 
-    Iterator<UserList> iterator = userListManager.getListsForUser(user.getId(), false, false).iterator();
+    Iterator<UserList> iterator = userListManager.getListsForUser(user.getExID(), false, false).iterator();
     UserList favorite = iterator.next();
     assertTrue(favorite.isFavorite());
     UserList test = iterator.next();
@@ -448,7 +448,7 @@ public class ReportTest {
     Collection<UserList> listsForUser2 = userListManager.getListsForUser(visitor, true, false);
     assertTrue(!listsForUser2.contains(test)); // list isn't mine, I'm just a visitor
 
-    removeList(user.getId(), userListManager, listid);
+    removeList(user.getExID(), userListManager, listid);
 
     // after removing, I shouldn't see it
     Collection<UserList> listsForUser3 = userListManager.getListsForUser(visitor, false, false);
@@ -468,7 +468,7 @@ public class ReportTest {
     User owner = users.iterator().next();
     UserListManager userListManager = database.getUserListManager();
 
-    long listid = addListCheck(owner.getId(), userListManager, "test");
+    long listid = addListCheck(owner.getExID(), userListManager, "test");
     UserList testList = userListManager.getUserListByID(listid, new ArrayList<String>());
     assertTrue(userListManager.getUserListsForText("", -1).contains(testList));
 
@@ -479,12 +479,12 @@ public class ReportTest {
     userListManager.addVisitor(testList.getUniqueID(), visitor);
 
     // what happens if the owner adds himself as a visitor
-    userListManager.addVisitor(testList.getUniqueID(), owner.getId());
+    userListManager.addVisitor(testList.getUniqueID(), owner.getExID());
 
-    Collection<UserList> listsForUser = userListManager.getListsForUser(owner.getId(), false, false);
+    Collection<UserList> listsForUser = userListManager.getListsForUser(owner.getExID(), false, false);
     assertTrue(listsForUser.contains(testList));   // should be able to see it, it's mine
 
-    listsForUser = userListManager.getListsForUser(owner.getId(), true, false);
+    listsForUser = userListManager.getListsForUser(owner.getExID(), true, false);
     assertTrue(listsForUser.contains(testList));  // should be able to see it, it's mine
 
     listsForUser = userListManager.getListsForUser(visitor, false, false);
@@ -493,13 +493,13 @@ public class ReportTest {
     listsForUser = userListManager.getListsForUser(visitor, true, false);
     assertTrue(!listsForUser.contains(testList));   // should be able to see it, it's mine
 
-    removeList(owner.getId(), userListManager, listid);
+    removeList(owner.getExID(), userListManager, listid);
 
     // after removing, I shouldn't see it
     listsForUser = userListManager.getListsForUser(visitor, false, false);
     assertTrue(!listsForUser.contains(testList));
 
-    listsForUser = userListManager.getListsForUser(owner.getId(), false, false);
+    listsForUser = userListManager.getListsForUser(owner.getExID(), false, false);
     assertTrue(!listsForUser.contains(testList));
   }*/
 
@@ -510,7 +510,7 @@ public class ReportTest {
 
     UserListManager userListManager = database.getUserListManager();
 
-    long listid = addListCheck(owner.getId(), userListManager, "test");
+    long listid = addListCheck(owner.getExID(), userListManager, "test");
     logger.debug("list id " + listid);
     UserList testList = userListManager.getUserListByID(listid, new ArrayList<String>());
     assertTrue(userListManager.getUserListsForText("", -1).contains(testList));

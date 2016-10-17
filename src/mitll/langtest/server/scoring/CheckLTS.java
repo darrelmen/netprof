@@ -49,6 +49,7 @@ import java.util.*;
  */
 class CheckLTS {
   private static final Logger logger = Logger.getLogger(CheckLTS.class);
+  private static final int WARN_LTS_COUNT = 1;
 
   private final LTS letterToSoundClass;
   private final String languageProperty;
@@ -93,7 +94,7 @@ class CheckLTS {
     return checkLTS2(letterToSoundClass, foreignLanguagePhrase);
   }
 
-  int shown = 0;
+  private int shown = 0;
 
   /**
    * So chinese is special -- it doesn't do lts -- it just uses a dictionary
@@ -105,7 +106,7 @@ class CheckLTS {
    */
   private Set<String> checkLTS(LTS lts, String foreignLanguagePhrase) {
     if (htkDictionary.isEmpty() && LTSFactory.isEmpty(lts)) {
-      if (shown++ < 20) {
+      if (shown++ < WARN_LTS_COUNT) {
         logger.debug("skipping LTS since dict is empty and using the empty LTS : " + lts);
       }
       return Collections.emptySet();
@@ -116,7 +117,7 @@ class CheckLTS {
 
     String language = isMandarin ? " MANDARIN " : "";
 
-    //logger.debug("checkLTS '" + language + "' tokens : '" + tokens + "' lts " + lts + " dict size " + htkDictionary.size());
+    if (DEBUG) logger.debug("checkLTS '" + language + "' tokens : '" + tokens + "' lts " + lts + " dict size " + htkDictionary.size());
 
     Set<String> oov = new HashSet<>();
     Set<String> inlts = new HashSet<>();
@@ -170,6 +171,8 @@ class CheckLTS {
     } else {
       if (DEBUG) logger.info("for " + foreignLanguagePhrase + " : inlts " + inlts + " indict " + indict);
     }
+    if (DEBUG)  logger.debug("checkLTS '" + language + "' tokens : '" + tokens + "' oov " + oov + " for " + foreignLanguagePhrase + " : inlts " + inlts + " indict " + indict);
+
     return oov;
   }
 
@@ -186,11 +189,11 @@ class CheckLTS {
     SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder(htkDictionary);
     Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase);
 
-    List<String> firstPron = new ArrayList<String>();
-    Set<String> uphones = new TreeSet<String>();
+    List<String> firstPron = new ArrayList<>();
+    Set<String> uphones = new TreeSet<>();
 
     if (isMandarin) {
-      List<String> token2 = new ArrayList<String>();
+      List<String> token2 = new ArrayList<>();
       for (String token : tokens) {
         String segmentation = smallVocabDecoder.segmentation(token.trim());
         if (segmentation.isEmpty()) {
