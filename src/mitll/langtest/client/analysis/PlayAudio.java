@@ -55,7 +55,7 @@ import java.util.logging.Logger;
  * @since 11/20/15.
  */
 class PlayAudio {
-//  private final Logger logger = Logger.getLogger("PlayAudio");
+  private final Logger logger = Logger.getLogger("PlayAudio");
 
   private final LangTestDatabaseAsync service;
   private final SoundPlayer soundFeedback;
@@ -76,6 +76,7 @@ class PlayAudio {
   }
 
   /**
+   * @see AnalysisPlot#getSeriesClickEventHandler
    * @param id
    * @param userid
    */
@@ -87,19 +88,30 @@ class PlayAudio {
 
       @Override
       public void onSuccess(CommonExercise commonExercise) {
-        List<CorrectAndScore> scores = commonExercise.getScores();
-        CorrectAndScore correctAndScore = scores.get(scores.size() - 1);
-        String refAudio = commonExercise.getRefAudio();
-
-        if (t != null) {
-         // logger.info("cancel timer");
-          t.cancel();
+        if (commonExercise == null) {
+          // if the exercise has been deleted...?
+          // show popup?
         }
-        if (refAudio != null) {
-          playLastThenRef(correctAndScore, refAudio);
-        } else {
-          playUserAudio(correctAndScore);
-       //   logger.info("no ref audio for " + commonExercise.getID());
+        else {
+          List<CorrectAndScore> scores = commonExercise.getScores();
+          if (scores.isEmpty()) {
+            logger.warning("no scores for " + id + " by user " + userid);
+          }
+          else {
+            CorrectAndScore correctAndScore = scores.get(scores.size() - 1);
+            String refAudio = commonExercise.getRefAudio();
+
+            if (t != null) {
+              // logger.info("cancel timer");
+              t.cancel();
+            }
+            if (refAudio != null) {
+              playLastThenRef(correctAndScore, refAudio);
+            } else {
+              playUserAudio(correctAndScore);
+              //   logger.info("no ref audio for " + commonExercise.getID());
+            }
+          }
         }
       }
     });
@@ -110,7 +122,7 @@ class PlayAudio {
    * @param refAudio
    */
   private void playLastThenRef(CorrectAndScore correctAndScore, String refAudio) {
-    final String path = getPath(refAudio);
+    final String path  = getPath(refAudio);
     final String path1 = getPath(correctAndScore.getPath());
     soundFeedback.queueSong(path1, new SoundFeedback.EndListener() {
       @Override
@@ -164,8 +176,6 @@ class PlayAudio {
       }
     });
   }
-
-  //private CompressedAudio compressedAudio = new CompressedAudio();
 
   private String getPath(String path) { return CompressedAudio.getPath(path);  }
 }
