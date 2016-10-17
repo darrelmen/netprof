@@ -49,11 +49,12 @@ import java.util.*;
  */
 public class SectionHelper<T extends Shell> {
   private static final Logger logger = Logger.getLogger(SectionHelper.class);
-  private List<String> predefinedTypeOrder = new ArrayList<String>();
+  private List<String> predefinedTypeOrder = new ArrayList<>();
 
   private final Map<String, Map<String, Lesson<T>>> typeToUnitToLesson = new HashMap<>();
   // e.g. "week"->"week 5"->[unit->["unit A","unit B"]],[chapter->["chapter 3","chapter 5"]]
   private final Map<String, Map<String, Map<String, Collection<String>>>> typeToSectionToTypeToSections = new HashMap<String, Map<String, Map<String, Collection<String>>>>();
+  private static final boolean DEBUG = false;
 
   public void clear() {
     typeToUnitToLesson.clear();
@@ -65,7 +66,7 @@ public class SectionHelper<T extends Shell> {
    * @see mitll.langtest.server.database.DatabaseImpl#getTypeOrder
    */
   public List<String> getTypeOrder() {
-    //logger.info("getTypeOrder " + predefinedTypeOrder);
+//    logger.info("getTypeOrder predefinedTypeOrder : " + predefinedTypeOrder);
     if (predefinedTypeOrder.isEmpty()) {
       List<String> types = new ArrayList<String>();
       types.addAll(typeToSectionToTypeToSections.keySet());
@@ -84,14 +85,13 @@ public class SectionHelper<T extends Shell> {
       return types;
     } else {
       Set<String> validTypes = typeToUnitToLesson.keySet();
-      //logger.info("getTypeOrder validTypes " + validTypes);
       List<String> valid = new ArrayList<String>(predefinedTypeOrder);
       valid.retainAll(validTypes);
       return valid;
     }
   }
 
-  public boolean allKeysValid() {
+  boolean allKeysValid() {
     for (String type : typeToUnitToLesson.keySet()) {
       if (type == null || type.equals("null")) {
         logger.error("ERROR ERROR \n\n - the tierIndex property is out of sync with the spreadsheet columns! - " +
@@ -111,7 +111,10 @@ public class SectionHelper<T extends Shell> {
   }
 
   private List<SectionNode> getChildren(List<String> typeOrder) {
-    if (typeOrder.isEmpty()) return Collections.emptyList();
+    if (typeOrder.isEmpty()) {
+      if (DEBUG) logger.info("type order is empty");
+      return Collections.emptyList();
+    }
     String root = typeOrder.iterator().next();
     List<SectionNode> firstSet = new ArrayList<SectionNode>();
 
@@ -172,11 +175,13 @@ public class SectionHelper<T extends Shell> {
     }
   }
 
+/*
   public Collection<T> getExercisesForSimpleSelectionState(Map<String, String> simpleMap) {
     Map<String, Collection<String>> typeToSection = new HashMap<>();
     for (Map.Entry<String,String> pair : simpleMap.entrySet()) typeToSection.put(pair.getKey(),Collections.singleton(pair.getValue()));
     return getExercisesForSelectionState(typeToSection);
   }
+*/
 
   public Collection<T> getExercisesForSelectionState(String type, String value) {
     Map<String, Collection<String>> typeToSection = new HashMap<>();
@@ -258,8 +263,7 @@ public class SectionHelper<T extends Shell> {
   public void addExercise(T where) {
     List<SectionHelper.Pair> pairs = new ArrayList<SectionHelper.Pair>();
     for (Map.Entry<String, String> pair : where.getUnitToValue().entrySet()) {
-      Pair pair1 = addExerciseToLesson(where, pair.getKey(), pair.getValue());
-      pairs.add(pair1);
+      pairs.add(addExerciseToLesson(where, pair.getKey(), pair.getValue()));
     }
     addAssociations(pairs);
   }
@@ -340,9 +344,9 @@ public class SectionHelper<T extends Shell> {
   }
 
   /**
-   * @see #addExerciseToLesson(Shell, String, String)
    * @param section
    * @return
+   * @see #addExerciseToLesson(Shell, String, String)
    */
   private Map<String, Lesson<T>> getSectionToLesson(String section) {
     Map<String, Lesson<T>> unit = typeToUnitToLesson.get(section);
@@ -364,7 +368,7 @@ public class SectionHelper<T extends Shell> {
     private final String type;
     private final String section;
 
-    public Pair(String type, String section) {
+    Pair(String type, String section) {
       this.type = type;
       this.section = section;
     }

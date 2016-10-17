@@ -64,8 +64,7 @@ import java.util.logging.Logger;
  */
 public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends CommonShell & AudioRefExercise>
     implements ReloadableContainer, RequiresResize {
-  private final Logger logger = Logger.getLogger("SimpleChapterNPFHelper");
-
+  //private final Logger logger = Logger.getLogger("SimpleChapterNPFHelper");
   private boolean madeNPFContent = false;
 
   protected final LangTestDatabaseAsync service;
@@ -96,6 +95,10 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
     this.flexListLayout = getMyListLayout(service, feedback, userManager, controller, outer);
   }
 
+  public Panel getCreatedPanel() {
+    return getExerciseList() != null ? getExerciseList().getCreatedPanel() : null;
+  }
+
   protected abstract FlexListLayout<T, U> getMyListLayout(LangTestDatabaseAsync service,
                                                           UserFeedback feedback,
                                                           UserManager userManager, ExerciseController controller,
@@ -113,8 +116,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
   void showNPF(TabAndContent tabAndContent, String instanceName) {
     // logger.info(getClass() + " : adding npf content instanceName = " + instanceName);//+ " loadExercises " + loadExercises);
     DivWidget content = tabAndContent.getContent();
-    int widgetCount = content.getWidgetCount();
-    if (!madeNPFContent || widgetCount == 0) {
+    if (!madeNPFContent || content.getWidgetCount() == 0) {
       madeNPFContent = true;
   //    logger.info("\t: adding npf content instanceName = " + instanceName);
       addNPFToContent(content, instanceName);
