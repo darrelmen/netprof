@@ -516,8 +516,9 @@ public class ASRScoring extends Scoring implements ASR {
   private Scores getScoresFromHydec(Audio testAudio, String sentence, String configFile) {
     sentence = svd.getTrimmed(sentence);
     long then = System.currentTimeMillis();
-//    logger.debug("getScoresFromHydec scoring '" + sentence +"' (" +sentence.length()+ " ) with " +
-//            "LTS " + letterToSoundClass + " against " + testAudio + " with " + configFile);
+    logger.debug("getScoresFromHydec scoring '" + sentence +"' (" +sentence.length()+ " ) with " +
+        //    "LTS " + letterToSoundClass +
+        " against " + testAudio + " with " + configFile);
 
     try {
       Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut =
@@ -525,13 +526,12 @@ public class ASRScoring extends Scoring implements ASR {
       float hydec_score = jscoreOut._1;
       long timeToRunHydec = System.currentTimeMillis() - then;
 
-      logger.debug("getScoresFromHydec : " + languageProperty +
-          " scoring '" + sentence + "' (" + sentence.length() + ") got score " + hydec_score +
+      logger.debug("getScoresFromHydec : '" + languageProperty +
+          "' scoring '" + sentence + "' (" + sentence.length() + ") got score " + hydec_score +
           " and took " + timeToRunHydec + " millis");
 
       Map<String, Map<String, Float>> stringMapMap = jscoreOut._2;
       //logger.debug("hydec output " + stringMapMap);
-
       return new Scores(hydec_score, stringMapMap, (int) timeToRunHydec);
     } catch (AssertionError e) {
       logger.error("Got assertion error " + e, e);
