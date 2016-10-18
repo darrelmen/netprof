@@ -85,18 +85,20 @@ public class RecordButton extends Button {
 
   public interface RecordingListener {
     void startRecording();
+
     void flip(boolean first);
+
     void stopRecording();
   }
 
   /**
-   * @see mitll.langtest.client.scoring.PostAudioRecordButton#PostAudioRecordButton
-   * @see mitll.langtest.client.scoring.SimplePostAudioRecordButton#SimplePostAudioRecordButton(mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.LangTestDatabaseAsync, String, String, String, String)
    * @param delay
    * @param doClickAndHold
    * @param buttonText
    * @param stopButtonText
    * @param propertyHandler
+   * @see mitll.langtest.client.scoring.PostAudioRecordButton#PostAudioRecordButton
+   * @see mitll.langtest.client.scoring.SimplePostAudioRecordButton#SimplePostAudioRecordButton(mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.LangTestDatabaseAsync, String, String, String, String)
    */
   protected RecordButton(int delay, boolean doClickAndHold, String buttonText, String stopButtonText, PropertyHandler propertyHandler) {
     super(buttonText);
@@ -113,18 +115,20 @@ public class RecordButton extends Button {
   }
 
   /**
-   * @see mitll.langtest.client.recorder.RecordButtonPanel#makeRecordButton
    * @param delay
    * @param recordingListener
    * @param doClickAndHold
    * @param propertyHandler
+   * @see mitll.langtest.client.recorder.RecordButtonPanel#makeRecordButton
    */
   public RecordButton(int delay, RecordingListener recordingListener, boolean doClickAndHold, PropertyHandler propertyHandler) {
     this(delay, doClickAndHold, RECORD1, STOP1, propertyHandler);
     this.setRecordingListener(recordingListener);
   }
 
-  void removeImage() {  StyleHelper.removeStyle(icon, icon.getBaseIconType());  }
+  void removeImage() {
+    StyleHelper.removeStyle(icon, icon.getBaseIconType());
+  }
 
   public boolean isRecording() {
     return recording;
@@ -137,13 +141,16 @@ public class RecordButton extends Button {
   }
 
   /*To call click() function for Programmatic equivalent of the user clicking the button.*/
-  private class ButtonClickEvent extends ClickEvent {}
+  private class ButtonClickEvent extends ClickEvent {
+  }
 
   /**
-   * @see #RecordButton(int, mitll.langtest.client.recorder.RecordButton.RecordingListener, boolean, mitll.langtest.client.PropertyHandler)
    * @param recordingListener
+   * @see #RecordButton(int, mitll.langtest.client.recorder.RecordButton.RecordingListener, boolean, mitll.langtest.client.PropertyHandler)
    */
-  protected void setRecordingListener(RecordingListener recordingListener) { this.recordingListener = recordingListener;  }
+  protected void setRecordingListener(RecordingListener recordingListener) {
+    this.recordingListener = recordingListener;
+  }
 
   private void setupRecordButton() {
     if (doClickAndHold) {
@@ -153,8 +160,7 @@ public class RecordButton extends Button {
           if (!mouseDown) {
             mouseDown = true;
             doClick();
-          }
-          else {
+          } else {
             logger.info("ignoring mouse down since mouse already down " + mouseDown);
           }
         }
@@ -191,6 +197,7 @@ public class RecordButton extends Button {
       doClick();
     }
   }
+
   /**
    * @see #setupRecordButton
    */
@@ -200,25 +207,40 @@ public class RecordButton extends Button {
     }
   }
 
+ // private long last = 0;
   /**
    * Wait after the user releases the button, since it seems to get cut off...
+   *
    * @see #doClick()
    */
   private void startOrStopRecording() {
+    long enter = System.currentTimeMillis();
+/*    if (last  > 0) {
+      logger.info("startOrStopRecording at " + enter + " millis after dur " +  (enter-last));
+    }
+    else {
+      logger.info("startOrStopRecording at " + enter + " millis");
+    }*/
+ //   last = enter;
+
     if (afterStopTimer != null && afterStopTimer.isRunning()) {
       afterStopTimer.cancel();
     }
     if (isRecording()) {
       cancelTimer();
 
+   //   final long then = System.currentTimeMillis();
+      int afterStopDelayMillis = propertyHandler.getAfterStopDelayMillis();
+  //    logger.info("startOrStopRecording schedule stop in " + afterStopDelayMillis + " millis, " + (then-enter) + " after button click");
       afterStopTimer = new Timer() {
         @Override
         public void run() {
+     //     long now = System.currentTimeMillis();
+    //      logger.info("\tstartOrStopRecording stopped " + (now - then) + " millis later");
           stop();
         }
       };
-      afterStopTimer.schedule(propertyHandler.getAfterStopDelayMillis());
-
+      afterStopTimer.schedule(afterStopDelayMillis);
     } else {
       start();
       addRecordingMaxLengthTimeout();
@@ -284,8 +306,8 @@ public class RecordButton extends Button {
   }
 
   /**
-   * @see #showRecording()
    * @return if we want to flip images
+   * @see #showRecording()
    */
   boolean showInitialRecordImage() {
     setText(STOP);
@@ -295,8 +317,11 @@ public class RecordButton extends Button {
   /**
    * @see #flipImage()
    */
-  void showFirstRecordImage() {}
-  void showSecondRecordImage() {}
+  void showFirstRecordImage() {
+  }
+
+  void showSecondRecordImage() {
+  }
 
   void hideBothRecordImages() {
     setText(RECORD);
@@ -346,11 +371,14 @@ public class RecordButton extends Button {
     if (getPlatform().contains(WINDOWS) && validity == AudioAnswer.Validity.TOO_LOUD) {
       showTooLoud();
       return true;
+    } else {
+      return false;
     }
-    else return false;
   }
 
-  void removeTooltip() {}
+  void removeTooltip() {
+  }
+
   private void showTooLoud() {
     final RecordButton widget = this;
     removeTooltip();
