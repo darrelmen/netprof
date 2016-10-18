@@ -32,8 +32,6 @@
 
 package mitll.langtest.shared;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
-
 import java.util.Date;
 
 /**
