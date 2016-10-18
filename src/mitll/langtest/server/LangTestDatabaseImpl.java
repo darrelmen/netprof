@@ -335,13 +335,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   *
    * @param request
    * @param exercises
    * @return
    */
   private Collection<CommonExercise> filterExercises(ExerciseListRequest request,
-                                             Collection<CommonExercise> exercises) {
+                                                     Collection<CommonExercise> exercises) {
     exercises = filterByUnrecorded(request, exercises);
     exercises = filterByOnlyAudioAnno(request.isOnlyWithAudioAnno(), exercises);
     exercises = filterByOnlyDefaultAudio(request.isOnlyDefaultAudio(), exercises);
@@ -858,7 +857,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       if (!id.isEmpty()) {
         String message = "getExercise : huh? couldn't find exercise with id '" + id + "' when examining " + exercises.size() + " items";
         logger.warn(message);
-      //  logAndNotifyServerException(new IllegalArgumentException(message));
+        //  logAndNotifyServerException(new IllegalArgumentException(message));
       }
     } else {
       then2 = System.currentTimeMillis();
@@ -1161,8 +1160,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * Get properties (first time called read properties file -- e.g. see war/config/levantine/config.properties).
    *
    * @return
-   * @see mitll.langtest.client.LangTest#onModuleLoad
    * @paramx userID
+   * @see mitll.langtest.client.LangTest#onModuleLoad
    */
   @Override
   public StartupInfo getStartupInfo() {
@@ -1174,8 +1173,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       String rtl = properties.get("rtl");
       if (rtl == null) {
         boolean isRTL = direction == HasDirection.Direction.RTL;
-       // logger.info("examined text and found it to be " + direction);
-        properties.put("rtl", ""+isRTL);
+        // logger.info("examined text and found it to be " + direction);
+        properties.put("rtl", "" + isRTL);
       }
     }
     return new StartupInfo(properties, db.getTypeOrder(), db.getSectionNodes());
@@ -1244,6 +1243,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * Be careful - we lookup audio file by .wav extension
+   *
    * @param reqid
    * @param resultID
    * @param testAudioFile
@@ -1263,9 +1263,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String[] split = testAudioFile.split(File.separator);
     String answer = split[split.length - 1];
     String wavEndingAudio = answer.replaceAll(".mp3", ".wav").replaceAll(".ogg", ".wav");
-    Result cachedResult = db.getRefResultDAO().getResult(exerciseID, wavEndingAudio);
+
+    //Result cachedResult = db.getRefResultDAO().getResult(exerciseID, wavEndingAudio);
+    long now = System.currentTimeMillis();
+    //logger.info("traditional " + (now-then) + " result " + cachedResult.getUniqueID());
+    then = now;
+    Result cachedResult = db.getRefResultDAO().getRefForExAndAudio(exerciseID, wavEndingAudio);
+    now = System.currentTimeMillis();
+
+    //now = System.currentTimeMillis();
     if (cachedResult != null) {
-      logger.debug("getPretestScore Cache HIT  : align exercise id = " + exerciseID + " file " + answer + " found previous " + cachedResult.getUniqueID());
+      logger.debug("getPretestScore Cache HIT  : align exercise id = " + exerciseID + " file " + answer + " found previous " + cachedResult.getUniqueID() + " in " + (now - then));
+
     } else {
       logger.debug("getPretestScore Cache MISS : align exercise id = " + exerciseID + " file " + answer);
     }
@@ -1449,7 +1458,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     long then = System.currentTimeMillis();
     UserList<CommonShell> defectList = userListManager.getDefectList(db.getTypeOrder());
     long now = System.currentTimeMillis();
-    logger.info("took " + (now-then) + " to get defect list size = "+ defectList.getExercises().size());
+    logger.info("took " + (now - then) + " to get defect list size = " + defectList.getExercises().size());
 
     List<UserList<CommonShell>> lists = new ArrayList<>();
     lists.add(defectList);
@@ -1458,7 +1467,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     lists.add(commentedList);
     now = System.currentTimeMillis();
 
-    logger.info("took " + (now-then) + " to get comment list size = "+ commentedList.getExercises().size());
+    logger.info("took " + (now - then) + " to get comment list size = " + commentedList.getExercises().size());
 
     if (!serverProps.isNoModel()) {
       then = System.currentTimeMillis();
@@ -1467,7 +1476,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
       lists.add(attentionList);
 
-      logger.info("took " + (now-then) + " to get attention list size = "+ attentionList.getExercises().size());
+      logger.info("took " + (now - then) + " to get attention list size = " + attentionList.getExercises().size());
 
     }
     return lists;
@@ -1543,17 +1552,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       String[] parts = line.split("\\t");
 //      logger.info("\tgot " + parts.length + " parts");
       if (parts.length > 1) {
-        String fl      = parts[0];
+        String fl = parts[0];
         String english = parts[1];
         if (onFirst && english.equalsIgnoreCase(getLanguage())) {
           logger.info("reallyCreateNewItems skipping header line");
           firstColIsEnglish = true;
-        }
-        else {
+        } else {
           if (firstColIsEnglish || (isValidForeignPhrase(english) && !isValidForeignPhrase(fl))) {
             String temp = english;
             english = fl;
-            fl      = temp;
+            fl = temp;
             //logger.info("flip english '" +english+ "' to fl '" +fl+ "'");
           }
           UserExercise newItem = new UserExercise(-1, UserExercise.CUSTOM_PREFIX + "_" + (n++), creator, english, fl, "");
@@ -1571,13 +1579,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         if (isValidForeignPhrase(foreignLanguage)) {
           getUserListManager().reallyCreateNewItem(userListID, candidate, serverProps.getMediaDir());
           actualItems.add(candidate);
-        }
-        else {
+        } else {
           logger.info("item #" + candidate.getID() + " '" + candidate.getForeignLanguage() + "' is invalid");
         }
       }
     }
-    logger.info("Returning " + actualItems.size() + "/"+lines.length);
+    logger.info("Returning " + actualItems.size() + "/" + lines.length);
     return actualItems;
   }
 
@@ -2240,7 +2247,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   private void ensureCompressedEquivalent(int user, CommonShell exercise1, AudioAnswer audioAnswer) {
-    ensureCompressedAudio(user, exercise1,  audioAnswer.getPath());
+    ensureCompressedAudio(user, exercise1, audioAnswer.getPath());
   }
 
   private void ensureCompressedAudio(int user, CommonShell exercise1, String path) {
@@ -2289,7 +2296,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   /**
    * Remember this audio as reference audio for this exercise, and possibly clear the APRROVED (inspected) state
    * on the exercise indicating it needs to be inspected again (we've added new audio).
-   *
+   * <p>
    * Don't return a path to the normalized audio, since this doesn't let the recorder have feedback about how soft
    * or loud they are : https://gh.ll.mit.edu/DLI-LTEA/Development/issues/601
    *
@@ -2309,7 +2316,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     String audioTranscript = getAudioTranscript(audioType, exercise1);
 
-  //  logger.debug("addToAudioTable user " + user + " ex " + exerciseID + " for " + audioType + " path before " + audioAnswer.getPath());
+    //  logger.debug("addToAudioTable user " + user + " ex " + exerciseID + " for " + audioType + " path before " + audioAnswer.getPath());
 
     String permanentAudioPath = new PathWriter().
         getPermanentAudioPath(pathHelper,
@@ -2324,8 +2331,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     AudioAttribute audioAttribute =
         db.getAudioDAO().addOrUpdate(user, idToUse, audioType, permanentAudioPath, System.currentTimeMillis(),
             audioAnswer.getDurationInMillis(), audioTranscript);
-   // audioAnswer.setPath(audioAttribute.getAudioRef());
-    logger.debug("addToAudioTable user " + user + " ex " + exerciseID + " for " + audioType + " path after " + audioAnswer.getPath()+
+    // audioAnswer.setPath(audioAttribute.getAudioRef());
+    logger.debug("addToAudioTable user " + user + " ex " + exerciseID + " for " + audioType + " path after " + audioAnswer.getPath() +
         " audio answer has " + audioAttribute);
 
     // what state should we mark recorded audio?
@@ -2482,7 +2489,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       }
     }
     AVPScoreReport userHistoryForList = db.getUserHistoryForList(userid, ids, latestResultID, allIDs, idToKey);
-    if (DEBUG) logger.debug("getUserHistoryForList for " + typeToSection + " found " + allIDs.size() + " : "+ userHistoryForList);
+    if (DEBUG)
+      logger.debug("getUserHistoryForList for " + typeToSection + " found " + allIDs.size() + " : " + userHistoryForList);
     return userHistoryForList;
   }
 
