@@ -35,6 +35,7 @@ package mitll.langtest.server.decoder;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
@@ -75,6 +76,7 @@ public class RefResultDecoder {
   private final AudioConversion audioConversion;
   String mediaDir;
   String installPath;
+  AudioCheck audioCheck;
 
   /**
    * @param db
@@ -96,6 +98,7 @@ public class RefResultDecoder {
     this.audioConversion = new AudioConversion(serverProperties);
     this.mediaDir = mediaDir;
     this.installPath = installPath;
+    audioCheck = new AudioCheck(serverProperties);
   }
 
   /**
@@ -518,7 +521,7 @@ public class RefResultDecoder {
    * @param exercise
    * @param audioAttributes
    * @return
-   * @see #writeRefDecode(List, String)
+   * @see #writeRefDecode
    */
   private int doDecode(Set<String> decodedFiles, CommonExercise exercise, Collection<AudioAttribute> audioAttributes) {
     int count = 0;
@@ -539,17 +542,32 @@ public class RefResultDecoder {
         String audioRef = attribute.getAudioRef();
 
         boolean fileExists = false;
+        File absoluteFile = pathHelper.getAbsoluteFile(audioRef);
         if (!audioRef.contains("context=")) {
           //logger.debug("doing alignment -- ");
           // Do alignment...
-          File absoluteFile = pathHelper.getAbsoluteFile(audioRef);
           fileExists = absoluteFile.exists();
         }
 
         if (fileExists) {
-          audioFileHelper.decodeOneAttribute(exercise, attribute, doHydec);
-          sleep(serverProps.getSleepBetweenDecodes());
-          count++;
+          double durationInSeconds = audioCheck.getDurationInSeconds(absoluteFile);
+          long durationInMillis = attribute.getDurationInMillis();
+
+          if (durationInMillis > 100) {
+            if (durationInSeconds < 0.01) {
+              logger.warn("doDecode : 1 huh? attr dur " + durationInMillis + " but check dur " + durationInSeconds);
+            }
+            audioFileHelper.decodeOneAttribute(exercise, attribute, doHydec);
+            sleep(serverProps.getSleepBetweenDecodes());
+            count++;
+          }
+          else {
+            if (durationInSeconds > 0.01) {
+              logger.warn("doDecode : 2 huh? attr dur " + durationInMillis + " but check dur " + durationInSeconds);
+            }
+            logger.info("doDecode : for " +exercise.getID()+ " (" + durationInMillis+
+                ") skip short file "+ audioRef);
+          }
         }
       } catch (Exception e) {
         logger.error("Got " + e, e);
@@ -565,7 +583,7 @@ public class RefResultDecoder {
    * @param title
    * @param exid
    * @return
-   * @see #trimRef(List, String)
+   * @see #trimRef
    */
   private Info doTrim(Collection<AudioAttribute> audioAttributes, String title, String exid) {
     int count = 0;
