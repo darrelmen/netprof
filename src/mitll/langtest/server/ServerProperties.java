@@ -648,6 +648,6 @@ public class ServerProperties {
   }
 
   public String getCurrentModel() {
-    return getProperty("MODELS_DIR").replaceAll("models.", "");
+    return hasModel()? getProperty("MODELS_DIR").replaceAll("models.", ""): "";
   }
 }
