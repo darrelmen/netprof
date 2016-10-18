@@ -177,9 +177,9 @@ import java.util.logging.Logger;
  * - Clean up download dialog as per Michael Grimmer request
  * 1.5.1 (10-11-16)
  * - Added shouldRecalcStudentAudio option to recalc student audio with the current model
+ *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since
- * */
+ */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private final Logger logger = Logger.getLogger("LangTest");
 
@@ -344,7 +344,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private void getImage(int reqid, final String key, String path, final String type, int toUse, int height,
                         String exerciseID, final AsyncCallback<ImageResponse> client) {
-  //  ImageResponse ifPresent = imageCache.getIfPresent(key);
+    //  ImageResponse ifPresent = imageCache.getIfPresent(key);
     ImageResponse ifPresent = imageCache.get(key);
     if (ifPresent != null) {
       //logger.info("getImage for key " + key+ " found  " + ifPresent);
@@ -749,6 +749,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public boolean isTeacher() {
     return userManager.isTeacher();
   }
+
   public boolean isAdmin() {
     return userManager.isAdmin();
   }
@@ -784,16 +785,17 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   public UserFeedback getFeedback() {
     return this;
   }
-
   // recording methods...
 
   public Widget getFlashRecordPanel() {
     return flashRecordPanel;
   }
 
-  long then = 0;
+  private long then = 0;
+
   /**
    * Recording interface
+   *
    * @see RecordButtonPanel#startRecording()
    * @see PostAudioRecordButton#startRecording()
    */
@@ -809,7 +811,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
    * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
    */
   public void stopRecording(WavCallback wavCallback) {
-    //logger.info("stopRecording : time recording in UI " + (System.currentTimeMillis() - then) + " millis");
+    logger.info("stopRecording : time recording in UI " + (System.currentTimeMillis() - then) + " millis");
     flashRecordPanel.stopRecording(wavCallback);
   }
 
