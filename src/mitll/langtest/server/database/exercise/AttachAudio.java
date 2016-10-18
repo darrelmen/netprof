@@ -97,7 +97,7 @@ class AttachAudio {
    * @param imported      to attach audio to
    * @see BaseExerciseDAO#afterReadingExercises
    */
-  @Deprecated
+/*  @Deprecated
   public <T extends AudioExercise> void addOldSchoolAudio(String refAudioIndex, T imported) {
     String audioDir = refAudioIndex.length() > 0 ? findBest(refAudioIndex) : imported.getID();
     if (audioOffset != 0) {
@@ -131,7 +131,7 @@ class AttachAudio {
         imported.addAudio(new AudioAttribute(ensureForwardSlashes(slowAudioRef), UserDAO.DEFAULT_USER).markSlow());
       }
     }
-  }
+  }*/
 
   /**
    * Make sure every audio file we attach is a valid audio file -- it's really where it says it's supposed to be.
