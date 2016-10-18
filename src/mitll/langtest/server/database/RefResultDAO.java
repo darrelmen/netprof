@@ -63,6 +63,7 @@ public class RefResultDAO extends DAO {
 
   private static final String REFRESULT = "refresult";
   private static final String SELECT_ALL = "SELECT * FROM " + REFRESULT;
+  public static final String SELECT_PREFIX = SELECT_ALL + " WHERE " + EXID;
 
   private static final String DURATION = "duration";
   private static final String CORRECT = "correct";
@@ -302,6 +303,31 @@ public class RefResultDAO extends DAO {
     return new ArrayList<>();
   }
 
+  public Result getRefForExAndAudio(String exid, String answer) {
+    Result latestResult = null;
+
+    try {
+      String exidPrefix = SELECT_PREFIX + "='" + exid + "'";
+      List<Result> resultsSQL = getResultsSQL(exidPrefix);
+      if (resultsSQL.size() > 0) {
+        logger.info("getRefForExAndAudio got " + resultsSQL.size() + " for " + exid);
+      }
+
+      long latest = 0;
+      for (Result res : resultsSQL) {
+        if (res.getAnswer().endsWith(answer)) {
+          if (res.getUniqueID() > latest) {
+            latest = res.getUniqueID();
+            latestResult = res;
+          }
+        }
+      }
+    } catch (SQLException e) {
+      logger.error("Got " + e, e);
+    }
+    return latestResult;
+  }
+
   /**
    * @param exid
    * @param answer
@@ -309,12 +335,11 @@ public class RefResultDAO extends DAO {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getPretestScore(int, long, String, String, int, int, boolean, String, boolean)
    */
   public Result getResult(String exid, String answer) {
-    String sql = SELECT_ALL +
-        " WHERE " + EXID + "='" + exid + "' AND " + ANSWER + " like '%" + answer + "'";
+    String sql = SELECT_ALL + " WHERE " + EXID + "='" + exid + "' AND " + ANSWER + " like '%" + answer + "'";
     try {
       List<Result> resultsSQL = getResultsSQL(sql);
       if (resultsSQL.size() > 1) {
-        logger.warn("for " + exid + " and  " + answer + " got " + resultsSQL);
+        logger.warn("for " + exid + " and  " + answer + " got " + resultsSQL.size());
       }
       return resultsSQL.isEmpty() ? null : resultsSQL.iterator().next();
     } catch (SQLException e) {
