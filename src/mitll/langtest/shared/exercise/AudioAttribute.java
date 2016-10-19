@@ -320,34 +320,22 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
    */
   public boolean hasMatchingTranscript(String foreignLanguage) {
     try {
-
-//      String before = foreignLanguage;
-//      String fixedAgainst = StringUtils.stripAccents(before);
-
-//      if (!before.equals(fixedAgainst)) {
-//        logger.info("attachAudio before '" + before +
-//            "' after '" + fixedAgainst +
-//            "'");
-//      }
-
-      return matchTranscript(foreignLanguage);
+      return transcript == null || foreignLanguage.isEmpty() || transcript.isEmpty() ||
+          removePunct(transcript).toLowerCase().equals(removePunct(foreignLanguage).toLowerCase());
     } catch (Exception e) {
       return true;
     }
   }
 
-  private boolean matchTranscript(String foreignLanguage) {
-    String transcript = this.transcript;
-    return matchTranscript(foreignLanguage, transcript);
-  }
-
-  public boolean matchTranscript(String foreignLanguage, String transcript) {
-    return transcript == null || foreignLanguage.isEmpty() || transcript.isEmpty() ||
-        removePunct(transcript).toLowerCase().equals(removePunct(foreignLanguage).toLowerCase());
-  }
-
   private String removePunct(String t) {
     return t.replaceAll("\\p{P}", "").replaceAll("\\s++", "");
+  }
+
+  @Override
+  public String toString() {
+    return "Audio id " + uniqueID + " : " + audioRef + " attrs " + attributes + " by " + userid + "/" + user +
+        " transcript '" + transcript +
+        "' ";
   }
 
   public String getTranscript() {
@@ -356,15 +344,5 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
 
   public void setTranscript(String transcript) {
     this.transcript = transcript;
-  }
-
-  @Override
-  public String toString() {
-    return "Audio id " + uniqueID +
-        " : " + audioRef +
-        " attrs " + attributes +
-        " by " + userid + "/" + user +
-        " transcript '" + transcript +
-        "' ";
   }
 }
