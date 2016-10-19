@@ -83,11 +83,12 @@ public class WordDAO extends DAO {
     float score;
 
     public Word(long id, long rid, String word, int seq, float score) {
-      this(rid, word, seq, score);
+      this(rid,word,seq,score);
       this.id = id;
     }
 
     public Word(long rid, String word, int seq, float score) {
+
       this.rid = rid;
       this.word = word;
       this.seq = seq;
@@ -108,11 +109,6 @@ public class WordDAO extends DAO {
    */
   private void createTable(Database database) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
-
-//    if (database.getServerProps().shouldRecalcStudentAudio()) {
-//      drop(WORD, connection);
-//    }
-
     PreparedStatement statement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS " +
         WORD +
         " (" +
@@ -161,53 +157,22 @@ public class WordDAO extends DAO {
 
       if (j != 1) {
         logger.error("huh? didn't insert row for ");// + grade + " grade for " + resultID + " and " + grader + " and " + gradeID + " and " + gradeType);
-        //    val = false;
+    //    val = false;
       }
 
       long id = getGeneratedKey(statement);
-      if (id == -1) {
-        logger.error("huh? no key was generated?");
-      }
+      if (id == -1) {  logger.error("huh? no key was generated?");  }
 
       statement.close();
       return id;
     } catch (SQLException ee) {
       logger.error("trying to add event " + word + " got " + ee, ee);
       logAndNotify.logAndNotifyServerException(ee);
-      //  val = false;
+    //  val = false;
     } finally {
       database.closeConnection(connection);
     }
     return 0;
-  }
-
-  public boolean removeWords(long resultid) {
-    Connection connection = getConnection();
-    boolean val = true;
-    try {
-      PreparedStatement statement = connection.prepareStatement(
-          "DELETE FROM " + WORD +
-              " WHERE " +
-              RID + "="+resultid
-              );
-  //    int i = 1;
-//      statement.setLong(i++, resultid);
-      int j = statement.executeUpdate();
-
-      if (j == 0) {
-        logger.error("huh? didn't remove rows for " + resultid + " got " + j);// + grade + " grade for " + resultID + " and " + grader + " and " + gradeID + " and " + gradeType);
-        val = false;
-      }
-      statement.close();
-
-    } catch (SQLException ee) {
-      logger.error("trying to drop words for " + resultid + " got " + ee, ee);
-      logAndNotify.logAndNotifyServerException(ee);
-      val = false;
-    } finally {
-      database.closeConnection(connection);
-    }
-    return val;
   }
 
   public List<Word> getAll() {
