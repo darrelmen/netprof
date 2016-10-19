@@ -557,7 +557,9 @@ public class RefResultDecoder {
             if (durationInSeconds < 0.01) {
               logger.warn("doDecode : 1 huh? attr dur " + durationInMillis + " but check dur " + durationInSeconds);
             }
-            if (audioCheck.hasValidDynamicRange(absoluteFile)) {
+            float dnr = attribute.getDnr();
+            if (dnr < 0) dnr = audioCheck.getDNR(absoluteFile);
+            if (dnr > audioCheck.getMinDNR()) {
               audioFileHelper.decodeOneAttribute(exercise, attribute, doHydec);
               sleep(serverProps.getSleepBetweenDecodes());
               count++;
