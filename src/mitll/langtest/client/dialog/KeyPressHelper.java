@@ -62,7 +62,7 @@ public class KeyPressHelper {
   /**
    * @see mitll.langtest.client.dialog.ModalInfoDialog
    */
-  KeyPressHelper() {
+  public KeyPressHelper() {
     removeOnEnter = true;
   }
 
@@ -112,7 +112,7 @@ public class KeyPressHelper {
   public void addKeyHandler(KeyListener handler) {
     listeners.put(handler.getName(), handler);
     if (listeners.size() > 3) {
-      logger.info("addKeyHandler added  " + handler.getName() + " now " + this);
+      System.out.println("addKeyHandler added  " + handler.getName() + " now " + this);
     }
   }
 
@@ -137,13 +137,14 @@ public class KeyPressHelper {
 
   private void gotEvent(NativeEvent ne, boolean isKeyDown) {
     for (KeyListener keyPressHandler : listeners.values()) {
-   //   logger.info("KeyPressHelper " + keyPressHandler + " getting " + ne + " down " +isKeyDown);
+     // logger.info("KeyPressHelper " + keyPressHandler + " getting " + ne + " down " +isKeyDown);
       keyPressHandler.gotPress(ne, isKeyDown);
     }
   }
 
-  public interface KeyListener {
+  public static interface KeyListener {
     String getName();
+
     void gotPress(NativeEvent ne, boolean isKeyDown);
   }
 
@@ -151,7 +152,7 @@ public class KeyPressHelper {
     if (keyHandler == null) {
       logger.warning("\nEnterKeyButtonHelper : removeKeyHandler : " + keyHandler);
     } //else {
-    // logger.info("EnterKeyButtonHelper : removeKeyHandler : " + keyHandler);
+    //System.out.println("EnterKeyButtonHelper : removeKeyHandler : " + keyHandler);
     // }
     if (keyHandler != null) {
       //logger.info("KeyPressHelper : removeKeyHandler : " + keyHandler);
@@ -160,8 +161,13 @@ public class KeyPressHelper {
     }
   }
 
+  public boolean removeKeyHandler(String name) {
+    KeyListener remove = listeners.remove(name);
+    return remove != null;
+  }
+
   public void userHitEnterKey(Button button) {
-    //logger.info("\tEnterKeyButtonHelper.userHitEnterKey " + keyHandler);
+    //System.out.println("\tEnterKeyButtonHelper.userHitEnterKey " + keyHandler);
     if (removeOnEnter) removeKeyHandler();
     button.fireEvent(new ButtonClickEvent());
   }
