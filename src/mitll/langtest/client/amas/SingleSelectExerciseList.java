@@ -314,7 +314,7 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
     status.addStyleName("inlineBlockStyle");
     status.add(statusHeader);
     statusHeader.getElement().setId("statusHeader");
-    statusHeader.getElement().getStyle().setMarginTop(5, Style.Unit.PX);
+    statusHeader.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
     statusHeader.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
     return status;
   }
@@ -394,11 +394,11 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
    * @seex #rememberAndLoadFirst(List, CommonExercise, String)
    */
   @Override
-  public void loadFirstExercise() {
-    //logger.info("loadFirstExercise : ---");
+  protected void loadFirstExercise() {
+    logger.info("loadFirstExercise : ---");
 
     if (isEmpty()) { // this can only happen if the database doesn't load properly, e.g. it's in use
-      //logger.info("loadFirstExercise : current exercises is empty?");
+      logger.info("loadFirstExercise : current exercises is empty?");
       gotEmptyExerciseList();
     } else {
       super.loadFirstExercise();
