@@ -177,13 +177,15 @@ import java.util.logging.Logger;
  * - Clean up download dialog as per Michael Grimmer request
  * 1.5.1 (10-11-16)
  * - Added shouldRecalcStudentAudio option to recalc student audio with the current model
+ * 1.5.2 (10-19-16)
+ * - Fixed bug in reporting where was throwing away valid recordings and added separate new teacher section to reporting
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private final Logger logger = Logger.getLogger("LangTest");
 
-  public static final String VERSION_INFO = "1.5.1";
+  public static final String VERSION_INFO = "1.5.2";
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
   private static final String UNKNOWN = "unknown";
