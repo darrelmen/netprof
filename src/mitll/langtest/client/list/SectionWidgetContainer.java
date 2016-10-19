@@ -80,13 +80,13 @@ public class SectionWidgetContainer<T extends SectionWidget> {
     boolean hasNonClearSelection = false;
     List<String> typesWithSelections = new ArrayList<>();
     if (typeOrder == null) {
-      logger.warning("restoreListBoxState : huh? type order is null for " + selectionState2);
+      logger.warning("huh? type order is null for " + selectionState2);
       typeOrder = Collections.emptyList();
     }
     for (String type : typeOrder) {
       Collection<String> selections = selectionState2.get(type);
-      if (selections == null && !selectionState2.isEmpty()) {
-        logger.warning("restoreListBoxState : huh? no selection in selection state " + selectionState2.keySet() + " for " + type);
+      if (selections == null) {
+        logger.warning("huh? no selection in selection state " + selectionState2.keySet() + " for " + type);
       }
       if (selections != null && selections.iterator().next().equals(HistoryExerciseList.ANY)) {
         if (hasNonClearSelection) {
@@ -102,7 +102,7 @@ public class SectionWidgetContainer<T extends SectionWidget> {
         hasNonClearSelection = true;
 
         if (!hasType(type)) {
-          if (hasTypes() && !type.equals("item")) {
+          if (!type.equals("item")) {
             logger.warning("restoreListBoxState for " + selectionState + " : huh? bad type '" + type +
                 "', expecting something in " + getTypes());
           }
@@ -219,8 +219,6 @@ public class SectionWidgetContainer<T extends SectionWidget> {
   private boolean hasType(String type) {
     return typeToBox.containsKey(type);
   }
-
-  private boolean hasTypes() { return !typeToBox.isEmpty(); }
 
   /**
    * Make sure all sections have a selection - quiz, test type, ilr level
