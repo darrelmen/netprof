@@ -39,7 +39,10 @@ import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.HasText;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.ReloadableContainer;
 import mitll.langtest.client.dialog.ModalInfoDialog;
@@ -74,7 +77,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class EditItem {
-  final Logger logger = Logger.getLogger("EditItem");
+  private final Logger logger = Logger.getLogger("EditItem");
 
   public static final String NEW_ITEM = "*New Item*";
   public static final String NEW_EXERCISE_ID = "NewExerciseID";
@@ -96,7 +99,8 @@ public class EditItem {
    * @param service
    * @param userManager
    * @param controller
-   * @see mitll.langtest.client.custom.ListManager#ListManager
+   * @paramx npfHelper
+   * @see mitll.langtest.client.custom.Navigation#Navigation
    */
   public EditItem(final LangTestDatabaseAsync service, final UserManager userManager, ExerciseController controller,
                   ReloadableContainer predefinedContentList, UserFeedback feedback
@@ -139,13 +143,7 @@ public class EditItem {
   }
 
   public void onResize() {
-    if (exerciseList != null) {
-      //  logger.info("EditItem onResize");
-      exerciseList.onResize();
-    } /*else {
-      logger.info("EditItem onResize - no exercise list");
-
-    }*/
+    if (exerciseList != null) exerciseList.onResize();
   }
 
   private UserList<CommonShell> makeListOfOnlyYourItems(UserList<CommonShell> toCopy) {
@@ -192,7 +190,8 @@ public class EditItem {
             if (itemID.equals(NEW_EXERCISE_ID)) {
               useExercise(getNewItem());
             } else {
-              //     logger.info("EditItem.makeExerciseList - askServerForExercise = " + itemID);
+              logger.info("EditItem.makeExerciseList - askServerForExercise = " + itemID);
+
               super.askServerForExercise(itemID);
             }
           }
@@ -218,7 +217,7 @@ public class EditItem {
         };
     setFactory(exerciseList, ul, originalList);
     exerciseList.setUnaccountedForVertical(280);   // TODO do something better here
-    // logger.info("setting vertical on " +exerciseList.getElement().getExID());
+    // logger.info("setting vertical on " +exerciseList.getElement().getId());
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       @Override
       public void execute() {
@@ -247,7 +246,7 @@ public class EditItem {
     exerciseList.setFactory(new ExercisePanelFactory<CommonShell, CommonExercise>(service, feedback, controller, exerciseList) {
       @Override
       public Panel getExercisePanel(CommonExercise e) {
-        Panel panel = new ResizableSimple();
+        Panel panel = new SimplePanel();
         panel.getElement().setId("EditItemPanel");
         // TODO : do something better here than toCommonUserExercise
         UserExercise userExercise = new UserExercise(e, e.getCreator());
@@ -255,19 +254,6 @@ public class EditItem {
         return panel;
       }
     });
-  }
-
-  private class ResizableSimple extends SimplePanel implements RequiresResize {
-
-    @Override
-    public void onResize() {
-      Widget widget = getWidget();
-      if (widget instanceof RequiresResize) {
-        ((RequiresResize) widget).onResize();
-      } else {
-        logger.info("skipping " + widget.getElement().getId());
-      }
-    }
   }
 
   /**
@@ -347,7 +333,7 @@ public class EditItem {
     if (setFields) editableExercise.setFields(newExercise);
   }
 
-  void clearNewExercise() {
+  public void clearNewExercise() {
     this.newExercise = null;
   }
 
@@ -371,13 +357,14 @@ public class EditItem {
     if (doNewExercise) { // whole new exercise
       editableExercise = new NewUserExercise(service, controller, itemMarker, this, exercise, getInstance(), originalList);
     } else {
-      boolean iCreatedThisItem = didICreateThisItem(exercise) || (userManager.isTeacher() && !exercise.isPredefined());  // asked that teachers be able to record audio for other's items
+      boolean iCreatedThisItem = didICreateThisItem(exercise);
       if (iCreatedThisItem) {  // it's mine!
         editableExercise = new EditableExerciseDialog(service, controller, this, itemMarker, exercise,
             originalList,
             exerciseList,
             predefinedContentList,
             getInstance()
+            //    npfHelper
         );
       } else {
         editableExercise = new RemoveFromListOnlyExercise(itemMarker, exercise, originalList);
@@ -387,7 +374,7 @@ public class EditItem {
   }
 
   private String getInstance() {
-    return instanceName;
+    return instanceName;//npfHelper.getInstanceName();
   }
 
   /**
@@ -398,15 +385,12 @@ public class EditItem {
    */
   private boolean didICreateThisItem(CommonExercise exercise) {
     boolean isMine = exercise.getCreator() == controller.getUser();
-    // logger.info("for " + exercise + " vs " + controller.getUser() + " is Mine " + isMine);
+    logger.info("for " + exercise + " vs " + controller.getUser() + " is Mine " + isMine);
     return isMine;
   }
 
-  /**
-   * @see #getAddOrEditPanel(CommonExercise, HasText, UserList, boolean)
-   */
   private class RemoveFromListOnlyExercise extends NewUserExercise {
-    RemoveFromListOnlyExercise(HasText itemMarker, CommonExercise exercise, UserList<CommonShell> originalList) {
+    public RemoveFromListOnlyExercise(HasText itemMarker, CommonExercise exercise, UserList<CommonShell> originalList) {
       super(EditItem.this.service, EditItem.this.controller, itemMarker, EditItem.this, exercise, EditItem.this.getInstance(), originalList);
     }
 
@@ -422,20 +406,18 @@ public class EditItem {
       this.listInterface = listInterface;
 
       Button delete = makeDeleteButton(ul, originalList.getUniqueID());
+
       container.add(delete);
       return container;
     }
 
-    Button makeDeleteButton(final UserList<CommonShell> ul, final long uniqueID) {
+    public Button makeDeleteButton(final UserList<CommonShell> ul, final long uniqueID) {
       Button delete = makeDeleteButton(ul);
 
       delete.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
 //          logger.info(getClass() + " : makeDeleteButton npfHelperList (2) " + npfHelper);
-          // delete.setEnabled(false);
-          String id = newUserExercise.getID();
-          logger.info("RemoveFromListOnlyExercise.makeDeleteButton got click to delete " + id);
           deleteItem(newUserExercise.getID(), uniqueID, ul, exerciseList, predefinedContentList);
         }
       });
