@@ -47,6 +47,7 @@ import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
+import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.TooltipHelper;
@@ -85,11 +86,8 @@ import java.util.logging.Logger;
  */
 public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & ScoredExercise> extends HorizontalPanel
     implements BusyPanel, RequiresResize, ProvidesResize, CommentAnnotator {
-  private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
-
   public static final String CONTEXT = "Context";
-  private static final String SAY = "Say";
-  private static final String TRANSLITERATION = "Transliteration";
+  private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
 
   private static final String MANDARIN = "Mandarin";
   private static final String KOREAN = "Korean";
@@ -105,7 +103,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
   /**
    * @see ASRScorePanel#addTooltip
    */
-  private static final String DOWNLOAD_YOUR_RECORDING = "Download your recording.";
+  public static final String DOWNLOAD_YOUR_RECORDING = "Download your recording.";
 
   private final ListInterface listContainer;
   private boolean isBusy = false;
@@ -121,8 +119,6 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
   protected final NavigationHelper navigationHelper;
   private final float screenPortion;
   protected final String instance;
-  private boolean hasClickable = false;
-  private boolean isJapanese = false;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -143,10 +139,6 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     this.service = controller.getService();
     this.screenPortion = screenPortion;
     this.instance = instance;
-    String language = controller.getLanguage();
-
-    isJapanese = language.equalsIgnoreCase(JAPANESE);
-    this.hasClickable = language.equalsIgnoreCase(MANDARIN) || language.equals(KOREAN) || isJapanese;
     setWidth("100%");
     //   addStyleName("inlineBlockStyle");
     getElement().setId("GoodwaveExercisePanel");
@@ -242,7 +234,6 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
   protected void addUserRecorder(LangTestDatabaseAsync service, ExerciseController controller, Panel toAddTo,
                                  float screenPortion, T exercise) {
     DivWidget div = new DivWidget();
-    div.getElement().setId("GoodwaveExercisePanel_UserRecorder");
     ScoringAudioPanel answerWidget = getAnswerWidget(service, controller, screenPortion);
     String refAudio = exercise.getRefAudio();
     if (refAudio == null) {
@@ -420,13 +411,16 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
    * @see #getContentWidget(String, String, boolean)
    */
   private void getClickableWords(String label, String value, Panel nameValueRow) {
+    String language = controller.getLanguage();
+    boolean isMandarinOrKorean = hasClickableCharacters(language);
+
     DivWidget horizontal = new DivWidget();
     horizontal.setWidth("80%");
     horizontal.getElement().getStyle().setDisplay(Style.Display.INLINE);
 
     List<String> tokens = new ArrayList<>();
-    boolean flLine = label.contains(SAY) || (isJapanese && label.contains(TRANSLITERATION));
-    boolean isChineseCharacter = flLine && hasClickable;
+    boolean flLine = label.contains("Say");
+    boolean isChineseCharacter = flLine && isMandarinOrKorean;
     if (isChineseCharacter) {
       for (int i = 0, n = value.length(); i < n; i++) {
         char c = value.charAt(i);
@@ -449,8 +443,12 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     horizontal.addStyleName("leftFiveMargin");
   }
 
-  private boolean isRTLContent(String content) {
+  protected boolean isRTLContent(String content) {
     return controller.isRightAlignContent() || WordCountDirectionEstimator.get().estimateDirection(content) == HasDirection.Direction.RTL;
+  }
+
+  private boolean hasClickableCharacters(String language) {
+    return language.equalsIgnoreCase(MANDARIN) || language.equals(KOREAN) || language.equalsIgnoreCase(JAPANESE);
   }
 
   private InlineHTML makeClickableText(String label, String value, final String html, boolean chineseCharacter) {
@@ -539,7 +537,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
    * An ASR scoring panel with a record button.
    */
   private class ASRRecordAudioPanel extends ASRScoringAudioPanel<T> {
-     static final String DOWNLOAD_AUDIO = "downloadAudio";
+    public static final String DOWNLOAD_AUDIO = "downloadAudio";
     private final int index;
     private PostAudioRecordButton postAudioRecordButton;
     private PlayAudioPanel playAudioPanel;
@@ -675,7 +673,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     private void setDownloadHref() {
       downloadContainer.setVisible(true);
 
-      String audioPathToUse = audioPath.endsWith(".ogg") ? audioPath.replaceAll(".ogg", ".mp3") : audioPath;
+      String audioPathToUse = audioPath.endsWith(".ogg") ? audioPath.replaceAll(".ogg",".mp3") : audioPath;
 
       String href = DOWNLOAD_AUDIO +
           "?file=" +
