@@ -123,14 +123,8 @@ class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise>
           }
 
           @Override
-          protected void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection,
-                                                  String prefix,
-                                                  boolean onlyWithAudioAnno,
-                                                  String exerciseID) {
-//            logger.info("got loadExercisesUsingPrefix " +prefix);
-          //  controller.logException(new Exception("where did this come from?"));
-            prefix = ""; // practice helper doesn't use a search box
-
+          protected void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection, String prefix,
+                                                  boolean onlyWithAudioAnno, String exerciseID) {
             super.loadExercisesUsingPrefix(typeToSection, prefix, onlyWithAudioAnno, exerciseID);
             statsFlashcardFactory.setSelection(typeToSection);
           }
@@ -139,7 +133,7 @@ class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise>
 
       @Override
       protected void styleBottomRow(Panel bottomRow) {
-        //    logger.info("-----\n\n Adding style to " + bottomRow.getElement().getExID());
+        //    logger.info("-----\n\n Adding style to " + bottomRow.getElement().getId());
         bottomRow.addStyleName("centerPractice");
         outerBottomRow = bottomRow;
       }

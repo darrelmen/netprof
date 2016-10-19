@@ -59,7 +59,7 @@ public class AVPHistoryForList implements IsSerializable {
   public AVPHistoryForList() {}
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#getUserHistoryForList
+   * @see mitll.langtest.server.database.DatabaseImpl#getUserHistoryForList(long, java.util.Collection, long)
    * @param scores
    * @param userID
    * @param useCorrect when false get score percentages true for percentage correct
@@ -93,7 +93,7 @@ public class AVPHistoryForList implements IsSerializable {
     return yValuesForUser;
   }
 
-  private void calc(List<Session> scores, long userID) {
+  public void calc(List<Session> scores, long userID) {
     pbCorrect = 0;
     top = 0;
     totalCorrect = 0;
