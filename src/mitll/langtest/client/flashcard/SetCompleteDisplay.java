@@ -74,17 +74,8 @@ public class SetCompleteDisplay {
   private static final int HORIZ_SPACE_FOR_CHARTS = (1250 - TABLE_WIDTH - TABLE_HISTORY_WIDTH);
   private static final int MAX_TO_SHOW = 5;
 
-  /**
-   *
-   * @param result
-   * @param exToScore
-   * @param numCorrect
-   * @param numIncorrect
-   * @param numExercises
-   * @param container
-   */
-  void addLeftAndRightCharts(List<AVPHistoryForList> result, Map<String, Double> exToScore,
-                             int numCorrect, int numIncorrect, int numExercises, Panel container) {
+  public void addLeftAndRightCharts(List<AVPHistoryForList> result, Map<String, Double> exToScore,
+                                    int numCorrect, int numIncorrect, int numExercises, Panel container) {
     // add left chart and table
     AVPHistoryForList sessionAVPHistoryForList = result.get(0);
     Chart chart = makeCorrectChart(result, sessionAVPHistoryForList, numCorrect, numIncorrect, numExercises);
@@ -179,7 +170,6 @@ public class SetCompleteDisplay {
    * @param sessionAVPHistoryForList
    * @param scoreColHeader
    * @return
-   * @see #addLeftAndRightCharts(List, Map, int, int, int, Panel)
    * @see #showFeedbackCharts(java.util.List, java.util.Map, int, int, int)
    */
   private Table makeTable(AVPHistoryForList sessionAVPHistoryForList, String scoreColHeader) {
