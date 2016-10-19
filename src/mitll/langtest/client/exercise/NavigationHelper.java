@@ -43,8 +43,6 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.Shell;
 
-import java.util.logging.Logger;
-
 /**
  * A row with prev/next buttons.  Key bindings for keys too.
  * Has confirm dialog appear on next button in some modes.
@@ -57,8 +55,6 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class NavigationHelper<T extends Shell> extends HorizontalPanel {
-  private Logger logger = Logger.getLogger("NavigationHelper");
-
   private static final String LEFT_ARROW_TOOLTIP = "Press the left arrow key to go to the previous item.";
 
   private Button prev;
@@ -75,9 +71,10 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
    * @param listContainer
    * @param addKeyHandler
    */
-  protected NavigationHelper(HasID exercise, ExerciseController controller, PostAnswerProvider provider,
+  public NavigationHelper(HasID exercise, ExerciseController controller, PostAnswerProvider provider,
                           ListInterface<T> listContainer, boolean addKeyHandler) {
-    this(exercise, controller, provider, listContainer, true, addKeyHandler, false);
+    this(exercise, controller, provider, listContainer, true, addKeyHandler,
+      false);
   }
 
   public NavigationHelper(HasID exercise, ExerciseController controller, PostAnswerProvider provider,
@@ -88,10 +85,9 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
     this.enableNextOnlyWhenAllCompleted = enableNextOnlyWhenAllCompleted;
     setSpacing(5);
     getNextAndPreviousButtons(exercise, controller, addButtons, addKeyHandler);
-    getElement().setId("NavigationHelper");
-    String id = exercise.getID();
-    controller.register(prev, id);
-    controller.register(next, id);
+    getElement().setId("AmasNavigationHelper");
+    controller.register(prev, exercise.getID());
+    controller.register(next, exercise.getID());
   }
 
   /**
@@ -103,11 +99,11 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
    */
   private void getNextAndPreviousButtons(final HasID e,
                                          final ExerciseController controller, boolean addButtons, boolean addKeyHandler) {
-    makePrevButton(e, addButtons, addKeyHandler);
+    makePrevButton(e, /*controller,*/ addButtons, addKeyHandler);
     makeNextButton(e, controller, addButtons);
   }
 
-  private void makePrevButton(final HasID exercise, boolean addButtons, boolean useKeyHandler) {
+  private void makePrevButton(final HasID exercise,/* ExerciseController controller,*/ boolean addButtons, boolean useKeyHandler) {
     this.prev = new Button("Previous");
     prev.getElement().setId("NavigationHelper_Previous");
     getPrev().addClickHandler(new ClickHandler() {
@@ -145,13 +141,10 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
 
   protected void enableNext(HasID exercise) {
     if (enableNextOnlyWhenAllCompleted) { // initially not enabled
-     // logger.info("enableNextOnlyWhenAllCompleted true");
       next.setEnabled(false);
     }
     else {
-      boolean b = listContainer.onLast(exercise);
-   //   logger.info("enableNextOnlyWhenAllCompleted false on last = " +  b);
-      next.setEnabled(!b);
+      next.setEnabled(!listContainer.onLast(exercise));
     }
   }
 
