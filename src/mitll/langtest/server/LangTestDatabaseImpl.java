@@ -2330,7 +2330,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     AudioAttribute audioAttribute =
         db.getAudioDAO().addOrUpdate(user, idToUse, audioType, permanentAudioPath, System.currentTimeMillis(),
-            audioAnswer.getDurationInMillis(), audioTranscript);
+            audioAnswer.getDurationInMillis(), audioTranscript, (float) audioAnswer.getDynamicRange());
     // audioAnswer.setPath(audioAttribute.getAudioRef());
     logger.debug("addToAudioTable user " + user + " ex " + exerciseID + " for " + audioType + " path after " + audioAnswer.getPath() +
         " audio answer has " + audioAttribute);
