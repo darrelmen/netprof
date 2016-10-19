@@ -151,13 +151,8 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   }
 
   private List<PhoneAndStats> getPhoneAndStatsList(long from, long to) {
-    if (phoneReport == null) {
-      return Collections.emptyList();
-    }
-    else {
-      Map<String, PhoneStats> phoneToAvgSorted = phoneReport.getPhoneToAvgSorted();
-      return getPhoneAndStatsListForPeriod(phoneToAvgSorted, from, to);
-    }
+    Map<String, PhoneStats> phoneToAvgSorted = phoneReport.getPhoneToAvgSorted();
+    return getPhoneAndStatsListForPeriod(phoneToAvgSorted, from, to);
   }
 
   private List<PhoneAndStats> getPhoneAndStatsListForPeriod(Map<String, PhoneStats> phoneToAvgSorted, long first, long last) {
