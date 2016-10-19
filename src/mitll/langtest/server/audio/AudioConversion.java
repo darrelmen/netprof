@@ -616,8 +616,8 @@ public class AudioConversion {
     }
     if (!new File(lamePath).exists()) {
       logger.error("no lame installed at " + lamePath + " or " + LAME_PATH_WINDOWS);
-      lamePath = LAME;
     }
+    lamePath = LAME;
     return lamePath;
   }
 
@@ -630,8 +630,8 @@ public class AudioConversion {
     File file = new File(oggEncPath);
     if (!file.exists()) {
       logger.error("can't find oggenc at " + file.getAbsolutePath());
-      oggEncPath = "oggenc";
     }
+//    oggEncPath = "oggenc";
     return oggEncPath;
   }
 
@@ -680,7 +680,7 @@ public class AudioConversion {
     if (title == null) title = "";
     ProcessBuilder lameProc = new ProcessBuilder(lamePath, pathToAudioFile, mp3File, "--tt", title, "--ta", author);
     try {
-      logger.debug("running lame" + lameProc.command());
+      //logger.debug("running lame" + lameProc.command());
       new ProcessRunner().runProcess(lameProc);
     } catch (IOException e) {
       //  logger.error("Couldn't run " + lameProc);
