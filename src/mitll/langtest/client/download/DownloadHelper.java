@@ -145,23 +145,23 @@ public class DownloadHelper {
     }
 
     closeButton = new DialogHelper(true).show(
-        "Download Audio and Spreadsheet",
-        Collections.emptyList(),
-        container,
-        "Download",
-        "Cancel",
-        new DialogHelper.CloseListener() {
-          @Override
-          public void gotYes() {
-            String urlForDownload = toDominoUrl(DOWNLOAD_AUDIO) + getURL(DOWNLOAD_AUDIO, DOWNLOAD_AUDIO, selectionState.getTypeToSection());
-            new DownloadIFrame(urlForDownload);
-          }
+            "Download Audio and Spreadsheet",
+            Collections.emptyList(),
+            container,
+            "Download",
+            "Cancel",
+            new DialogHelper.CloseListener() {
+              @Override
+              public void gotYes() {
+                String urlForDownload = toDominoUrl(DOWNLOAD_AUDIO) + getURL(DOWNLOAD_AUDIO, DOWNLOAD_AUDIO, selectionState.getTypeToSection());
+                new DownloadIFrame(urlForDownload);
+              }
 
-          @Override
-          public void gotNo() {
+              @Override
+              public void gotNo() {
 
-          }
-        }, 550);
+              }
+            }, 550);
     closeButton.setType(ButtonType.SUCCESS);
     closeButton.setEnabled(selectionState.isEmpty());
   }
@@ -386,9 +386,9 @@ public class DownloadHelper {
     onButton.addClickHandler(handler);
     onButton.getElement().getStyle().setZIndex(0);
     onButton.setWidth("50" +
-        "px");
+            "px");
     onButton.setHeight("32" +
-        "px");
+            "px");
     return onButton;
   }
 
@@ -417,13 +417,13 @@ public class DownloadHelper {
 
   private String getURL(String command, String request, Map<String, Collection<String>> typeToSection) {
     return //command +
-        "?" +
-            "request" +
-            "=" + request +
-            "&unit=" + typeToSection +
-            "&male=" + isMale +
-            "&regular=" + isRegular +
-            "&context=" + isContext
-        ;
+            "?" +
+                    "request" +
+                    "=" + request +
+                    "&unit=" + typeToSection +
+                    "&male=" + isMale +
+                    "&regular=" + isRegular +
+                    "&context=" + isContext
+            ;
   }
 }
