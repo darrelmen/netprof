@@ -34,6 +34,7 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.shared.MonitorResult;
+import mitll.langtest.shared.Result;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.log4j.Logger;
@@ -46,6 +47,7 @@ import java.sql.*;
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
+ * @since
  */
 public class AnswerDAO extends DAO {
   private static final Logger logger = Logger.getLogger(AnswerDAO.class);
@@ -124,7 +126,6 @@ public class AnswerDAO extends DAO {
   /**
    * JUST for MergeSites.
    * TODO : remove
-   *
    * @param info
    * @return
    * @throws SQLException
@@ -132,7 +133,7 @@ public class AnswerDAO extends DAO {
   long addResultToTable(MonitorResult info) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
 
-//    logger.debug("addResultToTable : adding answer for monitor result " + info);
+    logger.debug("addResultToTable : adding answer for monitor result " + info);
 
     PreparedStatement statement = connection.prepareStatement("INSERT INTO " +
         ResultDAO.RESULTS +
@@ -157,15 +158,14 @@ public class AnswerDAO extends DAO {
         ResultDAO.PROCESS_DUR + "," +
         ResultDAO.ROUND_TRIP_DUR + "," +
         ResultDAO.VALIDITY + "," +
-        ResultDAO.TRANSCRIPT + "," +
         ResultDAO.SNR +
-        ") VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+        ") VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
 
     int i = 1;
 
-    statement.setInt(i++, (int) info.getUserid());
+    statement.setInt(i++, (int)info.getUserid());
     statement.setString(i++, PLAN); // obsolete
-    statement.setString(i++, copyStringChar(info.getExID()));
+    statement.setString(i++, copyStringChar(info.getId()));
     statement.setInt(i++, 1);
     statement.setTimestamp(i++, new Timestamp(info.getTimestamp()));
     statement.setString(i++, copyStringChar(info.getAnswer()));
@@ -177,14 +177,13 @@ public class AnswerDAO extends DAO {
 
     statement.setBoolean(i++, info.isCorrect());
     statement.setFloat(i++, info.getPronScore());
-    statement.setString(i++, info.getDeviceType());
+/*    statement.setString(i++, info.getDeviceType());
     statement.setString(i++, info.getSimpleDevice());
-    statement.setString(i++, info.getScoreJSON());
+    statement.setString(i++, info.getScoreJSON());*/
     statement.setBoolean(i++, info.isWithFlash());
     statement.setInt(i++, info.getProcessDur());
     statement.setInt(i++, info.getRoundTripDur()); // always zero?
     statement.setString(i++, info.getValidity());
-    statement.setString(i++, info.getForeignText());
     statement.setFloat(i++, info.getSnr());
 
     statement.executeUpdate();
@@ -198,7 +197,7 @@ public class AnswerDAO extends DAO {
 
   /**
    * Need to protect call to get generated keys.
-   * <p>
+   *
    * Add a row to the table.
    * Each insert is marked with a timestamp.
    * This allows us to determine user completion rate.
@@ -276,7 +275,7 @@ public class AnswerDAO extends DAO {
       statement.close();
       long now = System.currentTimeMillis();
 
-      logger.debug(getLanguage() + " : END   : addAnswerToTable : adding answer for (" + (now - then) +
+      logger.debug(getLanguage() + " : END   : addAnswerToTable : adding answer for (" + (now-then)+
           ") millis : " + info + " result id " + newID);
     }
 
@@ -342,36 +341,29 @@ public class AnswerDAO extends DAO {
   /**
    * @param id
    * @param processDur
-   * @param isCorrect
    * @see mitll.langtest.server.LangTestDatabaseImpl#getPretestScore(int, long, String, String, int, int, boolean, String, boolean)
-   * @see DatabaseImpl#rememberScore(long, PretestScore, boolean)
+   * @see mitll.langtest.server.database.DatabaseImpl#rememberScore(long, PretestScore)
    */
-  public void changeAnswer(long id, float score, int processDur, String json, boolean isCorrect) {
+  public void changeAnswer(long id, float score, int processDur, String json) {
     //logger.info("Setting id " + id + " score " + score + " process dur " + processDur + " json " + json);
     Connection connection = getConnection();
     try {
-      String currentModel = database.getServerProps().getCurrentModel();
       String sql = "UPDATE " +
           "results " +
           "SET " +
           ResultDAO.PRON_SCORE + "='" + score + "', " +
           ResultDAO.PROCESS_DUR + "='" + processDur + "', " +
-          ResultDAO.CORRECT + "=" + isCorrect + ", " +
-          ResultDAO.MODELUPDATE + "='" + new Timestamp(System.currentTimeMillis()) + "', " +
-          ResultDAO.MODEL + "='" + currentModel + "', " +
           ResultDAO.SCORE_JSON + "='" + json + "' " +
-
           "WHERE id=" + id;
 
       PreparedStatement statement = connection.prepareStatement(sql);
-
       if (statement.executeUpdate() == 0) {
         logger.error("huh? didn't change the answer for " + id + " sql " + sql);
       }
 
       statement.close();
     } catch (Exception e) {
-      logger.error("changeAnswer got " + e, e);
+      logger.error("got " + e, e);
     } finally {
       database.closeConnection(connection);
     }
