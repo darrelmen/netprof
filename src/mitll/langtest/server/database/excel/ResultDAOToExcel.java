@@ -115,7 +115,7 @@ public class ResultDAOToExcel {
       Cell cell = row.createCell(j++);
       cell.setCellValue(result.getUserid());
       cell = row.createCell(j++);
-      cell.setCellValue(result.getExID());
+      cell.setCellValue(result.getId());
       cell = row.createCell(j++);
       cell.setCellValue(result.getForeignText());
 

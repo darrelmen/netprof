@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.database;
 
-import mitll.langtest.client.user.UserPassLogin;
 import mitll.langtest.server.*;
 import mitll.langtest.server.amas.FileExerciseDAO;
 import mitll.langtest.server.audio.AudioCheck;
@@ -130,7 +129,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   private Analysis analysis;
   private final String absConfigDir;
   private SimpleExerciseDAO<AmasExerciseImpl> fileExerciseDAO;
-  private static final boolean DEBUG = false;
 
   /**
    * @param configDir
@@ -202,7 +200,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     userDAO = new UserDAO(this, getServerProps());
     addRemoveDAO = new AddRemoveDAO(this);
 
-    UserListDAO userListDAO = new UserListDAO(this, userDAO);
     userExerciseDAO = new UserExerciseDAO(this);
     UserListExerciseJoinDAO userListExerciseJoinDAO = new UserListExerciseJoinDAO(this);
     resultDAO = new ResultDAO(this);
@@ -211,7 +208,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     phoneDAO = new PhoneDAO(this);
     audioDAO = new AudioDAO(this, userDAO);
     answerDAO = new AnswerDAO(this, resultDAO);
-    userListManager = new UserListManager(userDAO, userListDAO, userListExerciseJoinDAO,
+    userListManager = new UserListManager(userDAO, new UserListDAO(this, userDAO), userListExerciseJoinDAO,
         new AnnotationDAO(this, userDAO),
         new ReviewedDAO(this, ReviewedDAO.REVIEWED),
         new ReviewedDAO(this, ReviewedDAO.SECOND_STATE),
@@ -238,9 +235,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     }
 
     long then = System.currentTimeMillis();
-    if (false) {
-      putBackWordAndPhone();
-    }
+    putBackWordAndPhone();
     long now = System.currentTimeMillis();
     if (now - then > 1000) logger.info("took " + (now - then) + " millis to put back word and phone");
   }
@@ -314,7 +309,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    *
    * @see #initializeDAOs(PathHelper)
    */
-  public void putBackWordAndPhone() {
+  private void putBackWordAndPhone() {
     List<Result> results = resultDAO.getResultsForPractice();
     Map<Integer, Result> idToResult = new HashMap<>();
     //int skipped = 0;
@@ -325,6 +320,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         //  skipped++;
       }
     }
+
     //logger.info("skipped " + skipped);
 
     List<WordDAO.Word> all = wordDAO.getAll();
@@ -535,69 +531,57 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   }
 
   /**
-   * TODO : why is this so confusing???
-   *
    * @param userExercise
-   * @param keepAudio
    * @see mitll.langtest.server.LangTestDatabaseImpl#editItem
    * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#postEditItem
    */
-  public void editItem(CommonExercise userExercise, boolean keepAudio) {
-    String id = userExercise.getID();
-    logger.debug("editItem exercise #" + id +
-        " keep audio " + keepAudio +
-        " mediaDir : " + getServerProps().getMediaDir() +
+  public void editItem(CommonExercise userExercise) {
+    logger.debug("editItem ex #" + userExercise.getID() + " mediaDir : " + getServerProps().getMediaDir() +
         " initially audio was\n\t " + userExercise.getAudioAttributes());
 
-    getUserListManager().editItem(userExercise,
-        true, // create if doesn't exist
-        getServerProps().getMediaDir());
+    getUserListManager().editItem(userExercise, true, getServerProps().getMediaDir());
 
     Set<AudioAttribute> original = new HashSet<>(userExercise.getAudioAttributes());
     Set<AudioAttribute> defects = getAndMarkDefects(userExercise, userExercise.getFieldToAnnotation());
 
-    logger.debug("editItem originally had " + original.size() + " attribute, and " + defects.size() + " defects");
+    logger.debug("originally had " + original.size() + " attribute, and " + defects.size() + " defects");
 
     CommonExercise exercise = exerciseDAO.addOverlay(userExercise);
     boolean notOverlay = exercise == null;
     if (notOverlay) {
       // not an overlay! it's a new user exercise
-      exercise = getUserExerciseWhere(id);
-      logger.debug("\teditItem not an overlay " + exercise);
+      exercise = getUserExerciseWhere(userExercise.getID());
+      logger.debug("not an overlay " + exercise);
     } else {
       exercise = userExercise;
-      logger.debug("\teditItem made overlay " + exercise);
+      logger.debug("made overlay " + exercise);
     }
 
     if (notOverlay) {
       logger.error("huh? couldn't make overlay or find user exercise for " + userExercise);
     } else {
       boolean b = original.removeAll(defects);  // TODO - does this work really without a compareTo?
-      logger.debug(b ? "editItem removed defects " + original.size() + " now" : "editItem didn't remove any defects - " + defects.size());
+      logger.debug(b ? "removed defects " + original.size() + " now" : " didn't remove any defects - " + defects.size());
 
       MutableAudioExercise mutableAudio = exercise.getMutableAudio();
       for (AudioAttribute attribute : defects) {
         if (!mutableAudio.removeAudio(attribute)) {
-          logger.warn("editItem : huh? couldn't remove " + attribute.getKey() + " from " + exercise.getID());
+          logger.warn("huh? couldn't remove " + attribute.getKey() + " from " + exercise.getID());
         }
       }
 
       // why would this make sense to do???
-      if (keepAudio) {
-        Collection<AudioAttribute> audioAttributes = audioDAO.getAudioAttributes(id);
+/*      String overlayID = exercise.getID();
 
-        for (AudioAttribute audioAttribute : audioAttributes) logger.debug("before " + audioAttribute);
-        logger.debug("editItem copying " + original.size() + " audio attrs under exercise overlay id " + exercise.getID());
-        for (AudioAttribute toCopy : original) {
-          if (toCopy.getUserid() < UserDAO.DEFAULT_FEMALE_ID) {
-            logger.error("bad user id for " + toCopy);
-          }
-          logger.debug("\teditItem copying " + toCopy + " with new fl " + userExercise.getForeignLanguage());
-          audioDAO.copyWithNewTranscript(toCopy, userExercise.getForeignLanguage());
+      logger.debug("editItem copying " + original.size() + " audio attrs under exercise overlay id " + overlayID);
+
+      for (AudioAttribute toCopy : original) {
+        if (toCopy.getUserid() < UserDAO.DEFAULT_FEMALE_ID) {
+          logger.error("bad user id for " + toCopy);
         }
-
-        for (AudioAttribute audioAttribute : audioDAO.getAudioAttributes(id)) logger.debug("editItem after  " + audioAttribute);
-      }
+        logger.debug("\t copying " + toCopy);
+        audioDAO.add((int) toCopy.getUserid(), toCopy.getAudioRef(), overlayID, toCopy.getTimestamp(), toCopy.getAudioType(), toCopy.getDurationInMillis());
+      }*/
     }
 
     getSectionHelper().refreshExercise(exercise);
@@ -616,7 +600,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     Set<AudioAttribute> defects = new HashSet<AudioAttribute>();
 
     for (Map.Entry<String, ExerciseAnnotation> fieldAnno : fieldToAnnotation.entrySet()) {
-      if (fieldAnno.getValue().isDefect()) {  // i.e. defect
+      if (!fieldAnno.getValue().isCorrect()) {  // i.e. defect
         AudioAttribute audioAttribute = userExercise.getAudioRefToAttr().get(fieldAnno.getKey());
         if (audioAttribute != null) {
           logger.debug("getAndMarkDefects : found defect " + audioAttribute +
@@ -636,24 +620,13 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   }
 
   /**
-   * After marking an audio defective, we want to make an annotation that indicates it's no longer something that
-   * needs to be fixed.
-   *
    * @param audioAttribute
    * @see mitll.langtest.server.LangTestDatabaseImpl#markAudioDefect(mitll.langtest.shared.exercise.AudioAttribute, String)
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getPanelForAudio
    */
   public void markAudioDefect(AudioAttribute audioAttribute) {
     if (audioDAO.markDefect(audioAttribute) < 1) {
-      logger.error("markAudioDefect huh? couldn't mark error on " + audioAttribute);
-    }
-    else {
-      userListManager.addAnnotation(
-          audioAttribute.getExid(),
-          audioAttribute.getAudioRef(),
-          UserListManager.CORRECT,
-          "audio marked with defect",
-          audioAttribute.getUserid());
+      logger.error("huh? couldn't mark error on " + audioAttribute);
     }
   }
 
@@ -706,18 +679,10 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    */
   public AVPScoreReport getUserHistoryForList(long userid, Collection<String> ids, long latestResultID,
                                               Collection<String> allIDs, Map<String, CollationKey> idToKey) {
-    if (DEBUG) {
-      logger.debug("getUserHistoryForList " + userid + " and " + ids.size() + " ids, latest " + latestResultID);
-    }
-    ResultDAO.SessionsAndScores sessionsAndScores = resultDAO.getSessionsForUserIn2(ids, latestResultID, userid, allIDs, idToKey);
-    if (DEBUG) {
-      logger.debug("getUserHistoryForList " + userid + " and " + ids.size() + " sessions " + sessionsAndScores);
-    }
-    List<Session> sessionsForUserIn2 = sessionsAndScores.sessions;
+    logger.debug("getUserHistoryForList " + userid + " and " + ids.size() + " ids, latest " + latestResultID);
 
-    if (sessionsForUserIn2.isEmpty()) {
-      logger.warn("getUserHistoryForList " + userid + " and " + ids.size() + " no sessions?");
-    }
+    ResultDAO.SessionsAndScores sessionsAndScores = resultDAO.getSessionsForUserIn2(ids, latestResultID, userid, allIDs, idToKey);
+    List<Session> sessionsForUserIn2 = sessionsAndScores.sessions;
 
     Map<Long, User> userMap = userDAO.getUserMap();
 
@@ -744,7 +709,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       }
     }
 
-    if (DEBUG) logger.debug("getUserHistoryForList correct scores " + scores);
+    logger.debug("getUserHistoryForList correct scores " + scores);
 
     if (scores.size() == 11) {
       scores.remove(9);
@@ -766,7 +731,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         scores.add(makeScore(count, userMap, session, false));
       }
     }
-    if (DEBUG) logger.debug("getUserHistoryForList pron    scores " + scores);
+    logger.debug("getUserHistoryForList pron    scores " + scores);
 
     if (scores.size() == 11) {
       scores.remove(9);
@@ -885,10 +850,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @param user
    * @return
    * @seex mitll.langtest.server.database.ImportCourseExamples#copyUser
-   * @see MergeSites#addUsersToDest
    */
   public long addUser(User user) {
-    return userManagement.addUser(user, true);
+    return userManagement.addUser(user);
   }
 
   /**
@@ -955,15 +919,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
   public boolean logEvent(String id, String widgetType, String exid, String context, long userid, String hitID,
                           String device) {
-    if (userid == -1) {
-      if (widgetType.equals(UserPassLogin.USER_NAME_BOX)) {
-        return true;
-      }
-      else {
-        //  logger.debug("logEvent for user " + userid);
-        userid = userDAO.getBeforeLoginUser();
-      }
-    }
     return eventDAO != null && eventDAO.add(new Event(id, widgetType, exid, context, userid, -1, hitID, device));
   }
 
@@ -979,7 +934,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return audioDAO;
   }
 
-  public WordDAO getWordDAO() {
+  private WordDAO getWordDAO() {
     return wordDAO;
   }
 
@@ -996,7 +951,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     List<MonitorResult> monitorResults = resultDAO.getMonitorResults();
 
     for (MonitorResult result : monitorResults) {
-      CommonExercise exercise = getExercise(result.getExID());
+      CommonExercise exercise = getExercise(result.getId());
       if (exercise != null) {
         result.setDisplayID(exercise.getDisplayID());
       }
@@ -1302,16 +1257,12 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     if (userEx == null) {
       toRet = getExercise(id);
     } else {
-      //logger.info("getCustomOrPredefExercise got user ex for " + id);
+      //logger.info("got user ex for " + id);
       long updateTime = userEx.getUpdateTime();
       CommonExercise predef = getExercise(id);
 
       boolean usePredef = predef != null && predef.getUpdateTime() > updateTime;
-
-      //logger.info("getCustomOrPredefExercise usePredef " + usePredef);
-
       toRet = usePredef ? predef : userEx;
-      //logger.info("getCustomOrPredefExercise toRet " + toRet);
 
       if (predef != null && !usePredef) {
         // DON'T use the unit/chapter from database, at least for now
@@ -1336,8 +1287,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return serverProps;
   }
 
-
-
   private AddRemoveDAO getAddRemoveDAO() {
     return addRemoveDAO;
   }
@@ -1352,23 +1301,12 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @throws Exception
    * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
-  public void writeZip(OutputStream out,
-                       Map<String, Collection<String>> typeToSection,
-                       AudioExport.AudioExportOptions options) throws Exception {
+  public void writeZip(OutputStream out, Map<String, Collection<String>> typeToSection) throws Exception {
     Collection<CommonExercise> exercisesForSelectionState = typeToSection.isEmpty() ?
         getExercises() :
         getSectionHelper().getExercisesForSelectionState(typeToSection);
-    new AudioExport(getServerProps()).writeZip(out,
-        typeToSection,
-        getSectionHelper(),
-        exercisesForSelectionState,
-        getLanguage(),
-        getAudioDAO(),
-        installPath,
-        configDir,
-        false,
-        options
-    );
+    new AudioExport(getServerProps()).writeZip(out, typeToSection, getSectionHelper(), exercisesForSelectionState, getLanguage(),
+        getAudioDAO(), installPath, configDir, false);
   }
 
   @Override
@@ -1376,12 +1314,15 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return getServerProps().getLanguage();
   }
 
-  /**
-   * @param out
-   * @throws Exception
-   * @see DownloadServlet#writeAllAudio(HttpServletResponse)
-   */
-  public void writeUserListAudio(OutputStream out) throws Exception {
+  public void writeContextZip(OutputStream out, Map<String, Collection<String>> typeToSection) throws Exception {
+    Collection<CommonExercise> exercisesForSelectionState = typeToSection.isEmpty() ?
+        getExercises() :
+        getSectionHelper().getExercisesForSelectionState(typeToSection);
+    new AudioExport(getServerProps()).writeContextZip(out, typeToSection, getSectionHelper(), exercisesForSelectionState, getLanguage(),
+        getAudioDAO(), installPath, configDir);
+  }
+
+  public void writeZip(OutputStream out) throws Exception {
     new AudioExport(getServerProps()).writeZipJustOneAudio(out, getSectionHelper(), getExercises(), installPath);
   }
 
@@ -1390,13 +1331,11 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    *
    * @param out
    * @param listid
-   * @param options
    * @return
    * @throws Exception
-   * @see mitll.langtest.server.DownloadServlet#writeUserList
+   * @see mitll.langtest.server.DownloadServlet#writeUserList(javax.servlet.http.HttpServletResponse, DatabaseImpl, String)
    */
-  public String writeUserListAudio(OutputStream out, long listid, PathHelper pathHelper,
-                                   AudioExport.AudioExportOptions options) throws Exception {
+  public String writeZip(OutputStream out, long listid, PathHelper pathHelper) throws Exception {
     String language = getLanguage();
     if (listid == -1) return language + "_Unknown";
 
@@ -1413,21 +1352,20 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       for (CommonShell ex : userListByID.getExercises()) {
         copyAsExercises.add(getCustomOrPredefExercise(ex.getID()));
       }
-      AudioDAO audioDAO = getAudioDAO();
       for (CommonExercise ex : copyAsExercises) {
         userListManager.addAnnotations(ex);
-        audioDAO.attachAudio(ex, pathHelper.getInstallPath(), configDir);
+        getAudioDAO().attachAudio(ex, pathHelper.getInstallPath(), configDir);
       }
       long now = System.currentTimeMillis();
       logger.debug("\nTook " + (now - then) + " millis to annotate and attach.");
-      new AudioExport(getServerProps()).writeUserListAudio(out, userListByID.getName(), getSectionHelper(), copyAsExercises, language,
-          audioDAO, installPath, configDir, listid == UserListManager.REVIEW_MAGIC_ID, options);
+      new AudioExport(getServerProps()).writeZip(out, userListByID.getName(), getSectionHelper(), copyAsExercises, language,
+          getAudioDAO(), installPath, configDir, listid == UserListManager.REVIEW_MAGIC_ID);
     }
     return language + "_" + userListByID.getName();
   }
 
   /**
-   * JUST FOR TESTING
+   * JUST FOR TESTING?
    *
    * @param ex
    * @return
@@ -1537,15 +1475,12 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   }
 
   /**
+   * @see LangTestDatabaseImpl#getPretestScore(int, long, String, String, int, int, boolean, String, boolean)
    * @param resultID
    * @param asrScoreForAudio
-   * @param isCorrect
-   * @see LangTestDatabaseImpl#getPretestScore(int, long, String, String, int, int, boolean, String, boolean)
-   * @see ScoreServlet#getJsonForAudioForUser(int, String, int, ScoreServlet.Request, String, File, String, String, boolean, boolean)
-   * @see mitll.langtest.server.audio.AudioFileHelper#recalcOne
    */
-  public void rememberScore(long resultID, PretestScore asrScoreForAudio, boolean isCorrect) {
-    getAnswerDAO().changeAnswer(resultID, asrScoreForAudio.getHydecScore(), asrScoreForAudio.getProcessDur(), asrScoreForAudio.getJson(), isCorrect);
+  public void rememberScore(long resultID, PretestScore asrScoreForAudio) {
+    getAnswerDAO().changeAnswer(resultID, asrScoreForAudio.getHydecScore(), asrScoreForAudio.getProcessDur(), asrScoreForAudio.getJson());
     recordWordAndPhoneInfo(resultID, asrScoreForAudio);
   }
 
@@ -1565,16 +1500,13 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   }
 
   /**
+   * @see #rememberScore(long, PretestScore)
    * @param answerID
    * @param pretestScore
-   * @see #rememberScore(long, PretestScore, boolean)
    */
   private void recordWordAndPhoneInfo(long answerID, PretestScore pretestScore) {
     if (pretestScore != null) {
       recordWordAndPhoneInfo(answerID, pretestScore.getsTypeToEndTimes());
-    }
-    else {
-      logger.warn("recordWordAndPhoneInfo no score for " + answerID);
     }
   }
 
@@ -1585,7 +1517,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @see #recordWordAndPhoneInfo(long, PretestScore)
    */
   private void recordWordAndPhoneInfo(long answerID, Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap) {
-    List<TranscriptSegment> words  = netPronImageTypeListMap.get(NetPronImageType.WORD_TRANSCRIPT);
+    List<TranscriptSegment> words = netPronImageTypeListMap.get(NetPronImageType.WORD_TRANSCRIPT);
     List<TranscriptSegment> phones = netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
     if (words != null) {
       int windex = 0;
@@ -1599,7 +1531,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
             if (pseg.getStart() >= segment.getStart() && pseg.getEnd() <= segment.getEnd()) {
               String pevent = pseg.getEvent();
               if (!pevent.equals(SLFFile.UNKNOWN_MODEL) && !pevent.equals(SIL)) {
-                getPhoneDAO().addPhone(new PhoneDAO.Phone(answerID, wid, pevent, pindex++, pseg.getScore(), pseg.getDuration()));
+                getPhoneDAO().addPhone(new PhoneDAO.Phone(answerID, wid, pevent, pindex++, pseg.getScore()));
               }
             }
           }
@@ -1614,7 +1546,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    */
   public Map<String, Float> getMaleFemaleProgress() {
     UserDAO userDAO = getUserDAO();
-    Map<Long, User> userMapMales = userDAO.getUserMap(true);
+    Map<Long, User> userMapMales   = userDAO.getUserMap(true);
     Map<Long, User> userMapFemales = userDAO.getUserMap(false);
 
     Collection<? extends CommonShell> exercises = getExercises();
@@ -1623,8 +1555,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
     int context = 0;
     for (CommonShell shell : exercises) {
-      if (shell.getContext() != null &&
-          !shell.getContext().isEmpty()) context++;
+      if (!shell.getContext().isEmpty()) context++;
       boolean add = uniqueIDs.add(shell.getID());
       if (!add) {
         logger.warn("getMaleFemaleProgress found duplicate id " + shell.getID() + " : " + shell);
