@@ -64,7 +64,4 @@ public interface MutableExercise extends CommonShell, MutableShell {
   void setAvgScore(float v);
 
   void setRefSentences(Collection<String> orDefault);
-
-  void setContext(String context);
-  void setContextTranslation(String context);
 }

@@ -38,10 +38,6 @@ import com.google.gwt.user.client.ui.Anchor;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.instrumentation.EventRegistration;
 
-import java.util.logging.Logger;
-
-import static mitll.langtest.server.audio.AudioConversion.FILE_MISSING;
-
 /**
  * Audio widgets like the little ones at <a href="http://www.schillmania.com/projects/soundmanager2/">Sound Manager 2</a>
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -50,11 +46,6 @@ import static mitll.langtest.server.audio.AudioConversion.FILE_MISSING;
  * @since 7/25/14.
  */
 public class PlayAudioWidget {
-  private final Logger logger = Logger.getLogger("PlayAudioWidget");
-
-  /**
-   * @see mitll.langtest.client.analysis.PhoneExampleContainer#addItem(Object)
-   */
   public static native void addPlayer() /*-{
       $wnd.basicMP3Player.init();
   }-*/;
@@ -71,10 +62,6 @@ public class PlayAudioWidget {
                                                  EventRegistration eventRegistration) {
     Anchor anchor = getAudioWidget(path, title);
     eventRegistration.registerWidget(anchor, anchor, exerciseID, "playing user audio " + path);
-    if (path.contains(FILE_MISSING)) {
-      logger.warning("getAudioWidgetWithEventRecording path is " + path + " title " + title + " ex " + exerciseID);
-      anchor.setVisible(false);
-    }
     return anchor;
   }
 
@@ -92,7 +79,7 @@ public class PlayAudioWidget {
   }
 
   /**
-   * OK to have this be mp3 for now, could be ogg?
+   * OK to have this be mp3 for now
    * @param path
    * @param title
    * @return
@@ -101,8 +88,10 @@ public class PlayAudioWidget {
     SafeHtmlBuilder sb = new SafeHtmlBuilder();
     sb.appendHtmlConstant("<a href=\"" +
         ensureForwardSlashes(path).replace(".wav", ".mp3") +
-        "\"" + " title=\"" +  title + "\"" +
-        " class=\"sm2_button\">" +
+        "\"" +
+        " title=\"" +
+        title +
+        "\" class=\"sm2_button\">" +
         title +
         "</a>");
 
