@@ -38,7 +38,11 @@ import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.shared.ExerciseAnnotation;
 import org.apache.log4j.Logger;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.*;
 
 /**
@@ -61,79 +65,30 @@ public class AnnotationDAO extends DAO {
   private static final String FIELD = FIELD1;
   private static final String MODIFIED = "modified";
 
-  private final Map<String, List<UserAnnotation>> exerciseToAnnos = new HashMap<>();
+  private final Map<String,List<UserAnnotation>> exerciseToAnnos = new HashMap<String, List<UserAnnotation>>();
 
   /**
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    * @param database
    * @param userDAO
-   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
   public AnnotationDAO(Database database, UserDAO userDAO) {
     super(database);
     try {
       createTable(database);
       populate(userDAO.getDefectDetector());
-      markCorrectForDefectAudio();
     } catch (SQLException e) {
       logger.error("got " + e, e);
     }
   }
 
   /**
-   * Fix for an issue where we didn't clear incorrect annotations when the audio is marked with a defect.
-   * Later, if we filter for just items with audio defects, we'll find these unless we fix them.
-   *
-   * @throws SQLException
-   */
-  private void markCorrectForDefectAudio() throws SQLException {
-    String sql = "select annotation.uniqueid from annotation, audio where status='incorrect' and annotation.field = audio.audioref and audio.defect=true";
-    Connection connection = database.getConnection(this.getClass().toString());
-    PreparedStatement statement = connection.prepareStatement(sql);
-
-    ResultSet rs = statement.executeQuery();
-
-    Set<Long> ids = new HashSet<>();
-    while (rs.next()) {
-      ids.add(rs.getLong(1));
-    }
-
-    //logger.debug("getUserAnnotations sql " + sql + " yielded " + lists);
-    finish(connection, statement, rs);
-
-    if (!ids.isEmpty()) {
-      logger.info("fixing " + ids.size() + " annotations where audio was marked defect");
-      connection = database.getConnection(this.getClass().toString());
-      statement = connection.prepareStatement(
-          "update annotation" +
-              " set annotation.status='correct'" +
-              " where uniqueid" +
-              " IN (" + getInClause(ids) + ")"
-      );
-      statement.executeUpdate();
-      finish(connection, statement);
-    }
-  }
-
-  private String getInClause(Set<Long> longs) {
-    StringBuilder buffer = new StringBuilder();
-    for (long id : longs) {
-      buffer.append(id).append(",");
-    }
-
-    String s = buffer.toString();
-    if (s.endsWith(",")) s = s.substring(0, s.length() - 1);
-    return s;
-  }
-
-
-  /**
-   * String exerciseID; String field; String status; String comment;
+   *   String exerciseID; String field; String status; String comment;
    * String userID;
-   *
    * @param database
    * @throws SQLException
    */
-  private void createTable(Database database) throws SQLException {
+  void createTable(Database database) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS " +
         ANNOTATION +
@@ -157,7 +112,7 @@ public class AnnotationDAO extends DAO {
     index(database);
   }
 
-  private void index(Database database) throws SQLException {
+  void index(Database database) throws SQLException {
     createIndex(database, EXERCISEID, ANNOTATION);
     createIndex(database, FIELD1, ANNOTATION);
     createIndex(database, MODIFIED, ANNOTATION);
@@ -174,13 +129,13 @@ public class AnnotationDAO extends DAO {
     try {
       Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement = connection.prepareStatement(
-          "INSERT INTO " + ANNOTATION +
-              "(" +
-              CREATORID +
-              ",exerciseid,field," +
-              STATUS +
-              ",modified,comment) " +
-              "VALUES(?,?,?,?,?,?);");
+        "INSERT INTO " + ANNOTATION +
+          "(" +
+          CREATORID +
+          ",exerciseid,field," +
+          STATUS +
+          ",modified,comment) " +
+          "VALUES(?,?,?,?,?,?);");
       int i = 1;
 
       statement.setLong(i++, annotation.getCreatorID());
@@ -190,15 +145,14 @@ public class AnnotationDAO extends DAO {
       statement.setTimestamp(i++, new Timestamp(System.currentTimeMillis()));
       statement.setString(i++, annotation.getComment());
 
-      logger.info("adding annotation " + annotation);
       int j = statement.executeUpdate();
 
       if (j != 1) {
-        logger.error("add huh? didn't insert row for " + annotation);// + grade + " grade for " + resultID + " and " + grader + " and " + gradeID + " and " + gradeType);
+        logger.error("huh? didn't insert row for ");// + grade + " grade for " + resultID + " and " + grader + " and " + gradeID + " and " + gradeType);
       }
 
       finish(connection, statement);
-      //  logger.debug("now " + getCount(ANNOTATION) + " and user exercise is " + annotation);
+    //  logger.debug("now " + getCount(ANNOTATION) + " and user exercise is " + annotation);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
@@ -206,16 +160,15 @@ public class AnnotationDAO extends DAO {
 
   /**
    * TODO : this seems like a bad idea...
-   *
-   * @param userid
    * @see #AnnotationDAO
+   * @param userid
    */
   private void populate(long userid) {
     List<UserAnnotation> all = getAll(userid);
     for (UserAnnotation userAnnotation : all) {
       List<UserAnnotation> userAnnotations = exerciseToAnnos.get(userAnnotation.getExerciseID());
       if (userAnnotations == null) {
-        exerciseToAnnos.put(userAnnotation.getExerciseID(), userAnnotations = new ArrayList<>());
+        exerciseToAnnos.put(userAnnotation.getExerciseID(),userAnnotations = new ArrayList<UserAnnotation>());
       }
       userAnnotations.add(userAnnotation);
     }
@@ -228,7 +181,7 @@ public class AnnotationDAO extends DAO {
    */
   private List<UserAnnotation> getAll(long userid) {
     try {
-      String sql = "SELECT * from " + ANNOTATION + " where " + CREATORID + "=" + userid;
+      String sql = "SELECT * from " + ANNOTATION + " where " + CREATORID +"="+userid;
       return getUserAnnotations(sql);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
@@ -238,13 +191,12 @@ public class AnnotationDAO extends DAO {
 
   /**
    * TODO : this seems like a bad idea...
-   *
+   * @see mitll.langtest.server.database.custom.UserListManager#addDefect
    * @param exerciseID
    * @param field
    * @param status
    * @param comment
    * @return
-   * @see mitll.langtest.server.database.custom.UserListManager#addDefect
    */
   public boolean hasAnnotation(String exerciseID, String field, String status, String comment) {
     List<UserAnnotation> userAnnotations = exerciseToAnnos.get(exerciseID);
@@ -258,7 +210,6 @@ public class AnnotationDAO extends DAO {
 
   /**
    * TODO: Ought to be able to make a sql query that only returns the latest item for a exercise-field pair...
-   *
    * @return
    * @see mitll.langtest.server.database.custom.UserListManager#getAudioAnnos
    */
@@ -278,15 +229,13 @@ public class AnnotationDAO extends DAO {
 
     String sql3 = "select a.exerciseid, a.status, r.MaxTime \n" +
         "from (\n" +
-        "select exerciseid, field, MAX(modified) as MaxTime" +
-        " from annotation" +
-        " where field like'%.wav' group by exerciseid, field) r \n" +
+        "select exerciseid, field, MAX(modified) as MaxTime from annotation where field like'%.wav' group by exerciseid, field) r \n" +
         "inner join annotation a on a.exerciseid = r.exerciseid AND a.modified = r.MaxTime and a.status = 'incorrect' order by a.exerciseid, a.field";
     try {
       Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement = connection.prepareStatement(sql3);
       ResultSet rs = statement.executeQuery();
-      Set<String> incorrect = new HashSet<>();
+      Set<String> incorrect = new HashSet<String>();
 
       while (rs.next()) {
         incorrect.add(rs.getString(1));
@@ -298,14 +247,14 @@ public class AnnotationDAO extends DAO {
     } catch (SQLException e) {
       logger.error("got " + e, e);
     }
-    return new HashSet<>();
+    return new HashSet<String>();
   }
 
   /**
-   * @param exerciseID
-   * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#addAnnotations
    * @see UserListManager#addAnnotations
+   * @param exerciseID
+   * @return
    */
   public Map<String, ExerciseAnnotation> getLatestByExerciseID(String exerciseID) {
     String sql = "SELECT * from " + ANNOTATION + " where " +
@@ -325,12 +274,11 @@ public class AnnotationDAO extends DAO {
 
   /**
    * Always return the latest annotation.
-   *
    * @param lists
    * @return
    */
   private Map<String, ExerciseAnnotation> getFieldToAnnotationMap(List<UserAnnotation> lists) {
-    Map<String, UserAnnotation> fieldToAnno = new HashMap<>();
+    Map<String, UserAnnotation> fieldToAnno = new HashMap<String, UserAnnotation>();
 
     for (UserAnnotation annotation : lists) {
       UserAnnotation prevAnnotation = fieldToAnno.get(annotation.getField());
@@ -343,7 +291,7 @@ public class AnnotationDAO extends DAO {
       //logger.error("huh? no annotation with id " + unique);
       return Collections.emptyMap();
     } else {
-      Map<String, ExerciseAnnotation> fieldToAnnotation = new HashMap<>();
+      Map<String, ExerciseAnnotation> fieldToAnnotation = new HashMap<String, ExerciseAnnotation>();
       for (Map.Entry<String, UserAnnotation> pair : fieldToAnno.entrySet()) {
         fieldToAnnotation.put(pair.getKey(), new ExerciseAnnotation(pair.getValue().getStatus(), pair.getValue().getComment()));
       }
@@ -363,7 +311,7 @@ public class AnnotationDAO extends DAO {
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
     ResultSet rs = statement.executeQuery();
-    List<UserAnnotation> lists = new ArrayList<>();
+    List<UserAnnotation> lists = new ArrayList<UserAnnotation>();
 
     while (rs.next()) {
       lists.add(new UserAnnotation(
@@ -391,29 +339,25 @@ public class AnnotationDAO extends DAO {
     long then = System.currentTimeMillis();
     Map<String, Long> stateIds = getAnnotationToCreator(true);
     long now = System.currentTimeMillis();
-    if (now - then > 200)
-      logger.debug("getAnnotatedExerciseToCreator took " + (now - then) + " millis to find " + stateIds.size());
+    if (now - then > 200) logger.debug("getAnnotatedExerciseToCreator took " +(now-then) + " millis to find " + stateIds.size());
     return stateIds;
   }
 
   private Map<String, Long> getAnnotationToCreator(boolean forDefects) {
     Connection connection = database.getConnection(this.getClass().toString());
 
-    String sql2 =
-        "select exerciseid,field," + STATUS + "," + CREATORID +
-            " from annotation" +
-            " group by exerciseid,field," + STATUS + ",modified" +
-            " order by exerciseid,field,modified;";
+    String sql2 = "select exerciseid,field," +STATUS +"," +CREATORID +
+      " from annotation group by exerciseid,field," + STATUS +",modified order by exerciseid,field,modified;";
 
-    Map<String, Long> exToCreator = Collections.emptyMap();
+    Map<String,Long> exToCreator = Collections.emptyMap();
     try {
       PreparedStatement statement = connection.prepareStatement(sql2);
       ResultSet rs = statement.executeQuery();
-      exToCreator = new HashMap<>();
+      exToCreator = new HashMap<String, Long>();
       String prevExid = "";
       long prevCreatorid = -1;
 
-      Map<String, String> fieldToStatus = new HashMap<>();
+      Map<String,String> fieldToStatus = new HashMap<String, String>();
       while (rs.next()) {
         String exid = rs.getString(1);
         String field = rs.getString(2);
@@ -427,7 +371,7 @@ public class AnnotationDAO extends DAO {
           // go through all the fields -- if the latest is "incorrect" on any field, it's a defect
           //examineFields(forDefects, lists, prevExid, fieldToStatus);
           if (examineFields(forDefects, fieldToStatus)) {
-            exToCreator.put(prevExid, creatorid);
+            exToCreator.put(prevExid,creatorid);
           }
           fieldToStatus.clear();
           prevExid = exid;
@@ -438,7 +382,7 @@ public class AnnotationDAO extends DAO {
       }
 
       if (examineFields(forDefects, fieldToStatus)) {
-        exToCreator.put(prevExid, prevCreatorid);
+        exToCreator.put(prevExid,prevCreatorid);
       }
 
       //logger.debug("getUserAnnotations forDefects " +forDefects+ " sql " + sql2 + " yielded " + exToCreator.size());
@@ -449,7 +393,7 @@ public class AnnotationDAO extends DAO {
 
       finish(connection, statement, rs);
     } catch (SQLException e) {
-      logger.error("Got " + e + " doing " + sql2, e);
+      logger.error("Got " +e + " doing " + sql2,e);
     }
     return exToCreator;
   }
@@ -466,7 +410,7 @@ public class AnnotationDAO extends DAO {
     }
     if (forDefects) {
       if (foundIncorrect) {
-        // lists.add(prevExid);
+       // lists.add(prevExid);
         return true;
       }
     } else {
