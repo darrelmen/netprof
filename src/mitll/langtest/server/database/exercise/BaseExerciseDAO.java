@@ -183,7 +183,8 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
         serverProps.getAudioOffset(),
         audioDAO.getExToAudio(),
         serverProps.shouldCheckAudioTranscript(),
-        serverProps);
+        serverProps,
+        audioDAO);
   }
 
   /**
