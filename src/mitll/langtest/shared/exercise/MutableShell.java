@@ -41,5 +41,4 @@ package mitll.langtest.shared.exercise;
 public interface MutableShell {
   void setEnglish(String english);
   void setForeignLanguage(String foreignLanguage);
-  void setMeaning(String meaning);
 }

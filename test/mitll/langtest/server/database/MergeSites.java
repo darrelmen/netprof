@@ -20,7 +20,6 @@ import java.util.*;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 5/6/2014.
  */
-@SuppressWarnings("ALL")
 public class MergeSites extends BaseTest {
   private static final Logger logger = Logger.getLogger(MergeSites.class);
 
@@ -28,235 +27,22 @@ public class MergeSites extends BaseTest {
    * Take the users from the current site and add them to the candidate site
    * Add Result table entries from current site to new site - fixing the user id references for the result entries.
    * <p>
+   * Map old exercise id 900 to new 12887
    */
   @Test
   public void testMerge() {
-    String current = "egyptian";
-    String destination = "egyptianCandidate";
+    DatabaseImpl egyptianCurrent = getDatabase("egyptian");
+    DatabaseImpl<CommonExercise> candidate = getDatabase("egyptianCandidate");
 
-    doMerge(current, destination);
-  }
 
-  @Test
-  public void testMergeSudanese() {
-    String current = "sudanese";
-    String destination = "sudaneseEval";
-    doMerge(current, destination);
-  }
+    List<User> oldUsers = egyptianCurrent.getUsers();
 
-  @Test
-  public void testOldData() {
-    String current = "sudaneseEval";
-
-    DatabaseImpl<CommonExercise> currentSite = getDatabase(current);
-    List<MonitorResult> monitorResults = currentSite.getMonitorResults();
-
-    int i = 10;
-    List<MonitorResult> monitorResults1 = monitorResults.subList(monitorResults.size() - i, monitorResults.size());
-    for (MonitorResult result : monitorResults) {
-      if (result.getExID().equals("1")) {
-        logger.info("res " + result.getUniqueID() + " " + result.getExID() + " " + result.getForeignText());
-      }
-    }
-  }
-
-  private void doMerge(String current, String destination) {
-    DatabaseImpl<CommonExercise> currentSite = getDatabase(current);
-    DatabaseImpl<CommonExercise> destinationSite = getDatabase(destination);
-
-    Map<Long, Long> oldToNewUserIDs = mergeUsers(currentSite, destinationSite);
-
-    try {
-      mergeResults(currentSite, destinationSite, oldToNewUserIDs);
-    } catch (SQLException e) {
-      e.printStackTrace();
-    }
-  }
-
-  private void mergeResults(DatabaseImpl<CommonExercise> currentSite, DatabaseImpl<CommonExercise> destinationSite,
-                            Map<Long, Long> oldToNewUserIDs) throws SQLException {
-    List<MonitorResult> oldResults = currentSite.getResultDAO().getMonitorResults();
-    Set<String> knownFiles = getKnownAnswerFiles(destinationSite);
-    addOldResultsToDest(currentSite, destinationSite, oldToNewUserIDs, oldResults, knownFiles);
-  }
-
-  private Map<String, String> getFLToID(DatabaseImpl<CommonExercise> destinationSite) {
-    Map<String, String> newFLToID = new HashMap<>();
-    for (CommonExercise exercise : destinationSite.getExercises()) {
-      String foreignLanguage = exercise.getForeignLanguage().trim();
-      String newID = newFLToID.get(foreignLanguage);
-      if (newID == null) {
-        newFLToID.put(foreignLanguage, exercise.getID());
-      }
-    }
-
-    return newFLToID;
-  }
-
-  private Map<String, String> getOldIDToFL(DatabaseImpl<CommonExercise> destinationSite) {
-    Map<String, String> idToFL = new HashMap<>();
-    for (CommonExercise exercise : destinationSite.getExercises()) {
-      String foreignLanguage = exercise.getForeignLanguage().trim();
-      String id = exercise.getID();
-      String newID = idToFL.get(id);
-      if (newID == null) {
-        idToFL.put(id, foreignLanguage);
-      }
-    }
-
-    return idToFL;
-  }
-
-  private Map<Long, Long> mergeUsers(DatabaseImpl<CommonExercise> currentSite, DatabaseImpl<CommonExercise> destinationSite) {
-    Collection<User> oldUsers = currentSite.getUsers();
-    Collection<String> candidateIDs = new HashSet<>();
-
-    Map<Long, Long> oldToNewUserIDs = getOldToNewUserIDs(destinationSite, oldUsers, candidateIDs);
-
-    addUsersToDest(destinationSite, oldUsers, candidateIDs, oldToNewUserIDs);
-    return oldToNewUserIDs;
-  }
-
-  private void addOldResultsToDest(DatabaseImpl<CommonExercise> original,
-                                   DatabaseImpl<CommonExercise> destinationSite,
-                                   Map<Long, Long> oldToNewUserIDs,
-                                   Collection<MonitorResult> oldResults,
-                                   Collection<String> knownFiles) throws SQLException {
-    int n = 0;
-    int e = 0;
-    int before = destinationSite.getResultDAO().getNumResults();
-    Set<Long> unk = new HashSet<>();
-
-    Map<Long, User> userMap = destinationSite.getUserDAO().getUserMap();
-
-    int exidCount = 0;
-    int noExIDMatch = 0;
-    Map<String, String> newFLToID = getFLToID(destinationSite);
-    Map<String, String> oldIDToFL = getOldIDToFL(original);
-
-    logger.info("fl --> id     " + newFLToID.size() + " e.g. " + newFLToID.entrySet().iterator().next());
-    logger.info("old id --> fl " + oldIDToFL.size() + " e.g. " + oldIDToFL.entrySet().iterator().next());
-    int fix = 0;
-    int nofix = 0;
-    for (MonitorResult oldR : oldResults) {
-      if (!knownFiles.contains(oldR.getAnswer())) {
-        n++;
-        if (n < 5) logger.info(n + " add " + oldR.getAnswer());
-        long oldUserID = oldR.getUserid();
-        Long newUserID = oldToNewUserIDs.get(oldUserID);
-
-        if (newUserID == null) {
-          if (userMap.containsKey(oldUserID)) {
-            try {
-              String foreignText = oldIDToFL.get(oldR.getExID());
-
-              if (foreignText == null || foreignText.isEmpty()) logger.warn("no transcript on " + oldR);
-              else {
-                foreignText = foreignText.trim();
-                String exID = newFLToID.get(foreignText);
-                if (exID != null) {
-                  oldR.setExID(exID);
-                  exidCount++;
-                } else {
-                  noExIDMatch++;
-                }
-              }
-              if (oldR.getForeignText().isEmpty()) {
-                oldR.setForeignText(foreignText);
-                fix++;
-                if (oldR.getExID().equals("1"))
-                  logger.info("fixed " + oldR.getUniqueID() + " : " + oldR.getForeignText());
-              } else {
-                nofix++;
-              }
-              destinationSite.getAnswerDAO().addResultToTable(oldR);
-            } catch (SQLException e1) {
-              e1.printStackTrace();
-            }
-          } else {
-            e++;
-            logger.error("huh? can't find user id " + oldUserID);
-            unk.add(oldUserID);
-          }
-        } else {
-
-          String foreignText = oldIDToFL.get(oldR.getExID());
-
-          if (foreignText == null || foreignText.isEmpty()) logger.warn("no transcript on " + oldR);
-          else {
-            foreignText = foreignText.trim();
-            String exID = newFLToID.get(foreignText);
-            if (exID != null) {
-              oldR.setExID(exID);
-              exidCount++;
-            } else {
-              noExIDMatch++;
-            }
-          }
-          if (oldR.getForeignText().isEmpty()) {
-            oldR.setForeignText(foreignText);
-            fix++;
-            if (oldR.getExID().equals("1"))
-              logger.info("fixed " + oldR.getUniqueID() + " : " + oldR.getForeignText());
-          } else {
-            nofix++;
-          }
-
-          destinationSite.getAnswerDAO().addResultToTable(oldR);
-        }
-      }
-    }
-    int after = destinationSite.getResultDAO().getNumResults();
-    logger.info("dest before " + before + " after " + after);
-    if (!unk.isEmpty()) {
-      logger.info("unknown users " + new TreeSet<>(unk));
-    }
-    logger.info("added to dest " + n);
-    logger.info("exids copied " + exidCount + " no match " + noExIDMatch);
-    logger.info("fix " + fix + " no fix " + nofix);
-  }
-
-  private Set<String> getKnownAnswerFiles(DatabaseImpl<CommonExercise> destinationSite) {
-    List<Result> newResults = destinationSite.getResultDAO().getResults();
-
-    Set<String> knownFiles = new HashSet<>();
-    for (Result r : newResults) {
-      knownFiles.add(r.getAnswer());
-    }
-    return knownFiles;
-  }
-
-  private void addUsersToDest(DatabaseImpl<CommonExercise> destinationSite,
-                              Collection<User> oldUsers,
-                              Collection<String> candidateIDs,
-                              Map<Long, Long> oldToNew) {
-    int c = 0;
-    for (User old : oldUsers) {
-      if (!candidateIDs.contains(old.getUserID())) {
-        long l1 = destinationSite.addUser(old);
-        if (l1 < 0) logger.warn("huh - couldn't add " + old);
-        else {
-          //  logger.info("Adding " + old);
-          oldToNew.put(old.getId(), l1);
-          c++;
-        }
-      }
-    }
-    logger.info("added " + c + " old users to destinationSite");
-    if (false) {
-      for (User current : destinationSite.getUserDAO().getUsers()) {
-        logger.info("destinationSite user " + current.getUserID() + "\t: " + new Date(current.getTimestampMillis()) + "\t: " + current.getPasswordHash());
-      }
-    }
-  }
-
-  private Map<Long, Long> getOldToNewUserIDs(DatabaseImpl<CommonExercise> destinationSite, Collection<User> oldUsers,
-                                             Collection<String> candidateIDs) {
     Map<String, User> chosenToUser = new HashMap<>();
     for (User u : oldUsers) chosenToUser.put(u.getUserID(), u);
 
-    List<User> candidateUsers = destinationSite.getUsers();
+    List<User> candidateUsers = candidate.getUsers();
     Map<Long, Long> oldToNew = new HashMap<>();
+    Set<String> candidateIDs = new HashSet<>();
     for (User newUser : candidateUsers) {
       String userID = newUser.getUserID();
       candidateIDs.add(userID);
@@ -265,16 +51,82 @@ public class MergeSites extends BaseTest {
           User oldUser = chosenToUser.get(userID);
           if (oldUser.getId() != newUser.getId()) {
             oldToNew.put(oldUser.getId(), newUser.getId());
-            //logger.info("got existing user new\n\t" + newUser + "old\n\t" + oldUser);
+            logger.info("got existing user new\n\t" + newUser + "old\n\t" + oldUser);
           }
         }
       }
     }
-    return oldToNew;
+
+    int c = 0;
+    for (User old : oldUsers) {
+      if (!candidateIDs.contains(old.getUserID())) {
+        long l1 = candidate.addUser(old);
+        if (l1 < 0) logger.warn("huh - couldn't add " + old);
+        else {
+          logger.info("Adding " + old);
+          oldToNew.put(old.getId(), l1);
+          c++;
+        }
+      }
+    }
+    logger.info("added " + c + " old users to candidate");
+
+    List<MonitorResult> oldResults = egyptianCurrent.getResultDAO().getMonitorResults();
+    List<Result> newResults = candidate.getResultDAO().getResults();
+
+    Set<String> knownFiles = new HashSet<>();
+    List<Result> toAdd = new ArrayList<>();
+    for (Result r : newResults) {
+      knownFiles.add(r.getAnswer());
+    }
+
+    int n = 0;
+    int e = 0;
+    int before = candidate.getResultDAO().getNumResults();
+    Set<Long> unk = new HashSet<>();
+
+    Map<Long, User> userMap = candidate.getUserDAO().getUserMap();
+    for (MonitorResult oldR : oldResults) {
+      if (!knownFiles.contains(oldR.getAnswer())) {
+        n++;
+        if (n < 10) logger.info("add " + oldR.getAnswer());
+        long oldUserID = oldR.getUserid();
+        Long newUserID = oldToNew.get(oldUserID);
+
+        if (newUserID == null) {
+          if (userMap.containsKey(oldUserID)) {
+            try {
+              candidate.getAnswerDAO().addResultToTable(oldR);
+            } catch (SQLException e1) {
+              e1.printStackTrace();
+            }
+          }
+          else {
+            e++;
+            logger.error("huh? can't find user id " + oldUserID);
+            unk.add(oldUserID);
+          }
+        } else {
+        //  oldR.setUserID(newUserID);
+          //if (n < 10)
+            logger.warn("adding with fixed id " + oldR);
+
+          try {
+            candidate.getAnswerDAO().addResultToTable(oldR);
+          } catch (SQLException e1) {
+            e1.printStackTrace();
+          }
+
+        }
+      }
+    }
+    int after = candidate.getResultDAO().getNumResults();
+    logger.info("before " + before + " after " + after);
+    logger.info("unknown " + new TreeSet<Long>(unk));
+    logger.info("added " + n);
   }
 
-  private static void importExamples(String configDir, String importH2, String destinationH2, String destAudioDir,
-                                     String candidateAudioDir) {
+  private static void importExamples(String configDir, String importH2, String destinationH2, String destAudioDir, String candidateAudioDir) {
     DatabaseImpl courseExamples = makeDatabaseImpl(importH2, configDir);
     ResultDAO resultDAO1 = courseExamples.getResultDAO();
     System.out.println("got num results " + resultDAO1.getNumResults());
@@ -294,7 +146,7 @@ public class MergeSites extends BaseTest {
 
     DatabaseImpl npfRussian = makeDatabaseImpl(destinationH2, configDir);
     Map<Long, User> userMap = courseExamples.getUserDAO().getUserMap();
-    Map<Long, Long> oldToNew = new HashMap<>();
+    Map<Long, Long> oldToNew = new HashMap<Long, Long>();
 
     for (long userid : userToResultsRegular.keySet()) {
       copyUser(npfRussian, userMap, oldToNew, userid);
