@@ -47,7 +47,7 @@ import java.util.Collection;
  * To change this template use File | Settings | File Templates.
  */
 public class User extends MiniUser {
-  public static final String NOT_SET = "NOT_SET";
+  private static final String NOT_SET = "NOT_SET";
   private int experience;
   private String ipaddr;
   private String  passwordHash;
@@ -141,10 +141,6 @@ public class User extends MiniUser {
   }
   public long getTimestampMillis() { return timestamp; }
 
-  /**
-   *
-   * @param timestampMillis
-   */
   public void setTimestampMillis(long timestampMillis) {
     this.timestamp = timestampMillis;
   }
