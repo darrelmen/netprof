@@ -124,7 +124,7 @@ class AmasSupport {
         List<Integer> answered = exToQIDs.get(cs.getId());
         if (answered == null) exToQIDs.put(cs.getId(), answered = new ArrayList<>());
         answered.add(cs.getQid());
-        //  logger.info("Adding " + cs.getExID() + "/" + cs.getQid());
+        //  logger.info("Adding " + cs.getId() + "/" + cs.getQid());
       } else {
         //  logger.warn("skipping " + cs + " since no user score was set.");
       }
