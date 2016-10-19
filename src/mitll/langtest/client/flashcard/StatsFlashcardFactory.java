@@ -50,7 +50,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.ListChangeListener;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.custom.UserList;
@@ -156,7 +155,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     if (scoreHistory != null && scoreHistory instanceof RequiresResize) {
       ((RequiresResize) scoreHistory).onResize();
     } else {
-      logger.warning("huh? score history doesn't implement requires resize????\\n\n");
+      System.err.println("huh? score history doesn't implement requires resize????\\n\n");
     }
   }
 
@@ -192,10 +191,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         ADD_KEY_BINDING,
         StatsFlashcardFactory.this.controlState,
         soundFeedback,
-        soundFeedback.getEndListener(),
-        StatsFlashcardFactory.this.instance,
-        exerciseList) {
-
+        soundFeedback.getEndListener(), StatsFlashcardFactory.this.instance, exerciseList) {
       @Override
       protected void gotShuffleClick(boolean b) {
         sticky.resetStorage();
@@ -219,7 +215,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   /**
    * Pull state out of cache and re-populate correct, incorrect, and score history.
    *
-   * @see mitll.langtest.client.custom.Navigation#makePracticeHelper
+   * @see mitll.langtest.client.custom.Navigation#makePracticeHelper(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserManager, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.user.UserFeedback)
    */
   public void populateCorrectMap() {
     String value = sticky.getCorrect();
@@ -278,17 +274,9 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
           ADD_KEY_BINDING,
           StatsFlashcardFactory.this.controlState,
           soundFeedback,
-          null,
+          soundFeedback.getEndListener(),
           StatsFlashcardFactory.this.instance, exerciseListToUse);
-      soundFeedback.setEndListener(new SoundFeedback.EndListener() {
-        @Override
-        public void songStarted() {}
-
-        @Override
-        public void songEnded() {
-          removePlayingHighlight();
-        }
-      });
+      // logger.info("made " + this.getElement().getId() + " for " + e.getID());
     }
 
     @Override
@@ -300,7 +288,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     /**
      * @see #loadNextOnTimer(int)
      * @see #nextAfterDelay(boolean, String)
-     * @see BootstrapExercisePanel#playRefAndGoToNext
+     * @see #playRefAndGoToNext(String)
      */
     @Override
     protected void loadNext() {
@@ -311,10 +299,6 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       }
     }
 
-    /**
-     * @param b
-     * @see FlashcardPanel#getShuffleButton(ControlState)
-     */
     @Override
     protected void gotShuffleClick(boolean b) {
       sticky.resetStorage();
@@ -322,25 +306,11 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     }
 
     /**
-     * @see #getAutoPlayButton
-     * @param b
-     */
-    protected void gotAutoPlay(boolean b) {
-      if (b) {
-//        logger.info("gotAutoPlay got click...");
-        playRefAndGoToNextIfSet();
-      } else {
-//        logger.info("gotAutoPlay abortPlayback");
-        abortPlayback();
-      }
-    }
-
-    /**
      * @param result
      * @see mitll.langtest.client.recorder.RecordButtonPanel#receivedAudioAnswer(mitll.langtest.shared.AudioAnswer, com.google.gwt.user.client.ui.Panel)
      */
     public void receivedAudioAnswer(final AudioAnswer result) {
-     // if (false) logger.info("StatsPracticePanel.receivedAudioAnswer: result " + result);
+      logger.info("StatsPracticePanel.receivedAudioAnswer: result " + result);
 
       if (result.getValidity() == AudioAnswer.Validity.OK) {
         resultIDs.add(result.getResultID());
@@ -392,7 +362,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
       sticky.resetStorage();
       if (exercise == null) {
-        logger.warning("StatsPracticePanel.onSetComplete. : err : no exercise?");
+        System.err.println("StatsPracticePanel.onSetComplete. : err : no exercise?");
       } else {
         sticky.storeCurrent(exercise);
       }
@@ -414,7 +384,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       service.getUserHistoryForList(user, copies, latestResultID, selection, ul == null ? -1 : ul.getUniqueID(), new AsyncCallback<AVPScoreReport>() {
         @Override
         public void onFailure(Throwable caught) {
-          //logger.warning("StatsPracticePanel.onSetComplete. : got failure " + caught);
+          //System.err.println("StatsPracticePanel.onSetComplete. : got failure " + caught);
         }
 
         @Override
@@ -517,7 +487,9 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       w1.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
+
 //          logger.info("getRepeatButton : click on " + GO_BACK);
+
           w1.setVisible(false);
           showFlashcardDisplay();
 
@@ -570,6 +542,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     private void makeFlashcardButtonsVisible() {
       contentPanel.removeStyleName("noWidthCenterPractice");
       contentPanel.addStyleName("centerPractice");
+
       //   logger.info("makeFlashcardButtonsVisible ---- \n\n\n");
 
       startOver.setVisible(true);
@@ -588,8 +561,8 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       if (exerciseList.onLast()) {
         onSetComplete();
       } else {
-       // logger.info("nextAfterDelay " + correct);
-        loadNextOnTimer(DELAY_MILLIS);
+        int delayMillis = DELAY_MILLIS;
+        loadNextOnTimer(delayMillis);
       }
     }
 
@@ -614,11 +587,11 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     protected void gotClickOnNext() {
       abortPlayback();
 
-      //logger.info("on last " + exerciseList.onLast());
+      logger.info("on last " + exerciseList.onLast());
       if (exerciseList.onLast()) {
         onSetComplete();
       } else {
-        //logger.info("load next " + exerciseList.getCurrentExerciseID());
+        logger.info("load next " + exerciseList.getCurrentExerciseID());
         exerciseList.loadNext();
       }
     }
@@ -646,8 +619,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       return startOver;
     }
 
-    @Override
-    protected void abortPlayback() {
+    void abortPlayback() {
       cancelTimer();
       soundFeedback.clear();
     }
