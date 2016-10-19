@@ -557,9 +557,15 @@ public class RefResultDecoder {
             if (durationInSeconds < 0.01) {
               logger.warn("doDecode : 1 huh? attr dur " + durationInMillis + " but check dur " + durationInSeconds);
             }
-            audioFileHelper.decodeOneAttribute(exercise, attribute, doHydec);
-            sleep(serverProps.getSleepBetweenDecodes());
-            count++;
+            if (audioCheck.hasValidDynamicRange(absoluteFile)) {
+              audioFileHelper.decodeOneAttribute(exercise, attribute, doHydec);
+              sleep(serverProps.getSleepBetweenDecodes());
+              count++;
+            }
+            else {
+              logger.info("doDecode : for " +exercise.getID()+ " (" + durationInMillis+
+                  ") skip low dynamic range file "+ audioRef);
+            }
           }
           else {
             if (durationInSeconds > 0.01) {
