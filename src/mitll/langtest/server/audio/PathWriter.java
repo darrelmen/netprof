@@ -64,10 +64,9 @@ public class PathWriter {
    * @param serverProperties
    * @return path of file under bestAudio directory
    * @see mitll.langtest.server.database.custom.UserListManager#getRefAudioPath
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable
+   * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable(int, String, mitll.langtest.shared.exercise.CommonExercise, String, mitll.langtest.shared.AudioAnswer)
    */
-  public String getPermanentAudioPath(PathHelper pathHelper,
-                                      File fileRef, String destFileName, boolean overwrite,
+  public String getPermanentAudioPath(PathHelper pathHelper, File fileRef, String destFileName, boolean overwrite,
                                       String id, String title, String artist, ServerProperties serverProperties) {
     final File bestDir = pathHelper.getAbsoluteFile(BEST_AUDIO);
     if (!bestDir.exists() && !bestDir.mkdir()) {
@@ -82,7 +81,14 @@ public class PathWriter {
     String bestAudioPath = BEST_AUDIO + File.separator + id + File.separator + destFileName;
     //logger.debug("getPermanentAudioPath : dest path    " + bestDirForExercise.getPath() + " vs " +bestAudioPath);
     if (!fileRef.equals(destination) && !destFileName.equals(AudioConversion.FILE_MISSING)) {
-      copyAndNormalize(fileRef, serverProperties, destination);
+      try {
+        FileUtils.copyFile(fileRef, destination);
+      } catch (IOException e) {
+        logger.error("couldn't copy " +fileRef.getAbsolutePath() + " to " + destination.getAbsolutePath());
+      }
+
+      //logger.debug("getPermanentAudioPath : normalizing levels for " + destination.getAbsolutePath());
+      new AudioConversion(serverProperties).normalizeLevels(destination);
     } else {
       if (FileUtils.sizeOf(destination) == 0) {
         logger.error("\ngetRefAudioPath : huh? " + destination + " is empty???");
@@ -91,17 +97,6 @@ public class PathWriter {
     }
     ensureMP3(pathHelper, bestAudioPath, overwrite, title, artist, serverProperties);
     return bestAudioPath;
-  }
-
-  public void copyAndNormalize(File fileRef, ServerProperties serverProperties, File destination) {
-    try {
-      FileUtils.copyFile(fileRef, destination);
-    } catch (IOException e) {
-      logger.error("couldn't copy " +fileRef.getAbsolutePath() + " to " + destination.getAbsolutePath());
-    }
-
-    // logger.debug("getPermanentAudioPath : normalizing levels for " + destination.getAbsolutePath());
-    new AudioConversion(serverProperties).normalizeLevels(destination);
   }
 
   private void ensureMP3(PathHelper pathHelper, String wavFile, boolean overwrite, String title, String artist,
