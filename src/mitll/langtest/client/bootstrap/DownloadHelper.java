@@ -53,7 +53,7 @@ import java.util.Map;
  * @since 11/16/15.
  */
 class DownloadHelper {
-  private static final String DOWNLOAD_SPREADSHEET = "Download spreadsheet and audio for selected sections.";
+  /*private static final String DOWNLOAD_SPREADSHEET = "Download spreadsheet and audio for selected sections.";
   private static final String DOWNLOAD_AUDIO = "downloadAudio";
 
   private final EventRegistration eventRegistration;
@@ -85,10 +85,10 @@ class DownloadHelper {
     if (contextDownloadLink != null) contextDownloadLink.setHTML(getURLForContextDownload(selectionState));
   }
 
-  /**
+  *//**
    * @return
    * @see #addButtonRow
-   */
+   *//*
   private Anchor getDownloadLink() {
     final Anchor downloadLink = new Anchor(getDownloadURL());
     addTooltip(downloadLink);
@@ -102,12 +102,12 @@ class DownloadHelper {
     return downloadLink;
   }
 
-  /**
+  *//**
    * @param widget
    * @return
    * @see #addButtonRow(java.util.List, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection)
    * @see #getDownloadLink
-   */
+   *//*
   private void addTooltip(Widget widget) {
     new TooltipHelper().addTooltip(widget, DOWNLOAD_SPREADSHEET);
   }
@@ -125,17 +125,17 @@ class DownloadHelper {
     return downloadLink;
   }
 
-/*
+*//*
   public void updateDownloadLinks(SelectionState selectionState) {
     if (downloadLink != null)        downloadLink.setHTML(downloadHelper.getURLForDownload(selectionState));
     if (contextDownloadLink != null) contextDownloadLink.setHTML(downloadHelper.getURLForContextDownload(selectionState));
   }
-*/
+*//*
 
-  /**
+  *//**
    * @see #getDownloadLink()
    * @return
-   */
+   *//*
   private SafeHtml getDownloadURL() {
     return getURLForDownload(exerciseList.getSelectionState());
   }
@@ -144,11 +144,11 @@ class DownloadHelper {
     return getURLForContextDownload(exerciseList.getSelectionState());
   }
 
-  /**
+  *//**
    * @param selectionState
    * @return
    * @see #showSelectionState(mitll.langtest.client.list.SelectionState)
-   */
+   *//*
   private SafeHtml getURLForDownload(SelectionState selectionState) {
     return getUrlDownloadLink(selectionState, DOWNLOAD_AUDIO, "download", "Download");
   }
@@ -170,5 +170,5 @@ class DownloadHelper {
     sb.appendEscaped(" " + title);
     sb.appendHtmlConstant("</a>");
     return sb.toSafeHtml();
-  }
+  }*/
 }
