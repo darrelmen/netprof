@@ -35,15 +35,16 @@ package mitll.langtest.shared;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
+import java.beans.Transient;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.*;
 
 /**
  * So egyptian monitoring needs to show :
- * user exid/exid/unit/chapter/exercise text/audio/time/valid/duration/correct/score
+ * user id/id/unit/chapter/exercise text/audio/time/valid/duration/correct/score
  * <p>
- * Search on user, exid,unit,chapter,exer
+ * Search on user, id,unit,chapter,exer
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
@@ -52,7 +53,7 @@ import java.util.*;
 public class MonitorResult implements IsSerializable {
   private static final String ASC = "ASC";
   public static final String USERID = "userid";
-  public static final String ID = "exid";
+  public static final String ID = "id";
   public static final String VALID = "valid";
   public static final String TIMESTAMP = "timestamp";
   public static final String AUDIO_TYPE = "audioType";
@@ -66,9 +67,9 @@ public class MonitorResult implements IsSerializable {
 
   private int uniqueID;
   private long userid;
-  private String exid;
+  private String id;
 
-  private String foreignText = "";
+  private String foreignText;
 
   private String answer;
   private boolean valid;
@@ -85,10 +86,10 @@ public class MonitorResult implements IsSerializable {
   private int roundTripDur;
 
   private Map<String, String> unitToValue;
-
-  private transient String deviceType;
-  private transient String simpleDevice;
-  private transient String scoreJSON;
+/*
+  private String deviceType;
+  private String simpleDevice;
+  private String scoreJSON;*/
 
   public MonitorResult() {
   }
@@ -96,7 +97,7 @@ public class MonitorResult implements IsSerializable {
   /**
    * @param uniqueID
    * @param userid
-   * @param exid
+   * @param id
    * @param answer
    * @param valid
    * @param timestamp
@@ -110,15 +111,13 @@ public class MonitorResult implements IsSerializable {
    * @param roundTripDur
    * @see mitll.langtest.server.database.ResultDAO#getMonitorResultsForQuery(Connection, PreparedStatement)
    */
-  public MonitorResult(int uniqueID, long userid, String exid, String answer,
+  public MonitorResult(int uniqueID, long userid, String id, String answer,
                        boolean valid, long timestamp, String answerType, int durationInMillis,
                        boolean correct, float pronScore, String device, boolean withFlash, int processDur,
-                       int roundTripDur, String validity, float snr, String deviceType, String simpleDevice, String scoreJSON,
-                       String transcript
-  ) {
+                       int roundTripDur, String validity, float snr) {
     this.uniqueID = uniqueID;
     this.userid = userid;
-    this.exid = exid;
+    this.id = id;
     this.answer = answer;
     this.valid = valid;
     this.timestamp = timestamp;
@@ -132,10 +131,6 @@ public class MonitorResult implements IsSerializable {
     this.roundTripDur = roundTripDur;
     this.validity = validity;
     this.snr = snr;
-    this.deviceType = deviceType;
-    this.simpleDevice = simpleDevice;
-    this.scoreJSON = scoreJSON;
-    this.foreignText = transcript;
   }
 
   public int getUniqueID() {
@@ -146,12 +141,8 @@ public class MonitorResult implements IsSerializable {
     return userid;
   }
 
-  public String getExID() {
-    return exid;
-  }
-
-  public void setExID(String exID) {
-    exid = exID;
+  public String getId() {
+    return id;
   }
 
   public String getForeignText() {
@@ -186,10 +177,6 @@ public class MonitorResult implements IsSerializable {
     return pronScore;
   }
 
-  /**
-   *
-   * @param foreignText
-   */
   public void setForeignText(String foreignText) {
     this.foreignText = foreignText;
   }
@@ -241,10 +228,10 @@ public class MonitorResult implements IsSerializable {
           }
           if (comp != 0) return getComp(asc, comp);
 
-          // exid
+          // id
           if (field.equals(ID)) {
-            String id1 = o1.exid;
-            String id2 = o2.exid;
+            String id1 = o1.id;
+            String id2 = o2.id;
             comp = compareTwoMaybeInts(id1, id2);
           }
           if (comp != 0) return getComp(asc, comp);
@@ -365,7 +352,7 @@ public class MonitorResult implements IsSerializable {
 
   @Override
   public String toString() {
-    return "MonitorResult #" + uniqueID + "\t\tby user " + userid + "\texid " + exid + " " +
+    return "MonitorResult #" + uniqueID + "\t\tby user " + userid + "\texid " + id + " " +
         " at " + new Date(timestamp) +
         "  ans " + answer +
         " audioType : " + audioType +
@@ -394,19 +381,7 @@ public class MonitorResult implements IsSerializable {
   }
 
   public void setDisplayID(String displayID) {
-    this.exid = displayID;
-  }
-
-  public String getDeviceType() {
-    return deviceType;
-  }
-
-  public String getSimpleDevice() {
-    return simpleDevice;
-  }
-
-  public String getScoreJSON() {
-    return scoreJSON;
+    this.id = displayID;
   }
 
 /*  @Transient
