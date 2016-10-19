@@ -67,7 +67,6 @@ public class UserExerciseDAO extends DAO {
   private static final String STATE = "state";
   private static final String CONTEXT = "context";
   private static final String CONTEXT_TRANSLATION = "contextTranslation";
-  private static final String CREATORID = "creatorid";
 
   private ExerciseDAO<CommonExercise> exerciseDAO;
   private static final boolean DEBUG = false;
@@ -134,11 +133,9 @@ public class UserExerciseDAO extends DAO {
               "english" + "," +
               "foreignLanguage" + "," +
               TRANSLITERATION + "," +
-              CREATORID + "," +
-              CONTEXT + "," +
-              CONTEXT_TRANSLATION + "," +
-              "override," +
-              UNIT +
+              "creatorid" + "," +
+              CONTEXT + "," + CONTEXT_TRANSLATION +
+              ",override," + UNIT +
               "," + LESSON +
               "," + MODIFIED +
               ") " +
@@ -201,15 +198,13 @@ public class UserExerciseDAO extends DAO {
         preparedStatement.close();
         userExercise.getCombinedMutableUserExercise().setID(customID);
 
-        if (DEBUG) logger.debug("\tuserExercise= " + userExercise);
+        logger.debug("\tuserExercise= " + userExercise);
       }
 
       finish(connection, statement);
 
-    //  logger.debug("now " + getCount(USEREXERCISE) + " user exercises and user exercise is " + userExercise);
-      if (DEBUG) {
-        logger.debug("new " + (predefined ? " PREDEF " : " USER ") + " user exercise is " + userExercise);
-      }
+      logger.debug("now " + getCount(USEREXERCISE) + " user exercises and user exercise is " + userExercise);
+      logger.debug("new " + (predefined ? " PREDEF " : " USER ") + " user exercise is " + userExercise);
     } catch (Exception ee) {
       logException(ee);
     }
@@ -229,7 +224,7 @@ public class UserExerciseDAO extends DAO {
         "english VARCHAR, " +
         "foreignLanguage VARCHAR, " +
         TRANSLITERATION + " VARCHAR, " +
-        CREATORID + " INT, " +
+        "creatorid INT, " +
         CONTEXT + " VARCHAR, " +
         CONTEXT_TRANSLATION + " VARCHAR, " +
         OVERRIDE + " BOOLEAN, " +
@@ -257,7 +252,7 @@ public class UserExerciseDAO extends DAO {
    * @return
    * @see mitll.langtest.server.database.custom.UserListDAO#populateList
    */
-  List<CommonShell> getOnList(long listID) {
+  public List<CommonShell> getOnList(long listID) {
     String sql = getJoin(listID);
     List<CommonShell> userExercises2 = new ArrayList<>();
 
@@ -382,12 +377,6 @@ public class UserExerciseDAO extends DAO {
     return commonExercises.isEmpty() ? null : commonExercises.iterator().next();
   }
 
-  public Collection<CommonExercise> getByUser(int user) {
-    String sql = "SELECT * from " + USEREXERCISE + " where " + CREATORID + "=" + user;
-    Collection<CommonExercise> commonExercises = getCommonExercises(sql);
-    return commonExercises;
-  }
-
   public Collection<CommonExercise> getAll() {
     return getCommonExercises(GET_ALL_SQL);
   }
@@ -415,7 +404,7 @@ public class UserExerciseDAO extends DAO {
    * @return
    * @see UserListManager#getDefectList(java.util.Collection)
    */
-  Collection<CommonExercise> getWhere(Collection<String> exids) {
+  public Collection<CommonExercise> getWhere(Collection<String> exids) {
     if (exids.isEmpty()) return new ArrayList<>();
     String sql = "SELECT * from " + USEREXERCISE + " where " + EXERCISEID + " in (" + getIds(exids) + ")";
     return getCommonExercises(sql);
@@ -456,7 +445,7 @@ public class UserExerciseDAO extends DAO {
         UserExercise e = new UserExercise(
             rs.getLong("uniqueid"),
             rs.getString(EXERCISEID),
-            rs.getLong(CREATORID),
+            rs.getLong("creatorid"),
             rs.getString("english"),
             rs.getString("foreignLanguage"),
             rs.getString(TRANSLITERATION),
@@ -574,14 +563,14 @@ public class UserExerciseDAO extends DAO {
   public void update(CommonExercise userExercise, boolean createIfDoesntExist) {
     try {
       Connection connection = database.getConnection(this.getClass().toString());
-      String sql = "UPDATE " + USEREXERCISE +" " +
+      String sql = "UPDATE " + USEREXERCISE +
+          " " +
           "SET " +
           "english=?," +
           "foreignLanguage=?," +
           TRANSLITERATION + "=?," +
-          CONTEXT + "=?," +
-          CONTEXT_TRANSLATION + "=?," +
-          MODIFIED + "=? " +
+          MODIFIED +
+          "=? " +
           "WHERE " +
           EXERCISEID +
           "=?";
@@ -592,8 +581,6 @@ public class UserExerciseDAO extends DAO {
       statement.setString(ii++, userExercise.getEnglish());
       statement.setString(ii++, userExercise.getForeignLanguage());
       statement.setString(ii++, userExercise.getTransliteration());
-      statement.setString(ii++, userExercise.getContext());
-      statement.setString(ii++, userExercise.getContextTranslation());
       statement.setTimestamp(ii++, new Timestamp(System.currentTimeMillis()));
       statement.setString(ii++, userExercise.getID());
 
