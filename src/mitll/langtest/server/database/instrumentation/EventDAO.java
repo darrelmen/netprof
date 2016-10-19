@@ -71,8 +71,6 @@ public class EventDAO extends DAO {
   private static final String DEVICE = "device";
   public static final String MODIFIED = "modified";
   public static final String WHERE_DEVICE = " where length(device)=36";
-  public static final String UNIQUEID = "uniqueid";
-  public static final int MAX_ROWS = 10000;
   private final UserDAO userDAO;
 
   /**
@@ -114,8 +112,7 @@ public class EventDAO extends DAO {
     PreparedStatement statement = connection.prepareStatement("CREATE TABLE if not exists " +
         EVENT +
         " (" +
-        UNIQUEID +
-        " IDENTITY, " +
+        "uniqueid IDENTITY, " +
         CREATORID + " INT, " +
         EXERCISEID + " VARCHAR, " +
         "context VARCHAR, " +
@@ -198,29 +195,6 @@ public class EventDAO extends DAO {
   public List<Event> getAll() {
     try {
       return getEvents("SELECT * from " + EVENT);
-    } catch (Exception ee) {
-      logger.error("got " + ee, ee);
-      if (logAndNotify != null) {
-        logAndNotify.logAndNotifyServerException(ee);
-      }
-    }
-    return Collections.emptyList();
-  }
-
-  public Collection<Event> getLastRows() {
-    String sql = "SELECT * FROM (\n" +
-        "    SELECT * FROM " + EVENT +
-        " ORDER BY " + UNIQUEID +
-        " DESC LIMIT " +
-        MAX_ROWS +
-        "\n" +
-        ") sub\n" +
-        "ORDER BY " +
-        UNIQUEID +
-        " ASC";
-
-    try {
-      return getEvents(sql);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
       if (logAndNotify != null) {

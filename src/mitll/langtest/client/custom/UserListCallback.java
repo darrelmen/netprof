@@ -89,7 +89,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
    * @param optionalExercise
    * @see ListManager#viewLessons
    */
-  UserListCallback(ListManager listManager,
+  public UserListCallback(ListManager listManager,
                           Panel contentPanel,
                           Panel insideContentPanel,
                           ScrollPanel listScrollPanel,
@@ -118,7 +118,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
 
   @Override
   public void onSuccess(final Collection<UserList<CommonShell>> result) {
-//    logger.info("\tUserListCallback.onSuccess : Displaying " + result.size() + " user lists for " + instanceName);
+    logger.info("\tUserListCallback.onSuccess : Displaying " + result.size() + " user lists for " + instanceName);
     if (result.isEmpty()) {
       logger.info("\t\tUserListCallback.onSuccess : Displaying empty set");
 
@@ -126,7 +126,9 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
       listScrollPanel.clear();
       insideContentPanel.add(getNoListsCreated());
     } else {
+
       logger.info("\t\tUserListCallback.onSuccess : Displaying " + result.size() + " user lists for " + instanceName);
+
       listScrollPanel.getElement().setId("scrollPanel");
 
       setScrollPanelWidth(listScrollPanel);
@@ -193,7 +195,9 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
       if (userLists == null) nameToLists.put(ul.getName(), userLists = new ArrayList<>());
       userLists.add(ul);
     }
+
 //    logger.info("populateNameToList " +nameToLists);
+
     return nameToLists;
   }
 
