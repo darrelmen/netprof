@@ -304,13 +304,13 @@ class WordContainer extends SimplePagingContainer<WordScore> implements Analysis
         String columnText = new WordTable().toHTML2(shell.getNetPronImageTypeListMap());
         if (columnText.isEmpty()) {
           CommonShell exercise = getShell(shell.getId());
-          // logger.info("getItemColumn : column text empty for id " + shell.getExID() + " and found ex " + exercise);
+          // logger.info("getItemColumn : column text empty for id " + shell.getId() + " and found ex " + exercise);
 
           String foreignLanguage = exercise == null ? "" : exercise.getForeignLanguage();
           if (spanish) foreignLanguage = foreignLanguage.toUpperCase();
           columnText = new WordTable().getColoredSpan(foreignLanguage, shell.getPronScore());
         } else {
-          //logger.info("getItemColumn : Got item id " + shell.getExID() + " "+ columnText );
+          //logger.info("getItemColumn : Got item id " + shell.getId() + " "+ columnText );
         }
         return getSafeHtml(columnText);
       }
@@ -345,7 +345,7 @@ class WordContainer extends SimplePagingContainer<WordScore> implements Analysis
       @Override
       public SafeHtml getValue(WordScore shell) {
         CommonShell exercise = getShell(shell.getId());
-        // logger.info("getPlayAudio : Got " + shell.getExID() + "  : " + exercise);
+        // logger.info("getPlayAudio : Got " + shell.getId() + "  : " + exercise);
         String title = exercise == null ? "play" : exercise.getForeignLanguage() + "/" + exercise.getEnglish();
         return PlayAudioWidget.getAudioTagHTML(shell.getFileRef(), title);
       }
@@ -357,7 +357,7 @@ class WordContainer extends SimplePagingContainer<WordScore> implements Analysis
       @Override
       public SafeHtml getValue(WordScore shell) {
         CommonShell exercise = getShell(shell.getId());
-        // logger.info("getPlayAudio : Got " + shell.getExID() + "  : " + exercise);
+        // logger.info("getPlayAudio : Got " + shell.getId() + "  : " + exercise);
         String title = exercise == null ? "play" : exercise.getForeignLanguage() + "/" + exercise.getEnglish();
         if (shell.getNativeAudio() != null) {
           return PlayAudioWidget.getAudioTagHTML(shell.getNativeAudio(), title);
