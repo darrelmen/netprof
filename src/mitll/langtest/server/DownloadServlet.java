@@ -32,10 +32,9 @@
 
 package mitll.langtest.server;
 
-import mitll.langtest.server.database.AudioExport;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.shared.User;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.User;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
@@ -69,10 +68,6 @@ public class DownloadServlet extends DatabaseServlet {
   private static final String FILE = "file";
   private static final String CONTEXT = "context";
   private static final String COMPRESSED_SUFFIX = "mp3";
-  public static final String USERS = "users";
-  public static final String RESULTS = "results";
-  public static final String EVENTS = "events";
-  public static final String REQUEST = "request";
 
   /**
    * This is getting complicated.
@@ -115,21 +110,34 @@ public class DownloadServlet extends DatabaseServlet {
             writeAllAudio(response);
           } else if (queryString.startsWith(LIST)) {
             String[] split = queryString.split("list=");
-
             if (split.length == 2) {
-              String[] splitArgs = split[1].split("&");
-              String listid = splitArgs[0];
+              String listid = split[1];
               if (!listid.isEmpty()) {
-                writeUserList(response, db, listid, getAudioExportOptions(splitArgs));
+                writeUserList(response, db, listid);
               }
             }
           } else if (queryString.startsWith(FILE)) {
             returnAudioFile(response, db, queryString);
-          } else if (queryString.startsWith(REQUEST)) {
-            writeAudioZip(response, db, queryString);
+          } else if (queryString.startsWith("request")) {
+            String[] split1 = queryString.split("&");
+            String requestCommand = split1[0];
+
+            queryString = split1.length == 1 ? split1[0] : split1[1];
+
+            logger.debug("request " + requestCommand + " query " +queryString);
+            if (requestCommand.contains(CONTEXT)) {
+              Map<String, Collection<String>> typeToSection = getTypeToSelectionFromRequest(queryString);
+              setHeader(response, getZipFileName(db, typeToSection));
+              writeContextZip(response, typeToSection);
+            } else {
+              Map<String, Collection<String>> typeToSection = getTypeToSelectionFromRequest(queryString);
+              setHeader(response, getZipFileName(db, typeToSection));
+              writeZip(response, typeToSection);
+            }
           }
         } else {
-//          logger.debug("file download request " + requestURI);
+          logger.warn("file download request " + requestURI);
+
           returnSpreadsheet(response, db, requestURI);
         }
       } catch (Exception e) {
@@ -146,72 +154,32 @@ public class DownloadServlet extends DatabaseServlet {
     }
   }
 
-  private AudioExport.AudioExportOptions getAudioExportOptions(String[] splitArgs) {
-    AudioExport.AudioExportOptions options = new AudioExport.AudioExportOptions();
-    for (String arg : splitArgs) {
-      if (arg.startsWith("male=")) options.setJustMale(arg.endsWith("true"));
-      else if (arg.startsWith("regular=")) options.setJustRegularSpeed(arg.endsWith("true"));
-      else if (arg.startsWith("context=")) options.setJustContext(arg.endsWith("true"));
-    }
-    return options;
-  }
-
   /**
-   * @param response
-   * @param db
-   * @param queryString
-   * @see #doGet(HttpServletRequest, HttpServletResponse)
-   */
-  private void writeAudioZip(HttpServletResponse response, DatabaseImpl db, String queryString) {
-    // logger.debug("request " +  " query " + queryString);
-    String[] split1 = queryString.split("&");
-
-    String unitChapter = "";
-    for (String arg : split1) {
-      if (arg.startsWith("unit=")) unitChapter = arg.split("unit=")[1];
-    }
-
-    Map<String, Collection<String>> typeToSection = getTypeToSelectionFromRequest(unitChapter);
-    AudioExport.AudioExportOptions audioExportOptions = getAudioExportOptions(split1);
-    audioExportOptions.setSkip(typeToSection.isEmpty());
-    String zipFileName = getZipFileName(db, typeToSection, audioExportOptions);
-
-    //logger.info("writeAudioZip zip file name " + zipFileName);
-    setHeader(response, zipFileName);
-    writeZip(response, typeToSection, audioExportOptions);
-  }
-
-  /**
+   * @see #doGet
    * @param response
    * @param typeToSection
-   * @see #doGet
    */
-  private void writeZip(HttpServletResponse response,
-                        Map<String, Collection<String>> typeToSection,
-                        AudioExport.AudioExportOptions options) {
+  private void writeZip(HttpServletResponse response, Map<String, Collection<String>> typeToSection) {
     try {
-      getDatabase().writeZip(response.getOutputStream(), typeToSection, options);
+      getDatabase().writeZip(response.getOutputStream(), typeToSection);
     } catch (Exception e) {
       logger.error("couldn't write zip?", e);
     }
   }
 
-  private String getZipFileName(DatabaseImpl db,
-                                Map<String, Collection<String>> typeToSection,
-                                AudioExport.AudioExportOptions audioExportOptions) {
-    String name = getBaseName(db, typeToSection, audioExportOptions);
-    name += ".zip";
-    return name;
+  private void writeContextZip(HttpServletResponse response, Map<String, Collection<String>> typeToSection) {
+    try {
+      getDatabase().writeContextZip(response.getOutputStream(), typeToSection);
+    } catch (Exception e) {
+      logger.error("couldn't write zip?", e);
+    }
   }
 
-  private String getBaseName(DatabaseImpl db, Map<String, Collection<String>> typeToSection,
-                             AudioExport.AudioExportOptions audioExportOptions) {
+  private String getZipFileName(DatabaseImpl db, Map<String, Collection<String>> typeToSection) {
     String name = typeToSection.isEmpty() ? AUDIO : db.getPrefix(typeToSection);
     name = name.replaceAll("\\,", "_");
-
-    name += audioExportOptions.getInfo();
-    name = getLanguage() + "_" + name;
-    return name;
+    name += ".zip";
+    return db.getServerProps().getLanguage() + "_" + name;
   }
 
   /**
@@ -232,7 +200,7 @@ public class DownloadServlet extends DatabaseServlet {
 
     // better be mp3 lying around - see ensureCompressedAudio
 
-    if (file.endsWith(".wav")) file = file.replaceAll(".wav", ".mp3");
+    if (file.endsWith(".wav")) file = file.replaceAll(".wav",".mp3");
 
     String exercise = split[1].split("=")[1];
     String useridString = split[2].split("=")[1];
@@ -261,16 +229,16 @@ public class DownloadServlet extends DatabaseServlet {
 
   /**
    * Return an attachment that looks like foreign_english_by_user.
-   *
-   * @param db           to talk to
-   * @param exercise     id of the exercise
+   * 
+   * @param db to talk to
+   * @param exercise id of the exercise
    * @param useridString missing is OK, although unexpected
    * @return name without spaces
    * @throws UnsupportedEncodingException
    */
   private String getFilenameForDownload(DatabaseImpl db, String exercise, String useridString) throws UnsupportedEncodingException {
-    CommonExercise exercise1 = db.getCustomOrPredefExercise(exercise);
-    boolean english = getLanguage().equalsIgnoreCase("english");
+    CommonExercise exercise1 = db.getExercise(exercise);
+    boolean english = db.getServerProps().getLanguage().equalsIgnoreCase("english");
 
     // foreign part
     String foreignPart = english ? "" : exercise1.getForeignLanguage().trim();
@@ -284,7 +252,7 @@ public class DownloadServlet extends DatabaseServlet {
     String userPart = getUserPart(db, Long.parseLong(useridString));
 
     String fileName = foreignPart + englishPart + userPart;
-    fileName = fileName.replaceAll("\\.", "");
+    fileName = fileName.replaceAll("\\.","");
     fileName += "." + COMPRESSED_SUFFIX;
 
     //logger.debug("file is '" + fileName + "'");
@@ -293,36 +261,28 @@ public class DownloadServlet extends DatabaseServlet {
     return underscores;
   }
 
-  private String getLanguage() {
-    return getDatabase().getServerProps().getLanguage();
-  }
-
   private String getUserPart(DatabaseImpl db, long userid) {
     User userWhere = db.getUserDAO().getUserWhere(userid);
-    return userWhere != null ? (userWhere.getUserID().isEmpty() ? "" : "_by_" + userWhere.getUserID()) : "";
+    return userWhere != null ? (userWhere.getUserID().isEmpty() ? "":"_by_" + userWhere.getUserID()) : "";
   }
 
   /**
+   * @see #doGet
    * @param response
    * @param db
    * @param encodedFileName
    * @throws IOException
-   * @see #doGet
    */
   private void returnSpreadsheet(HttpServletResponse response, DatabaseImpl db, String encodedFileName) throws IOException {
     response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-    String prefix = getLanguage() + "_";
-    if (encodedFileName.toLowerCase().contains(USERS)) {
-      String filename = prefix + "users.xlsx";
-      response.setHeader("Content-Disposition", "attachment; filename=" + filename);
+    if (encodedFileName.toLowerCase().contains("users")) {
+      response.setHeader("Content-Disposition", "attachment; filename=users.xlsx");
       db.usersToXLSX(response.getOutputStream());
-    } else if (encodedFileName.toLowerCase().contains(RESULTS)) {
-      String filename = prefix + "results.xlsx";
-      response.setHeader("Content-Disposition", "attachment; filename=" + filename);
+    } else if (encodedFileName.toLowerCase().contains("results")) {
+      response.setHeader("Content-Disposition", "attachment; filename=results.xlsx");
       db.getResultDAO().writeExcelToStream(db.getMonitorResults(), db.getTypeOrder(), response.getOutputStream());
-    } else if (encodedFileName.toLowerCase().contains(EVENTS)) {
-      String filename = prefix + "events.xlsx";
-      response.setHeader("Content-Disposition", "attachment; filename=" + filename);
+    } else if (encodedFileName.toLowerCase().contains("events")) {
+      response.setHeader("Content-Disposition", "attachment; filename=events.xlsx");
       db.getEventDAO().toXLSX(response.getOutputStream());
     } else {
       logger.warn("huh? can't handle request " + encodedFileName);
@@ -330,27 +290,24 @@ public class DownloadServlet extends DatabaseServlet {
   }
 
   /**
-   * @param response
    * @see #doGet
+   * @param response
    */
   private void writeAllAudio(HttpServletResponse response) {
     try {
-      getDatabase().writeUserListAudio(response.getOutputStream());
+      getDatabase().writeZip(response.getOutputStream());
     } catch (Exception e) {
       logger.error("Got " + e, e);
     }
   }
 
   /**
+   * @see #doGet(HttpServletRequest, HttpServletResponse)
    * @param response
    * @param db
    * @param listid
-   * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
-  private void writeUserList(HttpServletResponse response,
-                             DatabaseImpl db,
-                             String listid,
-                             AudioExport.AudioExportOptions options) {
+  private void writeUserList(HttpServletResponse response, DatabaseImpl db, String listid) {
     Integer id = null;
     try {
       id = Integer.parseInt(listid);
@@ -364,18 +321,12 @@ public class DownloadServlet extends DatabaseServlet {
       name += ".zip";
       setHeader(response, name);
 
-      options.setUserList(true);
-      db.writeUserListAudio(response.getOutputStream(), id == null ? -1 : id, new PathHelper(getServletContext()), options);
+      db.writeZip(response.getOutputStream(), id == null ? -1 : id, new PathHelper(getServletContext()));
     } catch (Exception e) {
       logger.error("couldn't write zip?", e);
     }
   }
 
-  /**
-   * @param response
-   * @param fileName
-   * @see #writeAudioZip(HttpServletResponse, DatabaseImpl, String)
-   */
   private void setHeader(HttpServletResponse response, String fileName) {
     response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
     response.setContentType("application/zip");

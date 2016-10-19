@@ -239,7 +239,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
         rowForChildren.setHorizontalAlignment(ALIGN_LEFT);
         SectionNode sectionNode = nameToNode.get(sectionInFirstType);
         buttonWithChildren.setChildren(addButtonGroup(rowForChildren, sectionNode.getChildren(),
-            subType, subs, sectionWidget1));
+                subType, subs, sectionWidget1));
         //sectionColumn.add(rowForChildren);
 
         // make row container
@@ -625,7 +625,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
 
   private String getButtonTypeStyle(ButtonType buttonType) {
     return (buttonType.equals(ButtonType.PRIMARY)) ? "primaryButtonColor" : buttonType.equals(ButtonType.SUCCESS) ? "successButtonColor"
-        : (buttonType.equals(ButtonType.INFO)) ? "infoButtonColor" : "warningButtonColor";
+            : (buttonType.equals(ButtonType.INFO)) ? "infoButtonColor" : "warningButtonColor";
   }
 
   /**
@@ -689,7 +689,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
 //            " children at " + subType);
         ButtonGroupSectionWidget sectionWidget1 = getGroupSection(subType);
         List<ButtonWithChildren> subButtons =
-            addButtonGroup(horizontalContainerForChildren, children, subType, subs, sectionWidget1);
+                addButtonGroup(horizontalContainerForChildren, children, subType, subs, sectionWidget1);
         buttonForSection.setChildren(subButtons);
         //buttonForSection.setButtonGroup(sectionWidget1);
       } else {
@@ -845,8 +845,8 @@ public class FlexSectionExerciseList extends NPExerciseList {
 
     public String toString() {
       return "Button " + type + " = " + getText().trim() +
-          (children.isEmpty() ? "" :
-              ", children type " + getTypeOfChildren() + " num " + getButtonChildren().size());
+              (children.isEmpty() ? "" :
+                      ", children type " + getTypeOfChildren() + " num " + getButtonChildren().size());
     }
   }
 }
