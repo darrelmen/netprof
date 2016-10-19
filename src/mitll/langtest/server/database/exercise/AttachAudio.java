@@ -34,6 +34,7 @@ package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioCheck;
+import mitll.langtest.server.database.AudioDAO;
 import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.AudioExercise;
@@ -56,6 +57,7 @@ class AttachAudio {
   //private static final String FAST_WAV = "Fast" + ".wav";
   //private static final String SLOW_WAV = "Slow" + ".wav";
   private final AudioCheck audioCheck;
+  private final AudioDAO audioDAO;
 
   private int missingExerciseCount = 0;
   private int c = 0;
@@ -80,7 +82,8 @@ class AttachAudio {
               int audioOffset,
               Map<String, List<AudioAttribute>> exToAudio,
               boolean checkAudioTranscript,
-              ServerProperties serverProperties) {
+              ServerProperties serverProperties,
+              AudioDAO audioDAO) {
     this.mediaDir = mediaDir;
     this.mediaDir1 = mediaDir1;
     this.installPath = installPath;
@@ -88,6 +91,7 @@ class AttachAudio {
     //this.audioOffset = audioOffset;
     this.checkAudioTranscript = checkAudioTranscript;
     this.audioCheck = new AudioCheck(serverProperties);
+    this.audioDAO = audioDAO;
   }
 
   /**
@@ -236,11 +240,15 @@ class AttachAudio {
                 (audio.matchTranscript(before, transcript) ||
                     audio.matchTranscript(noAccents, noAccentsTranscript))
                 ) {
-              if (audioCheck.hasValidDynamicRangeForgiving(test)) {
+              float dnr1 = audio.getDnr();
+              if (dnr1 < 0) {
+                dnr1 = audioCheck.getDNR(test);
+                audioDAO.updateDNR(audio.getUniqueID(), dnr1);
+              }
+              if (dnr1 > audioCheck.getMinDNR()) {
                 audio.setAudioRef(child);   // remember to prefix the path
                 mutableAudio.addAudio(audio);
-              }
-              else {
+              } else {
                 logger.debug("attachAudio skipping audio file with low dynamic range " + test);
               }
             } else {
