@@ -60,16 +60,12 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class PagingContainer<T extends CommonShell> extends ClickablePagingContainer<T> {
-  // private final Logger logger = Logger.getLogger("PagingContainer");
+ // private final Logger logger = Logger.getLogger("PagingContainer");
   private static final int MAX_LENGTH_ID = 17;
-  private static final int JAPANESE_LENGTH = 9;
-  private static final String TRUNCATED = "...";
-
   private final boolean isRecorder;
   private final ExerciseComparator sorter;
   private static final String ENGLISH = "English";
   private final boolean english;
-  private int FLLength = MAX_LENGTH_ID;
 
   /**
    * @param controller
@@ -83,8 +79,6 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
     this.verticalUnaccountedFor = verticalUnaccountedFor;
     this.isRecorder = isRecorder;
     english = controller.getLanguage().equals(ENGLISH);
-    boolean japanese = controller.getLanguage().equalsIgnoreCase("Japanese");
-    if (japanese) FLLength = JAPANESE_LENGTH;
   }
 
   protected void addColumnsToTable() {
@@ -115,7 +109,7 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
 
     // Set the width of each column.
     table.setColumnWidth(englishCol, 50.0, Style.Unit.PCT);
-    table.setColumnWidth(flColumn, 50.0, Style.Unit.PCT);
+    table.setColumnWidth(flColumn,   50.0, Style.Unit.PCT);
   }
 
   private ColumnSortEvent.ListHandler<T> getFLSorter(Column<T, SafeHtml> flColumn, List<T> dataList) {
@@ -236,13 +230,7 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
   }
 
   private String truncate(String columnText) {
-    int lengthToUse = MAX_LENGTH_ID;
-    if (columnText.length() > lengthToUse) columnText = columnText.substring(0, lengthToUse - 3) + TRUNCATED;
-    return columnText;
-  }
-
-  private String truncateFL(String columnText) {
-    if (columnText.length() > FLLength) columnText = columnText.substring(0, FLLength - 3) + TRUNCATED;
+    if (columnText.length() > MAX_LENGTH_ID) columnText = columnText.substring(0, MAX_LENGTH_ID - 3) + "...";
     return columnText;
   }
 
@@ -262,7 +250,7 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
 
       @Override
       public SafeHtml getValue(T shell) {
-        String columnText = truncateFL(getFLText(shell));
+        String columnText = truncate(getFLText(shell));
         return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
       }
     };
@@ -271,7 +259,6 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
 
   /**
    * Confusing for english - english col should be foreign language for english,
-   *
    * @param shell
    * @return
    */
@@ -284,7 +271,6 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
 
   /**
    * Confusing for english - fl text should be english or meaning if there is meaning
-   *
    * @param shell
    * @return
    */

@@ -48,17 +48,15 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class PropertyHandler {
-  public static final String NPF_CLASSROOM_URL = "https://np.ll.mit.edu/npfClassroom";
   private final Logger logger = Logger.getLogger("PropertyHandler");
 
   private static final String RTL = "rtl";
   private static final String IS_AMAS = "isAMAS";
-
   /**
    * Possibly we need to add a delay after button is released to actually tell flash to stop recording.
    * @see RecordButton#startOrStopRecording()
    */
-  private static final int DEFAULT_AFTER_STOP_DELAY_MILLIS = 85;
+  private static final int DEFAULT_AFTER_STOP_DELAY_MILLIS = 75;
 
   // property file property names
   private static final String ENABLE_ALL_USERS = "enableAllUsers";
@@ -123,23 +121,18 @@ public class PropertyHandler {
   private static final String AMAS_PRONUNCIATION_FEEDBACK = "AMAS — Automatic Multi-Skilled Assessment System";
 
   private static final String INITIAL_PROMPT = "Practice pronunciation and learn vocabulary.";//"Learn how to pronounce words and practice vocabulary.";
-  private static final String AMAS_INITIAL_PROMPT = "Test your Listening and Reading Skills.";
+  private static final String AMAS_INITIAL_PROMPT = "Test your Listening and Reading Skills.";//"Learn how to pronounce words and practice vocabulary.";
 
-  /**
-   * TODO : don't do this in two places!
-   */
   private static final List<String> SITE_LIST = Arrays.asList(
       "Dari",
       "Egyptian",
       "English",
       "Farsi",
       "German",
-      "Iraqi",
-      "Japanese",
       "Korean",
+      "Iraqi",
       "Levantine",
       "Mandarin",
-      "MandarinTraditional",
       "MSA",
       "Pashto1",
       "Pashto2",
@@ -150,8 +143,7 @@ public class PropertyHandler {
       "Tagalog",
       "Urdu");
 
-  private static final List<String> AMAS_SITES = Arrays.asList("Dari", "Farsi", "Korean", "Mandarin", "MSA", "Pashto",
-      "Russian", "Spanish", "Urdu");
+  private static final List<String> AMAS_SITES = Arrays.asList("Dari", "Farsi", "Korean", "Mandarin", "MSA", "Pashto", "Russian", "Spanish", "Urdu");
   private String modelDir;
   private int afterStopDelayMillis;
 
@@ -160,8 +152,7 @@ public class PropertyHandler {
    * @see mitll.langtest.client.recorder.RecordButton#showTooLoud
    */
   public String getTooLoudMessage() {
-    return "If your recording is too loud, please follow the following steps to adjust your microphone level settings in" +
-        " Windows on your MacBook: <br/>" +
+    return "If your recording is too loud, please follow the following steps to adjust your microphone level settings in Windows on your MacBook: <br/>" +
         "1.\tClick on ‘Control Panel’<br/>" +
         "2.\tSelect ‘Sound’<br/>" +
         "3.\tClick on ‘Recording’<br/>" +
@@ -287,9 +278,7 @@ public class PropertyHandler {
       else if (key.equals(LOG_CLIENT_MESSAGES)) logClientMessages = getBoolean(value);
       else if (key.equals(LANGUAGE)) language = value;
       else if (key.equals(SPLASH_TITLE)) splashTitle = value;
-      else if (key.equals(RIGHT_ALIGN_CONTENT) || key.equals(RTL)) {
-        rightAlignContent = getBoolean(value);
-      }
+      else if (key.equals(RIGHT_ALIGN_CONTENT) || key.equals(RTL)) rightAlignContent = getBoolean(value);
       else if (key.equals(SHOW_FLASHCARD_ANSWER)) showFlashcardAnswer = getBoolean(value);
       else if (key.equals(ALLOW_PLUS_IN_URL)) allowPlusInURL = getBoolean(value);
       else if (key.equals(SHOW_SPECTROGRAM)) spectrogram = getBoolean(value);
@@ -302,9 +291,7 @@ public class PropertyHandler {
       else if (key.equals(IS_AMAS)) isAMAS = getBoolean(value);
       else if (key.equals("talksToDomino")) talksToDomino = getBoolean(value);
       else if (key.equals("scoringModel")) modelDir = value;
-      else if (key.equals("afterStopDelayMillis")) {
-        afterStopDelayMillis = getInt(value, DEFAULT_AFTER_STOP_DELAY_MILLIS, "afterStopDelayMillis");
-      }
+      else if (key.equals("afterStopDelayMillis")) afterStopDelayMillis = getInt(value, DEFAULT_AFTER_STOP_DELAY_MILLIS, "afterStopDelayMillis");
         //else if (key.equals(IS_AMAS)) isAMAS = getBoolean(value);
       else if (key.equals(USE_PHONE_TO_DISPLAY)) {
         // logger.info("found " + USE_PHONE_TO_DISPLAY + " = " + value);
@@ -359,7 +346,7 @@ public class PropertyHandler {
   }
 
   public String getSitePrefix() {
-    return isAMAS() ? "https://np.ll.mit.edu/amas" : NPF_CLASSROOM_URL;
+    return isAMAS() ? "https://np.ll.mit.edu/amas" : "https://np.ll.mit.edu/npfClassroom";
   }
 
   private void getPreferredVoices(String value) {
@@ -574,6 +561,12 @@ public class PropertyHandler {
     return !dialog.isEmpty();
   }
 
+/*
+  public String dialogFile() {
+    return dialog;
+  }
+*/
+
   public String getLanguage() {
     return language;
   }
@@ -614,15 +607,15 @@ public class PropertyHandler {
    * @return
    * @see LangTest#showLogin()
    */
-  String getResetPassToken() {
+  public String getResetPassToken() {
     return resetPassToken;
   }
 
- String getCdEnableToken() {
+  public String getCdEnableToken() {
     return cdEnableToken;
   }
 
- String getEmailRToken() {
+  public String getEmailRToken() {
     return emailRToken;
   }
 
@@ -734,7 +727,7 @@ public class PropertyHandler {
         "You will not be able to access NetProF until approval is granted.";
   }
 
-/*  public String getAMASHelpMessage() {
+  public String getAMASHelpMessage() {
     return
         "Welcome to the Automatic Multi-Skilled Assessment System (AMAS)<br/>" +
             "<br/>" +
@@ -747,5 +740,5 @@ public class PropertyHandler {
             "<br/>" +
             "The site will remember your login information on this computer for up to one year. You will need to login " +
             "with your username and password again if you access AMAS from a different machine.";
-  }*/
+  }
 }
