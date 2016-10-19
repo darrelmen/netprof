@@ -168,7 +168,7 @@ public class UserListDAO extends DAO {
 
       finish(connection, statement);
 
-      //logger.debug("add : now " + getCount(USER_EXERCISE_LIST) + " and user exercise is " + userList);
+      logger.debug("add : now " + getCount(USER_EXERCISE_LIST) + " and user exercise is " + userList);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
@@ -222,7 +222,7 @@ public class UserListDAO extends DAO {
       return lists;
 
     } catch (Exception ee) {
-      logger.error("getAllByUser got " + ee, ee);
+      logger.error("got " + ee, ee);
     }
     return Collections.emptyList();
   }
@@ -421,13 +421,8 @@ public class UserListDAO extends DAO {
    * @param where
    */
   private void populateList(UserList<CommonShell> where) {
-    if (userExerciseDAO == null) {
-      logger.warn("no user exercise DAO????");
-    }
-    else {
-      List<CommonShell> onList = userExerciseDAO.getOnList(where.getUniqueID());
-      where.setExercises(onList);
-    }
+    List<CommonShell> onList = userExerciseDAO.getOnList(where.getUniqueID());
+    where.setExercises(onList);
   }
 
   public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {
