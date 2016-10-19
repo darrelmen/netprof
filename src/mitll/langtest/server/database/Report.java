@@ -298,7 +298,9 @@ public class Report {
     Map<String, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
     Collection<AudioAttribute> audioAttributes = audioDAO.getAudioAttributes();
     List<Result> results = resultDAO.getResults();
+    logger.info("getReport : got " + results.size() + " results");
     List<Result> resultsDevices = resultDAO.getResultsDevices();
+    logger.info("getReport : got " + resultsDevices.size() + " device results");
 
     if (year == -1) {
       SlimEvent firstSlim = eventDAO.getFirstSlim();
@@ -981,7 +983,7 @@ public class Report {
    * @param year
    * @param exToAudio
    * @paramx language
-   * @see #doReport
+   * @see #getReport(JSONObject, int, List, List, Map, Collection, List, List)
    */
   private void getResults(StringBuilder builder, Set<Long> students,
                           JSONObject jsonObject, int year, Map<String, List<AudioAttribute>> exToAudio,
