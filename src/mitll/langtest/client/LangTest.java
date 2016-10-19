@@ -179,6 +179,8 @@ import java.util.logging.Logger;
  * - Added shouldRecalcStudentAudio option to recalc student audio with the current model
  * 1.5.2 (10-19-16)
  * - Fixed bug in reporting where was throwing away valid recordings and added separate new teacher section to reporting
+ * 1.5.3 (10-19-15)
+ * - Don't attach reference audio that doesn't pass dnr minimum (mainly for old audio).
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */

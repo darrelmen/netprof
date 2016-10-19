@@ -182,7 +182,8 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
         mediaDir.replaceAll("bestAudio", ""), fileInstallPath,
         serverProps.getAudioOffset(),
         audioDAO.getExToAudio(),
-        serverProps.shouldCheckAudioTranscript());
+        serverProps.shouldCheckAudioTranscript(),
+        serverProps);
   }
 
   /**
