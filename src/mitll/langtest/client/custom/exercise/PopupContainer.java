@@ -68,7 +68,6 @@ class PopupContainer {
 
   /**
    * Clicking OK just dismisses the popup.
-   *
    * @param commentPopup
    * @return
    */
@@ -92,14 +91,14 @@ class PopupContainer {
    * TODO : somehow the textEntry box loses focus when it's presented inside of another modal???
    * Maybe that's a bad thing to do???
    *
+   * @see mitll.langtest.client.custom.exercise.CommentBox#configureCommentButton(com.github.gwtbootstrap.client.ui.Button, boolean, com.google.gwt.user.client.ui.PopupPanel, String, com.github.gwtbootstrap.client.ui.TextBox)
    * @param popupButton
    * @param popup
    * @param textEntry
    * @param tooltip
-   * @see mitll.langtest.client.custom.exercise.CommentBox#configureCommentButton(com.github.gwtbootstrap.client.ui.Button, boolean, com.google.gwt.user.client.ui.PopupPanel, String, com.github.gwtbootstrap.client.ui.TextBox)
    */
   void configurePopupButton(final Button popupButton, final PopupPanel popup,
-                            final TextBox textEntry, final Tooltip tooltip) {
+                                      final TextBox textEntry, final Tooltip tooltip) {
     popupButton.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
@@ -134,13 +133,13 @@ class PopupContainer {
    * For this field configure the textBox box to post annotation on blur and enter
    *
    * @param initialText fill in with existing annotation, if there is one
-   * @param textBox     comment box to configure
+   * @param textBox comment box to configure
    * @return
    */
   void configureTextBox(String initialText,
-                        final HidePopupTextBox textBox,
-                        final PopupPanel popup) {
-    if (initialText != null && !initialText.isEmpty()) {
+                               final HidePopupTextBox textBox,
+                               final PopupPanel popup) {
+    if (initialText != null) {
       textBox.setText(initialText);
       if (textBox.getVisibleLength() < initialText.length()) {
         textBox.setVisibleLength(70);
@@ -149,6 +148,8 @@ class PopupContainer {
 
     textBox.addStyleName("leftFiveMargin");
     textBox.configure(popup);
+
+    //return textBox;
   }
 
   public static class HidePopupTextBox extends TextBox {
@@ -158,7 +159,7 @@ class PopupContainer {
         public void onKeyPress(KeyPressEvent event) {
           int keyCode = event.getNativeEvent().getKeyCode();
           if (keyCode == KeyCodes.KEY_ENTER) {
-            // System.out.println("HidePopupTextBox : got key press on " + getElement().getExID());
+            // System.out.println("HidePopupTextBox : got key press on " + getElement().getId());
             //popupAboutToBeHidden();
             popup.hide();
             onEnter();
@@ -166,7 +167,6 @@ class PopupContainer {
         }
       });
     }
-
     void onEnter() {
     }
   }
