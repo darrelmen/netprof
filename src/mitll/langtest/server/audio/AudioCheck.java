@@ -154,16 +154,24 @@ public class AudioCheck {
   }
 
   private void addDynamicRange(File file, ValidityAndDur validityAndDur) {
-    String highPassFilterFile = new AudioConversion(props).getHighPassFilterFile(file.getAbsolutePath());
-    File highPass = new File(highPassFilterFile);
-    DynamicRange.RMSInfo dynamicRange = new DynamicRange().getDynamicRange(highPass);
-    deleteParentTempDir(highPass);
+    DynamicRange.RMSInfo dynamicRange = getDynamicRange(file);
     if (dynamicRange.maxMin < MIN_DYNAMIC_RANGE) {
       logger.warn("file " + file.getName() + " doesn't meet dynamic range threshold (" + MIN_DYNAMIC_RANGE +
           "):\n" + dynamicRange);
       validityAndDur.validity = AudioAnswer.Validity.SNR_TOO_LOW;
     }
     validityAndDur.setMaxMinRange(dynamicRange.maxMin);
+  }
+
+  public boolean hasValidDynamicRange(File file) {  return getDynamicRange(file).maxMin >= MIN_DYNAMIC_RANGE;  }
+  public boolean hasValidDynamicRangeForgiving(File file) {  return getDynamicRange(file).maxMin >= 18;  }
+
+  private DynamicRange.RMSInfo getDynamicRange(File file) {
+    String highPassFilterFile = new AudioConversion(props).getHighPassFilterFile(file.getAbsolutePath());
+    File highPass = new File(highPassFilterFile);
+    DynamicRange.RMSInfo dynamicRange = new DynamicRange().getDynamicRange(highPass);
+    deleteParentTempDir(highPass);
+    return dynamicRange;
   }
 
   private void deleteParentTempDir(File srcFile) {
