@@ -411,7 +411,7 @@ public class UserManager {
 
       localStorageIfSupported.removeItem(getUserIDCookie());
       localStorageIfSupported.removeItem(getUserChosenID());
-     // logger.info("clearUser : removed item " + getUserID() + " user now " + getUser());
+      logger.info("clearUser : removed item " + getUserID() + " user now " + getUser());
     } else {
       userID = NO_USER_SET;
     }
@@ -423,7 +423,7 @@ public class UserManager {
    * @see mitll.langtest.client.user.UserPassLogin#storeUser(mitll.langtest.shared.User)
    */
   void storeUser(User user, String audioType) {
-    //logger.info("storeUser : user now " + user + " audio type '" + audioType + "'");
+    logger.info("storeUser : user now " + user + " audio type '" + audioType + "'");
     final long DURATION = getUserSessionDuration();
     long futureMoment = getUserSessionEnd(DURATION);
     if (Storage.isLocalStorageSupported()) {
