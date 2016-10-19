@@ -351,7 +351,7 @@ public class Report {
     jsonObject.put("forYear", year);
 
     long then = System.currentTimeMillis();
- //   logger.info(language + " : doing year " + year);
+    logger.info(language + " : doing year " + year);
 
     setUserStart(allSlim);
 
@@ -402,10 +402,7 @@ public class Report {
     jsonObject.put("hostInfo", browserReport);
 
     long now = System.currentTimeMillis();
-    long l = now - then;
-    if (l > 100) {
-      logger.info(language + " took " + l + " millis to generate report for " + year);
-    }
+    logger.info(language + " took " + (now - then) + " millis to generate report for " + year);
     return builder.toString();
   }
 
@@ -575,7 +572,7 @@ public class Report {
       Long aLong = userToStart.get(user.getId());
       if (aLong != null) user.setTimestampMillis(aLong);
       //else {
-      //  logger.error("no events for " + user.getExID());
+      //  logger.error("no events for " + user.getId());
       //  }
     }
     return users;

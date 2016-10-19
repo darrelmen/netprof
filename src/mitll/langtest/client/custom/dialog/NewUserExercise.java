@@ -39,11 +39,10 @@ import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
-import com.google.gwt.user.client.Element;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.RequiresResize;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.ReloadableContainer;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -51,7 +50,6 @@ import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.client.exercise.WaveformPostAudioRecordButton;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
-import mitll.langtest.client.list.Reloadable;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.user.BasicDialog;
@@ -83,11 +81,7 @@ class NewUserExercise extends BasicDialog {
   static final String SLOW_SPEED_REFERENCE_RECORDING_OPTIONAL = "Slow speed reference recording (optional)";
   private static final String ENTER_THE_FOREIGN_LANGUAGE_PHRASE = "Enter the foreign language phrase.";
   private static final String ENTER_THE_ENGLISH_PHRASE = "Enter the english equivalent.";
-  private static final String ENTER_MEANING = "Enter the meaning of the english.";
   private static final String RECORD_REFERENCE_AUDIO_FOR_THE_FOREIGN_LANGUAGE_PHRASE = "Record reference audio for the foreign language phrase.";
-  /**
-   * @see #makeDeleteButton(UserList)
-   */
   private static final String REMOVE_FROM_LIST = "Remove from list";
 
   private final EditItem editItem;
@@ -154,15 +148,12 @@ class NewUserExercise extends BasicDialog {
                       final Panel toAddTo) {
     this.ul = ul;
 
-    final FluidContainer container = new ResizableFluid();
+    final FluidContainer container = new FluidContainer();
     DivWidget upper = new DivWidget();
-    upper.getElement().setId("addNewFieldContainer");
-    Element element = container.getElement();
-    element.setId("NewUserExercise_container");
-    Style style = element.getStyle();
-    //style.setMarginTop(5, Style.Unit.PX);
-    style.setPaddingLeft(10, Style.Unit.PX);
-    style.setPaddingRight(10, Style.Unit.PX);
+
+    container.getElement().setId("NewUserExercise_container");
+    container.getElement().getStyle().setPaddingLeft(10, Style.Unit.PX);
+    container.getElement().getStyle().setPaddingRight(10, Style.Unit.PX);
     upper.addStyleName("buttonGroupInset4");
     container.addStyleName("greenBackground");
 
@@ -173,6 +164,7 @@ class NewUserExercise extends BasicDialog {
     final String id1 = ul.getID();
 
     foreignLang.box.getElement().setId("NewUserExercise_ForeignLang_entry_for_list_" + id1);
+
     // focusOn(formField); // Bad idea since steals the focus after search
     makeTranslitRow(upper);
     translit.box.getElement().setId("NewUserExercise_Transliteration_entry_for_list_" + id1);
@@ -180,7 +172,6 @@ class NewUserExercise extends BasicDialog {
     makeEnglishRow(upper);
     english.box.getElement().setId("NewUserExercise_English_entry_for_list_" + id1);
 
-    makeOptionalRows(upper);
     // make audio row
     upper.add(makeAudioRow());
 
@@ -191,7 +182,7 @@ class NewUserExercise extends BasicDialog {
     container.add(getCreateButton(ul, listInterface, toAddTo, normalSpeedRecording));
 
 //    logger.info("addNew (" +this.getClass()+
-//        ") : adding blur handler to " +foreignLang.getWidget().getElement().getExID());
+//        ") : adding blur handler to " +foreignLang.getWidget().getElement().getId());
 
     foreignLang.box.addBlurHandler(new BlurHandler() {
       @Override
@@ -218,35 +209,6 @@ class NewUserExercise extends BasicDialog {
     return container;
   }
 
-/*  private class ResizableDiv extends DivWidget implements RequiresResize {
-
-    @Override
-    public void onResize() {
-      for (int i = 0; i < getWidgetCount(); i++) {
-        Widget widget = getWidget(i);
-        if (widget instanceof RequiresResize) {
-          ((RequiresResize) widget).onResize();
-//          logger.info("ResizableDiv : resizing " + widget.getElement().getId() );
-        } else {
-//          logger.info("ResizableDiv : skipping " + widget.getElement().getId() + "  : " + widget.getClass());
-        }
-      }
-    }
-  }*/
-
-  private class ResizableFluid extends FluidContainer implements RequiresResize {
-    @Override
-    public void onResize() {
-      if (rap != null) {
-        rap.onResize();
-        rapSlow.onResize();
-      }
-    }
-  }
-
-  protected void makeOptionalRows(DivWidget upper) {
-  }
-
   /**
    * @return
    * @see #addNew(mitll.langtest.shared.custom.UserList, mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel)
@@ -269,7 +231,7 @@ class NewUserExercise extends BasicDialog {
   void addItemsAtTop(Panel container) {
   }
 
-  protected void gotBlur() {
+  private void gotBlur() {
     gotBlur(foreignLang, rap, normalSpeedRecording, ul, listInterface, toAddTo);
   }
 
@@ -308,12 +270,10 @@ class NewUserExercise extends BasicDialog {
    * @param ul
    * @param exerciseList
    * @param learnContainer
-   * @see #makeDeleteButton(UserList)
-   * @see mitll.langtest.client.custom.dialog.EditItem.RemoveFromListOnlyExercise#makeDeleteButton(UserList)
    */
   void deleteItem(final String id, final long uniqueID,
                   final UserList<?> ul,
-                  final PagingExerciseList<?, ?> exerciseList,
+                  final PagingExerciseList<?,?> exerciseList,
                   final ReloadableContainer learnContainer) {
     service.deleteItemFromList(uniqueID, id, new AsyncCallback<Boolean>() {
       @Override
@@ -332,22 +292,13 @@ class NewUserExercise extends BasicDialog {
         if (!originalList.removeAndCheck(id)) {
           logger.warning("deleteItem huh? didn't remove the item " + id + " from " + originalList);
         }
-        // if (npfExerciseList != null) {
-        if (learnContainer != null) {
-          Reloadable reloadable = learnContainer.getReloadable();
-          if (reloadable != null)
-            reloadable.redraw();   // TODO : or reload???
-        }
-        // }
+       // if (npfExerciseList != null) {
+        learnContainer.getReloadable().redraw();   // TODO : or reload???
+       // }
       }
     });
   }
 
-  /**
-   * @param ul
-   * @return
-   * @see EditableExerciseDialog#makeDeleteButton(long)
-   */
   Button makeDeleteButton(UserList<?> ul) {
     Button delete = new Button(REMOVE_FROM_LIST);
     delete.getElement().setId("Remove_from_list");
@@ -366,12 +317,11 @@ class NewUserExercise extends BasicDialog {
   }
 
   String getEnglishLabel() {
-    boolean english = getLanguage().equalsIgnoreCase("english");
-    return english ? ENGLISH_LABEL_2 : ENGLISH_LABEL;
+    return getLanguage().equalsIgnoreCase("english") ? ENGLISH_LABEL_2 : ENGLISH_LABEL;
   }
 
   void makeForeignLangRow(Panel container) {
-    //  logger.info("NewUserExercise.makeForeignLangRow --->");
+  //  logger.info("NewUserExercise.makeForeignLangRow --->");
     Panel row = new FluidRow();
     container.add(row);
     foreignLang = addControlFormField(row, getLanguage(), false, 1, 150, "");
@@ -388,8 +338,18 @@ class NewUserExercise extends BasicDialog {
     translit = addControlFormField(row, TRANSLITERATION_OPTIONAL, false, 0, 150, "");
   }
 
+/*
+  private void focusOn(final FormField form) {
+    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+      public void execute() {
+        form.box.setFocus(true);
+      }
+    });
+  }
+*/
+
   public <S extends CommonShell & AudioRefExercise & AnnotationExercise> void setFields(S newUserExercise) {
-    logger.info("setFields : setting fields with " + newUserExercise);
+    //  logger.info("setFields : setting fields with " + newUserExercise);
     // english
     String english = newUserExercise.getEnglish();
     this.english.box.setText(english);
@@ -435,14 +395,13 @@ class NewUserExercise extends BasicDialog {
                         ListInterface<CommonShell> pagingContainer,
                         Panel toAddTo,
                         ControlGroup normalSpeedRecording) {
-    //if (logger != null) {
-    //logger.info(this.getClass() + " adding create button - new user");
-    //}
+    if (logger != null) {
+      logger.info(this.getClass() + " adding create button - new user");
+    }
 
     Button submit = makeCreateButton(ul, pagingContainer, toAddTo, foreignLang, rap, normalSpeedRecording);
-    Style style = submit.getElement().getStyle();
-    style.setMarginBottom(5, Style.Unit.PX);
-    style.setMarginRight(15, Style.Unit.PX);
+    submit.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
+    submit.getElement().getStyle().setMarginRight(15, Style.Unit.PX);
 
     Panel row = new DivWidget();
     row.addStyleName("marginBottomTen");
@@ -503,18 +462,13 @@ class NewUserExercise extends BasicDialog {
     if (foreignLang.getText().isEmpty()) {
       markError(foreignLang, ENTER_THE_FOREIGN_LANGUAGE_PHRASE);
     } else if (english.getText().isEmpty()) {
-      String enterTheEnglishPhrase = isEnglish() ? ENTER_MEANING : ENTER_THE_ENGLISH_PHRASE;
-      markError(english, enterTheEnglishPhrase);
+      markError(english, ENTER_THE_ENGLISH_PHRASE);
     } else if (validateForm(foreignLang, rap, normalSpeedRecording, foreignChanged)) {
       isValidForeignPhrase(ul, pagingContainer, toAddTo, onClick);
     } else {
       formInvalid();
       logger.info("NewUserExercise.validateThenPost : form not valid");
     }
-  }
-
-  protected boolean isEnglish() {
-    return controller.getLanguage().equalsIgnoreCase("english");
   }
 
   void formInvalid() {
@@ -527,13 +481,13 @@ class NewUserExercise extends BasicDialog {
    * @param pagingContainer
    * @param toAddTo
    * @param onClick
-   * @see #validateThenPost
+   * @see #validateThenPost(mitll.langtest.client.user.BasicDialog.FormField, mitll.langtest.client.exercise.RecordAudioPanel, com.github.gwtbootstrap.client.ui.ControlGroup, mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, boolean, boolean)
    */
   private void isValidForeignPhrase(final UserList<CommonShell> ul,
-                                    final ListInterface<CommonShell> pagingContainer,
-                                    final Panel toAddTo,
+                                    final ListInterface<CommonShell> pagingContainer, final Panel toAddTo,
                                     final boolean onClick) {
-    //  logger.info("isValidForeignPhrase : checking phrase " + foreignLang.getText() + " before adding/changing " + newUserExercise);
+  //  logger.info("isValidForeignPhrase : checking phrase " + foreignLang.getText() + " before adding/changing " + newUserExercise);
+
     service.isValidForeignPhrase(foreignLang.getText(), new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -556,31 +510,16 @@ class NewUserExercise extends BasicDialog {
     });
   }
 
-  /**
-   * @param mutableExercise
-   * @see EditableExerciseDialog#postEditItem
-   */
-  void grabInfoFromFormAndStuffInfoExercise(MutableExercise mutableExercise) {
-    String text = english.getText();
-
-    logger.info("so english  field is " + text + " fl " + foreignLang.getText());
- //   logger.info("so translit field is " + translit.getText());
-    if (isEnglish()) {
-      mutableExercise.setMeaning(text);
-    }
-    else {
-      mutableExercise.setEnglish(text);
-    }
+  void grabInfoFromFormAndStuffInfoExercise(MutableExercise mutableExercise ) {
+    mutableExercise.setEnglish(english.getText());
     mutableExercise.setForeignLanguage(foreignLang.getText());
     mutableExercise.setTransliteration(translit.getText());
   }
 
-  /**
-   * @see #isValidForeignPhrase(UserList, ListInterface, Panel, boolean)
-   */
   void checkIfNeedsRefAudio() {
-    if (newUserExercise == null/* || newUserExercise.getRefAudio() == null*/) {
+    if (newUserExercise == null || newUserExercise.getRefAudio() == null) {
       //logger.info("checkIfNeedsRefAudio : new user ex " + newUserExercise);
+
       Button recordButton = rap.getButton();
       markError(normalSpeedRecording, recordButton, recordButton, "", RECORD_REFERENCE_AUDIO_FOR_THE_FOREIGN_LANGUAGE_PHRASE, Placement.RIGHT);
       recordButton.addMouseOverHandler(new MouseOverHandler() {
@@ -603,7 +542,7 @@ class NewUserExercise extends BasicDialog {
                                final ListInterface<CommonShell> exerciseList,
                                final Panel toAddTo,
                                boolean onClick) {
-    //   logger.info("user list is " + ul);
+ //   logger.info("user list is " + ul);
     service.reallyCreateNewItem(ul.getUniqueID(), newUserExercise, new AsyncCallback<CommonExercise>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -625,13 +564,10 @@ class NewUserExercise extends BasicDialog {
    * @param ul
    * @param exerciseList
    * @param toAddTo
-   * @see #afterValidForeignPhrase(UserList, ListInterface, Panel, boolean)
    */
-  private void afterItemCreated(CommonExercise newExercise,
-                                UserList<CommonShell> ul,
-                                ListInterface<CommonShell> exerciseList,
-                                Panel toAddTo) {
-    logger.info("afterItemCreated " + newExercise + " creator " + newExercise.getCreator());
+  private void afterItemCreated(CommonExercise newExercise, UserList<CommonShell> ul,
+                                ListInterface<CommonShell> exerciseList, Panel toAddTo) {
+    logger.info("afterItemCreated " + newExercise + " creator " +newExercise.getCreator());
 
     editItem.clearNewExercise(); // success -- don't remember it
 
@@ -710,6 +646,12 @@ class NewUserExercise extends BasicDialog {
       controller.register(getPlayButton(), newExercise.getID());
     }
 
+    @Override
+    protected void getEachImage(int width) {
+      float newWidth = Window.getClientWidth() * 0.65f;
+      super.getEachImage((int) newWidth);
+    }
+
     /**
      * Note that we want to post the audio the server, but not record in the results table (since it's not an answer
      * to an exercise...)
@@ -732,6 +674,7 @@ class NewUserExercise extends BasicDialog {
             public void stopRecording() {
               otherRAP.setEnabled(true);
               showStop();
+
               super.stopRecording();
             }
 
@@ -825,7 +768,7 @@ class NewUserExercise extends BasicDialog {
     if (foreignLang.getText().isEmpty()) {
       markError(foreignLang, ENTER_THE_FOREIGN_LANGUAGE_PHRASE);
       return false;
-    } else if (validRecordingCheck()) {
+    } else if (newUserExercise == null || newUserExercise.getRefAudio() == null) {
       logger.info("validateForm : new user ex " + newUserExercise);
 
       if (foreignChanged && rap != null) {
@@ -844,9 +787,5 @@ class NewUserExercise extends BasicDialog {
       }
     }
     return true;
-  }
-
-  private boolean validRecordingCheck() {
-    return newUserExercise == null;// || newUserExercise.getRefAudio() == null;
   }
 }
