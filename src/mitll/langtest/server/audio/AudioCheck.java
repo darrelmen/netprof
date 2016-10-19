@@ -72,10 +72,13 @@ public class AudioCheck {
   // private static final short clippedThreshold2 = 32752; // 32768-16
   // private static final short clippedThreshold2Minus = -32752; // 32768-16
   private static final float MAX_VALUE = 32768.0f;
-  public static final ValidityAndDur INVALID_AUDIO = new ValidityAndDur();
-  public static final int CLIPPED_FRAME_COUNT = 1;
+  static final ValidityAndDur INVALID_AUDIO = new ValidityAndDur();
+  //public static final int CLIPPED_FRAME_COUNT = 1;
   private final int MIN_DYNAMIC_RANGE;
   private final ServerProperties props;
+
+  // TODO :make a server prop
+  private final float FORGIVING_MIN_DNR = 18F;
 
   public AudioCheck(ServerProperties props) {
     this.props = props;
@@ -125,10 +128,10 @@ public class AudioCheck {
   }
 
   /**
-   * @see AudioConversion#isValid(File, boolean, boolean)
    * @param file
    * @param quietAudioOK
    * @return
+   * @see AudioConversion#isValid(File, boolean, boolean)
    */
   ValidityAndDur checkWavFileRejectAnyTooLoud(File file, boolean quietAudioOK) {
     ValidityAndDur validityAndDur = checkWavFileWithClipThreshold(file, false, quietAudioOK);
@@ -163,8 +166,10 @@ public class AudioCheck {
     validityAndDur.setMaxMinRange(dynamicRange.maxMin);
   }
 
-  public boolean hasValidDynamicRange(File file) {  return getDynamicRange(file).maxMin >= MIN_DYNAMIC_RANGE;  }
-  public boolean hasValidDynamicRangeForgiving(File file) {  return getDynamicRange(file).maxMin >= 18;  }
+  public boolean hasValidDynamicRange(File file) {
+    return getDynamicRange(file).maxMin >= MIN_DYNAMIC_RANGE;
+  }
+  // public boolean hasValidDynamicRangeForgiving(File file) {  return getDynamicRange(file).maxMin >= FORGIVING_MIN_DNR;  }
 
   private DynamicRange.RMSInfo getDynamicRange(File file) {
     String highPassFilterFile = new AudioConversion(props).getHighPassFilterFile(file.getAbsolutePath());
@@ -253,8 +258,8 @@ public class AudioCheck {
 
       float clippedRatio = ((float) countClipped) / (float) frameLength;
       float clippedRatio2 = ((float) cc) / (float) frameLength;
-      boolean wasClipped  = usePercent ? clippedRatio > CLIPPED_RATIO : clippedRatio > CLIPPED_RATIO_TIGHTER;// > CLIPPED_FRAME_COUNT;
-    //  boolean wasClipped2 = usePercent ? clippedRatio2 > CLIPPED_RATIO : cc > 1;
+      boolean wasClipped = usePercent ? clippedRatio > CLIPPED_RATIO : clippedRatio > CLIPPED_RATIO_TIGHTER;// > CLIPPED_FRAME_COUNT;
+      //  boolean wasClipped2 = usePercent ? clippedRatio2 > CLIPPED_RATIO : cc > 1;
 /*      logger.info("of " + total +" got " +countClipped + " out of " + n +"  or " + clippedRatio  + "/" +clippedRatio2+
         " not " + notClippedRatio +" wasClipped = " + wasClipped);*/
 
@@ -268,8 +273,8 @@ public class AudioCheck {
             "mean power = " + mean + " (dB) vs " + PowerThreshold +
             ", std = " + std + " vs " + VarianceThreshold +
             " valid = " + validAudio +
-            " was clipped (1) " + wasClipped +  " (" + (clippedRatio * 100f) +  "% samples clipped, # clipped = " + countClipped + ") " +
-           // " was clipped (2) " + wasClipped2 + " (" + (clippedRatio2 * 100f) + "% samples clipped, # clipped = " + cc + ")" +
+            " was clipped (1) " + wasClipped + " (" + (clippedRatio * 100f) + "% samples clipped, # clipped = " + countClipped + ") " +
+            // " was clipped (2) " + wasClipped2 + " (" + (clippedRatio2 * 100f) + "% samples clipped, # clipped = " + cc + ")" +
             " max = " + max + "/" + nmax
         );
       }
@@ -303,6 +308,14 @@ public class AudioCheck {
     return INVALID_AUDIO;
   }
 
+  public float getMinDNR() {
+    return FORGIVING_MIN_DNR;
+  }
+
+  public float getDNR(File test) {
+    return (float) getDynamicRange(test).maxMin;
+  }
+
   public static class ValidityAndDur {
     private AudioAnswer.Validity validity;
     private boolean isValid = false;
@@ -322,7 +335,7 @@ public class AudioCheck {
      * @param dur
      * @parma quietAudioOK - only useful for automated load testing where we aren't really making recordings
      */
-    public ValidityAndDur(AudioAnswer.Validity validity, double dur, boolean quietAudioOK) {
+    ValidityAndDur(AudioAnswer.Validity validity, double dur, boolean quietAudioOK) {
       this.validity = validity;
       this.durationInMillis = (int) (1000d * dur);
       isValid = validity ==
