@@ -76,7 +76,6 @@ public class Banner implements RequiresResize {
 //  private static final String LTEA_DLIFLC_EDU = "ltea@dliflc.edu";
   private final String HREF;
   private static final String NEED_HELP_QUESTIONS_CONTACT_US = "Need Help? Questions? Contact us.";
-  private static final String DOCUMENTATION = "User Manual";
 
   private final boolean isAnonymous;
   private Paragraph appName;
@@ -89,7 +88,6 @@ public class Banner implements RequiresResize {
   private Panel qc, recordAudio;
   private Dropdown cogMenu;
   private final PropertyHandler props;
-  private NavLink userC, resultsC, monitoringC, eventsC, reloadLink;
 
   /**
    * @see mitll.langtest.client.InitialUI#makeHeaderRow
@@ -150,8 +148,9 @@ public class Banner implements RequiresResize {
 
     Panel hp = new HorizontalPanel();
     hp.getElement().setId("UsernameContainer");
-    hp.add(getAnchorManual());
-    hp.add(getAnchor());
+
+    Anchor emailAnchor = getAnchor();
+    hp.add(emailAnchor);
 
     userNameWidget = getUserNameWidget(userName);
     if (!isAnonymous) {
@@ -276,33 +275,23 @@ public class Banner implements RequiresResize {
   }
 
   private Anchor getAnchor() {
-    return getAnchor(NEED_HELP_QUESTIONS_CONTACT_US, HREF);
-  }
-
-  private Anchor getAnchorManual() {
-    Anchor anchor = getAnchor(DOCUMENTATION, "NetProF_Manual.pdf");
-    anchor.getElement().getStyle().setColor("#5bb75b");
-    return anchor;
-  }
-
-  private Anchor getAnchor(String title, String href) {
-    Anchor emailAnchor = new Anchor(title, href);
+    Anchor emailAnchor = new Anchor(NEED_HELP_QUESTIONS_CONTACT_US, HREF);
 
     emailAnchor.getElement().setId("emailAnchor");
     emailAnchor.addStyleName("bold");
     emailAnchor.addStyleName("rightTwentyMargin");
-    emailAnchor.getElement().setAttribute("download","");
     emailAnchor.getElement().getStyle().setColor("#90B3CF");
     return emailAnchor;
   }
 
+  private NavLink userC, resultsC, monitoringC, eventsC, reloadLink;
 
   /**
    * @param users
    * @param results
    * @param monitoring
    * @return
-   * @see #makeCogMenu
+   * @see #getHeaderRow
    */
   private Dropdown makeMenu(ClickHandler users, ClickHandler results, ClickHandler monitoring, ClickHandler events, ClickHandler reload) {
     Dropdown w = new Dropdown();
@@ -354,14 +343,13 @@ public class Banner implements RequiresResize {
         try {
           String versionInfo = LangTest.VERSION_INFO;
           String releaseDate = props.getReleaseDate();
-          String recordingInfo = FlashRecordPanelHeadless.usingWebRTC() ? " Browser recording" : "Flash recording";
+          String s = FlashRecordPanelHeadless.usingWebRTC() ? " Browser recording" : "Flash recording";
           String model = props.getModelDir().replaceAll("models.", "");
           values = java.util.Arrays.asList(
               props.getLanguage(),
               versionInfo,
               releaseDate,
-              model,
-              recordingInfo
+              model, s
           );
         } catch (Exception e) {
           logger.warning("got " + e);

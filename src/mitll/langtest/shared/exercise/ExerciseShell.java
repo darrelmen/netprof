@@ -110,10 +110,6 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
     return meaning;
   }
 
-  public void setMeaning(String meaning) {
-    this.meaning = meaning;
-  }
-
   @Override
   public String getForeignLanguage() {
     return foreignLanguage;
