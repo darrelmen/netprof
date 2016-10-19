@@ -53,7 +53,7 @@ import java.util.Date;
  * Time: 5:45 PM
  * To change this template use File | Settings | File Templates.
  */
-public class Result implements UserAndTime {
+public class Result implements IsSerializable, UserAndTime {
   private int uniqueID;
   private long userid;
   public String plan;
@@ -69,7 +69,6 @@ public class Result implements UserAndTime {
   private float pronScore;
   private String device;
   private transient String jsonScore;
-  private transient String model;
 
   public static final String AUDIO_TYPE_UNSET = "unset";
   public static final String AUDIO_TYPE_REGULAR = "regular";
@@ -99,8 +98,7 @@ public class Result implements UserAndTime {
                 int qid,
                 String answer,
                 boolean valid, long timestamp,
-                String answerType, int durationInMillis, boolean correct, float pronScore, String device,
-                String model) {
+                String answerType, int durationInMillis, boolean correct, float pronScore, String device) {
     this.uniqueID = uniqueID;
     this.userid = userid;
     this.plan = plan;
@@ -114,7 +112,6 @@ public class Result implements UserAndTime {
     this.correct = correct;
     this.pronScore = pronScore;
     this.device = device;
-    this.model = model;
   }
 
   /**
@@ -159,9 +156,6 @@ public class Result implements UserAndTime {
 
   public long getTimestamp() {
     return timestamp;
-  }
-  public String getModel() {
-    return model;
   }
 
   @Override

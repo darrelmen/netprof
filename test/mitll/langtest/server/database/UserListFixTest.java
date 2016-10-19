@@ -56,6 +56,7 @@ public class UserListFixTest extends BaseTest {
     logger.info("list has " + userListByID.getExercises());
   }
 
+/*
   @Test
   public void testMSAGetOrpans() {
     DatabaseImpl<CommonExercise> msa = getDatabase("msa");
@@ -80,8 +81,9 @@ public class UserListFixTest extends BaseTest {
       logger.info("got " + exercise);
     }
   }
+*/
 
-  @Test
+  /*@Test
   public void testMSARestoreList() {
     int userid = 643;
 
@@ -104,7 +106,7 @@ public class UserListFixTest extends BaseTest {
     for (CommonShell exercise : exercises) {
       logger.info("got " + exercise);
     }
-  }
+  }*/
 
   @Test
   public void testGotThem() {

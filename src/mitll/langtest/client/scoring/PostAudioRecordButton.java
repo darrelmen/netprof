@@ -57,7 +57,6 @@ import java.util.logging.Logger;
  */
 public abstract class PostAudioRecordButton extends RecordButton implements RecordButton.RecordingListener {
   private final Logger logger = Logger.getLogger("PostAudioRecordButton");
-  private static final int BUTTON_WIDTH = 93; // was 68
 
   private boolean validAudio = false;
   private static final int LOG_ROUNDTRIP_THRESHOLD = 3000;
@@ -90,11 +89,9 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     this.recordInResults = recordInResults;
     getElement().setId("PostAudioRecordButton");
     controller.register(this, exerciseID);
-    Style style = getElement().getStyle();
-    style.setMarginTop(1, Style.Unit.PX);
-    style.setMarginBottom(1, Style.Unit.PX);
-    setWidth(BUTTON_WIDTH +
-        "px");
+    getElement().getStyle().setMarginTop(1, Style.Unit.PX);
+    getElement().getStyle().setMarginBottom(1, Style.Unit.PX);
+    setWidth("68px");
   }
 
   public void setExercise(String exercise) {

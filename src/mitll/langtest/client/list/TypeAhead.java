@@ -32,9 +32,11 @@
 
 package mitll.langtest.client.list;
 
-import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.ControlGroup;
+import com.github.gwtbootstrap.client.ui.ControlLabel;
+import com.github.gwtbootstrap.client.ui.Controls;
+import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.base.TextBox;
-import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -69,7 +71,7 @@ public class TypeAhead {
    */
   TypeAhead(Panel column, Image waitCursor, String title, boolean hasFirstFocus) {
     makeTypeAhead();
-    column.add(title.equals(PagingExerciseList.SEARCH) ? getSearch(waitCursor) : getControlGroup(waitCursor, title));
+    column.add(getControlGroup(waitCursor, title));
     checkFocus(hasFirstFocus);
   }
 
@@ -96,13 +98,13 @@ public class TypeAhead {
    */
   private void makeTypeAhead() {
     typeAhead.setWidth("240px");
-    typeAhead.getElement().getStyle().setFontSize(14, Style.Unit.PT);
+    typeAhead.getElement().getStyle().setFontSize(14, Style.Unit.PT );
     getTypeAhead().getElement().setId("ExerciseList_TypeAhead");
 
     getTypeAhead().setDirectionEstimator(true);   // automatically detect whether text is RTL
     getTypeAhead().addKeyUpHandler(new KeyUpHandler() {
       public void onKeyUp(KeyUpEvent event) {
-        //  logger.info("got key up " + event);
+      //  logger.info("got key up " + event);
         gotTypeAheadEntry(getTypeAhead().getText());
       }
     });
@@ -113,8 +115,7 @@ public class TypeAhead {
    *
    * @param text
    */
-  public void gotTypeAheadEntry(String text) {
-  }
+  public void gotTypeAheadEntry(String text) {}
 
   private Widget getControlGroup(Image waitCursor, String title) {
     Panel flow = new HorizontalPanel();
@@ -123,19 +124,6 @@ public class TypeAhead {
     configureWaitCursor(waitCursor);
 
     return getControlGroup(title, flow);
-  }
-
-  private Widget getSearch(Image waitCursor) {
-    Panel flow = new HorizontalPanel();
-    Icon child = new Icon(IconType.SEARCH);
-
-    Style style = child.getElement().getStyle();
-    style.setMarginRight(5, Style.Unit.PX);
-    style.setColor("gray");
-    flow.add(child);
-    flow.add(getTypeAhead());
-    flow.add(waitCursor);
-    return flow;
   }
 
   private void configureWaitCursor(Image waitCursor) {
@@ -161,14 +149,12 @@ public class TypeAhead {
   }
 
   /**
-   * @return
    * @see PagingExerciseList#addTypeAhead(Panel)
+   * @return
    */
   TextBox getTypeAhead() {
     return typeAhead;
   }
 
-  public void setText(String text) {
-    typeAhead.setText(text);
-  }
+  public void setText(String text) { typeAhead.setText(text);  }
 }
