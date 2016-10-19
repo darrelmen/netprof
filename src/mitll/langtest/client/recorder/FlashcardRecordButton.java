@@ -73,13 +73,13 @@ public class FlashcardRecordButton extends RecordButton {
   private final Tooltip tooltip;
 
   /**
+   * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#makeRecordButton
    * @param delay
    * @param recordingListener
    * @param warnNotASpace
    * @param addKeyBinding
    * @param controller
    * @param instance
-   * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#makeRecordButton
    */
   public FlashcardRecordButton(int delay, RecordingListener recordingListener, boolean warnNotASpace,
                                boolean addKeyBinding, ExerciseController controller, final String instance) {
@@ -87,7 +87,7 @@ public class FlashcardRecordButton extends RecordButton {
 
     if (addKeyBinding) {
       addKeyListener(controller, instance);
-      // logger.info("FlashcardRecordButton : " + instance + " key is  " + listener.getName());
+     // System.out.println("FlashcardRecordButton : " + instance + " key is  " + listener.getName());
     }
     this.controller = controller;
 
@@ -96,11 +96,11 @@ public class FlashcardRecordButton extends RecordButton {
 
     setWidth(WIDTH_FOR_BUTTON + "px");
     setHeight("48px");
-    getElement().getStyle().setProperty("fontSize", "x-large");
-    // DOM.setStyleAttribute(getElement(), "fontSize", "x-large");
-    getElement().getStyle().setProperty("fontFamily", "Arial Unicode MS, Arial, sans-serif");
+    getElement().getStyle().setProperty("fontSize","x-large");
+   // DOM.setStyleAttribute(getElement(), "fontSize", "x-large");
+    getElement().getStyle().setProperty("fontFamily","Arial Unicode MS, Arial, sans-serif");
 
-    // DOM.setStyleAttribute(getElement(), "fontFamily", "Arial Unicode MS, Arial, sans-serif");
+   // DOM.setStyleAttribute(getElement(), "fontFamily", "Arial Unicode MS, Arial, sans-serif");
     getElement().getStyle().setVerticalAlign(Style.VerticalAlign.MIDDLE);
     getElement().getStyle().setLineHeight(37, Style.Unit.PX);
 
@@ -110,20 +110,24 @@ public class FlashcardRecordButton extends RecordButton {
 
     tooltip = new TooltipHelper().addTooltip(this, addKeyBinding ? NO_SPACE_WARNING : PROMPT);
 
-//    logger.info("FlashcardRecordButton : using " + getElement().getExID());
+//    System.out.println("FlashcardRecordButton : using " + getElement().getId());
   }
 
   private void addKeyListener(ExerciseController controller, final String instance) {
-    //     logger.info("FlashcardRecordButton.addKeyListener : using " + getElement().getExID() + " for " + instance);
+
+
+  //     System.out.println("FlashcardRecordButton.addKeyListener : using " + getElement().getId() + " for " + instance);
+
     KeyPressHelper.KeyListener listener = new KeyPressHelper.KeyListener() {
       @Override
       public String getName() {
         return "FlashcardRecordButton_" + instance;
       }
+
       @Override
       public void gotPress(NativeEvent ne, boolean isKeyDown) {
         if (isKeyDown) {
-          checkKeyDown(ne);
+          checkKeyDown(ne/*,this*/);
         } else {
           checkKeyUp(ne);
         }
@@ -136,10 +140,13 @@ public class FlashcardRecordButton extends RecordButton {
     controller.addKeyListener(listener);
   }
 
-  private void checkKeyDown(NativeEvent event) {
+  private void checkKeyDown(NativeEvent event
+  //    , KeyPressHelper.KeyListener listener
+  ) {
     if (!shouldIgnoreKeyPress()) {
       boolean isSpace = checkIsSpace(event);
-      //logger.info("checkKeyDown got key press...");
+      //System.out.println("checkKeyDown got key press...");
+
       if (isSpace) {
         if (!mouseDown) {
           mouseDown = true;
@@ -148,42 +155,32 @@ public class FlashcardRecordButton extends RecordButton {
       } else if (warnUserWhenNotSpace) {
         int keyCode = event.getKeyCode();
         if (keyCode == KeyCodes.KEY_ALT || keyCode == KeyCodes.KEY_CTRL || keyCode == KeyCodes.KEY_ESCAPE || keyCode == KeyCodes.KEY_WIN_KEY) {
-          //logger.info("key code is " + keyCode);
-        } else {
-          //logger.info("warn - key code is " + keyCode);
+          //System.out.println("key code is " + keyCode);
+        }
+        else {
+          //System.out.println("warn - key code is " + keyCode);
           if (keyCode == KeyCodes.KEY_LEFT) {
             gotLeftArrow();
             event.stopPropagation();
-          } else if (keyCode == KeyCodes.KEY_RIGHT) {
+          }
+          else if (keyCode == KeyCodes.KEY_RIGHT) {
             gotRightArrow();
             event.stopPropagation();
-          } else if (keyCode == KeyCodes.KEY_UP) {
-            gotUpArrow();
-            event.stopPropagation();
-          } else if (keyCode == KeyCodes.KEY_DOWN) {
-            gotDownArrow();
-            event.stopPropagation();
-          } else {
+          }
+          else {
             warnNotASpace();
           }
         }
       }
-    } else {
-      //  logger.info("checkKeyDown ignoring key press... " + listener);
+    }
+    else {
+    //  System.out.println("checkKeyDown ignoring key press... " + listener);
     }
   }
 
-  protected void gotRightArrow() {
-  }
+  protected void gotRightArrow() {}
 
-  protected void gotLeftArrow() {
-  }
-
-  protected void gotUpArrow() {
-  }
-
-  protected void gotDownArrow() {
-  }
+  protected void gotLeftArrow()  {}
 
   private void checkKeyUp(NativeEvent event) {
     if (!shouldIgnoreKeyPress()) {
@@ -203,28 +200,24 @@ public class FlashcardRecordButton extends RecordButton {
 
   protected boolean shouldIgnoreKeyPress() {
     boolean b = !isAttached() || checkHidden(getElement().getId()) || controller.getUser() == -1;
-    //if (b) {
-    //logger.info("attached " + isAttached());
-    //   logger.info("hidden   " + checkHidden(getElement().getExID()));
-    //  logger.info("user     " + controller.getUser());
-    // }
+   //if (b) {
+      //System.out.println("attached " + isAttached());
+   //   System.out.println("hidden   " + checkHidden(getElement().getId()));
+    //  System.out.println("user     " + controller.getUser());
+   // }
     return b;
   }
 
   private native boolean checkHidden(String id)  /*-{
-      return $wnd.jQuery('#' + id).is(":hidden");
+    return $wnd.jQuery('#'+id).is(":hidden");
   }-*/;
 
   /**
    * @see #checkKeyDown(com.google.gwt.dom.client.NativeEvent)
    */
-  private void warnNotASpace() {
-    showPopup(NO_SPACE_WARNING);
-  }
+  private void warnNotASpace() { showPopup(NO_SPACE_WARNING);  }
 
-  private void showPopup(String html) {
-    new PopupHelper().showPopup(html);
-  }
+  private void showPopup(String html) { new PopupHelper().showPopup(html); }
 
   protected boolean showInitialRecordImage() {
     showFirstRecordImage();
@@ -253,9 +246,7 @@ public class FlashcardRecordButton extends RecordButton {
     setType(ButtonType.PRIMARY);
   }
 
-  protected String getPrompt() {
-    return PROMPT;
-  }
+  protected String getPrompt() { return PROMPT;  }
 
   public void removeTooltip() {
     if (tooltip != null) {
