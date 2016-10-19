@@ -123,15 +123,12 @@ public abstract class Scoring {
     languageProperty = properties.get("language");
     String language = languageProperty != null ? languageProperty : "";
 
-    if (language.isEmpty()) logger.error("\n\n\nno language property set???\n\n\n\n");
-    else logger.debug("language = '" + language + "'");
-
     isMandarin = language.equalsIgnoreCase("mandarin");
     if (isMandarin) logger.warn("using mandarin segmentation.");
     ltsFactory = new LTSFactory(languageProperty);
     this.configFileCreator = new ConfigFileCreator(properties, getLTS(), scoringDir);
 
-    // readDictionary();
+   // readDictionary();
     makeDecoder();
     checkLTSHelper = new CheckLTS(getLTS(), htkDictionary, language, props.hasModel());
   }
@@ -197,7 +194,7 @@ public abstract class Scoring {
       foundATranscript = true;
     }
     if (wordLab != null) {
-      //     logger.debug("wordLab: " + wordLab);
+ //     logger.debug("wordLab: " + wordLab);
       typeToFile.put(ImageType.WORD_TRANSCRIPT, wordLab);
       foundATranscript = true;
     }
@@ -244,7 +241,7 @@ public abstract class Scoring {
                                     String audioFileNoSuffix, boolean useScoreToColorBkg,
                                     String prefix, String suffix, boolean decode, boolean useWebservice,
                                     boolean usePhoneToDisplay) {
-    logger.debug("writeTranscripts - decode " + decode + " file " + audioFileNoSuffix + " width " + imageWidth + " height " + imageHeight +
+   logger.debug("writeTranscripts - decode " + decode + " file " + audioFileNoSuffix + " width " + imageWidth + " height " + imageHeight+
         " prefix " + prefix);
 
     boolean foundATranscript = false;
@@ -439,7 +436,6 @@ public abstract class Scoring {
   public SmallVocabDecoder getSmallVocabDecoder() {
     return svDecoderHelper;
   }
-
   public Collator getCollator() {
     return ltsFactory.getCollator();
   }
