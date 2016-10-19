@@ -50,7 +50,6 @@ public class ExerciseAnnotation implements IsSerializable {
   public ExerciseAnnotation(){}
   public ExerciseAnnotation(String status, String comment) { this.status = status; this.comment = comment; }
   public boolean isCorrect() { return getStatus().equals("correct"); }
-  public boolean isDefect()  { return !isCorrect(); }
 
   public String getStatus() {
     return status;
