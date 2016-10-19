@@ -47,12 +47,6 @@ public class AVPScoreReport implements IsSerializable {
   private List<ExerciseCorrectAndScore> sortedHistory;
 
   public AVPScoreReport() {}
-
-  /**
-   *
-   * @param historyForLists
-   * @param sortedHistory
-   */
   public AVPScoreReport(List<AVPHistoryForList> historyForLists,
                         List<ExerciseCorrectAndScore> sortedHistory) {
     this.avpHistoryForLists = historyForLists;

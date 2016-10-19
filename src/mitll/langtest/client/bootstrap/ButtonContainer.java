@@ -61,13 +61,8 @@ class ButtonContainer {
     addEnabled(b);
   }
 
-  private void addEnabled(Button b) {
-    enabled.add(b);
-  }
-
-  public Collection<Button> getButtons() {
-    return buttons;
-  }
+  private void addEnabled(Button b) { enabled.add(b); }
+  public Collection<Button> getButtons() { return buttons; }
 
   private void addButtonToName(String name, Button b) {
     Collection<Button> buttonsAtName = nameToButton.get(name);
@@ -77,25 +72,20 @@ class ButtonContainer {
     buttonsAtName.add(b);
   }
 
-  Collection<Button> getButtonsByName(Collection<String> sections) {
-    Set<Button> toSelectSet = new HashSet<Button>();
-    for (String toSelect : sections) {
-      Collection<Button> buttonsAtName = nameToButton.get(toSelect);
-      if (buttonsAtName == null) {
-        logger.warning("getButtonsByName : huh? can't find " + toSelect + " in " + nameToButton.keySet());
-      } else {
-        toSelectSet.addAll(buttonsAtName);
-      }
-    }
-    return toSelectSet;
-  }
-
-  Collection<Button> getButtonsForName(String name) {
+ public Collection<Button> getButtonsByName(Collection<String> sections) {
+   Set<Button> toSelectSet = new HashSet<Button>();
+   for (String toSelect : sections) {
+     Collection<Button> buttonsAtName = nameToButton.get(toSelect);
+     if (buttonsAtName == null) logger.warning("getButtonsByName : huh? can't find " + toSelect + " in " + nameToButton.keySet());
+     toSelectSet.addAll(buttonsAtName);
+   }
+   return toSelectSet;
+ }
+  public Collection<Button> getButtonsForName(String name) {
     return nameToButton.get(name);
 
   }
-
-  FlexSectionExerciseList.ButtonWithChildren getFirstButton() {
+  public FlexSectionExerciseList.ButtonWithChildren getFirstButton() {
     if (buttons.isEmpty()) return null;
     return (FlexSectionExerciseList.ButtonWithChildren) buttons.iterator().next();
   }
@@ -105,19 +95,19 @@ class ButtonContainer {
     enabled.remove(button);
   }*/
 
-  void enableAll() {
-    // logger.info("----> enableAll for " + this);
+  public void enableAll() {
+   // logger.info("----> enableAll for " + this);
     enabled.addAll(buttons);
     disabled.clear();
     showEnabled();
   }
 
   /**
+   * @see ButtonGroupSectionWidget#enableChildrenButtons
    * @param buttonChildren
    * @param isEnable
-   * @see ButtonGroupSectionWidget#enableChildrenButtons
    */
-  void rememberEnabled(Collection<FlexSectionExerciseList.ButtonWithChildren> buttonChildren, boolean isEnable) {
+  public void rememberEnabled(Collection<FlexSectionExerciseList.ButtonWithChildren> buttonChildren, boolean isEnable) {
     if (debug) logger.info(this + " rememberEnabled for " + buttonChildren + " : to enable = " + isEnable);
 
     if (!buttons.containsAll(buttonChildren)) {
@@ -130,7 +120,8 @@ class ButtonContainer {
         clearEnabled();
       }*/
       enabled.addAll(buttonChildren);
-    } else {
+    }
+    else {
       enabled.removeAll(buttonChildren);
     }
 /*    if (enabled.isEmpty()) {
@@ -141,20 +132,20 @@ class ButtonContainer {
     disabled.clear();
     disabled.addAll(buttons);
     disabled.removeAll(enabled);
-    // if (debug) logger.info(this + " rememberEnabled after ");
+   // if (debug) logger.info(this + " rememberEnabled after ");
   }
 
   /**
    * @see mitll.langtest.client.bootstrap.ButtonGroupSectionWidget#clearEnabled()
    */
-  void clearEnabled() {
-  //  logger.info(this + " : clearEnabled ");
+  public void clearEnabled() {
+    logger.info(this + " : clearEnabled ");
     enabled.clear();
     disabled.addAll(buttons);
   }
 
-  void showEnabled() {
-    // logger.info(this + " : showEnabled ");
+  public void showEnabled() {
+   // logger.info(this + " : showEnabled ");
     for (Button b : enabled) {
       b.setEnabled(true);
     }
