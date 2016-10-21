@@ -179,8 +179,10 @@ import java.util.logging.Logger;
  * - Added shouldRecalcStudentAudio option to recalc student audio with the current model
  * 1.5.2 (10-19-16)
  * - Fixed bug in reporting where was throwing away valid recordings and added separate new teacher section to reporting
- * 1.5.3 (10-19-15)
+ * 1.5.3 (10-19-16)
  * - Don't attach reference audio that doesn't pass dnr minimum (mainly for old audio). Mark audio rows with DNR.
+ * 1.5.4 (10-21-16)
+ * - Increase delay after correct avp response.
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
