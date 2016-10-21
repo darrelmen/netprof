@@ -38,6 +38,7 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
+import mitll.langtest.server.database.AudioDAO;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.ResultDAO;
 import mitll.langtest.shared.MiniUser;
@@ -74,9 +75,9 @@ public class RefResultDecoder {
   private boolean stopDecode = false;
   private final PathHelper pathHelper;
   private final AudioConversion audioConversion;
-  String mediaDir;
-  String installPath;
-  AudioCheck audioCheck;
+  private final String mediaDir;
+  private final String installPath;
+  private final AudioCheck audioCheck;
 
   /**
    * @param db
@@ -139,9 +140,9 @@ public class RefResultDecoder {
    * This was for a one time fix for weird sudanese thing where audio files were truncated on Aug 11 and 12
    * Very weird.
    *
+   * @return
    * @paramz pathHelper
    * @paramz path
-   * @return
    */
  /* public void fixTruncated(PathHelper war) {
     Collection<AudioAttribute> audioAttributes = db.getAudioDAO().getAudioAttributes();
@@ -194,11 +195,11 @@ public class RefResultDecoder {
     return pathHelper.getAbsoluteFile(path);
   }
 */
-
   private String getLanguage() {
     return serverProps.getLanguage();
   }
 
+/*
   private void populateAudioTable(final Collection<CommonExercise> exercises) {
     int total = 0;
     for (CommonExercise ex : exercises) {
@@ -218,6 +219,7 @@ public class RefResultDecoder {
     }
     logger.info(getLanguage() + " : populateAudioTable added " + total);
   }
+*/
 
   /**
    * @param exercises
@@ -277,6 +279,9 @@ public class RefResultDecoder {
       int femaleAudio = 0;
       int defaultAudio = 0;
       Set<String> failed = new TreeSet<>();
+      int dnr = 0;
+      int since = 0;
+      AudioDAO audioDAO = db.getAudioDAO();
       for (CommonExercise exercise : exercises) {
         if (stopDecode) return;
 
@@ -287,6 +292,12 @@ public class RefResultDecoder {
           attrc += audioAttributes.size();
           if (!didAll) {
             failed.add(exercise.getID());
+          }
+
+          dnr += setDNROnAudio(installPath, audioDAO, audioAttributes);
+          if (dnr - since > 2000) {
+            since = dnr;
+            logger.info(getLanguage() + ": trimRef : did DNR on " + dnr);
           }
         }
 
@@ -336,6 +347,31 @@ public class RefResultDecoder {
     }
   }
 
+  private int setDNROnAudio(String installPath, AudioDAO audioDAO, List<AudioAttribute> audioAttributes) {
+    int c = 0;
+
+    for (AudioAttribute audio : audioAttributes) {
+      float dnr1 = audio.getDnr();
+      if (dnr1 < 0) {
+        String audioRef = audio.getAudioRef();
+        File test = new File(installPath, audioRef);
+
+        boolean exists = test.exists();
+        if (!exists) {
+          test = new File(installPath, audioRef);
+          exists = test.exists();
+          // child = audioRef;
+        }
+        if (exists) {
+          dnr1 = audioCheck.getDNR(test);
+          audioDAO.updateDNR(audio.getUniqueID(), dnr1);
+          c++;
+        }
+      }
+    }
+    return c;
+  }
+
   private void recalcStudentAudio() {
     ResultDAO resultDAO = db.getResultDAO();
 
@@ -344,19 +380,20 @@ public class RefResultDecoder {
     for (CommonExercise ex : rawExercises) idToEx.put(ex.getID(), ex);
 
     int count = 0;
-    Set<String> skip = new HashSet<>(Arrays.asList("slow","regular","slow_by_WebRTC","regular_by_WebRTC"));
+    Set<String> skip = new HashSet<>(Arrays.asList("slow", "regular", "slow_by_WebRTC", "regular_by_WebRTC"));
     List<Result> results = resultDAO.getResults();
     int skipped = 0;
     int notThere = 0;
     int staleExercise = 0;
     int currentAlready = 0;
 
-    String currentModel =  db.getServerProps().getCurrentModel();
+    String currentModel = db.getServerProps().getCurrentModel();
 
     for (Result result : results) {
       if (result.isValid()) {
-        if (skip.contains(result.getAudioType())) {skipped++;}
-        else {
+        if (skip.contains(result.getAudioType())) {
+          skipped++;
+        } else {
           String audioRef = result.getAnswer();
 
           boolean fileExists = false;
@@ -377,20 +414,18 @@ public class RefResultDecoder {
                 sleep(serverProps.getSleepBetweenDecodes());
                 count++;
                 if (count % 100 == 0) logger.info("recalc " + count + "/" + results.size());
-              }
-              else {
+              } else {
                 currentAlready++;
               }
-            }
-            else {
+            } else {
               if (staleExercise < 1000) {
                 logger.info("can't find ex '" + exid + "' in " + idToEx.size());
               }
               staleExercise++;
             }
-          }
-          else {
-            if (notThere < 10 /*|| exid.startsWith("1")*/) logger.info("Can't find " + pathHelper.getAbsoluteFile(audioRef).getAbsolutePath());
+          } else {
+            if (notThere < 10 /*|| exid.startsWith("1")*/)
+              logger.info("Can't find " + pathHelper.getAbsoluteFile(audioRef).getAbsolutePath());
             notThere++;
           }
         }
@@ -563,18 +598,16 @@ public class RefResultDecoder {
               audioFileHelper.decodeOneAttribute(exercise, attribute, doHydec);
               sleep(serverProps.getSleepBetweenDecodes());
               count++;
+            } else {
+              logger.info("doDecode : for " + exercise.getID() + " (" + durationInMillis +
+                  ") skip low dynamic range file " + audioRef);
             }
-            else {
-              logger.info("doDecode : for " +exercise.getID()+ " (" + durationInMillis+
-                  ") skip low dynamic range file "+ audioRef);
-            }
-          }
-          else {
+          } else {
             if (durationInSeconds > 0.01) {
               logger.warn("doDecode : 2 huh? attr dur " + durationInMillis + " but check dur " + durationInSeconds);
             }
-            logger.info("doDecode : for " +exercise.getID()+ " (" + durationInMillis+
-                ") skip short file "+ audioRef);
+            logger.info("doDecode : for " + exercise.getID() + " (" + durationInMillis +
+                ") skip short file " + audioRef);
           }
         }
       } catch (Exception e) {
