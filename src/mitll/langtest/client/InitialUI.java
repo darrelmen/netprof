@@ -83,7 +83,7 @@ public class InitialUI {
    *
    * @see #getLinksToSites()
    */
-  private static final int LEFT_LIST_WIDTH = 267;
+  private static final int LEFT_LIST_WIDTH = 167;
 
   private static final String LANGTEST_IMAGES = "langtest/images/";
   private static final int NO_USER_INITIAL = -2;
@@ -602,7 +602,7 @@ public class InitialUI {
       // logger.info("populateRootPanelIfLogin found : '" + as.getExID() +"'");
 
       if (as.getId().contains(LOGIN)) {
-        logger.info("populateRootPanelIfLogin found login...");
+       // logger.info("populateRootPanelIfLogin found login...");
         populateRootPanel();
       }
     }
