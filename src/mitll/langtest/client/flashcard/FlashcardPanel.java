@@ -303,7 +303,8 @@ public class FlashcardPanel<T extends CommonShell & AudioRefExercise & Annotatio
       public void addCorrectComment(String field) {
         addAnnotation(field, GoodwaveExercisePanel.CORRECT, "");
       }
-    }, exercise);
+    }, exercise,
+        true);
 
     DivWidget left = new DivWidget();
     left.add(commentBox.getEntry(QCNPFExercise.FOREIGN_LANGUAGE, null, exercise.getAnnotation(QCNPFExercise.FOREIGN_LANGUAGE)));
