@@ -205,6 +205,7 @@ public class FlashcardPanel<T extends CommonShell & AudioRefExercise & Annotatio
       // logger.info("FlashcardRecordButton : " + instance + " key is  " + listener.getName());
     }
   }
+
   public void wasRevealed() {
     // logger.info("wasRevealed");
     playRefOrAutoPlay();
@@ -475,12 +476,12 @@ public class FlashcardPanel<T extends CommonShell & AudioRefExercise & Annotatio
    * @see BootstrapExercisePanel#showIncorrectFeedback
    */
   protected void playRefAndGoToNext(String path, final int delayMillis, boolean useCheck) {
-    // logger.info("playRefAndGoToNext " + path + " is song playing " + isSongPlaying);
+    logger.info("playRefAndGoToNext " + path + " is song playing " + isSongPlaying + " delay " + delayMillis);
     if (!isValid(path)) {
       if (isTabVisible()) {
         checkThenLoadNextOnTimer(1000);
       } else {
-        // logger.info("tab is not visible");
+        logger.info("\tplayRefAndGoToNext tab is not visible");
       }
     } else {
       getSoundFeedback().queueSong(getPath(path), new SoundFeedback.EndListener() {
@@ -1182,10 +1183,9 @@ public class FlashcardPanel<T extends CommonShell & AudioRefExercise & Annotatio
    * @see #playRef()
    */
   private void playRef(String path) {
-    // logger.info("playRef ---------- " + exercise.getID() + " path " + path);
+    logger.info("playRef ---------- " + exercise.getID() + " path " + path);
     path = getPath(path);
-    // final String outer = path;
-    final Widget textWidget = foreign;//() ? english : foreign;
+    final Widget textWidget = foreign;
     getSoundFeedback().queueSong(path,
         new SoundFeedback.EndListener() {
           @Override
@@ -1196,7 +1196,7 @@ public class FlashcardPanel<T extends CommonShell & AudioRefExercise & Annotatio
 
           @Override
           public void songEnded() {
-            //      logger.info("playRef remove playing highlight on " + outer);
+            logger.info("playRef remove playing highlight on ");
             removePlayingHighlight(textWidget);
             if (endListener != null) endListener.songEnded();
           }
