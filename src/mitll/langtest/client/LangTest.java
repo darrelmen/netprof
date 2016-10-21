@@ -306,7 +306,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   }
 
   private void logMessageOnServer(String message) {
-    new Exception().printStackTrace();
+    //new Exception().printStackTrace();
     service.logMessage(message,
         new AsyncCallback<Void>() {
           @Override
@@ -560,7 +560,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
                   initialUI.setSplash();
                   isMicConnected = false;
                 }
-              }, false);
+              }, false, true);
         }
       }
 
