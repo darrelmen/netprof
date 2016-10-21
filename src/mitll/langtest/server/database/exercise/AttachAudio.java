@@ -241,11 +241,13 @@ class AttachAudio {
                     audio.matchTranscript(noAccents, noAccentsTranscript))
                 ) {
               float dnr1 = audio.getDnr();
-              if (dnr1 < 0) {
-                dnr1 = audioCheck.getDNR(test);
-                audioDAO.updateDNR(audio.getUniqueID(), dnr1);
-              }
-              if (dnr1 > audioCheck.getMinDNR()) {
+              boolean dnrOK = dnr1 < 0 || dnr1 > audioCheck.getMinDNR();
+
+//              if (dnr1 < 0) {
+//                dnr1 = audioCheck.getDNR(test);
+//                audioDAO.updateDNR(audio.getUniqueID(), dnr1);
+//              }
+              if (dnrOK) {//dnr1 > audioCheck.getMinDNR()) {
                 audio.setAudioRef(child);   // remember to prefix the path
                 mutableAudio.addAudio(audio);
               } else {
