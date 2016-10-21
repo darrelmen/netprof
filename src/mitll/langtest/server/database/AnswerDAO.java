@@ -52,7 +52,7 @@ public class AnswerDAO extends DAO {
   private static final String PLAN = "plan";
   private final ResultDAO resultDAO;
 
-  public AnswerDAO(Database database, ResultDAO resultDAO) {
+  AnswerDAO(Database database, ResultDAO resultDAO) {
     super(database);
     this.resultDAO = resultDAO;
   }
@@ -209,11 +209,10 @@ public class AnswerDAO extends DAO {
    * @see #addAnswer
    */
   private long addAnswerToTable(Connection connection, AnswerInfo info) throws SQLException {
-
     long newID = -1;
     synchronized (this) {
       long then = System.currentTimeMillis();
-      logger.debug(getLanguage() + " : START : addAnswerToTable : adding answer for " + info);
+//      logger.debug(getLanguage() + " : START : addAnswerToTable : adding answer for " + info);
       PreparedStatement statement = connection.prepareStatement("INSERT INTO " +
           ResultDAO.RESULTS +
           "(" +
@@ -274,10 +273,9 @@ public class AnswerDAO extends DAO {
 
       connection.commit();
       statement.close();
-      long now = System.currentTimeMillis();
-
-      logger.debug(getLanguage() + " : END   : addAnswerToTable : adding answer for (" + (now - then) +
-          ") millis : " + info + " result id " + newID);
+//      long now = System.currentTimeMillis();
+//      logger.debug(getLanguage() + " : END   : addAnswerToTable : adding answer for (" + (now - then) +
+//          ") millis : " + info + " result id " + newID);
     }
 
     resultDAO.invalidateCachedResults();

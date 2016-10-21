@@ -79,12 +79,12 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
   private Logger logger;
 
   private Heading recoOutput;
+
+  static final int CORRECT_DELAY = 600;
   private static final int DELAY_MILLIS_LONG = 3000;
   private static final int LONG_DELAY_MILLIS = 3500;
-  //private static final int DELAY_CHARACTERS = 40;
   private static final int HIDE_DELAY = 2500;
-  protected static final int DELAY_MILLIS = 100;
-  //private static final boolean NEXT_ON_BAD_AUDIO = false;
+  static final int DELAY_MILLIS = 100;
 
   /**
    * @see #getFeedbackGroup(ControlState)
@@ -116,7 +116,8 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
   /**
    * Don't add one.
    */
-  protected void addKeyListener() { }
+  protected void addKeyListener() {
+  }
 
   /**
    * @param controlState
@@ -420,8 +421,8 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
     final double score = result.getScore();
 
     boolean badAudioRecording = result.getValidity() != AudioAnswer.Validity.OK;
-    if (false) logger.info("BootstrapExercisePanel.receivedAudioAnswer: correct " + correct + " pron score : " + score +
-        " has ref " + hasRefAudio + " bad audio " + badAudioRecording + " result " + result);
+//    logger.info("BootstrapExercisePanel.receivedAudioAnswer: correct " + correct + " pron score : " + score +
+//        " has ref " + hasRefAudio + " bad audio " + badAudioRecording + " result " + result);
 
     String feedback = "";
     if (badAudioRecording) {
@@ -461,6 +462,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
 
   /**
    * TODO : decide when to show what ASR "heard"
+   *
    * @param score
    * @see #receivedAudioAnswer(mitll.langtest.shared.AudioAnswer)
    */
@@ -495,7 +497,6 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
       }
     }
   }*/
-
   private String removePunct(String t) {
     return t.replaceAll("/", " ").replaceAll(CommentNPFExercise.PUNCT_REGEX, "");
   }
@@ -512,7 +513,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
   private String showIncorrectFeedback(AudioAnswer result, double score, boolean hasRefAudio, String heard) {
     if (result.isSaidAnswer()) { // if they said the right answer, but poorly, show pron score
       showPronScoreFeedback(score);
-    //  showHeard(heard);
+      //  showHeard(heard);
     }
     showOtherText();
 
@@ -573,8 +574,8 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
   void removePlayingHighlight() {
     //logger.info("removePlayingHighlight - ");
     removePlayingHighlight(
-    //    isSiteEnglish() ? english : foreign
-      foreign
+        //    isSiteEnglish() ? english : foreign
+        foreign
     );
   }
 
@@ -645,15 +646,15 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
     } else {*/
     //  logger.info("doing nextAfterDelay : correct " + correct + " feedback " + feedback);
 
-      if (correct) {
-        // go to next item
-//        logger.info("Bootstrap nextAfterDelay " + correct);
-        loadNextOnTimer(100);//DELAY_MILLIS);
-      } else {
-        initRecordButton();
-        clearFeedback();
-      }
-  //  }
+    if (correct) {
+      // go to next item
+      logger.info("Bootstrap nextAfterDelay " + correct + " : " +CORRECT_DELAY);
+      loadNextOnTimer(CORRECT_DELAY);//DELAY_MILLIS);
+    } else {
+      initRecordButton();
+      clearFeedback();
+    }
+    //  }
   }
 
   /**
