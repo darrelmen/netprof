@@ -60,5 +60,13 @@ public class ExerciseAnnotation implements IsSerializable {
     return comment;
   }
 
-  public String toString() { return "Anno status=" + getStatus() + " : '" + getComment() +"'"; }
+  public void setComment(String comment) {
+    this.comment = comment;
+  }
+
+  public String toString() { return "[" + getStatus() + " : '" + getComment() +"']"; }
+
+  public void setStatus(String status) {
+    this.status = status;
+  }
 }
