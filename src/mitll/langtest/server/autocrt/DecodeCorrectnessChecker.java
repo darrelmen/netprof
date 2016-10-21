@@ -102,9 +102,9 @@ public class DecodeCorrectnessChecker {
     double score = answer.getScore();
 
     if (answer.isCorrect()) {
-      logger.info("correct response for exercise #" + id +
-          " reco sentence was '" + decodeOutput + "' vs " + "'" + foregroundSentences + "' " +
-          "pron score was " + score + " answer " + answer);
+//      logger.info("correct response for exercise #" + id +
+//          " reco sentence was '" + decodeOutput + "' vs " + "'" + foregroundSentences + "' " +
+//          "pron score was " + score + " answer " + answer);
     } else {
       int length = foregroundSentences.isEmpty() ? 0 : foregroundSentences.iterator().next().length();
       logger.info("getFlashcardAnswer : incorrect response for exercise #" + id +
