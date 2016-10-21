@@ -84,6 +84,7 @@ public class ModalInfoDialog {
   public ModalInfoDialog(String title, Collection<String> messages, Collection<String> values, Widget widget,
                          HiddenHandler handler, boolean bigger, boolean addEnterKeyBinding) {
     Modal modal = getModal(title, messages, values, widget, handler, bigger, addEnterKeyBinding);
+    modal.setWidth(600);
     modal.show();
   }
 
