@@ -14,15 +14,19 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/stax-api-1.0.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/xmlbeans-2.3.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-fileupload-1.2.2.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/flashcard.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/org.moxieapps.gwt.highcharts-1.5.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-bootstrap-2.3.2.1-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/guava-16.0.1.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/guava-gwt-16.0.1.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/junit-4.11.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/imagewriter"/>
 	<classpathentry kind="lib" path="gwt/validation-api-1.0.0.GA-sources.jar"/>
 	<classpathentry kind="lib" path="gwt/validation-api-1.0.0.GA.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/junit-4.12.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/guava-19.0.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/org.moxieapps.gwt.highcharts-1.7.0.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/uadetector-core-0.9.22.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/uadetector-resources-2014.10.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-math3-3.5.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-lang3-3.4.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-io-2.4.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/servlet-api.jar"/>
+	<classpathentry kind="lib" path="gwt/gwt-codeserver.jar"/>
 	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/poi-3.10-FINAL-20140208.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/poi-ooxml-3.10-FINAL-20140208.jar"/>
