@@ -105,9 +105,9 @@ public class CommentBox extends PopupContainer {
   Widget getNoPopup(String field, Widget content, ExerciseAnnotation annotation,
                     AnnotationExercise toSet) {
     TextBox commentEntryText = new TextBox();
-    DivWidget commentAndOK = new DivWidget();
+    Panel commentAndOK = new HorizontalPanel();
 
-    Button ok = new Button("Add Comment");
+    Button ok = new Button("Comment");
     ok.setType(ButtonType.SUCCESS);
     ok.addStyleName("leftTenMargin");
 
@@ -134,7 +134,7 @@ public class CommentBox extends PopupContainer {
       }
     }
 
-    commentEntryText.addStyleName("topFiveMargin");
+//    commentEntryText.addStyleName("topFiveMargin");
 
     commentAndOK.add(commentEntryText);
     commentAndOK.add(ok);
