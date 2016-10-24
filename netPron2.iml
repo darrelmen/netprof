@@ -96,5 +96,7 @@
     <orderEntry type="module" module-name="Audioimage" />
     <orderEntry type="module" module-name="imagewriter" />
     <orderEntry type="module" module-name="Audioimage" />
+    <orderEntry type="library" name="pronz" level="project" />
+    <orderEntry type="library" name="slf4j-simple-1.7.21" level="project" />
   </component>
 </module>
