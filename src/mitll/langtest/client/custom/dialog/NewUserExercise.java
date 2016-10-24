@@ -72,6 +72,9 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 class NewUserExercise extends BasicDialog {
+  public static final int MAX_CHARACTERS = 300;
+  public static final int TEXT_FIELD_WIDTH = 500;
+
   private final Logger logger = Logger.getLogger("NewUserExercise");
 
   private static final String FOREIGN_LANGUAGE = "Foreign Language";
@@ -362,19 +365,18 @@ class NewUserExercise extends BasicDialog {
   void makeEnglishRow(Panel container) {
     Panel row = new FluidRow();
     container.add(row);
-    english = addControlFormField(row, getEnglishLabel(), false, 1, 100, "");
+    english = addControlFormField(row, getEnglishLabel(), false, 1, MAX_CHARACTERS, "", TEXT_FIELD_WIDTH);
   }
 
   String getEnglishLabel() {
-    boolean english = getLanguage().equalsIgnoreCase("english");
-    return english ? ENGLISH_LABEL_2 : ENGLISH_LABEL;
+    return getLanguage().equalsIgnoreCase("english") ? ENGLISH_LABEL_2 : ENGLISH_LABEL;
   }
 
   void makeForeignLangRow(Panel container) {
     //  logger.info("NewUserExercise.makeForeignLangRow --->");
     Panel row = new FluidRow();
     container.add(row);
-    foreignLang = addControlFormField(row, getLanguage(), false, 1, 150, "");
+    foreignLang = addControlFormField(row, getLanguage(), false, 1, MAX_CHARACTERS, "", TEXT_FIELD_WIDTH);
     foreignLang.box.setDirectionEstimator(true);   // automatically detect whether text is RTL
   }
 
@@ -385,7 +387,7 @@ class NewUserExercise extends BasicDialog {
   void makeTranslitRow(Panel container) {
     Panel row = new FluidRow();
     container.add(row);
-    translit = addControlFormField(row, TRANSLITERATION_OPTIONAL, false, 0, 150, "");
+    translit = addControlFormField(row, TRANSLITERATION_OPTIONAL, false, 0, MAX_CHARACTERS, "", TEXT_FIELD_WIDTH);
   }
 
   public <S extends CommonShell & AudioRefExercise & AnnotationExercise> void setFields(S newUserExercise) {
