@@ -100,7 +100,6 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
    * @param listContainer
    * @param addKeyHandler
    * @param instance
-   * @paramx mutableAnnotation
    * @see mitll.langtest.client.custom.Navigation#Navigation(LangTestDatabaseAsync, UserManager, ExerciseController, UserFeedback)
    * @see mitll.langtest.client.custom.content.NPFHelper#getFactory(PagingExerciseList, String, boolean)
    */
@@ -223,7 +222,6 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
 
   private void addContextTranslation(AnnotationExercise e, String contextTranslation, boolean same, Panel vp) {
     if (!contextTranslation.isEmpty() && !same) {
-      // Widget translationEntry = getEntry(e, QCNPFExercise.CONTEXT_TRANSLATION, ExerciseFormatter.CONTEXT_TRANSLATION, contextTranslation);
       Panel contentWidget = getContentWidget(ExerciseFormatter.CONTEXT_TRANSLATION, contextTranslation, false);
       Widget translationEntry = getCommentBox(false).getNoPopup(QCNPFExercise.CONTEXT_TRANSLATION, contentWidget,
           e.getAnnotation(QCNPFExercise.CONTEXT_TRANSLATION),
@@ -388,7 +386,6 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
 
   private void addGenderChoices(AudioRefExercise e, Panel hp) {
     // first, choose male and female voices
-
     long maleTime = 0, femaleTime = 0;
     Set<Long> preferredUsers = controller.getProps().getPreferredVoices();
     for (AudioAttribute audioAttribute : e.getAudioAttributes()) {
