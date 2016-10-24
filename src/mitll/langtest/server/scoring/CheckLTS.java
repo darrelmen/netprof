@@ -64,7 +64,7 @@ class CheckLTS {
    * @param languageProperty
    * @see Scoring#Scoring(String, ServerProperties, LogAndNotify)
    */
-  public CheckLTS(LTS lts, HTKDictionary htkDictionary, String languageProperty, boolean hasModel) {
+  CheckLTS(LTS lts, HTKDictionary htkDictionary, String languageProperty, boolean hasModel) {
     this.letterToSoundClass = lts;
     this.htkDictionary = htkDictionary;
     if (htkDictionary.isEmpty() && hasModel) {
@@ -81,7 +81,7 @@ class CheckLTS {
    * @return
    * @see mitll.langtest.server.scoring.Scoring#checkLTS(String)
    */
-  public Set<String> checkLTS(String foreignLanguagePhrase) {
+  Set<String> checkLTS(String foreignLanguagePhrase) {
     return checkLTS(letterToSoundClass, foreignLanguagePhrase);
   }
 
