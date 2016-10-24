@@ -63,7 +63,7 @@ public abstract class UserDialog extends BasicDialog {
     this.props = props;
   }
 
-  protected FormField addControlFormField(Panel dialogBox, String label, boolean isPassword, int minLength, int maxLength, String hint) {
+  protected FormField addControlFormField(Panel dialogBox, String label, boolean isPassword, int minLength, int maxLength, String hint, int optWidth) {
     final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
     user.setMaxLength(maxLength);
     return getFormField(dialogBox, label, user, minLength, hint);
