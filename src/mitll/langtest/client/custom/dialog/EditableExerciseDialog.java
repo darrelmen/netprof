@@ -239,9 +239,7 @@ class EditableExerciseDialog extends NewUserExercise {
     container.add(row);
 
     foreignAnno.getElement().setId("foreignLanguageAnnotation");
-
 //    if (DEBUG) logger.info("makeForeignLangRow make fl row " + foreignAnno);
-
     foreignLang = makeBoxAndAnno(row, controller.getLanguage(), "", foreignAnno);
     foreignLang.box.setDirectionEstimator(true);   // automatically detect whether text is RTL
     // return foreignLang;
@@ -290,7 +288,7 @@ class EditableExerciseDialog extends NewUserExercise {
    * @see #makeEnglishRow(com.google.gwt.user.client.ui.Panel)
    */
   FormField makeBoxAndAnno(Panel row, String label, String subtext, HTML annoBox) {
-    FormField formField = addControlFormFieldHorizontal(row, label, subtext, false, 1, annoBox, LABEL_WIDTH);
+    FormField formField = addControlFormFieldHorizontal(row, label, subtext, false, 1, annoBox, LABEL_WIDTH, TEXT_FIELD_WIDTH);
     annoBox.addStyleName("leftFiveMargin");
     annoBox.addStyleName("editComment");
     return formField;
