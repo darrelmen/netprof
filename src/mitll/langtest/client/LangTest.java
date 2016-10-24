@@ -183,13 +183,14 @@ import java.util.logging.Logger;
  * - Don't attach reference audio that doesn't pass dnr minimum (mainly for old audio). Mark audio rows with DNR.
  * 1.5.4 (10-21-16)
  * - Increase delay after correct avp response.
- *
+ * 1.5.5 (10-23-16)
+ * - Fix bug where couldn't add defect comments to context sentences, better handling of sentence length user exercise entries.
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private final Logger logger = Logger.getLogger("LangTest");
 
-  public static final String VERSION_INFO = "1.5.3";
+  public static final String VERSION_INFO = "1.5.5";
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
   private static final String UNKNOWN = "unknown";

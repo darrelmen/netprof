@@ -47,10 +47,29 @@ public class ExerciseAnnotation implements IsSerializable {
   private String status;
   private String comment;
 
-  public ExerciseAnnotation(){}
-  public ExerciseAnnotation(String status, String comment) { this.status = status; this.comment = comment; }
-  public boolean isCorrect() { return getStatus().equals("correct"); }
-  public boolean isDefect()  { return !isCorrect(); }
+  public enum TYPICAL {
+    CORRECT, INCORRECT;
+
+    public String toString() {
+      return name().toLowerCase();
+    }
+  }
+
+  public ExerciseAnnotation() {
+  }
+
+  public ExerciseAnnotation(String status, String comment) {
+    this.status = status;
+    this.comment = comment;
+  }
+
+  public boolean isCorrect() {
+    return getStatus().equals("correct");
+  }
+
+  public boolean isDefect() {
+    return !isCorrect();
+  }
 
   public String getStatus() {
     return status;
@@ -64,7 +83,9 @@ public class ExerciseAnnotation implements IsSerializable {
     this.comment = comment;
   }
 
-  public String toString() { return "[" + getStatus() + " : '" + getComment() +"']"; }
+  public String toString() {
+    return "[" + getStatus() + " : '" + getComment() + "']";
+  }
 
   public void setStatus(String status) {
     this.status = status;
