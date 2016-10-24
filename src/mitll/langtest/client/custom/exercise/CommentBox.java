@@ -46,14 +46,13 @@ import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.custom.TooltipHelper;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
+import mitll.langtest.client.flashcard.FlashcardPanel;
 import mitll.langtest.client.instrumentation.EventRegistration;
-import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.scoring.CommentAnnotator;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.shared.ExerciseAnnotation;
+import mitll.langtest.shared.ExerciseAnnotation.TYPICAL;
 import mitll.langtest.shared.exercise.AnnotationExercise;
-import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.MutableAnnotationExercise;
 
 import java.util.HashMap;
@@ -67,9 +66,11 @@ import java.util.logging.Logger;
  * @since 9/8/14.
  */
 public class CommentBox extends PopupContainer {
-  public static final String WAV = ".wav";
-  public static final String MP3 = ".mp3";
   private final Logger logger = Logger.getLogger("CommentBox");
+
+  private static final String WAV = ".wav";
+  private static final String MP3 = ".mp3";
+  private static final String CLEAR_COMMENT = "Clear comment";
 
   private static final String COMMENT_BUTTON_GROUP_NEW = "comment-button-group-new";
   private final String exerciseID;
@@ -77,7 +78,7 @@ public class CommentBox extends PopupContainer {
   private final EventRegistration registration;
   private DecoratedPopupPanel commentPopup;
   private final MutableAnnotationExercise annotationExercise;
-  boolean tooltipOnRight;
+  private final boolean tooltipOnRight;
 
   /**
    * @param exerciseID
@@ -102,7 +103,9 @@ public class CommentBox extends PopupContainer {
    * @return
    * @see CommentNPFExercise#getContext
    */
-  Widget getNoPopup(String field, Widget content, ExerciseAnnotation annotation,
+  Widget getNoPopup(String field,
+                    Widget content,
+                    final ExerciseAnnotation annotation,
                     AnnotationExercise toSet) {
     TextBox commentEntryText = new TextBox();
     Panel commentAndOK = new HorizontalPanel();
@@ -173,14 +176,17 @@ public class CommentBox extends PopupContainer {
       public void onClick(ClickEvent event) {
         commentAndOK.setVisible(false);
         commentComplete(commentEntryText, field, commentButton, clearButton);
+        String text = commentEntryText.getText();
+
+        ExerciseAnnotation toUse = annotation;
         if (annotation != null) {
-          annotation.setComment(commentEntryText.getText());
-          annotation.setStatus("incorrect");
-          toSet.getFieldToAnnotation().put(field, annotation);
+          annotation.setComment(text);
+          annotation.setStatus(TYPICAL.INCORRECT.toString());
           logger.info("anno now " + annotation);
         } else {
-          logger.info("no anno to set");
+          toUse = new ExerciseAnnotation(TYPICAL.INCORRECT.toString(), text);
         }
+        toSet.getFieldToAnnotation().put(field, toUse);
       }
     });
 
@@ -252,6 +258,10 @@ public class CommentBox extends PopupContainer {
     return field;
   }
 
+  /**
+   * @see FlashcardPanel#otherReasonToIgnoreKeyPress
+   * @return
+   */
   public boolean isPopupShowing() {
     return commentPopup.isShowing();
   }
@@ -293,14 +303,14 @@ public class CommentBox extends PopupContainer {
    * @return
    * @see #getEntry(String, Widget, ExerciseAnnotation)
    */
-  public Button getClearButton(final TextBox commentEntryText,
-                               final Widget commentButton,
-                               final String field) {
+  private Button getClearButton(final TextBox commentEntryText,
+                                final Widget commentButton,
+                                final String field) {
     final Button clear = new Button("");
     clear.getElement().setId("CommentNPFExercise_" + field);
     registration.register(clear, exerciseID, "clear comment");
     clear.addStyleName("leftFiveMargin");
-    addTooltip(clear, "Clear comment");
+    addTooltip(clear, CLEAR_COMMENT);
 
     clear.setIcon(IconType.REMOVE);
     clear.setSize(ButtonSize.MINI);
@@ -310,7 +320,7 @@ public class CommentBox extends PopupContainer {
         commentEntryText.setText("");
         showOrHideCommentButton(commentButton, clear, true);
 
-        annotationExercise.addAnnotation(field, "correct", "");
+        annotationExercise.addAnnotation(field, TYPICAL.CORRECT.toString(), "");
         setButtonTitle(commentButton, true, "");
         commentAnnotator.addCorrectComment(field);
       }
@@ -353,7 +363,7 @@ public class CommentBox extends PopupContainer {
    * @param isCorrect
    * @see #commentComplete
    */
-  public void showOrHideCommentButton(UIObject commentButton, UIObject clearButton, boolean isCorrect) {
+  private void showOrHideCommentButton(UIObject commentButton, UIObject clearButton, boolean isCorrect) {
     if (isCorrect) {
       showQC(commentButton);
     } else {
