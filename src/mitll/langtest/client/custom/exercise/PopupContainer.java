@@ -40,6 +40,11 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.PopupHelper;
+import mitll.langtest.shared.ExerciseAnnotation;
+
+import java.util.*;
+import java.util.logging.Logger;
+
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -48,13 +53,16 @@ import mitll.langtest.client.PopupHelper;
  * @since 9/8/14.
  */
 class PopupContainer {
+  private final Logger logger = Logger.getLogger("PopupContainer");
+
   private final PopupHelper popupHelper = new PopupHelper();
 
   /**
    * @param commentEntryText
    * @return
+   * @see NPFExercise#getNextListButton
    */
-  public DecoratedPopupPanel makePopupAndButton(TextBox commentEntryText, ClickHandler clickHandler) {
+  DecoratedPopupPanel makePopupAndButton(TextBox commentEntryText, ClickHandler clickHandler) {
     final DecoratedPopupPanel commentPopup = new DecoratedPopupPanel();
     commentPopup.setAutoHideEnabled(true);
 
@@ -98,8 +106,11 @@ class PopupContainer {
    * @param tooltip
    * @see mitll.langtest.client.custom.exercise.CommentBox#configureCommentButton(com.github.gwtbootstrap.client.ui.Button, boolean, com.google.gwt.user.client.ui.PopupPanel, String, com.github.gwtbootstrap.client.ui.TextBox)
    */
-  void configurePopupButton(final Button popupButton, final PopupPanel popup,
-                            final TextBox textEntry, final Tooltip tooltip) {
+  void configurePopupButton(final Button popupButton,
+                            final PopupPanel popup,
+                            final TextBox textEntry,
+                            final Tooltip tooltip) {
+  //  logger.info("configurePopupButton for " + textEntry.getElement().getId());
     popupButton.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
@@ -151,8 +162,11 @@ class PopupContainer {
     textBox.configure(popup);
   }
 
-  public static class HidePopupTextBox extends TextBox {
-    public void configure(final PopupPanel popup) {
+  /**
+   * @see CommentBox#getEntry(String, Widget, ExerciseAnnotation)
+   */
+  static class HidePopupTextBox extends TextBox {
+    void configure(final PopupPanel popup) {
       addKeyPressHandler(new KeyPressHandler() {
         @Override
         public void onKeyPress(KeyPressEvent event) {

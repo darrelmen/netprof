@@ -252,7 +252,7 @@ public class AudioConversion {
    * @see #convertBase64ToAudioFiles
    */
   public TrimInfo trimSilence(final File wavFile) {
-    //  logger.info("trimSilence " + wavFile.getAbsolutePath());
+   // logger.info("trimSilence " + wavFile.getAbsolutePath());
     if (!wavFile.exists()) {
       logger.error("trimSilence " + wavFile + " doesn't exist");
       return new TrimInfo();
@@ -268,17 +268,16 @@ public class AudioConversion {
         copyAndDeleteOriginal(trimmed, wavFile);
 
         long now = System.currentTimeMillis();
-        if (now - then > 0) {
+        //if (now - then > 0) {
           logger.debug("trimSilence (" + props.getLanguage() +
               "): took " + (now - then) + " millis to convert original " + wavFile.getName() +
               " to trim wav file : " + durationInSeconds + " before, " + durationInSecondsTrimmed + " after.");
-        }
+        //}
         return new TrimInfo(durationInSecondsTrimmed, true);
       } else {
-        //  long now = System.currentTimeMillis();
-/*        logger.info("trimSilence : took " + (now - then) + " millis to NOT convert original " + wavFile.getName() +
-            " to trim wav file : " + durationInSeconds + " before, " + durationInSecondsTrimmed + " after.");*/
-
+        long now = System.currentTimeMillis();
+        logger.debug("trimSilence : took " + (now - then) + " millis to NOT convert original " + wavFile.getName() +
+            " to trim wav file : " + durationInSeconds + " before, " + durationInSecondsTrimmed + " after.");
         return new TrimInfo(durationInSeconds, false);
       }
     } catch (IOException e) {
@@ -291,12 +290,12 @@ public class AudioConversion {
     private final double duration;
     private final boolean didTrim;
 
-    public TrimInfo() {
+    TrimInfo() {
       duration = 0;
       didTrim = false;
     }
 
-    public TrimInfo(double duration, boolean didTrim) {
+    TrimInfo(double duration, boolean didTrim) {
       this.duration = duration;
       this.didTrim = didTrim;
     }
@@ -304,11 +303,9 @@ public class AudioConversion {
     public double getDuration() {
       return duration;
     }
-
     public boolean didTrim() {
       return didTrim;
     }
-
     public String toString() {
       return " dur " + duration + " did trim " + didTrim;
     }
@@ -318,7 +315,6 @@ public class AudioConversion {
 //    logger.info("orig " + wavFile.getName() + " source " + sourceFile + " suffix " + suffix);
     String name1 = wavFile.getName();
     String dest = wavFile.getParent() + File.separator + removeSuffix(name1) + suffix + ".wav";
-
     File replacement = new File(dest);
     File srcFile = new File(sourceFile);
 //    logger.info("srcFile " + srcFile + " exists " + srcFile.exists());
