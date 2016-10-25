@@ -74,11 +74,12 @@ public class ServerProperties {
       "French",
       "Farsi",
       "German",
-      "Korean",
       "Iraqi",
       "Japanese",
+      "Korean",
       "Levantine",
       "Mandarin",
+      "MandarinTraditional",
       "MSA",
       "Pashto1",
       "Pashto2",
@@ -92,7 +93,6 @@ public class ServerProperties {
 
   private static final List<String> AMAS_SITES =
       Arrays.asList("Dari", "Farsi", "Korean", "Mandarin", "MSA", "Pashto", "Russian", "Spanish", "Urdu");
-
 
   public static final String MIRA_DEVEL_HOST = "mira-devel.llan.ll.mit.edu/scorer/item"; //"mira-devel.llan.ll.mit.edu/msa/item";
   private static final String MIRA_DEVEL = "https://" + MIRA_DEVEL_HOST;
@@ -424,6 +424,7 @@ public class ServerProperties {
     return props.getProperty(param, TRUE).equals(TRUE);
   }
 
+  public String getProperty(String prop) { return props.getProperty(prop); }
   /**
    * if true, use old school (hydec)
    * OR if there is no webservice port specified
@@ -634,7 +635,7 @@ public class ServerProperties {
   }
 
   private static final long TRIM_SILENCE_BEFORE = 300;
-  private static final long TRIM_SILENCE_AFTER = 300;
+  private static final long TRIM_SILENCE_AFTER  = 300;
 
   public long getTrimBefore() {
     return getIntPropertyDef("trimBeforeMillis", "" + TRIM_SILENCE_BEFORE);
@@ -642,5 +643,13 @@ public class ServerProperties {
 
   public long getTrimAfter() {
     return getIntPropertyDef("trimAfterMillis", "" + TRIM_SILENCE_AFTER);
+  }
+
+  public boolean shouldRecalcStudentAudio() {
+    return getDefaultTrue("shouldRecalcStudentAudio");
+  }
+
+  public String getCurrentModel() {
+    return hasModel()? getProperty("MODELS_DIR").replaceAll("models.", ""): "";
   }
 }
