@@ -149,7 +149,7 @@ public class KeyPressHelper {
 
   public void removeKeyHandler() {
     if (keyHandler == null) {
-      logger.warning("\nEnterKeyButtonHelper : removeKeyHandler : " + keyHandler);
+      //logger.warning("\nEnterKeyButtonHelper : removeKeyHandler : " + keyHandler);
     } //else {
     // logger.info("EnterKeyButtonHelper : removeKeyHandler : " + keyHandler);
     // }
