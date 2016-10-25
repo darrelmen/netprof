@@ -48,6 +48,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class PropertyHandler {
+  public static final String NPF_CLASSROOM_URL = "https://np.ll.mit.edu/npfClassroom";
   private final Logger logger = Logger.getLogger("PropertyHandler");
 
   private static final String RTL = "rtl";
@@ -57,7 +58,7 @@ public class PropertyHandler {
    * Possibly we need to add a delay after button is released to actually tell flash to stop recording.
    * @see RecordButton#startOrStopRecording()
    */
-  private static final int DEFAULT_AFTER_STOP_DELAY_MILLIS = 85;
+  private static final int DEFAULT_AFTER_STOP_DELAY_MILLIS = 90;//185;//85;
 
   // property file property names
   private static final String ENABLE_ALL_USERS = "enableAllUsers";
@@ -124,6 +125,9 @@ public class PropertyHandler {
   private static final String INITIAL_PROMPT = "Practice pronunciation and learn vocabulary.";//"Learn how to pronounce words and practice vocabulary.";
   private static final String AMAS_INITIAL_PROMPT = "Test your Listening and Reading Skills.";
 
+  /**
+   * TODO : don't do this in two places!
+   */
   private static final List<String> SITE_LIST = Arrays.asList(
       "Dari",
       "Egyptian",
@@ -131,11 +135,12 @@ public class PropertyHandler {
       "Farsi",
       "French",
       "German",
-      "Korean",
       "Iraqi",
       "Japanese",
+      "Korean",
       "Levantine",
       "Mandarin",
+      "MandarinTraditional",
       "MSA",
       "Pashto1",
       "Pashto2",
@@ -150,7 +155,7 @@ public class PropertyHandler {
   private static final List<String> AMAS_SITES = Arrays.asList("Dari", "Farsi", "Korean", "Mandarin", "MSA", "Pashto",
       "Russian", "Spanish", "Urdu");
   private String modelDir;
-  private int afterStopDelayMillis;
+  private int afterStopDelayMillis = DEFAULT_AFTER_STOP_DELAY_MILLIS;
 
   /**
    * @return
@@ -356,7 +361,7 @@ public class PropertyHandler {
   }
 
   public String getSitePrefix() {
-    return isAMAS() ? "https://np.ll.mit.edu/amas" : "https://np.ll.mit.edu/npfClassroom";
+    return isAMAS() ? "https://np.ll.mit.edu/amas" : NPF_CLASSROOM_URL;
   }
 
   private void getPreferredVoices(String value) {
