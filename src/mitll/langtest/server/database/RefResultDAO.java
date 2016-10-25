@@ -44,13 +44,14 @@ import java.sql.*;
 import java.util.*;
 
 import static mitll.langtest.server.database.Database.EXID;
+import static mitll.langtest.server.database.ResultDAO.MODEL;
+import static mitll.langtest.server.database.ResultDAO.MODELUPDATE;
 
 /**
  * Create, drop, alter, read from the results table.
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since
  */
 public class RefResultDAO extends DAO {
   private static final Logger logger = Logger.getLogger(RefResultDAO.class);
@@ -62,6 +63,7 @@ public class RefResultDAO extends DAO {
 
   private static final String REFRESULT = "refresult";
   private static final String SELECT_ALL = "SELECT * FROM " + REFRESULT;
+  public static final String SELECT_PREFIX = SELECT_ALL + " WHERE " + EXID;
 
   private static final String DURATION = "duration";
   private static final String CORRECT = "correct";
@@ -83,7 +85,8 @@ public class RefResultDAO extends DAO {
   private static final String HYDEC_ALIGN_NUM_PHONES = "hydecAlignNumPhones";
   private static final String WORDS = "{\"words\":[]}";
   private final boolean dropTable;
-//  private final boolean debug = false;
+  //  private final boolean debug = false;
+  private final String currentModel;
 
   /**
    * @param database
@@ -93,6 +96,7 @@ public class RefResultDAO extends DAO {
   RefResultDAO(Database database, boolean dropTable) {
     super(database);
     this.dropTable = dropTable;
+    currentModel = database.getServerProps().getCurrentModel();
   }
 
   public boolean removeForExercise(String exid) {
@@ -113,18 +117,18 @@ public class RefResultDAO extends DAO {
    * @see DatabaseImpl#addRefAnswer
    */
   long addAnswer(Database database,
-                        int userID, String id,
-                        String audioFile,
-                        long durationInMillis,
-                        boolean correct,
+                 int userID, String id,
+                 String audioFile,
+                 long durationInMillis,
+                 boolean correct,
 
-                        DecodeAlignOutput alignOutput,
-                        DecodeAlignOutput decodeOutput,
+                 DecodeAlignOutput alignOutput,
+                 DecodeAlignOutput decodeOutput,
 
-                        DecodeAlignOutput alignOutputOld,
-                        DecodeAlignOutput decodeOutputOld,
+                 DecodeAlignOutput alignOutputOld,
+                 DecodeAlignOutput decodeOutputOld,
 
-                        boolean isMale, String speed) {
+                 boolean isMale, String speed) {
     Connection connection = database.getConnection(this.getClass().toString());
     try {
       long then = System.currentTimeMillis();
@@ -208,13 +212,17 @@ public class RefResultDAO extends DAO {
             HYDEC_ALIGN_PROCESS_DUR + ", " +
 
             MALE + "," +
-            SPEED +
+            SPEED + "," +
+
+            MODEL + "," +
+            MODELUPDATE +
             ") " +
             "VALUES(?,?,?,?,?,?," +
             "?,?,?,?," +
             "?,?,?,?," +
             "?,?,?," +
             "?,?,?," +
+            "?,?," +
             "?,?" +
             ")",
         Statement.RETURN_GENERATED_KEYS);
@@ -249,6 +257,9 @@ public class RefResultDAO extends DAO {
 
     statement.setBoolean(i++, isMale);
     statement.setString(i++, speed);
+
+    statement.setString(i++, currentModel);
+    statement.setTimestamp(i++, new Timestamp(System.currentTimeMillis()));
 
     statement.executeUpdate();
 
@@ -292,6 +303,31 @@ public class RefResultDAO extends DAO {
     return new ArrayList<>();
   }
 
+  public Result getRefForExAndAudio(String exid, String answer) {
+    Result latestResult = null;
+
+    try {
+      String exidPrefix = SELECT_PREFIX + "='" + exid + "'";
+      List<Result> resultsSQL = getResultsSQL(exidPrefix);
+      if (resultsSQL.size() > 0) {
+        logger.info("getRefForExAndAudio got " + resultsSQL.size() + " for " + exid);
+      }
+
+      long latest = 0;
+      for (Result res : resultsSQL) {
+        if (res.getAnswer().endsWith(answer)) {
+          if (res.getUniqueID() > latest) {
+            latest = res.getUniqueID();
+            latestResult = res;
+          }
+        }
+      }
+    } catch (SQLException e) {
+      logger.error("Got " + e, e);
+    }
+    return latestResult;
+  }
+
   /**
    * @param exid
    * @param answer
@@ -299,12 +335,11 @@ public class RefResultDAO extends DAO {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getPretestScore(int, long, String, String, int, int, boolean, String, boolean)
    */
   public Result getResult(String exid, String answer) {
-    String sql = SELECT_ALL +
-        " WHERE " + EXID + "='" + exid + "' AND " + ANSWER + " like '%" + answer + "'";
+    String sql = SELECT_ALL + " WHERE " + EXID + "='" + exid + "' AND " + ANSWER + " like '%" + answer + "'";
     try {
       List<Result> resultsSQL = getResultsSQL(sql);
       if (resultsSQL.size() > 1) {
-        logger.warn("for " + exid + " and  " + answer + " got " + resultsSQL);
+        logger.warn("for " + exid + " and  " + answer + " got " + resultsSQL.size());
       }
       return resultsSQL.isEmpty() ? null : resultsSQL.iterator().next();
     } catch (SQLException e) {
@@ -430,6 +465,8 @@ public class RefResultDAO extends DAO {
     int count = 0;
     int skipped = 0;
     long then = System.currentTimeMillis();
+
+
     while (rs.next()) {
       int uniqueID = rs.getInt(ID);
       long userID = rs.getLong(USERID);
@@ -453,11 +490,14 @@ public class RefResultDAO extends DAO {
 
       float alignScore = rs.getFloat(ALIGNSCORE);
       String alignJSON = rs.getString(ALIGNJSON);
+      String model = rs.getString(MODEL);
+
       boolean validAlignJSON = alignScore > 0 && !alignJSON.contains(WORDS);
 
       if (validAlignJSON || validDecodeJSON) {
         float pronScore1 = validDecodeJSON ? pronScore : alignScore;
         String scoreJson1 = validDecodeJSON ? scoreJson : alignJSON;
+
         Result result = new Result(uniqueID, userID, //id
             "", // plan
             exid, // id
@@ -465,7 +505,9 @@ public class RefResultDAO extends DAO {
             trimPathForWebPage2(answer), // answer
             true, // valid
             timestamp.getTime(),
-            "", dur, correct, pronScore1, "browser");
+            "", dur, correct, pronScore1,
+            "browser",
+            model);
         result.setJsonScore(scoreJson1);
         results.add(result);
       } else {
@@ -535,6 +577,13 @@ public class RefResultDAO extends DAO {
     }
     if (!columns.contains(ALIGN_PROCESS_DUR.toLowerCase())) {
       addInt(connection, REFRESULT, ALIGN_PROCESS_DUR);
+    }
+
+    if (!columns.contains(MODEL.toLowerCase())) {
+      addVarchar(connection, REFRESULT, MODEL);
+    }
+    if (!columns.contains(MODELUPDATE.toLowerCase())) {
+      addTimestamp(connection, REFRESULT, MODELUPDATE);
     }
 
     createIndex(database, EXID, REFRESULT);
