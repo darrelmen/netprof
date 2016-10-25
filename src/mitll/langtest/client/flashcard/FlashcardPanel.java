@@ -63,6 +63,8 @@ import mitll.langtest.client.scoring.CommentAnnotator;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.SoundFeedback;
+import mitll.langtest.shared.ExerciseAnnotation;
+import mitll.langtest.shared.ExerciseAnnotation.TYPICAL;
 import mitll.langtest.shared.exercise.AnnotationExercise;
 import mitll.langtest.shared.exercise.AudioRefExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -205,6 +207,7 @@ public class FlashcardPanel<T extends CommonShell & AudioRefExercise & Annotatio
       // logger.info("FlashcardRecordButton : " + instance + " key is  " + listener.getName());
     }
   }
+
   public void wasRevealed() {
     // logger.info("wasRevealed");
     playRefOrAutoPlay();
@@ -212,7 +215,6 @@ public class FlashcardPanel<T extends CommonShell & AudioRefExercise & Annotatio
 
   private void playRefOrAutoPlay() {
     // logger.info("playRefOrAutoPlay");
-
     Scheduler.get().scheduleDeferred(new Command() {
       public void execute() {
         maybePlayRef(controlState);
@@ -222,7 +224,7 @@ public class FlashcardPanel<T extends CommonShell & AudioRefExercise & Annotatio
   }
 
   public void wasHidden() {
-    logger.info("wasHidden");
+    //logger.info("wasHidden");
     cancelTimer();
     getSoundFeedback().clear();
   }
@@ -236,9 +238,9 @@ public class FlashcardPanel<T extends CommonShell & AudioRefExercise & Annotatio
       } else {
         //    logger.info("maybePlayRef auto advance on, so not playing ref here");
       }
-    } else {
+    } //else {
       //logger.info("maybePlayRef tab not visible - so no audio.");
-    }
+    //}
   }
 
   /**
@@ -258,7 +260,7 @@ public class FlashcardPanel<T extends CommonShell & AudioRefExercise & Annotatio
       // String display = w.getElement().getStyle().getDisplay();
       //  logger.info("isVisible check " + w.getElement().getId() + " vis " + w.isVisible() + " display " + display);
       if (/*!w.isVisible() || display.equals("none") ||*/ w.getOffsetWidth() == 0) {
-        logger.info("isVisible check id = '" + w.getElement().getId() + "' vis " + w.isVisible() + " offset width " + w.getOffsetWidth());
+       // logger.info("isVisible check id = '" + w.getElement().getId() + "' vis " + w.isVisible() + " offset width " + w.getOffsetWidth());
         return false;
       } else {
         if (w.getElement().getId().equals(InitialUI.ROOT_VERTICAL_CONTAINER)) {
@@ -295,14 +297,15 @@ public class FlashcardPanel<T extends CommonShell & AudioRefExercise & Annotatio
     commentBox = new CommentBox(exercise.getID(), controller, new CommentAnnotator() {
       @Override
       public void addIncorrectComment(String commentToPost, String field) {
-        addAnnotation(field, GoodwaveExercisePanel.INCORRECT, commentToPost);
+        addAnnotation(field, TYPICAL.INCORRECT, commentToPost);
       }
 
       @Override
       public void addCorrectComment(String field) {
-        addAnnotation(field, GoodwaveExercisePanel.CORRECT, "");
+        addAnnotation(field, TYPICAL.CORRECT, "");
       }
-    }, exercise);
+    }, exercise,
+        true);
 
     DivWidget left = new DivWidget();
     left.add(commentBox.getEntry(QCNPFExercise.FOREIGN_LANGUAGE, null, exercise.getAnnotation(QCNPFExercise.FOREIGN_LANGUAGE)));
@@ -316,8 +319,8 @@ public class FlashcardPanel<T extends CommonShell & AudioRefExercise & Annotatio
     return firstRow;
   }
 
-  private void addAnnotation(final String field, final String status, final String commentToPost) {
-    service.addAnnotation(exercise.getID(), field, status, commentToPost, controller.getUser(), new AsyncCallback<Void>() {
+  private void addAnnotation(final String field, final TYPICAL status, final String commentToPost) {
+    service.addAnnotation(exercise.getID(), field, status.toString(), commentToPost, controller.getUser(), new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
       }
@@ -475,12 +478,12 @@ public class FlashcardPanel<T extends CommonShell & AudioRefExercise & Annotatio
    * @see BootstrapExercisePanel#showIncorrectFeedback
    */
   protected void playRefAndGoToNext(String path, final int delayMillis, boolean useCheck) {
-    // logger.info("playRefAndGoToNext " + path + " is song playing " + isSongPlaying);
+    logger.info("playRefAndGoToNext " + path + " is song playing " + isSongPlaying + " delay " + delayMillis);
     if (!isValid(path)) {
       if (isTabVisible()) {
         checkThenLoadNextOnTimer(1000);
       } else {
-        // logger.info("tab is not visible");
+        logger.info("\tplayRefAndGoToNext tab is not visible");
       }
     } else {
       getSoundFeedback().queueSong(getPath(path), new SoundFeedback.EndListener() {
@@ -1182,10 +1185,9 @@ public class FlashcardPanel<T extends CommonShell & AudioRefExercise & Annotatio
    * @see #playRef()
    */
   private void playRef(String path) {
-    // logger.info("playRef ---------- " + exercise.getID() + " path " + path);
+    logger.info("playRef ---------- " + exercise.getID() + " path " + path);
     path = getPath(path);
-    // final String outer = path;
-    final Widget textWidget = foreign;//() ? english : foreign;
+    final Widget textWidget = foreign;
     getSoundFeedback().queueSong(path,
         new SoundFeedback.EndListener() {
           @Override
@@ -1196,7 +1198,7 @@ public class FlashcardPanel<T extends CommonShell & AudioRefExercise & Annotatio
 
           @Override
           public void songEnded() {
-            //      logger.info("playRef remove playing highlight on " + outer);
+            logger.info("playRef remove playing highlight on ");
             removePlayingHighlight(textWidget);
             if (endListener != null) endListener.songEnded();
           }
