@@ -73,8 +73,9 @@ import java.util.logging.Logger;
 public class InitialUI {
   private final Logger logger = Logger.getLogger("InitialUI");
 
-  public static final String ROOT_VERTICAL_CONTAINER = "root_vertical_container";
+  private static final String NPF_CLASSROOM_URL = "https://np.ll.mit.edu/npfClassroom";
 
+  public static final String ROOT_VERTICAL_CONTAINER = "root_vertical_container";
   protected static final String LOGIN = "Login";
 
   /**
@@ -82,7 +83,7 @@ public class InitialUI {
    *
    * @see #getLinksToSites()
    */
-  private static final int LEFT_LIST_WIDTH = 267;
+  private static final int LEFT_LIST_WIDTH = 167;
 
   private static final String LANGTEST_IMAGES = "langtest/images/";
   private static final int NO_USER_INITIAL = -2;
@@ -124,7 +125,7 @@ public class InitialUI {
     Panel firstRow = makeFirstTwoRows(verticalContainer);
 
     if (!showLogin()) {
-     // logger.info("not show login -");
+      // logger.info("not show login -");
       populateBelowHeader(verticalContainer, firstRow);
     }
   }
@@ -172,8 +173,8 @@ public class InitialUI {
         });
       }
     };
-   // logger.info("talks to domino " + props.talksToDomino());
-    reload = (props.talksToDomino()) ?reload:null;
+    // logger.info("talks to domino " + props.talksToDomino());
+    reload = (props.talksToDomino()) ? reload : null;
     Widget title = banner.makeNPFHeaderRow(props.getSplash(), props.isBeta(), getGreeting(),
         getReleaseStatus(),
         new LogoutClickHandler(),
@@ -210,7 +211,6 @@ public class InitialUI {
   }
 
   /**
-   *
    * @return
    */
   public boolean isRTL() {
@@ -304,7 +304,7 @@ public class InitialUI {
    * @return
    */
   protected Container getRootContainer() {
-   // logger.info("getRootContainer");
+    // logger.info("getRootContainer");
     RootPanel.get().clear();   // necessary?
 
     Container verticalContainer = new FluidContainer();
@@ -384,7 +384,8 @@ public class InitialUI {
     style.setMarginTop(10, Style.Unit.PX);
 
     for (String site : props.getSites()) {
-      Anchor w = new Anchor(site, "https://np.ll.mit.edu/npfClassroom" + site.replaceAll("Mandarin", "CM"));
+      String siteChanged = site.endsWith("Mandarin") ? site.replaceAll("Mandarin", "CM") : site;
+      Anchor w = new Anchor(site, NPF_CLASSROOM_URL + siteChanged);
       w.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
       hp.add(w);
     }
@@ -598,10 +599,10 @@ public class InitialUI {
     if (childCount > 0) {
       Node child = firstRow.getElement().getChild(0);
       Element as = Element.as(child);
-     // logger.info("populateRootPanelIfLogin found : '" + as.getExID() +"'");
+      // logger.info("populateRootPanelIfLogin found : '" + as.getExID() +"'");
 
       if (as.getId().contains(LOGIN)) {
-        logger.info("populateRootPanelIfLogin found login...");
+       // logger.info("populateRootPanelIfLogin found login...");
         populateRootPanel();
       }
     }
