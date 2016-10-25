@@ -73,7 +73,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.text.Annotation;
 import java.text.CollationKey;
 import java.util.*;
 
@@ -315,7 +314,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    *
    * @see #initializeDAOs(PathHelper)
    */
-  private void putBackWordAndPhone() {
+  public void putBackWordAndPhone() {
     List<Result> results = resultDAO.getResultsForPractice();
     Map<Integer, Result> idToResult = new HashMap<>();
     //int skipped = 0;
@@ -326,7 +325,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         //  skipped++;
       }
     }
-
     //logger.info("skipped " + skipped);
 
     List<WordDAO.Word> all = wordDAO.getAll();
@@ -981,7 +979,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return audioDAO;
   }
 
-  private WordDAO getWordDAO() {
+  public WordDAO getWordDAO() {
     return wordDAO;
   }
 
@@ -1338,6 +1336,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     return serverProps;
   }
 
+
+
   private AddRemoveDAO getAddRemoveDAO() {
     return addRemoveDAO;
   }
@@ -1539,10 +1539,13 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   /**
    * @param resultID
    * @param asrScoreForAudio
+   * @param isCorrect
    * @see LangTestDatabaseImpl#getPretestScore(int, long, String, String, int, int, boolean, String, boolean)
+   * @see ScoreServlet#getJsonForAudioForUser(int, String, int, ScoreServlet.Request, String, File, String, String, boolean, boolean)
+   * @see mitll.langtest.server.audio.AudioFileHelper#recalcOne
    */
-  public void rememberScore(long resultID, PretestScore asrScoreForAudio) {
-    getAnswerDAO().changeAnswer(resultID, asrScoreForAudio.getHydecScore(), asrScoreForAudio.getProcessDur(), asrScoreForAudio.getJson());
+  public void rememberScore(long resultID, PretestScore asrScoreForAudio, boolean isCorrect) {
+    getAnswerDAO().changeAnswer(resultID, asrScoreForAudio.getHydecScore(), asrScoreForAudio.getProcessDur(), asrScoreForAudio.getJson(), isCorrect);
     recordWordAndPhoneInfo(resultID, asrScoreForAudio);
   }
 
@@ -1564,11 +1567,14 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   /**
    * @param answerID
    * @param pretestScore
-   * @see #rememberScore(long, PretestScore)
+   * @see #rememberScore(long, PretestScore, boolean)
    */
   private void recordWordAndPhoneInfo(long answerID, PretestScore pretestScore) {
     if (pretestScore != null) {
       recordWordAndPhoneInfo(answerID, pretestScore.getsTypeToEndTimes());
+    }
+    else {
+      logger.warn("recordWordAndPhoneInfo no score for " + answerID);
     }
   }
 
@@ -1579,7 +1585,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @see #recordWordAndPhoneInfo(long, PretestScore)
    */
   private void recordWordAndPhoneInfo(long answerID, Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap) {
-    List<TranscriptSegment> words = netPronImageTypeListMap.get(NetPronImageType.WORD_TRANSCRIPT);
+    List<TranscriptSegment> words  = netPronImageTypeListMap.get(NetPronImageType.WORD_TRANSCRIPT);
     List<TranscriptSegment> phones = netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
     if (words != null) {
       int windex = 0;
@@ -1593,7 +1599,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
             if (pseg.getStart() >= segment.getStart() && pseg.getEnd() <= segment.getEnd()) {
               String pevent = pseg.getEvent();
               if (!pevent.equals(SLFFile.UNKNOWN_MODEL) && !pevent.equals(SIL)) {
-                getPhoneDAO().addPhone(new PhoneDAO.Phone(answerID, wid, pevent, pindex++, pseg.getScore()));
+                getPhoneDAO().addPhone(new PhoneDAO.Phone(answerID, wid, pevent, pindex++, pseg.getScore(), pseg.getDuration()));
               }
             }
           }
