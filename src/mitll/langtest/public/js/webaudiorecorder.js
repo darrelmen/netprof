@@ -134,12 +134,16 @@ function grabWav() {
     recorder && recorder.exportMonoWAV(function (blob) {
         try {
             var reader = new FileReader();
+      //      __log("grabWav");
 
             var arrayBuffer;
             reader.onloadend = function () {
                 arrayBuffer = reader.result;
 
                 var myArray = new Uint8Array(arrayBuffer);
+
+        //        __log("grabWav onloadend " + myArray.length);
+
                 var bytes = bytesToBase64(myArray);
                 getBase64(bytes);
             }

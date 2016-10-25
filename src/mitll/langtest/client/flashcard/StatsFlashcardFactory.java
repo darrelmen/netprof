@@ -340,7 +340,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
      * @see mitll.langtest.client.recorder.RecordButtonPanel#receivedAudioAnswer(mitll.langtest.shared.AudioAnswer, com.google.gwt.user.client.ui.Panel)
      */
     public void receivedAudioAnswer(final AudioAnswer result) {
-     // if (false) logger.info("StatsPracticePanel.receivedAudioAnswer: result " + result);
+     // logger.info("StatsPracticePanel.receivedAudioAnswer: result " + result);
 
       if (result.getValidity() == AudioAnswer.Validity.OK) {
         resultIDs.add(result.getResultID());
@@ -370,7 +370,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         latestResultID = result.getResultID();
         //logger.info("\tStatsPracticePanel.receivedAudioAnswer: latest now " + latestResultID);
       } else {
-        logger.info("got invalid result " + result);
+    //    logger.info("got invalid result " + result);
       }
       super.receivedAudioAnswer(result);
     }
@@ -589,7 +589,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         onSetComplete();
       } else {
        // logger.info("nextAfterDelay " + correct);
-        loadNextOnTimer(DELAY_MILLIS);
+        loadNextOnTimer(CORRECT_DELAY);
       }
     }
 
@@ -613,7 +613,6 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     @Override
     protected void gotClickOnNext() {
       abortPlayback();
-
       //logger.info("on last " + exerciseList.onLast());
       if (exerciseList.onLast()) {
         onSetComplete();
