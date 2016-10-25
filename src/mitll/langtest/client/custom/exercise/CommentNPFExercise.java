@@ -100,7 +100,6 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
    * @param listContainer
    * @param addKeyHandler
    * @param instance
-   * @paramx mutableAnnotation
    * @see mitll.langtest.client.custom.Navigation#Navigation(LangTestDatabaseAsync, UserManager, ExerciseController, UserFeedback)
    * @see mitll.langtest.client.custom.content.NPFHelper#getFactory(PagingExerciseList, String, boolean)
    */
@@ -166,7 +165,8 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
       show.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          new ModalInfoDialog(CONTEXT_SENTENCE, getContext(e));
+     //     logger.info("show context " + e.getID() + " : " + e.getFieldToAnnotation());
+          new ModalInfoDialog(CONTEXT_SENTENCE, getContext(e), false);
         }
       });
 
@@ -180,24 +180,39 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
   }
 
   /**
-   * @param e
+   * @param exercise
    * @return
    * @see #addContextButton
    */
-  private <U extends CommonShell & AnnotationExercise & AudioRefExercise> Panel getContext(U e) {
-    String context = e.getContext() != null && !e.getContext().trim().isEmpty() ? e.getContext() : "";
-    String contextTranslation = e.getContextTranslation() != null && !e.getContextTranslation().trim().isEmpty() ? e.getContextTranslation() : "";
+  private <U extends CommonShell & AnnotationExercise & AudioRefExercise> Panel getContext(U exercise) {
+    String context = exercise.getContext() != null && !exercise.getContext().trim().isEmpty() ? exercise.getContext() : "";
+    String contextTranslation =
+        exercise.getContextTranslation() != null &&
+        !exercise.getContextTranslation().trim().isEmpty() ? exercise.getContextTranslation() : "";
+
     boolean same = context.equals(contextTranslation);
 
     if (!context.isEmpty()) {
       Panel hp = new HorizontalPanel();
-      addGenderChoices(e, hp);
-      String highlightedVocabItemInContext = highlightVocabItemInContext(e, context);
-      Widget entry = getEntry(e, QCNPFExercise.CONTEXT, ExerciseFormatter.CONTEXT, highlightedVocabItemInContext);
+      addGenderChoices(exercise, hp);
+      String highlightedVocabItemInContext = highlightVocabItemInContext(exercise, context);
+
+      Panel contentWidget = getContentWidget(ExerciseFormatter.CONTEXT, highlightedVocabItemInContext, false);
+      String field = QCNPFExercise.CONTEXT;
+      ExerciseAnnotation annotation = exercise.getAnnotation(field);
+
+      logger.info("getContext context " + exercise.getID() + " : " + annotation);
+
+      Widget commentRow = getCommentBox(false)
+          .getNoPopup(
+              field,
+              contentWidget,
+              annotation,
+              exercise);
 
       Panel vp = new VerticalPanel();
-      vp.add(entry);
-      addContextTranslation(e, contextTranslation, same, vp);
+      vp.add(commentRow);
+      addContextTranslation(exercise, contextTranslation, same, vp);
       hp.add(vp);
       return hp;
     } else {
@@ -207,7 +222,11 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
 
   private void addContextTranslation(AnnotationExercise e, String contextTranslation, boolean same, Panel vp) {
     if (!contextTranslation.isEmpty() && !same) {
-      Widget translationEntry = getEntry(e, QCNPFExercise.CONTEXT_TRANSLATION, ExerciseFormatter.CONTEXT_TRANSLATION, contextTranslation);
+      Panel contentWidget = getContentWidget(ExerciseFormatter.CONTEXT_TRANSLATION, contextTranslation, false);
+      Widget translationEntry = getCommentBox(false).getNoPopup(QCNPFExercise.CONTEXT_TRANSLATION, contentWidget,
+          e.getAnnotation(QCNPFExercise.CONTEXT_TRANSLATION),
+          exercise);
+
       vp.add(translationEntry);
     }
   }
@@ -237,7 +256,7 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
     if (i == -1) { // maybe mixed case - 'where' in Where is the desk?
       String str = toFind.toLowerCase();
       i = context.toLowerCase().indexOf(str);
-      logger.info("Got "+i + " for " + str + " in " + context);
+     // logger.info("Got " + i + " for " + str + " in " + context);
     }
     int end = i + toFind.length();
     if (i > -1) {
@@ -267,7 +286,7 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
           builder.append(context.substring(startToken, endToken = startToken + token.length()));
           builder.append(HIGHLIGHT_END);
         } else {
-  //        logger.info("getHighlightedItemInContext from " + endToken + " couldn't find token '" + token + "' len " + token.length() + " in '" + context + "'");
+          //        logger.info("getHighlightedItemInContext from " + endToken + " couldn't find token '" + token + "' len " + token.length() + " in '" + context + "'");
         }
       }
       builder.append(context.substring(endToken));
@@ -288,10 +307,9 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
       if (scoreForChoice > score) {
         highest = choice;
         score = scoreForChoice;
-    //    logger.info("findLongest Got " + score + " for " + new HashSet<>(choice));
-      }
-      else {
-      //  logger.info("findLongest Got " + score + " vs " + highest);
+        //    logger.info("findLongest Got " + score + " for " + new HashSet<>(choice));
+      } else {
+        //  logger.info("findLongest Got " + score + " vs " + highest);
       }
     }
     return highest == null ? tList : highest;
@@ -303,10 +321,10 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
     context = context.toLowerCase();
 
     for (String token : tokens) {
-     // logger.info("getHighlightedItemInContext Check token '" + token + "'");
+      // logger.info("getHighlightedItemInContext Check token '" + token + "'");
       startToken = context.indexOf(token, endToken);
       if (startToken == -1) {
-       // logger.info("getHighlightedItemInContext Check token '" + token + "' not after end " +endToken);
+        // logger.info("getHighlightedItemInContext Check token '" + token + "' not after end " +endToken);
         return false;
       } else {
         endToken = startToken + token.length();
@@ -368,7 +386,6 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
 
   private void addGenderChoices(AudioRefExercise e, Panel hp) {
     // first, choose male and female voices
-
     long maleTime = 0, femaleTime = 0;
     Set<Long> preferredUsers = controller.getProps().getPreferredVoices();
     for (AudioAttribute audioAttribute : e.getAudioAttributes()) {
@@ -507,7 +524,7 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
    * @see #makeFastAndSlowAudio(String)
    */
   private Widget getEntry(final String field, final String label, String value, ExerciseAnnotation annotation) {
-    return getCommentBox().getEntry(field, getContentWidget(label, value, false), annotation);
+    return getCommentBox(true).getEntry(field, getContentWidget(label, value, false), annotation);
   }
 
   /**
@@ -520,7 +537,7 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
     return new FastAndSlowASRScoringAudioPanel<T>(getLocalExercise(), path, service, controller, scorePanel, instance) {
       @Override
       protected void addAudioRadioButton(Panel vp, RadioButton fast) {
-        vp.add(getCommentBox().getEntry(audioPath, fast, exercise.getAnnotation(path)));
+        vp.add(getCommentBox(true).getEntry(audioPath, fast, exercise.getAnnotation(path)));
       }
 
       @Override
@@ -537,11 +554,11 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
    * @see #getEntry(String, String, String, ExerciseAnnotation)
    * @see #makeFastAndSlowAudio(String)
    */
-  private CommentBox getCommentBox() {
+  private CommentBox getCommentBox(boolean tooltipOnRight) {
     if (logger == null) {
       logger = Logger.getLogger("CommentNPFExercise");
     }
     T exercise = this.exercise;
-    return new CommentBox(this.exercise.getID(), controller, this, exercise.getMutableAnnotation());
+    return new CommentBox(this.exercise.getID(), controller, this, exercise.getMutableAnnotation(), tooltipOnRight);
   }
 }
