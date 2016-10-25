@@ -105,6 +105,8 @@ public class ResultDAO extends DAO {
 
   static final String USER_SCORE = "userscore";
   static final String TRANSCRIPT = "transcript";
+  public static final String MODEL = "model";
+  public static final String MODELUPDATE = "modelupdate";
 
   private final boolean DEBUG = false;
 
@@ -139,7 +141,7 @@ public class ResultDAO extends DAO {
    * @return
    * @see UserManagement#populateUserToNumAnswers
    * @see #getUserToResults
-   * @see Report#getResults(StringBuilder, Set, JSONObject, int)
+   * @seex Report#getResults(StringBuilder, Set, JSONObject, int)
    */
   public List<Result> getResults() {
     try {
@@ -667,7 +669,22 @@ public class ResultDAO extends DAO {
     return jsonObject;
   }*/
   public List<CorrectAndScore> getResultsForExIDInForUser(long userID, boolean isFlashcardRequest, String id) {
-    return getResultsForExIDInForUser(Collections.singleton(id), isFlashcardRequest, userID);
+    //return getResultsForExIDInForUser(Collections.singleton(id), isFlashcardRequest, userID);
+
+    try {
+      String sql = getCSSelect() + " FROM " + RESULTS + " WHERE " +
+          EXID + " ='" + id + "' AND "+
+          USERID + "=? AND " +
+          VALID + "=true" +
+          (isFlashcardRequest ? " AND " + getAVPClause(true) : "")
+          ;
+
+      return getCorrectAndScores(1, userID, sql);
+    } catch (Exception ee) {
+      logger.error("exception getting results for user " + userID + " and id " + id);
+      logException(ee);
+    }
+    return new ArrayList<>();
   }
 
   /**
@@ -769,27 +786,31 @@ public class ResultDAO extends DAO {
           " AND " +
           EXID + " in (" + list + ")";
 
-      Connection connection = database.getConnection(this.getClass().toString());
-      PreparedStatement statement = connection.prepareStatement(sql);
-      statement.setLong(1, userid);
-
-      long then = System.currentTimeMillis();
-      List<CorrectAndScore> scores = getScoreResultsForQuery(connection, statement);
-      long now = System.currentTimeMillis();
-
-      if (now - then > 200) {
-        logger.warn("getResultsForExIDInForUser " + getLanguage() + " took " + (now - then) + " millis : " +
-            " query for " + ids.size() + " and userid " + userid + " returned " + scores.size() + " scores");
-      }
-      if (DEBUG) {
-        logger.debug("getResultsForExIDInForUser for  " + sql + " got\n\t" + scores.size());
-      }
-      return scores;
+      return getCorrectAndScores(ids.size(), userid, sql);
     } catch (Exception ee) {
       logger.error("exception getting results for user " + userid + " and ids " + ids);
       logException(ee);
     }
     return new ArrayList<>();
+  }
+
+  private List<CorrectAndScore> getCorrectAndScores(int numIDs, long userid, String sql) throws SQLException {
+    Connection connection = database.getConnection(this.getClass().toString());
+    PreparedStatement statement = connection.prepareStatement(sql);
+    statement.setLong(1, userid);
+
+    long then = System.currentTimeMillis();
+    List<CorrectAndScore> scores = getScoreResultsForQuery(connection, statement);
+    long now = System.currentTimeMillis();
+
+    if (now - then > 200) {
+      logger.warn("getResultsForExIDInForUser " + getLanguage() + " took " + (now - then) + " millis : " +
+          " query for " + numIDs + " and userid " + userid + " returned " + scores.size() + " scores");
+    }
+    if (DEBUG) {
+      logger.debug("getResultsForExIDInForUser for  " + sql + " got\n\t" + scores.size());
+    }
+    return scores;
   }
 
   private String getAVPClause(boolean matchAVP) {
@@ -892,6 +913,7 @@ public class ResultDAO extends DAO {
       float pronScore = rs.getFloat(PRON_SCORE);
       String json = rs.getString(SCORE_JSON);
       String device = rs.getString(DEVICE);
+      String model = rs.getString(MODEL);
 
       Result result = new Result(uniqueID, userID, //id
           plan, // plan
@@ -901,7 +923,8 @@ public class ResultDAO extends DAO {
           valid, // valid
           timestamp.getTime(),
 
-          type, dur, correct, pronScore, device);
+          type, dur, correct, pronScore, device,
+          model);
       result.setJsonScore(json);
       results.add(result);
     }
@@ -1320,6 +1343,14 @@ public class ResultDAO extends DAO {
       addVarchar(connection, RESULTS, TRANSCRIPT);
     }
 
+    if (!columns.contains(MODEL.toLowerCase())) {
+      addVarchar(connection, RESULTS, MODEL);
+    }
+
+    if (!columns.contains(MODELUPDATE.toLowerCase())) {
+      addTimestamp(connection, RESULTS, MODELUPDATE);
+    }
+
     database.closeConnection(connection);
 
     createIndex(database, EXID, RESULTS);
@@ -1488,6 +1519,7 @@ public class ResultDAO extends DAO {
   public void writeExcelToStream(Collection<MonitorResult> results, Collection<String> typeOrder, OutputStream out) {
     new ResultDAOToExcel().writeExcelToStream(results, typeOrder, out);
   }
+
 
   private static class MyUserAndTime implements UserAndTime {
     private final long userID;
