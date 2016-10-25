@@ -76,7 +76,6 @@ public class AudioDAO extends DAO {
   private static final String FAST_WAV = "Fast" + ".wav";
   private static final String SLOW_WAV = "Slow" + ".wav";
 
-
   public static final String UNKNOWN = "unknown";
   public static final String TOTAL = "total";
   public static final String TOTAL_CONTEXT = "totalContext";
@@ -88,6 +87,7 @@ public class AudioDAO extends DAO {
   public static final String FEMALE_SLOW = "femaleSlow";
   public static final String MALE_CONTEXT = "maleContext";
   public static final String FEMALE_CONTEXT = "femaleContext";
+  public static final String DNR = "dnr";
 
   private final boolean DEBUG = false;
   private static final boolean DEBUG_ATTACH = false;
@@ -127,6 +127,17 @@ public class AudioDAO extends DAO {
         logger.error("got " + e, e);
       }
     }
+
+    if (!columns.contains(DNR)) {
+      try {
+        PreparedStatement statement = connection.prepareStatement("ALTER TABLE " + AUDIO + " ADD " + DNR + " " + "REAL" + " DEFAULT '-1'");
+        statement.execute();
+        statement.close();
+      } catch (SQLException e) {
+        logger.error("got " + e, e);
+      }
+    }
+
     database.closeConnection(connection);
     audioCheck = new AudioCheck(database.getServerProps());
   }
@@ -142,16 +153,15 @@ public class AudioDAO extends DAO {
     statement.close();
   }
 
-
   private void sleep(int millis) {
     try {
-      Thread.sleep(millis); // ???
+      Thread.sleep(millis);
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
   }
 
-  public <T extends AudioExercise> int addOldSchoolAudio(String refAudioIndex, T imported, int audioOffset, String mediaDir, String installPath) {
+  public <T extends AudioExercise> int addOldSchoolAudio(String refAudioIndex, T imported, int audioOffset, String mediaDir, String installPath) throws SQLException {
     String audioDir = refAudioIndex.length() > 0 ? findBest(refAudioIndex) : imported.getID();
     if (audioOffset != 0) {
       audioDir = "" + (Integer.parseInt(audioDir.trim()) + audioOffset);
@@ -183,6 +193,7 @@ public class AudioDAO extends DAO {
           total++;
         } catch (Exception e) {
           logger.error("got " + e, e);
+          throw e;
         }
       } else {
         // logger.info("2 no audio at " + test.getAbsolutePath());
@@ -945,6 +956,7 @@ public class AudioDAO extends DAO {
       String type = rs.getString(AUDIO_TYPE);
       int dur = rs.getInt(DURATION);
       String transcript = rs.getString(TRANSCRIPT);
+      Float dnr = rs.getFloat(DNR);
 
       MiniUser user = miniUsers.get(userID);
       user = checkDefaultUser(userID, user);
@@ -954,7 +966,9 @@ public class AudioDAO extends DAO {
           audioRef, // answer
           timestamp.getTime(),
           dur, type,
-          user, transcript);
+          user,
+          transcript,
+          dnr);
 
       if (user == null) {
         if (c++ < 20) {
@@ -1092,7 +1106,7 @@ public class AudioDAO extends DAO {
    * @param newTranscript
    * @see DatabaseImpl#editItem(CommonExercise, boolean)
    */
-   void copyWithNewTranscript(AudioAttribute existing, String newTranscript) {
+  void copyWithNewTranscript(AudioAttribute existing, String newTranscript) {
     String exerciseID = existing.getExid();
     long timestamp = existing.getTimestamp();
     String audioType = existing.getAudioType();
@@ -1175,11 +1189,12 @@ public class AudioDAO extends DAO {
    * @param timestamp
    * @param durationInMillis
    * @param transcript
+   * @param dnr
    * @return AudioAttribute that represents the audio that has been added to the exercise
    * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable
    */
   public AudioAttribute addOrUpdate(int userid, String exerciseID, String audioType, String audioRef, long timestamp,
-                                    long durationInMillis, String transcript) {
+                                    long durationInMillis, String transcript, float dnr) {
     if (isBadUser(userid)) {
       logger.error("huh? userid is " + userid, new Exception("huh? userid is " + userid));
     }
@@ -1219,7 +1234,7 @@ public class AudioDAO extends DAO {
             " type " + audioType + " dur " + durationInMillis);
 
         long l = addAudio(connection, userid, audioRef, exerciseID, timestamp, audioType, durationInMillis, transcript);
-        audioAttr = getAudioAttribute((int) l, userid, audioRef, exerciseID, timestamp, audioType, durationInMillis, transcript);
+        audioAttr = getAudioAttribute((int) l, userid, audioRef, exerciseID, timestamp, audioType, durationInMillis, transcript,dnr);
       } else {
         logger.debug("\taddOrUpdate updating entry for  " + userid + " " + audioRef + " ex " + exerciseID +
             " type " + audioType + " dur " + durationInMillis);
@@ -1266,13 +1281,13 @@ public class AudioDAO extends DAO {
    */
   private AudioAttribute getAudioAttribute(int i,
                                            int userid, String audioRef, String exerciseID, long timestamp,
-                                           String audioType, long durationInMillis, String transcript) {
+                                           String audioType, long durationInMillis, String transcript, float dnr) {
     return new AudioAttribute(i, userid,
         exerciseID, // id
         audioRef, // answer
         timestamp,
         durationInMillis, audioType,
-        userDAO.getMiniUser(userid), transcript);
+        userDAO.getMiniUser(userid), transcript, dnr);
   }
 
   public void updateExerciseID(int uniqueID, String exerciseID) {
@@ -1295,6 +1310,34 @@ public class AudioDAO extends DAO {
 
       if (i == 0) {
         logger.error("huh? couldn't update " + uniqueID + " to " + exerciseID);
+      }
+
+      finish(connection, statement);
+    } catch (Exception e) {
+      logger.error("got " + e, e);
+    }
+  }
+
+  public void updateDNR(int uniqueID, float dnr) {
+    try {
+      Connection connection = database.getConnection(this.getClass().toString());
+      String sql = "UPDATE " + AUDIO +
+          " SET " +
+          DNR +
+          "=? " +
+          "WHERE " +
+          ID + "=?";
+      PreparedStatement statement = connection.prepareStatement(sql);
+
+      int ii = 1;
+
+      statement.setFloat(ii++, dnr);
+      statement.setInt(ii++, uniqueID);
+
+      int i = statement.executeUpdate();
+
+      if (i == 0) {
+        logger.error("huh? couldn't update audio " + uniqueID + " to " + dnr);
       }
 
       finish(connection, statement);
@@ -1387,9 +1430,8 @@ public class AudioDAO extends DAO {
       logger.error("huh? userid is " + userid);
       new Exception().printStackTrace();
     }
-
     // logger.debug("addAudio : by " + userid + " for ex " + exerciseID + " type " + audioType + " ref " + audioRef);
-    int before = DEBUG ? getCount(AUDIO) : 0;
+    int before = 0;//DEBUG ? getCount(AUDIO) : 0;
 
     PreparedStatement statement = connection.prepareStatement("INSERT INTO " + AUDIO +
         "(" +

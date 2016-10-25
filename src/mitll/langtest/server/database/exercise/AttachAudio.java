@@ -32,6 +32,9 @@
 
 package mitll.langtest.server.database.exercise;
 
+import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.audio.AudioCheck;
+import mitll.langtest.server.database.AudioDAO;
 import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.AudioExercise;
@@ -51,12 +54,14 @@ import java.util.*;
  */
 class AttachAudio {
   private static final Logger logger = Logger.getLogger(AttachAudio.class);
-  private static final String FAST_WAV = "Fast" + ".wav";
-  private static final String SLOW_WAV = "Slow" + ".wav";
+  //private static final String FAST_WAV = "Fast" + ".wav";
+  //private static final String SLOW_WAV = "Slow" + ".wav";
+  private final AudioCheck audioCheck;
+  private final AudioDAO audioDAO;
 
   private int missingExerciseCount = 0;
   private int c = 0;
-  private final int audioOffset;
+  //private final int audioOffset;
   private final String mediaDir, mediaDir1;
   private final File installPath;
   private Map<String, List<AudioAttribute>> exToAudio;
@@ -76,13 +81,17 @@ class AttachAudio {
               File installPath,
               int audioOffset,
               Map<String, List<AudioAttribute>> exToAudio,
-              boolean checkAudioTranscript) {
+              boolean checkAudioTranscript,
+              ServerProperties serverProperties,
+              AudioDAO audioDAO) {
     this.mediaDir = mediaDir;
     this.mediaDir1 = mediaDir1;
     this.installPath = installPath;
     this.setExToAudio(exToAudio);
-    this.audioOffset = audioOffset;
+    //this.audioOffset = audioOffset;
     this.checkAudioTranscript = checkAudioTranscript;
+    this.audioCheck = new AudioCheck(serverProperties);
+    this.audioDAO = audioDAO;
   }
 
   /**
@@ -97,7 +106,7 @@ class AttachAudio {
    * @param imported      to attach audio to
    * @see BaseExerciseDAO#afterReadingExercises
    */
-  @Deprecated
+/*  @Deprecated
   public <T extends AudioExercise> void addOldSchoolAudio(String refAudioIndex, T imported) {
     String audioDir = refAudioIndex.length() > 0 ? findBest(refAudioIndex) : imported.getID();
     if (audioOffset != 0) {
@@ -131,7 +140,7 @@ class AttachAudio {
         imported.addAudio(new AudioAttribute(ensureForwardSlashes(slowAudioRef), UserDAO.DEFAULT_USER).markSlow());
       }
     }
-  }
+  }*/
 
   /**
    * Make sure every audio file we attach is a valid audio file -- it's really where it says it's supposed to be.
@@ -156,6 +165,8 @@ class AttachAudio {
   }
 
   /**
+   * Don't attach audio that doesn't meet the dynamic range minimum.
+   *
    * @param imported
    * @param missing
    * @param audioAttributes
@@ -226,10 +237,22 @@ class AttachAudio {
 //    }
 
             if (!checkAudioTranscript ||
-                (audio.matchTranscript(before, transcript) || audio.matchTranscript(noAccents, noAccentsTranscript))
+                (audio.matchTranscript(before, transcript) ||
+                    audio.matchTranscript(noAccents, noAccentsTranscript))
                 ) {
-              audio.setAudioRef(child);   // remember to prefix the path
-              mutableAudio.addAudio(audio);
+              float dnr1 = audio.getDnr();
+              boolean dnrOK = dnr1 < 0 || dnr1 > audioCheck.getMinDNR();
+
+//              if (dnr1 < 0) {
+//                dnr1 = audioCheck.getDNR(test);
+//                audioDAO.updateDNR(audio.getUniqueID(), dnr1);
+//              }
+              if (dnrOK) {//dnr1 > audioCheck.getMinDNR()) {
+                audio.setAudioRef(child);   // remember to prefix the path
+                mutableAudio.addAudio(audio);
+              } else {
+                logger.debug("attachAudio skipping audio file with low dynamic range " + test);
+              }
             } else {
               transcriptChangedIDs.add(audio.getExid());
 /*							if (m++ < 10) {
@@ -240,7 +263,7 @@ class AttachAudio {
             audioPaths.add(child);
 //            logger.debug("imported " +imported.getID()+ " now " + imported.getAudioAttributes());
           } else {
-            logger.debug("skipping " + child);
+            logger.debug("attachAudio skipping audio file already seen = " + child);
           }
         } else {
           missing++;
