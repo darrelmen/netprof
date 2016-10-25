@@ -20,7 +20,7 @@ import java.util.*;
  */
 public class ReportAllTest extends BaseTest {
   private static final Logger logger = Logger.getLogger(ReportAllTest.class);
-  public static final boolean DO_ONE = false;
+  public static final boolean DO_ONE = true;
 
 /*
   protected static DatabaseImpl getDatabase(String config) {
@@ -155,7 +155,8 @@ public class ReportAllTest extends BaseTest {
 
       logger.info("doing " + config + " ------- ");
 
-      H2Connection connection = getH2(db);
+      //H2Connection connection = getH2(db);
+      H2Connection connection = new H2Connection("war/config/spanish", "npfSpanish", true,null);
 
       DatabaseImpl database = getDatabase(connection, config, db);
       database.doReport(war, config, 2016);
