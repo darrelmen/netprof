@@ -159,6 +159,38 @@ public class SelectionState {
     return typeToSection;
   }
 
+  public static final String SHOWING_ALL_ENTRIES = "Showing all entries";
+
+  public String getDescription(Collection<String> typeOrder) {
+    if (typeToSection.isEmpty()) {
+      return SHOWING_ALL_ENTRIES;
+    } else {
+      StringBuilder status = new StringBuilder();
+      //System.out.println("showSelectionState : typeOrder " + typeOrder + " selection state " + typeToSection);
+      for (String type : typeOrder) {
+        Collection<String> selectedItems = typeToSection.get(type);
+        if (selectedItems != null) {
+          List<String> sorted = new ArrayList<String>();
+          for (String selectedItem : selectedItems) {
+            sorted.add(selectedItem);
+          }
+          Collections.sort(sorted);
+          StringBuilder status2 = new StringBuilder();
+          String sep = sorted.size() == 2 ? " and ":", ";
+          for (String item : sorted) {
+            status2.append(item).append(sep);
+          }
+          String s = status2.toString();
+          if (!s.isEmpty()) s = s.substring(0, s.length() - sep.length());
+          String statusForType = type + " " + s;
+          status.append(statusForType).append(" and ");
+        }
+      }
+      String text = status.toString();
+      if (text.length() > 0) text = text.substring(0, text.length() - " and ".length());
+      return text;
+    }
+  }
   public String getInstance() {
     return instance;
   }

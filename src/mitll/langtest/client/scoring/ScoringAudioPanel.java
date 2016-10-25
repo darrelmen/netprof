@@ -60,7 +60,7 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
-   // private Logger logger = Logger.getLogger("ScoringAudioPanel");
+  // private Logger logger = Logger.getLogger("ScoringAudioPanel");
 
   private static final int ANNOTATION_HEIGHT = 20;
   private static final boolean SHOW_SPECTROGRAM = false;
@@ -73,7 +73,6 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
   private static final boolean debug = false;
 
   /**
-   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, LangTestDatabaseAsync, ExerciseController, ScoreListener, String, String, T, String)
    * @param refSentence
    * @param service
    * @param gaugePanel
@@ -81,6 +80,7 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
    * @param exerciseID
    * @param exercise
    * @param instance
+   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, LangTestDatabaseAsync, ExerciseController, ScoreListener, String, String, T, String)
    */
   ScoringAudioPanel(String refSentence, LangTestDatabaseAsync service, ExerciseController controller,
                     ScoreListener gaugePanel, String playButtonSuffix, String exerciseID, T exercise, String instance) {
@@ -88,7 +88,6 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
   }
 
   /**
-   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, String, LangTestDatabaseAsync, ExerciseController, boolean, ScoreListener, int, String, String, T, String)
    * @param path
    * @param refSentence
    * @param service
@@ -99,6 +98,7 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
    * @param exerciseID
    * @param exercise
    * @param instance
+   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, String, LangTestDatabaseAsync, ExerciseController, boolean, ScoreListener, int, String, String, T, String)
    */
   ScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service,
                     ExerciseController controller,
@@ -117,7 +117,7 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
     this.phones.getImage().addClickHandler(new TranscriptEventClickHandler(this.phones.getImage(), NetPronImageType.PHONE_TRANSCRIPT));
     final Image image = this.words.getImage();
     image.getElement().getStyle().setCursor(Style.Cursor.POINTER);
-    image.addClickHandler(new TranscriptEventClickHandler(image,NetPronImageType.WORD_TRANSCRIPT));
+    image.addClickHandler(new TranscriptEventClickHandler(image, NetPronImageType.WORD_TRANSCRIPT));
 
     // TODO come back to this
    /* final PopupPanel popupPanel = new PopupPanel(true);
@@ -151,59 +151,63 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
   }
 
   /**
-   * @see GoodwaveExercisePanel#getAnswerWidget
    * @param l
+   * @see GoodwaveExercisePanel#getAnswerWidget
    */
-  public void addScoreListener(ScoreListener l) { this.scoreListener = l;}
+  public void addScoreListener(ScoreListener l) {
+    this.scoreListener = l;
+  }
 
   /**
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.ASRRecordAudioPanel.MyPostAudioRecordButton#useResult(PretestScore, ImageAndCheck, ImageAndCheck, boolean, String)
    * @param resultID
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.ASRRecordAudioPanel.MyPostAudioRecordButton#useResult(PretestScore, ImageAndCheck, ImageAndCheck, boolean, String)
    */
-  public void setResultID(long resultID) { this.resultID = resultID;}
+  public void setResultID(long resultID) {
+    this.resultID = resultID;
+  }
 
   /**
-   * @see mitll.langtest.client.scoring.AudioPanel#getImages()
    * @param width
+   * @see mitll.langtest.client.scoring.AudioPanel#getImages()
    */
   @Override
   protected void getEachImage(int width) {
     super.getEachImage(width);
     if (!controller.getProps().isNoModel()) {
-        getTranscriptImageURLForAudio(audioPath, refSentence, width, words, phones);
+      getTranscriptImageURLForAudio(audioPath, refSentence, width, words, phones);
     }
   }
 
   /**
-   *
-   * @see #getEachImage(int)
    * @param path
    * @param refSentence
    * @param width
    * @param wordTranscript
    * @param phoneTranscript
+   * @see #getEachImage(int)
    */
   private void getTranscriptImageURLForAudio(final String path, String refSentence, int width,
                                              final ImageAndCheck wordTranscript,
                                              final ImageAndCheck phoneTranscript) {
     int widthToUse = Math.max(MIN_WIDTH, width);
-      scoreAudio(path, resultID, refSentence, wordTranscript, phoneTranscript, widthToUse, ANNOTATION_HEIGHT, getReqID("score"));
+    scoreAudio(path, resultID, refSentence, wordTranscript, phoneTranscript, widthToUse, ANNOTATION_HEIGHT, getReqID("score"));
   }
 
   protected abstract void scoreAudio(final String path, long resultID, String refSentence,
                                      final ImageAndCheck wordTranscript, final ImageAndCheck phoneTranscript,
                                      int toUse, int height, int reqid);
 
-  private static final String IMAGES_REDX_PNG  = LangTest.LANGTEST_IMAGES +"redx.png";
+  private static final String IMAGES_REDX_PNG = LangTest.LANGTEST_IMAGES + "redx.png";
 
   /**
    * Record the image URLs in the Image widgets and enable the check boxes
-   * @see ScoringAudioPanel#scoreAudio(String, long, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
+   *
    * @param result
    * @param wordTranscript
    * @param phoneTranscript
    * @param scoredBefore
    * @param path
+   * @see ScoringAudioPanel#scoreAudio(String, long, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
    */
   void useResult(PretestScore result, ImageAndCheck wordTranscript, ImageAndCheck phoneTranscript,
                  boolean scoredBefore, String path) {
@@ -211,15 +215,13 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
     String words = netPronImageTypeStringMap.get(NetPronImageType.WORD_TRANSCRIPT);
     if (words != null) {
       showImageAndCheck(words, wordTranscript);
-    }
-    else {
+    } else {
       wordTranscript.getImage().setUrl(IMAGES_REDX_PNG);
     }
     String phones = netPronImageTypeStringMap.get(NetPronImageType.PHONE_TRANSCRIPT);
     if (phones != null) {
       showImageAndCheck(phones, phoneTranscript);
-    }
-    else {
+    } else {
       phoneTranscript.getImage().setUrl(IMAGES_REDX_PNG);
     }
     if (!scoredBefore && scoreListener != null) {
@@ -244,10 +246,10 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
 //      " duration " + wavFileLengthInSeconds + " secs or " + wavFileLengthInSeconds * 1000 + " millis");
 
     for (TranscriptSegment segment : transcriptSegments) {
-     // TranscriptSegment next = transcriptSegments.get(Math.min(transcriptSegments.size() - 1, index + 1));
+      // TranscriptSegment next = transcriptSegments.get(Math.min(transcriptSegments.size() - 1, index + 1));
       if (mouseClickTime > segment.getStart() && mouseClickTime <= segment.getEnd()) {
 //        if (debug) System.out.println("\t playing " + segment);
-     //   result.getsTypeToEndTimes();
+        //   result.getsTypeToEndTimes();
         onClick.onSegmentClick(segment);
         break;
       }
@@ -256,10 +258,12 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
   }
 
   /**
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, float, mitll.langtest.shared.exercise.T)
    * @param score
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, float, mitll.langtest.shared.exercise.T)
    */
-  public void addScore(CorrectAndScore score) {  scoreListener.addScore(score); }
+  public void addScore(CorrectAndScore score) {
+    scoreListener.addScore(score);
+  }
 
   /**
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, float, mitll.langtest.shared.exercise.T)
@@ -269,10 +273,12 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
   }
 
   /**
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, float, mitll.langtest.shared.exercise.T)
    * @param avgScore
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, float, mitll.langtest.shared.exercise.T)
    */
-  public void setClassAvg(float avgScore) { scoreListener.setClassAvg(avgScore);  }
+  public void setClassAvg(float avgScore) {
+    scoreListener.setClassAvg(avgScore);
+  }
 
   public void setRefAudio(String refAudio) {
     scoreListener.setRefAudio(refAudio);
@@ -292,14 +298,15 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
      * end time of the next segment.  <br></br>
      * Then plays, the segment - note we have to adjust between the duration of a wav file and an mp3 file, which
      * will likely be different. (A little surprising to me, initially.)
-     * @see mitll.langtest.client.scoring.AudioPanel#playSegment
+     *
      * @param event
+     * @see mitll.langtest.client.scoring.AudioPanel#playSegment
      */
     public void onClick(ClickEvent event) {
       if (result != null) {
         int eventXPos = event.getX();
 
-        getClickedOnSegment(eventXPos,type,this);
+        getClickedOnSegment(eventXPos, type, this);
       } else {
         System.err.println("no result for to click against?");
       }
@@ -327,6 +334,7 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
 
     public abstract void onSegmentClick(TranscriptSegment segment);
   }
+
   /**
    * Find the start-end time period corresponding to the click on either the phone or the word image and then
    * play the segment. <br></br>
@@ -334,22 +342,24 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
    * the mp3 file (silence padding at the end).<br></br>
    * This means we have to scale the values returned from alignment so the audio times
    * line up with those in the mp3 file.
+   *
    * @see #addClickHandlers
    */
   private class TranscriptEventClickHandler extends MyClickHandler {
     final UIObject widget;
+
     /**
-     * @see mitll.langtest.client.scoring.ScoringAudioPanel#addClickHandlers
      * @param type
+     * @see mitll.langtest.client.scoring.ScoringAudioPanel#addClickHandlers
      */
     public TranscriptEventClickHandler(UIObject widget, NetPronImageType type) {
       super(type);
-      this.widget =widget;
+      this.widget = widget;
     }
 
     @Override
     public void onSegmentClick(TranscriptSegment segment) {
-   //   playSegment(MP3_HEADER_OFFSET+segment.getStart(), MP3_HEADER_OFFSET+segment.getEnd());
+      //   playSegment(MP3_HEADER_OFFSET+segment.getStart(), MP3_HEADER_OFFSET+segment.getEnd());
       playSegment(segment.getStart(), segment.getEnd());
       long user = (long) controller.getUser();
       controller.getButtonFactory().logEvent(widget, type.toString(), exerciseID, "Clicked on " + segment.getEvent(), user);
