@@ -75,19 +75,18 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
   @Override
   public AudioAttribute addOrUpdate(int userid, int exerciseID, int projid, AudioType audioType, String audioRef,
-                                    long timestamp, long durationInMillis, String transcript) {
+                                    long timestamp, long durationInMillis, String transcript, float dnr) {
     MiniUser miniUser = userDAO.getMiniUser(userid);
     Map<Integer, MiniUser> mini = new HashMap<>();
     mini.put(userid, miniUser);
     return toAudioAttribute(
-        dao.addOrUpdate(userid, exerciseID, projid, audioType.toString(), audioRef, timestamp, durationInMillis, transcript),
+        dao.addOrUpdate(userid, exerciseID, projid, audioType.toString(), audioRef, timestamp, durationInMillis, transcript, dnr),
         mini);
   }
 
   /**
    * Update the user if the audio is already there.
-   *
-   * @param userid
+   *  @param userid
    * @param exerciseID
    * @param projid
    * @param audioType
@@ -95,11 +94,12 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @param timestamp
    * @param durationInMillis
    * @param transcript
+   * @param dnr
    */
   @Override
   public void addOrUpdateUser(int userid, int exerciseID, int projid, AudioType audioType, String audioRef, long timestamp,
-                              int durationInMillis, String transcript) {
-    dao.addOrUpdateUser(userid, exerciseID, projid, audioType.toString(), audioRef, timestamp, durationInMillis, transcript);
+                              int durationInMillis, String transcript, float dnr) {
+    dao.addOrUpdateUser(userid, exerciseID, projid, audioType.toString(), audioRef, timestamp, durationInMillis, transcript, dnr);
   }
 
   /**
@@ -149,7 +149,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    *
    * @param userid
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#markRecordedState
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#markRecordedState
    */
   public Collection<Integer> getRecordedExForUser(int userid) {
     try {
@@ -222,7 +222,8 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
         AudioType.valueOf(audiotype.toUpperCase()),
         miniUser,
         s.transcript(),
-        s.actualpath());
+        s.actualpath(),
+        s.dnr());
   }
 
   /**
@@ -258,7 +259,8 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
           projid,
           false,
           0,
-          "");
+          "",
+          orig.getDnr());
     }
   }
 

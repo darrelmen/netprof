@@ -85,6 +85,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   private int userid;
   private long timestamp;
   private long durationInMillis;
+  private transient float dnr;
 
   /**
    * Don't send to client - just server side
@@ -122,7 +123,8 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
                         AudioType type,
                         MiniUser user,
                         String transcript,
-                        String actualPath) {
+                        String actualPath,
+                        float dnr) {
     this.uniqueID = uniqueID;
     this.userid = userid;
     this.exid = exid;
@@ -130,6 +132,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     this.timestamp = timestamp;
     this.durationInMillis = durationInMillis;
     this.transcript = transcript;
+    this.dnr = dnr;
 
     this.setUser(user);
     this.audioType = type;
@@ -406,5 +409,9 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
         "\n\tby         " + userid + "/" + user +
         "\n\ttranscript '" + transcript +
         "' ";
+  }
+
+  public float getDnr() {
+    return dnr;
   }
 }
