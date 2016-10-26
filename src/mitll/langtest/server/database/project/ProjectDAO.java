@@ -118,11 +118,14 @@ public class ProjectDAO extends DAO implements IProjectDAO {
    * @param secondType
    * @param countryCode
    * @param displayOrder
+   * @param isDev
    * @return
-   * @see mitll.langtest.server.database.CopyToPostgres#createProject
+   * @see mitll.langtest.server.database.copy.CreateProject#createProject
    */
-  public int add(int userid, String name, String language, String course, String firstType, String secondType, String countryCode, int displayOrder) {
-    return add(userid, System.currentTimeMillis(), name, language, course, ProjectType.NP, ProjectStatus.PRODUCTION,
+  public int add(int userid, String name, String language, String course,
+                 String firstType, String secondType, String countryCode, int displayOrder, boolean isDev) {
+    return add(userid, System.currentTimeMillis(), name, language, course, ProjectType.NP,
+        isDev ? ProjectStatus.DEVELOPMENT : ProjectStatus.PRODUCTION,
         firstType, secondType, countryCode, displayOrder);
   }
 
@@ -175,8 +178,13 @@ public class ProjectDAO extends DAO implements IProjectDAO {
    * @return
    */
   @Override
-  public int add(int userid, long modified, String name, String language, String course,
-                 ProjectType type, ProjectStatus status, String firstType, String secondType, String countryCode,
+  public int add(int userid,
+                 long modified,
+                 String name,
+                 String language,
+                 String course,
+                 ProjectType type,
+                 ProjectStatus status, String firstType, String secondType, String countryCode,
                  int displayOrder) {
     return dao.insert(new SlickProject(
         -1,
