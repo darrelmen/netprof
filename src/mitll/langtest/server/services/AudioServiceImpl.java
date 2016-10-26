@@ -281,7 +281,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
     AudioAttribute audioAttribute =
         db.getAudioDAO().addOrUpdate(user, idToUse, projid, audioType, permanentAudioPath, System.currentTimeMillis(),
-            audioAnswer.getDurationInMillis(), audioTranscript);
+            audioAnswer.getDurationInMillis(), audioTranscript, (float)audioAnswer.getDynamicRange());
     audioAnswer.setPath(audioAttribute.getAudioRef());
     logger.debug("addToAudioTable" +
         "\n\tuser " + user +

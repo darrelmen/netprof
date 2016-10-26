@@ -350,7 +350,8 @@ public class User extends MiniUser {
    * @param resetPassKey
    * @param timestamp
    * @paramx cdEnableKey
-   * @see mitll.langtest.server.database.user.SlickUserDAOImpl#toUsers(List)
+   * @seex mitll.langtest.server.database.user.SlickUserDAOImpl#toUser
+   * @see mitll.langtest.server.database.user.DominoUserDAOImpl#toUser
    * @see UserDAO#getUsers
    */
   public User(int id,
@@ -369,6 +370,7 @@ public class User extends MiniUser {
     super(id, age, gender == 0, userID, isAdmin);
     this.experience = experience;
     this.ipaddr = ipaddr;
+    if (passwordH == null) passwordH = "";
     this.passwordHash = passwordH;
     this.email = email;
     this.emailHash = emailHash;

@@ -46,7 +46,6 @@ import mitll.langtest.client.exercise.SectionWidget;
 import mitll.langtest.client.table.ListBoxSelect;
 import mitll.langtest.client.table.TableSelect;
 import mitll.langtest.shared.SectionNode;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -110,7 +109,6 @@ public class ListSectionWidget implements SectionWidget {
     container.add(horizontalPanel);
   }
 
-  @NotNull
   private Button getLeftButton(final List<String> values) {
     Button left = new Button("", IconType.CARET_LEFT);
     left.addClickHandler(new ClickHandler() {
@@ -133,7 +131,6 @@ public class ListSectionWidget implements SectionWidget {
     return left;
   }
 
-  @NotNull
   private Button getRightButton(final List<String> values, Button left) {
     Button right = new Button("", IconType.CARET_RIGHT);
     right.addStyleName("leftFiveMargin");
