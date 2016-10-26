@@ -72,10 +72,13 @@ public class AudioCheck {
   // private static final short clippedThreshold2 = 32752; // 32768-16
   // private static final short clippedThreshold2Minus = -32752; // 32768-16
   private static final float MAX_VALUE = 32768.0f;
-  public static final ValidityAndDur INVALID_AUDIO = new ValidityAndDur();
-  public static final int CLIPPED_FRAME_COUNT = 1;
+  static final ValidityAndDur INVALID_AUDIO = new ValidityAndDur();
+  //public static final int CLIPPED_FRAME_COUNT = 1;
   private final int MIN_DYNAMIC_RANGE;
   private final ServerProperties props;
+
+  // TODO :make a server prop
+  private final float FORGIVING_MIN_DNR = 18F;
 
   public AudioCheck(ServerProperties props) {
     this.props = props;
@@ -125,10 +128,10 @@ public class AudioCheck {
   }
 
   /**
-   * @see AudioConversion#isValid(File, boolean, boolean)
    * @param file
    * @param quietAudioOK
    * @return
+   * @see AudioConversion#isValid(File, boolean, boolean)
    */
   ValidityAndDur checkWavFileRejectAnyTooLoud(File file, boolean quietAudioOK) {
     ValidityAndDur validityAndDur = checkWavFileWithClipThreshold(file, false, quietAudioOK);
@@ -154,16 +157,26 @@ public class AudioCheck {
   }
 
   private void addDynamicRange(File file, ValidityAndDur validityAndDur) {
-    String highPassFilterFile = new AudioConversion(props).getHighPassFilterFile(file.getAbsolutePath());
-    File highPass = new File(highPassFilterFile);
-    DynamicRange.RMSInfo dynamicRange = new DynamicRange().getDynamicRange(highPass);
-    deleteParentTempDir(highPass);
+    DynamicRange.RMSInfo dynamicRange = getDynamicRange(file);
     if (dynamicRange.maxMin < MIN_DYNAMIC_RANGE) {
       logger.warn("file " + file.getName() + " doesn't meet dynamic range threshold (" + MIN_DYNAMIC_RANGE +
           "):\n" + dynamicRange);
       validityAndDur.validity = AudioAnswer.Validity.SNR_TOO_LOW;
     }
     validityAndDur.setMaxMinRange(dynamicRange.maxMin);
+  }
+
+  public boolean hasValidDynamicRange(File file) {
+    return getDynamicRange(file).maxMin >= MIN_DYNAMIC_RANGE;
+  }
+  // public boolean hasValidDynamicRangeForgiving(File file) {  return getDynamicRange(file).maxMin >= FORGIVING_MIN_DNR;  }
+
+  private DynamicRange.RMSInfo getDynamicRange(File file) {
+    String highPassFilterFile = new AudioConversion(props).getHighPassFilterFile(file.getAbsolutePath());
+    File highPass = new File(highPassFilterFile);
+    DynamicRange.RMSInfo dynamicRange = new DynamicRange().getDynamicRange(highPass);
+    deleteParentTempDir(highPass);
+    return dynamicRange;
   }
 
   private void deleteParentTempDir(File srcFile) {
@@ -295,6 +308,14 @@ public class AudioCheck {
     return INVALID_AUDIO;
   }
 
+  public float getMinDNR() {
+    return FORGIVING_MIN_DNR;
+  }
+
+  public float getDNR(File test) {
+    return (float) getDynamicRange(test).maxMin;
+  }
+
   public static class ValidityAndDur {
     private AudioAnswer.Validity validity;
     private boolean isValid = false;
@@ -312,8 +333,9 @@ public class AudioCheck {
     /**
      * @param validity
      * @param dur
+     * @parma quietAudioOK - only useful for automated load testing where we aren't really making recordings
      */
-    public ValidityAndDur(AudioAnswer.Validity validity, double dur, boolean quietAudioOK) {
+    ValidityAndDur(AudioAnswer.Validity validity, double dur, boolean quietAudioOK) {
       this.validity = validity;
       this.durationInMillis = (int) (1000d * dur);
       isValid = validity ==
