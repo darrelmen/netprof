@@ -78,8 +78,9 @@ public class CopyToPostgres<T extends CommonShell> {
   private static final Logger logger = Logger.getLogger(CopyToPostgres.class);
   private static final int WARN_RID_MISSING_THRESHOLD = 50;
   private static final boolean COPY_EVENTS = true;
-  private static final boolean DEBUG = false;
   private static final int WARN_MISSING_THRESHOLD = 10;
+
+  private static final boolean DEBUG = false;
 
   /**
    * @param config
@@ -91,7 +92,6 @@ public class CopyToPostgres<T extends CommonShell> {
     new CopyToPostgres().copyOneConfig(databaseLight, getCC(config), null, 0);
     databaseLight.destroy();
   }
-
 
   /**
    * Add brazilian, serbo croatian, french, etc.
@@ -449,6 +449,7 @@ public class CopyToPostgres<T extends CommonShell> {
               logger.info("user collision to project " + projid + " map " + importID + "->" + existingID +
                   " : " + userByID1);
             } else {
+              logger.info("no existing user id '" + importUserID + "'");
               added.add(addUser(dominoUserDAO, oldToNew, toImport));
             }
           }
@@ -507,12 +508,24 @@ public class CopyToPostgres<T extends CommonShell> {
     oldToNew.put(toImport.getID(), add);
     return slickUser;
   }*/
+
+  /**
+   *
+   * @param dominoUserDAO
+   * @param oldToNew
+   * @param toImport
+   * @return
+   */
   private ClientUserDetail addUser(DominoUserDAOImpl dominoUserDAO,
                                    Map<Integer, Integer> oldToNew,
                                    User toImport) {
 //    logger.info("addUser " + toImport + " with " + toImport.getPermissions());
     ClientUserDetail user = dominoUserDAO.toClientUserDetail(toImport, false);
     ClientUserDetail addedUser = dominoUserDAO.addAndGet(user, toImport.getPasswordHash(), toImport.getPermissions());
+    if (addedUser == null) {
+      logger.error("no error returned from domino.");
+    }
+
     int add = addedUser.getDocumentDBID();
 //    logger.info("addUser id  " + add + " for " + user.id() + " equal " + (user == addedUser));
     //   logger.info("addUser map " + toImport.getID() + " -> " + add);

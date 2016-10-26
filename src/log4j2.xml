@@ -46,7 +46,7 @@
         <SMTP name="Mail" subject="Web App ${web:contextPath} error on host ${hostName}" to="${sys:log.mailto}"
               from="${sys:log.mailfrom}" smtpHost="${sys:log.mailhost}" smtpDebug="false"
               bufferSize="1" ignoreExceptions="false" smtpPort="25"/>
-        <RollingFile name="LogFile" fileName="${sys:catalina.base}/logs/${web:contextPath}-app.log"
+        <RollingFile name="STDOUT" fileName="${sys:catalina.base}/logs/${web:contextPath}-app.log"
                      filePattern="${sys:catalina.base}/logs/${web:contextPath}-app-%d{MM-dd-yyyy}-%i.log.gz">
             <PatternLayout
                     pattern="%d{yyyy-MM-dd HH:mm:ss} | IP=%X{ipAddress}, UserID=%X{loginId}, REQID=%X{requestId}, SessID=%X{sessionId} |%-5p|%-30.30c{1}:%-4L|%notEmpty{%marker|} %m%n%throwable"/>
@@ -68,18 +68,18 @@
     </appenders>
     <loggers>
         <logger name="org.apache.fop" level="WARN" additivity="true">
-            <appender-ref ref="LogFile"/>
+            <appender-ref ref="STDOUT"/>
         </logger>
         <logger name="org.apache.fop.fonts.autodetect" level="debug" additivity="true">
-            <appender-ref ref="LogFile"/>
+            <appender-ref ref="STDOUT"/>
         </logger>
 
         <logger name="org.apache.pdfbox" level="info" additivity="true">
-            <appender-ref ref="LogFile"/>
+            <appender-ref ref="STDOUT"/>
         </logger>
 
         <logger name="mitll.hlt.domino.server.configuration.JSONDigesterBase" level="info" additivity="false">
-            <appender-ref ref="LogFile"/>
+            <appender-ref ref="STDOUT"/>
         </logger>
 
         <logger name="mitll.hlt.domino.server.user.UserServiceFacadeImpl" level="debug" additivity="true">
@@ -90,15 +90,15 @@
         </logger>
 
         <logger name="mitll" level="debug" additivity="true">
-            <appender-ref ref="LogFile"/>
+            <appender-ref ref="STDOUT"/>
         </logger>
 
         <logger name="org.mongodb.driver.protocol.command" level="info" additivity="true">
-            <appender-ref ref="LogFile"/>
+            <appender-ref ref="STDOUT"/>
         </logger>
 
         <logger name="org.mongodb.driver.cluster" level="info" additivity="true">
-            <appender-ref ref="LogFile"/>
+            <appender-ref ref="STDOUT"/>
         </logger>
 
         <root level="debug">
