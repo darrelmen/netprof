@@ -48,7 +48,7 @@ public class ProjectContainer<T extends ProjectInfo> extends MemoryItemContainer
    * @param controller
    * @param header
    * @param rightSide
-   * @seex UserOps#getOpsUserContainer(User.Kind, DivWidget)
+   * @see ProjectOps#getProjectContainer
    */
   ProjectContainer(ExerciseController controller, String header, DivWidget rightSide,
                    ProjectOps projectOps) {

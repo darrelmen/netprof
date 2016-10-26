@@ -141,7 +141,7 @@ public class Navigation implements RequiresResize, ShowTab {
   private final ExerciseController controller;
   private final LangTestDatabaseAsync service;
   private final ExerciseServiceAsync exerciseServiceAsync = GWT.create(ExerciseService.class);
-  private final ProjectServiceAsync projectServiceAsync   = GWT.create(ProjectService.class);
+  //private final ProjectServiceAsync projectServiceAsync   = GWT.create(ProjectService.class);
 
   private final UserManager userManager;
   private final SimpleChapterNPFHelper practiceHelper;
@@ -157,7 +157,7 @@ public class Navigation implements RequiresResize, ShowTab {
 
   private TabPanel tabPanel;
   private TabAndContent studyLists;
- // private TabAndContent users;
+  // private TabAndContent users;
   private TabAndContent projects;
   private TabAndContent dialog;
   private TabAndContent chapters;
@@ -294,10 +294,11 @@ public class Navigation implements RequiresResize, ShowTab {
       public void onFailure(Throwable caught) {
         downloadFailedAlert();
       }
+
       public void onSuccess() {
         service.getContextPractice(new AsyncCallback<ContextPractice>() {
           public void onSuccess(ContextPractice cpw) {
-  //          logger.info("run async to get dialog ui");
+            //          logger.info("run async to get dialog ui");
             dialogWindow = new DialogWindow(service, controller, cpw);
           }
 
@@ -346,13 +347,13 @@ public class Navigation implements RequiresResize, ShowTab {
     if (wasChapters) {
       //  logger.info("\taddShowHandler got chapters! created panel was revealed class " + createdPanel.getClass());
       if (hasCreated && (createdPanel instanceof GoodwaveExercisePanel)) {
-      ((GoodwaveExercisePanel) createdPanel).wasRevealed();
+        ((GoodwaveExercisePanel) createdPanel).wasRevealed();
       }
 
       Panel createdPanel1 = practiceHelper.getCreatedPanel();
       if (createdPanel1 != null) {
         ((FlashcardPanel) createdPanel1).wasHidden();
-    } else {
+      } else {
         //          logger.info("no practice panel");
       }
     } else {
@@ -464,7 +465,7 @@ public class Navigation implements RequiresResize, ShowTab {
    * @see #addAnalysis()
    */
   private void showStudentAnalysis() {
-  //  logger.info("show student analysis");
+    //  logger.info("show student analysis");
     learnHelper.showNPF(chapters, LEARN);
     studentAnalysis.getContent().clear();
     studentAnalysis.getContent().add(new StudentAnalysis(exerciseServiceAsync, controller, this));
@@ -497,26 +498,26 @@ public class Navigation implements RequiresResize, ShowTab {
 
   /**
    * Add a way to make a new project
-   *  - associate project with domino project... (or just import for now?)
-   *
+   * - associate project with domino project... (or just import for now?)
+   * <p>
    * Or copy?
    * copy a new project? what about audio? or copy list of exercises? or just have a parent project?
    * then would need ref audio in context of a project...
-   *
+   * <p>
    * need project service
-   *  query for all projects
-   *  move project type from one to another
-   *  only allow if we're project admin
-   *
+   * query for all projects
+   * move project type from one to another
+   * only allow if we're project admin
+   * <p>
    * need model list table -- port, language, models dir
    * so we can associate a new model with a project... --- e.g.
-   *
+   * <p>
    * as a language model object...
-   *
+   * <p>
    * N_OUTPUT=29
    * N_HIDDEN=2000,2500,2500
    * webserviceHostPort=31196
-   *
+   * <p>
    * way to kick off ref result recalc...?
    * way to kick off user result recalc
    */
@@ -526,7 +527,6 @@ public class Navigation implements RequiresResize, ShowTab {
       @Override
       public void onClick(ClickEvent event) {
         checkAndMaybeClearTabAndLogEvent(PROJECTS, projects);
-
         ProjectOps projectOps = new ProjectOps(controller);
         projectOps.show(projects);
 //        UserOps userOps = new UserOps(controller, userManager);
@@ -574,6 +574,7 @@ public class Navigation implements RequiresResize, ShowTab {
         public void onFailure(Throwable caught) {
           downloadFailedAlert();
         }
+
         public void onSuccess() {
           reallyAddDialogTab();
           showPreviouslySelectedTab();
@@ -711,7 +712,9 @@ public class Navigation implements RequiresResize, ShowTab {
 //        userOps.showUsers(users);
 //        users.setResizeable(userOps);
       } else if (clickedTab.equals(PROJECTS)) {
-
+        ProjectOps ops = new ProjectOps(controller);
+        ops.show(projects);
+        projects.setResizeable(ops);
 //        UserOps userOps = new UserOps(controller, userManager);
 //        userOps.showUsers(users);
 //        users.setResizeable(userOps);
@@ -810,7 +813,7 @@ public class Navigation implements RequiresResize, ShowTab {
 
   @Override
   public void onResize() {
-   // logger.info("got onResize " + getClass().toString());
+    // logger.info("got onResize " + getClass().toString());
     learnHelper.onResize();
     recorderHelper.onResize();
     recordExampleHelper.onResize();

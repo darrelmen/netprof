@@ -32,6 +32,7 @@
 
 package mitll.langtest.client.project;
 
+import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.NavLink;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.GWT;
@@ -56,9 +57,9 @@ public class ProjectOps implements RequiresResize {
 
 //  private final Map<User.Kind, Label> kindToLabel = new HashMap<>();
 //  private final Map<String, Label> inviteToLabel = new HashMap<>();
- // private final Map<User.Kind, IconType> kindToIcon = new HashMap<>();
+  // private final Map<User.Kind, IconType> kindToIcon = new HashMap<>();
 
-  private final ProjectServiceAsync projectServiceAsync   = GWT.create(ProjectService.class);
+  private final ProjectServiceAsync projectServiceAsync = GWT.create(ProjectService.class);
 
   /**
    * @param controller
@@ -66,11 +67,10 @@ public class ProjectOps implements RequiresResize {
    * @see Navigation#addUserMaintenance
    */
   public ProjectOps(ExerciseController controller/*, UserManager userManager*/) {
-   // setKindToIcon();
+    // setKindToIcon();
     this.controller = controller;
-   // this.userManager = userManager;
+    // this.userManager = userManager;
   }
-
 
   /**
    * @param tabAndContent
@@ -81,33 +81,36 @@ public class ProjectOps implements RequiresResize {
     DivWidget content = tabAndContent.getContent();
     content.clear();
 
-    DivWidget left = addDiv(content);
+
+    DivWidget left  = addDiv(content);
+
+    left.getElement().setId("productionProjects");
+    left.getElement().getStyle().setMarginLeft(10, Style.Unit.PX);
+
     DivWidget right = addDiv(content);
 
     DivWidget detail = addDiv(content);
 
-  //  NavLink first = getKinds(left, right, detail);
-
+    //  NavLink first = getKinds(left, right, detail);
     right.getElement().setId("projectContent");
     right.getElement().getStyle().setMarginLeft(10, Style.Unit.PX);
 //    logger.info("Loaded everything...");
-
-    showInitialState(right, detail/*, first*/);
+    showInitialState(left, detail/*, first*/);
   }
 
   private NavLink lastClicked = null;
 
-  private void showInitialState(final DivWidget right, final DivWidget detail/*, NavLink first*/) {
-   // final NavLink toClick = first;
+  private void showInitialState(final DivWidget left, final DivWidget detail/*, NavLink first*/) {
+    // final NavLink toClick = first;
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       @Override
       public void execute() {
-     //   if (toClick != null) {
-          showProjects(//User.Kind.STUDENT,
-              right, detail);
-       //   toClick.setActive(true);
-       //   lastClicked = toClick;
-       // }
+        //   if (toClick != null) {
+        showProjects(//User.Kind.STUDENT,
+            left, detail);
+        //   toClick.setActive(true);
+        //   lastClicked = toClick;
+        // }
       }
     });
   }
@@ -148,7 +151,6 @@ public class ProjectOps implements RequiresResize {
     }
     return first;
   }*/
-
   private DivWidget addDiv(DivWidget content) {
     DivWidget left = new DivWidget();
     left.addStyleName("floatLeft");
@@ -236,7 +238,7 @@ public class ProjectOps implements RequiresResize {
 
       @Override
       public void onSuccess(List<ProjectInfo> projectInfos) {
-        requiresResize = showProjectList( content, projectInfos, userForm);
+        requiresResize = showProjectList(content, projectInfos, userForm);
 
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
           @Override
@@ -250,7 +252,7 @@ public class ProjectOps implements RequiresResize {
 
 
   private RequiresResize requiresResize = null;
-  private ProjectContainer projectContainer;
+  private ProjectContainer<ProjectInfo> projectContainer;
 
   /**
    * Show users of this kind.
@@ -262,19 +264,23 @@ public class ProjectOps implements RequiresResize {
    * @return
    */
   private RequiresResize showProjectList(
-                                      DivWidget content,
-                                      List<ProjectInfo> projectInfos,
-                                      DivWidget userForm) {
+      DivWidget content,
+      List<ProjectInfo> projectInfos,
+      DivWidget userForm) {
     content.clear();
 
     projectContainer = getProjectContainer(userForm);
     DivWidget table = projectContainer.getTable(projectInfos, "", "");
+
+    Heading production = new Heading(3, "Production");
+    content.add(production);
     content.add(table);
     return projectContainer;
   }
 
-  private ProjectContainer getProjectContainer(  DivWidget rightSide) {
-    return new ProjectContainer(controller,
+  private ProjectContainer<ProjectInfo> getProjectContainer(DivWidget rightSide) {
+    return new ProjectContainer<>(
+        controller,
         "Projects",
         rightSide,
         this

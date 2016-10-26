@@ -48,10 +48,7 @@ import mitll.langtest.shared.exercise.CommonShell;
 import mitll.npdata.dao.SlickProject;
 import org.apache.log4j.Logger;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Has everything associated with a project
@@ -73,7 +70,7 @@ public class Project {
   private PathHelper pathHelper;
   private DatabaseImpl db;
   private ServerProperties serverProps;
-  private ExerciseTrie<CommonExercise> phoneTrie;
+  //private ExerciseTrie<CommonExercise> phoneTrie;
   private Map<Integer, ExercisePhoneInfo> exToPhone;
 
   /**
@@ -116,8 +113,7 @@ public class Project {
    * Only public to support deletes...
    */
   public <T extends CommonShell> void buildExerciseTrie(DatabaseImpl db) {
-    logger.info("db " + db);
-    logger.info("audioFileHelper " + getAudioFileHelper());
+    logger.info("db " + db + " audioFileHelper " + getAudioFileHelper());
     fullTrie = new ExerciseTrie<>(getExercisesForUser(), project.language(), getSmallVocabDecoder());
   }
 
@@ -142,9 +138,23 @@ public class Project {
     return project;
   }
 
+  /**
+   * If we can't get the type order out of the section helper... find it from the project
+   * @return
+   */
   public List<String> getTypeOrder() {
     SectionHelper<CommonExercise> sectionHelper = getSectionHelper();
-    return sectionHelper == null ? Collections.EMPTY_LIST : sectionHelper.getTypeOrder();
+
+    List<String> types = sectionHelper == null ? Collections.EMPTY_LIST : sectionHelper.getTypeOrder();
+    if (project != null && (types == null || types.isEmpty())) {
+      types = new ArrayList<>();
+      String first = project.first();
+      String second = project.second();
+      if (first != null && !first.isEmpty()) types.add(first);
+      if (second != null && !second.isEmpty()) types.add(second);
+    }
+
+    return types;
   }
 
   /**
@@ -152,7 +162,7 @@ public class Project {
    * @see mitll.langtest.server.database.project.ProjectManagement#setExerciseDAO
    */
   public void setExerciseDAO(ExerciseDAO<CommonExercise> exerciseDAO) {
-    logger.info("setExerciseDAO - ");
+    //logger.info("setExerciseDAO - ");
     this.exerciseDAO = exerciseDAO;
   }
 

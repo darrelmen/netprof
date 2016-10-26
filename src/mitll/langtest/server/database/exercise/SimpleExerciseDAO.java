@@ -65,4 +65,6 @@ public interface SimpleExerciseDAO<T extends CommonShell> {
   SectionHelper<T> getSectionHelper();
 
   void reload();
+
+  List<String> getTypeOrder();
 }

@@ -132,6 +132,7 @@ public class ServerProperties {
   private static final String RUN_REF_DECODE_WITH_HYDEC = "runRefDecodeWithHydec";
   private static final String CHECK_AUDIO_ON_STARTUP = "checkAudioOnStartup";
   private static final String CHECK_AUDIO_FILE_EXISTS = "checkAudioFileExists";
+  private static final String CHECK_AUDIO_TRANSCRIPT = "checkAudioTranscript";
 
   private static final String DEFAULT_NETPROF_AUDIO_DIR = "/opt/netProf/";
   public static final String BEST_AUDIO = "bestAudio";
@@ -324,6 +325,10 @@ public class ServerProperties {
 
   public boolean isAMAS() {
     return getDefaultFalse("isAMAS");
+  }
+
+  public boolean shouldCheckAudioTranscript() {
+    return getDefaultTrue(CHECK_AUDIO_TRANSCRIPT);
   }
 
   /**
