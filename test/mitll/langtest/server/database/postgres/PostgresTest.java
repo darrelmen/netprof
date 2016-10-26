@@ -56,7 +56,8 @@ import java.util.*;
 public class PostgresTest extends BaseTest {
   private static final Logger logger = Logger.getLogger(PostgresTest.class);
 
-  private static final boolean doLocal = false;
+  // set to true to use a local postgres database
+  private static final boolean doLocal = true;
 
   @Test
   public void testCreate() {
@@ -84,6 +85,15 @@ public class PostgresTest extends BaseTest {
   public void testCopySpanish() {
     List<Info> toCopy = new ArrayList<>();
     toCopy.add(getSpanish());
+    testCopy(toCopy);
+  }
+
+  @Test
+  public void testCopySerbian() {
+    List<Info> toCopy = new ArrayList<>();
+    Info serbian = new Info("serbian");
+    serbian.setDev(true);
+    toCopy.add(serbian);
     testCopy(toCopy);
   }
 
@@ -248,15 +258,15 @@ public class PostgresTest extends BaseTest {
   }
 
   private Info getPashto() {
-    return new Info("pashto", "Pashto Elementary", "pashtoQuizlet1.properties", 0);
+    return new Info("pashto", "Pashto Elementary", "pashtoQuizlet1.properties", 0, false);
   }
 
   private Info getPashto2() {
-    return new Info("pashto", "Pashto Intermediate", "pashtoQuizlet2.properties", 1);
+    return new Info("pashto", "Pashto Intermediate", "pashtoQuizlet2.properties", 1, false);
   }
 
   private Info getPashto3() {
-    return new Info("pashto", "Pashto Advanced", "pashtoQuizlet3.properties", 2);
+    return new Info("pashto", "Pashto Advanced", "pashtoQuizlet3.properties", 2, false);
   }
 
   private Info getSpanish() {
@@ -280,7 +290,7 @@ public class PostgresTest extends BaseTest {
 
       //  DatabaseImpl databaseLight = getDatabaseLight(config.language, true, "hydra-dev", "netprof", "npadmin", config.props);
       DatabaseImpl databaseLight = getDatabaseLight(config.language, true, doLocal, config.props);
-      cp.copyOneConfig(databaseLight, cc, config.name, config.displayOrder);
+      cp.copyOneConfig(databaseLight, cc, config.name, config.displayOrder, config.isDev());
       databaseLight.destroy();
       long now = System.currentTimeMillis();
       logger.info("\n\n\n-------- FINISHED copy " + config + " " + cc + " in " + ((now - then) / 1000) + " seconds");
@@ -305,12 +315,13 @@ public class PostgresTest extends BaseTest {
     final String language;
     final String props;
     int displayOrder = 0;
+    private boolean isDev;
 
-    public Info(String language) {
-      this(language, language, null, 0);
+    Info(String language) {
+      this(language, language, null, 0, false);
     }
 
-    public Info(String language, String name, String props, int displayOrder) {
+    public Info(String language, String name, String props, int displayOrder, boolean isDev) {
       this.language = language;
       this.name = name;
       this.props = props;
@@ -319,6 +330,14 @@ public class PostgresTest extends BaseTest {
 
     public String toString() {
       return language + " : " + name + " : " + props;
+    }
+
+    public boolean isDev() {
+      return isDev;
+    }
+
+    public void setDev(boolean dev) {
+      isDev = dev;
     }
   }
 
@@ -343,9 +362,10 @@ public class PostgresTest extends BaseTest {
   @Test
   public void testCopyProject() {
     testCreate();
-    DatabaseImpl spanish = getDatabaseLight("spanish", true);
+    String config = "spanish";
+    DatabaseImpl spanish = getDatabaseLight(config, true);
     CopyToPostgres copyToPostgres = new CopyToPostgres();
-    copyToPostgres.createProjectIfNotExists(spanish, copyToPostgres.getCC("spanish"), null, "", 0);
+    copyToPostgres.createProjectIfNotExists(spanish, copyToPostgres.getCC(config), null, 0, false);
   }
 
   @Test
