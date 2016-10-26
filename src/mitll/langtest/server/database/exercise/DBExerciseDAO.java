@@ -62,6 +62,20 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     this.project = project;
   }
 
+  @Override
+  public List<String> getTypeOrder() {
+    List<String> typeOrder = getSectionHelper().getTypeOrder();
+    if (typeOrder.isEmpty()) {
+      typeOrder = new ArrayList<>();
+      String first = project.first();
+      String second = project.second();
+      if (first != null && !first.isEmpty()) typeOrder.add(first);
+      if (second != null && !second.isEmpty()) typeOrder.add(second);
+     // typeOrder = project.getTypeOrder();
+    }
+    return typeOrder;
+  }
+
   /**
    * I don't think we're doing user exercise mask-out overrides anymore...
    *

@@ -294,7 +294,7 @@ public class AnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
    * @param id
    * @param processDur
    * @see mitll.langtest.server.LangTestDatabaseImpl#getPretestScore(int, long, String, String, int, int, boolean, String, boolean)
-   * @see mitll.langtest.server.database.DatabaseImpl#rememberScore(int, PretestScore)
+   * @see mitll.langtest.server.database.DatabaseImpl#rememberScore(int, PretestScore, boolean)
    */
   @Override
   public void changeAnswer(int id, float score, int processDur, String json) {
