@@ -79,7 +79,9 @@ public class ProjectManagement implements IProjectManagement {
    * @param db
    * @see
    */
-  public ProjectManagement(PathHelper pathHelper, ServerProperties properties, LogAndNotify logAndNotify,
+  public ProjectManagement(PathHelper pathHelper,
+                           ServerProperties properties,
+                           LogAndNotify logAndNotify,
                            DatabaseImpl db) {
     this.pathHelper = pathHelper;
     this.serverProps = properties;
@@ -107,7 +109,10 @@ public class ProjectManagement implements IProjectManagement {
                                 LogAndNotify logAndNotify,
                                 DatabaseImpl db) {
     Collection<SlickProject> all = projectDAO.getAll();
-    logger.info("populateProjects : found " + all.size() + " projects");
+
+    if (!all.isEmpty()) {
+      logger.info("populateProjects : found " + all.size() + " projects");
+    }
 
     for (SlickProject slickProject : all) {
       if (!idToProject.containsKey(slickProject.id())) {
@@ -121,13 +126,7 @@ public class ProjectManagement implements IProjectManagement {
       }
     }
 
-/*    if (reload) {
-      doReload();
-    }*/
-
-    logger.info("populateProjects " +
-        //"(reload = " + reload + ") " +
-        "now project ids " + idToProject.keySet());
+    logger.info("populateProjects now project ids " + idToProject.keySet());
     for (Project project : getProjects()) {
       logger.info("\tproject " + project);
     }
@@ -268,9 +267,7 @@ public class ProjectManagement implements IProjectManagement {
                                DatabaseImpl db) {
     Project project = new Project(slickProject, pathHelper, serverProps, db, logAndNotify);
     idToProject.put(project.getProject().id(), project);
-    logger.info("populateProjects " +
-        //"(reload = " + reload + ")" +
-        " : " + project + " : " + project.getAudioFileHelper());
+    logger.info("populateProjects : " + project + " : " + project.getAudioFileHelper());
     setExerciseDAO(project);
   }
 
@@ -299,7 +296,7 @@ public class ProjectManagement implements IProjectManagement {
 
   /**
    * @param project
-   * @see #setExerciseDAOs
+   * @see #rememberProject(PathHelper, ServerProperties, LogAndNotify, SlickProject, DatabaseImpl)
    */
   private void setExerciseDAO(Project project) {
     logger.info("setExerciseDAO on " + project);
@@ -318,8 +315,9 @@ public class ProjectManagement implements IProjectManagement {
    * @return
    * @see mitll.langtest.server.services.ScoringServiceImpl#getResultASRInfo
    * @see mitll.langtest.server.DownloadServlet#getFilenameForDownload
-   * @see #deleteItem(int, int)
-   * @see #getCustomOrPredefExercise(int, int)
+   * @see DatabaseImpl#getExercise
+   * @seex #deleteItem(int, int)
+   * @seex #getCustomOrPredefExercise(int, int)
    */
   @Override
   public CommonExercise getExercise(int projectid, int id) {

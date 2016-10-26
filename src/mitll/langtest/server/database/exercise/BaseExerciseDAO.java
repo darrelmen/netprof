@@ -120,6 +120,11 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     getRawExercises();
   }
 
+  @Override
+  public List<String> getTypeOrder() {
+    return getSectionHelper().getTypeOrder();
+  }
+
   /**
    * Do steps after reading the exercises.
    */
@@ -176,8 +181,10 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   }
 
   /**
-   * Only validate audio when there is audio to validate.
+   * There must be an /opt/netProf/bestAudio directory for audio.
    *
+   * Only validate audio when there is audio to validate.
+   * <p>
    * TODO : what if they add a user exercise and add audio to it, or record new audio for other exercises???
    *
    * @param audioDAO
@@ -208,9 +215,9 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
         logger.error("configuration error - expecting media directory " + mediaDir + " to be directory.");
 
       }
-    } else logger.warn("configuration error - expecting a media directory " + mediaDir);
+    } else logger.error("configuration error - expecting a media directory " + mediaDir);
 
-    this.attachAudio = new AttachAudio(audioDAO.getExToAudio(projectID), language);
+    this.attachAudio = new AttachAudio(audioDAO.getExToAudio(projectID), language, serverProps.shouldCheckAudioTranscript(), serverProps);
   }
 
   /**
@@ -311,7 +318,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 
           if (userExUpdateTime > predefUpdateTime) {
             Map<String, String> unitToValue = originalExercise.getUnitToValue();
-            ((Exercise)userExercise).setUnitToValue(unitToValue);
+            ((Exercise) userExercise).setUnitToValue(unitToValue);
 
             logger.debug("addOverlays refresh originalExercise for " + userExercise.getID() + " '" + userExercise.getForeignLanguage() +
                 "' vs '" + originalExercise.getForeignLanguage() +

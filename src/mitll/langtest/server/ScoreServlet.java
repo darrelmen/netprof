@@ -810,7 +810,7 @@ public class ScoreServlet extends DatabaseServlet {
 
             if (pretestScore1.getHydecScore() > 0.25) {
               logger.info("remember score for result " + decodeResultID);
-              db.rememberScore(decodeResultID, pretestScore1);
+              db.rememberScore(decodeResultID, pretestScore1, isCorrect);
             } else {
               logger.debug("skipping remembering alignment since score was too low " + pretestScore1.getHydecScore());
             }
