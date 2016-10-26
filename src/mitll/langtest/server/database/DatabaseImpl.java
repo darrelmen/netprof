@@ -280,7 +280,7 @@ public class DatabaseImpl implements Database {
     if (projectManagement == null) {
       logger.info("no project management yet...");
     } else {
-      logger.info("populateProjects --- ");
+//      logger.info("populateProjects --- ");
       projectManagement.populateProjects();
     }
   }
@@ -606,6 +606,7 @@ public class DatabaseImpl implements Database {
    * @see #setInstallPath(String, String, String)
    */
   private void makeDAO(String lessonPlanFile, String mediaDir, String installPath) {
+    logger.info("makeDAO - " + lessonPlanFile);
     if (userManagement == null) {
       synchronized (this) {
         boolean isURL = serverProps.getLessonPlan().startsWith("http");
@@ -616,7 +617,7 @@ public class DatabaseImpl implements Database {
 //          logger.info("Got " + lessonPlanFile);
           numExercises = readAMASExercises(lessonPlanFile, mediaDir, installPath, isURL);
         } else {
-          logger.info("makeDAO makeExerciseDAO -- ");
+          logger.info("makeDAO makeExerciseDAO -- " + lessonPlanFile);
 
           makeExerciseDAO(lessonPlanFile, isURL);
 
@@ -662,7 +663,7 @@ public class DatabaseImpl implements Database {
    * @see #makeDAO(String, String, String)
    */
   private void makeExerciseDAO(String lessonPlanFile, boolean isURL) {
-    logger.info("makeExerciseDAO - " + lessonPlanFile);
+    logger.info("makeExerciseDAO - " + lessonPlanFile + " : use h2 = " + serverProps.useH2());
 
     if (isURL) {
       projectManagement.addSingleProject(new JSONURLExerciseDAO(getServerProps(), userListManager, ADD_DEFECTS));
@@ -1542,9 +1543,10 @@ public class DatabaseImpl implements Database {
   /**
    * @param resultID
    * @param asrScoreForAudio
+   * @param isCorrect
    * @see mitll.langtest.server.services.ScoringServiceImpl#getPretestScore
    */
-  public void rememberScore(int resultID, PretestScore asrScoreForAudio) {
+  public void rememberScore(int resultID, PretestScore asrScoreForAudio, boolean isCorrect) {
     getAnswerDAO().changeAnswer(resultID, asrScoreForAudio.getHydecScore(), asrScoreForAudio.getProcessDur(), asrScoreForAudio.getJson());
     recordWordAndPhone.recordWordAndPhoneInfo(resultID, asrScoreForAudio);
   }

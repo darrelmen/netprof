@@ -126,7 +126,22 @@
     <orderEntry type="library" name="Gradle: org.ow2.asm:asm-util:5.0.3" level="project" />
     <orderEntry type="library" name="Gradle: org.ow2.asm:asm:5.0.3" level="project" />
     <orderEntry type="module" module-name="root" />
+    <orderEntry type="library" name="pronz-assembly-1.0" level="project" />
+    <orderEntry type="library" name="log4j-api-2.7" level="project" />
+    <orderEntry type="library" name="gson-2.7" level="project" />
+    <orderEntry type="library" name="domino-shared-1.0.0" level="project" />
+    <orderEntry type="library" name="mongo-core (2)" level="project" />
+    <orderEntry type="library" name="Gradle: org.apache.ignite:ignite-core:1.5.0.final" level="project" />
+    <orderEntry type="library" name="Gradle: net.liftweb:lift-actor_2.11:3.0-RC4" level="project" />
+    <orderEntry type="library" name="Gradle: net.liftweb:lift-common_2.11:3.0-RC4" level="project" />
+    <orderEntry type="library" name="Gradle: net.liftweb:lift-json-ext_2.11:3.0-RC4" level="project" />
+    <orderEntry type="library" name="Gradle: net.liftweb:lift-json_2.11:3.0-RC4" level="project" />
+    <orderEntry type="library" name="Gradle: net.liftweb:lift-markdown_2.11:3.0-RC4" level="project" />
+    <orderEntry type="library" name="Gradle: net.liftweb:lift-mongodb_2.11:3.0-RC4" level="project" />
+    <orderEntry type="library" name="Gradle: net.liftweb:lift-util_2.11:3.0-RC4" level="project" />
+    <orderEntry type="library" name="Gradle: mitll.hlt:mongo-core:0.1-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Gradle: mitll.hlt:domino-shared:1.2.0-topic-v24-domino-core" level="project" />
+    <orderEntry type="library" name="Gradle: mitll.hlt:domino-shared:gwt:1.2.0-topic-v24-domino-core" level="project" />
     <orderEntry type="module" module-name="domino-core_main" />
-    <orderEntry type="module" module-name="domino-shared_main" />
   </component>
 </module>

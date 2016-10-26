@@ -141,10 +141,14 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   public ClientUserDetail addAndGet(ClientUserDetail user, String encodedPass, Collection<User.Permission> permissions) {
     invalidateCache();
     SResult<ClientUserDetail> clientUserDetailSResult = delegate.doAddUser(user, encodedPass);
+    logger.info("addAndGet Got back " + clientUserDetailSResult);
 //    SlickUser user1 = dao.addAndGet(user);
     //  int i = addPermissions(permissions, user1.id());
     // if (i > 0) logger.info("inserted " + i + " permissions for " + user1.id());
-    return clientUserDetailSResult.get();
+    ClientUserDetail clientUserDetail = clientUserDetailSResult.get();
+    logger.info("\taddAndGet Got back " + clientUserDetailSResult);
+
+    return clientUserDetail;
   }
 
   /**
@@ -285,8 +289,16 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return users.isEmpty() ? null : users.get(0).getUserId();
   }
 
+  /**
+   * @see #getDbUsersByUserID
+   * @param filterDetails
+   * @return
+   */
   private List<DBUser> getDbUsers(Set<FilterDetail<UserColumn>> filterDetails) {
-    return delegate.getUsers(-1, new FindOptions<>(filterDetails));
+    FindOptions<UserColumn> opts = new FindOptions<>(filterDetails);
+    List<DBUser> users = delegate.getUsers(-1, opts);
+    logger.info("getDbUsers " + opts + " = " + users);
+    return users;
   }
 
   private Set<FilterDetail<UserColumn>> getEmailFilter(String emailH) {
@@ -304,20 +316,34 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return users.isEmpty() ? null : users.get(0).getDocumentDBID();
   }
 
-  private void addUserID(String user, Set<FilterDetail<UserColumn>> emailFilter) {
-    emailFilter.add(new FilterDetail<>(UserColumn.UserId, user, FilterDetail.Operator.EQ));
-  }
-
   @Override
   public int getIdForUserID(String id) {
     List<DBUser> users = getDbUsersByUserID(id);
     return users.isEmpty() ? -1 : users.get(0).getDocumentDBID();
   }
 
+  /**
+   * @see #getUser
+   * @see #getIdForUserID
+   * @param id
+   * @return
+   */
   private List<DBUser> getDbUsersByUserID(String id) {
     Set<FilterDetail<UserColumn>> filterDetails = new HashSet<>();
     addUserID(id, filterDetails);
     return getDbUsers(filterDetails);
+  }
+
+  /**
+   * Make sure to do string comparison.
+   * @param user
+   * @param emailFilter
+   */
+  private void addUserID(String user, Set<FilterDetail<UserColumn>> emailFilter) {
+    FilterDetail<UserColumn> filterDetail = new FilterDetail<>(UserColumn.UserId, user, FilterDetail.Operator.EQ);
+    filterDetail.setStringField(true);
+  //  logger.info("Adding filter detail " + filterDetail + " match " + filterDetail.getMatchValue());
+    emailFilter.add(filterDetail);
   }
 
   /**
@@ -338,7 +364,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     User user = getUser(id, "");
 
     if (user != null) {
-      logger.info("getStrictUserWithPass " + id + " and " + passwordHash);
+      logger.info("getStrictUserWithPass '" + id + "' and password hash '" + passwordHash +"'");
       boolean magicMatch = passwordHash.equals(adminHash);
       if (netProfDelegate.isPasswordMatch(user.getID(), passwordHash) || magicMatch) {
         boolean isadmin = database.getServerProps().getAdmins().contains(user.getUserID());
@@ -358,9 +384,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @see mitll.langtest.server.database.copy.CopyToPostgres#copyUsers
    */
   @Override
-  public User getUserByID(String id) {
-    return getUser(id, "");
-  }
+  public User getUserByID(String id) {  return getUser(id, "");  }
 
   public User getByID(int id) {
     DBUser dbUser = delegate.lookupDBUser(id);

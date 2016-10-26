@@ -174,7 +174,8 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
 
     PretestScore asrScoreForAudio =
         getAudioFileHelper().getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg,
-            false, serverProps.useScoreCache(), "" + exerciseID, cachedResult, usePhoneToDisplay1, false);
+            false,
+            serverProps.useScoreCache(), "" + exerciseID, cachedResult, usePhoneToDisplay1, false);
 
     long timeToRunHydec = System.currentTimeMillis() - then;
 
@@ -187,7 +188,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         " usePhoneToDisplay " + usePhoneToDisplay1);
 
     if (resultID > -1 && cachedResult == null) { // alignment has two steps : 1) post the audio, then 2) do alignment
-      db.rememberScore(resultID, asrScoreForAudio);
+      db.rememberScore(resultID, asrScoreForAudio, true);
     }
     return asrScoreForAudio;
   }
