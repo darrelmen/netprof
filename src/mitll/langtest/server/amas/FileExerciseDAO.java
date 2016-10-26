@@ -104,6 +104,11 @@ public class FileExerciseDAO<T extends CommonShell> implements SimpleExerciseDAO
   }
 
   @Override
+  public List<String> getTypeOrder() {
+    return getSectionHelper().getTypeOrder();
+  }
+
+  @Override
   public T getExercise(int id) {
     if (idToExercise.isEmpty()) logger.warn("huh? couldn't find any exercises..?");
     if (!idToExercise.containsKey(id)) {

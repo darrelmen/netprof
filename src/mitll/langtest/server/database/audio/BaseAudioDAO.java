@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.audio;
 
+import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.database.AudioExport;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
@@ -430,7 +431,7 @@ public abstract class BaseAudioDAO extends DAO {
    * @param exerciseID
    * @param audioType
    * @return
-   * @see IAudioDAO#addOrUpdate(int, int, int, AudioType, String, long, long, String)
+   * @see IAudioDAO#addOrUpdate(int, int, int, AudioType, String, long, long, String, float)
    */
   protected AudioAttribute getAudioAttribute(int userid, int exerciseID, AudioType audioType) {
     AudioAttribute audioAttr = null;
@@ -458,13 +459,14 @@ public abstract class BaseAudioDAO extends DAO {
    * @param audioType
    * @param durationInMillis
    * @param transcript
+   * @param dnr
    * @return
-   * @see AudioDAO#addOrUpdate
+   * @see IAudioDAO#addOrUpdate
    * @deprecated
    */
   protected AudioAttribute getAudioAttribute(int i,
                                              int userid, String audioRef, int exerciseID, long timestamp,
-                                             AudioType audioType, long durationInMillis, String transcript) {
+                                             AudioType audioType, long durationInMillis, String transcript, float dnr) {
     MiniUser miniUser = userDAO.getMiniUser(userid);
 
     return new AudioAttribute(i, userid,
@@ -473,7 +475,8 @@ public abstract class BaseAudioDAO extends DAO {
         timestamp,
         durationInMillis, audioType,
         miniUser, transcript,
-        audioRef);
+        audioRef,
+        dnr);
   }
 
   public Set<AudioAttribute> getAndMarkDefects(AudioAttributeExercise userExercise,
@@ -511,22 +514,25 @@ public abstract class BaseAudioDAO extends DAO {
   }
 
   /**
+   * TODO : confirm this works...
+   *
    * Go back and mark gender on really old audio that had no user info on it.
    *
    * @param userid
    * @param projid
    * @param attr   @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#markGender(AudioAttribute, boolean)
+   * @see mitll.langtest.server.services.QCServiceImpl#markGender
    */
   public void addOrUpdateUser(int userid, int projid, AudioAttribute attr) {
     long timestamp = attr.getTimestamp();
     if (timestamp == 0) timestamp = System.currentTimeMillis();
+    float dnr = new AudioCheck(database.getServerProps()).getDNR(new File(attr.getActualPath()));
     addOrUpdateUser(userid, attr.getExid(), projid, attr.getAudioType(), attr.getAudioRef(), timestamp,
-        (int) attr.getDurationInMillis(), BaseAudioDAO.UNKNOWN);
+        (int) attr.getDurationInMillis(), BaseAudioDAO.UNKNOWN, dnr);
   }
 
   abstract void addOrUpdateUser(int userid, int exerciseID, int projid, AudioType audioType, String audioRef, long timestamp,
-                                int durationInMillis, String transcript);
+                                int durationInMillis, String transcript, float dnr);
 
   abstract int markDefect(int userid, int exerciseID, AudioType audioType);
 

@@ -132,7 +132,10 @@ public class SlickUserExerciseDAO
    * @return
    */
   List<String> getTypeOrder() {
-    return exerciseDAO.getSectionHelper().getTypeOrder();
+    //logger.info("exercise DAO "+ exerciseDAO);
+    List<String> typeOrder = exerciseDAO.getSectionHelper().getTypeOrder();
+    if (typeOrder.isEmpty()) typeOrder = exerciseDAO.getTypeOrder();
+    return typeOrder;
   }
 
   /**
@@ -161,6 +164,10 @@ public class SlickUserExerciseDAO
                                int importUser,
                                boolean isContext) {
     Map<String, String> unitToValue = shared.getUnitToValue();
+    if (getTypeOrder().isEmpty()) {
+      logger.error("type order is empty?");
+      return null;
+    }
     Iterator<String> iterator = getTypeOrder().iterator();
     String first = iterator.next();
     String second = iterator.hasNext() ? iterator.next() : "";
