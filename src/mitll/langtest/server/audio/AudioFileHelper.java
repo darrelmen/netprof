@@ -449,7 +449,7 @@ public class AudioFileHelper implements AlignDecode {
 
         // Do decoding, and record alignment info we just got in the database ...
         long durationInMillis = attribute.getDurationInMillis();
-        AudioAnswer decodeAnswer = getRefDecodeAnswer(exercise, audioRef, absoluteFile, durationInMillis, false);
+        AudioAnswer decodeAnswer = getDecodeAnswer(exercise, audioRef, absoluteFile, durationInMillis, false);
         DecodeAlignOutput decodeOutput = new DecodeAlignOutput(decodeAnswer, true);
 
         PretestScore alignmentScoreOld = doHydec ? getAlignmentScore(exercise, absolutePath,
@@ -457,7 +457,7 @@ public class AudioFileHelper implements AlignDecode {
         DecodeAlignOutput alignOutputOld = new DecodeAlignOutput(alignmentScoreOld, false);
 
         // Do decoding, and record alignment info we just got in the database ...
-        AudioAnswer decodeAnswerOld = doHydec ? getRefDecodeAnswer(exercise, audioRef, absoluteFile, durationInMillis, true) : new AudioAnswer();
+        AudioAnswer decodeAnswerOld = doHydec ? getDecodeAnswer(exercise, audioRef, absoluteFile, durationInMillis, true) : new AudioAnswer();
         DecodeAlignOutput decodeOutputOld = new DecodeAlignOutput(decodeAnswerOld, true);
 
         //logger.debug("attr dur " + attribute.getDurationInMillis());
@@ -478,6 +478,40 @@ public class AudioFileHelper implements AlignDecode {
     } else {
       logger.warn("skipping " + exercise.getID() + " since can't do decode/align b/c of LTS errors ");
     }
+  }
+
+  /**
+   * TODO : finish merge
+   * Re-write info in result table, mark it with model and model update date
+   * rewrite word and phone info for result.
+   *
+   * @see RefResultDecoder#recalcStudentAudio
+   * @param result
+   * @param exercise
+   * @return
+   */
+  public boolean recalcOne(Result result, CommonExercise exercise) {
+    String audioRef = result.getAnswer();
+    File absoluteFile = pathHelper.getAbsoluteFile(audioRef);
+
+    int uniqueID = result.getUniqueID();
+
+    if (result.getAudioType().equals("flashcard") || result.getAudioType().equals("avp")) {
+      long durationInMillis = result.getDurationInMillis();
+      AudioAnswer decodeAnswer = getDecodeAnswer(exercise, audioRef, absoluteFile, durationInMillis, false);
+//      db.getPhoneDAO().removePhones(uniqueID);
+//      db.getWordDAO().removeWords(uniqueID);
+      db.rememberScore(uniqueID, decodeAnswer.getPretestScore(), decodeAnswer.isCorrect());
+      logger.info("rememberScore for result " + uniqueID + " : decode " /* +decodeAnswer.getPretestScore()*/);
+    } else {
+      String absolutePath = absoluteFile.getAbsolutePath();
+      PretestScore alignmentScore = getAlignmentScore(exercise, absolutePath, serverProps.usePhoneToDisplay(), false);
+//      db.getPhoneDAO().removePhones(uniqueID);
+//      db.getWordDAO().removeWords(uniqueID);
+      db.rememberScore(uniqueID, alignmentScore, alignmentScore.getHydecScore() > 0.25);
+      logger.info("rememberScore for result " + uniqueID + " : alignment "  +alignmentScore);
+    }
+    return true;
   }
 
   private boolean isUsePhoneToDisplay() {
@@ -539,7 +573,7 @@ public class AudioFileHelper implements AlignDecode {
     //   logger.debug("getRefAudioAnswerDecoding decodeAnswer " + decodeAnswer);
   }
 
-  private AudioAnswer getRefDecodeAnswer(CommonExercise exercise1, String wavPath, File file, long duration,
+  private AudioAnswer getDecodeAnswer(CommonExercise exercise1, String wavPath, File file, long duration,
                                          boolean useOldSchool) {
     return getAudioAnswer(1, exercise1, true, wavPath, file,
         new AudioCheck.ValidityAndDur(duration),
@@ -1080,7 +1114,7 @@ public class AudioFileHelper implements AlignDecode {
    * @see #makeASRScoring
    */
   private HTKDictionary makeDict(String installPath, String modelsDir) {
-    logger.info("install path is " + installPath + " modelsDir " + modelsDir);
+    logger.info("makeDict : install path is '" + installPath + "' modelsDir " + modelsDir);
     String dictFile =
         new ConfigFileCreator(serverProps.getProperties(), null, Scoring.getScoringDir(installPath), modelsDir).getDictFile();
     if (dictFile != null && new File(dictFile).exists()) {

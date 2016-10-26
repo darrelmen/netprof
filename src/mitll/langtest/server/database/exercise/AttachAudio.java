@@ -33,6 +33,7 @@
 package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.MutableAudioExercise;
@@ -50,17 +51,12 @@ import java.util.*;
  */
 public class AttachAudio {
   private static final Logger logger = Logger.getLogger(AttachAudio.class);
-//  private static final String FAST_WAV = "Fast" + ".wav";
-//  private static final String SLOW_WAV = "Slow" + ".wav";
-
   private int missingExerciseCount = 0;
   private int c = 0;
-  //  private final int audioOffset;
-//private final String mediaDir;
- // private final String mediaDir1;
-  //  private final File installPath;
   private Map<Integer, List<AudioAttribute>> exToAudio;
   private String language;
+  private boolean checkAudioTranscript = true;
+  private final AudioCheck audioCheck;
 
   /**
    * @param exToAudio
@@ -68,15 +64,12 @@ public class AttachAudio {
    * @see BaseExerciseDAO#setAudioDAO
    */
   AttachAudio(Map<Integer, List<AudioAttribute>> exToAudio,
-                     String language) {
-    //  this.mediaDir = mediaDir;
-    // this.mediaDir1 = mediaDir1;
-   // this.mediaDir1 = "";
-    //  logger.info("media dir '" + mediaDir + "' '" + mediaDir1 + "'");
+              String language,
+              boolean checkAudioTranscript, ServerProperties serverProperties) {
     this.language = language;
-//    this.installPath = installPath;
     this.setExToAudio(exToAudio);
-    //this.audioOffset = audioOffset;
+    this.checkAudioTranscript = checkAudioTranscript;
+    this.audioCheck = new AudioCheck(serverProperties);
   }
 
 
@@ -84,7 +77,7 @@ public class AttachAudio {
    * Go looking for audio in the media directory ("bestAudio") and if there's a file there
    * under a matching exercise id, attach Fast and/or slow versions to this exercise.
    * <p>
-   * Can override audio file directory with a non-empty refAudioIndex.
+   * Can override audio file directory with a non-empty refAudioIndex.D
    * <p>
    * Also uses audioOffset - audio index is an integer.
    *
@@ -144,6 +137,9 @@ public class AttachAudio {
       //   if (audioAttributes.isEmpty()) logger.info("huh? audio attr empty for " + id);
       missing = attachAudio(imported, missing, audioAttributes, transcriptChanged, language);
     }
+    else if (exToAudio.isEmpty()) {
+      logger.error("ex->audio map is empty!\n\n\n");
+    }
     return missing;
   }
 
@@ -194,7 +190,7 @@ public class AttachAudio {
 // so this is something like bestAudio/spanish/bestAudio/3742/regular_xxx.ogg
         String actualPath = audio.getActualPath();
         if (!actualPath.startsWith(ServerProperties.BEST_AUDIO)) {
-          actualPath = ServerProperties.BEST_AUDIO + File.separator +actualPath;
+          actualPath = ServerProperties.BEST_AUDIO + File.separator + actualPath;
         }
         String before = exercise.getForeignLanguage();
         String noAccents = StringUtils.stripAccents(before);
@@ -222,10 +218,18 @@ public class AttachAudio {
                 logger.info("got more than 1 directly related ? " + directlyRelated.size());
               }
             }
-          } else if ((audio.matchTranscript(before, transcript) ||
-              audio.matchTranscript(noAccents, noAccentsTranscript))) {
-            audio.setAudioRef(actualPath);   // remember to prefix the path
-            mutableAudio.addAudio(audio);
+          } else if (!checkAudioTranscript ||
+              (audio.matchTranscript(before, transcript) ||
+                  audio.matchTranscript(noAccents, noAccentsTranscript))) {
+
+            float dnr1 = audio.getDnr();
+            boolean dnrOK = dnr1 < 0 || dnr1 > audioCheck.getMinDNR();
+
+            if (dnrOK) {
+              audio.setAudioRef(actualPath);   // remember to prefix the path
+              mutableAudio.addAudio(audio);
+            }
+
           } else {
             transcriptChangedIDs.add(audio.getExid());
 /*							if (m++ < 10) {
