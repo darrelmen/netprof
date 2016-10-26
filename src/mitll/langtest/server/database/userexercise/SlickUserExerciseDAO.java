@@ -508,7 +508,7 @@ public class SlickUserExerciseDAO
   /**
    * @param projectid
    * @return
-   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyOneConfig(DatabaseImpl, String, String, int)
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyOneConfig(DatabaseImpl, String, String, int, boolean)
    */
   public boolean isProjectEmpty(int projectid) {
     return dao.isProjectEmpty(projectid);

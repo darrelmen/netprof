@@ -138,7 +138,7 @@ public class AttachAudio {
       missing = attachAudio(imported, missing, audioAttributes, transcriptChanged, language);
     }
     else if (exToAudio.isEmpty()) {
-      logger.error("ex->audio map is empty!\n\n\n");
+//      logger.error("ex->audio map is empty!\n\n\n");
     }
     return missing;
   }
