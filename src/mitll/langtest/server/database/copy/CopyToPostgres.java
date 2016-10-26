@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.database.copy;
 
-import mitll.hlt.domino.shared.model.user.ClientUserDetail;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
@@ -46,7 +45,6 @@ import mitll.langtest.server.database.instrumentation.SlickEventImpl;
 import mitll.langtest.server.database.phone.Phone;
 import mitll.langtest.server.database.phone.PhoneDAO;
 import mitll.langtest.server.database.phone.SlickPhoneDAO;
-import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.refaudio.RefResultDAO;
 import mitll.langtest.server.database.refaudio.SlickRefResultDAO;
 import mitll.langtest.server.database.result.*;
@@ -65,13 +63,11 @@ import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Exercise;
-import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.*;
 import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.*;
 
 public class CopyToPostgres<T extends CommonShell> {
@@ -89,7 +85,7 @@ public class CopyToPostgres<T extends CommonShell> {
    */
   private void copyOneConfigCommand(String config, boolean inTest) {
     DatabaseImpl databaseLight = getDatabaseLight(config, inTest);
-    new CopyToPostgres().copyOneConfig(databaseLight, getCC(config), null, 0);
+    new CopyToPostgres().copyOneConfig(databaseLight, getCC(config), null, 0, false);
     databaseLight.destroy();
   }
 
@@ -117,6 +113,7 @@ public class CopyToPostgres<T extends CommonShell> {
         "pashto",
         "portuguese",
         "russian",
+        "serbian",
         "spanish",
         "sudanese",
         "tagalog",
@@ -139,6 +136,7 @@ public class CopyToPostgres<T extends CommonShell> {
         "af",
         "pt",
         "ru",
+        "rs",
         "es",
         "ss",
         "ph",
@@ -159,13 +157,6 @@ public class CopyToPostgres<T extends CommonShell> {
     File file = getConfigFile(config, null, inTest);
     String parent = file.getParentFile().getAbsolutePath();
     ServerProperties serverProps = new ServerProperties(parent, file.getName());
-/*    return new DBConnection(serverProps.getDatabaseType(),
-        serverProps.getDatabaseHost(),
-        serverProps.getDatabasePort(),
-        serverProps.getDatabaseName(),
-        serverProps.getDatabaseUser(),
-        serverProps.getDatabasePassword());*/
-
     return new DBConnection(serverProps.getDBConfig());
   }
 
@@ -206,10 +197,11 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param db
    * @param cc
    * @param optName null OK
+   * @param isDev
    * @see #copyOneConfig
    */
-  public void copyOneConfig(DatabaseImpl db, String cc, String optName, int displayOrder) {
-    int projectID = createProjectIfNotExists(db, cc, optName, "", displayOrder);  // TODO : course?
+  public void copyOneConfig(DatabaseImpl db, String cc, String optName, int displayOrder, boolean isDev) {
+    int projectID = createProjectIfNotExists(db, cc, optName, displayOrder, isDev);  // TODO : course?
 
     logger.info("copyOneConfig project is " + projectID);
 
@@ -224,7 +216,7 @@ public class CopyToPostgres<T extends CommonShell> {
     if (slickUEDAO.isProjectEmpty(projectID)) {
       ResultDAO resultDAO = new ResultDAO(db);
 
-      Map<Integer, Integer> oldToNewUser = copyUsers(db, projectID, resultDAO);
+      Map<Integer, Integer> oldToNewUser = new UserCopy().copyUsers(db, projectID, resultDAO);
 
       Map<Integer, String> idToFL = new HashMap<>();
       Map<String, Integer> exToID = copyUserAndPredefExercisesAndLists(db, projectID, oldToNewUser, idToFL);
@@ -276,6 +268,10 @@ public class CopyToPostgres<T extends CommonShell> {
     }
   }
 
+  public int createProjectIfNotExists(DatabaseImpl db, String cc, String optName, int displayOrder, boolean isDev) {
+    return new CreateProject().createProjectIfNotExists(db, cc, optName, "", displayOrder, isDev);
+  }
+
   /**
    * @param db
    * @param projectID
@@ -302,235 +298,6 @@ public class CopyToPostgres<T extends CommonShell> {
     SlickUserListDAO slickUserListDAO = (SlickUserListDAO) db.getUserListManager().getUserListDAO();
     Map<Integer, Integer> oldToNewUserList = slickUserListDAO.getOldToNew(projectid);
     copyUserExerciseListJoin(db, oldToNewUserList, exToInt);
-  }
-
-  /**
-   * TODO : what to do about pashto 1,2,3?
-   *
-   * @param db
-   * @param countryCode
-   * @param course
-   * @return
-   * @see #copyOneConfig
-   */
-  public int createProjectIfNotExists(DatabaseImpl db, String countryCode, String optName, String course, int displayOrder) {
-    IProjectDAO projectDAO = db.getProjectDAO();
-    String oldLanguage = getOldLanguage(db);
-    String name = optName != null ? optName : oldLanguage;
-
-    int byName = projectDAO.getByName(name);
-
-    if (byName == -1) {
-      logger.info("checking for project with name '" + name + "' opt '" + optName + "' language '" + oldLanguage +
-          "' - non found");
-
-      byName = createProject(db, projectDAO, countryCode, name, course, displayOrder);
-
-      db.populateProjects();
-    } else {
-      logger.info("found project " + byName + " for language '" + oldLanguage + "'");
-    }
-    return byName;
-  }
-
-  private String getOldLanguage(DatabaseImpl db) {
-    return db.getLanguage();
-  }
-
-  /**
-   * Ask the database for what the type order should be, e.g. [Unit, Chapter] or [Week, Unit] (from Dari)
-   *
-   * @param db
-   * @param projectDAO
-   * @param name
-   * @param course
-   * @param displayOrder
-   * @see #createProjectIfNotExists
-   */
-  private int createProject(DatabaseImpl db, IProjectDAO projectDAO, String countryCode, String name, String course, int displayOrder) {
-    Iterator<String> iterator = db.getTypeOrder(-1).iterator();
-    String firstType = iterator.hasNext() ? iterator.next() : "";
-    String secondType = iterator.hasNext() ? iterator.next() : "";
-    String language = getOldLanguage(db);
-
-    DominoUserDAOImpl dominoUserDAO = (DominoUserDAOImpl) db.getUserDAO();
-
-    if (language.equals("msa")) language = "MSA";
-
-    int byName = projectDAO.add(dominoUserDAO.getBeforeLoginUser(), name, language, course, firstType, secondType,
-        countryCode, displayOrder);
-
-    Properties props = db.getServerProps().getProps();
-    for (String prop : ServerProperties.CORE_PROPERTIES) {
-      String property = props.getProperty(prop);
-      if (property != null) {
-        projectDAO.addProperty(byName, prop, property);
-      }
-    }
-
-    logger.info("created project " + byName);
-    return byName;
-  }
-
-  /**
-   * What can happen:
-   * <p>
-   * 1) User id and password match - no action -they're already there
-   * 2) User id matches, but password doesn't - go ahead and add the user id and password
-   * -- could be multiple users with same userid but different password... trouble later on?
-   * 3) User id is new - add a new user
-   * <p>
-   * Worry about how to merge two or more user tables -
-   * find existing ids in postgres...
-   * if some from import db aren't there, add them
-   * return map of old ids -> new ids
-   * <p>
-   * For collisions -- must reset password -- someone loses.
-   * <p>
-   * ??? Also, going forward, we must store emails, since we need to be able to send the sign up message?
-   *
-   * @param db
-   * @param projid
-   * @see #copyOneConfig
-   */
-  private Map<Integer, Integer> copyUsers(DatabaseImpl db, int projid, IResultDAO oldResultDAO) {
-//    SlickUserDAOImpl dominoUserDAO = (SlickUserDAOImpl) db.getUserDAO();
-    DominoUserDAOImpl dominoUserDAO = (DominoUserDAOImpl) db.getUserDAO();
-
-    Map<Integer, Integer> oldToNew = new HashMap<>();
-    addDefaultUsers(oldToNew, dominoUserDAO);
-
-    IUserProjectDAO slickUserProjectDAO = db.getUserProjectDAO();
-
-    UserDAO userDAO = new UserDAO(db);
-    int defectDetector = userDAO.getDefectDetector();
-    oldToNew.put(defectDetector, dominoUserDAO.getDefectDetector());
-
-    List<User> importUsers = userDAO.getUsers();
-    logger.info("copyUsers h2 importUsers  " + importUsers.size());
-    UserToCount userToNumAnswers = oldResultDAO.getUserToNumAnswers();
-    Map<Integer, Integer> idToCount = userToNumAnswers.getIdToCount();
-    if (DEBUG) logger.info("id->count " + idToCount.size() + " values " + idToCount.values().size());
-
-    int collisions = 0;
-    int lurker = 0;
-    List<ClientUserDetail> added = new ArrayList<>();
-    for (User toImport : importUsers) {
-      int importID = toImport.getID();
-      if (importID != defectDetector) {
-        String importUserID = toImport.getUserID();
-        String passwordHash = toImport.getPasswordHash();
-        if (passwordHash == null) passwordHash = "";
-
-        if (DEBUG) logger.info("import " + toImport);
-        User strictUserWithPass = dominoUserDAO.getStrictUserWithPass(importUserID, passwordHash);
-
-        if (strictUserWithPass != null) {
-          // do nothing, but remember id mapping
-          oldToNew.put(importID, strictUserWithPass.getID());
-        } else {
-
-          if (importUserID.isEmpty() && idToCount.get(importID) != null && idToCount.get(importID) == 0) {
-            logger.info("skipping old user " + toImport + " since they have an empty user name and no recordings");
-            lurker++;
-          } else {
-            User userByID1 = dominoUserDAO.getUserByID(importUserID);
-
-            if (userByID1 != null) {
-              if (DEBUG) logger.info("found existing user " + importUserID + " : " + userByID1);
-              // User "adam" already exists with a different password - what to do?
-              // void current password! Force them to set it again when they log in again
-              int existingID = userByID1.getID();
-              if (!userByID1.getPasswordHash().isEmpty()) {
-                dominoUserDAO.changePassword(existingID, "");
-              }
-              oldToNew.put(importID, existingID);
-              collisions++;
-              logger.info("user collision to project " + projid + " map " + importID + "->" + existingID +
-                  " : " + userByID1);
-            } else {
-              logger.info("no existing user id '" + importUserID + "'");
-              added.add(addUser(dominoUserDAO, oldToNew, toImport));
-            }
-          }
-        }
-      }
-    }
-
-    addUserProjectBinding(projid, slickUserProjectDAO, added);
-    logger.info("after, postgres importUsers " +
-        "num = " + dominoUserDAO.getUsers().size() +
-        " added " + added.size() +
-        " collisions " + collisions +
-        " lurker " + lurker
-    );
-    return oldToNew;
-  }
-
-  private void addUserProjectBinding(int projid, IUserProjectDAO slickUserProjectDAO, List<ClientUserDetail> added) {
-    logger.info("adding user->project for " + projid);
-    List<SlickUserProject> toAdd = new ArrayList<>();
-    Timestamp modified = new Timestamp(System.currentTimeMillis());
-    for (ClientUserDetail user : added) {
-      toAdd.add(new SlickUserProject(-1, user.getDocumentDBID(), projid, modified));
-    }
-    slickUserProjectDAO.addBulk(toAdd);
-  }
-
-/*  private void addDefaultUsers(Map<Integer, Integer> oldToNew, SlickUserDAOImpl slickUserDAO) {
-    oldToNew.put(BaseUserDAO.DEFAULT_USER_ID, slickUserDAO.getDefaultUser());
-    oldToNew.put(BaseUserDAO.DEFAULT_MALE_ID, slickUserDAO.getDefaultMale());
-    oldToNew.put(BaseUserDAO.DEFAULT_FEMALE_ID, slickUserDAO.getDefaultFemale());
-  } */
-
-  private void addDefaultUsers(Map<Integer, Integer> oldToNew, DominoUserDAOImpl dominoUserDAO) {
-    oldToNew.put(BaseUserDAO.DEFAULT_USER_ID, dominoUserDAO.getDefaultUser());
-    oldToNew.put(BaseUserDAO.DEFAULT_MALE_ID, dominoUserDAO.getDefaultMale());
-    oldToNew.put(BaseUserDAO.DEFAULT_FEMALE_ID, dominoUserDAO.getDefaultFemale());
-  }
-
-  /**
-   * @param dominoUserDAO
-   * @param oldToNew
-   * @param toImport
-   * @return
-   * @see #copyUsers
-   */
-/*  private SlickUser addUser(dominoUserDAOImpl dominoUserDAO,
-                            Map<Integer, Integer> oldToNew,
-                            User toImport) {
-//    logger.info("addUser " + toImport + " with " + toImport.getPermissions());
-    SlickUser user = dominoUserDAO.toSlick(toImport, false);
-    SlickUser slickUser = dominoUserDAO.addAndGet(user, toImport.getPermissions());
-    int add = slickUser.id();
-//    logger.info("addUser id  " + add + " for " + user.id() + " equal " + (user == slickUser));
-    //   logger.info("addUser map " + toImport.getID() + " -> " + add);
-    oldToNew.put(toImport.getID(), add);
-    return slickUser;
-  }*/
-
-  /**
-   *
-   * @param dominoUserDAO
-   * @param oldToNew
-   * @param toImport
-   * @return
-   */
-  private ClientUserDetail addUser(DominoUserDAOImpl dominoUserDAO,
-                                   Map<Integer, Integer> oldToNew,
-                                   User toImport) {
-//    logger.info("addUser " + toImport + " with " + toImport.getPermissions());
-    ClientUserDetail user = dominoUserDAO.toClientUserDetail(toImport, false);
-    ClientUserDetail addedUser = dominoUserDAO.addAndGet(user, toImport.getPasswordHash(), toImport.getPermissions());
-    if (addedUser == null) {
-      logger.error("no error returned from domino.");
-    }
-
-    int add = addedUser.getDocumentDBID();
-//    logger.info("addUser id  " + add + " for " + user.id() + " equal " + (user == addedUser));
-    //   logger.info("addUser map " + toImport.getID() + " -> " + add);
-    oldToNew.put(toImport.getID(), add);
-    return addedUser;
   }
 
   /**
@@ -660,7 +427,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param db
    * @param oldToNewResult
    * @param slickWordDAO
-   * @see #copyOneConfig(DatabaseImpl, String, String, int)
+   * @see #copyOneConfig(DatabaseImpl, String, String, int, boolean)
    */
   private void copyWord(DatabaseImpl db, Map<Integer, Integer> oldToNewResult, SlickWordDAO slickWordDAO) {
     int c = 0;
@@ -1036,7 +803,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param db
    * @param oldToNewUser
    * @param exToID
-   * @see #copyOneConfig(DatabaseImpl, String, String, int)
+   * @see #copyOneConfig(DatabaseImpl, String, String, int, boolean)
    */
   private void copyRefResult(DatabaseImpl db, Map<Integer, Integer> oldToNewUser, Map<String, Integer> exToID) {
     SlickRefResultDAO dao = (SlickRefResultDAO) db.getRefResultDAO();
