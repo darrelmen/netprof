@@ -21,6 +21,8 @@ import java.util.Date;
  */
 public class BaseTest {
   private static final Logger logger = Logger.getLogger(BaseTest.class);
+  public static final String QUIZLET_PROPERTIES = "quizlet.properties";
+  public static final String DOMINO_PROPERTIES = "domino.properties";
 
   protected static DatabaseImpl getDatabase(String config) {
     return getDatabase(config, false);
@@ -32,7 +34,7 @@ public class BaseTest {
   }
 
   private static DatabaseImpl getDatabase(String installPath, String config, boolean useH2) {
-    File file = new File(installPath + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
+    File file = new File(installPath + File.separator + "config" + File.separator + config + File.separator + QUIZLET_PROPERTIES);
     String name = file.getName();
     String parent = file.getParentFile().getAbsolutePath();
     ServerProperties serverProps = new ServerProperties(parent, name);
@@ -48,7 +50,7 @@ public class BaseTest {
 
   protected static DatabaseImpl getDatabaseLight(String config, boolean useH2) {
     String installPath = "war";
-    String s = "quizlet.properties";
+    String s = QUIZLET_PROPERTIES;
     File file = new File(installPath + File.separator + "config" + File.separator + config + File.separator + s);
     ServerProperties serverProps = getServerProperties(config, s);
     DatabaseImpl database = getDatabaseVeryLight(config, s, useH2);
@@ -72,19 +74,19 @@ public class BaseTest {
                                                  boolean useLocal,
                                                  String optPropsFile) {
 
-    logger.info("db " + config + " props " + optPropsFile);
+    logger.info("getDatabaseLight db " + config + " props " + optPropsFile);
 
     String installPath = "war";
-    String propsFile = optPropsFile != null ? optPropsFile : "quizlet.properties";
+    String propsFile = optPropsFile != null ? optPropsFile : QUIZLET_PROPERTIES;
 
-    logger.info("db " + config + " props " + propsFile);
+    logger.info("getDatabaseLight db " + config + " props " + propsFile);
 
     File file = new File(installPath + File.separator + "config" + File.separator + config + File.separator + propsFile);
 
-    logger.info("path " + file.getAbsolutePath());
+    logger.info("getDatabaseLight path " + file.getAbsolutePath());
 
-    ServerProperties serverProps = getServerProperties(config, propsFile);
-    ServerProperties serverProps2 = getServerProperties("netProf", "domino.properties");
+    ServerProperties serverProps  = getServerProperties(config, propsFile);
+    ServerProperties serverProps2 = getServerProperties("netProf", DOMINO_PROPERTIES);
     String configFileFullPath = serverProps2.getConfigFileFullPath();
     try {
       serverProps.getProps().load(new FileInputStream(configFileFullPath));
