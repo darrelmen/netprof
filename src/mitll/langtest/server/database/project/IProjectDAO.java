@@ -39,7 +39,8 @@ import mitll.npdata.dao.SlickProject;
 import java.util.Collection;
 
 public interface IProjectDAO extends IDAO {
-  int add(int userid, String name, String language, String course, String firstType, String secondType, String countryCode, int displayOrder);
+  int add(int userid, String name, String language, String course,
+          String firstType, String secondType, String countryCode, int displayOrder, boolean isDev);
 
   int add(int userid, long modified, String name, String language, String course,
           ProjectType type, ProjectStatus status, String firstType, String secondType, String countryCode, int displayOrder);
@@ -67,6 +68,5 @@ public interface IProjectDAO extends IDAO {
   int ensureDefaultProject(int defaultUser);
 
   int getDefault();
-
   // void dropProject(String name);
 }
