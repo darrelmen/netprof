@@ -33,8 +33,8 @@
 package mitll.langtest.shared.project;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.server.services.ProjectServiceImpl;
 import mitll.langtest.shared.exercise.HasID;
-import org.jetbrains.annotations.NotNull;
 
 public class ProjectInfo implements HasID, IsSerializable {
   private String name;
@@ -48,7 +48,7 @@ public class ProjectInfo implements HasID, IsSerializable {
   } // for serialization
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getStartupInfo()
+   * @see ProjectServiceImpl#getAll
    */
   public ProjectInfo(int projectid, String language, String name, String course, long created) {
     this.language = language;
@@ -80,7 +80,7 @@ public class ProjectInfo implements HasID, IsSerializable {
   }*/
 
   @Override
-  public int compareTo(@NotNull HasID o) {
+  public int compareTo(HasID o) {
     if (o instanceof ProjectInfo) {
       ProjectInfo otherProject = (ProjectInfo) o;
       ProjectInfo thisProject = this;

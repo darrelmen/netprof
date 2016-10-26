@@ -39,7 +39,6 @@ import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.npdata.dao.SlickRefResultJson;
 import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -90,7 +89,6 @@ public class ExerciseToPhone {
     return getExToPhonePerProject(inProject, jsonResults);
   }
 
-  @NotNull
   public Map<Integer, ExercisePhoneInfo> getExToPhonePerProject(Set<Integer> inProject, List<SlickRefResultJson> jsonResults) {
     long then = System.currentTimeMillis();
     Map<Integer, ExercisePhoneInfo> exToPhones = new HashMap<>();
@@ -230,8 +228,6 @@ public class ExerciseToPhone {
     Info previous = wordToInfo.put(info.word, info);
   }
 
-
-  @NotNull
   private String getPronKey(List<String> pron) {
     StringBuilder builder = new StringBuilder();
     for (String phone : pron) builder.append(phone).append("-");
@@ -297,7 +293,6 @@ public class ExerciseToPhone {
       }
     }
 
-    @NotNull
     private String getPronKey(List<String> pron) {
       StringBuilder builder = new StringBuilder();
       for (String phone : pron) builder.append(phone).append("-");
@@ -319,7 +314,6 @@ public class ExerciseToPhone {
           "one sub neighbors " + pronToInfo.size() + " : " + builder;// + "\n\ttwo " + pronToInfo2.size() + " " + getProns(pronToInfo2);
     }
 
-    @NotNull
     private StringBuilder getProns(Map<String, Info>pronToInfo ) {
       StringBuilder builder = new StringBuilder();
       for (String pron : pronToInfo.keySet()) builder.append(pron).append(",");

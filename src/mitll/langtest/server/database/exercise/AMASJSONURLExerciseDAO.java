@@ -277,4 +277,9 @@ public class AMASJSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImp
     sectionHelper.clear();
     readExercisesFromURL();
   }
+
+  @Override
+  public List<String> getTypeOrder() {
+    return null;
+  }
 }

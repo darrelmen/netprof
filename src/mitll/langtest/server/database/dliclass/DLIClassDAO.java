@@ -77,7 +77,7 @@ public class DLIClassDAO implements IDLIClassDAO {
         dliClass.projid(),
         dliClass.ownerid(),
         dliClass.modified(),
-        dliClass.end(),
+        dliClass.classend(),
         dliClass.name(),
         dliClass.room(),
         dliClass.timeofday());
@@ -91,6 +91,4 @@ public class DLIClassDAO implements IDLIClassDAO {
   public String getName() {
     return dao.dao().name();
   }
-
-
 }
