@@ -1512,8 +1512,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, boolean)
    */
   @Override
-  public boolean isValidForeignPhrase(String foreign) {
-    return audioFileHelper.checkLTSOnForeignPhrase(foreign);
+  public boolean isValidForeignPhrase(String foreign, String transliteration) {
+    return audioFileHelper.checkLTSOnForeignPhrase(foreign, transliteration);
   }
 
   /**
@@ -1559,7 +1559,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
           logger.info("reallyCreateNewItems skipping header line");
           firstColIsEnglish = true;
         } else {
-          if (firstColIsEnglish || (isValidForeignPhrase(english) && !isValidForeignPhrase(fl))) {
+          // not going to try going through the transliteration here, I guess
+          if (firstColIsEnglish || (isValidForeignPhrase(english) && !isValidForeignPhrase(fl, ""))) {
             String temp = english;
             english = fl;
             fl = temp;
