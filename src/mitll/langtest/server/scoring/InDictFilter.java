@@ -67,8 +67,8 @@ public class InDictFilter {
    * @return
    * @see #isValid(String)
    */
-  private boolean isPhraseInDict(String phrase) {
-    return audioFileHelper.checkLTSOnForeignPhrase(phrase);
+  private boolean isPhraseInDict(String phrase, String transliteration) {
+    return audioFileHelper.checkLTSOnForeignPhrase(phrase, transliteration);
   }
 
   /**
