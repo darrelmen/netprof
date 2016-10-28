@@ -71,7 +71,7 @@ public interface ASR {
 	 * @return
 	 */
 	PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
-													 String sentence, Collection<String> lmSentences, String imageOutDir,
+													 String sentence, String transliteration, Collection<String> lmSentences, String imageOutDir,
 													 int imageWidth, int imageHeight, boolean useScoreForBkgColor,
 													 boolean decode,
 													 boolean useCache, String prefix, Result precalcResult, boolean usePhoneToDisplay);
