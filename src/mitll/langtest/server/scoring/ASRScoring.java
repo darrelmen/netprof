@@ -173,7 +173,7 @@ public class ASRScoring extends Scoring implements ASR {
     String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
     String pathname = noSuffix + ".wav";
 
-    boolean b = checkLTS(sentence).isEmpty();
+    boolean b = checkLTS(sentence, transliteration).isEmpty();
 
     if (!b) {
       logger.info("scoreRepeatExercise for " + testAudioFileNoSuffix + " under " + testAudioDir + " '" + sentence + "' is not in lts");
