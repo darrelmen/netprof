@@ -166,7 +166,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                                            String testAudioFileNoSuffix,
                                            String sentence,
                                            Collection<String> lmSentences, // TODO make two params, transcript and lm (null if no slf)
-                                           String transli
+                                           String transliteration,
                                            String imageOutDir,
                                            int imageWidth,
                                            int imageHeight,
@@ -178,7 +178,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
     String pathname = noSuffix + ".wav";
 
-    boolean b = validLTS(sentence);
+    boolean b = validLTS(sentence, transliteration);
     // audio conversion stuff
     File wavFile = new File(pathname);
     boolean mustPrepend = false;
