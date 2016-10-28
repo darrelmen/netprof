@@ -159,7 +159,7 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   private boolean isInDictOrLTS(CommonShell exercise) {
-    return asrScoring.validLTS(exercise.getForeignLanguage());
+    return asrScoring.validLTS(exercise.getForeignLanguage(), exercise.getTransliteration());
   }
 
   /**
@@ -183,9 +183,9 @@ public class AudioFileHelper implements AlignDecode {
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#isValidForeignPhrase(String)
    */
-  public boolean checkLTSOnForeignPhrase(String foreignLanguagePhrase) {
+  public boolean checkLTSOnForeignPhrase(String foreignLanguagePhrase, String transliteration) {
     makeASRScoring();
-    return asrScoring.validLTS(foreignLanguagePhrase);
+    return asrScoring.validLTS(foreignLanguagePhrase, transliteration);
   }
 
   public SmallVocabDecoder getSmallVocabDecoder() {
@@ -905,9 +905,9 @@ public class AudioFileHelper implements AlignDecode {
 
     PretestScore pretestScore = asrScoring.scoreRepeat(
         testAudioDir, removeSuffix(testAudioName),
-        sentence, transliteration, lmSentences,
+        sentence, lmSentences, transliteration,
 
-        pathHelper.getImageOutDir(), width, height, useScoreToColorBkg, decode, useCache, prefix, precalcResult,
+            pathHelper.getImageOutDir(), width, height, useScoreToColorBkg, decode, useCache, prefix, precalcResult,
         usePhoneToDisplay);
 
     if (!pretestScore.isRanNormally() && isWebservice(asrScoring)) {
@@ -916,9 +916,9 @@ public class AudioFileHelper implements AlignDecode {
           "'");
       pretestScore = oldschoolScoring.scoreRepeat(
           testAudioDir, removeSuffix(testAudioName),
-          sentence, transliteration, lmSentences,
+          sentence, lmSentences, transliteration,
 
-          pathHelper.getImageOutDir(), width, height, useScoreToColorBkg, decode, useCache, prefix, precalcResult,
+              pathHelper.getImageOutDir(), width, height, useScoreToColorBkg, decode, useCache, prefix, precalcResult,
           usePhoneToDisplay);
     }
     pretestScore.setReqid(reqid);
