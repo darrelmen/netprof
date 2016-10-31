@@ -309,9 +309,9 @@ public class RefResultDAO extends DAO {
     try {
       String exidPrefix = SELECT_PREFIX + "='" + exid + "'";
       List<Result> resultsSQL = getResultsSQL(exidPrefix);
-      if (resultsSQL.size() > 0) {
-        logger.info("getRefForExAndAudio got " + resultsSQL.size() + " for " + exid);
-      }
+//      if (resultsSQL.size() > 0) {
+//        logger.info("getRefForExAndAudio got " + resultsSQL.size() + " for " + exid);
+//      }
 
       long latest = 0;
       for (Result res : resultsSQL) {
@@ -425,7 +425,10 @@ public class RefResultDAO extends DAO {
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
 
+    long then = System.currentTimeMillis();
     List<Result> resultsForQuery = getResultsForQuery(connection, statement);
+    long now = System.currentTimeMillis();
+//    logger.info("getResultsSQL took " + (now - then) + " millis to exec query for " +sql);
     //   logger.debug("getResultsSQL running " + sql + " -> " +resultsForQuery.size() + " results");
     return resultsForQuery;
   }
@@ -459,12 +462,16 @@ public class RefResultDAO extends DAO {
    * @see #getResultsSQL(String)
    */
   private List<Result> getResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
+    long then = System.currentTimeMillis();
     ResultSet rs = statement.executeQuery();
+    long now = System.currentTimeMillis();
+//    logger.info("getResultsForQuery took " + (now - then) + " millis to exec query");
+
     List<Result> results = new ArrayList<>();
 
     int count = 0;
     int skipped = 0;
-    long then = System.currentTimeMillis();
+    then = System.currentTimeMillis();
 
 
     while (rs.next()) {
@@ -519,9 +526,9 @@ public class RefResultDAO extends DAO {
       }
     }
 
-    long now = System.currentTimeMillis();
+    now = System.currentTimeMillis();
 
-    logger.info("getResultsForQuery took " + (now - then) + " millis, found " + count + " invalid decode results, skipped " + skipped);
+ //   logger.info("getResultsForQuery took " + (now - then) + " millis, found " + count + " invalid decode results, skipped " + skipped);
     finish(connection, statement, rs);
 
     return results;
@@ -586,7 +593,7 @@ public class RefResultDAO extends DAO {
       addTimestamp(connection, REFRESULT, MODELUPDATE);
     }
 
-    createIndex(database, EXID, REFRESULT);
+    createTableIndex(database, EXID, REFRESULT);
     // seems to complain about index on CLOB???
     // createIndex(database, ANSWER, REFRESULT);
 
