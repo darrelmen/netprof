@@ -1,0 +1,252 @@
+// Build-time dependencies
+buildscript {
+    dependencies {
+        //Check for the latest version here: http://plugins.gradle.org/plugin/com.jfrog.artifactory
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:${jfrogVersion}"
+        classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.6'
+    }
+}
+
+plugins {
+    id "com.github.hierynomus.license" version "0.13.1"
+    id "net.saliman.cobertura" version "2.3.2"
+    id "org.sonarqube" version "2.0.1"
+}
+apply plugin: 'base'
+apply plugin: 'eclipse'
+apply plugin: 'java'
+apply plugin: 'ivy-publish'
+apply plugin: 'maven-publish'
+apply plugin: "com.jfrog.artifactory"
+apply plugin: 'gwt'
+
+// Setup repositories as proxy through Artifactory.
+repositories {
+    ivy { 
+	url file(System.getProperty('user.home') + localIvyFolder)
+	layout('ivy')
+    }
+    maven { url "${artifactory_contextUrl}/libs-release" }
+    maven { url "${artifactory_contextUrl}/mitll-internal-mvn"
+	    credentials {
+                username = "${artifactory_user}"
+                password = "${artifactory_password}"
+	    }
+          }
+    ivy { url "${artifactory_contextUrl}/mitll-internal-ivy"
+          credentials {
+	      username = "${artifactory_user}"
+	      password = "${artifactory_password}"
+          }
+        }
+    ivy {
+	url "${artifactory_contextUrl}/netProf"
+        credentials {
+            username = "${artifactory_user}"
+            password = "${artifactory_password}"
+        }
+    }
+}
+
+sourceCompatibility=1.8
+targetCompatibility=1.8
+group = 'mitll.hlt'
+description = 'NetProF pronunciation feedback'
+
+// get the current git sha. May need to adjust on Jenkins.
+task buildInfo {
+    project.ext.vendor = 'MIT Lincoln Lab'
+
+    def branch = System.env.GIT_BRANCH
+    if (branch == null) {
+	def bProc = "git rev-parse --abbrev-ref HEAD".execute()
+	branch = bProc.text.trim();
+	println "No branch in jenkins. Result of command line " + branch
+    }
+    println "Original branch " + branch
+    def lastSlash = branch.lastIndexOf("/");
+    if (lastSlash > -1) {
+	branch = branch.substring(lastSlash+1)
+    }
+    println "Prepared branch " + branch
+    // get the git sha
+    def revProc = "git rev-parse --short=11 HEAD".execute()
+    project.ext.gitSha = revProc.text.trim()
+    println "SHA: " + project.ext.gitSha
+
+    // potentially include this as an ivy/maven artifact
+    // potentially include this as an ivy/maven artifact
+    if(branch.endsWith('master')) {
+        project.ext.status='release'
+    } else if (branch.endsWith('development')) {
+	version = version + "-dev"
+        project.ext.status='integration'
+    } else {
+	version = version + "-" + branch
+        project.ext.status='test'
+    }
+}
+
+project.ext.sharedManifest = manifest {
+        attributes 'Specification-Title': 'NetProF',
+	           'Specification-Version': version,
+                   'Specification-Vendor':  project.ext.vendor,
+	           'Implementation-Title': group + "." + rootProject.name,
+                   'Implementation-Version': project.ext.status + " - " + project.ext.gitSha,
+                   'Implementation-Vendor':  project.ext.vendor,
+ 	           'Built-By': System.getProperty('user.name'), 
+	           'Build-Date': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+    }
+
+jar {
+    it.dependsOn ':buildInfo'
+    manifest = project.ext.sharedManifest
+}
+
+dependencies {
+    testCompile 'junit:junit:latest.integration'
+    testCompile 'org.hamcrest:hamcrest-all:latest.integration'
+    testRuntime 'org.slf4j:slf4j-api:1.7.10'
+}
+
+allprojects {
+    apply plugin: "com.jfrog.artifactory"
+}
+
+artifactory {
+    contextUrl = "${artifactory_contextUrl}"   //The base Artifactory URL if not overridden by the publisher/resolver
+    publish {
+        repository {
+            repoKey = 'netProf'
+            username = "${artifactory_user}"
+            password = "${artifactory_password}"
+            maven = false
+            ivy {
+                ivyLayout = '[organization]/[module]/[revision]/[type]s/ivy-[revision].xml'
+                artifactLayout = '[organization]/[module]/[revision]/[type]s/[module](-[classifier])-[revision].[ext]'
+                mavenCompatible = false
+            }
+        }
+        defaults {
+            publications ('ivyJava')
+        }
+    }
+    resolve {
+        repository {
+            repoKey = 'remote-repos'
+            username = "${artifactory_user}"
+            password = "${artifactory_password}"
+            maven = true
+        }
+    }
+}
+
+cobertura {
+    coverageFormats = [ 'html', 'xml' ]
+}
+
+task sourceJar(type: Jar) {
+    it.dependsOn ':buildInfo'
+    manifest = project.ext.sharedManifest
+    from sourceSets.main.allJava
+    classifier "source"
+}
+
+task testJar(type: Jar) {
+    it.dependsOn (':buildInfo', ':testClasses')
+    manifest = project.ext.sharedManifest
+    from sourceSets.test.output
+    classifier = 'tests'
+}
+
+task gwtJar(type: Jar) {
+    it.dependsOn ( ':buildInfo', ':build')
+    manifest = project.ext.sharedManifest
+    from sourceSets.main.allJava
+    from sourceSets.main.output
+    classifier "gwt"
+}
+
+publishing {
+    repositories {
+	ivy { 
+	    url file(System.getProperty('user.home') + localIvyFolder)
+	    layout('ivy')
+	}
+    }
+    publications {
+        ivyJava(IvyPublication) {
+            from components.java
+            descriptor.withXml {
+                asNode().info[0].appendNode('description', description)
+            }
+	    artifact(sourceJar) {
+                type "source"
+                conf "runtime"
+	    }
+	    artifact(gwtJar) {
+		name 'netProf'
+		type "gwt"
+                conf "runtime"
+	    }
+	    artifact(testJar) {
+                type "test"
+                conf "runtime"
+	    }
+        }
+        mavenJava(MavenPublication) {
+            from components.java
+	    artifact(sourceJar) {
+                classifier "sources"
+            }
+	    artifact(gwtJar) {
+                classifier "gwt"
+            }
+	    artifact(testJar) {
+                classifier "tests"
+	    }
+        }
+    }
+}
+
+license {
+    header = file('LICENSE.txt')
+    ext.year = Calendar.getInstance().get(Calendar.YEAR)
+    skipExistingHeaders
+}
+
+sonarqube {
+    properties {
+        property "sonar.sourceEncoding", "UTF-8"
+    }
+}
+
+gwt {
+    gwtVersion='2.8.0'
+    modules 'com.javacodegeeks.gradle.gwt.integration.build.GradleGWTIntegrationExampleJCG'
+
+    sourceSets {
+        main {
+            java {
+                srcDir 'src'
+            }
+        }
+    }
+
+    logLevel = 'ERROR'
+
+    minHeapSize = "512M";
+    maxHeapSize = "3G";
+
+    superDev {
+        noPrecompile=true
+    }
+
+    // The following is only needed if you don't use the Google Plugin for Eclipse.
+    eclipse{
+        addGwtContainer=false // Default set to true
+    }
+
+    //Specify the deployment Port
+    jettyRunWar.httpPort = 8089
+}
