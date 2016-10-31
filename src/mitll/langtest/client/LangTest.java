@@ -184,13 +184,15 @@ import java.util.logging.Logger;
  * 1.5.4 (10-21-16)
  * - Increase delay after correct avp response.
  * 1.5.5 (10-23-16)
- * - Fix bug where couldn't add defect comments to context sentences, better handling of sentence length user exercise entries.
+ * - Fixed bug where couldn't add defect comments to context sentences, better handling of sentence length user exercise entries.
+ * 1.5.6 (10-31-16)
+ * - Fixed bug where urdu was getting slow to return exercises - we hadn't created indexes on columns b/c there was another one with the same name on another table
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private final Logger logger = Logger.getLogger("LangTest");
 
-  public static final String VERSION_INFO = "1.5.5";
+  public static final String VERSION_INFO = "1.5.6";
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
   private static final String UNKNOWN = "unknown";
