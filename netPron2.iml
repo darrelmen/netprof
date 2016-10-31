@@ -35,6 +35,19 @@
         </sourceRoots>
       </configuration>
     </facet>
+    <facet type="web" name="Web3">
+      <configuration>
+        <descriptors>
+          <deploymentDescriptor name="web.xml" url="file://$MODULE_DIR$/war/WEB-INF/web.xml" />
+        </descriptors>
+        <webroots>
+          <root url="file://$MODULE_DIR$/war" relative="/" />
+        </webroots>
+        <sourceRoots>
+          <root url="file://$MODULE_DIR$/src" />
+        </sourceRoots>
+      </configuration>
+    </facet>
   </component>
   <component name="NewModuleRootManager" inherit-compiler-output="true">
     <exclude-output />
@@ -79,7 +92,6 @@
       <excludeFolder url="file://$MODULE_DIR$/war/config/russian" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/tagalog" />
       <excludeFolder url="file://$MODULE_DIR$/war/config/unitFlashcard" />
-      <excludeFolder url="file://$MODULE_DIR$/war/config/urdu" />
       <excludeFolder url="file://$MODULE_DIR$/war/imageOutdir" />
       <excludeFolder url="file://$MODULE_DIR$/war/images" />
       <excludeFolder url="file://$MODULE_DIR$/war/langtest" />
@@ -87,16 +99,50 @@
       <excludeFolder url="file://$MODULE_DIR$/war/scoring" />
     </content>
     <orderEntry type="inheritedJdk" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/war/WEB-INF/lib/slf4j-simple-1.7.21.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/war/WEB-INF/lib/slf4j-api-1.7.21.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="gwt" level="project" />
     <orderEntry type="library" name="lib2" level="project" />
     <orderEntry type="library" name="lib" level="project" />
     <orderEntry type="library" name="lib1" level="project" />
     <orderEntry type="module" module-name="imagewriter" />
-    <orderEntry type="library" name="lib" level="project" />
     <orderEntry type="module" module-name="Audioimage" />
-    <orderEntry type="module" module-name="imagewriter" />
-    <orderEntry type="module" module-name="Audioimage" />
-    <orderEntry type="library" name="pronz" level="project" />
-    <orderEntry type="library" name="slf4j-simple-1.7.21" level="project" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/gwt/gwt-user.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/gwt/gwt-user.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/war/WEB-INF/lib/log4j-1.2.17.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
 </module>
