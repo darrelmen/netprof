@@ -506,7 +506,7 @@ public class AudioConversion {
     String mp3File = absolutePathToWav.getAbsolutePath().replace(".wav", MP3);
     File mp3 = new File(mp3File);
     if (!mp3.exists() || overwrite) {
-      if (DEBUG)
+      if (DEBUG || true)
         logger.debug("writeMP3 : doing mp3 conversion for " + absolutePathToWav + " path " + pathToWav + " context " + realContextPath);
 
       if (DEBUG) logger.debug("run lame on " + absolutePathToWav + " making " + mp3File);
@@ -520,7 +520,7 @@ public class AudioConversion {
     String oggFile = absolutePathToWav.getAbsolutePath().replace(".wav", ".ogg");
     File ogg = new File(oggFile);
     if (!ogg.exists() || overwrite) {
-      if (DEBUG)
+      if (DEBUG || true)
         logger.debug("writeMP3 : doing ogg conversion for " + absolutePathToWav + " path " + pathToWav + " context " + realContextPath);
 
       if (DEBUG) logger.debug("run ogg on " + absolutePathToWav + " making " + oggFile);

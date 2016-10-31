@@ -268,7 +268,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     Image waveformImage = getWaveform().getImage();
     waveformImage.getElement().setId("waveformImage");
     // waveformImage.setHeight(getWaveformHeight()+"px");
-    waveformImage.setAltText(WAVEFORM_TOOLTIP);
+  //  waveformImage.setAltText(WAVEFORM_TOOLTIP);
     waveformImage.setTitle(WAVEFORM_TOOLTIP);
     return waveformImage;
   }
@@ -315,8 +315,8 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     audioPositionPopup.reinitialize();
   }
 
-  public void setScreenPortion(float screenPortion) {
-    if (DEBUG) logger.info("AudioPanel.setScreenPortion : screenPortion " + screenPortion);
+  void setScreenPortion(float screenPortion) {
+  //  if (DEBUG) logger.info("AudioPanel.setScreenPortion : screenPortion " + screenPortion);
     this.screenPortion = screenPortion;
   }
 
