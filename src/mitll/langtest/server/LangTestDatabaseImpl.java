@@ -945,16 +945,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     Collection<AudioAttribute> audioAttributes = byID.getAudioAttributes();
     for (AudioAttribute audioAttribute : audioAttributes) {
       if (!ensureMP3(audioAttribute.getAudioRef(), byID.getForeignLanguage(), audioAttribute.getUser().getUserID(), parentDir)) {
-        if (byID.getID().equals("1310")) {
-          logger.warn("ensureMP3 : can't find " + audioAttribute + " under " + parentDir + " for " + byID);
-        }
+//        if (byID.getID().equals("1310")) {
+//          logger.warn("ensureMP3 : can't find " + audioAttribute + " under " + parentDir + " for " + byID);
+//        }
         audioAttribute.setAudioRef(AudioConversion.FILE_MISSING);
       }
     }
 
-    if (audioAttributes.isEmpty() && byID.getID().equals("1310")) {
-      logger.warn("ensureMP3s : (" + getLanguage() + ") no ref audio for " + byID);
-    }
+//    if (audioAttributes.isEmpty() && byID.getID().equals("1310")) {
+//      logger.warn("ensureMP3s : (" + getLanguage() + ") no ref audio for " + byID);
+//    }
   }
 
   private Collection<AmasExerciseImpl> getAMASExercises() {

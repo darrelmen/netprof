@@ -190,7 +190,7 @@ public class DAO {
     alterTable(connection, table, col, "FLOAT");
   }
 
-  protected void addInt(Connection connection, String table, String col) throws SQLException {
+   void addInt(Connection connection, String table, String col) throws SQLException {
     alterTable(connection, table, col, "INTEGER");
   }
 
@@ -201,24 +201,65 @@ public class DAO {
   }
 
   protected void createIndex(Database database, String column, String table) throws SQLException {
+    String indexName = "IDX_" + column;
+    createIndex(database, column, table, indexName);
+  }
+
+   void createTableIndex(Database database, String column, String table) throws SQLException {
+    String indexName = "IDX_" + table + "_" + column;
+    createIndex(database, column, table, indexName);
+  }
+
+  protected void createIndex(Database database, String column, String table, String indexName) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement("" +
         "CREATE INDEX IF NOT EXISTS " +
-        "IDX_" + column +
-        " ON " +
-        table +
-        "(" +
-        column +
-        ");");
-    statement.execute();
+        indexName +
+        " ON " + table +
+        "(" + column + ")");
+    boolean execute = statement.execute();
+    //logger.info("got " + execute + " for index on " + table + " col " + column + " index " + indexName);
+
     statement.close();
     database.closeConnection(connection);
   }
 
   protected void finish(Connection connection, Statement statement, ResultSet rs) throws SQLException {
+    long then = System.currentTimeMillis();
     rs.close();
-    statement.close();
-    database.closeConnection(connection);
+    long now = System.currentTimeMillis();
+    int i = 5;
+//    if (now - then > i) {
+//      logger.info("finish took " + (now - then) + " millis to close result set");
+//    }
+
+    new Thread(new Runnable() {
+      @Override
+      public void run() {
+        long then = now;
+        try {
+//          logger.info("start closing " + statement);
+          statement.close();
+//          logger.info("end   closing " + statement);
+        } catch (SQLException e) {
+          logger.error("got " + e, e);
+        }
+        long now = System.currentTimeMillis();
+
+        if (now - then > i) {
+          logger.info("finish took " + (now - then) + " millis to close statement ");
+        }
+
+        then = now;
+        database.closeConnection(connection);
+        now = System.currentTimeMillis();
+
+        if (now - then > i) {
+          logger.info("finish took " + (now - then) + " millis to close connection");
+        }
+      }
+    }).start();
+
   }
 
   protected void finish(Database database, Connection connection, PreparedStatement statement) throws SQLException {
