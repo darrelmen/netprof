@@ -74,7 +74,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -718,15 +717,14 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
       }
 
       @Override
-      public void stopRecording() {
+      public void stopRecording(long duration) {
         controller.logEvent(this, "RecordButton", getExerciseID(), "stopRecording");
 
         playAudioPanel.setEnabled(true);
         isBusy = false;
-        super.stopRecording();
+        super.stopRecording(duration);
         recordImage1.setVisible(false);
         recordImage2.setVisible(false);
-
       }
 
       @Override
@@ -737,7 +735,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
 
       /**
        * @param result
-       * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording()
+       * @see RecordingListener#stopRecording(long)
        */
       @Override
       protected void useInvalidResult(AudioAnswer result) {

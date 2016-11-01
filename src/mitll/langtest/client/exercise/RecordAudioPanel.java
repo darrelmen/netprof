@@ -80,6 +80,9 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
   private PlayAudioPanel playAudioPanel;
   protected final Panel exercisePanel;
 
+  /**
+   * @see #flipRecordImages
+   */
   private final Image recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
   private final Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
   protected T exercise;
@@ -217,6 +220,10 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
     recordImage1.setVisible(true);
   }
 
+  /**
+   * @see RecordAudioPanel.MyWaveformPostAudioRecordButton#flip
+   * @param first
+   */
   protected void flipRecordImages(boolean first) {
     recordImage1.setVisible(first);
     recordImage2.setVisible(!first);
@@ -306,10 +313,10 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
     }
 
     @Override
-    public void stopRecording() {
+    public void stopRecording(long duration) {
       //  now = System.currentTimeMillis();
       // logger.info("stopRecording " + now + " diff " + (now-then) + " millis");
-      super.stopRecording();
+      super.stopRecording(duration);
       showStop();
     }
 
@@ -329,6 +336,7 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
      * Below the threshold is in the red.
      *
      * @param result
+     * @see PostAudioRecordButton#postAudioFile
      */
     @Override
     public void useResult(AudioAnswer result) {
