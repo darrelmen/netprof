@@ -34,6 +34,7 @@ package mitll.langtest.server.audio;
 
 import corpus.HTKDictionary;
 import mitll.langtest.client.AudioTag;
+import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
@@ -213,8 +214,8 @@ public class AudioFileHelper implements AlignDecode {
    * @paramx recordedWithFlash   true if recorded with Flash, false if via webRTC
    * @paramx deviceType          browser or iPad or iPhone
    * @paramx device              browser make and version or iPad unique id
-   * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording()
-   * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
+   * @see RecordButton.RecordingListener#stopRecording(long)
+   * @see RecordButton.RecordingListener#stopRecording(long)
    * @see LangTestDatabaseImpl#writeAudioFile
    */
   public AudioAnswer writeAudioFile(String base64EncodedString,
