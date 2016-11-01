@@ -47,7 +47,6 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.PopupHelper;
-import mitll.langtest.client.custom.exercise.CommentNPFExercise;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.recorder.FlashcardRecordButton;
@@ -83,7 +82,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
   static final int CORRECT_DELAY = 600;
   private static final int DELAY_MILLIS_LONG = 3000;
   private static final int LONG_DELAY_MILLIS = 3500;
-  private static final int HIDE_DELAY = 2500;
+  public static final int HIDE_DELAY = 2500;
   static final int DELAY_MILLIS = 100;
 
   /**
@@ -298,7 +297,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
                                             ExerciseController controller, final boolean addKeyBinding, String instance) {
     Map<String, Collection<String>> typeToSelection = Collections.emptyMap();
     AudioAnswerListener exercisePanel = this;
-    return new FlashcardRecordButtonPanel(exercisePanel, service, controller, exerciseID, 1, instance, typeToSelection) {
+    return new FlashcardRecordButtonPanel(exercisePanel, service, controller, exerciseID, 1) {
       final FlashcardRecordButtonPanel outer = this;
 
       @Override
@@ -316,10 +315,10 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
           }
 
           @Override
-          public void stop() {
+          public void stop(long duration) {
             controller.logEvent(this, AVP_RECORD_BUTTON, exerciseID, "Stop_Recording");
             outer.setAllowAlternates(showOnlyEnglish);
-            super.stop();
+            super.stop(duration);
           }
 
           @Override
@@ -456,7 +455,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
    * @param html
    * @see #receivedAudioAnswer
    */
-  private void showPopup(String html, Widget button) {
+  protected void showPopup(String html, Widget button) {
     new PopupHelper().showPopup(html, button, HIDE_DELAY);
   }
 
@@ -497,9 +496,9 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
       }
     }
   }*/
-  private String removePunct(String t) {
+/*  private String removePunct(String t) {
     return t.replaceAll("/", " ").replaceAll(CommentNPFExercise.PUNCT_REGEX, "");
-  }
+  }*/
 
   /**
    * If there's reference audio, play it and wait for it to finish.
@@ -517,7 +516,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
     }
     showOtherText();
 
-    logger.info("showIncorrectFeedback : result " + result + " score " + score + " has ref " + hasRefAudio);
+  //  logger.info("showIncorrectFeedback : result " + result + " score " + score + " has ref " + hasRefAudio);
 
     String correctPrompt = getCorrectDisplay();
     if (hasRefAudio) {
