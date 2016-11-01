@@ -123,9 +123,10 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
   }
 
   /**
-   * @see mitll.langtest.client.recorder.RecordButton#stop()
+   * @see RecordButton#stop(long)
+   * @param duration
    */
-  public void stopRecording() { controller.stopRecording(new WavCallback() {
+  public void stopRecording(long duration) { controller.stopRecording(new WavCallback() {
       @Override
       public void getBase64EncodedWavFile(String bytes) {
         postAudioFile(bytes);
