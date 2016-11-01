@@ -63,6 +63,7 @@ import mitll.langtest.client.instrumentation.ButtonFactory;
 import mitll.langtest.client.instrumentation.EventLogger;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.client.recorder.MicPermission;
+import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
 import mitll.langtest.client.sound.SoundManagerAPI;
@@ -187,6 +188,8 @@ import java.util.logging.Logger;
  * - Fixed bug where couldn't add defect comments to context sentences, better handling of sentence length user exercise entries.
  * 1.5.6 (10-31-16)
  * - Fixed bug where urdu was getting slow to return exercises - we hadn't created indexes on columns b/c there was another one with the same name on another table
+ * 1.5.7 (11-01-16)
+ * - Fixed bug where could get into a bad state if clicked the record button too quickly.
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
@@ -816,8 +819,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   /**
    * Recording interface
    *
-   * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording()
-   * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
+   * @see RecordButton.RecordingListener#stopRecording(long)
+   * @see RecordButton.RecordingListener#stopRecording(long)
    */
   public void stopRecording(WavCallback wavCallback) {
     logger.info("stopRecording : time recording in UI " + (System.currentTimeMillis() - then) + " millis");
