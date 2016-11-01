@@ -45,6 +45,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.analysis.ShowTab;
 import mitll.langtest.client.custom.dialog.ReviewEditableExercise;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.server.amas.QuizCorrect;
 import mitll.langtest.server.audio.AudioCheck;
@@ -2188,8 +2189,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param addToAudioTable     if true, add to audio table -- only when recording reference audio for an item.
    * @param allowAlternates
    * @return AudioAnswer object with information about the audio on the server, including if audio is valid (not too short, etc.)
-   * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording()
-   * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
+   * @see RecordButton.RecordingListener#stopRecording(long)
+   * @see RecordButton.RecordingListener#stopRecording(long)
    */
   @Override
   public AudioAnswer writeAudioFile(String base64EncodedString,
