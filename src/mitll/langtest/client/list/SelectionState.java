@@ -35,6 +35,8 @@ package mitll.langtest.client.list;
 import java.util.*;
 import java.util.logging.Logger;
 
+import static mitll.langtest.client.bootstrap.ButtonGroupSectionWidget.ITEM_SEPARATOR;
+
 /**
  * Created with IntelliJ IDEA.
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -54,8 +56,9 @@ public class SelectionState {
   private final Map<String, Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
   private String instance = "";
   private String search = "";
-  private static final boolean DEBUG = false;
   private boolean onlyWithAudioDefects;
+
+  private static final boolean DEBUG = false;
 
   /**
    * @param token
@@ -85,9 +88,11 @@ public class SelectionState {
 
   /**
    * Deals with responseType being on the URL.
-   *
+   * <p>
    * Don't trim the section - breaks searching for multi token items
+   *
    * @param token
+   * @see #SelectionState
    */
   private void parseToken(String token) {
     //token = token.contains("###") ? token.split("###")[0] : token;
@@ -108,12 +113,11 @@ public class SelectionState {
             setItem(section);
           } else if (type.equals("#search") || type.equals("search")) {
             search = section;
-          } else if (type.equals("#" +ONLY_WITH_AUDIO_DEFECTS) || type.equals(ONLY_WITH_AUDIO_DEFECTS)) {
+          } else if (type.equals("#" + ONLY_WITH_AUDIO_DEFECTS) || type.equals(ONLY_WITH_AUDIO_DEFECTS)) {
             onlyWithAudioDefects = section.equals("true");
           } else {
-            String[] split = section.split(",");
+            String[] split = section.split(ITEM_SEPARATOR);
             List<String> sections = Arrays.asList(split);
-
             if (sections.isEmpty()) {
               logger.warning("\t\tparseToken : part " + part + " is badly formed ");
             } else {
@@ -176,7 +180,7 @@ public class SelectionState {
           }
           Collections.sort(sorted);
           StringBuilder status2 = new StringBuilder();
-          String sep = sorted.size() == 2 ? " and ":", ";
+          String sep = sorted.size() == 2 ? " and " : ", ";
           for (String item : sorted) {
             status2.append(item).append(sep);
           }
@@ -191,6 +195,7 @@ public class SelectionState {
       return text;
     }
   }
+
   public String getInstance() {
     return instance;
   }
@@ -211,12 +216,4 @@ public class SelectionState {
     String s = builder.toString();
     return s.substring(0, Math.max(0, s.length() - 2));
   }
-
-/*  public String getInfo() {
-    return "parseToken : instance " + instance + " : " +
-        "search " + search + ", " +
-        "item " + item + ", " +
-        "unit->chapter " + getTypeToSection() +
-        " onlyWithAudioDefects="+isOnlyWithAudioDefects();
-  }*/
 }
