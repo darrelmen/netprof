@@ -283,8 +283,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     Collection<CommonExercise> exercises;
 
     logger.debug("getExerciseIds : (" + getLanguage() + ") " +
-        "getting exercise ids for " +
-        " config " + relativeConfigDir + " request " + request);
+        "getting exercise ids for config " + relativeConfigDir +
+        " request " + request);
 
     try {
       boolean isUserListReq = request.getUserListID() != -1;
@@ -612,18 +612,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.list.HistoryExerciseList#loadExercises
    * @see #getExerciseIds
    */
-  private <T extends CommonShell> ExerciseListWrapper<T> getExercisesForSelectionState(/*int reqID,
-                                                                                       Map<String, Collection<String>> typeToSection, String prefix,
-                                                                                       long userID, String role, boolean onlyUnrecordedByMe,
-                                                                                       boolean onlyExamples, boolean incorrectFirst*/
-                                                                                       ExerciseListRequest request) {
+  private <T extends CommonShell> ExerciseListWrapper<T> getExercisesForSelectionState(ExerciseListRequest request) {
     Collection<CommonExercise> exercisesForState = db.getSectionHelper().getExercisesForSelectionState(request.getTypeToSelection());
     exercisesForState = filterExercises(request, exercisesForState);
-    return getExerciseListWrapperForPrefix(request,
-        //  reqID, prefix,
-        exercisesForState
-        //    , userID, role, onlyExamples, incorrectFirst
-    );
+    return getExerciseListWrapperForPrefix(request, exercisesForState);
   }
 
   /**
@@ -2470,7 +2462,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
                                               long latestResultID,
                                               Map<String, Collection<String>> typeToSection,
                                               long userListID) {
-    if (DEBUG) logger.debug("getUserHistoryForList " + userid + " and " + ids + " type to section " + typeToSection);
+    if (DEBUG)
+      logger.debug("getUserHistoryForList " + userid + " and " + ids + " type to section '" + typeToSection + "'");
     UserList<CommonShell> userListByID = userListID != -1 ? db.getUserListByID(userListID) : null;
     List<String> allIDs = new ArrayList<String>();
     Map<String, CollationKey> idToKey = new HashMap<String, CollationKey>();
