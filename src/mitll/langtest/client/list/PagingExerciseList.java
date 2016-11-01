@@ -141,12 +141,11 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * @param selectionState
    * @param prefix
    * @param onlyWithAudioAnno
-   * @param setTypeAheadText
+   * @paramx setTypeAheadText
    * @see #addTypeAhead(com.google.gwt.user.client.ui.Panel)
    */
   void loadExercises(String selectionState, String prefix, boolean onlyWithAudioAnno) {
     scheduleWaitTimer();
-
 /*    logger.info("PagingExerciseList.loadExercises : looking for " +
         "'" + prefix + "' (" + prefix.length() + " chars) in list id " + userListID + " instance " + getInstance());
         */
