@@ -38,9 +38,6 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.exercise.Shell;
-
-import java.util.logging.Logger;
 
 /**
 * Tells playAudioPanel to be enabled/disabled in response to recording states
@@ -52,8 +49,10 @@ import java.util.logging.Logger;
 * To change this template use File | Settings | File Templates.
 */
 public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
-//  private final Logger logger = Logger.getLogger("WaveformPostAudioRecordButton");
+  //  private final Logger logger = Logger.getLogger("WaveformPostAudioRecordButton");
   private static final String RECORD_BUTTON = "RecordButton";
+  public static final String ANIMATED_PROGRESS_GIF = "animated_progress.gif";
+  public static final String URL = LangTest.LANGTEST_IMAGES + ANIMATED_PROGRESS_GIF;
   private final RecordAudioPanel recordAudioPanel;
   private PlayAudioPanel playAudioPanel;
   private final Panel parentPanel;
@@ -98,6 +97,10 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
   }
 
   private long then;
+
+  /**
+   * @see mitll.langtest.client.recorder.RecordButton#start
+   */
   @Override
   public void startRecording() {
     if (parentPanel instanceof BusyPanel) {
@@ -113,18 +116,19 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
   public void flip(boolean first) {} // force not to be abstract
 
   /**
-   * @see mitll.langtest.client.recorder.RecordButton#stop()
+   * @see mitll.langtest.client.recorder.RecordButton#stop
+   * @param duration
    */
   @Override
-  public void stopRecording() {
+  public void stopRecording(long duration) {
     if (parentPanel instanceof BusyPanel) {
       ((BusyPanel) parentPanel).setBusy(false);
     }
     controller.logEvent(this, RECORD_BUTTON, getExerciseID(), "stopRecording, duration " + (System.currentTimeMillis() - then) + " millis");
 
-    recordAudioPanel.getWaveform().setUrl(LangTest.LANGTEST_IMAGES + "animated_progress.gif");
+    recordAudioPanel.getWaveform().setUrl(URL);
 
-    super.stopRecording();
+    super.stopRecording(duration);
   }
 
   /**
@@ -137,7 +141,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
   }
 
   /**
-   * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording()
+   * @see RecordingListener#stopRecording(long)
    * @param result
    */
   @Override
