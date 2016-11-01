@@ -66,7 +66,7 @@ public class PopupHelper {
     showPopup(html, target, 2000);
   }
 
-  public void showPopup(String html, Widget button, int hideDelay) {
+  public PopupPanel showPopup(String html, Widget button, int hideDelay) {
     final PopupPanel pleaseWait = new DecoratedPopupPanel();
     pleaseWait.setAutoHideEnabled(true);
     pleaseWait.add(new HTML(html));
@@ -79,6 +79,7 @@ public class PopupHelper {
       }
     };
     t.schedule(hideDelay);
+    return pleaseWait;
   }
 
   public void showPopup(String toShow, String toShow2, Widget over) {
