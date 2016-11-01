@@ -1185,7 +1185,7 @@ public class FlashcardPanel<T extends CommonShell & AudioRefExercise & Annotatio
    * @see #playRef()
    */
   private void playRef(String path) {
-    logger.info("playRef ---------- " + exercise.getID() + " path " + path);
+    //logger.info("playRef ---------- " + exercise.getID() + " path " + path);
     path = getPath(path);
     final Widget textWidget = foreign;
     getSoundFeedback().queueSong(path,
