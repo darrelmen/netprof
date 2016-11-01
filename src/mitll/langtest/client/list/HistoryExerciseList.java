@@ -113,7 +113,6 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
    * @see #pushNewSectionHistoryToken()
    */
   protected String getHistoryTokenFromUIState(String search, String id) {
-//    String unitAndChapterSelection = ;
     //logger.info("\tgetHistoryToken for " + id + " is '" +unitAndChapterSelection.toString() + "'");
     String instanceSuffix = getInstance().isEmpty() ? "" : ";" + SelectionState.INSTANCE + "=" + getInstance();
     boolean hasItemID = id != null && id.length() > 0;
