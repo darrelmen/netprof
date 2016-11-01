@@ -130,7 +130,6 @@ public class FlexSectionExerciseList extends NPExerciseList {
        */
       protected void selectItem(String type, Collection<String> sections) {
         //   logger.info("FlexSectionExerciseList.selectItem : selecting " + type + "=" + sections);
-
         ButtonGroupSectionWidget listBox = getGroupSection(type);
         listBox.clearSelectionState();
         listBox.selectItem(sections);
