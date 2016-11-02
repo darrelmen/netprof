@@ -210,7 +210,8 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   }
 
   public boolean isContextAudio() {
-    return getAudioType().startsWith(CONTEXT);
+    String audioType = getAudioType();
+    return audioType != null && audioType.startsWith(CONTEXT);
   }
 
   /**
