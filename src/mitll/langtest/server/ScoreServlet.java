@@ -220,6 +220,7 @@ public class ScoreServlet extends DatabaseServlet {
       }
     } catch (Exception e) {
       logger.error("got " + e, e);
+      db.logAndNotify(e);
     }
 
     long now = System.currentTimeMillis();
@@ -453,6 +454,7 @@ public class ScoreServlet extends DatabaseServlet {
       writer.close();
     } catch (IOException e) {
       logger.error("got " + e, e);
+      db.logAndNotify(e);
     }
   }
 
