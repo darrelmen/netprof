@@ -821,7 +821,10 @@ public class AudioDAO extends DAO {
     for (CommonExercise ex : exercises) {
       Collection<AudioAttribute> audioAttributes = ex.getAudioAttributes();
       for (AudioAttribute audioAttribute : audioAttributes) {
-        if (audioAttribute.isMale() == isMale && audioAttribute.getAudioType().equals(audioType)) {
+        String audioType1 = audioAttribute.getAudioType();
+        if (audioAttribute.isMale() == isMale &&
+            audioType1 != null &&
+            audioType1.equals(audioType)) {
           n++;
           break;
         }
