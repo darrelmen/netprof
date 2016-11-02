@@ -332,4 +332,21 @@ public class DecodeTest extends BaseTest {
     logger.info("Got " + exercisesForSelectionState.size());
     if (!exercisesForSelectionState.isEmpty()) logger.info("Got " + exercisesForSelectionState.iterator().next());
   }
+
+
+  @Test
+  public void testTurkish() {
+    DatabaseImpl database = getDatabase("turkish");
+    AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), database.getServerProps(), database, null);
+    Collection exercises = database.getExercises();
+    logger.info("Got " + exercises.size());
+    if (exercises.isEmpty()) {
+
+    } else {
+      logger.info("Got " + exercises.iterator().next());
+    }
+    Map maleFemaleProgress = database.getMaleFemaleProgress();
+    logger.info("got " + maleFemaleProgress);
+
+  }
 }
