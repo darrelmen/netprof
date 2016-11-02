@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.exercise;
 
+import com.google.gwt.media.client.Audio;
 import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.AudioDAO;
@@ -39,6 +40,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.custom.UserExerciseDAO;
 import mitll.langtest.server.database.custom.UserListManager;
+import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.apache.log4j.Logger;
@@ -132,8 +134,21 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
 */
 
     int c = 0;
+    Map<String, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
+    attachAudio.setExToAudio(exToAudio, getMultiPronWords(exercises));
+    Set<String> allTranscripts = new HashSet<>();
+    for (List<AudioAttribute> audioAttributes : exToAudio.values()) {
+      for (AudioAttribute audioAttribute : audioAttributes) {
+        allTranscripts.add(audioAttribute.getTranscript().toLowerCase());
+      }
+    }
     for (CommonExercise ex : exercises) {
       attachAudio.attachAudio(ex, transcriptChanged);
+
+      Collection<AudioAttribute> audioAttributes = ex.getAudioAttributes();
+      for (AudioAttribute audioAttribute : audioAttributes) {
+        allTranscripts.remove(audioAttribute.getTranscript().toLowerCase());
+      }
 
  /*     if (i < 25) {
         if (c++ < 25) {
@@ -146,6 +161,9 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
         }
       }*/
     }
+
+    logger.info("found " + allTranscripts.size() + " orphan audio cuts - ");// + allTranscripts);
+
     consistencyCheck();
 
     if (!transcriptChanged.isEmpty()) {
@@ -178,13 +196,11 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
     }
 
     this.attachAudio = new AttachAudio(
-        mediaDir,
-        mediaDir.replaceAll("bestAudio", ""), fileInstallPath,
-        serverProps.getAudioOffset(),
-        audioDAO.getExToAudio(),
+        mediaDir.replaceAll("bestAudio", ""),
+        fileInstallPath,
         serverProps.shouldCheckAudioTranscript(),
-        serverProps,
-        audioDAO);
+        serverProps
+    );
   }
 
   /**
@@ -227,7 +243,7 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
   public void attachAudio(Collection<CommonExercise> all) {
     consistencyCheck();
 
-    attachAudio.setExToAudio(audioDAO.getExToAudio());
+    attachAudio.setExToAudio(audioDAO.getExToAudio(), getMultiPronWords(all));
     int user = 0;
     int examined = 0;
 
@@ -248,6 +264,23 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
     if (!transcriptChanged.isEmpty()) {
       logger.info("attachAudio : found " + transcriptChanged.size() + " changed transcripts in set of " + exercises.size() + " items");
     }
+  }
+
+  private Set<String> getMultiPronWords(Collection<CommonExercise> all) {
+    Map<String, String> seen = new HashMap<>();
+    Set<String> multiPron = new HashSet<>();
+
+    for (CommonExercise ex : all) {
+      String foreignLanguage = ex.getForeignLanguage();
+      String english = seen.get(foreignLanguage);
+      String english1 = ex.getEnglish();
+      if (english != null && !english.equals(english1)) {
+        multiPron.add(foreignLanguage);
+//        logger.info("getMultiPronWords before " + foreignLanguage + " eng " + english + " vs " + english1);
+      }
+      seen.put(foreignLanguage, english1);
+    }
+    return multiPron;
   }
 
   /**
@@ -382,10 +415,22 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
     }
   }
 
-  public void setDependencies(String mediaDir, String installPath,
-                              UserExerciseDAO userExerciseDAO, AddRemoveDAO addRemoveDAO, AudioDAO audioDAO) {
+  /**
+   * @param mediaDir
+   * @param installPath
+   * @param userExerciseDAO
+   * @param addRemoveDAO
+   * @param audioDAO
+   * @see DatabaseImpl#setDependencies(String, String, ExerciseDAO)
+   */
+  public void setDependencies(String mediaDir,
+                              String installPath,
+                              UserExerciseDAO userExerciseDAO,
+                              AddRemoveDAO addRemoveDAO,
+                              AudioDAO audioDAO) {
     this.userExerciseDAO = userExerciseDAO;
     this.addRemoveDAO = addRemoveDAO;
+
     setAudioDAO(audioDAO, mediaDir, installPath);
   }
 
@@ -403,7 +448,8 @@ public abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercis
     synchronized (this) {
       CommonExercise exercise = idToExercise.get(id);
       if (exercise == null) {
-        if (DEBUG) logger.warn("getExercise : no '" + id + "'  in " + idToExercise.keySet().size() + " keys vs " + getRawExercises().size() + " on list");
+        if (DEBUG)
+          logger.warn("getExercise : no '" + id + "'  in " + idToExercise.keySet().size() + " keys vs " + getRawExercises().size() + " on list");
       }
       //	logger.debug("returning " +exercise + " for " +id);
       return exercise;
