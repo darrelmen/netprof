@@ -39,13 +39,13 @@ repositories {
 	      password = "${artifactory_password}"
           }
         }
-    ivy {
-	url "${artifactory_contextUrl}/netProf"
-        credentials {
-            username = "${artifactory_user}"
-            password = "${artifactory_password}"
-        }
-    }
+//    ivy {
+//	url "${artifactory_contextUrl}/netProf"
+//        credentials {
+//            username = "${artifactory_user}"
+//            password = "${artifactory_password}"
+//        }
+//    }
 }
 
 sourceCompatibility=1.8
@@ -104,6 +104,16 @@ jar {
 }
 
 dependencies {
+//    compile('mitll.hlt:domino-core:domino-core'){changing = true}
+
+    compile 'org.apache.poi:poi:3.15'
+    compile 'net.sf.uadetector:uadetector-core:0.9.22'
+    compile 'net.sf.uadetector:uadetector-resources:2013.04'
+    //compile 'net.sf.json-lib:json-lib:2.4-jdk1.5'
+    compile 'javax.mail:mail:1.4.1'
+    compile 'log4j:log4j:1.2.17'
+    compile 'com.google.gwt:gwt-user:2.8.0'
+    compile 'com.github.gwtbootstrap:gwt-bootstrap:latest.integration'
     testCompile 'junit:junit:latest.integration'
     testCompile 'org.hamcrest:hamcrest-all:latest.integration'
     testRuntime 'org.slf4j:slf4j-api:1.7.10'
@@ -117,7 +127,7 @@ artifactory {
     contextUrl = "${artifactory_contextUrl}"   //The base Artifactory URL if not overridden by the publisher/resolver
     publish {
         repository {
-            repoKey = 'netProf'
+            repoKey = 'ivy-libs-release-internal'
             username = "${artifactory_user}"
             password = "${artifactory_password}"
             maven = false
@@ -159,6 +169,7 @@ task testJar(type: Jar) {
     classifier = 'tests'
 }
 
+// include both the source and compiled files
 task gwtJar(type: Jar) {
     it.dependsOn ( ':buildInfo', ':build')
     manifest = project.ext.sharedManifest
@@ -184,6 +195,7 @@ publishing {
                 type "source"
                 conf "runtime"
 	    }
+
 	    artifact(gwtJar) {
 		name 'netProf'
 		type "gwt"
@@ -194,6 +206,7 @@ publishing {
                 conf "runtime"
 	    }
         }
+
         mavenJava(MavenPublication) {
             from components.java
 	    artifact(sourceJar) {
@@ -248,5 +261,5 @@ gwt {
     }
 
     //Specify the deployment Port
-    jettyRunWar.httpPort = 8089
+   // jettyRunWar.httpPort = 8089
 }
