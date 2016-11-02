@@ -242,6 +242,24 @@ public class SimplePagingContainer<T> implements RequiresResize {
     getList().add(item);
   }
 
+  protected void scrollToVisible(int i) {
+    int pageNum = i / table.getPageSize();
+    int newIndex = pageNum * table.getPageSize();
+    if (i < table.getPageStart()) {
+      int newStart = Math.max(0, newIndex);//table.getPageStart() - table.getPageSize());
+    //  if (ClickablePagingContainer.DEBUG) logger.info("new start of prev page " + newStart + " vs current " + table.getVisibleRange());
+      table.setVisibleRange(newStart, table.getPageSize());
+    } else {
+      int pageEnd = table.getPageStart() + table.getPageSize();
+      if (i >= pageEnd) {
+        int newStart = Math.max(0, Math.min(table.getRowCount() - table.getPageSize(), newIndex));   // not sure how this happens, but need Math.max(0,...)
+//        if (ClickablePagingContainer.DEBUG) logger.info("new start of next newIndex " + newStart + "/" + newIndex + "/page = " + pageNum +
+//            " vs current " + table.getVisibleRange());
+        table.setVisibleRange(newStart, table.getPageSize());
+      }
+    }
+  }
+
   public interface TableResources extends CellTable.Resources {
     /**
      * The styles applied to the table.
