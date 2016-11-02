@@ -34,10 +34,7 @@ package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioCheck;
-import mitll.langtest.server.database.AudioDAO;
-import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.AudioExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.MutableAudioExercise;
 import org.apache.commons.lang3.StringUtils;
@@ -57,41 +54,32 @@ class AttachAudio {
   //private static final String FAST_WAV = "Fast" + ".wav";
   //private static final String SLOW_WAV = "Slow" + ".wav";
   private final AudioCheck audioCheck;
-  private final AudioDAO audioDAO;
 
   private int missingExerciseCount = 0;
   private int c = 0;
   //private final int audioOffset;
-  private final String mediaDir, mediaDir1;
+  private final String /*mediaDir, */mediaDir1;
   private final File installPath;
   private Map<String, List<AudioAttribute>> exToAudio;
   private boolean checkAudioTranscript = true;
+  private Map<String, List<AudioAttribute>> transcriptToAudio;
 
   /**
-   * @param mediaDir
+   * Map<String, List<AudioAttribute>> exToAudio,
+   *
    * @param mediaDir1
    * @param installPath
-   * @param audioOffset
-   * @param exToAudio
    * @param checkAudioTranscript
    * @see BaseExerciseDAO#setAudioDAO
    */
-  AttachAudio(String mediaDir,
-              String mediaDir1,
+  AttachAudio(String mediaDir1,
               File installPath,
-              int audioOffset,
-              Map<String, List<AudioAttribute>> exToAudio,
               boolean checkAudioTranscript,
-              ServerProperties serverProperties,
-              AudioDAO audioDAO) {
-    this.mediaDir = mediaDir;
+              ServerProperties serverProperties) {
     this.mediaDir1 = mediaDir1;
     this.installPath = installPath;
-    this.setExToAudio(exToAudio);
-    //this.audioOffset = audioOffset;
     this.checkAudioTranscript = checkAudioTranscript;
     this.audioCheck = new AudioCheck(serverProperties);
-    this.audioDAO = audioDAO;
   }
 
   /**
@@ -156,10 +144,31 @@ class AttachAudio {
   public <T extends CommonExercise> int attachAudio(T imported, Collection<String> transcriptChanged) {
     String id = imported.getID();
     int missing = 0;
+
     if (exToAudio.containsKey(id) || exToAudio.containsKey(id + "/1") || exToAudio.containsKey(id + "/2")) {
       List<AudioAttribute> audioAttributes = exToAudio.get(id);
       //   if (audioAttributes.isEmpty()) logger.info("huh? audio attr empty for " + id);
       missing = attachAudio(imported, missing, audioAttributes, transcriptChanged);
+      if (transcriptChanged.size() > 0) {
+        //logger.info("no matches for " + id);
+        id = imported.getForeignLanguage();
+        if (transcriptToAudio.containsKey(id)) {
+//          logger.info("1) using transcript->audio map for " + imported.getID() + " : " + id);
+          //   if (audioAttributes.isEmpty()) logger.info("huh? audio attr empty for " + id);
+          missing = attachAudio(imported, missing, transcriptToAudio.get(id), transcriptChanged);
+        }
+//        else if (audioAttributes != null && !audioAttributes.isEmpty()) {
+ //         logger.info("no match for '" + id + "'");
+  //      }
+      }
+    } else {
+      id = imported.getForeignLanguage();
+      if (transcriptToAudio.containsKey(id)) {
+        List<AudioAttribute> audioAttributes = transcriptToAudio.get(id);
+        //       logger.info("2) using transcript->audio map for " + imported.getID() + " : " + id);
+        //   if (audioAttributes.isEmpty()) logger.info("huh? audio attr empty for " + id);
+        missing = attachAudio(imported, missing, audioAttributes, transcriptChanged);
+      }
     }
     return missing;
   }
@@ -174,7 +183,8 @@ class AttachAudio {
    * @return
    * @see #attachAudio(CommonExercise, Collection)
    */
-  private <T extends CommonExercise> int attachAudio(T imported, int missing,
+  private <T extends CommonExercise> int attachAudio(T imported,
+                                                     int missing,
                                                      Collection<AudioAttribute> audioAttributes,
                                                      Collection<String> transcriptChangedIDs) {
     MutableAudioExercise mutableAudio = imported.getMutableAudio();
@@ -191,8 +201,6 @@ class AttachAudio {
         audioPaths.add(audioAttribute.getAudioRef());
       }
 
-      int m = 0;
-
       for (AudioAttribute audio : audioAttributes) {
         String child = mediaDir1 + File.separator + audio.getAudioRef();
         File test = new File(installPath, child);
@@ -208,57 +216,19 @@ class AttachAudio {
           if (!audioPaths.contains(child)) {
             String before = imported.getForeignLanguage();
             String noAccents = StringUtils.stripAccents(before);
-
-//            boolean foundAlt = false;
-//            if (!before.equals(noAccents)) {
-////      logger.info("attachAudio before '" + before +
-////          "' after '" + noAccents +
-////          "'");
-//              foundAlt = true;
-//            }
-
-            //    String noAccents = StringUtils.stripAccents(against);
             String transcript = audio.getTranscript();
             String noAccentsTranscript = transcript == null ? null : StringUtils.stripAccents(transcript);
-//    boolean foundAlt = false;
-//    if (!before.equals(noAccents)) {
-//      if (firstExercise.getID().equals("3277")) {
-//        logger.info("attachAudio before '" + before +
-//            "' after '" + noAccents +
-//            "'");
-//      }
-//      foundAlt = true;
-//    } else {
-//      if (firstExercise.getID().equals("3277")) {
-//        logger.info("attachAudio before '" + before +
-//            "' after '" + noAccents +
-//            "'");
-//      }
-//    }
 
             if (!checkAudioTranscript ||
                 (audio.matchTranscript(before, transcript) ||
                     audio.matchTranscript(noAccents, noAccentsTranscript))
                 ) {
-              float dnr1 = audio.getDnr();
-              boolean dnrOK = dnr1 < 0 || dnr1 > audioCheck.getMinDNR();
-
-//              if (dnr1 < 0) {
-//                dnr1 = audioCheck.getDNR(test);
-//                audioDAO.updateDNR(audio.getUniqueID(), dnr1);
-//              }
-              if (dnrOK) {//dnr1 > audioCheck.getMinDNR()) {
-                audio.setAudioRef(child);   // remember to prefix the path
-                mutableAudio.addAudio(audio);
-              } else {
-                logger.debug("attachAudio skipping audio file with low dynamic range " + test);
-              }
+              addIfDNRAboveThreshold(mutableAudio, audio, child, test);
             } else {
+
               transcriptChangedIDs.add(audio.getExid());
-/*							if (m++ < 10) {
-                logger.warn("for " + imported + " audio transcript " + audio.getTranscript() +
-										" doesn't match : '" + removePunct(audio.getTranscript()) + "' vs '" + removePunct(imported.getForeignLanguage()) + "'");
-							}*/
+//              logger.warn("for " + imported + " audio transcript " + audio.getTranscript() +
+//                  " doesn't match : '" + noAccents + "' vs '" + noAccentsTranscript + "'");
             }
             audioPaths.add(child);
 //            logger.debug("imported " +imported.getID()+ " now " + imported.getAudioAttributes());
@@ -280,23 +250,61 @@ class AttachAudio {
     return missing;
   }
 
+  private void addIfDNRAboveThreshold(MutableAudioExercise mutableAudio, AudioAttribute audio, String child, File test) {
+    float dnr1 = audio.getDnr();
+    boolean dnrOK = dnr1 < 0 || dnr1 > audioCheck.getMinDNR();
+
+    if (dnrOK) {
+      audio.setAudioRef(child);   // remember to prefix the path
+      mutableAudio.addAudio(audio);
+    } else {
+      logger.debug("attachAudio skipping audio file with low dynamic range " + test);
+    }
+  }
+
   /**
    * Assumes audio index field looks like : 11109 8723 8722 8721
    *
-   * @param refAudioIndex
    * @return
+   * @paramx refAudioIndex
    */
-
-  private String findBest(String refAudioIndex) {
+/*  private String findBest(String refAudioIndex) {
     String[] split = refAudioIndex.split("\\s+");
     return (split.length == 0) ? "" : split[0];
   }
-
   private String ensureForwardSlashes(String wavPath) {
     return wavPath.replaceAll("\\\\", "/");
-  }
+  }*/
 
-  void setExToAudio(Map<String, List<AudioAttribute>> exToAudio) {
+  /**
+   * @param exToAudio
+   * @param multiPron
+   * @see BaseExerciseDAO#afterReadingExercises
+   * @see BaseExerciseDAO#attachAudio
+   */
+  void setExToAudio(Map<String, List<AudioAttribute>> exToAudio, Set<String> multiPron) {
     this.exToAudio = exToAudio;
+    this.transcriptToAudio = new HashMap<>();
+
+    logger.info("setExToAudio found " + multiPron.size() + " items with differing english translations");
+    for (List<AudioAttribute> audioAttributes : exToAudio.values()) {
+      for (AudioAttribute audioAttribute : audioAttributes) {
+        String transcript = audioAttribute.getTranscript();
+        boolean hasTranscript = transcript != null && !transcript.isEmpty();
+        if (hasTranscript) {
+          if (multiPron.contains(transcript)) {
+//            logger.warn("setExToAudio transcript " + transcript + " has multiple translations");
+          } else {
+//            transcript = transcript.toLowerCase();
+            List<AudioAttribute> audioAttributes1 = transcriptToAudio.get(transcript);
+            if (audioAttributes1 == null) {
+              transcriptToAudio.put(transcript, audioAttributes1 = new ArrayList<AudioAttribute>());
+            }
+            audioAttributes1.add(audioAttribute);
+          }
+        }
+
+      }
+    }
   }
 }
