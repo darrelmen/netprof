@@ -192,6 +192,8 @@ import java.util.logging.Logger;
  * - Fixed bug where could get into a bad state if clicked the record button too quickly.
  * 1.5.8 (11-01-16)
  * - Fixes to support Sorani
+ * 1.5.9 (11-02-16)
+ * - Fixes to support updating Turkish and preserving audio.
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
