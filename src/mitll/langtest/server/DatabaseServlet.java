@@ -53,13 +53,13 @@ import java.util.Set;
 public class DatabaseServlet extends HttpServlet {
   private static final Logger logger = Logger.getLogger(DatabaseServlet.class);
   private static final int BUFFER_SIZE = 4096;
-  private static final String NO = "NO";
+  //private static final String NO = "NO";
   // not clear this is a big win currently - this enables us to rewrite the mp3s and possibly mark
   // them with a title
-  private static final Boolean CHECK_FOR_MP3 = false;
+//  private static final Boolean CHECK_FOR_MP3 = false;
 
   protected ServerProperties serverProps;
-  protected String relativeConfigDir;
+  String relativeConfigDir;
   protected String configDir;
   protected PathHelper pathHelper;
 
