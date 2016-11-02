@@ -656,7 +656,7 @@ public class AudioConversion {
     return new File(mp3File);
   }
 
-  int spew = 0;
+  private int spew = 0;
 
   /**
    * @param lamePath
@@ -674,7 +674,10 @@ public class AudioConversion {
       title = title.substring(0, 30);
     }
     if (title == null) title = "";
-    ProcessBuilder lameProc = new ProcessBuilder(lamePath, pathToAudioFile, mp3File, "--tt", title, "--ta", author);
+    ProcessBuilder lameProc = new ProcessBuilder(lamePath, pathToAudioFile, mp3File,
+        "--tt", title,
+        "--ta", author,
+        "--tl", language);
     try {
       //logger.debug("running lame" + lameProc.command());
       new ProcessRunner().runProcess(lameProc);
