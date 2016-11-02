@@ -228,7 +228,7 @@ public class DAO {
     long then = System.currentTimeMillis();
     rs.close();
     long now = System.currentTimeMillis();
-    int i = 5;
+    int i = 15;
 //    if (now - then > i) {
 //      logger.info("finish took " + (now - then) + " millis to close result set");
 //    }
