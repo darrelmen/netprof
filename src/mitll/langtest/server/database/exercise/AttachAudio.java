@@ -63,6 +63,8 @@ class AttachAudio {
   private Map<String, List<AudioAttribute>> exToAudio;
   private boolean checkAudioTranscript = true;
   private Map<String, List<AudioAttribute>> transcriptToAudio;
+  private String language;
+  private boolean useTranscriptToAudio = true;
 
   /**
    * Map<String, List<AudioAttribute>> exToAudio,
@@ -80,6 +82,7 @@ class AttachAudio {
     this.installPath = installPath;
     this.checkAudioTranscript = checkAudioTranscript;
     this.audioCheck = new AudioCheck(serverProperties);
+    language = serverProperties.getLanguage();
   }
 
   /**
@@ -142,32 +145,33 @@ class AttachAudio {
    * @see ExcelImport#getRawExercises()
    */
   public <T extends CommonExercise> int attachAudio(T imported, Collection<String> transcriptChanged) {
-    String id = imported.getID();
+    String exid = imported.getID();
+    String id = exid;
     int missing = 0;
 
     if (exToAudio.containsKey(id) || exToAudio.containsKey(id + "/1") || exToAudio.containsKey(id + "/2")) {
       List<AudioAttribute> audioAttributes = exToAudio.get(id);
       //   if (audioAttributes.isEmpty()) logger.info("huh? audio attr empty for " + id);
-      missing = attachAudio(imported, missing, audioAttributes, transcriptChanged);
-      if (transcriptChanged.size() > 0) {
+      Set<String> changedIDs = new HashSet<>();
+      missing = attachAudio(imported, missing, audioAttributes, transcriptChanged, changedIDs);
+      if (useTranscriptToAudio && changedIDs.size() > 0) {
         //logger.info("no matches for " + id);
         id = imported.getForeignLanguage();
         if (transcriptToAudio.containsKey(id)) {
-//          logger.info("1) using transcript->audio map for " + imported.getID() + " : " + id);
+          //logger.info(language + "1) using transcript->audio map for " + exid + " : " + id);
           //   if (audioAttributes.isEmpty()) logger.info("huh? audio attr empty for " + id);
-          missing = attachAudio(imported, missing, transcriptToAudio.get(id), transcriptChanged);
+          missing = attachAudio(imported, missing, transcriptToAudio.get(id), transcriptChanged, new HashSet<>());
         }
 //        else if (audioAttributes != null && !audioAttributes.isEmpty()) {
- //         logger.info("no match for '" + id + "'");
-  //      }
+        //         logger.info("no match for '" + id + "'");
+        //      }
       }
-    } else {
+    } else if (useTranscriptToAudio) {
       id = imported.getForeignLanguage();
       if (transcriptToAudio.containsKey(id)) {
-        List<AudioAttribute> audioAttributes = transcriptToAudio.get(id);
-        //       logger.info("2) using transcript->audio map for " + imported.getID() + " : " + id);
+        logger.info(language + " 2) using transcript->audio map for " + exid + " : " + id);
         //   if (audioAttributes.isEmpty()) logger.info("huh? audio attr empty for " + id);
-        missing = attachAudio(imported, missing, audioAttributes, transcriptChanged);
+        missing = attachAudio(imported, missing, transcriptToAudio.get(id), transcriptChanged, new HashSet<>());
       }
     }
     return missing;
@@ -176,17 +180,18 @@ class AttachAudio {
   /**
    * Don't attach audio that doesn't meet the dynamic range minimum.
    *
+   * @param <T>
    * @param imported
    * @param missing
    * @param audioAttributes
-   * @param <T>
+   * @param changedIDs
    * @return
    * @see #attachAudio(CommonExercise, Collection)
    */
   private <T extends CommonExercise> int attachAudio(T imported,
                                                      int missing,
                                                      Collection<AudioAttribute> audioAttributes,
-                                                     Collection<String> transcriptChangedIDs) {
+                                                     Collection<String> transcriptChangedIDs, Set<String> changedIDs) {
     MutableAudioExercise mutableAudio = imported.getMutableAudio();
 
     if (audioAttributes == null) {
@@ -225,16 +230,18 @@ class AttachAudio {
                 ) {
               addIfDNRAboveThreshold(mutableAudio, audio, child, test);
             } else {
-
-              transcriptChangedIDs.add(audio.getExid());
+              String exid = audio.getExid();
+              transcriptChangedIDs.add(exid);
+              changedIDs.add(exid);
 //              logger.warn("for " + imported + " audio transcript " + audio.getTranscript() +
 //                  " doesn't match : '" + noAccents + "' vs '" + noAccentsTranscript + "'");
             }
             audioPaths.add(child);
 //            logger.debug("imported " +imported.getID()+ " now " + imported.getAudioAttributes());
-          } else {
-            logger.debug("attachAudio skipping audio file already seen = " + child);
           }
+          //else {
+          //  logger.debug("attachAudio skipping audio file already seen = " + child);
+          // }
         } else {
           missing++;
           c++;
