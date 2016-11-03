@@ -806,6 +806,14 @@ public class ResultDAO extends DAO {
     return new ArrayList<>();
   }
 
+  /**
+   * @see #getResultsForExIDInForUser(long, boolean, String)
+   * @param numIDs
+   * @param userid
+   * @param sql
+   * @return
+   * @throws SQLException
+   */
   private List<CorrectAndScore> getCorrectAndScores(int numIDs, long userid, String sql) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
@@ -818,7 +826,9 @@ public class ResultDAO extends DAO {
     if (now - then > 100) {
       logger.warn("getCorrectAndScores " + getLanguage() +
           " took " + (now - then) + " millis : " +
-          " query for " + numIDs + " and userid " + userid + " returned " + scores.size() + " scores, sql:\n\t" + sql);
+          " query for " + numIDs + " and userid " + userid + " returned " + scores.size() + " scores"
+      //   + ", sql:\n\t" + sql
+      );
     }
     if (DEBUG) {
       logger.debug("getCorrectAndScores for  " + sql + " got\n\t" + scores.size());
