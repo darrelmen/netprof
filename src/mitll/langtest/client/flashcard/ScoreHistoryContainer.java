@@ -70,7 +70,6 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
   private static final String ENGLISH = "English";
   private final boolean english;
 
-
   private static final int MAX_LENGTH_ID = 15;
   public static final int TABLE_HISTORY_WIDTH = 420;
   private static final int COL_WIDTH = 130;
