@@ -45,6 +45,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.KeyStorage;
+import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -52,6 +53,7 @@ import mitll.langtest.client.list.ListChangeListener;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.client.user.UserFeedback;
+import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
@@ -219,7 +221,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   /**
    * Pull state out of cache and re-populate correct, incorrect, and score history.
    *
-   * @see mitll.langtest.client.custom.Navigation#makePracticeHelper
+   * @see mitll.langtest.client.custom.PracticeHelper#getMyListLayout(LangTestDatabaseAsync, UserFeedback, UserManager, ExerciseController, SimpleChapterNPFHelper)
    */
   public void populateCorrectMap() {
     String value = sticky.getCorrect();
@@ -454,7 +456,11 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       repeatButton.addStyleName("leftFiveMargin");
 
       child.add(repeatButton);
-      return child;
+
+      DivWidget lefty = new DivWidget();
+     // lefty.addStyleName("floatLeft");
+      lefty.add(child);
+      return lefty;
     }
 
     private Button getIncorrectListButton() {
