@@ -34,7 +34,6 @@ package mitll.langtest.shared.exercise;
 
 import mitll.langtest.server.database.AudioExport;
 import mitll.langtest.shared.user.MiniUser;
-import net.sf.json.JSONObject;
 
 import java.util.Collection;
 import java.util.List;
@@ -51,7 +50,7 @@ public interface AudioAttributeExercise extends AudioRefExercise {
   String getRefAudioWithPrefs(Collection<Long> preferredVoices);
 
   /**
-   * @see mitll.langtest.server.json.JsonExport#addContextAudioRefs(AudioAttributeExercise, JSONObject)
+   * @see mitll.langtest.server.json.JsonExport#addContextAudioRefs
    * @see AudioExport#copyContextAudioBothGenders
    * @return
    */
