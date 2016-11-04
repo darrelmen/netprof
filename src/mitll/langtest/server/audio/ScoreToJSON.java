@@ -68,6 +68,10 @@ public class ScoreToJSON {
     return getJsonObject(pretestScore);
   }
 
+  public String asJson(PretestScore pretestScore) {
+    return getJsonObject(pretestScore).toString();
+  }
+  
   public JSONObject getJsonObject(PretestScore pretestScore) {
     JSONObject jsonObject = new JSONObject();
     if (pretestScore != null) {

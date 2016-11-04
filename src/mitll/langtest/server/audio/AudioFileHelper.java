@@ -53,7 +53,6 @@ import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.MutableExercise;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.PretestScore;
-import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -974,9 +973,9 @@ public class AudioFileHelper implements AlignDecode {
     }
     pretestScore.setReqid(reqid);
 
-    JSONObject json = new ScoreToJSON().getJsonObject(pretestScore);
+    String json = new ScoreToJSON().asJson(pretestScore);
     // logger.info("json for preset score " +pretestScore + " " + json);
-    pretestScore.setJson(json.toString());
+    pretestScore.setJson(json);
 
     return pretestScore;
   }
