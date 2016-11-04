@@ -64,7 +64,11 @@ class AttachAudio {
   private boolean checkAudioTranscript = true;
   private Map<String, List<AudioAttribute>> transcriptToAudio;
   private String language;
-  private boolean useTranscriptToAudio = true;
+
+  /**
+   * This needs to be consistent with reporting and filtering, let's turn it off for now.
+   */
+  private boolean useTranscriptToAudio = false;
 
   /**
    * Map<String, List<AudioAttribute>> exToAudio,
