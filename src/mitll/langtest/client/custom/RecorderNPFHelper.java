@@ -38,25 +38,34 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.content.NPFlexSectionExerciseList;
+import mitll.langtest.client.custom.exercise.CommentBox;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.WaveformExercisePanel;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.client.qc.QCNPFExercise;
+import mitll.langtest.client.scoring.CommentAnnotator;
+import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
+import mitll.langtest.shared.ExerciseAnnotation;
+import mitll.langtest.shared.ExerciseFormatter;
+import mitll.langtest.shared.exercise.AnnotationExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Sets up recording both ref recordings and context ref recordings.
@@ -73,6 +82,7 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
 
   private final boolean doNormalRecording;
   private boolean added = false;
+  private final RecordingProgressTable flex = new RecordingProgressTable();
 
   /**
    * @param service
@@ -82,7 +92,7 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
    * @param doNormalRecording
    * @see Navigation#Navigation
    */
-  public RecorderNPFHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager,
+  RecorderNPFHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager,
                            ExerciseController controller, boolean doNormalRecording,
                            ReloadableContainer exerciseList) {
     super(service, feedback, userManager, controller, exerciseList);
@@ -155,8 +165,6 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
   }
 
 
-  private final RecordingProgressTable flex = new RecordingProgressTable();
-
   private Widget doMaleFemale() {
     flex.addStyleName("topMargin");
     getProgressInfo();
@@ -176,10 +184,14 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
     });
   }
 
-  private class MyWaveformExercisePanel extends WaveformExercisePanel<CommonShell, CommonExercise> {
-    private final CommonExercise e; // TODO REMOVE!
+  /**
+   * @see #getFactory(PagingExerciseList)
+   */
+  private class MyWaveformExercisePanel extends WaveformExercisePanel<CommonShell, CommonExercise> implements CommentAnnotator {
+//    private final Logger logger = Logger.getLogger("MyWaveformExercisePanel");
+    private final CommonExercise e;
 
-    public MyWaveformExercisePanel(CommonExercise e, ExerciseController controller1, ListInterface<CommonShell> exerciseList1, String instance) {
+    MyWaveformExercisePanel(CommonExercise e, ExerciseController controller1, ListInterface<CommonShell> exerciseList1, String instance) {
       super(e, service, controller1, exerciseList1, RecorderNPFHelper.this.doNormalRecording, instance);
       this.e = e;
     }
@@ -202,6 +214,31 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
     }
 
     /**
+     * @param e
+     * @return
+     * @seex #ExercisePanel(T, LangTestDatabaseAsync, ExerciseController, ListInterface, String, String)
+     */
+    @Override
+    protected Widget getQuestionContent(CommonExercise e) {
+      String content = getExerciseContent(e);
+
+      HTML maybeRTLContent = getMaybeRTLContent(content);
+      maybeRTLContent.addStyleName("rightTenMargin");
+      maybeRTLContent.addStyleName("topMargin");
+
+      Widget contentWidget = (content.length() > 200) ?
+          getContentScroller(maybeRTLContent)
+          : maybeRTLContent;
+
+      boolean exampleRecord = isExampleRecord();
+      Widget entry = getEntry(e, exampleRecord ? QCNPFExercise.CONTEXT : QCNPFExercise.FOREIGN_LANGUAGE,
+          contentWidget);
+      entry.addStyleName("floatLeft");
+
+      return entry;
+    }
+
+    /**
      * @param controller
      * @param completedExercise
      * @see RecorderNPFHelper.MyWaveformExercisePanel#postAnswers
@@ -210,6 +247,65 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
     public void postAnswers(ExerciseController controller, HasID completedExercise) {
       super.postAnswers(controller, completedExercise);
       tellOtherListExerciseDirty(e);
+    }
+
+    /**
+     * @param e
+     * @param field
+     * @return
+     * @seex #getContext
+     * @see GoodwaveExercisePanel#getQuestionContent(CommonShell)
+     */
+    private Widget getEntry(AnnotationExercise e, final String field, Widget contentWidget) {
+      return getEntry(field, e.getAnnotation(field), contentWidget);
+    }
+
+    /**
+     * @param field
+     * @param annotation
+     * @return
+     * @seex #makeFastAndSlowAudio(String)
+     * @see #getEntry
+     */
+    private Widget getEntry(final String field, ExerciseAnnotation annotation, Widget contentWidget) {
+      return getCommentBox(true).getEntry(field, contentWidget, annotation);
+    }
+
+    /**
+     * @return
+     * @seex #getEntry(String, String, String, ExerciseAnnotation)
+     * @seex #makeFastAndSlowAudio(String)
+     */
+    private CommentBox getCommentBox(boolean tooltipOnRight) {
+      return new CommentBox(this.exercise.getID(), controller, this, this.exercise.getMutableAnnotation(), tooltipOnRight);
+    }
+
+    /**
+     * @param commentToPost
+     * @param field
+     * @see mitll.langtest.client.qc.QCNPFExercise#makeCommentEntry(String, mitll.langtest.shared.ExerciseAnnotation)
+     */
+    @Override
+    public void addIncorrectComment(final String commentToPost, final String field) {
+      addAnnotation(field, ExerciseAnnotation.TYPICAL.INCORRECT, commentToPost);
+    }
+
+    @Override
+    public void addCorrectComment(final String field) {
+      addAnnotation(field, ExerciseAnnotation.TYPICAL.CORRECT, "");
+    }
+
+    private void addAnnotation(final String field, final ExerciseAnnotation.TYPICAL status, final String commentToPost) {
+      service.addAnnotation(exercise.getID(), field, status.toString(), commentToPost, controller.getUser(),
+          new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+            }
+          });
     }
   }
 }
