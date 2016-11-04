@@ -1611,7 +1611,42 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @see LangTestDatabaseImpl#getMaleFemaleProgress()
    */
   public Map<String, Float> getMaleFemaleProgress() {
-//    UserDAO userDAO = getUserDAO();
+    UserDAO userDAO = getUserDAO();
+    Map<Long, User> userMapMales = userDAO.getUserMap(true);
+    Map<Long, User> userMapFemales = userDAO.getUserMap(false);
+
+//    Collection<CommonExercise> exercises1 = getExercises();
+    Collection<? extends CommonShell> exercises = getExercises();
+    float total = exercises.size();
+    Set<String> uniqueIDs = new HashSet<String>();
+
+    int context = 0;
+    for (CommonShell shell : exercises) {
+      if (shell.getContext() != null &&
+          !shell.getContext().isEmpty()) context++;
+      boolean add = uniqueIDs.add(shell.getID());
+      if (!add) {
+        logger.warn("getMaleFemaleProgress found duplicate id " + shell.getID() + " : " + shell);
+      }
+    }
+/*
+    logger.info("found " + total + " total exercises, " +
+        uniqueIDs.size() +
+        " unique");
+*/
+
+    return getAudioDAO().getRecordedReport(userMapMales, userMapFemales,
+        total, uniqueIDs, context);
+  }
+
+  /**
+   * Look at the exercises to determine which ones have regular, slow, or context audio and broken down
+   * by gender.
+   *
+   * @return
+   */
+  public Map<String, Float> getMaleFemaleProgressEx() {
+    UserDAO userDAO = getUserDAO();
 //    Map<Long, User> userMapMales = userDAO.getUserMap(true);
 //    Map<Long, User> userMapFemales = userDAO.getUserMap(false);
 
