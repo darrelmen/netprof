@@ -336,7 +336,20 @@ public class DecodeTest extends BaseTest {
 
   @Test
   public void testTurkish() {
-    DatabaseImpl database = getDatabase("turkish");
+    doProgressReport("turkish");
+  }
+
+  @Test
+  public void testSpanishProgress() {
+    doProgressReport("spanish");
+  }
+
+  private void doProgressReport(String turkish) {
+    DatabaseImpl database = getDatabase(turkish);
+    doReport(database);
+  }
+
+  private void doReport(DatabaseImpl database) {
     AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), database.getServerProps(), database, null);
     Collection exercises = database.getExercises();
     logger.info("Got " + exercises.size());
@@ -347,6 +360,5 @@ public class DecodeTest extends BaseTest {
     }
     Map maleFemaleProgress = database.getMaleFemaleProgress();
     logger.info("got " + maleFemaleProgress);
-
   }
 }
