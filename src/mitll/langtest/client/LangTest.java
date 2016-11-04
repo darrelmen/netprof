@@ -194,13 +194,14 @@ import java.util.logging.Logger;
  * - Fixes to support Sorani
  * 1.5.9 (11-02-16)
  * - Fixes to support updating Turkish and preserving audio.
- *
+ * 1.5.10
+ * - Turn off transcript matching for audio for now, remove ref audio that doesn't meet the dnr threshold
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private final Logger logger = Logger.getLogger("LangTest");
 
-  public static final String VERSION_INFO = "1.5.8";
+  public static final String VERSION_INFO = "1.5.10";
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
   private static final String UNKNOWN = "unknown";
