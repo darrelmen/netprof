@@ -683,9 +683,9 @@ public class AudioDAO extends DAO {
           " WHERE " +
           (s.isEmpty() ? "" : USERID + " IN (" + s + ") AND ") +
           DEFECT + "<>true " +
-          " AND " + AUDIO_TYPE + "='" +
-          audioSpeed +
-          "' AND length(" + Database.EXID +
+          "AND " +DNR + ">0"+
+          " AND " + AUDIO_TYPE + "='" + audioSpeed +"' " +
+          "AND length(" + Database.EXID +
           ") > 0 ";
       PreparedStatement statement = connection.prepareStatement(sql);
       ResultSet rs = statement.executeQuery();
@@ -733,7 +733,7 @@ public class AudioDAO extends DAO {
    * @paramx uniqueIDs
    * @see DatabaseImpl#getMaleFemaleProgress
    */
-/*  Map<String, Float> getRecordedReport(Map<Long, User> userMapMales,
+  Map<String, Float> getRecordedReport(Map<Long, User> userMapMales,
                                        Map<Long, User> userMapFemales,
                                        float total,
                                        Set<String> uniqueIDs,
@@ -769,7 +769,7 @@ public class AudioDAO extends DAO {
     report.put(MALE_CONTEXT, cmale);
     report.put(FEMALE_CONTEXT, cfemale);
     return report;
-  }*/
+  }
 
   /**
    * So here, instead of asking the database for which items have been recorded,
@@ -783,6 +783,7 @@ public class AudioDAO extends DAO {
    * @param exercises
    * @return
    */
+  @Deprecated
   Map<String, Float> getRecordedReportFromExercises(
       float total,
       float totalContext,
@@ -814,6 +815,7 @@ public class AudioDAO extends DAO {
     return report;
   }
 
+  @Deprecated
   private int getCountForGenderEx(boolean isMale,
                                   String audioType,
                                   Collection<CommonExercise> exercises) {
@@ -834,6 +836,7 @@ public class AudioDAO extends DAO {
     return n;
   }
 
+  @Deprecated
   private int getCountForGenderExIn(boolean isMale,
                                     Collection<String> audioTypes,
                                     Collection<CommonExercise> exercises) {
@@ -868,7 +871,7 @@ public class AudioDAO extends DAO {
    * @paramx audioSpeed
    * @seex #getRecordedReport(Map, Map, float, Set)
    */
-/*  private int getCountForGender(Set<Long> userIds,
+  private int getCountForGender(Set<Long> userIds,
                                 String audioSpeed,
                                 Set<String> uniqueIDs) {
     Set<String> idsOfRecordedExercises = new HashSet<>();
@@ -886,6 +889,7 @@ public class AudioDAO extends DAO {
           " WHERE " +
           (s.isEmpty() ? "" : USERID + " IN (" + s + ") AND ") +
           DEFECT + "<>true " +
+          "AND " +DNR + ">0"+
           " AND " + AUDIO_TYPE + "='" + audioSpeed + "' ";
       PreparedStatement statement = connection.prepareStatement(sql);
       ResultSet rs = statement.executeQuery();
@@ -899,15 +903,19 @@ public class AudioDAO extends DAO {
         }
       }
       finish(connection, statement, rs);
-*//*      logger.debug("getCountForGender : for " + audioSpeed + "\n\t" + sql + "\n\tgot " + idsOfRecordedExercises.size() +
-          " and stale " +idsOfStaleExercises);*//*
+
+/*
+      logger.debug("getCountForGender : for " + audioSpeed + "\n\t" + sql + "\n\tgot " + idsOfRecordedExercises.size() +
+          " and stale " +idsOfStaleExercises.size());
+*/
+
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
     return idsOfRecordedExercises.size();
-  }*/
+  }
 
-  /*private int getCountBothSpeeds(Set<Long> userIds,
+  private int getCountBothSpeeds(Set<Long> userIds,
                                  Set<String> uniqueIDs) {
     Set<String> results = new HashSet<>();
 
@@ -947,7 +955,8 @@ public class AudioDAO extends DAO {
     }
     //logger.debug("both speeds " + results.size());
     return results.size();
-  }*/
+  }
+
   private String getInClause(Set<Long> longs) {
     StringBuilder buffer = new StringBuilder();
     for (long id : longs) {
@@ -955,7 +964,6 @@ public class AudioDAO extends DAO {
     }
     return buffer.toString();
   }
-
 
   /**
    * Items that are recorded must have both regular and slow speed audio.
