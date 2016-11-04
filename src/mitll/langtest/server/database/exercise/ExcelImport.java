@@ -554,7 +554,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   }
 
   private boolean contextColMatch(String colNormalized) {
-    return colNormalized.contains(CONTEXT) && colNormalized.contains("sentence");
+    return colNormalized.contains(CONTEXT) && (colNormalized.contains("sentence") || !colNormalized.contains("translation"));
   }
 
   private boolean isDeletedRow(Sheet sheet, Row next, int colIndex) {
