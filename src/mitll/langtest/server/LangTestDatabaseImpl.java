@@ -2566,7 +2566,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
 
     String mediaDir = relativeConfigDir + File.separator + serverProps.getMediaDir();
-    this.refResultDecoder = new RefResultDecoder(db, serverProps, pathHelper, audioFileHelper, mediaDir, pathHelper.getInstallPath());
+    this.refResultDecoder = new RefResultDecoder(db, serverProps, pathHelper, audioFileHelper);
     refResultDecoder.doRefDecode(getExercises(), relativeConfigDir);
     if (serverProps.isAMAS()) audioFileHelper.makeAutoCRT(relativeConfigDir);
 
