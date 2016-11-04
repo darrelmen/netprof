@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database;
 
+import com.google.common.base.CharMatcher;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
@@ -477,10 +478,12 @@ public class AudioDAO extends DAO {
         if (!didIt) {
           if (DEBUG_ATTACH && allSucceeded) {
             String foreignLanguage = attr.isContextAudio() ? firstExercise.getContext() : firstExercise.getForeignLanguage();
-            logger.info("not attaching audio\t" + attr.getUniqueID() + " to\t" + firstExercise.getID() +
+            logger.info("not attaching audio\t" + attr.getUniqueID() +
+                " to\t" + firstExercise.getID() +
                 "\tsince transcript has changed : old '" +
                 attr.getTranscript() +
-                "' vs new '" + foreignLanguage +
+                "' " +
+                "vs new '" + foreignLanguage +
                 "'");
           }
           allSucceeded = false;
@@ -542,31 +545,13 @@ public class AudioDAO extends DAO {
                                         AudioConversion audioConversion,
                                         AudioAttribute attr) {
     String against = attr.isContextAudio() ? firstExercise.getContext() : firstExercise.getForeignLanguage();
-//    String noAccents = Normalizer.normalize(against, Normalizer.Form.NFD);
-//
-//    logger.info("attachAudioAndFixPath before '" +against+
-//        "' after '" + noAccents+
-//        "'");
+    against =  CharMatcher.WHITESPACE.trimFrom(against);
 
     String noAccents = StringUtils.stripAccents(against);
     String transcript = attr.getTranscript();
-    String noAccentsTranscript = transcript == null ? null : StringUtils.stripAccents(transcript);
-//    boolean foundAlt = false;
-//    if (!before.equals(noAccents)) {
-//      if (firstExercise.getID().equals("3277")) {
-//        logger.info("attachAudio before '" + before +
-//            "' after '" + noAccents +
-//            "'");
-//      }
-//      foundAlt = true;
-//    } else {
-//      if (firstExercise.getID().equals("3277")) {
-//        logger.info("attachAudio before '" + before +
-//            "' after '" + noAccents +
-//            "'");
-//      }
-//    }
+    transcript =  CharMatcher.WHITESPACE.trimFrom(transcript);
 
+    String noAccentsTranscript = transcript == null ? null : StringUtils.stripAccents(transcript);
     if (attr.matchTranscript(against, transcript) || attr.matchTranscript(noAccents, noAccentsTranscript)) {
       firstExercise.getMutableAudio().addAudio(attr);
 
@@ -583,7 +568,14 @@ public class AudioDAO extends DAO {
       }
       return true;
     } else {
-
+/*
+      logger.info("no match '" + transcript +
+          "' vs '" + against +
+          "'");
+      logger.info("no accents match '" + noAccents +
+          "' vs '" + noAccentsTranscript +
+          "'");
+*/
       return false;
     }
   }
@@ -683,8 +675,8 @@ public class AudioDAO extends DAO {
           " WHERE " +
           (s.isEmpty() ? "" : USERID + " IN (" + s + ") AND ") +
           DEFECT + "<>true " +
-          "AND " +DNR + ">0"+
-          " AND " + AUDIO_TYPE + "='" + audioSpeed +"' " +
+          "AND " + DNR + ">0" +
+          " AND " + AUDIO_TYPE + "='" + audioSpeed + "' " +
           "AND length(" + Database.EXID +
           ") > 0 ";
       PreparedStatement statement = connection.prepareStatement(sql);
@@ -774,7 +766,7 @@ public class AudioDAO extends DAO {
   /**
    * So here, instead of asking the database for which items have been recorded,
    * we ask the exercises directly for what has been attached to them.
-   *
+   * <p>
    * This accounts for more complicated logic in attach audio that tries to look for audio entries that
    * have matching transcripts for items without audio.
    *
@@ -889,7 +881,7 @@ public class AudioDAO extends DAO {
           " WHERE " +
           (s.isEmpty() ? "" : USERID + " IN (" + s + ") AND ") +
           DEFECT + "<>true " +
-          "AND " +DNR + ">0"+
+          "AND " + DNR + ">0" +
           " AND " + AUDIO_TYPE + "='" + audioSpeed + "' ";
       PreparedStatement statement = connection.prepareStatement(sql);
       ResultSet rs = statement.executeQuery();
