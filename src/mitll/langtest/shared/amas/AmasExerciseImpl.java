@@ -38,7 +38,6 @@ import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.MutableShell;
 import mitll.langtest.shared.exercise.STATE;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
-import net.sf.json.JSONObject;
 
 import java.io.InputStream;
 import java.util.*;
@@ -89,7 +88,7 @@ public class AmasExerciseImpl implements CommonShell {
 
   /**
    * @param id
-   * @see mitll.langtest.server.database.exercise.AMASJSONURLExerciseDAO#toAMASExercise(JSONObject)
+   * @see mitll.langtest.server.database.exercise.AMASJSONURLExerciseDAO#toAMASExercise
    */
   public AmasExerciseImpl(String id, String content, //String altID,
                           String contentTrans,
