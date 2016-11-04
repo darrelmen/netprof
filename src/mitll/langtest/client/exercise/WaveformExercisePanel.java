@@ -61,6 +61,9 @@ import java.util.logging.Logger;
 public class WaveformExercisePanel<L extends CommonShell, T extends CommonShell & AudioRefExercise> extends ExercisePanel<L, T> {
   private final Logger logger = Logger.getLogger("WaveformExercisePanel");
 
+  /**
+   * @see #addInstructions
+   */
   private static final String RECORD_PROMPT = "Record the word or phrase, first at normal speed, then again at slow speed.";
   private static final String RECORD_PROMPT2 = "Record the in-context sentence.";
   private static final String EXAMPLE_RECORD = "EXAMPLE_RECORD";
@@ -112,10 +115,15 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonShell 
     return !isExampleRecord();
   }
 
-  private boolean isExampleRecord() {
+  protected boolean isExampleRecord() {
     return message.equals(EXAMPLE_RECORD);
   }
 
+  /**
+   * @see #getQuestionContent
+   * @param e
+   * @return
+   */
   @Override
   protected String getExerciseContent(T e) {
     String context = isNormalRecord() ? e.getForeignLanguage() :
