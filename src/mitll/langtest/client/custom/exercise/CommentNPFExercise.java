@@ -507,8 +507,8 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
    * @param label
    * @param value
    * @return
-   * @see GoodwaveExercisePanel#getQuestionContent(CommonShell)
-   * @see #getContext
+   * @seex GoodwaveExercisePanel#getQuestionContent(CommonShell)
+   * @see #getItemContent
    */
   private Widget getEntry(AnnotationExercise e, final String field, final String label, String value) {
     return getEntry(field, label, value, e.getAnnotation(field));

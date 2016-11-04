@@ -196,6 +196,9 @@ import java.util.logging.Logger;
  * - Fixes to support updating Turkish and preserving audio.
  * 1.5.10
  * - Turn off transcript matching for audio for now, remove ref audio that doesn't meet the dnr threshold
+ * 1.5.11
+ * - Support for Hindi - added comment on text for recording audio.
+ *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
