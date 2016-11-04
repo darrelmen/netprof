@@ -423,7 +423,10 @@ public class ServerProperties {
     return props.getProperty(param, TRUE).equals(TRUE);
   }
 
-  public String getProperty(String prop) { return props.getProperty(prop); }
+  public String getProperty(String prop) {
+    return props.getProperty(prop);
+  }
+
   /**
    * if true, use old school (hydec)
    * OR if there is no webservice port specified
@@ -634,7 +637,7 @@ public class ServerProperties {
   }
 
   private static final long TRIM_SILENCE_BEFORE = 300;
-  private static final long TRIM_SILENCE_AFTER  = 300;
+  private static final long TRIM_SILENCE_AFTER = 300;
 
   public long getTrimBefore() {
     return getIntPropertyDef("trimBeforeMillis", "" + TRIM_SILENCE_BEFORE);
@@ -649,7 +652,8 @@ public class ServerProperties {
   }
 
   public String getCurrentModel() {
-    return hasModel()? getProperty("MODELS_DIR").replaceAll("models.", ""): "";
+    String models_dir = getProperty("MODELS_DIR");
+    return hasModel() && models_dir != null ? models_dir.replaceAll("models.", "") : "";
   }
 
   public boolean shouldRecalcDNR() {
