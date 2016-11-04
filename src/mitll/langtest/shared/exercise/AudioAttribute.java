@@ -325,7 +325,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
    * @param foreignLanguage
    * @return
    */
-  public boolean hasMatchingTranscript(String foreignLanguage) {
+/*  public boolean hasMatchingTranscript(String foreignLanguage) {
     try {
 
 //      String before = foreignLanguage;
@@ -341,15 +341,23 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     } catch (Exception e) {
       return true;
     }
-  }
+  }*/
 
-  private boolean matchTranscript(String foreignLanguage) {
+/*  private boolean matchTranscript(String foreignLanguage) {
     String transcript = this.transcript;
     return matchTranscript(foreignLanguage, transcript);
-  }
+  }*/
 
+  /**
+   * @see
+   * @param foreignLanguage
+   * @param transcript
+   * @return
+   */
   public boolean matchTranscript(String foreignLanguage, String transcript) {
-    return transcript == null || foreignLanguage.isEmpty() || transcript.isEmpty() ||
+    return transcript == null ||
+        foreignLanguage.isEmpty() ||
+        transcript.isEmpty() ||
         removePunct(transcript).toLowerCase().equals(removePunct(foreignLanguage).toLowerCase());
   }
 
