@@ -316,7 +316,7 @@ public class ServerProperties {
    * @see mitll.langtest.server.decoder.RefResultDecoder#doRefDecode(Collection, String)
    */
   public boolean shouldTrimAudio() {
-    return getDefaultTrue(DO_TRIM);
+    return getDefaultFalse(DO_TRIM);
   }
 
   public int getAudioOffset() {
@@ -650,5 +650,9 @@ public class ServerProperties {
 
   public String getCurrentModel() {
     return hasModel()? getProperty("MODELS_DIR").replaceAll("models.", ""): "";
+  }
+
+  public boolean shouldRecalcDNR() {
+    return getDefaultTrue("shouldRecalcDNROnAudio");
   }
 }
