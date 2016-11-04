@@ -41,7 +41,6 @@ import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.database.userexercise.UserExerciseDAO;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.npdata.dao.SlickExercise;
-import net.sf.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -142,8 +141,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @param transliteration
    * @param dominoID
    * @param projectid
-   * @see mitll.langtest.server.database.exercise.JSONURLExerciseDAO#toExercise(JSONObject)
-   * @see mitll.langtest.server.json.JsonExport#toExercise(JSONObject, Collection)
+   * @see mitll.langtest.server.database.exercise.JSONURLExerciseDAO#toExercise
+   * @see mitll.langtest.server.json.JsonExport#toExercise
    */
   public Exercise(String id,
                   String englishSentence,
@@ -299,7 +298,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @param context
    * @param altcontext
    * @param contextTranslation
-   * @see mitll.langtest.server.database.exercise.JSONURLExerciseDAO#addContextSentences(JSONObject, Exercise)
+   * @see mitll.langtest.server.database.exercise.JSONURLExerciseDAO#addContextSentences
    */
   public void addContext(String context, String altcontext, String contextTranslation) {
     if (!context.isEmpty()) {

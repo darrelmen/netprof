@@ -150,6 +150,11 @@ public class UserManagement {
   public void usersToXLSX(OutputStream out) {
     new UserDAOToExcel().toXLSX(out, getUsers());
   }
+
+  /**
+   * @see DatabaseImpl#usersToJSON
+   * @return
+   */
   public JSON usersToJSON() {
     return new UserDAOToExcel().toJSON(getUsers());
   }

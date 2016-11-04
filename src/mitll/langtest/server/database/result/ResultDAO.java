@@ -43,7 +43,6 @@ import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.result.MonitorResult;
 import mitll.langtest.shared.user.User;
-import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import java.sql.*;
@@ -117,7 +116,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
    * @return
    * @see UserManagement#populateUserToNumAnswers
    * @see #getUserToResults
-   * @see Report#getResults(StringBuilder, Set, JSONObject, int)
+   * @see Report#getResults
    */
   @Override
   public List<Result> getResults() {
