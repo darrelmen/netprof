@@ -34,7 +34,6 @@ package mitll.langtest.shared.exercise;
 
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.user.MiniUser;
-import net.sf.json.JSONObject;
 
 import java.util.*;
 
@@ -76,7 +75,7 @@ public class AudioExercise extends ExerciseShell {
   /**
    * @param prefs
    * @return
-   * @see mitll.langtest.server.json.JsonExport#addContextAudioRefs(AudioAttributeExercise, JSONObject)
+   * @see mitll.langtest.server.json.JsonExport#addContextAudioRefs
    */
   public String getRefAudioWithPrefs(Collection<Long> prefs) {
     AudioAttribute audio = getRegularSpeedWithPrefs(prefs);
@@ -184,7 +183,7 @@ public class AudioExercise extends ExerciseShell {
   /**
    * @param isMale true if by male speaker
    * @return
-   * @see mitll.langtest.server.json.JsonExport#addContextAudioRefs(AudioAttributeExercise, JSONObject)
+   * @see mitll.langtest.server.json.JsonExport#addContextAudioRefs
    */
   public AudioAttribute getLatestContext(boolean isMale) {
     long latestTime = 0;
