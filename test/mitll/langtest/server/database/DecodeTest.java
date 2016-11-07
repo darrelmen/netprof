@@ -343,6 +343,16 @@ public class DecodeTest extends BaseTest {
   public void testSpanishProgress() {
     doProgressReport("spanish");
   }
+  @Test
+  public void testMSAProgress() {
+    DatabaseImpl database = getDatabase("msa");
+    doReport(database);
+    database.getExerciseIDToRefAudio();
+    CommonExercise exercise = database.getExercise("1093");
+    database.attachAudio(exercise);
+    logger.info("ex " +exercise);
+    logger.info("ex " +exercise.getAudioAttributes());
+  }
 
   private void doProgressReport(String turkish) {
     DatabaseImpl database = getDatabase(turkish);
