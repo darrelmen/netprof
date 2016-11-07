@@ -363,7 +363,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   }-*/;
 
   /**
-   * TODO : remove arguments
+   *
    */
   public native void flashRecordOnClick() /*-{
       $wnd.FlashRecorderLocal.record('audio', 'audio.wav');
