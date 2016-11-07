@@ -310,6 +310,17 @@
         </jar>
     </target>
 
+    <target depends="build" name="classroomHindi">
+        <jar destfile="npfClassroomHindiEval.war" basedir="war"
+             includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/hindi/**,scoring/bin.linux64/**,scoring/configurations/**"
+        >
+            <manifest>
+                <attribute name="Built-Date" value="${current.time}"/>
+            </manifest>
+        </jar>
+    </target>
+
+
     <target depends="build" name="classroomSorani">
         <jar destfile="npfClassroomSoraniEval.war" basedir="war"
              includes="flashFavIcon.gif,images/**,js/**,langtest/**,LangTest.css,LangTest.html,swf/**,WEB-INF/**,config/sorani/**,scoring/bin.linux64/**,scoring/configurations/**"
