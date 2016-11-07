@@ -531,6 +531,8 @@ public class AudioDAO extends DAO {
   }
 
   /**
+   * Trims out unicode whitespace too.
+   *
    * @param firstExercise
    * @param installPath
    * @param relativeConfigDir
