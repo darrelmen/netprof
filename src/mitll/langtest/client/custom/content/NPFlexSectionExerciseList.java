@@ -37,6 +37,7 @@ import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
+import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.user.UserFeedback;
@@ -57,7 +58,7 @@ public class NPFlexSectionExerciseList extends FlexSectionExerciseList {
    * @param currentExercisePanel
    * @param instanceName
    * @param incorrectFirst
-   * @see mitll.langtest.client.custom.Navigation#makePracticeHelper(LangTestDatabaseAsync, UserManager, ExerciseController, UserFeedback)
+   * @see mitll.langtest.client.custom.PracticeHelper#getMyListLayout(LangTestDatabaseAsync, UserFeedback, UserManager, ExerciseController, SimpleChapterNPFHelper)
    * @see FlexListLayout#makeExerciseList(Panel, Panel, String, boolean)
    */
   public NPFlexSectionExerciseList(FlexListLayout flexListLayout, Panel topRow, Panel currentExercisePanel, String instanceName,
@@ -78,6 +79,6 @@ public class NPFlexSectionExerciseList extends FlexSectionExerciseList {
 
   @Override
   protected void noSectionsGetExercises(long userID) {
-    loadExercises(getHistoryTokenFromUIState("", ""), getPrefix(), false);
+    loadExercises(getHistoryTokenFromUIState("", ""), getPrefix(), false, false);
   }
 }
