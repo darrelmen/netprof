@@ -60,10 +60,8 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.scoring.CommentAnnotator;
-import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.SoundFeedback;
-import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.ExerciseAnnotation.TYPICAL;
 import mitll.langtest.shared.exercise.AnnotationExercise;
 import mitll.langtest.shared.exercise.AudioRefExercise;
@@ -478,7 +476,7 @@ public class FlashcardPanel<T extends CommonShell & AudioRefExercise & Annotatio
    * @see BootstrapExercisePanel#showIncorrectFeedback
    */
   protected void playRefAndGoToNext(String path, final int delayMillis, boolean useCheck) {
-    logger.info("playRefAndGoToNext " + path + " is song playing " + isSongPlaying + " delay " + delayMillis);
+  //  logger.info("playRefAndGoToNext " + path + " is song playing " + isSongPlaying + " delay " + delayMillis);
     if (!isValid(path)) {
       if (isTabVisible()) {
         checkThenLoadNextOnTimer(1000);
@@ -1185,7 +1183,7 @@ public class FlashcardPanel<T extends CommonShell & AudioRefExercise & Annotatio
    * @see #playRef()
    */
   private void playRef(String path) {
-    logger.info("playRef ---------- " + exercise.getID() + " path " + path);
+    //logger.info("playRef ---------- " + exercise.getID() + " path " + path);
     path = getPath(path);
     final Widget textWidget = foreign;
     getSoundFeedback().queueSong(path,

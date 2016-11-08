@@ -125,7 +125,6 @@ public class ButtonFactory implements EventLogger {
   public void logEvent(final String widgetID, final String widgetType, final String exid, final String context,
                        final long userid) {
     // System.out.println("logEvent event for " + widgetID + " " + widgetType + " exid " + exid + " context " + context + " user " + userid);
-
     final ButtonFactory outer = this;
 
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {

@@ -77,12 +77,17 @@ class ButtonContainer {
     buttonsAtName.add(b);
   }
 
+  /**
+   * @see ButtonGroupSectionWidget#selectItem
+   * @param sections
+   * @return
+   */
   Collection<Button> getButtonsByName(Collection<String> sections) {
-    Set<Button> toSelectSet = new HashSet<Button>();
+    Set<Button> toSelectSet = new HashSet<>();
     for (String toSelect : sections) {
       Collection<Button> buttonsAtName = nameToButton.get(toSelect);
       if (buttonsAtName == null) {
-        logger.warning("getButtonsByName : huh? can't find " + toSelect + " in " + nameToButton.keySet());
+        logger.warning("getButtonsByName : huh? can't find '" + toSelect + "' in " + nameToButton.keySet());
       } else {
         toSelectSet.addAll(buttonsAtName);
       }

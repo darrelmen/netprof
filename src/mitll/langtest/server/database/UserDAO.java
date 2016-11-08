@@ -461,7 +461,7 @@ public class UserDAO extends DAO {
    * @see #getUser(String, String)
    */
   public User getUserWithPass(String id, String passwordHash) {
-    String idNoSuffix = id.split("@")[0];
+    //String idNoSuffix = id.split("@")[0];
     logger.debug(language + " : getUserWithPass getting user with id '" + id + "' and pass '" + passwordHash + "'");
     String sql = "SELECT * from " +
         USERS +
