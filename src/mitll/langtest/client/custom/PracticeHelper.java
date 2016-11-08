@@ -126,12 +126,12 @@ class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise>
           protected void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection,
                                                   String prefix,
                                                   boolean onlyWithAudioAnno,
-                                                  String exerciseID, boolean onlyUnrecorded) {
+                                                  String exerciseID, boolean onlyUnrecorded, boolean onlyDefaultUser) {
 //            logger.info("got loadExercisesUsingPrefix " +prefix);
           //  controller.logException(new Exception("where did this come from?"));
             prefix = ""; // practice helper doesn't use a search box
 
-            super.loadExercisesUsingPrefix(typeToSection, prefix, onlyWithAudioAnno, exerciseID, onlyUnrecorded);
+            super.loadExercisesUsingPrefix(typeToSection, prefix, onlyWithAudioAnno, exerciseID, onlyUnrecorded, onlyDefaultUser);
             statsFlashcardFactory.setSelection(typeToSection);
           }
         };
