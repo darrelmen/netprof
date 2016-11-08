@@ -219,7 +219,8 @@ public class ScoreServlet extends DatabaseServlet {
         toReturn.put(ERROR, "unknown req " + queryString);
       }
     } catch (Exception e) {
-      logger.error("got " + e, e);
+      logger.error(getLanguage() +" : doing query " +queryString+ " got " + e, e);
+      db.logAndNotify(e);
     }
 
     long now = System.currentTimeMillis();
@@ -374,7 +375,6 @@ public class ScoreServlet extends DatabaseServlet {
 
   private String getLanguage() {
     getAudioFileHelper();
-
     return serverProps.getLanguage();
   }
 
@@ -453,6 +453,7 @@ public class ScoreServlet extends DatabaseServlet {
       writer.close();
     } catch (IOException e) {
       logger.error("got " + e, e);
+      db.logAndNotify(e);
     }
   }
 

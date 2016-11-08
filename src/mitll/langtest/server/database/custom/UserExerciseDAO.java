@@ -527,13 +527,13 @@ public class UserExerciseDAO extends DAO {
 
 //  private Map<String, List<AudioAttribute>> exToAudio;
 //  private AudioDAO audioDAO;
-  public void setAudioDAO(AudioDAO audioDAO) {
+ // public void setAudioDAO(AudioDAO audioDAO) {
     //  exToAudio = audioDAO.getExToAudio();
     //  this.audioDAO = audioDAO;
 /*    if (ADD_MISSING_AUDIO) {
       getOverrides(true);
     }*/
-  }
+  //}
 
   private Map<String, String> getUnitToValue(ResultSet rs, List<String> typeOrder) throws SQLException {
     String first = rs.getString(UNIT);

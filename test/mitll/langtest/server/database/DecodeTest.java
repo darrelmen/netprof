@@ -74,16 +74,15 @@ public class DecodeTest extends BaseTest {
               logger.info("\tin db, found original (" + diff + ") " + orig);
               File origFile = getAbsoluteFile(war, orig);
               if (origFile.exists()) {
-                double durationInSeconds = new AudioCheck(null).getDurationInSeconds(origFile)*1000;
+                double durationInSeconds = new AudioCheck(null).getDurationInSeconds(origFile) * 1000;
                 long durationInMillis = attribute.getDurationInMillis();
 
-                if (durationInMillis == (long)durationInSeconds) {
+                if (durationInMillis == (long) durationInSeconds) {
                   logger.info("\t\tDur " + durationInSeconds + " vs " + durationInMillis + " got match - fixing...");
                   new PathWriter().copyAndNormalize(origFile, russian.getServerProps(), audioFile);
-                  logger.info("\t\tgot match - after length = " +audioFile.length());
+                  logger.info("\t\tgot match - after length = " + audioFile.length());
                   fixed++;
-                }
-                else {
+                } else {
                   logger.warn("\t\tNO MATCH Dur " + durationInSeconds + " vs " + durationInMillis);
                 }
               } else {
@@ -98,7 +97,7 @@ public class DecodeTest extends BaseTest {
         }
       }
     }
-    logger.info("Fixed " +fixed + " files");
+    logger.info("Fixed " + fixed + " files");
 
     CommonExercise exercise = russian.getExercise("2127");
     //String context = exercise.getContext();
@@ -303,12 +302,73 @@ public class DecodeTest extends BaseTest {
     DatabaseImpl database = getDatabase("serbian");
     AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), database.getServerProps(), database, null);
     Collection exercises = database.getExercises();
-    logger.info("Got " +exercises.size());
+    logger.info("Got " + exercises.size());
     if (exercises.isEmpty()) {
 
-    }
-    else {
+    } else {
       logger.info("Got " + exercises.iterator().next());
     }
+  }
+
+  @Test
+  public void testSorani() {
+    DatabaseImpl database = getDatabase("sorani");
+    AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), database.getServerProps(), database, null);
+    Collection exercises = database.getExercises();
+    logger.info("Got " + exercises.size());
+    if (exercises.isEmpty()) {
+
+    } else {
+      logger.info("Got " + exercises.iterator().next());
+    }
+    database.getSectionHelper().report();
+
+    String test = "Food, Drink";
+    Collection exercisesForSelectionState = database.getSectionHelper().getExercisesForSelectionState("Sub-topic", "Weaponry, Equipment");
+    logger.info("Got " + exercisesForSelectionState.size());
+    if (!exercisesForSelectionState.isEmpty()) logger.info("Got " + exercisesForSelectionState.iterator().next());
+
+    exercisesForSelectionState = database.getSectionHelper().getExercisesForSelectionState("Sub-topic", test);
+    logger.info("Got " + exercisesForSelectionState.size());
+    if (!exercisesForSelectionState.isEmpty()) logger.info("Got " + exercisesForSelectionState.iterator().next());
+  }
+
+
+  @Test
+  public void testTurkish() {
+    doProgressReport("turkish");
+  }
+
+  @Test
+  public void testSpanishProgress() {
+    doProgressReport("spanish");
+  }
+  @Test
+  public void testMSAProgress() {
+    DatabaseImpl database = getDatabase("msa");
+    doReport(database);
+    database.getExerciseIDToRefAudio();
+    CommonExercise exercise = database.getExercise("1093");
+    database.attachAudio(exercise);
+    logger.info("ex " +exercise);
+    logger.info("ex " +exercise.getAudioAttributes());
+  }
+
+  private void doProgressReport(String turkish) {
+    DatabaseImpl database = getDatabase(turkish);
+    doReport(database);
+  }
+
+  private void doReport(DatabaseImpl database) {
+    AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), database.getServerProps(), database, null);
+    Collection exercises = database.getExercises();
+    logger.info("Got " + exercises.size());
+    if (exercises.isEmpty()) {
+
+    } else {
+      logger.info("Got " + exercises.iterator().next());
+    }
+    Map maleFemaleProgress = database.getMaleFemaleProgress();
+    logger.info("got " + maleFemaleProgress);
   }
 }
