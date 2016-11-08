@@ -180,7 +180,7 @@ public class AudioExercise extends ExerciseShell {
 
   /**
    * @return
-   * @see mitll.langtest.server.DatabaseServlet#getJsonForExercise(CommonExercise)
+   * @see mitll.langtest.server.DatabaseServlet#getJsonForExercise
    */
   public AudioAttribute getLatestContext(boolean isMale) {
     long latestTime = 0;
