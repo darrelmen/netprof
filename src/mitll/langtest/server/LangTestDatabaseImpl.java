@@ -1560,7 +1560,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
           firstColIsEnglish = true;
         } else {
           // not going to try going through the transliteration here, I guess
-          if (firstColIsEnglish || (isValidForeignPhrase(english) && !isValidForeignPhrase(fl, ""))) {
+          if (firstColIsEnglish || (isValidForeignPhrase(english, "") && !isValidForeignPhrase(fl, ""))) {
             String temp = english;
             english = fl;
             fl = temp;
@@ -1578,7 +1578,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     for (CommonExercise candidate : newItems) {
       String foreignLanguage = candidate.getForeignLanguage();
       if (!currentKnownFL.contains(foreignLanguage)) {
-        if (isValidForeignPhrase(foreignLanguage)) {
+        if (isValidForeignPhrase(foreignLanguage, "")) {
           getUserListManager().reallyCreateNewItem(userListID, candidate, serverProps.getMediaDir());
           actualItems.add(candidate);
         } else {

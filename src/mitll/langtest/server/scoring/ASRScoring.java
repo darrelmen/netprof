@@ -110,8 +110,8 @@ public class ASRScoring extends Scoring implements ASR {
    */
   public PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
                                   String sentence,
-                                  String transliteration,
                                   Collection<String> lmSentences,
+                                  String transliteration,
 
                                   String imageOutDir,
                                   int imageWidth, int imageHeight, boolean useScoreForBkgColor,
