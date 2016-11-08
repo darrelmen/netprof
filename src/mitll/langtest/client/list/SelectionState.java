@@ -50,13 +50,14 @@ public class SelectionState {
   private final Logger logger = Logger.getLogger("SelectionState");
 
   public static final String ONLY_WITH_AUDIO_DEFECTS = "onlyWithAudioDefects";
+  public static final String ONLY_UNRECORDED = "onlyUnrecorded";
 
   static final String INSTANCE = "instance";
   private String item = "";
   private final Map<String, Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
   private String instance = "";
   private String search = "";
-  private boolean onlyWithAudioDefects;
+  private boolean onlyWithAudioDefects, onlyUnrecorded;
 
   private static final boolean DEBUG = false;
 
@@ -115,6 +116,8 @@ public class SelectionState {
             search = section;
           } else if (type.equals("#" + ONLY_WITH_AUDIO_DEFECTS) || type.equals(ONLY_WITH_AUDIO_DEFECTS)) {
             onlyWithAudioDefects = section.equals("true");
+          } else if (type.equals("#" + ONLY_UNRECORDED) || type.equals(ONLY_UNRECORDED)) {
+            onlyUnrecorded = section.equals("true");
           } else {
             String[] split = section.split(ITEM_SEPARATOR);
             List<String> sections = Arrays.asList(split);
@@ -204,9 +207,10 @@ public class SelectionState {
     return search;
   }
 
-  boolean isOnlyWithAudioDefects() {
+  public boolean isOnlyWithAudioDefects() {
     return onlyWithAudioDefects;
   }
+  public boolean isOnlyUnrecorded()       { return onlyUnrecorded;       }
 
   public String toString() {
     StringBuilder builder = new StringBuilder();
