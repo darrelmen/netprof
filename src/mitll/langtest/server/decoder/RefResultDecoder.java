@@ -44,7 +44,6 @@ import mitll.langtest.server.database.ResultDAO;
 import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.AudioExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.commons.io.FileUtils;
@@ -52,7 +51,6 @@ import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -66,6 +64,7 @@ public class RefResultDecoder {
 
   private static final boolean DO_REF_DECODE = true;
   private static final boolean DO_TRIM = true;
+  private static final boolean DO_CALC_DNR = true;
   //private static final int SLEEP_BETWEEN_DECODES = 2000;
 
   private final DatabaseImpl<CommonExercise> db;
@@ -75,8 +74,8 @@ public class RefResultDecoder {
   private boolean stopDecode = false;
   private final PathHelper pathHelper;
   private final AudioConversion audioConversion;
-  private final String mediaDir;
-  private final String installPath;
+  //private final String mediaDir;
+  //private final String installPath;
   private final AudioCheck audioCheck;
 
   /**
@@ -89,16 +88,14 @@ public class RefResultDecoder {
   public RefResultDecoder(DatabaseImpl<CommonExercise> db,
                           ServerProperties serverProperties,
                           PathHelper pathHelper,
-                          AudioFileHelper audioFileHelper,
-                          String mediaDir,
-                          String installPath) {
+                          AudioFileHelper audioFileHelper) {
     this.db = db;
     this.serverProps = serverProperties;
     this.pathHelper = pathHelper;
     this.audioFileHelper = audioFileHelper;
     this.audioConversion = new AudioConversion(serverProperties);
-    this.mediaDir = mediaDir;
-    this.installPath = installPath;
+    //this.mediaDir = mediaDir;
+    //this.installPath = installPath;
     audioCheck = new AudioCheck(serverProperties);
   }
 
@@ -114,9 +111,15 @@ public class RefResultDecoder {
     new Thread(new Runnable() {
       @Override
       public void run() {
-        if (serverProps.shouldTrimAudio()) {
+        if (serverProps.shouldTrimAudio() || serverProps.shouldRecalcDNR()) {
           sleep(5000);
-          trimRef(exercises, relativeConfigDir);
+          Map<String, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio();
+          if (serverProps.shouldTrimAudio()) {
+            trimRef(exercises, exToAudio);
+          }
+          if (serverProps.shouldRecalcDNR()) {
+            calcDNROnAudio(exercises, relativeConfigDir, exToAudio);
+          }
         }
         if (serverProps.shouldDoDecode()) {
           sleep(5000);
@@ -259,15 +262,52 @@ public class RefResultDecoder {
     }
   }
 
-  private void trimRef(Collection<CommonExercise> exercises, String relativeConfigDir) {
-    if (DO_TRIM) {
-      Map<String, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio();
+  private void calcDNROnAudio(Collection<CommonExercise> exercises, String relativeConfigDir, Map<String, List<AudioAttribute>> exToAudio) {
+    if (DO_CALC_DNR) {
       String installPath = pathHelper.getInstallPath();
 
       int numResults = db.getRefResultDAO().getNumResults();
       String language = getLanguage();
       logger.debug(language + " writeRefDecode : found " +
-          numResults + " in ref results table vs " + exToAudio.size() + " exercises with audio");
+          numResults + " in ref results table vs " + exToAudio.size() + " exercises with audio, examining " +
+          exercises.size() + " exercises");
+
+      if (stopDecode) logger.debug("Stop decode true");
+
+      int attrc = 0;
+//      Set<String> failed = new TreeSet<>();
+      int dnr = 0;
+      int since = 0;
+      AudioDAO audioDAO = db.getAudioDAO();
+      for (CommonExercise exercise : exercises) {
+        if (stopDecode) return;
+
+        List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
+        if (audioAttributes != null) {
+          boolean didAll = db.getAudioDAO().attachAudio(exercise, installPath, relativeConfigDir, audioAttributes);
+          attrc += audioAttributes.size();
+  //        if (!didAll) {
+   //         failed.add(exercise.getID());
+    //      }
+
+          dnr += setDNROnAudio(installPath, audioDAO, audioAttributes);
+          if (dnr - since > 2000) {
+            since = dnr;
+            logger.info(getLanguage() + ": trimRef : did DNR on " + dnr);
+          }
+        }
+      }
+    }
+  }
+
+  private void trimRef(Collection<CommonExercise> exercises, Map<String, List<AudioAttribute>> exToAudio) {
+    if (DO_TRIM) {
+//      String installPath = pathHelper.getInstallPath();
+      int numResults = db.getRefResultDAO().getNumResults();
+      String language = getLanguage();
+      logger.debug(language + " writeRefDecode : found " +
+          numResults + " in ref results table vs " + exToAudio.size() + " exercises with audio, examining " +
+          exercises.size() + " exercises");
 
       if (stopDecode) logger.debug("Stop decode true");
 
@@ -278,39 +318,21 @@ public class RefResultDecoder {
       int maleAudio = 0;
       int femaleAudio = 0;
       int defaultAudio = 0;
-      Set<String> failed = new TreeSet<>();
-      int dnr = 0;
-      int since = 0;
-      AudioDAO audioDAO = db.getAudioDAO();
+//      Set<String> failed = new TreeSet<>();
+      Set<Long> preferredVoices = serverProps.getPreferredVoices();
       for (CommonExercise exercise : exercises) {
         if (stopDecode) return;
 
-        List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
-        if (audioAttributes != null) {
-//					logger.warn("hmm - audio recorded for " + )
-          boolean didAll = db.getAudioDAO().attachAudio(exercise, installPath, relativeConfigDir, audioAttributes);
-          attrc += audioAttributes.size();
-          if (!didAll) {
-            failed.add(exercise.getID());
-          }
-
-          dnr += setDNROnAudio(installPath, audioDAO, audioAttributes);
-          if (dnr - since > 2000) {
-            since = dnr;
-            logger.info(getLanguage() + ": trimRef : did DNR on " + dnr);
-          }
-        }
-
-        Set<Long> preferredVoices = serverProps.getPreferredVoices();
         Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(true, preferredVoices);
         Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false, preferredVoices);
 
         List<MiniUser> maleUsers = exercise.getSortedUsers(malesMap);
         boolean maleEmpty = maleUsers.isEmpty();
-
         List<MiniUser> femaleUsers = exercise.getSortedUsers(femalesMap);
         boolean femaleEmpty = femaleUsers.isEmpty();
+
         String title = exercise.getForeignLanguage();
+
         if (!maleEmpty) {
           List<AudioAttribute> audioAttributes1 = malesMap.get(maleUsers.get(0));
           maleAudio += audioAttributes1.size();
@@ -335,18 +357,25 @@ public class RefResultDecoder {
           count += info.count;
           changed += info.changed;
         }
-        if (count > 0 && count % 2000 == 0) logger.debug("examined " + count + " files.");
+        if (count > 0 && count % 2000 == 0) logger.debug(getLanguage() + " trimRef examined " + count + " files.");
       }
 
-      logger.debug("trimRef : Out of " + attrc + " best audio files, " + maleAudio + " male, " + femaleAudio + " female, " +
+      logger.debug(getLanguage() + " trimRef : Out of " + attrc + " best audio files, " + maleAudio + " male, " + femaleAudio + " female, " +
           defaultAudio + " default " + "examined " + count +
           " trimmed " + trimmed + " dropped ref result rows = " + changed);
-      if (!failed.isEmpty()) {
-        logger.warn("failed to attach audio to " + failed.size() + " exercises : " + failed);
-      }
+//      if (!failed.isEmpty()) {
+//        logger.warn("failed to attach audio to " + failed.size() + " exercises : " + failed);
+//      }
     }
   }
 
+  /**
+   * @param installPath
+   * @param audioDAO
+   * @param audioAttributes
+   * @return
+   * @see #trimRef
+   */
   private int setDNROnAudio(String installPath, AudioDAO audioDAO, List<AudioAttribute> audioAttributes) {
     int c = 0;
 
@@ -360,12 +389,13 @@ public class RefResultDecoder {
         if (!exists) {
           test = new File(installPath, audioRef);
           exists = test.exists();
-          // child = audioRef;
         }
         if (exists) {
           dnr1 = audioCheck.getDNR(test);
           audioDAO.updateDNR(audio.getUniqueID(), dnr1);
           c++;
+        } else {
+          logger.warn("setDNROnAudio couldn't find audio to set dnr on audio ex " + audio.getID() + " : " + audioRef);
         }
       }
     }
