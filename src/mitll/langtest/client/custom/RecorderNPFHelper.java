@@ -34,6 +34,7 @@ package mitll.langtest.client.custom;
 
 import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -51,13 +52,13 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.WaveformExercisePanel;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.scoring.CommentAnnotator;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.ExerciseAnnotation;
-import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.exercise.AnnotationExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -93,8 +94,8 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
    * @see Navigation#Navigation
    */
   RecorderNPFHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager,
-                           ExerciseController controller, boolean doNormalRecording,
-                           ReloadableContainer exerciseList) {
+                    ExerciseController controller, boolean doNormalRecording,
+                    ReloadableContainer exerciseList) {
     super(service, feedback, userManager, controller, exerciseList);
     this.doNormalRecording = doNormalRecording;
   }
@@ -122,6 +123,7 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
       protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName,
                                                                                  boolean incorrectFirst) {
         return new NPFlexSectionExerciseList(outerLayout, topRow, currentExercisePanel, instanceName, incorrectFirst) {
+          //private final Logger logger = Logger.getLogger("NPFlexSectionExerciseList_" + instanceName);
           private CheckBox filterOnly;
 
           @Override
@@ -136,12 +138,11 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
             filterOnly.addClickHandler(new ClickHandler() {
               @Override
               public void onClick(ClickEvent event) {
-                setUnrecorded(filterOnly.getValue());
-                scheduleWaitTimer();
-                loadExercises(getHistoryToken(""), getTypeAheadText(), false);
+                pushNewSectionHistoryToken();
               }
             });
             filterOnly.addStyleName("leftFiveMargin");
+
             add(filterOnly);
 
             // row 3
@@ -150,13 +151,38 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
           }
 
           @Override
-          protected void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection, String prefix, boolean onlyWithAudioAnno, String exerciseID) {
-            super.loadExercisesUsingPrefix(typeToSection, prefix, onlyWithAudioAnno, exerciseID);
+          protected void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection,
+                                                  String prefix,
+                                                  boolean onlyWithAudioAnno,
+                                                  String exerciseID,
+                                                  boolean onlyUnrecorded) {
+            super.loadExercisesUsingPrefix(typeToSection, prefix, onlyWithAudioAnno, exerciseID, onlyUnrecorded);
             filterOnly.setText(setCheckboxTitle(userManager));
           }
 
           private String setCheckboxTitle(UserManager userManager) {
             return SHOW_ONLY_UNRECORDED + (userManager.isMale() ? " by Males" : " by Females");
+          }
+
+          /**
+           * @see mitll.langtest.client.list.HistoryExerciseList#getHistoryToken
+           * @param search
+           * @param id
+           * @return
+           */
+          protected String getHistoryTokenFromUIState(String search, String id) {
+            String s = super.getHistoryTokenFromUIState(search, id) +
+                ";" +
+                SelectionState.ONLY_UNRECORDED +
+                "=" + filterOnly.getValue();
+ //           logger.info("RecorderNPFHelper : history token now  " + s);
+            return s;
+          }
+
+          @Override
+          protected void restoreUIState(SelectionState selectionState) {
+            super.restoreUIState(selectionState);
+            filterOnly.setValue(selectionState.isOnlyUnrecorded());
           }
         };
 
@@ -188,7 +214,7 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
    * @see #getFactory(PagingExerciseList)
    */
   private class MyWaveformExercisePanel extends WaveformExercisePanel<CommonShell, CommonExercise> implements CommentAnnotator {
-//    private final Logger logger = Logger.getLogger("MyWaveformExercisePanel");
+    //    private final Logger logger = Logger.getLogger("MyWaveformExercisePanel");
     private final CommonExercise e;
 
     MyWaveformExercisePanel(CommonExercise e, ExerciseController controller1, ListInterface<CommonShell> exerciseList1, String instance) {
