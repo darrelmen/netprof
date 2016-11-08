@@ -43,7 +43,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
@@ -65,7 +64,10 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
   private static final String NO_LISTS_YET = "No lists created yet that you haven't seen.";
   private static final String DELETE = "Delete";
   private static final String REVIEWERS = "Reviewers";
-
+  public static final long REVIEW_MAGIC_ID = -100;
+  public static final long COMMENT_MAGIC_ID = -200;
+  private static final long ATTN_LL_MAGIC_ID = -300;
+  
   private final ListManager listManager;
   private final Panel contentPanel;
   private final Panel insideContentPanel;
@@ -330,8 +332,8 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
       //  String prefix = showIsPublic ? "" :
       String html1 = //(ul.isPrivate() ? "" : "Public ") +
           " by " +
-              (uniqueID == UserListManager.COMMENT_MAGIC_ID ? "Students" :
-                  uniqueID == UserListManager.REVIEW_MAGIC_ID ? REVIEWERS :
+              (uniqueID == COMMENT_MAGIC_ID ? "Students" :
+                  uniqueID == REVIEW_MAGIC_ID ? REVIEWERS :
                       ul.getCreator().getUserID());
       Heading h4Again = yourList ? new Heading(5, html1) : new Heading(4, "", html1);
 
