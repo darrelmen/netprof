@@ -91,10 +91,9 @@ public class LTSFactory {
         case MSA:
           ltsForLanguage = new ModernStandardArabicLTS();
           break;
-        case MANDARIN:
-          ltsForLanguage = unknown;
-          break;
         default:
+          logger.debug("here...");
+          logger.debug(className);
           Class<?> aClass = Class.forName(className);
           ltsForLanguage = (LTS) aClass.newInstance();
           break;
@@ -110,6 +109,7 @@ public class LTSFactory {
     if (isEmpty(ltsForLanguage)) {
       logger.debug("lts for '" + name + "' found at " + className + " is " + ltsForLanguage);
     }
+    logger.debug("lts is: "+ ltsForLanguage);
   }
 
   /**
