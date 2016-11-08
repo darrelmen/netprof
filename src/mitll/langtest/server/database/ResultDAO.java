@@ -242,6 +242,10 @@ public class ResultDAO extends DAO {
     return new ArrayList<>();
   }
 
+  /**
+   * @see #getSessions
+   * @return
+   */
   private List<CorrectAndScore> getCorrectAndScores() {
     try {
       synchronized (this) {
@@ -724,6 +728,7 @@ public class ResultDAO extends DAO {
 
 
   /**
+   * JUST FOR AMAS!
    * @param ids
    * @param userid
    * @return
@@ -750,6 +755,13 @@ public class ResultDAO extends DAO {
     return new ArrayList<>();
   }
 
+  /**
+   * JUST FOR AMAS
+   * @param userid
+   * @param sql
+   * @return
+   * @throws SQLException
+   */
   private List<CorrectAndScore> getCorrectAndScoresForUser(long userid, String sql) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
@@ -794,6 +806,14 @@ public class ResultDAO extends DAO {
     return new ArrayList<>();
   }
 
+  /**
+   * @see #getResultsForExIDInForUser(long, boolean, String)
+   * @param numIDs
+   * @param userid
+   * @param sql
+   * @return
+   * @throws SQLException
+   */
   private List<CorrectAndScore> getCorrectAndScores(int numIDs, long userid, String sql) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
@@ -803,12 +823,15 @@ public class ResultDAO extends DAO {
     List<CorrectAndScore> scores = getScoreResultsForQuery(connection, statement);
     long now = System.currentTimeMillis();
 
-    if (now - then > 200) {
-      logger.warn("getResultsForExIDInForUser " + getLanguage() + " took " + (now - then) + " millis : " +
-          " query for " + numIDs + " and userid " + userid + " returned " + scores.size() + " scores");
+    if (now - then > 100) {
+      logger.warn("getCorrectAndScores " + getLanguage() +
+          " took " + (now - then) + " millis : " +
+          " query for " + numIDs + " and userid " + userid + " returned " + scores.size() + " scores"
+      //   + ", sql:\n\t" + sql
+      );
     }
     if (DEBUG) {
-      logger.debug("getResultsForExIDInForUser for  " + sql + " got\n\t" + scores.size());
+      logger.debug("getCorrectAndScores for  " + sql + " got\n\t" + scores.size());
     }
     return scores;
   }
@@ -998,6 +1021,12 @@ public class ResultDAO extends DAO {
     return results;
   }
 
+  /**
+   * @see #getCorrectAndScores
+   * @param sql
+   * @return
+   * @throws SQLException
+   */
   private List<CorrectAndScore> getScoreResultsSQL(String sql) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
@@ -1012,9 +1041,16 @@ public class ResultDAO extends DAO {
    * @see #getResultsForExIDInForUser(java.util.Collection, boolean, long)
    */
   private List<CorrectAndScore> getScoreResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
+    long then = System.currentTimeMillis();
     ResultSet rs = statement.executeQuery();
+    long now = System.currentTimeMillis();
+//    if (now-then > 0) {
+//      logger.info("getScoreResultsForQuery took " + (now - then) + " millis to exec query");
+//    }
+
     List<CorrectAndScore> results = new ArrayList<>();
 
+    then = now;
     while (rs.next()) {
       int uniqueID = rs.getInt(ID);
       long userid = rs.getInt(USERID);
@@ -1029,7 +1065,18 @@ public class ResultDAO extends DAO {
           trimPathForWebPage2(path), json);
       results.add(result);
     }
+
+    now = System.currentTimeMillis();
+//    if (now-then > 0) {
+//      logger.info("getScoreResultsForQuery took " + (now - then) + " millis to read from query and get " + results.size() + " results");
+//    }
+
+    then = now;
     finish(connection, statement, rs);
+    now = System.currentTimeMillis();
+//    if (now-then > 0) {
+//      logger.info("getScoreResultsForQuery took " + (now - then) + " millis to finish query.");
+//    }
 
     return results;
   }
@@ -1353,7 +1400,7 @@ public class ResultDAO extends DAO {
 
     database.closeConnection(connection);
 
-    createIndex(database, EXID, RESULTS);
+    createTableIndex(database, EXID.toUpperCase(), RESULTS);
     createIndex(database, VALID, RESULTS);
     createIndex(database, AUDIO_TYPE, RESULTS);
   }

@@ -42,7 +42,7 @@ import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
-import mitll.langtest.client.exercise.WaveformPostAudioRecordButton;
+import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
@@ -268,7 +268,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     Image waveformImage = getWaveform().getImage();
     waveformImage.getElement().setId("waveformImage");
     // waveformImage.setHeight(getWaveformHeight()+"px");
-    waveformImage.setAltText(WAVEFORM_TOOLTIP);
+  //  waveformImage.setAltText(WAVEFORM_TOOLTIP);
     waveformImage.setTitle(WAVEFORM_TOOLTIP);
     return waveformImage;
   }
@@ -315,8 +315,8 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     audioPositionPopup.reinitialize();
   }
 
-  public void setScreenPortion(float screenPortion) {
-    if (DEBUG) logger.info("AudioPanel.setScreenPortion : screenPortion " + screenPortion);
+  void setScreenPortion(float screenPortion) {
+  //  if (DEBUG) logger.info("AudioPanel.setScreenPortion : screenPortion " + screenPortion);
     this.screenPortion = screenPortion;
   }
 
@@ -344,7 +344,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
 
     /**
      * @param visible
-     * @see WaveformPostAudioRecordButton#stopRecording()
+     * @see RecordButton.RecordingListener#stopRecording(long)
      */
     public void setVisible(boolean visible) {
       getImage().setVisible(visible);
@@ -356,7 +356,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
 
     /**
      * @param url
-     * @see WaveformPostAudioRecordButton#stopRecording()
+     * @see RecordButton.RecordingListener#stopRecording(long)
      */
     public void setUrl(String url) {
       getImage().setUrl(url);
@@ -377,7 +377,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
    *
    * @param path to audio on the server
    * @see #onLoad()
-   * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording()
+   * @see RecordButton.RecordingListener#stopRecording(long)
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.ASRRecordAudioPanel.MyPostAudioRecordButton#useResult(AudioAnswer)
    * @see mitll.langtest.client.result.ResultManager#getAsyncTable(int, Widget)
    */
