@@ -110,16 +110,14 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
             filterOnly.addClickHandler(new ClickHandler() {
               @Override
               public void onClick(ClickEvent event) {
-                setDefaultAudioFilter(filterOnly.getValue());
+                Boolean onlyUnrecorded = filterOnly.getValue();
+                setDefaultAudioFilter(onlyUnrecorded);
                 scheduleWaitTimer();
-                loadExercises(getHistoryToken(""), getTypeAheadText(), false);
+                loadExercises(getHistoryToken(""), getTypeAheadText(), false, onlyUnrecorded);
               }
             });
             filterOnly.addStyleName("leftFiveMargin");
           }
-//          private String setCheckboxTitle(UserManager userManager) {
-//            return SHOW_ONLY_UNRECORDED;// + (userManager.isMale() ? " by Males" : " by Females");
-//          }
         };
       }
     };
