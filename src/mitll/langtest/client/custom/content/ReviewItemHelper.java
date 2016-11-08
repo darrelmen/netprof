@@ -163,12 +163,18 @@ public class ReviewItemHelper extends NPFHelper {
       return new NPFlexSectionExerciseList(outer, topRow, currentExercisePanel, instanceName, incorrectFirst) {
         com.github.gwtbootstrap.client.ui.CheckBox checkBox;
 
+        /**
+         * @see mitll.langtest.client.list.HistoryExerciseList#getHistoryToken
+         * @param search
+         * @param id
+         * @return
+         */
         protected String getHistoryTokenFromUIState(String search, String id) {
           String s = super.getHistoryTokenFromUIState(search, id) +
               ";" +
               SelectionState.ONLY_WITH_AUDIO_DEFECTS +
               "=" + checkBox.getValue();
-        //  logger.info("history token now  " + s);
+      //    logger.info("ReviewItemHelper : history token now  " + s);
           return s;
         }
 
@@ -181,15 +187,10 @@ public class ReviewItemHelper extends NPFHelper {
 
           // row 2
           this.checkBox = new com.github.gwtbootstrap.client.ui.CheckBox(ONLY_WITH_AUDIO_DEFECTS);
-          //onlyAudio = w;
           checkBox.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-//              Boolean value = checkBox.getValue();
-          //    logger.info("START : got click on only audio defects - " +value);
-             // loadExercises(getHistoryToken(""), getTypeAheadText(), value);
               pushNewSectionHistoryToken();
-            //  logger.info("END   : got click on only audio defects - " +value);
             }
           });
           checkBox.addStyleName("leftFiveMargin");
@@ -197,6 +198,12 @@ public class ReviewItemHelper extends NPFHelper {
 
           // row 3
           add(pagingContainer.getTableWithPager());
+        }
+
+        @Override
+        protected void restoreUIState(SelectionState selectionState) {
+          super.restoreUIState(selectionState);
+          checkBox.setValue(selectionState.isOnlyWithAudioDefects());
         }
       };
 
