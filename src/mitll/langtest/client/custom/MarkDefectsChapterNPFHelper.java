@@ -44,6 +44,7 @@ import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
@@ -57,7 +58,7 @@ import mitll.langtest.shared.exercise.CommonShell;
  * @since 3/30/16.
  */
 class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
-  private static final String SHOW_ONLY_UNRECORDED = "Show Only Audio by Unknown Gender";
+  private static final String SHOW_ONLY_AUDIO_BY_UNKNOWN_GENDER = "Show Only Audio by Unknown Gender";
 
   private static final String MARK_DEFECTS1 = "markDefects";
 
@@ -106,20 +107,39 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
           }
 
           private void getFilterCheckbox() {
-            filterOnly = new CheckBox(SHOW_ONLY_UNRECORDED);
+            filterOnly = new CheckBox(SHOW_ONLY_AUDIO_BY_UNKNOWN_GENDER);
             filterOnly.addClickHandler(new ClickHandler() {
               @Override
               public void onClick(ClickEvent event) {
-                setDefaultAudioFilter(filterOnly.getValue());
+                Boolean onlyUnrecorded = filterOnly.getValue();
+    /*            setDefaultAudioFilter(onlyUnrecorded);
                 scheduleWaitTimer();
-                loadExercises(getHistoryToken(""), getTypeAheadText(), false);
+                loadExercises(getHistoryToken(""), getTypeAheadText(), false, onlyUnrecorded);*/
+                pushNewSectionHistoryToken();
               }
             });
             filterOnly.addStyleName("leftFiveMargin");
           }
-//          private String setCheckboxTitle(UserManager userManager) {
-//            return SHOW_ONLY_UNRECORDED;// + (userManager.isMale() ? " by Males" : " by Females");
-//          }
+
+          /**
+           * @see mitll.langtest.client.list.HistoryExerciseList#getHistoryToken
+           * @param search
+           * @param id
+           * @return
+           */
+          protected String getHistoryTokenFromUIState(String search, String id) {
+            String s = super.getHistoryTokenFromUIState(search, id) +
+                ";" +
+                SelectionState.ONLY_DEFAULT +
+                "=" + filterOnly.getValue();
+            return s;
+          }
+
+          @Override
+          protected void restoreUIState(SelectionState selectionState) {
+            super.restoreUIState(selectionState);
+            filterOnly.setValue(selectionState.isOnlyDefault());
+          }
         };
       }
     };

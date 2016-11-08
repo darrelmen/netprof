@@ -459,12 +459,12 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
           makeExerciseDAO(lessonPlanFile, isURL);
 
           userExerciseDAO.setExerciseDAO(exerciseDAO);
+          //  userExerciseDAO.setAudioDAO(audioDAO);
           setDependencies(mediaDir, installPath);
 
-          exerciseDAO.getRawExercises();
+          // exerciseDAO.getRawExercises();
 
           userDAO.checkForFavorites(userListManager);
-          userExerciseDAO.setAudioDAO(audioDAO);
 
           numExercises = exerciseDAO.getNumExercises();
 
@@ -521,6 +521,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @param mediaDir
    * @param installPath
    * @param exerciseDAO
+   * @see #setDependencies(String, String)
    */
   public void setDependencies(String mediaDir, String installPath, ExerciseDAO exerciseDAO) {
     exerciseDAO.setDependencies(mediaDir, installPath, userExerciseDAO, addRemoveDAO, audioDAO);
@@ -596,7 +597,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
           audioDAO.copyWithNewTranscript(toCopy, userExercise.getForeignLanguage());
         }
 
-        for (AudioAttribute audioAttribute : audioDAO.getAudioAttributes(id)) logger.debug("editItem after  " + audioAttribute);
+        for (AudioAttribute audioAttribute : audioDAO.getAudioAttributes(id))
+          logger.debug("editItem after  " + audioAttribute);
       }
     }
 
@@ -646,8 +648,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   public void markAudioDefect(AudioAttribute audioAttribute) {
     if (audioDAO.markDefect(audioAttribute) < 1) {
       logger.error("markAudioDefect huh? couldn't mark error on " + audioAttribute);
-    }
-    else {
+    } else {
       userListManager.addAnnotation(
           audioAttribute.getExid(),
           audioAttribute.getAudioRef(),
@@ -958,8 +959,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     if (userid == -1) {
       if (widgetType.equals(UserPassLogin.USER_NAME_BOX)) {
         return true;
-      }
-      else {
+      } else {
         //  logger.debug("logEvent for user " + userid);
         userid = userDAO.getBeforeLoginUser();
       }
@@ -1337,7 +1337,6 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   }
 
 
-
   private AddRemoveDAO getAddRemoveDAO() {
     return addRemoveDAO;
   }
@@ -1572,8 +1571,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   private void recordWordAndPhoneInfo(long answerID, PretestScore pretestScore) {
     if (pretestScore != null) {
       recordWordAndPhoneInfo(answerID, pretestScore.getsTypeToEndTimes());
-    }
-    else {
+    } else {
       logger.warn("recordWordAndPhoneInfo no score for " + answerID);
     }
   }
@@ -1585,7 +1583,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @see #recordWordAndPhoneInfo(long, PretestScore)
    */
   private void recordWordAndPhoneInfo(long answerID, Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap) {
-    List<TranscriptSegment> words  = netPronImageTypeListMap.get(NetPronImageType.WORD_TRANSCRIPT);
+    List<TranscriptSegment> words = netPronImageTypeListMap.get(NetPronImageType.WORD_TRANSCRIPT);
     List<TranscriptSegment> phones = netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
     if (words != null) {
       int windex = 0;
@@ -1617,6 +1615,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     Map<Long, User> userMapMales = userDAO.getUserMap(true);
     Map<Long, User> userMapFemales = userDAO.getUserMap(false);
 
+//    Collection<CommonExercise> exercises1 = getExercises();
     Collection<? extends CommonShell> exercises = getExercises();
     float total = exercises.size();
     Set<String> uniqueIDs = new HashSet<String>();
@@ -1630,11 +1629,47 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         logger.warn("getMaleFemaleProgress found duplicate id " + shell.getID() + " : " + shell);
       }
     }
+/*
+    logger.info("found " + total + " total exercises, " +
+        uniqueIDs.size() +
+        " unique");
+*/
+
+    return getAudioDAO().getRecordedReport(userMapMales, userMapFemales,
+        total, uniqueIDs, context);
+  }
+
+  /**
+   * Look at the exercises to determine which ones have regular, slow, or context audio and broken down
+   * by gender.
+   *
+   * @return
+   */
+  public Map<String, Float> getMaleFemaleProgressEx() {
+    UserDAO userDAO = getUserDAO();
+//    Map<Long, User> userMapMales = userDAO.getUserMap(true);
+//    Map<Long, User> userMapFemales = userDAO.getUserMap(false);
+
+    Collection<CommonExercise> exercises1 = getExercises();
+    Collection<? extends CommonShell> exercises = exercises1;
+    float total = exercises.size();
+    //Set<String> uniqueIDs = new HashSet<String>();
+
+    int context = 0;
+    for (CommonShell shell : exercises) {
+      if (shell.getContext() != null &&
+          !shell.getContext().isEmpty()) context++;
+//      boolean add = uniqueIDs.add(shell.getID());
+//      if (!add) {
+//        logger.warn("getMaleFemaleProgress found duplicate id " + shell.getID() + " : " + shell);
+//      }
+    }
 /*    logger.info("found " + total + " total exercises, " +
         uniqueIDs.size() +
         " unique");*/
 
-    return getAudioDAO().getRecordedReport(userMapMales, userMapFemales, total, uniqueIDs, context);
+    return getAudioDAO().getRecordedReportFromExercises(//userMapMales, userMapFemales,
+        total, context, exercises1);
   }
 
   public String toString() {

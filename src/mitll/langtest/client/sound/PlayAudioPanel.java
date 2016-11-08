@@ -492,6 +492,10 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     }
   }
 
+  /**
+   * @see
+   * @param val
+   */
   public void setEnabled(boolean val) {
     playButton.setEnabled(val);
   }
