@@ -34,7 +34,6 @@ package mitll.langtest.client.custom;
 
 import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -66,7 +65,6 @@ import mitll.langtest.shared.exercise.HasID;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * Sets up recording both ref recordings and context ref recordings.
@@ -155,8 +153,8 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
                                                   String prefix,
                                                   boolean onlyWithAudioAnno,
                                                   String exerciseID,
-                                                  boolean onlyUnrecorded) {
-            super.loadExercisesUsingPrefix(typeToSection, prefix, onlyWithAudioAnno, exerciseID, onlyUnrecorded);
+                                                  boolean onlyUnrecorded, boolean onlyDefaultUser) {
+            super.loadExercisesUsingPrefix(typeToSection, prefix, onlyWithAudioAnno, exerciseID, onlyUnrecorded, onlyDefaultUser);
             filterOnly.setText(setCheckboxTitle(userManager));
           }
 
