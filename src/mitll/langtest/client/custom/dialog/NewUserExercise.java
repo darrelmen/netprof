@@ -731,10 +731,10 @@ class NewUserExercise extends BasicDialog {
               RecordButton.STOP1,
               audioType) {
             @Override
-            public void stopRecording() {
+            public void stopRecording(long duration) {
               otherRAP.setEnabled(true);
               showStop();
-              super.stopRecording();
+              super.stopRecording(duration);
             }
 
             @Override

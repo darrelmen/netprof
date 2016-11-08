@@ -63,6 +63,7 @@ import mitll.langtest.client.instrumentation.ButtonFactory;
 import mitll.langtest.client.instrumentation.EventLogger;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.client.recorder.MicPermission;
+import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
 import mitll.langtest.client.sound.SoundManagerAPI;
@@ -184,13 +185,26 @@ import java.util.logging.Logger;
  * 1.5.4 (10-21-16)
  * - Increase delay after correct avp response.
  * 1.5.5 (10-23-16)
- * - Fix bug where couldn't add defect comments to context sentences, better handling of sentence length user exercise entries.
+ * - Fixed bug where couldn't add defect comments to context sentences, better handling of sentence length user exercise entries.
+ * 1.5.6 (10-31-16)
+ * - Fixed bug where urdu was getting slow to return exercises - we hadn't created indexes on columns b/c there was another one with the same name on another table
+ * 1.5.7 (11-01-16)
+ * - Fixed bug where could get into a bad state if clicked the record button too quickly.
+ * 1.5.8 (11-01-16)
+ * - Fixes to support Sorani
+ * 1.5.9 (11-02-16)
+ * - Fixes to support updating Turkish and preserving audio.
+ * 1.5.10
+ * - Turn off transcript matching for audio for now, remove ref audio that doesn't meet the dnr threshold
+ * 1.5.11
+ * - Support for Hindi - added comment on text for recording audio.
+ *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private final Logger logger = Logger.getLogger("LangTest");
 
-  public static final String VERSION_INFO = "1.5.5";
+  public static final String VERSION_INFO = "1.5.10";
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
   private static final String UNKNOWN = "unknown";
@@ -814,8 +828,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   /**
    * Recording interface
    *
-   * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording()
-   * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
+   * @see RecordButton.RecordingListener#stopRecording(long)
+   * @see RecordButton.RecordingListener#stopRecording(long)
    */
   public void stopRecording(WavCallback wavCallback) {
     logger.info("stopRecording : time recording in UI " + (System.currentTimeMillis() - then) + " millis");
