@@ -32,8 +32,9 @@
 
 package mitll.langtest.server.mail;
 
-import com.google.gwt.util.tools.shared.Md5Utils;
-import com.google.gwt.util.tools.shared.StringUtils;
+//import com.google.gwt.util.tools.shared.Md5Utils;
+//import com.google.gwt.util.tools.shared.StringUtils;
+import mitll.langtest.client.user.Md5Hash;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.UserDAO;
@@ -65,6 +66,9 @@ public class EmailHelper {
   private static final String RESET_PASSWORD = "Reset Password";
   private static final String REPLY_TO = "admin@" + NP_SERVER;
 
+  private static final String HEX_CHARACTERS = "0123456789abcdef";
+  private static final String HEX_CHARACTERS_UC = HEX_CHARACTERS.toUpperCase();
+
   private final String language;
   private final UserDAO userDAO;
   private final MailSupport mailSupport;
@@ -80,8 +84,40 @@ public class EmailHelper {
   }
 
   private String getHash(String toHash) {
-    return StringUtils.toHexString(Md5Utils.getMd5Digest(toHash.getBytes()));
+
+    //return StringUtils.toHexString(Md5Utils.getMd5Digest(toHash.getBytes()));
+    return toHexString(Md5Hash.getHash(toHash).getBytes(),false);
   }
+
+  /**
+   * Convert a byte array to a hexadecimal string.
+   *
+   * @param bytes The bytes to format.
+   * @param uppercase When <code>true</code> creates uppercase hex characters
+   *            instead of lowercase (the default).
+   * @return A hexadecimal representation of the specified bytes.
+   */
+  public static String toHexString(byte[] bytes, boolean uppercase)
+  {
+    if (bytes == null)
+    {
+      return null;
+    }
+
+    int numBytes = bytes.length;
+    StringBuilder str = new StringBuilder(numBytes * 2);
+
+    String table = (uppercase ? HEX_CHARACTERS_UC : HEX_CHARACTERS);
+
+    for (int i = 0; i < numBytes; i++)
+    {
+      str.append(table.charAt(bytes[i] >>> 4 & 0x0f));
+      str.append(table.charAt(bytes[i] & 0x0f));
+    }
+
+    return str.toString();
+  }
+
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#forgotUsername(String, String, String)
