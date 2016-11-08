@@ -62,6 +62,8 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   public static final String REGULAR = "regular";
   public static final String REGULAR_AND_SLOW = "regular and slow";
   private static final String CONTEXT = "context";
+  private static final String UNKNOWN = "unknown";
+
   /**
    * TODO : if every have slow recordings of context audio we'll need to add another type or an enum
    */
@@ -153,7 +155,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
 
   @Override
   public String getID() {
-    return exid +"/1";
+    return exid + "/1";
   }
 
   public void setAudioRef(String audioRef) {
@@ -180,7 +182,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
       String s = attributes.toString();
       return s.substring(1, s.length() - 1);
     } else {
-      return speed;
+      return speed == null ? UNKNOWN : speed;
     }
   }
 
@@ -210,7 +212,8 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   }
 
   public boolean isContextAudio() {
-    return getAudioType().startsWith(CONTEXT);
+    String audioType = getAudioType();
+    return audioType != null && audioType.startsWith(CONTEXT);
   }
 
   /**
@@ -322,7 +325,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
    * @param foreignLanguage
    * @return
    */
-  public boolean hasMatchingTranscript(String foreignLanguage) {
+/*  public boolean hasMatchingTranscript(String foreignLanguage) {
     try {
 
 //      String before = foreignLanguage;
@@ -338,15 +341,23 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     } catch (Exception e) {
       return true;
     }
-  }
+  }*/
 
-  private boolean matchTranscript(String foreignLanguage) {
+/*  private boolean matchTranscript(String foreignLanguage) {
     String transcript = this.transcript;
     return matchTranscript(foreignLanguage, transcript);
-  }
+  }*/
 
+  /**
+   * @see
+   * @param foreignLanguage
+   * @param transcript
+   * @return
+   */
   public boolean matchTranscript(String foreignLanguage, String transcript) {
-    return transcript == null || foreignLanguage.isEmpty() || transcript.isEmpty() ||
+    return transcript == null ||
+        foreignLanguage.isEmpty() ||
+        transcript.isEmpty() ||
         removePunct(transcript).toLowerCase().equals(removePunct(foreignLanguage).toLowerCase());
   }
 
