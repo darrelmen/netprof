@@ -52,6 +52,7 @@ import java.util.logging.Logger;
  */
 public class ButtonGroupSectionWidget implements SectionWidget {
   private final Logger logger = Logger.getLogger("ButtonGroupSectionWidget");
+  public static final String ITEM_SEPARATOR = "&#44";
 
   private Button clearButton;
   private final String type;
@@ -83,9 +84,9 @@ public class ButtonGroupSectionWidget implements SectionWidget {
 
   /**
    * @param row
-   * @see FlexSectionExerciseList#addButtonGroup(com.google.gwt.user.client.ui.HorizontalPanel, java.util.List, String, java.util.List, ButtonGroupSectionWidget)
-   * @see FlexSectionExerciseList#addButtonRow(java.util.List, com.github.gwtbootstrap.client.ui.FluidContainer, java.util.Collection, boolean)
-   * @see FlexSectionExerciseList#addColumnButton(com.google.gwt.user.client.ui.FlowPanel, String, ButtonGroupSectionWidget)
+   * @see FlexSectionExerciseList#addButtonGroup
+   * @see FlexSectionExerciseList#addButtonRow
+   * @see FlexSectionExerciseList#addColumnButton
    */
   void addRow(Panel row) {
     this.rows.add(row);
@@ -154,10 +155,11 @@ public class ButtonGroupSectionWidget implements SectionWidget {
         }
       }
     }
-    for (String name : inOrder) {
-      builder.append(name);
-      builder.append(",");
+    for (Iterator iter = inOrder.iterator();iter.hasNext();) {
+      builder.append(iter.next());
+      if (iter.hasNext()) builder.append(ITEM_SEPARATOR);
     }
+
     if (builder.length() > 0) {
       return builder.toString();
     } else {
@@ -193,7 +195,7 @@ public class ButtonGroupSectionWidget implements SectionWidget {
    * @see FlexSectionExerciseList#getSectionWidgetContainer
    */
   void selectItem(Collection<String> sections) {
- //   logger.info("ButtonGroupSectionWidget: selectItem " + this + " : " + type + "=" + sections);
+    //logger.info("ButtonGroupSectionWidget: selectItem " + this + " : " + type + "='" + sections +"' (" + sections.size()+ ")");
     if (isClearSelection(sections)) {
       clearAll();
     } else {
