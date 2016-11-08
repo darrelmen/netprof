@@ -165,6 +165,10 @@ public class ExerciseListRequest implements Serializable {
     return this;
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#filterExercises(ExerciseListRequest, Collection)
+   * @return
+   */
   public boolean isOnlyDefaultAudio() {
     return onlyDefaultAudio;
   }
@@ -175,8 +179,14 @@ public class ExerciseListRequest implements Serializable {
   }
 
   public String toString() {
-    return "prefix '" + prefix + "' selection " + getTypeToSelection() +
-        " and user list id " + userListID + " user " + userID + " role " + role +
-        " filter " + onlyUnrecordedByMe + " only examples " + onlyExamples + " only with audio " + onlyWithAudioAnno;
+    return
+        "prefix                  '" + prefix + "'" +
+        "\n\tselection           " + getTypeToSelection() +
+        "\n\tuser list id        " + userListID +
+        "\n\tuser                " + userID +
+        "\n\trole                " + role +
+        "\n\tonly recorded by me " + onlyUnrecordedByMe +
+        "\n\tonly examples       " + onlyExamples +
+        "\n\tonly with audio     " + onlyWithAudioAnno;
   }
 }
