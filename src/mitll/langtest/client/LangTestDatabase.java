@@ -460,7 +460,7 @@ public interface LangTestDatabase extends RemoteService {
    * @param foreign
    * @return
    */
-  boolean isValidForeignPhrase(String foreign);
+  boolean isValidForeignPhrase(String foreign, String transliteration);
 
   // Create User Exercises
   /**
