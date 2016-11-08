@@ -79,6 +79,6 @@ public class NPFlexSectionExerciseList extends FlexSectionExerciseList {
 
   @Override
   protected void noSectionsGetExercises(long userID) {
-    loadExercises(getHistoryTokenFromUIState("", ""), getPrefix(), false, false);
+    loadExercises(getHistoryTokenFromUIState("", ""), getPrefix(), false, false, false);
   }
 }
