@@ -165,6 +165,10 @@ public class ExerciseListRequest implements Serializable {
     return this;
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#filterExercises(ExerciseListRequest, Collection)
+   * @return
+   */
   public boolean isOnlyDefaultAudio() {
     return onlyDefaultAudio;
   }
