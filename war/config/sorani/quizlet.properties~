@@ -30,14 +30,13 @@
 #
 #
 
-appTitle=Turkish Classroom BETA
-splashTitle=Turkish pronunciation feedback and practice BETA
-language=Turkish
+appTitle=Serbian Classroom BETA
+splashTitle=Serbian pronunciation feedback and practice BETA
+language=Serbian
 #MODELS_DIR=models.appenFRAv4enoen202525
 N_HIDDEN=2000,2500,2500
 N_OUTPUT=25
-#lessonPlanFile=2016_07_01_Turkish.xlsx
-lessonPlanFile=2016_11_1_Turkish_NetProF_Revised_5004.xlsx
+lessonPlanFile=2016_09_27_Serbian_NetProF_Clean.xlsx
 #webserviceHostPort=31197
 #dodecode=true
 tierIndex=3,4,-1
