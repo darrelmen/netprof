@@ -32,14 +32,23 @@
 
 package mitll.langtest.client.scoring;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Logger;
+
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.*;
-import mitll.langtest.client.AudioTag;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.RequiresResize;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
+
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
@@ -50,12 +59,6 @@ import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.ImageResponse;
 import mitll.langtest.shared.exercise.Shell;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Logger;
-
-import static mitll.langtest.server.audio.AudioConversion.FILE_MISSING;
 
 /**
  * Does audio playback and fetches and shows various audio images (waveform, spectrogram, etc.) with a red line
@@ -74,6 +77,7 @@ import static mitll.langtest.server.audio.AudioConversion.FILE_MISSING;
 public class AudioPanel<T extends Shell> extends VerticalPanel implements RequiresResize {
   private final Logger logger = Logger.getLogger("AudioPanel");
 
+  public static final String FILE_MISSING = "FILE_MISSING";
   private static final int LEFT_COLUMN_WIDTH = PagingContainer.MAX_WIDTH;
 
   static final int MIN_WIDTH = 256;
