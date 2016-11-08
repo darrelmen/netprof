@@ -64,7 +64,7 @@ import java.util.logging.Logger;
  */
 public class HistoryExerciseList<T extends CommonShell, U extends Shell, V extends SectionWidget>
     extends PagingExerciseList<T, U> implements ValueChangeHandler<String> {
-  private final Logger logger = Logger.getLogger("HistoryExerciseList");
+  private Logger logger = Logger.getLogger("HistoryExerciseList");
 
   public static final String ANY = "Clear";
 
@@ -101,6 +101,10 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
     return sectionWidgetContainer.getWidget(type);
   }
 
+  /**
+   * @param id
+   * @return
+   */
   protected String getHistoryToken(String id) {
     return getHistoryTokenFromUIState("", id);
   }
@@ -113,16 +117,19 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
    * @see #pushNewSectionHistoryToken()
    */
   protected String getHistoryTokenFromUIState(String search, String id) {
-//    String unitAndChapterSelection = ;
-    //logger.info("\tgetHistoryToken for " + id + " is '" +unitAndChapterSelection.toString() + "'");
+    if (logger == null) {
+      logger = Logger.getLogger("HistoryExerciseList");
+    }
+//    logger.info("\tgetHistoryToken for " + id );
     String instanceSuffix = getInstance().isEmpty() ? "" : ";" + SelectionState.INSTANCE + "=" + getInstance();
     boolean hasItemID = id != null && id.length() > 0;
 
     String s = (hasItemID ?
         super.getHistoryTokenFromUIState(search, id) + ";" :
         "search=" + search + ";") +
-        sectionWidgetContainer.getHistoryToken() + instanceSuffix;
-    //logger.info("getHistoryTokenFromUIState '" + s + "'");
+        sectionWidgetContainer.getHistoryToken() +
+        instanceSuffix;
+   // logger.info("getHistoryTokenFromUIState '" + s + "'");
     return s;
   }
 
@@ -197,14 +204,14 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
 
   /**
    * @param exerciseID
-   * @see #loadExercisesUsingPrefix(Map, String, boolean, String)
+   * @see #loadExercisesUsingPrefix(Map, String, boolean, String, boolean, boolean)
    * @see #pushFirstSelection(String, String)
    * @see #pushNewItem(String, String)
    */
   private void checkAndAskOrFirst(String exerciseID) {
     String toUse = getValidExerciseID(exerciseID);
     if (hasExercise(toUse)) {
-    //  logger.info("\tcheckAndAskOrFirst "+ exerciseID);
+      //  logger.info("\tcheckAndAskOrFirst "+ exerciseID);
       checkAndAskServer(toUse);
     }
   }
@@ -234,7 +241,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
 //    if (DEBUG)
 //      logger.info("HistoryExerciseList.pushNewItem : current currentToken '" + currentToken + "' vs new id '" + exerciseID + "'");
     if (currentToken != null && (historyToken.equals(currentToken) || trimmedToken.equals(currentToken))) {
-      if (DEBUG || true)
+      if (DEBUG)
         logger.info("HistoryExerciseList.pushNewItem : current currentToken '" + currentToken + "' same as new " + historyToken);
       checkAndAskOrFirst(exerciseID);
     } else {
@@ -286,7 +293,13 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
       if (DEBUG)
         logger.info("pushNewSectionHistoryToken : currentToken " + currentToken + " instance " + getInstance());
       SelectionState newState = getSelectionState(historyToken);
-      loadExercisesUsingPrefix(newState.getTypeToSection(), selectionState.getSearch(), newState.isOnlyWithAudioDefects(), selectionState.getItem());
+      loadExercisesUsingPrefix(
+          newState.getTypeToSection(),
+          selectionState.getSearch(),
+          newState.isOnlyWithAudioDefects(),
+          selectionState.getItem(),
+          newState.isOnlyUnrecorded(),
+          newState.isOnlyDefault());
     }
   }
 
@@ -308,7 +321,9 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
     pushNewItem(getTypeAheadText(), itemID);
   }
 
-  protected void ignoreStaleRequest(ExerciseListWrapper<T> result) { popRequest(); }
+  protected void ignoreStaleRequest(ExerciseListWrapper<T> result) {
+    popRequest();
+  }
 
 
   /**
@@ -331,7 +346,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
   public void onValueChange(ValueChangeEvent<String> event) {
     // if (DEBUG_ON_VALUE_CHANGE) logger.info("HistoryExerciseList.onValueChange : ------ start ---- " + getInstance());
     SelectionState selectionState = getSelectionState(event.getValue());
-    //   logger.info("orig " + originalValue + " raw " + rawToken + " sel " + selectionState1.getInfo());
+//    logger.info("onValueChange " + event.getValue() + " sel " + selectionState);
     String instance1 = selectionState.getInstance();
 
     if (!instance1.equals(getInstance()) && instance1.length() > 0) {
@@ -354,7 +369,13 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
     restoreUIState(selectionState);
 
     try {
-      loadExercisesUsingPrefix(selectionState.getTypeToSection(), selectionState.getSearch(), selectionState.isOnlyWithAudioDefects(), selectionState.getItem());
+      loadExercisesUsingPrefix(
+          selectionState.getTypeToSection(),
+          selectionState.getSearch(),
+          selectionState.isOnlyWithAudioDefects(),
+          selectionState.getItem(),
+          selectionState.isOnlyUnrecorded(),
+          selectionState.isOnlyDefault());
     } catch (Exception e) {
       logger.warning("HistoryExerciseList.onValueChange " + event.getValue() + " badly formed. Got " + e);
     }
@@ -364,7 +385,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
    * @param selectionState
    * @return true if we're just clicking on a different item in the list and don't need to reload the exercise list
    */
-  private void restoreUIState(SelectionState selectionState) {
+  protected void restoreUIState(SelectionState selectionState) {
     String search = selectionState.getSearch();
     restoreListBoxState(selectionState);
     if (DEBUG_ON_VALUE_CHANGE) {
@@ -372,13 +393,13 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
           "'");
     }
 
-   // if (timeOfLastRequest >= getTimeOfLastKeyPress()) {
-   //   logger.info("restoreUIState time of last " + new Date(timeOfLastRequest) + " > " + new Date(getTimeOfLastKeyPress()));
-      setTypeAheadText(search);
-  //  }
-  //  else {
-  //    logger.info("restoreUIState ----> key press is newer ");
-  //  }
+    // if (timeOfLastRequest >= getTimeOfLastKeyPress()) {
+    //   logger.info("restoreUIState time of last " + new Date(timeOfLastRequest) + " > " + new Date(getTimeOfLastKeyPress()));
+    setTypeAheadText(search);
+    //  }
+    //  else {
+    //    logger.info("restoreUIState ----> key press is newer ");
+    //  }
   }
 
   /**
@@ -386,11 +407,14 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
    *
    * @see #gotTypeAheadEvent(String, boolean)
    */
-  protected void loadExercises(String selectionState, String prefix, boolean onlyWithAudioAnno) {
+  protected void loadExercises(String selectionState, String prefix,
+                               boolean onlyWithAudioAnno,
+                               boolean onlyUnrecorded,
+                               boolean onlyDefaultUser) {
     Map<String, Collection<String>> typeToSection = getSelectionState(selectionState).getTypeToSection();
 /*    logger.info("HistoryExerciseList.loadExercises : looking for " +
       "'" + prefix + "' (" + prefix.length() + " chars) in list id "+userListID + " instance " + getInstance());*/
-    loadExercisesUsingPrefix(typeToSection, prefix, onlyWithAudioAnno, "");
+    loadExercisesUsingPrefix(typeToSection, prefix, onlyWithAudioAnno, "", onlyUnrecorded, onlyDefaultUser);
   }
 
   /**
@@ -398,15 +422,21 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
    * @param prefix
    * @param onlyWithAudioAnno
    * @param exerciseID
+   * @param onlyUnrecorded
+   * @param onlyDefaultUser
    * @see PagingExerciseList#loadExercises
    */
   protected void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection,
                                           String prefix,
                                           boolean onlyWithAudioAnno,
-                                          String exerciseID) {
+                                          String exerciseID,
+                                          boolean onlyUnrecorded,
+                                          boolean onlyDefaultUser) {
     ExerciseListRequest request = getRequest(prefix)
         .setTypeToSelection(typeToSection)
-        .setOnlyWithAudioAnno(onlyWithAudioAnno);
+        .setOnlyWithAudioAnno(onlyWithAudioAnno)
+        .setOnlyUnrecordedByMe(onlyUnrecorded)
+        .setOnlyDefaultAudio(onlyDefaultUser);
 
     if (lastSuccessfulRequest == null || !request.sameAs(lastSuccessfulRequest)) {
       try {
@@ -426,7 +456,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
       }
     } else {
       if (DEBUG) {
-        logger.info(getClass() + " skipping request for current list" + "\n" + request + " vs\n" +lastSuccessfulRequest);
+        logger.info(getClass() + " skipping request for current list" + "\n" + request + " vs\n" + lastSuccessfulRequest);
       }
       if (exerciseID != null) {
         checkAndAskOrFirst(exerciseID);
@@ -437,12 +467,12 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
   }
 
   /**
-   * @see StatsFlashcardFactory.StatsPracticePanel#doIncorrectFirst
    * @param typeToSection
+   * @see StatsFlashcardFactory.StatsPracticePanel#doIncorrectFirst
    */
   @Override
   public void reload(Map<String, Collection<String>> typeToSection) {
-    loadExercisesUsingPrefix(typeToSection, getTypeAheadText(), false, "");
+    loadExercisesUsingPrefix(typeToSection, getTypeAheadText(), false, "", false, false);
   }
 
   /**
