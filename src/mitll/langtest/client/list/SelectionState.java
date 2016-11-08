@@ -51,13 +51,14 @@ public class SelectionState {
 
   public static final String ONLY_WITH_AUDIO_DEFECTS = "onlyWithAudioDefects";
   public static final String ONLY_UNRECORDED = "onlyUnrecorded";
+  public static final String ONLY_DEFAULT = "onlyDefault";
 
   static final String INSTANCE = "instance";
   private String item = "";
   private final Map<String, Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
   private String instance = "";
   private String search = "";
-  private boolean onlyWithAudioDefects, onlyUnrecorded;
+  private boolean onlyWithAudioDefects, onlyUnrecorded, onlyDefault;
 
   private static final boolean DEBUG = false;
 
@@ -118,6 +119,8 @@ public class SelectionState {
             onlyWithAudioDefects = section.equals("true");
           } else if (type.equals("#" + ONLY_UNRECORDED) || type.equals(ONLY_UNRECORDED)) {
             onlyUnrecorded = section.equals("true");
+          } else if (type.equals("#" + ONLY_DEFAULT) || type.equals(ONLY_DEFAULT)) {
+            onlyDefault = section.equals("true");
           } else {
             String[] split = section.split(ITEM_SEPARATOR);
             List<String> sections = Arrays.asList(split);
@@ -210,7 +213,8 @@ public class SelectionState {
   public boolean isOnlyWithAudioDefects() {
     return onlyWithAudioDefects;
   }
-  public boolean isOnlyUnrecorded()       { return onlyUnrecorded;       }
+  public boolean isOnlyUnrecorded()    { return onlyUnrecorded;       }
+  public boolean isOnlyDefault()       { return onlyDefault;       }
 
   public String toString() {
     StringBuilder builder = new StringBuilder();
