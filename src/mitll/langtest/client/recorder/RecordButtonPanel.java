@@ -38,14 +38,17 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.PopupHelper;
 import mitll.langtest.client.WavCallback;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.flashcard.BootstrapExercisePanel;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.scoring.AudioContext;
 
-import java.util.Collection;
-import java.util.Map;
+import java.util.logging.Logger;
+
+import static mitll.langtest.client.scoring.PostAudioRecordButton.MIN_DURATION;
 
 /**
  * Just a single record button for the UI component.
@@ -62,6 +65,8 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class RecordButtonPanel implements RecordButton.RecordingListener {
+  private final Logger logger = Logger.getLogger("RecordButtonPanel");
+
   protected final RecordButton recordButton;
   private final LangTestDatabaseAsync service;
   private final ExerciseController controller;
@@ -79,10 +84,12 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
    *
    * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#FlashcardRecordButtonPanel
    */
-  protected RecordButtonPanel(final LangTestDatabaseAsync service, final ExerciseController controller,
-                              final String exerciseID, final int index,
-                              boolean doFlashcardAudio, String audioType, String recordButtonTitle
-      , Map<String, Collection<String>> typeToSelection) {
+  protected RecordButtonPanel(final LangTestDatabaseAsync service,
+                              final ExerciseController controller,
+                              final String exerciseID,
+                              final int index,
+                              boolean doFlashcardAudio,
+                              String recordButtonTitle) {
     this.service = service;
     this.controller = controller;
     this.exerciseID = exerciseID;
@@ -95,6 +102,10 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
     return new RecordButton(controller.getRecordTimeout(), this, false, controller.getProps());
   }
 
+  /**
+   * @param first
+   * @see RecordButton#flipImage
+   */
   public void flip(boolean first) {
     recordImage1.setVisible(!first);
     recordImage2.setVisible(first);
@@ -136,6 +147,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
    * @see mitll.langtest.client.recorder.RecordButton#start()
    */
   public void startRecording() {
+    if (tooltip != null) tooltip.hide();
     recordImage1.setVisible(true);
     controller.startRecording();
   }
@@ -151,17 +163,30 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
    * (false if it's too short, etc.) and a URL to the stored audio on the server. <br></br>
    * This is used to make the audio playback widget.
    *
+   * @param duration
    * @see #RecordButtonPanel
    */
-  public void stopRecording() {
+  public void stopRecording(long duration) {
     recordImage1.setVisible(false);
     recordImage2.setVisible(false);
-    controller.stopRecording(new WavCallback() {
-      @Override
-      public void getBase64EncodedWavFile(String bytes) {
-        postAudioFile(getPanel(), 1, bytes);
-      }
-    });
+
+   // logger.info("stopRecording : got stop recording " + duration);
+    if (duration > MIN_DURATION) {
+      controller.stopRecording(new WavCallback() {
+        @Override
+        public void getBase64EncodedWavFile(String bytes) {
+          postAudioFile(getPanel(), 1, bytes);
+        }
+      });
+    } else {
+      initRecordButton();
+      showPopup(AudioAnswer.Validity.TOO_SHORT.getPrompt(), recordButton);
+    }
+  }
+
+  private PopupPanel tooltip;
+  protected void showPopup(String html, Widget button) {
+     tooltip = new PopupHelper().showPopup(html, button, BootstrapExercisePanel.HIDE_DELAY);
   }
 
   /**
@@ -201,9 +226,8 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
 
           public void onSuccess(AudioAnswer result) {
             //System.out.println("postAudioFile : onSuccess " + result);
-
             if (reqid != result.getReqid()) {
-              System.out.println("ignoring old answer " + result);
+//              System.out.println("ignoring old answer " + result);
               return;
             }
             long now = System.currentTimeMillis();
@@ -249,6 +273,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
 
   /**
    * Like not what you want - should be based on tab it's recorded in.
+   *
    * @return
    */
   private String getAudioType() {
@@ -263,7 +288,10 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
     return recordButton;
   }
 
-  protected void receivedAudioAnswer(AudioAnswer result, final Panel outer) {
+  protected void receivedAudioAnswer(AudioAnswer result, final Panel outer) {}
+
+  protected void hideRecordButton() {
+    recordButton.setVisible(false);
   }
 
   public void setAllowAlternates(boolean allowAlternates) {
