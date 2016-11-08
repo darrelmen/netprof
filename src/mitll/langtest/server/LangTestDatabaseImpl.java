@@ -45,6 +45,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.analysis.ShowTab;
 import mitll.langtest.client.custom.dialog.ReviewEditableExercise;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.server.amas.QuizCorrect;
 import mitll.langtest.server.audio.AudioCheck;
@@ -282,8 +283,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     Collection<CommonExercise> exercises;
 
     logger.debug("getExerciseIds : (" + getLanguage() + ") " +
-        "getting exercise ids for " +
-        " config " + relativeConfigDir + " request " + request);
+        "getting exercise ids for config " + relativeConfigDir +
+        " request " + request);
 
     try {
       boolean isUserListReq = request.getUserListID() != -1;
@@ -611,18 +612,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.list.HistoryExerciseList#loadExercises
    * @see #getExerciseIds
    */
-  private <T extends CommonShell> ExerciseListWrapper<T> getExercisesForSelectionState(/*int reqID,
-                                                                                       Map<String, Collection<String>> typeToSection, String prefix,
-                                                                                       long userID, String role, boolean onlyUnrecordedByMe,
-                                                                                       boolean onlyExamples, boolean incorrectFirst*/
-                                                                                       ExerciseListRequest request) {
+  private <T extends CommonShell> ExerciseListWrapper<T> getExercisesForSelectionState(ExerciseListRequest request) {
     Collection<CommonExercise> exercisesForState = db.getSectionHelper().getExercisesForSelectionState(request.getTypeToSelection());
     exercisesForState = filterExercises(request, exercisesForState);
-    return getExerciseListWrapperForPrefix(request,
-        //  reqID, prefix,
-        exercisesForState
-        //    , userID, role, onlyExamples, incorrectFirst
-    );
+    return getExerciseListWrapperForPrefix(request, exercisesForState);
   }
 
   /**
@@ -945,16 +938,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     Collection<AudioAttribute> audioAttributes = byID.getAudioAttributes();
     for (AudioAttribute audioAttribute : audioAttributes) {
       if (!ensureMP3(audioAttribute.getAudioRef(), byID.getForeignLanguage(), audioAttribute.getUser().getUserID(), parentDir)) {
-        if (byID.getID().equals("1310")) {
-          logger.warn("ensureMP3 : can't find " + audioAttribute + " under " + parentDir + " for " + byID);
-        }
+//        if (byID.getID().equals("1310")) {
+//          logger.warn("ensureMP3 : can't find " + audioAttribute + " under " + parentDir + " for " + byID);
+//        }
         audioAttribute.setAudioRef(AudioConversion.FILE_MISSING);
       }
     }
 
-    if (audioAttributes.isEmpty() && byID.getID().equals("1310")) {
-      logger.warn("ensureMP3s : (" + getLanguage() + ") no ref audio for " + byID);
-    }
+//    if (audioAttributes.isEmpty() && byID.getID().equals("1310")) {
+//      logger.warn("ensureMP3s : (" + getLanguage() + ") no ref audio for " + byID);
+//    }
   }
 
   private Collection<AmasExerciseImpl> getAMASExercises() {
@@ -2188,8 +2181,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param addToAudioTable     if true, add to audio table -- only when recording reference audio for an item.
    * @param allowAlternates
    * @return AudioAnswer object with information about the audio on the server, including if audio is valid (not too short, etc.)
-   * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording()
-   * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
+   * @see RecordButton.RecordingListener#stopRecording(long)
+   * @see RecordButton.RecordingListener#stopRecording(long)
    */
   @Override
   public AudioAnswer writeAudioFile(String base64EncodedString,
@@ -2469,7 +2462,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
                                               long latestResultID,
                                               Map<String, Collection<String>> typeToSection,
                                               long userListID) {
-    if (DEBUG) logger.debug("getUserHistoryForList " + userid + " and " + ids + " type to section " + typeToSection);
+    if (DEBUG)
+      logger.debug("getUserHistoryForList " + userid + " and " + ids + " type to section '" + typeToSection + "'");
     UserList<CommonShell> userListByID = userListID != -1 ? db.getUserListByID(userListID) : null;
     List<String> allIDs = new ArrayList<String>();
     Map<String, CollationKey> idToKey = new HashMap<String, CollationKey>();
@@ -2572,7 +2566,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
 
     String mediaDir = relativeConfigDir + File.separator + serverProps.getMediaDir();
-    this.refResultDecoder = new RefResultDecoder(db, serverProps, pathHelper, audioFileHelper, mediaDir, pathHelper.getInstallPath());
+    this.refResultDecoder = new RefResultDecoder(db, serverProps, pathHelper, audioFileHelper);
     refResultDecoder.doRefDecode(getExercises(), relativeConfigDir);
     if (serverProps.isAMAS()) audioFileHelper.makeAutoCRT(relativeConfigDir);
 
