@@ -66,7 +66,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
   private static final String PROMPT = "Read the following text and answer the question or questions below.";
   private final List<Widget> answers = new ArrayList<Widget>();
   private final Set<Widget> completed = new HashSet<Widget>();
-  T exercise = null;
+  protected T exercise = null;
   final ExerciseController controller;
   private final NavigationHelper<L> navigationHelper;
   final ListInterface<L> exerciseList;
@@ -142,7 +142,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
    * @return
    * @see #ExercisePanel(T, LangTestDatabaseAsync, ExerciseController, ListInterface, String, String)
    */
-  private Widget getQuestionContent(T e) {
+  protected Widget getQuestionContent(T e) {
     String content = getExerciseContent(e);
 
     HTML maybeRTLContent = getMaybeRTLContent(content);
@@ -169,7 +169,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
    * @return
    * @see #getQuestionContent
    */
-  private HTML getMaybeRTLContent(String content) {
+  protected HTML getMaybeRTLContent(String content) {
     boolean rightAlignContent = controller.isRightAlignContent();
     HasDirection.Direction direction =
         rightAlignContent ? HasDirection.Direction.RTL : getDirection(content);
