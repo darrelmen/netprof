@@ -33,7 +33,6 @@
 package mitll.langtest.client.custom;
 
 import com.google.gwt.user.client.ui.FlexTable;
-import mitll.langtest.server.database.AudioDAO;
 
 import java.util.Arrays;
 import java.util.List;
@@ -47,14 +46,25 @@ import java.util.Map;
  * @since 3/2/16.
  */
 public class RecordingProgressTable extends FlexTable {
-  private static final String MALE_CONTEXT = AudioDAO.MALE_CONTEXT;
-  private static final String FEMALE_SLOW = AudioDAO.FEMALE_SLOW;
-  private static final String FEMALE_FAST = AudioDAO.FEMALE_FAST;
-  private static final String FEMALE_CONTEXT = AudioDAO.FEMALE_CONTEXT;
-  private static final String FEMALE = AudioDAO.FEMALE;
-  private static final String MALE_SLOW = AudioDAO.MALE_SLOW;
-  private static final String MALE = AudioDAO.MALE;
-  private static final String MALE_FAST = AudioDAO.MALE_FAST;
+//  private static final String MALE_CONTEXT = AudioDAO.MALE_CONTEXT;
+//  private static final String FEMALE_SLOW = AudioDAO.FEMALE_SLOW;
+//  private static final String FEMALE_FAST = AudioDAO.FEMALE_FAST;
+//  private static final String FEMALE_CONTEXT = AudioDAO.FEMALE_CONTEXT;
+//  private static final String FEMALE = AudioDAO.FEMALE;
+//  private static final String MALE_SLOW = AudioDAO.MALE_SLOW;
+//  private static final String MALE = AudioDAO.MALE;
+//  private static final String MALE_FAST = AudioDAO.MALE_FAST;
+//  
+//  public static final String TOTAL = "total";
+//  public static final String TOTAL_CONTEXT = "totalContext";
+  public static final String MALE = "male";
+  public static final String FEMALE = "female";
+  public static final String MALE_FAST = "maleFast";
+  public static final String MALE_SLOW = "maleSlow";
+  public static final String FEMALE_FAST = "femaleFast";
+  public static final String FEMALE_SLOW = "femaleSlow";
+  public static final String MALE_CONTEXT = "maleContext";
+  public static final String FEMALE_CONTEXT = "femaleContext";
 
   /**
    * @see RecorderNPFHelper#getProgressInfo
