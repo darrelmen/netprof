@@ -199,10 +199,13 @@ public class SectionHelper<T extends Shell> {
   public Collection<T> getExercisesForSelectionState(Map<String, Collection<String>> typeToSection) {
     Collection<T> currentList = null;
 
+//    logger.info("getExercisesForSelectionState got " + typeToSection);
     for (Map.Entry<String, Collection<String>> pair : typeToSection.entrySet()) {
       String type = pair.getKey();
       if (isKnownType(type)) {
-        Collection<T> exercisesForSection = new HashSet<T>(getExercisesForSection(type, pair.getValue()));
+        Collection<String> value = pair.getValue();
+  //      logger.info("looking for exercises under '" +value +"' (" +value.size()+ ")");
+        Collection<T> exercisesForSection = new HashSet<T>(getExercisesForSection(type, value));
 
         if (currentList == null) {
           currentList = exercisesForSection;
@@ -210,7 +213,7 @@ public class SectionHelper<T extends Shell> {
           currentList.retainAll(exercisesForSection);
         }
       } else {
-        logger.warn("huh? typeToSelection type " + type + " is not in " + typeToUnitToLesson.keySet());
+        logger.warn("getExercisesForSelectionState huh? typeToSelection type " + type + " is not in " + typeToUnitToLesson.keySet());
       }
     }
     if (currentList == null) {
@@ -241,12 +244,12 @@ public class SectionHelper<T extends Shell> {
       for (String section : sections) {
         Lesson<T> lesson = sectionToLesson.get(section);
         if (lesson == null) {
-          logger.error("Couldn't find section " + section);
+          logger.error("getExercisesForSection : Couldn't find section '" + section +"'");
           return Collections.emptyList();
         } else {
           Collection<T> exercises1 = lesson.getExercises();
           if (exercises1.isEmpty()) {
-            logger.warn("getExercisesForSection : huh? section " + section + " has no exercises : " + lesson);
+            logger.warn("getExercisesForSection : huh? section '" + section + "' has no exercises : " + lesson);
           }
           exercises.addAll(exercises1);
         }
@@ -257,7 +260,7 @@ public class SectionHelper<T extends Shell> {
 
   /**
    * @param where
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesFromFiltered(java.util.Map, mitll.langtest.shared.custom.UserList)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getExercisesFromFiltered
    * @see mitll.langtest.server.database.exercise.ExcelImport#getRawExercises()
    */
   public void addExercise(T where) {
