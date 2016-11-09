@@ -16,7 +16,7 @@ buildscript {
 }
 
 plugins {
- //   id "com.jfrog.artifactory" version "4.4.7" // required for common.gradle
+    //   id "com.jfrog.artifactory" version "4.4.7" // required for common.gradle
     id "com.github.hierynomus.license" version "0.13.1"
     id "net.saliman.cobertura" version "2.3.2"
     id "org.sonarqube" version "2.0.1"
@@ -44,29 +44,38 @@ repositories {
         layout('ivy')
     }
     maven { url "${artifactory_contextUrl}/libs-release" }
-    maven { url "${artifactory_contextUrl}/mitll-internal-mvn"
+    //  maven { url "${artifactory_contextUrl}/ivy-libs-snapshot-dli" }
+    maven {
+        url "${artifactory_contextUrl}/mitll-internal-mvn"
         credentials {
             username = "${artifactory_user}"
             password = "${artifactory_password}"
         }
     }
-    ivy { url "${artifactory_contextUrl}/mitll-internal-ivy"
+
+    ivy {
+        url "${artifactory_contextUrl}/mitll-internal-ivy"
         credentials {
             username = "${artifactory_user}"
             password = "${artifactory_password}"
         }
     }
-//    ivy {
-//	url "${artifactory_contextUrl}/netProf"
-//        credentials {
-//            username = "${artifactory_user}"
-//            password = "${artifactory_password}"
-//        }
-//    }
+
+    ivy {
+        url "${artifactory_contextUrl}/ivy-libs-snapshot-dli"
+        credentials {
+            username = "${artifactory_user}"
+            password = "${artifactory_password}"
+        }
+        layout "pattern", {
+            artifact "[organization]/[module]/[revision]/gwts/[module].[ext]"
+            ivy "ivy-files/[organisation]/[module]/[revision]/ivy.xml"
+        }
+    }
 }
 
-sourceCompatibility=1.8
-targetCompatibility=1.8
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 group = 'mitll.hlt'
 description = 'NetProF pronunciation feedback'
 
@@ -83,7 +92,7 @@ task buildInfo {
     println "Original branch " + branch
     def lastSlash = branch.lastIndexOf("/");
     if (lastSlash > -1) {
-        branch = branch.substring(lastSlash+1)
+        branch = branch.substring(lastSlash + 1)
     }
     println "Prepared branch " + branch
     // get the git sha
@@ -93,24 +102,24 @@ task buildInfo {
 
     // potentially include this as an ivy/maven artifact
     // potentially include this as an ivy/maven artifact
-    if(branch.endsWith('master')) {
-        project.ext.status='release'
+    if (branch.endsWith('master')) {
+        project.ext.status = 'release'
     } else if (branch.endsWith('development')) {
         version = version + "-dev"
-        project.ext.status='integration'
+        project.ext.status = 'integration'
     } else {
         version = version + "-" + branch
-        project.ext.status='test'
+        project.ext.status = 'test'
     }
 }
 
 project.ext.sharedManifest = manifest {
     attributes 'Specification-Title': 'NetProF',
             'Specification-Version': version,
-            'Specification-Vendor':  project.ext.vendor,
+            'Specification-Vendor': project.ext.vendor,
             'Implementation-Title': group + "." + rootProject.name,
             'Implementation-Version': project.ext.status + " - " + project.ext.gitSha,
-            'Implementation-Vendor':  project.ext.vendor,
+            'Implementation-Vendor': project.ext.vendor,
             'Built-By': System.getProperty('user.name'),
             'Build-Date': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
 }
@@ -122,8 +131,26 @@ jar {
 
 evaluationDependsOn(':imagewriter')
 
+task listJars << {
+    configurations.compile.each { File file -> println file.name }
+}
+
 dependencies {
-    compile('mitll.hlt:domino-core:1.1.0-SNAPSHOT'){changing = true}
+   compile('mitll.hlt:domino-core:1.1.0-SNAPSHOT') { changing = true }
+
+    // Michael suggestions
+//    compile('mill.hlt:domino-core:1.1.0-SNAPSHOT:gwt'){changing = true}
+
+    compile('mitll.hlt:domino-shared:1.2.0-SNAPSHOT') { changing = true }
+   // otherConf group: 'mitll.hlt', name: 'domino-core', version: '1.1.0-SNAPSHOT'
+    // compile('mitll.hlt:domino-core:1.1.0-SNAPSHOT'){changing = true}
+
+//    compile('mitll.hlt:domino-core:1.1.0'){changing = true}
+
+//    compile "mitll.hlt:service:1.0:jdk15@jar"
+//    otherConf group: 'org.gradle.test.classifiers', name: 'service', version: '1.0', classifier: 'jdk14'
+
+//    compile group: 'mitll.hlt', name: 'domino-core', classifier:'gwts', version: '1.1.0-SNAPSHOT'
 
     compile project(':npdata')
     compile project(':imagewriter')
@@ -131,11 +158,27 @@ dependencies {
     compile 'org.apache.poi:poi:3.15'
     compile 'net.sf.uadetector:uadetector-core:0.9.22'
     compile 'net.sf.uadetector:uadetector-resources:2013.04'
-    //compile 'net.sf.json-lib:json-lib:2.4-jdk1.5'
+
+    compile group: 'net.sf.json-lib', name: 'json-lib', version: '2.4', classifier: 'jdk15'
+
+//    compile 'net.sf.json-lib:json-lib:2.4-jdk1.5'
+//    otherConf group: 'org.gradle.test.classifiers', name: 'service', version: '1.0', classifier: 'jdk14'
+
     compile 'javax.mail:mail:1.4.1'
     compile 'log4j:log4j:1.2.17'
+
     compile 'com.google.gwt:gwt-user:2.8.0'
+
     compile 'com.github.gwtbootstrap:gwt-bootstrap:latest.integration'
+    //  compile 'org.hamcrest:hamcrest-core:latest.integration'
+    compile 'org.moxieapps.gwt:highcharts:1.7.0'
+
+    compile group: 'com.google.gwt.google-apis', name: 'gwt-visualization', version: '1.0.2'
+
+    compile group: 'net.sf.json-lib', name: 'json-lib', version: '2.4', classifier: 'jdk15'
+
+    //  compile group: 'org.moxieapps.gwt.highcharts', name: 'org.moxieapps.gwt.highcharts', version: '1.7.0'
+
     testCompile 'junit:junit:latest.integration'
     testCompile 'org.hamcrest:hamcrest-all:latest.integration'
     testRuntime 'org.slf4j:slf4j-api:1.7.10'
@@ -172,11 +215,13 @@ artifactory {
             ivy {
                 ivyLayout = '[organization]/[module]/[revision]/[type]s/ivy-[revision].xml'
                 artifactLayout = '[organization]/[module]/[revision]/[type]s/[module](-[classifier])-[revision].[ext]'
+                // artifactLayout = "[organization]/[module]/[revision]/gwts/[module].[ext]"
+                // artifactLayout = '[organization]/[module]/[revision]/[type]s/[module](-[classifier])-[revision].[ext]'
                 mavenCompatible = false
             }
         }
         defaults {
-            publications ('ivyJava')
+            publications('ivyJava')
         }
     }
     resolve {
@@ -190,7 +235,7 @@ artifactory {
 }
 
 cobertura {
-    coverageFormats = [ 'html', 'xml' ]
+    coverageFormats = ['html', 'xml']
 }
 
 task sourceJar(type: Jar) {
@@ -201,7 +246,7 @@ task sourceJar(type: Jar) {
 }
 
 task testJar(type: Jar) {
-    it.dependsOn (':buildInfo', ':testClasses')
+    it.dependsOn(':buildInfo', ':testClasses')
     manifest = project.ext.sharedManifest
     from sourceSets.test.output
     classifier = 'tests'
@@ -209,7 +254,7 @@ task testJar(type: Jar) {
 
 // include both the source and compiled files
 task gwtJar(type: Jar) {
-    it.dependsOn ( ':buildInfo', ':build')
+    it.dependsOn(':buildInfo', ':build')
     manifest = project.ext.sharedManifest
     from sourceSets.main.allJava
     from sourceSets.main.output
@@ -273,7 +318,7 @@ sonarqube {
 }
 
 gwt {
-    gwtVersion='2.8.0'
+    gwtVersion = '2.8.0'
     modules 'com.javacodegeeks.gradle.gwt.integration.build.GradleGWTIntegrationExampleJCG'
 
     sourceSets {
@@ -290,12 +335,12 @@ gwt {
     maxHeapSize = "3G";
 
     superDev {
-        noPrecompile=true
+        noPrecompile = true
     }
 
     // The following is only needed if you don't use the Google Plugin for Eclipse.
-    eclipse{
-        addGwtContainer=false // Default set to true
+    eclipse {
+        addGwtContainer = false // Default set to true
     }
 
     //Specify the deployment Port
