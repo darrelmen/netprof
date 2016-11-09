@@ -181,6 +181,9 @@ dependencies {
     compile group: 'com.google.guava', name: 'guava', version: '20.0'
     compile group: 'org.apache.ignite', name: 'ignite-core', version: '1.7.0'
 
+    compile group: 'org.mongodb', name: 'mongo-java-driver', version: '3.3.0'
+    compile group: 'net.liftweb', name: 'lift-json', version: '2.0'
+
     testCompile 'junit:junit:latest.integration'
     testCompile 'org.hamcrest:hamcrest-all:latest.integration'
     testRuntime 'org.slf4j:slf4j-api:1.7.10'
@@ -333,7 +336,7 @@ sonarqube {
 
 gwt {
     gwtVersion = '2.8.0'
-    modules 'LangTest'
+    modules 'mitll.langtest.LangTest'
 
     sourceSets {
         main {

@@ -46,7 +46,6 @@
       <excludeFolder url="file://$MODULE_DIR$/bestAudioOrig" />
       <excludeFolder url="file://$MODULE_DIR$/config" />
       <excludeFolder url="file://$MODULE_DIR$/extras" />
-      <excludeFolder url="file://$MODULE_DIR$/gwt" />
       <excludeFolder url="file://$MODULE_DIR$/gwt-unitCache" />
       <excludeFolder url="file://$MODULE_DIR$/gwt27" />
       <excludeFolder url="file://$MODULE_DIR$/gwt28" />
@@ -107,7 +106,7 @@
     <orderEntry type="library" name="lib1" level="project" />
     <orderEntry type="module" module-name="imagewriter" />
     <orderEntry type="library" name="lib" level="project" />
-    <orderEntry type="module" module-name="Audioimage" />
+    <orderEntry type="module" module-name="audioimage" />
     <orderEntry type="library" name="Gradle: org.gridgain:ignite-shmem:1.0.0" level="project" />
     <orderEntry type="library" name="Gradle: com.sun.mail:javax.mail:1.5.2" level="project" />
     <orderEntry type="library" name="Gradle: commons-codec:commons-codec:1.10" level="project" />
