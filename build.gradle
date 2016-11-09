@@ -1,44 +1,61 @@
 // Build-time dependencies
 buildscript {
+    repositories {
+        jcenter()
+        // Alternatively use:
+//        maven {
+//            url 'http://dl.bintray.com/steffenschaefer/maven'
+//        }
+    }
     dependencies {
         //Check for the latest version here: http://plugins.gradle.org/plugin/com.jfrog.artifactory
-        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:${jfrogVersion}"
+//        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:${jfrogVersion}"
         classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.6'
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.4.7"
     }
 }
 
 plugins {
+ //   id "com.jfrog.artifactory" version "4.4.7" // required for common.gradle
     id "com.github.hierynomus.license" version "0.13.1"
     id "net.saliman.cobertura" version "2.3.2"
     id "org.sonarqube" version "2.0.1"
 }
+
 apply plugin: 'base'
 apply plugin: 'eclipse'
-apply plugin: 'java'
 apply plugin: 'ivy-publish'
 apply plugin: 'maven-publish'
 apply plugin: "com.jfrog.artifactory"
 apply plugin: 'gwt'
+apply plugin: 'war'
+apply plugin: 'java'
+
+task listrepos << {
+    println "Repositories:"
+    project.repositories.each { println "Name: " + it.name + "; url: " + it.url }
+}
 
 // Setup repositories as proxy through Artifactory.
 repositories {
-    ivy { 
-	url file(System.getProperty('user.home') + localIvyFolder)
-	layout('ivy')
+
+    ivy {
+        url file(System.getProperty('user.home') + localIvyFolder)
+        layout('ivy')
     }
     maven { url "${artifactory_contextUrl}/libs-release" }
     maven { url "${artifactory_contextUrl}/mitll-internal-mvn"
-	    credentials {
-                username = "${artifactory_user}"
-                password = "${artifactory_password}"
-	    }
-          }
-    ivy { url "${artifactory_contextUrl}/mitll-internal-ivy"
-          credentials {
-	      username = "${artifactory_user}"
-	      password = "${artifactory_password}"
-          }
+        credentials {
+            username = "${artifactory_user}"
+            password = "${artifactory_password}"
         }
+    }
+    ivy { url "${artifactory_contextUrl}/mitll-internal-ivy"
+        credentials {
+            username = "${artifactory_user}"
+            password = "${artifactory_password}"
+        }
+    }
 //    ivy {
 //	url "${artifactory_contextUrl}/netProf"
 //        credentials {
@@ -59,14 +76,14 @@ task buildInfo {
 
     def branch = System.env.GIT_BRANCH
     if (branch == null) {
-	def bProc = "git rev-parse --abbrev-ref HEAD".execute()
-	branch = bProc.text.trim();
-	println "No branch in jenkins. Result of command line " + branch
+        def bProc = "git rev-parse --abbrev-ref HEAD".execute()
+        branch = bProc.text.trim();
+        println "No branch in jenkins. Result of command line " + branch
     }
     println "Original branch " + branch
     def lastSlash = branch.lastIndexOf("/");
     if (lastSlash > -1) {
-	branch = branch.substring(lastSlash+1)
+        branch = branch.substring(lastSlash+1)
     }
     println "Prepared branch " + branch
     // get the git sha
@@ -79,32 +96,37 @@ task buildInfo {
     if(branch.endsWith('master')) {
         project.ext.status='release'
     } else if (branch.endsWith('development')) {
-	version = version + "-dev"
+        version = version + "-dev"
         project.ext.status='integration'
     } else {
-	version = version + "-" + branch
+        version = version + "-" + branch
         project.ext.status='test'
     }
 }
 
 project.ext.sharedManifest = manifest {
-        attributes 'Specification-Title': 'NetProF',
-	           'Specification-Version': version,
-                   'Specification-Vendor':  project.ext.vendor,
-	           'Implementation-Title': group + "." + rootProject.name,
-                   'Implementation-Version': project.ext.status + " - " + project.ext.gitSha,
-                   'Implementation-Vendor':  project.ext.vendor,
- 	           'Built-By': System.getProperty('user.name'), 
-	           'Build-Date': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
-    }
+    attributes 'Specification-Title': 'NetProF',
+            'Specification-Version': version,
+            'Specification-Vendor':  project.ext.vendor,
+            'Implementation-Title': group + "." + rootProject.name,
+            'Implementation-Version': project.ext.status + " - " + project.ext.gitSha,
+            'Implementation-Vendor':  project.ext.vendor,
+            'Built-By': System.getProperty('user.name'),
+            'Build-Date': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+}
 
 jar {
     it.dependsOn ':buildInfo'
     manifest = project.ext.sharedManifest
 }
 
+evaluationDependsOn(':imagewriter')
+
 dependencies {
-//    compile('mitll.hlt:domino-core:domino-core'){changing = true}
+    compile('mitll.hlt:domino-core:1.1.0-SNAPSHOT'){changing = true}
+
+    compile project(':npdata')
+    compile project(':imagewriter')
 
     compile 'org.apache.poi:poi:3.15'
     compile 'net.sf.uadetector:uadetector-core:0.9.22'
@@ -120,8 +142,24 @@ dependencies {
 }
 
 allprojects {
+    apply plugin: 'java'
     apply plugin: "com.jfrog.artifactory"
+    apply plugin: 'ivy-publish'
+    apply plugin: 'maven-publish'
+
+    apply plugin: 'base'
+    apply plugin: 'eclipse'
 }
+
+subprojects {
+    apply plugin: 'war'
+}
+
+//project(':imagewriter') {
+//    dependencies {
+//        compile project(':imagewriter:audioimage')
+//    }
+//}
 
 artifactory {
     contextUrl = "${artifactory_contextUrl}"   //The base Artifactory URL if not overridden by the publisher/resolver
@@ -180,10 +218,10 @@ task gwtJar(type: Jar) {
 
 publishing {
     repositories {
-	ivy { 
-	    url file(System.getProperty('user.home') + localIvyFolder)
-	    layout('ivy')
-	}
+        ivy {
+            url file(System.getProperty('user.home') + localIvyFolder)
+            layout('ivy')
+        }
     }
     publications {
         ivyJava(IvyPublication) {
@@ -191,33 +229,33 @@ publishing {
             descriptor.withXml {
                 asNode().info[0].appendNode('description', description)
             }
-	    artifact(sourceJar) {
+            artifact(sourceJar) {
                 type "source"
                 conf "runtime"
-	    }
+            }
 
-	    artifact(gwtJar) {
-		name 'netProf'
-		type "gwt"
+            artifact(gwtJar) {
+                name 'netProf'
+                type "gwt"
                 conf "runtime"
-	    }
-	    artifact(testJar) {
+            }
+            artifact(testJar) {
                 type "test"
                 conf "runtime"
-	    }
+            }
         }
 
         mavenJava(MavenPublication) {
             from components.java
-	    artifact(sourceJar) {
+            artifact(sourceJar) {
                 classifier "sources"
             }
-	    artifact(gwtJar) {
+            artifact(gwtJar) {
                 classifier "gwt"
             }
-	    artifact(testJar) {
+            artifact(testJar) {
                 classifier "tests"
-	    }
+            }
         }
     }
 }
@@ -261,5 +299,8 @@ gwt {
     }
 
     //Specify the deployment Port
-   // jettyRunWar.httpPort = 8089
+    // jettyRunWar.httpPort = 8089
 }
+
+println name
+println project.name
