@@ -1,1 +1,5 @@
 rootProject.name="netProf"
+
+//include 'imagewriter', 'npdata', 'imagewriter:audioimage'
+//include 'imagewriter', 'npdata', 'imagewriter:audioimage', 'imagewriter:audioimage:gradle'
+include 'imagewriter', 'npdata', 'imagewriter:audioimage'
