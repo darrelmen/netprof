@@ -673,7 +673,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
       // logger.info("getPanelForAudio path after  " + audioRef);
     }
     String speed = audio.isRegularSpeed() ? " Regular speed" : " Slow speed";
-    final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<T>(audioRef, e.getForeignLanguage(), service, controller,
+    final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<T>(audioRef, e.getForeignLanguage(), e.getTransliteration(), service, controller,
         controller.getProps().showSpectrogram(), scorePanel, 70, speed, e.getID(), e, instance);
     audioPanel.setShowColor(true);
     audioPanel.getElement().setId("ASRScoringAudioPanel");
