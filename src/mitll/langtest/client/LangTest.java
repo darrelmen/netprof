@@ -198,13 +198,15 @@ import java.util.logging.Logger;
  * - Turn off transcript matching for audio for now, remove ref audio that doesn't meet the dnr threshold
  * 1.5.11
  * - Support for Hindi - added comment on text for recording audio.
+ * 1.5.12
+ * - Fix for filtering bug where would not filter out recordings made by a user in the same day
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private final Logger logger = Logger.getLogger("LangTest");
 
-  public static final String VERSION_INFO = "1.5.10";
+  public static final String VERSION_INFO = "1.5.12";
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
   private static final String UNKNOWN = "unknown";
