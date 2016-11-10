@@ -280,7 +280,7 @@ public class DatabaseImpl implements Database {
     if (projectManagement == null) {
       logger.info("no project management yet...");
     } else {
-//      logger.info("populateProjects --- ");
+      logger.info("populateProjects --- ");
       projectManagement.populateProjects();
     }
   }
@@ -715,13 +715,13 @@ public class DatabaseImpl implements Database {
   /**
    * Public for testing only...
    *
-   * @param exerciseDAO
-   * @param projid
-   * @see #configureProject
+   * @paramx exerciseDAO
+   * @paramx projid
+   * @seex #configureProject
    */
-  public void setDependencies(ExerciseDAO exerciseDAO, int projid) {
-    exerciseDAO.setDependencies(userExerciseDAO, null /*addRemoveDAO*/, audioDAO, projid);
-  }
+/*  public void setDependencies(ExerciseDAO exerciseDAO, int projid) {
+    exerciseDAO.setDependencies(userExerciseDAO, null *//*addRemoveDAO*//*, audioDAO, projid);
+  }*/
 
   private void makeContextPractice(String contextPracticeFile, String installPath) {
     if (contextPractice == null && contextPracticeFile != null) {
