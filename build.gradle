@@ -200,14 +200,8 @@ allprojects {
     apply plugin: 'eclipse'
 }
 
-subprojects {
-    apply plugin: 'war'
-}
-
-//project(':imagewriter') {
-//    dependencies {
-//        compile project(':imagewriter:audioimage')
-//    }
+//subprojects {
+//    apply plugin: 'war'
 //}
 
 artifactory {
@@ -364,5 +358,22 @@ gwt {
     // jettyRunWar.httpPort = 8089
 }
 
-println name
-println project.name
+war {
+    from 'war/bin'
+    from ('war/config/netProf') {
+        into 'config/netProf'
+    }
+    from ('war/scoring/bin.linux64') {
+        into 'scoring'
+    }
+    from ('war/scoring/configurations') {
+        into 'scoring'
+    }
+    from 'war/LangTest.css'
+    from 'war/LangTest.html'
+    webXml = file('war/WEB-INF/web.xml')
+    from ('src/main/') {
+        include 'log*'
+    }
+}
+
