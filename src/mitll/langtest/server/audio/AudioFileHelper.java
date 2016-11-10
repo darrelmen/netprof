@@ -381,15 +381,19 @@ public class AudioFileHelper implements AlignDecode {
         true, allowAlternates, useOldSchool);
 
     if (recordInResults) {
+      double maxMinRange = validity.getMaxMinRange();
+      answer.setDynamicRange(maxMinRange);
+    //  logger.info("min max " + maxMinRange + " answer " + answer);
       recordInResults(context, recordingInfo, validity, answer);
-      answer.setDynamicRange(validity.getMaxMinRange());
     }
     //   logger.debug("getAudioAnswerDecoding answer " + answer);
     return answer;
   }
 
-  private void recordInResults(AudioContext context, AnswerInfo.RecordingInfo recordingInfo,
-                               AudioCheck.ValidityAndDur validity, AudioAnswer answer) {
+  private void recordInResults(AudioContext context,
+                               AnswerInfo.RecordingInfo recordingInfo,
+                               AudioCheck.ValidityAndDur validity,
+                               AudioAnswer answer) {
     int processDur = answer.getPretestScore() == null ? 0 : answer.getPretestScore().getProcessDur();
 
 /*      if (pretestScore != null) {
