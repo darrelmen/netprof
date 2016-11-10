@@ -1188,13 +1188,14 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         return new PretestScore();
       } else {
         String sentence = exercise.getForeignLanguage();
+        String transliteration = exercise.getTransliteration();
         if (result.getAudioType().contains("context")) sentence = exercise.getContext();
 
         String audioFilePath = result.getAnswer();
         ensureMP3(audioFilePath, sentence, "" + result.getUserid());
         //logger.info("resultID " +resultID+ " temp dir " + tempDir.getAbsolutePath());
         asrScoreForAudio = audioFileHelper.getASRScoreForAudio(1,
-            audioFilePath, sentence,
+            audioFilePath, sentence, transliteration,
             width, height,
             true,  // make transcript images with colored segments
             false, // false = do alignment
@@ -1222,9 +1223,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    * @see mitll.langtest.client.scoring.ASRScoringAudioPanel#scoreAudio(String, long, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
    */
-  public PretestScore getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence,
+  public PretestScore getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence, String transliteration,
                                           int width, int height, boolean useScoreToColorBkg, String exerciseID) {
-    return getPretestScore(reqid, resultID, testAudioFile, sentence, width, height, useScoreToColorBkg, exerciseID, false);
+    return getPretestScore(reqid, resultID, testAudioFile, sentence, transliteration, width, height, useScoreToColorBkg, exerciseID, false);
   }
 
   /**
@@ -1241,7 +1242,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param usePhoneToDisplay
    * @return
    */
-  private PretestScore getPretestScore(int reqid, long resultID, String testAudioFile, String sentence,
+  private PretestScore getPretestScore(int reqid, long resultID, String testAudioFile, String sentence, String transliteration,
                                        int width, int height, boolean useScoreToColorBkg, String exerciseID, boolean usePhoneToDisplay) {
     if (testAudioFile.equals(AudioConversion.FILE_MISSING)) return new PretestScore(-1);
     long then = System.currentTimeMillis();
@@ -1267,7 +1268,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     boolean usePhoneToDisplay1 = usePhoneToDisplay || serverProps.usePhoneToDisplay();
 
-    PretestScore asrScoreForAudio = audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg,
+    PretestScore asrScoreForAudio = audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, transliteration, width, height, useScoreToColorBkg,
         false, serverProps.useScoreCache(), exerciseID, cachedResult, usePhoneToDisplay1, false);
 
     long timeToRunHydec = System.currentTimeMillis() - then;
@@ -1298,9 +1299,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.scoring.ASRScoringAudioPanel#scoreAudio(String, long, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
    */
   @Override
-  public PretestScore getASRScoreForAudioPhonemes(int reqid, long resultID, String testAudioFile, String sentence,
+  public PretestScore getASRScoreForAudioPhonemes(int reqid, long resultID, String testAudioFile, String sentence, String transliteration,
                                                   int width, int height, boolean useScoreToColorBkg, String exerciseID) {
-    return getPretestScore(reqid, resultID, testAudioFile, sentence, width, height, useScoreToColorBkg, exerciseID, true);
+    return getPretestScore(reqid, resultID, testAudioFile, sentence, transliteration, width, height, useScoreToColorBkg, exerciseID, true);
   }
 
   @Override
@@ -1497,8 +1498,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, boolean)
    */
   @Override
-  public boolean isValidForeignPhrase(String foreign) {
-    return audioFileHelper.checkLTSOnForeignPhrase(foreign);
+  public boolean isValidForeignPhrase(String foreign, String transliteration) {
+    return audioFileHelper.checkLTSOnForeignPhrase(foreign, transliteration);
   }
 
   /**
@@ -1544,7 +1545,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
           logger.info("reallyCreateNewItems skipping header line");
           firstColIsEnglish = true;
         } else {
-          if (firstColIsEnglish || (isValidForeignPhrase(english) && !isValidForeignPhrase(fl))) {
+          // not going to try going through the transliteration here, I guess
+          if (firstColIsEnglish || (isValidForeignPhrase(english, "") && !isValidForeignPhrase(fl, ""))) {
             String temp = english;
             english = fl;
             fl = temp;
@@ -1562,7 +1564,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     for (CommonExercise candidate : newItems) {
       String foreignLanguage = candidate.getForeignLanguage();
       if (!currentKnownFL.contains(foreignLanguage)) {
-        if (isValidForeignPhrase(foreignLanguage)) {
+        if (isValidForeignPhrase(foreignLanguage, "")) {
           getUserListManager().reallyCreateNewItem(userListID, candidate, serverProps.getMediaDir());
           actualItems.add(candidate);
         } else {
@@ -2267,9 +2269,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public AudioAnswer getAlignment(String base64EncodedString,
                                   String textToAlign,
+                                  String transliteration,
                                   String identifier,
                                   int reqid, String device) {
-    AudioAnswer audioAnswer = audioFileHelper.getAlignment(base64EncodedString, textToAlign, identifier, reqid,
+    AudioAnswer audioAnswer = audioFileHelper.getAlignment(base64EncodedString, textToAlign, transliteration, identifier, reqid,
         serverProps.usePhoneToDisplay());
 
     if (!audioAnswer.isValid() && audioAnswer.getDurationInMillis() == 0) {
