@@ -611,7 +611,7 @@ public class UserDAO extends DAO {
 
       statement = connection.prepareStatement(sql
       );
-     // logger.info("drop default on " + this);
+      // logger.info("drop default on " + this);
 
       statement.execute();
       statement.close();
@@ -712,6 +712,27 @@ public class UserDAO extends DAO {
     User next = users.iterator().next();
     logger.debug("For " + userid + " found " + next);
     return next;
+  }
+
+  private Set<Long> getUserIDs(String sql) {
+    try {
+      Connection connection = getConnection();
+      PreparedStatement statement = connection.prepareStatement(sql);
+      ResultSet rs = statement.executeQuery();
+      // logger.info("sql:\n" +sql);
+      Set<Long> users = new TreeSet<>();
+      while (rs.next()) {
+        users.add(rs.getLong(1));
+      }
+
+      finish(connection, statement, rs);
+
+      return users;
+    } catch (Exception ee) {
+      logger.error("Got " + ee, ee);
+      database.logEvent("unk", "getUsers: " + ee.toString(), 0, UNKNOWN);
+    }
+    return new HashSet<>();
   }
 
   private List<User> getUsers(String sql) {
@@ -822,6 +843,19 @@ public class UserDAO extends DAO {
     return getUserMap(getMale, getUsers());
   }
 
+  /**
+   * @see AudioDAO#getUserIDsMatchingGender
+   * @param getMale
+   * @return
+   */
+  Set<Long> getUserIDsMatchingGender(boolean getMale) {
+    return getUserIDs("SELECT " + ID + " FROM " + USERS + " WHERE " + GENDER + " = " + (getMale ? 0 : 1));
+  }
+
+  /**
+   * @see mitll.langtest.server.database.analysis.Analysis#getUserInfo
+   * @return
+   */
   public Map<Long, User> getUserMap() {
     return getMap(getUsers());
   }
