@@ -131,6 +131,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   private final String absConfigDir;
   private SimpleExerciseDAO<AmasExerciseImpl> fileExerciseDAO;
   private static final boolean DEBUG = false;
+  private final PathHelper pathHelper;
 
   /**
    * @param configDir
@@ -167,6 +168,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     this.configDir = relativeConfigDir;
     this.serverProps = serverProps;
     this.logAndNotify = logAndNotify;
+    this.pathHelper = pathHelper;
 
     try {
       Connection connection1 = getConnection();
@@ -594,7 +596,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
             logger.error("bad user id for " + toCopy);
           }
           logger.debug("\teditItem copying " + toCopy + " with new fl " + userExercise.getForeignLanguage());
-          audioDAO.copyWithNewTranscript(toCopy, userExercise.getForeignLanguage());
+          audioDAO.copyWithNewTranscript(toCopy, userExercise.getForeignLanguage(), getPathHelper());
         }
 
         for (AudioAttribute audioAttribute : audioDAO.getAudioAttributes(id))
@@ -1612,8 +1614,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    */
   public Map<String, Float> getMaleFemaleProgress() {
     UserDAO userDAO = getUserDAO();
-    Map<Long, User> userMapMales = userDAO.getUserMap(true);
-    Map<Long, User> userMapFemales = userDAO.getUserMap(false);
+    Set<Long> userMapMales = userDAO.getUserIDsMatchingGender(true);
+    Set<Long> userMapFemales = userDAO.getUserIDsMatchingGender(false);
 
 //    Collection<CommonExercise> exercises1 = getExercises();
     Collection<? extends CommonShell> exercises = getExercises();
@@ -1644,6 +1646,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * by gender.
    *
    * @return
+   * @deprecated
    */
   public Map<String, Float> getMaleFemaleProgressEx() {
     UserDAO userDAO = getUserDAO();
@@ -1672,12 +1675,20 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         total, context, exercises1);
   }
 
-  public String toString() {
-    return "Database : " + this.getClass().toString();
-  }
-
   @Override
   public LogAndNotify getLogAndNotify() {
     return logAndNotify;
+  }
+
+  /**
+   * @return PathHelper
+   * @see #editItem
+   */
+  public PathHelper getPathHelper() {
+    return pathHelper;
+  }
+
+  public String toString() {
+    return "Database : " + this.getClass().toString();
   }
 }
