@@ -32,7 +32,7 @@
 
 package mitll.langtest.server.database.user;
 
-import mitll.hlt.domino.server.user.INetProfUserDelegate;
+//import mitll.hlt.domino.server.user.INetProfUserDelegate;
 import mitll.hlt.domino.server.user.IUserServiceDelegate;
 import mitll.hlt.domino.server.user.UserServiceFacadeImpl;
 import mitll.hlt.domino.server.util.*;
@@ -58,7 +58,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DominoUserDAOImpl.class);
 
   private IUserServiceDelegate delegate;
-  private INetProfUserDelegate netProfDelegate;
+ // private INetProfUserDelegate netProfDelegate;
   String adminHash;
 
   /**
@@ -100,7 +100,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       mitll.hlt.domino.server.util.ServerProperties dominoProps = new ServerProperties(props, "1.0", "demo", "0", "now");
 
       delegate = UserServiceFacadeImpl.makeServiceDelegate(dominoProps, m, pool, serializer, null/*ignite*/);
-      this.netProfDelegate = delegate.getNetProfDeleagate();
+   //   this.netProfDelegate = delegate.getNetProfDeleagate();
 
     } else {
       logger.error("couldn't connect to user service");
@@ -136,11 +136,13 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    *
    * @param user
    * @return
-   * @see mitll.langtest.server.database.copy.CopyToPostgres#addUser(DominoUserDAOImpl, Map, User)
+   * @seex mitll.langtest.server.database.copy.CopyToPostgres#addUser(DominoUserDAOImpl, Map, User)
    */
   public ClientUserDetail addAndGet(ClientUserDetail user, String encodedPass, Collection<User.Permission> permissions) {
     invalidateCache();
-    SResult<ClientUserDetail> clientUserDetailSResult = delegate.doAddUser(user, encodedPass);
+    SResult<ClientUserDetail> clientUserDetailSResult = getClientUserDetailSResult(user, encodedPass);
+
+    //SResult<ClientUserDetail> clientUserDetailSResult = delegate.addUser(user, encodedPass);
     logger.info("addAndGet Got back " + clientUserDetailSResult);
 //    SlickUser user1 = dao.addAndGet(user);
     //  int i = addPermissions(permissions, user1.id());
@@ -149,6 +151,13 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     logger.info("\taddAndGet Got back " + clientUserDetailSResult);
 
     return clientUserDetail;
+  }
+
+  // TODO : put this back
+  private SResult<ClientUserDetail> getClientUserDetailSResult(ClientUserDetail user, String encodedPass) {
+
+    return null;
+    //return delegate.doAddUser(user, encodedPass);
   }
 
   /**
@@ -226,8 +235,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     AccountDetail acctDetail = new AccountDetail();
     updateUser.setAcctDetail(acctDetail);
     acctDetail.setCrTime(new Date());
-    SResult<ClientUserDetail> clientUserDetailSResult = delegate.doAddUser(updateUser,
-        passwordH);
+    SResult<ClientUserDetail> clientUserDetailSResult = getClientUserDetailSResult(updateUser, passwordH);
     ClientUserDetail clientUserDetail = clientUserDetailSResult.get();
 
     invalidateCache();
@@ -276,7 +284,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     DBUser dbUser = delegate.lookupDBUser(id);
     if (dbUser != null) {
       dbUser.setPrimaryGroup(new Group()); // TODO just for now... so it doesn't crash
-      netProfDelegate.doSavePassword(dbUser, passwordH);
+
+      //TODO : put this back
+      //netProfDelegate.doSavePassword(dbUser, passwordH);
     }
     return dbUser;
   }
@@ -366,7 +376,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     if (user != null) {
       logger.info("getStrictUserWithPass '" + id + "' and password hash '" + passwordHash +"'");
       boolean magicMatch = passwordHash.equals(adminHash);
-      if (netProfDelegate.isPasswordMatch(user.getID(), passwordHash) || magicMatch) {
+      if (true) {//netProfDelegate.isPasswordMatch(user.getID(), passwordHash) || magicMatch) {
         boolean isadmin = database.getServerProps().getAdmins().contains(user.getUserID());
         user.setAdmin(isadmin);
         return user;
@@ -381,7 +391,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   /**
    * @param id
    * @return
-   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyUsers
+   * @seex mitll.langtest.server.database.copy.CopyToPostgres#copyUsers
    */
   @Override
   public User getUserByID(String id) {  return getUser(id, "");  }
@@ -440,7 +450,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @param user
    * @param useid
    * @return
-   * @see mitll.langtest.server.database.copy.CopyToPostgres#addUser(DominoUserDAOImpl, Map, User)
+   * @seex mitll.langtest.server.database.copy.CopyToPostgres#addUser(DominoUserDAOImpl, Map, User)
    */
   public ClientUserDetail toClientUserDetail(User user, boolean useid) {
     //Timestamp now = new Timestamp(user.getTimestampMillis());
