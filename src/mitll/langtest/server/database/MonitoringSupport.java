@@ -282,13 +282,14 @@ class MonitoringSupport {
 
     Map<String, Integer> idToCount = getInitialIdToCount(exercises);
 
-    Map<Long, User> userMap = userDAO.getUserMap(isMale);
+   // Map<Long, User> userMap = userDAO.getUserMap(isMale);
+    Collection<Long> userMap = userDAO.getUserIDsMatchingGender(isMale);
     Map<String, Set<Long>> keyToUsers = new HashMap<String, Set<Long>>();
 
     // logger.debug("results " + results.size() + ","+(isMale ? "male":"female") + " users num = " + userMap.size());
     SortedSet<String> resultKeys = new TreeSet<String>();
     for (UserAndTime r : results) {
-      if (userMap.containsKey(r.getUserid())) {   // filter for just results by males or females
+      if (userMap.contains(r.getUserid())) {   // filter for just results by males or females
         String key = r.getExid();
         resultKeys.add(key);
         Set<Long> usersForResult = keyToUsers.get(key);
