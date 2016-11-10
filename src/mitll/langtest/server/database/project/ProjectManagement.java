@@ -150,11 +150,12 @@ public class ProjectManagement implements IProjectManagement {
 
   /**
    * // TODO : this seems like a bad idea --
+   * @see DatabaseImpl#configureProjects
    */
   @Override
   public void configureProjects() {
     Collection<Project> projects = getProjects();
-    logger.info("configureProjects got " + projects.size());
+    logger.info("configureProjects got " + projects.size() + " projects");
     for (Project project : projects) {
       configureProject(project);
     }
@@ -167,7 +168,7 @@ public class ProjectManagement implements IProjectManagement {
    */
   // @Override
   private void configureProject(Project project) {
-//    logger.info("configureProject " + project);
+    logger.info("configureProject " + project);
     SlickProject project1 = project.getProject();
     if (project1 == null) logger.info("note : no project for " + project);
     int id = project1 == null ? -1 : project1.id();
@@ -211,7 +212,7 @@ public class ProjectManagement implements IProjectManagement {
   /**
    * @param exerciseDAO
    * @param projid
-   * @see #configureProject(Project)
+   * @see #configureProject
    */
   private void setDependencies(ExerciseDAO exerciseDAO, int projid) {
     logger.info("setDependencies - " + projid);
