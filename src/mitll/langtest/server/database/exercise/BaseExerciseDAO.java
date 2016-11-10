@@ -147,6 +147,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 
   /**
    * Worry about if the audio transcript doesn't match the exercise transcript
+   * @see #setAudioDAO
    */
   private void attachAudio() {
     Set<Integer> transcriptChanged = new HashSet<>();
@@ -419,7 +420,8 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    * @param addRemoveDAO
    * @param audioDAO
    * @param projid
-   * @see DatabaseImpl#setDependencies
+   * @seex DatabaseImpl#setDependencies
+   * @see mitll.langtest.server.database.project.ProjectManagement#setDependencies
    */
   public void setDependencies(IUserExerciseDAO userExerciseDAO,
                               AddRemoveDAO addRemoveDAO,
