@@ -396,34 +396,24 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    *
    * @param exercises to filter
    * @return exercises missing audio, what we want to record
-   * @paramx userID                   exercise not recorded by this user and matching the user's gender
-   * @paramx onlyUnrecordedByMyGender do we filter by gender
-   * @paramx onlyExamples             only example audio
    * @see #getExerciseIds
    * @see #getExercisesForSelectionState
    */
-  private Collection<CommonExercise> filterByUnrecorded(//long userID, boolean onlyUnrecordedByMyGender, boolean onlyExamples,
-                                                        ExerciseListRequest request,
-                                                        Collection<CommonExercise> exercises) {
-
-    // boolean onlyUnrecordedByMyGender = request.isOnlyUnrecordedByMe();
+  private Collection<CommonExercise> filterByUnrecorded(ExerciseListRequest request, Collection<CommonExercise> exercises) {
     boolean onlyExamples = request.isOnlyExamples();
 
     if (request.isOnlyUnrecordedByMe()) {
       int userID = request.getUserID();
-      logger.debug("filterByUnrecorded : for " + userID + " only by same gender " + //onlyUnrecordedByMyGender +
+      logger.debug("filterByUnrecorded : for " + userID + " only by same gender " +
           " examples only " + onlyExamples + " from " + exercises.size());
-      Set<String> recordedBySameGender = onlyExamples ?
+      Set<String> alreadyRecordedBySameGender = onlyExamples ?
           db.getAudioDAO().getWithContext(userID) :
           db.getAudioDAO().getRecordedBy(userID);
 
-      Set<String> allExercises = new HashSet<String>();
-      for (CommonShell exercise : exercises) {
-        allExercises.add(exercise.getID().trim());
-      }
+      Set<String> allExercises = getExerciseIDs(exercises);
 
-      //logger.debug("all exercises " + allExercises.size() + " removing " + recordedBySameGender.size());
-      allExercises.removeAll(recordedBySameGender);
+      //logger.debug("all exercises " + allExercises.size() + " removing " + alreadyRecordedBySameGender.size());
+      allExercises.removeAll(alreadyRecordedBySameGender);
       // logger.debug("after all exercises " + allExercises.size());
 
       List<CommonExercise> copy = new ArrayList<>();
@@ -432,14 +422,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         String trim = exercise.getID().trim();
         if (allExercises.contains(trim)) {
           if (seen.contains(trim)) logger.warn("saw " + trim + " " + exercise + " again!");
-          if ((onlyExamples && hasContext(exercise)) || !onlyExamples) {
+          if (!onlyExamples || hasContext(exercise)) {
             seen.add(trim);
             copy.add(exercise);
           }
         }
       }
-      //logger.debug("to be recorded " + copy.size() + " from " + exercises.size());
-
       return copy;
     } else {
       if (onlyExamples) {
@@ -447,20 +435,25 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         Set<String> seen = new HashSet<String>();
         for (CommonExercise exercise : exercises) {
           String trim = exercise.getID().trim();
-
           if (seen.contains(trim)) logger.warn("saw " + trim + " " + exercise + " again!");
           if (hasContext(exercise)) {
             seen.add(trim);
             copy.add(exercise);
           }
         }
-        //   logger.debug("ONLY EXAMPLES - to be recorded " + copy.size() + " from " + exercises.size());
-
         return copy;
       } else {
         return exercises;
       }
     }
+  }
+
+  private Set<String> getExerciseIDs(Collection<CommonExercise> exercises) {
+    Set<String> allExercises = new HashSet<String>();
+    for (CommonShell exercise : exercises) {
+      allExercises.add(exercise.getID().trim());
+    }
+    return allExercises;
   }
 
   private <X extends CommonShell> boolean hasContext(X exercise) {
@@ -1682,7 +1675,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   @Override
   public void markGender(AudioAttribute attr, boolean isMale) {
-    db.getAudioDAO().addOrUpdateUser(isMale ? UserDAO.DEFAULT_MALE_ID : UserDAO.DEFAULT_FEMALE_ID, attr);
+    db.getAudioDAO().addOrUpdateUser(isMale ? UserDAO.DEFAULT_MALE_ID : UserDAO.DEFAULT_FEMALE_ID, attr, pathHelper);
 
     String exid = attr.getExid();
     CommonExercise byID = db.getCustomOrPredefExercise(exid);
@@ -2306,9 +2299,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
                                          String exerciseID,
                                          AudioAnswer audioAnswer) {
     String idToUse = exercise1 == null ? exerciseID : exercise1.getID();
-
     String audioTranscript = getAudioTranscript(audioType, exercise1);
-
     //  logger.debug("addToAudioTable user " + user + " ex " + exerciseID + " for " + audioType + " path before " + audioAnswer.getPath());
 
     String permanentAudioPath = new PathWriter().
