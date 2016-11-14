@@ -171,14 +171,16 @@ class TimeSeriesPlot extends DivWidget {
   /**
    * @param phoneSessions
    * @see AnalysisPlot#setVisibility(long, long)
-   * @see PhonePlot#showErrorBarData(List, String, boolean)
+   * @see PhonePlot#showErrorBarData(List, String)
    */
   void setPhoneSessions(List<PhoneSession> phoneSessions) {
     timeToSession.clear();
-    PhoneSession lastSession = getLastSession(phoneSessions);
-    for (PhoneSession session : phoneSessions) {
-      long bin = getSessionTime(lastSession, session);
-      timeToSession.put(bin, session);
+    if (!phoneSessions.isEmpty()) {
+      PhoneSession lastSession = getLastSession(phoneSessions);
+      for (PhoneSession session : phoneSessions) {
+        long bin = getSessionTime(lastSession, session);
+        timeToSession.put(bin, session);
+      }
     }
   }
 
