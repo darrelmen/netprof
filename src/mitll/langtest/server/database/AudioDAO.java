@@ -630,13 +630,13 @@ public class AudioDAO extends DAO {
    * @return ids with both regular and slow speed recordings
    * @see mitll.langtest.server.LangTestDatabaseImpl#filterByUnrecorded
    */
-  public Set<String> getRecordedBy(long userid) {
+  public Set<String> getRecordedBy(long userid,Map<String, String> exToTranscript) {
     Collection<Long> userMap = getUserIDsMatchingGender(userid);
     //logger.debug("found " + (isMale ? " male " : " female ") + " users : " + userMap.keySet());
     // find set of users of same gender
-    Set<String> validAudioAtReg = getAudioForGender(userMap, REGULAR);
+    Set<String> validAudioAtReg = getAudioForGender(userMap, REGULAR, exToTranscript);
     //logger.debug(" regular speed for " + userMap.keySet() + " " + validAudioAtReg.size());
-    Set<String> validAudioAtSlow = getAudioForGender(userMap, SLOW);
+    Set<String> validAudioAtSlow = getAudioForGender(userMap, SLOW, exToTranscript);
 //    logger.debug(" slow speed for " + userMap.keySet() + " " + validAudioAtSlow.size());
 
     boolean b = validAudioAtReg.retainAll(validAudioAtSlow);
@@ -644,8 +644,8 @@ public class AudioDAO extends DAO {
     return validAudioAtReg;
   }
 
-  public Set<String> getWithContext(long userid) {
-    return getAudioForGender(getUserIDsMatchingGender(userid), CONTEXT_REGULAR);
+  public Set<String> getWithContext(long userid, Map<String, String> exToContext) {
+    return getAudioForGender(getUserIDsMatchingGender(userid), CONTEXT_REGULAR, exToContext);
   }
 
   private Collection<Long> getUserIDsMatchingGender(long userid) {
@@ -658,18 +658,19 @@ public class AudioDAO extends DAO {
   /**
    * select count(distinct exid) from audio where audiotype='regular';
    *
-   * @param userMap
+   * @param userIDs
    * @param audioSpeed
+   * @param exToTranscript
    * @return
    * @see #getRecordedBy
    */
-  private Set<String> getAudioForGender(Collection<Long> userIDs, String audioSpeed) {
+  private Set<String> getAudioForGender(Collection<Long> userIDs, String audioSpeed, Map<String, String> exToTranscript) {
     Set<String> results = new HashSet<>();
     try {
       Connection connection = database.getConnection(this.getClass().toString());
       String s = getInClause(userIDs);
       if (!s.isEmpty()) s = s.substring(0, s.length() - 1);
-      String sql = "SELECT distinct " + Database.EXID +
+      String sql = "SELECT distinct " + Database.EXID + ","+TRANSCRIPT +
           " FROM " + AUDIO +
           " WHERE " +
           (s.isEmpty() ? "" : USERID + " IN (" + s + ") AND ") +
@@ -682,8 +683,14 @@ public class AudioDAO extends DAO {
       ResultSet rs = statement.executeQuery();
       while (rs.next()) {
         String trim = rs.getString(1).trim();
-        if (trim.isEmpty()) logger.warn("huh? got empty exid");
-        results.add(trim);
+        String audioTranscript = rs.getString(2);
+
+        if (audioTranscript != null) {
+          String tran = exToTranscript.get(trim);
+          if(tran != null && isNoAccentMatch(audioTranscript,tran)) {
+            results.add(trim);
+          }
+        }
       }
 
 /*      logger.debug("getAudioForGender for" +
@@ -931,10 +938,10 @@ public class AudioDAO extends DAO {
             }
 
           } else {
-            logger.info("1) no match for " + exid + " '" + trimWhitespace(transcript) + "' vs '" + trimWhitespace(exerciseFL) + "'");
+//            logger.info("1) no match for " + exid + " '" + trimWhitespace(transcript) + "' vs '" + trimWhitespace(exerciseFL) + "'");
           }
         } else {
-          logger.info("2) stale exercise id : no match for " + exid);
+  //        logger.info("2) stale exercise id : no match for " + exid);
         }
       }
       finish(connection, statement, rs);
@@ -952,7 +959,7 @@ public class AudioDAO extends DAO {
 
   private boolean isNoAccentMatch(String transcript, String exerciseFL) {
     if (exerciseFL == null) return false;
-    String before = trimWhitespace(exerciseFL);
+    String before  = trimWhitespace(exerciseFL);
     String trimmed = trimWhitespace(transcript);
     String noAccents = StringUtils.stripAccents(before);
     //String transcript = audio.getTranscript();
@@ -1015,8 +1022,7 @@ public class AudioDAO extends DAO {
             results.add(id);
           }
         } else {
-          logger.info("both : no match for " + id + " '" + transcript +
-              "' vs '" + exerciseFL + "'");
+//          logger.info("both : no match for " + id + " '" + transcript +  "' vs '" + exerciseFL + "'");
         }
       }
       finish(connection, statement, rs);
