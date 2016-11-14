@@ -767,7 +767,7 @@ public class AudioFileHelper implements AlignDecode {
    */
   @Override
   public PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences, String transliteration, boolean canUseCache, boolean useOldSchool) {
-    return getASRScoreForAudio(testAudioFile, lmSentences, transliteration, serverProps.usePhoneToDisplay(), useOldSchool);
+    return getASRScoreForAudio(testAudioFile, lmSentences, transliteration, canUseCache, serverProps.usePhoneToDisplay(), useOldSchool);
   }
 
   /**
