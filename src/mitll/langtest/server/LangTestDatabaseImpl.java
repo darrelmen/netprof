@@ -390,6 +390,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
 
   /**
+   * TODO : this must include a check for transcript mismatch.
+   *
    * For all the exercises the user has not recorded, do they have the required reg and slow speed recordings by a matching gender.
    * <p>
    * Or if looking for example audio, find ones missing examples.
@@ -406,9 +408,23 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       int userID = request.getUserID();
       logger.debug("filterByUnrecorded : for " + userID + " only by same gender " +
           " examples only " + onlyExamples + " from " + exercises.size());
+
+
+
+      Map<String, String> exToTranscript = new HashMap<>();
+      Map<String, String> exToContextTranscript = new HashMap<>();
+
+      for (CommonShell shell : exercises) {
+        exToTranscript.put(shell.getID(), shell.getForeignLanguage());
+        String context = shell.getContext();
+        if (context != null && !context.isEmpty()) {
+          exToContextTranscript.put(shell.getID(), context);
+        }
+      }
+
       Set<String> alreadyRecordedBySameGender = onlyExamples ?
-          db.getAudioDAO().getWithContext(userID) :
-          db.getAudioDAO().getRecordedBy(userID);
+          db.getAudioDAO().getWithContext(userID, exToContextTranscript) :
+          db.getAudioDAO().getRecordedBy(userID, exToTranscript);
 
       Set<String> allExercises = getExerciseIDs(exercises);
 
