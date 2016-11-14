@@ -48,7 +48,7 @@ import java.util.Set;
  */
 public interface ASR {
 	Collator getCollator();
-	boolean validLTS(String foreignLanguagePhrase);
+	boolean validLTS(String foreignLanguagePhrase, String transliteration);
 	PhoneInfo getBagOfPhones(String foreignLanguagePhrase);
 	SmallVocabDecoder getSmallVocabDecoder();
 	String getUsedTokens(Collection<String> lmSentences, List<String> background);
@@ -71,7 +71,7 @@ public interface ASR {
 	 * @return
 	 */
 	PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
-													 String sentence, Collection<String> lmSentences, String imageOutDir,
+													 String sentence, Collection<String> lmSentences, String transliteration, String imageOutDir,
 													 int imageWidth, int imageHeight, boolean useScoreForBkgColor,
 													 boolean decode,
 													 boolean useCache, String prefix, Result precalcResult, boolean usePhoneToDisplay);
