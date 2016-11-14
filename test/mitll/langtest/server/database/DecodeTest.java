@@ -313,7 +313,7 @@ public class DecodeTest extends BaseTest {
   @Test
   public void testSorani() {
     DatabaseImpl database = getDatabase("sorani");
-    AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), database.getServerProps(), database, null);
+  //  AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), database.getServerProps(), database, null);
     Collection exercises = database.getExercises();
     logger.info("Got " + exercises.size());
     if (exercises.isEmpty()) {
@@ -343,6 +343,17 @@ public class DecodeTest extends BaseTest {
   public void testSpanishProgress() {
     doProgressReport("spanish");
   }
+
+  @Test
+  public void testSudaneseProgress() {
+    doProgressReport("sudanese");
+  }
+
+  @Test
+  public void testMSAProgress2() {
+    doProgressReport("msa");
+  }
+
   @Test
   public void testMSAProgress() {
     DatabaseImpl database = getDatabase("msa");
@@ -354,13 +365,10 @@ public class DecodeTest extends BaseTest {
     logger.info("ex " +exercise.getAudioAttributes());
   }
 
-  private void doProgressReport(String turkish) {
-    DatabaseImpl database = getDatabase(turkish);
-    doReport(database);
-  }
+  private void doProgressReport(String turkish) {  doReport(getDatabase(turkish));  }
 
   private void doReport(DatabaseImpl database) {
-    AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), database.getServerProps(), database, null);
+//    AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), database.getServerProps(), database, null);
     Collection exercises = database.getExercises();
     logger.info("Got " + exercises.size());
     if (exercises.isEmpty()) {
