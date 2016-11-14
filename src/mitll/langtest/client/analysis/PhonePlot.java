@@ -54,17 +54,16 @@ class PhonePlot extends TimeSeriesPlot {
   private static final int NARROW_WIDTH = 330;
   private static final int NARROW_WIDTH_REALLY = 320;
 
-  public PhonePlot() {
+  PhonePlot() {
     getElement().setId("PhonePlot");
   }
 
   /**
-   * @see PhoneContainer#showExamplesForSelectedSound()
+   * @see PhoneContainer#showExamplesForSelectedSound
    * @param rawBestScores
    * @param userChosenID
-   * @param isNarrow
    */
-  public void showErrorBarData(List<PhoneSession> rawBestScores, String userChosenID, boolean isNarrow) {
+  void showErrorBarData(List<PhoneSession> rawBestScores, String userChosenID) {
     clear();
     if (rawBestScores.isEmpty()) {
       add(new Label("No Recordings yet to analyze. Please record yourself."));
