@@ -87,6 +87,7 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
   ) {
     super(path,
         exercise.getForeignLanguage(),
+            exercise.getTransliteration(),
         service,
         controller1,
         controller1.getProps().showSpectrogram(), scoreListener, 23, REFERENCE, exercise.getID(), exercise, instance);
