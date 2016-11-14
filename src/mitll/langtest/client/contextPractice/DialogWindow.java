@@ -244,8 +244,8 @@ public class DialogWindow implements  DialogViewer {
       $wnd.soundManager.init;
   }-*/;
 
-  private SimplePostAudioRecordButton getRecordButton(String sent, final HTML resultHolder, final Button continueButton, final Image check, final Image x, final Image somethingIsHappening) {
-    SimplePostAudioRecordButton s = new SimplePostAudioRecordButton(controller, service, sent) {
+  private SimplePostAudioRecordButton getRecordButton(String sent, String transliteration, final HTML resultHolder, final Button continueButton, final Image check, final Image x, final Image somethingIsHappening) {
+    SimplePostAudioRecordButton s = new SimplePostAudioRecordButton(controller, service, sent, transliteration) {
 
       @Override
       public void useResult(AudioAnswer result) {
@@ -292,8 +292,8 @@ public class DialogWindow implements  DialogViewer {
   }
 
 
-  private SimplePostAudioRecordButton getFinalRecordButton(String sent, final Button continueButton, final Image check, final Image x, final Image somethingIsHappening, final ArrayList<HTML> scoreElements, final HTML score, final HTML avg) {
-    SimplePostAudioRecordButton s = new SimplePostAudioRecordButton(controller, service, sent) {
+  private SimplePostAudioRecordButton getFinalRecordButton(String sent, String transliteration, final Button continueButton, final Image check, final Image x, final Image somethingIsHappening, final ArrayList<HTML> scoreElements, final HTML score, final HTML avg) {
+    SimplePostAudioRecordButton s = new SimplePostAudioRecordButton(controller, service, sent, transliteration) {
 
       @Override
       public void useResult(AudioAnswer result) {
@@ -388,7 +388,8 @@ public class DialogWindow implements  DialogViewer {
           prevResponses.add(somethingIsHappening);
         }
         if (sentIndex != yourLast) {
-          recordButton = getRecordButton(dialogToSentIndexToSent.get(dialog).get(sentIndex).replaceAll("-", " "), score, continueButton, check, x, somethingIsHappening);
+          // going to have to do something to ensure OOVs in dialogs get handled appropriately
+          recordButton = getRecordButton(dialogToSentIndexToSent.get(dialog).get(sentIndex).replaceAll("-", " "), "", score, continueButton, check, x, somethingIsHappening);
           continueButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent e) {
@@ -398,7 +399,8 @@ public class DialogWindow implements  DialogViewer {
             }
           });
         } else {
-          recordButton = getFinalRecordButton(dialogToSentIndexToSent.get(dialog).get(sentIndex).replaceAll("-", " "), continueButton, check, x, somethingIsHappening, scoreElements, score, avg);
+          // going to have to do something to ensure OOVs in dialogs get handled appropriately
+          recordButton = getFinalRecordButton(dialogToSentIndexToSent.get(dialog).get(sentIndex).replaceAll("-", " "), "", continueButton, check, x, somethingIsHappening, scoreElements, score, avg);
 
           continueButton.addClickHandler(new ClickHandler() {
             @Override
