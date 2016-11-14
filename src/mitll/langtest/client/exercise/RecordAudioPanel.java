@@ -360,7 +360,7 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
       double dynamicRange = result.getDynamicRange();
       double percent = dynamicRange / 70;
       progressBar.setPercent(100 * percent);
-      progressBar.setText("" + roundToHundredth(dynamicRange));
+      progressBar.setText("" + roundToTenth(dynamicRange));
       progressBar.setColor(dynamicRange > MIN_GOOD_DYNAMIC_RANGE ?
           ProgressBarBase.Color.SUCCESS : dynamicRange > MIN_VALID_DYNAMIC_RANGE ?
           ProgressBarBase.Color.WARNING :
@@ -368,8 +368,6 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
       afterPlayWidget.setVisible(true);
     }
 
-    private float roundToHundredth(double totalHours) {
-      return ((float) ((Math.round(totalHours * 100d)))) / 100f;
-    }
+    private float roundToTenth(double totalHours) {   return ((float) ((Math.round(totalHours * 10d)))) / 10f;    }
   }
 }
