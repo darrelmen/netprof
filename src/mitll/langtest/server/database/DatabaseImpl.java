@@ -1613,23 +1613,28 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @see LangTestDatabaseImpl#getMaleFemaleProgress()
    */
   public Map<String, Float> getMaleFemaleProgress() {
-    UserDAO userDAO = getUserDAO();
-    Set<Long> userMapMales = userDAO.getUserIDsMatchingGender(true);
-    Set<Long> userMapFemales = userDAO.getUserIDsMatchingGender(false);
+    Set<Long> userMapMales = getUserDAO().getUserIDsMatchingGender(true);
+    Set<Long> userMapFemales = getUserDAO().getUserIDsMatchingGender(false);
 
 //    Collection<CommonExercise> exercises1 = getExercises();
     Collection<? extends CommonShell> exercises = getExercises();
+    Map<String, String> exToTranscript = new HashMap<>();
+    Map<String, String> exToContextTranscript = new HashMap<>();
     float total = exercises.size();
     Set<String> uniqueIDs = new HashSet<String>();
 
     int context = 0;
     for (CommonShell shell : exercises) {
-      if (shell.getContext() != null &&
-          !shell.getContext().isEmpty()) context++;
+      if (shell.getContext() != null && !shell.getContext().isEmpty()) {
+        context++;
+       // logger.info("found " + shell.getContext() + " for " + shell.getID());
+      }
       boolean add = uniqueIDs.add(shell.getID());
       if (!add) {
         logger.warn("getMaleFemaleProgress found duplicate id " + shell.getID() + " : " + shell);
       }
+      exToTranscript.put(shell.getID(), shell.getForeignLanguage());
+      exToContextTranscript.put(shell.getID(), shell.getContext());
     }
 /*
     logger.info("found " + total + " total exercises, " +
@@ -1637,8 +1642,14 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         " unique");
 */
 
-    return getAudioDAO().getRecordedReport(userMapMales, userMapFemales,
-        total, uniqueIDs, context);
+    return getAudioDAO().getRecordedReport(
+        userMapMales,
+        userMapFemales,
+        total,
+        uniqueIDs,
+        exToTranscript,
+        exToContextTranscript,
+        context);
   }
 
   /**
