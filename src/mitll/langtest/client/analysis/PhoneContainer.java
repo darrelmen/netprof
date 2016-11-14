@@ -582,7 +582,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     filteredWords = filteredWords.subList(0, Math.min(filteredWords.size(), MAX_EXAMPLES));
     exampleContainer.addItems(phone, filteredWords);
 
-    phonePlot.showErrorBarData(filtered, phone, isNarrow);
+    phonePlot.showErrorBarData(filtered, phone);
   }
 
   private SafeHtml getSafeHtml(String columnText) {
