@@ -57,5 +57,5 @@ public interface AlignDecode {
    * @param useOldSchool
    * @return
    */
-  PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences, boolean canUseCache, boolean useOldSchool);
+  PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences, String transliteration, boolean canUseCache, boolean useOldSchool);
 }
