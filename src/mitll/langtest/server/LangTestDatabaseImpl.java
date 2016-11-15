@@ -1478,7 +1478,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     long then = System.currentTimeMillis();
     UserList<CommonShell> defectList = userListManager.getDefectList(db.getTypeOrder());
     long now = System.currentTimeMillis();
-    logger.info("took " + (now - then) + " to get defect list size = " + defectList.getExercises().size());
+    logger.info("took " + (now - then) + " to get defect list size = " + defectList.getNumItems());
 
     List<UserList<CommonShell>> lists = new ArrayList<>();
     lists.add(defectList);
@@ -1487,7 +1487,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     lists.add(commentedList);
     now = System.currentTimeMillis();
 
-    logger.info("took " + (now - then) + " to get comment list size = " + commentedList.getExercises().size());
+    logger.info("took " + (now - then) + " to get comment list size = " + commentedList.getNumItems());
 
     if (!serverProps.isNoModel()) {
       then = System.currentTimeMillis();
@@ -1496,7 +1496,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
       lists.add(attentionList);
 
-      logger.info("took " + (now - then) + " to get attention list size = " + attentionList.getExercises().size());
+      logger.info("took " + (now - then) + " to get attention list size = " + attentionList.getNumItems());
 
     }
     return lists;
@@ -1563,7 +1563,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     logger.info("got " + lines.length + " lines");
     List<CommonExercise> newItems = new ArrayList<>();
     UserList<CommonShell> userListByID = db.getUserListManager().getUserListByID(userListID, Collections.emptyList());
-    int n = userListByID.getExercises().size();
+    int n = userListByID.getNumItems();
     Set<String> currentKnownFL = new HashSet<>();
     for (CommonShell shell : userListByID.getExercises()) currentKnownFL.add(shell.getForeignLanguage());
     boolean onFirst = true;
