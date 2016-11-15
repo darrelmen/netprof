@@ -157,7 +157,7 @@ public class ListManager implements RequiresResize {
       }
     });
 
-    npfHelper = new NPFHelper(service, feedback, controller, false);
+    npfHelper = new NPFHelper(service, feedback, controller, false, false);
     reviewItem = new ReviewItemHelper(service, feedback, controller, exerciseList);
     avpHelper = new AVPHelper(service, feedback, controller);
     editItem = new EditItem(service, userManager, controller, exerciseList, feedback);
@@ -839,10 +839,9 @@ public class ListManager implements RequiresResize {
 
           @Override
           public void onSuccess(Collection<CommonExercise> newExercise) {
-            logger.info("before " + ul.getExercises().size());
+           // logger.info("before " + ul.getNumItems());
             for (CommonExercise exercise : newExercise) ul.addExercise(exercise);
-            logger.info("after  " + ul.getExercises().size());
-
+           // logger.info("after  " + ul.getNumItems());
             reallyShowLearnTab(tabPanel, learnTab, ul, instanceName);
           }
         });
