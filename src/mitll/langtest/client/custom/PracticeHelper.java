@@ -96,7 +96,7 @@ class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise>
                                                                                  Panel currentExercisePanel,
                                                                                  String instanceName,
                                                                                  boolean incorrectFirst) {
-        return new NPFlexSectionExerciseList(outer, topRow, currentExercisePanel, instanceName, true) {
+        return new NPFlexSectionExerciseList(outer, topRow, currentExercisePanel, instanceName, true, false) {
           @Override
           protected CommonShell findFirstExercise() {
             String currentExerciseID = statsFlashcardFactory.getCurrentExerciseID();

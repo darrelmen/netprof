@@ -44,6 +44,7 @@ import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.BootstrapExercisePanel;
 import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.Result;
 import mitll.langtest.shared.scoring.AudioContext;
 
 import java.util.logging.Logger;
@@ -204,7 +205,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
     String device = controller.getBrowserInfo();
     final int len = base64EncodedWavFile.length();
 
-    AudioContext audioContext = new AudioContext(reqid, controller.getUser(), exerciseID, index, getAudioType());
+    AudioContext audioContext = new AudioContext(reqid, controller.getUser(), exerciseID, index, Result.AUDIO_TYPE_REGULAR);
 
     service.writeAudioFile(base64EncodedWavFile,
         audioContext,
@@ -269,15 +270,6 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
       public void onSuccess(Void result) {
       }
     });
-  }
-
-  /**
-   * Like not what you want - should be based on tab it's recorded in.
-   *
-   * @return
-   */
-  private String getAudioType() {
-    return controller.getAudioType();
   }
 
   public Widget getRecordButton() {
