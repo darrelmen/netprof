@@ -645,7 +645,7 @@ class NewUserExercise extends BasicDialog {
     originalList.addExercise(newExercise);
 
     ul.addExercise(newUserExercisePlaceholder); // make sure the placeholder is always at the end
-    itemMarker.setText(ul.getExercises().size() + " items");
+    itemMarker.setText(ul.getNumItems() + " items");
 
     Shell toMoveToEnd = moveNewExerciseToEndOfList(newExercise, exerciseList);
 
@@ -686,10 +686,17 @@ class NewUserExercise extends BasicDialog {
     private RecordAudioPanel otherRAP;
     private WaveformPostAudioRecordButton postAudioButton;
 
+    /**
+     * @see #makeRecordAudioPanel(Panel, boolean, String)
+     * @param newExercise
+     * @param row
+     * @param recordRegularSpeed
+     * @param instance
+     */
     public CreateFirstRecordAudioPanel(CommonExercise newExercise, Panel row,
                                        boolean recordRegularSpeed, String instance) {
       super(newExercise, NewUserExercise.this.controller, row, NewUserExercise.this.service, 0, false,
-          NewUserExercise.this.controller.getAudioType(), instance);
+          Result.AUDIO_TYPE_REGULAR, instance);
       this.recordRegularSpeed = recordRegularSpeed;
       setExercise(newExercise);
 
