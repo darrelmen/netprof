@@ -102,7 +102,7 @@ public class ResponseExerciseList extends SingleSelectExerciseList {
   public ResponseExerciseList(Panel secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                               UserFeedback feedback,
                               final ExerciseController controller, String instance) {
-    super(secondRow, currentExerciseVPanel, service, feedback, controller, instance, false);
+    super(secondRow, currentExerciseVPanel, service, feedback, controller, instance, false, true);
     innerContainer.getElement().getStyle().setPadding(5, Style.Unit.PX);
     String responseType = controller.getProps().getResponseType();
     responseTypeChanged(responseType);
