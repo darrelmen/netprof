@@ -74,7 +74,6 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
   private final ExerciseController controller;
   private final LangTestDatabaseAsync service;
   private final String textToAlign;
-  private final String transliteration;
   private final String identifier;
   protected AudioAnswer lastResult;
 
@@ -86,8 +85,8 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
    * @param textToAlign to align the audio to
    */
   public SimplePostAudioRecordButton(final ExerciseController controller, LangTestDatabaseAsync service,
-                                     String textToAlign, String transliteration) {
-    this(controller, service, textToAlign, transliteration, "item");
+                                     String textToAlign) {
+    this(controller, service, textToAlign, "item");
   }
 
   /**
@@ -99,8 +98,8 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
    * @param identifier  optional, but if you want to associate the audio with an item "e.g. Dialog Item #3".
    */
   private SimplePostAudioRecordButton(final ExerciseController controller, LangTestDatabaseAsync service,
-                                      String textToAlign, String transliteration, String identifier) {
-    this(controller, service, "Record", RELEASE_TO_STOP, textToAlign, transliteration, identifier);
+                                      String textToAlign, String identifier) {
+    this(controller, service, "Record", RELEASE_TO_STOP, textToAlign, identifier);
   }
 
   /**
@@ -111,13 +110,12 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.ASRRecordAudioPanel.MyPostAudioRecordButton
    */
   private SimplePostAudioRecordButton(final ExerciseController controller, LangTestDatabaseAsync service,
-                                      String recordButtonTitle, String stopButtonTitle, String textToAlign, String transliteration, String identifier) {
+                                      String recordButtonTitle, String stopButtonTitle, String textToAlign, String identifier) {
     super(controller.getRecordTimeout(), true, recordButtonTitle, stopButtonTitle, controller.getProps());
     setRecordingListener(this);
     this.controller = controller;
     this.service = service;
     this.textToAlign = textToAlign;
-    this.transliteration = transliteration;
     this.identifier = identifier;
     getElement().setId("PostAudioRecordButton");
     getElement().getStyle().setMarginTop(1, Style.Unit.PX);
@@ -140,7 +138,6 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
 
     service.getAlignment(base64EncodedWavFile,
         textToAlign,
-            transliteration,
         identifier,
         reqid,
         controller.getBrowserInfo(), getAlignmentCallback());
