@@ -48,10 +48,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.server.amas.QuizCorrect;
-import mitll.langtest.server.audio.AudioCheck;
-import mitll.langtest.server.audio.AudioConversion;
-import mitll.langtest.server.audio.AudioFileHelper;
-import mitll.langtest.server.audio.PathWriter;
+import mitll.langtest.server.audio.*;
 import mitll.langtest.server.autocrt.AutoCRT;
 import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.DatabaseImpl;
@@ -391,7 +388,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * TODO : this must include a check for transcript mismatch.
-   *
+   * <p>
    * For all the exercises the user has not recorded, do they have the required reg and slow speed recordings by a matching gender.
    * <p>
    * Or if looking for example audio, find ones missing examples.
@@ -408,7 +405,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       int userID = request.getUserID();
       logger.debug("filterByUnrecorded : for " + userID + " only by same gender " +
           " examples only " + onlyExamples + " from " + exercises.size());
-
 
 
       Map<String, String> exToTranscript = new HashMap<>();
@@ -1187,7 +1183,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param width
    * @param height
    * @return
-   * @see mitll.langtest.client.scoring.ReviewScoringPanel#scoreAudio(String, long, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
+   * @see mitll.langtest.client.scoring.ReviewScoringPanel#scoreAudio
    */
   @Override
   public PretestScore getResultASRInfo(long resultID, int width, int height) {
@@ -1213,9 +1209,19 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         asrScoreForAudio = audioFileHelper.getASRScoreForAudio(1,
             audioFilePath, sentence, transliteration,
             width, height,
+            exerciseID, result,
+
             true,  // make transcript images with colored segments
-            false, // false = do alignment
-            serverProps.useScoreCache(), exerciseID, result, serverProps.usePhoneToDisplay(), false);
+
+            // false, // false = do alignment
+            //  serverProps.useScoreCache(),
+            //  serverProps.usePhoneToDisplay(),
+            //  false,
+
+            new DecoderOptions()
+                .setDoFlashcard(false)
+                .setCanUseCache(serverProps.useScoreCache())
+                .setUsePhoneToDisplay(serverProps.usePhoneToDisplay()));
       }
     } catch (Exception e) {
       logger.error("Got " + e, e);
@@ -1237,11 +1243,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param useScoreToColorBkg
    * @param exerciseID
    * @return
-   * @see mitll.langtest.client.scoring.ASRScoringAudioPanel#scoreAudio(String, long, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
+   * @see mitll.langtest.client.scoring.ASRScoringAudioPanel#scoreAudio
    */
   public PretestScore getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence, String transliteration,
                                           int width, int height, boolean useScoreToColorBkg, String exerciseID) {
-    return getPretestScore(reqid, resultID, testAudioFile, sentence, transliteration, width, height, useScoreToColorBkg, exerciseID, false);
+    return getPretestScore(reqid, resultID, testAudioFile, sentence, transliteration, width, height, exerciseID, useScoreToColorBkg, false);
   }
 
   /**
@@ -1253,13 +1259,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param sentence
    * @param width
    * @param height
-   * @param useScoreToColorBkg
    * @param exerciseID
+   * @param useScoreToColorBkg
    * @param usePhoneToDisplay
    * @return
    */
   private PretestScore getPretestScore(int reqid, long resultID, String testAudioFile, String sentence, String transliteration,
-                                       int width, int height, boolean useScoreToColorBkg, String exerciseID, boolean usePhoneToDisplay) {
+                                       int width, int height,
+
+
+                                       String exerciseID,
+
+                                       boolean useScoreToColorBkg, boolean usePhoneToDisplay) {
     if (testAudioFile.equals(AudioConversion.FILE_MISSING)) return new PretestScore(-1);
     long then = System.currentTimeMillis();
 
@@ -1284,16 +1295,22 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     boolean usePhoneToDisplay1 = usePhoneToDisplay || serverProps.usePhoneToDisplay();
 
-    PretestScore asrScoreForAudio = audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, transliteration, width, height, useScoreToColorBkg,
-        false, serverProps.useScoreCache(), exerciseID, cachedResult, usePhoneToDisplay1, false);
+    PretestScore asrScoreForAudio = audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, transliteration, width, height, exerciseID, cachedResult, useScoreToColorBkg,
+        //false, serverProps.useScoreCache(), usePhoneToDisplay1, false,
+        new DecoderOptions()
+            .setDoFlashcard(false)
+            .setCanUseCache(serverProps.useScoreCache())
+            .setUsePhoneToDisplay(usePhoneToDisplay1));
 
     long timeToRunHydec = System.currentTimeMillis() - then;
 
-    logger.debug("getPretestScore : scoring file " + testAudioFile + " for " +
-        " exid " + exerciseID +
-        " sentence " + sentence.length() + " characters long : " +
-        " score " + asrScoreForAudio.getHydecScore() +
-        " took " + timeToRunHydec + " millis " + " usePhoneToDisplay " + usePhoneToDisplay1);
+    logger.debug("getPretestScore : scoring" +
+        "\n\tfile     " + testAudioFile + " for " +
+        "\n\texid     " + exerciseID +
+        "\n\tsentence " + sentence.length() + " characters long : " +
+        "\n\tscore    " + asrScoreForAudio.getHydecScore() +
+        "\n\ttook     " + timeToRunHydec + " millis " +
+        "\n\tusePhoneToDisplay " + usePhoneToDisplay1);
 
     if (resultID > -1 && cachedResult == null) { // alignment has two steps : 1) post the audio, then 2) do alignment
       db.rememberScore(resultID, asrScoreForAudio, false);
@@ -1312,12 +1329,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param useScoreToColorBkg
    * @param exerciseID
    * @return
-   * @see mitll.langtest.client.scoring.ASRScoringAudioPanel#scoreAudio(String, long, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
+   * @see mitll.langtest.client.scoring.ASRScoringAudioPanel#scoreAudio
    */
   @Override
   public PretestScore getASRScoreForAudioPhonemes(int reqid, long resultID, String testAudioFile, String sentence, String transliteration,
                                                   int width, int height, boolean useScoreToColorBkg, String exerciseID) {
-    return getPretestScore(reqid, resultID, testAudioFile, sentence, transliteration, width, height, useScoreToColorBkg, exerciseID, true);
+    return getPretestScore(reqid, resultID, testAudioFile, sentence, transliteration, width, height, exerciseID, useScoreToColorBkg, true);
   }
 
   @Override
@@ -2204,7 +2221,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
                                     boolean doFlashcard,
                                     boolean recordInResults,
                                     boolean addToAudioTable,
-                                    boolean allowAlternates) {
+                                    boolean allowAlternates
+
+  ) {
     String exercise = audioContext.getId();
 
     boolean amas = serverProps.isAMAS();
@@ -2222,12 +2241,20 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     AnswerInfo.RecordingInfo recordingInfo = new AnswerInfo.RecordingInfo("", "", deviceType, device, recordedWithFlash);
 
+    DecoderOptions options = new DecoderOptions()
+        .setRecordInResults(recordInResults)
+        .setDoFlashcard(doFlashcard)
+        .setRefRecording(addToAudioTable)
+        .setAllowAlternates(allowAlternates);
+
     AudioAnswer audioAnswer = amas ?
         audioFileHelper.writeAMASAudioFile(base64EncodedString, db.getAMASExercise(exercise), audioContext, recordingInfo) :
         audioFileHelper.writeAudioFile(base64EncodedString,
             exercise1,
             audioContext, recordingInfo,
-            recordInResults, doFlashcard, allowAlternates, addToAudioTable);
+            //recordInResults, doFlashcard, allowAlternates, addToAudioTable
+            options
+        );
 
     int user = audioContext.getUserid();
     if (addToAudioTable && audioAnswer.isValid()) {
