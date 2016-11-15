@@ -73,7 +73,6 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
     this.controller = controller;
     this.service = service;
     this.feedback = feedback;
-    //  this.userManager = userManager;
     this.incorrectFirst = false;
   }
 

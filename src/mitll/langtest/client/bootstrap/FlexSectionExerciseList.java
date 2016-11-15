@@ -98,13 +98,16 @@ public class FlexSectionExerciseList extends NPExerciseList {
    * @param controller
    * @param instance
    * @param incorrectFirst
+   * @param showFirstNotCompleted
    * @see NPFlexSectionExerciseList#NPFlexSectionExerciseList
    */
   protected FlexSectionExerciseList(Panel secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                     UserFeedback feedback,
                                     ExerciseController controller,
-                                    String instance, boolean incorrectFirst) {
-    super(currentExerciseVPanel, service, feedback, controller, true, instance, incorrectFirst);
+                                    String instance,
+                                    boolean incorrectFirst,
+                                    boolean showFirstNotCompleted) {
+    super(currentExerciseVPanel, service, feedback, controller, true, instance, incorrectFirst, showFirstNotCompleted);
 
     sectionPanel = new FluidContainer();
     sectionPanel.getElement().setId("sectionPanel_" + instance);

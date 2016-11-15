@@ -295,7 +295,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
 /*    Widget insideContentPanel = makeItemMarker2(ul);
     insideContentPanel.addStyleName("leftFiveMargin");*/
 
-    Heading h4 = new Heading(4, name, ul.getExercises().size() + " items");
+    Heading h4 = new Heading(4, name, ul.getNumItems() + " items");
     h4.addStyleName("floatLeft");
     r1.add(h4);
 
