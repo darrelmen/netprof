@@ -57,6 +57,7 @@ import mitll.langtest.shared.exercise.STATE;
 import mitll.langtest.shared.exercise.Shell;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Show exercises with a cell table that can handle thousands of rows.
@@ -70,7 +71,7 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class PagingExerciseList<T extends CommonShell, U extends Shell> extends ExerciseList<T, U> {
-  //  private final Logger logger = Logger.getLogger("PagingExerciseList");
+  private final Logger logger = Logger.getLogger("PagingExerciseList");
   public static final String SEARCH = "Search";
   private static final int TEN_SECONDS = 10 * 60 * 1000;
 
@@ -88,6 +89,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   private final SafeUri animated = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "animated_progress28.gif");
   private final SafeUri white = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "white_32x32.png");
   private final com.github.gwtbootstrap.client.ui.Image waitCursor = new com.github.gwtbootstrap.client.ui.Image(white);
+  protected boolean showFirstNotCompleted = false;
 
   /**
    * @param currentExerciseVPanel
@@ -98,17 +100,27 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * @param showTypeAhead
    * @param instance
    * @param incorrectFirst
-   * @see mitll.langtest.client.custom.content.AVPHelper#makeExerciseList(Panel, String)
-   * @see mitll.langtest.client.custom.content.NPFHelper#makeExerciseList(Panel, String)
+   * @param showFirstNotCompleted
+   * @see mitll.langtest.client.custom.content.AVPHelper#makeExerciseList
+   * @see mitll.langtest.client.custom.content.NPFHelper#makeExerciseList
    */
-  PagingExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
-                     ExercisePanelFactory<T, U> factory, ExerciseController controller,
-                     boolean showTypeAhead, String instance, boolean incorrectFirst) {
+  PagingExerciseList(Panel currentExerciseVPanel,
+                     LangTestDatabaseAsync service,
+                     UserFeedback feedback,
+                     ExercisePanelFactory<T, U> factory,
+                     ExerciseController controller,
+                     boolean showTypeAhead,
+                     String instance,
+                     boolean incorrectFirst,
+                     boolean showFirstNotCompleted) {
     super(currentExerciseVPanel, service, feedback, factory, controller, instance, incorrectFirst);
     this.controller = controller;
     this.showTypeAhead = showTypeAhead;
+    this.showFirstNotCompleted = showFirstNotCompleted;
+
     addComponents();
     getElement().setId("PagingExerciseList_" + instance);
+//    if (showFirstNotCompleted) logger.info("show first completed for " + instance);
   }
 
   @Override
@@ -192,9 +204,13 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     return pagingContainer;
   }
 
+  /**
+   * Skip to first not completed or just go to the first item.
+   * @return
+   */
   @Override
   protected T findFirstExercise() {
-    return controller.showCompleted() ? getFirstNotCompleted() : super.findFirstExercise();
+    return showFirstNotCompleted ? getFirstNotCompleted() : super.findFirstExercise();
   }
 
   private T getFirstNotCompleted() {
