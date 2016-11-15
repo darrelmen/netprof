@@ -262,7 +262,7 @@ public interface LangTestDatabase extends RemoteService {
    * @param exerciseID
    * @return
    */
-  PretestScore getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence, String transliteration,
+  PretestScore getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence,
                                    int width, int height, boolean useScoreToColorBkg, String exerciseID);
 
   /**
@@ -277,7 +277,7 @@ public interface LangTestDatabase extends RemoteService {
    * @param exerciseID
    * @return
    */
-  PretestScore getASRScoreForAudioPhonemes(int reqid, long resultID, String testAudioFile, String sentence, String transliteration,
+  PretestScore getASRScoreForAudioPhonemes(int reqid, long resultID, String testAudioFile, String sentence,
                                    int width, int height, boolean useScoreToColorBkg, String exerciseID);
 
   /**
@@ -298,7 +298,6 @@ public interface LangTestDatabase extends RemoteService {
    */
   AudioAnswer getAlignment(String base64EncodedString,
                            String textToAlign,
-                           String transliteration,
                            String identifier,
                            int reqid, String device);
 
@@ -460,7 +459,7 @@ public interface LangTestDatabase extends RemoteService {
    * @param foreign
    * @return
    */
-  boolean isValidForeignPhrase(String foreign, String transliteration);
+  boolean isValidForeignPhrase(String foreign);
 
   // Create User Exercises
   /**
