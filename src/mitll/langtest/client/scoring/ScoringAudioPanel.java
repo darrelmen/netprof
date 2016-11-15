@@ -66,7 +66,6 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
   private static final boolean SHOW_SPECTROGRAM = false;
 
   private final String refSentence;
-  private final String transliteration;
   private long resultID = -1;
   private ScoreListener scoreListener;
   private PretestScore result;
@@ -83,9 +82,9 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
    * @param instance
    * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, LangTestDatabaseAsync, ExerciseController, ScoreListener, String, String, T, String)
    */
-  ScoringAudioPanel(String refSentence, String transliteration, LangTestDatabaseAsync service, ExerciseController controller,
+  ScoringAudioPanel(String refSentence, LangTestDatabaseAsync service, ExerciseController controller,
                     ScoreListener gaugePanel, String playButtonSuffix, String exerciseID, T exercise, String instance) {
-    this(null, refSentence, transliteration, service, controller, SHOW_SPECTROGRAM, gaugePanel, 23, playButtonSuffix, exerciseID, exercise, instance);
+    this(null, refSentence, service, controller, SHOW_SPECTROGRAM, gaugePanel, 23, playButtonSuffix, exerciseID, exercise, instance);
   }
 
   /**
@@ -101,14 +100,13 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
    * @param instance
    * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, String, LangTestDatabaseAsync, ExerciseController, boolean, ScoreListener, int, String, String, T, String)
    */
-  ScoringAudioPanel(String path, String refSentence, String transliteration, LangTestDatabaseAsync service,
+  ScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service,
                     ExerciseController controller,
                     boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin, String playButtonSuffix,
                     String exerciseID, T exercise, String instance) {
     super(path, service, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix,
         controller.getAudioType(), exerciseID, exercise, instance);
     this.refSentence = refSentence;
-    this.transliteration = transliteration;
     showOnlyOneExercise = controller.showOnlyOneExercise();
     addClickHandlers();
   }
@@ -176,7 +174,7 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
   protected void getEachImage(int width) {
     super.getEachImage(width);
     if (!controller.getProps().isNoModel()) {
-      getTranscriptImageURLForAudio(audioPath, refSentence, transliteration, width, words, phones);
+      getTranscriptImageURLForAudio(audioPath, refSentence, width, words, phones);
     }
   }
 
@@ -188,14 +186,14 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
    * @param phoneTranscript
    * @see #getEachImage(int)
    */
-  private void getTranscriptImageURLForAudio(final String path, String refSentence, String transliteration, int width,
+  private void getTranscriptImageURLForAudio(final String path, String refSentence, int width,
                                              final ImageAndCheck wordTranscript,
                                              final ImageAndCheck phoneTranscript) {
     int widthToUse = Math.max(MIN_WIDTH, width);
-    scoreAudio(path, resultID, refSentence, transliteration, wordTranscript, phoneTranscript, widthToUse, ANNOTATION_HEIGHT, getReqID("score"));
+    scoreAudio(path, resultID, refSentence, wordTranscript, phoneTranscript, widthToUse, ANNOTATION_HEIGHT, getReqID("score"));
   }
 
-  protected abstract void scoreAudio(final String path, long resultID, String refSentence, String transliteration,
+  protected abstract void scoreAudio(final String path, long resultID, String refSentence,
                                      final ImageAndCheck wordTranscript, final ImageAndCheck phoneTranscript,
                                      int toUse, int height, int reqid);
 

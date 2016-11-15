@@ -75,8 +75,8 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
    * @param exercise
    *@param instance @see mitll.langtest.client.result.ResultManager#getAsyncTable(int, Widget)
    */
-  public ReviewScoringPanel(String path, String refSentence, String transliteration, LangTestDatabaseAsync service, ExerciseController controller, String exerciseID, CommonExercise exercise, String instance) {
-    super(path, refSentence, transliteration, service, controller, false, new EmptyScoreListener(), 23, "", exerciseID, exercise, instance);
+  public ReviewScoringPanel(String path, String refSentence, LangTestDatabaseAsync service, ExerciseController controller, String exerciseID, CommonExercise exercise, String instance) {
+    super(path, refSentence, service, controller, false, new EmptyScoreListener(), 23, "", exerciseID, exercise, instance);
     tablesContainer = new HorizontalPanel();
     tablesContainer.getElement().setId("TablesContainer");
     belowContainer = new DivWidget();
@@ -192,7 +192,7 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
    * @see ScoringAudioPanel#getTranscriptImageURLForAudio(String, String, int, ImageAndCheck, ImageAndCheck)
    */
   @Override
-  protected void scoreAudio(String path, long resultID, String refSentence, String transliteration, final ImageAndCheck wordTranscript,
+  protected void scoreAudio(String path, long resultID, String refSentence, final ImageAndCheck wordTranscript,
                             final ImageAndCheck phoneTranscript, int width, int height, int reqid) {
     // logger.info("ReviewScoringPanel.scoreAudio : path " + path + " width " + width + " height " + height);
     boolean wasVisible = wordTranscript.getImage().isVisible();
