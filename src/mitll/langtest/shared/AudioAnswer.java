@@ -119,7 +119,7 @@ public class AudioAnswer implements IsSerializable {
   public void setDecodeOutput(String decodeOutput) { this.decodeOutput = decodeOutput; }
 
   /**
-   * @see DecodeCorrectnessChecker#getFlashcardAnswer
+   * @see DecodeCorrectnessChecker#getDecodeScore
    * @param score
    */
   public void setScore(double score) { this.score = score; }
@@ -137,7 +137,7 @@ public class AudioAnswer implements IsSerializable {
   public boolean isCorrect() { return correct; }
 
   /**
-   * @see DecodeCorrectnessChecker#getFlashcardAnswer
+   * @see DecodeCorrectnessChecker#getDecodeScore
    * @param correct
    */
   public void setCorrect(boolean correct) {
