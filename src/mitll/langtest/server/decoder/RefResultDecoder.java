@@ -38,6 +38,7 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
+import mitll.langtest.server.audio.DecoderOptions;
 import mitll.langtest.server.database.AudioDAO;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.ResultDAO;
@@ -251,7 +252,7 @@ public class RefResultDecoder {
       CommonExercise exercise = idToEx.get(res.getExerciseID());
       if (exercise != null) {
         logger.info("doMissingInfo #" + count + " of " + size + " align " + exercise.getID() + " and result " + res.getUniqueID());
-        PretestScore alignmentScore = audioFileHelper.getAlignmentScore(exercise, res.getAnswer(), serverProps.usePhoneToDisplay(), false);
+        PretestScore alignmentScore = audioFileHelper.getEasyAlignment(exercise, res.getAnswer());
         db.rememberScore(res.getUniqueID(), alignmentScore, false);
       } else {
         logger.warn("no exercise for " + res.getExerciseID() + " from result?");
