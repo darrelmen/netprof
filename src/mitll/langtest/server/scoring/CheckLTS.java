@@ -133,7 +133,10 @@ class CheckLTS {
         }
       catch (Exception e){
         if (DEBUG)  logger.debug("transliteration not usable in checkLTS with lts "+lts+" and transliteration: "+transliteration);
+        translitOk = false;
       }
+    }else{
+      translitOk = false;
     }
 
     String language = isMandarin ? " MANDARIN " : "";
