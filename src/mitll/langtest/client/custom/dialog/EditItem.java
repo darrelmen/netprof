@@ -176,7 +176,7 @@ public class EditItem {
 
     final PagingExerciseList<CommonShell, CommonExercise> exerciseList =
         new NPExerciseList(right, service, feedback, controller,
-            true, instanceName, false) {
+            true, instanceName, false, false) {
           @Override
           protected void onLastItem() {
             new ModalInfoDialog("Complete", "List complete!", new HiddenHandler() {
