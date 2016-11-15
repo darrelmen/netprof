@@ -121,12 +121,12 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getASRScoreForAudio
    */
   public PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
-                                  String sentence, Collection<String> lmSentences, String transliteration, String imageOutDir,
+                                  String sentence, Collection<String> lmSentences, String imageOutDir,
                                   int imageWidth, int imageHeight, boolean useScoreForBkgColor,
                                   boolean decode,
                                   boolean useCache, String prefix, Result precalcResult, boolean usePhoneToDisplay) {
     return scoreRepeatExercise(testAudioDir, testAudioFileNoSuffix,
-        sentence, lmSentences, transliteration,
+        sentence, lmSentences,
         imageOutDir, imageWidth, imageHeight, useScoreForBkgColor,
         decode,
         useCache, prefix, precalcResult, usePhoneToDisplay);
@@ -166,7 +166,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                                            String testAudioFileNoSuffix,
                                            String sentence,
                                            Collection<String> lmSentences, // TODO make two params, transcript and lm (null if no slf)
-                                           String transliteration,
+
                                            String imageOutDir,
                                            int imageWidth,
                                            int imageHeight,
@@ -178,7 +178,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
     String pathname = noSuffix + ".wav";
 
-    boolean b = validLTS(sentence, transliteration);
+    boolean b = validLTS(sentence);
     // audio conversion stuff
     File wavFile = new File(pathname);
     boolean mustPrepend = false;

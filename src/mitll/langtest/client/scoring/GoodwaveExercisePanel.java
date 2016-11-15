@@ -552,7 +552,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
      * @param instance   @see GoodwaveExercisePanel#getAnswerWidget
      */
     public ASRRecordAudioPanel(LangTestDatabaseAsync service, ExerciseController controller, T exercise, String instance) {
-      super(exercise.getForeignLanguage(), exercise.getTransliteration(), service, controller, scorePanel, REFERENCE, exercise.getID(), exercise, instance);
+      super(exercise.getForeignLanguage(), service, controller, scorePanel, REFERENCE, exercise.getID(), exercise, instance);
       this.index = 1;
       getElement().setId("ASRRecordAudioPanel");
     }
