@@ -73,9 +73,9 @@ public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> 
    * @param exercise
    * @param instance
    */
-  public ASRScoringAudioPanel(String refSentence, String transliteration, LangTestDatabaseAsync service, ExerciseController controller, ScoreListener gaugePanel,
+  public ASRScoringAudioPanel(String refSentence, LangTestDatabaseAsync service, ExerciseController controller, ScoreListener gaugePanel,
                               String playButtonSuffix, String exerciseID, T exercise, String instance) {
-    super(refSentence, transliteration, service, controller, gaugePanel, playButtonSuffix, exerciseID, exercise, instance);
+    super(refSentence, service, controller, gaugePanel, playButtonSuffix, exerciseID, exercise, instance);
   }
 
   /**
@@ -92,10 +92,10 @@ public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> 
    * @param exercise
    * @param instance
    */
-  public ASRScoringAudioPanel(String path, String refSentence, String transliteration, LangTestDatabaseAsync service,
+  public ASRScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service,
                               ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel,
                               int rightMargin, String playButtonSuffix, String exerciseID, T exercise, String instance) {
-    super(path, refSentence, transliteration, service, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix, exerciseID, exercise, instance);
+    super(path, refSentence, service, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix, exerciseID, exercise, instance);
     this.useScoreToColorBkg = controller.useBkgColorForRef();
   }
 
@@ -113,7 +113,7 @@ public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> 
    * @param height of images returned
    * @param reqid so if many requests are made quickly and the returns are out of order, we can ignore older requests
    */
-  protected void scoreAudio(final String path, long resultID, String refSentence, String transliteration,
+  protected void scoreAudio(final String path, long resultID, String refSentence,
                             final ImageAndCheck wordTranscript, final ImageAndCheck phoneTranscript,
                             int toUse, int height, final int reqid) {
     if (path == null) return;
@@ -159,9 +159,9 @@ public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> 
     };
 
     if (controller.getProps().shouldUsePhoneToDisplay()) {
-      service.getASRScoreForAudioPhonemes(reqid, resultID, path, refSentence, transliteration, toUse, height, useScoreToColorBkg, exerciseID, async);
+      service.getASRScoreForAudioPhonemes(reqid, resultID, path, refSentence, toUse, height, useScoreToColorBkg, exerciseID, async);
     } else {
-      service.getASRScoreForAudio(reqid, resultID, path, refSentence, transliteration, toUse, height, useScoreToColorBkg, exerciseID, async);
+      service.getASRScoreForAudio(reqid, resultID, path, refSentence, toUse, height, useScoreToColorBkg, exerciseID, async);
     }
   }
 }

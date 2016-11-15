@@ -81,8 +81,8 @@ class CheckLTS {
    * @return
    * @see mitll.langtest.server.scoring.Scoring#checkLTS(String)
    */
-  Set<String> checkLTS(String foreignLanguagePhrase, String transliteration) {
-    return checkLTS(letterToSoundClass, foreignLanguagePhrase, transliteration);
+  Set<String> checkLTS(String foreignLanguagePhrase) {
+    return checkLTS(letterToSoundClass, foreignLanguagePhrase);
   }
 
   /**
@@ -96,10 +96,6 @@ class CheckLTS {
 
   private int shown = 0;
 
-  private boolean hasUsableTransliteration(Collection<String> foreignTokens, Collection<String> translitTokens){
-    return (foreignTokens.size() == translitTokens.size()) || (foreignTokens.size() == 1);
-  }
-
   /**
    * So chinese is special -- it doesn't do lts -- it just uses a dictionary
    *
@@ -108,7 +104,7 @@ class CheckLTS {
    * @return set of oov tokens
    * @see #checkLTS(String)
    */
-  private Set<String> checkLTS(LTS lts, String foreignLanguagePhrase, String transliteration) {
+  private Set<String> checkLTS(LTS lts, String foreignLanguagePhrase) {
     if (htkDictionary.isEmpty() && LTSFactory.isEmpty(lts)) {
       if (shown++ < WARN_LTS_COUNT) {
         logger.debug("skipping LTS since dict is empty and using the empty LTS : " + lts);
@@ -118,23 +114,6 @@ class CheckLTS {
 
     SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder(htkDictionary);
     Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase);
-    Collection<String> translitTokens = smallVocabDecoder.getTokens(transliteration);
-    boolean translitOk = true;
-    if (hasUsableTransliteration(tokens, translitTokens)) {
-      try {
-          int i = 0;
-          for (String translitToken : translitTokens) {
-            String trim = translitToken.trim();
-            String[][] process = lts.process(trim);
-            //if any of the words in the transliteration fails, we won't use the transliteration
-            translitOk &= (!(process == null || process.length == 0 || process[0].length == 0 ||
-                    process[0][0].length() == 0 || (process.length == 1 && process[0].length == 1 && process[0][0].equals("#"))));
-          }
-        }
-      catch (Exception e){
-        if (DEBUG)  logger.debug("transliteration not usable in checkLTS with lts "+lts+" and transliteration: "+transliteration);
-      }
-    }
 
     String language = isMandarin ? " MANDARIN " : "";
 
@@ -151,14 +130,14 @@ class CheckLTS {
           return oov;
         if (isMandarin) {
           String segmentation = smallVocabDecoder.segmentation(trim);
-          if (segmentation.isEmpty() && !translitOk) {
+          if (segmentation.isEmpty()) {
             logger.warn("checkLTSOnForeignPhrase: mandarin token : '" + token + "' invalid!");
             oov.add(trim);
           }
         } else {
           String[][] process = lts.process(token);
-          if (!translitOk && (process == null || process.length == 0 || process[0].length == 0 ||
-              process[0][0].length() == 0 || (process.length == 1 && process[0].length == 1 && process[0][0].equals("#")))) {
+          if (process == null || process.length == 0 || process[0].length == 0 ||
+              process[0][0].length() == 0 || (process.length == 1 && process[0].length == 1 && process[0][0].equals("aa"))) {
             boolean htkEntry = htkDictionary.contains(token);
             if (!htkEntry && !htkDictionary.isEmpty()) {
               if (!(lts instanceof corpus.EmptyLTS)) {
@@ -206,7 +185,6 @@ class CheckLTS {
    * @param lts
    * @param foreignLanguagePhrase
    */
-  //this seems to be dead code - it's called by a method that isn't so far as I can tell, called by anything else. Going to not mess with trying to get the transliteration in here
   private ASR.PhoneInfo checkLTS2(LTS lts, String foreignLanguagePhrase) {
     SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder(htkDictionary);
     Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase);
@@ -219,7 +197,7 @@ class CheckLTS {
       for (String token : tokens) {
         String segmentation = smallVocabDecoder.segmentation(token.trim());
         if (segmentation.isEmpty()) {
-          logger.warn("no segmentation for " + foreignLanguagePhrase + " token " + token + " trying transliteration");
+          logger.warn("no segmentation for " + foreignLanguagePhrase + " token " + token);
         } else {
           Collections.addAll(token2, segmentation.split(" "));
         }
