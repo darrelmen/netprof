@@ -81,10 +81,10 @@ public interface ExerciseController extends EventRegistration {
   int getRecordTimeout();
 
   boolean isLogClientMessages();
-  String getAudioType();
-  Collection<User.Permission> getPermissions();
 
-  boolean showCompleted();
+  User.Kind getUserKind();
+
+  Collection<User.Permission> getPermissions();
 
   void getImage(int reqid, String path, String type, int toUse, int height, String exerciseID, AsyncCallback<ImageResponse> client);
 

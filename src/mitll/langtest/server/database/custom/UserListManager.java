@@ -473,8 +473,12 @@ public class UserListManager {
    * @see #getCommentedList(java.util.Collection)
    * @see #getDefectList(java.util.Collection)
    */
-  private UserList<CommonShell> getReviewList(Collection<CommonExercise> allKnown, String name, String description,
-                                              Collection<String> ids, long userListMaginID, Collection<String> typeOrder) {
+  private UserList<CommonShell> getReviewList(Collection<CommonExercise> allKnown,
+                                              String name,
+                                              String description,
+                                              Collection<String> ids,
+                                              long userListMaginID,
+                                              Collection<String> typeOrder) {
     Map<String, CommonExercise> idToUser = new HashMap<>();
     for (CommonExercise ue : allKnown) idToUser.put(ue.getID(), ue);
 
@@ -522,8 +526,12 @@ public class UserListManager {
         CommonExercise byID = userExerciseDAO.getPredefExercise(id);
         if (byID != null) {
           //logger.debug("getReviewedUserExercises : found " + byID + " tooltip " + byID.getTooltip());
-          UserExercise e = new UserExercise(byID, byID.getCreator());
-          onList.add(e); // all predefined references
+
+          //UserExercise e = new UserExercise(byID, byID.getCreator());
+          //onList.add(e); // all predefined references
+
+          onList.add(byID);
+
           //e.setTooltip(byID.getCombinedTooltip());
           //logger.debug("getReviewedUserExercises : found " + e.getID() + " tooltip " + e.getTooltip());
         } else {
