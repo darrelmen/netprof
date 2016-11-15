@@ -77,14 +77,14 @@ public class ReviewItemHelper extends NPFHelper {
    * @param feedback
    * @param controller
    * @param predefinedContent
-   * @see mitll.langtest.client.custom.Navigation#Navigation
    * @see mitll.langtest.client.custom.ListManager#ListManager
    */
-  public ReviewItemHelper(final LangTestDatabaseAsync service, final UserFeedback feedback,
+  public ReviewItemHelper(final LangTestDatabaseAsync service,
+                          final UserFeedback feedback,
                           final ExerciseController controller,
                           final ReloadableContainer predefinedContent
   ) {
-    super(service, feedback, controller, true);
+    super(service, feedback, controller, true, false);
     this.itemMarker = null;
     this.predefinedContent = predefinedContent;
     if (predefinedContent == null) logger.warning("huh? predefinedContent is null");
@@ -160,7 +160,7 @@ public class ReviewItemHelper extends NPFHelper {
     protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow, Panel currentExercisePanel,
                                                                                String instanceName, boolean incorrectFirst) {
       FlexListLayout outer = this;
-      return new NPFlexSectionExerciseList(outer, topRow, currentExercisePanel, instanceName, incorrectFirst) {
+      return new NPFlexSectionExerciseList(outer, topRow, currentExercisePanel, instanceName, incorrectFirst, true) {
         com.github.gwtbootstrap.client.ui.CheckBox checkBox;
 
         /**

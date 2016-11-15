@@ -87,7 +87,7 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
       protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow,
                                                                                  Panel currentExercisePanel,
                                                                                  String instanceName, boolean incorrectFirst) {
-        return new NPFlexSectionExerciseList(this, topRow, currentExercisePanel, instanceName, incorrectFirst) {
+        return new NPFlexSectionExerciseList(this, topRow, currentExercisePanel, instanceName, incorrectFirst, true) {
           private CheckBox filterOnly;
 
           @Override
