@@ -66,7 +66,7 @@ public class AVPHelper extends NPFHelper {
    * @param controller
    */
   public AVPHelper(LangTestDatabaseAsync service, UserFeedback feedback, ExerciseController controller) {
-    super(service, feedback, controller, false);
+    super(service, feedback, controller, false, false);
   }
 
   /**
@@ -80,20 +80,21 @@ public class AVPHelper extends NPFHelper {
     Panel npfContentPanel = new SimplePanel();
     npfContentPanel.getElement().setId("AVPHelper_internalLayout_RightSideContent");
     this.ul = ul;
-    npfExerciseList = makeNPFExerciseList(npfContentPanel, instanceName + "_"+ul.getUniqueID());
+    npfExerciseList = makeNPFExerciseList(npfContentPanel, instanceName + "_"+ul.getUniqueID(), false);
     return npfContentPanel;
   }
 
   /**
-   * @see mitll.langtest.client.custom.content.NPFHelper#makeNPFExerciseList(com.google.gwt.user.client.ui.Panel, String)
+   * @see NPFHelper#makeNPFExerciseList(Panel, String, boolean)
    * @param right
    * @param instanceName
+   * @param showFirstNotCompleted
    * @return
    */
   @Override
-  PagingExerciseList<CommonShell,CommonExercise> makeExerciseList(final Panel right, final String instanceName) {
+  PagingExerciseList<CommonShell,CommonExercise> makeExerciseList(final Panel right, final String instanceName, boolean showFirstNotCompleted) {
     PagingExerciseList<CommonShell,CommonExercise> widgets = new NPExerciseList(right, service, feedback, controller,
-        true, instanceName, true) {
+        true, instanceName, true, false) {
       @Override
       protected void onLastItem() {
       } // TODO : necessary?

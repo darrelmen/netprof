@@ -326,9 +326,9 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
 
   private boolean isCompleted() {
     boolean b = completed.size() == answers.size();
-    if (b) {
-      logger.info("isCompleted : answered " + completed.size() + " vs total " + answers.size() + " : " + b);
-    }
+//    if (b) {
+//      logger.info("isCompleted : answered " + completed.size() + " vs total " + answers.size() + " : " + b);
+//    }
     return b;
   }
 
