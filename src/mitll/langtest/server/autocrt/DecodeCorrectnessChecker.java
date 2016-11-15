@@ -141,8 +141,7 @@ public class DecodeCorrectnessChecker {
                                           boolean canUseCache, boolean useOldSchool) {
     List<String> lmSentences = removePunct(possibleSentences);
 //    logger.debug("getFlashcardAnswer " + possibleSentences + " : '" + lmSentences + "'");
-    //making the transliteration empty as I don't think it is useful here
-    PretestScore asrScoreForAudio = alignDecode.getASRScoreForAudio(audioFile, lmSentences, "", canUseCache, useOldSchool);
+    PretestScore asrScoreForAudio = alignDecode.getASRScoreForAudio(audioFile, lmSentences, canUseCache, useOldSchool);
 
     String recoSentence =
         asrScoreForAudio != null && asrScoreForAudio.getRecoSentence() != null ?
