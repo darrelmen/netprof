@@ -37,6 +37,7 @@ import corpus.LTS;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.SLFFile;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import java.util.*;
@@ -128,12 +129,15 @@ class CheckLTS {
             String[][] process = lts.process(trim);
             //if any of the words in the transliteration fails, we won't use the transliteration
             translitOk &= (!(process == null || process.length == 0 || process[0].length == 0 ||
-                    process[0][0].length() == 0 || (process.length == 1 && process[0].length == 1 && process[0][0].equals("#"))));
+                    process[0][0].length() == 0 || (StringUtils.join(process[0], "-")).contains("#")));
           }
         }
       catch (Exception e){
         if (DEBUG)  logger.debug("transliteration not usable in checkLTS with lts "+lts+" and transliteration: "+transliteration);
+        translitOk = false;
       }
+    } else{
+      translitOk = false;
     }
 
     String language = isMandarin ? " MANDARIN " : "";
