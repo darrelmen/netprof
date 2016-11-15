@@ -187,7 +187,7 @@ public class DecodeTest extends BaseTest {
     DatabaseImpl msa = getDatabase("msa");
     //JSONObject war = msa.doReport(new PathHelper("war"));
     AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), msa.getServerProps(), msa, null);
-    audioFileHelper.checkLTSOnForeignPhrase("test", "");
+    audioFileHelper.checkLTSOnForeignPhrase("test");
     // logger.info("json:\n"+war);
   }
 
