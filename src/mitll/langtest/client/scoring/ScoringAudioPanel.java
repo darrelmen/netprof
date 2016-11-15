@@ -40,6 +40,7 @@ import com.google.gwt.user.client.ui.UIObject;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.shared.Result;
 import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
@@ -106,7 +107,7 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
                     boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin, String playButtonSuffix,
                     String exerciseID, T exercise, String instance) {
     super(path, service, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix,
-        controller.getAudioType(), exerciseID, exercise, instance);
+        Result.AUDIO_TYPE_REGULAR, exerciseID, exercise, instance);
     this.refSentence = refSentence;
     this.transliteration = transliteration;
     showOnlyOneExercise = controller.showOnlyOneExercise();

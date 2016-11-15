@@ -50,6 +50,7 @@ import mitll.langtest.client.PopupHelper;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.Answer;
+import mitll.langtest.shared.Result;
 import mitll.langtest.shared.scoring.AudioContext;
 
 import java.util.Collection;
@@ -162,7 +163,7 @@ class TextResponse {
     boolean allowPaste = controller.getProps().isDemoMode();
     final TextBox noPasteAnswer = getAnswerBox(controller, allowPaste, answerButton, getFocus);
     noPasteAnswer.setWidth(TEXT_BOX_WIDTH + "px");
-    String answerType = controller.getAudioType();
+    String answerType = Result.AUDIO_TYPE_REGULAR;
     setupSubmitButton(exerciseID, service, answerButton, noPasteAnswer, scoreFeedback, answerType, addEnterKeyBinding, questionID);
 
     // button then text box

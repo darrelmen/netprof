@@ -134,9 +134,15 @@ public class UserList<T extends HasID> extends BaseExercise {
     return classMarker;
   }
 
+  /**
+   *
+   * @return
+   */
   public Collection<T> getExercises() {
     return exercises;
   }
+
+  public int getNumItems() { return exercises.size(); }
 
   public T getLast() {
     return exercises.get(exercises.size() - 1);
@@ -228,6 +234,6 @@ public class UserList<T extends HasID> extends BaseExercise {
     return "UserList #" + getUniqueID() + " '" + name + "' by " + id +
         " : " + (isReview ? " REVIEW " : "") +
         " :" +
-        " with " + getExercises().size() + " exercises.";
+        " with " + getNumItems() + " exercises.";
   }
 }
