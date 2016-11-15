@@ -1411,7 +1411,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       long then = System.currentTimeMillis();
       List<CommonExercise> copyAsExercises = new ArrayList<>();
 
-      for (CommonShell ex : userListByID.getExercises()) {
+      for (HasID ex : userListByID.getExercises()) {
         copyAsExercises.add(getCustomOrPredefExercise(ex.getID()));
       }
       AudioDAO audioDAO = getAudioDAO();
