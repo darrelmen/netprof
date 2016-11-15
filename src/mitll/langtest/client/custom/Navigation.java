@@ -165,7 +165,7 @@ public class Navigation implements RequiresResize, ShowTab {
         return new MyFlexListLayout<CommonShell, CommonExercise>(service, feedback, controller, outer) {
           @Override
           protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName, boolean incorrectFirst) {
-            return new NPFlexSectionExerciseList(this, topRow, currentExercisePanel, instanceName, incorrectFirst);
+            return new NPFlexSectionExerciseList(this, topRow, currentExercisePanel, instanceName, incorrectFirst, false);
           }
         };
       }
@@ -186,7 +186,7 @@ public class Navigation implements RequiresResize, ShowTab {
 
     markDefectsHelper = new MarkDefectsChapterNPFHelper(service, feedback, userManager, controller, learnHelper);
     practiceHelper = new PracticeHelper(service, feedback, userManager, controller);
-    recorderHelper = new RecorderNPFHelper(service, feedback, userManager, controller, true, learnHelper);
+    recorderHelper = new RecorderNPFHelper(service, feedback, userManager, controller,      true,  learnHelper);
     recordExampleHelper = new RecorderNPFHelper(service, feedback, userManager, controller, false, learnHelper);
   }
 
