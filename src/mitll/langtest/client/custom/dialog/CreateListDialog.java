@@ -50,6 +50,7 @@ import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.UserManager;
+import mitll.langtest.shared.User;
 
 import java.util.logging.Logger;
 
@@ -147,8 +148,7 @@ public class CreateListDialog extends BasicDialog {
     RadioButton radioButton = new RadioButton("Public_Private_Group", "Public");
     RadioButton radioButton2 = new RadioButton("Public_Private_Group", "Private");
 
-    String audioType = controller.getAudioType();
-    boolean isStudent = audioType.equalsIgnoreCase(PRACTICE);
+    boolean isStudent = controller.getUserKind().equals(User.Kind.STUDENT);
 
     radioButton.setValue(!isStudent);
     radioButton2.setValue(isStudent);

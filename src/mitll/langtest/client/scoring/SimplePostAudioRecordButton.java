@@ -68,7 +68,7 @@ import java.util.Map;
  */
 public abstract class SimplePostAudioRecordButton extends RecordButton implements RecordButton.RecordingListener {
   private static final String RELEASE_TO_STOP = "Release";// to stop";
-  private boolean validAudio = false;
+  //private boolean validAudio = false;
   private static final int LOG_ROUNDTRIP_THRESHOLD = 3000;
   private int reqid = 0;
   private final ExerciseController controller;
@@ -176,11 +176,11 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
           return;
         }
         if (result.getValidity() == AudioAnswer.Validity.OK) {
-          validAudio = true;
+    //      validAudio = true;
           useResult(result);
         } else {
-          validAudio = false;
-          new Exception().printStackTrace();
+      //    validAudio = false;
+        //  new Exception().printStackTrace();
 
           showPopup(result.getValidity().getPrompt());
           useInvalidResult(result);
@@ -190,16 +190,6 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
         }
       }
     };
-  }
-
-/*
-  protected boolean shouldAddToAudioTable() {
-    return false;
-  }
-*/
-
-  protected String getAudioType() {
-    return controller.getAudioType();
   }
 
   private Widget getOuter() {
@@ -235,7 +225,6 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
   }
 
   public abstract void useResult(AudioAnswer result);
-
 /*
   public boolean hasValidAudio() {
     return validAudio;
@@ -289,5 +278,4 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
 	  tooltipHelper.createAddTooltip(bar, "Score " + score + "%", Placement.BOTTOM);
 	  return bar;
   }
-
 }
