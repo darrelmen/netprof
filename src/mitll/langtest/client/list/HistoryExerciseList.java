@@ -83,12 +83,17 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
    * @param showTypeAhead
    * @param instance
    * @param incorrectFirst
-   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#FlexSectionExerciseList(Panel, Panel, LangTestDatabaseAsync, UserFeedback, ExerciseController, String, boolean)
+   * @param showFirstNotCompleted
+   * @see FlexSectionExerciseList#FlexSectionExerciseList(Panel, Panel, LangTestDatabaseAsync, UserFeedback, ExerciseController, String, boolean, boolean)
    */
   protected HistoryExerciseList(Panel currentExerciseVPanel, LangTestDatabaseAsync service, UserFeedback feedback,
                                 ExerciseController controller,
-                                boolean showTypeAhead, String instance, boolean incorrectFirst) {
-    super(currentExerciseVPanel, service, feedback, null, controller, showTypeAhead, instance, incorrectFirst);
+                                boolean showTypeAhead,
+                                String instance,
+                                boolean incorrectFirst,
+                                boolean showFirstNotCompleted) {
+    super(currentExerciseVPanel, service, feedback, null, controller, showTypeAhead, instance, incorrectFirst, showFirstNotCompleted);
+//    logger.info("showFirstNotCompleted " + showFirstNotCompleted + " for " + instance + " : " + this.getElement().getId());
     sectionWidgetContainer = getSectionWidgetContainer();
     addHistoryListener();
   }
@@ -129,7 +134,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
         "search=" + search + ";") +
         sectionWidgetContainer.getHistoryToken() +
         instanceSuffix;
-   // logger.info("getHistoryTokenFromUIState '" + s + "'");
+    // logger.info("getHistoryTokenFromUIState '" + s + "'");
     return s;
   }
 
