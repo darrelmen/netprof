@@ -33,6 +33,7 @@
 package mitll.langtest.server;
 
 import mitll.langtest.server.audio.AudioFileHelper;
+import mitll.langtest.server.audio.DecoderOptions;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.server.rest.RestUserManagement;
@@ -40,6 +41,7 @@ import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.NetPronImageType;
@@ -63,7 +65,6 @@ import java.util.*;
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since
  */
 @SuppressWarnings("serial")
 public class ScoreServlet extends DatabaseServlet {
@@ -109,6 +110,8 @@ public class ScoreServlet extends DatabaseServlet {
   public static final String VERSION_NOW = "1.0";
   public static final String EXPORT = "export";
   public static final String REMOVE_REF_RESULT = "removeRefResult";
+  public static final String USE_PHONE_TO_DISPLAY = "USE_PHONE_TO_DISPLAY";
+  public static final String ALLOW_ALTERNATES = "ALLOW_ALTERNATES";
   private boolean removeExercisesWithMissingAudioDefault = true;
 
   private RestUserManagement userManagement;
@@ -144,7 +147,7 @@ public class ScoreServlet extends DatabaseServlet {
     if (queryString == null) queryString = ""; // how could this happen???
     if (!queryString.contains(NESTED_CHAPTERS)) { // quiet output for polling from status webapp
       String pathInfo = request.getPathInfo();
-      logger.debug("ScoreServlet.doGet (" +getLanguage() +
+      logger.debug("ScoreServlet.doGet (" + getLanguage() +
           "): Request '" + queryString + "' path " + pathInfo +
           " uri " + request.getRequestURI() + "  " + request.getRequestURL() + "  " + request.getServletPath());
     }
@@ -171,8 +174,7 @@ public class ScoreServlet extends DatabaseServlet {
                 whenCachedEverything = System.currentTimeMillis();
               }
               toReturn = nestedChaptersEverything;
-            }
-            else {
+            } else {
               toReturn = getJsonNestedChapters(true);
             }
           } else {
@@ -219,21 +221,21 @@ public class ScoreServlet extends DatabaseServlet {
         toReturn.put(ERROR, "unknown req " + queryString);
       }
     } catch (Exception e) {
-      logger.error(getLanguage() +" : doing query " +queryString+ " got " + e, e);
+      logger.error(getLanguage() + " : doing query " + queryString + " got " + e, e);
       db.logAndNotify(e);
     }
 
     long now = System.currentTimeMillis();
     long l = now - then;
     if (l > 10) {
-      logger.info("doGet : (" +getLanguage()+ ") took " + l + " millis to do " + request.getQueryString());
+      logger.info("doGet : (" + getLanguage() + ") took " + l + " millis to do " + request.getQueryString());
     }
     then = now;
     String x = toReturn.toString();
     now = System.currentTimeMillis();
     l = now - then;
     if (l > 50) {
-      logger.info("doGet : (" +getLanguage()+ ") took " + l + " millis to do " + request.getQueryString() + " and to do toString on json");
+      logger.info("doGet : (" + getLanguage() + ") took " + l + " millis to do " + request.getQueryString() + " and to do toString on json");
     }
 
     reply(response, x);
@@ -242,6 +244,7 @@ public class ScoreServlet extends DatabaseServlet {
   /**
    * Worries about sql injection attack.
    * Remove ref result entry for an exercise, helpful if you want to clear the ref result for just one exercise
+   *
    * @param queryString
    * @return
    */
@@ -250,20 +253,18 @@ public class ScoreServlet extends DatabaseServlet {
     if (split.length != 2) {
       JSONObject jsonObject = new JSONObject();
       jsonObject.put("success", Boolean.valueOf(false).toString());
-      jsonObject.put("error","Expecting exid");
+      jsonObject.put("error", "Expecting exid");
       return jsonObject;
-    }
-    else {
+    } else {
       String exid = split[1];
 
       CommonExercise exercise = db.getExercise(exid);
       if (exercise == null) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("success", Boolean.valueOf(false).toString());
-        jsonObject.put("error","no exercise with that id");
+        jsonObject.put("error", "no exercise with that id");
         return jsonObject;
-      }
-      else {
+      } else {
         boolean b = db.getRefResultDAO().removeForExercise(exid);
         //logger.info("Remove ref for " + exid + " got " + b);
         JSONObject jsonObject = new JSONObject();
@@ -292,9 +293,9 @@ public class ScoreServlet extends DatabaseServlet {
       int paramIntValue = getParamIntValue(param, YEAR);
       if (paramIntValue > 0) year = paramIntValue;
     }
-   // else {
-   //   year = Calendar.getInstance().get(Calendar.YEAR);
-   // }
+    // else {
+    //   year = Calendar.getInstance().get(Calendar.YEAR);
+    // }
     return year;
   }
 
@@ -458,6 +459,13 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
+   * Here's where we get posts from the iOS app.
+   * Requests are:
+   * 1) Add user
+   * 2) Align/decode/record audio - record supports appen corpora recording
+   * 3) Log UI event (e.g. a button click)
+   * 4) Add round trip bookkeeping - so we can how long the user had to wait for a response
+   * 5)
    * TODO : Is handling a multi-part request slow?
    *
    * @param request
@@ -488,8 +496,10 @@ public class ScoreServlet extends DatabaseServlet {
 
       if (requestType.startsWith(ADD_USER)) {
         userManagement.addUser(request, requestType, deviceType, device, jsonObject);
-      } else if (requestType.startsWith(ALIGN) || requestType.startsWith(DECODE) ||
-          requestType.startsWith(Request.RECORD.toString().toLowerCase())) {
+      } else if (
+          requestType.startsWith(ALIGN) ||
+              requestType.startsWith(DECODE) ||
+              requestType.startsWith(Request.RECORD.toString().toLowerCase())) {
         jsonObject = getJsonForAudio(request, requestType, deviceType, device);
       } else if (requestType.startsWith(EVENT)) {
         // log event
@@ -511,7 +521,7 @@ public class ScoreServlet extends DatabaseServlet {
       }
     } else {
       logger.info("request type is null?");
-      jsonObject = getJsonForAudio(request, null, deviceType, device);
+      jsonObject = getJsonForAudio(request, ALIGN, deviceType, device);
     }
 
     writeJsonToOutput(response, jsonObject);
@@ -569,7 +579,7 @@ public class ScoreServlet extends DatabaseServlet {
     response.setContentType("text/html; charset=UTF-8");
     response.setCharacterEncoding("UTF-8");
 
-    String fileName = year == -1 ? "reportFor" + getLanguage() : ("reportFor" +getLanguage()+"_forYear" + year);
+    String fileName = year == -1 ? "reportFor" + getLanguage() : ("reportFor" + getLanguage() + "_forYear" + year);
 
     response.setHeader("Content-disposition", "attachment; filename=" +
         fileName + ".html");
@@ -588,15 +598,15 @@ public class ScoreServlet extends DatabaseServlet {
     long then = System.currentTimeMillis();
     JsonExport jsonExport = getJSONExport();
     long now = System.currentTimeMillis();
-    if (now-then>1000) {
-      logger.warn("getJsonNestedChapters " + getLanguage() + " getJSONExport took " + (now-then) + " millis");
+    if (now - then > 1000) {
+      logger.warn("getJsonNestedChapters " + getLanguage() + " getJSONExport took " + (now - then) + " millis");
     }
     then = now;
 
     jsonObject.put(CONTENT, jsonExport.getContentAsJson(removeExercisesWithMissingAudio));
     now = System.currentTimeMillis();
-    if (now-then>1000) {
-      logger.warn("getJsonNestedChapters " + getLanguage() + " getContentAsJson took " + (now-then) + " millis");
+    if (now - then > 1000) {
+      logger.warn("getJsonNestedChapters " + getLanguage() + " getContentAsJson took " + (now - then) + " millis");
     }
     addVersion(jsonObject);
 
@@ -604,8 +614,8 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
-   * @see #doGet(HttpServletRequest, HttpServletResponse)
    * @return
+   * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
   private JSONObject getJSONForExercises() {
     return getJSONExerciseExport(getJSONExport());
@@ -648,36 +658,53 @@ public class ScoreServlet extends DatabaseServlet {
    * @param requestType - decode or align or record
    * @param deviceType
    * @param device
-   * @return
+   * @return JSON representing response
    * @throws IOException
    * @see #doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
-  private JSONObject getJsonForAudio(HttpServletRequest request, String requestType,
-                                     String deviceType, String device) throws IOException {
+  private JSONObject getJsonForAudio(HttpServletRequest request,
+                                     String requestType,
+                                     String deviceType,
+                                     String device) throws IOException {
     String user = request.getHeader(USER);
     String exerciseID = request.getHeader("exercise");
     int reqid = getReqID(request);
 
-    logger.debug("getJsonForAudio got request " + requestType + " for user " + user + " exercise " + exerciseID +
-        " req " + reqid + " device " + deviceType + "/" + device);
+    logger.debug("getJsonForAudio got " +
+        "\n\trequest  " + requestType +
+        "\n\tfor user " + user +
+        "\n\texercise " + exerciseID +
+        "\n\treq      " + reqid +
+        "\n\tdevice   " + deviceType + "/" + device);
 
-    int i = userManagement.getUserFromParam(user);
-    String wavPath = pathHelper.getLocalPathToAnswer("plan", exerciseID, 0, i);
+    int userid = userManagement.getUserFromParam(user);
+    String wavPath = pathHelper.getLocalPathToAnswer("plan", exerciseID, 0, userid);
     File saveFile = pathHelper.getAbsoluteFile(wavPath);
     new File(saveFile.getParent()).mkdirs();
 
-    String allow_alternates = request.getHeader("ALLOW_ALTERNATES");
-    boolean allowAlternates = allow_alternates != null && !allow_alternates.equals("false");
-
-    String use_phone_to_display = request.getHeader("USE_PHONE_TO_DISPLAY");
-    boolean usePhoneToDisplay = use_phone_to_display != null && !use_phone_to_display.equals("false");
+    boolean allowAlternates = getAllowAlternates(request);
+    boolean usePhoneToDisplay = getUsePhoneToDisplay(request);
 
     writeToFile(request.getInputStream(), saveFile);
-
 //    new AudioConversion(null).trimSilence(saveFile);
 
-    return getJsonForAudioForUser(reqid, exerciseID, i, Request.valueOf(requestType.toUpperCase()), wavPath, saveFile,
-        deviceType, device, allowAlternates, usePhoneToDisplay);
+    return getJsonForAudioForUser(reqid, exerciseID, userid, Request.valueOf(requestType.toUpperCase()), wavPath, saveFile,
+        deviceType, device,
+        //allowAlternates, usePhoneToDisplay,
+        new DecoderOptions().setAllowAlternates(allowAlternates).setUsePhoneToDisplay(usePhoneToDisplay));
+  }
+
+  private boolean getUsePhoneToDisplay(HttpServletRequest request) {
+    return getParam(request, USE_PHONE_TO_DISPLAY);
+  }
+
+  private boolean getAllowAlternates(HttpServletRequest request) {
+    return getParam(request, ALLOW_ALTERNATES);
+  }
+
+  private boolean getParam(HttpServletRequest request, String param) {
+    String use_phone_to_display = request.getHeader(param);
+    return use_phone_to_display != null && !use_phone_to_display.equals("false");
   }
 
   /**
@@ -699,23 +726,28 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
-   * @param reqid             label response with req id so the client can tell if it got a stale response
-   * @param exerciseID        for this exercise
-   * @param user              by this user
-   * @param request           not sure when this wouldn't be decode
-   * @param wavPath           relative path to posted audio file
-   * @param saveFile          File handle to file
-   * @param deviceType        iPad,iPhone, or browser
-   * @param device            id for device - helpful for iPads, etc.
-   * @param allowAlternates
-   * @param usePhoneToDisplay
+   * @param reqid      label response with req id so the client can tell if it got a stale response
+   * @param exerciseID for this exercise
+   * @param user       by this user
+   * @param request    mostly decode, could be record if doing appen corpora recording
+   * @param wavPath    relative path to posted audio file
+   * @param saveFile   File handle to file
+   * @param deviceType iPad,iPhone, or browser
+   * @param device     id for device - helpful for iPads, etc.
+   * @param options
    * @return score json
+   * @paramx allowAlternates   decode against multiple alternatives (e.g. male and female spanish words for the same english word)
+   * @paramx usePhoneToDisplay should we remap the phones to different labels for display
    * @see #getJsonForAudio(javax.servlet.http.HttpServletRequest, String, String, String)
    */
   private JSONObject getJsonForAudioForUser(int reqid, String exerciseID, int user, Request request, String wavPath,
                                             File saveFile,
-                                            String deviceType, String device, boolean allowAlternates,
-                                            boolean usePhoneToDisplay) {
+                                            String deviceType, String device,
+
+                                            //  boolean allowAlternates,
+                                            // boolean usePhoneToDisplay,
+
+                                            DecoderOptions options) {
     long then = System.currentTimeMillis();
     CommonExercise exercise1 = db.getCustomOrPredefExercise(exerciseID);  // allow custom items to mask out non-custom items
 
@@ -724,44 +756,35 @@ public class ScoreServlet extends DatabaseServlet {
       jsonForScore.put(VALID, "bad_exercise_id");
     } else {
       boolean doFlashcard = request == Request.DECODE;
-      AudioAnswer answer = getAudioAnswer(reqid, exerciseID, user, doFlashcard, wavPath, saveFile, deviceType, device,
-          exercise1, allowAlternates, usePhoneToDisplay);
+      options.setDoFlashcard(doFlashcard);
+      AudioAnswer answer = getAudioAnswer(reqid, exerciseID, user, wavPath, saveFile, deviceType, device, exercise1, //doFlashcard,
+          //allowAlternates, usePhoneToDisplay,
+          options);
       long now = System.currentTimeMillis();
       PretestScore pretestScore = answer == null ? null : answer.getPretestScore();
       float hydecScore = pretestScore == null ? -1 : pretestScore.getHydecScore();
+
       logger.debug("score flashcard " + doFlashcard +
           " exercise id " + exerciseID + " took " + (now - then) +
           " millis for " + saveFile.getName() + " = " + hydecScore);
 
       if (answer != null && answer.isValid()) {
+        boolean usePhoneToDisplay = options.isUsePhoneToDisplay();
         jsonForScore = getJsonForScore(pretestScore, usePhoneToDisplay);
         if (doFlashcard) {
+          long decodeResultID = answer.getResultID();
           jsonForScore.put(IS_CORRECT, answer.isCorrect());
           jsonForScore.put(SAID_WORD, answer.isSaidAnswer());
-          long decodeResultID = answer.getResultID();
           jsonForScore.put("resultID", decodeResultID);
 
           // attempt to get more feedback when we're too sensitive and match the unknown model
           if (!answer.isCorrect() && !answer.isSaidAnswer()) {
-            answer = getAudioAnswerAlign(reqid, exerciseID, user, false, wavPath, saveFile, deviceType, device,
-                exercise1, usePhoneToDisplay);
-            PretestScore pretestScore1 = answer.getPretestScore();
-            logger.debug("Alignment on an unknown model answer gets " + pretestScore1);
-            //   logger.debug("score info " + answer.getPretestScore().getsTypeToEndTimes());
-            jsonForScore = getJsonForScore(pretestScore1, usePhoneToDisplay);
-
-            // so we mark it correct if the score is above 50% on alignment
-            boolean isCorrect = pretestScore1.getHydecScore() > ALIGNMENT_SCORE_CORRECT;
-            jsonForScore.put(IS_CORRECT, isCorrect);
-            jsonForScore.put(SCORE, pretestScore1.getHydecScore());
-            jsonForScore.put(SAID_WORD, false);   // don't say they said the word - decode says they didn't
-
-            if (pretestScore1.getHydecScore() > 0.25) {
-              logger.info("remember score for result " + decodeResultID);
-              db.rememberScore(decodeResultID, pretestScore1, isCorrect);
-            } else {
-              logger.debug("skipping remembering alignment since score was too low " + pretestScore1.getHydecScore());
-            }
+            options.setDoFlashcard(false);
+            answer = getAudioAnswerAlign(reqid, exerciseID, user, wavPath, saveFile, deviceType, device, exercise1,
+//                false,
+//                usePhoneToDisplay,
+                options);
+            jsonForScore = getJsonFromAlignment(usePhoneToDisplay, answer, decodeResultID);
           }
         }
       }
@@ -771,10 +794,40 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
+   * Do alignment when decoding fails, since sometimes it's too sensitive for short words.
+   *
+   * @param usePhoneToDisplay
+   * @param answer
+   * @param decodeResultID
+   * @return
+   */
+  private JSONObject getJsonFromAlignment(boolean usePhoneToDisplay, AudioAnswer answer, long decodeResultID) {
+    JSONObject jsonForScore;
+    PretestScore pretestScore1 = answer.getPretestScore();
+    logger.debug("getJsonFromAlignment Alignment on an unknown model answer gets " + pretestScore1);
+    //   logger.debug("score info " + answer.getPretestScore().getsTypeToEndTimes());
+    jsonForScore = getJsonForScore(pretestScore1, usePhoneToDisplay);
+
+    // so we mark it correct if the score is above 50% on alignment
+    boolean isCorrect = pretestScore1.getHydecScore() > ALIGNMENT_SCORE_CORRECT;
+    jsonForScore.put(IS_CORRECT, isCorrect);
+    jsonForScore.put(SCORE, pretestScore1.getHydecScore());
+    jsonForScore.put(SAID_WORD, false);   // don't say they said the word - decode says they didn't
+
+    if (pretestScore1.getHydecScore() > 0.25) {
+      logger.info("remember score for result " + decodeResultID);
+      db.rememberScore(decodeResultID, pretestScore1, isCorrect);
+    } else {
+      logger.debug("skipping remembering alignment since score was too low " + pretestScore1.getHydecScore());
+    }
+    return jsonForScore;
+  }
+
+  /**
    * @param exerciseID
    * @param jsonForScore
    * @param answer
-   * @see #getJsonForAudioForUser(int, String, int, Request, String, File, String, String, boolean, boolean)
+   * @see #getJsonForAudioForUser
    */
   private void addValidity(String exerciseID, JSONObject jsonForScore, AudioAnswer answer) {
     jsonForScore.put(EXID, exerciseID);
@@ -783,34 +836,50 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
-   * @param reqid             label response with req id so the client can tell if it got a stale response
-   * @param exerciseID        for this exercise
-   * @param user              by this user
-   * @param doFlashcard
-   * @param wavPath           path to posted audio file
+   * @param reqid      label response with req id so the client can tell if it got a stale response
+   * @param exerciseID for this exercise
+   * @param user       by this user
+   * @param wavPath    path to posted audio file
    * @param saveFile
    * @param deviceType
    * @param device
-   * @param exercise1
-   * @param allowAlternates
-   * @param usePhoneToDisplay
+   * @param exercise
+   * @param options
    * @return
+   * @paramx doFlashcard
+   * @paramx allowAlternates
+   * @paramx usePhoneToDisplay
    * @see #getJsonForAudioForUser
    */
   private AudioAnswer getAudioAnswer(int reqid, String exerciseID, int user,
-                                     boolean doFlashcard,
-                                     String wavPath, File saveFile,
-                                     String deviceType, String device, CommonExercise exercise1,
-                                     boolean allowAlternates, boolean usePhoneToDisplay) {
+                                     String wavPath, File saveFile, String deviceType, String device, CommonShell exercise,
+
+                                     // boolean doFlashcard,
+                                     // boolean allowAlternates,
+                                     // boolean usePhoneToDisplay,
+
+                                     DecoderOptions options) {
     AudioAnswer answer;
 
-    if (doFlashcard) {
-      answer = getAnswer(reqid, exerciseID, user, doFlashcard, wavPath, saveFile, -1, deviceType, device, allowAlternates);
+    if (options.isDoFlashcard()) {
+      options.setDoFlashcard(true);
+      answer = getAnswer(reqid, exerciseID, user, wavPath, saveFile, -1, deviceType, device,
+          // true, options.isAllowAlternates()
+          options
+      );
     } else {
-      PretestScore asrScoreForAudio = getASRScoreForAudio(reqid, wavPath, exercise1.getForeignLanguage(), exercise1.getTransliteration(), exerciseID,
-          usePhoneToDisplay);
-      answer = getAnswer(reqid, exerciseID, user, doFlashcard, wavPath, saveFile, asrScoreForAudio.getHydecScore(),
-          deviceType, device, allowAlternates);
+      PretestScore asrScoreForAudio = getASRScoreForAudio(reqid, wavPath,
+          exercise.getForeignLanguage(),
+          exercise.getTransliteration(), exerciseID,
+          options.isUsePhoneToDisplay());
+
+      options.setDoFlashcard(false);
+
+      answer = getAnswer(reqid, exerciseID, user, wavPath, saveFile, asrScoreForAudio.getHydecScore(), deviceType, device,
+          //false,
+          // options.isAllowAlternates()
+          options
+      );
       answer.setPretestScore(asrScoreForAudio);
     }
     return answer;
@@ -820,24 +889,40 @@ public class ScoreServlet extends DatabaseServlet {
    * @param reqid
    * @param exerciseID
    * @param user
-   * @param doFlashcard
    * @param wavPath
    * @param saveFile
    * @param deviceType
    * @param device
    * @param exercise1
-   * @param usePhoneToDisplay
+   * @paramx doFlashcard
+   * @paramx usePhoneToDisplay
    * @return
    * @see #getJsonForAudio
    */
-  private AudioAnswer getAudioAnswerAlign(int reqid, String exerciseID, int user, boolean doFlashcard, String wavPath,
-                                          File saveFile,
+  private AudioAnswer getAudioAnswerAlign(int reqid, String exerciseID, int user, String wavPath, File saveFile,
                                           String deviceType, String device, CommonExercise exercise1,
-                                          boolean usePhoneToDisplay) {
-    PretestScore asrScoreForAudio = getASRScoreForAudioNoCache(reqid, saveFile.getAbsolutePath(),
-        exercise1.getForeignLanguage(), exercise1.getTransliteration(), exerciseID, usePhoneToDisplay);
-    AudioAnswer answer = getAnswer(reqid, exerciseID, user, doFlashcard, wavPath, saveFile, asrScoreForAudio.getHydecScore(),
-        deviceType, device, false);
+                                          //  boolean doFlashcard,
+                                          //  boolean usePhoneToDisplay,
+                                          DecoderOptions options) {
+    PretestScore asrScoreForAudio = getASRScoreForAudioNoCache(
+        reqid,
+        exerciseID,
+        saveFile.getAbsolutePath(),
+        exercise1.getForeignLanguage(),
+        exercise1.getTransliteration(),
+        options.isUsePhoneToDisplay());
+
+    AudioAnswer answer = getAnswer(
+        reqid,
+        exerciseID,
+        user,
+        wavPath,
+        saveFile,
+        asrScoreForAudio.getHydecScore(),
+        deviceType, device,
+        //doFlashcard,
+        //false
+        options);
     answer.setPretestScore(asrScoreForAudio);
     return answer;
   }
@@ -848,25 +933,33 @@ public class ScoreServlet extends DatabaseServlet {
    * @param reqid
    * @param exerciseID
    * @param user
-   * @param doFlashcard
    * @param wavPath
    * @param file
    * @param deviceType
    * @param device
-   * @param allowAlternates
+   * @paramx doFlashcard
+   * @paramx allowAlternates
    * @return
    * @see #getJsonForAudioForUser
    */
-  private AudioAnswer getAnswer(int reqid, String exerciseID, int user, boolean doFlashcard, String wavPath, File file, float score,
-                                String deviceType, String device, boolean allowAlternates) {
+  private AudioAnswer getAnswer(int reqid, String exerciseID, int user,
+                                String wavPath, File file,
+                                float score, String deviceType, String device,
+
+                                // boolean doFlashcard,
+                                //   boolean allowAlternates
+                                DecoderOptions options
+  ) {
     CommonExercise exercise1 = db.getCustomOrPredefExercise(exerciseID);  // allow custom items to mask out non-custom items
 
-    AudioContext audioContext = new AudioContext(reqid, user, exerciseID, 0, doFlashcard ? "flashcard" : "learn");
+    AudioContext audioContext = new AudioContext(reqid, user, exerciseID, 0, options.isDoFlashcard() ? "flashcard" : "learn");
 
     AudioAnswer answer = audioFileHelper.getAnswer(exercise1,
         audioContext,
-        wavPath, file, deviceType, device, score, doFlashcard,
-        allowAlternates);
+        wavPath, file, deviceType, device, score,
+     //   doFlashcard,
+      //  allowAlternates,
+        options);
 
     final String path = answer.getPath();
     final String foreignLanguage = exercise1.getForeignLanguage();
@@ -876,20 +969,24 @@ public class ScoreServlet extends DatabaseServlet {
     return answer;
   }
 
+  /**
+   * @param user
+   * @param path
+   * @param foreignLanguage
+   * @see #getAnswer
+   */
   private void ensureMP3Later(final int user, final String path, final String foreignLanguage) {
-    new Thread(new Runnable() {
-      @Override
-      public void run() {
-        //long then = System.currentTimeMillis();
-        ensureMP3(path, foreignLanguage, getUserID(user));
-        // long now = System.currentTimeMillis();
-        //       logger.debug("Took " + (now-then) + " millis to write mp3 version");
-      }
+    new Thread(() -> {
+      //long then = System.currentTimeMillis();
+      ensureMP3(path, foreignLanguage, getUserID(user));
+      // long now = System.currentTimeMillis();
+      //       logger.debug("Took " + (now-then) + " millis to write mp3 version");
     }).start();
   }
 
   /**
    * For both words and phones, return event text, start, end times, and score for event.
+   * Add overall score.
    *
    * @param score
    * @return
@@ -911,7 +1008,9 @@ public class ScoreServlet extends DatabaseServlet {
       for (TranscriptSegment segment : value) {
         JSONObject object = new JSONObject();
         String event = segment.getEvent();
-        if (usePhone) event = serverProps.getDisplayPhoneme(event);
+        if (usePhone) {  // remap to display labels
+          event = serverProps.getDisplayPhoneme(event);
+        }
 
         object.put(EVENT, event);
         object.put(START, segment.getStart());
@@ -928,6 +1027,7 @@ public class ScoreServlet extends DatabaseServlet {
 
   /**
    * Get a reference to the current database object, made in the main LangTestDatabaseImpl servlet
+   * Latchy.
    *
    * @return
    * @see #doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
@@ -999,28 +1099,36 @@ public class ScoreServlet extends DatabaseServlet {
    * @param exerciseID
    * @param usePhoneToDisplay
    * @return
-   * @see #getAudioAnswer(int, String, int, boolean, String, File, String, String, CommonExercise, boolean, boolean)
+   * @see #getAudioAnswer
    */
   private PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence, String transliteration,
                                            String exerciseID, boolean usePhoneToDisplay) {
-    return audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, transliteration, 128, 128, false,
-        false, serverProps.useScoreCache(), exerciseID, null, usePhoneToDisplay, false);
+    return audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, transliteration, 128, 128, exerciseID, null, false,
+       // false, serverProps.useScoreCache(), usePhoneToDisplay, false,
+        new DecoderOptions()
+            .setDoFlashcard(false)
+            .setCanUseCache(serverProps.useScoreCache())
+            .setUsePhoneToDisplay(usePhoneToDisplay));
   }
 
   /**
    * @param reqid
+   * @param exerciseID
    * @param testAudioFile
    * @param sentence
-   * @param exerciseID
    * @param usePhoneToDisplay
    * @return
-   * @see #getAudioAnswerAlign(int, String, int, boolean, String, File, String, String, CommonExercise, boolean)
+   * @see #getAudioAnswerAlign
    */
-  private PretestScore getASRScoreForAudioNoCache(int reqid, String testAudioFile, String sentence, String transliteration,
-                                                  String exerciseID, boolean usePhoneToDisplay) {
+  private PretestScore getASRScoreForAudioNoCache(int reqid, String exerciseID, String testAudioFile, String sentence, String transliteration,
+                                                  boolean usePhoneToDisplay) {
     //  logger.debug("getASRScoreForAudioNoCache for " + testAudioFile + " under " + sentence);
-    return audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, transliteration, 128, 128, false,
-        false, false, exerciseID, null, usePhoneToDisplay, false);
+    return audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, transliteration, 128, 128, exerciseID, null, false,
+       // false, false, usePhoneToDisplay, false,
+        new DecoderOptions()
+            .setDoFlashcard(false)
+            .setCanUseCache(false)
+            .setUsePhoneToDisplay(usePhoneToDisplay));
   }
 
   private void addVersion(JSONObject jsonObject) {
