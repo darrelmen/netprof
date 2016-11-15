@@ -725,24 +725,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
     this.audioType = audioType;
   }
 
-  public boolean showCompleted() {
-    return isReviewMode() || getAudioType().equals(Result.AUDIO_TYPE_RECORDER);
-  }
-
-  /**
-   * TODO : Hack - don't use audio type like this
-   *
-   * @return
-   */
-  @Override
-  public String getAudioType() {
-    if (permissions.contains(User.Permission.RECORD_AUDIO)) return Result.AUDIO_TYPE_RECORDER;
-    else return audioType;
-  }
-
-  private boolean isReviewMode() {
-    return audioType.equals(Result.AUDIO_TYPE_REVIEW);
-  }
+  public User.Kind getUserKind() { return userManager.getUserKind(); }
 
   private final Set<User.Permission> permissions = new HashSet<User.Permission>();
 
