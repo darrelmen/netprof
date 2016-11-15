@@ -59,7 +59,9 @@ import java.nio.file.Path;
 import java.util.*;
 
 /**
- * Does ASR scoring using hydec.  Results in either alignment or decoding, depending on the mode.
+ * Does ASR scoring using hydra.
+ * <p>
+ * Results in either alignment or decoding, depending on the mode.
  * Decoding is used with autoCRT of audio.
  * <p>
  * Takes the label files and generates transcript images for display in the client.
@@ -464,8 +466,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       String[] split = results[0].split(sep);
       Scores scores = new Scores(split);
       // clean up tmp directory if above score threshold
-      logger.debug(languageProperty + " : Took " + timeToRunHydra + " millis to run " +(decode ? "decode":"align")+
-          " hydra on " + audioPath+ " - score: " + split[0]);
+      logger.debug(languageProperty + " : Took " + timeToRunHydra + " millis to run " + (decode ? "decode" : "align") +
+          " hydra on " + audioPath + " - score: " + split[0]);
     /*if (Float.parseFloat(split[0]) > lowScoreThresholdKeepTempDir) {   // keep really bad scores for now
       try {
 				logger.debug("deleting " + tmpDir + " since score is " + split[0]);
