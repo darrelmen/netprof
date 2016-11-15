@@ -389,6 +389,7 @@ public class AudioConversion {
       logger.warn("doHighPassFilter couldn't do high pass filter on " + pathToAudioFile);
       String asRunnable = soxFirst.command().toString().replaceAll(",", " ");
       logger.warn("doHighPassFilter path " + asRunnable);
+      return null;
     }
 
     return tempForWavz;
