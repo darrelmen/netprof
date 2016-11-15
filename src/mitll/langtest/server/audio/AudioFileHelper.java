@@ -160,7 +160,7 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   private boolean isInDictOrLTS(CommonShell exercise) {
-    return asrScoring.validLTS(exercise.getForeignLanguage(), exercise.getTransliteration());
+    return asrScoring.validLTS(exercise.getForeignLanguage());
   }
 
   /**
@@ -184,9 +184,9 @@ public class AudioFileHelper implements AlignDecode {
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#isValidForeignPhrase(String)
    */
-  public boolean checkLTSOnForeignPhrase(String foreignLanguagePhrase, String transliteration) {
+  public boolean checkLTSOnForeignPhrase(String foreignLanguagePhrase) {
     makeASRScoring();
-    return asrScoring.validLTS(foreignLanguagePhrase, transliteration);
+    return asrScoring.validLTS(foreignLanguagePhrase);
   }
 
   public SmallVocabDecoder getSmallVocabDecoder() {
@@ -723,12 +723,12 @@ public class AudioFileHelper implements AlignDecode {
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#getAlignment
    */
-  public AudioAnswer getAlignment(String base64EncodedString, String textToAlign, String transliteration, String identifier, int reqid, boolean usePhoneToDisplay) {
+  public AudioAnswer getAlignment(String base64EncodedString, String textToAlign, String identifier, int reqid, boolean usePhoneToDisplay) {
     File file = getPostedFileLoc();
     AudioAnswer audioAnswer = getAudioAnswer(base64EncodedString, reqid, file);
 
     if (audioAnswer.isValid()) {
-      PretestScore asrScoreForAudio = getASRScoreForAudio(reqid, file.getAbsolutePath(), textToAlign, null, transliteration, -1, -1, false,
+      PretestScore asrScoreForAudio = getASRScoreForAudio(reqid, file.getAbsolutePath(), textToAlign, null, -1, -1, false,
           false, serverProps.useScoreCache(), identifier, null, usePhoneToDisplay, false);
 
       audioAnswer.setPretestScore(asrScoreForAudio);
@@ -766,8 +766,8 @@ public class AudioFileHelper implements AlignDecode {
    * @see DecodeCorrectnessChecker#getFlashcardAnswer(File, Collection, AudioAnswer, boolean, boolean)
    */
   @Override
-  public PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences, String transliteration, boolean canUseCache, boolean useOldSchool) {
-    return getASRScoreForAudio(testAudioFile, lmSentences, transliteration, serverProps.usePhoneToDisplay(), useOldSchool);
+  public PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences, boolean canUseCache, boolean useOldSchool) {
+    return getASRScoreForAudio(testAudioFile, lmSentences, canUseCache, serverProps.usePhoneToDisplay(), useOldSchool);
   }
 
   /**
@@ -777,7 +777,6 @@ public class AudioFileHelper implements AlignDecode {
    *
    * @param testAudioFile     audio file to score
    * @param lmSentences       to look for in the audio
-   * @param transliteration   for languages we can't do normal LTS on (Kanji characters or similar)
    * @param canUseCache
    * @param usePhoneToDisplay
    * @param useOldSchool
@@ -785,7 +784,7 @@ public class AudioFileHelper implements AlignDecode {
    * @see DecodeCorrectnessChecker#getFlashcardAnswer
    * @see AlignDecode#getASRScoreForAudio(File, Collection, boolean, boolean)
    */
-  private PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences, String transliteration, boolean canUseCache,
+  private PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences, boolean canUseCache,
                                            boolean usePhoneToDisplay, boolean useOldSchool) {
     makeASRScoring();
     List<String> unk = new ArrayList<String>();
@@ -800,7 +799,7 @@ public class AudioFileHelper implements AlignDecode {
     String path = testAudioFile.getPath();
 
     //  logger.info("getASRScoreForAudio audio file path is " + path);
-    return getASRScoreForAudio(0, path, vocab, lmSentences, transliteration, 128, 128, false, true,
+    return getASRScoreForAudio(0, path, vocab, lmSentences, 128, 128, false, true,
         canUseCache && serverProps.useScoreCache(), prefix, null, usePhoneToDisplay, useOldSchool);
   }
 
@@ -809,7 +808,7 @@ public class AudioFileHelper implements AlignDecode {
    * @see #decodeOneAttribute(CommonExercise, AudioAttribute, boolean)
    */
   public PretestScore getAlignmentScore(CommonExercise exercise, String testAudioPath, boolean usePhoneToDisplay, boolean useOldSchool) {
-    return getASRScoreForAudio(0, testAudioPath, exercise.getForeignLanguage(), exercise.getTransliteration(), 128, 128, false,
+    return getASRScoreForAudio(0, testAudioPath, exercise.getForeignLanguage(), 128, 128, false,
         false, serverProps.useScoreCache(), exercise.getID(), null, usePhoneToDisplay, useOldSchool);
   }
 
@@ -819,7 +818,6 @@ public class AudioFileHelper implements AlignDecode {
    * @param reqid
    * @param testAudioFile
    * @param sentence           empty string when using lmSentences non empty and vice-versa
-   * @param transliteration   for languages we can't do normal LTS on (Kanji characters or similar)
    * @param width              image dim
    * @param height             image dim
    * @param useScoreToColorBkg
@@ -834,13 +832,13 @@ public class AudioFileHelper implements AlignDecode {
    * @see AlignDecode#getASRScoreForAudio
    * @see mitll.langtest.client.scoring.ScoringAudioPanel#scoreAudio(String, long, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
    **/
-  public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence, String transliteration,
+  public PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
                                           int width, int height, boolean useScoreToColorBkg,
 
                                           boolean decode, boolean useCache, String prefix,
                                           Result precalcResult,
                                           boolean usePhoneToDisplay, boolean useOldSchool) {
-    return getASRScoreForAudio(reqid, testAudioFile, sentence, null, transliteration, width, height, useScoreToColorBkg, decode,
+    return getASRScoreForAudio(reqid, testAudioFile, sentence, null, width, height, useScoreToColorBkg, decode,
         useCache, prefix, precalcResult, usePhoneToDisplay, useOldSchool);
   }
 
@@ -852,7 +850,6 @@ public class AudioFileHelper implements AlignDecode {
    * @param testAudioFile
    * @param sentence
    * @param lmSentences
-   * @param transliteration   for languages we can't do normal LTS on (Kanji characters or similar)
    * @param width
    * @param height
    * @param useScoreToColorBkg
@@ -868,7 +865,6 @@ public class AudioFileHelper implements AlignDecode {
                                            String testAudioFile,
                                            String sentence,
                                            Collection<String> lmSentences,
-                                           String transliteration,
 
                                            int width, int height, boolean useScoreToColorBkg,
                                            boolean decode, boolean useCache, String prefix, Result precalcResult,
@@ -910,9 +906,9 @@ public class AudioFileHelper implements AlignDecode {
 
     PretestScore pretestScore = asrScoring.scoreRepeat(
         testAudioDir, removeSuffix(testAudioName),
-        sentence, lmSentences, transliteration,
+        sentence, lmSentences,
 
-            pathHelper.getImageOutDir(), width, height, useScoreToColorBkg, decode, useCache, prefix, precalcResult,
+        pathHelper.getImageOutDir(), width, height, useScoreToColorBkg, decode, useCache, prefix, precalcResult,
         usePhoneToDisplay);
 
     if (!pretestScore.isRanNormally() && isWebservice(asrScoring)) {
@@ -921,9 +917,9 @@ public class AudioFileHelper implements AlignDecode {
           "'");
       pretestScore = oldschoolScoring.scoreRepeat(
           testAudioDir, removeSuffix(testAudioName),
-          sentence, lmSentences, transliteration,
+          sentence, lmSentences,
 
-              pathHelper.getImageOutDir(), width, height, useScoreToColorBkg, decode, useCache, prefix, precalcResult,
+          pathHelper.getImageOutDir(), width, height, useScoreToColorBkg, decode, useCache, prefix, precalcResult,
           usePhoneToDisplay);
     }
     pretestScore.setReqid(reqid);
@@ -1019,7 +1015,7 @@ public class AudioFileHelper implements AlignDecode {
 
   /**
    * @return
-   * @see #getASRScoreForAudio(int, String, String, String, Collection, int, int, boolean, boolean, boolean, String, Result, boolean, boolean)
+   * @see #getASRScoreForAudio(int, String, String, Collection, int, int, boolean, boolean, boolean, String, Result, boolean, boolean)
    */
   private ASR getASRScoring() {
     return webserviceScoring;
