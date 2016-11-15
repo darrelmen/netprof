@@ -94,8 +94,6 @@ public class LTSFactory {
           ltsForLanguage = new ModernStandardArabicLTS();
           break;
         default:
-          logger.debug("here...");
-          logger.debug(className);
           Class<?> aClass = Class.forName(className);
           ltsForLanguage = (LTS) aClass.newInstance();
           break;
