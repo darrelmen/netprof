@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.scoring;
 
+import mitll.langtest.server.audio.DecoderOptions;
 import mitll.langtest.server.autocrt.DecodeCorrectnessChecker;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -53,9 +54,16 @@ public interface AlignDecode {
    * @see DecodeCorrectnessChecker#getFlashcardAnswer(File, Collection, AudioAnswer, boolean, boolean)
    * @param testAudioFile
    * @param lmSentences
-   * @param canUseCache
-   * @param useOldSchool
+   * @paramx canUseCache
+   * @paramx useOldSchool true if should use hydec and not hydra service
    * @return
    */
-  PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences, String transliteration, boolean canUseCache, boolean useOldSchool);
+  PretestScore getASRScoreForAudio(File testAudioFile,
+                                   Collection<String> lmSentences,
+                                   String transliteration,
+//                                   boolean canUseCache,
+  //                                 boolean useOldSchool
+          DecoderOptions decoderOptions
+
+  );
 }
