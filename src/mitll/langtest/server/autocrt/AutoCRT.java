@@ -285,7 +285,7 @@ public class AutoCRT {
     // logger.info("getScoreForAudio : got possible answers, num = " + size + " vs orig " + size1);
     long then = System.currentTimeMillis();
 
-    PretestScore asrScoreForAudio = autoCRTScoring.getASRScoreForAudio(audioFile, exportedAnswers, exercise.getTransliteration(), useCache, false);
+    PretestScore asrScoreForAudio = autoCRTScoring.getASRScoreForAudio(audioFile, exportedAnswers, useCache, false);
     long now = System.currentTimeMillis();
     if (now - then > 100) {
       logger.info("getScoreForAudio : took " + (now - then) + " millis to get score " + asrScoreForAudio +

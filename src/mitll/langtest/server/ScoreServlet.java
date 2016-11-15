@@ -807,7 +807,7 @@ public class ScoreServlet extends DatabaseServlet {
     if (doFlashcard) {
       answer = getAnswer(reqid, exerciseID, user, doFlashcard, wavPath, saveFile, -1, deviceType, device, allowAlternates);
     } else {
-      PretestScore asrScoreForAudio = getASRScoreForAudio(reqid, wavPath, exercise1.getForeignLanguage(), exercise1.getTransliteration(), exerciseID,
+      PretestScore asrScoreForAudio = getASRScoreForAudio(reqid, wavPath, exercise1.getForeignLanguage(), exerciseID,
           usePhoneToDisplay);
       answer = getAnswer(reqid, exerciseID, user, doFlashcard, wavPath, saveFile, asrScoreForAudio.getHydecScore(),
           deviceType, device, allowAlternates);
@@ -835,7 +835,7 @@ public class ScoreServlet extends DatabaseServlet {
                                           String deviceType, String device, CommonExercise exercise1,
                                           boolean usePhoneToDisplay) {
     PretestScore asrScoreForAudio = getASRScoreForAudioNoCache(reqid, saveFile.getAbsolutePath(),
-        exercise1.getForeignLanguage(), exercise1.getTransliteration(), exerciseID, usePhoneToDisplay);
+        exercise1.getForeignLanguage(), exerciseID, usePhoneToDisplay);
     AudioAnswer answer = getAnswer(reqid, exerciseID, user, doFlashcard, wavPath, saveFile, asrScoreForAudio.getHydecScore(),
         deviceType, device, false);
     answer.setPretestScore(asrScoreForAudio);
@@ -1001,9 +1001,9 @@ public class ScoreServlet extends DatabaseServlet {
    * @return
    * @see #getAudioAnswer(int, String, int, boolean, String, File, String, String, CommonExercise, boolean, boolean)
    */
-  private PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence, String transliteration,
+  private PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence,
                                            String exerciseID, boolean usePhoneToDisplay) {
-    return audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, transliteration, 128, 128, false,
+    return audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, 128, 128, false,
         false, serverProps.useScoreCache(), exerciseID, null, usePhoneToDisplay, false);
   }
 
@@ -1016,10 +1016,10 @@ public class ScoreServlet extends DatabaseServlet {
    * @return
    * @see #getAudioAnswerAlign(int, String, int, boolean, String, File, String, String, CommonExercise, boolean)
    */
-  private PretestScore getASRScoreForAudioNoCache(int reqid, String testAudioFile, String sentence, String transliteration,
+  private PretestScore getASRScoreForAudioNoCache(int reqid, String testAudioFile, String sentence,
                                                   String exerciseID, boolean usePhoneToDisplay) {
     //  logger.debug("getASRScoreForAudioNoCache for " + testAudioFile + " under " + sentence);
-    return audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, transliteration, 128, 128, false,
+    return audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, 128, 128, false,
         false, false, exerciseID, null, usePhoneToDisplay, false);
   }
 
