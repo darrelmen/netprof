@@ -60,6 +60,7 @@ import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.ReviewScoringPanel;
 import mitll.langtest.client.table.PagerTable;
 import mitll.langtest.shared.MonitorResult;
+import mitll.langtest.shared.Result;
 import mitll.langtest.shared.ResultAndTotal;
 
 import java.util.ArrayList;
@@ -482,7 +483,8 @@ public class ResultManager extends PagerTable {
       reviewContainer.add(vert);
       reviewContainer.add(w.getTables());
     } else {
-      AudioPanel w = new AudioPanel(selectedObject.getAnswer(), service, controller, false, null, 10, "", controller.getAudioType(), selectedObject.getExID(), null, "instance");
+      AudioPanel w = new AudioPanel(selectedObject.getAnswer(), service, controller, false, null, 10, "",
+          Result.AUDIO_TYPE_REGULAR, selectedObject.getExID(), null, "instance");
       reviewContainer.add(w);
     }
   }
