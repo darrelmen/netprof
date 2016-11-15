@@ -419,12 +419,12 @@ public abstract class Scoring {
    * @return
    * @see mitll.langtest.server.scoring.Scoring#validLTS(String)
    */
-  Set<String> checkLTS(String foreignLanguagePhrase, String transliteration) {
-    return checkLTSHelper.checkLTS(foreignLanguagePhrase, transliteration);
+  Set<String> checkLTS(String foreignLanguagePhrase) {
+    return checkLTSHelper.checkLTS(foreignLanguagePhrase);
   }
 
-  public boolean validLTS(String fl, String transliteration) {
-    return checkLTS(fl, transliteration).isEmpty();
+  public boolean validLTS(String fl) {
+    return checkLTS(fl).isEmpty();
   }
 
   /**
