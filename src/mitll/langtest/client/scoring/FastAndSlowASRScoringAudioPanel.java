@@ -81,13 +81,13 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#getAudioPanel
    */
   protected FastAndSlowASRScoringAudioPanel(T exercise,
-                                         String path, LangTestDatabaseAsync service, ExerciseController controller1,
-                                         ScoreListener scoreListener,
-                                         String instance
+                                            String path, LangTestDatabaseAsync service, ExerciseController controller1,
+                                            ScoreListener scoreListener,
+                                            String instance
   ) {
     super(path,
         exercise.getForeignLanguage(),
-            exercise.getTransliteration(),
+        exercise.getTransliteration(),
         service,
         controller1,
         controller1.getProps().showSpectrogram(), scoreListener, 23, REFERENCE, exercise.getID(), exercise, instance);
@@ -239,8 +239,8 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
    */
   private void addRegularAndSlow(Panel vp, Collection<AudioAttribute> audioAttributes, String instance) {
     logger.info("getAfterPlayWidget : for" +
-        "\n\texercise   " +exercise.getID() +
-        "\n\tpath       "+ audioPath +
+        "\n\texercise   " + exercise.getID() +
+        "\n\tpath       " + audioPath +
         "\n\tattributes " + audioAttributes);
 
     RadioButton regular = null;
@@ -253,7 +253,7 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
       if (!audioAttribute.isValid()) continue;
       String display = audioAttribute.getDisplay();
 
-      logger.info("getAfterPlayWidget : check attri " + audioAttribute + " display " +display);
+      logger.info("getAfterPlayWidget : check attri " + audioAttribute + " display " + display);
       final RadioButton radio = new RadioButton(GROUP + "_" + exerciseID + "_" + instance, display);
       radio.getElement().setId("Radio_" + display);
       if (audioAttribute.isRegularSpeed()) {
