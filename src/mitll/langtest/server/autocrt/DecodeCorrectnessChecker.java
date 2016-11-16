@@ -89,16 +89,14 @@ public class DecodeCorrectnessChecker {
    * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
    * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer
    */
-  public PretestScore getDecodeScore(CommonShell commonExercise, File audioFile, AudioAnswer answer,
+  public PretestScore getDecodeScore(CommonShell commonExercise,
+                                     File audioFile,
+                                     AudioAnswer answer,
                                      String language,
-
-//                                     boolean canUseCache, boolean allowAlternates,
-  //                                   boolean useOldSchool
-      DecoderOptions decoderOptions
-
+                                     DecoderOptions decoderOptions
   ) {
     Collection<String> foregroundSentences = getRefSentences(commonExercise, language, decoderOptions.isAllowAlternates());
-    PretestScore decodeScore = getDecodeScore(audioFile, foregroundSentences, answer, decoderOptions);//canUseCache, useOldSchool);
+    PretestScore decodeScore = getDecodeScore(audioFile, foregroundSentences, answer, decoderOptions);
     // log what happened
     logDecodeOutput(answer, foregroundSentences, commonExercise.getID());
 
@@ -139,15 +137,11 @@ public class DecodeCorrectnessChecker {
    * @param possibleSentences any of these can match and we'd call this a correct response
    * @param answer            holds the score, whether it was correct, the decode output, and whether one of the
    *                          possible sentences
-   * @paramx canUseCache
-   * @paramx useOldSchool
    * @return PretestScore word/phone alignment with scores
-   * @paramx firstPronLength
    * @see #getDecodeScore
    */
   private PretestScore getDecodeScore(File audioFile, Collection<String> possibleSentences, AudioAnswer answer,
-//                                      boolean canUseCache, boolean useOldSchool
-        DecoderOptions decoderOptions
+                                      DecoderOptions decoderOptions
 
   ) {
     List<String> lmSentences = removePunct(possibleSentences);
