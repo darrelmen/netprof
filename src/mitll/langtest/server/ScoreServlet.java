@@ -34,6 +34,7 @@ package mitll.langtest.server;
 
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.audio.DecoderOptions;
+import mitll.langtest.server.audio.TrackInfo;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.json.JsonExport;
@@ -692,7 +693,6 @@ public class ScoreServlet extends DatabaseServlet {
 
     return getJsonForAudioForUser(reqid, exerciseID, userid, Request.valueOf(requestType.toUpperCase()), wavPath, saveFile,
         deviceType, device,
-        //allowAlternates, usePhoneToDisplay,
         new DecoderOptions().setAllowAlternates(allowAlternates).setUsePhoneToDisplay(usePhoneToDisplay));
   }
 
@@ -745,10 +745,6 @@ public class ScoreServlet extends DatabaseServlet {
   private JSONObject getJsonForAudioForUser(int reqid, String exerciseID, int user, Request request, String wavPath,
                                             File saveFile,
                                             String deviceType, String device,
-
-                                            //  boolean allowAlternates,
-                                            // boolean usePhoneToDisplay,
-
                                             DecoderOptions options) {
     long then = System.currentTimeMillis();
     CommonExercise exercise1 = db.getCustomOrPredefExercise(exerciseID);  // allow custom items to mask out non-custom items
@@ -759,8 +755,7 @@ public class ScoreServlet extends DatabaseServlet {
     } else {
       boolean doFlashcard = request == Request.DECODE;
       options.setDoFlashcard(doFlashcard);
-      AudioAnswer answer = getAudioAnswer(reqid, exerciseID, user, wavPath, saveFile, deviceType, device, exercise1, //doFlashcard,
-          //allowAlternates, usePhoneToDisplay,
+      AudioAnswer answer = getAudioAnswer(reqid, exerciseID, user, wavPath, saveFile, deviceType, device, exercise1,
           options);
       long now = System.currentTimeMillis();
       PretestScore pretestScore = answer == null ? null : answer.getPretestScore();
@@ -783,8 +778,6 @@ public class ScoreServlet extends DatabaseServlet {
           if (!answer.isCorrect() && !answer.isSaidAnswer()) {
             options.setDoFlashcard(false);
             answer = getAudioAnswerAlign(reqid, exerciseID, user, wavPath, saveFile, deviceType, device, exercise1,
-//                false,
-//                usePhoneToDisplay,
                 options);
             jsonForScore = getJsonFromAlignment(usePhoneToDisplay, answer, decodeResultID);
           }
@@ -848,25 +841,16 @@ public class ScoreServlet extends DatabaseServlet {
    * @param exercise
    * @param options
    * @return
-   * @paramx doFlashcard
-   * @paramx allowAlternates
-   * @paramx usePhoneToDisplay
    * @see #getJsonForAudioForUser
    */
   private AudioAnswer getAudioAnswer(int reqid, String exerciseID, int user,
                                      String wavPath, File saveFile, String deviceType, String device, CommonShell exercise,
-
-                                     // boolean doFlashcard,
-                                     // boolean allowAlternates,
-                                     // boolean usePhoneToDisplay,
-
                                      DecoderOptions options) {
     AudioAnswer answer;
 
     if (options.isDoFlashcard()) {
       options.setDoFlashcard(true);
       answer = getAnswer(reqid, exerciseID, user, wavPath, saveFile, -1, deviceType, device,
-          // true, options.isAllowAlternates()
           options
       );
     } else {
@@ -918,8 +902,6 @@ public class ScoreServlet extends DatabaseServlet {
         saveFile,
         asrScoreForAudio.getHydecScore(),
         deviceType, device,
-        //doFlashcard,
-        //false
         options);
     answer.setPretestScore(asrScoreForAudio);
     return answer;
@@ -943,16 +925,12 @@ public class ScoreServlet extends DatabaseServlet {
   private AudioAnswer getAnswer(int reqid, String exerciseID, int user,
                                 String wavPath, File file,
                                 float score, String deviceType, String device,
-
-                                // boolean doFlashcard,
-                                //   boolean allowAlternates
                                 DecoderOptions options
   ) {
-    CommonExercise exercise1 = db.getCustomOrPredefExercise(exerciseID);  // allow custom items to mask out non-custom items
-
+    CommonExercise exercise = db.getCustomOrPredefExercise(exerciseID);  // allow custom items to mask out non-custom items
     AudioContext audioContext = new AudioContext(reqid, user, exerciseID, 0, options.isDoFlashcard() ? "flashcard" : "learn");
 
-    AudioAnswer answer = audioFileHelper.getAnswer(exercise1,
+    AudioAnswer answer = audioFileHelper.getAnswer(exercise,
         audioContext,
         wavPath, file, deviceType, device, score,
      //   doFlashcard,
@@ -960,23 +938,24 @@ public class ScoreServlet extends DatabaseServlet {
         options);
 
     final String path = answer.getPath();
-    final String foreignLanguage = exercise1.getForeignLanguage();
+    final String foreignLanguage = exercise.getForeignLanguage();
 
-    ensureMP3Later(user, path, foreignLanguage);
+    ensureMP3Later(path, user, foreignLanguage, exercise.getEnglish());
 
     return answer;
   }
 
   /**
-   * @param user
    * @param path
+   * @param user
    * @param foreignLanguage
+   * @param english
    * @see #getAnswer
    */
-  private void ensureMP3Later(final int user, final String path, final String foreignLanguage) {
+  private void ensureMP3Later(final String path, final int user, final String foreignLanguage, String english) {
     new Thread(() -> {
       //long then = System.currentTimeMillis();
-      ensureMP3(path, foreignLanguage, getUserID(user));
+      ensureMP3(path, new TrackInfo(foreignLanguage, getUserID(user), english));
       // long now = System.currentTimeMillis();
       //       logger.debug("Took " + (now-then) + " millis to write mp3 version");
     }).start();
