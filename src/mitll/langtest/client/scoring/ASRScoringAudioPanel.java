@@ -55,7 +55,6 @@ import java.util.logging.Logger;
  */
 public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> {
   //private Logger logger = Logger.getLogger("ASRScoringAudioPanel");
-
   private static final String ANIMATED_PROGRESS44_GIF = "animated_progress44.gif";
   private static final String WAIT_GIF = LangTest.LANGTEST_IMAGES + ANIMATED_PROGRESS44_GIF;
   private static final String SCORE = "score";
