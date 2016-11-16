@@ -72,7 +72,7 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
   private static final int HEIGHT_OF_RECORD_ROW = 58;
 
   private static final int MIN_VALID_DYNAMIC_RANGE = 32;
-  private static final int MIN_GOOD_DYNAMIC_RANGE  = 40;
+  private static final int MIN_GOOD_DYNAMIC_RANGE = 40;
 
   private final int index;
 
@@ -140,8 +140,8 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
     Style style = progressBar.getElement().getStyle();
     style.setMarginLeft(5, Style.Unit.PX);
     progressBar.addStyleName("topBarMargin");
-  //  style.setMarginTop(5, Style.Unit.PX);
-  //  style.setMarginBottom(5, Style.Unit.PX);
+    //  style.setMarginTop(5, Style.Unit.PX);
+    //  style.setMarginBottom(5, Style.Unit.PX);
     return afterPlayWidget;
   }
 
@@ -151,8 +151,11 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
    * @return
    */
   public AudioAttribute getAudioAttribute() {
-    AudioAttribute audioAttribute = audioType.equals(Result.AUDIO_TYPE_REGULAR) ? exercise.getRecordingsBy(controller.getUser(), true) :
-        audioType.equals(Result.AUDIO_TYPE_SLOW) ? exercise.getRecordingsBy(controller.getUser(), false) : null;
+    AudioAttribute audioAttribute =
+        audioType.equals(Result.AUDIO_TYPE_REGULAR) ?
+            exercise.getRecordingsBy(controller.getUser(), true) :
+            audioType.equals(Result.AUDIO_TYPE_SLOW) ?
+                exercise.getRecordingsBy(controller.getUser(), false) : null;
 
     if (audioType.startsWith("context")) {
       for (AudioAttribute audioAttribute1 : exercise.getAudioAttributes()) {
@@ -221,8 +224,8 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
   }
 
   /**
-   * @see RecordAudioPanel.MyWaveformPostAudioRecordButton#flip
    * @param first
+   * @see RecordAudioPanel.MyWaveformPostAudioRecordButton#flip
    */
   protected void flipRecordImages(boolean first) {
     recordImage1.setVisible(first);
@@ -251,21 +254,21 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
     public MyPlayAudioPanel(Image recordImage1, Image recordImage2, final Panel panel, String suffix, Widget toTheRightWidget) {
       super(RecordAudioPanel.this.soundManager,
           new PlayListener() {
-        public void playStarted() {
-          if (panel instanceof BusyPanel) {
-            ((BusyPanel) panel).setBusy(true);
-          }
-          postAudioRecordButton.setEnabled(false);
-        }
+            public void playStarted() {
+              if (panel instanceof BusyPanel) {
+                ((BusyPanel) panel).setBusy(true);
+              }
+              postAudioRecordButton.setEnabled(false);
+            }
 
-        public void playStopped() {
-          if (panel instanceof BusyPanel) {
-            ((BusyPanel) panel).setBusy(false);
-          }
-          postAudioRecordButton.setEnabled(true);
-        }
+            public void playStopped() {
+              if (panel instanceof BusyPanel) {
+                ((BusyPanel) panel).setBusy(false);
+              }
+              postAudioRecordButton.setEnabled(true);
+            }
 
-      }, suffix, toTheRightWidget);
+          }, suffix, toTheRightWidget);
       add(recordImage1);
       recordImage1.setVisible(false);
       add(recordImage2);
@@ -288,6 +291,7 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
 
   protected class MyWaveformPostAudioRecordButton extends WaveformPostAudioRecordButton {
     // private long then,now;
+
     /**
      * @param audioType
      * @param recordButtonTitle
@@ -327,7 +331,7 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
 
     /**
      * From Paul Gatewood:
-     * 
+     * <p>
      * Reasonable upper limit outside of an acoustic isolation room is 70dB Dynamic Range
      * <p>
      * I would put
@@ -368,6 +372,8 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
       afterPlayWidget.setVisible(true);
     }
 
-    private float roundToTenth(double totalHours) {   return ((float) ((Math.round(totalHours * 10d)))) / 10f;    }
+    private float roundToTenth(double totalHours) {
+      return ((float) ((Math.round(totalHours * 10d)))) / 10f;
+    }
   }
 }
