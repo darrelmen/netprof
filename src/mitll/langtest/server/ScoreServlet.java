@@ -34,6 +34,7 @@ package mitll.langtest.server;
 
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.audio.DecoderOptions;
+import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.server.rest.RestUserManagement;
@@ -112,6 +113,7 @@ public class ScoreServlet extends DatabaseServlet {
   public static final String REMOVE_REF_RESULT = "removeRefResult";
   public static final String USE_PHONE_TO_DISPLAY = "USE_PHONE_TO_DISPLAY";
   public static final String ALLOW_ALTERNATES = "ALLOW_ALTERNATES";
+  public static final ImageOptions DEFAULT = ImageOptions.getDefault();
   private boolean removeExercisesWithMissingAudioDefault = true;
 
   private RestUserManagement userManagement;
@@ -1099,7 +1101,8 @@ public class ScoreServlet extends DatabaseServlet {
    */
   private PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence, String transliteration,
                                            String exerciseID, boolean usePhoneToDisplay) {
-    return audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, transliteration, 128, 128, exerciseID, null, false,
+    return audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, transliteration, DEFAULT, exerciseID,
+        null,
         new DecoderOptions()
             .setDoFlashcard(false)
             .setCanUseCache(serverProps.useScoreCache())
@@ -1118,8 +1121,8 @@ public class ScoreServlet extends DatabaseServlet {
   private PretestScore getASRScoreForAudioNoCache(int reqid, String exerciseID, String testAudioFile, String sentence, String transliteration,
                                                   boolean usePhoneToDisplay) {
     //  logger.debug("getASRScoreForAudioNoCache for " + testAudioFile + " under " + sentence);
-    return audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, transliteration, 128, 128, exerciseID, null, false,
-       // false, false, usePhoneToDisplay, false,
+    return audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, transliteration, DEFAULT, exerciseID, null,
+        // false, false, usePhoneToDisplay, false,
         new DecoderOptions()
             .setDoFlashcard(false)
             .setCanUseCache(false)

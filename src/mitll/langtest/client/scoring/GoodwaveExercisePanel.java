@@ -322,8 +322,8 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
       path = CompressedAudio.getPathNoSlashChange(path);
     }
     //else {
-      logger.info("getScoringAudioPanel path is " +path +
-          " for " + e.getAudioAttributes());
+//      logger.info("getScoringAudioPanel path is " +path +
+//          " for " + e.getAudioAttributes());
    // }
     contentAudio = getAudioPanel(path);
     contentAudio.setScreenPortion(screenPortion);
