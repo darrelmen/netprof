@@ -20,3 +20,4 @@ war/config/levantine/media/nl*/*.mp3
 war/config/msa/media/ID*.raw
 war/config/msa/media/ID*.mp3
 
+/test-classes/
