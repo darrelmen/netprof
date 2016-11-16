@@ -89,7 +89,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   private final SafeUri animated = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "animated_progress28.gif");
   private final SafeUri white = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "white_32x32.png");
   private final com.github.gwtbootstrap.client.ui.Image waitCursor = new com.github.gwtbootstrap.client.ui.Image(white);
-  protected boolean showFirstNotCompleted = false;
+  boolean showFirstNotCompleted = false;
 
   /**
    * @param currentExerciseVPanel
@@ -206,17 +206,33 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
 
   /**
    * Skip to first not completed or just go to the first item.
+   *
    * @return
+   * @see #loadFirstExercise
    */
   @Override
   protected T findFirstExercise() {
     return showFirstNotCompleted ? getFirstNotCompleted() : super.findFirstExercise();
   }
 
+  /**
+   * Sometimes we want to not respect if there's an item selection in the url.
+   * @param searchIfAny
+   * @param exerciseID
+   */
+  protected void goToFirst(String searchIfAny, String exerciseID) {
+    if (showFirstNotCompleted) {
+      loadFirstExercise();
+    } else {
+      super.goToFirst(searchIfAny, exerciseID);
+    }
+  }
+
   private T getFirstNotCompleted() {
     for (T es : pagingContainer.getExercises()) {
       STATE state = es.getState();
       if (state != null && state.equals(STATE.UNSET)) {
+        logger.info("first unset is " + es.getID() + " state " + state);
         return es;
       }
     }
