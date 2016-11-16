@@ -188,7 +188,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    *
    * @param exercises
    * @return
-   * @see #makeExerciseListWrapper(int, Collection, long, String, boolean, boolean)
+   * @see #makeExerciseListWrapper
    */
   private <T extends CommonShell> List<CommonShell> getExerciseShells(Collection<? extends CommonExercise> exercises) {
     List<CommonShell> ids = new ArrayList<>();
@@ -937,7 +937,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param byID
    * @param parentDir
    * @seex LoadTesting#getExercise
-   * @see #makeExerciseListWrapper(int, java.util.Collection, long, String, boolean, boolean)
+   * @see #makeExerciseListWrapper
    */
   private void ensureMP3s(CommonExercise byID, String parentDir) {
     Collection<AudioAttribute> audioAttributes = byID.getAudioAttributes();
@@ -1200,24 +1200,20 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         return new PretestScore();
       } else {
         String sentence = exercise.getForeignLanguage();
-        String transliteration = exercise.getTransliteration();
         if (result.getAudioType().contains("context")) sentence = exercise.getContext();
 
         String audioFilePath = result.getAnswer();
         ensureMP3(audioFilePath, sentence, "" + result.getUserid());
         //logger.info("resultID " +resultID+ " temp dir " + tempDir.getAbsolutePath());
-        asrScoreForAudio = audioFileHelper.getASRScoreForAudio(1,
-            audioFilePath, sentence, transliteration,
+        asrScoreForAudio = audioFileHelper.getASRScoreForAudio(
+            1,
+            audioFilePath,
+            sentence,
+            exercise.getTransliteration(),
             width, height,
             exerciseID, result,
 
             true,  // make transcript images with colored segments
-
-            // false, // false = do alignment
-            //  serverProps.useScoreCache(),
-            //  serverProps.usePhoneToDisplay(),
-            //  false,
-
             new DecoderOptions()
                 .setDoFlashcard(false)
                 .setCanUseCache(serverProps.useScoreCache())
@@ -1267,7 +1263,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private PretestScore getPretestScore(int reqid, long resultID, String testAudioFile, String sentence, String transliteration,
                                        int width, int height,
 
-
                                        String exerciseID,
 
                                        boolean useScoreToColorBkg, boolean usePhoneToDisplay) {
@@ -1296,7 +1291,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     boolean usePhoneToDisplay1 = usePhoneToDisplay || serverProps.usePhoneToDisplay();
 
     PretestScore asrScoreForAudio = audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, transliteration, width, height, exerciseID, cachedResult, useScoreToColorBkg,
-        //false, serverProps.useScoreCache(), usePhoneToDisplay1, false,
         new DecoderOptions()
             .setDoFlashcard(false)
             .setCanUseCache(serverProps.useScoreCache())
@@ -1429,7 +1423,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param status
    * @param comment
    * @param userID
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addAnnotation(String, String, String)
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addAnnotation
    */
   @Override
   public void addAnnotation(String exerciseID, String field, String status, String comment, long userID) {
@@ -1578,8 +1572,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
           logger.info("reallyCreateNewItems skipping header line");
           firstColIsEnglish = true;
         } else {
-          // not going to try going through the transliteration here, I guess
-          if (firstColIsEnglish || (isValidForeignPhrase(english, "") && !isValidForeignPhrase(fl, ""))) {
+          if (firstColIsEnglish || (isValidForeignPhrase(english,"") && !isValidForeignPhrase(fl,""))) {
             String temp = english;
             english = fl;
             fl = temp;
@@ -1597,7 +1590,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     for (CommonExercise candidate : newItems) {
       String foreignLanguage = candidate.getForeignLanguage();
       if (!currentKnownFL.contains(foreignLanguage)) {
-        if (isValidForeignPhrase(foreignLanguage, "")) {
+        if (isValidForeignPhrase(foreignLanguage, candidate.getTransliteration())) {
           getUserListManager().reallyCreateNewItem(userListID, candidate, serverProps.getMediaDir());
           actualItems.add(candidate);
         } else {
