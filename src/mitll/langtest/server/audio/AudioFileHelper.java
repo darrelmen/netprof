@@ -747,8 +747,6 @@ public class AudioFileHelper implements AlignDecode {
           transliteration, -1, -1, false,
           identifier, null,
 
-          //false, serverProps.useScoreCache(), usePhoneToDisplay, false,
-
           new DecoderOptions()
               .setDoFlashcard(false)
               .setCanUseCache(serverProps.useScoreCache())
@@ -790,8 +788,6 @@ public class AudioFileHelper implements AlignDecode {
    */
   @Override
   public PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences, String transliteration,
-
-                                          //                                        boolean canUseCache, boolean useOldSchool
                                           DecoderOptions options
   ) {
     options.setUsePhoneToDisplay(serverProps.usePhoneToDisplay());
@@ -858,8 +854,6 @@ public class AudioFileHelper implements AlignDecode {
     return getASRScoreForAudio(0, testAudioPath, exercise.getForeignLanguage(), exercise.getTransliteration(), 128, 128, exercise.getID(), null,
 
         false,
-        // false, serverProps.useScoreCache(), usePhoneToDisplay, useOldSchool,
-
         options);
   }
 
@@ -885,25 +879,21 @@ public class AudioFileHelper implements AlignDecode {
    * @see AlignDecode#getASRScoreForAudio
    * @see mitll.langtest.client.scoring.ScoringAudioPanel#scoreAudio(String, long, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
    **/
-  public PretestScore getASRScoreForAudio(int reqid, String testAudioFile,
-                                          String sentence, String transliteration,
-                                          int width, int height,
+  public PretestScore getASRScoreForAudio(int reqid,
+                                          String testAudioFile,
+                                          String sentence,
+                                          String transliteration,
 
-                                          String prefix, Result precalcResult,
+                                          int width,
+                                          int height,
+
+                                          String prefix,
+                                          Result precalcResult,
 
                                           boolean useScoreToColorBkg,
-
-                                          //boolean decode, boolean useCache,
-                                          //boolean usePhoneToDisplay, boolean useOldSchool,
-
                                           DecoderOptions options) {
     return getASRScoreForAudio(reqid, testAudioFile, sentence, null, transliteration, width, height, useScoreToColorBkg,
-
         prefix, precalcResult,
-
-//        decode,
-//        useCache, usePhoneToDisplay, useOldSchool,
-//
         options);
   }
 
@@ -989,10 +979,18 @@ public class AudioFileHelper implements AlignDecode {
           sentence +
           "'");
       pretestScore = oldschoolScoring.scoreRepeat(
-          testAudioDir, removeSuffix(testAudioName),
-          sentence, lmSentences, transliteration,
+          testAudioDir,
+          removeSuffix(testAudioName),
+          sentence,
+          lmSentences,
+          transliteration,
 
-          pathHelper.getImageOutDir(), width, height, useScoreToColorBkg, options.isDoFlashcard(), options.isCanUseCache(), prefix, precalcResult,
+          pathHelper.getImageOutDir(), width, height,
+          useScoreToColorBkg,
+          options.isDoFlashcard(),
+          options.isCanUseCache(),
+          prefix,
+          precalcResult,
           options.isUsePhoneToDisplay());
     }
     pretestScore.setReqid(reqid);
@@ -1092,7 +1090,7 @@ public class AudioFileHelper implements AlignDecode {
 
   /**
    * @return
-   * @see #getASRScoreForAudio(int, String, String, String, Collection, int, int, boolean, boolean, boolean, String, Result, boolean, boolean)
+   * @see #getASRScoreForAudio(int, String, String, Collection, int, int, boolean, boolean, boolean, String, Result, boolean, boolean)
    */
   private ASR getASRScoring() {
     return webserviceScoring;
