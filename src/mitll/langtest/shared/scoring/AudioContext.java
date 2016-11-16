@@ -107,6 +107,10 @@ public class AudioContext implements IsSerializable {
     return reqid;
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
+   * @return
+   */
   public String getAudioType() {
     return audioType;
   }
