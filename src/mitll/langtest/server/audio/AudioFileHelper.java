@@ -784,7 +784,7 @@ public class AudioFileHelper implements AlignDecode {
    * @paramx canUseCache
    * @paramx useOldSchool
    * @see AutoCRT#getScoreForAudio
-   * @see DecodeCorrectnessChecker#getFlashcardAnswer
+   * @see DecodeCorrectnessChecker#getDecodeScore(File, Collection, AudioAnswer, DecoderOptions)
    */
   @Override
   public PretestScore getASRScoreForAudio(File testAudioFile, Collection<String> lmSentences, String transliteration,
