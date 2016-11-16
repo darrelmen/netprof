@@ -46,7 +46,6 @@ import mitll.langtest.client.analysis.ShowTab;
 import mitll.langtest.client.custom.dialog.ReviewEditableExercise;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.RecordButton;
-import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.server.amas.QuizCorrect;
 import mitll.langtest.server.audio.*;
 import mitll.langtest.server.autocrt.AutoCRT;
@@ -76,6 +75,7 @@ import mitll.langtest.shared.flashcard.QuizCorrectAndScore;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.scoring.AudioContext;
+import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
@@ -1066,13 +1066,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param reqid
    * @param audioFile
    * @param imageType
-   * @param width
-   * @param height
+   * @param imageOptions
    * @param exerciseID
    * @return path to an image file
    * @see mitll.langtest.client.scoring.AudioPanel#getImageURLForAudio
    */
-  public ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, String exerciseID) {
+  public ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType,
+                                            ImageOptions imageOptions, String exerciseID) {
     SimpleImageWriter imageWriter = new SimpleImageWriter();
 
     String wavAudioFile = getWavAudioFile(audioFile);
@@ -1089,6 +1089,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       return new ImageResponse(); // success = false!
     }
     String imageOutDir = pathHelper.getImageOutDir();
+
+    int width = imageOptions.getWidth();
+    int height = imageOptions.getHeight();
 
     if (DEBUG) {
       logger.debug("getImageForAudioFile : getting images (" + width + " x " + height + ") (" + reqid + ") type " + imageType +
@@ -1179,14 +1182,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
+   * Go back and score an old result, which mainly means generating images for it.
+   *
    * @param resultID
-   * @param width
-   * @param height
+   * @param imageOptions
    * @return
    * @see mitll.langtest.client.scoring.ReviewScoringPanel#scoreAudio
    */
   @Override
-  public PretestScore getResultASRInfo(long resultID, int width, int height) {
+  public PretestScore getResultASRInfo(long resultID, ImageOptions imageOptions) {
     PretestScore asrScoreForAudio = null;
     try {
       Result result = db.getResultDAO().getResultByID(resultID);
@@ -1210,10 +1214,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
             audioFilePath,
             sentence,
             exercise.getTransliteration(),
-            width, height,
-            exerciseID, result,
+            imageOptions,//new ImageOptions(width, height, true),
+            exerciseID,
+            result,
 
-            true,  // make transcript images with colored segments
+            // make transcript images with colored segments
             new DecoderOptions()
                 .setDoFlashcard(false)
                 .setCanUseCache(serverProps.useScoreCache())
@@ -1234,16 +1239,26 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param resultID
    * @param testAudioFile
    * @param sentence
-   * @param width
-   * @param height
-   * @param useScoreToColorBkg
    * @param exerciseID
+   * @param imageOptions
    * @return
    * @see mitll.langtest.client.scoring.ASRScoringAudioPanel#scoreAudio
    */
-  public PretestScore getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence, String transliteration,
-                                          int width, int height, boolean useScoreToColorBkg, String exerciseID) {
-    return getPretestScore(reqid, resultID, testAudioFile, sentence, transliteration, width, height, exerciseID, useScoreToColorBkg, false);
+  public PretestScore getASRScoreForAudio(int reqid,
+                                          long resultID,
+                                          String testAudioFile,
+                                          String sentence,
+                                          String transliteration,
+                                          String exerciseID,
+                                          ImageOptions imageOptions) {
+    return getPretestScore(reqid,
+        resultID,
+        testAudioFile,
+        sentence,
+        transliteration,
+        imageOptions,
+        exerciseID,
+        false);
   }
 
   /**
@@ -1253,19 +1268,19 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param resultID
    * @param testAudioFile
    * @param sentence
-   * @param width
-   * @param height
    * @param exerciseID
-   * @param useScoreToColorBkg
    * @param usePhoneToDisplay
    * @return
+   * @paramx width
+   * @paramx height
+   * @paramx useScoreToColorBkg
    */
-  private PretestScore getPretestScore(int reqid, long resultID, String testAudioFile, String sentence, String transliteration,
-                                       int width, int height,
+  private PretestScore getPretestScore(int reqid, long resultID, String testAudioFile,
+                                       String sentence, String transliteration,
 
-                                       String exerciseID,
+                                       ImageOptions imageOptions, String exerciseID,
 
-                                       boolean useScoreToColorBkg, boolean usePhoneToDisplay) {
+                                       boolean usePhoneToDisplay) {
     if (testAudioFile.equals(AudioConversion.FILE_MISSING)) return new PretestScore(-1);
     long then = System.currentTimeMillis();
 
@@ -1282,15 +1297,24 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     //now = System.currentTimeMillis();
     if (cachedResult != null) {
-      logger.debug("getPretestScore Cache HIT  : align exercise id = " + exerciseID + " file " + answer + " found previous " + cachedResult.getUniqueID() + " in " + (now - then));
-
+      long l = now - then;
+      logger.debug("getPretestScore Cache HIT  : align " +
+          "\n\texercise " + exerciseID +
+          "\n\tfile     " + answer +
+          "\n\timage    " + imageOptions +
+          "\n\tprevious " + cachedResult.getUniqueID() + (l > 10 ? " in " + l : ""));
     } else {
-      logger.debug("getPretestScore Cache MISS : align exercise id = " + exerciseID + " file " + answer);
+      logger.debug("getPretestScore Cache MISS : align" +
+          "\n\texercise " + exerciseID +
+          "\n\tfile     " + answer +
+          "\n\timage    " + imageOptions
+      );
     }
 
     boolean usePhoneToDisplay1 = usePhoneToDisplay || serverProps.usePhoneToDisplay();
 
-    PretestScore asrScoreForAudio = audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, transliteration, width, height, exerciseID, cachedResult, useScoreToColorBkg,
+    PretestScore asrScoreForAudio = audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence,
+        transliteration, imageOptions, exerciseID, cachedResult,
         new DecoderOptions()
             .setDoFlashcard(false)
             .setCanUseCache(serverProps.useScoreCache())
@@ -1299,9 +1323,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     long timeToRunHydec = System.currentTimeMillis() - then;
 
     logger.debug("getPretestScore : scoring" +
-        "\n\tfile     " + testAudioFile + " for " +
+        "\n\tfile     " + testAudioFile +
         "\n\texid     " + exerciseID +
-        "\n\tsentence " + sentence.length() + " characters long : " +
+        "\n\tsentence " + sentence.length() + " characters long" +
         "\n\tscore    " + asrScoreForAudio.getHydecScore() +
         "\n\ttook     " + timeToRunHydec + " millis " +
         "\n\tusePhoneToDisplay " + usePhoneToDisplay1);
@@ -1318,17 +1342,22 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param resultID
    * @param testAudioFile
    * @param sentence
-   * @param width
-   * @param height
-   * @param useScoreToColorBkg
    * @param exerciseID
+   * @param imageOptions
    * @return
    * @see mitll.langtest.client.scoring.ASRScoringAudioPanel#scoreAudio
    */
   @Override
-  public PretestScore getASRScoreForAudioPhonemes(int reqid, long resultID, String testAudioFile, String sentence, String transliteration,
-                                                  int width, int height, boolean useScoreToColorBkg, String exerciseID) {
-    return getPretestScore(reqid, resultID, testAudioFile, sentence, transliteration, width, height, exerciseID, useScoreToColorBkg, true);
+  public PretestScore getASRScoreForAudioPhonemes(int reqid,
+                                                  long resultID,
+                                                  String testAudioFile,
+
+                                                  String sentence,
+                                                  String transliteration,
+                                                  String exerciseID,
+
+                                                  ImageOptions imageOptions) {
+    return getPretestScore(reqid, resultID, testAudioFile, sentence, transliteration, imageOptions, exerciseID, true);
   }
 
   @Override
@@ -1572,7 +1601,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
           logger.info("reallyCreateNewItems skipping header line");
           firstColIsEnglish = true;
         } else {
-          if (firstColIsEnglish || (isValidForeignPhrase(english,"") && !isValidForeignPhrase(fl,""))) {
+          if (firstColIsEnglish || (isValidForeignPhrase(english, "") && !isValidForeignPhrase(fl, ""))) {
             String temp = english;
             english = fl;
             fl = temp;
