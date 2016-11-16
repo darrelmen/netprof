@@ -259,8 +259,8 @@ public class CommentBox extends PopupContainer {
   }
 
   /**
-   * @see FlashcardPanel#otherReasonToIgnoreKeyPress
    * @return
+   * @see FlashcardPanel#otherReasonToIgnoreKeyPress
    */
   public boolean isPopupShowing() {
     return commentPopup.isShowing();
@@ -335,11 +335,6 @@ public class CommentBox extends PopupContainer {
       this.field = field;
     }
 
-    @Override
-    protected void onLoad() {
-      logger.info("got load on " + getElement().getId());
-    }
-
     /**
      * @param commentBox
      * @param commentButton
@@ -347,12 +342,9 @@ public class CommentBox extends PopupContainer {
      * @see #makeCommentPopup(String, Button, HidePopupTextBox, Button)
      */
     void configure(final TextBox commentBox, final Widget commentButton, final Widget clearButton) {
-      addCloseHandler(new CloseHandler<PopupPanel>() {
-        @Override
-        public void onClose(CloseEvent<PopupPanel> event) {
-          registration.logEvent(commentBox, "Comment_TextBox", exerciseID, "submit comment '" + commentBox.getValue() + "'");
-          commentComplete(commentBox, field, commentButton, clearButton);
-        }
+      addCloseHandler(event -> {
+        registration.logEvent(commentBox, "Comment_TextBox", exerciseID, "submit comment '" + commentBox.getValue() + "'");
+        commentComplete(commentBox, field, commentButton, clearButton);
       });
     }
   }
@@ -436,7 +428,7 @@ public class CommentBox extends PopupContainer {
     if (previous == null || !previous.equals(comment)) {
       fieldToComment.put(field, comment);
       boolean isCorrect = comment.length() == 0;
-//      System.out.println("commentComplete " + field + " comment '" + comment +"' correct = " +isCorrect);
+      logger.info("commentComplete " + field + " comment '" + comment + "' correct = " + isCorrect);
       setButtonTitle(commentButton, isCorrect, comment);
       showOrHideCommentButton(commentButton, clearButton, isCorrect);
       if (isCorrect) {
@@ -444,7 +436,7 @@ public class CommentBox extends PopupContainer {
       } else {
         commentAnnotator.addIncorrectComment(comment, field);
       }
-      //System.out.println("\t commentComplete : annotations now " + exerciseID.getFields());
+      //logger.info("\t commentComplete : annotations now " + exerciseID.getFields());
     }
   }
 

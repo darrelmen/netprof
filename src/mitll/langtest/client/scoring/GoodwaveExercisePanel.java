@@ -63,10 +63,7 @@ import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.ExerciseAnnotation;
-import mitll.langtest.shared.exercise.AudioRefExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.HasID;
-import mitll.langtest.shared.exercise.ScoredExercise;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.scoring.PretestScore;
 
@@ -74,6 +71,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -85,7 +83,7 @@ import java.util.List;
  */
 public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExercise & ScoredExercise> extends HorizontalPanel
     implements BusyPanel, RequiresResize, ProvidesResize, CommentAnnotator {
-//  private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
+  private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
 
   public static final String CONTEXT = "Context";
   private static final String SAY = "Say";
@@ -323,6 +321,10 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     if (path != null) {
       path = CompressedAudio.getPathNoSlashChange(path);
     }
+    //else {
+      logger.info("getScoringAudioPanel path is " +path +
+          " for " + e.getAudioAttributes());
+   // }
     contentAudio = getAudioPanel(path);
     contentAudio.setScreenPortion(screenPortion);
     return contentAudio;
