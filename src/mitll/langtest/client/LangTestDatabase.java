@@ -65,6 +65,7 @@ import mitll.langtest.shared.flashcard.QuizCorrectAndScore;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.scoring.AudioContext;
+import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.Collection;
@@ -89,7 +90,7 @@ public interface LangTestDatabase extends RemoteService {
   StartupInfo getStartupInfo();
 
   /**
-   * @see mitll.langtest.client.list.PagingExerciseList#loadExercises(String, String, boolean)
+   * @see mitll.langtest.client.list.PagingExerciseList#loadExercises
    * @param request
    * @param <T>
    * @return
@@ -234,21 +235,19 @@ public interface LangTestDatabase extends RemoteService {
    * @param reqid
    * @param audioFile
    * @param imageType
-   * @param width
-   * @param height
-   * @param exerciseID
-   * @return
+   * @param imageOptions
+   *@param exerciseID  @return
    */
-  ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, String exerciseID);
+  ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, ImageOptions imageOptions,
+                                     String exerciseID);
 
   /**
    * @see mitll.langtest.client.scoring.ReviewScoringPanel#scoreAudio(String, long, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
    * @param resultID
-   * @param width
-   * @param height
+   * @param imageOptions
    * @return
    */
-  PretestScore getResultASRInfo(long resultID, int width, int height);
+  PretestScore getResultASRInfo(long resultID, ImageOptions imageOptions);
 
   /**
    * @see mitll.langtest.client.scoring.ASRScoringAudioPanel#scoreAudio(String, long, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
@@ -256,14 +255,14 @@ public interface LangTestDatabase extends RemoteService {
    * @param resultID
    * @param testAudioFile
    * @param sentence
-   * @param width
-   * @param height
-   * @param useScoreToColorBkg
    * @param exerciseID
+   * @param imageOptions
    * @return
    */
-  PretestScore getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence, String transliteration,
-                                   int width, int height, boolean useScoreToColorBkg, String exerciseID);
+  PretestScore getASRScoreForAudio(int reqid, long resultID, String testAudioFile,
+                                   String sentence, String transliteration,
+                                   String exerciseID,
+                                   ImageOptions imageOptions);
 
   /**
    * @see mitll.langtest.client.scoring.ASRScoringAudioPanel#scoreAudio(String, long, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
@@ -271,14 +270,16 @@ public interface LangTestDatabase extends RemoteService {
    * @param resultID
    * @param testAudioFile
    * @param sentence
-   * @param width
-   * @param height
-   * @param useScoreToColorBkg
    * @param exerciseID
+   * @param imageOptions
    * @return
    */
-  PretestScore getASRScoreForAudioPhonemes(int reqid, long resultID, String testAudioFile, String sentence, String transliteration,
-                                   int width, int height, boolean useScoreToColorBkg, String exerciseID);
+  PretestScore getASRScoreForAudioPhonemes(int reqid,
+                                           long resultID, String testAudioFile,
+                                           String sentence,
+                                           String transliteration,
+                                           String exerciseID,
+                                           ImageOptions imageOptions);
 
   /**
    * @see mitll.langtest.client.scoring.PostAudioRecordButton#addRT(AudioAnswer, int)

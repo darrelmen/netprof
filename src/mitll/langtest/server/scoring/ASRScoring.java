@@ -43,6 +43,7 @@ import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
+import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
@@ -98,9 +99,6 @@ public class ASRScoring extends Scoring implements ASR {
    * @param testAudioFileNoSuffix
    * @param sentence              that should be what the test audio contains
    * @param imageOutDir
-   * @param imageWidth
-   * @param imageHeight
-   * @param useScoreForBkgColor
    * @param useCache
    * @param prefix
    * @param precalcResult
@@ -114,7 +112,8 @@ public class ASRScoring extends Scoring implements ASR {
                                   String transliteration,
 
                                   String imageOutDir,
-                                  int imageWidth, int imageHeight, boolean useScoreForBkgColor,
+                                  ImageOptions imageOptions,
+
                                   boolean decode,
                                   boolean useCache, String prefix, Result precalcResult, boolean usePhoneToDisplay) {
     return scoreRepeatExercise(testAudioDir, testAudioFileNoSuffix,
@@ -122,7 +121,8 @@ public class ASRScoring extends Scoring implements ASR {
         lmSentences,
 
         scoringDir,
-        imageOutDir, imageWidth, imageHeight, useScoreForBkgColor,
+        imageOutDir,
+        imageOptions,
         decode,
         useCache, prefix, precalcResult, usePhoneToDisplay);
   }
@@ -146,9 +146,6 @@ public class ASRScoring extends Scoring implements ASR {
    * @param lmSentences
    * @param scoringDir            where the hydec subset is (models, bin.linux64, etc.)
    * @param imageOutDir           where to write the images (audioImage)
-   * @param imageWidth            image width
-   * @param imageHeight           image height
-   * @param useScoreForBkgColor   true if we want to color the segments by score else all are gray
    * @param decode                if true, skips writing image files
    * @param useCache              cache scores so subsequent requests for the same audio file will get the cached score
    * @param prefix                on the names of the image files, if they are written
@@ -163,9 +160,8 @@ public class ASRScoring extends Scoring implements ASR {
                                            String scoringDir,
 
                                            String imageOutDir,
-                                           int imageWidth,
-                                           int imageHeight,
-                                           boolean useScoreForBkgColor,
+                                           ImageOptions imageOptions,
+
                                            boolean decode,
                                            boolean useCache, String prefix,
                                            Result precalcResult,
@@ -229,7 +225,9 @@ public class ASRScoring extends Scoring implements ASR {
       logger.error("getScoreForAudio failed to generate scores.");
       return new PretestScore(0.01f);
     }
-    PretestScore pretestScore = getPretestScore(imageOutDir, imageWidth, imageHeight, useScoreForBkgColor, decode,
+    PretestScore pretestScore = getPretestScore(imageOutDir,
+        imageOptions,
+        decode,
         prefix, noSuffix, wavFile,
         scores, jsonObject, usePhoneToDisplay);
 //    logger.info("now we have pretest score " +pretestScore + " json " + jsonObject);
@@ -240,9 +238,6 @@ public class ASRScoring extends Scoring implements ASR {
    * Make image files for words, and phones, find out the reco sentence from the events.
    *
    * @param imageOutDir
-   * @param imageWidth
-   * @param imageHeight
-   * @param useScoreForBkgColor
    * @param decode
    * @param prefix
    * @param noSuffix
@@ -252,17 +247,20 @@ public class ASRScoring extends Scoring implements ASR {
    * @return
    * @see #scoreRepeatExercise
    */
-  private PretestScore getPretestScore(String imageOutDir, int imageWidth, int imageHeight, boolean useScoreForBkgColor,
+  private PretestScore getPretestScore(String imageOutDir,
+                                       ImageOptions imageOptions,
                                        boolean decode, String prefix, String noSuffix, File wavFile, Scores scores,
                                        JSONObject jsonObject,
                                        boolean usePhoneToDisplay) {
     //  logger.debug("getPretestScore jsonObject " + jsonObject);
 //    logger.debug("getPretestScore scores     " + scores);
-
+    int imageWidth = imageOptions.getWidth();
+    int imageHeight = imageOptions.getHeight();
+    boolean useScoreForBkgColor =imageOptions.isUseScoreToColorBkg();
     boolean reallyUsePhone = usePhoneToDisplay || props.usePhoneToDisplay();
 
     // we cache the images, so we don't want to return an image for a different option...
-    String prefix1 = prefix + (useScoreForBkgColor ? "bkgColorForRef" : "") + (reallyUsePhone ? "_phoneToDisp" : "");
+    String prefix1 = prefix + (imageOptions.isUseScoreToColorBkg() ? "bkgColorForRef" : "") + (reallyUsePhone ? "_phoneToDisp" : "");
 
     //logger.debug("getPretestScore prefix " + prefix1);
     if (jsonObject != null) logger.debug("generating images from " + jsonObject);
