@@ -49,6 +49,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.Navigation;
+import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.download.DownloadIFrame;
 import mitll.langtest.client.flashcard.Banner;
 import mitll.langtest.client.instrumentation.EventRegistration;
@@ -147,8 +148,6 @@ public class InitialUI {
     w.getElement().setId(DownloadIFrame.DOWNLOAD_AREA_ID);
     RootPanel.get().add(w);
     w.setVisible(false);
-//    w.setWidth("0px");
-//    w.setHeight("0px");
     return firstRow;
   }
 
@@ -182,8 +181,8 @@ public class InitialUI {
         new ResultsClickHandler(),
         new MonitoringClickHandler(),
         new EventsClickHandler(),
-        reload
-    );
+        reload,
+        new DownloadContentsClickHandler());
 
     headerRow = new FluidRow();
     headerRow.add(new Column(12, title));
@@ -259,6 +258,20 @@ public class InitialUI {
 
         public void onSuccess() {
           new EventTable().show(service);
+        }
+      });
+    }
+  }
+
+  private class DownloadContentsClickHandler implements ClickHandler {
+    public void onClick(ClickEvent event) {
+      GWT.runAsync(new RunAsyncCallback() {
+        public void onFailure(Throwable caught) {
+          downloadFailedAlert();
+        }
+
+        public void onSuccess() {
+          new DownloadHelper(null).downloadContext();
         }
       });
     }
