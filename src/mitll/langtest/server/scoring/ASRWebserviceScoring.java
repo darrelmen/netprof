@@ -49,7 +49,9 @@ import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 import net.sf.json.JSONObject;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.poi.util.StringUtil;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
@@ -245,7 +247,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         tempDir = Files.createTempDirectory("scoreRepeatExercise_" + languageProperty);
 
         File tempFile = tempDir.toFile();
-        Object[] result = runHydra(rawAudioPath, sentence, lmSentences, tempFile.getAbsolutePath(), decode, end);
+        Object[] result = runHydra(rawAudioPath, sentence, transliteration, lmSentences, tempFile.getAbsolutePath(), decode, end);
         if (result == null) {
           return new PretestScore(0);
         } else {
@@ -334,6 +336,11 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   ////////////////////////////////
   ////////////////////////////////
 
+  private boolean ltsOutputOk(String[][] process) {
+    return !(process == null || process.length == 0 || process[0].length == 0 ||
+            process[0][0].length() == 0 || (StringUtils.join(process[0], "-")).contains("#"));
+  }
+
   /**
    * TODO : Some phrases seem to break lts process?
    * This will work for both align and decode modes, although align will ignore the unknownmodel.
@@ -345,13 +352,17 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @return the dictionary for dcodr
    * @see #runHydra(String, String, Collection, String, boolean, int)
    */
-  private String createHydraDict(String transcript) {
+  private String createHydraDict(String transcript, String transliteration) {
     if (getLTS() == null) {
       logger.warn(this + " : createHydraDict : LTS is null???");
     }
 
     String dict = "[";
-    for (String word : transcript.split(" ")) {
+    String[] translitTokens = transliteration.toLowerCase().split(" ");
+    String[] transcriptTokens = transcript.split(" ");
+    boolean canUseTransliteration = (transliteration.trim().length() > 0) && ((transcriptTokens.length == translitTokens.length) || (transcriptTokens.length == 1));
+    int index = 0;
+    for (String word : transcriptTokens) {
       String trim = word.trim();
       if (!trim.equals(word)) {
         logger.warn("trim is different '" + trim + "' != '" + word + "'");
@@ -370,8 +381,32 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
             String word1 = word.toLowerCase();
             String[][] process = getLTS().process(word1);
-            if (process == null) {
+            if (!ltsOutputOk(process)) {
               logger.error("couldn't get letter to sound map from " + getLTS() + " for " + word1);
+              if(canUseTransliteration){
+                logger.info("trying transliteration LTS");
+                String[][] translitprocess = (transcriptTokens.length == 1) ? getLTS().process(StringUtils.join(translitTokens, "")) : getLTS().process(translitTokens[index]);
+                if(ltsOutputOk(translitprocess)) {
+                  logger.info("got pronunciation from transliteration");
+                  for (String[] pron : translitprocess) {
+                    dict += getPronStringForWord(word, pron);
+                  }
+                } else{
+                  logger.info("transliteration LTS failed");
+                  logger.error("couldn't get letter to sound map from " + getLTS() + " for " + word1);
+                  logger.info("attempting to fall back to default pronunciation");
+                  if ((translitprocess.length > 0) && (translitprocess[0].length > 1)){
+                    dict += getDefaultPronStringForWord(word, translitprocess);
+                  }
+                }
+              }else{
+                logger.info("can't use transliteration");
+                logger.error("couldn't get letter to sound map from " + getLTS() + " for " + word1);
+                logger.info("attempting to fall back to default pronunciation");
+                if (process.length > 0){
+                  dict += getDefaultPronStringForWord(word, process);
+                }
+              }
             } else {
               for (String[] pron : process) {
                 dict += getPronStringForWord(word, pron);
@@ -380,6 +415,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
           }
         }
       }
+      index += 1;
     }
     dict += "UNKNOWNMODEL,+UNK+;<s>,sil;</s>,sil";
     dict += "]";
@@ -398,6 +434,22 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     return word + "," + listToSpaceSepSequence(apply) + " sp" + ";";
   }
 
+  //last resort, if we can't even use the transliteration to get some kind of pronunciation
+  private String getDefaultPronStringForWord(String word, String[][] apply) {
+    for (String[] pc : apply){
+      StringBuilder builder = new StringBuilder();
+      for (String p : pc){
+        if(!p.contains("#"))
+          builder.append(p).append(" ");
+      }
+      String result = builder.toString().trim();
+      if(result.length() > 0){
+        return word +","+result+" sp;";
+      }
+    }
+    return word + ",  sp;"; //hopefully we never get here...
+  }
+
   private String listToSpaceSepSequence(String[] pron) {
     StringBuilder builder = new StringBuilder();
     for (String p : pron) builder.append(p).append(" ");
@@ -414,7 +466,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @return
    * @see #scoreRepeatExercise
    */
-  private Object[] runHydra(String audioPath, String transcript, Collection<String> lmSentences, String tmpDir, boolean decode, int end) {
+  private Object[] runHydra(String audioPath, String transcript, String transliteration, Collection<String> lmSentences, String tmpDir, boolean decode, int end) {
     // reference trans
     String cleaned = slfFile.cleanToken(transcript).trim();
     if (isMandarin) {
@@ -422,7 +474,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     }
 
     // generate dictionary
-    String hydraDict = createHydraDict(cleaned);
+    String hydraDict = createHydraDict(cleaned, transliteration);
     String smallLM = "[]";
 
     // generate SLF file (if decoding)
