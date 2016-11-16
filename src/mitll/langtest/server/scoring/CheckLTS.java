@@ -162,7 +162,7 @@ class CheckLTS {
         } else {
           String[][] process = lts.process(token);
           if (!translitOk && (process == null || process.length == 0 || process[0].length == 0 ||
-              process[0][0].length() == 0 || (process.length == 1 && process[0].length == 1 && process[0][0].equals("#")))) {
+              process[0][0].length() == 0 || (process.length == 1 && process[0].length == 1 && (StringUtils.join(process[0], "-")).contains("#")))) {
             boolean htkEntry = htkDictionary.contains(token);
             if (!htkEntry && !htkDictionary.isEmpty()) {
               if (!(lts instanceof corpus.EmptyLTS)) {
