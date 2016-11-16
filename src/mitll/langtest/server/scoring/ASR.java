@@ -70,11 +70,19 @@ public interface ASR {
 	 * @param usePhoneToDisplay
 	 * @return
 	 */
-	PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
-													 String sentence, Collection<String> lmSentences, String transliteration, String imageOutDir,
-													 int imageWidth, int imageHeight, boolean useScoreForBkgColor,
+	PretestScore scoreRepeat(String testAudioDir,
+													 String testAudioFileNoSuffix,
+													 String sentence,
+													 Collection<String> lmSentences,
+                           String transliteration,
+                           String imageOutDir,
+													 int imageWidth, int imageHeight,
+                           boolean useScoreForBkgColor,
 													 boolean decode,
-													 boolean useCache, String prefix, Result precalcResult, boolean usePhoneToDisplay);
+													 boolean useCache,
+                           String prefix,
+                           Result precalcResult,
+                           boolean usePhoneToDisplay);
 
 	/**
 	 * @see mitll.langtest.server.audio.AudioFileHelper#countPhones
