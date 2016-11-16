@@ -58,7 +58,7 @@ public interface AudioAttributeExercise extends AudioRefExercise {
    */
   AudioAttribute getLatestContext(boolean isMale);
 
-  AudioAttribute getLatest(boolean isMale);
+/*  AudioAttribute getLatest(boolean isMale);*/
 
   /**
    * @see AudioExport#getAudioAttribute(MiniUser, CommonExercise, boolean, String)
