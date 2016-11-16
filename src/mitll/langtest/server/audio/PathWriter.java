@@ -59,16 +59,15 @@ public class PathWriter {
    * @param destFileName
    * @param overwrite
    * @param id
-   * @param title            mark the mp3 meta data with this title
-   * @param artist mark the mp3 meta data with this artist
    * @param serverProperties
+   * @param trackInfo
    * @return path of file under bestAudio directory
    * @see mitll.langtest.server.database.custom.UserListManager#getRefAudioPath
    * @see mitll.langtest.server.LangTestDatabaseImpl#addToAudioTable
    */
   public String getPermanentAudioPath(PathHelper pathHelper,
                                       File fileRef, String destFileName, boolean overwrite,
-                                      String id, String title, String artist, ServerProperties serverProperties) {
+                                      String id, ServerProperties serverProperties, TrackInfo trackInfo) {
     final File bestDir = pathHelper.getAbsoluteFile(BEST_AUDIO);
     if (!bestDir.exists() && !bestDir.mkdir()) {
       if (!bestDir.exists()) logger.warn("huh? couldn't make " + bestDir.getAbsolutePath());
@@ -89,7 +88,7 @@ public class PathWriter {
       }
       logger.debug("getPermanentAudioPath : *not* normalizing levels for " + destination.getAbsolutePath());
     }
-    ensureMP3(pathHelper, bestAudioPath, overwrite, title, artist, serverProperties);
+    ensureMP3(pathHelper, bestAudioPath, overwrite, serverProperties, trackInfo);
     return bestAudioPath;
   }
 
@@ -104,8 +103,7 @@ public class PathWriter {
     new AudioConversion(serverProperties).normalizeLevels(destination);
   }
 
-  private void ensureMP3(PathHelper pathHelper, String wavFile, boolean overwrite, String title, String artist,
-                         ServerProperties serverProperties) {
+  private void ensureMP3(PathHelper pathHelper, String wavFile, boolean overwrite, ServerProperties serverProperties, TrackInfo trackInfo) {
     if (wavFile != null) {
       String parent = pathHelper.getInstallPath();
 
@@ -116,7 +114,7 @@ public class PathWriter {
       if (!audioConversion.exists(wavFile, parent)) {
         logger.error("can't find " + wavFile + " under " + parent);
       }
-      audioConversion.ensureWriteMP3(wavFile, parent, overwrite, title, artist);
+      audioConversion.ensureWriteMP3(wavFile, parent, overwrite, trackInfo);
     } else {
       logger.warn("not converting wav to mp3???\n\n\n");
     }
