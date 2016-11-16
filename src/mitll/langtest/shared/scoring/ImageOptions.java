@@ -10,10 +10,11 @@ public class ImageOptions implements IsSerializable {
   private int height;
   private boolean useScoreToColorBkg;
 
-  public ImageOptions() {}
+  public ImageOptions() {
+  }
 
   public static ImageOptions getDefault() {
-    return new ImageOptions(128,128,false);
+    return new ImageOptions(128, 128, false);
   }
 
   public ImageOptions(int width, int height, boolean useScoreToColorBkg) {
