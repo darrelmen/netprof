@@ -121,7 +121,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
     buttonTypes.add(ButtonType.INFO);
     buttonTypes.add(ButtonType.WARNING);
     setUnaccountedForVertical(CLASSROOM_VERTICAL_EXTRA);
-    downloadHelper = new DownloadHelper(controller, this);
+    downloadHelper = new DownloadHelper(this);
   }
 
   protected SectionWidgetContainer<ButtonGroupSectionWidget> getSectionWidgetContainer() {
