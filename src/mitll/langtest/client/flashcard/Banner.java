@@ -59,7 +59,6 @@ import java.util.logging.Logger;
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since
  */
 public class Banner implements RequiresResize {
   private final Logger logger = Logger.getLogger("Banner");
@@ -73,7 +72,7 @@ public class Banner implements RequiresResize {
   private static final double MIN_RATIO = 0.7;
   private static final int min = 720;
   private static final String NETPROF_HELP_LL_MIT_EDU = "netprof-help@dliflc.edu";
-//  private static final String LTEA_DLIFLC_EDU = "ltea@dliflc.edu";
+  //  private static final String LTEA_DLIFLC_EDU = "ltea@dliflc.edu";
   private final String HREF;
   private static final String NEED_HELP_QUESTIONS_CONTACT_US = "Need Help? Questions? Contact us.";
   private static final String DOCUMENTATION = "User Manual";
@@ -89,7 +88,7 @@ public class Banner implements RequiresResize {
   private Panel qc, recordAudio;
   private Dropdown cogMenu;
   private final PropertyHandler props;
-  private NavLink userC, resultsC, monitoringC, eventsC, reloadLink;
+  private NavLink userC, resultsC, monitoringC, eventsC, reloadLink, downloadC;
 
   /**
    * @see mitll.langtest.client.InitialUI#makeHeaderRow
@@ -100,7 +99,7 @@ public class Banner implements RequiresResize {
     isAnonymous = props.getLoginType().equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS);
     HREF = "mailto:" +
         NETPROF_HELP_LL_MIT_EDU + "?" +
-     //   "cc=" + LTEA_DLIFLC_EDU + "&" +
+        //   "cc=" + LTEA_DLIFLC_EDU + "&" +
         "Subject=Question%20about%20" + props.getLanguage() + "%20NetProF";
   }
 
@@ -108,6 +107,7 @@ public class Banner implements RequiresResize {
    * @param splashText
    * @param userName
    * @param reload
+   * @param downloadContext
    * @return
    * @see InitialUI#makeHeaderRow()
    */
@@ -117,7 +117,8 @@ public class Banner implements RequiresResize {
                                 ClickHandler results,
                                 ClickHandler monitoring,
                                 ClickHandler events,
-                                ClickHandler reload) {
+                                ClickHandler reload,
+                                ClickHandler downloadContext) {
     HorizontalPanel headerRow = new HorizontalPanel();
     headerRow.setWidth("100%");
     headerRow.addStyleName("headerBackground");
@@ -161,7 +162,7 @@ public class Banner implements RequiresResize {
     hp.add(recordAudio = new SimplePanel());
 
     // add log out/admin options cogMenu
-    makeCogMenu(logoutClickHandler, users, results, monitoring, events, reload);
+    makeCogMenu(logoutClickHandler, users, results, monitoring, events, reload, downloadContext);
 
     if (!isAnonymous) {
       hp.add(cogMenu);
@@ -188,7 +189,7 @@ public class Banner implements RequiresResize {
   /**
    * @param splashText
    * @return
-   * @see #makeNPFHeaderRow(String, boolean, String, HTML, ClickHandler, ClickHandler, ClickHandler, ClickHandler, ClickHandler, ClickHandler)
+   * @see #makeNPFHeaderRow(String, boolean, String, HTML, ClickHandler, ClickHandler, ClickHandler, ClickHandler, ClickHandler, ClickHandler, ClickHandler)
    */
   private Paragraph getSubtitle(String splashText) {
     subtitle = new Paragraph(splashText);
@@ -211,9 +212,14 @@ public class Banner implements RequiresResize {
    * @param events
    * @see #makeNPFHeaderRow
    */
-  private void makeCogMenu(ClickHandler logoutClickHandler, ClickHandler users, ClickHandler results,
-                           ClickHandler monitoring, ClickHandler events, ClickHandler reload) {
-    cogMenu = makeMenu(users, results, monitoring, events, reload);
+  private void makeCogMenu(ClickHandler logoutClickHandler,
+                           ClickHandler users,
+                           ClickHandler results,
+                           ClickHandler monitoring,
+                           ClickHandler events,
+                           ClickHandler reload,
+                           ClickHandler downloadContext) {
+    cogMenu = makeMenu(users, results, monitoring, events, reload, downloadContext);
     cogMenu.addStyleName("cogStyle");
     NavLink widget1 = new NavLink(LOG_OUT);
     widget1.addClickHandler(logoutClickHandler);
@@ -263,7 +269,7 @@ public class Banner implements RequiresResize {
   /**
    * @param userName
    * @return
-   * @see #makeNPFHeaderRow(String, boolean, String, HTML, ClickHandler, ClickHandler, ClickHandler, ClickHandler, ClickHandler, ClickHandler)
+   * @see #makeNPFHeaderRow(String, boolean, String, HTML, ClickHandler, ClickHandler, ClickHandler, ClickHandler, ClickHandler, ClickHandler, ClickHandler)
    */
   private HTML getUserNameWidget(String userName) {
     userNameWidget = new HTML(userName);
@@ -291,7 +297,7 @@ public class Banner implements RequiresResize {
     emailAnchor.getElement().setId("emailAnchor");
     emailAnchor.addStyleName("bold");
     emailAnchor.addStyleName("rightTwentyMargin");
-    emailAnchor.getElement().setAttribute("download","");
+    emailAnchor.getElement().setAttribute("download", "");
     emailAnchor.getElement().getStyle().setColor("#90B3CF");
     return emailAnchor;
   }
@@ -304,7 +310,7 @@ public class Banner implements RequiresResize {
    * @return
    * @see #makeCogMenu
    */
-  private Dropdown makeMenu(ClickHandler users, ClickHandler results, ClickHandler monitoring, ClickHandler events, ClickHandler reload) {
+  private Dropdown makeMenu(ClickHandler users, ClickHandler results, ClickHandler monitoring, ClickHandler events, ClickHandler reload, ClickHandler downloadContext) {
     Dropdown w = new Dropdown();
     w.setRightDropdown(true);
     w.setIcon(IconType.COG);
@@ -328,13 +334,15 @@ public class Banner implements RequiresResize {
     eventsC.addClickHandler(events);
     w.add(eventsC);
 
-
     reloadLink = new NavLink("Reload from Domino");
     if (reload != null) {
       reloadLink.addClickHandler(reload);
       w.add(reloadLink);
     }
 
+    downloadC = new NavLink("Download Context");
+    downloadC.addClickHandler(downloadContext);
+    w.add(downloadC);
     return w;
   }
 
@@ -374,7 +382,7 @@ public class Banner implements RequiresResize {
 
             int rowCount = flexTable.getRowCount();
             flexTable.setHTML(rowCount + 1, 0, "Need Help?");
-            flexTable.setHTML(rowCount + 1, 1, " <a href='" + HREF +            "'>Help Email</a>");
+            flexTable.setHTML(rowCount + 1, 1, " <a href='" + HREF + "'>Help Email</a>");
             return flexTable;
           }
         };
