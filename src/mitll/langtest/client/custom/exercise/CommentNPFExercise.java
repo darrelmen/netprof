@@ -201,7 +201,7 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
       String field = QCNPFExercise.CONTEXT;
       ExerciseAnnotation annotation = exercise.getAnnotation(field);
 
-      logger.info("getContext context " + exercise.getID() + " : " + annotation);
+//      logger.info("getContext context " + exercise.getID() + " : " + annotation);
 
       Widget commentRow = getCommentBox(false)
           .getNoPopup(
@@ -544,11 +544,6 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
         if (path == null) return;
         String audioRef = audioAttribute.getAudioRef();
         ExerciseAnnotation annotation = exercise.getAnnotation(audioRef);
-
-        logger.info("addAudioRadioButton for " + audioRef +
-            //" and " + audioPath +
-            " got anno "+annotation);
-
         vp.add(getCommentBox(true).getEntry(audioRef, radioButton, annotation));
       }
 
