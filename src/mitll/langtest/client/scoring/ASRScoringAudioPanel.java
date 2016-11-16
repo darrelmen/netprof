@@ -128,7 +128,7 @@ public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> 
                             int toUse,
                             int height,
                             final int reqid) {
-    if (path == null) return;
+    if (path == null || path.equals("FILE_MISSING")) return;
     //System.out.println("scoring audio " + path +" with ref sentence " + refSentence + " reqid " + reqid);
     boolean wasVisible = wordTranscript.isVisible();
 
