@@ -234,7 +234,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
 
     addNewOrYourRecordingTab(tabPanel);
 
-    logger.info("makeAudioRow...");
+    logger.info("makeAudioRow - select first tab ");
     tabPanel.selectTab(0);
 
     return tabPanel;

@@ -35,9 +35,12 @@ package mitll.langtest.client.exercise;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
+import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.shared.AudioAnswer;
+
+import java.util.logging.Logger;
 
 /**
 * Tells playAudioPanel to be enabled/disabled in response to recording states
@@ -49,10 +52,10 @@ import mitll.langtest.shared.AudioAnswer;
 * To change this template use File | Settings | File Templates.
 */
 public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
-  //  private final Logger logger = Logger.getLogger("WaveformPostAudioRecordButton");
+   private final Logger logger = Logger.getLogger("WaveformPostAudioRecordButton");
   private static final String RECORD_BUTTON = "RecordButton";
   public static final String ANIMATED_PROGRESS_GIF = "animated_progress.gif";
-  public static final String URL = LangTest.LANGTEST_IMAGES + ANIMATED_PROGRESS_GIF;
+  public static final String WAIT_URL = LangTest.LANGTEST_IMAGES + ANIMATED_PROGRESS_GIF;
   private final RecordAudioPanel recordAudioPanel;
   private PlayAudioPanel playAudioPanel;
   private final Panel parentPanel;
@@ -126,9 +129,12 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     }
     controller.logEvent(this, RECORD_BUTTON, getExerciseID(), "stopRecording, duration " + (System.currentTimeMillis() - then) + " millis");
 
-    recordAudioPanel.getWaveform().setUrl(URL);
-
+    getWaveform().setUrl(WAIT_URL);
     super.stopRecording(duration);
+  }
+
+  private AudioPanel.ImageAndCheck getWaveform() {
+    return recordAudioPanel.getWaveform();
   }
 
   /**
@@ -157,7 +163,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
   protected void useInvalidResult(AudioAnswer result) {
     super.useInvalidResult(result);
 //    logger.info("WaveformPostAudioRecordButton : " + getElement().getExID() + " : got invalid result " +result);
-    recordAudioPanel.getWaveform().setVisible(false);
+    hideWaveform();
     recordAudioPanel.getSpectrogram().setVisible(false);
     if (parentPanel instanceof ExercisePanel) {
       ((ExercisePanel) parentPanel).recordIncomplete(recordAudioPanel);
@@ -166,13 +172,17 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     setPlayEnabled(false);
   }
 
+  protected void hideWaveform() {
+    getWaveform().setVisible(false);
+  }
+
   private void setPlayEnabled(boolean val) {
     //logger.info("setPlayEnabled -- " + getElement().getExID() + " : valid audio ? " + hasValidAudio() + " enable " + val);
     playAudioPanel.setEnabled(val && hasValidAudio());
   }
 
   /**
-   * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel(com.google.gwt.user.client.ui.Widget, String)
+   * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel
    * @param playAudioPanel
    */
   void setPlayAudioPanel(PlayAudioPanel playAudioPanel) {
