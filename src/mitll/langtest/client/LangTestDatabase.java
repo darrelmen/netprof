@@ -236,7 +236,8 @@ public interface LangTestDatabase extends RemoteService {
    * @param audioFile
    * @param imageType
    * @param imageOptions
-   *@param exerciseID  @return
+   * @param exerciseID
+   *  @return
    */
   ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, ImageOptions imageOptions,
                                      String exerciseID);
