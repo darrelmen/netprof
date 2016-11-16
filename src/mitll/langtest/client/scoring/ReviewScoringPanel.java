@@ -189,7 +189,7 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
    * @param width
    * @param height
    * @param reqid
-   * @see ScoringAudioPanel#getTranscriptImageURLForAudio(String, String, int, ImageAndCheck, ImageAndCheck)
+   * @see ScoringAudioPanel#getTranscriptImageURLForAudio
    */
   @Override
   protected void scoreAudio(String path, long resultID, String refSentence, String transliteration, final ImageAndCheck wordTranscript,
@@ -278,7 +278,7 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
 
   /**
    * @return
-   * @see mitll.langtest.client.result.ResultManager#getAsyncTable(int)
+   * @see mitll.langtest.client.result.ResultManager#getAsyncTable
    */
   public Widget getTables() {
     return tablesContainer;
