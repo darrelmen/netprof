@@ -223,7 +223,7 @@ public class ASRScoring extends Scoring implements ASR {
       }
 
       //    logger.debug("recalculating : " + precalcResult);
-      scores = getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, transliteration, lmSentences, scoringDir, decode, useCache);
+      scores = getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, lmSentences, scoringDir, decode, useCache);
     }
     if (scores == null) {
       logger.error("getScoreForAudio failed to generate scores.");
@@ -305,7 +305,6 @@ public class ASRScoring extends Scoring implements ASR {
   private Scores getScoreForAudio(String testAudioDir,
                                   String testAudioFileNoSuffix,
                                   String sentence,
-                                  String transliteration,
                                   Collection<String> lmSentences,
                                   String scoringDir,
                                   boolean decode, boolean useCache) {
@@ -318,7 +317,7 @@ public class ASRScoring extends Scoring implements ASR {
     if (scores == null) {
       if (DEBUG)
         logger.debug("no cached score for file '" + key + "', so doing " + (decode ? "decoding" : "alignment") + " on " + sentence);
-      scores = calcScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, transliteration, lmSentences, scoringDir, decode);
+      scores = calcScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, lmSentences, scoringDir, decode);
       audioToScore.put(key, scores);
     } else {
       if (DEBUG) logger.debug("found cached score for file '" + key + "'");
@@ -346,7 +345,6 @@ public class ASRScoring extends Scoring implements ASR {
   private Scores calcScoreForAudio(String testAudioDir,
                                    String testAudioFileNoSuffix,
                                    String sentence,
-                                   String transliteration,
                                    Collection<String> lmSentences,
                                    String scoringDir,
                                    boolean decode) {
@@ -367,7 +365,7 @@ public class ASRScoring extends Scoring implements ASR {
         new SLFFile().createSimpleSLFFile(lmSentences, tempDir.toFile().getAbsolutePath(), -1.2f);
       }
 
-      Scores scores = computeRepeatExerciseScores(testAudio, sentence, transliteration, tempDir, decode);
+      Scores scores = computeRepeatExerciseScores(testAudio, sentence, tempDir, decode);
       maybeKeepHydecDir(tempDir, scores.hydraScore);
 
       return scores;
@@ -381,7 +379,7 @@ public class ASRScoring extends Scoring implements ASR {
    * @param lmSentences
    * @param background
    * @return
-   * @see AlignDecode#getASRScoreForAudio(File, Collection, boolean, boolean)
+   * @see AlignDecode#getASRScoreForAudio
    */
   public String getUsedTokens(Collection<String> lmSentences, List<String> background) {
     return getUniqueTokensInLM(lmSentences, getSmallVocabDecoder().getVocab(background, VOCAB_SIZE_LIMIT));
@@ -473,7 +471,7 @@ public class ASRScoring extends Scoring implements ASR {
    * @return Scores - score for audio, given the sentence and event info
    * @see #calcScoreForAudio
    */
-  private Scores computeRepeatExerciseScores(Audio testAudio, String sentence, String transliteration, Path tmpDir, boolean decode) {
+  private Scores computeRepeatExerciseScores(Audio testAudio, String sentence, Path tmpDir, boolean decode) {
     String modelsDir = configFileCreator.getModelsDir();
 
     // Make sure that we have an absolute path to the config and dict files.
@@ -489,7 +487,7 @@ public class ASRScoring extends Scoring implements ASR {
       return getEmptyScores();
     }
 
-    Scores scoresFromHydec = getScoresFromHydec(testAudio, sentence, transliteration, configFile);
+    Scores scoresFromHydec = getScoresFromHydec(testAudio, sentence, configFile);
     return scoresFromHydec;
   }
 
@@ -517,7 +515,7 @@ public class ASRScoring extends Scoring implements ASR {
    * @see SmallVocabDecoder
    * @see #computeRepeatExerciseScores
    */
-  private Scores getScoresFromHydec(Audio testAudio, String sentence, String transliteration, String configFile) {
+  private Scores getScoresFromHydec(Audio testAudio, String sentence, String configFile) {
     sentence = svd.getTrimmed(sentence);
     long then = System.currentTimeMillis();
     logger.debug("getScoresFromHydec scoring '" + sentence +"' (" +sentence.length()+ " ) with " +
@@ -526,7 +524,7 @@ public class ASRScoring extends Scoring implements ASR {
 
     try {
       Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut =
-          testAudio.jscore(sentence, transliteration, htkDictionary, getLTS(), configFile);
+          testAudio.jscore(sentence, htkDictionary, getLTS(), configFile);
       float hydec_score = jscoreOut._1;
       long timeToRunHydec = System.currentTimeMillis() - then;
 
