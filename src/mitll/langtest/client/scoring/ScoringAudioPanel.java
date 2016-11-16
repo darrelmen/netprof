@@ -262,14 +262,14 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
 
   /**
    * @param score
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, float, mitll.langtest.shared.exercise.T)
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder
    */
-  public void addScore(CorrectAndScore score) {
+  void addScore(CorrectAndScore score) {
     scoreListener.addScore(score);
   }
 
   /**
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, float, mitll.langtest.shared.exercise.T)
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder
    */
   public void showChart() {
     scoreListener.showChart(showOnlyOneExercise);
@@ -277,7 +277,7 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
 
   /**
    * @param avgScore
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, com.google.gwt.user.client.ui.Panel, float, mitll.langtest.shared.exercise.T)
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder
    */
   public void setClassAvg(float avgScore) {
     scoreListener.setClassAvg(avgScore);
