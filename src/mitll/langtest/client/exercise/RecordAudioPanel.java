@@ -100,7 +100,8 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
    * @see mitll.langtest.client.exercise.WaveformExercisePanel#getAnswerWidget(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
    */
   public RecordAudioPanel(T exercise, ExerciseController controller, Panel widgets,
-                          LangTestDatabaseAsync service, int index, boolean showSpectrogram, String audioType, String instance) {
+                          LangTestDatabaseAsync service, int index, boolean showSpectrogram,
+                          String audioType, String instance) {
     super(service,
         controller, showSpectrogram,
         null // no gauge panel
@@ -291,7 +292,6 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
 
   protected class MyWaveformPostAudioRecordButton extends WaveformPostAudioRecordButton {
     // private long then,now;
-
     /**
      * @param audioType
      * @param recordButtonTitle
