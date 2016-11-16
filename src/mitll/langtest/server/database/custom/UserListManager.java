@@ -34,6 +34,7 @@ package mitll.langtest.server.database.custom;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.audio.PathWriter;
+import mitll.langtest.server.audio.TrackInfo;
 import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.ExerciseAnnotation;
@@ -599,7 +600,7 @@ public class UserListManager {
     UserList where = userListDAO.getWhere(userListID, true);
 
     if (where == null) {
-      logger.warn("addItemToList: couldn't find ul with id " + userListID + " and '" + userExercise +"'");
+      logger.warn("addItemToList: couldn't find ul with id " + userListID + " and '" + userExercise + "'");
     }
 
     if (where != null) {
@@ -689,8 +690,8 @@ public class UserListManager {
     File fileRef = pathHelper.getAbsoluteFile(regularSpeed.getAudioRef());
 
     String fast = prefix + "_" + now + "_by_" + userExercise.getCombinedMutableUserExercise().getCreator() + ".wav";
-    String artist   = regularSpeed.getUser().getUserID();
-    String refAudio = getRefAudioPath(userExercise.getID(), fileRef, fast, overwrite, userExercise.getForeignLanguage(), artist);
+    String artist = regularSpeed.getUser().getUserID();
+    String refAudio = getRefAudioPath(userExercise.getID(), fileRef, fast, overwrite, new TrackInfo(userExercise.getForeignLanguage(), artist, userExercise.getEnglish()));
     regularSpeed.setAudioRef(refAudio);
     //  logger.debug("fixAudioPaths : for " + userExercise.getID() + " fast is " + fast + " size " + FileUtils.size(refAudio));
   }
@@ -704,14 +705,13 @@ public class UserListManager {
    * @param fileRef
    * @param destFileName
    * @param overwrite
-   * @param title
-   * @param artist
+   * @param trackInfo
    * @return new, permanent audio path
    * @see #fixAudioPaths
    */
-  private String getRefAudioPath(String id, File fileRef, String destFileName, boolean overwrite, String title, String artist) {
-    return new PathWriter().getPermanentAudioPath(pathHelper, fileRef, destFileName, overwrite, id, title, artist,
-        userDAO.getDatabase().getServerProps());
+  private String getRefAudioPath(String id, File fileRef, String destFileName, boolean overwrite, TrackInfo trackInfo) {
+    return new PathWriter().getPermanentAudioPath(pathHelper, fileRef, destFileName, overwrite, id, userDAO.getDatabase().getServerProps(),
+        trackInfo);
   }
 
   public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {
@@ -878,9 +878,9 @@ public class UserListManager {
   }
 
   /**
-   * @see #markState(String, STATE, long)
    * @param userExercise
    * @param userID
+   * @see #markState(String, STATE, long)
    */
   private void markAllFieldsFixed(CommonExercise userExercise, long userID) {
     Collection<String> fields = userExercise.getFields();
@@ -922,11 +922,11 @@ public class UserListManager {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#deleteItemFromList(long, String)
    * @param listid
    * @param exid
    * @param typeOrder
    * @return
+   * @see mitll.langtest.server.LangTestDatabaseImpl#deleteItemFromList(long, String)
    */
   public boolean deleteItemFromList(long listid, String exid, Collection<String> typeOrder) {
     logger.debug("deleteItemFromList " + listid + " " + exid);
