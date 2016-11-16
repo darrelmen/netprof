@@ -153,7 +153,7 @@ public class DecodeCorrectnessChecker {
     List<String> lmSentences = removePunct(possibleSentences);
 //    logger.debug("getDecodeScore " + possibleSentences + " : '" + lmSentences + "'");
     //making the transliteration empty as I don't think it is useful here
-    PretestScore asrScoreForAudio = alignDecode.getASRScoreForAudio(audioFile, lmSentences, "", decoderOptions);//canUseCache, useOldSchool);
+    PretestScore asrScoreForAudio = alignDecode.getASRScoreForAudio(audioFile, lmSentences, "", decoderOptions);
 
     String recoSentence =
         asrScoreForAudio != null && asrScoreForAudio.getRecoSentence() != null ?
