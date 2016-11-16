@@ -40,18 +40,15 @@ import com.google.common.cache.CacheBuilder;
 import corpus.HTKDictionary;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.audio.AudioCheck;
-import mitll.langtest.server.audio.AudioConversion;
-import mitll.langtest.server.audio.HTTPClient;
-import mitll.langtest.server.audio.SLFFile;
+import mitll.langtest.server.audio.*;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.apache.poi.util.StringUtil;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
@@ -114,9 +111,6 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @param testAudioFileNoSuffix
    * @param sentence              that should be what the test audio contains
    * @param imageOutDir
-   * @param imageWidth
-   * @param imageHeight
-   * @param useScoreForBkgColor
    * @param useCache
    * @param prefix
    * @param precalcResult
@@ -126,13 +120,15 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    */
   public PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
                                   String sentence, Collection<String> lmSentences, String transliteration, String imageOutDir,
-                                  int imageWidth, int imageHeight, boolean useScoreForBkgColor,
+                                  ImageOptions imageOptions,
                                   boolean decode,
                                   boolean useCache, String prefix, Result precalcResult, boolean usePhoneToDisplay) {
     return scoreRepeatExercise(testAudioDir, testAudioFileNoSuffix,
         sentence, lmSentences, transliteration,
-        imageOutDir, imageWidth, imageHeight, useScoreForBkgColor,
+        imageOutDir,
+        imageOptions,
         decode,
+
         useCache, prefix, precalcResult, usePhoneToDisplay);
   }
 
@@ -153,9 +149,6 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @param testAudioFileNoSuffix file name without a suffix - wav file, any sample rate
    * @param sentence              to align
    * @param imageOutDir           where to write the images (audioImage)
-   * @param imageWidth            image width
-   * @param imageHeight           image height
-   * @param useScoreForBkgColor   true if we want to color the segments by score else all are gray
    * @param decode                if true, skips writing image files
    * @param useCache              cache scores so subsequent requests for the same audio file will get the cached score
    * @param prefix                on the names of the image files, if they are written
@@ -172,9 +165,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                                            Collection<String> lmSentences, // TODO make two params, transcript and lm (null if no slf)
                                            String transliteration,
                                            String imageOutDir,
-                                           int imageWidth,
-                                           int imageHeight,
-                                           boolean useScoreForBkgColor,
+                                           ImageOptions imageOptions,
+
                                            boolean decode,
                                            boolean useCache, String prefix,
                                            Result precalcResult,
@@ -277,7 +269,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       logger.error("scoreRepeatExercise hydra failed to generate scores.");
       return new PretestScore(-1f);
     }
-    return getPretestScore(imageOutDir, imageWidth, imageHeight, useScoreForBkgColor, decode, prefix, noSuffix,
+    return getPretestScore(imageOutDir,
+        imageOptions,
+        decode, prefix, noSuffix,
         scores, phoneLab, wordLab, duration, processDur, usePhoneToDisplay, jsonObject);
   }
 
@@ -290,9 +284,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * TODO : don't copy this method in both ASRScoring and ASRWebserviceScoring
    *
    * @param imageOutDir
-   * @param imageWidth
-   * @param imageHeight
-   * @param useScoreForBkgColor
+   * @paramx imageWidth
+   * @paramx imageHeight
+   * @paramx useScoreForBkgColor
    * @param decode
    * @param prefix
    * @param noSuffix
@@ -305,11 +299,17 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @return
    * @see #scoreRepeatExercise
    */
-  private PretestScore getPretestScore(String imageOutDir, int imageWidth, int imageHeight, boolean useScoreForBkgColor,
+  private PretestScore getPretestScore(String imageOutDir,
+                                       ImageOptions imageOptions,
+
                                        boolean decode, String prefix, String noSuffix, Scores scores, String phoneLab,
                                        String wordLab, double duration, int processDur, boolean usePhoneToDisplay,
                                        JSONObject jsonObject
   ) {
+    int imageWidth = imageOptions.getWidth();
+    int imageHeight = imageOptions.getHeight();
+    boolean useScoreForBkgColor =imageOptions.isUseScoreToColorBkg();
+
     String prefix1 = prefix + (useScoreForBkgColor ? "bkgColorForRef" : "") + (usePhoneToDisplay ? "_phoneToDisplay" : "");
     boolean reallyUsePhone = usePhoneToDisplay || props.usePhoneToDisplay();
 
@@ -672,13 +672,4 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       return phoneToScore;
     }
   }
-
-/*  public static void main(String[] arg) {
-    String transcript = "~ 쯤";
-    String cleaned = new SLFFile().cleanToken(transcript).trim();
-    System.out.println("cleaned " + cleaned);
-
-    String cleanedTranscript = ASRWebserviceScoring.getCleanedTranscript(cleaned, ";");
-    System.out.println("After " + cleanedTranscript);
-  }*/
 }
