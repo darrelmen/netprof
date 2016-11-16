@@ -876,8 +876,6 @@ public class ScoreServlet extends DatabaseServlet {
       options.setDoFlashcard(false);
 
       answer = getAnswer(reqid, exerciseID, user, wavPath, saveFile, asrScoreForAudio.getHydecScore(), deviceType, device,
-          //false,
-          // options.isAllowAlternates()
           options
       );
       answer.setPretestScore(asrScoreForAudio);
@@ -901,8 +899,6 @@ public class ScoreServlet extends DatabaseServlet {
    */
   private AudioAnswer getAudioAnswerAlign(int reqid, String exerciseID, int user, String wavPath, File saveFile,
                                           String deviceType, String device, CommonExercise exercise1,
-                                          //  boolean doFlashcard,
-                                          //  boolean usePhoneToDisplay,
                                           DecoderOptions options) {
     PretestScore asrScoreForAudio = getASRScoreForAudioNoCache(
         reqid,
@@ -1104,7 +1100,6 @@ public class ScoreServlet extends DatabaseServlet {
   private PretestScore getASRScoreForAudio(int reqid, String testAudioFile, String sentence, String transliteration,
                                            String exerciseID, boolean usePhoneToDisplay) {
     return audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, transliteration, 128, 128, exerciseID, null, false,
-       // false, serverProps.useScoreCache(), usePhoneToDisplay, false,
         new DecoderOptions()
             .setDoFlashcard(false)
             .setCanUseCache(serverProps.useScoreCache())
@@ -1154,12 +1149,12 @@ public class ScoreServlet extends DatabaseServlet {
     return configDir + File.separator + serverProps.getLessonPlan();
   }
 
-  private class UserAndSelection {
+  private static class UserAndSelection {
     private final String[] split1;
     private String user;
     private Map<String, Collection<String>> selection;
 
-    public UserAndSelection(String... split1) {
+    UserAndSelection(String... split1) {
       this.split1 = split1;
     }
 
@@ -1171,7 +1166,7 @@ public class ScoreServlet extends DatabaseServlet {
       return selection;
     }
 
-    public UserAndSelection invoke() {
+    UserAndSelection invoke() {
       user = "";
       selection = new TreeMap<>();
       for (String param : split1) {
