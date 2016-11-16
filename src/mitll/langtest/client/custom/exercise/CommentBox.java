@@ -345,6 +345,7 @@ public class CommentBox extends PopupContainer {
       addCloseHandler(event -> {
         registration.logEvent(commentBox, "Comment_TextBox", exerciseID, "submit comment '" + commentBox.getValue() + "'");
         commentComplete(commentBox, field, commentButton, clearButton);
+
       });
     }
   }
@@ -428,7 +429,9 @@ public class CommentBox extends PopupContainer {
     if (previous == null || !previous.equals(comment)) {
       fieldToComment.put(field, comment);
       boolean isCorrect = comment.length() == 0;
+
       logger.info("commentComplete " + field + " comment '" + comment + "' correct = " + isCorrect);
+
       setButtonTitle(commentButton, isCorrect, comment);
       showOrHideCommentButton(commentButton, clearButton, isCorrect);
       if (isCorrect) {
@@ -436,6 +439,9 @@ public class CommentBox extends PopupContainer {
       } else {
         commentAnnotator.addIncorrectComment(comment, field);
       }
+
+      // remember to update the exercise itself
+      annotationExercise.addAnnotation(field, isCorrect ? TYPICAL.CORRECT.toString() : TYPICAL.INCORRECT.toString(), comment);
       //logger.info("\t commentComplete : annotations now " + exerciseID.getFields());
     }
   }
