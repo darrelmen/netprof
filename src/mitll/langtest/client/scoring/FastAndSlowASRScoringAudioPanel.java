@@ -133,7 +133,6 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
       }
       Collection<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
       //logger.info("getAfterPlayWidget : for ex " + exercise.getID() + " found " + audioAttributes);
-
       // first choice here is for default audio (where we don't know the gender)
       final Collection<AudioAttribute> initialAudioChoices = maleEmpty ?
           femaleEmpty ? audioAttributes : femalesMap.get(femaleUsers.get(0)) : malesMap.get(maleUsers.get(0));
@@ -238,10 +237,10 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
    * @see #getGenderChoices(Panel, Map, Map, Collection, String)
    */
   private void addRegularAndSlow(Panel vp, Collection<AudioAttribute> audioAttributes, String instance) {
-    logger.info("getAfterPlayWidget : for" +
+/*    logger.info("getAfterPlayWidget : for" +
         "\n\texercise   " + exercise.getID() +
         "\n\tpath       " + audioPath +
-        "\n\tattributes " + audioAttributes);
+        "\n\tattributes " + audioAttributes);*/
 
     RadioButton regular = null;
     AudioAttribute regAttr = null;
@@ -253,21 +252,19 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
       if (!audioAttribute.isValid()) continue;
       String display = audioAttribute.getDisplay();
 
-      logger.info("getAfterPlayWidget : check attri " + audioAttribute + " display " + display);
+  //    logger.info("getAfterPlayWidget : check attri " + audioAttribute + " display " + display);
       final RadioButton radio = new RadioButton(GROUP + "_" + exerciseID + "_" + instance, display);
       radio.getElement().setId("Radio_" + display);
       if (audioAttribute.isRegularSpeed()) {
         regular = radio;
         regAttr = audioAttribute;
 
-        logger.info("\tgetAfterPlayWidget : regular " + regAttr);
-
+    //    logger.info("\tgetAfterPlayWidget : regular " + regAttr);
       } else if (audioAttribute.isSlow()) {  // careful not to get context sentence audio ...
         slow = radio;
         slowAttr = audioAttribute;
 
-        logger.info("\tgetAfterPlayWidget : slowAttr " + slowAttr);
-
+//        logger.info("\tgetAfterPlayWidget : slowAttr " + slowAttr);
       }
     }
 
