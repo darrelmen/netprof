@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.scoring;
 
+import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.scoring.PretestScore;
 
@@ -60,9 +61,9 @@ public interface ASR {
 	 * @param sentence
 	 * @param lmSentences
 	 * @param imageOutDir
-	 * @param imageWidth
-	 * @param imageHeight
-	 * @param useScoreForBkgColor
+	 * @paramx imageWidth
+	 * @paramx imageHeight
+	 * @paramx useScoreForBkgColor
 	 * @param decode
 	 * @param useCache
 	 * @param prefix
@@ -76,8 +77,10 @@ public interface ASR {
 													 Collection<String> lmSentences,
                            String transliteration,
                            String imageOutDir,
-													 int imageWidth, int imageHeight,
-                           boolean useScoreForBkgColor,
+
+//													 int imageWidth, int imageHeight,
+  //                         boolean useScoreForBkgColor,
+                           ImageOptions imageOptions,
 													 boolean decode,
 													 boolean useCache,
                            String prefix,
