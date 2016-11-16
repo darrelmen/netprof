@@ -139,7 +139,7 @@ public class ResultManager extends PagerTable {
   private Typeahead userIDSuggest, textSuggest;
 
   /**
-   * @see mitll.langtest.client.LangTest.ResultsClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)
+   * @see mitll.langtest.client.InitialUI.ResultsClickHandler#onClick
    */
   public void showResults() {
     typeToSuggest = new HashMap<String, Typeahead>();
