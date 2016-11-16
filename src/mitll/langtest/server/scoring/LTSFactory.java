@@ -93,9 +93,6 @@ public class LTSFactory {
         case MSA:
           ltsForLanguage = new ModernStandardArabicLTS();
           break;
-        case MANDARIN:
-          ltsForLanguage = unknown;
-          break;
         default:
           Class<?> aClass = Class.forName(className);
           ltsForLanguage = (LTS) aClass.newInstance();
