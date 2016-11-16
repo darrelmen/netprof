@@ -383,7 +383,6 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
    * @param hp
    * @see #getContext
    */
-
   private void addGenderChoices(AudioRefExercise e, Panel hp) {
     // first, choose male and female voices
     long maleTime = 0, femaleTime = 0;
@@ -507,7 +506,6 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
    * @param label
    * @param value
    * @return
-   * @seex GoodwaveExercisePanel#getQuestionContent(CommonShell)
    * @see #getItemContent
    */
   private Widget getEntry(AnnotationExercise e, final String field, final String label, String value) {
@@ -535,11 +533,29 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
   @Override
   protected ASRScoringAudioPanel makeFastAndSlowAudio(final String path) {
     return new FastAndSlowASRScoringAudioPanel<T>(getLocalExercise(), path, service, controller, scorePanel, instance) {
+
+      /**
+       * @see #addRegularAndSlow
+       * @param vp
+       * @param radioButton
+       */
       @Override
-      protected void addAudioRadioButton(Panel vp, RadioButton fast) {
-        vp.add(getCommentBox(true).getEntry(audioPath, fast, exercise.getAnnotation(path)));
+      protected void addAudioRadioButton(Panel vp, RadioButton radioButton, AudioAttribute audioAttribute) {
+        if (path == null) return;
+        String audioRef = audioAttribute.getAudioRef();
+        ExerciseAnnotation annotation = exercise.getAnnotation(audioRef);
+
+        logger.info("addAudioRadioButton for " + audioRef +
+            //" and " + audioPath +
+            " got anno "+annotation);
+
+        vp.add(getCommentBox(true).getEntry(audioRef, radioButton, annotation));
       }
 
+      /**
+       * @see #getAfterPlayWidget
+       * @param vp
+       */
       @Override
       protected void addNoRefAudioWidget(Panel vp) {
         Widget entry = getEntry(REF_AUDIO, "ReferenceAudio", CommentNPFExercise.NO_REFERENCE_AUDIO, exercise.getAnnotation(REF_AUDIO));
