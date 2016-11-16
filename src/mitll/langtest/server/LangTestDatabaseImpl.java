@@ -942,7 +942,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private void ensureMP3s(CommonExercise byID, String parentDir) {
     Collection<AudioAttribute> audioAttributes = byID.getAudioAttributes();
     for (AudioAttribute audioAttribute : audioAttributes) {
-      if (!ensureMP3(audioAttribute.getAudioRef(), byID.getForeignLanguage(), audioAttribute.getUser().getUserID(), parentDir)) {
+      if (!ensureMP3(audioAttribute.getAudioRef(), parentDir, getTrackInfo(byID, audioAttribute))) {
 //        if (byID.getID().equals("1310")) {
 //          logger.warn("ensureMP3 : can't find " + audioAttribute + " under " + parentDir + " for " + byID);
 //        }
@@ -1019,19 +1019,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * @param wavFile
-   * @param title
-   * @param artist
+   * @param trackInfo
    * @return true if mp3 file exists
    * @see #ensureMP3s(CommonExercise, String)
    * @see #writeAudioFile
    */
-  private boolean ensureMP3(String wavFile, String title, String artist) {
-    return ensureMP3(wavFile, title, artist, pathHelper.getInstallPath());
+  private boolean ensureMP3(String wavFile, TrackInfo trackInfo) {
+    return ensureMP3(wavFile, pathHelper.getInstallPath(), trackInfo);
   }
 
   // int spew = 0;
 
-  private boolean ensureMP3(String wavFile, String title, String artist, String parent) {
+  private boolean ensureMP3(String wavFile, String parent, TrackInfo trackInfo) {
     if (wavFile != null) {
       if (!audioConversion.exists(wavFile, parent)) {
         //if (WARN_MISSING_FILE) {
@@ -1045,7 +1044,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         }
       }*/
 
-      String s = audioConversion.ensureWriteMP3(wavFile, parent, false, title, artist);
+      String s = audioConversion.ensureWriteMP3(wavFile, parent, false, trackInfo);
       boolean isMissing = s.equals(AudioConversion.FILE_MISSING);
 /*      if (isMissing && wavFile.contains("1310")) {
         logger.error("ensureMP3 : can't find " + wavFile + " under " + parent + " for " + title + " " + artist);
@@ -1204,10 +1203,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         return new PretestScore();
       } else {
         String sentence = exercise.getForeignLanguage();
-        if (result.getAudioType().contains("context")) sentence = exercise.getContext();
+        String comment = exercise.getEnglish();
+
+        if (result.getAudioType().contains("context")) {
+          sentence = exercise.getContext();
+          comment = exercise.getContextTranslation();
+        }
 
         String audioFilePath = result.getAnswer();
-        ensureMP3(audioFilePath, sentence, "" + result.getUserid());
+        ensureMP3(audioFilePath, new TrackInfo(sentence, "" + result.getUserid(), comment));
         //logger.info("resultID " +resultID+ " temp dir " + tempDir.getAbsolutePath());
         asrScoreForAudio = audioFileHelper.getASRScoreForAudio(
             1,
@@ -1229,6 +1233,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
 
     return asrScoreForAudio;
+  }
+
+  private TrackInfo getTrackInfo(CommonExercise ex, AudioAttribute latestContext) {
+    return new TrackInfo(ex.getForeignLanguage(), latestContext.getUser().getUserID(), ex.getEnglish());
   }
 
   /**
@@ -1924,7 +1932,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     List<MonitorResult> resultList = results.subList(start, min);
     logger.info("ensure compressed audio for " + resultList.size() + " items.");
     for (MonitorResult result : resultList) {
-      ensureCompressedAudio((int) result.getUserid(), db.getCustomOrPredefExercise(result.getExID()), result.getAnswer());
+
+      ensureCompressedAudio((int) result.getUserid(), db.getCustomOrPredefExercise(result.getExID()), result.getAnswer(), result.getAudioType());
     }
     return new ResultAndTotal(new ArrayList<MonitorResult>(resultList), n, req);
   }
@@ -2238,7 +2247,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public AudioAnswer writeAudioFile(String base64EncodedString,
                                     AudioContext audioContext,
 
-                                    boolean recordedWithFlash, String deviceType, String device,
+                                    boolean recordedWithFlash,
+
+                                    String deviceType, String device,
 
                                     boolean doFlashcard,
                                     boolean recordInResults,
@@ -2274,7 +2285,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         audioFileHelper.writeAudioFile(base64EncodedString,
             exercise1,
             audioContext, recordingInfo,
-            //recordInResults, doFlashcard, allowAlternates, addToAudioTable
             options
         );
 
@@ -2293,24 +2303,45 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       logger.warn("huh? got zero length recording " + user + " " + exercise);
       logEvent("audioRecording", "writeAudioFile", exercise, "Writing audio - got zero duration!", user, "unknown", device);
     } else {
-      ensureCompressedEquivalent(user, exercise1, audioAnswer);
+      ensureCompressedEquivalent(user, exercise1, audioAnswer, audioContext.getAudioType());
     }
 
     return audioAnswer;
   }
 
-  private void ensureCompressedEquivalent(int user, CommonShell exercise1, AudioAnswer audioAnswer) {
-    ensureCompressedAudio(user, exercise1, audioAnswer.getPath());
+  /**
+   * @param user
+   * @param exercise1
+   * @param audioAnswer
+   * @param audioType
+   * @see #writeAudioFile
+   */
+  private void ensureCompressedEquivalent(int user, CommonShell exercise1, AudioAnswer audioAnswer, String audioType) {
+    ensureCompressedAudio(user, exercise1, audioAnswer.getPath(), audioType);
   }
 
-  private void ensureCompressedAudio(int user, CommonShell exercise1, String path) {
-    String foreignLanguage = exercise1 == null ? "unknown" : exercise1.getForeignLanguage();
+  /**
+   * Have mp3 title be context sentence when recording context sentences.
+   *
+   * @param user
+   * @param commonShell
+   * @param path
+   * @param audioType
+   */
+  private void ensureCompressedAudio(int user, CommonShell commonShell, String path, String audioType) {
+    String title = commonShell == null ? "unknown" : commonShell.getForeignLanguage();
+    String comment = commonShell == null ? "unknown" : commonShell.getEnglish();
+    if (audioType.equals(AudioAttribute.CONTEXT_AUDIO_TYPE) && commonShell != null) {
+      title = commonShell.getContext();
+      comment = commonShell.getContextTranslation();
+    }
     String userID = getUserID(user);
     if (userID == null) {
       logger.warn("ensureCompressedEquivalent huh? no user for " + user);
+      userID = "unknown";
     }
 
-    ensureMP3(path, foreignLanguage, userID);
+    ensureMP3(path, new TrackInfo(title, userID, comment));
   }
 
   private String getUserID(int user) {
@@ -2376,9 +2407,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
             getPermanentName(user, audioType),
             true,
             idToUse,
-            audioTranscript,
-            getArtist(user),
-            serverProps);
+            serverProps,
+            new TrackInfo(audioTranscript, getArtist(user), audioType.contains("context") ? exercise1.getContextTranslation() : exercise1.getEnglish()));
 
     AudioAttribute audioAttribute =
         db.getAudioDAO().addOrUpdate(user, idToUse, audioType, permanentAudioPath, System.currentTimeMillis(),
