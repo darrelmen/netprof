@@ -121,8 +121,11 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     }
     else {
       showPopup(AudioAnswer.Validity.TOO_SHORT.getPrompt());
+      hideWaveform();
     }
   }
+
+  protected void hideWaveform() {}
 
   /**
    * @see RecordingListener#stopRecording
