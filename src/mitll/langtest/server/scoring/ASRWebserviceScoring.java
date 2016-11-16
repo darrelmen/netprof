@@ -529,7 +529,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @param lmSentences
    * @param background
    * @return
-   * @see AlignDecode#getASRScoreForAudio(File, Collection, boolean, boolean)
+   * @see AlignDecode#getASRScoreForAudio
    */
   public String getUsedTokens(Collection<String> lmSentences, List<String> background) {
     List<String> backgroundVocab = svDecoderHelper.getVocab(background, VOCAB_SIZE_LIMIT);
