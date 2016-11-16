@@ -51,19 +51,16 @@ import java.util.Collection;
  */
 public interface AlignDecode {
   /**
-   * @see DecodeCorrectnessChecker#getFlashcardAnswer(File, Collection, AudioAnswer, boolean, boolean)
    * @param testAudioFile
    * @param lmSentences
+   * @return
    * @paramx canUseCache
    * @paramx useOldSchool true if should use hydec and not hydra service
-   * @return
+   * @see DecodeCorrectnessChecker#getFlashcardAnswer
    */
   PretestScore getASRScoreForAudio(File testAudioFile,
                                    Collection<String> lmSentences,
                                    String transliteration,
-//                                   boolean canUseCache,
-  //                                 boolean useOldSchool
-          DecoderOptions decoderOptions
-
+                                   DecoderOptions decoderOptions
   );
 }
