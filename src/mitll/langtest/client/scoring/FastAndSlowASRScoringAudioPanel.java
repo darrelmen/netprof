@@ -80,7 +80,7 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
    * @param service
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#getAudioPanel
    */
-  public FastAndSlowASRScoringAudioPanel(T exercise,
+  protected FastAndSlowASRScoringAudioPanel(T exercise,
                                          String path, LangTestDatabaseAsync service, ExerciseController controller1,
                                          ScoreListener scoreListener,
                                          String instance
@@ -191,12 +191,16 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
           rightSide.clear();
           Collection<AudioAttribute> audioChoices;
 
-          if (choice.equals(M)) {
-            audioChoices = malesMap.values().iterator().next();
-          } else if (choice.equals(F)) {
-            audioChoices = femalesMap.values().iterator().next();
-          } else {
-            audioChoices = defaultAudioSet;
+          switch (choice) {
+            case M:
+              audioChoices = malesMap.values().iterator().next();
+              break;
+            case F:
+              audioChoices = femalesMap.values().iterator().next();
+              break;
+            default:
+              audioChoices = defaultAudioSet;
+              break;
           }
           addRegularAndSlow(rightSide, audioChoices, instance);
         }
@@ -234,32 +238,42 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
    * @see #getGenderChoices(Panel, Map, Map, Collection, String)
    */
   private void addRegularAndSlow(Panel vp, Collection<AudioAttribute> audioAttributes, String instance) {
-/*      System.out.println("getAfterPlayWidget : for exercise " +exercise.getID() +
-        " path "+ audioPath + " attributes were " + audioAttributes);*/
+    logger.info("getAfterPlayWidget : for" +
+        "\n\texercise   " +exercise.getID() +
+        "\n\tpath       "+ audioPath +
+        "\n\tattributes " + audioAttributes);
+
     RadioButton regular = null;
     AudioAttribute regAttr = null;
+
     RadioButton slow = null;
     AudioAttribute slowAttr = null;
+
     for (final AudioAttribute audioAttribute : audioAttributes) {
       if (!audioAttribute.isValid()) continue;
-
       String display = audioAttribute.getDisplay();
 
-      // System.out.println("attri " + audioAttribute + " display " +display);
+      logger.info("getAfterPlayWidget : check attri " + audioAttribute + " display " +display);
       final RadioButton radio = new RadioButton(GROUP + "_" + exerciseID + "_" + instance, display);
       radio.getElement().setId("Radio_" + display);
       if (audioAttribute.isRegularSpeed()) {
         regular = radio;
         regAttr = audioAttribute;
+
+        logger.info("\tgetAfterPlayWidget : regular " + regAttr);
+
       } else if (audioAttribute.isSlow()) {  // careful not to get context sentence audio ...
         slow = radio;
         slowAttr = audioAttribute;
+
+        logger.info("\tgetAfterPlayWidget : slowAttr " + slowAttr);
+
       }
     }
 
     boolean choseRegularSpeed = isRegularSpeed();
     if (regular != null) {
-      addAudioRadioButton(vp, regular);
+      addAudioRadioButton(vp, regular, regAttr);
       final AudioAttribute innerRegAttr = regAttr;
       final RadioButton innerRegular = regular;
       regular.addClickHandler(new ClickHandler() {
@@ -274,7 +288,7 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
     }
 
     if (slow != null) {
-      addAudioRadioButton(vp, slow);
+      addAudioRadioButton(vp, slow, slowAttr);
       final AudioAttribute innerSlowAttr = slowAttr;
       final RadioButton innerSlow = slow;
       slow.addClickHandler(new ClickHandler() {
@@ -359,7 +373,7 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
     return !exercise.getAudioAttributes().isEmpty();
   }
 
-  protected void addAudioRadioButton(Panel vp, RadioButton fast) {
+  protected void addAudioRadioButton(Panel vp, RadioButton fast, AudioAttribute audioAttribute) {
     vp.add(fast);
   }
 
