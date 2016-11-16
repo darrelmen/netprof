@@ -45,23 +45,19 @@ import java.util.logging.Logger;
  * @since Apr 22, 2014 7:22:15 AM
  */
 public class DownloadIFrame extends Frame {
-	protected static final Logger log = Logger.getLogger(DownloadIFrame.class.getName());
-
 	/** A separate area in the Domino.html that is used to manage download frames. */
 	/**
 	 * @see mitll.langtest.client.InitialUI
 	 */
 	public static final String DOWNLOAD_AREA_ID = "netProfDownloadArea";
 	
-	public DownloadIFrame(String url) {
-		super();
+	DownloadIFrame(String url) {
+	//	super();
 		addStyleName("hidden-download-frame");
 		removeOldFrames();
 		setUrl(url);
 		
 		RootPanel.get(DOWNLOAD_AREA_ID).add(this);
-
-		log.info("Initializing");
 	}
 	
 	private void removeOldFrames() {
