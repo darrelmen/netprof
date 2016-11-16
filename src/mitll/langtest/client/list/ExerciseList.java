@@ -173,7 +173,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @see NPFHelper#reload
    */
   public void reload() {
-    logger.info(getClass() + " reload -");
+//    logger.info(getClass() + " reload -");
     getExercises(controller.getUser());
   }
 
@@ -296,7 +296,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
         ignoreStaleRequest(result);
       } else {
         lastSuccessfulRequest = request;
-        if (DEBUG) logger.info("last req now " + lastSuccessfulRequest);
+        if (DEBUG) logger.info("onSuccess last req now " + lastSuccessfulRequest);
         gotExercises(result);
         String idToUse = exerciseID.isEmpty() ? result.getFirstExercise() == null ? "" : result.getFirstExercise().getID() : exerciseID;
         rememberAndLoadFirst(result.getExercises(), selectionID, searchIfAny, idToUse);
@@ -415,8 +415,10 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
                                    String exerciseID) {
 
     if (DEBUG) logger.info("ExerciseList : rememberAndLoadFirst instance '" + getInstance() +
-        "' remembering " + exercises.size() + " exercises, " + selectionID +
-        " first = " + exerciseID);
+        "'" +
+        "\n\tremembering " + exercises.size() + " exercises," +
+        "\n\tselection   " + selectionID +
+        "\n\tfirst       " + exerciseID);
 
     exercises = rememberExercises(exercises);
     for (ListChangeListener<T> listener : listeners) {
@@ -432,12 +434,18 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
         return;
       }
     }
+
+    goToFirst(searchIfAny, exerciseID);
+
+    listLoaded();
+  }
+
+  protected void goToFirst(String searchIfAny, String exerciseID) {
     if (exerciseID.isEmpty()) {
       loadFirstExercise();
     } else {
       pushFirstSelection(exerciseID, searchIfAny);
     }
-    listLoaded();
   }
 
   protected void listLoaded() {
