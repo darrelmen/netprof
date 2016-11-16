@@ -83,9 +83,6 @@ public class DecodeCorrectnessChecker {
    * @param commonExercise
    * @param audioFile
    * @param answer
-   * @paramx canUseCache
-   * @paramx allowAlternates
-   * @paramx useOldSchool
    * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
    * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer
    */
