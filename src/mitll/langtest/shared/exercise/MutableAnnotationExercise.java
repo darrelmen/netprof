@@ -39,5 +39,11 @@ package mitll.langtest.shared.exercise;
  * @since 2/1/16.
  */
 public interface MutableAnnotationExercise {
+  /**
+   * @see mitll.langtest.server.database.custom.UserListManager#addAnnotations
+   * @param field
+   * @param status
+   * @param comment
+   */
   void addAnnotation(String field, String status, String comment);
 }
