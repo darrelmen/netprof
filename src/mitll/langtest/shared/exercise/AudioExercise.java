@@ -202,7 +202,7 @@ public class AudioExercise extends ExerciseShell {
     return latest;
   }
 
-  public AudioAttribute getLatest(boolean isMale) {
+  /*public AudioAttribute getLatest(boolean isMale) {
     long latestTime = 0;
     AudioAttribute latest = null;
     for (AudioAttribute audioAttribute : getAudioAttributes()) {
@@ -219,7 +219,7 @@ public class AudioExercise extends ExerciseShell {
     }
 
     return latest;
-  }
+  }*/
 
   public Map<String, AudioAttribute> getAudioRefToAttr() {
     Map<String, AudioAttribute> audioToAttr = new HashMap<String, AudioAttribute>();

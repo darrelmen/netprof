@@ -38,7 +38,7 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
-import mitll.langtest.server.audio.DecoderOptions;
+import mitll.langtest.server.audio.TrackInfo;
 import mitll.langtest.server.database.AudioDAO;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.ResultDAO;
@@ -287,9 +287,9 @@ public class RefResultDecoder {
         if (audioAttributes != null) {
           boolean didAll = db.getAudioDAO().attachAudio(exercise, installPath, relativeConfigDir, audioAttributes);
           attrc += audioAttributes.size();
-  //        if (!didAll) {
-   //         failed.add(exercise.getID());
-    //      }
+          //        if (!didAll) {
+          //         failed.add(exercise.getID());
+          //      }
 
           dnr += setDNROnAudio(installPath, audioDAO, audioAttributes);
           if (dnr - since > 2000) {
@@ -333,11 +333,12 @@ public class RefResultDecoder {
         boolean femaleEmpty = femaleUsers.isEmpty();
 
         String title = exercise.getForeignLanguage();
+        String comment = exercise.getEnglish();
 
         if (!maleEmpty) {
           List<AudioAttribute> audioAttributes1 = malesMap.get(maleUsers.get(0));
           maleAudio += audioAttributes1.size();
-          Info info = doTrim(audioAttributes1, title, exercise.getID());
+          Info info = doTrim(audioAttributes1, title, exercise.getID(), comment);
           trimmed += info.trimmed;
           count += info.count;
           changed += info.changed;
@@ -346,14 +347,14 @@ public class RefResultDecoder {
           List<AudioAttribute> audioAttributes1 = femalesMap.get(femaleUsers.get(0));
           femaleAudio += audioAttributes1.size();
 
-          Info info = doTrim(audioAttributes1, title, exercise.getID());
+          Info info = doTrim(audioAttributes1, title, exercise.getID(), comment);
           trimmed += info.trimmed;
           count += info.count;
           changed += info.changed;
         } else if (maleEmpty) {
           Collection<AudioAttribute> defaultUserAudio = exercise.getDefaultUserAudio();
           defaultAudio += defaultUserAudio.size();
-          Info info = doTrim(defaultUserAudio, title, exercise.getID());
+          Info info = doTrim(defaultUserAudio, title, exercise.getID(), comment);
           trimmed += info.trimmed;
           count += info.count;
           changed += info.changed;
@@ -657,7 +658,7 @@ public class RefResultDecoder {
    * @return
    * @see #trimRef
    */
-  private Info doTrim(Collection<AudioAttribute> audioAttributes, String title, String exid) {
+  private Info doTrim(Collection<AudioAttribute> audioAttributes, String title, String exid, String comment) {
     int count = 0;
     int trimmed = 0;
     int changed = 0;
@@ -693,7 +694,7 @@ public class RefResultDecoder {
           count++;
 
           String author = attribute.getUser().getUserID();
-          audioConversion.ensureWriteMP3(audioRef, pathHelper.getInstallPath(), trimInfo.didTrim(), title, author);
+          audioConversion.ensureWriteMP3(audioRef, pathHelper.getInstallPath(), trimInfo.didTrim(), new TrackInfo(title, author, comment));
         }
       } else {
 //        logger.warn("no file for " + exid + " " + attribute + " at audio file " + bestAudio);
