@@ -33,16 +33,11 @@
 package mitll.langtest.server;
 
 import mitll.langtest.server.audio.AudioConversion;
-import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.AudioRefExercise;
-import mitll.langtest.shared.exercise.CommonExercise;
-import net.sf.json.JSONObject;
+import mitll.langtest.server.audio.TrackInfo;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServlet;
 import java.io.*;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -77,12 +72,11 @@ public class DatabaseServlet extends HttpServlet {
   /**
    * @see mitll.langtest.server.ScoreServlet#getAnswer
    * @param wavFile
-   * @param title
-   * @param author
+   * @param trackInfo
    */
-  protected void ensureMP3(String wavFile, String title, String author) { ensureMP3(wavFile, pathHelper, configDir, title, author);  }
+  protected void ensureMP3(String wavFile, TrackInfo trackInfo) { ensureMP3(wavFile, pathHelper, configDir, trackInfo);  }
 
-  private boolean ensureMP3(String wavFile, PathHelper pathHelper, String configDir, String title, String author) {
+  private boolean ensureMP3(String wavFile, PathHelper pathHelper, String configDir, TrackInfo trackInfo) {
     if (wavFile != null) {
       String parent = pathHelper.getInstallPath();
       //logger.debug("ensureMP3 : wav " + wavFile + " under " + parent);
@@ -95,7 +89,7 @@ public class DatabaseServlet extends HttpServlet {
       if (!audioConversion.exists(wavFile, parent)) {
         logger.error("huh? can't find " + wavFile + " under " + parent);
       }
-      String filePath = audioConversion.ensureWriteMP3(wavFile, parent, false, title, author);
+      String filePath = audioConversion.ensureWriteMP3(wavFile, parent, false, trackInfo);
       return new File(filePath).exists();
     } else {
       return false;
