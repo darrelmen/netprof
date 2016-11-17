@@ -321,6 +321,7 @@ license {
     ext.year = Calendar.getInstance().get(Calendar.YEAR)
     skipExistingHeaders
     ignoreFailures = true
+
 }
 
 sonarqube {
