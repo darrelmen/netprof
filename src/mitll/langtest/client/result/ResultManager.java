@@ -60,7 +60,6 @@ import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.ReviewScoringPanel;
 import mitll.langtest.client.table.PagerTable;
 import mitll.langtest.shared.MonitorResult;
-import mitll.langtest.shared.Result;
 import mitll.langtest.shared.ResultAndTotal;
 
 import java.util.ArrayList;
@@ -467,12 +466,12 @@ public class ResultManager extends PagerTable {
    */
   private void respondToClick(MonitorResult selectedObject) {
     reviewContainer.clear();
+    String audioType = selectedObject.getAudioType();
     if (selectedObject.getDurationInMillis() > 100 && selectedObject.isValid()) {
       // logger.info("audio type " + audioType);
       String foreignText = selectedObject.getForeignText();
-
-      //TODO: does this work?
-      ReviewScoringPanel w = new ReviewScoringPanel(selectedObject.getAnswer(), foreignText, "", service, controller, selectedObject.getExID(), null, "instance");
+      ReviewScoringPanel w = new ReviewScoringPanel(selectedObject.getAnswer(), foreignText, "",
+          service, controller, selectedObject.getExID(), null, "instance", audioType);
 
       w.setResultID(selectedObject.getUniqueID());
 
@@ -484,7 +483,7 @@ public class ResultManager extends PagerTable {
       reviewContainer.add(w.getTables());
     } else {
       AudioPanel w = new AudioPanel(selectedObject.getAnswer(), service, controller, false, null, 10, "",
-          Result.AUDIO_TYPE_REGULAR, selectedObject.getExID(), null, "instance");
+          audioType, selectedObject.getExID(), null, "instance");
       reviewContainer.add(w);
     }
   }
@@ -523,7 +522,7 @@ public class ResultManager extends PagerTable {
 
         int val = req++;
         // logger.info("getResults req " + unitToValue + " user " + userID + " text " + text + " val " + val);
-        logger.info("got " + builder.toString());
+     //   logger.info("got " + builder.toString());
 
         service.getResults(start, end, builder.toString(), unitToValue, userID, text, val, new AsyncCallback<ResultAndTotal>() {
           @Override
