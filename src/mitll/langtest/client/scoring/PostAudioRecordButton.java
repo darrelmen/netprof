@@ -70,6 +70,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   protected final ExerciseController controller;
   private final LangTestDatabaseAsync service;
   private final boolean recordInResults;
+  String audioType;
 
   /**
    * @param exerciseID
@@ -79,10 +80,12 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
    * @param recordInResults
    * @param recordButtonTitle
    * @param stopButtonTitle
+   * @param audioType
    * @see GoodwaveExercisePanel.ASRRecordAudioPanel.MyPostAudioRecordButton
    */
   public PostAudioRecordButton(String exerciseID, final ExerciseController controller, LangTestDatabaseAsync service,
-                               int index, boolean recordInResults, String recordButtonTitle, String stopButtonTitle) {
+                               int index, boolean recordInResults, String recordButtonTitle, String stopButtonTitle,
+                               String audioType) {
     super(controller.getRecordTimeout(), controller.getProps().doClickAndHold(), recordButtonTitle, stopButtonTitle,
         controller.getProps());
     setRecordingListener(this);
@@ -97,6 +100,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     style.setMarginTop(1, Style.Unit.PX);
     style.setMarginBottom(1, Style.Unit.PX);
     setWidth(BUTTON_WIDTH + "px");
+    this.audioType = audioType;
   }
 
   public void setExercise(String exercise) {
@@ -198,7 +202,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   }
 
   protected String getAudioType() {
-    return Result.AUDIO_TYPE_REGULAR;
+    return audioType;
   }
 
   private Widget getOuter() {
