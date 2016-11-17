@@ -320,6 +320,7 @@ license {
     header = file('LICENSE.txt')
     ext.year = Calendar.getInstance().get(Calendar.YEAR)
     skipExistingHeaders
+    ignoreFailures = true
 }
 
 sonarqube {
@@ -359,21 +360,24 @@ gwt {
 }
 
 war {
-    from 'war/bin'
+   // from 'war/bin'
     from ('war/config/netProf') {
         into 'config/netProf'
     }
     from ('war/scoring/bin.linux64') {
-        into 'scoring'
+        into 'scoring/bin.linux64'
     }
     from ('war/scoring/configurations') {
-        into 'scoring'
+        into 'scoring/configurations'
     }
+    from 'war/amas.css'
     from 'war/LangTest.css'
     from 'war/LangTest.html'
     webXml = file('war/WEB-INF/web.xml')
-    from ('src/main/') {
-        include 'log*'
+
+    from ('src') {
+        include '**/log*'
+        into 'WEB-INF/classes'
     }
 }
 
