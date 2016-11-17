@@ -47,6 +47,7 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.MiniUser;
+import mitll.langtest.shared.Result;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.AudioAttributeExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -61,7 +62,7 @@ import java.util.logging.Logger;
  * @since 10/16/15.
  */
 public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttributeExercise> extends ASRScoringAudioPanel<T> {
-  private Logger logger = Logger.getLogger("FastAndSlowASRScoringAudioPanel");
+  //private Logger logger = Logger.getLogger("FastAndSlowASRScoringAudioPanel");
 
   private static final String DEFAULT = "Default";
 
@@ -90,7 +91,8 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
         exercise.getTransliteration(),
         service,
         controller1,
-        controller1.getProps().showSpectrogram(), scoreListener, 23, REFERENCE, exercise.getID(), exercise, instance);
+        controller1.getProps().showSpectrogram(), scoreListener, 23, REFERENCE, exercise.getID(), exercise, instance,
+        Result.AUDIO_TYPE_PRACTICE);
   }
 
   /**
@@ -104,8 +106,7 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
    */
   @Override
   protected Widget getAfterPlayWidget() {
-    logger = Logger.getLogger("FastAndSlowASRScoringAudioPanel");
-
+   // logger = Logger.getLogger("FastAndSlowASRScoringAudioPanel");
     final Panel rightSide = new VerticalPanel();
 
     rightSide.getElement().setId("beforePlayWidget_verticalPanel");
