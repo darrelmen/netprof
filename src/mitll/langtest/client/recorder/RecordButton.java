@@ -97,7 +97,7 @@ public class RecordButton extends Button {
    * @param stopButtonText
    * @param propertyHandler
    * @see mitll.langtest.client.scoring.PostAudioRecordButton#PostAudioRecordButton
-   * @see mitll.langtest.client.scoring.SimplePostAudioRecordButton#SimplePostAudioRecordButton(mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.LangTestDatabaseAsync, String, String, String, String)
+   * @see mitll.langtest.client.scoring.SimplePostAudioRecordButton#SimplePostAudioRecordButton
    */
   protected RecordButton(int delay, boolean doClickAndHold, String buttonText, String stopButtonText, PropertyHandler propertyHandler) {
     super(buttonText);
@@ -162,9 +162,10 @@ public class RecordButton extends Button {
           if (!mouseDown) {
             mouseDown = true;
             doClick();
-          } else {
-            logger.info("ignoring mouse down since mouse already down " + mouseDown);
           }
+//          else {
+//            logger.info("ignoring mouse down since mouse already down " + mouseDown);
+//          }
         }
       });
 
@@ -207,13 +208,10 @@ public class RecordButton extends Button {
     if (isVisible() && isEnabled()) {
       startOrStopRecording();
     }
-    else {
-      logger.info("button visible " +isVisible() + " enabled " + isEnabled());
-    }
   }
 
   private long started = 0;
-  // private long last = 0;
+  //private long last = 0;
 
   /**
    * Wait after the user releases the button, since it seems to get cut off...
@@ -221,13 +219,13 @@ public class RecordButton extends Button {
    * @see #doClick
    */
   private void startOrStopRecording() {
- //   long enter = System.currentTimeMillis();
-/*    if (last  > 0) {
-      logger.info("startOrStopRecording at " + enter + " millis after dur " +  (enter-last));
-    }
-    else {
-      logger.info("startOrStopRecording at " + enter + " millis");
-    }*/
+    long enter = System.currentTimeMillis();
+//    if (last  > 0) {
+//      logger.info("startOrStopRecording at " + enter + " millis after dur " +  (enter-last));
+//    }
+//    else {
+//      logger.info("startOrStopRecording at " + enter + " millis");
+//    }
     //   last = enter;
 
     if (isRecording()) {
@@ -237,7 +235,9 @@ public class RecordButton extends Button {
       cancelAfterStopTimer();
       cancelTimer();
       long duration = now - started;
-     // logger.info("startOrStopRecording stop diff = " + duration + " millis, ");
+
+      //logger.info("startOrStopRecording ui time between button clicks = " + duration + " millis, ");
+
       int afterStopDelayMillis = propertyHandler.getAfterStopDelayMillis();
       afterStopTimer = new Timer() {
         @Override
@@ -276,6 +276,11 @@ public class RecordButton extends Button {
    * @see #startOrStopRecording()
    */
   protected void stop(long duration) {
+    long now = System.currentTimeMillis();
+    long duration2 = now - started;
+
+   // logger.info("startOrStopRecording after stop delay = " + duration2 + " millis, vs " + duration);
+
     showStopped();
     recordingListener.stopRecording(duration);
   }
