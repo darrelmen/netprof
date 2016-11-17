@@ -63,6 +63,7 @@ import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.ExerciseAnnotation;
+import mitll.langtest.shared.Result;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -551,10 +552,12 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
      * @param service
      * @param controller
      * @param exercise
-     * @param instance   @see GoodwaveExercisePanel#getAnswerWidget
+     * @param instance
+     * @see GoodwaveExercisePanel#getAnswerWidget
      */
-    public ASRRecordAudioPanel(LangTestDatabaseAsync service, ExerciseController controller, T exercise, String instance) {
-      super(exercise.getForeignLanguage(), exercise.getTransliteration(), service, controller, scorePanel, REFERENCE, exercise.getID(), exercise, instance);
+     ASRRecordAudioPanel(LangTestDatabaseAsync service, ExerciseController controller, T exercise, String instance) {
+      super(exercise.getForeignLanguage(), exercise.getTransliteration(), service, controller, scorePanel, REFERENCE,
+          exercise.getID(), exercise, instance, Result.AUDIO_TYPE_PRACTICE);
       this.index = 1;
       getElement().setId("ASRRecordAudioPanel");
     }
@@ -697,7 +700,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
       MyPostAudioRecordButton(ExerciseController controller) {
         super(getLocalExercise().getID(), controller, ASRRecordAudioPanel.this.service, ASRRecordAudioPanel.this.index,
             true,
-            RECORD_YOURSELF, controller.getProps().doClickAndHold() ? RELEASE_TO_STOP : "Stop");
+            RECORD_YOURSELF, controller.getProps().doClickAndHold() ? RELEASE_TO_STOP : "Stop", Result.AUDIO_TYPE_PRACTICE);
       }
 
       @Override
