@@ -36,10 +36,7 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
-import mitll.langtest.client.custom.tabs.RememberTabAndContent;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -75,13 +72,14 @@ public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> 
    * @param exerciseID
    * @param exercise
    * @param instance
+   * @param audioType
    */
   public ASRScoringAudioPanel(String refSentence, String transliteration,
                               LangTestDatabaseAsync service,
                               ExerciseController controller,
                               ScoreListener gaugePanel,
-                              String playButtonSuffix, String exerciseID, T exercise, String instance) {
-    super(refSentence, transliteration, service, controller, gaugePanel, playButtonSuffix, exerciseID, exercise, instance);
+                              String playButtonSuffix, String exerciseID, T exercise, String instance, String audioType) {
+    super(refSentence, transliteration, service, controller, gaugePanel, playButtonSuffix, exerciseID, exercise, instance, audioType);
   }
 
   /**
@@ -97,11 +95,13 @@ public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> 
    * @param exerciseID
    * @param exercise
    * @param instance
+   * @param audioType
    */
   public ASRScoringAudioPanel(String path, String refSentence, String transliteration, LangTestDatabaseAsync service,
                               ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel,
-                              int rightMargin, String playButtonSuffix, String exerciseID, T exercise, String instance) {
-    super(path, refSentence, transliteration, service, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix, exerciseID, exercise, instance);
+                              int rightMargin, String playButtonSuffix, String exerciseID, T exercise, String instance, String audioType) {
+    super(path, refSentence, transliteration, service, controller, showSpectrogram, gaugePanel, rightMargin,
+        playButtonSuffix, exerciseID, exercise, instance, audioType);
     this.useScoreToColorBkg = controller.useBkgColorForRef();
   }
 
