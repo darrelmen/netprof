@@ -70,12 +70,9 @@ public class AudioDAO extends DAO {
   private static final String DURATION = "duration";
   private static final String DEFECT = "defect";
   private static final String REGULAR = "regular";
-  private static final String AUDIO_TYPE1 = "context=" + REGULAR;
   private static final String SLOW = "slow";
-  private static final String CONTEXT_REGULAR = AUDIO_TYPE1;
+  private static final String CONTEXT_REGULAR = "context=" + REGULAR;
   private static final String TRANSCRIPT = "transcript";
-  //private static final String FAST_WAV = "Fast" + ".wav";
-  //private static final String SLOW_WAV = "Slow" + ".wav";
 
   public static final String UNKNOWN = "unknown";
   public static final String TOTAL = "total";
@@ -630,7 +627,7 @@ public class AudioDAO extends DAO {
    * @return ids with both regular and slow speed recordings
    * @see mitll.langtest.server.LangTestDatabaseImpl#filterByUnrecorded
    */
-  public Set<String> getRecordedBy(long userid,Map<String, String> exToTranscript) {
+  public Set<String> getRecordedBy(long userid, Map<String, String> exToTranscript) {
     Collection<Long> userMap = getUserIDsMatchingGender(userid);
     //logger.debug("found " + (isMale ? " male " : " female ") + " users : " + userMap.keySet());
     // find set of users of same gender
@@ -670,7 +667,7 @@ public class AudioDAO extends DAO {
       Connection connection = database.getConnection(this.getClass().toString());
       String s = getInClause(userIDs);
       if (!s.isEmpty()) s = s.substring(0, s.length() - 1);
-      String sql = "SELECT distinct " + Database.EXID + ","+TRANSCRIPT +
+      String sql = "SELECT distinct " + Database.EXID + "," + TRANSCRIPT +
           " FROM " + AUDIO +
           " WHERE " +
           (s.isEmpty() ? "" : USERID + " IN (" + s + ") AND ") +
@@ -687,7 +684,7 @@ public class AudioDAO extends DAO {
 
         if (audioTranscript != null) {
           String tran = exToTranscript.get(trim);
-          if(tran != null && isNoAccentMatch(audioTranscript,tran)) {
+          if (tran != null && isNoAccentMatch(audioTranscript, tran)) {
             results.add(trim);
           }
         }
@@ -941,7 +938,7 @@ public class AudioDAO extends DAO {
 //            logger.info("1) no match for " + exid + " '" + trimWhitespace(transcript) + "' vs '" + trimWhitespace(exerciseFL) + "'");
           }
         } else {
-  //        logger.info("2) stale exercise id : no match for " + exid);
+          //        logger.info("2) stale exercise id : no match for " + exid);
         }
       }
       finish(connection, statement, rs);
@@ -959,7 +956,7 @@ public class AudioDAO extends DAO {
 
   private boolean isNoAccentMatch(String transcript, String exerciseFL) {
     if (exerciseFL == null) return false;
-    String before  = trimWhitespace(exerciseFL);
+    String before = trimWhitespace(exerciseFL);
     String trimmed = trimWhitespace(transcript);
     String noAccents = StringUtils.stripAccents(before);
     //String transcript = audio.getTranscript();
@@ -1049,11 +1046,11 @@ public class AudioDAO extends DAO {
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#markRecordedState
    */
-  public Set<String> getRecordedForUser(long userid) {
+  public Set<String> getRecordedForUser(long userid,
+                                        Map<String, String> exToTranscript) {
     try {
-      Set<String> validAudioAtReg = getValidAudioOfType(userid, REGULAR);
-      Set<String> validAudioAtSlow = getValidAudioOfType(userid, SLOW);
-      /*boolean b =*/
+      Set<String> validAudioAtReg = getValidAudioOfType(userid, REGULAR, exToTranscript);
+      Set<String> validAudioAtSlow = getValidAudioOfType(userid, SLOW, exToTranscript);
       validAudioAtReg.retainAll(validAudioAtSlow);
       return validAudioAtReg;
     } catch (Exception ee) {
@@ -1069,25 +1066,29 @@ public class AudioDAO extends DAO {
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#markRecordedState(int, String, java.util.Collection, boolean)
    */
-  public Set<String> getRecordedExampleForUser(long userid) {
+  public Set<String> getRecordedExampleForUser(long userid,
+                                               Map<String, String> exToTranscript) {
     try {
-      return getValidAudioOfType(userid, AUDIO_TYPE1);
+      return getValidAudioOfType(userid, CONTEXT_REGULAR, exToTranscript);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
     return new HashSet<>();
   }
 
-  private Set<String> getValidAudioOfType(long userid, String audioType) throws SQLException {
-    String sql = "SELECT " + Database.EXID +
-        " FROM " + AUDIO + " WHERE " + USERID + "=" + userid +
+  private Set<String> getValidAudioOfType(long userid, String audioType, Map<String, String> exToTranscript) throws SQLException {
+    String sql = "SELECT " + Database.EXID + ", " + TRANSCRIPT +
+        " FROM " + AUDIO +
+        " WHERE " + USERID + "=" + userid +
         " AND " + DEFECT + "<>true " +
+        " AND " + DNR + ">0" +
+
         " AND " + AUDIO_TYPE + "='" + audioType + "'";
 
     // logger.debug("sql " + sql);
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
-    return getExidResultsForQuery(connection, statement);
+    return getExidResultsForQuery(connection, statement, exToTranscript);
   }
 
   /**
@@ -1168,11 +1169,24 @@ public class AudioDAO extends DAO {
     return user;
   }
 
-  private Set<String> getExidResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
+  private Set<String> getExidResultsForQuery(Connection connection,
+                                             PreparedStatement statement,
+                                             Map<String, String> exToTranscript) throws SQLException {
     ResultSet rs = statement.executeQuery();
     Set<String> results = new HashSet<>();
     while (rs.next()) {
-      results.add(rs.getString(Database.EXID));
+      String exid = rs.getString(Database.EXID).trim();
+      //results.add(string);
+
+      String audioTranscript = rs.getString(2);
+
+      if (audioTranscript != null) {
+        String tran = exToTranscript.get(exid);
+        if (tran != null && isNoAccentMatch(audioTranscript, tran)) {
+          results.add(exid);
+        }
+      }
+
     }
     finish(connection, statement, rs);
 
