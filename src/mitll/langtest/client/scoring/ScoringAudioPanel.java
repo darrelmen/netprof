@@ -40,7 +40,6 @@ import com.google.gwt.user.client.ui.UIObject;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.shared.Result;
 import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
@@ -82,11 +81,13 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
    * @param exerciseID
    * @param exercise
    * @param instance
-   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, LangTestDatabaseAsync, ExerciseController, ScoreListener, String, String, T, String)
+   * @param audioType
+   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, LangTestDatabaseAsync, ExerciseController, ScoreListener, String, String, T, String,String)
    */
   ScoringAudioPanel(String refSentence, String transliteration, LangTestDatabaseAsync service, ExerciseController controller,
-                    ScoreListener gaugePanel, String playButtonSuffix, String exerciseID, T exercise, String instance) {
-    this(null, refSentence, transliteration, service, controller, SHOW_SPECTROGRAM, gaugePanel, 23, playButtonSuffix, exerciseID, exercise, instance);
+                    ScoreListener gaugePanel, String playButtonSuffix, String exerciseID, T exercise, String instance, String audioType) {
+    this(null, refSentence, transliteration, service, controller, SHOW_SPECTROGRAM, gaugePanel, 23, playButtonSuffix,
+        exerciseID, exercise, instance, audioType);
   }
 
   /**
@@ -100,14 +101,15 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
    * @param exerciseID
    * @param exercise
    * @param instance
-   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, String, LangTestDatabaseAsync, ExerciseController, boolean, ScoreListener, int, String, String, T, String)
+   * @param audioType
+   * @see ASRScoringAudioPanel#ASRScoringAudioPanel
    */
   ScoringAudioPanel(String path, String refSentence, String transliteration, LangTestDatabaseAsync service,
                     ExerciseController controller,
                     boolean showSpectrogram, ScoreListener gaugePanel, int rightMargin, String playButtonSuffix,
-                    String exerciseID, T exercise, String instance) {
+                    String exerciseID, T exercise, String instance, String audioType) {
     super(path, service, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix,
-        Result.AUDIO_TYPE_REGULAR, exerciseID, exercise, instance);
+        audioType, exerciseID, exercise, instance);
     this.refSentence = refSentence;
     this.transliteration = transliteration;
     showOnlyOneExercise = controller.showOnlyOneExercise();
