@@ -65,7 +65,7 @@ import static mitll.langtest.client.scoring.PostAudioRecordButton.MIN_DURATION;
  * Time: 4:34 PM
  * To change this template use File | Settings | File Templates.
  */
-public class RecordButtonPanel implements RecordButton.RecordingListener {
+public abstract class RecordButtonPanel implements RecordButton.RecordingListener {
   private final Logger logger = Logger.getLogger("RecordButtonPanel");
 
   protected final RecordButton recordButton;
@@ -79,6 +79,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
   private final Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
   private boolean doFlashcardAudio = false;
   private boolean allowAlternates = false;
+  private final String audioType;
 
   /**
    * Has three parts -- record/stop button, audio validity feedback icon, and the audio control widget that allows playback.
@@ -90,12 +91,13 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
                               final String exerciseID,
                               final int index,
                               boolean doFlashcardAudio,
-                              String recordButtonTitle) {
+                              String recordButtonTitle, String audioType) {
     this.service = service;
     this.controller = controller;
     this.exerciseID = exerciseID;
     this.index = index;
     this.doFlashcardAudio = doFlashcardAudio;
+    this.audioType = audioType;
     layoutRecordButton(recordButton = makeRecordButton(controller, recordButtonTitle));
   }
 
@@ -171,7 +173,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
     recordImage1.setVisible(false);
     recordImage2.setVisible(false);
 
-   // logger.info("stopRecording : got stop recording " + duration);
+    // logger.info("stopRecording : got stop recording " + duration);
     if (duration > MIN_DURATION) {
       controller.stopRecording(new WavCallback() {
         @Override
@@ -186,8 +188,9 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
   }
 
   private PopupPanel tooltip;
+
   protected void showPopup(String html, Widget button) {
-     tooltip = new PopupHelper().showPopup(html, button, BootstrapExercisePanel.HIDE_DELAY);
+    tooltip = new PopupHelper().showPopup(html, button, BootstrapExercisePanel.HIDE_DELAY);
   }
 
   /**
@@ -205,7 +208,7 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
     String device = controller.getBrowserInfo();
     final int len = base64EncodedWavFile.length();
 
-    AudioContext audioContext = new AudioContext(reqid, controller.getUser(), exerciseID, index, Result.AUDIO_TYPE_REGULAR);
+    AudioContext audioContext = new AudioContext(reqid, controller.getUser(), exerciseID, index, audioType);
 
     service.writeAudioFile(base64EncodedWavFile,
         audioContext,
@@ -280,7 +283,9 @@ public class RecordButtonPanel implements RecordButton.RecordingListener {
     return recordButton;
   }
 
-  protected void receivedAudioAnswer(AudioAnswer result, final Panel outer) {}
+  protected abstract void receivedAudioAnswer(AudioAnswer result, final Panel outer);
+//  {
+//  }
 
   protected void hideRecordButton() {
     recordButton.setVisible(false);

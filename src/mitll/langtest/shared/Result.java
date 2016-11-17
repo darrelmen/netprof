@@ -70,6 +70,10 @@ public class Result implements UserAndTime {
   private transient String model;
 
   public static final String AUDIO_TYPE_UNSET = "unset";
+
+  /**
+   *
+   */
   public static final String AUDIO_TYPE_REGULAR = "regular";
   public static final String AUDIO_TYPE_SLOW = "slow";
   public static final String AUDIO_TYPE_FAST_AND_SLOW = "fastAndSlow";
