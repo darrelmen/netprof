@@ -242,6 +242,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
 
   /**
    * Be sure to make it clear when the audio under the new audio tab is yours.
+   *
    * @param tabPanel
    */
   private void addNewOrYourRecordingTab(TabPanel tabPanel) {
@@ -258,8 +259,8 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   }
 
   private void addAudioByGender(AudioAttributeExercise audioAttributeExercise, TabPanel tabPanel, boolean isMale) {
-    Map<MiniUser, List<AudioAttribute>> malesMap   = audioAttributeExercise.getUserMap(isMale);
-    List<MiniUser> maleUsers   = audioAttributeExercise.getSortedUsers(malesMap);
+    Map<MiniUser, List<AudioAttribute>> malesMap = audioAttributeExercise.getUserMap(isMale);
+    List<MiniUser> maleUsers = audioAttributeExercise.getSortedUsers(malesMap);
     addTabsForUsers(newUserExercise, tabPanel, malesMap, maleUsers);
   }
 
@@ -427,8 +428,8 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     }
     final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<X>(audioRef, exercise.getForeignLanguage(), exercise.getTransliteration(), service, controller,
         controller.getProps().showSpectrogram(), new EmptyScoreListener(), 70, audio.isRegularSpeed() ? REGULAR_SPEED : SLOW_SPEED, exercise.getID(),
-        exercise, instance
-    ) {
+        exercise, instance,
+        audio.isRegularSpeed() ? Result.AUDIO_TYPE_REGULAR : Result.AUDIO_TYPE_SLOW) {
       /**
        * @see mitll.langtest.client.scoring.AudioPanel#addWidgets(String, String, String)
        * @return
@@ -593,7 +594,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     row.add(getFixedButton(ul, pagingContainer, toAddTo, normalSpeedRecording));
     boolean keepAudioSelection = getKeepAudioSelection();
 
- //   logger.info("value is  " + keepAudioSelection);
+    //   logger.info("value is  " + keepAudioSelection);
     keepAudio.setValue(keepAudioSelection);
     keepAudio.addClickHandler(new ClickHandler() {
       @Override
@@ -739,13 +740,13 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   @Override
   protected void audioPosted() {
     Boolean value = getKeepAudio();
-  //  logger.info("did audioPosted keep audio = " + value);
+    //  logger.info("did audioPosted keep audio = " + value);
     reallyChange(listInterface, false, value);
   }
 
   protected boolean getKeepAudio() {
     Boolean value = keepAudio.getValue();
-  //  logger.info(this.getClass() + " : did getKeepAudio keep audio = " + value);
+    //  logger.info(this.getClass() + " : did getKeepAudio keep audio = " + value);
     return value;
   }
 
@@ -764,11 +765,10 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
       String item = localStorageIfSupported.getItem(selectedUserKey);
-     // logger.info("value for " + selectedUserKey + "='" + item+ "'");
+      // logger.info("value for " + selectedUserKey + "='" + item+ "'");
       if (item != null) {
         return item.toLowerCase().equals("true");
-      }
-      else {
+      } else {
         storeKeepAudio(true);
         return true;
       }
