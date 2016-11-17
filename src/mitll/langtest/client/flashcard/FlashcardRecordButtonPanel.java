@@ -41,6 +41,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.Result;
 
 import static mitll.langtest.client.scoring.PostAudioRecordButton.MIN_DURATION;
 
@@ -67,14 +68,14 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
    * @param controller
    * @param exerciseID
    * @param index
-   * @see BootstrapExercisePanel#getAnswerWidget(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, String)
+   * @see BootstrapExercisePanel#getAnswerWidget
    */
   public FlashcardRecordButtonPanel(AudioAnswerListener exercisePanel,
                                     LangTestDatabaseAsync service,
                                     ExerciseController controller,
                                     String exerciseID,
                                     int index) {
-    super(service, controller, exerciseID, index, true, "Record");
+    super(service, controller, exerciseID, index, true, "Record", Result.AUDIO_TYPE_PRACTICE);
     this.exercisePanel = exercisePanel;
   }
 
@@ -103,7 +104,7 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
 
   /**
    * @return
-   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#getAnswerAndRecordButtonRow(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController)
+   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#getAnswerAndRecordButtonRow
    */
   @Override
   public Widget getRecordButton() {
@@ -142,7 +143,6 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
    */
   @Override
   protected void receivedAudioAnswer(final AudioAnswer result, Panel outer) {
-    // System.out.println("FlashcardRecordButtonPanel.receivedAudioAnswer " + result);
     hideRecordButton();
     if (result.isCorrect()) {
       correctIcon.setVisible(true);
