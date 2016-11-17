@@ -406,7 +406,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       logger.debug("filterByUnrecorded : for " + userID + " only by same gender " +
           " examples only " + onlyExamples + " from " + exercises.size());
 
-
       Map<String, String> exToTranscript = new HashMap<>();
       Map<String, String> exToContextTranscript = new HashMap<>();
 
@@ -569,6 +568,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
 
   /**
+   * TODO : seems like we're doing the exercise->transcript map twice???
+   * <p>
    * Marks each exercise - first state - with whether this user has recorded audio for this item
    * Defective audio is not included.
    * Also if just one of regular or slow is recorded it's not "recorded".
@@ -584,19 +585,33 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    */
   private int markRecordedState(int userID, String role, Collection<? extends CommonShell> exercises, boolean onlyExample) {
     int c = 0;
+
     if (role.equals(Result.AUDIO_TYPE_RECORDER)) {
-      Set<String> recordedForUser = onlyExample ? db.getAudioDAO().getRecordedExampleForUser(userID) : db.getAudioDAO().getRecordedForUser(userID);
-      //logger.debug("\tfound " + recordedForUser.size() + " recordings by " + userID + " only example " + onlyExample);
+      Map<String, String> exToTranscript = new HashMap<>();
+      for (CommonShell shell : exercises) {
+        if (onlyExample) {
+          String context = shell.getContext();
+          if (context != null && !context.isEmpty()) {
+            exToTranscript.put(shell.getID(), context);
+          }
+        } else {
+          exToTranscript.put(shell.getID(), shell.getForeignLanguage());
+        }
+      }
+
+      Set<String> recordedForUser = onlyExample ?
+          db.getAudioDAO().getRecordedExampleForUser(userID, exToTranscript) :
+          db.getAudioDAO().getRecordedForUser(userID, exToTranscript);
+      logger.debug("\tmarkRecordedState : found " + recordedForUser.size() + " recordings by " + userID + " only example " + onlyExample);
       for (CommonShell shell : exercises) {
         if (recordedForUser.contains(shell.getID())) {
           shell.setState(STATE.RECORDED);
           c++;
         }
       }
+    } else {
+      logger.debug("\tmarkRecordedState not marking recorded for '" + role + "' and user " + userID);
     }
-    //else {
-    //logger.debug("\tnot marking recorded for '" + role + "' and user " + userID);
-    //}
     return c;
   }
 
