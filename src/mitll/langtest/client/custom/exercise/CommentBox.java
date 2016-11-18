@@ -43,6 +43,7 @@ import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.custom.TooltipHelper;
@@ -176,7 +177,7 @@ public class CommentBox extends PopupContainer {
       public void onClick(ClickEvent event) {
         commentAndOK.setVisible(false);
         commentComplete(commentEntryText, field, commentButton, clearButton);
-        String text = commentEntryText.getText();
+        String text = sanitize(commentEntryText.getText());
 
         ExerciseAnnotation toUse = annotation;
         if (annotation != null) {
@@ -421,7 +422,12 @@ public class CommentBox extends PopupContainer {
    * @see MyPopup#configure(com.github.gwtbootstrap.client.ui.TextBox, com.google.gwt.user.client.ui.Widget, com.google.gwt.user.client.ui.Widget)
    */
   private <T extends ValueBoxBase> void commentComplete(T commentEntry, String field, Widget commentButton, Widget clearButton) {
-    commentComplete(field, commentButton, clearButton, commentEntry.getText());
+    String text = commentEntry.getText();
+    commentComplete(field, commentButton, clearButton, sanitize(text));
+  }
+
+  private String sanitize(String text) {
+    return SimpleHtmlSanitizer.sanitizeHtml(text).asString();
   }
 
   private void commentComplete(String field, Widget commentButton, Widget clearButton, String comment) {
