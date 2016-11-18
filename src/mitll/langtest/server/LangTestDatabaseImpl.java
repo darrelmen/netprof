@@ -1543,7 +1543,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       lists.add(attentionList);
 
       logger.info("took " + (now - then) + " to get attention list size = " + attentionList.getNumItems());
-
     }
     return lists;
   }
@@ -2416,6 +2415,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String audioTranscript = getAudioTranscript(audioType, exercise1);
     //  logger.debug("addToAudioTable user " + user + " ex " + exerciseID + " for " + audioType + " path before " + audioAnswer.getPath());
 
+    String context = exercise1 == null ? "": audioType.contains("context") ? exercise1.getContextTranslation() : exercise1.getEnglish();
     String permanentAudioPath = new PathWriter().
         getPermanentAudioPath(pathHelper,
             getAbsoluteFile(audioAnswer.getPath()),
@@ -2423,7 +2423,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
             true,
             idToUse,
             serverProps,
-            new TrackInfo(audioTranscript, getArtist(user), audioType.contains("context") ? exercise1.getContextTranslation() : exercise1.getEnglish()));
+            new TrackInfo(audioTranscript, getArtist(user), context));
 
     AudioAttribute audioAttribute =
         db.getAudioDAO().addOrUpdate(user, idToUse, audioType, permanentAudioPath, System.currentTimeMillis(),

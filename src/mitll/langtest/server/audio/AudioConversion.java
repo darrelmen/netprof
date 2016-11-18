@@ -514,7 +514,7 @@ public class AudioConversion {
       if (DEBUG) logger.debug("run lame on " + absolutePathToWav + " making " + mp3File);
 
       if (!convertToMP3FileAndCheck(getLame(), absolutePathToWav.getAbsolutePath(), mp3File, trackInfo)) {
-        if (spew2++ < 10) logger.warn("File missing for " + pathToWav + " for " + trackInfo.artist);
+        if (spew2++ < 10) logger.warn("File missing for " + pathToWav + " for " + trackInfo.getArtist());
         return FILE_MISSING;
       }
     }
@@ -671,8 +671,8 @@ public class AudioConversion {
    */
   private boolean convertToMP3FileAndCheck(String lamePath, String pathToAudioFile, String mp3File, TrackInfo trackInfo) {
     if (DEBUG) logger.debug("convert " + pathToAudioFile + " to " + mp3File);
-    String title =trackInfo.title;
-    String author = trackInfo.artist;
+    String title = trackInfo.getTitle();
+    String author = trackInfo.getArtist();
     if (title != null && title.length() > 30) {
       title = title.substring(0, 30);
     }
@@ -680,7 +680,7 @@ public class AudioConversion {
     ProcessBuilder lameProc = new ProcessBuilder(lamePath, pathToAudioFile, mp3File,
         "--tt", title,
         "--ta", author,
-        "--tc", trackInfo.comment,
+        "--tc", trackInfo.getComment(),
         "--tl", language);
     try {
       //logger.debug("running lame" + lameProc.command());
@@ -714,8 +714,8 @@ public class AudioConversion {
 
   private boolean convertToOGGFileAndCheck(String oggPath, String pathToAudioFile, String oggFile, TrackInfo trackInfo) {
     if (DEBUG) logger.debug("convert " + pathToAudioFile + " to " + oggFile);
-    String title =trackInfo.title;
-    String author = trackInfo.artist;
+    String title = trackInfo.getTitle();
+    String author = trackInfo.getArtist();
     if (title != null && title.length() > 30) {
       title = title.substring(0, 30);
     }
@@ -724,7 +724,7 @@ public class AudioConversion {
         "-o", oggFile,
         "-t", title,
         "-a", author,
-        "-c", trackInfo.comment);
+        "-c", trackInfo.getComment());
     try {
       //logger.debug("running lame" + oggProx.command());
       new ProcessRunner().runProcess(oggProx);

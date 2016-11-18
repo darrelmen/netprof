@@ -111,7 +111,7 @@ public class H2Connection implements DatabaseConnection {
 
     File test = new File(h2FilePath + ".h2.db");
     if (!test.exists()) {
-      logger.error("no h2 db file at  " + test.getAbsolutePath() + "");
+      logger.error("\n\n\nconnect : no h2 db file at  " + test.getAbsolutePath() + " : check config file?\n\n\n");
     } else {
       logger.debug("H2 : connecting to " + url);
       org.h2.Driver.load();

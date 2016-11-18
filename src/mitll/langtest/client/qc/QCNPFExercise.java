@@ -707,7 +707,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
     final Widget entry;
     final AudioPanel audioPanel;
 
-    public Pair(Widget entry, AudioPanel audioPanel) {
+    Pair(Widget entry, AudioPanel audioPanel) {
       this.entry = entry;
       this.audioPanel = audioPanel;
     }
