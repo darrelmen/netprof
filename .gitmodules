@@ -1,3 +1,3 @@
 [submodule "imagewriter"]
 	path = imagewriter
-	url = git@gh.ll.mit.edu:DLI-LTEA/imagewriter
+	url = https://gh.ll.mit.edu/DLI-LTEA/imagewriter.git
