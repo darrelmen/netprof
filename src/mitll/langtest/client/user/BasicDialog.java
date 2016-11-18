@@ -43,7 +43,9 @@ import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.github.gwtbootstrap.client.ui.constants.Trigger;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.BlurHandler;
+import com.google.gwt.event.dom.client.HasBlurHandlers;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.*;
@@ -101,7 +103,7 @@ public class BasicDialog {
     final ControlGroup userGroup = addControlGroupEntryHorizontal(dialogBox, label, row, labelWidth, subtext);
 
     FormField formField = new FormField(user, userGroup, minLength);
-    formField.setRightSide(rightSide);
+   // formField.setRightSide(rightSide);
     return formField;
   }
 
@@ -228,6 +230,12 @@ public class BasicDialog {
     markErrorBlur(dialectGroup.group, dialectGroup.box, header, message, right);
   }
 
+  /**
+   * @seex EditableExerciseDialog#checkForForeignChange
+   * @param dialectGroup
+   * @param header
+   * @param message
+   */
   protected void markError(ControlGroup dialectGroup, String header, String message) {
     markError(dialectGroup, header, message, Placement.RIGHT);
   }
@@ -253,7 +261,7 @@ public class BasicDialog {
 
 /*
   boolean highlightIntegerBox(FormField ageEntryGroup, int min, int max, int exception) {
-    String text = ageEntryGroup.box.getText();
+    String text = ageEntryGroup.box.getSafeText();
     boolean validAge = false;
     if (text.length() == 0) {
       ageEntryGroup.group.setType(ControlGroupType.WARNING);
@@ -295,7 +303,7 @@ public class BasicDialog {
    * @param dialectGroup
    * @param header
    * @param message
-   * @see mitll.langtest.client.custom.dialog.EditableExercise#checkForForeignChange()
+   * @seex mitll.langtest.client.custom.dialog.EditableExercise#checkForForeignChange()
    */
   private void markError(ControlGroup dialectGroup, String header, String message, Placement placement) {
     dialectGroup.setType(ControlGroupType.ERROR);
@@ -524,52 +532,6 @@ public class BasicDialog {
       hide();
       setTrigger(Trigger.MANUAL);
       reconfigure();
-    }
-  }
-
-  protected static class FormField {
-    public final TextBoxBase box;
-    public final ControlGroup group;
-    public Widget rightSide;
-
-    public FormField(final TextBoxBase box, final ControlGroup group, final int minLength) {
-      this.box = box;
-
-      box.addKeyUpHandler(new KeyUpHandler() {
-        public void onKeyUp(KeyUpEvent event) {
-          if (box.getText().length() >= minLength) {
-            group.setType(ControlGroupType.NONE);
-          }
-        }
-      });
-
-      this.group = group;
-    }
-
-    public void setVisible(boolean visible) {
-      group.setVisible(visible);
-    }
-
-    public String getText() {
-      return box.getText();
-    }
-
-    public boolean isEmpty() { return getText().isEmpty(); }
-
-    public void setRightSide(Widget rightSide) {
-      this.rightSide = rightSide;
-    }
-
-    public ControlGroup getGroup() {
-      return group;
-    }
-
-    public FocusWidget getWidget() {
-      return box;
-    }
-
-    public String toString() {
-      return "FormField value " + getText();
     }
   }
 

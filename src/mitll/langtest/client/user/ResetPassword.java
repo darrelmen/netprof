@@ -111,8 +111,8 @@ public class ResetPassword extends UserDialog {
     Heading w = new Heading(3, CHOOSE_A_NEW_PASSWORD);
     fieldset.add(w);
     w.addStyleName("leftFiveMargin");
-    final BasicDialog.FormField firstPassword  = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, PASSWORD);
-    final BasicDialog.FormField secondPassword = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, "Confirm " + PASSWORD);
+    final FormField firstPassword  = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, PASSWORD);
+    final FormField secondPassword = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, "Confirm " + PASSWORD);
 
   //  firstPassword.getWidget().setTabIndex(0);
    // secondPassword.getWidget().setTabIndex(1);
@@ -127,7 +127,7 @@ public class ResetPassword extends UserDialog {
     return container;
   }
 
-  private void getChangePasswordButton(final String token, Fieldset fieldset, final BasicDialog.FormField firstPassword, final BasicDialog.FormField secondPassword) {
+  private void getChangePasswordButton(final String token, Fieldset fieldset, final FormField firstPassword, final FormField secondPassword) {
     final Button changePassword = new Button(CHANGE_PASSWORD);
    // changePassword.setTabIndex(3);
     changePassword.getElement().setId("changePassword");

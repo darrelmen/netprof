@@ -166,11 +166,11 @@ public class EditItem {
                                                                            UserList<CommonShell> ul,
                                                                            UserList<CommonShell> originalList,
                                                                            final boolean includeAddItem) {
-    logger.info("EditItem.makeExerciseList - ul = " + ul + " " + includeAddItem);
+    //logger.info("EditItem.makeExerciseList - ul = " + ul + " " + includeAddItem);
 
     if (includeAddItem) {
       CommonExercise newItem = getNewItem();
-      logger.info("makeExerciseList : Adding " + newItem);// + " with " + newItem.getTooltip());
+      //logger.info("makeExerciseList : Adding " + newItem);// + " with " + newItem.getTooltip());
       ul.addExercise(newItem);
     }
 

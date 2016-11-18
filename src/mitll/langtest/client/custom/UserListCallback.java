@@ -120,13 +120,13 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
   public void onSuccess(final Collection<UserList<CommonShell>> result) {
 //    logger.info("\tUserListCallback.onSuccess : Displaying " + result.size() + " user lists for " + instanceName);
     if (result.isEmpty()) {
-      logger.info("\t\tUserListCallback.onSuccess : Displaying empty set");
+    //  logger.info("\t\tUserListCallback.onSuccess : Displaying empty set");
 
       insideContentPanel.clear();
       listScrollPanel.clear();
       insideContentPanel.add(getNoListsCreated());
     } else {
-      logger.info("\t\tUserListCallback.onSuccess : Displaying " + result.size() + " user lists for " + instanceName);
+   //   logger.info("\t\tUserListCallback.onSuccess : Displaying " + result.size() + " user lists for " + instanceName);
       listScrollPanel.getElement().setId("scrollPanel");
 
       setScrollPanelWidth(listScrollPanel);
@@ -145,11 +145,11 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
       insideContentPanel.add(listScrollPanel);
 
       if (!optionalExercise.isEmpty()) {
-        logger.info("onSuccess find list for " + optionalExercise);
+     //   logger.info("onSuccess find list for " + optionalExercise);
         for (UserList<? extends HasID> ul : result) {
           for (HasID ex : ul.getExercises()) {
             if (ex.getID().equals(optionalExercise)) {
-              logger.info("onSuccess ex " + optionalExercise + " is on " + ul);
+        //      logger.info("onSuccess ex " + optionalExercise + " is on " + ul);
               listManager.showList(ul, contentPanel, instanceName, ex);
               break;
             }

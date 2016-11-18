@@ -43,6 +43,7 @@ import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
@@ -695,7 +696,7 @@ public class ListManager implements RequiresResize {
                                    final boolean isReview,
                                    final boolean isComment) {
     final TabAndContent editTab = makeTab(tabPanel, IconType.EDIT, isReview ? ADD_DELETE_EDIT_ITEM : ADD_OR_EDIT_ITEM);
-    logger.info("getListOperations : making editTab for list " + ul.getName());
+   // logger.info("getListOperations : making editTab for list " + ul.getName());
 
     editTab.getTab().addClickHandler(new ClickHandler() {
       @Override
@@ -707,7 +708,7 @@ public class ListManager implements RequiresResize {
           //    logger.info("getListOperations : showNPF ");
           reviewItem.showNPF(ul, editTab, getInstanceName(isReview), false, toSelect);
         } else {
-          logger.info("getEditTab : showEditItem "  + " : " + ul.getName());
+//          logger.info("getEditTab : showEditItem "  + " : " + ul.getName());
           showEditItem(ul, editTab, editItem, !ul.isFavorite());
         }
       }
@@ -832,7 +833,7 @@ public class ListManager implements RequiresResize {
     anImport.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        service.reallyCreateNewItems(getUser(), ul.getUniqueID(), w.getText(), new AsyncCallback<Collection<CommonExercise>>() {
+        service.reallyCreateNewItems(getUser(), ul.getUniqueID(), sanitize(w.getText()), new AsyncCallback<Collection<CommonExercise>>() {
           @Override
           public void onFailure(Throwable caught) {
           }
@@ -854,6 +855,9 @@ public class ListManager implements RequiresResize {
     container.getContent().add(inner);
   }
 
+  private String sanitize(String text) {
+    return SimpleHtmlSanitizer.sanitizeHtml(text).asString();
+  }
   /**
    * @param tabPanel
    * @param learn
