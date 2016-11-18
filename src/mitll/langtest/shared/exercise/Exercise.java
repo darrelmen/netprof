@@ -122,10 +122,10 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.contextTranslation = context;
   }
 
-  @Override
+/*  @Override
   public String getRefAudioIndex() {
     return refAudioIndex;
-  }
+  }*/
 
   @Override
   public boolean isPredefined() {

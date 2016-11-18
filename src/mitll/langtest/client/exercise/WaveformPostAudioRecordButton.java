@@ -130,6 +130,9 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     if (parentPanel instanceof BusyPanel) {
       ((BusyPanel) parentPanel).setBusy(false);
     }
+    else {
+      logger.info("parent is not a busy panel - " + parentPanel.getElement().getId() + " " + parentPanel.getClass());
+    }
     controller.logEvent(this, RECORD_BUTTON, getExerciseID(), "stopRecording, duration " + (System.currentTimeMillis() - then) + " millis");
 
     getWaveform().setUrl(WAIT_URL);
