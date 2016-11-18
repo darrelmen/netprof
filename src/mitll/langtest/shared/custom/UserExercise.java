@@ -250,10 +250,10 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
     this.refSentences = orDefault;
   }
 
-  @Override
+/*  @Override
   public String getRefAudioIndex() {
     return "";
-  }
+  }*/
 
   public void setAvgScore(float avgScore) {
     this.avgScore = avgScore;
