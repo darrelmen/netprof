@@ -1,0 +1,6499 @@
+A
+E
+H
+I
+J
+K
+L
+M
+N
+O
+P
+S
+T
+U
+M-K+sil
+J-NG
+L-H+EO
+L-H+EU
+L-H+NG
+J-I+A
+J-I+E
+J-I+H
+J-I+I
+J-I+J
+J-I+K
+J-I+L
+J-I+M
+J-I+N
+J-I+O
+J-I+P
+J-I+S
+J-I+T
+J-I+U
+E-M+EO
+E-M+EU
+L-H+sil L-H+NG
+E-M+NG
+E-EU+sil
+NG-S+A
+NG-S+E
+NG-S+H
+NG-S+I
+NG-S+J NG-S+H
+NG-S+K NG-S+H
+NG-S+L
+NG-S+M NG-S+H
+NG-S+N NG-S+L
+NG-S+O
+NG-S+P NG-S+H
+NG-S+S
+NG-S+T NG-S+L
+NG-S+U
+E-S+sil
+J-J+A
+J-J+E
+J-J+H
+J-J+I
+J-J+J J
+J-J+K J
+J-J+L J
+J-J+M J
+J-J+N J
+J-J+O
+J-J+P J
+J-J+S J
+J-J+T J
+J-J+U
+sil-EU+EO
+sil-EU+EU
+P-P+EO
+P-P+EU
+sil-EU+NG
+NG-T+A
+NG-T+E
+NG-T+H
+NG-T+I
+NG-T+J
+NG-T+K
+NG-T+L
+NG-T+M
+NG-T+N NG-T+L
+NG-T+O
+NG-T+P
+NG-T+S
+NG-T+T
+NG-T+U
+EO
+EU
+P-P+NG
+NG J-NG
+I-U+EO
+I-U+EU
+J-K+A
+J-K+E
+J-K+H
+J-K+I
+J-K+J
+J-K+K
+J-K+L
+J-K+M
+J-K+N J-K+L
+J-K+O
+J-K+P J-K+J
+J-K+S
+J-K+T
+J-K+U
+I-U+NG
+NG-U+A
+NG-U+E
+NG-U+H
+NG-U+I
+NG-U+J
+NG-U+K
+NG-U+L
+NG-U+M
+NG-U+N
+NG-U+O
+NG-U+P
+NG-U+S
+NG-U+T NG-U+S
+NG-U+U NG-U+O
+E-EU+EO
+E-EU+EU
+J-L+A
+J-L+E
+J-L+H
+J-L+I
+J-L+J
+J-L+K
+J-L+L
+J-L+M
+J-L+N
+J-L+O
+J-L+P
+J-L+S
+J-L+T
+J-L+U
+sp
+E-EU+NG
+NG-S+sil NG-S+H
+M+sil
+sil-P+EO
+sil-P+EU
+U-N+sil
+A-E+sil
+sil-P+NG
+O-L+EO
+O-L+EU
+J-M+A
+J-M+E
+J-M+H
+J-M+I
+J-M+J
+J-M+K M
+J-M+L
+J-M+M
+J-M+N
+J-M+O
+J-M+P
+J-M+S
+J-M+T M
+J-M+U
+O-L+NG
+T-K+sil
+K-NG+sil
+J-N+A
+J-N+E
+J-N+H
+J-N+I
+J-N+J
+J-N+K
+S-H+sil
+J-N+L
+J-N+M
+J-N+N
+J-N+O
+J-N+P
+J-N+S
+J-N+T
+J-N+U J-N+O
+NG-EU+EO
+NG-EU+EU
+NG-EU+NG
+S-T+EO
+S-T+EU
+L-U+sil
+A-EO+EO
+A-EO+EU
+U-EU+sil
+S-T+NG T
+J-O+A
+J-O+E
+J-O+H
+J-O+I
+J-O+J
+J-O+K
+J-O+L
+J-O+M
+J-O+N
+J-O+O
+J-O+P
+J-O+S
+J-O+T
+J-O+U J-O+O
+A-EO+NG
+EU-O+sil
+K-P+sil
+N-H+EO L-H+EO
+N-H+EU L-H+EU
+N-sil+A
+N-sil+E N-sil+A
+N-sil+H N-sil+A
+N-sil+I N-sil+A
+N-sil+J N-sil+A
+N-sil+K N-sil+A
+N-sil+L N-sil+A
+N-sil+M N-sil+A
+N-sil+N N-sil+A
+N-sil+O N-sil+A
+N-sil+P N-sil+A
+N-sil+S N-sil+A
+N-sil+T N-sil+A
+N-sil+U N-sil+A
+N-H+NG L-H+NG
+J-P+A
+J-P+E
+J-P+H
+J-P+I
+J-P+J
+J-P+K
+J-P+L
+J-P+M J-P+J
+J-P+N J-P+L
+J-P+O
+J-P+P J-P+K
+J-P+S
+J-P+T
+J-P+U
+EU-A+A
+EU-A+E
+EU-A+H
+EU-A+I
+EU-A+J
+EU-A+K
+EU-A+L
+EU-A+M
+EU-A+N
+EU-A+O
+EU-A+P
+EU-A+S
+EU-A+T
+J-M+sil M+sil
+EU-A+U EU-A+O
+J-sil+EO N-sil+A
+J-sil+EU N-sil+A
+J-sil+NG N-sil+A
+I-J+sil
+K-U+EO
+K-U+EU
+K-U+NG
+J-S+A
+J-S+E
+J-S+H S
+J-S+I
+J-S+J S
+J-S+K S
+J-S+L S
+J-S+M S
+J-S+N S
+J-S+O
+J-S+P S
+J-S+S
+J-S+T S
+J-S+U
+EO-EO+A
+EO-EO+E
+EO-EO+H
+EO-EO+I
+EO-EO+J
+EO-EO+K
+EO-EO+L
+EO-EO+M
+EO-EO+N
+EO-EO+O
+EO-EO+P EO-EO+K
+EO-EO+S
+EO-EO+T
+EO-EO+U EO-EO+O
+A-EO+sil
+S-U+sil
+J-T+A
+J-T+E
+J-T+H
+J-T+I
+J-T+J
+J-T+K
+J-T+L
+J-T+M
+J-T+N J-T+L
+J-T+O
+J-T+P
+J-T+S
+J-T+T
+J-T+U
+EU-E+A
+EU-E+E
+EU-E+H
+EU-E+I
+EU-E+J
+EU-E+K
+EU-E+L
+EU-E+M
+EU-E+N
+EU-E+O
+EU-E+P
+EU-E+S
+EU-E+T
+EU-E+U
+U-sil+A N-sil+A
+U-sil+E N-sil+A
+U-sil+H N-sil+A
+U-sil+I N-sil+A
+U-sil+J N-sil+A
+U-sil+K N-sil+A
+U-sil+L N-sil+A
+U-sil+M N-sil+A
+U-sil+N N-sil+A
+U-sil+O N-sil+A
+U-sil+P N-sil+A
+U-sil+S N-sil+A
+U-sil+T N-sil+A
+U-sil+U N-sil+A
+P-sil+sil N-sil+A
+NG-T+EO
+NG-T+EU
+J-U+A
+J-U+E
+J-U+H
+J-U+I
+J-U+J
+J-U+K
+J-U+L
+J-U+M
+J-U+N
+J-U+O
+J-U+P
+J-U+S
+J-U+T
+J-U+U J-U+P
+E-E+EO
+E-E+EU
+NG-T+NG NG-T+M
+E-E+NG
+U-T+EO
+U-T+EU
+P-J+sil
+U-T+NG
+N-NG+EO
+N-NG+EU
+N-NG+NG
+M-A+A
+M-A+E
+M-A+H
+M-A+I
+M-A+J
+M-A+K
+M-A+L
+M-A+M
+M-A+N
+M-A+O
+M-A+P
+M-A+S
+M-A+T M-A+K
+M-A+U M-A+O
+P-H+EO S-H+sil
+P-H+EU
+P-H+NG S-H+sil
+I-M+EO
+I-M+EU
+EU-H+A
+EU-H+E
+EU-H+H
+EU-H+I
+EU-H+J
+EU-H+K EU-H+J
+EU-H+L EU-H+I
+EU-H+M EU-H+J
+EU-H+N EU-H+I
+EU-H+O
+EU-H+P EU-H+J
+EU-H+S EU-H+I
+EU-H+T EU-H+I
+EU-H+U
+H-T+sil T
+I-M+NG
+sil-I+sil
+EU-N+EO
+EU-N+EU
+M-A+sil
+EU-N+NG
+EU-I+A
+EU-I+E
+EU-I+H
+EU-I+I
+EU-I+J
+EU-I+K
+EU-I+L
+EU-I+M
+EU-I+N
+EU-I+O
+EU-I+P
+EU-I+S
+EU-I+T
+EU-I+U
+T-P+EO P-P+EO
+T-P+EU P-P+EU
+T-P+NG P-P+NG
+sil-H+EO
+sil-H+EU
+M-U+EO
+M-U+EU
+sil-H+NG sil-H+EO
+S+EO
+S+EU
+M-U+NG
+EO-H+sil EU-H+J
+EU-J+A
+EU-J+E
+EU-J+H
+EU-J+I
+EU-J+J
+EU-J+K EU-J+J
+EU-J+L EU-J+J
+EU-J+M EU-J+J
+EU-J+N EU-J+J
+EU-J+O
+EU-J+P EU-J+J
+EU-J+S EU-J+J
+EU-J+T EU-J+J
+EU-J+U
+EO-EU+A
+EO-EU+E EO-EU+A
+EO-EU+H EO-EU+A
+EO-EU+I
+EO-EU+J
+EO-EU+K
+EO-EU+L
+EO-EU+M
+EO-EU+N
+EO-EU+O EO-EU+A
+EO-EU+P EO-EU+K
+EO-EU+S
+EO-EU+T EO-EU+S
+EO-EU+U
+S+NG S
+E-I+sil
+EO-sil N-sil+A
+H-I+EO
+H-I+EU
+H-I+NG
+L-NG+sil K-NG+sil
+A-N+EO
+A-N+EU
+EU-K+A
+EU-K+E
+EU-K+H
+EU-K+I
+EU-K+J
+EU-K+K
+EU-K+L
+EU-K+M
+EU-K+N EU-K+L
+EU-K+O
+EU-K+P
+EU-K+S
+EU-K+T EU-K+J
+EU-K+U
+M-E+A
+M-E+E
+M-E+H
+M-E+I
+M-E+J
+M-E+K
+M-E+L
+M-E+M
+M-E+N
+M-E+O
+M-E+P
+M-E+S
+M-E+T
+M-E+U
+A-N+NG
+S-L+EO
+S-L+EU
+U-NG+EO
+U-NG+EU
+S-EO
+S-EU
+S-L+NG
+EU-L+A
+EU-L+E
+EU-L+H
+EU-L+I
+EU-L+J
+EU-L+K
+EU-L+L
+EU-L+M
+EU-L+N
+EU-L+O
+EU-L+P
+EU-L+S
+EU-L+T
+EU-L+U
+U-NG+NG
+S-NG J-NG
+NG-I+sil
+EU-M+A
+EU-M+E
+EU-M+H
+EU-M+I
+EU-M+J
+EU-M+K
+EU-M+L
+EU-M+M
+EU-M+N
+EU-M+O
+EU-M+P
+EU-M+S
+EU-M+T
+EU-M+U
+K-sil+EO N-sil+A
+K-sil+EU N-sil+A
+O-T+sil
+K-sil+NG N-sil+A
+T-A+sil
+EU-N+A
+EU-N+E
+EU-N+H
+EU-N+I
+EU-N+J
+EU-N+K
+EU-N+L
+EU-N+M EU-N+H
+EU-N+N
+EU-N+O
+EU-N+P
+EU-N+S
+EU-N+T
+EU-N+U
+M-H+A
+M-H+E
+M-H+H
+M-H+I
+M-H+J
+M-H+K M-H+J
+M-H+L M-H+I
+M-H+M M-H+J
+M-H+N M-H+I
+M-H+O
+M-H+P M-H+J
+M-H+S M-H+I
+M-H+T M-H+I
+M-H+U
+M-N+sil
+K-M+EO
+K-M+EU
+EO-NG+A
+EO-NG+E
+EO-NG+H
+EO-NG+I
+EO-NG+J
+EO-NG+K
+EO-NG+L
+EO-NG+M
+EO-NG+N
+EO-NG+O
+EO-NG+P
+EO-NG+S
+EO-NG+T
+EO-NG+U
+EU-O+A
+EU-O+E
+EU-O+H
+EU-O+I
+EU-O+J
+EU-O+K
+EU-O+L
+EU-O+M
+EU-O+N
+EU-O+O
+EU-O+P EU-O+M
+EU-O+S
+EU-O+T
+EU-O+U EU-O+O
+K-M+NG J-M+L
+M-I+A
+M-I+E
+M-I+H
+M-I+I
+M-I+J
+M-I+K
+M-I+L
+M-I+M
+M-I+N
+M-I+O
+M-I+P
+M-I+S
+M-I+T
+M-I+U
+L-K+sil
+NG-sil+EO N-sil+A
+NG-sil+EU N-sil+A
+EO-U+sil
+EU-E+sil
+NG-sil+NG N-sil+A
+EU-P+A
+EU-P+E
+EU-P+H
+EU-P+I
+EU-P+J
+EU-P+K
+EU-P+L
+EU-P+M EU-P+J
+EU-P+N
+EU-P+O
+EU-P+P EU-P+K
+EU-P+S
+EU-P+T
+EU-P+U
+M-J+A
+M-J+E
+M-J+H
+M-J+I
+M-J+J
+M-J+K M-J+J
+M-J+L
+M-J+M M-J+J
+M-J+N M-J+L
+M-J+O
+M-J+P M-J+J
+M-J+S M-J+L
+M-J+T M-J+L
+M-J+U
+NG-sil+sil N-sil+A
+O-U+EO
+O-U+EU
+EU-sil+sil N-sil+A
+O-U+NG
+M-K+A
+M-K+E
+M-K+H
+M-K+I
+M-K+J
+M-K+K
+M-K+L
+M-K+M
+M-K+N M-K+L
+M-K+O
+M-K+P M-K+J
+M-K+S
+M-K+T
+M-K+U
+J-I+EO J-I+O
+J-I+EU
+J-I+NG
+EU-EO+EO
+EU-EO+EU
+NG-L+EO
+NG-L+EU
+EU-EO+NG
+M-L+A
+M-L+E
+M-L+H J-L+H
+M-L+I
+M-L+J J-L+J
+M-L+K J-L+K
+M-L+L J-L+L
+M-L+M J-L+M
+M-L+N J-L+N
+M-L+O
+M-L+P J-L+P
+M-L+S J-L+S
+M-L+T J-L+T
+M-L+U
+NG-L+NG S-L+NG
+P+sil
+U-L+EO
+U-L+EU
+EO-O+EO
+EO-O+EU EO-O+EO
+A-H+sil
+U-L+NG
+EU-S+A
+EU-S+E
+EU-S+H
+EU-S+I
+EU-S+J EU-S+H
+EU-S+K EU-S+H
+EU-S+L
+EU-S+M EU-S+H
+EU-S+N EU-S+L
+EU-S+O
+EU-S+P EU-S+H
+EU-S+S
+EU-S+T EU-S+L
+EU-S+U
+EO-O+NG
+M-M+A
+M-M+E
+M-M+H
+M-M+I
+M-M+J
+M-M+K
+M-M+L
+M-M+M
+M-M+N
+M-M+O
+M-M+P
+M-M+S
+M-M+T M-M+K
+M-M+U
+T-N+sil
+I-E+EO
+I-E+EU
+EU-T+A
+EU-T+E
+EU-T+H
+EU-T+I
+EU-T+J
+EU-T+K
+EU-T+L
+EU-T+M
+EU-T+N EU-T+L
+EU-T+O
+EU-T+P EU-T+K
+EU-T+S
+EU-T+T
+EU-T+U
+M-N+A
+M-N+E
+M-N+H
+M-N+I
+M-N+J
+M-N+K
+S-K+sil T-K+sil
+M-N+L
+M-N+M
+M-N+N
+M-N+O
+M-N+P
+M-N+S
+M-N+T
+M-N+U
+I-E+NG
+EU-U+A
+EU-U+E
+EU-U+H
+EU-U+I
+EU-U+J
+EU-U+K
+EU-U+L
+EU-U+M
+EU-U+N
+EU-U+O
+EU-U+P EU-U+O
+EU-U+S
+EU-U+T
+EU-U+U EU-U+O
+M-O+A
+M-O+E
+M-O+H
+M-O+I
+M-O+J
+M-O+K
+M-O+L
+M-O+M
+M-O+N
+M-O+O
+M-O+P
+M-O+S
+M-O+T
+M-O+U M-O+O
+T-H+EO S-H+sil
+T-H+EU P-H+EU
+T-H+NG S-H+sil
+K-S+sil
+M-M+EO
+M-M+EU
+K+EO
+K+EU
+M-M+NG M-M+L
+M-P+A
+M-P+E
+M-P+H
+M-P+I
+M-P+J
+M-P+K
+M-P+L
+M-P+M M-P+J
+M-P+N M-P+L
+M-P+O
+M-P+P M-P+K
+M-P+S
+M-P+T
+M-P+U
+T-sil N-sil+A
+K+NG
+J-P+sil
+A-NG+sil
+M-sil+A N-sil+A
+M-sil+E N-sil+A
+M-sil+H N-sil+A
+M-sil+I N-sil+A
+M-sil+J N-sil+A
+M-sil+K N-sil+A
+M-sil+L N-sil+A
+M-sil+M N-sil+A
+M-sil+N N-sil+A
+M-sil+O N-sil+A
+M-sil+P N-sil+A
+M-sil+S N-sil+A
+M-sil+T N-sil+A
+M-sil+U N-sil+A
+H-A+EO
+H-A+EU H-A+EO
+H-A+NG
+I-M+sil
+K-EU+sil
+K-EU+EO
+K-EU+EU
+H-J+sil J
+K-EU+NG
+K-EO
+K-EU
+K-NG J-NG
+L-I+EO
+L-I+EU
+A-U+sil
+L-I+NG
+L-sil+sil N-sil+A
+E-N+EO
+E-N+EU
+EU-EO+A
+EU-EO+E
+EU-EO+H
+EU-EO+I
+EU-EO+J
+EU-EO+K
+EU-EO+L
+EU-EO+M
+EU-EO+N
+EU-EO+O
+EU-EO+P EU-EO+K
+EU-EO+S
+EU-EO+T
+EU-EO+U EU-EO+O
+L-sil+EO N-sil+A
+L-sil+EU N-sil+A
+E-N+NG
+M-S+A
+M-S+E
+M-S+H
+M-S+I
+M-S+J M-S+H
+M-S+K M-S+H
+M-S+L
+M-S+M M-S+H
+M-S+N M-S+L
+M-S+O
+M-S+P M-S+H
+M-S+S
+M-S+T M-S+L
+M-S+U J-S+U
+L-sil+NG N-sil+A
+M-T+A
+M-T+E
+M-T+H
+M-T+I
+M-T+J
+M-T+K
+M-T+L
+M-T+M
+M-T+N M-T+L
+M-T+O
+M-T+P
+M-T+S
+M-T+T
+M-T+U
+K-E+EO
+K-E+EU
+M-U+A
+M-U+E
+M-U+H
+M-U+I
+M-U+J
+M-U+K
+M-U+L
+M-U+M
+M-U+N
+M-U+O
+M-U+P
+M-U+S
+M-U+T M-U+S
+M-U+U M-U+H
+K-E+NG
+A-EO+A
+A-EO+E
+A-EO+H
+A-EO+I
+A-EO+J
+A-EO+K
+A-EO+L
+A-EO+M
+A-EO+N
+A-EO+O
+A-EO+P A-EO+K
+A-EO+S
+A-EO+T
+A-EO+U A-EO+O
+T-sil+A N-sil+A
+T-sil+E N-sil+A
+T-sil+H N-sil+A
+T-sil+I N-sil+A
+T-sil+J N-sil+A
+T-sil+K N-sil+A
+T-sil+L N-sil+A
+T-sil+M N-sil+A
+T-sil+N N-sil+A
+T-sil+O N-sil+A
+T-sil+P N-sil+A
+T-sil+S N-sil+A
+T-sil+T N-sil+A
+T-sil+U N-sil+A
+P-M+sil M+sil
+NG-sil N-sil+A
+U-sil+sil N-sil+A
+P-A+A
+P-A+E
+P-A+H
+P-A+I
+P-A+J
+P-A+K
+P-A+L
+P-A+M
+P-A+N
+P-A+O
+P-A+P
+P-A+S
+P-A+T P-A+K
+P-A+U P-A+O
+O-M+EO
+O-J+sil
+O-M+EU
+M-NG+EO N-NG+EO
+M-NG+EU N-NG+EU
+O-M+NG
+M-NG+NG N-NG+NG
+J-A+EO
+J-A+EU
+J-A+NG
+sil-L+sil
+S-U+EO
+S-U+EU
+S-U+NG
+L-A+sil
+EU-EU+A
+EU-EU+E EU-EU+A
+EU-EU+H EU-EU+A
+EU-EU+I
+EU-EU+J
+EU-EU+K
+EU-EU+L
+EU-EU+M
+EU-EU+N
+EU-EU+O EU-EU+A
+EU-EU+P EU-EU+K
+EU-EU+S
+EU-EU+T EU-EU+S
+EU-EU+U
+EO-K+sil
+N-I+EO
+N-I+EU
+E-L+sil sil-L+sil
+N-I+NG
+sil-EO+sil
+P-E+A
+P-E+E
+P-E+H
+P-E+I
+P-E+J
+P-E+K
+P-E+L
+P-E+M
+P-E+N
+P-E+O
+P-E+P
+P-E+S
+P-E+T
+P-E+U
+A-EU+A EO-EU+A
+A-EU+E EO-EU+A
+A-EU+H EO-EU+A
+A-EU+I
+A-EU+J EO-EU+J
+A-EU+K EO-EU+K
+A-EU+L
+A-EU+M EO-EU+M
+A-EU+N
+A-EU+O EO-EU+A
+A-EU+P EO-EU+K
+A-EU+S EO-EU+S
+A-EU+T EO-EU+S
+A-EU+U EO-EU+U
+T-NG+EO N-NG+EO
+T-NG+EU N-NG+EU
+M-E+EO
+M-E+EU
+NG-L+sil sil-L+sil
+S-EO+sil
+T-NG+NG N-NG+NG
+M-E+NG
+N-T+sil
+L-EU+sil
+P-H+A
+P-H+E
+P-H+H S-H+sil
+P-H+I
+P-H+J S-H+sil
+P-H+K S-H+sil
+P-H+L
+P-H+M S-H+sil
+P-H+N P-H+L
+P-H+O
+P-H+P S-H+sil
+P-H+S P-H+L
+P-H+T P-H+L
+P-H+U P-H+EU
+EU-NG+A
+EU-NG+E
+EU-NG+H
+EU-NG+I
+EU-NG+J
+EU-NG+K
+EU-NG+L
+EU-NG+M
+EU-NG+N EU-NG+M
+EU-NG+O
+EU-NG+P
+EU-NG+S
+EU-NG+T EU-NG+J
+EU-NG+U
+S-A+sil
+P-I+A
+P-I+E
+P-I+H
+P-I+I
+P-I+J
+P-I+K
+P-I+L
+P-I+M
+P-I+N
+P-I+O
+P-I+P
+P-I+S
+L-A+EO
+P-I+T
+P-I+U
+L-A+EU
+L-N+sil T-N+sil
+A-sil+EO N-sil+A
+A-sil+EU N-sil+A
+L-A+NG
+NG-U+EO
+NG-U+EU
+EU-H+sil EU-H+J
+A-sil+NG N-sil+A
+NG-U+NG
+K-I+sil
+P-J+A
+P-J+E
+U-U+EO O-U+EO
+P-J+H
+P-J+I
+P-J+J P-J+sil
+P-J+K P-J+sil
+P-J+L P-J+sil
+P-J+M P-J+sil
+U-U+EU
+P-J+N P-J+sil
+P-J+O
+P-J+P P-J+sil
+P-J+S P-J+sil
+P-J+T P-J+sil
+P-J+U
+U-U+NG
+J-sil N-sil+A
+A-NG+A
+A-NG+E
+A-NG+H
+A-NG+I
+A-NG+J
+A-NG+K
+A-NG+L
+A-NG+M
+A-NG+N
+A-NG+O
+A-NG+P
+A-NG+S
+A-NG+T
+A-NG+U
+P-I+EO
+P-I+EU
+P-K+A
+P-K+E
+P-K+H
+P-K+I
+P-K+J K
+P-K+K
+P-K+L
+P-K+M K+NG
+P-K+N P-K+L
+P-K+O
+P-K+P K
+P-K+S
+P-K+T
+P-K+U
+P-I+NG P-I+N
+I-N+EO
+I-N+EU
+I-N+NG
+P-L+A M-L+A
+P-L+E M-L+E
+P-L+H J-L+H
+P-L+I
+P-L+J J-L+J
+P-L+K J-L+K
+P-L+L J-L+L
+P-L+M J-L+M
+P-L+N J-L+N
+P-L+O M-L+O
+P-L+P J-L+P
+P-L+S J-L+S
+P-L+T J-L+T
+P-L+U M-L+U
+EU-O+EO EO-O+EO
+EU-O+EU EO-O+EO
+S+sil S
+EU-O+NG EO-O+NG
+U-T+sil U-T+NG
+A-K+sil
+P-M+A
+P-M+E J-M+E
+P-M+H J-M+H
+P-M+I J-M+I
+P-M+J J-M+J
+P-M+K M
+P-M+L J-M+L
+P-M+M J-M+M
+P-M+N J-M+N
+P-M+O
+P-M+P J-M+P
+P-M+S J-M+S
+P-M+T M
+P-M+U
+sil-I+EO
+sil-I+EU
+sil-I+NG
+T+EO
+T+EU S-T+EU
+O-E+EO
+O-E+EU
+T+NG T
+O-E+NG
+E-EO+A
+E-EO+E
+E-EO+H
+E-EO+I
+E-EO+J
+E-EO+K
+E-EO+L
+E-EO+M
+E-EO+N
+E-EO+O
+E-EO+P
+E-EO+S
+E-EO+T
+E-EO+U E-EO+O
+H-J+EO
+H-J+EU
+P-N+A
+P-N+E J-N+E
+P-N+H J-N+H
+P-N+I
+P-N+J J-N+J
+P-N+K J-N+K
+S-N+sil T-N+sil
+P-N+L J-N+L
+P-N+M J-N+M
+P-N+N J-N+N
+P-N+O
+P-N+P J-N+P
+P-N+S J-N+S
+P-N+T J-N+T
+P-N+U J-N+O
+H-J+NG J
+EU+EO
+EU+EU
+A-O+EO
+A-O+EU A-O+EO
+EU+NG
+A-O+NG
+P-O+A
+P-O+E
+P-O+H
+P-O+I P-O+E
+P-O+J
+P-O+K
+P-O+L
+P-O+M
+P-O+N
+P-O+O
+P-O+P
+P-O+S
+P-O+T
+P-O+U
+EU-U+sil
+S-M+EO K-M+EO
+S-M+EU
+T-EO
+T-EU
+I-sil+sil N-sil+A
+S-M+NG
+T-NG J-NG
+N-A+EO
+N-A+EU
+P-P+A
+P-P+E
+P-P+H
+P-P+I
+P-P+J P-P+NG
+P-P+K
+P-P+L
+P-P+M P-P+NG
+P-P+N P-P+L
+P-P+O
+P-P+P P-P+K
+P-P+S
+P-P+T
+P-P+U
+J-S+sil S
+N-A+NG
+EU-EO EU-EO+EU
+EU-EU EU-EU+A
+EU-NG EU-NG+U
+I-P+sil
+L-sil+A N-sil+A
+L-sil+E N-sil+A
+L-sil+H N-sil+A
+L-sil+I N-sil+A
+L-sil+J N-sil+A
+L-sil+K N-sil+A
+L-sil+L N-sil+A
+L-sil+M N-sil+A
+L-sil+N N-sil+A
+L-sil+O N-sil+A
+L-sil+P N-sil+A
+L-sil+S N-sil+A
+L-sil+T N-sil+A
+L-sil+U N-sil+A
+H-M+sil M+sil
+J-EU+EO
+J-EU+EU J-EU+EO
+K-N+EO
+K-N+EU
+J-EU+NG
+K-N+NG
+T-EO+sil
+sil-sil+sil N-sil+A
+P-S+A
+P-S+E
+P-S+H P-S+A
+P-S+I
+P-S+J P-S+A
+P-S+K P-S+A
+P-S+L
+P-S+M P-S+A
+P-S+N P-S+L
+P-S+O
+P-S+P P-S+A
+P-S+S
+P-S+T P-S+L
+P-S+U
+EO-A+sil
+A-EU+sil
+E-EU+A E-EU+EO
+E-EU+E E-EU+EO
+E-EU+H E-EU+EO
+E-EU+I
+E-EU+J
+E-EU+K
+E-EU+L
+E-EU+M E-EU+NG
+E-EU+N
+E-EU+O E-EU+EO
+E-EU+P E-EU+K
+E-EU+S
+E-EU+T E-EU+S
+E-EU+U E-EU+EU
+P-T+A
+P-T+E
+P-T+H
+P-T+I
+P-T+J
+P-T+K
+P-T+L
+P-T+M
+P-T+N P-T+L
+P-T+O
+P-T+P P-T+M
+P-T+S
+P-T+T
+P-T+U P-T+O
+J-J+EO H-J+EO
+J-J+EU H-J+EU
+P-U+A
+P-U+E
+P-U+H
+P-U+I
+P-U+J
+P-U+K
+P-U+L
+P-U+M
+P-U+N
+P-U+O
+P-U+P
+P-U+S
+P-U+T
+P-U+U
+J-J+NG J
+NG-M+EO
+NG-M+EU
+NG-M+NG
+P-P+sil
+S-sil+A N-sil+A
+S-sil+E N-sil+A
+S-sil+H N-sil+A
+S-sil+I N-sil+A
+S-sil+J N-sil+A
+S-sil+K N-sil+A
+S-sil+L N-sil+A
+S-sil+M N-sil+A
+S-sil+N N-sil+A
+S-sil+O N-sil+A
+S-sil+P N-sil+A
+S-sil+S N-sil+A
+S-sil+T N-sil+A
+S-sil+U N-sil+A
+U-M+EO
+U-M+EU
+sil-NG+sil K-NG+sil
+EO-P+EO
+EO-P+EU
+S-A+A
+S-A+E
+S-A+H
+S-A+I
+S-A+J
+S-A+K
+S-A+L
+S-A+M
+S-A+N
+S-A+O
+S-A+P
+S-A+S
+S-A+T
+S-A+U
+U-M+NG
+EO-P+NG
+O-M+sil M+sil
+P-A+EO
+P-A+EU P-A+O
+P-A+NG
+N-J+sil
+L-NG+EO N-NG+EO
+L-NG+EU N-NG+EU
+L-NG+NG N-NG+NG
+sil-O+sil
+S-NG+sil K-NG+sil
+E-NG+A
+E-NG+E
+E-NG+H
+E-NG+I
+E-NG+J
+E-NG+K
+E-NG+L
+E-NG+M
+E-NG+N
+E-NG+O
+E-NG+P
+E-NG+S
+E-NG+T E-NG+J
+E-NG+U
+T-I+EO
+T-I+EU
+T-I+NG
+EO-N+sil
+sil-A+EO
+sil-A+EU
+M-N+EO M-N+O
+M-N+EU
+E-O+sil
+sil-A+NG
+L+EO
+L+EU
+EU-sil N-sil+A
+M-N+NG
+L+NG S-L+NG
+S-E+A
+S-E+E
+S-E+H
+S-E+I
+S-E+J
+S-E+K
+S-E+L
+S-E+M
+S-E+N
+S-E+O
+S-E+P
+S-E+S
+S-E+T
+S-E+U S-E+O
+S-E+EO
+S-E+EU
+L-EO
+L-EU
+S-E+NG
+I-EO+A
+I-EO+E
+I-EO+H
+I-EO+I
+I-EO+J
+I-EO+K
+I-EO+L
+I-EO+M
+I-EO+N
+I-EO+O
+I-EO+P
+I-EO+S
+I-EO+T
+I-EO+U I-EO+O
+L-NG J-NG
+NG-O+sil
+L-J+EO
+L-J+EU
+I+sil
+L-J+NG
+U-J+sil
+A-A+sil
+S-NG+EO N-NG+EO
+S-NG+EU N-NG+EU
+E-O+EO
+E-O+EU E-O+EO
+S-NG+NG N-NG+NG
+E-O+NG
+S-H+A
+S-H+E
+S-H+H S-H+sil
+S-H+I
+S-H+J S-H+sil
+S-H+K S-H+sil
+S-H+L P-H+L
+S-H+M S-H+sil
+S-H+N P-H+L
+S-H+O P-H+O
+S-H+P S-H+sil
+S-H+S P-H+L
+S-H+T P-H+L
+S-H+U P-H+EU
+M-T+sil M-T+M
+I-EO+sil
+S-I+A
+S-I+E
+S-I+H
+S-I+I
+S-I+J
+S-I+K
+S-I+L
+S-I+M
+S-I+N
+S-I+O
+S-I+P
+S-I+S
+S-I+T
+S-I+U
+EU-K+sil
+K-L+sil sil-L+sil
+S-J+A
+S-J+E
+S-J+H
+S-J+I
+S-J+J J
+S-J+K J
+S-J+L J
+S-J+M J
+S-J+N J
+S-J+O
+S-J+P J
+S-J+S J
+S-J+T J
+S-J+U
+M-sil N-sil+A
+J-I+sil
+A+A
+A+E
+A+H
+A+I
+A+J
+A+K
+A+L
+A+M
+A+N
+A+O
+A+P
+A+S
+A+T
+A+U A+O
+A-A
+A-E
+A-H A-H+sil
+A-I
+A-J
+A-K
+A-L
+A-M
+A-N
+A-O
+A-P
+A-S
+A-T
+A-U
+O-N+EO
+O-N+EU
+S-K+A
+S-K+E
+S-K+H
+S-K+I
+S-K+J K
+S-K+K P-K+K
+S-K+L
+S-K+M K+NG
+S-K+N S-K+L
+S-K+O
+S-K+P K
+S-K+S
+S-K+T
+S-K+U
+O-N+NG
+H-S+EO
+H-S+EU
+H-S+NG
+EO-sil+A N-sil+A
+EO-sil+E N-sil+A
+EO-sil+H N-sil+A
+EO-sil+I N-sil+A
+EO-sil+J N-sil+A
+EO-sil+K N-sil+A
+EO-sil+L N-sil+A
+EO-sil+M N-sil+A
+EO-sil+N N-sil+A
+EO-sil+O N-sil+A
+EO-sil+P N-sil+A
+EO-sil+S N-sil+A
+EO-sil+T N-sil+A
+EO-sil+U N-sil+A
+S-L+A S-L+EO
+S-L+E
+S-L+H J-L+H
+S-L+I
+S-L+J J-L+J
+S-L+K J-L+K
+S-L+L J-L+L
+S-L+M J-L+M
+S-L+N J-L+N
+S-L+O
+S-L+P J-L+P
+S-L+S J-L+S
+S-L+T J-L+T
+S-L+U
+NG-E+EO
+NG-E+EU
+I-EU+A
+I-EU+E I-EU+A
+I-EU+H I-EU+A
+I-EU+I
+I-EU+J
+I-EU+K
+I-EU+L
+I-EU+M
+I-EU+N
+I-EU+O I-EU+A
+I-EU+P I-EU+K
+I-EU+S
+I-EU+T I-EU+S
+I-EU+U
+NG-E+NG
+A-N+sil
+U-E+EO
+S-M+A
+U-E+EU
+S-M+E
+S-M+H
+S-M+I
+S-M+J
+S-M+K
+S-M+L S-M+NG
+S-M+M
+S-M+N
+S-M+O P-M+O
+S-M+P
+S-M+S
+S-M+T S-M+K
+S-M+U
+EO-H+EO
+EO-H+EU
+E-sil+sil N-sil+A
+U-E+NG
+K-EO+A
+K-EO+E
+K-EO+H
+K-EO+I
+K-EO+J
+K-EO+K
+K-EO+L
+K-EO+M
+T-T+sil P-T+M
+K-EO+N
+K-EO+O
+K-EO+P
+K-EO+S
+K-EO+T
+K-EO+U
+EO-H+NG EU-H+J
+N-J+EO
+N-J+EU
+N-J+NG N-J+sil
+S-N+A
+S-N+E
+S-N+H
+S-N+I
+S-N+J
+S-N+K
+S-N+L
+S-N+M
+S-N+N
+S-N+O
+S-N+P
+S-N+S
+S-N+T
+S-N+U
+E+A
+E+E P-E+E
+E+H P-E+H
+E+I P-E+I
+E+J
+E+K
+E+L P-E+L
+E+M P-E+M
+E+N P-E+N
+E+O P-E+O
+E+P
+E+S
+E+T
+E+U
+E-A
+E-E
+E-H
+E-I
+E-J
+E-K
+E-L
+E-M
+E-N
+E-O E-O+EO
+E-P
+E-S E-S+sil
+E-T
+E-U
+H-NG+sil
+S-O+A
+S-O+E
+S-O+H
+S-O+I
+S-O+J
+S-O+K
+S-O+L
+S-O+M
+S-O+N
+S-O+O
+S-O+P
+S-O+S
+S-O+T S-O+P
+S-O+U
+T-NG+sil K-NG+sil
+sil-sil+EO N-sil+A
+sil-sil+EU N-sil+A
+sil-sil+NG N-sil+A
+T-A+EO
+T-A+EU
+T-A+NG
+S-P+A
+S-P+E
+S-P+H
+S-P+I
+S-P+J
+S-P+K P
+S-P+L
+S-P+M S-P+J
+S-P+N S-P+L
+S-P+O
+S-P+P P
+S-P+S
+S-P+T
+S-P+U
+EO-sil+EO N-sil+A
+EO-sil+EU N-sil+A
+I-A+A
+I-A+E
+I-A+H
+I-A+I
+I-A+J
+I-A+K
+I-A+L
+I-A+M
+I-A+N
+I-A+O
+I-A+P
+I-A+S
+I-A+T
+I-A+U
+EO-sil+NG N-sil+A
+N-sil+sil N-sil+A
+I-S+sil
+I-NG+A
+I-NG+E
+I-NG+H
+I-NG+I I-NG+E
+I-NG+J
+I-NG+K
+I-NG+L I-NG+H
+I-NG+M
+I-NG+N I-NG+M
+I-NG+O
+I-NG+P I-NG+H
+I-NG+S I-NG+H
+I-NG+T I-NG+H
+I-NG+U
+S-sil+EO N-sil+A
+S-sil+EU N-sil+A
+H-P+sil P+sil
+H+A
+H+E
+H+H H
+H+I
+H+J H
+H+K H
+H+L
+H+M H
+H+N H+L
+H+O
+H+P H
+H+S H+L
+H+T H+L
+H+U
+S-sil+NG N-sil+A
+H-A
+H-E
+H-H S-H+sil
+H-I H-I+EU
+H-J J
+H-K K
+H-L L
+H-M
+H-N N
+H-O O
+H-P P
+H-S H-S+NG
+H-T T
+H-U
+sil-E+sil
+EO-NG+EO
+EO-NG+EU
+J-S+EO S+EO
+J-S+EU S+EU
+EO-NG+NG EO-NG+M
+J-S+NG S
+I+A
+I+E
+I+H
+I+I
+I+J
+I+K
+I+L
+I+M
+I+N
+I+O
+I+P
+I+S
+I+T
+I+U
+I-A
+I-E
+I-H
+I-I
+I-J I-J+sil
+I-K
+I-L
+I-M
+I-N
+I-O
+I-P
+I-S I-S+sil
+I-T
+I-U
+I-EU+EO I-EU+A
+I-EU+EU I-EU+U
+S-S+A
+S-S+E
+S-S+H
+S-S+I
+S-S+J S-S+H
+S-S+K S-S+H
+S-S+L
+S-S+M S-S+H
+S-S+N S-S+L
+S-S+O
+S-S+P S-S+H
+S-S+S
+S-S+T S-S+L
+S-S+U
+I-EU+NG I-EU+M
+K-EU+A
+K-EU+E K-EU+EU
+K-EU+H
+K-EU+I
+K-EU+J
+K-EU+K
+K-EU+L
+K-EU+M
+K-EU+N
+K-EU+O K-EU
+K-EU+P
+K-EU+S
+K-EU+T
+K-EU+U
+J+A S-J+A
+J+E S-J+E
+J+H J-J+H
+J+I
+J+J J
+J+K J
+J+L J
+J+M J
+J+N J
+J+O J-J+O
+J+P J
+J+S J
+J+T J
+J+U J-J+U
+E-E+sil
+J-A
+J-E
+J-H M-H+J
+J-I
+J-J J
+J-K J-K+J
+J-L L
+J-M M
+J-N N
+J-O J-O+P
+J-P J-P+K
+J-S S
+J-T J-T+M
+J-U J-U+P
+S-T+A
+S-T+E
+S-T+H
+S-T+I
+S-T+J
+S-T+K
+S-T+L
+S-T+M T
+S-T+N S-T+L
+S-T+O
+S-T+P
+S-T+S
+S-T+T
+S-T+U
+M-EO+A
+M-EO+E
+M-EO+H
+M-EO+I
+M-EO+J
+M-EO+K
+M-EO+L
+M-EO+M
+M-EO+N
+M-EO+O
+M-EO+P
+M-EO+S
+M-EO+T
+M-EO+U M-EO+O
+sil-EO+EO
+sil-EO+EU
+P-J+EO
+P-J+EU
+sil-EO+NG
+A-sil+A N-sil+A
+A-sil+E N-sil+A
+A-sil+H N-sil+A
+A-sil+I N-sil+A
+A-sil+J N-sil+A
+A-sil+K N-sil+A
+A-sil+L N-sil+A
+A-sil+M N-sil+A
+A-sil+N N-sil+A
+A-sil+O N-sil+A
+A-sil+P N-sil+A
+A-sil+S N-sil+A
+A-sil+T N-sil+A
+A-sil+U N-sil+A
+I-E+A
+I-E+E
+I-E+H
+I-E+I
+I-E+J
+I-E+K
+I-E+L
+I-E+M
+I-E+N
+I-E+O
+I-E+P
+I-E+S
+I-E+T
+I-E+U I-E
+K+A S-K+A
+K+E
+K+H P-K+H
+K+I
+K+J K
+K+K P-K+K
+K+L S-K+L
+K+M K+NG
+K+N S-K+L
+K+O S-K+O
+K+P K
+K+S S-K+S
+K+T S-K+T
+K+U
+P-J+NG P-J+sil
+K-A
+K-E
+K-H
+K-I
+K-J
+K-K
+K-L L
+K-M M
+K-N N
+K-O
+K-P
+K-S K-S+sil
+K-T
+K-U
+J-EO+sil
+S-U+A
+S-U+E
+S-U+H
+S-U+I
+S-U+J
+S-U+K
+S-U+L
+S-U+M
+S-U+N S-U+L
+S-U+O
+S-U+P
+I-O+EO I-O
+S-U+S
+S-U+T
+S-U+U S-U+O
+I-O+EU I-O
+I-O+NG
+L+A M-L+A
+L+E M-L+E
+L+H J-L+H
+L+I P-L+I
+L+J J-L+J
+L+K J-L+K
+L+L J-L+L
+L+M J-L+M
+L+N J-L+N
+L+O M-L+O
+L+P J-L+P
+L+S J-L+S
+L+T J-L+T
+L+U M-L+U
+L-A
+L-E
+L-H L-H+NG
+L-I
+L-J L-J+NG
+L-K
+L-L
+L-M
+L-N
+L-O
+L-P
+L-S
+L-T J-T+M
+L-U
+EU-P+EO
+P-S+sil P-S+A
+EU-P+EU
+E-EO+EO E-EO+I
+E-EO+EU E-EO+I
+EU-P+NG EU-P+J
+NG-E+sil
+E-EO+NG
+O-P+sil
+M+A P-M+A
+M+E J-M+E
+M+H J-M+H
+sil-J+EO
+M+I J-M+I
+M+J J-M+J
+M+K M
+M+L J-M+L
+M+M J-M+M
+M+N J-M+N
+sil-J+EU
+M+O P-M+O
+M+P J-M+P
+M+S J-M+S
+M+T M
+M+U P-M+U
+M-A
+M-E
+M-H M-H+J
+M-I M-I+I
+M-J M-J+J
+M-K M-K+J
+M-L L
+M-M M-M+K
+M-N
+M-O
+M-P M-P+K
+M-S M-S+H
+M-T M-T+M
+M-U M-U+H
+sil-J+NG
+U+EO
+U+EU
+N-M+sil
+U+NG
+H-K+EO K+EO
+H-K+EU K+EU
+I-H+A
+I-H+E
+I-H+H I-H
+I-H+I
+I-H+J I-H
+I-H+K I-H
+I-H+L I-H+I
+I-H+M I-H
+I-H+N I-H+I
+I-H+O EU-H+O
+I-H+P I-H
+I-H+S I-H+I
+I-H+T I-H+I
+I-H+U EU-H+U
+N+A P-N+A
+N+E J-N+E
+N+H J-N+H
+N+I J-N+I
+N+J J-N+J
+N+K J-N+K
+N+L J-N+L
+N+M J-N+M
+N+N J-N+N
+N+O P-N+O
+N+P J-N+P
+N+S J-N+S
+N+T J-N+T
+N+U J-N+O
+N-A
+N-E
+N-H L-H+NG
+N-I
+N-J N-J+sil
+N-K M-K+J
+N-L
+N-M S-M+K
+N-N
+N-O
+N-P
+N-S
+N-T N-T+sil
+N-U
+P-EU+EO
+P-EU+EU P-EU+EO
+H-K+NG K+NG
+M-J+sil M-J+J
+A-P+EO
+P-EU+NG
+K-NG+A
+K-NG+E
+A-P+EU
+K-NG+H E-NG+H
+K-NG+I
+K-NG+J E-NG+J
+K-NG+K E-NG+K
+K-NG+L E-NG+L
+K-NG+M
+K-NG+N
+K-NG+O E-NG+O
+K-NG+P E-NG+P
+K-NG+S E-NG+S
+K-NG+T E-NG+J
+K-NG+U E-NG+U
+NG-EO+EO
+NG-EO+EU
+A-P+NG
+NG-EO+NG
+I-I+A
+I-I+E
+I-I+H
+I-I+I
+I-I+J
+I-I+K
+I-I+L
+I-I+M
+I-I+N
+I-I+O
+I-I+P
+I-I+S
+I-I+T
+I-I+U
+O+A
+O+E
+O+H
+O+I
+O+J
+O+K
+O+L
+O+M
+O+N
+O+O
+O+P
+O+S
+O+T
+O+U O+O
+O-A
+O-E
+O-H
+O-I
+O-J O-J+sil
+O-K
+O-L
+O-M
+O-N
+O-O EU-O+M
+O-P
+O-S
+O-T
+O-U
+S-N+EO
+S-N+EU
+U-EO
+U-EU EU-EU+A
+S-N+NG
+EU-A+sil EO-A+sil
+U-NG
+L-S+EO
+L-S+EU
+sil-EU+sil
+I-J+A
+I-J+E
+I-J+H
+I-J+I
+I-J+J I-J+sil
+I-J+K I-J+sil
+I-J+L I-J+sil
+I-J+M I-J+sil
+I-J+N I-J+sil
+I-J+O
+I-J+P I-J+sil
+I-J+S I-J+sil
+L-S+NG L-S
+I-J+T I-J+sil
+I-J+U
+P+A S-P+A
+P+E S-P+E
+P+H S-P+H
+P+I S-P+I
+P+J S-P+J
+P+K P
+P+L S-P+L
+P+M S-P+J
+P+N S-P+L
+P+O S-P+O
+P+P P
+P+S S-P+S
+P+T P-P+T
+P+U S-P+U
+P-A
+P-E
+P-H S-H+sil
+P-I P-I+EU
+P-J P-J+sil
+P-K K
+P-L L
+P-M M
+P-N N
+P-O
+P-P P-P+K
+P-S P-S+A
+P-T P-T+M
+P-U
+M-EU+A
+M-EU+E M-EU+A
+M-EU+H M-EU+A
+M-EU+I
+M-EU+J
+M-EU+K M-EU+J
+M-EU+L
+M-EU+M
+M-EU+N
+M-EU+O M-EU+A
+M-EU+P M-EU+J
+M-EU+S
+M-EU+T M-EU+S
+M-EU+U
+I-K+A
+I-K+E
+I-K+H
+I-K+I
+I-K+J
+I-K+K
+I-K+L
+I-K+M
+I-K+N I-K+L
+I-K+O
+I-K+P
+I-K+S
+I-K+T
+I-K+U
+I-NG+sil
+A-NG+EO
+A-NG+EU
+O-EO+A
+O-EO+E
+O-EO+H
+O-EO+I O-EO+E
+O-EO+J
+O-EO+K
+O-EO+L
+O-EO+M
+O-EO+N A-EO+N
+O-EO+O O-EO+A
+O-EO+P
+O-EO+S
+O-EO+T
+O-EO+U O-EO+A
+A-NG+NG A-NG+M
+I-L+A
+I-L+E
+I-L+H
+I-L+I
+I-L+J
+I-L+K
+I-L+L
+I-L+M
+I-L+N
+I-L+O
+I-L+P
+I-L+S
+I-L+T
+I-L+U I-L+O
+S-EU+sil
+K-O+EO
+K-O+EU
+L+sil sil-L+sil
+U-M+sil
+K-O+NG
+I-M+A
+I-M+E
+I-M+H
+I-M+I
+I-M+J
+I-M+K I-M
+I-M+L I-M+NG
+I-M+M
+I-M+N
+I-M+O
+I-M+P
+I-M+S
+I-M+T I-M
+I-M+U
+S+A J-S+A
+S+E J-S+E
+S+H S
+S+I J-S+I
+S+J S
+S+K S
+S+L S
+S+M S
+S+N S
+S+O J-S+O
+S+P S
+S+S J-S+S
+S+T S
+S+U J-S+U
+S-A
+S-E
+S-H S-H+sil
+S-I
+S-J J
+S-K K
+S-L N-L
+S-M S-M+K
+S-N L-N
+S-O
+S-P P
+S-S S-S+H
+S-T T
+S-U S-U+O
+T-J+sil P-J+sil
+H-sil+EO N-sil+A
+H-sil+EU N-sil+A
+H-sil+NG N-sil+A
+I-N+A
+I-N+E
+I-N+H
+I-N+I
+I-N+J
+I-N+K
+I-N+L
+I-N+M I-N
+I-N+N
+I-N+O
+I-N+P
+I-N+S
+I-N+T
+I-N+U
+T+A
+T+E
+T+H S-T+H
+T+I S-T+I
+T+J S-T+J
+T+K S-T+K
+T+L S-T+L
+T+M T
+T+N S-T+L
+T+O S-T+O
+T+P S-T+P
+T+S S-T+S
+T+T S-T+T
+T+U S-T+U
+T-A
+T-E
+T-H S-H+sil
+T-I T-I+EU
+T-J P-J+sil
+T-K K
+T-L N-L
+T-M S-M+K
+T-N L-N
+T-O
+T-P P-P+K
+T-S S-S+H
+T-T P-T+M
+T-U
+L-T+sil J-T+M
+J-K+EO
+J-K+EU
+I-O+A
+I-O+E
+I-O+H
+I-O+I
+I-O+J
+I-O+K
+I-O+L
+I-O+M I-O
+I-O+N
+I-O+O
+I-O+P
+I-O+S
+I-O+T
+I-O+U
+U+A
+U+E
+U+H
+U+I
+U+J
+U+K
+U+L
+U+M
+U+N
+U+O
+U+P
+U+S
+U+T U+S
+U+U U
+U-A O-A
+U-E
+U-H O-H
+U-I
+U-J U-J+sil
+U-K
+U-L
+U-M
+U-N
+U-O EU-O+M
+U-P
+U-S
+U-T U-T+NG
+U-U
+EU-N+sil
+J-K+NG J-K+M
+M-NG+A K-NG+A
+M-NG+E K-NG+E
+M-NG+H E-NG+H
+M-NG+I K-NG+I
+M-NG+J E-NG+J
+M-NG+K E-NG+K
+M-NG+L E-NG+L
+K-O+sil
+M-NG+M K-NG+M
+M-NG+N K-NG+N
+M-NG+O E-NG+O
+M-NG+P E-NG+P
+M-NG+S E-NG+S
+M-NG+T E-NG+J
+M-NG+U E-NG+U
+NG-N+EO
+NG-N+EU
+NG-N+NG
+I-P+A
+I-P+E
+I-P+H
+I-P+I
+I-P+J
+I-P+K
+I-P+L
+I-P+M
+I-P+N
+I-P+O
+I-P+P
+I-P+S
+I-P+T
+I-P+U
+P-sil N-sil+A
+J-L+sil sil-L+sil
+U-N+EO
+U-N+EU
+U-N+NG
+N-S+EO
+N-S+EU
+I-I+sil
+N-S+NG N-S
+O-EU+A
+O-EU+E
+O-EU+H O-EU+A
+O-EU+I
+O-EU+J
+O-EU+K
+O-EU+L
+O-EU+M
+O-EU+N
+O-EU+O O-EU+A
+O-EU+P O-EU+K
+O-EU+S
+O-EU+T O-EU+S
+O-EU+U
+EU-H+EO EO-H+EO
+EU-H+EU EO-H+EU
+EU-H+NG EU-H+J
+T-J+EO
+T-J+EU P-J+EU
+I-S+A
+I-S+E
+I-S+H
+I-S+I
+I-S+J I-S+sil
+I-S+K
+I-S+L I-S+sil
+I-S+M I-S+sil
+I-S+N I-S+sil
+I-S+O
+I-S+P I-S+K
+I-S+S
+I-S+T I-S+K
+I-S+U
+T-J+NG P-J+sil
+M-O+EO
+M-O+EU M-O+EO
+K-sil+sil N-sil+A
+M+EO K-M+EO
+M+EU K-M+EU
+M-O+NG
+S-T+sil T
+M+NG J-M+L
+NG-EO+sil
+I-T+A
+I-T+E
+I-T+H
+I-T+I
+I-T+J
+I-T+K
+I-T+L
+I-T+M I-T
+I-T+N
+I-T+O
+I-T+P
+I-T+S
+I-T+T
+I-T+U
+A-H+EO
+A-H+EU
+A-H+NG A-H+sil
+I-U+A
+I-U+E
+I-U+H
+I-U+I
+I-U+J
+I-U+K
+I-U+L
+I-U+M
+I-U+N
+I-U+O
+I-U+P
+I-U+S
+I-U+T
+I-U+U
+M-EO
+M-EU M-EU+A
+M-NG J-NG
+P-I+sil
+L-K+EO
+L-K+EU
+L-K+NG
+L-A+A
+L-A+E
+L-A+H
+L-A+I
+L-A+J L-A
+L-A+K
+L-A+L
+L-A+M
+L-A+N
+L-A+O
+L-A+P
+L-A+S
+L-A+T
+L-A+U L-A+O
+E-P+EO
+O-NG+A
+O-NG+E
+E-P+EU
+O-NG+H
+O-NG+I
+O-NG+J
+O-NG+K
+O-NG+L
+O-NG+M
+O-NG+N
+O-NG+O
+O-NG+P
+O-NG+S
+O-NG+T O-NG+P
+O-NG+U
+E-P+NG
+T-sil+sil N-sil+A
+EU-sil+A N-sil+A
+EU-sil+E N-sil+A
+EU-sil+H N-sil+A
+EU-sil+I N-sil+A
+EU-sil+J N-sil+A
+EU-sil+K N-sil+A
+EU-sil+L N-sil+A
+EU-sil+M N-sil+A
+EU-sil+N N-sil+A
+EU-sil+O N-sil+A
+EU-sil+P N-sil+A
+EU-sil+S N-sil+A
+EU-sil+T N-sil+A
+EU-sil+U N-sil+A
+J-NG+sil K-NG+sil
+H-S+sil H-S+NG
+P-S+EO P-S+O
+P-S+EU
+sil-H+sil sil-H+EO
+P-S+NG P-S+A
+T-EU+sil
+H-EU+EO
+H-EU+EU H-EU+EO
+E-H+sil E-H
+S-EO+A
+S-EO+E S-EO+A
+S-EO+H
+S-EO+I S-EO+A
+S-EO+J
+S-EO+K
+S-EO+L
+S-EO+M
+S-EO+N
+S-EO+O S-EO
+S-EO+P S-EO+K
+H-EU+NG
+S-EO+S
+S-EO+T
+S-EO+U
+I-sil+EO N-sil+A
+I-sil+EU N-sil+A
+I-sil+NG N-sil+A
+sil-S+EO
+sil-S+EU
+sil-S+NG
+O-O+EO
+O-O+EU O-O+EO
+L-E+A
+L-E+E
+L-E+H
+L-E+I
+L-E+J
+L-E+K
+L-E+L
+L-E+M
+L-E+N
+L-E+O
+L-E+P
+L-E+S
+L-E+T
+L-E+U
+O-O+NG EO-O+NG
+H-T+EO
+H-T+EU
+H-T+NG T
+NG-H+sil
+sil+sil N-sil+A
+O-S+sil O-S
+EO-I+EO
+EO-I+EU
+EO-I+NG
+N-K+EO
+N-K+EU
+N-P+sil
+N-K+NG M-K+M
+L-H+A
+L-H+E
+L-H+H
+L-H+I
+L-H+J L-H+NG
+L-H+K L-H+NG
+L-H+L L-H+I
+L-H+M L-H+NG
+L-H+N L-H+I
+L-H+O M-H+O
+L-H+P L-H+NG
+L-H+S L-H+I
+L-H+T L-H+I
+L-H+U M-H+U
+sil-U+sil
+EU-NG+EO
+EU-NG+EU
+M-M+sil
+EU-NG+NG EU-NG+M
+O-EU+EO O-EU+A
+O-EU+EU O-EU+U
+L-I+A
+L-I+E
+L-I+H
+L-I+I
+L-I+J
+L-I+K L-I+J
+L-I+L
+L-I+M
+L-I+N
+L-I+O
+L-I+P
+L-I+S
+L-I+T
+L-I+U
+L-J+sil L-J+NG
+O-EU+NG
+EO-T+sil
+E-U+sil
+K-E+sil
+L-J+A
+L-J+E J-J+E
+L-J+H
+L-J+I J-J+I
+L-J+J L-J+NG
+L-J+K L-J+NG
+L-J+L L-J+NG
+L-J+M L-J+NG
+L-J+N L-J+NG
+L-J+O
+L-J+P L-J+NG
+L-J+S L-J+NG
+L-J+T L-J+NG
+L-J+U S-J+U
+S-EU+A
+S-EU+E
+S-EU+H
+S-EU+I
+S-EU+J
+S-EU+K
+S-EU+L
+S-EU+M
+S-EU+N
+S-EU+O S-EU+A
+S-EU+P S-EU+K
+S-EU+S S-EU+H
+S-EU+T
+S-EU+U
+E+EO
+E+EU
+NG-EO+A
+NG-EO+E
+NG-EO+H
+NG-EO+I NG-EO+EU
+NG-EO+J
+NG-EO+K
+NG-EO+L
+NG-EO+M
+NG-EO+N NG-EO+L
+NG-EO+O
+NG-EO+P
+NG-EO+S
+NG-EO+T
+NG-EO+U NG-EO+O
+E+NG
+L-K+A
+L-K+E
+L-K+H
+L-K+I
+L-K+J L-K
+L-K+K
+L-K+L J-K+L
+L-K+M L-K+NG
+L-K+N J-K+L
+L-K+O
+L-K+P L-K
+L-K+S J-K+S
+L-K+T J-K+T
+L-K+U
+U-EO+A U-EO
+U-EO+E
+U-EO+H
+U-EO+I U-EO+E
+U-EO+J
+U-EO+K
+U-EO+L
+U-EO+M
+U-EO+N
+U-EO+O U-EO
+U-EO+P
+U-EO+S
+U-EO+T
+U-EO+U U-EO
+K-EO+EO K-EO
+L-L+A
+K-EO+EU
+L-L+E
+L-L+H J-L+H
+L-L+I
+L-L+J J-L+J
+L-L+K J-L+K
+L-L+L J-L+L
+L-L+M J-L+M
+L-L+N J-L+N
+L-L+O S-L+O
+L-L+P J-L+P
+L-L+S J-L+S
+L-L+T J-L+T
+L-L+U
+NG-U+sil
+K-EO+NG
+O+sil
+E-EO
+E-EU E-EU+EO
+J-T+EO
+J-T+EU
+U-P+sil
+E-NG J-NG
+J-T+NG J-T+M
+L-M+A
+L-M+E
+L-M+H
+L-M+I
+L-M+J
+L-M+K L-M
+L-M+L
+L-M+M
+L-M+N
+L-M+O
+L-M+P
+L-M+S
+L-M+T L-M
+L-M+U
+P-EO+sil
+E-H+EO
+E-H+EU
+T-M+sil N-M+sil
+E-H+NG E-H
+L-N+A
+L-N+E
+L-N+H S-N+H
+L-N+I
+L-N+J S-N+J
+L-N+K S-N+K
+S-J+sil J
+L-N+L S-N+L
+L-N+M S-N+M
+L-N+N S-N+N
+L-N+O
+L-N+P S-N+P
+L-N+S S-N+S
+L-N+T S-N+T
+L-N+U
+P-K+EO K+EO
+P-K+EU K+EU
+I-EU+sil
+P-K+NG K+NG
+L-O+A
+L-O+E
+L-O+H
+L-O+I
+L-O+J
+L-O+K
+L-O+L
+L-O+M
+L-O+N
+L-O+O
+L-O+P
+L-O+S
+L-O+T
+L-O+U L-O+H
+I-P+EO
+S-NG+A K-NG+A
+S-NG+E K-NG+E
+I-P+EU
+S-NG+H E-NG+H
+S-NG+I K-NG+I
+S-NG+J E-NG+J
+S-NG+K E-NG+K
+S-NG+L E-NG+L
+S-NG+M K-NG+M
+S-NG+N K-NG+N
+S-NG+O E-NG+O
+S-NG+P E-NG+P
+S-NG+S E-NG+S
+S-NG+T E-NG+J
+S-NG+U E-NG+U
+I-P+NG I-P+M
+L-P+A
+L-P+E
+L-P+H
+L-P+I
+L-P+J
+L-P+K L-P
+L-P+L
+L-P+M L-P+J
+L-P+N L-P+L
+L-P+O
+L-P+P L-P
+L-P+S
+L-P+T
+L-P+U
+S-sil N-sil+A
+J-O+sil
+T-S+EO
+T-S+EU
+NG-EU+A NG-EU+EO
+NG-NG+sil K-NG+sil
+NG-EU+E NG-EU+EO
+NG-EU+H NG-EU+EO
+NG-EU+I
+NG-EU+J
+NG-EU+K
+NG-EU+L
+NG-EU+M
+NG-EU+N
+NG-EU+O NG-EU+EO
+NG-EU+P NG-EU+K
+NG-EU+S
+NG-EU+T NG-EU+S
+NG-EU+U NG-EU+EU
+T-S+NG S-S+H
+sil-K+EO
+sil-K+EU
+sil-A+A
+sil-A+E
+sil-A+H
+sil-A+I
+sil-A+J
+sil-A+K
+sil-A+L
+sil-A+M
+sil-A+N
+sil-A+O
+sil-A+P
+sil-A+S
+sil-A+T
+sil-A+U sil-A+O
+I-L+sil
+sil-K+NG
+U-EU+A EU-EU+A
+U-EU+E EU-EU+A
+U-EU+H EU-EU+A
+U-EU+I
+U-EU+J EU-EU+J
+U-EU+K EU-EU+K
+U-EU+L
+U-EU+M
+U-EU+N
+U-EU+O EU-EU+A
+U-EU+P EU-EU+K
+U-EU+S EU-EU+S
+U-EU+T EU-EU+S
+U-EU+U EU-EU+U
+H-I+sil
+H-L+EO L+EO
+H-L+EU L+EU
+H-L+NG S-L+NG
+A-T+sil
+S-O+EO S-O
+S-O+EU S-O
+L-S+A
+L-S+E
+L-S+H
+L-S+I
+L-S+J L-S
+L-S+K
+L-S+L L-S
+L-S+M L-S
+L-S+N L-S
+L-S+O
+L-S+P L-S+K
+L-S+S
+L-S+T L-S+K
+L-S+U
+S-O+NG
+EO-A+EO
+EO-A+EU
+L-T+EO
+L-T+EU J-T+EU
+EO-A+NG
+L-T+NG J-T+M
+L-T+A
+L-T+E
+L-T+H J-T+H
+L-T+I J-T+I
+L-T+J J-T+J
+L-T+K J-T+K
+L-T+L J-T+L
+L-T+M J-T+M
+L-T+N J-T+L
+L-T+O J-T+O
+L-T+P J-T+P
+L-T+S J-T+S
+L-T+T J-T+T
+L-T+U J-T+U
+sil-E+A
+sil-E+E
+sil-E+H
+sil-E+I
+sil-E+J
+sil-E+K
+sil-E+L
+sil-E+M
+sil-E+N
+sil-E+O
+sil-E+P
+sil-E+S
+sil-E+T
+sil-E+U
+L-U+A
+L-U+E
+L-U+H
+L-U+I
+L-U+J
+L-U+K
+L-U+L
+L-U+M L-U
+L-U+N
+L-U+O L-U
+L-U+P
+L-U+S
+L-U+T
+L-U+U L-U
+NG-NG+A K-NG+A
+NG-NG+E K-NG+E
+NG-NG+H E-NG+H
+NG-NG+I K-NG+I
+NG-NG+J E-NG+J
+NG-NG+K E-NG+K
+NG-NG+L E-NG+L
+NG-NG+M K-NG+M
+NG-NG+N K-NG+N
+NG-NG+O E-NG+O
+NG-NG+P E-NG+P
+NG-NG+S E-NG+S
+NG-NG+T E-NG+J
+NG-NG+U E-NG+U
+P-L+sil sil-L+sil
+K-P+EO
+U-NG+A
+U-NG+E
+K-P+EU
+U-NG+H
+U-NG+I
+U-NG+J
+U-NG+K
+U-NG+L
+U-NG+M U-NG+NG
+U-NG+N U-NG+NG
+U-NG+O
+U-NG+P U-NG+K
+U-NG+S
+U-NG+T
+U-NG+U
+K-P+NG
+O-A+A
+O-A+E
+O-A+H
+O-A+I
+O-A+J
+O-A+K
+O-A+L
+O-A+M
+O-A+N
+O-A+O
+O-A+P
+O-A+S
+O-A+T
+O-A+U
+O-I+sil
+sil-K+sil
+sil-H+A
+sil-H+E
+sil-H+H sil-H+EO
+sil-H+I
+sil-H+J sil-H+EO
+sil-H+K sil-H+EO
+sil-H+L
+sil-H+M sil-H+EO
+sil-H+N sil-H+L
+sil-H+O
+sil-H+P sil-H+EO
+sil-H+S sil-H+L
+sil-H+T sil-H+L
+sil-H+U sil-H+EU
+J-L+EO NG-L+EO
+J-L+EU NG-L+EU
+sil-I+A
+sil-I+E
+sil-I+H
+sil-I+I
+sil-I+J
+sil-I+K
+sil-I+L
+sil-I+M
+sil-I+N
+sil-I+O
+sil-I+P
+sil-I+S
+sil-I+T
+sil-I+U
+J-L+NG S-L+NG
+EO-J+sil
+NG-O+EO
+NG-O+EU NG-O+EO
+E-K+sil
+NG-O+NG
+sil N-sil+A
+sil-J+A
+sil-J+E
+sil-J+H sil-J+NG
+sil-J+I
+sil-J+J sil-J+NG
+sil-J+K sil-J+NG
+sil-J+L sil-J+NG
+sil-J+M sil-J+NG
+sil-J+N sil-J+NG
+sil-J+O
+sil-J+P sil-J+NG
+sil-J+S sil-J+NG
+sil-J+T sil-J+NG
+sil-J+U
+U-O+EO O-O+EO
+U-O+EU O-O+EO
+U-O+NG EO-O+NG
+O-E+A
+O-E+E
+O-E+H
+O-E+I
+O-E+J
+O-E+K
+O-E+L
+O-E+M
+O-E+N
+O-E+O
+O-E+P
+O-E+S
+O-E+T
+O-E+U
+N-T+EO
+N-T+EU
+J-EU+sil
+N-T+NG N-T+sil
+sil-K+A
+sil-K+E
+sil-K+H
+sil-K+I
+sil-K+J
+sil-K+K
+sil-K+L
+sil-K+M sil-K+NG
+sil-K+N sil-K+L
+sil-K+O
+sil-K+P sil-K+J
+sil-K+S
+sil-K+T
+sil-K+U
+I-H+EO
+I-H+EU
+I-H+NG I-H
+sil-L+A M-L+A
+sil-L+E M-L+E
+sil-L+H J-L+H
+sil-L+I
+sil-L+J J-L+J
+sil-L+K J-L+K
+sil-L+L J-L+L
+sil-L+M J-L+M
+sil-L+N J-L+N
+sil-L+O M-L+O
+sil-L+P J-L+P
+sil-L+S J-L+S
+sil-L+T J-L+T
+sil-L+U
+NG-K+sil
+E+sil
+EU-I+EO
+EU-I+EU
+EU-I+NG EU-I+N
+T-K+EO
+T-K+EU K+EU
+T-K+NG K+NG
+sil-M+A
+sil-M+E
+sil-M+H
+sil-M+I
+sil-M+J
+sil-M+K
+sil-M+L
+sil-M+M
+sil-M+N
+sil-M+O
+sil-M+P
+sil-M+S
+sil-M+T sil-M+K
+sil-M+U
+N-S+sil N-S
+M-P+EO
+M-P+EU
+N+EO P-N+O
+N+EU
+M-P+NG M-P+J
+O-H+A
+O-H+E
+O-H+H O-H
+O-H+I
+O-H+J O-H
+O-H+K O-H
+O-H+L
+O-H+M O-H
+O-H+N O-H+L
+O-H+O
+O-H+P O-H
+O-H+S O-H+L
+O-H+T O-H+L
+O-H+U
+N+NG K-N+NG
+M-P+sil
+sil-N+A
+sil-N+E
+sil-N+H
+sil-N+I
+sil-N+J
+sil-N+K
+sil-N+L
+sil-N+M
+sil-N+N
+sil-N+O
+sil-N+P
+sil-N+S
+sil-N+T
+sil-N+U
+EO+EO
+EO+EU EO
+A-I+EO
+A-I+EU
+O-I+A
+O-I+E
+O-I+H
+O-I+I
+O-I+J
+O-I+K O-I+H
+O-I+L
+O-I+M
+O-I+N
+O-I+O
+O-I+P
+O-I+S
+O-I+T
+O-I+U
+L-M+sil
+EO+NG
+A-I+NG
+sil-O+A
+sil-O+E
+sil-O+H
+sil-O+I
+sil-O+J
+sil-O+K
+sil-O+L
+sil-O+M
+sil-O+N
+sil-O+O
+sil-O+P
+sil-O+S
+sil-O+T
+sil-O+U sil-O+O
+N-EU+EO
+N-EU+EU
+K-H+sil K-H
+P-NG+sil K-NG+sil
+N-EU+NG
+N-EO
+N-EU
+O-J+A
+O-J+E
+O-J+H
+O-J+I
+O-J+J O-J+sil
+O-J+K O-J+sil
+O-J+L O-J+sil
+O-J+M O-J+sil
+O-J+N O-J+sil
+O-J+O
+O-J+P O-J+sil
+O-J+S O-J+sil
+O-J+T O-J+sil
+O-J+U
+N-NG J-NG
+L-L+EO L-L+A
+L-L+EU
+I-sil N-sil+A
+sil-P+A
+sil-P+E
+sil-P+H sil-P+NG
+sil-P+I
+sil-P+J sil-P+NG
+sil-P+K sil-P+NG
+sil-P+L sil-P+NG
+J-E+sil
+sil-P+M sil-P+NG
+sil-P+N sil-P+NG
+sil-P+O
+sil-P+P sil-P+NG
+sil-P+S sil-P+NG
+sil-P+T sil-P+NG
+sil-P+U
+L-L+NG S-L+NG
+EO-EO
+EO-EU EO-EU+A
+O-K+A
+O-K+E
+O-K+H
+O-K+I
+O-K+J
+O-K+K
+O-K+L
+O-K+M
+O-K+N O-K+L
+O-K+O
+O-K+P
+O-K+S
+O-K+T O-K+J
+O-K+U
+EO-NG
+O-L+A
+O-L+E
+O-L+H
+O-L+I
+O-L+J
+O-L+K
+O-L+L
+O-L+M
+O-L+N O-L+L
+O-L+O
+O-L+P
+O-L+S
+O-L+T
+O-L+U O-L+EU
+P-T+EO
+P-T+EU P-T+I
+O-sil+EO N-sil+A
+O-sil+EU N-sil+A
+P-T+NG P-T+M
+O-sil+NG N-sil+A
+U-S+sil U-S
+A-J+sil A-J
+J-EO+EO
+J-EO+EU
+K-H+EO K-H
+K-H+EU
+J-EO+NG
+O-M+A
+O-M+E
+O-M+H
+O-M+I
+O-M+J
+O-M+K
+O-M+L O-M+NG
+O-M+M
+O-M+N
+O-M+O
+O-M+P
+O-M+S
+O-M+T O-M
+O-M+U
+K-H+NG K-H
+T-P+sil P-P+sil
+sil-S+A
+sil-S+E
+sil-S+H
+sil-S+I
+sil-S+J sil-S+NG
+sil-S+K sil-S+NG
+sil-S+L sil-S+NG
+sil-S+M sil-S+NG
+sil-S+N sil-S+NG
+sil-S+O sil-S+NG
+sil-S+P sil-S+NG
+sil-S+S sil-S+NG
+sil-S+T sil-S+NG
+sil-S+U
+O-N+A
+O-N+E
+O-N+H
+O-N+I
+O-N+J
+O-N+K
+S-M+sil N-M+sil
+O-N+L
+O-N+M O-N
+O-N+N O-N+NG
+O-N+O
+O-N+P
+O-N+S
+O-N+T
+O-N+U
+sil-T+EO
+sil-T+EU
+sil-T+A
+sil-T+E
+sil-T+H
+sil-T+I
+sil-T+J sil-T+H
+sil-T+K
+sil-T+L sil-T+H
+sil-T+M sil-T+H
+sil-T+N sil-T+H
+sil-T+O
+sil-T+P
+sil-T+S sil-T+H
+sil-T+T
+sil-T+U
+sil-T+NG sil-T+H
+U-EU+EO EU-EU+A
+U-EU+EU EU-EU+U
+O-P+EO
+O-P+EU
+U-EU+NG
+O-P+NG
+O-O+A
+O-O+E
+O-O+H EU-O+H
+O-O+I
+O-O+J EU-O+J
+O-O+K EU-O+K
+O-O+L
+O-O+M EU-O+M
+O-O+N O-O+L
+O-O+O EU-O+O
+O-O+P EU-O+M
+O-O+S
+O-O+T
+O-O+U EU-O+O
+EU-T+sil
+H-U+EO U+EO
+H-U+EU U+EU
+H-U+NG
+K-U+sil
+sil-U+A
+sil-U+E
+sil-U+H
+sil-U+I
+sil-U+J
+sil-U+K
+sil-U+L
+sil-U+M
+sil-U+N
+sil-U+O
+sil-U+P
+sil-U+S sil-U+M
+sil-U+T sil-U+M
+sil-U+U
+O-P+A
+O-P+E
+O-P+H
+O-P+I
+O-P+J O-P+NG
+O-P+K
+O-P+L
+O-P+M O-P+NG
+O-P+N
+O-P+O
+O-P+P O-P+K
+O-P+S
+O-P+T
+O-P+U
+E-A+A
+E-A+E
+E-A+H
+E-A+I
+E-A+J
+E-A+K
+E-A+L
+E-A+M
+E-A+N
+E-A+O
+E-A+P
+E-A+S
+E-A+T
+E-A+U E-A+O
+EO-J+EO
+EO-J+EU
+I-O+sil E-O+sil
+EO-J+NG EO-J+sil
+N-L+EO S-L+EO
+N-L+EU
+N-L+NG S-L+NG
+H-L+sil sil-L+sil
+M-sil+sil N-sil+A
+sil-A+sil
+EU-A+EO EO-A+EO
+EU-A+EU EO-A+EU
+O-S+A
+O-S+E
+O-S+H O-S
+O-S+I
+O-S+J O-S
+O-S+K O-S
+O-S+L O-S
+O-S+M O-S
+O-S+N O-S
+O-S+O
+O-S+P O-S
+O-S+S
+O-S+T O-S
+O-S+U
+EU-A+NG
+E-A+sil
+M-H+EO L-H+EO
+M-H+EU L-H+EU
+NG-EU+sil
+O-T+A
+O-T+E
+O-T+H
+O-T+I
+O-T+J
+O-T+K
+O-T+L
+O-T+M O-T+sil
+O-T+N O-T+L
+O-T+O
+O-T+P O-T
+O-T+S
+O-T+T
+O-T+U
+M-H+NG M-H+J
+E-E+A
+E-E+E
+E-E+H
+E-E+I
+E-E+J
+E-E+K
+E-E+L
+E-E+M
+E-E+N
+E-E+O E-E
+E-E+P
+E-E+S
+E-E+T
+E-E+U E-E
+O-U+A
+O-U+E
+O-U+H
+O-U+I
+O-U+J
+O-U+K
+O-U+L
+O-U+M
+O-U+N
+O-U+O O-U
+O-U+P O-U
+O-U+S
+O-U+T
+O-U+U O-U
+A-A+EO
+A-A+EU
+A-A+NG
+P-O+sil
+J-U+EO
+J-U+EU
+NG-A+sil
+J-U+NG
+O-L+sil
+E-I+EO
+E-I+EU
+E-I+NG
+N-I+sil
+E-H+A
+E-H+E
+E-H+H E-H
+E-H+I
+E-H+J E-H
+E-H+K E-H
+E-H+L E-H+I
+E-H+M E-H
+E-H+N E-H+I
+E-H+O
+E-H+P E-H
+E-H+S E-H+I
+E-H+T E-H+I
+E-H+U
+sil-N+sil
+P-sil+EO N-sil+A
+P-sil+EU N-sil+A
+P-L+EO L+EO
+P-L+EU L+EU
+EO+A
+EO+E EU-EO+E
+EO+H
+EO+I EU-EO+I
+EO+J
+EO+K
+EO+L
+EO+M
+EO+N
+EO+O
+EO+P
+EO+S
+EO+T EU-EO+T
+EO+U EO+O
+EO-A
+EO-E
+EO-H EU-H+J
+EO-I EO-I+EU
+EO-J EO-J+sil
+EO-K
+EO-L
+EO-M
+EO-N
+EO-O EU-O+M
+EO-P
+EO-S
+EO-T
+EO-U
+P-sil+NG N-sil+A
+P-L+NG S-L+NG
+E-I+A
+E-I+E
+E-I+H
+E-I+I
+E-I+J
+E-I+K
+E-I+L
+E-I+M
+E-I+N
+E-I+O
+E-I+P
+E-I+S
+E-I+T
+E-I+U
+EO-M+sil
+E-N+sil
+E-J+A
+E-J+E
+E-J+H
+E-J+I
+E-J+J E-J
+E-J+K E-J
+E-J+L E-J
+E-J+M E-J
+E-J+N E-J
+E-J+O
+E-J+P E-J
+E-J+S E-J
+E-J+T E-J
+E-J+U
+T-T+EO
+T-T+EU
+T-T+NG P-T+M
+sil-L+EO L+EO
+sil-L+EU
+E-K+A
+E-K+E
+E-K+H
+E-K+I
+E-K+J
+E-K+K
+E-K+L
+E-K+M
+E-K+N E-K+L
+E-K+O
+E-K+P
+E-K+S
+E-K+T
+E-K+U
+sil-L+NG S-L+NG
+O-H+EO
+O-H+EU
+EO-EO+sil
+O-H+NG O-H
+H-M+EO K-M+EO
+H-M+EU K-M+EU
+H-M+NG
+E-L+A
+E-L+E
+E-L+H J-L+H
+E-L+I
+E-L+J J-L+J
+E-L+K
+E-L+L J-L+L
+E-L+M J-L+M
+E-L+N J-L+N
+E-L+O
+E-L+P J-L+P
+E-L+S J-L+S
+E-L+T
+E-L+U
+NG-N+sil
+H+sil H
+U-I+sil
+S-P+EO
+S-P+EU
+E-M+A
+E-M+E
+E-M+H
+E-M+I
+E-M+J
+E-M+K
+E-M+L
+E-M+M
+E-M+N
+E-M+O
+E-M+P
+E-M+S
+E-M+T
+E-M+U
+S-P+NG S-P+J
+L-U+EO
+L-U+EU
+L-U+NG
+M-S+sil M-S+H
+E-N+A
+E-N+E
+E-N+H
+E-N+I
+E-N+J
+E-N+K
+E-N+L
+E-N+M
+E-N+N
+E-N+O
+E-N+P
+E-N+S
+E-N+T
+E-N+U
+EU+A EU+EO
+EU+E EU+EO
+EU+H EU
+EU+I
+EU+J
+EU+K
+EU+L
+EU+M
+EU+N
+EU+O EU
+EU+P EU+K
+EU+S
+EU+T EU+S
+EU+U
+EU-A
+EU-E EU-E+U
+EU-H EU-H+J
+EU-I
+EU-J EU-J+J
+EU-K
+EU-L
+EU-M EU-M+K
+EU-N
+EU-O EU-O+M
+EU-P
+EU-S EU-S+H
+EU-T EU-T+M
+EU-U EU-U+O
+L-P+sil
+E-O+A
+E-O+E
+E-O+H
+E-O+I
+E-O+J
+E-O+K
+E-O+L
+E-O+M E-O+EO
+E-O+N
+E-O+O
+E-O+P E-O+EO
+E-O+S E-O+I
+E-O+T
+E-O+U
+EU-J+sil EU-J+J
+K-K+sil
+M-EU+EO M-EU+A
+M-EU+EU M-EU+U
+E-P+A
+E-P+E
+E-P+H
+E-P+I
+E-P+J E-P+NG
+E-P+K
+E-P+L
+E-P+M E-P+NG
+E-P+N
+E-P+O
+E-P+P
+E-P+S
+E-P+T
+E-P+U
+sil-sil+A N-sil+A
+sil-sil+E N-sil+A
+sil-sil+H N-sil+A
+sil-sil+I N-sil+A
+sil-sil+J N-sil+A
+sil-sil+K N-sil+A
+sil-sil+L N-sil+A
+sil-sil+M N-sil+A
+sil-sil+N N-sil+A
+sil-sil+O N-sil+A
+sil-sil+P N-sil+A
+sil-sil+S N-sil+A
+sil-sil+T N-sil+A
+sil-sil+U N-sil+A
+L-sil N-sil+A
+J-H+sil M-H+J
+M-EU+NG
+I-E+sil
+E-sil+A N-sil+A
+E-sil+E N-sil+A
+E-sil+H N-sil+A
+E-sil+I N-sil+A
+E-sil+J N-sil+A
+E-sil+K N-sil+A
+E-sil+L N-sil+A
+E-sil+M N-sil+A
+E-sil+N N-sil+A
+E-sil+O N-sil+A
+E-sil+P N-sil+A
+E-sil+S N-sil+A
+E-sil+T N-sil+A
+E-sil+U N-sil+A
+U+sil
+A-M+sil
+J-M+EO K-M+EO
+J-M+EU K-M+EU
+J-M+NG J-M+L
+P-EU+sil
+T-S+sil S-S+H
+E-S+A
+E-S+E
+E-S+H
+E-S+I
+E-S+J E-S+sil
+E-S+K
+E-S+L E-S+sil
+E-S+M E-S+sil
+E-S+N E-S+sil
+E-S+O
+E-S+P E-S+K
+E-S+S
+E-S+T E-S+K
+E-S+U
+I-EO+EO I-EO+A
+I-EO+EU I-EO+I
+NG-P+EO
+NG-P+EU
+I-EO+NG
+NG+A K-NG+A
+NG+E K-NG+E
+NG+H E-NG+H
+NG+I K-NG+I
+NG+J E-NG+J
+NG+K E-NG+K
+NG+L E-NG+L
+NG+M K-NG+M
+NG+N K-NG+N
+NG+O E-NG+O
+NG+P E-NG+P
+NG+S E-NG+S
+NG+T E-NG+J
+NG+U E-NG+U
+E-A+EO
+E-A+EU
+NG-A
+NG-E
+NG-H NG-H+sil
+NG-I
+NG-J
+NG-K
+NG-L L
+NG-P+NG
+NG-M
+NG-N
+NG-O
+NG-P
+NG-S NG-S+H
+NG-T NG-T+M
+NG-U NG-U+O
+S-P+sil P+sil
+E-A+NG
+U-P+EO
+U-P+EU
+EO-S+EO
+EO-S+EU
+E-T+A
+E-T+E
+E-T+H
+E-T+I
+E-T+J
+E-T+K
+E-T+L EU-T+L
+E-T+M E-T
+E-T+N EU-T+L
+E-T+O
+E-T+P
+E-T+S EU-T+S
+E-T+T
+E-T+U
+NG-sil+A N-sil+A
+NG-sil+E N-sil+A
+NG-sil+H N-sil+A
+NG-sil+I N-sil+A
+NG-sil+J N-sil+A
+NG-sil+K N-sil+A
+NG-sil+L N-sil+A
+NG-sil+M N-sil+A
+NG-sil+N N-sil+A
+NG-sil+O N-sil+A
+NG-sil+P N-sil+A
+NG-sil+S N-sil+A
+NG-sil+T N-sil+A
+NG-sil+U N-sil+A
+U-P+NG
+E-sil+EO N-sil+A
+E-sil+EU N-sil+A
+EO-S+NG EO-S
+N-U+EO
+N-U+EU
+E-sil+NG N-sil+A
+N-U+NG
+T-EU+EO
+T-EU+EU
+E-U+A
+E-U+E
+E-U+H
+E-U+I
+E-U+J
+E-U+K
+E-U+L
+E-U+M
+E-U+N
+E-U+O E-U
+E-U+P
+E-U+S
+E-U+T
+E-U+U E-U
+I-I+EO
+I-I+EU
+T-EU+NG
+I-I+NG
+J-U+sil
+P-E+sil
+EU-J+EO
+EU-J+EU
+H-A+A H-A+EO
+H-A+E H-A+EO
+H-A+H H-A
+H-A+I H-A+EO
+H-A+J
+H-A+K
+EU-J+NG EU-J+J
+H-A+L
+H-A+M
+H-A+N
+H-A+O H-A+EO
+H-A+P
+H-A+S
+H-A+T
+H-A+U H-A+EO
+sil-NG+EO N-NG+EO
+sil-NG+EU N-NG+EU
+T-L+EO S-L+EO
+T-L+EU S-L+EU
+sil-NG+NG N-NG+NG
+T-L+NG S-L+NG
+H-O+sil O+sil
+O+EO
+O+EU O+EO
+O+NG
+H-E+EO
+H-E+EU
+H-EO+sil
+P-EO+EO
+P-EO+EU P-EO+EO
+H-E+NG
+E-NG+EO N-NG+EO
+E-NG+EU
+A-J+EO
+P-EO+NG
+A-J+EU
+E-NG+NG E-NG+N
+A-J+NG A-J
+S-H+EO S-H+sil
+S-H+EU P-H+EU
+O-EO O-EO+A
+O-EU O-EU+A
+S-H+NG S-H+sil
+O-NG
+L-M+EO
+L-M+EU
+L-M+NG L-M+L
+H-E+A
+H-E+E
+H-E+H
+H-E+I
+H-E+J
+H-E+K
+H-E+L
+H-E+M
+H-E+N
+H-E+O
+H-E+P
+H-E+S
+H-E+T
+H-E+U
+NG-NG+EO N-NG+EO
+NG-NG+EU N-NG+EU
+NG-NG+NG N-NG+NG
+P-U+EO
+P-U+EU
+P-U+NG
+U-A+A O-A+A
+U-A+E
+U-A+H
+U-A+I
+U-A+J O-A+J
+U-A+K
+U-A+L O-A+L
+U-A+M
+U-A+N
+U-A+O O-A+O
+U-A+P O-A+P
+U-A+S
+U-A+T
+U-A+U O-A+U
+K-I+EO
+K-I+EU
+O-O+sil EU-O+sil
+K-I+NG
+N-L+sil sil-L+sil
+EO-NG+sil
+H-H+A S-H+A
+H-H+E S-H+E
+H-H+H S-H+sil
+H-H+I P-H+I
+H-H+J S-H+sil
+H-H+K S-H+sil
+H-H+L P-H+L
+H-H+M S-H+sil
+H-H+N P-H+L
+H-H+O P-H+O
+H-H+P S-H+sil
+H-H+S P-H+L
+H-H+T P-H+L
+H-H+U P-H+EU
+sil-U+EO
+sil-U+EU
+M-I+sil
+sil-U+NG
+H-I+A
+H-I+E
+H-I+H
+H-I+I
+H-I+J
+H-I+K
+H-I+L
+H-I+M
+H-I+N I+N
+H-I+O
+H-I+P
+H-I+S
+H-I+T
+H-I+U
+J-E+EO
+J-E+EU
+EO-P+sil
+J-E+NG
+K-A+sil
+H-J+A S-J+A
+H-J+E S-J+E
+H-J+H J-J+H
+H-J+I S-J+I
+H-J+J J
+H-J+K J
+H-J+L J
+H-J+M J
+H-J+N J
+H-J+O J-J+O
+H-J+P J
+H-J+S J
+H-J+T J
+H-J+U J-J+U
+NG-H+EO
+NG-H+EU
+EO-sil+sil N-sil+A
+NG-H+NG NG-H+sil
+sil-sil N-sil+A
+U-E+A
+U-E+E
+U-E+H
+U-E+I
+U-E+J
+U-E+K
+U-E+L
+U-E+M
+U-E+N
+U-E+O
+U-E+P
+U-E+S
+U-E+T
+U-E+U
+U-H+EO O-H+EO
+U-H+EU O-H+EU
+EO-K+EO
+EO-K+EU
+H-K+A S-K+A
+H-K+E K+E
+U-H+NG O-H
+H-K+H P-K+H
+H-K+I K+I
+H-K+J K
+H-K+K P-K+K
+H-K+L S-K+L
+H-K+M K+NG
+H-K+N S-K+L
+H-K+O S-K+O
+H-K+P K
+H-K+S S-K+S
+H-K+T S-K+T
+H-K+U K+U
+EO-K+NG
+N-M+EO K-M+EO
+N-M+EU S-M+EU
+N-M+NG S-M+NG
+H-L+A M-L+A
+H-L+E M-L+E
+H-L+H J-L+H
+H-L+I P-L+I
+H-L+J J-L+J
+H-L+K J-L+K
+H-L+L
+H-L+M J-L+M
+H-L+N J-L+N
+H-L+O M-L+O
+H-L+P J-L+P
+H-L+S J-L+S
+H-L+T J-L+T
+H-L+U M-L+U
+I-A+EO
+I-A+EU
+I-A+NG
+K+sil T-K+sil
+U-L+sil
+H-M+A P-M+A
+H-M+E J-M+E
+H-M+H J-M+H
+H-M+I J-M+I
+H-M+J J-M+J
+H-M+K M
+H-M+L H-M+NG
+H-M+M
+H-M+N J-M+N
+H-M+O P-M+O
+H-M+P J-M+P
+H-M+S J-M+S
+H-M+T H-M
+H-M+U P-M+U
+T-I+sil
+U-H+A
+U-H+E EU-H+E
+U-H+H O-H
+U-H+I O-H+I
+U-H+J O-H
+U-H+K O-H
+U-H+L O-H+L
+U-H+M O-H
+U-H+N O-H+L
+U-H+O O-H+O
+U-H+P O-H
+U-H+S O-H+L
+U-H+T O-H+L
+U-H+U O-H+U
+M-I+EO
+M-I+EU
+H-N+A P-N+A
+H-N+E J-N+E
+H-N+H J-N+H
+H-N+I J-N+I
+H-N+J J-N+J
+H-N+K J-N+K
+H-N+L
+H-N+M J-N+M
+H-N+N J-N+N
+H-N+O P-N+O
+H-N+P J-N+P
+H-N+S J-N+S
+H-N+T J-N+T
+H-N+U J-N+O
+M-I+NG
+U-I+A
+U-I+E
+U-I+H
+U-I+I
+U-I+J
+U-I+K U-I+H
+U-I+L
+U-I+M
+U-I+N
+U-I+O
+U-I+P U-I+H
+U-I+S
+U-I+T
+U-I+U
+L-S+sil L-S
+H-O+A
+H-O+E O+E
+H-O+H O+H
+H-O+I O+I
+H-O+J O+J
+H-O+K O+K
+H-O+L O+L
+H-O+M O+M
+H-O+N O+N
+H-O+O O+O
+H-O+P O+P
+H-O+S O+S
+H-O+T O+T
+H-O+U O+O
+EU-M+sil
+K-N+sil
+U-J+A
+U-J+E
+U-J+H
+U-J+I
+U-J+J U-J+sil
+U-J+K U-J+sil
+U-J+L U-J+sil
+U-J+M U-J+sil
+U-J+N U-J+sil
+U-J+O
+U-J+P U-J+sil
+U-J+S U-J+sil
+U-J+T U-J+sil
+U-J+U
+H-P+A S-P+A
+H-P+E S-P+E
+H-P+H S-P+H
+H-P+I S-P+I
+H-P+J S-P+J
+H-P+K P
+H-P+L S-P+L
+H-P+M S-P+J
+H-P+N S-P+L
+H-P+O S-P+O
+H-P+P P
+H-P+S S-P+S
+H-P+T P-P+T
+H-P+U S-P+U
+O-sil N-sil+A
+J-K+sil
+L-E+EO
+L-E+EU
+U-K+A
+U-K+E
+U-K+H
+U-K+I
+U-K+J
+U-K+K
+U-K+L
+U-K+M
+U-K+N
+U-K+O
+U-K+P
+U-K+S
+U-K+T U-K+J
+U-K+U
+L-EU+EO
+L-EU+EU
+L-E+NG
+I-H+sil I-H
+E-J+EO
+E-J+EU
+L-EU+NG
+E-J+NG E-J
+H-E+sil
+U-L+A
+U-L+E
+U-L+H
+U-L+I
+U-L+J
+U-L+K
+U-L+L
+U-L+M
+U-L+N
+U-L+O
+U-L+P
+U-L+S
+U-L+T
+U-L+U
+P-M+EO K-M+EO
+P-M+EU K-M+EU
+A-P+sil EO-P+sil
+P-M+NG J-M+L
+U-M+A
+U-M+E
+U-M+H
+U-M+I
+U-M+J
+U-M+K
+U-M+L U-M+NG
+U-M+M
+U-M+N EU-M+N
+U-M+O
+U-M+P
+U-M+S
+U-M+T
+U-M+U
+H-S+A
+H-S+E
+H-S+H H-S+NG
+H-S+I
+H-S+J H-S+NG
+H-S+K H-S+NG
+H-S+L
+H-S+M H-S+NG
+H-S+N H-S+L
+H-S+O
+H-S+P H-S+NG
+H-S+S
+H-S+T H-S+L
+H-S+U
+K-A+EO
+K-A+EU
+EU-EO+sil
+K-A+NG
+EU-S+EO
+EU-S+EU
+U-N+A
+U-N+E
+U-N+H
+U-N+I
+U-N+J
+U-N+K
+S-S+sil S-S+H
+U-N+L
+U-N+M
+U-N+N U-N+NG
+U-N+O
+U-N+P
+U-N+S
+U-N+T
+U-N+U
+H-EO+EO
+H-EO+EU
+EU-S+NG EU-S+H
+M-EO+sil
+H-T+A
+H-T+E
+H-T+H S-T+H
+H-T+I
+T-U+EO
+H-T+J S-T+J
+H-T+K
+H-T+L
+H-T+M T
+H-T+N H-T+L
+H-T+O
+T-U+EU
+H-T+P T
+H-T+S
+H-T+T
+H-T+U H-T+O
+H-EO+NG
+T-U+NG
+sil-M+EO
+sil-M+EU sil-M+EO
+U-O+A
+U-O+E O-O+E
+U-O+H EU-O+H
+U-O+I O-O+I
+U-O+J EU-O+J
+U-O+K EU-O+K
+U-O+L O-O+L
+U-O+M EU-O+M
+U-O+N O-O+L
+U-O+O EU-O+O
+U-O+P EU-O+M
+U-O+S O-O+S
+U-O+T O-O+T
+U-O+U EU-O+O
+sil-M+NG sil-M+L
+O-I+EO
+O-I+EU
+H-U+A U+A
+H-U+E U+E
+H-U+H U+H
+H-U+I U+I
+H-U+J U+J
+H-U+K
+H-U+L
+H-U+M
+H-U+N U+N
+H-U+O
+H-U+P
+H-U+S U+S
+H-U+T U+S
+H-U+U H-U
+O-I+NG
+H-N+EO P-N+O
+H-N+EU N+EU
+O-sil+sil N-sil+A
+H-N+NG K-N+NG
+U-P+A
+U-P+E
+U-P+H
+U-P+I
+U-P+J U-P+NG
+S-EU+EO S-EU+I
+U-P+K
+U-P+L
+U-P+M U-P+NG
+U-P+N
+U-P+O
+U-P+P U-P+K
+S-EU+EU S-EU+E
+U-P+S
+U-P+T
+U-P+U
+P-H+sil S-H+sil
+A-S+EO
+A-S+EU
+S-EU+NG
+A-S+NG A-S
+K-A+A
+K-A+E
+K-A+H
+K-A+I K-A+E
+K-A+J
+K-A+K
+K-A+L
+K-A+M
+K-A+N
+K-A+O
+K-A+P
+K-A+S
+K-A+T
+K-A+U K-A+O
+I-U+sil
+O-E+sil
+K-sil+A N-sil+A
+K-sil+E N-sil+A
+K-sil+H N-sil+A
+K-sil+I N-sil+A
+K-sil+J N-sil+A
+K-sil+K N-sil+A
+K-sil+L N-sil+A
+K-sil+M N-sil+A
+K-sil+N N-sil+A
+K-sil+O N-sil+A
+K-sil+P N-sil+A
+N-E+EO
+K-sil+S N-sil+A
+K-sil+T N-sil+A
+K-sil+U N-sil+A
+N-E+EU
+N-E+NG
+U-S+A
+U-S+E
+U-S+H U-S
+U-S+I
+U-S+J U-S
+U-S+K U-S
+U-S+L U-S
+U-S+M U-S
+U-S+N U-S
+U-S+O
+U-S+P U-S
+U-S+S
+U-S+T U-S
+U-S+U
+O-EO+EO O-EO+A
+O-EO+EU O-EO+A
+O-EO+NG
+U-T+A
+U-T+E
+U-T+H
+U-T+I
+U-T+J
+U-T+K
+U-T+L
+U-T+M U-T+NG
+U-T+N U-T+L
+U-T+O
+U-T+P U-T+K
+U-T+S
+U-T+T
+U-T+U
+M-A+EO
+M-A+EU M-A+EO
+M-A+NG
+K-E+A
+K-E+E
+K-E+H
+K-E+I
+K-E+J
+K-E+K
+K-E+L
+K-E+M
+K-E+N
+K-E+O
+K-E+P
+K-E+S
+K-E+T
+K-E+U
+U-U+A O-U+A
+U-U+E
+U-U+H
+U-U+I
+U-U+J
+U-U+K
+U-U+L
+U-U+M
+U-U+N
+U-U+O O-U
+U-U+P U-U
+U-U+S
+U-U+T U-U+L
+U-U+U O-U
+P-U+sil
+A+sil sil-A+sil
+J-N+EO J-N+O
+J-N+EU N+EU
+J-N+NG K-N+NG
+N-O+sil
+K-H+A
+K-H+E
+K-H+H K-H
+K-H+I
+K-H+J K-H
+K-H+K K-H
+K-H+L
+K-H+M K-H
+K-H+N K-H+L
+K-H+O K-H
+K-H+P K-H
+K-H+S K-H+L
+K-H+T K-H+L
+K-H+U K-H+EU
+sil-T+sil sil-T+H
+M-L+sil sil-L+sil
+EO-T+EO
+EO-T+EU
+K-NG+EO N-NG+EO
+K-NG+EU N-NG+EU
+EO-T+NG EO-T
+K-NG+NG N-NG+NG
+K-I+A
+K-I+E
+K-I+H
+K-I+I
+K-I+J
+K-I+K
+K-I+L
+K-I+M
+K-I+N
+K-I+O
+K-I+P
+K-I+S
+K-I+T
+K-I+U
+L-I+sil
+P-E+EO E+EO
+P-E+EU E+EU
+P-E+NG
+EO-S+sil EO-S
+I-J+EO
+I-J+EU
+E-T+sil E-T
+I-J+NG I-J+sil
+K-J+A
+K-J+E
+K-J+H
+K-J+I
+K-J+J K-J
+K-J+K K-J
+K-J+L K-J
+K-J+M K-J
+K-J+N K-J
+K-J+O
+K-J+P K-J
+K-J+S K-J
+K-J+T K-J
+K-J+U
+E-sil N-sil+A
+EU-K+EO
+EU-K+EU
+J-A+sil
+N-EO+sil
+EU-K+NG EU-K+L
+T-M+EO K-M+EO
+T-M+EU S-M+EU
+K-K+A
+K-K+E P-K+E
+K-K+H
+K-K+I P-K+I
+K-K+J K-K
+K-K+K
+K-K+L
+K-K+M
+K-K+N K-K+L
+K-K+O P-K+O
+K-K+P K-K
+K-K+S
+K-K+T
+K-K+U P-K+U
+T-M+NG S-M+NG
+EO-EU+sil A-EU+sil
+sil-E+EO
+sil-E+EU
+EO-EU+EO EO-EU+A
+EO-EU+EU EO-EU+U
+sil-E+NG
+P+EO S-P+EO
+P+EU S-P+EU
+O-A+EO
+O-A+EU
+EO-EU+NG EO-EU+M
+P+NG S-P+J
+O-A+NG
+K-L+A J-L+A
+K-L+E J-L+E
+K-L+H J-L+H
+K-L+I
+K-L+J J-L+J
+K-L+K J-L+K
+K-L+L J-L+L
+K-L+M J-L+M
+K-L+N J-L+N
+K-L+O J-L+O
+K-L+P J-L+P
+K-L+S J-L+S
+K-L+T J-L+T
+K-L+U J-L+U
+NG-T+sil NG-T+M
+N+sil K-N+sil
+U-O+sil EU-O+sil
+A-K+EO
+A-K+EU
+A-K+NG
+K-M+A J-M+A
+K-M+E J-M+E
+K-M+H J-M+H
+K-M+I J-M+I
+K-M+J J-M+J
+K-M+K M
+K-M+L J-M+L
+K-M+M J-M+M
+K-M+N J-M+N
+K-M+O P-M+O
+K-M+P J-M+P
+K-M+S J-M+S
+K-M+T M
+K-M+U P-M+U
+T-L+sil sil-L+sil
+S-I+EO
+S-I+EU S-I
+P-EO P-EO+EO
+P-EU
+S-I+NG
+P-NG J-NG
+L-N+EO L-N+A
+L-N+EU S-N+EU
+K-N+A J-N+A
+K-N+E J-N+E
+K-N+H J-N+H
+K-N+I J-N+I
+K-N+J J-N+J
+K-N+K J-N+K
+K-N+L J-N+L
+S-I+sil
+K-N+M J-N+M
+K-N+N J-N+N
+K-N+O K-N+EO
+K-N+P J-N+P
+K-N+S J-N+S
+K-N+T J-N+T
+K-N+U K-N+EO
+L-N+NG S-N+NG
+E-S+EO
+E-S+EU
+E-S+NG E-S+sil
+K-O+A
+K-O+E
+K-O+H
+K-O+I
+K-O+J
+K-O+K
+K-O+L
+K-O+M
+K-O+N
+K-O+O
+K-O+P
+K-O+S
+K-O+T
+K-O+U
+EU-P+sil
+EU-NG+sil
+K-P+A
+K-P+E P-P+E
+K-P+H
+K-P+I P-P+I
+K-P+J K-P+NG
+K-P+K K-P
+K-P+L
+K-P+M K-P+NG
+K-P+N K-P+L
+K-P+O
+K-P+P K-P
+K-P+S
+K-P+T
+K-P+U K-P+EU
+J-N+sil K-N+sil
+H-EO+A
+H-EO+E
+H-EO+H
+H-EO+I
+H-EO+J
+H-EO+K
+H-EO+L
+H-EO+M
+H-EO+N
+H-EO+O
+H-EO+P H-EO+K
+H-EO+S
+H-EO+T
+H-EO+U
+M-NG+sil K-NG+sil
+K-J+EO
+K-J+EU
+A-A+A
+A-A+E
+A-A+H
+A-A+I
+A-A+J
+A-A+K
+A-A+L
+A-A+M
+A-A+N
+A-A+O
+A-A+P
+A-A+S
+A-A+T
+A-A+U A-A+O
+K-J+NG K-J
+I-K+sil
+H-H+sil S-H+sil
+A-S+sil A-S
+K-S+A
+K-S+E
+K-S+H K-S+sil
+K-S+I
+K-S+J K-S+sil
+K-S+K K-S+sil
+K-S+L
+K-S+M K-S+sil
+K-S+N K-S+L
+K-S+O
+K-S+P K-S+sil
+K-S+S
+K-S+T K-S+L
+K-S+U
+NG-I+EO
+NG-I+EU
+NG-I+NG
+K-T+A
+K-T+E
+K-T+H
+K-T+I
+K-T+J
+K-T+K
+K-T+L
+K-T+M K-T
+K-T+N K-T+L
+K-T+O
+K-T+P K-T
+K-T+S
+K-T+T
+K-T+U K-T+O
+sil+A N-sil+A
+sil+E N-sil+A
+sil+H N-sil+A
+sil+I N-sil+A
+sil+J N-sil+A
+sil+K N-sil+A
+sil+L N-sil+A
+sil+M N-sil+A
+sil+N N-sil+A
+sil+O N-sil+A
+sil+P N-sil+A
+sil+S N-sil+A
+sil+T N-sil+A
+sil+U N-sil+A
+A-EU+EO EO-EU+A
+A-EU+EU EO-EU+U
+sil-A sil-A+J
+sil-E
+sil-H sil-H+EO
+sil-I
+sil-J sil-J+NG
+sil-K sil-K+J
+sil-L L
+sil-M sil-M+K
+sil-N
+sil-O
+sil-P sil-P+NG
+sil-S sil-S+NG
+sil-T sil-T+H
+sil-U
+U-I+EO
+U-I+EU
+EO-L+EO
+EO-L+EU
+A-EU+NG EO-EU+M
+A-E+A
+A-E+E
+A-E+H
+A-E+I
+A-E+J
+A-E+K
+A-E+L
+A-E+M
+A-E+N
+A-E+O A-E
+A-E+P
+A-E+S
+A-E+T
+A-E+U A-E
+U-I+NG
+EO-L+NG
+N-N+EO
+N-N+EU
+K-U+A
+K-U+E
+K-U+H
+K-U+I
+K-U+J
+K-U+K
+K-U+L
+K-U+M
+K-U+N
+K-U+O K-U
+K-U+P
+K-U+S
+K-U+T
+K-U+U K-U
+N-N+NG
+P-K+sil T-K+sil
+N-A+A N-A+EO
+H-EU+A
+N-A+E
+H-EU+E H-EU+EO
+N-A+H
+N-A+I
+H-EU+H
+N-A+J N-A
+H-EU+I
+N-A+K
+H-EU+J
+N-A+L
+H-EU+K
+N-A+M
+H-EU+L
+N-A+N
+H-EU+M
+N-A+O
+H-EU+N
+H-EU+O H-EU+H
+N-A+P
+H-EU+P H-EU+K
+N-A+S
+H-EU+S H-EU+H
+N-A+T
+N-A+U
+H-EU+T
+H-EU+U H-EU+H
+O-H+sil O-H
+O-EO+sil
+T-E+EO
+T-E+EU
+H-U+sil U+sil
+N-E+sil
+T-E+NG
+J-EO+A
+J-EO+E
+J-EO+H
+J-EO+I
+J-EO+J
+J-EO+K
+J-EO+L
+J-EO+M
+J-EO+N
+J-EO+O
+J-EO+P
+J-EO+S
+J-EO+T
+J-EO+U J-EO+O
+M-J+EO
+M-J+EU
+A-H+A
+A-H+E
+A-H+H
+A-H+I
+A-H+J A-H+sil
+A-H+K A-H+sil
+A-H+L A-H+I
+A-H+M A-H+sil
+A-H+N A-H+I
+A-H+O
+A-H+P A-H+sil
+A-H+S A-H+I
+A-H+T A-H+I
+A-H+U
+H+EO
+sil-J+sil sil-J+NG
+H+EU
+M-J+NG M-J+J
+H-EU+sil
+H+NG H
+J-sil+A N-sil+A
+J-sil+E N-sil+A
+J-sil+H N-sil+A
+J-sil+I N-sil+A
+J-sil+J N-sil+A
+J-sil+K N-sil+A
+J-sil+L N-sil+A
+J-sil+M N-sil+A
+J-sil+N N-sil+A
+J-sil+O N-sil+A
+J-sil+P N-sil+A
+J-sil+S N-sil+A
+J-sil+T N-sil+A
+J-sil+U N-sil+A
+A-I+A
+A-I+E
+A-I+H
+A-I+I
+A-I+J
+A-I+K A-I+J
+A-I+L
+A-I+M
+A-I+N
+A-I+O
+A-I+P
+A-I+S
+A-I+T
+A-I+U
+EO-I+sil
+E-J+sil E-J
+N-EO+EO
+N-EO+EU
+S-A+EO
+S-A+EU
+A-J+A
+A-J+E
+A-J+H
+A-J+I
+A-J+J A-J
+A-J+K A-J
+A-J+L A-J
+A-J+M A-J
+A-J+N A-J
+A-J+O
+A-J+P A-J
+A-J+S A-J
+A-J+T A-J
+A-J+U
+N-EO+NG
+H-EO H-EO+EU
+H-EU H-EU+H
+S-A+NG
+H-NG
+N-E+A
+N-E+E
+N-E+H
+N-E+I
+N-E+J
+N-E+K
+N-E+L
+N-E+M
+N-E+N
+N-E+O
+N-E+P
+N-E+S
+N-E+T
+N-E+U
+E-K+EO
+E-K+EU
+A-K+A
+A-K+E
+A-K+H
+A-K+I
+A-K+J
+A-K+K
+A-K+L
+A-K+M
+A-K+N A-K+L
+A-K+O
+A-K+P A-K
+A-K+S
+A-K+T
+A-K+U
+NG+EO N-NG+EO
+NG+EU N-NG+EU
+E-K+NG
+NG+NG N-NG+NG
+H-NG+A
+H-NG+E
+H-NG+H
+H-NG+I
+H-NG+J
+H-NG+K
+H-NG+L
+H-NG+M
+H-NG+N
+H-NG+O
+H-NG+P
+H-NG+S
+H-NG+T
+H-NG+U
+A-L+A
+A-L+E
+A-L+H
+A-L+I
+A-L+J
+A-L+K
+A-L+L
+A-L+M
+A-L+N
+A-L+O
+A-L+P
+A-L+S
+A-L+T
+A-L+U
+NG-J+sil NG-J
+P-N+EO P-N+O
+P-N+EU K-N+EU
+P-N+NG K-N+NG
+O-U+sil
+U-E+sil O-E+sil
+I-S+EO
+I-S+EU
+N-NG+sil K-NG+sil
+A-M+A
+A-M+E
+A-M+H
+A-M+I
+A-M+J
+A-M+K
+A-M+L
+A-M+M
+A-M+N
+A-M+O
+A-M+P
+A-M+S
+A-M+T
+A-M+U
+I-S+NG I-S+sil
+NG-EO NG-EO+EU
+NG-EU NG-EU+EO
+NG-NG J-NG
+EU-T+EO
+EU-T+EU
+J-EU+A J-EU+EO
+J-EU+E J-EU+EO
+J-EU+H
+J-EU+I
+J-EU+J
+J-EU+K
+J-EU+L
+J-EU+M
+J-EU+N
+J-EU+O J-EU+EO
+J-EU+P J-EU+K
+J-EU+S
+J-EU+T J-EU+S
+J-EU+U J-EU+EO
+N-H+A M-H+A
+N-H+E L-H+E
+N-H+H L-H+H
+N-H+I L-H+I
+N-H+J L-H+NG
+N-H+K L-H+NG
+N-H+L L-H+I
+N-H+M L-H+NG
+N-H+N L-H+I
+N-H+O M-H+O
+N-H+P L-H+NG
+N-H+S L-H+I
+N-H+T L-H+I
+N-H+U M-H+U
+EU-T+NG EU-T+M
+M-O+sil
+A-N+A
+A-N+E
+A-N+H
+A-N+I
+A-N+J
+A-N+K
+A-N+L
+A-N+M
+A-N+N
+A-N+O A-N+EO
+A-N+P
+A-N+S
+A-N+T
+A-N+U
+EU-sil+EO N-sil+A
+EU-sil+EU N-sil+A
+sil-N+EO
+sil-N+EU sil-N+E
+L-EO+A
+L-EO+E
+L-EO+H
+L-EO+I L-EO
+L-EO+J
+L-EO+K
+L-EO+L
+L-EO+M
+L-EO+N
+L-EO+O
+L-EO+P
+L-EO+S
+L-EO+T
+L-EO+U L-EO+O
+N-I+A
+N-I+E
+N-I+H
+N-I+I
+N-I+J
+N-I+K
+N-I+L
+N-I+M
+N-I+N
+N-I+O
+N-I+P
+N-I+S
+N-I+T
+N-I+U
+L-L+sil sil-L+sil
+EU-sil+NG N-sil+A
+sil-N+NG
+U-EO+EO U-EO
+U-EO+EU U-EO
+O-J+EO
+O-J+EU
+J-NG+EO N-NG+EO
+J-NG+EU N-NG+EU
+A-O+A
+A-O+E
+A-O+H
+A-O+I
+A-O+J
+A-O+K
+A-O+L
+A-O+M A-O
+A-O+N
+A-O+O
+A-O+P A-O
+A-O+S
+A-O+T
+A-O+U A-O+O
+U-EO+NG
+O-J+NG O-J+sil
+J-NG+NG N-NG+NG
+M-sil+EO N-sil+A
+M-sil+EU N-sil+A
+H-O+EO O+EO
+H-O+EU O+EO
+M-sil+NG N-sil+A
+H-O+NG O+NG
+N-J+A
+N-J+E
+N-J+H
+N-J+I
+N-J+J N-J+sil
+N-J+K N-J+sil
+N-J+L
+N-J+M N-J+sil
+N-J+N N-J+L
+N-J+O
+N-J+P N-J+sil
+N-J+S N-J+L
+N-J+T N-J+L
+N-J+U
+A-T+EO
+A-T+EU
+A-P+A
+A-P+E
+A-P+H
+A-P+I
+A-P+J A-P+NG
+A-P+K
+A-P+L
+A-P+M
+A-P+N
+A-P+O
+A-P+P A-P
+A-P+S
+A-P+T
+A-P+U
+H-sil N-sil+A
+A-T+NG A-T
+NG-A+EO
+NG-A+EU
+NG-A+NG
+N-K+A
+N-K+E
+N-K+H
+N-K+I
+N-K+J M-K+J
+N-K+K M-K+K
+N-K+L
+N-K+M M-K+M
+N-K+N N-K+L
+N-K+O
+N-K+P M-K+J
+N-K+S
+N-K+T
+N-K+U
+I-A+sil
+U-A+EO O-A+EO
+U-A+EU O-A+EU
+U-A+NG
+N-L+A S-L+EO
+N-L+E S-L+E
+N-L+H J-L+H
+N-L+I
+N-L+J J-L+J
+N-L+K J-L+K
+N-L+L J-L+L
+N-L+M J-L+M
+N-L+N J-L+N
+N-L+O S-L+O
+N-L+P J-L+P
+N-L+S J-L+S
+N-L+T J-L+T
+N-L+U
+A-I+sil
+J-NG+A K-NG+A
+J-NG+E K-NG+E
+J-NG+H E-NG+H
+J-NG+I K-NG+I
+J-NG+J E-NG+J
+J-NG+K E-NG+K
+J-NG+L E-NG+L
+J-NG+M K-NG+M
+J-NG+N K-NG+N
+J-NG+O E-NG+O
+J-NG+P E-NG+P
+J-NG+S E-NG+S
+J-NG+T E-NG+J
+J-NG+U E-NG+U
+N-M+A
+N-M+E
+N-M+H S-M+H
+N-M+I
+N-M+J S-M+J
+N-M+K S-M+K
+N-M+L S-M+NG
+N-M+M S-M+M
+N-M+N S-M+N
+N-M+O
+N-M+P S-M+P
+N-M+S S-M+S
+N-M+T S-M+K
+N-M+U
+T-O+sil
+A-S+A
+A-S+E
+A-S+H
+A-S+I
+A-S+J A-S
+A-S+K A-S
+A-S+L A-S
+A-S+M A-S
+A-S+N A-S
+A-S+O
+A-S+P A-S
+A-S+S
+A-S+T A-S
+A-S+U
+N-N+A
+N-N+E
+N-N+H
+N-N+I S-N+I
+N-N+J
+N-N+K
+S-L+sil sil-L+sil
+N-N+L
+N-N+M
+N-N+N
+N-N+O
+N-N+P
+N-N+S
+N-N+T
+N-N+U
+K-S+EO
+K-S+EU
+A-T+A
+A-T+E
+A-T+H
+A-T+I
+A-T+J
+A-T+K
+A-T+L
+A-T+M A-T
+A-T+N A-T+L
+A-T+O
+A-T+P
+A-T+S
+A-T+T
+K-S+NG K-S+sil
+A-T+U
+L-EU+A L-EU+EO
+L-EU+E
+L-EU+H L-EU
+L-EU+I
+L-EU+J
+L-EU+K
+L-EU+L
+L-EU+M
+L-EU+N
+L-EU+O L-EU+EO
+L-EU+P L-EU+K
+L-EU+S
+L-EU+T
+L-EU+U L-EU+EU
+N-O+A
+N-O+E
+N-O+H
+N-O+I
+N-O+J
+N-O+K
+N-O+L
+N-O+M
+N-O+N
+N-O+O
+N-O+P
+N-O+S
+N-O+T
+N-O+U
+EU-S+sil EU-S+H
+A-U+A
+A-U+E EU-U+E
+A-U+H
+A-U+I EU-U+I
+A-U+J EU-U+S
+A-U+K
+A-U+L EU-U+L
+A-U+M
+A-U+N
+A-U+O A-U
+A-U+P A-U
+A-U+S EU-U+S
+A-U+T EU-U+T
+A-U+U A-U
+K-T+sil K-T
+N-EO+A
+N-EO+E
+N-EO+H
+N-EO+I N-EO+EU
+N-EO+J
+N-EO+K
+N-EO+L
+N-EO+M
+N-EO+N
+N-EO+O
+N-EO+P
+N-EO+S
+N-EO+T
+N-EO+U N-EO+O
+N-P+A
+N-P+E
+N-P+H
+N-P+I
+N-P+J
+N-P+K N-P
+N-P+L
+N-P+M N-P+J
+N-P+N N-P+L
+N-P+O M-P+O
+N-P+P N-P
+N-P+S
+N-P+T
+N-P+U
+U-sil N-sil+A
+P-A+sil
+H-sil+sil N-sil+A
+J-O+EO
+J-O+EU
+I-N+sil
+J-O+NG
+EU-EU+EO EU-EU+A
+EU-EU+EU EU-EU+U
+EU-EU+NG EU-EU+M
+H-K+sil T-K+sil
+EO-U+EO EO-U
+EO-U+EU
+EO-U+NG
+N-S+A
+N-S+E
+N-S+H N-S
+N-S+I
+N-S+J N-S
+N-S+K
+N-S+L N-S
+N-S+M N-S
+N-S+N N-S
+N-S+O
+N-S+P N-S+K
+N-S+S
+N-S+T N-S+K
+N-S+U
+O-NG+sil
+EU-EU+sil U-EU+sil
+I-K+EO
+I-K+EU
+I-K+NG
+L-NG+A K-NG+A
+L-NG+E K-NG+E
+L-NG+H E-NG+H
+L-NG+I K-NG+I
+L-NG+J E-NG+J
+L-NG+K E-NG+K
+L-NG+L E-NG+L
+L-NG+M K-NG+M
+L-NG+N K-NG+N
+L-NG+O E-NG+O
+L-NG+P E-NG+P
+L-NG+S E-NG+S
+L-NG+T E-NG+J
+L-NG+U E-NG+U
+M-EU+sil
+N-T+A
+N-T+E
+N-T+H
+N-T+I
+N-T+J
+N-T+K
+N-T+L
+N-T+M N-T+sil
+N-T+N N-T+L
+N-T+O
+N-T+P
+N-T+S
+N-T+T
+N-T+U
+EU-L+EO
+EU-L+EU
+EU-L+NG
+T-N+EO S-N+EO
+T-N+EU
+T-N+NG S-N+NG
+N-U+A
+N-U+E
+N-U+H
+N-U+I N-U+EU
+N-U+J
+N-U+K
+N-U+L
+N-U+M
+N-U+N
+N-U+O N-U
+N-U+P
+N-U+S
+N-U+T N-U+J
+N-U+U N-U
+M-S+EO M-S+H
+M-S+EU S+EU
+M-S+NG M-S+H
+N-sil+EO N-sil+A
+N-sil+EU N-sil+A
+N-sil+NG N-sil+A
+EO+sil
+P-N+sil K-N+sil
+N-EU+A N-EU+EO
+N-EU+E N-EU+EO
+N-EU+H N-EU
+N-EU+I
+N-EU+J
+N-EU+K
+N-EU+L
+N-EU+M
+N-EU+N
+N-EU+O N-EU
+N-EU+P
+N-EU+S
+N-EU+T
+N-EU+U
+A-L+EO
+A-L+EU
+O-K+sil
+A-L+NG
+P-EO+A
+P-EO+E
+P-EO+H
+P-EO+I
+P-EO+J
+P-EO+K
+P-EO+L
+P-EO+M
+P-EO+N
+P-EO+O
+P-EO+P
+P-EO+S
+P-EO+T
+P-EO+U
+S-J+EO
+S-J+EU H-J+EU
+N-H+sil L-H+NG
+S-J+NG J
+L-O+EO L-O
+L-O+EU L-O
+sil-M+sil
+L-O+NG
+M-E+sil
+E-T+EO
+E-T+EU
+E-T+NG E-T
+I-sil+A N-sil+A
+I-sil+E N-sil+A
+I-sil+H N-sil+A
+I-sil+I N-sil+A
+I-sil+J N-sil+A
+I-sil+K N-sil+A
+I-sil+L N-sil+A
+I-sil+M N-sil+A
+I-sil+N N-sil+A
+I-sil+O N-sil+A
+I-sil+P N-sil+A
+I-sil+S N-sil+A
+I-sil+T N-sil+A
+I-sil+U N-sil+A
+E-EO+sil
+sil-EO+A
+sil-EO+E
+EO-L+sil sil-L+sil
+sil-EO+H
+sil-EO+I sil-EO+EU
+sil-EO+J
+sil-EO+K
+sil-EO+L
+sil-EO+M
+sil-EO+N
+sil-EO+O
+sil-EO+P
+sil-EO+S
+sil-EO+T
+sil-EO+U sil-EO+O
+E-M+sil
+M-EO+EO
+M-EO+EU M-EO
+K-K+EO
+K-K+EU K+EU
+M-EO+NG
+K-K+NG K-K+M
+N-NG+A K-NG+A
+N-NG+E K-NG+E
+N-NG+H E-NG+H
+N-NG+I K-NG+I
+N-NG+J E-NG+J
+N-NG+K E-NG+K
+N-NG+L E-NG+L
+N-NG+M K-NG+M
+N-NG+N K-NG+N
+N-NG+O E-NG+O
+N-NG+P E-NG+P
+N-NG+S E-NG+S
+N-NG+T E-NG+J
+N-NG+U E-NG+U
+NG-M+sil
+O-S+EO
+O-S+EU
+U-H+sil O-H
+O-S+NG O-S
+P-EU+A
+P-EU+E P-EU+EO
+P-EU+H
+P-EU+I
+P-EU+J P-EU+H
+P-EU+K
+P-EU+L
+P-EU+M
+P-EU+N
+P-EU+O P-EU
+P-EU+P
+P-EU+S
+P-EU+T
+P-EU+U P-EU
+N-U+sil
+T-E+sil
+NG-J+EO
+NG-J+EU
+NG-J+NG NG-J
+P-sil+A N-sil+A
+P-sil+E N-sil+A
+P-sil+H N-sil+A
+P-sil+I N-sil+A
+P-sil+J N-sil+A
+P-sil+K N-sil+A
+P-sil+L N-sil+A
+P-sil+M N-sil+A
+P-sil+N N-sil+A
+P-sil+O N-sil+A
+P-sil+P N-sil+A
+P-sil+S N-sil+A
+P-sil+T N-sil+A
+P-sil+U N-sil+A
+U-J+EO
+U-J+EU
+EO-M+EO
+EO-M+EU
+L-O+sil
+U-J+NG U-J+sil
+EO-M+NG
+U-EO+sil
+N-O+EO N-O
+N-O+EU N-O
+EU-I+sil
+N-O+NG
+K-J+sil K-J
+sil-EU+A
+sil-EU+E sil-EU+sil
+sil-EU+H sil-EU+A
+sil-EU+I
+sil-EU+J
+sil-EU+K
+sil-EU+L
+sil-EU+M sil-EU+NG
+sil-EU+N
+sil-EU+O sil-EU+A
+sil-EU+P sil-EU+sil
+sil-EU+S sil-EU+sil
+sil-EU+T sil-EU+sil
+sil-EU+U sil-EU+A
+T-EO+EO
+T-EO+EU
+I-NG+EO
+I-NG+EU
+T-EO+NG
+I-NG+NG I-NG+M
+K-sil N-sil+A
+EO-A+A EU-A+A
+EO-A+E EU-A+E
+EO-A+H
+EO-A+I
+EO-A+J
+EO-A+K
+EO-A+L
+EO-A+M
+EO-A+N
+EO-A+O EU-A+O
+EO-A+P EU-A+P
+EO-A+S
+EO-A+T
+EO-A+U EU-A+O
+N-EU+sil
+M-K+EO
+M-K+EU
+H-A+sil
+I+EO
+I+EU I
+M-K+NG M-K+M
+T+sil T
+I+NG H-I+NG
+P-NG+A K-NG+A
+P-NG+E K-NG+E
+P-NG+H E-NG+H
+P-NG+I K-NG+I
+P-NG+J E-NG+J
+P-NG+K E-NG+K
+P-NG+L E-NG+L
+P-NG+M K-NG+M
+P-NG+N K-NG+N
+P-NG+O E-NG+O
+P-NG+P E-NG+P
+P-NG+S E-NG+S
+P-NG+T E-NG+J
+P-NG+U E-NG+U
+U-U+sil
+A-L+sil
+S-O+sil
+I-EO
+I-EU I-EU+A
+I-NG I-NG+U
+EO-E+A
+EO-E+E
+EO-E+H
+EO-E+I
+EO-E+J
+EO-E+K EO-E+J
+EO-E+L
+EO-E+M
+EO-E+N
+EO-E+O EO-E
+EO-E+P
+EO-E+S
+EO-E+T
+EO-E+U EO-E
+sil-NG+A K-NG+A
+sil-NG+E K-NG+E
+sil-NG+H E-NG+H
+sil-NG+I K-NG+I
+sil-NG+J E-NG+J
+sil-NG+K E-NG+K
+sil-NG+L E-NG+L
+sil-NG+M K-NG+M
+sil-NG+N K-NG+N
+sil-NG+O E-NG+O
+sil-NG+P E-NG+P
+sil-NG+S E-NG+S
+sil-NG+T E-NG+J
+sil-NG+U E-NG+U
+P-NG+EO N-NG+EO
+P-NG+EU N-NG+EU
+E-L+EO
+E-L+EU
+P-NG+NG N-NG+NG
+E-L+NG S-L+NG
+T-EO+A
+T-EO+E
+T-EO+H
+T-EO+I T-EO+EU
+T-EO+J
+T-EO+K
+T-EO+L
+T-EO+M
+T-EO+N
+T-EO+O
+T-EO+P
+T-EO+S
+T-EO+T
+T-EO+U
+J-T+sil J-T+M
+P-O+EO
+P-O+EU P-O+EO
+P-O+NG
+I-T+EO
+I-T+EU
+O-A+sil
+I-T+NG
+EO-H+A
+EO-H+E EU-H+E
+EO-H+H
+EO-H+I EU-H+I
+EO-H+J EU-H+J
+EO-H+K EU-H+J
+EO-H+L EU-H+I
+EO-H+M EU-H+J
+EO-H+N EU-H+I
+EO-H+O
+EO-H+P EU-H+J
+EO-H+S EU-H+I
+EO-H+T EU-H+I
+EO-H+U
+H-N+sil K-N+sil
+EU-U+EO EU-U+O
+EU-U+EU
+EU-U+NG
+NG+sil K-NG+sil
+EO-I+A
+EO-I+E
+EO-I+H EO-I+NG
+EO-I+I
+EO-I+J
+EO-I+K EO-I+NG
+EO-I+L
+EO-I+M
+EO-I+N EO-I+NG
+EO-I+O
+EO-I+P
+EO-I+S
+EO-I+T
+sil-O+EO
+EO-I+U
+sil-O+EU sil-O+EO
+sil-O+NG
+O-K+EO
+O-K+EU
+O-K+NG O-K+L
+H-P+EO S-P+EO
+H-P+EU S-P+EU
+EO-J+A
+EO-J+E
+EO-J+H
+EO-J+I
+EO-J+J EO-J+sil
+EO-J+K EO-J+sil
+EO-J+L EO-J+sil
+EO-J+M EO-J+sil
+EO-J+N EO-J+sil
+EO-J+O
+EO-J+P EO-J+sil
+EO-J+S EO-J+sil
+EO-J+T EO-J+sil
+EO-J+U
+H-P+NG S-P+J
+A-U+EO
+A-U+EU
+A-U+NG A-U+K
+EO-K+A
+EO-K+E
+EO-K+H
+EO-K+I
+EO-K+J
+EO-K+K
+EO-K+L EO-K+NG
+EO-K+M
+EO-K+N EO-K+NG
+EO-K+O
+EO-K+P
+EO-K+S
+EO-K+T EO-K+J
+EO-K+U
+S-S+EO T-S+EO
+S-S+EU
+S-S+NG S-S+H
+EO-E+EO
+EO-E+EU
+EO-E+NG
+EO-L+A
+EO-L+E
+EO-L+H A-L+H
+EO-L+I
+EO-L+J
+EO-L+K
+EO-L+L
+EO-L+M
+EO-L+N J-L+N
+EO-L+O
+EO-L+P
+EO-L+S
+EO-L+T
+T-EU+A
+EO-L+U EO-L+EU
+T-EU+E T-EU+EU
+T-EU+H
+T-EU+I T-EU+EO
+T-EU+J
+T-EU+K
+T-EU+L
+T-EU+M
+T-EU+N
+T-EU+O
+T-EU+P T-EU+M
+T-EU+S
+T-EU+T
+T-EU+U
+E-NG+sil
+T-A+A
+T-A+E
+T-A+H
+T-A+I
+T-A+J T-A
+T-A+K
+T-A+L
+T-A+M
+T-A+N
+T-A+O
+T-A+P
+T-A+S
+T-A+T
+T-A+U
+EO-M+A
+EO-M+E
+EO-M+H
+EO-M+I
+EO-M+J
+EO-M+K
+EO-M+L
+EO-M+M
+EO-M+N
+EO-M+O
+EO-M+P
+EO-M+S
+EO-M+T
+EO-M+U
+O-N+sil
+O-EU+sil
+N-K+sil M-K+sil
+EO-N+A
+EO-N+E
+EO-N+H
+EO-N+I
+EO-N+J
+EO-N+K
+EO-N+L
+EO-N+M
+EO-N+N
+EO-N+O
+EO-N+P
+EO-N+S
+EO-N+T
+EO-N+U
+K-T+EO
+sil-P+sil sil-P+NG
+K-T+EU K-T+I
+M-H+sil M-H+J
+K-T+NG K-T
+A+EO
+A+EU
+EO-O+A EU-O+A
+EO-O+E EU-O+E
+EO-O+H EU-O+H
+EO-O+I EU-O+I
+EO-O+J EU-O+J
+EO-O+K EU-O+K
+EO-O+L
+EO-O+M EU-O+M
+EO-O+N
+EO-O+O EU-O+O
+EO-O+P EU-O+M
+EO-O+S
+EO-O+T
+EO-O+U EU-O+O
+A+NG
+L-E+sil E+sil
+EO-O+sil EU-O+sil
+E-P+sil
+EO-P+A
+EO-P+E
+EO-P+H
+EO-P+I
+EO-P+J EO-P+NG
+EO-P+K
+EO-P+L O-P+L
+EO-P+M EO-P+NG
+EO-P+N O-P+N
+EO-P+O
+EO-P+P EO-P+K
+EO-P+S
+EO-P+T
+EO-P+U
+H-sil+A N-sil+A
+H-sil+E N-sil+A
+H-sil+H N-sil+A
+H-sil+I N-sil+A
+H-sil+J N-sil+A
+H-sil+K N-sil+A
+H-sil+L N-sil+A
+H-sil+M N-sil+A
+H-sil+N N-sil+A
+H-sil+O N-sil+A
+H-sil+P N-sil+A
+H-sil+S N-sil+A
+H-sil+T N-sil+A
+H-sil+U N-sil+A
+A-sil N-sil+A
+A-EO A-EO+EU
+A-EU EO-EU+A
+T-E+A
+T-E+E
+T-E+H
+T-E+I
+T-E+J
+T-E+K
+T-E+L
+T-E+M
+T-E+N
+T-E+O
+T-E+P
+T-E+S
+T-E+T
+T-E+U T-E+O
+J-P+EO
+T-NG+A K-NG+A
+T-NG+E K-NG+E
+J-P+EU
+T-NG+H E-NG+H
+T-NG+I K-NG+I
+T-NG+J E-NG+J
+T-NG+K E-NG+K
+T-NG+L E-NG+L
+T-NG+M K-NG+M
+T-NG+N K-NG+N
+T-NG+O E-NG+O
+T-NG+P E-NG+P
+T-NG+S E-NG+S
+T-NG+T E-NG+J
+T-NG+U E-NG+U
+A-NG
+J-P+NG J-P+J
+L-EO+EO
+L-EO+EU L-EO
+NG-S+EO
+NG-S+EU
+U-NG+sil
+L-EO+NG
+NG-S+NG NG-S+H
+U-S+EO
+U-S+EU
+NG-P+sil
+U-S+NG U-S
+J+sil J
+U-K+sil
+NG-A+A
+NG-A+E
+NG-A+H
+NG-A+I
+NG-A+J
+NG-A+K
+NG-A+L
+NG-A+M
+NG-A+N
+NG-A+O
+NG-A+P
+NG-A+S
+NG-A+T
+NG-A+U NG-A+O
+EO-S+A
+EO-S+E
+EO-S+H EO-S
+EO-S+I
+EO-S+J EO-S
+EO-S+K EO-S
+EO-S+L
+EO-S+M EO-S
+EO-S+N EO-S+L
+EO-S+O
+EO-S+P EO-S
+EO-S+S
+EO-S+T EO-S+L
+EO-S+U
+I-L+EO
+I-L+EU
+T-H+sil S-H+sil
+I-L+NG I-L+N
+T-H+A S-H+A
+T-H+E P-H+E
+T-H+H S-H+sil
+T-H+I P-H+I
+T-H+J S-H+sil
+T-H+K S-H+sil
+T-H+L P-H+L
+T-H+M S-H+sil
+T-H+N P-H+L
+T-H+O P-H+O
+T-H+P S-H+sil
+T-H+S P-H+L
+T-H+T P-H+L
+T-H+U P-H+EU
+T-sil+EO N-sil+A
+T-sil+EU N-sil+A
+EO-T+A
+EO-T+E
+EO-T+H
+EO-T+I
+EO-T+J
+EO-T+K
+EO-T+L
+EO-T+M EO-T
+EO-T+N EO-T+L
+EO-T+O
+EO-T+P EO-T+K
+EO-T+S
+EO-T+T
+EO-T+U
+M-U+sil
+S-E+sil
+T-sil+NG N-sil+A
+EU-M+EO
+EU-M+EU
+EU-M+NG EU-M+L
+T-O+EO
+T-O+EU T-O+EO
+T-I+A
+T-I+E
+T-I+H
+T-I+I
+T-I+J
+T-I+K
+T-I+L
+T-I+M
+T-I+N
+T-I+O
+T-I+P
+T-I+S
+T-I+T
+T-I+U
+EO-U+A
+T-O+NG
+O-sil+A N-sil+A
+EO-U+E
+O-sil+E N-sil+A
+EO-U+H
+EO-U+I
+EO-U+J
+O-sil+H N-sil+A
+EO-U+K
+O-sil+I N-sil+A
+EO-U+L
+O-sil+J N-sil+A
+EO-U+M
+O-sil+K N-sil+A
+EO-U+N
+O-sil+L N-sil+A
+EO-U+O EO-U
+O-sil+M N-sil+A
+EO-U+P EO-U
+O-sil+N N-sil+A
+O-sil+O N-sil+A
+O-sil+P N-sil+A
+EO-U+S
+EO-U+T
+EO-U+U EO-U
+O-sil+S N-sil+A
+O-sil+T N-sil+A
+O-sil+U N-sil+A
+M-T+EO
+M-T+EU
+EU-L+sil
+M-T+NG M-T+M
+K-M+sil M+sil
+T-J+A P-J+A
+T-J+E
+T-J+H
+T-J+I P-J+I
+T-J+J P-J+sil
+T-J+K P-J+sil
+T-J+L P-J+sil
+T-J+M P-J+sil
+T-J+N P-J+sil
+T-J+O
+T-J+P P-J+sil
+T-J+S P-J+sil
+T-J+T P-J+sil
+T-J+U
+H-H+EO S-H+sil
+H-H+EU P-H+EU
+N-sil N-sil+A
+H-H+NG S-H+sil
+J-J+sil J
+S-EO+EO S-EO+A
+S-EO+EU
+H-NG+EO
+H-NG+EU
+A-M+EO
+A-M+EU
+S-EO+NG
+H-NG+NG H-NG+M
+A-sil+sil N-sil+A
+T-K+A
+T-K+E
+T-K+H S-K+H
+T-K+I
+T-K+J K
+T-K+K P-K+K
+T-K+L P-K+L
+T-K+M K+NG
+T-K+N P-K+L
+T-K+O
+T-K+P K
+T-K+S P-K+S
+T-K+T P-K+T
+T-K+U
+A-M+NG A-M+L
+NG-E+A
+NG-E+E
+NG-E+H
+NG-E+I
+NG-E+J
+NG-E+K
+NG-E+L
+NG-E+M
+NG-E+N
+NG-E+O NG-E
+NG-E+P
+NG-E+S
+NG-E+T
+NG-E+U
+sil+EO N-sil+A
+sil+EU N-sil+A
+S-K+EO T-K+EO
+S-K+EU K+EU
+K-EO+sil
+sil+NG N-sil+A
+S-K+NG K+NG
+T-L+A S-L+EO
+T-L+E S-L+E
+T-L+H J-L+H
+T-L+I S-L+I
+L-P+EO
+T-L+J J-L+J
+T-L+K J-L+K
+T-L+L J-L+L
+T-L+M J-L+M
+T-L+N J-L+N
+T-L+O S-L+O
+L-P+EU
+T-L+P J-L+P
+T-L+S J-L+S
+T-L+T J-L+T
+T-L+U S-L+U
+L-P+NG L-P+J
+E-U+EO
+E-U+EU E-U+I
+A-O+sil
+E-U+NG
+T-M+A S-M+A
+T-M+E S-M+E
+T-M+H S-M+H
+T-M+I S-M+I
+T-M+J S-M+J
+T-M+K S-M+K
+T-M+L S-M+NG
+T-M+M S-M+M
+T-M+N S-M+N
+T-M+O P-M+O
+T-M+P S-M+P
+T-M+S S-M+S
+T-M+T S-M+K
+T-M+U S-M+U
+T-U+sil
+sil-EO
+sil-EU sil-EU+sil
+sil-NG J-NG
+T-N+A S-N+A
+T-N+E S-N+E
+T-N+H S-N+H
+T-N+I S-N+I
+T-N+J S-N+J
+T-N+K S-N+K
+T-N+L S-N+L
+T-N+M S-N+M
+T-N+N S-N+N
+T-N+O S-N+O
+T-N+P S-N+P
+T-N+S S-N+S
+T-N+T S-N+T
+T-N+U S-N+U
+NG-H+A
+NG-H+E
+NG-H+H NG-H+sil
+NG-H+I
+NG-H+J NG-H+sil
+NG-H+K NG-H+sil
+NG-H+L NG-H+I
+NG-H+M NG-H+sil
+NG-H+N NG-H+I
+NG-H+O
+NG-H+P NG-H+sil
+NG-H+S NG-H+I
+NG-H+T NG-H+I
+NG-H+U
+J-sil+sil N-sil+A
+K-L+EO NG-L+EO
+K-L+EU
+K-L+NG S-L+NG
+T-O+A
+T-O+E
+T-O+H
+T-O+I
+T-O+J
+T-O+K
+T-O+L
+T-O+M
+T-O+N
+T-O+O
+T-O+P T-O+K
+T-O+S
+T-O+T
+T-O+U
+NG-I+A
+NG-I+E
+NG-I+H
+NG-I+I
+NG-I+J
+NG-I+K
+NG-I+L
+NG-I+M
+NG-I+N
+NG-I+O
+NG-I+P
+NG-I+S
+NG-I+T
+NG-I+U
+O-NG+EO
+O-NG+EU
+O-NG+NG O-NG+M
+T-P+A P-P+A
+T-P+E P-P+E
+T-P+H P-P+H
+T-P+I P-P+I
+T-P+J P-P+NG
+T-P+K P-P+K
+T-P+L P-P+L
+T-P+M P-P+NG
+T-P+N P-P+L
+T-P+O P-P+O
+T-P+P P-P+K
+T-P+S P-P+S
+T-P+T S-P+T
+T-P+U P-P+EU
+NG-J+A
+NG-J+E
+NG-J+H
+NG-J+I
+NG-J+J NG-J
+NG-J+K NG-J
+NG-J+L
+NG-J+M NG-J
+NG-J+N NG-J+L
+NG-J+O
+NG-J+P NG-J
+NG-J+S NG-J+L
+NG-J+T NG-J+L
+NG-J+U
+O-T+EO
+O-T+EU
+J-A+A
+J-A+E
+J-A+H
+J-A+I
+J-A+J
+O-T+NG O-T+sil
+J-A+K
+J-A+L
+J-A+M
+J-A+N
+J-A+O J-A+EO
+J-A+P
+J-A+S
+J-A+T
+J-A+U
+I-T+sil
+NG-K+A
+NG-K+E
+NG-K+H
+NG-K+I
+NG-K+J NG-K
+NG-K+K
+NG-K+L
+NG-K+M
+NG-K+N NG-K+L
+NG-K+O
+NG-K+P NG-K
+NG-K+S
+NG-K+T
+NG-K+U
+J-H+EO L-H+EO
+J-H+EU L-H+EU
+J-H+NG M-H+J
+N-A+sil NG-A+sil
+NG-K+EO
+NG-K+EU
+NG-K+NG NG-K+M
+NG-L+A J-L+A
+NG-L+E
+NG-L+H J-L+H
+NG-L+I
+NG-L+J J-L+J
+NG-L+K J-L+K
+NG-L+L J-L+L
+NG-L+M J-L+M
+NG-L+N J-L+N
+NG-L+O J-L+O
+NG-L+P J-L+P
+NG-L+S J-L+S
+NG-L+T J-L+T
+NG-L+U J-L+U
+S-sil+sil N-sil+A
+U-K+EO
+U-K+EU
+EO-N+EO EO-N+O
+EO-N+EU
+U-K+NG U-K+N
+EO-N+NG
+N-P+EO
+N-P+EU
+T-S+A S-S+A
+T-S+E S-S+E
+T-S+H S-S+H
+T-S+I S-S+I
+T-S+J S-S+H
+T-S+K S-S+H
+T-S+L S-S+L
+T-S+M S-S+H
+T-S+N S-S+L
+T-S+O S-S+O
+T-S+P S-S+H
+T-S+S S-S+S
+T-S+T S-S+L
+T-S+U S-S+U
+NG-M+A
+NG-M+E
+NG-M+H
+NG-M+I
+NG-M+J
+NG-M+K NG-M
+NG-M+L NG-M+NG
+NG-M+M
+NG-M+N
+NG-M+O
+NG-M+P
+NG-M+S
+NG-M+T NG-M
+NG-M+U
+N-P+NG N-P+J
+EO-E+sil
+T-T+A
+T-T+E P-T+E
+T-T+H P-T+H
+T-T+I T-T+EU
+T-T+J P-T+J
+T-T+K P-T+K
+T-T+L P-T+L
+T-T+M P-T+M
+T-T+N P-T+L
+T-T+O P-T+O
+T-T+P P-T+M
+T-T+S P-T+S
+T-T+T P-T+T
+T-T+U
+NG-N+A
+NG-N+E
+NG-N+H
+NG-N+I
+NG-N+J
+NG-N+K
+NG-N+L
+NG-N+M
+NG-N+N
+NG-N+O NG-N+EO
+NG-N+P
+NG-N+S
+NG-N+T
+NG-N+U NG-N+EO
+U-sil+EO N-sil+A
+U-sil+EU N-sil+A
+U-sil+NG N-sil+A
+EU-E+EO
+EU-E+EU
+J-E+A
+J-E+E
+J-E+H
+J-E+I
+J-E+J
+J-E+K
+J-E+L
+J-E+M
+J-E+N
+J-E+O
+J-E+P
+J-E+S
+J-E+T
+J-E+U
+EU-E+NG I-E+NG
+T-U+A
+T-U+E
+T-U+H
+T-U+I
+T-U+J
+T-U+K
+T-U+L
+T-U+M
+T-U+N
+T-U+O T-U
+T-U+P
+T-U+S
+T-U+T
+T-U+U T-U
+NG-O+A
+NG-O+E
+NG-O+H
+NG-O+I
+NG-O+J
+NG-O+K
+NG-O+L
+NG-O+M
+NG-O+N
+NG-O+O
+NG-O+P
+NG-O+S
+NG-O+T M-O+T
+NG-O+U NG-O+O
+M-L+EO L+EO
+M-L+EU M-L+I
+EO-EO+EO
+EO-EO+EU EO-EO
+J+EO H-J+EO
+J+EU H-J+EU
+EU+sil
+M-L+NG S-L+NG
+P-T+sil P-T+M
+EO-EO+NG
+NG-P+A
+NG-P+E
+NG-P+H
+NG-P+I
+NG-P+J NG-P+NG
+NG-P+K NG-P
+NG-P+L
+NG-P+M NG-P+NG
+NG-P+N NG-P+L
+NG-P+O
+NG-P+P NG-P
+NG-P+S
+NG-P+T
+NG-P+U
+J+NG J
+U-A+sil O-A+sil
+A-E+EO
+A-E+EU
+A-E+NG
+N-N+sil
+L-EO+sil N-EO+sil
+J-H+A
+J-H+E M-H+E
+J-H+H M-H+H
+J-H+I M-H+I
+J-H+J M-H+J
+J-H+K M-H+J
+J-H+L M-H+I
+J-H+M M-H+J
+J-H+N M-H+I
+J-H+O M-H+O
+J-H+P M-H+J
+J-H+S M-H+I
+J-H+T M-H+I
+J-H+U M-H+U
+sil-S+sil sil-S+NG
+J-EO
+J-EU J-EU+H
