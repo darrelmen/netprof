@@ -48,6 +48,7 @@ import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.list.Reloadable;
+import mitll.langtest.client.user.FormField;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
@@ -356,7 +357,7 @@ class EditableExerciseDialog extends NewUserExercise {
         markError(slowSpeedRecording, header, getWarningForFL());
       }
       if (!translitChanged() && !translit.isEmpty()) {
-        markError(translit, header, "Is the transliteration consistent with \"" + foreignLang.getText() + "\" ?");
+        markError(translit, header, "Is the transliteration consistent with \"" + foreignLang.getSafeText() + "\" ?");
       }
     }
     return didChange;
@@ -384,7 +385,7 @@ class EditableExerciseDialog extends NewUserExercise {
    * @see ReviewEditableExercise#checkForForeignChange()
    */
   String getWarningForFL() {
-    return "Is the audio consistent with \"" + foreignLang.getText() + "\" ?";
+    return "Is the audio consistent with \"" + foreignLang.getSafeText() + "\" ?";
   }
 
   private boolean englishChanged() {
@@ -393,7 +394,7 @@ class EditableExerciseDialog extends NewUserExercise {
 
   private boolean foreignChanged() {
     //    if (b)
-//      logger.info("foreignChanged : foreign '" + foreignLang.box.getText() + "' != original '" + originalForeign + "'");
+//      logger.info("foreignChanged : foreign '" + foreignLang.box.getSafeText() + "' != original '" + originalForeign + "'");
     return !foreignLang.box.getText().equals(originalForeign);
   }
 

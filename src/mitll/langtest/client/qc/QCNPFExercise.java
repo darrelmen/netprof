@@ -47,6 +47,7 @@ import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTestDatabaseAsync;
@@ -802,11 +803,15 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
     commentEntry.addBlurHandler(new BlurHandler() {
       @Override
       public void onBlur(BlurEvent event) {
-        addIncorrectComment(commentEntry.getText(), field);
+        addIncorrectComment(sanitize(commentEntry.getText()), field);
       }
     });
     addTooltip(commentEntry, COMMENT_TOOLTIP);
     return commentEntry;
+  }
+
+  private String sanitize(String text) {
+    return SimpleHtmlSanitizer.sanitizeHtml(text).asString();
   }
 
   /**

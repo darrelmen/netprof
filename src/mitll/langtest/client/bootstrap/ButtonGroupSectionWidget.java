@@ -270,7 +270,7 @@ public class ButtonGroupSectionWidget implements SectionWidget {
     for (Button unselectCandidate : buttons.getButtons()) {
       if (!toSelectSet.contains(unselectCandidate)) {
         if (unselectCandidate.isActive()) {
-          //if (debug) System.out.println("ButtonGroupSectionWidget: unselecting " + unselectCandidate.getText());
+          //if (debug) System.out.println("ButtonGroupSectionWidget: unselecting " + unselectCandidate.getSafeText());
 
           unselectCandidate.setActive(false);
           selected.remove(unselectCandidate);
@@ -290,8 +290,8 @@ public class ButtonGroupSectionWidget implements SectionWidget {
     b.setActive(active);
     if (active) selected.add(b);
     else selected.remove(b);
-    //   if (active) logger.info("\ttoggleButton " + b.getText() + " is active");
-    //  else  logger.info("\t\ttoggleButton " + b.getText() + " is inactive");
+    //   if (active) logger.info("\ttoggleButton " + b.getSafeText() + " is active");
+    //  else  logger.info("\t\ttoggleButton " + b.getSafeText() + " is inactive");
     return active;
   }
 
