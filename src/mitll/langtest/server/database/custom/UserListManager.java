@@ -483,18 +483,25 @@ public class UserListManager {
     Map<String, CommonExercise> idToUser = new HashMap<>();
     for (CommonExercise ue : allKnown) idToUser.put(ue.getID(), ue);
 
-    List<CommonShell> onList = getReviewedUserExercises(idToUser, ids);
+    long then = System.currentTimeMillis();
+    List<CommonExercise> onList = getReviewedUserExercises(idToUser, ids);
 
-    // logger.debug("getReviewList '" +name+ "' ids size = " + allKnown.size() + " yielded " + onList.size());
+    List<CommonShell> copy = new ArrayList<>();
+
+    for (CommonExercise orig:onList) copy.add(orig.getShell());
+
+    long now = System.currentTimeMillis();
+
+    logger.debug("getReviewList '" +name+ "' ids size = " + allKnown.size() + " yielded " + copy.size() + " took " + (now-then) + " millis");
     User user = getQCUser();
     UserList<CommonShell> userList = new UserList<CommonShell>(userListMaginID, user, name, description, "", false);
     userList.setReview(true);
 
-    new ExerciseSorter(typeOrder).getSortedByUnitThenAlpha(onList, false);
+    new ExerciseSorter(typeOrder).getSortedByUnitThenAlpha(copy, false);
 
-    userList.setExercises(onList);
+    userList.setExercises(copy);
 
-    markState(onList);
+    markState(copy);
     logger.debug("getReviewList returning " + userList + (userList.getExercises().isEmpty() ? "" : " first " + userList.getExercises().iterator().next()));
     return userList;
   }
@@ -511,8 +518,8 @@ public class UserListManager {
    * @return
    * @see #getReviewList(java.util.Collection, String, String, java.util.Collection, long, java.util.Collection)
    */
-  private List<CommonShell> getReviewedUserExercises(Map<String, CommonExercise> idToUserExercise, Collection<String> ids) {
-    List<CommonShell> onList = new ArrayList<>();
+  private List<CommonExercise> getReviewedUserExercises(Map<String, CommonExercise> idToUserExercise, Collection<String> ids) {
+    List<CommonExercise> onList = new ArrayList<>();
 
     int c = 0;
     for (String id : ids) {

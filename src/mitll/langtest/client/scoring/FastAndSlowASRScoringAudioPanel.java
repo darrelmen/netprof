@@ -63,7 +63,6 @@ import java.util.logging.Logger;
  */
 public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttributeExercise> extends ASRScoringAudioPanel<T> {
   //private Logger logger = Logger.getLogger("FastAndSlowASRScoringAudioPanel");
-
   private static final String DEFAULT = "Default";
 
   private static final String GROUP = "group";
@@ -118,7 +117,6 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
     } else {
       // add gender choices
       Set<Long> preferredVoices = controller.getProps().getPreferredVoices();
-
       Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(true, preferredVoices);
       Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false, preferredVoices);
       Collection<AudioAttribute> defaultUserAudio = exercise.getDefaultUserAudio();
