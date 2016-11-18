@@ -268,16 +268,16 @@ public class ResultManager extends PagerTable {
 /*    userIDSuggest = new Typeahead(new SuggestOracle() {
       @Override
       public void requestSuggestions(final Request request, final Callback callback) {
-        //logger.info(" requestSuggestions got request for userid " + getUnitToValue() + " " + getText() + " " + getUserID());
+        //logger.info(" requestSuggestions got request for userid " + getUnitToValue() + " " + getSafeText() + " " + getUserID());
 
-        service.getResultAlternatives(getUnitToValue(), getUserID(), getText(), MonitorResult.USERID, new AsyncCallback<Collection<String>>() {
+        service.getResultAlternatives(getUnitToValue(), getUserID(), getSafeText(), MonitorResult.USERID, new AsyncCallback<Collection<String>>() {
           @Override
           public void onFailure(Throwable caught) {
           }
 
           @Override
           public void onSuccess(Collection<String> result) {
-            //logger.info(" requestSuggestions got request for userid " + getUnitToValue() + " " + getText() + " " + getUserID() + " yielded " + result.size());
+            //logger.info(" requestSuggestions got request for userid " + getUnitToValue() + " " + getSafeText() + " " + getUserID() + " yielded " + result.size());
             makeSuggestionResponse(result, callback, request);
           }
         });
@@ -299,16 +299,16 @@ public class ResultManager extends PagerTable {
     textSuggest = new Typeahead(new SuggestOracle() {
       @Override
       public void requestSuggestions(final Request request, final Callback callback) {
-        //logger.info(" requestSuggestions got request for txt " + getUnitToValue() + " " + getText() + " " + getUserID());
+        //logger.info(" requestSuggestions got request for txt " + getUnitToValue() + " " + getSafeText() + " " + getUserID());
 
-        service.getResultAlternatives(getUnitToValue(), getUserID(), getText(), MonitorResult.TEXT, new AsyncCallback<Collection<String>>() {
+        service.getResultAlternatives(getUnitToValue(), getUserID(), getSafeText(), MonitorResult.TEXT, new AsyncCallback<Collection<String>>() {
           @Override
           public void onFailure(Throwable caught) {
           }
 
           @Override
           public void onSuccess(Collection<String> result) {
-            //logger.info(" requestSuggestions got request for text " + getUnitToValue() + " " + getText() + " " + getUserID() + " yielded " + result.size());
+            //logger.info(" requestSuggestions got request for text " + getUnitToValue() + " " + getSafeText() + " " + getUserID() + " yielded " + result.size());
             makeSuggestionResponse(result, callback, request);
 
           }
@@ -355,7 +355,7 @@ public class ResultManager extends PagerTable {
     return new KeyUpHandler() {
       @Override
       public void onKeyUp(KeyUpEvent event) {
-        logger.info(w.getId() + " KeyUpEvent event " + event + " item " + w.getText() + " " + w.getValue());
+      //  logger.info(w.getId() + " KeyUpEvent event " + event + " item " + w.getText() + " " + w.getValue());
         redraw();
       }
     };
@@ -366,12 +366,12 @@ public class ResultManager extends PagerTable {
       @Override
       public String onSelection(SuggestOracle.Suggestion selectedSuggestion) {
         String replacementString = selectedSuggestion.getReplacementString();
-        logger.info("UpdaterCallback " + " got update " +" " + " ---> '" + replacementString +"'");
+      //  logger.info("UpdaterCallback " + " got update " +" " + " ---> '" + replacementString +"'");
 
         // NOTE : we need both a redraw on key up and one on selection!
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
           public void execute() {
-            logger.info("--> getUpdaterCallback onSelection REDRAW ");
+     //       logger.info("--> getUpdaterCallback onSelection REDRAW ");
             redraw();
           }
         });
@@ -394,7 +394,7 @@ public class ResultManager extends PagerTable {
 
     else {
       TextBox widget = (TextBox) textSuggest.getWidget();
-      //    logger.info("checking " + widget.getElement().getExID() + " " + widget.getText() +" " + widget.getValue());
+      //    logger.info("checking " + widget.getElement().getExID() + " " + widget.getSafeText() +" " + widget.getValue());
       return widget.getValue();
     }
   }

@@ -55,6 +55,7 @@ import mitll.langtest.client.list.Reloadable;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.user.BasicDialog;
+import mitll.langtest.client.user.FormField;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.Result;
 import mitll.langtest.shared.custom.UserList;
@@ -100,9 +101,9 @@ class NewUserExercise extends BasicDialog {
   final ExerciseController controller;
   final LangTestDatabaseAsync service;
   private final HasText itemMarker;
-  BasicDialog.FormField english;
-  BasicDialog.FormField foreignLang;
-  BasicDialog.FormField translit;
+  FormField english;
+  FormField foreignLang;
+  FormField translit;
   CreateFirstRecordAudioPanel rap;
   CreateFirstRecordAudioPanel rapSlow;
 
@@ -492,7 +493,7 @@ class NewUserExercise extends BasicDialog {
    * @param onClick
    * @param foreignChanged
    * @see #audioPosted()
-   * @see #makeCreateButton(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, mitll.langtest.client.user.BasicDialog.FormField, mitll.langtest.client.exercise.RecordAudioPanel, com.github.gwtbootstrap.client.ui.ControlGroup)
+   * @see #makeCreateButton(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, FormField, mitll.langtest.client.exercise.RecordAudioPanel, com.github.gwtbootstrap.client.ui.ControlGroup)
    */
   void validateThenPost(FormField foreignLang,
                         RecordAudioPanel rap,
@@ -502,9 +503,9 @@ class NewUserExercise extends BasicDialog {
                         Panel toAddTo,
                         boolean onClick,
                         boolean foreignChanged) {
-    if (foreignLang.getText().isEmpty()) {
+    if (foreignLang.getSafeText().isEmpty()) {
       markError(foreignLang, ENTER_THE_FOREIGN_LANGUAGE_PHRASE);
-    } else if (english.getText().isEmpty()) {
+    } else if (english.getSafeText().isEmpty()) {
       String enterTheEnglishPhrase = isEnglish() ? ENTER_MEANING : ENTER_THE_ENGLISH_PHRASE;
       markError(english, enterTheEnglishPhrase);
     } else if (validateForm(foreignLang, rap, normalSpeedRecording, foreignChanged)) {
@@ -535,15 +536,15 @@ class NewUserExercise extends BasicDialog {
                                     final ListInterface<CommonShell> pagingContainer,
                                     final Panel toAddTo,
                                     final boolean onClick) {
-    //  logger.info("isValidForeignPhrase : checking phrase " + foreignLang.getText() + " before adding/changing " + newUserExercise);
-    service.isValidForeignPhrase(foreignLang.getText(), "", new AsyncCallback<Boolean>() {
+    //  logger.info("isValidForeignPhrase : checking phrase " + foreignLang.getSafeText() + " before adding/changing " + newUserExercise);
+    service.isValidForeignPhrase(foreignLang.getSafeText(), "", new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
       }
 
       @Override
       public void onSuccess(Boolean result) {
-/*        logger.info("\tisValidForeignPhrase : checking phrase " + foreignLang.getText() +
+/*        logger.info("\tisValidForeignPhrase : checking phrase " + foreignLang.getSafeText() +
             " before adding/changing " + newUserExercise + " -> " + result);*/
 
         if (result) {
@@ -563,18 +564,18 @@ class NewUserExercise extends BasicDialog {
    * @see EditableExerciseDialog#postEditItem
    */
   void grabInfoFromFormAndStuffInfoExercise(MutableExercise mutableExercise) {
-    String text = english.getText();
+    String text = english.getSafeText();
 
-    logger.info("so english  field is " + text + " fl " + foreignLang.getText());
- //   logger.info("so translit field is " + translit.getText());
+ //   logger.info("so english  field is " + text + " fl " + foreignLang.getSafeText());
+ //   logger.info("so translit field is " + translit.getSafeText());
     if (isEnglish()) {
       mutableExercise.setMeaning(text);
     }
     else {
       mutableExercise.setEnglish(text);
     }
-    mutableExercise.setForeignLanguage(foreignLang.getText());
-    mutableExercise.setTransliteration(translit.getText());
+    mutableExercise.setForeignLanguage(foreignLang.getSafeText());
+    mutableExercise.setTransliteration(translit.getSafeText());
   }
 
   /**
@@ -831,7 +832,7 @@ class NewUserExercise extends BasicDialog {
    */
   private boolean validateForm(final FormField foreignLang, final RecordAudioPanel rap,
                                final ControlGroup normalSpeedRecording, boolean foreignChanged) {
-    if (foreignLang.getText().isEmpty()) {
+    if (foreignLang.getSafeText().isEmpty()) {
       markError(foreignLang, ENTER_THE_FOREIGN_LANGUAGE_PHRASE);
       return false;
     } else if (validRecordingCheck()) {

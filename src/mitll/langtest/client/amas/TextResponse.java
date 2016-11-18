@@ -40,6 +40,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.i18n.client.HasDirection;
+import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -249,7 +250,9 @@ class TextResponse {
 
     noPasteAnswer.addKeyUpHandler(new KeyUpHandler() {
       public void onKeyUp(KeyUpEvent event) {
-        check.setEnabled(noPasteAnswer.getText().length() > 0);
+        String text = noPasteAnswer.getText();
+        text = sanitize(text);
+        check.setEnabled(!text.isEmpty());
       }
     });
 
@@ -261,6 +264,10 @@ class TextResponse {
       });
     }
     return noPasteAnswer;
+  }
+
+  private String sanitize(String text) {
+    return SimpleHtmlSanitizer.sanitizeHtml(text).asString();
   }
 
   /**
