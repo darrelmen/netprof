@@ -367,6 +367,8 @@ public class ListManager implements RequiresResize {
   public void viewReview(final Panel contentPanel) {
     final ListManager outer = this;
     final Panel child = getContentChild(contentPanel);
+
+    long then = System.currentTimeMillis();
 //    logger.info("------> viewReview : reviewLessons for " + userManager.getUser());
     service.getReviewLists(new AsyncCallback<List<UserList<CommonShell>>>() {
       @Override
@@ -375,7 +377,10 @@ public class ListManager implements RequiresResize {
 
       @Override
       public void onSuccess(List<UserList<CommonShell>> reviewLists) {
-        // logger.info("\tviewReview : reviewLessons for " + userManager.getUser() + " got " + reviewLists);
+
+        long now = System.currentTimeMillis();
+
+        logger.info("\tviewReview : reviewLessons for " + userManager.getUser() + " got " + reviewLists.size() + " in " + (now-then) + " millis");
         new UserListCallback(outer, contentPanel, child,
             new ScrollPanel(), REVIEW, false, false, userManager, false, "").onSuccess(reviewLists);
       }

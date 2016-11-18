@@ -50,6 +50,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.ReloadableContainer;
 import mitll.langtest.client.custom.tabs.RememberTabAndContent;
 import mitll.langtest.client.dialog.DialogHelper;
+import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.client.exercise.WaveformPostAudioRecordButton;
@@ -82,7 +83,7 @@ import java.util.logging.Logger;
 public class ReviewEditableExercise extends EditableExerciseDialog {
   public static final String DELETE_AUDIO = "Delete Audio";
   public static final String DELETE_THIS_AUDIO_CUT = "Delete this audio cut.";
-  private final Logger logger = Logger.getLogger("ReviewEditableExercise");
+  final Logger logger = Logger.getLogger("ReviewEditableExercise");
 
   private static final String MARK_FIXED_TOOLTIP = "Mark item as fixed, removed defective audio, and remove item from the review list.";
 
@@ -216,7 +217,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     contextTrans = makeBoxAndAnno(row, "Context Translation", "", contextTransAnno);
   }
 
-
+  int currentTab = 0;
   /**
    * @return
    * @see #addNew
@@ -229,13 +230,28 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
 
     TabPanel tabPanel = new TabPanel();
 
+    tabLinks.clear();
+
+//    Set<Long> preferredVoices = controller.getProps().getPreferredVoices();
+//    Map<MiniUser, List<AudioAttribute>> malesMap   = audioAttributeExercise.getMostRecentAudio(true, preferredVoices);
+//    Map<MiniUser, List<AudioAttribute>> femalesMap = audioAttributeExercise.getMostRecentAudio(false, preferredVoices);
+
     addAudioByGender(audioAttributeExercise, tabPanel, true);
     addAudioByGender(audioAttributeExercise, tabPanel, false);
 
     addNewOrYourRecordingTab(tabPanel);
 
-    logger.info("makeAudioRow - select first tab ");
-    tabPanel.selectTab(0);
+    tabPanel.addShowHandler(new TabPanel.ShowEvent.Handler() {
+      @Override
+      public void onShow(TabPanel.ShowEvent showEvent) {
+        currentTab = tabLinks.indexOf(showEvent.getTarget());
+//        logger.info("got show event " + showEvent);
+//        logger.info("got target     " + target + " now " + currentTab);
+      }
+    });
+
+//  logger.info("makeAudioRow - select tab # " +currentTab);
+    tabPanel.selectTab(currentTab);
 
     return tabPanel;
   }
@@ -265,15 +281,23 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   }
 
   private DivWidget getRecordingWidget() {
-    DivWidget widget = new DivWidget();
-    widget.add(getRecordAudioWithAnno(widget, Result.AUDIO_TYPE_REGULAR));
+    DivWidget widget = new MyDivWidget();
+
+    panels.clear();
+
+    Panel recordAudioWithAnno = getRecordAudioWithAnno(widget, Result.AUDIO_TYPE_REGULAR);
+    widget.add(recordAudioWithAnno);
     widget.add(getRecordAudioWithAnno(widget, Result.AUDIO_TYPE_SLOW));
 
     return widget;
   }
 
+  List<MyRecordAudioPanel> panels = new ArrayList<>();
+
   private Panel getRecordAudioWithAnno(DivWidget widget, String audioTypeRegular) {
     MyRecordAudioPanel w = new MyRecordAudioPanel(widget, audioTypeRegular, instance);
+
+    panels.add(w);
 
     if (w.getAudioAttribute() == null) {
       return w;
@@ -324,48 +348,55 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    * @param users
    * @see #makeAudioRow()
    */
-  private <X extends CommonShell & AnnotationExercise> void addTabsForUsers(X commonExercise, TabPanel tabPanel,
+  private <X extends CommonShell & AnnotationExercise> void addTabsForUsers(X commonExercise,
+                                                                            TabPanel tabPanel,
                                                                             Map<MiniUser, List<AudioAttribute>> userToAudio,
                                                                             List<MiniUser> users) {
     int me = controller.getUser();
     for (MiniUser user : users) {
-
       boolean byMe = (user.getId() == me);
       if (!byMe) {
-        String tabTitle = getUserTitle(me, user);
-
-        RememberTabAndContent tabAndContent = getRememberTabAndContent(tabPanel, tabTitle, true, true);
-
-        boolean allHaveBeenPlayed = true;
-
         List<AudioAttribute> audioAttributes = userToAudio.get(user);
-        for (AudioAttribute audio : audioAttributes) {
-          if (!audio.isHasBeenPlayed()) {
-            allHaveBeenPlayed = false;
-          }
-          Widget panelForAudio = getPanelForAudio(commonExercise, audio, tabAndContent);
-          if (audioAttributes.size() == 2 && audioAttributes.indexOf(audio) == 0) {
-            panelForAudio.addStyleName("bottomFiveMargin");
-          }
-          tabAndContent.getContent().add(panelForAudio);
-          if (audio.isHasBeenPlayed()) {
-            audioWasPlayed.add(panelForAudio);
-          }
-        }
 
-        if (allHaveBeenPlayed) {
-          tabAndContent.getTab().setIcon(IconType.CHECK_SIGN);
+        if (!audioAttributes.isEmpty()) {
+          String tabTitle = getUserTitle(me, user);
+
+          RememberTabAndContent tabAndContent = getRememberTabAndContent(tabPanel, tabTitle, true, true);
+
+          boolean allHaveBeenPlayed = true;
+
+          for (AudioAttribute audio : audioAttributes) {
+            if (!audio.isHasBeenPlayed()) {
+              allHaveBeenPlayed = false;
+            }
+            Widget panelForAudio = getPanelForAudio(commonExercise, audio, tabAndContent);
+            if (audioAttributes.size() == 2 && audioAttributes.indexOf(audio) == 0) {
+              panelForAudio.addStyleName("bottomFiveMargin");
+            }
+            tabAndContent.getContent().add(panelForAudio);
+            if (audio.isHasBeenPlayed()) {
+              audioWasPlayed.add(panelForAudio);
+            }
+          }
+
+          if (allHaveBeenPlayed) {
+            tabAndContent.getTab().setIcon(IconType.CHECK_SIGN);
+          }
         }
       }
     }
   }
+
+  private  List<TabLink> tabLinks = new ArrayList<>();
 
   private RememberTabAndContent getRememberTabAndContent(TabPanel tabPanel,
                                                          String tabTitle,
                                                          boolean addRightMargin,
                                                          boolean isCheckable) {
     RememberTabAndContent tabAndContent = new RememberTabAndContent(IconType.QUESTION_SIGN, tabTitle, isCheckable);
-    tabPanel.add(tabAndContent.getTab().asTabLink());
+    TabLink child = tabAndContent.getTab().asTabLink();
+    tabPanel.add(child);
+    tabLinks.add(child);
     tabs.add(tabAndContent);
 
     // TODO : when do we need this???
@@ -387,8 +418,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
 
   private String getUserTitle(MiniUser user) {
     String suffix = user.getAge() < 99 ? " age " + user.getAge() : "";
-    String userid = true//user.isAdmin()
-        ? " (" + user.getUserID() + ")" : "";
+    String userid = " (" + user.getUserID() + ")";
     return (user.isMale() ? MALE : FEMALE) +
         userid +
         suffix;
@@ -849,7 +879,28 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     return "Transliteration";
   }
 
-  private class MyRecordAudioPanel extends RecordAudioPanel {
+  private class MyDivWidget extends DivWidget implements BusyPanel {
+    @Override
+    public boolean isBusy() {
+      return false;
+    }
+
+    @Override
+    public void setBusy(boolean v) {
+    //  logger.info("this " + this.getClass() + " got a busy " + v);
+
+      for (RecordAudioPanel ap : panels) {
+        if (!ap.isRecording()) {
+          ap.setEnabled(!v);
+        }
+        else {
+          ap.setEnabled(v);
+        }
+      }
+    }
+  }
+
+  private class MyRecordAudioPanel extends RecordAudioPanel implements BusyPanel {
     private Button deleteButton;
     private Widget comment;
 
@@ -903,7 +954,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
                 comment.setVisible(false);
               }
 
-         //     reloadLearnList();
+              //     reloadLearnList();
             }
           });
         }
@@ -917,6 +968,16 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     @Override
     protected float getWaveformHeight() {
       return 60;
+    }
+
+    @Override
+    public boolean isBusy() {
+      return false;
+    }
+
+    @Override
+    public void setBusy(boolean v) {
+        logger.info("this " + this.getClass() + " got a busy " + v);
     }
   }
 }

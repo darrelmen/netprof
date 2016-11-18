@@ -45,7 +45,9 @@ public interface CommonExercise extends CommonShell, AudioAttributeExercise, Ann
 
   List<String> getFirstPron();
 
+/*
   String getRefAudioIndex();
+*/
 
   boolean isPredefined();
 
