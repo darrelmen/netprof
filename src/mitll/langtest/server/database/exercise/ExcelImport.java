@@ -83,17 +83,6 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   private boolean first = false;
 
   /**
-   * JUST FOR TESTING
-   * @param file
-   * @param serverProperties
-   */
-/*
-  public ExcelImport(String file, ServerProperties serverProperties) {
-    this(file, serverProperties, null, false);
-  }
-*/
-
-  /**
    * @param file
    * @param userListManager
    * @param addDefects
@@ -112,9 +101,9 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     this.usePredefinedTypeOrder = serverProps.usePredefinedTypeOrder();
     this.skipSemicolons = serverProps.shouldSkipSemicolonEntries();
     // from the tier index property
-    this.unitIndex = serverProps.getUnitChapterWeek()[0];
+    this.unitIndex    = serverProps.getUnitChapterWeek()[0];
     this.chapterIndex = serverProps.getUnitChapterWeek()[1];
-    this.weekIndex = serverProps.getUnitChapterWeek()[2];
+    this.weekIndex    = serverProps.getUnitChapterWeek()[2];
     if (DEBUG) logger.debug("unit " + unitIndex + " chapter " + chapterIndex + " week " + weekIndex);
   }
 
@@ -680,10 +669,9 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     String unit = getCell(next, unitIndex);
     String chapter = getCell(next, chapterIndex);
     String week = getCell(next, weekIndex);
-    List<SectionHelper.Pair> pairs = new ArrayList<SectionHelper.Pair>();
 
-    if (unit.length() == 0 && chapter.length() == 0 && week.length() == 0) {
-      unit = "Other";
+    if (unit.isEmpty() && chapter.isEmpty() && week.isEmpty()) {
+      unit    = "Other";
       chapter = "Other";
     }
 
@@ -698,19 +686,30 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
         ")" + unitIndex + "/" + unit + " chapter " + chapterIndex + "/(" +chapterName+
         ")" + chapter + " week (" + weekName+ ") : " + week);*/
 
+    List<SectionHelper.Pair> pairs = new ArrayList<SectionHelper.Pair>();
+    SectionHelper<CommonExercise> sectionHelper = getSectionHelper();
     if (unit.length() > 0) {
-      pairs.add(getSectionHelper().addExerciseToLesson(imported, unitName, unit));
+      pairs.add(sectionHelper.addExerciseToLesson(imported, unitName, unit));
+    }
+    else {
+      unit = chapter;
+      pairs.add(sectionHelper.addExerciseToLesson(imported, unitName, unit));
     }
     if (chapter.length() > 0) {
       if (language.equalsIgnoreCase("English")) {
         chapter = (unitIndex == -1 ? "" : unit + "-") + chapter; // hack for now to get unique chapters...
       }
-      pairs.add(getSectionHelper().addExerciseToLesson(imported, chapterName, chapter));
+      pairs.add(sectionHelper.addExerciseToLesson(imported, chapterName, chapter));
+    } else {
+      chapter = unit;
+      pairs.add(sectionHelper.addExerciseToLesson(imported, chapterName, chapter));
+
+//      logger.info("skip unit '" +unit + "' and chapter '" +chapter+ "'");
     }
     if (week.length() > 0) {
-      pairs.add(getSectionHelper().addExerciseToLesson(imported, weekName, week));
+      pairs.add(sectionHelper.addExerciseToLesson(imported, weekName, week));
     }
-    getSectionHelper().addAssociations(pairs);
+    sectionHelper.addAssociations(pairs);
   }
 
   private String getCell(Row next, int col) {
