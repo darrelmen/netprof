@@ -43,6 +43,8 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.HasClickHandlers;
+import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -235,6 +237,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private final KeyPressHelper keyPressHelper = new KeyPressHelper(false, true);
   private boolean isMicConnected = true;
   private InitialUI initialUI;
+  public static EventBus EVENT_BUS = GWT.create(SimpleEventBus.class);
 
   /**
    * This gets called first.

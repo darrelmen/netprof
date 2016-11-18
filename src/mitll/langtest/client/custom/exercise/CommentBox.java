@@ -69,6 +69,8 @@ import java.util.logging.Logger;
 public class CommentBox extends PopupContainer {
   private final Logger logger = Logger.getLogger("CommentBox");
 
+  private static final int MAX_LENGTH = 500;
+
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
   private static final String CLEAR_COMMENT = "Clear comment";
@@ -192,7 +194,6 @@ public class CommentBox extends PopupContainer {
     });
 
     return row;
-
   }
 
   /**
@@ -204,7 +205,6 @@ public class CommentBox extends PopupContainer {
    * @see mitll.langtest.client.flashcard.FlashcardPanel#getFirstRow(mitll.langtest.client.exercise.ExerciseController)
    */
   public Widget getEntry(String field, Widget content, ExerciseAnnotation annotation) {
-
     field = fixAudioField(field);
     final HidePopupTextBox commentEntryText = getCommentBox(field);
 
@@ -229,7 +229,6 @@ public class CommentBox extends PopupContainer {
     // content on left side, comment button on right
 
     Panel row = getCommentAndButtonsRow(field, content, commentButton, clearButton);
-
     showOrHideCommentButton(commentButton, clearButton, isCorrect);
     return row;
   }
@@ -346,7 +345,6 @@ public class CommentBox extends PopupContainer {
       addCloseHandler(event -> {
         registration.logEvent(commentBox, "Comment_TextBox", exerciseID, "submit comment '" + commentBox.getValue() + "'");
         commentComplete(commentBox, field, commentButton, clearButton);
-
       });
     }
   }
@@ -422,8 +420,7 @@ public class CommentBox extends PopupContainer {
    * @see MyPopup#configure(com.github.gwtbootstrap.client.ui.TextBox, com.google.gwt.user.client.ui.Widget, com.google.gwt.user.client.ui.Widget)
    */
   private <T extends ValueBoxBase> void commentComplete(T commentEntry, String field, Widget commentButton, Widget clearButton) {
-    String text = commentEntry.getText();
-    commentComplete(field, commentButton, clearButton, sanitize(text));
+    commentComplete(field, commentButton, clearButton, sanitize(commentEntry.getText()));
   }
 
   private String sanitize(String text) {
@@ -432,9 +429,10 @@ public class CommentBox extends PopupContainer {
 
   private void commentComplete(String field, Widget commentButton, Widget clearButton, String comment) {
     String previous = fieldToComment.get(field);
+    comment = normalize(comment);
     if (previous == null || !previous.equals(comment)) {
       fieldToComment.put(field, comment);
-      boolean isCorrect = comment.length() == 0;
+      boolean isCorrect = comment.isEmpty();
 
       logger.info("commentComplete " + field + " comment '" + comment + "' correct = " + isCorrect);
 
@@ -450,6 +448,12 @@ public class CommentBox extends PopupContainer {
       annotationExercise.addAnnotation(field, isCorrect ? TYPICAL.CORRECT.toString() : TYPICAL.INCORRECT.toString(), comment);
       //logger.info("\t commentComplete : annotations now " + exerciseID.getFields());
     }
+  }
+
+  private String normalize(String comment) {
+    comment = comment.trim();
+    if (comment.length() > MAX_LENGTH) comment = comment.substring(0, MAX_LENGTH);
+    return comment;
   }
 
   private Tooltip setButtonTitle(Widget button, boolean isCorrect, String comment) {

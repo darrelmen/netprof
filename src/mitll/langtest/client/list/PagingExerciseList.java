@@ -232,7 +232,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     for (T es : pagingContainer.getExercises()) {
       STATE state = es.getState();
       if (state != null && state.equals(STATE.UNSET)) {
-        logger.info("first unset is " + es.getID() + " state " + state);
+       // logger.info("first unset is " + es.getID() + " state " + state);
         return es;
       }
     }

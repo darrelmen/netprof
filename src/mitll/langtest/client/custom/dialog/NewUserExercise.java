@@ -144,6 +144,7 @@ class NewUserExercise extends BasicDialog {
     this.originalList = originalList;
   }
 
+
   /**
    * @param ul
    * @param originalList
@@ -193,7 +194,6 @@ class NewUserExercise extends BasicDialog {
     this.listInterface = listInterface;
 
     container.add(getCreateButton(ul, listInterface, toAddTo, normalSpeedRecording));
-
 //    logger.info("addNew (" +this.getClass()+
 //        ") : adding blur handler to " +foreignLang.getWidget().getElement().getExID());
 
@@ -222,22 +222,6 @@ class NewUserExercise extends BasicDialog {
     return container;
   }
 
-/*  private class ResizableDiv extends DivWidget implements RequiresResize {
-
-    @Override
-    public void onResize() {
-      for (int i = 0; i < getWidgetCount(); i++) {
-        Widget widget = getWidget(i);
-        if (widget instanceof RequiresResize) {
-          ((RequiresResize) widget).onResize();
-//          logger.info("ResizableDiv : resizing " + widget.getElement().getId() );
-        } else {
-//          logger.info("ResizableDiv : skipping " + widget.getElement().getId() + "  : " + widget.getClass());
-        }
-      }
-    }
-  }*/
-
   private class ResizableFluid extends FluidContainer implements RequiresResize {
     @Override
     public void onResize() {
@@ -259,7 +243,6 @@ class NewUserExercise extends BasicDialog {
     FluidRow row = new FluidRow();
 
     normalSpeedRecording = makeRegularAudioPanel(row);
-    // logger.info("makeAudioRow ---> " + normalSpeedRecording);
     normalSpeedRecording.addStyleName("buttonGroupInset3");
 
     slowSpeedRecording = makeSlowAudioPanel(row);
@@ -273,7 +256,7 @@ class NewUserExercise extends BasicDialog {
   void addItemsAtTop(Panel container) {
   }
 
-  protected void gotBlur() {
+  void gotBlur() {
     gotBlur(foreignLang, rap, normalSpeedRecording, ul, listInterface, toAddTo);
   }
 
