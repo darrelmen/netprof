@@ -61,7 +61,7 @@ import mitll.langtest.client.scoring.EmptyScoreListener;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayListener;
-import mitll.langtest.client.user.BasicDialog;
+import mitll.langtest.client.user.FormField;
 import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.shared.AudioAnswer;
 import mitll.langtest.shared.ExerciseAnnotation;
@@ -113,8 +113,8 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
 
   private final PagingExerciseList<CommonShell, CommonExercise> exerciseList;
 
-  private BasicDialog.FormField context;
-  private BasicDialog.FormField contextTrans;
+  private FormField context;
+  private FormField contextTrans;
   private final HTML contextAnno = new HTML();
   private final HTML contextTransAnno = new HTML();
   private String originalContext = "";
@@ -195,8 +195,8 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
 
   void grabInfoFromFormAndStuffInfoExercise(MutableExercise mutableExercise) {
     super.grabInfoFromFormAndStuffInfoExercise(mutableExercise);
-    mutableExercise.setContext(context.getText());
-    mutableExercise.setContextTranslation(contextTrans.getText());
+    mutableExercise.setContext(context.getSafeText());
+    mutableExercise.setContextTranslation(contextTrans.getSafeText());
   }
 
   protected void makeOptionalRows(DivWidget upper) {
@@ -903,7 +903,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
                 comment.setVisible(false);
               }
 
-              reloadLearnList();
+         //     reloadLearnList();
             }
           });
         }

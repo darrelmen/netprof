@@ -420,11 +420,11 @@ public class UserPassLogin extends UserDialog {
     user.box.addBlurHandler(new BlurHandler() {
       @Override
       public void onBlur(BlurEvent event) {
-        if (!user.getText().isEmpty()) {
-          eventRegistration.logEvent(user.box, USER_NAME_BOX, "N/A", "left username field '" + user.getText() + "'");
+        if (!user.getSafeText().isEmpty()) {
+          eventRegistration.logEvent(user.box, USER_NAME_BOX, "N/A", "left username field '" + user.getSafeText() + "'");
 
-          //    logger.info("checking makeSignInUserName " + user.getText());
-          service.userExists(user.getText(), "", new AsyncCallback<User>() {
+          //    logger.info("checking makeSignInUserName " + user.getSafeText());
+          service.userExists(user.getSafeText(), "", new AsyncCallback<User>() {
             @Override
             public void onFailure(Throwable caught) {
 
@@ -432,7 +432,7 @@ public class UserPassLogin extends UserDialog {
 
             @Override
             public void onSuccess(User result) {
-              //       System.out.println("makeSignInUserName : for " + user.getText() + " got back " + result);
+              //       System.out.println("makeSignInUserName : for " + user.getSafeText() + " got back " + result);
               if (result != null) {
                 String emailHash = result.getEmailHash();
                 String passwordHash = result.getPasswordHash();
@@ -456,7 +456,7 @@ public class UserPassLogin extends UserDialog {
     forgotPassword.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        if (user.getText().isEmpty()) {
+        if (user.getSafeText().isEmpty()) {
           markErrorBlur(user, ENTER_A_USER_NAME);
           return;
         }
@@ -868,7 +868,7 @@ public class UserPassLogin extends UserDialog {
           //         eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "didn't fill in age ");
           //         markErrorBlur(registrationInfo.getAgeEntryGroup().box, AGE_ERR_MSG,Placement.TOP);
           //   registrationInfo.getAgeEntryGroup().markError(AGE_ERR_MSG);
-        } else if (selectedRole == User.Kind.CONTENT_DEVELOPER && registrationInfo.getDialectGroup().getText().isEmpty()) {
+        } else if (selectedRole == User.Kind.CONTENT_DEVELOPER && registrationInfo.getDialectGroup().getSafeText().isEmpty()) {
           eventRegistration.logEvent(signUp, "SignUp_Button", "N/A", "didn't fill in dialect ");
           markErrorBlur(registrationInfo.getDialectGroup(), "Enter a language dialect.");
         } else {
@@ -900,9 +900,9 @@ public class UserPassLogin extends UserDialog {
 
     boolean isCD = kind == User.Kind.CONTENT_DEVELOPER;
     String gender = isCD ? registrationInfo.isMale() ? MALE : "female" : MALE;
-    String age = isCD ? registrationInfo.getAgeEntryGroup().getText() : "";
+    String age = isCD ? registrationInfo.getAgeEntryGroup().getSafeText() : "";
     int age1 = isCD ? (age.isEmpty() ? 99 : Integer.parseInt(age)) : 0;
-    String dialect = isCD ? registrationInfo.getDialectGroup().getText() : "unk";
+    String dialect = isCD ? registrationInfo.getDialectGroup().getSafeText() : "unk";
 
     signUp.setEnabled(false);
 
@@ -1065,7 +1065,7 @@ public class UserPassLogin extends UserDialog {
           signIn.setEnabled(true);
         }
       } else { // special pathway...
-        String enteredPass = Md5Hash.getHash(password.getText());
+        String enteredPass = Md5Hash.getHash(password.getSafeText());
         if (enteredPass.equals(MAGIC_PASS)) {
           eventRegistration.logEvent(signIn, "sign in", "N/A", "sign in as user '" + user + "'");
           storeUser(result);
@@ -1091,7 +1091,7 @@ public class UserPassLogin extends UserDialog {
    */
   private void copyInfoToSignUp(User result) {
     signUpUser.box.setText(result.getUserID());
-    signUpPassword.box.setText(password.getText());
+    signUpPassword.box.setText(password.getSafeText());
     setFocusOn(signUpEmail.getWidget());
     eventRegistration.logEvent(signIn, "sign in", "N/A", "copied info to sign up form");
 
