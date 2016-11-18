@@ -1,9 +1,10 @@
 [submodule "imagewriter"]
 	path = imagewriter
-	url = git@g62code:gvidaver/imagewriter
+	url = https://gh.ll.mit.edu/DLI-LTEA/imagewriter
 [submodule "npdata"]
 	path = npdata
-	url = git@g62code:gvidaver/npdata
+	url = https://gh.ll.mit.edu/DLI-LTEA/npdata
 [submodule "gradle-common"]
 	path = gradle-common
 	url = https://gh.ll.mit.edu/Domino/gradle-common.git
+
