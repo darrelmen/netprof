@@ -222,7 +222,7 @@ public class NPFHelper implements RequiresResize {
    * @see ##getRightSideContent
    */
   PagingExerciseList<CommonShell, CommonExercise> makeNPFExerciseList(Panel right, String instanceName, boolean showFirstNotCompleted) {
-    logger.info("got " + getClass() + " instance " + instanceName+ " show first " + showFirstNotCompleted);
+  //  logger.info("got " + getClass() + " instance " + instanceName+ " show first " + showFirstNotCompleted);
     final PagingExerciseList<CommonShell, CommonExercise> exerciseList = makeExerciseList(right, instanceName, showFirstNotCompleted);
     setFactory(exerciseList, instanceName, showQC);
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {

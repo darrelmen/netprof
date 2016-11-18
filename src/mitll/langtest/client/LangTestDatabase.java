@@ -51,7 +51,7 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.result.ResultManager;
 import mitll.langtest.client.scoring.AudioPanel;
-import mitll.langtest.client.user.BasicDialog;
+import mitll.langtest.client.user.FormField;
 import mitll.langtest.client.user.UserPassLogin;
 import mitll.langtest.shared.*;
 import mitll.langtest.shared.analysis.PhoneReport;
@@ -150,7 +150,7 @@ public interface LangTestDatabase extends RemoteService {
 
 
   /**
-   * @see mitll.langtest.client.user.ResetPassword#getChangePasswordButton(String, Fieldset, BasicDialog.FormField, BasicDialog.FormField)
+   * @see mitll.langtest.client.user.ResetPassword#getChangePasswordButton(String, Fieldset, FormField, FormField)
    * @param token
    * @param first
    * @return
@@ -403,7 +403,7 @@ public interface LangTestDatabase extends RemoteService {
   // User Exercise Lists -
 
   /**
-   * @see mitll.langtest.client.custom.dialog.CreateListDialog#addUserList(BasicDialog.FormField, TextArea, BasicDialog.FormField, boolean)
+   * @see mitll.langtest.client.custom.dialog.CreateListDialog#addUserList(FormField, TextArea, FormField, boolean)
    * @param userid
    * @param name
    * @param description
