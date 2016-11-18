@@ -4,3 +4,6 @@
 [submodule "npdata"]
 	path = npdata
 	url = git@g62code:gvidaver/npdata
+[submodule "gradle-common"]
+	path = gradle-common
+	url = https://gh.ll.mit.edu/Domino/gradle-common.git
