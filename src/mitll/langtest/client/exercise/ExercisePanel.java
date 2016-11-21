@@ -72,7 +72,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
   final ListInterface<L> exerciseList;
   private final Map<Integer, Set<Widget>> indexToWidgets = new HashMap<Integer, Set<Widget>>();
   final String message;
-  final String instance;
+  protected final String instance;
 
   /**
    * @param e

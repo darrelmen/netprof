@@ -128,7 +128,7 @@ public class UserManager {
     if (user != NO_USER_SET) {
      // logger.info("UserManager.login : current user : " + user);
       //console("UserManager.login : current user : " + user);
-      rememberAudioType();
+      //rememberAudioType();
       getPermissionsAndSetUser(user);
     } else {
       userNotification.showLogin();
@@ -235,7 +235,7 @@ public class UserManager {
     int user = getUser();
     if (user != NO_USER_SET) {
       //logger.info("UserManager.anonymousLogin : current user : " + user);
-      rememberAudioType(); // TODO : necessary?
+      //rememberAudioType(); // TODO : necessary?
       getPermissionsAndSetUser(user);
     } else {
       logger.info("UserManager.anonymousLogin : make new user, since user = " + user);
@@ -284,7 +284,7 @@ public class UserManager {
     }
   }
 
-  private void rememberAudioType() {
+/*  private void rememberAudioType() {
     if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
 
@@ -292,9 +292,9 @@ public class UserManager {
       if (audioType == null) {
         audioType = Result.AUDIO_TYPE_FAST_AND_SLOW;
       }
-      userNotification.rememberAudioType(audioType);
+     // userNotification.rememberAudioType(audioType);
     }
-  }
+  }*/
 
   /**
    * @return id of user
@@ -407,7 +407,7 @@ public class UserManager {
   }
 
   private void clearCookieState() {
-    userNotification.rememberAudioType(Result.AUDIO_TYPE_UNSET);
+   // userNotification.rememberAudioType(Result.AUDIO_TYPE_UNSET);
 /*
     if (USE_COOKIE) {
       Cookies.setCookie("sid", "" + NO_USER_SET);
@@ -443,7 +443,7 @@ public class UserManager {
       // localStorageIfSupported.setItem(getLoginType(), "" + userType);
       logger.info("storeUser : user now " + user.getId() + " / " + getUser() + " audio '" + audioType +
           "' expires in " + (DURATION / 1000) + " seconds");
-      userNotification.rememberAudioType(audioType);
+     // userNotification.rememberAudioType(audioType);
 
       gotNewUser(user);
 
