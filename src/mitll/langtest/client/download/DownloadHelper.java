@@ -117,9 +117,10 @@ public class DownloadHelper {
     isRegular = true;
 
     DivWidget container = new DivWidget();
-    if (selectionState.isEmpty()) {
+    boolean empty = selectionState.isEmpty();
+    if (empty) {
       container.add(new Heading(3, "Download spreadsheet for whole course."));
-      container.add(new Heading(4, "Select a unit or chapter to download audio."));
+      container.add(new Heading(4, "If you also want to download audio, select a unit or chapter."));
     } else {
       status1.setText("");
       status1.setHeight("20px");
@@ -152,8 +153,12 @@ public class DownloadHelper {
       container.add(row);
     }
 
+    String title = "Download Audio and Spreadsheet";
+
+    if (empty) title = "Download Content Spreadsheeet";
+
     closeButton = new DialogHelper(true).show(
-        "Download Audio and Spreadsheet",
+        title,
         Collections.emptyList(),
         container,
         "Download",
@@ -171,7 +176,7 @@ public class DownloadHelper {
           }
         }, 550);
     closeButton.setType(ButtonType.SUCCESS);
-    closeButton.setEnabled(selectionState.isEmpty());
+    closeButton.setEnabled(empty);
   }
 
   private FluidRow getStatusArea() {

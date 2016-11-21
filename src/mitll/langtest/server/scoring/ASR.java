@@ -61,9 +61,6 @@ public interface ASR {
 	 * @param sentence
 	 * @param lmSentences
 	 * @param imageOutDir
-	 * @paramx imageWidth
-	 * @paramx imageHeight
-	 * @paramx useScoreForBkgColor
 	 * @param decode
 	 * @param useCache
 	 * @param prefix
@@ -77,9 +74,6 @@ public interface ASR {
 													 Collection<String> lmSentences,
                            String transliteration,
                            String imageOutDir,
-
-//													 int imageWidth, int imageHeight,
-  //                         boolean useScoreForBkgColor,
                            ImageOptions imageOptions,
 													 boolean decode,
 													 boolean useCache,

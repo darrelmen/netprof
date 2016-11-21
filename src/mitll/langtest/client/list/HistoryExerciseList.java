@@ -73,7 +73,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
   protected final SectionWidgetContainer<V> sectionWidgetContainer;
 
   protected static final boolean DEBUG_ON_VALUE_CHANGE = false;
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   /**
    * @param currentExerciseVPanel
@@ -448,7 +448,8 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
         if (DEBUG) {
           logger.info("HistoryExerciseList.loadExercisesUsingPrefix looking for '" + prefix +
               "' (" + prefix.length() + " chars) in context of " + typeToSection + " list " + userListID +
-              " instance " + getInstance() + " user " + controller.getUser() + " unrecorded " + getUnrecorded() +
+              " instance " + getInstance() + " user " + controller.getUser() +
+              //" unrecorded " + getUnrecorded() +
               " only examples " + isOnlyExamples());
         }
         scheduleWaitTimer();

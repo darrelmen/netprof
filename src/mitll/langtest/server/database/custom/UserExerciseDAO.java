@@ -252,6 +252,7 @@ public class UserExerciseDAO extends DAO {
     createIndex(database, EXERCISEID, USEREXERCISE);
   }
 
+  int c = 0;
   /**
    * @param listID
    * @return
@@ -273,8 +274,6 @@ public class UserExerciseDAO extends DAO {
             " found " + userExercises.size() + " exercises userExercises on list " + listID);
       }
 
-
-      int c = 0;
       for (CommonExercise ue : userExercises) {
         // if (DEBUG) logger.debug("\ton list " + listID + " " + ue.getID() + " / " + ue.getUniqueID() + " : " + ue);
         if (ue.isPredefined()) {

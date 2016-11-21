@@ -32,6 +32,7 @@
 
 package mitll.langtest.client.list;
 
+import com.github.gwtbootstrap.client.ui.Heading;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Command;
@@ -70,8 +71,11 @@ import java.util.logging.Logger;
 public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     extends VerticalPanel
     implements ListInterface<T>, ProvidesResize {
-  private static final String EMPTY_PANEL = "placeHolderWhenNoExercises";
   private final Logger logger = Logger.getLogger("ExerciseList");
+  /**
+   * @see #showEmptyExercise
+   */
+  private static final String EMPTY_PANEL = "placeHolderWhenNoExercises";
 
   private static final int MAX_MSG_LEN = 200;
   boolean incorrectFirstOrder = false;
@@ -750,11 +754,13 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     super.clear();
   }
 
+  /**
+   * Compare with google response for this state.
+   */
   void showEmptyExercise() {
-    createdPanel = new SimplePanel();
+    createdPanel = new SimplePanel(new Heading(3,"<b>Your search or selection did not match any items.</b>"));
     createdPanel.getElement().setId(EMPTY_PANEL);
     innerContainer.setWidget(createdPanel);
-
   }
 
   @Override
