@@ -488,7 +488,7 @@ public class UserListManager {
 
     List<CommonShell> copy = new ArrayList<>();
 
-    for (CommonExercise orig:onList) copy.add(orig);
+    for (CommonExercise orig:onList) copy.add(orig.getShell());
 
     long now = System.currentTimeMillis();
 

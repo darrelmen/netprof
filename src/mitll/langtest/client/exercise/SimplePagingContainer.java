@@ -87,7 +87,7 @@ public class SimplePagingContainer<T> implements RequiresResize {
     dataProvider.addDataDisplay(table);
 
     // Create a SimplePager.
-    final SimplePager pager = new SimplePager();
+    final SimplePager pager = new SimplePager(SimplePager.TextLocation.CENTER, true, true);
 
     // Set the cellList as the display.
     pager.setDisplay(table);
@@ -114,7 +114,9 @@ public class SimplePagingContainer<T> implements RequiresResize {
     return new CellTable<T>(getPageSize(), o);
   }
 
-  protected int getPageSize() { return PAGE_SIZE;  }
+  protected int getPageSize() {
+    return PAGE_SIZE;
+  }
 
   protected CellTable.Resources chooseResources() {
     CellTable.Resources o;
@@ -123,7 +125,7 @@ public class SimplePagingContainer<T> implements RequiresResize {
       //logger.info("simplePaging : chooseResources RTL - content");
       o = GWT.create(RTLTableResources.class);
     } else {
-     // logger.info("simplePaging : chooseResources LTR - content");
+      // logger.info("simplePaging : chooseResources LTR - content");
       o = GWT.create(TableResources.class);
     }
     return o;
@@ -247,7 +249,7 @@ public class SimplePagingContainer<T> implements RequiresResize {
     int newIndex = pageNum * table.getPageSize();
     if (i < table.getPageStart()) {
       int newStart = Math.max(0, newIndex);//table.getPageStart() - table.getPageSize());
-    //  if (ClickablePagingContainer.DEBUG) logger.info("new start of prev page " + newStart + " vs current " + table.getVisibleRange());
+      //  if (ClickablePagingContainer.DEBUG) logger.info("new start of prev page " + newStart + " vs current " + table.getVisibleRange());
       table.setVisibleRange(newStart, table.getPageSize());
     } else {
       int pageEnd = table.getPageStart() + table.getPageSize();

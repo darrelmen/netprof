@@ -227,8 +227,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private UserManager userManager;
   private FlashRecordPanelHeadless flashRecordPanel;
 
-  private String audioType = Result.AUDIO_TYPE_UNSET;
-
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
   private final BrowserCheck browserCheck = new BrowserCheck();
   private SoundManagerStatic soundManager;
@@ -732,7 +730,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   @Override
   public void rememberAudioType(String audioType) {
-    this.audioType = audioType;
+   // this.audioType = audioType;
   }
 
   public User.Kind getUserKind() { return userManager.getUserKind(); }
