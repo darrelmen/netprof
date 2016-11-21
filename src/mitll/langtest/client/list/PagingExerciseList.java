@@ -72,7 +72,8 @@ import java.util.logging.Logger;
  */
 public abstract class PagingExerciseList<T extends CommonShell, U extends Shell> extends ExerciseList<T, U> {
   private final Logger logger = Logger.getLogger("PagingExerciseList");
-  public static final String SEARCH = "Search";
+
+  static final String SEARCH = "Search";
   private static final int TEN_SECONDS = 10 * 60 * 1000;
 
   protected final ExerciseController controller;
@@ -217,12 +218,14 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
 
   /**
    * Sometimes we want to not respect if there's an item selection in the url.
+   *
    * @param searchIfAny
    * @param exerciseID
    */
   protected void goToFirst(String searchIfAny, String exerciseID) {
     if (showFirstNotCompleted) {
-      loadFirstExercise();
+      // logger.info("goToFirst " + exerciseID + " searchIfAny '" + searchIfAny +"'");
+      loadFirstExercise(searchIfAny);
     } else {
       super.goToFirst(searchIfAny, exerciseID);
     }
@@ -232,7 +235,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     for (T es : pagingContainer.getExercises()) {
       STATE state = es.getState();
       if (state != null && state.equals(STATE.UNSET)) {
-       // logger.info("first unset is " + es.getID() + " state " + state);
+        // logger.info("first unset is " + es.getID() + " state " + state);
         return es;
       }
     }
@@ -304,7 +307,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
   private Stack<Long> pendingRequests = new Stack<>();
-  // private int typeRequestID = 0;
 
   private void gotTypeAheadEvent(String text, boolean setTypeAheadText) {
     //  logger.info("got type ahead '" + text + "' at " + new Date(keypressTimestamp));
@@ -314,7 +316,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     loadExercises(getHistoryTokenFromUIState(text, ""), text, false, false, false);
   }
 
-  protected void scheduleWaitTimer() {
+  void scheduleWaitTimer() {
     if (waitTimer != null) {
       waitTimer.cancel();
     }
@@ -327,7 +329,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     waitTimer.schedule(700);
   }
 
-  protected String getTypeAheadText() {
+  String getTypeAheadText() {
     return typeAhead != null ? typeAhead.getText() : "";
   }
 
@@ -565,9 +567,10 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
   /**
-   * @param unrecorded
+   * @paramx unrecorded
    * @see mitll.langtest.client.custom.RecorderNPFHelper#getMyListLayout
    */
+/*
   public void setUnrecorded(boolean unrecorded) {
     this.unrecorded = unrecorded;
   }
@@ -575,6 +578,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   public void setDefaultAudioFilter(boolean unrecorded) {
     this.defaultAudioFilter = unrecorded;
   }
+*/
 
   boolean isOnlyExamples() {
     return onlyExamples;

@@ -103,6 +103,10 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return refSentences;
   }
 
+  public CommonShell getShell() {
+    return new ExerciseShell(getID(), englishSentence, meaning, foreignLanguage, transliteration, context, contextTranslation, displayID);
+  }
+
   /**
    * @param sentenceRefs
    * @see mitll.langtest.server.database.exercise.ExcelImport#getExercise

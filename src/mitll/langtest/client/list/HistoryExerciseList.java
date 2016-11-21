@@ -73,7 +73,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
   protected final SectionWidgetContainer<V> sectionWidgetContainer;
 
   protected static final boolean DEBUG_ON_VALUE_CHANGE = false;
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
   /**
    * @param currentExerciseVPanel
@@ -169,7 +169,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
    *
    * @param exerciseID
    * @param searchIfAny
-   * @see #loadFirstExercise()
+   * @see ExerciseList#loadFirstExercise(String)
    */
   void pushFirstSelection(String exerciseID, String searchIfAny) {
     String token = History.getToken();
