@@ -215,7 +215,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private final Logger logger = Logger.getLogger("LangTest");
 
   public static final String VERSION_INFO = "1.5.15";
-  
+
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
   private static final String UNKNOWN = "unknown";
