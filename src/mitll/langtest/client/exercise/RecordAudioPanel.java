@@ -80,6 +80,9 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
   private PlayAudioPanel playAudioPanel;
   protected final Panel exercisePanel;
 
+  private final ProgressBar progressBar = new ProgressBar(ProgressBarBase.Style.DEFAULT);
+  private final HorizontalPanel afterPlayWidget = new HorizontalPanel();
+
   /**
    * @see #flipRecordImages
    */
@@ -97,7 +100,7 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
    * @param audioType
    * @param instance
    * @see mitll.langtest.client.custom.dialog.NewUserExercise.CreateFirstRecordAudioPanel#CreateFirstRecordAudioPanel(CommonExercise, Panel, boolean, String)
-   * @see mitll.langtest.client.exercise.WaveformExercisePanel#getAnswerWidget(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
+   * @see mitll.langtest.client.exercise.WaveformExercisePanel#getAnswerWidget
    */
   public RecordAudioPanel(T exercise, ExerciseController controller, Panel widgets,
                           LangTestDatabaseAsync service, int index, boolean showSpectrogram,
@@ -119,8 +122,6 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
     getElement().setId("RecordAudioPanel_" + exerciseID + "_" + index + "_" + audioType);
   }
 
-  private final ProgressBar progressBar = new ProgressBar(ProgressBarBase.Style.DEFAULT);
-  private final HorizontalPanel afterPlayWidget = new HorizontalPanel();
 
   /**
    * Add dynamic range feedback to the right of the play button.
@@ -297,7 +298,7 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
      * @param recordButtonTitle
      * @see #makePostAudioRecordButton(String, String)
      */
-    public MyWaveformPostAudioRecordButton(String audioType, String recordButtonTitle) {
+    protected MyWaveformPostAudioRecordButton(String audioType, String recordButtonTitle) {
       super(RecordAudioPanel.this.exercise.getID(),
           RecordAudioPanel.this.controller,
           RecordAudioPanel.this.exercisePanel,
