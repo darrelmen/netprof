@@ -34,6 +34,7 @@ package mitll.langtest.client.custom.dialog;
 
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -243,7 +244,11 @@ class EditableExerciseDialog extends NewUserExercise {
 //    if (DEBUG) logger.info("makeForeignLangRow make fl row " + foreignAnno);
     foreignLang = makeBoxAndAnno(row, controller.getLanguage(), "", foreignAnno);
     foreignLang.box.setDirectionEstimator(true);   // automatically detect whether text is RTL
-    // return foreignLang;
+    setMarginBottom(foreignLang);
+  }
+
+  private void setMarginBottom(FormField foreignLang) {
+    foreignLang.box.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
   }
 
   @Override
@@ -290,6 +295,8 @@ class EditableExerciseDialog extends NewUserExercise {
    */
   FormField makeBoxAndAnno(Panel row, String label, String subtext, HTML annoBox) {
     FormField formField = addControlFormFieldHorizontal(row, label, subtext, false, 1, annoBox, LABEL_WIDTH, TEXT_FIELD_WIDTH);
+    setMarginBottom(formField);
+
     annoBox.addStyleName("leftFiveMargin");
     annoBox.addStyleName("editComment");
     return formField;
@@ -406,7 +413,6 @@ class EditableExerciseDialog extends NewUserExercise {
   private boolean translitChanged() {
     String transliteration = newUserExercise.getTransliteration();
     String originalTransliteration = this.originalTransliteration;
-
     //  logger.info("translitChanged : translit '" + transliteration + "' vs original '" + originalTransliteration + "' changed  = " + changed);
     return !transliteration.equals(originalTransliteration);
   }
@@ -431,7 +437,7 @@ class EditableExerciseDialog extends NewUserExercise {
    * @see #audioPosted()
    */
   void reallyChange(final ListInterface<CommonShell> pagingContainer, final boolean markFixedClicked, boolean keepAudio) {
-    logger.info("reallyChange " + markFixedClicked + " " + keepAudio);
+//    logger.info("reallyChange " + markFixedClicked + " " + keepAudio);
     newUserExercise.getCombinedMutableUserExercise().setCreator(controller.getUser());
     postEditItem(pagingContainer, markFixedClicked, keepAudio);
   }
@@ -547,8 +553,11 @@ class EditableExerciseDialog extends NewUserExercise {
     }
 
     // translit
-    translit.box.setText(originalTransliteration = newUserExercise.getTransliteration());
-    useAnnotation(newUserExercise, "transliteration", translitAnno);
+    {
+      translit.box.setText(originalTransliteration = newUserExercise.getTransliteration());
+      setMarginBottom(translit);
+      useAnnotation(newUserExercise, "transliteration", translitAnno);
+    }
 
     if (rap != null) {
       // regular speed audio

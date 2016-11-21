@@ -162,40 +162,51 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   public <S extends CommonShell & AudioRefExercise & AnnotationExercise> void setFields(S newUserExercise) {
     super.setFields(newUserExercise);
 
-    final com.github.gwtbootstrap.client.ui.base.TextBoxBase box = context.box;
+    addContext(newUserExercise);
+    addContextTranslation(newUserExercise);
+  }
+
+  private <S extends CommonShell & AudioRefExercise & AnnotationExercise> void addContext(S newUserExercise) {
+    final TextBoxBase box = context.box;
+    context.box.setDirectionEstimator(true);   // automatically detect whether text is RTL
+    context.box.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
 
     box.setText(originalContext = newUserExercise.getContext());
-
     box.addBlurHandler(new BlurHandler() {
       @Override
       public void onBlur(BlurEvent event) {
         gotBlur();
-        try {
-          long uniqueID = originalList.getUniqueID();
-          controller.logEvent(box, "TextBox", "UserList_" + uniqueID, "ContextBox = " + box.getValue());
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
+        logBlur("ContextBox = ", box);
       }
     });
 
     useAnnotation(newUserExercise, "context", contextAnno);
-    useAnnotation(newUserExercise, "context translation", contextTransAnno);
+  }
 
+  private void logBlur(String prefix, TextBoxBase box) {
+    try {
+      long uniqueID = originalList.getUniqueID();
+      controller.logEvent(box, "TextBox", "UserList_" + uniqueID, prefix + box.getValue());
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  private <S extends CommonShell & AudioRefExercise & AnnotationExercise> void addContextTranslation(S newUserExercise) {
     TextBoxBase box1 = contextTrans.box;
+
+    contextTrans.box.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
+
     box1.setText(originalContextTrans = newUserExercise.getContextTranslation());
     box1.addBlurHandler(new BlurHandler() {
       @Override
       public void onBlur(BlurEvent event) {
         gotBlur();
-        try {
-          long uniqueID = originalList.getUniqueID();
-          controller.logEvent(box1, "TextBox", "UserList_" + uniqueID, "ContextTransBox = " + box1.getValue());
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
+        logBlur("ContextTransBox = ", box1);
       }
     });
+
+    useAnnotation(newUserExercise, "context translation", contextTransAnno);
   }
 
   void grabInfoFromFormAndStuffInfoExercise(MutableExercise mutableExercise) {
@@ -397,7 +408,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
 //          logger.info("examining " + audioAttributes.size() + " for displayed " + displayed.size());
           for (AudioAttribute audio : audioAttributes) {
             boolean contains = displayed.contains(audio);
-  //          logger.info("\tdisplayed contains " + audio.getID() + " = " + contains);
+            //          logger.info("\tdisplayed contains " + audio.getID() + " = " + contains);
 
             isDisplayed |= contains;
           }
