@@ -190,9 +190,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @return
    * @see #makeExerciseListWrapper
    */
-  private <T extends CommonShell> List<CommonShell> getExerciseShells(Collection<? extends CommonExercise> exercises) {
+  private <T extends CommonShell> List<CommonShell> getExerciseShells(Collection<T> exercises) {
     List<CommonShell> ids = new ArrayList<>();
-    for (CommonExercise e : exercises) {
+    for (CommonShell e : exercises) {
 //      logger.info("got " +e.getID() + " mean " + e.getMeaning() + " eng " + e.getEnglish() + " fl " + e.getForeignLanguage());
       ids.add(e.getShell());
     }
@@ -690,17 +690,20 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    *
    * @param exercises
    * @return
-   * @paramx reqID
-   * @paramx userID
-   * @paramx role
-   * @paramx onlyExamples
-   * @paramx isFlashcardReq
    * @see #getExerciseIds
    * @see #getExerciseListWrapperForPrefix
    */
   private <T extends CommonShell> ExerciseListWrapper<T> makeExerciseListWrapper(ExerciseListRequest request,
                                                                                  Collection<CommonExercise> exercises) {
-    CommonExercise firstExercise = exercises.isEmpty() ? null : exercises.iterator().next();
+    CommonExercise firstExercise = null;
+    if (exercises.isEmpty()) {
+
+    }
+    else {
+      firstExercise = db.getCustomOrPredefExercise(exercises.iterator().next().getID());  // allow custom items to mask out non-custom items
+    }
+
+//    CommonExercise firstExercise = exercises.isEmpty() ? null : exercises.iterator().next();
 
     int reqID = request.getReqID();
     int userID = request.getUserID();
@@ -994,7 +997,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * XCalled from the client:
+   * Called from the client:
    *
    * @return
    * @see mitll.langtest.client.list.ListInterface#getExercises
@@ -1544,6 +1547,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
       logger.info("took " + (now - then) + " to get attention list size = " + attentionList.getNumItems());
     }
+    logger.info("returning lists ------->");
     return lists;
   }
 

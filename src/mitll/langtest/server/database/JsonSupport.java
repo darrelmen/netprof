@@ -36,6 +36,7 @@ import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import net.sf.json.JSONArray;
@@ -51,7 +52,7 @@ import java.util.*;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 4/7/15.
  */
-public class JsonSupport {
+public class JsonSupport<T extends Shell>  {
   private static final Logger logger = Logger.getLogger(JsonSupport.class);
 
   private final SectionHelper<CommonExercise> sectionHelper;
@@ -104,7 +105,7 @@ public class JsonSupport {
       idToKey.put(id, collationKey);
     }*/
 
-    Map<String, CommonExercise> idToEx = new HashMap<String, CommonExercise>();
+    Map<String, CommonExercise> idToEx = new HashMap<>();
     for (CommonExercise exercise : exercisesForState) {
       String id = exercise.getID();
       allIDs.add(id);
@@ -127,7 +128,7 @@ public class JsonSupport {
     Collection<CommonExercise> exercisesForState = sectionHelper.getExercisesForSelectionState(typeToSection);
     List<String> allIDs = new ArrayList<String>();
 
-    Map<String, CommonExercise> idToEx = new HashMap<String, CommonExercise>();
+    Map<String, CommonExercise> idToEx = new HashMap<>();
     for (CommonExercise exercise : exercisesForState) {
       String id = exercise.getID();
       allIDs.add(id);
