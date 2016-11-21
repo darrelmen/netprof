@@ -891,7 +891,7 @@ public class ListManager implements RequiresResize {
         ul, instanceName1, isReview, isComment, isNormalList);
 
     if (!chosePrev) {
-      logger.info("selectTabGivenHistory ul " + ul.getName() + " private " + ul.isPrivate() + " empty " + ul.isEmpty() + " ");
+      //logger.info("selectTabGivenHistory ul " + ul.getName() + " private " + ul.isPrivate() + " empty " + ul.isEmpty() + " ");
       if (createdByYou(ul) &&
           //!ul.isPrivate() &&
           ul.isEmpty() && edit != null) {
@@ -899,7 +899,7 @@ public class ListManager implements RequiresResize {
         logger.info("selectTabGivenHistory doing showEditReviewOrComment");
         showEditReviewOrComment(ul, isNormalList, edit, isReview, isComment);
       } else {
-        logger.info("selectTabGivenHistory doing sublearn " + instanceName1+ " learn " + learn);
+      //  logger.info("selectTabGivenHistory doing sublearn " + instanceName1+ " learn " + learn);
 
         if (learn == null) {
           tabPanel.selectTab(0); // first tab
@@ -939,7 +939,7 @@ public class ListManager implements RequiresResize {
                                                 boolean isReview, boolean isComment,
                                                 boolean isNormalList) {
     String subTab = storage.getValue(SUB_TAB);
-    logger.info("selectPreviouslyClickedSubTab : subtab '" + subTab + "'");
+ //   logger.info("selectPreviouslyClickedSubTab : subtab '" + subTab + "'");
 
     boolean chosePrev = false;
     if (subTab != null) {
