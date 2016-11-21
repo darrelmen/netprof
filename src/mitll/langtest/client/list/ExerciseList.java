@@ -206,7 +206,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    *
    * @param exerciseID
    * @param searchIfAny
-   * @see #loadFirstExercise()
+   * @see #loadFirstExercise
    */
   abstract void pushFirstSelection(String exerciseID, String searchIfAny);
 
@@ -442,8 +442,9 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   protected void goToFirst(String searchIfAny, String exerciseID) {
     if (exerciseID.isEmpty()) {
-      loadFirstExercise();
+      loadFirstExercise(searchIfAny);
     } else {
+    //  logger.info("goToFirst pushFirstSelection " + exerciseID + " searchIfAny '" + searchIfAny +"'");
       pushFirstSelection(exerciseID, searchIfAny);
     }
   }
@@ -490,15 +491,16 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * Does this by pushing a history item and then noticing the history item change.
    *
    * @see #rememberAndLoadFirst
+   * @param searchIfAny
    */
-  protected void loadFirstExercise() {
+  protected void loadFirstExercise(String searchIfAny) {
     if (isEmpty()) { // this can only happen if the database doesn't load properly, e.g. it's in use
       if (DEBUG) logger.info("loadFirstExercise (" + instance + ") : current exercises is empty?");
       removeCurrentExercise();
     } else {
       T toLoad = findFirstExercise();
       if (DEBUG) logger.info("loadFirstExercise ex id =" + toLoad.getID() + " instance " + instance);
-      pushFirstSelection(toLoad.getID(), "");
+      pushFirstSelection(toLoad.getID(), searchIfAny);
     }
   }
 
@@ -527,7 +529,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   /**
    * @param itemID
-   * @see #loadFirstExercise()
+   * @see #loadFirstExercise(String)
    * @see ListInterface ListInterface#loadNextExercise
    * @see ListInterface ListInterface#loadPreviousExercise
    */
@@ -801,7 +803,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    * @see ListInterface#loadNextExercise
    */
   protected void onLastItem() {
-    loadFirstExercise();
+    loadFirstExercise("");
   }
 
   @Override
@@ -890,7 +892,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
   @Override
   public void reloadExercises() {
-    loadFirstExercise();
+    loadFirstExercise("");
   }
 
   public void redraw() {

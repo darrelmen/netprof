@@ -123,7 +123,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   private final ServerProperties serverProps;
   private final LogAndNotify logAndNotify;
 
-  private JsonSupport jsonSupport;
+  private JsonSupport<T> jsonSupport;
 
   private static final boolean ADD_DEFECTS = true;
   private UserManagement userManagement;
@@ -373,7 +373,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     //  logger.debug("got install path " + installPath + " media " + mediaDir);
     this.installPath = installPath;
     makeDAO(lessonPlanFile, mediaDir, installPath);
-    this.jsonSupport = new JsonSupport(getSectionHelper(), getResultDAO(), getRefResultDAO(), getAudioDAO(),
+    this.jsonSupport = new JsonSupport<T>(getSectionHelper(), getResultDAO(), getRefResultDAO(), getAudioDAO(),
         getPhoneDAO(), configDir, installPath);
   }
 
@@ -406,7 +406,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   /**
    * @param id
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getResultASRInfo(long, int, int)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getResultASRInfo
    * @see mitll.langtest.server.DownloadServlet#getFilenameForDownload(DatabaseImpl, String, String)
    * @see #deleteItem(String)
    * @see #getCustomOrPredefExercise(String)
@@ -888,7 +888,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @param user
    * @return
    * @seex mitll.langtest.server.database.ImportCourseExamples#copyUser
-   * @see MergeSites#addUsersToDest
+   * @seex MergeSites#addUsersToDest
    */
   public long addUser(User user) {
     return userManagement.addUser(user, true);
@@ -1541,8 +1541,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @param resultID
    * @param asrScoreForAudio
    * @param isCorrect
-   * @see LangTestDatabaseImpl#getPretestScore(int, long, String, String, int, int, boolean, String, boolean)
-   * @see ScoreServlet#getJsonForAudioForUser(int, String, int, ScoreServlet.Request, String, File, String, String, boolean, boolean)
+   * @see LangTestDatabaseImpl#getPretestScore
+   * @see ScoreServlet#getJsonForAudioForUser
    * @see mitll.langtest.server.audio.AudioFileHelper#recalcOne
    */
   public void rememberScore(long resultID, PretestScore asrScoreForAudio, boolean isCorrect) {
