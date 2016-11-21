@@ -149,6 +149,8 @@ public class DecodeTest extends BaseTest {
 
     logger.info("got\n" + exercise);
     logger.info("got\n" + db.getCustomOrPredefExercise("1826"));
+
+
   }
 
   @Test
@@ -363,6 +365,21 @@ public class DecodeTest extends BaseTest {
     database.attachAudio(exercise);
     logger.info("ex " +exercise);
     logger.info("ex " +exercise.getAudioAttributes());
+  }
+
+  @Test
+  public void testJapaneseProgress() {
+    DatabaseImpl database = getDatabase("japanese");
+    database.getSectionHelper().report();
+
+    /*
+    doReport(database);
+    database.getExerciseIDToRefAudio();
+    CommonExercise exercise = database.getExercise("1093");
+    database.attachAudio(exercise);
+    logger.info("ex " +exercise);
+    logger.info("ex " +exercise.getAudioAttributes());
+  */
   }
 
   private void doProgressReport(String turkish) {  doReport(getDatabase(turkish));  }
