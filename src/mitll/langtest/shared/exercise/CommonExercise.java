@@ -41,27 +41,25 @@ import java.util.List;
  * @since 3/20/2014.
  */
 public interface CommonExercise extends CommonShell, AudioAttributeExercise, AnnotationExercise, ScoredExercise {
-  CommonShell getShell();
-
   List<String> getFirstPron();
-
-/*
-  String getRefAudioIndex();
-*/
 
   boolean isPredefined();
 
   /**
-   * @see mitll.langtest.client.custom.dialog.EditItem#didICreateThisItem(CommonExercise)
    * @return
+   * @see mitll.langtest.client.custom.dialog.EditItem#didICreateThisItem(CommonExercise)
    */
   long getCreator();
 
   long getUpdateTime();
 
   MutableExercise getMutable();
+
   MutableAudioExercise getMutableAudio();
+
   MutableAnnotationExercise getMutableAnnotation();
+
   CombinedMutableUserExercise getCombinedMutableUserExercise();
+
   CommonAnnotatable getCommonAnnotatable();
 }

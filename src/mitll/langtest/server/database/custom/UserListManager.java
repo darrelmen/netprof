@@ -442,7 +442,7 @@ public class UserListManager {
    *
    * @param typeOrder used by sorter to sort first in unit & chapter order
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getReviewLists()
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getReviewLists
    * @see #markCorrectness(String, boolean, long)
    */
   public UserList<CommonShell> getDefectList(Collection<String> typeOrder) {
@@ -488,7 +488,7 @@ public class UserListManager {
 
     List<CommonShell> copy = new ArrayList<>();
 
-    for (CommonExercise orig:onList) copy.add(orig.getShell());
+    for (CommonExercise orig:onList) copy.add(orig);
 
     long now = System.currentTimeMillis();
 
