@@ -40,6 +40,11 @@ test {
     runWithMongoDb = true
 }
 
+license {
+        skipExistingHeaders true
+        ignoreFailures true
+}
+
 repositories {
     flatDir {
         dirs 'libs'
