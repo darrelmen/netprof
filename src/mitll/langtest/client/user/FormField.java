@@ -44,12 +44,6 @@ public class FormField {
     return getSafeText().isEmpty();
   }
 
-/*
-  void setRightSide(Widget rightSide) {
-    Widget rightSide1 = rightSide;
-  }
-*/
-
   public ControlGroup getGroup() {
     return group;
   }

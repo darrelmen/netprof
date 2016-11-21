@@ -681,8 +681,8 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     if (chapter.startsWith("'")) chapter = chapter.substring(1);
     if (week.startsWith("'")) week = week.substring(1);
 
-/*    if (debug && false)
-      logger.debug("unit(" +unitName+
+//   if (debug && false)
+/*      logger.debug("unit(" +unitName+
         ")" + unitIndex + "/" + unit + " chapter " + chapterIndex + "/(" +chapterName+
         ")" + chapter + " week (" + weekName+ ") : " + week);*/
 
@@ -691,7 +691,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     if (unit.length() > 0) {
       pairs.add(sectionHelper.addExerciseToLesson(imported, unitName, unit));
     }
-    else {
+    else if (unitName != null) {
       unit = chapter;
       pairs.add(sectionHelper.addExerciseToLesson(imported, unitName, unit));
     }
@@ -700,10 +700,9 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
         chapter = (unitIndex == -1 ? "" : unit + "-") + chapter; // hack for now to get unique chapters...
       }
       pairs.add(sectionHelper.addExerciseToLesson(imported, chapterName, chapter));
-    } else {
+    } else if (chapterName != null){
       chapter = unit;
       pairs.add(sectionHelper.addExerciseToLesson(imported, chapterName, chapter));
-
 //      logger.info("skip unit '" +unit + "' and chapter '" +chapter+ "'");
     }
     if (week.length() > 0) {

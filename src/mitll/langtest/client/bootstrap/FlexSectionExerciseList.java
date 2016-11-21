@@ -721,7 +721,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
   }
 
   private void setScrollPanelWidth() {
-    if (labelColumn != null) {
+    if (labelColumn != null && clearColumnContainer != null) {
       int leftSideWidth = labelColumn.getOffsetWidth() + clearColumnContainer.getOffsetWidth();
       if (leftSideWidth == 0) leftSideWidth = 130;
       int width = Window.getClientWidth() - leftSideWidth - UNACCOUNTED_WIDTH;
