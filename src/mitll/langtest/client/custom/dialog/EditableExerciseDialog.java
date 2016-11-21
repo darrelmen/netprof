@@ -118,8 +118,7 @@ class EditableExerciseDialog extends NewUserExercise {
                          UserList<CommonShell> ul,
                          ListInterface<CommonShell> pagingContainer,
                          Panel toAddTo) {
-    boolean changed = foreignChanged();
-    validateThenPost(foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo, false, changed);
+    validateThenPost(foreignLang, rap, normalSpeedRecording, ul, pagingContainer, toAddTo, false, foreignChanged());
   }
 
   /**
@@ -314,7 +313,7 @@ class EditableExerciseDialog extends NewUserExercise {
                                final ListInterface<CommonShell> exerciseList,
                                final Panel toAddTo,
                                boolean onClick) {
-    if (DEBUG) logger.info("EditableExerciseDialog.afterValidForeignPhrase : exercise id " + newUserExercise.getID());
+  //  if (DEBUG) logger.info("EditableExerciseDialog.afterValidForeignPhrase : exercise id " + newUserExercise.getID());
     checkForForeignChange();
     postChangeIfDirty(exerciseList, onClick);
   }
@@ -324,14 +323,27 @@ class EditableExerciseDialog extends NewUserExercise {
     postChangeIfDirty(exerciseList, false);
   }
 
+  /**
+   * Don't post anything to server unless text actually changed - could get lots of blur events that should be ignored.
+   * @param exerciseList
+   * @param onClick
+   */
   private void postChangeIfDirty(ListInterface<CommonShell> exerciseList, boolean onClick) {
-    if (foreignChanged() || translitChanged() || englishChanged() || refAudioChanged() || slowRefAudioChanged() || onClick) {
-      if (DEBUG)
-        logger.info("postChangeIfDirty:  change " + foreignChanged() + translitChanged() + englishChanged() + refAudioChanged() + slowRefAudioChanged());
-
-      logger.info("postChangeIfDirty keep audio = " + getKeepAudio());
+    if (anyFieldsDirty() || onClick) {
+//      if (DEBUG) {
+//        logger.info("postChangeIfDirty:  change " + foreignChanged() + translitChanged() + englishChanged() + refAudioChanged() + slowRefAudioChanged());
+//      }
+ //    logger.info("postChangeIfDirty keep audio = " + getKeepAudio());
       reallyChange(exerciseList, onClick, getKeepAudio());
     }
+  }
+
+  protected boolean anyFieldsDirty() {
+    return foreignChanged() ||
+        translitChanged() ||
+        englishChanged() ||
+        refAudioChanged() ||
+        slowRefAudioChanged();
   }
 
   protected boolean getKeepAudio() {
@@ -445,6 +457,8 @@ class EditableExerciseDialog extends NewUserExercise {
   /**
    * Wait for edit to succeed before altering original fields.
    *
+   * If the keep audio check box is checked, keep the audio!
+   *
    * @param pagingContainer
    * @param buttonClicked
    * @param keepAudio
@@ -455,7 +469,7 @@ class EditableExerciseDialog extends NewUserExercise {
 
     grabInfoFromFormAndStuffInfoExercise(newUserExercise.getMutable());
 
-    service.editItem(newUserExercise, buttonClicked && keepAudio, new AsyncCallback<Void>() {
+    service.editItem(newUserExercise, /*buttonClicked &&*/ keepAudio, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
       }

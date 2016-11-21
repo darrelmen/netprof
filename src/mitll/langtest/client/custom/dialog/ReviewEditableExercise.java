@@ -47,14 +47,12 @@ import com.google.gwt.media.client.Audio;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
+import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.ReloadableContainer;
 import mitll.langtest.client.custom.tabs.RememberTabAndContent;
 import mitll.langtest.client.dialog.DialogHelper;
-import mitll.langtest.client.exercise.BusyPanel;
-import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.RecordAudioPanel;
-import mitll.langtest.client.exercise.WaveformPostAudioRecordButton;
+import mitll.langtest.client.exercise.*;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.list.Reloadable;
@@ -85,6 +83,10 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   final Logger logger = Logger.getLogger("ReviewEditableExercise");
 
   private static final String YOUR_RECORDING = "Your Recording";
+
+  /**
+   * @see #getDeleteButton(String, ClickHandler)
+   */
   private static final String DELETE_AUDIO = "Delete Audio";
   private static final String DELETE_THIS_AUDIO_CUT = "Delete this audio cut.";
   private static final String TRANSLITERATION = "Transliteration";
@@ -125,6 +127,11 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   private String originalContext = "";
   private String originalContextTrans = "";
   private List<RememberTabAndContent> tabs;
+
+  /**
+   * @see #checkForForeignChange
+   * @see #getKeepAudio
+   */
   private CheckBox keepAudio = new CheckBox("Keep Audio even if text changes");
 
   /**
@@ -170,6 +177,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     final TextBoxBase box = context.box;
     context.box.setDirectionEstimator(true);   // automatically detect whether text is RTL
     context.box.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
+    addBlurHandler(ul.getID(),context);
 
     box.setText(originalContext = newUserExercise.getContext());
     box.addBlurHandler(new BlurHandler() {
@@ -196,6 +204,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     TextBoxBase box1 = contextTrans.box;
 
     contextTrans.box.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
+    addBlurHandler(ul.getID(),contextTrans);
 
     box1.setText(originalContextTrans = newUserExercise.getContextTranslation());
     box1.addBlurHandler(new BlurHandler() {
@@ -209,6 +218,10 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     useAnnotation(newUserExercise, "context translation", contextTransAnno);
   }
 
+  /**
+   * @see #gotBlur(FormField, RecordAudioPanel, ControlGroup, UserList, ListInterface, Panel)
+   * @param mutableExercise
+   */
   void grabInfoFromFormAndStuffInfoExercise(MutableExercise mutableExercise) {
     super.grabInfoFromFormAndStuffInfoExercise(mutableExercise);
     mutableExercise.setContext(context.getSafeText());
@@ -231,6 +244,14 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     container.add(row);
     contextTrans = makeBoxAndAnno(row, "Context Translation", "", contextTransAnno);
   }
+
+  @Override
+  protected boolean anyFieldsDirty() {
+    return super.anyFieldsDirty() ||
+        !originalContext.equals(context.getSafeText()) ||
+        !originalContextTrans.equals(contextTrans.getSafeText());
+  }
+
 
   private int currentTab = 0;
 
@@ -563,6 +584,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
           public void onSuccess(Void result) {
             widgets.getParent().setVisible(false);
             reloadLearnList();
+            LangTest.EVENT_BUS.fireEvent(new AudioChangedEvent(instance));
             // TODO : need to update other lists too?
           }
         });
@@ -823,17 +845,13 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    * @see mitll.langtest.client.custom.dialog.NewUserExercise.CreateFirstRecordAudioPanel#makePostAudioRecordButton
    */
   @Override
-  protected void audioPosted() {
-    Boolean value = getKeepAudio();
-    //  logger.info("did audioPosted keep audio = " + value);
-    reallyChange(listInterface, false, value);
-  }
+  protected void audioPosted() {  reallyChange(listInterface, false, getKeepAudio());  }
 
-  protected boolean getKeepAudio() {
-    Boolean value = keepAudio.getValue();
-    //  logger.info(this.getClass() + " : did getKeepAudio keep audio = " + value);
-    return value;
-  }
+  /**
+   * @see #postChangeIfDirty
+   * @return
+   */
+  protected boolean getKeepAudio() { return keepAudio.getValue();  }
 
   /**
    * @see #isValidForeignPhrase(UserList, ListInterface, Panel, boolean)
@@ -992,7 +1010,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
         @Override
         public void onClick(ClickEvent event) {
           deleteButton.setEnabled(false);
-          logger.info("marking audio defect for " + getAudioAttribute() + " on " + exerciseID);
+          //logger.info("marking audio defect for " + getAudioAttribute() + " on " + exerciseID);
           service.markAudioDefect(getAudioAttribute(), exerciseID, new AsyncCallback<Void>() {    // delete comment too?
             @Override
             public void onFailure(Throwable caught) {
@@ -1005,7 +1023,8 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
               if (comment != null) {
                 comment.setVisible(false);
               }
-
+          //    logger.info("delete button clicked - fire changed!");
+           //  LangTest.EVENT_BUS.fireEvent(new AudioChangedEvent(instance));
               //     reloadLearnList();
             }
           });

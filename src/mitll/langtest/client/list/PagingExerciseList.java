@@ -83,7 +83,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   private TypeAhead typeAhead;
   long userListID = -1;
   private int unaccountedForVertical = 160;
-  private boolean unrecorded, defaultAudioFilter;
+//  private boolean unrecorded, defaultAudioFilter;
   private boolean onlyExamples;
 
   private Timer waitTimer = null;
@@ -145,6 +145,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
 
   /**
    * Add two rows -- the search box and then the item list
+   * @see #PagingExerciseList
    */
   protected void addComponents() {
     addTableWithPager(makePagingContainer());
@@ -175,10 +176,10 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
         .setPrefix(prefix)
         .setUserListID(userListID)
         .setRole(getRole())
-        .setOnlyUnrecordedByMe(getUnrecorded())
+        .setOnlyUnrecordedByMe(false)
         .setOnlyExamples(isOnlyExamples())
         .setIncorrectFirstOrder(incorrectFirstOrder)
-        .setOnlyDefaultAudio(defaultAudioFilter);
+        .setOnlyDefaultAudio(false);
   }
 
   /**
@@ -265,6 +266,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * add left side components
    *
    * @param pagingContainer
+   * @see #addComponents
    */
   protected void addTableWithPager(ClickablePagingContainer<T> pagingContainer) {
     // row 1
@@ -536,7 +538,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   @Override
   public void onResize() {
     super.onResize();
-
     pagingContainer.onResize(getCurrentExercise());
   }
 
@@ -547,7 +548,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   protected void markCurrentExercise(String itemID) {
     pagingContainer.markCurrentExercise(itemID);
   }
-
 
   public void setUserListID(long userListID) {
     this.userListID = userListID;
@@ -562,9 +562,11 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * @return
    * @see HistoryExerciseList#loadExercisesUsingPrefix(Map, String, boolean, String, boolean, boolean)
    */
+/*
   boolean getUnrecorded() {
     return unrecorded;
   }
+*/
 
   /**
    * @paramx unrecorded

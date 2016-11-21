@@ -243,6 +243,8 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonShell 
     exerciseList.setState(id, STATE.RECORDED);
     L l = exerciseList.byID(id);
 
+    LangTest.EVENT_BUS.fireEvent(new AudioChangedEvent(instance));
+
     //logger.info("after recording " +l.getState());
 
     exerciseList.redraw();

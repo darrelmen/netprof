@@ -73,10 +73,11 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 class NewUserExercise extends BasicDialog {
-  public static final int MAX_CHARACTERS = 300;
-  public static final int TEXT_FIELD_WIDTH = 500;
-
   private final Logger logger = Logger.getLogger("NewUserExercise");
+
+
+  private static final int MAX_CHARACTERS = 300;
+  private static final int TEXT_FIELD_WIDTH = 500;
 
   private static final String FOREIGN_LANGUAGE = "Foreign Language";
   private static final String CREATE = "Create";
@@ -194,32 +195,21 @@ class NewUserExercise extends BasicDialog {
     this.listInterface = listInterface;
 
     container.add(getCreateButton(ul, listInterface, toAddTo, normalSpeedRecording));
-//    logger.info("addNew (" +this.getClass()+
-//        ") : adding blur handler to " +foreignLang.getWidget().getElement().getExID());
 
-    foreignLang.box.addBlurHandler(new BlurHandler() {
-      @Override
-      public void onBlur(BlurEvent event) {
-        gotBlur();
-        controller.logEvent(foreignLang.box, "TextBox", "UserList_" + id1, "ForeignLangBox = " + foreignLang.box.getValue());
-      }
-    });
-    translit.box.addBlurHandler(new BlurHandler() {
-      @Override
-      public void onBlur(BlurEvent event) {
-        gotBlur();
-        controller.logEvent(translit.box, "TextBox", "UserList_" + id1, "TranslitBox = " + translit.box.getValue());
-      }
-    });
-    english.box.addBlurHandler(new BlurHandler() {
-      @Override
-      public void onBlur(BlurEvent event) {
-        gotBlur();
-        controller.logEvent(english.box, "TextBox", "UserList_" + id1, "EnglishBox = " + english.box.getValue());
-      }
-    });
-
+    addBlurHandler(id1,foreignLang);
+    addBlurHandler(id1,translit);
+    addBlurHandler(id1,english);
     return container;
+  }
+
+  protected void addBlurHandler(final String id1, FormField field) {
+    field.box.addBlurHandler(new BlurHandler() {
+      @Override
+      public void onBlur(BlurEvent event) {
+        gotBlur();
+        controller.logEvent(field.box, "TextBox", "UserList_" + id1, "ForeignLangBox = " + field.box.getValue());
+      }
+    });
   }
 
   private class ResizableFluid extends FluidContainer implements RequiresResize {
@@ -256,15 +246,16 @@ class NewUserExercise extends BasicDialog {
   void addItemsAtTop(Panel container) {
   }
 
-  void gotBlur() {
-    gotBlur(foreignLang, rap, normalSpeedRecording, ul, listInterface, toAddTo);
-  }
+  void gotBlur() {  gotBlur(foreignLang, rap, normalSpeedRecording, ul, listInterface, toAddTo);  }
 
-  void gotBlur(FormField foreignLang, RecordAudioPanel rap,
+  void gotBlur(FormField foreignLang,
+               RecordAudioPanel rap,
                ControlGroup normalSpeedRecording,
                UserList<CommonShell> ul,
                ListInterface<CommonShell> pagingContainer,
                Panel toAddTo) {
+
+    logger.info("got blur -");
     grabInfoFromFormAndStuffInfoExercise(newUserExercise.getMutable());
   }
 
@@ -529,7 +520,6 @@ class NewUserExercise extends BasicDialog {
       public void onSuccess(Boolean result) {
 /*        logger.info("\tisValidForeignPhrase : checking phrase " + foreignLang.getSafeText() +
             " before adding/changing " + newUserExercise + " -> " + result);*/
-
         if (result) {
           checkIfNeedsRefAudio();
           grabInfoFromFormAndStuffInfoExercise(newUserExercise.getMutable());
@@ -617,8 +607,7 @@ class NewUserExercise extends BasicDialog {
                                 UserList<CommonShell> ul,
                                 ListInterface<CommonShell> exerciseList,
                                 Panel toAddTo) {
-    logger.info("afterItemCreated " + newExercise + " creator " + newExercise.getCreator());
-
+//    logger.info("afterItemCreated " + newExercise + " creator " + newExercise.getCreator());
     editItem.clearNewExercise(); // success -- don't remember it
 
     CommonShell newUserExercisePlaceholder = ul.remove(EditItem.NEW_EXERCISE_ID);
