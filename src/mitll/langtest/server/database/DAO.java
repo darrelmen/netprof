@@ -224,7 +224,7 @@ public class DAO {
     database.closeConnection(connection);
   }
 
-  protected void finish(Connection connection, Statement statement, ResultSet rs) throws SQLException {
+  protected void finish(Connection connection, Statement statement, ResultSet rs, String sql) throws SQLException {
     long then = System.currentTimeMillis();
     rs.close();
     long now = System.currentTimeMillis();
@@ -247,16 +247,19 @@ public class DAO {
         long now = System.currentTimeMillis();
 
         if (now - then > i) {
-          logger.info("finish took " + (now - then) + " millis to close " + statement + " rs "+ rs);
+          logger.info("finish took " + (now - then) + " millis to close " + statement + " sql " + sql);
+          if (now - then > 100) {
+            logger.info("long sql "+sql,new Exception());
+          }
         }
 
         then = now;
         database.closeConnection(connection);
         now = System.currentTimeMillis();
 
-        if (now - then > i) {
-          logger.info("finish took " + (now - then) + " millis to close connection");
-        }
+//        if (now - then > i) {
+  //        logger.info("finish took " + (now - then) + " millis to close connection - sql " + sql);
+    //    }
       }
     }).start();
 

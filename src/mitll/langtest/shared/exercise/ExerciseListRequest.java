@@ -186,6 +186,10 @@ public class ExerciseListRequest implements Serializable {
     return this;
   }
 
+  public boolean isOnlyUninspected() {
+    return onlyUninspected;
+  }
+
   public ExerciseListRequest setOnlyUninspected(boolean onlyDefaultAudio) {
     this.onlyUninspected = onlyDefaultAudio;
     return this;
@@ -202,9 +206,5 @@ public class ExerciseListRequest implements Serializable {
             "\n\tonly examples       " + onlyExamples +
             "\n\tonly with audio     " + onlyWithAudioAnno +
             "\n\tonly uninspecte     " + onlyUninspected;
-  }
-
-  public boolean isOnlyUninspected() {
-    return onlyUninspected;
   }
 }

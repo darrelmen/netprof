@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.database.custom;
 
-import mitll.langtest.server.database.AudioDAO;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
@@ -476,7 +475,7 @@ public class UserExerciseDAO extends DAO {
         }*/
         exercises.add(e);
       }
-      finish(connection, statement, rs);
+      finish(connection, statement, rs, sql);
     } finally {
       database.closeConnection(connection);
     }
@@ -560,7 +559,7 @@ public class UserExerciseDAO extends DAO {
     while (rs.next()) {
       exercises.add(rs.getString(EXERCISEID));
     }
-    finish(connection, statement, rs);
+    finish(connection, statement, rs, sql);
 
     return exercises;
   }

@@ -44,7 +44,6 @@ import org.apache.log4j.Logger;
 
 import java.sql.*;
 import java.util.*;
-import java.util.Date;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -204,7 +203,7 @@ public class Analysis extends DAO {
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
     long then = System.currentTimeMillis();
-    Map<Long, UserInfo> bestForQuery = getBestForQuery(connection, statement, minRecordings);
+    Map<Long, UserInfo> bestForQuery = getBestForQuery(connection, statement, minRecordings, sql);
     long now = System.currentTimeMillis();
     logger.debug(getLanguage() + " : getBest took " + (now - then) + " millis to return\t" + bestForQuery.size() + " items");
 
@@ -360,13 +359,14 @@ public class Analysis extends DAO {
    * @param connection
    * @param statement
    * @param minRecordings
+   * @param sql
    * @return
    * @throws SQLException
    * @see #getBest(String, int)
    */
-  private Map<Long, UserInfo> getBestForQuery(Connection connection, PreparedStatement statement, int minRecordings)
+  private Map<Long, UserInfo> getBestForQuery(Connection connection, PreparedStatement statement, int minRecordings, String sql)
       throws SQLException {
-    Map<Long, List<BestScore>> userToBest = getUserToResults(connection, statement);
+    Map<Long, List<BestScore>> userToBest = getUserToResults(connection, statement, sql);
 
     if (DEBUG) logger.info("getBestForQuery got " + userToBest.values().iterator().next().size());
 
@@ -458,11 +458,12 @@ public class Analysis extends DAO {
   /**
    * @param connection
    * @param statement
+   * @param sql
    * @return
    * @throws SQLException
-   * @see #getBestForQuery(Connection, PreparedStatement, int)
+   * @see #getBestForQuery(Connection, PreparedStatement, int, String)
    */
-  private Map<Long, List<BestScore>> getUserToResults(Connection connection, PreparedStatement statement) throws SQLException {
+  private Map<Long, List<BestScore>> getUserToResults(Connection connection, PreparedStatement statement, String sql) throws SQLException {
     ResultSet rs = statement.executeQuery();
     Map<Long, List<BestScore>> userToBest = new HashMap<>();
 
@@ -522,7 +523,7 @@ public class Analysis extends DAO {
       if (emptyCount > 0) logger.info("missing score json count " + emptyCount + "/" + count);
     }
 
-    finish(connection, statement, rs);
+    finish(connection, statement, rs, sql);
     return userToBest;
   }
 

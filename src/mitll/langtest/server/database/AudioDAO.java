@@ -696,7 +696,7 @@ public class AudioDAO extends DAO {
           "\n\tsql     " + sql +
           "\n\tyielded " + results.size());*/
 
-      finish(connection, statement, rs);
+      finish(connection, statement, rs, sql);
 
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
@@ -941,7 +941,7 @@ public class AudioDAO extends DAO {
           //        logger.info("2) stale exercise id : no match for " + exid);
         }
       }
-      finish(connection, statement, rs);
+      finish(connection, statement, rs, sql);
 
 /*
       logger.debug("getCountForGender : for " + audioSpeed + "\n\t" + sql + "\n\tgot " + idsOfRecordedExercises.size() +
@@ -1022,7 +1022,7 @@ public class AudioDAO extends DAO {
 //          logger.info("both : no match for " + id + " '" + transcript +  "' vs '" + exerciseFL + "'");
         }
       }
-      finish(connection, statement, rs);
+      finish(connection, statement, rs, sql);
 
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
@@ -1088,7 +1088,7 @@ public class AudioDAO extends DAO {
     // logger.debug("sql " + sql);
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
-    return getExidResultsForQuery(connection, statement, exToTranscript);
+    return getExidResultsForQuery(connection, statement, exToTranscript, sql);
   }
 
   /**
@@ -1101,7 +1101,7 @@ public class AudioDAO extends DAO {
   private List<AudioAttribute> getResultsSQL(String sql) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
-    return getResultsForQuery(connection, statement);
+    return getResultsForQuery(connection, statement, sql);
   }
 
   private int c = 0;
@@ -1111,11 +1111,12 @@ public class AudioDAO extends DAO {
    *
    * @param connection
    * @param statement
+   * @param sql
    * @return
    * @throws java.sql.SQLException
    * @see #getResultsSQL(String)
    */
-  private List<AudioAttribute> getResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
+  private List<AudioAttribute> getResultsForQuery(Connection connection, PreparedStatement statement, String sql) throws SQLException {
     ResultSet rs = statement.executeQuery();
     List<AudioAttribute> results = new ArrayList<>();
     Map<Long, MiniUser> miniUsers = userDAO.getMiniUsers();
@@ -1153,7 +1154,7 @@ public class AudioDAO extends DAO {
     }
     //   logger.debug("found " + results.size() + " audio attributes");
 
-    finish(connection, statement, rs);
+    finish(connection, statement, rs, sql);
 
     return results;
   }
@@ -1171,7 +1172,7 @@ public class AudioDAO extends DAO {
 
   private Set<String> getExidResultsForQuery(Connection connection,
                                              PreparedStatement statement,
-                                             Map<String, String> exToTranscript) throws SQLException {
+                                             Map<String, String> exToTranscript, String sql) throws SQLException {
     ResultSet rs = statement.executeQuery();
     Set<String> results = new HashSet<>();
     while (rs.next()) {
@@ -1188,7 +1189,7 @@ public class AudioDAO extends DAO {
       }
 
     }
-    finish(connection, statement, rs);
+    finish(connection, statement, rs, sql);
 
     return results;
   }
