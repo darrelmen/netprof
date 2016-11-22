@@ -509,7 +509,7 @@ public class UserDAO extends DAO {
       }
 
       //    logger.debug("user exists " + id + " = " + val);
-      finish(connection, statement, rs);
+      finish(connection, statement, rs, sql);
 
     } catch (Exception e) {
       logger.error("Got " + e, e);
@@ -725,7 +725,7 @@ public class UserDAO extends DAO {
         users.add(rs.getLong(1));
       }
 
-      finish(connection, statement, rs);
+      finish(connection, statement, rs, sql);
 
       return users;
     } catch (Exception ee) {
@@ -742,7 +742,7 @@ public class UserDAO extends DAO {
       ResultSet rs = statement.executeQuery();
       // logger.info("sql:\n" +sql);
       List<User> users = getUsers(rs);
-      finish(connection, statement, rs);
+      finish(connection, statement, rs, sql);
 
       return users;
     } catch (Exception ee) {

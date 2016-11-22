@@ -134,7 +134,13 @@ class WordContainer extends SimplePagingContainer<WordScore> implements Analysis
       @Override
       public int compare(WordScore o1, WordScore o2) {
         int i = new Long(o1.getTimestamp()).compareTo(o2.getTimestamp());
-        return i == 0 ? o1.getId().compareTo(o2.getId()) : i;
+        String id = o1.getId();
+        String id1 = o2.getId();
+        boolean firstNull = id == null;
+        if (firstNull) logger.warning("1 got null id for " +o1);
+        boolean secondNull = id1 == null;
+        if (secondNull) logger.warning("2 got null id for " +o2);
+        return i == 0 ? (firstNull || secondNull ? i : id.compareTo(id1)) : i;
       }
     });
 
