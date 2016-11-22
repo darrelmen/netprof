@@ -301,17 +301,42 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
     } else {
       if (DEBUG)
         logger.info("pushNewSectionHistoryToken : currentToken " + currentToken + " instance " + getInstance());
-      SelectionState newState = getSelectionState(historyToken);
-      loadExercisesUsingPrefix(
-          newState.getTypeToSection(),
-          selectionState.getSearch(),
-          selectionState.getItem(),
-
-          newState.isOnlyWithAudioDefects(),
-          newState.isOnlyUnrecorded(),
-          newState.isOnlyDefault(),
-          newState.isOnlyUninspected());
+      loadFromSelectionState(selectionState, getSelectionState(historyToken));
     }
+  }
+
+  /**
+   * For when we want to reload the list, but not by pushing state onto the URL.
+   * @see mitll.langtest.client.custom.MarkDefectsChapterNPFHelper#addEventHandler
+   */
+  public void reloadFromState() {
+    String currentToken = History.getToken();
+    SelectionState selectionState = getSelectionState(currentToken);
+    String typeAheadText = getTypeAheadText();
+
+    ExerciseListRequest request =
+        getExerciseListRequest(selectionState.getTypeToSection(),
+            typeAheadText,
+            selectionState.isOnlyWithAudioDefects(),
+            selectionState.isOnlyUnrecorded(),
+            selectionState.isOnlyDefault(),
+            selectionState.isOnlyUninspected());
+    getExerciseIDs(selectionState.getTypeToSection(),
+        typeAheadText,
+        "",
+        request);
+  }
+
+  private void loadFromSelectionState(SelectionState selectionState, SelectionState newState) {
+    loadExercisesUsingPrefix(
+        newState.getTypeToSection(),
+        selectionState.getSearch(),
+        selectionState.getItem(),
+
+        newState.isOnlyWithAudioDefects(),
+        newState.isOnlyUnrecorded(),
+        newState.isOnlyDefault(),
+        newState.isOnlyUninspected());
   }
 
   protected void setHistoryItem(String historyToken) {
@@ -380,15 +405,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
     restoreUIState(selectionState);
 
     try {
-      loadExercisesUsingPrefix(
-          selectionState.getTypeToSection(),
-          selectionState.getSearch(),
-          selectionState.getItem(),
-
-          selectionState.isOnlyWithAudioDefects(),
-          selectionState.isOnlyUnrecorded(),
-          selectionState.isOnlyDefault(),
-          selectionState.isOnlyUninspected());
+      loadFromSelectionState(selectionState, selectionState);
     } catch (Exception e) {
       logger.warning("HistoryExerciseList.onValueChange " + event.getValue() + " badly formed. Got " + e);
     }
@@ -420,7 +437,8 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
    *
    * @see #gotTypeAheadEvent(String, boolean)
    */
-  protected void loadExercises(String selectionState, String prefix,
+  protected void loadExercises(String selectionState,
+                               String prefix,
 
                                boolean onlyWithAudioAnno,
                                boolean onlyUnrecorded,
@@ -448,13 +466,10 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
 
                                           boolean onlyWithAudioAnno,
                                           boolean onlyUnrecorded,
-                                          boolean onlyDefaultUser, boolean onlyUninspected) {
-    ExerciseListRequest request = getRequest(prefix)
-        .setTypeToSelection(typeToSection)
-        .setOnlyWithAudioAnno(onlyWithAudioAnno)
-        .setOnlyUnrecordedByMe(onlyUnrecorded)
-        .setOnlyDefaultAudio(onlyDefaultUser)
-        .setOnlyUninspected(onlyUninspected);
+                                          boolean onlyDefaultUser,
+                                          boolean onlyUninspected) {
+    ExerciseListRequest request =
+        getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyUnrecorded, onlyDefaultUser, onlyUninspected);
 
     if (lastSuccessfulRequest == null || !request.sameAs(lastSuccessfulRequest)) {
       try {
@@ -465,11 +480,7 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
               //" unrecorded " + getUnrecorded() +
               " only examples " + isOnlyExamples());
         }
-        scheduleWaitTimer();
-        String selectionID = userListID + "_" + typeToSection.toString();
-        service.getExerciseIds(
-            request,
-            new SetExercisesCallback(selectionID, prefix, exerciseID, request));
+        getExerciseIDs(typeToSection, prefix, exerciseID, request);
       } catch (Exception e) {
         logger.warning("got " + e);
       }
@@ -483,6 +494,26 @@ public class HistoryExerciseList<T extends CommonShell, U extends Shell, V exten
         logger.warning("Not doing anything as response to " + request);
       }
     }
+  }
+
+  private ExerciseListRequest getExerciseListRequest(Map<String, Collection<String>> typeToSection, String prefix, boolean onlyWithAudioAnno, boolean onlyUnrecorded, boolean onlyDefaultUser, boolean onlyUninspected) {
+    return getRequest(prefix)
+        .setTypeToSelection(typeToSection)
+        .setOnlyWithAudioAnno(onlyWithAudioAnno)
+        .setOnlyUnrecordedByMe(onlyUnrecorded)
+        .setOnlyDefaultAudio(onlyDefaultUser)
+        .setOnlyUninspected(onlyUninspected);
+  }
+
+  private void getExerciseIDs(Map<String, Collection<String>> typeToSection,
+                              String prefix,
+                              String exerciseID,
+                              ExerciseListRequest request) {
+    scheduleWaitTimer();
+    String selectionID = userListID + "_" + typeToSection.toString();
+    service.getExerciseIds(
+        request,
+        new SetExercisesCallback(selectionID, prefix, exerciseID, request));
   }
 
   /**
