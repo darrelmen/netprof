@@ -582,14 +582,13 @@ public class AudioConversion {
       new ProcessRunner().runProcess(soxFirst2);
 
       if (!tempFile.exists() || tempFile.length() == 0) {
-        logger.error("didn't make " + tempFile);
-        logger.error("soxFirst " + soxFirst2.command());
+        logger.error("didn't make " + tempFile + " soxFirst " + soxFirst2.command());
       }
-      //else {
+      else {
       //logger.debug("wrote normalized to " + tempFile.getAbsolutePath());
-      //}
+        copyAndDeleteOriginal(tempFile, absolutePathToWav);
+      }
 
-      copyAndDeleteOriginal(tempFile, absolutePathToWav);
     } catch (IOException e) {
       logger.error("normalizing " + absolutePathToWav + " got " + e, e);
     }

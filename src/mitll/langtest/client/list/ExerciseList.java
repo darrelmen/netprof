@@ -472,7 +472,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     T current = getCurrentExercise();
     if (current.getID().equals(id)) {
       if (!onLast(current)) {
-        logger.info(getClass() + " removeExercise - load next after " + id);
+        //logger.info(getClass() + " removeExercise - load next after " + id);
         loadNextExercise(current);
       } else if (!onFirst(current)) {
         logger.info(getClass() + " removeExercise - load prev before " + id);
@@ -484,10 +484,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   }
 
   @Override
-  public void hide() {
-    //logger.info(getElement().getId() + " got hide");
-    getParent().setVisible(false);
-  }
+  public void hide() { getParent().setVisible(false);  }
 
   /**
    * If we're not already showing this item, ask there server for the exercise.

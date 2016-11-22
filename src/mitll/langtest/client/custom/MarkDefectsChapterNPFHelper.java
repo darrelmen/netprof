@@ -42,6 +42,7 @@ import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.content.NPFlexSectionExerciseList;
 import mitll.langtest.client.exercise.*;
+import mitll.langtest.client.list.HistoryExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.qc.QCNPFExercise;
@@ -61,6 +62,7 @@ import java.util.logging.Logger;
 class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
   private final Logger logger = Logger.getLogger("MarkDefectsChapterNPFHelper");
 
+  private static final String SHOW_ONLY_UNINSPECTED_ITEMS = "Show Only Uninspected Items.";
   private static final String SHOW_ONLY_AUDIO_BY_UNKNOWN_GENDER = "Show Only Audio by Unknown Gender";
   private static final String MARK_DEFECTS1 = "markDefects";
 
@@ -80,6 +82,17 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
     super(service, feedback, userManager, controller, learnHelper);
   }
 
+  /**
+   * Adds two checkboxes to filter for uninspected items and items with audio that's old enough it's not marked
+   * by gender.
+   *
+   * @param service
+   * @param feedback
+   * @param userManager
+   * @param controller
+   * @param outer
+   * @return
+   */
   @Override
   protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(LangTestDatabaseAsync service,
                                                                         UserFeedback feedback,
@@ -105,14 +118,13 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
             addTypeAhead(column);
 
             // row 2
-            ;
-            add(filterOnly = getFilterCheckbox());
+            add(filterOnly      = getFilterCheckbox());
             add(uninspectedOnly = getUninspectedCheckbox());
 
             // row 3
             add(pagingContainer.getTableWithPager());
 
-            addEventHandler(instanceName, pagingContainer);
+            addEventHandler(instanceName, this);
           }
 
           /**
@@ -130,7 +142,7 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
           }
 
           private CheckBox getUninspectedCheckbox() {
-            return addFilter("Show only uninspected items.");
+            return addFilter(SHOW_ONLY_UNINSPECTED_ITEMS);
           }
 
           /**
@@ -143,8 +155,6 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
             String s = super.getHistoryTokenFromUIState(search, id) + ";" +
                 SelectionState.ONLY_DEFAULT + "=" + filterOnly.getValue() + ";" +
                 SelectionState.ONLY_UNINSPECTED + "=" + uninspectedOnly.getValue();
-
-  //          logger.info("token " + s);
             return s;
           }
 
@@ -159,15 +169,23 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
     };
   }
 
-  private void addEventHandler(final String instanceName, SimplePagingContainer container) {
+  /**
+   * So if you fix a defect in the fix defects tab, want it to be reflected here in mark defects.
+   * For instance if you mark a defect here, and fix it there, coming back here, if you filter
+   * for uninspected, the item should not be there.
+   *
+   * @param instanceName
+   * @param container
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#afterValidForeignPhrase
+   */
+  private void addEventHandler(final String instanceName, HistoryExerciseList container) {
     LangTest.EVENT_BUS.addHandler(DefectEvent.TYPE, authenticationEvent -> {
-//      if (!authenticationEvent.getSource().equals(instanceName)) {
-//        // logger.info("this " + getClass() + " instance " + instanceName + " updating progress " + authenticationEvent.getSource());
-//        getProgressInfo(instanceName);
-//      }
-
-      logger.info("got defect event");
-      // container.onResize();
+      if (authenticationEvent.getSource().equals(instanceName)) {
+        //logger.info("skip self event from " + instanceName);
+      } else {
+    //    logger.info("---> got defect event " + instanceName);
+        container.reloadFromState();
+      }
     });
   }
 

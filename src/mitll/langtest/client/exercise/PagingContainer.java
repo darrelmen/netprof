@@ -97,7 +97,7 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
     if (japanese) FLLength = JAPANESE_LENGTH;
     this.showExerciseState = showExerciseState;
     this.instance = instance;
-    logger.info("for " + instance + " show " + showExerciseState + " for recorder " + isRecorder);
+   // logger.info("for " + instance + " show " + showExerciseState + " for recorder " + isRecorder);
   }
 
   protected void addColumnsToTable() {
