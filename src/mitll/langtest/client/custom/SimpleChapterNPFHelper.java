@@ -64,7 +64,7 @@ import java.util.logging.Logger;
  */
 public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends CommonShell & AudioRefExercise>
     implements ReloadableContainer, RequiresResize {
-  //private final Logger logger = Logger.getLogger("SimpleChapterNPFHelper");
+  private final Logger logger = Logger.getLogger("SimpleChapterNPFHelper");
   private boolean madeNPFContent = false;
 
   protected final LangTestDatabaseAsync service;
@@ -143,7 +143,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    * @see #addNPFToContent(Panel, String)
    */
   private Panel doNPF(String instanceName) {
-    //logger.info(getClass() + " : doNPF instanceName = " + instanceName + " for list loadExercises " + loadExercises);
+//    logger.info(getClass() + " : doNPF instanceName = " + instanceName);
     Panel widgets = flexListLayout.doInternalLayout(null, instanceName);
     npfExerciseList = flexListLayout.npfExerciseList;
     return widgets;

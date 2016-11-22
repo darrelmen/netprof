@@ -52,13 +52,14 @@ public class SelectionState {
   public static final String ONLY_WITH_AUDIO_DEFECTS = "onlyWithAudioDefects";
   public static final String ONLY_UNRECORDED = "onlyUnrecorded";
   public static final String ONLY_DEFAULT = "onlyDefault";
+  public static final String ONLY_UNINSPECTED = "onlyUninspected";
 
   static final String INSTANCE = "instance";
   private String item = "";
   private final Map<String, Collection<String>> typeToSection = new HashMap<String, Collection<String>>();
   private String instance = "";
   private String search = "";
-  private boolean onlyWithAudioDefects, onlyUnrecorded, onlyDefault;
+  private boolean onlyWithAudioDefects, onlyUnrecorded, onlyDefault, onlyUninspected;
 
   private static final boolean DEBUG = false;
 
@@ -109,18 +110,20 @@ public class SelectionState {
         if (DEBUG) logger.info("\tpart " + part + " : " + Arrays.asList(segments));
         if (segments.length > 1) {
           String type = segments[0].trim();
-          String section = segments[1]/*.trim()*/;
+          String section = segments[1];
 
-          if (type.equals("#item") || type.equals("item")) {
+          if (isMatch(type, "item")) {
             setItem(section);
-          } else if (type.equals("#search") || type.equals("search")) {
+          } else if (isMatch(type, "search")) {
             search = section;
-          } else if (type.equals("#" + ONLY_WITH_AUDIO_DEFECTS) || type.equals(ONLY_WITH_AUDIO_DEFECTS)) {
+          } else if (isMatch(type, ONLY_WITH_AUDIO_DEFECTS)) {
             onlyWithAudioDefects = section.equals("true");
-          } else if (type.equals("#" + ONLY_UNRECORDED) || type.equals(ONLY_UNRECORDED)) {
+          } else if (isMatch(type, ONLY_UNRECORDED)) {
             onlyUnrecorded = section.equals("true");
-          } else if (type.equals("#" + ONLY_DEFAULT) || type.equals(ONLY_DEFAULT)) {
+          } else if (isMatch(type, ONLY_DEFAULT)) {
             onlyDefault = section.equals("true");
+          } else if (isMatch(type, ONLY_UNINSPECTED)) {
+            onlyUninspected = section.equals("true");
           } else {
             String[] split = section.split(ITEM_SEPARATOR);
             List<String> sections = Arrays.asList(split);
@@ -149,6 +152,10 @@ public class SelectionState {
 
     if (DEBUG) logger.info("parseToken : got " + this + " from token '" + token + "'");
     //  logger.info(getInfo());
+  }
+
+  private boolean isMatch(String type, String toMatch) {
+    return type.equals("#" + toMatch) || type.equals(toMatch);
   }
 
   private void add(String type, Collection<String> section) {
@@ -213,8 +220,18 @@ public class SelectionState {
   public boolean isOnlyWithAudioDefects() {
     return onlyWithAudioDefects;
   }
-  public boolean isOnlyUnrecorded()    { return onlyUnrecorded;       }
-  public boolean isOnlyDefault()       { return onlyDefault;       }
+
+  public boolean isOnlyUnrecorded() {
+    return onlyUnrecorded;
+  }
+
+  public boolean isOnlyDefault() {
+    return onlyDefault;
+  }
+
+  public boolean isOnlyUninspected() {
+    return onlyUninspected;
+  }
 
   public String toString() {
     StringBuilder builder = new StringBuilder();

@@ -143,6 +143,10 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
     });
   }
 
+  /**
+   * @see #makeNextButton(HasID, ExerciseController, boolean)
+   * @param exercise
+   */
   protected void enableNext(HasID exercise) {
     if (enableNextOnlyWhenAllCompleted) { // initially not enabled
      // logger.info("enableNextOnlyWhenAllCompleted true");
@@ -181,10 +185,13 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
     return "Next";
   }
 
+  /**
+   * @see ExercisePanel#enableNext
+   * @param val
+   */
   public void enableNextButton(boolean val) {
     next.setEnabled(val);
   }
-
   public Widget getNext() { return next; }
   private Button getPrev() { return prev; }
 }

@@ -229,9 +229,9 @@ public class DAO {
     rs.close();
     long now = System.currentTimeMillis();
     int i = 15;
-//    if (now - then > i) {
-//      logger.info("finish took " + (now - then) + " millis to close result set");
-//    }
+    if (now - then > i) {
+      logger.info("finish took " + (now - then) + " millis to close result set " + rs);
+    }
 
     new Thread(new Runnable() {
       @Override
@@ -247,7 +247,7 @@ public class DAO {
         long now = System.currentTimeMillis();
 
         if (now - then > i) {
-          logger.info("finish took " + (now - then) + " millis to close statement ");
+          logger.info("finish took " + (now - then) + " millis to close " + statement + " rs "+ rs);
         }
 
         then = now;

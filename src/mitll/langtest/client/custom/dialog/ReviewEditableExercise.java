@@ -994,6 +994,8 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
           if (result.isValid()) {
             newUserExercise.getMutableAudio().addAudio(result.getAudioAttribute());
             deleteButton.setEnabled(true);
+
+            LangTest.EVENT_BUS.fireEvent(new AudioChangedEvent(instance));
           }
         }
       };
@@ -1023,7 +1025,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
                 comment.setVisible(false);
               }
           //    logger.info("delete button clicked - fire changed!");
-           //  LangTest.EVENT_BUS.fireEvent(new AudioChangedEvent(instance));
+             LangTest.EVENT_BUS.fireEvent(new AudioChangedEvent(instance));
               //     reloadLearnList();
             }
           });
