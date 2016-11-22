@@ -83,8 +83,11 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
    * @param instance
    * @see mitll.langtest.client.list.PagingExerciseList#makePagingContainer
    */
-  public PagingContainer(ExerciseController controller, int verticalUnaccountedFor, boolean isRecorder,
-                         boolean showExerciseState, String instance) {
+  public PagingContainer(ExerciseController controller,
+                         int verticalUnaccountedFor,
+                         boolean isRecorder,
+                         boolean showExerciseState,
+                         String instance) {
     super(controller);
     sorter = new ExerciseComparator(controller.getStartupInfo().getTypeOrder());
     this.verticalUnaccountedFor = verticalUnaccountedFor;
@@ -94,7 +97,7 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
     if (japanese) FLLength = JAPANESE_LENGTH;
     this.showExerciseState = showExerciseState;
     this.instance = instance;
- //   logger.info("for " + instance + " show " + showExerciseState + " for recorder " + isRecorder);
+    logger.info("for " + instance + " show " + showExerciseState + " for recorder " + isRecorder);
   }
 
   protected void addColumnsToTable() {
@@ -203,7 +206,7 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
             STATE state = shell.getState();
 
             boolean isDefect = state == STATE.DEFECT;
-            boolean isFixed = state == STATE.FIXED;
+            boolean isFixed  = state == STATE.FIXED;
             boolean isLL = shell.getSecondState() == STATE.ATTN_LL;
             boolean isRerecord = shell.getSecondState() == STATE.RECORDED;
 

@@ -237,17 +237,19 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonShell 
   public void postAnswers(ExerciseController controller, HasID completedExercise) {
     //completedExercise.setState(STATE.RECORDED);
     // TODO : gah = do we really need to do this???
+    showRecordedState(completedExercise);
+    exerciseList.loadNextExercise(completedExercise);
+  }
+
+  protected void showRecordedState(HasID completedExercise) {
     String id = completedExercise.getID();
-    logger.info("Not setting state on " + id);
+//    logger.info("Not setting state on " + id);
 
     exerciseList.setState(id, STATE.RECORDED);
-    L l = exerciseList.byID(id);
-
+    //L l = exerciseList.byID(id);
+    //logger.info("after recording " +l.getState());
     LangTest.EVENT_BUS.fireEvent(new AudioChangedEvent(instance));
 
-    //logger.info("after recording " +l.getState());
-
     exerciseList.redraw();
-    exerciseList.loadNextExercise(completedExercise);
   }
 }

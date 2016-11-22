@@ -289,7 +289,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
   /**
    * @param answer
    */
-  public void recordIncomplete(Widget answer) {
+  void recordIncomplete(Widget answer) {
     if (!completed.remove(answer) && !completed.isEmpty()) {
       logger.warning("recordIncomplete : huh? answer " + answer.getElement().getId() +
           " is not on list of size " + completed.size());
@@ -305,11 +305,10 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
    * @param answer
    * @see mitll.langtest.client.exercise.WaveformPostAudioRecordButton#useResult(mitll.langtest.shared.AudioAnswer)
    */
-  public void recordCompleted(Widget answer) {
+  void recordCompleted(Widget answer) {
     completed.add(answer);
-
-    logger.info("recordCompleted : id " + answer.getElement().getId() +
-        " completed " + completed.size() + " vs total " + answers.size());
+/*    logger.info("recordCompleted : id " + answer.getElement().getId() +
+        " completed " + completed.size() + " vs total " + answers.size());*/
 
     if (completed.size() > answers.size()) {
       logger.warning("recordCompleted huh? more complete " + completed.size() + " than answers " + answers.size());
@@ -318,13 +317,12 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
     enableNext();
   }
 
-  private void enableNext() {
+  protected void enableNext() {
     //logger.info("enableNext : answered " + completed.size() + " vs total " + answers.size());
-    boolean isComplete = isCompleted();
-    navigationHelper.enableNextButton(isComplete);
+    navigationHelper.enableNextButton(isCompleted());
   }
 
-  private boolean isCompleted() {
+  protected boolean isCompleted() {
     boolean b = completed.size() == answers.size();
 //    if (b) {
 //      logger.info("isCompleted : answered " + completed.size() + " vs total " + answers.size() + " : " + b);
