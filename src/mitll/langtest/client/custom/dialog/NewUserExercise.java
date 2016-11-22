@@ -75,7 +75,6 @@ import java.util.logging.Logger;
 class NewUserExercise extends BasicDialog {
   private final Logger logger = Logger.getLogger("NewUserExercise");
 
-
   private static final int MAX_CHARACTERS = 300;
   protected static final int TEXT_FIELD_WIDTH = 500;
 

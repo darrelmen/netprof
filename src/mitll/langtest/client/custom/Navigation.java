@@ -109,7 +109,15 @@ public class Navigation implements RequiresResize, ShowTab {
   private static final String LEARN = "learn";
   private static final String RECORD_AUDIO = "Record Audio";
   private static final String RECORD_EXAMPLE = "Record In-context Audio";
-  private static final String CONTENT1 = "content";
+
+  /**
+   * @see #selectPreviousTab
+   */
+  //private static final String CONTENT1 = "content";
+
+  /**
+   * @see #addDefectsTabs
+   */
   private static final String MARK_DEFECTS1 = "markDefects";
 
   private static final int STUDY_LISTS_INDEX = 2;
@@ -627,7 +635,7 @@ public class Navigation implements RequiresResize, ShowTab {
       } else if (value.equals(RECORD_EXAMPLE)) {
         recordExampleHelper.showNPF(recordExampleTab, "record_example_audio");
       } else if (value.equals(MARK_DEFECTS) && markDefectsTab != null) {
-        markDefectsHelper.showNPF(markDefectsTab, CONTENT1);
+        markDefectsHelper.showNPF(markDefectsTab, MARK_DEFECTS1);
       } else if (value.equals(PRACTICE) && practiceTab != null) {
         showPracticeTab();
       } else if (value.equals(ANALYSIS) && analysis != null) {

@@ -218,8 +218,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         }
         AmasSupport amasSupport = new AmasSupport();
         exercises = amasSupport.filterByUnrecorded(request.getUserID(), exercises, typeToSelection, db.getResultDAO());
-        // exercises = filterByOnlyAudioAnno(onlyWithAudioAnno, exercises);
-        //    int i = markRecordedState(userID, role, exercises, onlyExamples);
         //  logger.debug("marked " +i + " as recorded");
 
         // now sort : everything gets sorted the same way
@@ -231,7 +229,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         //   sortExercises("", commonExercises);
 //        }
 
-        return new ExerciseListWrapper<AmasExerciseImpl>(reqID, exercises, null);
+        return new ExerciseListWrapper<>(reqID, exercises, null);
       } else { // sort by unit-chapter selection
         // builds unit-lesson hierarchy if non-empty type->selection over user list
         Collection<AmasExerciseImpl> exercisesForSelectionState1 =
@@ -269,9 +267,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.list.PagingExerciseList#loadExercises
    */
   @Override
-  public <T extends CommonShell> ExerciseListWrapper<T> getExerciseIds(
-      ExerciseListRequest request
-  ) {
+  public <T extends CommonShell> ExerciseListWrapper<T> getExerciseIds(ExerciseListRequest request) {
     if (serverProps.isAMAS()) {
       ExerciseListWrapper<AmasExerciseImpl> amasExerciseIds = getAMASExerciseIds(request);
       return (ExerciseListWrapper<T>) amasExerciseIds; // TODO : how to do this without forcing it.
@@ -303,15 +299,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         }
         exercises = filterExercises(request, exercises);
 
-        logger.debug("\tgetExerciseIds : (" + getLanguage() + ") " +
+/*        logger.debug("\tgetExerciseIds : (" + getLanguage() + ") " +
             "after filtering " + exercises.size() +
-            " for request " + request);
+            " for request " + request);*/
 
         String role = request.getRole();
 
         if (!isUserListReq) {
-
-
           int i = markRecordedState(userID, role, exercises, request.isOnlyExamples());
           logger.debug("\tgetExerciseIds : (" + getLanguage() + ") " +
               "mark recorded on " + exercises.size() + " = " + i +
@@ -325,9 +319,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         } else {
           commonExercises = new ArrayList<>(exercises);
 
-          logger.debug("\tgetExerciseIds : (" + getLanguage() + ") " +
+  /*        logger.debug("\tgetExerciseIds : (" + getLanguage() + ") " +
               "sorting   " + commonExercises.size() +
               " for request " + request);
+  */
           sortExercises(role, commonExercises);
         }
 
@@ -356,9 +351,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private Collection<CommonExercise> filterExercises(ExerciseListRequest request,
                                                      Collection<CommonExercise> exercises) {
     exercises = filterByUnrecorded(request, exercises);
-    exercises = filterByOnlyAudioAnno(request.isOnlyWithAudioAnno(), exercises);
-    exercises = filterByOnlyDefaultAudio(request.isOnlyDefaultAudio(), exercises);
-
+    if (request.isOnlyWithAudioAnno()) {
+      exercises = filterByOnlyAudioAnno(exercises);
+    }
+    if (request.isOnlyDefaultAudio()) {
+      exercises = filterByOnlyDefaultAudio(exercises);
+    }
+    if (request.isOnlyUninspected()) {
+      exercises = filterByUninspected(exercises);
+    }
     return exercises;
   }
 
@@ -488,41 +489,44 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @param onlyAudioAnno
    * @param exercises
    * @return
+   * @paramx onlyAudioAnno
    * @see #getExerciseIds
    */
-  private Collection<CommonExercise> filterByOnlyAudioAnno(boolean onlyAudioAnno,
-                                                           Collection<CommonExercise> exercises) {
-    if (onlyAudioAnno) {
-      Set<String> audioAnnos = getUserListManager().getAudioAnnos();
-      List<CommonExercise> copy = new ArrayList<CommonExercise>();
-      for (CommonExercise exercise : exercises) {
-        if (audioAnnos.contains(exercise.getID())) copy.add(exercise);
-      }
-      return copy;
-    } else {
-      return exercises;
+  private Collection<CommonExercise> filterByOnlyAudioAnno(Collection<CommonExercise> exercises) {
+    Set<String> audioAnnos = getUserListManager().getAudioAnnos();
+    List<CommonExercise> copy = new ArrayList<CommonExercise>();
+    for (CommonExercise exercise : exercises) {
+      if (audioAnnos.contains(exercise.getID())) copy.add(exercise);
     }
+    return copy;
   }
 
-  private Collection<CommonExercise> filterByOnlyDefaultAudio(boolean onlyDefault,
-                                                              Collection<CommonExercise> exercises) {
-    if (onlyDefault) {
-      List<CommonExercise> copy = new ArrayList<CommonExercise>();
-      for (CommonExercise exercise : exercises) {
-        for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) {
-          if (audioAttribute.getUserid() == UserDAO.DEFAULT_USER_ID) {
-            copy.add(exercise);
-            break;
-          }
+  private Collection<CommonExercise> filterByOnlyDefaultAudio(Collection<CommonExercise> exercises) {
+    List<CommonExercise> copy = new ArrayList<CommonExercise>();
+    for (CommonExercise exercise : exercises) {
+      for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) {
+        if (audioAttribute.getUserid() == UserDAO.DEFAULT_USER_ID) {
+          copy.add(exercise);
+          break;
         }
       }
-      return copy;
-    } else {
-      return exercises;
     }
+    return copy;
+  }
+
+  private Collection<CommonExercise> filterByUninspected(Collection<CommonExercise> exercises) {
+    Collection<String> uninspected = getUserListManager().getUninspected();
+    logger.info("found " + uninspected.size());
+
+    List<CommonExercise> copy = new ArrayList<CommonExercise>();
+    for (CommonExercise exercise : exercises) {
+      if (uninspected.contains(exercise.getID())) {
+        copy.add(exercise);
+      }
+    }
+    return copy;
   }
 
   private <T extends CommonShell> Collection<CommonExercise> getExercisesFromUserListFiltered(Map<String, Collection<String>> typeToSelection,
@@ -739,11 +743,23 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
     List<CommonShell> exerciseShells = getExerciseShells(exercises);
 
-    //   logger.debug("makeExerciseListWrapper : userID " +userID + " Role is " + role);
+    logger.debug("makeExerciseListWrapper : userID " + userID + " request is " + request);
     if (role.equals(Result.AUDIO_TYPE_RECORDER)) {
-      markRecordedState((int) userID, role, exerciseShells, onlyExamples);
-    } else if (role.equalsIgnoreCase(User.Permission.QUALITY_CONTROL.toString()) || role.startsWith(Result.AUDIO_TYPE_REVIEW)) {
+      markRecordedState(userID, role, exerciseShells, onlyExamples);
+    } else if (
+        role.equalsIgnoreCase(User.Permission.QUALITY_CONTROL.toString()) ||
+            role.startsWith(Result.AUDIO_TYPE_REVIEW)) {
       getUserListManager().markState(exerciseShells);
+    } else if (role.equals("markDefects")) {
+      Collection<String> defectExercises = getUserListManager().getDefectExercises();
+      int c = 0;
+      for (CommonShell shell : exerciseShells) {
+        if (defectExercises.contains(shell.getID())) {
+          shell.setState(STATE.DEFECT);
+          //    if (shell.getID().startsWith("50")) logger.info("adding defect to " +shell.getID() + " : " + shell.getState());
+          c++;
+        }
+      }
     }
 
     // TODO : do this the right way vis-a-vis type safe collection...
