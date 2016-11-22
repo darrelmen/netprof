@@ -347,8 +347,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
 
     panels.clear();
 
-    Panel recordAudioWithAnno = getRecordAudioWithAnno(widget, Result.AUDIO_TYPE_REGULAR);
-    widget.add(recordAudioWithAnno);
+    widget.add(getRecordAudioWithAnno(widget, Result.AUDIO_TYPE_REGULAR));
     widget.add(getRecordAudioWithAnno(widget, Result.AUDIO_TYPE_SLOW));
 
     return widget;

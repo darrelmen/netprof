@@ -77,7 +77,7 @@ class NewUserExercise extends BasicDialog {
 
 
   private static final int MAX_CHARACTERS = 300;
-  private static final int TEXT_FIELD_WIDTH = 500;
+  protected static final int TEXT_FIELD_WIDTH = 500;
 
   private static final String FOREIGN_LANGUAGE = "Foreign Language";
   private static final String CREATE = "Create";
