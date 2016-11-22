@@ -48,7 +48,6 @@ import mitll.langtest.shared.exercise.MutableExercise;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import mitll.langtest.shared.monitoring.Session;
-import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 import java.io.OutputStream;
@@ -716,7 +715,7 @@ public class ResultDAO extends DAO {
       Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement = connection.prepareStatement(sql);
 
-      List<CorrectAndScore> scores = getScoreResultsForQuery(connection, statement);
+      List<CorrectAndScore> scores = getScoreResultsForQuery(connection, statement, sql);
 
       if (DEBUG) logger.debug("getResultsForExIDIn for  " + sql + " got\n\t" + scores.size());
       return scores;
@@ -767,7 +766,7 @@ public class ResultDAO extends DAO {
     PreparedStatement statement = connection.prepareStatement(sql);
     statement.setLong(1, userid);
 
-    List<CorrectAndScore> scores = getScoreResultsForQuery(connection, statement);
+    List<CorrectAndScore> scores = getScoreResultsForQuery(connection, statement, sql);
 
     //  if (sql.contains("session")) {
     //    logger.DEBUG("getCorrectAndScoresForUser for  " + sql + " got " + scores.size() + " scores");
@@ -820,7 +819,7 @@ public class ResultDAO extends DAO {
     statement.setLong(1, userid);
 
     long then = System.currentTimeMillis();
-    List<CorrectAndScore> scores = getScoreResultsForQuery(connection, statement);
+    List<CorrectAndScore> scores = getScoreResultsForQuery(connection, statement, sql);
     long now = System.currentTimeMillis();
 
     if (now - then > 100) {
@@ -866,21 +865,21 @@ public class ResultDAO extends DAO {
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
 
-    return getResultsForQuery(connection, statement);
+    return getResultsForQuery(connection, statement, sql);
   }
 
   private List<MonitorResult> getMonitorResultsSQL(String sql) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
 
-    return getMonitorResultsForQuery(connection, statement);
+    return getMonitorResultsForQuery(connection, statement, sql);
   }
 
   private List<UserAndTime> getUserAndTimeSQL(String sql) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
 
-    return getUserAndTimeForQuery(connection, statement);
+    return getUserAndTimeForQuery(connection, statement, sql);
   }
 
   /**
@@ -895,12 +894,13 @@ public class ResultDAO extends DAO {
     int numResults = 0;
     try {
       Connection connection = database.getConnection(this.getClass().toString());
-      PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) FROM " + RESULTS);
+      String sql = "SELECT COUNT(*) FROM " + RESULTS;
+      PreparedStatement statement = connection.prepareStatement(sql);
       ResultSet rs = statement.executeQuery();
       if (rs.next()) {
         numResults = rs.getInt(1);
       }
-      finish(connection, statement, rs);
+      finish(connection, statement, rs, sql);
     } catch (Exception ee) {
       logException(ee);
     }
@@ -912,11 +912,12 @@ public class ResultDAO extends DAO {
    *
    * @param connection
    * @param statement
+   * @param sql
    * @return
    * @throws SQLException
    * @see #getResultsSQL(String)
    */
-  private List<Result> getResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
+  private List<Result> getResultsForQuery(Connection connection, PreparedStatement statement, String sql) throws SQLException {
     ResultSet rs = statement.executeQuery();
     List<Result> results = new ArrayList<>();
     long then = System.currentTimeMillis();
@@ -951,14 +952,14 @@ public class ResultDAO extends DAO {
       result.setJsonScore(json);
       results.add(result);
     }
-    finish(connection, statement, rs);
+    finish(connection, statement, rs, sql);
     long now = System.currentTimeMillis();
     long diff = now - then;
     if (diff > 100) logger.warn("took " + diff + " to get " + results.size() + " results");
     return results;
   }
 
-  private List<UserAndTime> getUserAndTimeForQuery(Connection connection, PreparedStatement statement) throws SQLException {
+  private List<UserAndTime> getUserAndTimeForQuery(Connection connection, PreparedStatement statement, String sql) throws SQLException {
     ResultSet rs = statement.executeQuery();
     List<UserAndTime> results = new ArrayList<>();
     while (rs.next()) {
@@ -970,12 +971,12 @@ public class ResultDAO extends DAO {
 
       results.add(userAndTime);
     }
-    finish(connection, statement, rs);
+    finish(connection, statement, rs, sql);
 
     return results;
   }
 
-  private List<MonitorResult> getMonitorResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
+  private List<MonitorResult> getMonitorResultsForQuery(Connection connection, PreparedStatement statement, String sql) throws SQLException {
     ResultSet rs = statement.executeQuery();
     List<MonitorResult> results = new ArrayList<>();
     while (rs.next()) {
@@ -1016,7 +1017,7 @@ public class ResultDAO extends DAO {
 
       results.add(result);
     }
-    finish(connection, statement, rs);
+    finish(connection, statement, rs, sql);
 
     return results;
   }
@@ -1030,17 +1031,18 @@ public class ResultDAO extends DAO {
   private List<CorrectAndScore> getScoreResultsSQL(String sql) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
-    return getScoreResultsForQuery(connection, statement);
+    return getScoreResultsForQuery(connection, statement, sql);
   }
 
   /**
    * @param connection
    * @param statement
+   * @param sql
    * @return
    * @throws SQLException
    * @see #getResultsForExIDInForUser(java.util.Collection, boolean, long)
    */
-  private List<CorrectAndScore> getScoreResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
+  private List<CorrectAndScore> getScoreResultsForQuery(Connection connection, PreparedStatement statement, String sql) throws SQLException {
     long then = System.currentTimeMillis();
     ResultSet rs = statement.executeQuery();
     long now = System.currentTimeMillis();
@@ -1072,7 +1074,7 @@ public class ResultDAO extends DAO {
 //    }
 
     then = now;
-    finish(connection, statement, rs);
+    finish(connection, statement, rs, sql);
     now = System.currentTimeMillis();
 //    if (now-then > 0) {
 //      logger.info("getScoreResultsForQuery took " + (now - then) + " millis to finish query.");
