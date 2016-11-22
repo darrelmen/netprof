@@ -140,7 +140,10 @@ public class NPFHelper implements RequiresResize {
     }
   }
 
-  private void addNPFToContent(UserList<CommonShell> ul, Panel listContent, String instanceName, boolean loadExercises,
+  private void addNPFToContent(UserList<CommonShell> ul,
+                               Panel listContent,
+                               String instanceName,
+                               boolean loadExercises,
                                HasID toSelect) {
     listContent.add(doNPF(ul, instanceName, loadExercises, toSelect));
     listContent.addStyleName("userListBackground");

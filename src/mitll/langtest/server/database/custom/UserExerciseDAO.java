@@ -289,7 +289,7 @@ public class UserExerciseDAO extends DAO {
           userExercises2.add(ue);
         }
       }
-      if (c > 0) logger.warn("huh? can't find " +c+"/"+userExercises.size() + " items???");
+      if (c <10) logger.warn("huh? can't find " +c+"/"+userExercises.size() + " items???");
 
       boolean isEnglish = database.getLanguage().equalsIgnoreCase("english");
       String join2 = getJoin2(listID);

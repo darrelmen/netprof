@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.custom;
 
+import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.audio.PathWriter;
 import mitll.langtest.server.audio.TrackInfo;
@@ -396,6 +397,7 @@ public class UserListManager {
    *
    * @param typeOrder
    * @return
+   * @see LangTestDatabaseImpl#getReviewLists
    */
   public UserList<CommonShell> getCommentedList(Collection<String> typeOrder) {
     //Map<String, ReviewedDAO.StateCreator> exerciseToState = getExerciseToState(true); // skip unset items!
@@ -488,11 +490,11 @@ public class UserListManager {
 
     List<CommonShell> copy = new ArrayList<>();
 
-    for (CommonExercise orig:onList) copy.add(orig.getShell());
+    for (CommonExercise orig : onList) copy.add(orig.getShell());
 
     long now = System.currentTimeMillis();
 
-    logger.debug("getReviewList '" +name+ "' ids size = " + allKnown.size() + " yielded " + copy.size() + " took " + (now-then) + " millis");
+    logger.debug("getReviewList '" + name + "' ids size = " + allKnown.size() + " yielded " + copy.size() + " took " + (now - then) + " millis");
     User user = getQCUser();
     UserList<CommonShell> userList = new UserList<CommonShell>(userListMaginID, user, name, description, "", false);
     userList.setReview(true);
@@ -769,7 +771,7 @@ public class UserListManager {
    * @param exerciseID
    * @param field
    * @param comment
-   * @see mitll.langtest.server.database.exercise.ExcelImport#addDefects
+   * @see mitll.langtest.server.database.exercise.BaseExerciseDAO#addDefects
    */
   public boolean addDefect(String exerciseID, String field, String comment) {
     if (!annotationDAO.hasAnnotation(exerciseID, field, INCORRECT, comment)) {
@@ -962,5 +964,13 @@ public class UserListManager {
 
   public UserExerciseDAO getUserExerciseDAO() {
     return userExerciseDAO;
+  }
+
+  public Collection<String> getDefectExercises() {
+    return reviewedDAO.getDefectExercises();
+  }
+
+  public Collection<String> getUninspected() {
+    return reviewedDAO.getUninspectedExercises();
   }
 }

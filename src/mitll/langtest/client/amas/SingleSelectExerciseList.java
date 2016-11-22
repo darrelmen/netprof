@@ -440,7 +440,7 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
       if (count == 3) {
         //    logger.info("push new token " + getHistoryTokenFromUIState());
         logger.info("gotSelection count = " + count);
-        loadExercisesUsingPrefix(selectionState.getTypeToSection(), getPrefix(), false, "", false, false);
+        loadExercisesUsingPrefix(selectionState.getTypeToSection(), getPrefix(), "", false, false, false, false);
       } else {
         // logger.warning("not enough selections " +count);
         gotEmptyExerciseList();

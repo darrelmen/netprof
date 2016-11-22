@@ -50,9 +50,11 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
+import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.custom.tabs.RememberTabAndContent;
+import mitll.langtest.client.exercise.DefectEvent;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.NavigationHelper;
 import mitll.langtest.client.exercise.PostAnswerProvider;
@@ -87,9 +89,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
   private Logger logger = Logger.getLogger("QCNPFExercise");
 
   private static final String VOCABULARY = "Vocabulary:";
-
   private static final String DEFECT = "Defect?";
-
   public static final String FOREIGN_LANGUAGE = "foreignLanguage";
   public static final String TRANSLITERATION = "transliteration";
   public static final String ENGLISH = "english";
@@ -282,6 +282,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
    *
    * @param listContainer
    * @param completedExercise
+   * @see #addAttnLLButton(ListInterface, NavigationHelper)
    */
   private void markAttentionLL(ListInterface listContainer, HasID completedExercise) {
     if (isCourseContent()) {
@@ -776,10 +777,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
    */
   private void populateCommentRow(FocusWidget commentEntry, boolean alreadyMarkedCorrect, Panel commentRow) {
     commentRow.setVisible(!alreadyMarkedCorrect);
-
-    final Label commentLabel = getCommentLabel();
-
-    commentRow.add(commentLabel);
+    commentRow.add(getCommentLabel());
     commentRow.add(commentEntry);
   }
 
@@ -879,6 +877,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
 
       setApproveButtonState();
       markReviewed(exercise);
+      LangTest.EVENT_BUS.fireEvent(new DefectEvent());
     }
   }
 
@@ -888,19 +887,18 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
   private void setApproveButtonState() {
     boolean allCorrect = incorrectFields.isEmpty();
     boolean allPlayed = audioWasPlayed.size() == toResize.size();
-
     //System.out.println("\tsetApproveButtonState : allPlayed= '" +allPlayed +"' allCorrect " + allCorrect + " audio played " + audioWasPlayed.size() + " total " + toResize.size());
 
+    String tooltipText = !allPlayed ? "Not all audio has been reviewed" : allCorrect ? APPROVED_BUTTON_TOOLTIP : APPROVED_BUTTON_TOOLTIP2;
     if (approvedButton != null) {   // comment tab doesn't have it...!
       approvedButton.setEnabled(allCorrect && allPlayed);
-
-      approvedTooltip.setText(!allPlayed ? "Not all audio has been reviewed" : allCorrect ? APPROVED_BUTTON_TOOLTIP : APPROVED_BUTTON_TOOLTIP2);
+      approvedTooltip.setText(tooltipText);
       approvedTooltip.reconfigure();
     }
 
     if (navigationHelper != null) { // this called before nav helper exists
       navigationHelper.enableNextButton(allPlayed);
-      nextTooltip.setText(!allPlayed ? "Not all audio has been reviewed" : allCorrect ? APPROVED_BUTTON_TOOLTIP : APPROVED_BUTTON_TOOLTIP2);
+      nextTooltip.setText(tooltipText);
       nextTooltip.reconfigure();
     }
   }
