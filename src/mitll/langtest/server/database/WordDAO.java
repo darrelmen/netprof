@@ -253,7 +253,7 @@ public class WordDAO extends DAO {
       );
     }
 
-    finish(connection, statement, rs);
+    finish(connection, statement, rs, sql);
     return lists;
   }
 }

@@ -36,7 +36,6 @@ import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.apache.log4j.Logger;
 
@@ -409,7 +408,7 @@ public class UserListDAO extends DAO {
       );
     }
     //logger.debug("getWhere : got " + lists);
-    finish(connection, statement, rs);
+    finish(connection, statement, rs, sql);
     return lists;
   }
 

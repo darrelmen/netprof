@@ -35,7 +35,6 @@ package mitll.langtest.server.database.custom;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.shared.exercise.STATE;
-import org.apache.commons.collections.bag.HashBag;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;
@@ -270,7 +269,7 @@ public class ReviewedDAO extends DAO {
         }
       }
 
-      finish(connection, statement, rs);
+      finish(connection, statement, rs, sql3);
      // int count = getCount();
      // if (count % 10 == 0) logger.debug("now " + count + " reviewed");
       //logger.debug("query " + sql3 + " returned " + exidToState.size() + " exercise->state items");
@@ -296,17 +295,18 @@ public class ReviewedDAO extends DAO {
     return ids;
   }
 
-  public Collection<String> getUninspectedExercises() {
+  public Collection<String> getInspectedExercises() {
     Map<String, StateCreator> exerciseToState = getExerciseToState(false);
     Set<String> ids = new HashSet<String>();
-//    Collection<STATE> toMatch = new HashSet<>();
-//    toMatch.add(STATE.APPROVED);
-//    toMatch.add(STATE.DEFECT);
-//    toMatch.add(STATE.FIXED);
-//    toMatch.add(STATE.ATTN_LL);
+
+   Collection<STATE> toMatch = new HashSet<>();
+    toMatch.add(STATE.APPROVED);
+    toMatch.add(STATE.DEFECT);
+    toMatch.add(STATE.FIXED);
+    toMatch.add(STATE.ATTN_LL);
     for (Map.Entry<String,StateCreator> pair : exerciseToState.entrySet()) {
       STATE state = pair.getValue().getState();
-      if (state == STATE.UNSET || state == STATE.RECORDED) {
+      if (toMatch.contains(state)) {
         ids.add(pair.getKey());
       }
     }

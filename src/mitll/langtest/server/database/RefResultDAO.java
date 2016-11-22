@@ -406,7 +406,7 @@ public class RefResultDAO extends DAO {
         jsonObject.put(exid, array);
       }
 
-      finish(connection, statement, rs);
+      finish(connection, statement, rs, sql);
 
       return jsonObject;
     } catch (Exception ee) {
@@ -426,7 +426,7 @@ public class RefResultDAO extends DAO {
     PreparedStatement statement = connection.prepareStatement(sql);
 
     long then = System.currentTimeMillis();
-    List<Result> resultsForQuery = getResultsForQuery(connection, statement);
+    List<Result> resultsForQuery = getResultsForQuery(connection, statement, sql);
     long now = System.currentTimeMillis();
 //    logger.info("getResultsSQL took " + (now - then) + " millis to exec query for " +sql);
     //   logger.debug("getResultsSQL running " + sql + " -> " +resultsForQuery.size() + " results");
@@ -437,12 +437,13 @@ public class RefResultDAO extends DAO {
     int numResults = 0;
     try {
       Connection connection = database.getConnection(this.getClass().toString());
-      PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) FROM " + REFRESULT);
+      String sql = "SELECT COUNT(*) FROM " + REFRESULT;
+      PreparedStatement statement = connection.prepareStatement(sql);
       ResultSet rs = statement.executeQuery();
       if (rs.next()) {
         numResults = rs.getInt(1);
       }
-      finish(connection, statement, rs);
+      finish(connection, statement, rs, sql);
     } catch (Exception ee) {
       logException(ee);
     }
@@ -457,11 +458,12 @@ public class RefResultDAO extends DAO {
    *
    * @param connection
    * @param statement
+   * @param sql
    * @return
    * @throws SQLException
    * @see #getResultsSQL(String)
    */
-  private List<Result> getResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
+  private List<Result> getResultsForQuery(Connection connection, PreparedStatement statement, String sql) throws SQLException {
     long then = System.currentTimeMillis();
     ResultSet rs = statement.executeQuery();
     long now = System.currentTimeMillis();
@@ -529,7 +531,7 @@ public class RefResultDAO extends DAO {
     now = System.currentTimeMillis();
 
  //   logger.info("getResultsForQuery took " + (now - then) + " millis, found " + count + " invalid decode results, skipped " + skipped);
-    finish(connection, statement, rs);
+    finish(connection, statement, rs, sql);
 
     return results;
   }

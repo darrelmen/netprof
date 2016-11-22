@@ -299,7 +299,7 @@ public class GradeDAO extends DAO {
         grades.add(g);
         ids.add(resultID);
       }
-      finish(connection, statement, rs);
+      finish(connection, statement, rs, sql);
 
     //  logger.debug("found " + results.size() + " graded results for " + exerciseID);
       return new GradesAndIDs(grades,ids);

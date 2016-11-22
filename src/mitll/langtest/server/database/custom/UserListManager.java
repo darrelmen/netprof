@@ -970,7 +970,7 @@ public class UserListManager {
     return reviewedDAO.getDefectExercises();
   }
 
-  public Collection<String> getUninspected() {
-    return reviewedDAO.getUninspectedExercises();
+  public Collection<String> getInspectedExercises() {
+    return reviewedDAO.getInspectedExercises();
   }
 }
