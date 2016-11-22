@@ -152,24 +152,15 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
             add(pagingContainer.getTableWithPager());
             setOnlyExamples(!doNormalRecording);
 
-            LangTest.EVENT_BUS.addHandler(AudioChangedEvent.TYPE, new AudioChangedEventHandler()     {
-              @Override
-              public void onAudioChanged(AudioChangedEvent authenticationEvent) {
-                if (!authenticationEvent.getSource().equals(instanceName)) {
-                 // logger.info("this " + getClass() + " instance " + instanceName + " updating progress " + authenticationEvent.getSource());
-                  getProgressInfo(instanceName);
-                }
-              }
-            });
+            addEventHandler(instanceName);
           }
 
           @Override
           protected void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection,
                                                   String prefix,
-                                                  boolean onlyWithAudioAnno,
-                                                  String exerciseID,
-                                                  boolean onlyUnrecorded, boolean onlyDefaultUser) {
-            super.loadExercisesUsingPrefix(typeToSection, prefix, onlyWithAudioAnno, exerciseID, onlyUnrecorded, onlyDefaultUser);
+                                                  String exerciseID, boolean onlyWithAudioAnno,
+                                                  boolean onlyUnrecorded, boolean onlyDefaultUser, boolean onlyUninspected) {
+            super.loadExercisesUsingPrefix(typeToSection, prefix, exerciseID, onlyWithAudioAnno, onlyUnrecorded, onlyDefaultUser, onlyUninspected);
             filterOnly.setText(setCheckboxTitle(userManager));
           }
 
@@ -201,6 +192,15 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
 
       }
     };
+  }
+
+  private void addEventHandler(final String instanceName) {
+    LangTest.EVENT_BUS.addHandler(AudioChangedEvent.TYPE, authenticationEvent -> {
+      if (!authenticationEvent.getSource().equals(instanceName)) {
+       // logger.info("this " + getClass() + " instance " + instanceName + " updating progress " + authenticationEvent.getSource());
+        getProgressInfo(instanceName);
+      }
+    });
   }
 
 
@@ -235,6 +235,15 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
       super(e, service, controller1, exerciseList1, RecorderNPFHelper.this.doNormalRecording, instance);
       this.e = e;
     }
+
+    @Override
+    protected void enableNext() {
+      super.enableNext();
+      if (isCompleted()) {
+        showRecordedState(e);
+      }
+    }
+
 
     @Override
     protected void onLoad() {

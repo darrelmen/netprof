@@ -68,6 +68,7 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioPanel<Shell> {
+  public static final String DYNAMIC_RANGE = "Dynamic Range";
   private final Logger logger = Logger.getLogger("RecordAudioPanel");
   private static final int HEIGHT_OF_RECORD_ROW = 58;
 
@@ -122,7 +123,6 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
     getElement().setId("RecordAudioPanel_" + exerciseID + "_" + index + "_" + audioType);
   }
 
-
   /**
    * Add dynamic range feedback to the right of the play button.
    *
@@ -131,7 +131,7 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
    */
   @Override
   protected Widget getAfterPlayWidget() {
-    HTML w = new HTML("Dynamic Range");
+    HTML w = new HTML(DYNAMIC_RANGE);
     w.addStyleName("leftTenMargin");
     w.addStyleName("topBarMargin");
     afterPlayWidget.add(w);
@@ -142,8 +142,6 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
     Style style = progressBar.getElement().getStyle();
     style.setMarginLeft(5, Style.Unit.PX);
     progressBar.addStyleName("topBarMargin");
-    //  style.setMarginTop(5, Style.Unit.PX);
-    //  style.setMarginBottom(5, Style.Unit.PX);
     return afterPlayWidget;
   }
 
@@ -201,7 +199,6 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
   public void clickStop() {
     postAudioRecordButton.clickStop();
   }
-
   public boolean isRecording() {
     return postAudioRecordButton.isRecording();
   }
