@@ -98,7 +98,7 @@ public class AnnotationDAO extends DAO {
     }
 
     //logger.debug("getUserAnnotations sql " + sql + " yielded " + lists);
-    finish(connection, statement, rs);
+    finish(connection, statement, rs, sql);
 
     if (!ids.isEmpty()) {
       logger.info("fixing " + ids.size() + " annotations where audio was marked defect");
@@ -293,7 +293,7 @@ public class AnnotationDAO extends DAO {
       }
 
       //logger.debug("getUserAnnotations sql " + sql + " yielded " + lists);
-      finish(connection, statement, rs);
+      finish(connection, statement, rs, sql3);
       return incorrect;
     } catch (SQLException e) {
       logger.error("got " + e, e);
@@ -378,7 +378,7 @@ public class AnnotationDAO extends DAO {
     }
 
     //logger.debug("getUserAnnotations sql " + sql + " yielded " + lists);
-    finish(connection, statement, rs);
+    finish(connection, statement, rs, sql);
     return lists;
   }
 
@@ -447,7 +447,7 @@ public class AnnotationDAO extends DAO {
         //for (int i = 0; i < 20;i++) logger.debug("\tgetUserAnnotations e.g. " + iterator.next() );
       }*/
 
-      finish(connection, statement, rs);
+      finish(connection, statement, rs, sql2);
     } catch (SQLException e) {
       logger.error("Got " + e + " doing " + sql2, e);
     }

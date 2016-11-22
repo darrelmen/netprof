@@ -516,13 +516,17 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     return copy;
   }
 
+  /**
+   * Remove any items that have been inspected already.
+   * @param exercises
+   * @return
+   */
   private Collection<CommonExercise> filterByUninspected(Collection<CommonExercise> exercises) {
-    Collection<String> uninspected = getUserListManager().getUninspected();
-    logger.info("found " + uninspected.size());
-
+    Collection<String> inspected = getUserListManager().getInspectedExercises();
+   // logger.info("found " + inspected.size());
     List<CommonExercise> copy = new ArrayList<CommonExercise>();
     for (CommonExercise exercise : exercises) {
-      if (uninspected.contains(exercise.getID())) {
+      if (!inspected.contains(exercise.getID())) {
         copy.add(exercise);
       }
     }
