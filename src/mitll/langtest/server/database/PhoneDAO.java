@@ -481,7 +481,7 @@ public class PhoneDAO extends DAO {
             " skipping " + exid + " " + rid + " word " + word + "<-------------- ");*/
       //  }
     }
-    finish(connection, statement, rs);
+    finish(connection, statement, rs, sql);
 
     return getPhoneReport(phoneToScores, phoneToWordAndScore, totalScore, totalItems, sortByLatestExample);
   }
