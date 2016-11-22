@@ -40,4 +40,16 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 4/25/2014.
 */
-public enum STATE implements IsSerializable { UNSET, APPROVED, DEFECT, FIXED, ATTN_LL, RECORDED }
+public enum STATE implements IsSerializable {
+  UNSET,
+
+  APPROVED,
+  DEFECT,
+  FIXED,
+  ATTN_LL,
+
+  /**
+   * @see mitll.langtest.client.exercise.WaveformExercisePanel#postAnswers
+   */
+  RECORDED
+}

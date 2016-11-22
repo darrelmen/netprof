@@ -104,7 +104,10 @@ public class Exercise extends AudioExercise implements CommonExercise,
   }
 
   public CommonShell getShell() {
-    return new ExerciseShell(getID(), englishSentence, meaning, foreignLanguage, transliteration, context, contextTranslation, displayID);
+    ExerciseShell exerciseShell = new ExerciseShell(getID(), englishSentence, meaning, foreignLanguage, transliteration, context, contextTranslation, displayID);
+//    exerciseShell.setState(getState());
+//    exerciseShell.setSecondState(getSecondState());
+    return exerciseShell;
   }
 
   /**
@@ -125,11 +128,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
   public void setContextTranslation(String context) {
     this.contextTranslation = context;
   }
-
-/*  @Override
-  public String getRefAudioIndex() {
-    return refAudioIndex;
-  }*/
 
   @Override
   public boolean isPredefined() {

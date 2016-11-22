@@ -157,10 +157,11 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * @param onlyWithAudioAnno
    * @param onlyUnrecorded
    * @param onlyDefaultUser
+   * @param onlyUninspected
    * @paramx setTypeAheadText
    * @see #addTypeAhead(com.google.gwt.user.client.ui.Panel)
    */
-  void loadExercises(String selectionState, String prefix, boolean onlyWithAudioAnno, boolean onlyUnrecorded, boolean onlyDefaultUser) {
+  void loadExercises(String selectionState, String prefix, boolean onlyWithAudioAnno, boolean onlyUnrecorded, boolean onlyDefaultUser, boolean onlyUninspected) {
     scheduleWaitTimer();
 /*    logger.info("PagingExerciseList.loadExercises : looking for " +
         "'" + prefix + "' (" + prefix.length() + " chars) in list id " + userListID + " instance " + getInstance());
@@ -179,7 +180,8 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
         .setOnlyUnrecordedByMe(false)
         .setOnlyExamples(isOnlyExamples())
         .setIncorrectFirstOrder(incorrectFirstOrder)
-        .setOnlyDefaultAudio(false);
+        .setOnlyDefaultAudio(false)
+        .setOnlyUninspected(false);
   }
 
   /**
@@ -315,7 +317,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     if (!setTypeAheadText) {
       pendingRequests.add(System.currentTimeMillis());
     }
-    loadExercises(getHistoryTokenFromUIState(text, ""), text, false, false, false);
+    loadExercises(getHistoryTokenFromUIState(text, ""), text, false, false, false, false);
   }
 
   void scheduleWaitTimer() {
@@ -560,7 +562,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
 
   /**
    * @return
-   * @see HistoryExerciseList#loadExercisesUsingPrefix(Map, String, boolean, String, boolean, boolean)
+   * @see HistoryExerciseList#loadExercisesUsingPrefix(Map, String, String, boolean, boolean, boolean, boolean)
    */
 /*
   boolean getUnrecorded() {

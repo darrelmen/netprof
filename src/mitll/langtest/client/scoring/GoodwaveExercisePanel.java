@@ -395,6 +395,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
       InlineHTML labelWidget = new InlineHTML(label);
       labelWidget.addStyleName("Instruction-title");
       nameValueRow.add(labelWidget);
+      labelWidget.setWidth("150px");
     }
 
     // TODO : for now, since we need to deal with underline... somehow...
