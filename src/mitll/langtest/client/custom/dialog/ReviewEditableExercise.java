@@ -41,6 +41,7 @@ import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.media.client.Audio;
@@ -729,6 +730,24 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     return fixed;
   }
 
+  /**
+   * @param ul
+   * @param exerciseList
+   * @param toAddTo
+   * @param onClick
+   * @see #isValidForeignPhrase
+   * @see mitll.langtest.client.custom.MarkDefectsChapterNPFHelper#addEventHandler
+   */
+  @Override
+  void afterValidForeignPhrase(final UserList<CommonShell> ul,
+                               final ListInterface<CommonShell> exerciseList,
+                               final Panel toAddTo,
+                               boolean onClick) {
+    super.afterValidForeignPhrase(ul,exerciseList,toAddTo,onClick);
+    LangTest.EVENT_BUS.fireEvent(new DefectEvent(instance));
+  }
+
+
   private Button getRemove() {
     Button remove = new Button(DELETE);
     remove.setType(ButtonType.WARNING);
@@ -922,7 +941,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
       logger.warning("\ndoAfterEditComplete : error - didn't remove " + id + " from ul " + ul);
     }
     if (!originalList.remove(newUserExercise)) {
-      logger.warning("\ndoAfterEditComplete : error - didn't remove " + id + " from original " + originalList);
+   //   logger.warning("\ndoAfterEditComplete : error - didn't remove " + id + " from original " + originalList);
     }
 
     service.setExerciseState(id, STATE.FIXED, user, new AsyncCallback<Void>() {
@@ -932,10 +951,14 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
 
       @Override
       public void onSuccess(Void result) {
-        logger.info("doAfterEditComplete : forgetting exercise " + id);
+//        logger.info("doAfterEditComplete : forgetting exercise " + id);
         exerciseList.forgetExercise(id);
 
-        reloadLearnList();
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+          public void execute() {
+            reloadLearnList();
+          }
+        });
       }
     });
   }

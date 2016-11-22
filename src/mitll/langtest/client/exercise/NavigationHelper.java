@@ -169,11 +169,10 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
   /**
    * Ignore clicks or keyboard activity when the widget is not enabled.
    * @see #getNextAndPreviousButtons
-   * @seex #addKeyHandler
    * @param controller
    * @param exercise
    */
-  private void clickNext(ExerciseController controller, HasID exercise) {
+  public void clickNext(ExerciseController controller, HasID exercise) {
     if (next.isEnabled() && next.isVisible()) {
       if (provider != null) {
         provider.postAnswers(controller, exercise);
