@@ -86,6 +86,7 @@ import java.util.logging.Logger;
  */
 public class QCNPFExercise<T extends CommonShell & AudioRefExercise & AnnotationExercise & ScoredExercise>
     extends GoodwaveExercisePanel<T> {
+  public static final String UNINSPECTED_TOOLTIP = "Item has uninspected audio.";
   private Logger logger = Logger.getLogger("QCNPFExercise");
 
   private static final String VOCABULARY = "Vocabulary:";
@@ -205,7 +206,9 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
       }
     };
 
-    nextTooltip = addTooltip(navHelper.getNext(), audioWasPlayed.size() == toResize.size() ? "Click to indicate item has been reviewed." : "Item has uninspected audio.");
+    nextTooltip = addTooltip(navHelper.getNext(), audioWasPlayed.size() == toResize.size() ?
+        "Click to indicate item has been reviewed." :
+        UNINSPECTED_TOOLTIP);
 
     if (!instance.contains(Navigation.REVIEW) && !instance.contains(Navigation.COMMENT)) {
       approvedButton = addApprovedButton(listContainer, navHelper);
@@ -274,6 +277,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
       boolean allCorrect = incorrectFields.isEmpty();
       listContainer.setState(completedExercise.getID(), allCorrect ? STATE.APPROVED : STATE.DEFECT);
       listContainer.redraw();
+      navigationHelper.clickNext(controller,completedExercise);
     }
   }
 
@@ -299,6 +303,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
 
       listContainer.setSecondState(completedExercise.getID(), STATE.ATTN_LL);
       listContainer.redraw();
+      navigationHelper.clickNext(controller,completedExercise);
     }
   }
 
@@ -877,7 +882,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
 
       setApproveButtonState();
       markReviewed(exercise);
-      LangTest.EVENT_BUS.fireEvent(new DefectEvent());
+      LangTest.EVENT_BUS.fireEvent(new DefectEvent(instance));
     }
   }
 
