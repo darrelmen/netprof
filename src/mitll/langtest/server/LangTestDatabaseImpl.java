@@ -872,13 +872,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public List<CommonShell> getShells(List<String> ids) {
     List<CommonShell> shells = new ArrayList<>();
-    for (String id : ids) {
-      CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(id);
-      if (customOrPredefExercise == null) {
-        logger.warn("Couldn't find exercise for " + id);
-      } else {
-        shells.add(customOrPredefExercise.getShell());
-      }
+
+    Collection<CommonExercise> where = db.getUserExerciseDAO().getWhere(ids);
+
+    List<CommonExercise> customOrPredef = db.getCustomOrPredef(ids, where);
+
+    for (CommonExercise customOrPredefExercise: customOrPredef) {
+      shells.add(customOrPredefExercise.getShell());
     }
     return shells;
   }

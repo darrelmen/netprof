@@ -413,7 +413,7 @@ public class UserExerciseDAO extends DAO {
    * @return
    * @see UserListManager#getDefectList(java.util.Collection)
    */
-  Collection<CommonExercise> getWhere(Collection<String> exids) {
+  public Collection<CommonExercise> getWhere(Collection<String> exids) {
     if (exids.isEmpty()) return new ArrayList<>();
     String sql = "SELECT * from " + USEREXERCISE + " where " + EXERCISEID + " in (" + getIds(exids) + ")";
     return getCommonExercises(sql);
