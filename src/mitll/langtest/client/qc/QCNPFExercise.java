@@ -102,7 +102,7 @@ public class QCNPFExercise<T extends CommonShell & AudioRefExercise & Annotation
   /**
    * @see #addApprovedButton(ListInterface, NavigationHelper)
    */
-  private static final String APPROVED = "Approve Item";
+  private static final String APPROVED = "Mark Inspected";
   private static final String NO_AUDIO_RECORDED = "No Audio Recorded.";
   private static final String COMMENT = "Comment";
 
