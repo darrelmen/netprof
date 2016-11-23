@@ -1299,6 +1299,24 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   public CommonExercise getCustomOrPredefExercise(String id) {
     CommonExercise userEx = getUserExerciseWhere(id);  // allow custom items to mask out non-custom items
 
+    return chooseWhichExercise(id, userEx);
+  }
+
+  public List<CommonExercise> getCustomOrPredef(Collection<String> ids, Collection<CommonExercise> userEx) {
+    Map<String,CommonExercise> idToEx = new HashMap<>();
+    for (CommonExercise exercise:userEx) idToEx.put(exercise.getID(),exercise);
+
+    List<CommonExercise> ret = new ArrayList<>();
+    for (String id : ids) {
+      CommonExercise e = chooseWhichExercise(id, idToEx.get(id));
+      if (e != null) {
+        ret.add(e);
+      }
+    }
+    return ret;
+  }
+
+  private CommonExercise chooseWhichExercise(String id, CommonExercise userEx) {
     CommonExercise toRet;
 
     if (userEx == null) {
@@ -1701,5 +1719,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
   public String toString() {
     return "Database : " + this.getClass().toString();
+  }
+
+  public UserExerciseDAO getUserExerciseDAO() {
+    return userExerciseDAO;
   }
 }
