@@ -140,7 +140,6 @@ sourceSets {
     }
 }
 
-
 gwt {
     gwtVersion = '2.8.0'
     modules 'mitll.langtest.LangTest'
@@ -190,5 +189,17 @@ war {
     from ('src') {
         include '**/log*'
         into 'WEB-INF/classes'
+    }
+}
+
+// ***************************** Publishing **************************************
+publishing {
+    publications {
+        ivyJava(IvyPublication) {
+            artifact(war)
+        }
+        mavenJava(MavenPublication) {
+            artifact(war)
+        }
     }
 }
