@@ -7,7 +7,7 @@ import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -21,7 +21,7 @@ import java.util.*;
  * @since 1/30/14.
  */
 public class AnalysisTest {
-  private static Logger logger = Logger.getLogger(AnalysisTest.class);
+  private static Logger logger = LogManager.getLogger(AnalysisTest.class);
   private static String dbName;
 
   @BeforeClass

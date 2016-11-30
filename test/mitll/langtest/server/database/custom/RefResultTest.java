@@ -8,7 +8,7 @@ import mitll.langtest.server.database.result.Result;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import net.sf.json.JSONObject;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -22,7 +22,7 @@ import java.util.*;
  * @since 1/30/14.
  */
 public class RefResultTest {
-  private static Logger logger = Logger.getLogger(RefResultTest.class);
+  private static Logger logger = LogManager.getLogger(RefResultTest.class);
   private static String dbName;
 
   @BeforeClass

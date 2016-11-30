@@ -8,7 +8,7 @@ import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -22,7 +22,7 @@ import java.util.*;
  * @since 1/30/14.
  */
 public class InvalidateAudioTest {
-  private static Logger logger = Logger.getLogger(InvalidateAudioTest.class);
+  private static Logger logger = LogManager.getLogger(InvalidateAudioTest.class);
   //private static String dbName;
 
   @BeforeClass

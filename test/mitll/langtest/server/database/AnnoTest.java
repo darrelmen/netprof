@@ -37,7 +37,7 @@ import mitll.langtest.server.database.annotation.IAnnotationDAO;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.exercise.CommonExercise;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.*;
 import org.junit.Test;
 
 import java.util.Collection;
@@ -45,7 +45,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class AnnoTest extends BaseTest {
-  private static final Logger logger = Logger.getLogger(AnnoTest.class);
+  private static final Logger logger = LogManager.getLogger(AnnoTest.class);
 
   @Test
   public void testAnno() {

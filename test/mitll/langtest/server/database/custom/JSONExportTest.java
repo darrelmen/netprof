@@ -8,7 +8,7 @@ import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.shared.exercise.CommonExercise;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -26,7 +26,7 @@ import java.util.List;
  * @since 2/9/16.
  */
 public class JSONExportTest extends JsonExport {
-  private static final Logger logger = Logger.getLogger(JSONExportTest.class);
+  private static final Logger logger = LogManager.getLogger(JSONExportTest.class);
   private static DatabaseImpl database;
 
   /**

@@ -38,13 +38,15 @@ import mitll.langtest.server.database.instrumentation.IEventDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.npdata.dao.SlickSlimEvent;
-import org.apache.log4j.Logger;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
 import java.util.*;
 
 public class EventTest extends BaseTest {
-  private static final Logger logger = Logger.getLogger(EventTest.class);
+  private static final Logger logger = LogManager.getLogger(EventTest.class);
 
   @Test
   public void testSpanishEventCopy() {
