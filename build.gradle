@@ -10,7 +10,7 @@ buildscript {
     dependencies {
         //Check for the latest version here: http://plugins.gradle.org/plugin/com.jfrog.artifactory
 //        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:${jfrogVersion}"
-        classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.6'
+//        classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.6'
         classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.4.7"
     }
 }
@@ -23,11 +23,11 @@ plugins {
     id "com.sourcemuse.mongo" version "0.13.0"
 }
 
-apply plugin: 'java'
+apply plugin: 'idea'
 apply plugin: 'mongo'
 apply from: 'gradle-common/common.gradle'
 apply from: 'gradle-common/common-java.gradle'
-apply plugin: 'gwt'
+//apply plugin: 'gwt'
 apply plugin: 'war'
 apply plugin: 'java'
 
@@ -74,6 +74,8 @@ dependencies {
     compile 'org.apache.logging.log4j:log4j-jcl:latest.integration'
     compile 'org.apache.logging.log4j:log4j-web:latest.integration'
     compile 'org.apache.ignite:ignite-core:1.5.0.final'
+  //  compile 'org.scala-lang:scala-library:2.11.8'
+
     testCompile 'junit:junit:latest.integration'
     testCompile 'org.hamcrest:hamcrest-all:latest.integration'
     testRuntime 'org.slf4j:slf4j-api:1.7.10'
@@ -97,8 +99,12 @@ dependencies {
 
     // compile group: 'com.google.gwt.google-apis', name: 'gwt-visualization', version: '1.0.2'
     compile name: 'gwt-visualization'
-    compile name: 'pronz-assembly-1.0'
     compile name: 'mira'
+
+    compile name: 'pronz_2.11-1.0'
+    compile name: 'hydec_2.11-1.0'
+ //   compile name: 'npdata-1.0'
+    compile name: 'utils_2.11-1.0.0-snapshot'
 
     compile group: 'net.sf.json-lib', name: 'json-lib', version: '2.4', classifier: 'jdk15'
 
@@ -108,17 +114,19 @@ dependencies {
     //compile group: 'com.', name: 'ooxml-schemas', version: '1.3'
     compile group: 'org.apache.commons', name: 'commons-math3', version: '3.0'
     compile group: 'com.google.guava', name: 'guava', version: '20.0'
+    compile group: 'com.google.code.gson', name: 'gson', version: '2.8.0'
+
 //    compile group: 'org.apache.ignite', name: 'ignite-core', version: '1.7.0'
-
 //    compile group: 'org.mongodb', name: 'mongo-java-driver', version: '3.3.0'
-
 //    compile 'net.liftweb:lift-json_2.11:latest.integration'
 //    compile 'net.liftweb:lift-json-ext_2.11:latest.integration'
 //    compile 'net.liftweb:lift-mongodb_2.11:latest.integration'
-
 //    testCompile 'junit:junit:latest.integration'
 //    testCompile 'org.hamcrest:hamcrest-all:latest.integration'
 //    testRuntime 'org.slf4j:slf4j-api:1.7.10'
+
+//    compile name: 'pronz-assembly-1.0'
+
 }
 
 // Add a test dependency only when the full composite project is checked out.
@@ -140,7 +148,7 @@ sourceSets {
     }
 }
 
-gwt {
+/*gwt {
     gwtVersion = '2.8.0'
     modules 'mitll.langtest.LangTest'
 
@@ -168,7 +176,7 @@ gwt {
 
     //Specify the deployment Port
     // jettyRunWar.httpPort = 8089
-}
+}*/
 
 war {
     // from 'war/bin'
