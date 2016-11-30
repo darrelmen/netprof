@@ -39,7 +39,8 @@ import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonShell;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -49,7 +50,7 @@ import java.util.List;
 
 @Deprecated public class UserListDAO extends DAO implements IUserListDAO {
   private static final String CREATORID = "creatorid";
-  private static final Logger logger = Logger.getLogger(UserListDAO.class);
+  private static final Logger logger = LogManager.getLogger(UserListDAO.class);
 
   private static final String NAME = "name";
 

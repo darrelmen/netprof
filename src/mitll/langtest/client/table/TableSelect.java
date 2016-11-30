@@ -44,7 +44,6 @@ import mitll.langtest.client.list.MenuSectionWidget;
 import mitll.langtest.client.list.SimpleSelectExerciseList;
 
 import java.util.List;
-import java.util.logging.Logger;
 
 public class TableSelect {
 //  private final Logger logger = Logger.getLogger("TableSelect");

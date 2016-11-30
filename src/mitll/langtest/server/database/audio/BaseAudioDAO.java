@@ -44,13 +44,14 @@ import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.util.*;
 
 public abstract class BaseAudioDAO extends DAO {
-  private static final Logger logger = Logger.getLogger(BaseAudioDAO.class);
+  private static final Logger logger = LogManager.getLogger(BaseAudioDAO.class);
 
   public static final String UNKNOWN = "unknown";
   private static final String TOTAL = "total";

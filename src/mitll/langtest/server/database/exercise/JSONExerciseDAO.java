@@ -36,7 +36,8 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.shared.exercise.CommonExercise;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -55,7 +56,7 @@ import java.util.Map;
  * @since 2/10/16.
  */
 public class JSONExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<CommonExercise> {
-  private static final Logger logger = Logger.getLogger(JSONExerciseDAO.class);
+  private static final Logger logger = LogManager.getLogger(JSONExerciseDAO.class);
 
   private static final String ENCODING = "UTF8";
   private final String jsonFile;

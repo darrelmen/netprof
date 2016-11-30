@@ -43,7 +43,8 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.phone.PhoneDAO;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
@@ -54,7 +55,7 @@ import java.util.*;
  * @since 9/28/15.
  */
 public class ParseResultJson {
-  private static final Logger logger = Logger.getLogger(ParseResultJson.class);
+  private static final Logger logger = LogManager.getLogger(ParseResultJson.class);
   private static final String STR = "str";
   private static final String END = "end";
   private static final String S = "s";

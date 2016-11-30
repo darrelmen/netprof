@@ -36,7 +36,8 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
@@ -61,7 +62,7 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonExercise> {
-  private static final Logger logger = Logger.getLogger(ExcelImport.class);
+  private static final Logger logger = LogManager.getLogger(ExcelImport.class);
   private static final String CONTEXT_TRANSLATION = "context translation";
   private static final String TRANSLATION_OF_CONTEXT = "Translation of Context";
   private static final String CONTEXT = "context";

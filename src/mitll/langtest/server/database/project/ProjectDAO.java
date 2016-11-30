@@ -38,7 +38,8 @@ import mitll.langtest.server.database.user.UserProjectDAO;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickProject;
 import mitll.npdata.dao.project.ProjectDAOWrapper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import scala.collection.Seq;
 
 import java.sql.Timestamp;
@@ -46,7 +47,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class ProjectDAO extends DAO implements IProjectDAO {
-  private static final Logger logger = Logger.getLogger(ProjectDAO.class);
+  private static final Logger logger = LogManager.getLogger(ProjectDAO.class);
   private static final String DEFAULT_PROJECT = "DEFAULT_PROJECT";
 
   private final ProjectDAOWrapper dao;

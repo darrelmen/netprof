@@ -35,7 +35,8 @@ package mitll.langtest.server.sorter;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
@@ -46,7 +47,7 @@ import java.util.*;
  * @since 4/30/2014.
  */
 public class ExerciseSorter extends SimpleSorter {
-  private static final Logger logger = Logger.getLogger(ExerciseSorter.class);
+  private static final Logger logger = LogManager.getLogger(ExerciseSorter.class);
 
   private Map<String, Integer> phoneToCount;
 

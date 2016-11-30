@@ -38,13 +38,14 @@ import mitll.langtest.server.database.IDAO;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickProjectProperty;
 import mitll.npdata.dao.project.ProjectPropertyDAOWrapper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.Timestamp;
 import java.util.Collection;
 
 class ProjectPropertyDAO extends DAO implements IDAO {
-  private static final Logger logger = Logger.getLogger(ProjectPropertyDAO.class);
+  private static final Logger logger = LogManager.getLogger(ProjectPropertyDAO.class);
 
   private ProjectPropertyDAOWrapper dao;
 

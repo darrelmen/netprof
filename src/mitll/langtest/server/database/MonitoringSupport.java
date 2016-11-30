@@ -41,7 +41,8 @@ import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.user.User;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -58,7 +59,7 @@ import java.util.*;
 public class MonitoringSupport {
   private static final int MIN_DESIRED = 2;
   private static final int MAX_PEOPLE = 21;
-  private static final Logger logger = Logger.getLogger(MonitoringSupport.class);
+  private static final Logger logger = LogManager.getLogger(MonitoringSupport.class);
 
   private static final int MINUTE_MILLIS = 60 * 1000;
   private static final float MINUTE_MILLIS_FLOAT = (float) MINUTE_MILLIS;

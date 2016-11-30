@@ -9,7 +9,8 @@ import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickEvent;
 import mitll.npdata.dao.SlickSlimEvent;
 import mitll.npdata.dao.event.EventDAOWrapper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
@@ -17,7 +18,7 @@ import java.util.*;
  * Created by go22670 on 5/13/16.
  */
 public class SlickEventImpl implements IEventDAO/*, ISchema<Event, SlickEvent>*/ {
-  private static final Logger logger = Logger.getLogger(SlickEventImpl.class);
+  private static final Logger logger = LogManager.getLogger(SlickEventImpl.class);
   private static final int MAX_EVENTS_TO_SHOW = 20000;
   private EventDAOWrapper eventDAOWrapper;
 

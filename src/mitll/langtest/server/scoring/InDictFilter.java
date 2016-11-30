@@ -33,6 +33,8 @@
 package mitll.langtest.server.scoring;
 
 import mitll.langtest.server.audio.AudioFileHelper;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Collection;
 import java.util.Set;
@@ -45,7 +47,7 @@ import java.util.TreeSet;
  * @since 12/23/15.
  */
 public class InDictFilter {
-  private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(InDictFilter.class);
+  private static final Logger logger = LogManager.getLogger(InDictFilter.class);
 
   private final AudioFileHelper audioFileHelper;
 

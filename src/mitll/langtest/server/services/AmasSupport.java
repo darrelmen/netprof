@@ -39,12 +39,13 @@ import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.STATE;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.flashcard.QuizCorrectAndScore;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
 class AmasSupport {
-  private static final Logger logger = Logger.getLogger(AmasSupport.class);
+  private static final Logger logger = LogManager.getLogger(AmasSupport.class);
   //  private static final String WAV = ".wav";
 //  private static final String MP3 = ".mp3";
 //  public static final String DATABASE_REFERENCE = "databaseReference";

@@ -45,7 +45,7 @@ import java.util.*;
  */
 
 public class UserPerformance implements Serializable {
-  //  private transient final Logger logger = Logger.getLogger("UserPerformance");
+  //  private transient final Logger logger = LogManager.getLogger("UserPerformance");
   private static final int TOSHOW = 2;
   private List<TimeAndScore> rawTimeAndScores = new ArrayList<>();
   private List<TimeAndScore> iPadTimeAndScores = new ArrayList<>();

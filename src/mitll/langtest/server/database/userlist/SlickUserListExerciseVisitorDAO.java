@@ -36,12 +36,13 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.SlickDAO;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.userexercise.UserExerciseListVisitorDAOWrapper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Collection;
 
 public class SlickUserListExerciseVisitorDAO extends SlickDAO implements IUserExerciseListVisitorDAO {
-  private static final Logger logger = Logger.getLogger(SlickUserListExerciseVisitorDAO.class);
+  private static final Logger logger = LogManager.getLogger(SlickUserListExerciseVisitorDAO.class);
 
   private final UserExerciseListVisitorDAOWrapper dao;
 

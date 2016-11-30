@@ -33,11 +33,6 @@
 package mitll.langtest.server.database.dliclass;
 
 import mitll.langtest.server.database.IDAO;
-import mitll.langtest.shared.user.User;
-import mitll.npdata.dao.SlickUserPermission;
-
-import java.util.Collection;
-import java.util.Map;
 
 public interface IDLIClassDAO extends IDAO {
 

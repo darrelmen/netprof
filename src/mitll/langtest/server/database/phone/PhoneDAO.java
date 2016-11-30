@@ -16,7 +16,8 @@ import mitll.langtest.shared.analysis.WordAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import net.sf.json.JSONObject;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.*;
 import java.util.*;
@@ -29,7 +30,7 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
-  private static final Logger logger = Logger.getLogger(PhoneDAO.class);
+  private static final Logger logger = LogManager.getLogger(PhoneDAO.class);
   //  private static final int MAX_EXAMPLES = 30;
 
   private static final String RID = "rid";

@@ -53,7 +53,8 @@ import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.MutableExercise;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.PretestScore;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.text.Collator;
@@ -69,7 +70,7 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class AudioFileHelper implements AlignDecode {
-  private static final Logger logger = Logger.getLogger(AudioFileHelper.class);
+  private static final Logger logger = LogManager.getLogger(AudioFileHelper.class);
   private static final String POSTED_AUDIO = "postedAudio";
   //  private static final int MIN_WARN_DUR = 30;
   private static final String REG = "reg";

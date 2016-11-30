@@ -35,7 +35,8 @@ package mitll.langtest.server.database.connection;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -53,7 +54,7 @@ import java.sql.Statement;
  * To change this template use File | Settings | File Templates.
  */
 public class PostgreSQLConnection implements DatabaseConnection {
-  private static final Logger logger = Logger.getLogger(PostgreSQLConnection.class);
+  private static final Logger logger = LogManager.getLogger(PostgreSQLConnection.class);
   public static final String DEFAULT_USER = "postgres";
 
   private Connection conn;

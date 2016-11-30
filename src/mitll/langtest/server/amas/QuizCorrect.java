@@ -46,7 +46,7 @@ import java.util.*;
  * @since 1/4/16.
  */
 public class QuizCorrect {
-//  private static final Logger logger = Logger.getLogger(QuizCorrect.class);
+//  private static final Logger logger = LogManager.getLogger(QuizCorrect.class);
 //  private static final String QUIZ = "Quiz";
 //  private static final String ILR_LEVEL = "ILR Level";
 //  private static final String TEST_TYPE = "Test type";

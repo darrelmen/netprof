@@ -37,7 +37,8 @@ import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.user.User;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -55,7 +56,7 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class SectionHelper<T extends Shell> {
-  private static final Logger logger = Logger.getLogger(SectionHelper.class);
+  private static final Logger logger = LogManager.getLogger(SectionHelper.class);
   private List<String> predefinedTypeOrder = new ArrayList<>();
 
   private final Map<String, Map<String, Lesson<T>>> typeToUnitToLesson = new HashMap<>();

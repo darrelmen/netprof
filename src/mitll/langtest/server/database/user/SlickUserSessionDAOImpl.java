@@ -38,12 +38,13 @@ import mitll.langtest.server.database.Database;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickUserSession;
 import mitll.npdata.dao.user.UserSessionDAOWrapper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Collection;
 
 public class SlickUserSessionDAOImpl extends DAO implements IUserSessionDAO {
-  private static final Logger logger = Logger.getLogger(SlickUserSessionDAOImpl.class);
+  private static final Logger logger = LogManager.getLogger(SlickUserSessionDAOImpl.class);
   private final UserSessionDAOWrapper dao;
 
   /**

@@ -33,7 +33,8 @@
 package mitll.langtest.server;
 
 import mitll.langtest.shared.scoring.AudioContext;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.servlet.GenericServlet;
 import javax.servlet.ServletContext;
@@ -51,7 +52,7 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class PathHelper {
-  private static final Logger logger = Logger.getLogger(PathHelper.class);
+  private static final Logger logger = LogManager.getLogger(PathHelper.class);
 
   public static final String ANSWERS = "answers";
   private static final String IMAGE_WRITER_IMAGES = "audioimages";

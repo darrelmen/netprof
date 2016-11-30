@@ -39,14 +39,15 @@ import mitll.langtest.server.database.userlist.UserListExerciseJoinDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Exercise;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.*;
 import java.util.*;
 import java.util.Date;
 
 public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExerciseDAO {
-  private static final Logger logger = Logger.getLogger(UserExerciseDAO.class);
+  private static final Logger logger = LogManager.getLogger(UserExerciseDAO.class);
 
   private static final String EXERCISEID = "exerciseid";
   private static final String TRANSLITERATION = "transliteration";

@@ -44,14 +44,15 @@ import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.result.MonitorResult;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.text.CollationKey;
 import java.text.Collator;
 import java.util.*;
 
 public abstract class BaseResultDAO extends DAO {
-  private static final Logger logger = Logger.getLogger(BaseResultDAO.class);
+  private static final Logger logger = LogManager.getLogger(BaseResultDAO.class);
 
   private static final int MINUTE = 60 * 1000;
   protected static final int SESSION_GAP = 5 * MINUTE;  // 5 minutes

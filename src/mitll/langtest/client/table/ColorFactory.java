@@ -32,21 +32,18 @@
 
 package mitll.langtest.client.table;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Logger;
-
-
 /**
  * ColorFactory
  *
  * @author Raymond Budd <a href=mailto:raymond.budd@ll.mit.edu>raymond.budd@ll.mit.edu</a>
  * @since Apr 4, 2013 2:00:27 PM
+ *
+ * TODO : remove me
  */
 public class ColorFactory {
 	
 	
-	public static final String[] FG_BW_COLOR_CODES = {
+	/*public static final String[] FG_BW_COLOR_CODES = {
 		"#000000", "#444444", "#5D5D5D", "#999999", "#CCCCCC", "#EEEEEE", "#F3F3F3", "#FFFFFF" };
 	
 	public static final String[] BG_BW_COLOR_CODES = {
@@ -114,11 +111,11 @@ public class ColorFactory {
 		return mappedColor;
 	}
 	
-	/**
+	*//**
 	 * Convert an RGB formatted color string into a Hexadecimal.
 	 * @param rgbString The rgb string -- i.e., rgb(255, 255, 255)
 	 * @return The Hex string -- i.e., #ffffff 
-	 */
+	 *//*
 	public String rgbToHex(String rgbString) {
 		int lIdx = rgbString.indexOf("(");
 		int rIdx = rgbString.indexOf(")");
@@ -147,6 +144,6 @@ public class ColorFactory {
 		}
 		log.warning("Can not convert string " + rgbString);
 		return rgbString;
-	}
+	}*/
 
 }

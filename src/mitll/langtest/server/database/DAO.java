@@ -35,7 +35,8 @@ package mitll.langtest.server.database;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.database.refaudio.RefResultDAO;
 import mitll.langtest.server.database.userlist.UserExerciseListVisitorDAO;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.*;
 import java.util.Collection;
@@ -52,7 +53,7 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class DAO {
-  private static final Logger logger = Logger.getLogger(DAO.class);
+  private static final Logger logger = LogManager.getLogger(DAO.class);
   protected final LogAndNotify logAndNotify;
   private final boolean isMYSQL;
   private final boolean isPostgreSQL;

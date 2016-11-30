@@ -32,7 +32,8 @@
 
 package mitll.langtest.server.audio;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -93,7 +94,7 @@ import java.text.DecimalFormat;
  * fprintf(STATID,'Maximum RMS Value:\t%.2fdBFS\n', 20*log10(maxrms));
  */
 public class DynamicRange {
-  private static final Logger logger = Logger.getLogger(DynamicRange.class);
+  private static final Logger logger = LogManager.getLogger(DynamicRange.class);
   private static final double MAX_VALUE = 32768.0f;
   private static final double SILENCE_THRESHOLD = 0.000032;
 

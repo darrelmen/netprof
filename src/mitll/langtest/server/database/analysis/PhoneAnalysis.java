@@ -34,7 +34,8 @@ package mitll.langtest.server.database.analysis;
 
 import mitll.langtest.server.database.phone.PhoneDAO;
 import mitll.langtest.shared.analysis.*;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
@@ -45,7 +46,7 @@ import java.util.*;
  * @since 11/18/15.
  */
 public class PhoneAnalysis {
-  private static final Logger logger = Logger.getLogger(PhoneAnalysis.class);
+  private static final Logger logger = LogManager.getLogger(PhoneAnalysis.class);
 
   private static final int DESIRED_NUM_SESSIONS = 15;
   private static final int MIN_SESSION_SIZE = 9;

@@ -39,7 +39,8 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
@@ -51,7 +52,7 @@ import java.util.*;
  * @since 2/10/16.
  */
 public class AMASJSONURLExerciseDAO implements SimpleExerciseDAO<AmasExerciseImpl> {
-  private static final Logger logger = Logger.getLogger(AMASJSONURLExerciseDAO.class);
+  private static final Logger logger = LogManager.getLogger(AMASJSONURLExerciseDAO.class);
 
   public static final String ENGLISH = "english";
   private static final String ATT_LST = "att-lst";

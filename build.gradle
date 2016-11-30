@@ -61,18 +61,20 @@ dependencies {
     compile('mitll.hlt:mongo-core:0.1.0'){changing = true}
 
     compile 'com.google.gwt:gwt-user:2.8.0'
-   // compile 'com.google.gwt:gwt-dev:2.8.0'
     compile 'com.google.gwt:gwt-servlet:2.8.0'
-    //compile 'com.google.gwt:gwt-codeserver:2.8.0'
+
     compile 'org.mongodb:mongo-java-driver:3.3.0'
+
     compile 'org.apache.commons:commons-email:latest.integration'
     compile 'org.apache.commons:commons-lang3:latest.integration'
     compile 'commons-codec:commons-codec:latest.integration'
     compile 'commons-io:commons-io:latest.integration'
+
     compile 'org.apache.logging.log4j:log4j-api:latest.integration'
     compile 'org.apache.logging.log4j:log4j-core:latest.integration'
     compile 'org.apache.logging.log4j:log4j-jcl:latest.integration'
     compile 'org.apache.logging.log4j:log4j-web:latest.integration'
+
     compile 'org.apache.ignite:ignite-core:1.5.0.final'
   //  compile 'org.scala-lang:scala-library:2.11.8'
 
@@ -86,7 +88,6 @@ dependencies {
     testCompile 'org.hamcrest:hamcrest-all:latest.integration'
     testRuntime 'org.slf4j:slf4j-api:1.7.10'
 
-
     compile project(':npdata')
     compile project(':imagewriter')
 
@@ -97,8 +98,11 @@ dependencies {
     compile group: 'net.sf.json-lib', name: 'json-lib', version: '2.4', classifier: 'jdk15'
 
 //    compile 'javax.mail:mail:1.4.1'
-    compile 'log4j:log4j:1.2.17'
+
+//    compile 'log4j:log4j:1.2.17'
+
 //    compile 'com.google.gwt:gwt-user:2.8.0'
+
     compile 'com.github.gwtbootstrap:gwt-bootstrap:latest.integration'
 
     compile 'org.moxieapps.gwt:highcharts:1.7.0'

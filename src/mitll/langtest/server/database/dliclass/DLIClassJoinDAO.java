@@ -34,11 +34,11 @@ package mitll.langtest.server.database.dliclass;
 
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.dliclass.DLIClassJoinWrapper;
-import mitll.npdata.dao.dliclass.DLIClassWrapper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class DLIClassJoinDAO implements IDLIClassJoinDAO {
-  private static final Logger logger = Logger.getLogger(DLIClassJoinDAO.class);
+  private static final Logger logger = LogManager.getLogger(DLIClassJoinDAO.class);
   private final DLIClassJoinWrapper dao;
 
   /**

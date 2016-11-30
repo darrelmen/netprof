@@ -41,14 +41,15 @@ import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.scoring.PretestScore;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.util.Collection;
 
 @SuppressWarnings("serial")
 public class ScoringServiceImpl extends MyRemoteServiceServlet implements ScoringService {
-  private static final Logger logger = Logger.getLogger(ScoringServiceImpl.class);
+  private static final Logger logger = LogManager.getLogger(ScoringServiceImpl.class);
 
   private static final boolean DEBUG = true;
 

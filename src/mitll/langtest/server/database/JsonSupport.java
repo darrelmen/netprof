@@ -44,7 +44,8 @@ import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -56,7 +57,7 @@ import java.util.*;
  * @since 4/7/15.
  */
 public class JsonSupport {
-  private static final Logger logger = Logger.getLogger(JsonSupport.class);
+  private static final Logger logger = LogManager.getLogger(JsonSupport.class);
 
   private final SectionHelper<CommonExercise> sectionHelper;
   private final IResultDAO resultDAO;
