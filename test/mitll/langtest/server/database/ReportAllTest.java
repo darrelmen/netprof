@@ -2,7 +2,7 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.connection.H2Connection;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.*;
 import org.junit.Test;
 
 import java.util.*;
@@ -14,7 +14,7 @@ import java.util.*;
  * @since 1/30/14.
  */
 public class ReportAllTest extends BaseTest {
-  private static final Logger logger = Logger.getLogger(ReportAllTest.class);
+  private static final Logger logger = LogManager.getLogger(ReportAllTest.class);
   public static final boolean DO_ONE = false;
 
 /*

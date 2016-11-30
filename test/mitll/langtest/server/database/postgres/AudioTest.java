@@ -38,7 +38,7 @@ import mitll.langtest.server.database.audio.AudioDAO;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.user.User;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.*;
 import org.junit.Test;
 
 import java.util.Collection;
@@ -47,7 +47,7 @@ import java.util.List;
 import java.util.Map;
 
 public class AudioTest extends BaseTest {
-  private static final Logger logger = Logger.getLogger(AudioTest.class);
+  private static final Logger logger = LogManager.getLogger(AudioTest.class);
   //public static final boolean DO_ONE = false;
 
 /*  @Test

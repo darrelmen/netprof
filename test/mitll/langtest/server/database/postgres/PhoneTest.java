@@ -41,13 +41,13 @@ import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.exercise.CommonExercise;
 import net.sf.json.JSONObject;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.*;
 import org.junit.Test;
 
 import java.util.*;
 
 public class PhoneTest extends BaseTest {
-  private static final Logger logger = Logger.getLogger(PhoneTest.class);
+  private static final Logger logger = LogManager.getLogger(PhoneTest.class);
 
   @Test
   public void testWorst() {

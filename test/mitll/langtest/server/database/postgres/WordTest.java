@@ -36,11 +36,11 @@ import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.word.IWordDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.*;
 import org.junit.Test;
 
 public class WordTest extends BaseTest {
-  private static final Logger logger = Logger.getLogger(WordTest.class);
+  private static final Logger logger = LogManager.getLogger(WordTest.class);
 
   @Test
   public void testAnno() {
