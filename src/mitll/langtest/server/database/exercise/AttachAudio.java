@@ -38,7 +38,8 @@ import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.MutableAudioExercise;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.util.*;
@@ -50,7 +51,7 @@ import java.util.*;
  * @since 11/10/15.
  */
 public class AttachAudio {
-  private static final Logger logger = Logger.getLogger(AttachAudio.class);
+  private static final Logger logger = LogManager.getLogger(AttachAudio.class);
   private int missingExerciseCount = 0;
   private int c = 0;
   private Map<Integer, List<AudioAttribute>> exToAudio;

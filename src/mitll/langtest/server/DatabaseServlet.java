@@ -37,7 +37,8 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.security.DominoSessionException;
 import mitll.langtest.server.database.security.UserSecurityManager;
 import mitll.langtest.shared.user.User;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -45,14 +46,14 @@ import java.io.*;
 
 /**
  * TODO : consider how to partition audio services...
- *
+ * <p>
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 4/8/2014.
  */
 public class DatabaseServlet extends HttpServlet {
-  private static final Logger logger = Logger.getLogger(DatabaseServlet.class);
+  private static final Logger logger = LogManager.getLogger(DatabaseServlet.class);
   private static final int BUFFER_SIZE = 4096;
   // private static final String NO = "NO";
   // not clear this is a big win currently - this enables us to rewrite the mp3s and possibly mark
@@ -86,7 +87,7 @@ public class DatabaseServlet extends HttpServlet {
 
   private void ensureMP3(String wavFile, String configDir, String title, String author) {
     if (wavFile != null) {
-    //  String parent = pathHelper.getInstallPath();
+      //  String parent = pathHelper.getInstallPath();
       String parent = serverProps.getMediaDir();
 
       //logger.debug("ensureMP3 : wav " + wavFile + " under " + parent);
@@ -100,7 +101,7 @@ public class DatabaseServlet extends HttpServlet {
         logger.error("huh? can't find " + wavFile + " under " + parent);
       }
       String filePath = audioConversion.ensureWriteMP3(wavFile, parent, false, title, author);
-      logger.info("wrote " +wavFile + " to " + filePath);
+      logger.info("wrote " + wavFile + " to " + filePath);
       // return new File(filePath).exists();
     } else {
       //return;
@@ -109,7 +110,7 @@ public class DatabaseServlet extends HttpServlet {
 
   void setPaths() {
     pathHelper = getPathHelper();
-   // String config = getServletContext().getInitParameter("config");
+    // String config = getServletContext().getInitParameter("config");
     //this.relativeConfigDir = "config" + File.separator + config;
     // logger.debug("setPaths rel " + relativeConfigDir  + " pathHelper " + pathHelper);
     this.configDir = getConfigDir();

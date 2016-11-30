@@ -40,13 +40,14 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Exercise;
 import mitll.langtest.shared.exercise.HasID;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Collection;
 import java.util.List;
 
 public class BaseUserExerciseDAO extends DAO {
-  private static final Logger logger = Logger.getLogger(BaseUserExerciseDAO.class);
+  private static final Logger logger = LogManager.getLogger(BaseUserExerciseDAO.class);
 
   ExerciseDAO<CommonExercise> exerciseDAO;
 

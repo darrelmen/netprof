@@ -51,7 +51,8 @@ import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import pronz.dirs.Dirs;
 import pronz.speech.Audio;
 import pronz.speech.Audio$;
@@ -78,7 +79,7 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class ASRScoring extends Scoring implements ASR {
-  private static final Logger logger = Logger.getLogger(ASRScoring.class);
+  private static final Logger logger = LogManager.getLogger(ASRScoring.class);
   private final Cache<String, Scores> audioToScore;
 
   private static final boolean DEBUG = false;

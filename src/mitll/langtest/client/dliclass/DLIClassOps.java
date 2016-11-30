@@ -32,31 +32,22 @@
 
 package mitll.langtest.client.dliclass;
 
-import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.NavHeader;
 import com.github.gwtbootstrap.client.ui.NavLink;
-import com.github.gwtbootstrap.client.ui.NavList;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RequiresResize;
 import mitll.langtest.client.custom.Navigation;
-import mitll.langtest.client.custom.tabs.TabAndContent;
-import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.client.userops.OpsUserContainer;
-import mitll.langtest.shared.user.Invitation;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 

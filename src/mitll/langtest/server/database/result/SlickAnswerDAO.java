@@ -41,13 +41,14 @@ import mitll.langtest.shared.scoring.AudioContext;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickResult;
 import mitll.npdata.dao.result.ResultDAOWrapper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.sql.Timestamp;
 
 public class SlickAnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
-  private static final Logger logger = Logger.getLogger(SlickAnswerDAO.class);
+  private static final Logger logger = LogManager.getLogger(SlickAnswerDAO.class);
 
   private final ResultDAOWrapper dao;
 

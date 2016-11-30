@@ -32,10 +32,8 @@
 
 package mitll.langtest.server.services;
 
-import com.github.gwtbootstrap.client.ui.Fieldset;
 import mitll.langtest.client.InitialUI;
 import mitll.langtest.client.services.UserService;
-import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.security.DominoSessionException;
 import mitll.langtest.server.database.security.UserSecurityManager;
@@ -49,7 +47,8 @@ import mitll.langtest.shared.user.*;
 import mitll.npdata.dao.SlickInvite;
 import mitll.npdata.dao.SlickUserPermission;
 import mitll.npdata.dao.SlickUserSession;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -58,7 +57,7 @@ import java.util.*;
 
 @SuppressWarnings("serial")
 public class UserServiceImpl extends MyRemoteServiceServlet implements UserService {
-  private static final Logger logger = Logger.getLogger(UserServiceImpl.class);
+  private static final Logger logger = LogManager.getLogger(UserServiceImpl.class);
   /**
    * The key to get/set the id of the user stored in the session
    */

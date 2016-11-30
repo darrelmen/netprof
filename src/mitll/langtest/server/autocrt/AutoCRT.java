@@ -48,7 +48,8 @@ import mitll.langtest.shared.amas.QAPair;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.scoring.PretestScore;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.text.DecimalFormat;
@@ -67,7 +68,7 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class AutoCRT {
-  private static final Logger logger = Logger.getLogger(AutoCRT.class);
+  private static final Logger logger = LogManager.getLogger(AutoCRT.class);
   private static final String SERIALIZED_CLASSIFIER = "serializedClassifier.ser";
 
   private static final double CORRECT_THRESHOLD = 0.499;

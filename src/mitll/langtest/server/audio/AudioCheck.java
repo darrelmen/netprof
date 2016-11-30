@@ -35,7 +35,8 @@ package mitll.langtest.server.audio;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.shared.answer.AudioAnswer;
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -56,7 +57,7 @@ import java.io.IOException;
  * To change this template use File | Settings | File Templates.
  */
 public class AudioCheck {
-  private static final Logger logger = Logger.getLogger(AudioCheck.class);
+  private static final Logger logger = LogManager.getLogger(AudioCheck.class);
 
   private static final int MinRecordLength = (10000 / 2); // 10000 = 0.7 second
   private static final int WinSize = 10;

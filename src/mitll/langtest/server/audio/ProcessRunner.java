@@ -47,7 +47,7 @@ import java.io.InputStreamReader;
  * To change this template use File | Settings | File Templates.
  */
 class ProcessRunner {
-  // private static final Logger logger = Logger.getLogger(ProcessRunner.class);
+  // private static final Logger logger = LogManager.getLogger(ProcessRunner.class);
   //private static final boolean SHOW_OUTPUT = true;
 
   boolean runProcess(ProcessBuilder shellProc) throws IOException {

@@ -35,13 +35,14 @@ package mitll.langtest.server.database.annotation;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.ExerciseAnnotation;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.*;
 import java.util.*;
 
 public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
-  private static final Logger logger = Logger.getLogger(AnnotationDAO.class);
+  private static final Logger logger = LogManager.getLogger(AnnotationDAO.class);
 
   private static final String ANNOTATION = "annotation";
   private static final String CREATORID = "creatorid";

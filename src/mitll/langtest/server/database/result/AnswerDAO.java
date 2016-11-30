@@ -35,12 +35,13 @@ package mitll.langtest.server.database.result;
 import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.shared.scoring.PretestScore;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.*;
 
 public class AnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
-  private static final Logger logger = Logger.getLogger(AnswerDAO.class);
+  private static final Logger logger = LogManager.getLogger(AnswerDAO.class);
   private static final String PLAN = "plan";
   private final IResultDAO resultDAO;
 

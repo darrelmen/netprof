@@ -98,7 +98,8 @@ import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickProject;
 import net.sf.json.JSON;
 import net.sf.json.JSONObject;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.servlet.http.HttpSession;
 import java.io.File;
@@ -126,7 +127,7 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class DatabaseImpl implements Database {
-  private static final Logger logger = Logger.getLogger(DatabaseImpl.class);
+  private static final Logger logger = LogManager.getLogger(DatabaseImpl.class);
   private static final int LOG_THRESHOLD = 10;
   private static final String UNKNOWN = "unknown";
   public static final int IMPORT_PROJECT_ID = -100;

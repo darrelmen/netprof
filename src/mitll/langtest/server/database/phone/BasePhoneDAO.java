@@ -40,14 +40,15 @@ import mitll.langtest.shared.analysis.PhoneAndScore;
 import mitll.langtest.shared.analysis.WordAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class BasePhoneDAO extends DAO {
-  private static final Logger logger = Logger.getLogger(BasePhoneDAO.class);
+  private static final Logger logger = LogManager.getLogger(BasePhoneDAO.class);
 
   protected static final String PHONE = "phone";
   protected static final String SEQ = "seq";

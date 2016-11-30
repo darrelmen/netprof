@@ -42,7 +42,8 @@ import mitll.langtest.shared.analysis.UserPerformance;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -50,7 +51,7 @@ import java.util.List;
 
 @SuppressWarnings("serial")
 public class AnalysisServiceImpl extends MyRemoteServiceServlet implements AnalysisService {
-  private static final Logger logger = Logger.getLogger(AnalysisServiceImpl.class);
+  private static final Logger logger = LogManager.getLogger(AnalysisServiceImpl.class);
   private static final int MIN_RECORDINGS = 5;
 
 /*  @Override

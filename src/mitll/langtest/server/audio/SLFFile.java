@@ -49,7 +49,7 @@ import java.util.List;
  * See <a href="http://www1.icsi.berkeley.edu/Speech/docs/HTKBook/node288_ct.html">SLF File Documentation</a>
  */
 public class SLFFile {
-  //private static final Logger logger = Logger.getLogger(SLFFile.class);
+  //private static final Logger logger = LogManager.getLogger(SLFFile.class);
 
   public static final String UNKNOWN_MODEL = "UNKNOWNMODEL";
   private static final String ENCODING = "UTF8";

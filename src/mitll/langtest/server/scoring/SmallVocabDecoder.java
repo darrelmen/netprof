@@ -34,7 +34,8 @@ package mitll.langtest.server.scoring;
 
 import corpus.HTKDictionary;
 import corpus.LTS;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import pronz.speech.Audio;
 
 import java.text.CharacterIterator;
@@ -52,7 +53,7 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class SmallVocabDecoder {
-  private static final Logger logger = Logger.getLogger(SmallVocabDecoder.class);
+  private static final Logger logger = LogManager.getLogger(SmallVocabDecoder.class);
   private HTKDictionary htkDictionary;
 
   public SmallVocabDecoder() {

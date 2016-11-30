@@ -35,7 +35,8 @@ package mitll.langtest.server.database.userlist;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.shared.custom.UserList;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -46,7 +47,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class UserListExerciseJoinDAO extends DAO implements IUserListExerciseJoinDAO {
-  private static final Logger logger = Logger.getLogger(UserListExerciseJoinDAO.class);
+  private static final Logger logger = LogManager.getLogger(UserListExerciseJoinDAO.class);
 
   private static final String USERLISTID = "userlistid";
   private static final String EXERCISEID = "exerciseid";

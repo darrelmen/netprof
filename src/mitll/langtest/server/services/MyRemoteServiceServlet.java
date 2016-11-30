@@ -48,7 +48,8 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickProject;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -56,7 +57,7 @@ import java.io.File;
 
 @SuppressWarnings("serial")
 public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogAndNotify {
-  private static final Logger logger = Logger.getLogger(MyRemoteServiceServlet.class);
+  private static final Logger logger = LogManager.getLogger(MyRemoteServiceServlet.class);
 
   protected DatabaseImpl db;
   protected ServerProperties serverProps;

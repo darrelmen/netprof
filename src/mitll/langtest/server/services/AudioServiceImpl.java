@@ -47,7 +47,8 @@ import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.user.User;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 
@@ -56,7 +57,7 @@ import java.io.File;
  */
 @SuppressWarnings("serial")
 public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioService {
-  private static final Logger logger = Logger.getLogger(AudioServiceImpl.class);
+  private static final Logger logger = LogManager.getLogger(AudioServiceImpl.class);
 
   private static final String WAV1 = "wav";
   private static final String WAV = ".wav";

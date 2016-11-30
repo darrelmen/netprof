@@ -35,8 +35,6 @@ package mitll.langtest.server.database.user;
 import mitll.langtest.server.database.IDAO;
 import mitll.npdata.dao.SlickUserSession;
 
-import java.util.Collection;
-
 public interface IUserSessionDAO extends IDAO {
   void add(SlickUserSession user);
 

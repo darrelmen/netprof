@@ -37,7 +37,8 @@ import corpus.LTS;
 import corpus.ModernStandardArabicLTS;
 import mitll.langtest.server.database.AudioExport;
 import mitll.langtest.shared.exercise.CommonExercise;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.text.CollationKey;
 import java.text.Collator;
@@ -53,7 +54,7 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class LTSFactory {
-  private static final Logger logger = Logger.getLogger(LTSFactory.class);
+  private static final Logger logger = LogManager.getLogger(LTSFactory.class);
 
   private final Language thisLanguage;
 

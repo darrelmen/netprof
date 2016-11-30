@@ -35,7 +35,8 @@ package mitll.langtest.server.database.excel;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.shared.result.MonitorResult;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
@@ -50,7 +51,7 @@ import java.util.*;
  * @since 10/16/15.
  */
 public class ResultDAOToExcel {
-  private static final Logger logger = Logger.getLogger(ResultDAOToExcel.class);
+  private static final Logger logger = LogManager.getLogger(ResultDAOToExcel.class);
   private static final String YES = "Yes";
   private static final String NO = "No";
 

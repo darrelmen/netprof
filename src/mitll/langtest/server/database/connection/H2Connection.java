@@ -34,7 +34,8 @@ package mitll.langtest.server.database.connection;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.sql.Connection;
@@ -53,7 +54,7 @@ import java.sql.Statement;
  * To change this template use File | Settings | File Templates.
  */
 public class H2Connection implements DatabaseConnection {
-  private static final Logger logger = Logger.getLogger(H2Connection.class);
+  private static final Logger logger = LogManager.getLogger(H2Connection.class);
   private static final int QUERY_CACHE_SIZE = 1024;
   private static final int CACHE_SIZE_KB = 500000;
 

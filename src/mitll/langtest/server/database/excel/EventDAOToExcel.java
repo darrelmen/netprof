@@ -3,7 +3,8 @@ package mitll.langtest.server.database.excel;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.shared.instrumentation.Event;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
@@ -17,7 +18,7 @@ import java.util.List;
  * Created by go22670 on 3/25/16.
  */
 public class EventDAOToExcel {
-  private static final Logger logger = Logger.getLogger(EventDAOToExcel.class);
+  private static final Logger logger = LogManager.getLogger(EventDAOToExcel.class);
 
   private static final String EVENTS = "Events";
   private static final List<String> COLUMNS2 = Arrays.asList("id", "type", "exercise", "context", "userid", "timestamp", "time_millis", "hitID", "device");

@@ -36,7 +36,8 @@ import corpus.HTKDictionary;
 import corpus.LTS;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.util.HashMap;
@@ -52,7 +53,7 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class ConfigFileCreator {
-  private static Logger logger = Logger.getLogger(ConfigFileCreator.class);
+  private static Logger logger = LogManager.getLogger(ConfigFileCreator.class);
 
   private final String platform = Utils.package$.MODULE$.platform();
   private final Map<String, String> properties;

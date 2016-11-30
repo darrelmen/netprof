@@ -39,7 +39,8 @@ import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -53,7 +54,7 @@ import java.util.Map;
  * @since 9/3/15.
  */
 public class ScoreToJSON {
-  private static final Logger logger = Logger.getLogger(ScoreToJSON.class);
+  private static final Logger logger = LogManager.getLogger(ScoreToJSON.class);
 
   /**
    * We skip sils, since we wouldn't want to show them to the user.

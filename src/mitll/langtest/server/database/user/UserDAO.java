@@ -37,7 +37,8 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.audio.AudioDAO;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.*;
 import java.util.*;
@@ -49,7 +50,7 @@ import java.util.*;
  * @since
  */
 public class UserDAO extends BaseUserDAO implements IUserDAO {
-  private static final Logger logger = Logger.getLogger(UserDAO.class);
+  private static final Logger logger = LogManager.getLogger(UserDAO.class);
 
   /**
    * @param database

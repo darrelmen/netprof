@@ -36,7 +36,8 @@ import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.grade.Grade;
 import mitll.langtest.shared.user.User;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -56,7 +57,7 @@ import java.util.*;
 public class GradeDAO extends DAO {
   private static final String SELECT_PREFIX = "SELECT id, exerciseID, resultID, grade, grader, gradeType, gradeIndex from grades";
  // private static final String SELECT_PREFIX2 = SELECT_PREFIX +" where exerciseID";
-  private static final Logger logger = Logger.getLogger(GradeDAO.class);
+  private static final Logger logger = LogManager.getLogger(GradeDAO.class);
 
   private static final String GRADES = "grades";
  // private final boolean debug = false;

@@ -52,7 +52,8 @@ import net.sf.uadetector.ReadableUserAgent;
 import net.sf.uadetector.UserAgentStringParser;
 import net.sf.uadetector.VersionNumber;
 import net.sf.uadetector.service.UADetectorServiceFactory;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -70,7 +71,7 @@ import java.util.*;
  * @since 10/16/14.
  */
 public class Report {
-  private static final Logger logger = Logger.getLogger(Report.class);
+  private static final Logger logger = LogManager.getLogger(Report.class);
 
   private static final String NP_SERVER = "np.ll.mit.edu";
   private static final String MY_EMAIL = "gordon.vidaver@ll.mit.edu";

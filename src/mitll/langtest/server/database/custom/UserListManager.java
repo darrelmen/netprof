@@ -53,7 +53,8 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.DBConnection;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.util.*;
@@ -68,7 +69,7 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class UserListManager implements IUserListManager {
-  private static final Logger logger = Logger.getLogger(UserListManager.class);
+  private static final Logger logger = LogManager.getLogger(UserListManager.class);
 
   private static final String CORRECT = "correct";
   private static final String FIXED = "fixed";

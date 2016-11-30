@@ -34,7 +34,8 @@ package mitll.langtest.server.audio;
 
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.shared.amas.QAPair;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.net.ConnectException;
@@ -55,7 +56,7 @@ import java.util.Collection;
  * @since
  */
 public class HTTPClient {
-  private static final Logger logger = Logger.getLogger(HTTPClient.class);
+  private static final Logger logger = LogManager.getLogger(HTTPClient.class);
 
   private HttpURLConnection httpConn;
 

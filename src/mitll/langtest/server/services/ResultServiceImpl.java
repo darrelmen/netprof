@@ -37,13 +37,14 @@ import mitll.langtest.server.trie.TextEntityValue;
 import mitll.langtest.server.trie.Trie;
 import mitll.langtest.shared.ResultAndTotal;
 import mitll.langtest.shared.result.MonitorResult;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
 @SuppressWarnings("serial")
 public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultService {
-  private static final Logger logger = Logger.getLogger(ResultServiceImpl.class);
+  private static final Logger logger = LogManager.getLogger(ResultServiceImpl.class);
 
   private static final int MAX = 30;
 

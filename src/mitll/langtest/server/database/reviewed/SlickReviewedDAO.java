@@ -39,7 +39,8 @@ import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickReviewed;
 import mitll.npdata.dao.reviewed.ReviewedDAOWrapper;
 import mitll.npdata.dao.reviewed.SecondStateDAOWrapper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import scala.Option;
 import scala.Tuple3;
 import scala.Tuple4;
@@ -48,7 +49,7 @@ import java.sql.Timestamp;
 import java.util.*;
 
 public class SlickReviewedDAO extends DAO implements IReviewedDAO {
-  private static final Logger logger = Logger.getLogger(SlickReviewedDAO.class);
+  private static final Logger logger = LogManager.getLogger(SlickReviewedDAO.class);
 
   private final ReviewedDAOWrapper dao;
 
