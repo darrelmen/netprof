@@ -91,7 +91,7 @@ public class CommonValidation {
 				return new Result(); // success
 			}
 		}
-		log.warning("Invalid attachment filename: " + filename);
+		log.warninging("Invalid attachment filename: " + filename);
 		return new Result("File type must be " + aType.getExtensionsString());
 	}
 	*/

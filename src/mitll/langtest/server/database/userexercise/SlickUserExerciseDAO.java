@@ -48,7 +48,8 @@ import mitll.npdata.dao.SlickExercise;
 import mitll.npdata.dao.SlickRelatedExercise;
 import mitll.npdata.dao.userexercise.ExerciseDAOWrapper;
 import mitll.npdata.dao.userexercise.RelatedExerciseDAOWrapper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import scala.collection.Seq;
 
 import java.sql.Timestamp;
@@ -57,7 +58,7 @@ import java.util.*;
 public class SlickUserExerciseDAO
     extends BaseUserExerciseDAO
     implements IUserExerciseDAO {
-  private static final Logger logger = Logger.getLogger(SlickUserExerciseDAO.class);
+  private static final Logger logger = LogManager.getLogger(SlickUserExerciseDAO.class);
   public static final String SOUND = "Sound";
   public static final String DIFFICULTY = "Difficulty";
 
@@ -323,6 +324,8 @@ public class SlickUserExerciseDAO
     return sectionHelper.addExerciseToLesson(exercise, pair.getKey(), pair.getValue());
   }
 
+  int c = 0;
+
   private Map<String, String> getUnitToValue(SlickExercise slick, Collection<String> typeOrder) {
     Map<String, String> unitToValue = new HashMap<>();
     Iterator<String> iterator = typeOrder.iterator();
@@ -331,7 +334,7 @@ public class SlickUserExerciseDAO
     boolean firstEmpty = slick.unit().isEmpty();
     if (firstEmpty && slick.ispredef()) {
       unitToValue.put(first, "1");
-      logger.warn("got empty " + first + " for " + slick);
+      if (c++ < 100) logger.warn("got empty " + first + " for " + slick);
 
     } else {
       unitToValue.put(first, slick.unit());
@@ -340,7 +343,9 @@ public class SlickUserExerciseDAO
       if (slick.ispredef()) {
         boolean empty = slick.lesson().trim().isEmpty();
         unitToValue.put(second, empty ? "1" : slick.lesson());
-        if (empty) logger.warn("got empty " + second + " for " + slick);
+        if (empty) {
+          if (c++ < 100) logger.warn("got empty " + second + " for " + slick);
+        }
       }
     }
     return unitToValue;
@@ -402,12 +407,11 @@ public class SlickUserExerciseDAO
   @Override
   public int add(CommonExercise userExercise, boolean isOverride) {
     int insert = insert(toSlick(userExercise, isOverride));
-    ((Exercise)userExercise).setID(insert);
+    ((Exercise) userExercise).setID(insert);
     return insert;
   }
 
   /**
-   *
    * @param projID
    */
   private void insertDefault(int projID) {

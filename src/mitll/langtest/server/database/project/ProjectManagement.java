@@ -43,22 +43,18 @@ import mitll.langtest.server.database.exercise.DBExerciseDAO;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.result.SlickResultDAO;
-import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
-import mitll.langtest.server.database.userexercise.ExerciseToPhone;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
-import mitll.langtest.server.scoring.SmallVocabDecoder;
-import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickProject;
-import mitll.npdata.dao.SlickRefResultJson;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
 public class ProjectManagement implements IProjectManagement {
-  private static final Logger logger = Logger.getLogger(ProjectManagement.class);
+  private static final Logger logger = LogManager.getLogger(ProjectManagement.class);
   private static final int IMPORT_PROJECT_ID = -100;
   private static final boolean ADD_DEFECTS = false;
 

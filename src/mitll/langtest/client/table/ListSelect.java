@@ -32,14 +32,11 @@
 
 package mitll.langtest.client.table;
 
-import com.github.gwtbootstrap.client.ui.ButtonGroup;
 import com.github.gwtbootstrap.client.ui.DropdownButton;
 import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.constants.IconSize;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import mitll.langtest.client.domino.common.DecoratedFields;
-import mitll.langtest.client.list.FixedHeightPickList;
 import mitll.langtest.client.list.MenuSectionWidget;
 import mitll.langtest.client.list.SimpleSelectExerciseList;
 

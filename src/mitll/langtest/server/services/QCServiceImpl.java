@@ -40,11 +40,12 @@ import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.STATE;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @SuppressWarnings("serial")
 public class QCServiceImpl extends MyRemoteServiceServlet implements QCService {
-  private static final Logger logger = Logger.getLogger(LangTestDatabaseImpl.class);
+  private static final Logger logger = LogManager.getLogger(LangTestDatabaseImpl.class);
 
   /**
    * @param exerciseID

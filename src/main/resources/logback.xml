@@ -1,0 +1,77 @@
+<!--
+  ~
+  ~ DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
+  ~ and their contractors; 2015. Other request for this document shall be referred
+  ~ to DLIFLC.
+  ~
+  ~ WARNING: This document may contain technical data whose export is restricted
+  ~ by the Arms Export Control Act (AECA) or the Export Administration Act (EAA).
+  ~ Transfer of this data by any means to a non-US person who is not eligible to
+  ~ obtain export-controlled data is prohibited. By accepting this data, the consignee
+  ~ agrees to honor the requirements of the AECA and EAA. DESTRUCTION NOTICE: For
+  ~ unclassified, limited distribution documents, destroy by any method that will
+  ~ prevent disclosure of the contents or reconstruction of the document.
+  ~
+  ~ This material is based upon work supported under Air Force Contract No.
+  ~ FA8721-05-C-0002 and/or FA8702-15-D-0001. Any opinions, findings, conclusions
+  ~ or recommendations expressed in this material are those of the author(s) and
+  ~ do not necessarily reflect the views of the U.S. Air Force.
+  ~
+  ~ © 2015 Massachusetts Institute of Technology.
+  ~
+  ~ The software/firmware is provided to you on an As-Is basis
+  ~
+  ~ Delivered to the US Government with Unlimited Rights, as defined in DFARS
+  ~ Part 252.227-7013 or 7014 (Feb 2014). Notwithstanding any copyright notice,
+  ~ U.S. Government rights in this work are defined by DFARS 252.227-7013 or
+  ~ DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
+  ~ authorized by the U.S. Government may violate any copyrights that exist in this work.
+  ~
+  ~
+  -->
+
+<configuration>
+
+    DUDE DUDE
+
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- encoders are assigned the type
+             ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36}.%M\(%line\) - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="debug">
+        <appender-ref ref="STDOUT"/>
+    </root>
+    "
+
+    <!--
+        <logger name="slick.compiler" level="INFO"/>
+    -->
+
+    <logger name="slick.compiler.QueryCompiler" level="INFO"/>
+    <logger name="slick.compiler.QueryCompilerBenchmark" level="INFO"/>
+    <logger name="slick.compiler" level="INFO"/>
+    <logger name="slick.compiler.CodeGen" level="INFO"/>
+
+    <logger name="slick.jdbc" level="INFO"/>
+    <logger name="slick.jdbc.JdbcBackend" level="INFO"/>
+    <logger name="slick.backend" level="INFO"/>
+
+
+    <logger name="slick.relational" level="INFO"/>
+    <logger name="slick.session" level="DEBUG"/>
+
+    <logger name="org.eclipse.jetty" level="INFO"/>
+
+    <logger name="com.zaxxer.hikari.HikariConfig" level="INFO"/>
+    <logger name="com.zaxxer.hikari.pool" level="INFO"/>
+
+    <logger name="org.mongodb.driver.protocol.command" level="INFO"/>
+
+    <logger name="mitll.npdata.dao.audio" level="DEBUG"/>
+
+</configuration>

@@ -42,14 +42,15 @@ import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.user.MiniUser;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.*;
 import java.util.*;
 import java.util.Date;
 
 public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
-  private static final Logger logger = Logger.getLogger(AudioDAO.class);
+  private static final Logger logger = LogManager.getLogger(AudioDAO.class);
 
   private static final String ID = "id";
   private static final String USERID = "userid";

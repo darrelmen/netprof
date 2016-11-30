@@ -46,7 +46,8 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.scoring.NetPronImageType;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -68,7 +69,7 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class Scoring {
-  private static final Logger logger = Logger.getLogger(Scoring.class);
+  private static final Logger logger = LogManager.getLogger(Scoring.class);
 
   private static final float SCORE_SCALAR = 1.0f;
   private static final String SCORING = "scoring";

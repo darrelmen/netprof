@@ -45,13 +45,13 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.bootstrap.ItemSorter;
 import mitll.langtest.client.exercise.SectionWidget;
-import mitll.langtest.client.table.ListBoxSelect;
 import mitll.langtest.client.table.ListSelect;
 import mitll.langtest.client.table.TableSelect;
 import mitll.langtest.shared.SectionNode;
 
 import java.util.*;
 import java.util.logging.Logger;
+//import java.util.logging.Logger;
 
 public class MenuSectionWidget implements SectionWidget {
   private final Logger logger = Logger.getLogger("MenuSectionWidget");

@@ -37,7 +37,8 @@ import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickAnnotation;
 import mitll.npdata.dao.annotation.AnnotationDAOWrapper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import scala.Tuple4;
 
 import java.sql.Timestamp;
@@ -45,7 +46,7 @@ import java.util.*;
 
 public class SlickAnnotationDAO
     extends BaseAnnotationDAO implements IAnnotationDAO {
-  private static final Logger logger = Logger.getLogger(SlickAnnotationDAO.class);
+  private static final Logger logger = LogManager.getLogger(SlickAnnotationDAO.class);
 
   private final AnnotationDAOWrapper dao;
 

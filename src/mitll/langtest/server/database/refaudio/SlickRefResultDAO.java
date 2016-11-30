@@ -42,14 +42,15 @@ import mitll.npdata.dao.SlickRefResult;
 import mitll.npdata.dao.SlickRefResultJson;
 import mitll.npdata.dao.refaudio.RefResultDAOWrapper;
 import net.sf.json.JSONObject;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import scala.Tuple3;
 
 import java.sql.Timestamp;
 import java.util.*;
 
 public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
-  private static final Logger logger = Logger.getLogger(SlickRefResultDAO.class);
+  private static final Logger logger = LogManager.getLogger(SlickRefResultDAO.class);
 
   private final RefResultDAOWrapper dao;
 

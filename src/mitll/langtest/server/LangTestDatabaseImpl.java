@@ -51,7 +51,8 @@ import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.user.SlimProject;
 import mitll.npdata.dao.SlickProject;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -73,7 +74,7 @@ import java.util.*;
  */
 @SuppressWarnings("serial")
 public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements LangTestDatabase {
-  private static final Logger logger = Logger.getLogger(LangTestDatabaseImpl.class);
+  private static final Logger logger = LogManager.getLogger(LangTestDatabaseImpl.class);
 
   public static final String DATABASE_REFERENCE = "databaseReference";
 

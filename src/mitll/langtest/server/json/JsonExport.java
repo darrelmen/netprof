@@ -40,7 +40,8 @@ import mitll.langtest.shared.SectionNode;
 import mitll.langtest.shared.exercise.*;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
@@ -51,7 +52,7 @@ import java.util.*;
  * @since 2/5/16.
  */
 public class JsonExport {
-  private static final Logger logger = Logger.getLogger(JsonExport.class);
+  private static final Logger logger = LogManager.getLogger(JsonExport.class);
 
   private static final String NO = "NO";
 

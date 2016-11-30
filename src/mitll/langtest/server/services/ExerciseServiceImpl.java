@@ -33,7 +33,6 @@
 package mitll.langtest.server.services;
 
 import mitll.langtest.client.services.ExerciseService;
-import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.user.BaseUserDAO;
@@ -46,7 +45,8 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.user.User;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -55,7 +55,7 @@ import java.util.*;
 
 @SuppressWarnings("serial")
 public class ExerciseServiceImpl extends MyRemoteServiceServlet implements ExerciseService {
-  private static final Logger logger = Logger.getLogger(ExerciseServiceImpl.class);
+  private static final Logger logger = LogManager.getLogger(ExerciseServiceImpl.class);
 
   private static final int SLOW_EXERCISE_EMAIL = 2000;
   private static final int SLOW_MILLIS = 40;

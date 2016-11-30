@@ -37,7 +37,8 @@ import mitll.langtest.server.audio.HTTPClient;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.amas.QAPair;
 import net.sf.json.JSONObject;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -52,7 +53,7 @@ import java.util.Set;
  * @since 8/19/15.
  */
 public class MiraClassifier {
-  private static final Logger logger = Logger.getLogger(MiraClassifier.class);
+  private static final Logger logger = LogManager.getLogger(MiraClassifier.class);
 
   private static final String LANGUAGE = "language";
   private static final String QUESTION = "question";

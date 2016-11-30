@@ -34,7 +34,8 @@ package mitll.langtest.server.mail;
 
 import mitll.langtest.server.database.Report;
 import mitll.langtest.server.rest.RestUserManagement;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
@@ -50,7 +51,7 @@ import java.util.*;
 public class MailSupport {
   private static final String RECIPIENT_NAME = "Gordon Vidaver";
   private static final String DATA_COLLECT_WEBMASTER = "Data Collect Webmaster";
-  private static final Logger logger = Logger.getLogger(MailSupport.class);
+  private static final Logger logger = LogManager.getLogger(MailSupport.class);
   private static final String EMAIL = "gordon.vidaver@ll.mit.edu";
   private static final String LOCALHOST = "localhost";
   private static final int MAIL_PORT = 1025;

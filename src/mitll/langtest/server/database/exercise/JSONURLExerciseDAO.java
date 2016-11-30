@@ -39,7 +39,8 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -56,7 +57,7 @@ import java.util.*;
  * @since 2/10/16.
  */
 public class JSONURLExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<CommonExercise> {
-  private static final Logger logger = Logger.getLogger(JSONURLExerciseDAO.class);
+  private static final Logger logger = LogManager.getLogger(JSONURLExerciseDAO.class);
   private final Collection<String> typeOrder;
 
   /**

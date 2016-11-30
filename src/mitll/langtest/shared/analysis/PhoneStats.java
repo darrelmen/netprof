@@ -47,7 +47,7 @@ import java.util.Map;
  * @see mitll.langtest.client.analysis.PhoneContainer#clickOnPhone(String)
  */
 public class PhoneStats implements Serializable {
-  // private final Logger logger = Logger.getLogger("PhoneStats");
+  // private final Logger logger = LogManager.getLogger("PhoneStats");
   private int count;
   private transient List<TimeAndScore> timeSeries;
   private List<PhoneSession> sessions;

@@ -40,7 +40,8 @@ import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.scoring.PretestScore;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.util.*;
@@ -57,7 +58,7 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class DecodeCorrectnessChecker {
-  private static final Logger logger = Logger.getLogger(DecodeCorrectnessChecker.class);
+  private static final Logger logger = LogManager.getLogger(DecodeCorrectnessChecker.class);
   private final AlignDecode alignDecode;
   private final double minPronScore;
   private final SmallVocabDecoder svd = new SmallVocabDecoder();

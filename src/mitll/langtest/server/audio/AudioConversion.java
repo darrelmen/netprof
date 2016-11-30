@@ -37,7 +37,8 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.shared.answer.AudioAnswer;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -59,7 +60,7 @@ import java.nio.file.Path;
  * To change this template use File | Settings | File Templates.
  */
 public class AudioConversion {
-  private static final Logger logger = Logger.getLogger(AudioConversion.class);
+  private static final Logger logger = LogManager.getLogger(AudioConversion.class);
   private static final String LAME_PATH_WINDOWS = "lame.exe";
   private static final String LAME_PATH_LINUX = "/usr/local/bin/lame";
   private static final String SOX = "sox";

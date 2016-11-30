@@ -34,7 +34,6 @@ package mitll.langtest.shared.user;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-import java.sql.Time;
 import java.sql.Timestamp;
 
 /**

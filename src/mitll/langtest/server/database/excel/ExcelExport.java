@@ -37,7 +37,8 @@ import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.MiniUser;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
@@ -47,7 +48,7 @@ import java.io.OutputStream;
 import java.util.*;
 
 public class ExcelExport {
-  private static final Logger logger = Logger.getLogger(ExcelExport.class);
+  private static final Logger logger = LogManager.getLogger(ExcelExport.class);
 
   private static final String ID = "ID";
   private static final String WORD_EXPRESSION = "Word/Expression";

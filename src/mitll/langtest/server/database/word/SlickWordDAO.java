@@ -43,7 +43,7 @@ import java.util.List;
 import java.util.Map;
 
 public class SlickWordDAO extends BaseUserExerciseDAO implements IWordDAO {
- // private static final Logger logger = Logger.getLogger(SlickWordDAO.class);
+ // private static final Logger logger = LogManager.getLogger(SlickWordDAO.class);
 
   private final WordDAOWrapper dao;
 

@@ -42,7 +42,8 @@ import mitll.langtest.server.decoder.RefResultDecoder;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.npdata.dao.SlickRefResultJson;
 import net.sf.json.JSONObject;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.*;
 import java.util.*;
@@ -50,7 +51,7 @@ import java.util.*;
 import static mitll.langtest.server.database.Database.EXID;
 
 public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
-  private static final Logger logger = Logger.getLogger(RefResultDAO.class);
+  private static final Logger logger = LogManager.getLogger(RefResultDAO.class);
 
   private static final String ID = "id";
   private static final String USERID = "userid";

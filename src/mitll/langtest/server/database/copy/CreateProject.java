@@ -4,7 +4,8 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.user.DominoUserDAOImpl;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Iterator;
 import java.util.Properties;
@@ -13,7 +14,7 @@ import java.util.Properties;
  * Created by go22670 on 10/26/16.
  */
 class CreateProject {
-  private static final Logger logger = Logger.getLogger(CreateProject.class);
+  private static final Logger logger = LogManager.getLogger(CreateProject.class);
 
   /**
    * xTODO : what to do about pashto 1,2,3?

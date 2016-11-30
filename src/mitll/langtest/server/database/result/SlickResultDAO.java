@@ -44,13 +44,14 @@ import mitll.npdata.dao.SlickResult;
 import mitll.npdata.dao.result.ResultDAOWrapper;
 import mitll.npdata.dao.result.SlickCorrectAndScore;
 import mitll.npdata.dao.result.SlickUserAndTime;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.Timestamp;
 import java.util.*;
 
 public class SlickResultDAO extends BaseResultDAO implements IResultDAO/*, ISchema<Result, SlickResult>*/ {
-  private static final Logger logger = Logger.getLogger(SlickResultDAO.class);
+  private static final Logger logger = LogManager.getLogger(SlickResultDAO.class);
 
   private final ResultDAOWrapper dao;
 

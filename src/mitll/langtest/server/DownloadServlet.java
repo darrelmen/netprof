@@ -39,7 +39,8 @@ import mitll.langtest.server.database.excel.ResultDAOToExcel;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.User;
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -66,7 +67,7 @@ import java.util.*;
  */
 @SuppressWarnings("serial")
 public class DownloadServlet extends DatabaseServlet {
-  private static final Logger logger = Logger.getLogger(DownloadServlet.class);
+  private static final Logger logger = LogManager.getLogger(DownloadServlet.class);
   private static final String AUDIO = "audio";
   private static final String LIST = "list";
   private static final String FILE = "file";

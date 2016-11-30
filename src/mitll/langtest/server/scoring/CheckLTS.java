@@ -37,7 +37,8 @@ import corpus.LTS;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.SLFFile;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
@@ -48,7 +49,7 @@ import java.util.*;
  * @since 10/7/15.
  */
 class CheckLTS {
-  private static final Logger logger = Logger.getLogger(CheckLTS.class);
+  private static final Logger logger = LogManager.getLogger(CheckLTS.class);
   private static final int WARN_LTS_COUNT = 1;
 
   private final LTS letterToSoundClass;

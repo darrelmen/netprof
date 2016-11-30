@@ -37,7 +37,8 @@ import mitll.langtest.shared.user.User;
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
@@ -56,7 +57,7 @@ import java.util.List;
  * @since 1/27/16.
  */
 public class UserDAOToExcel {
-  private static final Logger logger = Logger.getLogger(UserDAOToExcel.class);
+  private static final Logger logger = LogManager.getLogger(UserDAOToExcel.class);
 
   private static final String MALE = "male";
   private static final String FEMALE = "female";

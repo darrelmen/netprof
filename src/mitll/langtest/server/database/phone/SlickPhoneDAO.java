@@ -52,7 +52,7 @@ import java.util.List;
 import java.util.Map;
 
 public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
-//  private static final Logger logger = Logger.getLogger(SlickPhoneDAO.class);
+//  private static final Logger logger = LogManager.getLogger(SlickPhoneDAO.class);
 
   private final PhoneDAOWrapper dao;
 

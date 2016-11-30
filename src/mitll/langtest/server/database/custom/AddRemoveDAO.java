@@ -34,7 +34,8 @@ package mitll.langtest.server.database.custom;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.*;
 import java.util.Collection;
@@ -52,7 +53,7 @@ import java.util.TreeSet;
  * To change this template use File | Settings | File Templates.
  */
 public class AddRemoveDAO extends DAO {
-  private static final Logger logger = Logger.getLogger(AddRemoveDAO.class);
+  private static final Logger logger = LogManager.getLogger(AddRemoveDAO.class);
 
   private static final String ADDREMOVE = "addremove";
   public static final String ADD = "ADD";

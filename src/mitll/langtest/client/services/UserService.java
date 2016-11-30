@@ -34,12 +34,10 @@ package mitll.langtest.client.services;
 
 import com.github.gwtbootstrap.client.ui.Container;
 import com.github.gwtbootstrap.client.ui.Fieldset;
-import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.InitialUI;
-import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.UserPassLogin;
@@ -48,8 +46,6 @@ import mitll.langtest.shared.user.*;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
-import static mitll.langtest.shared.user.User.Kind;
 
 @RemoteServiceRelativePath("user-manager")
 public interface UserService extends RemoteService {

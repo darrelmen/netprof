@@ -40,7 +40,8 @@ import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickUserPermission;
 import net.sf.json.JSON;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.OutputStream;
@@ -58,7 +59,7 @@ import java.util.Map;
  * @since 9/18/15.
  */
 public class UserManagement {
-  private static final Logger logger = Logger.getLogger(UserManagement.class);
+  private static final Logger logger = LogManager.getLogger(UserManagement.class);
   private final IUserDAO userDAO;
   private final IUserPermissionDAO permissionDAO;
   private final IResultDAO resultDAO;

@@ -33,7 +33,6 @@
 package mitll.langtest.server.services;
 
 import mitll.langtest.client.services.ProjectService;
-import mitll.langtest.server.database.security.UserSecurityManager;
 import mitll.langtest.shared.project.ProjectInfo;
 import org.apache.logging.log4j.LogManager;
 
@@ -42,7 +41,7 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings("serial")
 public class ProjectServiceImpl extends MyRemoteServiceServlet implements ProjectService {
-  //private static final Logger logger = Logger.getLogger(ProjectServiceImpl.class);
+  //private static final Logger logger = LogManager.getLogger(ProjectServiceImpl.class);
   // try to use a more modern logger...?
   private static final org.apache.logging.log4j.Logger log = LogManager.getLogger(ProjectServiceImpl.class);
 

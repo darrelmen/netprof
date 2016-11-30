@@ -44,7 +44,8 @@ import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickUserExerciseList;
 import mitll.npdata.dao.userexercise.UserExerciseListDAOWrapper;
 import mitll.npdata.dao.userexercise.UserExerciseListVisitorDAOWrapper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import scala.Option;
 
 import java.sql.SQLException;
@@ -52,7 +53,7 @@ import java.sql.Timestamp;
 import java.util.*;
 
 public class SlickUserListDAO extends DAO implements IUserListDAO {
-  private static final Logger logger = Logger.getLogger(SlickUserListDAO.class);
+  private static final Logger logger = LogManager.getLogger(SlickUserListDAO.class);
 
   private final UserExerciseListDAOWrapper dao;
   private final UserExerciseListVisitorDAOWrapper visitorDAOWrapper;

@@ -34,7 +34,8 @@ package mitll.langtest.server.audio;
 
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.server.PathHelper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 
@@ -45,7 +46,7 @@ import java.io.File;
  * @since 9/3/15.
  */
 class MP3Support {
-  private static final Logger logger = Logger.getLogger(MP3Support.class);
+  private static final Logger logger = LogManager.getLogger(MP3Support.class);
   private static final int SUFFIX_LENGTH = ("." + AudioTag.COMPRESSED_TYPE).length();
   private static final String WAV = ".wav";
   private final PathHelper pathHelper;

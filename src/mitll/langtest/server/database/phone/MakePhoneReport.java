@@ -2,7 +2,8 @@ package mitll.langtest.server.database.phone;
 
 import mitll.langtest.server.database.analysis.PhoneAnalysis;
 import mitll.langtest.shared.analysis.*;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
@@ -10,7 +11,7 @@ import java.util.*;
  * Created by go22670 on 3/29/16.
  */
 public class MakePhoneReport {
-  private static final Logger logger = Logger.getLogger(MakePhoneReport.class);
+  private static final Logger logger = LogManager.getLogger(MakePhoneReport.class);
 
 //  private static final String PHONE = "phone";
 //  private static final String RID = "rid";
