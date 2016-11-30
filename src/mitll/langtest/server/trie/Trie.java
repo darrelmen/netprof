@@ -43,7 +43,8 @@ package mitll.langtest.server.trie;
  */
 
 import mitll.langtest.server.scoring.SmallVocabDecoder;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
@@ -51,7 +52,7 @@ import java.util.*;
  * A tree-like data structure that enables quick lookup due to sharing common prefixes (using Aho Corasick algorithm).
  */
 public class Trie<T> {
-  private static final Logger logger = Logger.getLogger(Trie.class);
+  private static final Logger logger = LogManager.getLogger(Trie.class);
 
   private static final boolean SPLIT_ON_CHARACTERS = true;
   private final TrieNode<T> root;

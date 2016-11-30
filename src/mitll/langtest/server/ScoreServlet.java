@@ -48,7 +48,8 @@ import mitll.langtest.shared.scoring.PretestScore;
 import mitll.langtest.shared.user.User;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -68,7 +69,7 @@ import java.util.*;
  */
 @SuppressWarnings("serial")
 public class ScoreServlet extends DatabaseServlet {
-  private static final Logger logger = Logger.getLogger(ScoreServlet.class);
+  private static final Logger logger = LogManager.getLogger(ScoreServlet.class);
 
   private static final String REQUEST = "request";
   private static final String NESTED_CHAPTERS = "nestedChapters";

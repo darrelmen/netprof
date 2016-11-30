@@ -38,7 +38,8 @@ import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.user.User;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Collection;
 import java.util.List;
@@ -46,7 +47,7 @@ import java.util.Map;
 
 @SuppressWarnings("serial")
 public class MonitoringServiceImpl extends MyRemoteServiceServlet implements MonitoringService {
-  private static final Logger logger = Logger.getLogger(MonitoringServiceImpl.class);
+  private static final Logger logger = LogManager.getLogger(MonitoringServiceImpl.class);
 
 
 

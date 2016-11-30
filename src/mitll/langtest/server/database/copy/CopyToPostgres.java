@@ -47,11 +47,15 @@ import mitll.langtest.server.database.phone.PhoneDAO;
 import mitll.langtest.server.database.phone.SlickPhoneDAO;
 import mitll.langtest.server.database.refaudio.RefResultDAO;
 import mitll.langtest.server.database.refaudio.SlickRefResultDAO;
-import mitll.langtest.server.database.result.*;
+import mitll.langtest.server.database.result.Result;
+import mitll.langtest.server.database.result.ResultDAO;
+import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.server.database.reviewed.ReviewedDAO;
 import mitll.langtest.server.database.reviewed.SlickReviewedDAO;
 import mitll.langtest.server.database.reviewed.StateCreator;
-import mitll.langtest.server.database.user.*;
+import mitll.langtest.server.database.user.DominoUserDAOImpl;
+import mitll.langtest.server.database.user.IUserDAO;
+import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.server.database.userexercise.UserExerciseDAO;
 import mitll.langtest.server.database.userlist.*;
@@ -64,14 +68,15 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Exercise;
 import mitll.npdata.dao.*;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.sql.SQLException;
 import java.util.*;
 
 public class CopyToPostgres<T extends CommonShell> {
-  private static final Logger logger = Logger.getLogger(CopyToPostgres.class);
+  private static final Logger logger = LogManager.getLogger(CopyToPostgres.class);
   private static final int WARN_RID_MISSING_THRESHOLD = 50;
   private static final boolean COPY_EVENTS = true;
   private static final int WARN_MISSING_THRESHOLD = 10;

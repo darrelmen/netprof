@@ -43,7 +43,8 @@ import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.MiniUser;
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -59,7 +60,7 @@ import java.util.zip.ZipOutputStream;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class AudioExport {
-  private static final Logger logger = Logger.getLogger(AudioExport.class);
+  private static final Logger logger = LogManager.getLogger(AudioExport.class);
 
   private static final String MALE = "Male";
   private static final String FEMALE = "Female";

@@ -43,13 +43,14 @@ import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 import java.util.Map;
 
 public class RecordWordAndPhone {
-  private static final Logger logger = Logger.getLogger(DatabaseImpl.class);
+  private static final Logger logger = LogManager.getLogger(DatabaseImpl.class);
   private static final String SIL = "sil";
   private final IWordDAO wordDAO;
   private final IPhoneDAO<Phone> phoneDAO;

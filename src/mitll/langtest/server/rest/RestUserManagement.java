@@ -43,7 +43,8 @@ import mitll.langtest.server.services.UserServiceImpl;
 import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
 import net.sf.json.JSONObject;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -58,7 +59,7 @@ import java.io.PrintWriter;
  * @since 10/21/15.
  */
 public class RestUserManagement {
-  private static final Logger logger = Logger.getLogger(RestUserManagement.class);
+  private static final Logger logger = LogManager.getLogger(RestUserManagement.class);
 
   private static final String HAS_USER = "hasUser";
   private static final String FORGOT_USERNAME = "forgotUsername";

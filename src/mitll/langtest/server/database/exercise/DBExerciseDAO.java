@@ -38,12 +38,13 @@ import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.npdata.dao.SlickProject;
 import mitll.npdata.dao.SlickRelatedExercise;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
 public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<CommonExercise> {
-  private static final Logger logger = Logger.getLogger(DBExerciseDAO.class);
+  private static final Logger logger = LogManager.getLogger(DBExerciseDAO.class);
   private SlickUserExerciseDAO userExerciseDAO;
   private SlickProject project;
 

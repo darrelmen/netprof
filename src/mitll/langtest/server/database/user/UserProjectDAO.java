@@ -35,14 +35,15 @@ package mitll.langtest.server.database.user;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickUserProject;
 import mitll.npdata.dao.word.UserProjectDAOWrapper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
 
 public class UserProjectDAO implements IUserProjectDAO {
-  private static final Logger logger = Logger.getLogger(UserProjectDAO.class);
+  private static final Logger logger = LogManager.getLogger(UserProjectDAO.class);
 
   private UserProjectDAOWrapper dao;
 

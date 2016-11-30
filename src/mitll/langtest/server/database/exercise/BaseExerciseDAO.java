@@ -45,7 +45,8 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Exercise;
 import mitll.npdata.dao.SlickProject;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.util.*;
@@ -57,7 +58,7 @@ import java.util.*;
  * @since 2/10/16.
  */
 abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
-  private static final Logger logger = Logger.getLogger(BaseExerciseDAO.class);
+  private static final Logger logger = LogManager.getLogger(BaseExerciseDAO.class);
   private static final String CONTAINS_SEMI = "contains semicolon - should this item be split?";
   private static final String ENGLISH = "english";
   private static final String MISSING_ENGLISH = "missing english";

@@ -32,11 +32,11 @@
 
 package mitll.langtest.server.trie;
 
-import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.exercise.CommonShell;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.text.CharacterIterator;
 import java.text.Normalizer;
@@ -53,7 +53,7 @@ import java.util.Collection;
  * @see Project#fullTrie
  */
 public class ExerciseTrie<T extends CommonShell> extends Trie<T> {
-  private static final Logger logger = Logger.getLogger(ExerciseTrie.class);
+  private static final Logger logger = LogManager.getLogger(ExerciseTrie.class);
 
   private static final int TOOLONG_TO_WAIT = 150;
   private static final String MANDARIN = "Mandarin";

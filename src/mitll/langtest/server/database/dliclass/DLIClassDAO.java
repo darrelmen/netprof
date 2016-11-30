@@ -36,14 +36,15 @@ import mitll.langtest.shared.dliclass.DLIClass;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickDLIClass;
 import mitll.npdata.dao.dliclass.DLIClassWrapper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 public class DLIClassDAO implements IDLIClassDAO {
-  private static final Logger logger = Logger.getLogger(DLIClassDAO.class);
+  private static final Logger logger = LogManager.getLogger(DLIClassDAO.class);
   private static final String DEFAULT_PROJECT = "DEFAULT_PROJECT";
 
   private final DLIClassWrapper dao;

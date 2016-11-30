@@ -35,7 +35,8 @@ package mitll.langtest.server.database.userlist;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.user.UserDAO;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -48,7 +49,7 @@ public class UserExerciseListVisitorDAO extends DAO implements IUserExerciseList
   private static final String VISITORID = "visitorid";
   private static final String MODIFIED = "modified";
 
-  private static final Logger logger = Logger.getLogger(UserExerciseListVisitorDAO.class);
+  private static final Logger logger = LogManager.getLogger(UserExerciseListVisitorDAO.class);
 
   private static final String USER_EXERCISE_LIST_VISITOR = "userexerciselist_visitor";
 

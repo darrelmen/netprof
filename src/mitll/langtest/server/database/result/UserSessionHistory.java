@@ -36,13 +36,14 @@ import mitll.langtest.shared.flashcard.AVPHistoryForList;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.user.User;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.text.CollationKey;
 import java.util.*;
 
 public class UserSessionHistory {
-  private static final Logger logger = Logger.getLogger(UserSessionHistory.class);
+  private static final Logger logger = LogManager.getLogger(UserSessionHistory.class);
 
   /**
    * does all average calc on server

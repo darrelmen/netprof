@@ -38,7 +38,8 @@ import mitll.langtest.server.database.phone.IPhoneDAO;
 import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.analysis.*;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.*;
 import java.util.*;
@@ -47,7 +48,7 @@ import java.util.*;
  * @
  */
 class H2Analysis extends Analysis implements IAnalysis {
-  private static final Logger logger = Logger.getLogger(H2Analysis.class);
+  private static final Logger logger = LogManager.getLogger(H2Analysis.class);
 
   private static final boolean DEBUG = false;
 

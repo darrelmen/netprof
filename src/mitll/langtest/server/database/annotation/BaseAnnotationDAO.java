@@ -36,12 +36,13 @@ import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.shared.ExerciseAnnotation;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
 public abstract class BaseAnnotationDAO extends DAO {
-  private static final Logger logger = Logger.getLogger(BaseAnnotationDAO.class);
+  private static final Logger logger = LogManager.getLogger(BaseAnnotationDAO.class);
   int defectDetector;
 
   private Map<Integer, List<UserAnnotation>> exerciseToAnnos = null;

@@ -51,7 +51,7 @@ import java.util.Map;
  * @since 9/28/15.
  */
 class PrecalcScores {
-//  private static final Logger logger = Logger.getLogger(PrecalcScores.class);
+//  private static final Logger logger = LogManager.getLogger(PrecalcScores.class);
 
   private final Result precalcResult;
   private Scores scores;

@@ -38,7 +38,8 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.user.User;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Collections;
 import java.util.List;
@@ -50,7 +51,7 @@ import java.util.List;
  * @since 9/30/14.
  */
 public class EmailHelper {
-  private static final Logger logger = Logger.getLogger(EmailHelper.class);
+  private static final Logger logger = LogManager.getLogger(EmailHelper.class);
 
   @Deprecated  private static final String MY_EMAIL = "gordon.vidaver@ll.mit.edu";
   /**

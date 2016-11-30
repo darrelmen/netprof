@@ -36,7 +36,8 @@ import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.exercise.SimpleExerciseDAO;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.exercise.CommonShell;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.util.*;
@@ -52,9 +53,10 @@ import java.util.*;
  * @since 10/8/12
  * Time: 3:35 PM
  * To change this template use File | Settings | File Templates.
+ * @deprecated we don't do this any more... maybe just in AMAS
  */
 public class FileExerciseDAO<T extends CommonShell> implements SimpleExerciseDAO<T> {
-  private static final Logger logger = Logger.getLogger(FileExerciseDAO.class);
+  private static final Logger logger = LogManager.getLogger(FileExerciseDAO.class);
 
   private static final String FILE_PREFIX = "file://";
   private static final int FILE_PREFIX_LENGTH = "file://".length();

@@ -36,18 +36,17 @@ import com.github.gwtbootstrap.client.ui.Button;
 import mitll.langtest.client.services.ListService;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Exercise;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.io.File;
 import java.util.*;
 
 @SuppressWarnings("serial")
 public class ListServiceImpl extends MyRemoteServiceServlet implements ListService {
-  private static final Logger logger = Logger.getLogger(ListServiceImpl.class);
+  private static final Logger logger = LogManager.getLogger(ListServiceImpl.class);
   private static final boolean DEBUG = true;
 
   /**

@@ -4,7 +4,8 @@ import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.WordAndScore;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -16,7 +17,7 @@ import java.util.Map;
  */
 public class PhoneJSON {
   private static final int MAX_EXAMPLES = 30;
-  private static final Logger logger = Logger.getLogger(PhoneJSON.class);
+  private static final Logger logger = LogManager.getLogger(PhoneJSON.class);
 
   private static final String WID = "wid";
 

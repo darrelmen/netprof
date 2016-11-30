@@ -39,7 +39,8 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.instrumentation.SlimEvent;
 import mitll.npdata.dao.SlickSlimEvent;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.*;
 import java.util.*;
@@ -54,7 +55,7 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class EventDAO extends DAO implements IEventDAO {
-  private static final Logger logger = Logger.getLogger(EventDAO.class);
+  private static final Logger logger = LogManager.getLogger(EventDAO.class);
 
   private static final String EVENT = "event";
   private static final String CREATORID = "creatorid";

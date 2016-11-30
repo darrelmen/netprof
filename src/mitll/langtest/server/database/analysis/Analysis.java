@@ -43,7 +43,8 @@ import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.user.MiniUser;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
@@ -54,7 +55,7 @@ import java.util.*;
  * @since 10/21/15.
  */
 public abstract class Analysis extends DAO {
-  private static final Logger logger = Logger.getLogger(Analysis.class);
+  private static final Logger logger = LogManager.getLogger(Analysis.class);
 
   private static final boolean DEBUG = false;
 

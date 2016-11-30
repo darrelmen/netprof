@@ -34,24 +34,15 @@ package mitll.langtest.server.database.user;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
-import mitll.npdata.dao.DBConnection;
-import mitll.npdata.dao.SlickMiniUser;
-import mitll.npdata.dao.SlickUser;
-import mitll.npdata.dao.SlickUserPermission;
-import mitll.npdata.dao.user.UserDAOWrapper;
-import org.apache.log4j.Logger;
-import scala.collection.Seq;
 
-import java.sql.Timestamp;
-import java.util.*;
+import java.util.Map;
 
 public abstract class SlickUserDAOImpl extends BaseUserDAO implements IUserDAO {
   SlickUserDAOImpl(Database database) {
     super(database);
   }
-  /*private static final Logger logger = Logger.getLogger(SlickUserDAOImpl.class);
+  /*private static final Logger logger = LogManager.getLogger(SlickUserDAOImpl.class);
   private final UserDAOWrapper dao;
   private IUserPermissionDAO permissionDAO;
 

@@ -47,6 +47,8 @@ import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -55,7 +57,7 @@ import java.util.stream.Collectors;
  * Store user info in domino tables.
  */
 public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
-  private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DominoUserDAOImpl.class);
+  private static final Logger logger = LogManager.getLogger(DominoUserDAOImpl.class);
 
   private IUserServiceDelegate delegate;
  // private INetProfUserDelegate netProfDelegate;

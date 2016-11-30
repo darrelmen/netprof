@@ -36,7 +36,8 @@ import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.result.ResultDAO;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -53,7 +54,7 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class WordDAO extends DAO implements IWordDAO {
-  private static final Logger logger = Logger.getLogger(WordDAO.class);
+  private static final Logger logger = LogManager.getLogger(WordDAO.class);
 
   public static final String WORD = "word";
   private static final String RID = "rid";

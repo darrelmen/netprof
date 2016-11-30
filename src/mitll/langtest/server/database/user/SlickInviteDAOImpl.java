@@ -39,14 +39,15 @@ import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickInvite;
 import mitll.npdata.dao.user.InviteDAOWrapper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 public class SlickInviteDAOImpl extends DAO implements IInviteDAO {
-  private static final Logger logger = Logger.getLogger(SlickInviteDAOImpl.class);
+  private static final Logger logger = LogManager.getLogger(SlickInviteDAOImpl.class);
   private final InviteDAOWrapper dao;
 
   /**

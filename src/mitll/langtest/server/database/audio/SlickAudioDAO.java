@@ -40,13 +40,14 @@ import mitll.langtest.shared.user.MiniUser;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickAudio;
 import mitll.npdata.dao.audio.AudioDAOWrapper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.Timestamp;
 import java.util.*;
 
 public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
-  private static final Logger logger = Logger.getLogger(SlickAudioDAO.class);
+  private static final Logger logger = LogManager.getLogger(SlickAudioDAO.class);
 
   private final AudioDAOWrapper dao;
   private final long now = System.currentTimeMillis();

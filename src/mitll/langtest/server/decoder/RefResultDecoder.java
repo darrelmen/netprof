@@ -44,7 +44,8 @@ import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.MiniUser;
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -57,7 +58,7 @@ import java.util.*;
  * @since 7/22/15.
  */
 public class RefResultDecoder {
-  private static final Logger logger = Logger.getLogger(RefResultDecoder.class);
+  private static final Logger logger = LogManager.getLogger(RefResultDecoder.class);
 
   private static final boolean DO_REF_DECODE = true;
   private static final boolean DO_TRIM = false;

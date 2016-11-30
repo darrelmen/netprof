@@ -50,7 +50,8 @@ import mitll.langtest.server.database.result.Result;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
@@ -73,7 +74,7 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class ASRWebserviceScoring extends Scoring implements ASR {
-  private static final Logger logger = Logger.getLogger(ASRWebserviceScoring.class);
+  private static final Logger logger = LogManager.getLogger(ASRWebserviceScoring.class);
   private static final int FOREGROUND_VOCAB_LIMIT = 100;
   private static final int VOCAB_SIZE_LIMIT = 200;
 

@@ -10,7 +10,8 @@ import mitll.langtest.server.database.user.IUserProjectDAO;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickUserProject;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -22,7 +23,7 @@ import java.util.Map;
  * Created by go22670 on 10/26/16.
  */
 public class UserCopy {
-  private static final Logger logger = Logger.getLogger(UserCopy.class);
+  private static final Logger logger = LogManager.getLogger(UserCopy.class);
   private static final boolean DEBUG = false;
 
   /**

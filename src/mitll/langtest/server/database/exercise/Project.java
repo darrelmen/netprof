@@ -46,7 +46,8 @@ import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.npdata.dao.SlickProject;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
@@ -54,7 +55,7 @@ import java.util.*;
  * Has everything associated with a project
  */
 public class Project {
-  private static final Logger logger = Logger.getLogger(Project.class);
+  private static final Logger logger = LogManager.getLogger(Project.class);
 
   private static final String WEBSERVICE_HOST_IP1 = "webserviceHostIP";
   private static final String WEBSERVICE_HOST_PORT = "webserviceHostPort";

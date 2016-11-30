@@ -36,7 +36,8 @@ import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.shared.exercise.STATE;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.*;
 import java.util.*;
@@ -57,7 +58,7 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class ReviewedDAO extends DAO implements IReviewedDAO {
-  private static final Logger logger = Logger.getLogger(ReviewedDAO.class);
+  private static final Logger logger = LogManager.getLogger(ReviewedDAO.class);
 
   public static final String REVIEWED = "reviewed";
   public static final String SECOND_STATE = "secondstate";

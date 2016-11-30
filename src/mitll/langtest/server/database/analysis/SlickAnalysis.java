@@ -39,14 +39,15 @@ import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.analysis.*;
 import mitll.npdata.dao.SlickPerfResult;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
 
 public class SlickAnalysis extends Analysis implements IAnalysis {
-  private static final Logger logger = Logger.getLogger(Analysis.class);
+  private static final Logger logger = LogManager.getLogger(Analysis.class);
   private SlickResultDAO resultDAO;
   private static final boolean DEBUG = true;
 

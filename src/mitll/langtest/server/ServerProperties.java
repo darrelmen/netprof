@@ -39,7 +39,8 @@ import mitll.langtest.server.mail.EmailList;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.scoring.PretestScore;
 import mitll.langtest.shared.user.User;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.servlet.ServletContext;
 import java.io.*;
@@ -60,7 +61,7 @@ import java.util.jar.Manifest;
  * To change this template use File | Settings | File Templates.
  */
 public class ServerProperties {
-  private static final Logger logger = Logger.getLogger(ServerProperties.class);
+  private static final Logger logger = LogManager.getLogger(ServerProperties.class);
 
   private static final String FALSE = "false";
   private static final String TRUE = "true";

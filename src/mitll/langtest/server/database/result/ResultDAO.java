@@ -43,7 +43,8 @@ import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.result.MonitorResult;
 import mitll.langtest.shared.user.User;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.*;
 import java.util.*;
@@ -51,7 +52,7 @@ import java.util.*;
 import static mitll.langtest.server.database.Database.EXID;
 
 public class ResultDAO extends BaseResultDAO implements IResultDAO {
-  private static final Logger logger = Logger.getLogger(ResultDAO.class);
+  private static final Logger logger = LogManager.getLogger(ResultDAO.class);
 
   public static final String ID = "id";
   public static final String USERID = "userid";
