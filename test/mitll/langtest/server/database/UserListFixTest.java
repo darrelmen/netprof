@@ -36,14 +36,14 @@ import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.*;
 import org.junit.Test;
 
 import java.util.Collection;
 import java.util.Collections;
 
 public class UserListFixTest extends BaseTest {
-  private static final Logger logger = Logger.getLogger(UserListFixTest.class);
+  private static final Logger logger = LogManager.getLogger(UserListFixTest.class);
   public static final int MAX_EXERCISE = 701;
   //public static final boolean DO_ONE = false;
 

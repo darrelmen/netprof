@@ -67,8 +67,6 @@
         </Console>
     </appenders>
 
-DUDE DUDE
-
     <loggers>
         <logger name="org.apache.fop" level="WARN" additivity="true">
             <appender-ref ref="STDOUT"/>
@@ -117,7 +115,7 @@ DUDE DUDE
         <logger name="slick.session" level="DEBUG"/>
 
         <root level="debug">
-            <appender-ref ref="Mail" level="error"/>
+            <appender-ref ref="STDOUT" level="error"/>
         </root>
 
     </loggers>

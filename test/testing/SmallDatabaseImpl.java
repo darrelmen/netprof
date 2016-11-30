@@ -6,7 +6,7 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.user.UserDAO;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.*;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
@@ -33,7 +33,7 @@ import java.util.Collection;
  * To change this template use File | Settings | File Templates.
  */
 public class SmallDatabaseImpl implements Database {
-  private static final Logger logger = Logger.getLogger(DatabaseImpl.class);
+  private static final Logger logger = LogManager.getLogger(DatabaseImpl.class);
   private static final boolean TESTING = false;
 
   //private static final boolean DROP_USER = false;

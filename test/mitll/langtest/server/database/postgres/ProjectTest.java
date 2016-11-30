@@ -47,7 +47,7 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickProject;
 import mitll.npdata.dao.SlickProjectProperty;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.*;
 import org.junit.Test;
 
 import java.util.Collection;
@@ -56,7 +56,7 @@ import java.util.List;
 import java.util.Map;
 
 public class ProjectTest extends BaseTest {
-  private static final Logger logger = Logger.getLogger(ProjectTest.class);
+  private static final Logger logger = LogManager.getLogger(ProjectTest.class);
   public static final int MAX = 200;
 
   @Test

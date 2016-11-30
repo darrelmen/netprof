@@ -8,7 +8,7 @@ import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import net.sf.json.JSONObject;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.*;
 import org.junit.Test;
 
 import java.util.*;
@@ -20,7 +20,7 @@ import java.util.*;
  * @since 1/30/14.
  */
 public class DecodeTest extends BaseTest {
-  private static final Logger logger = Logger.getLogger(DecodeTest.class);
+  private static final Logger logger = LogManager.getLogger(DecodeTest.class);
   //public static final boolean DO_ONE = false;
 
 

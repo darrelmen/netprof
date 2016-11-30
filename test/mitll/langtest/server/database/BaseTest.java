@@ -4,7 +4,6 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.connection.DatabaseConnection;
 import mitll.langtest.server.database.connection.H2Connection;
-import org.apache.log4j.Logger;
 
 import java.io.*;
 import java.sql.ResultSet;
@@ -13,6 +12,8 @@ import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.apache.logging.log4j.*;
+
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -20,7 +21,7 @@ import java.util.Date;
  * @since 11/5/15.
  */
 public class BaseTest {
-  private static final Logger logger = Logger.getLogger(BaseTest.class);
+  private static final Logger logger = LogManager.getLogger(BaseTest.class);
   public static final String QUIZLET_PROPERTIES = "quizlet.properties";
   public static final String DOMINO_PROPERTIES = "domino.properties";
 

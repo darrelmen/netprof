@@ -4,7 +4,7 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.instrumentation.IEventDAO;
 import mitll.langtest.shared.instrumentation.Event;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -14,7 +14,7 @@ import java.io.File;
  * Created by go22670 on 2/17/16.
  */
 public class EventReaderTest {
-  private static final Logger logger = Logger.getLogger(EventReaderTest.class);
+  private static final Logger logger = LogManager.getLogger(EventReaderTest.class);
   private static DatabaseImpl database;
 
   @BeforeClass
