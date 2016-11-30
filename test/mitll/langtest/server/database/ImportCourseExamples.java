@@ -1,7 +1,7 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.ServerProperties;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.*;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -10,7 +10,7 @@ import org.apache.log4j.Logger;
  * @since 5/6/2014.
  */
 public class ImportCourseExamples {
-  private static final Logger logger = Logger.getLogger(ImportCourseExamples.class);
+  private static final Logger logger = LogManager.getLogger(ImportCourseExamples.class);
 
 /*  protected static void importCourseExamplesRussian() {
     String configDir = "war/config/russian";

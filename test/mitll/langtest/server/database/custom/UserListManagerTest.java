@@ -9,7 +9,7 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.user.User;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.*;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -33,7 +33,7 @@ import static org.junit.Assert.assertTrue;
 public class UserListManagerTest {
   private static final String CHANGED = "changed";
   private static final String ENGLISH = "english";
-  private static final Logger logger = Logger.getLogger(UserListManagerTest.class);
+  private static final Logger logger = LogManager.getLogger(UserListManagerTest.class);
   private static DatabaseImpl database;
   private static String dbName;
 

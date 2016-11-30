@@ -5,7 +5,7 @@ import mitll.langtest.server.database.analysis.IAnalysis;
 import mitll.langtest.server.database.connection.H2Connection;
 import mitll.langtest.shared.analysis.*;
 import net.sf.json.JSONObject;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.*;
 import org.junit.Test;
 
 import java.io.BufferedWriter;
@@ -20,7 +20,7 @@ import java.util.*;
  * @since 1/30/14.
  */
 public class PerformanceTest extends BaseTest {
-  private static final Logger logger = Logger.getLogger(PerformanceTest.class);
+  private static final Logger logger = LogManager.getLogger(PerformanceTest.class);
   public static final int CHINESE_DUDE = 71;
   public static final String UNIT_TO_VALUE = "unitToValue";
 

@@ -39,13 +39,13 @@ import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.reviewed.StateCreator;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.STATE;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.*;
 import org.junit.Test;
 
 import java.util.*;
 
 public class ReviewedExTest extends BaseTest {
-  private static final Logger logger = Logger.getLogger(ReviewedExTest.class);
+  private static final Logger logger = LogManager.getLogger(ReviewedExTest.class);
 
   @Test
   public void testReviewed() {

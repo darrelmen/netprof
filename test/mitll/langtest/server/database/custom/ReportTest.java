@@ -10,7 +10,7 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.Event;
 import net.sf.json.JSONObject;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -32,7 +32,7 @@ import static org.junit.Assert.assertTrue;
 public class ReportTest {
   //private static final String CHANGED = "changed";
   private static final String ENGLISH = "english";
-  private static final Logger logger = Logger.getLogger(ReportTest.class);
+  private static final Logger logger = LogManager.getLogger(ReportTest.class);
   private static DatabaseImpl database;
   //private static String dbName;
 

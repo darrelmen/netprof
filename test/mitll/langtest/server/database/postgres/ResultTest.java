@@ -40,7 +40,7 @@ import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.exercise.CommonExercise;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.*;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -49,7 +49,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class ResultTest extends BaseTest {
-  private static final Logger logger = Logger.getLogger(ResultTest.class);
+  private static final Logger logger = LogManager.getLogger(ResultTest.class);
 
 //  @Test
 //  public void testResult() {

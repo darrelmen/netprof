@@ -1,6 +1,6 @@
 package mitll.langtest.server.database;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.*;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -9,7 +9,7 @@ import org.apache.log4j.Logger;
  * @since 5/6/2014.
  */
 public class MergeSites extends BaseTest {
-  private static final Logger logger = Logger.getLogger(MergeSites.class);
+  private static final Logger logger = LogManager.getLogger(MergeSites.class);
 
   /**
    * Take the users from the current site and addExerciseToList them to the candidate site

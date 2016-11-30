@@ -37,13 +37,13 @@ import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.user.User;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.*;
 import org.junit.Test;
 
 import java.util.List;
 
 public class UserTest extends BaseTest {
-  private static final Logger logger = Logger.getLogger(UserTest.class);
+  private static final Logger logger = LogManager.getLogger(UserTest.class);
 
   @Test
   public void testAdmin() {

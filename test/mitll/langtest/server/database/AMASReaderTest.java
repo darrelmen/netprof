@@ -5,7 +5,7 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.amas.QAPair;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -21,7 +21,7 @@ import java.util.stream.Stream;
  * @since 2/17/16.
  */
 public class AMASReaderTest {
-  private static final Logger logger = Logger.getLogger(AMASReaderTest.class);
+  private static final Logger logger = LogManager.getLogger(AMASReaderTest.class);
   // public static final String AM_LB_002 = "AM-LB-002";
   private static DatabaseImpl database;
 

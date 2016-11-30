@@ -3,7 +3,7 @@ package mitll.langtest.server.database.custom;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.*;
 import org.junit.BeforeClass;
 
 import java.io.File;
@@ -15,7 +15,7 @@ import java.io.File;
  * @since 2/17/16.
  */
 public class AnalysisAgainTest {
-  private static final Logger logger = Logger.getLogger(AnalysisAgainTest.class);
+  private static final Logger logger = LogManager.getLogger(AnalysisAgainTest.class);
   private static DatabaseImpl database;
 
   @BeforeClass

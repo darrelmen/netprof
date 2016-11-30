@@ -39,14 +39,14 @@ import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.*;
 import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collection;
 
 public class UserExTest extends BaseTest {
-  private static final Logger logger = Logger.getLogger(UserExTest.class);
+  private static final Logger logger = LogManager.getLogger(UserExTest.class);
 
   @Test
   public void testExercise() {

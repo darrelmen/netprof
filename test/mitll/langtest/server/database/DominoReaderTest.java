@@ -2,7 +2,7 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -15,7 +15,7 @@ import java.io.File;
  * @since 2/17/16.
  */
 public class DominoReaderTest {
-  private static final Logger logger = Logger.getLogger(DominoReaderTest.class);
+  private static final Logger logger = LogManager.getLogger(DominoReaderTest.class);
   private static DatabaseImpl database;
 
   @BeforeClass

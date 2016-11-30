@@ -47,14 +47,15 @@ import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickProject;
 import mitll.npdata.dao.SlickUserProject;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
 import java.io.File;
 import java.util.*;
 
 public class PostgresTest extends BaseTest {
-  private static final Logger logger = Logger.getLogger(PostgresTest.class);
+  private static final Logger logger = LogManager.getLogger(PostgresTest.class);
 
   // set to true to use a local postgres database
   private static final boolean doLocal = true;
@@ -74,11 +75,28 @@ public class PostgresTest extends BaseTest {
   }
 
   @Test
+  public void testListTables() {
+    DBConnection spanish = getConnection("netProf");
+    scala.collection.immutable.List<String> listOfTables = spanish.getListOfTables();
+    scala.collection.Iterator<String> iterator = listOfTables.iterator();
+    for (;iterator.hasNext();
+        ) {
+      logger.info("got " + iterator.next());
+    }
+    logger.info("list tables " + listOfTables);
+  }
+
+  @Test
   public void testDropNetProf() {
     DBConnection spanish = getConnection("netProf");
     spanish.dropAll();
     scala.collection.immutable.List<String> listOfTables = spanish.getListOfTables();
     logger.info("after drop " + listOfTables);
+  }
+
+  @Test
+  public void testListAll() {
+    DBConnection spanish = getConnection("netProf");
   }
 
   @Test
@@ -290,6 +308,9 @@ public class PostgresTest extends BaseTest {
 
       //  DatabaseImpl databaseLight = getDatabaseLight(config.language, true, "hydra-dev", "netprof", "npadmin", config.props);
       DatabaseImpl databaseLight = getDatabaseLight(config.language, true, doLocal, config.props);
+
+      logger.info("\n\n\n-------- Got  databaseLight " + databaseLight);
+
       cp.copyOneConfig(databaseLight, cc, config.name, config.displayOrder, config.isDev());
       databaseLight.destroy();
       long now = System.currentTimeMillis();
@@ -566,6 +587,19 @@ public class PostgresTest extends BaseTest {
   public void testProjects() {
     DatabaseImpl spanish = getDatabaseLight("spanish", false);
     SlickProject next = spanish.getProjectDAO().getAll().iterator().next();
+
+  }
+
+  /**
+   * Doesn't work?
+   */
+  @Test
+  public void testListProjects() {
+    DatabaseImpl spanish = getDatabaseLight("spanish", false);
+    Collection<SlickProject> all = spanish.getProjectDAO().getAll();
+    logger.info("found " +all.size());
+
+    for (SlickProject project:all) logger.info("project"  + project);
 
   }
 

@@ -2,7 +2,7 @@ package mitll.langtest.server.database.custom;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.*;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.*;
 import org.junit.Test;
@@ -20,7 +20,7 @@ import java.util.List;
  * @since 2/12/16.
  */
 public class SiteExport {
-  private static final Logger logger = Logger.getLogger(SiteExport.class);
+  private static final Logger logger = LogManager.getLogger(SiteExport.class);
 
   @Test
   public void testExport() {
