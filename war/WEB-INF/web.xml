@@ -3,7 +3,8 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
               http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
          version="2.5"
-         xmlns="http://java.sun.com/xml/ns/javaee">
+         xmlns="http://java.sun.com/xml/ns/javaee"
+         metadata-complete="true">
 
     <!-- Default page to serve -->
     <welcome-file-list>
