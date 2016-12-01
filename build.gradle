@@ -10,7 +10,7 @@ buildscript {
     dependencies {
         //Check for the latest version here: http://plugins.gradle.org/plugin/com.jfrog.artifactory
 //        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:${jfrogVersion}"
-//        classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.6'
+        classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.6'
         classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.4.7"
     }
 }
@@ -27,7 +27,7 @@ apply plugin: 'idea'
 apply plugin: 'mongo'
 apply from: 'gradle-common/common.gradle'
 apply from: 'gradle-common/common-java.gradle'
-//apply plugin: 'gwt'
+apply plugin: 'gwt'
 apply plugin: 'war'
 apply plugin: 'java'
 
@@ -167,7 +167,7 @@ sourceSets {
     }
 }
 
-/*gwt {
+gwt {
     gwtVersion = '2.8.0'
     modules 'mitll.langtest.LangTest'
 
@@ -195,7 +195,7 @@ sourceSets {
 
     //Specify the deployment Port
     // jettyRunWar.httpPort = 8089
-}*/
+}
 
 war {
     // from 'war/bin'
