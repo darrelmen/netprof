@@ -83,7 +83,7 @@ public class SectionHelper<T extends Shell> {
     if (predefinedTypeOrder.isEmpty()) {
       List<String> types = new ArrayList<>();
       types.addAll(typeToSectionToTypeToSections.keySet());
-    //  logger.info("getTypeOrder " + predefinedTypeOrder + " : " + types);
+   //   logger.info("getTypeOrder predef = " + predefinedTypeOrder + " : " + types);
 
       if (types.isEmpty()) {
         types.addAll(typeToUnitToLesson.keySet());
@@ -96,11 +96,18 @@ public class SectionHelper<T extends Shell> {
             return first > second ? +1 : first < second ? -1 : 0;
           }
         });
+
+        // TODO : I feel like I did this before...?
+        // put sound at end...
+        if (types.contains("Sound")) {
+          types.remove("Sound");
+          types.add("Sound");
+        }
       }
       return types;
     } else {
       Set<String> validTypes = typeToUnitToLesson.keySet();
-  //    logger.info("getTypeOrder validTypes " + validTypes);
+     // logger.info("getTypeOrder validTypes " + validTypes);
 
       List<String> valid = new ArrayList<>(predefinedTypeOrder);
       valid.retainAll(validTypes);
