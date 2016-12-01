@@ -118,9 +118,9 @@ public class PostgresTest extends BaseTest {
   @Test
   public void testCopyHindi() {
     List<Info> toCopy = new ArrayList<>();
-    Info serbian = new Info("hindi");
-    serbian.setDev(true);
-    toCopy.add(serbian);
+    Info info = new Info("hindi");
+    info.setDev(true);
+    toCopy.add(info);
     testCopy(toCopy);
   }
 
@@ -320,8 +320,13 @@ public class PostgresTest extends BaseTest {
 
       logger.info("\n\n\n-------- Got  databaseLight " + databaseLight);
 
+//      SectionHelper<CommonExercise> sectionHelper = databaseLight.getSectionHelper();
+//      sectionHelper.report();
+
       cp.copyOneConfig(databaseLight, cc, config.name, config.displayOrder, config.isDev());
       databaseLight.destroy();
+
+
       long now = System.currentTimeMillis();
       logger.info("\n\n\n-------- FINISHED copy " + config + " " + cc + " in " + ((now - then) / 1000) + " seconds");
       log();
