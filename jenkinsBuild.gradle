@@ -1,0 +1,231 @@
+// Build-time dependencies
+buildscript {
+    repositories {
+        jcenter()
+        // Alternatively use:
+//        maven {
+//            url 'http://dl.bintray.com/steffenschaefer/maven'
+//        }
+    }
+    dependencies {
+        //Check for the latest version here: http://plugins.gradle.org/plugin/com.jfrog.artifactory
+//        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:${jfrogVersion}"
+        classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.6'
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.4.7"
+    }
+}
+
+plugins {
+    id "com.jfrog.artifactory" version "4.4.7" // required for common.gradle
+    id "com.github.hierynomus.license" version "0.13.1"
+    id "net.saliman.cobertura" version "2.3.2" // required for common.gradle
+    id "org.sonarqube" version "2.2"
+    id "com.sourcemuse.mongo" version "0.13.0"
+}
+
+apply plugin: 'idea'
+apply plugin: 'mongo'
+apply from: 'gradle-common/common.gradle'
+apply from: 'gradle-common/common-java.gradle'
+//apply plugin: 'gwt'
+apply plugin: 'war'
+apply plugin: 'java'
+
+mongo {
+    port mongoPort
+    mongoVersion mongoV
+}
+
+test {
+    runWithMongoDb = true
+}
+
+license {
+        skipExistingHeaders true
+        ignoreFailures true
+}
+
+repositories {
+    flatDir {
+        dirs 'libs'
+    }
+}
+
+description = 'NetProF pronunciation feedback'
+
+evaluationDependsOn(':imagewriter')
+
+dependencies {
+    compile('mitll.hlt:domino-core:1.1.0-SNAPSHOT') { changing = true }
+    compile('mitll.hlt:domino-shared:1.1.0'){changing = true}
+    compile('mitll.hlt:mongo-core:0.1.0'){changing = true}
+
+    compile 'com.google.gwt:gwt-user:2.8.0'
+    compile 'com.google.gwt:gwt-servlet:2.8.0'
+
+    compile 'org.mongodb:mongo-java-driver:3.3.0'
+
+    compile 'org.apache.commons:commons-email:latest.integration'
+    compile 'org.apache.commons:commons-lang3:latest.integration'
+    compile 'commons-codec:commons-codec:latest.integration'
+    compile 'commons-io:commons-io:latest.integration'
+
+    compile 'org.apache.logging.log4j:log4j-api:latest.integration'
+    compile 'org.apache.logging.log4j:log4j-core:latest.integration'
+    compile 'org.apache.logging.log4j:log4j-jcl:latest.integration'
+    compile 'org.apache.logging.log4j:log4j-web:latest.integration'
+
+    compile 'org.apache.ignite:ignite-core:1.5.0.final'
+  //  compile 'org.scala-lang:scala-library:2.11.8'
+
+//    testCompile 'junit:junit:latest.integration'
+
+    // I know this is awkward - I can't seem to get IDEA to work decently without it...
+
+    compile group: 'junit', name: 'junit', version: '4.12'
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+
+    testCompile 'org.hamcrest:hamcrest-all:latest.integration'
+    testRuntime 'org.slf4j:slf4j-api:1.7.10'
+
+    compile project(':npdata')
+    compile project(':imagewriter')
+
+   // compile 'org.apache.poi:poi:3.15'
+    compile 'net.sf.uadetector:uadetector-core:0.9.22'
+    compile 'net.sf.uadetector:uadetector-resources:2013.04'
+
+    compile group: 'net.sf.json-lib', name: 'json-lib', version: '2.4', classifier: 'jdk15'
+
+//    compile 'javax.mail:mail:1.4.1'
+
+//    compile 'log4j:log4j:1.2.17'
+
+//    compile 'com.google.gwt:gwt-user:2.8.0'
+
+    compile 'com.github.gwtbootstrap:gwt-bootstrap:latest.integration'
+
+    compile 'org.moxieapps.gwt:highcharts:1.7.0'
+
+    // compile group: 'com.google.gwt.google-apis', name: 'gwt-visualization', version: '1.0.2'
+    compile name: 'gwt-visualization'
+    compile name: 'mira'
+
+    compile name: 'pronz_2.11-1.0'
+    compile name: 'hydec_2.11-1.0'
+ //   compile name: 'npdata-1.0'
+    compile name: 'utils_2.11-1.0.0-SNAPSHOT'
+
+    compile group: 'net.sf.json-lib', name: 'json-lib', version: '2.4', classifier: 'jdk15'
+
+    compile group: 'org.apache.poi', name: 'poi', version: '3.15'
+    compile group: 'org.apache.poi', name: 'poi-ooxml', version: '3.15'
+    compile group: 'org.apache.poi', name: 'ooxml-schemas', version: '1.3'
+    //compile group: 'com.', name: 'ooxml-schemas', version: '1.3'
+    compile group: 'org.apache.commons', name: 'commons-math3', version: '3.0'
+    compile group: 'com.google.guava', name: 'guava', version: '20.0'
+    compile group: 'com.google.code.gson', name: 'gson', version: '2.8.0'
+
+//    compile group: 'org.apache.ignite', name: 'ignite-core', version: '1.7.0'
+//    compile group: 'org.mongodb', name: 'mongo-java-driver', version: '3.3.0'
+//    compile 'net.liftweb:lift-json_2.11:latest.integration'
+//    compile 'net.liftweb:lift-json-ext_2.11:latest.integration'
+//    compile 'net.liftweb:lift-mongodb_2.11:latest.integration'
+//    testCompile 'junit:junit:latest.integration'
+//    testCompile 'org.hamcrest:hamcrest-all:latest.integration'
+//    testRuntime 'org.slf4j:slf4j-api:1.7.10'
+
+//    compile name: 'pronz-assembly-1.0'
+
+}
+
+// Add a test dependency only when the full composite project is checked out.
+if (project.rootProject != project) {
+    dependencies {
+        //testCompile project(':domino-shared').sourceSets.test.output
+        testCompile project(path: ':domino-shared', configuration: 'testArtifacts')
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src']
+        }
+        resources {
+            srcDirs = ['src/main/resources']
+        }
+    }
+
+    test {
+        java {
+            srcDirs = ['test']
+        }
+        resources {
+            srcDirs = ['test/resources']
+        }
+    }
+}
+
+gwt {
+    gwtVersion = '2.8.0'
+    modules 'mitll.langtest.LangTest'
+
+    sourceSets {
+        main {
+            java {
+                srcDir 'src'
+            }
+        }
+    }
+
+    logLevel = 'ERROR'
+
+    minHeapSize = "512M";
+    maxHeapSize = "3G";
+
+    superDev {
+        noPrecompile = true
+    }
+
+    // The following is only needed if you don't use the Google Plugin for Eclipse.
+    eclipse {
+        addGwtContainer = false // Default set to true
+    }
+    //Specify the deployment Port
+    // jettyRunWar.httpPort = 8089
+}
+
+war {
+    // from 'war/bin'
+    from ('war/config/netProf') {
+        into 'config/netProf'
+    }
+    from ('war/scoring/bin.linux64') {
+        into 'scoring/bin.linux64'
+    }
+    from ('war/scoring/configurations') {
+        into 'scoring/configurations'
+    }
+    from 'war/amas.css'
+    from 'war/LangTest.css'
+    from 'war/LangTest.html'
+    webXml = file('war/WEB-INF/web.xml')
+
+    from ('src') {
+        include '**/log*'
+        into 'WEB-INF/classes'
+    }
+}
+
+// ***************************** Publishing **************************************
+publishing {
+    publications {
+        ivyJava(IvyPublication) {
+            artifact(war)
+        }
+        mavenJava(MavenPublication) {
+            artifact(war)
+        }
+    }
+}
