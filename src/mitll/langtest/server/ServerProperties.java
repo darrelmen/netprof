@@ -668,7 +668,7 @@ public class ServerProperties {
    * @return
    */
   public boolean doAudioFileExistsCheck() {
-    return getDefaultTrue(CHECK_AUDIO_FILE_EXISTS);
+    return getDefaultFalse(CHECK_AUDIO_FILE_EXISTS);
   }
 
   public void setRTL(boolean isRTL) {
