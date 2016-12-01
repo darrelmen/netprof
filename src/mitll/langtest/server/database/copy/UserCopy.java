@@ -24,7 +24,7 @@ import java.util.Map;
  */
 public class UserCopy {
   private static final Logger logger = LogManager.getLogger(UserCopy.class);
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
   /**
    * What can happen:
@@ -64,7 +64,7 @@ public class UserCopy {
     logger.info("copyUsers h2 importUsers  " + importUsers.size());
     UserToCount userToNumAnswers = oldResultDAO.getUserToNumAnswers();
     Map<Integer, Integer> idToCount = userToNumAnswers.getIdToCount();
-    if (DEBUG) logger.info("id->count " + idToCount.size() + " values " + idToCount.values().size());
+    if (DEBUG) logger.info("copyUsers id->count " + idToCount.size() + " values " + idToCount.values().size());
 
     int collisions = 0;
     int lurker = 0;
@@ -76,7 +76,7 @@ public class UserCopy {
         String passwordHash = toImport.getPasswordHash();
         if (passwordHash == null) passwordHash = "";
 
-        if (DEBUG) logger.info("import " + toImport);
+        if (DEBUG) logger.info("copyUsers import " + toImport);
         User strictUserWithPass = dominoUserDAO.getStrictUserWithPass(importUserID, passwordHash);
 
         if (strictUserWithPass != null) {
@@ -85,7 +85,7 @@ public class UserCopy {
         } else {
 
           if (importUserID.isEmpty() && idToCount.get(importID) != null && idToCount.get(importID) == 0) {
-            logger.info("skipping old user " + toImport + " since they have an empty user name and no recordings");
+            logger.info("copyUsers skipping old user " + toImport + " since they have an empty user name and no recordings");
             lurker++;
           } else {
             User userByID1 = dominoUserDAO.getUserByID(importUserID);
@@ -100,10 +100,10 @@ public class UserCopy {
               }
               oldToNew.put(importID, existingID);
               collisions++;
-              logger.info("user collision to project " + projid + " map " + importID + "->" + existingID +
+              logger.info("copyUsers user collision to project " + projid + " map " + importID + "->" + existingID +
                   " : " + userByID1);
             } else {
-              logger.info("no existing user id '" + importUserID + "'");
+              logger.info("copyUsers no existing user id '" + importUserID + "'");
               added.add(addUser(dominoUserDAO, oldToNew, toImport));
             }
           }
@@ -112,7 +112,7 @@ public class UserCopy {
     }
 
     addUserProjectBinding(projid, slickUserProjectDAO, added);
-    logger.info("after, postgres importUsers " +
+    logger.info("copyUsers after, postgres importUsers " +
         "num = " + dominoUserDAO.getUsers().size() +
         " added " + added.size() +
         " collisions " + collisions +
@@ -134,16 +134,15 @@ public class UserCopy {
     ClientUserDetail user = dominoUserDAO.toClientUserDetail(toImport, false);
     ClientUserDetail addedUser = dominoUserDAO.addAndGet(user, toImport.getPasswordHash(), toImport.getPermissions());
     if (addedUser == null) {
-      logger.error("no error returned from domino.");
-    }
-
-    int add = addedUser.getDocumentDBID();
+      logger.error("addUser no error returned from domino.");
+    } else {
+      int add = addedUser.getDocumentDBID();
 //    logger.info("addUser id  " + add + " for " + user.id() + " equal " + (user == addedUser));
-    //   logger.info("addUser map " + toImport.getID() + " -> " + add);
-    oldToNew.put(toImport.getID(), add);
+      //   logger.info("addUser map " + toImport.getID() + " -> " + add);
+      oldToNew.put(toImport.getID(), add);
+    }
     return addedUser;
   }
-
 
   private void addDefaultUsers(Map<Integer, Integer> oldToNew, DominoUserDAOImpl dominoUserDAO) {
     oldToNew.put(BaseUserDAO.DEFAULT_USER_ID, dominoUserDAO.getDefaultUser());
@@ -151,14 +150,23 @@ public class UserCopy {
     oldToNew.put(BaseUserDAO.DEFAULT_FEMALE_ID, dominoUserDAO.getDefaultFemale());
   }
 
+  /**
+   * @see #copyUsers(DatabaseImpl, int, IResultDAO)
+   * @param projid
+   * @param slickUserProjectDAO
+   * @param added
+   */
   private void addUserProjectBinding(int projid, IUserProjectDAO slickUserProjectDAO, List<ClientUserDetail> added) {
-    logger.info("adding user->project for " + projid);
+    logger.info("addUserProjectBinding adding user->project for " + projid);
     List<SlickUserProject> toAdd = new ArrayList<>();
     Timestamp modified = new Timestamp(System.currentTimeMillis());
     for (ClientUserDetail user : added) {
-      toAdd.add(new SlickUserProject(-1, user.getDocumentDBID(), projid, modified));
+      if (user == null) {
+        logger.warn("skipping invalid user...");
+      } else {
+        toAdd.add(new SlickUserProject(-1, user.getDocumentDBID(), projid, modified));
+      }
     }
     slickUserProjectDAO.addBulk(toAdd);
   }
-
 }

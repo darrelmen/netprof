@@ -58,7 +58,7 @@ public class PostgresTest extends BaseTest {
   private static final Logger logger = LogManager.getLogger(PostgresTest.class);
 
   // set to true to use a local postgres database
-  private static final boolean doLocal = true;
+  private static final boolean doLocal = false;
 
   @Test
   public void testCreate() {
@@ -79,7 +79,7 @@ public class PostgresTest extends BaseTest {
     DBConnection spanish = getConnection("netProf");
     scala.collection.immutable.List<String> listOfTables = spanish.getListOfTables();
     scala.collection.Iterator<String> iterator = listOfTables.iterator();
-    for (;iterator.hasNext();
+    for (; iterator.hasNext();
         ) {
       logger.info("got " + iterator.next());
     }
@@ -110,6 +110,15 @@ public class PostgresTest extends BaseTest {
   public void testCopySerbian() {
     List<Info> toCopy = new ArrayList<>();
     Info serbian = new Info("serbian");
+    serbian.setDev(true);
+    toCopy.add(serbian);
+    testCopy(toCopy);
+  }
+
+  @Test
+  public void testCopyHindi() {
+    List<Info> toCopy = new ArrayList<>();
+    Info serbian = new Info("hindi");
     serbian.setDev(true);
     toCopy.add(serbian);
     testCopy(toCopy);
@@ -347,6 +356,7 @@ public class PostgresTest extends BaseTest {
       this.name = name;
       this.props = props;
       this.displayOrder = displayOrder;
+      this.isDev = isDev;
     }
 
     public String toString() {
@@ -357,8 +367,9 @@ public class PostgresTest extends BaseTest {
       return isDev;
     }
 
-    public void setDev(boolean dev) {
+    public Info setDev(boolean dev) {
       isDev = dev;
+      return this;
     }
   }
 
@@ -597,9 +608,9 @@ public class PostgresTest extends BaseTest {
   public void testListProjects() {
     DatabaseImpl spanish = getDatabaseLight("spanish", false);
     Collection<SlickProject> all = spanish.getProjectDAO().getAll();
-    logger.info("found " +all.size());
+    logger.info("found " + all.size());
 
-    for (SlickProject project:all) logger.info("project"  + project);
+    for (SlickProject project : all) logger.info("project" + project);
 
   }
 
