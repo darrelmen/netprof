@@ -159,11 +159,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }
 
   private SResult<ClientUserDetail> addUserToMongo(ClientUserDetail user, String freeTextPassword) {
-    SResult<ClientUserDetail> clientUserDetailSResult = delegate.addUser(adminUser, user);
+    SResult<ClientUserDetail> clientUserDetailSResult = delegate.addUser(adminUser, user, "");
 
     logger.info("addUserToMongo Got back " + clientUserDetailSResult);
 
-    boolean b = delegate.changePassword(adminUser, user, "", freeTextPassword, false);
+    boolean b = delegate.changePassword(adminUser, user, "", freeTextPassword);
     if (!b) {
       logger.warn("addUserToMongo didn't set password for " +user.getUserId());
     }
