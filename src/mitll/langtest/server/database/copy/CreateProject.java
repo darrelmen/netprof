@@ -26,7 +26,8 @@ class CreateProject {
    * @return
    * @see CopyToPostgres#copyOneConfig
    */
-  int createProjectIfNotExists(DatabaseImpl db, String countryCode, String optName, String course, int displayOrder, boolean isDev) {
+  int createProjectIfNotExists(DatabaseImpl db, String countryCode, String optName, String course, int displayOrder,
+                               boolean isDev) {
     IProjectDAO projectDAO = db.getProjectDAO();
     String oldLanguage = getOldLanguage(db);
     String name = optName != null ? optName : oldLanguage;
