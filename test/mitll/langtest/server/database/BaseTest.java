@@ -74,7 +74,6 @@ public class BaseTest {
                                                  boolean useH2,
                                                  boolean useLocal,
                                                  String optPropsFile) {
-
     logger.info("getDatabaseLight db " + config + " props " + optPropsFile);
 
     String installPath = "war";

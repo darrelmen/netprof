@@ -114,7 +114,7 @@ dependencies {
     compile name: 'pronz_2.11-1.0'
     compile name: 'hydec_2.11-1.0'
  //   compile name: 'npdata-1.0'
-    compile name: 'utils_2.11-1.0.0-snapshot'
+    compile name: 'utils_2.11-1.0.0-SNAPSHOT'
 
     compile group: 'net.sf.json-lib', name: 'json-lib', version: '2.4', classifier: 'jdk15'
 

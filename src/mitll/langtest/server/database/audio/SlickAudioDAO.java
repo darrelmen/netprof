@@ -227,6 +227,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
         s.dnr());
   }
 
+  int c= 0;
   /**
    * @param orig
    * @param oldToNewUser
@@ -242,7 +243,9 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     }
     Integer userid = oldToNewUser.get(orig.getUserid());
     if (userid == null) {
-      logger.error("huh? no user id for " + orig.getUserid() + " for " + orig + " in " + oldToNewUser.size());
+      if (c++ <100) {
+        logger.error("getSlickAudio huh? no user id for " + orig.getUserid() + " for " + orig + " in " + oldToNewUser.size());
+      }
       return null;
     } else {
       long timestamp = orig.getTimestamp();

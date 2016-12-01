@@ -60,8 +60,11 @@ public class LTSFactory {
 
   // known languages
   public enum Language {
-    ARABIC, DARI, EGYPTIAN, ENGLISH, FARSI, FRENCH, GERMAN, JAPANESE, IRAQI, LEVANTINE, KOREAN, MANDARIN, MSA,
-    PASHTO, PORTUGUESE, RUSSIAN, SPANISH, SUDANESE, TAGALOG, URDU
+    ARABIC, DARI, EGYPTIAN, ENGLISH, FARSI, FRENCH, GERMAN, HINDI, JAPANESE, IRAQI, LEVANTINE, KOREAN, MANDARIN, MSA,
+    PASHTO, PORTUGUESE, RUSSIAN, SERBIAN,
+    SORANI,
+    SPANISH,
+    SUDANESE, TAGALOG, TURKISH, URDU
   }
 
   private final LTS unknown = new EmptyLTS();
@@ -90,9 +93,6 @@ public class LTSFactory {
         case ARABIC:
         case MSA:
           ltsForLanguage = new ModernStandardArabicLTS();
-          break;
-        case MANDARIN:
-          ltsForLanguage = unknown;
           break;
         default:
           Class<?> aClass = Class.forName(className);
