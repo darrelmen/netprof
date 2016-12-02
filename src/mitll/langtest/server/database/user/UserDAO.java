@@ -47,7 +47,6 @@ import java.util.*;
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since
  */
 public class UserDAO extends BaseUserDAO implements IUserDAO {
   private static final Logger logger = LogManager.getLogger(UserDAO.class);
@@ -83,6 +82,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    * Somehow on subsequent runs, the ids skip by 30 or so?
    * <p>
    * Uses return generated keys to get the user id
+   *
    * @param age
    * @param gender
    * @param experience
@@ -98,10 +98,10 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    * @param emailH
    * @param email
    * @param device
-   * @return newly inserted user id, or 0 if something goes horribly wrong
-   * @see UserManagement#addUser(User)
    * @param first
    * @param last
+   * @return newly inserted user id, or 0 if something goes horribly wrong
+   * @see UserManagement#addUser(User)
    */
   @Override
   public int addUser(int age, String gender, int experience, String userAgent,
@@ -275,6 +275,19 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     return userWhere;
   }
 
+  /**
+   * Shouldn't call this...
+   *
+   * @param id
+   * @param freeTextPassword
+   * @return
+   * @deprecated
+   */
+  @Override
+  public User getUserFreeTextPassword(String id, String freeTextPassword) {
+    return getUser(id, freeTextPassword);
+  }
+
   @Override
   public User getStrictUserWithPass(String id, String passwordHash) {
     logger.debug(language + " : getUser getting user with id '" + id + "' and pass '" + passwordHash + "'");
@@ -290,6 +303,17 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
         "'";
 
     return getUserWhere(-1, sql);
+  }
+
+  /**
+   * @param id
+   * @param freeTextPassword
+   * @return
+   * @deprecated
+   */
+  @Override
+  public User getStrictUserWithFreeTextPass(String id, String freeTextPassword) {
+    return getStrictUserWithPass(id, freeTextPassword);
   }
 
   /**
@@ -333,7 +357,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
 
     try {
       String sql = "CREATE TABLE IF NOT EXISTS users (" +
-          ID +" " + getIdentity() + ", " +
+          ID + " " + getIdentity() + ", " +
           "age INT, " +
           "gender INT, " +
           "experience INT, " +
@@ -354,7 +378,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
           //getPrimaryKey() +
           "CONSTRAINT pkusers PRIMARY KEY (id))";
 
-  //    logger.info("sql\n"+sql);
+      //    logger.info("sql\n"+sql);
       PreparedStatement statement = connection.prepareStatement(sql);
       statement.execute();
       statement.close();
@@ -456,7 +480,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    */
   @Override
   public User getUserWithEnabledKey(String resetKey) {
-    return getUserWhere(-1, "SELECT * from users where " + ENABLED_REQ_KEY + "='" + resetKey +"'");
+    return getUserWhere(-1, "SELECT * from users where " + ENABLED_REQ_KEY + "='" + resetKey + "'");
   }
 
   /**
@@ -469,7 +493,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     String sql = "SELECT * from users where " + ID + "=" + userid;
     //long then = System.currentTimeMillis();
     Collection<User> users = getUsers(sql);
-   // long now = System.currentTimeMillis();
+    // long now = System.currentTimeMillis();
     //logger.debug("getUserWhere took " +(now-then) + " millis.");
 
     if (users.isEmpty()) {
@@ -564,7 +588,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
           emailH,
           device,
           resetKey,
-        //  "",
+          //  "",
           rs.getTimestamp(TIMESTAMP).getTime());
 
       users.add(newUser);
@@ -596,8 +620,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
               "' is not a permission?");
         }
       }
-    }
-    else {
+    } else {
       logger.info("no perms column???");
     }
     return permissions;
@@ -757,5 +780,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    * @see mitll.langtest.server.mail.EmailHelper#enableCDUser(String, String, String, String)
    */
   @Override
-  public boolean enableUser(int id) {  return changeEnabled(id,true);  }
+  public boolean enableUser(int id) {
+    return changeEnabled(id, true);
+  }
 }

@@ -243,6 +243,29 @@ public abstract class BaseUserDAO extends DAO {
 
   abstract int getIdForUserID(String id);
 
+  /**
+   * @see #addShellUser
+   * @see #addUserAndGetID
+   *
+   * @param age
+   * @param gender
+   * @param experience
+   * @param userAgent
+   * @param trueIP
+   * @param nativeLang
+   * @param dialect
+   * @param userID
+   * @param enabled
+   * @param permissions
+   * @param kind
+   * @param passwordH
+   * @param emailH
+   * @param email
+   * @param device
+   * @param first
+   * @param last
+   * @return
+   */
   abstract int addUser(int age,
                        String gender,
                        int experience,

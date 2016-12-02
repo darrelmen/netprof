@@ -36,7 +36,13 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class SignUpUser implements IsSerializable {
   private String userID;
+  private String freeTextPassword;
+
+  /**
+   * @deprecated
+   */
   private String passwordH;
+
   private String emailH;
   private String email;
   private User.Kind kind;
@@ -51,7 +57,24 @@ public class SignUpUser implements IsSerializable {
   public SignUpUser() {
   }
 
+  /**
+   * @see mitll.langtest.client.user.SignUpForm#gotSignUp
+   * @param userID
+   * @param freeTextPassword
+   * @param passwordH
+   * @param emailH
+   * @param email
+   * @param kind
+   * @param isMale
+   * @param age
+   * @param dialect
+   * @param device
+   * @param ip
+   * @param first
+   * @param last
+   */
   public SignUpUser(String userID,
+                    String freeTextPassword,
                     String passwordH,
                     String emailH,
                     String email,
@@ -62,10 +85,10 @@ public class SignUpUser implements IsSerializable {
                     String device,
                     String ip,
                     String first,
-                    String last
-  ) {
+                    String last) {
     this.userID = userID;
     this.passwordH = passwordH;
+    this.freeTextPassword = freeTextPassword;
     this.emailH = emailH;
     this.email = email;
     this.kind = kind;
@@ -84,6 +107,9 @@ public class SignUpUser implements IsSerializable {
 
   public String getPasswordH() {
     return passwordH;
+  }
+  public String getFreeTextPassword() {
+    return freeTextPassword;
   }
 
   public String getEmailH() {

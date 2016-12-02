@@ -98,6 +98,7 @@ public interface IUserDAO extends IDAO {
    * @return
    */
   User getUser(String id, String passwordHash);
+  User getUserFreeTextPassword(String id, String freeTextPassword);
 
   /**
    * @see mitll.langtest.server.database.copy.CopyToPostgres#copyUsers(DatabaseImpl, int, IResultDAO)
@@ -106,6 +107,7 @@ public interface IUserDAO extends IDAO {
    * @return
    */
   User getStrictUserWithPass(String id, String passwordHash);
+  User getStrictUserWithFreeTextPass(String id, String freeTextPassword);
 
   /**
    * @see mitll.langtest.server.database.copy.CopyToPostgres#copyUsers(DatabaseImpl, int, IResultDAO)
