@@ -32,10 +32,7 @@
 
 package mitll.langtest.client.user;
 
-import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.Fieldset;
-import com.github.gwtbootstrap.client.ui.Form;
-import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
@@ -67,15 +64,26 @@ public class ResetPassword extends UserDialog {
   private static final String SUCCESS = "Success";
   private static final String CHANGE_PASSWORD = "Change Password";
   private static final String CHOOSE_A_NEW_PASSWORD = "Choose a new password";
+
   private final EventRegistration eventRegistration;
   private final KeyPressHelper enterKeyButtonHelper;
 
+  /**
+   * @see
+   * @param props
+   * @param eventRegistration
+   */
   public ResetPassword(PropertyHandler props, EventRegistration eventRegistration) {
     super(props);
     this.eventRegistration = eventRegistration;
     enterKeyButtonHelper = new KeyPressHelper(false);
   }
 
+  /**
+   * @param token
+   * @return
+   * @see mitll.langtest.client.InitialUI#handleResetPass
+   */
   public Panel getResetPassword(final String token) {
     Panel container = new DivWidget();
     container.getElement().setId("ResetPassswordContent");
@@ -109,75 +117,48 @@ public class ResetPassword extends UserDialog {
     Heading w = new Heading(3, CHOOSE_A_NEW_PASSWORD);
     fieldset.add(w);
     w.addStyleName("leftFiveMargin");
-    final BasicDialog.FormField firstPassword =
-        addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, PASSWORD);
-    final BasicDialog.FormField secondPassword =
-        addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, "Confirm " + PASSWORD);
+    final BasicDialog.FormField firstPassword = getPasswordField(fieldset,PASSWORD);
+   // final BasicDialog.FormField secondPassword = ;
+ //   addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, "Confirm " + PASSWORD);
 
     //  firstPassword.getWidget().setTabIndex(0);
     // secondPassword.getWidget().setTabIndex(1);
 
-    getChangePasswordButton(token, fieldset, firstPassword, secondPassword);
+    Button changePasswordButton =
+        getChangePasswordButton(
+            token,
+            firstPassword,
+            getPasswordField(fieldset,"Confirm " + PASSWORD));
+
+    fieldset.add(changePasswordButton);
+
     right.add(rightDiv);
     setFocusOn(firstPassword.getWidget());
     return container;
   }
 
-  private void getChangePasswordButton(final String token, Fieldset fieldset, final BasicDialog.FormField firstPassword, final BasicDialog.FormField secondPassword) {
+  private FormField getPasswordField(Fieldset fieldset, String hint) {
+    return addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, hint);
+  }
+
+  /**
+   * @param token
+   * @param firstPassword  what we use to reset the password
+   * @param secondPassword just so we can make sure the user didn't make a typo
+   * @see
+   */
+  private Button getChangePasswordButton(final String token,
+                                         final BasicDialog.FormField firstPassword,
+                                         final BasicDialog.FormField secondPassword) {
     final Button changePassword = new Button(CHANGE_PASSWORD);
     // changePassword.setTabIndex(3);
     changePassword.getElement().setId("changePassword");
     eventRegistration.register(changePassword);
     changePassword.addStyleName("floatRight");
-    fieldset.add(changePassword);
     changePassword.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        String first = firstPassword.box.getText();
-        String second = secondPassword.box.getText();
-        if (first.isEmpty()) {
-          markErrorBlur(firstPassword, PLEASE_ENTER_A_PASSWORD);
-        } else if (first.length() < MIN_PASSWORD) {
-          markErrorBlur(firstPassword, PLEASE_ENTER_A_LONGER_PASSWORD);
-        } else if (second.isEmpty()) {
-          markErrorBlur(secondPassword, PLEASE_ENTER_A_PASSWORD);
-        } else if (second.length() < MIN_PASSWORD) {
-          markErrorBlur(secondPassword, PLEASE_ENTER_A_LONGER_PASSWORD);
-        } else if (!second.equals(first)) {
-          markErrorBlur(secondPassword, PLEASE_ENTER_THE_SAME_PASSWORD);
-
-        } else {
-          changePassword.setEnabled(false);
-          enterKeyButtonHelper.removeKeyHandler();
-          service.changePFor(token, Md5Hash.getHash(first), new AsyncCallback<Boolean>() {
-            @Override
-            public void onFailure(Throwable caught) {
-              changePassword.setEnabled(true);
-              markErrorBlur(changePassword, "Can't communicate with server - check network connection.");
-            }
-
-            @Override
-            public void onSuccess(Boolean result) {
-              if (!result) {
-                markErrorBlur(changePassword, "Password has already been changed?");
-              } else {
-                markErrorBlur(changePassword, SUCCESS, PASSWORD_HAS_BEEN_CHANGED, Placement.LEFT);
-                Timer t = new Timer() {
-                  @Override
-                  public void run() {
-
-                    String newURL = trimURL(Window.Location.getHref());
-                    //  System.out.println("url now " +newURL);
-                    Window.Location.replace(newURL);
-                    Window.Location.reload();
-
-                  }
-                };
-                t.schedule(3000);
-              }
-            }
-          });
-        }
+        onChangePassword(firstPassword, secondPassword, changePassword, token);
       }
     });
     enterKeyButtonHelper.addKeyHandler(changePassword);
@@ -185,5 +166,55 @@ public class ResetPassword extends UserDialog {
     changePassword.addStyleName("rightFiveMargin");
     changePassword.addStyleName("leftFiveMargin");
     changePassword.setType(ButtonType.PRIMARY);
+
+    return changePassword;
+  }
+
+  private void onChangePassword(FormField firstPassword, FormField secondPassword, final Button changePassword, String token) {
+    String first = firstPassword.box.getText();
+    String second = secondPassword.box.getText();
+    if (first.isEmpty()) {
+      markErrorBlur(firstPassword, PLEASE_ENTER_A_PASSWORD);
+    } else if (first.length() < MIN_PASSWORD) {
+      markErrorBlur(firstPassword, PLEASE_ENTER_A_LONGER_PASSWORD);
+    } else if (second.isEmpty()) {
+      markErrorBlur(secondPassword, PLEASE_ENTER_A_PASSWORD);
+    } else if (second.length() < MIN_PASSWORD) {
+      markErrorBlur(secondPassword, PLEASE_ENTER_A_LONGER_PASSWORD);
+    } else if (!second.equals(first)) {
+      markErrorBlur(secondPassword, PLEASE_ENTER_THE_SAME_PASSWORD);
+
+    } else {
+      changePassword.setEnabled(false);
+      enterKeyButtonHelper.removeKeyHandler();
+      String hash = Md5Hash.getHash(first);
+      service.changePFor(token, hash, new AsyncCallback<Boolean>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          changePassword.setEnabled(true);
+          markErrorBlur(changePassword, "Can't communicate with server - check network connection.");
+        }
+
+        @Override
+        public void onSuccess(Boolean result) {
+          if (!result) {
+            markErrorBlur(changePassword, "Password has already been changed?");
+          } else {
+            markErrorBlur(changePassword, SUCCESS, PASSWORD_HAS_BEEN_CHANGED, Placement.LEFT);
+            Timer t = new Timer() {
+              @Override
+              public void run() {
+                String newURL = trimURL(Window.Location.getHref());
+                //  System.out.println("url now " +newURL);
+                Window.Location.replace(newURL);
+                Window.Location.reload();
+
+              }
+            };
+            t.schedule(3000);
+          }
+        }
+      });
+    }
   }
 }

@@ -212,6 +212,8 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   /**
    * Send confirmation to your email too.
    *
+   * TODO : content developers are handled differently now...
+   *
    * @param url
    * @return null if existing user
    * @paramx isCD
@@ -221,16 +223,16 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   public User addUser(SignUpUser user, String url) {
     UserManagement userManagement = db.getUserManagement();
     User newUser = userManagement.addUser(getThreadLocalRequest(), user);
-    MailSupport mailSupport = getMailSupport();
+  //  MailSupport mailSupport = getMailSupport();
 
     String userID = user.getUserID();
-    String email = user.getEmail();
-    String first = user.getFirst();
+  //  String email = user.getEmail();
+  //  String first = user.getFirst();
 
     if (newUser != null/* && !newUser.isEnabled()*/) { // newUser = null means existing newUser.
-      logger.debug("newUser " + userID + "/" + newUser + " wishes to be a content developer. Asking for approval.");
+     // logger.debug("newUser " + userID + "/" + newUser + " wishes to be a content developer. Asking for approval.");
       //getEmailHelper().addContentDeveloper(url, email, newUser, mailSupport, getProject().getLanguage());
-      getEmailHelper().sendConfirmationEmail(email, userID, first, mailSupport);
+     // getEmailHelper().sendConfirmationEmail(email, userID, first, mailSupport);
     } else /*if (newUser == null)*/ {
       logger.debug("no newUser found for id " + userID);
     } /*else {
@@ -312,13 +314,24 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
 
   /**
    * @see mitll.langtest.client.user.ResetPassword#getChangePasswordButton
-   * @param token
+   * @param userid
    * @param passwordH
    * @return
    */
   @Override
-  public boolean changePFor(String token, String passwordH) {
-    User userWhereResetKey = db.getUserDAO().getUserWithResetKey(token);
+  public boolean changePFor(String userid, String passwordH) {
+
+    User userByID = db.getUserDAO().getUserByID(userid);
+
+    boolean b = db.getUserDAO().changePassword(userByID.getID(), passwordH);
+
+    if (!b) {
+      logger.error("changePFor : couldn't update user password for user " + userByID);
+    }
+
+    return b;
+
+/*    User userWhereResetKey = db.getUserDAO().getUserWithResetKey(token);
     if (userWhereResetKey != null) {
       db.getUserDAO().clearKey(userWhereResetKey.getID(), true);
 
@@ -331,7 +344,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     } else {
 
       return false;
-    }
+    }*/
   }
 
   /**

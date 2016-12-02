@@ -44,6 +44,8 @@ import org.apache.logging.log4j.Logger;
 import java.util.Collections;
 import java.util.List;
 
+import static mitll.langtest.server.rest.RestUserManagement.RESET_PASSWORD_FROM_EMAIL;
+
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -60,7 +62,7 @@ public class EmailHelper {
   private static final String CLOSING = "Regards, Administrator";
   @Deprecated  private static final String GORDON = "Gordon";
 
-  private static final String RP = "rp";
+  private static final String RP = RESET_PASSWORD_FROM_EMAIL;//"rp";
   private static final String CD = "cd";
   private static final String ER = "er";
 
@@ -74,6 +76,7 @@ public class EmailHelper {
   private static final String USER_CONF_FIRST_LINE = "You are now a user of NetProF.<br/>";
   private static final String USER_CONF_SECOND_LINE = "If you have any questions, see the user manual or email " +
       HELP_EMAIL + ".";
+  public static final String INVALID_PASSWORD_RESET = "Invalid password reset";
 
   private final IUserDAO userDAO;
   private final MailSupport mailSupport;
@@ -147,7 +150,7 @@ public class EmailHelper {
    * @see mitll.langtest.server.services.UserServiceImpl#resetPassword
    */
   public boolean resetPassword(String user, String email, String url) {
-    logger.debug(" resetPassword for " + user + " url " + url);
+    logger.debug("resetPassword for " + user + " url " + url);
 
     user = user.trim();
     email = email.trim();
@@ -174,7 +177,8 @@ public class EmailHelper {
       if (!url.startsWith("https")) {
         url = url.replaceAll("http", "https");
       }
-      logger.debug("url is " + url);
+      logger.debug("resetPassword url is " + url);
+
       sendEmail(url + "?" + RP + "=" + hash,
           email,
           PASSWORD_RESET,
@@ -184,12 +188,17 @@ public class EmailHelper {
 
       return true;
     } else {
-      logger.error(" couldn't find user " + user + " and email " + email + " " + hash1);
+      logger.error("resetPassword couldn't find user " + user + " and email " + email + " " + hash1);
+
       String message = "User " + user + " with email " + email + " tried to reset password - but they're not valid.";
       String prefixedMessage = "for " + pathHelper.getInstallPath() + " got " + message;
+
       logger.debug(prefixedMessage);
-      mailSupport.email(serverProperties.getEmailAddress(),
-          "Invalid password reset", prefixedMessage);
+
+      mailSupport.email(
+          serverProperties.getEmailAddress(),
+          INVALID_PASSWORD_RESET,
+          prefixedMessage);
       return false;
     }
   }

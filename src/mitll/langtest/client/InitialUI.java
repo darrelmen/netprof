@@ -676,8 +676,10 @@ public class InitialUI implements UILifecycle {
     banner.setCogVisible(false);
   }
 
-  private void handleResetPass(final Container verticalContainer, final Panel firstRow,
-                               final EventRegistration eventRegistration, final String resetPassToken) {
+  private void handleResetPass(final Container verticalContainer,
+                               final Panel firstRow,
+                               final EventRegistration eventRegistration,
+                               final String resetPassToken) {
     //logger.info("showLogin token '" + resetPassToken + "' for password reset");
     userService.getUserIDForToken(resetPassToken, new AsyncCallback<Long>() {
       @Override
