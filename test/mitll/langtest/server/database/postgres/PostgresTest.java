@@ -308,28 +308,32 @@ public class PostgresTest extends BaseTest {
     return new Info("english");
   }
 
-  private void testCopy(List<Info> infos) {
+  private void testCopy(List<Info> infos)  {
     CopyToPostgres cp = new CopyToPostgres();
-    for (Info config : infos) {
-      String cc = cp.getCC(config.language);
-      long then = System.currentTimeMillis();
-      logger.info("\n\n\n-------- STARTED  copy " + config + " " + cc);
+    try {
+      for (Info config : infos) {
+        String cc = cp.getCC(config.language);
+        long then = System.currentTimeMillis();
+        logger.info("\n\n\n-------- STARTED  copy " + config + " " + cc);
 
-      //  DatabaseImpl databaseLight = getDatabaseLight(config.language, true, "hydra-dev", "netprof", "npadmin", config.props);
-      DatabaseImpl databaseLight = getDatabaseLight(config.language, true, doLocal, config.props);
+        //  DatabaseImpl databaseLight = getDatabaseLight(config.language, true, "hydra-dev", "netprof", "npadmin", config.props);
+        DatabaseImpl databaseLight = getDatabaseLight(config.language, true, doLocal, config.props);
 
-      logger.info("\n\n\n-------- Got  databaseLight " + databaseLight);
+        logger.info("\n\n\n-------- Got  databaseLight " + databaseLight);
 
-//      SectionHelper<CommonExercise> sectionHelper = databaseLight.getSectionHelper();
-//      sectionHelper.report();
+  //      SectionHelper<CommonExercise> sectionHelper = databaseLight.getSectionHelper();
+  //      sectionHelper.report();
 
-      cp.copyOneConfig(databaseLight, cc, config.name, config.displayOrder, config.isDev());
-      databaseLight.destroy();
+        cp.copyOneConfig(databaseLight, cc, config.name, config.displayOrder, config.isDev());
+        databaseLight.destroy();
 
 
-      long now = System.currentTimeMillis();
-      logger.info("\n\n\n-------- FINISHED copy " + config + " " + cc + " in " + ((now - then) / 1000) + " seconds");
-      log();
+        long now = System.currentTimeMillis();
+        logger.info("\n\n\n-------- FINISHED copy " + config + " " + cc + " in " + ((now - then) / 1000) + " seconds");
+        log();
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
     }
   }
 
