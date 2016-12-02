@@ -47,7 +47,7 @@ public class UserCopy {
    * @param projid
    * @see CopyToPostgres#copyOneConfig
    */
-  Map<Integer, Integer> copyUsers(DatabaseImpl db, int projid, IResultDAO oldResultDAO) {
+  Map<Integer, Integer> copyUsers(DatabaseImpl db, int projid, IResultDAO oldResultDAO) throws Exception {
 //    SlickUserDAOImpl dominoUserDAO = (SlickUserDAOImpl) db.getUserDAO();
     DominoUserDAOImpl dominoUserDAO = (DominoUserDAOImpl) db.getUserDAO();
 
@@ -95,8 +95,11 @@ public class UserCopy {
               // User "adam" already exists with a different password - what to do?
               // void current password! Force them to set it again when they log in again
               int existingID = userByID1.getID();
-              if (!userByID1.getPasswordHash().isEmpty()) {
-                dominoUserDAO.changePassword(existingID, "");
+              String passwordHash1 = userByID1.getPasswordHash();
+              if (!passwordHash1.isEmpty()) {
+                logger.info("Found existing user " + existingID + " : " + userByID1.getUserID() + " with password hash " + passwordHash1);
+               //dominoUserDAO.changePassword(existingID, "");
+                dominoUserDAO.forgetPassword(existingID);
               }
               oldToNew.put(importID, existingID);
               collisions++;
@@ -129,12 +132,13 @@ public class UserCopy {
    */
   private ClientUserDetail addUser(DominoUserDAOImpl dominoUserDAO,
                                    Map<Integer, Integer> oldToNew,
-                                   User toImport) {
+                                   User toImport) throws Exception {
 //    logger.info("addUser " + toImport + " with " + toImport.getPermissions());
     ClientUserDetail user = dominoUserDAO.toClientUserDetail(toImport, false);
     ClientUserDetail addedUser = dominoUserDAO.addAndGet(user, toImport.getPasswordHash(), toImport.getPermissions());
     if (addedUser == null) {
       logger.error("addUser no error returned from domino.");
+      throw new Exception("couldn't import " + toImport);
     } else {
       int add = addedUser.getDocumentDBID();
 //    logger.info("addUser id  " + add + " for " + user.id() + " equal " + (user == addedUser));

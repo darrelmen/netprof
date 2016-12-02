@@ -88,7 +88,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param inTest
    * @see #main(String[])
    */
-  private void copyOneConfigCommand(String config, boolean inTest) {
+  private void copyOneConfigCommand(String config, boolean inTest) throws Exception {
     DatabaseImpl databaseLight = getDatabaseLight(config, inTest);
     new CopyToPostgres().copyOneConfig(databaseLight, getCC(config), null, 0, false);
     databaseLight.destroy();
@@ -207,7 +207,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param isDev
    * @see #copyOneConfig
    */
-  public void copyOneConfig(DatabaseImpl db, String cc, String optName, int displayOrder, boolean isDev) {
+  public void copyOneConfig(DatabaseImpl db, String cc, String optName, int displayOrder, boolean isDev) throws Exception {
     int projectID = createProjectIfNotExists(db, cc, optName, displayOrder, isDev);  // TODO : course?
 
     logger.info("copyOneConfig project is " + projectID);
@@ -861,7 +861,11 @@ public class CopyToPostgres<T extends CommonShell> {
       copyToPostgres.testDrop(config, inTest);
     } else if (action.equals("copy")) {
       logger.info("copying " + config);
-      copyToPostgres.copyOneConfigCommand(config, inTest);
+      try {
+        copyToPostgres.copyOneConfigCommand(config, inTest);
+      } catch (Exception e) {
+        logger.error("couldn't copy config " + config,e);
+      }
     }
   }
 }
