@@ -569,19 +569,19 @@ public class SignUpForm extends UserDialog implements SignUp {
    * When the form is valid, make a new user or update an existing one.
    *
    * @param user
-   * @param password
+   * @param freeTextPassword
    * @param email
    * @param kind
    * @see #getSignUpButton(com.github.gwtbootstrap.client.ui.base.TextBoxBase, com.github.gwtbootstrap.client.ui.base.TextBoxBase)
    */
-  protected void gotSignUp(final String user, String password, String email, User.Kind kind) {
+  protected void gotSignUp(final String user, String freeTextPassword, String email, User.Kind kind) {
     signUp.setEnabled(false);
 
-    String passH  = Md5Hash.getHash(password);
+    String passH  = Md5Hash.getHash(freeTextPassword);
     String emailH = Md5Hash.getHash(email);
     boolean isCD = askForDemographic(kind);
 
-    SignUpUser newUser = new SignUpUser(user, passH, emailH, email, kind,
+    SignUpUser newUser = new SignUpUser(user, freeTextPassword, passH, emailH, email, kind,
 
         isMale(isCD),  // don't really know the gender, so guess male...?
         getAge(isCD),

@@ -75,6 +75,7 @@ public class RestUserManagement {
   private static final String EXISTING_USER_NAME = "ExistingUserName";
   private static final String USER = "user";
   private static final String PASSWORD_H = "passwordH";
+  private static final String FREE_TEXT_PASSWORD = "freeTextPassword";
 
   /**
    * @see mitll.langtest.server.database.user.UserManagement#userExists
@@ -245,9 +246,9 @@ public class RestUserManagement {
   }
 
   /**
-   * @see #doGet(HttpServletRequest, HttpServletResponse, String, JSONObject)
    * @param token
    * @return
+   * @see #doGet(HttpServletRequest, HttpServletResponse, String, JSONObject)
    */
   private long getUserIDForToken(String token) {
     User user = db.getUserDAO().getUserWithResetKey(token);
@@ -332,10 +333,11 @@ public class RestUserManagement {
 
   /**
    * TODO : remove duplicate code - here and
-   * @see UserServiceImpl#changePFor
+   *
    * @param token
    * @param passwordH
    * @return
+   * @see UserServiceImpl#changePFor
    */
   private boolean changePFor(String token, String passwordH) {
     User userWhereResetKey = db.getUserDAO().getUserWithResetKey(token);
@@ -379,6 +381,11 @@ public class RestUserManagement {
   public void addUser(HttpServletRequest request, String requestType, String deviceType, String device, JSONObject jsonObject) {
     String user = request.getHeader(USER);
     String passwordH = request.getHeader(PASSWORD_H);
+    String freeTextPassword = request.getHeader(FREE_TEXT_PASSWORD);
+
+    if (freeTextPassword == null) {
+      freeTextPassword = passwordH;
+    }
 
     // first check if user exists already with this password -- if so go ahead and log them in.
     User exactMatch = db.getUserDAO().getStrictUserWithPass(user, passwordH);
@@ -407,7 +414,7 @@ public class RestUserManagement {
           try {
             int age1 = Integer.parseInt(age);
             boolean male = gender.equalsIgnoreCase("male");
-            SignUpUser user2 = new SignUpUser(user, passwordH, emailH, email, User.Kind.CONTENT_DEVELOPER, male, age1, dialect, deviceType, device, "", "");
+            SignUpUser user2 = new SignUpUser(user, freeTextPassword, passwordH, emailH, email, User.Kind.CONTENT_DEVELOPER, male, age1, dialect, deviceType, device, "", "");
 //            user1 = getUserManagement().addUser(user, passwordH, emailH, email, deviceType, device,
 //                User.Kind.CONTENT_DEVELOPER, male, age1, dialect);
             user1 = getUserManagement().addUser(user2);
@@ -417,7 +424,7 @@ public class RestUserManagement {
             jsonObject.put(ERROR, "bad age");
           }
         } else {
-          SignUpUser user2 = new SignUpUser(user, passwordH, emailH, email, User.Kind.CONTENT_DEVELOPER, true, 89, dialect, deviceType, device, "", "");
+          SignUpUser user2 = new SignUpUser(user, freeTextPassword, passwordH, emailH, email, User.Kind.CONTENT_DEVELOPER, true, 89, dialect, deviceType, device, "", "");
           user1 = getUserManagement().addUser(user2);
         }
 

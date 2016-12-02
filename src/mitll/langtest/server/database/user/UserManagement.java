@@ -84,7 +84,6 @@ public class UserManagement {
     User user1 = userDAO.addUser(user);
 
     if (user1 != null) {
-
       ifTeacherAddPermissions(user1);
     }
 

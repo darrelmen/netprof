@@ -134,7 +134,7 @@ class EditUserForm extends SignUpForm {
     } else return true;
   }
 
-  protected void gotSignUp(final String user, String password, String email, User.Kind kind) {
+  protected void gotSignUp(final String user, String freeTextPassword, String email, User.Kind kind) {
     signUp.setEnabled(false);
 
     User updated = new User(toEdit);
