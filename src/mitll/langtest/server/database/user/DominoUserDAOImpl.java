@@ -44,7 +44,9 @@ import mitll.hlt.domino.shared.model.user.*;
 import mitll.hlt.json.JSONSerializer;
 import mitll.langtest.client.user.Md5Hash;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.analysis.Analysis;
+import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
@@ -412,9 +414,18 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
   @Override
   public User getUserFreeTextPassword(String id, String freeTextPassword) {
-    return getUser(id,freeTextPassword);
+    logger.error("confirm this is the right thing\n\n\n ");
+    return getUser(id, freeTextPassword);
   }
 
+  /**
+   * TODO : don't use password hash - use free text instead
+   *
+   * @see mitll.langtest.server.database.copy.UserCopy#copyUsers(DatabaseImpl, int, IResultDAO)
+   * @param id
+   * @param passwordHash
+   * @return
+   */
   @Override
   public User getStrictUserWithPass(String id, String passwordHash) {
     User user = getUser(id, "");
@@ -424,6 +435,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       boolean magicMatch = passwordHash.equals(adminHash);
 
       // TODO : put this back
+      // TODO : put this back
+      // TODO : put this back
+
       if (true) {//netProfDelegate.isPasswordMatch(user.getID(), passwordHash) || magicMatch) {
         boolean isadmin = database.getServerProps().getAdmins().contains(user.getUserID());
         user.setAdmin(isadmin);
@@ -438,7 +452,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
   @Override
   public User getStrictUserWithFreeTextPass(String id, String freeTextPassword) {
-    return null;
+    logger.error("2 confirm this is the right thing\n\n\n ");
+    return getStrictUserWithPass(id, freeTextPassword);
   }
 
   /**
@@ -846,6 +861,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @param resetKey
    * @param key
    * @return
+   *
    * @see mitll.langtest.server.mail.EmailHelper#resetPassword(String, String, String)
    */
   @Override

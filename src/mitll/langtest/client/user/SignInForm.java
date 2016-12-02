@@ -56,11 +56,18 @@ import java.util.logging.Logger;
 public class SignInForm extends UserDialog implements SignIn {
   private final Logger logger = Logger.getLogger("SignInForm");
 
+  /**
+   * @see #gotGoodPassword(User, String)
+   * @see #gotLogin(String, String, boolean)
+   */
   private static final String DEACTIVATED = "I'm sorry, this account has been deactivated.";
-
   private static final String TROUBLE_CONNECTING_TO_SERVER = "Trouble connecting to server.";
   private static final String NO_USER_FOUND = "No userField found - have you signed up?";
 
+  /**
+   * @deprecated dude get rid of this
+   * @see #gotBadPassword(User, String)
+   */
   private static final String MAGIC_PASS = Md5Hash.getHash("adm!n");
 
   private static final int MIN_LENGTH_USER_ID = 4;
@@ -74,7 +81,7 @@ public class SignInForm extends UserDialog implements SignIn {
   private static final String PLEASE_ENTER_A_LONGER_USER_ID = "Please enter a longer userField id.";
   // private static final String PLEASE_WAIT = "Please wait";
   private static final String FORGOT_PASSWORD = "Forgot password?";
-  private static final String ENTER_A_USER_NAME = "Enter a userField name.";
+  private static final String ENTER_A_USER_NAME = "Enter a user name.";
   private static final String CHECK_EMAIL = "Check Email";
   private static final String PLEASE_CHECK_YOUR_EMAIL = "Please check your email";
   private static final String ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD = "Enter your email to reset your password.";
@@ -424,57 +431,67 @@ public class SignInForm extends UserDialog implements SignIn {
         final TextBox emailEntry = new TextBox();
 
         resetEmailPopup = new DecoratedPopupPanel(true);
+
         sendEmail = new Button(SEND);
         sendEmail.setType(ButtonType.PRIMARY);
         sendEmail.addStyleName("leftTenMargin");
         sendEmail.addClickHandler(new ClickHandler() {
           @Override
           public void onClick(ClickEvent event) {
-            String text = emailEntry.getText();
-            if (!isValidEmail(text)) {
-       /*       System.out.println("email is '" + text+ "' ");*/
-              markErrorBlur(emailEntry, PLEASE_CHECK, VALID_EMAIL, Placement.TOP);
-              return;
-            }
-
-            sendEmail.setEnabled(false);
-            service.resetPassword(userField.box.getText(), text, Window.Location.getHref(), new AsyncCallback<Boolean>() {
-              @Override
-              public void onFailure(Throwable caught) {
-                sendEmail.setEnabled(true);
-              }
-
-              @Override
-              public void onSuccess(Boolean result) {
-                String heading = result ? CHECK_EMAIL : "Unknown email";
-                String message = result ? PLEASE_CHECK_YOUR_EMAIL : userField.box.getText() + " doesn't have that email. Check for a typo?";
-                setupPopover(sendEmail, heading, message, Placement.LEFT, EMAIL_POPUP_DELAY, new MyPopover(false) {
-                  boolean isFirst = true;
-
-                  @Override
-                  public void hide() {
-                    super.hide();
-                    if (isFirst) {
-                      isFirst = false;
-                    } else {
-                      resetEmailPopup.hide(); // TODO : ugly - somehow hide is called twice
-                    }
-                    //System.out.println("got hide !" + new Date()
-                    //);
-                  }
-                }, false);
-              }
-            });
+            onSendReset(emailEntry);
           }
         });
         eventRegistration.register(sendEmail, "N/A", "reset password");
 
         makePopup(resetEmailPopup, emailEntry, sendEmail, ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD);
         resetEmailPopup.showRelativeTo(forgotPassword);
+
         setFocusOn(emailEntry);
       }
     });
     return forgotPassword;
+  }
+
+  /**
+   * So - two cases - old legacy users have no email, new ones do.
+   * Potentially we could skip asking users for their email...?
+   * @param emailEntry
+   */
+  private void onSendReset(TextBox emailEntry) {
+    String userEmail = emailEntry.getText();
+    if (!isValidEmail(userEmail)) {
+      markErrorBlur(emailEntry, PLEASE_CHECK, VALID_EMAIL, Placement.TOP);
+      return;
+    }
+
+    sendEmail.setEnabled(false);
+    service.resetPassword(userField.box.getText(), userEmail, Window.Location.getHref(), new AsyncCallback<Boolean>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        sendEmail.setEnabled(true);
+      }
+
+      @Override
+      public void onSuccess(Boolean result) {
+        String heading = result ? CHECK_EMAIL : "Unknown email";
+        String message = result ? PLEASE_CHECK_YOUR_EMAIL : userField.box.getText() + " doesn't have that email. Check for a typo?";
+        setupPopover(sendEmail, heading, message, Placement.LEFT, EMAIL_POPUP_DELAY, new MyPopover(false) {
+          boolean isFirst = true;
+
+          @Override
+          public void hide() {
+            super.hide();
+            if (isFirst) {
+              isFirst = false;
+            } else {
+              resetEmailPopup.hide(); // TODO : ugly - somehow hide is called twice
+            }
+            //System.out.println("got hide !" + new Date()
+            //);
+          }
+        }, false);
+      }
+    });
   }
 
   /**

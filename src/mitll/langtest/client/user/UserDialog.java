@@ -153,8 +153,8 @@ abstract class UserDialog extends BasicDialog {
    * @param commentEntryText
    * @param okButton
    * @param prompt
-   * @see #getForgotPassword
-   * @see #getForgotUser
+   * @see SignInForm#getForgotPassword
+   * @see UserPassLogin#getForgotUser
    */
    void makePopup(Panel commentPopup, Widget commentEntryText, Widget okButton, String prompt) {
     Panel vp = new VerticalPanel();
