@@ -45,6 +45,7 @@ import mitll.langtest.shared.user.User;
 import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -63,6 +64,10 @@ public class RestUserManagement {
 
   private static final String HAS_USER = "hasUser";
   private static final String FORGOT_USERNAME = "forgotUsername";
+
+  /**
+   * @see #doGet(HttpServletRequest, HttpServletResponse, String, JSONObject)
+   */
   private static final String RESET_PASS = "resetPassword";
   private static final String SET_PASSWORD = "setPassword";
 
@@ -103,6 +108,13 @@ public class RestUserManagement {
   private static final String DIALECT = "dialect";
   private static final String KIND = "kind";
 
+  /**
+   * @see #doGet(HttpServletRequest, HttpServletResponse, String, JSONObject)
+   * @see EmailHelper#resetPassword
+   */
+  public static final String RESET_PASSWORD_FROM_EMAIL = "rp";
+  public static final String USERS = "users";
+
   private DatabaseImpl db;
   private ServerProperties serverProps;
   protected String configDir;
@@ -117,6 +129,8 @@ public class RestUserManagement {
   }
 
   /**
+   *
+   * Accepts queries - hasUser, forgotUsername, resetPassword, rp, setPassword
    * @param request
    * @param response
    * @param queryString
@@ -126,7 +140,7 @@ public class RestUserManagement {
    */
   public boolean doGet(HttpServletRequest request, HttpServletResponse response, String queryString, JSONObject toReturn) {
     if (queryString.startsWith(HAS_USER)) {
-      String[] split1 = queryString.split("&");
+      String[] split1 = getParams(queryString);
       if (split1.length != 2) {
         toReturn.put(ERROR, EXPECTING_TWO_QUERY_PARAMETERS);
       } else {
@@ -134,37 +148,37 @@ public class RestUserManagement {
       }
       return true;
     } else if (queryString.startsWith(FORGOT_USERNAME)) {
-      String[] split1 = queryString.split("&");
+      String[] split1 = getParams(queryString);
       if (split1.length != 1) {
         toReturn.put(ERROR, EXPECTING_ONE_QUERY_PARAMETER);
       } else {
         String first = split1[0];
-        String emailFromDevice = first.split("=")[1];
+        String emailFromDevice = getArg(first);
         boolean valid = forgotUsername(emailFromDevice);
         toReturn.put(VALID, valid);
       }
       return true;
     } else if (queryString.startsWith(RESET_PASS)) {
-      String[] split1 = queryString.split("&");
+      String[] split1 = getParams(queryString);
       if (split1.length != 2) {
         toReturn.put(ERROR, EXPECTING_TWO_QUERY_PARAMETERS);
       } else {
         String first = split1[0];
-        String user = first.split("=")[1];
+        String user = getArg(first);
 
         String second = split1[1];
-        String emailFromDevice = second.split("=")[1];
+        String emailFromDevice = getArg(second);//second.split("=")[1];
         String token = resetPassword(user, emailFromDevice, request.getRequestURL().toString());
         toReturn.put(TOKEN, token);
       }
       return true;
-    } else if (queryString.startsWith("rp")) {
-      String[] split1 = queryString.split("&");
+    } else if (queryString.startsWith(RESET_PASSWORD_FROM_EMAIL)) {
+      String[] split1 = getParams(queryString);
       if (split1.length != 1) {
         toReturn.put(ERROR, EXPECTING_ONE_QUERY_PARAMETER);
       } else {
         String first = split1[0];
-        String token = first.split("=")[1];
+        String token = getArg(first);
 
         // OK the real person clicked on their email link
         response.setContentType("text/html");
@@ -176,23 +190,32 @@ public class RestUserManagement {
       }
       return true;
     } else if (queryString.startsWith(SET_PASSWORD)) {
-      String[] split1 = queryString.split("&");
+      String[] split1 = getParams(queryString);
       if (split1.length != 2) {
         toReturn.put(ERROR, EXPECTING_TWO_QUERY_PARAMETERS);
       } else {
         String first = split1[0];
-        String token = first.split("=")[1];
+        String token = getArg(first);
 
         String second = split1[1];
-        String passwordH = second.split("=")[1];
+        String passwordH = getArg(second);
         toReturn.put(VALID, changePFor(token, passwordH));
       }
       return true;
-    } else if (queryString.equals("users")) {
-      toReturn.put("users", db.usersToJSON());
+    } else if (queryString.equals(USERS)) {
+      toReturn.put(USERS, db.usersToJSON());
       return true;
     }
     return false;
+  }
+
+  @NotNull
+  private String[] getParams(String queryString) {
+    return queryString.split("&");
+  }
+
+  private String getArg(String first) {
+    return first.split("=")[1];
   }
 
   private void reply(HttpServletResponse response, String x) {
@@ -316,7 +339,7 @@ public class RestUserManagement {
   }
 
   private String resetPassword(String user, String email, String requestURL) {
-    logger.debug(" resetPassword for " + user);
+    logger.warn("resetPassword for " + user);
     String emailH = Md5Hash.getHash(email);
     Integer validUserAndEmail = db.getUserDAO().getIDForUserAndEmail(user, emailH);
 
@@ -332,28 +355,42 @@ public class RestUserManagement {
   }
 
   /**
-   * TODO : remove duplicate code - here and
+   * TODO : remove duplicate code - here and in UserService
    *
-   * @param token
+   * Password reset used to have two steps, so userid here was a token...
+   *
+   * @param userid NOTE - this used to be a token -
    * @param passwordH
    * @return
    * @see UserServiceImpl#changePFor
+   * @see #doGet(HttpServletRequest, HttpServletResponse, String, JSONObject)
    */
-  private boolean changePFor(String token, String passwordH) {
-    User userWhereResetKey = db.getUserDAO().getUserWithResetKey(token);
-    if (userWhereResetKey != null) {
-      logger.debug("clearing key for " + userWhereResetKey);
-      db.getUserDAO().clearKey(userWhereResetKey.getID(), true);
+  private boolean changePFor(String userid, String passwordH) {
+    User userByID = db.getUserDAO().getUserByID(userid);
 
-      if (!db.getUserDAO().changePassword(userWhereResetKey.getID(), passwordH)) {
-        logger.error("couldn't update user password for user " + userWhereResetKey);
+    boolean b = db.getUserDAO().changePassword(userByID.getID(), passwordH);
+
+    if (!b) {
+      logger.error("changePFor : couldn't update user password for user " + userByID);
+    }
+
+    return b;
+/*
+    User userByID = db.getUserDAO().getUserWithResetKey(userid);
+    if (userByID != null) {
+      logger.debug("clearing key for " + userByID);
+      db.getUserDAO().clearKey(userByID.getID(), true);
+
+      if (!db.getUserDAO().changePassword(userByID.getID(), passwordH)) {
+        logger.error("couldn't update user password for user " + userByID);
       }
       return true;
     } else {
-      logger.debug("NOT clearing key for " + token);
+      logger.debug("NOT clearing key for " + userid);
 
       return false;
     }
+*/
   }
 
   private EmailHelper getEmailHelper() {
@@ -366,6 +403,7 @@ public class RestUserManagement {
 
   /**
    * TODO : pass in the project id from the iOS app.
+   * TODO : pass in the freetext password from the iOS app.
    * <p>
    * So - what can happen - either we have a user and password match, in which case adding a user is equivalent
    * to logging in OR we have an existing user with a different password, in which case either it's a different
@@ -378,7 +416,8 @@ public class RestUserManagement {
    * @param jsonObject
    * @see mitll.langtest.server.ScoreServlet#doPost
    */
-  public void addUser(HttpServletRequest request, String requestType, String deviceType, String device, JSONObject jsonObject) {
+  public void addUser(HttpServletRequest request, String requestType, String deviceType, String device,
+                      JSONObject jsonObject) {
     String user = request.getHeader(USER);
     String passwordH = request.getHeader(PASSWORD_H);
     String freeTextPassword = request.getHeader(FREE_TEXT_PASSWORD);
