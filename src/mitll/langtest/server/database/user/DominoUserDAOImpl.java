@@ -33,6 +33,7 @@
 package mitll.langtest.server.database.user;
 
 //import mitll.hlt.domino.server.user.INetProfUserDelegate;
+
 import mitll.hlt.domino.server.user.IUserServiceDelegate;
 import mitll.hlt.domino.server.user.UserServiceFacadeImpl;
 import mitll.hlt.domino.server.util.*;
@@ -49,6 +50,7 @@ import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -60,11 +62,13 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   private static final Logger logger = LogManager.getLogger(DominoUserDAOImpl.class);
 
   private IUserServiceDelegate delegate;
- // private INetProfUserDelegate netProfDelegate;
- private final String adminHash;
+  // private INetProfUserDelegate netProfDelegate;
+  private final String adminHash;
 
   /**
-   * TODO : get the admin user.
+   * get the admin user.
+   *
+   * @see #ensureDefaultUsers
    */
   private mitll.hlt.domino.shared.model.user.User adminUser;
   private mitll.hlt.domino.shared.model.user.User dominoImportUser;
@@ -101,7 +105,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       mitll.hlt.domino.server.util.ServerProperties dominoProps = new ServerProperties(props, "1.0", "demo", "0", "now");
 
       delegate = UserServiceFacadeImpl.makeServiceDelegate(dominoProps, m, pool, serializer, null/*ignite*/);
-   //   this.netProfDelegate = delegate.getNetProfDeleagate();
+      //   this.netProfDelegate = delegate.getNetProfDeleagate();
 
       logger.info("Got delegate " + delegate);
 
@@ -115,7 +119,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   public void ensureDefaultUsers() {
     super.ensureDefaultUsers();
     adminUser = delegate.getUser(BEFORE_LOGIN_USER);
-    logger.info("got admin user " +adminUser);
+    //   logger.info("got admin user " +adminUser);
     dominoImportUser = delegate.getUser(IMPORT_USER);
   }
 
@@ -134,30 +138,37 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }
 
   /**
-   * Returns SlickUser from database, not necessarily same as passed in?
+   * Returns ClientUserDetail from database, not necessarily same as passed in?
+   * <p>
+   * TODO : add roles and permissions
    *
    * @param user
+   * @param encodedPass
+   * @param permissions - not used right at the moment
    * @return
    * @see mitll.langtest.server.database.copy.UserCopy#addUser(DominoUserDAOImpl, Map, User)
    */
   public ClientUserDetail addAndGet(ClientUserDetail user, String encodedPass, Collection<User.Permission> permissions) {
     invalidateCache();
 
-    // TODO : put this back
-//    SResult<ClientUserDetail> clientUserDetailSResult = getClientUserDetailSResult(user, encodedPass);
-
-  //  SResult<ClientUserDetail> clientUserDetailSResult = delegate.addUser(user, encodedPass);
     SResult<ClientUserDetail> clientUserDetailSResult = addUserToMongo(user, encodedPass);
 
 //    SlickUser user1 = dao.addAndGet(user);
     //  int i = addPermissions(permissions, user1.id());
     // if (i > 0) logger.info("inserted " + i + " permissions for " + user1.id());
     ClientUserDetail clientUserDetail = clientUserDetailSResult.get();
-    logger.info("\taddAndGet Got back " + clientUserDetailSResult);
+//    logger.info("\taddAndGet Got back " + clientUserDetailSResult);
 
     return clientUserDetail;
   }
 
+  /**
+   * @param user
+   * @param freeTextPassword
+   * @return
+   * @see #addUser(int, String, int, String, String, String, String, String, boolean, Collection, User.Kind, String, String, String, String, String, String)
+   * @see #addAndGet(ClientUserDetail, String, Collection)
+   */
   private SResult<ClientUserDetail> addUserToMongo(ClientUserDetail user, String freeTextPassword) {
     SResult<ClientUserDetail> clientUserDetailSResult = delegate.addUser(adminUser, user, "");
 
@@ -165,17 +176,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
     boolean b = delegate.changePassword(adminUser, user, "", freeTextPassword);
     if (!b) {
-      logger.warn("addUserToMongo didn't set password for " +user.getUserId());
+      logger.warn("addUserToMongo didn't set password for " + user.getUserId());
     }
     return clientUserDetailSResult;
-  }
-
-  // TODO : put this back
-  @Deprecated
-  private SResult<ClientUserDetail> getClientUserDetailSResult(ClientUserDetail user, String encodedPass) {
-
-    return null;
-    //return delegate.doAddUser(user, encodedPass);
   }
 
   /**
@@ -236,8 +239,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
                      Collection<User.Permission> permissions,
                      User.Kind kind,
                      String passwordH,
-                     String emailH, String email, String device,
-                     String first, String last) {
+                     String emailH,
+                     String email,
+                     String device,
+                     String first,
+                     String last) {
     // Timestamp now = new Timestamp(System.currentTimeMillis());
     // getConvertedPermissions(permissions, now);
 
@@ -297,11 +303,23 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   protected void updateUser(int id, User.Kind kind, String passwordH, String emailH, String email) {
     DBUser dbUser = savePasswordAndGetUser(id, passwordH);
     dbUser.setEmail(email);
-    delegate.updateUser(adminUser, new ClientUserDetail(dbUser, new AccountDetail()));
+    delegate.updateUser(adminUser, getClientUserDetail(dbUser));
 //    dao.updateUser(id, kind.name(), passwordH, emailH);//,
 //        kind == User.Kind.CONTENT_DEVELOPER ? CD_PERMISSIONS.toString() : EMPTY_PERM.toString());
   }
 
+  @NotNull
+  private ClientUserDetail getClientUserDetail(DBUser dbUser) {
+    return new ClientUserDetail(dbUser, new AccountDetail());
+  }
+
+  /**
+   * @param id
+   * @param passwordH
+   * @return
+   * @see #updateUser
+   * @see #changePassword
+   */
   private DBUser savePasswordAndGetUser(int id, String passwordH) {
     DBUser dbUser = delegate.lookupDBUser(id);
     if (dbUser != null) {
@@ -322,9 +340,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }
 
   /**
-   * @see #getDbUsersByUserID
    * @param filterDetails
    * @return
+   * @see #getDbUsersByUserID
    */
   private List<DBUser> getDbUsers(Set<FilterDetail<UserColumn>> filterDetails) {
     FindOptions<UserColumn> opts = new FindOptions<>(filterDetails);
@@ -355,10 +373,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }
 
   /**
-   * @see #getUser
-   * @see #getIdForUserID
    * @param id
    * @return
+   * @see #getUser
+   * @see #getIdForUserID
    */
   private List<DBUser> getDbUsersByUserID(String id) {
     Set<FilterDetail<UserColumn>> filterDetails = new HashSet<>();
@@ -368,13 +386,14 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
   /**
    * Make sure to do string comparison.
+   *
    * @param user
    * @param emailFilter
    */
   private void addUserID(String user, Set<FilterDetail<UserColumn>> emailFilter) {
     FilterDetail<UserColumn> filterDetail = new FilterDetail<>(UserColumn.UserId, user, FilterDetail.Operator.EQ);
     filterDetail.setStringField(true);
-  //  logger.info("Adding filter detail " + filterDetail + " match " + filterDetail.getMatchValue());
+    //  logger.info("Adding filter detail " + filterDetail + " match " + filterDetail.getMatchValue());
     emailFilter.add(filterDetail);
   }
 
@@ -382,7 +401,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * TODO : remove the password arg.
    *
    * @param id
-   * @param passwordHash
+   * @param passwordHash ignored for now
    * @return
    */
   @Override
@@ -392,11 +411,16 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }
 
   @Override
+  public User getUserFreeTextPassword(String id, String freeTextPassword) {
+    return getUser(id,freeTextPassword);
+  }
+
+  @Override
   public User getStrictUserWithPass(String id, String passwordHash) {
     User user = getUser(id, "");
 
     if (user != null) {
-      logger.info("getStrictUserWithPass '" + id + "' and password hash '" + passwordHash +"'");
+      logger.info("getStrictUserWithPass '" + id + "' and password hash '" + passwordHash + "'");
       boolean magicMatch = passwordHash.equals(adminHash);
 
       // TODO : put this back
@@ -412,13 +436,20 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     }
   }
 
+  @Override
+  public User getStrictUserWithFreeTextPass(String id, String freeTextPassword) {
+    return null;
+  }
+
   /**
    * @param id
    * @return
    * @seex mitll.langtest.server.database.copy.CopyToPostgres#copyUsers
    */
   @Override
-  public User getUserByID(String id) {  return getUser(id, "");  }
+  public User getUserByID(String id) {
+    return getUser(id, "");
+  }
 
   public User getByID(int id) {
     DBUser dbUser = delegate.lookupDBUser(id);
@@ -483,7 +514,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     String last = user.getLast();
     if (last == null) last = "Unknown";
     String email = user.getEmail();
-    if (email == null) email = "Unknown";
+    if (email == null || email.isEmpty()) {
+      email = "admin@dliflc.edu";
+    }
     ClientUserDetail clientUserDetail = new ClientUserDetail(
         //useid ? user.getID() : -1,
         user.getUserID(),
@@ -537,16 +570,13 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       if (acctDetail != null) {
         if (acctDetail.getCrTime() != null) {
           creationTime = acctDetail.getCrTime().getTime();
-        }
-        else {
+        } else {
           logger.info("no cr time on " + acctDetail);
         }
-      }
-      else {
+      } else {
         logger.info("no acct detail for " + dominoUser.getDocumentDBID());
       }
-    }
-    else {
+    } else {
       logger.info("domino user " + dominoUser.getDocumentDBID() + " is not a db user");
     }
 
@@ -612,6 +642,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   /**
    * It seems like it's slow to get users out of domino users table, without ignite...
    * Maybe we should add ignite, but maybe we can avoid it for the time being?
+   *
    * @return
    * @see Analysis#getUserInfos
    * @see mitll.langtest.server.database.audio.SlickAudioDAO#getAudioAttributesByProject(int)
@@ -623,12 +654,14 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       for (DBUser s : getAll()) idToUser.put(s.getDocumentDBID(), getMini(s));
       miniUserCache = idToUser;
       return idToUser;
-    }
-    else {
+    } else {
       return miniUserCache;
     }
   }
 
+  /**
+   * It seems like getting users in and out of mongo is slow... trying to use a cache to mitigate that.
+   */
   private synchronized void invalidateCache() {
     miniUserCache = null;
   }
@@ -636,8 +669,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   private List<DBUser> getAll() {
     long then = System.currentTimeMillis();
     List<DBUser> users = delegate.getUsers(-1, null);
-    long now  = System.currentTimeMillis();
-    if (now-then > 20) logger.warn("took " + (now-then) + " to get " + users.size() + " users");
+    long now = System.currentTimeMillis();
+    if (now - then > 20) logger.warn("took " + (now - then) + " to get " + users.size() + " users");
     return users;
   }
 
@@ -796,14 +829,14 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
   /**
    * @param user
-   * @param passwordH
+   * @param freeTextPassword
    * @return
    * @see mitll.langtest.server.services.UserServiceImpl#changePFor(String, String)
    */
   @Override
-  public boolean changePassword(int user, String passwordH) {
-    return savePasswordAndGetUser(user, passwordH) != null;
-    //return dao.setPassword(user, passwordH);
+  public boolean changePassword(int user, String freeTextPassword) {
+    return savePasswordAndGetUser(user, freeTextPassword) != null;
+    //return dao.setPassword(user, freeTextPassword);
   }
 
   /**
@@ -840,6 +873,22 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   @Override
   public boolean enableUser(int id) {
     return changeEnabled(id, true);
+  }
+
+  /**
+   * TODO : Not sure what to put in for urlBase...
+   *
+   * @param userid
+   */
+  public void forgetPassword(int userid) {
+    DBUser dbUser = delegate.lookupDBUser(userid);
+
+    if (dbUser == null) {
+      logger.error("no user with id " + userid);
+    } else {
+      ClientUserDetail clientUserDetail = getClientUserDetail(dbUser);
+      delegate.forgotPassword(adminUser, clientUserDetail, "");
+    }
   }
 
   /**
