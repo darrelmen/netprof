@@ -222,10 +222,18 @@ public class ProjectTest extends BaseTest {
     project.getSectionHelper().report();
   }
 
+
+  @Test
+  public void testListProjects2() {
+    IProjectDAO projectDAO = getDatabaseVeryLight("netProf", "config.properties", false).getProjectDAO();
+    projectDAO.getAll().stream().forEach(p -> logger.info("projec " + p));
+    //  projectDAO.delete(14);
+  }
+
   @Test
   public void testDrop() {
     IProjectDAO projectDAO = getDatabaseVeryLight("netProf", "config.properties", false).getProjectDAO();
-    projectDAO.delete(3);
+    projectDAO.delete(4);
     //  projectDAO.delete(14);
   }
 }
