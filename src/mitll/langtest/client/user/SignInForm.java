@@ -65,8 +65,8 @@ public class SignInForm extends UserDialog implements SignIn {
   private static final String NO_USER_FOUND = "No userField found - have you signed up?";
 
   /**
-   * @deprecated dude get rid of this
    * @see #gotBadPassword(User, String)
+   * @deprecated dude get rid of this
    */
   private static final String MAGIC_PASS = Md5Hash.getHash("adm!n");
 
@@ -183,8 +183,8 @@ public class SignInForm extends UserDialog implements SignIn {
 
         if (!text.isEmpty()) {
           eventRegistration.logEvent(userField.box, "UserNameBox", "N/A", "left username field '" + text + "'");
-             logger.info("\tchecking makeSignInUserName " + text);
-          service.userExists(text, "", new AsyncCallback<User>() {
+          logger.info("\tchecking makeSignInUserName " + text);
+          service.getUserByID(text, new AsyncCallback<User>() {
             @Override
             public void onFailure(Throwable caught) {
               logger.warning("\tgot FAILURE on userExists " + text);
@@ -201,19 +201,29 @@ public class SignInForm extends UserDialog implements SignIn {
     });
   }
 
+  /**
+   * Skip case where really old users didn't have passwords.  Kind of a bad idea - what were we thinking?
+   *
+   * @param result
+   */
   private void gotUserExists(User result) {
-    logger.info("makeSignInUserName : for " + userField.getText() + " got back " + result);
     if (result != null) {
       String emailHash = result.getEmailHash();
-      String passwordHash = result.getPasswordHash();
+//      String passwordHash = result.getPasswordHash();
       logger.info("makeSignInUserName : for " + userField.getText() + " got back " + result);
       logger.info("makeSignInUserName : for " + userField.getText() + " emailHash " + emailHash);
-      logger.info("makeSignInUserName : for " + userField.getText() + " passwordHash " + passwordHash);
+//      logger.info("makeSignInUserName : for " + userField.getText() + " passwordHash " + passwordHash);
       //  this.email = result.getEmail();
-      if (emailHash == null || passwordHash == null || emailHash.isEmpty() || passwordHash.isEmpty()) {
+      if (emailHash == null ||
+          //passwordHash == null ||
+          emailHash.isEmpty() //||
+        //passwordHash.isEmpty()
+          ) {
         eventRegistration.logEvent(userField.box, "UserNameBox", "N/A", "existing legacy userField " + result.toStringShort());
-        copyInfoToSignUp(result);
+        copyInfoToSignUp(result.getUserID());
       }
+    } else {
+      logger.info("makeSignInUserName : for " + userField.getText() + " - no user with that id");
     }
   }
 
@@ -249,8 +259,12 @@ public class SignInForm extends UserDialog implements SignIn {
           String value = password.box.getValue();
           if (!value.isEmpty() && value.length() < MIN_PASSWORD) {
             markErrorBlur(password, "Please enter a password longer than " + MIN_PASSWORD + " characters.");
+          } else if (value.isEmpty()) {
+            eventRegistration.logEvent(signIn, "sign in", "N/A", "empty password");
+            markErrorBlur(password, PLEASE_ENTER_YOUR_PASSWORD);
+            signIn.setEnabled(true);
           } else {
-            gotLogin(userID, value, value.isEmpty());
+            gotLogin(userID, value);
           }
         }
       }
@@ -262,19 +276,66 @@ public class SignInForm extends UserDialog implements SignIn {
     return signIn;
   }
 
+  private String rot13(String val) {
+    StringBuilder builder = new StringBuilder();
+    for (char c : val.toCharArray()) {
+      if (c >= 'a' && c <= 'm') c += 13;
+      else if (c >= 'A' && c <= 'M') c += 13;
+      else if (c >= 'n' && c <= 'z') c -= 13;
+      else if (c >= 'N' && c <= 'Z') c -= 13;
+      builder.append(c);
+    }
+    return builder.toString();
+  }
+
   /**
-   * TODOx : get list of projects
-   *
    * @param user
-   * @param pass
+   * @param freeTextPassword
    * @see #getSignInButton
    */
-  private void gotLogin(final String user, final String pass, final boolean emptyPassword) {
-    final String hashedPass = Md5Hash.getHash(pass);
-    logger.info("gotLogin : userField is '" + user + "' pass " + pass.length() + " characters or '" + hashedPass + "'");
+  private void gotLogin(final String user, final String freeTextPassword) {
+    //final String hashedPass = Md5Hash.getHash(freeTextPassword);
+    logger.info("gotLogin : userField is '" + user + "' freeTextPassword " + freeTextPassword.length() + " characters" //+
+        //    " or '" + hashedPass + "'"
+    );
 
     signIn.setEnabled(false);
-    service.userExists(user, hashedPass, new AsyncCallback<User>() {
+
+    userManager.getUserService().loginUser(user, rot13(freeTextPassword), new AsyncCallback<LoginResult>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        signIn.setEnabled(true);
+        markErrorBlur(signIn, TROUBLE_CONNECTING_TO_SERVER);
+      }
+
+      @Override
+      public void onSuccess(LoginResult result) {
+        if (result.getResultType() == LoginResult.ResultType.Failed) {
+          eventRegistration.logEvent(signIn, "sign in", "N/A", "unknown userField " + user);
+
+          logger.info("No userField with that name '" + user +
+              "' freeTextPassword " + freeTextPassword.length() + " characters - ");
+          markErrorBlur(password, NO_USER_FOUND);
+          signIn.setEnabled(true);
+        } else {
+          if (!result.getLoggedInUser().isEnabled()) {
+            markErrorBlur(userField, DEACTIVATED);
+            signIn.setEnabled(true);
+          } else {
+            if (result.getResultType() == LoginResult.ResultType.MissingEmail) {
+              copyInfoToSignUp(user);
+              signIn.setEnabled(true);
+            } else {
+//                  foundExistingUser(result, emptyPassword, freeTextPassword);
+              gotGoodOrBadPassword(result
+                  //    , freeTextPassword
+              );
+            }
+          }
+        }
+      }
+    });
+ /*   service.userExists(user, freeTextPassword, new AsyncCallback<User>() {
       @Override
       public void onFailure(Throwable caught) {
         signIn.setEnabled(true);
@@ -288,32 +349,38 @@ public class SignInForm extends UserDialog implements SignIn {
         if (result == null) {
           eventRegistration.logEvent(signIn, "sign in", "N/A", "unknown userField " + user);
 
-          logger.info("No userField with that name '" + user + "' pass " + pass.length() + " characters - " + emptyPassword);
-          markErrorBlur(password, emptyPassword ? PLEASE_ENTER_YOUR_PASSWORD : NO_USER_FOUND);
+          logger.info("No userField with that name '" + user +
+              "' freeTextPassword " + freeTextPassword.length() + " characters - ");
+          markErrorBlur(password,   NO_USER_FOUND);
           signIn.setEnabled(true);
         } else {
           if (!result.isEnabled()) {
             markErrorBlur(userField, DEACTIVATED);
             signIn.setEnabled(true);
           } else {
-            foundExistingUser(result, emptyPassword, hashedPass);
+
+            foundExistingUser(result, emptyPassword, freeTextPassword);
           }
         }
       }
-    });
+    });*/
   }
 
   /**
    * @param foundUser
    * @param emptyPassword
-   * @param hashedPass
+   * @param freeTextPassword
    * @see #gotLogin
    */
-  private void foundExistingUser(User foundUser, boolean emptyPassword, String hashedPass) {
+/*  private void foundExistingUser(User foundUser, boolean emptyPassword, String freeTextPassword) {
     String emailHash = foundUser.getEmailHash();
-    String passwordHash = foundUser.getPasswordHash();
-    if (emailHash == null || passwordHash == null || emailHash.isEmpty() || passwordHash.isEmpty()) {
-      copyInfoToSignUp(foundUser);
+//    String passwordHash = foundUser.getPasswordHash();
+    if (emailHash == null ||
+        //passwordHash == null ||
+        emailHash.isEmpty()
+      // || passwordHash.isEmpty()
+        ) {
+      copyInfoToSignUp(foundUser.getUserID());
       signIn.setEnabled(true);
     } else {
       // logger.info("Got valid userField " + foundUser);
@@ -322,20 +389,21 @@ public class SignInForm extends UserDialog implements SignIn {
         markErrorBlur(password, PLEASE_ENTER_YOUR_PASSWORD);
         signIn.setEnabled(true);
       } else {
-        getPermissionsAndSetUser(foundUser.getUserID(),hashedPass);
+        getPermissionsAndSetUser(foundUser.getUserID(), freeTextPassword);
       }
     }
-  }
+  }*/
 
   /**
+   * If the user exists with this password?
    *
-   * @param user
-   * @param passwordHash
+   * @paramx user
+   * @paramx freeTextPassword
    */
-  private void getPermissionsAndSetUser(final String user, final String passwordHash) {
+/*  private void getPermissionsAndSetUser(final String user, final String freeTextPassword) {
     //console("getPermissionsAndSetUser : " + user);
-   // if (passwordHash == null) passwordHash = "";
-    userManager.getUserService().loginUser(user, passwordHash, new AsyncCallback<LoginResult>() {
+    // if (freeTextPassword == null) freeTextPassword = "";
+    userManager.getUserService().loginUser(user, freeTextPassword, new AsyncCallback<LoginResult>() {
       @Override
       public void onFailure(Throwable caught) {
       }
@@ -343,19 +411,27 @@ public class SignInForm extends UserDialog implements SignIn {
       @Override
       public void onSuccess(LoginResult result) {
         //if (DEBUG) logger.info("UserManager.getPermissionsAndSetUser : onSuccess " + user + " : " + result);
-        if (result == null ||
-            result.getResultType() != LoginResult.ResultType.Success
-            ) {
-          gotBadPassword(result.getLoggedInUser(), passwordHash);
-
-        } else {
-          gotGoodPassword(result.getLoggedInUser(), passwordHash);
-        }
+        gotGoodOrBadPassword(result, freeTextPassword);
       }
     });
+  }*/
+  private void gotGoodOrBadPassword(LoginResult result
+                                    //    , String freeTextPassword
+  ) {
+    if (result == null ||
+        result.getResultType() != LoginResult.ResultType.Success
+        ) {
+      gotBadPassword(/*result.getLoggedInUser(), freeTextPassword*/);
+    } else {
+      gotGoodPassword(result.getLoggedInUser()
+          //    , freeTextPassword
+      );
+    }
   }
 
-  private void gotGoodPassword(User foundUser,String passwordHash) {
+  private void gotGoodPassword(User foundUser
+                               //    , String passwordHash
+  ) {
     String user = foundUser.getUserID();
     if (foundUser.isEnabled() //||
       //   foundUser.getUserKind() != User.Kind.CONTENT_DEVELOPER ||
@@ -364,7 +440,9 @@ public class SignInForm extends UserDialog implements SignIn {
       //foundUser.setPassword()
       eventRegistration.logEvent(signIn, "sign in", "N/A", "successful sign in for " + user);
       //    logger.info("Got valid userField " + userField + " and matching password, so we're letting them in.");
-      storeUser(foundUser, userManager, passwordHash);
+      storeUser(foundUser, userManager
+          //    , passwordHash
+      );
     } else {
       eventRegistration.logEvent(signIn, "sign in", "N/A", "successful sign in for " + user + " but wait for approval.");
       markErrorBlur(signIn, "I'm sorry", DEACTIVATED, Placement.LEFT);
@@ -374,35 +452,42 @@ public class SignInForm extends UserDialog implements SignIn {
 
   /**
    * TODO : Maybe for now magic pass won't work? think of something better!
-   * @param foundUser
-   * @param passwordHash
+   *
+   * @paramx foundUser
+   * @paramx freeTextPassword
    */
-  private void gotBadPassword(User foundUser, String passwordHash) {
-    String enteredPass = Md5Hash.getHash(password.getText());
-    if (enteredPass.equals(MAGIC_PASS)) {
-      // special pathway...
-      String user = foundUser.getUserID();
-      eventRegistration.logEvent(signIn, "sign in", "N/A", "sign in as userField '" + user + "'");
-      storeUser(foundUser, userManager, passwordHash);
-    } else {
-      logger.info("foundExistingUser bad pass  " + passwordHash);
-      //  logger.info("admin " + Md5Hash.getHash("adm!n"));
-      eventRegistration.logEvent(signIn, "sign in", "N/A", "bad password");
-      markErrorBlur(password, BAD_PASSWORD);
-      signIn.setEnabled(true);
-    }
+  private void gotBadPassword(/*User foundUser, String freeTextPassword*/) {
+    //String enteredPass = Md5Hash.getHash(password.getText());
+//    if (freeTextPassword.equals(MAGIC_PASS)) {  // TODO : do masquerade
+//      // special pathway...
+//      String user = foundUser.getUserID();
+//      eventRegistration.logEvent(signIn, "sign in", "N/A", "sign in as userField '" + user + "'");
+//      storeUser(foundUser, userManager, freeTextPassword);
+//    } else {
+
+
+    //logger.info("foundExistingUser bad pass  " + freeTextPassword);
+    //  logger.info("admin " + Md5Hash.getHash("adm!n"));
+    eventRegistration.logEvent(signIn, "sign in", "N/A", "bad password");
+    markErrorBlur(password, BAD_PASSWORD);
+    signIn.setEnabled(true);
+
+    //}
   }
 
   /**
    * Don't enable the teacher choice for legacy users, b/c it lets them skip over the
    * recorder/not a recorder choice.
    *
-   * @param result
+   * @param userID
    * @see #foundExistingUser(User, boolean, String)
    * @see #makeSignInUserName(com.github.gwtbootstrap.client.ui.Fieldset)
    */
-  private void copyInfoToSignUp(User result) {
-    signUpForm.copyInfoToSignUp(result, password.getText());
+  private void copyInfoToSignUp(String userID) {
+    signUpForm.copyInfoToSignUp(
+        //
+        userID
+        , password.getText());
     eventRegistration.logEvent(signIn, "sign in", "N/A", "copied info to sign up form");
   }
 
@@ -455,6 +540,7 @@ public class SignInForm extends UserDialog implements SignIn {
   /**
    * So - two cases - old legacy users have no email, new ones do.
    * Potentially we could skip asking users for their email...?
+   *
    * @param emailEntry
    */
   private void onSendReset(TextBox emailEntry) {

@@ -253,7 +253,7 @@ public class UserOps implements RequiresResize {
         currentContent = content;
         currentUserForm = userForm;
 
-        userManager.getCounts(kindToLabel);
+      //  userManager.getCounts(kindToLabel);
 
         requiresResize = showUserList(kind, content, kindCollectionMap, userForm);
 
@@ -286,7 +286,7 @@ public class UserOps implements RequiresResize {
 
           @Override
           public void onSuccess(Collection<Invitation> invitations) {
-            userManager.getInvitationCounts(inviteToLabel);
+          //  userManager.getInvitationCounts(inviteToLabel);
             content.clear();
             Button w = new Button("Invite New User", IconType.ENVELOPE);
             w.addClickHandler(new ClickHandler() {

@@ -637,11 +637,13 @@ public class LangTest implements
    */
   public void gotUser(User user) {
     setProjectStartupInfo(user);
-    logger.info("\ngotUser Got startup info " + projectStartupInfo);
+//    logger.info("\ngotUser Got startup info " + projectStartupInfo);
     initialUI.gotUser(user);
   }
 
   /**
+   * So we can either get project info from the user itself, or it can be changed later when
+   * the user changes language/project.
    * @param user
    * @see InitialUI#setProjectForUser
    */
@@ -657,7 +659,7 @@ public class LangTest implements
       if (DEBUG) logger.info("checkInitFlash : initFlash - has permission");
       checkLogin();
     } else {
-      logger.info("checkInitFlash : initFlash - no permission yet");
+      if (DEBUG) logger.info("checkInitFlash : initFlash - no permission yet");
       flashRecordPanel.tryWebAudio();
 /*      if (flashRecordPanel.initFlash()) {
         checkLogin();

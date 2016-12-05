@@ -817,9 +817,10 @@ public class Navigation implements RequiresResize, ShowTab {
     markDefectsHelper.onResize();
     practiceHelper.onResize();
 
-
     //users.onResize();
-    projects.onResize();
+    if (projects != null) {
+      projects.onResize();
+    }
 
     if (listManager != null) listManager.onResize();
   }

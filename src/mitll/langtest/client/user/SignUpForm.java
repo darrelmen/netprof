@@ -147,12 +147,13 @@ public class SignUpForm extends UserDialog implements SignUp {
    * Don't enable the teacher choice for legacy users, b/c it lets them skip over the
    * recorder/not a recorder choice.
    *
-   * @param result
+   * @param userID
    * @see SignInForm#copyInfoToSignUp(User)
    */
   @Override
-  public void copyInfoToSignUp(User result, String passwordText) {
-    signUpUser.box.setText(result.getUserID());
+  public void copyInfoToSignUp(String userID, String passwordText) {
+   // String userID = userID.getUserID();
+    signUpUser.box.setText(userID);
     signUpPassword.box.setText(passwordText);
     signUpPassword.getGroup().setType(ControlGroupType.ERROR);
 
@@ -611,7 +612,8 @@ public class SignUpForm extends UserDialog implements SignUp {
               if (result.isEnabled()) {
                 eventRegistration.logEvent(signUp, "signing up", "N/A", getSignUpEvent(result));
                 // logger.info("Got valid, enabled new user " + user + " and so we're letting them in.");
-                storeUser(result, userManager, passH);
+                // TODO : store the selector and validator...
+                storeUser(result, userManager);//)/*, passH)*/;
               } else {
                 eventRegistration.logEvent(signUp, "signing up", "N/A", getSignUpEvent(result) +
                     " but waiting for approval from Tamas.");

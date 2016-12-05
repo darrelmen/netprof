@@ -384,7 +384,7 @@ public class ProjectManagement implements IProjectManagement {
   /**
    * @param userWhere
    * @param projid
-   * @see #setStartupInfo
+   * @see DatabaseImpl#setStartupInfo
    * @see mitll.langtest.server.services.UserServiceImpl#setProject(int)
    */
   @Override
