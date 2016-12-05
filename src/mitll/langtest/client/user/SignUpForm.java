@@ -589,7 +589,7 @@ public class SignUpForm extends UserDialog implements SignUp {
         getDialect(isCD),
 
         "browser", "",
-        firstName.getText(), lastName.getText());
+        firstName.getText(), lastName.getText(), trimURL(Window.Location.getHref()));
 
     service.addUser(
         newUser,

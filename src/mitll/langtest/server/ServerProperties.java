@@ -64,6 +64,7 @@ public class ServerProperties {
   private static final Logger logger = LogManager.getLogger(ServerProperties.class);
 
   private static final String APP_TITLE = "appTitle";
+  private static final String APP_URL = "app.url";
 
   private static final String FALSE = "false";
   private static final String TRUE = "true";
@@ -769,5 +770,13 @@ public class ServerProperties {
 
   public String getAppTitle() {
     return props.getProperty(APP_TITLE, "NetProF");
+  }
+
+  /**
+   * Not what you want probably...
+   * @return
+   */
+  public String getAppURL() {
+    return props.getProperty(APP_URL, "https://np.ll.mit.edu/netProf");
   }
 }
