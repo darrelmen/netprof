@@ -46,7 +46,12 @@ public class User extends MiniUser {
   public static final String NOT_SET = "NOT_SET";
   private int experience;
   private String ipaddr;
+
+  /**
+   * @deprecated
+   */
   private String passwordHash;
+
   private String emailHash;
   private String email;
   private boolean enabled;
@@ -63,38 +68,6 @@ public class User extends MiniUser {
 
   private Collection<Permission> permissions;
   private ProjectStartupInfo startupInfo;
-
-  public String getEmail() {
-    return email;
-  }
-
-  /**
-   * @see mitll.langtest.client.userops.EditUserForm#gotSignUp
-   * @param email
-   */
-  public void setEmail(String email) {
-    this.email = email;
-  }
-
-  public void setUserKind(Kind userKind) {
-    this.userKind = userKind;
-  }
-
-  public void setDialect(String dialect) {
-    this.dialect = dialect;
-  }
-
-  public void setPermissions(Collection<Permission> permissions) {
-    this.permissions = permissions;
-  }
-
-  public String getFullName() {
-    return first != null && !first.isEmpty() || last != null && !last.isEmpty() ? first + " " + last : getUserID();
-  }
-
-  public void setAdmin(boolean admin) {
-    this.admin = admin;
-  }
 
   public enum Kind implements IsSerializable {
     UNSET("Unset", false),
@@ -493,6 +466,10 @@ public class User extends MiniUser {
     return ipaddr;
   }
 
+  /**
+   * @return
+   * @deprecated
+   */
   public String getPasswordHash() {
     return passwordHash;
   }
@@ -533,6 +510,38 @@ public class User extends MiniUser {
     return device;
   }
 
+  public String getEmail() {
+    return email;
+  }
+
+  /**
+   * @param email
+   * @see mitll.langtest.client.userops.EditUserForm#gotSignUp
+   */
+  public void setEmail(String email) {
+    this.email = email;
+  }
+
+  public void setUserKind(Kind userKind) {
+    this.userKind = userKind;
+  }
+
+  public void setDialect(String dialect) {
+    this.dialect = dialect;
+  }
+
+  public void setPermissions(Collection<Permission> permissions) {
+    this.permissions = permissions;
+  }
+
+  public String getFullName() {
+    return first != null && !first.isEmpty() || last != null && !last.isEmpty() ? first + " " + last : getUserID();
+  }
+
+  public void setAdmin(boolean admin) {
+    this.admin = admin;
+  }
+
   public String toStringShort() {
     return "user " + getID() + "/" + getUserID() +
         "\n\tis a " + getGender() +
@@ -542,24 +551,25 @@ public class User extends MiniUser {
   }
 
   public String toString() {
-    return "user " + getID() + "/" + getUserID() +
+    return "user " +
+        "\n\tid" + getID() + "/" + getUserID() +
         "\n\t first '" + first +
         "'" +
         "\n\t last  '" + last +
         "'" +
-        "\n\tis a    " + getGender() +
-        "\n\tage     " + getAge() +
-        "\n\tadmin   " + isAdmin() +
-        "\n\tenabled   " + isEnabled() +
-        "\n\tdialect " + getDialect() +
+        "\n\tis a    " + (getGender() == 0 ? "male" : "female") +
+        (getAge() < 99 ? "\n\tage     " + getAge() : "") +
+        (isAdmin() ? "\n\tadmin   " + isAdmin() : "") +
+        (!isEnabled() ? "\n\tenabled   " + isEnabled() : "") +
+//        "\n\tdialect " + getDialect() +
         "\n\temailH  " + getEmailHash() +
         "\n\tpassH   " + getPasswordHash() +
         "\n\tkind    " + getUserKind() +
-        "\n\tperms   " + getPermissions() +
-        "\n\tdevice  " + getDevice() +
-        "\n\treset  '" + resetKey + "'" +
+        (getPermissions().isEmpty() ? "" : "\n\tperms   " + getPermissions()) +
+        (getDevice().isEmpty() ? "" : "\n\tdevice  " + getDevice()) +
+        (resetKey.isEmpty() ? "" : "\n\treset  '" + resetKey + "'") +
         //" cdenable '" + cdKey + "'" +
-        "\n\t         " + startupInfo
+        (startupInfo == null ? "" : "\n\tstartup  " + startupInfo)
         ;
   }
 }

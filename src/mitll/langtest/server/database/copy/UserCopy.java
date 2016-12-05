@@ -135,7 +135,10 @@ public class UserCopy {
                                    User toImport) throws Exception {
 //    logger.info("addUser " + toImport + " with " + toImport.getPermissions());
     ClientUserDetail user = dominoUserDAO.toClientUserDetail(toImport, false);
-    ClientUserDetail addedUser = dominoUserDAO.addAndGet(user, toImport.getPasswordHash(), toImport.getPermissions());
+    ClientUserDetail addedUser = dominoUserDAO.addAndGet(
+        user,
+        toImport.getPasswordHash(),
+        toImport.getPermissions());
     if (addedUser == null) {
       logger.error("addUser no error returned from domino.");
       throw new Exception("couldn't import " + toImport);

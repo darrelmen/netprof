@@ -562,11 +562,10 @@ public class DatabaseImpl implements Database {
 
   /**
    * @param userWhere
-   * @see mitll.langtest.server.services.UserServiceImpl#setSessionUser(HttpSession, User)
+   * @see mitll.langtest.server.services.UserServiceImpl#setSessionUser
    */
   public void setStartupInfo(User userWhere) {
-    int i = getUserProjectDAO().mostRecentByUser(userWhere.getID());
-    setStartupInfo(userWhere, i);
+    setStartupInfo(userWhere, getUserProjectDAO().mostRecentByUser(userWhere.getID()));
   }
 
   /**
@@ -1657,6 +1656,10 @@ public class DatabaseImpl implements Database {
     return userManagement;
   }
 
+  /**
+   *
+   * @return
+   */
   public IUserSessionDAO getUserSessionDAO() {
     return userSessionDAO;
   }

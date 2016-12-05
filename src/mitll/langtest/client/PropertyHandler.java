@@ -35,6 +35,7 @@ package mitll.langtest.client;
 import com.google.gwt.user.client.Window;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.user.UserPassLogin;
+import mitll.langtest.server.rest.RestUserManagement;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -67,7 +68,7 @@ public class PropertyHandler {
   private static final int DEFAULT_AFTER_STOP_DELAY_MILLIS = 90;
 
   // property file property names
-  private static final String ENABLE_ALL_USERS = "enableAllUsers";
+  //private static final String ENABLE_ALL_USERS = "enableAllUsers";
   private static final String GRADING_PROP = "grading";
   private static final String APP_TITLE = "appTitle";
   private static final String SPLASH_TITLE = "splashTitle";
@@ -109,7 +110,7 @@ public class PropertyHandler {
   /**
    * @see mitll.langtest.server.mail.EmailHelper#RP
    */
-  private static final String RP = "rp";
+  private static final String RP = RestUserManagement.RESET_PASSWORD_FROM_EMAIL;//"rp";
   private static final String CD = "cd";
   private static final String ER = "er";
 
@@ -122,11 +123,11 @@ public class PropertyHandler {
 
   private boolean analysis = false;
   private boolean canPracticeContext = false;
-  private boolean enableAllUsers;
+//  private boolean enableAllUsers;
   private boolean isAMAS;
   private boolean usePhoneToDisplay;
 
-  private static final String AMAS_WELCOME = "Welcome to the Automatic Multi-Skilled Assessment System (AMAS)";
+//  private static final String AMAS_WELCOME = "Welcome to the Automatic Multi-Skilled Assessment System (AMAS)";
   private static final String AMAS_PRONUNCIATION_FEEDBACK = "AMAS — Automatic Multi-Skilled Assessment System";
 
   private static final String INITIAL_PROMPT = "Practice pronunciation and learn vocabulary.";//"Learn how to pronounce words and practice vocabulary.";
@@ -236,6 +237,10 @@ public class PropertyHandler {
   private boolean quietAudioOK;
   private boolean showContext = true;
   private final Set<Long> preferredVoices = new HashSet<>();
+
+  /**
+   * @see #checkParams
+   */
   private String resetPassToken = "";
   private String cdEnableToken = "", emailRToken = "";
 
@@ -321,7 +326,7 @@ public class PropertyHandler {
       else if (key.equals(DIALOG)) dialog = value;
       else if (key.equals(QUIET_AUDIO_OK)) quietAudioOK = getBoolean(value);
       else if (key.equals(SHOW_CONTEXT)) showContext = getBoolean(value);
-      else if (key.equals(ENABLE_ALL_USERS)) enableAllUsers = getBoolean(value);
+   //   else if (key.equals(ENABLE_ALL_USERS)) enableAllUsers = getBoolean(value);
       else if (key.equals(IS_AMAS)) isAMAS = getBoolean(value);
       else if (key.equals(TALKS_TO_DOMINO)) talksToDomino = getBoolean(value);
       else if (key.equals(PRACTICE_CONTEXT)) canPracticeContext = getBoolean(value);
@@ -637,9 +642,7 @@ public class PropertyHandler {
    * @return
    * @see LangTest#showLogin()
    */
-  String getResetPassToken() {
-    return resetPassToken;
-  }
+  String getResetPassToken() { return resetPassToken;  }
 
   String getCdEnableToken() {
     return cdEnableToken;

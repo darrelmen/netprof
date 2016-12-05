@@ -35,6 +35,7 @@ package mitll.langtest.server;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.security.DominoSessionException;
+import mitll.langtest.server.database.security.IUserSecurityManager;
 import mitll.langtest.server.database.security.UserSecurityManager;
 import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
@@ -62,7 +63,7 @@ public class DatabaseServlet extends HttpServlet {
   protected ServerProperties serverProps;
   private String configDir;
   protected PathHelper pathHelper;
-  private UserSecurityManager securityManager;
+  private IUserSecurityManager securityManager;
 
   /**
    * @see #ensureMP3s
