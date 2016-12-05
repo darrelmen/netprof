@@ -197,7 +197,8 @@ public abstract class BaseUserDAO extends DAO {
         true,
         Collections.emptyList(),
         user.getKind(), user.getFreeTextPassword(), user.getPasswordH(),
-        user.getEmailH(), user.getEmail(), user.getDevice(), user.getFirst(), user.getLast());
+        user.getEmailH(), user.getEmail(), user.getDevice(), user.getFirst(), user.getLast(),
+        user.getUrl());
   }
 
   abstract User getUserByID(String id);
@@ -239,7 +240,7 @@ public abstract class BaseUserDAO extends DAO {
         MALE,
         0, "", "", UNKNOWN, UNKNOWN, defectDetector, false, EMPTY_PERMISSIONS,
         User.Kind.INTERNAL,
-        "", "", "", "", "", "", "");
+        "", "", "", "", "", "", "", "");
   }
 
   abstract int getIdForUserID(String id);
@@ -247,8 +248,7 @@ public abstract class BaseUserDAO extends DAO {
   /**
    * @see #addShellUser
    * @see #addUserAndGetID
-   *
-   * @param age
+   *@param age
    * @param gender
    * @param experience
    * @param userAgent
@@ -260,13 +260,14 @@ public abstract class BaseUserDAO extends DAO {
    * @param permissions
    * @param kind
    * @param freeTextPassword
-   *@param passwordH
+   * @param passwordH
    * @param emailH
    * @param email
    * @param device
    * @param first
    * @param last       @return
-   */
+   * @param url
+   * */
   abstract int addUser(int age,
                        String gender,
                        int experience,
@@ -283,6 +284,6 @@ public abstract class BaseUserDAO extends DAO {
                        String email,
                        String device,
                        String first,
-                       String last);
+                       String last, String url);
 
 }

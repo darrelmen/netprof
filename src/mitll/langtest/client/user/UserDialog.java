@@ -106,9 +106,18 @@ abstract class UserDialog extends BasicDialog {
     markErrorBlur(dialectGroup.group, dialectGroup.box, TRY_AGAIN, message, Placement.TOP);
   }
 
+  /**
+   * When would we want it to be different for testing?
+   * @param url
+   * @return
+   */
   String trimURL(String url) {
-    if (url.contains("127.0.0.1")) return url.split("#")[0];
-    else return url.split("\\?")[0].split("#")[0];
+    if (url.contains("127.0.0.1")) {
+      return url.split("\\?")[0].split("#")[0];
+    }
+    else {
+      return url.split("\\?")[0].split("#")[0];
+    }
   }
 
   protected boolean isValidEmail(String text) {
