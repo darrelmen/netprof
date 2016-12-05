@@ -133,7 +133,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
       }
       return loginResult;
     } else {
-      loggedInUser = db.getUserDAO().getUser(userId, attemptedFreeTextPassword);
+      loggedInUser = db.getUserDAO().getUserByID(userId);
       return getLoginResult(loggedInUser);
     }
   }

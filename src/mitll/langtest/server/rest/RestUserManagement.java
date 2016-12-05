@@ -440,7 +440,7 @@ public class RestUserManagement {
     }
 
     // first check if user exists already with this password -- if so go ahead and log them in.
-    User exactMatch = db.getUserDAO().getStrictUserWithPass(user, passwordH);
+    User exactMatch = db.getUserDAO().getStrictUserWithPass(user, freeTextPassword);
 
     logger.info("addUser user " + user + " pass " + passwordH + " match " + exactMatch);
 
@@ -462,11 +462,13 @@ public class RestUserManagement {
             " age " + age + " dialect " + dialect);
 
         User user1 = null;
+        String appURL = serverProps.getAppURL();
         if (age != null && gender != null && dialect != null) {
           try {
             int age1 = Integer.parseInt(age);
             boolean male = gender.equalsIgnoreCase("male");
-            SignUpUser user2 = new SignUpUser(user, freeTextPassword, passwordH, emailH, email, User.Kind.CONTENT_DEVELOPER, male, age1, dialect, deviceType, device, "", "");
+            SignUpUser user2 = new SignUpUser(user, freeTextPassword, passwordH, emailH, email,
+                User.Kind.CONTENT_DEVELOPER, male, age1, dialect, deviceType, device, "", "", appURL);
 //            user1 = getUserManagement().addUser(user, passwordH, emailH, email, deviceType, device,
 //                User.Kind.CONTENT_DEVELOPER, male, age1, dialect);
             user1 = getUserManagement().addUser(user2);
@@ -476,7 +478,8 @@ public class RestUserManagement {
             jsonObject.put(ERROR, "bad age");
           }
         } else {
-          SignUpUser user2 = new SignUpUser(user, freeTextPassword, passwordH, emailH, email, User.Kind.CONTENT_DEVELOPER, true, 89, dialect, deviceType, device, "", "");
+          SignUpUser user2 = new SignUpUser(user, freeTextPassword, passwordH, emailH, email,
+              User.Kind.CONTENT_DEVELOPER, true, 89, dialect, deviceType, device, "", "", appURL);
           user1 = getUserManagement().addUser(user2);
         }
 
