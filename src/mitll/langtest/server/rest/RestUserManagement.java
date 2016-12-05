@@ -354,21 +354,34 @@ public class RestUserManagement {
     }
   }
 
+  private String rot13(String val) {
+    StringBuilder builder = new StringBuilder();
+    for (char c : val.toCharArray()) {
+      if (c >= 'a' && c <= 'm') c += 13;
+      else if (c >= 'A' && c <= 'M') c += 13;
+      else if (c >= 'n' && c <= 'z') c -= 13;
+      else if (c >= 'N' && c <= 'Z') c -= 13;
+      builder.append(c);
+    }
+    return builder.toString();
+  }
+
   /**
    * TODO : remove duplicate code - here and in UserService
    *
    * Password reset used to have two steps, so userid here was a token...
    *
    * @param userid NOTE - this used to be a token -
-   * @param passwordH
+   * @param freeTextPassword
    * @return
    * @see UserServiceImpl#changePFor
    * @see #doGet(HttpServletRequest, HttpServletResponse, String, JSONObject)
    */
-  private boolean changePFor(String userid, String passwordH) {
+  private boolean changePFor(String userid, String freeTextPassword) {
     User userByID = db.getUserDAO().getUserByID(userid);
 
-    boolean b = db.getUserDAO().changePassword(userByID.getID(), passwordH);
+    freeTextPassword = rot13(freeTextPassword);
+    boolean b = db.getUserDAO().changePassword(userByID.getID(), freeTextPassword);
 
     if (!b) {
       logger.error("changePFor : couldn't update user password for user " + userByID);
@@ -381,7 +394,7 @@ public class RestUserManagement {
       logger.debug("clearing key for " + userByID);
       db.getUserDAO().clearKey(userByID.getID(), true);
 
-      if (!db.getUserDAO().changePassword(userByID.getID(), passwordH)) {
+      if (!db.getUserDAO().changePassword(userByID.getID(), freeTextPassword)) {
         logger.error("couldn't update user password for user " + userByID);
       }
       return true;

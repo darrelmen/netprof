@@ -159,18 +159,19 @@ public abstract class BaseUserDAO extends DAO {
       return userWhere;
     } else {
       // user exists!
-      String emailHash = currentUser.getEmailHash();
-      String passwordHash = currentUser.getPasswordHash();
+      String emailHash    = currentUser.getEmailHash();
+      //String passwordHash = currentUser.getPasswordHash();
 
       if (emailHash != null &&
-          passwordHash != null &&
-          !emailHash.isEmpty() &&
-          !passwordHash.isEmpty()) {
+        //  passwordHash != null &&
+          !emailHash.isEmpty()
+          //&& !passwordHash.isEmpty()
+          ) {
         logger.debug(" : addUser : user " + userID + " is an existing user.");
         return null; // existing user!
       } else {
         int id = currentUser.getID();
-        updateUser(id, user.getKind(), user.getPasswordH(), user.getEmailH(), user.getEmail());
+        updateUser(id, user.getKind(), user.getEmailH(), user.getEmail());
         User userWhere = getUserWhere(id);
         logger.debug(" : addUser : returning updated user " + userWhere);
         return userWhere;
@@ -195,13 +196,13 @@ public abstract class BaseUserDAO extends DAO {
         user.getUserID(),
         true,
         Collections.emptyList(),
-        user.getKind(), user.getPasswordH(),
+        user.getKind(), user.getFreeTextPassword(), user.getPasswordH(),
         user.getEmailH(), user.getEmail(), user.getDevice(), user.getFirst(), user.getLast());
   }
 
   abstract User getUserByID(String id);
 
-  abstract void updateUser(int id, User.Kind kind, String passwordH, String emailH, String email);
+  abstract void updateUser(int id, User.Kind kind, String emailH, String email);
 
   abstract User getUserWhere(int userid);
 
@@ -238,7 +239,7 @@ public abstract class BaseUserDAO extends DAO {
         MALE,
         0, "", "", UNKNOWN, UNKNOWN, defectDetector, false, EMPTY_PERMISSIONS,
         User.Kind.INTERNAL,
-        "", "", "", "", "", "");
+        "", "", "", "", "", "", "");
   }
 
   abstract int getIdForUserID(String id);
@@ -258,13 +259,13 @@ public abstract class BaseUserDAO extends DAO {
    * @param enabled
    * @param permissions
    * @param kind
-   * @param passwordH
+   * @param freeTextPassword
+   *@param passwordH
    * @param emailH
    * @param email
    * @param device
    * @param first
-   * @param last
-   * @return
+   * @param last       @return
    */
   abstract int addUser(int age,
                        String gender,
@@ -277,7 +278,7 @@ public abstract class BaseUserDAO extends DAO {
                        boolean enabled,
                        Collection<User.Permission> permissions,
                        User.Kind kind,
-                       String passwordH,
+                       String freeTextPassword, String passwordH,
                        String emailH,
                        String email,
                        String device,

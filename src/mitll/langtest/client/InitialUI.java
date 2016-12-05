@@ -676,6 +676,13 @@ public class InitialUI implements UILifecycle {
     banner.setCogVisible(false);
   }
 
+  /**
+   * @see #showLogin
+   * @param verticalContainer
+   * @param firstRow
+   * @param eventRegistration
+   * @param resetPassToken
+   */
   private void handleResetPass(final Container verticalContainer,
                                final Panel firstRow,
                                final EventRegistration eventRegistration,

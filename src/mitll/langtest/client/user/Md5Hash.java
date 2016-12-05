@@ -74,6 +74,11 @@ public class Md5Hash {
     return new String(hexString);
   }
 
+  /**
+   * @deprecated not doing hashing of passwords, etc. anymore to be consistent with Domino user service
+   * @param toHash
+   * @return
+   */
   public static String getHash(String toHash) {
     return toHexString(Md5Hash.getMd5Digest(toHash.getBytes()));
   }

@@ -290,7 +290,8 @@ public class UserTable extends PagerTable {
     table.addColumn(emailH, "Email?");
     setColWidth(table, emailH);
 
-    TextColumn<User> passH = new TextColumn<User>() {
+/*
+   TextColumn<User> passH = new TextColumn<User>() {
       @Override
       public String getValue(User contact) {
         return contact.getPasswordHash() == null ? "NO" : "YES";
@@ -298,6 +299,7 @@ public class UserTable extends PagerTable {
     };
     table.addColumn(passH, "Pass?");
     setColWidth(table, passH);
+    */
 
     TextColumn<User> device = new TextColumn<User>() {
       @Override
