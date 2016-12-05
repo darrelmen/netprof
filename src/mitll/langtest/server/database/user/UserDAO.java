@@ -94,20 +94,20 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    * @param enabled
    * @param permissions
    * @param kind
-   * @param passwordH
+   * @param freeTextPassword
+   *@param passwordH
    * @param emailH
    * @param email
    * @param device
    * @param first
-   * @param last
-   * @return newly inserted user id, or 0 if something goes horribly wrong
+   * @param last       @return newly inserted user id, or 0 if something goes horribly wrong
    * @see UserManagement#addUser(User)
    */
   @Override
   public int addUser(int age, String gender, int experience, String userAgent,
                      String trueIP, String nativeLang, String dialect, String userID, boolean enabled,
                      Collection<User.Permission> permissions,
-                     User.Kind kind, String passwordH, String emailH, String email, String device, String first, String last) {
+                     User.Kind kind, String freeTextPassword, String passwordH, String emailH, String email, String device, String first, String last) {
     if (passwordH == null) new Exception().printStackTrace();
     try {
       // there are much better ways of doing this...
@@ -169,16 +169,15 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    *
    * @param id
    * @param kind
-   * @param passwordH
    * @param emailH
    * @param email
    * @see BaseUserDAO#addUser(String, String, String, String, User.Kind, String, boolean, int, String, String, String, String)
    */
-  protected void updateUser(int id, User.Kind kind, String passwordH, String emailH, String email) {
+  protected void updateUser(int id, User.Kind kind, String emailH, String email) {
     try {
-      if (passwordH == null) {
+/*      if (passwordH == null) {
         logger.error("Got null password Hash?", new Exception("empty password hash"));
-      }
+      }*/
       logger.debug(language + " : update user #" + id + " kind " + kind);
 
       Connection connection = getConnection();
@@ -192,7 +191,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
               ID + "=?");
       int i = 1;
       statement.setString(i++, kind.toString());
-      statement.setString(i++, passwordH);
+      statement.setString(i++, "");//passwordH);
       statement.setString(i++, emailH);
       String kind1 = kind == User.Kind.CONTENT_DEVELOPER ? CD_PERMISSIONS.toString() : EMPTY_PERM.toString();
       statement.setString(i++, kind1);
@@ -240,6 +239,11 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     return i == -1 ? null : getUserWhere(i).getID();
   }
 
+  @Override
+  public User loginUser(String userId, String attemptedPassword, String userAgent, String remoteAddr, String sessionID) {
+    return null;
+  }
+
   /**
    * Not case sensitive.
    *
@@ -278,15 +282,16 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   /**
    * Shouldn't call this...
    *
-   * @param id
-   * @param freeTextPassword
+   * @paramx id
+   * @paramx freeTextPassword
    * @return
    * @deprecated
    */
-  @Override
+  /*@Override
   public User getUserFreeTextPassword(String id, String freeTextPassword) {
     return getUser(id, freeTextPassword);
   }
+*/
 
   @Override
   public User getStrictUserWithPass(String id, String passwordHash) {
@@ -311,10 +316,10 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    * @return
    * @deprecated
    */
-  @Override
+/*  @Override
   public User getStrictUserWithFreeTextPass(String id, String freeTextPassword) {
     return getStrictUserWithPass(id, freeTextPassword);
-  }
+  }*/
 
   /**
    * Case insensitive
@@ -665,7 +670,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
 
 
   @Override
-  public boolean changePassword(int user, String passwordH) {
+  public boolean changePassword(int user, String freeTextPassword) {
     try {
       Connection connection = getConnection();
       PreparedStatement statement;
@@ -676,7 +681,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
               " WHERE " +
               ID + "=?");
       int i = 1;
-      statement.setString(i++, passwordH);
+      statement.setString(i++, freeTextPassword);
       statement.setLong(i++, user);
 
       int i1 = statement.executeUpdate();
@@ -685,7 +690,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
       database.closeConnection(connection);
 
       User userByID = getUserWhere(user);
-      logger.debug("after password set to " + passwordH + " user now " + userByID);
+      logger.debug("after password set to " + freeTextPassword + " user now " + userByID);
       return i1 != 0;
     } catch (Exception ee) {
       logger.error("Got " + ee, ee);

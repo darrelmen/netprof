@@ -31,7 +31,6 @@
  */
 package mitll.langtest.client.domino.user;
 
-import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.Form;
 import com.github.gwtbootstrap.client.ui.PasswordTextBox;
 import com.github.gwtbootstrap.client.ui.constants.FormType;
@@ -46,7 +45,6 @@ import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.Label;
 import mitll.langtest.client.domino.common.*;
 import mitll.langtest.client.services.UserServiceAsync;
-import mitll.langtest.client.user.Md5Hash;
 import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.user.User;
 
@@ -68,8 +66,8 @@ public class ChangePasswordView extends Composite {
   private DecoratedFields pass1DF;
   private DecoratedFields pass2DF;
 
-  private DecoratedFields emailDF;
-  private CheckBox emailBox;
+//  private DecoratedFields emailDF;
+//  private CheckBox emailBox;
 
   private User editUser = null;
   private CommonValidation cValidator = new CommonValidation();
@@ -144,9 +142,9 @@ public class ChangePasswordView extends Composite {
     p2Box.addKeyPressHandler(uiHandler);
     pass2DF = new DecoratedFields("Verify password", p2Box);
     form.add(pass2DF.getCtrlGroup());
-    if (emailDF != null) {
-      form.add(emailDF.getCtrlGroup());
-    }
+//    if (emailDF != null) {
+//      form.add(emailDF.getCtrlGroup());
+//    }
     initWidget(form);
   }
 
@@ -221,17 +219,30 @@ public class ChangePasswordView extends Composite {
     return cPassValid && pass1Valid && pass2Valid;
   }
 
+  private String rot13(String val) {
+    StringBuilder builder = new StringBuilder();
+    for (char c : val.toCharArray()) {
+      if (c >= 'a' && c <= 'm') c += 13;
+      else if (c >= 'A' && c <= 'M') c += 13;
+      else if (c >= 'n' && c <= 'z') c -= 13;
+      else if (c >= 'N' && c <= 'Z') c -= 13;
+      builder.append(c);
+    }
+    return builder.toString();
+  }
+
   private void changePassword() {
     //	final Modal m = getMsgHelper().makeWaitDialog("Updating password");
     String currPass = (currentPWDF != null) ? (String) currentPWDF.getValue() : null;
     String newPass = (String) pass1DF.getValue();
-    boolean sendEmail = emailBox != null && emailBox.getValue();
+   // boolean sendEmail = emailBox != null && emailBox.getValue();
     final DecoratedFields df = getFirstDecoratedField();
+
 
 //    String hash = Md5Hash.getHash(newPass);
     userServiceAsync.changePassword(editUser.getID(),
-        currPass == null ? "" : Md5Hash.getHash(currPass),
-        Md5Hash.getHash(newPass),
+        currPass == null ? "" : rot13(currPass),//Md5Hash.getHash(currPass),
+        rot13(newPass),//Md5Hash.getHash(newPass),
         //sendEmail,
         new AsyncCallback<Boolean>() {
           @Override

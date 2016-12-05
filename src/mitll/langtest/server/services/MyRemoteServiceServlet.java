@@ -42,6 +42,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.security.DominoSessionException;
+import mitll.langtest.server.database.security.IUserSecurityManager;
 import mitll.langtest.server.database.security.UserSecurityManager;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -61,7 +62,7 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
 
   protected DatabaseImpl db;
   protected ServerProperties serverProps;
-  protected UserSecurityManager securityManager;
+  protected IUserSecurityManager securityManager;
   protected PathHelper pathHelper;
 
   /**

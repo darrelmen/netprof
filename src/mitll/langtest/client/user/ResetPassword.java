@@ -145,16 +145,20 @@ public class ResetPassword extends UserDialog {
    * @param token
    * @param firstPassword  what we use to reset the password
    * @param secondPassword just so we can make sure the user didn't make a typo
-   * @see
+   * @see #getResetPassword
    */
   private Button getChangePasswordButton(final String token,
                                          final BasicDialog.FormField firstPassword,
                                          final BasicDialog.FormField secondPassword) {
     final Button changePassword = new Button(CHANGE_PASSWORD);
+    changePassword.setType(ButtonType.PRIMARY);
+
     // changePassword.setTabIndex(3);
     changePassword.getElement().setId("changePassword");
-    eventRegistration.register(changePassword);
     changePassword.addStyleName("floatRight");
+    changePassword.addStyleName("rightFiveMargin");
+    changePassword.addStyleName("leftFiveMargin");
+
     changePassword.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
@@ -163,32 +167,57 @@ public class ResetPassword extends UserDialog {
     });
     enterKeyButtonHelper.addKeyHandler(changePassword);
 
-    changePassword.addStyleName("rightFiveMargin");
-    changePassword.addStyleName("leftFiveMargin");
-    changePassword.setType(ButtonType.PRIMARY);
+    eventRegistration.register(changePassword);
 
     return changePassword;
   }
 
-  private void onChangePassword(FormField firstPassword, FormField secondPassword, final Button changePassword, String token) {
-    String first = firstPassword.box.getText();
+
+  private String rot13(String val) {
+    StringBuilder builder = new StringBuilder();
+    for (char c : val.toCharArray()) {
+      if (c >= 'a' && c <= 'm') c += 13;
+      else if (c >= 'A' && c <= 'M') c += 13;
+      else if (c >= 'n' && c <= 'z') c -= 13;
+      else if (c >= 'N' && c <= 'Z') c -= 13;
+      builder.append(c);
+    }
+    return builder.toString();
+  }
+
+  /**
+   *
+   * @param firstPassword
+   * @param secondPassword for confirmation
+   * @param changePassword
+   * @param token
+   */
+  private void onChangePassword(FormField firstPassword,
+                                FormField secondPassword,
+                                final Button changePassword,
+                                String token) {
+    String newPassword = firstPassword.box.getText();
     String second = secondPassword.box.getText();
-    if (first.isEmpty()) {
+    if (newPassword.isEmpty()) {
       markErrorBlur(firstPassword, PLEASE_ENTER_A_PASSWORD);
-    } else if (first.length() < MIN_PASSWORD) {
+    } else if (newPassword.length() < MIN_PASSWORD) {
       markErrorBlur(firstPassword, PLEASE_ENTER_A_LONGER_PASSWORD);
     } else if (second.isEmpty()) {
       markErrorBlur(secondPassword, PLEASE_ENTER_A_PASSWORD);
     } else if (second.length() < MIN_PASSWORD) {
       markErrorBlur(secondPassword, PLEASE_ENTER_A_LONGER_PASSWORD);
-    } else if (!second.equals(first)) {
+    } else if (!second.equals(newPassword)) {
       markErrorBlur(secondPassword, PLEASE_ENTER_THE_SAME_PASSWORD);
 
     } else {
       changePassword.setEnabled(false);
       enterKeyButtonHelper.removeKeyHandler();
-      String hash = Md5Hash.getHash(first);
-      service.changePFor(token, hash, new AsyncCallback<Boolean>() {
+
+     // String hash = Md5Hash.getHash(newPassword);
+
+      newPassword = rot13(newPassword);
+
+      service.changePFor(token, newPassword, new AsyncCallback<Boolean>() {
         @Override
         public void onFailure(Throwable caught) {
           changePassword.setEnabled(true);

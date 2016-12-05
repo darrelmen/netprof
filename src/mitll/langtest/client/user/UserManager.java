@@ -131,9 +131,8 @@ public class UserManager {
       //console("UserManager.login : current user : " + user);
       if (current == null) {
         getPermissionsAndSetUser();
-      }
-      else {
-        logger.info("user "+ user + " and full info " + current);
+      } else {
+        logger.info("user " + user + " and full info " + current);
       }
     } else {
       userNotification.showLogin();
@@ -239,10 +238,10 @@ public class UserManager {
    */
   public boolean isUserExpired() {
     String sid = getUserFromStorage();
- //   logger.info("sid from storage "+ sid);
+    //   logger.info("sid from storage "+ sid);
     return (
         sid == null ||
-        sid.equals(NO_USER_SET_STRING)) ||
+            sid.equals(NO_USER_SET_STRING)) ||
         checkUserExpired(sid);
   }
 
@@ -271,7 +270,7 @@ public class UserManager {
   private boolean checkUserExpired(String sid) {
     boolean expired = false;
     if (userExpired(sid)) {
-      logger.info("user expired " +sid);
+      logger.info("user expired " + sid);
       clearUser();
       expired = true;
     }
@@ -287,6 +286,10 @@ public class UserManager {
     return appTitle + ":" + USER_ID;
   }
 
+  /**
+   * @deprecated
+   * @return
+   */
   private String getPassCookie() {
     return appTitle + ":" + "pwd";
   }
@@ -360,13 +363,17 @@ public class UserManager {
   }
 
   /**
+   * TODO : do we store the password hash local storage???
+   *
    * @param user
-   * @param passwordHash
-   * @see SignInForm#foundExistingUser(User, boolean, String)
+   * @paramx passwordHash
+   * @seex SignInForm#foundExistingUser(User, boolean, String)
    * @see SignUpForm#gotSignUp(String, String, String, User.Kind)
-   * @see UserDialog#storeUser(User, UserManager, String)
+   * @see UserDialog#storeUser
    */
-  void storeUser(User user, String passwordHash) {
+  void storeUser(User user
+                 //    , String passwordHash
+  ) {
     logger.info("storeUser : user now " + user);
 
     final long DURATION = getUserSessionDuration();
@@ -375,7 +382,7 @@ public class UserManager {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
       userChosenID = user.getUserID();
       localStorageIfSupported.setItem(getUserIDCookie(), "" + user.getID());
-      localStorageIfSupported.setItem(getPassCookie(), passwordHash);
+      //  localStorageIfSupported.setItem(getPassCookie(), passwordHash);
       localStorageIfSupported.setItem(getUserChosenID(), "" + userChosenID);
       rememberUserSessionEnd(localStorageIfSupported, futureMoment);
       // localStorageIfSupported.setItem(getLoginType(), "" + userType);
@@ -397,7 +404,7 @@ public class UserManager {
    * @see #storeUser
    */
   private void gotNewUser(User result) {
-   // logger.info("UserManager.gotNewUser " + result);
+    // logger.info("UserManager.gotNewUser " + result);
 //    userNotification.getPermissions().clear();
     if (result != null) {
 /*      for (User.Permission permission : result.getPermissions()) {
@@ -411,7 +418,7 @@ public class UserManager {
         }
       }*/
       this.current = result;
-     // logger.info("\tgotNewUser current user " + current);
+      // logger.info("\tgotNewUser current user " + current);
       userNotification.gotUser(result);
     }
     //console("getPermissionsAndSetUser.onSuccess : " + user);
@@ -479,7 +486,7 @@ public class UserManager {
     return current.getPermissions().contains(permission);
   }
 
-  public void getCounts(Map<User.Kind, Label> kindToLabel) {
+/*  public void getCounts(Map<User.Kind, Label> kindToLabel) {
     userServiceAsync.getCounts(new AsyncCallback<Map<User.Kind, Integer>>() {
       @Override
       public void onFailure(Throwable throwable) {
@@ -500,9 +507,9 @@ public class UserManager {
         }
       }
     });
-  }
+  }*/
 
-  public void getInvitationCounts(Map<String, Label> kindToLabel) {
+/*  public void getInvitationCounts(Map<String, Label> kindToLabel) {
     userServiceAsync.getInvitationCounts(current.getUserKind(),
         new AsyncCallback<Map<String, Integer>>() {
           @Override
@@ -524,5 +531,5 @@ public class UserManager {
             }
           }
         });
-  }
+  }*/
 }

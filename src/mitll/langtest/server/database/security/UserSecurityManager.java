@@ -50,13 +50,8 @@ import java.util.Map;
  * @author Raymond Budd <a href=mailto:raymond.budd@ll.mit.edu>raymond.budd@ll.mit.edu</a>
  * @since Oct 31, 2013 6:30:34 PM
  */
-public class UserSecurityManager {
+public class UserSecurityManager implements IUserSecurityManager {
   private static final Logger log = LogManager.getLogger(UserSecurityManager.class);
-
-  /**
-   * The key to get/set the id of the user stored in the session
-   */
-  public static final String USER_SESSION_ATT = "user-db-id";
 
   /**
    * The key to get/set the request attribute that holds the
@@ -86,6 +81,7 @@ public class UserSecurityManager {
    * @param killAllSessions remove???
    * @see mitll.langtest.server.services.UserServiceImpl#logout(String)
    */
+  @Override
   public void logoutUser(HttpServletRequest request, String userId, boolean killAllSessions) {
     long startMS = System.currentTimeMillis();
     HttpSession session = getCurrentSession(request);
@@ -123,6 +119,7 @@ public class UserSecurityManager {
    * @throws DominoSessionException
    * @see LangTestDatabaseImpl#getProject()
    */
+  @Override
   public User getLoggedInUser(HttpServletRequest request) throws RestrictedOperationException, DominoSessionException {
     return getLoggedInUser(request, "", false);
   }

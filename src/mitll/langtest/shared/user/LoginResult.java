@@ -44,13 +44,14 @@ import java.util.Date;
  */
 
 public class LoginResult implements Serializable {
-  public static enum ResultType {
+  public enum ResultType {
     Success,
     Failed,
     AcctExpired,
     PassExpired,
     BadPassword,
-    SessionNotRestored
+    SessionNotRestored,
+    MissingEmail
   }
 
   private static final long serialVersionUID = -8359612864581208214L;

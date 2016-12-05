@@ -91,6 +91,14 @@ public interface IUserDAO extends IDAO {
    */
   Integer getIDForUserAndEmail(String user, String emailH);
 
+  User loginUser(String userId,
+                 String attemptedPassword,
+                 //String remoteIP,
+                 String userAgent,
+                 //String sessionId,
+                 String remoteAddr,
+                 String sessionID);
+
   /**
    * @see mitll.langtest.server.services.UserServiceImpl#loginUser(String, String)
    * @param id
@@ -98,7 +106,7 @@ public interface IUserDAO extends IDAO {
    * @return
    */
   User getUser(String id, String passwordHash);
-  User getUserFreeTextPassword(String id, String freeTextPassword);
+  //User getUserFreeTextPassword(String id, String freeTextPassword);
 
   /**
    * @see mitll.langtest.server.database.copy.CopyToPostgres#copyUsers(DatabaseImpl, int, IResultDAO)
@@ -107,7 +115,7 @@ public interface IUserDAO extends IDAO {
    * @return
    */
   User getStrictUserWithPass(String id, String passwordHash);
-  User getStrictUserWithFreeTextPass(String id, String freeTextPassword);
+  //User getStrictUserWithFreeTextPass(String id, String freeTextPassword);
 
   /**
    * @see mitll.langtest.server.database.copy.CopyToPostgres#copyUsers(DatabaseImpl, int, IResultDAO)
@@ -192,10 +200,10 @@ public interface IUserDAO extends IDAO {
   /**
    * @see UserServiceImpl#changePassword(int, String, String)
    * @param user
-   * @param passwordH
+   * @param freeTextPassword
    * @return
    */
-  boolean changePassword(int user, String passwordH);
+  boolean changePassword(int user, String freeTextPassword);
 
   /**
    * @see UserServiceImpl#changePFor(String, String)

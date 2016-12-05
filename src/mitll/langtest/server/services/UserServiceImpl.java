@@ -33,18 +33,16 @@
 package mitll.langtest.server.services;
 
 import mitll.langtest.client.InitialUI;
+import mitll.langtest.client.domino.user.ChangePasswordView;
 import mitll.langtest.client.services.UserService;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.security.DominoSessionException;
-import mitll.langtest.server.database.security.UserSecurityManager;
 import mitll.langtest.server.database.user.IUserPermissionDAO;
 import mitll.langtest.server.database.user.IUserSessionDAO;
 import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
-import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.user.*;
-import mitll.npdata.dao.SlickInvite;
 import mitll.npdata.dao.SlickUserPermission;
 import mitll.npdata.dao.SlickUserSession;
 import org.apache.logging.log4j.LogManager;
@@ -55,13 +53,15 @@ import javax.servlet.http.HttpSession;
 import java.sql.Timestamp;
 import java.util.*;
 
+import static mitll.langtest.server.database.security.IUserSecurityManager.USER_SESSION_ATT;
+
 @SuppressWarnings("serial")
 public class UserServiceImpl extends MyRemoteServiceServlet implements UserService {
   private static final Logger logger = LogManager.getLogger(UserServiceImpl.class);
   /**
    * The key to get/set the id of the user stored in the session
    */
-  private static final String USER_SESSION_ATT = UserSecurityManager.USER_SESSION_ATT;
+  //private static final String USER_SESSION_ATT = IUserSecurityManager.USER_SESSION_ATT;
 
   /**
    * The key to get/set the request attribute that holds the
@@ -69,15 +69,29 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    */
 //  private static final String USER_REQUEST_ATT = UserSecurityManager.USER_REQUEST_ATT;
 
+  private String rot13(String val) {
+    StringBuilder builder = new StringBuilder();
+    for (char c : val.toCharArray()) {
+      if (c >= 'a' && c <= 'm') c += 13;
+      else if (c >= 'A' && c <= 'M') c += 13;
+      else if (c >= 'n' && c <= 'z') c -= 13;
+      else if (c >= 'N' && c <= 'Z') c -= 13;
+      builder.append(c);
+    }
+    return builder.toString();
+  }
+
+
   /**
    * TODO record additional session info in database.
    *
    * @param userId
-   * @param attemptedPassword
+   * @param attemptedFreeTextPassword
    * @return
+   * @seex #userExists
    * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser(String, String)
    */
-  public LoginResult loginUser(String userId, String attemptedPassword) {
+  public LoginResult loginUser(String userId, String attemptedFreeTextPassword) {
     HttpServletRequest request = getThreadLocalRequest();
     String remoteAddr = request.getHeader("X-FORWARDED-FOR");
     if (remoteAddr == null || remoteAddr.isEmpty()) {
@@ -90,7 +104,18 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     logger.info("Login session " + session.getId() + " isNew=" + session.isNew()
         //    + " host is secondary " + properties.isSecondaryHost()
     );
-    User loggedInUser = db.getUserDAO().getStrictUserWithPass(userId, attemptedPassword);//, remoteAddr, userAgent, session.getID());
+
+    attemptedFreeTextPassword = rot13(attemptedFreeTextPassword);
+
+    logger.info("userid " + userId+
+        " free '" + attemptedFreeTextPassword+     "'");
+//    User loggedInUser = db.getUserDAO().getStrictUserWithPass(userId, attemptedFreeTextPassword);
+    User loggedInUser = db.getUserDAO().loginUser(
+        userId,
+        attemptedFreeTextPassword,
+        userAgent,
+        remoteAddr,
+        session.getId());
 
     boolean success = loggedInUser != null;
     String resultStr = success ? " was successful" : " failed";
@@ -98,11 +123,17 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
         ". IP: " + remoteAddr +
         ", UA: " + userAgent +
         (success ? ", user: " + loggedInUser.getID() : ""));
+
     if (success) {
-      setSessionUser(session, loggedInUser);
-      return new LoginResult(loggedInUser, new Date(System.currentTimeMillis()));
+      LoginResult loginResult = new LoginResult(loggedInUser, new Date(System.currentTimeMillis()));
+      if (loggedInUser.getEmail().isEmpty()) {
+        loginResult = new LoginResult(loggedInUser, LoginResult.ResultType.MissingEmail);
+      } else {
+        setSessionUser(session, loggedInUser);
+      }
+      return loginResult;
     } else {
-      loggedInUser = db.getUserDAO().getUser(userId, attemptedPassword);//, remoteAddr, userAgent, session.getID());
+      loggedInUser = db.getUserDAO().getUser(userId, attemptedFreeTextPassword);
       return getLoginResult(loggedInUser);
     }
   }
@@ -119,7 +150,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @param session
    * @param loggedInUser
    * @see #loginUser(String, String)
-   * @see #addUser(SignUpUser, String, boolean)
+   * @see #addUser
    */
   private void setSessionUser(HttpSession session, User loggedInUser) {
     int id1 = loggedInUser.getID();
@@ -167,39 +198,50 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     return getThreadLocalRequest().getSession(false);
   }
 
+  public User getUserByID(String id) {
+    return db.getUserDAO().getUserByID(id);
+  }
+
   /**
+   * TODO : rework this
+   *
    * @param login
-   * @param passwordH
+   * @param freeTextPassword
    * @return
    * @see mitll.langtest.client.user.SignInForm#gotLogin
    * @see mitll.langtest.client.user.SignInForm#makeSignInUserName
    */
-  public User userExists(String login, String passwordH) {
-    logger.info("userExists " + login + " pass " + passwordH);
+/*  public User userExists(String login, String freeTextPassword) {
+    logger.info("userExists " + login + " pass " + freeTextPassword);
 
-    if (passwordH.isEmpty()) {
-      User user = db.getUserDAO().getUser(login, passwordH);
+*//*    if (freeTextPassword.isEmpty()) {
+      User user = db.getUserDAO().getUser(login, freeTextPassword);
       if (user != null) {
         logger.info("\tuserExists " + login + " user " + user);
-        int i = db.getUserProjectDAO().mostRecentByUser(user.getID());
-        ProjectStartupInfo startupInfo = new ProjectStartupInfo();
-        user.setStartupInfo(startupInfo);
-        startupInfo.setProjectid(i);
+        addProjectInfoToUser(user);
       }
       else {
         logger.info("\tuserExists no user for " + login);
       }
 
       return user;
-    } else {
-      LoginResult loginResult = loginUser(login, passwordH);
-      User loggedInUser = loginResult.getLoggedInUser();
+    } else {*//*
+    LoginResult loginResult = loginUser(login, freeTextPassword);
+    User loggedInUser = loginResult.getLoggedInUser();
 //      if (loginResult.getResultType() == LoginResult.ResultType.Success) {
 //        db.rememberUserSelectedProject(loggedInUser, projectid);
 //      }
-      return loggedInUser;
-    }
-  }
+    return loggedInUser;
+    //  }
+  }*/
+
+  // this is done when we start a session
+/*  private void addProjectInfoToUser(User user) {
+    int i = db.getUserProjectDAO().mostRecentByUser(user.getID());
+    ProjectStartupInfo startupInfo = new ProjectStartupInfo();
+    user.setStartupInfo(startupInfo);
+    startupInfo.setProjectid(i);
+  }*/
 
   /**
    * @param login
@@ -211,7 +253,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
 
   /**
    * Send confirmation to your email too.
-   *
+   * <p>
    * TODO : content developers are handled differently now...
    *
    * @param url
@@ -223,16 +265,16 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   public User addUser(SignUpUser user, String url) {
     UserManagement userManagement = db.getUserManagement();
     User newUser = userManagement.addUser(getThreadLocalRequest(), user);
-  //  MailSupport mailSupport = getMailSupport();
+    //  MailSupport mailSupport = getMailSupport();
 
     String userID = user.getUserID();
-  //  String email = user.getEmail();
-  //  String first = user.getFirst();
+    //  String email = user.getEmail();
+    //  String first = user.getFirst();
 
     if (newUser != null/* && !newUser.isEnabled()*/) { // newUser = null means existing newUser.
-     // logger.debug("newUser " + userID + "/" + newUser + " wishes to be a content developer. Asking for approval.");
+      // logger.debug("newUser " + userID + "/" + newUser + " wishes to be a content developer. Asking for approval.");
       //getEmailHelper().addContentDeveloper(url, email, newUser, mailSupport, getProject().getLanguage());
-     // getEmailHelper().sendConfirmationEmail(email, userID, first, mailSupport);
+      // getEmailHelper().sendConfirmationEmail(email, userID, first, mailSupport);
     } else /*if (newUser == null)*/ {
       logger.debug("no newUser found for id " + userID);
     } /*else {
@@ -278,14 +320,14 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
 
   /**
    * @param user
-   * @param email
+   * @param userEmail
    * @param url
    * @return true if there's a user with this email
    * @see mitll.langtest.client.user.SignInForm#getForgotPassword
    */
-  public boolean resetPassword(String user, String email, String url) {
+  public boolean resetPassword(String user, String userEmail, String url) {
     logger.debug("resetPassword for " + user);
-    return getEmailHelper().resetPassword(user, email, url);
+    return getEmailHelper().resetPassword(user, userEmail, url);
   }
 
   /**
@@ -313,17 +355,17 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   }
 
   /**
-   * @see mitll.langtest.client.user.ResetPassword#getChangePasswordButton
    * @param userid
-   * @param passwordH
+   * @param newFreeTextPassword
    * @return
+   * @see mitll.langtest.client.user.ResetPassword#getChangePasswordButton
    */
   @Override
-  public boolean changePFor(String userid, String passwordH) {
+  public boolean changePFor(String userid, String newFreeTextPassword) {
+    newFreeTextPassword = rot13(newFreeTextPassword);
 
     User userByID = db.getUserDAO().getUserByID(userid);
-
-    boolean b = db.getUserDAO().changePassword(userByID.getID(), passwordH);
+    boolean b = db.getUserDAO().changePassword(userByID.getID(), newFreeTextPassword);
 
     if (!b) {
       logger.error("changePFor : couldn't update user password for user " + userByID);
@@ -351,16 +393,22 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * TODO: consider stronger passwords like in domino.
    *
    * @param userid
-   * @param currentPasswordH
-   * @param passwordH
+   * @param currentFreeTextPassword
+   * @param newFreeTextPassword
    * @return
+   * @see ChangePasswordView#changePassword
    */
-  public boolean changePassword(int userid, String currentPasswordH, String passwordH) {
+  public boolean changePassword(int userid, String currentFreeTextPassword, String newFreeTextPassword) {
+
+    currentFreeTextPassword = rot13(currentFreeTextPassword);
+    newFreeTextPassword = rot13(newFreeTextPassword);
+
     User userWhereResetKey = db.getUserDAO().getByID(userid);
     if (userWhereResetKey == null) {
       return false;
-    } else if (userWhereResetKey.getPasswordHash().equals(currentPasswordH)) {
-      if (db.getUserDAO().changePassword(userid, passwordH)) {
+      // TODO : fix this to call new domino call
+    } else if (userWhereResetKey.getPasswordHash().equals(currentFreeTextPassword)) {
+      if (db.getUserDAO().changePassword(userid, newFreeTextPassword)) {
         getEmailHelper().sendChangedPassword(userWhereResetKey);
         return true;
       } else {
@@ -470,9 +518,10 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     }
   }
 
+  @Deprecated
   @Override
   public Collection<Invitation> getPending(User.Kind requestRole) {
-    List<Invitation> visible = new ArrayList<>();
+/*    List<Invitation> visible = new ArrayList<>();
     Collection<SlickInvite> pending = db.getInviteDAO().getPending();
     for (SlickInvite invite : pending) {
       String kind = invite.kind();
@@ -481,9 +530,11 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
         visible.add(toInvitation(invite));
       }
     }
-    return visible;
+    return visible;*/
+    return Collections.emptyList();
   }
 
+/*
   private Invitation toInvitation(SlickInvite invite) {
     return new Invitation(User.Kind.valueOf(invite.kind()),
         invite.byuserid(),
@@ -491,6 +542,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
         invite.email()
     );
   }
+*/
 
   /**
    * Invite you to NetProF as a student, or teacher, or program manager, etc.
@@ -500,7 +552,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   @Override
   public void invite(String url,
                      Invitation invite) {
-    int inviteID = db.getInviteDAO().add(new SlickInvite(-1,
+/*    int inviteID = db.getInviteDAO().add(new SlickInvite(-1,
         invite.getKind().toString(),
         invite.getByuser(),
         new Timestamp(System.currentTimeMillis()),
@@ -519,7 +571,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     getEmailHelper().sendInviteEmail(url,
         invite.getEmail(),
         inviter,
-        invite.getKind(),inviteKey,getMailSupport());
+        invite.getKind(), inviteKey, getMailSupport());*/
 
   }
 }

@@ -34,6 +34,7 @@ package mitll.langtest.client.services;
 
 import com.github.gwtbootstrap.client.ui.Container;
 import com.github.gwtbootstrap.client.ui.Fieldset;
+import com.github.gwtbootstrap.client.ui.TextBox;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.google.gwt.user.client.ui.Panel;
@@ -49,52 +50,45 @@ import java.util.Map;
 
 @RemoteServiceRelativePath("user-manager")
 public interface UserService extends RemoteService {
-  User setProject(int projectid);
-
-  /**
-   * @see mitll.langtest.client.user.SignUpForm#gotSignUp
-   * @param user
-   * @param url
-   * @return
-   */
-  User addUser(SignUpUser user, String url);
-
-  /**
-   * @return
-   * @see mitll.langtest.client.user.UserTable#showDialog
-   */
-  List<User> getUsers();
-
-
   /**
    * @param login
-   * @param passwordH
+   * @param freeTextPassword
    * @return
    * @see mitll.langtest.client.user.SignInForm#gotLogin
    */
-  User userExists(String login, String passwordH);
+  //User userExists(String login, String freeTextPassword);
 
   /**
    * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser(String, String)
    * @param userId
-   * @param attemptedPassword - hashed - don't send clear password
+   * @param attemptedFreeTextPassword - hashed - don't send clear password
    * @return
    */
-  LoginResult loginUser(String userId, String attemptedPassword);
+  LoginResult loginUser(String userId, String attemptedFreeTextPassword);
 
   void logout(String login);
 
   /**
    * @param token
-   * @param passwordH
+   * @param newFreeTextPassword
    * @return
-   * @see mitll.langtest.client.user.ResetPassword#getChangePasswordButton(String, Fieldset, BasicDialog.FormField, BasicDialog.FormField)
+   * @see mitll.langtest.client.user.ResetPassword#onChangePassword
    */
-  boolean changePFor(String token, String passwordH);
+  boolean changePFor(String token, String newFreeTextPassword);
 
-  boolean changePassword(int userid, String currentPasswordH, String passwordH);
+  boolean changePassword(int userid, String currentFreeTextPassword, String newFreeTextPassword);
 
   /**
+   * @param userid
+   * @param userEmail
+   * @param url
+   * @return
+   * @see mitll.langtest.client.user.SignInForm#onSendReset
+   */
+  boolean resetPassword(String userid, String userEmail, String url);
+
+  /**
+   * @deprecated no tokens anymore
    * @param token
    * @return
    * @see InitialUI#handleResetPass(Container, Panel, EventRegistration, String)
@@ -117,28 +111,40 @@ public interface UserService extends RemoteService {
    */
   boolean forgotUsername(String emailH, String email, String url);
 
+
+
+
   /**
-   * @param userid
-   * @param text
+   * @see mitll.langtest.client.user.SignUpForm#gotSignUp
+   * @param user
    * @param url
    * @return
-   * @see mitll.langtest.client.user.SignInForm#getForgotPassword
    */
-  boolean resetPassword(String userid, String text, String url);
+  User addUser(SignUpUser user, String url);
+
+  /**
+   * @return
+   * @see mitll.langtest.client.user.UserTable#showDialog
+   */
+  List<User> getUsers();
+
+  User getUser(int id);
+
+  User getUserByID(String id);
 
   /**
    * @param cdToken
    * @param emailR
    * @param url
    * @return
+   * @deprecated not sure if we're doing this anymore
    * @see InitialUI#handleCDToken(Container, Panel, String, String)
    */
   String enableCDUser(String cdToken, String emailR, String url);
 
+  User setProject(int projectid);
+
   void forgetProject();
-
-  User getUser(int id);
-
 
 
 

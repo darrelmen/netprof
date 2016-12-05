@@ -34,11 +34,10 @@ package mitll.langtest.client.user;
 
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.dialog.KeyPressHelper;
-import mitll.langtest.shared.user.User;
 
 public interface SignUp {
   void setEnterKeyButtonHelper(KeyPressHelper enterKeyButtonHelper);
   void clickSignUp();
-  void copyInfoToSignUp(User result, String passwordText);
+  void copyInfoToSignUp(String userID, String passwordText);
   Panel getSignUpForm();
 }

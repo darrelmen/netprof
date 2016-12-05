@@ -63,6 +63,8 @@ import java.util.jar.Manifest;
 public class ServerProperties {
   private static final Logger logger = LogManager.getLogger(ServerProperties.class);
 
+  private static final String APP_TITLE = "appTitle";
+
   private static final String FALSE = "false";
   private static final String TRUE = "true";
 /*
@@ -763,5 +765,9 @@ public class ServerProperties {
 
   public String getConfigFileFullPath() {
     return configFileFullPath;
+  }
+
+  public String getAppTitle() {
+    return props.getProperty(APP_TITLE, "NetProF");
   }
 }
