@@ -53,6 +53,7 @@ public class SignUpUser implements IsSerializable {
   private String first;
   private String last;
   private String ip;
+  private String url;
 
   public SignUpUser() {
   }
@@ -72,6 +73,7 @@ public class SignUpUser implements IsSerializable {
    * @param ip
    * @param first
    * @param last
+   * @param url
    */
   public SignUpUser(String userID,
                     String freeTextPassword,
@@ -85,7 +87,7 @@ public class SignUpUser implements IsSerializable {
                     String device,
                     String ip,
                     String first,
-                    String last) {
+                    String last, String url) {
     this.userID = userID;
     this.passwordH = passwordH;
     this.freeTextPassword = freeTextPassword;
@@ -99,6 +101,7 @@ public class SignUpUser implements IsSerializable {
     this.ip = ip;
     this.first = first;
     this.last = last;
+    this.url = url;
   }
 
   public String getUserID() {
@@ -165,5 +168,9 @@ public class SignUpUser implements IsSerializable {
   public SignUpUser setMale(boolean male) {
     isMale = male;
     return this;
+  }
+
+  public String getUrl() {
+    return url;
   }
 }

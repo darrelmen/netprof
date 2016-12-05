@@ -82,8 +82,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    * Somehow on subsequent runs, the ids skip by 30 or so?
    * <p>
    * Uses return generated keys to get the user id
-   *
-   * @param age
+   *  @param age
    * @param gender
    * @param experience
    * @param userAgent
@@ -95,19 +94,20 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    * @param permissions
    * @param kind
    * @param freeTextPassword
-   *@param passwordH
+   * @param passwordH
    * @param emailH
    * @param email
    * @param device
    * @param first
    * @param last       @return newly inserted user id, or 0 if something goes horribly wrong
+   * @param url
    * @see UserManagement#addUser(User)
    */
   @Override
   public int addUser(int age, String gender, int experience, String userAgent,
                      String trueIP, String nativeLang, String dialect, String userID, boolean enabled,
                      Collection<User.Permission> permissions,
-                     User.Kind kind, String freeTextPassword, String passwordH, String emailH, String email, String device, String first, String last) {
+                     User.Kind kind, String freeTextPassword, String passwordH, String emailH, String email, String device, String first, String last, String url) {
     if (passwordH == null) new Exception().printStackTrace();
     try {
       // there are much better ways of doing this...
@@ -267,7 +267,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    * @see mitll.langtest.server.LangTestDatabaseImpl#userExists
    * @see mitll.langtest.server.ScoreServlet#doGet
    */
-  @Override
+/*  @Override
   public User getUser(String id, String passwordHash) {
     User userWhere = getStrictUserWithPass(id, passwordHash);
     if (userWhere == null) {
@@ -277,7 +277,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
           " and empty or different pass is " + userWhere);
     }
     return userWhere;
-  }
+  }*/
 
   /**
    * Shouldn't call this...

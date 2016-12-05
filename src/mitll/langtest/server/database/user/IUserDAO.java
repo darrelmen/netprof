@@ -105,7 +105,7 @@ public interface IUserDAO extends IDAO {
    * @param passwordHash
    * @return
    */
-  User getUser(String id, String passwordHash);
+//  User getUser(String id, String passwordHash);
   //User getUserFreeTextPassword(String id, String freeTextPassword);
 
   /**

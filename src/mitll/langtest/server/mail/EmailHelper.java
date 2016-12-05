@@ -37,6 +37,8 @@ import com.google.gwt.util.tools.shared.StringUtils;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.user.IUserDAO;
+import mitll.langtest.server.rest.RestUserManagement;
+import mitll.langtest.server.services.UserServiceImpl;
 import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -73,17 +75,30 @@ public class EmailHelper {
   private static final String NETPROF_HELP_DLIFLC_EDU = "netprof-help@dliflc.edu";
 
   private static final String HELP_EMAIL = "<a href='mailto:" + NETPROF_HELP_DLIFLC_EDU + "'>NetProF Help</a>";
+
+  /*
   private static final String USER_CONF_FIRST_LINE = "You are now a user of NetProF.<br/>";
-  private static final String USER_CONF_SECOND_LINE = "If you have any questions, see the user manual or email " +
-      HELP_EMAIL + ".";
-  public static final String INVALID_PASSWORD_RESET = "Invalid password reset";
+  private static final String USER_CONF_SECOND_LINE =
+      "If you have any questions, see the user manual or email " + HELP_EMAIL + ".";
+      */
+
+  private static final String INVALID_PASSWORD_RESET = "Invalid password reset";
 
   private final IUserDAO userDAO;
   private final MailSupport mailSupport;
-  private ServerProperties serverProperties;
-  private PathHelper pathHelper;
-  private String REPLY_TO, NP_SERVER;
+  private final ServerProperties serverProperties;
+  private final PathHelper pathHelper;
+  private final String REPLY_TO;
+  private final String NP_SERVER;
 
+  /**
+   * @see RestUserManagement#getEmailHelper
+   * @see UserServiceImpl#getEmailHelper
+   * @param serverProperties
+   * @param userDAO
+   * @param mailSupport
+   * @param pathHelper
+   */
   public EmailHelper(ServerProperties serverProperties,
                      IUserDAO userDAO,
                      MailSupport mailSupport,
@@ -97,7 +112,7 @@ public class EmailHelper {
     REPLY_TO = "admin@" + NP_SERVER;
   }
 
-  public String getHash(String toHash) {
+  private String getHash(String toHash) {
     return StringUtils.toHexString(Md5Utils.getMd5Digest(toHash.getBytes()));
   }
 
@@ -234,7 +249,8 @@ public class EmailHelper {
    * @seex mitll.langtest.client.LangTest#handleCDToken
    * @see mitll.langtest.server.services.UserServiceImpl#enableCDUser(String, String, String)
    */
-  @Deprecated  public String enableCDUser(String token, String emailR, String url, String language) {
+  @Deprecated
+  public String enableCDUser(String token, String emailR, String url, String language) {
     User userWhereEnabledReq = userDAO.getUserWithEnabledKey(token);
     Integer userID;
     if (userWhereEnabledReq == null) {
@@ -335,7 +351,8 @@ public class EmailHelper {
    * @see mitll.langtest.server.services.UserServiceImpl#addUser
    * @seex mitll.langtest.client.user.UserPassLogin#gotSignUp
    */
-  @Deprecated public void addContentDeveloper(String url, String email, User user, MailSupport mailSupport, String language) {
+  @Deprecated
+  public void addContentDeveloper(String url, String email, User user, MailSupport mailSupport, String language) {
     url = trimURL(url);
     String userID1 = user.getUserID();
     String toHash = userID1 + "_" + System.currentTimeMillis();
@@ -392,7 +409,7 @@ public class EmailHelper {
    * @param inviteKey
    * @param mailSupport
    */
-  public void sendInviteEmail(String url,
+/*  public void sendInviteEmail(String url,
                                String email,
                                User inviter,
                                User.Kind atRole,
@@ -418,7 +435,7 @@ public class EmailHelper {
         message,
         "Click to sign up", // link text
         Collections.singleton(EmailList.GORDON_VIDAVER));
-  }
+  }*/
 
   private String getInvitation(String inviterFullName) {
     return "Hi," +
@@ -437,11 +454,11 @@ public class EmailHelper {
    * @param firstName
    * @param mailSupport
    */
-  public void sendConfirmationEmail(String email, String userID1, String firstName, MailSupport mailSupport) {
+/*  public void sendConfirmationEmail(String email, String userID1, String firstName, MailSupport mailSupport) {
     mailSupport.sendEmail(NP_SERVER, email, NETPROF_HELP_DLIFLC_EDU, "Welcome to NetProF", getUserConfirmationEmail(userID1, firstName));
-  }
+  }*/
 
-  private String getUserConfirmationEmail(String userID1, String firstName) {
+  /*private String getUserConfirmationEmail(String userID1, String firstName) {
     return "Hi " +
         firstName + ",<br/><br/>" +
         "Your user id is " + userID1 + ".<br/>" +
@@ -449,7 +466,7 @@ public class EmailHelper {
         USER_CONF_SECOND_LINE +
         "<br/><br/>" +
         CLOSING;
-  }
+  }*/
 
   private String getHelpEmail() {
     return HELP_EMAIL;
