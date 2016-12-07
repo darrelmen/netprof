@@ -102,7 +102,7 @@ public class ResponseExerciseList extends SingleSelectExerciseList {
   public ResponseExerciseList(Panel secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                               UserFeedback feedback,
                               final ExerciseController controller, String instance) {
-    super(secondRow, currentExerciseVPanel, service, feedback, controller, instance, false);
+    super(secondRow, currentExerciseVPanel, service, feedback, controller, instance, false, true);
     innerContainer.getElement().getStyle().setPadding(5, Style.Unit.PX);
     String responseType = controller.getProps().getResponseType();
     responseTypeChanged(responseType);
@@ -354,10 +354,10 @@ public class ResponseExerciseList extends SingleSelectExerciseList {
     return strings == null ? "" : strings.iterator().next();
   }
 
-  private void quizCompleteDisplay() {
+/*  private void quizCompleteDisplay() {
     showMessage(getQuizStatus(), true);
     getScores();
-  }
+  }*/
 
   // @Override
   public Map<String, Collection<String>> getTypeToSelection() {
@@ -370,9 +370,9 @@ public class ResponseExerciseList extends SingleSelectExerciseList {
    * @param typeToSection
    */
 //  @Override
-  protected void loadExercises(final Map<String, Collection<String>> typeToSection) {
-    loadExercisesUsingPrefix(typeToSection, getPrefix(), false, "", false, false);
-  }
+/*  protected void loadExercises(final Map<String, Collection<String>> typeToSection) {
+    loadExercisesUsingPrefix(typeToSection, getPrefix(), "", false, false, false, false);
+  }*/
 
   /**
    * @see FeedbackRecordPanel#postAnswers
@@ -392,7 +392,7 @@ public class ResponseExerciseList extends SingleSelectExerciseList {
     this.quizPanel = quizPanel;
   }
 
-  private void getScores() {
+/*  private void getScores() {
     service.getScoresForUser(getTypeToSelection(), controller.getUser(), getIDs(), new AsyncCallback<QuizCorrectAndScore>() {
       @Override
       public void onFailure(Throwable throwable) {
@@ -405,7 +405,7 @@ public class ResponseExerciseList extends SingleSelectExerciseList {
         quizPanel.setVisible(true);
       }
     });
-  }
+  }*/
 
   private static class MySafeHtmlCell extends SafeHtmlCell {
     private final boolean consumeClicks;

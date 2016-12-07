@@ -195,7 +195,7 @@ public class UserListVisitorJoinDAO extends DAO {
     while (rs.next()) {
       visitors.add(rs.getLong(UserListVisitorJoinDAO.USERLISTID));
     }
-    finish(connection, statement, rs);
+    finish(connection, statement, rs, sql);
 
     return visitors;
   }

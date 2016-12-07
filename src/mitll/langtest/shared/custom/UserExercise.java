@@ -136,6 +136,11 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
     this.creator = creatorID;
   }
 
+  public CommonShell getShell() {
+    return new ExerciseShell(getID(), englishSentence, meaning, foreignLanguage, transliteration, context, contextTranslation, displayID);
+  }
+
+
   private void copyAudio(AudioRefExercise exercise) {
     for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) {
       addAudio(audioAttribute);
@@ -250,10 +255,10 @@ public class UserExercise extends AudioExercise implements CombinedMutableUserEx
     this.refSentences = orDefault;
   }
 
-  @Override
+/*  @Override
   public String getRefAudioIndex() {
     return "";
-  }
+  }*/
 
   public void setAvgScore(float avgScore) {
     this.avgScore = avgScore;

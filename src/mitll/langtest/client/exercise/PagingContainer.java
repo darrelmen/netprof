@@ -49,6 +49,7 @@ import mitll.langtest.shared.sorter.ExerciseComparator;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Created with IntelliJ IDEA.
@@ -60,7 +61,8 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class PagingContainer<T extends CommonShell> extends ClickablePagingContainer<T> {
-  // private final Logger logger = Logger.getLogger("PagingContainer");
+  private final Logger logger = Logger.getLogger("PagingContainer");
+
   private static final int MAX_LENGTH_ID = 17;
   private static final int JAPANESE_LENGTH = 9;
   private static final String TRUNCATED = "...";
@@ -69,15 +71,23 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
   private final ExerciseComparator sorter;
   private static final String ENGLISH = "English";
   private final boolean english;
+  private final boolean showExerciseState;
+  private final String instance;
   private int FLLength = MAX_LENGTH_ID;
 
   /**
    * @param controller
    * @param verticalUnaccountedFor
    * @param isRecorder
-   * @see mitll.langtest.client.list.PagingExerciseList#makePagingContainer()
+   * @param showExerciseState
+   * @param instance
+   * @see mitll.langtest.client.list.PagingExerciseList#makePagingContainer
    */
-  public PagingContainer(ExerciseController controller, int verticalUnaccountedFor, boolean isRecorder) {
+  public PagingContainer(ExerciseController controller,
+                         int verticalUnaccountedFor,
+                         boolean isRecorder,
+                         boolean showExerciseState,
+                         String instance) {
     super(controller);
     sorter = new ExerciseComparator(controller.getStartupInfo().getTypeOrder());
     this.verticalUnaccountedFor = verticalUnaccountedFor;
@@ -85,6 +95,9 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
     english = controller.getLanguage().equals(ENGLISH);
     boolean japanese = controller.getLanguage().equalsIgnoreCase("Japanese");
     if (japanese) FLLength = JAPANESE_LENGTH;
+    this.showExerciseState = showExerciseState;
+    this.instance = instance;
+   // logger.info("for " + instance + " show " + showExerciseState + " for recorder " + isRecorder);
   }
 
   protected void addColumnsToTable() {
@@ -183,7 +196,8 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
       @Override
       public SafeHtml getValue(T shell) {
         String columnText = getEnglishText(shell);
-        if (!controller.showCompleted()) {
+
+        if (!showExerciseState) {
           return getColumnToolTip(columnText);
         } else {
           String html = shell.getID();
@@ -192,7 +206,7 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
             STATE state = shell.getState();
 
             boolean isDefect = state == STATE.DEFECT;
-            boolean isFixed = state == STATE.FIXED;
+            boolean isFixed  = state == STATE.FIXED;
             boolean isLL = shell.getSecondState() == STATE.ATTN_LL;
             boolean isRerecord = shell.getSecondState() == STATE.RECORDED;
 

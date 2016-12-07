@@ -104,7 +104,7 @@ public class DynamicRange {
    *
    * @param file audio byte array with header
    * @return true if well formed
-* @see AudioCheck#addDynamicRange
+   * @see AudioCheck#addDynamicRange
    * @see AudioConversion#isValid(File, boolean, boolean)
    */
   public RMSInfo getDynamicRange(File file) {
@@ -289,6 +289,10 @@ public class DynamicRange {
     final double minRMS;
     final double maxRMS;
     final DecimalFormat decimalFormat = new DecimalFormat("##.##");
+
+    public RMSInfo() {
+      this(0, 0, 0, 0, 0, 0);
+    }
 
     RMSInfo(double maxMin, int max, int min, double totalRMS, double minRMS, double maxRMS) {
       this.maxMin = maxMin;

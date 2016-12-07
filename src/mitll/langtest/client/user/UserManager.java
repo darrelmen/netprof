@@ -87,6 +87,7 @@ public class UserManager {
   private final PropertyHandler props;
   private boolean isMale;
   private boolean isTeacher, isAdmin;
+  private User.Kind userKind;
 
   /**
    * @param lt
@@ -127,7 +128,7 @@ public class UserManager {
     if (user != NO_USER_SET) {
      // logger.info("UserManager.login : current user : " + user);
       //console("UserManager.login : current user : " + user);
-      rememberAudioType();
+      //rememberAudioType();
       getPermissionsAndSetUser(user);
     } else {
       userNotification.showLogin();
@@ -175,7 +176,7 @@ public class UserManager {
 //        } else
 //
         if (result == null || //loginType != PropertyHandler.LOGIN_TYPE.ANONYMOUS &&
-            result.getUserKind() == User.Kind.ANONYMOUS) {
+            getUserKind(result) == User.Kind.ANONYMOUS) {
           clearUser();
           userNotification.showLogin();
         } else {
@@ -197,7 +198,7 @@ public class UserManager {
 //    logger.info("UserManager.gotNewUser " + result);
     userNotification.getPermissions().clear();
     if (result != null) {
-      boolean isCD = result.getUserKind() == User.Kind.CONTENT_DEVELOPER;
+      boolean isCD = getUserKind(result) == User.Kind.CONTENT_DEVELOPER;
       for (User.Permission permission : result.getPermissions()) {
         boolean valid = true;
         if (permission == User.Permission.QUALITY_CONTROL ||
@@ -207,13 +208,19 @@ public class UserManager {
         }
       }
       isMale = result.isMale();
-      isTeacher = (result.getUserKind() == User.Kind.TEACHER) || isCD;
+      isTeacher = ((this.userKind = getUserKind(result)) == User.Kind.TEACHER) || isCD;
       isAdmin = result.isAdmin();
-      //logger.info("\t is male " + isMale + " is CD " + isCD + " is teacher " + isTeacher);
-
       userNotification.gotUser(result);
     }
     //console("getPermissionsAndSetUser.onSuccess : " + user);
+  }
+
+  private User.Kind getUserKind(User result) {
+    return result.getUserKind();
+  }
+
+  public User.Kind getUserKind() {
+    return userKind;
   }
 
   /**
@@ -228,7 +235,7 @@ public class UserManager {
     int user = getUser();
     if (user != NO_USER_SET) {
       //logger.info("UserManager.anonymousLogin : current user : " + user);
-      rememberAudioType(); // TODO : necessary?
+      //rememberAudioType(); // TODO : necessary?
       getPermissionsAndSetUser(user);
     } else {
       logger.info("UserManager.anonymousLogin : make new user, since user = " + user);
@@ -277,7 +284,7 @@ public class UserManager {
     }
   }
 
-  private void rememberAudioType() {
+/*  private void rememberAudioType() {
     if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
 
@@ -285,9 +292,9 @@ public class UserManager {
       if (audioType == null) {
         audioType = Result.AUDIO_TYPE_FAST_AND_SLOW;
       }
-      userNotification.rememberAudioType(audioType);
+     // userNotification.rememberAudioType(audioType);
     }
-  }
+  }*/
 
   /**
    * @return id of user
@@ -400,7 +407,7 @@ public class UserManager {
   }
 
   private void clearCookieState() {
-    userNotification.rememberAudioType(Result.AUDIO_TYPE_UNSET);
+   // userNotification.rememberAudioType(Result.AUDIO_TYPE_UNSET);
 /*
     if (USE_COOKIE) {
       Cookies.setCookie("sid", "" + NO_USER_SET);
@@ -436,7 +443,7 @@ public class UserManager {
       // localStorageIfSupported.setItem(getLoginType(), "" + userType);
       logger.info("storeUser : user now " + user.getId() + " / " + getUser() + " audio '" + audioType +
           "' expires in " + (DURATION / 1000) + " seconds");
-      userNotification.rememberAudioType(audioType);
+     // userNotification.rememberAudioType(audioType);
 
       gotNewUser(user);
 

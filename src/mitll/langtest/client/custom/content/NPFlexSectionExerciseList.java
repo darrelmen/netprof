@@ -58,13 +58,14 @@ public class NPFlexSectionExerciseList extends FlexSectionExerciseList {
    * @param currentExercisePanel
    * @param instanceName
    * @param incorrectFirst
+   * @param showFirstNotCompleted
    * @see mitll.langtest.client.custom.PracticeHelper#getMyListLayout(LangTestDatabaseAsync, UserFeedback, UserManager, ExerciseController, SimpleChapterNPFHelper)
    * @see FlexListLayout#makeExerciseList(Panel, Panel, String, boolean)
    */
   public NPFlexSectionExerciseList(FlexListLayout flexListLayout, Panel topRow, Panel currentExercisePanel, String instanceName,
-                                   boolean incorrectFirst) {
+                                   boolean incorrectFirst, boolean showFirstNotCompleted) {
     super(topRow, currentExercisePanel, flexListLayout.service, flexListLayout.feedback,
-        flexListLayout.controller, instanceName, incorrectFirst);
+        flexListLayout.controller, instanceName, incorrectFirst, showFirstNotCompleted);
   }
 
   @Override
@@ -79,6 +80,6 @@ public class NPFlexSectionExerciseList extends FlexSectionExerciseList {
 
   @Override
   protected void noSectionsGetExercises(long userID) {
-    loadExercises(getHistoryTokenFromUIState("", ""), getPrefix(), false, false, false);
+    loadExercises(getHistoryTokenFromUIState("", ""), getPrefix(), false, false, false, false);
   }
 }

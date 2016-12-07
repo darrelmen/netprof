@@ -41,14 +41,12 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.content.NPFlexSectionExerciseList;
 import mitll.langtest.client.custom.exercise.CommentBox;
-import mitll.langtest.client.exercise.ClickablePagingContainer;
-import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.exercise.WaveformExercisePanel;
+import mitll.langtest.client.exercise.*;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.list.SelectionState;
@@ -65,6 +63,7 @@ import mitll.langtest.shared.exercise.HasID;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Sets up recording both ref recordings and context ref recordings.
@@ -77,6 +76,8 @@ import java.util.Map;
  * <T extends CommonShell & AudioRefExercise>
  */
 class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
+  private final Logger logger = Logger.getLogger("RecorderNPFHelper");
+
   private static final String SHOW_ONLY_UNRECORDED = "Show Only Unrecorded";
 
   private final boolean doNormalRecording;
@@ -91,8 +92,11 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
    * @param doNormalRecording
    * @see Navigation#Navigation
    */
-  RecorderNPFHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager,
-                    ExerciseController controller, boolean doNormalRecording,
+  RecorderNPFHelper(LangTestDatabaseAsync service,
+                    UserFeedback feedback,
+                    UserManager userManager,
+                    ExerciseController controller,
+                    boolean doNormalRecording,
                     ReloadableContainer exerciseList) {
     super(service, feedback, userManager, controller, exerciseList);
     this.doNormalRecording = doNormalRecording;
@@ -120,9 +124,10 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
       @Override
       protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName,
                                                                                  boolean incorrectFirst) {
-        return new NPFlexSectionExerciseList(outerLayout, topRow, currentExercisePanel, instanceName, incorrectFirst) {
-          //private final Logger logger = Logger.getLogger("NPFlexSectionExerciseList_" + instanceName);
+        return new NPFlexSectionExerciseList(outerLayout, topRow, currentExercisePanel, instanceName, incorrectFirst, true) {
+          private final Logger logger = Logger.getLogger("NPFlexSectionExerciseList_" + instanceName);
           private CheckBox filterOnly;
+
 
           @Override
           protected void addTableWithPager(ClickablePagingContainer<CommonShell> pagingContainer) {
@@ -146,15 +151,16 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
             // row 3
             add(pagingContainer.getTableWithPager());
             setOnlyExamples(!doNormalRecording);
+
+            addEventHandler(instanceName);
           }
 
           @Override
           protected void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection,
                                                   String prefix,
-                                                  boolean onlyWithAudioAnno,
-                                                  String exerciseID,
-                                                  boolean onlyUnrecorded, boolean onlyDefaultUser) {
-            super.loadExercisesUsingPrefix(typeToSection, prefix, onlyWithAudioAnno, exerciseID, onlyUnrecorded, onlyDefaultUser);
+                                                  String exerciseID, boolean onlyWithAudioAnno,
+                                                  boolean onlyUnrecorded, boolean onlyDefaultUser, boolean onlyUninspected) {
+            super.loadExercisesUsingPrefix(typeToSection, prefix, exerciseID, onlyWithAudioAnno, onlyUnrecorded, onlyDefaultUser, onlyUninspected);
             filterOnly.setText(setCheckboxTitle(userManager));
           }
 
@@ -188,14 +194,24 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
     };
   }
 
+  private void addEventHandler(final String instanceName) {
+    LangTest.EVENT_BUS.addHandler(AudioChangedEvent.TYPE, authenticationEvent -> {
+      if (!authenticationEvent.getSource().equals(instanceName)) {
+       // logger.info("this " + getClass() + " instance " + instanceName + " updating progress " + authenticationEvent.getSource());
+        getProgressInfo(instanceName);
+      }
+    });
+  }
+
 
   private Widget doMaleFemale() {
     flex.addStyleName("topMargin");
-    getProgressInfo();
+    getProgressInfo("RecordedNPFHelper");
     return flex;
   }
 
-  private void getProgressInfo() {
+  private void getProgressInfo(String instance) {
+    logger.info("Get progress info for " +getClass() + " instance " + instance);
     service.getMaleFemaleProgress(new AsyncCallback<Map<String, Float>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -221,6 +237,15 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
     }
 
     @Override
+    protected void enableNext() {
+      super.enableNext();
+      if (isCompleted()) {
+        showRecordedState(e);
+      }
+    }
+
+
+    @Override
     protected void onLoad() {
       super.onLoad();
       if (!added) {
@@ -233,7 +258,7 @@ class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExerci
         ((Panel) parent).add(c);
         added = true;
       } else {
-        getProgressInfo();
+        getProgressInfo(instance);
       }
     }
 

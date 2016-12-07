@@ -38,6 +38,7 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.HashSet;
@@ -54,8 +55,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> {
-  //private Logger logger = Logger.getLogger("ASRScoringAudioPanel");
-
+  private Logger logger = Logger.getLogger("ASRScoringAudioPanel");
   private static final String ANIMATED_PROGRESS44_GIF = "animated_progress44.gif";
   private static final String WAIT_GIF = LangTest.LANGTEST_IMAGES + ANIMATED_PROGRESS44_GIF;
   private static final String SCORE = "score";
@@ -72,14 +72,18 @@ public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> 
    * @param exerciseID
    * @param exercise
    * @param instance
+   * @param audioType
    */
-  public ASRScoringAudioPanel(String refSentence, LangTestDatabaseAsync service, ExerciseController controller, ScoreListener gaugePanel,
-                              String playButtonSuffix, String exerciseID, T exercise, String instance) {
-    super(refSentence, service, controller, gaugePanel, playButtonSuffix, exerciseID, exercise, instance);
+  public ASRScoringAudioPanel(String refSentence, String transliteration,
+                              LangTestDatabaseAsync service,
+                              ExerciseController controller,
+                              ScoreListener gaugePanel,
+                              String playButtonSuffix, String exerciseID, T exercise, String instance, String audioType) {
+    super(refSentence, transliteration, service, controller, gaugePanel, playButtonSuffix, exerciseID, exercise, instance, audioType);
   }
 
   /**
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.FastAndSlowASRScoringAudioPanel#FastAndSlowASRScoringAudioPanel
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getPanelForAudio
    * @param path
    * @param refSentence
    * @param service
@@ -91,11 +95,13 @@ public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> 
    * @param exerciseID
    * @param exercise
    * @param instance
+   * @param audioType
    */
-  public ASRScoringAudioPanel(String path, String refSentence, LangTestDatabaseAsync service,
+  public ASRScoringAudioPanel(String path, String refSentence, String transliteration, LangTestDatabaseAsync service,
                               ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel,
-                              int rightMargin, String playButtonSuffix, String exerciseID, T exercise, String instance) {
-    super(path, refSentence, service, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix, exerciseID, exercise, instance);
+                              int rightMargin, String playButtonSuffix, String exerciseID, T exercise, String instance, String audioType) {
+    super(path, refSentence, transliteration, service, controller, showSpectrogram, gaugePanel, rightMargin,
+        playButtonSuffix, exerciseID, exercise, instance, audioType);
     this.useScoreToColorBkg = controller.useBkgColorForRef();
   }
 
@@ -113,25 +119,21 @@ public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> 
    * @param height of images returned
    * @param reqid so if many requests are made quickly and the returns are out of order, we can ignore older requests
    */
-  protected void scoreAudio(final String path, long resultID, String refSentence,
-                            final ImageAndCheck wordTranscript, final ImageAndCheck phoneTranscript,
-                            int toUse, int height, final int reqid) {
-    if (path == null) return;
+  protected void scoreAudio(final String path,
+                            long resultID,
+                            String refSentence,
+                            String transliteration,
+                            final ImageAndCheck wordTranscript,
+                            final ImageAndCheck phoneTranscript,
+                            int toUse,
+                            int height,
+                            final int reqid) {
+    if (path == null || path.equals("FILE_MISSING")) return;
     //System.out.println("scoring audio " + path +" with ref sentence " + refSentence + " reqid " + reqid);
     boolean wasVisible = wordTranscript.isVisible();
 
     // only show the spinning icon if it's going to take awhile
-    final Timer t = new Timer() {
-      @Override
-      public void run() {
-        wordTranscript.setUrl(WAIT_GIF);
-       // wordTranscript.getImage().setVisible(true);
-        phoneTranscript.setVisible(false);
-      }
-    };
-
-    // Schedule the timer to run once in 1 seconds.
-    t.schedule(wasVisible ? 1000 : WAIT_GIF_DELAY);
+    final Timer t = getWaitTimer(wordTranscript, phoneTranscript, wasVisible);
 
     //logger.info("ASRScoringAudioPanel.scoreAudio : req " + reqid + " path " + path + " type " + "score" + " width " + toUse);
 
@@ -158,10 +160,30 @@ public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> 
       }
     };
 
+    ImageOptions imageOptions = new ImageOptions(toUse, height, useScoreToColorBkg);
+
+    //logger.info("scoreAudio image options "+ imageOptions);
     if (controller.getProps().shouldUsePhoneToDisplay()) {
-      service.getASRScoreForAudioPhonemes(reqid, resultID, path, refSentence, toUse, height, useScoreToColorBkg, exerciseID, async);
+      service.getASRScoreForAudioPhonemes(reqid, resultID, path, refSentence, transliteration, exerciseID,
+          imageOptions, async);
     } else {
-      service.getASRScoreForAudio(reqid, resultID, path, refSentence, toUse, height, useScoreToColorBkg, exerciseID, async);
+      service.getASRScoreForAudio(reqid, resultID, path, refSentence, transliteration, exerciseID,
+          imageOptions, async);
     }
+  }
+
+  private Timer getWaitTimer(final ImageAndCheck wordTranscript, final ImageAndCheck phoneTranscript, boolean wasVisible) {
+    final Timer t = new Timer() {
+      @Override
+      public void run() {
+        wordTranscript.setUrl(WAIT_GIF);
+       // wordTranscript.getImage().setVisible(true);
+        phoneTranscript.setVisible(false);
+      }
+    };
+
+    // Schedule the timer to run once in 1 seconds.
+    t.schedule(wasVisible ? 1000 : WAIT_GIF_DELAY);
+    return t;
   }
 }

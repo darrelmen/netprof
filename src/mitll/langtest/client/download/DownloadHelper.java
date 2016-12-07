@@ -49,7 +49,6 @@ import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
 import mitll.langtest.client.dialog.DialogHelper;
-import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.list.SelectionState;
 
 import java.util.*;
@@ -60,14 +59,18 @@ public class DownloadHelper {
 
   //  private static final String DOWNLOAD_SPREADSHEET = "Download spreadsheet and audio for selected sections.";
   private static final String DOWNLOAD_AUDIO = "downloadAudio";
+
+  /**
+   * TODO : put this back eventually...
+   */
 //  private final EventRegistration eventRegistration;
 
   private SelectionState selectionState;
   private final FlexSectionExerciseList exerciseList;
   private Collection<String> typeOrder;
-  private Heading selectionStatus;
+  //private Heading selectionStatus;
 
-  public DownloadHelper(EventRegistration eventRegistration, FlexSectionExerciseList exerciseList) {
+  public DownloadHelper(FlexSectionExerciseList exerciseList) {
     //  this.eventRegistration = eventRegistration;
     this.exerciseList = exerciseList;
   }
@@ -99,6 +102,11 @@ public class DownloadHelper {
     this.typeOrder = typeOrder;
   }
 
+  public void downloadContext() {
+    String urlForDownload = toDominoUrl(DOWNLOAD_AUDIO) + getURL(DOWNLOAD_AUDIO, new HashMap<>()) + "&allcontext=true";
+    new DownloadIFrame(urlForDownload);
+  }
+
   private Heading status1 = new Heading(4, "");
   private Heading status2 = new Heading(4, "");
   private Heading status3 = new Heading(4, "");
@@ -109,9 +117,10 @@ public class DownloadHelper {
     isRegular = true;
 
     DivWidget container = new DivWidget();
-    if (selectionState.isEmpty()) {
+    boolean empty = selectionState.isEmpty();
+    if (empty) {
       container.add(new Heading(3, "Download spreadsheet for whole course."));
-      container.add(new Heading(4, "Select a unit or chapter to download audio."));
+      container.add(new Heading(4, "If you also want to download audio, select a unit or chapter."));
     } else {
       status1.setText("");
       status1.setHeight("20px");
@@ -144,8 +153,12 @@ public class DownloadHelper {
       container.add(row);
     }
 
+    String title = "Download Audio and Spreadsheet";
+
+    if (empty) title = "Download Content Spreadsheeet";
+
     closeButton = new DialogHelper(true).show(
-        "Download Audio and Spreadsheet",
+        title,
         Collections.emptyList(),
         container,
         "Download",
@@ -153,7 +166,7 @@ public class DownloadHelper {
         new DialogHelper.CloseListener() {
           @Override
           public void gotYes() {
-            String urlForDownload = toDominoUrl(DOWNLOAD_AUDIO) + getURL(DOWNLOAD_AUDIO, DOWNLOAD_AUDIO, selectionState.getTypeToSection());
+            String urlForDownload = toDominoUrl(DOWNLOAD_AUDIO) + getURL(DOWNLOAD_AUDIO, selectionState.getTypeToSection());
             new DownloadIFrame(urlForDownload);
           }
 
@@ -163,7 +176,7 @@ public class DownloadHelper {
           }
         }, 550);
     closeButton.setType(ButtonType.SUCCESS);
-    closeButton.setEnabled(selectionState.isEmpty());
+    closeButton.setEnabled(empty);
   }
 
   private FluidRow getStatusArea() {
@@ -203,7 +216,7 @@ public class DownloadHelper {
   }
 
   private FluidRow getGenderRow() {
-    DivWidget showGroup = getGenderChoices(false);
+    DivWidget showGroup = getGenderChoices();
     showGroup.addStyleName("topFiveMargin");
     showGroup.addStyleName("bottomFiveMargin");
 
@@ -298,19 +311,16 @@ public class DownloadHelper {
   private final Image rabbit = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "rabbit32.png"));
   private final Image rabbitSelected = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "rabbit32_selected.png"));
 
-  private DivWidget getGenderChoices(boolean selectFirst) {
+  private DivWidget getGenderChoices() {
     ButtonGroup buttonGroup = new ButtonGroup();
     ButtonToolbar buttonToolbar = getToolbar(buttonGroup);
 
     for (final String choice : Arrays.asList(M, F)) {
-      com.github.gwtbootstrap.client.ui.Button choice1 = getChoice(choice, false, new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-          if (choice.equals(M)) isMale = true;
-          else if (choice.equals(F)) isMale = false;
-          isMaleSet = true;
-          showStatus();
-        }
+      com.github.gwtbootstrap.client.ui.Button choice1 = getChoice(choice, false, event -> {
+        if (choice.equals(M)) isMale = true;
+        else if (choice.equals(F)) isMale = false;
+        isMaleSet = true;
+        showStatus();
       });
       buttonGroup.add(choice1);
       if (choice.equals(M)) choice1.setIcon(IconType.MALE);
@@ -392,14 +402,6 @@ public class DownloadHelper {
     return onButton;
   }
 
-  /**
-   * @param widget
-   * @return
-   * @see #getSpeedChoices
-   */
-//  private void addTooltip(Widget widget) {
-//    new TooltipHelper().addTooltip(widget, "Click for slow speed audio.");
-//  }
   private String toDominoUrl(String relativeLoc) {
     String baseUrl = GWT.getHostPageBaseURL();
     StringBuilder dominoUrl = new StringBuilder();
@@ -415,13 +417,12 @@ public class DownloadHelper {
     return dominoUrl.toString();
   }
 
-  private String getURL(String command, String request, Map<String, Collection<String>> typeToSection) {
+  private String getURL(String request, Map<String, Collection<String>> typeToSection) {
     return //command +
         "?" +
-            "request" +
-            "=" + request +
-            "&unit=" + typeToSection +
-            "&male=" + isMale +
+            "request="  + request +
+            "&unit="    + typeToSection +
+            "&male="    + isMale +
             "&regular=" + isRegular +
             "&context=" + isContext
         ;

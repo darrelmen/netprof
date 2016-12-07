@@ -81,7 +81,7 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
    * @see #getShell()
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseShells
    */
-  private ExerciseShell(String id, String englishSentence, String meaning, String foreignLanguage,
+  public ExerciseShell(String id, String englishSentence, String meaning, String foreignLanguage,
                         String transliteration, String context, String contextTranslation, String displayID) {
     super(id);
     this.englishSentence = englishSentence;
@@ -98,7 +98,8 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
    * @see mitll.langtest.server.LangTestDatabaseImpl#getExerciseShells(java.util.Collection)
    */
   public CommonShell getShell() {
-    return new ExerciseShell(getID(), englishSentence, meaning, foreignLanguage, transliteration, context, contextTranslation, displayID);
+    return this;
+//    return new ExerciseShell(getID(), englishSentence, meaning, foreignLanguage, transliteration, context, contextTranslation, displayID);
   }
 
   public String getEnglish() {

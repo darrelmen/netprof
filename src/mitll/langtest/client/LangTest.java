@@ -43,6 +43,8 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.HasClickHandlers;
+import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -76,6 +78,7 @@ import mitll.langtest.shared.Result;
 import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.User;
 import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.scoring.ImageOptions;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -200,13 +203,19 @@ import java.util.logging.Logger;
  * - Support for Hindi - added comment on text for recording audio.
  * 1.5.12
  * - Fix for filtering bug where would not filter out recordings made by a user in the same day
- *
+ * 1.5.13
+ * - Fix for Bug #739 - recording summary total doesn't reflect transcript mismatch
+ * 1.5.14
+ * - Fixes for audio recording, commenting on audio
+ * 1.5.15
+ * - Fixes for indicating which audio in fix defects is actually presented, fix for bug #751
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class LangTest implements EntryPoint, UserFeedback, ExerciseController, UserNotification {
   private final Logger logger = Logger.getLogger("LangTest");
 
-  public static final String VERSION_INFO = "1.5.12";
+  public static final String VERSION_INFO = "1.5.15";
+
   private static final String VERSION = "v" + VERSION_INFO + "&nbsp;";
 
   private static final String UNKNOWN = "unknown";
@@ -217,8 +226,6 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   private UserManager userManager;
   private FlashRecordPanelHeadless flashRecordPanel;
-
-  private String audioType = Result.AUDIO_TYPE_UNSET;
 
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
   private final BrowserCheck browserCheck = new BrowserCheck();
@@ -231,6 +238,7 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
   private final KeyPressHelper keyPressHelper = new KeyPressHelper(false, true);
   private boolean isMicConnected = true;
   private InitialUI initialUI;
+  public static EventBus EVENT_BUS = GWT.create(SimpleEventBus.class);
 
   /**
    * This gets called first.
@@ -374,7 +382,8 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
       ifPresent.req = -1;
       client.onSuccess(ifPresent);
     } else {
-      service.getImageForAudioFile(reqid, path, type, toUse, height, exerciseID, new AsyncCallback<ImageResponse>() {
+      ImageOptions imageOptions = new ImageOptions(toUse, height, useBkgColorForRef());
+      service.getImageForAudioFile(reqid, path, type, imageOptions, exerciseID, new AsyncCallback<ImageResponse>() {
         public void onFailure(Throwable caught) {
        /*   if (!caught.getMessage().trim().equals("0")) {
             Window.alert("getImageForAudioFile Couldn't contact server. Please check network connection.");
@@ -721,27 +730,10 @@ public class LangTest implements EntryPoint, UserFeedback, ExerciseController, U
 
   @Override
   public void rememberAudioType(String audioType) {
-    this.audioType = audioType;
+   // this.audioType = audioType;
   }
 
-  public boolean showCompleted() {
-    return isReviewMode() || getAudioType().equals(Result.AUDIO_TYPE_RECORDER);
-  }
-
-  /**
-   * TODO : Hack - don't use audio type like this
-   *
-   * @return
-   */
-  @Override
-  public String getAudioType() {
-    if (permissions.contains(User.Permission.RECORD_AUDIO)) return Result.AUDIO_TYPE_RECORDER;
-    else return audioType;
-  }
-
-  private boolean isReviewMode() {
-    return audioType.equals(Result.AUDIO_TYPE_REVIEW);
-  }
+  public User.Kind getUserKind() { return userManager.getUserKind(); }
 
   private final Set<User.Permission> permissions = new HashSet<User.Permission>();
 

@@ -45,6 +45,7 @@ import mitll.langtest.shared.flashcard.QuizCorrectAndScore;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.scoring.AudioContext;
+import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.Collection;
@@ -76,10 +77,10 @@ public interface LangTestDatabaseAsync {
                       boolean allowAlternates, AsyncCallback<AudioAnswer> async);
 
 
-  void getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence, int width, int height,
-                           boolean useScoreToColorBkg, String exerciseID, AsyncCallback<PretestScore> async);
+  void getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence, String transliteration,
+                           String exerciseID, ImageOptions imageOptions, AsyncCallback<PretestScore> async);
 
-  void getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, String exerciseID,
+  void getImageForAudioFile(int reqid, String audioFile, String imageType, ImageOptions imageOptions, String exerciseID,
                             AsyncCallback<ImageResponse> async);
 
   void getScoreForAnswer(AudioContext audioContext, String answer,
@@ -138,7 +139,7 @@ public interface LangTestDatabaseAsync {
 
   void setExerciseState(String id, STATE state, long userID, AsyncCallback<Void> async);
 
-  void isValidForeignPhrase(String foreign, AsyncCallback<Boolean> async);
+  void isValidForeignPhrase(String foreign, String transliteration, AsyncCallback<Boolean> async);
 
   void deleteList(long id, AsyncCallback<Boolean> async);
 
@@ -179,6 +180,7 @@ public interface LangTestDatabaseAsync {
    */
   void getAlignment(String base64EncodedString,
                     String textToAlign,
+                    String transliteration,
                     String identifier,
                     int reqid, String device, AsyncCallback<AudioAnswer> async);
 
@@ -204,13 +206,13 @@ public interface LangTestDatabaseAsync {
 
   void addRoundTrip(long resultid, int roundTrip, AsyncCallback<Void> async);
 
-  void getResultASRInfo(long resultID, int width, int height, AsyncCallback<PretestScore> async);
+  void getResultASRInfo(long resultID, ImageOptions imageOptions, AsyncCallback<PretestScore> async);
 
   void changeEnabledFor(int userid, boolean enabled, AsyncCallback<Void> async);
 
-  void getASRScoreForAudioPhonemes(int reqid, long resultID, String testAudioFile, String sentence,
-                                   int width, int height, boolean useScoreToColorBkg, String exerciseID,
-                                   AsyncCallback<PretestScore> async);
+  void getASRScoreForAudioPhonemes(int reqid, long resultID, String testAudioFile, String sentence, String transliteration,
+                                   String exerciseID,
+                                   ImageOptions imageOptions, AsyncCallback<PretestScore> async);
 
   void getContextPractice(AsyncCallback<ContextPractice> async);
 

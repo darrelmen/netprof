@@ -109,7 +109,15 @@ public class Navigation implements RequiresResize, ShowTab {
   private static final String LEARN = "learn";
   private static final String RECORD_AUDIO = "Record Audio";
   private static final String RECORD_EXAMPLE = "Record In-context Audio";
-  private static final String CONTENT1 = "content";
+
+  /**
+   * @see #selectPreviousTab
+   */
+  //private static final String CONTENT1 = "content";
+
+  /**
+   * @see #addDefectsTabs
+   */
   private static final String MARK_DEFECTS1 = "markDefects";
 
   private static final int STUDY_LISTS_INDEX = 2;
@@ -165,7 +173,7 @@ public class Navigation implements RequiresResize, ShowTab {
         return new MyFlexListLayout<CommonShell, CommonExercise>(service, feedback, controller, outer) {
           @Override
           protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName, boolean incorrectFirst) {
-            return new NPFlexSectionExerciseList(this, topRow, currentExercisePanel, instanceName, incorrectFirst);
+            return new NPFlexSectionExerciseList(this, topRow, currentExercisePanel, instanceName, incorrectFirst, false);
           }
         };
       }
@@ -186,7 +194,7 @@ public class Navigation implements RequiresResize, ShowTab {
 
     markDefectsHelper = new MarkDefectsChapterNPFHelper(service, feedback, userManager, controller, learnHelper);
     practiceHelper = new PracticeHelper(service, feedback, userManager, controller);
-    recorderHelper = new RecorderNPFHelper(service, feedback, userManager, controller, true, learnHelper);
+    recorderHelper = new RecorderNPFHelper(service, feedback, userManager, controller,      true,  learnHelper);
     recordExampleHelper = new RecorderNPFHelper(service, feedback, userManager, controller, false, learnHelper);
   }
 
@@ -627,7 +635,7 @@ public class Navigation implements RequiresResize, ShowTab {
       } else if (value.equals(RECORD_EXAMPLE)) {
         recordExampleHelper.showNPF(recordExampleTab, "record_example_audio");
       } else if (value.equals(MARK_DEFECTS) && markDefectsTab != null) {
-        markDefectsHelper.showNPF(markDefectsTab, CONTENT1);
+        markDefectsHelper.showNPF(markDefectsTab, MARK_DEFECTS1);
       } else if (value.equals(PRACTICE) && practiceTab != null) {
         showPracticeTab();
       } else if (value.equals(ANALYSIS) && analysis != null) {

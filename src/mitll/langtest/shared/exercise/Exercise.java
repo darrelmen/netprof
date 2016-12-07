@@ -103,6 +103,13 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return refSentences;
   }
 
+  public CommonShell getShell() {
+    ExerciseShell exerciseShell = new ExerciseShell(getID(), englishSentence, meaning, foreignLanguage, transliteration, context, contextTranslation, displayID);
+//    exerciseShell.setState(getState());
+//    exerciseShell.setSecondState(getSecondState());
+    return exerciseShell;
+  }
+
   /**
    * @param sentenceRefs
    * @see mitll.langtest.server.database.exercise.ExcelImport#getExercise
@@ -120,11 +127,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
   @Override
   public void setContextTranslation(String context) {
     this.contextTranslation = context;
-  }
-
-  @Override
-  public String getRefAudioIndex() {
-    return refAudioIndex;
   }
 
   @Override

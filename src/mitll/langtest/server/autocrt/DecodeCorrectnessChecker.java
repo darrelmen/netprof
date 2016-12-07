@@ -33,12 +33,12 @@
 package mitll.langtest.server.autocrt;
 
 import mitll.langtest.server.audio.AudioFileHelper;
+import mitll.langtest.server.audio.DecoderOptions;
 import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.scoring.AlignDecode;
 import mitll.langtest.server.scoring.Scoring;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.AudioAnswer;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.log4j.Logger;
@@ -47,8 +47,11 @@ import java.io.File;
 import java.util.*;
 
 /**
- * AutoCRT support -- basically wrapping Jacob's work that lives in mira.jar <br></br>
- * Does some work to make a lm and lattice file suitable for doing small vocabulary decoding.
+ * Normalize input and compare decoder output against possible results to determine whether
+ * the text was correctly decoded or not.
+ * <p>
+ * For instance, the decoder could return only a subset of the expected tokens
+ * and so the audio would be marked as incorrect.
  * <p/>
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -70,7 +73,7 @@ public class DecodeCorrectnessChecker {
    * @see AudioFileHelper#makeDecodeCorrectnessChecker()
    */
   public DecodeCorrectnessChecker(AlignDecode alignDecode, double minPronScore) {
-    this.alignDecode  = alignDecode;
+    this.alignDecode = alignDecode;
     this.minPronScore = minPronScore;
   }
 
@@ -80,21 +83,21 @@ public class DecodeCorrectnessChecker {
    * @param commonExercise
    * @param audioFile
    * @param answer
-   * @param canUseCache
-   * @param allowAlternates
-   * @param useOldSchool
    * @see mitll.langtest.server.LangTestDatabaseImpl#writeAudioFile
    * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer
    */
-  public PretestScore getFlashcardAnswer(CommonShell commonExercise, File audioFile, AudioAnswer answer,
-                                         String language, boolean canUseCache, boolean allowAlternates,
-                                         boolean useOldSchool) {
-    Collection<String> foregroundSentences = getRefSentences(commonExercise, language, allowAlternates);
-    PretestScore flashcardAnswer = getFlashcardAnswer(audioFile, foregroundSentences, answer, canUseCache, useOldSchool);
+  public PretestScore getDecodeScore(CommonShell commonExercise,
+                                     File audioFile,
+                                     AudioAnswer answer,
+                                     String language,
+                                     DecoderOptions decoderOptions
+  ) {
+    Collection<String> foregroundSentences = getRefSentences(commonExercise, language, decoderOptions.isAllowAlternates());
+    PretestScore decodeScore = getDecodeScore(audioFile, foregroundSentences, answer, decoderOptions);
     // log what happened
     logDecodeOutput(answer, foregroundSentences, commonExercise.getID());
 
-    return flashcardAnswer;
+    return decodeScore;
   }
 
   private void logDecodeOutput(AudioAnswer answer, Collection<String> foregroundSentences, String id) {
@@ -107,7 +110,7 @@ public class DecodeCorrectnessChecker {
 //          "pron score was " + score + " answer " + answer);
     } else {
       int length = foregroundSentences.isEmpty() ? 0 : foregroundSentences.iterator().next().length();
-      logger.info("getFlashcardAnswer : incorrect response for exercise #" + id +
+      logger.info("getDecodeScore : incorrect response for exercise #" + id +
           " reco sentence was '" + decodeOutput + "' (" + decodeOutput.length() +
           ") vs " + "'" + foregroundSentences + "' (" + length +
           ") pron score was " + score);
@@ -131,17 +134,17 @@ public class DecodeCorrectnessChecker {
    * @param possibleSentences any of these can match and we'd call this a correct response
    * @param answer            holds the score, whether it was correct, the decode output, and whether one of the
    *                          possible sentences
-   * @param canUseCache
-   * @param useOldSchool
    * @return PretestScore word/phone alignment with scores
-   * @paramx firstPronLength
-   * @see #getFlashcardAnswer
+   * @see #getDecodeScore
    */
-  private PretestScore getFlashcardAnswer(File audioFile, Collection<String> possibleSentences, AudioAnswer answer,
-                                          boolean canUseCache, boolean useOldSchool) {
+  private PretestScore getDecodeScore(File audioFile, Collection<String> possibleSentences, AudioAnswer answer,
+                                      DecoderOptions decoderOptions
+
+  ) {
     List<String> lmSentences = removePunct(possibleSentences);
-//    logger.debug("getFlashcardAnswer " + possibleSentences + " : '" + lmSentences + "'");
-    PretestScore asrScoreForAudio = alignDecode.getASRScoreForAudio(audioFile, lmSentences, canUseCache, useOldSchool);
+//    logger.debug("getDecodeScore " + possibleSentences + " : '" + lmSentences + "'");
+    //making the transliteration empty as I don't think it is useful here
+    PretestScore asrScoreForAudio = alignDecode.getASRScoreForAudio(audioFile, lmSentences, "", decoderOptions);
 
     String recoSentence =
         asrScoreForAudio != null && asrScoreForAudio.getRecoSentence() != null ?
@@ -165,7 +168,7 @@ public class DecodeCorrectnessChecker {
    * @return
    */
   private boolean isCorrect(Collection<String> answerSentences, String recoSentence) {
-    if (DEBUG) logger.debug("isCorrect - expected '" + answerSentences + "' vs heard '" + recoSentence +"'");
+    if (DEBUG) logger.debug("isCorrect - expected '" + answerSentences + "' vs heard '" + recoSentence + "'");
 
     List<String> recoTokens = svd.getTokens(recoSentence);
     for (String answer : answerSentences) {
@@ -178,10 +181,12 @@ public class DecodeCorrectnessChecker {
         for (int i = 0; i < answerTokens.size() && same; i++) {
           String s = answerTokens.get(i);
           String anotherString = recoTokens.get(i);
-          if (DEBUG)  logger.debug("comparing '" + s + "' " +s.length()+ " to '" + anotherString  +"' "  +anotherString.length());
+          if (DEBUG)
+            logger.debug("comparing '" + s + "' " + s.length() + " to '" + anotherString + "' " + anotherString.length());
           same = s.equalsIgnoreCase(anotherString);
           if (!same) {
-            if (DEBUG) logger.debug("comparing '" + s + "' " + s.length() + " to '" + anotherString + "' " + anotherString.length());
+            if (DEBUG)
+              logger.debug("comparing '" + s + "' " + s.length() + " to '" + anotherString + "' " + anotherString.length());
           }
         }
         if (same) return true;
@@ -194,20 +199,21 @@ public class DecodeCorrectnessChecker {
   }
 
   /**
-   * @param other
-   * @param allowAlternates
-   * @return
-   * @see #getFlashcardAnswer
+   * @param toDecode        exercise to get text from
+   * @param language        mandarin and possibly toDecode languages require special segmentation
+   * @param allowAlternates true if we want to decode against multiple possible paths
+   * @return possible paths for the decoder
+   * @see #getDecodeScore
    */
-  private Collection<String> getRefSentences(CommonShell other, String language, boolean allowAlternates) {
+  private Collection<String> getRefSentences(CommonShell toDecode, String language, boolean allowAlternates) {
     if (allowAlternates) {
       Set<String> ret = new HashSet<>();
-      for (String alt : other.getRefSentences()) ret.add(getPhraseToDecode(alt, language));
+      for (String alt : toDecode.getRefSentences()) ret.add(getPhraseToDecode(alt, language));
       return ret;
     } else {
-      String phraseToDecode = getPhraseToDecode(other.getForeignLanguage(), language);
+      String phraseToDecode = getPhraseToDecode(toDecode.getForeignLanguage(), language);
 /*      logger.debug("(" + language +
-          ") for " + other.getID() + " fl is '" + other.getForeignLanguage() + "' / '" +other.getForeignLanguage().trim()+
+          ") for " + toDecode.getID() + " fl is '" + toDecode.getForeignLanguage() + "' / '" +toDecode.getForeignLanguage().trim()+
           "' -> '" + phraseToDecode +          "'");*/
       return Collections.singleton(phraseToDecode);
     }
@@ -227,9 +233,9 @@ public class DecodeCorrectnessChecker {
   }
 
   /**
-   * @see #getFlashcardAnswer(File, Collection, AudioAnswer, boolean, boolean)
    * @param possibleSentences
    * @return
+   * @see #getDecodeScore
    */
   private List<String> removePunct(Collection<String> possibleSentences) {
     List<String> foreground = new ArrayList<String>();
@@ -242,12 +248,13 @@ public class DecodeCorrectnessChecker {
   /**
    * Replace elipsis with space. Then remove all punct.
    * Replace commas with spaces.
+   * <p>
+   * Deal with forward slashes like in english.
    *
-   *  Deal with forward slashes like in english.
    * @param t
    * @return
    */
   private String removePunct(String t) {
-    return t.replaceAll("\\.\\.\\.", " ").replaceAll("/", " ").replaceAll(","," ").replaceAll("\\p{P}", "");
+    return t.replaceAll("\\.\\.\\.", " ").replaceAll("/", " ").replaceAll(",", " ").replaceAll("\\p{P}", "");
   }
 }

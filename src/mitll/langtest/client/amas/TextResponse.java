@@ -40,6 +40,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.i18n.client.HasDirection;
+import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -50,6 +51,7 @@ import mitll.langtest.client.PopupHelper;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.Answer;
+import mitll.langtest.shared.Result;
 import mitll.langtest.shared.scoring.AudioContext;
 
 import java.util.Collection;
@@ -162,7 +164,7 @@ class TextResponse {
     boolean allowPaste = controller.getProps().isDemoMode();
     final TextBox noPasteAnswer = getAnswerBox(controller, allowPaste, answerButton, getFocus);
     noPasteAnswer.setWidth(TEXT_BOX_WIDTH + "px");
-    String answerType = controller.getAudioType();
+    String answerType = Result.AUDIO_TYPE_REGULAR;
     setupSubmitButton(exerciseID, service, answerButton, noPasteAnswer, scoreFeedback, answerType, addEnterKeyBinding, questionID);
 
     // button then text box
@@ -248,7 +250,9 @@ class TextResponse {
 
     noPasteAnswer.addKeyUpHandler(new KeyUpHandler() {
       public void onKeyUp(KeyUpEvent event) {
-        check.setEnabled(noPasteAnswer.getText().length() > 0);
+        String text = noPasteAnswer.getText();
+        text = sanitize(text);
+        check.setEnabled(!text.isEmpty());
       }
     });
 
@@ -260,6 +264,10 @@ class TextResponse {
       });
     }
     return noPasteAnswer;
+  }
+
+  private String sanitize(String text) {
+    return SimpleHtmlSanitizer.sanitizeHtml(text).asString();
   }
 
   /**

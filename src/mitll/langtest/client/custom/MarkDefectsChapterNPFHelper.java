@@ -37,12 +37,12 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.LangTest;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.content.NPFlexSectionExerciseList;
-import mitll.langtest.client.exercise.ClickablePagingContainer;
-import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.client.exercise.*;
+import mitll.langtest.client.list.HistoryExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.qc.QCNPFExercise;
@@ -51,6 +51,8 @@ import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
+import java.util.logging.Logger;
+
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -58,24 +60,39 @@ import mitll.langtest.shared.exercise.CommonShell;
  * @since 3/30/16.
  */
 class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
-  private static final String SHOW_ONLY_AUDIO_BY_UNKNOWN_GENDER = "Show Only Audio by Unknown Gender";
+  private final Logger logger = Logger.getLogger("MarkDefectsChapterNPFHelper");
 
+  private static final String SHOW_ONLY_UNINSPECTED_ITEMS = "Show Only Uninspected Items.";
+  private static final String SHOW_ONLY_AUDIO_BY_UNKNOWN_GENDER = "Show Only Audio by Unknown Gender";
   private static final String MARK_DEFECTS1 = "markDefects";
 
   /**
-   * @see Navigation#Navigation(LangTestDatabaseAsync, UserManager, ExerciseController, UserFeedback)
    * @param service
    * @param feedback
    * @param userManager
    * @param controller
    * @param learnHelper
+   * @see Navigation#Navigation(LangTestDatabaseAsync, UserManager, ExerciseController, UserFeedback)
    */
-  MarkDefectsChapterNPFHelper( LangTestDatabaseAsync service,
-                                     UserFeedback feedback, UserManager userManager, ExerciseController controller,
-                                     SimpleChapterNPFHelper learnHelper) {
+  MarkDefectsChapterNPFHelper(LangTestDatabaseAsync service,
+                              UserFeedback feedback,
+                              UserManager userManager,
+                              ExerciseController controller,
+                              SimpleChapterNPFHelper learnHelper) {
     super(service, feedback, userManager, controller, learnHelper);
   }
 
+  /**
+   * Adds two checkboxes to filter for uninspected items and items with audio that's old enough it's not marked
+   * by gender.
+   *
+   * @param service
+   * @param feedback
+   * @param userManager
+   * @param controller
+   * @param outer
+   * @return
+   */
   @Override
   protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(LangTestDatabaseAsync service,
                                                                         UserFeedback feedback,
@@ -83,12 +100,15 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
                                                                         ExerciseController controller,
                                                                         SimpleChapterNPFHelper<CommonShell, CommonExercise> outer) {
     return new MyFlexListLayout<CommonShell, CommonExercise>(service, feedback, controller, outer) {
+
       @Override
       protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow,
                                                                                  Panel currentExercisePanel,
-                                                                                 String instanceName, boolean incorrectFirst) {
-        return new NPFlexSectionExerciseList(this, topRow, currentExercisePanel, instanceName, incorrectFirst) {
-          private CheckBox filterOnly;
+                                                                                 String instanceName,
+                                                                                 boolean incorrectFirst) {
+//        logger.info("instance is " + instanceName);
+        return new NPFlexSectionExerciseList(this, topRow, currentExercisePanel, instanceName, incorrectFirst, true) {
+          private CheckBox filterOnly, uninspectedOnly;
 
           @Override
           protected void addTableWithPager(ClickablePagingContainer<CommonShell> pagingContainer) {
@@ -98,27 +118,31 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
             addTypeAhead(column);
 
             // row 2
-            getFilterCheckbox();
-            add(filterOnly);
+            add(filterOnly      = getFilterCheckbox());
+            add(uninspectedOnly = getUninspectedCheckbox());
 
             // row 3
             add(pagingContainer.getTableWithPager());
-            //setOnlyExamples(!doNormalRecording);
+
+            addEventHandler(instanceName, this);
           }
 
-          private void getFilterCheckbox() {
-            filterOnly = new CheckBox(SHOW_ONLY_AUDIO_BY_UNKNOWN_GENDER);
-            filterOnly.addClickHandler(new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                Boolean onlyUnrecorded = filterOnly.getValue();
-    /*            setDefaultAudioFilter(onlyUnrecorded);
-                scheduleWaitTimer();
-                loadExercises(getHistoryToken(""), getTypeAheadText(), false, onlyUnrecorded);*/
-                pushNewSectionHistoryToken();
-              }
-            });
+          /**
+           * @see  #addTableWithPager
+           */
+          private CheckBox getFilterCheckbox() {
+            return addFilter(SHOW_ONLY_AUDIO_BY_UNKNOWN_GENDER);
+          }
+
+          private CheckBox addFilter(String title) {
+            CheckBox filterOnly = new CheckBox(title);
+            filterOnly.addClickHandler(event -> pushNewSectionHistoryToken());
             filterOnly.addStyleName("leftFiveMargin");
+            return filterOnly;
+          }
+
+          private CheckBox getUninspectedCheckbox() {
+            return addFilter(SHOW_ONLY_UNINSPECTED_ITEMS);
           }
 
           /**
@@ -128,10 +152,9 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
            * @return
            */
           protected String getHistoryTokenFromUIState(String search, String id) {
-            String s = super.getHistoryTokenFromUIState(search, id) +
-                ";" +
-                SelectionState.ONLY_DEFAULT +
-                "=" + filterOnly.getValue();
+            String s = super.getHistoryTokenFromUIState(search, id) + ";" +
+                SelectionState.ONLY_DEFAULT + "=" + filterOnly.getValue() + ";" +
+                SelectionState.ONLY_UNINSPECTED + "=" + uninspectedOnly.getValue();
             return s;
           }
 
@@ -139,10 +162,31 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
           protected void restoreUIState(SelectionState selectionState) {
             super.restoreUIState(selectionState);
             filterOnly.setValue(selectionState.isOnlyDefault());
+            uninspectedOnly.setValue(selectionState.isOnlyUninspected());
           }
         };
       }
     };
+  }
+
+  /**
+   * So if you fix a defect in the fix defects tab, want it to be reflected here in mark defects.
+   * For instance if you mark a defect here, and fix it there, coming back here, if you filter
+   * for uninspected, the item should not be there.
+   *
+   * @param instanceName
+   * @param container
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#afterValidForeignPhrase
+   */
+  private void addEventHandler(final String instanceName, HistoryExerciseList container) {
+    LangTest.EVENT_BUS.addHandler(DefectEvent.TYPE, authenticationEvent -> {
+      if (authenticationEvent.getSource().equals(instanceName)) {
+        //logger.info("skip self event from " + instanceName);
+      } else {
+    //    logger.info("---> got defect event " + instanceName);
+        container.reloadFromState();
+      }
+    });
   }
 
   protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(final PagingExerciseList<CommonShell, CommonExercise> exerciseList) {

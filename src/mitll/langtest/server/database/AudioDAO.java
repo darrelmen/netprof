@@ -70,12 +70,9 @@ public class AudioDAO extends DAO {
   private static final String DURATION = "duration";
   private static final String DEFECT = "defect";
   private static final String REGULAR = "regular";
-  private static final String AUDIO_TYPE1 = "context=" + REGULAR;
   private static final String SLOW = "slow";
-  private static final String CONTEXT_REGULAR = AUDIO_TYPE1;
+  private static final String CONTEXT_REGULAR = "context=" + REGULAR;
   private static final String TRANSCRIPT = "transcript";
-  //private static final String FAST_WAV = "Fast" + ".wav";
-  //private static final String SLOW_WAV = "Slow" + ".wav";
 
   public static final String UNKNOWN = "unknown";
   public static final String TOTAL = "total";
@@ -548,11 +545,11 @@ public class AudioDAO extends DAO {
                                         AudioConversion audioConversion,
                                         AudioAttribute attr) {
     String against = attr.isContextAudio() ? firstExercise.getContext() : firstExercise.getForeignLanguage();
-    against = CharMatcher.WHITESPACE.trimFrom(against);
+    against = trimWhitespace(against);
 
     String noAccents = StringUtils.stripAccents(against);
     String transcript = attr.getTranscript();
-    transcript = CharMatcher.WHITESPACE.trimFrom(transcript);
+    transcript = trimWhitespace(transcript);
 
     String noAccentsTranscript = transcript == null ? null : StringUtils.stripAccents(transcript);
     if (attr.matchTranscript(against, transcript) || attr.matchTranscript(noAccents, noAccentsTranscript)) {
@@ -581,6 +578,10 @@ public class AudioDAO extends DAO {
 */
       return false;
     }
+  }
+
+  private String trimWhitespace(String against) {
+    return CharMatcher.WHITESPACE.trimFrom(against);
   }
 
   /**
@@ -626,13 +627,13 @@ public class AudioDAO extends DAO {
    * @return ids with both regular and slow speed recordings
    * @see mitll.langtest.server.LangTestDatabaseImpl#filterByUnrecorded
    */
-  public Set<String> getRecordedBy(long userid) {
+  public Set<String> getRecordedBy(long userid, Map<String, String> exToTranscript) {
     Collection<Long> userMap = getUserIDsMatchingGender(userid);
     //logger.debug("found " + (isMale ? " male " : " female ") + " users : " + userMap.keySet());
     // find set of users of same gender
-    Set<String> validAudioAtReg = getAudioForGender(userMap, REGULAR);
+    Set<String> validAudioAtReg = getAudioForGender(userMap, REGULAR, exToTranscript);
     //logger.debug(" regular speed for " + userMap.keySet() + " " + validAudioAtReg.size());
-    Set<String> validAudioAtSlow = getAudioForGender(userMap, SLOW);
+    Set<String> validAudioAtSlow = getAudioForGender(userMap, SLOW, exToTranscript);
 //    logger.debug(" slow speed for " + userMap.keySet() + " " + validAudioAtSlow.size());
 
     boolean b = validAudioAtReg.retainAll(validAudioAtSlow);
@@ -640,8 +641,8 @@ public class AudioDAO extends DAO {
     return validAudioAtReg;
   }
 
-  public Set<String> getWithContext(long userid) {
-    return getAudioForGender(getUserIDsMatchingGender(userid), CONTEXT_REGULAR);
+  public Set<String> getWithContext(long userid, Map<String, String> exToContext) {
+    return getAudioForGender(getUserIDsMatchingGender(userid), CONTEXT_REGULAR, exToContext);
   }
 
   private Collection<Long> getUserIDsMatchingGender(long userid) {
@@ -654,18 +655,19 @@ public class AudioDAO extends DAO {
   /**
    * select count(distinct exid) from audio where audiotype='regular';
    *
-   * @param userMap
+   * @param userIDs
    * @param audioSpeed
+   * @param exToTranscript
    * @return
    * @see #getRecordedBy
    */
-  private Set<String> getAudioForGender(Collection<Long> userIDs, String audioSpeed) {
+  private Set<String> getAudioForGender(Collection<Long> userIDs, String audioSpeed, Map<String, String> exToTranscript) {
     Set<String> results = new HashSet<>();
     try {
       Connection connection = database.getConnection(this.getClass().toString());
       String s = getInClause(userIDs);
       if (!s.isEmpty()) s = s.substring(0, s.length() - 1);
-      String sql = "SELECT distinct " + Database.EXID +
+      String sql = "SELECT distinct " + Database.EXID + "," + TRANSCRIPT +
           " FROM " + AUDIO +
           " WHERE " +
           (s.isEmpty() ? "" : USERID + " IN (" + s + ") AND ") +
@@ -678,8 +680,14 @@ public class AudioDAO extends DAO {
       ResultSet rs = statement.executeQuery();
       while (rs.next()) {
         String trim = rs.getString(1).trim();
-        if (trim.isEmpty()) logger.warn("huh? got empty exid");
-        results.add(trim);
+        String audioTranscript = rs.getString(2);
+
+        if (audioTranscript != null) {
+          String tran = exToTranscript.get(trim);
+          if (tran != null && isNoAccentMatch(audioTranscript, tran)) {
+            results.add(trim);
+          }
+        }
       }
 
 /*      logger.debug("getAudioForGender for" +
@@ -688,7 +696,7 @@ public class AudioDAO extends DAO {
           "\n\tsql     " + sql +
           "\n\tyielded " + results.size());*/
 
-      finish(connection, statement, rs);
+      finish(connection, statement, rs, sql);
 
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
@@ -726,7 +734,7 @@ public class AudioDAO extends DAO {
    * @paramx uniqueIDs
    * @see DatabaseImpl#getMaleFemaleProgress
    */
-  Map<String, Float> getRecordedReport(Map<Long, User> userMapMales,
+/*  Map<String, Float> getRecordedReport(Map<Long, User> userMapMales,
                                        Map<Long, User> userMapFemales,
                                        float total,
                                        Set<String> uniqueIDs,
@@ -735,26 +743,39 @@ public class AudioDAO extends DAO {
     Set<Long> femaleIDs = userMapFemales.keySet();
 
     return getRecordedReport(maleIDs, femaleIDs, total, uniqueIDs, totalContext);
-  }
+  }*/
 
-  Map<String, Float> getRecordedReport(Set<Long> maleIDs, Set<Long> femaleIDs,
-                                       float total, Set<String> uniqueIDs, float totalContext) {
+  /**
+   * @param total
+   * @param maleIDs
+   * @param femaleIDs
+   * @param uniqueIDs
+   * @return
+   * @see DatabaseImpl#getMaleFemaleProgress
+   */
+  Map<String, Float> getRecordedReport(Set<Long> maleIDs,
+                                       Set<Long> femaleIDs,
+                                       float total,
+                                       Set<String> uniqueIDs,
+                                       Map<String, String> exToTranscript,
+                                       Map<String, String> exToContextTranscript,
+                                       float totalContext) {
     maleIDs = new HashSet<>(maleIDs);
     maleIDs.add((long) UserDAO.DEFAULT_MALE_ID);
 
-    float maleFast = getCountForGender(maleIDs, REGULAR, uniqueIDs);
-    float maleSlow = getCountForGender(maleIDs, SLOW, uniqueIDs);
-    float male = getCountBothSpeeds(maleIDs, uniqueIDs);
+    float maleFast = getCountForGender(maleIDs, REGULAR, uniqueIDs, exToTranscript);
+    float maleSlow = getCountForGender(maleIDs, SLOW, uniqueIDs, exToTranscript);
+    float male = getCountBothSpeeds(maleIDs, uniqueIDs, exToTranscript);
 
     femaleIDs = new HashSet<>(femaleIDs);
     femaleIDs.add((long) UserDAO.DEFAULT_FEMALE_ID);
 
-    float femaleFast = getCountForGender(femaleIDs, REGULAR, uniqueIDs);
-    float femaleSlow = getCountForGender(femaleIDs, SLOW, uniqueIDs);
-    float female = getCountBothSpeeds(femaleIDs, uniqueIDs);
+    float femaleFast = getCountForGender(femaleIDs, REGULAR, uniqueIDs, exToTranscript);
+    float femaleSlow = getCountForGender(femaleIDs, SLOW, uniqueIDs, exToTranscript);
+    float female = getCountBothSpeeds(femaleIDs, uniqueIDs, exToTranscript);
 
-    float cmale = getCountForGender(maleIDs, CONTEXT_REGULAR, uniqueIDs);
-    float cfemale = getCountForGender(femaleIDs, CONTEXT_REGULAR, uniqueIDs);
+    float cmale = getCountForGender(maleIDs, CONTEXT_REGULAR, uniqueIDs, exToContextTranscript);
+    float cfemale = getCountForGender(femaleIDs, CONTEXT_REGULAR, uniqueIDs, exToContextTranscript);
 
     Map<String, Float> report = new HashMap<>();
     report.put(TOTAL, total);
@@ -863,16 +884,20 @@ public class AudioDAO extends DAO {
   }
 
   /**
+   * Worries about matching transcript when counting total -
+   * <p>
    * select count(*) from (select count(*) from (select DISTINCT exid, audiotype from audio where length(exid) > 0 and audiotype='regular' OR audiotype='slow' and defect<>true) where length(exid) > 0 group by exid)
    *
+   * @param userIds
+   * @param audioSpeed
    * @return
-   * @paramx userIds
-   * @paramx audioSpeed
-   * @seex #getRecordedReport(Map, Map, float, Set)
+   * @see <a href="https://gh.ll.mit.edu/DLI-LTEA/Development/issues/739">https://gh.ll.mit.edu/DLI-LTEA/Development/issues/739</a>
+   * @see #getRecordedReport
    */
   private int getCountForGender(Set<Long> userIds,
                                 String audioSpeed,
-                                Set<String> uniqueIDs) {
+                                Set<String> uniqueIDs,
+                                Map<String, String> exToTranscript) {
     Set<String> idsOfRecordedExercises = new HashSet<>();
 
     Set<String> idsOfStaleExercises = new HashSet<>();
@@ -883,25 +908,40 @@ public class AudioDAO extends DAO {
       // logger.info("checking speed " + audioSpeed + " on " + userIds.size() + " users and " + uniqueIDs.size() + " ex ids");
       if (!s.isEmpty()) s = s.substring(0, s.length() - 1);
       String sql = "select " +
-          "distinct " + Database.EXID +
+          "distinct " + Database.EXID + ", " +
+          TRANSCRIPT +
           " from " + AUDIO +
           " WHERE " +
           (s.isEmpty() ? "" : USERID + " IN (" + s + ") AND ") +
-          DEFECT + "<>true " +
-          "AND " + DNR + ">0" +
-          " AND " + AUDIO_TYPE + "='" + audioSpeed + "' ";
+          DEFECT + "<>true " + "AND " +
+          DNR + ">0" + " AND " +
+          AUDIO_TYPE + "='" + audioSpeed + "' ";
       PreparedStatement statement = connection.prepareStatement(sql);
       ResultSet rs = statement.executeQuery();
       while (rs.next()) {
         String exid = rs.getString(1);
-        if (uniqueIDs.contains(exid)) {
-          idsOfRecordedExercises.add(exid);
+        String exerciseFL = exToTranscript.get(exid);
+
+        if (exerciseFL != null) {
+          String transcript = rs.getString(2);
+          boolean isMatch = isNoAccentMatch(transcript, exerciseFL);
+          if (
+              isMatch) {
+            if (uniqueIDs.contains(exid)) {
+              idsOfRecordedExercises.add(exid);
+            } else {
+              idsOfStaleExercises.add(exid);
+              //        logger.debug("getCountForGender skipping stale exid " + exid);
+            }
+
+          } else {
+//            logger.info("1) no match for " + exid + " '" + trimWhitespace(transcript) + "' vs '" + trimWhitespace(exerciseFL) + "'");
+          }
         } else {
-          idsOfStaleExercises.add(exid);
-          //        logger.debug("getCountForGender skipping stale exid " + exid);
+          //        logger.info("2) stale exercise id : no match for " + exid);
         }
       }
-      finish(connection, statement, rs);
+      finish(connection, statement, rs, sql);
 
 /*
       logger.debug("getCountForGender : for " + audioSpeed + "\n\t" + sql + "\n\tgot " + idsOfRecordedExercises.size() +
@@ -914,8 +954,32 @@ public class AudioDAO extends DAO {
     return idsOfRecordedExercises.size();
   }
 
+  private boolean isNoAccentMatch(String transcript, String exerciseFL) {
+    if (exerciseFL == null) return false;
+    String before = trimWhitespace(exerciseFL);
+    String trimmed = trimWhitespace(transcript);
+    String noAccents = StringUtils.stripAccents(before);
+    //String transcript = audio.getTranscript();
+    String noAccentsTranscript = trimmed == null ? null : StringUtils.stripAccents(trimmed);
+
+    return matchTranscript(before, trimmed) ||
+        matchTranscript(noAccents, noAccentsTranscript);
+  }
+
+  private boolean matchTranscript(String foreignLanguage, String transcript) {
+    return transcript == null ||
+        foreignLanguage.isEmpty() ||
+        transcript.isEmpty() ||
+        removePunct(transcript).toLowerCase().equals(removePunct(foreignLanguage).toLowerCase());
+  }
+
+  private String removePunct(String t) {
+    return t.replaceAll("\\p{P}", "").replaceAll("\\s++", "");
+  }
+
   private int getCountBothSpeeds(Set<Long> userIds,
-                                 Set<String> uniqueIDs) {
+                                 Set<String> uniqueIDs,
+                                 Map<String, String> exToTranscript) {
     Set<String> results = new HashSet<>();
 
     try {
@@ -932,22 +996,33 @@ public class AudioDAO extends DAO {
 //              ") where length(exid) > 0 group by exid) where count1 = 2";
 ////        ;
 
-      String sql = "select exid from (select exid,count(*) as count1 from " +
-          "(select DISTINCT exid, audiotype from audio " +
+      String sql = "select exid," + TRANSCRIPT +
+          "  from (select exid," + TRANSCRIPT + "," +
+          "count(*) as count1 from " +
+          "(select DISTINCT exid, audiotype," + TRANSCRIPT +
+          " from audio " +
           "where length(exid) > 0 and audiotype='regular' OR audiotype='slow' and defect<>true " +
           (s.isEmpty() ? "" : "AND " + USERID + " IN (" + s + ") ") +
           ") " +
-          "where length(exid) > 0 group by exid) where count1 = 2";
+          "where length(exid) > 0 group by exid," + TRANSCRIPT +
+          ") where count1 = 2";
 
       PreparedStatement statement = connection.prepareStatement(sql);
       ResultSet rs = statement.executeQuery();
       while (rs.next()) {
         String id = rs.getString(1);
-        if (uniqueIDs.contains(id)) {
-          results.add(id);
+        String transcript = rs.getString(2);
+        String exerciseFL = exToTranscript.get(id);
+
+        if (isNoAccentMatch(transcript, exerciseFL)) {
+          if (uniqueIDs.contains(id)) {
+            results.add(id);
+          }
+        } else {
+//          logger.info("both : no match for " + id + " '" + transcript +  "' vs '" + exerciseFL + "'");
         }
       }
-      finish(connection, statement, rs);
+      finish(connection, statement, rs, sql);
 
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
@@ -971,11 +1046,11 @@ public class AudioDAO extends DAO {
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#markRecordedState
    */
-  public Set<String> getRecordedForUser(long userid) {
+  public Set<String> getRecordedForUser(long userid,
+                                        Map<String, String> exToTranscript) {
     try {
-      Set<String> validAudioAtReg = getValidAudioOfType(userid, REGULAR);
-      Set<String> validAudioAtSlow = getValidAudioOfType(userid, SLOW);
-      /*boolean b =*/
+      Set<String> validAudioAtReg = getValidAudioOfType(userid, REGULAR, exToTranscript);
+      Set<String> validAudioAtSlow = getValidAudioOfType(userid, SLOW, exToTranscript);
       validAudioAtReg.retainAll(validAudioAtSlow);
       return validAudioAtReg;
     } catch (Exception ee) {
@@ -991,25 +1066,29 @@ public class AudioDAO extends DAO {
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#markRecordedState(int, String, java.util.Collection, boolean)
    */
-  public Set<String> getRecordedExampleForUser(long userid) {
+  public Set<String> getRecordedExampleForUser(long userid,
+                                               Map<String, String> exToTranscript) {
     try {
-      return getValidAudioOfType(userid, AUDIO_TYPE1);
+      return getValidAudioOfType(userid, CONTEXT_REGULAR, exToTranscript);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
     return new HashSet<>();
   }
 
-  private Set<String> getValidAudioOfType(long userid, String audioType) throws SQLException {
-    String sql = "SELECT " + Database.EXID +
-        " FROM " + AUDIO + " WHERE " + USERID + "=" + userid +
+  private Set<String> getValidAudioOfType(long userid, String audioType, Map<String, String> exToTranscript) throws SQLException {
+    String sql = "SELECT " + Database.EXID + ", " + TRANSCRIPT +
+        " FROM " + AUDIO +
+        " WHERE " + USERID + "=" + userid +
         " AND " + DEFECT + "<>true " +
+        " AND " + DNR + ">0" +
+
         " AND " + AUDIO_TYPE + "='" + audioType + "'";
 
     // logger.debug("sql " + sql);
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
-    return getExidResultsForQuery(connection, statement);
+    return getExidResultsForQuery(connection, statement, exToTranscript, sql);
   }
 
   /**
@@ -1022,7 +1101,7 @@ public class AudioDAO extends DAO {
   private List<AudioAttribute> getResultsSQL(String sql) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
-    return getResultsForQuery(connection, statement);
+    return getResultsForQuery(connection, statement, sql);
   }
 
   private int c = 0;
@@ -1032,11 +1111,12 @@ public class AudioDAO extends DAO {
    *
    * @param connection
    * @param statement
+   * @param sql
    * @return
    * @throws java.sql.SQLException
    * @see #getResultsSQL(String)
    */
-  private List<AudioAttribute> getResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
+  private List<AudioAttribute> getResultsForQuery(Connection connection, PreparedStatement statement, String sql) throws SQLException {
     ResultSet rs = statement.executeQuery();
     List<AudioAttribute> results = new ArrayList<>();
     Map<Long, MiniUser> miniUsers = userDAO.getMiniUsers();
@@ -1074,7 +1154,7 @@ public class AudioDAO extends DAO {
     }
     //   logger.debug("found " + results.size() + " audio attributes");
 
-    finish(connection, statement, rs);
+    finish(connection, statement, rs, sql);
 
     return results;
   }
@@ -1090,13 +1170,26 @@ public class AudioDAO extends DAO {
     return user;
   }
 
-  private Set<String> getExidResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
+  private Set<String> getExidResultsForQuery(Connection connection,
+                                             PreparedStatement statement,
+                                             Map<String, String> exToTranscript, String sql) throws SQLException {
     ResultSet rs = statement.executeQuery();
     Set<String> results = new HashSet<>();
     while (rs.next()) {
-      results.add(rs.getString(Database.EXID));
+      String exid = rs.getString(Database.EXID).trim();
+      //results.add(string);
+
+      String audioTranscript = rs.getString(2);
+
+      if (audioTranscript != null) {
+        String tran = exToTranscript.get(exid);
+        if (tran != null && isNoAccentMatch(audioTranscript, tran)) {
+          results.add(exid);
+        }
+      }
+
     }
-    finish(connection, statement, rs);
+    finish(connection, statement, rs, sql);
 
     return results;
   }

@@ -46,12 +46,8 @@ import mitll.langtest.client.analysis.ShowTab;
 import mitll.langtest.client.custom.dialog.ReviewEditableExercise;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.RecordButton;
-import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.server.amas.QuizCorrect;
-import mitll.langtest.server.audio.AudioCheck;
-import mitll.langtest.server.audio.AudioConversion;
-import mitll.langtest.server.audio.AudioFileHelper;
-import mitll.langtest.server.audio.PathWriter;
+import mitll.langtest.server.audio.*;
 import mitll.langtest.server.autocrt.AutoCRT;
 import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.DatabaseImpl;
@@ -79,6 +75,7 @@ import mitll.langtest.shared.flashcard.QuizCorrectAndScore;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.monitoring.Session;
 import mitll.langtest.shared.scoring.AudioContext;
+import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
@@ -191,11 +188,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    *
    * @param exercises
    * @return
-   * @see #makeExerciseListWrapper(int, Collection, long, String, boolean, boolean)
+   * @see #makeExerciseListWrapper
    */
-  private <T extends CommonShell> List<CommonShell> getExerciseShells(Collection<? extends CommonExercise> exercises) {
+  private <T extends CommonShell> List<CommonShell> getExerciseShells(Collection<T> exercises) {
     List<CommonShell> ids = new ArrayList<>();
-    for (CommonExercise e : exercises) {
+    for (CommonShell e : exercises) {
 //      logger.info("got " +e.getID() + " mean " + e.getMeaning() + " eng " + e.getEnglish() + " fl " + e.getForeignLanguage());
       ids.add(e.getShell());
     }
@@ -221,8 +218,6 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         }
         AmasSupport amasSupport = new AmasSupport();
         exercises = amasSupport.filterByUnrecorded(request.getUserID(), exercises, typeToSelection, db.getResultDAO());
-        // exercises = filterByOnlyAudioAnno(onlyWithAudioAnno, exercises);
-        //    int i = markRecordedState(userID, role, exercises, onlyExamples);
         //  logger.debug("marked " +i + " as recorded");
 
         // now sort : everything gets sorted the same way
@@ -234,7 +229,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         //   sortExercises("", commonExercises);
 //        }
 
-        return new ExerciseListWrapper<AmasExerciseImpl>(reqID, exercises, null);
+        return new ExerciseListWrapper<>(reqID, exercises, null);
       } else { // sort by unit-chapter selection
         // builds unit-lesson hierarchy if non-empty type->selection over user list
         Collection<AmasExerciseImpl> exercisesForSelectionState1 =
@@ -272,9 +267,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.list.PagingExerciseList#loadExercises
    */
   @Override
-  public <T extends CommonShell> ExerciseListWrapper<T> getExerciseIds(
-      ExerciseListRequest request
-  ) {
+  public <T extends CommonShell> ExerciseListWrapper<T> getExerciseIds(ExerciseListRequest request) {
     if (serverProps.isAMAS()) {
       ExerciseListWrapper<AmasExerciseImpl> amasExerciseIds = getAMASExerciseIds(request);
       return (ExerciseListWrapper<T>) amasExerciseIds; // TODO : how to do this without forcing it.
@@ -295,6 +288,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         boolean predefExercises = userListByID == null;
         exercises = predefExercises ? getExercises() : getCommonExercises(userListByID);
 
+        logger.debug("\tgetExerciseIds : (" + getLanguage() + ") " +
+            "got " + exercises.size() +
+            " for request " + request);
         // now if there's a prefix, filter by prefix match
         int userID = request.getUserID();
         if (!request.getPrefix().isEmpty()) {
@@ -303,10 +299,17 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         }
         exercises = filterExercises(request, exercises);
 
+/*        logger.debug("\tgetExerciseIds : (" + getLanguage() + ") " +
+            "after filtering " + exercises.size() +
+            " for request " + request);*/
+
         String role = request.getRole();
 
         if (!isUserListReq) {
           int i = markRecordedState(userID, role, exercises, request.isOnlyExamples());
+          logger.debug("\tgetExerciseIds : (" + getLanguage() + ") " +
+              "mark recorded on " + exercises.size() + " = " + i +
+              " for request " + request);
         }
 
         // now sort : everything gets sorted the same way
@@ -315,6 +318,11 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
           commonExercises = db.getResultDAO().getExercisesSortedIncorrectFirst(exercises, userID, audioFileHelper.getCollator());
         } else {
           commonExercises = new ArrayList<>(exercises);
+
+  /*        logger.debug("\tgetExerciseIds : (" + getLanguage() + ") " +
+              "sorting   " + commonExercises.size() +
+              " for request " + request);
+  */
           sortExercises(role, commonExercises);
         }
 
@@ -343,9 +351,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   private Collection<CommonExercise> filterExercises(ExerciseListRequest request,
                                                      Collection<CommonExercise> exercises) {
     exercises = filterByUnrecorded(request, exercises);
-    exercises = filterByOnlyAudioAnno(request.isOnlyWithAudioAnno(), exercises);
-    exercises = filterByOnlyDefaultAudio(request.isOnlyDefaultAudio(), exercises);
-
+    if (request.isOnlyWithAudioAnno()) {
+      exercises = filterByOnlyAudioAnno(exercises);
+    }
+    if (request.isOnlyDefaultAudio()) {
+      exercises = filterByOnlyDefaultAudio(exercises);
+    }
+    if (request.isOnlyUninspected()) {
+      exercises = filterByUninspected(exercises);
+    }
     return exercises;
   }
 
@@ -390,6 +404,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
 
   /**
+   * TODO : this must include a check for transcript mismatch.
+   * <p>
    * For all the exercises the user has not recorded, do they have the required reg and slow speed recordings by a matching gender.
    * <p>
    * Or if looking for example audio, find ones missing examples.
@@ -406,9 +422,21 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       int userID = request.getUserID();
       logger.debug("filterByUnrecorded : for " + userID + " only by same gender " +
           " examples only " + onlyExamples + " from " + exercises.size());
+
+      Map<String, String> exToTranscript = new HashMap<>();
+      Map<String, String> exToContextTranscript = new HashMap<>();
+
+      for (CommonShell shell : exercises) {
+        exToTranscript.put(shell.getID(), shell.getForeignLanguage());
+        String context = shell.getContext();
+        if (context != null && !context.isEmpty()) {
+          exToContextTranscript.put(shell.getID(), context);
+        }
+      }
+
       Set<String> alreadyRecordedBySameGender = onlyExamples ?
-          db.getAudioDAO().getWithContext(userID) :
-          db.getAudioDAO().getRecordedBy(userID);
+          db.getAudioDAO().getWithContext(userID, exToContextTranscript) :
+          db.getAudioDAO().getRecordedBy(userID, exToTranscript);
 
       Set<String> allExercises = getExerciseIDs(exercises);
 
@@ -461,49 +489,56 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * @param onlyAudioAnno
    * @param exercises
    * @return
+   * @paramx onlyAudioAnno
    * @see #getExerciseIds
    */
-  private Collection<CommonExercise> filterByOnlyAudioAnno(boolean onlyAudioAnno,
-                                                           Collection<CommonExercise> exercises) {
-    if (onlyAudioAnno) {
-      Set<String> audioAnnos = getUserListManager().getAudioAnnos();
-      List<CommonExercise> copy = new ArrayList<CommonExercise>();
-      for (CommonExercise exercise : exercises) {
-        if (audioAnnos.contains(exercise.getID())) copy.add(exercise);
-      }
-      return copy;
-    } else {
-      return exercises;
+  private Collection<CommonExercise> filterByOnlyAudioAnno(Collection<CommonExercise> exercises) {
+    Set<String> audioAnnos = getUserListManager().getAudioAnnos();
+    List<CommonExercise> copy = new ArrayList<CommonExercise>();
+    for (CommonExercise exercise : exercises) {
+      if (audioAnnos.contains(exercise.getID())) copy.add(exercise);
     }
+    return copy;
   }
 
-  private Collection<CommonExercise> filterByOnlyDefaultAudio(boolean onlyDefault,
-                                                              Collection<CommonExercise> exercises) {
-    if (onlyDefault) {
-      List<CommonExercise> copy = new ArrayList<CommonExercise>();
-      for (CommonExercise exercise : exercises) {
-        for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) {
-          if (audioAttribute.getUserid() == UserDAO.DEFAULT_USER_ID) {
-            copy.add(exercise);
-            break;
-          }
+  private Collection<CommonExercise> filterByOnlyDefaultAudio(Collection<CommonExercise> exercises) {
+    List<CommonExercise> copy = new ArrayList<CommonExercise>();
+    for (CommonExercise exercise : exercises) {
+      for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) {
+        if (audioAttribute.getUserid() == UserDAO.DEFAULT_USER_ID) {
+          copy.add(exercise);
+          break;
         }
       }
-      return copy;
-    } else {
-      return exercises;
     }
+    return copy;
   }
 
-  private <T extends CommonShell> Collection<T> getExercisesFromUserListFiltered(Map<String, Collection<String>> typeToSelection,
-                                                                                 UserList<T> userListByID) {
-    SectionHelper<T> helper = new SectionHelper<T>();
-    Collection<T> exercises2 = getCommonExercises(userListByID);
+  /**
+   * Remove any items that have been inspected already.
+   * @param exercises
+   * @return
+   */
+  private Collection<CommonExercise> filterByUninspected(Collection<CommonExercise> exercises) {
+    Collection<String> inspected = getUserListManager().getInspectedExercises();
+   // logger.info("found " + inspected.size());
+    List<CommonExercise> copy = new ArrayList<CommonExercise>();
+    for (CommonExercise exercise : exercises) {
+      if (!inspected.contains(exercise.getID())) {
+        copy.add(exercise);
+      }
+    }
+    return copy;
+  }
+
+  private <T extends CommonShell> Collection<CommonExercise> getExercisesFromUserListFiltered(Map<String, Collection<String>> typeToSelection,
+                                                                                              UserList<T> userListByID) {
+    SectionHelper<CommonExercise> helper = new SectionHelper<>();
+    Collection<CommonExercise> exercises2 = getCommonExercises(userListByID);
     long then = System.currentTimeMillis();
-    for (T commonExercise : exercises2) {
+    for (CommonExercise commonExercise : exercises2) {
       helper.addExercise(commonExercise);
     }
     long now = System.currentTimeMillis();
@@ -512,7 +547,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       logger.debug("used " + exercises2.size() + " exercises to build a hierarchy in " + (now - then) + " millis");
     }
     //helper.report();
-    Collection<T> exercisesForState = helper.getExercisesForSelectionState(typeToSelection);
+    Collection<CommonExercise> exercisesForState = helper.getExercisesForSelectionState(typeToSelection);
     // logger.debug("\tafter found " + exercisesForState.size() + " matches to " + typeToSelection);
     return exercisesForState;
   }
@@ -557,6 +592,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
 
   /**
+   * TODO : seems like we're doing the exercise->transcript map twice???
+   * <p>
    * Marks each exercise - first state - with whether this user has recorded audio for this item
    * Defective audio is not included.
    * Also if just one of regular or slow is recorded it's not "recorded".
@@ -567,24 +604,38 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param role
    * @param exercises
    * @param onlyExample
-   * @return
+   * @return number recorded
    * @see #getExerciseIds
    */
   private int markRecordedState(int userID, String role, Collection<? extends CommonShell> exercises, boolean onlyExample) {
     int c = 0;
+
     if (role.equals(Result.AUDIO_TYPE_RECORDER)) {
-      Set<String> recordedForUser = onlyExample ? db.getAudioDAO().getRecordedExampleForUser(userID) : db.getAudioDAO().getRecordedForUser(userID);
-      //logger.debug("\tfound " + recordedForUser.size() + " recordings by " + userID + " only example " + onlyExample);
+      Map<String, String> exToTranscript = new HashMap<>();
+      for (CommonShell shell : exercises) {
+        if (onlyExample) {
+          String context = shell.getContext();
+          if (context != null && !context.isEmpty()) {
+            exToTranscript.put(shell.getID(), context);
+          }
+        } else {
+          exToTranscript.put(shell.getID(), shell.getForeignLanguage());
+        }
+      }
+
+      Set<String> recordedForUser = onlyExample ?
+          db.getAudioDAO().getRecordedExampleForUser(userID, exToTranscript) :
+          db.getAudioDAO().getRecordedForUser(userID, exToTranscript);
+      logger.debug("\tmarkRecordedState : found " + recordedForUser.size() + " recordings by " + userID + " only example " + onlyExample);
       for (CommonShell shell : exercises) {
         if (recordedForUser.contains(shell.getID())) {
           shell.setState(STATE.RECORDED);
           c++;
         }
       }
+    } else {
+      logger.debug("\tmarkRecordedState not marking recorded for '" + role + "' and user " + userID);
     }
-    //else {
-    //logger.debug("\tnot marking recorded for '" + role + "' and user " + userID);
-    //}
     return c;
   }
 
@@ -596,8 +647,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see #getExerciseIds
    * @see #getExercisesFromUserListFiltered(java.util.Map, mitll.langtest.shared.custom.UserList)
    */
-  private <T extends CommonShell> List<T> getCommonExercises(UserList<T> userListByID) {
-    return new ArrayList<>(userListByID.getExercises());
+  private <T extends CommonShell> List<CommonExercise> getCommonExercises(UserList<T> userListByID) {
+    Collection<T> exercises = userListByID.getExercises();
+    List<CommonExercise> ts = new ArrayList<>(exercises.size());
+    for (CommonShell shell : exercises) {
+      CommonExercise byID = db.getCustomOrPredefExercise(shell.getID());  // allow custom items to mask out non-custom items
+      if (byID != null) {
+        ts.add(byID);
+      }
+    }
+    return ts;
   }
 
   /**
@@ -663,17 +722,19 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    *
    * @param exercises
    * @return
-   * @paramx reqID
-   * @paramx userID
-   * @paramx role
-   * @paramx onlyExamples
-   * @paramx isFlashcardReq
    * @see #getExerciseIds
    * @see #getExerciseListWrapperForPrefix
    */
   private <T extends CommonShell> ExerciseListWrapper<T> makeExerciseListWrapper(ExerciseListRequest request,
                                                                                  Collection<CommonExercise> exercises) {
-    CommonExercise firstExercise = exercises.isEmpty() ? null : exercises.iterator().next();
+    CommonExercise firstExercise = null;
+    if (exercises.isEmpty()) {
+
+    } else {
+      firstExercise = db.getCustomOrPredefExercise(exercises.iterator().next().getID());  // allow custom items to mask out non-custom items
+    }
+
+//    CommonExercise firstExercise = exercises.isEmpty() ? null : exercises.iterator().next();
 
     int reqID = request.getReqID();
     int userID = request.getUserID();
@@ -686,11 +747,23 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     }
     List<CommonShell> exerciseShells = getExerciseShells(exercises);
 
-    //   logger.debug("makeExerciseListWrapper : userID " +userID + " Role is " + role);
+    logger.debug("makeExerciseListWrapper : userID " + userID + " request is " + request);
     if (role.equals(Result.AUDIO_TYPE_RECORDER)) {
-      markRecordedState((int) userID, role, exerciseShells, onlyExamples);
-    } else if (role.equalsIgnoreCase(User.Permission.QUALITY_CONTROL.toString()) || role.startsWith(Result.AUDIO_TYPE_REVIEW)) {
+      markRecordedState(userID, role, exerciseShells, onlyExamples);
+    } else if (
+        role.equalsIgnoreCase(User.Permission.QUALITY_CONTROL.toString()) ||
+            role.startsWith(Result.AUDIO_TYPE_REVIEW)) {
       getUserListManager().markState(exerciseShells);
+    } else if (role.equals("markDefects")) {
+      Collection<String> defectExercises = getUserListManager().getDefectExercises();
+      int c = 0;
+      for (CommonShell shell : exerciseShells) {
+        if (defectExercises.contains(shell.getID())) {
+          shell.setState(STATE.DEFECT);
+          //    if (shell.getID().startsWith("50")) logger.info("adding defect to " +shell.getID() + " : " + shell.getState());
+          c++;
+        }
+      }
     }
 
     // TODO : do this the right way vis-a-vis type safe collection...
@@ -799,13 +872,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public List<CommonShell> getShells(List<String> ids) {
     List<CommonShell> shells = new ArrayList<>();
-    for (String id : ids) {
-      CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(id);
-      if (customOrPredefExercise == null) {
-        logger.warn("Couldn't find exercise for " + id);
-      } else {
-        shells.add(customOrPredefExercise.getShell());
-      }
+
+    Collection<CommonExercise> where = db.getUserExerciseDAO().getWhere(ids);
+
+    List<CommonExercise> customOrPredef = db.getCustomOrPredef(ids, where);
+
+    for (CommonExercise customOrPredefExercise: customOrPredef) {
+      shells.add(customOrPredefExercise.getShell());
     }
     return shells;
   }
@@ -925,12 +998,12 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param byID
    * @param parentDir
    * @seex LoadTesting#getExercise
-   * @see #makeExerciseListWrapper(int, java.util.Collection, long, String, boolean, boolean)
+   * @see #makeExerciseListWrapper
    */
   private void ensureMP3s(CommonExercise byID, String parentDir) {
     Collection<AudioAttribute> audioAttributes = byID.getAudioAttributes();
     for (AudioAttribute audioAttribute : audioAttributes) {
-      if (!ensureMP3(audioAttribute.getAudioRef(), byID.getForeignLanguage(), audioAttribute.getUser().getUserID(), parentDir)) {
+      if (!ensureMP3(audioAttribute.getAudioRef(), parentDir, getTrackInfo(byID, audioAttribute))) {
 //        if (byID.getID().equals("1310")) {
 //          logger.warn("ensureMP3 : can't find " + audioAttribute + " under " + parentDir + " for " + byID);
 //        }
@@ -967,7 +1040,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
-   * XCalled from the client:
+   * Called from the client:
    *
    * @return
    * @see mitll.langtest.client.list.ListInterface#getExercises
@@ -1007,19 +1080,18 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
   /**
    * @param wavFile
-   * @param title
-   * @param artist
+   * @param trackInfo
    * @return true if mp3 file exists
    * @see #ensureMP3s(CommonExercise, String)
    * @see #writeAudioFile
    */
-  private boolean ensureMP3(String wavFile, String title, String artist) {
-    return ensureMP3(wavFile, title, artist, pathHelper.getInstallPath());
+  private boolean ensureMP3(String wavFile, TrackInfo trackInfo) {
+    return ensureMP3(wavFile, pathHelper.getInstallPath(), trackInfo);
   }
 
   // int spew = 0;
 
-  private boolean ensureMP3(String wavFile, String title, String artist, String parent) {
+  private boolean ensureMP3(String wavFile, String parent, TrackInfo trackInfo) {
     if (wavFile != null) {
       if (!audioConversion.exists(wavFile, parent)) {
         //if (WARN_MISSING_FILE) {
@@ -1033,7 +1105,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         }
       }*/
 
-      String s = audioConversion.ensureWriteMP3(wavFile, parent, false, title, artist);
+      String s = audioConversion.ensureWriteMP3(wavFile, parent, false, trackInfo);
       boolean isMissing = s.equals(AudioConversion.FILE_MISSING);
 /*      if (isMissing && wavFile.contains("1310")) {
         logger.error("ensureMP3 : can't find " + wavFile + " under " + parent + " for " + title + " " + artist);
@@ -1054,13 +1126,13 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param reqid
    * @param audioFile
    * @param imageType
-   * @param width
-   * @param height
+   * @param imageOptions
    * @param exerciseID
    * @return path to an image file
    * @see mitll.langtest.client.scoring.AudioPanel#getImageURLForAudio
    */
-  public ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, String exerciseID) {
+  public ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType,
+                                            ImageOptions imageOptions, String exerciseID) {
     SimpleImageWriter imageWriter = new SimpleImageWriter();
 
     String wavAudioFile = getWavAudioFile(audioFile);
@@ -1077,6 +1149,9 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       return new ImageResponse(); // success = false!
     }
     String imageOutDir = pathHelper.getImageOutDir();
+
+    int width = imageOptions.getWidth();
+    int height = imageOptions.getHeight();
 
     if (DEBUG) {
       logger.debug("getImageForAudioFile : getting images (" + width + " x " + height + ") (" + reqid + ") type " + imageType +
@@ -1167,14 +1242,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   }
 
   /**
+   * Go back and score an old result, which mainly means generating images for it.
+   *
    * @param resultID
-   * @param width
-   * @param height
+   * @param imageOptions
    * @return
-   * @see mitll.langtest.client.scoring.ReviewScoringPanel#scoreAudio(String, long, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
+   * @see mitll.langtest.client.scoring.ReviewScoringPanel#scoreAudio
    */
   @Override
-  public PretestScore getResultASRInfo(long resultID, int width, int height) {
+  public PretestScore getResultASRInfo(long resultID, ImageOptions imageOptions) {
     PretestScore asrScoreForAudio = null;
     try {
       Result result = db.getResultDAO().getResultByID(resultID);
@@ -1188,23 +1264,40 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
         return new PretestScore();
       } else {
         String sentence = exercise.getForeignLanguage();
-        if (result.getAudioType().contains("context")) sentence = exercise.getContext();
+        String comment = exercise.getEnglish();
+
+        if (result.getAudioType().contains("context")) {
+          sentence = exercise.getContext();
+          comment = exercise.getContextTranslation();
+        }
 
         String audioFilePath = result.getAnswer();
-        ensureMP3(audioFilePath, sentence, "" + result.getUserid());
+        ensureMP3(audioFilePath, new TrackInfo(sentence, "" + result.getUserid(), comment));
         //logger.info("resultID " +resultID+ " temp dir " + tempDir.getAbsolutePath());
-        asrScoreForAudio = audioFileHelper.getASRScoreForAudio(1,
-            audioFilePath, sentence,
-            width, height,
-            true,  // make transcript images with colored segments
-            false, // false = do alignment
-            serverProps.useScoreCache(), exerciseID, result, serverProps.usePhoneToDisplay(), false);
+        asrScoreForAudio = audioFileHelper.getASRScoreForAudio(
+            1,
+            audioFilePath,
+            sentence,
+            exercise.getTransliteration(),
+            imageOptions,//new ImageOptions(width, height, true),
+            exerciseID,
+            result,
+
+            // make transcript images with colored segments
+            new DecoderOptions()
+                .setDoFlashcard(false)
+                .setCanUseCache(serverProps.useScoreCache())
+                .setUsePhoneToDisplay(serverProps.usePhoneToDisplay()));
       }
     } catch (Exception e) {
       logger.error("Got " + e, e);
     }
 
     return asrScoreForAudio;
+  }
+
+  private TrackInfo getTrackInfo(CommonExercise ex, AudioAttribute latestContext) {
+    return new TrackInfo(ex.getForeignLanguage(), latestContext.getUser().getUserID(), ex.getEnglish());
   }
 
   /**
@@ -1215,16 +1308,26 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param resultID
    * @param testAudioFile
    * @param sentence
-   * @param width
-   * @param height
-   * @param useScoreToColorBkg
    * @param exerciseID
+   * @param imageOptions
    * @return
-   * @see mitll.langtest.client.scoring.ASRScoringAudioPanel#scoreAudio(String, long, String, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck, int, int, int)
+   * @see mitll.langtest.client.scoring.ASRScoringAudioPanel#scoreAudio
    */
-  public PretestScore getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence,
-                                          int width, int height, boolean useScoreToColorBkg, String exerciseID) {
-    return getPretestScore(reqid, resultID, testAudioFile, sentence, width, height, useScoreToColorBkg, exerciseID, false);
+  public PretestScore getASRScoreForAudio(int reqid,
+                                          long resultID,
+                                          String testAudioFile,
+                                          String sentence,
+                                          String transliteration,
+                                          String exerciseID,
+                                          ImageOptions imageOptions) {
+    return getPretestScore(reqid,
+        resultID,
+        testAudioFile,
+        sentence,
+        transliteration,
+        imageOptions,
+        exerciseID,
+        false);
   }
 
   /**
@@ -1234,15 +1337,19 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param resultID
    * @param testAudioFile
    * @param sentence
-   * @param width
-   * @param height
-   * @param useScoreToColorBkg
    * @param exerciseID
    * @param usePhoneToDisplay
    * @return
+   * @paramx width
+   * @paramx height
+   * @paramx useScoreToColorBkg
    */
-  private PretestScore getPretestScore(int reqid, long resultID, String testAudioFile, String sentence,
-                                       int width, int height, boolean useScoreToColorBkg, String exerciseID, boolean usePhoneToDisplay) {
+  private PretestScore getPretestScore(int reqid, long resultID, String testAudioFile,
+                                       String sentence, String transliteration,
+
+                                       ImageOptions imageOptions, String exerciseID,
+
+                                       boolean usePhoneToDisplay) {
     if (testAudioFile.equals(AudioConversion.FILE_MISSING)) return new PretestScore(-1);
     long then = System.currentTimeMillis();
 
@@ -1259,24 +1366,38 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     //now = System.currentTimeMillis();
     if (cachedResult != null) {
-      logger.debug("getPretestScore Cache HIT  : align exercise id = " + exerciseID + " file " + answer + " found previous " + cachedResult.getUniqueID() + " in " + (now - then));
-
+      long l = now - then;
+      logger.debug("getPretestScore Cache HIT  : align " +
+          "\n\texercise " + exerciseID +
+          "\n\tfile     " + answer +
+          "\n\timage    " + imageOptions +
+          "\n\tprevious " + cachedResult.getUniqueID() + (l > 10 ? " in " + l : ""));
     } else {
-      logger.debug("getPretestScore Cache MISS : align exercise id = " + exerciseID + " file " + answer);
+      logger.debug("getPretestScore Cache MISS : align" +
+          "\n\texercise " + exerciseID +
+          "\n\tfile     " + answer +
+          "\n\timage    " + imageOptions
+      );
     }
 
     boolean usePhoneToDisplay1 = usePhoneToDisplay || serverProps.usePhoneToDisplay();
 
-    PretestScore asrScoreForAudio = audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg,
-        false, serverProps.useScoreCache(), exerciseID, cachedResult, usePhoneToDisplay1, false);
+    PretestScore asrScoreForAudio = audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence,
+        transliteration, imageOptions, exerciseID, cachedResult,
+        new DecoderOptions()
+            .setDoFlashcard(false)
+            .setCanUseCache(serverProps.useScoreCache())
+            .setUsePhoneToDisplay(usePhoneToDisplay1));
 
     long timeToRunHydec = System.currentTimeMillis() - then;
 
-    logger.debug("getPretestScore : scoring file " + testAudioFile + " for " +
-        " exid " + exerciseID +
-        " sentence " + sentence.length() + " characters long : " +
-        " score " + asrScoreForAudio.getHydecScore() +
-        " took " + timeToRunHydec + " millis " + " usePhoneToDisplay " + usePhoneToDisplay1);
+    logger.debug("getPretestScore : scoring" +
+        "\n\tfile     " + testAudioFile +
+        "\n\texid     " + exerciseID +
+        "\n\tsentence " + sentence.length() + " characters long" +
+        "\n\tscore    " + asrScoreForAudio.getHydecScore() +
+        "\n\ttook     " + timeToRunHydec + " millis " +
+        "\n\tusePhoneToDisplay " + usePhoneToDisplay1);
 
     if (resultID > -1 && cachedResult == null) { // alignment has two steps : 1) post the audio, then 2) do alignment
       db.rememberScore(resultID, asrScoreForAudio, false);
@@ -1290,17 +1411,22 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param resultID
    * @param testAudioFile
    * @param sentence
-   * @param width
-   * @param height
-   * @param useScoreToColorBkg
    * @param exerciseID
+   * @param imageOptions
    * @return
-   * @see mitll.langtest.client.scoring.ASRScoringAudioPanel#scoreAudio(String, long, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
+   * @see mitll.langtest.client.scoring.ASRScoringAudioPanel#scoreAudio
    */
   @Override
-  public PretestScore getASRScoreForAudioPhonemes(int reqid, long resultID, String testAudioFile, String sentence,
-                                                  int width, int height, boolean useScoreToColorBkg, String exerciseID) {
-    return getPretestScore(reqid, resultID, testAudioFile, sentence, width, height, useScoreToColorBkg, exerciseID, true);
+  public PretestScore getASRScoreForAudioPhonemes(int reqid,
+                                                  long resultID,
+                                                  String testAudioFile,
+
+                                                  String sentence,
+                                                  String transliteration,
+                                                  String exerciseID,
+
+                                                  ImageOptions imageOptions) {
+    return getPretestScore(reqid, resultID, testAudioFile, sentence, transliteration, imageOptions, exerciseID, true);
   }
 
   @Override
@@ -1395,7 +1521,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @param status
    * @param comment
    * @param userID
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addAnnotation(String, String, String)
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addAnnotation
    */
   @Override
   public void addAnnotation(String exerciseID, String field, String status, String comment, long userID) {
@@ -1442,29 +1568,38 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     UserListManager userListManager = getUserListManager();
 
     long then = System.currentTimeMillis();
-    UserList<CommonShell> defectList = userListManager.getDefectList(db.getTypeOrder());
-    long now = System.currentTimeMillis();
-    logger.info("took " + (now - then) + " to get defect list size = " + defectList.getExercises().size());
-
     List<UserList<CommonShell>> lists = new ArrayList<>();
-    lists.add(defectList);
-    then = System.currentTimeMillis();
-    UserList<CommonShell> commentedList = userListManager.getCommentedList(db.getTypeOrder());
-    lists.add(commentedList);
-    now = System.currentTimeMillis();
+    {
+      UserList<CommonShell> defectList = userListManager.getDefectList(db.getTypeOrder());
+      long now = System.currentTimeMillis();
+      long diff = (now - then);
+      if (diff > 30) logger.info("took " + (now - then) + " to get defect list size = " + defectList.getNumItems());
 
-    logger.info("took " + (now - then) + " to get comment list size = " + commentedList.getExercises().size());
+      lists.add(defectList);
+    }
+    {
+      then = System.currentTimeMillis();
+      UserList<CommonShell> commentedList = userListManager.getCommentedList(db.getTypeOrder());
+      lists.add(commentedList);
+      long now = System.currentTimeMillis();
 
+      long diff = (now - then);
+      if (diff > 30) {
+        logger.info("took " + diff + " to get comment list size = " + commentedList.getNumItems());
+      }
+    }
     if (!serverProps.isNoModel()) {
       then = System.currentTimeMillis();
       UserList<CommonShell> attentionList = userListManager.getAttentionList(db.getTypeOrder());
-      now = System.currentTimeMillis();
+      long now = System.currentTimeMillis();
 
       lists.add(attentionList);
+      long diff = (now - then);
 
-      logger.info("took " + (now - then) + " to get attention list size = " + attentionList.getExercises().size());
-
+      if (diff > 30)
+        logger.info("took " + (now - then) + " to get attention list size = " + attentionList.getNumItems());
     }
+
     return lists;
   }
 
@@ -1497,8 +1632,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, boolean)
    */
   @Override
-  public boolean isValidForeignPhrase(String foreign) {
-    return audioFileHelper.checkLTSOnForeignPhrase(foreign);
+  public boolean isValidForeignPhrase(String foreign, String transliteration) {
+    return audioFileHelper.checkLTSOnForeignPhrase(foreign, transliteration);
   }
 
   /**
@@ -1529,7 +1664,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     logger.info("got " + lines.length + " lines");
     List<CommonExercise> newItems = new ArrayList<>();
     UserList<CommonShell> userListByID = db.getUserListManager().getUserListByID(userListID, Collections.emptyList());
-    int n = userListByID.getExercises().size();
+    int n = userListByID.getNumItems();
     Set<String> currentKnownFL = new HashSet<>();
     for (CommonShell shell : userListByID.getExercises()) currentKnownFL.add(shell.getForeignLanguage());
     boolean onFirst = true;
@@ -1544,7 +1679,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
           logger.info("reallyCreateNewItems skipping header line");
           firstColIsEnglish = true;
         } else {
-          if (firstColIsEnglish || (isValidForeignPhrase(english) && !isValidForeignPhrase(fl))) {
+          if (firstColIsEnglish || (isValidForeignPhrase(english, "") && !isValidForeignPhrase(fl, ""))) {
             String temp = english;
             english = fl;
             fl = temp;
@@ -1562,7 +1697,7 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     for (CommonExercise candidate : newItems) {
       String foreignLanguage = candidate.getForeignLanguage();
       if (!currentKnownFL.contains(foreignLanguage)) {
-        if (isValidForeignPhrase(foreignLanguage)) {
+        if (isValidForeignPhrase(foreignLanguage, candidate.getTransliteration())) {
           getUserListManager().reallyCreateNewItem(userListID, candidate, serverProps.getMediaDir());
           actualItems.add(candidate);
         } else {
@@ -1867,7 +2002,8 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     List<MonitorResult> resultList = results.subList(start, min);
     logger.info("ensure compressed audio for " + resultList.size() + " items.");
     for (MonitorResult result : resultList) {
-      ensureCompressedAudio((int) result.getUserid(), db.getCustomOrPredefExercise(result.getExID()), result.getAnswer());
+
+      ensureCompressedAudio((int) result.getUserid(), db.getCustomOrPredefExercise(result.getExID()), result.getAnswer(), result.getAudioType());
     }
     return new ResultAndTotal(new ArrayList<MonitorResult>(resultList), n, req);
   }
@@ -2181,12 +2317,16 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   public AudioAnswer writeAudioFile(String base64EncodedString,
                                     AudioContext audioContext,
 
-                                    boolean recordedWithFlash, String deviceType, String device,
+                                    boolean recordedWithFlash,
+
+                                    String deviceType, String device,
 
                                     boolean doFlashcard,
                                     boolean recordInResults,
                                     boolean addToAudioTable,
-                                    boolean allowAlternates) {
+                                    boolean allowAlternates
+
+  ) {
     String exercise = audioContext.getId();
 
     boolean amas = serverProps.isAMAS();
@@ -2204,12 +2344,19 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
 
     AnswerInfo.RecordingInfo recordingInfo = new AnswerInfo.RecordingInfo("", "", deviceType, device, recordedWithFlash);
 
+    DecoderOptions options = new DecoderOptions()
+        .setRecordInResults(recordInResults)
+        .setDoFlashcard(doFlashcard)
+        .setRefRecording(addToAudioTable)
+        .setAllowAlternates(allowAlternates);
+
     AudioAnswer audioAnswer = amas ?
         audioFileHelper.writeAMASAudioFile(base64EncodedString, db.getAMASExercise(exercise), audioContext, recordingInfo) :
         audioFileHelper.writeAudioFile(base64EncodedString,
             exercise1,
             audioContext, recordingInfo,
-            recordInResults, doFlashcard, allowAlternates, addToAudioTable);
+            options
+        );
 
     int user = audioContext.getUserid();
     if (addToAudioTable && audioAnswer.isValid()) {
@@ -2226,24 +2373,45 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
       logger.warn("huh? got zero length recording " + user + " " + exercise);
       logEvent("audioRecording", "writeAudioFile", exercise, "Writing audio - got zero duration!", user, "unknown", device);
     } else {
-      ensureCompressedEquivalent(user, exercise1, audioAnswer);
+      ensureCompressedEquivalent(user, exercise1, audioAnswer, audioContext.getAudioType());
     }
 
     return audioAnswer;
   }
 
-  private void ensureCompressedEquivalent(int user, CommonShell exercise1, AudioAnswer audioAnswer) {
-    ensureCompressedAudio(user, exercise1, audioAnswer.getPath());
+  /**
+   * @param user
+   * @param exercise1
+   * @param audioAnswer
+   * @param audioType
+   * @see #writeAudioFile
+   */
+  private void ensureCompressedEquivalent(int user, CommonShell exercise1, AudioAnswer audioAnswer, String audioType) {
+    ensureCompressedAudio(user, exercise1, audioAnswer.getPath(), audioType);
   }
 
-  private void ensureCompressedAudio(int user, CommonShell exercise1, String path) {
-    String foreignLanguage = exercise1 == null ? "unknown" : exercise1.getForeignLanguage();
+  /**
+   * Have mp3 title be context sentence when recording context sentences.
+   *
+   * @param user
+   * @param commonShell
+   * @param path
+   * @param audioType
+   */
+  private void ensureCompressedAudio(int user, CommonShell commonShell, String path, String audioType) {
+    String title = commonShell == null ? "unknown" : commonShell.getForeignLanguage();
+    String comment = commonShell == null ? "unknown" : commonShell.getEnglish();
+    if (audioType.equals(AudioAttribute.CONTEXT_AUDIO_TYPE) && commonShell != null) {
+      title = commonShell.getContext();
+      comment = commonShell.getContextTranslation();
+    }
     String userID = getUserID(user);
     if (userID == null) {
       logger.warn("ensureCompressedEquivalent huh? no user for " + user);
+      userID = "unknown";
     }
 
-    ensureMP3(path, foreignLanguage, userID);
+    ensureMP3(path, new TrackInfo(title, userID, comment));
   }
 
   private String getUserID(int user) {
@@ -2267,9 +2435,10 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
   @Override
   public AudioAnswer getAlignment(String base64EncodedString,
                                   String textToAlign,
+                                  String transliteration,
                                   String identifier,
                                   int reqid, String device) {
-    AudioAnswer audioAnswer = audioFileHelper.getAlignment(base64EncodedString, textToAlign, identifier, reqid,
+    AudioAnswer audioAnswer = audioFileHelper.getAlignment(base64EncodedString, textToAlign, transliteration, identifier, reqid,
         serverProps.usePhoneToDisplay());
 
     if (!audioAnswer.isValid() && audioAnswer.getDurationInMillis() == 0) {
@@ -2302,15 +2471,15 @@ public class LangTestDatabaseImpl extends RemoteServiceServlet implements LangTe
     String audioTranscript = getAudioTranscript(audioType, exercise1);
     //  logger.debug("addToAudioTable user " + user + " ex " + exerciseID + " for " + audioType + " path before " + audioAnswer.getPath());
 
+    String context = exercise1 == null ? "" : audioType.contains("context") ? exercise1.getContextTranslation() : exercise1.getEnglish();
     String permanentAudioPath = new PathWriter().
         getPermanentAudioPath(pathHelper,
             getAbsoluteFile(audioAnswer.getPath()),
             getPermanentName(user, audioType),
             true,
             idToUse,
-            audioTranscript,
-            getArtist(user),
-            serverProps);
+            serverProps,
+            new TrackInfo(audioTranscript, getArtist(user), context));
 
     AudioAttribute audioAttribute =
         db.getAudioDAO().addOrUpdate(user, idToUse, audioType, permanentAudioPath, System.currentTimeMillis(),

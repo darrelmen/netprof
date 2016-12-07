@@ -57,6 +57,7 @@ public class ExerciseListRequest implements Serializable {
   private boolean incorrectFirstOrder = false;
   private boolean onlyWithAudioAnno = false;
   private boolean onlyDefaultAudio = false;
+  private boolean onlyUninspected = false;
 
   public ExerciseListRequest() {
   }
@@ -66,16 +67,23 @@ public class ExerciseListRequest implements Serializable {
     this.userID = userID;
   }
 
+  /**
+   * TODO something less error prone
+   * @param other
+   * @return
+   */
   public boolean sameAs(ExerciseListRequest other) {
     return prefix.equals(other.getPrefix()) &&
         typeToSelection.equals(other.getTypeToSelection()) &&
         onlyUnrecordedByMe == other.onlyUnrecordedByMe &&
         onlyExamples == other.onlyExamples &&
-        incorrectFirstOrder == other.incorrectFirstOrder  &&
-        onlyWithAudioAnno == other.onlyWithAudioAnno  &&
-        onlyDefaultAudio == other.onlyDefaultAudio  &&
+        incorrectFirstOrder == other.incorrectFirstOrder &&
+        onlyWithAudioAnno == other.onlyWithAudioAnno &&
+        onlyDefaultAudio == other.onlyDefaultAudio &&
+        onlyUninspected == other.onlyUninspected &&
         userListID == other.userListID;
   }
+
   public int getReqID() {
     return reqID;
   }
@@ -153,8 +161,8 @@ public class ExerciseListRequest implements Serializable {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#filterExercises(ExerciseListRequest, Collection)
    * @return
+   * @see mitll.langtest.server.LangTestDatabaseImpl#filterExercises(ExerciseListRequest, Collection)
    */
   public boolean isOnlyWithAudioAnno() {
     return onlyWithAudioAnno;
@@ -166,8 +174,8 @@ public class ExerciseListRequest implements Serializable {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#filterExercises(ExerciseListRequest, Collection)
    * @return
+   * @see mitll.langtest.server.LangTestDatabaseImpl#filterExercises(ExerciseListRequest, Collection)
    */
   public boolean isOnlyDefaultAudio() {
     return onlyDefaultAudio;
@@ -178,15 +186,25 @@ public class ExerciseListRequest implements Serializable {
     return this;
   }
 
+  public boolean isOnlyUninspected() {
+    return onlyUninspected;
+  }
+
+  public ExerciseListRequest setOnlyUninspected(boolean onlyDefaultAudio) {
+    this.onlyUninspected = onlyDefaultAudio;
+    return this;
+  }
+
   public String toString() {
     return
         "prefix                  '" + prefix + "'" +
-        "\n\tselection           " + getTypeToSelection() +
-        "\n\tuser list id        " + userListID +
-        "\n\tuser                " + userID +
-        "\n\trole                " + role +
-        "\n\tonly recorded by me " + onlyUnrecordedByMe +
-        "\n\tonly examples       " + onlyExamples +
-        "\n\tonly with audio     " + onlyWithAudioAnno;
+            "\n\tselection           " + getTypeToSelection() +
+            "\n\tuser list id        " + userListID +
+            "\n\tuser                " + userID +
+            "\n\trole                " + role +
+            "\n\tonly recorded by me " + onlyUnrecordedByMe +
+            "\n\tonly examples       " + onlyExamples +
+            "\n\tonly with audio     " + onlyWithAudioAnno +
+            "\n\tonly uninspecte     " + onlyUninspected;
   }
 }

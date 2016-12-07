@@ -123,7 +123,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   private final ServerProperties serverProps;
   private final LogAndNotify logAndNotify;
 
-  private JsonSupport jsonSupport;
+  private JsonSupport<T> jsonSupport;
 
   private static final boolean ADD_DEFECTS = true;
   private UserManagement userManagement;
@@ -373,7 +373,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
     //  logger.debug("got install path " + installPath + " media " + mediaDir);
     this.installPath = installPath;
     makeDAO(lessonPlanFile, mediaDir, installPath);
-    this.jsonSupport = new JsonSupport(getSectionHelper(), getResultDAO(), getRefResultDAO(), getAudioDAO(),
+    this.jsonSupport = new JsonSupport<T>(getSectionHelper(), getResultDAO(), getRefResultDAO(), getAudioDAO(),
         getPhoneDAO(), configDir, installPath);
   }
 
@@ -406,7 +406,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   /**
    * @param id
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getResultASRInfo(long, int, int)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getResultASRInfo
    * @see mitll.langtest.server.DownloadServlet#getFilenameForDownload(DatabaseImpl, String, String)
    * @see #deleteItem(String)
    * @see #getCustomOrPredefExercise(String)
@@ -888,7 +888,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @param user
    * @return
    * @seex mitll.langtest.server.database.ImportCourseExamples#copyUser
-   * @see MergeSites#addUsersToDest
+   * @seex MergeSites#addUsersToDest
    */
   public long addUser(User user) {
     return userManagement.addUser(user, true);
@@ -1299,6 +1299,24 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
   public CommonExercise getCustomOrPredefExercise(String id) {
     CommonExercise userEx = getUserExerciseWhere(id);  // allow custom items to mask out non-custom items
 
+    return chooseWhichExercise(id, userEx);
+  }
+
+  public List<CommonExercise> getCustomOrPredef(Collection<String> ids, Collection<CommonExercise> userEx) {
+    Map<String,CommonExercise> idToEx = new HashMap<>();
+    for (CommonExercise exercise:userEx) idToEx.put(exercise.getID(),exercise);
+
+    List<CommonExercise> ret = new ArrayList<>();
+    for (String id : ids) {
+      CommonExercise e = chooseWhichExercise(id, idToEx.get(id));
+      if (e != null) {
+        ret.add(e);
+      }
+    }
+    return ret;
+  }
+
+  private CommonExercise chooseWhichExercise(String id, CommonExercise userEx) {
     CommonExercise toRet;
 
     if (userEx == null) {
@@ -1411,7 +1429,7 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
       long then = System.currentTimeMillis();
       List<CommonExercise> copyAsExercises = new ArrayList<>();
 
-      for (CommonShell ex : userListByID.getExercises()) {
+      for (HasID ex : userListByID.getExercises()) {
         copyAsExercises.add(getCustomOrPredefExercise(ex.getID()));
       }
       AudioDAO audioDAO = getAudioDAO();
@@ -1541,8 +1559,8 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @param resultID
    * @param asrScoreForAudio
    * @param isCorrect
-   * @see LangTestDatabaseImpl#getPretestScore(int, long, String, String, int, int, boolean, String, boolean)
-   * @see ScoreServlet#getJsonForAudioForUser(int, String, int, ScoreServlet.Request, String, File, String, String, boolean, boolean)
+   * @see LangTestDatabaseImpl#getPretestScore
+   * @see ScoreServlet#getJsonForAudioForUser
    * @see mitll.langtest.server.audio.AudioFileHelper#recalcOne
    */
   public void rememberScore(long resultID, PretestScore asrScoreForAudio, boolean isCorrect) {
@@ -1613,23 +1631,28 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
    * @see LangTestDatabaseImpl#getMaleFemaleProgress()
    */
   public Map<String, Float> getMaleFemaleProgress() {
-    UserDAO userDAO = getUserDAO();
-    Set<Long> userMapMales = userDAO.getUserIDsMatchingGender(true);
-    Set<Long> userMapFemales = userDAO.getUserIDsMatchingGender(false);
+    Set<Long> userMapMales = getUserDAO().getUserIDsMatchingGender(true);
+    Set<Long> userMapFemales = getUserDAO().getUserIDsMatchingGender(false);
 
 //    Collection<CommonExercise> exercises1 = getExercises();
     Collection<? extends CommonShell> exercises = getExercises();
+    Map<String, String> exToTranscript = new HashMap<>();
+    Map<String, String> exToContextTranscript = new HashMap<>();
     float total = exercises.size();
     Set<String> uniqueIDs = new HashSet<String>();
 
     int context = 0;
     for (CommonShell shell : exercises) {
-      if (shell.getContext() != null &&
-          !shell.getContext().isEmpty()) context++;
+      if (shell.getContext() != null && !shell.getContext().isEmpty()) {
+        context++;
+       // logger.info("found " + shell.getContext() + " for " + shell.getID());
+      }
       boolean add = uniqueIDs.add(shell.getID());
       if (!add) {
         logger.warn("getMaleFemaleProgress found duplicate id " + shell.getID() + " : " + shell);
       }
+      exToTranscript.put(shell.getID(), shell.getForeignLanguage());
+      exToContextTranscript.put(shell.getID(), shell.getContext());
     }
 /*
     logger.info("found " + total + " total exercises, " +
@@ -1637,8 +1660,14 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         " unique");
 */
 
-    return getAudioDAO().getRecordedReport(userMapMales, userMapFemales,
-        total, uniqueIDs, context);
+    return getAudioDAO().getRecordedReport(
+        userMapMales,
+        userMapFemales,
+        total,
+        uniqueIDs,
+        exToTranscript,
+        exToContextTranscript,
+        context);
   }
 
   /**
@@ -1690,5 +1719,9 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
 
   public String toString() {
     return "Database : " + this.getClass().toString();
+  }
+
+  public UserExerciseDAO getUserExerciseDAO() {
+    return userExerciseDAO;
   }
 }

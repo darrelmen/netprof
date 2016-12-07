@@ -98,13 +98,16 @@ public class FlexSectionExerciseList extends NPExerciseList {
    * @param controller
    * @param instance
    * @param incorrectFirst
+   * @param showFirstNotCompleted
    * @see NPFlexSectionExerciseList#NPFlexSectionExerciseList
    */
   protected FlexSectionExerciseList(Panel secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                                     UserFeedback feedback,
                                     ExerciseController controller,
-                                    String instance, boolean incorrectFirst) {
-    super(currentExerciseVPanel, service, feedback, controller, true, instance, incorrectFirst);
+                                    String instance,
+                                    boolean incorrectFirst,
+                                    boolean showFirstNotCompleted) {
+    super(currentExerciseVPanel, service, feedback, controller, true, instance, incorrectFirst, showFirstNotCompleted);
 
     sectionPanel = new FluidContainer();
     sectionPanel.getElement().setId("sectionPanel_" + instance);
@@ -118,7 +121,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
     buttonTypes.add(ButtonType.INFO);
     buttonTypes.add(ButtonType.WARNING);
     setUnaccountedForVertical(CLASSROOM_VERTICAL_EXTRA);
-    downloadHelper = new DownloadHelper(controller, this);
+    downloadHelper = new DownloadHelper(this);
   }
 
   protected SectionWidgetContainer<ButtonGroupSectionWidget> getSectionWidgetContainer() {
@@ -718,7 +721,7 @@ public class FlexSectionExerciseList extends NPExerciseList {
   }
 
   private void setScrollPanelWidth() {
-    if (labelColumn != null) {
+    if (labelColumn != null && clearColumnContainer != null) {
       int leftSideWidth = labelColumn.getOffsetWidth() + clearColumnContainer.getOffsetWidth();
       if (leftSideWidth == 0) leftSideWidth = 130;
       int width = Window.getClientWidth() - leftSideWidth - UNACCOUNTED_WIDTH;

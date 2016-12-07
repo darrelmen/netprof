@@ -138,7 +138,7 @@ public class ResultManager extends PagerTable {
   private Typeahead userIDSuggest, textSuggest;
 
   /**
-   * @see mitll.langtest.client.LangTest.ResultsClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)
+   * @see mitll.langtest.client.InitialUI.ResultsClickHandler#onClick
    */
   public void showResults() {
     typeToSuggest = new HashMap<String, Typeahead>();
@@ -268,16 +268,16 @@ public class ResultManager extends PagerTable {
 /*    userIDSuggest = new Typeahead(new SuggestOracle() {
       @Override
       public void requestSuggestions(final Request request, final Callback callback) {
-        //logger.info(" requestSuggestions got request for userid " + getUnitToValue() + " " + getText() + " " + getUserID());
+        //logger.info(" requestSuggestions got request for userid " + getUnitToValue() + " " + getSafeText() + " " + getUserID());
 
-        service.getResultAlternatives(getUnitToValue(), getUserID(), getText(), MonitorResult.USERID, new AsyncCallback<Collection<String>>() {
+        service.getResultAlternatives(getUnitToValue(), getUserID(), getSafeText(), MonitorResult.USERID, new AsyncCallback<Collection<String>>() {
           @Override
           public void onFailure(Throwable caught) {
           }
 
           @Override
           public void onSuccess(Collection<String> result) {
-            //logger.info(" requestSuggestions got request for userid " + getUnitToValue() + " " + getText() + " " + getUserID() + " yielded " + result.size());
+            //logger.info(" requestSuggestions got request for userid " + getUnitToValue() + " " + getSafeText() + " " + getUserID() + " yielded " + result.size());
             makeSuggestionResponse(result, callback, request);
           }
         });
@@ -299,16 +299,16 @@ public class ResultManager extends PagerTable {
     textSuggest = new Typeahead(new SuggestOracle() {
       @Override
       public void requestSuggestions(final Request request, final Callback callback) {
-        //logger.info(" requestSuggestions got request for txt " + getUnitToValue() + " " + getText() + " " + getUserID());
+        //logger.info(" requestSuggestions got request for txt " + getUnitToValue() + " " + getSafeText() + " " + getUserID());
 
-        service.getResultAlternatives(getUnitToValue(), getUserID(), getText(), MonitorResult.TEXT, new AsyncCallback<Collection<String>>() {
+        service.getResultAlternatives(getUnitToValue(), getUserID(), getSafeText(), MonitorResult.TEXT, new AsyncCallback<Collection<String>>() {
           @Override
           public void onFailure(Throwable caught) {
           }
 
           @Override
           public void onSuccess(Collection<String> result) {
-            //logger.info(" requestSuggestions got request for text " + getUnitToValue() + " " + getText() + " " + getUserID() + " yielded " + result.size());
+            //logger.info(" requestSuggestions got request for text " + getUnitToValue() + " " + getSafeText() + " " + getUserID() + " yielded " + result.size());
             makeSuggestionResponse(result, callback, request);
 
           }
@@ -355,7 +355,7 @@ public class ResultManager extends PagerTable {
     return new KeyUpHandler() {
       @Override
       public void onKeyUp(KeyUpEvent event) {
-        logger.info(w.getId() + " KeyUpEvent event " + event + " item " + w.getText() + " " + w.getValue());
+      //  logger.info(w.getId() + " KeyUpEvent event " + event + " item " + w.getText() + " " + w.getValue());
         redraw();
       }
     };
@@ -366,12 +366,12 @@ public class ResultManager extends PagerTable {
       @Override
       public String onSelection(SuggestOracle.Suggestion selectedSuggestion) {
         String replacementString = selectedSuggestion.getReplacementString();
-        logger.info("UpdaterCallback " + " got update " +" " + " ---> '" + replacementString +"'");
+      //  logger.info("UpdaterCallback " + " got update " +" " + " ---> '" + replacementString +"'");
 
         // NOTE : we need both a redraw on key up and one on selection!
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
           public void execute() {
-            logger.info("--> getUpdaterCallback onSelection REDRAW ");
+     //       logger.info("--> getUpdaterCallback onSelection REDRAW ");
             redraw();
           }
         });
@@ -394,7 +394,7 @@ public class ResultManager extends PagerTable {
 
     else {
       TextBox widget = (TextBox) textSuggest.getWidget();
-      //    logger.info("checking " + widget.getElement().getExID() + " " + widget.getText() +" " + widget.getValue());
+      //    logger.info("checking " + widget.getElement().getExID() + " " + widget.getSafeText() +" " + widget.getValue());
       return widget.getValue();
     }
   }
@@ -466,11 +466,12 @@ public class ResultManager extends PagerTable {
    */
   private void respondToClick(MonitorResult selectedObject) {
     reviewContainer.clear();
+    String audioType = selectedObject.getAudioType();
     if (selectedObject.getDurationInMillis() > 100 && selectedObject.isValid()) {
       // logger.info("audio type " + audioType);
       String foreignText = selectedObject.getForeignText();
-
-      ReviewScoringPanel w = new ReviewScoringPanel(selectedObject.getAnswer(), foreignText, service, controller, selectedObject.getExID(), null, "instance");
+      ReviewScoringPanel w = new ReviewScoringPanel(selectedObject.getAnswer(), foreignText, "",
+          service, controller, selectedObject.getExID(), null, "instance", audioType);
 
       w.setResultID(selectedObject.getUniqueID());
 
@@ -481,7 +482,8 @@ public class ResultManager extends PagerTable {
       reviewContainer.add(vert);
       reviewContainer.add(w.getTables());
     } else {
-      AudioPanel w = new AudioPanel(selectedObject.getAnswer(), service, controller, false, null, 10, "", controller.getAudioType(), selectedObject.getExID(), null, "instance");
+      AudioPanel w = new AudioPanel(selectedObject.getAnswer(), service, controller, false, null, 10, "",
+          audioType, selectedObject.getExID(), null, "instance");
       reviewContainer.add(w);
     }
   }
@@ -520,7 +522,7 @@ public class ResultManager extends PagerTable {
 
         int val = req++;
         // logger.info("getResults req " + unitToValue + " user " + userID + " text " + text + " val " + val);
-        logger.info("got " + builder.toString());
+     //   logger.info("got " + builder.toString());
 
         service.getResults(start, end, builder.toString(), unitToValue, userID, text, val, new AsyncCallback<ResultAndTotal>() {
           @Override

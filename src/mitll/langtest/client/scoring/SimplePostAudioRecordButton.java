@@ -68,12 +68,13 @@ import java.util.Map;
  */
 public abstract class SimplePostAudioRecordButton extends RecordButton implements RecordButton.RecordingListener {
   private static final String RELEASE_TO_STOP = "Release";// to stop";
-  private boolean validAudio = false;
+  //private boolean validAudio = false;
   private static final int LOG_ROUNDTRIP_THRESHOLD = 3000;
   private int reqid = 0;
   private final ExerciseController controller;
   private final LangTestDatabaseAsync service;
   private final String textToAlign;
+  private final String transliteration;
   private final String identifier;
   protected AudioAnswer lastResult;
 
@@ -85,8 +86,8 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
    * @param textToAlign to align the audio to
    */
   public SimplePostAudioRecordButton(final ExerciseController controller, LangTestDatabaseAsync service,
-                                     String textToAlign) {
-    this(controller, service, textToAlign, "item");
+                                     String textToAlign, String transliteration) {
+    this(controller, service, textToAlign, transliteration, "item");
   }
 
   /**
@@ -98,8 +99,8 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
    * @param identifier  optional, but if you want to associate the audio with an item "e.g. Dialog Item #3".
    */
   private SimplePostAudioRecordButton(final ExerciseController controller, LangTestDatabaseAsync service,
-                                      String textToAlign, String identifier) {
-    this(controller, service, "Record", RELEASE_TO_STOP, textToAlign, identifier);
+                                      String textToAlign, String transliteration, String identifier) {
+    this(controller, service, "Record", RELEASE_TO_STOP, textToAlign, transliteration, identifier);
   }
 
   /**
@@ -110,12 +111,13 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.ASRRecordAudioPanel.MyPostAudioRecordButton
    */
   private SimplePostAudioRecordButton(final ExerciseController controller, LangTestDatabaseAsync service,
-                                      String recordButtonTitle, String stopButtonTitle, String textToAlign, String identifier) {
+                                      String recordButtonTitle, String stopButtonTitle, String textToAlign, String transliteration, String identifier) {
     super(controller.getRecordTimeout(), true, recordButtonTitle, stopButtonTitle, controller.getProps());
     setRecordingListener(this);
     this.controller = controller;
     this.service = service;
     this.textToAlign = textToAlign;
+    this.transliteration = transliteration;
     this.identifier = identifier;
     getElement().setId("PostAudioRecordButton");
     getElement().getStyle().setMarginTop(1, Style.Unit.PX);
@@ -138,6 +140,7 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
 
     service.getAlignment(base64EncodedWavFile,
         textToAlign,
+            transliteration,
         identifier,
         reqid,
         controller.getBrowserInfo(), getAlignmentCallback());
@@ -173,11 +176,11 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
           return;
         }
         if (result.getValidity() == AudioAnswer.Validity.OK) {
-          validAudio = true;
+    //      validAudio = true;
           useResult(result);
         } else {
-          validAudio = false;
-          new Exception().printStackTrace();
+      //    validAudio = false;
+        //  new Exception().printStackTrace();
 
           showPopup(result.getValidity().getPrompt());
           useInvalidResult(result);
@@ -187,16 +190,6 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
         }
       }
     };
-  }
-
-/*
-  protected boolean shouldAddToAudioTable() {
-    return false;
-  }
-*/
-
-  protected String getAudioType() {
-    return controller.getAudioType();
   }
 
   private Widget getOuter() {
@@ -232,7 +225,6 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
   }
 
   public abstract void useResult(AudioAnswer result);
-
 /*
   public boolean hasValidAudio() {
     return validAudio;
@@ -286,5 +278,4 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
 	  tooltipHelper.createAddTooltip(bar, "Score " + score + "%", Placement.BOTTOM);
 	  return bar;
   }
-
 }

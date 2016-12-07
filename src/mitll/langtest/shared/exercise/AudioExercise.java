@@ -37,6 +37,7 @@ import mitll.langtest.shared.MiniUser;
 import mitll.langtest.shared.custom.UserExercise;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Created with IntelliJ IDEA.
@@ -48,6 +49,9 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class AudioExercise extends ExerciseShell {
+
+  final transient  Logger logger = Logger.getLogger("AudioExercise");
+
   private static final String SPEED = "speed";
   private static final String REGULAR = "regular";
   private static final String SLOW = "slow";
@@ -202,7 +206,7 @@ public class AudioExercise extends ExerciseShell {
     return latest;
   }
 
-  public AudioAttribute getLatest(boolean isMale) {
+  /*public AudioAttribute getLatest(boolean isMale) {
     long latestTime = 0;
     AudioAttribute latest = null;
     for (AudioAttribute audioAttribute : getAudioAttributes()) {
@@ -219,7 +223,7 @@ public class AudioExercise extends ExerciseShell {
     }
 
     return latest;
-  }
+  }*/
 
   public Map<String, AudioAttribute> getAudioRefToAttr() {
     Map<String, AudioAttribute> audioToAttr = new HashMap<String, AudioAttribute>();
@@ -338,7 +342,7 @@ public class AudioExercise extends ExerciseShell {
    * @see #getMostRecentAudio(boolean, java.util.Set)
    * @see #getUserMap(boolean)
    */
-  private Map<MiniUser, List<AudioAttribute>> getUserToAudio(boolean isMale) {
+  public Map<MiniUser, List<AudioAttribute>> getUserToAudio(boolean isMale) {
     Map<MiniUser, List<AudioAttribute>> userToAudio = new HashMap<MiniUser, List<AudioAttribute>>();
     Collection<AudioAttribute> byGender = getByGender(isMale);
 
@@ -350,10 +354,10 @@ public class AudioExercise extends ExerciseShell {
         audioAttributes1.add(attribute);
       }
       //  else {
-      //    System.out.println("getUserToAudio : skipping context " + attribute);
+      //    logger.info("getUserToAudio : skipping context " + attribute);
       //  }
     }
-    //  System.out.println("getUserToAudio : ret " +isMale+ " for " + userToAudio);
+    //  logger.info("getUserToAudio : ret " +isMale+ " for " + userToAudio);
 
     return userToAudio;
   }
@@ -380,14 +384,16 @@ public class AudioExercise extends ExerciseShell {
   /**
    * So we probably want the most recent recordings but bias first towards ones that have both fast and slow.
    *
+   * preferredVoices matches are more important than more recent recordings.
+   *
    * @param isMale
-   * @param preferredUsers
+   * @param preferredVoices if we find audio from preferred voices, we will use it, no matter how old it is
    * @return singleton map not containing default user -
    * @see mitll.langtest.client.scoring.FastAndSlowASRScoringAudioPanel#getAfterPlayWidget
    */
-  public Map<MiniUser, List<AudioAttribute>> getMostRecentAudio(boolean isMale, Collection<Long> preferredUsers) {
+  public Map<MiniUser, List<AudioAttribute>> getMostRecentAudio(boolean isMale, Collection<Long> preferredVoices) {
     Map<MiniUser, List<AudioAttribute>> userToAudio = getUserToAudio(isMale);
-    //System.out.println("\tgetMostRecentAudio userToAudio " + userToAudio + " " + preferredUsers);
+   // logger.info("\tgetMostRecentAudio userToAudio " + userToAudio + "\n\tpref" + preferredVoices);
 
     long bothTimestamp = 0;
     long timestamp = 0;
@@ -400,30 +406,29 @@ public class AudioExercise extends ExerciseShell {
         if (!audioAttribute.isValid()) continue;
 
         MiniUser user = pair.getKey();
-        //System.out.println("\t\tgetMostRecentAudio user " + user + "" + (user.isDefault() ? " DEFAULT " : ""));
-
-        if (user.getId() != -1) {
+        if (user.getId() != -1) {  // these shouldn't get attached anyway
           if (audioAttribute.isRegularSpeed()) reg = true;
           if (audioAttribute.isSlow()) slow = true;
 
           long timestamp1 = audioAttribute.getTimestamp();
           if (reg && slow && bothTimestamp < timestamp1) {
-            //  System.out.println("\t\tlatest is " + new Date(timestamp1));
-            if (bothLatest == null || !preferredUsers.contains(bothLatest.getId())) {
+     //       logger.info("\t\tlatest is " + new Date(timestamp1));
+            if (bothLatest == null || !preferredVoices.contains(bothLatest.getId())) {
               bothTimestamp = timestamp1;
-              //  System.out.println("\t\t\tlatest is " + new Date(bothTimestamp));
+   //           logger.info("\t\t\tlatest is " + new Date(bothTimestamp));
               bothLatest = user;
             }
           }
           if (timestamp <= timestamp1) {
-            if (latest == null || !preferredUsers.contains(latest.getId())) {
+            if (latest == null || !preferredVoices.contains(latest.getId())) {
               timestamp = timestamp1;
               latest = user;
             }
           }
-        } else {
-          //System.out.println("\t\tgetMostRecentAudio found default user " + user);
-          //defaultUser = user;
+        }
+        else {
+ //         logger.info("\t\tgetMostRecentAudio found default user " + user);
+       //   defaultUser = user;
         }
       }
     }
@@ -432,12 +437,12 @@ public class AudioExercise extends ExerciseShell {
 
     Map<MiniUser, List<AudioAttribute>> userToAudioSingle = new HashMap<MiniUser, List<AudioAttribute>>();
     if (toUse == null && !userToAudio.isEmpty()) {
-/*
-      if (userToAudio.size() > 1 || defaultUser == null) {
-        System.err.println("AudioExercise.getMostRecentAudio : huh? user->audio map size=" + userToAudio.size() +
-            " was " + userToAudio + " but couldn't find latest user?");
-      }
-*/
+
+//      if (userToAudio.size() > 1 || defaultUser == null) {
+//        System.err.println("AudioExercise.getMostRecentAudio : huh? user->audio map size=" + userToAudio.size() +
+//            " was " + userToAudio + " but couldn't find latest user?");
+//      }
+
     } else {
       List<AudioAttribute> value = userToAudio.get(toUse);
       if (value != null) {

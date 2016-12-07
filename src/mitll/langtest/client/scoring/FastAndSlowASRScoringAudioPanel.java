@@ -47,6 +47,7 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTestDatabaseAsync;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.MiniUser;
+import mitll.langtest.shared.Result;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.AudioAttributeExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -61,8 +62,7 @@ import java.util.logging.Logger;
  * @since 10/16/15.
  */
 public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttributeExercise> extends ASRScoringAudioPanel<T> {
-  private Logger logger = Logger.getLogger("FastAndSlowASRScoringAudioPanel");
-
+  //private Logger logger = Logger.getLogger("FastAndSlowASRScoringAudioPanel");
   private static final String DEFAULT = "Default";
 
   private static final String GROUP = "group";
@@ -80,16 +80,18 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
    * @param service
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#getAudioPanel
    */
-  public FastAndSlowASRScoringAudioPanel(T exercise,
-                                         String path, LangTestDatabaseAsync service, ExerciseController controller1,
-                                         ScoreListener scoreListener,
-                                         String instance
+  protected FastAndSlowASRScoringAudioPanel(T exercise,
+                                            String path, LangTestDatabaseAsync service, ExerciseController controller1,
+                                            ScoreListener scoreListener,
+                                            String instance
   ) {
     super(path,
         exercise.getForeignLanguage(),
+        exercise.getTransliteration(),
         service,
         controller1,
-        controller1.getProps().showSpectrogram(), scoreListener, 23, REFERENCE, exercise.getID(), exercise, instance);
+        controller1.getProps().showSpectrogram(), scoreListener, 23, REFERENCE, exercise.getID(), exercise, instance,
+        Result.AUDIO_TYPE_PRACTICE);
   }
 
   /**
@@ -103,8 +105,7 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
    */
   @Override
   protected Widget getAfterPlayWidget() {
-    logger = Logger.getLogger("FastAndSlowASRScoringAudioPanel");
-
+   // logger = Logger.getLogger("FastAndSlowASRScoringAudioPanel");
     final Panel rightSide = new VerticalPanel();
 
     rightSide.getElement().setId("beforePlayWidget_verticalPanel");
@@ -116,7 +117,6 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
     } else {
       // add gender choices
       Set<Long> preferredVoices = controller.getProps().getPreferredVoices();
-
       Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(true, preferredVoices);
       Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false, preferredVoices);
       Collection<AudioAttribute> defaultUserAudio = exercise.getDefaultUserAudio();
@@ -132,7 +132,6 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
       }
       Collection<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
       //logger.info("getAfterPlayWidget : for ex " + exercise.getID() + " found " + audioAttributes);
-
       // first choice here is for default audio (where we don't know the gender)
       final Collection<AudioAttribute> initialAudioChoices = maleEmpty ?
           femaleEmpty ? audioAttributes : femalesMap.get(femaleUsers.get(0)) : malesMap.get(maleUsers.get(0));
@@ -190,12 +189,16 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
           rightSide.clear();
           Collection<AudioAttribute> audioChoices;
 
-          if (choice.equals(M)) {
-            audioChoices = malesMap.values().iterator().next();
-          } else if (choice.equals(F)) {
-            audioChoices = femalesMap.values().iterator().next();
-          } else {
-            audioChoices = defaultAudioSet;
+          switch (choice) {
+            case M:
+              audioChoices = malesMap.values().iterator().next();
+              break;
+            case F:
+              audioChoices = femalesMap.values().iterator().next();
+              break;
+            default:
+              audioChoices = defaultAudioSet;
+              break;
           }
           addRegularAndSlow(rightSide, audioChoices, instance);
         }
@@ -233,32 +236,40 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
    * @see #getGenderChoices(Panel, Map, Map, Collection, String)
    */
   private void addRegularAndSlow(Panel vp, Collection<AudioAttribute> audioAttributes, String instance) {
-/*      System.out.println("getAfterPlayWidget : for exercise " +exercise.getID() +
-        " path "+ audioPath + " attributes were " + audioAttributes);*/
+/*    logger.info("getAfterPlayWidget : for" +
+        "\n\texercise   " + exercise.getID() +
+        "\n\tpath       " + audioPath +
+        "\n\tattributes " + audioAttributes);*/
+
     RadioButton regular = null;
     AudioAttribute regAttr = null;
+
     RadioButton slow = null;
     AudioAttribute slowAttr = null;
+
     for (final AudioAttribute audioAttribute : audioAttributes) {
       if (!audioAttribute.isValid()) continue;
-
       String display = audioAttribute.getDisplay();
 
-      // System.out.println("attri " + audioAttribute + " display " +display);
+  //    logger.info("getAfterPlayWidget : check attri " + audioAttribute + " display " + display);
       final RadioButton radio = new RadioButton(GROUP + "_" + exerciseID + "_" + instance, display);
       radio.getElement().setId("Radio_" + display);
       if (audioAttribute.isRegularSpeed()) {
         regular = radio;
         regAttr = audioAttribute;
+
+    //    logger.info("\tgetAfterPlayWidget : regular " + regAttr);
       } else if (audioAttribute.isSlow()) {  // careful not to get context sentence audio ...
         slow = radio;
         slowAttr = audioAttribute;
+
+//        logger.info("\tgetAfterPlayWidget : slowAttr " + slowAttr);
       }
     }
 
     boolean choseRegularSpeed = isRegularSpeed();
     if (regular != null) {
-      addAudioRadioButton(vp, regular);
+      addAudioRadioButton(vp, regular, regAttr);
       final AudioAttribute innerRegAttr = regAttr;
       final RadioButton innerRegular = regular;
       regular.addClickHandler(new ClickHandler() {
@@ -273,7 +284,7 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
     }
 
     if (slow != null) {
-      addAudioRadioButton(vp, slow);
+      addAudioRadioButton(vp, slow, slowAttr);
       final AudioAttribute innerSlowAttr = slowAttr;
       final RadioButton innerSlow = slow;
       slow.addClickHandler(new ClickHandler() {
@@ -358,7 +369,7 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
     return !exercise.getAudioAttributes().isEmpty();
   }
 
-  protected void addAudioRadioButton(Panel vp, RadioButton fast) {
+  protected void addAudioRadioButton(Panel vp, RadioButton fast, AudioAttribute audioAttribute) {
     vp.add(fast);
   }
 

@@ -41,6 +41,7 @@ import mitll.langtest.client.WavCallback;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.shared.AudioAnswer;
+import mitll.langtest.shared.Result;
 import mitll.langtest.shared.scoring.AudioContext;
 
 import java.util.logging.Logger;
@@ -69,6 +70,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   protected final ExerciseController controller;
   private final LangTestDatabaseAsync service;
   private final boolean recordInResults;
+  String audioType;
 
   /**
    * @param exerciseID
@@ -78,10 +80,12 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
    * @param recordInResults
    * @param recordButtonTitle
    * @param stopButtonTitle
+   * @param audioType
    * @see GoodwaveExercisePanel.ASRRecordAudioPanel.MyPostAudioRecordButton
    */
   public PostAudioRecordButton(String exerciseID, final ExerciseController controller, LangTestDatabaseAsync service,
-                               int index, boolean recordInResults, String recordButtonTitle, String stopButtonTitle) {
+                               int index, boolean recordInResults, String recordButtonTitle, String stopButtonTitle,
+                               String audioType) {
     super(controller.getRecordTimeout(), controller.getProps().doClickAndHold(), recordButtonTitle, stopButtonTitle,
         controller.getProps());
     setRecordingListener(this);
@@ -96,6 +100,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     style.setMarginTop(1, Style.Unit.PX);
     style.setMarginBottom(1, Style.Unit.PX);
     setWidth(BUTTON_WIDTH + "px");
+    this.audioType = audioType;
   }
 
   public void setExercise(String exercise) {
@@ -120,8 +125,11 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     }
     else {
       showPopup(AudioAnswer.Validity.TOO_SHORT.getPrompt());
+      hideWaveform();
     }
   }
+
+  protected void hideWaveform() {}
 
   /**
    * @see RecordingListener#stopRecording
@@ -194,7 +202,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   }
 
   protected String getAudioType() {
-    return controller.getAudioType();
+    return audioType;
   }
 
   private Widget getOuter() {

@@ -68,17 +68,21 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioPanel<Shell> {
+  public static final String DYNAMIC_RANGE = "Dynamic Range";
   private final Logger logger = Logger.getLogger("RecordAudioPanel");
   private static final int HEIGHT_OF_RECORD_ROW = 58;
 
   private static final int MIN_VALID_DYNAMIC_RANGE = 32;
-  private static final int MIN_GOOD_DYNAMIC_RANGE  = 40;
+  private static final int MIN_GOOD_DYNAMIC_RANGE = 40;
 
   private final int index;
 
   private PostAudioRecordButton postAudioRecordButton;
   private PlayAudioPanel playAudioPanel;
   protected final Panel exercisePanel;
+
+  private final ProgressBar progressBar = new ProgressBar(ProgressBarBase.Style.DEFAULT);
+  private final HorizontalPanel afterPlayWidget = new HorizontalPanel();
 
   /**
    * @see #flipRecordImages
@@ -97,10 +101,11 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
    * @param audioType
    * @param instance
    * @see mitll.langtest.client.custom.dialog.NewUserExercise.CreateFirstRecordAudioPanel#CreateFirstRecordAudioPanel(CommonExercise, Panel, boolean, String)
-   * @see mitll.langtest.client.exercise.WaveformExercisePanel#getAnswerWidget(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, ExerciseController, int)
+   * @see mitll.langtest.client.exercise.WaveformExercisePanel#getAnswerWidget
    */
   public RecordAudioPanel(T exercise, ExerciseController controller, Panel widgets,
-                          LangTestDatabaseAsync service, int index, boolean showSpectrogram, String audioType, String instance) {
+                          LangTestDatabaseAsync service, int index, boolean showSpectrogram,
+                          String audioType, String instance) {
     super(service,
         controller, showSpectrogram,
         null // no gauge panel
@@ -118,9 +123,6 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
     getElement().setId("RecordAudioPanel_" + exerciseID + "_" + index + "_" + audioType);
   }
 
-  private final ProgressBar progressBar = new ProgressBar(ProgressBarBase.Style.DEFAULT);
-  private final HorizontalPanel afterPlayWidget = new HorizontalPanel();
-
   /**
    * Add dynamic range feedback to the right of the play button.
    *
@@ -129,7 +131,7 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
    */
   @Override
   protected Widget getAfterPlayWidget() {
-    HTML w = new HTML("Dynamic Range");
+    HTML w = new HTML(DYNAMIC_RANGE);
     w.addStyleName("leftTenMargin");
     w.addStyleName("topBarMargin");
     afterPlayWidget.add(w);
@@ -140,8 +142,6 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
     Style style = progressBar.getElement().getStyle();
     style.setMarginLeft(5, Style.Unit.PX);
     progressBar.addStyleName("topBarMargin");
-  //  style.setMarginTop(5, Style.Unit.PX);
-  //  style.setMarginBottom(5, Style.Unit.PX);
     return afterPlayWidget;
   }
 
@@ -151,8 +151,11 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
    * @return
    */
   public AudioAttribute getAudioAttribute() {
-    AudioAttribute audioAttribute = audioType.equals(Result.AUDIO_TYPE_REGULAR) ? exercise.getRecordingsBy(controller.getUser(), true) :
-        audioType.equals(Result.AUDIO_TYPE_SLOW) ? exercise.getRecordingsBy(controller.getUser(), false) : null;
+    AudioAttribute audioAttribute =
+        audioType.equals(Result.AUDIO_TYPE_REGULAR) ?
+            exercise.getRecordingsBy(controller.getUser(), true) :
+            audioType.equals(Result.AUDIO_TYPE_SLOW) ?
+                exercise.getRecordingsBy(controller.getUser(), false) : null;
 
     if (audioType.startsWith("context")) {
       for (AudioAttribute audioAttribute1 : exercise.getAudioAttributes()) {
@@ -196,7 +199,6 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
   public void clickStop() {
     postAudioRecordButton.clickStop();
   }
-
   public boolean isRecording() {
     return postAudioRecordButton.isRecording();
   }
@@ -221,8 +223,8 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
   }
 
   /**
-   * @see RecordAudioPanel.MyWaveformPostAudioRecordButton#flip
    * @param first
+   * @see RecordAudioPanel.MyWaveformPostAudioRecordButton#flip
    */
   protected void flipRecordImages(boolean first) {
     recordImage1.setVisible(first);
@@ -251,21 +253,21 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
     public MyPlayAudioPanel(Image recordImage1, Image recordImage2, final Panel panel, String suffix, Widget toTheRightWidget) {
       super(RecordAudioPanel.this.soundManager,
           new PlayListener() {
-        public void playStarted() {
-          if (panel instanceof BusyPanel) {
-            ((BusyPanel) panel).setBusy(true);
-          }
-          postAudioRecordButton.setEnabled(false);
-        }
+            public void playStarted() {
+              if (panel instanceof BusyPanel) {
+                ((BusyPanel) panel).setBusy(true);
+              }
+              postAudioRecordButton.setEnabled(false);
+            }
 
-        public void playStopped() {
-          if (panel instanceof BusyPanel) {
-            ((BusyPanel) panel).setBusy(false);
-          }
-          postAudioRecordButton.setEnabled(true);
-        }
+            public void playStopped() {
+              if (panel instanceof BusyPanel) {
+                ((BusyPanel) panel).setBusy(false);
+              }
+              postAudioRecordButton.setEnabled(true);
+            }
 
-      }, suffix, toTheRightWidget);
+          }, suffix, toTheRightWidget);
       add(recordImage1);
       recordImage1.setVisible(false);
       add(recordImage2);
@@ -293,7 +295,7 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
      * @param recordButtonTitle
      * @see #makePostAudioRecordButton(String, String)
      */
-    public MyWaveformPostAudioRecordButton(String audioType, String recordButtonTitle) {
+    protected MyWaveformPostAudioRecordButton(String audioType, String recordButtonTitle) {
       super(RecordAudioPanel.this.exercise.getID(),
           RecordAudioPanel.this.controller,
           RecordAudioPanel.this.exercisePanel,
@@ -327,7 +329,7 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
 
     /**
      * From Paul Gatewood:
-     * 
+     * <p>
      * Reasonable upper limit outside of an acoustic isolation room is 70dB Dynamic Range
      * <p>
      * I would put
@@ -360,7 +362,7 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
       double dynamicRange = result.getDynamicRange();
       double percent = dynamicRange / 70;
       progressBar.setPercent(100 * percent);
-      progressBar.setText("" + roundToHundredth(dynamicRange));
+      progressBar.setText("" + roundToTenth(dynamicRange));
       progressBar.setColor(dynamicRange > MIN_GOOD_DYNAMIC_RANGE ?
           ProgressBarBase.Color.SUCCESS : dynamicRange > MIN_VALID_DYNAMIC_RANGE ?
           ProgressBarBase.Color.WARNING :
@@ -368,8 +370,8 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
       afterPlayWidget.setVisible(true);
     }
 
-    private float roundToHundredth(double totalHours) {
-      return ((float) ((Math.round(totalHours * 100d)))) / 100f;
+    private float roundToTenth(double totalHours) {
+      return ((float) ((Math.round(totalHours * 10d)))) / 10f;
     }
   }
 }

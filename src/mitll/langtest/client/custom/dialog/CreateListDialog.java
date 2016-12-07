@@ -41,6 +41,7 @@ import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
@@ -49,7 +50,9 @@ import mitll.langtest.client.custom.ListManager;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.user.BasicDialog;
+import mitll.langtest.client.user.FormField;
 import mitll.langtest.client.user.UserManager;
+import mitll.langtest.shared.User;
 
 import java.util.logging.Logger;
 
@@ -108,7 +111,7 @@ public class CreateListDialog extends BasicDialog {
 
     row = new FluidRow();
     child.add(row);
-    final BasicDialog.FormField titleBox = addControlFormField(row, TITLE);
+    final FormField titleBox = addControlFormField(row, TITLE);
     titleBox.box.getElement().setId("CreateListDialog_Title");
     titleBox.box.addBlurHandler(new BlurHandler() {
       @Override
@@ -119,7 +122,7 @@ public class CreateListDialog extends BasicDialog {
     row = new FluidRow();
     child.add(row);
     final TextArea area = new TextArea();
-    final BasicDialog.FormField description = getFormField(row, DESCRIPTION_OPTIONAL, area, 1);
+    final FormField description = getFormField(row, DESCRIPTION_OPTIONAL, area, 1);
     description.box.getElement().setId("CreateListDialog_Description");
     description.box.addBlurHandler(new BlurHandler() {
       @Override
@@ -131,7 +134,7 @@ public class CreateListDialog extends BasicDialog {
     row = new FluidRow();
     child.add(row);
 
-    final BasicDialog.FormField classBox = addControlFormField(row, CLASS);
+    final FormField classBox = addControlFormField(row, CLASS);
     classBox.box.getElement().setId("CreateListDialog_CourseInfo");
     classBox.box.addBlurHandler(new BlurHandler() {
       @Override
@@ -147,8 +150,7 @@ public class CreateListDialog extends BasicDialog {
     RadioButton radioButton = new RadioButton("Public_Private_Group", "Public");
     RadioButton radioButton2 = new RadioButton("Public_Private_Group", "Private");
 
-    String audioType = controller.getAudioType();
-    boolean isStudent = audioType.equalsIgnoreCase(PRACTICE);
+    boolean isStudent = controller.getUserKind().equals(User.Kind.STUDENT);
 
     radioButton.setValue(!isStudent);
     radioButton2.setValue(isStudent);
@@ -188,7 +190,7 @@ public class CreateListDialog extends BasicDialog {
     submit.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        logger.info("creating list for " + titleBox + " " + area.getText() + " and " + classBox.getText());
+       // logger.info("creating list for " + titleBox + " " + area.getText() + " and " + classBox.getSafeText());
         enterKeyButtonHelper.removeKeyHandler();
         if (validateCreateList(titleBox/*, description, classBox*/)) {
           addUserList(titleBox, area, classBox,publicRadio.getValue());
@@ -202,16 +204,16 @@ public class CreateListDialog extends BasicDialog {
   private void addUserList(final FormField titleBox, TextArea area, FormField classBox, boolean isPublic) {
     int user = userManager.getUser();
     service.addUserList(user,
-      titleBox.getText(),
-      area.getText(),
-      classBox.getText(), isPublic, new AsyncCallback<Long>() {
+      titleBox.getSafeText(),
+      sanitize(area.getText()),
+      classBox.getSafeText(), isPublic, new AsyncCallback<Long>() {
         @Override
         public void onFailure(Throwable caught) {}
 
         @Override
         public void onSuccess(Long result) {
           if (result == -1) {
-            markError(titleBox, "You already have a list named " + titleBox.getText());
+            markError(titleBox, "You already have a list named " + titleBox.getSafeText());
           } else {
             navigation.clickOnYourLists(result);
           }
@@ -224,13 +226,17 @@ public class CreateListDialog extends BasicDialog {
     createContent.getElement().getStyle().setPaddingRight(0, Style.Unit.PX);
   }
 
-  private boolean validateCreateList(BasicDialog.FormField titleBox) {
-    if (titleBox.getText().isEmpty()) {
+  private boolean validateCreateList(FormField titleBox) {
+    if (titleBox.getSafeText().isEmpty()) {
       markError(titleBox, "Please fill in a title");
       return false;
     }
     else {
       return true;
     }
+  }
+
+  private String sanitize(String text) {
+    return SimpleHtmlSanitizer.sanitizeHtml(text).asString();
   }
 }

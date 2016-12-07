@@ -86,12 +86,14 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
    * @param controller
    * @param instance
    * @param incorrectFirst
+   * @param showFirstNotCompleted
+   * @see ResponseExerciseList#ResponseExerciseList(Panel, Panel, LangTestDatabaseAsync, UserFeedback, ExerciseController, String)
    */
   SingleSelectExerciseList(Panel secondRow, Panel currentExerciseVPanel, LangTestDatabaseAsync service,
                            UserFeedback feedback,
                            ExerciseController controller,
-                           String instance, boolean incorrectFirst) {
-    super(currentExerciseVPanel, service, feedback, controller, true, instance, incorrectFirst);
+                           String instance, boolean incorrectFirst, boolean showFirstNotCompleted) {
+    super(currentExerciseVPanel, service, feedback, controller, true, instance, incorrectFirst, showFirstNotCompleted);
 
     sectionPanel = new FluidContainer();
     sectionPanel.getElement().setId("sectionPanel_" + instance);
@@ -392,16 +394,17 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
 
   /**
    * @seex #rememberAndLoadFirst(List, CommonExercise, String)
+   * @param searchIfAny
    */
   @Override
-  public void loadFirstExercise() {
+  public void loadFirstExercise(String searchIfAny) {
     //logger.info("loadFirstExercise : ---");
 
     if (isEmpty()) { // this can only happen if the database doesn't load properly, e.g. it's in use
       //logger.info("loadFirstExercise : current exercises is empty?");
       gotEmptyExerciseList();
     } else {
-      super.loadFirstExercise();
+      super.loadFirstExercise(searchIfAny);
     }
   }
 
@@ -437,7 +440,7 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
       if (count == 3) {
         //    logger.info("push new token " + getHistoryTokenFromUIState());
         logger.info("gotSelection count = " + count);
-        loadExercisesUsingPrefix(selectionState.getTypeToSection(), getPrefix(), false, "", false, false);
+        loadExercisesUsingPrefix(selectionState.getTypeToSection(), getPrefix(), "", false, false, false, false);
       } else {
         // logger.warning("not enough selections " +count);
         gotEmptyExerciseList();

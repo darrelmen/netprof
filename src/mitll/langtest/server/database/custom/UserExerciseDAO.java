@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.database.custom;
 
-import mitll.langtest.server.database.AudioDAO;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
@@ -252,6 +251,7 @@ public class UserExerciseDAO extends DAO {
     createIndex(database, EXERCISEID, USEREXERCISE);
   }
 
+  int c = 0;
   /**
    * @param listID
    * @return
@@ -273,8 +273,6 @@ public class UserExerciseDAO extends DAO {
             " found " + userExercises.size() + " exercises userExercises on list " + listID);
       }
 
-
-      int c = 0;
       for (CommonExercise ue : userExercises) {
         // if (DEBUG) logger.debug("\ton list " + listID + " " + ue.getID() + " / " + ue.getUniqueID() + " : " + ue);
         if (ue.isPredefined()) {
@@ -290,7 +288,7 @@ public class UserExerciseDAO extends DAO {
           userExercises2.add(ue);
         }
       }
-      if (c > 0) logger.warn("huh? can't find " +c+"/"+userExercises.size() + " items???");
+      if (c <10) logger.warn("huh? can't find " +c+"/"+userExercises.size() + " items???");
 
       boolean isEnglish = database.getLanguage().equalsIgnoreCase("english");
       String join2 = getJoin2(listID);
@@ -415,7 +413,7 @@ public class UserExerciseDAO extends DAO {
    * @return
    * @see UserListManager#getDefectList(java.util.Collection)
    */
-  Collection<CommonExercise> getWhere(Collection<String> exids) {
+  public Collection<CommonExercise> getWhere(Collection<String> exids) {
     if (exids.isEmpty()) return new ArrayList<>();
     String sql = "SELECT * from " + USEREXERCISE + " where " + EXERCISEID + " in (" + getIds(exids) + ")";
     return getCommonExercises(sql);
@@ -477,7 +475,7 @@ public class UserExerciseDAO extends DAO {
         }*/
         exercises.add(e);
       }
-      finish(connection, statement, rs);
+      finish(connection, statement, rs, sql);
     } finally {
       database.closeConnection(connection);
     }
@@ -561,7 +559,7 @@ public class UserExerciseDAO extends DAO {
     while (rs.next()) {
       exercises.add(rs.getString(EXERCISEID));
     }
-    finish(connection, statement, rs);
+    finish(connection, statement, rs, sql);
 
     return exercises;
   }

@@ -35,6 +35,7 @@ package mitll.langtest.server.autocrt;
 import ag.experiment.AutoGradeExperiment;
 import mira.classifier.Classifier;
 import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.audio.DecoderOptions;
 import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.database.export.Export;
 import mitll.langtest.server.export.ExerciseExport;
@@ -274,7 +275,7 @@ public class AutoCRT {
    * @see #getExportedAnswers(String, int)
    */
   private PretestScore getScoreForAudio(AmasExerciseImpl exercise, String exerciseID, int questionID, File audioFile, boolean useCache) {
-    Collection<String> exportedAnswersOrig = getPredefAnswers(exercise, questionID-1);
+    Collection<String> exportedAnswersOrig = getPredefAnswers(exercise, questionID - 1);
     if (exportedAnswersOrig == null) logger.warn("getScoreForAudio : can't find " + exerciseID + "/" + questionID);
     Collection<String> exportedAnswers = inDictFilter.getValidPhrases(exportedAnswersOrig);   // remove phrases that break hydec
     if (exportedAnswers == null)
@@ -285,7 +286,9 @@ public class AutoCRT {
     // logger.info("getScoreForAudio : got possible answers, num = " + size + " vs orig " + size1);
     long then = System.currentTimeMillis();
 
-    PretestScore asrScoreForAudio = autoCRTScoring.getASRScoreForAudio(audioFile, exportedAnswers, useCache, false);
+    PretestScore asrScoreForAudio = autoCRTScoring.getASRScoreForAudio(audioFile, exportedAnswers, exercise.getTransliteration(),
+        new DecoderOptions().setCanUseCache(useCache)
+    );
     long now = System.currentTimeMillis();
     if (now - then > 100) {
       logger.info("getScoreForAudio : took " + (now - then) + " millis to get score " + asrScoreForAudio +
@@ -296,10 +299,10 @@ public class AutoCRT {
   }
 
   /**
-   * @see #getScoreForAudio(AmasExerciseImpl, String, int, File, boolean)
    * @param exercise
    * @param questionID
    * @return
+   * @see #getScoreForAudio(AmasExerciseImpl, String, int, File, boolean)
    */
   private Collection<String> getPredefAnswers(AmasExerciseImpl exercise, int questionID) {
     QAPair q = exercise.getQuestions().get(questionID);
@@ -335,10 +338,10 @@ public class AutoCRT {
    * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer
    * @see mitll.langtest.server.audio.AudioFileHelper#getFlashcardAnswer(CommonExercise, File, AudioAnswer)
    */
-/*  public PretestScore getFlashcardAnswer(CommonExercise commonExercise, File audioFile, AudioAnswer answer,
+/*  public PretestScore getDecodeScore(CommonExercise commonExercise, File audioFile, AudioAnswer answer,
                                          String language) {
     Collection<String> foregroundSentences = getRefSentences(commonExercise, language);
-    PretestScore flashcardAnswer = getFlashcardAnswer(audioFile, foregroundSentences, answer);
+    PretestScore flashcardAnswer = getDecodeScore(audioFile, foregroundSentences, answer);
 
     // log what happened
     if (answer.isCorrect()) {
@@ -347,7 +350,7 @@ public class AutoCRT {
           "pron score was " + answer.getScore() + " answer " + answer);
     } else {
       int length = foregroundSentences.isEmpty() ? 0 : foregroundSentences.iterator().next().length();
-      logger.info("getFlashcardAnswer : incorrect response for exercise #" + commonExercise.getID() +
+      logger.info("getDecodeScore : incorrect response for exercise #" + commonExercise.getID() +
           " reco sentence was '" + answer.getDecodeOutput() + "' (" + answer.getDecodeOutput().length() +
           ") vs " + "'" + foregroundSentences + "' (" + length +
           ") pron score was " + answer.getScore());
@@ -375,7 +378,7 @@ public class AutoCRT {
    * @return PretestScore word/phone alignment with scores
    * @see #getFlashcardAnswer
    */
- /* private PretestScore getFlashcardAnswer(File audioFile, Collection<String> possibleSentences, AudioAnswer answer) {
+ /* private PretestScore getDecodeScore(File audioFile, Collection<String> possibleSentences, AudioAnswer answer) {
     PretestScore asrScoreForAudio = autoCRTScoring.getASRScoreForAudio(audioFile, removePunct(possibleSentences));
 
     String recoSentence =

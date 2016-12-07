@@ -32,8 +32,10 @@
 
 package mitll.langtest.server.database.custom;
 
+import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.audio.PathWriter;
+import mitll.langtest.server.audio.TrackInfo;
 import mitll.langtest.server.database.UserDAO;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.ExerciseAnnotation;
@@ -395,6 +397,7 @@ public class UserListManager {
    *
    * @param typeOrder
    * @return
+   * @see LangTestDatabaseImpl#getReviewLists
    */
   public UserList<CommonShell> getCommentedList(Collection<String> typeOrder) {
     //Map<String, ReviewedDAO.StateCreator> exerciseToState = getExerciseToState(true); // skip unset items!
@@ -441,7 +444,7 @@ public class UserListManager {
    *
    * @param typeOrder used by sorter to sort first in unit & chapter order
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getReviewLists()
+   * @see mitll.langtest.server.LangTestDatabaseImpl#getReviewLists
    * @see #markCorrectness(String, boolean, long)
    */
   public UserList<CommonShell> getDefectList(Collection<String> typeOrder) {
@@ -473,23 +476,34 @@ public class UserListManager {
    * @see #getCommentedList(java.util.Collection)
    * @see #getDefectList(java.util.Collection)
    */
-  private UserList<CommonShell> getReviewList(Collection<CommonExercise> allKnown, String name, String description,
-                                              Collection<String> ids, long userListMaginID, Collection<String> typeOrder) {
+  private UserList<CommonShell> getReviewList(Collection<CommonExercise> allKnown,
+                                              String name,
+                                              String description,
+                                              Collection<String> ids,
+                                              long userListMaginID,
+                                              Collection<String> typeOrder) {
     Map<String, CommonExercise> idToUser = new HashMap<>();
     for (CommonExercise ue : allKnown) idToUser.put(ue.getID(), ue);
 
-    List<CommonShell> onList = getReviewedUserExercises(idToUser, ids);
+    long then = System.currentTimeMillis();
+    List<CommonExercise> onList = getReviewedUserExercises(idToUser, ids);
 
-    // logger.debug("getReviewList '" +name+ "' ids size = " + allKnown.size() + " yielded " + onList.size());
+    List<CommonShell> copy = new ArrayList<>();
+
+    for (CommonExercise orig : onList) copy.add(orig.getShell());
+
+    long now = System.currentTimeMillis();
+
+    logger.debug("getReviewList '" + name + "' ids size = " + allKnown.size() + " yielded " + copy.size() + " took " + (now - then) + " millis");
     User user = getQCUser();
     UserList<CommonShell> userList = new UserList<CommonShell>(userListMaginID, user, name, description, "", false);
     userList.setReview(true);
 
-    new ExerciseSorter(typeOrder).getSortedByUnitThenAlpha(onList, false);
+    new ExerciseSorter(typeOrder).getSortedByUnitThenAlpha(copy, false);
 
-    userList.setExercises(onList);
+    userList.setExercises(copy);
 
-    markState(onList);
+    markState(copy);
     logger.debug("getReviewList returning " + userList + (userList.getExercises().isEmpty() ? "" : " first " + userList.getExercises().iterator().next()));
     return userList;
   }
@@ -506,8 +520,8 @@ public class UserListManager {
    * @return
    * @see #getReviewList(java.util.Collection, String, String, java.util.Collection, long, java.util.Collection)
    */
-  private List<CommonShell> getReviewedUserExercises(Map<String, CommonExercise> idToUserExercise, Collection<String> ids) {
-    List<CommonShell> onList = new ArrayList<>();
+  private List<CommonExercise> getReviewedUserExercises(Map<String, CommonExercise> idToUserExercise, Collection<String> ids) {
+    List<CommonExercise> onList = new ArrayList<>();
 
     int c = 0;
     for (String id : ids) {
@@ -522,8 +536,12 @@ public class UserListManager {
         CommonExercise byID = userExerciseDAO.getPredefExercise(id);
         if (byID != null) {
           //logger.debug("getReviewedUserExercises : found " + byID + " tooltip " + byID.getTooltip());
-          UserExercise e = new UserExercise(byID, byID.getCreator());
-          onList.add(e); // all predefined references
+
+          //UserExercise e = new UserExercise(byID, byID.getCreator());
+          //onList.add(e); // all predefined references
+
+          onList.add(byID);
+
           //e.setTooltip(byID.getCombinedTooltip());
           //logger.debug("getReviewedUserExercises : found " + e.getID() + " tooltip " + e.getTooltip());
         } else {
@@ -591,7 +609,7 @@ public class UserListManager {
     UserList where = userListDAO.getWhere(userListID, true);
 
     if (where == null) {
-      logger.warn("addItemToList: couldn't find ul with id " + userListID + " and '" + userExercise +"'");
+      logger.warn("addItemToList: couldn't find ul with id " + userListID + " and '" + userExercise + "'");
     }
 
     if (where != null) {
@@ -681,8 +699,8 @@ public class UserListManager {
     File fileRef = pathHelper.getAbsoluteFile(regularSpeed.getAudioRef());
 
     String fast = prefix + "_" + now + "_by_" + userExercise.getCombinedMutableUserExercise().getCreator() + ".wav";
-    String artist   = regularSpeed.getUser().getUserID();
-    String refAudio = getRefAudioPath(userExercise.getID(), fileRef, fast, overwrite, userExercise.getForeignLanguage(), artist);
+    String artist = regularSpeed.getUser().getUserID();
+    String refAudio = getRefAudioPath(userExercise.getID(), fileRef, fast, overwrite, new TrackInfo(userExercise.getForeignLanguage(), artist, userExercise.getEnglish()));
     regularSpeed.setAudioRef(refAudio);
     //  logger.debug("fixAudioPaths : for " + userExercise.getID() + " fast is " + fast + " size " + FileUtils.size(refAudio));
   }
@@ -696,14 +714,13 @@ public class UserListManager {
    * @param fileRef
    * @param destFileName
    * @param overwrite
-   * @param title
-   * @param artist
+   * @param trackInfo
    * @return new, permanent audio path
    * @see #fixAudioPaths
    */
-  private String getRefAudioPath(String id, File fileRef, String destFileName, boolean overwrite, String title, String artist) {
-    return new PathWriter().getPermanentAudioPath(pathHelper, fileRef, destFileName, overwrite, id, title, artist,
-        userDAO.getDatabase().getServerProps());
+  private String getRefAudioPath(String id, File fileRef, String destFileName, boolean overwrite, TrackInfo trackInfo) {
+    return new PathWriter().getPermanentAudioPath(pathHelper, fileRef, destFileName, overwrite, id, userDAO.getDatabase().getServerProps(),
+        trackInfo);
   }
 
   public void setUserExerciseDAO(UserExerciseDAO userExerciseDAO) {
@@ -754,7 +771,7 @@ public class UserListManager {
    * @param exerciseID
    * @param field
    * @param comment
-   * @see mitll.langtest.server.database.exercise.ExcelImport#addDefects
+   * @see mitll.langtest.server.database.exercise.BaseExerciseDAO#addDefects
    */
   public boolean addDefect(String exerciseID, String field, String comment) {
     if (!annotationDAO.hasAnnotation(exerciseID, field, INCORRECT, comment)) {
@@ -870,9 +887,9 @@ public class UserListManager {
   }
 
   /**
-   * @see #markState(String, STATE, long)
    * @param userExercise
    * @param userID
+   * @see #markState(String, STATE, long)
    */
   private void markAllFieldsFixed(CommonExercise userExercise, long userID) {
     Collection<String> fields = userExercise.getFields();
@@ -914,11 +931,11 @@ public class UserListManager {
   }
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#deleteItemFromList(long, String)
    * @param listid
    * @param exid
    * @param typeOrder
    * @return
+   * @see mitll.langtest.server.LangTestDatabaseImpl#deleteItemFromList(long, String)
    */
   public boolean deleteItemFromList(long listid, String exid, Collection<String> typeOrder) {
     logger.debug("deleteItemFromList " + listid + " " + exid);
@@ -947,5 +964,13 @@ public class UserListManager {
 
   public UserExerciseDAO getUserExerciseDAO() {
     return userExerciseDAO;
+  }
+
+  public Collection<String> getDefectExercises() {
+    return reviewedDAO.getDefectExercises();
+  }
+
+  public Collection<String> getInspectedExercises() {
+    return reviewedDAO.getInspectedExercises();
   }
 }

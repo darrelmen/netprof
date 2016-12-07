@@ -1,3 +1,5 @@
 [submodule "imagewriter"]
 	path = imagewriter
-	url = git@g62code:gvidaver/imagewriter
+	url = https://gh.ll.mit.edu/DLI-LTEA/imagewriter.git
+	branch = master
+

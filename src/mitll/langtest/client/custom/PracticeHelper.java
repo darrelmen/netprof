@@ -59,14 +59,11 @@ import java.util.logging.Logger;
 class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
   private final Logger logger = Logger.getLogger("PracticeHelper");
 
-  //  private Navigation navigation;
   private StatsFlashcardFactory<CommonShell, CommonExercise> statsFlashcardFactory;
   private Widget outerBottomRow;
 
-  public PracticeHelper(//Navigation navigation,
-                        LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager, ExerciseController controller) {
+  PracticeHelper(LangTestDatabaseAsync service, UserFeedback feedback, UserManager userManager, ExerciseController controller) {
     super(service, feedback, userManager, controller, null);
-    // this.navigation = navigation;
   }
 
   @Override
@@ -96,7 +93,7 @@ class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise>
                                                                                  Panel currentExercisePanel,
                                                                                  String instanceName,
                                                                                  boolean incorrectFirst) {
-        return new NPFlexSectionExerciseList(outer, topRow, currentExercisePanel, instanceName, true) {
+        return new NPFlexSectionExerciseList(outer, topRow, currentExercisePanel, instanceName, true, false) {
           @Override
           protected CommonShell findFirstExercise() {
             String currentExerciseID = statsFlashcardFactory.getCurrentExerciseID();
@@ -125,13 +122,13 @@ class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise>
           @Override
           protected void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection,
                                                   String prefix,
-                                                  boolean onlyWithAudioAnno,
-                                                  String exerciseID, boolean onlyUnrecorded, boolean onlyDefaultUser) {
+                                                  String exerciseID, boolean onlyWithAudioAnno,
+                                                  boolean onlyUnrecorded, boolean onlyDefaultUser, boolean onlyUninspected) {
 //            logger.info("got loadExercisesUsingPrefix " +prefix);
-          //  controller.logException(new Exception("where did this come from?"));
+            //  controller.logException(new Exception("where did this come from?"));
             prefix = ""; // practice helper doesn't use a search box
 
-            super.loadExercisesUsingPrefix(typeToSection, prefix, onlyWithAudioAnno, exerciseID, onlyUnrecorded, onlyDefaultUser);
+            super.loadExercisesUsingPrefix(typeToSection, prefix, exerciseID, onlyWithAudioAnno, onlyUnrecorded, onlyDefaultUser, onlyUninspected);
             statsFlashcardFactory.setSelection(typeToSection);
           }
         };
