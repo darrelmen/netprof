@@ -47,16 +47,18 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickProject;
 import mitll.npdata.dao.SlickProjectProperty;
-import org.apache.logging.log4j.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
-public class ProjectTest extends BaseTest {
-  private static final Logger logger = LogManager.getLogger(ProjectTest.class);
+public class DominoUserTest extends BaseTest {
+  private static final Logger logger = LogManager.getLogger(DominoUserTest.class);
   public static final int MAX = 200;
 
   @Test
@@ -228,11 +230,23 @@ public class ProjectTest extends BaseTest {
     projectDAO.getAll().stream().forEach(p -> logger.info("projec " + p));
     //  projectDAO.delete(14);
   }
-
   @Test
-  public void testDrop() {
-    IProjectDAO projectDAO = getDatabaseVeryLight("netProf", "config.properties", false).getProjectDAO();
-    projectDAO.delete(7);
+  public void testForget() {
+    DatabaseImpl netProf = getDatabaseVeryLight("netProf", "config.properties", false);
+    IProjectDAO projectDAO = netProf.getProjectDAO();
+    SlickProject project;
+    Stream<SlickProject> serbian = projectDAO.getAll().stream().filter(p -> p.name().equals("serbian"));
+
+    SlickProject project1 = serbian.findFirst().get();
+    logger.info("Got " + project1);
+
+    IUserDAO userDAO = netProf.getUserDAO();
+    User demo = userDAO.getUserByID("demo");
+    logger.info("Got " + demo);
+
+    userDAO.forgotPassword("demo","");
+
     //  projectDAO.delete(14);
   }
+
 }

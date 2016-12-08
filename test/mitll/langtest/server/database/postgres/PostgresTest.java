@@ -308,7 +308,9 @@ public class PostgresTest extends BaseTest {
     return new Info("english");
   }
 
-  private void testCopy(List<Info> infos)  {
+  boolean justReport = false;
+
+  private void testCopy(List<Info> infos) {
     CopyToPostgres cp = new CopyToPostgres();
     try {
       for (Info config : infos) {
@@ -321,12 +323,13 @@ public class PostgresTest extends BaseTest {
 
         logger.info("\n\n\n-------- Got  databaseLight " + databaseLight);
 
-  //      SectionHelper<CommonExercise> sectionHelper = databaseLight.getSectionHelper();
-  //      sectionHelper.report();
-
-        cp.copyOneConfig(databaseLight, cc, config.name, config.displayOrder, config.isDev());
-        databaseLight.destroy();
-
+        if (justReport) {
+          SectionHelper<CommonExercise> sectionHelper = databaseLight.getSectionHelper();
+          sectionHelper.report();
+        } else {
+          cp.copyOneConfig(databaseLight, cc, config.name, config.displayOrder, config.isDev());
+          databaseLight.destroy();
+        }
 
         long now = System.currentTimeMillis();
         logger.info("\n\n\n-------- FINISHED copy " + config + " " + cc + " in " + ((now - then) / 1000) + " seconds");

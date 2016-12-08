@@ -763,6 +763,11 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   }
 
   @Override
+  public boolean forgotPassword(String user, String url) {
+    return false;
+  }
+
+  @Override
   public boolean changeEnabled(int userid, boolean enabled) {
     try {
       Connection connection = getConnection();
