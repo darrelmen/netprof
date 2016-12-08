@@ -57,18 +57,18 @@ public class SignInForm extends UserDialog implements SignIn {
   private final Logger logger = Logger.getLogger("SignInForm");
 
   /**
-   * @see #gotGoodPassword(User, String)
-   * @see #gotLogin(String, String, boolean)
+   * @see #gotGoodPassword
+   * @see #gotLogin
    */
   private static final String DEACTIVATED = "I'm sorry, this account has been deactivated.";
   private static final String TROUBLE_CONNECTING_TO_SERVER = "Trouble connecting to server.";
   private static final String NO_USER_FOUND = "No userField found - have you signed up?";
 
   /**
-   * @see #gotBadPassword(User, String)
+   * @see #gotBadPassword
    * @deprecated dude get rid of this
    */
-  private static final String MAGIC_PASS = Md5Hash.getHash("adm!n");
+//  private static final String MAGIC_PASS = Md5Hash.getHash("adm!n");
 
   private static final int MIN_LENGTH_USER_ID = 4;
 
@@ -276,6 +276,7 @@ public class SignInForm extends UserDialog implements SignIn {
     return signIn;
   }
 
+/*
   private String rot13(String val) {
     StringBuilder builder = new StringBuilder();
     for (char c : val.toCharArray()) {
@@ -287,6 +288,7 @@ public class SignInForm extends UserDialog implements SignIn {
     }
     return builder.toString();
   }
+*/
 
   /**
    * @param user
@@ -294,14 +296,14 @@ public class SignInForm extends UserDialog implements SignIn {
    * @see #getSignInButton
    */
   private void gotLogin(final String user, final String freeTextPassword) {
-    //final String hashedPass = Md5Hash.getHash(freeTextPassword);
+    final String hashedPass = Md5Hash.getHash(freeTextPassword);
     logger.info("gotLogin : userField is '" + user + "' freeTextPassword " + freeTextPassword.length() + " characters" //+
         //    " or '" + hashedPass + "'"
     );
 
     signIn.setEnabled(false);
 
-    userManager.getUserService().loginUser(user, rot13(freeTextPassword), new AsyncCallback<LoginResult>() {
+    userManager.getUserService().loginUser(user, hashedPass, freeTextPassword, new AsyncCallback<LoginResult>() {
       @Override
       public void onFailure(Throwable caught) {
         signIn.setEnabled(true);
@@ -480,7 +482,7 @@ public class SignInForm extends UserDialog implements SignIn {
    * recorder/not a recorder choice.
    *
    * @param userID
-   * @see #foundExistingUser(User, boolean, String)
+   * @see #foundExistingUser
    * @see #makeSignInUserName(com.github.gwtbootstrap.client.ui.Fieldset)
    */
   private void copyInfoToSignUp(String userID) {

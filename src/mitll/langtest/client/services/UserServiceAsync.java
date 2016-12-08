@@ -35,7 +35,6 @@ package mitll.langtest.client.services;
 import com.github.gwtbootstrap.client.ui.Fieldset;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.domino.user.ChangePasswordView;
-import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.user.*;
 
 import java.util.Collection;
@@ -43,7 +42,6 @@ import java.util.List;
 import java.util.Map;
 
 public interface UserServiceAsync {
-
   /**
    * @see mitll.langtest.client.user.SignInForm#gotLogin(String, String, boolean)
    * @see mitll.langtest.client.user.SignInForm#makeSignInUserName(Fieldset)
@@ -55,41 +53,39 @@ public interface UserServiceAsync {
 
   /**
    * @param userId
+   * @param attemptedHashedPassword
    * @param attemptedFreeTextPassword
-   * @param async
-   * @see UserManager#getPermissionsAndSetUser
+   *@param async  @see UserManager#getPermissionsAndSetUser
    * @see mitll.langtest.client.user.SignInForm#getPermissionsAndSetUser
    */
-  void loginUser(String userId, String attemptedFreeTextPassword, AsyncCallback<LoginResult> async);
+  void loginUser(String userId, String attemptedHashedPassword, String attemptedFreeTextPassword, AsyncCallback<LoginResult> async);
 
   /**
    * TODO : don't do a token - I guess it should be the userid?
    * @see mitll.langtest.client.user.ResetPassword#onChangePassword
    * @param token
-   * @param newFreeTextPassword
+   * @param newHashedPassword
    * @param asyncCallback
    */
-  void changePFor(String token, String newFreeTextPassword, AsyncCallback<Boolean> asyncCallback);
+  void changePFor(String token, String newHashedPassword, AsyncCallback<Boolean> asyncCallback);
 
   /**
    * @see ChangePasswordView#changePassword
    * @param userid
-   * @param currentFreeTextPassword
-   * @param newFreeTextPassword
+   * @param currentHashedPassword
+   * @param newHashedPassword
    * @param async
    */
   void changePassword(int userid,
-                      String currentFreeTextPassword,
-                      String newFreeTextPassword,
+                      String currentHashedPassword,
+                      String newHashedPassword,
                       AsyncCallback<Boolean> async);
 
   void resetPassword(String userid, String userEmail, String url, AsyncCallback<Boolean> asyncCallback);
 
-
   void getUsers(AsyncCallback<List<User>> async);
 
   void getUser(int id, AsyncCallback<User> async);
-
 
   /**
    * No real need to pass this in
@@ -108,7 +104,6 @@ public interface UserServiceAsync {
   void forgotUsername(String emailH, String email, String url, AsyncCallback<Boolean> async);
 
   void getUserIDForToken(String token, AsyncCallback<Long> async);
-
 
   void changeEnabledFor(int userid, boolean enabled, AsyncCallback<Void> async);
 
@@ -138,4 +133,6 @@ public interface UserServiceAsync {
   void invite(String url, Invitation invite, AsyncCallback<Void> async);
 
   void getUserByID(String id, AsyncCallback<User> async);
+
+  void getUserFromSession(AsyncCallback<User> async);
 }

@@ -40,6 +40,7 @@ import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickUserPermission;
 import net.sf.json.JSON;
+import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -75,20 +76,6 @@ public class UserManagement {
     this.permissionDAO = permissionDAO;
   }
 
-  /**
-   * For now, only teachers get pending requests...
-   * @param user
-   * @return
-   */
-  public User addUser(SignUpUser user) {
-    User user1 = userDAO.addUser(user);
-
-    if (user1 != null) {
-      ifTeacherAddPermissions(user1);
-    }
-
-    return user1;
-  }
 
   private void ifTeacherAddPermissions(User user1) {
     List<User.Permission> permissions = new ArrayList<>();
@@ -128,6 +115,24 @@ public class UserManagement {
    */
   public User addUser(HttpServletRequest request, SignUpUser user) {
     return addUser(user.setIp(getIPInfo(request)));
+  }
+
+  /**
+   * For now, only teachers get pending requests...
+   * @param user
+   * @return
+   * @see #addUser(HttpServletRequest, SignUpUser)
+   * @see mitll.langtest.server.rest.RestUserManagement#addUser(HttpServletRequest, String, String, String, JSONObject)
+   *
+   */
+  public User addUser(SignUpUser user) {
+    User user1 = userDAO.addUser(user);
+
+    if (user1 != null) {
+      ifTeacherAddPermissions(user1);
+    }
+
+    return user1;
   }
 
   /**

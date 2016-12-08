@@ -69,7 +69,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    */
 //  private static final String USER_REQUEST_ATT = UserSecurityManager.USER_REQUEST_ATT;
 
-  private String rot13(String val) {
+/*  private String rot13(String val) {
     StringBuilder builder = new StringBuilder();
     for (char c : val.toCharArray()) {
       if (c >= 'a' && c <= 'm') c += 13;
@@ -79,19 +79,19 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
       builder.append(c);
     }
     return builder.toString();
-  }
-
+  }*/
 
   /**
    * TODO record additional session info in database.
    *
    * @param userId
+   * @param attemptedHashedPassword
    * @param attemptedFreeTextPassword
    * @return
    * @seex #userExists
    * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser(String, String)
    */
-  public LoginResult loginUser(String userId, String attemptedFreeTextPassword) {
+  public LoginResult loginUser(String userId, String attemptedHashedPassword, String attemptedFreeTextPassword) {
     HttpServletRequest request = getThreadLocalRequest();
     String remoteAddr = request.getHeader("X-FORWARDED-FOR");
     if (remoteAddr == null || remoteAddr.isEmpty()) {
@@ -105,10 +105,8 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
         //    + " host is secondary " + properties.isSecondaryHost()
     );
 
-    attemptedFreeTextPassword = rot13(attemptedFreeTextPassword);
-
-    logger.info("userid " + userId+
-        " free '" + attemptedFreeTextPassword+     "'");
+//    attemptedFreeTextPassword = rot13(attemptedFreeTextPassword);
+    logger.info("userid " + userId +  " password '" + attemptedHashedPassword + "'");
 //    User loggedInUser = db.getUserDAO().getStrictUserWithPass(userId, attemptedFreeTextPassword);
     User loggedInUser = db.getUserDAO().loginUser(
         userId,
@@ -356,16 +354,16 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
 
   /**
    * @param userid
-   * @param newFreeTextPassword
+   * @param newHashedPassword
    * @return
    * @see mitll.langtest.client.user.ResetPassword#getChangePasswordButton
    */
   @Override
-  public boolean changePFor(String userid, String newFreeTextPassword) {
-    newFreeTextPassword = rot13(newFreeTextPassword);
+  public boolean changePFor(String userid, String newHashedPassword) {
+    // hashedPassword = rot13(hashedPassword);
 
     User userByID = db.getUserDAO().getUserByID(userid);
-    boolean b = db.getUserDAO().changePassword(userByID.getID(), newFreeTextPassword);
+    boolean b = db.getUserDAO().changePassword(userByID.getID(), newHashedPassword);
 
     if (!b) {
       logger.error("changePFor : couldn't update user password for user " + userByID);
@@ -390,25 +388,27 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   }
 
   /**
-   * TODO: consider stronger passwords like in domino.
+   * TODOx: consider stronger passwords like in domino.
    *
    * @param userid
-   * @param currentFreeTextPassword
-   * @param newFreeTextPassword
+   * @param currentHashedPassword
+   * @param newHashedPassword
    * @return
    * @see ChangePasswordView#changePassword
    */
-  public boolean changePassword(int userid, String currentFreeTextPassword, String newFreeTextPassword) {
+  public boolean changePassword(int userid, String currentHashedPassword, String newHashedPassword) {
 
-    currentFreeTextPassword = rot13(currentFreeTextPassword);
-    newFreeTextPassword = rot13(newFreeTextPassword);
+//    currentHashedPassword = rot13(currentHashedPassword);
+//    newHashedPassword = rot13(newHashedPassword);
 
     User userWhereResetKey = db.getUserDAO().getByID(userid);
     if (userWhereResetKey == null) {
       return false;
-      // TODO : fix this to call new domino call
-    } else if (userWhereResetKey.getPasswordHash().equals(currentFreeTextPassword)) {
-      if (db.getUserDAO().changePassword(userid, newFreeTextPassword)) {
+      // TODOx : fix this to call new domino call
+    }
+
+/*    else if (userWhereResetKey.getPasswordHash().equals(currentHashedPassword)) {
+      if (db.getUserDAO().changePassword(userid, newHashedPassword)) {
         getEmailHelper().sendChangedPassword(userWhereResetKey);
         return true;
       } else {
@@ -417,7 +417,10 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
       }
     } else {
       return false;
-    }
+    }*/
+
+    return (db.getUserDAO().changePasswordWithCurrent(userid, currentHashedPassword, newHashedPassword));
+
   }
 
   @Override
@@ -479,6 +482,11 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     return db.getUserDAO().getByID(id);
   }
 
+  /**
+   * @deprecated this will be done in Domino
+   * @param toUpdate
+   * @param changingUser
+   */
   public void update(User toUpdate, int changingUser) {
     db.getUserDAO().update(toUpdate);
 

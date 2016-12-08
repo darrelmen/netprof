@@ -33,14 +33,11 @@
 package mitll.langtest.client.services;
 
 import com.github.gwtbootstrap.client.ui.Container;
-import com.github.gwtbootstrap.client.ui.Fieldset;
-import com.github.gwtbootstrap.client.ui.TextBox;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.InitialUI;
 import mitll.langtest.client.instrumentation.EventRegistration;
-import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.UserPassLogin;
 import mitll.langtest.shared.user.*;
 
@@ -50,6 +47,8 @@ import java.util.Map;
 
 @RemoteServiceRelativePath("user-manager")
 public interface UserService extends RemoteService {
+  User getUserFromSession();
+
   /**
    * @param login
    * @param freeTextPassword
@@ -61,22 +60,23 @@ public interface UserService extends RemoteService {
   /**
    * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser(String, String)
    * @param userId
-   * @param attemptedFreeTextPassword - hashed - don't send clear password
+   * @param attemptedHashedPassword - hashed - don't send clear password
+   * @param attemptedFreeTextPassword
    * @return
    */
-  LoginResult loginUser(String userId, String attemptedFreeTextPassword);
+  LoginResult loginUser(String userId, String attemptedHashedPassword, String attemptedFreeTextPassword);
 
   void logout(String login);
 
   /**
    * @param token
-   * @param newFreeTextPassword
+   * @param newHashedPassword
    * @return
    * @see mitll.langtest.client.user.ResetPassword#onChangePassword
    */
-  boolean changePFor(String token, String newFreeTextPassword);
+  boolean changePFor(String token, String newHashedPassword);
 
-  boolean changePassword(int userid, String currentFreeTextPassword, String newFreeTextPassword);
+  boolean changePassword(int userid, String currentHashedPassword, String newHashedPassword);
 
   /**
    * @param userid
