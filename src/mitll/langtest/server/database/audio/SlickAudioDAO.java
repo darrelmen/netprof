@@ -203,7 +203,9 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   private AudioAttribute toAudioAttribute(SlickAudio s, Map<Integer, MiniUser> idToMini) {
     MiniUser miniUser = idToMini.get(s.userid());
 
-    if (miniUser == null && spew++ < 20) logger.error("no user for " + s.userid());
+    if (miniUser == null && spew++ < 20) {
+      logger.error("toAudioAttribute : no user for " + s.userid() + " in " +idToMini.size() + " entries");
+    }
 
     String audiotype = s.audiotype();
 

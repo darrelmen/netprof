@@ -82,7 +82,8 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    * Somehow on subsequent runs, the ids skip by 30 or so?
    * <p>
    * Uses return generated keys to get the user id
-   *  @param age
+   *
+   * @param age
    * @param gender
    * @param experience
    * @param userAgent
@@ -93,22 +94,26 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    * @param enabled
    * @param permissions
    * @param kind
-   * @param freeTextPassword
-   * @param passwordH
    * @param emailH
    * @param email
    * @param device
    * @param first
-   * @param last       @return newly inserted user id, or 0 if something goes horribly wrong
+   * @param last
    * @param url
-   * @see UserManagement#addUser(User)
+   * @return newly inserted user id, or 0 if something goes horribly wrong
+   * @paramx freeTextPassword
+   * @paramx passwordH
+   * @see UserManagement#addUser
    */
   @Override
   public int addUser(int age, String gender, int experience, String userAgent,
                      String trueIP, String nativeLang, String dialect, String userID, boolean enabled,
                      Collection<User.Permission> permissions,
-                     User.Kind kind, String freeTextPassword, String passwordH, String emailH, String email, String device, String first, String last, String url) {
-    if (passwordH == null) new Exception().printStackTrace();
+                     User.Kind kind,
+                     //String freeTextPassword,
+                     //String passwordH,
+                     String emailH, String email, String device, String first, String last, String url) {
+    //if (passwordH == null) new Exception().printStackTrace();
     try {
       // there are much better ways of doing this...
       int max = 0;
@@ -147,7 +152,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
       statement.setString(i++, builder.toString());
 
       statement.setString(i++, kind.toString());
-      statement.setString(i++, passwordH);
+//      statement.setString(i++, passwordH);
       statement.setString(i++, emailH);
       statement.setString(i++, device);
       statement.setTimestamp(i++, new Timestamp(System.currentTimeMillis()));
@@ -171,7 +176,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    * @param kind
    * @param emailH
    * @param email
-   * @see BaseUserDAO#addUser(String, String, String, String, User.Kind, String, boolean, int, String, String, String, String)
+   * @see BaseUserDAO#addUser
    */
   protected void updateUser(int id, User.Kind kind, String emailH, String email) {
     try {
@@ -282,9 +287,9 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   /**
    * Shouldn't call this...
    *
+   * @return
    * @paramx id
    * @paramx freeTextPassword
-   * @return
    * @deprecated
    */
   /*@Override
@@ -292,7 +297,6 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     return getUser(id, freeTextPassword);
   }
 */
-
   @Override
   public User getStrictUserWithPass(String id, String passwordHash) {
     logger.debug(language + " : getUser getting user with id '" + id + "' and pass '" + passwordHash + "'");
@@ -670,7 +674,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
 
 
   @Override
-  public boolean changePassword(int user, String freeTextPassword) {
+  public boolean changePassword(int user, String newHashPassword) {
     try {
       Connection connection = getConnection();
       PreparedStatement statement;
@@ -681,7 +685,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
               " WHERE " +
               ID + "=?");
       int i = 1;
-      statement.setString(i++, freeTextPassword);
+      statement.setString(i++, newHashPassword);
       statement.setLong(i++, user);
 
       int i1 = statement.executeUpdate();
@@ -690,13 +694,18 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
       database.closeConnection(connection);
 
       User userByID = getUserWhere(user);
-      logger.debug("after password set to " + freeTextPassword + " user now " + userByID);
+      logger.debug("after password set to " + newHashPassword + " user now " + userByID);
       return i1 != 0;
     } catch (Exception ee) {
       logger.error("Got " + ee, ee);
       database.logEvent("unk", "update user: " + ee.toString(), 0, UNKNOWN);
     }
     return false;
+  }
+
+  @Override
+  public boolean changePasswordWithCurrent(int user, String currentHashPassword, String newHashPassword) {
+    return true;
   }
 
   /**

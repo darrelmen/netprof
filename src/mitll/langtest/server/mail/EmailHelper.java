@@ -260,6 +260,7 @@ public class EmailHelper {
       userID = userWhereEnabledReq.getID();
       logger.debug("enableCDUser user id '" + userID + "' for " + token + " vs " + userWhereEnabledReq.getID());
     }
+
     String email = rot13(emailR);
 
     if (userID == null) {

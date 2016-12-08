@@ -45,6 +45,7 @@ import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.Label;
 import mitll.langtest.client.domino.common.*;
 import mitll.langtest.client.services.UserServiceAsync;
+import mitll.langtest.client.user.Md5Hash;
 import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.user.User;
 
@@ -219,7 +220,7 @@ public class ChangePasswordView extends Composite {
     return cPassValid && pass1Valid && pass2Valid;
   }
 
-  private String rot13(String val) {
+/*  private String rot13(String val) {
     StringBuilder builder = new StringBuilder();
     for (char c : val.toCharArray()) {
       if (c >= 'a' && c <= 'm') c += 13;
@@ -229,7 +230,7 @@ public class ChangePasswordView extends Composite {
       builder.append(c);
     }
     return builder.toString();
-  }
+  }*/
 
   private void changePassword() {
     //	final Modal m = getMsgHelper().makeWaitDialog("Updating password");
@@ -238,11 +239,11 @@ public class ChangePasswordView extends Composite {
    // boolean sendEmail = emailBox != null && emailBox.getValue();
     final DecoratedFields df = getFirstDecoratedField();
 
-
-//    String hash = Md5Hash.getHash(newPass);
+    String hashNewPass = Md5Hash.getHash(newPass);
+    String hashCurrPass = Md5Hash.getHash(currPass);
     userServiceAsync.changePassword(editUser.getID(),
-        currPass == null ? "" : rot13(currPass),//Md5Hash.getHash(currPass),
-        rot13(newPass),//Md5Hash.getHash(newPass),
+        currPass == null ? "" : hashCurrPass,
+        hashNewPass,
         //sendEmail,
         new AsyncCallback<Boolean>() {
           @Override
