@@ -79,8 +79,6 @@ public class ServerProperties {
   private static final String MIRA_DEFAULT = MIRA_LEN;
   private static final String MIRA_CLASSIFIER_URL = "miraClassifierURL";
 
-  //  private static final String WEBSERVICE_HOST_IP1 = "webserviceHostIP";
-//  private static final String WEBSERVICE_HOST_PORT = "webserviceHostPort";
   private static final String LESSON_PLAN_FILE = "lessonPlanFile";
   private static final String USE_MYSQL = "useMYSQL";
   private static final String USE_H_2 = "useH2";

@@ -81,7 +81,7 @@ public interface UserServiceAsync {
                       String newHashedPassword,
                       AsyncCallback<Boolean> async);
 
-  void resetPassword(String userid, String userEmail, String url, AsyncCallback<Boolean> asyncCallback);
+  void resetPassword(String userid, String url, AsyncCallback<Boolean> asyncCallback);
 
   void getUsers(AsyncCallback<List<User>> async);
 

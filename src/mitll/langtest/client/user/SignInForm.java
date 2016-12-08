@@ -32,10 +32,7 @@
 
 package mitll.langtest.client.user;
 
-import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.Fieldset;
-import com.github.gwtbootstrap.client.ui.Form;
-import com.github.gwtbootstrap.client.ui.TextBox;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.event.dom.client.*;
@@ -84,7 +81,9 @@ public class SignInForm extends UserDialog implements SignIn {
   private static final String ENTER_A_USER_NAME = "Enter a user name.";
   private static final String CHECK_EMAIL = "Check Email";
   private static final String PLEASE_CHECK_YOUR_EMAIL = "Please check your email";
-  private static final String ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD = "Enter your email to reset your password.";
+
+//  private static final String ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD = "Enter your email to reset your password.";
+  private static final String ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD = "Reset your password.";
   // private static final String ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD_GOT_IT = "Click here and then check your email to reset your password.";
   private static final String SEND = "Send Reset Email";
   private static final String SIGN_UP_WIDTH = "266px";
@@ -515,8 +514,8 @@ public class SignInForm extends UserDialog implements SignIn {
           markErrorBlur(userField, ENTER_A_USER_NAME);
           return;
         }
-        final TextBox emailEntry = new TextBox();
-
+//        final TextBox emailEntry = new TextBox();
+        Heading emailEntry = new Heading(5, "Click the button to reset.");
         resetEmailPopup = new DecoratedPopupPanel(true);
 
         sendEmail = new Button(SEND);
@@ -525,7 +524,7 @@ public class SignInForm extends UserDialog implements SignIn {
         sendEmail.addClickHandler(new ClickHandler() {
           @Override
           public void onClick(ClickEvent event) {
-            onSendReset(emailEntry);
+            onSendReset(/*emailEntry*/);
           }
         });
         eventRegistration.register(sendEmail, "N/A", "reset password");
@@ -533,7 +532,8 @@ public class SignInForm extends UserDialog implements SignIn {
         makePopup(resetEmailPopup, emailEntry, sendEmail, ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD);
         resetEmailPopup.showRelativeTo(forgotPassword);
 
-        setFocusOn(emailEntry);
+        // setFocusOn(emailEntry);
+        //  setFocusOn(sendEmail);
       }
     });
     return forgotPassword;
@@ -543,17 +543,19 @@ public class SignInForm extends UserDialog implements SignIn {
    * So - two cases - old legacy users have no email, new ones do.
    * Potentially we could skip asking users for their email...?
    *
-   * @param emailEntry
+   * @paramx emailEntry
    */
-  private void onSendReset(TextBox emailEntry) {
-    String userEmail = emailEntry.getText();
+  private void onSendReset(
+      //    TextBox emailEntry
+  ) {
+/*    String userEmail = emailEntry.getText();
     if (!isValidEmail(userEmail)) {
       markErrorBlur(emailEntry, PLEASE_CHECK, VALID_EMAIL, Placement.TOP);
       return;
-    }
+    }*/
 
     sendEmail.setEnabled(false);
-    service.resetPassword(userField.box.getText(), userEmail, Window.Location.getHref(), new AsyncCallback<Boolean>() {
+    service.resetPassword(userField.box.getText(), Window.Location.getHref(), new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
         sendEmail.setEnabled(true);

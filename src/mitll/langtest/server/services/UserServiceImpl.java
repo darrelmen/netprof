@@ -318,14 +318,16 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
 
   /**
    * @param user
-   * @param userEmail
    * @param url
    * @return true if there's a user with this email
    * @see mitll.langtest.client.user.SignInForm#getForgotPassword
    */
-  public boolean resetPassword(String user, String userEmail, String url) {
+  public boolean resetPassword(String user, String url) {
     logger.debug("resetPassword for " + user);
-    return getEmailHelper().resetPassword(user, userEmail, url);
+
+    // Use Domino call to do reset password
+    return db.getUserDAO().forgotPassword(user, url);
+ //   return getEmailHelper().resetPassword(user, userEmail, url);
   }
 
   /**

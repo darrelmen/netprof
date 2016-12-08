@@ -50,7 +50,6 @@ import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.user.MiniUser;
-import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -989,9 +988,12 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * TODO : Not sure what to put in for urlBase...
    *
    * @param userid
+   * @see
    */
   public void forgetPassword(int userid) {
     DBUser dbUser = delegate.lookupDBUser(userid);
+
+    logger.info("forgetPassword " + userid);
 
     if (dbUser == null) {
       logger.error("no user with id " + userid);
@@ -1049,5 +1051,37 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     }
 */
     // logger.info("user now " + getByID(toUpdate.getID()));
+  }
+
+  @Override
+  public boolean forgotPassword(String user, String url) {
+    List<DBUser> dbUsersByUserID = getDbUsersByUserID(user);
+
+    logger.info("forgotPassword users for " + user + " : " + dbUsersByUserID);
+
+    if (dbUsersByUserID == null || dbUsersByUserID.isEmpty()) {
+      logger.warn("no user with id '" + user + "'");
+      return false;
+    }
+
+    DBUser next = dbUsersByUserID.iterator().next();
+    if (next.getPrimaryGroup() == null) next.setPrimaryGroup(new Group());
+    ClientUserDetail clientUserDetail = getClientUserDetail(next);
+
+    logger.info("forgotPassword users for " + user + " : " + clientUserDetail);
+
+    ClientUserDetail clientUserDetail1 = null;
+    try {
+      clientUserDetail1 = delegate.forgotPassword(next,
+          clientUserDetail,
+          url);
+
+      logger.info("forgotPassword forgotPassword users for " + user + " : " + clientUserDetail1);
+
+    } catch (Exception e) {
+      logger.error("Got " + e,e);
+    }
+
+    return clientUserDetail1 != null;
   }
 }

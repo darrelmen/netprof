@@ -115,8 +115,8 @@
         <logger name="slick.relational" level="DEBUG"/>
         <logger name="slick.session" level="DEBUG"/>
 
-        <logger name="mitll.hlt.domino.server.util" level="WARN"/>
-        <logger name="mitll.hlt.domino.server.user" level="WARN"/>
+        <logger name="mitll.hlt.domino.server.util" level="DEBUG"/>
+        <logger name="mitll.hlt.domino.server.user" level="DEBUG"/>
 
         <root level="debug">
             <appender-ref ref="STDOUT" level="error"/>
