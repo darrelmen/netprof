@@ -48,6 +48,9 @@ import mitll.langtest.shared.user.User;
 import java.util.*;
 import java.util.logging.Logger;
 
+/**
+ * @deprecated we don't do this in netprof
+ */
 class EditUserForm extends SignUpForm {
   private final Logger logger = Logger.getLogger("SignUpForm");
   private final User toEdit;

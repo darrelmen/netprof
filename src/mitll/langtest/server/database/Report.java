@@ -159,8 +159,28 @@ public class Report {
                 PathHelper pathHelper) {
     List<String> reportEmails = serverProps.getReportEmails();
 
+    InetAddress ip = null;
+    boolean skipReport = false;
+    try {
+      ip = InetAddress.getLocalHost();
+
+      logger.info("\n\n\ndoReport got " + ip);
+      logger.info("\n\n\ndoReport got " + ip.getHostName());
+      skipReport = ip.getHostName().contains("MITLL");
+      if (skipReport) {
+        logger.info("skip writing report while testing.... " + ip.getHostName());
+      }
+      else {
+        logger.info("will write report");
+      }
+    } catch (UnknownHostException e) {
+      logger.error("Got " + e,e);
+      e.printStackTrace();
+    }
+
     // check if it's a monday
-    if (Calendar.getInstance().get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY &&
+    if (!skipReport &&
+        Calendar.getInstance().get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY &&
         !reportEmails.isEmpty()) {
       writeAndSendReport(serverProps.getLanguage(), site, mailSupport, pathHelper, reportEmails, getThisYear());
     } else {

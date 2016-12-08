@@ -33,12 +33,16 @@
 package mitll.langtest.shared.user;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.result.IResultDAO;
+import mitll.langtest.server.database.user.DominoUserDAOImpl;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 
 import static mitll.langtest.shared.user.User.Permission.*;
 
@@ -328,7 +332,8 @@ public class User extends MiniUser {
    */
   public User(int id,
               int age,
-              int gender, int experience, String ipaddr, String passwordH,
+              int gender, int experience, String ipaddr,
+              String passwordH,
               String nativeLang, String dialect, String userID, boolean enabled, boolean isAdmin,
               Collection<Permission> permissions, Kind userKind,
 
@@ -469,6 +474,8 @@ public class User extends MiniUser {
   /**
    * @return
    * @deprecated
+   * @see mitll.langtest.server.database.copy.UserCopy#addUser(DominoUserDAOImpl, Map, User)
+   * @see mitll.langtest.server.database.copy.UserCopy#copyUsers(DatabaseImpl, int, IResultDAO)
    */
   public String getPasswordHash() {
     return passwordHash;
@@ -566,8 +573,8 @@ public class User extends MiniUser {
         "\n\tpassH   " + getPasswordHash() +
         "\n\tkind    " + getUserKind() +
         (getPermissions().isEmpty() ? "" : "\n\tperms   " + getPermissions()) +
-        (getDevice().isEmpty() ? "" : "\n\tdevice  " + getDevice()) +
-        (resetKey.isEmpty() ? "" : "\n\treset  '" + resetKey + "'") +
+        (getDevice() == null || getDevice().isEmpty() ? "" : "\n\tdevice  " + getDevice()) +
+        (resetKey == null || resetKey.isEmpty() ? "" : "\n\treset  '" + resetKey + "'") +
         //" cdenable '" + cdKey + "'" +
         (startupInfo == null ? "" : "\n\tstartup  " + startupInfo)
         ;

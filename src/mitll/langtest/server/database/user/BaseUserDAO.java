@@ -143,7 +143,7 @@ public abstract class BaseUserDAO extends DAO {
    *
    * @param user
    * @return user if add or modified, null if no change was done
-   * @see UserManagement#addUser(SignUpUser)
+   * @see UserManagement#addUser
    */
   public User addUser(SignUpUser user) {
     String userID = user.getUserID();
@@ -183,7 +183,7 @@ public abstract class BaseUserDAO extends DAO {
    * @param user
    * @paramx perms
    * @return
-   * @see #addUser(SignUpUser)
+   * @see #addUser
    */
   private int addUserAndGetID(SignUpUser user/*, Collection<User.Permission> perms*/) {
     return addUser(user.getAge(),
@@ -196,8 +196,14 @@ public abstract class BaseUserDAO extends DAO {
         user.getUserID(),
         true,
         Collections.emptyList(),
-        user.getKind(), user.getFreeTextPassword(), user.getPasswordH(),
-        user.getEmailH(), user.getEmail(), user.getDevice(), user.getFirst(), user.getLast(),
+        user.getKind(),
+       // user.getFreeTextPassword(),
+       // user.getPasswordH(),
+
+        user.getEmailH(),
+        user.getEmail(),
+        user.getDevice(),
+        user.getFirst(), user.getLast(),
         user.getUrl());
   }
 
@@ -219,12 +225,12 @@ public abstract class BaseUserDAO extends DAO {
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
   public void ensureDefaultUsers() {
-    this.defectDetector = getOrAdd(DEFECT_DETECTOR);
+    this.defectDetector  = getOrAdd(DEFECT_DETECTOR);
     this.beforeLoginUser = getOrAdd(BEFORE_LOGIN_USER);
-    this.importUser = getOrAdd(IMPORT_USER);
-    this.defaultUser = getOrAdd("defaultUser");
-    this.defaultMale = getOrAdd("defaultMaleUser");
-    this.defaultFemale = getOrAdd("defaultFemaleUser");
+    this.importUser      = getOrAdd(IMPORT_USER);
+    this.defaultUser     = getOrAdd("defaultUser");
+    this.defaultMale     = getOrAdd("defaultMaleUser");
+    this.defaultFemale   = getOrAdd("defaultFemaleUser");
   }
 
   private int getOrAdd(String beforeLoginUser) {
@@ -240,7 +246,9 @@ public abstract class BaseUserDAO extends DAO {
         MALE,
         0, "", "", UNKNOWN, UNKNOWN, defectDetector, false, EMPTY_PERMISSIONS,
         User.Kind.INTERNAL,
-        "", "", "", "", "", "", "", "");
+        //"",
+        //"",
+        "", "", "", "", "", "");
   }
 
   abstract int getIdForUserID(String id);
@@ -248,7 +256,7 @@ public abstract class BaseUserDAO extends DAO {
   /**
    * @see #addShellUser
    * @see #addUserAndGetID
-   *@param age
+   * @param age
    * @param gender
    * @param experience
    * @param userAgent
@@ -259,13 +267,14 @@ public abstract class BaseUserDAO extends DAO {
    * @param enabled
    * @param permissions
    * @param kind
-   * @param freeTextPassword
-   * @param passwordH
+   * @paramx freeTextPassword
+   * @paramx passwordH
    * @param emailH
    * @param email
    * @param device
    * @param first
-   * @param last       @return
+   * @param last
+   * @return
    * @param url
    * */
   abstract int addUser(int age,
@@ -279,11 +288,13 @@ public abstract class BaseUserDAO extends DAO {
                        boolean enabled,
                        Collection<User.Permission> permissions,
                        User.Kind kind,
-                       String freeTextPassword, String passwordH,
+
+                    //   @Deprecated  String freeTextPassword,
+                     //  String passwordH,
                        String emailH,
                        String email,
                        String device,
                        String first,
-                       String last, String url);
-
+                       String last,
+                       String url);
 }
