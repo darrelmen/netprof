@@ -75,7 +75,7 @@ public class Md5Hash {
   }
 
   /**
-   * @deprecated not doing hashing of passwords, etc. anymore to be consistent with Domino user service
+   * for doing hashing of passwords - can still be consistent with Domino user service
    * @param toHash
    * @return
    */

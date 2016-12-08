@@ -91,6 +91,15 @@ public interface IUserDAO extends IDAO {
    */
   Integer getIDForUserAndEmail(String user, String emailH);
 
+  /**
+   * @see UserServiceImpl#loginUser
+   * @param userId
+   * @param attemptedPassword
+   * @param userAgent
+   * @param remoteAddr
+   * @param sessionID
+   * @return
+   */
   User loginUser(String userId,
                  String attemptedPassword,
                  //String remoteIP,
@@ -200,10 +209,11 @@ public interface IUserDAO extends IDAO {
   /**
    * @see UserServiceImpl#changePassword(int, String, String)
    * @param user
-   * @param freeTextPassword
+   * @param newHashPassword
    * @return
    */
-  boolean changePassword(int user, String freeTextPassword);
+  boolean changePassword(int user, String newHashPassword);
+  boolean changePasswordWithCurrent(int user, String currentHashPassword, String newHashPassword);
 
   /**
    * @see UserServiceImpl#changePFor(String, String)

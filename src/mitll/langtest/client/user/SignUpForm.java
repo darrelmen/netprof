@@ -36,7 +36,6 @@ import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
-import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
@@ -57,6 +56,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 public class SignUpForm extends UserDialog implements SignUp {
+  public static final String I_M_SORRY = "I'm sorry";
   private final Logger logger = Logger.getLogger("SignUpForm");
 
   public static final int BOGUS_AGE = 99;
@@ -65,29 +65,31 @@ public class SignUpForm extends UserDialog implements SignUp {
 //  private static final String WAIT_FOR_APPROVAL = "Wait for approval";
 //  private static final String YOU_WILL_GET_AN_APPROVAL_MESSAGE_BY_EMAIL = "You will get an approval message by email.";
 
-  private static final String MALE = "male";
+//  private static final String MALE = "male";
   private static final int MIN_LENGTH_USER_ID = 4;
-
-  private static final int MIN_PASSWORD = 4;
+  /**
+   * TO BE CONSISTENT WITH DOMINO
+   */
+  private static final int MIN_PASSWORD = 8;
 
   /**
    * @see #getSignUpButton(TextBoxBase, TextBoxBase)
    */
   private static final String SIGN_UP = "Sign Up";
   private static final String SIGN_UP_SUBTEXT = "Sign up";
-  private static final String PASSWORD = "Password";
+//  private static final String PASSWORD = "Password";
   private static final String USERNAME = "Username";
   private static final String PLEASE_ENTER_A_LONGER_USER_ID = "Please enter a longer user id.";
   private static final String VALID_EMAIL = "Please enter a valid email address.";
   private static final String PLEASE_ENTER_A_PASSWORD = "Please enter a password";
   private static final String ARE_YOU_A = "Please choose : Are you a";
-  private static final String STUDENT = "Student or ";
-  private static final String TEACHER = "Teacher?";
+//  private static final String STUDENT = "Student or ";
+//  private static final String TEACHER = "Teacher?";
   private static final String SIGN_UP_WIDTH = "266px";
   private static final int USERNAME_WIDTH = 25;
-  private static final String RECORD_AUDIO_HEADING = "Recording audio/Quality Control";
-  private static final int WAIT_FOR_READING_APPROVAL = 3000;
-  private static final String RECORD_REFERENCE_AUDIO = "Are you an assigned reference audio recorder?";
+//  private static final String RECORD_AUDIO_HEADING = "Recording audio/Quality Control";
+//  private static final int WAIT_FOR_READING_APPROVAL = 3000;
+//  private static final String RECORD_REFERENCE_AUDIO = "Are you an assigned reference audio recorder?";
   private static final String USER_EXISTS = "User exists already, please sign in or choose a different name.";
   private static final String AGE_ERR_MSG = "Enter age between " + MIN_AGE + " and " + MAX_AGE + ".";
 
@@ -95,7 +97,12 @@ public class SignUpForm extends UserDialog implements SignUp {
   protected BasicDialog.FormField firstName;
   protected BasicDialog.FormField lastName;
   protected BasicDialog.FormField signUpEmail;
-  private BasicDialog.FormField signUpPassword;
+
+  /**
+   * We don't let them enter a password initially anymore.
+   *
+   */
+  //  private BasicDialog.FormField signUpPassword;
 
   private RegistrationInfo registrationInfo;
   protected User.Kind selectedRole = User.Kind.STUDENT;
@@ -148,26 +155,27 @@ public class SignUpForm extends UserDialog implements SignUp {
    * recorder/not a recorder choice.
    *
    * @param userID
-   * @see SignInForm#copyInfoToSignUp(User)
+   * @see SignInForm#copyInfoToSignUp
    */
   @Override
   public void copyInfoToSignUp(String userID, String passwordText) {
-   // String userID = userID.getUserID();
+    // String userID = userID.getUserID();
     signUpUser.box.setText(userID);
-    signUpPassword.box.setText(passwordText);
-    signUpPassword.getGroup().setType(ControlGroupType.ERROR);
+
+   // signUpPassword.box.setText(passwordText);
+   // signUpPassword.getGroup().setType(ControlGroupType.ERROR);
 
     FormField firstFocus = this.firstName;
     setFocusOn(firstFocus.getWidget());
     //   eventRegistration.logEvent(signIn, "sign in", "N/A", "copied info to sign up form");
     markErrorBlur(firstFocus, "Add info", CURRENT_USERS, Placement.TOP);
 
-    firstFocus.box.addBlurHandler(new BlurHandler() {
+/*    firstFocus.box.addBlurHandler(new BlurHandler() {
       @Override
       public void onBlur(BlurEvent event) {
         signUpPassword.getGroup().setType(ControlGroupType.NONE);
       }
-    });
+    });*/
   }
 
   /**
@@ -180,17 +188,31 @@ public class SignUpForm extends UserDialog implements SignUp {
     heading.addStyleName("signUp");
     Fieldset fields = getFields(null);
     fields.add(getSignUpButton(userBox, emailBox));
+
+    pleaseCheck = new Heading(4, "Please check your email.");
+    pleaseCheck.getElement().setId("pleaseCheck");
+    fields.add(pleaseCheck);
+    pleaseCheck.setVisible(false);
+    pleaseCheck.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
+
     return getTwoPartForm(heading, fields);
   }
+  Heading pleaseCheck;
 
   /**
    * @param user
    * @return
    * @see mitll.langtest.client.userops.OpsUserContainer#populateUserEdit(DivWidget, User)
+   * @deprecated
    */
   public Panel getSignUpForm(User user) {
     Fieldset fields = getFields(user);
     fields.add(getSignUpButton(userBox, emailBox));
+
+    pleaseCheck = new Heading(4, "Please check your email.");
+    pleaseCheck.getElement().setId("pleaseCheck");
+    fields.add(pleaseCheck);
+    pleaseCheck.setVisible(true);
 
     return getTwoPartForm(
         getHeading(user),
@@ -215,6 +237,11 @@ public class SignUpForm extends UserDialog implements SignUp {
   private TextBoxBase userBox;
   private TextBoxBase emailBox;
 
+  /**
+   *
+   * @param user
+   * @return
+   */
   protected Fieldset getFields(User user) {
     Fieldset fieldset = new Fieldset();
     userBox = makeSignUpUsername(fieldset);
@@ -232,9 +259,12 @@ public class SignUpForm extends UserDialog implements SignUp {
 //        getContentDevCheckbox();
 //      }
     }
+
+/*
     if (user == null) {
       makeSignUpPassword(fieldset);
     }
+*/
 
     fieldset.add(getRolesHeader());
     fieldset.add(getRolesChoices(user == null ? User.Kind.STUDENT : userKind));
@@ -397,6 +427,11 @@ public class SignUpForm extends UserDialog implements SignUp {
     return userBox;
   }
 
+  /**
+   * @see #getFields
+   * @param fieldset
+   * @return
+   */
   private TextBoxBase makeSignUpEmail(Fieldset fieldset) {
     signUpEmail = getFormField(fieldset, false, MIN_LENGTH_USER_ID, USER_ID_MAX_LENGTH, "Email");
     final TextBoxBase emailBox = signUpEmail.box;
@@ -410,6 +445,8 @@ public class SignUpForm extends UserDialog implements SignUp {
       @Override
       public void onFocus(FocusEvent event) {
         userPassLogin.clearSignInHasFocus();
+        pleaseCheck.setVisible(false);
+        signUp.setEnabled(true);
         eventRegistration.logEvent(userBox, "SignUp_" + username + "Box", "N/A", "focus in " + username + " field in sign up form");
       }
     });
@@ -425,6 +462,7 @@ public class SignUpForm extends UserDialog implements SignUp {
    * @param fieldset
    * @see #getSignUpForm
    */
+/*
   private void makeSignUpPassword(Fieldset fieldset) {
     signUpPassword = getFormField(fieldset, true, MIN_PASSWORD, 15, PASSWORD);
     signUpPassword.box.addFocusHandler(new FocusHandler() {
@@ -437,9 +475,11 @@ public class SignUpForm extends UserDialog implements SignUp {
     signUpPassword.box.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
     signUpPassword.box.setWidth(SIGN_UP_WIDTH);
   }
+*/
 
   /**
    * @param fieldset
+   * @deprecated don't really collect demo info anymore...
    */
   private void makeRegistrationInfo(Fieldset fieldset) {
     registrationInfo = new RegistrationInfo(fieldset);
@@ -483,6 +523,12 @@ public class SignUpForm extends UserDialog implements SignUp {
     //  registrationInfo.setVisible(false);
   }
 
+  /**
+   *
+   * @param userBox
+   * @param emailBox
+   * @return
+   */
   private Button getSignUpButton(final TextBoxBase userBox, final TextBoxBase emailBox) {
     this.signUp = new Button(signUpTitle);
     this.signUp.getElement().setId("SignUp");
@@ -494,7 +540,9 @@ public class SignUpForm extends UserDialog implements SignUp {
         String userID = userBox.getValue();
         //logger.info("sign up click for " + userID);
         if (isFormValid(userID)) {
-          gotSignUp(userID, getPasswordText(), emailBox.getValue(), selectedRole);
+          gotSignUp(userID,
+              //getPasswordText(),
+              emailBox.getValue(), selectedRole);
         } else {
           logger.warning("form is not valid!!");
         }
@@ -508,9 +556,11 @@ public class SignUpForm extends UserDialog implements SignUp {
     return this.signUp;
   }
 
+/*
   private String getPasswordText() {
     return signUpPassword == null ? "" : signUpPassword.box.getValue();
   }
+*/
 
   protected boolean isFormValid(String userID) {
     if (userID.length() < MIN_LENGTH_USER_ID) {
@@ -537,7 +587,8 @@ public class SignUpForm extends UserDialog implements SignUp {
       } else if (!isValidEmail(emailText)) {
         markInvalidEmail();
         return false;
-      } else if (signUpPassword != null) {
+/*      }
+      else if (signUpPassword != null) {
         String passwordText = getPasswordText();
         if (passwordText.length() < MIN_PASSWORD) {
           eventRegistration.logEvent(SignUpForm.this.signUp, "SignUp_Button", "N/A", "short password");
@@ -546,7 +597,7 @@ public class SignUpForm extends UserDialog implements SignUp {
           return false;
         } else {
           return true;
-        }
+        }*/
       } else {
         return true;
       }
@@ -564,31 +615,50 @@ public class SignUpForm extends UserDialog implements SignUp {
     return age1;
   }
 
+/*  private String rot13(String val) {
+    StringBuilder builder = new StringBuilder();
+    for (char c : val.toCharArray()) {
+      if (c >= 'a' && c <= 'm') c += 13;
+      else if (c >= 'A' && c <= 'M') c += 13;
+      else if (c >= 'n' && c <= 'z') c -= 13;
+      else if (c >= 'N' && c <= 'Z') c -= 13;
+      builder.append(c);
+    }
+    return builder.toString();
+  }*/
+
   /**
    * TODO : add first and last name so students can find their teacher
    * <p>
    * When the form is valid, make a new user or update an existing one.
    *
    * @param user
-   * @param freeTextPassword
+   * @paramx freeTextPassword
    * @param email
    * @param kind
    * @see #getSignUpButton(com.github.gwtbootstrap.client.ui.base.TextBoxBase, com.github.gwtbootstrap.client.ui.base.TextBoxBase)
    */
-  protected void gotSignUp(final String user, String freeTextPassword, String email, User.Kind kind) {
+  protected void gotSignUp(final String user,
+                           //String freeTextPassword,
+                           String email, User.Kind kind) {
     signUp.setEnabled(false);
 
-    String passH  = Md5Hash.getHash(freeTextPassword);
+//    String passH  = Md5Hash.getHash(freeTextPassword);
     String emailH = Md5Hash.getHash(email);
     boolean isCD = askForDemographic(kind);
 
-    SignUpUser newUser = new SignUpUser(user, freeTextPassword, passH, emailH, email, kind,
+    SignUpUser newUser = new SignUpUser(user,
+        //rot13(freeTextPassword),
+//        passH,
+        emailH,
+        email, kind,
 
         isMale(isCD),  // don't really know the gender, so guess male...?
         getAge(isCD),
         getDialect(isCD),
 
-        "browser", "",
+        "browser",
+        "",
         firstName.getText(), lastName.getText(), trimURL(Window.Location.getHref()));
 
     service.addUser(
@@ -612,14 +682,24 @@ public class SignUpForm extends UserDialog implements SignUp {
               if (result.isEnabled()) {
                 eventRegistration.logEvent(signUp, "signing up", "N/A", getSignUpEvent(result));
                 // logger.info("Got valid, enabled new user " + user + " and so we're letting them in.");
+
                 // TODO : store the selector and validator...
-                storeUser(result, userManager);//)/*, passH)*/;
+
+                //storeUser(result, userManager);
+
+                pleaseCheck.setVisible(true);
+                //)/*, passH)*/;
               } else {
                 eventRegistration.logEvent(signUp, "signing up", "N/A", getSignUpEvent(result) +
-                    " but waiting for approval from Tamas.");
+                //    " but waiting for approval from Tamas."
+                  "but gotta check email for next step..."
+                );
                 //  markErrorBlur(signUp, WAIT_FOR_APPROVAL, YOU_WILL_GET_AN_APPROVAL_MESSAGE_BY_EMAIL, Placement.TOP);
-                markErrorBlur(signUp, "I'm sorry",
-                    "Your account has been deactivated. Please contact help email if needed.", Placement.TOP);
+//                markErrorBlur(signUp, I_M_SORRY,
+//                    "Your account has been deactivated. Please contact help email if needed.", Placement.TOP);
+
+                pleaseCheck.setVisible(true);
+
 /*
                 Timer t = new Timer() {
                   @Override

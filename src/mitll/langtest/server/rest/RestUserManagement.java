@@ -36,6 +36,7 @@ import mitll.langtest.client.user.Md5Hash;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
@@ -79,18 +80,20 @@ public class RestUserManagement {
   private static final String EXPECTING_ONE_QUERY_PARAMETER = "expecting one query parameter";
   private static final String EXISTING_USER_NAME = "ExistingUserName";
   private static final String USER = "user";
-  private static final String PASSWORD_H = "passwordH";
-  private static final String FREE_TEXT_PASSWORD = "freeTextPassword";
+
+  //  private static final String PASSWORD_H = "passwordH";
+//  private static final String FREE_TEXT_PASSWORD = "freeTextPassword";
 
   /**
    * @see mitll.langtest.server.database.user.UserManagement#userExists
+   * @see #addUser
    */
   private static final String EMAIL_H = "emailH";
   private static final String EMAIL = "email";
   /**
    * @see mitll.langtest.server.database.user.UserManagement#userExists
    */
-  public static final String USERID = "userid";
+  private static final String USERID = "userid";
   /**
    * @see mitll.langtest.server.database.user.UserManagement#userExists
    */
@@ -129,8 +132,8 @@ public class RestUserManagement {
   }
 
   /**
-   *
    * Accepts queries - hasUser, forgotUsername, resetPassword, rp, setPassword
+   *
    * @param request
    * @param response
    * @param queryString
@@ -245,7 +248,8 @@ public class RestUserManagement {
 
     logger.debug("gotHasUser user '" + user + "' pass '" + passwordH + "'");
 
-    User userFound = db.getUserDAO().getUserByID(user);
+    IUserDAO userDAO = db.getUserDAO();
+    User userFound = userDAO.getUserByID(user);
 
     logger.debug("gotHasUser user '" + user + "' pass '" + passwordH + "' -> " + userFound);
 
@@ -257,14 +261,16 @@ public class RestUserManagement {
       toReturn.put(TOKEN, "");
       toReturn.put(PASSWORD_CORRECT, FALSE);
     } else {
+      User strictUserWithPass = userDAO.getStrictUserWithPass(user, passwordH);
+
       toReturn.put(USERID, userFound.getID());
       toReturn.put(EMAIL_H, userFound.getEmailHash());
       toReturn.put(KIND, userFound.getUserKind().toString());
       toReturn.put(HAS_RESET, userFound.hasResetKey());
       toReturn.put(TOKEN, userFound.getResetKey());
-      toReturn.put(PASSWORD_CORRECT,
-          userFound.getPasswordHash() == null ? FALSE :
-              userFound.getPasswordHash().equalsIgnoreCase(passwordH));
+      toReturn.put(PASSWORD_CORRECT, strictUserWithPass == null ? FALSE : "TRUE");
+//          userFound.getPasswordHash() == null ? FALSE :
+      //            userFound.getPasswordHash().equalsIgnoreCase(passwordH));
     }
   }
 
@@ -354,7 +360,7 @@ public class RestUserManagement {
     }
   }
 
-  private String rot13(String val) {
+/*  private String rot13(String val) {
     StringBuilder builder = new StringBuilder();
     for (char c : val.toCharArray()) {
       if (c >= 'a' && c <= 'm') c += 13;
@@ -364,14 +370,14 @@ public class RestUserManagement {
       builder.append(c);
     }
     return builder.toString();
-  }
+  }*/
 
   /**
    * TODO : remove duplicate code - here and in UserService
-   *
+   * <p>
    * Password reset used to have two steps, so userid here was a token...
    *
-   * @param userid NOTE - this used to be a token -
+   * @param userid           NOTE - this used to be a token -
    * @param freeTextPassword
    * @return
    * @see UserServiceImpl#changePFor
@@ -380,8 +386,9 @@ public class RestUserManagement {
   private boolean changePFor(String userid, String freeTextPassword) {
     User userByID = db.getUserDAO().getUserByID(userid);
 
-    freeTextPassword = rot13(freeTextPassword);
-    boolean b = db.getUserDAO().changePassword(userByID.getID(), freeTextPassword);
+    //  freeTextPassword = rot13(freeTextPassword);
+    String hash = Md5Hash.getHash(freeTextPassword);
+    boolean b = db.getUserDAO().changePassword(userByID.getID(), hash);
 
     if (!b) {
       logger.error("changePFor : couldn't update user password for user " + userByID);
@@ -416,7 +423,7 @@ public class RestUserManagement {
 
   /**
    * TODO : pass in the project id from the iOS app.
-   * TODO : pass in the freetext password from the iOS app.
+   * TODOx : pass in the freetext password from the iOS app.
    * <p>
    * So - what can happen - either we have a user and password match, in which case adding a user is equivalent
    * to logging in OR we have an existing user with a different password, in which case either it's a different
@@ -429,25 +436,34 @@ public class RestUserManagement {
    * @param jsonObject
    * @see mitll.langtest.server.ScoreServlet#doPost
    */
-  public void addUser(HttpServletRequest request, String requestType, String deviceType, String device,
+  public void addUser(HttpServletRequest request,
+                      String requestType,
+                      String deviceType,
+                      String device,
                       JSONObject jsonObject) {
     String user = request.getHeader(USER);
-    String passwordH = request.getHeader(PASSWORD_H);
+    //  String passwordH = request.getHeader(PASSWORD_H);
+/*
     String freeTextPassword = request.getHeader(FREE_TEXT_PASSWORD);
-
     if (freeTextPassword == null) {
       freeTextPassword = passwordH;
     }
+    */
 
     // first check if user exists already with this password -- if so go ahead and log them in.
-    User exactMatch = db.getUserDAO().getStrictUserWithPass(user, freeTextPassword);
+    //  User existingUser = db.getUserDAO().getStrictUserWithPass(user, passwordH);
+    User existingUser = db.getUserDAO().getUserByID(user);
 
-    logger.info("addUser user " + user + " pass " + passwordH + " match " + exactMatch);
+    logger.info("addUser user " + user +
+        //" pass " + passwordH +
+        " match " + existingUser);
 
     int projid = -1; // TODO : figure out which project a user is in right now
 
-    if (exactMatch == null) {
-      User checkExisting = db.getUserDAO().getUserByID(user);
+    if (existingUser == null) {
+      //User checkExisting = db.getUserDAO().getUserByID(user);
+
+      User checkExisting = existingUser;// kinda stupid but here we are
 
       if (checkExisting == null) { // OK, nobody with matching user and password
         String age = request.getHeader(AGE);
@@ -467,7 +483,10 @@ public class RestUserManagement {
           try {
             int age1 = Integer.parseInt(age);
             boolean male = gender.equalsIgnoreCase("male");
-            SignUpUser user2 = new SignUpUser(user, freeTextPassword, passwordH, emailH, email,
+
+            SignUpUser user2 = new SignUpUser(user,
+//                passwordH,
+                emailH, email,
                 User.Kind.CONTENT_DEVELOPER, male, age1, dialect, deviceType, device, "", "", appURL);
 //            user1 = getUserManagement().addUser(user, passwordH, emailH, email, deviceType, device,
 //                User.Kind.CONTENT_DEVELOPER, male, age1, dialect);
@@ -478,7 +497,10 @@ public class RestUserManagement {
             jsonObject.put(ERROR, "bad age");
           }
         } else {
-          SignUpUser user2 = new SignUpUser(user, freeTextPassword, passwordH, emailH, email,
+
+          SignUpUser user2 = new SignUpUser(user,
+              //            passwordH,
+              emailH, email,
               User.Kind.CONTENT_DEVELOPER, true, 89, dialect, deviceType, device, "", "", appURL);
           user1 = getUserManagement().addUser(user2);
         }
@@ -493,12 +515,14 @@ public class RestUserManagement {
         jsonObject.put(EXISTING_USER_NAME, "");
       }
     } else {
-      logger.debug("addUser - found existing user for " + user + " pass " + passwordH + " -> " + exactMatch);
+      logger.debug("addUser - found existing user for " + user +
+          //" pass " + passwordH +
+          " -> " + existingUser);
 
-      if (exactMatch.hasResetKey()) {
+      if (existingUser.hasResetKey()) {
         jsonObject.put(ERROR, "password was reset");
       } else {
-        jsonObject.put(USERID, exactMatch.getID());
+        jsonObject.put(USERID, existingUser.getID());
       }
     }
   }

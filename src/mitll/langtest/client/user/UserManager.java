@@ -34,14 +34,12 @@ package mitll.langtest.client.user;
 
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Label;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.shared.user.LoginResult;
 import mitll.langtest.shared.user.User;
 
 import java.util.Date;
-import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -111,26 +109,12 @@ public class UserManager {
    * @see mitll.langtest.client.LangTest#checkLogin()
    */
   public void checkLogin() {
-    //logger.info("loginType " + loginType);
-    //  if (loginType.equals(PropertyHandler.LOGIN_TYPE.ANONYMOUS)) { // explicit setting of login type
-    //     anonymousLogin();
-    //  } else {
-    login();
-    //}
-  }
-
-  /**
-   * TODO : if we have a user id from any site, try to use it to log in to this site.
-   *
-   * @see #checkLogin()
-   */
-  private void login() {
     final int user = getUser();
     if (user != NO_USER_SET) {
       //logger.info("UserManager.login : current user : " + user);
       //console("UserManager.login : current user : " + user);
       if (current == null) {
-        getPermissionsAndSetUser();
+        getPermissionsAndSetUser(getUserChosenFromStorage(), getPassFromStorage());
       } else {
         logger.info("user " + user + " and full info " + current);
       }
@@ -142,9 +126,9 @@ public class UserManager {
   /**
    * @see #login
    */
-  private void getPermissionsAndSetUser() {
-    getPermissionsAndSetUser(getUserChosenFromStorage(), getPassFromStorage());
-  }
+//  private void getPermissionsAndSetUser() {
+//    getPermissionsAndSetUser(getUserChosenFromStorage(), getPassFromStorage());
+//  }
 /*  private void console(String message) {
     int ieVersion = BrowserCheck.getIEVersion();
     if (ieVersion == -1 || ieVersion > 9) {
@@ -165,33 +149,59 @@ public class UserManager {
    *
    * @param user
    * @param passwordHash
+   * @seex #getPermissionsAndSetUser()
    * @see #login()
    * @see #storeUser
-   * @see #getPermissionsAndSetUser()
    */
   private void getPermissionsAndSetUser(final String user, String passwordHash) {
-    //console("getPermissionsAndSetUser : " + user);
-    if (DEBUG || true) logger.info("UserManager.getPermissionsAndSetUser " + user + " asking server for info...");
-    if (passwordHash == null) passwordHash = "";
 
-    userServiceAsync.loginUser(user, passwordHash, new AsyncCallback<LoginResult>() {
+
+    if (DEBUG || true) logger.info("UserManager.getPermissionsAndSetUser " + user + " asking server for info...");
+
+    userServiceAsync.getUserFromSession(new AsyncCallback<User>() {
       @Override
       public void onFailure(Throwable caught) {
+
+
       }
 
       @Override
-      public void onSuccess(LoginResult result) {
+      public void onSuccess(User result) {
         if (DEBUG) logger.info("UserManager.getPermissionsAndSetUser : onSuccess " + user + " : " + result);
-        if (result == null ||
-            result.getResultType() != LoginResult.ResultType.Success
+        if (result == null
             ) {
           clearUser();
           userNotification.showLogin();
         } else {
-          gotNewUser(result.getLoggedInUser());
+          gotNewUser(result);
         }
+
       }
     });
+
+    //console("getPermissionsAndSetUser : " + user);
+   /* if (passwordHash == null) passwordHash = "";
+
+    userServiceAsync.loginUser(user, passwordHash, "",
+        //attemptedFreeTextPassword,
+        new AsyncCallback<LoginResult>() {
+          @Override
+          public void onFailure(Throwable caught) {
+          }
+
+          @Override
+          public void onSuccess(LoginResult result) {
+            if (DEBUG) logger.info("UserManager.getPermissionsAndSetUser : onSuccess " + user + " : " + result);
+            if (result == null ||
+                result.getResultType() != LoginResult.ResultType.Success
+                ) {
+              clearUser();
+              userNotification.showLogin();
+            } else {
+              gotNewUser(result.getLoggedInUser());
+            }
+          }
+        });*/
   }
 
   /**
@@ -287,8 +297,8 @@ public class UserManager {
   }
 
   /**
-   * @deprecated
    * @return
+   * @deprecated
    */
   private String getPassCookie() {
     return appTitle + ":" + "pwd";

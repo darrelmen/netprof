@@ -50,7 +50,7 @@ public interface UserNotification {
 
   /**
    * @see UserManager#gotNewUser(User)
-   * @see UserManager#storeUser(User, String)
+   * @see UserManager#storeUser
    * @param user
    */
   void gotUser(User user);

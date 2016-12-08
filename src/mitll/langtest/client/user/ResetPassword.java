@@ -172,8 +172,7 @@ public class ResetPassword extends UserDialog {
     return changePassword;
   }
 
-
-  private String rot13(String val) {
+/*  private String rot13(String val) {
     StringBuilder builder = new StringBuilder();
     for (char c : val.toCharArray()) {
       if (c >= 'a' && c <= 'm') c += 13;
@@ -183,7 +182,7 @@ public class ResetPassword extends UserDialog {
       builder.append(c);
     }
     return builder.toString();
-  }
+  }*/
 
   /**
    *
@@ -213,11 +212,11 @@ public class ResetPassword extends UserDialog {
       changePassword.setEnabled(false);
       enterKeyButtonHelper.removeKeyHandler();
 
-     // String hash = Md5Hash.getHash(newPassword);
+      String hashNewPassword = Md5Hash.getHash(newPassword);
 
-      newPassword = rot13(newPassword);
+     // newPassword = rot13(newPassword);
 
-      service.changePFor(token, newPassword, new AsyncCallback<Boolean>() {
+      service.changePFor(token, hashNewPassword, new AsyncCallback<Boolean>() {
         @Override
         public void onFailure(Throwable caught) {
           changePassword.setEnabled(true);
@@ -230,20 +229,26 @@ public class ResetPassword extends UserDialog {
             markErrorBlur(changePassword, "Password has already been changed?");
           } else {
             markErrorBlur(changePassword, SUCCESS, PASSWORD_HAS_BEEN_CHANGED, Placement.LEFT);
-            Timer t = new Timer() {
-              @Override
-              public void run() {
-                String newURL = trimURL(Window.Location.getHref());
-                //  System.out.println("url now " +newURL);
-                Window.Location.replace(newURL);
-                Window.Location.reload();
-
-              }
-            };
-            t.schedule(3000);
+            reloadPageInThreeSeconds();
           }
         }
       });
     }
+  }
+
+  private void reloadPageInThreeSeconds() {
+    Timer t = new Timer() {
+      @Override
+      public void run() {
+        reloadPage();
+      }
+    };
+    t.schedule(3000);
+  }
+
+  private void reloadPage() {
+    String newURL = trimURL(Window.Location.getHref());
+    Window.Location.replace(newURL);
+    Window.Location.reload();
   }
 }
