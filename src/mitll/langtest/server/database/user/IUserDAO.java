@@ -258,4 +258,6 @@ public interface IUserDAO extends IDAO {
    * @param toUpdate
    */
   void update(User toUpdate);
+
+  boolean forgotPassword(String user, String url);
 }

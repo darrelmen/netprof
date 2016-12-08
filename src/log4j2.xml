@@ -101,7 +101,10 @@
             <appender-ref ref="STDOUT"/>
         </logger>
 
-        <root level="debug">
+
+        DEU DEU DEU DE
+
+        <root DEU DEU DEU DE level="debug">
             <appender-ref ref="Mail" level="error"/>
         </root>
 
