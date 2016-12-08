@@ -73,6 +73,11 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 
   private List<CommonExercise> exercises = null;
   private AddRemoveDAO addRemoveDAO;
+  /**
+   * @see #addNewExercises
+   * @see #addOverlays
+   * @see #setDependencies
+   */
   private IUserExerciseDAO userExerciseDAO;
   private AttachAudio attachAudio;
   private IAudioDAO audioDAO;

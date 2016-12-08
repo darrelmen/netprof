@@ -177,6 +177,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
    * @param secondType
    * @param countryCode
    * @return
+   * @see #ensureDefaultProject(int)
    */
   @Override
   public int add(int userid,
@@ -185,7 +186,10 @@ public class ProjectDAO extends DAO implements IProjectDAO {
                  String language,
                  String course,
                  ProjectType type,
-                 ProjectStatus status, String firstType, String secondType, String countryCode,
+                 ProjectStatus status,
+                 String firstType,
+                 String secondType,
+                 String countryCode,
                  int displayOrder) {
     return dao.insert(new SlickProject(
         -1,

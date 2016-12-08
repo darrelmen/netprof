@@ -17,8 +17,6 @@ class CreateProject {
   private static final Logger logger = LogManager.getLogger(CreateProject.class);
 
   /**
-   * xTODO : what to do about pashto 1,2,3?
-   *
    * @param db
    * @param countryCode
    * @param course
@@ -32,16 +30,19 @@ class CreateProject {
     String oldLanguage = getOldLanguage(db);
     String name = optName != null ? optName : oldLanguage;
 
+    logger.info("createProjectIfNotExists create project " + name);
+
     int byName = projectDAO.getByName(name);
 
     if (byName == -1) {
-      logger.info("checking for project with name '" + name + "' opt '" + optName + "' language '" + oldLanguage +
+      logger.info("createProjectIfNotExists checking for project with name '" + name + "' opt '" + optName + "' language '" + oldLanguage +
           "' - non found");
 
       byName = createProject(db, projectDAO, countryCode, name, course, displayOrder, isDev);
-      db.populateProjects();
+      db.rememberProject(byName);
+      //    db.populateProjects();
     } else {
-      logger.info("found project " + byName + " for language '" + oldLanguage + "'");
+      logger.info("createProjectIfNotExists found project " + byName + " for language '" + oldLanguage + "'");
     }
     return byName;
   }
@@ -57,8 +58,13 @@ class CreateProject {
    * @param isDev
    * @see #createProjectIfNotExists
    */
-  private int createProject(DatabaseImpl db, IProjectDAO projectDAO, String countryCode, String name, String course,
-                            int displayOrder, boolean isDev) {
+  private int createProject(DatabaseImpl db,
+                            IProjectDAO projectDAO,
+                            String countryCode,
+                            String name,
+                            String course,
+                            int displayOrder,
+                            boolean isDev) {
     Iterator<String> iterator = db.getTypeOrder(-1).iterator();
     String firstType = iterator.hasNext() ? iterator.next() : "";
     String secondType = iterator.hasNext() ? iterator.next() : "";
@@ -83,7 +89,7 @@ class CreateProject {
       }
     }
 
-    logger.info("created project " + byName);
+    logger.info("createProject : created project " + byName);
     return byName;
   }
 

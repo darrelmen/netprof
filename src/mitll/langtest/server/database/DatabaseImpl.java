@@ -279,7 +279,7 @@ public class DatabaseImpl implements Database {
    */
   public void populateProjects() {
     if (projectManagement == null) {
-      logger.info("no project management yet...");
+      logger.info("populateProjects no project management yet...");
     } else {
       logger.info("populateProjects --- ");
       projectManagement.populateProjects();
@@ -490,7 +490,9 @@ public class DatabaseImpl implements Database {
     SectionHelper sectionHelper = (isAmas()) ? getAMASSectionHelper() : getSectionHelper(projectid);
     if (sectionHelper == null) logger.warn("no section helper for " + this);
     List<String> objects = Collections.emptyList();
-    return (sectionHelper == null) ? objects : sectionHelper.getTypeOrder();
+    Collection<String> strings = (sectionHelper == null) ? objects : sectionHelper.getTypeOrder();
+    logger.info("getTypeOrder : " + projectid + " = " + strings);
+    return strings;
   }
 
   /**
@@ -541,6 +543,14 @@ public class DatabaseImpl implements Database {
 
   public void stopDecode() {
     projectManagement.stopDecode();
+  }
+
+  /**
+   * Just for import
+   * @param projectid
+   */
+  public void rememberProject(int projectid) {
+    projectManagement.rememberProject(projectid);
   }
 
   /**
@@ -621,22 +631,28 @@ public class DatabaseImpl implements Database {
 
           makeExerciseDAO(lessonPlanFile, isURL);
 
-          populateProjects();
-          //    logger.info("set exercise dao " + exerciseDAO + " on " + userExerciseDAO);
-          if (projectManagement.getProjects().isEmpty()) {
-            logger.warn("\n\n\nmakeDAO no projects loaded yet...?");
-          } else {
-            ExerciseDAO<CommonExercise> exerciseDAO = projectManagement.getFirstProject().getExerciseDAO();
-            userExerciseDAO.setExerciseDAO(exerciseDAO);
+          if (!serverProps.useH2()) {
+            populateProjects();
+            //    logger.info("set exercise dao " + exerciseDAO + " on " + userExerciseDAO);
+            if (projectManagement.getProjects().isEmpty()) {
+              logger.warn("\n\n\nmakeDAO no projects loaded yet...?");
+            } else {
+              ExerciseDAO<CommonExercise> exerciseDAO = projectManagement.getFirstProject().getExerciseDAO();
+              logger.info("using exercise dao from first project " + exerciseDAO);
+              userExerciseDAO.setExerciseDAO(exerciseDAO);
+            }
           }
 
           // TODO
           // TODO : will this break import???
           // TODO
 
-          // if (!serverProps.useH2()) {
-          configureProjects();
-          //}
+          if (!serverProps.useH2()) {
+            configureProjects();
+          } else {
+            ExerciseDAO<CommonExercise> commonExerciseExerciseDAO = projectManagement.setDependencies();
+            userExerciseDAO.setExerciseDAO(commonExerciseExerciseDAO);
+          }
         }
         userManagement = new mitll.langtest.server.database.user.UserManagement(userDAO, resultDAO, userPermissionDAO);
       }
@@ -680,6 +696,9 @@ public class DatabaseImpl implements Database {
   }
 
   public Project getProject(int projectid) {
+    if (projectid == -1) {
+      logger.warn("getProject asking for project -1?", new Exception());
+    }
     return projectManagement.getProject(projectid);
   }
 
@@ -722,7 +741,6 @@ public class DatabaseImpl implements Database {
 /*  public void setDependencies(ExerciseDAO exerciseDAO, int projid) {
     exerciseDAO.setDependencies(userExerciseDAO, null *//*addRemoveDAO*//*, audioDAO, projid);
   }*/
-
   private void makeContextPractice(String contextPracticeFile, String installPath) {
     if (contextPractice == null && contextPracticeFile != null) {
       synchronized (this) {
@@ -1657,7 +1675,6 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   *
    * @return
    */
   public IUserSessionDAO getUserSessionDAO() {
