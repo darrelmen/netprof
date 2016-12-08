@@ -51,6 +51,9 @@ public interface IProjectManagement {
    */
   void configureProjects();
 
+  void rememberProject(int id);
+
+  ExerciseDAO<CommonExercise> setDependencies();
 
   Project getProjectForUser(int userid);
 
