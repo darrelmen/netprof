@@ -80,12 +80,11 @@ public interface UserService extends RemoteService {
 
   /**
    * @param userid
-   * @param userEmail
    * @param url
    * @return
    * @see mitll.langtest.client.user.SignInForm#onSendReset
    */
-  boolean resetPassword(String userid, String userEmail, String url);
+  boolean resetPassword(String userid, String url);
 
   /**
    * @deprecated no tokens anymore
