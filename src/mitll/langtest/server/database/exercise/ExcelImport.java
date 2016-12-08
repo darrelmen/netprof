@@ -83,6 +83,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   private int weekIndex;
 
   private final boolean DEBUG = false;
+  private final boolean DEBUG_DETAIL = false;
   private long lastModified;
 
   /**
@@ -663,7 +664,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     imported.setForeignLanguage(foreignLanguagePhrase);
     imported.setAltFL(altfl);
 
-    if (DEBUG) logger.info("got " + imported);
+    if (DEBUG_DETAIL) logger.info("got " + imported);
     return imported;
   }
 
