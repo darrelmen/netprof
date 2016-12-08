@@ -73,7 +73,7 @@ public class ProjectManagement implements IProjectManagement {
    * @param properties
    * @param logAndNotify
    * @param db
-   * @see
+   * @see DatabaseImpl#setInstallPath
    */
   public ProjectManagement(PathHelper pathHelper,
                            ServerProperties properties,
@@ -95,6 +95,19 @@ public class ProjectManagement implements IProjectManagement {
     populateProjects(pathHelper, serverProps, logAndNotify, db);
   }
 
+  public void rememberProject(int id) {
+    SlickProject found = null;
+    for (SlickProject slickProject :projectDAO.getAll()) {
+      if (slickProject.id() == id) {
+        found = slickProject;
+        break;
+      }
+    }
+    if (found != null) {
+      rememberProject(pathHelper, serverProps, logAndNotify, found, db);
+    }
+
+  }
   /**
    * Fill in id->project map
    *
@@ -159,14 +172,12 @@ public class ProjectManagement implements IProjectManagement {
 
   /**
    * @param project
-   * @paramx installPath
    * @see #configureProjects
    */
-  // @Override
   private void configureProject(Project project) {
     logger.info("configureProject " + project);
     SlickProject project1 = project.getProject();
-    if (project1 == null) logger.info("note : no project for " + project);
+    if (project1 == null) logger.info("configureProject : note : no project for " + project);
     int id = project1 == null ? -1 : project1.id();
     setDependencies(project.getExerciseDAO(), id);
 
@@ -205,12 +216,21 @@ public class ProjectManagement implements IProjectManagement {
     logMemory();
   }
 
+  public ExerciseDAO<CommonExercise> setDependencies() {
+    Project project = idToProject.get(IMPORT_PROJECT_ID);
+    ExerciseDAO<CommonExercise> exerciseDAO = project.getExerciseDAO();
+    logger.info("setDependencies " + project + " : " + exerciseDAO);
+    setDependencies(exerciseDAO,-1);
+
+    return exerciseDAO;
+  }
+
   /**
    * @param exerciseDAO
    * @param projid
    * @see #configureProject
    */
-  private void setDependencies(ExerciseDAO exerciseDAO, int projid) {
+  public void setDependencies(ExerciseDAO exerciseDAO, int projid) {
     logger.info("setDependencies - " + projid);
     IAudioDAO audioDAO = db.getAudioDAO();
 
@@ -337,6 +357,8 @@ public class ProjectManagement implements IProjectManagement {
       return Collections.emptyList();
     }
     Project project = getProjectOrFirst(projectid);
+
+    logger.info("getExercises " + projectid  + " = " +project);
 
     List<CommonExercise> rawExercises = project.getRawExercises();
     if (rawExercises.isEmpty()) {

@@ -225,6 +225,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   /**
    * Pulls the list of audio recordings out of the database.
    *
+   * @param projid here ignored, since in old world there are no project ids
    * @return
    * @see #getExToAudio
    * @see Report#getReport

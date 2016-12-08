@@ -49,6 +49,10 @@ import java.util.List;
 public class BaseUserExerciseDAO extends DAO {
   private static final Logger logger = LogManager.getLogger(BaseUserExerciseDAO.class);
 
+  /**
+   * @see #getPredefExercise
+   * @see #
+   */
   ExerciseDAO<CommonExercise> exerciseDAO;
 
   protected BaseUserExerciseDAO(Database database) { super(database);  }

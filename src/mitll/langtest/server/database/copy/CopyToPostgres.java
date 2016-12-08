@@ -205,9 +205,14 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param cc
    * @param optName null OK
    * @param isDev
-   * @see #copyOneConfig
+   * @see #copyOneConfigCommand(String, boolean)
+   * @see PostgresTest#testCopy
    */
   public void copyOneConfig(DatabaseImpl db, String cc, String optName, int displayOrder, boolean isDev) throws Exception {
+    logger.info("copyOneConfig type order is " + db.getTypeOrder(DatabaseImpl.IMPORT_PROJECT_ID));
+
+    //if (true) return;
+
     int projectID = createProjectIfNotExists(db, cc, optName, displayOrder, isDev);  // TODO : course?
 
     logger.info("copyOneConfig project is " + projectID);
