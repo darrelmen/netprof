@@ -159,13 +159,20 @@ public class Report {
                 PathHelper pathHelper) {
     List<String> reportEmails = serverProps.getReportEmails();
 
-    InetAddress ip = null;
+    // check if it's a monday
+    if (!getShouldSkip() &&
+        Calendar.getInstance().get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY &&
+        !reportEmails.isEmpty()) {
+      writeAndSendReport(serverProps.getLanguage(), site, mailSupport, pathHelper, reportEmails, getThisYear());
+    } else {
+//      logger.debug("not sending email report since this is not monday");
+    }
+  }
+
+  private boolean getShouldSkip() {
     boolean skipReport = false;
     try {
-      ip = InetAddress.getLocalHost();
-
-      logger.info("\n\n\ndoReport got " + ip);
-      logger.info("\n\n\ndoReport got " + ip.getHostName());
+      InetAddress ip = InetAddress.getLocalHost();
       skipReport = ip.getHostName().contains("MITLL");
       if (skipReport) {
         logger.info("skip writing report while testing.... " + ip.getHostName());
@@ -177,15 +184,7 @@ public class Report {
       logger.error("Got " + e,e);
       e.printStackTrace();
     }
-
-    // check if it's a monday
-    if (!skipReport &&
-        Calendar.getInstance().get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY &&
-        !reportEmails.isEmpty()) {
-      writeAndSendReport(serverProps.getLanguage(), site, mailSupport, pathHelper, reportEmails, getThisYear());
-    } else {
-//      logger.debug("not sending email report since this is not monday");
-    }
+    return skipReport;
   }
 
   /**
