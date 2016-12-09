@@ -209,7 +209,7 @@ public class UserSecurityManager implements IUserSecurityManager {
           session.getID(), request.getRequestedSessionId(),
           request.getSession().getCreationTime(), request.getSession().isNew(), uidI);*/
 
-      if (uidI != null) {
+      if (uidI != null && uidI > 0) {
         sessUser = getUserForID(uidI);
         if (sessUser == null) {
          // log.info("lookupUserFromHttpSession got cache miss for " + uidI);

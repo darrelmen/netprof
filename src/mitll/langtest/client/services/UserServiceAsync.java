@@ -81,7 +81,7 @@ public interface UserServiceAsync {
                                  String newHashedPassword,
                                  AsyncCallback<Boolean> async);
 
-  void changePasswordWithToken(String userId, String userKey, String newPassword, AsyncCallback<Boolean> async);
+  void changePasswordWithToken(String userId, String userKey, String newPassword, AsyncCallback<User> async);
 
   void resetPassword(String userid, String url, String emailForLegacy, AsyncCallback<Boolean> asyncCallback);
 

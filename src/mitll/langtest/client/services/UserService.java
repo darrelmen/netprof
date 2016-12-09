@@ -93,7 +93,7 @@ public interface UserService extends RemoteService {
    * @param newPassword
    * @return
    */
-  boolean changePasswordWithToken(String userId, String userKey, String newPassword);
+  User changePasswordWithToken(String userId, String userKey, String newPassword);
 
   /**
    * @param userid

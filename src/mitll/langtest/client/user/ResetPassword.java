@@ -45,6 +45,9 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.instrumentation.EventRegistration;
+import mitll.langtest.shared.user.User;
+
+import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -53,7 +56,9 @@ import mitll.langtest.client.instrumentation.EventRegistration;
  * @since 10/2/14.
  */
 public class ResetPassword extends UserDialog {
-  private static final int MIN_PASSWORD = 4;
+  private final Logger logger = Logger.getLogger("ResetPassword");
+
+  private static final int MIN_PASSWORD = 8; // Consistent with Domino minimums
 
   private static final String PASSWORD = "Password";
 
@@ -67,16 +72,18 @@ public class ResetPassword extends UserDialog {
 
   private final EventRegistration eventRegistration;
   private final KeyPressHelper enterKeyButtonHelper;
+  UserManager userManager;
 
   /**
    * @param props
    * @param eventRegistration
    * @see
    */
-  public ResetPassword(PropertyHandler props, EventRegistration eventRegistration) {
+  public ResetPassword(PropertyHandler props, EventRegistration eventRegistration, UserManager userManager) {
     super(props);
     this.eventRegistration = eventRegistration;
     enterKeyButtonHelper = new KeyPressHelper(false);
+    this.userManager = userManager;
   }
 
   /**
@@ -114,11 +121,18 @@ public class ResetPassword extends UserDialog {
     final Fieldset fieldset = new Fieldset();
     form.add(fieldset);
 
-    FormField useridField = addControlFormFieldWithPlaceholder(fieldset, false, 4, 35, "User ID");
-
     Heading w = new Heading(3, CHOOSE_A_NEW_PASSWORD);
     fieldset.add(w);
     w.addStyleName("leftFiveMargin");
+
+    // FormField useridField = addControlFormFieldWithPlaceholder(fieldset, false, 4, 35, "User ID");
+
+    final TextBox user = new TextBox();
+    user.setMaxLength(35);
+    user.setPlaceholder("User ID");
+    user.setText(userManager.getPendingUserID());
+    FormField useridField = getSimpleFormField(fieldset, user, 4);
+
     final BasicDialog.FormField firstPassword = getPasswordField(fieldset, PASSWORD);
     // final BasicDialog.FormField secondPassword = ;
     //   addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, "Confirm " + PASSWORD);
@@ -136,7 +150,9 @@ public class ResetPassword extends UserDialog {
     fieldset.add(changePasswordButton);
 
     right.add(rightDiv);
+
     setFocusOn(firstPassword.getWidget());
+    //   setFocusOn(useridField.getWidget());
     return container;
   }
 
@@ -220,7 +236,7 @@ public class ResetPassword extends UserDialog {
       // newPassword = rot13(newPassword);
 
       //    service.changePFor(token, newPassword, new AsyncCallback<Boolean>() {
-      service.changePasswordWithToken(userIDForm.getText(), token, newPassword, new AsyncCallback<Boolean>() {
+      service.changePasswordWithToken(userIDForm.getText(), token, newPassword, new AsyncCallback<User>() {
         @Override
         public void onFailure(Throwable caught) {
           changePassword.setEnabled(true);
@@ -228,31 +244,41 @@ public class ResetPassword extends UserDialog {
         }
 
         @Override
-        public void onSuccess(Boolean result) {
-          if (!result) {
+        public void onSuccess(User result) {
+          if (result == null) {
             markErrorBlur(changePassword, "Password has already been changed?");
+            changePassword.setEnabled(true);
           } else {
+
             markErrorBlur(changePassword, SUCCESS, PASSWORD_HAS_BEEN_CHANGED, Placement.LEFT);
-            reloadPageInThreeSeconds();
+            reloadPageInThreeSeconds(result);
           }
         }
       });
     }
   }
 
-  private void reloadPageInThreeSeconds() {
+  private void reloadPageInThreeSeconds(final User user) {
     Timer t = new Timer() {
       @Override
       public void run() {
-        reloadPage();
+        reloadPage(user);
       }
     };
-    t.schedule(3000);
+    t.schedule(2000);
   }
 
-  private void reloadPage() {
+  private void reloadPage(User user) {
     String newURL = trimURL(Window.Location.getHref());
     Window.Location.replace(newURL);
-    Window.Location.reload();
+    userManager.storeUser(user);
+
+    //    Timer t = new Timer() {
+//      @Override
+//      public void run() {
+//        Window.Location.reload();
+//      }
+//    };
+//    t.schedule(1000);
   }
 }

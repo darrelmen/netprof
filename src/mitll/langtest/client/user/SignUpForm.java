@@ -65,7 +65,7 @@ public class SignUpForm extends UserDialog implements SignUp {
 //  private static final String WAIT_FOR_APPROVAL = "Wait for approval";
 //  private static final String YOU_WILL_GET_AN_APPROVAL_MESSAGE_BY_EMAIL = "You will get an approval message by email.";
 
-//  private static final String MALE = "male";
+  //  private static final String MALE = "male";
   private static final int MIN_LENGTH_USER_ID = 4;
   /**
    * TO BE CONSISTENT WITH DOMINO
@@ -77,17 +77,17 @@ public class SignUpForm extends UserDialog implements SignUp {
    */
   private static final String SIGN_UP = "Sign Up";
   private static final String SIGN_UP_SUBTEXT = "Sign up";
-//  private static final String PASSWORD = "Password";
+  //  private static final String PASSWORD = "Password";
   private static final String USERNAME = "Username";
   private static final String PLEASE_ENTER_A_LONGER_USER_ID = "Please enter a longer user id.";
   private static final String VALID_EMAIL = "Please enter a valid email address.";
   private static final String PLEASE_ENTER_A_PASSWORD = "Please enter a password";
   private static final String ARE_YOU_A = "Please choose : Are you a";
-//  private static final String STUDENT = "Student or ";
+  //  private static final String STUDENT = "Student or ";
 //  private static final String TEACHER = "Teacher?";
   private static final String SIGN_UP_WIDTH = "266px";
   private static final int USERNAME_WIDTH = 25;
-//  private static final String RECORD_AUDIO_HEADING = "Recording audio/Quality Control";
+  //  private static final String RECORD_AUDIO_HEADING = "Recording audio/Quality Control";
 //  private static final int WAIT_FOR_READING_APPROVAL = 3000;
 //  private static final String RECORD_REFERENCE_AUDIO = "Are you an assigned reference audio recorder?";
   private static final String USER_EXISTS = "User exists already, please sign in or choose a different name.";
@@ -100,7 +100,6 @@ public class SignUpForm extends UserDialog implements SignUp {
 
   /**
    * We don't let them enter a password initially anymore.
-   *
    */
   //  private BasicDialog.FormField signUpPassword;
 
@@ -162,8 +161,8 @@ public class SignUpForm extends UserDialog implements SignUp {
     // String userID = userID.getUserID();
     signUpUser.box.setText(userID);
 
-   // signUpPassword.box.setText(passwordText);
-   // signUpPassword.getGroup().setType(ControlGroupType.ERROR);
+    // signUpPassword.box.setText(passwordText);
+    // signUpPassword.getGroup().setType(ControlGroupType.ERROR);
 
     FormField firstFocus = this.firstName;
     setFocusOn(firstFocus.getWidget());
@@ -197,6 +196,7 @@ public class SignUpForm extends UserDialog implements SignUp {
 
     return getTwoPartForm(heading, fields);
   }
+
   Heading pleaseCheck;
 
   /**
@@ -238,7 +238,6 @@ public class SignUpForm extends UserDialog implements SignUp {
   private TextBoxBase emailBox;
 
   /**
-   *
    * @param user
    * @return
    */
@@ -428,9 +427,9 @@ public class SignUpForm extends UserDialog implements SignUp {
   }
 
   /**
-   * @see #getFields
    * @param fieldset
    * @return
+   * @see #getFields
    */
   private TextBoxBase makeSignUpEmail(Fieldset fieldset) {
     signUpEmail = getFormField(fieldset, false, MIN_LENGTH_USER_ID, USER_ID_MAX_LENGTH, "Email");
@@ -524,7 +523,6 @@ public class SignUpForm extends UserDialog implements SignUp {
   }
 
   /**
-   *
    * @param userBox
    * @param emailBox
    * @return
@@ -633,9 +631,9 @@ public class SignUpForm extends UserDialog implements SignUp {
    * When the form is valid, make a new user or update an existing one.
    *
    * @param user
-   * @paramx freeTextPassword
    * @param email
    * @param kind
+   * @paramx freeTextPassword
    * @see #getSignUpButton(com.github.gwtbootstrap.client.ui.base.TextBoxBase, com.github.gwtbootstrap.client.ui.base.TextBoxBase)
    */
   protected void gotSignUp(final String user,
@@ -680,6 +678,7 @@ public class SignUpForm extends UserDialog implements SignUp {
               signUp.setEnabled(true);
               markErrorBlur(signUpUser, USER_EXISTS);
             } else {
+              userManager.setPendingUserStorage(result.getUserID());
               if (result.isEnabled()) {
                 eventRegistration.logEvent(signUp, "signing up", "N/A", getSignUpEvent(result));
                 // logger.info("Got valid, enabled new user " + user + " and so we're letting them in.");
@@ -692,15 +691,14 @@ public class SignUpForm extends UserDialog implements SignUp {
                 //)/*, passH)*/;
               } else {
                 eventRegistration.logEvent(signUp, "signing up", "N/A", getSignUpEvent(result) +
-                //    " but waiting for approval from Tamas."
-                  "but gotta check email for next step..."
+                    //    " but waiting for approval from Tamas."
+                    "but gotta check email for next step..."
                 );
                 //  markErrorBlur(signUp, WAIT_FOR_APPROVAL, YOU_WILL_GET_AN_APPROVAL_MESSAGE_BY_EMAIL, Placement.TOP);
 //                markErrorBlur(signUp, I_M_SORRY,
 //                    "Your account has been deactivated. Please contact help email if needed.", Placement.TOP);
 
                 pleaseCheck.setVisible(true);
-
 /*
                 Timer t = new Timer() {
                   @Override
@@ -728,6 +726,11 @@ public class SignUpForm extends UserDialog implements SignUp {
     return "successful sign up as " + result.getUserID() + "/" + result.getID() + " as " + result.getUserKind();
   }
 
+  /**
+   * @see mitll.langtest.client.userops.EditUserForm
+   * @param rolesHeader
+   * @deprecated
+   */
   public void setRolesHeader(String rolesHeader) {
     this.rolesHeader = rolesHeader;
   }
