@@ -651,7 +651,8 @@ public class SignUpForm extends UserDialog implements SignUp {
         //rot13(freeTextPassword),
 //        passH,
         emailH,
-        email, kind,
+        email,
+        kind,
 
         isMale(isCD),  // don't really know the gender, so guess male...?
         getAge(isCD),

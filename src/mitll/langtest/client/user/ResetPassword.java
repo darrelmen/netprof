@@ -69,9 +69,9 @@ public class ResetPassword extends UserDialog {
   private final KeyPressHelper enterKeyButtonHelper;
 
   /**
-   * @see
    * @param props
    * @param eventRegistration
+   * @see
    */
   public ResetPassword(PropertyHandler props, EventRegistration eventRegistration) {
     super(props);
@@ -114,12 +114,14 @@ public class ResetPassword extends UserDialog {
     final Fieldset fieldset = new Fieldset();
     form.add(fieldset);
 
+    FormField useridField = addControlFormFieldWithPlaceholder(fieldset, false, 4, 35, "User ID");
+
     Heading w = new Heading(3, CHOOSE_A_NEW_PASSWORD);
     fieldset.add(w);
     w.addStyleName("leftFiveMargin");
-    final BasicDialog.FormField firstPassword = getPasswordField(fieldset,PASSWORD);
-   // final BasicDialog.FormField secondPassword = ;
- //   addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, "Confirm " + PASSWORD);
+    final BasicDialog.FormField firstPassword = getPasswordField(fieldset, PASSWORD);
+    // final BasicDialog.FormField secondPassword = ;
+    //   addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, "Confirm " + PASSWORD);
 
     //  firstPassword.getWidget().setTabIndex(0);
     // secondPassword.getWidget().setTabIndex(1);
@@ -127,8 +129,9 @@ public class ResetPassword extends UserDialog {
     Button changePasswordButton =
         getChangePasswordButton(
             token,
+            useridField,
             firstPassword,
-            getPasswordField(fieldset,"Confirm " + PASSWORD));
+            getPasswordField(fieldset, "Confirm " + PASSWORD));
 
     fieldset.add(changePasswordButton);
 
@@ -148,6 +151,7 @@ public class ResetPassword extends UserDialog {
    * @see #getResetPassword
    */
   private Button getChangePasswordButton(final String token,
+                                         final BasicDialog.FormField userID,
                                          final BasicDialog.FormField firstPassword,
                                          final BasicDialog.FormField secondPassword) {
     final Button changePassword = new Button(CHANGE_PASSWORD);
@@ -162,7 +166,7 @@ public class ResetPassword extends UserDialog {
     changePassword.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        onChangePassword(firstPassword, secondPassword, changePassword, token);
+        onChangePassword(userID, firstPassword, secondPassword, changePassword, token);
       }
     });
     enterKeyButtonHelper.addKeyHandler(changePassword);
@@ -185,13 +189,13 @@ public class ResetPassword extends UserDialog {
   }*/
 
   /**
-   *
    * @param firstPassword
    * @param secondPassword for confirmation
    * @param changePassword
    * @param token
    */
-  private void onChangePassword(FormField firstPassword,
+  private void onChangePassword(FormField userIDForm,
+                                FormField firstPassword,
                                 FormField secondPassword,
                                 final Button changePassword,
                                 String token) {
@@ -212,11 +216,11 @@ public class ResetPassword extends UserDialog {
       changePassword.setEnabled(false);
       enterKeyButtonHelper.removeKeyHandler();
 
-      String hashNewPassword = Md5Hash.getHash(newPassword);
+//      String hashNewPassword = Md5Hash.getHash(newPassword);
+      // newPassword = rot13(newPassword);
 
-     // newPassword = rot13(newPassword);
-
-      service.changePFor(token, hashNewPassword, new AsyncCallback<Boolean>() {
+      //    service.changePFor(token, newPassword, new AsyncCallback<Boolean>() {
+      service.changePasswordWithToken(userIDForm.getText(), token, newPassword, new AsyncCallback<Boolean>() {
         @Override
         public void onFailure(Throwable caught) {
           changePassword.setEnabled(true);

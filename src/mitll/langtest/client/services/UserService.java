@@ -37,6 +37,7 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.InitialUI;
+import mitll.langtest.client.domino.user.ChangePasswordView;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.user.UserPassLogin;
 import mitll.langtest.shared.user.*;
@@ -69,22 +70,39 @@ public interface UserService extends RemoteService {
   void logout(String login);
 
   /**
-   * @param token
-   * @param newHashedPassword
+   * @paramz token
+   * @paramz newHashedPassword
    * @return
    * @see mitll.langtest.client.user.ResetPassword#onChangePassword
    */
-  boolean changePFor(String token, String newHashedPassword);
+ // boolean changePFor(String token, String newHashedPassword);
 
-  boolean changePassword(int userid, String currentHashedPassword, String newHashedPassword);
+  /**
+   * @see ChangePasswordView#changePassword
+   * @param userid
+   * @param currentHashedPassword
+   * @param newHashedPassword
+   * @return
+   */
+  boolean changePasswordWithCurrent(int userid, String currentHashedPassword, String newHashedPassword);
+
+  /**
+   * @see mitll.langtest.client.user.ResetPassword#onChangePassword
+   * @param userId
+   * @param userKey
+   * @param newPassword
+   * @return
+   */
+  boolean changePasswordWithToken(String userId, String userKey, String newPassword);
 
   /**
    * @param userid
    * @param url
+   * @param emailForLegacy
    * @return
    * @see mitll.langtest.client.user.SignInForm#onSendReset
    */
-  boolean resetPassword(String userid, String url);
+  boolean resetPassword(String userid, String url, String emailForLegacy);
 
   /**
    * @deprecated no tokens anymore

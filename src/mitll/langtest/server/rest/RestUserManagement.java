@@ -380,15 +380,16 @@ public class RestUserManagement {
    * @param userid           NOTE - this used to be a token -
    * @param freeTextPassword
    * @return
-   * @see UserServiceImpl#changePFor
+   * @seex UserServiceImpl#changePFor
    * @see #doGet(HttpServletRequest, HttpServletResponse, String, JSONObject)
    */
   private boolean changePFor(String userid, String freeTextPassword) {
     User userByID = db.getUserDAO().getUserByID(userid);
 
     //  freeTextPassword = rot13(freeTextPassword);
-    String hash = Md5Hash.getHash(freeTextPassword);
-    boolean b = db.getUserDAO().changePassword(userByID.getID(), hash);
+ //   String hash = Md5Hash.getHash(freeTextPassword);
+
+    boolean b = db.getUserDAO().changePassword(userByID.getID(), freeTextPassword);
 
     if (!b) {
       logger.error("changePFor : couldn't update user password for user " + userByID);

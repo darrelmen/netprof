@@ -708,6 +708,11 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     return true;
   }
 
+  @Override
+  public boolean changePasswordForToken(String userId, String userKey, String newPassword, String url) {
+    return false;
+  }
+
   /**
    * @param userid
    * @param resetKey
@@ -763,7 +768,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   }
 
   @Override
-  public boolean forgotPassword(String user, String url) {
+  public boolean forgotPassword(String user, String url, String emailForLegacy) {
     return false;
   }
 
