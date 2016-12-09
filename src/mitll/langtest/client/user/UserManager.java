@@ -72,6 +72,7 @@ public class UserManager {
 
   private static final String USER_ID = "userID";
   private static final String USER_CHOSEN_ID = "userChosenID";
+  private static final String USER_PENDING_ID = "userPendingID";
   // private static final String AUDIO_TYPE = "audioType";
 
   private final UserServiceAsync userServiceAsync;
@@ -102,10 +103,6 @@ public class UserManager {
   }
 
   /**
-   * Keeping option to do an anonymous login...
-   * for egyptian class and headstart?
-   * 8/22/14
-   *
    * @see mitll.langtest.client.LangTest#checkLogin()
    */
   public void checkLogin() {
@@ -114,7 +111,8 @@ public class UserManager {
       //logger.info("UserManager.login : current user : " + user);
       //console("UserManager.login : current user : " + user);
       if (current == null) {
-        getPermissionsAndSetUser(getUserChosenFromStorage(), getPassFromStorage());
+        getPermissionsAndSetUser(
+            /*getUserChosenFromStorage()*/);//, getPassFromStorage());
       } else {
         logger.info("user " + user + " and full info " + current);
       }
@@ -147,35 +145,35 @@ public class UserManager {
   /**
    * TODOx : instead have call to get permissions for a user.
    *
-   * @param user
-   * @param passwordHash
-   * @seex #getPermissionsAndSetUser()
-   * @see #login()
+   * @paramx user
+   * @paramx passwordHash
+   * @see #checkLogin
    * @see #storeUser
    */
-  private void getPermissionsAndSetUser(final String user, String passwordHash) {
-
-
-    if (DEBUG || true) logger.info("UserManager.getPermissionsAndSetUser " + user + " asking server for info...");
+  private void getPermissionsAndSetUser(/*final String user*/
+                                        /*, String passwordHash*/) {
+    if (DEBUG || true) logger.info("UserManager.getPermissionsAndSetUser " + //user +
+        " asking server for info...");
 
     userServiceAsync.getUserFromSession(new AsyncCallback<User>() {
       @Override
       public void onFailure(Throwable caught) {
 
-
       }
 
       @Override
       public void onSuccess(User result) {
-        if (DEBUG) logger.info("UserManager.getPermissionsAndSetUser : onSuccess " + user + " : " + result);
+        if (DEBUG) logger.info("UserManager.getPermissionsAndSetUser : onSuccess " +
+            //user +
+            " : " + result);
         if (result == null
             ) {
           clearUser();
           userNotification.showLogin();
         } else {
+          setPendingUserStorage(result.getUserID());
           gotNewUser(result);
         }
-
       }
     });
 
@@ -213,6 +211,14 @@ public class UserManager {
   public String getUserID() {
     if (Storage.isLocalStorageSupported()) {
       return Storage.getLocalStorageIfSupported().getItem(getUserChosenID());
+    } else {
+      return userChosenID;
+    }
+  }
+
+  public String getPendingUserID() {
+    if (Storage.isLocalStorageSupported()) {
+      return Storage.getLocalStorageIfSupported().getItem(getUserPendingID());
     } else {
       return userChosenID;
     }
@@ -261,15 +267,24 @@ public class UserManager {
     return localStorageIfSupported != null ? localStorageIfSupported.getItem(userIDCookie) : NO_USER_SET_STRING;
   }
 
+/*
   private String getPassFromStorage() {
     Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
     return localStorageIfSupported != null ? localStorageIfSupported.getItem(getPassCookie()) : NO_USER_SET_STRING;
   }
+*/
 
   private String getUserChosenFromStorage() {
     Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
     String userChosenID = getUserChosenID();
     return localStorageIfSupported != null ? localStorageIfSupported.getItem(userChosenID) : NO_USER_SET_STRING;
+  }
+
+  public void setPendingUserStorage(String pendingID) {
+    if (Storage.isLocalStorageSupported()) {
+      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
+      localStorageIfSupported.setItem(getUserPendingID(), pendingID);
+    }
   }
 
   /**
@@ -298,14 +313,21 @@ public class UserManager {
 
   /**
    * @return
-   * @deprecated
+   * @deprecatedx
    */
-  private String getPassCookie() {
+/*  private String getPassCookie() {
     return appTitle + ":" + "pwd";
-  }
+  }*/
 
+  /**
+   * @return
+   */
   private String getUserChosenID() {
     return appTitle + ":" + USER_CHOSEN_ID;
+  }
+
+  private String getUserPendingID() {
+    return appTitle + ":" + USER_PENDING_ID;
   }
 
   private String getExpires() {
@@ -364,8 +386,10 @@ public class UserManager {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
 
       localStorageIfSupported.removeItem(getUserIDCookie());
-      localStorageIfSupported.removeItem(getPassCookie());
+      // localStorageIfSupported.removeItem(getPassCookie());
       localStorageIfSupported.removeItem(getUserChosenID());
+      localStorageIfSupported.removeItem(getUserPendingID());
+
       logger.info("clearUser : removed item " + getUserID() + " user now " + getUser());
     } else {
       userID = NO_USER_SET;
@@ -378,7 +402,7 @@ public class UserManager {
    * @param user
    * @paramx passwordHash
    * @seex SignInForm#foundExistingUser(User, boolean, String)
-   * @see SignUpForm#gotSignUp(String, String, String, User.Kind)
+   * @seex SignUpForm#gotSignUp
    * @see UserDialog#storeUser
    */
   void storeUser(User user

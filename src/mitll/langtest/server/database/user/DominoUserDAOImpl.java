@@ -55,6 +55,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -111,8 +112,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     adminUser.getRoles().add(mitll.hlt.domino.shared.model.user.User.Role.GrAM);
     adminUser.getRoles().add(mitll.hlt.domino.shared.model.user.User.Role.UM);
     logger.info("got admin user " + adminUser + " has roles " + adminUser.getRoles());
-    Group group = new Group();
-    group.setPasswordPeriodDays(365);
+    Group group = getPrimaryGroup();
     adminUser.setPrimaryGroup(group);
 
     dominoImportUser = delegate.getUser(IMPORT_USER);
@@ -276,8 +276,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     // getConvertedPermissions(permissions, now);
 
     List<mitll.hlt.domino.shared.model.user.User.Role> ts = Collections.emptyList();
-    Group primaryGroup = new Group();
-    primaryGroup.setPasswordPeriodDays(365);
 
     ClientUserDetail updateUser = new ClientUserDetail(
         userID,
@@ -285,11 +283,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         last,
         email,
         ts,
-        primaryGroup
+        getGroup()
     );
 
-    logger.info("update user " + updateUser.getPrimaryGroup());
-    logger.info("update user days " + updateUser.getPrimaryGroup().getPasswordPeriodDays());
+    //  logger.info("update user " + updateUser.getPrimaryGroup());
+    //  logger.info("update user days " + updateUser.getPrimaryGroup().getPasswordPeriodDays());
 
     AccountDetail acctDetail = new AccountDetail();
     updateUser.setAcctDetail(acctDetail);
@@ -308,6 +306,28 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       invalidateCache();
       return clientUserDetail.getDocumentDBID();
     }
+  }
+
+  @NotNull
+  private Group getGroup() {
+    List<Group> groups = delegate.getGroupDelegate().searchGroups("");
+
+    Group primaryGroup = null;
+
+    for (Group group:groups) {
+      logger.info("Group " + group);
+      primaryGroup = group;
+      break;
+    }
+    if (primaryGroup == null) primaryGroup = getPrimaryGroup();
+    return primaryGroup;
+  }
+
+  @NotNull
+  private Group getPrimaryGroup() {
+    LocalDateTime f = LocalDateTime.now().plusYears(30);
+    Date out = Date.from(f.atZone(ZoneId.systemDefault()).toInstant());
+    return new Group("primary", "primaryGroup", 365, 24 * 365, out, adminUser);
   }
 
 /*  private void getConvertedPermissions(Collection<User.Permission> permissions, Timestamp now) {
@@ -598,18 +618,17 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       email = "admin@dliflc.edu";
     }
 
-    Group primaryGroup = new Group();
-
-    primaryGroup.setPasswordPeriodDays(365);
+    Group primaryGroup = getGroup();
 
     ClientUserDetail clientUserDetail = new ClientUserDetail(
-        //useid ? user.getID() : -1,
         user.getUserID(),
         first,
         last,
         email,
         Collections.emptyList(),
-        primaryGroup/*
+        primaryGroup
+
+        /*
 
         user.isMale(),
         user.getIpaddr() == null ? "" : user.getIpaddr(),
@@ -939,7 +958,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   @Override
   public boolean changePassword(int user, String newHashPassword) {
     return savePasswordAndGetUser(user, "", newHashPassword) != null;
-    //return dao.setPassword(user, freeTextPassword);
   }
 
   /**
@@ -951,7 +969,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    */
   public boolean changePasswordForToken(String userId, String userKey, String newPassword, String url) {
     return delegate.changePassword(userId, userKey, newPassword, url);//ServletUtil.get().getBaseURL(request));
-
   }
 
   /**
@@ -1093,7 +1110,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     }
 
     DBUser next = dbUsersByUserID.iterator().next();
-    if (next.getPrimaryGroup() == null) next.setPrimaryGroup(new Group());
+    if (next.getPrimaryGroup() == null) next.setPrimaryGroup(getGroup());
     ClientUserDetail clientUserDetail = getClientUserDetail(next);
 
     logger.info("forgotPassword users for " + user + " : " + clientUserDetail);
