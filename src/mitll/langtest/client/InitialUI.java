@@ -84,7 +84,6 @@ public class InitialUI implements UILifecycle {
 
   public static final String ROOT_VERTICAL_CONTAINER = "root_vertical_container";
 
-
   /**
    * Tamas doesn't like scrolling -- try to prevent it on laptops
    */
@@ -688,6 +687,10 @@ public class InitialUI implements UILifecycle {
                                final EventRegistration eventRegistration,
                                final String resetPassToken) {
     //logger.info("showLogin token '" + resetPassToken + "' for password reset");
+    firstRow.add(new ResetPassword(props, eventRegistration).getResetPassword(resetPassToken));
+    clearPadding(verticalContainer);
+
+/*
     userService.getUserIDForToken(resetPassToken, new AsyncCallback<Long>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -705,6 +708,7 @@ public class InitialUI implements UILifecycle {
         }
       }
     });
+*/
 
     RootPanel.get().add(verticalContainer);
     banner.setCogVisible(false);
