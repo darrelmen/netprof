@@ -45,7 +45,6 @@ import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.Label;
 import mitll.langtest.client.domino.common.*;
 import mitll.langtest.client.services.UserServiceAsync;
-import mitll.langtest.client.user.Md5Hash;
 import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.user.User;
 
@@ -239,9 +238,9 @@ public class ChangePasswordView extends Composite {
    // boolean sendEmail = emailBox != null && emailBox.getValue();
     final DecoratedFields df = getFirstDecoratedField();
 
-    String hashNewPass = Md5Hash.getHash(newPass);
-    String hashCurrPass = Md5Hash.getHash(currPass);
-    userServiceAsync.changePassword(editUser.getID(),
+    String hashNewPass  = newPass;// Md5Hash.getHash(newPass);
+    String hashCurrPass = currPass;//Md5Hash.getHash(currPass);
+    userServiceAsync.changePasswordWithCurrent(editUser.getID(),
         currPass == null ? "" : hashCurrPass,
         hashNewPass,
         //sendEmail,

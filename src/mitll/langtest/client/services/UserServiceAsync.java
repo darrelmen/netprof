@@ -50,7 +50,6 @@ public interface UserServiceAsync {
    * @param async
    */
  // void userExists(String login, String passwordH, AsyncCallback<User> async);
-
   /**
    * @param userId
    * @param attemptedHashedPassword
@@ -66,8 +65,9 @@ public interface UserServiceAsync {
    * @param token
    * @param newHashedPassword
    * @param asyncCallback
+   * @deprecated
    */
-  void changePFor(String token, String newHashedPassword, AsyncCallback<Boolean> asyncCallback);
+ // void changePFor(String token, String newHashedPassword, AsyncCallback<Boolean> asyncCallback);
 
   /**
    * @see ChangePasswordView#changePassword
@@ -76,12 +76,14 @@ public interface UserServiceAsync {
    * @param newHashedPassword
    * @param async
    */
-  void changePassword(int userid,
-                      String currentHashedPassword,
-                      String newHashedPassword,
-                      AsyncCallback<Boolean> async);
+  void changePasswordWithCurrent(int userid,
+                                 String currentHashedPassword,
+                                 String newHashedPassword,
+                                 AsyncCallback<Boolean> async);
 
-  void resetPassword(String userid, String url, AsyncCallback<Boolean> asyncCallback);
+  void changePasswordWithToken(String userId, String userKey, String newPassword, AsyncCallback<Boolean> async);
+
+  void resetPassword(String userid, String url, String emailForLegacy, AsyncCallback<Boolean> asyncCallback);
 
   void getUsers(AsyncCallback<List<User>> async);
 
@@ -135,4 +137,5 @@ public interface UserServiceAsync {
   void getUserByID(String id, AsyncCallback<User> async);
 
   void getUserFromSession(AsyncCallback<User> async);
+
 }

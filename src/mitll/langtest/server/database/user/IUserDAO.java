@@ -208,12 +208,33 @@ public interface IUserDAO extends IDAO {
 
   /**
    * @see UserServiceImpl#changePassword(int, String, String)
+   * @see mitll.langtest.server.rest.RestUserManagement#changePFor(String, String)
    * @param user
    * @param newHashPassword
    * @return
    */
   boolean changePassword(int user, String newHashPassword);
+
+  /**
+   * @see UserServiceImpl#changePassword
+   * @param user
+   * @param currentHashPassword
+   * @param newHashPassword
+   * @return
+   */
   boolean changePasswordWithCurrent(int user, String currentHashPassword, String newHashPassword);
+
+  /**
+   * @see
+   * @param userId
+   * @param userKey
+   * @param newPassword
+   * @param url
+   * @return
+   */
+  boolean changePasswordForToken(String userId, String userKey, String newPassword, String url);
+
+  boolean forgotPassword(String user, String url, String emailForLegacy);
 
   /**
    * @see UserServiceImpl#changePFor(String, String)
@@ -259,5 +280,4 @@ public interface IUserDAO extends IDAO {
    */
   void update(User toUpdate);
 
-  boolean forgotPassword(String user, String url);
 }
