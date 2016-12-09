@@ -511,7 +511,7 @@ public class BasicDialog {
     popover.reconfigure();
   }
 
-  private FormField getSimpleFormField(Panel dialogBox, TextBox user, int minLength) {
+  protected FormField getSimpleFormField(Panel dialogBox, TextBox user, int minLength) {
     final ControlGroup userGroup = addControlGroupEntryNoLabel(dialogBox, user);
     return new FormField(user, userGroup, minLength);
   }

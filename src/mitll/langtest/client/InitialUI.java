@@ -687,7 +687,7 @@ public class InitialUI implements UILifecycle {
                                final EventRegistration eventRegistration,
                                final String resetPassToken) {
     //logger.info("showLogin token '" + resetPassToken + "' for password reset");
-    firstRow.add(new ResetPassword(props, eventRegistration).getResetPassword(resetPassToken));
+    firstRow.add(new ResetPassword(props, eventRegistration, userManager).getResetPassword(resetPassToken));
     clearPadding(verticalContainer);
 
 /*

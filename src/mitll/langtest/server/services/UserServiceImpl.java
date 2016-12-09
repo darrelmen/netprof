@@ -401,15 +401,21 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @see mitll.langtest.client.user.ResetPassword#onChangePassword
    */
   @Override
-  public boolean changePasswordWithToken(String userId, String userKey, String newPassword) {
+  public User changePasswordWithToken(String userId, String userKey, String newPassword) {
     //long startMS = System.currentTimeMillis();
     String baseURL = getBaseURL();
 
     logger.info("changePassword - userId " + userId + " base url " + baseURL);
 
     boolean result = db.getUserDAO().changePasswordForToken(userId, userKey, newPassword, baseURL);
-    //  log.info(TIMING, "[changePassword, {} ms, for {}", () -> elapsedMS(startMS), () -> result);
-    return result;
+
+    if (result) {
+      return db.getUserDAO().getUserByID(userId);
+    }
+    else {
+      //  log.info(TIMING, "[changePassword, {} ms, for {}", () -> elapsedMS(startMS), () -> result);
+      return null;
+    }
   }
 
   private String getBaseURL() {
