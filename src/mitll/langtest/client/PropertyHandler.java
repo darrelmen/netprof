@@ -33,6 +33,7 @@
 package mitll.langtest.client;
 
 import com.google.gwt.user.client.Window;
+import mitll.hlt.domino.shared.Constants;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.user.UserPassLogin;
 import mitll.langtest.server.rest.RestUserManagement;
@@ -52,6 +53,9 @@ import java.util.logging.Logger;
  */
 public class PropertyHandler {
   private final Logger logger = Logger.getLogger("PropertyHandler");
+
+  public static final String CPW_TOKEN = "CPWtoken";
+  public static final String CPW_TOKEN2 = "CPW-token";
 
   private static final String TALKS_TO_DOMINO = "talksToDomino";
   private static final String PRACTICE_CONTEXT = "practiceContext";
@@ -483,6 +487,18 @@ public class PropertyHandler {
     String resetPasswordID = Window.Location.getParameter(RP);
     if (resetPasswordID != null) {
       resetPassToken = resetPasswordID;
+    }
+
+    String dominoResetPasswordID = Window.Location.getParameter(CPW_TOKEN);
+    if (dominoResetPasswordID != null) {
+      resetPassToken = dominoResetPasswordID;
+      logger.info("1 found cpw token '" +resetPassToken+          "'");
+    }
+
+    dominoResetPasswordID = Window.Location.getParameter(CPW_TOKEN2);
+    if (dominoResetPasswordID != null) {
+      resetPassToken = dominoResetPasswordID;
+      logger.info("2 found cpw token '" +resetPassToken+          "'");
     }
 
     String cdEnable = Window.Location.getParameter(CD);

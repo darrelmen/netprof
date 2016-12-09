@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.services;
 
+import mitll.hlt.domino.server.util.ServletUtil;
 import mitll.langtest.client.InitialUI;
 import mitll.langtest.client.domino.user.ChangePasswordView;
 import mitll.langtest.client.services.UserService;
@@ -106,7 +107,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     );
 
 //    attemptedFreeTextPassword = rot13(attemptedFreeTextPassword);
-    logger.info("userid " + userId +  " password '" + attemptedHashedPassword + "'");
+    logger.info("userid " + userId + " password '" + attemptedHashedPassword + "'");
 //    User loggedInUser = db.getUserDAO().getStrictUserWithPass(userId, attemptedFreeTextPassword);
     User loggedInUser = db.getUserDAO().loginUser(
         userId,
@@ -318,22 +319,26 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
 
   /**
    * @param user
-   * @param url
+   * @param url            IGNORED - remove me!
+   * @param emailForLegacy
    * @return true if there's a user with this email
    * @see mitll.langtest.client.user.SignInForm#getForgotPassword
    */
-  public boolean resetPassword(String user, String url) {
-    logger.debug("resetPassword for " + user);
+  public boolean resetPassword(String user, String url, String emailForLegacy) {
+    String baseURL = getBaseURL();
+    logger.debug("resetPassword for " + user + " " + baseURL);
 
     // Use Domino call to do reset password
-    return db.getUserDAO().forgotPassword(user, url);
- //   return getEmailHelper().resetPassword(user, userEmail, url);
+    return db.getUserDAO().forgotPassword(user, baseURL, emailForLegacy);
+    //   return getEmailHelper().resetPassword(user, userEmail, url);
   }
 
   /**
    * @param token
    * @param emailR - email encoded by rot13
+   * @param url    - remove me???
    * @return
+   * @deprecated don't do this anymore - just in domino
    * @see mitll.langtest.client.InitialUI#handleCDToken
    */
   public String enableCDUser(String token, String emailR, String url) {
@@ -360,10 +365,9 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @return
    * @see mitll.langtest.client.user.ResetPassword#getChangePasswordButton
    */
-  @Override
+/*  @Override
   public boolean changePFor(String userid, String newHashedPassword) {
     // hashedPassword = rot13(hashedPassword);
-
     User userByID = db.getUserDAO().getUserByID(userid);
     boolean b = db.getUserDAO().changePassword(userByID.getID(), newHashedPassword);
 
@@ -373,7 +377,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
 
     return b;
 
-/*    User userWhereResetKey = db.getUserDAO().getUserWithResetKey(token);
+*//*    User userWhereResetKey = db.getUserDAO().getUserWithResetKey(token);
     if (userWhereResetKey != null) {
       db.getUserDAO().clearKey(userWhereResetKey.getID(), true);
 
@@ -386,8 +390,32 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     } else {
 
       return false;
-    }*/
+    }*//*
+  }*/
+
+  /**
+   * @param userId
+   * @param userKey
+   * @param newPassword
+   * @return
+   * @see mitll.langtest.client.user.ResetPassword#onChangePassword
+   */
+  @Override
+  public boolean changePasswordWithToken(String userId, String userKey, String newPassword) {
+    //long startMS = System.currentTimeMillis();
+    String baseURL = getBaseURL();
+
+    logger.info("changePassword - userId " + userId + " base url " + baseURL);
+
+    boolean result = db.getUserDAO().changePasswordForToken(userId, userKey, newPassword, baseURL);
+    //  log.info(TIMING, "[changePassword, {} ms, for {}", () -> elapsedMS(startMS), () -> result);
+    return result;
   }
+
+  private String getBaseURL() {
+    return ServletUtil.get().getBaseURL(getThreadLocalRequest());
+  }
+
 
   /**
    * TODOx: consider stronger passwords like in domino.
@@ -398,7 +426,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @return
    * @see ChangePasswordView#changePassword
    */
-  public boolean changePassword(int userid, String currentHashedPassword, String newHashedPassword) {
+  public boolean changePasswordWithCurrent(int userid, String currentHashedPassword, String newHashedPassword) {
 
 //    currentHashedPassword = rot13(currentHashedPassword);
 //    newHashedPassword = rot13(newHashedPassword);
@@ -437,14 +465,16 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   /**
    * @param emailH
    * @param email
-   * @param url
+   * @param url ignored - remove me
    * @return
    * @see mitll.langtest.client.user.UserPassLogin#getForgotUser()
    */
   @Override
   public boolean forgotUsername(String emailH, String email, String url) {
     String userChosenIDIfValid = db.getUserDAO().isValidEmail(emailH);
-    getEmailHelper().getUserNameEmail(email, url, userChosenIDIfValid);
+
+    String baseURL = getBaseURL();
+    getEmailHelper().getUserNameEmail(email, baseURL, userChosenIDIfValid);
     return userChosenIDIfValid != null;
   }
 
@@ -485,9 +515,9 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   }
 
   /**
-   * @deprecated this will be done in Domino
    * @param toUpdate
    * @param changingUser
+   * @deprecated this will be done in Domino
    */
   public void update(User toUpdate, int changingUser) {
     db.getUserDAO().update(toUpdate);
