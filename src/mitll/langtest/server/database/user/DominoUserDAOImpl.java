@@ -150,7 +150,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
     SResult<ClientUserDetail> clientUserDetailSResult = addUserToMongo(user,
         /*encodedPass, */
-        "");
+        "", false);
 
     logger.info("addAndGet Got back " + clientUserDetailSResult);
 
@@ -174,6 +174,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   /**
    * @param user
    * @param url
+   * @param sendEmail
    * @return
    * @paramx freeTextPassword
    * @see BaseUserDAO#addUser(int, String, int, String, String, String, String, String, boolean, Collection, User.Kind, String, String, String, String, String, String, String, String)
@@ -181,8 +182,12 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    */
   private SResult<ClientUserDetail> addUserToMongo(ClientUserDetail user,
                                                    //String freeTextPassword,
-                                                   String url) {
-    SResult<ClientUserDetail> clientUserDetailSResult = delegate.addUser(adminUser, user, url);
+                                                   String url,
+                                                   boolean sendEmail) {
+    SResult<ClientUserDetail> clientUserDetailSResult = delegate.addUser(
+        sendEmail ? user : adminUser,// adminUser,
+        user,
+        url);
 
     logger.info("addUserToMongo Got back " + clientUserDetailSResult);
 
@@ -293,7 +298,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
     SResult<ClientUserDetail> clientUserDetailSResult = addUserToMongo(updateUser,
         //freeTextPassword,
-        url);
+        url, true);
 
     if (clientUserDetailSResult == null) {
       return -1; // password error?
@@ -390,7 +395,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   private List<DBUser> getDbUsers(Set<FilterDetail<UserColumn>> filterDetails) {
     FindOptions<UserColumn> opts = new FindOptions<>(filterDetails);
     List<DBUser> users = delegate.getUsers(-1, opts);
-    logger.info("getDbUsers " + opts + " = " + users);
+    //  logger.info("getDbUsers " + opts + " = " + users);
     return users;
   }
 
@@ -937,6 +942,25 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     //return dao.setPassword(user, freeTextPassword);
   }
 
+  /**
+   * @param userId
+   * @param userKey
+   * @param newPassword
+   * @param url
+   * @return
+   */
+  public boolean changePasswordForToken(String userId, String userKey, String newPassword, String url) {
+    return delegate.changePassword(userId, userKey, newPassword, url);//ServletUtil.get().getBaseURL(request));
+
+  }
+
+  /**
+   * @param user
+   * @param currentHashPass
+   * @param newHashPass
+   * @return
+   * @see mitll.langtest.server.services.UserServiceImpl#changePassword(String, String, String)
+   */
   public boolean changePasswordWithCurrent(int user, String currentHashPass, String newHashPass) {
     return savePasswordAndGetUser(user, currentHashPass, newHashPass) != null;
   }
@@ -1053,8 +1077,12 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     // logger.info("user now " + getByID(toUpdate.getID()));
   }
 
+  private boolean isValidAsEmail(String text) {
+    return text.trim().toUpperCase().matches("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$");
+  }
+
   @Override
-  public boolean forgotPassword(String user, String url) {
+  public boolean forgotPassword(String user, String url, String emailForLegacy) {
     List<DBUser> dbUsersByUserID = getDbUsersByUserID(user);
 
     logger.info("forgotPassword users for " + user + " : " + dbUsersByUserID);
@@ -1072,6 +1100,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
     ClientUserDetail clientUserDetail1 = null;
     try {
+      if (!isValidAsEmail(clientUserDetail.getEmail())) {
+        clientUserDetail.setEmail(emailForLegacy);
+        logger.info("forgotPassword email now " + emailForLegacy);
+      }
+
       clientUserDetail1 = delegate.forgotPassword(next,
           clientUserDetail,
           url);
@@ -1079,7 +1112,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       logger.info("forgotPassword forgotPassword users for " + user + " : " + clientUserDetail1);
 
     } catch (Exception e) {
-      logger.error("Got " + e,e);
+      logger.error("Got " + e, e);
     }
 
     return clientUserDetail1 != null;
