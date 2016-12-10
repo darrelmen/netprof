@@ -1647,18 +1647,18 @@ public class DatabaseImpl<T extends CommonShell> implements Database {
         context++;
        // logger.info("found " + shell.getContext() + " for " + shell.getID());
       }
-      boolean add = uniqueIDs.add(shell.getID());
+      boolean add = uniqueIDs.add(shell.getID().trim());
       if (!add) {
         logger.warn("getMaleFemaleProgress found duplicate id " + shell.getID() + " : " + shell);
       }
       exToTranscript.put(shell.getID(), shell.getForeignLanguage());
       exToContextTranscript.put(shell.getID(), shell.getContext());
     }
-/*
-    logger.info("found " + total + " total exercises, " +
+
+    logger.info("getMaleFemaleProgress found " + total + " total exercises, " +
         uniqueIDs.size() +
         " unique");
-*/
+
 
     return getAudioDAO().getRecordedReport(
         userMapMales,
