@@ -678,13 +678,16 @@ public class AudioDAO extends DAO {
           ") > 0 ";
       PreparedStatement statement = connection.prepareStatement(sql);
       ResultSet rs = statement.executeQuery();
+
+      boolean checkAudioTranscript = database.getServerProps().shouldCheckAudioTranscript();
+
       while (rs.next()) {
         String trim = rs.getString(1).trim();
         String audioTranscript = rs.getString(2);
 
         if (audioTranscript != null) {
           String tran = exToTranscript.get(trim);
-          if (tran != null && isNoAccentMatch(audioTranscript, tran)) {
+          if (!checkAudioTranscript || (tran != null && isNoAccentMatch(audioTranscript, tran))) {
             results.add(trim);
           }
         }
@@ -918,13 +921,17 @@ public class AudioDAO extends DAO {
           AUDIO_TYPE + "='" + audioSpeed + "' ";
       PreparedStatement statement = connection.prepareStatement(sql);
       ResultSet rs = statement.executeQuery();
+
+      boolean checkAudioTranscript = database.getServerProps().shouldCheckAudioTranscript();
+
       while (rs.next()) {
         String exid = rs.getString(1);
         String exerciseFL = exToTranscript.get(exid);
 
         if (exerciseFL != null) {
           String transcript = rs.getString(2);
-          boolean isMatch = isNoAccentMatch(transcript, exerciseFL);
+
+          boolean isMatch = !checkAudioTranscript || isNoAccentMatch(transcript, exerciseFL);
           if (
               isMatch) {
             if (uniqueIDs.contains(exid)) {
@@ -1009,12 +1016,13 @@ public class AudioDAO extends DAO {
 
       PreparedStatement statement = connection.prepareStatement(sql);
       ResultSet rs = statement.executeQuery();
+      boolean checkAudioTranscript = database.getServerProps().shouldCheckAudioTranscript();
       while (rs.next()) {
         String id = rs.getString(1);
         String transcript = rs.getString(2);
         String exerciseFL = exToTranscript.get(id);
 
-        if (isNoAccentMatch(transcript, exerciseFL)) {
+        if (!checkAudioTranscript || isNoAccentMatch(transcript, exerciseFL)) {
           if (uniqueIDs.contains(id)) {
             results.add(id);
           }
