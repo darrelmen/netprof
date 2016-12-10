@@ -315,7 +315,7 @@ public class DecodeTest extends BaseTest {
   @Test
   public void testSorani() {
     DatabaseImpl database = getDatabase("sorani");
-  //  AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), database.getServerProps(), database, null);
+    //  AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), database.getServerProps(), database, null);
     Collection exercises = database.getExercises();
     logger.info("Got " + exercises.size());
     if (exercises.isEmpty()) {
@@ -355,6 +355,15 @@ public class DecodeTest extends BaseTest {
   public void testMSAProgress2() {
     doProgressReport("msa");
   }
+  @Test
+  public void testHindi() {
+    doProgressReport("hindi");
+  }
+
+  @Test
+  public void testMandarinProgress() {
+    doProgressReport("mandarin", "traditional.properties");
+  }
 
   @Test
   public void testMSAProgress() {
@@ -363,8 +372,8 @@ public class DecodeTest extends BaseTest {
     database.getExerciseIDToRefAudio();
     CommonExercise exercise = database.getExercise("1093");
     database.attachAudio(exercise);
-    logger.info("ex " +exercise);
-    logger.info("ex " +exercise.getAudioAttributes());
+    logger.info("ex " + exercise);
+    logger.info("ex " + exercise.getAudioAttributes());
   }
 
   @Test
@@ -382,7 +391,13 @@ public class DecodeTest extends BaseTest {
   */
   }
 
-  private void doProgressReport(String turkish) {  doReport(getDatabase(turkish));  }
+  private void doProgressReport(String config) {
+    doProgressReport(config, "quizlet.properties");
+  }
+
+  private void doProgressReport(String config, String propertiesFile) {
+    doReport(getDatabaseWithConfig(config, propertiesFile));
+  }
 
   private void doReport(DatabaseImpl database) {
 //    AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), database.getServerProps(), database, null);

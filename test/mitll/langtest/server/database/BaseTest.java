@@ -27,8 +27,14 @@ public class BaseTest {
   private static final Logger logger = Logger.getLogger(BaseTest.class);
 
   protected static DatabaseImpl<CommonExercise> getDatabase(String config) {
+    String s = "quizlet.properties";
+
+    return getDatabaseWithConfig(config, s);
+  }
+
+  protected static DatabaseImpl<CommonExercise> getDatabaseWithConfig(String config, String properties) {
     String rootDir = "war";
-    File file = new File(rootDir + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
+    File file = new File(rootDir + File.separator + "config" + File.separator + config + File.separator + properties);
     String parent = file.getParent();
     String name = file.getName();
 
