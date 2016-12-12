@@ -313,7 +313,11 @@ public class DecodeTest extends BaseTest {
   @Test
   public void testSorani() {
     DatabaseImpl database = getDatabase("sorani");
+<<<<<<< HEAD
     AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), database.getServerProps(), database, null);
+=======
+    //  AudioFileHelper audioFileHelper = new AudioFileHelper(new PathHelper("war"), database.getServerProps(), database, null);
+>>>>>>> 6dda7ca4109a0862416d6ad0d7749b71e502486f
     Collection exercises = database.getExercises();
     logger.info("Got " + exercises.size());
     if (exercises.isEmpty()) {
@@ -343,6 +347,28 @@ public class DecodeTest extends BaseTest {
   public void testSpanishProgress() {
     doProgressReport("spanish");
   }
+<<<<<<< HEAD
+=======
+
+  @Test
+  public void testSudaneseProgress() {
+    doProgressReport("sudanese");
+  }
+
+  @Test
+  public void testMSAProgress2() {
+    doProgressReport("msa");
+  }
+  @Test
+  public void testHindi() {
+    doProgressReport("hindi");
+  }
+
+  @Test
+  public void testMandarinProgress() {
+    doProgressReport("mandarin", "traditional.properties");
+  }
+
   @Test
   public void testMSAProgress() {
     DatabaseImpl database = getDatabase("msa");
@@ -350,13 +376,16 @@ public class DecodeTest extends BaseTest {
     database.getExerciseIDToRefAudio();
     CommonExercise exercise = database.getExercise("1093");
     database.attachAudio(exercise);
-    logger.info("ex " +exercise);
-    logger.info("ex " +exercise.getAudioAttributes());
+    logger.info("ex " + exercise);
+    logger.info("ex " + exercise.getAudioAttributes());
   }
 
-  private void doProgressReport(String turkish) {
-    DatabaseImpl database = getDatabase(turkish);
-    doReport(database);
+  private void doProgressReport(String config) {
+    doProgressReport(config, "quizlet.properties");
+  }
+
+  private void doProgressReport(String config, String propertiesFile) {
+    doReport(getDatabaseWithConfig(config, propertiesFile));
   }
 
   private void doReport(DatabaseImpl database) {

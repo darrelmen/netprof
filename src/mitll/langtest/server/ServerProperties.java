@@ -32,6 +32,7 @@
 
 package mitll.langtest.server;
 
+import mitll.langtest.server.database.AudioDAO;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.mail.EmailList;
@@ -307,6 +308,10 @@ public class ServerProperties {
     return getDefaultFalse("isAMAS");
   }
 
+  /**
+   * @see mitll.langtest.server.database.exercise.BaseExerciseDAO#setAudioDAO
+   * @return
+   */
   public boolean shouldCheckAudioTranscript() {
     return getDefaultTrue(CHECK_AUDIO_TRANSCRIPT);
   }

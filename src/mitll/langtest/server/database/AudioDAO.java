@@ -678,13 +678,16 @@ public class AudioDAO extends DAO {
           ") > 0 ";
       PreparedStatement statement = connection.prepareStatement(sql);
       ResultSet rs = statement.executeQuery();
+
+      boolean checkAudioTranscript = database.getServerProps().shouldCheckAudioTranscript();
+
       while (rs.next()) {
         String trim = rs.getString(1).trim();
         String audioTranscript = rs.getString(2);
 
         if (audioTranscript != null) {
           String tran = exToTranscript.get(trim);
-          if (tran != null && isNoAccentMatch(audioTranscript, tran)) {
+          if (!checkAudioTranscript || (tran != null && isNoAccentMatch(audioTranscript, tran))) {
             results.add(trim);
           }
         }
@@ -916,33 +919,52 @@ public class AudioDAO extends DAO {
           DEFECT + "<>true " + "AND " +
           DNR + ">0" + " AND " +
           AUDIO_TYPE + "='" + audioSpeed + "' ";
+
       PreparedStatement statement = connection.prepareStatement(sql);
       ResultSet rs = statement.executeQuery();
+
+      boolean checkAudioTranscript = database.getServerProps().shouldCheckAudioTranscript();
+
+//      boolean b = exToTranscript.containsKey("6701");
+//
+//      if (b) {
+//        logger.error("\n\n\n\nhas 6701 " + userIds);
+//      }
+//      logger.info("\n\n\n\nunique ids "+ uniqueIDs.contains("6701"));
+
       while (rs.next()) {
         String exid = rs.getString(1);
         String exerciseFL = exToTranscript.get(exid);
 
-        if (exerciseFL != null) {
+        if (exid.equals("6701")) {
+          logger.warn("\n\tfound " + exid + " " + exerciseFL);
+        }
+        if (exerciseFL != null || !checkAudioTranscript) {
           String transcript = rs.getString(2);
-          boolean isMatch = isNoAccentMatch(transcript, exerciseFL);
-          if (
-              isMatch) {
+
+          boolean isMatch = !checkAudioTranscript || isNoAccentMatch(transcript, exerciseFL);
+          if (isMatch) {
             if (uniqueIDs.contains(exid)) {
               idsOfRecordedExercises.add(exid);
             } else {
               idsOfStaleExercises.add(exid);
-              //        logger.debug("getCountForGender skipping stale exid " + exid);
+              logger.debug("getCountForGender skipping stale exid " + exid);
             }
-
           } else {
-//            logger.info("1) no match for " + exid + " '" + trimWhitespace(transcript) + "' vs '" + trimWhitespace(exerciseFL) + "'");
+            logger.info("1) no match for " + exid + " '" + trimWhitespace(transcript) + "' vs '" + trimWhitespace(exerciseFL) + "'");
           }
         } else {
           //        logger.info("2) stale exercise id : no match for " + exid);
         }
       }
       finish(connection, statement, rs, sql);
+      logger.info("getCountForGender audioSpeed " + audioSpeed +
+          "\n\tsize\t" + idsOfRecordedExercises.size() +
+          "  sql:\n\t" + sql);
 
+//      if (userIds.size() == 2) {
+//        for (String id : new TreeSet<>(idsOfRecordedExercises)) logger.info(id);
+//      }
 /*
       logger.debug("getCountForGender : for " + audioSpeed + "\n\t" + sql + "\n\tgot " + idsOfRecordedExercises.size() +
           " and stale " +idsOfStaleExercises.size());
@@ -977,6 +999,13 @@ public class AudioDAO extends DAO {
     return t.replaceAll("\\p{P}", "").replaceAll("\\s++", "");
   }
 
+  /**
+   * @param userIds
+   * @param uniqueIDs
+   * @param exToTranscript
+   * @return
+   * @see #getRecordedReport(Set, Set, float, Set, Map, Map, float)
+   */
   private int getCountBothSpeeds(Set<Long> userIds,
                                  Set<String> uniqueIDs,
                                  Map<String, String> exToTranscript) {
@@ -1007,28 +1036,45 @@ public class AudioDAO extends DAO {
           "where length(exid) > 0 group by exid," + TRANSCRIPT +
           ") where count1 = 2";
 
+
       PreparedStatement statement = connection.prepareStatement(sql);
       ResultSet rs = statement.executeQuery();
+      boolean checkAudioTranscript = database.getServerProps().shouldCheckAudioTranscript();
       while (rs.next()) {
         String id = rs.getString(1);
+        id = id.trim();
+
         String transcript = rs.getString(2);
         String exerciseFL = exToTranscript.get(id);
 
-        if (isNoAccentMatch(transcript, exerciseFL)) {
+        if (!checkAudioTranscript || isNoAccentMatch(transcript, exerciseFL)) {
           if (uniqueIDs.contains(id)) {
-            results.add(id);
+            boolean add = results.add(id);
+            if (!add) {
+              logger.info("not adding duplicate '" + id + "'");
+            }
           }
         } else {
-//          logger.info("both : no match for " + id + " '" + transcript +  "' vs '" + exerciseFL + "'");
+          logger.info("both : no match for " + id + " '" + transcript +  "' vs '" + exerciseFL + "'");
         }
       }
       finish(connection, statement, rs, sql);
+
+      logger.info("getCountBothSpeeds audioSpeed " + userIds +
+          "\n\tsize\t" + results.size() +
+          " sql:\n\t" + sql);
 
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
     //logger.debug("both speeds " + results.size());
-    return results.size();
+    int size = results.size();
+
+//    if (userIds.size() == 2) {
+//      for (String res : new TreeSet<>(results)) logger.info(res);
+//    }
+
+    return size;
   }
 
   private String getInClause(Collection<Long> longs) {
