@@ -267,13 +267,19 @@ public class AudioDAO extends DAO {
         idToPaths.put(exid, paths = new HashSet<>());
       }
       String audioRef = audio.getAudioRef();
-      if (!paths.contains(audioRef)) {
-        audioAttributes.add(audio);
-        paths.add(audioRef);
+
+      // when an exercise is edited and becomes a user exercise, the audio attributes
+      // are copied - we want both copies.
+      // if (!paths.contains(audioRef)) {
+      audioAttributes.add(audio);
+
+      if (paths.contains(audioRef)) {
+        logger.warn("getExToAudio found duplicate path " + audioRef + " on " + exid);
       }
-      //    else {
-      //logger.warn("skipping " +audioRef + " on " + exid);
-      //  }
+
+      paths.add(audioRef);
+      // }
+
     }
     long now = System.currentTimeMillis();
     logger.info("getExToAudio (" + database.getLanguage() +
@@ -766,19 +772,31 @@ public class AudioDAO extends DAO {
     maleIDs = new HashSet<>(maleIDs);
     maleIDs.add((long) UserDAO.DEFAULT_MALE_ID);
 
-    float maleFast = getCountForGender(maleIDs, REGULAR, uniqueIDs, exToTranscript);
-    float maleSlow = getCountForGender(maleIDs, SLOW, uniqueIDs, exToTranscript);
-    float male = getCountBothSpeeds(maleIDs, uniqueIDs, exToTranscript);
+    Set<String> maleRegExercises = new HashSet<>();
+    Set<String> maleSlowExercises = new HashSet<>();
+    float maleFast = getCountForGender(maleIDs, REGULAR, uniqueIDs, exToTranscript, maleRegExercises);
+    float maleSlow = getCountForGender(maleIDs, SLOW, uniqueIDs, exToTranscript, maleSlowExercises);
+    //float male = getCountBothSpeeds(maleIDs, uniqueIDs, exToTranscript);
+
+    maleRegExercises.retainAll(maleSlowExercises);
+    float male = maleRegExercises.size();
 
     femaleIDs = new HashSet<>(femaleIDs);
     femaleIDs.add((long) UserDAO.DEFAULT_FEMALE_ID);
 
-    float femaleFast = getCountForGender(femaleIDs, REGULAR, uniqueIDs, exToTranscript);
-    float femaleSlow = getCountForGender(femaleIDs, SLOW, uniqueIDs, exToTranscript);
-    float female = getCountBothSpeeds(femaleIDs, uniqueIDs, exToTranscript);
+    Set<String> femaleRegExercises = new HashSet<>();
+    Set<String> femaleSlowExercises = new HashSet<>();
+    float femaleFast = getCountForGender(femaleIDs, REGULAR, uniqueIDs, exToTranscript, femaleRegExercises);
+    float femaleSlow = getCountForGender(femaleIDs, SLOW, uniqueIDs, exToTranscript, femaleSlowExercises);
+    // float female = getCountBothSpeeds(femaleIDs, uniqueIDs, exToTranscript);
 
-    float cmale = getCountForGender(maleIDs, CONTEXT_REGULAR, uniqueIDs, exToContextTranscript);
-    float cfemale = getCountForGender(femaleIDs, CONTEXT_REGULAR, uniqueIDs, exToContextTranscript);
+    femaleRegExercises.retainAll(femaleSlowExercises);
+
+    Set<String> cRegExercises = new HashSet<>();
+    Set<String> cSlowExercises = new HashSet<>();
+    float female = femaleRegExercises.size();
+    float cmale = getCountForGender(maleIDs, CONTEXT_REGULAR, uniqueIDs, exToContextTranscript, cRegExercises);
+    float cfemale = getCountForGender(femaleIDs, CONTEXT_REGULAR, uniqueIDs, exToContextTranscript, cSlowExercises);
 
     Map<String, Float> report = new HashMap<>();
     report.put(TOTAL, total);
@@ -900,10 +918,9 @@ public class AudioDAO extends DAO {
   private int getCountForGender(Set<Long> userIds,
                                 String audioSpeed,
                                 Set<String> uniqueIDs,
-                                Map<String, String> exToTranscript) {
-    Set<String> idsOfRecordedExercises = new HashSet<>();
-
-    Set<String> idsOfStaleExercises = new HashSet<>();
+                                Map<String, String> exToTranscript,
+                                Set<String> idsOfRecordedExercises) {
+//    Set<String> idsOfStaleExercises = new HashSet<>();
 
     try {
       Connection connection = database.getConnection(this.getClass().toString());
@@ -922,23 +939,12 @@ public class AudioDAO extends DAO {
 
       PreparedStatement statement = connection.prepareStatement(sql);
       ResultSet rs = statement.executeQuery();
-
       boolean checkAudioTranscript = database.getServerProps().shouldCheckAudioTranscript();
-
-//      boolean b = exToTranscript.containsKey("6701");
-//
-//      if (b) {
-//        logger.error("\n\n\n\nhas 6701 " + userIds);
-//      }
-//      logger.info("\n\n\n\nunique ids "+ uniqueIDs.contains("6701"));
 
       while (rs.next()) {
         String exid = rs.getString(1);
         String exerciseFL = exToTranscript.get(exid);
 
-        if (exid.equals("6701")) {
-          logger.warn("\n\tfound " + exid + " " + exerciseFL);
-        }
         if (exerciseFL != null || !checkAudioTranscript) {
           String transcript = rs.getString(2);
 
@@ -947,24 +953,22 @@ public class AudioDAO extends DAO {
             if (uniqueIDs.contains(exid)) {
               idsOfRecordedExercises.add(exid);
             } else {
-              idsOfStaleExercises.add(exid);
+  //            idsOfStaleExercises.add(exid);
               logger.debug("getCountForGender skipping stale exid " + exid);
             }
           } else {
-            logger.info("1) no match for " + exid + " '" + trimWhitespace(transcript) + "' vs '" + trimWhitespace(exerciseFL) + "'");
+      //      logger.info("1) no match for " + exid + " '" + trimWhitespace(transcript) + "' vs '" + trimWhitespace(exerciseFL) + "'");
           }
         } else {
           //        logger.info("2) stale exercise id : no match for " + exid);
         }
       }
       finish(connection, statement, rs, sql);
-      logger.info("getCountForGender audioSpeed " + audioSpeed +
-          "\n\tsize\t" + idsOfRecordedExercises.size() +
-          "  sql:\n\t" + sql);
 
-//      if (userIds.size() == 2) {
-//        for (String id : new TreeSet<>(idsOfRecordedExercises)) logger.info(id);
-//      }
+      //      logger.info("getCountForGender audioSpeed " + audioSpeed +
+//          "\n\tsize\t" + idsOfRecordedExercises.size() +
+//          "  sql:\n\t" + sql);
+
 /*
       logger.debug("getCountForGender : for " + audioSpeed + "\n\t" + sql + "\n\tgot " + idsOfRecordedExercises.size() +
           " and stale " +idsOfStaleExercises.size());
@@ -1006,7 +1010,7 @@ public class AudioDAO extends DAO {
    * @return
    * @see #getRecordedReport(Set, Set, float, Set, Map, Map, float)
    */
-  private int getCountBothSpeeds(Set<Long> userIds,
+ /* private int getCountBothSpeeds(Set<Long> userIds,
                                  Set<String> uniqueIDs,
                                  Map<String, String> exToTranscript) {
     Set<String> results = new HashSet<>();
@@ -1055,7 +1059,7 @@ public class AudioDAO extends DAO {
             }
           }
         } else {
-          logger.info("both : no match for " + id + " '" + transcript +  "' vs '" + exerciseFL + "'");
+          logger.info("both : no match for " + id + " '" + transcript + "' vs '" + exerciseFL + "'");
         }
       }
       finish(connection, statement, rs, sql);
@@ -1076,6 +1080,7 @@ public class AudioDAO extends DAO {
 
     return size;
   }
+*/
 
   private String getInClause(Collection<Long> longs) {
     StringBuilder buffer = new StringBuilder();

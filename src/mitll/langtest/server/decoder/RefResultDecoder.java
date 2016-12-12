@@ -263,7 +263,15 @@ public class RefResultDecoder {
     }
   }
 
-  private void calcDNROnAudio(Collection<CommonExercise> exercises, String relativeConfigDir, Map<String, List<AudioAttribute>> exToAudio) {
+  /**
+   *
+   * @param exercises
+   * @param relativeConfigDir
+   * @param exToAudio
+   */
+  private void calcDNROnAudio(Collection<CommonExercise> exercises,
+                              String relativeConfigDir,
+                              Map<String, List<AudioAttribute>> exToAudio) {
     if (DO_CALC_DNR) {
       String installPath = pathHelper.getInstallPath();
 
@@ -283,7 +291,8 @@ public class RefResultDecoder {
       for (CommonExercise exercise : exercises) {
         if (stopDecode) return;
 
-        List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
+        String id = exercise.getID();
+        List<AudioAttribute> audioAttributes = exToAudio.get(id);
         if (audioAttributes != null) {
           boolean didAll = db.getAudioDAO().attachAudio(exercise, installPath, relativeConfigDir, audioAttributes);
           attrc += audioAttributes.size();
@@ -291,7 +300,11 @@ public class RefResultDecoder {
           //         failed.add(exercise.getID());
           //      }
 
-          dnr += setDNROnAudio(installPath, audioDAO, audioAttributes);
+          int i = setDNROnAudio(installPath, audioDAO, audioAttributes);
+//          if (i > 0) {
+//            logger.info(id + " set dnr on " + i);
+//          }
+          dnr += i;
           if (dnr - since > 2000) {
             since = dnr;
             logger.info(getLanguage() + ": trimRef : did DNR on " + dnr);

@@ -380,7 +380,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
         " attrs " + attributes +
         " by " + userid + "/" + user +
         " transcript '" + transcript +
-        "' ";
+        "'\n\tdnr\t"+dnr;
   }
 
   public float getDnr() {

@@ -72,6 +72,7 @@ import static mitll.langtest.server.audio.AudioConversion.FILE_MISSING;
  * To change this template use File | Settings | File Templates.
  */
 public class AudioPanel<T extends Shell> extends VerticalPanel implements RequiresResize {
+  public static final int TRANSCRIPT_IMAGE_HEIGHT = 22;
   private final Logger logger = Logger.getLogger("AudioPanel");
 
   private static final int LEFT_COLUMN_WIDTH = PagingContainer.MAX_WIDTH;
@@ -214,7 +215,9 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     Panel imageContainer = new VerticalPanel();
     divWithRelativePosition.add(imageContainer);
     imageContainer.getElement().setId("AudioPanel_imageContainer");
-    float totalHeight = getWaveformHeight() + (2 * 20);
+    int heightForTranscripts = rightMargin > 0 ? 2 * TRANSCRIPT_IMAGE_HEIGHT : 0;
+
+    float totalHeight = getScaledImageHeight(WAVEFORM) + heightForTranscripts;
     imageContainer.setHeight(totalHeight + "px");
     //  imageContainer.setWidth(getImageWidth()+"px");
 
@@ -268,7 +271,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     Image waveformImage = getWaveform().getImage();
     waveformImage.getElement().setId("waveformImage");
     // waveformImage.setHeight(getWaveformHeight()+"px");
-  //  waveformImage.setAltText(WAVEFORM_TOOLTIP);
+    //  waveformImage.setAltText(WAVEFORM_TOOLTIP);
     waveformImage.setTitle(WAVEFORM_TOOLTIP);
     return waveformImage;
   }
@@ -316,7 +319,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
   }
 
   void setScreenPortion(float screenPortion) {
-  //  if (DEBUG) logger.info("AudioPanel.setScreenPortion : screenPortion " + screenPortion);
+    //  if (DEBUG) logger.info("AudioPanel.setScreenPortion : screenPortion " + screenPortion);
     this.screenPortion = screenPortion;
   }
 
@@ -531,12 +534,11 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
    * @see mitll.langtest.client.LangTest#getImage(int, String, String, int, int, String, com.google.gwt.user.client.rpc.AsyncCallback)
    */
   private void getImageURLForAudio(final String path, final String type, int width, final ImageAndCheck imageAndCheck) {
-    final int toUse = Math.max(MIN_WIDTH, width);
-    float heightForType = type.equals(WAVEFORM) ? getWaveformHeight() : SPECTROGRAM_HEIGHT;
-    int height = Math.max(10, (int) (((float) Window.getClientHeight()) / 1200f * heightForType));
     if (path != null && !path.equals(FILE_MISSING)) {
       final long then = System.currentTimeMillis();
 //      logger.info("getImageURLForAudio : req " + reqid + " path " + path + " type " + type + " width " + width);
+      final int toUse = Math.max(MIN_WIDTH, width);
+      int height = getScaledImageHeight(type);
       controller.getImage(getReqID(type), path, type, toUse, height, exerciseID, new AsyncCallback<ImageResponse>() {
         public void onFailure(Throwable caught) {
           long now = System.currentTimeMillis();
@@ -566,6 +568,11 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
         }
       });
     }
+  }
+
+  private int getScaledImageHeight(String type) {
+    float heightForType = type.equals(WAVEFORM) ? getWaveformHeight() : SPECTROGRAM_HEIGHT;
+    return Math.max(10, (int) (((float) Window.getClientHeight()) / 1200f * heightForType));
   }
 
   protected float getWaveformHeight() {
