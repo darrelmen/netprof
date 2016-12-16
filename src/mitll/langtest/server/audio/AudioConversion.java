@@ -118,7 +118,7 @@ public class AudioConversion {
       logger.error("writeAudioFile : huh? can't find " + file.getAbsolutePath());
     }
     AudioCheck.ValidityAndDur valid = isValid(file, useSensitiveTooLoudCheck, quietAudioOK);
-    if (valid.isValid()) {
+    if (valid.isValid() && props.shouldTrimAudio()) {
       valid.setDuration(trimSilence(file).getDuration());
     }
 
