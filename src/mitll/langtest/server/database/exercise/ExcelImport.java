@@ -364,14 +364,17 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
               CommonExercise imported = isDelete ? null : getExercise(idToUse, english, foreignLanguagePhrase, translit,
                   meaning, context, contextTranslation, hasAudioIndex ? getCell(next, audioIndex) : "");
 
+              String id1 = imported.getID();
               if (!isDelete &&
                   (imported.hasRefAudio() || !shouldHaveRefAudio)) {  // skip items without ref audio, for now.
                 recordUnitChapterWeek(unitIndex, chapterIndex, weekIndex, next, imported, unitName, chapterName, weekName);
 
-                if (knownIds.contains(imported.getID())) {
-                  logger.warn("readFromSheet : found duplicate entry under " + imported.getID() + " " + imported);
+                if (knownIds.contains(id1)) {
+                  if (!id1.isEmpty()) {
+                    logger.warn("readFromSheet : found duplicate entry under '" + id1 + "' " + imported);
+                  }
                 } else {
-                  knownIds.add(imported.getID());
+                  knownIds.add(id1);
                   exercises.add(imported);
                 }
               } else {
@@ -379,7 +382,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
                   deleted++;
                 } else {
                   if (logging++ < 3) {
-                    logger.info("skipping exercise " + imported.getID() + " : '" + imported.getEnglish() + "' since no audio.");
+                    logger.info("skipping exercise " + id1 + " : '" + imported.getEnglish() + "' since no audio.");
                   }
                   skipped++;
                 }
