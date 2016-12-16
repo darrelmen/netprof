@@ -34,6 +34,7 @@ package mitll.langtest.client.custom.dialog;
 
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
@@ -60,7 +61,6 @@ import java.util.logging.Logger;
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since
  */
 public class CreateListDialog extends BasicDialog {
   private final Logger logger = Logger.getLogger("CreateListDialog");
@@ -86,9 +86,9 @@ public class CreateListDialog extends BasicDialog {
   }
 
   /**
-   * @see mitll.langtest.client.custom.Navigation#getTabPanel(com.google.gwt.user.client.ui.Panel)
    * @param thirdRow
    * @seex
+   * @see mitll.langtest.client.custom.Navigation#getTabPanel(com.google.gwt.user.client.ui.Panel)
    */
   public void doCreate(Panel thirdRow) {
     thirdRow.clear();
@@ -111,14 +111,17 @@ public class CreateListDialog extends BasicDialog {
 
     row = new FluidRow();
     child.add(row);
+
     final FormField titleBox = addControlFormField(row, TITLE);
-    titleBox.box.getElement().setId("CreateListDialog_Title");
-    titleBox.box.addBlurHandler(new BlurHandler() {
+    final TextBoxBase box = titleBox.box;
+    box.getElement().setId("CreateListDialog_Title");
+    box.addBlurHandler(new BlurHandler() {
       @Override
       public void onBlur(BlurEvent event) {
-        controller.logEvent(titleBox.box,"TextBox","Create New List","Title = " + titleBox.box.getValue());
+        controller.logEvent(box, "TextBox", "Create New List", "Title = " + box.getValue());
       }
     });
+
     row = new FluidRow();
     child.add(row);
     final TextArea area = new TextArea();
@@ -127,7 +130,7 @@ public class CreateListDialog extends BasicDialog {
     description.box.addBlurHandler(new BlurHandler() {
       @Override
       public void onBlur(BlurEvent event) {
-        controller.logEvent(description.box,"TextBox","Create New List","Description = " + description.box.getValue());
+        controller.logEvent(description.box, "TextBox", "Create New List", "Description = " + description.box.getValue());
       }
     });
 
@@ -139,7 +142,7 @@ public class CreateListDialog extends BasicDialog {
     classBox.box.addBlurHandler(new BlurHandler() {
       @Override
       public void onBlur(BlurEvent event) {
-        controller.logEvent(classBox.box,"TextBox","Create New List","CourseInfo = " + classBox.box.getValue());
+        controller.logEvent(classBox.box, "TextBox", "Create New List", "CourseInfo = " + classBox.box.getValue());
       }
     });
 
@@ -172,13 +175,16 @@ public class CreateListDialog extends BasicDialog {
 
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
-        titleBox.box.setFocus(true);
+        box.setFocus(true);
       }
     });
   }
 
-  private Button makeCreateButton(final KeyPressHelper enterKeyButtonHelper, final FormField titleBox, final TextArea area,
-                                  final FormField classBox,final RadioButton publicRadio) {
+  private Button makeCreateButton(final KeyPressHelper enterKeyButtonHelper,
+                                  final FormField titleBox,
+                                  final TextArea area,
+                                  final FormField classBox,
+                                  final RadioButton publicRadio) {
     Button submit = new Button(CREATE_LIST);
     submit.setType(ButtonType.PRIMARY);
     submit.getElement().setId("CreateList_Submit");
@@ -190,10 +196,10 @@ public class CreateListDialog extends BasicDialog {
     submit.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-       // logger.info("creating list for " + titleBox + " " + area.getText() + " and " + classBox.getSafeText());
+        // logger.info("creating list for " + titleBox + " " + area.getText() + " and " + classBox.getSafeText());
         enterKeyButtonHelper.removeKeyHandler();
-        if (validateCreateList(titleBox/*, description, classBox*/)) {
-          addUserList(titleBox, area, classBox,publicRadio.getValue());
+        if (validateCreateList(titleBox)) {
+          addUserList(titleBox, area, classBox, publicRadio.getValue());
         }
       }
     });
@@ -203,22 +209,25 @@ public class CreateListDialog extends BasicDialog {
 
   private void addUserList(final FormField titleBox, TextArea area, FormField classBox, boolean isPublic) {
     int user = userManager.getUser();
-    service.addUserList(user,
-      titleBox.getSafeText(),
-      sanitize(area.getText()),
-      classBox.getSafeText(), isPublic, new AsyncCallback<Long>() {
-        @Override
-        public void onFailure(Throwable caught) {}
+    final String safeText = titleBox.getSafeText();
 
-        @Override
-        public void onSuccess(Long result) {
-          if (result == -1) {
-            markError(titleBox, "You already have a list named " + titleBox.getSafeText());
-          } else {
-            navigation.clickOnYourLists(result);
+    service.addUserList(user,
+        safeText,
+        sanitize(area.getText()),
+        classBox.getSafeText(), isPublic, new AsyncCallback<Long>() {
+          @Override
+          public void onFailure(Throwable caught) {
           }
-        }
-    });
+
+          @Override
+          public void onSuccess(Long result) {
+            if (result == -1) {
+              markError(titleBox, "You already have a list named " + safeText);
+            } else {
+              navigation.clickOnYourLists(result);
+            }
+          }
+        });
   }
 
   private void zeroPadding(Panel createContent) {
@@ -230,8 +239,7 @@ public class CreateListDialog extends BasicDialog {
     if (titleBox.getSafeText().isEmpty()) {
       markError(titleBox, "Please fill in a title");
       return false;
-    }
-    else {
+    } else {
       return true;
     }
   }
