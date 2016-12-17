@@ -27,7 +27,6 @@
  * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
  *
- *
  */
 
 package mitll.langtest.server.audio;
@@ -48,17 +47,6 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-/**
- * Does mp3 conversion using a shell call to lame.
- * Uses ffmpeg to convert to webm format.
- * <p>
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 8/22/12
- * Time: 2:27 PM
- * To change this template use File | Settings | File Templates.
- */
 public class AudioConversion {
   private static final Logger logger = LogManager.getLogger(AudioConversion.class);
   private static final String LAME_PATH_WINDOWS = "lame.exe";

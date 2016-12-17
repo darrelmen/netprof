@@ -44,6 +44,7 @@ import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.database.userexercise.ExerciseToPhone;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickProject;
 import mitll.npdata.dao.SlickProjectProperty;
@@ -230,6 +231,7 @@ public class DominoUserTest extends BaseTest {
     projectDAO.getAll().stream().forEach(p -> logger.info("projec " + p));
     //  projectDAO.delete(14);
   }
+
   @Test
   public void testForget() {
     DatabaseImpl netProf = getDatabaseVeryLight("netProf", "config.properties", false);
@@ -244,9 +246,36 @@ public class DominoUserTest extends BaseTest {
     User demo = userDAO.getUserByID("demo");
     logger.info("Got " + demo);
 
-    userDAO.forgotPassword("demo","", "gordon.vidaver@ll.mit.edu");
+    userDAO.forgotPassword("demo", "", "gordon.vidaver@ll.mit.edu");
+  }
 
-    //  projectDAO.delete(14);
+  @Test
+  public void testAddAndChange() {
+    DatabaseImpl netProf = getDatabaseVeryLight("netProf", "config.properties", false);
+    IProjectDAO projectDAO = netProf.getProjectDAO();
+    SlickProject project;
+    Stream<SlickProject> serbian = projectDAO.getAll().stream().filter(p -> p.name().equals("serbian"));
+
+    SlickProject project1 = serbian.findFirst().get();
+    logger.info("Got " + project1);
+
+    IUserDAO userDAO = netProf.getUserDAO();
+    User demo = userDAO.getUserByID("demo");
+    logger.info("Got " + demo);
+
+    String bstevens3 = "bstevens3";
+    String url = "https://netprof1-dev/netProf";
+    User user = userDAO.addUser(new SignUpUser(bstevens3,
+        "gordon.vidaver@ll.mit.edu",
+        "gordon.vidaver@ll.mit.edu",
+        User.Kind.STUDENT, true, 99, "basketball", "browser", "127.0.0.1",
+        "Brad", "Stevens", url));
+
+
+    userDAO.changePasswordForToken(bstevens3, "123", "abc123def456", url);
+
+
+    // userDAO.forgotPassword("demo","", "gordon.vidaver@ll.mit.edu");
   }
 
 }
