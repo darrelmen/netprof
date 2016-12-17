@@ -54,6 +54,7 @@ import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import scala.tools.cmd.gen.AnyVals;
 
 import java.time.*;
 import java.util.*;
@@ -64,6 +65,9 @@ import java.util.stream.Collectors;
  */
 public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   private static final Logger logger = LogManager.getLogger(DominoUserDAOImpl.class);
+  public static final String EMAIL = "admin@dliflc.edu";
+  public static final mitll.hlt.domino.shared.model.user.User.Gender DMALE = mitll.hlt.domino.shared.model.user.User.Gender.Male;
+  public static final mitll.hlt.domino.shared.model.user.User.Gender DFEMALE = mitll.hlt.domino.shared.model.user.User.Gender.Female;
 
   private IUserServiceDelegate delegate;
   //private final String adminHash;
@@ -75,6 +79,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    */
   private mitll.hlt.domino.shared.model.user.User adminUser;
   private mitll.hlt.domino.shared.model.user.User dominoImportUser;
+  DBUser dominoAdminUser;
 
   /**
    * @param database
@@ -99,6 +104,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       //logger.info("app name is " +appName);
 
       delegate = UserServiceFacadeImpl.makeServiceDelegate(dominoProps, m, pool, serializer, null/*ignite*/);
+
+      dominoAdminUser = delegate.getAdminUser();
+      //adminUser.getRoleAbbreviations();
     } else {
       logger.error("couldn't connect to user service");
     }
@@ -107,11 +115,13 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   @Override
   public void ensureDefaultUsers() {
     super.ensureDefaultUsers();
-    adminUser = delegate.getUser(BEFORE_LOGIN_USER);
+    String userId = dominoAdminUser.getUserId();
+    adminUser = delegate.getUser(userId);//BEFORE_LOGIN_USER);
 
-    adminUser.getRoles().add(mitll.hlt.domino.shared.model.user.User.Role.GrAM);
-    adminUser.getRoles().add(mitll.hlt.domino.shared.model.user.User.Role.UM);
-    logger.info("got admin user " + adminUser + " has roles " + adminUser.getRoles());
+//    adminUser.getRoles().add(mitll.hlt.domino.shared.model.user.User.Role.GrAM);
+//    adminUser.getRoles().add(mitll.hlt.domino.shared.model.user.User.Role.UM);
+
+    logger.info("got admin user " + adminUser + " has roles " + adminUser.getRoleAbbreviationsString());
     Group group = getPrimaryGroup();
     adminUser.setPrimaryGroup(group);
 
@@ -137,7 +147,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * <p>
    * Returns ClientUserDetail from database, not necessarily same as passed in?
    * <p>
-   * TODO : add roles and permissions
+   * TODO : permissions
    *
    * @param user
    * @param encodedPass
@@ -145,7 +155,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @return
    * @see mitll.langtest.server.database.copy.UserCopy#addUser(DominoUserDAOImpl, Map, User)
    */
-  public ClientUserDetail addAndGet(ClientUserDetail user, String encodedPass, Collection<User.Permission> permissions) {
+  public ClientUserDetail addAndGet(ClientUserDetail user,
+                                    String encodedPass,
+                                    Collection<User.Permission> permissions) {
     invalidateCache();
 
     SResult<ClientUserDetail> clientUserDetailSResult = addUserToMongo(user,
@@ -275,14 +287,18 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     // Timestamp now = new Timestamp(System.currentTimeMillis());
     // getConvertedPermissions(permissions, now);
 
-    List<mitll.hlt.domino.shared.model.user.User.Role> ts = Collections.emptyList();
+    //  List<mitll.hlt.domino.shared.model.user.User.Role> ts = Collections.emptyList();
+    Set<String> roles = new HashSet<>();
+
+    roles.add(kind.getName());
 
     ClientUserDetail updateUser = new ClientUserDetail(
         userID,
         first,
         last,
         email,
-        ts,
+        gender.equalsIgnoreCase("male") ? DMALE : DFEMALE,
+        roles,
         getGroup()
     );
 
@@ -295,31 +311,34 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 //    SResult<ClientUserDetail> clientUserDetailSResult = getClientUserDetailSResult(updateUser, passwordH);
 
     SResult<ClientUserDetail> clientUserDetailSResult = addUserToMongo(updateUser,
-        //freeTextPassword,
-        url, true);
+        url,
+        true);
 
     if (clientUserDetailSResult == null) {
       return -1; // password error?
     } else {
       ClientUserDetail clientUserDetail = clientUserDetailSResult.get();
-
       invalidateCache();
       return clientUserDetail.getDocumentDBID();
     }
   }
 
+  /**
+   * Need a group - just use the first one.
+   *
+   * @return
+   */
   @NotNull
   private Group getGroup() {
-    List<Group> groups = delegate.getGroupDelegate().searchGroups("");
+    //List<Group> groups = delegate.getGroupDelegate().searchGroups("");
+    List<Group> groups = delegate.getGroupDAO().searchGroups("");
 
-    Group primaryGroup = null;
+    Group primaryGroup = groups.isEmpty() ? null : groups.iterator().next();
 
-    for (Group group:groups) {
-      logger.info("Group " + group);
-      primaryGroup = group;
-      break;
+    if (primaryGroup == null) { //defensive
+      logger.warn("getGroup making a new group...?");
+      primaryGroup = getPrimaryGroup();
     }
-    if (primaryGroup == null) primaryGroup = getPrimaryGroup();
     return primaryGroup;
   }
 
@@ -354,7 +373,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * Just set the email...
    * <p>
    * <p>
-   * TODO: SKIP ROLE FOR NOW.
+   * TODOx: SKIP ROLE FOR NOW.
    *
    * @param id
    * @param kind
@@ -615,17 +634,21 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     if (last == null) last = "Unknown";
     String email = user.getEmail();
     if (email == null || email.isEmpty()) {
-      email = "admin@dliflc.edu";
+      email = EMAIL;
     }
 
     Group primaryGroup = getGroup();
+
+    Set<String> roleAbbreviations = new HashSet<>();
+    roleAbbreviations.add(user.getUserKind().name());
 
     ClientUserDetail clientUserDetail = new ClientUserDetail(
         user.getUserID(),
         first,
         last,
         email,
-        Collections.emptyList(),
+        user.isMale() ? DMALE : DFEMALE,
+        roleAbbreviations,
         primaryGroup
 
         /*
@@ -649,16 +672,14 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         user.getID(),
         now*/
     );
-
     clientUserDetail.setAcctDetail(new AccountDetail(dominoImportUser, new Date(user.getTimestampMillis())));
-
-    logger.info("toClientUserDetail made " + clientUserDetail);
+//    logger.info("toClientUserDetail made " + clientUserDetail);
 
     return clientUserDetail;
   }
 
   /**
-   * TODO: figure out how to add gender -
+   * TODOx: figure out how to add gender -
    *
    * @param dominoUser
    * @param perms
@@ -689,7 +710,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     User user = new User(
         dominoUser.getDocumentDBID(),
         99,//dominoUser.age(),
-        0,//dominoUser.ismale() ? 0 : 1,
+        dominoUser.getGender().equals(mitll.hlt.domino.shared.model.user.User.Gender.Male) ? 0 : 1,
         0,
         "",//dominoUser.ipaddr(),
         "",//"BOGUS_HASH_PASS",//dominoUser.passhash(),
@@ -716,9 +737,18 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     return user;
   }
 
+  /**
+   * TODO : put back role check?
+   *
+   * @param dominoUser
+   * @return
+   * @see #getMini(DBUser)
+   * @see #toUser(mitll.hlt.domino.shared.model.user.User, Collection)
+   */
   private boolean isAdmin(mitll.hlt.domino.shared.model.user.User dominoUser) {
-    return dominoUser.hasRole(mitll.hlt.domino.shared.model.user.User.Role.GrAM) ||
-        dominoUser.hasRole(mitll.hlt.domino.shared.model.user.User.Role.PrAdmin);
+    return false;
+//        dominoUser.hasRole(mitll.hlt.domino.shared.model.user.User.Role.GrAM) ||
+    //          dominoUser.hasRole(mitll.hlt.domino.shared.model.user.User.Role.PrAdmin);
   }
 
   /**
@@ -728,7 +758,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @return
    */
   private User.Kind getUserKind(mitll.hlt.domino.shared.model.user.User dominoUser) {
-    return User.Kind.STUDENT;
+    String firstRole = dominoUser.getRoleAbbreviations().iterator().next();
+    logger.info("convert " + firstRole);
+    return User.Kind.valueOf(firstRole);
   }
 
   /**
@@ -778,8 +810,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     }
   }
 
-  int lastCount = -1;
-  long lastCache = 0;
+  private int lastCount = -1;
+  private long lastCache = 0;
 
   /**
    * It seems like getting users in and out of mongo is slow... trying to use a cache to mitigate that.
@@ -829,7 +861,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }
 
   /**
-   * TODO : figure out how to get gender
+   * TODOx : figure out how to get gender
    *
    * @param dominoUser
    * @return
@@ -840,22 +872,28 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     MiniUser miniUser = new MiniUser(
         dominoUser.getDocumentDBID(),
         0,  // age
-        true,//dominoUser.ismale(),
+        isMale(dominoUser),
         dominoUser.getUserId(),
         admin);
 
     //   logger.info("getMini for " + dominoUser);
 
     AccountDetail acctDetail = dominoUser.getAcctDetail();
+    long now = System.currentTimeMillis();
+
     long time = acctDetail == null ?
-        System.currentTimeMillis() :
-        acctDetail.getCrTime() == null ? System.currentTimeMillis() : acctDetail.getCrTime().getTime();
+        now :
+        acctDetail.getCrTime() == null ? now : acctDetail.getCrTime().getTime();
 
     miniUser.setTimestampMillis(time);
     miniUser.setFirst(dominoUser.getFirstName());
     miniUser.setLast(dominoUser.getLastName());
 
     return miniUser;
+  }
+
+  private boolean isMale(DBUser dominoUser) {
+    return dominoUser.getGender() == DMALE;
   }
 
   /**
@@ -865,12 +903,14 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @return
    * @see mitll.langtest.server.rest.RestUserManagement#changePFor(String, String)
    * @see mitll.langtest.server.rest.RestUserManagement#getUserIDForToken(String)
-   * @see mitll.langtest.server.services.UserServiceImpl#changePFor(String, String)
+   * @see mitll.langtest.server.services.UserServiceImpl#changePFor
    * @see mitll.langtest.server.services.UserServiceImpl#getUserIDForToken(String)
    */
   @Override
   @Deprecated
   public User getUserWithResetKey(String resetKey) {
+
+    logger.warn("no reset key! " + resetKey);
     return null;//convertOrNull(dao.getByReset(resetKey));
   }
 
@@ -895,36 +935,42 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
   /**
    * TODO:add permissions?
-   * TODO:add gender
+   * TODOx:add gender
    *
    * @param getMale
    * @return
    */
   @Override
   public Map<Integer, User> getUserMap(boolean getMale) {
-    logger.warn("getUserMap: NOTE : no gender support yet.");
+    //logger.warn("getUserMap: NOTE : no gender support yet.");
     //Map<Integer, SlickUser> byMale = dao.getByMaleMap(getMale);
 
     Map<Integer, User> idToUser = new HashMap<>();
-    getAll().forEach(dbUser -> idToUser.put(dbUser.getDocumentDBID(), toUser(dbUser)));
+    getAll()
+        .stream()
+        .filter(dbUser -> getMale ? dbUser.getGender() == mitll.hlt.domino.shared.model.user.User.Gender.Male :
+            dbUser.getGender() == mitll.hlt.domino.shared.model.user.User.Gender.Female)
+        .forEach(dbUser -> idToUser.put(dbUser.getDocumentDBID(), toUser(dbUser)));
 //    Map<Integer, Collection<String>> granted = permissionDAO.granted();
 //    byMale.forEach((k, v) -> idToUser.put(k, toUser(v, toUserPerms(granted.get(k)))));
     return idToUser;
   }
 
   /**
-   * TODO:add gender
+   * TODOx:add gender
    *
    * @param getMale
    * @return
    */
   @Override
   public Collection<Integer> getUserIDs(boolean getMale) {
-    logger.warn("getUserIDs: NOTE : no gender support yet.");
+    //logger.warn("getUserIDs: NOTE : no gender support yet.");
 
 //    return dao.getByMaleIDs(getMale);
     List<Integer> ids = getAll()
         .stream()
+        .filter(dbUser -> getMale ? dbUser.getGender() == mitll.hlt.domino.shared.model.user.User.Gender.Male :
+            dbUser.getGender() == mitll.hlt.domino.shared.model.user.User.Gender.Female)
         .map(UserDescriptor::getDocumentDBID)
         .collect(Collectors.toList());
 
@@ -939,14 +985,15 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    */
   @Override
   public Map<Integer, User> getUserMap() {
-    logger.warn("getUserMap: NOTE : no gender support yet.");
-
+    //logger.warn("getUserMap: NOTE : no gender support yet.");
 /*    Map<Integer, User> idToUser = new HashMap<>();
 //    Map<Integer, Collection<String>> granted = permissionDAO.granted();
     dao.getIdToUser().forEach((k, v) -> idToUser.put(k, toUser(v, toUserPerms(granted.get(k)))));
     return idToUser;*/
 
-    return getUserMap(true);
+    Map<Integer, User> idToUser = getUserMap(true);
+    idToUser.putAll(getUserMap(false));
+    return idToUser;//(true);
   }
 
   /**
