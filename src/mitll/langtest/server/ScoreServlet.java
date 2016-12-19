@@ -263,13 +263,15 @@ public class ScoreServlet extends DatabaseServlet {
 
       CommonExercise exercise = db.getExercise(exid);
       if (exercise == null) {
+        logger.info("removeRefResult can't find '" + exid + "'");
+
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("success", Boolean.valueOf(false).toString());
         jsonObject.put("error", "no exercise with that id");
         return jsonObject;
       } else {
         boolean b = db.getRefResultDAO().removeForExercise(exid);
-        //logger.info("Remove ref for " + exid + " got " + b);
+        logger.info("removeRefResult Remove ref for " + exid + " got " + b);
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("success", Boolean.valueOf(b).toString());
         return jsonObject;

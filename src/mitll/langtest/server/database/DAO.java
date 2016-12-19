@@ -138,7 +138,12 @@ public class DAO {
         "='" + itemId +
         "'";
 
-    return doSqlOn(sql, table, warnIfDidntAlter);
+    boolean b = doSqlOn(sql, table, warnIfDidntAlter);
+
+    if (b) logger.info("changed ref result with " + sql);
+    else logger.error("didn't change ref result with " + sql);
+
+    return b;
   }
 
   protected boolean doSqlOn(String sql, String table, boolean warnIfDidntAlter) {
