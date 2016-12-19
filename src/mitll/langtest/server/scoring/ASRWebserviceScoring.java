@@ -84,6 +84,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   private final Cache<String, Object[]> decodeAudioToScore; // key => (Scores, wordLab, phoneLab)
   private final Cache<String, Object[]> alignAudioToScore; // key => (Scores, wordLab, phoneLab)
 
+  private boolean sendGrammerWithAlignment = true;
+
   /**
    * Normally we delete the tmp dir created by hydec, but if something went wrong, we want to keep it around.
    * If the score was below a threshold, or the magic -1, we keep it around for future study.
@@ -284,9 +286,6 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * TODO : don't copy this method in both ASRScoring and ASRWebserviceScoring
    *
    * @param imageOutDir
-   * @paramx imageWidth
-   * @paramx imageHeight
-   * @paramx useScoreForBkgColor
    * @param decode
    * @param prefix
    * @param noSuffix
@@ -297,6 +296,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @param processDur
    * @param usePhoneToDisplay
    * @return
+   * @paramx imageWidth
+   * @paramx imageHeight
+   * @paramx useScoreForBkgColor
    * @see #scoreRepeatExercise
    */
   private PretestScore getPretestScore(String imageOutDir,
@@ -308,7 +310,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   ) {
     int imageWidth = imageOptions.getWidth();
     int imageHeight = imageOptions.getHeight();
-    boolean useScoreForBkgColor =imageOptions.isUseScoreToColorBkg();
+    boolean useScoreForBkgColor = imageOptions.isUseScoreToColorBkg();
 
     String prefix1 = prefix + (useScoreForBkgColor ? "bkgColorForRef" : "") + (usePhoneToDisplay ? "_phoneToDisplay" : "");
     boolean reallyUsePhone = usePhoneToDisplay || props.usePhoneToDisplay();
@@ -325,7 +327,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = getTypeToEndTimes(eventAndFileInfo);
       String recoSentence = getRecoSentence(eventAndFileInfo);
 
-      return new PretestScore(scores.hydraScore, getPhoneToScore(scores), getWordToScore(scores),
+      return new PretestScore(scores.hydraScore,
+          getPhoneToScore(scores),
+          getWordToScore(scores),
           sTypeToImage, typeToEndTimes, recoSentence, (float) duration, processDur);
     } catch (Exception e) {
       logger.error("Got " + e, e);
@@ -338,7 +342,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
   private boolean ltsOutputOk(String[][] process) {
     return !(process == null || process.length == 0 || process[0].length == 0 ||
-            process[0][0].length() == 0 || (StringUtils.join(process[0], "-")).contains("#"));
+        process[0][0].length() == 0 || (StringUtils.join(process[0], "-")).contains("#"));
   }
 
   /**
@@ -350,7 +354,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    *
    * @param transcript
    * @return the dictionary for dcodr
-   * @see #runHydra(String, String, Collection, String, boolean, int)
+   * @see #runHydra
    */
   private String createHydraDict(String transcript, String transliteration) {
     if (getLTS() == null) {
@@ -383,27 +387,27 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
             String[][] process = getLTS().process(word1);
             if (!ltsOutputOk(process)) {
               logger.error("couldn't get letter to sound map from " + getLTS() + " for " + word1);
-              if(canUseTransliteration){
+              if (canUseTransliteration) {
                 logger.info("trying transliteration LTS");
                 String[][] translitprocess = (transcriptTokens.length == 1) ? getLTS().process(StringUtils.join(translitTokens, "")) : getLTS().process(translitTokens[index]);
-                if(ltsOutputOk(translitprocess)) {
+                if (ltsOutputOk(translitprocess)) {
                   logger.info("got pronunciation from transliteration");
                   for (String[] pron : translitprocess) {
                     dict += getPronStringForWord(word, pron);
                   }
-                } else{
+                } else {
                   logger.info("transliteration LTS failed");
                   logger.error("couldn't get letter to sound map from " + getLTS() + " for " + word1);
                   logger.info("attempting to fall back to default pronunciation");
-                  if ((translitprocess.length > 0) && (translitprocess[0].length > 1)){
+                  if ((translitprocess.length > 0) && (translitprocess[0].length > 1)) {
                     dict += getDefaultPronStringForWord(word, translitprocess);
                   }
                 }
-              }else{
+              } else {
                 logger.info("can't use transliteration");
                 logger.error("couldn't get letter to sound map from " + getLTS() + " for " + word1);
                 logger.info("attempting to fall back to default pronunciation");
-                if (process.length > 0){
+                if (process.length > 0) {
                   dict += getDefaultPronStringForWord(word, process);
                 }
               }
@@ -417,7 +421,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       }
       index += 1;
     }
-    dict += "UNKNOWNMODEL,+UNK+;<s>,sil;</s>,sil";
+    dict += "UNKNOWNMODEL,+UNK+;<s>,sil;</s>,sil;SIL,sil";
     dict += "]";
     return dict;
   }
@@ -436,15 +440,15 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
   //last resort, if we can't even use the transliteration to get some kind of pronunciation
   private String getDefaultPronStringForWord(String word, String[][] apply) {
-    for (String[] pc : apply){
+    for (String[] pc : apply) {
       StringBuilder builder = new StringBuilder();
-      for (String p : pc){
-        if(!p.contains("#"))
+      for (String p : pc) {
+        if (!p.contains("#"))
           builder.append(p).append(" ");
       }
       String result = builder.toString().trim();
-      if(result.length() > 0){
-        return word +","+result+" sp;";
+      if (result.length() > 0) {
+        return word + "," + result + " sp;";
       }
     }
     return word + ",  sp;"; //hopefully we never get here...
@@ -475,11 +479,13 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
     // generate dictionary
     String hydraDict = createHydraDict(cleaned, transliteration);
-    String smallLM = "[]";
+    String smallLM = "[" +
+        (sendGrammerWithAlignment ? slfFile.createSimpleSLFFile(Collections.singleton(cleaned), true, false)[0] : "") +
+        "]";
 
     // generate SLF file (if decoding)
     if (decode) {
-      String[] slfOut = slfFile.createSimpleSLFFile(lmSentences);
+      String[] slfOut = slfFile.createSimpleSLFFile(lmSentences, true, true);
       smallLM = "[" + slfOut[0] + "]";
       cleaned = slfFile.cleanToken(slfOut[1]);
     }
@@ -650,6 +656,11 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     return getTokenToScore(scores, phones, true);
   }
 
+  /**
+   * @param scores
+   * @return
+   * @see #getPretestScore(String, ImageOptions, boolean, String, String, Scores, String, String, double, int, boolean, JSONObject)
+   */
   private Map<String, Float> getWordToScore(Scores scores) {
     Map<String, Float> phones = scores.eventScores.get(Scores.WORDS);
     return getTokenToScore(scores, phones, false);
@@ -658,16 +669,22 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   private Map<String, Float> getTokenToScore(Scores scores, Map<String, Float> phones, boolean expecting) {
     if (phones == null) {
       if (expecting) {
-        logger.warn("no phone scores in " + scores.eventScores);
+        logger.warn("getTokenToScore no phone scores in " + scores.eventScores);
       }
       return Collections.emptyMap();
     } else {
       Map<String, Float> phoneToScore = new HashMap<>();
       for (Map.Entry<String, Float> phoneScorePair : phones.entrySet()) {
         String key = phoneScorePair.getKey();
-        if (!key.equals("sil")) {
-          phoneToScore.put(key, Math.min(1.0f, phoneScorePair.getValue()));
+
+        if (!key.equalsIgnoreCase("sil")) {
+          Float value = phoneScorePair.getValue();
+          //   logger.info("getTokenToScore adding '" + key + "' : " + value);
+          phoneToScore.put(key, Math.min(1.0f, value));
+        } else {
+          // logger.info("getTokenToScore skipping key '" + key + "'");
         }
+
       }
       return phoneToScore;
     }
