@@ -292,7 +292,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     Panel vp = new VerticalPanel();
     vp.getElement().setId("getQuestionContent_verticalContainer");
     vp.addStyleName("blockStyle");
-    vp.addStyleName("topFiveMargin");
+//    vp.addStyleName("topFiveMargin");
 
     new UnitChapterItemHelper<T>(controller.getTypeOrder()).addUnitChapterItem(exercise, vp);
     vp.add(getItemContent(exercise));

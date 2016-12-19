@@ -524,7 +524,9 @@ public class ASRScoring extends Scoring implements ASR {
 
     try {
       Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut =
-          testAudio.jscore(sentence, transliteration, htkDictionary, getLTS(), configFile);
+          testAudio.jscore(sentence,
+              transliteration,
+              htkDictionary, getLTS(), configFile);
       float hydec_score = jscoreOut._1;
       long timeToRunHydec = System.currentTimeMillis() - then;
 
