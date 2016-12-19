@@ -267,14 +267,19 @@ public class AudioDAO extends DAO {
         idToPaths.put(exid, paths = new HashSet<>());
       }
       String audioRef = audio.getAudioRef();
-      if (!paths.contains(audioRef)) {
-        audioAttributes.add(audio);
-        paths.add(audioRef);
+
+//      if (!paths.contains(audioRef)) {
+      // when an exercise is edited and becomes a user exercise, the audio attributes
+      // are copied - we want both copies.
+      audioAttributes.add(audio);
+
+      if (paths.contains(audioRef)) {
+        logger.warn("getExToAudio found duplicate path " + audioRef + " on " + exid);
       }
-      //    else {
-      //logger.warn("skipping " +audioRef + " on " + exid);
-      //  }
+
+      paths.add(audioRef);
     }
+
     long now = System.currentTimeMillis();
     logger.info("getExToAudio (" + database.getLanguage() +
         ") took " + (now - then) + " millis to get  " + audioAttributes1.size() + " audio entries");
@@ -910,10 +915,6 @@ public class AudioDAO extends DAO {
                                 Set<String> uniqueIDs,
                                 Map<String, String> exToTranscript,
                                 Set<String> idsOfRecordedExercises) {
-    //  Set<String> idsOfRecordedExercises = new HashSet<>();
-
-    //  Set<String> idsOfStaleExercises = new HashSet<>();
-
     try {
       Connection connection = database.getConnection(this.getClass().toString());
       String s = getInClause(userIds);
@@ -949,12 +950,14 @@ public class AudioDAO extends DAO {
 //              idsOfStaleExercises.add(exid);
               logger.debug("getCountForGender skipping stale exid " + exid);
             }
-          } else {
-            logger.info("1) no match for " + exid + " '" + trimWhitespace(transcript) + "' vs '" + trimWhitespace(exerciseFL) + "'");
           }
-        } else {
-          //        logger.info("2) stale exercise id : no match for " + exid);
+          //else {
+          //  logger.info("1) no match for " + exid + " '" + trimWhitespace(transcript) + "' vs '" + trimWhitespace(exerciseFL) + "'");
+          //}
         }
+        //else {
+          //        logger.info("2) stale exercise id : no match for " + exid);
+       // }
       }
       finish(connection, statement, rs, sql);
 //      logger.info("getCountForGender audioSpeed " + audioSpeed +
@@ -996,10 +999,10 @@ public class AudioDAO extends DAO {
   }
 
   /**
+   * @return
    * @paramx userIds
    * @paramx uniqueIDs
    * @paramx exToTranscript
-   * @return
    * @see #getRecordedReport(Set, Set, float, Set, Map, Map, float)
    */
  /* private int getCountBothSpeeds(Set<Long> userIds,
@@ -1072,7 +1075,6 @@ public class AudioDAO extends DAO {
 
     return size;
   }*/
-
   private String getInClause(Collection<Long> longs) {
     StringBuilder buffer = new StringBuilder();
     for (long id : longs) {

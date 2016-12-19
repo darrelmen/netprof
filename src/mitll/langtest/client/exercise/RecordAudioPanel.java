@@ -109,7 +109,7 @@ public class RecordAudioPanel<T extends Shell & AudioRefExercise> extends AudioP
     super(service,
         controller, showSpectrogram,
         null // no gauge panel
-        , 1.0f, 23, exercise.getID(), exercise, instance);
+        , 1.0f, 0, exercise.getID(), exercise, instance);
     this.exercisePanel = widgets;
     this.index = index;
     this.exercise = exercise;
