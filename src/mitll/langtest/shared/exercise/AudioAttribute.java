@@ -349,10 +349,10 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   }*/
 
   /**
-   * @see
    * @param foreignLanguage
    * @param transcript
    * @return
+   * @see
    */
   public boolean matchTranscript(String foreignLanguage, String transcript) {
     return transcript == null ||
@@ -380,7 +380,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
         " attrs " + attributes +
         " by " + userid + "/" + user +
         " transcript '" + transcript +
-        "' ";
+        "'\n\tdnr\t" + dnr;
   }
 
   public float getDnr() {

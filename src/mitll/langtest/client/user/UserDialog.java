@@ -78,7 +78,7 @@ public abstract class UserDialog extends BasicDialog {
     markError(dialectGroup.group, dialectGroup.box, TRY_AGAIN, message, Placement.TOP);
   }
 
-  void markErrorBlur(FormField dialectGroup, String message) {
+  protected void markErrorBlur(FormField dialectGroup, String message) {
     markErrorBlur(dialectGroup.group, dialectGroup.box, TRY_AGAIN, message, Placement.TOP);
   }
 
