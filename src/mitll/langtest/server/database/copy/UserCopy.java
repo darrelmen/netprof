@@ -107,7 +107,8 @@ public class UserCopy {
                   " : " + userByID1);
             } else {
               logger.info("copyUsers no existing user id '" + importUserID + "'");
-              added.add(addUser(dominoUserDAO, oldToNew, toImport));
+              ClientUserDetail e = addUser(dominoUserDAO, oldToNew, toImport);
+              added.add(e);
             }
           }
         }
@@ -133,8 +134,10 @@ public class UserCopy {
   private ClientUserDetail addUser(DominoUserDAOImpl dominoUserDAO,
                                    Map<Integer, Integer> oldToNew,
                                    User toImport) throws Exception {
-//    logger.info("addUser " + toImport + " with " + toImport.getPermissions());
+    logger.info("addUser " + toImport + " with " + toImport.getPermissions());
     ClientUserDetail user = dominoUserDAO.toClientUserDetail(toImport, false);
+    logger.info("addUser " + user);
+
     ClientUserDetail addedUser = dominoUserDAO.addAndGet(
         user,
         toImport.getPasswordHash(),
