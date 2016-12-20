@@ -58,7 +58,7 @@ public interface CommonExercise extends CommonAudioExercise, ScoredExercise {
 
   Collection<CommonExercise> getDirectlyRelated();
 
-/*
+  /*
   Collection<CommonExercise> getMentions();
 */
 
