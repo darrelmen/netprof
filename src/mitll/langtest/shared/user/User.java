@@ -74,27 +74,30 @@ public class User extends MiniUser {
   private ProjectStartupInfo startupInfo;
 
   public enum Kind implements IsSerializable {
-    UNSET("Unset", false),
-    INTERNAL("INTERNAL", false),  // for users we keep to maintain referencial integrity, for instance an importUser
+    UNSET("Unset", "UST", false),
+    INTERNAL("INTERNAL", "INT", false),  // for users we keep to maintain referencial integrity, for instance an importUser
 
-    STUDENT("Student", true),
-    TEACHER("Teacher", true),
-    CONTENT_DEVELOPER("Content Developer", true), // someone who can edit content and record audio
-    AUDIO_RECORDER("Audio Recorder", true),       // someone who is just an audio recorder
-    TEST("Test Account", true),                   // e.g. for developers at Lincoln or DLI, demo accounts
-    SPAM("Spam Account", true),                   // for marking nuisance accounts
-    PROJECT_ADMIN("Project Admin", true),         // invite new users, admin accounts below
-    ADMIN("System Admin", true);                  // invite project admins, closed set determined by server properties
+    STUDENT("Student", "STU", true),
+    TEACHER("Teacher", "TCHR", true),
+    QAQC("QAQC", "QAQC", true), // someone who can edit content
+    CONTENT_DEVELOPER("Content Developer", "CDEV", true), // someone who can edit content and record audio
+    AUDIO_RECORDER("Audio Recorder", "AREC", true),       // someone who is just an audio recorder
+    TEST("Test Account", "TST", true),                   // e.g. for developers at Lincoln or DLI, demo accounts
+    SPAM("Spam Account", "SPM", true),                   // for marking nuisance accounts
+    PROJECT_ADMIN("Project Admin", "PrAdmin", true),         // invite new users, admin accounts below
+    ADMIN("System Admin", "UM", true);                  // invite project admins, closed set determined by server properties
 
     String name;
+    String role;
     boolean show;
 
     Kind() {
     }
 
-    Kind(String name, boolean show) {
+    Kind(String name, String role, boolean show) {
       this.name = name;
       this.show = show;
+      this.role = role;
     }
 
     public String getName() {
@@ -103,6 +106,10 @@ public class User extends MiniUser {
 
     public boolean shouldShow() {
       return show;
+    }
+
+    public String getRole() {
+      return role;
     }
   }
 
@@ -473,9 +480,9 @@ public class User extends MiniUser {
 
   /**
    * @return
-   * @deprecated
    * @see mitll.langtest.server.database.copy.UserCopy#addUser(DominoUserDAOImpl, Map, User)
    * @see mitll.langtest.server.database.copy.UserCopy#copyUsers(DatabaseImpl, int, IResultDAO)
+   * @deprecated
    */
   public String getPasswordHash() {
     return passwordHash;

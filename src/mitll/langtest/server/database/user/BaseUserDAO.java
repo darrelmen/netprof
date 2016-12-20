@@ -159,13 +159,13 @@ public abstract class BaseUserDAO extends DAO {
       return userWhere;
     } else {
       // user exists!
-      String emailHash    = currentUser.getEmailHash();
+      String emailHash = currentUser.getEmailHash();
       //String passwordHash = currentUser.getPasswordHash();
 
       if (emailHash != null &&
-        //  passwordHash != null &&
+          //  passwordHash != null &&
           !emailHash.isEmpty()
-          //&& !passwordHash.isEmpty()
+        //&& !passwordHash.isEmpty()
           ) {
         logger.debug(" : addUser : user " + userID + " is an existing user.");
         return null; // existing user!
@@ -181,8 +181,8 @@ public abstract class BaseUserDAO extends DAO {
 
   /**
    * @param user
-   * @paramx perms
    * @return
+   * @paramx perms
    * @see #addUser
    */
   private int addUserAndGetID(SignUpUser user/*, Collection<User.Permission> perms*/) {
@@ -197,8 +197,8 @@ public abstract class BaseUserDAO extends DAO {
         true,
         Collections.emptyList(),
         user.getKind(),
-       // user.getFreeTextPassword(),
-       // user.getPasswordH(),
+        // user.getFreeTextPassword(),
+        // user.getPasswordH(),
 
         user.getEmailH(),
         user.getEmail(),
@@ -213,7 +213,8 @@ public abstract class BaseUserDAO extends DAO {
 
   abstract User getUserWhere(int userid);
 
-  @Deprecated  boolean isAdmin(String userid) {
+  @Deprecated
+  boolean isAdmin(String userid) {
     return userid != null && (admins.contains(userid.toLowerCase()));
   }
 
@@ -225,37 +226,33 @@ public abstract class BaseUserDAO extends DAO {
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
   public void ensureDefaultUsers() {
-    this.defectDetector  = getOrAdd(DEFECT_DETECTOR);
-    this.beforeLoginUser = getOrAdd(BEFORE_LOGIN_USER);
-    this.importUser      = getOrAdd(IMPORT_USER);
-    this.defaultUser     = getOrAdd("defaultUser");
-    this.defaultMale     = getOrAdd("defaultMaleUser");
-    this.defaultFemale   = getOrAdd("defaultFemaleUser");
+    this.defectDetector = getOrAdd(DEFECT_DETECTOR, "Defect", "Detector", User.Kind.QAQC);
+    this.beforeLoginUser = getOrAdd(BEFORE_LOGIN_USER, "Before", "Login", User.Kind.STUDENT);
+    this.importUser = getOrAdd(IMPORT_USER, "Import", "User", User.Kind.CONTENT_DEVELOPER);
+    this.defaultUser = getOrAdd("defaultUser", "Default", "User", User.Kind.AUDIO_RECORDER);
+    this.defaultMale = getOrAdd("defaultMaleUser", "Default", "Male", User.Kind.AUDIO_RECORDER);
+    this.defaultFemale = getOrAdd("defaultFemaleUser", "Default", "Female", User.Kind.AUDIO_RECORDER);
   }
 
-  private int getOrAdd(String beforeLoginUser) {
+  private int getOrAdd(String beforeLoginUser, String first, String last, User.Kind kind) {
     int beforeLoginUserID = getIdForUserID(beforeLoginUser);
     if (beforeLoginUserID == -1) {
-      beforeLoginUserID = addShellUser(beforeLoginUser);
+      beforeLoginUserID = addShellUser(beforeLoginUser, first, last, kind);
     }
     return beforeLoginUserID;
   }
 
-  private int addShellUser(String defectDetector) {
+  private int addShellUser(String defectDetector, String first, String last, User.Kind kind) {
     return addUser(89,
         MALE,
         0, "", "", UNKNOWN, UNKNOWN, defectDetector, false, EMPTY_PERMISSIONS,
-        User.Kind.INTERNAL,
-        //"",
-        //"",
-        "", "", "", "", "", "");
+        kind,
+        "", "admin@dliflc.edu", "", first, last, "");
   }
 
   abstract int getIdForUserID(String id);
 
   /**
-   * @see #addShellUser
-   * @see #addUserAndGetID
    * @param age
    * @param gender
    * @param experience
@@ -267,16 +264,18 @@ public abstract class BaseUserDAO extends DAO {
    * @param enabled
    * @param permissions
    * @param kind
-   * @paramx freeTextPassword
-   * @paramx passwordH
    * @param emailH
    * @param email
    * @param device
    * @param first
    * @param last
-   * @return
    * @param url
-   * */
+   * @return
+   * @paramx freeTextPassword
+   * @paramx passwordH
+   * @see #addShellUser
+   * @see #addUserAndGetID
+   */
   abstract int addUser(int age,
                        String gender,
                        int experience,
@@ -289,8 +288,8 @@ public abstract class BaseUserDAO extends DAO {
                        Collection<User.Permission> permissions,
                        User.Kind kind,
 
-                    //   @Deprecated  String freeTextPassword,
-                     //  String passwordH,
+                       //   @Deprecated  String freeTextPassword,
+                       //  String passwordH,
                        String emailH,
                        String email,
                        String device,
