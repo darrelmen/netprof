@@ -83,7 +83,6 @@ public class UserCopy {
           // do nothing, but remember id mapping
           oldToNew.put(importID, strictUserWithPass.getID());
         } else {
-
           if (importUserID.isEmpty() && idToCount.get(importID) != null && idToCount.get(importID) == 0) {
             logger.info("copyUsers skipping old user " + toImport + " since they have an empty user name and no recordings");
             lurker++;
@@ -91,15 +90,18 @@ public class UserCopy {
             User userByID1 = dominoUserDAO.getUserByID(importUserID);
 
             if (userByID1 != null) {
-              if (DEBUG) logger.info("found existing user " + importUserID + " : " + userByID1);
+              if (DEBUG) logger.info("copyUsers found existing user " + importUserID + " : " + userByID1);
               // User "adam" already exists with a different password - what to do?
               // void current password! Force them to set it again when they log in again
               int existingID = userByID1.getID();
               String passwordHash1 = userByID1.getPasswordHash();
               if (!passwordHash1.isEmpty()) {
-                logger.info("Found existing user " + existingID + " : " + userByID1.getUserID() + " with password hash " + passwordHash1);
+                logger.info("copyUsers Found existing user " + existingID + " : " + userByID1.getUserID() + " with password hash " + passwordHash1);
                //dominoUserDAO.changePassword(existingID, "");
                 dominoUserDAO.forgetPassword(existingID);
+              }
+              else {
+                logger.info("copyUsers password not empty for " + existingID);
               }
               oldToNew.put(importID, existingID);
               collisions++;
