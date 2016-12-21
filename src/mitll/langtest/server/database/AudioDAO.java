@@ -273,9 +273,10 @@ public class AudioDAO extends DAO {
       // are copied - we want both copies.
       audioAttributes.add(audio);
 
-      if (paths.contains(audioRef)) {
-        logger.warn("getExToAudio found duplicate path " + audioRef + " on " + exid);
-      }
+      // let's not warn about this for now...
+//      if (paths.contains(audioRef)) {
+//        logger.warn("getExToAudio found duplicate path " + audioRef + " on " + exid);
+//      }
 
       paths.add(audioRef);
     }
