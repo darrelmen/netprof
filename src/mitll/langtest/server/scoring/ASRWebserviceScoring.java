@@ -84,7 +84,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   private final Cache<String, Object[]> decodeAudioToScore; // key => (Scores, wordLab, phoneLab)
   private final Cache<String, Object[]> alignAudioToScore; // key => (Scores, wordLab, phoneLab)
 
-  private boolean sendGrammerWithAlignment = true;
+  private static final boolean SEND_GRAMMER_WITH_ALIGNMENT = false;
 
   /**
    * Normally we delete the tmp dir created by hydec, but if something went wrong, we want to keep it around.
@@ -480,12 +480,12 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     // generate dictionary
     String hydraDict = createHydraDict(cleaned, transliteration);
     String smallLM = "[" +
-        (sendGrammerWithAlignment ? slfFile.createSimpleSLFFile(Collections.singleton(cleaned), true, false)[0] : "") +
+        (SEND_GRAMMER_WITH_ALIGNMENT ? slfFile.createSimpleSLFFile(Collections.singleton(cleaned), SEND_GRAMMER_WITH_ALIGNMENT, false)[0] : "") +
         "]";
 
     // generate SLF file (if decoding)
     if (decode) {
-      String[] slfOut = slfFile.createSimpleSLFFile(lmSentences, true, true);
+      String[] slfOut = slfFile.createSimpleSLFFile(lmSentences, SEND_GRAMMER_WITH_ALIGNMENT, true);
       smallLM = "[" + slfOut[0] + "]";
       cleaned = slfFile.cleanToken(slfOut[1]);
     }
