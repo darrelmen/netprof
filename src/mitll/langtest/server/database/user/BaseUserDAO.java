@@ -66,6 +66,9 @@ public abstract class BaseUserDAO extends DAO {
   static final String ENABLED_REQ_KEY = "enabledReqKey";
   static final String NATIVE_LANG = "nativeLang";
   static final String UNKNOWN = "unknown";
+  public static final String DEFAULT_USER1 = "defaultUser";
+  public static final String DEFAULT_MALE_USER = "defaultMaleUser";
+  public static final String DEFAULT_FEMALE_USER = "defaultFemaleUser";
   @Deprecated
   final String language;
   protected int defectDetector, beforeLoginUser, importUser, defaultUser, defaultMale, defaultFemale;
@@ -99,6 +102,7 @@ public abstract class BaseUserDAO extends DAO {
   public static MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 99, false, "Female", false);
 
   protected final Collection<String> admins;
+  private HashSet<String> defaultUsers;
 
   BaseUserDAO(Database database) {
     super(database);
@@ -229,9 +233,15 @@ public abstract class BaseUserDAO extends DAO {
     this.defectDetector = getOrAdd(DEFECT_DETECTOR, "Defect", "Detector", User.Kind.QAQC);
     this.beforeLoginUser = getOrAdd(BEFORE_LOGIN_USER, "Before", "Login", User.Kind.STUDENT);
     this.importUser = getOrAdd(IMPORT_USER, "Import", "User", User.Kind.CONTENT_DEVELOPER);
-    this.defaultUser = getOrAdd("defaultUser", "Default", "User", User.Kind.AUDIO_RECORDER);
-    this.defaultMale = getOrAdd("defaultMaleUser", "Default", "Male", User.Kind.AUDIO_RECORDER);
-    this.defaultFemale = getOrAdd("defaultFemaleUser", "Default", "Female", User.Kind.AUDIO_RECORDER);
+    this.defaultUser = getOrAdd(DEFAULT_USER1, "Default", "User", User.Kind.AUDIO_RECORDER);
+    this.defaultMale = getOrAdd(DEFAULT_MALE_USER, "Default", "Male", User.Kind.AUDIO_RECORDER);
+    this.defaultFemale = getOrAdd(DEFAULT_FEMALE_USER, "Default", "Female", User.Kind.AUDIO_RECORDER);
+
+    this.defaultUsers = new HashSet<String>(Arrays.asList(DEFECT_DETECTOR,BEFORE_LOGIN_USER,IMPORT_USER,DEFAULT_USER1,DEFAULT_FEMALE_USER,DEFAULT_MALE_USER,"beforeLoginUser"));
+  }
+
+  public boolean isDefaultUser(String userid) {
+    return defaultUsers.contains(userid);
   }
 
   private int getOrAdd(String beforeLoginUser, String first, String last, User.Kind kind) {

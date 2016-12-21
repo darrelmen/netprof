@@ -125,17 +125,27 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
           "INSERT INTO " +
               USERS +
               "(" +
-              ID +
-              ",age,gender,experience,ipaddr,nativeLang,dialect,userID," +
+              ID + "," +
+              "age," +
+              "gender," +
+              "experience," +
+              "ipaddr," +
+              "nativeLang," +
+              "dialect," +
+              "userID," +
               ENABLED + "," +
               PERMISSIONS + "," +
               KIND + "," +
               PASS + "," +
               EMAIL + "," +
-              DEVICE + "," + TIMESTAMP +
+              DEVICE + "," +
+              TIMESTAMP +
 
               ") " +
-              "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+              "VALUES(" +
+              "?,?,?,?,?," +
+              "?,?,?,?,?," +
+              "?,?,?,?,?)");
       int i = 1;
       int newID = max + 1;
       statement.setLong(i++, newID);
@@ -152,7 +162,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
       statement.setString(i++, builder.toString());
 
       statement.setString(i++, kind.toString());
-//      statement.setString(i++, passwordH);
+      statement.setString(i++, "");
       statement.setString(i++, emailH);
       statement.setString(i++, device);
       statement.setTimestamp(i++, new Timestamp(System.currentTimeMillis()));
