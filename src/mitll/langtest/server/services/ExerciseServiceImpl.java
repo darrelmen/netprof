@@ -689,6 +689,11 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
     return ids;
   }
 
+  /**
+   * @deprecated
+   * @param request
+   * @return
+   */
   private ExerciseListWrapper<AmasExerciseImpl> getAMASExerciseIds(
       ExerciseListRequest request
   ) {

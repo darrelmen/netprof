@@ -82,7 +82,7 @@ class CheckLTS {
    * @return
    * @see mitll.langtest.server.scoring.Scoring#checkLTS(String)
    */
-  public Set<String> checkLTS(String foreignLanguagePhrase) {
+  Set<String> checkLTS(String foreignLanguagePhrase) {
     return checkLTS(letterToSoundClass, foreignLanguagePhrase);
   }
 

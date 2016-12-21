@@ -44,6 +44,8 @@ import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.result.Result;
+import mitll.langtest.server.decoder.RefResultDecoder;
+
 import mitll.langtest.server.scoring.*;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.answer.AudioAnswer;
@@ -101,7 +103,7 @@ public class AudioFileHelper implements AlignDecode {
    * @param serverProperties
    * @param db
    * @param langTestDatabase
-   * @see mitll.langtest.server.ScoreServlet#getAudioFileHelper()
+   * @see mitll.langtest.server.ScoreServlet#getAudioFileHelper
    * @see LangTestDatabaseImpl#init
    * @see Project#Project
    */
@@ -577,7 +579,10 @@ public class AudioFileHelper implements AlignDecode {
                                          boolean useOldSchool) {
     return getAudioAnswer(1, exercise1, true, wavPath, file,
         new AudioCheck.ValidityAndDur(duration),
-        false, false, useOldSchool);
+        false, // don't use cache
+        false, // don't allow alternates
+        useOldSchool // if should use hydec instead of hydra NPWS service
+    );
   }
 
   private void logValidity(AudioContext context, File file, AudioCheck.ValidityAndDur validity) {

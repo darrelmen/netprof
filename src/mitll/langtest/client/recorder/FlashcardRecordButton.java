@@ -87,7 +87,7 @@ public class FlashcardRecordButton extends RecordButton {
 
     if (addKeyBinding) {
       addKeyListener(controller, instance);
-      // System.out.println("FlashcardRecordButton : " + instance + " key is  " + listener.getName());
+      // logger.info("FlashcardRecordButton : " + instance + " key is  " + listener.getName());
     }
     this.controller = controller;
 
@@ -110,22 +110,20 @@ public class FlashcardRecordButton extends RecordButton {
 
     tooltip = new TooltipHelper().addTooltip(this, addKeyBinding ? NO_SPACE_WARNING : PROMPT);
 
-//    System.out.println("FlashcardRecordButton : using " + getElement().getExID());
+//    logger.info("FlashcardRecordButton : using " + getElement().getExID());
   }
 
   private void addKeyListener(ExerciseController controller, final String instance) {
-    //     System.out.println("FlashcardRecordButton.addKeyListener : using " + getElement().getExID() + " for " + instance);
-
+    //     logger.info("FlashcardRecordButton.addKeyListener : using " + getElement().getExID() + " for " + instance);
     KeyPressHelper.KeyListener listener = new KeyPressHelper.KeyListener() {
       @Override
       public String getName() {
         return "FlashcardRecordButton_" + instance;
       }
-
       @Override
       public void gotPress(NativeEvent ne, boolean isKeyDown) {
         if (isKeyDown) {
-          checkKeyDown(ne/*,this*/);
+          checkKeyDown(ne);
         } else {
           checkKeyUp(ne);
         }
@@ -138,13 +136,10 @@ public class FlashcardRecordButton extends RecordButton {
     controller.addKeyListener(listener);
   }
 
-  private void checkKeyDown(NativeEvent event
-                            //    , KeyPressHelper.KeyListener listener
-  ) {
+  private void checkKeyDown(NativeEvent event) {
     if (!shouldIgnoreKeyPress()) {
       boolean isSpace = checkIsSpace(event);
-      //System.out.println("checkKeyDown got key press...");
-
+      //logger.info("checkKeyDown got key press...");
       if (isSpace) {
         if (!mouseDown) {
           mouseDown = true;
@@ -153,9 +148,9 @@ public class FlashcardRecordButton extends RecordButton {
       } else if (warnUserWhenNotSpace) {
         int keyCode = event.getKeyCode();
         if (keyCode == KeyCodes.KEY_ALT || keyCode == KeyCodes.KEY_CTRL || keyCode == KeyCodes.KEY_ESCAPE || keyCode == KeyCodes.KEY_WIN_KEY) {
-          //System.out.println("key code is " + keyCode);
+          //logger.info("key code is " + keyCode);
         } else {
-          //System.out.println("warn - key code is " + keyCode);
+          //logger.info("warn - key code is " + keyCode);
           if (keyCode == KeyCodes.KEY_LEFT) {
             gotLeftArrow();
             event.stopPropagation();
@@ -174,7 +169,7 @@ public class FlashcardRecordButton extends RecordButton {
         }
       }
     } else {
-      //  System.out.println("checkKeyDown ignoring key press... " + listener);
+      //  logger.info("checkKeyDown ignoring key press... " + listener);
     }
   }
 
@@ -209,9 +204,9 @@ public class FlashcardRecordButton extends RecordButton {
   protected boolean shouldIgnoreKeyPress() {
     boolean b = !isAttached() || checkHidden(getElement().getId()) || controller.getUser() == -1;
     //if (b) {
-    //System.out.println("attached " + isAttached());
-    //   System.out.println("hidden   " + checkHidden(getElement().getExID()));
-    //  System.out.println("user     " + controller.getUser());
+    //logger.info("attached " + isAttached());
+    //   logger.info("hidden   " + checkHidden(getElement().getExID()));
+    //  logger.info("user     " + controller.getUser());
     // }
     return b;
   }

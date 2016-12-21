@@ -106,8 +106,17 @@ public class SlickAnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
     dao.addUserScore(id, score);
   }
 
+  /**
+   * TODO : set the isCorrect field
+   * @param id
+   * @param score
+   * @param processDur
+   * @param json
+   * @param isCorrect
+   */
   @Override
-  public void changeAnswer(int id, float score, int processDur, String json) {
+  public void changeAnswer(int id, float score, int processDur, String json, boolean isCorrect) {
+
     dao.changeAnswer(id, score, processDur, json);
   }
 }

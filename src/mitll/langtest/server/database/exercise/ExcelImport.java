@@ -85,6 +85,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   private final boolean DEBUG = false;
   private final boolean DEBUG_DETAIL = false;
   private long lastModified;
+  private boolean first = false;
 
   /**
    * @param file
@@ -507,14 +508,18 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
             }
           }
 
-          if (DEBUG) logger.debug("columns word index " + colIndexOffset +
-              " week " + weekIndex + " unit " + unitIndex + " chapter " + chapterIndex +
-              " meaning " + meaningIndex +
-              " transliterationIndex " + transliterationIndex +
-              " contextIndex " + contextIndex +
-              " contextTranslationIndex " + contextTranslationIndex +
-              " id " + idIndex + " audio " + audioIndex
-          );
+          if (DEBUG && !first) {
+            logger.debug("columns word index " + colIndexOffset +
+                " week " + weekIndex + " unit " + unitIndex + " chapter " + chapterIndex +
+                " meaning " + meaningIndex +
+                " transliterationIndex " + transliterationIndex +
+                " contextIndex " + contextIndex +
+                " contextTranslationIndex " + contextTranslationIndex +
+                " id " + idIndex + " audio " + audioIndex
+
+            );
+            first = true;
+          }
         } else {
           int colIndex = colIndexOffset;
           boolean isDelete = isDeletedRow(sheet, next, colIndex);

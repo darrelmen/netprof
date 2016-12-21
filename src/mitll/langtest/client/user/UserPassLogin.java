@@ -67,6 +67,10 @@ import java.util.List;
  */
 public class UserPassLogin extends UserDialog implements UserPassDialog {
 //  private final Logger logger = Logger.getLogger("UserPassLogin");
+
+  private static final String USERNAME_BOX_SIGN_IN = "Username_Box_SignIn";
+  public static final String USER_NAME_BOX = "UserNameBox";
+
   private static final String IPAD_LINE_1 = "Also consider installing the NetProF app, which is available on the DLI App Store.";// or";
   // private static final String IPAD_LINE_2 = "Or click this link to install <a href='https://np.ll.mit.edu/iOSNetProF/'>iOS NetProF" + "</a>.";
   private static final String IPAD_LINE_3 = "Otherwise, you will not be able to record yourself practicing vocabulary.";
@@ -196,8 +200,8 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
             signInForm.setFocusOnUserID();
           }
         },
-        true);
-    modal.setMaxHeigth((600) + "px");
+        true, true);
+    modal.setMaxHeigth(600 + "px");
     modal.show();
   }
 

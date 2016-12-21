@@ -33,7 +33,6 @@
 package mitll.langtest.client;
 
 import com.google.gwt.user.client.Window;
-import mitll.hlt.domino.shared.Constants;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.user.UserPassLogin;
 import mitll.langtest.server.rest.RestUserManagement;
@@ -137,17 +136,21 @@ public class PropertyHandler {
   private static final String INITIAL_PROMPT = "Practice pronunciation and learn vocabulary.";//"Learn how to pronounce words and practice vocabulary.";
   private static final String AMAS_INITIAL_PROMPT = "Test your Listening and Reading Skills.";
 
+  /**
+   * TODO : don't do this in two places!
+   */
   private static final List<String> SITE_LIST = Arrays.asList(
       "Dari",
       "Egyptian",
       "English",
       "Farsi",
       "German",
-      "Korean",
       "Iraqi",
       "Japanese",
+      "Korean",
       "Levantine",
       "Mandarin",
+      "MandarinTraditional",
       "MSA",
       "Pashto1",
       "Pashto2",
@@ -162,7 +165,7 @@ public class PropertyHandler {
   // private boolean beta;
   private String fontFamily = "";
   private String modelDir;
-  private int afterStopDelayMillis;
+  private int afterStopDelayMillis = DEFAULT_AFTER_STOP_DELAY_MILLIS;
 
   /**
    * @return

@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.rest;
 
+import mitll.hlt.domino.server.util.ServletUtil;
 import mitll.langtest.client.user.Md5Hash;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
@@ -40,7 +41,6 @@ import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
-import mitll.langtest.server.services.UserServiceImpl;
 import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
 import net.sf.json.JSONObject;
@@ -85,17 +85,17 @@ public class RestUserManagement {
 //  private static final String FREE_TEXT_PASSWORD = "freeTextPassword";
 
   /**
-   * @see mitll.langtest.server.database.user.UserManagement#userExists
+   * @seex mitll.langtest.server.database.user.UserManagement#userExists
    * @see #addUser
    */
   private static final String EMAIL_H = "emailH";
   private static final String EMAIL = "email";
   /**
-   * @see mitll.langtest.server.database.user.UserManagement#userExists
+   * @seex mitll.langtest.server.database.user.UserManagement#userExists
    */
   private static final String USERID = "userid";
   /**
-   * @see mitll.langtest.server.database.user.UserManagement#userExists
+   * @seex mitll.langtest.server.database.user.UserManagement#userExists
    */
   private static final String PASSWORD_CORRECT = "passwordCorrect";
 
@@ -202,7 +202,7 @@ public class RestUserManagement {
 
         String second = split1[1];
         String passwordH = getArg(second);
-        toReturn.put(VALID, changePFor(token, passwordH));
+        toReturn.put(VALID, changePFor(token, passwordH, getBaseURL(request)));
       }
       return true;
     } else if (queryString.equals(USERS)) {
@@ -383,13 +383,13 @@ public class RestUserManagement {
    * @seex UserServiceImpl#changePFor
    * @see #doGet(HttpServletRequest, HttpServletResponse, String, JSONObject)
    */
-  private boolean changePFor(String userid, String freeTextPassword) {
+  private boolean changePFor(String userid, String freeTextPassword, String baseURL) {
     User userByID = db.getUserDAO().getUserByID(userid);
 
     //  freeTextPassword = rot13(freeTextPassword);
- //   String hash = Md5Hash.getHash(freeTextPassword);
+    //   String hash = Md5Hash.getHash(freeTextPassword);
 
-    boolean b = db.getUserDAO().changePassword(userByID.getID(), freeTextPassword);
+    boolean b = db.getUserDAO().changePassword(userByID.getID(), freeTextPassword, baseURL);
 
     if (!b) {
       logger.error("changePFor : couldn't update user password for user " + userByID);
@@ -413,6 +413,11 @@ public class RestUserManagement {
     }
 */
   }
+
+  private String getBaseURL(HttpServletRequest r) {
+    return ServletUtil.get().getBaseURL(r);
+  }
+
 
   private EmailHelper getEmailHelper() {
     return new EmailHelper(serverProps, db.getUserDAO(), getMailSupport(), pathHelper);

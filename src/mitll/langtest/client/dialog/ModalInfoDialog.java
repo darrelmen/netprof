@@ -73,24 +73,28 @@ public class ModalInfoDialog {
     this(title, message, null);
   }
 
-  public ModalInfoDialog(String title, Widget widget) {
-    this(title, MESSAGES, Collections.emptyList(), widget, null, false);
+  public ModalInfoDialog(String title, Widget widget, boolean addEnterKeyBinding) {
+    this(title, MESSAGES, Collections.emptyList(), widget, null, false, addEnterKeyBinding);
   }
 
   public ModalInfoDialog(String title, String message, HiddenHandler handler) {
-    this(title, Collections.singleton(message), Collections.emptyList(), null, handler, false);
+    this(title, Collections.singleton(message), Collections.emptyList(), null, handler, false, true);
   }
 
-  public ModalInfoDialog(String title, Collection<String> messages, Collection<String> values, Widget widget, HiddenHandler handler, boolean bigger) {
-    Modal modal = getModal(title, messages, values, widget, handler, bigger);
+  public ModalInfoDialog(String title, Collection<String> messages, Collection<String> values, Widget widget,
+                         HiddenHandler handler, boolean bigger, boolean addEnterKeyBinding) {
+    Modal modal = getModal(title, messages, values, widget, handler, bigger, addEnterKeyBinding);
+    modal.setWidth(600);
     modal.show();
   }
 
-/*  public Modal getModal(String title, String message, Widget widget, HiddenHandler handler, boolean bigger) {
-    return getModal(title, Collections.singleton(message), Collections.emptyList(), widget, handler, bigger);
-  }*/
 
-  public Modal getModal(String title, Collection<String> messages, Collection<String> values, Widget widget, HiddenHandler handler, boolean bigger) {
+  public Modal getModal(String title, String message, Widget widget, HiddenHandler handler, boolean bigger) {
+    return getModal(title, Collections.singleton(message), Collections.emptyList(), widget, handler, bigger, true);
+  }
+
+  public Modal getModal(String title, Collection<String> messages, Collection<String> values, Widget widget,
+                        HiddenHandler handler, boolean bigger, boolean addEnterKeyBinding) {
     final Modal modal = new Modal(true);
     modal.setTitle(title);
 
@@ -98,7 +102,7 @@ public class ModalInfoDialog {
 
     if (widget != null) modal.add(widget);
 
-    final Button begin = getOKButton(modal);
+    final Button begin = getOKButton(modal, addEnterKeyBinding);
     begin.addStyleName("floatRight");
     modal.add(begin);
 
@@ -139,7 +143,7 @@ public class ModalInfoDialog {
     return flexTable;
   }
 
-  private Button getOKButton(final Modal modal) {
+  private Button getOKButton(final Modal modal, boolean addEnterKeyBinding) {
     final Button begin = new Button("OK");
     begin.setType(ButtonType.PRIMARY);
     begin.setEnabled(true);
@@ -153,7 +157,10 @@ public class ModalInfoDialog {
       }
     });
 
-    enterKeyButtonHelper.addKeyHandler(begin);
+    if (addEnterKeyBinding) {
+      enterKeyButtonHelper.addKeyHandler(begin);
+    }
+
     begin.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {

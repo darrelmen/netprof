@@ -49,7 +49,15 @@ import java.sql.*;
 import java.util.*;
 
 import static mitll.langtest.server.database.Database.EXID;
+import static mitll.langtest.server.database.result.ResultDAO.MODEL;
+import static mitll.langtest.server.database.result.ResultDAO.MODELUPDATE;
 
+/**
+ * Create, drop, alter, read from the results table.
+ * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
+ */
 public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
   private static final Logger logger = LogManager.getLogger(RefResultDAO.class);
 
@@ -60,6 +68,7 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
 
   private static final String REFRESULT = "refresult";
   private static final String SELECT_ALL = "SELECT * FROM " + REFRESULT;
+  public static final String SELECT_PREFIX = SELECT_ALL + " WHERE " + EXID;
 
   private static final String DURATION = "duration";
   private static final String CORRECT = "correct";
@@ -81,6 +90,9 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
   private static final String HYDEC_ALIGN_NUM_PHONES = "hydecAlignNumPhones";
   private static final String WORDS = "{\"words\":[]}";
   //  private final boolean debug = false;
+//  private final boolean dropTable;
+  //  private final boolean debug = false;
+  private final String currentModel;
 
   /**
    * @param database
@@ -89,6 +101,7 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
    */
   public RefResultDAO(Database database, boolean dropTable) {
     super(database, dropTable);
+    currentModel = database.getServerProps().getCurrentModel();
   }
 
   @Override
@@ -115,13 +128,13 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
                         long durationInMillis,
                         boolean correct,
 
-                        DecodeAlignOutput alignOutput,
-                        DecodeAlignOutput decodeOutput,
+                 DecodeAlignOutput alignOutput,
+                 DecodeAlignOutput decodeOutput,
 
-                        DecodeAlignOutput alignOutputOld,
-                        DecodeAlignOutput decodeOutputOld,
+                 DecodeAlignOutput alignOutputOld,
+                 DecodeAlignOutput decodeOutputOld,
 
-                        boolean isMale, String speed) {
+                 boolean isMale, String speed) {
     Connection connection = database.getConnection(this.getClass().toString());
     try {
       long then = System.currentTimeMillis();
@@ -206,13 +219,17 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
             HYDEC_ALIGN_PROCESS_DUR + ", " +
 
             MALE + "," +
-            SPEED +
+            SPEED + "," +
+
+            MODEL + "," +
+            MODELUPDATE +
             ") " +
             "VALUES(?,?,?,?,?,?," +
             "?,?,?,?," +
             "?,?,?,?," +
             "?,?,?," +
             "?,?,?," +
+            "?,?," +
             "?,?" +
             ")",
         Statement.RETURN_GENERATED_KEYS);
@@ -247,6 +264,9 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
 
     statement.setBoolean(i++, isMale);
     statement.setString(i++, speed);
+
+    statement.setString(i++, currentModel);
+    statement.setTimestamp(i++, new Timestamp(System.currentTimeMillis()));
 
     statement.executeUpdate();
 
@@ -295,6 +315,31 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
   @Override
   public List<SlickRefResultJson> getJsonResults() {
     return null;
+  }
+
+  public Result getRefForExAndAudio(String exid, String answer) {
+    Result latestResult = null;
+
+    try {
+      String exidPrefix = SELECT_PREFIX + "='" + exid + "'";
+      List<Result> resultsSQL = getResultsSQL(exidPrefix);
+      if (resultsSQL.size() > 0) {
+        logger.info("getRefForExAndAudio got " + resultsSQL.size() + " for " + exid);
+      }
+
+      long latest = 0;
+      for (Result res : resultsSQL) {
+        if (res.getAnswer().endsWith(answer)) {
+          if (res.getUniqueID() > latest) {
+            latest = res.getUniqueID();
+            latestResult = res;
+          }
+        }
+      }
+    } catch (SQLException e) {
+      logger.error("Got " + e, e);
+    }
+    return latestResult;
   }
 
   /**
@@ -413,6 +458,8 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
     int count = 0;
     int skipped = 0;
     long then = System.currentTimeMillis();
+
+
     while (rs.next()) {
       int uniqueID = rs.getInt(ID);
       int userID = rs.getInt(USERID);
@@ -438,6 +485,8 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
 
       float alignScore = rs.getFloat(ALIGNSCORE);
       String alignJSON = rs.getString(ALIGNJSON);
+      String model = rs.getString(MODEL);
+
       boolean validAlignJSON = alignScore > 0 && !alignJSON.contains(WORDS);
 
       if (validAlignJSON || validDecodeJSON) {
@@ -468,6 +517,9 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
 
         result.setDecodeOutput(new DecodeAlignOutput(pronScore, scoreJson, hydraDecodeDur, correct, rs.getInt(NUMDECODE_PHONES)));
         result.setAlignOutput(new DecodeAlignOutput(alignScore, alignJSON, hydraAlignDur, true, rs.getInt(NUM_ALIGN_PHONES)));
+//            "", dur, correct, pronScore1,
+//            "browser",
+//            model);
         result.setJsonScore(scoreJson1);
         result.setOldExID(exid);
         results.add(result);
@@ -533,6 +585,13 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
     }
     if (!columns.contains(ALIGN_PROCESS_DUR.toLowerCase())) {
       addInt(connection, REFRESULT, ALIGN_PROCESS_DUR);
+    }
+
+    if (!columns.contains(MODEL.toLowerCase())) {
+      addVarchar(connection, REFRESULT, MODEL);
+    }
+    if (!columns.contains(MODELUPDATE.toLowerCase())) {
+      addTimestamp(connection, REFRESULT, MODELUPDATE);
     }
 
     createIndex(database, EXID, REFRESULT);

@@ -76,6 +76,8 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
   private Logger logger;
 
   private Heading recoOutput;
+
+  static final int CORRECT_DELAY = 600;
   private static final int DELAY_MILLIS_LONG = 3000;
   private static final int LONG_DELAY_MILLIS = 3500;
   //private static final int DELAY_CHARACTERS = 40;
@@ -108,6 +110,12 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
                                 SoundFeedback.EndListener endListener,
                                 String instance, ListInterface exerciseList) {
     super(e, service, controller, addKeyBinding, controlState, soundFeedback, endListener, instance, exerciseList);
+  }
+
+  /**
+   * Don't add one.
+   */
+  protected void addKeyListener() {
   }
 
   /**
@@ -180,7 +188,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
     if (logger == null) {
       logger = Logger.getLogger("BootstrapExercisePanel");
     }
-    //  logger.info("called  addRecordingAndFeedbackWidgets ");
+    // logger.info("called  addRecordingAndFeedbackWidgets ");
     // add answer widget to do the recording
     toAddTo.add(getAnswerAndRecordButtonRow(exerciseID, service, controller));
 
@@ -369,7 +377,6 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
     scoreFeedbackRow.add(showScoreFeedback(score));
   }
 
-
   /**
    * @param score
    * @seex #showCRTFeedback(Double, mitll.langtest.client.sound.SoundFeedback, String, boolean)
@@ -414,8 +421,8 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
     final double score = result.getScore();
 
     boolean badAudioRecording = result.getValidity() != AudioAnswer.Validity.OK;
-    if (false) logger.info("BootstrapExercisePanel.receivedAudioAnswer: correct " + correct + " pron score : " + score +
-        " has ref " + hasRefAudio + " bad audio " + badAudioRecording + " result " + result);
+//    logger.info("BootstrapExercisePanel.receivedAudioAnswer: correct " + correct + " pron score : " + score +
+//        " has ref " + hasRefAudio + " bad audio " + badAudioRecording + " result " + result);
 
     String feedback = "";
     if (badAudioRecording) {
@@ -542,6 +549,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
     return correctPrompt;
   }
 
+
   private void showOtherText() {
     if (controlState.isEnglish()) showForeign();
     else if (controlState.isForeign()) showEnglish();
@@ -642,7 +650,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
       if (correct) {
         // go to next item
 //        logger.info("Bootstrap nextAfterDelay " + correct);
-        loadNextOnTimer(100);//DELAY_MILLIS);
+        loadNextOnTimer(CORRECT_DELAY);//DELAY_MILLIS);
       } else {
         initRecordButton();
         clearFeedback();

@@ -86,6 +86,9 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
 
   public static final String USER_SCORE = "userscore";
   //public static final String CLASSIFIER_SCORE = "classifierscore";
+  static final String TRANSCRIPT = "transcript";
+  public static final String MODEL = "model";
+  public static final String MODELUPDATE = "modelupdate";
 
   private final boolean debug = true;
 

@@ -40,6 +40,13 @@ import org.apache.logging.log4j.Logger;
 
 import java.sql.*;
 
+/**
+ * Does writing to the results table.
+ * Reading, etc. happens in {@link ResultDAO} - might be a little confusing... :)
+ * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
+ */
 public class AnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
   private static final Logger logger = LogManager.getLogger(AnswerDAO.class);
   private static final String PLAN = "plan";
@@ -114,7 +121,7 @@ public class AnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
 
     int i = 1;
 
-    statement.setInt(i++, (int)info.getUserid());
+    statement.setInt(i++, (int) info.getUserid());
     statement.setString(i++, PLAN); // obsolete
     statement.setString(i++, copyStringChar(info.getId()));
     statement.setInt(i++, 1);
@@ -148,7 +155,7 @@ public class AnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
 
   /**
    * Need to protect call to get generated keys.
-   *
+   * <p>
    * Add a row to the table.
    * Each insert is marked with a timestamp.
    * This allows us to determine user completion rate.
@@ -159,11 +166,10 @@ public class AnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
    * @see AnswerDAO#addAnswer
    */
   private long addAnswerToTable(Connection connection, AnswerInfo info) throws SQLException {
-
     long newID = -1;
     synchronized (this) {
       long then = System.currentTimeMillis();
-      logger.debug(getLanguage() + " : START : addAnswerToTable : adding answer for " + info);
+//      logger.debug(getLanguage() + " : START : addAnswerToTable : adding answer for " + info);
       PreparedStatement statement = connection.prepareStatement("INSERT INTO " +
           ResultDAO.RESULTS +
           "(" +
@@ -224,10 +230,9 @@ public class AnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
 
       connection.commit();
       statement.close();
-      long now = System.currentTimeMillis();
-
-      logger.debug(getLanguage() + " : END   : addAnswerToTable : adding answer for (" + (now-then)+
-          ") millis : " + info + " result id " + newID);
+//      long now = System.currentTimeMillis();
+//      logger.debug(getLanguage() + " : END   : addAnswerToTable : adding answer for (" + (now - then) +
+//          ") millis : " + info + " result id " + newID);
     }
 
     resultDAO.invalidateCachedResults();
@@ -298,26 +303,32 @@ public class AnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
    * @see mitll.langtest.server.database.DatabaseImpl#rememberScore(int, PretestScore, boolean)
    */
   @Override
-  public void changeAnswer(int id, float score, int processDur, String json) {
+  public void changeAnswer(int id, float score, int processDur, String json, boolean isCorrect) {
     //logger.info("Setting id " + id + " score " + score + " process dur " + processDur + " json " + json);
     Connection connection = getConnection();
     try {
+      String currentModel = database.getServerProps().getCurrentModel();
       String sql = "UPDATE " +
           "results " +
           "SET " +
           ResultDAO.PRON_SCORE + "='" + score + "', " +
           ResultDAO.PROCESS_DUR + "='" + processDur + "', " +
+          ResultDAO.CORRECT + "=" + isCorrect + ", " +
+          ResultDAO.MODELUPDATE + "='" + new Timestamp(System.currentTimeMillis()) + "', " +
+          ResultDAO.MODEL + "='" + currentModel + "', " +
           ResultDAO.SCORE_JSON + "='" + json + "' " +
+
           "WHERE id=" + id;
 
       PreparedStatement statement = connection.prepareStatement(sql);
+
       if (statement.executeUpdate() == 0) {
         logger.error("huh? didn't change the answer for " + id + " sql " + sql);
       }
 
       statement.close();
     } catch (Exception e) {
-      logger.error("got " + e, e);
+      logger.error("changeAnswer got " + e, e);
     } finally {
       database.closeConnection(connection);
     }

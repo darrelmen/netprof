@@ -97,4 +97,8 @@ public class TranscriptSegment implements IsSerializable {
   public String toString() {
     return "[" + roundToHundredth(start) + "-" + roundToHundredth(end) + "] " + event + " (" + roundToHundredth(score) + ")";
   }
+
+  public float getFloatDuration() {
+    return getEnd()-getStart();
+  }
 }

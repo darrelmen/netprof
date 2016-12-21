@@ -153,7 +153,11 @@ public class UserList<T extends HasID> extends BaseExercise {
   }
 
   public boolean remove(T newUserExercise) {
-    return exercises.remove(newUserExercise);
+    int before = exercises.size();
+    boolean remove = exercises.remove(newUserExercise);
+    int after = exercises.size();
+   // if (after-before != 1) System.err.println("huh? before " + before + " after " + after);
+    return remove;
   }
 
   public boolean removeAndCheck(int id) {

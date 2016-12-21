@@ -674,7 +674,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
 
 
   @Override
-  public boolean changePassword(int user, String newHashPassword) {
+  public boolean changePassword(int user, String newHashPassword, String baseURL) {
     try {
       Connection connection = getConnection();
       PreparedStatement statement;
@@ -704,7 +704,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   }
 
   @Override
-  public boolean changePasswordWithCurrent(int user, String currentHashPassword, String newHashPassword) {
+  public boolean changePasswordWithCurrent(int user, String currentHashPassword, String newHashPassword, String baseURL) {
     return true;
   }
 
