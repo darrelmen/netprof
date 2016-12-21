@@ -364,7 +364,8 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
               CommonExercise imported = isDelete ? null : getExercise(idToUse, english, foreignLanguagePhrase, translit,
                   meaning, context, contextTranslation, hasAudioIndex ? getCell(next, audioIndex) : "");
 
-              String id1 = imported.getID();
+              String id1 = imported == null ? idToUse : imported.getID();
+
               if (!isDelete &&
                   (imported.hasRefAudio() || !shouldHaveRefAudio)) {  // skip items without ref audio, for now.
                 recordUnitChapterWeek(unitIndex, chapterIndex, weekIndex, next, imported, unitName, chapterName, weekName);

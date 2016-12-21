@@ -71,7 +71,7 @@ public class SLFFile {
    * @param tmpDir
    * @param unknownModelBiasWeight - a property you can set in the property file
    * @return
-   * @see mitll.langtest.server.audio.AudioFileHelper#createSLFFile
+   * @see mitll.langtest.server.scoring.ASRScoring#calcScoreForAudio
    */
   public String createSimpleSLFFile(Collection<String> lmSentences, String tmpDir, float unknownModelBiasWeight) {
     String slfFile = getSLFPath(tmpDir);
@@ -197,7 +197,6 @@ public class SLFFile {
               nodesBuf.append("I=" + currentSil + " W=" + SIL + ";");
               linksBuf.append("J=" + (linkCount++) + " S=" + currentNode + " E=" + currentSil + " l=" + linkWeight + ";");
             }
-
           }
           if (!isUNK)
             finalSentence += cleanedToken + ";";
