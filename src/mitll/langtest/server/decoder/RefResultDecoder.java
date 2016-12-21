@@ -35,10 +35,13 @@ package mitll.langtest.server.decoder;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -72,6 +75,7 @@ public class RefResultDecoder {
   private final PathHelper pathHelper;
   private final AudioConversion audioConversion;
   private final boolean hasModel;
+  private final AudioCheck audioCheck;
 
   /**
    * @param db
@@ -88,9 +92,13 @@ public class RefResultDecoder {
     this.audioFileHelper = audioFileHelper;
     this.audioConversion = new AudioConversion(serverProperties);
     this.hasModel = hasModel;
+    audioCheck = new AudioCheck(serverProperties);
   }
 
   /**
+   * Used to have cheesy check for trying to convert old audio held outside of audio table into audio table
+   * entries.
+   *
    * @param exercises
    * @see LangTestDatabaseImpl#init()
    */
@@ -113,6 +121,10 @@ public class RefResultDecoder {
             if (!exercises.isEmpty()) {
               CommonExercise next = exercises.iterator().next();
               writeRefDecode(exercises, next.getProjectID());
+            }
+            if (db.getServerProps().shouldRecalcStudentAudio()) {
+              //            recalcStudentAudio();
+              logger.warn("not doing recalc student audio.");
             }
           }
         } else {
@@ -195,6 +207,9 @@ public class RefResultDecoder {
       int femaleAudio = 0;
       int defaultAudio = 0;
       Set<Integer> failed = new TreeSet<>();
+      int dnr = 0;
+      int since = 0;
+      //AudioDAO audioDAO = db.getAudioDAO();
       for (CommonExercise exercise : exercises) {
         if (stopDecode) return;
 
@@ -205,6 +220,12 @@ public class RefResultDecoder {
           attrc += audioAttributes.size();
           if (!didAll) {
             failed.add(exercise.getID());
+          }
+
+          dnr += setDNROnAudio(installPath, db.getAudioDAO(), audioAttributes);
+          if (dnr - since > 2000) {
+            since = dnr;
+            logger.info(language + ": trimRef : did DNR on " + dnr);
           }
         }
 
@@ -255,6 +276,98 @@ public class RefResultDecoder {
     }
   }
 
+  private int setDNROnAudio(String installPath, IAudioDAO audioDAO, List<AudioAttribute> audioAttributes) {
+    int c = 0;
+
+    for (AudioAttribute audio : audioAttributes) {
+      float dnr1 = audio.getDnr();
+      if (dnr1 < 0) {
+        String audioRef = audio.getAudioRef();
+        File test = new File(installPath, audioRef);
+
+        boolean exists = test.exists();
+        if (!exists) {
+          test = new File(installPath, audioRef);
+          exists = test.exists();
+          // child = audioRef;
+        }
+        if (exists) {
+          dnr1 = audioCheck.getDNR(test);
+          audioDAO.updateDNR(audio.getUniqueID(), dnr1);
+          c++;
+        }
+      }
+    }
+    return c;
+  }
+
+  /*private void recalcStudentAudio() {
+    IResultDAO resultDAO = db.getResultDAO();
+
+    Map<String, CommonExercise> idToEx = new HashMap<>();
+    List<CommonExercise> rawExercises = db.getExerciseDAO().getRawExercises();
+    for (CommonExercise ex : rawExercises) idToEx.put(ex.getID(), ex);
+
+    int count = 0;
+    Set<String> skip = new HashSet<>(Arrays.asList("slow", "regular", "slow_by_WebRTC", "regular_by_WebRTC"));
+    List<Result> results = resultDAO.getResults();
+    int skipped = 0;
+    int notThere = 0;
+    int staleExercise = 0;
+    int currentAlready = 0;
+
+    String currentModel = db.getServerProps().getCurrentModel();
+
+    for (Result result : results) {
+      if (result.isValid()) {
+        if (skip.contains(result.getAudioType())) {
+          skipped++;
+        } else {
+          String audioRef = result.getAnswer();
+
+          boolean fileExists = false;
+          if (!audioRef.contains("context=")) {
+            //logger.debug("doing alignment -- ");
+            // Do alignment...
+            File absoluteFile = pathHelper.getAbsoluteFile(audioRef);
+            fileExists = absoluteFile.exists();
+          }
+
+          String exid = result.getExid();
+
+          if (fileExists) {
+            CommonExercise exercise = idToEx.get(exid);
+            if (exercise != null) {
+              if (result.getModel() == null || !result.getModel().equals(currentModel)) {
+                audioFileHelper.recalcOne(result, exercise);
+                sleep(serverProps.getSleepBetweenDecodes());
+                count++;
+                if (count % 100 == 0) logger.info("recalc " + count + "/" + results.size());
+              } else {
+                currentAlready++;
+              }
+            } else {
+              if (staleExercise < 1000) {
+                logger.info("can't find ex '" + exid + "' in " + idToEx.size());
+              }
+              staleExercise++;
+            }
+          } else {
+            if (notThere < 10 *//*|| exid.startsWith("1")*//*)
+              logger.info("Can't find " + pathHelper.getAbsoluteFile(audioRef).getAbsolutePath());
+            notThere++;
+          }
+        }
+      }
+    }
+
+    logger.info("recalcStudentAudio did recalc on " + count + "/" + results.size() +
+        " skipped " + skipped +
+        " not there " + notThere + " stale exercises " + staleExercise + " currentAlready " + currentAlready);
+
+  }
+*/
+
   /**
    * TODO : put this back so we can run it per project
    * Do alignment and decoding on all the reference audio and store the results in the RefResult table.
@@ -266,7 +379,7 @@ public class RefResultDecoder {
     logger.warn("writeRefDecode got " + b + " for should do decode");
     if (false) {
       Map<Integer, List<AudioAttribute>> exToAudio = db.getAudioDAO().getExToAudio(projid);
-     // String installPath = pathHelper.getInstallPath();
+      // String installPath = pathHelper.getInstallPath();
 
       int numResults = db.getRefResultDAO().getNumResults();
       String language = db.getLanguage(projid);
@@ -397,17 +510,39 @@ public class RefResultDecoder {
         String audioRef = attribute.getAudioRef();
 
         boolean fileExists = false;
+        File absoluteFile = pathHelper.getAbsoluteFile(audioRef);
         if (!audioRef.contains("context=")) {
           //logger.debug("doing alignment -- ");
           // Do alignment...
-          File absoluteFile = pathHelper.getAbsoluteAudioFile(audioRef);
+//          File absoluteFile = pathHelper.getAbsoluteAudioFile(audioRef);
           fileExists = absoluteFile.exists();
         }
 
         if (fileExists) {
-          audioFileHelper.decodeOneAttribute(exercise, attribute, doHydec);
-          sleep(serverProps.getSleepBetweenDecodes());
-          count++;
+          double durationInSeconds = audioCheck.getDurationInSeconds(absoluteFile);
+          long durationInMillis = attribute.getDurationInMillis();
+
+          if (durationInMillis > 100) {
+            if (durationInSeconds < 0.01) {
+              logger.warn("doDecode : 1 huh? attr dur " + durationInMillis + " but check dur " + durationInSeconds);
+            }
+            float dnr = attribute.getDnr();
+            if (dnr < 0) dnr = audioCheck.getDNR(absoluteFile);
+            if (dnr > audioCheck.getMinDNR()) {
+              audioFileHelper.decodeOneAttribute(exercise, attribute, doHydec);
+              sleep(serverProps.getSleepBetweenDecodes());
+              count++;
+            } else {
+              logger.info("doDecode : for " + exercise.getID() + " (" + durationInMillis +
+                  ") skip low dynamic range file " + audioRef);
+            }
+          } else {
+            if (durationInSeconds > 0.01) {
+              logger.warn("doDecode : 2 huh? attr dur " + durationInMillis + " but check dur " + durationInSeconds);
+            }
+            logger.info("doDecode : for " + exercise.getID() + " (" + durationInMillis +
+                ") skip short file " + audioRef);
+          }
         }
       } catch (Exception e) {
         logger.error("Got " + e, e);

@@ -747,6 +747,34 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
     }
   }
 
+  public void updateDNR(int uniqueID, float dnr) {
+    try {
+      Connection connection = database.getConnection(this.getClass().toString());
+      String sql = "UPDATE " + AUDIO +
+          " SET " +
+          DNR +
+          "=? " +
+          "WHERE " +
+          ID + "=?";
+      PreparedStatement statement = connection.prepareStatement(sql);
+
+      int ii = 1;
+
+      statement.setFloat(ii++, dnr);
+      statement.setInt(ii++, uniqueID);
+
+      int i = statement.executeUpdate();
+
+      if (i == 0) {
+        logger.error("huh? couldn't update audio " + uniqueID + " to " + dnr);
+      }
+
+      finish(connection, statement);
+    } catch (Exception e) {
+      logger.error("got " + e, e);
+    }
+  }
+
   @Override
   public void validateFileExists(int projid, String installPath, String language) {
 

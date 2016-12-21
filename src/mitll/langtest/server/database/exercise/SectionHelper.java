@@ -348,7 +348,7 @@ public class SectionHelper<T extends Shell> {
 
   /**
    * @param exercise
-   * @see mitll.langtest.server.database.DatabaseImpl#deleteItem(int, int)
+   * @see mitll.langtest.server.database.DatabaseImpl#deleteItem
    * @see BaseExerciseDAO#removeExercises()
    */
   public boolean removeExercise(T exercise) {
@@ -377,7 +377,7 @@ public class SectionHelper<T extends Shell> {
    * @param type
    * @param unitName
    * @return
-   * @see mitll.langtest.server.database.DatabaseImpl#deleteItem(int, int)
+   * @see mitll.langtest.server.database.DatabaseImpl#deleteItem
    */
   private boolean removeExerciseToLesson(T exercise, String type, String unitName) {
     Map<String, Lesson<T>> unit = getSectionToLesson(type);

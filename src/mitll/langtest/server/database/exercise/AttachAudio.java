@@ -41,6 +41,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+
 import java.io.File;
 import java.util.*;
 
@@ -58,6 +59,8 @@ public class AttachAudio {
   private String language;
   private boolean checkAudioTranscript = true;
   private final AudioCheck audioCheck;
+//  private final AudioDAO audioDAO;
+
 
   /**
    * @param exToAudio
@@ -125,7 +128,7 @@ public class AttachAudio {
    * Why does it sometimes have the config dir on the front?
    *
    * @param imported
-   * @paramx id
+   * @param transcriptChanged
    * @see ExcelImport#attachAudio
    * @see ExcelImport#getRawExercises()
    */
@@ -153,9 +156,11 @@ public class AttachAudio {
    * We get the actual path from what's set in the database.
    * Only the hydra server can see the actual file to see if it's there.
    * We communicate that via the actual path field in the database.
+   * Don't attach audio that doesn't meet the dynamic range minimum.
    *
    * @param <T>
    * @param exercise
+   *
    * @param missing
    * @param audioAttributes
    * @param language
@@ -230,6 +235,9 @@ public class AttachAudio {
               audio.setAudioRef(actualPath);   // remember to prefix the path
               mutableAudio.addAudio(audio);
             }
+           else {
+            logger.debug("attachAudio skipping audio file with low dynamic range ");
+          }
 
           } else {
             transcriptChangedIDs.add(audio.getExid());

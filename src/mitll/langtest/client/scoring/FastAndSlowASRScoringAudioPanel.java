@@ -234,7 +234,6 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
   private void addRegularAndSlow(Panel vp, Collection<AudioAttribute> audioAttributes, String instance) {
 /*      System.out.println("getAfterPlayWidget : for exercise " +exercise.getOldID() +
         " path "+ audioPath + " attributes were " + audioAttributes);*/
-
     RadioButton regular = null;
     AudioAttribute regAttr = null;
     RadioButton slow = null;
@@ -271,6 +270,7 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
       });
       regular.setValue(choseRegularSpeed);
     }
+
     if (slow != null) {
       addAudioRadioButton(vp, slow);
       final AudioAttribute innerSlowAttr = slowAttr;

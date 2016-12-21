@@ -290,12 +290,12 @@ public class AudioConversion {
     private final double duration;
     private final boolean didTrim;
 
-    public TrimInfo() {
+    TrimInfo() {
       duration = 0;
       didTrim = false;
     }
 
-    public TrimInfo(double duration, boolean didTrim) {
+    TrimInfo(double duration, boolean didTrim) {
       this.duration = duration;
       this.didTrim = didTrim;
     }
@@ -303,11 +303,9 @@ public class AudioConversion {
     public double getDuration() {
       return duration;
     }
-
     public boolean didTrim() {
       return didTrim;
     }
-
     public String toString() {
       return " dur " + duration + " did trim " + didTrim;
     }

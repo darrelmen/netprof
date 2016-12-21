@@ -87,7 +87,7 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
     style.setPaddingRight(0, Style.Unit.PX);
     secondRow.add(new Column(12, sectionPanel));
     setUnaccountedForVertical(CLASSROOM_VERTICAL_EXTRA);
-    downloadHelper = new DownloadHelper(controller, this);
+    downloadHelper = new DownloadHelper(this);
   }
 
   /**
@@ -136,7 +136,7 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
 
   private void getTypeOrder(final FluidContainer container) {
     typeOrder = controller.getProjectStartupInfo().getTypeOrder();
-  //  logger.info("getTypeOrder type order is " + typeOrder);
+    //  logger.info("getTypeOrder type order is " + typeOrder);
     addChoiceRow(controller.getProjectStartupInfo().getSectionNodes(), container, typeOrder);
   }
 
@@ -164,27 +164,27 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
 
 //    logger.info("iter order ");
     rootNodes = new SectionNodeItemSorter().getSortedItems(rootNodes);
-   // for (SectionNode node:rootNodes) logger.info("\t" + node.getType() + " " +node.getName());
+    // for (SectionNode node:rootNodes) logger.info("\t" + node.getType() + " " +node.getName());
 
     //int index = 0;
 
     ListSectionWidget parent = null;
-    int i =0;
+    int i = 0;
 
     for (String type : types) {
 //      List<String> sectionsInType = new ArrayList<>();
 //      for (SectionNode node:rootNodes) {
 //        sectionsInType.add(node.getName());
 //      }
-     // if (!type.equals("Sound")) {
-     //   for (SectionNode node : rootNodes) logger.info("#" + (i++) + "\t" + node.getName());
-     // }
+      // if (!type.equals("Sound")) {
+      //   for (SectionNode node : rootNodes) logger.info("#" + (i++) + "\t" + node.getName());
+      // }
       //List<String> sectionsInType = new ItemSorter().getSortedItems(getLabels(rootNodes));
       List<String> sectionsInType = getLabels(rootNodes);
 
-   //   logger.info("got " + type + " num sections " + sectionsInType.size());
+      //   logger.info("got " + type + " num sections " + sectionsInType.size());
 
-   //   MenuSectionWidget value = new MenuSectionWidget(type, rootNodes, this);
+      //   MenuSectionWidget value = new MenuSectionWidget(type, rootNodes, this);
       ListSectionWidget value = new ListSectionWidget(type, rootNodes, this);
       if (parent != null) {
         parent.addChild(value);
@@ -195,7 +195,7 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
       //   logger.info("for " + type + " : " + sectionsInType);
       value.addChoices(firstTypeRow, type, sectionsInType);
 
-      if (types.indexOf(type) < types.size()-1) {
+      if (types.indexOf(type) < types.size() - 1) {
         rootNodes = getChildSectionNodes(rootNodes);
         rootNodes = new SectionNodeItemSorter().getSortedItems(rootNodes);
       }
@@ -214,14 +214,14 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
   private List<SectionNode> getChildSectionNodes(Collection<SectionNode> rootNodes) {
     List<SectionNode> newNodes = new ArrayList<>();
     for (SectionNode node : rootNodes) {
-    //  logger.info("getChildSectionNodes " + node.getType() + " "+ node.getName());
+      //  logger.info("getChildSectionNodes " + node.getType() + " "+ node.getName());
 
       Collection<SectionNode> children = node.getChildren();
 
       if (!children.isEmpty() && !children.iterator().next().getType().equals("Sound")) {
-    //    for (SectionNode child : children) {
-    //      logger.info("\tAdding " + child.getType() + " "+ child.getName());
-     //   }
+        //    for (SectionNode child : children) {
+        //      logger.info("\tAdding " + child.getType() + " "+ child.getName());
+        //   }
       }
       newNodes.addAll(children);
 
@@ -233,7 +233,7 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
    * @seex ButtonBarSectionWidget#getChoice(ButtonGroup, String)
    */
   public void gotSelection() {
- //   logger.info("gotSelection --- >");
+    //   logger.info("gotSelection --- >");
     pushNewSectionHistoryToken();
   }
 
@@ -299,9 +299,9 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
     // keep the download link info in sync with the selection
     Map<String, Collection<String>> typeToSection = selectionState.getTypeToSection();
 
-  //  logger.info("showSelectionState : typeOrder " + typeOrder + " selection state " + typeToSection);
+    //  logger.info("showSelectionState : typeOrder " + typeOrder + " selection state " + typeToSection);
 
-    downloadHelper.updateDownloadLinks(selectionState);
+    downloadHelper.updateDownloadLinks(selectionState, typeOrder);
 
     if (typeToSection.isEmpty()) {
       showDefaultStatus();
@@ -391,7 +391,7 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
    */
   @Override
   protected void loadFirstExercise() {
-   // logger.info("loadFirstExercise : ---");
+    // logger.info("loadFirstExercise : ---");
 
     if (isEmpty()) { // this can only happen if the database doesn't load properly, e.g. it's in use
       logger.info("loadFirstExercise : current exercises is empty?");

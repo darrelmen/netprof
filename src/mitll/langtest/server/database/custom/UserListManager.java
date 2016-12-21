@@ -71,9 +71,9 @@ import java.util.*;
 public class UserListManager implements IUserListManager {
   private static final Logger logger = LogManager.getLogger(UserListManager.class);
 
-  private static final String CORRECT = "correct";
-  private static final String FIXED = "fixed";
+  public static final String CORRECT = "correct";
   private static final String INCORRECT = "incorrect";
+  private static final String FIXED = "fixed";
 
   private static final String FAST = "regular";
   private static final String SLOW = "slow";
@@ -548,7 +548,7 @@ public class UserListManager implements IUserListManager {
     userList.setExercises(onList);
 
     markState(onList);
-    logger.debug("returning " + userList + (userList.getExercises().isEmpty() ? "" : " first " + userList.getExercises().iterator().next()));
+    logger.debug("getReviewList returning " + userList + (userList.getExercises().isEmpty() ? "" : " first " + userList.getExercises().iterator().next()));
     return userList;
   }
 

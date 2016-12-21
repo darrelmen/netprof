@@ -163,5 +163,5 @@ public interface ListService extends RemoteService {
    * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#postEditItem(ListInterface, boolean)
    * @param userExercise
    */
-  void editItem(CommonExercise userExercise);
+  void editItem(CommonExercise userExercise, boolean keepAudio);
 }

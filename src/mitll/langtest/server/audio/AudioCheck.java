@@ -259,8 +259,8 @@ public class AudioCheck {
 
       float clippedRatio = ((float) countClipped) / (float) frameLength;
       float clippedRatio2 = ((float) cc) / (float) frameLength;
-      boolean wasClipped  = usePercent ? clippedRatio > CLIPPED_RATIO : clippedRatio > CLIPPED_RATIO_TIGHTER;// > CLIPPED_FRAME_COUNT;
-    //  boolean wasClipped2 = usePercent ? clippedRatio2 > CLIPPED_RATIO : cc > 1;
+      boolean wasClipped = usePercent ? clippedRatio > CLIPPED_RATIO : clippedRatio > CLIPPED_RATIO_TIGHTER;// > CLIPPED_FRAME_COUNT;
+      //  boolean wasClipped2 = usePercent ? clippedRatio2 > CLIPPED_RATIO : cc > 1;
 /*      logger.info("of " + total +" got " +countClipped + " out of " + n +"  or " + clippedRatio  + "/" +clippedRatio2+
         " not " + notClippedRatio +" wasClipped = " + wasClipped);*/
 
@@ -274,8 +274,8 @@ public class AudioCheck {
             "mean power = " + mean + " (dB) vs " + PowerThreshold +
             ", std = " + std + " vs " + VarianceThreshold +
             " valid = " + validAudio +
-            " was clipped (1) " + wasClipped +  " (" + (clippedRatio * 100f) +  "% samples clipped, # clipped = " + countClipped + ") " +
-           // " was clipped (2) " + wasClipped2 + " (" + (clippedRatio2 * 100f) + "% samples clipped, # clipped = " + cc + ")" +
+            " was clipped (1) " + wasClipped + " (" + (clippedRatio * 100f) + "% samples clipped, # clipped = " + countClipped + ") " +
+            // " was clipped (2) " + wasClipped2 + " (" + (clippedRatio2 * 100f) + "% samples clipped, # clipped = " + cc + ")" +
             " max = " + max + "/" + nmax
         );
       }

@@ -41,7 +41,6 @@ import java.util.logging.Logger;
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since
  */
 public class PopupHelper {
   private final Logger logger = Logger.getLogger("PopupHelper");
@@ -64,7 +63,7 @@ public class PopupHelper {
   }
 
   public void showPopup(String html, Widget target) {
-    showPopup(html,target,2000);
+    showPopup(html, target, 2000);
   }
 
   public void showPopup(String html, Widget button, int hideDelay) {
@@ -82,7 +81,7 @@ public class PopupHelper {
     t.schedule(hideDelay);
   }
 
-  public void showPopup(String toShow,String toShow2, Widget over) {
+  public void showPopup(String toShow, String toShow2, Widget over) {
     final PopupPanel popupImage = new PopupPanel(true);
     Panel vp = new VerticalPanel();
     vp.add(new HTML(toShow));
@@ -94,7 +93,9 @@ public class PopupHelper {
     popupImage.showRelativeTo(over);
     Timer t = new Timer() {
       @Override
-      public void run() { popupImage.hide(); }
+      public void run() {
+        popupImage.hide();
+      }
     };
     t.schedule(3000);
   }

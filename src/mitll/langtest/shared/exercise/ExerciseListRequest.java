@@ -164,6 +164,10 @@ public class ExerciseListRequest implements IsSerializable {
     return this;
   }
 
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#filterExercises(ExerciseListRequest, Collection)
+   * @return
+   */
   public boolean isOnlyWithAudioAnno() {
     return onlyWithAudioAnno;
   }

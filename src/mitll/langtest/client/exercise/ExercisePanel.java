@@ -98,7 +98,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
     this.navigationHelper = getNavigationHelper(controller);
 
     addInstructions();
-    add(getQuestionContent(e, controller));
+    add(getQuestionContentRTL(e));
 
     addQuestions(e, service, controller);
 
@@ -112,18 +112,21 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
    * Worry about RTL
    *
    * @param e
-   * @param controller
    * @return
+   * @see #ExercisePanel(CommonShell, LangTestDatabaseAsync, ExerciseController, ListInterface, String, String)
    */
-  private Widget getQuestionContent(T e, ExerciseController controller) {
+  private Widget getQuestionContentRTL(T e) {
     HorizontalPanel hp = new HorizontalPanel();
+    hp.getElement().setId("QuestionContentRTL");
     hp.setWidth("100%");
     boolean isRTL = isRTL(e);
     if (isRTL) {
       setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
     }
     hp.setHorizontalAlignment(isRTL ? HasHorizontalAlignment.ALIGN_RIGHT : HasHorizontalAlignment.ALIGN_LEFT);
+
     hp.add(getQuestionContent(e));
+
     return hp;
   }
 

@@ -403,11 +403,11 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   @Override
   public User changePasswordWithToken(String userId, String userKey, String newPassword) {
     //long startMS = System.currentTimeMillis();
-    String baseURL = getBaseURL();
 
-    logger.info("changePassword - userId " + userId + " base url " + baseURL);
 
-    boolean result = db.getUserDAO().changePasswordForToken(userId, userKey, newPassword, baseURL);
+    logger.info("changePassword - userId " + userId);
+
+    boolean result = db.getUserDAO().changePasswordForToken(userId, userKey, newPassword,  getBaseURL());
 
     if (result) {
       return db.getUserDAO().getUserByID(userId);
@@ -433,7 +433,6 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @see ChangePasswordView#changePassword
    */
   public boolean changePasswordWithCurrent(int userid, String currentHashedPassword, String newHashedPassword) {
-
 //    currentHashedPassword = rot13(currentHashedPassword);
 //    newHashedPassword = rot13(newHashedPassword);
 
@@ -455,7 +454,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
       return false;
     }*/
 
-    return (db.getUserDAO().changePasswordWithCurrent(userid, currentHashedPassword, newHashedPassword));
+    return (db.getUserDAO().changePasswordWithCurrent(userid, currentHashedPassword, newHashedPassword, getBaseURL()));
 
   }
 

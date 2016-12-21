@@ -57,6 +57,11 @@ public class TabAndContent implements RequiresResize {
   private final String label;
   private RequiresResize resizeable = null;
 
+  public TabAndContent(TabPanel tabPanel, IconType iconType, String label) {
+    this(iconType,label);
+    tabPanel.add(getTab().asTabLink());
+  }
+
   /**
    * @param iconType
    * @param label
@@ -77,11 +82,6 @@ public class TabAndContent implements RequiresResize {
     this.tab = tab;
     this.content = content;
     this.label = label;
-  }
-
-  public TabAndContent(TabPanel tabPanel, IconType iconType, String label) {
-    this(iconType, label);
-    tabPanel.add(getTab().asTabLink());
   }
 
   private void zeroPadding(Panel createContent) {

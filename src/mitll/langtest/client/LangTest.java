@@ -172,6 +172,22 @@ import java.util.logging.Logger;
  * - Fixed bug with detecting RTL text and showing it in the exercise list
  * 1.4.9
  * - Fixed bug with downloading audio for custom item.
+ * 1.4.10 (9/9/16)
+ * - Fixes for QC -
+ * 1.4.11 (9-26-16)
+ * - Added auto advance button to avp
+ * 1.5.0 (10-07-16)
+ * - Clean up download dialog as per Michael Grimmer request
+ * 1.5.1 (10-11-16)
+ * - Added shouldRecalcStudentAudio option to recalc student audio with the current model
+ * 1.5.2 (10-19-16)
+ * - Fixed bug in reporting where was throwing away valid recordings and added separate new teacher section to reporting
+ * 1.5.3 (10-19-16)
+ * - Don't attach reference audio that doesn't pass dnr minimum (mainly for old audio). Mark audio rows with DNR.
+ * 1.5.4 (10-21-16)
+ * - Increase delay after correct avp response.
+ * 1.5.5 (10-23-16)
+ * - Fix bug where couldn't add defect comments to context sentences, better handling of sentence length user exercise entries.
  * 2.0.0
  * - development to master
  *
@@ -306,7 +322,7 @@ public class LangTest implements
   }
 
   private void logMessageOnServer(String message) {
-    new Exception().printStackTrace();
+    //new Exception().printStackTrace();
     service.logMessage(message,
         new AsyncCallback<Void>() {
           @Override
@@ -350,6 +366,7 @@ public class LangTest implements
 
   private void getImage(int reqid, final String key, String path, final String type, int toUse, int height,
                         String exerciseID, final AsyncCallback<ImageResponse> client) {
+    //  ImageResponse ifPresent = imageCache.getIfPresent(key);
     ImageResponse ifPresent = imageCache.get(key);
     if (ifPresent != null) {
       //logger.info("getImage for key " + key+ " found  " + ifPresent);
@@ -572,7 +589,7 @@ public class LangTest implements
                   initialUI.setSplash();
                   isMicConnected = false;
                 }
-              }, false);
+              }, false, true);
         }
       }
 
@@ -866,6 +883,8 @@ public class LangTest implements
   }
 //  private long then = 0;
 
+  private long then = 0;
+
   /**
    * Recording interface
    *
@@ -884,7 +903,7 @@ public class LangTest implements
    * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
    */
   public void stopRecording(WavCallback wavCallback) {
-    //logger.info("stopRecording : time recording in UI " + (System.currentTimeMillis() - then) + " millis");
+    logger.info("stopRecording : time recording in UI " + (System.currentTimeMillis() - then) + " millis");
     flashRecordPanel.stopRecording(wavCallback);
   }
 

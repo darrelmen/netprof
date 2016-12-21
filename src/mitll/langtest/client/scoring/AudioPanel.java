@@ -46,6 +46,7 @@ import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
+
 import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.image.ImageResponse;
 
@@ -464,7 +465,6 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
    * @see #onResize()
    */
   private int getImages() {
-    //int leftColumnWidth1 = controller.getLeftColumnWidth();
     int width = getImageWidth();
 
     int diff = Math.abs(Window.getClientWidth() - lastWidth);
@@ -485,15 +485,20 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
   }
 
   private int getImageWidth() {
-    int leftColumnWidth = LEFT_COLUMN_WIDTH + IMAGE_WIDTH_SLOP;
-    int rightSide = gaugePanel != null ? gaugePanel.getOffsetWidth() : rightMargin;
-    if (gaugePanel != null && rightSide == 0) {
-      //logger.info("adding right side offset ");
-      rightSide = 180; // TODO : hack!!!
-    } else {
-      rightSide = 180;
+    try {
+      int leftColumnWidth = LEFT_COLUMN_WIDTH + IMAGE_WIDTH_SLOP;
+      int rightSide = gaugePanel != null ? gaugePanel.getOffsetWidth() : rightMargin;
+      if (gaugePanel != null && rightSide == 0) {
+        //logger.info("adding right side offset ");
+        rightSide = 180; // TODO : hack!!!
+      } else {
+        rightSide = 180;
+      }
+      return getWidthForWaveform(LEFT_COLUMN_WIDTH, leftColumnWidth, rightSide);
+    } catch (Exception e) {
+      // OK, ignore it
+      return 200;
     }
-    return getWidthForWaveform(LEFT_COLUMN_WIDTH, leftColumnWidth, rightSide);
   }
 
   int getWidthForWaveform(int leftColumnWidth1, int leftColumnWidth, int rightSide) {
