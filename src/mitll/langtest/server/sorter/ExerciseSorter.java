@@ -130,7 +130,15 @@ public class ExerciseSorter extends SimpleSorter {
         String b = pron2.get(i);
         if (!a.equals(b)) {
           Integer a1 = phoneToCount.get(a);
+          if (a1 == null) {
+            logger.error("phoneCompFirst huh? no phone count for " + a + " in " + phoneToCount.keySet() + " for " +o1.getID());
+            a1 = -1;
+          }
           Integer b1 = phoneToCount.get(b);
+          if (b1 == null) {
+            logger.error("phoneCompFirst huh? no phone count for " + b + " in " + phoneToCount.keySet() + " for " +o2.getID());
+            b1 = -1;
+          }
           int compt = a1.compareTo(b1);
           return compt == 0 ? a.compareTo(b) :compt;
         }

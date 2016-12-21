@@ -66,6 +66,7 @@ public class RefResultDecoder {
   private static final boolean DO_REF_DECODE = true;
   private static final boolean DO_TRIM = true;
   private static final boolean DO_CALC_DNR = true;
+  private static final boolean ENSURE_OGG = false;
   //private static final int SLEEP_BETWEEN_DECODES = 2000;
 
   private final DatabaseImpl<CommonExercise> db;
@@ -118,6 +119,12 @@ public class RefResultDecoder {
           if (serverProps.shouldTrimAudio()) {
             trimRef(exercises, exToAudio);
           }
+          sleep(5000);
+
+          if (ENSURE_OGG) {
+            ensure(exercises, exToAudio);
+          }
+
           if (serverProps.shouldRecalcDNR()) {
             calcDNROnAudio(exercises, relativeConfigDir, exToAudio);
           }
@@ -264,7 +271,6 @@ public class RefResultDecoder {
   }
 
   /**
-   *
    * @param exercises
    * @param relativeConfigDir
    * @param exToAudio
@@ -308,6 +314,10 @@ public class RefResultDecoder {
     }
   }
 
+  /**
+   * @param exercises
+   * @param exToAudio
+   */
   private void trimRef(Collection<CommonExercise> exercises, Map<String, List<AudioAttribute>> exToAudio) {
     if (DO_TRIM) {
 //      String installPath = pathHelper.getInstallPath();
@@ -376,6 +386,69 @@ public class RefResultDecoder {
 //        logger.warn("failed to attach audio to " + failed.size() + " exercises : " + failed);
 //      }
     }
+  }
+
+  private void ensure(Collection<CommonExercise> exercises, Map<String, List<AudioAttribute>> exToAudio) {
+//      String installPath = pathHelper.getInstallPath();
+    int numResults = db.getRefResultDAO().getNumResults();
+    String language = getLanguage();
+    logger.debug(language + " writeRefDecode : found " +
+        numResults + " in ref results table vs " + exToAudio.size() + " exercises with audio, examining " +
+        exercises.size() + " exercises");
+
+    if (stopDecode) logger.debug("Stop decode true");
+
+    int count = 0;
+    int trimmed = 0;
+    int changed = 0;
+    int attrc = 0;
+    int maleAudio = 0;
+    int femaleAudio = 0;
+    int defaultAudio = 0;
+
+    Set<Long> preferredVoices = serverProps.getPreferredVoices();
+    for (CommonExercise exercise : exercises) {
+      if (stopDecode) return;
+
+      Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(true, preferredVoices);
+      Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false, preferredVoices);
+
+      List<MiniUser> maleUsers = exercise.getSortedUsers(malesMap);
+      boolean maleEmpty = maleUsers.isEmpty();
+      List<MiniUser> femaleUsers = exercise.getSortedUsers(femalesMap);
+      boolean femaleEmpty = femaleUsers.isEmpty();
+
+      String title = exercise.getForeignLanguage();
+      String comment = exercise.getEnglish();
+
+      if (!maleEmpty) {
+        List<AudioAttribute> audioAttributes1 = malesMap.get(maleUsers.get(0));
+        maleAudio += audioAttributes1.size();
+        doEnsure(audioAttributes1, title, exercise.getID(), comment);
+
+      }
+      if (!femaleEmpty) {
+        List<AudioAttribute> audioAttributes1 = femalesMap.get(femaleUsers.get(0));
+        femaleAudio += audioAttributes1.size();
+
+        doEnsure(audioAttributes1, title, exercise.getID(), comment);
+
+      } else if (maleEmpty) {
+        Collection<AudioAttribute> defaultUserAudio = exercise.getDefaultUserAudio();
+        defaultAudio += defaultUserAudio.size();
+        doEnsure(defaultUserAudio, title, exercise.getID(), comment);
+
+      }
+      // if (count > 0 && count % 2000 == 0) logger.debug(getLanguage() + " trimRef examined " + count + " files.");
+    }
+
+    logger.debug(getLanguage() + " ensure : Out of " + attrc + " best audio files, " + maleAudio + " male, " + femaleAudio + " female, " +
+        defaultAudio + " default " + "examined " + count +
+        " trimmed " + trimmed + " dropped ref result rows = " + changed);
+//      if (!failed.isEmpty()) {
+//        logger.warn("failed to attach audio to " + failed.size() + " exercises : " + failed);
+//      }
+
   }
 
   /**
@@ -657,6 +730,18 @@ public class RefResultDecoder {
     return count;
   }
 
+  private void doEnsure(Collection<AudioAttribute> audioAttributes, String title, String exid, String comment) {
+    int c = 0;
+    for (AudioAttribute attribute : audioAttributes) {
+      String audioRef = attribute.getAudioRef();
+      File absoluteFile = pathHelper.getAbsoluteFile(audioRef);
+
+      if (absoluteFile.exists()) {
+        String author = attribute.getUser().getUserID();
+        audioConversion.ensureWriteMP3(audioRef, pathHelper.getInstallPath(), false, new TrackInfo(title, author, comment));
+      }
+    }
+  }
 
   /**
    * @param audioAttributes
