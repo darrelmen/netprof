@@ -401,7 +401,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   public String toString() {
     return "Audio" +
         "\n\tid         " + uniqueID +
-        "\n\tfor ex     " + getID()+
+       // "\n\tfor ex     " + getID()+
         " (old ex " + getOldexid() + ") :" +
         "\n\tpath       " + audioRef +
         "\n\tactual     " + actualPath +

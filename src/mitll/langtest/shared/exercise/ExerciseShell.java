@@ -108,6 +108,10 @@ class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
     return meaning;
   }
 
+  public void setMeaning(String meaning) {
+    this.meaning = meaning;
+  }
+
   @Override
   public String getForeignLanguage() {
     return foreignLanguage;

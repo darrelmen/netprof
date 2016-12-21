@@ -284,8 +284,8 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#postEditItem
    */
   @Override
-  public void editItem(CommonExercise userExercise) {
-    db.editItem(userExercise);
+  public void editItem(CommonExercise userExercise, boolean keepAudio) {
+    db.editItem(userExercise, keepAudio);
     if (DEBUG) logger.debug("editItem : now user exercise " + userExercise);
   }
 

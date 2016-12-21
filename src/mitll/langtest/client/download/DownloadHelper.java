@@ -32,7 +32,9 @@
 
 package mitll.langtest.client.download;
 
+import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
@@ -43,13 +45,9 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.UriUtils;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.ToggleButton;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.bootstrap.FlexSectionExerciseList;
-import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.list.HistoryExerciseList;
@@ -66,9 +64,13 @@ public class DownloadHelper {
 
   private final HistoryExerciseList exerciseList;
 
-  public DownloadHelper(EventRegistration eventRegistration,
-                        HistoryExerciseList exerciseList) {
-  //  this.eventRegistration = eventRegistration;
+  private SelectionState selectionState;
+//  private final FlexSectionExerciseList exerciseList;
+  private Collection<String> typeOrder;
+  private Heading selectionStatus;
+
+  public DownloadHelper(HistoryExerciseList exerciseList) {
+    //  this.eventRegistration = eventRegistration;
     this.exerciseList = exerciseList;
   }
 
@@ -77,9 +79,8 @@ public class DownloadHelper {
    * @see FlexSectionExerciseList#getBottomRow
    */
   public Panel getDownloadLinks() {
-    FlexTable links = new FlexTable();
     Button download = new Button("Download", IconType.DOWNLOAD);
-    download.setType(ButtonType.SUCCESS);
+    download.setType(ButtonType.PRIMARY);
     selectionState = exerciseList.getSelectionState();
     download.addClickHandler(new ClickHandler() {
       @Override
@@ -87,21 +88,22 @@ public class DownloadHelper {
         showDialog();
       }
     });
-    links.setWidget(0, 0, download
 
-    );
-    return links;
+    return download;
   }
-
-  private SelectionState selectionState;
 
   /**
    * @param selectionState
    * @see FlexSectionExerciseList#showSelectionState(SelectionState)
    */
-  public void updateDownloadLinks(SelectionState selectionState) {
+  public void updateDownloadLinks(SelectionState selectionState, Collection<String> typeOrder) {
     this.selectionState = selectionState;
+    this.typeOrder = typeOrder;
   }
+
+  private Heading status1 = new Heading(4, "");
+  private Heading status2 = new Heading(4, "");
+  private Heading status3 = new Heading(4, "");
 
   private void showDialog() {
     isMale = false;
@@ -113,36 +115,39 @@ public class DownloadHelper {
       container.add(new Heading(3, "Download spreadsheet for whole course."));
       container.add(new Heading(4, "Select a unit or chapter to download audio."));
     } else {
+      status1.setText("");
+      status1.setHeight("20px");
+      isRegularSet = false;
+      isContextSet = false;
+      isMaleSet = false;
 
-      DivWidget showGroup = getShowGroup(false);
-      showGroup.addStyleName("topFiveMargin");
-      showGroup.addStyleName("bottomFiveMargin");
-      // showGroup.addStyleName("leftFiveMargin");
+      status2.setText("");
+      status2.setHeight("20px");
+
+      status3.setText("");
+      status3.setHeight("20px");
 
       FluidRow row = new FluidRow();
-      row.add(new Heading(4, "Gender"));
-      row.add(showGroup);
+      Heading w = new Heading(4, selectionState.getDescription(typeOrder));
+      w.addStyleName("blueColor");
+      row.add(w);
       container.add(row);
 
-      row = new FluidRow();
-      row.add(new Heading(4, "Content"));
-      Widget buttonBarChoices = getButtonBarChoices(Arrays.asList("Vocabulary", "Context Sentences"), "vocab", ButtonType.SUCCESS);
-      row.add(buttonBarChoices);
-
+      row = getContentRow();
       container.add(row);
 
-      row = new FluidRow();
-      row.add(new Heading(4, "Speed"));
-      Widget showGroup2 = getShowGroup2();
-      row.add(showGroup2);
-      // showGroup2.addStyleName("leftFiveMargin");
+      row = getGenderRow();
+      container.add(row);
 
+      row = getSpeedRow();
+      container.add(row);
 
+      row = getStatusArea();
       container.add(row);
     }
 
-    new DialogHelper(true).show(
-        "Download Content",
+    closeButton = new DialogHelper(true).show(
+        "Download Audio and Spreadsheet",
         Collections.emptyList(),
         container,
         "Download",
@@ -158,7 +163,65 @@ public class DownloadHelper {
           public void gotNo() {
 
           }
-        });
+        }, 550);
+    closeButton.setType(ButtonType.SUCCESS);
+    closeButton.setEnabled(selectionState.isEmpty());
+  }
+
+  private FluidRow getStatusArea() {
+    FluidRow row;
+    row = new FluidRow();
+
+    Well well = new Well();
+    Panel vert = new VerticalPanel();
+    well.add(vert);
+    vert.add(status1);
+    status1.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
+    status1.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
+    vert.add(status2);
+    status2.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
+    vert.add(status3);
+    status3.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
+    row.add(well);
+    return row;
+  }
+
+  private FluidRow getSpeedRow() {
+    FluidRow row;
+    row = new FluidRow();
+    row.add(new Heading(4, "Speed"));
+    Widget showGroup2 = getSpeedChoices();
+    row.add(showGroup2);
+    return row;
+  }
+
+  private FluidRow getContentRow() {
+    FluidRow row;
+    row = new FluidRow();
+    row.add(new Heading(4, "Content"));
+    Widget buttonBarChoices = getButtonBarChoices(Arrays.asList("Vocabulary", "Context Sentences"), "vocab", ButtonType.DEFAULT);
+    row.add(buttonBarChoices);
+    return row;
+  }
+
+  private FluidRow getGenderRow() {
+    DivWidget showGroup = getGenderChoices(false);
+    showGroup.addStyleName("topFiveMargin");
+    showGroup.addStyleName("bottomFiveMargin");
+
+    FluidRow row = new FluidRow();
+    row.add(new Heading(4, "Gender"));
+    row.add(showGroup);
+    return row;
+  }
+
+  private Button closeButton;
+
+  private void showStatus() {
+    status1.setText(isContextSet ? isContext ? "Context Sentences " : "Vocabulary Items " : "");
+    status2.setText(isMaleSet ? isMale ? "Male Audio " : "Female Audio " : "");
+    status3.setText((isRegularSet ? isRegular ? "Regular Speed" : "Slow Speed" : ""));
+    closeButton.setEnabled(isMaleSet && isContextSet && isRegularSet);
   }
 
   private Widget getButtonBarChoices(Collection<String> values, final String type, ButtonType buttonType) {
@@ -170,15 +233,11 @@ public class DownloadHelper {
     buttonGroup.setToggle(ToggleType.RADIO);
     toolbar.add(buttonGroup);
 
-
     Set<String> seen = new HashSet<String>();
-    boolean isFirst = true;
+
     for (String v : values) {
       if (!seen.contains(v)) {
         Button choice1 = getChoice(buttonGroup, v);
-        //buttons.add(choice1);
-        choice1.setActive(isFirst);
-        isFirst = false;
         choice1.setType(buttonType);
         buttonGroup.add(choice1);
         seen.add(v);
@@ -195,6 +254,8 @@ public class DownloadHelper {
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
           public void execute() {
             isContext = !(text.equals("Vocabulary"));
+            isContextSet = true;
+            showStatus();
           }
         });
       }
@@ -227,58 +288,88 @@ public class DownloadHelper {
 
   private boolean isMale = false;
   private boolean isContext = false;
-  private boolean isRegular = true;
+  private boolean isRegular = false;
+
+  private boolean isContextSet = false;
+  private boolean isRegularSet = false;
+  private boolean isMaleSet = false;
 
   private final Image turtle = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "turtle_32.png"));
   private final Image turtleSelected = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "turtle_32_selected.png"));
 
-  private DivWidget getShowGroup(boolean selectFirst) {
-    Collection<String> choices = new ArrayList<>();
-    choices.add("M");
-    choices.add("F");
+  private final Image rabbit = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "rabbit32.png"));
+  private final Image rabbitSelected = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "rabbit32_selected.png"));
 
-    ButtonToolbar buttonToolbar = new ButtonToolbar();
+  private DivWidget getGenderChoices(boolean selectFirst) {
     ButtonGroup buttonGroup = new ButtonGroup();
-    buttonGroup.setToggle(ToggleType.RADIO);
-    buttonToolbar.add(buttonGroup);
+    ButtonToolbar buttonToolbar = getToolbar(buttonGroup);
 
-    boolean first = selectFirst;
-    for (final String choice : choices) {
-      com.github.gwtbootstrap.client.ui.Button choice1 = getChoice(choice, first, new ClickHandler() {
+    for (final String choice : Arrays.asList(M, F)) {
+      com.github.gwtbootstrap.client.ui.Button choice1 = getChoice(choice, false, new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          //contextPlay.playAudio(getAudioRef(choice));
           if (choice.equals(M)) isMale = true;
           else if (choice.equals(F)) isMale = false;
+          isMaleSet = true;
+          showStatus();
         }
       });
       buttonGroup.add(choice1);
       if (choice.equals(M)) choice1.setIcon(IconType.MALE);
       else if (choice.equals(F)) choice1.setIcon(IconType.FEMALE);
-      first = !selectFirst;
     }
 
     return buttonToolbar;
   }
 
+  private ButtonToolbar getToolbar(ButtonGroup buttonGroup) {
+    ButtonToolbar buttonToolbar = new ButtonToolbar();
+    buttonGroup.setToggle(ToggleType.RADIO);
+    buttonToolbar.add(buttonGroup);
+    return buttonToolbar;
+  }
 
-  private Widget getShowGroup2() {
-    FluidRow row = new FluidRow();
-    ToggleButton pushButton = new ToggleButton(turtle, turtleSelected);
-    pushButton.addClickHandler(new ClickHandler() {
+  private Panel getToolbar2() {
+    Panel buttonToolbar = new HorizontalPanel();
+    return buttonToolbar;
+  }
+
+  private Widget getSpeedChoices() {
+    Panel buttonToolbar = getToolbar2();
+    buttonToolbar.setHeight("40px");
+    String choice = "Regular";
+
+    regular = getChoice2(choice, rabbit, rabbitSelected, new ClickHandler() {
       @Override
-      public void onClick(ClickEvent clickEvent) {
-        isRegular = !pushButton.isDown();
-
+      public void onClick(ClickEvent event) {
+        isRegular = regular.isDown();
+        isRegularSet = true;
+        showSpeeds();
       }
     });
-    row.add(pushButton);
-    addTooltip(pushButton);
-    row.setWidth("65px");
-    row.getElement().getStyle().setMarginBottom(25, Style.Unit.PX);
+    buttonToolbar.add(regular);
 
+    String choice2 = "Slow";
+    slow = getChoice2(choice2, turtle, turtleSelected, new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        isRegular = !slow.isDown();
+        logger.info("got slow click " + isRegular);
+        isRegularSet = true;
+        showSpeeds();
+      }
+    });
+    buttonToolbar.add(slow);
+    buttonToolbar.getElement().getStyle().setMarginBottom(25, Style.Unit.PX);
+    return buttonToolbar;
+  }
 
-    return row;
+  private ToggleButton regular, slow;
+
+  private void showSpeeds() {
+    regular.setDown(isRegular);
+    slow.setDown(!isRegular);
+    showStatus();
   }
 
   private com.github.gwtbootstrap.client.ui.Button getChoice(String title, boolean isActive, ClickHandler handler) {
@@ -291,16 +382,26 @@ public class DownloadHelper {
     return onButton;
   }
 
+  private ToggleButton getChoice2(String title, Image upImage, Image downImage, ClickHandler handler) {
+    ToggleButton onButton = new ToggleButton(upImage, downImage);
+    onButton.getElement().setId("Choice_" + title);
+    onButton.addClickHandler(handler);
+    onButton.getElement().getStyle().setZIndex(0);
+    onButton.setWidth("50" +
+        "px");
+    onButton.setHeight("32" +
+        "px");
+    return onButton;
+  }
+
   /**
    * @param widget
    * @return
-   * @see #getDownloadLink
+   * @see #getSpeedChoices
    */
-  private void addTooltip(Widget widget) {
-    new TooltipHelper().addTooltip(widget, "Click for slow speed audio.");
-  }
-
-
+//  private void addTooltip(Widget widget) {
+//    new TooltipHelper().addTooltip(widget, "Click for slow speed audio.");
+//  }
   private String toDominoUrl(String relativeLoc) {
     String baseUrl = GWT.getHostPageBaseURL();
     StringBuilder dominoUrl = new StringBuilder();

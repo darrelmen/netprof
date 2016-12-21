@@ -50,17 +50,13 @@ import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
-import org.apache.ignite.Ignite;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import scala.tools.cmd.gen.AnyVals;
 
 import java.time.*;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static com.mongodb.client.model.Filters.eq;
 
 /**
  * Store user info in domino tables.
@@ -238,7 +234,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @param sendEmail
    * @return
    * @paramx freeTextPassword
-   * @see BaseUserDAO#addUser(int, String, int, String, String, String, String, String, boolean, Collection, User.Kind, String, String, String, String, String, String, String, String)
+   * @see BaseUserDAO#addUser
    * @see #addAndGet(ClientUserDetail, String, Collection)
    */
   private SResult<ClientUserDetail> addUserToMongo(ClientUserDetail user,
@@ -454,15 +450,16 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   /**
    * @param id
    * @param newHashedPassword
+   * @param baseURL
    * @return
    * @see BaseUserDAO#updateUser
-   * @see #changePassword
+   * @see IUserDAO#changePassword
    */
-  private DBUser savePasswordAndGetUser(int id, String currentPassword, String newHashedPassword) {
+  private DBUser savePasswordAndGetUser(int id, String currentPassword, String newHashedPassword, String baseURL) {
     DBUser dbUser = delegate.lookupDBUser(id);
     if (dbUser != null) {
       dbUser.setPrimaryGroup(new Group()); // TODO just for now... so it doesn't crash
-      boolean b = delegate.changePassword(adminUser, dbUser, currentPassword, newHashedPassword);
+      boolean b = delegate.changePassword(adminUser, dbUser, currentPassword, newHashedPassword, baseURL);
       if (!b) {
         logger.error("huh? didn't change password for " + id + "\n");
       }
@@ -987,9 +984,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    *
    * @param resetKey
    * @return
-   * @see mitll.langtest.server.rest.RestUserManagement#changePFor(String, String)
+   * @see mitll.langtest.server.rest.RestUserManagement#changePFor
    * @see mitll.langtest.server.rest.RestUserManagement#getUserIDForToken(String)
-   * @see mitll.langtest.server.services.UserServiceImpl#changePFor
+   * @seex mitll.langtest.server.services.UserServiceImpl#changePFor
    * @see mitll.langtest.server.services.UserServiceImpl#getUserIDForToken(String)
    */
   @Override
@@ -1085,12 +1082,13 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   /**
    * @param user
    * @param newHashPassword
+   * @param baseURL
    * @return
-   * @see mitll.langtest.server.services.UserServiceImpl#changePFor(String, String)
+   * @see mitll.langtest.server.services.UserServiceImpl#changePFor
    */
   @Override
-  public boolean changePassword(int user, String newHashPassword) {
-    return savePasswordAndGetUser(user, "", newHashPassword) != null;
+  public boolean changePassword(int user, String newHashPassword, String baseURL) {
+    return savePasswordAndGetUser(user, "", newHashPassword, baseURL) != null;
   }
 
   /**
@@ -1101,18 +1099,19 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @return
    */
   public boolean changePasswordForToken(String userId, String userKey, String newPassword, String url) {
-    return delegate.changePassword(userId, userKey, newPassword, url);//ServletUtil.get().getBaseURL(request));
+    return delegate.changePassword(userId, userKey, newPassword, url);
   }
 
   /**
    * @param user
    * @param currentHashPass
    * @param newHashPass
+   * @param baseURL
    * @return
-   * @see mitll.langtest.server.services.UserServiceImpl#changePassword(String, String, String)
+   * @see mitll.langtest.server.services.UserServiceImpl#changePassword
    */
-  public boolean changePasswordWithCurrent(int user, String currentHashPass, String newHashPass) {
-    return savePasswordAndGetUser(user, currentHashPass, newHashPass) != null;
+  public boolean changePasswordWithCurrent(int user, String currentHashPass, String newHashPass, String baseURL) {
+    return savePasswordAndGetUser(user, currentHashPass, newHashPass, baseURL) != null;
   }
 
   /**

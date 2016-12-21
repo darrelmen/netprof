@@ -537,6 +537,7 @@ fieldset > legend {
     white-space: normal;
     font-family: sans-serif;
     line-height: 100%;
+    float:left;
 }
 
 .blueColor {

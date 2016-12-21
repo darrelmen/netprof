@@ -454,6 +454,7 @@ public class ServerProperties {
     return props.getProperty(param, TRUE).equals(TRUE);
   }
 
+  public String getProperty(String prop) { return props.getProperty(prop); }
   /**
    * if true, use old school (hydec)
    * OR if there is no webservice port specified
@@ -773,8 +774,18 @@ public class ServerProperties {
   /**
    * Not what you want probably...
    * @return
+   * @deprecated
    */
   public String getAppURL() {
     return props.getProperty(APP_URL, "https://np.ll.mit.edu/netProf");
+  }
+
+  public boolean shouldRecalcStudentAudio() {
+    return getDefaultTrue("shouldRecalcStudentAudio");
+  }
+
+  public String getCurrentModel() {
+    String models_dir = getProperty("MODELS_DIR");
+    return models_dir != null? models_dir.replaceAll("models.", ""): "";
   }
 }

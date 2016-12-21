@@ -199,6 +199,12 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   /**
    * TODO : consider moving this into user service?
    * what if later an admin changes it while someone else is looking at it...
+
+   * Remember this audio as reference audio for this exercise, and possibly clear the APRROVED (inspected) state
+   * on the exercise indicating it needs to be inspected again (we've added new audio).
+   * <p>
+   * Don't return a path to the normalized audio, since this doesn't let the recorder have feedback about how soft
+   * or loud they are : https://gh.ll.mit.edu/DLI-LTEA/Development/issues/601
    *
    * @return
    */

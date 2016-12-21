@@ -197,9 +197,7 @@ class UserListCallback implements AsyncCallback<Collection<UserList<CommonShell>
       if (userLists == null) nameToLists.put(ul.getName(), userLists = new ArrayList<>());
       userLists.add(ul);
     }
-
 //    logger.info("populateNameToList " +nameToLists);
-
     return nameToLists;
   }
 

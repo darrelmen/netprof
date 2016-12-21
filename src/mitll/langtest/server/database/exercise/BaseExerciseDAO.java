@@ -41,6 +41,7 @@ import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.userexercise.BaseUserExerciseDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
+
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Exercise;
@@ -225,6 +226,16 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     } else logger.error("configuration error - expecting a media directory " + mediaDir);
 
     this.attachAudio = new AttachAudio(audioDAO.getExToAudio(projectID), language, serverProps.shouldCheckAudioTranscript(), serverProps);
+/*
+    this.attachAudio = new AttachAudio(
+        mediaDir,
+        mediaDir.replaceAll("bestAudio", ""), fileInstallPath,
+        serverProps.getAudioOffset(),
+        audioDAO.getExToAudio(),
+        serverProps.shouldCheckAudioTranscript(),
+        serverProps,
+        audioDAO);
+*/
   }
 
   /**

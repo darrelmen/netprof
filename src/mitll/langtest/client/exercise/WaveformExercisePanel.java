@@ -188,9 +188,8 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
 
   @Override
   public void onResize() {
-    logger.info(getElement().getId() + " gotResize " + (audioPanels
-        != null ? audioPanels.size() : ""));
-
+/*    logger.info(getElement().getId() + " gotResize " + (audioPanels
+        != null ? audioPanels.size() : ""));*/
     for (RecordAudioPanel ap : audioPanels) {
       ap.onResize();
     }

@@ -119,8 +119,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
   void showNPF(TabAndContent tabAndContent, String instanceName) {
     // logger.info(getClass() + " : adding npf content instanceName = " + instanceName);//+ " loadExercises " + loadExercises);
     DivWidget content = tabAndContent.getContent();
-    int widgetCount = content.getWidgetCount();
-    if (!madeNPFContent || widgetCount == 0) {
+    if (!madeNPFContent || content.getWidgetCount() == 0) {
       madeNPFContent = true;
       //    logger.info("\t: adding npf content instanceName = " + instanceName);
       addNPFToContent(content, instanceName);

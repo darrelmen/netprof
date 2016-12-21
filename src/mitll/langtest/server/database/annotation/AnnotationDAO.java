@@ -52,6 +52,8 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
   private static final String FIELD = FIELD1;
   private static final String MODIFIED = "modified";
 
+  //private final Map<String, List<UserAnnotation>> exerciseToAnnos = new HashMap<>();
+
   /**
    * @param database
    * @param userDAO
@@ -68,13 +70,60 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
   }
 
   /**
+   * Fix for an issue where we didn't clear incorrect annotations when the audio is marked with a defect.
+   * Later, if we filter for just items with audio defects, we'll find these unless we fix them.
+   *
+   * @throws SQLException
+   */
+  private void markCorrectForDefectAudio() throws SQLException {
+    String sql = "select annotation.uniqueid from annotation, audio where status='incorrect' and annotation.field = audio.audioref and audio.defect=true";
+    Connection connection = database.getConnection(this.getClass().toString());
+    PreparedStatement statement = connection.prepareStatement(sql);
+
+    ResultSet rs = statement.executeQuery();
+
+    Set<Long> ids = new HashSet<>();
+    while (rs.next()) {
+      ids.add(rs.getLong(1));
+    }
+
+    //logger.debug("getUserAnnotations sql " + sql + " yielded " + lists);
+    finish(connection, statement, rs);
+
+    if (!ids.isEmpty()) {
+      logger.info("fixing " + ids.size() + " annotations where audio was marked defect");
+      connection = database.getConnection(this.getClass().toString());
+      statement = connection.prepareStatement(
+          "update annotation" +
+              " set annotation.status='correct'" +
+              " where uniqueid" +
+              " IN (" + getInClause(ids) + ")"
+      );
+      statement.executeUpdate();
+      finish(connection, statement);
+    }
+  }
+
+  private String getInClause(Set<Long> longs) {
+    StringBuilder buffer = new StringBuilder();
+    for (long id : longs) {
+      buffer.append(id).append(",");
+    }
+
+    String s = buffer.toString();
+    if (s.endsWith(",")) s = s.substring(0, s.length() - 1);
+    return s;
+  }
+
+
+  /**
    * String exerciseID; String field; String status; String comment;
    * String userID;
    *
    * @param database
    * @throws SQLException
    */
-  void createTable(Database database) throws SQLException {
+  private void createTable(Database database) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS " +
         ANNOTATION +
@@ -135,7 +184,7 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
       int j = statement.executeUpdate();
 
       if (j != 1) {
-        logger.error("huh? didn't insert row for ");// + grade + " grade for " + resultID + " and " + grader + " and " + gradeID + " and " + gradeType);
+        logger.error("add huh? didn't insert row for " + annotation);// + grade + " grade for " + resultID + " and " + grader + " and " + gradeID + " and " + gradeType);
       }
 
       finish(connection, statement);
@@ -259,7 +308,7 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
     ResultSet rs = statement.executeQuery();
-    List<UserAnnotation> lists = new ArrayList<UserAnnotation>();
+    List<UserAnnotation> lists = new ArrayList<>();
 
     while (rs.next()) {
       lists.add(new UserAnnotation(

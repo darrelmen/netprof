@@ -126,6 +126,11 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   @Override
+  public void updateDNR(int uniqueID, float dnr) {
+    logger.info("add impl for updateDNR...");
+  }
+
+  @Override
   Collection<AudioAttribute> getAudioAttributesForExercise(int exid) {
     long then = System.currentTimeMillis();
     List<SlickAudio> byExerciseID = dao.getByExerciseID(exid);

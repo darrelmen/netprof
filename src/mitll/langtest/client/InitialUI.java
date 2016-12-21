@@ -88,6 +88,7 @@ public class InitialUI implements UILifecycle {
    * Tamas doesn't like scrolling -- try to prevent it on laptops
    */
   private static final int ITEMS_IN_ROW = 5;
+  private static final int LEFT_LIST_WIDTH = 167;
 
   protected static final String LOGIN = "Login";
 
@@ -1054,7 +1055,7 @@ public class InitialUI implements UILifecycle {
       if (DEBUG) logger.info("populateRootPanelIfLogin found : '" + as.getId() + "'");
 
       if (as.getId().contains(LOGIN)) {
-        logger.info("populateRootPanelIfLogin found login...");
+       // logger.info("populateRootPanelIfLogin found login...");
         populateRootPanel();
       } else {
         if (DEBUG) logger.info("populateRootPanelIfLogin no login...");

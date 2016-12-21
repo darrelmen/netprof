@@ -88,7 +88,6 @@ public class SoundFeedback {
       @Override
       public void songLoaded(double duration) {
         //  System.out.println("songLoaded " +song);
-
         if (soft) {
           soundManager.setVolume(song, SOFT_VOL);
         }
@@ -102,7 +101,6 @@ public class SoundFeedback {
       @Override
       public void songFinished() {
         //  System.out.println("songFinished " +song);
-
         destroySound();
         if (endListener != null) {
           endListener.songEnded();
