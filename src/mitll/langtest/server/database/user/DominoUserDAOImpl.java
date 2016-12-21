@@ -34,7 +34,11 @@ package mitll.langtest.server.database.user;
 
 //import mitll.hlt.domino.server.user.INetProfUserDelegate;
 
+import com.mongodb.client.MongoCollection;
+import mitll.hlt.domino.server.user.CachingMongoUserService;
 import mitll.hlt.domino.server.user.IUserServiceDelegate;
+import mitll.hlt.domino.server.user.LDAPUserServiceDelegate;
+import mitll.hlt.domino.server.user.MongoUserServiceDelegate;
 import mitll.hlt.domino.server.user.UserServiceFacadeImpl;
 import mitll.hlt.domino.server.util.*;
 import mitll.hlt.domino.server.util.ServerProperties;
@@ -51,14 +55,23 @@ import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
+import org.apache.ignite.Ignite;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
-import scala.tools.cmd.gen.AnyVals;
 
 import java.time.*;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.mongodb.client.model.Filters.eq;
+
+import org.bson.conversions.Bson;
+
+import static com.mongodb.client.model.Projections.*;
+import static mitll.hlt.domino.server.user.MongoUserServiceDelegate.USERS_C;
+
 
 /**
  * Store user info in domino tables.
@@ -70,7 +83,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   public static final mitll.hlt.domino.shared.model.user.User.Gender DFEMALE = mitll.hlt.domino.shared.model.user.User.Gender.Female;
 
   private IUserServiceDelegate delegate;
+  MyMongoUserServiceDelegate myDelegate;
   //private final String adminHash;
+  Mongo pool;
 
   /**
    * get the admin user.
@@ -92,7 +107,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     //  log.info("Starting Mongo connection initialization");
     mitll.langtest.server.ServerProperties serverProps = database.getServerProps();
     Properties props = serverProps.getProps();
-    Mongo pool = Mongo.createPool(new DBProperties(props));
+    pool = Mongo.createPool(new DBProperties(props));
 
     if (pool != null) {
       JSONSerializer serializer = Mongo.makeSerializer();
@@ -104,6 +119,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       //logger.info("app name is " +appName);
 
       delegate = UserServiceFacadeImpl.makeServiceDelegate(dominoProps, m, pool, serializer, null/*ignite*/);
+      myDelegate = makeMyServiceDelegate(dominoProps, m, pool, serializer);
 
       dominoAdminUser = delegate.getAdminUser();
       //adminUser.getRoleAbbreviations();
@@ -111,6 +127,14 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       logger.error("couldn't connect to user service");
     }
   }
+
+  private MyMongoUserServiceDelegate makeMyServiceDelegate(ServerProperties props,
+                                                           Mailer mailer, Mongo mongoCP, JSONSerializer serializer) {
+    MyMongoUserServiceDelegate d = new MyMongoUserServiceDelegate(props, mailer, mongoCP);
+    d.initializeDAOs(serializer);
+    return d;
+  }
+
 
   @Override
   public void ensureDefaultUsers() {
@@ -162,11 +186,15 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
     SResult<ClientUserDetail> clientUserDetailSResult = addUserToMongo(user,
         /*encodedPass, */
-        "", false);
+        "",
+        false);
 
     logger.info("addAndGet Got back " + clientUserDetailSResult);
 
-    boolean b = delegate.changePassword(adminUser, clientUserDetailSResult.get(), "", encodedPass);
+    // boolean b = delegate.changePassword(adminUser, clientUserDetailSResult.get(), "", encodedPass);
+
+    boolean b = myDelegate.setPassword(clientUserDetailSResult.get(), encodedPass);
+
     if (!b) {
       logger.error("\n\n\naddUserToMongo didn't set password for " + user.getUserId() + "\n\n\n");
       return null;
@@ -523,35 +551,67 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
   /**
    * TODO : don't use password hash - use free text instead
+   * <p>
+   * TODO : (somewhere else) allow admin masquerade login - e.g. gvidaver/steve - with gvidaver's password logs you in as steve
    *
    * @param id
-   * @param freeTextPassword
+   * @param encodedPassword
    * @return
    * @see mitll.langtest.server.database.copy.UserCopy#copyUsers(DatabaseImpl, int, IResultDAO)
    */
   @Override
-  public User getStrictUserWithPass(String id, String freeTextPassword) {
-    // User user = getUser(id, "");
-    User user = loginUser(id, freeTextPassword, "", "", "");
+  public User getStrictUserWithPass(String id, String encodedPassword) {
+    User user = getUserByID(id);
+    // User user = loginUser(id, encodedPassword, "", "", "");
+    return getUserIfMatch(user, id, encodedPassword);
+  }
+
+  private User getUserIfMatch(User user, String id, String encodedPassword) {
     if (user != null) {
-      logger.info("getStrictUserWithPass '" + id + "' and password hash '" + freeTextPassword + "'");
-
-      // TODO : allow admin masquerade login - e.g. gvidaver/steve - with gvidaver's password logs you in as steve
-
-      //boolean magicMatch = freeTextPassword.equals(adminHash);
-
-      if (true) {//netProfDelegate.isPasswordMatch(user.getID(), freeTextPassword) || magicMatch) {
-        boolean isadmin = database.getServerProps().getAdmins().contains(user.getUserID());
-        user.setAdmin(isadmin);
-        return user;
-      } else {
-        return null;
-      }
+      return getUserIfMatchPass(user, id, encodedPassword);
     } else {
+      logger.info("getStrictUserWithPass '" + id + "' is an unknown user");
       return null;
     }
   }
 
+ // @Override
+  public User getUserIfMatchPass(User user, String id, String encodedPassword) {
+    logger.info("getStrictUserWithPass '" + id + "' and password hash '" + encodedPassword + "'");
+    String password = getUserCredentials(id);
+    //boolean magicMatch = encodedPassword.equals(adminHash);
+
+    if (password.equals(encodedPassword)) {//netProfDelegate.isPasswordMatch(user.getID(), encodedPassword) || magicMatch) {
+      boolean isadmin = database.getServerProps().getAdmins().contains(user.getUserID());
+      user.setAdmin(isadmin);
+      return user;
+    } else {
+      logger.info("getStrictUserWithPass no match in db " + password + " vs " + encodedPassword);
+      return null;
+    }
+  }
+
+  private static final String UID_F = "userId";
+  private static final String PASS_F = "pass";
+
+  protected String getUserCredentials(String userId) {
+    return getUserCredentials(eq(UID_F, userId));
+  }
+
+  MongoCollection<Document> users() {
+    return pool.getMongoCollection(USERS_C);
+  }
+
+  private String getUserCredentials(Bson query) {
+    Document user = users().find(query).projection(include(PASS_F)).first();
+
+    if (user != null) {
+      return user.getString(PASS_F);
+    } else {
+      logger.warn("User not found in DB! Query: " + query);
+    }
+    return null;
+  }
 //  @Override
 //  public User getStrictUserWithFreeTextPass(String id, String freeTextPassword) {
 //    logger.error("2 confirm this is the right thing\n\n\n ");
@@ -622,11 +682,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
   /**
    * @param user
-   * @param useid
    * @return
    * @seex mitll.langtest.server.database.copy.CopyToPostgres#addUser(DominoUserDAOImpl, Map, User)
    */
-  public ClientUserDetail toClientUserDetail(User user, boolean useid) {
+  public ClientUserDetail toClientUserDetail(User user) {
     //Timestamp now = new Timestamp(user.getTimestampMillis());
     String first = user.getFirst();
     if (first == null) first = user.getUserID();
@@ -1180,5 +1239,15 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     }
 
     return clientUserDetail1 != null;
+  }
+
+  private static class MyMongoUserServiceDelegate extends MongoUserServiceDelegate {
+    public MyMongoUserServiceDelegate(ServerProperties props, Mailer mailer, Mongo mongoCP) {
+      super(props.getUserServiceProperties(), mailer, props.getAppName(), mongoCP);
+    }
+
+    public boolean setPassword(mitll.hlt.domino.shared.model.user.User user, String encodedPass) {
+      return doSavePassword(user, encodedPass) != null;
+    }
   }
 }

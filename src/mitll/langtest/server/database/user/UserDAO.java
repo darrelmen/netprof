@@ -314,6 +314,11 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     return getUserWhere(-1, sql);
   }
 
+//  @Override
+//  public User getUserIfMatchPass(User user, String id, String encodedPassword) {
+//    return null;
+//  }
+
   /**
    * @param id
    * @param freeTextPassword

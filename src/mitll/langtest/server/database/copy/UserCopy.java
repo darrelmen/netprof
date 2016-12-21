@@ -29,7 +29,7 @@ public class UserCopy {
   /**
    * What can happen:
    * <p>
-   * 1) User id and password match - no action -they're already there
+   * 1) User id and password match - no action - they're already there
    * 2) User id matches, but password doesn't - go ahead and add the user id and password
    * -- could be multiple users with same userid but different password... trouble later on?
    * 3) User id is new - add a new user
@@ -41,18 +41,18 @@ public class UserCopy {
    * <p>
    * For collisions -- must reset password -- someone loses.
    * <p>
-   * ??? Also, going forward, we must store emails, since we need to be able to send the sign up message?
+   * Also, going forward, we must store emails, since we need to be able to send the sign up message?
    *
    * @param db
    * @param projid
    * @see CopyToPostgres#copyOneConfig
    */
-  Map<Integer, Integer> copyUsers(DatabaseImpl db, int projid, IResultDAO oldResultDAO) throws Exception {
+  Map<Integer, Integer> copyUsers(DatabaseImpl db, int projid, IResultDAO oldResultDAO, String optName) throws Exception {
 //    SlickUserDAOImpl dominoUserDAO = (SlickUserDAOImpl) db.getUserDAO();
     DominoUserDAOImpl dominoUserDAO = (DominoUserDAOImpl) db.getUserDAO();
 
     Map<Integer, Integer> oldToNew = new HashMap<>();
-    addDefaultUsers(oldToNew, dominoUserDAO);
+    addDefaultUsers(oldToNew, /*(BaseUserDAO)*/ dominoUserDAO);
 
     IUserProjectDAO slickUserProjectDAO = db.getUserProjectDAO();
 
@@ -73,42 +73,52 @@ public class UserCopy {
       int importID = toImport.getID();
       if (importID != defectDetector) {
         String importUserID = toImport.getUserID();
-        String passwordHash = toImport.getPasswordHash();
-        if (passwordHash == null) passwordHash = "";
 
-        if (DEBUG) logger.info("copyUsers import " + toImport);
-        User strictUserWithPass = dominoUserDAO.getStrictUserWithPass(importUserID, passwordHash);
-
-        if (strictUserWithPass != null) {
-          // do nothing, but remember id mapping
-          oldToNew.put(importID, strictUserWithPass.getID());
+        if (importUserID.isEmpty() && idToCount.get(importID) != null && idToCount.get(importID) == 0) {
+          logger.info("copyUsers skipping old user " + toImport + " since they have an empty user name and no recordings");
+          lurker++;
         } else {
+          if (DEBUG) logger.info("copyUsers import " + toImport);
 
-          if (importUserID.isEmpty() && idToCount.get(importID) != null && idToCount.get(importID) == 0) {
-            logger.info("copyUsers skipping old user " + toImport + " since they have an empty user name and no recordings");
-            lurker++;
-          } else {
-            User userByID1 = dominoUserDAO.getUserByID(importUserID);
+          User userByID1 = dominoUserDAO.getUserByID(importUserID);
+          if (userByID1 != null) { // user exists
+            String passwordHash = toImport.getPasswordHash();
+            if (passwordHash == null) passwordHash = "";
 
-            if (userByID1 != null) {
-              if (DEBUG) logger.info("found existing user " + importUserID + " : " + userByID1);
+            User strictUserWithPass = dominoUserDAO.getUserIfMatchPass(userByID1, importUserID, passwordHash);
+            if (strictUserWithPass != null) { // existing user with same password
+              // do nothing, but remember id mapping
+              oldToNew.put(importID, strictUserWithPass.getID());
+            } else {
+              if (DEBUG) logger.info("copyUsers found existing user " + importUserID + " : " + userByID1);
+
               // User "adam" already exists with a different password - what to do?
               // void current password! Force them to set it again when they log in again
+
               int existingID = userByID1.getID();
-              String passwordHash1 = userByID1.getPasswordHash();
-              if (!passwordHash1.isEmpty()) {
-                logger.info("Found existing user " + existingID + " : " + userByID1.getUserID() + " with password hash " + passwordHash1);
-               //dominoUserDAO.changePassword(existingID, "");
-                dominoUserDAO.forgetPassword(existingID);
-              }
-              oldToNew.put(importID, existingID);
+
+              // give the person a new id in the name space of the language
+
+              String compoundID = importUserID+"#"+optName;
+              toImport.setUserID(compoundID);
+              added.add(addUser(dominoUserDAO, oldToNew, toImport));
+
+//              String passwordHash1 = userByID1.getPasswordHash();
+//              if (!passwordHash1.isEmpty()) {
+//                logger.info("Found existing user " + existingID + " : " + userByID1.getUserID() + " with password hash " + passwordHash1);
+//                //dominoUserDAO.changePassword(existingID, "");
+//                dominoUserDAO.forgetPassword(existingID);
+//              }
+//
+//              oldToNew.put(importID, existingID);
+
               collisions++;
               logger.info("copyUsers user collision to project " + projid + " map " + importID + "->" + existingID +
                   " : " + userByID1);
-            } else {
-              logger.info("copyUsers no existing user id '" + importUserID + "'");
-              added.add(addUser(dominoUserDAO, oldToNew, toImport));
             }
+          } else {
+            logger.info("copyUsers no existing user id '" + importUserID + "'");
+            added.add(addUser(dominoUserDAO, oldToNew, toImport));
           }
         }
       }
@@ -134,7 +144,7 @@ public class UserCopy {
                                    Map<Integer, Integer> oldToNew,
                                    User toImport) throws Exception {
 //    logger.info("addUser " + toImport + " with " + toImport.getPermissions());
-    ClientUserDetail user = dominoUserDAO.toClientUserDetail(toImport, false);
+    ClientUserDetail user = dominoUserDAO.toClientUserDetail(toImport);
     ClientUserDetail addedUser = dominoUserDAO.addAndGet(
         user,
         toImport.getPasswordHash(),
@@ -151,17 +161,17 @@ public class UserCopy {
     return addedUser;
   }
 
-  private void addDefaultUsers(Map<Integer, Integer> oldToNew, DominoUserDAOImpl dominoUserDAO) {
+  private void addDefaultUsers(Map<Integer, Integer> oldToNew, BaseUserDAO dominoUserDAO) {
     oldToNew.put(BaseUserDAO.DEFAULT_USER_ID, dominoUserDAO.getDefaultUser());
     oldToNew.put(BaseUserDAO.DEFAULT_MALE_ID, dominoUserDAO.getDefaultMale());
     oldToNew.put(BaseUserDAO.DEFAULT_FEMALE_ID, dominoUserDAO.getDefaultFemale());
   }
 
   /**
-   * @see #copyUsers(DatabaseImpl, int, IResultDAO)
    * @param projid
    * @param slickUserProjectDAO
    * @param added
+   * @see #copyUsers(DatabaseImpl, int, IResultDAO)
    */
   private void addUserProjectBinding(int projid, IUserProjectDAO slickUserProjectDAO, List<ClientUserDetail> added) {
     logger.info("addUserProjectBinding adding user->project for " + projid);
