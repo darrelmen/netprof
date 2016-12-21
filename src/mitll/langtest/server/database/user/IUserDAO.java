@@ -125,6 +125,7 @@ public interface IUserDAO extends IDAO {
    */
   User getStrictUserWithPass(String id, String passwordHash);
   //User getStrictUserWithFreeTextPass(String id, String freeTextPassword);
+ // User getUserIfMatchPass(User user, String id, String encodedPassword);
 
   /**
    * @see mitll.langtest.server.database.copy.CopyToPostgres#copyUsers(DatabaseImpl, int, IResultDAO)
