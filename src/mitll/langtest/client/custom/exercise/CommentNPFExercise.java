@@ -80,6 +80,8 @@ import java.util.logging.Logger;
  */
 public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T> {
   private Logger logger = Logger.getLogger("CommentNPFExercise");
+  private static final String HIGHLIGHT_START = "<span style='background-color:#5bb75b;color:black'>"; //#5bb75b
+  private static final String HIGHLIGHT_END = "</span>";
 
 //  private static final String HIGHLIGHT_START = "<span style='background-color:#5bb75b;color:black'>"; //#5bb75b
 //  private static final String HIGHLIGHT_END = "</span>";
@@ -103,7 +105,6 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
    * @param listContainer
    * @param addKeyHandler
    * @param instance
-   * @paramx mutableAnnotation
    * @see mitll.langtest.client.custom.Navigation#Navigation(LangTestDatabaseAsync, UserManager, ExerciseController, UserFeedback)
    * @see mitll.langtest.client.custom.content.NPFHelper#getFactory(PagingExerciseList, String, boolean)
    */
@@ -192,7 +193,7 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
           for (CommonExercise contextEx : directlyRelated) {
             container.add(getContext(contextEx, foreignLanguage, altFL));
           }
-          new ModalInfoDialog(CONTEXT_SENTENCE, container);
+          new ModalInfoDialog(CONTEXT_SENTENCE, container,false);
         }
       });
 
@@ -216,26 +217,57 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
   private <U extends CommonAudioExercise> Panel getContext(U exercise, String itemText, String altText) {
     String context = exercise.getForeignLanguage();
     String contextTranslation = exercise.getEnglish();
+
+  /**
+   * @param exercise
+   * @return
+   * @see #addContextButton
+   */
+//  private <U extends CommonShell & AnnotationExercise & AudioRefExercise> Panel getContext(U exercise) {
+//    String context = exercise.getContext() != null && !exercise.getContext().trim().isEmpty() ? exercise.getContext() : "";
+//    String contextTranslation =
+//        exercise.getContextTranslation() != null &&
+//        !exercise.getContextTranslation().trim().isEmpty() ? exercise.getContextTranslation() : "";
+
+
     boolean same = context.equals(contextTranslation);
 
     if (!context.isEmpty()) {
       Panel hp = new HorizontalPanel();
       addGenderChoices(exercise, hp);
 
+//      Panel vp = new VerticalPanel();
+//
+//      Widget entry = getEntry(exercise, QCNPFExercise.CONTEXT, ExerciseFormatter.CONTEXT,
+//          contextSupport.getHighlightedItemInContext(context, itemText));
+//      vp.add(entry);
+//
+//      if (!exercise.getAltFL().isEmpty()) {
+//        Widget entry2 = getEntry(exercise, QCNPFExercise.ALTCONTEXT, ExerciseFormatter.ALTCONTEXT,
+//            contextSupport.getHighlightedItemInContext(exercise.getAltFL(), altText));
+//        vp.add(entry2);
+//      }
+//
+//      addContextTranslation(exercise, contextTranslation, same, vp);
+
+      String highlightedVocabItemInContext = highlightVocabItemInContext(exercise, context);
+
+      Panel contentWidget = getContentWidget(ExerciseFormatter.CONTEXT, highlightedVocabItemInContext, false);
+      String field = QCNPFExercise.CONTEXT;
+      ExerciseAnnotation annotation = exercise.getAnnotation(field);
+
+      logger.info("getContext context " + exercise.getID() + " : " + annotation);
+
+      Widget commentRow = getCommentBox(false)
+          .getNoPopup(
+              field,
+              contentWidget,
+              annotation,
+              exercise);
+
       Panel vp = new VerticalPanel();
-
-      Widget entry = getEntry(exercise, QCNPFExercise.CONTEXT, ExerciseFormatter.CONTEXT,
-          contextSupport.getHighlightedItemInContext(context, itemText));
-      vp.add(entry);
-
-      if (!exercise.getAltFL().isEmpty()) {
-        Widget entry2 = getEntry(exercise, QCNPFExercise.ALTCONTEXT, ExerciseFormatter.ALTCONTEXT,
-            contextSupport.getHighlightedItemInContext(exercise.getAltFL(), altText));
-        vp.add(entry2);
-      }
-
+      vp.add(commentRow);
       addContextTranslation(exercise, contextTranslation, same, vp);
-
       hp.add(vp);
       return hp;
     } else {
@@ -245,12 +277,157 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
 
   private void addContextTranslation(AnnotationExercise e, String contextTranslation, boolean same, Panel vp) {
     if (!contextTranslation.isEmpty() && !same) {
-      Widget translationEntry = getEntry(e, QCNPFExercise.CONTEXT_TRANSLATION, ExerciseFormatter.CONTEXT_TRANSLATION,
-          contextTranslation);
+//      Widget translationEntry = getEntry(e, QCNPFExercise.CONTEXT_TRANSLATION, ExerciseFormatter.CONTEXT_TRANSLATION,
+//          contextTranslation);
+      Panel contentWidget = getContentWidget(ExerciseFormatter.CONTEXT_TRANSLATION, contextTranslation, false);
+      Widget translationEntry = getCommentBox(false).getNoPopup(QCNPFExercise.CONTEXT_TRANSLATION, contentWidget,
+          e.getAnnotation(QCNPFExercise.CONTEXT_TRANSLATION),
+          exercise);
+
       vp.add(translationEntry);
     }
   }
 
+  /**
+   * Add underlines of item tokens in context sentence.
+   * <p>
+   * TODO : don't do this - make spans with different colors
+   * <p>
+   * Worries about lower case/upper case mismatch.
+   *
+   * @param e
+   * @param context
+   * @return
+   * @see #getContext
+   */
+  private String highlightVocabItemInContext(CommonShell e, String context) {
+    return getHighlightedItemInContext(context, e.getForeignLanguage());
+  }
+
+  private String getHighlightedItemInContext(String context, String foreignLanguage) {
+    String trim = foreignLanguage.trim();
+    String toFind = removePunct(trim);
+
+    // split on spaces, find matching words if no contigious overlap
+    int i = context.indexOf(toFind);
+    if (i == -1) { // maybe mixed case - 'where' in Where is the desk?
+      String str = toFind.toLowerCase();
+      i = context.toLowerCase().indexOf(str);
+     // logger.info("Got " + i + " for " + str + " in " + context);
+    }
+    int end = i + toFind.length();
+    if (i > -1) {
+      //log("marking underline from " + i + " to " + end + " for '" + toFind +  "' in '" + trim + "'");
+      context = context.substring(0, i) + HIGHLIGHT_START + context.substring(i, end) + HIGHLIGHT_END + context.substring(end);
+    } else {
+      //log("NOT marking underline from " + i + " to " + end);
+      //log("trim   " + trim + " len " + trim.length());
+      //log("toFind " + toFind + " len " + trim.length());
+
+      Collection<String> tokens = getTokens(trim);
+      int startToken;
+      int endToken = 0;
+      StringBuilder builder = new StringBuilder();
+
+      boolean b = allMatch(context, tokens);
+      if (!b) {
+        tokens = findLongest(context, tokens);
+      }
+      String lowerContext = context.toLowerCase();
+      for (String token : tokens) {
+//        logger.info("getHighlightedItemInContext Check token '" + token + "'");
+        startToken = lowerContext.indexOf(token, endToken);
+        if (startToken != -1) {
+          builder.append(context.substring(endToken, startToken));
+          builder.append(HIGHLIGHT_START);
+          builder.append(context.substring(startToken, endToken = startToken + token.length()));
+          builder.append(HIGHLIGHT_END);
+        } else {
+          //        logger.info("getHighlightedItemInContext from " + endToken + " couldn't find token '" + token + "' len " + token.length() + " in '" + context + "'");
+        }
+      }
+      builder.append(context.substring(endToken));
+      // System.out.println("before " + context + " after " + builder.toString());
+      context = builder.toString();
+    }
+    return context;
+  }
+
+  private Collection<String> findLongest(String context, Collection<String> tokens) {
+    List<String> tList = new ArrayList<>(tokens);
+    List<String> highest = null;
+    int score = 0;
+    context = context.toLowerCase();
+    for (int i = 0; i < tokens.size(); i++) {
+      List<String> choice = tList.subList(i, tList.size());
+      int scoreForChoice = getCharsMatched(context, choice);
+      if (scoreForChoice > score) {
+        highest = choice;
+        score = scoreForChoice;
+        //    logger.info("findLongest Got " + score + " for " + new HashSet<>(choice));
+      } else {
+        //  logger.info("findLongest Got " + score + " vs " + highest);
+      }
+    }
+    return highest == null ? tList : highest;
+  }
+
+  private boolean allMatch(String context, Collection<String> tokens) {
+    int startToken;
+    int endToken = 0;
+    context = context.toLowerCase();
+
+    for (String token : tokens) {
+      // logger.info("getHighlightedItemInContext Check token '" + token + "'");
+      startToken = context.indexOf(token, endToken);
+      if (startToken == -1) {
+        // logger.info("getHighlightedItemInContext Check token '" + token + "' not after end " +endToken);
+        return false;
+      } else {
+        endToken = startToken + token.length();
+      }
+    }
+    return true;
+  }
+
+  private int getCharsMatched(String context, Collection<String> tokens) {
+    int startToken;
+    int endToken = 0;
+    int total = 0;
+
+    context = context.toLowerCase();
+
+    for (String token : tokens) {
+      //logger.info("getHighlightedItemInContext Check token '" + token + "'");
+      startToken = context.indexOf(token, endToken);
+      if (startToken == -1) {
+        return total;
+      } else {
+        endToken = startToken + token.length();
+        total += token.length();
+      }
+    }
+    return total;
+  }
+
+  /**
+   * @param sentence
+   * @return
+   * @see #getHighlightedItemInContext(String, String)
+   */
+  private Collection<String> getTokens(String sentence) {
+    List<String> all = new ArrayList<>();
+    sentence = removePunct(sentence);
+    for (String untrimedToken : sentence.split(CommentNPFExercise.SPACE_REGEX)) { // split on spaces
+      String tt = untrimedToken.replaceAll(CommentNPFExercise.PUNCT_REGEX, ""); // remove all punct
+      String token = tt.trim();  // necessary?
+      if (token.length() > 0) {
+        all.add(token);
+      }
+    }
+
+    return all;
+  }
 
   /**
    * For context audio!
@@ -265,7 +442,6 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
    */
   private void addGenderChoices(AudioRefExercise e, Panel hp) {
     // first, choose male and female voices
-
     long maleTime = 0, femaleTime = 0;
     Set<Long> preferredUsers = controller.getProps().getPreferredVoices();
     for (AudioAttribute audioAttribute : e.getAudioAttributes()) {
@@ -408,7 +584,7 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
    * @see #makeFastAndSlowAudio(String)
    */
   private Widget getEntry(final String field, final String label, String value, ExerciseAnnotation annotation) {
-    return getCommentBox().getEntry(field, getContentWidget(label, value, false), annotation);
+    return getCommentBox(true).getEntry(field, getContentWidget(label, value, false), annotation);
   }
 
   /**
@@ -421,7 +597,7 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
     return new FastAndSlowASRScoringAudioPanel<T>(getLocalExercise(), path, controller, scorePanel, instance) {
       @Override
       protected void addAudioRadioButton(Panel vp, RadioButton fast) {
-        vp.add(getCommentBox().getEntry(audioPath, fast, exercise.getAnnotation(path)));
+        vp.add(getCommentBox(true).getEntry(audioPath, fast, exercise.getAnnotation(path)));
       }
 
       @Override
@@ -438,11 +614,11 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
    * @see #getEntry(String, String, String, ExerciseAnnotation)
    * @see #makeFastAndSlowAudio(String)
    */
-  private CommentBox getCommentBox() {
+  private CommentBox getCommentBox(boolean tooltipOnRight) {
     if (logger == null) {
       logger = Logger.getLogger("CommentNPFExercise");
     }
     T exercise = this.exercise;
-    return new CommentBox(this.exercise.getID(), controller, this, exercise.getMutableAnnotation());
+    return new CommentBox(this.exercise.getID(), controller, this, exercise.getMutableAnnotation(), tooltipOnRight);
   }
 }

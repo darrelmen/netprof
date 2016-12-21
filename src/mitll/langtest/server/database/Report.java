@@ -94,7 +94,7 @@ public class Report {
 
   private static final String NEW_I_PAD_I_PHONE_USERS = "New iPad/iPhone Users";
   private static final String TIME_ON_TASK = "Time on Task";
-  private static final String MM_DD = "MM-dd";
+  //  private static final String MM_DD = "MM-dd";
   private static final String ALL_NEW_USERS = "All New Users";
   private static final String ALL_USERS = "allUsers";
   private static final String I_PAD_USERS = "iPadUsers";
@@ -113,9 +113,9 @@ public class Report {
   private static final String BROWSER = "browser";
   private static final String BROWSER_VERSION = "browserVersion";
   private static final String NAME = "name";
-  public static final String ACTIVE_I_PAD = "Active iPad/iPhone Users";
-  public static final int EVIL_LAST_WEEK = 54;
-  public static final String SKIP_USER = "gvidaver";
+  private static final String ACTIVE_I_PAD = "Active iPad/iPhone Users";
+  private static final int EVIL_LAST_WEEK = 54;
+  private static final String SKIP_USER = "gvidaver";
 
   private final IUserDAO userDAO;
   private final IResultDAO resultDAO;
@@ -126,14 +126,18 @@ public class Report {
   private final String language;
   private BufferedWriter csv;
   private final Map<Long, Long> userToStart = new HashMap<>();
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
+
+  private final Map<Long, String> idToUser = new HashMap<>();
 
   private final Set<String> lincoln = new HashSet<>(Arrays.asList(SKIP_USER, "rbudd", "jmelot", "esalesky", "gatewood",
       "testing", "grading", "fullperm", "0001abcd", "egodoy",
       "rb2rb2",
       "dajone3",
       "WagnerSandy",
-      "rbtrbt"));
+      "rbtrbt",
+      "tamas01",
+      "teacher", "newteacher"));
 
   Report(IUserDAO userDAO, IResultDAO resultDAO, IEventDAO eventDAO, IAudioDAO audioDAO, String language,
          String prefix) {
@@ -372,7 +376,7 @@ public class Report {
                        Collection<Result> results,
                        Collection<Result> resultsDevices) {
     JSONObject forYear = new JSONObject();
-    builder.append("<h1>" + i + "</h1>");
+    builder.append("<h1>").append(i).append("</h1>");
     builder.append(getReport(forYear, i, allSlim, allDevicesSlim, exToAudio, audioAttributes, results, resultsDevices));
     dataArray.add(forYear);
   }
@@ -407,7 +411,7 @@ public class Report {
 
     // ipad users
     JSONObject iPadUsers = new JSONObject();
-    getUsers(builder, userDAO.getUsersDevices(), NEW_I_PAD_I_PHONE_USERS, iPadUsers, year);
+    getUsers(builder, userDAO.getUsersDevices(), NEW_I_PAD_I_PHONE_USERS, iPadUsers, year, false);
     jsonObject.put(I_PAD_USERS, iPadUsers);
 
     JSONObject timeOnTaskJSON = new JSONObject();
@@ -432,9 +436,9 @@ public class Report {
     Date january1st = getJanuaryFirst(calendar, year);
     Date january1stNextYear = getNextYear(year);
 
-    if (DEBUG) {
-      logger.info("doReport : between " + january1st + " and " + january1stNextYear);
-    }
+//    if (DEBUG) {
+//      logger.info("doReport : between " + january1st + " and " + january1stNextYear);
+//    }
 
     JSONObject referenceRecordings = new JSONObject();
     addRefAudio(builder, calendar, audioAttributes, referenceRecordings, year);
@@ -464,7 +468,7 @@ public class Report {
         "<body><h2>Host : " + hostInfo + "</h2>\n";
   }
 
-  private Map<String, ReadableUserAgent> userAgentToReadable = new HashMap<>();
+  private final Map<String, ReadableUserAgent> userAgentToReadable = new HashMap<>();
 
   /**
    * @param fusers
@@ -547,7 +551,7 @@ public class Report {
     section.put(BROWSER_VERSION, browserVerArray);
 
     if (miss > 0)
-      logger.info(language + " for " + year + " users by year " + userAgentToReadable.size() + " miss " + miss);
+      logger.info("getBrowserReport " + language + " for " + year + " users by year " + userAgentToReadable.size() + " miss " + miss);
   }
 
   private List<User> filterUsersByYear(List<User> fusers, int year) {
@@ -589,7 +593,7 @@ public class Report {
    * @see #getReport
    */
   private Set<Integer> getUsers(StringBuilder builder, JSONObject jsonObject, int year) {
-    return getUsers(builder, fixUserStarts(), ALL_NEW_USERS, jsonObject, year);
+    return getUsers(builder, fixUserStarts(), ALL_NEW_USERS, jsonObject, year, true);
   }
 
   private String getHostInfo() {
@@ -639,10 +643,13 @@ public class Report {
    * @see #doReport
    * @see #getUsers
    */
-  private Set<Integer> getUsers(StringBuilder builder, Collection<User> users, String users1, JSONObject jsonObject, int year) {
+  private Set<Integer> getUsers(StringBuilder builder, Collection<User> users, String users1, JSONObject jsonObject,
+                                int year,
+                                boolean reportTeachers) {
     Calendar calendar = getCalendarForYear(year);
     YearTimeRange yearTimeRange = new YearTimeRange(year, calendar).invoke();
     int ytd = 0;
+    int tytd = 0;
 
     Counts counts = new Counts(year);
     Map<Integer, Integer> monthToCount = counts.getMonthToCount();
@@ -650,11 +657,21 @@ public class Report {
 
     Set<Integer> students = new HashSet<>();
 
-    for (User user : users) {
-      boolean isStudent = (user.getAge() == 89 && user.getUserID().isEmpty()) || user.getAge() == 0 ||
-          user.getUserKind() == User.Kind.STUDENT;
+    Counts tcounts = new Counts(year);
+    Map<Integer, Integer> tmonthToCount = tcounts.getMonthToCount();
+    Map<Integer, Integer> tweekToCount = tcounts.getWeekToCount();
 
-      if (user.getUserKind() == User.Kind.TEACHER) isStudent = false;
+    for (User user : users) {
+      boolean isStudent =
+          (user.getAge() == 89 &&
+              user.getUserID().isEmpty()) ||
+              user.getAge() == 0 ||
+              user.getUserKind() == User.Kind.STUDENT;
+
+      boolean isTeacher = user.getUserKind() == User.Kind.TEACHER;
+
+      if (isTeacher) isStudent = false;
+
       boolean contains = false;
       for (String ll : lincoln) {
         if (user.getUserID().startsWith(ll)) {
@@ -668,50 +685,66 @@ public class Report {
         if (SHOW_TEACHER_SKIPS) logger.warn("skipping ? " + user);
         continue;
       }
+      long userCreated = user.getTimestampMillis();
+      boolean inYear = yearTimeRange.inYear(userCreated);
       if (isStudent) {
         students.add(user.getID());
-        long userCreated = user.getTimestampMillis();
-        if (yearTimeRange.inYear(userCreated)) {
+        if (inYear) {
           ytd++;
-          calendar.setTimeInMillis(userCreated);
-
-          int month = calendar.get(Calendar.MONTH);
-          monthToCount.put(month, monthToCount.getOrDefault(month, 0) + 1);
-
-          int w = calendar.get(Calendar.WEEK_OF_YEAR);
-          weekToCount.put(w, weekToCount.getOrDefault(w, 0) + 1);
+          countByWeekAndMonth(calendar, monthToCount, weekToCount, userCreated);
         } else {
           //   logger.debug("NO time " +user.getTimestamp() + " " + parse);
         }
         //}
       } else {
+        if (isTeacher) {
+          if (inYear) {
+            tytd++;
+            countByWeekAndMonth(calendar, tmonthToCount, tweekToCount, userCreated);
+          }
+        }
         if (SHOW_TEACHER_SKIPS) logger.warn("skipping teacher " + user);
       }
     }
-    int monthTotal = 0;
-    for (Integer count : monthToCount.values()) monthTotal += count;
+    {
+      int monthTotal = 0;
+      for (Integer count : monthToCount.values()) monthTotal += count;
 
-    int weekTotal = 0;
-    for (Integer count : weekToCount.values()) weekTotal += count;
+      int weekTotal = 0;
+      for (Integer count : weekToCount.values()) weekTotal += count;
 
-    if (monthTotal != weekTotal) {
-      logger.info("users month total " + monthTotal + " week total " + weekTotal);
-      logger.info("weeks\n" + weekToCount);
-      logger.info("users " + weekToCount.keySet());
+      if (monthTotal != weekTotal) {
+        logger.info("users month total " + monthTotal + " week total " + weekTotal);
+        logger.info("weeks\n" + weekToCount);
+        logger.info("users " + weekToCount.keySet());
+      }
     }
     //logger.info("users " + weekToCount.keySet());
 
     builder.append(getSectionReport(ytd, monthToCount, weekToCount, users1, jsonObject, year));
+    if (reportTeachers) {
+      builder.append(getSectionReport(tytd, tmonthToCount, tweekToCount, "New Teachers", jsonObject, year));
+    }
     return students;
+  }
+
+  private void countByWeekAndMonth(Calendar calendar, Map<Integer, Integer> monthToCount, Map<Integer, Integer> weekToCount, long userCreated) {
+    calendar.setTimeInMillis(userCreated);
+
+    int month = calendar.get(Calendar.MONTH);
+    monthToCount.put(month, monthToCount.getOrDefault(month, 0) + 1);
+
+    int w = calendar.get(Calendar.WEEK_OF_YEAR);
+    weekToCount.put(w, weekToCount.getOrDefault(w, 0) + 1);
   }
 
   private void ensureYTDEntries0(int year, Map<Integer, Long> monthToCount) {
     Calendar today = getCalendarForYearOrNow();
     int thisMonth = today.get(Calendar.MONTH);
-    for (int i = 0; i <= thisMonth; i++) monthToCount.put(i, 0l);
+    for (int i = 0; i <= thisMonth; i++) monthToCount.put(i, 0L);
 
     if (isNotThisYear(year)) {
-      for (int i = 0; i < 12; i++) monthToCount.put(i, 0l);
+      for (int i = 0; i < 12; i++) monthToCount.put(i, 0L);
     }
   }
 
@@ -728,10 +761,10 @@ public class Report {
   private void ensureYTDEntriesW(int year, Map<Integer, Long> weekToCount) {
     Calendar today = getCalendarForYearOrNow();
     int thisWeek = today.get(Calendar.WEEK_OF_YEAR);
-    for (int i = 0; i <= thisWeek; i++) weekToCount.put(i, 0l);
+    for (int i = 0; i <= thisWeek; i++) weekToCount.put(i, 0L);
 
     if (isNotThisYear(year)) {
-      for (int i = 0; i < EVIL_LAST_WEEK; i++) weekToCount.put(i, 0l);
+      for (int i = 0; i < EVIL_LAST_WEEK; i++) weekToCount.put(i, 0L);
     }
   }
 
@@ -1062,15 +1095,19 @@ public class Report {
     int teacherAudio = 0;
     int invalid = 0;
     int invalidScore = 0;
+    int me = 0;
 
     int beforeJanuary = 0;
     Set<Integer> skipped = new TreeSet<>();
+    int size = results.size();
     try {
       BufferedWriter writer = null;
       teacherAudio = 0;
       invalid = 0;
+      me = 0;
       Calendar calendar = getCalendarForYear(year);
 
+      Set<String> seen = new HashSet<>();
       for (Result result : results) {
         long timestamp = result.getTimestamp();
 
@@ -1079,15 +1116,18 @@ public class Report {
             if (!isRefAudioResult(exToAudio, result)) {
               int userid = result.getUserid();
               if (students.contains(userid)) {
-                //if (result.getAudioType().equals("unset") || result.getAudioType().equals("_by_WebRTC")) {
-                if (result.getPronScore() > -1) {
+                if (isResultReallyValid(result, seen)) {
                   if (isValidUser(userid)) {
            /*         if (WRITE_RESULTS_TO_FILE) {
                       writer.write(result.toString());
                       writer.write("\n");
                     }*/
                     ytd++;
+
                     tallyByMonthAndWeek(calendar, monthToCount, weekToCount, result, userToDayToCount);
+                    seen.add(result.getAnswer());
+                  } else {
+                    me++;
                   }
                 } else {
                   invalidScore++;
@@ -1111,10 +1151,21 @@ public class Report {
       logger.error("got " + e, e);
     }
 
-    if (DEBUG)
-      logger.debug("Skipped " + invalid + " invalid recordings, " + invalidScore + " -1 score items, " + beforeJanuary + " beforeJan1st");
+    if (DEBUG) {
+      logger.debug("getResultsForSet out of " + size +
+          "  Skipped " +
+          invalid + " invalid recordings, " +
+          invalidScore + " -1 score items, " +
+          me + " by gvidaver, " +
+          beforeJanuary + " beforeJan1st");
+    }
     if (teacherAudio > 0) {
-      if (DEBUG) logger.debug("skipped " + teacherAudio + " teacher recordings by " + skipped);
+      StringBuilder builder1 = new StringBuilder();
+      builder1.append("\n");
+      for (Integer skip : skipped) {
+        builder1.append(skip).append("/").append(idToUser.get(skip)).append(",\n");
+      }
+      if (DEBUG) logger.debug("getResultsForSet skipped " + teacherAudio + " teacher recordings by " + builder1);
     }
     //logger.debug("userToDayToCount " + userToDayToCount.size());
 
@@ -1122,6 +1173,19 @@ public class Report {
     builder.append(
         getSectionReport(ytd, monthToCount, weekToCount, recordings, jsonObject, year)
     );
+  }
+
+  /**
+   * Don't count the same audio twice.
+   *
+   * @param result
+   * @param seen
+   * @return
+   */
+  private boolean isResultReallyValid(Result result, Set<String> seen) {
+    return
+        result.getDurationInMillis() > 250 &&
+            !seen.contains(result.getAnswer());
   }
 
   /**
@@ -1168,8 +1232,8 @@ public class Report {
   }
 
   private static class Counts {
-    private Map<Integer, Integer> monthToCount = new TreeMap<>();
-    private Map<Integer, Integer> weekToCount = new TreeMap<>();
+    private final Map<Integer, Integer> monthToCount = new TreeMap<>();
+    private final Map<Integer, Integer> weekToCount = new TreeMap<>();
 
     Counts(int year) {
       if (year == getThisYear()) {
@@ -1453,7 +1517,7 @@ public class Report {
   }*/
 
   private boolean isValidUser(long creatorID) {
-    return creatorID != 1;
+    return creatorID != 1; // 1 = gvidaver
   }
 
   /**
@@ -1649,8 +1713,8 @@ public class Report {
   }
 
   private class YearTimeRange {
-    private int year;
-    private Calendar calendar;
+    private final int year;
+    private final Calendar calendar;
     private long time;
     private long time1;
 
@@ -1674,7 +1738,7 @@ public class Report {
     YearTimeRange invoke() {
       Date january1st = getJanuaryFirst(calendar, year);
       Date january1stNextYear = getNextYear(year);
-      if (DEBUG) logger.info("getEvents from " + january1st + " to " + january1stNextYear);
+//      if (DEBUG) logger.info("getEvents from " + january1st + " to " + january1stNextYear);
       time = january1st.getTime();
       time1 = january1stNextYear.getTime();
       return this;

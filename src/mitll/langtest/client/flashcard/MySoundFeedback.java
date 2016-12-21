@@ -35,6 +35,8 @@ package mitll.langtest.client.flashcard;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.client.sound.SoundManagerAPI;
 
+import java.util.logging.Logger;
+
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -42,9 +44,16 @@ import mitll.langtest.client.sound.SoundManagerAPI;
  * @since 2/2/16.
  */
 class MySoundFeedback extends SoundFeedback {
+//  private final Logger logger = Logger.getLogger("MySoundFeedback");
   public MySoundFeedback(SoundManagerAPI soundManagerAPI) {
     super(soundManagerAPI);
   }
+
+  /**
+   * @param song
+   * @param endListener
+   * @see BootstrapExercisePanel#playRefAndGoToNext
+   */
 
   public synchronized void queueSong(String song, EndListener endListener) {
     //logger.info("\t queueSong song " +song+ " -------  "+ System.currentTimeMillis());
@@ -53,7 +62,7 @@ class MySoundFeedback extends SoundFeedback {
   }
 
   public synchronized void queueSong(String song) {
-    //logger.info("\t queueSong song " +song+ " -------  "+ System.currentTimeMillis());
+    //logger.info("\t queueSong (no callback) song " +song+ " -------  "+ System.currentTimeMillis());
     destroySound(); // if there's something playing, stop it!
     createSound(song, null);
   }
@@ -62,7 +71,7 @@ class MySoundFeedback extends SoundFeedback {
    * @see StatsFlashcardFactory.StatsPracticePanel#abortPlayback
    */
   public synchronized void clear() {
-    //  logger.info("\t stop playing current sound -------  "+ System.currentTimeMillis());
+   // logger.info("\t stop playing current sound -------  "+ System.currentTimeMillis());
     destroySound(); // if there's something playing, stop it!
   }
 

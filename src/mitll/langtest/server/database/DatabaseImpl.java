@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database;
 
+import mitll.langtest.client.user.UserPassLogin;
 import mitll.langtest.server.*;
 import mitll.langtest.server.amas.FileExerciseDAO;
 import mitll.langtest.server.audio.AudioCheck;
@@ -750,12 +751,19 @@ public class DatabaseImpl implements Database {
   }
 
   /**
+   * TODO : why is this so confusing???
+   *
    * @param userExercise
    * @see mitll.langtest.server.services.ListServiceImpl#editItem
+   * @param keepAudio
+   * @see mitll.langtest.server.LangTestDatabaseImpl#editItem
    * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#postEditItem
    */
-  public void editItem(CommonExercise userExercise) {
-    logger.debug("editItem ex #" + userExercise.getID() + " mediaDir : " + getServerProps().getMediaDir() +
+  public void editItem(CommonExercise userExercise, boolean keepAudio) {
+    int id = userExercise.getID();
+    logger.debug("editItem exercise #" + id +
+        " keep audio " + keepAudio +
+        " mediaDir : " + getServerProps().getMediaDir() +
         " initially audio was\n\t " + userExercise.getAudioAttributes());
 
     getUserListManager().editItem(userExercise, true, getServerProps().getMediaDir());
@@ -795,14 +803,14 @@ public class DatabaseImpl implements Database {
 
       logger.debug("editItem copying " + original.size() + " audio attrs under exercise overlay id " + overlayID);
 
-      for (AudioAttribute toCopy : original) {
-        if (toCopy.getUserid() < UserDAO.DEFAULT_FEMALE_ID) {
-          logger.error("bad user id for " + toCopy);
-        }
+        for (AudioAttribute toCopy : original) {
+          if (toCopy.getUserid() < UserDAO.DEFAULT_FEMALE_ID) {
+            logger.error("bad user id for " + toCopy);
+          }
         logger.debug("\t copying " + toCopy);
         audioDAO.add((int) toCopy.getUserid(), toCopy.getAudioRef(), overlayID, toCopy.getTimestamp(), toCopy.getAudioType(), toCopy.getDurationInMillis());
       }*/
-    }
+        }
 
     getSectionHelper(projectID).refreshExercise(exercise);
   }
@@ -815,6 +823,14 @@ public class DatabaseImpl implements Database {
   public void markAudioDefect(AudioAttribute audioAttribute) {
     if (audioDAO.markDefect(audioAttribute) < 1) {
       logger.error("markAudioDefect huh? couldn't mark error on " + audioAttribute);
+    }
+    else {
+      userListManager.addAnnotation(
+          audioAttribute.getExid(),
+          audioAttribute.getAudioRef(),
+          UserListManager.CORRECT,
+          "audio marked with defect",
+          audioAttribute.getUserid());
     }
   }
 
@@ -955,6 +971,14 @@ public class DatabaseImpl implements Database {
   public boolean logEvent(String id, String widgetType, String exid, String context, int userid, String device) {
     if (userid == -1) {
       userid = userDAO.getBeforeLoginUser();
+
+      if (widgetType.equals(UserPassLogin.USER_NAME_BOX)) {
+        return true;
+      }
+      else {
+        //  logger.debug("logEvent for user " + userid);
+        userid = userDAO.getBeforeLoginUser();
+      }
     }
 
     IProjectDAO projectDAO = getProjectDAO();
@@ -1342,6 +1366,8 @@ public class DatabaseImpl implements Database {
     return serverProps;
   }
 
+
+
   private AddRemoveDAO getAddRemoveDAO() {
     return null;//addRemoveDAO;
   }
@@ -1565,7 +1591,7 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.services.ScoringServiceImpl#getPretestScore
    */
   public void rememberScore(int resultID, PretestScore asrScoreForAudio, boolean isCorrect) {
-    getAnswerDAO().changeAnswer(resultID, asrScoreForAudio.getHydecScore(), asrScoreForAudio.getProcessDur(), asrScoreForAudio.getJson());
+    getAnswerDAO().changeAnswer(resultID, asrScoreForAudio.getHydecScore(), asrScoreForAudio.getProcessDur(), asrScoreForAudio.getJson(),isCorrect);
     recordWordAndPhone.recordWordAndPhoneInfo(resultID, asrScoreForAudio);
   }
 

@@ -128,7 +128,8 @@ class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise>
           protected void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection,
                                                   String prefix,
                                                   boolean onlyWithAudioAnno, int exerciseID) {
-            super.loadExercisesUsingPrefix(typeToSection, prefix, onlyWithAudioAnno, exerciseID);
+              prefix = ""; // practice helper doesn't use a search box
+              super.loadExercisesUsingPrefix(typeToSection, prefix, onlyWithAudioAnno, exerciseID);
             statsFlashcardFactory.setSelection(typeToSection);
           }
         };

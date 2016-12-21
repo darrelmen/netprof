@@ -77,6 +77,9 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 class NewUserExercise extends BasicDialog {
+  public static final int MAX_CHARACTERS = 300;
+  public static final int TEXT_FIELD_WIDTH = 500;
+
   private final Logger logger = Logger.getLogger("NewUserExercise");
 
   private static final String FOREIGN_LANGUAGE = "Foreign Language";
@@ -88,6 +91,7 @@ class NewUserExercise extends BasicDialog {
   static final String SLOW_SPEED_REFERENCE_RECORDING_OPTIONAL = "Slow speed reference recording (optional)";
   private static final String ENTER_THE_FOREIGN_LANGUAGE_PHRASE = "Enter the foreign language phrase.";
   private static final String ENTER_THE_ENGLISH_PHRASE = "Enter the english equivalent.";
+  private static final String ENTER_MEANING = "Enter the meaning of the english.";
   private static final String RECORD_REFERENCE_AUDIO_FOR_THE_FOREIGN_LANGUAGE_PHRASE = "Record reference audio for the foreign language phrase.";
   /**
    * @see #makeDeleteButton(UserList)
@@ -166,7 +170,7 @@ class NewUserExercise extends BasicDialog {
 
     final FluidContainer container = new ResizableFluid();
     DivWidget upper = new DivWidget();
-
+    upper.getElement().setId("addNewFieldContainer");
     Element element = container.getElement();
     element.setId("NewUserExercise_container");
     Style style = element.getStyle();
@@ -239,7 +243,6 @@ class NewUserExercise extends BasicDialog {
   }
 
   protected void makeOptionalRows(DivWidget upper) {
-
   }
 
   /**
@@ -353,7 +356,7 @@ class NewUserExercise extends BasicDialog {
   void makeEnglishRow(Panel container) {
     Panel row = new FluidRow();
     container.add(row);
-    english = addControlFormField(row, getEnglishLabel(), false, 1, 100, "");
+    english = addControlFormField(row, getEnglishLabel(), false, 1, MAX_CHARACTERS, "", TEXT_FIELD_WIDTH);
   }
 
   String getEnglishLabel() {
@@ -364,7 +367,7 @@ class NewUserExercise extends BasicDialog {
     //  logger.info("NewUserExercise.makeForeignLangRow --->");
     Panel row = new FluidRow();
     container.add(row);
-    foreignLang = addControlFormField(row, getLanguage(), false, 1, 150, "");
+    foreignLang = addControlFormField(row, getLanguage(), false, 1, MAX_CHARACTERS, "", TEXT_FIELD_WIDTH);
     foreignLang.box.setDirectionEstimator(true);   // automatically detect whether text is RTL
   }
 
@@ -375,11 +378,11 @@ class NewUserExercise extends BasicDialog {
   void makeTranslitRow(Panel container) {
     Panel row = new FluidRow();
     container.add(row);
-    translit = addControlFormField(row, TRANSLITERATION_OPTIONAL, false, 0, 150, "");
+    translit = addControlFormField(row, TRANSLITERATION_OPTIONAL, false, 0, MAX_CHARACTERS, "", TEXT_FIELD_WIDTH);
   }
 
   public <S extends CommonShell & AudioRefExercise & AnnotationExercise> void setFields(S newUserExercise) {
-    //  logger.info("setFields : setting fields with " + newUserExercise);
+    logger.info("setFields : setting fields with " + newUserExercise);
     // english
     String english = newUserExercise.getEnglish();
     this.english.box.setText(english);
@@ -494,13 +497,18 @@ class NewUserExercise extends BasicDialog {
     if (foreignLang.getText().isEmpty()) {
       markError(foreignLang, ENTER_THE_FOREIGN_LANGUAGE_PHRASE);
     } else if (english.getText().isEmpty()) {
-      markError(english, ENTER_THE_ENGLISH_PHRASE);
+      String enterTheEnglishPhrase = isEnglish() ? ENTER_MEANING : ENTER_THE_ENGLISH_PHRASE;
+      markError(english, enterTheEnglishPhrase);
     } else if (validateForm(foreignLang, rap, normalSpeedRecording, foreignChanged)) {
       isValidForeignPhrase(ul, pagingContainer, toAddTo, onClick);
     } else {
       formInvalid();
       logger.info("NewUserExercise.validateThenPost : form not valid");
     }
+  }
+
+  protected boolean isEnglish() {
+    return controller.getLanguage().equalsIgnoreCase("english");
   }
 
   void formInvalid() {
@@ -543,7 +551,16 @@ class NewUserExercise extends BasicDialog {
   }
 
   void grabInfoFromFormAndStuffInfoExercise(MutableExercise mutableExercise) {
-    mutableExercise.setEnglish(english.getText());
+    String text = english.getText();
+
+    logger.info("so english  field is " + text + " fl " + foreignLang.getText());
+ //   logger.info("so translit field is " + translit.getText());
+    if (isEnglish()) {
+      mutableExercise.setMeaning(text);
+    }
+    else {
+      mutableExercise.setEnglish(text);
+    }
     mutableExercise.setForeignLanguage(foreignLang.getText());
     mutableExercise.setTransliteration(translit.getText());
   }
@@ -554,7 +571,6 @@ class NewUserExercise extends BasicDialog {
   void checkIfNeedsRefAudio() {
     if (newUserExercise == null/* || newUserExercise.getRefAudio() == null*/) {
       //logger.info("checkIfNeedsRefAudio : new user ex " + newUserExercise);
-
       Button recordButton = rap.getButton();
       markError(normalSpeedRecording, recordButton, recordButton, "", RECORD_REFERENCE_AUDIO_FOR_THE_FOREIGN_LANGUAGE_PHRASE, Placement.RIGHT);
       recordButton.addMouseOverHandler(new MouseOverHandler() {
@@ -732,7 +748,6 @@ class NewUserExercise extends BasicDialog {
             public void stopRecording() {
               otherRAP.setEnabled(true);
               showStop();
-
               super.stopRecording();
             }
 

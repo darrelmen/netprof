@@ -126,7 +126,10 @@ public class NPFHelper implements RequiresResize {
    * @param toSelect
    * @see mitll.langtest.client.custom.ListManager#getListOperations
    */
-  public void showNPF(UserList<CommonShell> ul, TabAndContent tabAndContent, String instanceName, boolean loadExercises,
+  public void showNPF(UserList<CommonShell> ul,
+                      TabAndContent tabAndContent,
+                      String instanceName,
+                      boolean loadExercises,
                       HasID toSelect) {
     // logger.info(getClass() + " : adding npf content instanceName = " + instanceName + " for list " + ul + " with " +ul.getExercises().size());
 

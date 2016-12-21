@@ -50,6 +50,7 @@
         sampleRate: this.context.sampleRate
       }
     });
+
     var recording = false,
         currCallback;
 
@@ -73,11 +74,18 @@
     };
 
     this.record = function () {
+     // source.connect(this.node);
+    //  this.node.connect(this.context.destination);    //this should not be necessary
+      //source.start();
       recording = true;
+//      console.log("record " + "  at " + new Date().getTime());
     };
 
     this.stop = function () {
-      recording = false;
+  //    source.disconnect(this.node);
+  //    this.node.disconnect(this.context.destination);    //this should not be necessary
+        recording = false;
+//      console.log("stop " + "  at " + new Date().getTime());
     };
 
     this.clear = function () {
@@ -86,6 +94,7 @@
 
     this.getBuffers = function (cb) {
       currCallback = cb || config.callback;
+      if (!currCallback) throw new Error('Callback not set');
       worker.postMessage({command: 'getBuffers'})
     };
 
@@ -103,6 +112,7 @@
     this.exportMonoWAV = function (cb, type) {
       currCallback = cb || config.callback;
       type = type || config.type || 'audio/wav';
+//      console.log("exportMonoWAV " + "  at " + new Date().getTime());
       if (!currCallback) throw new Error('Callback not set');
       worker.postMessage({
         command: 'exportMonoWAV',

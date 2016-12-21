@@ -491,18 +491,10 @@ public class AudioExercise extends ExerciseShell {
       if (field.endsWith(WAV)) {
         String key = field.replaceAll(WAV, MP3);
         ExerciseAnnotation exerciseAnnotation = fieldToAnnotation.get(key);
-        //if (exerciseAnnotation == null && !fieldToAnnotation.isEmpty()) {
-        //  System.out.println("getAnnotation : Can't find " + field + " in "+ fieldToAnnotation.keySet());
-        //}
-
         return exerciseAnnotation;
       } else if (field.endsWith(MP3)) {
         String key = field.replaceAll(MP3, WAV);
         ExerciseAnnotation exerciseAnnotation = fieldToAnnotation.get(key);
-        //     if (exerciseAnnotation == null && !fieldToAnnotation.isEmpty()) {
-//          System.out.println("getAnnotation : Can't find " + field + " in "+ fieldToAnnotation.keySet());
-        //   }
-
         return exerciseAnnotation;
       }
     }

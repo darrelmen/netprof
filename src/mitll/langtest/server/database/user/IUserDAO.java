@@ -211,18 +211,20 @@ public interface IUserDAO extends IDAO {
    * @see mitll.langtest.server.rest.RestUserManagement#changePFor(String, String)
    * @param user
    * @param newHashPassword
+   * @param baseURL
    * @return
    */
-  boolean changePassword(int user, String newHashPassword);
+  boolean changePassword(int user, String newHashPassword, String baseURL);
 
   /**
    * @see UserServiceImpl#changePassword
    * @param user
    * @param currentHashPassword
    * @param newHashPassword
+   * @param baseURL
    * @return
    */
-  boolean changePasswordWithCurrent(int user, String currentHashPassword, String newHashPassword);
+  boolean changePasswordWithCurrent(int user, String currentHashPassword, String newHashPassword, String baseURL);
 
   /**
    * @see

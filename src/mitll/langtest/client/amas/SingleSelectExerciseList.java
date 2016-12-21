@@ -399,11 +399,11 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
    * @seex #rememberAndLoadFirst(List, CommonExercise, String)
    */
   @Override
-  protected void loadFirstExercise() {
-    logger.info("loadFirstExercise : ---");
+  public void loadFirstExercise() {
+    //logger.info("loadFirstExercise : ---");
 
     if (isEmpty()) { // this can only happen if the database doesn't load properly, e.g. it's in use
-      logger.info("loadFirstExercise : current exercises is empty?");
+      //logger.info("loadFirstExercise : current exercises is empty?");
       gotEmptyExerciseList();
     } else {
       super.loadFirstExercise();

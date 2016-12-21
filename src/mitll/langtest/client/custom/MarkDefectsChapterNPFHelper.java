@@ -90,6 +90,15 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
             addTypeAhead(column);
 
             // row 2
+            getFilterCheckbox();
+            add(filterOnly);
+
+            // row 3
+            add(pagingContainer.getTableWithPager());
+            //setOnlyExamples(!doNormalRecording);
+          }
+
+          private void getFilterCheckbox() {
             filterOnly = new CheckBox(SHOW_ONLY_UNRECORDED);
             filterOnly.addClickHandler(new ClickHandler() {
               @Override
@@ -118,7 +127,7 @@ class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, Co
     return new ExercisePanelFactory<CommonShell, CommonExercise>(service, feedback, controller, exerciseList) {
       @Override
       public Panel getExercisePanel(CommonExercise e) {
-        return new QCNPFExercise<CommonExercise>(e, controller, exerciseList, MARK_DEFECTS1);
+        return new QCNPFExercise<>(e, controller, exerciseList, MARK_DEFECTS1);
       }
     };
   }

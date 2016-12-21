@@ -468,6 +468,6 @@ public class ContextCommentNPFExercise<T extends CommonExercise> extends NPFExer
       logger = Logger.getLogger("CommentNPFExercise");
     }
     T exercise = this.exercise;
-    return new CommentBox(this.exercise.getID(), controller, this, exercise.getMutableAnnotation());
+    return new CommentBox(this.exercise.getID(), controller, this, exercise.getMutableAnnotation(),true);
   }
 }

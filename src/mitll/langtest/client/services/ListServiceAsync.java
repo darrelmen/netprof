@@ -65,7 +65,7 @@ public interface ListServiceAsync {
 
   void reallyCreateNewItems(int creator, long userListID, String userExerciseText, AsyncCallback<Collection<CommonExercise>> async);
 
-  void editItem(CommonExercise userExercise, AsyncCallback<Void> async);
+  void editItem(CommonExercise userExercise, boolean keepAudio, AsyncCallback<Void> async);
 
   void deleteList(long id, AsyncCallback<Boolean> async);
 

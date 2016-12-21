@@ -64,6 +64,7 @@ import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
+import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.AudioRefExercise;
@@ -362,17 +363,16 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
    */
   @Override
   public void addIncorrectComment(final String commentToPost, final String field) {
-    addAnnotation(field, INCORRECT, commentToPost);
+    addAnnotation(field, ExerciseAnnotation.TYPICAL.INCORRECT, commentToPost);
   }
 
   @Override
   public void addCorrectComment(final String field) {
-    addAnnotation(field, CORRECT, "");
+    addAnnotation(field, ExerciseAnnotation.TYPICAL.CORRECT, "");
   }
 
-  private void addAnnotation(final String field, final String status, final String commentToPost) {
-    controller.getQCService().addAnnotation(getLocalExercise().getID(), field, status, commentToPost,
-        getUser(),
+  private void addAnnotation(final String field, final ExerciseAnnotation.TYPICAL status, final String commentToPost) {
+    controller.getQCService().addAnnotation(getLocalExercise().getID(), field, status.toString(), commentToPost, controller.getUser(),
         new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
@@ -440,8 +440,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
    */
   private void getClickableWords(String label, String value, Panel nameValueRow) {
     DivWidget horizontal = new DivWidget();
-    horizontal.setWidth("80%");
-    horizontal.getElement().getStyle().setDisplay(Style.Display.INLINE);
+    horizontal.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 
     List<String> tokens = new ArrayList<>();
     boolean flLine = label.contains(SAY) || (isJapanese && label.contains(TRANSLITERATION));

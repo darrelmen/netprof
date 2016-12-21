@@ -88,6 +88,7 @@ public class DAO {
   }
 
   @Deprecated  protected String getLanguage() { return database.getLanguage(); }
+
   /**
    * @param table
    * @return column names, all lower case
@@ -182,6 +183,10 @@ public class DAO {
 
   protected void addVarchar(Connection connection, String table, String col) throws SQLException {
     alterTable(connection, table, col, "VARCHAR");
+  }
+
+  protected void addTimestamp(Connection connection, String table, String col) throws SQLException {
+    alterTable(connection, table, col, "TIMESTAMP");
   }
 
   protected void addBoolean(Connection connection, String table, String col) throws SQLException {
@@ -294,7 +299,9 @@ public class DAO {
   }
 
   //protected String getPrimaryKey() { return getPrimaryKey(ID); }
-  protected String getPrimaryKey(String col) { return isMYSQL ? "PRIMARY KEY (" + col +  "), " : ""; }
+  protected String getPrimaryKey(String col) {
+    return isMYSQL ? "PRIMARY KEY (" + col + "), " : "";
+  }
 
 
   /**
@@ -321,11 +328,12 @@ public class DAO {
 
   /**
    * Does not seem to work with h2
+   *
+   * @return
+   * @throws SQLException
    * @paramx connection
    * @paramx table
    * @paramx column
-   * @return
-   * @throws SQLException
    */
 /*  protected boolean columnExists(Connection connection, String table, String column) throws SQLException {
     DatabaseMetaData md = connection.getMetaData();
@@ -338,7 +346,6 @@ public class DAO {
 
     return numColumns == 1;
   }*/
-
   public String toString() {
     return super.toString() + " : " + database.getServerProps().getH2Database();
   }

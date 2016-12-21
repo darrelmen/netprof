@@ -68,22 +68,31 @@ public class BasicDialog {
 
   private static final boolean DEBUG = false;
 
-  private static final int ILR_CHOICE_WIDTH = 80;
+ // private static final int ILR_CHOICE_WIDTH = 80;
   static final String TRY_AGAIN = "Try Again";
 
   protected FormField addControlFormField(Panel dialogBox, String label) {
-    return addControlFormField(dialogBox, label, false, 0, 30, "");
+    return addControlFormField(dialogBox, label, false, 0, 30, "", -1);
   }
 
-  protected FormField addControlFormField(Panel dialogBox, String label, boolean isPassword, int minLength, int maxLength, String hint) {
+  protected FormField addControlFormField(Panel dialogBox, String label, boolean isPassword,
+                                          int minLength, int maxLength, String hint, int optWidth) {
     final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
+    if (optWidth>0) user.setWidth(optWidth + "px");
     user.setMaxLength(maxLength);
     return getSimpleFormField(dialogBox, label, user, minLength);
   }
 
-  protected FormField addControlFormFieldHorizontal(Panel dialogBox, String label, String subtext, boolean isPassword, int minLength,
-                                                    Widget rightSide, int labelWidth) {
+  protected FormField addControlFormFieldHorizontal(Panel dialogBox,
+                                                    String label,
+                                                    String subtext,
+                                                    boolean isPassword,
+                                                    int minLength,
+                                                    Widget rightSide,
+                                                    int labelWidth,
+                                                    int optWidth) {
     final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
+    if (optWidth>0) user.setWidth(optWidth + "px");
 
     user.getElement().setId("textBox");
     Panel row = new HorizontalPanel();
@@ -165,12 +174,9 @@ public class BasicDialog {
 
     final HorizontalPanel hp = new HorizontalPanel();
     hp.addStyleName("leftFiveMargin");
-    Heading w = new Heading(6, label, subtext);
-    w.getElement().getStyle().setPadding(0, Style.Unit.PX);
-    w.getElement().getStyle().setMargin(0, Style.Unit.PX);
+    Heading labelHeading = getLabel(label, labelWidth, subtext);
 
-    hp.add(w);
-    w.setWidth(labelWidth + "px");
+    hp.add(labelHeading);
     hp.add(widget);
     userGroup.add(hp);
 
@@ -180,11 +186,19 @@ public class BasicDialog {
 
   /**
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#makeRegularAudioPanel(Panel)
-   * @param dialogBox
+   * @paramx dialogBox
    * @param label
-   * @param widget
+   * @paramx widget
    * @return
    */
+  private Heading getLabel(String label, int labelWidth, String subtext) {
+    Heading labelHeading = new Heading(6, label, subtext);
+    labelHeading.getElement().getStyle().setPadding(0, Style.Unit.PX);
+    labelHeading.getElement().getStyle().setMargin(0, Style.Unit.PX);
+    labelHeading.setWidth(labelWidth + "px");
+    return labelHeading;
+  }
+
   protected ControlGroup addControlGroupEntrySimple(Panel dialogBox, String label, Widget widget) {
     final ControlGroup userGroup = new ControlGroup();
     userGroup.add(new ControlLabel(label));

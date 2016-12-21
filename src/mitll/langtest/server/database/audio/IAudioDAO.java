@@ -94,4 +94,6 @@ public interface IAudioDAO extends IDAO {
   void updateExerciseID(int uniqueID, int exerciseID, String actualPath);
 
   void validateFileExists(int projid, String installPath, String language);
+
+  void updateDNR(int uniqueID, float dnr);
 }

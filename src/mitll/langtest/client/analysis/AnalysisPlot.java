@@ -778,10 +778,18 @@ public class AnalysisPlot extends TimeSeriesPlot {
     this.timeHorizon = timeHorizon;
 
     // logger.info("goToLast set time from " + new Date(firstTime) + " to " + new Date(lastTime));
+    XAxis xAxis;
+    try {
+      xAxis = chart.getXAxis();
+    } catch (Exception e) {
+      // somehow this is happening
+      return 0L;
+    }
+
     switch (timeHorizon) {
       case WEEK:
         long prevWeek = lastTime - WEEK;
-        chart.getXAxis().setExtremes(prevWeek, lastTime + HOUR);
+        xAxis.setExtremes(prevWeek, lastTime + HOUR);
 
         int lastWeekIndex = weeks.size() - 1;
         Long lastWeek = weeks.get(lastWeekIndex);
@@ -796,7 +804,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
         return prevWeek;
       case MONTH:
         long startOfPrevMonth = lastTime - MONTH;
-        chart.getXAxis().setExtremes(startOfPrevMonth, lastTime + HOUR);
+        xAxis.setExtremes(startOfPrevMonth, lastTime + HOUR);
 
         int lastMonthIndex = months.size() - 1;
         Long lastMonth = months.get(lastMonthIndex);
@@ -810,7 +818,7 @@ public class AnalysisPlot extends TimeSeriesPlot {
 
         return startOfPrevMonth;
       case ALL:
-        chart.getXAxis().setExtremes(firstTime - HOUR, lastTime + HOUR);
+        xAxis.setExtremes(firstTime - HOUR, lastTime + HOUR);
         setTimeWindowControlsToAll();
         timeChanged(firstTime, lastTime);
 

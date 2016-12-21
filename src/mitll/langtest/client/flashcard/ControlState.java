@@ -39,7 +39,7 @@ import mitll.langtest.client.custom.KeyStorage;
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 2/11/14.
-*/
+ */
 public class ControlState {
   private static final String SHOW_STATE = "showState";
   private static final String AUDIO_ON = "audioOn";
@@ -61,16 +61,33 @@ public class ControlState {
   private KeyStorage storage = null;
   private final int id;
 
-  public ControlState() { id = count++;}
-  public boolean showEnglish() { return showState.equals(ENGLISH) || showState.equals(BOTH);}
-  public boolean showForeign() { return showState.equals(FOREIGN) || showState.equals(BOTH);}
-  public boolean showBoth() { return  showState.equals(BOTH);}
-  public boolean isEnglish() { return showState.equals(ENGLISH);}
-  public boolean isForeign() { return showState.equals(FOREIGN);}
+  public ControlState() {
+    id = count++;
+  }
+
+  boolean showEnglish() {
+    return showState.equals(ENGLISH) || showState.equals(BOTH);
+  }
+
+  boolean showForeign() {
+    return showState.equals(FOREIGN) || showState.equals(BOTH);
+  }
+
+  boolean showBoth() {
+    return showState.equals(BOTH);
+  }
+
+  public boolean isEnglish() {
+    return showState.equals(ENGLISH);
+  }
+
+  public boolean isForeign() {
+    return showState.equals(FOREIGN);
+  }
 
   /**
-   * @see StatsFlashcardFactory#StatsFlashcardFactory(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, String, mitll.langtest.shared.custom.UserList)
    * @param storage
+   * @see StatsFlashcardFactory#StatsFlashcardFactory(mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.user.UserFeedback, mitll.langtest.client.exercise.ExerciseController, mitll.langtest.client.list.ListInterface, String, mitll.langtest.shared.custom.UserList)
    */
   public void setStorage(KeyStorage storage) {
     this.storage = storage;
@@ -102,7 +119,7 @@ public class ControlState {
 
   void setSuffleOn(boolean shuffleOn) {
     this.shuffleOn = shuffleOn;
-    storeValue(SHUFFLE_ON,shuffleOn);
+    storeValue(SHUFFLE_ON, shuffleOn);
   }
 
   void setShowState(String showState) {

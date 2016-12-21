@@ -63,6 +63,8 @@ import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import java.util.*;
 import java.util.logging.Logger;
 
+import static mitll.langtest.client.flashcard.BootstrapExercisePanel.DELAY_MILLIS;
+
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -187,7 +189,10 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         ADD_KEY_BINDING,
         StatsFlashcardFactory.this.controlState,
         soundFeedback,
-        soundFeedback.getEndListener(), StatsFlashcardFactory.this.instance, exerciseList) {
+        soundFeedback.getEndListener(),
+        StatsFlashcardFactory.this.instance,
+        exerciseList) {
+
       @Override
       protected void gotShuffleClick(boolean b) {
         sticky.resetStorage();
@@ -341,7 +346,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
      * @see mitll.langtest.client.recorder.RecordButtonPanel#receivedAudioAnswer(AudioAnswer, com.google.gwt.user.client.ui.Panel)
      */
     public void receivedAudioAnswer(final AudioAnswer result) {
-      if (false) logger.info("StatsPracticePanel.receivedAudioAnswer: result " + result);
+     // logger.info("StatsPracticePanel.receivedAudioAnswer: result " + result);
 
       if (result.getValidity() == AudioAnswer.Validity.OK) {
         //resultIDs.add(result.getResultID());
@@ -372,7 +377,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         latestResultID = result.getResultID();
         //logger.info("\tStatsPracticePanel.receivedAudioAnswer: latest now " + latestResultID);
       } else {
-        logger.info("got invalid result " + result);
+    //    logger.info("got invalid result " + result);
       }
       super.receivedAudioAnswer(result);
     }
@@ -517,9 +522,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       w1.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-
 //          logger.info("getRepeatButton : click on " + GO_BACK);
-
           w1.setVisible(false);
           showFlashcardDisplay();
 
@@ -574,7 +577,6 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     private void makeFlashcardButtonsVisible() {
       contentPanel.removeStyleName("noWidthCenterPractice");
       contentPanel.addStyleName("centerPractice");
-
       //   logger.info("makeFlashcardButtonsVisible ---- \n\n\n");
 
       startOver.setVisible(true);
@@ -617,7 +619,6 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     @Override
     protected void gotClickOnNext() {
       abortPlayback();
-
       //logger.info("on last " + exerciseList.onLast());
       if (exerciseList.onLast()) {
         onSetComplete();
