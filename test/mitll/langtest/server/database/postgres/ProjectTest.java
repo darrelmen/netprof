@@ -232,7 +232,7 @@ public class ProjectTest extends BaseTest {
   @Test
   public void testDrop() {
     IProjectDAO projectDAO = getDatabaseVeryLight("netProf", "config.properties", false).getProjectDAO();
-    projectDAO.delete(2);
+    projectDAO.delete(9);
     //  projectDAO.delete(14);
   }
 }

@@ -125,6 +125,15 @@ public class PostgresTest extends BaseTest {
   }
 
   @Test
+  public void testCopyFrench() {
+    List<Info> toCopy = new ArrayList<>();
+    Info info = new Info("french");
+    info.setDev(true);
+    toCopy.add(info);
+    testCopy(toCopy);
+  }
+
+  @Test
   public void testCopyRussian() {
     List<Info> toCopy = new ArrayList<>();
     toCopy.add(getRussian());
