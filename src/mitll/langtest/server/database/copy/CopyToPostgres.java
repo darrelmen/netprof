@@ -72,6 +72,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -80,6 +82,8 @@ public class CopyToPostgres<T extends CommonShell> {
   private static final int WARN_RID_MISSING_THRESHOLD = 50;
   private static final boolean COPY_EVENTS = true;
   private static final int WARN_MISSING_THRESHOLD = 10;
+  public static final String QUIZLET_PROPERTIES = "quizlet.properties";
+  public static final String DOMINO_PROPERTIES = "domino.properties";
 
   private static final boolean DEBUG = false;
 
@@ -89,8 +93,11 @@ public class CopyToPostgres<T extends CommonShell> {
    * @see #main(String[])
    */
   private void copyOneConfigCommand(String config, boolean inTest) throws Exception {
-    DatabaseImpl databaseLight = getDatabaseLight(config, inTest);
-    new CopyToPostgres().copyOneConfig(databaseLight, getCC(config), null, 0, false);
+//    DatabaseImpl databaseLight = getDatabaseLight(config, inTest);
+    DatabaseImpl databaseLight = getDatabaseLight(config, true, false, null);
+    String language = databaseLight.getLanguage();
+    logger.info("loading " + language);
+    new CopyToPostgres().copyOneConfig(databaseLight, getCC(config), language, 0, false);
     databaseLight.destroy();
   }
 
@@ -179,6 +186,70 @@ public class CopyToPostgres<T extends CommonShell> {
     return database;
   }
 
+
+  /**
+   * @param config
+   * @param useH2
+   * @param optPropsFile
+   * @return
+   * @paramx host
+   * @paramx user
+   * @paramx pass
+   * @see mitll.langtest.server.database.postgres.PostgresTest#testCopy
+   */
+  protected static DatabaseImpl getDatabaseLight(String config,
+                                                 boolean useH2,
+                                                 boolean useLocal,
+                                                 String optPropsFile) {
+    logger.info("getDatabaseLight db " + config + " props " + optPropsFile);
+
+    String installPath = "war";
+    String propsFile = optPropsFile != null ? optPropsFile : QUIZLET_PROPERTIES;
+
+    logger.info("getDatabaseLight db " + config + " props " + propsFile);
+
+    File file = new File(installPath + File.separator + "config" + File.separator + config + File.separator + propsFile);
+
+    logger.info("getDatabaseLight path " + file.getAbsolutePath());
+
+    ServerProperties serverProps = getServerProperties(config, propsFile);
+    ServerProperties serverProps2 = getServerProperties("netProf", DOMINO_PROPERTIES);
+    String configFileFullPath = serverProps2.getConfigFileFullPath();
+    try {
+      serverProps.getProps().load(new FileInputStream(configFileFullPath));
+    } catch (IOException e) {
+      logger.error("can't find " + configFileFullPath);
+    }
+    if (useLocal) {
+      serverProps.setLocalPostgres();
+    } else {
+      serverProps.setHydraPostgres();
+    }
+//    serverProps.getProps().setProperty("databaseHost", host);
+//    serverProps.getProps().setProperty("databaseUser", user);
+//    serverProps.getProps().setProperty("databasePassword", pass);
+
+    serverProps.setH2(useH2);
+
+    String parent = file.getParentFile().getAbsolutePath();
+    String name = file.getName();
+
+    DatabaseImpl database = new DatabaseImpl(parent, name, serverProps.getH2Database(), serverProps,
+        new PathHelper("war", serverProps), false, null, false);
+
+    database.setInstallPath(installPath,
+        file.getParentFile().getAbsolutePath() + File.separator + database.getServerProps().getLessonPlan(),
+        serverProps.getMediaDir());
+
+    return database;
+  }
+
+  protected static ServerProperties getServerProperties(String config, String propsFile) {
+    // String s = "quizlet.properties";
+    File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + propsFile);
+    return new ServerProperties(file.getParentFile().getAbsolutePath(), file.getName());
+  }
+
   private static File getConfigFile(String config, String optPropsFile, boolean inTest) {
     String propsFile = "quizlet.properties";
     return new File((inTest ? "war" + File.separator : "") + "config" + File.separator + config + File.separator + propsFile);
@@ -202,7 +273,7 @@ public class CopyToPostgres<T extends CommonShell> {
 
   /**
    * @param db
-   * @param cc country code
+   * @param cc      country code
    * @param optName null OK
    * @param isDev
    * @see #copyOneConfigCommand(String, boolean)
@@ -690,12 +761,12 @@ public class CopyToPostgres<T extends CommonShell> {
   }
 
   /**
-   * @paramx db
    * @param slickResultDAO
    * @param oldToNewUser
    * @param projid
    * @param exToID
    * @param resultDAO
+   * @paramx db
    * @see #copyOneConfig
    */
   private void copyResult(//DatabaseImpl db,
@@ -866,7 +937,7 @@ public class CopyToPostgres<T extends CommonShell> {
       try {
         copyToPostgres.copyOneConfigCommand(config, inTest);
       } catch (Exception e) {
-        logger.error("couldn't copy config " + config,e);
+        logger.error("couldn't copy config " + config, e);
       }
     }
   }

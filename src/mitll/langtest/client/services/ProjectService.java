@@ -41,5 +41,5 @@ import java.util.List;
 @RemoteServiceRelativePath("project-manager")
 public interface ProjectService extends RemoteService {
   List<ProjectInfo> getAll();
-
+  boolean exists(int projectid);
 }

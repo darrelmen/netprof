@@ -54,7 +54,8 @@ public interface UserServiceAsync {
    * @param userId
    * @param attemptedHashedPassword
    * @param attemptedFreeTextPassword
-   *@param async  @see UserManager#getPermissionsAndSetUser
+   * @param async
+   * @see UserManager#getPermissionsAndSetUser
    * @see mitll.langtest.client.user.SignInForm#getPermissionsAndSetUser
    */
   void loginUser(String userId, String attemptedHashedPassword, String attemptedFreeTextPassword, AsyncCallback<LoginResult> async);
@@ -65,7 +66,7 @@ public interface UserServiceAsync {
    * @param token
    * @param newHashedPassword
    * @param asyncCallback
-   * @deprecated
+   * @deprecatedx
    */
  // void changePFor(String token, String newHashedPassword, AsyncCallback<Boolean> asyncCallback);
 
@@ -101,7 +102,6 @@ public interface UserServiceAsync {
       SignUpUser user,
       String url,
       AsyncCallback<User> async);
-
 
   void forgotUsername(String emailH, String email, String url, AsyncCallback<Boolean> async);
 

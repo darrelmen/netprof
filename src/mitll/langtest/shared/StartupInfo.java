@@ -57,8 +57,6 @@ public class StartupInfo implements IsSerializable {
 
   /**
    * @param properties
-   * @paramx typeOrder
-   * @paramx sectionNodes
    * @see mitll.langtest.server.LangTestDatabaseImpl#getStartupInfo()
    */
   public StartupInfo(Map<String, String> properties,

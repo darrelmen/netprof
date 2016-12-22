@@ -68,5 +68,7 @@ public interface IProjectDAO extends IDAO {
   int ensureDefaultProject(int defaultUser);
 
   int getDefault();
+
+  boolean exists(int projid);
   // void dropProject(String name);
 }

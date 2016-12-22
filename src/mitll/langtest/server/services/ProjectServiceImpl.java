@@ -56,4 +56,9 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
             project.modified().getTime()))
         .collect(Collectors.toList());
   }
+
+  @Override
+  public boolean exists(int projectid) {
+    return db.getProjectDAO().exists(projectid);
+  }
 }

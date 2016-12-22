@@ -239,32 +239,19 @@ public class LangTest implements
   public void onModuleLoad() {
     // set uncaught exception handler
     dealWithExceptions();
-    final long then = System.currentTimeMillis();
+    askForStartupInfo();
+  }
 
+  private void askForStartupInfo() {
+    final long then = System.currentTimeMillis();
     service.getStartupInfo(new AsyncCallback<StartupInfo>() {
       public void onFailure(Throwable caught) {
-        if (caught instanceof IncompatibleRemoteServiceException) {
-          Window.alert("This application has recently been updated.\nPlease refresh this page, or restart your browser." +
-              "\nIf you still see this message, clear your cache. (" + caught.getMessage() +
-              ")");
-        } else {
-          long now = System.currentTimeMillis();
-          String message = "onModuleLoad.getProperties : (failure) took " + (now - then) + " millis";
-
-          logger.info(message);
-          if (!caught.getMessage().trim().equals("0")) {
-            logger.info("Exception " + caught.getMessage() + " " + caught + " " + caught.getClass() + " " + caught.getCause());
-            Window.alert("Couldn't contact server.  Please check your network connection. (getProperties)");
-            logMessageOnServer(message);
-          }
-        }
+        LangTest.this.onFailure(caught, then);
       }
 
       public void onSuccess(StartupInfo startupInfo) {
         long now = System.currentTimeMillis();
-        LangTest.this.startupInfo = startupInfo;
-        //   logger.info("Got startup info " + startupInfo);
-        props = new PropertyHandler(startupInfo.getProperties());
+        rememberStartup(startupInfo);
         if (isLogClientMessages()) {
           String message = "onModuleLoad.getProperties : (success) took " + (now - then) + " millis";
           logMessageOnServer(message);
@@ -273,6 +260,42 @@ public class LangTest implements
         onModuleLoad2();
       }
     });
+  }
+
+  private void onFailure(Throwable caught, long then) {
+    if (caught instanceof IncompatibleRemoteServiceException) {
+      Window.alert("This application has recently been updated.\nPlease refresh this page, or restart your browser." +
+          "\nIf you still see this message, clear your cache. (" + caught.getMessage() +
+          ")");
+    } else {
+      long now = System.currentTimeMillis();
+      String message = "onModuleLoad.getProperties : (failure) took " + (now - then) + " millis";
+
+      logger.info(message);
+      if (!caught.getMessage().trim().equals("0")) {
+        logger.info("Exception " + caught.getMessage() + " " + caught + " " + caught.getClass() + " " + caught.getCause());
+        Window.alert("Couldn't contact server.  Please check your network connection. (getProperties)");
+        logMessageOnServer(message);
+      }
+    }
+  }
+
+  public void refreshStartupInfo() {
+    service.getStartupInfo(new AsyncCallback<StartupInfo>() {
+      public void onFailure(Throwable caught) {
+        LangTest.this.onFailure(caught, then);
+      }
+
+      public void onSuccess(StartupInfo startupInfo) {
+        rememberStartup(startupInfo);
+        gotUser(userManager.getCurrent());
+      }
+    });
+  }
+
+  private void rememberStartup(StartupInfo startupInfo) {
+    LangTest.this.startupInfo = startupInfo;
+    props = new PropertyHandler(startupInfo.getProperties());
   }
 
   /**
@@ -661,6 +684,7 @@ public class LangTest implements
   /**
    * So we can either get project info from the user itself, or it can be changed later when
    * the user changes language/project.
+   *
    * @param user
    * @see InitialUI#setProjectForUser
    */
