@@ -203,7 +203,7 @@ public class CopyToPostgres<T extends CommonShell> {
                                                  String optPropsFile) {
     logger.info("getDatabaseLight db " + config + " props " + optPropsFile);
 
-    String installPath = "war";
+    String installPath = ".";//war";
     String propsFile = optPropsFile != null ? optPropsFile : QUIZLET_PROPERTIES;
 
     logger.info("getDatabaseLight db " + config + " props " + propsFile);
@@ -212,8 +212,8 @@ public class CopyToPostgres<T extends CommonShell> {
 
     logger.info("getDatabaseLight path " + file.getAbsolutePath());
 
-    ServerProperties serverProps = getServerProperties(config, propsFile);
-    ServerProperties serverProps2 = getServerProperties("netProf", DOMINO_PROPERTIES);
+    ServerProperties serverProps = getServerProperties(config, propsFile, installPath);
+    ServerProperties serverProps2 = getServerProperties("netProf", DOMINO_PROPERTIES, installPath);
     String configFileFullPath = serverProps2.getConfigFileFullPath();
     try {
       serverProps.getProps().load(new FileInputStream(configFileFullPath));
@@ -225,9 +225,6 @@ public class CopyToPostgres<T extends CommonShell> {
     } else {
       serverProps.setHydraPostgres();
     }
-//    serverProps.getProps().setProperty("databaseHost", host);
-//    serverProps.getProps().setProperty("databaseUser", user);
-//    serverProps.getProps().setProperty("databasePassword", pass);
 
     serverProps.setH2(useH2);
 
@@ -235,7 +232,7 @@ public class CopyToPostgres<T extends CommonShell> {
     String name = file.getName();
 
     DatabaseImpl database = new DatabaseImpl(parent, name, serverProps.getH2Database(), serverProps,
-        new PathHelper("war", serverProps), false, null, false);
+        new PathHelper(installPath, serverProps), false, null, false);
 
     database.setInstallPath(installPath,
         file.getParentFile().getAbsolutePath() + File.separator + database.getServerProps().getLessonPlan(),
@@ -244,9 +241,9 @@ public class CopyToPostgres<T extends CommonShell> {
     return database;
   }
 
-  protected static ServerProperties getServerProperties(String config, String propsFile) {
-    // String s = "quizlet.properties";
-    File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + propsFile);
+  private static ServerProperties getServerProperties(String config, String propsFile, String installPath) {
+    //String war = "war";
+    File file = new File(installPath + File.separator + "config" + File.separator + config + File.separator + propsFile);
     return new ServerProperties(file.getParentFile().getAbsolutePath(), file.getName());
   }
 
