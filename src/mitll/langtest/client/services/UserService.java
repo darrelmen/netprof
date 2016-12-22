@@ -159,6 +159,11 @@ public interface UserService extends RemoteService {
    */
   String enableCDUser(String cdToken, String emailR, String url);
 
+  /**
+   * @see InitialUI#setProjectForUser(int)
+   * @param projectid
+   * @return
+   */
   User setProject(int projectid);
 
   void forgetProject();
