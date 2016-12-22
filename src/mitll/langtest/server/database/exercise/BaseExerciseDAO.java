@@ -212,9 +212,9 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
       if (file.isDirectory()) {
         String[] list = file.list();
         if (list == null) {
-          logger.error("configuration error - can't get files from media directory " + mediaDir);
+          logger.error("setAudioDAO configuration error - can't get files from media directory " + mediaDir);
         } else if (list.length > 0) { // only on pnetprof (behind firewall), znetprof has no audio, might have a directory.
-          logger.debug("validating files under " + file.getAbsolutePath());
+          logger.debug("setAudioDAO validating files under " + file.getAbsolutePath());
           if (serverProps.doAudioFileExistsCheck()) {
             audioDAO.validateFileExists(projectID, mediaDir, language);
           }

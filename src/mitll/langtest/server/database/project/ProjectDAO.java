@@ -92,6 +92,11 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     return defaultProject == null ? -1 : defaultProject.id();
   }
 
+  @Override
+  public boolean exists(int projid) {
+    return !dao.byID(projid).isEmpty();
+  }
+
   private SlickProject getDefaultProject() {
     Seq<SlickProject> aDefault = dao.getDefault();
     return aDefault.isEmpty() ? null : aDefault.iterator().next();
@@ -142,7 +147,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
 
   /**
    * @param id
-   * @see PostgresTest#testDeleteEnglish
+   * @seex PostgresTest#testDeleteEnglish
    */
   public void delete(int id) {
     dao.delete(id);
@@ -249,5 +254,4 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     int i = userProjectDAO.mostRecentByUser(user);
     return i == -1 ? null : dao.byID(i).headOption().getOrElse(null);
   }
-
 }

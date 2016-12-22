@@ -39,4 +39,6 @@ import java.util.List;
 
 public interface ProjectServiceAsync {
   void getAll(AsyncCallback<List<ProjectInfo>> async);
+
+  void exists(int projectid, AsyncCallback<Boolean> async);
 }

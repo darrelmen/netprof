@@ -58,6 +58,8 @@ import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.instrumentation.EventTable;
 import mitll.langtest.client.monitoring.MonitoringManager;
 import mitll.langtest.client.result.ResultManager;
+import mitll.langtest.client.services.ProjectService;
+import mitll.langtest.client.services.ProjectServiceAsync;
 import mitll.langtest.client.services.UserService;
 import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.client.user.*;
@@ -80,6 +82,9 @@ import java.util.logging.Logger;
  * @since 2/23/16
  */
 public class InitialUI implements UILifecycle {
+  public static final String PLEASE_SELECT_A_LANGUAGE = "Please select a language";
+  public static final String PLEASE_SELECT_A_COURSE = "Please select a course";
+  public static final String NO_LANGUAGES_LOADED_YET = "No languages loaded yet. Please wait.";
   private final Logger logger = Logger.getLogger("InitialUI");
 
   public static final String ROOT_VERTICAL_CONTAINER = "root_vertical_container";
@@ -116,6 +121,7 @@ public class InitialUI implements UILifecycle {
 
   protected final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
   private final UserServiceAsync userService = GWT.create(UserService.class);
+  private final ProjectServiceAsync projectServiceAsync = GWT.create(ProjectService.class);
 
   private final Banner banner;
 
@@ -453,6 +459,10 @@ public class InitialUI implements UILifecycle {
     }
   }
 
+  /**
+   * @see #addBreadcrumbs
+   * @return
+   */
   private Breadcrumbs getBreadcrumbs() {
     //   logger.info("getBreadcrumbs --->");
     Breadcrumbs crumbs = new Breadcrumbs(">");
@@ -855,7 +865,7 @@ public class InitialUI implements UILifecycle {
   }
 
   /**
-   * @see #addProjectChoices(int, SlimProject)
+   * @see #addProjectChoices
    */
   private void addBreadcrumbs() {
     int childCount = verticalContainer.getElement().getChildCount();
@@ -892,13 +902,13 @@ public class InitialUI implements UILifecycle {
 
     DivWidget header = new DivWidget();
     header.addStyleName("container");
-    String text = "Please select a language";
+    String text = PLEASE_SELECT_A_LANGUAGE;
     if (nest == 1) {
-      text = "Please select a course";
+      text = PLEASE_SELECT_A_COURSE;
     }
 
     if (result.isEmpty()) {
-      text = "No languages loaded yet. Please wait.";
+      text = NO_LANGUAGES_LOADED_YET;
     }
     Heading child = new Heading(3, text);
     header.add(child);
@@ -940,10 +950,16 @@ public class InitialUI implements UILifecycle {
     }
   }
 
+  /**
+   * @see #showProjectChoices
+   * @param lang
+   * @param projectForLang
+   * @param nest
+   * @return
+   */
   private Panel getLangIcon(String lang, SlimProject projectForLang, int nest) {
     String lang1 = nest == 0 ? lang : projectForLang.getName();
-    Panel imageAnchor = getImageAnchor(lang1, projectForLang);
-    return imageAnchor;
+    return getImageAnchor(lang1, projectForLang);
   }
 
   /**
@@ -952,6 +968,7 @@ public class InitialUI implements UILifecycle {
    * @param name
    * @param projectForLang
    * @return
+   * @see #getLangIcon
    */
   private Panel getImageAnchor(String name, SlimProject projectForLang) {
     int nest = 1;
@@ -1015,7 +1032,27 @@ public class InitialUI implements UILifecycle {
    * @param projectid
    * @see #getImageAnchor(String, SlimProject)
    */
-  private void setProjectForUser(int projectid) {
+  private void setProjectForUser(final int projectid) {
+    projectServiceAsync.exists(projectid, new AsyncCallback<Boolean>() {
+      @Override
+      public void onFailure(Throwable caught) {
+
+      }
+
+      @Override
+      public void onSuccess(Boolean result) {
+        if (result) {
+          reallySetTheProject(projectid);
+        }
+        else {
+          lifecycleSupport.getStartupInfo();
+        }
+      }
+    });
+
+  }
+
+  private void reallySetTheProject(int projectid) {
     logger.info("setProjectForUser set project for " + projectid);
     clearContent();
     userService.setProject(projectid, new AsyncCallback<User>() {
