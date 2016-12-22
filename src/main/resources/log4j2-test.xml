@@ -107,13 +107,12 @@
         <logger name="slick.compiler" level="INFO"/>
         <logger name="slick.compiler.CodeGen" level="INFO"/>
 
-        <logger name="slick.jdbc" level="DEBUG"/>
-        <logger name="slick.jdbc.JdbcBackend" level="DEBUG"/>
+        <logger name="slick.jdbc" level="INFO"/>
+        <logger name="slick.jdbc.JdbcBackend" level="INFO"/>
         <logger name="slick.backend" level="INFO"/>
 
-
-        <logger name="slick.relational" level="DEBUG"/>
-        <logger name="slick.session" level="DEBUG"/>
+        <logger name="slick.relational" level="INFO"/>
+        <logger name="slick.session" level="INFO"/>
 
         <logger name="mitll.hlt.domino.server.util" level="WARN"/>
         <logger name="mitll.hlt.domino.server.user" level="WARN"/>
