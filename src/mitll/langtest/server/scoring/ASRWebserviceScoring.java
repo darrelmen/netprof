@@ -84,7 +84,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   private final Cache<String, Object[]> decodeAudioToScore; // key => (Scores, wordLab, phoneLab)
   private final Cache<String, Object[]> alignAudioToScore; // key => (Scores, wordLab, phoneLab)
 
-  private static final boolean SEND_GRAMMER_WITH_ALIGNMENT = false;
+  private static final boolean SEND_GRAMMER_WITH_ALIGNMENT = true;
+  private static final boolean ADD_SIL = false;
+  private static final boolean INCLUDE_SELF_SIL_LINK = true;
 
   /**
    * Normally we delete the tmp dir created by hydec, but if something went wrong, we want to keep it around.
@@ -470,7 +472,13 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @return
    * @see #scoreRepeatExercise
    */
-  private Object[] runHydra(String audioPath, String transcript, String transliteration, Collection<String> lmSentences, String tmpDir, boolean decode, int end) {
+  private Object[] runHydra(String audioPath,
+                            String transcript,
+                            String transliteration,
+                            Collection<String> lmSentences,
+                            String tmpDir,
+                            boolean decode,
+                            int end) {
     // reference trans
     String cleaned = slfFile.cleanToken(transcript).trim();
     if (isMandarin) {
@@ -480,12 +488,12 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     // generate dictionary
     String hydraDict = createHydraDict(cleaned, transliteration);
     String smallLM = "[" +
-        (SEND_GRAMMER_WITH_ALIGNMENT ? slfFile.createSimpleSLFFile(Collections.singleton(cleaned), SEND_GRAMMER_WITH_ALIGNMENT, false)[0] : "") +
+        (SEND_GRAMMER_WITH_ALIGNMENT ? slfFile.createSimpleSLFFile(Collections.singleton(cleaned), ADD_SIL, false, INCLUDE_SELF_SIL_LINK)[0] : "") +
         "]";
 
     // generate SLF file (if decoding)
     if (decode) {
-      String[] slfOut = slfFile.createSimpleSLFFile(lmSentences, SEND_GRAMMER_WITH_ALIGNMENT, true);
+      String[] slfOut = slfFile.createSimpleSLFFile(lmSentences, ADD_SIL, true, INCLUDE_SELF_SIL_LINK);
       smallLM = "[" + slfOut[0] + "]";
       cleaned = slfFile.cleanToken(slfOut[1]);
     }

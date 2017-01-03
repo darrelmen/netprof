@@ -136,21 +136,24 @@ public class SLFFile {
   }
 
   /**
+   * creates string LM for hydra
+   *
    * @param lmSentences
    * @param addSil
    * @param includeUnk
+   * @param includeSelfSILLink
    * @return
    * @see mitll.langtest.server.scoring.ASRWebserviceScoring#runHydra
    */
-  // creates string LM for hydra
-  public String[] createSimpleSLFFile(Collection<String> lmSentences, boolean addSil, boolean includeUnk) {
+  public String[] createSimpleSLFFile(Collection<String> lmSentences, boolean addSil, boolean includeUnk, boolean includeSelfSILLink) {
     List<String> slf = new ArrayList<>();
     slf.add("VERSION=1.0;");
 
     int linkCount = 0;
     StringBuilder nodesBuf = new StringBuilder();
     nodesBuf.append("I=0 W=<s>;");
-    nodesBuf.append("I=1 W=</s>;");
+    int finalNodeIndex = 1;
+    nodesBuf.append("I=" + finalNodeIndex + " W=</s>;");
     int newNodes = 2;
     StringBuilder linksBuf = new StringBuilder();
 
@@ -167,14 +170,18 @@ public class SLFFile {
     for (String sentence : sentencesToUse) {
       Collection<String> tokens = svd.getTokens(sentence);
 
-      int prevNode = 0;
+      int prevNode = 0;  // points to initial node
       int currentSil = 0;
       int c = 0;
+
+      if (includeSelfSILLink) {
+        linksBuf.append(getLink(linkCount++, prevNode, prevNode, STANDARD_WEIGHT, false));
+      }
 
 //      logger.info("tokens " + tokens);
       for (String token : tokens) {
         boolean onLast = ++c == tokens.size();
-  //      logger.info("onLast " + onLast + " c " + c + " " + token + " tokens " + tokens.size());
+        //      logger.info("onLast " + onLast + " c " + c + " " + token + " tokens " + tokens.size());
         String cleanedToken = cleanToken(token);
 
         if (!cleanedToken.isEmpty()) {
@@ -182,33 +189,42 @@ public class SLFFile {
           boolean isUNK = cleanedToken.toUpperCase().equals(UNKNOWN_MODEL);
           String linkWeight = isUNK ? UNKNOWN_MODEL_BIAS : STANDARD_WEIGHT;
 
-          linksBuf.append("J=" + (linkCount++) + " S=" + prevNode + " E=" + currentNode + " l=" + linkWeight + ";");
+          linksBuf.append(getLink(linkCount++, prevNode, currentNode, linkWeight, false));
 
           String wordtoken = isUNK ? cleanedToken.toUpperCase() : cleanedToken;
-          nodesBuf.append("I=" + currentNode + " W=" + wordtoken + ";");
+          nodesBuf.append(getNode(currentNode, wordtoken));
 
           if (addSil && !isUNK) {
             if (c > 1) {
-              linksBuf.append("J=" + (linkCount++) + " S=" + currentSil + " E=" + currentNode + " l=" + linkWeight + ";");
+              linksBuf.append(getLink(linkCount++, currentSil, currentNode, linkWeight, false));
             }
 
             if (!onLast) {
               currentSil = newNodes++;
-              nodesBuf.append("I=" + currentSil + " W=" + SIL + ";");
-              linksBuf.append("J=" + (linkCount++) + " S=" + currentNode + " E=" + currentSil + " l=" + linkWeight + ";");
+              nodesBuf.append(getNode(currentSil, SIL));
+              linksBuf.append(getLink(linkCount++, currentNode, currentSil, linkWeight, false));
             }
           }
-          if (!isUNK)
+          if (!isUNK) {
             finalSentence += cleanedToken + ";";
+          }
 
           prevNode = currentNode;
         }
       }
 
-      linksBuf.append("J=" + (linkCount++) + " S=" + prevNode + " E=1" + " l=-1.00" + (ctr == sentencesToUse.size() - 1 ? "" : ";"));
+      //int linkID = linkCount++;
+      // String finalLinkWeight = "-1.00";
+      boolean isLastLink = ctr == sentencesToUse.size() - 1;
+      //linksBuf.append("J=" + linkID + " S=" + prevNode + " E=" + finalNodeIndex + " l=" + finalLinkWeight + (isLastLink ? "" : ";"));
+      linksBuf.append(getLink(linkCount++, prevNode, finalNodeIndex, STANDARD_WEIGHT, isLastLink && !includeSelfSILLink));
+
+      if (includeSelfSILLink) {
+        linksBuf.append(getLink(linkCount++, finalNodeIndex, finalNodeIndex, STANDARD_WEIGHT, isLastLink));
+      }
       ctr += 1;
     }
-    slf.add("N=" + newNodes + " L=" + linkCount + ";");
+    slf.add(getNodeAndLinkCount(newNodes, linkCount));
     slf.add(nodesBuf.toString());
     slf.add(linksBuf.toString());
 
@@ -219,6 +235,18 @@ public class SLFFile {
       //	  slfBuf.append(";");
     }
     return new String[]{slfBuf.toString(), finalSentence};
+  }
+
+  private String getNodeAndLinkCount(int newNodes, int linkCount) {
+    return "N=" + newNodes + " L=" + linkCount + ";";
+  }
+
+  private String getLink(int linkID, int prevNode, int currentNode, String linkWeight, boolean isLastLink) {
+    return "J=" + linkID + " S=" + prevNode + " E=" + currentNode + " l=" + linkWeight + (isLastLink ? "" : ";");
+  }
+
+  private String getNode(int currentNode, String wordtoken) {
+    return "I=" + currentNode + " W=" + wordtoken + ";";
   }
 
   public String cleanToken(String token) {

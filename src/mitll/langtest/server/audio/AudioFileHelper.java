@@ -52,13 +52,18 @@ import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.MutableExercise;
+import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.ImageOptions;
+import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
+import scala.tools.nsc.backend.icode.Primitives;
 
+import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
+import java.io.IOException;
 import java.text.Collator;
 import java.util.*;
 
@@ -224,12 +229,6 @@ public class AudioFileHelper implements AlignDecode {
                                     CommonShell exercise1,
                                     AudioContext audioContext,
                                     AnswerInfo.RecordingInfo recordingInfoInitial,
-
-//                                    boolean recordInResults,
-                                    //                                  boolean doFlashcard,
-                                    //                                boolean allowAlternates,
-                                    //                              boolean isRefRecording
-
                                     DecoderOptions options
 
   ) {
@@ -239,6 +238,8 @@ public class AudioFileHelper implements AlignDecode {
     //long then = System.currentTimeMillis();
     AudioCheck.ValidityAndDur validity =
         audioConversion.convertBase64ToAudioFiles(base64EncodedString, file, options.isRefRecording(), serverProps.isQuietAudioOK());
+
+    PretestScore easyAlignment = getEasyAlignment(exercise1, wavPath);
 
     // logger.debug("writeAudioFile writing to " + file.getAbsolutePath() + " validity " + validity);
 /*    long now = System.currentTimeMillis();
@@ -256,8 +257,6 @@ public class AudioFileHelper implements AlignDecode {
 
         validity,
 
-//        recordInResults, doFlashcard, allowAlternates,
-        //      false
         options
     );
   }
@@ -779,12 +778,22 @@ public class AudioFileHelper implements AlignDecode {
     return pathHelper.getAbsoluteFile(wavPath);
   }
 
+  /**
+   * @param base64EncodedString
+   * @param reqid
+   * @param file
+   * @return
+   * @see #getAlignment(String, String, String, String, int, boolean)
+   */
   private AudioAnswer getAudioAnswer(String base64EncodedString, int reqid, File file) {
     AudioCheck.ValidityAndDur validity =
         audioConversion.convertBase64ToAudioFiles(base64EncodedString, file, false, serverProps.isQuietAudioOK());
     //  logger.debug("getAMASAudioAnswer writing to " + file.getAbsolutePath() + " validity " + validity);
-    return new AudioAnswer(pathHelper.ensureForwardSlashes(pathHelper.getWavPathUnder(POSTED_AUDIO)),
-        validity.getValidity(), reqid, validity.durationInMillis);
+    return new AudioAnswer(
+        pathHelper.ensureForwardSlashes(pathHelper.getWavPathUnder(POSTED_AUDIO)),
+        validity.getValidity(),
+        reqid,
+        validity.durationInMillis);
   }
 
   /**
@@ -807,9 +816,41 @@ public class AudioFileHelper implements AlignDecode {
     );
   }*/
 
+  /**
+   * @param exercise
+   * @param testAudioPath
+   * @return
+   * @see #recalcOne
+   */
   public PretestScore getEasyAlignment(CommonShell exercise, String testAudioPath) {
     DecoderOptions options = new DecoderOptions().setUsePhoneToDisplay(serverProps.usePhoneToDisplay());
     return getAlignmentScore(exercise, testAudioPath, options);
+  }
+
+  public void doTrim(CommonShell exercise, String testAudioPath) {
+    PretestScore easyAlignment = getEasyAlignment(exercise, testAudioPath);
+
+    Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = easyAlignment.getsTypeToEndTimes();
+    List<TranscriptSegment> transcriptSegments = netPronImageTypeListMap.get(NetPronImageType.WORD_TRANSCRIPT);
+    TranscriptSegment transcriptSegment = transcriptSegments.get(0);
+    float start = transcriptSegment.getStart();
+
+    TranscriptSegment endSegment = transcriptSegments.get(transcriptSegments.size() - 1);
+    float end = endSegment.getEnd();
+
+    int startMillis = (int) (start * 1000f);
+    int endMillis = (int) (end * 1000f);
+
+    File absoluteFile = pathHelper.getAbsoluteFile(testAudioPath);
+    try {
+      String trimWithAlignment = audioConversion.makeTempFile("trimWithAlignment");
+      TrimmerAIS.easyTrimFile(absoluteFile, trimWithAlignment, startMillis, endMillis);
+      audioConversion.getTrimInfo(absoluteFile, trimWithAlignment);
+    } catch (UnsupportedAudioFileException e) {
+      e.printStackTrace();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   /**
@@ -827,9 +868,9 @@ public class AudioFileHelper implements AlignDecode {
    * <p>
    * TODO : why even generate images here???
    *
-   * @param testAudioFile     audio file to score
-   * @param lmSentences       to look for in the audio
-   * @param transliteration   for languages we can't do normal LTS on (Kanji characters or similar)
+   * @param testAudioFile   audio file to score
+   * @param lmSentences     to look for in the audio
+   * @param transliteration for languages we can't do normal LTS on (Kanji characters or similar)
    * @param options
    * @return PretestScore for audio
    * @see DecodeCorrectnessChecker#getDecodeScore
@@ -837,9 +878,9 @@ public class AudioFileHelper implements AlignDecode {
    */
   @Override
   public PretestScore getASRScoreForAudio(File testAudioFile,
-                                           Collection<String> lmSentences,
-                                           String transliteration,
-                                           DecoderOptions options) {
+                                          Collection<String> lmSentences,
+                                          String transliteration,
+                                          DecoderOptions options) {
     makeASRScoring();
     List<String> unk = new ArrayList<String>();
 
@@ -863,8 +904,8 @@ public class AudioFileHelper implements AlignDecode {
    *
    * @param reqid
    * @param testAudioFile
-   * @param sentence           empty string when using lmSentences non empty and vice-versa
-   * @param transliteration    for languages we can't do normal LTS on (Kanji characters or similar)
+   * @param sentence        empty string when using lmSentences non empty and vice-versa
+   * @param transliteration for languages we can't do normal LTS on (Kanji characters or similar)
    * @param prefix
    * @param precalcResult
    * @param options
@@ -903,7 +944,7 @@ public class AudioFileHelper implements AlignDecode {
    * @param testAudioFile
    * @param sentence
    * @param lmSentences
-   * @param transliteration    for languages we can't do normal LTS on (Kanji characters or similar)
+   * @param transliteration for languages we can't do normal LTS on (Kanji characters or similar)
    * @param prefix
    * @param precalcResult
    * @param options
