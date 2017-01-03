@@ -317,6 +317,7 @@ public class RefResultDecoder {
   /**
    * @param exercises
    * @param exToAudio
+   * @see #doRefDecode(Collection, String)
    */
   private void trimRef(Collection<CommonExercise> exercises, Map<String, List<AudioAttribute>> exToAudio) {
     if (DO_TRIM) {
