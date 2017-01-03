@@ -110,6 +110,7 @@ public class CopyToPostgres<T extends CommonShell> {
   public String getCC(String config) {
     String cc = "";
     List<String> languages = Arrays.asList(
+        "croatian",
         "dari",
         "egyptian",
         "english",
@@ -134,6 +135,7 @@ public class CopyToPostgres<T extends CommonShell> {
         "urdu");
 
     List<String> flags = Arrays.asList(
+        "hr",
         "af",
         "eg",
         "us",
@@ -158,7 +160,13 @@ public class CopyToPostgres<T extends CommonShell> {
         "pk");
 
     int i = languages.indexOf(config.toLowerCase());
-    cc = flags.get(i);
+    if (i == -1) {
+      logger.error("can't find a flag for " + config);
+      cc = "us";
+    }
+    else {
+      cc = flags.get(i);
+    }
     return cc;
   }
 
