@@ -32,12 +32,7 @@
 
 package mitll.langtest.client.userops;
 
-import com.github.gwtbootstrap.client.ui.CheckBox;
-import com.github.gwtbootstrap.client.ui.ControlGroup;
-import com.github.gwtbootstrap.client.ui.Fieldset;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Grid;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.user.SignUpForm;
@@ -45,7 +40,6 @@ import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserPassDialog;
 import mitll.langtest.shared.user.User;
 
-import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -72,19 +66,19 @@ class EditUserForm extends SignUpForm {
                UserOps userOps) {
     super(props, userManager, eventRegistration, userPassLogin);
     setMarkFieldsWithLabels(true);
-    setRolesHeader("Current user role");
+    //setRolesHeader("Current user role");
     this.toEdit = toEdit;
     this.userOps = userOps;
     userKind = userManager.getCurrent().getUserKind();
   }
 
-  private CheckBox enabled;
+  /*private CheckBox enabled;
 
-  /**
+  *//**
    * @param user
    * @return
    * @see SignUpForm#getSignUpForm(User)
-   */
+   *//*
   protected Fieldset getFields(User user) {
     Fieldset fields = super.getFields(user);
 
@@ -183,5 +177,5 @@ class EditUserForm extends SignUpForm {
       if (role.compareTo(userKind) < 0) choices.add(role);
     }
     return choices;
-  }
+  }*/
 }

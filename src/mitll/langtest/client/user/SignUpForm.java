@@ -82,7 +82,7 @@ public class SignUpForm extends UserDialog implements SignUp {
   private static final String PLEASE_ENTER_A_LONGER_USER_ID = "Please enter a longer user id.";
   private static final String VALID_EMAIL = "Please enter a valid email address.";
   private static final String PLEASE_ENTER_A_PASSWORD = "Please enter a password";
-  private static final String ARE_YOU_A = "Please choose : Are you a";
+  //private static final String ARE_YOU_A = "Please choose : Are you a";
   //  private static final String STUDENT = "Student or ";
 //  private static final String TEACHER = "Teacher?";
   private static final String SIGN_UP_WIDTH = "266px";
@@ -113,7 +113,7 @@ public class SignUpForm extends UserDialog implements SignUp {
   private UserPassDialog userPassLogin;
   private static final String CURRENT_USERS = "Current users should add an email and password.";
   private String signUpTitle = SIGN_UP;
-  private String rolesHeader = ARE_YOU_A;
+//  private String rolesHeader = ARE_YOU_A;
   private boolean markFieldsWithLabels = false;
   protected UserManager userManager;
   private Map<User.Kind, RadioButton> roleToChoice = new HashMap<>();
@@ -265,7 +265,7 @@ public class SignUpForm extends UserDialog implements SignUp {
     }
 */
 
-    fieldset.add(getRolesHeader());
+//    fieldset.add(getRolesHeader());
   //  fieldset.add(getRolesChoices(user == null ? User.Kind.STUDENT : userKind));
 
 //    if (!props.isAMAS() && contentDevCheckbox != null) {
@@ -285,10 +285,10 @@ public class SignUpForm extends UserDialog implements SignUp {
         userKind == User.Kind.AUDIO_RECORDER;
   }
 
-  private Heading getRolesHeader() {
-    String rolesHeader = this.rolesHeader;
-    return getHeader(rolesHeader);
-  }
+//  private Heading getRolesHeader() {
+//    String rolesHeader = this.rolesHeader;
+//    return getHeader(rolesHeader);
+//  }
 
   protected Heading getHeader(String rolesHeader) {
     Heading w1 = new Heading(5, rolesHeader);
@@ -731,7 +731,9 @@ public class SignUpForm extends UserDialog implements SignUp {
    * @param rolesHeader
    * @deprecated
    */
+/*
   public void setRolesHeader(String rolesHeader) {
     this.rolesHeader = rolesHeader;
   }
+*/
 }

@@ -43,5 +43,5 @@ public interface ExerciseServiceAsync {
       ExerciseListRequest request,
       AsyncCallback<ExerciseListWrapper<T>> async);
 
-  <T extends Shell> void getExercise(int exid, int userID, boolean isFlashcardReq, AsyncCallback<T> async);
+  <T extends Shell> void getExercise(int exid, boolean isFlashcardReq, AsyncCallback<T> async);
 }

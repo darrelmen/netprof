@@ -130,15 +130,13 @@ public class ResetPassword extends UserDialog {
     final TextBox user = new TextBox();
     user.setMaxLength(35);
     user.setPlaceholder("User ID");
-    user.setText(userManager.getPendingUserID());
+    String pendingUserID = userManager.getPendingUserID();
+    user.setText(pendingUserID);
     FormField useridField = getSimpleFormField(fieldset, user, 4);
 
     final FormField firstPassword = getPasswordField(fieldset, PASSWORD);
     // final BasicDialog.FormField secondPassword = ;
     //   addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, "Confirm " + PASSWORD);
-
-    //  firstPassword.getWidget().setTabIndex(0);
-    // secondPassword.getWidget().setTabIndex(1);
 
     Button changePasswordButton =
         getChangePasswordButton(
@@ -151,7 +149,7 @@ public class ResetPassword extends UserDialog {
 
     right.add(rightDiv);
 
-    setFocusOn(firstPassword.getWidget());
+    setFocusOn((pendingUserID == null || pendingUserID.isEmpty()) ? useridField.getWidget() : firstPassword.getWidget());
     //   setFocusOn(useridField.getWidget());
     return container;
   }
