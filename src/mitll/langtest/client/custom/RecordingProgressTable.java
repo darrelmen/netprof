@@ -57,8 +57,8 @@ public class RecordingProgressTable extends FlexTable {
   private static final String MALE_FAST = BaseAudioDAO.MALE_FAST;
 
   /**
-   * @see RecorderNPFHelper#getProgressInfo
    * @param result
+   * @see RecorderNPFHelper#getProgressInfo
    */
   public void populate(Map<String, Float> result) {
     float total = result.get("total");
@@ -72,15 +72,16 @@ public class RecordingProgressTable extends FlexTable {
     List<String> labels = Arrays.asList("Male ", "regular", "slow");
     List<String> keys = Arrays.asList(MALE, MALE_FAST, MALE_SLOW);
     for (int i = 0; i < labels.size(); i++) {
-      col = setLabelAndVal(result, total, r, col, labels.get(i), keys.get(i));
+      col = setLabelAndVal(result, total, r, col, labels.get(i), keys.get(i), true);
     }
+    col = setLabelAndVal(result, total, r, col, "Total", "total", false);
 
     labels = Arrays.<String>asList("Female ", "regular", "slow");
     keys = Arrays.asList(FEMALE, FEMALE_FAST, FEMALE_SLOW);
     col = 0;
     r++;
     for (int i = 0; i < labels.size(); i++) {
-      col = setLabelAndVal(result, total, r, col, labels.get(i), keys.get(i));
+      col = setLabelAndVal(result, total, r, col, labels.get(i), keys.get(i), true);
     }
 
     labels = Arrays.<String>asList("Context Male ", "Female");
@@ -88,17 +89,20 @@ public class RecordingProgressTable extends FlexTable {
     col = 0;
     r++;
     for (int i = 0; i < labels.size(); i++) {
-      col = setLabelAndVal(result, ctotal, r, col, labels.get(i), keys.get(i));
+      col = setLabelAndVal(result, ctotal, r, col, labels.get(i), keys.get(i), true);
     }
+    col += 3;
+    col = setLabelAndVal(result, total, r, col, "Total", "totalContext", false);
+
   }
 
-  private int setLabelAndVal(Map<String, Float> result, float total, int r, int col, String label, String key) {
+  private int setLabelAndVal(Map<String, Float> result, float total, int r, int col, String label, String key, boolean addPercent) {
     setHTML(r, col++, label);
-    col = setCol(result, total, r, col, key);
+    col = setCol(result, total, r, col, key, addPercent);
     return col;
   }
 
-  private int setCol(Map<String, Float> result, float total, int r, int col, String male) {
+  private int setCol(Map<String, Float> result, float total, int r, int col, String male, boolean addPercent) {
     String sp = "&nbsp;";
     String p = "<b>";
     String s = "</b>" + sp;
@@ -106,9 +110,15 @@ public class RecordingProgressTable extends FlexTable {
     setHTML(r, col++, sp + result.get(male).intValue() + "");
     int percent = getPercent(result.get(male), total);
 
-    setHTML(r, col++, p + "<span" + ((percent == 100) ? " style='color:green'":"") +
-        ">"+percent + "%</span>" + s);
+    setHTML(r, col++, p +
+        (addPercent ? getPercent(percent) : "")
+        + s);
     return col;
+  }
+
+  private String getPercent(int percent) {
+    return "<span" + ((percent == 100) ? " style='color:green'" : "") +
+        ">" + percent + "%</span>";
   }
 
   private int getPercent(Float male, float total) {

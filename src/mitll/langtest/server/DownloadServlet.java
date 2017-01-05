@@ -71,12 +71,16 @@ public class DownloadServlet extends DatabaseServlet {
   private static final String AUDIO = "audio";
   private static final String LIST = "list";
   private static final String FILE = "file";
+  //private static final String CONTEXT = "context";
   private static final String COMPRESSED_SUFFIX = "mp3";
-  private static final String UTF_8 = "UTF-8";
-  private static final String USERS = "users";
-  private static final String RESULTS = "results";
-  private static final String EVENTS = "events";
-  private static final String REQUEST = "request";
+  public static final String USERS = "users";
+  public static final String RESULTS = "results";
+  public static final String EVENTS = "events";
+  public static final String REQUEST = "request";
+  public static final String MALE = "male=";
+  public static final String REGULAR = "regular=";
+  public static final String CONTEXT = "context=";
+  public static final String ALLCONTEXT = "allcontext";
 
   /**
    * This is getting complicated.
@@ -157,11 +161,16 @@ public class DownloadServlet extends DatabaseServlet {
   private AudioExport.AudioExportOptions getAudioExportOptions(String[] splitArgs) {
     AudioExport.AudioExportOptions options = new AudioExport.AudioExportOptions();
     for (String arg : splitArgs) {
-      if (arg.startsWith("male=")) options.setJustMale(arg.endsWith("true"));
-      else if (arg.startsWith("regular=")) options.setJustRegularSpeed(arg.endsWith("true"));
-      else if (arg.startsWith("context=")) options.setJustContext(arg.endsWith("true"));
+      if (arg.startsWith(MALE)) options.setJustMale(isTrue(arg));
+      else if (arg.startsWith(REGULAR)) options.setJustRegularSpeed(isTrue(arg));
+      else if (arg.startsWith(CONTEXT)) options.setJustContext(isTrue(arg));
+      else if (arg.startsWith(ALLCONTEXT)) options.setAllContext(isTrue(arg));
     }
     return options;
+  }
+
+  private boolean isTrue(String arg) {
+    return arg.endsWith("true");
   }
 
   /**
@@ -181,7 +190,8 @@ public class DownloadServlet extends DatabaseServlet {
 
     Map<String, Collection<String>> typeToSection = getTypeToSelectionFromRequest(unitChapter);
     AudioExport.AudioExportOptions audioExportOptions = getAudioExportOptions(split1);
-    audioExportOptions.setSkip(typeToSection.isEmpty());
+
+    audioExportOptions.setSkip(typeToSection.isEmpty() && !audioExportOptions.isAllContext());
     String zipFileName = getZipFileName(db, typeToSection, projid, language, audioExportOptions);
 
     //logger.info("writeAudioZip zip file name " + zipFileName);
@@ -321,7 +331,7 @@ public class DownloadServlet extends DatabaseServlet {
 
       //logger.debug("file is '" + fileName + "'");
       String underscores = fileName.replaceAll("\\p{Z}+", "_");  // split on spaces
-      underscores = URLEncoder.encode(underscores, UTF_8);
+    underscores = URLEncoder.encode(underscores, "UTF-8");
       return underscores;
     }
   }
@@ -469,10 +479,10 @@ public class DownloadServlet extends DatabaseServlet {
 //        logger.debug("\tkey " + key + "=" + trimmed);
         typeToSection.put(key.trim(), trimmed);
       } else {
-        logger.debug("\tsections 1" + split1[0]);
+        logger.debug("\tgetTypeToSelectionFromRequest sections 1" + split1[0]);
       }
     }
-    logger.debug("returning " + typeToSection + " for " + queryString);
+    logger.debug("getTypeToSelectionFromRequest returning " + typeToSection + " for " + queryString);
     return typeToSection;
   }
 

@@ -51,6 +51,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class PropertyHandler {
+  public static final String NPF_CLASSROOM_URL = "https://np.ll.mit.edu/npfClassroom";
   private final Logger logger = Logger.getLogger("PropertyHandler");
 
   public static final String CPW_TOKEN = "CPWtoken";
@@ -68,7 +69,7 @@ public class PropertyHandler {
    *
    * @see RecordButton#startOrStopRecording()
    */
-  private static final int DEFAULT_AFTER_STOP_DELAY_MILLIS = 90;
+  private static final int DEFAULT_AFTER_STOP_DELAY_MILLIS = 120;//185;//85;
 
   // property file property names
   //private static final String ENABLE_ALL_USERS = "enableAllUsers";

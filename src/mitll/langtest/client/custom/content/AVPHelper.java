@@ -69,7 +69,7 @@ public class AVPHelper extends NPFHelper {
    * @param exerciseServiceAsync
    */
   public AVPHelper(LangTestDatabaseAsync service, UserFeedback feedback, ExerciseController controller, ExerciseServiceAsync exerciseServiceAsync) {
-    super(service, feedback, controller, false, exerciseServiceAsync);
+    super(service, feedback, controller, false, false, exerciseServiceAsync);
   }
 
   /**
@@ -83,21 +83,22 @@ public class AVPHelper extends NPFHelper {
     Panel npfContentPanel = new SimplePanel();
     npfContentPanel.getElement().setId("AVPHelper_internalLayout_RightSideContent");
     this.ul = ul;
-    npfExerciseList = makeNPFExerciseList(npfContentPanel, instanceName + "_"+ul.getID());
+    npfExerciseList = makeNPFExerciseList(npfContentPanel, instanceName + "_"+ul.getID(),false);
     return npfContentPanel;
   }
 
   /**
    * TODO : parameterize exercise list by different SectionWidget
-   * @see mitll.langtest.client.custom.content.NPFHelper#makeNPFExerciseList(com.google.gwt.user.client.ui.Panel, String)
+   * @see NPFHelper#makeNPFExerciseList(Panel, String, boolean)
    * @param right
    * @param instanceName
+   * @param showFirstNotCompleted
    * @return
    */
   @Override
-  PagingExerciseList<CommonShell,CommonExercise> makeExerciseList(final Panel right, final String instanceName) {
+  PagingExerciseList<CommonShell,CommonExercise> makeExerciseList(final Panel right, final String instanceName, boolean showFirstNotCompleted) {
     PagingExerciseList<CommonShell,CommonExercise> widgets = new NPExerciseList<ButtonGroupSectionWidget>(right, exerciseServiceAsync, feedback, controller,
-        true, instanceName, true) {
+        true, instanceName, true, false) {
       @Override
       protected void onLastItem() {
       } // TODO : necessary?

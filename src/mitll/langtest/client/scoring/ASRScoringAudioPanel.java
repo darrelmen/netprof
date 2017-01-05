@@ -38,6 +38,7 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.ScoringServiceAsync;
 import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.HashSet;
@@ -55,7 +56,10 @@ import java.util.logging.Logger;
  */
 public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> {
   private Logger logger = Logger.getLogger("ASRScoringAudioPanel");
+  private static final String ANIMATED_PROGRESS44_GIF = "animated_progress44.gif";
+  private static final String WAIT_GIF = LangTest.LANGTEST_IMAGES + ANIMATED_PROGRESS44_GIF;
   private static final String SCORE = "score";
+  private static final int WAIT_GIF_DELAY = 150;
   private final Set<String> tested = new HashSet<String>();
   private boolean useScoreToColorBkg = true;
 
@@ -66,14 +70,16 @@ public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> 
    * @param playButtonSuffix
    * @param exercise
    * @param instance
+   * @param audioType
    */
   ASRScoringAudioPanel(String refSentence,
+                       String transliteration,
                               ExerciseController controller,
                               ScoreListener gaugePanel,
                               String playButtonSuffix,
                               T exercise,
                               String instance) {
-    super(refSentence, controller, gaugePanel, playButtonSuffix, exercise, instance);
+    super(refSentence,transliteration, controller, gaugePanel, playButtonSuffix, exercise, instance);
   }
 
   /**
@@ -87,13 +93,14 @@ public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> 
    * @param playButtonSuffix
    * @param exercise
    * @param instance
+   * @param audioType
    */
-  public ASRScoringAudioPanel(String path, String refSentence,
+  public ASRScoringAudioPanel(String path, String refSentence, String transliteration,
                               ExerciseController controller, boolean showSpectrogram, ScoreListener gaugePanel,
                               int rightMargin, String playButtonSuffix,
                               T exercise,
                               String instance) {
-    super(path, refSentence, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix, exercise, exercise.getID(), instance);
+    super(path, refSentence, transliteration, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix, exercise, exercise.getID(), instance);
     this.useScoreToColorBkg = controller.useBkgColorForRef();
   }
 
@@ -111,25 +118,21 @@ public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> 
    * @param height of images returned
    * @param reqid so if many requests are made quickly and the returns are out of order, we can ignore older requests
    */
-  protected void scoreAudio(final String path, int resultID, String refSentence,
-                            final ImageAndCheck wordTranscript, final ImageAndCheck phoneTranscript,
-                            int toUse, int height, final int reqid) {
-    if (path == null) return;
+  protected void scoreAudio(final String path,
+                            int resultID,
+                            String refSentence,
+                            String transliteration,
+                            final ImageAndCheck wordTranscript,
+                            final ImageAndCheck phoneTranscript,
+                            int toUse,
+                            int height,
+                            final int reqid) {
+    if (path == null || path.equals("FILE_MISSING")) return;
     //System.out.println("scoring audio " + path +" with ref sentence " + refSentence + " reqid " + reqid);
     boolean wasVisible = wordTranscript.isVisible();
 
     // only show the spinning icon if it's going to take awhile
-    final Timer t = new Timer() {
-      @Override
-      public void run() {
-        wordTranscript.setUrl(LangTest.LANGTEST_IMAGES + "animated_progress44.gif");
-       // wordTranscript.getImage().setVisible(true);
-        phoneTranscript.setVisible(false);
-      }
-    };
-
-    // Schedule the timer to run once in 1 seconds.
-    t.schedule(wasVisible ? 1000 : 1);
+    final Timer t = getWaitTimer(wordTranscript, phoneTranscript, wasVisible);
 
     //logger.info("ASRScoringAudioPanel.scoreAudio : req " + reqid + " path " + path + " type " + "score" + " width " + toUse);
 
@@ -157,13 +160,30 @@ public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> 
     };
 
     int id = exercise.getID();
+    ImageOptions imageOptions = new ImageOptions(toUse, height, useScoreToColorBkg);
+
     ScoringServiceAsync service = controller.getScoringService();
     if (controller.getProps().shouldUsePhoneToDisplay()) {
       service.getASRScoreForAudioPhonemes(
-          reqid, resultID, path, refSentence, toUse, height, useScoreToColorBkg, id, async);
+          reqid, resultID, path, refSentence,transliteration, imageOptions, id, async);
     } else {
       service.getASRScoreForAudio(
-          reqid, resultID, path, refSentence, toUse, height, useScoreToColorBkg, id, async);
+          reqid, resultID, path, refSentence, transliteration,imageOptions, id, async);
     }
+  }
+
+  private Timer getWaitTimer(final ImageAndCheck wordTranscript, final ImageAndCheck phoneTranscript, boolean wasVisible) {
+    final Timer t = new Timer() {
+      @Override
+      public void run() {
+        wordTranscript.setUrl(WAIT_GIF);
+       // wordTranscript.getImage().setVisible(true);
+        phoneTranscript.setVisible(false);
+      }
+    };
+
+    // Schedule the timer to run once in 1 seconds.
+    t.schedule(wasVisible ? 1000 : WAIT_GIF_DELAY);
+    return t;
   }
 }

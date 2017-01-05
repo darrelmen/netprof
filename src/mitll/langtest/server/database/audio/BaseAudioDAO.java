@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.audio;
 
+import com.google.common.base.CharMatcher;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.database.AudioExport;
 import mitll.langtest.server.database.DAO;
@@ -39,11 +40,13 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.database.user.IUserDAO;
+import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.ExerciseAnnotation;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -316,14 +319,14 @@ public abstract class BaseAudioDAO extends DAO {
    * @return ids with both regular and slow speed recordings
    * @see mitll.langtest.server.LangTestDatabaseImpl#filterByUnrecorded
    */
-  public Collection<Integer> getRecordedBy(int userid) {
+  public Collection<Integer> getRecordedBy(int userid, Map<Integer, String> exToTranscript) {
     //Map<Integer, User> userMap = getUserMap(userid);
     Collection<Integer> userIDs = getUserIDs(userid);
     //logger.debug("found " + (isMale ? " male " : " female ") + " users : " + userMap.keySet());
     // find set of users of same gender
-    Set<Integer> validAudioAtReg = getAudioExercisesForGender(userIDs, REGULAR);
+    Set<Integer> validAudioAtReg = getAudioExercisesForGender(userIDs, REGULAR, exToTranscript);
     //logger.debug(" regular speed for " + userMap.keySet() + " " + validAudioAtReg.size());
-    Set<Integer> validAudioAtSlow = getAudioExercisesForGender(userIDs, SLOW);
+    Set<Integer> validAudioAtSlow = getAudioExercisesForGender(userIDs, SLOW, exToTranscript);
 //    logger.debug(" slow speed for " + userMap.keySet() + " " + validAudioAtSlow.size());
     boolean b = validAudioAtReg.retainAll(validAudioAtSlow);
     //  logger.debug("retain all " + b + " " + validAudioAtReg.size());
@@ -354,25 +357,38 @@ public abstract class BaseAudioDAO extends DAO {
                                               Map<Integer, User> userMapFemales,
                                               float total,
                                               Set<Integer> uniqueIDs,
+                                              Map<Integer, String> exToTranscript,
+                                              Map<Integer, String> exToContextTranscript,
                                               float totalContext) {
     Set<Integer> maleIDs = userMapMales.keySet();
     maleIDs = new HashSet<>(maleIDs);
     maleIDs.add(BaseUserDAO.DEFAULT_MALE_ID);
 
-    float maleFast = getCountForGender(maleIDs, REGULAR, uniqueIDs);
-    float maleSlow = getCountForGender(maleIDs, SLOW, uniqueIDs);
-    float male = getCountBothSpeeds(maleIDs, uniqueIDs);
+    Set<Integer> maleReg = new HashSet<>();
+    Set<Integer> maleSlowSpeed = new HashSet<>();
+
+    float maleFast = getCountForGender(maleIDs, REGULAR, uniqueIDs, exToTranscript, maleReg);
+    float maleSlow = getCountForGender(maleIDs, SLOW, uniqueIDs, exToTranscript, maleSlowSpeed);
+    maleReg.retainAll(maleSlowSpeed);
+    float male = maleReg.size();
 
     Set<Integer> femaleIDs = userMapFemales.keySet();
     femaleIDs = new HashSet<>(femaleIDs);
     femaleIDs.add(BaseUserDAO.DEFAULT_FEMALE_ID);
 
-    float femaleFast = getCountForGender(femaleIDs, REGULAR, uniqueIDs);
-    float femaleSlow = getCountForGender(femaleIDs, SLOW, uniqueIDs);
-    float female = getCountBothSpeeds(femaleIDs, uniqueIDs);
+    Set<Integer> femaleReg = new HashSet<>();
+    Set<Integer> femaleSlowSpeed = new HashSet<>();
+    float femaleFast = getCountForGender(femaleIDs, REGULAR, uniqueIDs, exToTranscript, femaleReg);
+    float femaleSlow = getCountForGender(femaleIDs, SLOW, uniqueIDs, exToTranscript, femaleSlowSpeed);
 
-    float cmale = getCountForGender(maleIDs, CONTEXT_REGULAR, uniqueIDs);
-    float cfemale = getCountForGender(femaleIDs, CONTEXT_REGULAR, uniqueIDs);
+    femaleReg.retainAll(femaleSlowSpeed);
+    float female = femaleReg.size();
+
+    Set<Integer> conReg = new HashSet<>();
+    Set<Integer> conSlow = new HashSet<>();
+
+    float cmale = getCountForGender(maleIDs, CONTEXT_REGULAR, uniqueIDs, exToContextTranscript, conReg);
+    float cfemale = getCountForGender(femaleIDs, CONTEXT_REGULAR, uniqueIDs, exToContextTranscript, conSlow);
 
     Map<String, Float> report = new HashMap<>();
     report.put(BaseAudioDAO.TOTAL, total);
@@ -388,7 +404,11 @@ public abstract class BaseAudioDAO extends DAO {
     return report;
   }
 
-  abstract int getCountForGender(Set<Integer> userIds, String audioSpeed, Set<Integer> uniqueIDs);
+  abstract int getCountForGender(Set<Integer> userIds,
+                                 String audioSpeed,
+                                 Set<Integer> uniqueIDs,
+                                 Map<Integer, String> exToTranscript,
+                                 Set<Integer> idsOfRecordedExercises);
 
   /**
    * Items that are recorded must have both regular and slow speed audio.
@@ -516,7 +536,7 @@ public abstract class BaseAudioDAO extends DAO {
 
   /**
    * TODO : confirm this works...
-   *
+   * <p>
    * Go back and mark gender on really old audio that had no user info on it.
    *
    * @param userid
@@ -546,15 +566,45 @@ public abstract class BaseAudioDAO extends DAO {
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#filterByUnrecorded(ExerciseListRequest, Collection)
    */
-  public Set<Integer> getWithContext(int userid) {
-    return getWithContext(getUserMap(userid));
+  public Set<Integer> getWithContext(int userid, Map<Integer, String> exToContext) {
+    return getWithContext(getUserMap(userid), exToContext);
   }
 
-  private Set<Integer> getWithContext(Map<Integer, User> userMap) {
-    return getAudioExercisesForGender(userMap.keySet(), CONTEXT_REGULAR);
+  private Set<Integer> getWithContext(Map<Integer, User> userMap, Map<Integer, String> exToContext) {
+    return getAudioExercisesForGender(userMap.keySet(), CONTEXT_REGULAR, exToContext);
   }
 
-  abstract Set<Integer> getAudioExercisesForGender(Collection<Integer> userIDs, String audioSpeed);
+  abstract Set<Integer> getAudioExercisesForGender(Collection<Integer> userIDs,
+                                                   String audioSpeed,
+                                                   Map<Integer, String> exToTranscript);
 
   abstract int getCountBothSpeeds(Set<Integer> userIds, Set<Integer> uniqueIDs);
+
+
+  protected boolean isNoAccentMatch(String transcript, String exerciseFL) {
+    if (exerciseFL == null) return false;
+    String before  = trimWhitespace(exerciseFL);
+    String trimmed = trimWhitespace(transcript);
+    String noAccents = StringUtils.stripAccents(before);
+    //String transcript = audio.getTranscript();
+    String noAccentsTranscript = trimmed == null ? null : StringUtils.stripAccents(trimmed);
+
+    return matchTranscript(before, trimmed) ||
+        matchTranscript(noAccents, noAccentsTranscript);
+  }
+
+  private String trimWhitespace(String against) {
+    return CharMatcher.WHITESPACE.trimFrom(against);
+  }
+
+  private boolean matchTranscript(String foreignLanguage, String transcript) {
+    return transcript == null ||
+        foreignLanguage.isEmpty() ||
+        transcript.isEmpty() ||
+        removePunct(transcript).toLowerCase().equals(removePunct(foreignLanguage).toLowerCase());
+  }
+
+  private String removePunct(String t) {
+    return t.replaceAll("\\p{P}", "").replaceAll("\\s++", "");
+  }
 }

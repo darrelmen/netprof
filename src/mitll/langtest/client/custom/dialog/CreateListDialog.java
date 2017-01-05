@@ -34,6 +34,7 @@ package mitll.langtest.client.custom.dialog;
 
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -42,6 +43,7 @@ import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
@@ -51,6 +53,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.ListService;
 import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.client.user.BasicDialog;
+import mitll.langtest.client.user.FormField;
 import mitll.langtest.client.user.UserManager;
 
 import java.util.logging.Logger;
@@ -113,18 +116,21 @@ public class CreateListDialog extends BasicDialog {
 
     row = new FluidRow();
     child.add(row);
-    final BasicDialog.FormField titleBox = addControlFormField(row, TITLE);
-    titleBox.box.getElement().setId("CreateListDialog_Title");
-    titleBox.box.addBlurHandler(new BlurHandler() {
+
+    final FormField titleBox = addControlFormField(row, TITLE);
+    final TextBoxBase box = titleBox.box;
+    box.getElement().setId("CreateListDialog_Title");
+    box.addBlurHandler(new BlurHandler() {
       @Override
       public void onBlur(BlurEvent event) {
-        controller.logEvent(titleBox.box, "TextBox", "Create New List", "Title = " + titleBox.box.getValue());
+        controller.logEvent(box, "TextBox", "Create New List", "Title = " + box.getValue());
       }
     });
+
     row = new FluidRow();
     child.add(row);
     final TextArea area = new TextArea();
-    final BasicDialog.FormField description = getSimpleFormField(row, DESCRIPTION_OPTIONAL, area, 1);
+    final FormField description = getSimpleFormField(row, DESCRIPTION_OPTIONAL, area, 1);
     description.box.getElement().setId("CreateListDialog_Description");
     description.box.addBlurHandler(new BlurHandler() {
       @Override
@@ -136,7 +142,7 @@ public class CreateListDialog extends BasicDialog {
     row = new FluidRow();
     child.add(row);
 
-    final BasicDialog.FormField classBox = addControlFormField(row, CLASS);
+    final FormField classBox = addControlFormField(row, CLASS);
     classBox.box.getElement().setId("CreateListDialog_CourseInfo");
     classBox.box.addBlurHandler(new BlurHandler() {
       @Override
@@ -174,13 +180,16 @@ public class CreateListDialog extends BasicDialog {
 
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       public void execute() {
-        titleBox.box.setFocus(true);
+        box.setFocus(true);
       }
     });
   }
 
-  private Button makeCreateButton(final KeyPressHelper enterKeyButtonHelper, final FormField titleBox, final TextArea area,
-                                  final FormField classBox, final RadioButton publicRadio) {
+  private Button makeCreateButton(final KeyPressHelper enterKeyButtonHelper,
+                                  final FormField titleBox,
+                                  final TextArea area,
+                                  final FormField classBox,
+                                  final RadioButton publicRadio) {
     Button submit = new Button(CREATE_LIST);
     submit.setType(ButtonType.PRIMARY);
     submit.getElement().setId("CreateList_Submit");
@@ -192,9 +201,9 @@ public class CreateListDialog extends BasicDialog {
     submit.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        logger.info("creating list for " + titleBox + " " + area.getText() + " and " + classBox.getText());
+        // logger.info("creating list for " + titleBox + " " + area.getText() + " and " + classBox.getSafeText());
         enterKeyButtonHelper.removeKeyHandler();
-        if (validateCreateList(titleBox/*, description, classBox*/)) {
+        if (validateCreateList(titleBox)) {
           addUserList(titleBox, area, classBox, publicRadio.getValue());
         }
       }
@@ -205,10 +214,12 @@ public class CreateListDialog extends BasicDialog {
 
   private void addUserList(final FormField titleBox, TextArea area, FormField classBox, boolean isPublic) {
     int user = userManager.getUser();
+    final String safeText = titleBox.getSafeText();
+
     listService.addUserList(user,
-        titleBox.getText(),
-        area.getText(),
-        classBox.getText(), isPublic, new AsyncCallback<Long>() {
+        safeText,
+        sanitize(area.getText()),
+        classBox.getSafeText(), isPublic, new AsyncCallback<Long>() {
           @Override
           public void onFailure(Throwable caught) {
           }
@@ -216,7 +227,7 @@ public class CreateListDialog extends BasicDialog {
           @Override
           public void onSuccess(Long result) {
             if (result == -1) {
-              markError(titleBox, "You already have a list named " + titleBox.getText());
+              markError(titleBox, "You already have a list named " + safeText);
             } else {
               navigation.clickOnYourLists(result);
             }
@@ -229,12 +240,16 @@ public class CreateListDialog extends BasicDialog {
     createContent.getElement().getStyle().setPaddingRight(0, Style.Unit.PX);
   }
 
-  private boolean validateCreateList(BasicDialog.FormField titleBox) {
-    if (titleBox.getText().isEmpty()) {
+  private boolean validateCreateList(FormField titleBox) {
+    if (titleBox.getSafeText().isEmpty()) {
       markError(titleBox, "Please fill in a title");
       return false;
     } else {
       return true;
     }
+  }
+
+  private String sanitize(String text) {
+    return SimpleHtmlSanitizer.sanitizeHtml(text).asString();
   }
 }

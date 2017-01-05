@@ -94,6 +94,7 @@ public class ServerProperties {
   private String miraClassifierURL = MIRA_DEVEL;// MIRA_LEN; //MIRA_DEVEL;
   private static final String NP_SERVER = "np.ll.mit.edu";
 
+
   /**
    * I.e. the hydra web service for ASR
    */
@@ -335,10 +336,10 @@ public class ServerProperties {
 
   /**
    * @return
-   * @see mitll.langtest.server.decoder.RefResultDecoder#doRefDecode(Collection)
+   * @see mitll.langtest.server.decoder.RefResultDecoder#doRefDecode
    */
   public boolean shouldTrimAudio() {
-    return getDefaultTrue(DO_TRIM);
+    return getDefaultFalse(DO_TRIM);
   }
 
 /*
@@ -787,5 +788,9 @@ public class ServerProperties {
   public String getCurrentModel() {
     String models_dir = getProperty("MODELS_DIR");
     return models_dir != null? models_dir.replaceAll("models.", ""): "";
+  }
+
+  public boolean shouldRecalcDNR() {
+    return getDefaultTrue("shouldRecalcDNROnAudio");
   }
 }

@@ -55,6 +55,7 @@ import java.util.*;
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 2/10/16.
+ * @deprecated not sure if this will ever be used --
  */
 public class JSONURLExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<CommonExercise> {
   private static final Logger logger = LogManager.getLogger(JSONURLExerciseDAO.class);
@@ -67,7 +68,7 @@ public class JSONURLExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<C
       ServerProperties serverProps,
       IUserListManager userListManager,
       boolean addDefects) {
-    super(serverProps, userListManager, addDefects, serverProps.getLanguage());
+    super(serverProps, userListManager, addDefects, serverProps.getLanguage(),-1);
     this.typeOrder = serverProps.getTypes();
 
     new DominoReader().readProjectInfo(serverProps);

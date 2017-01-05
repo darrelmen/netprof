@@ -56,8 +56,6 @@ public interface AudioAttributeExercise extends AudioRefExercise {
    */
   AudioAttribute getLatestContext(boolean isMale);
 
-  AudioAttribute getLatest(boolean isMale);
-
   /**
    * @see AudioExport#getAudioAttribute(MiniUser, CommonExercise, boolean, String)
    * @param userID
@@ -66,8 +64,17 @@ public interface AudioAttributeExercise extends AudioRefExercise {
    */
   AudioAttribute getRecordingsBy(long userID, String speed);
 
+  /**
+   * @see AudioExport#getAudioAttribute
+   * @param isMale
+   * @return
+   */
   Collection<AudioAttribute> getByGender(boolean isMale);
 
+  /**
+   * @see mitll.langtest.client.scoring.FastAndSlowASRScoringAudioPanel#getAfterPlayWidget()
+   * @return
+   */
   Collection<AudioAttribute> getDefaultUserAudio();
 
   Map<String, AudioAttribute> getAudioRefToAttr();
@@ -78,5 +85,4 @@ public interface AudioAttributeExercise extends AudioRefExercise {
    * @return
    */
   Map<MiniUser, List<AudioAttribute>> getMostRecentAudio(boolean isMale, Collection<Long> preferredUsers);
-
 }

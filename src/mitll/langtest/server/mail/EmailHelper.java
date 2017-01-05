@@ -85,6 +85,9 @@ public class EmailHelper {
   private static final String INVALID_PASSWORD_RESET = "Invalid password reset";
 
   private final IUserDAO userDAO;
+  private static final String HEX_CHARACTERS = "0123456789abcdef";
+  private static final String HEX_CHARACTERS_UC = HEX_CHARACTERS.toUpperCase();
+
   private final MailSupport mailSupport;
   private final ServerProperties serverProperties;
   private final PathHelper pathHelper;
@@ -117,6 +120,37 @@ public class EmailHelper {
   }
 
   /**
+   * Convert a byte array to a hexadecimal string.
+   *
+   * @param bytes The bytes to format.
+   * @param uppercase When <code>true</code> creates uppercase hex characters
+   *            instead of lowercase (the default).
+   * @return A hexadecimal representation of the specified bytes.
+   */
+  public static String toHexString(byte[] bytes, boolean uppercase)
+  {
+    if (bytes == null)
+    {
+      return null;
+    }
+
+    int numBytes = bytes.length;
+    StringBuilder str = new StringBuilder(numBytes * 2);
+
+    String table = (uppercase ? HEX_CHARACTERS_UC : HEX_CHARACTERS);
+
+    for (int i = 0; i < numBytes; i++)
+    {
+      str.append(table.charAt(bytes[i] >>> 4 & 0x0f));
+      str.append(table.charAt(bytes[i] & 0x0f));
+    }
+
+    return str.toString();
+  }
+
+
+  /**
+   * @see mitll.langtest.server.LangTestDatabaseImpl#forgotUsername(String, String, String)
    * @param email
    * @param url
    * @param userID

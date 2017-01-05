@@ -83,7 +83,7 @@ public class SignInForm extends UserDialog implements SignIn {
   private static final String PLEASE_CHECK_YOUR_EMAIL = "Please check your email";
 
   private static final String ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD = "Enter your email to reset your password.";
-//  private static final String ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD = "Reset your password.";
+  //  private static final String ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD = "Reset your password.";
   // private static final String ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD_GOT_IT = "Click here and then check your email to reset your password.";
   private static final String SEND = "Send Reset Email";
   private static final String SIGN_UP_WIDTH = "266px";
@@ -178,7 +178,7 @@ public class SignInForm extends UserDialog implements SignIn {
       @Override
       public void onBlur(BlurEvent event) {
         logger.info("makeSignInUserName : got blur ");
-        final String text = userField.getText();
+        final String text = userField.getSafeText();
 
         if (!text.isEmpty()) {
           eventRegistration.logEvent(userField.box, "UserNameBox", "N/A", "left username field '" + text + "'");
@@ -209,8 +209,8 @@ public class SignInForm extends UserDialog implements SignIn {
     if (result != null) {
       String emailHash = result.getEmailHash();
 //      String passwordHash = result.getPasswordHash();
-      logger.info("makeSignInUserName : for " + userField.getText() + " got back " + result);
-      logger.info("makeSignInUserName : for " + userField.getText() + " emailHash " + emailHash);
+//      logger.info("makeSignInUserName : for " + userField.getText() + " got back " + result);
+//      logger.info("makeSignInUserName : for " + userField.getText() + " emailHash " + emailHash);
 //      logger.info("makeSignInUserName : for " + userField.getText() + " passwordHash " + passwordHash);
       //  this.email = result.getEmail();
       if (emailHash == null ||
@@ -222,7 +222,7 @@ public class SignInForm extends UserDialog implements SignIn {
         copyInfoToSignUp(result.getUserID());
       }
     } else {
-      logger.info("makeSignInUserName : for " + userField.getText() + " - no user with that id");
+//      logger.info("makeSignInUserName : for " + userField.getText() + " - no user with that id");
     }
   }
 
@@ -481,14 +481,14 @@ public class SignInForm extends UserDialog implements SignIn {
    * recorder/not a recorder choice.
    *
    * @param userID
-   * @see #foundExistingUser
+   * @seex #foundExistingUser
    * @see #makeSignInUserName(com.github.gwtbootstrap.client.ui.Fieldset)
    */
   private void copyInfoToSignUp(String userID) {
     signUpForm.copyInfoToSignUp(
         //
-        userID
-        , password.getText());
+        userID,
+        password.getSafeText());
     eventRegistration.logEvent(signIn, "sign in", "N/A", "copied info to sign up form");
   }
 
@@ -510,7 +510,7 @@ public class SignInForm extends UserDialog implements SignIn {
     forgotPassword.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        if (userField.getText().isEmpty()) {
+        if (userField.getSafeText().isEmpty()) {
           markErrorBlur(userField, ENTER_A_USER_NAME);
           return;
         }
@@ -546,7 +546,7 @@ public class SignInForm extends UserDialog implements SignIn {
    * @param emailEntry - need this since old accounts don't have email with them
    */
   private void onSendReset(
-         TextBox emailEntry
+      TextBox emailEntry
   ) {
     String userEmail = emailEntry.getText();
     if (!isValidEmail(userEmail)) {

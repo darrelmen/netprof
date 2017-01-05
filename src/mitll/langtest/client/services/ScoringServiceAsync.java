@@ -34,12 +34,14 @@ package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 
 public interface ScoringServiceAsync {
+  void getASRScoreForAudio(int reqid,
+                           long resultID, String testAudioFile, String sentence, String transliteration,
 
-  void getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence, int width, int height,
-                           boolean useScoreToColorBkg,
+                           ImageOptions imageOptions,
                            int exerciseID,
                            AsyncCallback<PretestScore> async);
 
@@ -54,16 +56,18 @@ public interface ScoringServiceAsync {
    */
   void getAlignment(String base64EncodedString,
                     String textToAlign,
+                    String transliteration,
                     String identifier,
                     int reqid, String device, AsyncCallback<AudioAnswer> async);
 
 
   void addRoundTrip(int resultid, int roundTrip, AsyncCallback<Void> async);
 
-  void getResultASRInfo(int resultID, int width, int height, AsyncCallback<PretestScore> async);
+  void getResultASRInfo(int resultID, ImageOptions imageOptions, AsyncCallback<PretestScore> async);
 
   void getASRScoreForAudioPhonemes(int reqid, long resultID, String testAudioFile, String sentence,
-                                   int width, int height, boolean useScoreToColorBkg,
+                                   String transliteration,
+                                   ImageOptions imageOptions,
                                    int exerciseID,
                                    AsyncCallback<PretestScore> async);
 }

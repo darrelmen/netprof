@@ -44,6 +44,7 @@ import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
+import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.result.Result;
@@ -102,9 +103,6 @@ public class ASRScoring extends Scoring implements ASR {
    * @param testAudioFileNoSuffix
    * @param sentence              that should be what the test audio contains
    * @param imageOutDir
-   * @param imageWidth
-   * @param imageHeight
-   * @param useScoreForBkgColor
    * @param useCache
    * @param prefix
    * @param precalcResult
@@ -115,17 +113,20 @@ public class ASRScoring extends Scoring implements ASR {
   public PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
                                   String sentence,
                                   Collection<String> lmSentences,
+                                  String transliteration,
 
                                   String imageOutDir,
-                                  int imageWidth, int imageHeight, boolean useScoreForBkgColor,
+                                  ImageOptions imageOptions,
+
                                   boolean decode,
                                   boolean useCache, String prefix, Result precalcResult, boolean usePhoneToDisplay) {
     return scoreRepeatExercise(testAudioDir, testAudioFileNoSuffix,
-        sentence,
+        sentence, transliteration,
         lmSentences,
 
         scoringDir,
-        imageOutDir, imageWidth, imageHeight, useScoreForBkgColor,
+        imageOutDir,
+        imageOptions,
         decode,
         useCache, prefix, precalcResult, usePhoneToDisplay);
   }
@@ -149,9 +150,6 @@ public class ASRScoring extends Scoring implements ASR {
    * @param lmSentences
    * @param scoringDir            where the hydec subset is (models, bin.linux64, etc.)
    * @param imageOutDir           where to write the images (audioImage)
-   * @param imageWidth            image width
-   * @param imageHeight           image height
-   * @param useScoreForBkgColor   true if we want to color the segments by score else all are gray
    * @param decode                if true, skips writing image files
    * @param useCache              cache scores so subsequent requests for the same audio file will get the cached score
    * @param prefix                on the names of the image files, if they are written
@@ -161,13 +159,13 @@ public class ASRScoring extends Scoring implements ASR {
   private PretestScore scoreRepeatExercise(String testAudioDir,
                                            String testAudioFileNoSuffix,
                                            String sentence,
+                                           String transliteration,
                                            Collection<String> lmSentences,
                                            String scoringDir,
 
                                            String imageOutDir,
-                                           int imageWidth,
-                                           int imageHeight,
-                                           boolean useScoreForBkgColor,
+                                           ImageOptions imageOptions,
+
                                            boolean decode,
                                            boolean useCache, String prefix,
                                            Result precalcResult,
@@ -175,7 +173,7 @@ public class ASRScoring extends Scoring implements ASR {
     String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
     String pathname = noSuffix + ".wav";
 
-    boolean b = checkLTS(sentence).isEmpty();
+    boolean b = checkLTS(sentence, transliteration).isEmpty();
 
     if (!b) {
       logger.info("scoreRepeatExercise for " + testAudioFileNoSuffix + " under " + testAudioDir + " '" + sentence + "' is not in lts");
@@ -225,13 +223,15 @@ public class ASRScoring extends Scoring implements ASR {
       }
 
       //    logger.debug("recalculating : " + precalcResult);
-      scores = getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, lmSentences, scoringDir, decode, useCache);
+      scores = getScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, transliteration, lmSentences, scoringDir, decode, useCache);
     }
     if (scores == null) {
       logger.error("getScoreForAudio failed to generate scores.");
       return new PretestScore(0.01f);
     }
-    PretestScore pretestScore = getPretestScore(imageOutDir, imageWidth, imageHeight, useScoreForBkgColor, decode,
+    PretestScore pretestScore = getPretestScore(imageOutDir,
+        imageOptions,
+        decode,
         prefix, noSuffix, wavFile,
         scores, jsonObject, usePhoneToDisplay);
 //    logger.info("now we have pretest score " +pretestScore + " json " + jsonObject);
@@ -242,9 +242,6 @@ public class ASRScoring extends Scoring implements ASR {
    * Make image files for words, and phones, find out the reco sentence from the events.
    *
    * @param imageOutDir
-   * @param imageWidth
-   * @param imageHeight
-   * @param useScoreForBkgColor
    * @param decode
    * @param prefix
    * @param noSuffix
@@ -254,20 +251,21 @@ public class ASRScoring extends Scoring implements ASR {
    * @return
    * @see #scoreRepeatExercise
    */
-  private PretestScore getPretestScore(String imageOutDir, int imageWidth, int imageHeight,
-                                       boolean useScoreForBkgColor,
-                                       boolean decode, String prefix, String noSuffix,
-                                       File wavFile,
-                                       Scores scores,
+  private PretestScore getPretestScore(String imageOutDir,
+                                       ImageOptions imageOptions,
+                                       boolean decode, String prefix, String noSuffix, File wavFile, Scores scores,
                                        JsonObject jsonObject,
+
                                        boolean usePhoneToDisplay) {
     //  logger.debug("getPretestScore jsonObject " + jsonObject);
 //    logger.debug("getPretestScore scores     " + scores);
-
+    int imageWidth = imageOptions.getWidth();
+    int imageHeight = imageOptions.getHeight();
+    boolean useScoreForBkgColor =imageOptions.isUseScoreToColorBkg();
     boolean reallyUsePhone = usePhoneToDisplay || props.usePhoneToDisplay();
 
     // we cache the images, so we don't want to return an image for a different option...
-    String prefix1 = prefix + (useScoreForBkgColor ? "bkgColorForRef" : "") + (reallyUsePhone ? "_phoneToDisp" : "");
+    String prefix1 = prefix + (imageOptions.isUseScoreToColorBkg() ? "bkgColorForRef" : "") + (reallyUsePhone ? "_phoneToDisp" : "");
 
     //logger.debug("getPretestScore prefix " + prefix1);
     if (DEBUG && jsonObject != null) logger.debug("generating images from " + jsonObject);
@@ -310,6 +308,7 @@ public class ASRScoring extends Scoring implements ASR {
   private Scores getScoreForAudio(String testAudioDir,
                                   String testAudioFileNoSuffix,
                                   String sentence,
+                                  String transliteration,
                                   Collection<String> lmSentences,
                                   String scoringDir,
                                   boolean decode, boolean useCache) {
@@ -322,7 +321,7 @@ public class ASRScoring extends Scoring implements ASR {
     if (scores == null) {
       if (DEBUG)
         logger.debug("no cached score for file '" + key + "', so doing " + (decode ? "decoding" : "alignment") + " on " + sentence);
-      scores = calcScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, lmSentences, scoringDir, decode);
+      scores = calcScoreForAudio(testAudioDir, testAudioFileNoSuffix, sentence, transliteration, lmSentences, scoringDir, decode);
       audioToScore.put(key, scores);
     } else {
       if (DEBUG) logger.debug("found cached score for file '" + key + "'");
@@ -350,6 +349,7 @@ public class ASRScoring extends Scoring implements ASR {
   private Scores calcScoreForAudio(String testAudioDir,
                                    String testAudioFileNoSuffix,
                                    String sentence,
+                                   String transliteration,
                                    Collection<String> lmSentences,
                                    String scoringDir,
                                    boolean decode) {
@@ -371,7 +371,7 @@ public class ASRScoring extends Scoring implements ASR {
         new SLFFile().createSimpleSLFFile(lmSentences, tempDir.toFile().getAbsolutePath(), -1.2f);
       }
 
-      Scores scores = computeRepeatExerciseScores(testAudio, sentence, tempDir, decode);
+      Scores scores = computeRepeatExerciseScores(testAudio, sentence, transliteration, tempDir, decode);
       maybeKeepHydecDir(tempDir, scores.hydraScore);
 
       return scores;
@@ -385,7 +385,7 @@ public class ASRScoring extends Scoring implements ASR {
    * @param lmSentences
    * @param background
    * @return
-   * @see AlignDecode#getASRScoreForAudio(File, Collection, boolean, boolean)
+   * @see AlignDecode#getASRScoreForAudio
    */
   public String getUsedTokens(Collection<String> lmSentences, List<String> background) {
     return getUniqueTokensInLM(lmSentences, getSmallVocabDecoder().getVocab(background, VOCAB_SIZE_LIMIT));
@@ -477,7 +477,7 @@ public class ASRScoring extends Scoring implements ASR {
    * @return Scores - score for audio, given the sentence and event info
    * @see #calcScoreForAudio
    */
-  private Scores computeRepeatExerciseScores(Audio testAudio, String sentence, Path tmpDir, boolean decode) {
+  private Scores computeRepeatExerciseScores(Audio testAudio, String sentence, String transliteration, Path tmpDir, boolean decode) {
     String modelsDir = configFileCreator.getModelsDir();
 
     // Make sure that we have an absolute path to the config and dict files.
@@ -493,7 +493,7 @@ public class ASRScoring extends Scoring implements ASR {
       return getEmptyScores();
     }
 
-    Scores scoresFromHydec = getScoresFromHydec(testAudio, sentence, configFile);
+    Scores scoresFromHydec = getScoresFromHydec(testAudio, sentence, transliteration, configFile);
     return scoresFromHydec;
   }
 
@@ -512,6 +512,8 @@ public class ASRScoring extends Scoring implements ASR {
   }
 
   /**
+   * TODO : for now don't use transliteration call - since we haven't merged.
+   *
    * Tries to remove junky characters from the sentence so hydec won't choke on them.
    *
    * @param testAudio
@@ -521,7 +523,7 @@ public class ASRScoring extends Scoring implements ASR {
    * @see SmallVocabDecoder
    * @see #computeRepeatExerciseScores
    */
-  private Scores getScoresFromHydec(Audio testAudio, String sentence, String configFile) {
+  private Scores getScoresFromHydec(Audio testAudio, String sentence, String transliteration, String configFile) {
     sentence = svd.getTrimmed(sentence);
     long then = System.currentTimeMillis();
     logger.debug("getScoresFromHydec scoring '" + sentence +"' (" +sentence.length()+ " ) with " +
@@ -530,7 +532,9 @@ public class ASRScoring extends Scoring implements ASR {
 
     try {
       Tuple2<Float, Map<String, Map<String, Float>>> jscoreOut =
-          testAudio.jscore(sentence, htkDictionary, getLTS(), configFile);
+          testAudio.jscore(sentence,
+             // transliteration,
+              htkDictionary, getLTS(), configFile);
       float hydec_score = jscoreOut._1;
       long timeToRunHydec = System.currentTimeMillis() - then;
 

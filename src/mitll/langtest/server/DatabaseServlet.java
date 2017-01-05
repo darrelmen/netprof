@@ -33,6 +33,7 @@
 package mitll.langtest.server;
 
 import mitll.langtest.server.audio.AudioConversion;
+import mitll.langtest.server.audio.TrackInfo;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.security.DominoSessionException;
 import mitll.langtest.server.database.security.IUserSecurityManager;
@@ -78,15 +79,12 @@ public class DatabaseServlet extends HttpServlet {
 
   /**
    * @param wavFile
-   * @param title
-   * @param author
+   * @param trackInfo
    * @see mitll.langtest.server.ScoreServlet#ensureMP3Later(int, String, String)
    */
-  void ensureMP3(String wavFile, String title, String author) {
-    ensureMP3(wavFile, configDir, title, author);
-  }
+  void ensureMP3(String wavFile, TrackInfo trackInfo) { ensureMP3(wavFile, pathHelper, configDir, trackInfo);  }
 
-  private void ensureMP3(String wavFile, String configDir, String title, String author) {
+  private boolean ensureMP3(String wavFile, PathHelper pathHelper, String configDir, TrackInfo trackInfo) {
     if (wavFile != null) {
       //  String parent = pathHelper.getInstallPath();
       String parent = serverProps.getMediaDir();
@@ -101,11 +99,10 @@ public class DatabaseServlet extends HttpServlet {
       if (!audioConversion.exists(wavFile, parent)) {
         logger.error("huh? can't find " + wavFile + " under " + parent);
       }
-      String filePath = audioConversion.ensureWriteMP3(wavFile, parent, false, title, author);
-      logger.info("wrote " + wavFile + " to " + filePath);
-      // return new File(filePath).exists();
+      String filePath = audioConversion.ensureWriteMP3(wavFile, parent, false, trackInfo);
+      return new File(filePath).exists();
     } else {
-      //return;
+      return false;
     }
   }
 

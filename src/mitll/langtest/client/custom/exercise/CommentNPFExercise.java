@@ -55,7 +55,6 @@ import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.scoring.FastAndSlowASRScoringAudioPanel;
-import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
@@ -80,11 +79,9 @@ import java.util.logging.Logger;
  */
 public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T> {
   private Logger logger = Logger.getLogger("CommentNPFExercise");
+
   private static final String HIGHLIGHT_START = "<span style='background-color:#5bb75b;color:black'>"; //#5bb75b
   private static final String HIGHLIGHT_END = "</span>";
-
-//  private static final String HIGHLIGHT_START = "<span style='background-color:#5bb75b;color:black'>"; //#5bb75b
-//  private static final String HIGHLIGHT_END = "</span>";
 
   private static final String CONTEXT_SENTENCE = "Context Sentence";
   private static final String DEFAULT = "Default";
@@ -256,7 +253,7 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
       String field = QCNPFExercise.CONTEXT;
       ExerciseAnnotation annotation = exercise.getAnnotation(field);
 
-      logger.info("getContext context " + exercise.getID() + " : " + annotation);
+//      logger.info("getContext context " + exercise.getID() + " : " + annotation);
 
       Widget commentRow = getCommentBox(false)
           .getNoPopup(
@@ -277,8 +274,6 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
 
   private void addContextTranslation(AnnotationExercise e, String contextTranslation, boolean same, Panel vp) {
     if (!contextTranslation.isEmpty() && !same) {
-//      Widget translationEntry = getEntry(e, QCNPFExercise.CONTEXT_TRANSLATION, ExerciseFormatter.CONTEXT_TRANSLATION,
-//          contextTranslation);
       Panel contentWidget = getContentWidget(ExerciseFormatter.CONTEXT_TRANSLATION, contextTranslation, false);
       Widget translationEntry = getCommentBox(false).getNoPopup(QCNPFExercise.CONTEXT_TRANSLATION, contentWidget,
           e.getAnnotation(QCNPFExercise.CONTEXT_TRANSLATION),
@@ -567,8 +562,7 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
    * @param label
    * @param value
    * @return
-   * @see GoodwaveExercisePanel#getQuestionContent(CommonShell)
-   * @see #getContext
+   * @see #getItemContent
    */
   private Widget getEntry(AnnotationExercise e, final String field, final String label, String value) {
     return getEntry(field, label, value, e.getAnnotation(field));
@@ -594,12 +588,29 @@ public class CommentNPFExercise<T extends CommonExercise> extends NPFExercise<T>
    */
   @Override
   protected ASRScoringAudioPanel makeFastAndSlowAudio(final String path) {
+//    return new FastAndSlowASRScoringAudioPanel<T>(getLocalExercise(), path, controller, scorePanel, instance) {
+//      @Override
+//      protected void addAudioRadioButton(Panel vp, RadioButton fast) {
+//        vp.add(getCommentBox(true).getEntry(audioPath, fast, exercise.getAnnotation(path)));
     return new FastAndSlowASRScoringAudioPanel<T>(getLocalExercise(), path, controller, scorePanel, instance) {
+
+      /**
+       * @see #addRegularAndSlow
+       * @param vp
+       * @param radioButton
+       */
       @Override
-      protected void addAudioRadioButton(Panel vp, RadioButton fast) {
-        vp.add(getCommentBox(true).getEntry(audioPath, fast, exercise.getAnnotation(path)));
+      protected void addAudioRadioButton(Panel vp, RadioButton radioButton, AudioAttribute audioAttribute) {
+        if (path == null) return;
+        String audioRef = audioAttribute.getAudioRef();
+        ExerciseAnnotation annotation = exercise.getAnnotation(audioRef);
+        vp.add(getCommentBox(true).getEntry(audioRef, radioButton, annotation));
       }
 
+      /**
+       * @see #getAfterPlayWidget
+       * @param vp
+       */
       @Override
       protected void addNoRefAudioWidget(Panel vp) {
         Widget entry = getEntry(REF_AUDIO, "ReferenceAudio", CommentNPFExercise.NO_REFERENCE_AUDIO, exercise.getAnnotation(REF_AUDIO));

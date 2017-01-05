@@ -64,19 +64,20 @@ import java.util.logging.Logger;
  * @since 12/18/12
  * Time: 6:51 PM
  * To change this template use File | Settings | File Templates.
- *
- *  TODO : make PostAudioRecordButton extend this class.
+ * <p>
+ * TODO : make PostAudioRecordButton extend this class.
  */
 public abstract class SimplePostAudioRecordButton extends RecordButton implements RecordButton.RecordingListener {
   private Logger logger = Logger.getLogger("SimplePostAudioRecordButton");
 
   private static final String RELEASE_TO_STOP = "Release";// to stop";
-  private boolean validAudio = false;
+  //private boolean validAudio = false;
   private static final int LOG_ROUNDTRIP_THRESHOLD = 3000;
   private int reqid = 0;
   private final ExerciseController controller;
   private final LangTestDatabaseAsync service;
   private final String textToAlign;
+  private final String transliteration;
   private final String identifier;
   protected AudioAnswer lastResult;
 
@@ -87,9 +88,9 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
    * @param service     to post the audio to
    * @param textToAlign to align the audio to
    */
-  protected SimplePostAudioRecordButton(final ExerciseController controller, LangTestDatabaseAsync service,
-                                     String textToAlign) {
-    this(controller, service, textToAlign, "item");
+  public SimplePostAudioRecordButton(final ExerciseController controller, LangTestDatabaseAsync service,
+                                     String textToAlign, String transliteration) {
+    this(controller, service, textToAlign, transliteration, "item");
   }
 
   /**
@@ -101,8 +102,8 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
    * @param identifier  optional, but if you want to associate the audio with an item "e.g. Dialog Item #3".
    */
   private SimplePostAudioRecordButton(final ExerciseController controller, LangTestDatabaseAsync service,
-                                      String textToAlign, String identifier) {
-    this(controller, service, "Record", RELEASE_TO_STOP, textToAlign, identifier);
+                                      String textToAlign, String transliteration, String identifier) {
+    this(controller, service, "Record", RELEASE_TO_STOP, textToAlign, transliteration, identifier);
   }
 
   /**
@@ -113,12 +114,13 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.ASRRecordAudioPanel.MyPostAudioRecordButton
    */
   private SimplePostAudioRecordButton(final ExerciseController controller, LangTestDatabaseAsync service,
-                                      String recordButtonTitle, String stopButtonTitle, String textToAlign, String identifier) {
+                                      String recordButtonTitle, String stopButtonTitle, String textToAlign, String transliteration, String identifier) {
     super(controller.getRecordTimeout(), true, recordButtonTitle, stopButtonTitle, controller.getProps());
     setRecordingListener(this);
     this.controller = controller;
     this.service = service;
     this.textToAlign = textToAlign;
+    this.transliteration = transliteration;
     this.identifier = identifier;
     getElement().setId("PostAudioRecordButton");
     getElement().getStyle().setMarginTop(1, Style.Unit.PX);
@@ -126,20 +128,24 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
   }
 
   /**
-   * @see mitll.langtest.client.recorder.RecordButton#stop()
+   * @param duration
+   * @see RecordButton#stop(long)
    */
-  public void stopRecording() { controller.stopRecording(new WavCallback() {
+  public void stopRecording(long duration) {
+    controller.stopRecording(new WavCallback() {
       @Override
       public void getBase64EncodedWavFile(String bytes) {
         postAudioFile(bytes);
       }
-    }); }
+    });
+  }
 
   private void postAudioFile(String base64EncodedWavFile) {
     reqid++;
 
     controller.getScoringService().getAlignment(base64EncodedWavFile,
         textToAlign,
+        transliteration,
         identifier,
         reqid,
         controller.getBrowserInfo(), getAlignmentCallback());
@@ -162,7 +168,7 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
        * @param toShow
        */
       private void showPopup(String toShow) {
-        new PopupHelper().showPopup(toShow,getOuter(),3000);
+        new PopupHelper().showPopup(toShow, getOuter(), 3000);
       }
 
       public void onSuccess(AudioAnswer result) {
@@ -175,11 +181,11 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
           return;
         }
         if (result.getValidity() == AudioAnswer.Validity.OK) {
-          validAudio = true;
+          //      validAudio = true;
           useResult(result);
         } else {
-          validAudio = false;
-          new Exception().printStackTrace();
+          //    validAudio = false;
+          //  new Exception().printStackTrace();
 
           showPopup(result.getValidity().getPrompt());
           useInvalidResult(result);
@@ -225,20 +231,20 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
 
   public abstract void useResult(AudioAnswer result);
 
-  public HorizontalPanel getSentColors(String sentToColor){
-	  HorizontalPanel colorfulSent = new HorizontalPanel();
-	  if(null == lastResult.getPretestScore()){
-		  HTML bad = new HTML("no result available");
-		  bad.getElement().getStyle().setBackgroundColor("#000000");
-		  bad.getElement().getStyle().setProperty("color", "#FFFFFF");
-		  bad.getElement().getStyle().setProperty("margin", "5px 10px");
-		  bad.getElement().getStyle().setProperty("fontSize", "130%");
-		  colorfulSent.add(bad);
-		  return colorfulSent;
-	  }
-	  List<TranscriptSegment> ts = lastResult.getPretestScore().getsTypeToEndTimes().get(NetPronImageType.WORD_TRANSCRIPT);
-	  String[] words = sentToColor.replaceAll("-", " ").split("\\s+");
-	  int wordIndex = 0;
+  public HorizontalPanel getSentColors(String sentToColor) {
+    HorizontalPanel colorfulSent = new HorizontalPanel();
+    if (null == lastResult.getPretestScore()) {
+      HTML bad = new HTML("no result available");
+      bad.getElement().getStyle().setBackgroundColor("#000000");
+      bad.getElement().getStyle().setProperty("color", "#FFFFFF");
+      bad.getElement().getStyle().setProperty("margin", "5px 10px");
+      bad.getElement().getStyle().setProperty("fontSize", "130%");
+      colorfulSent.add(bad);
+      return colorfulSent;
+    }
+    List<TranscriptSegment> ts = lastResult.getPretestScore().getsTypeToEndTimes().get(NetPronImageType.WORD_TRANSCRIPT);
+    String[] words = sentToColor.replaceAll("-", " ").split("\\s+");
+    int wordIndex = 0;
     for (TranscriptSegment wordInfo : ts) {
       if (wordInfo.getEvent().contains("<"))
         continue;
@@ -249,27 +255,27 @@ public abstract class SimplePostAudioRecordButton extends RecordButton implement
       colorfulSent.add(word);
       wordIndex += 1;
     }
-	  colorfulSent.getElement().getStyle().setProperty("margin", "5px 10px");
-	  return colorfulSent;
+    colorfulSent.getElement().getStyle().setProperty("margin", "5px 10px");
+    return colorfulSent;
   }
-  
-  public Map<String, Float> getPhoneScores(){
-	  if(null == lastResult.getPretestScore())
-		  return new HashMap<String, Float>();
-	  return lastResult.getPretestScore().getPhoneScores();
-  }
-  
-  public DivWidget getScoreBar(float score){
-	  int iscore = (int) (100f * score);
-	  final int HEIGHT = 18;
-	  DivWidget bar = new DivWidget();
-	  TooltipHelper tooltipHelper = new TooltipHelper();
-	  bar.setWidth(iscore + "px");
-	  bar.setHeight(HEIGHT + "px");
-	  bar.getElement().getStyle().setBackgroundColor(SimpleColumnChart.getColor(score));
-	  bar.getElement().getStyle().setMarginTop(2, Style.Unit.PX);
 
-	  tooltipHelper.createAddTooltip(bar, "Score " + score + "%", Placement.BOTTOM);
-	  return bar;
+  public Map<String, Float> getPhoneScores() {
+    if (null == lastResult.getPretestScore())
+      return new HashMap<String, Float>();
+    return lastResult.getPretestScore().getPhoneScores();
+  }
+
+  public DivWidget getScoreBar(float score) {
+    int iscore = (int) (100f * score);
+    final int HEIGHT = 18;
+    DivWidget bar = new DivWidget();
+    TooltipHelper tooltipHelper = new TooltipHelper();
+    bar.setWidth(iscore + "px");
+    bar.setHeight(HEIGHT + "px");
+    bar.getElement().getStyle().setBackgroundColor(SimpleColumnChart.getColor(score));
+    bar.getElement().getStyle().setMarginTop(2, Style.Unit.PX);
+
+    tooltipHelper.createAddTooltip(bar, "Score " + score + "%", Placement.BOTTOM);
+    return bar;
   }
 }

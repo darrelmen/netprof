@@ -69,7 +69,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   public static final String REGULAR = AudioType.REGULAR.toString();
 
   /**
-   * TODO : if every have slow recordings of context audio we'll need to add another type or an enum
+   * TODO : if we ever have slow recordings of context audio we'll need to add another type or an enum
    */
   public static final AudioType CONTEXT_AUDIO_TYPE = AudioType.CONTEXT_REGULAR;
 
@@ -351,14 +351,27 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     }
   }
 
+/*  private boolean matchTranscript(String foreignLanguage) {
+    String transcript = this.transcript;
+    return matchTranscript(foreignLanguage, transcript);
+  }*/
+
+  /**
+   * @param foreignLanguage
+   * @param transcript
+   * @return
+   * @see
+   */
+  public boolean matchTranscript(String foreignLanguage, String transcript) {
+    return transcript == null ||
+        foreignLanguage.isEmpty() ||
+        transcript.isEmpty() ||
+        removePunct(transcript).toLowerCase().equals(removePunct(foreignLanguage).toLowerCase());
+  }
+
   private boolean matchTranscript(String foreignLanguage) {
     String transcript = this.transcript;
     return matchTranscript(foreignLanguage, transcript);
-  }
-
-  public boolean matchTranscript(String foreignLanguage, String transcript) {
-      return transcript == null || foreignLanguage.isEmpty() || transcript.isEmpty() ||
-          removePunct(transcript).toLowerCase().equals(removePunct(foreignLanguage).toLowerCase());
   }
 
   private String removePunct(String t) {
@@ -408,7 +421,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
         "\n\tattrs      " + attributes +
         "\n\tby         " + userid + "/" + user +
         "\n\ttranscript '" + transcript +
-        "' ";
+        "'\n\tdnr\t" + dnr;
   }
 
   public float getDnr() {

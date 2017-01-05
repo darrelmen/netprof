@@ -30,4 +30,6 @@ public interface IPhoneDAO<T>  extends IDAO {
    * @return
    */
   PhoneReport getWorstPhonesForResults(long userid, Collection<Integer> ids, Map<Integer, String> idToRef);
+
+  void removeForResult(int resultid);
 }

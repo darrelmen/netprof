@@ -109,7 +109,7 @@ public class AudioTest extends BaseTest {
     }
   }
 
-  @Test
+/*  @Test
   public void testAllAudio() {
     DatabaseImpl spanish = getDatabase("spanish");
 
@@ -150,7 +150,7 @@ public class AudioTest extends BaseTest {
         logger.info("postgres for " + user.getUserID() + " getRecordedExampleForUser " + recordedBy.size());
       }
     }
-  }
+  }*/
 
 /*  @Test
   public void testDefect() {

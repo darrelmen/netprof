@@ -41,12 +41,11 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
-import mitll.langtest.client.exercise.WaveformPostAudioRecordButton;
+import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
-
 import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.image.ImageResponse;
 
@@ -55,6 +54,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import static mitll.langtest.server.audio.AudioConversion.FILE_MISSING;
+
 
 /**
  * Does audio playback and fetches and shows various audio images (waveform, spectrogram, etc.) with a red line
@@ -72,7 +72,7 @@ import static mitll.langtest.server.audio.AudioConversion.FILE_MISSING;
  */
 public class AudioPanel<T extends Shell> extends VerticalPanel implements RequiresResize {
   private final Logger logger = Logger.getLogger("AudioPanel");
-  private static final int TRANSCRIPT_IMAGE_HEIGHT = 20;
+  public static final int TRANSCRIPT_IMAGE_HEIGHT = 22;
 
   private static final int LEFT_COLUMN_WIDTH = PagingContainer.MAX_WIDTH;
 
@@ -225,8 +225,10 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     Panel imageContainer = new VerticalPanel();
     divWithRelativePosition.add(imageContainer);
     imageContainer.getElement().setId("AudioPanel_imageContainer");
-    // float totalHeight = getWaveformHeight() + (2 * TRANSCRIPT_IMAGE_HEIGHT);
-    // imageContainer.setHeight(totalHeight +"px");
+
+    int heightForTranscripts = rightMargin > 0 ? 2 * TRANSCRIPT_IMAGE_HEIGHT : 0;
+    float totalHeight = getScaledImageHeight(WAVEFORM) + heightForTranscripts;
+    imageContainer.setHeight(totalHeight + "px");
     //  imageContainer.setWidth(getImageWidth()+"px");
 
     HorizontalPanel hp = new HorizontalPanel();
@@ -279,7 +281,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     Image waveformImage = getWaveform().getImage();
     waveformImage.getElement().setId("waveformImage");
     // waveformImage.setHeight(getWaveformHeight()+"px");
-    waveformImage.setAltText(WAVEFORM_TOOLTIP);
+    //  waveformImage.setAltText(WAVEFORM_TOOLTIP);
     waveformImage.setTitle(WAVEFORM_TOOLTIP);
     return waveformImage;
   }
@@ -326,8 +328,8 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     audioPositionPopup.reinitialize();
   }
 
-  public void setScreenPortion(float screenPortion) {
-    if (DEBUG) logger.info("AudioPanel.setScreenPortion : screenPortion " + screenPortion);
+  void setScreenPortion(float screenPortion) {
+    //  if (DEBUG) logger.info("AudioPanel.setScreenPortion : screenPortion " + screenPortion);
     this.screenPortion = screenPortion;
   }
 
@@ -355,7 +357,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
 
     /**
      * @param visible
-     * @see WaveformPostAudioRecordButton#stopRecording()
+     * @see RecordButton.RecordingListener#stopRecording(long)
      */
     public void setVisible(boolean visible) {
       getImage().setVisible(visible);
@@ -367,7 +369,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
 
     /**
      * @param url
-     * @see WaveformPostAudioRecordButton#stopRecording()
+     * @see RecordButton.RecordingListener#stopRecording(long)
      */
     public void setUrl(String url) {
       getImage().setUrl(url);
@@ -389,8 +391,8 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
    *
    * @param path to audio on the server
    * @see #onLoad()
-   * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording()
-   * @see mitll.langtest.client.scoring.FastAndSlowASRScoringAudioPanel#showAudio
+   * @see RecordButton.RecordingListener#stopRecording(long)
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.ASRRecordAudioPanel.MyPostAudioRecordButton#useResult(AudioAnswer)
    * @see mitll.langtest.client.result.ResultManager#getAsyncTable(int, Widget)
    */
   public String getImagesForPath(String path) {
@@ -543,12 +545,11 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
    * @see mitll.langtest.client.LangTest#getImage
    */
   private void getImageURLForAudio(final String path, final String type, int width, final ImageAndCheck imageAndCheck) {
-    final int toUse = Math.max(MIN_WIDTH, width);
-    float heightForType = type.equals(WAVEFORM) ? getWaveformHeight() : SPECTROGRAM_HEIGHT;
-    int height = Math.max(10, (int) (((float) Window.getClientHeight()) / 1200f * heightForType));
     if (path != null && !path.equals(FILE_MISSING)) {
       final long then = System.currentTimeMillis();
 //      logger.info("getImageURLForAudio : req " + reqid + " path " + path + " type " + type + " width " + width);
+      final int toUse = Math.max(MIN_WIDTH, width);
+      int height = getScaledImageHeight(type);
       final int id = exercise == null ? exerciseID : exercise.getID();
       controller.getImage(getReqID(type), path, type, toUse, height, id, new AsyncCallback<ImageResponse>() {
         public void onFailure(Throwable caught) {
@@ -579,6 +580,11 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
         }
       });
     }
+  }
+
+  private int getScaledImageHeight(String type) {
+    float heightForType = type.equals(WAVEFORM) ? getWaveformHeight() : SPECTROGRAM_HEIGHT;
+    return Math.max(10, (int) (((float) Window.getClientHeight()) / 1200f * heightForType));
   }
 
   protected float getWaveformHeight() {

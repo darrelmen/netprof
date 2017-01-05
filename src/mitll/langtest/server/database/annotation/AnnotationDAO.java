@@ -64,6 +64,7 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
     try {
       createTable(database);
 //      populate(userDAO.getDefectDetector());
+    //  markCorrectForDefectAudio();
     } catch (SQLException e) {
       logger.error("got " + e, e);
     }
@@ -88,7 +89,7 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
     }
 
     //logger.debug("getUserAnnotations sql " + sql + " yielded " + lists);
-    finish(connection, statement, rs);
+    finish(connection, statement, rs, sql);
 
     if (!ids.isEmpty()) {
       logger.info("fixing " + ids.size() + " annotations where audio was marked defect");
@@ -220,6 +221,28 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
   }
 
   /**
+   * TODO : this seems like a bad idea...
+   *
+   * @param exerciseID
+   * @param field
+   * @param status
+   * @param comment
+   * @return
+   * @see mitll.langtest.server.database.custom.UserListManager#addDefect
+   */
+/*
+  public boolean hasAnnotation(String exerciseID, String field, String status, String comment) {
+    List<UserAnnotation> userAnnotations = exerciseToAnnos.get(exerciseID);
+    if (userAnnotations == null) {
+      return false;
+    }
+    Map<String, ExerciseAnnotation> latestByExerciseID = getFieldToAnnotationMap(userAnnotations);
+    ExerciseAnnotation annotation = latestByExerciseID.get(field);
+    return (annotation != null) && (annotation.getStatus().equals(status) && annotation.getComment().equals(comment));
+  }
+*/
+
+  /**
    * TODO: Ought to be able to make a sql query that only returns the latest item for a exercise-field pair...
    *
    * @return
@@ -261,7 +284,7 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
       }
 
       //logger.debug("getUserAnnotations sql " + sql + " yielded " + lists);
-      finish(connection, statement, rs);
+      finish(connection, statement, rs, sql3);
       return incorrect;
     } catch (SQLException e) {
       logger.error("got " + e, e);
@@ -298,6 +321,35 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
   }
 
   /**
+   * Always return the latest annotation.
+   *
+   * @param lists
+   * @return
+   */
+  private Map<String, ExerciseAnnotation> getFieldToAnnotationMap(List<UserAnnotation> lists) {
+    Map<String, UserAnnotation> fieldToAnno = new HashMap<>();
+
+    for (UserAnnotation annotation : lists) {
+      UserAnnotation prevAnnotation = fieldToAnno.get(annotation.getField());
+      if (prevAnnotation == null) fieldToAnno.put(annotation.getField(), annotation);
+      else if (prevAnnotation.getTimestamp() < annotation.getTimestamp()) {
+        fieldToAnno.put(annotation.getField(), annotation);
+      }
+    }
+    if (lists.isEmpty()) {
+      //logger.error("huh? no annotation with id " + unique);
+      return Collections.emptyMap();
+    } else {
+      Map<String, ExerciseAnnotation> fieldToAnnotation = new HashMap<>();
+      for (Map.Entry<String, UserAnnotation> pair : fieldToAnno.entrySet()) {
+        fieldToAnnotation.put(pair.getKey(), new ExerciseAnnotation(pair.getValue().getStatus(), pair.getValue().getComment()));
+      }
+      //logger.debug("field->anno " + fieldToAnno);
+      return fieldToAnnotation;
+    }
+  }
+
+  /**
    * @param sql
    * @return
    * @throws SQLException
@@ -324,7 +376,7 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
     }
 
     //logger.debug("getUserAnnotations sql " + sql + " yielded " + lists);
-    finish(connection, statement, rs);
+    finish(connection, statement, rs, sql);
     return lists;
   }
 
@@ -381,7 +433,7 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
         //for (int i = 0; i < 20;i++) logger.debug("\tgetUserAnnotations e.g. " + iterator.next() );
       }*/
 
-      finish(connection, statement, rs);
+      finish(connection, statement, rs, sql2);
     } catch (SQLException e) {
       logger.error("Got " + e + " doing " + sql2, e);
     }

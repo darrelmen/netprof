@@ -130,7 +130,15 @@ public class Navigation implements RequiresResize, ShowTab {
    */
   private static final String RECORD_AUDIO = "Record Audio";
   private static final String RECORD_EXAMPLE = "Record In-context Audio";
+
+  /**
+   * @see #selectPreviousTab
+   */
   private static final String CONTENT1 = "content";
+
+  /**
+   * @see #addDefectsTabs
+   */
   private static final String MARK_DEFECTS1 = "markDefects";
 
   private static final int STUDY_LISTS_INDEX = 2;
@@ -193,7 +201,7 @@ public class Navigation implements RequiresResize, ShowTab {
           protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow,
                                                                                      Panel currentExercisePanel,
                                                                                      String instanceName, boolean incorrectFirst) {
-            return new NPFlexSectionExerciseList(this, topRow, currentExercisePanel, instanceName, incorrectFirst);
+            return new NPFlexSectionExerciseList(this, topRow, currentExercisePanel, instanceName, incorrectFirst,false);
           }
         };
       }
@@ -643,7 +651,7 @@ public class Navigation implements RequiresResize, ShowTab {
 
   private boolean noPrevClickedTab() {
     String value = getClickedTab();
-//    logger.info("noPrevClickedTab selected tab = " + value);
+    //  logger.info("selected tab = " + value);
     return value.isEmpty();
   }
 
@@ -723,6 +731,13 @@ public class Navigation implements RequiresResize, ShowTab {
       } else if (clickedTab.equals(MARK_DEFECTS) && markDefectsTab != null) {
         markDefectsHelper.showNPF(markDefectsTab, CONTENT1);
       } else if (clickedTab.equals(PRACTICE) && practiceTab != null) {
+//      } else if (value.equals(RECORD_AUDIO)) {
+//        recorderHelper.showNPF(recorderTab, "record_audio");
+//      } else if (value.equals(RECORD_EXAMPLE)) {
+//        recordExampleHelper.showNPF(recordExampleTab, "record_example_audio");
+//      } else if (value.equals(MARK_DEFECTS) && markDefectsTab != null) {
+//        markDefectsHelper.showNPF(markDefectsTab, MARK_DEFECTS1);
+//      } else if (value.equals(PRACTICE) && practiceTab != null) {
         showPracticeTab();
       } else if (clickedTab.equals(ANALYSIS) && analysis != null) {
         showAnalysis();
@@ -811,6 +826,7 @@ public class Navigation implements RequiresResize, ShowTab {
   @Override
   public void onResize() {
     // logger.info("got onResize " + getClass().toString());
+
     learnHelper.onResize();
     recorderHelper.onResize();
     recordExampleHelper.onResize();

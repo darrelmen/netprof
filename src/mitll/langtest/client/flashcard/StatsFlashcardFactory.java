@@ -63,8 +63,6 @@ import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import java.util.*;
 import java.util.logging.Logger;
 
-import static mitll.langtest.client.flashcard.BootstrapExercisePanel.DELAY_MILLIS;
-
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -292,7 +290,8 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
           StatsFlashcardFactory.this.instance, exerciseListToUse);
       soundFeedback.setEndListener(new SoundFeedback.EndListener() {
         @Override
-        public void songStarted() {}
+        public void songStarted() {
+        }
 
         @Override
         public void songEnded() {
@@ -310,7 +309,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
     /**
      * @see #loadNextOnTimer(int)
      * @see #nextAfterDelay(boolean, String)
-     * @see #playRefAndGoToNext
+     * @see BootstrapExercisePanel#playRefAndGoToNext
      */
     @Override
     protected void loadNext() {
@@ -346,7 +345,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
      * @see mitll.langtest.client.recorder.RecordButtonPanel#receivedAudioAnswer(AudioAnswer, com.google.gwt.user.client.ui.Panel)
      */
     public void receivedAudioAnswer(final AudioAnswer result) {
-     // logger.info("StatsPracticePanel.receivedAudioAnswer: result " + result);
+      // logger.info("StatsPracticePanel.receivedAudioAnswer: result " + result);
 
       if (result.getValidity() == AudioAnswer.Validity.OK) {
         //resultIDs.add(result.getResultID());
@@ -377,7 +376,8 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         latestResultID = result.getResultID();
         //logger.info("\tStatsPracticePanel.receivedAudioAnswer: latest now " + latestResultID);
       } else {
-    //    logger.info("got invalid result " + result);
+
+        //    logger.info("got invalid result " + result);
       }
       super.receivedAudioAnswer(result);
     }
@@ -413,13 +413,13 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         }
       }
 
-/*      logger.info("StatsPracticePanel.onSetComplete. : calling  getUserHistoryForList for " + user +
-        " with " + exToCorrect + " and latest " + latestResultID + " and ids " +copies);*/
+//      logger.info("StatsPracticePanel.onSetComplete. : calling  getUserHistoryForList for " + user +
+//          " with " + exToCorrect + " and latest " + latestResultID + " and ids " + copies);
 
       service.getUserHistoryForList(user, copies, latestResultID, selection, ul == null ? -1 : ul.getID(), new AsyncCallback<AVPScoreReport>() {
         @Override
         public void onFailure(Throwable caught) {
-          //logger.warning("StatsPracticePanel.onSetComplete. : got failure " + caught);
+          logger.warning("StatsPracticePanel.onSetComplete. : got failure " + caught);
         }
 
         @Override
@@ -432,11 +432,8 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
     private void showFeedbackCharts(List<AVPHistoryForList> result, final List<ExerciseCorrectAndScore> sortedHistory) {
       setMainContentVisible(false);
-
       contentPanel.removeStyleName("centerPractice");
       contentPanel.addStyleName("noWidthCenterPractice");
-      //  logger.info("showFeedbackCharts ---- \n\n\n");
-
       HorizontalPanel widgets = new HorizontalPanel();
       container = widgets;
       scoreHistory = completeDisplay.getScoreHistory(sortedHistory, allExercises, controller);
@@ -446,17 +443,26 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       belowContentDiv.add(container);
     }
 
+    /**
+     * @see #showFeedbackCharts
+     * @return
+     */
     private Panel getButtonsBelowScoreHistory() {
-      Panel child = new VerticalPanel();
+      Panel child = new HorizontalPanel();
 
       final Button w = getIncorrectListButton();
       child.add(w);
       w.addStyleName("topFiveMargin");
       Button repeatButton = getRepeatButton();
       repeatButton.addStyleName("topFiveMargin");
+      repeatButton.addStyleName("leftFiveMargin");
 
       child.add(repeatButton);
-      return child;
+
+      DivWidget lefty = new DivWidget();
+     // lefty.addStyleName("floatLeft");
+      lefty.add(child);
+      return lefty;
     }
 
     private Button getIncorrectListButton() {
@@ -595,7 +601,8 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
       if (exerciseList.onLast()) {
         onSetComplete();
       } else {
-        loadNextOnTimer(DELAY_MILLIS);
+        // logger.info("nextAfterDelay " + correct);
+        loadNextOnTimer(CORRECT_DELAY);
       }
     }
 

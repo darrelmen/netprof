@@ -77,7 +77,7 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
                                   ExerciseController controller,
                                   String instance,
                                   boolean incorrectFirst) {
-    super(currentExerciseVPanel, service, feedback, controller, true, instance, incorrectFirst);
+    super(currentExerciseVPanel, service, feedback, controller, true, instance, incorrectFirst,false);
 
     sectionPanel = new FluidContainer();
     sectionPanel.getElement().setId("sectionPanel_" + instance);
@@ -390,14 +390,14 @@ public abstract class SimpleSelectExerciseList extends NPExerciseList<ListSectio
    * @seex #rememberAndLoadFirst(List, CommonExercise, String)
    */
   @Override
-  protected void loadFirstExercise() {
+  protected void loadFirstExercise(String searchIfAny) {
     // logger.info("loadFirstExercise : ---");
 
     if (isEmpty()) { // this can only happen if the database doesn't load properly, e.g. it's in use
       logger.info("loadFirstExercise : current exercises is empty?");
       gotEmptyExerciseList();
     } else {
-      super.loadFirstExercise();
+      super.loadFirstExercise(searchIfAny);
     }
   }
 

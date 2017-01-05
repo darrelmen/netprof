@@ -73,6 +73,7 @@ public class AudioConversion {
   private final String soxPath;
   private final long trimMillisBefore;
   private final long trimMillisAfter;
+  ServerProperties props;
 
   /**
    * @param props
@@ -82,6 +83,7 @@ public class AudioConversion {
     trimMillisBefore = props.getTrimBefore();
     trimMillisAfter = props.getTrimAfter();
     soxPath = getSox();
+    this.props = props;
     audioCheck = new AudioCheck(props);
     setLame();
   }
@@ -114,7 +116,7 @@ public class AudioConversion {
       logger.error("writeAudioFile : huh? can't find " + file.getAbsolutePath());
     }
     AudioCheck.ValidityAndDur valid = isValid(file, useSensitiveTooLoudCheck, quietAudioOK);
-    if (valid.isValid()) {
+    if (valid.isValid() && props.shouldTrimAudio()) {
       valid.setDuration(trimSilence(file).getDuration());
     }
 
@@ -303,9 +305,11 @@ public class AudioConversion {
     public double getDuration() {
       return duration;
     }
+
     public boolean didTrim() {
       return didTrim;
     }
+
     public String toString() {
       return " dur " + duration + " did trim " + didTrim;
     }
@@ -405,6 +409,7 @@ public class AudioConversion {
       logger.warn("doHighPassFilter couldn't do high pass filter on " + pathToAudioFile);
       String asRunnable = soxFirst.command().toString().replaceAll(",", " ");
       logger.warn("doHighPassFilter path " + asRunnable);
+      return null;
     }
 
     return tempForWavz;
@@ -498,14 +503,13 @@ public class AudioConversion {
    * @param pathToWav
    * @param realContextPath
    * @param overwrite
-   * @param title
-   * @param author
+   * @param trackInfo
    * @return
    * @see mitll.langtest.server.LangTestDatabaseImpl#ensureMP3
    */
-  public String ensureWriteMP3(String pathToWav, String realContextPath, boolean overwrite, String title, String author) {
+  public String ensureWriteMP3(String pathToWav, String realContextPath, boolean overwrite, TrackInfo trackInfo) {
     if (pathToWav == null || pathToWav.equals("null")) throw new IllegalArgumentException("huh? path is null");
-    return writeMP3(pathToWav, realContextPath, overwrite, title, author);
+    return writeMP3(pathToWav, realContextPath, overwrite, trackInfo);
   }
 
 //  public String ensureWriteMP3Easy(String pathToWav, boolean overwrite, String title, String author) {
@@ -519,28 +523,27 @@ public class AudioConversion {
    * @param pathToWav
    * @param realContextPath
    * @param overwrite
-   * @param author
+   * @param trackInfo
    * @return
    * @see #ensureWriteMP3
    */
-  private String writeMP3(String pathToWav, String realContextPath, boolean overwrite, String title, String author) {
+  private String writeMP3(String pathToWav, String realContextPath, boolean overwrite, TrackInfo trackInfo) {
     File absolutePathToWav = new File(pathToWav); // LAZY - what should it be?
     if (!absolutePathToWav.exists()) {
-      logger.info("can't find " +absolutePathToWav.getAbsolutePath());
+      logger.info("can't find " + absolutePathToWav.getAbsolutePath());
       absolutePathToWav = getAbsoluteFile(pathToWav, realContextPath);
     }
-    return writeMP3Easy(absolutePathToWav, overwrite, title, author);
+    return writeMP3Easy(absolutePathToWav, overwrite, trackInfo);
   }
 
   /**
-   * @see PathWriter#getPermanentAudioPath(File, String, boolean, String, int, String, String, ServerProperties)
    * @param absolutePathToWav
    * @param overwrite
-   * @param title
-   * @param author
+   * @param trackInfo
    * @return
+   * @see PathWriter#getPermanentAudioPath(File, String, boolean, String, int, String, String, ServerProperties)
    */
-  String writeMP3Easy(File absolutePathToWav, boolean overwrite, String title, String author) {
+  String writeMP3Easy(File absolutePathToWav, boolean overwrite, TrackInfo trackInfo) {
     String mp3File = absolutePathToWav.getAbsolutePath().replace(WAV, MP3);
     File mp3 = new File(mp3File);
     if (!mp3.exists() || overwrite) {
@@ -549,8 +552,8 @@ public class AudioConversion {
 
       if (DEBUG) logger.debug("run lame on " + absolutePathToWav + " making " + mp3File);
 
-      if (!convertToMP3FileAndCheck(getLame(), title, absolutePathToWav.getAbsolutePath(), mp3File, author)) {
-        if (spew2++ < 10) logger.error("File missing for " + absolutePathToWav + " for " + author);
+      if (!convertToMP3FileAndCheck(getLame(), absolutePathToWav.getAbsolutePath(), mp3File, trackInfo)) {
+        if (spew2++ < 10) logger.error("File missing for " + absolutePathToWav + " for " + trackInfo.getArtist());
         return FILE_MISSING;
       }
       logger.info("writeMP3Easy path is " + mp3.getAbsolutePath() + " : " + mp3.exists());
@@ -564,7 +567,7 @@ public class AudioConversion {
 
       if (DEBUG) logger.debug("run ogg on " + absolutePathToWav + " making " + oggFile);
 
-      if (!convertToOGGFileAndCheck(getOggenc(), title, absolutePathToWav.getAbsolutePath(), oggFile, author)) {
+      if (!convertToOGGFileAndCheck(getOggenc(), absolutePathToWav.getAbsolutePath(), oggFile, trackInfo)) {
         logger.error("ogg File missing for " + absolutePathToWav);
         return FILE_MISSING;
       }
@@ -604,7 +607,7 @@ public class AudioConversion {
    *
    * @param absolutePathToWav
    * @seex mitll.langtest.server.LangTestDatabaseImpl#normalizeLevel
-   * @see PathWriter#getPermanentAudioPath(mitll.langtest.server.PathHelper, File, String, boolean, String, String, String, ServerProperties)
+   * @see PathWriter#getPermanentAudioPath(mitll.langtest.server.PathHelper, File, String, boolean, String, ServerProperties, TrackInfo)
    */
   void normalizeLevels(File absolutePathToWav) {
     try {
@@ -619,14 +622,12 @@ public class AudioConversion {
       new ProcessRunner().runProcess(soxFirst2);
 
       if (!tempFile.exists() || tempFile.length() == 0) {
-        logger.error("didn't make " + tempFile);
-        logger.error("soxFirst " + soxFirst2.command());
+        logger.error("didn't make " + tempFile + " soxFirst " + soxFirst2.command());
+      } else {
+        //logger.debug("wrote normalized to " + tempFile.getAbsolutePath());
+        copyAndDeleteOriginal(tempFile, absolutePathToWav);
       }
-      //else {
-      //logger.debug("wrote normalized to " + tempFile.getAbsolutePath());
-      //}
 
-      copyAndDeleteOriginal(tempFile, absolutePathToWav);
     } catch (IOException e) {
       logger.error("normalizing " + absolutePathToWav + " got " + e, e);
     }
@@ -714,21 +715,26 @@ public class AudioConversion {
 
   /**
    * @param lamePath
-   * @param title
    * @param pathToAudioFile
    * @param mp3File
-   * @param author
+   * @param trackInfo
    * @return
    * @see #ensureWriteMP3
    * @see #writeMP3
    */
-  private boolean convertToMP3FileAndCheck(String lamePath, String title, String pathToAudioFile, String mp3File, String author) {
+  private boolean convertToMP3FileAndCheck(String lamePath, String pathToAudioFile, String mp3File, TrackInfo trackInfo) {
     if (DEBUG) logger.debug("convert " + pathToAudioFile + " to " + mp3File);
+    String title = trackInfo.getTitle();
+    String author = trackInfo.getArtist();
     if (title != null && title.length() > 30) {
       title = title.substring(0, 30);
     }
     if (title == null) title = "";
-    ProcessBuilder lameProc = new ProcessBuilder(lamePath, pathToAudioFile, mp3File, "--tt", title, "--ta", author);
+    ProcessBuilder lameProc = new ProcessBuilder(lamePath, pathToAudioFile, mp3File,
+        "--tt", title,
+        "--ta", author,
+        "--tc", trackInfo.getComment(),
+        "--tl", trackInfo.getAlbum());
     try {
 //      logger.debug("running lame" + lameProc.command());
       new ProcessRunner().runProcess(lameProc);
@@ -741,7 +747,7 @@ public class AudioConversion {
     if (!testMP3.exists()) {
       if (!new File(pathToAudioFile).exists()) {
         if (SPEW && spew++ < 10) logger.error("huh? source file " + pathToAudioFile + " doesn't exist?",
-             new Exception("can't find " + pathToAudioFile));
+            new Exception("can't find " + pathToAudioFile));
       } else {
         logger.error("didn't write MP3 : " + testMP3.getAbsolutePath() +
             " exe path " + lamePath +
@@ -761,21 +767,26 @@ public class AudioConversion {
   }
 
   /**
-   * @see #writeMP3Easy(String, File, boolean, String, String)
    * @param oggPath
-   * @param title
    * @param pathToAudioFile
    * @param oggFile
-   * @param author
+   * @param trackInfo
    * @return
+   * @see #writeMP3Easy
    */
-  private boolean convertToOGGFileAndCheck(String oggPath, String title, String pathToAudioFile, String oggFile, String author) {
+  private boolean convertToOGGFileAndCheck(String oggPath, String pathToAudioFile, String oggFile, TrackInfo trackInfo) {
     if (DEBUG) logger.debug("convert " + pathToAudioFile + " to " + oggFile);
+    String title = trackInfo.getTitle();
+    String author = trackInfo.getArtist();
     if (title != null && title.length() > 30) {
       title = title.substring(0, 30);
     }
     if (title == null) title = "";
-    ProcessBuilder oggProx = new ProcessBuilder(oggPath, pathToAudioFile, "-o", oggFile, "-t", title, "-a", author);
+    ProcessBuilder oggProx = new ProcessBuilder(oggPath, pathToAudioFile,
+        "-o", oggFile,
+        "-t", title,
+        "-a", author,
+        "-c", trackInfo.getComment());
     try {
       //logger.debug("running lame" + oggProx.command());
       new ProcessRunner().runProcess(oggProx);
@@ -805,4 +816,5 @@ public class AudioConversion {
     }
     return true;
   }
+
 }

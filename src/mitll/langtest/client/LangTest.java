@@ -43,6 +43,8 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.HasClickHandlers;
+import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -64,6 +66,7 @@ import mitll.langtest.client.instrumentation.EventContext;
 import mitll.langtest.client.instrumentation.EventLogger;
 import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.client.recorder.MicPermission;
+import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
 import mitll.langtest.client.services.*;
@@ -77,6 +80,7 @@ import mitll.langtest.shared.StartupInfo;
 import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.ProjectStartupInfo;
+import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.user.User;
 
 import java.util.*;
@@ -187,7 +191,27 @@ import java.util.logging.Logger;
  * 1.5.4 (10-21-16)
  * - Increase delay after correct avp response.
  * 1.5.5 (10-23-16)
- * - Fix bug where couldn't add defect comments to context sentences, better handling of sentence length user exercise entries.
+ * - Fixed bug where couldn't add defect comments to context sentences, better handling of sentence length user exercise entries.
+ * 1.5.6 (10-31-16)
+ * - Fixed bug where urdu was getting slow to return exercises - we hadn't created indexes on columns b/c there was another one with the same name on another table
+ * 1.5.7 (11-01-16)
+ * - Fixed bug where could get into a bad state if clicked the record button too quickly.
+ * 1.5.8 (11-01-16)
+ * - Fixes to support Sorani
+ * 1.5.9 (11-02-16)
+ * - Fixes to support updating Turkish and preserving audio.
+ * 1.5.10
+ * - Turn off transcript matching for audio for now, remove ref audio that doesn't meet the dnr threshold
+ * 1.5.11
+ * - Support for Hindi - added comment on text for recording audio.
+ * 1.5.12
+ * - Fix for filtering bug where would not filter out recordings made by a user in the same day
+ * 1.5.13
+ * - Fix for Bug #739 - recording summary total doesn't reflect transcript mismatch
+ * 1.5.14
+ * - Fixes for audio recording, commenting on audio
+ * 1.5.15
+ * - Fixes for indicating which audio in fix defects is actually presented, fix for bug #751
  * 2.0.0
  * - development to master
  *
@@ -230,6 +254,7 @@ public class LangTest implements
   private final KeyPressHelper keyPressHelper = new KeyPressHelper(false, true);
   private boolean isMicConnected = true;
   private UILifecycle initialUI;
+  public static EventBus EVENT_BUS = GWT.create(SimpleEventBus.class);
 
   /**
    * This gets called first.
@@ -396,8 +421,8 @@ public class LangTest implements
       ifPresent.req = -1;
       client.onSuccess(ifPresent);
     } else {
-      logger.info("get image for " + path);
-      audioService.getImageForAudioFile(reqid, path, type, toUse, height, exerciseID, new AsyncCallback<ImageResponse>() {
+      ImageOptions imageOptions = new ImageOptions(toUse, height, useBkgColorForRef());
+      audioService.getImageForAudioFile(reqid, path, type,imageOptions, exerciseID, new AsyncCallback<ImageResponse>() {
         public void onFailure(Throwable caught) {
        /*   if (!caught.getMessage().trim().equals("0")) {
             Window.alert("getImageForAudioFile Couldn't contact server. Please check network connection.");
@@ -686,7 +711,7 @@ public class LangTest implements
    * the user changes language/project.
    *
    * @param user
-   * @see InitialUI#setProjectForUser
+   * @see InitialUI.ChangePasswordClickHandler#reallySetTheProject(int)
    */
   public void setProjectStartupInfo(User user) {
     projectStartupInfo = user.getStartupInfo();
@@ -809,6 +834,10 @@ public class LangTest implements
     return hasPermission(User.Permission.QUALITY_CONTROL);
   }
 
+/*
+  public User.Kind getUserKind() { return userManager.getU(); }
+*/
+
 //  private final Set<User.Permission> permissions = new HashSet<User.Permission>();
 
   /**
@@ -923,8 +952,8 @@ public class LangTest implements
   /**
    * Recording interface
    *
-   * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording()
-   * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
+   * @see RecordButton.RecordingListener#stopRecording(long)
+   * @see RecordButton.RecordingListener#stopRecording(long)
    */
   public void stopRecording(WavCallback wavCallback) {
     logger.info("stopRecording : time recording in UI " + (System.currentTimeMillis() - then) + " millis");

@@ -93,10 +93,10 @@ public class SignUpForm extends UserDialog implements SignUp {
   private static final String USER_EXISTS = "User exists already, please sign in or choose a different name.";
   private static final String AGE_ERR_MSG = "Enter age between " + MIN_AGE + " and " + MAX_AGE + ".";
 
-  private BasicDialog.FormField signUpUser;
-  protected BasicDialog.FormField firstName;
-  protected BasicDialog.FormField lastName;
-  protected BasicDialog.FormField signUpEmail;
+  private FormField signUpUser;
+  protected FormField firstName;
+  protected FormField lastName;
+  protected FormField signUpEmail;
 
   /**
    * We don't let them enter a password initially anymore.
@@ -565,12 +565,12 @@ public class SignUpForm extends UserDialog implements SignUp {
       eventRegistration.logEvent(SignUpForm.this.signUp, "SignUp_Button", "N/A", "short user id '" + userID + "'");
       markErrorBlur(signUpUser, PLEASE_ENTER_A_LONGER_USER_ID);
       return false;
-    } else if (firstName.getText().isEmpty()) {
-      eventRegistration.logEvent(firstName.getWidget(), "SignUp_Button", "N/A", "short user first name '" + firstName.getText() + "'");
+    } else if (firstName.getSafeText().isEmpty()) {
+      eventRegistration.logEvent(firstName.getWidget(), "SignUp_Button", "N/A", "short user first name '" + firstName.getSafeText() + "'");
       markErrorBlur(firstName, "Please enter a first name.");
       return false;
-    } else if (lastName.getText().isEmpty()) {
-      eventRegistration.logEvent(lastName.getWidget(), "SignUp_Button", "N/A", "short user last name '" + lastName.getText() + "'");
+    } else if (lastName.getSafeText().isEmpty()) {
+      eventRegistration.logEvent(lastName.getWidget(), "SignUp_Button", "N/A", "short user last name '" + lastName.getSafeText() + "'");
       markErrorBlur(lastName, "Please enter a last name.");
       return false;
     } else {
@@ -608,7 +608,7 @@ public class SignUpForm extends UserDialog implements SignUp {
   }
 
   protected int getAge(boolean isCD) {
-    String age = isCD ? registrationInfo.getAgeEntryGroup().getText() : "";
+    String age = isCD ? registrationInfo.getAgeEntryGroup().getSafeText() : "";
     int age1 = isCD ? (age.isEmpty() ? 99 : Integer.parseInt(age)) : 0;
     return age1;
   }
@@ -658,7 +658,7 @@ public class SignUpForm extends UserDialog implements SignUp {
 
         "browser",
         "",
-        firstName.getText(), lastName.getText(), trimURL(Window.Location.getHref()));
+        firstName.getSafeText(), lastName.getSafeText(), trimURL(Window.Location.getHref()));
 
     service.addUser(
         newUser,
@@ -715,7 +715,7 @@ public class SignUpForm extends UserDialog implements SignUp {
   }
 
   protected String getDialect(boolean isCD) {
-    return isCD ? registrationInfo.getDialectGroup().getText() : "unk";
+    return isCD ? registrationInfo.getDialectGroup().getSafeText() : "unk";
   }
 
   protected boolean isMale(boolean isCD) {

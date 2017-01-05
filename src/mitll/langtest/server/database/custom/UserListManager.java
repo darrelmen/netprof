@@ -35,6 +35,7 @@ package mitll.langtest.server.database.custom;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.PathWriter;
+import mitll.langtest.server.audio.TrackInfo;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.annotation.IAnnotationDAO;
 import mitll.langtest.server.database.annotation.UserAnnotation;
@@ -447,6 +448,7 @@ public class UserListManager implements IUserListManager {
    *
    * @param typeOrder
    * @return
+   * @see LangTestDatabaseImpl#getReviewLists
    */
   @Override
   public UserList<CommonShell> getCommentedList(Collection<String> typeOrder) {
@@ -543,11 +545,23 @@ public class UserListManager implements IUserListManager {
         System.currentTimeMillis());
     //userList.setReview(true);
 
-    new ExerciseSorter(typeOrder).getSortedByUnitThenAlpha(onList, false);
+    List<CommonShell> copy = new ArrayList<>();
 
-    userList.setExercises(onList);
+    for (CommonShell orig : onList) copy.add(orig.getShell());
 
-    markState(onList);
+    long now = System.currentTimeMillis();
+
+    logger.debug("getReviewList '" + name + "' ids size = " + allKnown.size() + " yielded " + copy.size());// + " took " + (now - then) + " millis");
+  //  User user = getQCUser();
+  //  UserList<CommonShell> userList = new UserList<CommonShell>(userListMaginID, user, name, description, "", false);
+    userList.setReview(true);
+
+    new ExerciseSorter(typeOrder).getSortedByUnitThenAlpha(copy, false);
+
+    userList.setExercises(copy);
+
+//    markState(onList);
+    markState(copy);
     logger.debug("getReviewList returning " + userList + (userList.getExercises().isEmpty() ? "" : " first " + userList.getExercises().iterator().next()));
     return userList;
   }
@@ -776,7 +790,13 @@ public class UserListManager implements IUserListManager {
 
     String fast = prefix + "_" + now + "_by_" + userExercise.getCreator() + ".wav";
     String artist = regularSpeed.getUser().getUserID();
-    String refAudio = getRefAudioPath(projectID, id, fileRef, fast, overwrite, foreignLanguage, artist);
+    String refAudio = getRefAudioPath(
+        projectID,
+        id,
+        fileRef,
+        fast,
+        overwrite,
+        new TrackInfo(userExercise.getForeignLanguage(), artist, userExercise.getEnglish(),""));
     regularSpeed.setAudioRef(refAudio);
   }
 
@@ -790,8 +810,7 @@ public class UserListManager implements IUserListManager {
    * @param fileRef
    * @param destFileName
    * @param overwrite
-   * @param title
-   * @param artist
+   * @param trackInfo
    * @return new, permanent audio path
    * @see #fixAudioPaths
    */
@@ -800,8 +819,7 @@ public class UserListManager implements IUserListManager {
                                  File fileRef,
                                  String destFileName,
                                  boolean overwrite,
-                                 String title,
-                                 String artist) {
+                                 TrackInfo trackInfo) {
     ServerProperties serverProps = userDAO.getDatabase().getServerProps();
     Project project = userDAO.getDatabase().getProject(projid);
     return new PathWriter(serverProps).getPermanentAudioPath(
@@ -810,9 +828,8 @@ public class UserListManager implements IUserListManager {
         overwrite,
         project.getLanguage(),
         id,
-        title,
-        artist,
-        serverProps);
+        serverProps,
+        trackInfo);
   }
 
   /**
@@ -869,7 +886,7 @@ public class UserListManager implements IUserListManager {
    * @param exerciseID
    * @param field
    * @param comment
-   * @see mitll.langtest.server.database.exercise.ExcelImport#addDefects
+   * @see mitll.langtest.server.database.exercise.BaseExerciseDAO#addDefects
    */
   @Override
   public boolean addDefect(int exerciseID, String field, String comment) {
@@ -888,7 +905,7 @@ public class UserListManager implements IUserListManager {
    * @param status
    * @param comment
    * @param userid
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addAnnotation(String, String, String)
+   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addAnnotation
    */
   @Override
   public void addAnnotation(int exerciseID, String field, String status, String comment, int userid) {
@@ -1004,6 +1021,11 @@ public class UserListManager implements IUserListManager {
     reviewedDAO.remove(exerciseid);
   }
 
+  /**
+   * @param userExercise
+   * @param userID
+   * @see #markState(String, STATE, long)
+   */
   private void markAllFieldsFixed(CommonExercise userExercise, int userid) {
     Collection<String> fields = userExercise.getFields();
     // logger.debug("setExerciseState " + userExercise + "  has " + fields + " user " + userid);
@@ -1123,5 +1145,13 @@ public class UserListManager implements IUserListManager {
   @Override
   public IUserExerciseListVisitorDAO getVisitorDAO() {
     return visitorDAO;
+  }
+
+  public Collection<Integer> getDefectExercises() {
+    return reviewedDAO.getDefectExercises();
+  }
+
+  public Collection<Integer> getInspectedExercises() {
+    return reviewedDAO.getInspectedExercises();
   }
 }

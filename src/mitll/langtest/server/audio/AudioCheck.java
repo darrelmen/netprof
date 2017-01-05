@@ -170,14 +170,16 @@ public class AudioCheck {
   public boolean hasValidDynamicRange(File file) {
     return getDynamicRange(file).maxMin >= MIN_DYNAMIC_RANGE;
   }
-  // public boolean hasValidDynamicRangeForgiving(File file) {  return getDynamicRange(file).maxMin >= FORGIVING_MIN_DNR;  }
 
   private DynamicRange.RMSInfo getDynamicRange(File file) {
     String highPassFilterFile = new AudioConversion(props).getHighPassFilterFile(file.getAbsolutePath());
-    File highPass = new File(highPassFilterFile);
-    DynamicRange.RMSInfo dynamicRange = new DynamicRange().getDynamicRange(highPass);
-    deleteParentTempDir(highPass);
-    return dynamicRange;
+    if (highPassFilterFile == null) return new DynamicRange.RMSInfo();
+    else {
+      File highPass = new File(highPassFilterFile);
+      DynamicRange.RMSInfo dynamicRange = new DynamicRange().getDynamicRange(highPass);
+      deleteParentTempDir(highPass);
+      return dynamicRange;
+    }
   }
 
   private void deleteParentTempDir(File srcFile) {
@@ -314,7 +316,8 @@ public class AudioCheck {
   }
 
   public float getDNR(File test) {
-    return (float) getDynamicRange(test).maxMin;
+    DynamicRange.RMSInfo dynamicRange = getDynamicRange(test);
+    return dynamicRange == null ? 0f : (float) dynamicRange.maxMin;
   }
 
   public static class ValidityAndDur {

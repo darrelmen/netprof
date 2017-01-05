@@ -63,6 +63,7 @@ public class UserList<T extends HasID> extends BaseExercise {
   private String description;
   private String classMarker;
   private boolean isPrivate;
+  private boolean isReview;
   private long modified;
   private List<T> exercises = new ArrayList<>();
 
@@ -135,9 +136,15 @@ public class UserList<T extends HasID> extends BaseExercise {
     return classMarker;
   }
 
+  /**
+   *
+   * @return
+   */
   public Collection<T> getExercises() {
     return exercises;
   }
+
+  public int getNumItems() { return exercises.size(); }
 
   public T getLast() {
     return exercises.get(exercises.size() - 1);
@@ -218,11 +225,16 @@ public class UserList<T extends HasID> extends BaseExercise {
     return getName().equals(MY_LIST);
   }
 
+  public void setReview(boolean isReview) {
+    this.isReview = isReview;
+  }
+
   @Override
   public String toString() {
     long id = creator == null ? -1 : creator.getID();
     return "UserList #" + getID() + " '" + name + "' by " + id +
-        " : with " + getExercises().size() + " exercises.";
+        " : " + (isReview ? " REVIEW " : "") +
+        " : with " +  getNumItems()  + " exercises.";
   }
 
   public long getModified() {

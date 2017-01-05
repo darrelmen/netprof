@@ -36,6 +36,7 @@ import ag.experiment.AutoGradeExperiment;
 import mira.classifier.Classifier;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.audio.DecoderOptions;
 import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.database.export.Export;
 import mitll.langtest.server.export.ExerciseExport;
@@ -162,7 +163,7 @@ public class AutoCRT {
   /**
    * ONLY for testing.
    *
-   * @see MiraTest#testClassifier
+   * @seex MiraTest#testClassifier
    */
   public void close() {
     try {
@@ -292,7 +293,8 @@ public class AutoCRT {
     // logger.info("getScoreForAudio : got possible answers, num = " + size + " vs orig " + size1);
     long then = System.currentTimeMillis();
 
-    PretestScore asrScoreForAudio = autoCRTScoring.getASRScoreForAudio(audioFile, exportedAnswers, useCache, false);
+    PretestScore asrScoreForAudio = autoCRTScoring.getASRScoreForAudio(audioFile, exportedAnswers, exercise.getTransliteration(),
+        new DecoderOptions().setCanUseCache(useCache));
     long now = System.currentTimeMillis();
     if (now - then > 100) {
       logger.info("getScoreForAudio : took " + (now - then) + " millis to get score " + asrScoreForAudio +
@@ -370,10 +372,10 @@ public class AutoCRT {
    * Decode result is correct if all the tokens match (ignore case) any of the possibleSentences AND the score is
    * above the {@link #minPronScore} min score, typically in the 30s.
    * <p>
-   * If you want to see what the decoder output was, that's in {@link AudioAnswer#getDecodeOutput()}.
+   * If you want to see what the decoder output was, that's in {@link mitll.langtest.shared.AudioAnswer#getDecodeOutput()}.
    * For instance if you wanted to show that for debugging purposes.
    * If you want to know whether the said the right word or not (which might have scored too low to be correct)
-   * see {@link AudioAnswer#isSaidAnswer()}.
+   * see {@link mitll.langtest.shared.AudioAnswer#isSaidAnswer()}.
    *
    * @param audioFile         to score against
    * @param possibleSentences any of these can match and we'd call this a correct response
@@ -513,8 +515,8 @@ public class AutoCRT {
    * @param questionID
    * @param answer
    * @return
-   * @see #markCorrectnessOnAnswer(CommonExercise, int, PretestScore, AudioAnswer)
-   * @see mitll.langtest.server.audio.AudioFileHelper#getScoreForAnswer(CommonExercise, int, String)
+   * @seex #markCorrectnessOnAnswer(CommonExercise, int, PretestScore, AudioAnswer)
+   * @seex mitll.langtest.server.audio.AudioFileHelper#getScoreForAnswer(CommonExercise, int, String)
    */
   public CRTScores getScoreForExercise(AmasExerciseImpl exercise, int questionID, String answer) {
     return getScoreForExercise(exercise, questionID, answer, -1);
@@ -532,7 +534,7 @@ public class AutoCRT {
    * @param answer        to score (correct->incorrect)
    * @param expectedGrade only valid for predef answer key items (5) or questions (1)
    * @return 0-1
-   * @see #getScoreForExercise(CommonExercise, int, String)
+   * @seex #getScoreForExercise(CommonExercise, int, String)
    */
   public CRTScores getScoreForExercise(AmasExerciseImpl exercise, int questionID, String answer, float expectedGrade) {
     getClassifier();

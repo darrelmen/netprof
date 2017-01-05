@@ -146,7 +146,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    * @see #addNPFToContent(Panel, String)
    */
   private Panel doNPF(String instanceName) {
-    //logger.info(getClass() + " : doNPF instanceName = " + instanceName + " for list loadExercises " + loadExercises);
+//    logger.info(getClass() + " : doNPF instanceName = " + instanceName);
     Panel widgets = flexListLayout.doInternalLayout(null, instanceName);
     npfExerciseList = flexListLayout.npfExerciseList;
     return widgets;
