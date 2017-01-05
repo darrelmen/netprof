@@ -567,7 +567,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   @Override
   public int getIdForUserID(String id) {
     mitll.hlt.domino.shared.model.user.User user = delegate.getUser(id);
-    return user.getDocumentDBID();
+    return user == null ? -1 : user.getDocumentDBID();
 //    List<DBUser> users = getDbUsersByUserID(id);
 //    int i = users.isEmpty() ? -1 : users.get(0).getDocumentDBID();
 //    logger.info("getIdForUserID " + id + " = " + i);
