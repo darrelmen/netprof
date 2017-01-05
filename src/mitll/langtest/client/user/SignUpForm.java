@@ -266,7 +266,7 @@ public class SignUpForm extends UserDialog implements SignUp {
 */
 
     fieldset.add(getRolesHeader());
-    fieldset.add(getRolesChoices(user == null ? User.Kind.STUDENT : userKind));
+  //  fieldset.add(getRolesChoices(user == null ? User.Kind.STUDENT : userKind));
 
 //    if (!props.isAMAS() && contentDevCheckbox != null) {
 //      fieldset.add(contentDevCheckbox);
@@ -337,7 +337,7 @@ public class SignUpForm extends UserDialog implements SignUp {
   }
 */
 
-  private Panel getRolesChoices(User.Kind currentRole) {
+ /* private Panel getRolesChoices(User.Kind currentRole) {
     Panel vert = new VerticalPanel();
 
     Collection<User.Kind> roles1 = getRoles();
@@ -369,13 +369,13 @@ public class SignUpForm extends UserDialog implements SignUp {
       }
     }
     return vert;
-  }
+  }*/
 
   protected Collection<User.Kind> getRoles() {
     return User.getSelfChoiceRoles();
   }
 
-  private RadioButton addRoleChoice(Panel roles, final User.Kind student) {
+/*  private RadioButton addRoleChoice(Panel roles, final User.Kind student) {
     RadioButton studentChoice = new RadioButton("ROLE_CHOICE", student.getName());
     studentChoice.addClickHandler(new ClickHandler() {
       @Override
@@ -389,7 +389,7 @@ public class SignUpForm extends UserDialog implements SignUp {
     });
     roles.add(studentChoice);
     return studentChoice;
-  }
+  }*/
 
   private TextBoxBase makeSignUpUsername(Fieldset fieldset) {
     signUpUser = getFormField(fieldset, false, MIN_LENGTH_USER_ID, USERNAME_WIDTH, USERNAME);
