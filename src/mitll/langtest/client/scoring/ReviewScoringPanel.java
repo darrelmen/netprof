@@ -43,6 +43,7 @@ import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 
@@ -53,6 +54,8 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 /**
+ * Shows recorded audio with scores and alignments in the result manager audio review dialog.
+ *
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
@@ -69,15 +72,17 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
   /**
    * @param refSentence
    * @param controller
-   * @param exercise
+   * @paramx exercise
    * @param instance
    * @see mitll.langtest.client.result.ResultManager#getAsyncTable(int, Widget)
    */
-  public ReviewScoringPanel(String path, String refSentence,
+  public ReviewScoringPanel(String path,
+                            String refSentence,
+                            String transliteration,
                             ExerciseController controller,
                             int exerciseID,
                             String instance) {
-    super(path, refSentence, controller, false, new EmptyScoreListener(), 23, "", null, exerciseID, instance);
+    super(path, refSentence,transliteration, controller, false, new EmptyScoreListener(), 23, "", null, exerciseID, instance);
     tablesContainer = new HorizontalPanel();
     tablesContainer.getElement().setId("TablesContainer");
     belowContainer = new DivWidget();
@@ -95,11 +100,12 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
   }
 
   /**
-   * @see ScoringAudioPanel#scoreAudio(String, int, String, ImageAndCheck, ImageAndCheck, int, int, int)
+   * @see ScoringAudioPanel#scoreAudio
    * @param label
    * @param scoreColHeader
    * @param scores
    * @return
+   * @see #scoreAudio
    */
   private Table makeTable(String label, String scoreColHeader, Map<String, Float> scores) {
     Table table = new Table();
@@ -184,16 +190,16 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
   /**
    * @param path
    * @param resultID
-   * @param refSentence IGNORED!
+   * @param refSentence     IGNORED!
    * @param wordTranscript
    * @param phoneTranscript
    * @param width
    * @param height
    * @param reqid
-   * @see ScoringAudioPanel#getTranscriptImageURLForAudio(String, String, int, ImageAndCheck, ImageAndCheck)
+   * @see ScoringAudioPanel#getTranscriptImageURLForAudio
    */
   @Override
-  protected void scoreAudio(String path, int resultID, String refSentence, final ImageAndCheck wordTranscript,
+  protected void scoreAudio(String path, int resultID, String refSentence, String transliteration,final ImageAndCheck wordTranscript,
                             final ImageAndCheck phoneTranscript, int width, int height, int reqid) {
     // logger.info("ReviewScoringPanel.scoreAudio : path " + path + " width " + width + " height " + height);
     boolean wasVisible = wordTranscript.getImage().isVisible();
@@ -211,7 +217,7 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
     // Schedule the timer to run once in 1 seconds.
     t.schedule(wasVisible ? 1000 : 1);
 
-    controller.getScoringService().getResultASRInfo(resultID, width, height, new AsyncCallback<PretestScore>() {
+    controller.getScoringService().getResultASRInfo((int)resultID, new ImageOptions(width, height, true), new AsyncCallback<PretestScore>() {
       public void onFailure(Throwable caught) {
         wordTranscript.getImage().setVisible(false);
         phoneTranscript.getImage().setVisible(false);
@@ -279,9 +285,10 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
   }
 
   /**
-   * @see ScoringAudioPanel#scoreAudio(String, int, String, ImageAndCheck, ImageAndCheck, int, int, int)
+   * @see ScoringAudioPanel#scoreAudio
    * @param score
    * @return
+   * @see #scoreAudio
    */
   private Widget getWordTable(PretestScore score) {
     Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime = score.getsTypeToEndTimes();
@@ -295,5 +302,7 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
   public Widget getTables() {
     return tablesContainer;
   }
-  public Widget getBelow()  { return belowContainer; }
+  public Widget getBelow()  {
+    return belowContainer;
+  }
 }

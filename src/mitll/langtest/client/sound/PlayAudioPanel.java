@@ -213,7 +213,7 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
   private void doClick() {
     if (playButton.isVisible() && playButton.isEnabled()) {
       if (isPlaying()) {
-        pause();
+        pause();  // somehow get exception here?
       } else {
         for (PlayListener playListener : playListeners) playListener.playStarted();
         play();
@@ -492,6 +492,10 @@ public class PlayAudioPanel extends HorizontalPanel implements AudioControl {
     }
   }
 
+  /**
+   * @see
+   * @param val
+   */
   public void setEnabled(boolean val) {
     playButton.setEnabled(val);
   }

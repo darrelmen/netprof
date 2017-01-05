@@ -51,6 +51,7 @@ import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.ui.Image;
 import mitll.langtest.client.custom.Navigation;
 import mitll.langtest.client.domino.user.ChangePasswordView;
+import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.download.DownloadIFrame;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.Banner;
@@ -238,6 +239,7 @@ public class InitialUI implements UILifecycle {
     choices.add(new Banner.LinkAndTitle("Monitoring", new MonitoringClickHandler(), true));
     choices.add(new Banner.LinkAndTitle("Events", new EventsClickHandler(), true));
     choices.add(new Banner.LinkAndTitle("Change Password", new ChangePasswordClickHandler(), false));
+    choices.add(new Banner.LinkAndTitle("Download Context", new DownloadContentsClickHandler(), true));
     choices.add(new Banner.LinkAndTitle(LOG_OUT, new LogoutClickHandler(), false));
     return choices;
   }
@@ -352,6 +354,20 @@ public class InitialUI implements UILifecycle {
 
         public void onSuccess() {
           new ChangePasswordView(userManager.getCurrent(), false, userState, userService).showModal();
+        }
+      });
+    }
+  }
+
+  private class DownloadContentsClickHandler implements ClickHandler {
+    public void onClick(ClickEvent event) {
+      GWT.runAsync(new RunAsyncCallback() {
+        public void onFailure(Throwable caught) {
+          downloadFailedAlert();
+        }
+
+        public void onSuccess() {
+          new DownloadHelper(null).downloadContext();
         }
       });
     }

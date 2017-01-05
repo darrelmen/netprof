@@ -66,6 +66,7 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
 
   private final String refSentence;
   private int resultID = -1;
+  private final String transliteration;
   private ScoreListener scoreListener;
   private PretestScore result;
   private boolean showOnlyOneExercise = false; // true for when called from the headstart website
@@ -79,10 +80,10 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
    * @param instance
    * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, ExerciseController, ScoreListener, String, Shell, String)
    */
-  ScoringAudioPanel(String refSentence, ExerciseController controller,
+  ScoringAudioPanel(String refSentence, String transliteration, ExerciseController controller,
                     ScoreListener gaugePanel, String playButtonSuffix, T exercise,
                     String instance) {
-    this(null, refSentence, controller, SHOW_SPECTROGRAM, gaugePanel, 23, playButtonSuffix, exercise, exercise.getID(), instance);
+    this(null, refSentence,transliteration, controller, SHOW_SPECTROGRAM, gaugePanel, 23, playButtonSuffix, exercise, exercise.getID(), instance);
   }
 
   /**
@@ -98,6 +99,7 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
    * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, String, ExerciseController, boolean, ScoreListener, int, String, Shell, String)
    */
   ScoringAudioPanel(String path, String refSentence,
+                    String transliteration,
                     ExerciseController controller,
                     boolean showSpectrogram,
                     ScoreListener gaugePanel,
@@ -109,6 +111,7 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
     super(path, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix,
         exercise, exerciseID, instance);
     this.refSentence = refSentence;
+    this.transliteration = transliteration;
     showOnlyOneExercise = controller.showOnlyOneExercise();
     addClickHandlers();
   }
@@ -176,7 +179,7 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
   protected void getEachImage(int width) {
     super.getEachImage(width);
     if (controller.hasModel()) {
-      getTranscriptImageURLForAudio(audioPath, refSentence, width, words, phones);
+      getTranscriptImageURLForAudio(audioPath, refSentence, transliteration, width, words, phones);
     }
   }
 
@@ -188,16 +191,22 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
    * @param phoneTranscript
    * @see #getEachImage(int)
    */
-  private void getTranscriptImageURLForAudio(final String path, String refSentence, int width,
+  private void getTranscriptImageURLForAudio(final String path, String refSentence, String transliteration, int width,
                                              final ImageAndCheck wordTranscript,
                                              final ImageAndCheck phoneTranscript) {
     int widthToUse = Math.max(MIN_WIDTH, width);
-    scoreAudio(path, resultID, refSentence, wordTranscript, phoneTranscript, widthToUse, ANNOTATION_HEIGHT, getReqID("score"));
+    scoreAudio(path, resultID, refSentence, transliteration, wordTranscript, phoneTranscript, widthToUse, ANNOTATION_HEIGHT, getReqID("score"));
   }
 
-  protected abstract void scoreAudio(final String path, int resultID, String refSentence,
-                                     final ImageAndCheck wordTranscript, final ImageAndCheck phoneTranscript,
-                                     int toUse, int height, int reqid);
+  protected abstract void scoreAudio(final String path,
+                                     int resultID,
+                                     String refSentence,
+                                     String transliteration,
+                                     final ImageAndCheck wordTranscript,
+                                     final ImageAndCheck phoneTranscript,
+                                     int toUse,
+                                     int height,
+                                     int reqid);
 
   private static final String IMAGES_REDX_PNG = LangTest.LANGTEST_IMAGES + "redx.png";
 

@@ -259,9 +259,9 @@ public class ReviewedDAO extends DAO implements IReviewedDAO {
         }
       }
 
-      finish(connection, statement, rs);
-      // int count = getCount();
-      // if (count % 10 == 0) logger.debug("now " + count + " reviewed");
+      finish(connection, statement, rs, sql3);
+     // int count = getCount();
+     // if (count % 10 == 0) logger.debug("now " + count + " reviewed");
       //logger.debug("query " + sql3 + " returned " + exidToState.size() + " exercise->state items");
       return exidToState;
     } catch (SQLException e) {
@@ -270,9 +270,30 @@ public class ReviewedDAO extends DAO implements IReviewedDAO {
     return Collections.emptyMap();
   }
 
+  public Collection<Integer> getInspectedExercises() {
+  /*
+    Map<String, StateCreator> exerciseToState = getExerciseToState(false);
+    Set<String> ids = new HashSet<String>();
+
+   Collection<STATE> toMatch = new HashSet<>();
+    toMatch.add(STATE.APPROVED);
+    toMatch.add(STATE.DEFECT);
+    toMatch.add(STATE.FIXED);
+    toMatch.add(STATE.ATTN_LL);
+    for (Map.Entry<String,StateCreator> pair : exerciseToState.entrySet()) {
+      STATE state = pair.getValue().getState();
+      if (toMatch.contains(state)) {
+        ids.add(pair.getKey());
+      }
+    }
+    return ids;
+    */
+
+    return null;
+  }
+
   public Collection<StateCreator> getAll() {
     Connection connection = database.getConnection(this.getClass().toString());
-
     List<StateCreator> all = new ArrayList<>();
 
     String latest = "latest";

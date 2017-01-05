@@ -34,6 +34,7 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioConversion;
+import mitll.langtest.server.audio.TrackInfo;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.excel.ExcelExport;
 import mitll.langtest.server.database.exercise.SectionHelper;
@@ -96,8 +97,10 @@ public class AudioExport {
                 boolean isDefectList,
                 AudioExportOptions options) throws Exception {
     List<CommonExercise> copy = getSortedExercises(sectionHelper, exercisesForSelectionState);
+    boolean skipAudio = typeToSection.isEmpty() && !options.isAllContext();
+    logger.info("skip audio = " + skipAudio);
     writeToStream(copy, audioDAO, installPath, relPath, getPrefix(typeToSection, typeOrder), typeOrder, language1, out,
-        typeToSection.isEmpty(), isDefectList, options);
+        skipAudio, isDefectList, options);
   }
 
   /**
@@ -125,16 +128,19 @@ public class AudioExport {
                           AudioExportOptions options) throws Exception {
     List<CommonExercise> copy = getSortableExercises(sectionHelper, exercisesForSelectionState);
     new ExerciseSorter(typeOrder).sortByTooltip(copy);
-    writeToStream(copy, audioDAO, installPath, relPath, prefix, typeOrder, language1, out, false, isDefectList, options);
+    writeToStream(copy, audioDAO, installPath, relPath, prefix, typeOrder, language1, out, false,
+        isDefectList, options);
   }
 
-  private List<CommonExercise> getSortedExercises(SectionHelper<?> sectionHelper, Collection<CommonExercise> exercisesForSelectionState) {
+  private List<CommonExercise> getSortedExercises(SectionHelper<?> sectionHelper,
+                                                  Collection<CommonExercise> exercisesForSelectionState) {
     List<CommonExercise> copy = getSortableExercises(sectionHelper, exercisesForSelectionState);
     new ExerciseSorter(typeOrder).getSortedByUnitThenAlpha(copy, false);
     return copy;
   }
 
-  private List<CommonExercise> getSortableExercises(SectionHelper<?> sectionHelper, Collection<? extends CommonExercise> exercisesForSelectionState) {
+  private List<CommonExercise> getSortableExercises(SectionHelper<?> sectionHelper,
+                                                    Collection<? extends CommonExercise> exercisesForSelectionState) {
     this.typeOrder = sectionHelper.getTypeOrder();
     return new ArrayList<>(exercisesForSelectionState);
   }
@@ -144,16 +150,18 @@ public class AudioExport {
    * @param sectionHelper
    * @param exercisesForSelectionState
    * @param installPath
+   * @param language
    * @throws Exception
    * @see mitll.langtest.server.database.DatabaseImpl#writeUserListAudio
    */
   public void writeZipJustOneAudio(OutputStream out,
                                    SectionHelper<?> sectionHelper,
                                    Collection<? extends CommonExercise> exercisesForSelectionState,
-                                   String installPath) throws Exception {
+                                   String installPath,
+                                   String language) throws Exception {
     List<CommonExercise> copy = new ArrayList<>(exercisesForSelectionState);
     new ExerciseSorter(sectionHelper.getTypeOrder()).sortByTooltip(copy);
-    writeToStreamJustOneAudio(copy, installPath, out);
+    writeToStreamJustOneAudio(copy, installPath, out, language);
   }
 
   /**
@@ -223,6 +231,9 @@ public class AudioExport {
       writeFolderContents(zOut, toWrite, audioDAO, installPath, relativeConfigDir1,
           overallName,
           isEnglish(language1), getCountryCode(language1), options, language1);
+
+    } else {
+      logger.info("skip audio export.");
     }
 
     addSpreadsheetToZip(toWrite, typeOrder, language1, zOut, baseName, isDefectList);
@@ -236,6 +247,7 @@ public class AudioExport {
     private boolean justMale = false;
     private boolean justRegularSpeed = true;
     private boolean justContext = false;
+    private boolean allContext = false;
     private boolean isUserList = false;
     boolean skip = false;
 
@@ -271,11 +283,9 @@ public class AudioExport {
       this.justRegularSpeed = justRegularSpeed;
     }
 
-/*
     public boolean isJustContext() {
       return justContext;
     }
-*/
 
     public void setSkip(boolean skip) {
       this.skip = skip;
@@ -283,6 +293,10 @@ public class AudioExport {
 
     public void setJustContext(boolean justContext) {
       this.justContext = justContext;
+    }
+
+    public void setAllContext(boolean justContext) {
+      this.allContext = justContext;
     }
 
     boolean isUserList() {
@@ -300,11 +314,20 @@ public class AudioExport {
     }
 
     public String getInfo() {
-      return skip || isUserList ?
-          "" :
-          "_" + (justMale ? "male" : "female") + "_" +
-              (justRegularSpeed ? "regular" : "slow") + "_" +
-              (justContext ? "context" : "vocab");
+      if (isAllContext()) {
+        return "";
+      }
+      else {
+        return skip || isUserList ?
+            "" :
+            "_" + (justMale ? "male" : "female") + "_" +
+                (justRegularSpeed ? "regular" : "slow") + "_" +
+                (justContext ? "context" : "vocab");
+      }
+    }
+
+    public boolean isAllContext() {
+      return allContext;
     }
   }
 
@@ -323,12 +346,14 @@ public class AudioExport {
    * @param toWrite
    * @param installPath
    * @param out
+   * @param language
    * @throws Exception
    */
   private void writeToStreamJustOneAudio(Collection<CommonExercise> toWrite,
                                          String installPath,
-                                         OutputStream out) throws Exception {
-    writeFolderContentsSimple(new ZipOutputStream(out), toWrite, installPath);
+                                         OutputStream out,
+                                         String language) throws Exception {
+    writeFolderContentsSimple(new ZipOutputStream(out), toWrite, installPath, language);
   }
 
   private boolean isEnglish(String language1) {
@@ -346,8 +371,6 @@ public class AudioExport {
    * @param options
    * @param language
    * @throws Exception
-   * @paramz justMale
-   * @paramz justRegularSpeed
    * @see #writeToStream
    */
   private void writeFolderContents(ZipOutputStream zOut,
@@ -364,6 +387,10 @@ public class AudioExport {
     long then = System.currentTimeMillis();
 
     //logger.info("writeFolderContents overall name " + overallName);
+    logger.info("overall name " + overallName);
+    if (options.isAllContext()) {
+      overallName += "_allContextAudio";
+    }
     //logger.debug("found audio for " + exToAudio.size() + " items and writing " + toWrite.size() + " items ");
     // logger.debug("realContextPath " + realContextPath + " installPath " + installPath + " relativeConfigDir1 " +relativeConfigDir1);
 
@@ -374,7 +401,7 @@ public class AudioExport {
     // attach audio
     int numAttach = attachAudio(toWrite, audioDAO, language);
 
-    boolean justContext = options.justContext;
+    boolean justContext = options.justContext || options.isAllContext();
     if (!justContext) {
       populateGenderToCount(toWrite, maleToCount, femaleToCount);
     }
@@ -392,9 +419,15 @@ public class AudioExport {
 
       // write male/female fast/slow
       if (justContext) {
-        someAudio =
+        someAudio = someAudio ||
             copyContextAudioBothGenders(zOut, installPath, overallName, isEnglish, countryCode,
-                audioConversion, names, ex, options.justMale);
+                audioConversion, names, ex, options.justMale, language);
+        if (options.isAllContext()) {
+          someAudio = someAudio || copyContextAudioBothGenders(zOut, installPath, overallName, isEnglish, countryCode,
+              audioConversion, names, ex, !options.justMale, language);
+        }
+        // if (someAudio) logger.info("found context for " + ex.getID());
+
       } else {
         MiniUser majorityUser = options.justMale ? male : female;
         String speed = options.justRegularSpeed ? AudioAttribute.REGULAR : AudioAttribute.SLOW;
@@ -402,14 +435,14 @@ public class AudioExport {
         if (options.isUserList()) {
           AudioAttribute audioAttribute = getLatest(ex, true);
           if (audioAttribute != null) {
-            copyAudio(zOut, overallName, isEnglish, audioConversion, names, ex, speed, audioAttribute);
+            copyAudio(zOut, overallName, isEnglish, audioConversion, names, ex, speed, audioAttribute, language);
             someAudio = true;
           } else {
             logger.info("no   male audio for " + ex.getID());
           }
           audioAttribute = getLatest(ex, false);
           if (audioAttribute != null) {
-            copyAudio(zOut, overallName, isEnglish, audioConversion, names, ex, speed, audioAttribute);
+            copyAudio(zOut, overallName, isEnglish, audioConversion, names, ex, speed, audioAttribute, language);
             someAudio = true;
           } else {
             logger.info("no female audio for " + ex.getID());
@@ -418,7 +451,7 @@ public class AudioExport {
           AudioAttribute recording = getAudioAttribute(majorityUser, ex, options.justMale, speed);
           if (recording != null) {
             // logger.debug("found " + recording + " by " + recording.getUser());
-            copyAudio(zOut, overallName, isEnglish, audioConversion, names, ex, speed, recording);
+            copyAudio(zOut, overallName, isEnglish, audioConversion, names, ex, speed, recording, language);
             someAudio = true;
           }
         }
@@ -472,6 +505,7 @@ public class AudioExport {
    * @param ex
    * @param speed
    * @param audioAttribute
+   * @param language
    * @throws IOException
    * @see #writeFolderContents(ZipOutputStream, Collection, IAudioDAO, String, String, String, boolean, String, AudioExportOptions, String)
    */
@@ -482,9 +516,10 @@ public class AudioExport {
                          Set<String> names,
                          CommonExercise ex,
                          String speed,
-                         AudioAttribute audioAttribute) throws IOException {
+                         AudioAttribute audioAttribute, String language) throws IOException {
     String name = overallName + File.separator + getUniqueName(ex, !isEnglish);
-    copyAudio(zOut, names, name, speed, audioConversion, audioAttribute, ex.getID(), ex.getForeignLanguage());
+    copyAudio(zOut, names, name, speed, audioConversion, audioAttribute, ex.getID(), getTrackInfo(ex, audioAttribute,
+        language));
   }
 
   private boolean copyContextAudioBothGenders(ZipOutputStream zOut,
@@ -495,13 +530,13 @@ public class AudioExport {
                                               AudioConversion audioConversion,
                                               Set<String> names,
                                               CommonExercise ex,
-                                              boolean justMale) throws IOException {
+                                              boolean justMale, String language) throws IOException {
     boolean someAudio = false;
-
 
     AudioAttribute latestContext = ex.getLatestContext(justMale);
     if (latestContext != null) {
-      copyContextAudio(zOut, installPath, overallName, isEnglish, audioConversion, names, ex, latestContext, countryCode);
+      copyContextAudio(zOut, installPath, overallName, isEnglish, audioConversion, names, ex, latestContext, countryCode,
+          language);
       someAudio = true;
     }
     return someAudio;
@@ -552,6 +587,7 @@ public class AudioExport {
    * @param namesSoFar
    * @param ex
    * @param latestContext
+   * @param language
    * @throws IOException
    */
   private void copyContextAudio(ZipOutputStream zOut,
@@ -562,7 +598,7 @@ public class AudioExport {
                                 Set<String> namesSoFar,
                                 CommonExercise ex,
                                 AudioAttribute latestContext,
-                                String countryCode) throws IOException {
+                                String countryCode, String language) throws IOException {
     String speed = latestContext.getSpeed();
     String folder = overallName + File.separator;
     Map<String, String> unitToValue = ex.getUnitToValue();
@@ -586,7 +622,11 @@ public class AudioExport {
       name = folder + builder.toString();
     }
     copyAudio(zOut, namesSoFar, name, speed == null ? "" : speed, audioConversion, latestContext, id,
-        ex.getForeignLanguage());
+        getTrackInfo(ex, latestContext, language));
+  }
+
+  private TrackInfo getTrackInfo(CommonExercise ex, AudioAttribute latestContext, String language) {
+    return new TrackInfo(ex.getForeignLanguage(), latestContext.getUser().getUserID(), ex.getEnglish(), language);
   }
 
   private MiniUser getMaxUser(Map<MiniUser, Integer> maleToCount) {
@@ -605,12 +645,13 @@ public class AudioExport {
    * @param zOut
    * @param toWrite
    * @param installPath
+   * @param language
    * @throws Exception
-   * @see #writeToStreamJustOneAudio(Collection, String, OutputStream)
+   * @see #writeToStreamJustOneAudio(Collection, String, OutputStream, String)
    */
   private void writeFolderContentsSimple(ZipOutputStream zOut,
                                          Collection<CommonExercise> toWrite,
-                                         String installPath) throws Exception {
+                                         String installPath, String language) throws Exception {
     long then = System.currentTimeMillis();
     AudioConversion audioConversion = new AudioConversion(props);
     logger.debug("writing " + toWrite.size());
@@ -621,7 +662,8 @@ public class AudioExport {
         try {
           AudioAttribute audio = ex.getRegularSpeed();
           String artist = audio.getUser().getUserID();
-          copyAudioSimple(zOut, installPath, audioConversion, ex.getRefAudio(), ex.getForeignLanguage(), artist);
+          copyAudioSimple(zOut, installPath, audioConversion, ex.getRefAudio(),
+              new TrackInfo(ex.getForeignLanguage(), artist, ex.getEnglish(), language));
         } catch (IOException e) {
           //logger.debug("skipping duplicate " +e);
           d++;
@@ -711,7 +753,7 @@ public class AudioExport {
    * @param audioConversion
    * @param attribute
    * @param exid
-   * @param title
+   * @param trackInfo
    * @throws IOException
    * @see #writeFolderContents
    * @see #copyContextAudio
@@ -723,12 +765,13 @@ public class AudioExport {
                          AudioConversion audioConversion,
                          AudioAttribute attribute,
                          int exid,
-                         String title) throws IOException {
+                         TrackInfo trackInfo) throws IOException {
     String audioRef = attribute.getActualPath();
     String baseAudioDir = audioRef.startsWith(ServerProperties.BEST_AUDIO) ? props.getAudioBaseDir() : props.getMediaDir();
 //    logger.debug("\tcopyAudio for ex id " +exid + " writing audio under context path " + baseAudioDir + " at " + audioRef);
     String author = attribute.getUser().getUserID();
-    String s = audioConversion.ensureWriteMP3(audioRef, baseAudioDir, false, title, author);
+    String s = audioConversion.ensureWriteMP3(audioRef, baseAudioDir, false, trackInfo);
+
     File mp3 = new File(s);
     if (mp3.exists()) {
       //  logger.debug("---> Did write " + mp3.getAbsolutePath());
@@ -760,7 +803,7 @@ public class AudioExport {
    * @param realContextPath
    * @param audioConversion
    * @param audioRef
-   * @param title
+   * @param trackInfo
    * @return
    * @throws IOException
    * @see #writeFolderContentsSimple
@@ -769,8 +812,8 @@ public class AudioExport {
                                String realContextPath,
                                AudioConversion audioConversion,
                                String audioRef,
-                               String title, String author) throws IOException {
-    String filePath = audioConversion.ensureWriteMP3(audioRef, realContextPath, false, title, author);
+                               TrackInfo trackInfo) throws IOException {
+    String filePath = audioConversion.ensureWriteMP3(audioRef, realContextPath, false, trackInfo);
     File mp3 = new File(filePath);
     if (mp3.exists()) {
       String name = audioRef.replaceAll(".wav", ".mp3");

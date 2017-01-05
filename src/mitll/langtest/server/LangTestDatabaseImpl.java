@@ -143,6 +143,8 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   }
 
   /**
+   * <<<<<<< HEAD
+   *
    * @paramx byID
    * @paramx parentDir
    * @seex LoadTesting#getExercise
@@ -177,7 +179,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     db.reloadExercises(getProjectID());
   }
 
-   /**
+  /**
    * Get properties (first time called read properties file -- e.g. see war/config/levantine/config.properties).
    *
    * @return
@@ -199,7 +201,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   /**
    * TODO : consider moving this into user service?
    * what if later an admin changes it while someone else is looking at it...
-
+   * <p>
    * Remember this audio as reference audio for this exercise, and possibly clear the APRROVED (inspected) state
    * on the exercise indicating it needs to be inspected again (we've added new audio).
    * <p>
@@ -274,8 +276,8 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, boolean)
    */
   @Override
-  public boolean isValidForeignPhrase(String foreign) {
-    return getAudioFileHelper().checkLTSOnForeignPhrase(foreign);
+  public boolean isValidForeignPhrase(String foreign, String transliteration) {
+    return getAudioFileHelper().checkLTSOnForeignPhrase(foreign, transliteration);
   }
 
   private IUserListManager getUserListManager() {
@@ -293,6 +295,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     return db.duplicateExercise(exercise);
   }
 */
+
   /**
    * @param id
    * @param widgetType
@@ -468,7 +471,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   private DatabaseImpl makeDatabaseImpl(String h2DatabaseFile) {
     //logger.debug("word pairs " +  serverProps.isWordPairs() + " language " + serverProps.getLanguage() + " config dir " + relativeConfigDir);
     return new DatabaseImpl(configDir, relativeConfigDir, h2DatabaseFile, serverProps, pathHelper, true, this, false
-    //    ,        getServletContext()
+        //    ,        getServletContext()
     );
   }
 

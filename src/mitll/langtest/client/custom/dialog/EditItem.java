@@ -147,10 +147,10 @@ public class EditItem {
     if (exerciseList != null) {
       //  logger.info("EditItem onResize");
       exerciseList.onResize();
-    } else {
+    } /*else {
       logger.info("EditItem onResize - no exercise list");
 
-    }
+    }*/
   }
 
   private UserList<CommonShell> makeListOfOnlyYourItems(UserList<CommonShell> toCopy) {
@@ -171,17 +171,17 @@ public class EditItem {
                                                                            UserList<CommonShell> ul,
                                                                            UserList<CommonShell> originalList,
                                                                            final boolean includeAddItem) {
-    logger.info("EditItem.makeExerciseList - ul = " + ul + " " + includeAddItem);
+    //logger.info("EditItem.makeExerciseList - ul = " + ul + " " + includeAddItem);
 
     if (includeAddItem) {
       CommonExercise newItem = getNewItem();
-      logger.info("makeExerciseList : Adding " + newItem);// + " with " + newItem.getTooltip());
+      //logger.info("makeExerciseList : Adding " + newItem);// + " with " + newItem.getTooltip());
       ul.addExercise(newItem);
     }
 
     final PagingExerciseList<CommonShell, CommonExercise> exerciseList =
         new NPExerciseList<ButtonGroupSectionWidget>(right, exerciseServiceAsync, feedback, controller,
-            true, instanceName, false) {
+            true, instanceName, false,false) {
           @Override
           protected void onLastItem() {
             new ModalInfoDialog("Complete", "List complete!", new HiddenHandler() {
@@ -197,7 +197,7 @@ public class EditItem {
             if (itemID == NEW_EXERCISE_ID) {
               useExercise(getNewItem());
             } else {
-              //   logger.info("EditItem.makeExerciseList - askServerForExercise = " + itemID);
+              //     logger.info("EditItem.makeExerciseList - askServerForExercise = " + itemID);
               super.askServerForExercise(itemID);
             }
           }
@@ -426,7 +426,7 @@ public class EditItem {
    */
   private boolean didICreateThisItem(CommonExercise exercise) {
     boolean isMine = exercise.getCreator() == controller.getUser();
-    //  logger.info("for " + exercise + " vs " + controller.getUser() + " is Mine " + isMine);
+    // logger.info("for " + exercise + " vs " + controller.getUser() + " is Mine " + isMine);
     return isMine;
   }
 
@@ -466,7 +466,7 @@ public class EditItem {
     }
 
     @Override
-    public <S extends CommonShell & AudioRefExercise & AnnotationExercise> void setFields(S newUserExercise) {
+    public <S extends CommonExercise & AudioRefExercise & AnnotationExercise> void setFields(S newUserExercise) {
     }
   }
 }

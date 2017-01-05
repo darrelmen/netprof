@@ -44,6 +44,7 @@ import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
@@ -164,7 +165,7 @@ public class ListManager implements RequiresResize {
       }
     });
 
-    npfHelper = new NPFHelper(service, feedback, controller, false, exerciseServiceAsync);
+    npfHelper = new NPFHelper(service, feedback, controller, false, false, exerciseServiceAsync);
     reviewItem = new ReviewItemHelper(service, feedback, controller, exerciseList, exerciseServiceAsync);
     avpHelper = new AVPHelper(service, feedback, controller, exerciseServiceAsync);
     editItem = new EditItem(service, userManager, controller, exerciseList, feedback);
@@ -387,6 +388,8 @@ public class ListManager implements RequiresResize {
   public void viewReview(final Panel contentPanel) {
     final ListManager outer = this;
     final Panel child = getContentChild(contentPanel);
+
+    long then = System.currentTimeMillis();
 //    logger.info("------> viewReview : reviewLessons for " + userManager.getUser());
     listService.getReviewLists(new AsyncCallback<List<UserList<CommonShell>>>() {
       @Override
@@ -395,7 +398,10 @@ public class ListManager implements RequiresResize {
 
       @Override
       public void onSuccess(List<UserList<CommonShell>> reviewLists) {
-        // logger.info("\tviewReview : reviewLessons for " + userManager.getUser() + " got " + reviewLists);
+
+        long now = System.currentTimeMillis();
+
+        logger.info("\tviewReview : reviewLessons for " + userManager.getUser() + " got " + reviewLists.size() + " in " + (now-then) + " millis");
         new UserListCallback(outer, contentPanel, child,
             new ScrollPanel(), REVIEW, false, false, userManager, false, -1).onSuccess(reviewLists);
       }
@@ -622,7 +628,9 @@ public class ListManager implements RequiresResize {
             isComment ? ITEMS_WITH_COMMENTS :
                 isAttention ? "Items for LL" : LEARN_PRONUNCIATION;
 
-    final boolean isNormalList = !isReview && !isComment && !isAttention;
+    final boolean isNormalList = !isReview &&
+        !isComment && !isAttention;
+
     final TabAndContent learn = isNormalList ? getLearnTab(ul, tabPanel, isReview, instanceName1, learnTitle) : null;
 
     // add practice tab
@@ -639,11 +647,18 @@ public class ListManager implements RequiresResize {
     //  logger.info("edit tab created " + created);
     if ((created || userManager.isTeacher()) &&
         (!ul.isPrivate() || isMyList)) {
-      editItemTab = getEditTab(ul, toSelect, tabPanel, isReview, isComment);
+      editItemTab = getEditTab(ul, toSelect, tabPanel,
+          isReview,
+          //false,
+          isComment);
     }
-    if (isMyList && !isReview && !isComment && !ul.isFavorite()) {
+    // if (SHOW_IMPORT) {
+    if (isMyList &&
+        !isReview &&
+        !isComment && !ul.isFavorite()) {
       getImportTab(ul, tabPanel, learn, instanceName1);
     }
+    // }
 
     // select the initial tab -- either add if an empty
     selectTabGivenHistory(tabPanel,
@@ -661,7 +676,11 @@ public class ListManager implements RequiresResize {
   }
 
   private TabAndContent getLearnTab(final UserList<CommonShell> ul, TabPanel tabPanel, boolean isReview, final String instanceName1, String learnTitle) {
-    final TabAndContent learn = makeTab(tabPanel, isReview ? IconType.EDIT_SIGN : IconType.LIGHTBULB, learnTitle);
+    final TabAndContent learn = makeTab(tabPanel,
+        isReview ?
+            IconType.EDIT_SIGN :
+            IconType.LIGHTBULB,
+        learnTitle);
     learn.getTab().addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
@@ -706,7 +725,7 @@ public class ListManager implements RequiresResize {
                                    final boolean isReview,
                                    final boolean isComment) {
     final TabAndContent editTab = makeTab(tabPanel, IconType.EDIT, isReview ? ADD_DELETE_EDIT_ITEM : ADD_OR_EDIT_ITEM);
-    logger.info("getListOperations : making editTab for list " + ul.getName());
+   // logger.info("getListOperations : making editTab for list " + ul.getName());
 
     editTab.getTab().addClickHandler(new ClickHandler() {
       @Override
@@ -718,7 +737,7 @@ public class ListManager implements RequiresResize {
           //    logger.info("getListOperations : showNPF ");
           reviewItem.showNPF(ul, editTab, getInstanceName(isReview), false, toSelect);
         } else {
-          logger.info("getEditTab : showEditItem "  + " : " + ul.getName());
+//          logger.info("getEditTab : showEditItem "  + " : " + ul.getName());
           showEditItem(ul, editTab, editItem, !ul.isFavorite());
         }
       }
@@ -847,7 +866,7 @@ public class ListManager implements RequiresResize {
     anImport.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        listService.reallyCreateNewItems(userManager.getUser(), ul.getID(), w.getText(),
+        listService.reallyCreateNewItems(userManager.getUser(), ul.getID(), sanitize(w.getText()),
             new AsyncCallback<Collection<CommonExercise>>() {
               @Override
               public void onFailure(Throwable caught) {
@@ -871,6 +890,9 @@ public class ListManager implements RequiresResize {
     container.getContent().add(inner);
   }
 
+  private String sanitize(String text) {
+    return SimpleHtmlSanitizer.sanitizeHtml(text).asString();
+  }
   /**
    * @param tabPanel
    * @param learn
@@ -899,7 +921,7 @@ public class ListManager implements RequiresResize {
         ul, instanceName1, isReview, isComment, isNormalList);
 
     if (!chosePrev) {
-      logger.info("selectTabGivenHistory ul " + ul.getName() + " private " + ul.isPrivate() + " empty " + ul.isEmpty() + " ");
+      //logger.info("selectTabGivenHistory ul " + ul.getName() + " private " + ul.isPrivate() + " empty " + ul.isEmpty() + " ");
       if (createdByYou(ul) &&
           //!ul.isPrivate() &&
           ul.isEmpty() && edit != null) {
@@ -907,7 +929,7 @@ public class ListManager implements RequiresResize {
         logger.info("selectTabGivenHistory doing showEditReviewOrComment");
         showEditReviewOrComment(ul, isNormalList, edit, isReview, isComment);
       } else {
-        logger.info("selectTabGivenHistory doing sublearn " + instanceName1+ " learn " + learn);
+      //  logger.info("selectTabGivenHistory doing sublearn " + instanceName1+ " learn " + learn);
 
         if (learn == null) {
           tabPanel.selectTab(0); // first tab
@@ -916,9 +938,9 @@ public class ListManager implements RequiresResize {
 
         }
         else {
-        tabPanel.selectTab(SUBTAB_LEARN_INDEX);
-        showLearnTab(learn, ul, instanceName1, toSelect);
-      }
+          tabPanel.selectTab(SUBTAB_LEARN_INDEX);
+          showLearnTab(learn, ul, instanceName1, toSelect);
+        }
       }
     } else {
 //      logger.info("selectTabGivenHistory choose prev ");
@@ -947,7 +969,7 @@ public class ListManager implements RequiresResize {
                                                 boolean isReview, boolean isComment,
                                                 boolean isNormalList) {
     String subTab = storage.getValue(SUB_TAB);
-    logger.info("selectPreviouslyClickedSubTab : subtab '" + subTab + "'");
+ //   logger.info("selectPreviouslyClickedSubTab : subtab '" + subTab + "'");
 
     boolean chosePrev = false;
     if (subTab != null) {

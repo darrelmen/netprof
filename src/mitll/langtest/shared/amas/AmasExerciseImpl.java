@@ -301,8 +301,12 @@ public class AmasExerciseImpl implements CommonShell {
     return Collections.singleton(getForeignLanguage());
   }
 
-/*
-  public String getContentTrans() {
+  @Override
+  public CommonShell getShell() {
+    return null;
+  }
+
+/*  public String getContentTrans() {
     return contentTrans;
   }
 */

@@ -301,9 +301,11 @@ public abstract class Analysis extends DAO {
    * @see SlickAnalysis#getBest(Collection, int)
    * @param minRecordings
    * @param userToBest
+   * @paramx sql
    * @return
    */
   protected Map<Integer, UserInfo> getBestForQuery(int minRecordings, Map<Integer, List<BestScore>> userToBest) {
+//    Map<Long, List<BestScore>> userToBest = getUserToResults(connection, statement, sql);
     if (DEBUG) logger.info("getBestForQuery got " + userToBest.values().iterator().next().size());
 
     Map<Integer, List<BestScore>> userToBest2 = new HashMap<>();

@@ -186,6 +186,13 @@ public class Exercise extends AudioExercise implements CommonExercise,
     setTransliteration(transliteration);
   }
 
+/*  public CommonShell getShell() {
+    ExerciseShell exerciseShell = new ExerciseShell(getID(), english, meaning, foreignLanguage, transliteration, context, contextTranslation, displayID);
+//    exerciseShell.setState(getState());
+//    exerciseShell.setSecondState(getSecondState());
+    return exerciseShell;
+  }*/
+
   /**
    * @param uniqueID
    * @param exerciseID

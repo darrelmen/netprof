@@ -75,7 +75,7 @@ public class UserTable extends PagerTable {
   private static final int PAGE_SIZE = 5;
 
   private static final String USER_ID = "User ID";
-  private static final int PAGE_SIZE1 = 10;
+  private static final int PAGE_SIZE1 = 8;
   private static final int INSET_PERCENT = 50;
   private static final String IP_PREFIX = "127.0.0.1/Mozilla/5.0 ";
   private static final String PERMISSIONS = "Perm.";//issions";

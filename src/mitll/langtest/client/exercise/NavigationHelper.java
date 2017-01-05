@@ -142,6 +142,10 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
     });
   }
 
+  /**
+   * @see #makeNextButton(HasID, ExerciseController, boolean)
+   * @param exercise
+   */
   protected void enableNext(HasID exercise) {
     if (enableNextOnlyWhenAllCompleted) { // initially not enabled
      // logger.info("enableNextOnlyWhenAllCompleted true");
@@ -164,11 +168,10 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
   /**
    * Ignore clicks or keyboard activity when the widget is not enabled.
    * @see #getNextAndPreviousButtons
-   * @seex #addKeyHandler
    * @param controller
    * @param exercise
    */
-  private void clickNext(ExerciseController controller, HasID exercise) {
+  public void clickNext(ExerciseController controller, HasID exercise) {
     if (next.isEnabled() && next.isVisible()) {
       if (provider != null) {
         provider.postAnswers(controller, exercise);
@@ -180,10 +183,13 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
     return "Next";
   }
 
+  /**
+   * @see ExercisePanel#enableNext
+   * @param val
+   */
   public void enableNextButton(boolean val) {
     next.setEnabled(val);
   }
-
   public Widget getNext() { return next; }
   private Button getPrev() { return prev; }
 }

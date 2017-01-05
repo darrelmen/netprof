@@ -63,7 +63,7 @@ import java.util.logging.Logger;
  * Time: 3:07 PM
  * To change this template use File | Settings | File Templates.
  */
-public class PressAndHoldExercisePanel extends VerticalPanel implements AudioAnswerListener {
+class PressAndHoldExercisePanel extends VerticalPanel implements AudioAnswerListener {
   private final Logger logger = Logger.getLogger("PressAndHoldExercisePanel");
 
   private static final String ANSWER_UPDATED = "Answer Updated";
@@ -262,9 +262,9 @@ public class PressAndHoldExercisePanel extends VerticalPanel implements AudioAns
           }
 
           @Override
-          public void stop() {
+          public void stop(long duration) {
             controller.logEvent(this, "AVP_RecordButton", exercise, "Stop_Recording");
-            super.stop();
+            super.stop(duration);
           }
 
           @Override
@@ -293,7 +293,7 @@ public class PressAndHoldExercisePanel extends VerticalPanel implements AudioAns
        * @param result        from server about the audio we just posted
        * @paramx questionState so we keep track of which questions have been answered
        * @param outer
-       * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
+       * @see RecordButton.RecordingListener#stopRecording(long)
        */
       @Override
       protected void receivedAudioAnswer(AudioAnswer result, final Panel outer) {
@@ -304,9 +304,9 @@ public class PressAndHoldExercisePanel extends VerticalPanel implements AudioAns
       }
 
       @Override
-      public void stopRecording() {
+      public void stopRecording(long duration) {
         scoreFeedback.setWaiting();
-        super.stopRecording();
+        super.stopRecording(duration);
         recordButton.setVisible(true);
         recordButton.setEnabled(false);
       }

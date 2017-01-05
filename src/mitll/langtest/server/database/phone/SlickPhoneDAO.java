@@ -52,8 +52,7 @@ import java.util.List;
 import java.util.Map;
 
 public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
-//  private static final Logger logger = LogManager.getLogger(SlickPhoneDAO.class);
-
+  //  private static final Logger logger = LogManager.getLogger(SlickPhoneDAO.class);
   private final PhoneDAOWrapper dao;
 
   public SlickPhoneDAO(Database database, DBConnection dbConnection) {
@@ -116,12 +115,11 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   public JSONObject getWorstPhonesJson(long userid, Collection<Integer> exids, Map<Integer, String> idToRef) {
     Collection<SlickPhoneReport> phoneReportByResult = dao.getPhoneReportByExercises((int) userid, exids);
     PhoneReport report = getPhoneReport(phoneReportByResult, idToRef, false, true);
-   // logger.info("getWorstPhonesJson phone report " + report);
+    // logger.info("getWorstPhonesJson phone report " + report);
     return new PhoneJSON().getWorstPhonesJson(report);
   }
 
   /**
-*
    * @param userid
    * @param ids
    * @param idToRef
@@ -164,7 +162,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
       int i = 1;
       c++;
 
-     // logger.info("#"+ c + " : " + report);
+      // logger.info("#"+ c + " : " + report);
       // info from result table
       int exid = report.exid();
       String scoreJson = report.scorejson();
@@ -172,7 +170,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 
       if (exid != currentExercise) {
         currentExercise = exid;
-      //  logger.debug("#" +c+  " adding " + exid + " score " + pronScore);
+        //  logger.debug("#" +c+  " adding " + exid + " score " + pronScore);
         totalScore += pronScore;
         totalItems++;
       }
@@ -194,6 +192,15 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     return new MakePhoneReport().getPhoneReport(phoneToScores, phoneToWordAndScore, totalScore, totalItems, sortByLatestExample);
   }
 
-  public int getNumRows() { return dao.getNumRows(); }
-  public boolean isEmpty() { return getNumRows() == 0; }
+  public void removeForResult(int resultid) {
+    dao.removeForResult(resultid);
+  }
+
+  public int getNumRows() {
+    return dao.getNumRows();
+  }
+
+  public boolean isEmpty() {
+    return getNumRows() == 0;
+  }
 }

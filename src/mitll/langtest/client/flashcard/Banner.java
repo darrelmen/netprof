@@ -186,7 +186,7 @@ public class Banner implements RequiresResize {
   /**
    * @param splashText
    * @return
-   * @see #makeNPFHeaderRow(String, boolean, String, HTML, ClickHandler, ClickHandler, ClickHandler, ClickHandler, ClickHandler, ClickHandler)
+   * @see #makeNPFHeaderRow(String, boolean, String, HTML, ClickHandler, ClickHandler, ClickHandler, ClickHandler, ClickHandler, ClickHandler, ClickHandler)
    */
   private Paragraph getSubtitle(String splashText) {
     subtitle = new Paragraph(splashText);
@@ -258,7 +258,7 @@ public class Banner implements RequiresResize {
   /**
    * @param userName
    * @return
-   * @see #makeNPFHeaderRow(String, boolean, String, HTML, ClickHandler, ClickHandler, ClickHandler, ClickHandler, ClickHandler, ClickHandler)
+   * @see #makeNPFHeaderRow(String, boolean, String, HTML, ClickHandler, ClickHandler, ClickHandler, ClickHandler, ClickHandler, ClickHandler, ClickHandler)
    */
   private HTML getUserNameWidget(String userName) {
     userNameWidget = new HTML(userName);

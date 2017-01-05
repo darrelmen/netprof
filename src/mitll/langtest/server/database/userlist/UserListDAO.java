@@ -413,8 +413,8 @@ import java.util.List;
           )
       );
     }
-    //logger.debug("getByExID : got " + lists);
-    finish(connection, statement, rs);
+    //logger.debug("getWhere : got " + lists);
+    finish(connection, statement, rs, sql);
     return lists;
   }
 

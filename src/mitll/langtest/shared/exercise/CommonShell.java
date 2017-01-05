@@ -56,4 +56,7 @@ public interface CommonShell extends Shell {
    * @return
    */
   Collection<String> getRefSentences();
+
+  CommonShell getShell();
+
 }

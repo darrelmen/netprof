@@ -221,7 +221,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
           logger.info("reallyCreateNewItems skipping header line");
           firstColIsEnglish = true;
         } else {
-          if (firstColIsEnglish || (isValidForeignPhrase(english) && !isValidForeignPhrase(fl))) {
+          if (firstColIsEnglish || (isValidForeignPhrase(english, "") && !isValidForeignPhrase(fl, ""))) {
             String temp = english;
             english = fl;
             fl = temp;
@@ -246,7 +246,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     for (CommonExercise candidate : newItems) {
       String foreignLanguage = candidate.getForeignLanguage();
       if (!currentKnownFL.contains(foreignLanguage)) {
-        if (isValidForeignPhrase(foreignLanguage)) {
+        if (isValidForeignPhrase(foreignLanguage, candidate.getTransliteration())) {
           getUserListManager().reallyCreateNewItem(userListID, candidate, serverProps.getMediaDir());
           actualItems.add(candidate);
         } else {
@@ -272,11 +272,12 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * Can't check if it's valid if we don't have a model.
    *
    * @param foreign
+   * @param transliteration
    * @return
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase(mitll.langtest.shared.custom.UserList, mitll.langtest.client.list.ListInterface, com.google.gwt.user.client.ui.Panel, boolean)
    */
-  private boolean isValidForeignPhrase(String foreign) {
-    return getProject().getAudioFileHelper().checkLTSOnForeignPhrase(foreign);
+  private boolean isValidForeignPhrase(String foreign, String transliteration) {
+    return getProject().getAudioFileHelper().checkLTSOnForeignPhrase(foreign, transliteration);
   }
 
   /**

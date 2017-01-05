@@ -58,6 +58,8 @@ import java.util.logging.Logger;
  */
 public abstract class PostAudioRecordButton extends RecordButton implements RecordButton.RecordingListener {
   private final Logger logger = Logger.getLogger("PostAudioRecordButton");
+
+  public static final int MIN_DURATION = 150;
   private static final int BUTTON_WIDTH = 93; // was 68
 
   private boolean validAudio = false;
@@ -78,6 +80,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
    * @param recordInResults
    * @param recordButtonTitle
    * @param stopButtonTitle
+   * @paramx audioType
    * @see GoodwaveExercisePanel.ASRRecordAudioPanel.MyPostAudioRecordButton
    */
   public PostAudioRecordButton(int exerciseID,
@@ -112,17 +115,30 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   }
 
   /**
-   * @see mitll.langtest.client.recorder.RecordButton#stop()
+   * @see RecordButton#stop(long)
+   * @param duration
    */
-  public void stopRecording() {
-    controller.stopRecording(new WavCallback() {
-      @Override
-      public void getBase64EncodedWavFile(String bytes) {
-        postAudioFile(bytes);
-      }
-    });
+  public void stopRecording(long duration) {
+    if (duration > MIN_DURATION) {
+      controller.stopRecording(new WavCallback() {
+        @Override
+        public void getBase64EncodedWavFile(String bytes) {
+          postAudioFile(bytes);
+        }
+      });
+    }
+    else {
+      showPopup(AudioAnswer.Validity.TOO_SHORT.getPrompt());
+      hideWaveform();
+    }
   }
 
+  protected void hideWaveform() {}
+
+  /**
+   * @see RecordingListener#stopRecording
+   * @param base64EncodedWavFile
+   */
   private void postAudioFile(String base64EncodedWavFile) {
     reqid++;
     final long then = System.currentTimeMillis();
@@ -240,6 +256,12 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     controller.startRecording();
   }
 
+  /**
+   * TODO : consider why we have to do this from the client.
+   *
+   * @see PostAudioRecordButton#postAudioFile
+   * @param result
+   */
   protected void useInvalidResult(AudioAnswer result) {
     controller.logEvent(this, "recordButton", "" + exerciseID, "invalid recording " + result.getValidity());
     //  logger.info("useInvalidResult platform is " + getPlatform());

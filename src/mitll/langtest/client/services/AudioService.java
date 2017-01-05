@@ -43,6 +43,7 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.scoring.AudioContext;
+import mitll.langtest.shared.scoring.ImageOptions;
 
 @RemoteServiceRelativePath("audio-manager")
 public interface AudioService extends RemoteService {
@@ -69,16 +70,17 @@ public interface AudioService extends RemoteService {
 
 
   /**
+   * TODO : why exerciseID a String
    * @see LangTest#getImage(int, String, String, String, int, int, String, AsyncCallback)
    * @param reqid
    * @param audioFile
    * @param imageType
-   * @param width
-   * @param height
+   * @param imageOptions
    * @param exerciseID
    * @return
    */
-  ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height, String exerciseID);
+  ImageResponse getImageForAudioFile(int reqid, String audioFile, String imageType, ImageOptions imageOptions,
+                                     String exerciseID);
 
   /**
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase(UserList, ListInterface, Panel, boolean)

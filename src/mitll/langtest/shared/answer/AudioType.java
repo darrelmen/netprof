@@ -39,7 +39,7 @@ public enum AudioType implements IsSerializable {
 
   REGULAR("regular"),
   SLOW("slow"),
-    FAST_AND_SLOW("fastAndSlow"),  // really old legacy thing
+  @Deprecated FAST_AND_SLOW("fastAndSlow"),  // really old legacy thing
   PRACTICE("practice"),  // or avp or flashcard
   // FLASHCARD("flashcard"),
   LEARN("learn"),

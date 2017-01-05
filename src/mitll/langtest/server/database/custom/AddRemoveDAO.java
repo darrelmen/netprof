@@ -180,7 +180,7 @@ public class AddRemoveDAO extends DAO {
 
       // logger.debug("getReviewed sql " + sql + " yielded " + lists.size());
       if (!lists.isEmpty()) logger.debug("getReviewed yielded " + lists.size());
-      finish(connection, statement, rs);
+      finish(connection, statement, rs, sql);
     } catch (SQLException e) {
       logger.error("Got " + e + " doing " + sql, e);
     }

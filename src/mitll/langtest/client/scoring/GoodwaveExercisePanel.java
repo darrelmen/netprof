@@ -103,8 +103,6 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
   private static final String REFERENCE = "";
   private static final String RECORD_YOURSELF = "Record";
   private static final String RELEASE_TO_STOP = "Release";
-  public static final String CORRECT = "correct";
-  public static final String INCORRECT = "incorrect";
   public static final String DEFAULT_SPEAKER = "Default Speaker";
 
   /**
@@ -306,7 +304,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     Panel vp = new VerticalPanel();
     vp.getElement().setId("getQuestionContent_verticalContainer");
     vp.addStyleName("blockStyle");
-    vp.addStyleName("topFiveMargin");
+//    vp.addStyleName("topFiveMargin");
 
     new UnitChapterItemHelper<T>(controller.getTypeOrder()).addUnitChapterItem(exercise, vp);
     vp.add(getItemContent(exercise));
@@ -336,6 +334,10 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
     if (path != null) {
       path = CompressedAudio.getPathNoSlashChange(path);
     }
+    //else {
+//      logger.info("getScoringAudioPanel path is " +path +
+//          " for " + e.getAudioAttributes());
+   // }
     contentAudio = getAudioPanel(path);
     contentAudio.setScreenPortion(screenPortion);
     return contentAudio;
@@ -412,6 +414,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
       InlineHTML labelWidget = new InlineHTML(label);
       labelWidget.addStyleName("Instruction-title");
       nameValueRow.add(labelWidget);
+      labelWidget.setWidth("150px");
     }
 
     // TODO : for now, since we need to deal with underline... somehow...
@@ -572,7 +575,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
      * @see GoodwaveExercisePanel#getAnswerWidget
      */
     ASRRecordAudioPanel(ExerciseController controller, T exercise, String instance) {
-      super(exercise.getForeignLanguage(), controller, scorePanel, REFERENCE, exercise, instance);
+      super(exercise.getForeignLanguage(), exercise.getTransliteration(), controller, scorePanel, REFERENCE, exercise, instance);
       this.index = 1;
       getElement().setId("ASRRecordAudioPanel");
     }
@@ -722,6 +725,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
             RECORD_YOURSELF,
             controller.getProps().doClickAndHold() ? RELEASE_TO_STOP : "Stop"
         );
+//            RECORD_YOURSELF, controller.getProps().doClickAndHold() ? RELEASE_TO_STOP : "Stop", Result.AUDIO_TYPE_PRACTICE);
       }
 
       @Override
@@ -743,15 +747,14 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
       }
 
       @Override
-      public void stopRecording() {
+      public void stopRecording(long duration) {
         controller.logEvent(this, "RecordButton", getExerciseID(), "stopRecording");
 
         playAudioPanel.setEnabled(true);
         isBusy = false;
-        super.stopRecording();
+        super.stopRecording(duration);
         recordImage1.setVisible(false);
         recordImage2.setVisible(false);
-
       }
 
       @Override
@@ -767,7 +770,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonShell & AudioRefExer
 
       /**
        * @param result
-       * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording()
+       * @see RecordingListener#stopRecording(long)
        */
       @Override
       protected void useInvalidResult(AudioAnswer result) {

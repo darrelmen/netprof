@@ -102,7 +102,6 @@ import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -235,6 +234,7 @@ public class DatabaseImpl implements Database {
     this.configDir = relativeConfigDir;
     this.serverProps = serverProps;
     this.logAndNotify = logAndNotify;
+    this.pathHelper = pathHelper;
 
     if (maybeGetH2Connection(relativeConfigDir, dbName, serverProps)) return;
     then = System.currentTimeMillis();
@@ -548,6 +548,7 @@ public class DatabaseImpl implements Database {
 
   /**
    * Just for import
+   *
    * @param projectid
    */
   public void rememberProject(int projectid) {
@@ -754,9 +755,9 @@ public class DatabaseImpl implements Database {
    * TODO : why is this so confusing???
    *
    * @param userExercise
-   * @see mitll.langtest.server.services.ListServiceImpl#editItem
    * @param keepAudio
-   * @see mitll.langtest.server.LangTestDatabaseImpl#editItem
+   * @see mitll.langtest.server.services.ListServiceImpl#editItem
+   * @seex mitll.langtest.server.LangTestDatabaseImpl#editItem
    * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#postEditItem
    */
   public void editItem(CommonExercise userExercise, boolean keepAudio) {
@@ -766,7 +767,9 @@ public class DatabaseImpl implements Database {
         " mediaDir : " + getServerProps().getMediaDir() +
         " initially audio was\n\t " + userExercise.getAudioAttributes());
 
-    getUserListManager().editItem(userExercise, true, getServerProps().getMediaDir());
+    getUserListManager().editItem(userExercise,
+        true, // create if doesn't exist
+        getServerProps().getMediaDir());
 
     Set<AudioAttribute> original = new HashSet<>(userExercise.getAudioAttributes());
     Set<AudioAttribute> defects = audioDAO.getAndMarkDefects(userExercise, userExercise.getFieldToAnnotation());
@@ -782,14 +785,14 @@ public class DatabaseImpl implements Database {
       logger.debug("not an overlay " + exercise);
     } else {
       exercise = userExercise;
-      logger.debug("made overlay " + exercise);
+      logger.debug("\teditItem made overlay " + exercise);
     }
 
     if (notOverlay) {
       logger.error("huh? couldn't make overlay or find user exercise for " + userExercise);
     } else {
       boolean b = original.removeAll(defects);  // TODO - does this work really without a compareTo?
-      logger.debug(b ? "removed defects " + original.size() + " now" : " didn't remove any defects - " + defects.size());
+      logger.debug(b ? "editItem removed defects " + original.size() + " now" : "editItem didn't remove any defects - " + defects.size());
 
       MutableAudioExercise mutableAudio = exercise.getMutableAudio();
       for (AudioAttribute attribute : defects) {
@@ -810,12 +813,15 @@ public class DatabaseImpl implements Database {
         logger.debug("\t copying " + toCopy);
         audioDAO.add((int) toCopy.getUserid(), toCopy.getAudioRef(), overlayID, toCopy.getTimestamp(), toCopy.getAudioType(), toCopy.getDurationInMillis());
       }*/
-        }
+    }
 
     getSectionHelper(projectID).refreshExercise(exercise);
   }
 
   /**
+   * After marking an audio defective, we want to make an annotation that indicates it's no longer something that
+   * needs to be fixed.
+   *
    * @param audioAttribute
    * @see mitll.langtest.server.services.QCServiceImpl#markAudioDefect
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getPanelForAudio
@@ -974,8 +980,7 @@ public class DatabaseImpl implements Database {
 
       if (widgetType.equals(UserPassLogin.USER_NAME_BOX)) {
         return true;
-      }
-      else {
+      } else {
         //  logger.debug("logEvent for user " + userid);
         userid = userDAO.getBeforeLoginUser();
       }
@@ -1073,8 +1078,8 @@ public class DatabaseImpl implements Database {
   /**
    * @param projid
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getResultAlternatives
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getResults
+   * @seex mitll.langtest.server.LangTestDatabaseImpl#getResultAlternatives
+   * @seex mitll.langtest.server.LangTestDatabaseImpl#getResults
    */
   public Collection<MonitorResult> getMonitorResults(int projid) {
     List<MonitorResult> monitorResults = resultDAO.getMonitorResults(projid);
@@ -1092,7 +1097,7 @@ public class DatabaseImpl implements Database {
   /**
    * @param monitorResults
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#getResults
+   * @seex mitll.langtest.server.LangTestDatabaseImpl#getResults
    * @see #getMonitorResults(int)
    */
   public List<MonitorResult> getMonitorResultsWithText(List<MonitorResult> monitorResults) {
@@ -1160,7 +1165,7 @@ public class DatabaseImpl implements Database {
    * @param projectid
    * @return
    * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceForUser
-   * @see DatabaseImpl#configureProject(String, Project)
+   * @seex DatabaseImpl#configureProject(String, Project)
    */
   public Map<Integer, String> getExerciseIDToRefAudio(int projectid) {
     logger.info("getExerciseIDToRefAudio for " + projectid);
@@ -1284,7 +1289,7 @@ public class DatabaseImpl implements Database {
    * @param exid
    * @param projectid
    * @return
-   * @see mitll.langtest.server.LangTestDatabaseImpl#deleteItem
+   * @seex mitll.langtest.server.LangTestDatabaseImpl#deleteItem
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#deleteItem
    */
   @Deprecated
@@ -1367,7 +1372,6 @@ public class DatabaseImpl implements Database {
   }
 
 
-
   private AddRemoveDAO getAddRemoveDAO() {
     return null;//addRemoveDAO;
   }
@@ -1415,7 +1419,9 @@ public class DatabaseImpl implements Database {
    * @see DownloadServlet#writeAllAudio
    */
   public void writeUserListAudio(OutputStream out, int projectid) throws Exception {
-    new AudioExport(getServerProps()).writeZipJustOneAudio(out, getSectionHelper(projectid), getExercises(projectid), installPath);
+    new AudioExport(getServerProps()).writeZipJustOneAudio(out, getSectionHelper(projectid),
+        getExercises(projectid), installPath,
+        getProject(projectid).getLanguage());
   }
 
   /**
@@ -1591,7 +1597,7 @@ public class DatabaseImpl implements Database {
    * @see mitll.langtest.server.services.ScoringServiceImpl#getPretestScore
    */
   public void rememberScore(int resultID, PretestScore asrScoreForAudio, boolean isCorrect) {
-    getAnswerDAO().changeAnswer(resultID, asrScoreForAudio.getHydecScore(), asrScoreForAudio.getProcessDur(), asrScoreForAudio.getJson(),isCorrect);
+    getAnswerDAO().changeAnswer(resultID, asrScoreForAudio.getHydecScore(), asrScoreForAudio.getProcessDur(), asrScoreForAudio.getJson(), isCorrect);
     recordWordAndPhone.recordWordAndPhoneInfo(resultID, asrScoreForAudio);
   }
 
@@ -1620,12 +1626,17 @@ public class DatabaseImpl implements Database {
     Set<Integer> uniqueIDs = new HashSet<>();
 
     int context = 0;
+    Map<Integer, String> exToTranscript = new HashMap<>();
+    Map<Integer, String> exToContextTranscript = new HashMap<>();
+
     for (CommonExercise shell : exercises) {
       if (shell.hasContext()) context++;
       boolean add = uniqueIDs.add(shell.getID());
       if (!add) {
         logger.warn("getMaleFemaleProgress found duplicate id " + shell.getID() + " : " + shell);
       }
+      exToTranscript.put(shell.getID(), shell.getForeignLanguage());
+      exToContextTranscript.put(shell.getID(), shell.getContext());
     }
 /*
     logger.info("getMaleFemaleProgress found " + total + " total exercises, " +
@@ -1634,7 +1645,8 @@ public class DatabaseImpl implements Database {
         " males " + userMapMales.size() + " females " + userMapFemales.size());
 */
 
-    return getAudioDAO().getRecordedReport(userMapMales, userMapFemales, total, uniqueIDs, context);
+    return getAudioDAO().getRecordedReport(userMapMales, userMapFemales, total, uniqueIDs,
+        exToTranscript, exToContextTranscript, context);
   }
 
   /**
@@ -1642,12 +1654,15 @@ public class DatabaseImpl implements Database {
    * @return
    * @see LangTestDatabaseImpl#getMaleFemaleProgress()
    */
+/*
   public Map<String, Float> getH2MaleFemaleProgress(int projectid) {
     IUserDAO userDAO = getUserDAO();
     Map<Integer, User> userMapMales = userDAO.getUserMap(true);
     Map<Integer, User> userMapFemales = userDAO.getUserMap(false);
 
     Collection<CommonExercise> exercises = getExercises(projectid);
+    Map<Integer, String> exToTranscript = new HashMap<>();
+    Map<Integer, String> exToContextTranscript = new HashMap<>();
     float total = exercises.size();
     Set<Integer> uniqueIDs = new HashSet<>();
 
@@ -1658,15 +1673,62 @@ public class DatabaseImpl implements Database {
       if (!add) {
         logger.warn("getMaleFemaleProgress found duplicate id " + shell.getID() + " : " + shell);
       }
+      exToTranscript.put(shell.getID(), shell.getForeignLanguage());
+      exToContextTranscript.put(shell.getID(), shell.getContext());
+    }
+
+    logger.info("getMaleFemaleProgress found " + total + " total exercises, " +
+        uniqueIDs.size() +
+        " unique");
+
+
+    return getAudioDAO().getRecordedReport(
+        userMapMales,
+        userMapFemales,
+        total,
+        uniqueIDs,
+        exToTranscript,
+        exToContextTranscript,
+        context);
+  }
+*/
+
+  /**
+   * Look at the exercises to determine which ones have regular, slow, or context audio and broken down
+   * by gender.
+   *
+   * @return
+   * @deprecated
+   */
+/*
+  public Map<String, Float> getMaleFemaleProgressEx() {
+    IUserDAO userDAO = getUserDAO();
+//    Map<Long, User> userMapMales = userDAO.getUserMap(true);
+//    Map<Long, User> userMapFemales = userDAO.getUserMap(false);
+
+    Collection<CommonExercise> exercises1 = getExercises();
+    Collection<? extends CommonShell> exercises = exercises1;
+    float total = exercises.size();
+    //Set<String> uniqueIDs = new HashSet<String>();
+
+    int context = 0;
+    for (CommonShell shell : exercises) {
+      if (shell.getContext() != null &&
+          !shell.getContext().isEmpty()) context++;
+//      boolean add = uniqueIDs.add(shell.getID());
+//      if (!add) {
+//        logger.warn("getMaleFemaleProgress found duplicate id " + shell.getID() + " : " + shell);
+//      }
     }
     logger.info("getH2MaleFemaleProgress found " + total + " total exercises, " +
         uniqueIDs.size() +
         " unique" +
         " males " + userMapMales.size() + " females " + userMapFemales.size());
 
-    return new AudioDAO(this, new UserDAO(this)).getRecordedReport(userMapMales, userMapFemales, total, uniqueIDs, context);
+    return getAudioDAO().getRecordedReportFromExercises(//userMapMales, userMapFemales,
+        total, context, exercises1);
   }
-
+  */
   @Override
   public LogAndNotify getLogAndNotify() {
     return logAndNotify;

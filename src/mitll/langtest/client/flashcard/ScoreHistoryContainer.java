@@ -34,12 +34,14 @@ package mitll.langtest.client.flashcard;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.TooltipHelper;
@@ -92,6 +94,7 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
   }
 
   /**
+   * Scroll to first score.
    * @param sortedHistory
    * @return
    * @see SetCompleteDisplay#getScoreHistory
@@ -99,12 +102,26 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
   public Panel getTableWithPager(List<ExerciseCorrectAndScore> sortedHistory) {
     Panel tableWithPager = getTableWithPager();
     tableWithPager.getElement().setId("TableScoreHistory");
-    //  tableWithPager.setWidth(TABLE_HISTORY_WIDTH + "px");
-    // tableWithPager.addStyleName("floatLeft");
 
+    int last = -1;
+    int i = 0;
     for (ExerciseCorrectAndScore exerciseCorrectAndScore : sortedHistory) {
       addItem(exerciseCorrectAndScore);
+      if (last == -1 && !exerciseCorrectAndScore.isEmpty()) {
+  //      logger.info("found non empty " + exerciseCorrectAndScore.getId());
+        last = i;
+      }
+      i++;
     }
+
+    final int flast = last;
+    Scheduler.get().scheduleDeferred(new Command() {
+      public void execute() {
+       // logger.info("scroll to visible " + flast);
+        scrollToVisible(flast);
+      }
+    });
+
     flush();
     return tableWithPager;
   }
@@ -143,7 +160,6 @@ class ScoreHistoryContainer extends SimplePagingContainer<ExerciseCorrectAndScor
     table.addColumnSortHandler(columnSortHandler2);
 
     table.setWidth("100%", true);
-
     // We know that the data is sorted alphabetically by default.
 //    table.getColumnSortList().push(englishCol);
   }

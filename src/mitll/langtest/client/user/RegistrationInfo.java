@@ -57,7 +57,7 @@ class RegistrationInfo extends BasicDialog {
 
   private final FormField ageEntryGroup;
   private final FormField dialectGroup;
-  private final RadioButton male = new RadioButton(GENDER_GROUP, "Male");
+  private final RadioButton male   = new RadioButton(GENDER_GROUP, "Male");
   private final RadioButton female = new RadioButton(GENDER_GROUP, "Female");
   private final Panel genders;
   private static final Boolean ADD_AGE = true;
@@ -90,7 +90,7 @@ class RegistrationInfo extends BasicDialog {
     dialectGroup.setVisible(visible);
   }
 
-  public void hideAge() {
+  void hideAge() {
     ageEntryGroup.setVisible(false);
   }
 
@@ -98,7 +98,7 @@ class RegistrationInfo extends BasicDialog {
     final FormField dialectGroup = addControlFormFieldWithPlaceholder(dialogBox, false, 3, 25, DIALECT);
     dialectGroup.box.addKeyUpHandler(new KeyUpHandler() {
       public void onKeyUp(KeyUpEvent event) {
-        if (dialectGroup.box.getText().length() > 0) {
+        if (!dialectGroup.getSafeText().isEmpty()) {
           dialectGroup.group.setType(ControlGroupType.NONE);
         }
       }
@@ -110,7 +110,7 @@ class RegistrationInfo extends BasicDialog {
    * @return
    * @see mitll.langtest.client.user.UserPassLogin#getSignUpButton(com.github.gwtbootstrap.client.ui.base.TextBoxBase, com.github.gwtbootstrap.client.ui.base.TextBoxBase)
    */
-  public boolean checkValidGender() {
+  boolean checkValidGender() {
     boolean valid = male.getValue() || female.getValue();
     if (!valid) {
       male.setFocus(true);
@@ -123,11 +123,11 @@ class RegistrationInfo extends BasicDialog {
     return male.getValue();
   }
 
-  public FormField getAgeEntryGroup() {
+  FormField getAgeEntryGroup() {
     return ageEntryGroup;
   }
 
-  public FormField getDialectGroup() {
+  FormField getDialectGroup() {
     return dialectGroup;
   }
 

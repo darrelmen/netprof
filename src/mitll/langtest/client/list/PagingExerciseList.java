@@ -45,7 +45,6 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.PopupHelper;
-import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -80,13 +79,14 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   private TypeAhead typeAhead;
   long userListID = -1;
   private int unaccountedForVertical = 160;
-  private boolean unrecorded, defaultAudioFilter;
+//  private boolean unrecorded, defaultAudioFilter;
   private boolean onlyExamples;
 
   private Timer waitTimer = null;
   private final SafeUri animated = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "animated_progress28.gif");
   private final SafeUri white = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "white_32x32.png");
   private final com.github.gwtbootstrap.client.ui.Image waitCursor = new com.github.gwtbootstrap.client.ui.Image(white);
+  boolean showFirstNotCompleted = false;
 
   /**
    * @param currentExerciseVPanel
@@ -97,8 +97,9 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * @param showTypeAhead
    * @param instance
    * @param incorrectFirst
-   * @see mitll.langtest.client.custom.content.AVPHelper#makeExerciseList(Panel, String)
-   * @see mitll.langtest.client.custom.content.NPFHelper#makeExerciseList(Panel, String)
+   * @param showFirstNotCompleted
+   * @see mitll.langtest.client.custom.content.AVPHelper#makeExerciseList
+   * @see mitll.langtest.client.custom.content.NPFHelper#makeExerciseList
    */
   PagingExerciseList(Panel currentExerciseVPanel,
                      ExerciseServiceAsync service,
@@ -107,12 +108,16 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
                      ExerciseController controller,
                      boolean showTypeAhead,
                      String instance,
-                     boolean incorrectFirst) {
+                     boolean incorrectFirst,
+                     boolean showFirstNotCompleted) {
     super(currentExerciseVPanel, service, feedback, factory, controller, instance, incorrectFirst);
     this.controller = controller;
     this.showTypeAhead = showTypeAhead;
+    this.showFirstNotCompleted = showFirstNotCompleted;
+
     addComponents();
     getElement().setId("PagingExerciseList_" + instance);
+//    if (showFirstNotCompleted) logger.info("show first completed for " + instance);
   }
 
   @Override
@@ -136,6 +141,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
 
   /**
    * Add two rows -- the search box and then the item list
+   * @see #PagingExerciseList
    */
   protected void addComponents() {
     addTableWithPager(makePagingContainer());
@@ -145,12 +151,14 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * @param selectionState
    * @param prefix
    * @param onlyWithAudioAnno
-   * @paramz setTypeAheadText
+   * @param onlyUnrecorded
+   * @param onlyDefaultUser
+   * @param onlyUninspected
+   * @paramx setTypeAheadText
    * @see #addTypeAhead(com.google.gwt.user.client.ui.Panel)
    */
-  void loadExercises(String selectionState, String prefix, boolean onlyWithAudioAnno) {
+  void loadExercises(String selectionState, String prefix, boolean onlyWithAudioAnno, boolean onlyUnrecorded, boolean onlyDefaultUser, boolean onlyUninspected) {
     scheduleWaitTimer();
-
 /*    logger.info("PagingExerciseList.loadExercises : looking for " +
         "'" + prefix + "' (" + prefix.length() + " chars) in list id " + userListID + " instance " + getInstance());
         */
@@ -166,12 +174,28 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
         .setPrefix(prefix)
         .setUserListID(userListID)
         .setRole(getRole())
-        .setOnlyUnrecordedByMe(getUnrecorded())
+        .setOnlyUnrecordedByMe(false)
         .setOnlyExamples(isOnlyExamples())
         .setIncorrectFirstOrder(incorrectFirstOrder)
-        .setOnlyDefaultAudio(defaultAudioFilter);
+        .setOnlyDefaultAudio(false)
+        .setOnlyUninspected(false);
   }
 
+  /**
+   *   ExerciseListRequest getRequest(String prefix) {
+   return new ExerciseListRequest(incrRequest(),
+   controller.getUserState().getUser())
+   .setPrefix(prefix)
+   .setUserListID(userListID)
+   .setRole(getRole())
+   .setOnlyUnrecordedByMe(getUnrecorded())
+   .setOnlyExamples(isOnlyExamples())
+   .setIncorrectFirstOrder(incorrectFirstOrder)
+   .setOnlyDefaultAudio(defaultAudioFilter);
+   }
+
+
+   */
   /**
    * @return
    * @see PagingExerciseList#loadExercises
@@ -196,15 +220,37 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     return pagingContainer;
   }
 
+  /**
+   * Skip to first not completed or just go to the first item.
+   *
+   * @return
+   * @see #loadFirstExercise
+   */
   @Override
   protected T findFirstExercise() {
-    return controller.showCompleted() ? getFirstNotCompleted() : super.findFirstExercise();
+    return showFirstNotCompleted ? getFirstNotCompleted() : super.findFirstExercise();
+  }
+
+  /**
+   * Sometimes we want to not respect if there's an item selection in the url.
+   *
+   * @param searchIfAny
+   * @param exerciseID
+   */
+  protected void goToFirst(String searchIfAny, int exerciseID) {
+    if (showFirstNotCompleted) {
+      // logger.info("goToFirst " + exerciseID + " searchIfAny '" + searchIfAny +"'");
+      loadFirstExercise(searchIfAny);
+    } else {
+      super.goToFirst(searchIfAny, exerciseID);
+    }
   }
 
   private T getFirstNotCompleted() {
     for (T es : pagingContainer.getExercises()) {
       STATE state = es.getState();
       if (state != null && state.equals(STATE.UNSET)) {
+        // logger.info("first unset is " + es.getID() + " state " + state);
         return es;
       }
     }
@@ -240,6 +286,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * add left side components
    *
    * @param pagingContainer
+   * @see #addComponents
    */
   protected void addTableWithPager(ClickablePagingContainer<T> pagingContainer) {
     // row 1
@@ -282,17 +329,16 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
   private Stack<Long> pendingRequests = new Stack<>();
-  // private int typeRequestID = 0;
 
   private void gotTypeAheadEvent(String text, boolean setTypeAheadText) {
     //  logger.info("got type ahead '" + text + "' at " + new Date(keypressTimestamp));
     if (!setTypeAheadText) {
       pendingRequests.add(System.currentTimeMillis());
     }
-    loadExercises(getHistoryTokenFromUIState(text, -1), text, false);
+    loadExercises(getHistoryTokenFromUIState(text, -1), text, false,false, false, false);
   }
 
-  protected void scheduleWaitTimer() {
+  void scheduleWaitTimer() {
     if (waitTimer != null) {
       waitTimer.cancel();
     }
@@ -305,7 +351,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     waitTimer.schedule(700);
   }
 
-  protected String getTypeAheadText() {
+  String getTypeAheadText() {
     return typeAhead != null ? typeAhead.getText() : "";
   }
 
@@ -411,7 +457,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   public List<T> rememberExercises(List<T> result) {
     inOrderResult = result;
     if (doShuffle) {
-     // logger.info(getInstance() + " : rememberExercises - shuffling " + result.size() + " items");
+      // logger.info(getInstance() + " : rememberExercises - shuffling " + result.size() + " items");
       ArrayList<T> ts = new ArrayList<>(result);
       result = ts;
       Shuffler.shuffle(ts);
@@ -517,7 +563,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   @Override
   public void onResize() {
     super.onResize();
-
     pagingContainer.onResize(getCurrentExercise());
   }
 
@@ -528,7 +573,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   protected void markCurrentExercise(int itemID) {
     pagingContainer.markCurrentExercise(itemID);
   }
-
 
   public void setUserListID(long userListID) {
     this.userListID = userListID;
@@ -543,14 +587,17 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * @return
    * @see HistoryExerciseList#loadExercisesUsingPrefix
    */
+/*
   boolean getUnrecorded() {
     return unrecorded;
   }
+*/
 
   /**
-   * @param unrecorded
-   * @see SimpleChapterNPFHelper#getMyListLayout
+   * @paramx unrecorded
+   * @seex SimpleChapterNPFHelper#getMyListLayout
    */
+/*
   public void setUnrecorded(boolean unrecorded) {
     this.unrecorded = unrecorded;
   }
@@ -558,6 +605,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   public void setDefaultAudioFilter(boolean unrecorded) {
     this.defaultAudioFilter = unrecorded;
   }
+*/
 
   boolean isOnlyExamples() {
     return onlyExamples;

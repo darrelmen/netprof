@@ -92,6 +92,11 @@ public class SlickWordDAO extends BaseUserExerciseDAO implements IWordDAO {
     return dao.insert(toSlick(word));
   }
 
+  @Override
+  public void removeForResult(int resultid) {
+    dao.removeForResult(resultid);
+  }
+
   public Map<Integer, Integer> getOldToNew() {
     Map<Integer, Integer> oldToNew = new HashMap<>();
     for (SlickWord word : dao.getAll()) oldToNew.put(word.legacyid(), word.id());
