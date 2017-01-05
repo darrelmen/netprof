@@ -359,9 +359,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
                      Collection<User.Permission> permissions,
                      User.Kind kind,
 
-                     //      String freeTextPassword,
-                     //      String passwordH,
-
                      String emailH,
                      String email,
                      String device,
@@ -371,29 +368,19 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     // Timestamp now = new Timestamp(System.currentTimeMillis());
     // getConvertedPermissions(permissions, now);
 
-    //  List<mitll.hlt.domino.shared.model.user.User.Role> ts = Collections.emptyList();
-    Set<String> roles = new HashSet<>();
-
-    roles.add(kind.getName());
-
     ClientUserDetail updateUser = new ClientUserDetail(
         userID,
         first,
         last,
         email,
         gender.equalsIgnoreCase("male") ? DMALE : DFEMALE,
-        roles,
+        Collections.singleton(kind.getRole()),
         getGroup()
     );
-
-    //  logger.info("update user " + updateUser.getPrimaryGroup());
-    //  logger.info("update user days " + updateUser.getPrimaryGroup().getPasswordPeriodDays());
 
     AccountDetail acctDetail = new AccountDetail();
     updateUser.setAcctDetail(acctDetail);
     acctDetail.setCrTime(new Date());
-//    SResult<ClientUserDetail> clientUserDetailSResult = getClientUserDetailSResult(updateUser, passwordH);
-
     SResult<ClientUserDetail> clientUserDetailSResult = addUserToMongo(updateUser,
         url,
         true);
@@ -871,14 +858,17 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @param perms
    * @return
    */
-  private User toUser(mitll.hlt.domino.shared.model.user.User dominoUser, Collection<User.Permission> perms) {
+  private User toUser(mitll.hlt.domino.shared.model.user.User dominoUser,
+                      Collection<User.Permission> perms) {
     // logger.info("toUser " + dominoUser);
     boolean admin = isAdmin(dominoUser);
     long creationTime = 0;
+    String device = "";
     // logger.info("\ttoUser admin " + admin);
     if (dominoUser instanceof DBUser) {
       AccountDetail acctDetail = ((DBUser) dominoUser).getAcctDetail();
       if (acctDetail != null) {
+        device = acctDetail.getDevice().toString();
         if (acctDetail.getCrTime() != null) {
           creationTime = acctDetail.getCrTime().getTime();
         } else {
@@ -888,7 +878,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         logger.info("toUser no acct detail for " + dominoUser.getDocumentDBID());
       }
     } else {
-      logger.info("toUser domino user " + dominoUser.getDocumentDBID() + " is not a db user");
+      logger.warn("toUser domino user " + dominoUser.getDocumentDBID() + " is not a db user?");
     }
 
     String email = dominoUser.getEmail();
@@ -909,7 +899,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         getUserKind(dominoUser),
         email,
         email == null ? "" : Md5Hash.getHash(email),//dominoUser.emailhash(),
-        "",//        dominoUser.device(),
+        device,//        dominoUser.device(),
         "",//dominoUser.resetpasswordkey(),
         //dominoUser.enabledreqkey(),
         creationTime//dominoUser.modified().getTime()
@@ -917,9 +907,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
     user.setFirst(dominoUser.getFirstName());
     user.setLast(dominoUser.getLastName());
-
 //    logger.info("\ttoUser return " + user);
-
     return user;
   }
 
@@ -959,12 +947,15 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
     User.Kind kind = roleToKind.get(firstRole);
     if (kind == null) {
-      logger.error("getUserKind no user for " + firstRole);
-      kind = User.Kind.STUDENT;
+      try {
+        kind = User.Kind.valueOf(firstRole.toUpperCase());
+        // shouldn't need this
+        logger.debug("getUserKind lookup by NetProF user role " + firstRole);
+      } catch (IllegalArgumentException e) {
+        logger.error("getUserKind no user for " + firstRole);
+        kind = User.Kind.STUDENT;
+      }
     }
-
-//    logger.info("getUserKind convert " + firstRole + " to " + kind);
-
     return kind;
   }
 

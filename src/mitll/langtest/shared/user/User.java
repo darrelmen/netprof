@@ -117,8 +117,12 @@ public class User extends MiniUser {
     return Arrays.asList(Kind.STUDENT, Kind.TEACHER, Kind.AUDIO_RECORDER, Kind.CONTENT_DEVELOPER, Kind.PROJECT_ADMIN, Kind.TEST);
   }
 
+  /**
+   * For right now,  you can only choose to be a student initially.
+   * @return
+   */
   public static Collection<User.Kind> getSelfChoiceRoles() {
-    return Arrays.asList(Kind.STUDENT, Kind.TEACHER);
+    return Arrays.asList(Kind.STUDENT);//, Kind.TEACHER);
   }
 
 /*
