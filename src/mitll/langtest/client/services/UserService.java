@@ -50,15 +50,7 @@ import java.util.Map;
 public interface UserService extends RemoteService {
   User getUserFromSession();
 
-  /**
-   * @param login
-   * @param freeTextPassword
-   * @return
-   * @see mitll.langtest.client.user.SignInForm#gotLogin
-   */
-  //User userExists(String login, String freeTextPassword);
-
-  /**
+    /**
    * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser(String, String)
    * @param userId
    * @param attemptedHashedPassword - hashed - don't send clear password

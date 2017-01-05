@@ -117,7 +117,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       Mailer m = new Mailer(new MailerProperties(props));
       mitll.hlt.domino.server.util.ServerProperties dominoProps =
           new ServerProperties(props, "1.0", "demo", "0", "now");
-      dominoProps.updateProperty(ServerProperties.APP_NAME_PROP, serverProps.getAppTitle());
+
+
+     //
+      // dominoProps.updateProperty(ServerProperties.APP_NAME_PROP, serverProps.getAppTitle());
 //      String appName = dominoProps.getAppName();
       //logger.info("app name is " +appName);
 
@@ -722,7 +725,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   @Override
   public User getUserByID(String id) {
     mitll.hlt.domino.shared.model.user.User user1 = delegate.getUser(id);
-
+    if (user1 == null) {
+      logger.warn("getUserByID no user by '" + id + "'");
+    }
     return user1 == null ? null : toUser(user1);
 //    List<DBUser> users = getDbUsersByUserID(id);
 //    User user = users.isEmpty() ? null : toUser(users.iterator().next());

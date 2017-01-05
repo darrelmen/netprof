@@ -595,7 +595,7 @@ UserState userState;
     } else {
       pendingReq = true;
       if (DEBUG || true) logger.info("ExerciseList.askServerForExercise id = " + itemID + " instance " + instance);
-      service.getExercise(itemID, getUser(), incorrectFirstOrder, new ExerciseAsyncCallback());
+      service.getExercise(itemID, incorrectFirstOrder, new ExerciseAsyncCallback());
     }
 
     // go get next and cache it
@@ -608,7 +608,7 @@ UserState userState;
       T next = getAt(i + 1);
       if (next.getID() != EditItem.NEW_EXERCISE_ID) {
       //  logger.info("ask for next " + next);
-        service.getExercise(next.getID(), getUser(), incorrectFirstOrder, new AsyncCallback<U>() {
+        service.getExercise(next.getID(), incorrectFirstOrder, new AsyncCallback<U>() {
           @Override
           public void onFailure(Throwable caught) {
           }

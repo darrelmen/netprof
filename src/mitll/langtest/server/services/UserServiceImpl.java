@@ -404,8 +404,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   public User changePasswordWithToken(String userId, String userKey, String newPassword) {
     //long startMS = System.currentTimeMillis();
 
-
-    logger.info("changePassword - userId " + userId);
+    logger.info("changePasswordWithToken - userId " + userId + " key " + userKey + " pass " + newPassword);
 
     boolean result = db.getUserDAO().changePasswordForToken(userId, userKey, newPassword,  getBaseURL());
 
