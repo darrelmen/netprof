@@ -63,7 +63,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
 
   private ExerciseTrie<AmasExerciseImpl> amasFullTrie = null;
 
-  private static final boolean WARN_MISSING_FILE = true;
+//  private static final boolean WARN_MISSING_FILE = true;
   private static final boolean DEBUG = false;
 
   /**
@@ -530,10 +530,10 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
         try {
           exid = Integer.parseInt(prefix);
         } catch (NumberFormatException e) {
-          logger.info("can't parse search number '" + prefix + "'");
+          logger.info("getExercisesForSearchWithTrie can't parse search number '" + prefix + "'");
         }
       }
-      T exercise = getExercise(exid, userID, false);
+      T exercise = getExercise(exid,/* userID, */false);
       if (exercise != null) exercises = Collections.singletonList(exercise);
     }
     return exercises;
@@ -794,17 +794,17 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
    * Joins with annotation data when doing QC.
    *
    * @param exid
-   * @param userID
    * @param isFlashcardReq
    * @return
    * @see mitll.langtest.client.list.ExerciseList#askServerForExercise
    * @see mitll.langtest.client.list.ExerciseList#goGetNextAndCacheIt
    * @see mitll.langtest.client.analysis.PlayAudio#playLast
    */
-  public <T extends Shell> T getExercise(int exid, int userID, boolean isFlashcardReq) {
+  public <T extends Shell> T getExercise(int exid, boolean isFlashcardReq) {
     if (serverProps.isAMAS()) { // TODO : HOW TO AVOID CAST???
       return (T) db.getAMASExercise(exid);
     }
+    int userID = getUserIDFromSession();
 
     long then = System.currentTimeMillis();
     Collection<CommonExercise> exercises = getExercises();
@@ -881,7 +881,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
     } catch (NumberFormatException e) {
       logger.warn("can't parse '" + exid + "'");
     }
-    return getExercise(exid1, userID, isFlashcardReq);
+    return getExercise(exid1, isFlashcardReq);
   }
 
 

@@ -54,10 +54,9 @@ public interface ExerciseService extends RemoteService {
    * @see mitll.langtest.client.list.ExerciseList#askServerForExercise(int)
    * @param <T>
    * @param exid
-   * @param userID
    * @param isFlashcardReq
    * @return
    */
-  <T extends Shell> T getExercise(int exid, int userID, boolean isFlashcardReq);
+  <T extends Shell> T getExercise(int exid, boolean isFlashcardReq);
 
 }
