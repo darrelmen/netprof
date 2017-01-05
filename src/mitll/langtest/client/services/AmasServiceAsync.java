@@ -46,7 +46,7 @@ public interface AmasServiceAsync {
 
   void addStudentAnswer(long resultID, boolean correct, AsyncCallback<Void> async);
 
-  void getScoresForUser(Map<String, Collection<String>> typeToSection, int userID, Collection<Integer> exids,
+  void getScoresForUser(Map<String, Collection<String>> typeToSection, Collection<Integer> exids,
                         AsyncCallback<QuizCorrectAndScore> async);
 
 }

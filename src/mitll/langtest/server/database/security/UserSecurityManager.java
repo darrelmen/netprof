@@ -204,7 +204,7 @@ public class UserSecurityManager implements IUserSecurityManager {
     User sessUser = null;
     HttpSession session = request != null ? getCurrentSession(request) : null;
     if (session != null) {
-      Integer uidI = (Integer) session.getAttribute(USER_SESSION_ATT);
+      Integer uidI = getUserIDFromSession(session);
 /*      log.info("Lookup user from HTTP session. SID={} Request SID={}, Session Created={}, isNew={}, result={}",
           session.getID(), request.getRequestedSessionId(),
           request.getSession().getCreationTime(), request.getSession().isNew(), uidI);*/
@@ -235,6 +235,25 @@ public class UserSecurityManager implements IUserSecurityManager {
           request.getRequestedSessionId());
     }
     return sessUser;
+  }
+
+  private int getUserIDFromSession(HttpSession session) {
+    return (Integer) session.getAttribute(USER_SESSION_ATT);
+  }
+
+  /**
+   * Get the userid from the session.
+   * @param request
+   * @return
+   */
+  public int getUserIDFromRequest(HttpServletRequest request) {
+    HttpSession session = request != null ? getCurrentSession(request) : null;
+    if (session != null) {
+      return (Integer) session.getAttribute(USER_SESSION_ATT);
+    }
+    else {
+      return -1;
+    }
   }
 
   /**

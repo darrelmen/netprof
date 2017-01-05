@@ -585,7 +585,7 @@ public class SlickUserExerciseDAO
     for (Integer bin : binToCount.keySet()) {
       Integer count = binToCount.get(bin);
       window -= count;
-      logger.info(bin + "\t" + count + "\tleft " + window);
+     // logger.info(bin + "\t" + count + "\tleft " + window);
       if (window <= 0) {
         range.add(prev);
         window += desired;
@@ -593,6 +593,6 @@ public class SlickUserExerciseDAO
       prev = bin;
     }
     if (!range.isEmpty()) range = range.subList(0, range.size() - 1);
-    logger.info("got range " + range);
+    logger.info("setExToPhones got range " + range);
   }
 }

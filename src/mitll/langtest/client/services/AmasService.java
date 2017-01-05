@@ -67,9 +67,8 @@ public interface AmasService extends RemoteService {
    * AMAS
    * @see mitll.langtest.client.amas.FeedbackRecordPanel#getScores(boolean)
    * @param typeToSection
-   * @param userID
    * @param exids
    * @return
    */
-  QuizCorrectAndScore getScoresForUser(Map<String, Collection<String>> typeToSection, int userID, Collection<Integer> exids);
+  QuizCorrectAndScore getScoresForUser(Map<String, Collection<String>> typeToSection, Collection<Integer> exids);
 }

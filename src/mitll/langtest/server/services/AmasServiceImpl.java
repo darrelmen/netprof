@@ -78,13 +78,12 @@ public class AmasServiceImpl extends MyRemoteServiceServlet implements AmasServi
    * JUST FOR AMAS
    *
    * @param typeToSection
-   * @param userID
    * @param exids
    * @return
    */
   public QuizCorrectAndScore getScoresForUser(Map<String, Collection<String>> typeToSection,
-                                              int userID,
                                               Collection<Integer> exids) {
+    int userID = getUserIDFromSession();
     return new QuizCorrect(db).getScoresForUser(typeToSection, userID, exids, getProjectID());
   }
 

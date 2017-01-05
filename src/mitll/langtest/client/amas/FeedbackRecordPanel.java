@@ -215,7 +215,7 @@ public class FeedbackRecordPanel extends AmasExercisePanel {
    * @see mitll.langtest.client.amas.FeedbackRecordPanel.AnswerPanel#getStudentAnswer(LangTestDatabaseAsync, int)
    */
   private void getScores(final boolean firstTime) {
-    amasService.getScoresForUser(exerciseList.getTypeToSelection(), controller.getUser(), exerciseList.getIDs(),
+    amasService.getScoresForUser(exerciseList.getTypeToSelection(), exerciseList.getIDs(),
         new AsyncCallback<QuizCorrectAndScore>() {
           @Override
           public void onFailure(Throwable throwable) {
