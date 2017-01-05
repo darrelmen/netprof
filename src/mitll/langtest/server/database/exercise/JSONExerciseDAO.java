@@ -54,6 +54,7 @@ import java.util.Map;
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 2/10/16.
+ * @deprecated not used anywhere - just shows we could read from a json file - probably remove it
  */
 public class JSONExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<CommonExercise> {
   private static final Logger logger = LogManager.getLogger(JSONExerciseDAO.class);
@@ -71,7 +72,7 @@ public class JSONExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Comm
                          ServerProperties serverProps,
                          IUserListManager userListManager,
                          boolean addDefects) {
-    super(serverProps, userListManager, addDefects, serverProps.getLanguage());
+    super(serverProps, userListManager, addDefects, serverProps.getLanguage(),-1);
     this.jsonFile = file;
   }
 

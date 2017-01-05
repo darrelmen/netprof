@@ -60,9 +60,10 @@ public class NPFlexSectionExerciseList extends SimpleSelectExerciseList {
                                    Panel topRow,
                                    Panel currentExercisePanel,
                                    String instanceName,
-                                   boolean incorrectFirst) {
+                                   boolean incorrectFirst,
+                                   boolean showFirstNotCompleted) {
     super(topRow, currentExercisePanel, flexListLayout.exerciseServiceAsync, flexListLayout.feedback,
-        flexListLayout.controller, instanceName, incorrectFirst);
+        flexListLayout.controller, instanceName, incorrectFirst/*, showFirstNotCompleted*/);
   }
 
   @Override
@@ -76,5 +77,7 @@ public class NPFlexSectionExerciseList extends SimpleSelectExerciseList {
   }
 
   @Override
-  protected void noSectionsGetExercises(long userID) { loadExercises(getInitialHistoryToken(), getPrefix(), false);  }
+  protected void noSectionsGetExercises(long userID) {
+    simpleLoadExercises(getInitialHistoryToken(), getPrefix());
+  }
 }

@@ -133,7 +133,7 @@ public class ResetPassword extends UserDialog {
     user.setText(userManager.getPendingUserID());
     FormField useridField = getSimpleFormField(fieldset, user, 4);
 
-    final BasicDialog.FormField firstPassword = getPasswordField(fieldset, PASSWORD);
+    final FormField firstPassword = getPasswordField(fieldset, PASSWORD);
     // final BasicDialog.FormField secondPassword = ;
     //   addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, "Confirm " + PASSWORD);
 
@@ -167,9 +167,9 @@ public class ResetPassword extends UserDialog {
    * @see #getResetPassword
    */
   private Button getChangePasswordButton(final String token,
-                                         final BasicDialog.FormField userID,
-                                         final BasicDialog.FormField firstPassword,
-                                         final BasicDialog.FormField secondPassword) {
+                                         final FormField userID,
+                                         final FormField firstPassword,
+                                         final FormField secondPassword) {
     final Button changePassword = new Button(CHANGE_PASSWORD);
     changePassword.setType(ButtonType.PRIMARY);
 
@@ -236,7 +236,7 @@ public class ResetPassword extends UserDialog {
       // newPassword = rot13(newPassword);
 
       //    service.changePFor(token, newPassword, new AsyncCallback<Boolean>() {
-      service.changePasswordWithToken(userIDForm.getText(), token, newPassword, new AsyncCallback<User>() {
+      service.changePasswordWithToken(userIDForm.getSafeText(), token, newPassword, new AsyncCallback<User>() {
         @Override
         public void onFailure(Throwable caught) {
           changePassword.setEnabled(true);

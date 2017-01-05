@@ -134,6 +134,27 @@ public class SlickReviewedDAO extends DAO implements IReviewedDAO {
   }
 
   @Override
+  public Collection<Integer> getInspectedExercises() {
+    Map<Integer, StateCreator> exerciseToState = getExerciseToState(true);
+    Set<Integer> ids = new HashSet<>();
+
+    Collection<STATE> toMatch = new HashSet<>();
+    toMatch.add(STATE.APPROVED);
+    toMatch.add(STATE.DEFECT);
+    toMatch.add(STATE.FIXED);
+    toMatch.add(STATE.ATTN_LL);
+
+    for (Map.Entry<Integer, StateCreator> pair : exerciseToState.entrySet()) {
+      STATE state = pair.getValue().getState();
+
+      if (toMatch.contains(state)) {
+        ids.add(pair.getKey());
+      }
+    }
+    return ids;
+  }
+
+  @Override
   public Map<Integer, StateCreator> getExerciseToState(boolean skipUnset) {
     Map<Integer, StateCreator> exidToState = new HashMap<>();
     Collection<Tuple4<Integer, String, Integer, Option<Timestamp>>> tuple4s = dao.groupBy(skipUnset);

@@ -168,7 +168,7 @@ public class HTTPClient {
     try {
       return receive(httpConn, getReader(httpConn));
     } catch (IOException e) {
-      e.printStackTrace();
+      logger.error("Got " + e,e);
       return "";
     }
   }

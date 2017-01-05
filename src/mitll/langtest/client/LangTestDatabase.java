@@ -37,14 +37,23 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.client.scoring.AudioPanel;
+import mitll.langtest.client.user.FormField;
+import mitll.langtest.client.user.UserPassLogin;
 import mitll.langtest.shared.ContextPractice;
 import mitll.langtest.shared.StartupInfo;
+import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
+import mitll.langtest.shared.scoring.AudioContext;
+import mitll.langtest.shared.scoring.ImageOptions;
+import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.Collection;
 import java.util.Map;
+
 
 /**
  * Created with IntelliJ IDEA.
@@ -58,35 +67,35 @@ import java.util.Map;
 @RemoteServiceRelativePath("langtestdatabase")
 public interface LangTestDatabase extends RemoteService {
   /**
-   * @see LangTest#onModuleLoad()
    * @return
+   * @see LangTest#onModuleLoad()
    */
   StartupInfo getStartupInfo();
 
-    /**
-   * @see RecorderNPFHelper#getProgressInfo
+  /**
    * @return
+   * @seex RecorderNPFHelper#getProgressInfo
    */
   Map<String, Float> getMaleFemaleProgress();
 
   /**
-   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete
    * @param userid
    * @param ids
    * @param latestResultID
    * @param typeToSection
    * @param userListID
    * @return
+   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete
    */
   AVPScoreReport getUserHistoryForList(int userid, Collection<Integer> ids, long latestResultID,
                                        Map<String, Collection<String>> typeToSection, long userListID);
 
   /**
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase(UserList, ListInterface, Panel, boolean)
    * @param foreign
    * @return
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase(UserList, ListInterface, Panel, boolean)
    */
-  boolean isValidForeignPhrase(String foreign);
+  boolean isValidForeignPhrase(String foreign, String transliteration);
 
 /*  // Create User Exercises
   *//**
@@ -198,13 +207,12 @@ public interface LangTestDatabase extends RemoteService {
   // Telemetry ---
 
   /**
-   * @see LangTest#logMessageOnServer(String)
    * @param message
+   * @see LangTest#logMessageOnServer(String)
    */
   void logMessage(String message);
 
   /**
-   * @see mitll.langtest.client.instrumentation.ButtonFactory#logEvent
    * @param id
    * @param widgetType
    * @param exid
@@ -212,22 +220,25 @@ public interface LangTestDatabase extends RemoteService {
    * @param userid
    * @param hitID
    * @param device
+   * @see mitll.langtest.client.instrumentation.ButtonFactory#logEvent
    */
   void logEvent(String id, String widgetType, String exid, String context, int userid, String hitID, String device);
 
   /**
-   * @see mitll.langtest.client.instrumentation.EventTable#show
    * @return
+   * @see mitll.langtest.client.instrumentation.EventTable#show
    */
   Collection<Event> getEvents();
 
   /**
    * Dialog support...
-   * @see mitll.langtest.client.custom.Navigation#makeDialogWindow(LangTestDatabaseAsync, ExerciseController)
+   *
    * @return
+   * @see mitll.langtest.client.custom.Navigation#makeDialogWindow(LangTestDatabaseAsync, ExerciseController)
    */
   ContextPractice getContextPractice();
 
 
-  @Deprecated void reloadExercises();
+  @Deprecated
+  void reloadExercises();
 }

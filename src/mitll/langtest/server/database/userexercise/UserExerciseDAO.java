@@ -258,6 +258,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
     createIndex(database, EXERCISEID, USEREXERCISE);
   }
 
+  int c = 0;
   /**
    * Handles both userexercise items and predefined exercises.
    *
@@ -284,6 +285,23 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
 
 
       enrichWithPredefInfo(userExercises2, userExercises);
+/*      for (CommonExercise ue : userExercises) {
+        // if (DEBUG) logger.debug("\ton list " + listID + " " + ue.getID() + " / " + ue.getUniqueID() + " : " + ue);
+        if (ue.isPredefined()) {
+          CommonExercise byID = getExercise(ue);
+
+          if (byID != null) {
+            userExercises2.add(new UserExercise(byID, byID.getCreator())); // all predefined references
+          } else {
+            if (c++< 10)
+            logger.error("getOnList: huh can't find user exercise '" + ue.getID() + "'");
+          }
+        } else {
+          userExercises2.add(ue);
+        }
+      }*/
+
+      if (c <10 && !userExercises.isEmpty()) logger.warn("huh? can't find " +c+"/"+userExercises.size() + " items???");
 
       boolean isEnglish = database.getLanguage().equalsIgnoreCase("english");
       String join2 = getJoin2(listID);
@@ -414,7 +432,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
       while (rs.next()) {
         exercises.add(getUserExercise(rs, typeOrder));
       }
-      finish(connection, statement, rs);
+      finish(connection, statement, rs,"");
     } finally {
       database.closeConnection(connection);
     }
@@ -469,7 +487,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
         }*/
         exercises.add(e);
       }
-      finish(connection, statement, rs);
+      finish(connection, statement, rs, sql);
     } finally {
       database.closeConnection(connection);
     }
@@ -533,7 +551,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
     while (rs.next()) {
       exercises.add(rs.getString(EXERCISEID));
     }
-    finish(connection, statement, rs);
+    finish(connection, statement, rs, sql);
 
     return exercises;
   }

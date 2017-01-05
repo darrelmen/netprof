@@ -83,7 +83,7 @@ public class SimpleSorter extends ExerciseComparator {
    * NOTE:  be careful to use collation order when it's not "english-foreign language"
    *
    * @param exerciseShells
-   * @see mitll.langtest.server.database.AudioExport#writeZipJustOneAudio(OutputStream, SectionHelper, Collection, String)
+   * @see mitll.langtest.server.database.AudioExport#writeZipJustOneAudio(OutputStream, SectionHelper, Collection, String, String)
    */
   public <T extends CommonShell> void sortByTooltip(List<T> exerciseShells) {
     Collections.sort(exerciseShells, new Comparator<T>() {

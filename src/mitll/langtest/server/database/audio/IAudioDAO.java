@@ -60,14 +60,16 @@ public interface IAudioDAO extends IDAO {
                       Collection<AudioAttribute> audioAttributes,
                       String language);
 
-  Collection<Integer> getRecordedBy(int userid);
+  Collection<Integer> getRecordedBy(int userid, Map<Integer, String> exToTranscript);
 
-  Set<Integer> getWithContext(int userid);
+  Set<Integer> getWithContext(int userid, Map<Integer, String> exToContext);
 
   Map<String, Float> getRecordedReport(Map<Integer, User> userMapMales,
                                        Map<Integer, User> userMapFemales,
                                        float total,
                                        Set<Integer> uniqueIDs,
+                                       Map<Integer, String> exToTranscript,
+                                       Map<Integer, String> exToContextTranscript,
                                        float totalContext);
 
   /**

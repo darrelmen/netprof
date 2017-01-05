@@ -56,9 +56,9 @@ public class SectionWidgetContainer<T extends SectionWidget> {
   }
 
   /**
-   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#populateButtonGroups(Collection)
    * @param type
    * @param value
+   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#populateButtonGroups(Collection)
    */
   public void setWidget(String type, T value) {
     typeToBox.put(type, value);
@@ -188,7 +188,6 @@ public class SectionWidgetContainer<T extends SectionWidget> {
       for (String type : getTypes()) {
         String section = getCurrentSelection(type);
         //   logger.info("getHistoryTokenFromUIState type " + type + " section " + section);
-
         if (!section.equals(getAnySelectionValue())) {
           unitAndChapterSelection.append(type + "=" + section + ";");
         }
@@ -224,7 +223,9 @@ public class SectionWidgetContainer<T extends SectionWidget> {
     return typeToBox.containsKey(type);
   }
 
-  private boolean hasTypes() { return !typeToBox.isEmpty(); }
+  private boolean hasTypes() {
+    return !typeToBox.isEmpty();
+  }
 
   /**
    * Make sure all sections have a selection - quiz, test type, ilr level

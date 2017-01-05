@@ -87,8 +87,11 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
   ) {
     super(path,
         exercise.getForeignLanguage(),
+        exercise.getTransliteration(),
+
         controller1,
         controller1.getProps().showSpectrogram(), scoreListener, RIGHT_MARGIN, REFERENCE, exercise, instance);
+//        Result.AUDIO_TYPE_PRACTICE);
   }
 
   /**
@@ -102,8 +105,7 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
    */
   @Override
   protected Widget getAfterPlayWidget() {
-    logger = Logger.getLogger("FastAndSlowASRScoringAudioPanel");
-
+   // logger = Logger.getLogger("FastAndSlowASRScoringAudioPanel");
     final Panel rightSide = new VerticalPanel();
 
     rightSide.getElement().setId("beforePlayWidget_verticalPanel");
@@ -115,7 +117,6 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
     } else {
       // add gender choices
       Set<Long> preferredVoices = controller.getProps().getPreferredVoices();
-
       Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(true, preferredVoices);
       Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false, preferredVoices);
       Collection<AudioAttribute> defaultUserAudio = exercise.getDefaultUserAudio();
@@ -130,8 +131,6 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
         container = getGenderChoices(rightSide, malesMap, femalesMap, defaultUserAudio, instance);
       }
       Collection<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
-      //logger.info("getAfterPlayWidget : for ex " + exercise.getOldID() + " found " + audioAttributes);
-
       // first choice here is for default audio (where we don't know the gender)
       final Collection<AudioAttribute> initialAudioChoices = maleEmpty ?
           femaleEmpty ? audioAttributes : femalesMap.get(femaleUsers.get(0)) : malesMap.get(maleUsers.get(0));
@@ -189,12 +188,16 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
           rightSide.clear();
           Collection<AudioAttribute> audioChoices;
 
-          if (choice.equals(M)) {
-            audioChoices = malesMap.values().iterator().next();
-          } else if (choice.equals(F)) {
-            audioChoices = femalesMap.values().iterator().next();
-          } else {
-            audioChoices = defaultAudioSet;
+          switch (choice) {
+            case M:
+              audioChoices = malesMap.values().iterator().next();
+              break;
+            case F:
+              audioChoices = femalesMap.values().iterator().next();
+              break;
+            default:
+              audioChoices = defaultAudioSet;
+              break;
           }
           addRegularAndSlow(rightSide, audioChoices, instance);
         }
@@ -236,11 +239,12 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
         " path "+ audioPath + " attributes were " + audioAttributes);*/
     RadioButton regular = null;
     AudioAttribute regAttr = null;
+
     RadioButton slow = null;
     AudioAttribute slowAttr = null;
+
     for (final AudioAttribute audioAttribute : audioAttributes) {
       if (!audioAttribute.isValid()) continue;
-
       String display = audioAttribute.getDisplay();
 
       // System.out.println("attri " + audioAttribute + " display " +display);
@@ -257,7 +261,7 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
 
     boolean choseRegularSpeed = isRegularSpeed();
     if (regular != null) {
-      addAudioRadioButton(vp, regular);
+      addAudioRadioButton(vp, regular, regAttr);
       final AudioAttribute innerRegAttr = regAttr;
       final RadioButton innerRegular = regular;
       regular.addClickHandler(new ClickHandler() {
@@ -272,7 +276,7 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
     }
 
     if (slow != null) {
-      addAudioRadioButton(vp, slow);
+      addAudioRadioButton(vp, slow, slowAttr);
       final AudioAttribute innerSlowAttr = slowAttr;
       final RadioButton innerSlow = slow;
       slow.addClickHandler(new ClickHandler() {
@@ -357,7 +361,7 @@ public class FastAndSlowASRScoringAudioPanel<T extends CommonShell & AudioAttrib
     return !exercise.getAudioAttributes().isEmpty();
   }
 
-  protected void addAudioRadioButton(Panel vp, RadioButton fast) {
+  protected void addAudioRadioButton(Panel vp, RadioButton fast, AudioAttribute audioAttribute) {
     vp.add(fast);
   }
 

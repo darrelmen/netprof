@@ -32,14 +32,17 @@
 
 package mitll.langtest.server.services;
 
+import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.ScoringAudioPanel;
 import mitll.langtest.client.services.ScoringService;
 import mitll.langtest.server.audio.AudioConversion;
+import mitll.langtest.server.audio.DecoderOptions;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -58,13 +61,11 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    * maybe it should?
    *
    * @param resultID
-   * @param width
-   * @param height
    * @return
    * @see mitll.langtest.client.scoring.ReviewScoringPanel#scoreAudio(String, int, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
    */
   @Override
-  public PretestScore getResultASRInfo(int resultID, int width, int height) {
+  public PretestScore getResultASRInfo(int resultID, ImageOptions imageOptions) {
     PretestScore asrScoreForAudio = null;
     try {
       Result result = db.getResultDAO().getResultByID(resultID);
@@ -79,15 +80,17 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         sentence = exercise.getForeignLanguage();
       } else {
         CommonExercise exercise1 = db.getExercise(getProjectID(), exerciseID);
+
         exercise = exercise1;
 
-        Collection<CommonExercise> directlyRelated = exercise1.getDirectlyRelated();
-        sentence =
-            result.getAudioType().isContext() && !directlyRelated.isEmpty() ?
-                directlyRelated.iterator().next().getForeignLanguage() :
-                exercise.getForeignLanguage();
+        if (exercise1 != null) {
+          Collection<CommonExercise> directlyRelated = exercise1.getDirectlyRelated();
+          sentence =
+              result.getAudioType().isContext() && !directlyRelated.isEmpty() ?
+                  directlyRelated.iterator().next().getForeignLanguage() :
+                  exercise.getForeignLanguage();
+        }
       }
-
 
       // maintain backward compatibility - so we can show old recordings of ref audio for the context sentence
 //      String sentence = isAMAS ? exercise.getForeignLanguage() :
@@ -104,13 +107,24 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         // NOTE : actively avoid doing this -
         //ensureMP3(audioFilePath, sentence, "" + result.getUserid());
         //logger.info("resultID " +resultID+ " temp dir " + tempDir.getAbsolutePath());
-        asrScoreForAudio = getAudioFileHelper().getASRScoreForAudio(1,
-            audioFilePath, sentence,
-            width, height,
-            true,  // make transcript images with colored segments
-            false, // false = do alignment
-            serverProps.useScoreCache(),
-            "" + exerciseID, result, serverProps.usePhoneToDisplay(), false);
+        asrScoreForAudio = getAudioFileHelper().getASRScoreForAudio(
+            1,
+            audioFilePath,
+            sentence,
+            exercise.getTransliteration(),
+            imageOptions,//new ImageOptions(width, height, true),
+//            true,  // make transcript images with colored segments
+            //          false, // false = do alignment
+            //        serverProps.useScoreCache(),
+            "" + exerciseID,
+            result,
+            // serverProps.usePhoneToDisplay(), false
+
+
+            new DecoderOptions()
+                .setDoFlashcard(false)
+                .setCanUseCache(serverProps.useScoreCache())
+                .setUsePhoneToDisplay(serverProps.usePhoneToDisplay()));
       }
     } catch (Exception e) {
       logger.error("Got " + e, e);
@@ -127,16 +141,19 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    * @param resultID
    * @param testAudioFile
    * @param sentence
-   * @param width
-   * @param height
-   * @param useScoreToColorBkg
    * @param exerciseID
    * @return
-   * @see ScoringAudioPanel#scoreAudio(String, int, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
+   * @see ASRScoringAudioPanel#scoreAudio
    */
-  public PretestScore getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence,
-                                          int width, int height, boolean useScoreToColorBkg, int exerciseID) {
-    return getPretestScore(reqid, (int) resultID, testAudioFile, sentence, width, height, useScoreToColorBkg, exerciseID, false);
+  public PretestScore getASRScoreForAudio(int reqid,
+                                          long resultID,
+                                          String testAudioFile,
+                                          String sentence,
+                                          String transliteration,
+
+                                          ImageOptions imageOptions,
+                                          int exerciseID) {
+    return getPretestScore(reqid, (int) resultID, testAudioFile, sentence, transliteration, imageOptions, exerciseID, false);
   }
 
   /**
@@ -146,16 +163,14 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    * @param resultID
    * @param testAudioFile
    * @param sentence
-   * @param width
-   * @param height
-   * @param useScoreToColorBkg
    * @param exerciseID
    * @param usePhoneToDisplay
    * @return
    */
-  private PretestScore getPretestScore(int reqid, int resultID, String testAudioFile, String sentence,
-                                       int width, int height, boolean useScoreToColorBkg, int exerciseID,
-                                       boolean usePhoneToDisplay) {
+  private PretestScore getPretestScore(int reqid, int resultID, String testAudioFile, String sentence, String transliteration,
+                                       ImageOptions imageOptions, int exerciseID
+      , boolean usePhoneToDisplay
+  ) {
     if (testAudioFile.equals(AudioConversion.FILE_MISSING)) return new PretestScore(-1);
     long then = System.currentTimeMillis();
 
@@ -174,19 +189,31 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     boolean usePhoneToDisplay1 = usePhoneToDisplay || serverProps.usePhoneToDisplay();
 
     PretestScore asrScoreForAudio =
-        getAudioFileHelper().getASRScoreForAudio(reqid, testAudioFile, sentence, width, height, useScoreToColorBkg,
-            false,
-            serverProps.useScoreCache(), "" + exerciseID, cachedResult, usePhoneToDisplay1, false);
+        getAudioFileHelper().getASRScoreForAudio(
+            reqid,
+            testAudioFile,
+            sentence,
+            transliteration,
+            imageOptions,
+            //    false,
+            //serverProps.useScoreCache(),
+            "" + exerciseID,
+            cachedResult,
+            new DecoderOptions()
+                .setDoFlashcard(false)
+                .setCanUseCache(serverProps.useScoreCache())
+                .setUsePhoneToDisplay(usePhoneToDisplay1)
+        );
 
     long timeToRunHydec = System.currentTimeMillis() - then;
 
     logger.debug("getPretestScore : scoring" +
-        " file " + testAudioFile + " for " +
-        " exid " + exerciseID +
-        " sentence " + sentence.length() + " characters long : " +
-        " score " + asrScoreForAudio.getHydecScore() +
-        " took " + timeToRunHydec + " millis " +
-        " usePhoneToDisplay " + usePhoneToDisplay1);
+        "\n\tfile     " + testAudioFile +
+        "\n\texid     " + exerciseID +
+        "\n\tsentence " + sentence.length() + " characters long" +
+        "\n\tscore    " + asrScoreForAudio.getHydecScore() +
+        "\n\ttook     " + timeToRunHydec + " millis " +
+        "\n\tusePhoneToDisplay " + usePhoneToDisplay1);
 
     if (resultID > -1 && cachedResult == null) { // alignment has two steps : 1) post the audio, then 2) do alignment
       db.rememberScore(resultID, asrScoreForAudio, true);
@@ -200,17 +227,15 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    * @param resultID
    * @param testAudioFile
    * @param sentence
-   * @param width
-   * @param height
-   * @param useScoreToColorBkg
    * @param exerciseID
    * @return
-   * @see ScoringAudioPanel#scoreAudio(String, int, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
+   * @see ASRScoringAudioPanel#scoreAudio
    */
   @Override
   public PretestScore getASRScoreForAudioPhonemes(int reqid, long resultID, String testAudioFile, String sentence,
-                                                  int width, int height, boolean useScoreToColorBkg, int exerciseID) {
-    return getPretestScore(reqid, (int) resultID, testAudioFile, sentence, width, height, useScoreToColorBkg, exerciseID, true);
+                                                  String transliteration,
+                                                  ImageOptions imageOptions, int exerciseID) {
+    return getPretestScore(reqid, (int) resultID, testAudioFile, sentence, transliteration, imageOptions, exerciseID, true);
   }
 
   @Override
@@ -235,9 +260,10 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   @Override
   public AudioAnswer getAlignment(String base64EncodedString,
                                   String textToAlign,
+                                  String transliteration,
                                   String identifier,
                                   int reqid, String device) {
-    AudioAnswer audioAnswer = getAudioFileHelper().getAlignment(base64EncodedString, textToAlign, identifier, reqid,
+    AudioAnswer audioAnswer = getAudioFileHelper().getAlignment(base64EncodedString, textToAlign, transliteration, identifier, reqid,
         serverProps.usePhoneToDisplay());
 
     if (!audioAnswer.isValid() && audioAnswer.getDurationInMillis() == 0) {

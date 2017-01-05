@@ -48,6 +48,7 @@ import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.ProjectStartupInfo;
+import mitll.langtest.shared.user.User;
 
 import java.util.Collection;
 
@@ -105,7 +106,11 @@ public interface ExerciseController extends EventRegistration {
 
   boolean isLogClientMessages();
 
-  boolean showCompleted();
+/*
+  User.Kind getUserKind();
+*/
+
+  Collection<User.Permission> getPermissions();
 
   void getImage(int reqid, String path, String type, int toUse, int height, int exerciseID, AsyncCallback<ImageResponse> client);
 

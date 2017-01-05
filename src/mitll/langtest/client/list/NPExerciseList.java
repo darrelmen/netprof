@@ -43,6 +43,8 @@ import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
+import java.util.logging.Logger;
+
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -50,26 +52,36 @@ import mitll.langtest.shared.exercise.CommonShell;
  * @since 1/5/16.
  */
 public class NPExerciseList<V extends SectionWidget> extends HistoryExerciseList<CommonShell, CommonExercise, V> {
+  private Logger logger = Logger.getLogger("NPExerciseList");
   protected NPExerciseList(Panel currentExerciseVPanel,
                            ExerciseServiceAsync service,
                            UserFeedback feedback,
                            ExerciseController controller,
                            boolean showTypeAhead,
                            String instance,
-                           boolean incorrectFirst) {
-    super(currentExerciseVPanel, service, feedback, controller, showTypeAhead, instance, incorrectFirst);
+                           boolean incorrectFirst,
+                           boolean showFirstNotCompleted) {
+    super(currentExerciseVPanel, service, feedback, controller, showTypeAhead, instance, incorrectFirst, showFirstNotCompleted);
   }
 
   /**
    * @return
-   * @see mitll.langtest.client.bootstrap.FlexSectionExerciseList#addComponents()
+   * @see mitll.langtest.client.list.PagingExerciseList#addComponents
    */
   protected ClickablePagingContainer<CommonShell> makePagingContainer() {
     final PagingExerciseList<CommonShell, CommonExercise> outer = this;
+//    if (logger == null) {
+//      logger = Logger.getLogger("NPExerciseList");
+//    }
+//    logger.info("makePagingContainer : for " + getInstance() + " show first not complete " + showFirstNotCompleted);
+
     pagingContainer =
-        new PagingContainer<CommonShell>(controller,
+        new PagingContainer<CommonShell>(
+            controller,
             getVerticalUnaccountedFor(),
-            getRole().equals(AudioType.RECORDER.toString())) {
+            getRole().equals(AudioType.RECORDER.toString()),
+            showFirstNotCompleted,
+            getInstance()) {
           @Override
           protected void gotClickOnItem(CommonShell e) {
             outer.gotClickOnItem(e);

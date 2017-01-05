@@ -37,6 +37,7 @@ import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.scoring.AudioContext;
+import mitll.langtest.shared.scoring.ImageOptions;
 
 public interface AudioServiceAsync {
   void writeAudioFile(String base64EncodedString,
@@ -52,7 +53,7 @@ public interface AudioServiceAsync {
 
                       AsyncCallback<AudioAnswer> async);
 
-  void getImageForAudioFile(int reqid, String audioFile, String imageType, int width, int height,
+  void getImageForAudioFile(int reqid, String audioFile, String imageType, ImageOptions imageOptions,
                             String exerciseID,
                             AsyncCallback<ImageResponse> async);
 

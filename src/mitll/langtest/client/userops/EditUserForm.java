@@ -152,8 +152,8 @@ class EditUserForm extends SignUpForm {
     updated.setUserID(user);
     updated.setEmail(email);
     updated.setUserKind(kind);
-    updated.setFirst(firstName.getText());
-    updated.setLast(lastName.getText());
+    updated.setFirst(firstName.getSafeText());
+    updated.setLast(lastName.getSafeText());
     updated.setEnabled(enabled.getValue());
 
     List<User.Permission> perms = new ArrayList<>();

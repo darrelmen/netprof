@@ -51,6 +51,8 @@ import java.util.*;
 import static mitll.langtest.server.database.Database.EXID;
 import static mitll.langtest.server.database.result.ResultDAO.MODEL;
 import static mitll.langtest.server.database.result.ResultDAO.MODELUPDATE;
+//import static mitll.langtest.server.database.ResultDAO.MODEL;
+//import static mitll.langtest.server.database.ResultDAO.MODELUPDATE;
 
 /**
  * Create, drop, alter, read from the results table.
@@ -91,6 +93,7 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
   private static final String WORDS = "{\"words\":[]}";
   //  private final boolean debug = false;
 //  private final boolean dropTable;
+  private final boolean dropTable;
   //  private final boolean debug = false;
   private final String currentModel;
 
@@ -101,6 +104,7 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
    */
   public RefResultDAO(Database database, boolean dropTable) {
     super(database, dropTable);
+    this.dropTable = dropTable;
     currentModel = database.getServerProps().getCurrentModel();
   }
 
@@ -398,7 +402,7 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
 
       JSONObject jsonObject = getJsonObject(idToAnswers, idToJSONs);
 
-      finish(connection, statement, rs);
+      finish(connection, statement, rs, sql);
 
       return jsonObject;
     } catch (Exception ee) {
@@ -417,7 +421,10 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement(sql);
 
-    List<Result> resultsForQuery = getResultsForQuery(connection, statement);
+    long then = System.currentTimeMillis();
+    List<Result> resultsForQuery = getResultsForQuery(connection, statement, sql);
+    long now = System.currentTimeMillis();
+//    logger.info("getResultsSQL took " + (now - then) + " millis to exec query for " +sql);
     //   logger.debug("getResultsSQL running " + sql + " -> " +resultsForQuery.size() + " results");
     return resultsForQuery;
   }
@@ -427,12 +434,13 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
     int numResults = 0;
     try {
       Connection connection = database.getConnection(this.getClass().toString());
-      PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) FROM " + REFRESULT);
+      String sql = "SELECT COUNT(*) FROM " + REFRESULT;
+      PreparedStatement statement = connection.prepareStatement(sql);
       ResultSet rs = statement.executeQuery();
       if (rs.next()) {
         numResults = rs.getInt(1);
       }
-      finish(connection, statement, rs);
+      finish(connection, statement, rs, sql);
     } catch (Exception ee) {
       logException(ee);
     }
@@ -447,11 +455,12 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
    *
    * @param connection
    * @param statement
+   * @param sql
    * @return
    * @throws SQLException
    * @see #getResultsSQL(String)
    */
-  private List<Result> getResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
+  private List<Result> getResultsForQuery(Connection connection, PreparedStatement statement, String sql) throws SQLException {
     ResultSet rs = statement.executeQuery();
     List<Result> results = new ArrayList<>();
 
@@ -532,10 +541,10 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
       }
     }
 
-    long now = System.currentTimeMillis();
+    //now = System.currentTimeMillis();
 
-    logger.info("getResultsForQuery took " + (now - then) + " millis, found " + count + " invalid decode results, skipped " + skipped);
-    finish(connection, statement, rs);
+ //   logger.info("getResultsForQuery took " + (now - then) + " millis, found " + count + " invalid decode results, skipped " + skipped);
+    finish(connection, statement, rs, sql);
 
     return results;
   }

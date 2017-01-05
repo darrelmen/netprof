@@ -62,7 +62,9 @@ public class DAO {
 
   protected final Database database;
 
-  public String getName() { throw new IllegalArgumentException("not to be called"); }
+  public String getName() {
+    throw new IllegalArgumentException("not to be called");
+  }
 
   public void createTable() {
     throw new IllegalArgumentException("no code for creating the table " + getClass());
@@ -87,7 +89,10 @@ public class DAO {
     return numColumns;
   }
 
-  @Deprecated  protected String getLanguage() { return database.getLanguage(); }
+  @Deprecated
+  protected String getLanguage() {
+    return database.getLanguage();
+  }
 
   /**
    * @param table
@@ -145,7 +150,12 @@ public class DAO {
         "='" + itemId +
         "'";
 
-    return doSqlOn(sql, table, warnIfDidntAlter);
+    boolean b = doSqlOn(sql, table, warnIfDidntAlter);
+
+    if (b) logger.info("changed ref result with " + sql);
+    else logger.error("didn't change ref result with " + sql);
+
+    return b;
   }
 
   protected boolean doSqlOn(String sql, String table, boolean warnIfDidntAlter) {
@@ -208,24 +218,81 @@ public class DAO {
   }
 
   protected void createIndex(Database database, String column, String table) throws SQLException {
+    String indexName = "IDX_" + column;
+    createIndex(database, column, table, indexName);
+  }
+
+  void createTableIndex(Database database, String column, String table) throws SQLException {
+    String indexName = "IDX_" + table + "_" + column;
+    createIndex(database, column, table, indexName);
+  }
+
+  protected void createIndex(Database database, String column, String table, String indexName) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());
     PreparedStatement statement = connection.prepareStatement("" +
         "CREATE INDEX IF NOT EXISTS " +
-        "IDX_" + column +
-        " ON " +
-        table +
-        "(" +
-        column +
-        ");");
-    statement.execute();
+        indexName +
+        " ON " + table +
+        "(" + column + ")");
+    boolean execute = statement.execute();
+    //logger.info("got " + execute + " for index on " + table + " col " + column + " index " + indexName);
+
     statement.close();
     database.closeConnection(connection);
   }
 
   protected void finish(Connection connection, Statement statement, ResultSet rs) throws SQLException {
+    finish(connection, statement, rs, "");
+  }
+
+  /**
+   * TODO : avoid doing lots of queries to user ex table.
+   *
+   * @param connection
+   * @param statement
+   * @param rs
+   * @param sql
+   * @throws SQLException
+   */
+  protected void finish(Connection connection, Statement statement, ResultSet rs, String sql) throws SQLException {
+    long then = System.currentTimeMillis();
     rs.close();
-    statement.close();
-    database.closeConnection(connection);
+    long now = System.currentTimeMillis();
+    int i = 50;
+    if (now - then > i) {
+      logger.info("finish took " + (now - then) + " millis to close result set " + rs);
+    }
+
+    //Exception exception = new Exception();
+    new Thread(new Runnable() {
+      @Override
+      public void run() {
+        long then = now;
+        try {
+//          logger.info("start closing " + statement);
+          statement.close();
+//          logger.info("end   closing " + statement);
+        } catch (SQLException e) {
+          logger.error("got " + e, e);
+        }
+        long now = System.currentTimeMillis();
+
+        if (now - then > i) {
+          logger.info("finish took " + (now - then) + " millis to close " + statement);// + " sql " + sql);
+//          if (now - then > 100) {
+//            logger.info("long sql " + sql, exception);
+//          }
+        }
+
+        then = now;
+        database.closeConnection(connection);
+        now = System.currentTimeMillis();
+//        if (now - then > i) {
+        //        logger.info("finish took " + (now - then) + " millis to close connection - sql " + sql);
+        //    }
+      }
+    }).start();
+
   }
 
   protected void finish(Database database, Connection connection, PreparedStatement statement) throws SQLException {
@@ -245,7 +312,7 @@ public class DAO {
     if (rs.next()) {
       newID = rs.getLong(1);
     }
-    return (int)newID;
+    return (int) newID;
   }
 
   protected Connection getConnection() {

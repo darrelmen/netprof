@@ -252,7 +252,7 @@ public class SectionHelper<T extends Shell> {
           currentList.retainAll(exercisesForSection);
         }
       } else {
-        logger.warn("huh? typeToSelection type " + type + " is not in " + typeToUnitToLesson.keySet());
+        logger.warn("getExercisesForSelectionState huh? typeToSelection type " + type + " is not in " + typeToUnitToLesson.keySet());
       }
     }
     if (currentList == null) {
@@ -283,12 +283,12 @@ public class SectionHelper<T extends Shell> {
       for (String section : sections) {
         Lesson<T> lesson = sectionToLesson.get(section);
         if (lesson == null) {
-          logger.error("Couldn't find section " + section);
+          logger.error("getExercisesForSection : Couldn't find section '" + section +"'");
           return Collections.emptyList();
         } else {
           Collection<T> exercises1 = lesson.getExercises();
           if (exercises1.isEmpty()) {
-            logger.warn("getExercisesForSection : huh? section " + section + " has no exercises : " + lesson);
+            logger.warn("getExercisesForSection : huh? section '" + section + "' has no exercises : " + lesson);
           }
           exercises.addAll(exercises1);
         }

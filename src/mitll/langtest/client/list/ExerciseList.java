@@ -32,6 +32,7 @@
 
 package mitll.langtest.client.list;
 
+import com.github.gwtbootstrap.client.ui.Heading;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Command;
@@ -67,8 +68,11 @@ import java.util.logging.Logger;
 public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     extends VerticalPanel
     implements ListInterface<T>, ProvidesResize {
-  private static final String EMPTY_PANEL = "placeHolderWhenNoExercises";
   private final Logger logger = Logger.getLogger("ExerciseList");
+  /**
+   * @see #showEmptyExercise
+   */
+  private static final String EMPTY_PANEL = "placeHolderWhenNoExercises";
 
   private static final int MAX_MSG_LEN = 200;
   boolean incorrectFirstOrder = false;
@@ -208,7 +212,7 @@ UserState userState;
    *
    * @param exerciseID
    * @param searchIfAny
-   * @see #loadFirstExercise()
+   * @see #loadFirstExercise
    */
   abstract void pushFirstSelection(int exerciseID, String searchIfAny);
 
@@ -297,7 +301,7 @@ UserState userState;
         ignoreStaleRequest(result);
       } else {
         lastSuccessfulRequest = request;
-        if (DEBUG) logger.info("last req now " + lastSuccessfulRequest);
+        if (DEBUG) logger.info("onSuccess last req now " + lastSuccessfulRequest);
         gotExercises(result);
         int idToUse = exerciseID == -1 ? result.getFirstExercise() == null ? -1 : result.getFirstExercise().getID() : exerciseID;
         rememberAndLoadFirst(result.getExercises(), selectionID, searchIfAny, idToUse);
@@ -416,8 +420,10 @@ UserState userState;
                                    int exerciseID) {
 
     if (DEBUG) logger.info("ExerciseList : rememberAndLoadFirst instance '" + getInstance() +
-        "' remembering " + exercises.size() + " exercises, " + selectionID +
-        " first = " + exerciseID);
+        "'" +
+        "\n\tremembering " + exercises.size() + " exercises," +
+        "\n\tselection   " + selectionID +
+        "\n\tfirst       " + exerciseID);
 
     exercises = rememberExercises(exercises);
     for (ListChangeListener<T> listener : listeners) {
@@ -434,12 +440,22 @@ UserState userState;
       }
     }*/
 
+//    if (exerciseID < 0) {
+//      loadFirstExercise();
+//    }
+
+    goToFirst(searchIfAny, exerciseID);
+
+    listLoaded();
+  }
+
+  protected void goToFirst(String searchIfAny, int exerciseID) {
     if (exerciseID < 0) {
-      loadFirstExercise();
+      loadFirstExercise(searchIfAny);
     } else {
+    //  logger.info("goToFirst pushFirstSelection " + exerciseID + " searchIfAny '" + searchIfAny +"'");
       pushFirstSelection(exerciseID, searchIfAny);
     }
-    listLoaded();
   }
 
   protected void listLoaded() {
@@ -462,7 +478,7 @@ UserState userState;
     T current = getCurrentExercise();
     if (current.getID() ==id) {
       if (!onLast(current)) {
-        logger.info(getClass() + " removeExercise - load next after " + id);
+        //logger.info(getClass() + " removeExercise - load next after " + id);
         loadNextExercise(current);
       } else if (!onFirst(current)) {
         logger.info(getClass() + " removeExercise - load prev before " + id);
@@ -474,25 +490,23 @@ UserState userState;
   }
 
   @Override
-  public void hide() {
-    //logger.info(getElement().getId() + " got hide");
-    getParent().setVisible(false);
-  }
+  public void hide() { getParent().setVisible(false);  }
 
   /**
    * If we're not already showing this item, ask there server for the exercise.
    * Does this by pushing a history item and then noticing the history item change.
    *
    * @see #rememberAndLoadFirst
+   * @param searchIfAny
    */
-  protected void loadFirstExercise() {
+  protected void loadFirstExercise(String searchIfAny) {
     if (isEmpty()) { // this can only happen if the database doesn't load properly, e.g. it's in use
       if (DEBUG) logger.info("loadFirstExercise (" + instance + ") : current exercises is empty?");
       removeCurrentExercise();
     } else {
       T toLoad = findFirstExercise();
       if (DEBUG) logger.info("loadFirstExercise ex id =" + toLoad.getID() + " instance " + instance);
-      pushFirstSelection(toLoad.getID(), "");
+      pushFirstSelection(toLoad.getID(), searchIfAny);
     }
   }
 
@@ -521,7 +535,7 @@ UserState userState;
 
   /**
    * @param itemID
-   * @see #loadFirstExercise()
+   * @see #loadFirstExercise(String)
    * @see ListInterface ListInterface#loadNextExercise
    * @see ListInterface ListInterface#loadPreviousExercise
    */
@@ -754,11 +768,13 @@ UserState userState;
     super.clear();
   }
 
+  /**
+   * Compare with google response for this state.
+   */
   void showEmptyExercise() {
-    createdPanel = new SimplePanel();
+    createdPanel = new SimplePanel(new Heading(3,"<b>Your search or selection did not match any items.</b>"));
     createdPanel.getElement().setId(EMPTY_PANEL);
     innerContainer.setWidget(createdPanel);
-
   }
 
   @Override
@@ -807,7 +823,7 @@ UserState userState;
    * @see ListInterface#loadNextExercise
    */
   protected void onLastItem() {
-    loadFirstExercise();
+    loadFirstExercise("");
   }
 
   @Override
@@ -896,7 +912,7 @@ UserState userState;
 
   @Override
   public void reloadExercises() {
-    loadFirstExercise();
+    loadFirstExercise("");
   }
 
   public void redraw() {

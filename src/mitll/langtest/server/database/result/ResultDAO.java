@@ -427,12 +427,13 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
     int numResults = 0;
     try {
       Connection connection = database.getConnection(this.getClass().toString());
-      PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) FROM " + RESULTS);
+      String sql = "SELECT COUNT(*) FROM " + RESULTS;
+      PreparedStatement statement = connection.prepareStatement(sql);
       ResultSet rs = statement.executeQuery();
       if (rs.next()) {
         numResults = rs.getInt(1);
       }
-      finish(connection, statement, rs);
+      finish(connection, statement, rs,sql);
     } catch (Exception ee) {
       logException(ee);
     }
@@ -560,7 +561,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
 
       results.add(userAndTime);
     }
-    finish(connection, statement, rs);
+    finish(connection, statement, rs,"");
 
     return results;
   }
@@ -649,7 +650,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
           trimPathForWebPage2(path), json);
       results.add(result);
     }
-    finish(connection, statement, rs);
+    finish(connection, statement, rs,"");
 
     return results;
   }

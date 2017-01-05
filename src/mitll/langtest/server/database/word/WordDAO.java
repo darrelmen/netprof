@@ -157,6 +157,10 @@ public class WordDAO extends DAO implements IWordDAO {
     return 0;
   }
 
+  @Override
+  public void removeForResult(int resultid) {
+  }
+
   /**
    * @see DatabaseImpl#putBackWordAndPhone
    * @return
@@ -217,7 +221,7 @@ public class WordDAO extends DAO implements IWordDAO {
       );
     }
 
-    finish(connection, statement, rs);
+    finish(connection, statement, rs, sql);
     return lists;
   }
 }

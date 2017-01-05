@@ -42,6 +42,9 @@ import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 
+import static mitll.langtest.client.scoring.PostAudioRecordButton.MIN_DURATION;
+
+
 /**
  * Created with IntelliJ IDEA.
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -52,19 +55,19 @@ import mitll.langtest.shared.answer.AudioType;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel implements RecordButton.RecordingListener {
+//  private final Logger logger = Logger.getLogger("FlashcardRecordButtonPanel");
   private final AudioAnswerListener exercisePanel;
 
   private IconAnchor waiting;
   private IconAnchor correctIcon;
   private IconAnchor incorrect;
-  //private final String instance;
 
   /**
    * @param exercisePanel
    * @param controller
    * @param exerciseID
    * @param index
-   * @see BootstrapExercisePanel#getAnswerWidget(mitll.langtest.shared.exercise.CommonExercise, mitll.langtest.client.LangTestDatabaseAsync, mitll.langtest.client.exercise.ExerciseController, boolean, String)
+   * @see BootstrapExercisePanel#getAnswerWidget
    */
   public FlashcardRecordButtonPanel(AudioAnswerListener exercisePanel,
                                     ExerciseController controller,
@@ -80,18 +83,22 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
    */
   @Override
   protected void addImages() {
-    waiting = new IconAnchor();
+    waiting     = new IconAnchor();
     correctIcon = new IconAnchor();
-    incorrect = new IconAnchor();
+    incorrect   = new IconAnchor();
 
     waiting.setBaseIcon(MyCustomIconType.waiting);
-    waiting.setVisible(false);
+    hideWaiting();
 
     correctIcon.setBaseIcon(MyCustomIconType.correct);
     correctIcon.setVisible(false);
 
     incorrect.setBaseIcon(MyCustomIconType.incorrect);
     incorrect.setVisible(false);
+  }
+
+  private void hideWaiting() {
+    waiting.setVisible(false);
   }
 
   /**
@@ -102,6 +109,7 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
   public Widget getRecordButton() {
     Widget recordButton1 = super.getRecordButton();
     Panel hp = new FlowPanel();
+    hp.getElement().setId("flashcardButtonContainer");
     hp.add(recordButton1);
     hp.add(waiting);
     hp.add(correctIcon);
@@ -114,7 +122,7 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
     super.initRecordButton();
     correctIcon.setVisible(false);
     incorrect.setVisible(false);
-    waiting.setVisible(false);
+    hideWaiting();
   }
 
   @Override
@@ -134,8 +142,7 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
    */
   @Override
   protected void receivedAudioAnswer(final AudioAnswer result, Panel outer) {
-    recordButton.setVisible(false);
-    waiting.setVisible(false);
+    hideRecordButton();
     if (result.isCorrect()) {
       correctIcon.setVisible(true);
     } else {
@@ -145,13 +152,21 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
   }
 
   @Override
+  protected void hideRecordButton() {
+    recordButton.setVisible(false);
+    hideWaiting();
+  }
+
+  @Override
   public void flip(boolean first) {
   }
 
   @Override
-  public void stopRecording() {
-    super.stopRecording();
-    recordButton.setVisible(false);
-    waiting.setVisible(true);
+  public void stopRecording(long duration) {
+    super.stopRecording(duration);
+    if (duration > MIN_DURATION) {
+      recordButton.setVisible(false);
+      waiting.setVisible(true);
+    }
   }
 }
