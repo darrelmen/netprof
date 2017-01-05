@@ -212,7 +212,7 @@ public class UserSecurityManager implements IUserSecurityManager {
       if (uidI != null && uidI > 0) {
         sessUser = getUserForID(uidI);
         if (sessUser == null) {
-         // log.info("lookupUserFromHttpSession got cache miss for " + uidI);
+          // log.info("lookupUserFromHttpSession got cache miss for " + uidI);
           log.info("Lookup user from HTTP session. " +
                   "SID={} " +
                   "Request SID={}, " +
@@ -250,7 +250,7 @@ public class UserSecurityManager implements IUserSecurityManager {
     log.info("Lookup user from DB session. SID: {}", sid);
     int userForSession = userSessionDAO.getUserForSession(sid);
     if (userForSession == -1) {
-      log.error("no user for session " +sid + " in database?");
+      log.error("no user for session " + sid + " in database?");
     }
     return rememberUser(userForSession);
   }
@@ -276,8 +276,18 @@ public class UserSecurityManager implements IUserSecurityManager {
     idToSession.put(id, user);
   }
 
-  private synchronized User getUserForID(int id) {
-    return idToSession.get(id);
+  /**
+   * @param id
+   * @return
+   * @see #rememberUser(int)
+   */
+  private User getUserForID(int id) {
+    long then = System.currentTimeMillis();
+    User sessUser = userDAO.getByID(id);
+    long now = System.currentTimeMillis();
+    if (now - then > 20) log.warn("getUserForID took " + (now - then) + " millis to get user " + id);
+    return sessUser;
+    //return idToSession.get(id);
   }
 
   private void throwException(String opName, User cUser, String checkDesc)
