@@ -94,10 +94,6 @@ public class UserCopy {
               if (DEBUG) logger.info("copyUsers found existing user " + importUserID + " : " + userByID1);
 
               // User "adam" already exists with a different password - what to do?
-              // void current password! Force them to set it again when they log in again
-
-              int existingID = userByID1.getID();
-
               // give the person a new id in the name space of the language
 
               String compoundID = importUserID + "#" + optName;
@@ -125,7 +121,7 @@ public class UserCopy {
 //              oldToNew.put(importID, existingID);
 
               collisions++;
-              logger.info("copyUsers user collision to project " + projid + " map " + importID + "->" + existingID +
+              logger.info("copyUsers user collision to project " + projid + " map " + importID + "->" +  userByID1.getID() +
                   " : " + userByID1);
             }
           } else {
