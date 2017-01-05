@@ -100,11 +100,10 @@ public class Navigation implements RequiresResize, ShowTab {
 
   private static final String CHAPTERS = "Learn Pronunciation";
   /**
-   * @see #addUserMaintenance
+   * @seex #addUserMaintenance
    */
-  private static final String USERS = "Users";
-
-  private static final String CLASSES = "Classes";
+  //private static final String USERS = "Users";
+  //private static final String CLASSES = "Classes";
 
   private static final String PROJECTS = "Projects";
 
@@ -146,7 +145,6 @@ public class Navigation implements RequiresResize, ShowTab {
   private final ExerciseController controller;
   private final LangTestDatabaseAsync service;
   private final ExerciseServiceAsync exerciseServiceAsync = GWT.create(ExerciseService.class);
-  //private final ProjectServiceAsync projectServiceAsync   = GWT.create(ProjectService.class);
 
   private final UserManager userManager;
   private final SimpleChapterNPFHelper practiceHelper;
@@ -280,9 +278,7 @@ public class Navigation implements RequiresResize, ShowTab {
 
     if (controller.getProps().useAnalysis() ||
         userManager.hasPermission(User.Permission.TEACHER_PERM)) {
-      // if (userManager.isTeacher()) {
       addTeacherAnalysis();
-      // }
     }
 
     if (isQC()) {
