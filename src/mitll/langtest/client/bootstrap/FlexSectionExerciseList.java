@@ -98,6 +98,7 @@ public class FlexSectionExerciseList extends NPExerciseList<ButtonGroupSectionWi
    * @param controller
    * @param instance
    * @param incorrectFirst
+   * @param showFirstNotCompleted
    * @see NPFlexSectionExerciseList#NPFlexSectionExerciseList
    */
   protected FlexSectionExerciseList(Panel secondRow,
@@ -106,8 +107,9 @@ public class FlexSectionExerciseList extends NPExerciseList<ButtonGroupSectionWi
                                     UserFeedback feedback,
                                     ExerciseController controller,
                                     String instance,
-                                    boolean incorrectFirst) {
-    super(currentExerciseVPanel, service, feedback, controller, true, instance, incorrectFirst);
+                                    boolean incorrectFirst,
+                                    boolean showFirstNotCompleted) {
+    super(currentExerciseVPanel, service, feedback, controller, true, instance, incorrectFirst, showFirstNotCompleted);
 
     sectionPanel = new FluidContainer();
     sectionPanel.getElement().setId("sectionPanel_" + instance);
@@ -132,7 +134,7 @@ public class FlexSectionExerciseList extends NPExerciseList<ButtonGroupSectionWi
        * @param sections
        */
       protected void selectItem(String type, Collection<String> sections) {
-     //   logger.info("FlexSectionExerciseList.selectItem : selecting " + type + "=" + sections);
+        //   logger.info("FlexSectionExerciseList.selectItem : selecting " + type + "=" + sections);
         ButtonGroupSectionWidget listBox = getGroupSection(type);
         listBox.clearSelectionState();
         listBox.selectItem(sections);
@@ -142,7 +144,7 @@ public class FlexSectionExerciseList extends NPExerciseList<ButtonGroupSectionWi
 
   /**
    * @param userID
-   * @see mitll.langtest.client.InitialUI#configureUIGivenUser
+   * @seex mitll.langtest.client.InitialUI#configureUIGivenUser
    */
   public boolean getExercises(final long userID) {
     //logger.info("FlexSectionExerciseList.getExercises : Get exercises for user=" + userID + " instance " + getInstance());
@@ -453,39 +455,7 @@ public class FlexSectionExerciseList extends NPExerciseList<ButtonGroupSectionWi
     // keep the download link info in sync with the selection
     Map<String, Collection<String>> typeToSection = selectionState.getTypeToSection();
     downloadHelper.updateDownloadLinks(selectionState,controller.getTypeOrder());
-
-    if (typeToSection.isEmpty()) {
-      showDefaultStatus();
-    } else {
-      StringBuilder status = new StringBuilder();
-
-      //System.out.println("showSelectionState : typeOrder " + typeOrder + " selection state " + typeToSection);
-
-      for (String type : controller.getTypeOrder()) {
-        Collection<String> selectedItems = typeToSection.get(type);
-        if (selectedItems != null) {
-          // String statusForType = type + " " + selectedItems.toString().replaceAll("\\[", "").replaceAll("\\]", "");
-          List<String> sorted = new ArrayList<String>();
-          for (String selectedItem : selectedItems) {
-            sorted.add(selectedItem);
-          }
-          Collections.sort(sorted);
-          StringBuilder status2 = new StringBuilder();
-          for (String item : sorted) status2.append(item).append(", ");
-          String s = status2.toString();
-          if (!s.isEmpty()) s = s.substring(0, s.length() - 2);
-          String statusForType = type + " " + s;
-          status.append(statusForType).append(" and ");
-        }
-      }
-      String text = status.toString();
-      if (text.length() > 0) text = text.substring(0, text.length() - " and ".length());
-      statusHeader.setText(text);
-    }
-
-    //   Map<String, Collection<String>> typeToSection = selectionState.getTypeToSection();
-//    downloadHelper.updateDownloadLinks(selectionState, typeOrder);
-//    statusHeader.setText(selectionState.getDescription(typeOrder));
+    statusHeader.setText(selectionState.getDescription(controller.getTypeOrder()));
   }
 
   private void showDefaultStatus() {
@@ -755,7 +725,7 @@ public class FlexSectionExerciseList extends NPExerciseList<ButtonGroupSectionWi
   }
 
   private void setScrollPanelWidth() {
-    if (labelColumn != null) {
+    if (labelColumn != null && clearColumnContainer != null) {
       int leftSideWidth = labelColumn.getOffsetWidth() + clearColumnContainer.getOffsetWidth();
       if (leftSideWidth == 0) leftSideWidth = 130;
       int width = Window.getClientWidth() - leftSideWidth - UNACCOUNTED_WIDTH;

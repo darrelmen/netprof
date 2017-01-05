@@ -159,6 +159,11 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     }
   }
 
+  @Override
+  public void removeForResult(int resultid) {
+
+  }
+
   /**
    * @param userid
    * @param exids
@@ -272,7 +277,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
             " skipping " + exid + " " + rid + " word " + word + "<-------------- ");*/
       //  }
     }
-    finish(connection, statement, rs);
+    finish(connection, statement, rs,sql);
 
     return new MakePhoneReport().getPhoneReport(phoneToScores, phoneToWordAndScore, totalScore, totalItems, sortByLatestExample);
   }
@@ -333,7 +338,8 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 
     List<Phone> all = new ArrayList<>();
     try {
-      PreparedStatement statement = connection.prepareStatement("select * from " + PHONE);
+      String sql = "select * from " + PHONE;
+      PreparedStatement statement = connection.prepareStatement(sql);
       ResultSet rs = statement.executeQuery();
       while (rs.next()) {
         long rid = rs.getLong(RID1);
@@ -344,7 +350,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
         float phoneScore = rs.getFloat(SCORE);
         all.add(new Phone(rid, wid, phone, seq, phoneScore, 0));
       }
-      finish(connection, statement, rs);
+      finish(connection, statement, rs,sql);
     } catch (SQLException e) {
       logger.error("Got " + e, e);
     }

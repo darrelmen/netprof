@@ -299,6 +299,7 @@ public class AnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
   /**
    * @param id
    * @param processDur
+   * @param isCorrect
    * @see mitll.langtest.server.LangTestDatabaseImpl#getPretestScore(int, long, String, String, int, int, boolean, String, boolean)
    * @see mitll.langtest.server.database.DatabaseImpl#rememberScore(int, PretestScore, boolean)
    */

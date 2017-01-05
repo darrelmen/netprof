@@ -71,6 +71,8 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
   private final ExerciseComparator sorter;
   private static final String ENGLISH = "English";
   private final boolean english;
+  private final boolean showExerciseState;
+  private final String instance;
   private int FLLength = MAX_LENGTH_ID;
   boolean showCompleted;
 
@@ -78,9 +80,15 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
    * @param controller
    * @param verticalUnaccountedFor
    * @param isRecorder
-   * @see mitll.langtest.client.list.PagingExerciseList#makePagingContainer()
+   * @param showExerciseState
+   * @param instance
+   * @see mitll.langtest.client.list.PagingExerciseList#makePagingContainer
    */
-  public PagingContainer(ExerciseController controller, int verticalUnaccountedFor, boolean isRecorder) {
+  public PagingContainer(ExerciseController controller,
+                         int verticalUnaccountedFor,
+                         boolean isRecorder,
+                         boolean showExerciseState,
+                         String instance) {
     super(controller);
     ProjectStartupInfo startupInfo = controller.getProjectStartupInfo();
     if (startupInfo == null) {
@@ -100,7 +108,10 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
     this.isRecorder = isRecorder;
     english = controller.getLanguage().equals(ENGLISH);
 
-    showCompleted = controller.showCompleted();
+//    showCompleted = controller.showCompleted();
+    this.showExerciseState = showExerciseState;
+    this.instance = instance;
+   // logger.info("for " + instance + " show " + showExerciseState + " for recorder " + isRecorder);
   }
 
   protected void addColumnsToTable() {
@@ -199,7 +210,8 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
       @Override
       public SafeHtml getValue(T shell) {
         String columnText = getEnglishText(shell);
-        if (!showCompleted) {
+
+        if (!showExerciseState) {
           return getColumnToolTip(columnText);
         } else {
           String html = ""+shell.getID();
@@ -209,7 +221,7 @@ public class PagingContainer<T extends CommonShell> extends ClickablePagingConta
             STATE state = shell.getState();
 
             boolean isDefect = state == STATE.DEFECT;
-            boolean isFixed = state == STATE.FIXED;
+            boolean isFixed  = state == STATE.FIXED;
             boolean isLL = shell.getSecondState() == STATE.ATTN_LL;
             boolean isRerecord = shell.getSecondState() == STATE.RECORDED;
 

@@ -47,6 +47,7 @@ public class ControlState {
   private static final String SHUFFLE_ON = "shuffleOn";
   private static final String TRUE_VALUE = Boolean.TRUE.toString();
   private static int count = 0;
+
   private boolean audioOn = true;
   private boolean audioFeedbackOn = true;
   private boolean shuffleOn = false;

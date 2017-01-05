@@ -65,8 +65,8 @@ public interface CommonExercise extends CommonAudioExercise, ScoredExercise {
   boolean isSafeToDecode();
 
   /**
-   * @see mitll.langtest.client.custom.dialog.EditItem#didICreateThisItem(CommonExercise)
    * @return
+   * @see mitll.langtest.client.custom.dialog.EditItem#didICreateThisItem(CommonExercise)
    */
   int getCreator();
 
@@ -75,7 +75,9 @@ public interface CommonExercise extends CommonAudioExercise, ScoredExercise {
   int getProjectID();
 
   MutableExercise getMutable();
+
   MutableAudioExercise getMutableAudio();
+
   MutableAnnotationExercise getMutableAnnotation();
   CommonAnnotatable getCommonAnnotatable();
 }

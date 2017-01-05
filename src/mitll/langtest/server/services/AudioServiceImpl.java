@@ -36,9 +36,7 @@ import audio.image.ImageType;
 import audio.imagewriter.SimpleImageWriter;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.services.AudioService;
-import mitll.langtest.server.audio.AudioCheck;
-import mitll.langtest.server.audio.AudioConversion;
-import mitll.langtest.server.audio.PathWriter;
+import mitll.langtest.server.audio.*;
 import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.shared.answer.AudioAnswer;
@@ -46,6 +44,7 @@ import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.scoring.AudioContext;
+import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -132,8 +131,11 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         db.getCustomOrPredefExercise(getProjectID(), exerciseID) :
         db.getUserExerciseDAO().getTemplateExercise(db.getProjectDAO().getDefault());
 
+    int projid = audioContext.getProjid();
+    String language = db.getProject(projid).getLanguage();
+
     if (!isExistingExercise) {
-      ((Exercise) commonExercise).setProjectID(audioContext.getProjid());
+      ((Exercise) commonExercise).setProjectID(projid);
       audioContext.setExid(commonExercise.getID());
     }
 
@@ -144,13 +146,20 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
     AnswerInfo.RecordingInfo recordingInfo = new AnswerInfo.RecordingInfo("", "", deviceType, device, recordedWithFlash);
 
+    DecoderOptions options = new DecoderOptions()
+        .setRecordInResults(recordInResults)
+        .setDoFlashcard(doFlashcard)
+        .setRefRecording(addToAudioTable)
+        .setAllowAlternates(allowAlternates);
+
     AudioAnswer audioAnswer = amas ?
         getAudioFileHelper().writeAMASAudioFile(base64EncodedString, db.getAMASExercise(exerciseID), audioContext, recordingInfo) :
         getAudioFileHelper().writeAudioFile(
             base64EncodedString,
             exercise1,
             audioContext, recordingInfo,
-            recordInResults, doFlashcard, allowAlternates, addToAudioTable);
+
+            options);
 
     int user = audioContext.getUserid();
     if (addToAudioTable && audioAnswer.isValid()) {
@@ -167,34 +176,44 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       logger.warn("huh? got zero length recording " + user + " " + exerciseID);
       logEvent("audioRecording", "writeAudioFile", "" + exerciseID, "Writing audio - got zero duration!", user, "unknown", device);
     } else {
-      ensureCompressedAudio(user, exercise1, audioAnswer.getPath());
+      ensureCompressedAudio(user, commonExercise, audioAnswer.getPath(), audioContext.getAudioType(), language);
     }
 
     return audioAnswer;
   }
 
-  private void ensureCompressedAudio(int user, CommonShell exercise1, String path) {
-    String foreignLanguage = exercise1 == null ? "unknown" : exercise1.getForeignLanguage();
+  private void ensureCompressedAudio(int user, CommonExercise commonShell, String path, AudioType audioType,
+                                     String language) {
+    //String foreignLanguage = commonShell == null ? "unknown" : commonShell.getForeignLanguage();
     String userID = getUserID(user);
     if (userID == null) {
       logger.warn("ensureCompressedEquivalent huh? no user for " + user);
     }
 
-    ensureMP3(path, foreignLanguage, userID);
+    String title = commonShell == null ? "unknown" : commonShell.getForeignLanguage();
+    String comment = commonShell == null ? "unknown" : commonShell.getEnglish();
+    if (audioType.equals(AudioAttribute.CONTEXT_AUDIO_TYPE) && commonShell != null) {
+      if (commonShell.hasContext()) {
+        CommonExercise contextSentence = commonShell.getDirectlyRelated().iterator().next();
+        title = contextSentence.getForeignLanguage();
+        comment = contextSentence.getEnglish();
+      }
+    }
+
+    ensureMP3(path, new TrackInfo(title, userID, comment, language));
   }
 
   /**
    * for both audio in answers and best audio -- could be more efficient...
    *
    * @param wavFile
-   * @param title
-   * @param artist
+   * @param trackInfo
    * @return true if mp3 file exists
    * @seex #ensureMP3s(CommonExercise, String)
    * @see #writeAudioFile
    */
-  private boolean ensureMP3(String wavFile, String title, String artist) {
-   // if (!wavFile.startsWith(serverProps.getAudioBaseDir()))
+  private boolean ensureMP3(String wavFile, TrackInfo trackInfo) {
+    // if (!wavFile.startsWith(serverProps.getAudioBaseDir()))
     String parent = serverProps.getAnswerDir();
     if (wavFile != null) {
       logger.debug("ensureMP3 : trying " + wavFile);
@@ -214,10 +233,10 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         }
       }*/
 
-      String s = audioConversion.ensureWriteMP3(wavFile, parent, false, title, artist);
+      String s = audioConversion.ensureWriteMP3(wavFile, parent, false, trackInfo);
       boolean isMissing = s.equals(AudioConversion.FILE_MISSING);
       if (isMissing) {
-        logger.error("ensureMP3 : can't find " + wavFile + " under " + parent + " for " + title + " " + artist);
+        logger.error("ensureMP3 : can't find " + wavFile + " under " + parent + " for " + trackInfo);
       }
       return !isMissing;
     }
@@ -261,13 +280,18 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
                                          CommonExercise exercise1,
                                          int exerciseID,
                                          AudioAnswer audioAnswer) {
-    int idToUse = exercise1 == null ? exerciseID : exercise1.getID();
-    int projid = exercise1 == null ? -1 : exercise1.getProjectID();
+    boolean noExistingExercise = exercise1 == null;
+    int idToUse = noExistingExercise ? exerciseID : exercise1.getID();
+    int projid = noExistingExercise ? -1 : exercise1.getProjectID();
     String audioTranscript = getAudioTranscript(audioType, exercise1);
     String language = db.getProject(projid).getLanguage();
- //   logger.debug("addToAudioTable user " + user + " ex " + exerciseID + " for " + audioType + " path before " + audioAnswer.getPath());
+    //   logger.debug("addToAudioTable user " + user + " ex " + exerciseID + " for " + audioType + " path before " + audioAnswer.getPath());
 
     File absoluteFile = pathHelper.getAbsoluteAudioFile(audioAnswer.getPath());
+    boolean isContext = audioType == AudioType.CONTEXT_REGULAR || audioType == AudioType.CONTEXT_SLOW;
+    String context = noExistingExercise ? "" :
+        isContext ? exercise1.getDirectlyRelated().iterator().next().getEnglish() : exercise1.getEnglish();
+
     if (!absoluteFile.exists()) logger.error("addToAudioTable huh? no file at " + absoluteFile.getAbsolutePath());
     String permanentAudioPath = pathWriter.
         getPermanentAudioPath(
@@ -276,13 +300,13 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
             true,
             language,
             idToUse,
-            audioTranscript,
-            getArtist(user),
-            serverProps);
+            //audioTranscript,
+            serverProps,
+            new TrackInfo(audioTranscript, getArtist(user), context, language));
 
     AudioAttribute audioAttribute =
         db.getAudioDAO().addOrUpdate(user, idToUse, projid, audioType, permanentAudioPath, System.currentTimeMillis(),
-            audioAnswer.getDurationInMillis(), audioTranscript, (float)audioAnswer.getDynamicRange());
+            audioAnswer.getDurationInMillis(), audioTranscript, (float) audioAnswer.getDynamicRange());
     audioAnswer.setPath(audioAttribute.getAudioRef());
     logger.debug("addToAudioTable" +
         "\n\tuser " + user +
@@ -361,14 +385,13 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * @param reqid
    * @param audioFile
    * @param imageType
-   * @param width
-   * @param height
+   * @param imageOptions
    * @param exerciseID
    * @return path to an image file
    * @see mitll.langtest.client.scoring.AudioPanel#getImageURLForAudio
    */
   public ImageResponse getImageForAudioFile(int reqid,
-                                            String audioFile, String imageType, int width, int height,
+                                            String audioFile, String imageType, ImageOptions imageOptions,
                                             String exerciseID) {
     if (audioFile.isEmpty()) logger.error("huh? audio file is empty for req id " + reqid + " exid " + exerciseID);
 
@@ -387,21 +410,23 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       logger.error("getImageForAudioFile '" + imageType + "' is unknown?");
       return new ImageResponse(); // success = false!
     }
-    if (DEBUG || true) {
-      logger.debug("getImageForAudioFile : getting images (" + width + " x " + height + ") (" + reqid + ") type " + imageType +
-          " for " + wavAudioFile + "");
-    }
+//    if (DEBUG || true) {
+//      logger.debug("getImageForAudioFile : getting images (" + width + " x " + height + ") (" + reqid + ") type " + imageType +
+//          " for " + wavAudioFile + "");
+//    }
 
     long then = System.currentTimeMillis();
 
     String absolutePathToImage = imageWriter.writeImage(
         wavAudioFile,
         getAbsoluteFile(pathHelper.getImageOutDir()).getAbsolutePath(),
-        width, height, imageType1, exerciseID);
+        imageOptions.getWidth(), imageOptions.getHeight(), imageType1, exerciseID);
     long now = System.currentTimeMillis();
     long diff = now - then;
     if (diff > 100) {
-      logger.debug("getImageForAudioFile : got images (" + width + " x " + height + ") (" + reqid + ") type " + imageType +
+      logger.debug("getImageForAudioFile : got images " +
+          //"(" + width + " x " + height + ")" +
+          " (" + reqid + ") type " + imageType +
           " for " + wavAudioFile + " took " + diff + " millis");
     }
     String installPath = pathHelper.getInstallPath();

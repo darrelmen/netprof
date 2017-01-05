@@ -43,6 +43,7 @@ import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.AudioTag;
 import mitll.langtest.client.custom.TooltipHelper;
@@ -66,8 +67,9 @@ import java.util.logging.Logger;
  * @since 9/8/14.
  */
 public class CommentBox extends PopupContainer {
-  //private final Logger logger = Logger.getLogger("CommentBox");
   private final Logger logger = Logger.getLogger("CommentBox");
+
+  private static final int MAX_LENGTH = 500;
 
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
@@ -177,7 +179,7 @@ public class CommentBox extends PopupContainer {
       public void onClick(ClickEvent event) {
         commentAndOK.setVisible(false);
         commentComplete(commentEntryText, field, commentButton, clearButton);
-        String text = commentEntryText.getText();
+        String text = sanitize(commentEntryText.getText());
 
         ExerciseAnnotation toUse = annotation;
         if (annotation != null) {
@@ -204,7 +206,6 @@ public class CommentBox extends PopupContainer {
    * @see mitll.langtest.client.flashcard.FlashcardPanel#getFirstRow(mitll.langtest.client.exercise.ExerciseController)
    */
   public Widget getEntry(String field, Widget content, ExerciseAnnotation annotation) {
-
     field = fixAudioField(field);
     final HidePopupTextBox commentEntryText = getCommentBox(field);
 
@@ -229,7 +230,6 @@ public class CommentBox extends PopupContainer {
     // content on left side, comment button on right
 
     Panel row = getCommentAndButtonsRow(field, content, commentButton, clearButton);
-
     showOrHideCommentButton(commentButton, clearButton, isCorrect);
     return row;
   }
@@ -260,8 +260,8 @@ public class CommentBox extends PopupContainer {
   }
 
   /**
-   * @see FlashcardPanel#otherReasonToIgnoreKeyPress
    * @return
+   * @see FlashcardPanel#otherReasonToIgnoreKeyPress
    */
   public boolean isPopupShowing() {
     return commentPopup.isShowing();
@@ -348,12 +348,12 @@ public class CommentBox extends PopupContainer {
      * @see #makeCommentPopup(String, Button, HidePopupTextBox, Button)
      */
     void configure(final TextBox commentBox, final Widget commentButton, final Widget clearButton) {
-      addCloseHandler(new CloseHandler<PopupPanel>() {
-        @Override
-        public void onClose(CloseEvent<PopupPanel> event) {
-          registration.logEvent(commentBox, "Comment_TextBox", exerciseID, "submit comment '" + commentBox.getValue() + "'");
-          commentComplete(commentBox, field, commentButton, clearButton);
-        }
+
+      addCloseHandler(event ->
+
+      {
+        registration.logEvent(commentBox, "Comment_TextBox", exerciseID, "submit comment '" + commentBox.getValue() + "'");
+        commentComplete(commentBox, field, commentButton, clearButton);
       });
     }
   }
@@ -429,15 +429,22 @@ public class CommentBox extends PopupContainer {
    * @see MyPopup#configure(com.github.gwtbootstrap.client.ui.TextBox, com.google.gwt.user.client.ui.Widget, com.google.gwt.user.client.ui.Widget)
    */
   private <T extends ValueBoxBase> void commentComplete(T commentEntry, String field, Widget commentButton, Widget clearButton) {
-    commentComplete(field, commentButton, clearButton, commentEntry.getText());
+    commentComplete(field, commentButton, clearButton, sanitize(commentEntry.getText()));
+  }
+
+  private String sanitize(String text) {
+    return SimpleHtmlSanitizer.sanitizeHtml(text).asString();
   }
 
   private void commentComplete(String field, Widget commentButton, Widget clearButton, String comment) {
     String previous = fieldToComment.get(field);
+    comment = normalize(comment);
     if (previous == null || !previous.equals(comment)) {
       fieldToComment.put(field, comment);
-      boolean isCorrect = comment.length() == 0;
-//      System.out.println("commentComplete " + field + " comment '" + comment +"' correct = " +isCorrect);
+      boolean isCorrect = comment.isEmpty();
+
+      logger.info("commentComplete " + field + " comment '" + comment + "' correct = " + isCorrect);
+
       setButtonTitle(commentButton, isCorrect, comment);
       showOrHideCommentButton(commentButton, clearButton, isCorrect);
       if (isCorrect) {
@@ -445,8 +452,18 @@ public class CommentBox extends PopupContainer {
       } else {
         commentAnnotator.addIncorrectComment(comment, field);
       }
-      //System.out.println("\t commentComplete : annotations now " + exerciseID.getFields());
+
+      // remember to update the exercise itself
+      annotationExercise.addAnnotation(field, isCorrect ? TYPICAL.CORRECT.toString() : TYPICAL.INCORRECT.toString(), comment);
+      //logger.info("\t commentComplete : annotations now " + exerciseID.getFields());
     }
+  }
+
+
+  private String normalize(String comment) {
+    comment = comment.trim();
+    if (comment.length() > MAX_LENGTH) comment = comment.substring(0, MAX_LENGTH);
+    return comment;
   }
 
   private Tooltip setButtonTitle(Widget button, boolean isCorrect, String comment) {

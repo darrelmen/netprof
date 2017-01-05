@@ -147,7 +147,7 @@ public class SmallVocabDecoder {
    * @param sentence
    * @return
    * @see Scoring#getSegmented(String)
-   * @see mitll.langtest.server.audio.SLFFile#createSimpleSLFFile(Collection)
+   * @see mitll.langtest.server.audio.SLFFile#createSimpleSLFFile(Collection, boolean, boolean)
    */
   public List<String> getTokens(String sentence) {
     List<String> all = new ArrayList<String>();

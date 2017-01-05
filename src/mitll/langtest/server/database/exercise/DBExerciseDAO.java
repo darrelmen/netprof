@@ -58,11 +58,15 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       SlickUserExerciseDAO userExerciseDAO,
       SlickProject project
   ) {
-    super(serverProps, userListManager, addDefects, project.language());
+    super(serverProps, userListManager, addDefects, project.language(), project.id());
     this.userExerciseDAO = userExerciseDAO;
     this.project = project;
   }
 
+  /**
+   * TODO : remove duplicate
+   * @return
+   */
   @Override
   public List<String> getTypeOrder() {
     List<String> typeOrder = getSectionHelper().getTypeOrder();

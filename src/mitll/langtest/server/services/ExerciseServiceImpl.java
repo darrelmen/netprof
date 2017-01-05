@@ -87,7 +87,6 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
    * @param request
    * @return
    * @see mitll.langtest.client.list.PagingExerciseList#loadExercises
-   *
    */
   @Override
   public <T extends CommonShell> ExerciseListWrapper<T> getExerciseIds(ExerciseListRequest request) {
@@ -157,7 +156,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
   /**
    * TODO : this doesn't make sense - we need to do this on all projects, once.
    * Here it's just doing it on the first project that's asked for.
-   *
+   * <p>
    * TODO : remove duplicate
    * Called from the client:
    *
@@ -190,7 +189,10 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
     return exercises;
   }
 
-  private Collection<CommonExercise> getExercisesForUser() {  return db.getExercises(getProjectID());  }
+  private Collection<CommonExercise> getExercisesForUser() {
+    return db.getExercises(getProjectID());
+  }
+
   Collator getCollator() {
     return getAudioFileHelper().getCollator();
   }
@@ -328,7 +330,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
 
   /**
    * TODO : what to do with request role here?
-   *
+   * <p>
    * NOTE NOTE NOTE : not doing ensureMP3 - since we likely don't have access to file system for here.
    * ALSO - ideally this is done at the moment the wav is made.
    * <p>
@@ -362,6 +364,16 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
     } else if (role.equalsIgnoreCase(User.Permission.QUALITY_CONTROL.toString()) ||
         role.startsWith(AudioType.REVIEW.toString())) {
       getUserListManager().markState(exerciseShells);
+    } else if (role.equals("markDefects")) {
+      Collection<Integer> defectExercises = getUserListManager().getDefectExercises();
+      int c = 0;
+      for (CommonShell shell : exerciseShells) {
+        if (defectExercises.contains(shell.getID())) {
+          shell.setState(STATE.DEFECT);
+          //    if (shell.getID().startsWith("50")) logger.info("adding defect to " +shell.getID() + " : " + shell.getState());
+          c++;
+        }
+      }
     }
 
     // TODO : do this the right way vis-a-vis type safe collection...
@@ -474,9 +486,15 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
   private Collection<CommonExercise> filterExercises(ExerciseListRequest request,
                                                      Collection<CommonExercise> exercises) {
     exercises = filterByUnrecorded(request, exercises);
-    exercises = filterByOnlyAudioAnno(request.isOnlyWithAudioAnno(), exercises);
-    exercises = filterByOnlyDefaultAudio(request.isOnlyDefaultAudio(), exercises);
-
+    if (request.isOnlyWithAudioAnno()) {
+      exercises = filterByOnlyAudioAnno(request.isOnlyWithAudioAnno(), exercises);
+    }
+    if (request.isOnlyDefaultAudio()) {
+      exercises = filterByOnlyDefaultAudio(request.isOnlyDefaultAudio(), exercises);
+    }
+    if (request.isOnlyUninspected()) {
+      exercises = filterByUninspected(exercises);
+    }
     return exercises;
   }
 
@@ -561,9 +579,21 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
       int userID = request.getUserID();
       logger.debug("filterByUnrecorded : for " + userID + " only by same gender " + //onlyUnrecordedByMyGender +
           " examples only " + onlyExamples + " from " + exercises.size());
+
+      Map<Integer, String> exToTranscript = new HashMap<>();
+      Map<Integer, String> exToContextTranscript = new HashMap<>();
+
+      for (CommonExercise shell : exercises) {
+        exToTranscript.put(shell.getID(), shell.getForeignLanguage());
+        String context = shell.hasContext() ? shell.getDirectlyRelated().iterator().next().getForeignLanguage() : null;
+        if (context != null && !context.isEmpty()) {
+          exToContextTranscript.put(shell.getID(), context);
+        }
+      }
+
       Collection<Integer> recordedBySameGender = onlyExamples ?
-          db.getAudioDAO().getWithContext(userID) :
-          db.getAudioDAO().getRecordedBy(userID);
+          db.getAudioDAO().getWithContext(userID, exToContextTranscript) :
+          db.getAudioDAO().getRecordedBy(userID, exToTranscript);
 
       Set<Integer> allExercises = new HashSet<>();
       for (CommonShell exercise : exercises) {
@@ -653,6 +683,24 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
     }
   }
 
+  /**
+   * Remove any items that have been inspected already.
+   *
+   * @param exercises
+   * @return
+   */
+  private Collection<CommonExercise> filterByUninspected(Collection<CommonExercise> exercises) {
+    Collection<Integer> inspected = getUserListManager().getInspectedExercises();
+    // logger.info("found " + inspected.size());
+    List<CommonExercise> copy = new ArrayList<CommonExercise>();
+    for (CommonExercise exercise : exercises) {
+      if (!inspected.contains(exercise.getID())) {
+        copy.add(exercise);
+      }
+    }
+    return copy;
+  }
+
   private <T extends CommonShell> Collection<T> getExercisesFromUserListFiltered(Map<String, Collection<String>> typeToSelection,
                                                                                  UserList<T> userListByID) {
     SectionHelper<T> helper = new SectionHelper<T>();
@@ -690,9 +738,9 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
   }
 
   /**
-   * @deprecated
    * @param request
    * @return
+   * @deprecated
    */
   private ExerciseListWrapper<AmasExerciseImpl> getAMASExerciseIds(
       ExerciseListRequest request

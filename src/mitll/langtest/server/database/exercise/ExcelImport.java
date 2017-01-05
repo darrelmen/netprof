@@ -96,7 +96,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   public ExcelImport(String file, ServerProperties serverProps,
                      IUserListManager userListManager,
                      boolean addDefects) {
-    super(serverProps, userListManager, addDefects, serverProps.getLanguage());
+    super(serverProps, userListManager, addDefects, serverProps.getLanguage(),-1);
     this.file = file;
 
     //  logger.info("Reading from " + file);
@@ -105,9 +105,10 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     shouldHaveRefAudio = false;
     this.usePredefinedTypeOrder = serverProps.usePredefinedTypeOrder();
     this.skipSemicolons = serverProps.shouldSkipSemicolonEntries();
+    // from the tier index property
     this.unitIndex = serverProps.getUnitChapterWeek()[0];
     this.chapterIndex = serverProps.getUnitChapterWeek()[1];
-    this.weekIndex = serverProps.getUnitChapterWeek()[2];
+    this.weekIndex    = serverProps.getUnitChapterWeek()[2];
     if (DEBUG) logger.debug("unit " + unitIndex + " chapter " + chapterIndex + " week " + weekIndex);
   }
 
@@ -373,14 +374,18 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
                       context, altcontext, contextTranslation,
                       hasAudioIndex ? getCell(next, audioIndex) : "");
 
+              String id1 = imported == null ? idToUse : imported.getOldID();
+
               if (!isDelete &&
                   (imported.hasRefAudio() || !shouldHaveRefAudio)) {  // skip items without ref audio, for now.
                 recordUnitChapterWeek(unitIndex, chapterIndex, weekIndex, next, imported, unitName, chapterName, weekName);
 
-                if (knownIds.contains(imported.getOldID())) {
-                  logger.warn("readFromSheet : found duplicate entry under " + imported.getOldID() + " " + imported);
+                if (knownIds.contains(id1)) {
+                  if (!id1.isEmpty()) {
+                    logger.warn("readFromSheet : found duplicate entry under '" + id1 + "' " + imported);
+                  }
                 } else {
-                  knownIds.add(imported.getOldID());
+                  knownIds.add(id1);
                   exercises.add(imported);
                 }
               } else {
@@ -679,10 +684,9 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     String unit = getCell(next, unitIndex);
     String chapter = getCell(next, chapterIndex);
     String week = getCell(next, weekIndex);
-    List<SectionHelper.Pair> pairs = new ArrayList<SectionHelper.Pair>();
 
-    if (unit.length() == 0 && chapter.length() == 0 && week.length() == 0) {
-      unit = "Other";
+    if (unit.isEmpty() && chapter.isEmpty() && week.isEmpty()) {
+      unit    = "Other";
       chapter = "Other";
     }
 
@@ -692,24 +696,34 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     if (chapter.startsWith("'")) chapter = chapter.substring(1);
     if (week.startsWith("'")) week = week.substring(1);
 
-/*    if (debug && false)
-      logger.debug("unit(" +unitName+
+//   if (debug && false)
+/*      logger.debug("unit(" +unitName+
         ")" + unitIndex + "/" + unit + " chapter " + chapterIndex + "/(" +chapterName+
         ")" + chapter + " week (" + weekName+ ") : " + week);*/
 
+    List<SectionHelper.Pair> pairs = new ArrayList<SectionHelper.Pair>();
+    SectionHelper<CommonExercise> sectionHelper = getSectionHelper();
     if (unit.length() > 0) {
-      pairs.add(getSectionHelper().addExerciseToLesson(imported, unitName, unit));
+      pairs.add(sectionHelper.addExerciseToLesson(imported, unitName, unit));
+    }
+    else if (unitName != null) {
+      unit = chapter;
+      pairs.add(sectionHelper.addExerciseToLesson(imported, unitName, unit));
     }
     if (chapter.length() > 0) {
       if (language.equalsIgnoreCase("English")) {
         chapter = (unitIndex == -1 ? "" : unit + "-") + chapter; // hack for now to get unique chapters...
       }
-      pairs.add(getSectionHelper().addExerciseToLesson(imported, chapterName, chapter));
+      pairs.add(sectionHelper.addExerciseToLesson(imported, chapterName, chapter));
+    } else if (chapterName != null){
+      chapter = unit;
+      pairs.add(sectionHelper.addExerciseToLesson(imported, chapterName, chapter));
+//      logger.info("skip unit '" +unit + "' and chapter '" +chapter+ "'");
     }
     if (week.length() > 0) {
-      pairs.add(getSectionHelper().addExerciseToLesson(imported, weekName, week));
+      pairs.add(sectionHelper.addExerciseToLesson(imported, weekName, week));
     }
-    getSectionHelper().addAssociations(pairs);
+    sectionHelper.addAssociations(pairs);
   }
 
   private String getCell(Row next, int col) {

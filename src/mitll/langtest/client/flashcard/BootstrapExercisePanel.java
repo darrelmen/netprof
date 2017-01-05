@@ -80,10 +80,8 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
   static final int CORRECT_DELAY = 600;
   private static final int DELAY_MILLIS_LONG = 3000;
   private static final int LONG_DELAY_MILLIS = 3500;
-  //private static final int DELAY_CHARACTERS = 40;
-  private static final int HIDE_DELAY = 2500;
-  protected static final int DELAY_MILLIS = 100;
-  //private static final boolean NEXT_ON_BAD_AUDIO = false;
+  public static final int HIDE_DELAY = 2500;
+  static final int DELAY_MILLIS = 100;
 
   /**
    * @see #getFeedbackGroup(ControlState)
@@ -316,10 +314,10 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
           }
 
           @Override
-          public void stop() {
+          public void stop(long duration) {
             controller.logEvent(this, AVP_RECORD_BUTTON, exerciseID, "Stop_Recording");
             outer.setAllowAlternates(showOnlyEnglish);
-            super.stop();
+            super.stop(duration);
           }
 
           @Override
@@ -457,12 +455,13 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
    * @param html
    * @see #receivedAudioAnswer
    */
-  private void showPopup(String html, Widget button) {
+  protected void showPopup(String html, Widget button) {
     new PopupHelper().showPopup(html, button, HIDE_DELAY);
   }
 
   /**
    * TODO : decide when to show what ASR "heard"
+   *
    * @param score
    * @see #receivedAudioAnswer(AudioAnswer)
    */
@@ -518,7 +517,7 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
     }
     showOtherText();
 
-    logger.info("showIncorrectFeedback : result " + result + " score " + score + " has ref " + hasRefAudio);
+  //  logger.info("showIncorrectFeedback : result " + result + " score " + score + " has ref " + hasRefAudio);
 
     String correctPrompt = getCorrectDisplay();
     if (hasRefAudio) {
@@ -575,8 +574,8 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
   void removePlayingHighlight() {
     //logger.info("removePlayingHighlight - ");
     removePlayingHighlight(
-    //    isSiteEnglish() ? english : foreign
-      foreign
+        //    isSiteEnglish() ? english : foreign
+        foreign
     );
   }
 
@@ -647,15 +646,15 @@ public class BootstrapExercisePanel<T extends CommonShell & AudioRefExercise & A
     } else {*/
     //  logger.info("doing nextAfterDelay : correct " + correct + " feedback " + feedback);
 
-      if (correct) {
-        // go to next item
-//        logger.info("Bootstrap nextAfterDelay " + correct);
-        loadNextOnTimer(CORRECT_DELAY);//DELAY_MILLIS);
-      } else {
-        initRecordButton();
-        clearFeedback();
-      }
-  //  }
+    if (correct) {
+      // go to next item
+      logger.info("Bootstrap nextAfterDelay " + correct + " : " +CORRECT_DELAY);
+      loadNextOnTimer(CORRECT_DELAY);//DELAY_MILLIS);
+    } else {
+      initRecordButton();
+      clearFeedback();
+    }
+    //  }
   }
 
   /**

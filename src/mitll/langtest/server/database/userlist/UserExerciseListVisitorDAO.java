@@ -186,7 +186,7 @@ public class UserExerciseListVisitorDAO extends DAO implements IUserExerciseList
     while (rs.next()) {
       visitors.add(rs.getInt(UserExerciseListVisitorDAO.USERLISTID));
     }
-    finish(connection, statement, rs);
+    finish(connection, statement, rs, sql);
 
     return visitors;
   }
@@ -242,7 +242,8 @@ public class UserExerciseListVisitorDAO extends DAO implements IUserExerciseList
     List<Pair> visitors = new ArrayList<>();
     try {
       Connection connection = database.getConnection(this.getClass().toString());
-      PreparedStatement statement = connection.prepareStatement("select * from " + USER_EXERCISE_LIST_VISITOR);
+      String sql = "select * from " + USER_EXERCISE_LIST_VISITOR;
+      PreparedStatement statement = connection.prepareStatement(sql);
       ResultSet rs = statement.executeQuery();
 
       while (rs.next()) {
@@ -255,7 +256,7 @@ public class UserExerciseListVisitorDAO extends DAO implements IUserExerciseList
             time
         ));
       }
-      finish(connection, statement, rs);
+      finish(connection, statement, rs,sql);
 
     } catch (SQLException e) {
       e.printStackTrace();

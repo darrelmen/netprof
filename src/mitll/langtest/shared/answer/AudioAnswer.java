@@ -109,6 +109,7 @@ public class AudioAnswer implements IsSerializable {
   }
 
   /**
+   * @see DecodeCorrectnessChecker#getDecodeScore
    * @param score
    * @see DecodeCorrectnessChecker#getFlashcardAnswer
    */
@@ -133,6 +134,7 @@ public class AudioAnswer implements IsSerializable {
   }
 
   /**
+   * @see DecodeCorrectnessChecker#getDecodeScore
    * @param correct
    * @see DecodeCorrectnessChecker#getFlashcardAnswer
    */

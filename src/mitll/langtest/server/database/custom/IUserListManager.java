@@ -74,6 +74,10 @@ public interface IUserListManager {
 
   UserList<CommonShell> getDefectList(Collection<String> typeOrder);
 
+  Collection<Integer> getDefectExercises();
+
+  Collection<Integer> getInspectedExercises();
+
   List<UserList<CommonShell>> getUserListsForText(String search, int userid, int projid);
 
   void reallyCreateNewItem(long userListID, CommonExercise userExercise, String mediaDir);

@@ -83,6 +83,7 @@ public class NPFHelper implements RequiresResize {
   private final boolean showQC;
   DivWidget contentPanel;
   ExerciseServiceAsync exerciseServiceAsync;
+  private final boolean showFirstNotCompleted;
 
   /**
    * @param service
@@ -97,12 +98,15 @@ public class NPFHelper implements RequiresResize {
                    UserFeedback feedback,
                    ExerciseController controller,
                    boolean showQC,
+                   boolean showFirstNotCompleted,
                    ExerciseServiceAsync exerciseServiceAsync) {
     this.service = service;
     this.feedback = feedback;
     this.controller = controller;
     this.showQC = showQC;
     this.exerciseServiceAsync = exerciseServiceAsync;
+    this.showFirstNotCompleted = showFirstNotCompleted;
+ //   logger.info("this " + this.getClass() + " shows first completed = " + showFirstNotCompleted);
   }
 
   /**
@@ -131,8 +135,7 @@ public class NPFHelper implements RequiresResize {
                       String instanceName,
                       boolean loadExercises,
                       HasID toSelect) {
-    // logger.info(getClass() + " : adding npf content instanceName = " + instanceName + " for list " + ul + " with " +ul.getExercises().size());
-
+//    logger.info(getClass() + " : adding npf content instanceName = " + instanceName + " for list " + ul + " with " +ul.getExercises().size());
     DivWidget content = tabAndContent.getContent();
     int widgetCount = content.getWidgetCount();
     if (!madeNPFContent || widgetCount == 0) {
@@ -145,7 +148,10 @@ public class NPFHelper implements RequiresResize {
     }
   }
 
-  private void addNPFToContent(UserList<CommonShell> ul, Panel listContent, String instanceName, boolean loadExercises,
+  private void addNPFToContent(UserList<CommonShell> ul,
+                               Panel listContent,
+                               String instanceName,
+                               boolean loadExercises,
                                HasID toSelect) {
     listContent.add(doNPF(ul, instanceName, loadExercises, toSelect));
     listContent.addStyleName("userListBackground");
@@ -215,18 +221,20 @@ public class NPFHelper implements RequiresResize {
     npfContentPanel.addStyleName("floatRight");
     npfContentPanel.getElement().setId("internalLayout_RightContent");
 
-    npfExerciseList = makeNPFExerciseList(npfContentPanel, instanceName + "_" + ul.getID());
+    npfExerciseList = makeNPFExerciseList(npfContentPanel, instanceName + "_" + ul.getID(), showFirstNotCompleted);
     return npfContentPanel;
   }
 
   /**
    * @param right
    * @param instanceName
+   * @param showFirstNotCompleted
    * @return
-   * @see #doNPF
+   * @see ##getRightSideContent
    */
-  PagingExerciseList<CommonShell, CommonExercise> makeNPFExerciseList(Panel right, String instanceName) {
-    final PagingExerciseList<CommonShell, CommonExercise> exerciseList = makeExerciseList(right, instanceName);
+  PagingExerciseList<CommonShell, CommonExercise> makeNPFExerciseList(Panel right, String instanceName, boolean showFirstNotCompleted) {
+  //  logger.info("got " + getClass() + " instance " + instanceName+ " show first " + showFirstNotCompleted);
+    final PagingExerciseList<CommonShell, CommonExercise> exerciseList = makeExerciseList(right, instanceName, showFirstNotCompleted);
     setFactory(exerciseList, instanceName, showQC);
     Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
       @Override
@@ -261,12 +269,14 @@ public class NPFHelper implements RequiresResize {
   /**
    * @param right
    * @param instanceName
+   * @param showFirstNotCompleted
    * @return
    * @see #makeNPFExerciseList
    */
-  PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(final Panel right, final String instanceName) {
+  PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(final Panel right, final String instanceName,
+                                                                   boolean showFirstNotCompleted) {
     return new NPExerciseList(right, exerciseServiceAsync, feedback, controller,
-        true, instanceName, false) {
+        true, instanceName, false,showFirstNotCompleted) {
       @Override
       protected void onLastItem() {
         new ModalInfoDialog(COMPLETE, LIST_COMPLETE, new HiddenHandler() {
@@ -283,7 +293,7 @@ public class NPFHelper implements RequiresResize {
    * @param exerciseList
    * @param instanceName
    * @param showQC
-   * @see #makeNPFExerciseList(com.google.gwt.user.client.ui.Panel, String)
+   * @see #makeNPFExerciseList(Panel, String, boolean)
    */
   private void setFactory(final PagingExerciseList<CommonShell, CommonExercise> exerciseList, final String instanceName, boolean showQC) {
     exerciseList.setFactory(getFactory(exerciseList, instanceName, showQC));
@@ -303,10 +313,6 @@ public class NPFHelper implements RequiresResize {
         }
       }
     };
-  }
-
-  public void reload(UserList<CommonShell> userList) {
-    rememberAndLoadFirst(userList, null);
   }
 
   @Override

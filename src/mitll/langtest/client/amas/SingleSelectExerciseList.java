@@ -71,7 +71,7 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
   private final Logger logger = Logger.getLogger("SingleSelectExerciseList");
   private static final int NUM_CHOICES = 3;
 
-  private static final String PLEASE_SELECT  = "Please select a quiz, test type, ILR level, and response type";
+  private static final String PLEASE_SELECT = "Please select a quiz, test type, ILR level, and response type";
   private static final String PLEASE_SELECT2 = "Please select a test type, ILR level, and response type";
   private static final int CLASSROOM_VERTICAL_EXTRA = 270;
   private static final String SHOWING_ALL_ENTRIES = "Showing all entries";
@@ -89,15 +89,16 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
    * @param controller
    * @param instance
    * @param incorrectFirst
+   * @param showFirstNotCompleted
+   * @see ResponseExerciseList#ResponseExerciseList(Panel, Panel, LangTestDatabaseAsync, UserFeedback, ExerciseController, String)
    */
   SingleSelectExerciseList(Panel secondRow,
                            Panel currentExerciseVPanel,
                            ExerciseServiceAsync service,
                            UserFeedback feedback,
                            ExerciseController controller,
-                           String instance,
-                           boolean incorrectFirst) {
-    super(currentExerciseVPanel, service, feedback, controller, true, instance, incorrectFirst);
+                           String instance, boolean incorrectFirst, boolean showFirstNotCompleted) {
+    super(currentExerciseVPanel, service, feedback, controller, true, instance, incorrectFirst, showFirstNotCompleted);
 
     sectionPanel = new FluidContainer();
     sectionPanel.getElement().setId("sectionPanel_" + instance);
@@ -218,7 +219,7 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
   public void gotSelection() {
     int count = getNumSelections();
     if (count == getNumChoices()) {
-    //  logger.info("gotSelection count = " + count);
+      //  logger.info("gotSelection count = " + count);
       pushNewSectionHistoryToken();
     } else {
       //logger.info("gotSelection count " + count + " < " + getNumChoices());
@@ -341,7 +342,7 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
   }
 
   private int getNumChoices() {
-    return getSectionWidget("Quiz") == null ? NUM_CHOICES-1:NUM_CHOICES;
+    return getSectionWidget("Quiz") == null ? NUM_CHOICES - 1 : NUM_CHOICES;
   }
 
   /**
@@ -396,17 +397,18 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
   }*/
 
   /**
+   * @param searchIfAny
    * @seex #rememberAndLoadFirst(List, CommonExercise, String)
    */
   @Override
-  public void loadFirstExercise() {
+  public void loadFirstExercise(String searchIfAny) {
     //logger.info("loadFirstExercise : ---");
 
     if (isEmpty()) { // this can only happen if the database doesn't load properly, e.g. it's in use
       //logger.info("loadFirstExercise : current exercises is empty?");
       gotEmptyExerciseList();
     } else {
-      super.loadFirstExercise();
+      super.loadFirstExercise(searchIfAny);
     }
   }
 
@@ -415,16 +417,19 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
    */
   private void makeDefaultSelections() {
     for (ButtonBarSectionWidget v : sectionWidgetContainer.getValues()) {
-     // ButtonBarSectionWidget value = (ButtonBarSectionWidget) v;
+      // ButtonBarSectionWidget value = (ButtonBarSectionWidget) v;
       v.simpleSelectOnlyOne();
     }
   }
 
   /**
    * When we log in we want to check the history in the url and set the current selection state to reflect it.
+   *
    * @see AMASInitialUI#configureUIGivenUser()
    */
-  public void restoreListFromHistory() {  restoreListFromHistory(History.getToken());  }
+  public void restoreListFromHistory() {
+    restoreListFromHistory(History.getToken());
+  }
 
   private void restoreListFromHistory(String token) {
     try {
@@ -442,7 +447,8 @@ public abstract class SingleSelectExerciseList extends HistoryExerciseList<AmasE
       if (count == 3) {
         //    logger.info("push new token " + getHistoryTokenFromUIState());
         logger.info("gotSelection count = " + count);
-        loadExercisesUsingPrefix(selectionState.getTypeToSection(), getPrefix(), false, -1);
+        loadExercisesUsingPrefix(selectionState.getTypeToSection(), getPrefix(), -1,
+            false, false, false, false);
       } else {
         // logger.warning("not enough selections " +count);
         gotEmptyExerciseList();

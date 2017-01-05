@@ -280,7 +280,47 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
     return getAudioExercisesForGender(Collections.singleton(userid), REGULAR);
   }*/
 
-  protected Set<Integer> getAudioExercisesForGender(Collection<Integer> userIDs, String audioSpeed) {
+  /**
+   * Get back the ids of exercises recorded by people who are the same gender as the userid.
+   *
+   * @param userid only used to determine the gender we should show
+   * @return ids with both regular and slow speed recordings
+   * @see mitll.langtest.server.LangTestDatabaseImpl#filterByUnrecorded
+   */
+  public Set<Integer> getRecordedBy(long userid, Map<Integer, String> exToTranscript) {
+/*
+    Collection<Long> userMap = getUserIDsMatchingGender(userid);
+    //logger.debug("found " + (isMale ? " male " : " female ") + " users : " + userMap.keySet());
+    // find set of users of same gender
+    Set<String> validAudioAtReg = getAudioForGender(userMap, REGULAR, exToTranscript);
+    //logger.debug(" regular speed for " + userMap.keySet() + " " + validAudioAtReg.size());
+    Set<String> validAudioAtSlow = getAudioForGender(userMap, SLOW, exToTranscript);
+//    logger.debug(" slow speed for " + userMap.keySet() + " " + validAudioAtSlow.size());
+
+    boolean b = validAudioAtReg.retainAll(validAudioAtSlow);
+    //  logger.debug("retain all " + b + " " + validAudioAtReg.size());
+    return validAudioAtReg;
+    */
+
+    return null;
+
+  }
+
+  public Set<Integer> getWithContext(long userid, Map<Integer, String> exToContext) {
+    //  return getAudioForGender(getUserIDsMatchingGender(userid), CONTEXT_REGULAR, exToContext);
+    return null;
+  }
+
+/*  private Collection<Long> getUserIDsMatchingGender(long userid) {
+    User user = userDAO.getUserWhere(userid);
+    boolean isMale = (user != null && user.isMale());
+    //   logger.info("getUserMapMatchingGender getting users who are " + (isMale ? "male" : "female"));
+    return userDAO.getUserIDsMatchingGender(isMale);
+  }*/
+
+  protected Set<Integer> getAudioExercisesForGender(Collection<Integer> userIDs,
+                                                    String audioSpeed,
+                                                    Map<Integer, String> exToTranscript) {
     Set<Integer> results = new HashSet<>();
     try {
       Connection connection = database.getConnection(this.getClass().toString());
@@ -309,7 +349,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
         results.add(e);
       }
       //    logger.debug("for " + audioSpeed + " " + sql + " yielded " + results.size());
-      finish(connection, statement, rs);
+      finish(connection, statement, rs, sql);
 
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
@@ -327,35 +367,59 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @return
    * @see #getRecordedReport
    */
-  protected int getCountForGender(Set<Integer> userIds, String audioSpeed, Set<Integer> uniqueIDs) {
-    Set<String> idsOfRecordedExercises = new HashSet<>();
-
-    Set<String> idsOfStaleExercises = new HashSet<>();
-
+  protected int getCountForGender(Set<Integer> userIds, String audioSpeed, Set<Integer> uniqueIDs,
+                                  Map<Integer, String> exToTranscript,
+                                  Set<Integer> idsOfRecordedExercises) {
     try {
       Connection connection = database.getConnection(this.getClass().toString());
       String s = getInClause(userIds);
       // logger.info("checking speed " + audioSpeed + " on " + userIds.size() + " users and " + uniqueIDs.size() + " ex ids");
       if (!s.isEmpty()) s = s.substring(0, s.length() - 1);
       String sql = "select " +
-          "distinct " + Database.EXID +
+          "distinct " + Database.EXID + ", " +
+          TRANSCRIPT +
           " from " + AUDIO +
           " WHERE " +
           (s.isEmpty() ? "" : USERID + " IN (" + s + ") AND ") +
-          DEFECT + "<>true " +
-          " AND " + AUDIO_TYPE + "='" + audioSpeed + "' ";
+          DEFECT + "<>true " + "AND " +
+          DNR + ">0" + " AND " +
+          AUDIO_TYPE + "='" + audioSpeed + "' ";
+
       PreparedStatement statement = connection.prepareStatement(sql);
       ResultSet rs = statement.executeQuery();
+
+      boolean checkAudioTranscript = database.getServerProps().shouldCheckAudioTranscript();
+
       while (rs.next()) {
         String exid = rs.getString(1);
-        if (uniqueIDs.contains(exid)) {
-          idsOfRecordedExercises.add(exid);
-        } else {
-          idsOfStaleExercises.add(exid);
-          //        logger.debug("getCountForGender skipping stale exid " + exid);
+        String exerciseFL = exToTranscript.get(exid);
+
+        if (exerciseFL != null || !checkAudioTranscript) {
+          String transcript = rs.getString(2);
+
+          boolean isMatch = !checkAudioTranscript || isNoAccentMatch(transcript, exerciseFL);
+          if (isMatch) {
+            if (uniqueIDs.contains(exid)) {
+              try {
+                int e = Integer.parseInt(exid);
+                idsOfRecordedExercises.add(e);
+              } catch (NumberFormatException e1) {
+                logger.warn(e1);
+              }
+            } else {
+//              idsOfStaleExercises.add(exid);
+              logger.debug("getCountForGender skipping stale exid " + exid);
+            }
+          }
+          //else {
+          //  logger.info("1) no match for " + exid + " '" + trimWhitespace(transcript) + "' vs '" + trimWhitespace(exerciseFL) + "'");
+          //}
         }
+        //else {
+        //        logger.info("2) stale exercise id : no match for " + exid);
+        // }
       }
-      finish(connection, statement, rs);
+      finish(connection, statement, rs, sql);
 /*      logger.debug("getCountForGender : for " + audioSpeed + "\n\t" + sql + "\n\tgot " + idsOfRecordedExercises.size() +
           " and stale " +idsOfStaleExercises);*/
     } catch (Exception ee) {
@@ -364,11 +428,38 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
     return idsOfRecordedExercises.size();
   }
 
+/*  private boolean isNoAccentMatch(String transcript, String exerciseFL) {
+    if (exerciseFL == null) return false;
+    String before = trimWhitespace(exerciseFL);
+    String trimmed = trimWhitespace(transcript);
+    String noAccents = StringUtils.stripAccents(before);
+    //String transcript = audio.getTranscript();
+    String noAccentsTranscript = trimmed == null ? null : StringUtils.stripAccents(trimmed);
+
+    return matchTranscript(before, trimmed) ||
+        matchTranscript(noAccents, noAccentsTranscript);
+  }*/
+/*
+  private String trimWhitespace(String against) {
+    return CharMatcher.WHITESPACE.trimFrom(against);
+  }
+
+  private boolean matchTranscript(String foreignLanguage, String transcript) {
+    return transcript == null ||
+        foreignLanguage.isEmpty() ||
+        transcript.isEmpty() ||
+        removePunct(transcript).toLowerCase().equals(removePunct(foreignLanguage).toLowerCase());
+  }
+
+  private String removePunct(String t) {
+    return t.replaceAll("\\p{P}", "").replaceAll("\\s++", "");
+  }*/
+
   /**
    * @param userIds
    * @param uniqueIDs
    * @return
-   * @see BaseAudioDAO#getRecordedReport(Map, Map, float, Set, float)
+   * @see BaseAudioDAO#getRecordedReport
    */
   protected int getCountBothSpeeds(Set<Integer> userIds,
                                    Set<Integer> uniqueIDs) {
@@ -404,7 +495,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
           results.add(id);
         }
       }
-      finish(connection, statement, rs);
+      finish(connection, statement, rs, sql);
 
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
@@ -515,7 +606,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
     }
     //   logger.debug("found " + results.size() + " audio attributes");
 
-    finish(connection, statement, rs);
+    finish(connection, statement, rs,"");
 
     return results;
   }
@@ -527,7 +618,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
       String string = rs.getString(Database.EXID);
       results.add(Integer.parseInt(string));
     }
-    finish(connection, statement, rs);
+    finish(connection, statement, rs,"");
 
     return results;
   }

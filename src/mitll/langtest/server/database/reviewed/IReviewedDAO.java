@@ -38,7 +38,7 @@ import mitll.langtest.shared.exercise.STATE;
 import java.util.Collection;
 import java.util.Map;
 
-public interface IReviewedDAO  extends IDAO {
+public interface IReviewedDAO extends IDAO {
   void remove(int exerciseID);
 
   void setState(int exerciseID, STATE state, long creatorID);
@@ -48,6 +48,8 @@ public interface IReviewedDAO  extends IDAO {
   STATE getCurrentState(int exerciseID);
 
   Collection<Integer> getDefectExercises();
+
+  Collection<Integer> getInspectedExercises();
 
   int getCount();
 }

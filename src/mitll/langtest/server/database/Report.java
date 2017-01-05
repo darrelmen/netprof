@@ -312,6 +312,33 @@ public class Report {
 
     for (SlickProject project:projects) {
       getReportForProject(language, jsonObject, year, builder, project.id());
+/*    builder.append(getHeader());
+    jsonObject.put("host", getHostInfo());
+    JSONArray dataArray = new JSONArray();
+    List<SlimEvent> allSlim = eventDAO.getAllSlim();
+    List<SlimEvent> allDevicesSlim = eventDAO.getAllDevicesSlim();
+    Map<String, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio();
+    Collection<AudioAttribute> audioAttributes = audioDAO.getAudioAttributes();
+    List<Result> results = resultDAO.getResults();
+    logger.info("getReport : got " + results.size() + " results");
+    List<Result> resultsDevices = resultDAO.getResultsDevices();
+    logger.info("getReport : got " + resultsDevices.size() + " device results");
+
+    if (year == -1) {
+      SlimEvent firstSlim = eventDAO.getFirstSlim();
+      long timestamp = firstSlim.getTimestamp();
+      Calendar instance = Calendar.getInstance();
+      instance.clear();
+      instance.setTimeInMillis(timestamp);
+      int firstYear = instance.get(Calendar.YEAR);
+      int thisYear = Calendar.getInstance().get(Calendar.YEAR);
+      logger.info(language + " doReport for " + firstYear + "->" + thisYear);
+
+      for (int i = firstYear; i <= thisYear; i++) {
+        addYear(dataArray, builder, i, allSlim, allDevicesSlim, exToAudio, audioAttributes, results, resultsDevices);
+      }
+    } else {
+      addYear(dataArray, builder, year, allSlim, allDevicesSlim, exToAudio, audioAttributes, results, resultsDevices);*/
     }
 
     builder.append(getFooter());
@@ -622,6 +649,7 @@ public class Report {
     for (User user : users) {
       Long aLong = userToStart.get(user.getID());
       if (aLong != null) user.setTimestampMillis(aLong);
+      idToUser.put((long)user.getID(), user.getUserID());
       //else {
       //  logger.error("no events for " + user.getExID());
       //  }

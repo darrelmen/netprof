@@ -38,71 +38,68 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 
 @RemoteServiceRelativePath("scoring-manager")
 public interface ScoringService extends RemoteService {
 
   /**
-   * @see mitll.langtest.client.scoring.ReviewScoringPanel#scoreAudio(String, int, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
    * @param resultID
-   * @param width
-   * @param height
    * @return
+   * @see mitll.langtest.client.scoring.ReviewScoringPanel#scoreAudio(String, int, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
    */
-  PretestScore getResultASRInfo(int resultID, int width, int height);
+  PretestScore getResultASRInfo(int resultID, ImageOptions imageOptions);
 
   /**
-   * @see ASRScoringAudioPanel#scoreAudio(String, int, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
    * @param reqid
    * @param resultID
    * @param testAudioFile
    * @param sentence
-   * @param width
-   * @param height
-   * @param useScoreToColorBkg
    * @param exerciseID
    * @return
+   * @see ASRScoringAudioPanel#scoreAudio(String, int, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
    */
   PretestScore getASRScoreForAudio(int reqid, long resultID, String testAudioFile, String sentence,
-                                   int width, int height, boolean useScoreToColorBkg, int exerciseID);
+                                   String transliteration,
+
+                                   ImageOptions imageOptions, int exerciseID);
 
   /**
-   * @see ASRScoringAudioPanel#scoreAudio(String, int, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
    * @param reqid
    * @param resultID
    * @param testAudioFile
    * @param sentence
-   * @param width
-   * @param height
-   * @param useScoreToColorBkg
    * @param exerciseID
    * @return
+   * @see ASRScoringAudioPanel#scoreAudio(String, int, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
    */
   PretestScore getASRScoreForAudioPhonemes(int reqid, long resultID, String testAudioFile, String sentence,
-                                           int width, int height, boolean useScoreToColorBkg, int exerciseID);
+                                           String transliteration,
+
+                                           ImageOptions imageOptions, int exerciseID);
 
   /**
-   * @see mitll.langtest.client.scoring.PostAudioRecordButton#addRT(AudioAnswer, int)
-   * @see mitll.langtest.client.recorder.RecordButtonPanel#postAudioFile(Panel, int, String)
    * @param resultid
    * @param roundTrip
+   * @see mitll.langtest.client.scoring.PostAudioRecordButton#addRT
+   * @see mitll.langtest.client.recorder.RecordButtonPanel#postAudioFile(Panel, int, String)
    */
   void addRoundTrip(int resultid, int roundTrip);
 
   /**
-   * @see mitll.langtest.client.scoring.SimplePostAudioRecordButton#postAudioFile(String)
    * @param base64EncodedString
    * @param textToAlign
    * @param identifier
    * @param reqid
    * @param device
    * @return
+   * @see mitll.langtest.client.scoring.SimplePostAudioRecordButton#postAudioFile(String)
    */
   AudioAnswer getAlignment(String base64EncodedString,
                            String textToAlign,
+                           String transliteration,
                            String identifier,
                            int reqid,
                            String device);
-
 }

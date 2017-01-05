@@ -362,7 +362,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
       }
 
       //    logger.debug("user exists " + id + " = " + val);
-      finish(connection, statement, rs);
+      finish(connection, statement, rs, sql);
 
     } catch (Exception e) {
       logger.error("Got " + e, e);
@@ -439,6 +439,31 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     PreparedStatement statement = connection.prepareStatement("ALTER TABLE users ADD " + column + " " + type);
     statement.execute();
     statement.close();
+  }
+
+  private void dropDefaultColumn(Connection connection, String column, String type) throws SQLException {
+    PreparedStatement statement = connection.prepareStatement("ALTER TABLE users ALTER COLUMN " + column +
+            " DROP DEFAULT"
+        //    " SET DEFAULT NULL"
+    );
+    //  logger.info("drop default on " +this);
+
+    statement.execute();
+    statement.close();
+
+    try {
+      String sql = "ALTER TABLE users ALTER COLUMN " + column +
+          " TIMESTAMP DEFAULT NOT NULL";
+
+      statement = connection.prepareStatement(sql
+      );
+      // logger.info("drop default on " + this);
+
+      statement.execute();
+      statement.close();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
   }
 
   /**
@@ -541,13 +566,34 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     return next;
   }
 
+  private Set<Long> getUserIDs(String sql) {
+    try {
+      Connection connection = getConnection();
+      PreparedStatement statement = connection.prepareStatement(sql);
+      ResultSet rs = statement.executeQuery();
+      // logger.info("sql:\n" +sql);
+      Set<Long> users = new TreeSet<>();
+      while (rs.next()) {
+        users.add(rs.getLong(1));
+      }
+
+      finish(connection, statement, rs, sql);
+
+      return users;
+    } catch (Exception ee) {
+      logger.error("Got " + ee, ee);
+      database.logEvent("unk", "getUsers: " + ee.toString(), 0, UNKNOWN);
+    }
+    return new HashSet<>();
+  }
+
   private List<User> getUsers(String sql) {
     try {
       Connection connection = getConnection();
       PreparedStatement statement = connection.prepareStatement(sql);
       ResultSet rs = statement.executeQuery();
       List<User> users = getUsers(rs);
-      finish(connection, statement, rs);
+      finish(connection, statement, rs, sql);
 
       return users;
     } catch (Exception ee) {
@@ -654,6 +700,16 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   public Set<Integer> getUserIDs(boolean getMale) {
     return getUserMap(getMale).keySet();
   }
+
+  /**
+   * @see AudioDAO#getUserIDsMatchingGender
+   * @param getMale
+   * @return
+   */
+  Set<Long> getUserIDsMatchingGender(boolean getMale) {
+    return getUserIDs("SELECT " + ID + " FROM " + USERS + " WHERE " + GENDER + " = " + (getMale ? 0 : 1));
+  }
+
 
   @Override
   public Map<Integer, User> getUserMap() {

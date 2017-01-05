@@ -98,7 +98,7 @@ class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise>
                                                                                  Panel currentExercisePanel,
                                                                                  String instanceName,
                                                                                  boolean incorrectFirst) {
-        return new NPFlexSectionExerciseList(outer, topRow, currentExercisePanel, instanceName, true) {
+        return new NPFlexSectionExerciseList(outer, topRow, currentExercisePanel, instanceName, true, false) {
           @Override
           protected CommonShell findFirstExercise() {
             int currentExerciseID = statsFlashcardFactory.getCurrentExerciseID();
@@ -127,9 +127,13 @@ class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise>
           @Override
           protected void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection,
                                                   String prefix,
-                                                  boolean onlyWithAudioAnno, int exerciseID) {
-              prefix = ""; // practice helper doesn't use a search box
-              super.loadExercisesUsingPrefix(typeToSection, prefix, onlyWithAudioAnno, exerciseID);
+                                                  int exerciseID, boolean onlyWithAudioAnno,
+                                                  boolean onlyUnrecorded, boolean onlyDefaultUser, boolean onlyUninspected) {
+//            logger.info("got loadExercisesUsingPrefix " +prefix);
+            //  controller.logException(new Exception("where did this come from?"));
+            prefix = ""; // practice helper doesn't use a search box
+
+            super.loadExercisesUsingPrefix(typeToSection, prefix, exerciseID, onlyWithAudioAnno, onlyUnrecorded, onlyDefaultUser, onlyUninspected);
             statsFlashcardFactory.setSelection(typeToSection);
           }
         };

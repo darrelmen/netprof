@@ -141,7 +141,11 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   @Override
-  int getCountForGender(Set<Integer> userIds, String audioSpeed, Set<Integer> uniqueIDs) {
+  int getCountForGender(Set<Integer> userIds,
+                        String audioSpeed,
+                        Set<Integer> uniqueIDs,
+                        Map<Integer, String> exToTranscript,
+                        Set<Integer> idsOfRecordedExercises) {
     return dao.getCountForGender(userIds, audioSpeed, uniqueIDs);
   }
 
@@ -176,8 +180,34 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     return dao.getAudioForGenderBothSpeeds(userIDs);
   }
 
+  /**
+   * TODO TODO :
+   *
+   * only include ids for audio where the audio transcript matches the exercise text
+   *
+   * @param userIDs
+   * @param audioSpeed
+   * @param exToTranscript
+   * @return
+   */
   @Override
-  Set<Integer> getAudioExercisesForGender(Collection<Integer> userIDs, String audioSpeed) {
+  Set<Integer> getAudioExercisesForGender(Collection<Integer> userIDs,
+                                          String audioSpeed,
+                                          Map<Integer, String> exToTranscript) {
+    boolean checkAudioTranscript = database.getServerProps().shouldCheckAudioTranscript();
+
+    if (checkAudioTranscript) {
+      logger.warn("getAudioExercisesForGender should do check audio transcript -");
+    }
+// use something like this?
+/*     if (audioTranscript != null) {
+      String tran = exToTranscript.get(trim);
+      if (!checkAudioTranscript || (tran != null && isNoAccentMatch(audioTranscript, tran))) {
+        results.add(trim);
+      }
+    }
+    */
+
     return dao.getAudioForGender(userIDs, audioSpeed);
   }
 

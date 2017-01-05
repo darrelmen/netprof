@@ -42,6 +42,7 @@ import mitll.langtest.server.database.userexercise.BaseUserExerciseDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 
+import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Exercise;
@@ -82,6 +83,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   private IUserExerciseDAO userExerciseDAO;
   private AttachAudio attachAudio;
   private IAudioDAO audioDAO;
+  private int id;
 
   /**
    * @param serverProps
@@ -90,11 +92,14 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    * @param language
    * @see DBExerciseDAO#DBExerciseDAO(ServerProperties, IUserListManager, boolean, SlickUserExerciseDAO, SlickProject)
    */
-  BaseExerciseDAO(ServerProperties serverProps, IUserListManager userListManager, boolean addDefects, String language) {
+  BaseExerciseDAO(ServerProperties serverProps, IUserListManager userListManager, boolean addDefects,
+                  String language,
+                  int id) {
     this.serverProps = serverProps;
     this.userListManager = userListManager;
     this.language = language;
     this.addDefects = addDefects;
+    this.id = id;
   }
 
   public int getNumExercises() {
@@ -153,28 +158,50 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   }
 
   /**
+   * Is this kosher to do - exToAudio
    * Worry about if the audio transcript doesn't match the exercise transcript
    * @see #setAudioDAO
    */
   private void attachAudio() {
     Set<Integer> transcriptChanged = new HashSet<>();
 
-    logger.info("attachAudio afterReadingExercises trying to attach audio to " + exercises.size());
+    logger.info("attachAudio afterReadingExercises trying to attach audio to " + exercises.size() + " with project id " + id);
 
-    int n = 0;
+    int c = 0;
+    Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio(id);
+    attachAudio.setExToAudio(exToAudio, getMultiPronWords(exercises));
+    Set<String> allTranscripts = new HashSet<>();
+    for (List<AudioAttribute> audioAttributes : exToAudio.values()) {
+      for (AudioAttribute audioAttribute : audioAttributes) {
+        allTranscripts.add(audioAttribute.getTranscript().toLowerCase());
+      }
+    }
     for (CommonExercise ex : exercises) {
       attachAudio.attachAudio(ex, transcriptChanged);
-/*      String refAudioIndex = ex.getRefAudioIndex();
-      if (refAudioIndex != null && !refAudioIndex.isEmpty()) {
-        attachAudio.addOldSchoolAudio(refAudioIndex, (AudioExercise) ex);
-        n++;
+
+      Collection<AudioAttribute> audioAttributes = ex.getAudioAttributes();
+      for (AudioAttribute audioAttribute : audioAttributes) {
+        allTranscripts.remove(audioAttribute.getTranscript().toLowerCase());
+      }
+
+ /*     if (i < 25) {
+        if (c++ < 25) {
+          logger.warn(language + " (" + exercises.size() +
+              ") -----------> adding old school audio for " + ex.getID() + " : " + serverProps.getLessonPlan());
+        }
+        String refAudioIndex = ex.getRefAudioIndex();
+        if (refAudioIndex != null && !refAudioIndex.isEmpty()) {
+          attachAudio.addOldSchoolAudio(refAudioIndex, (AudioExercise) ex);
+        }
       }*/
     }
-    logger.info("attachAudio afterReadingExercises finished attaching audio to " + n);
 
+    logger.info("attachAudio found " + allTranscripts.size() + " orphan audio cuts - ");// + allTranscripts);
+
+    //consistencyCheck();
 
     if (!transcriptChanged.isEmpty()) {
-      logger.info("afterReadingExercises : found " + transcriptChanged.size() + " changed transcripts in set of " + exercises.size() + " items");
+      logger.info("attachAudio afterReadingExercises : found " + transcriptChanged.size() + " changed transcripts in set of " + exercises.size() + " items");
     }
   }
 
@@ -274,7 +301,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
         ")" +
         " attach audio to " + all.size() + " exercises");
 
-    attachAudio.setExToAudio(audioDAO.getExToAudio(projectid));
+    attachAudio.setExToAudio(audioDAO.getExToAudio(projectid), getMultiPronWords(all));
     int user = 0;
     int examined = 0;
 
@@ -296,6 +323,28 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
       logger.info("attachAudio : found " + transcriptChanged.size() + " changed transcripts in set of " +
           exercises.size() + " items");
     }
+  }
+
+  /**
+   * The idea here is to
+   * @param all
+   * @return
+   */
+  private Set<String> getMultiPronWords(Collection<CommonExercise> all) {
+    Map<String, String> seen = new HashMap<>();
+    Set<String> multiPron = new HashSet<>();
+
+    for (CommonExercise ex : all) {
+      String foreignLanguage = ex.getForeignLanguage();
+      String english = seen.get(foreignLanguage);
+      String english1 = ex.getEnglish();
+      if (english != null && !english.equals(english1)) {
+        multiPron.add(foreignLanguage);
+//        logger.info("getMultiPronWords before " + foreignLanguage + " eng " + english + " vs " + english1);
+      }
+      seen.put(foreignLanguage, english1);
+    }
+    return multiPron;
   }
 
   /**
@@ -431,6 +480,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   }
 
   /**
+<<<<<<< HEAD
    * This DAO needs to talk to other DAOs.
    *
    * @param userExerciseDAO

@@ -46,43 +46,9 @@ import java.util.Map;
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since
  */
 public interface LangTestDatabaseAsync {
-  void getStartupInfo( AsyncCallback<StartupInfo> async);
-
-//  void getUserListsForText(String search, long userid, AsyncCallback<Collection<UserList<CommonShell>>> async);
-//
-//  void getListsForUser(long userid, boolean onlyCreated, boolean visited, AsyncCallback<Collection<UserList<CommonShell>>> async);
-//
-//  void addItemToUserList(long userListID, String exID, AsyncCallback<Void> async);
-//
-//  void reallyCreateNewItem(long userListID, CommonExercise userExercise, AsyncCallback<CommonExercise> async);
-//
-//  void addUserList(long userid, String name, String description, String dliClass, boolean isPublic, AsyncCallback<Long> async);
-//
-//  void addVisitor(long userListID, long user, AsyncCallback<Void> asyncCallback);
-//
-//  void editItem(CommonExercise userExercise, boolean keepAudio, AsyncCallback<Void> async);
-//
-//  void addAnnotation(String exerciseID, String field, String status, String comment, long userID, AsyncCallback<Void> async);
-//
-//  void markReviewed(String id, boolean isCorrect, long creatorID, AsyncCallback<Void> asyncCallback);
-//
-//  void setExerciseState(String id, STATE state, long userID, AsyncCallback<Void> async);
-//
-//  void isValidForeignPhrase(String foreign, AsyncCallback<Boolean> async);
-//
-//  void deleteList(long id, AsyncCallback<Boolean> async);
-//
-//  void deleteItemFromList(long listid, String exid, AsyncCallback<Boolean> async);
-//
-//  void duplicateExercise(CommonExercise id, AsyncCallback<CommonExercise> async);
-//
-//  void deleteItem(String exid, AsyncCallback<Boolean> async);
-//
-//  void getUserHistoryForList(long userid, Collection<String> ids, long latestResultID,
-//                             Map<String, Collection<String>> typeToSection, long userListID, AsyncCallback<AVPScoreReport> async);
+  void getStartupInfo(AsyncCallback<StartupInfo> async);
 
   void logMessage(String message, AsyncCallback<Void> async);
 
@@ -91,7 +57,7 @@ public interface LangTestDatabaseAsync {
 
   void getEvents(AsyncCallback<Collection<Event>> async);
 
-  void isValidForeignPhrase(String foreign, AsyncCallback<Boolean> async);
+  void isValidForeignPhrase(String foreign, String transliteration, AsyncCallback<Boolean> async);
 
   void getUserHistoryForList(int userid,
                              Collection<Integer> ids,

@@ -33,6 +33,7 @@
 package mitll.langtest.server.scoring;
 
 import mitll.langtest.server.database.result.Result;
+import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 
 import java.text.Collator;
@@ -48,7 +49,7 @@ import java.util.Set;
  */
 public interface ASR {
 	Collator getCollator();
-	boolean validLTS(String foreignLanguagePhrase);
+	boolean validLTS(String foreignLanguagePhrase, String transliteration);
 	PhoneInfo getBagOfPhones(String foreignLanguagePhrase);
 	SmallVocabDecoder getSmallVocabDecoder();
 	String getUsedTokens(Collection<String> lmSentences, List<String> background);
@@ -60,9 +61,6 @@ public interface ASR {
 	 * @param sentence
 	 * @param lmSentences
 	 * @param imageOutDir
-	 * @param imageWidth
-	 * @param imageHeight
-	 * @param useScoreForBkgColor
 	 * @param decode
 	 * @param useCache
 	 * @param prefix
@@ -70,11 +68,18 @@ public interface ASR {
 	 * @param usePhoneToDisplay
 	 * @return
 	 */
-	PretestScore scoreRepeat(String testAudioDir, String testAudioFileNoSuffix,
-													 String sentence, Collection<String> lmSentences, String imageOutDir,
-													 int imageWidth, int imageHeight, boolean useScoreForBkgColor,
+	PretestScore scoreRepeat(String testAudioDir,
+													 String testAudioFileNoSuffix,
+													 String sentence,
+													 Collection<String> lmSentences,
+                           String transliteration,
+                           String imageOutDir,
+                           ImageOptions imageOptions,
 													 boolean decode,
-													 boolean useCache, String prefix, Result precalcResult, boolean usePhoneToDisplay);
+													 boolean useCache,
+                           String prefix,
+                           Result precalcResult,
+                           boolean usePhoneToDisplay);
 
 	/**
 	 * @see mitll.langtest.server.audio.AudioFileHelper#countPhones

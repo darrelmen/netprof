@@ -329,7 +329,7 @@ public class EventDAO extends DAO implements IEventDAO {
       );
     }
 
-    finish(connection, statement, rs);
+    finish(connection, statement, rs, sql);
     return lists;
   }
 
@@ -346,7 +346,7 @@ public class EventDAO extends DAO implements IEventDAO {
           -1));
     }
 
-    finish(connection, statement, rs);
+    finish(connection, statement, rs, sql);
     return lists;
   }
 }
