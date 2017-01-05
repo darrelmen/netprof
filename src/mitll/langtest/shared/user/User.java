@@ -96,20 +96,16 @@ public class User extends MiniUser {
 
     Kind(String name, String role, boolean show) {
       this.name = name;
-      this.show = show;
       this.role = role;
+      this.show = show;
     }
 
     public String getName() {
       return name;
     }
-
+    public String getRole() { return role; }
     public boolean shouldShow() {
       return show;
-    }
-
-    public String getRole() {
-      return role;
     }
   }
 
@@ -125,60 +121,36 @@ public class User extends MiniUser {
     return Arrays.asList(Kind.STUDENT);//, Kind.TEACHER);
   }
 
-/*
-  public static Collection<Permission> getInitialPermsForRole(Kind role) {
-    switch (role) {
-      case STUDENT:
-        return Collections.emptyList();
-      case TEACHER:
-        return Collections.emptyList();
-      case AUDIO_RECORDER:
-        return Collections.singleton(
-            RECORD_AUDIO);
-      case CONTENT_DEVELOPER:
-        return Arrays.asList(
-            RECORD_AUDIO,
-            Permission.QUALITY_CONTROL);
-      case PROJECT_ADMIN:
-        return Arrays.asList(
-            TEACHER_PERM,
-            INVITE,
-            EDIT_STUDENT,
-            EDIT_USER);
-      default:
-        return Collections.emptyList();
-    }
-  }
-*/
-
   /**
    * These are the permissions you get when you are invited by program manager or admin
    *
    * @param role
    * @return
    */
-  public static Collection<Permission> getInvitedPermsForRole(Kind role) {
+  public static Collection<Permission> getInitialPermsForRole(Kind role) {
     switch (role) {
       case STUDENT:
         return Collections.emptyList();
       case TEACHER:
         return Arrays.asList(
-            TEACHER_PERM,
-            INVITE // other stuedents
+            TEACHER_PERM//,
+//            INVITE // other stuedents
         );
       case AUDIO_RECORDER:
         return Collections.singleton(
             RECORD_AUDIO);
+      case QAQC:
       case CONTENT_DEVELOPER:
         return Arrays.asList(
             RECORD_AUDIO,
             QUALITY_CONTROL);
       case PROJECT_ADMIN:
+      case ADMIN:
         return Arrays.asList(
             TEACHER_PERM,
-            INVITE,
-            EDIT_STUDENT,
-            EDIT_USER);
+            RECORD_AUDIO,
+            QUALITY_CONTROL
+        );
       default:
         return Collections.emptyList();
     }
@@ -221,10 +193,10 @@ public class User extends MiniUser {
         return Arrays.asList(
             TEACHER_PERM, // allows them to via the full analysis tab, edit students
             RECORD_AUDIO,
-            DEVELOP_CONTENT, // make new projects, edit via domino
-            INVITE,
-            EDIT_STUDENT,
-            EDIT_USER
+            DEVELOP_CONTENT//, // make new projects, edit via domino
+            //INVITE,
+   //         EDIT_STUDENT//,
+            //EDIT_USER
         );  // students
       case AUDIO_RECORDER:
         return Collections.singleton(RECORD_AUDIO);
@@ -235,9 +207,12 @@ public class User extends MiniUser {
       case PROJECT_ADMIN:
         return Arrays.asList(
             TEACHER_PERM,
-            INVITE,
-            EDIT_STUDENT,
-            EDIT_USER);
+            RECORD_AUDIO,
+            DEVELOP_CONTENT
+        //    INVITE,
+//            EDIT_STUDENT//,
+          //  EDIT_USER
+        );
       default:
         return Collections.emptyList();
     }
@@ -245,13 +220,13 @@ public class User extends MiniUser {
 
   public enum Permission implements IsSerializable {
     TEACHER_PERM("View Student Data"), // gets to see teacher things like student analysis, invite
-    EDIT_STUDENT("Edit Student Profile"),
+    //EDIT_STUDENT("Edit Student Profile"),
 
     QUALITY_CONTROL("Quality Control"),
     RECORD_AUDIO("Record Audio"),
-    DEVELOP_CONTENT("Develop Content"), //? make new projects? edit via domino?
-    INVITE("Invite New Users"),
-    EDIT_USER("Edit All User Profiles");
+    DEVELOP_CONTENT("Develop Content"); //? make new projects? edit via domino?
+    //INVITE("Invite New Users"),
+    //EDIT_USER("Edit All User Profiles");
 
     String name;
 

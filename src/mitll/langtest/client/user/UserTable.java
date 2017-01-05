@@ -63,7 +63,6 @@ import java.util.List;
  */
 public class UserTable extends PagerTable {
 //  private Logger logger = Logger.getLogger("UserTable");
-
   private static final String ENABLED = "Enabled?";
   private static final int ENABLED_WIDTH = 40;
 
