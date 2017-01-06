@@ -490,7 +490,7 @@ public class RestUserManagement {
             int age1 = Integer.parseInt(age);
             boolean male = gender.equalsIgnoreCase("male");
 
-            SignUpUser user2 = new SignUpUser(user,
+            SignUpUser user2 = new SignUpUser(user,"",
 //                passwordH,
                 emailH, email,
                 User.Kind.CONTENT_DEVELOPER, male, age1, dialect, deviceType, device, "", "", appURL);
@@ -505,6 +505,7 @@ public class RestUserManagement {
         } else {
 
           SignUpUser user2 = new SignUpUser(user,
+              "",
               //            passwordH,
               emailH, email,
               User.Kind.CONTENT_DEVELOPER, true, 89, dialect, deviceType, device, "", "", appURL);

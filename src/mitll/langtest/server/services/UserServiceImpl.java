@@ -273,8 +273,15 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
         userByID.setEmail(user.getEmail());
         userByID.setFirst(user.getFirst());
         userByID.setLast(user.getLast());
-        db.getUserDAO().update(userByID);
-        return new LoginResult(userByID, LoginResult.ResultType.Updated);
+        User strictUserWithPass = db.getUserDAO().getStrictUserWithPass(user.getUserID(), user.getPasswordH());
+
+        if (strictUserWithPass != null) {
+          db.getUserDAO().update(userByID);
+          return new LoginResult(userByID, LoginResult.ResultType.Updated);
+        }
+        else {
+          return new LoginResult(userByID, LoginResult.ResultType.BadPassword);
+        }
       }
 //      setSessionUser(createSession(), userByID);
 
@@ -322,8 +329,8 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
 
   /**
    * @param user
-   * @param url            IGNORED - remove me!
-   * @param emailForLegacy
+   * @paramx url            IGNORED - remove me!
+   * @paramx emailForLegacy
    * @return true if there's a user with this email
    * @see mitll.langtest.client.user.SignInForm#getForgotPassword
    */
