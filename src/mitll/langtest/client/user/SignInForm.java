@@ -61,12 +61,6 @@ public class SignInForm extends UserDialog implements SignIn {
   private static final String TROUBLE_CONNECTING_TO_SERVER = "Trouble connecting to server.";
   private static final String NO_USER_FOUND = "No userField found - have you signed up?";
 
-  /**
-   * @see #gotBadPassword
-   * @deprecated dude get rid of this
-   */
-//  private static final String MAGIC_PASS = Md5Hash.getHash("adm!n");
-
   private static final int MIN_LENGTH_USER_ID = 4;
 
   private static final int MIN_PASSWORD = 4;
@@ -203,27 +197,22 @@ public class SignInForm extends UserDialog implements SignIn {
   /**
    * Skip case where really old users didn't have passwords.  Kind of a bad idea - what were we thinking?
    *
-   * @param result
+   * @param loginUser
    */
-  private void gotUserExists(User result) {
-    if (result != null) {
-      String emailHash = result.getEmailHash();
-//      String passwordHash = result.getPasswordHash();
-//      logger.info("makeSignInUserName : for " + userField.getText() + " got back " + result);
-//      logger.info("makeSignInUserName : for " + userField.getText() + " emailHash " + emailHash);
-//      logger.info("makeSignInUserName : for " + userField.getText() + " passwordHash " + passwordHash);
-      //  this.email = result.getEmail();
-      if (emailHash == null ||
-          //passwordHash == null ||
-          emailHash.isEmpty() //||
-        //passwordHash.isEmpty()
-          ) {
-        eventRegistration.logEvent(userField.box, "UserNameBox", "N/A", "existing legacy userField " + result.toStringShort());
-        copyInfoToSignUp(result.getUserID());
+  private void gotUserExists(User loginUser) {
+    if (loginUser != null) {
+      if (loginUser.isValid()) {
+        logger.info("login user " + loginUser.getID() + " is valid");
+      } else {
+        logger.info("login user " + loginUser.getID() + " is NOT valid");
+
+        eventRegistration.logEvent(userField.box, "UserNameBox", "N/A", "existing legacy userField " + loginUser.toStringShort());
+        copyInfoToSignUp(loginUser.getUserID(), loginUser);
       }
-    } else {
-//      logger.info("makeSignInUserName : for " + userField.getText() + " - no user with that id");
     }
+    //else {
+//      logger.info("makeSignInUserName : for " + userField.getText() + " - no user with that id");
+    // }
   }
 
   private void addPasswordField(Fieldset fieldset, Panel hp) {
@@ -319,12 +308,14 @@ public class SignInForm extends UserDialog implements SignIn {
           markErrorBlur(password, NO_USER_FOUND);
           signIn.setEnabled(true);
         } else {
-          if (!result.getLoggedInUser().isEnabled()) {
+          User loggedInUser = result.getLoggedInUser();
+          if (!loggedInUser.isEnabled()) {
             markErrorBlur(userField, DEACTIVATED);
             signIn.setEnabled(true);
           } else {
-            if (result.getResultType() == LoginResult.ResultType.MissingEmail) {
-              copyInfoToSignUp(user);
+            logger.info("user is enabled...");
+            if (result.getResultType() == LoginResult.ResultType.MissingInfo) {
+              copyInfoToSignUp(user, loggedInUser);
               signIn.setEnabled(true);
             } else {
 //                  foundExistingUser(result, emptyPassword, freeTextPassword);
@@ -431,7 +422,6 @@ public class SignInForm extends UserDialog implements SignIn {
   }
 
   private void gotGoodPassword(User foundUser
-                               //    , String passwordHash
   ) {
     String user = foundUser.getUserID();
     if (foundUser.isEnabled() //||
@@ -484,11 +474,11 @@ public class SignInForm extends UserDialog implements SignIn {
    * @seex #foundExistingUser
    * @see #makeSignInUserName(com.github.gwtbootstrap.client.ui.Fieldset)
    */
-  private void copyInfoToSignUp(String userID) {
+  private void copyInfoToSignUp(String userID, User candidate) {
     signUpForm.copyInfoToSignUp(
         //
         userID,
-        password.getSafeText());
+        candidate);
     eventRegistration.logEvent(signIn, "sign in", "N/A", "copied info to sign up form");
   }
 

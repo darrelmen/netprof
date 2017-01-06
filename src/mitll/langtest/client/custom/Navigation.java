@@ -199,7 +199,7 @@ public class Navigation implements RequiresResize, ShowTab {
           protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow,
                                                                                      Panel currentExercisePanel,
                                                                                      String instanceName, boolean incorrectFirst) {
-            return new NPFlexSectionExerciseList(this, topRow, currentExercisePanel, instanceName, incorrectFirst,false);
+            return new NPFlexSectionExerciseList(this, topRow, currentExercisePanel, instanceName, incorrectFirst, false);
           }
         };
       }
@@ -262,7 +262,9 @@ public class Navigation implements RequiresResize, ShowTab {
     addPracticeTab();
     addStudyLists();
 
-    addProjectMaintenance();
+    if (userManager.hasPermission(User.Permission.DEVELOP_CONTENT) || userManager.getCurrent().isAdmin()) {
+      addProjectMaintenance();
+    }
 
 //    User.Kind userKind = userManager.getCurrent().getUserKind();
 /*    if (userManager.hasPermission(User.Permission.TEACHER_PERM) ||

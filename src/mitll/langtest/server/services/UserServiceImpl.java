@@ -90,7 +90,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @param attemptedFreeTextPassword
    * @return
    * @seex #userExists
-   * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser(String, String)
+   * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser
    */
   public LoginResult loginUser(String userId, String attemptedHashedPassword, String attemptedFreeTextPassword) {
     HttpServletRequest request = getThreadLocalRequest();
@@ -125,8 +125,9 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
 
     if (success) {
       LoginResult loginResult = new LoginResult(loggedInUser, new Date(System.currentTimeMillis()));
-      if (loggedInUser.getEmail().isEmpty()) {
-        loginResult = new LoginResult(loggedInUser, LoginResult.ResultType.MissingEmail);
+      if (!loggedInUser.isValid()) {
+        logger.info("user " + loggedInUser + " is missing email ");
+        loginResult = new LoginResult(loggedInUser, LoginResult.ResultType.MissingInfo);
       } else {
         setSessionUser(session, loggedInUser);
       }
@@ -263,29 +264,37 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   @Override
   public User addUser(SignUpUser user, String url) {
     UserManagement userManagement = db.getUserManagement();
-    User newUser = userManagement.addUser(getThreadLocalRequest(), user);
-    //  MailSupport mailSupport = getMailSupport();
 
-    String userID = user.getUserID();
-    //  String email = user.getEmail();
-    //  String first = user.getFirst();
+    User userByID = db.getUserDAO().getUserByID(user.getUserID());
 
-    if (newUser != null/* && !newUser.isEnabled()*/) { // newUser = null means existing newUser.
-      // logger.debug("newUser " + userID + "/" + newUser + " wishes to be a content developer. Asking for approval.");
-      //getEmailHelper().addContentDeveloper(url, email, newUser, mailSupport, getProject().getLanguage());
-      // getEmailHelper().sendConfirmationEmail(email, userID, first, mailSupport);
-    } else /*if (newUser == null)*/ {
-      logger.debug("no newUser found for id " + userID);
-    } /*else {
+    if (userByID != null) {
+      userByID.setEmail(user.getEmail());
+      userByID.setFirst(user.getFirst());
+      userByID.setLast(user.getLast());
+      db.getUserDAO().update(userByID);
+      setSessionUser(createSession(), userByID);
+      return userByID;
+    }
+    else {
+      User newUser = userManagement.addUser(getThreadLocalRequest(), user);
+      String userID = user.getUserID();
+
+      if (newUser != null/* && !newUser.isEnabled()*/) { // newUser = null means existing newUser.
+        // logger.debug("newUser " + userID + "/" + newUser + " wishes to be a content developer. Asking for approval.");
+        //getEmailHelper().addContentDeveloper(url, email, newUser, mailSupport, getProject().getLanguage());
+        // getEmailHelper().sendConfirmationEmail(email, userID, first, mailSupport);
+      } else /*if (newUser == null)*/ {
+        logger.debug("no newUser found for id " + userID);
+      } /*else {
       logger.debug("newUser " + userID + "/" + newUser + " is enabled.");
       getEmailHelper().sendConfirmationEmail(email, userID, first, mailSupport);
     }*/
 
-
-    if (newUser != null) {
-      setSessionUser(createSession(), newUser);
+      if (newUser != null) {
+        setSessionUser(createSession(), newUser);
+      }
+      return newUser;
     }
-    return newUser;
   }
 
   private EmailHelper getEmailHelper() {
@@ -521,12 +530,12 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   /**
    * @param toUpdate
    * @param changingUser
-   * @deprecated this will be done in Domino
+   *
    */
   public void update(User toUpdate, int changingUser) {
     db.getUserDAO().update(toUpdate);
 
-    Collection<User.Permission> included = toUpdate.getPermissions();
+/*    Collection<User.Permission> included = toUpdate.getPermissions();
 
     IUserPermissionDAO userPermissionDAO = db.getUserPermissionDAO();
     int updatedUserID = toUpdate.getID();
@@ -559,7 +568,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
           now,
           changingUser
       ));
-    }
+    }*/
   }
 
   @Deprecated
