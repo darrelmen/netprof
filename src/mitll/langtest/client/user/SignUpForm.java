@@ -45,6 +45,7 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.instrumentation.EventRegistration;
+import mitll.langtest.shared.user.LoginResult;
 import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
 
@@ -109,12 +110,12 @@ public class SignUpForm extends UserDialog implements SignUp {
   protected Button signUp;
   //  private CheckBox contentDevCheckbox;
   private UserPassDialog userPassLogin;
-  private static final String CURRENT_USERS = "Current users should add an email and password.";
+  private static final String CURRENT_USERS = "Please update your name and email.";
   private String signUpTitle = SIGN_UP;
   //  private String rolesHeader = ARE_YOU_A;
   private boolean markFieldsWithLabels = false;
   protected UserManager userManager;
-  private Map<User.Kind, RadioButton> roleToChoice = new HashMap<>();
+  //private Map<User.Kind, RadioButton> roleToChoice = new HashMap<>();
 
   /**
    * @param props
@@ -163,10 +164,15 @@ public class SignUpForm extends UserDialog implements SignUp {
     lastName.setText(candidate.getLast());
     signUpEmail.setText(candidate.getEmail());
 
+    boolean b = askForDemographic(candidate);
+    demoHeader.setVisible(b);
+    registrationInfo.setVisible(b);
+
     FormField firstFocus =
         firstName.isEmpty() ?
             firstName :
             lastName.isEmpty() ? lastName : signUpEmail;
+
     setFocusOn(firstFocus.getWidget());
     markErrorBlur(firstFocus, "Add info", CURRENT_USERS, Placement.TOP);
   }
@@ -179,7 +185,7 @@ public class SignUpForm extends UserDialog implements SignUp {
   public Panel getSignUpForm() {
     Heading heading = new Heading(3, NEW_USER, SIGN_UP_SUBTEXT);
     heading.addStyleName("signUp");
-    Fieldset fields = getFields(null);
+    Fieldset fields = getFields();
     fields.add(getSignUpButton(userBox, emailBox));
 
     pleaseCheck = new Heading(4, "Please check your email.");
@@ -191,15 +197,15 @@ public class SignUpForm extends UserDialog implements SignUp {
     return getTwoPartForm(heading, fields);
   }
 
-  Heading pleaseCheck;
+  private Heading pleaseCheck;
 
   /**
-   * @param user
+   * @paramx user
    * @return
-   * @see mitll.langtest.client.userops.OpsUserContainer#populateUserEdit(DivWidget, User)
+   * @seex mitll.langtest.client.userops.OpsUserContainer#populateUserEdit(DivWidget, User)
    * @deprecated
    */
-  public Panel getSignUpForm(User user) {
+/*  public Panel getSignUpForm(User user) {
     Fieldset fields = getFields(user);
     fields.add(getSignUpButton(userBox, emailBox));
 
@@ -211,14 +217,14 @@ public class SignUpForm extends UserDialog implements SignUp {
     return getTwoPartForm(
         getHeading(user),
         fields);
-  }
+  }*/
 
-  private Heading getHeading(User user) {
+/*  private Heading getHeading(User user) {
     Heading heading = new Heading(3, "Edit User Fields and Permissions",
         user.getUserID() + " : " + user.getFirst() + " " + user.getLast());
     heading.addStyleName("signUp");
     return heading;
-  }
+  }*/
 
   private Panel getTwoPartForm(Heading heading, Fieldset fieldset) {
     Form form = getUserForm();
@@ -230,19 +236,21 @@ public class SignUpForm extends UserDialog implements SignUp {
 
   private TextBoxBase userBox;
   private TextBoxBase emailBox;
+  Heading demoHeader;
 
   /**
-   * @param user
+   * @paramx user
    * @return
    */
-  protected Fieldset getFields(User user) {
+  protected Fieldset getFields(/*User user*/) {
     Fieldset fieldset = new Fieldset();
     userBox = makeSignUpUsername(fieldset);
     TextBoxBase firstNameBox = makeSignUpFirstName(fieldset);
     TextBoxBase lastNameBox = makeSignUpLastName(fieldset);
     emailBox = makeSignUpEmail(fieldset);
 
-    User.Kind userKind = user == null ? User.Kind.UNSET : user.getUserKind();
+
+/*    User.Kind userKind = user == null ? User.Kind.UNSET : user.getUserKind();
     if (user != null) {
       userBox.setText(user.getUserID());
       firstNameBox.setText(user.getFirst());
@@ -251,7 +259,7 @@ public class SignUpForm extends UserDialog implements SignUp {
 //      if (askForDemographic(userKind)) {
 //        getContentDevCheckbox();
 //      }
-    }
+    }*/
 
 /*
     if (user == null) {
@@ -266,17 +274,26 @@ public class SignUpForm extends UserDialog implements SignUp {
 //      fieldset.add(contentDevCheckbox);
 //    }
 
-    if (askForDemographic(userKind)) {
-      fieldset.add(getHeader("Demographic Info"));
+//    if (askForDemographic(userKind)) {
+      demoHeader = getHeader("Demographic Info");
+      demoHeader.setVisible(false);
+      fieldset.add(demoHeader);
       makeRegistrationInfo(fieldset);
-    }
+      registrationInfo.setVisible(false);
+  //  }
 
     return fieldset;
   }
 
-  protected boolean askForDemographic(User.Kind userKind) {
+/*  protected boolean askForDemographic(User.Kind userKind) {
     return userKind == User.Kind.CONTENT_DEVELOPER ||
         userKind == User.Kind.AUDIO_RECORDER;
+  } */
+
+  protected boolean askForDemographic(User user) {
+    Collection<User.Permission> permissions = user.getPermissions();
+    return permissions.contains(User.Permission.DEVELOP_CONTENT) || permissions.contains(User.Permission.RECORD_AUDIO) ||
+        permissions.contains(User.Permission.QUALITY_CONTROL);
   }
 
 //  private Heading getRolesHeader() {
@@ -472,7 +489,7 @@ public class SignUpForm extends UserDialog implements SignUp {
 
   /**
    * @param fieldset
-   * @deprecated don't really collect demo info anymore...
+   * collect demographic info (age, gender, dialect) only if it's missing and they have the right permission
    */
   private void makeRegistrationInfo(Fieldset fieldset) {
     registrationInfo = new RegistrationInfo(fieldset);
@@ -532,9 +549,7 @@ public class SignUpForm extends UserDialog implements SignUp {
         String userID = userBox.getValue();
         //logger.info("sign up click for " + userID);
         if (isFormValid(userID)) {
-          gotSignUp(userID,
-              //getPasswordText(),
-              emailBox.getValue(), selectedRole);
+          gotSignUp(userID, emailBox.getValue(), selectedRole);
         } else {
           logger.warning("form is not valid!!");
         }
@@ -601,11 +616,6 @@ public class SignUpForm extends UserDialog implements SignUp {
     markErrorBlur(signUpEmail, VALID_EMAIL);
   }
 
-  protected int getAge(boolean isCD) {
-    String age = isCD ? registrationInfo.getAgeEntryGroup().getSafeText() : "";
-    int age1 = isCD ? (age.isEmpty() ? 99 : Integer.parseInt(age)) : 0;
-    return age1;
-  }
 
 /*  private String rot13(String val) {
     StringBuilder builder = new StringBuilder();
@@ -635,20 +645,16 @@ public class SignUpForm extends UserDialog implements SignUp {
                            String email, User.Kind kind) {
     signUp.setEnabled(false);
 
-//    String passH  = Md5Hash.getHash(freeTextPassword);
-    String emailH = Md5Hash.getHash(email);
-    boolean isCD = askForDemographic(kind);
-
     SignUpUser newUser = new SignUpUser(user,
         //rot13(freeTextPassword),
 //        passH,
-        emailH,
+        Md5Hash.getHash(email),
         email,
         kind,
 
-        isMale(isCD),  // don't really know the gender, so guess male...?
-        getAge(isCD),
-        getDialect(isCD),
+        isMale(),  // don't really know the gender, so guess male...?
+        getAge(),
+        getDialect(),
 
         "browser",
         "",
@@ -659,7 +665,7 @@ public class SignUpForm extends UserDialog implements SignUp {
     service.addUser(
         newUser,
         Window.Location.getHref(),
-        new AsyncCallback<User>() {
+        new AsyncCallback<LoginResult>() {
           @Override
           public void onFailure(Throwable caught) {
             eventRegistration.logEvent(signUp, "signing up", "N/A", "Couldn't contact server...?");
@@ -667,55 +673,64 @@ public class SignUpForm extends UserDialog implements SignUp {
             markErrorBlur(signUp, "Trouble connecting to server.");
           }
 
+          /**
+           * So, what can happen with a user?
+           *
+           * - user already exists with userid
+           * - user slots are incomplete and need to be updated
+           *  - user could be locked
+           * - user is new and needs to be added
+           *
+           *  @param result
+           */
           @Override
-          public void onSuccess(User result) {
-            if (result == null) {
+          public void onSuccess(LoginResult result) {
+            signUp.setEnabled(true);
+
+            if (result.getResultType() == LoginResult.ResultType.Exists) {
               eventRegistration.logEvent(signUp, "signing up", "N/A", "Tried to sign up, but existing user (" + user + ").");
               signUp.setEnabled(true);
               markErrorBlur(signUpUser, USER_EXISTS);
             } else {
-              userManager.setPendingUserStorage(result.getUserID());
-              if (result.isEnabled()) {
-                eventRegistration.logEvent(signUp, "signing up", "N/A", getSignUpEvent(result));
-                // logger.info("Got valid, enabled new user " + user + " and so we're letting them in.");
+              User theUser = result.getLoggedInUser();
 
-                // TODO : store the selector and validator...
-
-                //storeUser(result, userManager);
-
-                pleaseCheck.setVisible(true);
-                //)/*, passH)*/;
-              } else {
-                eventRegistration.logEvent(signUp, "signing up", "N/A", getSignUpEvent(result) +
-                    //    " but waiting for approval from Tamas."
-                    "but gotta check email for next step..."
-                );
-                //  markErrorBlur(signUp, WAIT_FOR_APPROVAL, YOU_WILL_GET_AN_APPROVAL_MESSAGE_BY_EMAIL, Placement.TOP);
-//                markErrorBlur(signUp, I_M_SORRY,
-//                    "Your account has been deactivated. Please contact help email if needed.", Placement.TOP);
-
-                pleaseCheck.setVisible(true);
-/*
-                Timer t = new Timer() {
-                  @Override
-                  public void run() {
-                    Window.Location.reload();
-                  }
-                };
-                t.schedule(WAIT_FOR_READING_APPROVAL);
-*/
+              if (result.getResultType() == LoginResult.ResultType.Updated) {
+                // shift focus to sign in.
+                userPassLogin.setSignInPasswordFocus();
+              }
+              else {
+                userManager.setPendingUserStorage(theUser.getUserID());
+                if (theUser.isEnabled()) {
+                  eventRegistration.logEvent(signUp, "signing up", "N/A", getSignUpEvent(theUser));
+                  pleaseCheck.setVisible(true);
+                } else {
+                  eventRegistration.logEvent(signUp, "signing up", "N/A", getSignUpEvent(theUser) +
+                      //    " but waiting for approval from Tamas."
+                      "but gotta check email for next step..."
+                  );
+                  //  markErrorBlur(signUp, WAIT_FOR_APPROVAL, YOU_WILL_GET_AN_APPROVAL_MESSAGE_BY_EMAIL, Placement.TOP);
+                  markErrorBlur(signUp, I_M_SORRY,
+                      "Your account has been deactivated. Please contact help email if needed.", Placement.TOP);
+//                signUp.setEnabled(false);
+                }
               }
             }
           }
         });
   }
 
-  protected String getDialect(boolean isCD) {
-    return isCD ? registrationInfo.getDialectGroup().getSafeText() : "unk";
+  protected String getDialect() {
+    return registrationInfo.isVisible() ? registrationInfo.getDialectGroup().getSafeText() : "unk";
   }
 
-  protected boolean isMale(boolean isCD) {
-    return !isCD || registrationInfo.isMale();
+  protected boolean isMale() {
+    return !registrationInfo.isVisible() || registrationInfo.isMale();
+  }
+
+  protected int getAge() {
+    String age = registrationInfo.isVisible() ? registrationInfo.getAgeEntryGroup().getSafeText() : "";
+    int age1 = registrationInfo.isVisible() ? (age.isEmpty() ? 99 : Integer.parseInt(age)) : 0;
+    return age1;
   }
 
   private String getSignUpEvent(User result) {

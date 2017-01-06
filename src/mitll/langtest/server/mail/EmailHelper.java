@@ -150,7 +150,7 @@ public class EmailHelper {
 
 
   /**
-   * @see mitll.langtest.server.LangTestDatabaseImpl#forgotUsername(String, String, String)
+   * @see mitll.langtest.server.LangTestDatabaseImpl#forgotUsername
    * @param email
    * @param url
    * @param userID
@@ -168,6 +168,9 @@ public class EmailHelper {
           getUserNameMessage(userID),
           "Click here to return to the site." // link text
       );
+    }
+    else {
+      logger.warn("no user with email " + email);
     }
   }
 

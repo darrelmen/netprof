@@ -168,6 +168,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     logger.info("attachAudio afterReadingExercises trying to attach audio to " + exercises.size() + " with project id " + id);
 
     int c = 0;
+
     Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio(id);
     attachAudio.setExToAudio(exToAudio, getMultiPronWords(exercises));
     Set<String> allTranscripts = new HashSet<>();
@@ -480,7 +481,6 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   }
 
   /**
-<<<<<<< HEAD
    * This DAO needs to talk to other DAOs.
    *
    * @param userExerciseDAO

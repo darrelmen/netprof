@@ -90,6 +90,8 @@ class RegistrationInfo extends BasicDialog {
     dialectGroup.setVisible(visible);
   }
 
+  public boolean isVisible() { return genders.isVisible(); }
+
   void hideAge() {
     ageEntryGroup.setVisible(false);
   }

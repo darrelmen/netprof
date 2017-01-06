@@ -47,6 +47,7 @@ public class ExerciseToPhone {
   private static final Logger logger = LogManager.getLogger(ExerciseToPhone.class);
 
   /**
+   * TODO: Seems like this could take a long time????
    * @param refResultDAO
    * @return
    * @see DatabaseImpl#configureProjects
@@ -62,7 +63,7 @@ public class ExerciseToPhone {
 
     for (SlickRefResultJson exjson : jsonResults) {
       Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = parseResultJson.parseJson(exjson.scorejson());
-      List<TranscriptSegment> transcriptSegments = netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
+      /*List<TranscriptSegment> transcriptSegments =*/ netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
 
       int exid = exjson.exid();
       ExercisePhoneInfo phonesForEx = exToPhones.get(exid);
@@ -70,7 +71,7 @@ public class ExerciseToPhone {
       addPhones(phonesForEx, netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT));
       phonesForEx.setNumPhones(exjson.numalignphones());
     }
-    logger.info("took " + (System.currentTimeMillis() - then) + " millis to populate ex->phone map");
+    logger.info("getExerciseToPhone took " + (System.currentTimeMillis() - then) + " millis to populate ex->phone map");
 
     return exToPhones;
   }
