@@ -189,6 +189,7 @@ war {
     from 'war/LangTest.css'
     from 'war/LangTest.html'
     from 'copy.sh'
+    from 'drop.sh'
     webXml = file('war/WEB-INF/web.xml')
 
     from ('src') {
