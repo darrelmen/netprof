@@ -608,12 +608,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    */
   public User loginUser(String userId,
                         String attemptedPassword,
-                        //String remoteIP,
                         String userAgent,
-                        //String sessionId,
                         String remoteAddr,
                         String sessionID) {
-    logger.info("loginUser " + userId + " pass " + attemptedPassword);
+    logger.info("loginUser " + userId + " pass num chars " + attemptedPassword.length());
     DBUser loggedInUser =
         delegate.loginUser(
             userId,
@@ -1321,18 +1319,15 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @param toUpdate
    */
   @Override
-  @Deprecated
   public void update(User toUpdate) {
-/*
-    //  logger.info("update " + toUpdate);
-    SlickUser toUpdate1 = toSlick(toUpdate, true);
-    //  logger.info("update " + toUpdate1);
-    int update = dao.update(toUpdate1);
-    if (update == 0) {
-      logger.warn("didn't update table with " + toUpdate1);
+    DBUser dbUser = delegate.lookupDBUser(toUpdate.getID());
+
+    if (dbUser != null) {
+      dbUser.setEmail(toUpdate.getEmail());
+      dbUser.setFirstName(toUpdate.getFirst());
+      dbUser.setLastName(toUpdate.getLast());
+      delegate.updateUser(adminUser, getClientUserDetail(dbUser));
     }
-*/
-    // logger.info("user now " + getByID(toUpdate.getID()));
   }
 
   private boolean isValidAsEmail(String text) {

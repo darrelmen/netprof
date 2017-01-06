@@ -41,9 +41,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.instrumentation.EventRegistration;
@@ -113,7 +111,7 @@ public class SignUpForm extends UserDialog implements SignUp {
   private UserPassDialog userPassLogin;
   private static final String CURRENT_USERS = "Current users should add an email and password.";
   private String signUpTitle = SIGN_UP;
-//  private String rolesHeader = ARE_YOU_A;
+  //  private String rolesHeader = ARE_YOU_A;
   private boolean markFieldsWithLabels = false;
   protected UserManager userManager;
   private Map<User.Kind, RadioButton> roleToChoice = new HashMap<>();
@@ -154,27 +152,23 @@ public class SignUpForm extends UserDialog implements SignUp {
    * recorder/not a recorder choice.
    *
    * @param userID
+   * @param candidate
    * @see SignInForm#copyInfoToSignUp
    */
   @Override
-  public void copyInfoToSignUp(String userID, String passwordText) {
-    // String userID = userID.getUserID();
+  public void copyInfoToSignUp(String userID, User candidate) {
     signUpUser.box.setText(userID);
 
-    // signUpPassword.box.setText(passwordText);
-    // signUpPassword.getGroup().setType(ControlGroupType.ERROR);
+    firstName.setText(candidate.getFirst());
+    lastName.setText(candidate.getLast());
+    signUpEmail.setText(candidate.getEmail());
 
-    FormField firstFocus = this.firstName;
+    FormField firstFocus =
+        firstName.isEmpty() ?
+            firstName :
+            lastName.isEmpty() ? lastName : signUpEmail;
     setFocusOn(firstFocus.getWidget());
-    //   eventRegistration.logEvent(signIn, "sign in", "N/A", "copied info to sign up form");
     markErrorBlur(firstFocus, "Add info", CURRENT_USERS, Placement.TOP);
-
-/*    firstFocus.box.addBlurHandler(new BlurHandler() {
-      @Override
-      public void onBlur(BlurEvent event) {
-        signUpPassword.getGroup().setType(ControlGroupType.NONE);
-      }
-    });*/
   }
 
   /**
@@ -266,7 +260,7 @@ public class SignUpForm extends UserDialog implements SignUp {
 */
 
 //    fieldset.add(getRolesHeader());
-  //  fieldset.add(getRolesChoices(user == null ? User.Kind.STUDENT : userKind));
+    //  fieldset.add(getRolesChoices(user == null ? User.Kind.STUDENT : userKind));
 
 //    if (!props.isAMAS() && contentDevCheckbox != null) {
 //      fieldset.add(contentDevCheckbox);
@@ -658,7 +652,9 @@ public class SignUpForm extends UserDialog implements SignUp {
 
         "browser",
         "",
-        firstName.getSafeText(), lastName.getSafeText(), trimURL(Window.Location.getHref()));
+        firstName.getSafeText(),
+        lastName.getSafeText(),
+        trimURL(Window.Location.getHref()));
 
     service.addUser(
         newUser,
@@ -725,15 +721,4 @@ public class SignUpForm extends UserDialog implements SignUp {
   private String getSignUpEvent(User result) {
     return "successful sign up as " + result.getUserID() + "/" + result.getID() + " as " + result.getUserKind();
   }
-
-  /**
-   * @see mitll.langtest.client.userops.EditUserForm
-   * @param rolesHeader
-   * @deprecated
-   */
-/*
-  public void setRolesHeader(String rolesHeader) {
-    this.rolesHeader = rolesHeader;
-  }
-*/
 }

@@ -32,7 +32,6 @@
 
 package mitll.langtest.client.services;
 
-import com.github.gwtbootstrap.client.ui.Fieldset;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.domino.user.ChangePasswordView;
 import mitll.langtest.shared.user.*;
@@ -43,20 +42,12 @@ import java.util.Map;
 
 public interface UserServiceAsync {
   /**
-   * @see mitll.langtest.client.user.SignInForm#gotLogin(String, String, boolean)
-   * @see mitll.langtest.client.user.SignInForm#makeSignInUserName(Fieldset)
-   * @param login
-   * @param passwordH
-   * @param async
-   */
- // void userExists(String login, String passwordH, AsyncCallback<User> async);
-  /**
    * @param userId
    * @param attemptedHashedPassword
    * @param attemptedFreeTextPassword
    * @param async
-   * @see UserManager#getPermissionsAndSetUser
-   * @see mitll.langtest.client.user.SignInForm#getPermissionsAndSetUser
+   * @seex UserManager#getPermissionsAndSetUser
+   * @seex mitll.langtest.client.user.SignInForm#getPermissionsAndSetUser
    */
   void loginUser(String userId, String attemptedHashedPassword, String attemptedFreeTextPassword, AsyncCallback<LoginResult> async);
 

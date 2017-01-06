@@ -36,6 +36,10 @@ public class FormField {
     return sanitize(box.getText());
   }
 
+  public void setText(String text) {
+    box.setText(text);
+  }
+
   private String sanitize(String text) {
     return SimpleHtmlSanitizer.sanitizeHtml(text).asString();
   }

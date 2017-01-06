@@ -73,14 +73,12 @@ public class UserManager {
   private static final String USER_ID = "userID";
   private static final String USER_CHOSEN_ID = "userChosenID";
   private static final String USER_PENDING_ID = "userPendingID";
-  // private static final String AUDIO_TYPE = "audioType";
 
   private final UserServiceAsync userServiceAsync;
   private final UserNotification userNotification;
   private long userID = NO_USER_SET;
   private String userChosenID = "";
 
-  //  private final PropertyHandler.LOGIN_TYPE loginType;
   private final String appTitle;
   private User current;
 
@@ -166,7 +164,7 @@ public class UserManager {
         if (DEBUG) logger.info("UserManager.getPermissionsAndSetUser : onSuccess " +
             //user +
             " : " + result);
-        if (result == null
+        if (result == null  || !result.isEnabled()
             ) {
           clearUser();
           userNotification.showLogin();

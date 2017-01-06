@@ -198,6 +198,8 @@ gwt {
 }
 
 war {
+    archiveName "netprof.war"
+
     // from 'war/bin'
     from ('war/config/netProf') {
         into 'config/netProf'
