@@ -35,7 +35,6 @@ package mitll.langtest.shared.user;
 import java.io.Serializable;
 import java.util.Date;
 
-
 /**
  * LoginResult
  *
@@ -52,7 +51,10 @@ public class LoginResult implements Serializable {
     BadPassword,
     SessionNotRestored,
   //  MissingEmail,
-    MissingInfo
+    MissingInfo,
+    Updated,
+    Added,
+    Exists
   }
 
   private static final long serialVersionUID = -8359612864581208214L;

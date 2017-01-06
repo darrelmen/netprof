@@ -45,7 +45,6 @@ import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.BrowserCheck;
@@ -153,6 +152,11 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
   public void setSignInHasFocus() {
     signInHasFocus = true;
   }
+
+  public void setSignInPasswordFocus() {
+    signInForm.setFocusPassword();
+  }
+
 /*  private boolean checkWelcome() {
     if (!hasShownWelcome() && props.shouldShowWelcome()) {
       keyStorage.storeValue(SHOWN_HELLO, "yes");
@@ -317,7 +321,7 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
             }
 
             sendUsernameEmail.setEnabled(false);
-            service.forgotUsername(Md5Hash.getHash(text), text, Window.Location.getHref(), new AsyncCallback<Boolean>() {
+            service.forgotUsername(Md5Hash.getHash(text), text, new AsyncCallback<Boolean>() {
               @Override
               public void onFailure(Throwable caught) {
                 sendUsernameEmail.setEnabled(true);

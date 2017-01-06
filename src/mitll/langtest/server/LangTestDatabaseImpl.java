@@ -221,9 +221,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       if (slimProjects == null) langToProject.put(project.language(), slimProjects = new ArrayList<>());
       slimProjects.add(project);
     }
-
 //    logger.info("lang->project is " + langToProject);
-
     for (String lang : langToProject.keySet()) {
       List<SlickProject> slickProjects = langToProject.get(lang);
       SlickProject firstProject = slickProjects.get(0);
@@ -242,7 +240,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   }
 
   /**
-   * TODOx FIX ME
+   *
    *
    * @param project
    * @return
@@ -471,7 +469,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   private DatabaseImpl makeDatabaseImpl(String h2DatabaseFile) {
     //logger.debug("word pairs " +  serverProps.isWordPairs() + " language " + serverProps.getLanguage() + " config dir " + relativeConfigDir);
     return new DatabaseImpl(configDir, relativeConfigDir, h2DatabaseFile, serverProps, pathHelper, true, this, false
-        //    ,        getServletContext()
     );
   }
 
@@ -496,6 +493,10 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
         mediaDir);
   }
 
+  /**
+   * @deprecated - only used (if at all) during import
+   * @return
+   */
   private String getLessonPlan() {
     return serverProps.getLessonPlan() == null ? null : configDir + File.separator + serverProps.getLessonPlan();
   }

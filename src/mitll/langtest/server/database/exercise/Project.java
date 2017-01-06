@@ -74,6 +74,8 @@ public class Project {
   //private ExerciseTrie<CommonExercise> phoneTrie;
   private Map<Integer, ExercisePhoneInfo> exToPhone;
 
+  private boolean wasConfigured = false;
+
   /**
    * @see mitll.langtest.server.database.project.ProjectManagement#addSingleProject
    * @param exerciseDAO
@@ -96,13 +98,7 @@ public class Project {
                  DatabaseImpl db,
                  LogAndNotify logAndNotify) {
     this.project = project;
- //   this.typeOrder = Arrays.asList(project.first(), project.second());
-    // String prop = project.getProp(ServerProperties.MODELS_DIR);
-    // logger.info("Project got " + ServerProperties.MODELS_DIR + ": " + prop);
     audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, logAndNotify, this);
-    // logger.info("Project got " + audioFileHelper);
-    // logger.info("Project got " + audioFileHelper.getCollator());
-   // this.relativeConfigDir = relativeConfigDir;
     this.db = db;
     this.serverProps = serverProps;
     this.pathHelper = pathHelper;
@@ -114,7 +110,7 @@ public class Project {
    * Only public to support deletes...
    */
   public <T extends CommonShell> void buildExerciseTrie(DatabaseImpl db) {
-    logger.info("db " + db + " audioFileHelper " + getAudioFileHelper());
+//    logger.info("db " + db + " audioFileHelper " + getAudioFileHelper());
     fullTrie = new ExerciseTrie<>(getExercisesForUser(), project.language(), getSmallVocabDecoder());
   }
 
@@ -246,15 +242,23 @@ public class Project {
     return phoneTrie;
   }*/
 
-  public String toString() {
-    return "Project project = " + project + " types " + getTypeOrder() + " exercise dao " + exerciseDAO;
-  }
-
   public void setExToPhone(Map<Integer, ExercisePhoneInfo> exToPhone) {
     this.exToPhone = exToPhone;
   }
 
   public Map<Integer, ExercisePhoneInfo> getExToPhone() {
     return exToPhone;
+  }
+
+  public String toString() {
+    return "Project project = " + project + " types " + getTypeOrder() + " exercise dao " + exerciseDAO;
+  }
+
+  public boolean isConfigured() {
+    return wasConfigured;
+  }
+
+  public void setConfigured(boolean wasConfigured) {
+    this.wasConfigured = wasConfigured;
   }
 }

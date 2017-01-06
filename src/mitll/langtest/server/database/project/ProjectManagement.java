@@ -142,22 +142,7 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   /**
-   * TODO : add mechanism to trigger reload of exercises for a NetProf project from a domino project
-   *
-   */
-  //@Override
-/*  private void doReload() {
-    for (Project project : getProjects()) {
-      if (project.getExerciseDAO() == null) {
-        setExerciseDAO(project);
-        configureProject(*//*installPath,*//* project);
-        logger.info("\tpopulateProjects : " + project + " : " + project.getAudioFileHelper());
-      }
-    }
-  }*/
-
-
-  /**
+   * Latchy - would be better to do this when the project is remembered...
    * // TODO : this seems like a bad idea --
    * @see DatabaseImpl#configureProjects
    */
@@ -166,7 +151,12 @@ public class ProjectManagement implements IProjectManagement {
     Collection<Project> projects = getProjects();
     logger.info("configureProjects got " + projects.size() + " projects");
     for (Project project : projects) {
-      configureProject(project);
+      if (!project.isConfigured()) {
+        configureProject(project);
+      }
+      else {
+        logger.debug("project already configured " + project.getProject().id());
+      }
     }
   }
 
@@ -176,6 +166,7 @@ public class ProjectManagement implements IProjectManagement {
    */
   private void configureProject(Project project) {
     logger.info("configureProject " + project);
+    project.setConfigured(true);
     SlickProject project1 = project.getProject();
     if (project1 == null) logger.info("configureProject : note : no project for " + project);
     int id = project1 == null ? -1 : project1.id();
@@ -183,7 +174,7 @@ public class ProjectManagement implements IProjectManagement {
 
     List<CommonExercise> rawExercises = project.getRawExercises();
     if (!rawExercises.isEmpty()) {
-      logger.debug("first exercise is " + rawExercises.iterator().next());
+      logger.debug("configureProject first exercise is " + rawExercises.iterator().next());
     }
     project.setJsonSupport(new JsonSupport(project.getSectionHelper(), db.getResultDAO(), db.getRefResultDAO(), db.getAudioDAO(),
         db.getPhoneDAO()));
@@ -196,7 +187,6 @@ public class ProjectManagement implements IProjectManagement {
               exerciseIDToRefAudio,
               (SlickResultDAO) db.getResultDAO())
       );
-//      userExerciseDAO.getTemplateExercise();
       project.getAudioFileHelper().checkLTSAndCountPhones(rawExercises);
 
 //      ExerciseTrie<CommonExercise> commonExerciseExerciseTrie = populatePhoneTrie(rawExercises);
@@ -211,11 +201,16 @@ public class ProjectManagement implements IProjectManagement {
 //      project.setExToPhone(exToPhonePerProject);
       //    project.setPhoneTrie(commonExerciseExerciseTrie);
       logMemory();
+
     }
 
     logMemory();
   }
 
+  /**
+   * @see DatabaseImpl#makeDAO
+   * @return
+   */
   public ExerciseDAO<CommonExercise> setDependencies() {
     Project project = idToProject.get(IMPORT_PROJECT_ID);
     ExerciseDAO<CommonExercise> exerciseDAO = project.getExerciseDAO();
@@ -223,6 +218,24 @@ public class ProjectManagement implements IProjectManagement {
     setDependencies(exerciseDAO,-1);
 
     return exerciseDAO;
+  }
+
+  /**
+   * @param pathHelper
+   * @param serverProps
+   * @param logAndNotify
+   * @param slickProject
+   * @see #populateProjects
+   */
+  private void rememberProject(PathHelper pathHelper,
+                               ServerProperties serverProps,
+                               LogAndNotify logAndNotify,
+                               SlickProject slickProject,
+                               DatabaseImpl db) {
+    Project project = new Project(slickProject, pathHelper, serverProps, db, logAndNotify);
+    idToProject.put(project.getProject().id(), project);
+    logger.info("populateProjects : " + project + " : " + project.getAudioFileHelper());
+    setExerciseDAO(project);
   }
 
   /**
@@ -242,6 +255,22 @@ public class ProjectManagement implements IProjectManagement {
         audioDAO,
         projid);
   }
+
+
+  /**
+   * TODO : add mechanism to trigger reload of exercises for a NetProf project from a domino project
+   *
+   */
+  //@Override
+/*  private void doReload() {
+    for (Project project : getProjects()) {
+      if (project.getExerciseDAO() == null) {
+        setExerciseDAO(project);
+        configureProject(*//*installPath,*//* project);
+        logger.info("\tpopulateProjects : " + project + " : " + project.getAudioFileHelper());
+      }
+    }
+  }*/
 
   private void logMemory() {
     int MB = (1024 * 1024);
@@ -270,23 +299,6 @@ public class ProjectManagement implements IProjectManagement {
     for (Project project : getProjects()) project.stopDecode();
   }
 
-  /**
-   * @param pathHelper
-   * @param serverProps
-   * @param logAndNotify
-   * @param slickProject
-   * @see #populateProjects
-   */
-  private void rememberProject(PathHelper pathHelper,
-                               ServerProperties serverProps,
-                               LogAndNotify logAndNotify,
-                               SlickProject slickProject,
-                               DatabaseImpl db) {
-    Project project = new Project(slickProject, pathHelper, serverProps, db, logAndNotify);
-    idToProject.put(project.getProject().id(), project);
-    logger.info("populateProjects : " + project + " : " + project.getAudioFileHelper());
-    setExerciseDAO(project);
-  }
 
   @Override
   public void addSingleProject(ExerciseDAO<CommonExercise> jsonExerciseDAO) {
@@ -338,13 +350,13 @@ public class ProjectManagement implements IProjectManagement {
    */
   @Override
   public CommonExercise getExercise(int projectid, int id) {
-    Project project = getProjectOrFirst(projectid);
-    return project.getExercise(id);
+    return getProjectOrFirst(projectid).getExercise(id);
   }
 
-
   /**
-   * TODO : exercises are in the context of a project
+   * exercises are in the context of a project
+   *
+   * deals with projects added while webapp is running -
    *
    * @param projectid
    * @return
@@ -359,6 +371,12 @@ public class ProjectManagement implements IProjectManagement {
     Project project = getProjectOrFirst(projectid);
 
     logger.info("getExercises " + projectid  + " = " +project);
+
+    if (!project.isConfigured()) {
+      logger.info("\tgetExercises configure " + projectid);
+
+      configureProject(project);
+    }
 
     List<CommonExercise> rawExercises = project.getRawExercises();
     if (rawExercises.isEmpty()) {
@@ -428,8 +446,8 @@ public class ProjectManagement implements IProjectManagement {
       //logger.info("project " + projid + " type order " + typeOrder);
 
       boolean sound = typeOrder.remove(SlickUserExerciseDAO.SOUND);
-      boolean diff = typeOrder.remove(SlickUserExerciseDAO.DIFFICULTY);
-      if (!sound) logger.warn("sound missing???");
+      boolean diff  = typeOrder.remove(SlickUserExerciseDAO.DIFFICULTY);
+      if (!sound) logger.warn("setStartupInfo : sound missing???");
       else {
         typeOrder.add(SlickUserExerciseDAO.SOUND);
       }

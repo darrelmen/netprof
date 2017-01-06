@@ -237,7 +237,9 @@ public interface IUserDAO extends IDAO {
    */
   boolean changePasswordForToken(String userId, String userKey, String newPassword, String url);
 
-  boolean forgotPassword(String user, String url, String emailForLegacy);
+  boolean forgotPassword(String user, String url
+  //    , String emailForLegacy
+  );
 
   /**
    * @see UserServiceImpl#changePFor(String, String)

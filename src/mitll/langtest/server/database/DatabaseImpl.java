@@ -634,6 +634,7 @@ public class DatabaseImpl implements Database {
           makeExerciseDAO(lessonPlanFile, isURL);
 
           if (!serverProps.useH2()) {
+    //        userExerciseDAO.setExToPhones(new ExerciseToPhone().getExerciseToPhone(refresultDAO));
             populateProjects();
             //    logger.info("set exercise dao " + exerciseDAO + " on " + userExerciseDAO);
             if (projectManagement.getProjects().isEmpty()) {
@@ -649,11 +650,10 @@ public class DatabaseImpl implements Database {
           // TODO : will this break import???
           // TODO
 
-          if (!serverProps.useH2()) {
-            configureProjects();
+          if (serverProps.useH2()) {
+            userExerciseDAO.setExerciseDAO(projectManagement.setDependencies());
           } else {
-            ExerciseDAO<CommonExercise> commonExerciseExerciseDAO = projectManagement.setDependencies();
-            userExerciseDAO.setExerciseDAO(commonExerciseExerciseDAO);
+            configureProjects();
           }
         }
         userManagement = new mitll.langtest.server.database.user.UserManagement(userDAO, resultDAO, userPermissionDAO);
@@ -668,8 +668,7 @@ public class DatabaseImpl implements Database {
    */
   private void configureProjects() {
     // TODO : this seems like a bad idea --
-    Map<Integer, ExercisePhoneInfo> exerciseToPhone = new ExerciseToPhone().getExerciseToPhone(refresultDAO);
-    userExerciseDAO.setExToPhones(exerciseToPhone);
+    userExerciseDAO.setExToPhones(new ExerciseToPhone().getExerciseToPhone(refresultDAO));
     projectManagement.configureProjects();
   }
 
