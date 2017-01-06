@@ -406,7 +406,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
   }
 
   public String getContext() {
-    return getDirectlyRelated().iterator().next().getForeignLanguage();
+    return hasContext() ? getDirectlyRelated().iterator().next().getForeignLanguage() : "";
   }
 
   public Collection<CommonExercise> getDirectlyRelated() {

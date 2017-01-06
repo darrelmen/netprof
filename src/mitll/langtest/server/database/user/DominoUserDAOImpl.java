@@ -68,7 +68,7 @@ import static mitll.langtest.shared.user.User.Kind.PROJECT_ADMIN;
  */
 public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   private static final Logger logger = LogManager.getLogger(DominoUserDAOImpl.class);
-  private static final String EMAIL = "admin@dliflc.edu";
+  //private static final String EMAIL = "admin@dliflc.edu";
   private static final mitll.hlt.domino.shared.model.user.User.Gender DMALE = mitll.hlt.domino.shared.model.user.User.Gender.Male;
   private static final mitll.hlt.domino.shared.model.user.User.Gender DFEMALE = mitll.hlt.domino.shared.model.user.User.Gender.Female;
   private static final String PRIMARY = "primary";
@@ -495,7 +495,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   private DBUser savePasswordAndGetUser(int id, String currentPassword, String newHashedPassword, String baseURL) {
     DBUser dbUser = delegate.lookupDBUser(id);
     if (dbUser != null) {
-      dbUser.setPrimaryGroup(new Group()); // TODO just for now... so it doesn't crash
+//      dbUser.setPrimaryGroup(new Group()); // TODO just for now... so it doesn't crash
       boolean b = delegate.changePassword(adminUser, dbUser, currentPassword, newHashedPassword, baseURL);
       if (!b) {
         logger.error("huh? didn't change password for " + id + "\n");
@@ -505,8 +505,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }
 
   @Override
-  public String isValidEmail(String emailH) {
-    Set<FilterDetail<UserColumn>> filterDetails = getEmailFilter(emailH);
+  public String isValidEmail(String email) {
+    Set<FilterDetail<UserColumn>> filterDetails = getEmailFilter(email);
     List<DBUser> users = getDbUsers(filterDetails);
 
     return users.isEmpty() ? null : users.get(0).getUserId();
@@ -515,7 +515,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   /**
    * @param filterDetails
    * @return
-   * @see #getDbUsersByUserID
+   * @see #getIDForUserAndEmail
    */
   private List<DBUser> getDbUsers(Set<FilterDetail<UserColumn>> filterDetails) {
     FindOptions<UserColumn> opts = new FindOptions<>(filterDetails);
@@ -765,20 +765,21 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }*/
 
   /**
+   * Convert a netprof user into a domino user.
+   *
    * @param user
    * @param projectName
    * @return
    * @seex mitll.langtest.server.database.copy.CopyToPostgres#addUser(DominoUserDAOImpl, Map, User)
    */
   public ClientUserDetail toClientUserDetail(User user, String projectName) {
-    //Timestamp now = new Timestamp(user.getTimestampMillis());
     String first = user.getFirst();
     if (first == null) first = user.getUserID();
     String last = user.getLast();
     if (last == null) last = "Unknown";
     String email = user.getEmail();
     if (email == null || email.isEmpty()) {
-      email = EMAIL;
+      email = "";
     }
 
     Group primaryGroup = getGroup();
@@ -1335,7 +1336,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   }
 
   @Override
-  public boolean forgotPassword(String user, String url, String emailForLegacy) {
+  public boolean forgotPassword(String user, String url
+  //    , String emailForLegacy
+  ) {
     DBUser next = delegate.getDBUser(user);
 
     if (next.getPrimaryGroup() == null) {
@@ -1348,8 +1351,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     ClientUserDetail clientUserDetail1 = null;
     try {
       if (!isValidAsEmail(clientUserDetail.getEmail())) {
-        clientUserDetail.setEmail(emailForLegacy);
-        logger.info("forgotPassword email now " + emailForLegacy);
+        logger.error("huh? email " + clientUserDetail.getEmail() + " not valid?");
+    //    clientUserDetail.setEmail(emailForLegacy);
+ //       logger.info("forgotPassword email now " + emailForLegacy);
       }
 
       clientUserDetail1 = delegate.forgotPassword(next,

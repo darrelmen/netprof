@@ -75,7 +75,7 @@ public class OpsUserContainer extends BasicUserContainer<MiniUser> implements Re
     this.userOps = userOps;
   }
 
-  protected int getPageSize() {
+  /*protected int getPageSize() {
     return 31;
   }
 
@@ -185,5 +185,5 @@ public class OpsUserContainer extends BasicUserContainer<MiniUser> implements Re
     Panel signUpForm1 = signUpForm.getSignUpForm(user);
     signUpForm1.addStyleName("leftFiveMargin");
     userDetail.add(signUpForm1);
-  }
+  }*/
 }

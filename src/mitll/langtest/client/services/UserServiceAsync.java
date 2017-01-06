@@ -75,7 +75,10 @@ public interface UserServiceAsync {
 
   void changePasswordWithToken(String userId, String userKey, String newPassword, AsyncCallback<User> async);
 
-  void resetPassword(String userid, String url, String emailForLegacy, AsyncCallback<Boolean> asyncCallback);
+  void resetPassword(String userid,
+        //, String url,
+                     //String emailForLegacy,
+                     AsyncCallback<Boolean> asyncCallback);
 
   void getUsers(AsyncCallback<List<User>> async);
 
@@ -92,9 +95,9 @@ public interface UserServiceAsync {
   void addUser(
       SignUpUser user,
       String url,
-      AsyncCallback<User> async);
+      AsyncCallback<LoginResult> async);
 
-  void forgotUsername(String emailH, String email, String url, AsyncCallback<Boolean> async);
+  void forgotUsername(String emailH, String email, AsyncCallback<Boolean> async);
 
   void getUserIDForToken(String token, AsyncCallback<Long> async);
 
