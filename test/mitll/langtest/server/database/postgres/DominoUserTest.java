@@ -249,6 +249,7 @@ public class DominoUserTest extends BaseTest {
     userDAO.forgotPassword("demo", "");//, "gordon.vidaver@ll.mit.edu");
   }
 
+/*
   @Test
   public void testAddAndChange() {
     DatabaseImpl netProf = getDatabaseVeryLight("netProf", "config.properties", false);
@@ -277,5 +278,6 @@ public class DominoUserTest extends BaseTest {
 
     // userDAO.forgotPassword("demo","", "gordon.vidaver@ll.mit.edu");
   }
+*/
 
 }
