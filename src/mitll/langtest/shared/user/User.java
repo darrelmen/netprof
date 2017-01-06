@@ -69,6 +69,7 @@ public class User extends MiniUser {
   private String dialect;
   private String device;
   private String resetKey;
+  private String affiliation;
 
   private Collection<Permission> permissions;
   private ProjectStartupInfo startupInfo;
@@ -103,7 +104,11 @@ public class User extends MiniUser {
     public String getName() {
       return name;
     }
-    public String getRole() { return role; }
+
+    public String getRole() {
+      return role;
+    }
+
     public boolean shouldShow() {
       return show;
     }
@@ -115,6 +120,7 @@ public class User extends MiniUser {
 
   /**
    * For right now,  you can only choose to be a student initially.
+   *
    * @return
    */
   public static Collection<User.Kind> getSelfChoiceRoles() {
@@ -195,7 +201,7 @@ public class User extends MiniUser {
             RECORD_AUDIO,
             DEVELOP_CONTENT//, // make new projects, edit via domino
             //INVITE,
-   //         EDIT_STUDENT//,
+            //         EDIT_STUDENT//,
             //EDIT_USER
         );  // students
       case AUDIO_RECORDER:
@@ -209,9 +215,9 @@ public class User extends MiniUser {
             TEACHER_PERM,
             RECORD_AUDIO,
             DEVELOP_CONTENT
-        //    INVITE,
+            //    INVITE,
 //            EDIT_STUDENT//,
-          //  EDIT_USER
+            //  EDIT_USER
         );
       default:
         return Collections.emptyList();
@@ -533,6 +539,22 @@ public class User extends MiniUser {
 
   public void setAdmin(boolean admin) {
     this.admin = admin;
+  }
+
+  public String getAffiliation() {
+    return affiliation;
+  }
+
+  public boolean isValid() {
+    return
+        isValid(emailHash) &&
+            isValid(email) &&
+            isValid(first) &&
+            isValid(last);
+  }
+
+  private boolean isValid(String email) {
+    return email != null && !email.isEmpty();
   }
 
   public String toStringShort() {
