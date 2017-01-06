@@ -389,16 +389,31 @@ public class ProjectManagement implements IProjectManagement {
     return serverProps.isAMAS();
   }
 
+  /**
+   * Try to deal with project set changing out from underneath us...
+   * @param projectid
+   * @return
+   */
   @Override
   public Project getProject(int projectid) {
     if (projectid == -1) return getFirstProject();
     Project project = idToProject.get(projectid);
     if (project == null) {
-      Project firstProject = getFirstProject();
-      logger.error("no project with id " + projectid + " in known projects (" + idToProject.keySet() +
-              ") returning first " + firstProject,
-          new IllegalArgumentException());
-      return firstProject;
+      Collection<SlickProject> all = projectDAO.getAll();
+      if (all.size() != idToProject.size()) {
+        logger.debug("getProject no project with id " + projectid + " in known projects (" + idToProject.keySet() +
+            ") - refreshing projects");
+        populateProjects();
+        project = idToProject.get(projectid);
+      }
+
+      if (project == null) {
+        Project firstProject = getFirstProject();
+        logger.error("getProject no project with id " + projectid + " in known projects (" + idToProject.keySet() +
+                ") returning first " + firstProject,
+            new IllegalArgumentException());
+        return firstProject;
+      }
     }
     return project;
   }

@@ -81,7 +81,7 @@ public class SignInForm extends UserDialog implements SignIn {
   // private static final String ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD_GOT_IT = "Click here and then check your email to reset your password.";
   private static final String SEND = "Send Reset Email";
   private static final String SIGN_UP_WIDTH = "266px";
-  private static final String PLEASE_CHECK = "Please check";
+//  private static final String PLEASE_CHECK = "Please check";
   private static final int EMAIL_POPUP_DELAY = 4000;
 
   private FormField userField;

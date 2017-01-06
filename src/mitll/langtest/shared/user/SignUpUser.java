@@ -39,11 +39,7 @@ public class SignUpUser implements IsSerializable {
 
   // private String freeTextPassword;
 
-  /**
-   * @deprecated
-   */
-//  private String passwordH;
-
+  private String passwordH;
   private String emailH;
   private String email;
   private User.Kind kind;
@@ -76,7 +72,7 @@ public class SignUpUser implements IsSerializable {
    * @param url
    */
   public SignUpUser(String userID,
-                   // String passwordH,
+                    String passwordH,
                     String emailH,
                     String email,
                     User.Kind kind,
@@ -88,7 +84,7 @@ public class SignUpUser implements IsSerializable {
                     String first,
                     String last, String url) {
     this.userID = userID;
- //   this.passwordH = passwordH;
+    this.passwordH = passwordH;
    // this.freeTextPassword = freeTextPassword;
     this.emailH = emailH;
     this.email = email;
@@ -107,11 +103,9 @@ public class SignUpUser implements IsSerializable {
     return userID;
   }
 
-/*
   public String getPasswordH() {
     return passwordH;
   }
-*/
 
   /**
    * @deprecated

@@ -109,23 +109,12 @@ public interface IUserDAO extends IDAO {
                  String sessionID);
 
   /**
-   * @see mitll.langtest.server.services.UserServiceImpl#loginUser(String, String)
-   * @param id
-   * @param passwordHash
-   * @return
-   */
-//  User getUser(String id, String passwordHash);
-  //User getUserFreeTextPassword(String id, String freeTextPassword);
-
-  /**
    * @see mitll.langtest.server.database.copy.CopyToPostgres#copyUsers(DatabaseImpl, int, IResultDAO)
    * @param id
    * @param passwordHash
    * @return
    */
   User getStrictUserWithPass(String id, String passwordHash);
-  //User getStrictUserWithFreeTextPass(String id, String freeTextPassword);
- // User getUserIfMatchPass(User user, String id, String encodedPassword);
 
   /**
    * @see mitll.langtest.server.database.copy.CopyToPostgres#copyUsers(DatabaseImpl, int, IResultDAO)

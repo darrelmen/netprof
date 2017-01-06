@@ -51,6 +51,8 @@ import org.apache.logging.log4j.Logger;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import scala.tools.cmd.gen.AnyVals;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -956,11 +958,27 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         // shouldn't need this
         logger.debug("getUserKind lookup by NetProF user role " + firstRole);
       } catch (IllegalArgumentException e) {
-        logger.error("getUserKind no user for " + firstRole);
-        kind = User.Kind.STUDENT;
+        User.Kind kindByName = getKindByName(firstRole);
+        if (kindByName == null) {
+          logger.error("getUserKind no user for " + firstRole);
+          kind = User.Kind.STUDENT;
+        }
+        else {
+          kind = kindByName;
+        }
       }
     }
     return kind;
+  }
+
+  @Nullable
+  private User.Kind getKindByName(String firstRole) {
+    for (User.Kind testKind: User.Kind.values()) {
+      if (testKind.getName().equalsIgnoreCase(firstRole)) {
+        return testKind;
+      }
+    }
+    return null;
   }
 
   /**
