@@ -41,6 +41,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.dialog.KeyPressHelper;
@@ -48,6 +49,8 @@ import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.shared.user.LoginResult;
 import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
+import net.liftweb.util.RE;
+import sun.rmi.runtime.Log;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -93,14 +96,14 @@ public class SignUpForm extends UserDialog implements SignUp {
   private static final String AGE_ERR_MSG = "Enter age between " + MIN_AGE + " and " + MAX_AGE + ".";
 
   private FormField signUpUser;
+
+  private TextBoxBase userBox;
+  private TextBoxBase emailBox;
+  Heading demoHeader;
+
   protected FormField firstName;
   protected FormField lastName;
   protected FormField signUpEmail;
-
-  /**
-   * We don't let them enter a password initially anymore.
-   */
-  //  private BasicDialog.FormField signUpPassword;
 
   private RegistrationInfo registrationInfo;
   protected User.Kind selectedRole = User.Kind.STUDENT;
@@ -115,6 +118,8 @@ public class SignUpForm extends UserDialog implements SignUp {
   //  private String rolesHeader = ARE_YOU_A;
   private boolean markFieldsWithLabels = false;
   protected UserManager userManager;
+  //private FormField password;
+  private FormField signUpPassword;
   //private Map<User.Kind, RadioButton> roleToChoice = new HashMap<>();
 
   /**
@@ -163,6 +168,7 @@ public class SignUpForm extends UserDialog implements SignUp {
     firstName.setText(candidate.getFirst());
     lastName.setText(candidate.getLast());
     signUpEmail.setText(candidate.getEmail());
+    signUpPassword.setVisible(true);
 
     boolean b = askForDemographic(candidate);
     demoHeader.setVisible(b);
@@ -175,6 +181,22 @@ public class SignUpForm extends UserDialog implements SignUp {
 
     setFocusOn(firstFocus.getWidget());
     markErrorBlur(firstFocus, "Add info", CURRENT_USERS, Placement.TOP);
+  }
+
+  private FormField addPasswordField(Fieldset fieldset, Panel hp) {
+    FormField password;
+    password = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, "Password");
+    password.box.addFocusHandler(new FocusHandler() {
+      @Override
+      public void onFocus(FocusEvent event) {
+        userPassLogin.setSignInHasFocus();
+        //     eventRegistration.logEvent(userField.box, "PasswordBox", "N/A", "focus in password field");
+      }
+    });
+
+    hp.add(password.box);
+    password.setVisible(false);
+    return password;
   }
 
   /**
@@ -200,8 +222,8 @@ public class SignUpForm extends UserDialog implements SignUp {
   private Heading pleaseCheck;
 
   /**
-   * @paramx user
    * @return
+   * @paramx user
    * @seex mitll.langtest.client.userops.OpsUserContainer#populateUserEdit(DivWidget, User)
    * @deprecated
    */
@@ -225,7 +247,6 @@ public class SignUpForm extends UserDialog implements SignUp {
     heading.addStyleName("signUp");
     return heading;
   }*/
-
   private Panel getTwoPartForm(Heading heading, Fieldset fieldset) {
     Form form = getUserForm();
     form.add(heading);
@@ -234,21 +255,19 @@ public class SignUpForm extends UserDialog implements SignUp {
     return form;
   }
 
-  private TextBoxBase userBox;
-  private TextBoxBase emailBox;
-  Heading demoHeader;
 
   /**
-   * @paramx user
    * @return
+   * @paramx user
    */
   protected Fieldset getFields(/*User user*/) {
     Fieldset fieldset = new Fieldset();
     userBox = makeSignUpUsername(fieldset);
-    TextBoxBase firstNameBox = makeSignUpFirstName(fieldset);
-    TextBoxBase lastNameBox = makeSignUpLastName(fieldset);
+    //TextBoxBase firstNameBox =
+    makeSignUpFirstName(fieldset);
+    //TextBoxBase lastNameBox =
+    makeSignUpLastName(fieldset);
     emailBox = makeSignUpEmail(fieldset);
-
 
 /*    User.Kind userKind = user == null ? User.Kind.UNSET : user.getUserKind();
     if (user != null) {
@@ -261,12 +280,8 @@ public class SignUpForm extends UserDialog implements SignUp {
 //      }
     }*/
 
-/*
-    if (user == null) {
-      makeSignUpPassword(fieldset);
-    }
-*/
-
+    makeSignUpPassword(fieldset);
+    signUpPassword.setVisible(false);
 //    fieldset.add(getRolesHeader());
     //  fieldset.add(getRolesChoices(user == null ? User.Kind.STUDENT : userKind));
 
@@ -275,12 +290,12 @@ public class SignUpForm extends UserDialog implements SignUp {
 //    }
 
 //    if (askForDemographic(userKind)) {
-      demoHeader = getHeader("Demographic Info");
-      demoHeader.setVisible(false);
-      fieldset.add(demoHeader);
-      makeRegistrationInfo(fieldset);
-      registrationInfo.setVisible(false);
-  //  }
+    demoHeader = getHeader("Demographic Info");
+    demoHeader.setVisible(false);
+    fieldset.add(demoHeader);
+    makeRegistrationInfo(fieldset);
+    registrationInfo.setVisible(false);
+    //  }
 
     return fieldset;
   }
@@ -460,6 +475,32 @@ public class SignUpForm extends UserDialog implements SignUp {
         eventRegistration.logEvent(userBox, "SignUp_" + username + "Box", "N/A", "focus in " + username + " field in sign up form");
       }
     });
+
+    userBox.addBlurHandler(new BlurHandler() {
+      @Override
+      public void onBlur(BlurEvent event) {
+        logger.info("check on " + signUpUser.getSafeText());
+        service.getUserByID(signUpUser.getSafeText(), new AsyncCallback<User>() {
+          @Override
+          public void onFailure(Throwable caught) {
+
+          }
+
+          @Override
+          public void onSuccess(User result) {
+            if (result == null || result.isValid()) {
+              logger.info("valid " + signUpUser.getSafeText());
+
+              signUpPassword.setVisible(false);
+            } else if (!result.isValid()) {
+              logger.info("NOT valid " + signUpUser.getSafeText());
+
+              signUpPassword.setVisible(true);
+            }
+          }
+        });
+      }
+    });
   }
 
   private void styleBox(TextBoxBase userBox) {
@@ -472,24 +513,21 @@ public class SignUpForm extends UserDialog implements SignUp {
    * @param fieldset
    * @see #getSignUpForm
    */
-/*
   private void makeSignUpPassword(Fieldset fieldset) {
-    signUpPassword = getFormField(fieldset, true, MIN_PASSWORD, 15, PASSWORD);
+    signUpPassword = getFormField(fieldset, true, MIN_PASSWORD, 15, "Password");
     signUpPassword.box.addFocusHandler(new FocusHandler() {
       @Override
       public void onFocus(FocusEvent event) {
         userPassLogin.clearSignInHasFocus();
-        eventRegistration.logEvent(signUpPassword.box, "SignUp_PasswordBox", "N/A", "focus in password field in sign up form");
+//        eventRegistration.logEvent(signUpPassword.box, "SignUp_PasswordBox", "N/A", "focus in password field in sign up form");
       }
     });
     signUpPassword.box.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
     signUpPassword.box.setWidth(SIGN_UP_WIDTH);
   }
-*/
 
   /**
-   * @param fieldset
-   * collect demographic info (age, gender, dialect) only if it's missing and they have the right permission
+   * @param fieldset collect demographic info (age, gender, dialect) only if it's missing and they have the right permission
    */
   private void makeRegistrationInfo(Fieldset fieldset) {
     registrationInfo = new RegistrationInfo(fieldset);
@@ -537,6 +575,7 @@ public class SignUpForm extends UserDialog implements SignUp {
    * @param userBox
    * @param emailBox
    * @return
+   * @see #getSignUpForm
    */
   private Button getSignUpButton(final TextBoxBase userBox, final TextBoxBase emailBox) {
     this.signUp = new Button(signUpTitle);
@@ -642,12 +681,13 @@ public class SignUpForm extends UserDialog implements SignUp {
    */
   protected void gotSignUp(final String user,
                            //String freeTextPassword,
-                           String email, User.Kind kind) {
+                           String email,
+                           User.Kind kind) {
     signUp.setEnabled(false);
 
     SignUpUser newUser = new SignUpUser(user,
         //rot13(freeTextPassword),
-//        passH,
+        Md5Hash.getHash(signUpPassword.getSafeText()),
         Md5Hash.getHash(email),
         email,
         kind,
@@ -679,6 +719,7 @@ public class SignUpForm extends UserDialog implements SignUp {
            * - user already exists with userid
            * - user slots are incomplete and need to be updated
            *  - user could be locked
+           *  - user should provide password, otherwise anyone could take over an account
            * - user is new and needs to be added
            *
            *  @param result
@@ -687,18 +728,23 @@ public class SignUpForm extends UserDialog implements SignUp {
           public void onSuccess(LoginResult result) {
             signUp.setEnabled(true);
 
-            if (result.getResultType() == LoginResult.ResultType.Exists) {
+            LoginResult.ResultType resultType = result.getResultType();
+            if (resultType == LoginResult.ResultType.BadPassword) {
+              markErrorBlur(signUp, I_M_SORRY,
+                  "Your password is incorrect. Please try again.", Placement.TOP);
+            }
+            else if (resultType == LoginResult.ResultType.Exists) {
               eventRegistration.logEvent(signUp, "signing up", "N/A", "Tried to sign up, but existing user (" + user + ").");
               signUp.setEnabled(true);
               markErrorBlur(signUpUser, USER_EXISTS);
             } else {
               User theUser = result.getLoggedInUser();
 
-              if (result.getResultType() == LoginResult.ResultType.Updated) {
+
+              if (resultType == LoginResult.ResultType.Updated) {
                 // shift focus to sign in.
                 userPassLogin.setSignInPasswordFocus();
-              }
-              else {
+              } else {
                 userManager.setPendingUserStorage(theUser.getUserID());
                 if (theUser.isEnabled()) {
                   eventRegistration.logEvent(signUp, "signing up", "N/A", getSignUpEvent(theUser));
