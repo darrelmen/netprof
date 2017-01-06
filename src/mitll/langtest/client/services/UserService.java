@@ -94,7 +94,10 @@ public interface UserService extends RemoteService {
    * @return
    * @see mitll.langtest.client.user.SignInForm#onSendReset
    */
-  boolean resetPassword(String userid, String url, String emailForLegacy);
+  boolean resetPassword(String userid
+      //, String url
+  //    , String emailForLegacy
+  );
 
   /**
    * @deprecated no tokens anymore
@@ -114,11 +117,10 @@ public interface UserService extends RemoteService {
   /**
    * @param emailH
    * @param email
-   * @param url
    * @return
    * @see UserPassLogin#getForgotUser()
    */
-  boolean forgotUsername(String emailH, String email, String url);
+  boolean forgotUsername(String emailH, String email);
 
 
 
@@ -129,7 +131,7 @@ public interface UserService extends RemoteService {
    * @param url
    * @return
    */
-  User addUser(SignUpUser user, String url);
+  LoginResult addUser(SignUpUser user, String url);
 
   /**
    * @return

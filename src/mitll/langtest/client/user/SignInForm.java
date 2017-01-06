@@ -76,7 +76,7 @@ public class SignInForm extends UserDialog implements SignIn {
   private static final String CHECK_EMAIL = "Check Email";
   private static final String PLEASE_CHECK_YOUR_EMAIL = "Please check your email";
 
-  private static final String ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD = "Enter your email to reset your password.";
+ // private static final String ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD = "Enter your email to reset your password.";
   //  private static final String ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD = "Reset your password.";
   // private static final String ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD_GOT_IT = "Click here and then check your email to reset your password.";
   private static final String SEND = "Send Reset Email";
@@ -132,7 +132,7 @@ public class SignInForm extends UserDialog implements SignIn {
     hp.getElement().setId("password_login_box");
     hp.addStyleName("leftFiveMargin");
 
-    addPasswordField(fieldset, hp);
+    password = addPasswordField(fieldset, hp);
 
     Button signInButton = getSignInButton();
     enterKeyButtonHelper.addKeyHandler(signIn);
@@ -215,7 +215,8 @@ public class SignInForm extends UserDialog implements SignIn {
     // }
   }
 
-  private void addPasswordField(Fieldset fieldset, Panel hp) {
+  private FormField addPasswordField(Fieldset fieldset, Panel hp) {
+    FormField password;
     password = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, PASSWORD);
     password.box.addFocusHandler(new FocusHandler() {
       @Override
@@ -226,6 +227,8 @@ public class SignInForm extends UserDialog implements SignIn {
     });
 
     hp.add(password.box);
+
+    return password;
   }
 
   /**
@@ -476,7 +479,6 @@ public class SignInForm extends UserDialog implements SignIn {
    */
   private void copyInfoToSignUp(String userID, User candidate) {
     signUpForm.copyInfoToSignUp(
-        //
         userID,
         candidate);
     eventRegistration.logEvent(signIn, "sign in", "N/A", "copied info to sign up form");
@@ -488,6 +490,11 @@ public class SignInForm extends UserDialog implements SignIn {
   @Override
   public void setFocusOnUserID() {
     setFocusOn(userField.box);
+  }
+
+  @Override
+  public void setFocusPassword() {
+    setFocusOn(password.box);
   }
 
   /**
@@ -504,8 +511,9 @@ public class SignInForm extends UserDialog implements SignIn {
           markErrorBlur(userField, ENTER_A_USER_NAME);
           return;
         }
-        final TextBox emailEntry = new TextBox();
-//        Heading emailEntry = new Heading(5, "Click the button to reset.");
+        //final TextBox emailEntry = new TextBox();
+
+        Heading emailEntry = new Heading(5, "Click the button to reset.");
         resetEmailPopup = new DecoratedPopupPanel(true);
 
         sendEmail = new Button(SEND);
@@ -514,15 +522,15 @@ public class SignInForm extends UserDialog implements SignIn {
         sendEmail.addClickHandler(new ClickHandler() {
           @Override
           public void onClick(ClickEvent event) {
-            onSendReset(emailEntry);
+            onSendReset(
+            //    emailEntry
+            );
           }
         });
         eventRegistration.register(sendEmail, "N/A", "reset password");
-
-        makePopup(resetEmailPopup, emailEntry, sendEmail, ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD);
+        makePopup(resetEmailPopup, emailEntry, sendEmail, "");//ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD);
         resetEmailPopup.showRelativeTo(forgotPassword);
-
-        setFocusOn(emailEntry);
+//        setFocusOn(emailEntry);
         //  setFocusOn(sendEmail);
       }
     });
@@ -533,19 +541,22 @@ public class SignInForm extends UserDialog implements SignIn {
    * So - two cases - old legacy users have no email, new ones do.
    * Potentially we could skip asking users for their email...?
    *
-   * @param emailEntry - need this since old accounts don't have email with them
+   * @paramx emailEntry - need this since old accounts don't have email with them
    */
   private void onSendReset(
-      TextBox emailEntry
+    //  TextBox emailEntry
   ) {
-    String userEmail = emailEntry.getText();
+/*    String userEmail = emailEntry.getText();
     if (!isValidEmail(userEmail)) {
       markErrorBlur(emailEntry, PLEASE_CHECK, VALID_EMAIL, Placement.TOP);
       return;
-    }
+    }*/
 
     sendEmail.setEnabled(false);
-    service.resetPassword(userField.box.getText(), Window.Location.getHref(), userEmail, new AsyncCallback<Boolean>() {
+    service.resetPassword(userField.box.getText(),
+        //Window.Location.getHref(),
+        //userEmail,
+        new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
         sendEmail.setEnabled(true);

@@ -44,6 +44,8 @@ public interface SignIn {
 
   void setFocusOnUserID();
 
+  void setFocusPassword();
+
   Anchor getForgotPassword();
 
   boolean clickSendEmail();

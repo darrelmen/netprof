@@ -38,13 +38,11 @@ import mitll.langtest.client.domino.user.ChangePasswordView;
 import mitll.langtest.client.services.UserService;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.security.DominoSessionException;
-import mitll.langtest.server.database.user.IUserPermissionDAO;
 import mitll.langtest.server.database.user.IUserSessionDAO;
 import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.user.*;
-import mitll.npdata.dao.SlickUserPermission;
 import mitll.npdata.dao.SlickUserSession;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -149,7 +147,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   /**
    * @param session
    * @param loggedInUser
-   * @see #loginUser(String, String)
+   * @see #loginUser
    * @see #addUser
    */
   private void setSessionUser(HttpSession session, User loggedInUser) {
@@ -252,48 +250,44 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   }
 
   /**
-   * Send confirmation to your email too.
-   * <p>
-   * TODO : content developers are handled differently now...
+   * Updates existing user if they are missing info.
+   *
+   * If user exists already with complete info, then someone is already using this userid
+   *
+   * I don't think we want to mess with the session until they've logged in with a password!
    *
    * @param url
    * @return null if existing user
-   * @paramx isCD
    * @see mitll.langtest.client.user.SignUpForm#gotSignUp
    */
   @Override
-  public User addUser(SignUpUser user, String url) {
+  public LoginResult addUser(SignUpUser user, String url) {
     UserManagement userManagement = db.getUserManagement();
-
     User userByID = db.getUserDAO().getUserByID(user.getUserID());
 
     if (userByID != null) {
-      userByID.setEmail(user.getEmail());
-      userByID.setFirst(user.getFirst());
-      userByID.setLast(user.getLast());
-      db.getUserDAO().update(userByID);
-      setSessionUser(createSession(), userByID);
-      return userByID;
-    }
-    else {
-      User newUser = userManagement.addUser(getThreadLocalRequest(), user);
-      String userID = user.getUserID();
-
-      if (newUser != null/* && !newUser.isEnabled()*/) { // newUser = null means existing newUser.
-        // logger.debug("newUser " + userID + "/" + newUser + " wishes to be a content developer. Asking for approval.");
-        //getEmailHelper().addContentDeveloper(url, email, newUser, mailSupport, getProject().getLanguage());
-        // getEmailHelper().sendConfirmationEmail(email, userID, first, mailSupport);
-      } else /*if (newUser == null)*/ {
-        logger.debug("no newUser found for id " + userID);
-      } /*else {
-      logger.debug("newUser " + userID + "/" + newUser + " is enabled.");
-      getEmailHelper().sendConfirmationEmail(email, userID, first, mailSupport);
-    }*/
-
-      if (newUser != null) {
-        setSessionUser(createSession(), newUser);
+      if (userByID.isValid()) {
+        return new LoginResult(userByID, LoginResult.ResultType.Exists);
       }
-      return newUser;
+      else {
+        userByID.setEmail(user.getEmail());
+        userByID.setFirst(user.getFirst());
+        userByID.setLast(user.getLast());
+        db.getUserDAO().update(userByID);
+        return new LoginResult(userByID, LoginResult.ResultType.Updated);
+      }
+//      setSessionUser(createSession(), userByID);
+
+    } else {
+      User newUser = userManagement.addUser(getThreadLocalRequest(), user);
+
+      if (newUser == null) {
+        logger.error("addUser somehow couldn't add " + user.getUserID());
+        return new LoginResult(null, LoginResult.ResultType.Failed);
+      } else {
+  //      setSessionUser(createSession(), newUser);
+        return new LoginResult(newUser, LoginResult.ResultType.Added);
+      }
     }
   }
 
@@ -333,12 +327,16 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @return true if there's a user with this email
    * @see mitll.langtest.client.user.SignInForm#getForgotPassword
    */
-  public boolean resetPassword(String user, String url, String emailForLegacy) {
+  public boolean resetPassword(String user
+  //    , String url, String emailForLegacy
+  ) {
     String baseURL = getBaseURL();
     logger.debug("resetPassword for " + user + " " + baseURL);
 
     // Use Domino call to do reset password
-    return db.getUserDAO().forgotPassword(user, baseURL, emailForLegacy);
+    return db.getUserDAO().forgotPassword(user, baseURL
+        //, emailForLegacy
+    );
     //   return getEmailHelper().resetPassword(user, userEmail, url);
   }
 
@@ -347,8 +345,8 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @param emailR - email encoded by rot13
    * @param url    - remove me???
    * @return
-   * @deprecated don't do this anymore - just in domino
    * @see mitll.langtest.client.InitialUI#handleCDToken
+   * @deprecated don't do this anymore - just in domino
    */
   public String enableCDUser(String token, String emailR, String url) {
     logger.info("enabling token " + token + " for email " + emailR + " and url " + url);
@@ -412,15 +410,12 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   @Override
   public User changePasswordWithToken(String userId, String userKey, String newPassword) {
     //long startMS = System.currentTimeMillis();
-
-    logger.info("changePasswordWithToken - userId " + userId + " key " + userKey + " pass " + newPassword);
-
-    boolean result = db.getUserDAO().changePasswordForToken(userId, userKey, newPassword,  getBaseURL());
+    logger.info("changePasswordWithToken - userId " + userId + " key " + userKey + " pass length " + newPassword.length());
+    boolean result = db.getUserDAO().changePasswordForToken(userId, userKey, newPassword, getBaseURL());
 
     if (result) {
       return db.getUserDAO().getUserByID(userId);
-    }
-    else {
+    } else {
       //  log.info(TIMING, "[changePassword, {} ms, for {}", () -> elapsedMS(startMS), () -> result);
       return null;
     }
@@ -478,16 +473,13 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   /**
    * @param emailH
    * @param email
-   * @param url ignored - remove me
    * @return
    * @see mitll.langtest.client.user.UserPassLogin#getForgotUser()
    */
   @Override
-  public boolean forgotUsername(String emailH, String email, String url) {
-    String userChosenIDIfValid = db.getUserDAO().isValidEmail(emailH);
-
-    String baseURL = getBaseURL();
-    getEmailHelper().getUserNameEmail(email, baseURL, userChosenIDIfValid);
+  public boolean forgotUsername(String emailH, String email) {
+    String userChosenIDIfValid = db.getUserDAO().isValidEmail(email);
+    getEmailHelper().getUserNameEmail(email,  getBaseURL(), userChosenIDIfValid);
     return userChosenIDIfValid != null;
   }
 
@@ -530,7 +522,6 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   /**
    * @param toUpdate
    * @param changingUser
-   *
    */
   public void update(User toUpdate, int changingUser) {
     db.getUserDAO().update(toUpdate);

@@ -63,7 +63,6 @@ abstract class UserDialog extends BasicDialog {
   static final int MAX_AGE = 90;
 
   final PropertyHandler props;
-//  private final UserManager userManager;
   private KeyPressHelper enterKeyButtonHelper;
 
   protected final UserServiceAsync service = GWT.create(UserService.class);
@@ -72,10 +71,7 @@ abstract class UserDialog extends BasicDialog {
    * @see SignUpForm#SignUpForm(PropertyHandler, UserManager, EventRegistration, UserPassDialog)
    * @param props
    */
-  UserDialog(PropertyHandler props) {
-    this.props = props;
-  //  this.userManager = userManager;
-  }
+  UserDialog(PropertyHandler props) { this.props = props;  }
 
   /**
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#makeEnglishRow
@@ -178,7 +174,9 @@ abstract class UserDialog extends BasicDialog {
     vp.add(w);
     w.addStyleName("bottomFiveMargin");
     Panel hp = new HorizontalPanel();
-    hp.add(commentEntryText);
+    if (commentEntryText != null) {
+      hp.add(commentEntryText);
+    }
     hp.add(okButton);
     vp.add(hp);
     commentPopup.add(vp);

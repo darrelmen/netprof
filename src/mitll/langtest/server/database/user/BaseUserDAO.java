@@ -153,23 +153,17 @@ public abstract class BaseUserDAO extends DAO {
     String userID = user.getUserID();
     User currentUser = getUserByID(userID);
     if (currentUser == null) {
-//      List<User.Permission> requested = new ArrayList<>();
-//      User.Kind kind = user.getKind();
-//      if (kind.equals(User.Kind.TEACHER)) {
-//        requested.add(User.Permission.TEACHER_PERM);
-//      }
-      User userWhere = getUserWhere(addUserAndGetID(user/*,requested*/));
+      User userWhere = getUserWhere(addUserAndGetID(user));
       logger.debug(" : addUser : added new user " + userWhere);
       return userWhere;
     } else {
       // user exists!
-      String emailHash = currentUser.getEmailHash();
-      //String passwordHash = currentUser.getPasswordHash();
+      return null;
+
+      /*String emailHash = currentUser.getEmailHash();
 
       if (emailHash != null &&
-          //  passwordHash != null &&
           !emailHash.isEmpty()
-        //&& !passwordHash.isEmpty()
           ) {
         logger.debug(" : addUser : user " + userID + " is an existing user.");
         return null; // existing user!
@@ -179,7 +173,7 @@ public abstract class BaseUserDAO extends DAO {
         User userWhere = getUserWhere(id);
         logger.debug(" : addUser : returning updated user " + userWhere);
         return userWhere;
-      }
+      }*/
     }
   }
 
@@ -189,7 +183,7 @@ public abstract class BaseUserDAO extends DAO {
    * @paramx perms
    * @see #addUser
    */
-  private int addUserAndGetID(SignUpUser user/*, Collection<User.Permission> perms*/) {
+  private int addUserAndGetID(SignUpUser user) {
     return addUser(user.getAge(),
         user.isMale() ? MALE : FEMALE,
         0,
@@ -237,7 +231,7 @@ public abstract class BaseUserDAO extends DAO {
     this.defaultMale = getOrAdd(DEFAULT_MALE_USER, "Default", "Male", User.Kind.AUDIO_RECORDER);
     this.defaultFemale = getOrAdd(DEFAULT_FEMALE_USER, "Default", "Female", User.Kind.AUDIO_RECORDER);
 
-    this.defaultUsers = new HashSet<String>(Arrays.asList(DEFECT_DETECTOR,BEFORE_LOGIN_USER,IMPORT_USER,DEFAULT_USER1,DEFAULT_FEMALE_USER,DEFAULT_MALE_USER,"beforeLoginUser"));
+    this.defaultUsers = new HashSet<>(Arrays.asList(DEFECT_DETECTOR, BEFORE_LOGIN_USER, IMPORT_USER, DEFAULT_USER1, DEFAULT_FEMALE_USER, DEFAULT_MALE_USER, "beforeLoginUser"));
   }
 
   public boolean isDefaultUser(String userid) {
@@ -252,12 +246,25 @@ public abstract class BaseUserDAO extends DAO {
     return beforeLoginUserID;
   }
 
+  /**
+   * @see #getOrAdd
+   * @param defectDetector
+   * @param first
+   * @param last
+   * @param kind
+   * @return
+   */
   private int addShellUser(String defectDetector, String first, String last, User.Kind kind) {
     return addUser(89,
         MALE,
         0, "", "", UNKNOWN, UNKNOWN, defectDetector, false, EMPTY_PERMISSIONS,
         kind,
-        "", "admin@dliflc.edu", "", first, last, "");
+        "",
+        "",//"admin@dliflc.edu",
+        "",
+        first,
+        last,
+        "");
   }
 
   abstract int getIdForUserID(String id);

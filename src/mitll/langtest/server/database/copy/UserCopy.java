@@ -24,7 +24,10 @@ import java.util.Map;
  */
 public class UserCopy {
   private static final Logger logger = LogManager.getLogger(UserCopy.class);
+
   private static final boolean DEBUG = true;
+  private static final boolean MAKE_COLLISION_ACCOUNT = false;
+  private static final boolean WARN_ON_COLLISION = true;
 
   /**
    * What can happen:
@@ -96,21 +99,21 @@ public class UserCopy {
               // User "adam" already exists with a different password - what to do?
               // give the person a new id in the name space of the language
 
-              String compoundID = importUserID + "#" + optName;
+              if (MAKE_COLLISION_ACCOUNT) {
+                String compoundID = importUserID + "#" + optName;
+                User userByCompound = dominoUserDAO.getUserByID(compoundID);
 
-              User userByCompound = dominoUserDAO.getUserByID(compoundID);
+                if (userByCompound != null) {
+                  logger.warn("copyUsers already added " + compoundID + " : " +
+                      userByCompound +
+                      " so moving on...");
+                } else {
+                  logger.warn("copyUsers no user for '" + compoundID + "'");
 
-              if (userByCompound != null) {
-                logger.warn("copyUsers already added " + compoundID + " : " +
-                    userByCompound +
-                    " so moving on...");
-              } else {
-                logger.warn("copyUsers no user for '" + compoundID + "'");
-
-                toImport.setUserID(compoundID);
-                ClientUserDetail e = addUser(dominoUserDAO, oldToNew, toImport, optName);
-                added.add(e);
-              }
+                  toImport.setUserID(compoundID);
+                  ClientUserDetail e = addUser(dominoUserDAO, oldToNew, toImport, optName);
+                  added.add(e);
+                }
 //              String passwordHash1 = userByID1.getPasswordHash();
 //              if (!passwordHash1.isEmpty()) {
 //                logger.info("Found existing user " + existingID + " : " + userByID1.getUserID() + " with password hash " + passwordHash1);
@@ -119,9 +122,15 @@ public class UserCopy {
 //              }
 //
 //              oldToNew.put(importID, existingID);
+              } else {
+                if (WARN_ON_COLLISION) {
+                  logger.info("\n\n\ncopyUsers found existing user with password difference " + importUserID + " : " + userByID1 + "\n\n\n");
+                }
 
+                oldToNew.put(importID, userByID1.getID());
+              }
               collisions++;
-              logger.info("copyUsers user collision to project " + projid + " map " + importID + "->" +  userByID1.getID() +
+              logger.info("copyUsers user collision to project " + projid + " map " + importID + "->" + userByID1.getID() +
                   " : " + userByID1);
             }
           } else {
@@ -148,15 +157,14 @@ public class UserCopy {
    * @param toImport
    * @param projectName
    * @return
-   * @see #copyUsers(DatabaseImpl, int, IResultDAO, String)
+   * @see #copyUsers
    */
   private ClientUserDetail addUser(DominoUserDAOImpl dominoUserDAO,
                                    Map<Integer, Integer> oldToNew,
-                                   User toImport, String projectName) throws Exception {
+                                   User toImport,
+                                   String projectName) throws Exception {
     logger.info("addUser " + toImport + " with " + toImport.getPermissions());
-
     ClientUserDetail user = dominoUserDAO.toClientUserDetail(toImport, projectName);
-
     ClientUserDetail addedUser = dominoUserDAO.addAndGet(
         user,
         toImport.getPasswordHash(),
