@@ -70,7 +70,6 @@ public class PostgresTest extends BaseTest {
     DBConnection spanish = getConnection("spanish");
     spanish.dropAll();
     scala.collection.immutable.List<String> listOfTables = spanish.getListOfTables();
-
     logger.info("after drop " + listOfTables);
   }
 
@@ -100,130 +99,96 @@ public class PostgresTest extends BaseTest {
   }
 
   @Test
-  public void testCopySpanish() {
-    List<Info> toCopy = new ArrayList<>();
-    toCopy.add(getSpanish());
-    testCopy(toCopy);
-  }
+  public void testCopySpanish() { testCopy(getSpanish());  }
 
   @Test
   public void testCopySerbian() {
-    List<Info> toCopy = new ArrayList<>();
-    Info serbian = new Info("serbian");
-    serbian.setDev(true);
-    toCopy.add(serbian);
-    testCopy(toCopy);
+    copyDev("serbian");
   }
 
   @Test
   public void testCopyHindi() {
-    List<Info> toCopy = new ArrayList<>();
-    Info info = new Info("hindi");
+    copyDev("hindi");
+  }
+
+  private void copyDev(String hindi) {
+    Info info = new Info(hindi);
     info.setDev(true);
-    toCopy.add(info);
-    testCopy(toCopy);
+    testCopy(info);
   }
 
   @Test
   public void testCopyCroatian() {
-    List<Info> toCopy = new ArrayList<>();
-    Info info = new Info("croatian");
-    info.setDev(true);
-    toCopy.add(info);
-    testCopy(toCopy);
+    copyDev("croatian");
   }
 
   @Test
   public void testCopyFrench() {
-    List<Info> toCopy = new ArrayList<>();
-    Info info = new Info("french");
-    info.setDev(true);
-    toCopy.add(info);
-    testCopy(toCopy);
+    copyDev("french");
   }
 
   @Test
   public void testCopyRussian() {
-    List<Info> toCopy = new ArrayList<>();
-    toCopy.add(getRussian());
-    testCopy(toCopy);
+    testCopy(getRussian());
   }
 
   @Test
   public void testCopyEnglish() {
-    List<Info> toCopy = new ArrayList<>();
-    toCopy.add(getEnglish());
-    testCopy(toCopy);
+    testCopy(getEnglish());
   }
 
   @Test
   public void testCopyPashto1() {
-    List<Info> toCopy = new ArrayList<>();
-    toCopy.add(getPashto());
-    testCopy(toCopy);
+    testCopy(getPashto());
   }
 
   @Test
   public void testCopyPashto2() {
-    List<Info> toCopy = new ArrayList<>();
-    toCopy.add(getPashto2());
-    testCopy(toCopy);
+    testCopy(getPashto2());
   }
 
   @Test
   public void testCopyPashto3() {
-    List<Info> toCopy = new ArrayList<>();
-    toCopy.add(getPashto3());
-    testCopy(toCopy);
+    testCopy(getPashto3());
   }
 
   @Test
   public void testDari() {
-    List<Info> toCopy = new ArrayList<>();
-    toCopy.add(new Info("Dari"));
-    testCopy(toCopy);
+    copyProd("Dari");
+  }
+
+  private void copyProd(String config) {
+    testCopy(new Info(config));
   }
 
   @Test
   public void testEgyptian() {
-    List<Info> toCopy = new ArrayList<>();
-    toCopy.add(new Info("Egyptian"));
-    testCopy(toCopy);
+    copyProd("Egyptian");
   }
 
   @Test
   public void testFarsi() {
-    List<Info> toCopy = new ArrayList<>();
-    toCopy.add(new Info("Farsi"));
-    testCopy(toCopy);
+    copyProd("Farsi");
   }
 
   @Test
   public void testGerman() {
-    List<Info> toCopy = new ArrayList<>();
-    toCopy.add(new Info("German"));
-    testCopy(toCopy);
+    copyProd("German");
   }
 
   @Test
   public void testKorean() {
-    List<Info> toCopy = new ArrayList<>();
-    toCopy.add(new Info("Korean"));
-    testCopy(toCopy);
+    copyProd("Korean");
   }
 
   @Test
   public void testMandarin() {
-    List<Info> toCopy = new ArrayList<>();
-    toCopy.add(new Info("Mandarin"));
-    testCopy(toCopy);
+    copyProd("Mandarin");
   }
 
   @Test
   public void testIraqi() {
-    List<Info> toCopy = new ArrayList<>();
-    toCopy.add(new Info("Iraqi"));
-    testCopy(toCopy);
+   copyProd("Iraqi");
   }
 
   /**
@@ -231,9 +196,7 @@ public class PostgresTest extends BaseTest {
    */
   @Test
   public void testJapanese() {
-    List<Info> toCopy = new ArrayList<>();
-    toCopy.add(new Info("Japanese"));
-    testCopy(toCopy);
+    copyProd("Japanese");
   }
 
   /**
@@ -241,23 +204,17 @@ public class PostgresTest extends BaseTest {
    */
   @Test
   public void testLevantine() {
-    List<Info> toCopy = new ArrayList<>();
-    toCopy.add(new Info("Levantine"));
-    testCopy(toCopy);
+    copyProd("Levantine");
   }
 
   @Test
   public void testMSA() {
-    List<Info> toCopy = new ArrayList<>();
-    toCopy.add(new Info("msa"));
-    testCopy(toCopy);
+    copyProd("msa");
   }
 
   @Test
   public void testTagalog() {
-    List<Info> toCopy = new ArrayList<>();
-    toCopy.add(new Info("Tagalog"));
-    testCopy(toCopy);
+    copyProd("Tagalog");
   }
 
   /**
@@ -327,6 +284,10 @@ public class PostgresTest extends BaseTest {
   }
 
   boolean justReport = false;
+
+  private void testCopy(Info info) {
+    testCopy(Collections.singletonList(info));
+  }
 
   private void testCopy(List<Info> infos) {
     CopyToPostgres cp = new CopyToPostgres();
