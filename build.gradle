@@ -58,7 +58,6 @@ evaluationDependsOn(':imagewriter')
 dependencies {
     compile('mitll.hlt:domino-core:1.1.0-SNAPSHOT') { changing = true }
     compile('mitll.hlt:domino-shared:1.2.0-SNAPSHOT'){changing = true}
-  //  compile('mitll.hlt:mongo-core:0.1.0'){changing = true}
 
     compile 'com.google.gwt:gwt-user:2.8.0'
     compile 'com.google.gwt:gwt-servlet:2.8.0'
@@ -76,13 +75,8 @@ dependencies {
     compile 'org.apache.logging.log4j:log4j-web:latest.integration'
 
     compile 'org.apache.ignite:ignite-core:1.5.0.final'
-  //  compile 'org.scala-lang:scala-library:2.11.8'
 
 //    testCompile 'junit:junit:latest.integration'
-
-    // I know this is awkward - I can't seem to get IDEA to work decently without it...
-
-//    compile group: 'junit', name: 'junit', version: '4.12'
     testCompile group: 'junit', name: 'junit', version: '4.12'
 
     testCompile 'org.hamcrest:hamcrest-all:latest.integration'
@@ -97,12 +91,6 @@ dependencies {
 
     compile group: 'net.sf.json-lib', name: 'json-lib', version: '2.4', classifier: 'jdk15'
 
-//    compile 'javax.mail:mail:1.4.1'
-
-//    compile 'log4j:log4j:1.2.17'
-
-//    compile 'com.google.gwt:gwt-user:2.8.0'
-
     compile 'com.github.gwtbootstrap:gwt-bootstrap:latest.integration'
 
     compile 'org.moxieapps.gwt:highcharts:1.7.0'
@@ -113,7 +101,6 @@ dependencies {
 
     compile name: 'pronz_2.11-1.0'
     compile name: 'hydec_2.11-1.0'
- //   compile name: 'npdata-1.0'
     compile name: 'utils_2.11-1.0.0-SNAPSHOT'
 
     compile group: 'net.sf.json-lib', name: 'json-lib', version: '2.4', classifier: 'jdk15'
@@ -121,22 +108,10 @@ dependencies {
     compile group: 'org.apache.poi', name: 'poi', version: '3.15'
     compile group: 'org.apache.poi', name: 'poi-ooxml', version: '3.15'
     compile group: 'org.apache.poi', name: 'ooxml-schemas', version: '1.3'
-    //compile group: 'com.', name: 'ooxml-schemas', version: '1.3'
+
     compile group: 'org.apache.commons', name: 'commons-math3', version: '3.0'
     compile group: 'com.google.guava', name: 'guava', version: '20.0'
     compile group: 'com.google.code.gson', name: 'gson', version: '2.8.0'
-
-//    compile group: 'org.apache.ignite', name: 'ignite-core', version: '1.7.0'
-//    compile group: 'org.mongodb', name: 'mongo-java-driver', version: '3.3.0'
-//    compile 'net.liftweb:lift-json_2.11:latest.integration'
-//    compile 'net.liftweb:lift-json-ext_2.11:latest.integration'
-//    compile 'net.liftweb:lift-mongodb_2.11:latest.integration'
-//    testCompile 'junit:junit:latest.integration'
-//    testCompile 'org.hamcrest:hamcrest-all:latest.integration'
-//    testRuntime 'org.slf4j:slf4j-api:1.7.10'
-
-//    compile name: 'pronz-assembly-1.0'
-
 }
 
 // Add a test dependency only when the full composite project is checked out.
@@ -213,6 +188,7 @@ war {
     from 'war/amas.css'
     from 'war/LangTest.css'
     from 'war/LangTest.html'
+    from 'copy.sh'
     webXml = file('war/WEB-INF/web.xml')
 
     from ('src') {
