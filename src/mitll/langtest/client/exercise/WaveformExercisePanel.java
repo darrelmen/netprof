@@ -137,11 +137,8 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
   }
 
   /**
-<<<<<<< HEAD
    * TODO : support recording audio for multiple context sentences...?
-=======
    * @see #getQuestionContent
->>>>>>> gradle/master
    * @param e
    * @return
    */

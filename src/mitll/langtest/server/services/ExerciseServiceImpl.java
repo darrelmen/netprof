@@ -448,7 +448,6 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
     }
   }
 
-
   /**
    * @param byID
    * @see #addAnnotationsAndAudio(int, mitll.langtest.shared.exercise.CommonExercise, boolean)
@@ -729,6 +728,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
    * @see #makeExerciseListWrapper
    */
   private <T extends CommonShell> List<CommonShell> getExerciseShells(Collection<? extends CommonExercise> exercises) {
+    logger.info("getExerciseShells for " + exercises.size());
     List<CommonShell> ids = new ArrayList<>();
     for (CommonExercise e : exercises) {
 //      logger.info("got " +e.getOldID() + " mean " + e.getMeaning() + " eng " + e.getEnglish() + " fl " + e.getForeignLanguage());

@@ -1019,7 +1019,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         long now2 = System.currentTimeMillis();
 
         if (now2 - then > 10) {
-          logger.warn("took " + (now2 - then) + " millis to get count of db users.");
+          logger.warn("getMiniUsers took " + (now2 - then) + " millis to get count of db users = " + miniUserCache.size());
         }
 
       }
@@ -1043,7 +1043,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     long then = System.currentTimeMillis();
     List<DBUser> users = delegate.getUsers(-1, null);
     long now = System.currentTimeMillis();
-    if (now - then > 20) logger.warn("took " + (now - then) + " to get " + users.size() + " users");
+    if (now - then > 20) logger.warn("getAll took " + (now - then) + " to get " + users.size() + " users");
     return users;
   }
 

@@ -234,6 +234,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 //      logger.warn("\n\n\nhuh? install path " + fileInstallPath.getAbsolutePath() + " doesn't exist???");
 //    }
 
+    boolean foundFiles = audioDAO.didFindAnyAudioFiles(projectID);
     String mediaDir = serverProps.getMediaDir();
     File file = new File(mediaDir);
     if (file.exists()) {
@@ -243,7 +244,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
           logger.error("setAudioDAO configuration error - can't get files from media directory " + mediaDir);
         } else if (list.length > 0) { // only on pnetprof (behind firewall), znetprof has no audio, might have a directory.
           logger.debug("setAudioDAO validating files under " + file.getAbsolutePath());
-          if (serverProps.doAudioFileExistsCheck()) {
+          if (serverProps.doAudioFileExistsCheck() || !foundFiles) {
             audioDAO.validateFileExists(projectID, mediaDir, language);
           }
         }
@@ -253,7 +254,9 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
       }
     } else logger.error("configuration error - expecting a media directory " + mediaDir);
 
-    this.attachAudio = new AttachAudio(audioDAO.getExToAudio(projectID), language, serverProps.shouldCheckAudioTranscript(), serverProps);
+    Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio(projectID);
+    logger.info("setAudioDAO exToAudio " +exToAudio.size());
+    this.attachAudio = new AttachAudio(exToAudio, language, serverProps.shouldCheckAudioTranscript(), serverProps);
 /*
     this.attachAudio = new AttachAudio(
         mediaDir,
