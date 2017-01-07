@@ -134,7 +134,7 @@ public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> 
     // only show the spinning icon if it's going to take awhile
     final Timer t = getWaitTimer(wordTranscript, phoneTranscript, wasVisible);
 
-    //logger.info("ASRScoringAudioPanel.scoreAudio : req " + reqid + " path " + path + " type " + "score" + " width " + toUse);
+    logger.info("ASRScoringAudioPanel.scoreAudio : req " + reqid + " path " + path + " type " + "score" + " width " + toUse);
 
     AsyncCallback<PretestScore> async = new AsyncCallback<PretestScore>() {
       public void onFailure(Throwable caught) {

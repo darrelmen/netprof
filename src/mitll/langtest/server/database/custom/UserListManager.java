@@ -538,7 +538,7 @@ public class UserListManager implements IUserListManager {
     Map<Integer, CommonExercise> idToEx = new HashMap<>();
     for (CommonExercise ue : allKnown) idToEx.put(ue.getID(), ue);
 
-    List<CommonShell> onList = getReviewedUserExercises(idToEx, ids);
+    List<CommonExercise> onList = getReviewedUserExercises(idToEx, ids);
 
     // logger.debug("getReviewList '" +name+ "' ids size = " + allKnown.size() + " yielded " + onList.size());
     UserList<CommonShell> userList = new UserList<CommonShell>(userListMaginID, getQCUser(), name, description, "", false,
@@ -584,8 +584,8 @@ public class UserListManager implements IUserListManager {
    * @return
    * @see #getReviewList(Collection, String, String, Collection, int, Collection)
    */
-  private List<CommonShell> getReviewedUserExercises(Map<Integer, CommonExercise> idToUserExercise, Collection<Integer> ids) {
-    List<CommonShell> onList = new ArrayList<>();
+  private List<CommonExercise> getReviewedUserExercises(Map<Integer, CommonExercise> idToUserExercise, Collection<Integer> ids) {
+    List<CommonExercise> onList = new ArrayList<>();
 
     for (Integer id : ids) {
       CommonExercise commonExercise = idToUserExercise.get(id);

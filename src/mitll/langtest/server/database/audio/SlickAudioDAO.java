@@ -69,9 +69,17 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     return dao.dao().name();
   }
 
+  /**
+   *
+   * @param projid
+   * @return
+   */
   @Override
   public Collection<AudioAttribute> getAudioAttributesByProject(int projid) {
-    return toAudioAttribute(dao.getAll(projid), userDAO.getMiniUsers());
+    List<SlickAudio> all = dao.getAll(projid);
+    Map<Integer, MiniUser> miniUsers = userDAO.getMiniUsers();
+    logger.info("getAudioAttributesByProject " + projid + " " + all.size() + " users " + miniUsers.size());
+    return toAudioAttribute(all, miniUsers);
   }
 
   @Override
@@ -87,7 +95,8 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
   /**
    * Update the user if the audio is already there.
-   *  @param userid
+   *
+   * @param userid
    * @param exerciseID
    * @param projid
    * @param audioType
@@ -128,6 +137,10 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   @Override
   public void updateDNR(int uniqueID, float dnr) {
     logger.info("add impl for updateDNR...");
+  }
+
+  public boolean didFindAnyAudioFiles(int projectid) {
+    return dao.getCountExists(projectid) > 0;
   }
 
   @Override
@@ -182,7 +195,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
   /**
    * TODO TODO :
-   *
+   * <p>
    * only include ids for audio where the audio transcript matches the exercise text
    *
    * @param userIDs
@@ -239,7 +252,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     MiniUser miniUser = idToMini.get(s.userid());
 
     if (miniUser == null && spew++ < 20) {
-      logger.error("toAudioAttribute : no user for " + s.userid() + " in " +idToMini.size() + " entries");
+      logger.error("toAudioAttribute : no user for " + s.userid() + " in " + idToMini.size() + " entries");
     }
 
     String audiotype = s.audiotype();
@@ -264,7 +277,8 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
         s.dnr());
   }
 
-  int c= 0;
+  int c = 0;
+
   /**
    * @param orig
    * @param oldToNewUser
@@ -280,7 +294,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     }
     Integer userid = oldToNewUser.get(orig.getUserid());
     if (userid == null) {
-      if (c++ <100) {
+      if (c++ < 100) {
         logger.error("getSlickAudio huh? no user id for " + orig.getUserid() + " for " + orig + " in " + oldToNewUser.size());
       }
       return null;
@@ -313,7 +327,9 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    */
   private List<AudioAttribute> toAudioAttribute(List<SlickAudio> all, Map<Integer, MiniUser> idToMini) {
     List<AudioAttribute> copy = new ArrayList<>();
-//    logger.info("table has " + dao.getNumRows());
+    if (all.isEmpty()) {
+      logger.warn("toAudioAttribute table has " + dao.getNumRows());
+    }
     for (SlickAudio s : all) {
 //      logger.info("got " + s);
       copy.add(toAudioAttribute(s, idToMini));
