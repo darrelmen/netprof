@@ -191,7 +191,10 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
    * @param phoneTranscript
    * @see #getEachImage(int)
    */
-  private void getTranscriptImageURLForAudio(final String path, String refSentence, String transliteration, int width,
+  private void getTranscriptImageURLForAudio(final String path,
+                                             String refSentence,
+                                             String transliteration,
+                                             int width,
                                              final ImageAndCheck wordTranscript,
                                              final ImageAndCheck phoneTranscript) {
     int widthToUse = Math.max(MIN_WIDTH, width);

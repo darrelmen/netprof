@@ -92,13 +92,15 @@ public abstract class BaseAudioDAO extends DAO {
    * @seex ExerciseDAO#setAudioDAO
    * @see AudioExport#writeFolderContents
    * @see DatabaseImpl#attachAllAudio
+   * @see mitll.langtest.server.database.exercise.BaseExerciseDAO#attachAudio()
    */
   public Map<Integer, List<AudioAttribute>> getExToAudio(int projid) {
     long then = System.currentTimeMillis();
     Map<Integer, List<AudioAttribute>> exToAudio = new HashMap<>();
     Map<Integer, Set<String>> idToPaths = new HashMap<>();
-    Collection<AudioAttribute> audioAttributes1 = getAudioAttributesByProject(projid);
-    for (AudioAttribute audio : audioAttributes1) {
+    Collection<AudioAttribute> attributesByProject = getAudioAttributesByProject(projid);
+
+    for (AudioAttribute audio : attributesByProject) {
       Integer exid = audio.getExid();
       List<AudioAttribute> audioAttributes = exToAudio.get(exid);
       Set<String> paths = idToPaths.get(exid);
@@ -115,9 +117,12 @@ public abstract class BaseAudioDAO extends DAO {
       //logger.warn("skipping " +audioRef + " on " + exid);
       //  }
     }
+
     long now = System.currentTimeMillis();
-    logger.info("getExToAudio (" + database.getLanguage() +
-        ") took " + (now - then) + " millis to get  " + audioAttributes1.size() + " audio entries " + this);
+    logger.info("getExToAudio " +
+        " project " + + projid +
+        "(" + database.getLanguage() +
+        ") took " + (now - then) + " millis to get  " + attributesByProject.size() + " audio entries " + this);
 //    logger.debug("map size is " + exToAudio.size());
     return exToAudio;
   }

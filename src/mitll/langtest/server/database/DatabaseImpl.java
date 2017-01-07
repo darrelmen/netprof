@@ -519,7 +519,7 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   * TODO : exercises are in the context of a project
+   * exercises are in the context of a project
    *
    * @param projectid
    * @return
@@ -1164,13 +1164,14 @@ public class DatabaseImpl implements Database {
    * @param projectid
    * @return
    * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceForUser
-   * @seex DatabaseImpl#configureProject(String, Project)
+   * @see ProjectManagement#configureProject
    */
   public Map<Integer, String> getExerciseIDToRefAudio(int projectid) {
-    logger.info("getExerciseIDToRefAudio for " + projectid);
+    Collection<CommonExercise> exercises = getExercises(projectid);
+    logger.info("getExerciseIDToRefAudio for project #" + projectid + " exercises "  + exercises.size());
 
     Map<Integer, String> join = new HashMap<>();
-    populateIDToRefAudio(join, getExercises(projectid));
+    populateIDToRefAudio(join, exercises);
 
     Collection<CommonExercise> all = userExerciseDAO.getAllUserExercises(projectid);
     getExerciseDAO(projectid).attachAudio(all);
@@ -1178,6 +1179,12 @@ public class DatabaseImpl implements Database {
     return join;
   }
 
+  /**
+   *
+   * @param join
+   * @param all
+   * @param <T>
+   */
   private <T extends Shell & AudioAttributeExercise> void populateIDToRefAudio(Map<Integer, String> join,
                                                                                Collection<CommonExercise> all) {
     for (CommonExercise exercise : all) {
@@ -1189,7 +1196,9 @@ public class DatabaseImpl implements Database {
         join.put(id, refAudio);
       }
     }
-    if (join.isEmpty()) logger.warn("huh? no ref audio on " + all.size() + " exercises???");
+    if (join.isEmpty()) {
+      logger.warn("populateIDToRefAudio huh? no ref audio on " + all.size() + " exercises???");
+    }
   }
 
   public IAnswerDAO getAnswerDAO() {
