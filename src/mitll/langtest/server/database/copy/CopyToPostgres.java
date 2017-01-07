@@ -45,6 +45,7 @@ import mitll.langtest.server.database.instrumentation.SlickEventImpl;
 import mitll.langtest.server.database.phone.Phone;
 import mitll.langtest.server.database.phone.PhoneDAO;
 import mitll.langtest.server.database.phone.SlickPhoneDAO;
+import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.refaudio.RefResultDAO;
 import mitll.langtest.server.database.refaudio.SlickRefResultDAO;
 import mitll.langtest.server.database.result.Result;
@@ -76,6 +77,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class CopyToPostgres<T extends CommonShell> {
   private static final Logger logger = LogManager.getLogger(CopyToPostgres.class);
@@ -98,6 +100,20 @@ public class CopyToPostgres<T extends CommonShell> {
     String language = databaseLight.getLanguage();
     logger.info("loading " + language);
     new CopyToPostgres().copyOneConfig(databaseLight, getCC(config), language, 0, false);
+    databaseLight.destroy();
+  }
+
+  private void dropOneConfig(String config) throws Exception {
+    DatabaseImpl databaseLight = getDatabaseLight(config, true, false, null);
+    String language = databaseLight.getLanguage();
+    IProjectDAO projectDAO = databaseLight.getProjectDAO();
+    List<SlickProject> collect = projectDAO.getAll().stream().filter(p -> p.name().equalsIgnoreCase(config)).collect(Collectors.toList());
+
+    for (SlickProject project:collect) {
+      logger.info("dropping " + project.name());
+      projectDAO.delete(project.id());
+    }
+
     databaseLight.destroy();
   }
 
@@ -163,8 +179,7 @@ public class CopyToPostgres<T extends CommonShell> {
     if (i == -1) {
       logger.error("can't find a flag for " + config);
       cc = "us";
-    }
-    else {
+    } else {
       cc = flags.get(i);
     }
     return cc;
@@ -936,7 +951,11 @@ public class CopyToPostgres<T extends CommonShell> {
 
     if (action.equals("drop")) {
       logger.info("drop " + config);
-      copyToPostgres.testDrop(config, inTest);
+      try {
+        copyToPostgres.dropOneConfig(config);
+      } catch (Exception e) {
+        logger.error("couldn't drop config " + config, e);
+      }
     } else if (action.equals("copy")) {
       logger.info("copying " + config);
       try {
