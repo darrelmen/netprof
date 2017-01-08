@@ -166,7 +166,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     IUserSessionDAO userSessionDAO = db.getUserSessionDAO();
     // logger.info("num user sessions before " + userSessionDAO.getNumRows());
 
-    userSessionDAO.add(new SlickUserSession(-1, id1, id, new Timestamp(System.currentTimeMillis())));
+    userSessionDAO.add(new SlickUserSession(-1, id1, id, "","", new Timestamp(System.currentTimeMillis())));
 
     // logger.info("num user sessions now " + userSessionDAO.getNumRows() + " : session = " + userSessionDAO.getByUser(id1));
 
