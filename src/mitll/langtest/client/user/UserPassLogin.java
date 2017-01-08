@@ -155,6 +155,7 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
 
   public void setSignInPasswordFocus() {
     signInForm.setFocusPassword();
+
   }
 
 /*  private boolean checkWelcome() {

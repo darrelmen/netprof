@@ -232,15 +232,8 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
         userByID.setEmail(user.getEmail());
         userByID.setFirst(user.getFirst());
         userByID.setLast(user.getLast());
-        User strictUserWithPass = db.getUserDAO().getStrictUserWithPass(user.getUserID(), user.getPasswordH());
-
-        if (strictUserWithPass != null) {
-          db.getUserDAO().update(userByID);
-          return new LoginResult(userByID, LoginResult.ResultType.Updated);
-        }
-        else {
-          return new LoginResult(userByID, LoginResult.ResultType.BadPassword);
-        }
+        db.getUserDAO().update(userByID);
+        return new LoginResult(userByID, LoginResult.ResultType.Updated);
       }
 //      setSessionUser(createSession(), userByID);
 

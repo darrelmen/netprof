@@ -167,16 +167,13 @@ public class UserCopy {
     ClientUserDetail user = dominoUserDAO.toClientUserDetail(toImport, projectName);
     ClientUserDetail addedUser = dominoUserDAO.addAndGet(
         user,
-        toImport.getPasswordHash(),
-        toImport.getPermissions());
+        toImport.getPasswordHash()
+    );
     if (addedUser == null) {
       logger.error("addUser no error returned from domino.");
       throw new Exception("couldn't import " + toImport);
     } else {
-      int add = addedUser.getDocumentDBID();
-//    logger.info("addUser id  " + add + " for " + user.id() + " equal " + (user == addedUser));
-      //   logger.info("addUser map " + toImport.getID() + " -> " + add);
-      oldToNew.put(toImport.getID(), add);
+      oldToNew.put(toImport.getID(), addedUser.getDocumentDBID());
     }
     return addedUser;
   }

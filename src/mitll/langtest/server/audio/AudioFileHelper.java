@@ -217,8 +217,8 @@ public class AudioFileHelper implements AlignDecode {
    * @param exercise1           exerciseID within the plan - could be null if we're creating a new user exercise
    * @param options
    * @return URL to audio on server and if audio is valid (not too short, etc.)
-   * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording()
-   * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
+   * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording
+   * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording
    * @see mitll.langtest.server.services.AudioServiceImpl#writeAudioFile
    */
   public AudioAnswer writeAudioFile(String base64EncodedString,
@@ -231,16 +231,17 @@ public class AudioFileHelper implements AlignDecode {
     String relPath = pathHelper.getRelToAnswer(audioContext);
 
     File file = new File(wavPath);
-    logger.debug("writeAudioFile got req ex " + exercise1 +
-        " for " + audioContext + " " + recordingInfoInitial +
-        " to " + wavPath +
-        " and " + file.getAbsolutePath());
+    logger.debug("writeAudioFile got req\n\tex " + exercise1 +
+        "\n\tfor " + audioContext +
+        "\n\trec " + recordingInfoInitial +
+        "\n\tto " + wavPath +
+        "\n\tand " + file.getAbsolutePath());
 
     //long then = System.currentTimeMillis();
     AudioCheck.ValidityAndDur validity =
         audioConversion.convertBase64ToAudioFiles(base64EncodedString, file, options.isRefRecording(), isQuietAudioOK());
 
-    logger.debug("writeAudioFile writing to " + file.getAbsolutePath() + " validity " + validity);
+    logger.debug("writeAudioFile writing to\n\t" + file.getAbsolutePath() + "\n\tvalidity " + validity);
 /*    long now = System.currentTimeMillis();
     long diff = now - then;
     if (diff > MIN_WARN_DUR) {
