@@ -52,7 +52,6 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import scala.tools.cmd.gen.AnyVals;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -210,29 +209,12 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    *
    * @param user
    * @param encodedPass
-   * @param permissions - not used right at the moment
    * @return
    * @see mitll.langtest.server.database.copy.UserCopy#addUser
    */
   public ClientUserDetail addAndGet(ClientUserDetail user,
-                                    String encodedPass,
-                                    Collection<User.Permission> permissions) {
+                                    String encodedPass) {
     invalidateCache();
-
-//    SResult<ClientUserDetail> clientUserDetailSResult = addUserToMongo(user,
-//        /*encodedPass, */
-//        "",
-//        false);
-//
-//    logger.info("addAndGet Got back " + clientUserDetailSResult);
-
-//    boolean b = delegate.changePassword(adminUser, clientUserDetailSResult.get(), "", encodedPass);
-//    boolean b = delegate.changePassword(user.getUserId(), "", encodedPass, "");
-    // boolean b = delegate.changePassword(adminUser, clientUserDetailSResult.get(), "", encodedPass);
-
-//    boolean b = myDelegate.setPassword(clientUserDetailSResult.get(), encodedPass);
-//    ClientUserDetail clientUserDetail1 = clientUserDetailSResult.get();
-
     logger.info("addAndGet really adding " + user);
     SResult<ClientUserDetail> clientUserDetailSResult1 = delegate.migrateUser(user, encodedPass);
     boolean b = !clientUserDetailSResult1.isError();
@@ -240,16 +222,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
       logger.error("\n\n\naddUserToMongo didn't set password for " + user.getUserId() + " : " +
           clientUserDetailSResult1.getResponseMessage());
       return null;
-    } else {
-      //return clientUserDetailSResult;
     }
 
-//    SlickUser user1 = dao.addAndGet(user);
-    //  int i = addPermissions(permissions, user1.id());
-    // if (i > 0) logger.info("inserted " + i + " permissions for " + user1.id());
     ClientUserDetail clientUserDetail = clientUserDetailSResult1.get();
-//    logger.info("\taddAndGet Got back " + clientUserDetailSResult);
-
     return clientUserDetail;
   }
 
@@ -260,7 +235,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @return
    * @paramx freeTextPassword
    * @see BaseUserDAO#addUser
-   * @see #addAndGet(ClientUserDetail, String, Collection)
+   * @see #addAndGet(ClientUserDetail, String)
    */
   private SResult<ClientUserDetail> addUserToMongo(ClientUserDetail user,
                                                    //String freeTextPassword,
@@ -772,7 +747,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
    * @param user
    * @param projectName
    * @return
-   * @seex mitll.langtest.server.database.copy.CopyToPostgres#addUser(DominoUserDAOImpl, Map, User)
+   * @see mitll.langtest.server.database.copy.UserCopy#addUser
    */
   public ClientUserDetail toClientUserDetail(User user, String projectName) {
     String first = user.getFirst();
@@ -781,18 +756,14 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     if (last == null) last = "Unknown";
     String email = user.getEmail();
     if (email == null || email.isEmpty()) {
-      email = "";
+      email = user.getEmailHash();
     }
 
     Group primaryGroup = getGroup();
-
     Group secondary = getGroupOrMake(projectName);
 
-    Set<String> roleAbbreviations = new HashSet<>();
-    roleAbbreviations.add(user.getUserKind().getRole());
-
-    logger.info("toClientUserDetail " + user.getUserID() + " role is " + roleAbbreviations);
-    logger.info("toClientUserDetail " + user.getUserID() + " group is " + secondary);
+    Set<String> roleAbbreviations = Collections.singleton(user.getUserKind().getRole());
+    logger.info("toClientUserDetail " + user.getUserID() + " role is " + roleAbbreviations + " email " +email);
 
     ClientUserDetail clientUserDetail = new ClientUserDetail(
         user.getUserID(),
@@ -803,27 +774,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         user.isMale() ? DMALE : DFEMALE,
         roleAbbreviations,
         primaryGroup
-
-        /*
-
-        user.isMale(),
-        user.getIpaddr() == null ? "" : user.getIpaddr(),
-        "",
-        user.getAge(),
-        user.getDialect(),
-        now,
-        user.isEnabled(),
-        user.getResetKey() == null ? "" : user.getResetKey(),
-        "",
-        //  user.getPermissions().toString(),
-        user.getUserKind().name(),
-        user.getPasswordHash() == null ? "" : user.getPasswordHash(),
-        user.getEmailHash() == null ? "" : user.getEmailHash(),
-        "",
-        user.getDevice() == null ? "" : user.getDevice(),
-
-        user.getID(),
-        now*/
     );
     AccountDetail acctDetail = new AccountDetail(
         dominoImportUser,
@@ -831,10 +781,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
     clientUserDetail.addSecondaryGroup(secondary);
     clientUserDetail.setAcctDetail(acctDetail);
-
-    logger.info("toClientUserDetail " + " groups for\n\t" + clientUserDetail + " : \n\t" + clientUserDetail.getSecondaryGroups());
-
-//    logger.info("toClientUserDetail made " + clientUserDetail);
+    //logger.info("toClientUserDetail " + " groups for\n\t" + clientUserDetail + " : \n\t" + clientUserDetail.getSecondaryGroups());
 
     return clientUserDetail;
   }
@@ -870,6 +817,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     String email = dominoUser.getEmail();
 
     Set<User.Permission> permissionSet = new HashSet<>();
+    String emailHash = email == null ? "" : isValidEmailGrammar(email) ? Md5Hash.getHash(email) : email;
     User user = new User(
         dominoUser.getDocumentDBID(),
         99,//dominoUser.age(),
@@ -885,7 +833,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         Collections.emptyList(),
         getUserKind(dominoUser, permissionSet),
         email,
-        email == null ? "" : Md5Hash.getHash(email),//dominoUser.emailhash(),
+        emailHash,//dominoUser.emailhash(),
         device,//        dominoUser.device(),
         "",//dominoUser.resetpasswordkey(),
         //dominoUser.enabledreqkey(),
@@ -897,6 +845,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     user.setPermissions(permissionSet);
 //    logger.info("\ttoUser return " + user);
     return user;
+  }
+
+  protected boolean isValidEmailGrammar(String text) {
+    return text.trim().toUpperCase().matches("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$");
   }
 
   /**
@@ -962,8 +914,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         if (kindByName == null) {
           logger.error("getUserKind no user for " + firstRole);
           kind = User.Kind.STUDENT;
-        }
-        else {
+        } else {
           kind = kindByName;
         }
       }
@@ -973,7 +924,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
   @Nullable
   private User.Kind getKindByName(String firstRole) {
-    for (User.Kind testKind: User.Kind.values()) {
+    for (User.Kind testKind : User.Kind.values()) {
       if (testKind.getName().equalsIgnoreCase(firstRole)) {
         return testKind;
       }
@@ -1359,7 +1310,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
   @Override
   public boolean forgotPassword(String user, String url
-  //    , String emailForLegacy
+                                //    , String emailForLegacy
   ) {
     DBUser next = delegate.getDBUser(user);
 
@@ -1374,8 +1325,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     try {
       if (!isValidAsEmail(clientUserDetail.getEmail())) {
         logger.error("huh? email " + clientUserDetail.getEmail() + " not valid?");
-    //    clientUserDetail.setEmail(emailForLegacy);
- //       logger.info("forgotPassword email now " + emailForLegacy);
+        //    clientUserDetail.setEmail(emailForLegacy);
+        //       logger.info("forgotPassword email now " + emailForLegacy);
       }
 
       clientUserDetail1 = delegate.forgotPassword(next,

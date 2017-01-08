@@ -495,6 +495,7 @@ public class SignInForm extends UserDialog implements SignIn {
   @Override
   public void setFocusPassword() {
     setFocusOn(password.box);
+    markErrorBlur(password, "Please enter your password.");
   }
 
   /**
