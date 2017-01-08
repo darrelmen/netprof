@@ -1008,14 +1008,17 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
   public synchronized Map<Integer, MiniUser> getMiniUsers() {
     long now = System.currentTimeMillis();
 
-    if (miniUserCache == null || (now - lastCache) > 60 * 60 * 1000 || lastCount != delegate.getUserCount()) {
+    int userCount = delegate.getUserCount();
+    logger.debug("user count is " + userCount);
+
+    if (miniUserCache == null || (now - lastCache) > 60 * 60 * 1000 || lastCount != userCount) {
       Map<Integer, MiniUser> idToUser = new HashMap<>();
       for (DBUser s : getAll()) idToUser.put(s.getDocumentDBID(), getMini(s));
       miniUserCache = idToUser;
       if (!miniUserCache.isEmpty()) {
         lastCache = now;
         long then = System.currentTimeMillis();
-        lastCount = delegate.getUserCount();
+        lastCount = userCount;
         long now2 = System.currentTimeMillis();
 
         if (now2 - then > 10) {
@@ -1041,6 +1044,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
 
   private List<DBUser> getAll() {
     long then = System.currentTimeMillis();
+    logger.warn("getAll calling get all users");
     List<DBUser> users = delegate.getUsers(-1, null);
     long now = System.currentTimeMillis();
     if (now - then > 20) logger.warn("getAll took " + (now - then) + " to get " + users.size() + " users");

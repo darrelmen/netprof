@@ -48,7 +48,7 @@ public interface IUserExerciseDAO extends IDAO {
   int add(CommonExercise userExercise, boolean isOverride);
 
   List<CommonShell> getOnList(int listID);
-
+  List<CommonExercise> getCommonExercises(int listID);
   /**
    * @param exid
    * @return

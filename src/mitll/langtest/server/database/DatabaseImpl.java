@@ -1526,6 +1526,10 @@ public class DatabaseImpl implements Database {
     return getUserListManager().getUserListByID(listid, getSectionHelper(projectid).getTypeOrder());
   }
 
+  public UserList<CommonExercise> getUserListByIDExercises(long listid, int projectid) {
+    return getUserListManager().getUserListByIDExercises(listid, getSectionHelper(projectid).getTypeOrder());
+  }
+
   /**
    * @param typeToSection
    * @param projectid
