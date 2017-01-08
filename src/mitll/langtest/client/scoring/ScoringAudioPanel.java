@@ -48,6 +48,7 @@ import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Asks server to score the audio.  Gets back transcript image URLs, phonem scores and end times.
@@ -60,7 +61,7 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
-  // private Logger logger = Logger.getLogger("ScoringAudioPanel");
+  private Logger logger = Logger.getLogger("ScoringAudioPanel");
   private static final int ANNOTATION_HEIGHT = 20;
   private static final boolean SHOW_SPECTROGRAM = false;
 
@@ -83,7 +84,8 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
   ScoringAudioPanel(String refSentence, String transliteration, ExerciseController controller,
                     ScoreListener gaugePanel, String playButtonSuffix, T exercise,
                     String instance) {
-    this(null, refSentence,transliteration, controller, SHOW_SPECTROGRAM, gaugePanel, 23, playButtonSuffix, exercise, exercise.getID(), instance);
+    this(null, refSentence,transliteration, controller, SHOW_SPECTROGRAM, gaugePanel, 23,
+        playButtonSuffix, exercise, exercise.getID(), instance);
   }
 
   /**
@@ -198,6 +200,7 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
                                              final ImageAndCheck wordTranscript,
                                              final ImageAndCheck phoneTranscript) {
     int widthToUse = Math.max(MIN_WIDTH, width);
+   // logger.info("getTranscriptImageURLForAudio width " + widthToUse);
     scoreAudio(path, resultID, refSentence, transliteration, wordTranscript, phoneTranscript, widthToUse, ANNOTATION_HEIGHT, getReqID("score"));
   }
 
@@ -322,7 +325,7 @@ public abstract class ScoringAudioPanel<T extends Shell> extends AudioPanel<T> {
 
         getClickedOnSegment(eventXPos, type, this);
       } else {
-        System.err.println("no result for to click against?");
+//        System.err.println("no result for to click against?");
       }
     }
 

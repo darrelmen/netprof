@@ -98,7 +98,11 @@ public abstract class BaseAudioDAO extends DAO {
     long then = System.currentTimeMillis();
     Map<Integer, List<AudioAttribute>> exToAudio = new HashMap<>();
     Map<Integer, Set<String>> idToPaths = new HashMap<>();
+
+    logger.info("getExToAudio - for " +projid);
     Collection<AudioAttribute> attributesByProject = getAudioAttributesByProject(projid);
+
+    logger.info("getExToAudio - for " +projid + " got " +attributesByProject.size());
 
     for (AudioAttribute audio : attributesByProject) {
       Integer exid = audio.getExid();

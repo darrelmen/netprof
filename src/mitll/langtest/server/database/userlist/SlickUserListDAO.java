@@ -39,6 +39,7 @@ import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickUserExerciseList;
@@ -110,6 +111,17 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
   }
 
   private UserList<CommonShell> fromSlick(SlickUserExerciseList slick) {
+    return new UserList<>(
+        slick.id(),
+        userDAO.getUserWhere(slick.userid()),
+        slick.name(),
+        slick.description(),
+        slick.classmarker(),
+        slick.isprivate(),
+        slick.modified().getTime());
+  }
+
+  private UserList<CommonExercise> fromSlickEx(SlickUserExerciseList slick) {
     return new UserList<>(
         slick.id(),
         userDAO.getUserWhere(slick.userid()),
@@ -204,6 +216,11 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
     }*/
   }
 
+  private void populateListEx(UserList<CommonExercise> where) {
+    List<CommonExercise> onList = userExerciseDAO.getCommonExercises(where.getID());
+    where.setExercises(onList);
+  }
+
   /**
    * Expensive ...?
    *
@@ -261,6 +278,21 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
     UserList<CommonShell> where = getWhere(unique, true);
     if (where != null) populateList(where);
     return where;
+  }
+
+  @Override
+  public UserList<CommonExercise> getWithExercisesEx(long unique) {
+    Option<SlickUserExerciseList> slickUserExerciseListOption = dao.byID((int) unique);
+    UserList<CommonExercise> exlist = null;
+
+    if (slickUserExerciseListOption.isDefined()) {
+      exlist = fromSlickEx(slickUserExerciseListOption.get());
+    } else {
+      if (true) logger.error("getByExID : huh? no user list with id " + unique);
+      return null;
+    }
+    populateListEx(exlist);
+    return exlist;
   }
 
   @Override

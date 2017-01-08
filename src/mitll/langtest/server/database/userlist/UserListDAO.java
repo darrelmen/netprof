@@ -38,6 +38,7 @@ import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -295,7 +296,7 @@ import java.util.List;
    *
    * @param unique
    * @return
-   * @see UserListManager#getUserListByID(long, java.util.Collection)
+   * @see UserListManager#getUserListByID
    */
   @Override
   public UserList<CommonShell> getWithExercises(long unique) {
@@ -306,6 +307,11 @@ import java.util.List;
     }
     populateList(where);
     return where;
+  }
+
+  @Override
+  public UserList<CommonExercise> getWithExercisesEx(long unique) {
+    return null;
   }
 
   /**

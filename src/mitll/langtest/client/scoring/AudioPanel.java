@@ -187,7 +187,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     getElement().setId("AudioPanel_exercise_" + id);
 
     int width = getImageWidth();
-//    logger.info(getElement().getID() + " width " + width);
+    logger.info("AudioPanel " + getElement().getId() + " width " + width);
     setWidth((width) + "px");
   }
 
@@ -261,12 +261,13 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     Image wordsImage = words.getImage();
     imageContainer.add(wordsImage);
     wordsImage.getElement().setId("Transcript_Words");
-    wordsImage.setHeight(TRANSCRIPT_IMAGE_HEIGHT + "px");
+ //   wordsImage.setHeight(TRANSCRIPT_IMAGE_HEIGHT + "px");
 
     phones = new ImageAndCheck();
     Image phonesImage = phones.getImage();
     imageContainer.add(phonesImage);
-    phonesImage.setHeight(TRANSCRIPT_IMAGE_HEIGHT + "px");
+    // for some reason this totally screws up max width for transcript images ????
+   // phonesImage.setHeight(TRANSCRIPT_IMAGE_HEIGHT + "px");
     phonesImage.getElement().setId("Transcript_Phones");
 
     // hp.setWidth("100%");
@@ -503,6 +504,13 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
     }
   }
 
+  /**
+   *
+   * @param leftColumnWidth1
+   * @param leftColumnWidth
+   * @param rightSide
+   * @return
+   */
   int getWidthForWaveform(int leftColumnWidth1, int leftColumnWidth, int rightSide) {
     int width = (int) ((screenPortion * ((float) Window.getClientWidth())) - leftColumnWidth) - rightSide;
     int i = width / 5;
@@ -525,7 +533,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
    * @see #getImages()
    */
   protected void getEachImage(int width) {
-  //  logger.info("AudioPanel.getEachImage : " + getElement().getId()+ " path " + audioPath);
+    logger.info("AudioPanel.getEachImage : " + getElement().getId()+ " path " + audioPath + " width " +width);
     getImageURLForAudio(audioPath, WAVEFORM, width, getWaveform());
     if (showSpectrogram) {
       getImageURLForAudio(audioPath, SPECTROGRAM, width, getSpectrogram());
@@ -547,7 +555,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
   private void getImageURLForAudio(final String path, final String type, int width, final ImageAndCheck imageAndCheck) {
     if (path != null && !path.equals(FILE_MISSING)) {
       final long then = System.currentTimeMillis();
-//      logger.info("getImageURLForAudio : req " + reqid + " path " + path + " type " + type + " width " + width);
+      logger.info("getImageURLForAudio : req " + reqid + " path " + path + " type " + type + " width " + width);
       final int toUse = Math.max(MIN_WIDTH, width);
       int height = getScaledImageHeight(type);
       final int id = exercise == null ? exerciseID : exercise.getID();

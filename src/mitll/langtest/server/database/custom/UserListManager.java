@@ -56,6 +56,7 @@ import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.DBConnection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.*;
@@ -132,7 +133,7 @@ public class UserListManager implements IUserListManager {
 
   /**
    * TODO : this doesn't really do anything - doesn't touch the exercises?????
-   *
+   * <p>
    * Turned off setting second state for now -- what does it mean?
    *
    * @see mitll.langtest.server.LangTestDatabaseImpl#init()
@@ -454,13 +455,12 @@ public class UserListManager implements IUserListManager {
   public UserList<CommonShell> getCommentedList(Collection<String> typeOrder) {
     //Map<String, ReviewedDAO.StateCreator> exerciseToState = getExerciseToState(true); // skip unset items!
 
-    Collection<Integer> defectExercises = reviewedDAO.getDefectExercises();
     Collection<Integer> incorrectAnnotations = annotationDAO.getExercisesWithIncorrectAnnotations();
     //logger.debug("getCommentedList There are " + defectExercises.size() + " defect items ");
     // logger.debug("getCommentedList There are " + idToCreator.size() + " idToCreator items ");
 
     // if it's on the defect list, remove it
-    for (Integer exid : defectExercises) {
+    for (Integer exid : reviewedDAO.getDefectExercises()) {
       incorrectAnnotations.remove(exid);// what's left are items that are not reviewed
     }
     //logger.debug("getCommentedList After there are " + idToCreator.size() + " idToCreator items ");
@@ -474,9 +474,50 @@ public class UserListManager implements IUserListManager {
   }
 
   @Override
-  public UserList<CommonShell> getAttentionList(Collection<String> typeOrder) {
-    Map<Integer, StateCreator> exerciseToState = secondStateDAO.getExerciseToState(false);
+  public UserList<CommonExercise> getCommentedListEx(Collection<String> typeOrder) {
+    //Map<String, ReviewedDAO.StateCreator> exerciseToState = getExerciseToState(true); // skip unset items!
 
+    Collection<Integer> incorrectAnnotations = annotationDAO.getExercisesWithIncorrectAnnotations();
+    //logger.debug("getCommentedList There are " + defectExercises.size() + " defect items ");
+    // logger.debug("getCommentedList There are " + idToCreator.size() + " idToCreator items ");
+
+    // if it's on the defect list, remove it
+    for (Integer exid : reviewedDAO.getDefectExercises()) {
+      incorrectAnnotations.remove(exid);// what's left are items that are not reviewed
+    }
+    //logger.debug("getCommentedList After there are " + idToCreator.size() + " idToCreator items ");
+
+    Collection<CommonExercise> include = userExerciseDAO.getByExID(incorrectAnnotations);
+    //logger.debug("getCommentedList include " + include.size() + " included ");
+
+    UserList<CommonExercise> reviewList = getReviewListEx(include, COMMENTS, ALL_ITEMS_WITH_COMMENTS, incorrectAnnotations, COMMENT_MAGIC_ID, typeOrder);
+    reviewList.setUniqueID(COMMENT_MAGIC_ID);
+    return reviewList;
+  }
+
+  @Override
+  public UserList<CommonShell> getAttentionList(Collection<String> typeOrder) {
+    Set<Integer> defectIds = getAttentionIDs();
+
+    Collection<CommonExercise> allKnown = userExerciseDAO.getByExID(defectIds);
+    logger.debug("\tgetAttentionList ids #=" + allKnown.size());
+
+    return getReviewList(allKnown, ATTENTION, "Items for LL review", defectIds, ATTN_LL_MAGIC_ID, typeOrder);
+  }
+
+  @Override
+  public UserList<CommonExercise> getAttentionListEx(Collection<String> typeOrder) {
+    Set<Integer> defectIds = getAttentionIDs();
+
+    Collection<CommonExercise> allKnown = userExerciseDAO.getByExID(defectIds);
+    logger.debug("\tgetAttentionList ids #=" + allKnown.size());
+
+    return getReviewListEx(allKnown, ATTENTION, "Items for LL review", defectIds, ATTN_LL_MAGIC_ID, typeOrder);
+  }
+
+  @NotNull
+  private Set<Integer> getAttentionIDs() {
+    Map<Integer, StateCreator> exerciseToState = secondStateDAO.getExerciseToState(false);
     //logger.debug("attention " + exerciseToState);
 
     Set<Integer> defectIds = new HashSet<>();
@@ -485,11 +526,7 @@ public class UserListManager implements IUserListManager {
         defectIds.add(pair.getKey());
       }
     }
-
-    Collection<CommonExercise> allKnown = userExerciseDAO.getByExID(defectIds);
-    logger.debug("\tgetAttentionList ids #=" + allKnown.size());
-
-    return getReviewList(allKnown, ATTENTION, "Items for LL review", defectIds, ATTN_LL_MAGIC_ID, typeOrder);
+    return defectIds;
   }
 
   /**
@@ -502,6 +539,26 @@ public class UserListManager implements IUserListManager {
    */
   @Override
   public UserList<CommonShell> getDefectList(Collection<String> typeOrder) {
+    Set<Integer> defectIds = getDefectIDs();
+
+    Collection<CommonExercise> allKnown = userExerciseDAO.getByExID(defectIds);
+    //logger.debug("\tgetDefectList ids #=" + allKnown.size() + " vs " + defectIds.size());
+
+    return getReviewList(allKnown, REVIEW, ITEMS_TO_REVIEW, defectIds, REVIEW_MAGIC_ID, typeOrder);
+  }
+
+  @Override
+  public UserList<CommonExercise> getDefectListEx(Collection<String> typeOrder) {
+    Set<Integer> defectIds = getDefectIDs();
+
+    Collection<CommonExercise> allKnown = userExerciseDAO.getByExID(defectIds);
+    //logger.debug("\tgetDefectList ids #=" + allKnown.size() + " vs " + defectIds.size());
+
+    return getReviewListEx(allKnown, REVIEW, ITEMS_TO_REVIEW, defectIds, REVIEW_MAGIC_ID, typeOrder);
+  }
+
+  @NotNull
+  private Set<Integer> getDefectIDs() {
     Set<Integer> defectIds = new HashSet<>();
     Map<Integer, StateCreator> exerciseToState = reviewedDAO.getExerciseToState(false);
     //logger.debug("\tgetDefectList exerciseToState=" + exerciseToState.size());
@@ -511,11 +568,7 @@ public class UserListManager implements IUserListManager {
         defectIds.add(pair.getKey());
       }
     }
-
-    Collection<CommonExercise> allKnown = userExerciseDAO.getByExID(defectIds);
-    //logger.debug("\tgetDefectList ids #=" + allKnown.size() + " vs " + defectIds.size());
-
-    return getReviewList(allKnown, REVIEW, ITEMS_TO_REVIEW, defectIds, REVIEW_MAGIC_ID, typeOrder);
+    return defectIds;
   }
 
   /**
@@ -523,8 +576,8 @@ public class UserListManager implements IUserListManager {
    * @param name
    * @param description
    * @param ids
-   * @param userListMaginID
-   * @param typeOrder       used by sorter to sort first in unit & chapter order
+   * @param userListID
+   * @param typeOrder   used by sorter to sort first in unit & chapter order
    * @return
    * @see #getAttentionList(java.util.Collection)
    * @see #getCommentedList(java.util.Collection)
@@ -533,41 +586,61 @@ public class UserListManager implements IUserListManager {
   private UserList<CommonShell> getReviewList(Collection<CommonExercise> allKnown,
                                               String name, String description,
                                               Collection<Integer> ids,
-                                              int userListMaginID,
+                                              int userListID,
                                               Collection<String> typeOrder) {
-    Map<Integer, CommonExercise> idToEx = new HashMap<>();
-    for (CommonExercise ue : allKnown) idToEx.put(ue.getID(), ue);
-
-    List<CommonExercise> onList = getReviewedUserExercises(idToEx, ids);
+    List<CommonExercise> onList = getReviewedExercises(allKnown, ids);
 
     // logger.debug("getReviewList '" +name+ "' ids size = " + allKnown.size() + " yielded " + onList.size());
-    UserList<CommonShell> userList = new UserList<CommonShell>(userListMaginID, getQCUser(), name, description, "", false,
+    UserList<CommonShell> userList = new UserList<>(userListID, getQCUser(), name, description, "", false,
         System.currentTimeMillis());
-    //userList.setReview(true);
 
     List<CommonShell> copy = new ArrayList<>();
-
     for (CommonShell orig : onList) copy.add(orig.getShell());
 
-    long now = System.currentTimeMillis();
-
     logger.debug("getReviewList '" + name + "' ids size = " + allKnown.size() + " yielded " + copy.size());// + " took " + (now - then) + " millis");
-  //  User user = getQCUser();
-  //  UserList<CommonShell> userList = new UserList<CommonShell>(userListMaginID, user, name, description, "", false);
+    return getCommonUserList(typeOrder, userList, copy);
+  }
+
+  private UserList<CommonExercise> getReviewListEx(Collection<CommonExercise> allKnown,
+                                                   String name, String description,
+                                                   Collection<Integer> ids,
+                                                   int userListID,
+                                                   Collection<String> typeOrder) {
+    List<CommonExercise> onList = getReviewedExercises(allKnown, ids);
+
+    // logger.debug("getReviewList '" +name+ "' ids size = " + allKnown.size() + " yielded " + onList.size());
+    UserList<CommonExercise> userList = new UserList<>(userListID, getQCUser(), name, description, "", false,
+        System.currentTimeMillis());
+
+//    List<CommonShell> copy = new ArrayList<>();
+//    for (CommonShell orig : onList) copy.add(orig.getShell());
+
+    logger.debug("getReviewList '" + name + "' ids size = " + allKnown.size() + " yielded " + onList.size());// + " took " + (now - then) + " millis");
+    return getCommonUserList(typeOrder, userList, onList);
+  }
+
+  @NotNull
+  private <T extends CommonShell> UserList<T> getCommonUserList(Collection<String> typeOrder, UserList<T> userList, List<T> copy) {
     userList.setReview(true);
 
     new ExerciseSorter(typeOrder).getSortedByUnitThenAlpha(copy, false);
 
     userList.setExercises(copy);
-
-//    markState(onList);
     markState(copy);
     logger.debug("getReviewList returning " + userList + (userList.getExercises().isEmpty() ? "" : " first " + userList.getExercises().iterator().next()));
     return userList;
   }
 
+  private List<CommonExercise> getReviewedExercises(Collection<CommonExercise> allKnown, Collection<Integer> ids) {
+    Map<Integer, CommonExercise> idToEx = new HashMap<>();
+    for (CommonExercise ue : allKnown) idToEx.put(ue.getID(), ue);
+
+    return getReviewedUserExercises(idToEx, ids);
+  }
+
   /**
    * Need a bogus user for the list.
+   *
    * @return
    */
   private User getQCUser() {
@@ -731,7 +804,7 @@ public class UserListManager implements IUserListManager {
 
   /**
    * TODO : Why is this needed?
-   *
+   * <p>
    * Remember to copy the audio from the posted location to a more permanent location.
    * <p>
    * If it's already under a media directory -- don't change it.
@@ -749,7 +822,7 @@ public class UserListManager implements IUserListManager {
       return;
     }
     long now = System.currentTimeMillis();
-    logger.debug("fixAudioPaths : checking regular '" + regularSpeed.getAudioRef() + "' against '" +mediaDir + "'");
+    logger.debug("fixAudioPaths : checking regular '" + regularSpeed.getAudioRef() + "' against '" + mediaDir + "'");
 
     String foreignLanguage = userExercise.getForeignLanguage();
     int id = userExercise.getID();
@@ -768,7 +841,6 @@ public class UserListManager implements IUserListManager {
   }
 
   /**
-   *
    * @param userExercise
    * @param overwrite
    * @param regularSpeed
@@ -796,7 +868,7 @@ public class UserListManager implements IUserListManager {
         fileRef,
         fast,
         overwrite,
-        new TrackInfo(userExercise.getForeignLanguage(), artist, userExercise.getEnglish(),""));
+        new TrackInfo(userExercise.getForeignLanguage(), artist, userExercise.getEnglish(), ""));
     regularSpeed.setAudioRef(refAudio);
   }
 
@@ -859,6 +931,20 @@ public class UserListManager implements IUserListManager {
             id == COMMENT_MAGIC_ID ? getCommentedList(typeOrder) :
                 id == ATTN_LL_MAGIC_ID ? getAttentionList(typeOrder) :
                     userListDAO.getWithExercises(id);
+  }
+
+  @Override
+  public UserList<CommonExercise> getUserListByIDExercises(long id, Collection<String> typeOrder) {
+    if (id == -1) {
+      logger.error("getUserListByID : huh? asking for id " + id);
+      return null;
+    }
+    return
+        id == REVIEW_MAGIC_ID ? getDefectListEx(typeOrder) :
+            id == COMMENT_MAGIC_ID ? getCommentedListEx(typeOrder) :
+                id == ATTN_LL_MAGIC_ID ? getAttentionListEx(typeOrder) :
+                    userListDAO.getWithExercisesEx(id);
+
   }
 
   /**
@@ -958,7 +1044,7 @@ public class UserListManager implements IUserListManager {
     CommonExercise predefExercise = userExerciseDAO.getPredefExercise(exid);
 
     if (predefExercise == null) {
-      logger.debug("markState " + exid + " = " + state + " by " +creatorID);
+      logger.debug("markState " + exid + " = " + state + " by " + creatorID);
       predefExercise = userExerciseDAO.getByExID(exid);
     }
     if (predefExercise != null) {
