@@ -367,8 +367,9 @@ public class DatabaseImpl implements Database {
    * @see #initializeDAOs
    */
   private DBConnection getDbConnection() {
-    logger.info("getDbConnection using " + serverProps.getDBConfig());
-    return new DBConnection(serverProps.getDBConfig());
+    DBConnection dbConnection = new DBConnection(serverProps.getDBConfig());
+    logger.info("getDbConnection using " + serverProps.getDBConfig() + " : " + dbConnection);
+    return dbConnection;
   }
 
   public IAudioDAO getH2AudioDAO() {
@@ -636,7 +637,7 @@ public class DatabaseImpl implements Database {
           makeExerciseDAO(lessonPlanFile, isURL);
 
           if (!serverProps.useH2()) {
-    //        userExerciseDAO.setExToPhones(new ExerciseToPhone().getExerciseToPhone(refresultDAO));
+            //        userExerciseDAO.setExToPhones(new ExerciseToPhone().getExerciseToPhone(refresultDAO));
             populateProjects();
             //    logger.info("set exercise dao " + exerciseDAO + " on " + userExerciseDAO);
             if (projectManagement.getProjects().isEmpty()) {
@@ -757,8 +758,8 @@ public class DatabaseImpl implements Database {
    *
    * @param userExercise
    * @param keepAudio
-   * @see mitll.langtest.server.services.ListServiceImpl#editItem
    * @seex mitll.langtest.server.LangTestDatabaseImpl#editItem
+   * @see mitll.langtest.server.services.ListServiceImpl#editItem
    * @see mitll.langtest.client.custom.dialog.EditableExerciseDialog#postEditItem
    */
   public void editItem(CommonExercise userExercise, boolean keepAudio) {
@@ -830,8 +831,7 @@ public class DatabaseImpl implements Database {
   public void markAudioDefect(AudioAttribute audioAttribute) {
     if (audioDAO.markDefect(audioAttribute) < 1) {
       logger.error("markAudioDefect huh? couldn't mark error on " + audioAttribute);
-    }
-    else {
+    } else {
       userListManager.addAnnotation(
           audioAttribute.getExid(),
           audioAttribute.getAudioRef(),
@@ -1170,7 +1170,7 @@ public class DatabaseImpl implements Database {
    */
   public Map<Integer, String> getExerciseIDToRefAudio(int projectid) {
     Collection<CommonExercise> exercises = getExercises(projectid);
-    logger.info("getExerciseIDToRefAudio for project #" + projectid + " exercises "  + exercises.size());
+    logger.info("getExerciseIDToRefAudio for project #" + projectid + " exercises " + exercises.size());
 
     Map<Integer, String> join = new HashMap<>();
     populateIDToRefAudio(join, exercises);
@@ -1182,7 +1182,6 @@ public class DatabaseImpl implements Database {
   }
 
   /**
-   *
    * @param join
    * @param all
    * @param <T>

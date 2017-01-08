@@ -107,15 +107,7 @@ public class PostgresTest extends BaseTest {
   }
 
   @Test
-  public void testCopyHindi() {
-    copyDev("hindi");
-  }
-
-  private void copyDev(String hindi) {
-    Info info = new Info(hindi);
-    info.setDev(true);
-    testCopy(info);
-  }
+  public void testCopyHindi() {   copyDev("hindi");  }
 
   @Test
   public void testCopyCroatian() {
@@ -125,6 +117,12 @@ public class PostgresTest extends BaseTest {
   @Test
   public void testCopyFrench() {
     copyDev("french");
+  }
+
+  private void copyDev(String hindi) {
+    Info info = new Info(hindi);
+    info.setDev(true);
+    testCopy(info);
   }
 
   @Test
