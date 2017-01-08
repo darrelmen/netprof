@@ -36,6 +36,6 @@ public class ImageOptions implements IsSerializable {
   }
 
   public String toString() {
-    return "w " + width + " x h " + height + (useScoreToColorBkg ? " scoreToColor" : "");
+    return "opt : w " + width + " x h " + height + (useScoreToColorBkg ? " scoreToColor" : "");
   }
 }

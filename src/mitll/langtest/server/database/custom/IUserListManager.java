@@ -69,10 +69,12 @@ public interface IUserListManager {
   UserList createFavorites(int userid, int projid);
 
   UserList<CommonShell> getCommentedList(Collection<String> typeOrder);
-
   UserList<CommonShell> getAttentionList(Collection<String> typeOrder);
-
   UserList<CommonShell> getDefectList(Collection<String> typeOrder);
+
+  UserList<CommonExercise> getCommentedListEx(Collection<String> typeOrder);
+  UserList<CommonExercise> getAttentionListEx(Collection<String> typeOrder);
+  UserList<CommonExercise> getDefectListEx(Collection<String> typeOrder);
 
   Collection<Integer> getDefectExercises();
 
@@ -91,6 +93,7 @@ public interface IUserListManager {
   CommonExercise duplicate(CommonExercise userExercise);
 
   UserList<CommonShell> getUserListByID(long id, Collection<String> typeOrder);
+  UserList<CommonExercise> getUserListByIDExercises(long id, Collection<String> typeOrder);
 
   void addVisitor(long userListID, long user);
 

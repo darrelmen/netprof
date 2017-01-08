@@ -340,6 +340,11 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
     return userExercises2;
   }
 
+  @Override
+  public List<CommonExercise> getCommonExercises(int listID) {
+    return null;
+  }
+
   /**
    * @param listID
    * @return

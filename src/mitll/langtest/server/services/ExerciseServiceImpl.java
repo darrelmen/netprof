@@ -104,7 +104,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
 
     try {
       boolean isUserListReq = request.getUserListID() != -1;
-      UserList userListByID = isUserListReq ? db.getUserListByID(request.getUserListID(), getProjectID()) : null;
+      UserList<CommonExercise> userListByID = isUserListReq ? db.getUserListByIDExercises(request.getUserListID(), getProjectID()) : null;
 
       if (request.getTypeToSelection().isEmpty()) {   // no unit-chapter filtering
         // get initial exercise set, either from a user list or predefined
@@ -211,7 +211,9 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
    * @return
    * @see #getExerciseIds
    */
-  private int markRecordedState(int userID, String role, Collection<? extends CommonShell> exercises,
+  private int markRecordedState(int userID,
+                                String role,
+                                Collection<? extends CommonShell> exercises,
                                 boolean onlyExample) {
     int c = 0;
     if (role.equals(AudioType.RECORDER.toString())) {
@@ -307,7 +309,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
     //logger.debug("marked " +i + " as recorded role " +role);
 
     if (hasPrefix) {
-      ExerciseTrie<CommonExercise> trie = new ExerciseTrie<CommonExercise>(exercisesForState, getLanguage(), getSmallVocabDecoder());
+      ExerciseTrie<CommonExercise> trie = new ExerciseTrie<>(exercisesForState, getLanguage(), getSmallVocabDecoder());
       exercisesForState = trie.getExercises(prefix, getSmallVocabDecoder());
     }
 
@@ -350,7 +352,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
     String role = request.getRole();
     boolean onlyExamples = request.isOnlyExamples();
 
-    if (firstExercise != null) {
+    if (!exercises.isEmpty()) {
       addAnnotationsAndAudio(userID, firstExercise, request.isIncorrectFirstOrder());
 
       // NOTE : not ensuring MP3s or OGG versions of WAV file.
@@ -379,7 +381,6 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
     // TODO : do this the right way vis-a-vis type safe collection...
 
     List<T> exerciseShells1 = (List<T>) exerciseShells;
-
     ExerciseListWrapper<T> exerciseListWrapper = new ExerciseListWrapper<T>(reqID, exerciseShells1, firstExercise);
     //logger.debug("returning " + exerciseListWrapper);
     return exerciseListWrapper;
@@ -700,6 +701,13 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
     return copy;
   }
 
+  /**
+   * On the fly we make a new section helper to do filtering of user list.
+   * @param typeToSelection
+   * @param userListByID
+   * @param <T>
+   * @return
+   */
   private <T extends CommonShell> Collection<T> getExercisesFromUserListFiltered(Map<String, Collection<String>> typeToSelection,
                                                                                  UserList<T> userListByID) {
     SectionHelper<T> helper = new SectionHelper<T>();
@@ -727,10 +735,13 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
    * @return
    * @see #makeExerciseListWrapper
    */
-  private <T extends CommonShell> List<CommonShell> getExerciseShells(Collection<? extends CommonExercise> exercises) {
+  private <T extends CommonShell> List<CommonShell> getExerciseShells(
+     // Collection<? extends CommonExercise> exercises
+      Collection<T> exercises
+  ) {
     logger.info("getExerciseShells for " + exercises.size());
     List<CommonShell> ids = new ArrayList<>();
-    for (CommonExercise e : exercises) {
+    for (T e : exercises) {
 //      logger.info("got " +e.getOldID() + " mean " + e.getMeaning() + " eng " + e.getEnglish() + " fl " + e.getForeignLanguage());
       ids.add(e.getShell());
     }

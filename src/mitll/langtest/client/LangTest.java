@@ -305,7 +305,7 @@ public class LangTest implements
     }
   }
 
-  public void refreshStartupInfo() {
+/*  public void refreshStartupInfo() {
     service.getStartupInfo(new AsyncCallback<StartupInfo>() {
       public void onFailure(Throwable caught) {
         LangTest.this.onFailure(caught, then);
@@ -316,7 +316,7 @@ public class LangTest implements
         gotUser(userManager.getCurrent());
       }
     });
-  }
+  }*/
 
   private void rememberStartup(StartupInfo startupInfo) {
     LangTest.this.startupInfo = startupInfo;
@@ -511,7 +511,7 @@ public class LangTest implements
 
   /**
    * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser
-   * @see mitll.langtest.client.user.UserManager#login()
+   * @seex mitll.langtest.client.user.UserManager#login
    */
   @Override
   public void showLogin() {
@@ -673,7 +673,7 @@ public class LangTest implements
 
   @Override
   public ProjectStartupInfo getProjectStartupInfo() {
-    //logger.info("\ngetStartupInfo Got startup info " + projectStartupInfo);
+//    logger.info("\ngetStartupInfo Got startup info " + projectStartupInfo);
     return projectStartupInfo;
   }
 
@@ -683,7 +683,7 @@ public class LangTest implements
 
   public void clearStartupInfo() {
     this.projectStartupInfo = null;
-    //logger.info("clearStartupInfo   ");
+//    logger.info("clearStartupInfo   ");
   }
 
   public Collection<String> getTypeOrder() {
