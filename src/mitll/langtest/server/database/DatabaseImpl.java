@@ -83,6 +83,7 @@ import mitll.langtest.server.database.userlist.SlickUserListExerciseVisitorDAO;
 import mitll.langtest.server.database.word.IWordDAO;
 import mitll.langtest.server.database.word.SlickWordDAO;
 import mitll.langtest.server.mail.MailSupport;
+import mitll.langtest.server.services.UserServiceImpl;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.ContextPractice;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
@@ -575,6 +576,7 @@ public class DatabaseImpl implements Database {
   /**
    * @param userWhere
    * @see mitll.langtest.server.services.UserServiceImpl#setSessionUser
+   * @see UserServiceImpl#getUserFromSession
    */
   public void setStartupInfo(User userWhere) {
     setStartupInfo(userWhere, getUserProjectDAO().mostRecentByUser(userWhere.getID()));
