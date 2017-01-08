@@ -443,10 +443,14 @@ public class SlickUserExerciseDAO
    */
   @Override
   public List<CommonShell> getOnList(int listID) {
-    List<CommonExercise> userExercises = getUserExercises(dao.getOnList(listID));
+    List<CommonExercise> userExercises = getCommonExercises(listID);
     List<CommonShell> userExercises2 = new ArrayList<>();
     userExercises2.addAll(userExercises);
     return userExercises2;
+  }
+
+  public List<CommonExercise> getCommonExercises(int listID) {
+    return getUserExercises(dao.getOnList(listID));
   }
 
   @Override

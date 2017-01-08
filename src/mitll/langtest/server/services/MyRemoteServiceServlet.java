@@ -151,7 +151,9 @@ public class MyRemoteServiceServlet extends RemoteServiceServlet implements LogA
 
   public User getUserFromSession() {
     try {
-      return securityManager.getLoggedInUser(getThreadLocalRequest());
+      User loggedInUser = securityManager.getLoggedInUser(getThreadLocalRequest());
+      db.setStartupInfo(loggedInUser);
+      return loggedInUser;
     } catch (DominoSessionException e) {
       logger.error("Got " + e,e);
       return null;

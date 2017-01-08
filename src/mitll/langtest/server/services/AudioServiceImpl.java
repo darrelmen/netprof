@@ -99,8 +99,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * @param addToAudioTable     if true, add to audio table -- only when recording reference audio for an item.
    * @param allowAlternates
    * @return AudioAnswer object with information about the audio on the server, including if audio is valid (not too short, etc.)
-   * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording()
-   * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording()
+   * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording
+   * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording
    */
   @Override
   public AudioAnswer writeAudioFile(String base64EncodedString,
@@ -391,9 +391,11 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * @see mitll.langtest.client.scoring.AudioPanel#getImageURLForAudio
    */
   public ImageResponse getImageForAudioFile(int reqid,
-                                            String audioFile, String imageType, ImageOptions imageOptions,
+                                            String audioFile,
+                                            String imageType,
+                                            ImageOptions imageOptions,
                                             String exerciseID) {
-    if (audioFile.isEmpty()) logger.error("huh? audio file is empty for req id " + reqid + " exid " + exerciseID);
+    if (audioFile.isEmpty()) logger.error("getImageForAudioFile huh? audio file is empty for req id " + reqid + " exid " + exerciseID);
 
     SimpleImageWriter imageWriter = new SimpleImageWriter();
 
@@ -425,7 +427,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     long diff = now - then;
     if (diff > 100) {
       logger.debug("getImageForAudioFile : got images " +
-          //"(" + width + " x " + height + ")" +
+         // "(" + width + " x " + height + ")" +
           " (" + reqid + ") type " + imageType +
           " for " + wavAudioFile + " took " + diff + " millis");
     }

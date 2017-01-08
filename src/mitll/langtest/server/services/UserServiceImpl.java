@@ -201,47 +201,6 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   }
 
   /**
-   * TODO : rework this
-   *
-   * @param login
-   * @param freeTextPassword
-   * @return
-   * @see mitll.langtest.client.user.SignInForm#gotLogin
-   * @see mitll.langtest.client.user.SignInForm#makeSignInUserName
-   */
-/*  public User userExists(String login, String freeTextPassword) {
-    logger.info("userExists " + login + " pass " + freeTextPassword);
-
-*//*    if (freeTextPassword.isEmpty()) {
-      User user = db.getUserDAO().getUser(login, freeTextPassword);
-      if (user != null) {
-        logger.info("\tuserExists " + login + " user " + user);
-        addProjectInfoToUser(user);
-      }
-      else {
-        logger.info("\tuserExists no user for " + login);
-      }
-
-      return user;
-    } else {*//*
-    LoginResult loginResult = loginUser(login, freeTextPassword);
-    User loggedInUser = loginResult.getLoggedInUser();
-//      if (loginResult.getResultType() == LoginResult.ResultType.Success) {
-//        db.rememberUserSelectedProject(loggedInUser, projectid);
-//      }
-    return loggedInUser;
-    //  }
-  }*/
-
-  // this is done when we start a session
-/*  private void addProjectInfoToUser(User user) {
-    int i = db.getUserProjectDAO().mostRecentByUser(user.getID());
-    ProjectStartupInfo startupInfo = new ProjectStartupInfo();
-    user.setStartupInfo(startupInfo);
-    startupInfo.setProjectid(i);
-  }*/
-
-  /**
    * @param login
    * @see InitialUI#logout
    */

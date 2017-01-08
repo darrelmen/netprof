@@ -35,6 +35,7 @@ package mitll.langtest.server.database.userlist;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.Collection;
@@ -65,6 +66,7 @@ public interface IUserListDAO extends IDAO {
   boolean remove(long unique);
 
   UserList<CommonShell> getWithExercises(long unique);
+  UserList<CommonExercise> getWithExercisesEx(long unique);
 
   UserList<CommonShell> getWhere(long unique, boolean warnIfMissing);
 

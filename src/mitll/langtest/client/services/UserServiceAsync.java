@@ -34,6 +34,7 @@ package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.domino.user.ChangePasswordView;
+import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.user.*;
 
 import java.util.Collection;
@@ -130,6 +131,10 @@ public interface UserServiceAsync {
 
   void getUserByID(String id, AsyncCallback<User> async);
 
+  /**
+   * @see UserManager#getPermissionsAndSetUser()
+   * @param async
+   */
   void getUserFromSession(AsyncCallback<User> async);
 
 }

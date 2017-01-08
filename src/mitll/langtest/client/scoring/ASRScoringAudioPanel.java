@@ -100,7 +100,8 @@ public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> 
                               int rightMargin, String playButtonSuffix,
                               T exercise,
                               String instance) {
-    super(path, refSentence, transliteration, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix, exercise, exercise.getID(), instance);
+    super(path, refSentence, transliteration, controller, showSpectrogram, gaugePanel, rightMargin, playButtonSuffix,
+        exercise, exercise.getID(), instance);
     this.useScoreToColorBkg = controller.useBkgColorForRef();
   }
 
@@ -161,6 +162,8 @@ public class ASRScoringAudioPanel<T extends Shell> extends ScoringAudioPanel<T> 
 
     int id = exercise.getID();
     ImageOptions imageOptions = new ImageOptions(toUse, height, useScoreToColorBkg);
+
+ //   logger.info("request for " + imageOptions);
 
     ScoringServiceAsync service = controller.getScoringService();
     if (controller.getProps().shouldUsePhoneToDisplay()) {

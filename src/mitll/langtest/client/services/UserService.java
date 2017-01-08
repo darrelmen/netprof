@@ -39,6 +39,7 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.InitialUI;
 import mitll.langtest.client.domino.user.ChangePasswordView;
 import mitll.langtest.client.instrumentation.EventRegistration;
+import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserPassLogin;
 import mitll.langtest.shared.user.*;
 
@@ -48,6 +49,10 @@ import java.util.Map;
 
 @RemoteServiceRelativePath("user-manager")
 public interface UserService extends RemoteService {
+  /**
+   * @see UserManager#getPermissionsAndSetUser
+   * @return
+   */
   User getUserFromSession();
 
     /**
