@@ -135,6 +135,7 @@ public class ServerProperties {
   private static final String RUN_REF_DECODE_WITH_HYDEC = "runRefDecodeWithHydec";
   private static final String CHECK_AUDIO_ON_STARTUP = "checkAudioOnStartup";
   private static final String CHECK_AUDIO_FILE_EXISTS = "checkAudioFileExists";
+  private static final String CHECK_AUDIO_FILE_EXISTS_DEV = "checkAudioFileExistsDev";
   private static final String CHECK_AUDIO_TRANSCRIPT = "checkAudioTranscript";
 
   private static final String DEFAULT_NETPROF_AUDIO_DIR = "/opt/netProf/";
@@ -672,6 +673,9 @@ public class ServerProperties {
    */
   public boolean doAudioFileExistsCheck() {
     return getDefaultFalse(CHECK_AUDIO_FILE_EXISTS);
+  }
+  public boolean doAudioFileExistsCheckDev() {
+    return getDefaultFalse(CHECK_AUDIO_FILE_EXISTS_DEV);
   }
 
   public void setRTL(boolean isRTL) {

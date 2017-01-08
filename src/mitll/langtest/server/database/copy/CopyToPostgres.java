@@ -240,7 +240,7 @@ public class CopyToPostgres<T extends CommonShell> {
     String configFileFullPath = serverProps2.getConfigFileFullPath();
     try {
       serverProps.getProps().load(new FileInputStream(configFileFullPath));
-    } catch (IOException e) {
+    } catch (Exception e) {
       logger.error("can't find " + configFileFullPath);
     }
     if (useLocal) {
