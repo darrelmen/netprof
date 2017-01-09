@@ -258,7 +258,7 @@ public class Banner implements RequiresResize {
   /**
    * @param userName
    * @return
-   * @see #makeNPFHeaderRow(String, boolean, String, HTML, ClickHandler, ClickHandler, ClickHandler, ClickHandler, ClickHandler, ClickHandler, ClickHandler)
+   * @see #makeNPFHeaderRow
    */
   private HTML getUserNameWidget(String userName) {
     userNameWidget = new HTML(userName);
@@ -274,8 +274,12 @@ public class Banner implements RequiresResize {
     return getAnchor(NEED_HELP_QUESTIONS_CONTACT_US, HREF);
   }
 
+  /**
+   * Make sure this points to the manual.
+   * @return
+   */
   private Anchor getAnchorManual() {
-    Anchor anchor = getAnchor(DOCUMENTATION, "NetProF_Manual.pdf");
+    Anchor anchor = getAnchor(DOCUMENTATION, "langtest/NetProF_Manual.pdf");
     anchor.getElement().getStyle().setColor("#5bb75b");
     return anchor;
   }
