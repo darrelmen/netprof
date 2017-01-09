@@ -60,8 +60,9 @@ import java.util.logging.Logger;
 public class UserManager {
   private final Logger logger = Logger.getLogger("UserManager");
 
+  private static final boolean DEBUG = false;
+
   private static final long HOUR_IN_MILLIS = 1000 * 60 * 60;
-  private static final boolean DEBUG = true;
 
   private static final int DAY_HOURS = 24;
   private static final long WEEK_HOURS = DAY_HOURS * 7;
@@ -374,37 +375,26 @@ public class UserManager {
    * @see mitll.langtest.client.InitialUI#resetState()
    */
   public void clearUser() {
-/*
-    if (USE_COOKIE) {
-      Cookies.setCookie("sid", "" + NO_USER_SET);
-    } else
-*/
     if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-
       localStorageIfSupported.removeItem(getUserIDCookie());
       // localStorageIfSupported.removeItem(getPassCookie());
       localStorageIfSupported.removeItem(getUserChosenID());
       localStorageIfSupported.removeItem(getUserPendingID());
-
-      logger.info("clearUser : removed item " + getUserID() + " user now " + getUser());
+    //  logger.info("clearUser : removed item " + getUserID() + " user now " + getUser());
     } else {
       userID = NO_USER_SET;
     }
   }
 
   /**
-   * TODO : do we store the password hash local storage???
+   * don't store the password hash in local storage :)
    *
    * @param user
    * @see UserDialog#storeUser
    */
-  void storeUser(User user
-                 //    , String passwordHash
-  ) {
-    logger.info("storeUser : user now " + user);
-
-
+  void storeUser(User user) {
+//    logger.info("storeUser : user now " + user);
     if (Storage.isLocalStorageSupported()) {
       rememberUser(user);
       gotNewUser(user);
