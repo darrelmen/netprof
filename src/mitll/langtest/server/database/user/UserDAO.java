@@ -118,7 +118,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    * @see UserManagement#addUser
    */
   @Override
-  public int addUser(int age, String gender, int experience, String userAgent,
+  public int addUser(int age, MiniUser.Gender gender, int experience, String userAgent,
                      String trueIP, String nativeLang, String dialect, String userID, boolean enabled,
                      Collection<User.Permission> permissions,
                      User.Kind kind,
@@ -162,7 +162,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
       int newID = max + 1;
       statement.setLong(i++, newID);
       statement.setInt(i++, age);
-      statement.setInt(i++, gender.equalsIgnoreCase(MALE) ? 0 : 1);
+      statement.setInt(i++, gender == MiniUser.Gender.Male ? 0 : 1);
       statement.setInt(i++, experience);
       statement.setString(i++, userAgent);
       statement.setString(i++, nativeLang);
@@ -276,7 +276,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    *
    * @param id
    * @return
-   * @see DatabaseImpl#userExists
+   * @see BaseUserDAO#getOrAdd
    */
   @Override
   public int getIdForUserID(String id) {

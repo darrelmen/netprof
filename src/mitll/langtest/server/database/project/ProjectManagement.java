@@ -369,12 +369,10 @@ public class ProjectManagement implements IProjectManagement {
       return Collections.emptyList();
     }
     Project project = getProjectOrFirst(projectid);
-
-    logger.info("getExercises " + projectid  + " = " +project);
+//    logger.info("getExercises " + projectid  + " = " +project);
 
     if (!project.isConfigured()) {
       logger.info("\tgetExercises configure " + projectid);
-
       configureProject(project);
     }
 

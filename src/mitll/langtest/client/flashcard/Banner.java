@@ -156,7 +156,7 @@ public class Banner implements RequiresResize {
     hp.add(getAnchor());
 
     userNameWidget = getUserNameWidget(userName);
-     hp.add(userNameWidget);
+    hp.add(userNameWidget);
     hp.add(qc = new SimplePanel());
     hp.add(recordAudio = new SimplePanel());
 
@@ -347,11 +347,11 @@ public class Banner implements RequiresResize {
     return w;
   }
 
-
   public static class LinkAndTitle {
     ClickHandler clickHandler;
     String title;
     boolean isAdminChoice;
+    private String linkURL;
 
     public LinkAndTitle(String title, ClickHandler click, boolean isAdminChoice) {
       this.title = title;
@@ -361,10 +361,20 @@ public class Banner implements RequiresResize {
 
     public NavLink add(Dropdown dropdown) {
       NavLink monitoringC = new NavLink(title);
-      monitoringC.addClickHandler(clickHandler);
+      if (linkURL != null) monitoringC.setHref(linkURL);
+      else
+        monitoringC.addClickHandler(clickHandler);
 
       dropdown.add(monitoringC);
       return monitoringC;
+    }
+
+    public String getLinkURL() {
+      return linkURL;
+    }
+
+    public void setLinkURL(String linkURL) {
+      this.linkURL = linkURL;
     }
   }
 
@@ -452,7 +462,8 @@ public class Banner implements RequiresResize {
     appName.getElement().getStyle().setFontSize(ratio, Style.Unit.EM);
   }
 
-  @Deprecated  public void setNavigation(Navigation navigation) {
+  @Deprecated
+  public void setNavigation(Navigation navigation) {
 
 //    this.navigation = navigation;
   }

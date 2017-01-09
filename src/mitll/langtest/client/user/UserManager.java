@@ -37,6 +37,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.shared.user.LoginResult;
+import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 
 import java.util.Date;
@@ -141,7 +142,7 @@ public class UserManager {
 */
 
   /**
-   *  instead have call to get permissions for a user.
+   * instead have call to get permissions for a user.
    *
    * @see #checkLogin
    * @see #storeUser
@@ -163,7 +164,12 @@ public class UserManager {
               //user +
               " : " + result);
         }
-        if (result == null  || !result.isEnabled()
+        if (result == null ||
+            !result.isEnabled() ||
+            !result.isValid() ||
+            ((result.getPermissions().contains(User.Permission.RECORD_AUDIO) ||
+                result.getPermissions().contains(User.Permission.DEVELOP_CONTENT)) &&
+                result.getRealGender() == MiniUser.Gender.Unspecified)
             ) {
           clearUser();
           userNotification.showLogin();
@@ -309,14 +315,6 @@ public class UserManager {
   private String getUserIDCookie() {
     return appTitle + ":" + USER_ID;
   }
-
-  /**
-   * @return
-   * @deprecatedx
-   */
-/*  private String getPassCookie() {
-    return appTitle + ":" + "pwd";
-  }*/
 
   /**
    * @return

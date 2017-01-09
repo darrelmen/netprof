@@ -38,12 +38,12 @@ public class SignUpUser implements IsSerializable {
   private String userID;
 
   // private String freeTextPassword;
-
   private String passwordH;
   private String emailH;
   private String email;
   private User.Kind kind;
   private boolean isMale;
+  private MiniUser.Gender realGender;
   private int age;
   private String dialect;
   private String device;
@@ -77,8 +77,11 @@ public class SignUpUser implements IsSerializable {
                     String emailH,
                     String email,
                     User.Kind kind,
+
                     boolean isMale,
+                    MiniUser.Gender realGender,
                     int age,
+
                     String dialect,
                     String device,
                     String ip,
@@ -92,6 +95,7 @@ public class SignUpUser implements IsSerializable {
     this.email = email;
     this.kind = kind;
     this.isMale = isMale;
+    this.realGender = realGender;
     this.age = age;
     this.dialect = dialect;
     this.device = device;
@@ -181,4 +185,12 @@ public class SignUpUser implements IsSerializable {
   public String getAffiliation() {
     return affiliation;
   }
+
+  public MiniUser.Gender getRealGender() {
+    return realGender;
+  }
+
+//  public void setRealGender(MiniUser.Gender realGender) {
+//    this.realGender = realGender;
+//  }
 }

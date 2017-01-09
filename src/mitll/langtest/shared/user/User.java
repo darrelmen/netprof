@@ -296,7 +296,6 @@ public class User extends MiniUser {
         copy.getEmailHash(),
         copy.getDevice(),
         copy.getResetKey(),
-        //copy.cdKey,
         copy.getTimestampMillis());
   }
 
@@ -489,10 +488,12 @@ public class User extends MiniUser {
     this.enabled = enabled;
   }
 
+  @Deprecated
   public boolean hasResetKey() {
     return resetKey != null && !resetKey.isEmpty();
   }
 
+  @Deprecated
   public String getResetKey() {
     return resetKey;
   }
@@ -545,12 +546,23 @@ public class User extends MiniUser {
     return affiliation;
   }
 
+  /**
+   * Two cases-
+   * legacy users that are missing first, last, and email
+   * new users who become audio recorders, for whom we need more information
+   *
+   * @return
+   */
   public boolean isValid() {
     return
         isValid(emailHash) &&
             isValid(email) &&
             isValid(first) &&
-            isValid(last);
+            isValid(last) &&
+            ((getPermissions().contains(User.Permission.RECORD_AUDIO) ||
+                getPermissions().contains(User.Permission.DEVELOP_CONTENT)) &&
+                getRealGender() != MiniUser.Gender.Unspecified)
+        ;
   }
 
   private boolean isValid(String email) {
@@ -559,7 +571,7 @@ public class User extends MiniUser {
 
   public String toStringShort() {
     return "user " + getID() + "/" + getUserID() +
-        "\n\tis a " + getGender() +
+        "\n\tis a " + getGender() + "/" + getRealGender() +
         "\n\tage " + getAge() +
         "\n\tkind " + getUserKind() +
         "\n\tperms " + getPermissions();
@@ -572,7 +584,7 @@ public class User extends MiniUser {
         "'" +
         "\n\t last  '" + last +
         "'" +
-        "\n\tis a    " + (getGender() == 0 ? "male" : "female") +
+        "\n\tis a    " + getRealGender() +
         (getAge() < 99 ? "\n\tage     " + getAge() : "") +
         (isAdmin() ? "\n\tadmin   " + isAdmin() : "") +
         (!isEnabled() ? "\n\tenabled   " + isEnabled() : "") +

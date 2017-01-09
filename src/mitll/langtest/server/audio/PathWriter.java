@@ -153,15 +153,15 @@ public class PathWriter {
       String parent = serverProperties.getMediaDir();
 
       AudioConversion audioConversion = new AudioConversion(serverProperties);
-      if (!audioConversion.exists(wavFile, parent)) {
+      if (!audioConversion.exists(parent, wavFile)) {
         logger.warn("ensureMP3 can't find " + wavFile + " under " + parent);
         //    parent = pathHelper.getConfigDir();
         parent = serverProperties.getAnswerDir();
       }
-      if (!audioConversion.exists(wavFile, parent)) {
+      if (!audioConversion.exists(parent, wavFile)) {
         logger.error("ensureMP3 can't find " + wavFile + " under " + parent);
       }
-      String s = audioConversion.ensureWriteMP3(wavFile, parent, overwrite, trackInfo);
+      String s = audioConversion.ensureWriteMP3(parent, wavFile, overwrite, trackInfo);
       logger.info("ensureMP3 wrote " + wavFile + " to " + s);
     } else {
       logger.warn("not converting wav to mp3???\n\n\n");
