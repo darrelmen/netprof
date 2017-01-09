@@ -188,14 +188,23 @@ war {
     from 'war/amas.css'
     from 'war/LangTest.css'
     from 'war/LangTest.html'
+
+    // TODO : DONT
     from 'copy.sh'
+
+    // TODO : DONT
     from 'drop.sh'
+
+    from 'src/mitll/langtest/public/NetProf_Manual.pdf'
+
     webXml = file('war/WEB-INF/web.xml')
 
     from ('src') {
         include '**/log*'
         into 'WEB-INF/classes'
     }
+
+    exclude ('**/**-tests.jar')
 }
 
 // ***************************** Publishing **************************************

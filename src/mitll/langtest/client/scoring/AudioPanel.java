@@ -533,7 +533,7 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
    * @see #getImages()
    */
   protected void getEachImage(int width) {
-    logger.info("AudioPanel.getEachImage : " + getElement().getId()+ " path " + audioPath + " width " +width);
+  //  logger.info("AudioPanel.getEachImage : " + getElement().getId()+ " path " + audioPath + " width " +width);
     getImageURLForAudio(audioPath, WAVEFORM, width, getWaveform());
     if (showSpectrogram) {
       getImageURLForAudio(audioPath, SPECTROGRAM, width, getSpectrogram());
@@ -555,7 +555,9 @@ public class AudioPanel<T extends Shell> extends VerticalPanel implements Requir
   private void getImageURLForAudio(final String path, final String type, int width, final ImageAndCheck imageAndCheck) {
     if (path != null && !path.equals(FILE_MISSING)) {
       final long then = System.currentTimeMillis();
-      logger.info("getImageURLForAudio : req " + reqid + " path " + path + " type " + type + " width " + width);
+
+ //     logger.info("getImageURLForAudio : req " + reqid + " path " + path + " type " + type + " width " + width);
+
       final int toUse = Math.max(MIN_WIDTH, width);
       int height = getScaledImageHeight(type);
       final int id = exercise == null ? exerciseID : exercise.getID();
