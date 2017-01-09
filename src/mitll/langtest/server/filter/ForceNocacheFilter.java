@@ -32,7 +32,7 @@
 
 package mitll.langtest.server.filter;
 
-import mitll.langtest.server.database.security.IUserSecurityManager;
+import mitll.langtest.server.database.security.UserSecurityManager;
 import org.apache.logging.log4j.ThreadContext;
 
 import javax.servlet.*;
@@ -60,13 +60,12 @@ public class ForceNocacheFilter implements Filter {
 
     final HttpServletRequest httpRequest = (HttpServletRequest) request;
     final String requestUri = httpRequest.getRequestURI();
-
     HttpSession session = httpRequest.getSession(false);
-    String sessionId;
+    String sessionId = "no-session";
     String loginId = "no-user";
     if (session != null) {
       sessionId = session.getId();
-      Object loginO = session.getAttribute(IUserSecurityManager.USER_SESSION_ATT);
+      Object loginO = session.getAttribute(UserSecurityManager.USER_SESSION_ATT);
       if (loginO != null) {
         loginId = loginO.toString();
       }
@@ -90,11 +89,12 @@ public class ForceNocacheFilter implements Filter {
       Date now = new Date();
       HttpServletResponse httpResponse = (HttpServletResponse) response;
       httpResponse.setDateHeader("Date", now.getTime());
-// one day old
+      // one day old
       httpResponse.setDateHeader("Expires", now.getTime() - 86400000L);
       httpResponse.setHeader("Pragma", "no-cache");
       httpResponse.setHeader("Cache-control", "no-cache, no-store, must-revalidate");
     }
+
 
     chain.doFilter(request, response);
     ThreadContext.clearAll();
