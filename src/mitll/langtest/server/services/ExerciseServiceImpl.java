@@ -63,7 +63,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
 
   private ExerciseTrie<AmasExerciseImpl> amasFullTrie = null;
 
-//  private static final boolean WARN_MISSING_FILE = true;
+  //  private static final boolean WARN_MISSING_FILE = true;
   private static final boolean DEBUG = false;
 
   /**
@@ -299,7 +299,6 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
     boolean onlyExamples = request.isOnlyExamples();
     boolean incorrectFirst = request.isIncorrectFirstOrder();
 
-
     boolean hasPrefix = !prefix.isEmpty();
     if (hasPrefix) {
       logger.debug("getExerciseListWrapperForPrefix userID " + userID + " prefix '" + prefix + "' role " + role);
@@ -506,8 +505,9 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
    * @param <T>
    */
   private <T extends CommonShell> void sortExercises(String role, List<T> commonExercises) {
-    new ExerciseSorter(db.getTypeOrder(getProjectID())).getSortedByUnitThenAlpha(commonExercises,
-        role.equals(AudioType.RECORDER.toString()));
+    new ExerciseSorter(db.getTypeOrder(getProjectID()))
+        .getSortedByUnitThenAlpha(commonExercises,
+            role.equals(AudioType.RECORDER.toString()));
   }
 
   private <T extends CommonShell> Collection<T> getExercisesForSearch(String prefix, int userID, Collection<T> exercises,
@@ -703,6 +703,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
 
   /**
    * On the fly we make a new section helper to do filtering of user list.
+   *
    * @param typeToSelection
    * @param userListByID
    * @param <T>
@@ -736,7 +737,7 @@ public class ExerciseServiceImpl extends MyRemoteServiceServlet implements Exerc
    * @see #makeExerciseListWrapper
    */
   private <T extends CommonShell> List<CommonShell> getExerciseShells(
-     // Collection<? extends CommonExercise> exercises
+      // Collection<? extends CommonExercise> exercises
       Collection<T> exercises
   ) {
     logger.info("getExerciseShells for " + exercises.size());

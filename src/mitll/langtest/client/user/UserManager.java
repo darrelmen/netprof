@@ -60,7 +60,7 @@ public class UserManager {
   private final Logger logger = Logger.getLogger("UserManager");
 
   private static final long HOUR_IN_MILLIS = 1000 * 60 * 60;
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
   private static final int DAY_HOURS = 24;
   private static final long WEEK_HOURS = DAY_HOURS * 7;
@@ -141,16 +141,13 @@ public class UserManager {
 */
 
   /**
-   * TODOx : instead have call to get permissions for a user.
+   *  instead have call to get permissions for a user.
    *
-   * @paramx user
-   * @paramx passwordHash
    * @see #checkLogin
    * @see #storeUser
    */
-  private void getPermissionsAndSetUser(/*final String user*/
-                                        /*, String passwordHash*/) {
-    if (DEBUG || true) logger.info("UserManager.getPermissionsAndSetUser " + //user +
+  private void getPermissionsAndSetUser() {
+    if (DEBUG || true) logger.info("UserManager.getPermissionsAndSetUser " +
         " asking server for info...");
 
     userServiceAsync.getUserFromSession(new AsyncCallback<User>() {
@@ -161,9 +158,11 @@ public class UserManager {
 
       @Override
       public void onSuccess(User result) {
-        if (DEBUG) logger.info("UserManager.getPermissionsAndSetUser : onSuccess " +
-            //user +
-            " : " + result);
+        if (DEBUG) {
+          logger.info("UserManager.getPermissionsAndSetUser : onSuccess " +
+              //user +
+              " : " + result);
+        }
         if (result == null  || !result.isEnabled()
             ) {
           clearUser();
@@ -272,11 +271,13 @@ public class UserManager {
   }
 */
 
+ /*
   private String getUserChosenFromStorage() {
     Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
     String userChosenID = getUserChosenID();
     return localStorageIfSupported != null ? localStorageIfSupported.getItem(userChosenID) : NO_USER_SET_STRING;
   }
+  */
 
   public void setPendingUserStorage(String pendingID) {
     if (Storage.isLocalStorageSupported()) {
@@ -398,9 +399,6 @@ public class UserManager {
    * TODO : do we store the password hash local storage???
    *
    * @param user
-   * @paramx passwordHash
-   * @seex SignInForm#foundExistingUser(User, boolean, String)
-   * @seex SignUpForm#gotSignUp
    * @see UserDialog#storeUser
    */
   void storeUser(User user
@@ -408,23 +406,28 @@ public class UserManager {
   ) {
     logger.info("storeUser : user now " + user);
 
-    final long DURATION = getUserSessionDuration();
-    long futureMoment = getUserSessionEnd(DURATION);
-    if (Storage.isLocalStorageSupported()) {
-      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-      userChosenID = user.getUserID();
-      localStorageIfSupported.setItem(getUserIDCookie(), "" + user.getID());
-      //  localStorageIfSupported.setItem(getPassCookie(), passwordHash);
-      localStorageIfSupported.setItem(getUserChosenID(), "" + userChosenID);
-      rememberUserSessionEnd(localStorageIfSupported, futureMoment);
-      // localStorageIfSupported.setItem(getLoginType(), "" + userType);
-      logger.info("storeUser : user now " + user.getID() + " / " + getUser() + "' expires in " + (DURATION / 1000) + " seconds");
 
+    if (Storage.isLocalStorageSupported()) {
+      rememberUser(user);
       gotNewUser(user);
     } else {  // not sure what we could possibly do here...
       userID = user.getID();
       userNotification.gotUser(user);
     }
+  }
+
+  public void rememberUser(User user) {
+    final long DURATION = getUserSessionDuration();
+    long futureMoment = getUserSessionEnd(DURATION);
+
+    Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
+    userChosenID = user.getUserID();
+    localStorageIfSupported.setItem(getUserIDCookie(), "" + user.getID());
+    //  localStorageIfSupported.setItem(getPassCookie(), passwordHash);
+    localStorageIfSupported.setItem(getUserChosenID(), "" + userChosenID);
+    rememberUserSessionEnd(localStorageIfSupported, futureMoment);
+    // localStorageIfSupported.setItem(getLoginType(), "" + userType);
+    logger.info("storeUser : user now " + user.getID() + " / " + getUser() + "' expires in " + (DURATION / 1000) + " seconds");
   }
 
   /**
