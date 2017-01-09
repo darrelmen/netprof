@@ -348,6 +348,11 @@ public abstract class BaseAudioDAO extends DAO {
     return userDAO.getUserMap(isMale);
   }
 
+  /**
+   *
+   * @param userid
+   * @return
+   */
   Collection<Integer> getUserIDs(int userid) {
     User user = userDAO.getUserWhere(userid);
     boolean isMale = (user != null && user.isMale());

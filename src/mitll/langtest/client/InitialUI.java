@@ -35,7 +35,6 @@ package mitll.langtest.client;
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style;
@@ -47,26 +46,32 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.PushButton;
+import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.Navigation;
-import mitll.langtest.client.domino.user.ChangePasswordView;
-import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.download.DownloadIFrame;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.Banner;
 import mitll.langtest.client.instrumentation.EventRegistration;
-import mitll.langtest.client.instrumentation.EventTable;
-import mitll.langtest.client.monitoring.MonitoringManager;
-import mitll.langtest.client.result.ResultManager;
 import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.client.services.ProjectServiceAsync;
 import mitll.langtest.client.services.UserService;
 import mitll.langtest.client.services.UserServiceAsync;
-import mitll.langtest.client.user.*;
+import mitll.langtest.client.user.ResetPassword;
+import mitll.langtest.client.user.UserFeedback;
+import mitll.langtest.client.user.UserManager;
+import mitll.langtest.client.user.UserMenu;
+import mitll.langtest.client.user.UserNotification;
+import mitll.langtest.client.user.UserPassLogin;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.user.SlimProject;
 import mitll.langtest.shared.user.User;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -83,9 +88,12 @@ import java.util.logging.Logger;
  * @since 2/23/16
  */
 public class InitialUI implements UILifecycle {
-  public static final String PLEASE_SELECT_A_LANGUAGE = "Please select a language";
-  public static final String PLEASE_SELECT_A_COURSE = "Please select a course";
-  public static final String NO_LANGUAGES_LOADED_YET = "No languages loaded yet. Please wait.";
+  /**
+   * @see #showProjectChoices(List, int)
+   */
+  private static final String PLEASE_SELECT_A_LANGUAGE = "Please select a language";
+  private static final String PLEASE_SELECT_A_COURSE = "Please select a course";
+  private static final String NO_LANGUAGES_LOADED_YET = "No languages loaded yet. Please wait.";
   private final Logger logger = Logger.getLogger("InitialUI");
 
   public static final String ROOT_VERTICAL_CONTAINER = "root_vertical_container";
@@ -94,14 +102,14 @@ public class InitialUI implements UILifecycle {
    * Tamas doesn't like scrolling -- try to prevent it on laptops
    */
   private static final int ITEMS_IN_ROW = 5;
-  private static final int LEFT_LIST_WIDTH = 167;
+//  private static final int LEFT_LIST_WIDTH = 167;
 
   protected static final String LOGIN = "Login";
-
   private static final String LANGTEST_IMAGES = LangTest.LANGTEST_IMAGES;
   private static final int NO_USER_INITIAL = -2;
 
   private final UserManager userManager;
+  private final UserMenu userMenu;
 
   /**
    * @see #configureUIGivenUser
@@ -109,14 +117,12 @@ public class InitialUI implements UILifecycle {
    * @see #lastUser
    * @see #resetState
    * @see #showUserPermissions
-   *
    */
   protected long lastUser = NO_USER_INITIAL;
 
   protected final LifecycleSupport lifecycleSupport;
   protected final ExerciseController controller;
   protected final UserFeedback userFeedback;
-  protected final UserState userState;
   private final UserNotification userNotification;
   protected final PropertyHandler props;
 
@@ -141,12 +147,12 @@ public class InitialUI implements UILifecycle {
    */
   public InitialUI(LangTest langTest, UserManager userManager) {
     this.lifecycleSupport = langTest;
-    this.userState = langTest;
     this.props = langTest.getProps();
     this.userManager = userManager;
     this.controller = langTest;
     userFeedback = langTest;
     this.userNotification = langTest;
+    this.userMenu = new UserMenu(langTest, userManager, this);
     banner = new Banner(props, userService, langTest, langTest);
   }
 
@@ -156,7 +162,7 @@ public class InitialUI implements UILifecycle {
    */
   @Override
   public void populateRootPanel() {
-  //  logger.info("----> populateRootPanel BEGIN ------>");
+    //  logger.info("----> populateRootPanel BEGIN ------>");
     Container verticalContainer = getRootContainer();
     this.verticalContainer = verticalContainer;
     // header/title line
@@ -193,8 +199,6 @@ public class InitialUI implements UILifecycle {
     return contentRow;
   }
 
-  private static final String LOG_OUT = "Log Out";
-
   /**
    * @return
    * @see #populateRootPanel()
@@ -218,7 +222,8 @@ public class InitialUI implements UILifecycle {
     // logger.info("talks to domino " + props.talksToDomino());
     reload = (props.talksToDomino()) ? reload : null;
 
-    List<Banner.LinkAndTitle> choices = getCogMenuChoices();
+    List<Banner.LinkAndTitle> choices =
+        userMenu.getCogMenuChoices();
 
     Widget bannerRow = banner.makeNPFHeaderRow(props.getSplash(), props.isBeta(), getGreeting(),
         getReleaseStatus(),
@@ -228,20 +233,6 @@ public class InitialUI implements UILifecycle {
     headerRow = new FluidRow();
     headerRow.add(new Column(12, bannerRow));
     return headerRow;
-  }
-
-  private List<Banner.LinkAndTitle> getCogMenuChoices() {
-    List<Banner.LinkAndTitle> choices = new ArrayList<>();
-    choices.add(new Banner.LinkAndTitle("Users", new UsersClickHandler(), true));
-    String nameForAnswer = props.getNameForAnswer() + "s";
-    choices.add(new Banner.LinkAndTitle(
-        nameForAnswer.substring(0, 1).toUpperCase() + nameForAnswer.substring(1), new ResultsClickHandler(), true));
-    choices.add(new Banner.LinkAndTitle("Monitoring", new MonitoringClickHandler(), true));
-    choices.add(new Banner.LinkAndTitle("Events", new EventsClickHandler(), true));
-    choices.add(new Banner.LinkAndTitle("Change Password", new ChangePasswordClickHandler(), false));
-    choices.add(new Banner.LinkAndTitle("Download Context", new DownloadContentsClickHandler(), true));
-    choices.add(new Banner.LinkAndTitle(LOG_OUT, new LogoutClickHandler(), false));
-    return choices;
   }
 
   /**
@@ -266,14 +257,8 @@ public class InitialUI implements UILifecycle {
   @Override
   public boolean isRTL() {
     boolean b = controller.getProps().isRightAlignContent();//navigation != null && navigation.isRTL();
-  //  if (b) logger.info("content is RTL!");
+    //  if (b) logger.info("content is RTL!");
     return b;
-  }
-
-  private class LogoutClickHandler implements ClickHandler {
-    public void onClick(ClickEvent event) {
-      logout();
-    }
   }
 
   public void logout() {
@@ -306,7 +291,7 @@ public class InitialUI implements UILifecycle {
   /**
    * @see #getBreadcrumbs()
    */
-  private void clearContent() {
+  public void clearContent() {
     clearStartupInfo();
     contentRow.clear();
     contentRow.add(lifecycleSupport.getFlashRecordPanel()); // put back record panel
@@ -314,104 +299,6 @@ public class InitialUI implements UILifecycle {
 
   private void clearStartupInfo() {
     lifecycleSupport.clearStartupInfo();
-  }
-
-  private class UsersClickHandler implements ClickHandler {
-    public void onClick(ClickEvent event) {
-      GWT.runAsync(new RunAsyncCallback() {
-        public void onFailure(Throwable caught) {
-          downloadFailedAlert();
-        }
-
-        public void onSuccess() {
-          new UserTable(props, userManager.isAdmin()).showUsers(userService);
-        }
-      });
-    }
-  }
-
-  private class EventsClickHandler implements ClickHandler {
-    public void onClick(ClickEvent event) {
-      GWT.runAsync(new RunAsyncCallback() {
-        public void onFailure(Throwable caught) {
-          downloadFailedAlert();
-        }
-
-        public void onSuccess() {
-          new EventTable().show(service);
-        }
-      });
-    }
-  }
-
-  private class ChangePasswordClickHandler implements ClickHandler {
-    //UserState outer = LangTest.this;
-    public void onClick(ClickEvent event) {
-      GWT.runAsync(new RunAsyncCallback() {
-        public void onFailure(Throwable caught) {
-          downloadFailedAlert();
-        }
-
-        public void onSuccess() {
-          new ChangePasswordView(userManager.getCurrent(), false, userState, userService).showModal();
-        }
-      });
-    }
-  }
-
-  private class DownloadContentsClickHandler implements ClickHandler {
-    public void onClick(ClickEvent event) {
-      GWT.runAsync(new RunAsyncCallback() {
-        public void onFailure(Throwable caught) {
-          downloadFailedAlert();
-        }
-
-        public void onSuccess() {
-          new DownloadHelper(null).downloadContext();
-        }
-      });
-    }
-  }
-
-  private class ResultsClickHandler implements ClickHandler {
-    final EventRegistration outer = lifecycleSupport;
-
-    public void onClick(ClickEvent event) {
-      GWT.runAsync(new RunAsyncCallback() {
-        public void onFailure(Throwable caught) {
-          downloadFailedAlert();
-        }
-
-        public void onSuccess() {
-          ResultManager resultManager = new ResultManager(
-              service,
-              // resultService,
-              props.getNameForAnswer(),
-              lifecycleSupport.getProjectStartupInfo().getTypeOrder(),
-              outer,
-              controller);
-          resultManager.showResults();
-        }
-      });
-    }
-  }
-
-  private class MonitoringClickHandler implements ClickHandler {
-    public void onClick(ClickEvent event) {
-      GWT.runAsync(new RunAsyncCallback() {
-        public void onFailure(Throwable caught) {
-          downloadFailedAlert();
-        }
-
-        public void onSuccess() {
-          new MonitoringManager(props).showResults();
-        }
-      });
-    }
-  }
-
-  private void downloadFailedAlert() {
-    Window.alert("Code download failed");
   }
 
   /**
@@ -453,14 +340,16 @@ public class InitialUI implements UILifecycle {
        */
       contentRow.add(lifecycleSupport.getFlashRecordPanel());
     }
-   // logger.info("populateBelowHeader -- ");
+    // logger.info("populateBelowHeader -- ");
     lifecycleSupport.recordingModeSelect();
     makeNavigation();
     addResizeHandler();
   }
 
   /**
-   * Breadcrumb shows sequence of choices - who - languge - course (FL100 or FL200 or FL300) Elementary FL/Intermediate FL/Advanced FL - what do you want to do
+   * Breadcrumb shows sequence of choices :
+   * <p>
+   * languge - course (FL100 or FL200 or FL300) Elementary FL/Intermediate FL/Advanced FL - what do you want to do
    *
    * @see #configureUIGivenUser(long)
    * @see #gotUser(User)
@@ -468,7 +357,7 @@ public class InitialUI implements UILifecycle {
    */
   private void showNavigation() {
     if (contentRow.getElement().getChildCount() == 1) {
-     // logger.info("showNavigation : - add to content root");
+      // logger.info("showNavigation : - add to content root");
       contentRow.add(navigation.getTabPanel());
     } else {
       logger.info("showNavigation : first row has " + contentRow.getElement().getChildCount() + " child(ren) - not adding tab panel???");
@@ -476,8 +365,8 @@ public class InitialUI implements UILifecycle {
   }
 
   /**
-   * @see #addBreadcrumbs
    * @return
+   * @see #addBreadcrumbs
    */
   private Breadcrumbs getBreadcrumbs() {
     //   logger.info("getBreadcrumbs --->");
@@ -492,7 +381,7 @@ public class InitialUI implements UILifecycle {
 
   /**
    * @param crumbs
-   * @see #clickOnUserCrumb()
+   * @see #chooseProjectAgain()
    * @see #getBreadcrumbs()
    */
   private void addCrumbs(Breadcrumbs crumbs) {
@@ -501,7 +390,8 @@ public class InitialUI implements UILifecycle {
     home.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent clickEvent) {
-        logout();
+//        logout();
+        chooseProjectAgain();
       }
     });
     crumbs.add(home);
@@ -509,14 +399,14 @@ public class InitialUI implements UILifecycle {
 
     User current = userManager.getCurrent();
     if (current != null) {
-      NavLink me = new NavLink(current.getUserID());
+ /*     NavLink me = new NavLink(current.getUserID());
       me.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent clickEvent) {
-          clickOnUserCrumb();
+          chooseProjectAgain();
         }
       });
-      crumbs.add(me);
+      crumbs.add(me);*/
       // logger.info("getBreadcrumbs adding step for current user " + current);
 
       ProjectStartupInfo startupInfo = lifecycleSupport.getProjectStartupInfo();
@@ -566,7 +456,7 @@ public class InitialUI implements UILifecycle {
    * @return
    * @see #addCrumbs(Breadcrumbs)
    */
-  private NavLink addProjectCrumb(Breadcrumbs crumbs, SlimProject project) {
+  private void addProjectCrumb(Breadcrumbs crumbs, SlimProject project) {
     String crumbName = project.getName();
     NavLink lang = new NavLink(crumbName);
     lang.addClickHandler(new ClickHandler() {
@@ -578,14 +468,14 @@ public class InitialUI implements UILifecycle {
       }
     });
     crumbs.add(lang);
- //   logger.info("getBreadcrumbs adding step for " + lang);
-    return lang;
+    logger.info("getBreadcrumbs adding step for " + lang);
+    //return lang;
   }
 
   /**
    * @see #addCrumbs(Breadcrumbs)
    */
-  private void clickOnUserCrumb() {
+  private void chooseProjectAgain() {
     userService.forgetProject(new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable throwable) {
@@ -675,13 +565,13 @@ public class InitialUI implements UILifecycle {
     }
 
     // are we here to enable a CD user?
-    final String cdToken = props.getCdEnableToken();
+  /*  final String cdToken = props.getCdEnableToken();
     if (!cdToken.isEmpty()) {
       logger.info("showLogin token '" + resetPassToken + "' for enabling cd user");
       handleCDToken(verticalContainer, contentRow, cdToken, props.getEmailRToken());
       return true;
     }
-
+*/
     // are we here to show the login screen?
     boolean show = userManager.isUserExpired() || userManager.getUserID() == null;
     if (show) {
@@ -703,11 +593,11 @@ public class InitialUI implements UILifecycle {
   }
 
   /**
-   * @see #showLogin
    * @param verticalContainer
    * @param firstRow
    * @param eventRegistration
    * @param resetPassToken
+   * @see #showLogin
    */
   private void handleResetPass(final Container verticalContainer,
                                final Panel firstRow,
@@ -746,12 +636,13 @@ public class InitialUI implements UILifecycle {
    * <p>
    * Mainly something Tamas would see.
    *
-   * @param verticalContainer
-   * @param firstRow
-   * @param cdToken
-   * @param emailR
+   * @paramx verticalContainer
+   * @paramx firstRow
+   * @paramx cdToken
+   * @paramx emailR
    * @deprecated
    */
+/*
   private void handleCDToken(final Container verticalContainer, final Panel firstRow, final String cdToken, String emailR) {
     logger.info("enabling token " + cdToken + " for email " + emailR);
     userService.enableCDUser(cdToken, emailR, Window.Location.getHref(), new AsyncCallback<String>() {
@@ -777,7 +668,7 @@ public class InitialUI implements UILifecycle {
     RootPanel.get().add(verticalContainer);
     banner.setCogVisible(false);
   }
-
+*/
   private void trimURLAndReload() {
     Timer t = new Timer() {
       @Override
@@ -841,9 +732,9 @@ public class InitialUI implements UILifecycle {
       banner.setCogVisible(true);
       banner.setVisibleAdmin(
           user.isAdmin() ||
-          props.isAdminView() ||
-          user.getUserKind() == User.Kind.PROJECT_ADMIN ||
-          user.isCD());
+              props.isAdminView() ||
+              user.getUserKind() == User.Kind.PROJECT_ADMIN ||
+              user.isCD());
     }
   }
 
@@ -869,14 +760,14 @@ public class InitialUI implements UILifecycle {
 
   /**
    * @see #configureUIGivenUser(long)
-   * @see #clickOnUserCrumb()
+   * @see #chooseProjectAgain()
    * @see #clickOnParentCrumb
    */
   private void addProjectChoices(int level, SlimProject parent) {
     clearContent();
     addBreadcrumbs();
     List<SlimProject> projects = parent == null ? lifecycleSupport.getStartupInfo().getProjects() : parent.getChildren();
-  //  logger.info("addProjectChoices found " + projects.size() + " initial projects, nest " + level);
+    logger.info("addProjectChoices found " + projects.size() + " initial projects, nest " + level);
     showProjectChoices(projects, level);
   }
 
@@ -886,7 +777,7 @@ public class InitialUI implements UILifecycle {
   private void addBreadcrumbs() {
     int childCount = verticalContainer.getElement().getChildCount();
     boolean found = false;
-    // logger.info("populateRootPanelIfLogin root " + contentRow.getElement().getNodeName() + " childCount " + childCount);
+    logger.info("populateRootPanelIfLogin root " + contentRow.getElement().getNodeName() + " childCount " + childCount);
     if (childCount > 0) {
       for (int i = 0; i < childCount; i++) {
         Node child = verticalContainer.getElement().getChild(i);
@@ -895,9 +786,11 @@ public class InitialUI implements UILifecycle {
 
         if (id.equals("breadcrumb")) {
           found = true;
-    //      logger.info("found " + id);
+          //      logger.info("found " + id);
         }
       }
+    } else {
+      logger.info("addBreadcrumbs - no breadcrumbs...");
     }
     if (!found) {
       verticalContainer.insert(breadcrumbs = getBreadcrumbs(), 1);
@@ -905,9 +798,9 @@ public class InitialUI implements UILifecycle {
   }
 
   /**
-   * @see #addProjectChoices(int, SlimProject)
    * @param result
    * @param nest
+   * @see #addProjectChoices(int, SlimProject)
    */
   private void showProjectChoices(List<SlimProject> result, int nest) {
     logger.info("showProjectChoices " + result.size() + " : " + nest);
@@ -937,6 +830,9 @@ public class InitialUI implements UILifecycle {
     flags.add(current);
     int numInRow = ITEMS_IN_ROW;
     List<SlimProject> languages = new ArrayList<SlimProject>(result);
+
+    logger.info("addProjectChoices " + languages.size() + " languages");
+
     Collections.sort(languages, new Comparator<SlimProject>() {
       @Override
       public int compare(SlimProject o1, SlimProject o2) {
@@ -951,7 +847,7 @@ public class InitialUI implements UILifecycle {
     });
 
     int size = languages.size();
-  //  logger.info("addProjectChoices " + size + "-------- nest " + nest);
+    logger.info("addProjectChoices " + size + "-------- nest " + nest);
     for (int i = 0; i < size; i += numInRow) {
       int max = i + numInRow;
       if (max > size) max = size;
@@ -967,11 +863,11 @@ public class InitialUI implements UILifecycle {
   }
 
   /**
-   * @see #showProjectChoices
    * @param lang
    * @param projectForLang
    * @param nest
    * @return
+   * @see #showProjectChoices
    */
   private Panel getLangIcon(String lang, SlimProject projectForLang, int nest) {
     String lang1 = nest == 0 ? lang : projectForLang.getName();
@@ -989,14 +885,11 @@ public class InitialUI implements UILifecycle {
   private Panel getImageAnchor(String name, SlimProject projectForLang) {
     int nest = 1;
 
-    Heading child1 = new Heading(5, name);
     Thumbnail widgets = new Thumbnail();
     widgets.setSize(2);
     final int projid = projectForLang.getProjectid();
-    String cc = projectForLang.getCountryCode();
 
-    Image imageAnchor = new Image("langtest/cc/" + cc + ".png");
-    PushButton button = new PushButton(imageAnchor);
+    PushButton button = new PushButton(getFlag(projectForLang.getCountryCode()));
     button.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent clickEvent) {
@@ -1021,9 +914,18 @@ public class InitialUI implements UILifecycle {
       }
     });
     widgets.add(button);
-    widgets.add(child1);
+    Heading label = new Heading(5, name);
+    if (!projectForLang.getStatus().equalsIgnoreCase("production")) {
+      label.setSubtext(projectForLang.getStatus());
+    }
+    widgets.add(label);
 
     return widgets;
+  }
+
+  @NotNull
+  private Image getFlag(String cc) {
+    return new Image("langtest/cc/" + cc + ".png");
   }
 
   private void clickOnParentCrumb(SlimProject parent) {
@@ -1059,8 +961,7 @@ public class InitialUI implements UILifecycle {
       public void onSuccess(Boolean result) {
         if (result) {
           reallySetTheProject(projectid);
-        }
-        else {
+        } else {
           lifecycleSupport.getStartupInfo();
         }
       }
@@ -1108,7 +1009,7 @@ public class InitialUI implements UILifecycle {
       if (DEBUG) logger.info("populateRootPanelIfLogin found : '" + as.getId() + "'");
 
       if (as.getId().contains(LOGIN)) {
-       // logger.info("populateRootPanelIfLogin found login...");
+        // logger.info("populateRootPanelIfLogin found login...");
         populateRootPanel();
       } else {
         if (DEBUG) logger.info("populateRootPanelIfLogin no login...");

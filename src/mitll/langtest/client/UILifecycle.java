@@ -34,7 +34,7 @@ package mitll.langtest.client;
 
 import mitll.langtest.shared.user.User;
 
-interface UILifecycle {
+public interface UILifecycle {
   /**
    * @see InitialUI#populateRootPanelIfLogin()
    * @see LangTest#populateRootPanel()
@@ -58,4 +58,6 @@ interface UILifecycle {
   void setSplash();
 
   void logout();
+
+  void clearContent();
 }
