@@ -554,18 +554,22 @@ public class User extends MiniUser {
    * @return
    */
   public boolean isValid() {
-    return
-        isValid(emailHash) &&
-            isValid(email) &&
-            isValid(first) &&
-            isValid(last) &&
-            ((getPermissions().contains(User.Permission.RECORD_AUDIO) ||
-                getPermissions().contains(User.Permission.DEVELOP_CONTENT)) &&
-                getRealGender() != MiniUser.Gender.Unspecified)
-        ;
+    boolean hasStandardInfo = isValid(emailHash) &&
+        isValid(email) &&
+        isValid(first) &&
+        isValid(last);
+
+    // must have a gender (and ideally age and dialect) if you want to record audio
+    boolean hasOptInfo = hasStandardInfo &&
+        (getPermissions().isEmpty() ||
+            ((getPermissions().contains(Permission.RECORD_AUDIO) ||
+                getPermissions().contains(Permission.DEVELOP_CONTENT)) &&
+                getRealGender() != Gender.Unspecified));
+
+    return hasStandardInfo && hasOptInfo;
   }
 
-  private boolean isValid(String email) {
+  public boolean isValid(String email) {
     return email != null && !email.isEmpty();
   }
 

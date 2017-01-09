@@ -30,11 +30,9 @@
   ~
   -->
 
+<!-- TODO: I don't think this is being used currently... -->
+
 <configuration>
-
-    DUDE DUDE
-
-
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <!-- encoders are assigned the type
              ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->

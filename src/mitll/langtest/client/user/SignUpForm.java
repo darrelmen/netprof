@@ -32,17 +32,12 @@
 
 package mitll.langtest.client.user;
 
-import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.Fieldset;
-import com.github.gwtbootstrap.client.ui.Form;
-import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.ListBox;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
-import com.google.gwt.i18n.server.testing.Gender;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
@@ -51,20 +46,16 @@ import mitll.langtest.client.PropertyHandler;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.shared.StartupInfo;
-import mitll.langtest.shared.user.Affiliation;
-import mitll.langtest.shared.user.LoginResult;
-import mitll.langtest.shared.user.MiniUser;
-import mitll.langtest.shared.user.SignUpUser;
-import mitll.langtest.shared.user.User;
-import scala.tools.cmd.gen.AnyVals;
+import mitll.langtest.shared.user.*;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
 public class SignUpForm extends UserDialog implements SignUp {
-  public static final String I_M_SORRY = "I'm sorry";
-  public static final String CHOOSE_AFFILIATION = " -- Choose Affiliation -- ";
+  private static final String I_M_SORRY = "I'm sorry";
+  private static final String CHOOSE_AFFILIATION = " -- Choose Affiliation -- ";
+  public static final String PLEASE_CHECK_YOUR_EMAIL = "Please check your email.";
   private final Logger logger = Logger.getLogger("SignUpForm");
 
   public static final int BOGUS_AGE = 99;
@@ -88,25 +79,25 @@ public class SignUpForm extends UserDialog implements SignUp {
 
   private TextBoxBase userBox;
   private TextBoxBase emailBox;
-  Heading demoHeader;
+  private Heading demoHeader;
 
-  protected FormField firstName;
-  protected FormField lastName;
-  protected FormField signUpEmail;
+  private FormField firstName;
+  private FormField lastName;
+  private FormField signUpEmail;
 
   private RegistrationInfo registrationInfo;
-  protected User.Kind selectedRole = User.Kind.STUDENT;
+  private final User.Kind selectedRole = User.Kind.STUDENT;
 
   private final EventRegistration eventRegistration;
 
-  protected Button signUp;
-  private UserPassDialog userPassLogin;
+  private Button signUp;
+  private final UserPassDialog userPassLogin;
   private static final String CURRENT_USERS = "Please update your name and email.";
   private String signUpTitle = SIGN_UP;
   private boolean markFieldsWithLabels = false;
-  protected UserManager userManager;
+  private final UserManager userManager;
   private ListBox affBox;
-  List<Affiliation> affiliations;
+  private final List<Affiliation> affiliations;
 
   /**
    * @param props
@@ -125,7 +116,7 @@ public class SignUpForm extends UserDialog implements SignUp {
     this.eventRegistration = eventRegistration;
     this.userPassLogin = userPassLogin;
     affiliations = startupInfo.getAffiliations();
-    logger.info("got " + affiliations);
+    //logger.info("got " + affiliations);
   }
 
   public SignUpForm setSignUpButtonTitle(String title) {
@@ -208,7 +199,7 @@ public class SignUpForm extends UserDialog implements SignUp {
     Fieldset fields = getFields();
     fields.add(getSignUpButton(userBox, emailBox));
 
-    pleaseCheck = new Heading(4, "Please check your email.");
+    pleaseCheck = new Heading(4, PLEASE_CHECK_YOUR_EMAIL);
     pleaseCheck.getElement().setId("pleaseCheck");
     fields.add(pleaseCheck);
     pleaseCheck.setVisible(false);
@@ -258,7 +249,7 @@ public class SignUpForm extends UserDialog implements SignUp {
    * @return
    * @paramx user
    */
-  protected Fieldset getFields(/*User user*/) {
+  private Fieldset getFields(/*User user*/) {
     Fieldset fieldset = new Fieldset();
     userBox = makeSignUpUsername(fieldset);
     makeSignUpFirstName(fieldset);
@@ -281,24 +272,20 @@ public class SignUpForm extends UserDialog implements SignUp {
       }
     });
     affBox.getElement().getStyle().setWidth(276, Style.Unit.PX);
-    //affBox.removeStyleName("select");
 
     addControlGroupEntrySimple(fieldset,
-        //"Affiliation",
         "", affBox).setWidth(SIGN_UP_WIDTH);
 
-//    if (askForDemographic(userKind)) {
     demoHeader = getHeader("Demographic Info");
     demoHeader.setVisible(false);
     fieldset.add(demoHeader);
     makeRegistrationInfo(fieldset);
     registrationInfo.setVisible(false);
-    //  }
 
     return fieldset;
   }
 
-  protected boolean askForDemographic(User user) {
+  private boolean askForDemographic(User user) {
     Collection<User.Permission> permissions = user.getPermissions();
     return permissions.contains(User.Permission.DEVELOP_CONTENT) || permissions.contains(User.Permission.RECORD_AUDIO) ||
         permissions.contains(User.Permission.QUALITY_CONTROL);
@@ -309,7 +296,7 @@ public class SignUpForm extends UserDialog implements SignUp {
 //    return getHeader(rolesHeader);
 //  }
 
-  protected Heading getHeader(String rolesHeader) {
+  private Heading getHeader(String rolesHeader) {
     Heading w1 = new Heading(5, rolesHeader);
     w1.addStyleName("leftTenMargin");
     int value = 5;
@@ -551,16 +538,20 @@ public class SignUpForm extends UserDialog implements SignUp {
         } else {
           String hash = Md5Hash.getHash(email);
           //     logger.info("user " + userID + " email hash\n\t" + result.getEmailHash() + " vs \n\t"+hash);
-          if (result.getEmailHash().equals(hash)) {  //don't let someone come along and hijack account with different email.
+          String currentEmailHash = result.getEmailHash();
+
+          // if the email hash is missing, don't compare with the given email.
+          if (currentEmailHash == null ||
+              currentEmailHash.isEmpty() ||
+              currentEmailHash.equals(hash)) {  //don't let someone come along and hijack account with different email.
             if (isFormValid(userID)) {
               gotSignUp(userID, emailBox.getValue());
             } else {
               logger.info("getSignUpClickHandler form is not valid!!");
             }
 
-          } else {
+          } else { // email hash mismatch -
             markErrorBlur(signUpEmail, "Sorry, this email is not in this user account.");
-
           }
         }
       }
@@ -575,40 +566,39 @@ public class SignUpForm extends UserDialog implements SignUp {
     }
   }
 
-  protected boolean isFormValid(String userID) {
+  private boolean isFormValid(String userID) {
+    String emailText = signUpEmail.box.getValue();
+
     if (userID.length() < MIN_LENGTH_USER_ID) {
-      eventRegistration.logEvent(SignUpForm.this.signUp, "SignUp_Button", "N/A", "short user id '" + userID + "'");
+      eventRegistration.logEvent(SignUpForm.this.signUp, "TextBox", "N/A", "short user id '" + userID + "'");
       markErrorBlur(signUpUser, PLEASE_ENTER_A_LONGER_USER_ID);
       return false;
     } else if (firstName.getSafeText().isEmpty()) {
-      eventRegistration.logEvent(firstName.getWidget(), "SignUp_Button", "N/A", "short user first name '" + firstName.getSafeText() + "'");
+      eventRegistration.logEvent(firstName.getWidget(), "TextBox", "N/A", "short user first name '" + firstName.getSafeText() + "'");
       markErrorBlur(firstName, "Please enter a first name.");
       return false;
     } else if (lastName.getSafeText().isEmpty()) {
-      eventRegistration.logEvent(lastName.getWidget(), "SignUp_Button", "N/A", "short user last name '" + lastName.getSafeText() + "'");
+      eventRegistration.logEvent(lastName.getWidget(), "TextBox", "N/A", "short user last name '" + lastName.getSafeText() + "'");
       markErrorBlur(lastName, "Please enter a last name.");
+      return false;
+    } else if (emailText.isEmpty()) {
+      eventRegistration.logEvent(signUpEmail.box, "TextBox", "N/A", "empty email");
+      markErrorBlur(signUpEmail, "Please enter your email.");
+      return false;
+    } else if (!isValidEmail(emailText)) {
+      markInvalidEmail();
       return false;
     } else if (affBox.getSelectedIndex() == 0) {
       eventRegistration.logEvent(affBox, "Affiliation_ListBox", "N/A", "didn't make choice");
       markErrorBlur(affBox, "Please choose an affiliation.", Placement.RIGHT);
       return false;
     } else {
-      String emailText = signUpEmail.box.getValue();
-      if (emailText.isEmpty()) {
-        eventRegistration.logEvent(SignUpForm.this.signUp, "SignUp_Button", "N/A", "short email");
-        markErrorBlur(signUpEmail, "Please enter your email.");
-        return false;
-      } else if (!isValidEmail(emailText)) {
-        markInvalidEmail();
-        return false;
-      } else {
-        return true;
-      }
+      return true;
     }
   }
 
-  protected void markInvalidEmail() {
-    eventRegistration.logEvent(SignUpForm.this.signUp, "SignUp_Button", "N/A", "invalid email");
+  private void markInvalidEmail() {
+    eventRegistration.logEvent(signUpEmail.box, "TextBox", "N/A", "invalid email");
     markErrorBlur(signUpEmail, VALID_EMAIL);
   }
 
@@ -621,8 +611,8 @@ public class SignUpForm extends UserDialog implements SignUp {
    * @param email
    * @see #getSignUpButton(com.github.gwtbootstrap.client.ui.base.TextBoxBase, com.github.gwtbootstrap.client.ui.base.TextBoxBase)
    */
-  protected void gotSignUp(final String user,
-                           String email) {
+  private void gotSignUp(final String user,
+                         String email) {
     signUp.setEnabled(false);
 
     SignUpUser newUser = new SignUpUser(user,
@@ -705,25 +695,24 @@ public class SignUpForm extends UserDialog implements SignUp {
         });
   }
 
-  protected String getDialect() {
+  private String getDialect() {
     return registrationInfo.isVisible() ? registrationInfo.getDialectGroup().getSafeText() : "unk";
   }
 
-  protected boolean isMale() {
+  private boolean isMale() {
     return !registrationInfo.isVisible() || registrationInfo.isMale();
   }
 
-  protected MiniUser.Gender getRealGender() {
+  private MiniUser.Gender getRealGender() {
     return !registrationInfo.isVisible() ?
         MiniUser.Gender.Unspecified : registrationInfo.isMale() ?
         MiniUser.Gender.Male :
         MiniUser.Gender.Female;
   }
 
-  protected int getAge() {
+  private int getAge() {
     String age = registrationInfo.isVisible() ? registrationInfo.getAgeEntryGroup().getSafeText() : "";
-    int age1 = registrationInfo.isVisible() ? (age.isEmpty() ? 99 : Integer.parseInt(age)) : 0;
-    return age1;
+    return registrationInfo.isVisible() ? (age.isEmpty() ? 99 : Integer.parseInt(age)) : 0;
   }
 
   private String getSignUpEvent(User result) {

@@ -575,7 +575,7 @@ public class InitialUI implements UILifecycle {
     // are we here to show the login screen?
     boolean show = userManager.isUserExpired() || userManager.getUserID() == null;
     if (show) {
-      logger.info("showLogin user is not valid : user expired " + userManager.isUserExpired() + " / " + userManager.getUserID());
+  //    logger.info("showLogin user is not valid : user expired " + userManager.isUserExpired() + " / " + userManager.getUserID());
       showLogin(eventRegistration);
       return true;
     }
