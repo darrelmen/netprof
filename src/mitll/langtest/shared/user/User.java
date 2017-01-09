@@ -48,7 +48,7 @@ import static mitll.langtest.shared.user.User.Permission.*;
 
 public class User extends MiniUser {
   public static final String NOT_SET = "NOT_SET";
-  private int experience;
+  @Deprecated  private int experience;
   private String ipaddr;
 
   /**
@@ -65,10 +65,10 @@ public class User extends MiniUser {
   private boolean complete;
   private float completePercent = 0.0f;
   private Kind userKind;
-  private String nativeLang;
+  @Deprecated  private String nativeLang;
   private String dialect;
   private String device;
-  private String resetKey;
+  @Deprecated  private String resetKey;
   private String affiliation;
 
   private Collection<Permission> permissions;
@@ -275,7 +275,7 @@ public class User extends MiniUser {
         Kind.STUDENT,
         "",
         "", "", "", //"",
-        System.currentTimeMillis());
+        System.currentTimeMillis(), "OTHER");
   }
 
   public User(User copy) {
@@ -296,7 +296,8 @@ public class User extends MiniUser {
         copy.getEmailHash(),
         copy.getDevice(),
         copy.getResetKey(),
-        copy.getTimestampMillis());
+        copy.getTimestampMillis(),
+        copy.getAffiliation());
   }
 
   /**
@@ -316,6 +317,7 @@ public class User extends MiniUser {
    * @param device
    * @param resetPassKey
    * @param timestamp
+   * @param affiliation
    * @paramx cdEnableKey
    * @seex mitll.langtest.server.database.user.SlickUserDAOImpl#toUser
    * @see mitll.langtest.server.database.user.DominoUserDAOImpl#toUser
@@ -323,9 +325,12 @@ public class User extends MiniUser {
    */
   public User(int id,
               int age,
-              int gender, int experience, String ipaddr,
+              int gender,
+              int experience,
+              String ipaddr,
               String passwordH,
-              String nativeLang, String dialect, String userID, boolean enabled, boolean isAdmin,
+              String nativeLang, String dialect,
+              String userID, boolean enabled, boolean isAdmin,
               Collection<Permission> permissions, Kind userKind,
 
               String email, String emailHash,
@@ -333,8 +338,8 @@ public class User extends MiniUser {
               String device,
               String resetPassKey,
               //String cdEnableKey,
-              long timestamp//, boolean isActive
-  ) {
+              long timestamp,//, boolean isActive
+              String affiliation) {
     super(id, age, gender == 0, userID, isAdmin);
     this.experience = experience;
     this.ipaddr = ipaddr;
@@ -352,6 +357,7 @@ public class User extends MiniUser {
     this.resetKey = resetPassKey;
     //  this.cdKey = cdEnableKey;
     this.timestamp = timestamp;
+    this.affiliation = affiliation;
   }
 
   public boolean isStudent() {
@@ -498,6 +504,7 @@ public class User extends MiniUser {
     return resetKey;
   }
 
+  @Deprecated
   public String getNativeLang() {
     return nativeLang;
   }

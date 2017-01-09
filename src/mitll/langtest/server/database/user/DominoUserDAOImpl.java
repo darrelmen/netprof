@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.database.user;
 
-import com.google.gwt.i18n.server.testing.Gender;
 import com.mongodb.client.MongoCollection;
 import mitll.hlt.domino.server.user.*;
 import mitll.hlt.domino.server.util.*;
@@ -296,7 +295,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
                      String url,
                      String affiliation) {
     // Timestamp now = new Timestamp(System.currentTimeMillis());
-
     mitll.hlt.domino.shared.model.user.User.Gender gender1 = mitll.hlt.domino.shared.model.user.User.Gender.valueOf(gender.name());
     ClientUserDetail updateUser = new ClientUserDetail(
         userID,
@@ -708,8 +706,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
         emailHash,//dominoUser.emailhash(),
         device,//        dominoUser.device(),
         "",//dominoUser.resetpasswordkey(),
-        creationTime
-    );
+        creationTime,
+        dominoUser.getAffiliation());
 
     try {
       user.setRealGender(User.Gender.valueOf(gender.name()));
@@ -720,6 +718,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO {
     user.setFirst(dominoUser.getFirstName());
     user.setLast(dominoUser.getLastName());
     user.setPermissions(permissionSet);
+
 //    logger.info("\ttoUser return " + user);
     return user;
   }

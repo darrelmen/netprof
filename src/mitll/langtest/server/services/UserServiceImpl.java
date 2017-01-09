@@ -102,7 +102,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     if (success) {
       LoginResult loginResult = new LoginResult(loggedInUser, new Date(System.currentTimeMillis()));
       if (!loggedInUser.isValid()) {
-        logger.info("user " + loggedInUser + " is missing email ");
+        logger.info("user " + loggedInUser + "\n\tis missing email ");
         loginResult = new LoginResult(loggedInUser, LoginResult.ResultType.MissingInfo);
       } else {
         setSessionUser(session, loggedInUser);
